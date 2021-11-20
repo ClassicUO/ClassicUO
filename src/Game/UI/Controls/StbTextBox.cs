@@ -58,6 +58,13 @@ namespace ClassicUO.Game.UI.Controls
         private string _text = string.Empty;
         private Vector2 _textSize;
         private float _maxWidth;
+        private Vector2 _caretScreenPosition;
+    
+        protected bool _is_writing;
+        protected bool _leftWasDown, _fromServer;
+
+
+        public event EventHandler TextChanged;
 
 
         public StbTextBox
@@ -132,11 +139,9 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
+
         protected TextEdit Stb { get; }
-
-
         public override bool AcceptKeyboardInput => base.AcceptKeyboardInput && IsEditable;
-
         public byte Font
         {
             get => _fontSettings.FontIndex;
@@ -150,10 +155,8 @@ namespace ClassicUO.Game.UI.Controls
                 }
             }
         }
-
         public bool AllowTAB { get; set; }
         public bool NoSelection { get; set; }
-
         public int CaretIndex
         {
             get => Stb.CursorIndex;
@@ -163,15 +166,12 @@ namespace ClassicUO.Game.UI.Controls
                 UpdateCaretScreenPosition();
             }
         }
-
         public bool Multiline
         {
             get => !Stb.SingleLine;
             set => Stb.SingleLine = !value;
         }
-
         public bool NumbersOnly { get; set; }
-
         public int SelectionStart
         {
             get => Stb.SelectStart;
@@ -183,7 +183,6 @@ namespace ClassicUO.Game.UI.Controls
                 }
             }
         }
-
         public int SelectionEnd
         {
             get => Stb.SelectEnd;
@@ -195,25 +194,13 @@ namespace ClassicUO.Game.UI.Controls
                 }
             }
         }
-
         public bool AllowSelection { get; set; } = true;
-
         public bool IsUnicode => _fontSettings.IsUnicode;
-
         public ushort Hue
         {
             get => _hue;
             set => _hue = value;
         }
-
-        internal int TotalHeight
-        {
-            get
-            { 
-                return (int) _textSize.Y;
-            }
-        }
-
         public string Text
         {
             get => _text;
@@ -235,7 +222,7 @@ namespace ClassicUO.Game.UI.Controls
                 //Sanitize(ref value);
 
                 _text = value;
-                _textSize = UOFontRenderer.Shared.MeasureString(_text.AsSpan(), _fontSettings, 1f, _maxWidth);
+                _textSize = UOFontRenderer.Shared.MeasureString(_text.AsSpan(), _fontSettings, 1f);
 
                 if (!_is_writing)
                 {
@@ -243,15 +230,17 @@ namespace ClassicUO.Game.UI.Controls
                 }
             }
         }
-
         public int Length => Text?.Length ?? 0;
+
+
+
 
         public float GetWidth(int index)
         {
             float width = 0;
-            if (!string.IsNullOrEmpty(_text))
+            if (!string.IsNullOrEmpty(_text) && index >= 0 && index < _text.Length && _text[index] != '\n')
             {
-                width = UOFontRenderer.Shared.MeasureString(_text.AsSpan(index, 1), _fontSettings, 1f, _maxWidth).X;               
+                width = UOFontRenderer.Shared.MeasureString(_text.AsSpan(index, 1), _fontSettings, 1f).X;               
             }
 
             return width;
@@ -263,11 +252,46 @@ namespace ClassicUO.Game.UI.Controls
 
             if (!string.IsNullOrEmpty(_text))
             {
-                r.x0 = 0;
-                r.x1 = _textSize.X;
-                r.num_chars = _text.Length - startIndex - 1; //TODO: need to be fixed
+                int? lastBreakPosition = null;
+                Vector2? lastBreakMeasure = null;
 
-                r.baseline_y_delta = r.ymax = UOFontRenderer.Shared.GetFontHeight(_fontSettings);
+                var fontHeight = UOFontRenderer.Shared.GetFontHeight(_fontSettings);
+
+                for (int i = startIndex; i < _text.Length; ++i)
+                {
+                    var c = _text[i];
+                    var span = _text.AsSpan(startIndex, (i - startIndex) + 1);
+
+                    var size = UOFontRenderer.Shared.MeasureString(span, _fontSettings, 1f);
+
+                    if (char.IsWhiteSpace(c))
+                    {
+                        lastBreakPosition = i + 1;
+                        lastBreakMeasure = size;
+                    }
+
+                    if ((_maxWidth > 0.0f && size.X > _maxWidth) || c == '\n')
+                    {
+                        if (lastBreakPosition != null)
+                        {
+                            r.num_chars = lastBreakPosition.Value - startIndex;
+                        }
+
+                        if (lastBreakMeasure != null)
+                        {
+                            r.x1 = lastBreakMeasure.Value.X;
+                            r.ymax = fontHeight;
+                            r.baseline_y_delta = fontHeight;
+                        }
+
+                        break;
+                    }
+
+                    ++r.num_chars;
+                    r.x1 = size.X;
+                    r.ymax = fontHeight;
+                    r.baseline_y_delta = fontHeight;
+                }
             }
 
             int sx = ScreenCoordinateX;
@@ -281,29 +305,28 @@ namespace ClassicUO.Game.UI.Controls
             return r;
         }
 
-        protected Point _caretScreenPosition;
-        protected bool _is_writing;
-        protected bool _leftWasDown, _fromServer;
-
-        public event EventHandler TextChanged;
+       
 
 
-        public void SelectAll()
+        
+
+        private void UpdateCaretScreenPosition()
         {
-            if (AllowSelection)
+            _caretScreenPosition = Vector2.Zero;
+            var fontHeight = UOFontRenderer.Shared.GetFontHeight(_fontSettings);
+
+            for (int i = 0, count = Math.Min(Stb.CursorIndex, _text.Length); i < count; ++i)
             {
-                Stb.SelectStart = 0;
-                Stb.SelectEnd = Length;
+                var size = _text[i] == '\n' ? Vector2.Zero : UOFontRenderer.Shared.MeasureString(_text.AsSpan(i, 1), _fontSettings, 1f);
+
+                _caretScreenPosition.X += size.X;
+
+                if ((_maxWidth > 0.0f && _caretScreenPosition.X > _maxWidth) || _text[i] == '\n')
+                {
+                    _caretScreenPosition.X = 0;
+                    _caretScreenPosition.Y += fontHeight;
+                }
             }
-        }
-
-        protected void UpdateCaretScreenPosition()
-        {
-            var cursorIndex = Math.Min(Stb.CursorIndex, Math.Max(0, _text.Length));
-
-            var size = UOFontRenderer.Shared.MeasureString(_text.AsSpan(0, cursorIndex), _fontSettings, 1f);
-            _caretScreenPosition.X = (int)size.X;
-            _caretScreenPosition.Y = (int)size.Y;
         }
 
         private ControlKeys ApplyShiftIfNecessary(ControlKeys k)
@@ -321,27 +344,271 @@ namespace ClassicUO.Game.UI.Controls
             return _maxCharCount >= 0 && Length + count >= _maxCharCount;
         }
 
-        protected virtual void OnTextChanged()
-        {
-            TextChanged?.Raise(this);
 
-            UpdateCaretScreenPosition();
-        }
 
-        internal override void OnFocusEnter()
+        public void SetText(string text)
         {
-            base.OnFocusEnter();
-            CaretIndex = Text?.Length ?? 0;
-        }
-
-        internal override void OnFocusLost()
-        {
-            if (Stb != null)
+            if (string.IsNullOrEmpty(text))
             {
-                Stb.SelectStart = Stb.SelectEnd = 0;
+                ClearText();
+            }
+            else
+            {
+                if (_maxCharCount > 0)
+                {
+                    if (NumbersOnly)
+                    {
+                        // TODO ?
+                    }
+                    else if (text.Length > _maxCharCount)
+                    {
+                        text = text.Substring(0, _maxCharCount);
+                    }
+                }
+
+                Stb.ClearState(!Multiline);
+                Text = text;
+
+                Stb.CursorIndex = Length;
+
+                if (!_is_writing)
+                {
+                    OnTextChanged();
+                }
+            }
+        }
+
+        public void ClearText()
+        {
+            if (Length != 0)
+            {
+                SelectionStart = 0;
+                SelectionEnd = 0;
+                Stb.Delete(0, Length);
+
+                if (!_is_writing)
+                {
+                    OnTextChanged();
+                }
+            }
+        }
+
+        public void AppendText(string text) => Stb.Paste(text);
+      
+        public void SelectAll()
+        {
+            if (AllowSelection)
+            {
+                Stb.SelectStart = 0;
+                Stb.SelectEnd = Length;
+            }
+        }
+
+
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        {
+            if (batcher.ClipBegin(x - 1, y - 1, Width + 2, Height + 2))
+            {
+                base.Draw(batcher, x, y);
+                DrawSelection(batcher, x, y);
+
+                Vector3 hueVec = new Vector3();
+                ShaderHueTranslator.GetHueVector(ref hueVec, _hue);
+
+                var fontHeight = UOFontRenderer.Shared.GetFontHeight(_fontSettings);
+                var offY = 0.0f;
+                var width = 0.0f;
+                Vector2 position = new Vector2(x, y);
+
+                for (int i = 0; i < _text.Length; ++i)
+                {
+                    var span = _text.AsSpan(i, 1);
+
+                    var size = _text[i] == '\n' ? Vector2.Zero : UOFontRenderer.Shared.MeasureString(span, _fontSettings, 1f);
+                    width += size.X;
+
+                    if ((_maxWidth > 0.0f && width + size.X > _maxWidth) || _text[i] == '\n')
+                    {
+                        position.X = x;
+                        position.Y += fontHeight;
+                        offY += fontHeight;
+                        width = 0;
+                    }
+
+                    UOFontRenderer.Shared.Draw
+                    (
+                       batcher,
+                       span,
+                       position,
+                       1f,
+                       _fontSettings,
+                       hueVec,
+                       false
+                    );
+
+                    position.X += size.X;
+                }
+
+                DrawCaret(batcher, x, y);
+
+                batcher.ClipEnd();
+            }
+            
+            return true;
+        }
+
+        private protected void DrawSelection(UltimaBatcher2D batcher, int x, int y)
+        {
+            if (!AllowSelection)
+            {
+                return;
             }
 
-            base.OnFocusLost();
+            ResetHueVector();
+            HueVector.Z = 0.5f;
+
+            int selectStart = Math.Min(Stb.SelectStart, Stb.SelectEnd);
+            int selectEnd = Math.Max(Stb.SelectStart, Stb.SelectEnd);
+          
+            if (selectStart < selectEnd)
+            {
+                var texture = SolidColorTextureCache.GetTexture(SELECTION_COLOR);
+                var fontHeight = UOFontRenderer.Shared.GetFontHeight(_fontSettings);
+
+
+                Vector2 startPosition = Vector2.Zero;
+                int i = 0;
+
+                for (; i < selectStart; ++i)
+                {
+                    var span = _text.AsSpan(i, 1);
+                    var size = _text[i] == '\n' ? Vector2.Zero : UOFontRenderer.Shared.MeasureString(span, _fontSettings, 1f);
+                
+                    startPosition.X += size.X;
+
+                    if ((_maxWidth > 0.0f && startPosition.X > _maxWidth) || _text[i] == '\n')
+                    {
+                        startPosition.X = 0;
+                        startPosition.Y += fontHeight;
+                    }
+                }
+
+                while (i < selectEnd)
+                {
+                    var span = _text.AsSpan(selectStart, (i - selectStart) + 1);
+                    var size = UOFontRenderer.Shared.MeasureString(span, _fontSettings, 1f);
+
+                    if ((_maxWidth > 0.0f && size.X > _maxWidth) || _text[i] == '\n')
+                    {
+                        batcher.Draw
+                        (
+                            texture,
+                            new Rectangle(x + (int)startPosition.X, y + (int)startPosition.Y, (int)(size.X), (int)fontHeight),
+                            HueVector
+                        );
+
+                        startPosition.X = 0;
+                        startPosition.Y += fontHeight;
+                        selectStart = i;
+                    }
+
+                    ++i;
+                }
+
+                if (selectStart < selectEnd)
+                {
+                    var sizeEnd = UOFontRenderer.Shared.MeasureString(_text.AsSpan(selectStart, Math.Min(_text.Length, selectEnd - selectStart)), _fontSettings, 1f);
+
+                    batcher.Draw
+                    (
+                        texture,
+                        new Rectangle(x + (int)startPosition.X, y + (int)startPosition.Y, (int)sizeEnd.X, (int)fontHeight),
+                        HueVector
+                    );
+                }
+            }
+          
+
+            ResetHueVector();
+        }
+
+        protected virtual void DrawCaret(UltimaBatcher2D batcher, int x, int y)
+        {
+            if (HasKeyboardFocus)
+            {
+                UOFontRenderer.Shared.Draw
+                (
+                    batcher,
+                    "_".AsSpan(),
+                    new Vector2(x + _caretScreenPosition.X, y + _caretScreenPosition.Y),
+                    1f,
+                    _fontSettings,
+                    _hue          
+                );
+            }
+        }
+
+        protected override void OnMouseDown(int x, int y, MouseButtonType button)
+        {
+            if (button == MouseButtonType.Left && IsEditable)
+            {
+                if (!NoSelection)
+                {
+                    _leftWasDown = true;
+                }
+
+                Stb.Click(Mouse.Position.X, Mouse.Position.Y);
+                UpdateCaretScreenPosition();
+            }
+
+            base.OnMouseDown(x, y, button);
+        }
+
+        protected override void OnMouseUp(int x, int y, MouseButtonType button)
+        {
+            if (button == MouseButtonType.Left)
+            {
+                _leftWasDown = false;
+            }
+
+            base.OnMouseUp(x, y, button);
+        }
+
+        protected override void OnMouseOver(int x, int y)
+        {
+            base.OnMouseOver(x, y);
+
+            if (!_leftWasDown)
+            {
+                return;
+            }
+
+            Stb.Drag(Mouse.Position.X, Mouse.Position.Y);
+        }
+
+        protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
+        {
+            if (!NoSelection && CaretIndex < Text.Length && CaretIndex >= 0 && !char.IsWhiteSpace(Text[CaretIndex]))
+            {
+                int idx = CaretIndex;
+
+                if (idx - 1 >= 0 && char.IsWhiteSpace(Text[idx - 1]))
+                {
+                    ++idx;
+                }
+
+                SelectionStart = Stb.MoveToPreviousWord(idx);
+                SelectionEnd = Stb.MoveToNextWord(idx);
+
+                if (SelectionEnd < Text.Length)
+                {
+                    --SelectionEnd;
+                }
+
+                return true;
+            }
+
+            return base.OnMouseDoubleClick(x, y, button);
         }
 
         protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
@@ -604,62 +871,9 @@ namespace ClassicUO.Game.UI.Controls
             base.OnKeyDown(key, mod);
         }
 
-        public void SetText(string text)
+        protected override void OnTextInput(string text)
         {
-            if (string.IsNullOrEmpty(text))
-            {
-                ClearText();
-            }
-            else
-            {
-                if (_maxCharCount > 0)
-                {
-                    if (NumbersOnly)
-                    {
-                        // TODO ?
-                    }
-                    else if (text.Length > _maxCharCount)
-                    {
-                        text = text.Substring(0, _maxCharCount);
-                    }
-                }
-
-                Stb.ClearState(!Multiline);
-                Text = text;
-
-                Stb.CursorIndex = Length;
-
-                if (!_is_writing)
-                {
-                    OnTextChanged();
-                }
-            }
-        }
-
-        public void ClearText()
-        {
-            if (Length != 0)
-            {
-                SelectionStart = 0;
-                SelectionEnd = 0;
-                Stb.Delete(0, Length);
-
-                if (!_is_writing)
-                {
-                    OnTextChanged();
-                }
-            }
-        }
-
-        public void AppendText(string text)
-        {
-            Stb.Paste(text);
-        }
-
-
-        protected override void OnTextInput(string c)
-        {
-            if (c == null || !IsEditable)
+            if (text == null || !IsEditable)
             {
                 return;
             }
@@ -684,16 +898,16 @@ namespace ClassicUO.Game.UI.Controls
                     return;
                 }
 
-                count = Math.Min(remains, c.Length);
+                count = Math.Min(remains, text.Length);
 
-                if (remains < c.Length && count > 0)
+                if (remains < text.Length && count > 0)
                 {
-                    c = c.Substring(0, count);
+                    text = text.Substring(0, count);
                 }
             }
             else
             {
-                count = c.Length;
+                count = text.Length;
             }
 
             if (count > 0)
@@ -702,7 +916,7 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     for (int i = 0; i < count; i++)
                     {
-                        if (!char.IsNumber(c[i]))
+                        if (!char.IsNumber(text[i]))
                         {
                             _is_writing = false;
 
@@ -710,7 +924,7 @@ namespace ClassicUO.Game.UI.Controls
                         }
                     }
 
-                    if (_maxCharCount > 0 && int.TryParse(Stb.text + c, out int val))
+                    if (_maxCharCount > 0 && int.TryParse(Stb.text + text, out int val))
                     {
                         if (val > _maxCharCount)
                         {
@@ -722,170 +936,111 @@ namespace ClassicUO.Game.UI.Controls
                     }
                 }
 
+                //var currentTextSize = UOFontRenderer.Shared.MeasureString(_text.AsSpan(0, CaretIndex), _fontSettings, 1f);
+                //Vector2 currentTextSize = Vector2.Zero;
 
+                //ReadOnlySpan<char> currentText = _text.AsSpan();
+
+                //if (!currentText.IsEmpty)
+                //{
+                //    for (int i = 0, max = Math.Max(CaretIndex, currentText.Length); i < max; ++i)
+                //    {
+                //        currentTextSize.X += UOFontRenderer.Shared.MeasureString(currentText.Slice(0, CaretIndex), _fontSettings, 1f).X;
+
+                //        if (currentTextSize.X > _maxWidth)
+                //        {
+                //            currentTextSize.X = 0;
+                //            Stb.InsertChar(CaretIndex, '\n');
+                //        }
+                //    }
+                //}
+                
                 if (count > 1)
                 {
-                    Stb.Paste(c);
-                    OnTextChanged();
+                    Stb.Paste(text);
                 }
-                else if (UOFontRenderer.Shared.MeasureString(c.AsSpan(0, 1), _fontSettings, 1f).X > 0.0f || c[0] == '\n' || c[0] == ' ')
+                else
                 {
-                    Stb.InputChar(c[0]);
-                    OnTextChanged();
+                    Stb.InputChar(text[0]);
                 }
+
+                OnTextChanged();
+
+                //if (count > 1)
+                //{
+                //    if (_maxWidth > 0.0f)
+                //    {
+                //        ValueStringBuilder sb = new ValueStringBuilder();
+                //        float width = currentTextSize.X;
+
+                //        for (int i = 0; i < count; ++i)
+                //        {
+                //            var c = text[i];
+
+                //            var size = UOFontRenderer.Shared.MeasureString(text.AsSpan(i, 1), _fontSettings, 1f);
+
+                //            width += size.X;
+
+                //            sb.Append(c);
+
+                //            if (width > _maxWidth)
+                //            {
+                //                sb.Append('\n');
+                //                width = 0;
+                //            }
+                //        }
+
+                //        Stb.Paste(sb.ToString());
+                //        sb.Dispose();
+                //    }
+                //    else
+                //    {
+                //        Stb.Paste(text);
+                //    }
+                    
+                //    OnTextChanged();
+                //}    
+                //else
+                //{
+                //    var size = UOFontRenderer.Shared.MeasureString(text.AsSpan(0, 1), _fontSettings, 1f);
+             
+                //    if (size.X > 0.0f || text[0] == '\n' || text[0] == ' ')
+                //    {
+                //        if (_maxWidth > 0.0f && currentTextSize.X + size.X > _maxWidth)
+                //        {
+                //            Stb.InsertChar(CaretIndex, '\n');
+                //        }
+
+                //        Stb.InputChar(text[0]);
+                //        OnTextChanged();
+                //    }        
+                //}
             }
 
             _is_writing = false;
         }
 
-        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        protected virtual void OnTextChanged()
         {
-            if (batcher.ClipBegin(x - 1, y - 1, Width + 2, Height + 2))
-            {
-                base.Draw(batcher, x, y);
-                DrawSelection(batcher, x, y);
+            TextChanged?.Raise(this);
 
-                UOFontRenderer.Shared.Draw
-                (
-                    batcher,
-                    _text.AsSpan(),
-                    new Vector2(x, y),
-                    1f,
-                    _fontSettings,
-                    _hue
-                );
-
-                DrawCaret(batcher, x, y);
-
-                batcher.ClipEnd();
-            }
-            
-            return true;
+            UpdateCaretScreenPosition();
         }
 
-        private protected void DrawSelection(UltimaBatcher2D batcher, int x, int y)
+        internal override void OnFocusEnter()
         {
-            if (!AllowSelection)
-            {
-                return;
-            }
-
-            ResetHueVector();
-
-            int selectStart = Math.Min(Stb.SelectStart, Stb.SelectEnd);
-            int selectEnd = Math.Max(Stb.SelectStart, Stb.SelectEnd);
-            int count = Math.Max(0, selectEnd - selectStart);
-            HueVector.Z = 0.5f;
-
-            if (count > 0)
-            {
-                // TODO: this is a single line selection. It's necessary to manage multilines too
-                var texture = SolidColorTextureCache.GetTexture(SELECTION_COLOR);
-
-                ++count;
-
-                if (count >= _text.Length - selectStart)
-                {
-                    count = _text.Length - selectStart;
-                }
-
-                Vector2 size = UOFontRenderer.Shared.MeasureString(_text.AsSpan(0, selectStart), _fontSettings, 1f);
-                var rect = new Rectangle(x, y, (int)size.X, (int)size.Y);
-
-                rect.X += (int)size.X;
-                rect.Y = Math.Max((int)size.Y, rect.Y);
-                size = UOFontRenderer.Shared.MeasureString(_text.AsSpan(selectStart, count), _fontSettings, 1f);
-                rect.Y = Math.Max((int)size.Y, rect.Y);
-                rect.Width = (int)size.X;
-                rect.Height = (int)size.Y + 1;
-                batcher.Draw
-                (
-                   texture,
-                   rect,
-                   HueVector
-                );               
-            }
-
-            ResetHueVector();
+            base.OnFocusEnter();
+            CaretIndex = Text?.Length ?? 0;
         }
 
-        protected virtual void DrawCaret(UltimaBatcher2D batcher, int x, int y)
+        internal override void OnFocusLost()
         {
-            if (HasKeyboardFocus)
+            if (Stb != null)
             {
-                UOFontRenderer.Shared.Draw
-                (
-                    batcher,
-                    "_".AsSpan(),
-                    new Vector2(x + _caretScreenPosition.X, y + _caretScreenPosition.Y),
-                    1f,
-                    _fontSettings,
-                    _hue
-                );
-            }
-        }
-
-        protected override void OnMouseDown(int x, int y, MouseButtonType button)
-        {
-            if (button == MouseButtonType.Left && IsEditable)
-            {
-                if (!NoSelection)
-                {
-                    _leftWasDown = true;
-                }
-
-                Stb.Click(Mouse.Position.X, Mouse.Position.Y);
-                UpdateCaretScreenPosition();
+                Stb.SelectStart = Stb.SelectEnd = 0;
             }
 
-            base.OnMouseDown(x, y, button);
-        }
-
-        protected override void OnMouseUp(int x, int y, MouseButtonType button)
-        {
-            if (button == MouseButtonType.Left)
-            {
-                _leftWasDown = false;
-            }
-
-            base.OnMouseUp(x, y, button);
-        }
-
-        protected override void OnMouseOver(int x, int y)
-        {
-            base.OnMouseOver(x, y);
-
-            if (!_leftWasDown)
-            {
-                return;
-            }
-
-            Stb.Drag(Mouse.Position.X, Mouse.Position.Y);
-        }
-
-        protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
-        {
-            if (!NoSelection && CaretIndex < Text.Length && CaretIndex >= 0 && !char.IsWhiteSpace(Text[CaretIndex]))
-            {
-                int idx = CaretIndex;
-
-                if (idx - 1 >= 0 && char.IsWhiteSpace(Text[idx - 1]))
-                {
-                    ++idx;
-                }
-
-                SelectionStart = Stb.MoveToPreviousWord(idx);
-                SelectionEnd = Stb.MoveToNextWord(idx);
-
-                if (SelectionEnd < Text.Length)
-                {
-                    --SelectionEnd;
-                }
-
-                return true;
-            }
-
-            return base.OnMouseDoubleClick(x, y, button);
+            base.OnFocusLost();
         }
     }
 }

@@ -164,7 +164,7 @@ namespace ClassicUO.Renderer
                 scale
             );
 
-            //if (CUOEnviroment.Debug)
+            if (CUOEnviroment.Debug)
             {
                 Vector3 hueVec2 = Vector3.Zero;
                 batcher.DrawRectangle(SolidColorTextureCache.GetTexture(Color.Red), (int)startPosition.X - 1, (int)startPosition.Y - 1, (int)fullSize.X + 2, (int)fullSize.Y + 2, ref hueVec2);
@@ -295,6 +295,8 @@ namespace ClassicUO.Renderer
                         if (c == '\n')
                         {
                             PushFontDrawCmd(CommandType.NewLine, null, position, Rectangle.Empty, hue, color, scale, 0);
+
+                            fullSize.X = Math.Max(fullSize.X, wordSize.X);
 
                             wordSize.Y += lineHeight;
                             position.Y += lineHeight;
