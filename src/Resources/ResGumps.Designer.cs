@@ -124,6 +124,15 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Add Marker on Player.
+        /// </summary>
+        public static string AddMarkerOnPlayer {
+            get {
+                return ResourceManager.GetString("AddMarkerOnPlayer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Add New Member.
         /// </summary>
         public static string AddNewMember {
@@ -1295,6 +1304,15 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Marker Name.
+        /// </summary>
+        public static string EnterMarkerName {
+            get {
+                return ResourceManager.GetString("EnterMarkerName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Erase.
         /// </summary>
         public static string Erase {
@@ -1967,6 +1985,15 @@ namespace ClassicUO.Resources {
         public static string InvalidLocation {
             get {
                 return ResourceManager.GetString("InvalidLocation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid marker name..
+        /// </summary>
+        public static string InvalidMarkerName {
+            get {
+                return ResourceManager.GetString("InvalidMarkerName", resourceCulture);
             }
         }
         
