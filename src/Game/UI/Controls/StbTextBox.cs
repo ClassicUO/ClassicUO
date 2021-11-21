@@ -54,20 +54,15 @@ namespace ClassicUO.Game.UI.Controls
         private readonly FontStyle _fontStyle;
 
         private readonly int _maxCharCount = -1;
-
         private FontSettings _fontSettings;
-        private ushort _hue;
         private string _text = string.Empty;
-        private Vector2 _textSize;
         private float _maxWidth;
-        private Vector2 _caretScreenPosition;
-    
-        protected bool _is_writing;
-        protected bool _leftWasDown, _fromServer;
+        private Vector2 _caretScreenPosition;  
+        private bool _is_writing;
+        private bool _leftWasDown, _fromServer;
         private uint _caretBlinkTime;
         private bool _cursorOn;
-
-        public event EventHandler TextChanged;
+        private TextEdit _textEdit;
 
 
         public StbTextBox
@@ -88,25 +83,17 @@ namespace ClassicUO.Game.UI.Controls
 
             _maxCharCount = max_char_count;
 
-            Stb = new TextEdit(this);
-            Stb.SingleLine = true;
+            _textEdit = new TextEdit(this);
+            _textEdit.SingleLine = true;
 
             if (maxWidth > 0)
             {
                 style |= FontStyle.CropTexture;
             }
 
-            _fontStyle = style;
+            Hue = hue;
 
-            if ((style & (FontStyle.Fixed | FontStyle.Cropped)) != 0 && maxWidth <= 0)
-            {
-                Debug.Assert((style & (FontStyle.Fixed | FontStyle.Cropped)) != 0 && maxWidth <= 0);
-            }
-
-            // stb_textedit will handle part of these tag
-            style &= ~( /*FontStyle.Fixed | */FontStyle.Cropped | FontStyle.CropTexture);
-
-            _hue = hue;
+            _fontStyle = style;       
             _maxWidth = maxWidth;
             _fontSettings.FontIndex = (byte)(font == 0xFF ? (Client.Version >= ClientVersion.CV_305D ? 1 : 0) : font);
             _fontSettings.Border = (style & FontStyle.BlackBorder) != 0;
@@ -141,9 +128,29 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
+        public event EventHandler TextChanged;
 
-        protected TextEdit Stb { get; }
+
         public override bool AcceptKeyboardInput => base.AcceptKeyboardInput && IsEditable;
+        public bool AllowTAB { get; set; }
+        public bool NoSelection { get; set; }
+        public bool NumbersOnly { get; set; }
+        public bool AllowSelection { get; set; } = true;
+        public bool IsPassword { get; set; }
+        public ushort Hue { get; set; }
+        public int Length => Text?.Length ?? 0;
+
+        public int CaretIndex
+        {
+            get => _textEdit.CursorIndex;
+            set
+            {
+                _textEdit.CursorIndex = value;
+
+                UpdateCaretScreenPosition();
+            }
+        }
+
         public byte Font
         {
             get => _fontSettings.FontIndex;
@@ -157,51 +164,37 @@ namespace ClassicUO.Game.UI.Controls
                 }
             }
         }
-        public bool AllowTAB { get; set; }
-        public bool NoSelection { get; set; }
-        public int CaretIndex
-        {
-            get => Stb.CursorIndex;
-            set
-            {
-                Stb.CursorIndex = value;
-                UpdateCaretScreenPosition();
-            }
-        }
+
         public bool Multiline
         {
-            get => !Stb.SingleLine;
-            set => Stb.SingleLine = !value;
+            get => !_textEdit.SingleLine;
+            set => _textEdit.SingleLine = !value;
         }
-        public bool NumbersOnly { get; set; }
+
         public int SelectionStart
         {
-            get => Stb.SelectStart;
+            get => _textEdit.SelectStart;
             set
             {
                 if (AllowSelection)
                 {
-                    Stb.SelectStart = value;
+                    _textEdit.SelectStart = value;
                 }
             }
         }
+
         public int SelectionEnd
         {
-            get => Stb.SelectEnd;
+            get => _textEdit.SelectEnd;
             set
             {
                 if (AllowSelection)
                 {
-                    Stb.SelectEnd = value;
+                    _textEdit.SelectEnd = value;
                 }
             }
         }
-        public bool AllowSelection { get; set; } = true;
-        public ushort Hue
-        {
-            get => _hue;
-            set => _hue = value;
-        }
+
         public string Text
         {
             get => _text;
@@ -219,10 +212,7 @@ namespace ClassicUO.Game.UI.Controls
                     }
                 }
                 
-                //Sanitize(ref value);
-
                 _text = value;
-                _textSize = UOFontRenderer.Shared.MeasureString(_text.AsSpan(), _fontSettings, 1f);
 
                 if (!_is_writing)
                 {
@@ -230,7 +220,6 @@ namespace ClassicUO.Game.UI.Controls
                 }
             }
         }
-        public int Length => Text?.Length ?? 0;
 
 
 
@@ -240,7 +229,7 @@ namespace ClassicUO.Game.UI.Controls
             float width = 0;
             if (!string.IsNullOrEmpty(_text) && index >= 0 && index < _text.Length && _text[index] != '\n')
             {
-                width = UOFontRenderer.Shared.MeasureString(_text.AsSpan(index, 1), _fontSettings, 1f).X;               
+                width = UOFontRenderer.Shared.MeasureString(IsPassword ? "*".AsSpan() : _text.AsSpan(index, 1), _fontSettings, 1f).X;               
             }
 
             return width;
@@ -261,9 +250,14 @@ namespace ClassicUO.Game.UI.Controls
                 for (int i = startIndex; i < _text.Length; ++i)
                 {
                     var c = _text[i];
-                    var span = _text.AsSpan(startIndex, (i - startIndex) + 1);
+                    var span = IsPassword ? "*".AsSpan() : _text.AsSpan(startIndex, (i - startIndex) + 1);
 
                     var size = UOFontRenderer.Shared.MeasureString(span, _fontSettings, 1f);
+
+                    if (IsPassword)
+                    {
+                        size.X *= (i - startIndex) + 1;
+                    }
 
                     if (char.IsWhiteSpace(c))
                     {
@@ -316,9 +310,9 @@ namespace ClassicUO.Game.UI.Controls
             _caretScreenPosition = Vector2.Zero;
             var fontHeight = UOFontRenderer.Shared.GetFontHeight(_fontSettings);
 
-            for (int i = 0, count = Math.Min(Stb.CursorIndex, _text.Length); i < count; ++i)
+            for (int i = 0, count = Math.Min(_textEdit.CursorIndex, _text.Length); i < count; ++i)
             {
-                var size = _text[i] == '\n' ? Vector2.Zero : UOFontRenderer.Shared.MeasureString(_text.AsSpan(i, 1), _fontSettings, 1f);
+                var size = _text[i] == '\n' ? Vector2.Zero : UOFontRenderer.Shared.MeasureString(IsPassword ? "*".AsSpan() : _text.AsSpan(i, 1), _fontSettings, 1f);
 
                 _caretScreenPosition.X += size.X;
 
@@ -367,10 +361,11 @@ namespace ClassicUO.Game.UI.Controls
                     }
                 }
 
-                Stb.ClearState(!Multiline);
+                _textEdit.ClearState(!Multiline);
+             
                 Text = text;
 
-                Stb.CursorIndex = Length;
+                _textEdit.CursorIndex = Length;
 
                 if (!_is_writing)
                 {
@@ -385,7 +380,7 @@ namespace ClassicUO.Game.UI.Controls
             {
                 SelectionStart = 0;
                 SelectionEnd = 0;
-                Stb.Delete(0, Length);
+                _textEdit.Delete(0, Length);
 
                 if (!_is_writing)
                 {
@@ -394,14 +389,14 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        public void AppendText(string text) => Stb.Paste(text);
+        public void AppendText(string text) => _textEdit.Paste(text);
       
         public void SelectAll()
         {
             if (AllowSelection)
             {
-                Stb.SelectStart = 0;
-                Stb.SelectEnd = Length;
+                _textEdit.SelectStart = 0;
+                _textEdit.SelectEnd = Length;
             }
         }
 
@@ -414,7 +409,7 @@ namespace ClassicUO.Game.UI.Controls
                 DrawSelection(batcher, x, y);
 
                 Vector3 hueVec = new Vector3();
-                ShaderHueTranslator.GetHueVector(ref hueVec, _hue);
+                ShaderHueTranslator.GetHueVector(ref hueVec, Hue);
 
                 var fontHeight = UOFontRenderer.Shared.GetFontHeight(_fontSettings);
                 var offY = 0.0f;
@@ -423,7 +418,7 @@ namespace ClassicUO.Game.UI.Controls
 
                 for (int i = 0; i < _text.Length; ++i)
                 {
-                    var span = _text.AsSpan(i, 1);
+                    var span = IsPassword ? "*".AsSpan() : _text.AsSpan(i, 1);
 
                     var size = _text[i] == '\n' ? Vector2.Zero : UOFontRenderer.Shared.MeasureString(span, _fontSettings, 1f);
                     width += size.X;
@@ -468,8 +463,8 @@ namespace ClassicUO.Game.UI.Controls
             ResetHueVector();
             HueVector.Z = 0.5f;
 
-            int selectStart = Math.Min(Stb.SelectStart, Stb.SelectEnd);
-            int selectEnd = Math.Max(Stb.SelectStart, Stb.SelectEnd);
+            int selectStart = Math.Min(_textEdit.SelectStart, _textEdit.SelectEnd);
+            int selectEnd = Math.Max(_textEdit.SelectStart, _textEdit.SelectEnd);
           
             if (selectStart < selectEnd)
             {
@@ -482,7 +477,7 @@ namespace ClassicUO.Game.UI.Controls
 
                 for (; i < selectStart; ++i)
                 {
-                    var span = _text.AsSpan(i, 1);
+                    var span = IsPassword ? "*".AsSpan() : _text.AsSpan(i, 1);
                     var size = _text[i] == '\n' ? Vector2.Zero : UOFontRenderer.Shared.MeasureString(span, _fontSettings, 1f);
                 
                     startPosition.X += size.X;
@@ -496,8 +491,13 @@ namespace ClassicUO.Game.UI.Controls
 
                 while (i < selectEnd)
                 {
-                    var span = _text.AsSpan(selectStart, (i - selectStart) + 1);
+                    var span = IsPassword ? "*".AsSpan() : _text.AsSpan(selectStart, (i - selectStart) + 1);
                     var size = UOFontRenderer.Shared.MeasureString(span, _fontSettings, 1f);
+
+                    if (IsPassword)
+                    {
+                        size.X *= (i - selectStart) + 1;
+                    }
 
                     if ((_maxWidth > 0.0f && size.X > _maxWidth) || _text[i] == '\n')
                     {
@@ -518,7 +518,12 @@ namespace ClassicUO.Game.UI.Controls
 
                 if (selectStart < selectEnd)
                 {
-                    var sizeEnd = UOFontRenderer.Shared.MeasureString(_text.AsSpan(selectStart, Math.Min(_text.Length, selectEnd - selectStart)), _fontSettings, 1f);
+                    var sizeEnd = UOFontRenderer.Shared.MeasureString(IsPassword ? "*".AsSpan() : _text.AsSpan(selectStart, Math.Min(_text.Length, selectEnd - selectStart)), _fontSettings, 1f);
+
+                    if (IsPassword)
+                    {
+                        sizeEnd.X *= Math.Min(_text.Length, selectEnd - selectStart);
+                    }
 
                     batcher.Draw
                     (
@@ -528,7 +533,6 @@ namespace ClassicUO.Game.UI.Controls
                     );
                 }
             }
-          
 
             ResetHueVector();
         }
@@ -543,12 +547,11 @@ namespace ClassicUO.Game.UI.Controls
                     _caretBlinkTime = Time.Ticks;
                 }
 
-
                 if (_cursorOn)
                 {
-                    if (Stb.InsertMode && Stb.CursorIndex < _text.Length)
+                    if (_textEdit.InsertMode && _textEdit.CursorIndex < _text.Length)
                     {
-                        var size = UOFontRenderer.Shared.MeasureString(_text.AsSpan(Stb.CursorIndex, 1), _fontSettings, 1f);
+                        var size = UOFontRenderer.Shared.MeasureString(IsPassword ? "*".AsSpan() : _text.AsSpan(_textEdit.CursorIndex, 1), _fontSettings, 1f);
 
                         batcher.Draw
                         (
@@ -565,11 +568,10 @@ namespace ClassicUO.Game.UI.Controls
                         (
                             SolidColorTextureCache.GetTexture(Color.White),
                             new Rectangle(x + (int)_caretScreenPosition.X, y + (int)_caretScreenPosition.Y, 1, (int)fontHeight),
-                            ShaderHueTranslator.GetHueVector(_hue)
+                            ShaderHueTranslator.GetHueVector(Hue)
                         );
                     } 
-                }
-                
+                }               
             }
         }
 
@@ -582,7 +584,7 @@ namespace ClassicUO.Game.UI.Controls
                     _leftWasDown = true;
                 }
 
-                Stb.Click(Mouse.Position.X, Mouse.Position.Y);
+                _textEdit.Click(Mouse.Position.X, Mouse.Position.Y);
                 UpdateCaretScreenPosition();
             }
 
@@ -608,7 +610,7 @@ namespace ClassicUO.Game.UI.Controls
                 return;
             }
 
-            Stb.Drag(Mouse.Position.X, Mouse.Position.Y);
+            _textEdit.Drag(Mouse.Position.X, Mouse.Position.Y);
         }
 
         protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
@@ -622,8 +624,8 @@ namespace ClassicUO.Game.UI.Controls
                     ++idx;
                 }
 
-                SelectionStart = Stb.MoveToPreviousWord(idx);
-                SelectionEnd = Stb.MoveToNextWord(idx);
+                SelectionStart = _textEdit.MoveToPreviousWord(idx);
+                SelectionEnd = _textEdit.MoveToNextWord(idx);
 
                 if (SelectionEnd < Text.Length)
                 {
@@ -673,8 +675,8 @@ namespace ClassicUO.Game.UI.Controls
                     break;
 
                 case SDL.SDL_Keycode.SDLK_c when Keyboard.Ctrl && !NoSelection:
-                    int selectStart = Math.Min(Stb.SelectStart, Stb.SelectEnd);
-                    int selectEnd = Math.Max(Stb.SelectStart, Stb.SelectEnd);
+                    int selectStart = Math.Min(_textEdit.SelectStart, _textEdit.SelectEnd);
+                    int selectEnd = Math.Max(_textEdit.SelectStart, _textEdit.SelectEnd);
 
                     if (selectStart < selectEnd && selectStart >= 0 && selectEnd - selectStart <= Text.Length)
                     {
@@ -684,8 +686,8 @@ namespace ClassicUO.Game.UI.Controls
                     break;
 
                 case SDL.SDL_Keycode.SDLK_x when Keyboard.Ctrl && !NoSelection:
-                    selectStart = Math.Min(Stb.SelectStart, Stb.SelectEnd);
-                    selectEnd = Math.Max(Stb.SelectStart, Stb.SelectEnd);
+                    selectStart = Math.Min(_textEdit.SelectStart, _textEdit.SelectEnd);
+                    selectEnd = Math.Max(_textEdit.SelectStart, _textEdit.SelectEnd);
 
                     if (selectStart < selectEnd && selectStart >= 0 && selectEnd - selectStart <= Text.Length)
                     {
@@ -693,7 +695,7 @@ namespace ClassicUO.Game.UI.Controls
 
                         if (IsEditable)
                         {
-                            Stb.Cut();
+                            _textEdit.Cut();
                         }
                     }
 
@@ -885,7 +887,7 @@ namespace ClassicUO.Game.UI.Controls
 
             if (stb_key != null)
             {
-                Stb.Key(stb_key.Value);
+                _textEdit.Key(stb_key.Value);
             }
 
             if (update_caret)
@@ -907,7 +909,7 @@ namespace ClassicUO.Game.UI.Controls
 
             if (SelectionStart != SelectionEnd)
             {
-                Stb.DeleteSelection();
+                _textEdit.DeleteSelection();
             }
 
             int count;
@@ -949,7 +951,7 @@ namespace ClassicUO.Game.UI.Controls
                         }
                     }
 
-                    if (_maxCharCount > 0 && int.TryParse(Stb.text + text, out int val))
+                    if (_maxCharCount > 0 && int.TryParse(_textEdit.text + text, out int val))
                     {
                         if (val > _maxCharCount)
                         {
@@ -963,11 +965,11 @@ namespace ClassicUO.Game.UI.Controls
                 
                 if (count > 1)
                 {
-                    Stb.Paste(text);
+                    _textEdit.Paste(text);
                 }
                 else
                 {
-                    Stb.InputChar(text[0]);
+                    _textEdit.InputChar(text[0]);
                 }
 
                 OnTextChanged();
@@ -991,9 +993,9 @@ namespace ClassicUO.Game.UI.Controls
 
         internal override void OnFocusLost()
         {
-            if (Stb != null)
+            if (_textEdit != null)
             {
-                Stb.SelectStart = Stb.SelectEnd = 0;
+                _textEdit.SelectStart = _textEdit.SelectEnd = 0;
             }
 
             base.OnFocusLost();
