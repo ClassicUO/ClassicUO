@@ -3323,7 +3323,7 @@ namespace ClassicUO.Network
             writer.Dispose();
         }
 
-        public static void Send_BookPageData(this NetClient socket, uint serial, string[] text, int page)
+        public static void Send_BookPageData(this NetClient socket, uint serial, string text, int page)
         {
             const byte ID = 0x66;
 
@@ -3341,42 +3341,44 @@ namespace ClassicUO.Network
             writer.WriteUInt32BE(serial);
             writer.WriteUInt16BE(0x01);
             writer.WriteUInt16BE((ushort) page);
-            writer.WriteUInt16BE((ushort) text.Length);
+
+            var linesCountStreamPosition = writer.Position;
+            writer.WriteUInt16BE(0x0000);
+
+            int linesCount = 0;
+            int last = 0;
 
             for (int i = 0; i < text.Length; ++i)
             {
-                if (!string.IsNullOrEmpty(text[i]))
+                var c = text[i];
+
+                if (c == '\n')
                 {
-                    string t = text[i].Replace("\n", "");
+                    ++linesCount;
 
-                    if (t.Length > 0)
-                    {
-                        byte[] buffer = ArrayPool<byte>.Shared.Rent(t.Length * 2);//we have to assume we are using all two byte chars
+                    var str = text.Substring(last, i - last);
+                    writer.WriteUTF8(str, str.Length);
+                    writer.WriteUInt8(0x00);
 
-                        try
-                        {
-                            int written = Encoding.UTF8.GetBytes
-                            (
-                                t,
-                                0,
-                                t.Length,
-                                buffer,
-                                0
-                            );
-
-                            writer.Write(buffer.AsSpan(0, written));
-                        }
-                        finally
-                        {
-                            ArrayPool<byte>.Shared.Return(buffer);
-                        }
-                    }
+                    last = i;
                 }
+            }
 
+            if (last < text.Length)
+            {
+                ++linesCount;
+
+                var str = text.Substring(last, text.Length - last);
+                writer.WriteUTF8(str, str.Length);
                 writer.WriteUInt8(0x00);
             }
 
-            writer.WriteUInt8(0x00);
+            writer.WriteUInt8(0x00); // ???
+
+            var eofPosition = writer.Position;
+            writer.Seek(linesCountStreamPosition, SeekOrigin.Begin);
+            writer.WriteUInt16BE((ushort) linesCount);
+            writer.Seek(eofPosition, SeekOrigin.Begin);
 
             if (length < 0)
             {

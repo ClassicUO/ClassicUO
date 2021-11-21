@@ -2178,27 +2178,37 @@ namespace ClassicUO.Network
                 {
                     ushort lineCnt = p.ReadUInt16BE();
 
+                    ValueStringBuilder sb = new ValueStringBuilder();
+
                     for (int line = 0; line < lineCnt; line++)
                     {
-                        int index = pageNum * ModernBookGump.MAX_BOOK_LINES + line;
+                        var lineText = ModernBookGump.IsNewBook ? p.ReadUTF8(true) : p.ReadASCII();
 
-                        if (index < gump.BookLines.Length)
+                        sb.Append(lineText);
+
+                        if (line + 1 < lineCnt)
                         {
-                            gump.BookLines[index] = ModernBookGump.IsNewBook ? p.ReadUTF8(true) : p.ReadASCII();
-                        }
-                        else
-                        {
-                            Log.Error("BOOKGUMP: The server is sending a page number GREATER than the allowed number of pages in BOOK!");
-                        }
+                            sb.Append('\n');
+                        }             
                     }
 
-                    if (lineCnt < ModernBookGump.MAX_BOOK_LINES)
+                    if (!gump.SetPageText(sb.ToString(), pageNum))
                     {
-                        for (int line = lineCnt; line < ModernBookGump.MAX_BOOK_LINES; line++)
-                        {
-                            gump.BookLines[pageNum * ModernBookGump.MAX_BOOK_LINES + line] = string.Empty;
-                        }
+                        Log.Error("BOOKGUMP: The server is sending a page number GREATER than the allowed number of pages in BOOK!");
                     }
+
+                    sb.Dispose();
+
+                    //if (lineCnt < ModernBookGump.MAX_BOOK_LINES)
+                    //{
+                    //    for (int line = lineCnt; line < ModernBookGump.MAX_BOOK_LINES; line++)
+                    //    {
+                    //        if (!gump.SetPageText(string.Empty, pageNum * ModernBookGump.MAX_BOOK_LINES + line))
+                    //        {
+                    //            Log.Error("BOOKGUMP: The server is sending a page number GREATER than the allowed number of pages in BOOK!");
+                    //        }
+                    //    }
+                    //}
                 }
                 else
                 {
@@ -2206,7 +2216,7 @@ namespace ClassicUO.Network
                 }
             }
 
-            gump.ServerSetBookText();
+            gump?.OnPageChanged();
         }
 
         private static void CharacterAnimation(ref StackDataReader p)
