@@ -108,10 +108,6 @@ namespace ClassicUO.Game.UI.Controls
         }
 
         public ushort Hue { get; set; }
-        public byte Font => _fontSettings.FontIndex;
-        public bool Unicode => _fontSettings.IsUnicode;
-
-
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
@@ -127,8 +123,7 @@ namespace ClassicUO.Game.UI.Controls
                 pos.X = x + (_maxWidth * 0.5f) - (_textSize.X * 0.5f);
             }
 
-            Vector3 hueVec = new Vector3();
-            ShaderHueTranslator.GetHueVector(ref hueVec, Hue);
+            Vector3 hueVec = ShaderHueTranslator.GetHueVector(Hue);
 
             UOFontRenderer.Shared.Draw
             (

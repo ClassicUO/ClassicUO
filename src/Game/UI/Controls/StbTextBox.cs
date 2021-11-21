@@ -48,6 +48,8 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class StbTextBox : Control, ITextEditHandler
     {
+        const int CARET_BLINK_TIME = 450;
+
         protected static readonly Color SELECTION_COLOR = new Color() { PackedValue = 0x80a06020 };
         private readonly FontStyle _fontStyle;
 
@@ -62,7 +64,8 @@ namespace ClassicUO.Game.UI.Controls
     
         protected bool _is_writing;
         protected bool _leftWasDown, _fromServer;
-
+        private uint _caretBlinkTime;
+        private bool _cursorOn;
 
         public event EventHandler TextChanged;
 
@@ -194,7 +197,6 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
         public bool AllowSelection { get; set; } = true;
-        public bool IsUnicode => _fontSettings.IsUnicode;
         public ushort Hue
         {
             get => _hue;
@@ -203,7 +205,6 @@ namespace ClassicUO.Game.UI.Controls
         public string Text
         {
             get => _text;
-
             set
             {
                 if (_maxCharCount > 0)
@@ -536,15 +537,39 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (HasKeyboardFocus)
             {
-                UOFontRenderer.Shared.Draw
-                (
-                    batcher,
-                    "_".AsSpan(),
-                    new Vector2(x + _caretScreenPosition.X, y + _caretScreenPosition.Y),
-                    1f,
-                    _fontSettings,
-                    _hue          
-                );
+                if (Time.Ticks - _caretBlinkTime >= CARET_BLINK_TIME)
+                {
+                    _cursorOn = !_cursorOn;
+                    _caretBlinkTime = Time.Ticks;
+                }
+
+
+                if (_cursorOn)
+                {
+                    if (Stb.InsertMode && Stb.CursorIndex < _text.Length)
+                    {
+                        var size = UOFontRenderer.Shared.MeasureString(_text.AsSpan(Stb.CursorIndex, 1), _fontSettings, 1f);
+
+                        batcher.Draw
+                        (
+                            SolidColorTextureCache.GetTexture(Color.Gray * 0.5f),
+                            new Rectangle(x + (int) _caretScreenPosition.X, y + (int)_caretScreenPosition.Y, (int)size.X, (int)size.Y),
+                            Vector3.Zero
+                        );
+                    }
+                    else
+                    {
+                        var fontHeight = UOFontRenderer.Shared.GetFontHeight(_fontSettings);
+
+                        batcher.Draw
+                        (
+                            SolidColorTextureCache.GetTexture(Color.White),
+                            new Rectangle(x + (int)_caretScreenPosition.X, y + (int)_caretScreenPosition.Y, 1, (int)fontHeight),
+                            ShaderHueTranslator.GetHueVector(_hue)
+                        );
+                    } 
+                }
+                
             }
         }
 
