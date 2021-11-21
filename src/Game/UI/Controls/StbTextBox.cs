@@ -246,6 +246,7 @@ namespace ClassicUO.Game.UI.Controls
             return width;
         }
 
+        // https://github.com/rds1983/Myra/blob/5dde5e3229cb6752a264abb4b92edfa671b507ca/src/Myra/Graphics2D/UI/TextField.cs
         public TextEditRow LayoutRow(int startIndex)
         {
             TextEditRow r = new TextEditRow();
@@ -323,7 +324,7 @@ namespace ClassicUO.Game.UI.Controls
 
                 if ((_maxWidth > 0.0f && _caretScreenPosition.X > _maxWidth) || _text[i] == '\n')
                 {
-                    _caretScreenPosition.X = 0;
+                    _caretScreenPosition.X = size.X;
                     _caretScreenPosition.Y += fontHeight;
                 }
             }
@@ -427,14 +428,6 @@ namespace ClassicUO.Game.UI.Controls
                     var size = _text[i] == '\n' ? Vector2.Zero : UOFontRenderer.Shared.MeasureString(span, _fontSettings, 1f);
                     width += size.X;
 
-                    if ((_maxWidth > 0.0f && width + size.X > _maxWidth) || _text[i] == '\n')
-                    {
-                        position.X = x;
-                        position.Y += fontHeight;
-                        offY += fontHeight;
-                        width = 0;
-                    }
-
                     UOFontRenderer.Shared.Draw
                     (
                        batcher,
@@ -447,6 +440,14 @@ namespace ClassicUO.Game.UI.Controls
                     );
 
                     position.X += size.X;
+
+                    if ((_maxWidth > 0.0f && width + size.X > _maxWidth) || _text[i] == '\n')
+                    {
+                        position.X = x;
+                        position.Y += fontHeight;
+                        offY += fontHeight;
+                        width = 0;
+                    }
                 }
 
                 DrawCaret(batcher, x, y);
