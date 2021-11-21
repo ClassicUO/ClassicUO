@@ -103,7 +103,6 @@ namespace ClassicUO.Game.UI.Controls
             // stb_textedit will handle part of these tag
             style &= ~( /*FontStyle.Fixed | */FontStyle.Cropped | FontStyle.CropTexture);
 
-
             _hue = hue;
             _maxWidth = maxWidth;
             _fontSettings.FontIndex = (byte)(font == 0xFF ? (Client.Version >= ClientVersion.CV_305D ? 1 : 0) : font);
@@ -936,25 +935,6 @@ namespace ClassicUO.Game.UI.Controls
                         }
                     }
                 }
-
-                //var currentTextSize = UOFontRenderer.Shared.MeasureString(_text.AsSpan(0, CaretIndex), _fontSettings, 1f);
-                //Vector2 currentTextSize = Vector2.Zero;
-
-                //ReadOnlySpan<char> currentText = _text.AsSpan();
-
-                //if (!currentText.IsEmpty)
-                //{
-                //    for (int i = 0, max = Math.Max(CaretIndex, currentText.Length); i < max; ++i)
-                //    {
-                //        currentTextSize.X += UOFontRenderer.Shared.MeasureString(currentText.Slice(0, CaretIndex), _fontSettings, 1f).X;
-
-                //        if (currentTextSize.X > _maxWidth)
-                //        {
-                //            currentTextSize.X = 0;
-                //            Stb.InsertChar(CaretIndex, '\n');
-                //        }
-                //    }
-                //}
                 
                 if (count > 1)
                 {
@@ -966,56 +946,6 @@ namespace ClassicUO.Game.UI.Controls
                 }
 
                 OnTextChanged();
-
-                //if (count > 1)
-                //{
-                //    if (_maxWidth > 0.0f)
-                //    {
-                //        ValueStringBuilder sb = new ValueStringBuilder();
-                //        float width = currentTextSize.X;
-
-                //        for (int i = 0; i < count; ++i)
-                //        {
-                //            var c = text[i];
-
-                //            var size = UOFontRenderer.Shared.MeasureString(text.AsSpan(i, 1), _fontSettings, 1f);
-
-                //            width += size.X;
-
-                //            sb.Append(c);
-
-                //            if (width > _maxWidth)
-                //            {
-                //                sb.Append('\n');
-                //                width = 0;
-                //            }
-                //        }
-
-                //        Stb.Paste(sb.ToString());
-                //        sb.Dispose();
-                //    }
-                //    else
-                //    {
-                //        Stb.Paste(text);
-                //    }
-                    
-                //    OnTextChanged();
-                //}    
-                //else
-                //{
-                //    var size = UOFontRenderer.Shared.MeasureString(text.AsSpan(0, 1), _fontSettings, 1f);
-             
-                //    if (size.X > 0.0f || text[0] == '\n' || text[0] == ' ')
-                //    {
-                //        if (_maxWidth > 0.0f && currentTextSize.X + size.X > _maxWidth)
-                //        {
-                //            Stb.InsertChar(CaretIndex, '\n');
-                //        }
-
-                //        Stb.InputChar(text[0]);
-                //        OnTextChanged();
-                //    }        
-                //}
             }
 
             _is_writing = false;

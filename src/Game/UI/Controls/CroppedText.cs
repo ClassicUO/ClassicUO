@@ -53,11 +53,6 @@ namespace ClassicUO.Game.UI.Controls
         {
             _text = text;
 
-            if (hue == 0xFFFF)
-            {
-                hue = 1;
-            }
-
             _hue = (ushort)(hue - 1);
             _maxWidth = maxWidth;
             _cropped = maxWidth > 0.0f;
@@ -100,7 +95,9 @@ namespace ClassicUO.Game.UI.Controls
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             Vector2 position = new Vector2(x, y);
-            Vector3 hueVec = new Vector3(_hue, 1f, 0);
+
+            Vector3 hueVec = new Vector3();
+            ShaderHueTranslator.GetHueVector(ref hueVec, _hue);
 
             UOFontRenderer.Shared.Draw
             (

@@ -71,12 +71,7 @@ namespace ClassicUO.Game.UI.Controls
             _maxWidth = maxwidth;
             _align = align;
 
-            if (hue == 0xFFFF)
-            {
-                hue = 1;
-            }
-
-            Hue = (ushort)(hue - 1);
+            Hue = hue;
             Text = text;
 
             AcceptMouseInput = false;
@@ -132,11 +127,8 @@ namespace ClassicUO.Game.UI.Controls
                 pos.X = x + (_maxWidth * 0.5f) - (_textSize.X * 0.5f);
             }
 
-            Vector3 hueVec = new Vector3(Hue, 0f, Alpha);
-            if (Hue != 0)
-            {
-                hueVec.Y = 1f;
-            }
+            Vector3 hueVec = new Vector3();
+            ShaderHueTranslator.GetHueVector(ref hueVec, Hue);
 
             UOFontRenderer.Shared.Draw
             (

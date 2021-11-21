@@ -173,7 +173,7 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        public int Hue { get; set; }
+        public ushort Hue { get; set; }
         public ushort FontHue { get; }
         public ushort HueHover { get; }
         public bool FontCenter { get; set; }

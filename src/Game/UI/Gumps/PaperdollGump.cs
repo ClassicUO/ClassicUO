@@ -891,7 +891,7 @@ namespace ClassicUO.Game.UI.Gumps
                     ShaderHueTranslator.GetHueVector
                     (
                         ref HueVector,
-                        MouseIsOver && HighlightOnMouseOver ? 0x0035 : item.Hue,
+                        (ushort) (MouseIsOver && HighlightOnMouseOver ? 0x0035 : item.Hue),
                         item.ItemData.IsPartialHue,
                         0,
                         true
