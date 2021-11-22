@@ -41,6 +41,7 @@ using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Resources;
+using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
@@ -257,44 +258,120 @@ namespace ClassicUO.Game.UI.Gumps
             Client.Game.Scene.Audio.PlaySound(0x0055);
         }
 
+
         private void BookPageLeft_TextChanged(object sender, EventArgs e)
         {
-            int index = ActivePage - 1;
+            int index = Math.Min(Math.Max(ActivePage, 1), MaxPage);
+            int rightPage = ((index - 1) << 1);
+            int leftPage = rightPage - 1;
 
-            if (index >= 0 && index < _pagesChanged.Length)
+            if (leftPage >= 0 && leftPage < _pagesChanged.Length)
             {
-                _pagesChanged[index] = true;
-                _pagesText[index - 1] = _bookPageLeft.Text;
+                _pagesChanged[leftPage + 1] = true;
+                _pagesText[leftPage] = _bookPageLeft.Text;
+            
+                if (leftPage + 1 < _pagesText.Length)
+                {
+                    var i = GetIndexOfLargeText(_bookPageLeft.Text.AsSpan(), _bookPageLeft.FontSettings, _bookPageLeft.Width, _bookPageLeft.Height);
+
+                    if (i >= 0)
+                    {
+                        var span = _bookPageLeft.Text.AsSpan(i);
+
+                        if (!span.IsEmpty)
+                        {
+                            _pagesText[leftPage + 1] = $"{span.ToString()}{_bookPageRight.Text}";
+
+                            if (ActivePage + 1 < BookPageCount)
+                            {
+                                ActivePage++;
+                                _bookPageRight.SetKeyboardFocus();
+                            }
+                        }
+                    }
+                }
             }
         }
-
+        
         private void BookPageRight_TextChanged(object sender, EventArgs e)
         {
-            int index = ActivePage;
+            int index = Math.Min(Math.Max(ActivePage, 1), MaxPage);
+            int rightPage = ((index - 1) << 1);
+            int leftPage = rightPage - 1;
 
-            if (index >= 0 && index < _pagesChanged.Length)
+            if (rightPage >= 0 && rightPage < _pagesChanged.Length)
             {
-                _pagesChanged[index] = true;
-                _pagesText[index - 1] = _bookPageRight.Text;
+                _pagesChanged[rightPage + 1] = true;
+                _pagesText[rightPage] = _bookPageRight.Text;
+
+                if (rightPage + 1 < _pagesText.Length)
+                {
+                    var i = GetIndexOfLargeText(_bookPageRight.Text.AsSpan(), _bookPageRight.FontSettings, _bookPageRight.Width, _bookPageRight.Height);
+
+                    if (i >= 0)
+                    {
+                        var span = _bookPageRight.Text.AsSpan(i);
+
+                        if (!span.IsEmpty)
+                        {
+                            _pagesText[rightPage + 1] = $"{span.ToString()}{_bookPageLeft.Text}";
+
+                            if (ActivePage + 1 < BookPageCount)
+                            {
+                                ActivePage++;
+                                _bookPageLeft.SetKeyboardFocus();
+                            }
+                        }
+                    }
+                }
             }
         }
+
+        private int GetIndexOfLargeText(ReadOnlySpan<char> text, in FontSettings fs, int maxWidth, int maxHeight)
+        {
+            var fontHeight = UOFontRenderer.Shared.GetFontHeight(fs);
+
+            Vector2 size = new Vector2(0, fontHeight);
+
+            for (int i = 0; i < text.Length; ++i)
+            {
+                size.X += text[i] == '\n' ? 0.0f : UOFontRenderer.Shared.MeasureString(text.Slice(i, 1), fs, 1f).X;
+
+                if (text[i] == '\n' || size.X > maxWidth)
+                {
+                    size.X = 0;
+                    size.Y += fontHeight;
+
+                    if (size.Y > maxHeight)
+                    {
+                        return i + 1;
+                    }
+                }
+            }
+
+            return -1;
+        }
+
 
         public override void OnPageChanged()
         {
-            if (ActivePage == 1)
-            {
-                _bookPageLeft.IsVisible = false;
-                _bookPageRight.IsVisible = true;
+            UpdatePageButtonVisibility();
 
-                _bookPageRight.SetText(_pagesText[ActivePage - 1]);
+            int index = Math.Min(Math.Max(ActivePage, 1), MaxPage);
+            int rightPage = ((index - 1) << 1);
+            int leftPage = rightPage - 1;
+
+            _bookPageLeft.IsVisible = leftPage >= 0 && leftPage < _pagesText.Length;
+            _bookPageRight.IsVisible = rightPage >= 0 && rightPage < _pagesText.Length;
+
+            if (_bookPageLeft.IsVisible)
+            {
+                _bookPageLeft.SetText(_pagesText[leftPage]);
             }
-            else
-            {
-                _bookPageLeft.IsVisible = true;
-                _bookPageRight.IsVisible = true;
 
-                _bookPageLeft.SetText(_pagesText[ActivePage - 1]);
-                _bookPageRight.SetText(_pagesText[ActivePage]);
+            if (_bookPageRight.IsVisible)
+            {
+                _bookPageRight.SetText(_pagesText[rightPage]);
             }
 
             base.OnPageChanged();
@@ -383,7 +460,30 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                         else
                         {
-                            NetClient.Socket.Send_BookPageData(LocalSerial, _pagesText[i - 1], i);
+                            ValueStringBuilder sb = new ValueStringBuilder();
+                            var span = _pagesText[i - 1].AsSpan();
+                            var fontSettings = (i - 1) % 2 == 0 ? _bookPageLeft.FontSettings : _bookPageRight.FontSettings;
+                            int last = 0;
+                          
+                            for (int j = 0; j < span.Length; ++j)
+                            {
+                                var c = span[j];
+                                var size = UOFontRenderer.Shared.MeasureString(span.Slice(last, j - last), fontSettings, 1f);
+
+                                sb.Append(c);
+
+                                if ((_bookPageLeft.MaxWidth > 0.0f && size.X > _bookPageLeft.MaxWidth))
+                                {
+                                    sb.Append('\n');
+
+                                    last = j;
+                                }
+                            }
+
+
+                            NetClient.Socket.Send_BookPageData(LocalSerial, sb.ToString(), i);
+
+                            sb.Dispose();
                         }
                     }
                 }
@@ -408,29 +508,5 @@ namespace ClassicUO.Game.UI.Gumps
 
             base.CloseWithRightClick();
         }
-
-
-        //public override void OnHitTestSuccess(int x, int y, ref Control res)
-        //{
-        //    if (!IsDisposed)
-        //    {
-        //        int page = -1;
-
-        //        if (ActivePage > 1 && x >= LEFT_X + X && x <= LEFT_X + X + _bookPage.Width)
-        //        {
-        //            page = (ActivePage - 1) * 2 - 1;
-        //        }
-        //        else if (ActivePage - 1 < BookPageCount >> 1 && x >= RIGHT_X + X && x <= RIGHT_X + _bookPage.Width + X)
-        //        {
-        //            page = (ActivePage - 1) * 2;
-        //        }
-
-        //        if (page >= 0 && page < BookPageCount && y >= UPPER_MARGIN + Y && y <= UPPER_MARGIN + PAGE_HEIGHT + Y)
-        //        {
-        //            _bookPage._focusPage = page;
-        //            res = _bookPage;
-        //        }
-        //    }
-        //}
     }
 }

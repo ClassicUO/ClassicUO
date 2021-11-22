@@ -130,6 +130,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public event EventHandler TextChanged;
 
+        public FontSettings FontSettings => _fontSettings;
 
         public override bool AcceptKeyboardInput => base.AcceptKeyboardInput && IsEditable;
         public bool AllowTAB { get; set; }
@@ -139,6 +140,7 @@ namespace ClassicUO.Game.UI.Controls
         public bool IsPassword { get; set; }
         public ushort Hue { get; set; }
         public int Length => Text?.Length ?? 0;
+        public float MaxWidth => _maxWidth;
 
         public int CaretIndex
         {
@@ -408,8 +410,7 @@ namespace ClassicUO.Game.UI.Controls
                 base.Draw(batcher, x, y);
                 DrawSelection(batcher, x, y);
 
-                Vector3 hueVec = new Vector3();
-                ShaderHueTranslator.GetHueVector(ref hueVec, Hue);
+                Vector3 hueVec = ShaderHueTranslator.GetHueVector(Hue);
 
                 var fontHeight = UOFontRenderer.Shared.GetFontHeight(_fontSettings);
                 var offY = 0.0f;
