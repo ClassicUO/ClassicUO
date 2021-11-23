@@ -305,7 +305,7 @@ namespace ClassicUO.Game
                         effect.X += effect.SpeedX * speedOffset;
                         effect.Y += effect.SpeedY * speedOffset;
 
-                        batcher.Draw2D
+                        batcher.Draw
                         (
                             SolidColorTextureCache.GetTexture(Color.White),
                             x + (int) effect.X,

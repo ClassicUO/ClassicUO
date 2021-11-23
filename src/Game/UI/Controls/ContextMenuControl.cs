@@ -356,7 +356,7 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     ResetHueVector();
 
-                    batcher.Draw2D
+                    batcher.Draw
                     (
                         SolidColorTextureCache.GetTexture(Color.Gray),
                         x + 2,

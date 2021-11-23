@@ -93,7 +93,7 @@ namespace ClassicUO.Game.UI.Controls
 
             if (texture != null)
             {
-                batcher.Draw2D
+                batcher.Draw
                 (
                     texture,
                     x,

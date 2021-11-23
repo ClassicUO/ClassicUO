@@ -223,7 +223,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 ShaderHueTranslator.GetHueVector(ref HueVector, _warningLinesHue);
 
-                batcher.Draw2D
+                batcher.Draw
                 (
                     SolidColorTextureCache.GetTexture(Color.White),
                     _data.ScreenCoordinateX,
@@ -233,7 +233,7 @@ namespace ClassicUO.Game.UI.Gumps
                     ref HueVector
                 );
 
-                batcher.Draw2D
+                batcher.Draw
                 (
                     SolidColorTextureCache.GetTexture(Color.White),
                     _data.ScreenCoordinateX,

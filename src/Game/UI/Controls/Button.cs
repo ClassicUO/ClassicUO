@@ -241,7 +241,7 @@ namespace ClassicUO.Game.UI.Controls
 
             HueVector.Z = Alpha;
 
-            batcher.Draw2D
+            batcher.Draw
             (
                 texture,
                 x,

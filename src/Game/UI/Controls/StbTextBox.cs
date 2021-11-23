@@ -946,7 +946,7 @@ namespace ClassicUO.Game.UI.Controls
                                 endX += _rendererText.GetCharWidth(info.Data[startSelectionIndex + k].Item);
                             }
 
-                            batcher.Draw2D
+                            batcher.Draw
                             (
                                 SolidColorTextureCache.GetTexture(SELECTION_COLOR),
                                 x + drawX + diffX,
@@ -961,7 +961,7 @@ namespace ClassicUO.Game.UI.Controls
 
 
                         // do the whole line
-                        batcher.Draw2D
+                        batcher.Draw
                         (
                             SolidColorTextureCache.GetTexture(SELECTION_COLOR),
                             x + drawX + diffX,

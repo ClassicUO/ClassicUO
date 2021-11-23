@@ -442,7 +442,7 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     case 0:
 
-                        batcher.Draw2D
+                        batcher.Draw
                         (
                             t,
                             drawX,
@@ -458,7 +458,7 @@ namespace ClassicUO.Game.UI.Controls
                         drawX += th_0_width;
                         drawWidth = Width - th_0_width - th_2_width;
 
-                        batcher.Draw2DTiled
+                        batcher.DrawTiled
                         (
                             t,
                             drawX,
@@ -474,7 +474,7 @@ namespace ClassicUO.Game.UI.Controls
                         drawX += Width - drawWidth;
                         drawY += offsetTop;
 
-                        batcher.Draw2D
+                        batcher.Draw
                         (
                             t,
                             drawX,
@@ -491,7 +491,7 @@ namespace ClassicUO.Game.UI.Controls
                         drawY += th_0_height;
                         drawHeight = Height - th_0_height - th_5_height;
 
-                        batcher.Draw2DTiled
+                        batcher.DrawTiled
                         (
                             t,
                             drawX,
@@ -508,7 +508,7 @@ namespace ClassicUO.Game.UI.Controls
                         drawY += th_2_height;
                         drawHeight = Height - th_2_height - th_7_height;
 
-                        batcher.Draw2DTiled
+                        batcher.DrawTiled
                         (
                             t,
                             drawX,
@@ -523,7 +523,7 @@ namespace ClassicUO.Game.UI.Controls
                     case 5:
                         drawY += Height - drawHeight;
 
-                        batcher.Draw2D
+                        batcher.Draw
                         (
                             t,
                             drawX,
@@ -540,7 +540,7 @@ namespace ClassicUO.Game.UI.Controls
                         drawY += Height - drawHeight - offsetBottom;
                         drawWidth = Width - th_5_width - th_7_width;
 
-                        batcher.Draw2DTiled
+                        batcher.DrawTiled
                         (
                             t,
                             drawX,
@@ -556,7 +556,7 @@ namespace ClassicUO.Game.UI.Controls
                         drawX += Width - drawWidth;
                         drawY += Height - drawHeight;
 
-                        batcher.Draw2D
+                        batcher.Draw
                         (
                             t,
                             drawX,
@@ -576,7 +576,7 @@ namespace ClassicUO.Game.UI.Controls
 
                         drawWidth += offsetLeft + offsetRight;
 
-                        batcher.Draw2DTiled
+                        batcher.DrawTiled
                         (
                             t,
                             drawX,

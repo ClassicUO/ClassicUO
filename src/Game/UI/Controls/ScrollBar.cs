@@ -121,9 +121,9 @@ namespace ClassicUO.Game.UI.Controls
 
             if (middleHeight > 0)
             {
-                batcher.Draw2D(_textureBackground[0], x, y + _textureUpButton[0].Height, ref HueVector);
+                batcher.Draw(_textureBackground[0], x, y + _textureUpButton[0].Height, ref HueVector);
 
-                batcher.Draw2DTiled
+                batcher.DrawTiled
                 (
                     _textureBackground[1],
                     x,
@@ -133,13 +133,13 @@ namespace ClassicUO.Game.UI.Controls
                     ref HueVector
                 );
 
-                batcher.Draw2D(_textureBackground[2], x, y + Height - _textureDownButton[0].Height - _textureBackground[2].Height, ref HueVector);
+                batcher.Draw(_textureBackground[2], x, y + Height - _textureDownButton[0].Height - _textureBackground[2].Height, ref HueVector);
             }
             else
             {
                 middleHeight = Height - _textureUpButton[0].Height - _textureDownButton[0].Height;
 
-                batcher.Draw2DTiled
+                batcher.DrawTiled
                 (
                     _textureBackground[1],
                     x,
@@ -151,15 +151,15 @@ namespace ClassicUO.Game.UI.Controls
             }
 
             // draw up button
-            batcher.Draw2D(_btUpClicked ? _textureUpButton[1] : _textureUpButton[0], x, y, ref HueVector);
+            batcher.Draw(_btUpClicked ? _textureUpButton[1] : _textureUpButton[0], x, y, ref HueVector);
 
             // draw down button
-            batcher.Draw2D(_btDownClicked ? _textureDownButton[1] : _textureDownButton[0], x, y + Height - _textureDownButton[0].Height, ref HueVector);
+            batcher.Draw(_btDownClicked ? _textureDownButton[1] : _textureDownButton[0], x, y + Height - _textureDownButton[0].Height, ref HueVector);
 
             // draw slider
             if (MaxValue > MinValue && middleHeight > 0)
             {
-                batcher.Draw2D(_textureSlider, x + ((_textureBackground[0].Width - _textureSlider.Width) >> 1), y + _textureUpButton[0].Height + _sliderPosition, ref HueVector);
+                batcher.Draw(_textureSlider, x + ((_textureBackground[0].Width - _textureSlider.Width) >> 1), y + _textureUpButton[0].Height + _sliderPosition, ref HueVector);
             }
 
             return base.Draw(batcher, x, y);

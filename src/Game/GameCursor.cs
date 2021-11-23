@@ -372,7 +372,7 @@ namespace ClassicUO.Game
 
                 ShaderHueTranslator.GetHueVector(ref hue, ItemHold.Hue, ItemHold.IsPartialHue, ItemHold.HasAlpha ? .5f : 0);
 
-                sb.Draw2D
+                sb.Draw
                 (
                     _draggedItemTexture,
                     x,
@@ -387,7 +387,7 @@ namespace ClassicUO.Game
                     x += 5;
                     y += 5;
 
-                    sb.Draw2D
+                    sb.Draw
                     (
                         _draggedItemTexture,
                         x,
@@ -426,7 +426,7 @@ namespace ClassicUO.Game
                     ShaderHueTranslator.GetHueVector(ref hueVec, 0x0033);
                 }
 
-                sb.Draw2D(ArtLoader.Instance.GetTexture(Graphic), Mouse.Position.X - offX, Mouse.Position.Y - offY, ref hueVec);
+                sb.Draw(ArtLoader.Instance.GetTexture(Graphic), Mouse.Position.X - offX, Mouse.Position.Y - offY, ref hueVec);
             }
         }
 

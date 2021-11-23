@@ -183,7 +183,7 @@ namespace ClassicUO.Game.UI
             Vector3 hue_vec = Vector3.Zero;
             ShaderHueTranslator.GetHueVector(ref hue_vec, 0, false, alpha);
 
-            batcher.Draw2D
+            batcher.Draw
             (
                 SolidColorTextureCache.GetTexture(Color.Black),
                 x - 4,
@@ -207,7 +207,7 @@ namespace ClassicUO.Game.UI
             hue_vec.Y = 0;
             hue_vec.Z = 0;
 
-            return batcher.Draw2D
+            return batcher.Draw
             (
                 _renderedText.Texture,
                 x + 3,

@@ -488,7 +488,7 @@ namespace ClassicUO.Renderer
 
             _hueVector.Z = alpha;
 
-            return batcher.Draw2D
+            return batcher.Draw
             (
                 Texture,
                 dx,
@@ -562,7 +562,7 @@ namespace ClassicUO.Renderer
 
             _hueVector.Z = 0;
 
-            return batcher.Draw2D
+            return batcher.Draw
             (
                 Texture,
                 dx,
@@ -617,7 +617,7 @@ namespace ClassicUO.Renderer
 
             _hueVector.Z = alpha;
 
-            return batcher.Draw2D
+            return batcher.Draw
             (
                 Texture,
                 x,

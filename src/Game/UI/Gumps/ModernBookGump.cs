@@ -747,7 +747,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                                 if (drawY >= starty && drawY <= endy)
                                 {
-                                    batcher.Draw2D
+                                    batcher.Draw
                                     (
                                         SolidColorTextureCache.GetTexture(SELECTION_COLOR),
                                         x + drawX,
@@ -765,7 +765,7 @@ namespace ClassicUO.Game.UI.Gumps
                             // do the whole line
                             if (drawY >= starty && drawY <= endy)
                             {
-                                batcher.Draw2D
+                                batcher.Draw
                                 (
                                     SolidColorTextureCache.GetTexture(SELECTION_COLOR),
                                     x + drawX,

@@ -4183,7 +4183,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             ResetHueVector();
 
-            batcher.Draw2D
+            batcher.Draw
             (
                 LogoTexture,
                 x + 190,

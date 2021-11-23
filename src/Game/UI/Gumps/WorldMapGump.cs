@@ -1542,7 +1542,7 @@ namespace ClassicUO.Game.UI.Gumps
             ResetHueVector();
 
 
-            batcher.Draw2D
+            batcher.Draw
             (
                 SolidColorTextureCache.GetTexture(Color.Black),
                 gX,
@@ -1558,7 +1558,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     int offset = size >> 1;
 
-                    batcher.Draw2D
+                    batcher.Draw
                     (
                         _mapTexture,
                         gX - offset + halfWidth,
@@ -1934,7 +1934,7 @@ namespace ClassicUO.Game.UI.Gumps
                 rot.Y = y + Height - 8 - DOT_SIZE;
             }
 
-            batcher.Draw2D
+            batcher.Draw
             (
                 SolidColorTextureCache.GetTexture(color),
                 rot.X - DOT_SIZE_HALF,
@@ -2070,7 +2070,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_zoomIndex < marker.ZoomIndex || !_showMarkerIcons || marker.MarkerIcon == null)
             {
-                batcher.Draw2D
+                batcher.Draw
                 (
                     SolidColorTextureCache.GetTexture(marker.Color),
                     rot.X - DOT_SIZE_HALF,
@@ -2088,7 +2088,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
             else
             {
-                batcher.Draw2D(marker.MarkerIcon, rot.X - (marker.MarkerIcon.Width >> 1), rot.Y - (marker.MarkerIcon.Height >> 1), ref HueVector);
+                batcher.Draw(marker.MarkerIcon, rot.X - (marker.MarkerIcon.Width >> 1), rot.Y - (marker.MarkerIcon.Height >> 1), ref HueVector);
                
                 if (!showMarkerName)
                 {
@@ -2158,7 +2158,7 @@ namespace ClassicUO.Game.UI.Gumps
             HueVector.Y = 1;
             HueVector.Z = 0.5f;
 
-            batcher.Draw2D
+            batcher.Draw
             (
                 SolidColorTextureCache.GetTexture(Color.Black),
                 xx - 2,
@@ -2236,7 +2236,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Texture2D texture = SolidColorTextureCache.GetTexture(Color.DarkGray);
 
-            batcher.Draw2D
+            batcher.Draw
             (
                 texture,
                 rot.X - sW / 2f * zoom,
@@ -2333,7 +2333,7 @@ namespace ClassicUO.Game.UI.Gumps
                 rot.Y = y + Height - 8 - DOT_SIZE;
             }
 
-            batcher.Draw2D
+            batcher.Draw
             (
                 SolidColorTextureCache.GetTexture(color),
                 rot.X - DOT_SIZE_HALF,
@@ -2413,7 +2413,7 @@ namespace ClassicUO.Game.UI.Gumps
             const int BAR_MAX_HEIGHT_HALF = BAR_MAX_HEIGHT / 2;
 
 
-            batcher.Draw2D
+            batcher.Draw
             (
                 SolidColorTextureCache.GetTexture(Color.Black),
                 x - BAR_MAX_WIDTH_HALF - 1,
@@ -2423,7 +2423,7 @@ namespace ClassicUO.Game.UI.Gumps
                 ref HueVector
             );
 
-            batcher.Draw2D
+            batcher.Draw
             (
                 SolidColorTextureCache.GetTexture(Color.Red),
                 x - BAR_MAX_WIDTH_HALF,
@@ -2451,7 +2451,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            batcher.Draw2D
+            batcher.Draw
             (
                 SolidColorTextureCache.GetTexture(Color.CornflowerBlue),
                 x - BAR_MAX_WIDTH_HALF,

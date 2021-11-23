@@ -171,7 +171,7 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     ShaderHueTranslator.GetHueVector(ref HueVector, _hues[i * _columns + j]);
 
-                    batcher.Draw2D
+                    batcher.Draw
                     (
                         texture,
                         x + j * _cellWidth, 
@@ -186,7 +186,7 @@ namespace ClassicUO.Game.UI.Controls
 
             if (_hues.Length > 1)
             {
-                batcher.Draw2D
+                batcher.Draw
                 (
                     SolidColorTextureCache.GetTexture(Color.White),
                     (int) (x + Width / _columns * (SelectedIndex % _columns + .5f) - 1),

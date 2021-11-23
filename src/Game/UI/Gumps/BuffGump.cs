@@ -392,12 +392,12 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.BuffBarTime)
                     {
-                        batcher.Draw2D(texture, x, y, ref HueVector);
+                        batcher.Draw(texture, x, y, ref HueVector);
 
                         return _gText.Draw(batcher, x - 3, y + texture.Height / 2 - 3, HueVector.Z);
                     }
 
-                    return batcher.Draw2D(texture, x, y, ref HueVector);
+                    return batcher.Draw(texture, x, y, ref HueVector);
                 }
 
                 return false;

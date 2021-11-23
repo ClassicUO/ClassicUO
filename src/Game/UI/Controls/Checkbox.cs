@@ -140,7 +140,7 @@ namespace ClassicUO.Game.UI.Controls
             ResetHueVector();
 
             bool ok = base.Draw(batcher, x, y);
-            batcher.Draw2D(IsChecked ? _textures[ACTIVE] : _textures[INACTIVE], x, y, ref HueVector);
+            batcher.Draw(IsChecked ? _textures[ACTIVE] : _textures[INACTIVE], x, y, ref HueVector);
 
             _text.Draw(batcher, x + _textures[ACTIVE].Width + 2, y);
 
