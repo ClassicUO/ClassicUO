@@ -281,7 +281,7 @@ namespace ClassicUO.Game.Managers
 
             const int MULTIPLER = 1;
 
-            batcher.Draw2D
+            batcher.Draw
             (
                 _background_texture,
                 x,
@@ -304,7 +304,7 @@ namespace ClassicUO.Game.Managers
                     offset = per;
                 }
 
-                batcher.Draw2DTiled
+                batcher.DrawTiled
                 (
                     _hp_texture,
                     x + per * MULTIPLER - offset,
@@ -334,7 +334,7 @@ namespace ClassicUO.Game.Managers
                 _vectorHue.X = hue;
 
 
-                batcher.Draw2DTiled
+                batcher.DrawTiled
                 (
                     _hp_texture,
                     x,

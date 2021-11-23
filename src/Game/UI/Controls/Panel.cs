@@ -73,9 +73,9 @@ namespace ClassicUO.Game.UI.Controls
             int line3Y = y + Height - _frame[6].Height;
 
             // top row
-            batcher.Draw2D(_frame[0], x, y, ref HueVector);
+            batcher.Draw(_frame[0], x, y, ref HueVector);
 
-            batcher.Draw2DTiled
+            batcher.DrawTiled
             (
                 _frame[1],
                 x + _frame[0].Width,
@@ -85,10 +85,10 @@ namespace ClassicUO.Game.UI.Controls
                 ref HueVector
             );
 
-            batcher.Draw2D(_frame[2], x + Width - _frame[2].Width, y, ref HueVector);
+            batcher.Draw(_frame[2], x + Width - _frame[2].Width, y, ref HueVector);
 
             // middle
-            batcher.Draw2DTiled
+            batcher.DrawTiled
             (
                 _frame[3],
                 x,
@@ -98,7 +98,7 @@ namespace ClassicUO.Game.UI.Controls
                 ref HueVector
             );
 
-            batcher.Draw2DTiled
+            batcher.DrawTiled
             (
                 _frame[4],
                 x + _frame[3].Width,
@@ -108,7 +108,7 @@ namespace ClassicUO.Game.UI.Controls
                 ref HueVector
             );
 
-            batcher.Draw2DTiled
+            batcher.DrawTiled
             (
                 _frame[5],
                 x + Width - _frame[5].Width,
@@ -119,9 +119,9 @@ namespace ClassicUO.Game.UI.Controls
             );
 
             // bottom
-            batcher.Draw2D(_frame[6], x, line3Y, ref HueVector);
+            batcher.Draw(_frame[6], x, line3Y, ref HueVector);
 
-            batcher.Draw2DTiled
+            batcher.DrawTiled
             (
                 _frame[7],
                 x + _frame[6].Width,
@@ -131,7 +131,7 @@ namespace ClassicUO.Game.UI.Controls
                 ref HueVector
             );
 
-            batcher.Draw2D(_frame[8], x + Width - _frame[8].Width, line3Y, ref HueVector);
+            batcher.Draw(_frame[8], x + Width - _frame[8].Width, line3Y, ref HueVector);
 
             return base.Draw(batcher, x, y);
         }

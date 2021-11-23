@@ -154,7 +154,7 @@ namespace ClassicUO.Game.UI.Gumps
                         HueVector.Y = 1;
                     }
 
-                    batcher.Draw2D(lock_texture, x + (Width - lock_texture.Width), y, ref HueVector);
+                    batcher.Draw(lock_texture, x + (Width - lock_texture.Width), y, ref HueVector);
                 }
             }
 
@@ -170,7 +170,7 @@ namespace ClassicUO.Game.UI.Gumps
                     ResetHueVector();
                     HueVector.Z = 0.5f;
 
-                    batcher.Draw2D
+                    batcher.Draw
                     (
                         previewColor,
                         drawLoc.X,

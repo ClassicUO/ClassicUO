@@ -55,7 +55,7 @@ namespace ClassicUO.Game.UI.Controls
 
             if (texture != null)
             {
-                return batcher.Draw2DTiled
+                return batcher.DrawTiled
                 (
                     texture,
                     x,

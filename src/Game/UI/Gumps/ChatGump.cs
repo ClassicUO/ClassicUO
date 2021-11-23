@@ -516,7 +516,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (MouseIsOver)
                 {
-                    batcher.Draw2D
+                    batcher.Draw
                     (
                         SolidColorTextureCache.GetTexture(Color.Cyan),
                         x,

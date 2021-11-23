@@ -110,7 +110,7 @@ namespace ClassicUO.Game.UI.Controls
             HueVector.Z = 0.5f;
 
             //batcher.SetStencil(_checkerStencil.Value);
-            batcher.Draw2D
+            batcher.Draw
             (
                 SolidColorTextureCache.GetTexture(Color.Black),
                 x,

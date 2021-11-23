@@ -1164,9 +1164,9 @@ namespace ClassicUO.Game.UI.Gumps
 
                 int middleWidth = Width - _gumpTexture[0].Width - _gumpTexture[2].Width;
 
-                batcher.Draw2D(_gumpTexture[0], x, y, ref HueVector);
+                batcher.Draw(_gumpTexture[0], x, y, ref HueVector);
 
-                batcher.Draw2DTiled
+                batcher.DrawTiled
                 (
                     _gumpTexture[1],
                     x + _gumpTexture[0].Width,
@@ -1176,7 +1176,7 @@ namespace ClassicUO.Game.UI.Gumps
                     ref HueVector
                 );
 
-                batcher.Draw2D(_gumpTexture[2], x + Width - _gumpTexture[2].Width, y, ref HueVector);
+                batcher.Draw(_gumpTexture[2], x + Width - _gumpTexture[2].Width, y, ref HueVector);
 
                 return base.Draw(batcher, x, y);
             }
@@ -1207,7 +1207,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (_tiled)
                 {
-                    batcher.Draw2DTiled
+                    batcher.DrawTiled
                     (
                         _texture,
                         x,
@@ -1219,7 +1219,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else
                 {
-                    batcher.Draw2D
+                    batcher.Draw
                     (
                         _texture,
                         x,

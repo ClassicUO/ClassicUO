@@ -232,7 +232,7 @@ namespace ClassicUO.Renderer
 
                 float offsetY = baseOffset.Y + (curOffset.Y + cCrop.Y) * axisDirY;
 
-                Draw2D
+                Draw
                 (
                     textureValue,
                     x + (int) Math.Round(offsetX),
@@ -1115,7 +1115,7 @@ namespace ClassicUO.Renderer
             return true;
         }
 
-        public bool Draw2D(Texture2D texture, int x, int y, ref Vector3 hue)
+        public bool Draw(Texture2D texture, int x, int y, ref Vector3 hue)
         {
             EnsureSize();
 
@@ -1168,7 +1168,7 @@ namespace ClassicUO.Renderer
             return true;
         }
 
-        public bool Draw2D
+        public bool Draw
         (
             Texture2D texture,
             int x,
@@ -1232,7 +1232,7 @@ namespace ClassicUO.Renderer
             return true;
         }
 
-        public bool Draw2D
+        public bool Draw
         (
             Texture2D texture,
             float dx,
@@ -1372,7 +1372,7 @@ namespace ClassicUO.Renderer
             return false;
         }
 
-        public bool Draw2D
+        public bool Draw
         (
             Texture2D texture,
             float x,
@@ -1433,7 +1433,7 @@ namespace ClassicUO.Renderer
             return true;
         }
 
-        public bool Draw2DTiled
+        public bool DrawTiled
         (
             Texture2D texture,
             int dx,
@@ -1461,7 +1461,7 @@ namespace ClassicUO.Renderer
                         rw = w;
                     }
 
-                    Draw2D
+                    Draw
                     (
                         texture,
                         x,
@@ -1494,7 +1494,7 @@ namespace ClassicUO.Renderer
             ref Vector3 hue
         )
         {
-            Draw2D
+            Draw
             (
                 texture,
                 x,
@@ -1504,7 +1504,7 @@ namespace ClassicUO.Renderer
                 ref hue
             );
 
-            Draw2D
+            Draw
             (
                 texture,
                 x + width,
@@ -1514,7 +1514,7 @@ namespace ClassicUO.Renderer
                 ref hue
             );
 
-            Draw2D
+            Draw
             (
                 texture,
                 x,
@@ -1524,7 +1524,7 @@ namespace ClassicUO.Renderer
                 ref hue
             );
 
-            Draw2D
+            Draw
             (
                 texture,
                 x,

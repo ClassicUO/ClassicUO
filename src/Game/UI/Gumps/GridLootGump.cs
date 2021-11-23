@@ -481,7 +481,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     HueVector.Z = 0.7f;
 
-                    batcher.Draw2D
+                    batcher.Draw
                     (
                         SolidColorTextureCache.GetTexture(Color.Yellow),
                         x + 1,

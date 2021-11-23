@@ -116,7 +116,7 @@ namespace ClassicUO.Game.UI.Gumps
                         HueVector.Y = 1;
                     }
 
-                    batcher.Draw2D(lockTexture, x + (Width - lockTexture.Width), y, ref HueVector);
+                    batcher.Draw(lockTexture, x + (Width - lockTexture.Width), y, ref HueVector);
                 }
             }
 

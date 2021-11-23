@@ -87,7 +87,7 @@ namespace ClassicUO.Game.UI.Controls
                     true
                 );
 
-                batcher.Draw2D
+                batcher.Draw
                 (
                     _texture,
                     x,

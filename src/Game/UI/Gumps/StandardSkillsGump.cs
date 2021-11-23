@@ -743,7 +743,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (_status == 2)
                 {
-                    batcher.Draw2D
+                    batcher.Draw
                     (
                         SolidColorTextureCache.GetTexture(Color.Beige),
                         x,
@@ -755,7 +755,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else if (_status == 1)
                 {
-                    batcher.Draw2D
+                    batcher.Draw
                     (
                         SolidColorTextureCache.GetTexture(Color.Bisque),
                         x + 16,
@@ -976,7 +976,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (UIManager.LastControlMouseDown(MouseButtonType.Left) == this)
                 {
-                    batcher.Draw2D
+                    batcher.Draw
                     (
                         SolidColorTextureCache.GetTexture(Color.Wheat),
                         x,

@@ -977,7 +977,7 @@ namespace ClassicUO.Game.Scenes
 
                 batcher.Begin(null, Camera.ViewTransformMatrix);
 
-                batcher.Draw2D
+                batcher.Draw
                 (
                     _world_render_target,
                     0,
@@ -1007,7 +1007,7 @@ namespace ClassicUO.Game.Scenes
                     batcher.SetBlendState(_darknessBlend.Value);
                 }
 
-                batcher.Draw2D
+                batcher.Draw
                 (
                     _lightRenderTarget,
                     0,
@@ -1228,7 +1228,7 @@ namespace ClassicUO.Game.Scenes
             {
                 _selectionLines.Z = 0.3F;
 
-                batcher.Draw2D
+                batcher.Draw
                 (
                     SolidColorTextureCache.GetTexture(Color.Black),
                     _selectionStart.X - Camera.Bounds.X,

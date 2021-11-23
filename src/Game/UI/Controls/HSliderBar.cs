@@ -193,9 +193,9 @@ namespace ClassicUO.Game.UI.Controls
 
             if (_gumpSpliderBackground != null)
             {
-                batcher.Draw2D(_gumpSpliderBackground[0], x, y, ref HueVector);
+                batcher.Draw(_gumpSpliderBackground[0], x, y, ref HueVector);
 
-                batcher.Draw2DTiled
+                batcher.DrawTiled
                 (
                     _gumpSpliderBackground[1],
                     x + _gumpSpliderBackground[0].Width,
@@ -205,10 +205,10 @@ namespace ClassicUO.Game.UI.Controls
                     ref HueVector
                 );
 
-                batcher.Draw2D(_gumpSpliderBackground[2], x + BarWidth - _gumpSpliderBackground[2].Width, y, ref HueVector);
+                batcher.Draw(_gumpSpliderBackground[2], x + BarWidth - _gumpSpliderBackground[2].Width, y, ref HueVector);
             }
 
-            batcher.Draw2D(_gumpWidget, x + _sliderX, y, ref HueVector);
+            batcher.Draw(_gumpWidget, x + _sliderX, y, ref HueVector);
 
             if (_text != null)
             {

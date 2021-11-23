@@ -154,7 +154,7 @@ namespace ClassicUO.Game.UI.Controls
 
             if (texture != null)
             {
-                batcher.Draw2D
+                batcher.Draw
                 (
                     texture,
                     x,
@@ -168,7 +168,7 @@ namespace ClassicUO.Game.UI.Controls
 
                 if (item != null && !item.IsMulti && !item.IsCoin && item.Amount > 1 && item.ItemData.IsStackable)
                 {
-                    batcher.Draw2D
+                    batcher.Draw
                     (
                         texture,
                         x + 5,

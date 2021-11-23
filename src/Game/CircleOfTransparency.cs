@@ -116,7 +116,7 @@ namespace ClassicUO.Game
                 }
                
                 batcher.SetStencil(_stencil.Value);
-                batcher.Draw2D(_texture, x, y, ref _hueVector);
+                batcher.Draw(_texture, x, y, ref _hueVector);
                 batcher.SetStencil(null);
             }
         }

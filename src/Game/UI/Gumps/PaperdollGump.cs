@@ -906,7 +906,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (texture != null)
                     {
-                        return batcher.Draw2D
+                        return batcher.Draw
                         (
                             texture,
                             x + _point.X,

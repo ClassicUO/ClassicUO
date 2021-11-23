@@ -177,9 +177,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             ResetHueVector();
 
-            batcher.Draw2D(_gumpTexture, x, y, ref HueVector);
+            batcher.Draw(_gumpTexture, x, y, ref HueVector);
             CreateMiniMapTexture();
-            batcher.Draw2D(_mapTexture, x, y, ref HueVector);
+            batcher.Draw(_mapTexture, x, y, ref HueVector);
 
             if (_draw)
             {
@@ -205,7 +205,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     ShaderHueTranslator.GetHueVector(ref HueVector, Notoriety.GetHue(mob.NotorietyFlag));
 
-                    batcher.Draw2D
+                    batcher.Draw
                     (
                         mobilesTextureDot,
                         x + w + gx,
@@ -219,7 +219,7 @@ namespace ClassicUO.Game.UI.Gumps
                 //DRAW DOT OF PLAYER
                 ResetHueVector();
 
-                batcher.Draw2D
+                batcher.Draw
                 (
                     SolidColorTextureCache.GetTexture(Color.White),
                     x + w,

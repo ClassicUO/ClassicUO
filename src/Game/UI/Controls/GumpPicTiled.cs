@@ -118,7 +118,7 @@ namespace ClassicUO.Game.UI.Controls
 
             if (texture != null)
             {
-                batcher.Draw2DTiled
+                batcher.DrawTiled
                 (
                     texture,
                     x,

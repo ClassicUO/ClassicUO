@@ -326,7 +326,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             // sopra
-            batcher.Draw2DTiled
+            batcher.DrawTiled
             (
                 _borders[0],
                 x,
@@ -337,7 +337,7 @@ namespace ClassicUO.Game.UI.Gumps
             );
 
             // sotto
-            batcher.Draw2DTiled
+            batcher.DrawTiled
             (
                 _borders[0],
                 x,
@@ -348,7 +348,7 @@ namespace ClassicUO.Game.UI.Gumps
             );
 
             //sx
-            batcher.Draw2DTiled
+            batcher.DrawTiled
             (
                 _borders[1],
                 x,
@@ -359,7 +359,7 @@ namespace ClassicUO.Game.UI.Gumps
             );
 
             //dx
-            batcher.Draw2DTiled
+            batcher.DrawTiled
             (
                 _borders[1],
                 x + Width - _borderSize,
