@@ -90,7 +90,7 @@ namespace ClassicUO.Game.UI.Controls
                         y += (Height >> 1) - (h >> 1);
                     }
 
-                    return batcher.Draw
+                    batcher.Draw
                     (
                         Texture,
                         x,
@@ -103,9 +103,11 @@ namespace ClassicUO.Game.UI.Controls
                         r.Height,
                         ref HueVector
                     );
+
+                    return true;
                 }
 
-                return batcher.Draw
+                batcher.Draw
                 (
                     Texture,
                     x,
@@ -118,9 +120,13 @@ namespace ClassicUO.Game.UI.Controls
                     Texture.Height,
                     ref HueVector
                 );
+
+                return true;
             }
 
-            return batcher.Draw(Texture, x, y, ref HueVector);
+            batcher.Draw(Texture, x, y, ref HueVector);
+
+            return true;
         }
 
         public override void Dispose()

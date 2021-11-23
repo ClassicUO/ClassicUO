@@ -55,7 +55,7 @@ namespace ClassicUO.Game.UI.Controls
 
             if (texture != null)
             {
-                return batcher.DrawTiled
+                batcher.DrawTiled
                 (
                     texture,
                     x,
@@ -64,6 +64,8 @@ namespace ClassicUO.Game.UI.Controls
                     Height,
                     ref HueVector
                 );
+
+                return true;
             }
 
             return false;

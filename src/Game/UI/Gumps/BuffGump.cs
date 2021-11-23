@@ -394,10 +394,14 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         batcher.Draw(texture, x, y, ref HueVector);
 
-                        return _gText.Draw(batcher, x - 3, y + texture.Height / 2 - 3, HueVector.Z);
+                        _gText.Draw(batcher, x - 3, y + texture.Height / 2 - 3, HueVector.Z);
+
+                        return true;
                     }
 
-                    return batcher.Draw(texture, x, y, ref HueVector);
+                    batcher.Draw(texture, x, y, ref HueVector);
+
+                    return true;
                 }
 
                 return false;

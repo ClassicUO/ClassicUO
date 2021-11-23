@@ -51,7 +51,7 @@ namespace ClassicUO.Game.UI.Controls
 
             ShaderHueTranslator.GetHueVector(ref HueVector, Hue, false, Alpha);
 
-            return batcher.Draw
+            batcher.Draw
             (
                 SolidColorTextureCache.GetTexture(Color.Black),
                 x,
@@ -60,6 +60,8 @@ namespace ClassicUO.Game.UI.Controls
                 Height,
                 ref HueVector
             );
+
+            return true;
         }
     }
 }

@@ -74,7 +74,7 @@ namespace ClassicUO.Game.UI.Controls
 
             ShaderHueTranslator.GetHueVector(ref HueVector, Hue);
 
-            return batcher.Draw
+            batcher.Draw
             (
                 SolidColorTextureCache.GetTexture(Color.White),
                 x + 3,
@@ -83,6 +83,8 @@ namespace ClassicUO.Game.UI.Controls
                 Height - 6,
                 ref HueVector
             );
+
+            return true;
         }
 
         protected override void OnMouseUp(int x, int y, MouseButtonType button)
