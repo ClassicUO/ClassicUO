@@ -906,7 +906,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (texture != null)
                     {
-                        return batcher.Draw
+                        batcher.Draw
                         (
                             texture,
                             x + _point.X,
@@ -919,6 +919,8 @@ namespace ClassicUO.Game.UI.Gumps
                             _rect.Height,
                             ref HueVector
                         );
+
+                        return true;
                     }
 
                     return false;

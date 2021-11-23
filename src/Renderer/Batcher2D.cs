@@ -283,7 +283,7 @@ namespace ClassicUO.Renderer
         }
         */
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool DrawSprite(Texture2D texture, int x, int y, bool mirror, ref Vector3 hue)
+        public void DrawSprite(Texture2D texture, int x, int y, bool mirror, ref Vector3 hue)
         {
             EnsureSize();
 
@@ -380,8 +380,6 @@ namespace ClassicUO.Renderer
             vertex.Hue0 = vertex.Hue1 = vertex.Hue2 = vertex.Hue3 = hue;
 
             PushSprite(texture);
-
-            return true;
         }
 
         public struct YOffsets
@@ -392,7 +390,7 @@ namespace ClassicUO.Renderer
             public int Bottom;
         }
 
-        public bool DrawSpriteLand
+        public void DrawSpriteLand
         (
             Texture2D texture,
             int x,
@@ -450,13 +448,11 @@ namespace ClassicUO.Renderer
             vertex.Hue0 = vertex.Hue1 = vertex.Hue2 = vertex.Hue3 = hue;
 
             PushSprite(texture);
-
-            return true;
         }
 
         
 
-        public bool DrawSpriteRotated
+        public void DrawSpriteRotated
         (
             Texture2D texture,
             int x,
@@ -533,11 +529,9 @@ namespace ClassicUO.Renderer
             vertex.Hue0 = vertex.Hue1 = vertex.Hue2 = vertex.Hue3 = hue;
 
             PushSprite(texture);
-
-            return true;
         }
 
-        public bool DrawSpriteShadow(Texture2D texture, int x, int y, bool flip)
+        public void DrawSpriteShadow(Texture2D texture, int x, int y, bool flip)
         {
             EnsureSize();
 
@@ -633,11 +627,9 @@ namespace ClassicUO.Renderer
             vertex.Hue0.Y = vertex.Hue1.Y = vertex.Hue2.Y = vertex.Hue3.Y = ShaderHueTranslator.SHADER_SHADOW;
 
             PushSprite(texture);
-
-            return true;
         }
 
-        public bool DrawCharacterSitted
+        public void DrawCharacterSitted
         (
             Texture2D texture,
             int x,
@@ -1111,11 +1103,9 @@ namespace ClassicUO.Renderer
                     PushSprite(texture);
                 }
             }
-
-            return true;
         }
 
-        public bool Draw(Texture2D texture, int x, int y, ref Vector3 hue)
+        public void Draw(Texture2D texture, int x, int y, ref Vector3 hue)
         {
             EnsureSize();
 
@@ -1164,11 +1154,9 @@ namespace ClassicUO.Renderer
             vertex.Hue0 = vertex.Hue1 = vertex.Hue2 = vertex.Hue3 = hue;
 
             PushSprite(texture);
-
-            return true;
         }
 
-        public bool Draw
+        public void Draw
         (
             Texture2D texture,
             int x,
@@ -1228,11 +1216,9 @@ namespace ClassicUO.Renderer
             vertex.Hue0 = vertex.Hue1 = vertex.Hue2 = vertex.Hue3 = hue;
 
             PushSprite(texture);
-
-            return true;
         }
 
-        public bool Draw
+        public void Draw
         (
             Texture2D texture,
             float dx,
@@ -1362,17 +1348,10 @@ namespace ClassicUO.Renderer
             vertex.Hue0 = vertex.Hue1 = vertex.Hue2 = vertex.Hue3 = hue;
 
 
-            //if (CheckInScreen(idx))
-            {
-                PushSprite(texture);
-
-                return true;
-            }
-
-            return false;
+            PushSprite(texture);
         }
 
-        public bool Draw
+        public void Draw
         (
             Texture2D texture,
             float x,
@@ -1429,11 +1408,9 @@ namespace ClassicUO.Renderer
             vertex.Hue0 = vertex.Hue1 = vertex.Hue2 = vertex.Hue3 = hue;
 
             PushSprite(texture);
-
-            return true;
         }
 
-        public bool DrawTiled
+        public void DrawTiled
         (
             Texture2D texture,
             int dx,
@@ -1480,11 +1457,9 @@ namespace ClassicUO.Renderer
                 h -= texture.Height;
                 y += texture.Height;
             }
-
-            return true;
         }
 
-        public bool DrawRectangle
+        public void DrawRectangle
         (
             Texture2D texture,
             int x,
@@ -1533,11 +1508,9 @@ namespace ClassicUO.Renderer
                 height,
                 ref hue
             );
-
-            return true;
         }
 
-        public bool DrawLine
+        public void DrawLine
         (
             Texture2D texture,
             int startX,
@@ -1624,8 +1597,6 @@ namespace ClassicUO.Renderer
             vertex.Hue0 = vertex.Hue1 = vertex.Hue2 = vertex.Hue3 = Vector3.Zero;
 
             PushSprite(texture);
-
-            return true;
         }
 
         public void Begin()

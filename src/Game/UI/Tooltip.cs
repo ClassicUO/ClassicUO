@@ -207,7 +207,7 @@ namespace ClassicUO.Game.UI
             hue_vec.Y = 0;
             hue_vec.Z = 0;
 
-            return batcher.Draw
+            batcher.Draw
             (
                 _renderedText.Texture,
                 x + 3,
@@ -220,6 +220,8 @@ namespace ClassicUO.Game.UI
                 z_height,
                 ref hue_vec
             );
+
+            return true;
         }
 
         public void Clear()

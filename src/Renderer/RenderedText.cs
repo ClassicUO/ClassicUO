@@ -488,7 +488,7 @@ namespace ClassicUO.Renderer
 
             _hueVector.Z = alpha;
 
-            return batcher.Draw
+            batcher.Draw
             (
                 Texture,
                 dx,
@@ -501,6 +501,8 @@ namespace ClassicUO.Renderer
                 srcHeight,
                 ref _hueVector
             );
+
+            return true;
         }
 
         public bool Draw
@@ -562,7 +564,7 @@ namespace ClassicUO.Renderer
 
             _hueVector.Z = 0;
 
-            return batcher.Draw
+            batcher.Draw
             (
                 Texture,
                 dx,
@@ -573,6 +575,8 @@ namespace ClassicUO.Renderer
                 sheight,
                 ref _hueVector
             );
+
+            return true;
         }
 
         public bool Draw(UltimaBatcher2D batcher, int x, int y, float alpha = 0, ushort hue = 0)
@@ -617,7 +621,7 @@ namespace ClassicUO.Renderer
 
             _hueVector.Z = alpha;
 
-            return batcher.Draw
+            batcher.Draw
             (
                 Texture,
                 x,
@@ -626,6 +630,8 @@ namespace ClassicUO.Renderer
                 Height,
                 ref _hueVector
             );
+
+            return true;
         }
 
         public void CreateTexture()

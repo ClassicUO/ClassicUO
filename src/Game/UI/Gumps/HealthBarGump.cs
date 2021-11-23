@@ -1252,7 +1252,7 @@ namespace ClassicUO.Game.UI.Gumps
                 ResetHueVector();
                 ShaderHueTranslator.GetHueVector(ref HueVector, 0, false, Alpha);
 
-                return batcher.Draw
+                batcher.Draw
                 (
                     LineColor,
                     x,
@@ -1261,6 +1261,8 @@ namespace ClassicUO.Game.UI.Gumps
                     Height,
                     ref HueVector
                 );
+
+                return true;
             }
         }
 
