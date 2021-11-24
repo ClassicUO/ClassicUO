@@ -193,6 +193,30 @@ namespace ClassicUO.Game.UI.Gumps
             _bookPageLeft.TextChanged += BookPageLeft_TextChanged;
             _bookPageRight.TextChanged += BookPageRight_TextChanged;
 
+            _bookPageLeft.KeyDown += (sender, e) => 
+            {
+                if (e.Key == SDL2.SDL.SDL_Keycode.SDLK_BACKSPACE)
+                {
+                    if (_bookPageLeft.CaretIndex <= 0)
+                    {
+                        SetActivePage(Math.Max(1, ActivePage - 1));
+                        _bookPageRight?.SetKeyboardFocus();
+                    }
+                }
+            };
+
+            _bookPageRight.KeyDown += (sender, e) =>
+            {
+                if (e.Key == SDL2.SDL.SDL_Keycode.SDLK_BACKSPACE)
+                {
+                    if (_bookPageRight.CaretIndex <= 0)
+                    {
+                        SetActivePage(Math.Max(1, ActivePage - 1));
+                        _bookPageLeft?.SetKeyboardFocus();
+                    }
+                }
+            };
+
             Add(_bookPageLeft);
             Add(_bookPageRight);
 
