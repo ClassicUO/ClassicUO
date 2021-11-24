@@ -2184,7 +2184,12 @@ namespace ClassicUO.Network
                     {
                         var lineText = ModernBookGump.IsNewBook ? p.ReadUTF8(true) : p.ReadASCII();
 
-                        sb.Append(lineText);             
+                        sb.Append(lineText);   
+                        
+                        if (line + 1 < lineCnt && (string.IsNullOrEmpty(lineText) || lineText[lineText.Length - 1] != '\n'))
+                        {
+                            sb.Append('\n');
+                        }
                     }
 
                     if (!gump.SetPageText(sb.ToString(), pageNum))

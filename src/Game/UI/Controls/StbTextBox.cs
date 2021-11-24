@@ -413,7 +413,6 @@ namespace ClassicUO.Game.UI.Controls
                 Vector3 hueVec = ShaderHueTranslator.GetHueVector(Hue);
 
                 var fontHeight = UOFontRenderer.Shared.GetFontHeight(_fontSettings);
-                var offY = 0.0f;
                 var width = 0.0f;
                 Vector2 position = new Vector2(x, y);
 
@@ -422,6 +421,14 @@ namespace ClassicUO.Game.UI.Controls
                     var span = IsPassword ? "*".AsSpan() : _text.AsSpan(i, 1);
 
                     var size = _text[i] == '\n' ? Vector2.Zero : UOFontRenderer.Shared.MeasureString(span, _fontSettings, 1f);
+
+                    if ((_maxWidth > 0.0f && width + size.X > _maxWidth) || _text[i] == '\n')
+                    {
+                        position.X = x;
+                        position.Y += fontHeight;
+                        width = 0;
+                    }
+
                     width += size.X;
 
                     UOFontRenderer.Shared.Draw
@@ -437,13 +444,7 @@ namespace ClassicUO.Game.UI.Controls
 
                     position.X += size.X;
 
-                    if ((_maxWidth > 0.0f && width + size.X > _maxWidth) || _text[i] == '\n')
-                    {
-                        position.X = x;
-                        position.Y += fontHeight;
-                        offY += fontHeight;
-                        width = 0;
-                    }
+                   
                 }
 
                 DrawCaret(batcher, x, y);

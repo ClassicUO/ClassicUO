@@ -3323,7 +3323,7 @@ namespace ClassicUO.Network
             writer.Dispose();
         }
 
-        public static void Send_BookPageData(this NetClient socket, uint serial, string text, int page)
+        public static void Send_BookPageData(this NetClient socket, uint serial, List<string> lines, int page)
         {
             const byte ID = 0x66;
 
@@ -3341,42 +3341,13 @@ namespace ClassicUO.Network
             writer.WriteUInt32BE(serial);
             writer.WriteUInt16BE(0x01);
             writer.WriteUInt16BE((ushort) page);
+            writer.WriteUInt16BE((ushort) lines.Count);
 
-            var linesCountStreamPosition = writer.Position;
-            writer.WriteUInt16BE(0x0000);
-
-            int linesCount = 0;
-            int last = 0;
-
-            for (int i = 0; i < text.Length; ++i)
+            foreach (var line in lines)
             {
-                var c = text[i];
-
-                if (c == '\n')
-                {
-                    ++linesCount;
-
-                    var str = text.Substring(last, i - last);
-                    writer.WriteUTF8(str, str.Length);
-                    writer.WriteUInt8(0x00);
-
-                    last = i + 1;
-                }
-            }
-
-            if (last < text.Length)
-            {
-                ++linesCount;
-
-                var str = text.Substring(last, text.Length - last);
-                writer.WriteUTF8(str, str.Length);
+                writer.WriteUTF8(line, line.Length);
                 writer.WriteUInt8(0x00);
             }
-
-            var eofPosition = writer.Position;
-            writer.Seek(linesCountStreamPosition, SeekOrigin.Begin);
-            writer.WriteUInt16BE((ushort) linesCount);
-            writer.Seek(eofPosition, SeekOrigin.Begin);
 
             if (length < 0)
             {
