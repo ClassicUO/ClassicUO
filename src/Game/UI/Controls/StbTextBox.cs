@@ -493,14 +493,14 @@ namespace ClassicUO.Game.UI.Controls
                 while (i < selectEnd)
                 {
                     var span = IsPassword ? "*".AsSpan() : _text.AsSpan(selectStart, (i - selectStart) + 1);
-                    var size = UOFontRenderer.Shared.MeasureString(span, _fontSettings, 1f);
+                    var size = _text[i] == '\n' ? Vector2.UnitX * 4f : UOFontRenderer.Shared.MeasureString(span, _fontSettings, 1f);
 
                     if (IsPassword)
                     {
                         size.X *= (i - selectStart) + 1;
                     }
 
-                    if ((_maxWidth > 0.0f && startPosition.X + size.X > _maxWidth) || _text[i] == '\n')
+                    if (_text[i] == '\n' || (_maxWidth > 0.0f && startPosition.X + size.X > _maxWidth))
                     {
                         batcher.Draw
                         (
