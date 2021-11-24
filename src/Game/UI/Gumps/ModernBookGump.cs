@@ -54,7 +54,16 @@ namespace ClassicUO.Game.UI.Gumps
         private const int RIGHT_X = 223;
         private const int UPPER_MARGIN = 34;
         private const int PAGE_HEIGHT = 166;
+        
+        [Flags]
+        enum TextBoxFlag
+        {
+            None,
+            WorkingOnLeft,
+            WorkingOnRight
+        }
 
+        private TextBoxFlag _textboxFlag;
         private GumpPic _forwardGumpPic, _backwardGumpPic;
         private StbTextBox _titleTextBox, _authorTextBox, _bookPageLeft, _bookPageRight;
         private string[] _pagesText;
@@ -281,16 +290,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             Client.Game.Scene.Audio.PlaySound(0x0055);
         }
-
-        [Flags]
-        enum TextBoxFlag
-        {
-            None,
-            WorkingOnLeft,
-            WorkingOnRight
-        }
-
-        private TextBoxFlag _textboxFlag;
 
         private void BookPageLeft_TextChanged(object sender, EventArgs e)
         {
