@@ -642,6 +642,8 @@ namespace ClassicUO.Game.UI.Controls
 
         protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
         {
+            base.OnKeyDown(key, mod);
+
             ControlKeys? stb_key = null;
             bool update_caret = false;
 
@@ -896,8 +898,6 @@ namespace ClassicUO.Game.UI.Controls
             {
                 UpdateCaretScreenPosition();
             }
-
-            base.OnKeyDown(key, mod);
         }
 
         protected override void OnTextInput(string text)
