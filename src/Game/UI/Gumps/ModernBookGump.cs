@@ -43,6 +43,7 @@ using ClassicUO.Renderer;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
+using SDL2;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -201,30 +202,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             _bookPageLeft.TextChanged += BookPageLeft_TextChanged;
             _bookPageRight.TextChanged += BookPageRight_TextChanged;
-
-            _bookPageLeft.KeyDown += (sender, e) => 
-            {
-                if (e.Key == SDL2.SDL.SDL_Keycode.SDLK_BACKSPACE)
-                {
-                    if (_bookPageLeft.CaretIndex <= 0 && _bookPageLeft.SelectionStart == _bookPageLeft.SelectionEnd)
-                    {
-                        SetActivePage(Math.Max(1, ActivePage - 1));
-                        _bookPageRight?.SetKeyboardFocus();
-                    }
-                }
-            };
-
-            _bookPageRight.KeyDown += (sender, e) =>
-            {
-                if (e.Key == SDL2.SDL.SDL_Keycode.SDLK_BACKSPACE)
-                {
-                    if (_bookPageRight.CaretIndex <= 0 && _bookPageRight.SelectionStart == _bookPageRight.SelectionEnd)
-                    {
-                        SetActivePage(Math.Max(1, ActivePage - 1));
-                        _bookPageLeft?.SetKeyboardFocus();
-                    }
-                }
-            };
 
             Add(_bookPageLeft);
             Add(_bookPageRight);
@@ -418,6 +395,40 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             return -1;
+        }
+
+        protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
+        {
+            if (key == SDL.SDL_Keycode.SDLK_BACKSPACE)
+            {
+                StbTextBox textbox = null, textboxToFocus = null;
+
+                if (_bookPageLeft == UIManager.KeyboardFocusControl && _bookPageLeft.IsVisible)
+                {
+                    textbox = _bookPageLeft;
+                    textboxToFocus = _bookPageRight;
+                }
+                else if (_bookPageRight == UIManager.KeyboardFocusControl && _bookPageRight.IsVisible)
+                {
+                    textbox = _bookPageRight;
+                    textboxToFocus = _bookPageLeft;
+                }
+
+                if (textbox != null)
+                {
+                    if (textbox.CaretIndex <= 0 && textbox.SelectionStart == textbox.SelectionEnd)
+                    {
+                        SetActivePage(Math.Max(1, ActivePage - 1));
+
+                        if (textboxToFocus != null && textboxToFocus.IsVisible)
+                        {
+                            textboxToFocus?.SetKeyboardFocus();
+                        }                       
+                    }
+                }
+            }
+
+            base.OnKeyDown(key, mod);
         }
 
         public override void OnPageChanged()
