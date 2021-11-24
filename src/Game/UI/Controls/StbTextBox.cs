@@ -485,7 +485,7 @@ namespace ClassicUO.Game.UI.Controls
 
                     if ((_maxWidth > 0.0f && startPosition.X > _maxWidth) || _text[i] == '\n')
                     {
-                        startPosition.X = 0;
+                        startPosition.X = size.X;
                         startPosition.Y += fontHeight;
                     }
                 }
@@ -500,7 +500,7 @@ namespace ClassicUO.Game.UI.Controls
                         size.X *= (i - selectStart) + 1;
                     }
 
-                    if ((_maxWidth > 0.0f && size.X > _maxWidth) || _text[i] == '\n')
+                    if ((_maxWidth > 0.0f && startPosition.X + size.X > _maxWidth) || _text[i] == '\n')
                     {
                         batcher.Draw
                         (
