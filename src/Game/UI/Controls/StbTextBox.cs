@@ -493,7 +493,7 @@ namespace ClassicUO.Game.UI.Controls
                 while (i < selectEnd)
                 {
                     var span = IsPassword ? "*".AsSpan() : _text.AsSpan(selectStart, (i - selectStart) + 1);
-                    var size = _text[i] == '\n' ? Vector2.UnitX * 4f : UOFontRenderer.Shared.MeasureString(span, _fontSettings, 1f);
+                    var size = UOFontRenderer.Shared.MeasureString(span, _fontSettings, 1f);
 
                     if (IsPassword)
                     {
@@ -505,7 +505,7 @@ namespace ClassicUO.Game.UI.Controls
                         batcher.Draw
                         (
                             texture,
-                            new Rectangle(x + (int)startPosition.X, y + (int)startPosition.Y, (int)(size.X), (int)fontHeight),
+                            new Rectangle(x + (int)startPosition.X, y + (int)startPosition.Y, Math.Max(4, (int)(size.X)), (int)fontHeight),
                             HueVector
                         );
 
