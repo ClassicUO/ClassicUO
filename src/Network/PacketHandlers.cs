@@ -2184,12 +2184,7 @@ namespace ClassicUO.Network
                     {
                         var lineText = ModernBookGump.IsNewBook ? p.ReadUTF8(true) : p.ReadASCII();
 
-                        sb.Append(lineText);
-
-                        if (line + 1 < lineCnt)
-                        {
-                            sb.Append('\n');
-                        }             
+                        sb.Append(lineText);             
                     }
 
                     if (!gump.SetPageText(sb.ToString(), pageNum))
@@ -2198,17 +2193,6 @@ namespace ClassicUO.Network
                     }
 
                     sb.Dispose();
-
-                    //if (lineCnt < ModernBookGump.MAX_BOOK_LINES)
-                    //{
-                    //    for (int line = lineCnt; line < ModernBookGump.MAX_BOOK_LINES; line++)
-                    //    {
-                    //        if (!gump.SetPageText(string.Empty, pageNum * ModernBookGump.MAX_BOOK_LINES + line))
-                    //        {
-                    //            Log.Error("BOOKGUMP: The server is sending a page number GREATER than the allowed number of pages in BOOK!");
-                    //        }
-                    //    }
-                    //}
                 }
                 else
                 {

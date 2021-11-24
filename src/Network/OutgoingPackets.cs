@@ -3360,7 +3360,7 @@ namespace ClassicUO.Network
                     writer.WriteUTF8(str, str.Length);
                     writer.WriteUInt8(0x00);
 
-                    last = i;
+                    last = i + 1;
                 }
             }
 
@@ -3372,8 +3372,6 @@ namespace ClassicUO.Network
                 writer.WriteUTF8(str, str.Length);
                 writer.WriteUInt8(0x00);
             }
-
-            writer.WriteUInt8(0x00); // ???
 
             var eofPosition = writer.Position;
             writer.Seek(linesCountStreamPosition, SeekOrigin.Begin);

@@ -48,7 +48,7 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class ModernBookGump : Gump
     {
-        internal const int MAX_BOOK_LINES = 8;
+        private const int MAX_BOOK_LINES = 8;
         private const int MAX_BOOK_CHARS_PER_LINE = 53;
         private const int LEFT_X = 38;
         private const int RIGHT_X = 223;
@@ -258,9 +258,25 @@ namespace ClassicUO.Game.UI.Gumps
             Client.Game.Scene.Audio.PlaySound(0x0055);
         }
 
+        [Flags]
+        enum TextBoxFlag
+        {
+            None,
+            WorkingOnLeft,
+            WorkingOnRight
+        }
+
+        private TextBoxFlag _textboxFlag;
 
         private void BookPageLeft_TextChanged(object sender, EventArgs e)
         {
+            if ((_textboxFlag & TextBoxFlag.WorkingOnLeft) != 0)
+            {
+                return;
+            }
+
+            _textboxFlag |= TextBoxFlag.WorkingOnLeft;
+
             int index = Math.Min(Math.Max(ActivePage, 1), MaxPage);
             int rightPage = ((index - 1) << 1);
             int leftPage = rightPage - 1;
@@ -272,7 +288,7 @@ namespace ClassicUO.Game.UI.Gumps
             
                 if (leftPage + 1 < _pagesText.Length)
                 {
-                    var i = GetIndexOfLargeText(_bookPageLeft.Text.AsSpan(), _bookPageLeft.FontSettings, _bookPageLeft.Width, _bookPageLeft.Height);
+                    var i = GetIndexOfLargeText(_bookPageLeft.Text.AsSpan(), _bookPageLeft.FontSettings, _bookPageLeft.MaxWidth, _bookPageLeft.Height);
 
                     if (i >= 0)
                     {
@@ -280,21 +296,35 @@ namespace ClassicUO.Game.UI.Gumps
 
                         if (!span.IsEmpty)
                         {
+                            _pagesText[leftPage] = _bookPageLeft.Text.Substring(0, i);
                             _pagesText[leftPage + 1] = $"{span.ToString()}{_bookPageRight.Text}";
+                            _pagesChanged[leftPage + 2] = true;
 
-                            if (ActivePage + 1 < BookPageCount)
+                            _bookPageLeft.Text = (_pagesText[leftPage]);
+                            _bookPageRight.Text = (_pagesText[leftPage + 1]);
+
+                            if (_bookPageLeft.CaretIndex >= i)
                             {
-                                ActivePage++;
+                                _bookPageRight.CaretIndex = 0;
                                 _bookPageRight.SetKeyboardFocus();
-                            }
+                            }  
                         }
                     }
                 }
             }
+
+            _textboxFlag &= ~TextBoxFlag.WorkingOnLeft;
         }
         
         private void BookPageRight_TextChanged(object sender, EventArgs e)
         {
+            if ((_textboxFlag & TextBoxFlag.WorkingOnRight) != 0)
+            {
+                return;
+            }
+
+            _textboxFlag |= TextBoxFlag.WorkingOnRight;
+
             int index = Math.Min(Math.Max(ActivePage, 1), MaxPage);
             int rightPage = ((index - 1) << 1);
             int leftPage = rightPage - 1;
@@ -306,7 +336,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (rightPage + 1 < _pagesText.Length)
                 {
-                    var i = GetIndexOfLargeText(_bookPageRight.Text.AsSpan(), _bookPageRight.FontSettings, _bookPageRight.Width, _bookPageRight.Height);
+                    var i = GetIndexOfLargeText(_bookPageRight.Text.AsSpan(), _bookPageRight.FontSettings, _bookPageRight.MaxWidth, _bookPageRight.Height);
 
                     if (i >= 0)
                     {
@@ -314,20 +344,31 @@ namespace ClassicUO.Game.UI.Gumps
 
                         if (!span.IsEmpty)
                         {
+                            _pagesText[rightPage] = _bookPageRight.Text.Substring(0, i);
                             _pagesText[rightPage + 1] = $"{span.ToString()}{_bookPageLeft.Text}";
+                            _pagesChanged[rightPage + 2] = true;
 
-                            if (ActivePage + 1 < BookPageCount)
+                            _bookPageRight.Text = (_pagesText[rightPage]);
+                            _bookPageLeft.Text = (_pagesText[rightPage + 1]);
+
+                            if (_bookPageRight.CaretIndex >= i)
                             {
-                                ActivePage++;
-                                _bookPageLeft.SetKeyboardFocus();
+                                if (ActivePage + 1 < BookPageCount)
+                                {
+                                    ActivePage++;
+                                    _bookPageLeft.CaretIndex = 0;
+                                    _bookPageLeft.SetKeyboardFocus();
+                                }
                             }
                         }
                     }
                 }
             }
+
+            _textboxFlag &= ~TextBoxFlag.WorkingOnRight;
         }
 
-        private int GetIndexOfLargeText(ReadOnlySpan<char> text, in FontSettings fs, int maxWidth, int maxHeight)
+        private int GetIndexOfLargeText(ReadOnlySpan<char> text, in FontSettings fs, float maxWidth, float maxHeight)
         {
             var fontHeight = UOFontRenderer.Shared.GetFontHeight(fs);
 
@@ -335,23 +376,24 @@ namespace ClassicUO.Game.UI.Gumps
 
             for (int i = 0; i < text.Length; ++i)
             {
-                size.X += text[i] == '\n' ? 0.0f : UOFontRenderer.Shared.MeasureString(text.Slice(i, 1), fs, 1f).X;
+                var charsize = text[i] == '\n' ? 0.0f : UOFontRenderer.Shared.MeasureString(text.Slice(i, 1), fs, 1f).X;
 
-                if (text[i] == '\n' || size.X > maxWidth)
+                size.X += charsize;
+
+                if (text[i] == '\n' || (maxWidth > 0.0f && size.X > maxWidth))
                 {
-                    size.X = 0;
+                    size.X = charsize;
                     size.Y += fontHeight;
 
-                    if (size.Y > maxHeight)
+                    if (size.Y > maxHeight || size.Y / fontHeight > MAX_BOOK_LINES)
                     {
-                        return i + 1;
+                        return i;
                     }
                 }
             }
 
             return -1;
         }
-
 
         public override void OnPageChanged()
         {
@@ -366,12 +408,16 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_bookPageLeft.IsVisible)
             {
+                _textboxFlag |= TextBoxFlag.WorkingOnLeft;
                 _bookPageLeft.SetText(_pagesText[leftPage]);
+                _textboxFlag &= ~TextBoxFlag.WorkingOnLeft;
             }
 
             if (_bookPageRight.IsVisible)
             {
+                _textboxFlag |= TextBoxFlag.WorkingOnRight;
                 _bookPageRight.SetText(_pagesText[rightPage]);
+                _textboxFlag &= ~TextBoxFlag.WorkingOnRight;
             }
 
             base.OnPageChanged();
@@ -463,21 +509,23 @@ namespace ClassicUO.Game.UI.Gumps
                             ValueStringBuilder sb = new ValueStringBuilder();
                             var span = _pagesText[i - 1].AsSpan();
                             var fontSettings = (i - 1) % 2 == 0 ? _bookPageLeft.FontSettings : _bookPageRight.FontSettings;
-                            int last = 0;
-                          
+                            float width = 0.0f;
+
                             for (int j = 0; j < span.Length; ++j)
                             {
                                 var c = span[j];
-                                var size = UOFontRenderer.Shared.MeasureString(span.Slice(last, j - last), fontSettings, 1f);
+                                var size = UOFontRenderer.Shared.MeasureString(span.Slice(j, 1), fontSettings, 1f);
+
+                                width += size.X;
+
+                                if ((_bookPageLeft.MaxWidth > 0.0f && width > _bookPageLeft.MaxWidth))
+                                {
+                                    width = size.X;
+
+                                    sb.Append('\n');
+                                }
 
                                 sb.Append(c);
-
-                                if ((_bookPageLeft.MaxWidth > 0.0f && size.X > _bookPageLeft.MaxWidth))
-                                {
-                                    sb.Append('\n');
-
-                                    last = j;
-                                }
                             }
 
 
