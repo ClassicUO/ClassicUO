@@ -1446,8 +1446,6 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void AddMenu()
         {
-            const int TEXT_WIDTH = 108;
-
             Button button = new Button
             (
                 (int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_MENU_BACKUP,

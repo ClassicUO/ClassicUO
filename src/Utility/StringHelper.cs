@@ -42,6 +42,22 @@ namespace ClassicUO.Utility
     {
         private static readonly char[] _dots = { '.', ',', ';', '!' };
 
+        private static Encoding _cp1252Encoding;
+
+        public static Encoding Cp1252Encoding
+        {
+            get
+            {
+                if (_cp1252Encoding == null)
+                {
+                    //Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+                    //_cp1252Encoding = Encoding.GetEncoding(1252);
+                    _cp1252Encoding = Encoding.ASCII;
+                }
+                return _cp1252Encoding;
+            }
+        }
+
         public static string CapitalizeFirstCharacter(string str)
         {
             if (string.IsNullOrEmpty(str))

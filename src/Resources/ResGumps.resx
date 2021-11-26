@@ -1468,4 +1468,13 @@ Client version: '{0}'</value>
   <data name="HighlightPoisoned" xml:space="preserve">
     <value>Highlight poisoned</value>
   </data>
+  <data name="AddMarkerOnPlayer" xml:space="preserve">
+    <value>Add Marker on Player</value>
+  </data>
+  <data name="EnterMarkerName" xml:space="preserve">
+    <value>Marker Name</value>
+  </data>
+  <data name="InvalidMarkerName" xml:space="preserve">
+    <value>Invalid marker name.</value>
+  </data>
 </root>

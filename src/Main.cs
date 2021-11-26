@@ -35,6 +35,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading;
 using ClassicUO.Configuration;
 using ClassicUO.Data;
