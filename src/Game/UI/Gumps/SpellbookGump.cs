@@ -322,7 +322,7 @@ namespace ClassicUO.Game.UI.Gumps
                 );
             }
 
-            int spellDone = 0, passivesDone = 0;
+            int spellDone = 0;
 
             for (int page = 1; page <= pagesToFill; page++)
             {
