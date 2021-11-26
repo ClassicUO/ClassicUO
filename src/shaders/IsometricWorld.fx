@@ -207,6 +207,7 @@ technique HueTechnique
 	}
 }
 
+/*
 technique PartialHueTechnique
 {
 	pass p0
@@ -251,3 +252,4 @@ technique LandHueTechnique
 		PixelShader = compile ps_3_0 PixelShader_Hue();
 	}
 }
+*/
