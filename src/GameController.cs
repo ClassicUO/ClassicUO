@@ -502,25 +502,25 @@ namespace ClassicUO
             SelectedObject.HealthbarObject = null;
             SelectedObject.SelectedContainer = null;
 
-            _uoSpriteBatch.Begin();
-            _fontRenderer.Draw
-            (
-                _uoSpriteBatch,
-                $"New Engine ❤ 😁".AsSpan(),
-                new Vector2(200, 100),
-                5f,
-                new FontSettings() 
-                { 
-                    IsUnicode = true, 
-                    FontIndex = 0, 
-                    Italic = false,
-                    Bold = false, 
-                    Border = true,
-                    Underline = true,
-                },
-                new Vector3(0x44, 0, 0)
-            );
-            _uoSpriteBatch.End();
+            //_uoSpriteBatch.Begin();
+            //_fontRenderer.Draw
+            //(
+            //    _uoSpriteBatch,
+            //    $"New Engine ❤ 😁".AsSpan(),
+            //    new Vector2(200, 100),
+            //    5f,
+            //    new FontSettings() 
+            //    { 
+            //        IsUnicode = true, 
+            //        FontIndex = 0, 
+            //        Italic = false,
+            //        Bold = false, 
+            //        Border = true,
+            //        Underline = true,
+            //    },
+            //    new Vector3(0x44, 0, 0)
+            //);
+            //_uoSpriteBatch.End();
 
             base.Draw(gameTime);
 
