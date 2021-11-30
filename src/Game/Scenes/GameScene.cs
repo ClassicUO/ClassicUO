@@ -1126,15 +1126,15 @@ namespace ClassicUO.Game.Scenes
             }
 
 
-            batcher.Begin();
-            hueVec.X = 0;
-            hueVec.Y = 1;
-            hueVec.Z = 0;
-            string s = $"Flushes: {flushes}\nSwitches: {switches}\nArt texture count: {TextureAtlas.Shared.TexturesCount}\nMaxZ: {_maxZ}\nMaxGround: {_maxGroundZ}";
-            batcher.DrawString(Fonts.Bold, s, 200, 200, ref hueVec);
-            hueVec = Vector3.Zero;
-            batcher.DrawString(Fonts.Bold, s, 200 + 1, 200 - 1, ref hueVec);
-            batcher.End();
+            //batcher.Begin();
+            //hueVec.X = 0;
+            //hueVec.Y = 1;
+            //hueVec.Z = 0;
+            //string s = $"Flushes: {flushes}\nSwitches: {switches}\nArt texture count: {TextureAtlas.Shared.TexturesCount}\nMaxZ: {_maxZ}\nMaxGround: {_maxGroundZ}";
+            //batcher.DrawString(Fonts.Bold, s, 200, 200, ref hueVec);
+            //hueVec = Vector3.Zero;
+            //batcher.DrawString(Fonts.Bold, s, 200 + 1, 200 - 1, ref hueVec);
+            //batcher.End();
         }
 
         private int DrawRenderList(UltimaBatcher2D batcher, GameObject obj, int count)
