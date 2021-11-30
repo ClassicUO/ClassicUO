@@ -1065,7 +1065,7 @@ namespace ClassicUO.Game.GameObjects
             r.X = position.X - r.X;
             r.Y = position.Y - r.Y;
 
-            if (!r.Contains(Mouse.Position))
+            if (!r.Contains(SelectedObject.TranslatedMousePositionByViewport))
             {
                 return false;
             }
@@ -1107,7 +1107,7 @@ namespace ClassicUO.Game.GameObjects
 
                         if (GetTexture(ref mountGraphic, ref animGroupMount, ref animIndex, dir, out spriteInfo, out isUop))
                         {
-                            int x = position.X - (IsFlipped ? spriteInfo.UV.Width - spriteInfo.Center.X : spriteInfo.Center.X);
+                            int x = position.X - (isFlipped ? spriteInfo.UV.Width - spriteInfo.Center.X : spriteInfo.Center.X);
                             int y = position.Y - (spriteInfo.UV.Height + spriteInfo.Center.Y);
 
                             if (AnimationsLoader.Instance.PixelCheck
@@ -1117,7 +1117,7 @@ namespace ClassicUO.Game.GameObjects
                                 dir,
                                 isUop,
                                 animIndex,
-                                IsFlipped ? x + spriteInfo.UV.Width - SelectedObject.TranslatedMousePositionByViewport.X : SelectedObject.TranslatedMousePositionByViewport.X - x,
+                                isFlipped ? x + spriteInfo.UV.Width - SelectedObject.TranslatedMousePositionByViewport.X : SelectedObject.TranslatedMousePositionByViewport.X - x,
                                 SelectedObject.TranslatedMousePositionByViewport.Y - y
                             ))
                             {
@@ -1133,7 +1133,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (GetTexture(ref graphic, ref animGroup, ref animIndex, dir, out spriteInfo, out isUop))
             {
-                int x = position.X - (IsFlipped ? spriteInfo.UV.Width - spriteInfo.Center.X : spriteInfo.Center.X);
+                int x = position.X - (isFlipped ? spriteInfo.UV.Width - spriteInfo.Center.X : spriteInfo.Center.X);
                 int y = position.Y - (spriteInfo.UV.Height + spriteInfo.Center.Y);
 
                 if (AnimationsLoader.Instance.PixelCheck
@@ -1143,7 +1143,7 @@ namespace ClassicUO.Game.GameObjects
                     dir,
                     isUop,
                     animIndex,
-                    IsFlipped ? x + spriteInfo.UV.Width - SelectedObject.TranslatedMousePositionByViewport.X : SelectedObject.TranslatedMousePositionByViewport.X - x,
+                    isFlipped ? x + spriteInfo.UV.Width - SelectedObject.TranslatedMousePositionByViewport.X : SelectedObject.TranslatedMousePositionByViewport.X - x,
                     SelectedObject.TranslatedMousePositionByViewport.Y - y
                 ))
                 {
@@ -1172,7 +1172,7 @@ namespace ClassicUO.Game.GameObjects
 
                         if (GetTexture(ref graphic, ref animGroup, ref animIndex, dir, out spriteInfo, out isUop))
                         {
-                            int x = position.X - (IsFlipped ? spriteInfo.UV.Width - spriteInfo.Center.X : spriteInfo.Center.X);
+                            int x = position.X - (isFlipped ? spriteInfo.UV.Width - spriteInfo.Center.X : spriteInfo.Center.X);
                             int y = position.Y - (spriteInfo.UV.Height + spriteInfo.Center.Y);
 
                             if (AnimationsLoader.Instance.PixelCheck
@@ -1182,7 +1182,7 @@ namespace ClassicUO.Game.GameObjects
                                 dir,
                                 isUop,
                                 animIndex,
-                                IsFlipped ? x + spriteInfo.UV.Width - SelectedObject.TranslatedMousePositionByViewport.X : SelectedObject.TranslatedMousePositionByViewport.X - x,
+                                isFlipped ? x + spriteInfo.UV.Width - SelectedObject.TranslatedMousePositionByViewport.X : SelectedObject.TranslatedMousePositionByViewport.X - x,
                                 SelectedObject.TranslatedMousePositionByViewport.Y - y
                             ))
                             {
