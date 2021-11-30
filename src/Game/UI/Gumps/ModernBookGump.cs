@@ -275,46 +275,61 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
-            _textboxFlag |= TextBoxFlag.WorkingOnLeft;
-
             int index = Math.Min(Math.Max(ActivePage, 1), MaxPage);
             int rightPage = ((index - 1) << 1);
             int leftPage = rightPage - 1;
 
-            if (leftPage >= 0 && leftPage < _pagesChanged.Length)
+            if (leftPage >= 0 && leftPage < _pagesText.Length)
             {
-                _pagesChanged[leftPage + 1] = true;
                 _pagesText[leftPage] = _bookPageLeft.Text;
+                int page = UpdateTextRecursive(leftPage, _bookPageLeft.MaxWidth, _bookPageLeft.Height, _bookPageLeft.FontSettings);
 
-                var i = GetIndexOfLargeText(_bookPageLeft.Text.AsSpan(), _bookPageLeft.FontSettings, _bookPageLeft.MaxWidth, _bookPageLeft.Height);
-
-                if (i >= 0)
+                if (rightPage >= 0 && rightPage < _pagesText.Length)
                 {
-                    var span = _bookPageLeft.Text.AsSpan(i);
+                    _textboxFlag |= TextBoxFlag.WorkingOnRight;
+                    _bookPageRight.Text = _pagesText[rightPage];
+                    _textboxFlag &= ~TextBoxFlag.WorkingOnRight;
+                }
 
-                    if (!span.IsEmpty)
+                if (leftPage >= 0 && leftPage < _pagesText.Length)
+                {
+                    _textboxFlag |= TextBoxFlag.WorkingOnLeft;
+                    _bookPageLeft.Text = _pagesText[leftPage];
+                    _textboxFlag &= ~TextBoxFlag.WorkingOnLeft;
+                }
+
+                if (page > rightPage)
+                {
+                    var p = page + 1;
+
+                    if (p % 2 == 0)
                     {
-                        _pagesText[leftPage] = _bookPageLeft.Text.Substring(0, i);
-                        _bookPageLeft.Text = _pagesText[leftPage];
+                        p += 1;
+                    }
 
-                        if (leftPage + 1 < _pagesText.Length)
-                        {
-                            _pagesText[leftPage + 1] = $"{span.ToString()}{_bookPageRight.Text}";
-                            _pagesChanged[leftPage + 2] = true;
+                    p = (p / 2) + 1;
+                    ActivePage = Math.Max(MaxPage, p);
 
-                            _bookPageRight.Text = _pagesText[leftPage + 1];
+                    index = Math.Min(Math.Max(ActivePage, 1), MaxPage);
+                    rightPage = ((index - 1) << 1);
+                    leftPage = rightPage - 1;
 
-                            if (_bookPageLeft.CaretIndex >= i)
-                            {
-                                _bookPageRight.CaretIndex = 0;
-                                _bookPageRight.SetKeyboardFocus();
-                            }
-                        }
+                    if (page == leftPage)
+                    {
+                        _bookPageLeft.CaretIndex = 0;
+                        _bookPageLeft.SetKeyboardFocus();
+                    }
+                }
+
+                if (page != -1)
+                {
+                    if (page == rightPage)
+                    {
+                        _bookPageRight.CaretIndex = 0;
+                        _bookPageRight.SetKeyboardFocus();
                     }
                 }
             }
-
-            _textboxFlag &= ~TextBoxFlag.WorkingOnLeft;
         }
         
         private void BookPageRight_TextChanged(object sender, EventArgs e)
@@ -324,50 +339,97 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
-            _textboxFlag |= TextBoxFlag.WorkingOnRight;
-
             int index = Math.Min(Math.Max(ActivePage, 1), MaxPage);
             int rightPage = ((index - 1) << 1);
             int leftPage = rightPage - 1;
 
-            if (rightPage >= 0 && rightPage < _pagesChanged.Length)
+            if (rightPage >= 0 && rightPage < _pagesText.Length)
             {
-                _pagesChanged[rightPage + 1] = true;
                 _pagesText[rightPage] = _bookPageRight.Text;
+                int page = UpdateTextRecursive(rightPage, _bookPageRight.MaxWidth, _bookPageRight.Height, _bookPageRight.FontSettings);
 
-                var i = GetIndexOfLargeText(_bookPageRight.Text.AsSpan(), _bookPageRight.FontSettings, _bookPageRight.MaxWidth, _bookPageRight.Height);
-
-                if (i >= 0)
+                if (rightPage >= 0 && rightPage < _pagesText.Length)
                 {
-                    var span = _bookPageRight.Text.AsSpan(i);
+                    _textboxFlag |= TextBoxFlag.WorkingOnRight;
+                    _bookPageRight.Text = _pagesText[rightPage];
+                    _textboxFlag &= ~TextBoxFlag.WorkingOnRight;
+                }
 
-                    if (!span.IsEmpty)
+                if (leftPage >= 0 && leftPage < _pagesText.Length)
+                {
+                    _textboxFlag |= TextBoxFlag.WorkingOnLeft;
+                    _bookPageLeft.Text = _pagesText[leftPage];
+                    _textboxFlag &= ~TextBoxFlag.WorkingOnLeft;
+                }
+
+                if (page > rightPage)
+                {
+                    var p = page + 1;
+
+                    if (p % 2 == 0)
                     {
-                        _pagesText[rightPage] = _bookPageRight.Text.Substring(0, i);
-                        _bookPageRight.Text = _pagesText[rightPage];
+                        p += 1;
+                    }
 
-                        if (rightPage + 1 < _pagesText.Length)
-                        {
-                            _pagesText[rightPage + 1] = $"{span.ToString()}{_bookPageLeft.Text}";
-                            _pagesChanged[rightPage + 2] = true;
+                    p = (p / 2) + 1;
+                    ActivePage = Math.Max(MaxPage, p);
 
-                            _bookPageLeft.Text = _pagesText[rightPage + 1];
+                    index = Math.Min(Math.Max(ActivePage, 1), MaxPage);
+                    rightPage = ((index - 1) << 1);
+                    leftPage = rightPage - 1;
 
-                            if (_bookPageRight.CaretIndex >= i)
-                            {
-                                if (ActivePage + 1 < BookPageCount)
-                                {
-                                    ActivePage++;
-                                    _bookPageLeft.CaretIndex = 0;
-                                    _bookPageLeft.SetKeyboardFocus();
-                                }
-                            }
-                        }
+                    if (page == rightPage)
+                    {
+                        _bookPageRight.CaretIndex = 0;
+                        _bookPageRight.SetKeyboardFocus();
+                    }
+                }
+
+                if (page != -1)
+                {
+                    if (page == leftPage)
+                    {
+                        _bookPageLeft.CaretIndex = 0;
+                        _bookPageLeft.SetKeyboardFocus();
                     }
                 }
             }
+        }
 
-            _textboxFlag &= ~TextBoxFlag.WorkingOnRight;
+        private int UpdateTextRecursive(int currentGumpPage, float maxWidth, int maxHeight, in FontSettings fontSettings)
+        {
+            if (currentGumpPage < 0 || currentGumpPage >= _pagesText.Length)
+            {
+                return -1;
+            }
+
+            _pagesChanged[currentGumpPage + 1] = true;
+            var span = _pagesText[currentGumpPage].AsSpan();
+
+            if (!span.IsEmpty)
+            {
+                var i = GetIndexOfLargeText(span, fontSettings, maxWidth, maxHeight);
+
+                if (i < 0)
+                {
+                    return currentGumpPage;
+                }
+
+                var currentSpan = span.Slice(0, i);
+                var spanToAppend = span.Slice(i);
+
+                _pagesText[currentGumpPage] = currentSpan.ToString();
+
+                if (currentGumpPage + 1 < _pagesText.Length)
+                {
+                    _pagesText[currentGumpPage + 1] = $"{spanToAppend.ToString()}{_pagesText[currentGumpPage + 1]}";
+                    _pagesChanged[currentGumpPage + 2] = true;
+
+                    return UpdateTextRecursive(currentGumpPage + 1, maxWidth, maxHeight, fontSettings);
+                }
+            }
+
+            return currentGumpPage;
         }
 
         private int GetIndexOfLargeText(ReadOnlySpan<char> text, in FontSettings fs, float maxWidth, float maxHeight)
