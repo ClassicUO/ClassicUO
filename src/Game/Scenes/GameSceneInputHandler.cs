@@ -1223,6 +1223,11 @@ namespace ClassicUO.Game.Scenes
 
         internal override void OnKeyUp(SDL.SDL_KeyboardEvent e)
         {
+            if (!World.InGame)
+            {
+                return;
+            }
+
             if (ProfileManager.CurrentProfile.EnableMousewheelScaleZoom && ProfileManager.CurrentProfile.RestoreScaleAfterUnpressCtrl && !Keyboard.Ctrl)
             {
                 Camera.Zoom = ProfileManager.CurrentProfile.DefaultScale;
