@@ -95,22 +95,28 @@ namespace ClassicUO.Game.Managers
 
         public static void Open()
         {
-            if (_gump != null)
+            if (_gump == null)
             {
-                return;
+                _gump = new NameOverHeadHandlerGump();
             }
 
-            _gump = new NameOverHeadHandlerGump();
+            if (!_gump.IsEnabled)
+                _gump.IsEnabled = true;
+            if (!_gump.IsVisible)
+                _gump.IsVisible = true;
+
             UIManager.Add(_gump);
         }
 
         public static void Close()
         {
-            if (_gump != null)
-            {
-                _gump.Dispose();
-                _gump = null;
-            }
+            if (_gump == null)
+                return;
+
+            if (_gump.IsEnabled)
+                _gump.IsEnabled = false;
+            if (_gump.IsVisible)
+                _gump.IsVisible = false;
         }
 
         public static void ToggleOverheads()

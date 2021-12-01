@@ -33,14 +33,12 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Xml;
 using ClassicUO.Game;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
-using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 using TinyJson;
@@ -344,14 +342,7 @@ namespace ClassicUO.Configuration
                         gumps.AddLast(gump);
                     }
                 }
-
-                // Save NameOverHeadHandlerGump's last position even if it's not opened on save unless it's at default position
-                if (!gumps.Any(g => g.GumpType == GumpType.NameOverHeadHandler) && NameOverHeadHandlerGump.LastPosition.HasValue && NameOverHeadHandlerGump.LastPosition != new Point(100, 100))
-                {
-                    var nameOverHeadHandlerGump = new NameOverHeadHandlerGump();
-                    gumps.AddLast(nameOverHeadHandlerGump);
-                }
-
+                
                 LinkedListNode<Gump> first = gumps.First;
 
                 while (first != null)
