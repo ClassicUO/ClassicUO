@@ -90,7 +90,7 @@ namespace ClassicUO.Game.GameObjects
                     drawX, 
                     drawY,
                     ProfileManager.CurrentProfile.PartyAura && World.Party.Contains(this) ? ProfileManager.CurrentProfile.PartyAuraHue : Notoriety.GetHue(NotorietyFlag),
-                    depth + 0.5f
+                    depth + 1f
                 );
             }
 
