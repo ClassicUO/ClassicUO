@@ -46,14 +46,14 @@ namespace ClassicUO.Game.UI.Controls
             CanMove = true;
             CanCloseWithRightClick = true;
 
-            for (int i = 0; i < 9; i++)
-            {
-                if (GumpsLoader.Instance.GetGumpTexture((ushort)(graphic + i), out _) == null)
-                {
-                    Dispose();
-                    return;
-                }
-            }
+            //for (int i = 0; i < 9; i++)
+            //{
+            //    if (GumpsLoader.Instance.GetGumpTexture((ushort)(graphic + i), out _) == null)
+            //    {
+            //        Dispose();
+            //        return;
+            //    }
+            //}
 
             Graphic = graphic;
         }
@@ -273,116 +273,134 @@ namespace ClassicUO.Game.UI.Controls
 
 
 
-
-            batcher.Draw
-            (
-                texture0,
-                new Vector2(x, y), 
-                bounds0,
-                color
-            );
-
-
-            batcher.DrawTiled
-            (
-                texture1,
-                new Rectangle
+            if (texture0 != null)
+            {
+                batcher.Draw
+               (
+                   texture0,
+                   new Vector2(x, y),
+                   bounds0,
+                   color
+               );
+            }
+           
+            if (texture1 != null)
+            {
+                batcher.DrawTiled
                 (
-                    x + bounds0.Width,
-                    y,
-                    Width - bounds0.Width - bounds2.Width,
-                    bounds1.Height
-                ),
-                bounds1,
-                color
-            );
+                    texture1,
+                    new Rectangle
+                    (
+                        x + bounds0.Width,
+                        y,
+                        Width - bounds0.Width - bounds2.Width,
+                        bounds1.Height
+                    ),
+                    bounds1,
+                    color
+                );
+            }         
 
-
-            batcher.Draw
-            (
-                texture2,
-                new Vector2(x + (Width - bounds2.Width), y + offsetTop),
-                bounds2,
-                color
-            );
-
-
-            batcher.DrawTiled
-            (
-                texture3,
-                new Rectangle
+            if (texture2 != null)
+            {
+                batcher.Draw
                 (
-                    x,
-                    y + bounds0.Height,
-                    bounds3.Width,
-                    Height - bounds0.Height - bounds5.Height
-                ),
-                bounds3,
-                color
-            );
+                    texture2,
+                    new Vector2(x + (Width - bounds2.Width), y + offsetTop),
+                    bounds2,
+                    color
+                );
+            }
 
-
-            batcher.DrawTiled
-            (
-                texture4,
-                new Rectangle
+            if (texture3 != null)
+            {
+                batcher.DrawTiled
                 (
-                    x + (Width - bounds4.Width),
-                    y + bounds2.Height,
-                    bounds4.Width,
-                    Height - bounds2.Height - bounds7.Height
-                ),
-                bounds4,
-                color
-            );
-
-
-            batcher.Draw
-            (
-                texture5,
-                new Vector2(x, y + (Height - bounds5.Height)),
-                bounds5,
-                color
-            );
-
-
-            batcher.DrawTiled
-            (
-                texture6,
-                new Rectangle
+                    texture3,
+                    new Rectangle
+                    (
+                        x,
+                        y + bounds0.Height,
+                        bounds3.Width,
+                        Height - bounds0.Height - bounds5.Height
+                    ),
+                    bounds3,
+                    color
+                );
+            }
+            
+            if (texture4 != null)
+            {
+                batcher.DrawTiled
                 (
-                    x + bounds5.Width,
-                    y + (Height - bounds6.Height - offsetBottom),
-                    Width - bounds5.Width - bounds7.Width,
-                    bounds6.Height
-                ),
-                bounds6,
-                color
-            );
+                    texture4,
+                    new Rectangle
+                    (
+                        x + (Width - bounds4.Width),
+                        y + bounds2.Height,
+                        bounds4.Width,
+                        Height - bounds2.Height - bounds7.Height
+                    ),
+                    bounds4,
+                    color
+                );
+            }
 
-
-            batcher.Draw
-            (
-                texture7,
-                new Vector2(x + (Width - bounds7.Width), y + (Height - bounds7.Height)),
-                bounds7,
-                color
-            );
-
-
-            batcher.DrawTiled
-            (
-                texture8,
-                new Rectangle
+            if (texture5 != null)
+            {
+                batcher.Draw
                 (
-                    x + bounds0.Width,
-                    y + bounds0.Height,
-                    (Width - bounds0.Width - bounds2.Width) + (offsetLeft + offsetRight),
-                    Height - bounds2.Height - bounds7.Height
-                ),
-                bounds8,
-                color
-            );
+                    texture5,
+                    new Vector2(x, y + (Height - bounds5.Height)),
+                    bounds5,
+                    color
+                );
+            }
+            
+            if (texture6 != null)
+            {
+                batcher.DrawTiled
+                (
+                    texture6,
+                    new Rectangle
+                    (
+                        x + bounds5.Width,
+                        y + (Height - bounds6.Height - offsetBottom),
+                        Width - bounds5.Width - bounds7.Width,
+                        bounds6.Height
+                    ),
+                    bounds6,
+                    color
+                );
+            }
+            
+            if (texture7 != null)
+            {
+                batcher.Draw
+                (
+                    texture7,
+                    new Vector2(x + (Width - bounds7.Width), y + (Height - bounds7.Height)),
+                    bounds7,
+                    color
+                );
+            }
+            
+            if (texture8 != null)
+            {
+                batcher.DrawTiled
+                (
+                    texture8,
+                    new Rectangle
+                    (
+                        x + bounds0.Width,
+                        y + bounds0.Height,
+                        (Width - bounds0.Width - bounds2.Width) + (offsetLeft + offsetRight),
+                        Height - bounds2.Height - bounds7.Height
+                    ),
+                    bounds8,
+                    color
+                );
+            }
         }
     }
 }
