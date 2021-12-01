@@ -192,6 +192,11 @@ namespace ClassicUO.Game.UI.Controls
                 return false;
             }
 
+            if (bounds.Width == 0 || bounds.Height == 0)
+            {
+                return false;
+            }
+
             int textureWidth = bounds.Width;
             int textureHeight = bounds.Height;
 
