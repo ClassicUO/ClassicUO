@@ -53,7 +53,7 @@ namespace ClassicUO.Game.UI.Controls
 
             for (_maxIndex = 0; _maxIndex < 9; ++_maxIndex)
             {
-                if (GumpsLoader.Instance.GetGumpTexture((ushort)(Graphic + 0), out _) == null)
+                if (GumpsLoader.Instance.GetGumpTexture((ushort)(Graphic + _maxIndex), out _) == null)
                 {
                     break;
                 }
