@@ -98,14 +98,11 @@ namespace ClassicUO.Game.Managers
             if (_gump == null)
             {
                 _gump = new NameOverHeadHandlerGump();
+                UIManager.Add(_gump);
             }
 
-            if (!_gump.IsEnabled)
-                _gump.IsEnabled = true;
-            if (!_gump.IsVisible)
-                _gump.IsVisible = true;
-
-            UIManager.Add(_gump);
+            _gump.IsEnabled = true;
+            _gump.IsVisible = true;
         }
 
         public static void Close()
@@ -113,10 +110,8 @@ namespace ClassicUO.Game.Managers
             if (_gump == null)
                 return;
 
-            if (_gump.IsEnabled)
-                _gump.IsEnabled = false;
-            if (_gump.IsVisible)
-                _gump.IsVisible = false;
+            _gump.IsEnabled = false;
+            _gump.IsVisible = false;
         }
 
         public static void ToggleOverheads()
