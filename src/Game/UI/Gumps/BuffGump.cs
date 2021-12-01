@@ -332,7 +332,7 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                         else
                         {
-                            _gText.Text = span.Minutes > 0 ? $"{span.Minutes}:{span.Seconds}" : $"{span.Seconds}";
+                            _gText.Text = span.Minutes > 0 ? $"{span.Minutes}:{span.Seconds:00}" : $"{span.Seconds:00}s";
                         }
                     }
 
