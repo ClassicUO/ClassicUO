@@ -36,26 +36,28 @@ using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.UI.Controls
 {
     internal class ResizePic : Control
     {
+        private int _maxIndex;
+
         public ResizePic(ushort graphic)
         {
             CanMove = true;
             CanCloseWithRightClick = true;
-
-            //for (int i = 0; i < 9; i++)
-            //{
-            //    if (GumpsLoader.Instance.GetGumpTexture((ushort)(graphic + i), out _) == null)
-            //    {
-            //        Dispose();
-            //        return;
-            //    }
-            //}
-
             Graphic = graphic;
+
+
+            for (_maxIndex = 0; _maxIndex < 9; ++_maxIndex)
+            {
+                if (GumpsLoader.Instance.GetGumpTexture((ushort)(Graphic + 0), out _) == null)
+                {
+                    break;
+                }
+            }
         }
 
         public ResizePic(List<string> parts) : this(UInt16Converter.Parse(parts[3]))
@@ -76,21 +78,20 @@ namespace ClassicUO.Game.UI.Controls
             y -= Offset.Y;
 
 
-            _ = GumpsLoader.Instance.GetGumpTexture((ushort)(Graphic + 0), out var bounds0);
-            _ = GumpsLoader.Instance.GetGumpTexture((ushort)(Graphic + 1), out var bounds1);
-            _ = GumpsLoader.Instance.GetGumpTexture((ushort)(Graphic + 2), out var bounds2);
-            _ = GumpsLoader.Instance.GetGumpTexture((ushort)(Graphic + 3), out var bounds3);
-            _ = GumpsLoader.Instance.GetGumpTexture((ushort)(Graphic + 5), out var bounds4);
-            _ = GumpsLoader.Instance.GetGumpTexture((ushort)(Graphic + 6), out var bounds5);
-            _ = GumpsLoader.Instance.GetGumpTexture((ushort)(Graphic + 7), out var bounds6);
-            _ = GumpsLoader.Instance.GetGumpTexture((ushort)(Graphic + 8), out var bounds7);
-            _ = GumpsLoader.Instance.GetGumpTexture((ushort)(Graphic + 4), out var bounds8);
+            var texture0 = GetTexture(0, out var bounds0);
+            var texture1 = GetTexture(1, out var bounds1);
+            var texture2 = GetTexture(2, out var bounds2);
+            var texture3 = GetTexture(3, out var bounds3);
+            var texture4 = GetTexture(4, out var bounds4);
+            var texture5 = GetTexture(5, out var bounds5);
+            var texture6 = GetTexture(6, out var bounds6);
+            var texture7 = GetTexture(7, out var bounds7);
+            var texture8 = GetTexture(8, out var bounds8);
 
             int offsetTop = Math.Max(bounds0.Height, bounds2.Height) - bounds1.Height;
             int offsetBottom = Math.Max(bounds5.Height, bounds7.Height) - bounds6.Height;
             int offsetLeft = Math.Abs(Math.Max(bounds0.Width, bounds5.Width) - bounds2.Width);
             int offsetRight = Math.Max(bounds2.Width, bounds7.Width) - bounds4.Width;
-
 
 
             if (PixelsInXY(ref bounds0, Graphic, x, y))
@@ -256,15 +257,15 @@ namespace ClassicUO.Game.UI.Controls
 
         private void DrawInternal(UltimaBatcher2D batcher, int x, int y, ref Vector3 color)
         {
-            var texture0 = GumpsLoader.Instance.GetGumpTexture((ushort)(Graphic + 0), out var bounds0);
-            var texture1 = GumpsLoader.Instance.GetGumpTexture((ushort)(Graphic + 1), out var bounds1);
-            var texture2 = GumpsLoader.Instance.GetGumpTexture((ushort)(Graphic + 2), out var bounds2);
-            var texture3 = GumpsLoader.Instance.GetGumpTexture((ushort)(Graphic + 3), out var bounds3);
-            var texture4 = GumpsLoader.Instance.GetGumpTexture((ushort)(Graphic + 5), out var bounds4);
-            var texture5 = GumpsLoader.Instance.GetGumpTexture((ushort)(Graphic + 6), out var bounds5);
-            var texture6 = GumpsLoader.Instance.GetGumpTexture((ushort)(Graphic + 7), out var bounds6);
-            var texture7 = GumpsLoader.Instance.GetGumpTexture((ushort)(Graphic + 8), out var bounds7);
-            var texture8 = GumpsLoader.Instance.GetGumpTexture((ushort)(Graphic + 4), out var bounds8);
+            var texture0 = GetTexture(0, out var bounds0);
+            var texture1 = GetTexture(1, out var bounds1);
+            var texture2 = GetTexture(2, out var bounds2);
+            var texture3 = GetTexture(3, out var bounds3);
+            var texture4 = GetTexture(4, out var bounds4);
+            var texture5 = GetTexture(5, out var bounds5);
+            var texture6 = GetTexture(6, out var bounds6);
+            var texture7 = GetTexture(7, out var bounds7);
+            var texture8 = GetTexture(8, out var bounds8);
 
             int offsetTop = Math.Max(bounds0.Height, bounds2.Height) - bounds1.Height;
             int offsetBottom = Math.Max(bounds5.Height, bounds7.Height) - bounds6.Height;
@@ -402,5 +403,26 @@ namespace ClassicUO.Game.UI.Controls
                 );
             }
         }
+       
+        private Texture2D GetTexture(int index, out Rectangle bounds)
+        {
+            if (index >= 0 && index <= _maxIndex)
+            {
+                if (index >= 8)
+                {
+                    index = 4;
+                }
+                else if (index >= 4)
+                {
+                    ++index;
+                }
+
+                return GumpsLoader.Instance.GetGumpTexture((ushort)(Graphic + index), out bounds);
+            }
+
+            bounds = Rectangle.Empty;
+            return null;
+        }
+
     }
 }
