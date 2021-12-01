@@ -1638,7 +1638,7 @@ namespace ClassicUO.IO.Resources
 
         public void GetAnimationDimensions
         (
-            sbyte animIndex,
+            byte animIndex,
             ushort graphic,
             byte dir,
             byte animGroup,

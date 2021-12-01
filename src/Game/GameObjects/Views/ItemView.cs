@@ -490,7 +490,7 @@ namespace ClassicUO.Game.GameObjects
 
                 byte direction = (byte)((byte)Layer & 0x7F & 7);
                 AnimationsLoader.Instance.GetAnimDirection(ref direction, ref IsFlipped);
-                sbyte animIndex = AnimIndex;
+                byte animIndex = AnimIndex;
                 bool ishuman = MathHelper.InRange(Amount, 0x0190, 0x0193) ||
                     MathHelper.InRange(Amount, 0x00B7, 0x00BA) ||
                     MathHelper.InRange(Amount, 0x025D, 0x0260) ||
@@ -564,7 +564,7 @@ namespace ClassicUO.Game.GameObjects
             return false;
         }
 
-        private static bool GetTexture(ref ushort graphic, ref byte animGroup, ref sbyte animIndex, byte direction, out SpriteInfo spriteInfo, out bool isUOP)
+        private static bool GetTexture(ref ushort graphic, ref byte animGroup, ref byte animIndex, byte direction, out SpriteInfo spriteInfo, out bool isUOP)
         {
             spriteInfo = default;
             isUOP = false;
@@ -595,7 +595,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (fc > 0 && animIndex >= fc)
             {
-                animIndex = (sbyte)(fc - 1);
+                animIndex = (byte)(fc - 1);
             }
             else if (animIndex < 0)
             {
@@ -607,7 +607,7 @@ namespace ClassicUO.Game.GameObjects
                 return false;
             }
 
-            spriteInfo = animationSet.SpriteInfos[animIndex];
+            spriteInfo = animationSet.SpriteInfos[animIndex % animationSet.FrameCount];
 
             if (spriteInfo.Texture == null)
             {

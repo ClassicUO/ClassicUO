@@ -2232,10 +2232,9 @@ namespace ClassicUO.Network
                 (byte) frame_count,
                 (byte) repeat_count,
                 repeat,
-                forward
+                forward,
+                true
             );
-
-            mobile.AnimationFromServer = true;
         }
 
         private static void GraphicEffect(ref StackDataReader p)
@@ -4330,9 +4329,9 @@ namespace ClassicUO.Network
 
                                 if (mobile != null)
                                 {
-                                    // TODO: animation for statues
-                                    //mobile.SetAnimation(Mobile.GetReplacedObjectAnimation(mobile.Graphic, animation), 0, (byte) frame, 0, false, false);
-                                    //mobile.AnimationFromServer = true;
+                                    mobile.SetAnimation(Mobile.GetReplacedObjectAnimation(mobile.Graphic, animation));
+                                    mobile.ExecuteAnimation = false;
+                                    mobile.AnimIndex = (byte) frame;
                                 }
                             }
                             else if (World.Player != null && serial == World.Player)
@@ -4546,23 +4545,17 @@ namespace ClassicUO.Network
                     byte animID = p.ReadUInt8();
                     byte frameCount = p.ReadUInt8();
 
-                    //foreach (Mobile m in World.Mobiles)
-                    //{
-                    //    if ((m.Serial & 0xFFFF) == serial)
-                    //    {
-                    //       // byte group = Mobile.GetObjectNewAnimation(m, animID, action, mode);
-                    //        m.SetAnimation(animID);
-                    //        //m.AnimationRepeatMode = 1;
-                    //        //m.AnimationForwardDirection = true;
-                    //        //if ((type == 1 || type == 2) && mobile.Graphic == 0x0015)
-                    //        //    mobile.AnimationRepeat = true;
-                    //        //mobile.AnimationFromServer = true;
+                    foreach (Mobile m in World.Mobiles.Values)
+                    {
+                        if ((m.Serial & 0xFFFF) == serial)
+                        {
+                            m.SetAnimation(animID);
+                            m.AnimIndex = frameCount;
+                            m.ExecuteAnimation = false;
 
-                    //        //m.SetAnimation(Mobile.GetReplacedObjectAnimation(m.Graphic, animID), 0, frameCount);
-                    //       // m.AnimationFromServer = true;
-                    //        break;
-                    //    }
-                    //}
+                            break;
+                        }
+                    }
 
                     break;
 
@@ -5442,16 +5435,8 @@ namespace ClassicUO.Network
             ushort action = p.ReadUInt16BE();
             byte mode = p.ReadUInt8();
             byte group = Mobile.GetObjectNewAnimation(mobile, type, action, mode);
-            mobile.SetAnimation(group);
-            mobile.AnimationRepeatMode = 1;
-            mobile.AnimationForwardDirection = true;
 
-            if ((type == 1 || type == 2) && mobile.Graphic == 0x0015)
-            {
-                mobile.AnimationRepeat = true;
-            }
-
-            mobile.AnimationFromServer = true;
+            mobile.SetAnimation(group, repeatCount: 1, repeat: (type == 1 || type == 2) && mobile.Graphic == 0x0015, forward: true, fromServer: true);
         }
 
         private static void KREncryptionResponse(ref StackDataReader p)
