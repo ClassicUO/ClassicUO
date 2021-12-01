@@ -1096,7 +1096,7 @@ namespace ClassicUO.Game.GameObjects
                                 frameIndex = (byte) (fc - 1);
                             }
 
-                            AnimIndex = (byte) (frameIndex & direction.FrameCount);
+                            AnimIndex = (byte) (frameIndex % direction.FrameCount);
                         }
                     }
 
