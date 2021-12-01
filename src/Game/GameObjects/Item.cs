@@ -94,7 +94,7 @@ namespace ClassicUO.Game.GameObjects
                 i.ObjectHandlesStatus = ObjectHandlesStatus.NONE;
                 i.AlphaHue = 0;
                 i.AllowedToDraw = true;
-
+                i.ExecuteAnimation = true;
                 i.HitsRequest = HitsRequestStatus.None;
             }
         );
