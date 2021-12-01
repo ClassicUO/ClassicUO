@@ -33,6 +33,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Xml;
 using ClassicUO.Game;
@@ -344,6 +345,12 @@ namespace ClassicUO.Configuration
                     }
                 }
 
+                // Save NameOverHeadHandlerGump's last position even if it's not opened on save unless it's at default position
+                if (!gumps.Any(g => g.GumpType == GumpType.NameOverHeadHandler) && NameOverHeadHandlerGump.LastPosition.HasValue && NameOverHeadHandlerGump.LastPosition != new Point(100, 100))
+                {
+                    var nameOverHeadHandlerGump = new NameOverHeadHandlerGump();
+                    gumps.AddLast(nameOverHeadHandlerGump);
+                }
 
                 LinkedListNode<Gump> first = gumps.First;
 
@@ -598,6 +605,11 @@ namespace ClassicUO.Configuration
                                 case GumpType.NetStats:
                                     gump = new NetworkStatsGump(100, 100);
 
+                                    break;
+
+                                case GumpType.NameOverHeadHandler:
+                                    NameOverHeadHandlerGump.LastPosition = new Point(x, y);
+                                    // Gump gets opened by NameOverHeadManager, we just want to save the last position from profile
                                     break;
                             }
 
