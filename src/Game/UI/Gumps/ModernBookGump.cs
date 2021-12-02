@@ -171,7 +171,7 @@ namespace ClassicUO.Game.UI.Gumps
             _bookPageLeft = new StbTextBox
             (
                 DefaultFont,
-                MAX_BOOK_CHARS_PER_LINE * MAX_BOOK_LINES,
+                -1,
                 MAX_WIDTH,
                 hue: 1
             )
@@ -187,7 +187,7 @@ namespace ClassicUO.Game.UI.Gumps
             _bookPageRight = new StbTextBox
             (
                 DefaultFont,
-                MAX_BOOK_CHARS_PER_LINE * MAX_BOOK_LINES,
+                -1,
                 MAX_WIDTH,
                 hue: 1
             )
@@ -308,7 +308,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
 
                     p = (p / 2) + 1;
-                    ActivePage = Math.Max(MaxPage, p);
+                    ActivePage = Math.Min(MaxPage, p);
 
                     index = Math.Min(Math.Max(ActivePage, 1), MaxPage);
                     rightPage = ((index - 1) << 1);
@@ -372,7 +372,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
 
                     p = (p / 2) + 1;
-                    ActivePage = Math.Max(MaxPage, p);
+                    ActivePage = Math.Min(MaxPage, p);
 
                     index = Math.Min(Math.Max(ActivePage, 1), MaxPage);
                     rightPage = ((index - 1) << 1);
@@ -464,11 +464,13 @@ namespace ClassicUO.Game.UI.Gumps
             if (key == SDL.SDL_Keycode.SDLK_BACKSPACE)
             {
                 StbTextBox textbox = null, textboxToFocus = null;
+                bool switchPage = false;
 
                 if (_bookPageLeft == UIManager.KeyboardFocusControl && _bookPageLeft.IsVisible)
                 {
                     textbox = _bookPageLeft;
                     textboxToFocus = _bookPageRight;
+                    switchPage = true;
                 }
                 else if (_bookPageRight == UIManager.KeyboardFocusControl && _bookPageRight.IsVisible)
                 {
@@ -478,9 +480,12 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (textbox != null)
                 {
-                    if (textbox.CaretIndex <= 0 && textbox.SelectionStart == textbox.SelectionEnd)
+                    if (textbox.CaretIndex <= 0 && textbox.SelectionStart == textbox.SelectionEnd && ActivePage > 1)
                     {
-                        SetActivePage(Math.Max(1, ActivePage - 1));
+                        if (switchPage)
+                        {
+                            SetActivePage(Math.Max(1, ActivePage - 1));
+                        }
 
                         if (textboxToFocus != null && textboxToFocus.IsVisible)
                         {
@@ -488,7 +493,7 @@ namespace ClassicUO.Game.UI.Gumps
                         }                       
                     }
                 }
-            }
+            }          
 
             base.OnKeyDown(key, mod);
         }
