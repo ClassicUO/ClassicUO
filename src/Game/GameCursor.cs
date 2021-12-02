@@ -383,35 +383,24 @@ namespace ClassicUO.Game
 
                 var texture = ArtLoader.Instance.GetStaticTexture(draggingGraphic, out var bounds);
 
-                Point offset = GetDraggingItemOffset();
-
-                int x = (ItemHold.IsFixedPosition ? ItemHold.FixedX : Mouse.Position.X) - offset.X;
-                int y = (ItemHold.IsFixedPosition ? ItemHold.FixedY : Mouse.Position.Y) - offset.Y;
-
-                Vector3 hue = Vector3.Zero;
-
-                ShaderHueTranslator.GetHueVector(ref hue, ItemHold.Hue, ItemHold.IsPartialHue, ItemHold.HasAlpha ? .5f : 0);
-
-                var rect = new Rectangle
-                (
-                    x,
-                    y,
-                    (int)(bounds.Width * scale),
-                    (int)(bounds.Height * scale)
-                );
-
-                sb.Draw
-                (
-                    texture,
-                    rect,
-                    bounds,
-                    hue
-                );
-
-                if (ItemHold.Amount > 1 && ItemHold.DisplayedGraphic == ItemHold.Graphic && ItemHold.IsStackable)
+                if (texture != null)
                 {
-                    rect.X += 5;
-                    rect.Y += 5;
+                    Point offset = GetDraggingItemOffset();
+
+                    int x = (ItemHold.IsFixedPosition ? ItemHold.FixedX : Mouse.Position.X) - offset.X;
+                    int y = (ItemHold.IsFixedPosition ? ItemHold.FixedY : Mouse.Position.Y) - offset.Y;
+
+                    Vector3 hue = Vector3.Zero;
+
+                    ShaderHueTranslator.GetHueVector(ref hue, ItemHold.Hue, ItemHold.IsPartialHue, ItemHold.HasAlpha ? .5f : 0);
+
+                    var rect = new Rectangle
+                    (
+                        x,
+                        y,
+                        (int)(bounds.Width * scale),
+                        (int)(bounds.Height * scale)
+                    );
 
                     sb.Draw
                     (
@@ -420,6 +409,20 @@ namespace ClassicUO.Game
                         bounds,
                         hue
                     );
+
+                    if (ItemHold.Amount > 1 && ItemHold.DisplayedGraphic == ItemHold.Graphic && ItemHold.IsStackable)
+                    {
+                        rect.X += 5;
+                        rect.Y += 5;
+
+                        sb.Draw
+                        (
+                            texture,
+                            rect,
+                            bounds,
+                            hue
+                        );
+                    }
                 }
             }
 

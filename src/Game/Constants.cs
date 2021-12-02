@@ -92,7 +92,7 @@ namespace ClassicUO.Game
         public const int ITEM_GUMP_TEXTURE_OFFSET = 11369;
 
         public const int MAX_LAND_DATA_INDEX_COUNT = 0x4000;
-        public const int MAX_STATIC_DATA_INDEX_COUNT = 0x10000;
+        public const int MAX_STATIC_DATA_INDEX_COUNT = 0x14000;
         public const int MAX_LAND_TEXTURES_DATA_INDEX_COUNT = 0x4000;
         public const int MAX_GUMP_DATA_INDEX_COUNT = 0x10000;
         public const int MAX_SOUND_DATA_INDEX_COUNT = 0xFFFF;
