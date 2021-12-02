@@ -223,6 +223,7 @@ namespace ClassicUO.IO.Resources
         public Texture2D GetStaticTexture(uint g, out Rectangle bounds)
         {
             g += 0x4000;
+            g &= 0xFFFF;
 
             var atlas = TextureAtlas.Shared;
 
