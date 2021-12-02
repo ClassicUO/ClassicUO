@@ -568,7 +568,7 @@ namespace ClassicUO.Game.Scenes
             }
 
             // slow as fuck
-            if (allowSelection && obj.AllowedToDraw && obj.CheckMouseSelection())
+            if (allowSelection && obj.Z <= _maxGroundZ && obj.AllowedToDraw && obj.CheckMouseSelection())
             {
                 SelectedObject.Object = obj;
             }

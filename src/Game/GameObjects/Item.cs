@@ -94,7 +94,7 @@ namespace ClassicUO.Game.GameObjects
                 i.ObjectHandlesStatus = ObjectHandlesStatus.NONE;
                 i.AlphaHue = 0;
                 i.AllowedToDraw = true;
-
+                i.ExecuteAnimation = true;
                 i.HitsRequest = HitsRequestStatus.None;
             }
         );
@@ -464,7 +464,7 @@ namespace ClassicUO.Game.GameObjects
             BoatMovingManager.ClearSteps(Serial);
         }
 
-        public override void CheckGraphicChange(sbyte animIndex = 0)
+        public override void CheckGraphicChange(byte animIndex = 0)
         {
             if (!IsMulti)
             {
@@ -1061,7 +1061,7 @@ namespace ClassicUO.Game.GameObjects
 
                 if (LastAnimationChangeTime < Time.Ticks)
                 {
-                    sbyte frameIndex = (sbyte) (AnimIndex + 1);
+                    byte frameIndex = (byte) (AnimIndex + (ExecuteAnimation ? 1 : 0));
                     ushort id = GetGraphicForAnimation();
 
                     //FileManager.Animations.GetCorpseAnimationGroup(ref graphic, ref animGroup, ref newHue);
@@ -1093,10 +1093,10 @@ namespace ClassicUO.Game.GameObjects
 
                             if (frameIndex >= fc)
                             {
-                                frameIndex = (sbyte) (fc - 1);
+                                frameIndex = (byte) (fc - 1);
                             }
 
-                            AnimIndex = frameIndex;
+                            AnimIndex = (byte) (frameIndex % direction.FrameCount);
                         }
                     }
 

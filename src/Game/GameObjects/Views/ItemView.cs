@@ -30,6 +30,7 @@
 
 #endregion
 
+using System;
 using System.Collections.Generic;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
@@ -39,6 +40,7 @@ using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using MathHelper = ClassicUO.Utility.MathHelper;
 
 namespace ClassicUO.Game.GameObjects
@@ -398,18 +400,43 @@ namespace ClassicUO.Game.GameObjects
                     ShaderHueTranslator.GetHueVector(ref hueVec, color, ispartialhue, alpha);
                 }
 
-                batcher.Draw
-                (
-                    spriteInfo.Texture,
-                    new Vector2(posX, posY),
-                    spriteInfo.UV,
-                    hueVec,
-                    0f,
-                    Vector2.Zero,
-                    1f,
-                    flipped ? Microsoft.Xna.Framework.Graphics.SpriteEffects.FlipHorizontally : Microsoft.Xna.Framework.Graphics.SpriteEffects.None,
-                    depth
-                );
+                Vector2 pos = new Vector2(posX, posY);
+                Rectangle rect = spriteInfo.UV;
+
+                int diffY = (spriteInfo.UV.Height + spriteInfo.Center.Y);
+                int value = /*!isMounted && diffX <= 44 ? spriteInfo.UV.Height * 2 :*/ Math.Max(1, diffY);
+                int count = Math.Max((spriteInfo.UV.Height / value) + 1, 2);
+
+                rect.Height = Math.Min(value, rect.Height);
+                int remains = spriteInfo.UV.Height - rect.Height;
+
+                int tiles = (byte)owner.Direction % 2 == 0 ? 2 : 2;
+
+
+                for (int i = 0; i < count; ++i)
+                {
+                    //hueVec.Y = 1;
+                    //hueVec.X = 0x44 + (i * 20);
+
+                    batcher.Draw
+                    (
+                        spriteInfo.Texture,
+                        pos,
+                        rect,
+                        hueVec,
+                        0f,
+                        Vector2.Zero,
+                        1f,
+                        flipped ? SpriteEffects.FlipHorizontally : SpriteEffects.None,
+                        depth + 1f + (i * tiles)
+                    //depth + (i * tiles) + (owner.PriorityZ * 0.001f)
+                    );
+
+                    pos.Y += rect.Height;
+                    rect.Y += rect.Height;
+                    rect.Height = remains; // Math.Min(value, remains);
+                    remains -= rect.Height;
+                }
             }
         }
 
@@ -490,7 +517,7 @@ namespace ClassicUO.Game.GameObjects
 
                 byte direction = (byte)((byte)Layer & 0x7F & 7);
                 AnimationsLoader.Instance.GetAnimDirection(ref direction, ref IsFlipped);
-                sbyte animIndex = AnimIndex;
+                byte animIndex = AnimIndex;
                 bool ishuman = MathHelper.InRange(Amount, 0x0190, 0x0193) ||
                     MathHelper.InRange(Amount, 0x00B7, 0x00BA) ||
                     MathHelper.InRange(Amount, 0x025D, 0x0260) ||
@@ -564,7 +591,7 @@ namespace ClassicUO.Game.GameObjects
             return false;
         }
 
-        private static bool GetTexture(ref ushort graphic, ref byte animGroup, ref sbyte animIndex, byte direction, out SpriteInfo spriteInfo, out bool isUOP)
+        private static bool GetTexture(ref ushort graphic, ref byte animGroup, ref byte animIndex, byte direction, out SpriteInfo spriteInfo, out bool isUOP)
         {
             spriteInfo = default;
             isUOP = false;
@@ -595,7 +622,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (fc > 0 && animIndex >= fc)
             {
-                animIndex = (sbyte)(fc - 1);
+                animIndex = (byte)(fc - 1);
             }
             else if (animIndex < 0)
             {
@@ -607,7 +634,7 @@ namespace ClassicUO.Game.GameObjects
                 return false;
             }
 
-            spriteInfo = animationSet.SpriteInfos[animIndex];
+            spriteInfo = animationSet.SpriteInfos[animIndex % animationSet.FrameCount];
 
             if (spriteInfo.Texture == null)
             {

@@ -90,7 +90,7 @@ namespace ClassicUO.Game.GameObjects
                     drawX, 
                     drawY,
                     ProfileManager.CurrentProfile.PartyAura && World.Party.Contains(this) ? ProfileManager.CurrentProfile.PartyAuraHue : Notoriety.GetHue(NotorietyFlag),
-                    depth + 0.5f
+                    depth + 1f
                 );
             }
 
@@ -183,7 +183,7 @@ namespace ClassicUO.Game.GameObjects
 
             ushort graphic = GetGraphicForAnimation();
             byte animGroup = GetGroupForAnimation(this, graphic, true);
-            sbyte animIndex = AnimIndex;
+            byte animIndex = AnimIndex;
 
             Item mount = FindItemByLayer(Layer.Mount);
             sbyte mountOffsetY = 0;
@@ -613,7 +613,7 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        private static bool GetTexture(ref ushort graphic, ref byte animGroup, ref sbyte animIndex, byte direction, out SpriteInfo spriteInfo, out bool isUOP)
+        private static bool GetTexture(ref ushort graphic, ref byte animGroup, ref byte animIndex, byte direction, out SpriteInfo spriteInfo, out bool isUOP)
         {
             spriteInfo = default;
             isUOP = false;
@@ -644,7 +644,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (fc > 0 && animIndex >= fc)
             {
-                animIndex = (sbyte)(fc - 1);
+                animIndex = (byte)(fc - 1);
             }
             else if (animIndex < 0)
             {
@@ -656,7 +656,7 @@ namespace ClassicUO.Game.GameObjects
                 return false;
             }
 
-            spriteInfo = animationSet.SpriteInfos[animIndex];
+            spriteInfo = animationSet.SpriteInfos[animIndex % animationSet.FrameCount];
 
             if (spriteInfo.Texture == null)
             {
@@ -677,7 +677,7 @@ namespace ClassicUO.Game.GameObjects
             int y,
             ref Vector3 hueVec,
             bool mirror,
-            sbyte frameIndex,
+            byte frameIndex,
             bool hasShadow,
             ushort id,
             byte animGroup,
@@ -734,7 +734,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (fc > 0 && frameIndex >= fc)
             {
-                frameIndex = (sbyte) (fc - 1);
+                frameIndex = (byte) (fc - 1);
             }
             else if (frameIndex < 0)
             {
@@ -743,7 +743,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (frameIndex < direction.FrameCount)
             {
-                ref var spriteInfo = ref direction.SpriteInfos[frameIndex];
+                ref var spriteInfo = ref direction.SpriteInfos[frameIndex % direction.FrameCount];
 
                 if (spriteInfo.Texture == null)
                 {
@@ -1065,7 +1065,7 @@ namespace ClassicUO.Game.GameObjects
             r.X = position.X - r.X;
             r.Y = position.Y - r.Y;
 
-            if (!r.Contains(Mouse.Position))
+            if (!r.Contains(SelectedObject.TranslatedMousePositionByViewport))
             {
                 return false;
             }
@@ -1085,10 +1085,10 @@ namespace ClassicUO.Game.GameObjects
 
             ushort graphic = GetGraphicForAnimation();
             byte animGroup = GetGroupForAnimation(this, graphic, true);
-            sbyte animIndex = AnimIndex;
+            byte animIndex = AnimIndex;
 
             byte animGroupBackup = animGroup;
-            sbyte animIndexBackup = animIndex;
+            byte animIndexBackup = animIndex;
 
             SpriteInfo spriteInfo;
             bool isUop;
@@ -1107,7 +1107,7 @@ namespace ClassicUO.Game.GameObjects
 
                         if (GetTexture(ref mountGraphic, ref animGroupMount, ref animIndex, dir, out spriteInfo, out isUop))
                         {
-                            int x = position.X - (IsFlipped ? spriteInfo.UV.Width - spriteInfo.Center.X : spriteInfo.Center.X);
+                            int x = position.X - (isFlipped ? spriteInfo.UV.Width - spriteInfo.Center.X : spriteInfo.Center.X);
                             int y = position.Y - (spriteInfo.UV.Height + spriteInfo.Center.Y);
 
                             if (AnimationsLoader.Instance.PixelCheck
@@ -1117,7 +1117,7 @@ namespace ClassicUO.Game.GameObjects
                                 dir,
                                 isUop,
                                 animIndex,
-                                IsFlipped ? x + spriteInfo.UV.Width - SelectedObject.TranslatedMousePositionByViewport.X : SelectedObject.TranslatedMousePositionByViewport.X - x,
+                                isFlipped ? x + spriteInfo.UV.Width - SelectedObject.TranslatedMousePositionByViewport.X : SelectedObject.TranslatedMousePositionByViewport.X - x,
                                 SelectedObject.TranslatedMousePositionByViewport.Y - y
                             ))
                             {
@@ -1133,7 +1133,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (GetTexture(ref graphic, ref animGroup, ref animIndex, dir, out spriteInfo, out isUop))
             {
-                int x = position.X - (IsFlipped ? spriteInfo.UV.Width - spriteInfo.Center.X : spriteInfo.Center.X);
+                int x = position.X - (isFlipped ? spriteInfo.UV.Width - spriteInfo.Center.X : spriteInfo.Center.X);
                 int y = position.Y - (spriteInfo.UV.Height + spriteInfo.Center.Y);
 
                 if (AnimationsLoader.Instance.PixelCheck
@@ -1143,7 +1143,7 @@ namespace ClassicUO.Game.GameObjects
                     dir,
                     isUop,
                     animIndex,
-                    IsFlipped ? x + spriteInfo.UV.Width - SelectedObject.TranslatedMousePositionByViewport.X : SelectedObject.TranslatedMousePositionByViewport.X - x,
+                    isFlipped ? x + spriteInfo.UV.Width - SelectedObject.TranslatedMousePositionByViewport.X : SelectedObject.TranslatedMousePositionByViewport.X - x,
                     SelectedObject.TranslatedMousePositionByViewport.Y - y
                 ))
                 {
@@ -1172,7 +1172,7 @@ namespace ClassicUO.Game.GameObjects
 
                         if (GetTexture(ref graphic, ref animGroup, ref animIndex, dir, out spriteInfo, out isUop))
                         {
-                            int x = position.X - (IsFlipped ? spriteInfo.UV.Width - spriteInfo.Center.X : spriteInfo.Center.X);
+                            int x = position.X - (isFlipped ? spriteInfo.UV.Width - spriteInfo.Center.X : spriteInfo.Center.X);
                             int y = position.Y - (spriteInfo.UV.Height + spriteInfo.Center.Y);
 
                             if (AnimationsLoader.Instance.PixelCheck
@@ -1182,7 +1182,7 @@ namespace ClassicUO.Game.GameObjects
                                 dir,
                                 isUop,
                                 animIndex,
-                                IsFlipped ? x + spriteInfo.UV.Width - SelectedObject.TranslatedMousePositionByViewport.X : SelectedObject.TranslatedMousePositionByViewport.X - x,
+                                isFlipped ? x + spriteInfo.UV.Width - SelectedObject.TranslatedMousePositionByViewport.X : SelectedObject.TranslatedMousePositionByViewport.X - x,
                                 SelectedObject.TranslatedMousePositionByViewport.Y - y
                             ))
                             {

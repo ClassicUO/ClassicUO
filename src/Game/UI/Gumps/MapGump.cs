@@ -248,14 +248,14 @@ namespace ClassicUO.Game.UI.Gumps
 
             for (int i = 0; i < _container.Count; i++)
             {
+                // HACK: redraw because pins are drawn when calling base.Draw(batcher, x, y);
+                ResetHueVector();
+                _container[i].Draw(batcher, x + _container[i].X, y + _container[i].Y);
+
                 if (i + 1 >= _container.Count)
                 {
                     break;
                 }
-
-                // HACK: redraw because pins are drawn when calling base.Draw(batcher, x, y);
-                ResetHueVector();
-                _container[i].Draw(batcher, x + _container[i].X, y + _container[i].Y);
 
                 Control c0 = _container[i];
                 Control c1 = _container[i + 1];
