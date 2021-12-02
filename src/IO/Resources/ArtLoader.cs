@@ -222,11 +222,8 @@ namespace ClassicUO.IO.Resources
 
         public Texture2D GetStaticTexture(uint g, out Rectangle bounds)
         {
-            if (g + 0x4000 < _spriteInfos.Length)
-            {
-                g += 0x4000;
-            }
-            
+            g += 0x4000;
+
             var atlas = TextureAtlas.Shared;
 
             ref var spriteInfo = ref _spriteInfos[g];
