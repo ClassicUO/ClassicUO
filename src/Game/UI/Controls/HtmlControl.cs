@@ -279,7 +279,11 @@ namespace ClassicUO.Game.UI.Controls
                 (
                     batcher,
                     x + offset - ScrollX, 
-                    y + offset - ScrollY
+                    y + offset - ScrollY,
+                    0,
+                    0,
+                    Width,
+                    Height
                 );
 
                 batcher.ClipEnd();
