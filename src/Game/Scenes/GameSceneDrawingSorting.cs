@@ -743,7 +743,15 @@ namespace ClassicUO.Game.Scenes
 
                     CheckIfBehindATree(obj, worldX, worldY, ref itemData);
 
-                    PushToRenderList(obj, ref _renderList, ref _renderListStaticsHead, ref _renderListStaticsCount, allowSelection);
+                    // hacky way to render shadows without z-fight
+                    if (ProfileManager.CurrentProfile.ShadowsEnabled && ProfileManager.CurrentProfile.ShadowsStatics && (StaticFilters.IsTree(obj.Graphic, out _) || itemData.IsFoliage || StaticFilters.IsRock(obj.Graphic)))
+                    {
+                        PushToRenderList(obj, ref _renderListTransparentObjects, ref _renderListTransparentObjectsHead, ref _renderListTransparentObjectsCount, allowSelection);
+                    }
+                    else
+                    {
+                        PushToRenderList(obj, ref _renderList, ref _renderListStaticsHead, ref _renderListStaticsCount, allowSelection);
+                    } 
                 }
                 else if (obj is Multi multi)
                 {
