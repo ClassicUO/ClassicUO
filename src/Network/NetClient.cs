@@ -56,7 +56,8 @@ namespace ClassicUO.Network
 
         private int _incompletePacketLength;
         private bool _isCompressionEnabled;
-        private byte[] _recvBuffer, _incompletePacketBuffer, _decompBuffer, _packetBuffer;
+        private int _sendingCount;
+        private byte[] _recvBuffer, _incompletePacketBuffer, _decompBuffer, _packetBuffer, _sendingBuffer;
         private CircularBuffer _circularBuffer;
         private ConcurrentQueue<byte[]> _pluginRecvQueue = new ConcurrentQueue<byte[]>();
         private readonly bool _is_login_socket;
@@ -177,6 +178,8 @@ namespace ClassicUO.Network
             _incompletePacketBuffer = new byte[BUFF_SIZE];
             _decompBuffer = new byte[BUFF_SIZE];
             _packetBuffer = new byte[BUFF_SIZE];
+            _sendingBuffer = new byte[4096];
+            _sendingCount = 0;
             _circularBuffer = new CircularBuffer();
             _pluginRecvQueue = new ConcurrentQueue<byte[]>();
             Statistics.Reset();
@@ -274,6 +277,8 @@ namespace ClassicUO.Network
             _netStream = null;
             _circularBuffer = null;
             _localIP = null;
+            _sendingBuffer = null;
+            _sendingCount = 0;
 
             if (error != 0)
             {
@@ -323,41 +328,16 @@ namespace ClassicUO.Network
                     EncryptionHelper.Encrypt(_is_login_socket, ref data, ref data, length);
                 }
 
-                try
+                if (_sendingCount + length >= _sendingBuffer.Length)
                 {
-                    _netStream.Write(data, 0, length);
-                    _netStream.Flush();
-
-                    Statistics.TotalBytesSent += (uint)length;
-                    Statistics.TotalPacketsSent++;
+                    ProcessSend();
                 }
-                catch (SocketException ex)
-                {
-                    Log.Error("socket error when sending:\n" + ex);
-                    _logFile?.Write($"disconnection  -  error during writing to the socket buffer: {ex}");
 
-                    Disconnect(ex.SocketErrorCode);
-                }
-                catch (Exception ex)
-                {
-                    if (ex.InnerException is SocketException socketEx)
-                    {
-                        Log.Error("socket error when sending:\n" + socketEx);
+                data.AsSpan().CopyTo(_sendingBuffer.AsSpan(_sendingCount));
+                _sendingCount += length;
 
-                        _logFile?.Write($"disconnection  -  error during writing to the socket buffer [2]: {socketEx}");
-                        Disconnect(socketEx.SocketErrorCode);
-                    }
-                    else
-                    {
-                        Log.Error("fatal error when receiving:\n" + ex);
-
-                        _logFile?.Write($"disconnection  -  error during writing to the socket buffer [3]: {ex}");
-
-                        Disconnect();
-
-                        throw;
-                    }
-                }
+                Statistics.TotalBytesSent += (uint)length;
+                Statistics.TotalPacketsSent++;
             }
         }
 
@@ -384,6 +364,8 @@ namespace ClassicUO.Network
 
                 PacketHandlers.Handlers.AnalyzePacket(data, offset, data.Length);
             }
+
+            ProcessSend();
         }
 
         private void ExtractPackets()
@@ -539,6 +521,61 @@ namespace ClassicUO.Network
                 {
                     Log.Error("fatal error when receiving:\n" + ex);
                     _logFile?.Write($"disconnection  -  error while reading from socket [2]: {ex}");
+
+                    Disconnect();
+
+                    throw;
+                }
+            }
+        }
+
+        private void ProcessSend()
+        {
+            if (IsDisposed || Status != ClientSocketStatus.Connected)
+            {
+                return;
+            }
+
+            if (!IsConnected && !IsDisposed)
+            {
+                Disconnect();
+
+                return;
+            }
+
+            if (_sendingCount <= 0)
+            {
+                return;
+            }
+
+            try
+            {
+                _netStream.Write(_sendingBuffer, 0, _sendingCount);
+                _netStream.Flush();
+
+                _sendingCount = 0;
+            }
+            catch (SocketException ex)
+            {
+                Log.Error("socket error when sending:\n" + ex);
+                _logFile?.Write($"disconnection  -  error during writing to the socket buffer: {ex}");
+
+                Disconnect(ex.SocketErrorCode);
+            }
+            catch (Exception ex)
+            {
+                if (ex.InnerException is SocketException socketEx)
+                {
+                    Log.Error("socket error when sending:\n" + socketEx);
+
+                    _logFile?.Write($"disconnection  -  error during writing to the socket buffer [2]: {socketEx}");
+                    Disconnect(socketEx.SocketErrorCode);
+                }
+                else
+                {
+                    Log.Error("fatal error when receiving:\n" + ex);
+
+                    _logFile?.Write($"disconnection  -  error during writing to the socket buffer [3]: {ex}");
 
                     Disconnect();
 
