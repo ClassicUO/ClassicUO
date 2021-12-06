@@ -333,7 +333,7 @@ namespace ClassicUO.Network
                     ProcessSend();
                 }
 
-                data.AsSpan().CopyTo(_sendingBuffer.AsSpan(_sendingCount));
+                data.AsSpan(0, length).CopyTo(_sendingBuffer.AsSpan(_sendingCount, length));
                 _sendingCount += length;
 
                 Statistics.TotalBytesSent += (uint)length;
@@ -573,7 +573,7 @@ namespace ClassicUO.Network
                 }
                 else
                 {
-                    Log.Error("fatal error when receiving:\n" + ex);
+                    Log.Error("fatal error when sending:\n" + ex);
 
                     _logFile?.Write($"disconnection  -  error during writing to the socket buffer [3]: {ex}");
 
