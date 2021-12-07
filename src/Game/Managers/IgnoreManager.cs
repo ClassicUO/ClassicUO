@@ -41,7 +41,7 @@ namespace ClassicUO.Game.Managers
                 if (IgnoredCharsList.Contains(charName))
                 {
                     GameActions.Print(string.Format(ResGumps.AddToIgnoreListExist, charName));
-                    //return;
+                    return;
                 }
 
                 IgnoredCharsList.Add(charName);
@@ -94,7 +94,7 @@ namespace ClassicUO.Game.Managers
 
             if (root != null)
             {
-                foreach (XmlElement xml in root.ChildNodes /*.GetElementsByTagName("gump")*/)
+                foreach (XmlElement xml in root.ChildNodes)
                 {
                     if (xml.Name != "info")
                     {
