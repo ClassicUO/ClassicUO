@@ -55,7 +55,7 @@ using SpriteFont = ClassicUO.Renderer.SpriteFont;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    internal sealed class WorldMapGump : ResizableGump
+    internal class WorldMapGump : ResizableGump
     {
         private static Point _last_position = new Point(100, 100);
         private Point _center, _lastScroll, _mouseCenter;
@@ -670,7 +670,7 @@ namespace ClassicUO.Game.UI.Gumps
             public string ColorName { get; set; }
         }
 
-        public class WMapMarkerFile
+        internal class WMapMarkerFile
         {
             public string Name { get; set; }
             public string FullPath { get; set; }
