@@ -601,7 +601,7 @@ namespace ClassicUO.Game.UI.Gumps
                 ushort boundWidth = (ushort) (bounds.Width * scale);
                 ushort boundHeight = (ushort) (bounds.Height * scale);
 
-                ResetHueVector();
+                Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
                 batcher.DrawRectangle
                 (
@@ -610,7 +610,7 @@ namespace ClassicUO.Game.UI.Gumps
                     y + boundY,
                     boundWidth - boundX,
                     boundHeight - boundY,
-                    ref HueVector
+                    hueVector
                 );
             }
 

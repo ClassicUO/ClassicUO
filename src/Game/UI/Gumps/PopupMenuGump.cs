@@ -49,7 +49,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             ResizePic pic = new ResizePic(0x0A3C)
             {
-                Alpha = 0.25f
+                Alpha = 0.75f
             };
 
             Add(pic);

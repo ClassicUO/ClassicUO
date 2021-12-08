@@ -155,15 +155,14 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (IsSelected)
             {
-                ResetHueVector();
-                ShaderHueTranslator.GetHueVector(ref HueVector, 0, false, Alpha);
+                Vector3 hueVector = ShaderHueTranslator.GetHueVector(0, false, Alpha);
 
                 batcher.Draw
                 (
                     _texture,
                     new Vector2(x, y),
                     new Rectangle(0, 0, Width, Height),
-                    HueVector
+                    hueVector
                 );
             }
 

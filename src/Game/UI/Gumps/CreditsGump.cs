@@ -74,9 +74,9 @@ Ultima Online(R) 2021 Electronic Arts Inc. All Rights Reserved.
         {
             base.Draw(batcher, x, y);
 
-            ResetHueVector();
+            Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
-            batcher.DrawString(Fonts.Bold, CREDITS, x + _offset.X, y + _offset.Y, ref HueVector);
+            batcher.DrawString(Fonts.Bold, CREDITS, x + _offset.X, y + _offset.Y, hueVector);
 
             return true;
         }

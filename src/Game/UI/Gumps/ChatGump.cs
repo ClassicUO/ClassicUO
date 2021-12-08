@@ -512,7 +512,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
-                ResetHueVector();
+                Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
                 if (MouseIsOver)
                 {
@@ -526,7 +526,7 @@ namespace ClassicUO.Game.UI.Gumps
                             Width, 
                             Height
                         ),                    
-                        HueVector
+                        hueVector
                     );
                 }
 

@@ -47,8 +47,6 @@ namespace ClassicUO.Game.GameObjects
 
             //Engine.DebugInfo.LandsRendered++;
 
-            Vector3 hueVec = Vector3.Zero;
-
             ushort hue = Hue;
 
             if (ProfileManager.CurrentProfile.HighlightGameObjects && SelectedObject.LastObject == this)
@@ -64,7 +62,7 @@ namespace ClassicUO.Game.GameObjects
                 hue = Constants.DEAD_RANGE_COLOR;
             }
 
-
+            Vector3 hueVec;
             if (hue != 0)
             {
                 hueVec.X = hue - 1;
@@ -72,8 +70,10 @@ namespace ClassicUO.Game.GameObjects
             }
             else
             {
+                hueVec.X = 0;
                 hueVec.Y = IsStretched ? ShaderHueTranslator.SHADER_LAND : ShaderHueTranslator.SHADER_NONE;
             }
+            hueVec.Z = 1f;
 
             if (IsStretched)
             {
@@ -90,7 +90,7 @@ namespace ClassicUO.Game.GameObjects
                     ref NormalRight,
                     ref NormalLeft,
                     ref NormalBottom,
-                    ref hueVec,
+                    hueVec,
                     depth
                 );
             }
@@ -102,7 +102,7 @@ namespace ClassicUO.Game.GameObjects
                     Graphic,
                     posX,
                     posY,
-                    ref hueVec,
+                    hueVec,
                     depth
                 );
             }

@@ -739,7 +739,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
-                ResetHueVector();
+                Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
                 if (_status == 2)
                 {
@@ -753,7 +753,7 @@ namespace ClassicUO.Game.UI.Gumps
                             Width,
                             17
                         ),
-                        HueVector
+                        hueVector
                     );
                 }
                 else if (_status == 1)
@@ -768,7 +768,7 @@ namespace ClassicUO.Game.UI.Gumps
                             200,
                             17
                         ),
-                        HueVector
+                        hueVector
                     );
                 }
 
@@ -978,7 +978,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
-                ResetHueVector();
+                Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
                 if (UIManager.LastControlMouseDown(MouseButtonType.Left) == this)
                 {
@@ -992,7 +992,7 @@ namespace ClassicUO.Game.UI.Gumps
                             Width,
                             Height
                         ),
-                        HueVector
+                        hueVector
                     );
                 }
 

@@ -128,7 +128,7 @@ namespace ClassicUO.Game.GameObjects
             return false;
         }
 
-        protected static void DrawLand(UltimaBatcher2D batcher, ushort graphic, int x, int y, ref Vector3 hue, float depth)
+        protected static void DrawLand(UltimaBatcher2D batcher, ushort graphic, int x, int y, Vector3 hue, float depth)
         {
             var texture = ArtLoader.Instance.GetLandTexture(graphic, out var bounds);
 
@@ -160,7 +160,7 @@ namespace ClassicUO.Game.GameObjects
             ref Vector3 nRight,
             ref Vector3 nLeft,
             ref Vector3 nBottom,
-            ref Vector3 hue,
+            Vector3 hue,
             float depth
         )
         {
@@ -190,13 +190,13 @@ namespace ClassicUO.Game.GameObjects
                     graphic,
                     x,
                     y,
-                    ref hue,
+                    hue,
                     depth
                 );
             }
         }
 
-        protected static void DrawStatic(UltimaBatcher2D batcher, ushort graphic, int x, int y, ref Vector3 hue, float depth)
+        protected static void DrawStatic(UltimaBatcher2D batcher, ushort graphic, int x, int y, Vector3 hue, float depth)
         {
             var texture = ArtLoader.Instance.GetStaticTexture(graphic, out var bounds);
 
@@ -222,7 +222,7 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        protected static void DrawGump(UltimaBatcher2D batcher, ushort graphic, int x, int y, ref Vector3 hue, float depth)
+        protected static void DrawGump(UltimaBatcher2D batcher, ushort graphic, int x, int y, Vector3 hue, float depth)
         {
             var texture = GumpsLoader.Instance.GetGumpTexture(graphic, out var bounds);
 
@@ -250,7 +250,7 @@ namespace ClassicUO.Game.GameObjects
             int x,
             int y,
             float angle,
-            ref Vector3 hue,
+            Vector3 hue,
             float depth
         )
         {
@@ -286,7 +286,7 @@ namespace ClassicUO.Game.GameObjects
             ushort graphic,
             int x,
             int y,
-            ref Vector3 hue,
+            Vector3 hue,
             bool shadow,
             float depth
         )

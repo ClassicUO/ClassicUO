@@ -57,14 +57,15 @@ namespace ClassicUO.Renderer
 
         public static readonly Vector3 SelectedItemHue = new Vector3(0x0035, 1, 0);
 
-        public static void GetHueVector(ref Vector3 hueVector, int hue)
+        public static Vector3 GetHueVector(int hue)
         {
-            GetHueVector(ref hueVector, hue, false, 0);
+            return GetHueVector(hue, false, 1);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void GetHueVector(ref Vector3 hueVector, int hue, bool partial, float alpha, bool gump = false, bool effect = false)
+        public static Vector3 GetHueVector(int hue, bool partial, float alpha, bool gump = false, bool effect = false)
         {
+            Vector3 hueVector;
             byte type;
 
             if ((hue & 0x8000) != 0)
@@ -101,6 +102,8 @@ namespace ClassicUO.Renderer
             hueVector.X = hue;
             hueVector.Y = type;
             hueVector.Z = alpha;
+
+            return hueVector;
         }
     }
 }

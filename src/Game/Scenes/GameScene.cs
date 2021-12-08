@@ -196,7 +196,6 @@ namespace ClassicUO.Game.Scenes
                 Client.Game.SetWindowSize(w, h);
             }
 
-
             CircleOfTransparency.Create(ProfileManager.CurrentProfile.CircleOfTransparencyRadius);
             Plugin.OnConnected();
 
@@ -943,6 +942,7 @@ namespace ClassicUO.Game.Scenes
 
             // draw world rt
             Vector3 hue = Vector3.Zero;
+            hue.Z = 1f;
 
 
             if (_use_render_target)
@@ -1020,7 +1020,7 @@ namespace ClassicUO.Game.Scenes
                 batcher.SetBlendState(null);
                 batcher.End();
 
-                hue.Z = 0f;
+                hue.Z = 1f;
             }
 
 
@@ -1102,11 +1102,8 @@ namespace ClassicUO.Game.Scenes
             //}
 
 
-
-            Vector3 hueVec = Vector3.Zero;
             if (_multi != null && TargetManager.IsTargeting && TargetManager.TargetingState == CursorTarget.MultiPlacement)
             {
-                hueVec = Vector3.Zero;
                 _multi.Draw(batcher, _multi.RealScreenPosition.X, _multi.RealScreenPosition.Y, _multi.CalculateDepthZ());
             } 
 
@@ -1129,7 +1126,7 @@ namespace ClassicUO.Game.Scenes
             //batcher.Begin();
             //hueVec.X = 0;
             //hueVec.Y = 1;
-            //hueVec.Z = 0;
+            //hueVec.Z = 1;
             //string s = $"Flushes: {flushes}\nSwitches: {switches}\nArt texture count: {TextureAtlas.Shared.TexturesCount}\nMaxZ: {_maxZ}\nMaxGround: {_maxGroundZ}";
             //batcher.DrawString(Fonts.Bold, s, 200, 200, ref hueVec);
             //hueVec = Vector3.Zero;
@@ -1184,7 +1181,7 @@ namespace ClassicUO.Game.Scenes
 
             Vector3 hue = Vector3.Zero;
             hue.Y = ShaderHueTranslator.SHADER_LIGHTS;
-            hue.Z = 0;
+            hue.Z = 1f;
 
             for (int i = 0; i < _lightCount; i++)
             {
@@ -1245,7 +1242,7 @@ namespace ClassicUO.Game.Scenes
             if (_isSelectionActive)
             {
                 Vector3 selectionHue = new Vector3();
-                selectionHue.Z = 0.3f;
+                selectionHue.Z = 0.7f;
 
                 batcher.Draw
                 (
@@ -1260,7 +1257,7 @@ namespace ClassicUO.Game.Scenes
                     selectionHue
                 );
 
-                selectionHue.Z = 0.7f;
+                selectionHue.Z = 0.3f;
 
                 batcher.DrawRectangle
                 (
@@ -1269,7 +1266,7 @@ namespace ClassicUO.Game.Scenes
                     _selectionStart.Y - Camera.Bounds.Y,
                     Mouse.Position.X - _selectionStart.X,
                     Mouse.Position.Y - _selectionStart.Y,
-                    ref selectionHue
+                    selectionHue
                 );
             }
         }

@@ -100,7 +100,7 @@ float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 		discard;
 
 	int mode = int(IN.Hue.y);
-	float alpha = 1 - IN.Hue.z;
+	float alpha = IN.Hue.z;
 
 	if (mode == NONE)
 	{
