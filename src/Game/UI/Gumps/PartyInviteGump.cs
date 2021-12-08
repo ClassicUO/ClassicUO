@@ -54,7 +54,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Height = 80,
                 X = ProfileManager.CurrentProfile.GameWindowSize.X / 2 - 125,
                 Y = 150,
-                Alpha = 0.2f
+                Alpha = 0.8f
             };
 
             Label text = new Label(string.Format(ResGumps.P0HasInvitedYouToParty, mobile == null || string.IsNullOrEmpty(mobile.Name) ? ResGumps.NoName : mobile.Name), true, 15)

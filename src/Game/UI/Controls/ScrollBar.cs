@@ -83,7 +83,7 @@ namespace ClassicUO.Game.UI.Controls
                 return false;
             }
 
-            ResetHueVector();
+            Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
             var textureUp0 = GumpsLoader.Instance.GetGumpTexture(BUTTON_UP_0, out var boundsUp0);
             var textureUp1 = GumpsLoader.Instance.GetGumpTexture(BUTTON_UP_1, out var boundsUp1);
@@ -104,7 +104,7 @@ namespace ClassicUO.Game.UI.Controls
                     textureBackground0,
                     new Vector2(x, y + boundsUp0.Height),
                     boundsBackground0,
-                    HueVector
+                    hueVector
                 );
 
                 batcher.DrawTiled
@@ -118,7 +118,7 @@ namespace ClassicUO.Game.UI.Controls
                         middleHeight
                     ),
                     boundsBackground1,
-                    HueVector
+                    hueVector
                 );
 
                 batcher.Draw
@@ -126,7 +126,7 @@ namespace ClassicUO.Game.UI.Controls
                     textureBackground2,
                     new Vector2(x, y + Height - boundsDown0.Height - boundsBackground2.Height),
                     boundsBackground2,
-                    HueVector
+                    hueVector
                 );
             }
             else
@@ -144,7 +144,7 @@ namespace ClassicUO.Game.UI.Controls
                         middleHeight
                     ),
                     boundsBackground1,
-                    HueVector
+                    hueVector
                 );
             }
 
@@ -156,7 +156,7 @@ namespace ClassicUO.Game.UI.Controls
                     textureUp1,
                     new Vector2(x, y),
                     boundsUp1,
-                    HueVector
+                    hueVector
                 );
             }
             else
@@ -166,7 +166,7 @@ namespace ClassicUO.Game.UI.Controls
                     textureUp0,
                     new Vector2(x, y),
                     boundsUp0,
-                    HueVector
+                    hueVector
                 );
             }
 
@@ -178,7 +178,7 @@ namespace ClassicUO.Game.UI.Controls
                     textureDown1,
                     new Vector2(x, y + Height - boundsDown0.Height),
                     boundsDown1,
-                    HueVector
+                    hueVector
                 );
             }
             else
@@ -188,7 +188,7 @@ namespace ClassicUO.Game.UI.Controls
                     textureDown0,
                     new Vector2(x, y + Height - boundsDown0.Height),
                     boundsDown0,
-                    HueVector
+                    hueVector
                 );
             }        
 
@@ -204,7 +204,7 @@ namespace ClassicUO.Game.UI.Controls
                         y + boundsUp0.Height + _sliderPosition
                     ),
                     boundsSlider,
-                    HueVector
+                    hueVector
                 );
             }
 

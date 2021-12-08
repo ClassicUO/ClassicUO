@@ -1566,7 +1566,7 @@ namespace ClassicUO.Game.UI.Gumps
             int halfWidth = gWidth >> 1;
             int halfHeight = gHeight >> 1;
 
-            ResetHueVector();
+            Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
 
             batcher.Draw
@@ -1579,7 +1579,7 @@ namespace ClassicUO.Game.UI.Gumps
                     gWidth,
                     gHeight
                 ),
-                HueVector
+                hueVector
             );
 
             if (_mapTexture != null)
@@ -1613,7 +1613,7 @@ namespace ClassicUO.Game.UI.Gumps
                         _mapTexture,
                         destRect,
                         srcRect,
-                        HueVector,
+                        hueVector,
                         _flipMap ? Microsoft.Xna.Framework.MathHelper.ToRadians(45) : 0,
                         origin,
                         SpriteEffects.None,
@@ -1890,9 +1890,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_showCoordinates)
             {
-                ResetHueVector();
-
-                HueVector.Y = 1;
+                Vector3 hueVector = new Vector3(0f, 1f, 1f);
 
                 batcher.DrawString
                 (
@@ -1900,10 +1898,10 @@ namespace ClassicUO.Game.UI.Gumps
                     $"{World.Player.X}, {World.Player.Y} ({World.Player.Z}) [{_zoomIndex}]",
                     gX + 6,
                     gY + 6,
-                    ref HueVector
+                    hueVector
                 );
 
-                ResetHueVector();
+                hueVector = ShaderHueTranslator.GetHueVector(0);
 
                 batcher.DrawString
                 (
@@ -1911,7 +1909,7 @@ namespace ClassicUO.Game.UI.Gumps
                     $"{World.Player.X}, {World.Player.Y} ({World.Player.Z}) [{_zoomIndex}]",
                     gX + 5,
                     gY + 5,
-                    ref HueVector
+                    hueVector
                 );
             }
         }
@@ -1931,7 +1929,7 @@ namespace ClassicUO.Game.UI.Gumps
             bool drawHpBar = false
         )
         {
-            ResetHueVector();
+            Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
             int sx = mobile.X - _center.X;
             int sy = mobile.Y - _center.Y;
@@ -1991,7 +1989,7 @@ namespace ClassicUO.Game.UI.Gumps
                     DOT_SIZE,
                     DOT_SIZE
                 ),
-                HueVector
+                hueVector
             );
 
             if (drawName && !string.IsNullOrEmpty(mobile.Name))
@@ -2019,8 +2017,8 @@ namespace ClassicUO.Game.UI.Gumps
                 int xx = (int) (rot.X - size.X / 2);
                 int yy = (int) (rot.Y - size.Y);
 
-                HueVector.X = 0;
-                HueVector.Y = 1;
+                hueVector.X = 0;
+                hueVector.Y = 1;
 
                 batcher.DrawString
                 (
@@ -2028,12 +2026,12 @@ namespace ClassicUO.Game.UI.Gumps
                     mobile.Name,
                     xx + 1,
                     yy + 1,
-                    ref HueVector
+                    hueVector
                 );
 
-                ResetHueVector();
-                HueVector.X = isparty ? 0x0034 : Notoriety.GetHue(mobile.NotorietyFlag);
-                HueVector.Y = 1;
+                hueVector.X = isparty ? 0x0034 : Notoriety.GetHue(mobile.NotorietyFlag);
+                hueVector.Y = 1;
+                hueVector.Z = 1;
 
                 batcher.DrawString
                 (
@@ -2041,7 +2039,7 @@ namespace ClassicUO.Game.UI.Gumps
                     mobile.Name,
                     xx,
                     yy,
-                    ref HueVector
+                    hueVector
                 );
             }
 
@@ -2090,7 +2088,7 @@ namespace ClassicUO.Game.UI.Gumps
                 return false;
             }
 
-            ResetHueVector();
+            Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
             int sx = marker.X - _center.X;
             int sy = marker.Y - _center.Y;
@@ -2130,7 +2128,7 @@ namespace ClassicUO.Game.UI.Gumps
                         DOT_SIZE,
                         DOT_SIZE
                     ),
-                    HueVector
+                    hueVector
                 );
 
                 if (Mouse.Position.X >= rot.X - DOT_SIZE && Mouse.Position.X <= rot.X + DOT_SIZE_HALF &&
@@ -2141,7 +2139,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
             else
             {
-                batcher.Draw(marker.MarkerIcon, new Vector2(rot.X - (marker.MarkerIcon.Width >> 1), rot.Y - (marker.MarkerIcon.Height >> 1)), HueVector);
+                batcher.Draw(marker.MarkerIcon, new Vector2(rot.X - (marker.MarkerIcon.Width >> 1), rot.Y - (marker.MarkerIcon.Height >> 1)), hueVector);
                
                 if (!showMarkerName)
                 {
@@ -2205,11 +2203,7 @@ namespace ClassicUO.Game.UI.Gumps
             int xx = (int)(rot.X - size.X / 2);
             int yy = (int)(rot.Y - size.Y - 5);
 
-            ResetHueVector();
-
-            HueVector.X = 0;
-            HueVector.Y = 1;
-            HueVector.Z = 0.5f;
+            Vector3 hueVector = new Vector3(0f, 1f, 0.5f);
 
             batcher.Draw
             (
@@ -2221,13 +2215,10 @@ namespace ClassicUO.Game.UI.Gumps
                     (int) (size.X + 4),
                     (int) (size.Y + 4)
                 ),
-                HueVector
+                hueVector
             );
 
-            ResetHueVector();
-
-            HueVector.X = 0;
-            HueVector.Y = 1;
+            hueVector = new Vector3(0f, 1f, 1f);
 
             batcher.DrawString
             (
@@ -2235,10 +2226,10 @@ namespace ClassicUO.Game.UI.Gumps
                 marker.Name,
                 xx + 1,
                 yy + 1,
-                ref HueVector
+                hueVector
             );
 
-            ResetHueVector();
+            hueVector = ShaderHueTranslator.GetHueVector(0);
 
             batcher.DrawString
             (
@@ -2246,7 +2237,7 @@ namespace ClassicUO.Game.UI.Gumps
                 marker.Name,
                 xx,
                 yy,
-                ref HueVector
+                hueVector
             );
         }
 
@@ -2288,7 +2279,7 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
-            ResetHueVector();
+            Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
             Texture2D texture = SolidColorTextureCache.GetTexture(Color.DarkGray);
 
@@ -2303,7 +2294,7 @@ namespace ClassicUO.Game.UI.Gumps
                     (int)(sH * zoom)
                 ),
                 null,
-                HueVector,
+                hueVector,
                 _flipMap ? Microsoft.Xna.Framework.MathHelper.ToRadians(45) : 0,
                 new Vector2(0.5f, 0.5f),
                 SpriteEffects.None,
@@ -2322,7 +2313,7 @@ namespace ClassicUO.Game.UI.Gumps
             float zoom
         )
         {
-            ResetHueVector();
+            Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
             ushort uohue;
             Color color;
@@ -2402,7 +2393,7 @@ namespace ClassicUO.Game.UI.Gumps
                     DOT_SIZE,
                     DOT_SIZE
                 ),
-                HueVector
+                hueVector
             );
 
             if (_showGroupName)
@@ -2431,8 +2422,8 @@ namespace ClassicUO.Game.UI.Gumps
                 int xx = (int) (rot.X - size.X / 2);
                 int yy = (int) (rot.Y - size.Y);
 
-                HueVector.X = 0;
-                HueVector.Y = 1;
+                hueVector.X = 0;
+                hueVector.Y = 1;
 
                 batcher.DrawString
                 (
@@ -2440,12 +2431,10 @@ namespace ClassicUO.Game.UI.Gumps
                     name,
                     xx + 1,
                     yy + 1,
-                    ref HueVector
+                    hueVector
                 );
 
-                ResetHueVector();
-                HueVector.X = uohue;
-                HueVector.Y = 1;
+                hueVector = new Vector3(uohue, 1f, 1f);
 
                 batcher.DrawString
                 (
@@ -2453,7 +2442,7 @@ namespace ClassicUO.Game.UI.Gumps
                     name,
                     xx,
                     yy,
-                    ref HueVector
+                    hueVector
                 );
             }
 
@@ -2466,7 +2455,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void DrawHpBar(UltimaBatcher2D batcher, int x, int y, int hp)
         {
-            ResetHueVector();
+            Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
             const int BAR_MAX_WIDTH = 25;
             const int BAR_MAX_WIDTH_HALF = BAR_MAX_WIDTH / 2;
@@ -2485,7 +2474,7 @@ namespace ClassicUO.Game.UI.Gumps
                     BAR_MAX_WIDTH + 2,
                     BAR_MAX_HEIGHT + 2
                 ),
-                HueVector
+                hueVector
             );
 
             batcher.Draw
@@ -2498,7 +2487,7 @@ namespace ClassicUO.Game.UI.Gumps
                     BAR_MAX_WIDTH,
                     BAR_MAX_HEIGHT
                 ),
-                HueVector
+                hueVector
             );
 
             int max = 100;
@@ -2529,7 +2518,7 @@ namespace ClassicUO.Game.UI.Gumps
                     max,
                     BAR_MAX_HEIGHT
                 ),
-                HueVector
+                hueVector
             );
         }
 

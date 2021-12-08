@@ -308,9 +308,9 @@ namespace ClassicUO.Game.UI.Gumps
                 return false;
             }
 
-            ResetHueVector();
             base.Draw(batcher, x, y);
-            ResetHueVector();
+
+            Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
             batcher.DrawRectangle
             (
@@ -319,7 +319,7 @@ namespace ClassicUO.Game.UI.Gumps
                 y,
                 Width,
                 Height,
-                ref HueVector
+                hueVector
             );
 
             return true;
@@ -453,17 +453,18 @@ namespace ClassicUO.Game.UI.Gumps
 
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
-                ResetHueVector();
                 base.Draw(batcher, x, y);
 
                 Item item = World.Items.Get(LocalSerial);
+
+                Vector3 hueVector;
 
                 if (item != null)
                 {
                     var texture = ArtLoader.Instance.GetStaticTexture(item.DisplayedGraphic, out var bounds);
                     var rect = ArtLoader.Instance.GetRealArtBounds(item.DisplayedGraphic);
 
-                    ShaderHueTranslator.GetHueVector(ref HueVector, item.Hue, item.ItemData.IsPartialHue, 0f);
+                    hueVector = ShaderHueTranslator.GetHueVector(item.Hue, item.ItemData.IsPartialHue, 1f);
 
                     Point originalSize = new Point(_hit.Width, _hit.Height);
                     Point point = new Point();
@@ -497,11 +498,11 @@ namespace ClassicUO.Game.UI.Gumps
                             rect.Width,
                             rect.Height
                         ),
-                        HueVector
+                        hueVector
                     );
                 }
                 
-                ResetHueVector();
+                hueVector = ShaderHueTranslator.GetHueVector(0);
 
                 batcher.DrawRectangle
                 (
@@ -510,12 +511,12 @@ namespace ClassicUO.Game.UI.Gumps
                     y + 15,
                     Width,
                     Height - 15,
-                    ref HueVector
+                    hueVector
                 );
 
                 if (_hit.MouseIsOver)
                 {
-                    HueVector.Z = 0.7f;
+                    hueVector.Z = 0.7f;
 
                     batcher.Draw
                     (
@@ -527,10 +528,10 @@ namespace ClassicUO.Game.UI.Gumps
                             Width - 1,
                             Height - 15
                         ),
-                        HueVector
+                        hueVector
                     );
 
-                    HueVector.Z = 0;
+                    hueVector.Z = 1;
                 }
 
                 return true;

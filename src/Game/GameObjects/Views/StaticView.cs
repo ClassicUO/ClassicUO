@@ -71,8 +71,6 @@ namespace ClassicUO.Game.GameObjects
             ushort hue = Hue;
             bool partial = ItemData.IsPartialHue;
 
-            Vector3 hueVec = Vector3.Zero;
-
             if (ProfileManager.CurrentProfile.HighlightGameObjects && SelectedObject.LastObject == this)
             {
                 hue = Constants.HIGHLIGHT_CURRENT_OBJECT_HUE;
@@ -89,7 +87,7 @@ namespace ClassicUO.Game.GameObjects
                 partial = false;
             }
 
-            ShaderHueTranslator.GetHueVector(ref hueVec, hue, partial, 0);
+            Vector3 hueVec = ShaderHueTranslator.GetHueVector(hue, partial, AlphaHue / 255f);
 
             bool isTree = StaticFilters.IsTree(graphic, out _);
 
@@ -98,18 +96,13 @@ namespace ClassicUO.Game.GameObjects
                 graphic = Constants.TREE_REPLACE_GRAPHIC;
             }
 
-            if (AlphaHue != 0xFF)
-            {
-                hueVec.Z = MathHelper.Clamp(1f - (AlphaHue / 255.0f), 0f, 1f);
-            }
-
             DrawStaticAnimated
             (
                 batcher,
                 graphic,
                 posX,
                 posY,
-                ref hueVec,
+                hueVec,
                 ProfileManager.CurrentProfile.ShadowsEnabled && ProfileManager.CurrentProfile.ShadowsStatics && (isTree || ItemData.IsFoliage || StaticFilters.IsRock(graphic)),
                 depth
             );

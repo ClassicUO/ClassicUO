@@ -167,11 +167,13 @@ namespace ClassicUO.Game.UI.Controls
 
             Rectangle rect = new Rectangle(0, 0, _cellWidth, _cellHeight);
 
+            Vector3 hueVector;
+
             for (int i = 0; i < _rows; i++)
             {
                 for (int j = 0; j < _columns; j++)
                 {
-                    ShaderHueTranslator.GetHueVector(ref HueVector, _hues[i * _columns + j]);
+                    hueVector = ShaderHueTranslator.GetHueVector(_hues[i * _columns + j]);
 
                     rect.X = x + j * _cellWidth;
                     rect.Y = y + i * _cellHeight;
@@ -180,12 +182,12 @@ namespace ClassicUO.Game.UI.Controls
                     (
                         texture,
                         rect,
-                        HueVector
+                        hueVector
                     );
                 }
             }
 
-            ResetHueVector();
+            hueVector = ShaderHueTranslator.GetHueVector(0);
 
             if (_hues.Length > 1)
             {
@@ -198,11 +200,9 @@ namespace ClassicUO.Game.UI.Controls
                 (
                     SolidColorTextureCache.GetTexture(Color.White),
                     rect,
-                    HueVector
+                    hueVector
                 );
             }
-
-            ResetHueVector();
 
             return base.Draw(batcher, x, y);
         }

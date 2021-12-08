@@ -267,8 +267,6 @@ namespace ClassicUO.Game.UI.Controls
                 return false;
             }
 
-            ResetHueVector();
-
             if (batcher.ClipBegin(x, y, Width, Height))
             {
                 base.Draw(batcher, x, y);

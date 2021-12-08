@@ -235,13 +235,13 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Draw(batcher, x, y);
 
-            ResetHueVector();
+            Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
             batcher.Draw
             (
                 _mapTexture,
                 new Rectangle(x + _hit.X, y + _hit.Y, _hit.Width, _hit.Height),
-                HueVector
+                hueVector
             );
 
             var texture = SolidColorTextureCache.GetTexture(Color.White);
@@ -249,7 +249,6 @@ namespace ClassicUO.Game.UI.Gumps
             for (int i = 0; i < _container.Count; i++)
             {
                 // HACK: redraw because pins are drawn when calling base.Draw(batcher, x, y);
-                ResetHueVector();
                 _container[i].Draw(batcher, x + _container[i].X, y + _container[i].Y);
 
                 if (i + 1 >= _container.Count)
@@ -260,13 +259,12 @@ namespace ClassicUO.Game.UI.Gumps
                 Control c0 = _container[i];
                 Control c1 = _container[i + 1];
 
-                ResetHueVector();
                 batcher.DrawLine
                 (
                     texture,
                     new Vector2(c0.ScreenCoordinateX, c0.ScreenCoordinateY),
                     new Vector2(c1.ScreenCoordinateX, c1.ScreenCoordinateY),
-                    HueVector,
+                    hueVector,
                     1
                 );
             }

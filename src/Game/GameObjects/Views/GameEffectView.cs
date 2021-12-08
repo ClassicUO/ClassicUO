@@ -99,8 +99,6 @@ namespace ClassicUO.Game.GameObjects
                 return false;
             }
 
-            Vector3 hueVec = Vector3.Zero;
-
             ref StaticTiles data = ref TileDataLoader.Instance.StaticData[Graphic];
 
             posX += (int)Offset.X;
@@ -117,7 +115,7 @@ namespace ClassicUO.Game.GameObjects
                 hue = Constants.DEAD_RANGE_COLOR;
             }
 
-            ShaderHueTranslator.GetHueVector(ref hueVec, hue, data.IsPartialHue, data.IsTranslucent ? .5f : 0, effect: true);
+            Vector3 hueVec = ShaderHueTranslator.GetHueVector(hue, data.IsPartialHue, data.IsTranslucent ? .5f : 1f, effect: true);
 
             if (Source != null)
             {
@@ -136,7 +134,7 @@ namespace ClassicUO.Game.GameObjects
                         posX,
                         posY,
                         AngleToTarget,
-                        ref hueVec,
+                        hueVec,
                         depth
                     );
 
@@ -155,7 +153,7 @@ namespace ClassicUO.Game.GameObjects
                         posX,
                         posY,
                         AngleToTarget,
-                        ref hueVec,
+                        hueVec,
                         depth
                     );
 
@@ -173,7 +171,7 @@ namespace ClassicUO.Game.GameObjects
                         posX,
                         posY,
                         AngleToTarget,
-                        ref hueVec,
+                        hueVec,
                         depth
                     );
 
@@ -191,7 +189,7 @@ namespace ClassicUO.Game.GameObjects
                         posX,
                         posY,
                         AngleToTarget,
-                        ref hueVec,
+                        hueVec,
                         depth
                     );
 
@@ -209,7 +207,7 @@ namespace ClassicUO.Game.GameObjects
                         posX,
                         posY,
                         AngleToTarget,
-                        ref hueVec,
+                        hueVec,
                         depth
                     );
 
@@ -220,7 +218,7 @@ namespace ClassicUO.Game.GameObjects
                 default:
                     //if (Graphic == 0x36BD)
                     //{
-                    //    ResetHueVector();
+                    //    hueVector = ShaderHueTranslator.GetHueVector(0);
                     //    HueVector.X = 0;
                     //    HueVector.Y = ShaderHueTranslator.SHADER_LIGHTS;
                     //    HueVector.Z = 0;
@@ -237,7 +235,7 @@ namespace ClassicUO.Game.GameObjects
                         posX,
                         posY,
                         AngleToTarget,
-                        ref hueVec,
+                        hueVec,
                         depth
                     );
 

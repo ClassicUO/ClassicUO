@@ -110,22 +110,21 @@ namespace ClassicUO.Game.GameObjects
                 return false;
             }
 
-            Vector3 hueVec = Vector3.Zero;
-
+            ushort hue;
             if (ProfileManager.CurrentProfile.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
             {
-                hueVec.X = Constants.OUT_RANGE_COLOR;
-                hueVec.Y = 1;
+                hue = Constants.OUT_RANGE_COLOR;
             }
             else if (World.Player.IsDead && ProfileManager.CurrentProfile.EnableBlackWhiteEffect)
             {
-                hueVec.X = Constants.DEAD_RANGE_COLOR;
-                hueVec.Y = 1;
+                hue = Constants.DEAD_RANGE_COLOR;
             }
             else
             {
-                ShaderHueTranslator.GetHueVector(ref hueVec, Hue);
+                hue = Hue;
             }
+
+            Vector3 hueVec = ShaderHueTranslator.GetHueVector(hue);
 
             //Engine.DebugInfo.EffectsRendered++;
 
@@ -135,7 +134,7 @@ namespace ClassicUO.Game.GameObjects
                 AnimationGraphic,
                 posX - ((int) Offset.X + 22),
                 posY - ((int) -Offset.Y + 22),
-                ref hueVec,
+                hueVec,
                 depth
             );
 

@@ -63,16 +63,12 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            ResetHueVector();
-
             if (Children.Count != 0)
             {
                 Children[0].Draw(batcher, x, y);
             }
 
-            ResetHueVector();
-
-            ShaderHueTranslator.GetHueVector(ref HueVector, Hue);
+            Vector3 hueVector = ShaderHueTranslator.GetHueVector(Hue);
 
             batcher.Draw
             (
@@ -84,7 +80,7 @@ namespace ClassicUO.Game.UI.Controls
                    Width - 6,
                    Height - 6
                 ),
-                HueVector
+                hueVector
             );
 
             return true;

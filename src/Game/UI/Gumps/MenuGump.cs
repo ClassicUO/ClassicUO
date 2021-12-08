@@ -218,20 +218,18 @@ namespace ClassicUO.Game.UI.Gumps
 
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
-                ResetHueVector();
-
                 if (_graphic != 0)
                 {
                     var texture = ArtLoader.Instance.GetStaticTexture(_graphic, out var bounds);
 
-                    ShaderHueTranslator.GetHueVector(ref HueVector, _hue, _isPartial, 0f);
+                    Vector3 hueVector = ShaderHueTranslator.GetHueVector(_hue, _isPartial, 1f);
 
                     batcher.Draw
                     (
                         texture,
                         new Vector2(x, y),
                         bounds,
-                        HueVector
+                        hueVector
                     );
                 }
 

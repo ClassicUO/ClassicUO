@@ -410,7 +410,7 @@ namespace ClassicUO.Renderer
             int dheight,
             int offsetX,
             int offsetY,
-            float alpha = 0,
+            float alpha = 1,
             ushort hue = 0
         )
         {
@@ -589,7 +589,7 @@ namespace ClassicUO.Renderer
             return true;
         }
 
-        public bool Draw(UltimaBatcher2D batcher, int x, int y, float alpha = 0, ushort hue = 0)
+        public bool Draw(UltimaBatcher2D batcher, int x, int y, float alpha = 1, ushort hue = 0)
         {
             if (string.IsNullOrEmpty(Text) || Texture == null || IsDestroyed || Texture.IsDisposed)
             {

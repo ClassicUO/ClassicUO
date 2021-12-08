@@ -238,20 +238,17 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            ResetHueVector();
-
             if (batcher.ClipBegin(x, y, Width, Height))
             {
-                ShaderHueTranslator.GetHueVector
-                (
-                    ref HueVector,
-                    0,
-                    false,
-                    Alpha,
-                    true
-                );
+                Vector3 hueVector = ShaderHueTranslator.GetHueVector
+                                    (
+                                        0,
+                                        false,
+                                        Alpha,
+                                        true
+                                    );
 
-                DrawInternal(batcher, x, y, ref HueVector);
+                DrawInternal(batcher, x, y, hueVector);
                 base.Draw(batcher, x, y);
 
                 batcher.ClipEnd();
@@ -260,7 +257,7 @@ namespace ClassicUO.Game.UI.Controls
             return true;
         }
 
-        private void DrawInternal(UltimaBatcher2D batcher, int x, int y, ref Vector3 color)
+        private void DrawInternal(UltimaBatcher2D batcher, int x, int y, Vector3 color)
         {
             var texture0 = GetTexture(0, out var bounds0);
             var texture1 = GetTexture(1, out var bounds1);

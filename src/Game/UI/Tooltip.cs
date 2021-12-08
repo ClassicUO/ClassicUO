@@ -180,8 +180,7 @@ namespace ClassicUO.Game.UI
             }
 
 
-            Vector3 hue_vec = Vector3.Zero;
-            ShaderHueTranslator.GetHueVector(ref hue_vec, 0, false, alpha);
+            Vector3 hue_vec = ShaderHueTranslator.GetHueVector(0, false, alpha);
 
             batcher.Draw
             (
@@ -204,7 +203,7 @@ namespace ClassicUO.Game.UI
                 y - 2,
                 (int) (z_width * zoom),
                 (int) (z_height * zoom),
-                ref hue_vec
+                hue_vec
             );
 
             hue_vec.X = 0;

@@ -104,7 +104,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (ShowEdit)
             {
-                ResetHueVector();
+                Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
                 var texture = GumpsLoader.Instance.GetGumpTexture(LOCK_GRAPHIC, out var bounds);
 
@@ -112,8 +112,8 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (UIManager.MouseOverControl != null && (UIManager.MouseOverControl == this || UIManager.MouseOverControl.RootParent == this))
                     {
-                        HueVector.X = 34;
-                        HueVector.Y = 1;
+                        hueVector.X = 34;
+                        hueVector.Y = 1;
                     }
 
                     batcher.Draw
@@ -121,7 +121,7 @@ namespace ClassicUO.Game.UI.Gumps
                         texture, 
                         new Vector2(x + (Width - bounds.Width), y),
                         bounds,
-                        HueVector
+                        hueVector
                     );
                 }
             }

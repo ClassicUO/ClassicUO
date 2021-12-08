@@ -57,25 +57,21 @@ namespace ClassicUO.Game.GameObjects
             }
 
             //Engine.DebugInfo.ItemsRendered++;
-
-            Vector3 hueVec = Vector3.Zero;
+            Vector3 hueVec;
 
             posX += (int) Offset.X;
             posY += (int) (Offset.Y + Offset.Z);
 
+            float alpha = AlphaHue / 255f;
             if (ItemData.IsTranslucent)
             {
-                hueVec.Z = 0.5f;
-            }
-
-            if (AlphaHue != 255)
-            {
-                hueVec.Z = 1f - AlphaHue / 255f;
+                alpha *= 0.5f;
             }
 
             if (IsCorpse)
             {
-                return DrawCorpse(batcher, posX, posY - 3, ref hueVec, depth);
+                hueVec = ShaderHueTranslator.GetHueVector(0, false, alpha);
+                return DrawCorpse(batcher, posX, posY - 3, hueVec, depth);
             }
 
 
@@ -151,7 +147,7 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-            ShaderHueTranslator.GetHueVector(ref hueVec, hue, partial, hueVec.Z);
+            hueVec = ShaderHueTranslator.GetHueVector(hue, partial, alpha);
 
             if (!IsMulti && !IsCoin && Amount > 1 && ItemData.IsStackable)
             {
@@ -161,7 +157,7 @@ namespace ClassicUO.Game.GameObjects
                     graphic,
                     posX - 5,
                     posY - 5,
-                    ref hueVec,
+                    hueVec,
                     false,
                     depth
                 );
@@ -183,7 +179,7 @@ namespace ClassicUO.Game.GameObjects
                 graphic,
                 posX,
                 posY,
-                ref hueVec,
+                hueVec,
                 false,
                 depth
             );
@@ -191,7 +187,7 @@ namespace ClassicUO.Game.GameObjects
             return true;
         }
 
-        private bool DrawCorpse(UltimaBatcher2D batcher, int posX, int posY, ref Vector3 hueVec, float depth)
+        private bool DrawCorpse(UltimaBatcher2D batcher, int posX, int posY, Vector3 hueVec, float depth)
         {
             if (IsDestroyed || World.CorpseManager.Exists(Serial, 0))
             {
@@ -225,7 +221,7 @@ namespace ClassicUO.Game.GameObjects
                 hueVec.Z,
                 group,
                 direction,
-                ref hueVec,
+                hueVec,
                 depth
             );
 
@@ -247,7 +243,7 @@ namespace ClassicUO.Game.GameObjects
                     hueVec.Z,
                     group,
                     direction,
-                    ref hueVec,
+                    hueVec,
                     depth
                 );
             }
@@ -269,7 +265,7 @@ namespace ClassicUO.Game.GameObjects
             float alpha,
             byte animGroup,
             byte dir,
-            ref Vector3 hueVec,
+            Vector3 hueVec,
             float depth
         )
         {
@@ -374,17 +370,13 @@ namespace ClassicUO.Game.GameObjects
                     }
                 }
 
-                hueVec = Vector3.Zero;
-
                 if (ProfileManager.CurrentProfile.NoColorObjectsOutOfRange && owner.Distance > World.ClientViewRange)
                 {
-                    hueVec.X = Constants.OUT_RANGE_COLOR;
-                    hueVec.Y = 1;
+                    hueVec = ShaderHueTranslator.GetHueVector(Constants.OUT_RANGE_COLOR + 1, false, 1);
                 }
                 else if (World.Player.IsDead && ProfileManager.CurrentProfile.EnableBlackWhiteEffect)
                 {
-                    hueVec.X = Constants.DEAD_RANGE_COLOR;
-                    hueVec.Y = 1;
+                    hueVec = ShaderHueTranslator.GetHueVector(Constants.DEAD_RANGE_COLOR + 1, false, 1);
                 }
                 else
                 {
@@ -397,7 +389,7 @@ namespace ClassicUO.Game.GameObjects
                         color = Constants.HIGHLIGHT_CURRENT_OBJECT_HUE;
                     }
 
-                    ShaderHueTranslator.GetHueVector(ref hueVec, color, ispartialhue, alpha);
+                    hueVec = ShaderHueTranslator.GetHueVector(color, ispartialhue, alpha);
                 }
 
                 Vector2 pos = new Vector2(posX, posY);

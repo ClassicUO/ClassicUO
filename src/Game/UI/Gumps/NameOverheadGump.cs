@@ -574,7 +574,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
 
-            ResetHueVector();
+            Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
             Point p = Client.Game.Scene.Camera.WorldToScreen(new Point(x, y));
             x = p.X - (Width >> 1);
@@ -603,7 +603,7 @@ namespace ClassicUO.Game.UI.Gumps
                 y - 1,
                 Width + 1,
                 Height + 1,
-                ref HueVector
+                hueVector
             );
 
             base.Draw(batcher, x, y);
