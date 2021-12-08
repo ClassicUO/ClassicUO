@@ -44,6 +44,16 @@ namespace ClassicUO.Game.GameObjects
     {
         private int _canBeTransparent;
 
+        private bool UseCircleOfTransparency()
+        {
+            if (ItemData.IsSurface && !ItemData.IsImpassable)
+            {
+                return false;
+            }
+
+            return (Z + ItemData.Height) > World.Player.Z;
+        }
+
         public override bool TransparentTest(int z)
         {
             bool r = true;
@@ -87,7 +97,7 @@ namespace ClassicUO.Game.GameObjects
                 partial = false;
             }
 
-            Vector3 hueVec = ShaderHueTranslator.GetHueVector(hue, partial, AlphaHue / 255f);
+            Vector3 hueVec = ShaderHueTranslator.GetHueVector(hue, partial, AlphaHue / 255f, circletrans: UseCircleOfTransparency());
 
             bool isTree = StaticFilters.IsTree(graphic, out _);
 

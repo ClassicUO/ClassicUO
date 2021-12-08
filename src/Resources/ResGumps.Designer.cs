@@ -19,7 +19,7 @@ namespace ClassicUO.Resources {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     public class ResGumps {
@@ -615,33 +615,6 @@ namespace ClassicUO.Resources {
         public static string ChooseName {
             get {
                 return ResourceManager.GetString("ChooseName", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Transparency type:.
-        /// </summary>
-        public static string CircleTransType {
-            get {
-                return ResourceManager.GetString("CircleTransType", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Full.
-        /// </summary>
-        public static string CircleTransType_Full {
-            get {
-                return ResourceManager.GetString("CircleTransType_Full", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Gradient.
-        /// </summary>
-        public static string CircleTransType_Gradient {
-            get {
-                return ResourceManager.GetString("CircleTransType_Gradient", resourceCulture);
             }
         }
         

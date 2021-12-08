@@ -50,13 +50,44 @@ namespace ClassicUO.Game.Managers
             }
         );
 
+        public static uint[] CreateCircleTexture(int radius, ref short width, ref short height)
+        {
+            int fixRadius = radius + 1;
+            int mulRadius = fixRadius * 2;
+
+            uint[] pixels = new uint[mulRadius * mulRadius];
+
+            width = (short) mulRadius;
+            height = (short) mulRadius;
+
+            for (int x = -fixRadius; x<fixRadius; x++)
+            {
+                int mulX = x * x;
+                int posX = (x + fixRadius) * mulRadius + fixRadius;
+
+                for (int y = -fixRadius; y<fixRadius; y++)
+                {
+                    int r = (int)Math.Sqrt(mulX + y * y);
+
+                    uint pic = (uint)(r <= radius ? (radius - r) & 0xFF : 0);
+
+                    int pos = posX + y;
+
+                    pixels[pos] = pic;
+                }
+            }
+
+            return pixels;
+        }
+
+
         private readonly Texture2D _texture;
 
         public Aura(int radius)
         {
             short w = 0;
             short h = 0;
-            uint[] data = CircleOfTransparency.CreateCircleTexture(radius, ref w, ref h);
+            uint[] data = CreateCircleTexture(radius, ref w, ref h);
 
             for (int i = 0; i < data.Length; i++)
             {
