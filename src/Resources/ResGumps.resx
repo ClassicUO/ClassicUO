@@ -1519,4 +1519,22 @@ Client version: '{0}'</value>
   <data name="MarkerY" xml:space="preserve">
     <value>Y</value>
   </data>
+  <data name="AddToIgnoreListExist" xml:space="preserve">
+    <value>Character {0} already exist in a list.</value>
+  </data>
+  <data name="AddToIgnoreListNotMobile" xml:space="preserve">
+    <value>This is not a player.</value>
+  </data>
+  <data name="AddToIgnoreListSuccess" xml:space="preserve">
+    <value>Added {0} to ignore list.</value>
+  </data>
+  <data name="IgnoreListAddButton" xml:space="preserve">
+    <value>Add person to ignore list</value>
+  </data>
+  <data name="IgnoreListManager" xml:space="preserve">
+    <value>Ignore List</value>
+  </data>
+  <data name="IgnoreListName" xml:space="preserve">
+    <value>Character name</value>
+  </data>
 </root>

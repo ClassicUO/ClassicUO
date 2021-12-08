@@ -151,6 +151,33 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Character {0} already exist in a list..
+        /// </summary>
+        public static string AddToIgnoreListExist {
+            get {
+                return ResourceManager.GetString("AddToIgnoreListExist", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to This is not a player..
+        /// </summary>
+        public static string AddToIgnoreListNotMobile {
+            get {
+                return ResourceManager.GetString("AddToIgnoreListNotMobile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Added {0} to ignore list..
+        /// </summary>
+        public static string AddToIgnoreListSuccess {
+            get {
+                return ResourceManager.GetString("AddToIgnoreListSuccess", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to All.
         /// </summary>
         public static string All {
@@ -1957,6 +1984,33 @@ namespace ClassicUO.Resources {
         public static string IgnoreGuildMessages {
             get {
                 return ResourceManager.GetString("IgnoreGuildMessages", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Add person to ignore list.
+        /// </summary>
+        public static string IgnoreListAddButton {
+            get {
+                return ResourceManager.GetString("IgnoreListAddButton", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Ignore List.
+        /// </summary>
+        public static string IgnoreListManager {
+            get {
+                return ResourceManager.GetString("IgnoreListManager", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Character name.
+        /// </summary>
+        public static string IgnoreListName {
+            get {
+                return ResourceManager.GetString("IgnoreListName", resourceCulture);
             }
         }
         
