@@ -573,22 +573,6 @@ namespace ClassicUO.Game.Scenes
                 SelectedObject.Object = obj;
             }
 
-            //if (_renderListStaticsHead == null)
-            //{
-            //    _renderListStaticsHead = _renderList = obj;
-            //}
-            //else
-            //{
-            //    _renderList.RenderListNext = obj;
-            //    _renderList = obj;
-            //}
-
-            //obj.RenderListNext = null;
-
-            //++_renderListStaticsCount;
-
-
-
             if (obj.AlphaHue != byte.MaxValue)
             {
                 if (_renderListTransparentObjectsHead == null)
@@ -597,9 +581,6 @@ namespace ClassicUO.Game.Scenes
                 }
                 else
                 {
-                    //obj.RenderListNext = _renderListTransparentObjectsHead;
-                    //_renderListTransparentObjectsHead = obj;
-
                     _renderListTransparentObjects.RenderListNext = obj;
                     _renderListTransparentObjects = obj;
                 }
