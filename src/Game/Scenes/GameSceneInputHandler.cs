@@ -612,6 +612,13 @@ namespace ClassicUO.Game.Scenes
                         }
 
                         break;
+                    case CursorTarget.IgnorePlayerTarget:
+                        if (SelectedObject.Object is Entity pmEntity)
+                        {
+                            IgnoreManager.AddIgnoredTarget(pmEntity);
+                        }
+                        TargetManager.CancelTarget();
+                        break;
                 }
             }
             else
