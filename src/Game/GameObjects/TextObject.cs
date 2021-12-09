@@ -46,7 +46,7 @@ namespace ClassicUO.Game.GameObjects
             o =>
             {
                 o.IsDestroyed = false;
-                o.Alpha = 0;
+                o.Alpha = 0xFF;
                 o.Hue = 0;
                 o.Time = 0;
                 o.IsTransparent = false;
