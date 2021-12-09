@@ -410,7 +410,6 @@ namespace ClassicUO.Renderer
             int dheight,
             int offsetX,
             int offsetY,
-            float alpha = 1,
             ushort hue = 0
         )
         {
@@ -464,7 +463,7 @@ namespace ClassicUO.Renderer
                 --hue;
             }
 
-            Vector3 hueVector = new Vector3(hue, 0, 0);
+            Vector3 hueVector = new Vector3(hue, 0, 1f);
 
             if (hue != 0)
             {
@@ -485,8 +484,6 @@ namespace ClassicUO.Renderer
             {
                 hueVector.Y = 0;
             }
-
-            hueVector.Z = alpha;
 
             batcher.Draw
             (
@@ -543,7 +540,7 @@ namespace ClassicUO.Renderer
                 --hue;
             }
 
-            Vector3 hueVector = new Vector3(hue, 0, 0);
+            Vector3 hueVector = new Vector3(hue, 0, 1f);
 
             if (hue != -1)
             {
@@ -569,8 +566,6 @@ namespace ClassicUO.Renderer
                     hueVector.Y = 0;
                 }
             }
-
-            hueVector.Z = 0;
 
             batcher.Draw
             (
@@ -606,7 +601,7 @@ namespace ClassicUO.Renderer
                 --hue;
             }
 
-            Vector3 hueVector = new Vector3(hue, 0, 0);
+            Vector3 hueVector = new Vector3(hue, 0, alpha);
 
 
             if (hue != 0)
@@ -628,8 +623,6 @@ namespace ClassicUO.Renderer
             {
                 hueVector.Y = 0;
             }
-
-            hueVector.Z = alpha;
 
             batcher.Draw
             (
