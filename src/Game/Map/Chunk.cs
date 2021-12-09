@@ -251,13 +251,7 @@ namespace ClassicUO.Game.Map
                     {
                         priorityZ--;
                     }
-
-                    // hack to fix transparent objects at the same level of a opaque one
-                    if (data.IsTranslucent || data.IsTransparent)
-                    {
-                        priorityZ--;
-                    }
-
+         
                     //if (data.IsSurface)
                     //{
                     //    priorityZ--;
