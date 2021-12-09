@@ -58,7 +58,7 @@ namespace ClassicUO.Game.UI.Gumps
             CanCloseWithRightClick = false;
             Height = 20;
 
-            Add(_background = new AlphaBlendControl(0.3f) { Width = Width, Height = Height });
+            Add(_background = new AlphaBlendControl(0.7f) { Width = Width, Height = Height });
 
             ResetItems();
         }

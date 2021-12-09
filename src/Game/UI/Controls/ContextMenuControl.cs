@@ -136,7 +136,7 @@ namespace ClassicUO.Game.UI.Controls
             AcceptMouseInput = true;
 
 
-            _background = new AlphaBlendControl(0.3f);
+            _background = new AlphaBlendControl(0.7f);
             Add(_background);
 
             int y = 0;

@@ -69,7 +69,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                _trans = new AlphaBlendControl(.3f)
+                _trans = new AlphaBlendControl(.7f)
                 {
                     Width = Width,
                     Height = Height

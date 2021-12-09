@@ -74,7 +74,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Height = 220,
                 X = ProfileManager.CurrentProfile.GameWindowSize.X / 2 - 125,
                 Y = 150,
-                Alpha = 0.2f,
+                Alpha = 0.7f,
                 CanMove = true,
                 CanCloseWithRightClick = true,
                 AcceptMouseInput = true

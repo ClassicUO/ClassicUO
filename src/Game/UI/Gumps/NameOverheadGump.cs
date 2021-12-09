@@ -201,7 +201,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                _background = new AlphaBlendControl(.3f)
+                _background = new AlphaBlendControl(.7f)
                 {
                     WantUpdateSize = false,
                     Hue = entity is Mobile m ? Notoriety.GetHue(m.NotorietyFlag) : (ushort) 0x0481

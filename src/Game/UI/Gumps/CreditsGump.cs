@@ -50,7 +50,7 @@ Ultima Online(R) 2021 Electronic Arts Inc. All Rights Reserved.
             Width = background.Width;
             Height = background.Height;
 
-            Add(new AlphaBlendControl(0f) { Width = background.Width, Height = background.Height});
+            Add(new AlphaBlendControl(1f) { Width = background.Width, Height = background.Height});
 
             Add(background);
 

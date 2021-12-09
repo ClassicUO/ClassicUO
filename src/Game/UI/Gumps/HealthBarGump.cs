@@ -727,7 +727,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Height = HPB_HEIGHT_MULTILINE;
                 Width = HPB_WIDTH;
 
-                Add(_background = new AlphaBlendControl(0.3f) { Width = Width, Height = Height, AcceptMouseInput = true, CanMove = true });
+                Add(_background = new AlphaBlendControl(0.7f) { Width = Width, Height = Height, AcceptMouseInput = true, CanMove = true });
 
 
                 if (LocalSerial == World.Player)
@@ -917,7 +917,7 @@ namespace ClassicUO.Game.UI.Gumps
                     Height = HPB_HEIGHT_MULTILINE;
                     Width = HPB_WIDTH;
 
-                    Add(_background = new AlphaBlendControl(0.3f) { Width = Width, Height = Height, AcceptMouseInput = true, CanMove = true });
+                    Add(_background = new AlphaBlendControl(0.7f) { Width = Width, Height = Height, AcceptMouseInput = true, CanMove = true });
 
                     Add
                     (
@@ -1086,7 +1086,7 @@ namespace ClassicUO.Game.UI.Gumps
                     Height = HPB_HEIGHT_SINGLELINE;
                     Width = HPB_WIDTH;
 
-                    Add(_background = new AlphaBlendControl(0.3f) { Width = Width, Height = Height, AcceptMouseInput = true, CanMove = true });
+                    Add(_background = new AlphaBlendControl(0.7f) { Width = Width, Height = Height, AcceptMouseInput = true, CanMove = true });
 
                     Add
                     (
