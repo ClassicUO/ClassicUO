@@ -731,7 +731,17 @@ namespace ClassicUO.Game.Scenes
                     }
                     else
                     {
+                        var alpha = obj.AlphaHue;
+
+                        // hack to fix transparent objects at the same level of a opaque one
+                        if (itemData.IsTranslucent || itemData.IsTransparent)
+                        {
+                            obj.AlphaHue = 0xFF;
+                        }
+
                         PushToRenderList(obj, ref _renderList, ref _renderListStaticsHead, ref _renderListStaticsCount, allowSelection);
+
+                        obj.AlphaHue = alpha;
                     } 
                 }
                 else if (obj is Multi multi)
@@ -782,13 +792,27 @@ namespace ClassicUO.Game.Scenes
                         continue;
                     }
 
-                    if (multi.IsMovable)
-                    {
-                    }
-
                     CheckIfBehindATree(obj, worldX, worldY, ref itemData);
 
-                    PushToRenderList(obj, ref _renderList, ref _renderListStaticsHead, ref _renderListStaticsCount, allowSelection);
+                    // hacky way to render shadows without z-fight
+                    if (ProfileManager.CurrentProfile.ShadowsEnabled && ProfileManager.CurrentProfile.ShadowsStatics && (StaticFilters.IsTree(obj.Graphic, out _) || itemData.IsFoliage || StaticFilters.IsRock(obj.Graphic)))
+                    {
+                        PushToRenderList(obj, ref _renderListTransparentObjects, ref _renderListTransparentObjectsHead, ref _renderListTransparentObjectsCount, allowSelection);
+                    }
+                    else
+                    {
+                        var alpha = obj.AlphaHue;
+
+                        // hack to fix transparent objects at the same level of a opaque one
+                        if (itemData.IsTranslucent || itemData.IsTransparent)
+                        {
+                            obj.AlphaHue = 0xFF;
+                        }
+
+                        PushToRenderList(obj, ref _renderList, ref _renderListStaticsHead, ref _renderListStaticsCount, allowSelection);
+
+                        obj.AlphaHue = alpha;
+                    }
                 }
                 else if (obj is Mobile mobile)
                 {
