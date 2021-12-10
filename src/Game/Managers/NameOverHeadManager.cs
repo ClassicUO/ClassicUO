@@ -95,7 +95,7 @@ namespace ClassicUO.Game.Managers
 
         public static void Open()
         {
-            if (_gump == null)
+            if (_gump == null || _gump.IsDisposed)
             {
                 _gump = new NameOverHeadHandlerGump();
                 UIManager.Add(_gump);
