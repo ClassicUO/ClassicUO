@@ -63,10 +63,6 @@ namespace ClassicUO.Game.GameObjects
             posY += (int) (Offset.Y + Offset.Z);
 
             float alpha = AlphaHue / 255f;
-            if (ItemData.IsTranslucent)
-            {
-                alpha *= 0.5f;
-            }
 
             if (IsCorpse)
             {
