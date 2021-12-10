@@ -109,7 +109,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             HitBox left = new HitBox(25, 60, 10, 15)
             {
-                Alpha = 1
+                Alpha = 0f
             };
 
             left.MouseDown += (sender, e) =>
@@ -124,7 +124,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             HitBox right = new HitBox(260, 60, 10, 15)
             {
-                Alpha = 1
+                Alpha = 0f
             };
 
             right.MouseDown += (sender, e) =>
