@@ -276,12 +276,12 @@ namespace ClassicUO.Game.UI.Controls
                 _gameText.Draw
                 (
                     batcher,
-                    x + offset - ScrollX, 
-                    y + offset - ScrollY,
-                    0,
-                    0,
-                    Width,
-                    Height
+                    x + offset, 
+                    y + offset,
+                    ScrollX,
+                    ScrollY,
+                    Width + ScrollX,
+                    Height + ScrollY
                 );
 
                 batcher.ClipEnd();
