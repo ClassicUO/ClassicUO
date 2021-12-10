@@ -1366,7 +1366,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _background = new GumpPic(0, 0, BACKGROUND_NORMAL, 0)
                     {
                         ContainsByBounds = true,
-                        Alpha = 1
+                        Alpha = 0
                     }
                 );
 
