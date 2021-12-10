@@ -371,6 +371,7 @@ namespace ClassicUO.IO
                             }
 
                             if (index >= Constants.MAX_LAND_DATA_INDEX_COUNT && checkIndex >= Constants.MAX_LAND_DATA_INDEX_COUNT &&
+                                index < tiledataLoader.StaticData.Length && checkIndex < tiledataLoader.StaticData.Length &&
                                 tiledataLoader.StaticData[index].Equals(default) && !tiledataLoader.StaticData[checkIndex].Equals(default))
                             {
                                 tiledataLoader.StaticData[index] = tiledataLoader.StaticData[checkIndex];
