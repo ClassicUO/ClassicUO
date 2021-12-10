@@ -1244,16 +1244,23 @@ namespace ClassicUO.Game.Scenes
                 Vector3 selectionHue = new Vector3();
                 selectionHue.Z = 0.7f;
 
+                int minX = Math.Min(_selectionStart.X, Mouse.Position.X);
+                int maxX = Math.Max(_selectionStart.X, Mouse.Position.X);
+                int minY = Math.Min(_selectionStart.Y, Mouse.Position.Y);
+                int maxY = Math.Max(_selectionStart.Y, Mouse.Position.Y);
+
+                Rectangle selectionRect = new Rectangle
+                (
+                    minX - Camera.Bounds.X,
+                    minY - Camera.Bounds.Y,
+                    maxX - minX,
+                    maxY - minY
+                );
+
                 batcher.Draw
                 (
                     SolidColorTextureCache.GetTexture(Color.Black),
-                    new Rectangle
-                    (
-                        _selectionStart.X - Camera.Bounds.X,
-                        _selectionStart.Y - Camera.Bounds.Y,
-                        Mouse.Position.X - _selectionStart.X,
-                        Mouse.Position.Y - _selectionStart.Y
-                    ),
+                    selectionRect,
                     selectionHue
                 );
 
@@ -1262,10 +1269,10 @@ namespace ClassicUO.Game.Scenes
                 batcher.DrawRectangle
                 (
                     SolidColorTextureCache.GetTexture(Color.DeepSkyBlue),
-                    _selectionStart.X - Camera.Bounds.X,
-                    _selectionStart.Y - Camera.Bounds.Y,
-                    Mouse.Position.X - _selectionStart.X,
-                    Mouse.Position.Y - _selectionStart.Y,
+                    selectionRect.X,
+                    selectionRect.Y,
+                    selectionRect.Width,
+                    selectionRect.Height,
                     selectionHue
                 );
             }
