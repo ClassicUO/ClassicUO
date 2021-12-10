@@ -86,7 +86,7 @@ namespace ClassicUO.Game.UI.Gumps
 
 
 
-            _hit = new HitBox(24, 31, width, height, null, 1f);
+            _hit = new HitBox(24, 31, width, height, null, 0f);
             Add(_hit);
 
             _hit.MouseUp += TextureControlOnMouseUp;

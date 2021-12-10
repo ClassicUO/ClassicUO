@@ -219,7 +219,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add(expander);
 
 
-            const float ALPHA_HIT_BUTTON = 1f;
+            const float ALPHA_HIT_BUTTON = 0f;
 
             HitBox accept = new HitBox(RIGHT_OFFSET + rightTop.X, (rightBottom.Y + rightBottom.Height) - 50, 34, 30, "Accept", ALPHA_HIT_BUTTON);
             HitBox clear = new HitBox(accept.X + 175, accept.Y, 20, 20, "Clear", ALPHA_HIT_BUTTON);

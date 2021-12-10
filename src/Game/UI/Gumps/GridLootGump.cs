@@ -429,7 +429,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Add(background);
 
 
-                _hit = new HitBox(0, 15, size, size, null, 1f);
+                _hit = new HitBox(0, 15, size, size, null, 0f);
                 Add(_hit);
 
                 if (World.ClientFeatures.TooltipsEnabled)
