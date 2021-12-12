@@ -355,7 +355,7 @@ namespace ClassicUO.Game
                         {
                             string dist = obj.Distance.ToString();
 
-                            Vector3 hue = new Vector3(0, 1, 0);
+                            Vector3 hue = new Vector3(0, 1, 1f);
                             sb.DrawString(Fonts.Bold, dist, Mouse.Position.X - 26, Mouse.Position.Y - 21, hue);
                             
                             hue.Y = 0;
