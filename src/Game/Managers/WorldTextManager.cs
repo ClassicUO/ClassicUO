@@ -63,14 +63,13 @@ namespace ClassicUO.Game.Managers
         }
 
 
-        public override void Draw(UltimaBatcher2D batcher, int startX, int startY, int renderIndex, bool isGump = false)
+        public override void Draw(UltimaBatcher2D batcher, int startX, int startY, bool isGump = false)
         {
             base.Draw
             (
                 batcher,
                 startX,
                 startY,
-                renderIndex,
                 isGump
             );
 

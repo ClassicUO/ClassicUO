@@ -69,7 +69,6 @@ namespace ClassicUO.Game.Scenes
         private bool _noDrawRoofs;
         private Point _offset, _maxTile, _minTile, _last_scaled_offset;
         private int _oldPlayerX, _oldPlayerY, _oldPlayerZ;
-        private int _renderIndex = 1;
         private int _foliageCount;
       
 
@@ -366,8 +365,6 @@ namespace ClassicUO.Game.Scenes
 
                 if (!changed)
                 {
-                    obj.UseInRender = (byte)_renderIndex;
-
                     return false;
                 }
             }
@@ -605,9 +602,6 @@ namespace ClassicUO.Game.Scenes
 
                 ++renderListCount;
             }
-
-
-            obj.UseInRender = (byte)_renderIndex;
         }
 
         private unsafe bool AddTileToRenderList
@@ -623,18 +617,10 @@ namespace ClassicUO.Game.Scenes
         {
             for (; obj != null; obj = obj.TNext)
             {
-                // i think we can remove this property. It's used to the "odd sorting system"
-                //if (obj.CurrentRenderIndex == _renderIndex)
-                //{
-                //    continue;
-                //}
-
-                if (UpdateDrawPosition && obj.CurrentRenderIndex != _renderIndex || obj.IsPositionChanged)
+                if (UpdateDrawPosition || obj.IsPositionChanged)
                 {
                     obj.UpdateRealScreenPosition(_offset.X, _offset.Y);
                 }
-
-                obj.UseInRender = 0xFF;
 
                 int screenX = obj.RealScreenPosition.X;
 
@@ -652,8 +638,6 @@ namespace ClassicUO.Game.Scenes
                     {
                         return false;
                     }
-
-                    obj.CurrentRenderIndex = _renderIndex;
 
                     if (screenY > _maxPixel.Y)
                     {
@@ -714,8 +698,6 @@ namespace ClassicUO.Game.Scenes
                     {
                         return itemData.Height != 0 && maxObjectZ - maxZ < height;
                     }
-
-                    obj.CurrentRenderIndex = _renderIndex;
 
                     if (screenY < _minPixel.Y || screenY > _maxPixel.Y)
                     {
@@ -785,8 +767,6 @@ namespace ClassicUO.Game.Scenes
                         return itemData.Height != 0 && maxObjectZ - maxZ < height;
                     }
 
-                    obj.CurrentRenderIndex = _renderIndex;
-
                     if (screenY < _minPixel.Y || screenY > _maxPixel.Y)
                     {
                         continue;
@@ -831,8 +811,6 @@ namespace ClassicUO.Game.Scenes
                     {
                         continue;
                     }
-
-                    obj.CurrentRenderIndex = _renderIndex;
 
                     if (screenY < _minPixel.Y || screenY > _maxPixel.Y)
                     {
@@ -884,8 +862,6 @@ namespace ClassicUO.Game.Scenes
                         return itemData.Height != 0 && maxObjectZ - maxZ < height;
                     }
 
-                    obj.CurrentRenderIndex = _renderIndex;
-
                     if (screenY < _minPixel.Y || screenY > _maxPixel.Y)
                     {
                         continue;
@@ -918,8 +894,6 @@ namespace ClassicUO.Game.Scenes
                     {
                         continue;
                     }
-
-                    obj.CurrentRenderIndex = _renderIndex;
 
                     if (screenY < _minPixel.Y || screenY > _maxPixel.Y)
                     {

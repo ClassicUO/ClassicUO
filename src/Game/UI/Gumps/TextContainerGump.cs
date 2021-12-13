@@ -84,7 +84,6 @@ namespace ClassicUO.Game.UI.Gumps
                 batcher,
                 x,
                 y,
-                -1,
                 true
             );
 
