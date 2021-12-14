@@ -536,7 +536,7 @@ namespace ClassicUO.Game.Scenes
                         {
                             ref var itemData = ref TileDataLoader.Instance.StaticData[tile.Graphic];
 
-                            if (itemData.IsSurface || itemData.IsBackground)
+                            if (itemData.IsNoShoot || itemData.IsWindow)
                             {
                                 if (_maxZ - tile.Z + 5 >= tile.Z - obj.Z)
                                 {
