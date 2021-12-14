@@ -595,15 +595,18 @@ namespace ClassicUO.Game.Scenes
 
             GetViewPort();
 
-            _useObjectHandles = NameOverHeadManager.IsToggled || Keyboard.Ctrl && Keyboard.Shift;
-
-            if (_useObjectHandles)
+            var useObjectHandles = NameOverHeadManager.IsToggled || Keyboard.Ctrl && Keyboard.Shift;
+            if (useObjectHandles != _useObjectHandles)
             {
-                NameOverHeadManager.Open();
-            }
-            else
-            {
-                NameOverHeadManager.Close();
+                _useObjectHandles = useObjectHandles;
+                if (_useObjectHandles)
+                {
+                    NameOverHeadManager.Open();
+                }
+                else
+                {
+                    NameOverHeadManager.Close();
+                }
             }
 
             _rectanglePlayer.X = (int) (World.Player.RealScreenPosition.X - World.Player.FrameInfo.X + 22 + World.Player.Offset.X);
