@@ -196,6 +196,9 @@ namespace ClassicUO.Configuration
 
         public Point OverrideContainerLocationPosition { get; set; } = new Point(200, 200);
         public bool DragSelectHumanoidsOnly { get; set; }
+        public int DragSelectStartX { get; set; } = 100;
+        public int DragSelectStartY { get; set; } = 100;
+        public bool DragSelectAsAnchor { get; set; } = false;
         public NameOverheadTypeAllowed NameOverheadTypeAllowed { get; set; } = NameOverheadTypeAllowed.All;
         public bool NameOverheadToggled { get; set; } = false;
         public bool ShowTargetRangeIndicator { get; set; }

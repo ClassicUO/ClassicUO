@@ -1537,4 +1537,13 @@ Client version: '{0}'</value>
   <data name="MarkerY" xml:space="preserve">
     <value>Y</value>
   </data>
+  <data name="DragSelectAnchoredHB" xml:space="preserve">
+    <value>Anchored Healthbar</value>
+  </data>
+  <data name="DragSelectStartingPosX" xml:space="preserve">
+    <value>Starting X position of health bars</value>
+  </data>
+  <data name="DragSelectStartingPosY" xml:space="preserve">
+    <value>Starting Y position of health bars</value>
+  </data>
 </root>
