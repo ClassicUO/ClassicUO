@@ -161,6 +161,8 @@ namespace ClassicUO.Game.UI.Gumps
         private InputField _spellFormatBox;
         private ClickableColorBox _tooltip_font_hue;
         private FontSelector _tooltip_font_selector;
+        private HSliderBar _dragSelectStartX, _dragSelectStartY;
+        private Checkbox _dragSelectAsAnchor;
 
         // video
         private Checkbox _use_old_status_gump, _windowBorderless, _enableDeathScreen, _enableBlackWhiteEffect, _altLights, _enableLight, _enableShadows, _enableShadowsStatics, _auraMouse, _runMouseInSeparateThread, _useColoredLights, _darkNights, _partyAura, _hideChatGradient;
@@ -1236,6 +1238,20 @@ namespace ClassicUO.Game.UI.Gumps
                     ResGumps.DragHumanoidsOnly,
                     _currentProfile.DragSelectHumanoidsOnly,
                     startX,
+                    startY
+                )
+            );
+
+            section4.Add(new Label(ResGumps.DragSelectStartingPosX, true, HUE_FONT));
+            section4.Add(_dragSelectStartX = new HSliderBar(startX, startY, 200, 0, _currentProfile.GameWindowSize.X, _currentProfile.DragSelectStartX, HSliderBarStyle.MetalWidgetRecessedBar, true, 0, HUE_FONT));
+
+            section4.Add(new Label(ResGumps.DragSelectStartingPosY, true, HUE_FONT));
+            section4.Add(_dragSelectStartY = new HSliderBar(startX, startY, 200, 0, _currentProfile.GameWindowSize.Y, _currentProfile.DragSelectStartY, HSliderBarStyle.MetalWidgetRecessedBar, true, 0, HUE_FONT));
+            section4.Add
+            (
+                _dragSelectAsAnchor = AddCheckBox
+                (
+                    null, ResGumps.DragSelectAnchoredHB, _currentProfile.DragSelectAsAnchor, startX,
                     startY
                 )
             );
@@ -3484,6 +3500,10 @@ namespace ClassicUO.Game.UI.Gumps
                     _showSkillsMessageDelta.Value = 1;
                     _showStatsMessage.IsChecked = true;
 
+                    _dragSelectStartX.Value = 100;
+                    _dragSelectStartY.Value = 100;
+                    _dragSelectAsAnchor.IsChecked = false;
+
                     break;
 
                 case 2: // sounds
@@ -4066,6 +4086,9 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.EnableDragSelect = _enableDragSelect.IsChecked;
             _currentProfile.DragSelectModifierKey = _dragSelectModifierKey.SelectedIndex;
             _currentProfile.DragSelectHumanoidsOnly = _dragSelectHumanoidsOnly.IsChecked;
+            _currentProfile.DragSelectStartX = _dragSelectStartX.Value;
+            _currentProfile.DragSelectStartY = _dragSelectStartY.Value;
+            _currentProfile.DragSelectAsAnchor = _dragSelectAsAnchor.IsChecked;
 
             _currentProfile.ShowSkillsChangedMessage = _showSkillsMessage.IsChecked;
             _currentProfile.ShowSkillsChangedDeltaValue = _showSkillsMessageDelta.Value;
