@@ -144,7 +144,7 @@ namespace ClassicUO.Game.GameObjects
                     Vector2.Zero,
                     1f, 
                     SpriteEffects.None,
-                    depth
+                    depth + 0.5f
                 );
             }
         }
@@ -161,7 +161,7 @@ namespace ClassicUO.Game.GameObjects
             ref Vector3 nLeft,
             ref Vector3 nBottom,
             Vector3 hue,
-            float depth
+            float depth 
         )
         {
             var texture = TexmapsLoader.Instance.GetLandTexture(TileDataLoader.Instance.LandData[graphic].TexID, out var bounds);
