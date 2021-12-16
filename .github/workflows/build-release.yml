@@ -33,7 +33,7 @@ jobs:
         dotnet-version: 5.0.x
             
     - name: Build
-      run: dotnet publish -c Release -f net472 -o ../bin/dist -p:IS_DEV_BUILD=true -p:AssemblyVersion=${{ env.CUO_ASSEMBLY_VERSION }}
+      run: dotnet build -c Release -o ../bin/dist -p:IS_DEV_BUILD=true -p:AssemblyVersion=${{ env.CUO_ASSEMBLY_VERSION }}
       
     - name: Create package
       uses: thedoctor0/zip-release@master
