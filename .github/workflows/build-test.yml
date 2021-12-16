@@ -25,13 +25,16 @@ jobs:
     - name: Get submodules
       run: git submodule update --init --recursive
         
-    - name: Setup .NET 5
+    - name: Setup .NET 6
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 5.0.x
-            
+        dotnet-version: 6.0.x
+        
+    - name: Restore
+      run: dotnet restore
+      
     - name: Build
-      run: dotnet build -c Release
+      run: dotnet build -c Release -nowarn:NU1605
       
     - name: Test
       run: dotnet test --verbosity normal
