@@ -44,7 +44,7 @@ jobs:
         exclusions: 'ClassicUO.exe.config'
         
     - name: Remove old Release
-    - uses: dev-drprasad/delete-tag-and-release@v0.2.0
+      uses: dev-drprasad/delete-tag-and-release@v0.2.0
       with:
         delete_release: true
         tag_name: ClassicUO-dev-release
