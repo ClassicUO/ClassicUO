@@ -22,16 +22,17 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       
-    - name: Install FNA
+    - name: Get submodules
       run: git submodule update --init --recursive
         
-    - name: Setup .NET 5
+    - name: Setup .NET 6
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 5.0.100
+        dotnet-version: 6.0.*
             
     - name: Build
       run: dotnet build -c Release
       
     - name: Test
       run: dotnet test --verbosity normal
+   
