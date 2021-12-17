@@ -5,10 +5,12 @@ on:
     branches: "*"
     paths-ignore:
       - '**/build-release.yml'
+      - 'appveyor.yml'
   pull_request:
     branches: "*"
     paths-ignore:
       - '**/build-release.yml'
+      - 'appveyor.yml'
 
 
 env:
