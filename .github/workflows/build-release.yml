@@ -55,7 +55,7 @@ jobs:
     - name: Upload Release
       uses: ncipollo/release-action@v1
       with:
-        artifacts: "ClassicUO-dev-release.zip"
+        artifacts: "${{ env.CUO_OUTPUT_PATH }}/ClassicUO-dev-release.zip"
         name: 'ClassicUO dev preview'
         body: 'This build may not be safe: use it at your own risk.'
         prerelease: true
