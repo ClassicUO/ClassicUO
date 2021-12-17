@@ -3,9 +3,9 @@ name: Build-Release
 on:
   push:
     branches: "dev"
-    paths-ignore:
-      - '**/build-test.yml'
-      - 'appveyor.yml'
+    paths:
+      - 'src/'
+      - 'external/'
   workflow_dispatch:
 
 
