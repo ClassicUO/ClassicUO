@@ -7,7 +7,6 @@ branches:
 skip_commits:
   files:
     - '.github/**/*'
-    - '.github/**/*'
 image: Visual Studio 2019
 configuration: Release
 platform: x64
