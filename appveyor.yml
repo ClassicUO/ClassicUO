@@ -4,6 +4,10 @@ pull_requests:
 branches:
   only:
   - dev
+only_commits:
+  files:
+     - 'src/'
+     - 'external/'
 image: Visual Studio 2019
 configuration: Release
 platform: x64

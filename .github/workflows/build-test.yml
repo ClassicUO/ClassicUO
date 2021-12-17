@@ -3,8 +3,15 @@ name: Build-Test
 on:
   push:
     branches: "*"
+    paths-ignore:
+      - '**/build-release.yml'
+      - 'appveyor.yml'
   pull_request:
     branches: "*"
+    paths-ignore:
+      - '**/build-release.yml'
+      - 'appveyor.yml'
+
 
 env:
   DOTNET_NOLOGO: false
@@ -34,7 +41,7 @@ jobs:
       run: dotnet restore
       
     - name: Build
-      run: dotnet build -c Release -nowarn:NU1605
+      run: dotnet build -c Release
       
     - name: Test
       run: dotnet test --verbosity normal
