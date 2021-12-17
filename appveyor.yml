@@ -4,6 +4,10 @@ pull_requests:
 branches:
   only:
   - dev
+skip_commits:
+  files:
+    - '.github/**/*'
+    - '.github/**/*'
 image: Visual Studio 2019
 configuration: Release
 platform: x64
