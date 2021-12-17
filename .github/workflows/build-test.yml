@@ -4,11 +4,11 @@ on:
   push:
     branches: "*"
     paths-ignore:
-      - '**/build-test.yml'
+      - '**/build-release.yml'
   pull_request:
     branches: "*"
     paths-ignore:
-      - '**/build-test.yml'
+      - '**/build-release.yml'
 
 
 env:
