@@ -5,6 +5,7 @@ on:
     branches: "dev"
     paths-ignore:
       - '**/build-test.yml'
+      - 'appveyor.yml'
   workflow_dispatch:
 
 
