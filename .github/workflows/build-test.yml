@@ -3,8 +3,13 @@ name: Build-Test
 on:
   push:
     branches: "*"
+    paths-ignore:
+      - '**/build-test.yml'
   pull_request:
     branches: "*"
+    paths-ignore:
+      - '**/build-test.yml'
+
 
 env:
   DOTNET_NOLOGO: false
