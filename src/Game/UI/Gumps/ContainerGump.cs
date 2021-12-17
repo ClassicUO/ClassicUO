@@ -82,28 +82,28 @@ namespace ClassicUO.Game.UI.Gumps
                 switch (ProfileManager.CurrentProfile.BackpackStyle)
                 {
                     case 1:
-                        if (loader.GetTexture(0x775E) != null)
+                        if (loader.GetGumpTexture(0x775E, out _) != null)
                         {
                             Graphic = 0x775E; // Suede Backpack
                         }
 
                         break;
                     case 2:
-                        if (loader.GetTexture(0x7760) != null)
+                        if (loader.GetGumpTexture(0x7760, out _) != null)
                         {
                             Graphic = 0x7760; // Polar Bear Backpack
                         }
 
                         break;
                     case 3:
-                        if (loader.GetTexture(0x7762) != null)
+                        if (loader.GetGumpTexture(0x7762, out _) != null)
                         {
                             Graphic = 0x7762; // Ghoul Skin Backpack
                         }
 
                         break;
                     default:
-                        if (loader.GetTexture(0x003C) != null)
+                        if (loader.GetGumpTexture(0x003C, out _) != null)
                         {
                             Graphic = 0x003C; // Default Backpack
                         }
@@ -336,30 +336,33 @@ namespace ClassicUO.Game.UI.Gumps
                             y += 20;
                         }
 
-                        Rectangle bounds = ContainerManager.Get(gump.Graphic).Bounds;
+                        Rectangle containerBounds = ContainerManager.Get(gump.Graphic).Bounds;
 
-                        UOTexture texture = gump.IsChessboard ? GumpsLoader.Instance.GetTexture((ushort) (ItemHold.DisplayedGraphic - Constants.ITEM_GUMP_TEXTURE_OFFSET)) : ArtLoader.Instance.GetTexture(ItemHold.DisplayedGraphic);
+                        var texture = gump.IsChessboard ?
+                            GumpsLoader.Instance.GetGumpTexture((ushort) (ItemHold.DisplayedGraphic - Constants.ITEM_GUMP_TEXTURE_OFFSET), out var bounds) 
+                            : 
+                            ArtLoader.Instance.GetStaticTexture(ItemHold.DisplayedGraphic, out bounds);
 
                         float scale = GetScale();
 
-                        bounds.X = (int) (bounds.X * scale);
-                        bounds.Y = (int) (bounds.Y * scale);
-                        bounds.Width = (int) (bounds.Width * scale);
-                        bounds.Height = (int) ((bounds.Height + (gump.IsChessboard ? 20 : 0)) * scale);
+                        containerBounds.X = (int) (containerBounds.X * scale);
+                        containerBounds.Y = (int) (containerBounds.Y * scale);
+                        containerBounds.Width = (int) (containerBounds.Width * scale);
+                        containerBounds.Height = (int) ((containerBounds.Height + (gump.IsChessboard ? 20 : 0)) * scale);
 
-                        if (texture != null && !texture.IsDisposed)
+                        if (texture != null)
                         {
                             int textureW, textureH;
 
                             if (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.ScaleItemsInsideContainers)
                             {
-                                textureW = (int) (texture.Width * scale);
-                                textureH = (int) (texture.Height * scale);
+                                textureW = (int) (bounds.Width * scale);
+                                textureH = (int) (bounds.Height * scale);
                             }
                             else
                             {
-                                textureW = texture.Width;
-                                textureH = texture.Height;
+                                textureW = bounds.Width;
+                                textureH = bounds.Height;
                             }
 
                             if (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.RelativeDragAndDropItems)
@@ -371,25 +374,25 @@ namespace ClassicUO.Game.UI.Gumps
                             x -= textureW >> 1;
                             y -= textureH >> 1;
 
-                            if (x + textureW > bounds.Width)
+                            if (x + textureW > containerBounds.Width)
                             {
-                                x = bounds.Width - textureW;
+                                x = containerBounds.Width - textureW;
                             }
 
-                            if (y + textureH > bounds.Height)
+                            if (y + textureH > containerBounds.Height)
                             {
-                                y = bounds.Height - textureH;
+                                y = containerBounds.Height - textureH;
                             }
                         }
 
-                        if (x < bounds.X)
+                        if (x < containerBounds.X)
                         {
-                            x = bounds.X;
+                            x = containerBounds.X;
                         }
 
-                        if (y < bounds.Y)
+                        if (y < containerBounds.Y)
                         {
-                            y = bounds.Y;
+                            y = containerBounds.Y;
                         }
 
                         x = (int) (x / scale);
@@ -545,21 +548,24 @@ namespace ClassicUO.Game.UI.Gumps
 
         public void CheckItemControlPosition(Item item)
         {
-            Rectangle bounds = _data.Bounds;
+            Rectangle dataBounds = _data.Bounds;
 
-            int boundX = bounds.X;
-            int boundY = bounds.Y;
-            int boundWidth = bounds.Width;
-            int boundHeight = bounds.Height + (IsChessboard ? 20 : 0);
+            int boundX = dataBounds.X;
+            int boundY = dataBounds.Y;
+            int boundWidth = dataBounds.Width;
+            int boundHeight = dataBounds.Height + (IsChessboard ? 20 : 0);
 
-            UOTexture texture = IsChessboard ? GumpsLoader.Instance.GetTexture((ushort) (item.DisplayedGraphic - (IsChessboard ? Constants.ITEM_GUMP_TEXTURE_OFFSET : 0))) : ArtLoader.Instance.GetTexture(item.DisplayedGraphic);
+            var texture = IsChessboard ? 
+                GumpsLoader.Instance.GetGumpTexture((ushort) (item.DisplayedGraphic - (IsChessboard ? Constants.ITEM_GUMP_TEXTURE_OFFSET : 0)), out var bounds) 
+                :
+                ArtLoader.Instance.GetStaticTexture(item.DisplayedGraphic, out bounds);
 
             if (texture != null)
             {
                 float scale = GetScale();
 
-                boundWidth -= (int) (texture.Width / scale);
-                boundHeight -= (int) (texture.Height / scale);
+                boundWidth -= (int) (bounds.Width / scale);
+                boundHeight -= (int) (bounds.Height / scale);
             }
 
             if (item.X < boundX)
@@ -595,7 +601,7 @@ namespace ClassicUO.Game.UI.Gumps
                 ushort boundWidth = (ushort) (bounds.Width * scale);
                 ushort boundHeight = (ushort) (bounds.Height * scale);
 
-                ResetHueVector();
+                Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
                 batcher.DrawRectangle
                 (
@@ -604,7 +610,7 @@ namespace ClassicUO.Game.UI.Gumps
                     y + boundY,
                     boundWidth - boundX,
                     boundHeight - boundY,
-                    ref HueVector
+                    hueVector
                 );
             }
 

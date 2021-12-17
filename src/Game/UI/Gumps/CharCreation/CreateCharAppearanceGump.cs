@@ -2,7 +2,7 @@
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 // 1. Redistributions of source code must retain the above copyright
@@ -16,7 +16,7 @@
 // 4. Neither the name of the copyright holder nor the
 //    names of its contributors may be used to endorse or promote products
 //    derived from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -280,6 +280,10 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             {
                 _character.Flags |= Flags.Female;
             }
+            else
+            {
+                _character.Flags &= ~Flags.Female;
+            }
 
             switch (race)
             {
@@ -446,7 +450,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             // Hair
             CharacterCreationValues.ComboContent content = CharacterCreationValues.GetHairComboContent(_characterInfo.IsFemale, race);
 
-            bool isAsianLang = string.Compare(Settings.GlobalSettings.Language, "CHT", StringComparison.InvariantCultureIgnoreCase) == 0 || 
+            bool isAsianLang = string.Compare(Settings.GlobalSettings.Language, "CHT", StringComparison.InvariantCultureIgnoreCase) == 0 ||
                 string.Compare(Settings.GlobalSettings.Language, "KOR", StringComparison.InvariantCultureIgnoreCase) == 0 ||
                 string.Compare(Settings.GlobalSettings.Language, "JPN", StringComparison.InvariantCultureIgnoreCase) == 0;
 
@@ -735,7 +739,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
                         HandleRaceChanged();
                     }
-                   
+
                     break;
 
                 case Buttons.ElfButton:
@@ -754,7 +758,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
                         HandleRaceChanged();
                     }
-                    
+
                     break;
 
                 case Buttons.GargoyleButton:
@@ -1061,7 +1065,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 _layer = layer;
                 _pallet = pallet;
 
-                bool isAsianLang = string.Compare(Settings.GlobalSettings.Language, "CHT", StringComparison.InvariantCultureIgnoreCase) == 0 || 
+                bool isAsianLang = string.Compare(Settings.GlobalSettings.Language, "CHT", StringComparison.InvariantCultureIgnoreCase) == 0 ||
                     string.Compare(Settings.GlobalSettings.Language, "KOR", StringComparison.InvariantCultureIgnoreCase) == 0 ||
                     string.Compare(Settings.GlobalSettings.Language, "JPN", StringComparison.InvariantCultureIgnoreCase) == 0;
 
@@ -1124,7 +1128,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                     SetCurrentHue();
                 }
             }
-            
+
             private void ColorPicker_MouseClick(object sender, MouseEventArgs e)
             {
                 if (e.Button == MouseButtonType.Left)

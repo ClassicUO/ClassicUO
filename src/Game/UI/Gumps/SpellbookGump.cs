@@ -322,7 +322,7 @@ namespace ClassicUO.Game.UI.Gumps
                 );
             }
 
-            int spellDone = 0, passivesDone = 0;
+            int spellDone = 0;
 
             for (int page = 1; page <= pagesToFill; page++)
             {
@@ -1462,26 +1462,30 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (ShowEdit)
                 {
-                    ResetHueVector();
+                    Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
-                    UOTexture lockTexture = GumpsLoader.Instance.GetTexture(0x09CF);
+                    var texture = GumpsLoader.Instance.GetGumpTexture(0x09CF, out var bounds);
 
-                    if (lockTexture != null)
+                    if (texture != null)
                     {
-                        lockTexture.Ticks = Time.Ticks;
-
                         if (UIManager.MouseOverControl != null && (UIManager.MouseOverControl == this || UIManager.MouseOverControl.RootParent == this))
                         {
-                            HueVector.X = 34;
-                            HueVector.Y = 1;
+                            hueVector.X = 34;
+                            hueVector.Y = 1;
                         }
                         else
                         {
-                            HueVector.X = 0x44;
-                            HueVector.Y = 1;
+                            hueVector.X = 0x44;
+                            hueVector.Y = 1;
                         }
 
-                        batcher.Draw2D(lockTexture, x + (Width - lockTexture.Width), y, ref HueVector);
+                        batcher.Draw
+                        (
+                            texture,
+                            new Vector2(x + (Width - bounds.Width),  y), 
+                            bounds,
+                            hueVector
+                        );
                     }
                 }
 

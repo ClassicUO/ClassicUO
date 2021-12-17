@@ -82,6 +82,9 @@ PS_INPUT VertexShaderFunction(VS_INPUT IN)
 	
 	OUT.Position = mul(mul(IN.Position, WorldMatrix), MatrixTransform);
 	
+	OUT.Position.x -= 0.5 / Viewport.x;
+	OUT.Position.y += 0.5 / Viewport.y;
+
 	OUT.TexCoord = IN.TexCoord; 
 	OUT.Normal = IN.Normal;
 	OUT.Hue = IN.Hue;
@@ -97,7 +100,7 @@ float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 		discard;
 
 	int mode = int(IN.Hue.y);
-	float alpha = 1 - IN.Hue.z;
+	float alpha = IN.Hue.z;
 
 	if (mode == NONE)
 	{

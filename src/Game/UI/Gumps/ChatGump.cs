@@ -101,7 +101,7 @@ namespace ClassicUO.Game.UI.Gumps
                 )
             );
 
-            Add(new AlphaBlendControl(0) { X = 64, Y = startY, Width = 220, Height = 200 });
+            Add(new AlphaBlendControl(1f) { X = 64, Y = startY, Width = 220, Height = 200 });
 
             ScrollArea area = new ScrollArea
             (
@@ -327,7 +327,7 @@ namespace ClassicUO.Game.UI.Gumps
                 const int BORDER_SIZE = 3;
                 const int ROW_HEIGHT = 25;
 
-                Add(new AlphaBlendControl(0) { Width = Width, Height = Height });
+                Add(new AlphaBlendControl(1f) { Width = Width, Height = Height });
 
                 Add
                 (
@@ -512,18 +512,21 @@ namespace ClassicUO.Game.UI.Gumps
 
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
-                ResetHueVector();
+                Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
                 if (MouseIsOver)
                 {
-                    batcher.Draw2D
+                    batcher.Draw
                     (
                         SolidColorTextureCache.GetTexture(Color.Cyan),
-                        x,
-                        y,
-                        Width,
-                        Height,
-                        ref HueVector
+                        new Rectangle
+                        (
+                            x,
+                            y,
+                            Width, 
+                            Height
+                        ),                    
+                        hueVector
                     );
                 }
 

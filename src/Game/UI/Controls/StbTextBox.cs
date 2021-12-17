@@ -903,12 +903,10 @@ namespace ClassicUO.Game.UI.Controls
                 return;
             }
 
-            ResetHueVector();
+            Vector3 hueVector = ShaderHueTranslator.GetHueVector(0, false, 0.5f);
 
             int selectStart = Math.Min(Stb.SelectStart, Stb.SelectEnd);
             int selectEnd = Math.Max(Stb.SelectStart, Stb.SelectEnd);
-
-            HueVector.Z = 0.5f;
 
             if (selectStart < selectEnd)
             {
@@ -946,14 +944,17 @@ namespace ClassicUO.Game.UI.Controls
                                 endX += _rendererText.GetCharWidth(info.Data[startSelectionIndex + k].Item);
                             }
 
-                            batcher.Draw2D
+                            batcher.Draw
                             (
                                 SolidColorTextureCache.GetTexture(SELECTION_COLOR),
-                                x + drawX + diffX,
-                                y + drawY,
-                                endX,
-                                info.MaxHeight + 1,
-                                ref HueVector
+                                new Rectangle
+                                (
+                                    x + drawX + diffX,
+                                    y + drawY,
+                                    endX,
+                                    info.MaxHeight + 1
+                                ),
+                                hueVector
                             );
 
                             break;
@@ -961,14 +962,17 @@ namespace ClassicUO.Game.UI.Controls
 
 
                         // do the whole line
-                        batcher.Draw2D
+                        batcher.Draw
                         (
                             SolidColorTextureCache.GetTexture(SELECTION_COLOR),
-                            x + drawX + diffX,
-                            y + drawY,
-                            info.Width - drawX,
-                            info.MaxHeight + 1,
-                            ref HueVector
+                            new Rectangle
+                            (
+                                x + drawX + diffX,
+                                y + drawY,
+                                info.Width - drawX,
+                                info.MaxHeight + 1
+                            ),
+                            hueVector
                         );
 
                         // first selection is gone. M
@@ -980,9 +984,6 @@ namespace ClassicUO.Game.UI.Controls
                     info = info.Next;
                 }
             }
-
-
-            ResetHueVector();
         }
 
         protected virtual void DrawCaret(UltimaBatcher2D batcher, int x, int y)

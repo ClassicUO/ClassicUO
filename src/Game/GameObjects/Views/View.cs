@@ -51,37 +51,65 @@ namespace ClassicUO.Game.GameObjects
 
     internal abstract partial class GameObject
     {
-        public static bool DrawTransparent;
-
-        protected static readonly Lazy<DepthStencilState> StaticTransparentStencil = new Lazy<DepthStencilState>
-        (
-            () =>
-            {
-                DepthStencilState state = new DepthStencilState
-                {
-                    StencilEnable = true,
-                    StencilFunction = CompareFunction.GreaterEqual,
-                    StencilPass = StencilOperation.Keep,
-                    ReferenceStencil = 0
-                    //DepthBufferEnable = true,
-                    //DepthBufferWriteEnable = true,
-                };
-
-
-                return state;
-            }
-        );
-
         public byte AlphaHue;
         public bool AllowedToDraw = true;
         public ObjectHandlesStatus ObjectHandlesStatus;
         public Rectangle FrameInfo;
         protected bool IsFlipped;
 
+        public abstract bool Draw(UltimaBatcher2D batcher, int posX, int posY, float depth);
 
-        public abstract bool Draw(UltimaBatcher2D batcher, int posX, int posY, ref Vector3 hue);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public float CalculateDepthZ()
+        {
+            int x = X;
+            int y = Y;
+            int z = PriorityZ;
 
+            // Offsets are in SCREEN coordinates
+            if (Offset.X > 0 && Offset.Y < 0)
+            {
+                // North
+            }
+            else if (Offset.X > 0 && Offset.Y == 0)
+            {
+                // Northeast
+                x++;
+            }
+            else if (Offset.X > 0 && Offset.Y > 0)
+            {
+                // East
+                z += Math.Max(0, (int)Offset.Z);
+                x++;
+            }
+            else if (Offset.X == 0 && Offset.Y > 0)
+            {
+                // Southeast
+                x++;
+                y++;
+            }
+            else if (Offset.X < 0 && Offset.Y > 0)
+            {
+                // South
+                z += Math.Max(0, (int)Offset.Z);
+                y++;
+            }
+            else if (Offset.X < 0 && Offset.Y == 0)
+            {
+                // Southwest
+                y++;
+            }
+            else if (Offset.X < 0 && Offset.Y > 0)
+            {
+                // West
+            }
+            else if (Offset.X == 0 && Offset.Y < 0)
+            {
+                // Northwest
+            }
 
+           return (x + y) + (127 + z) * 0.01f;
+        }
 
         public Rectangle GetOnScreenRectangle()
         {
@@ -100,21 +128,23 @@ namespace ClassicUO.Game.GameObjects
             return false;
         }
 
-        protected static void DrawLand(UltimaBatcher2D batcher, ushort graphic, int x, int y, ref Vector3 hue)
+        protected static void DrawLand(UltimaBatcher2D batcher, ushort graphic, int x, int y, Vector3 hue, float depth)
         {
-            UOTexture texture = ArtLoader.Instance.GetLandTexture(graphic);
+            var texture = ArtLoader.Instance.GetLandTexture(graphic, out var bounds);
 
             if (texture != null)
             {
-                texture.Ticks = Time.Ticks;
-
-                batcher.DrawSprite
+                batcher.Draw
                 (
                     texture,
-                    x,
-                    y,
-                    false,
-                    ref hue
+                    new Vector2(x, y), 
+                    bounds,
+                    hue,
+                    0f,
+                    Vector2.Zero,
+                    1f, 
+                    SpriteEffects.None,
+                    depth + 0.5f
                 );
             }
         }
@@ -130,26 +160,26 @@ namespace ClassicUO.Game.GameObjects
             ref Vector3 nRight,
             ref Vector3 nLeft,
             ref Vector3 nBottom,
-            ref Vector3 hue
+            Vector3 hue,
+            float depth 
         )
         {
-            UOTexture texture = TexmapsLoader.Instance.GetTexture(TileDataLoader.Instance.LandData[graphic].TexID);
+            var texture = TexmapsLoader.Instance.GetLandTexture(TileDataLoader.Instance.LandData[graphic].TexID, out var bounds);
 
             if (texture != null)
             {
-                texture.Ticks = Time.Ticks;
-
-                batcher.DrawSpriteLand
+                batcher.DrawStretchedLand
                 (
                     texture,
-                    x,
-                    y,
+                    new Vector2(x, y),
+                    bounds,
                     ref yOffsets,
                     ref nTop,
                     ref nRight,
                     ref nLeft,
                     ref nBottom,
-                    ref hue
+                    hue,
+                    depth + 0.5f
                 );
             }
             else
@@ -160,46 +190,55 @@ namespace ClassicUO.Game.GameObjects
                     graphic,
                     x,
                     y,
-                    ref hue
+                    hue,
+                    depth
                 );
             }
         }
 
-        protected static void DrawStatic(UltimaBatcher2D batcher, ushort graphic, int x, int y, ref Vector3 hue)
+        protected static void DrawStatic(UltimaBatcher2D batcher, ushort graphic, int x, int y, Vector3 hue, float depth)
         {
-            ArtTexture texture = ArtLoader.Instance.GetTexture(graphic);
+            var texture = ArtLoader.Instance.GetStaticTexture(graphic, out var bounds);
 
             if (texture != null)
             {
-                texture.Ticks = Time.Ticks;
                 ref UOFileIndex index = ref ArtLoader.Instance.GetValidRefEntry(graphic + 0x4000);
 
-                batcher.DrawSprite
+                x -= index.Width;
+                y -= index.Height;
+
+                batcher.Draw
                 (
                     texture,
-                    x - index.Width,
-                    y - index.Height,
-                    false,
-                    ref hue
+                    new Vector2(x, y),
+                    bounds,
+                    hue,
+                    0f,
+                    Vector2.Zero,
+                    1f,
+                    SpriteEffects.None, 
+                    depth + 0.5f
                 );
             }
         }
 
-        protected static void DrawGump(UltimaBatcher2D batcher, ushort graphic, int x, int y, ref Vector3 hue)
+        protected static void DrawGump(UltimaBatcher2D batcher, ushort graphic, int x, int y, Vector3 hue, float depth)
         {
-            UOTexture texture = GumpsLoader.Instance.GetTexture(graphic);
+            var texture = GumpsLoader.Instance.GetGumpTexture(graphic, out var bounds);
 
             if (texture != null)
             {
-                texture.Ticks = Time.Ticks;
-
-                batcher.DrawSprite
+                batcher.Draw
                 (
                     texture,
-                    x,
-                    y,
-                    false,
-                    ref hue
+                    new Vector2(x, y),
+                    bounds,
+                    hue,
+                    0f,
+                    Vector2.Zero,
+                    1f,
+                    SpriteEffects.None,
+                    depth + 0.5f
                 );
             }
         }
@@ -211,26 +250,32 @@ namespace ClassicUO.Game.GameObjects
             int x,
             int y,
             float angle,
-            ref Vector3 hue
+            Vector3 hue,
+            float depth
         )
         {
-            ArtTexture texture = ArtLoader.Instance.GetTexture(graphic);
+            var texture = ArtLoader.Instance.GetStaticTexture(graphic, out var bounds);
 
             if (texture != null)
             {
-                texture.Ticks = Time.Ticks;
-
                 ref UOFileIndex index = ref ArtLoader.Instance.GetValidRefEntry(graphic + 0x4000);
 
-                batcher.DrawSpriteRotated
+                batcher.Draw
                 (
                     texture,
-                    x - index.Width,
-                    y - index.Height,
-                    texture.Width,
-                    texture.Height,
-                    ref hue,
-                    angle
+                    new Rectangle
+                    (
+                        x - index.Width,
+                        y - index.Height, 
+                        bounds.Width,
+                        bounds.Height
+                    ),
+                    bounds,
+                    hue,
+                    MathHelper.ToRadians(angle),
+                    Vector2.Zero,
+                    SpriteEffects.None,
+                    depth + 0.5f
                 );
             }
         }
@@ -241,109 +286,42 @@ namespace ClassicUO.Game.GameObjects
             ushort graphic,
             int x,
             int y,
-            ref Vector3 hue,
-            ref bool transparent,
-            bool shadow
+            Vector3 hue,
+            bool shadow,
+            float depth
         )
         {
             ref UOFileIndex index = ref ArtLoader.Instance.GetValidRefEntry(graphic + 0x4000);
 
             graphic = (ushort) (graphic + index.AnimOffset);
 
-            ArtTexture texture = ArtLoader.Instance.GetTexture(graphic);
+            var texture = ArtLoader.Instance.GetStaticTexture(graphic, out var bounds);
 
             if (texture != null)
             {
-                texture.Ticks = Time.Ticks;
                 index = ref ArtLoader.Instance.GetValidRefEntry(graphic + 0x4000);
               
                 x -= index.Width;
                 y -= index.Height;
 
-                if (transparent)
-                {
-                    int maxDist = ProfileManager.CurrentProfile.CircleOfTransparencyRadius;
-
-                    Vector2 pos = new Vector2
-                    {
-                        X = (World.Player.RealScreenPosition.X + World.Player.Offset.X),
-                        Y = (World.Player.RealScreenPosition.Y + (World.Player.Offset.Y - World.Player.Offset.Z))
-                    };
-
-                    //pos.X -= 22;
-                    pos.Y -= 22f;
-
-                    Vector2 pos2 = new Vector2
-                    {
-                        X = x,
-                        Y = y
-                    };
-
-                    Vector2.Distance(ref pos, ref pos2, out float dist);
-                    
-                    if (dist <= maxDist)
-                    {
-                        float alpha = hue.Z;
-
-                        switch (ProfileManager.CurrentProfile.CircleOfTransparencyType)
-                        {
-                            default:
-                            case 0:
-                                hue.Z = 0.75f;
-
-                                break;
-
-                            case 1:
-
-                                float delta = (maxDist - 44) * 0.5f;
-                                float fraction = (dist - delta) / (maxDist - delta);
-
-                                hue.Z = MathHelper.Lerp(1f, 0f, fraction);
-
-                                break;
-                        }
-                       
-                        batcher.DrawSprite
-                        (
-                            texture,
-                            x,
-                            y,
-                            false,
-                            ref hue
-                        );
-
-                        batcher.SetStencil(StaticTransparentStencil.Value);
-                        hue.Z = alpha;
-
-                        batcher.DrawSprite
-                        (
-                            texture,
-                            x,
-                            y,
-                            false,
-                            ref hue
-                        );
-
-                        batcher.SetStencil(null);
-
-                        return;
-                    }
-                }
-
-                transparent = false;
+                Vector2 pos = new Vector2(x, y);
 
                 if (shadow)
                 {
-                    batcher.DrawSpriteShadow(texture, x, y, false);
+                    batcher.DrawShadow(texture, pos, bounds, false, depth + 0.25f);
                 }
 
-                batcher.DrawSprite
+                batcher.Draw
                 (
                     texture,
-                    x,
-                    y,
-                    false,
-                    ref hue
+                    pos,
+                    bounds,
+                    hue,
+                    0f,
+                    Vector2.Zero,
+                    1f,
+                    SpriteEffects.None,
+                    depth + 0.5f
                 );
             }
         }

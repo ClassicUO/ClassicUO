@@ -36,6 +36,8 @@ using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -48,15 +50,10 @@ namespace ClassicUO.Game.UI.Controls
 
     internal class Button : Control
     {
-        private const int NORMAL = 0;
-        private const int PRESSED = 1;
-        private const int OVER = 2;
         private readonly string _caption;
-
         private bool _entered;
         private readonly RenderedText[] _fontTexture;
-        private readonly ushort[] _gumpGraphics = new ushort[3];
-        private readonly UOTexture[] _textures = new UOTexture[3];
+        private ushort _normal, _pressed, _over;
 
         public Button
         (
@@ -72,28 +69,19 @@ namespace ClassicUO.Game.UI.Controls
         )
         {
             ButtonID = buttonID;
-            _gumpGraphics[NORMAL] = normal;
-            _gumpGraphics[PRESSED] = pressed;
-            _gumpGraphics[OVER] = over;
-            _textures[NORMAL] = GumpsLoader.Instance.GetTexture(normal);
-            _textures[PRESSED] = GumpsLoader.Instance.GetTexture(pressed);
+            _normal = normal;
+            _pressed = pressed;
+            _over = over;
 
-            if (over > 0)
-            {
-                _textures[OVER] = GumpsLoader.Instance.GetTexture(over);
-            }
-
-            UOTexture t = _textures[NORMAL];
-
-            if (t == null)
+            if (GumpsLoader.Instance.GetGumpTexture(normal, out var bounds) == null)
             {
                 Dispose();
 
                 return;
             }
-
-            Width = t.Width;
-            Height = t.Height;
+          
+            Width = bounds.Width;
+            Height = bounds.Height;
             FontHue = normalHue == ushort.MaxValue ? (ushort) 0 : normalHue;
             HueHover = hoverHue == ushort.MaxValue ? normalHue : hoverHue;
 
@@ -147,43 +135,43 @@ namespace ClassicUO.Game.UI.Controls
 
         public ushort ButtonGraphicNormal
         {
-            get => _gumpGraphics[NORMAL];
+            get => _normal;
             set
             {
-                _textures[NORMAL] = GumpsLoader.Instance.GetTexture(value);
-                _gumpGraphics[NORMAL] = value;
+                _normal = value;
 
-                Width = _textures[NORMAL].Width;
+                _ = GumpsLoader.Instance.GetGumpTexture(value, out var bounds);
 
-                Height = _textures[NORMAL].Height;
+                Width = bounds.Width;
+                Height = bounds.Height;
             }
         }
 
         public ushort ButtonGraphicPressed
         {
-            get => _gumpGraphics[PRESSED];
+            get => _pressed;
             set
             {
-                _textures[PRESSED] = GumpsLoader.Instance.GetTexture(value);
-                _gumpGraphics[PRESSED] = value;
+                _pressed = value;
 
-                Width = _textures[PRESSED].Width;
+                _ = GumpsLoader.Instance.GetGumpTexture(value, out var bounds);
 
-                Height = _textures[PRESSED].Height;
+                Width = bounds.Width;
+                Height = bounds.Height;
             }
         }
 
         public ushort ButtonGraphicOver
         {
-            get => _gumpGraphics[OVER];
+            get => _over;
             set
             {
-                _textures[OVER] = GumpsLoader.Instance.GetTexture(value);
-                _gumpGraphics[OVER] = value;
+                _over = value;
 
-                Width = _textures[OVER].Width;
+                _ = GumpsLoader.Instance.GetGumpTexture(value, out var bounds);
 
-                Height = _textures[OVER].Height;
+                Width = bounds.Width;
+                Height = bounds.Height;
             }
         }
 
@@ -196,26 +184,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public bool ContainsByBounds { get; set; }
 
-        public override void Update(double totalTime, double frameTime)
-        {
-            base.Update(totalTime, frameTime);
-
-            if (IsDisposed)
-            {
-                return;
-            }
-
-            for (int i = 0; i < _textures.Length; i++)
-            {
-                UOTexture t = _textures[i];
-
-                if (t != null)
-                {
-                    t.Ticks = Time.Ticks;
-                }
-            }
-        }
-
+       
         protected override void OnMouseEnter(int x, int y)
         {
             _entered = true;
@@ -228,27 +197,46 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            UOTexture texture = GetTextureByState();
+            Texture2D texture = null;
+            Rectangle bounds = Rectangle.Empty;
 
-            ShaderHueTranslator.GetHueVector
-            (
-                ref HueVector,
-                Hue,
-                false,
-                Alpha,
-                true
-            );
+            if (_entered || IsClicked)
+            {
+                if (IsClicked && _pressed > 0)
+                {
+                    texture = GumpsLoader.Instance.GetGumpTexture(_pressed, out bounds);
+                }
 
-            HueVector.Z = Alpha;
+                if (texture == null && _over > 0)
+                {
+                    texture = GumpsLoader.Instance.GetGumpTexture(_over, out bounds);
+                }
+            }
 
-            batcher.Draw2D
+            if (texture == null)
+            {
+                texture = GumpsLoader.Instance.GetGumpTexture(_normal, out bounds);
+            }
+
+            if (texture == null)
+            {
+                return false;
+            }
+
+            Vector3 hue = ShaderHueTranslator.GetHueVector
+                            (
+                                Hue,
+                                false,
+                                Alpha,
+                                true
+                            );
+
+            batcher.Draw
             (
                 texture,
-                x,
-                y,
-                Width,
-                Height,
-                ref HueVector
+                new Rectangle(x, y, Width, Height),
+                bounds,
+                hue
             );
 
             if (!string.IsNullOrEmpty(_caption))
@@ -310,24 +298,7 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        private UOTexture GetTextureByState()
-        {
-            if (_entered || IsClicked)
-            {
-                if (IsClicked && _textures[PRESSED] != null)
-                {
-                    return _textures[PRESSED];
-                }
-
-                if (_textures[OVER] != null)
-                {
-                    return _textures[OVER];
-                }
-            }
-
-            return _textures[NORMAL];
-        }
-        
+   
         public override bool Contains(int x, int y)
         {
             if (IsDisposed)
@@ -335,7 +306,7 @@ namespace ClassicUO.Game.UI.Controls
                 return false;
             }
 
-            return ContainsByBounds ? base.Contains(x, y) : GumpsLoader.Instance.PixelCheck(_gumpGraphics[NORMAL], x - Offset.X, y - Offset.Y);
+            return ContainsByBounds ? base.Contains(x, y) : GumpsLoader.Instance.PixelCheck(_normal, x - Offset.X, y - Offset.Y);
         }
 
         public sealed override void Dispose()

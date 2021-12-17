@@ -100,16 +100,19 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (DrawBackgroundCurrentIndex && MouseIsOver && !string.IsNullOrWhiteSpace(Text))
             {
-                ResetHueVector();
+                Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
-                batcher.Draw2D
+                batcher.Draw
                 (
                     SolidColorTextureCache.GetTexture(Color.Gray),
-                    x,
-                    y + 2,
-                    Width - 4,
-                    Height - 4,
-                    ref HueVector
+                    new Rectangle
+                    (
+                        x,
+                        y + 2,
+                        Width - 4,
+                        Height - 4
+                    ),
+                    hueVector
                 );
             }
 

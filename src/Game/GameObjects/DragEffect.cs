@@ -103,30 +103,28 @@ namespace ClassicUO.Game.GameObjects
             base.Update(totalTime, frameTime);
         }
 
-        public override bool Draw(UltimaBatcher2D batcher, int posX, int posY, ref Vector3 hueVec)
+        public override bool Draw(UltimaBatcher2D batcher, int posX, int posY, float depth)
         {
             if (IsDestroyed)
             {
                 return false;
             }
 
-            hueVec = Vector3.Zero;
-
-
+            ushort hue;
             if (ProfileManager.CurrentProfile.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
             {
-                hueVec.X = Constants.OUT_RANGE_COLOR;
-                hueVec.Y = 1;
+                hue = Constants.OUT_RANGE_COLOR;
             }
             else if (World.Player.IsDead && ProfileManager.CurrentProfile.EnableBlackWhiteEffect)
             {
-                hueVec.X = Constants.DEAD_RANGE_COLOR;
-                hueVec.Y = 1;
+                hue = Constants.DEAD_RANGE_COLOR;
             }
             else
             {
-                ShaderHueTranslator.GetHueVector(ref hueVec, Hue);
+                hue = Hue;
             }
+
+            Vector3 hueVec = ShaderHueTranslator.GetHueVector(hue);
 
             //Engine.DebugInfo.EffectsRendered++;
 
@@ -136,7 +134,8 @@ namespace ClassicUO.Game.GameObjects
                 AnimationGraphic,
                 posX - ((int) Offset.X + 22),
                 posY - ((int) -Offset.Y + 22),
-                ref hueVec
+                hueVec,
+                depth
             );
 
             ref StaticTiles data = ref TileDataLoader.Instance.StaticData[Graphic];

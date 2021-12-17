@@ -63,26 +63,38 @@ namespace ClassicUO.Game.UI.Controls
             CanMove = true;
             AcceptMouseInput = true;
 
-            UOTexture[] textures = new UOTexture[4];
             int width = 0;
+
+            int w0 = 0, w1 = 0, w3 = 0;
 
             for (int i = 0; i < 4; i++)
             {
-                UOTexture t = GumpsLoader.Instance.GetTexture((ushort) (graphic + i));
+                var texture = GumpsLoader.Instance.GetGumpTexture((ushort) (graphic + i), out var bounds);
 
-                if (t == null)
+                if (texture == null)
                 {
                     Dispose();
 
                     return;
                 }
 
-                if (t.Width > width)
+                if (bounds.Width > width)
                 {
-                    width = t.Width;
+                    width = bounds.Width;
                 }
 
-                textures[i] = t;
+                if (i == 0)
+                {
+                    w0 = bounds.Width;
+                }
+                else if (i == 1)
+                {
+                    w1 = bounds.Width;
+                }
+                else if (i == 3)
+                {
+                    w3 = bounds.Width;
+                }
             }
 
 
@@ -131,9 +143,9 @@ namespace ClassicUO.Game.UI.Controls
                 _gumpExpander.MouseOver += expander_OnMouseOver;
             }
 
-            int off = textures[0].Width - textures[3].Width;
+            int off = w0 - w3;
 
-            _gumpRight.X = _gumpMiddle.X = (width - textures[1].Width) / 2;
+            _gumpRight.X = _gumpMiddle.X = (width - w1) / 2;
             _gumpRight.Y = _gumpMiddle.Y = _gumplingMidY;
             _gumpRight.Height = _gumpMiddle.Height = _gumplingMidHeight;
             _gumpRight.WantUpdateSize = _gumpMiddle.WantUpdateSize = true;

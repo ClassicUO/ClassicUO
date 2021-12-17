@@ -104,7 +104,7 @@ namespace ClassicUO.Game.UI.Gumps
             Width = _rectSize * _columns + 1;
             Height = _rectSize * _rows + 1;
 
-            Add(_background = new AlphaBlendControl(0.3f) { Width = Width, Height = Height });
+            Add(_background = new AlphaBlendControl(0.7f) { Width = Width, Height = Height });
 
             for (int row = 0; row < _rows; row++)
             {
@@ -469,7 +469,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Texture2D color = SolidColorTextureCache.GetTexture(MouseIsOver ? Color.Yellow : ProfileManager.CurrentProfile.CounterBarHighlightOnAmount && _amount < ProfileManager.CurrentProfile.CounterBarHighlightAmount && Graphic != 0 ? Color.Red : Color.Gray);
 
-                ResetHueVector();
+                Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
                 batcher.DrawRectangle
                 (
@@ -478,7 +478,7 @@ namespace ClassicUO.Game.UI.Gumps
                     y,
                     Width,
                     Height,
-                    ref HueVector
+                    hueVector
                 );
 
                 return true;
@@ -488,22 +488,15 @@ namespace ClassicUO.Game.UI.Gumps
             private class ImageWithText : Control
             {
                 private readonly Label _label;
-                private readonly TextureControl _textureControl;
+                private ushort _graphic;
+                private ushort _hue;
+                private bool _partial;
 
                 public ImageWithText()
                 {
                     CanMove = true;
                     WantUpdateSize = true;
                     AcceptMouseInput = false;
-
-                    _textureControl = new TextureControl
-                    {
-                        ScaleTexture = true,
-                        AcceptMouseInput = false
-                    };
-
-                    Add(_textureControl);
-
 
                     _label = new Label
                     (
@@ -527,21 +520,75 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (graphic != 0)
                     {
-                        _textureControl.Texture = ArtLoader.Instance.GetTexture(graphic);
-                        _textureControl.Hue = hue;
-
-                        _textureControl.IsPartial = TileDataLoader.Instance.StaticData[graphic].IsPartialHue;
-
-                        _textureControl.Width = Parent.Width;
-                        _textureControl.Height = Parent.Height;
+                        _graphic = graphic;
+                        _hue = hue;
+                        _partial = TileDataLoader.Instance.StaticData[graphic].IsPartialHue;
                         _label.Y = Parent.Height - 15;
                     }
                     else
                     {
-                        _textureControl.Texture = null;
+                        _graphic = 0;
                     }
                 }
 
+                public override void Update(double totalTime, double frameTime)
+                {
+                    base.Update(totalTime, frameTime);
+
+                    if (Parent != null)
+                    {
+                        Width = Parent.Width;
+                        Height = Parent.Height;
+                    }
+                }
+
+                public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+                {
+                    if (_graphic != 0)
+                    {
+                        var texture = ArtLoader.Instance.GetStaticTexture(_graphic, out var bounds);
+                        var rect = ArtLoader.Instance.GetRealArtBounds(_graphic);
+
+                        Vector3 hueVector = ShaderHueTranslator.GetHueVector(_hue, _partial, 1f);
+
+                        Point originalSize = new Point(Width, Height);
+                        Point point = new Point();
+
+                        if (rect.Width < Width)
+                        {
+                            originalSize.X = rect.Width;
+                            point.X = (Width >> 1) - (originalSize.X >> 1);
+                        }
+
+                        if (rect.Height < Height)
+                        {
+                            originalSize.Y = rect.Height;
+                            point.Y = (Height >> 1) - (originalSize.Y >> 1);
+                        }
+
+                        batcher.Draw
+                        (
+                            texture,
+                            new Rectangle
+                            (
+                                x + point.X,
+                                y + point.Y,
+                                originalSize.X,
+                                originalSize.Y
+                            ),
+                            new Rectangle
+                            (
+                                bounds.X + rect.X,
+                                bounds.Y + rect.Y,
+                                rect.Width,
+                                rect.Height
+                            ),
+                            hueVector
+                        );
+                    }
+                        
+                    return base.Draw(batcher, x, y);
+                }
 
                 public void SetAmount(string amount)
                 {

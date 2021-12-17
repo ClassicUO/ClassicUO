@@ -34,6 +34,7 @@ using System.Collections.Generic;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -83,7 +84,7 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     _graphic = value;
 
-                    UOTexture texture = GumpsLoader.Instance.GetTexture(_graphic);
+                    var texture = GumpsLoader.Instance.GetGumpTexture(_graphic, out var bounds);
 
                     if (texture == null)
                     {
@@ -92,8 +93,8 @@ namespace ClassicUO.Game.UI.Controls
                         return;
                     }
 
-                    Width = texture.Width;
-                    Height = texture.Height;
+                    Width = bounds.Width;
+                    Height = bounds.Height;
                 }
             }
         }
@@ -103,29 +104,30 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            ResetHueVector();
-
-            ShaderHueTranslator.GetHueVector
+            Vector3 hueVector = ShaderHueTranslator.GetHueVector
             (
-                ref HueVector,
                 Hue,
                 false,
                 Alpha,
                 true
             );
 
-            UOTexture texture = GumpsLoader.Instance.GetTexture(Graphic);
+            var texture = GumpsLoader.Instance.GetGumpTexture(Graphic, out var bounds);
 
             if (texture != null)
             {
-                batcher.Draw2DTiled
+                batcher.DrawTiled
                 (
                     texture,
-                    x,
-                    y,
-                    Width,
-                    Height,
-                    ref HueVector
+                    new Rectangle
+                    (
+                        x,
+                        y,
+                        Width,
+                        Height
+                    ),
+                    bounds,
+                    hueVector
                 );
             }
 
@@ -140,7 +142,7 @@ namespace ClassicUO.Game.UI.Controls
             x -= Offset.X;
             y -= Offset.Y;
 
-            UOTexture texture = GumpsLoader.Instance.GetTexture(Graphic);
+            var texture = GumpsLoader.Instance.GetGumpTexture(Graphic, out var bounds);
 
             if (texture == null)
             {
@@ -149,24 +151,24 @@ namespace ClassicUO.Game.UI.Controls
 
             if (width == 0)
             {
-                width = texture.Width;
+                width = bounds.Width;
             }
 
             if (height == 0)
             {
-                height = texture.Height;
+                height = bounds.Height;
             }
 
-            while (x > texture.Width && width > texture.Width)
+            while (x > bounds.Width && width > bounds.Width)
             {
-                x -= texture.Width;
-                width -= texture.Width;
+                x -= bounds.Width;
+                width -= bounds.Width;
             }
 
-            while (y > texture.Height && height > texture.Height)
+            while (y > bounds.Height && height > bounds.Height)
             {
-                y -= texture.Height;
-                height -= texture.Height;
+                y -= bounds.Height;
+                height -= bounds.Height;
             }
 
 

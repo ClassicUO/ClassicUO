@@ -287,8 +287,10 @@ namespace ClassicUO.Game.UI.Gumps
 
     internal class BorderControl : Control
     {
-        private readonly UOTexture[] _borders = new UOTexture[2];
         private readonly int _borderSize;
+
+        const ushort H_BORDER = 0x0A8C;
+        const ushort V_BORDER = 0x0A8D;
 
         public BorderControl(int x, int y, int w, int h, int borderSize)
         {
@@ -296,8 +298,6 @@ namespace ClassicUO.Game.UI.Gumps
             Y = y;
             Width = w;
             Height = h;
-            _borders[0] = GumpsLoader.Instance.GetTexture(0x0A8C);
-            _borders[1] = GumpsLoader.Instance.GetTexture(0x0A8D);
             _borderSize = borderSize;
             CanMove = true;
             AcceptMouseInput = true;
@@ -305,68 +305,79 @@ namespace ClassicUO.Game.UI.Gumps
 
         public ushort Hue { get; set; }
 
-        public override void Update(double totalTime, double frameTime)
-        {
-            base.Update(totalTime, frameTime);
-
-            foreach (UOTexture t in _borders)
-            {
-                t.Ticks = (long) totalTime;
-            }
-        }
-
+     
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            ResetHueVector();
+            Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
             if (Hue != 0)
             {
-                HueVector.X = Hue;
-                HueVector.Y = 1;
+                hueVector.X = Hue;
+                hueVector.Y = 1;
             }
 
+            var texture = GumpsLoader.Instance.GetGumpTexture(H_BORDER, out var bounds);
+
             // sopra
-            batcher.Draw2DTiled
+            batcher.DrawTiled
             (
-                _borders[0],
-                x,
-                y,
-                Width,
-                _borderSize,
-                ref HueVector
+                texture,
+                new Rectangle
+                (
+                    x,
+                    y,
+                    Width,
+                    _borderSize
+                ),
+                bounds,
+                hueVector
             );
 
             // sotto
-            batcher.Draw2DTiled
+            batcher.DrawTiled
             (
-                _borders[0],
-                x,
-                y + Height - _borderSize,
-                Width,
-                _borderSize,
-                ref HueVector
+                texture,
+                new Rectangle
+                (
+                    x,
+                    y + Height - _borderSize,
+                    Width,
+                    _borderSize
+                ),
+                bounds,
+                hueVector
             );
 
+            texture = GumpsLoader.Instance.GetGumpTexture(V_BORDER, out bounds);
+
             //sx
-            batcher.Draw2DTiled
+            batcher.DrawTiled
             (
-                _borders[1],
-                x,
-                y,
-                _borderSize,
-                Height,
-                ref HueVector
+                texture,
+                new Rectangle
+                (
+                    x,
+                    y,
+                    _borderSize,
+                    Height
+                ),
+                bounds,
+                hueVector
             );
 
             //dx
-            batcher.Draw2DTiled
+            batcher.DrawTiled
             (
-                _borders[1],
-                x + Width - _borderSize,
-                y + (_borders[1].Width >> 1),
-                _borderSize,
-                Height - _borderSize,
-                ref HueVector
+                texture,
+                new Rectangle
+                (
+                    x + Width - _borderSize,
+                    y + (bounds.Width >> 1),
+                    _borderSize,
+                    Height - _borderSize
+                ),
+                bounds,
+                hueVector
             );
 
             return base.Draw(batcher, x, y);

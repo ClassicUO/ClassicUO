@@ -45,7 +45,7 @@ namespace ClassicUO.Game.UI.Controls
             int w,
             int h,
             string tooltip = null,
-            float alpha = 0.75f
+            float alpha = 0.25f
         )
         {
             CanMove = false;
@@ -76,27 +76,20 @@ namespace ClassicUO.Game.UI.Controls
 
             if (MouseIsOver)
             {
-                ResetHueVector();
+                Vector3 hueVector = ShaderHueTranslator.GetHueVector
+                                    (
+                                        0,
+                                        false,
+                                        Alpha,
+                                        true
+                                    );
 
-                ShaderHueTranslator.GetHueVector
-                (
-                    ref HueVector,
-                    0,
-                    false,
-                    Alpha,
-                    true
-                );
-
-                batcher.Draw2D
+                batcher.Draw
                 (
                     _texture,
-                    x,
-                    y,
-                    0,
-                    0,
-                    Width,
-                    Height,
-                    ref HueVector
+                    new Vector2(x, y),
+                    new Rectangle(0, 0, Width, Height),
+                    hueVector
                 );
             }
 

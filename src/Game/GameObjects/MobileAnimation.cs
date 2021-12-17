@@ -538,9 +538,9 @@ namespace ClassicUO.Game.GameObjects
 
             bool uop = (flags & ANIMATION_FLAGS.AF_USE_UOP_ANIMATION) != 0;
 
-            if (mobile.AnimationFromServer && mobile.AnimationGroup != 0xFF)
+            if (mobile.AnimationFromServer && mobile._animationGroup != 0xFF)
             {
-                ushort v13 = mobile.AnimationGroup;
+                ushort v13 = mobile._animationGroup;
 
                 if (v13 == 12)
                 {
@@ -1003,7 +1003,7 @@ namespace ClassicUO.Game.GameObjects
             }
 
 
-            byte result = mobile.AnimationGroup;
+            byte result = mobile._animationGroup;
 
 
             bool isWalking = mobile.IsWalking;
@@ -1307,11 +1307,11 @@ namespace ClassicUO.Game.GameObjects
                         {
                             if (isRun)
                             {
-                                result = 2;
+                                result = (byte)(hand2 != null ? 3 : 2);
                             }
                             else
                             {
-                                result = 0;
+                                result = (byte)(hand2 != null ? 1 : 0);
                             }
                         }
 

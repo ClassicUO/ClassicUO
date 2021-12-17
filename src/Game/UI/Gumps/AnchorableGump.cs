@@ -53,6 +53,8 @@ namespace ClassicUO.Game.UI.Gumps
         //private GumpPic _lockGumpPic;
         private int _prevX, _prevY;
 
+        const ushort LOCK_GRAPHIC = 0x082C;
+
         protected AnchorableGump(uint local, uint server) : base(local, server)
         {
         }
@@ -104,26 +106,35 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnDragEnd(int x, int y)
         {
+            Attache();
+
+            base.OnDragEnd(x, y);
+        }
+
+        public void TryAttacheToExist()
+        {
+            _anchorCandidate = UIManager.AnchorManager.GetAnchorableControlUnder(this);
+
+            Attache();
+        }
+
+        private void Attache()
+        {
             if (_anchorCandidate != null)
             {
                 Location = UIManager.AnchorManager.GetCandidateDropLocation(this, _anchorCandidate);
                 UIManager.AnchorManager.DropControl(this, _anchorCandidate);
                 _anchorCandidate = null;
             }
-
-            base.OnDragEnd(x, y);
         }
-
 
         protected override void OnMouseUp(int x, int y, MouseButtonType button)
         {
             if (button == MouseButtonType.Left && ShowLock)
             {
-                Texture2D lock_texture = GumpsLoader.Instance.GetTexture(0x082C);
-
-                if (lock_texture != null)
+                if (GumpsLoader.Instance.GetGumpTexture(LOCK_GRAPHIC, out var bounds) != null)
                 {
-                    if (x >= Width - lock_texture.Width && x < Width && y >= 0 && y <= lock_texture.Height)
+                    if (x >= Width - bounds.Width && x < Width && y >= 0 && y <= bounds.Height)
                     {
                         UIManager.AnchorManager.DetachControl(this);
                     }
@@ -138,27 +149,33 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Draw(batcher, x, y);
 
+            Vector3 hueVector;
+
             if (ShowLock)
             {
-                ResetHueVector();
+                hueVector = ShaderHueTranslator.GetHueVector(0);
 
-                UOTexture lock_texture = GumpsLoader.Instance.GetTexture(0x082C);
+                var texture = GumpsLoader.Instance.GetGumpTexture(LOCK_GRAPHIC, out var bounds);
 
-                if (lock_texture != null)
+                if (texture != null)
                 {
-                    lock_texture.Ticks = Time.Ticks;
-
                     if (UIManager.MouseOverControl != null && (UIManager.MouseOverControl == this || UIManager.MouseOverControl.RootParent == this))
                     {
-                        HueVector.X = 34;
-                        HueVector.Y = 1;
+                        hueVector.X = 34;
+                        hueVector.Y = 1;
                     }
 
-                    batcher.Draw2D(lock_texture, x + (Width - lock_texture.Width), y, ref HueVector);
+                    batcher.Draw
+                    (
+                        texture, 
+                        new Vector2(x + (Width - bounds.Width), y), 
+                        bounds,
+                        hueVector
+                    );
                 }
             }
 
-            ResetHueVector();
+            hueVector = ShaderHueTranslator.GetHueVector(0);
 
             if (_anchorCandidate != null)
             {
@@ -167,20 +184,22 @@ namespace ClassicUO.Game.UI.Gumps
                 if (drawLoc != Location)
                 {
                     Texture2D previewColor = SolidColorTextureCache.GetTexture(Color.Silver);
-                    ResetHueVector();
-                    HueVector.Z = 0.5f;
+                    hueVector = ShaderHueTranslator.GetHueVector(0, false, 0.5f);
 
-                    batcher.Draw2D
+                    batcher.Draw
                     (
                         previewColor,
-                        drawLoc.X,
-                        drawLoc.Y,
-                        Width,
-                        Height,
-                        ref HueVector
+                        new Rectangle
+                        (
+                            drawLoc.X,
+                            drawLoc.Y,
+                            Width,
+                            Height
+                        ),
+                        hueVector
                     );
 
-                    HueVector.Z = 0;
+                    hueVector.Z = 0;
 
                     // double rectangle for thicker "stroke"
                     batcher.DrawRectangle
@@ -190,7 +209,7 @@ namespace ClassicUO.Game.UI.Gumps
                         drawLoc.Y,
                         Width,
                         Height,
-                        ref HueVector
+                        hueVector
                     );
 
                     batcher.DrawRectangle
@@ -200,7 +219,7 @@ namespace ClassicUO.Game.UI.Gumps
                         drawLoc.Y + 1,
                         Width - 2,
                         Height - 2,
-                        ref HueVector
+                        hueVector
                     );
                 }
             }

@@ -508,7 +508,6 @@ namespace ClassicUO.Game
             ItemHold.Set(item, (ushort) amount, offset);
             ItemHold.IsGumpTexture = is_gump;
             Socket.Send_PickUpRequest(item, (ushort) amount);
-            UIManager.GameCursor.SetDraggedItem(offset);
 
             if (item.OnGround)
             {

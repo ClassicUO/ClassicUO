@@ -44,6 +44,7 @@ using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.IO.Resources
 {
@@ -68,11 +69,15 @@ namespace ClassicUO.IO.Resources
         private readonly UOFileMul[] _files = new UOFileMul[5];
         private readonly UOFileUop[] _filesUop = new UOFileUop[4];
         private readonly PixelPicker _picker = new PixelPicker();
-
-        private readonly LinkedList<AnimationDirection> _usedTextures = new LinkedList<AnimationDirection>();
+        private TextureAtlas _atlas;
 
         private AnimationsLoader()
         {
+        }
+
+        public void CreateAtlas(GraphicsDevice device)
+        {
+            _atlas = new TextureAtlas(device, 4096, 4096, SurfaceFormat.Color);
         }
 
         public static AnimationsLoader Instance => _instance ?? (_instance = new AnimationsLoader());
@@ -986,39 +991,39 @@ namespace ClassicUO.IO.Resources
 
         public override void ClearResources()
         {
-            LinkedListNode<AnimationDirection> first = _usedTextures.First;
+            //LinkedListNode<AnimationDirection> first = _usedTextures.First;
 
-            while (first != null)
-            {
-                LinkedListNode<AnimationDirection> next = first.Next;
+            //while (first != null)
+            //{
+            //    LinkedListNode<AnimationDirection> next = first.Next;
 
-                if (first.Value.LastAccessTime != 0)
-                {
-                    for (int j = 0; j < first.Value.FrameCount; j++)
-                    {
-                        ref AnimationFrameTexture texture = ref first.Value.Frames[j];
+            //    if (first.Value.LastAccessTime != 0)
+            //    {
+            //        for (int j = 0; j < first.Value.FrameCount; j++)
+            //        {
+            //            ref AnimationFrameTexture texture = ref first.Value.Frames[j];
 
-                        if (texture != null)
-                        {
-                            texture.Dispose();
-                            texture = null;
-                        }
-                    }
+            //            if (texture != null)
+            //            {
+            //                texture.Dispose();
+            //                texture = null;
+            //            }
+            //        }
 
-                    first.Value.FrameCount = 0;
-                    first.Value.Frames = null;
-                    first.Value.LastAccessTime = 0;
+            //        first.Value.FrameCount = 0;
+            //        first.Value.Frames = null;
+            //        first.Value.LastAccessTime = 0;
 
-                    _usedTextures.Remove(first);
-                }
+            //        _usedTextures.Remove(first);
+            //    }
 
-                first = next;
-            }
+            //    first = next;
+            //}
 
-            if (_usedTextures.Count != 0)
-            {
-                _usedTextures.Clear();
-            }
+            //if (_usedTextures.Count != 0)
+            //{
+            //    _usedTextures.Clear();
+            //}
         }
 
         public bool PixelCheck(ushort animID, byte group, byte direction, bool uop, int frame, int x, int y)
@@ -1346,7 +1351,6 @@ namespace ClassicUO.IO.Resources
             return false;
         }
 
-
         public bool LoadAnimationFrames(ushort animID, byte animGroup, byte direction, ref AnimationDirection animDir)
         {
             if (animDir.FileIndex == -1 && animDir.Address == -1)
@@ -1376,9 +1380,7 @@ namespace ClassicUO.IO.Resources
                 return false;
             }
 
-            UOFileMul file = _files[animDir.FileIndex];
-            file.Seek(animDir.Address);
-            ReadMULAnimationFrame(animID, animGroup, direction, ref animDir, file);
+            ReadMULAnimationFrame(animID, animGroup, direction, ref animDir, _files[animDir.FileIndex]);
 
             return true;
         }
@@ -1398,8 +1400,6 @@ namespace ClassicUO.IO.Resources
 
                 return false;
             }
-
-            animDirection.LastAccessTime = Time.Ticks;
 
             int decLen = (int) animData.DecompressedLength;
             UOFileUop file = _filesUop[animData.FileIndex];
@@ -1435,7 +1435,7 @@ namespace ClassicUO.IO.Resources
                 ANIMATION_GROUPS_TYPE type = DataIndex[animID].Type;
 
                 animDirection.FrameCount = (byte)(type < ANIMATION_GROUPS_TYPE.EQUIPMENT ? Math.Round(fc / 5f) : 10);
-                animDirection.Frames = new AnimationFrameTexture[animDirection.FrameCount];
+                animDirection.SpriteInfos = new SpriteInfo[animDirection.FrameCount];
 
                 int headerSize = sizeof(UOPAnimationHeader);
                 int count = 0;
@@ -1488,7 +1488,7 @@ namespace ClassicUO.IO.Resources
                     {
                         int index = animHeaderInfo->FrameID % animDirection.FrameCount;
 
-                        if (animDirection.Frames[index] == null || animDirection.Frames[index].IsDisposed)
+                        if (animDirection.SpriteInfos[index].Texture == null)
                         {
                             unchecked
                             {
@@ -1497,91 +1497,11 @@ namespace ClassicUO.IO.Resources
                                 ushort* palette = (ushort*)reader.PositionAddress;
 
                                 reader.Skip(512);
+                                uint packed32 = (uint)((animGroup | (direction << 8) | (0x01 << 16)));
+                                uint packed32_2 = (uint)((animID | (index << 16)));
+                                ulong packed = (packed32_2 | ((ulong)packed32 << 32));
 
-                                short imageCenterX = reader.ReadInt16LE();
-                                short imageCenterY = reader.ReadInt16LE();
-                                short imageWidth = reader.ReadInt16LE();
-                                short imageHeight = reader.ReadInt16LE();
-
-                                if (imageWidth > 0 && imageHeight > 0)
-                                {
-                                    uint[] data = System.Buffers.ArrayPool<uint>.Shared.Rent(imageWidth * imageHeight);
-
-                                    try
-                                    {
-                                        uint header = reader.ReadUInt32LE();
-
-                                        long pos = reader.Position;
-
-                                        int sum = imageCenterY + imageHeight;
-
-                                        while (header != 0x7FFF7FFF && pos < end)
-                                        {
-                                            ushort runLength = (ushort)(header & 0x0FFF);
-                                            int x = (int)((header >> 22) & 0x03FF);
-
-                                            if ((x & 0x0200) > 0)
-                                            {
-                                                x |= (int)0xFFFFFE00;
-                                            }
-
-                                            int y = (int)((header >> 12) & 0x3FF);
-
-                                            if ((y & 0x0200) > 0)
-                                            {
-                                                y |= (int)0xFFFFFE00;
-                                            }
-
-                                            x += imageCenterX;
-                                            y += sum;
-
-                                            int block = y * imageWidth + x;
-
-                                            for (int k = 0; k < runLength; ++k)
-                                            {
-                                                ushort val = palette[reader.ReadUInt8()];
-
-                                                // FIXME: same of MUL ? Keep it as original for the moment
-                                                if (val != 0)
-                                                {
-                                                    data[block] = HuesHelper.Color16To32(val) | 0xFF_00_00_00;
-                                                }
-                                                else
-                                                {
-                                                    data[block] = 0;
-                                                }
-
-                                                block++;
-                                            }
-
-                                            header = reader.ReadUInt32LE();
-                                        }
-
-                                        AnimationFrameTexture f = new AnimationFrameTexture(imageWidth, imageHeight)
-                                        {
-                                            CenterX = imageCenterX,
-                                            CenterY = imageCenterY
-                                        };
-
-                                        f.SetData(data, 0, imageWidth * imageHeight);
-
-                                        animDirection.Frames[index] = f;
-
-                                        uint packed32 = (uint)((animGroup | (direction << 8) | (0x01 << 16)));
-                                        uint packed32_2 = (uint)((animID | (index << 16)));
-                                        ulong packed = (packed32_2 | ((ulong)packed32 << 32));
-
-                                        _picker.Set(packed, imageWidth, imageHeight, data);
-                                    }
-                                    finally
-                                    {
-                                        System.Buffers.ArrayPool<uint>.Shared.Return(data, true);
-                                    }
-                                }
-                                else
-                                {
-                                    Log.Warn("frame size is null");
-                                }
+                                ReadSpriteData(ref reader, palette, packed, ref animDirection.SpriteInfos[index], true);
                             }
                         }
                     }
@@ -1590,8 +1510,6 @@ namespace ClassicUO.IO.Resources
                     animHeaderInfo = (UOPAnimationHeader*)reader.PositionAddress;
                 }
 
-
-                _usedTextures.AddLast(animDirection);
                 reader.Release();
 
                 return true;
@@ -1605,112 +1523,122 @@ namespace ClassicUO.IO.Resources
             }
         }
 
-        private void ReadMULAnimationFrame(ushort animID, byte animGroup, byte direction, ref AnimationDirection animDir, UOFile reader)
+        private void ReadMULAnimationFrame(ushort animID, byte animGroup, byte direction, ref AnimationDirection animDir, UOFile file)
         {
-            animDir.LastAccessTime = Time.Ticks;
+            StackDataReader reader = new StackDataReader(new ReadOnlySpan<byte>((byte*)file.StartAddress.ToPointer(), (int)file.Length));
+            reader.Seek(animDir.Address);
 
             ushort* palette = (ushort*) reader.PositionAddress;
             reader.Skip(512);
 
             long dataStart = reader.Position;
-            uint frameCount = reader.ReadUInt();
+            uint frameCount = reader.ReadUInt32LE();
             animDir.FrameCount = (byte) frameCount;
             uint* frameOffset = (uint*) reader.PositionAddress;
 
-
-            if (animDir.Frames != null && animDir.Frames.Length != 0)
-            {
-                Log.Panic("MEMORY LEAK MUL ANIM");
-            }
-
-
-            animDir.Frames = new AnimationFrameTexture[frameCount];
+            animDir.SpriteInfos = new SpriteInfo[frameCount];
             long end = (long) reader.StartAddress + reader.Length;
+
 
             for (int i = 0; i < frameCount; i++)
             {
-                if (animDir.Frames[i] != null)
+                if (animDir.SpriteInfos[i].Texture != null)
                 {
                     continue;
                 }
 
                 reader.Seek(dataStart + frameOffset[i]);
 
-                short imageCenterX = reader.ReadShort();
-                short imageCenterY = reader.ReadShort();
-                short imageWidth = reader.ReadShort();
-                short imageHeight = reader.ReadShort();
+                uint packed32 = (uint)((animGroup | (direction << 8) | (0x00 << 16)));
+                uint packed32_2 = (uint)((animID | (i << 16)));
+                ulong packed = (packed32_2 | ((ulong)packed32 << 32));
 
-                if (imageWidth == 0 || imageHeight == 0)
-                {
-                    continue;
-                }
+                ReadSpriteData(ref reader, palette, packed, ref animDir.SpriteInfos[i], false);
+            }
+        }
 
-                uint[] data = System.Buffers.ArrayPool<uint>.Shared.Rent(imageWidth * imageHeight);
+        private void ReadSpriteData(ref StackDataReader reader, ushort* palette, ulong key, ref SpriteInfo spriteInfo, bool alphaCheck)
+        {
+            short imageCenterX = reader.ReadInt16LE();
+            short imageCenterY = reader.ReadInt16LE();
+            short imageWidth = reader.ReadInt16LE();
+            short imageHeight = reader.ReadInt16LE();
 
-                try
-                {
-                    uint header = reader.ReadUInt();
-                    long pos = reader.Position;
-
-                    while (header != 0x7FFF7FFF && pos < end)
-                    {
-                        ushort runLength = (ushort)(header & 0x0FFF);
-                        int x = (int)((header >> 22) & 0x03FF);
-
-                        if ((x & 0x0200) > 0)
-                        {
-                            x |= unchecked((int)0xFFFFFE00);
-                        }
-
-                        int y = (int)((header >> 12) & 0x3FF);
-
-                        if ((y & 0x0200) > 0)
-                        {
-                            y |= unchecked((int)0xFFFFFE00);
-                        }
-
-                        x += imageCenterX;
-                        y += imageCenterY + imageHeight;
-
-                        int block = y * imageWidth + x;
-
-                        for (int k = 0; k < runLength; k++)
-                        {
-                            data[block++] = HuesHelper.Color16To32(palette[reader.ReadByte()]) | 0xFF_00_00_00;
-                        }
-
-                        header = reader.ReadUInt();
-                    }
-
-                    AnimationFrameTexture f = new AnimationFrameTexture(imageWidth, imageHeight)
-                    {
-                        CenterX = imageCenterX,
-                        CenterY = imageCenterY
-                    };
-                    
-                    f.SetData(data, 0, imageWidth * imageHeight);
-
-                    animDir.Frames[i] = f;
-
-                    uint packed32 = (uint)((animGroup | (direction << 8) | (0x00 << 16)));
-                    uint packed32_2 = (uint)((animID | (i << 16)));
-                    ulong packed = (packed32_2 | ((ulong)packed32 << 32));
-
-                    _picker.Set(packed, imageWidth, imageHeight, data);
-                }
-                finally
-                {
-                    System.Buffers.ArrayPool<uint>.Shared.Return(data, true);
-                }
+            if (imageWidth == 0 || imageHeight == 0)
+            {
+                return;
             }
 
-            _usedTextures.AddLast(animDir);
+            long end = (long)reader.StartAddress + reader.Length;
+            int bufferSize = imageWidth * imageHeight;
+
+            uint[] buffer = null;
+
+            Span<uint> data = bufferSize <= 1024 ? stackalloc uint[bufferSize] : (buffer = System.Buffers.ArrayPool<uint>.Shared.Rent(bufferSize));
+
+            try
+            {
+                uint header = reader.ReadUInt32LE();
+                long pos = reader.Position;
+
+                while (header != 0x7FFF7FFF && pos < end)
+                {
+                    ushort runLength = (ushort)(header & 0x0FFF);
+                    int x = (int)((header >> 22) & 0x03FF);
+
+                    if ((x & 0x0200) > 0)
+                    {
+                        x |= unchecked((int)0xFFFFFE00);
+                    }
+
+                    int y = (int)((header >> 12) & 0x3FF);
+
+                    if ((y & 0x0200) > 0)
+                    {
+                        y |= unchecked((int)0xFFFFFE00);
+                    }
+
+                    x += imageCenterX;
+                    y += imageCenterY + imageHeight;
+
+                    int block = y * imageWidth + x;
+
+                    for (int k = 0; k < runLength; ++k, ++block)
+                    {
+                        ushort val = palette[reader.ReadUInt8()];
+
+                        // FIXME: same of MUL ? Keep it as original for the moment
+                        if (!alphaCheck || val != 0)
+                        {
+                            data[block] = HuesHelper.Color16To32(val) | 0xFF_00_00_00;
+                        }
+                        else
+                        {
+                            data[block] = 0;
+                        }
+                    }
+
+                    header = reader.ReadUInt32LE();
+                }
+
+                spriteInfo.Center.X = imageCenterX;
+                spriteInfo.Center.Y = imageCenterY;
+
+                _picker.Set(key, imageWidth, imageHeight, data);
+                spriteInfo.Texture = _atlas.AddSprite(data, imageWidth, imageHeight, out spriteInfo.UV);
+            }
+            finally
+            {
+                if (buffer != null)
+                {
+                    System.Buffers.ArrayPool<uint>.Shared.Return(buffer, true);
+                }
+            }
         }
 
         public void GetAnimationDimensions
         (
-            sbyte animIndex,
+            byte animIndex,
             ushort graphic,
             byte dir,
             byte animGroup,
@@ -1790,14 +1718,14 @@ namespace ClassicUO.IO.Resources
                                 frameIndex = 0;
                             }
 
-                            AnimationFrameTexture animationFrameTexture = direction.Frames?[frameIndex];
+                            ref var spriteInfo = ref direction.SpriteInfos[frameIndex];
 
-                            if (animationFrameTexture != null)
+                            if (spriteInfo.Texture != null)
                             {
-                                x = animationFrameTexture.CenterX;
-                                y = animationFrameTexture.CenterY;
-                                w = animationFrameTexture.Width;
-                                h = animationFrameTexture.Height;
+                                x = spriteInfo.Center.X;
+                                y = spriteInfo.Center.Y;
+                                w = spriteInfo.UV.Width;
+                                h = spriteInfo.UV.Height;
                                 _animDimensionCache[id] = new Rectangle(x, y, w, h);
 
                                 return;
@@ -1929,46 +1857,6 @@ namespace ClassicUO.IO.Resources
             else
             {
                 x = y = w = h = 0;
-            }
-        }
-
-        public void CleaUnusedResources(int maxCount)
-        {
-            int count = 0;
-            long ticks = Time.Ticks - Constants.CLEAR_TEXTURES_DELAY;
-
-            LinkedListNode<AnimationDirection> first = _usedTextures.First;
-
-            while (first != null)
-            {
-                LinkedListNode<AnimationDirection> next = first.Next;
-
-                if (first.Value.LastAccessTime != 0 && first.Value.LastAccessTime < ticks)
-                {
-                    for (int j = 0; j < first.Value.FrameCount; j++)
-                    {
-                        ref AnimationFrameTexture texture = ref first.Value.Frames[j];
-
-                        if (texture != null)
-                        {
-                            texture.Dispose();
-                            texture = null;
-                        }
-                    }
-
-                    first.Value.FrameCount = 0;
-                    first.Value.Frames = null;
-                    first.Value.LastAccessTime = 0;
-
-                    _usedTextures.Remove(first);
-
-                    if (++count >= maxCount)
-                    {
-                        break;
-                    }
-                }
-
-                first = next;
             }
         }
 
@@ -2322,11 +2210,18 @@ namespace ClassicUO.IO.Resources
         public long Address;
         public int FileIndex;
         public byte FrameCount;
-        public AnimationFrameTexture[] Frames;
+        public SpriteInfo[] SpriteInfos;
+        //public AnimationFrameTexture[] Frames;
         public bool IsUOP;
         public bool IsVerdata;
-        public long LastAccessTime;
         public uint Size;
+    }
+
+    struct SpriteInfo
+    {
+        public Texture2D Texture;
+        public Rectangle UV;
+        public Point Center;
     }
 
     internal struct EquipConvData : IEquatable<EquipConvData>

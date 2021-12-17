@@ -710,7 +710,7 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                         else
                         {
-                            Rectangle bounds = GumpsLoader.Instance.GetTexture(0x0804).Bounds;
+                            _ = GumpsLoader.Instance.GetGumpTexture(0x0804, out var bounds);
 
                             UIManager.Add
                             (
@@ -853,12 +853,7 @@ namespace ClassicUO.Game.UI.Gumps
                     Height = h;
                     WantUpdateSize = false;
 
-                    ArtTexture texture = ArtLoader.Instance.GetTexture(item.DisplayedGraphic);
-
-                    if (texture != null)
-                    {
-                        _rect = texture.ImageRectangle;
-                    }
+                    _rect = ArtLoader.Instance.GetRealArtBounds(item.DisplayedGraphic);
 
                     _originalSize.X = Width;
                     _originalSize.Y = Height;
@@ -891,34 +886,39 @@ namespace ClassicUO.Game.UI.Gumps
                         return false;
                     }
 
-                    ResetHueVector();
+                    Vector3 hueVector = ShaderHueTranslator.GetHueVector
+                                        (
+                                            MouseIsOver && HighlightOnMouseOver ? 0x0035 : item.Hue,
+                                            item.ItemData.IsPartialHue,
+                                            1,
+                                            true
+                                        );
 
-                    ShaderHueTranslator.GetHueVector
-                    (
-                        ref HueVector,
-                        MouseIsOver && HighlightOnMouseOver ? 0x0035 : item.Hue,
-                        item.ItemData.IsPartialHue,
-                        0,
-                        true
-                    );
-
-                    ArtTexture texture = ArtLoader.Instance.GetTexture(item.DisplayedGraphic);
+                    var texture = ArtLoader.Instance.GetStaticTexture(item.DisplayedGraphic, out var bounds);
 
                     if (texture != null)
                     {
-                        return batcher.Draw2D
+                        batcher.Draw
                         (
                             texture,
-                            x + _point.X,
-                            y + _point.Y,
-                            _originalSize.X,
-                            _originalSize.Y,
-                            _rect.X,
-                            _rect.Y,
-                            _rect.Width,
-                            _rect.Height,
-                            ref HueVector
+                            new Rectangle
+                            (
+                                x + _point.X,
+                                y + _point.Y,
+                                _originalSize.X,
+                                _originalSize.Y
+                            ),
+                            new Rectangle
+                            (
+                                bounds.X + _rect.X,
+                                bounds.Y + _rect.Y,
+                                _rect.Width,
+                                _rect.Height
+                            ),
+                            hueVector
                         );
+
+                        return true;
                     }
 
                     return false;

@@ -92,6 +92,7 @@ namespace ClassicUO.Game.Managers
                 s =>
                 {
                     CUOEnviroment.Debug = !CUOEnviroment.Debug;
+
                 }
             );
         }

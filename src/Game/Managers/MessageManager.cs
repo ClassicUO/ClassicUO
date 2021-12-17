@@ -170,6 +170,10 @@ namespace ClassicUO.Game.Managers
                         break;
                     }
 
+                    // If person who send that message is in ignores list - but filter out Spell Text
+                    if (IgnoreManager.IgnoredCharsList.Contains(parent.Name) && type != MessageType.Spell)
+                        break;
+
                     TextObject msg = CreateMessage
                     (
                         text,

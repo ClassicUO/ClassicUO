@@ -251,7 +251,7 @@ namespace ClassicUO.Game.Map
                     {
                         priorityZ--;
                     }
-
+         
                     //if (data.IsSurface)
                     //{
                     //    priorityZ--;

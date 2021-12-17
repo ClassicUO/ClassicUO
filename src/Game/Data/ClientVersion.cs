@@ -30,6 +30,8 @@
 
 #endregion
 
+using System;
+using System.Buffers.Binary;
 using System.Diagnostics;
 using System.IO;
 
@@ -84,24 +86,40 @@ namespace ClassicUO.Data
         {
             if (File.Exists(clientpath))
             {
-                FileInfo fileInfo = new FileInfo(clientpath);
-
-                DirectoryInfo dirInfo = new DirectoryInfo(fileInfo.DirectoryName);
-
-                if (dirInfo.Exists)
+                using (FileStream fs = new FileStream(clientpath, FileMode.Open, FileAccess.Read, FileShare.Read))
                 {
-                    foreach (FileInfo clientInfo in dirInfo.GetFiles("client.exe", SearchOption.TopDirectoryOnly))
-                    {
-                        FileVersionInfo versInfo = FileVersionInfo.GetVersionInfo(clientInfo.FullName);
+                    byte[] buffer = new byte[fs.Length];
 
-                        if (versInfo != null && !string.IsNullOrEmpty(versInfo.FileVersion))
+                    fs.Read(buffer, 0, (int) fs.Length);
+
+                    // VS_VERSION_INFO (unicode)
+                    Span<byte> vsVersionInfo = stackalloc byte[]
+                    {
+                        0x56, 0x00, 0x53, 0x00, 0x5F, 0x00, 0x56,
+                        0x00, 0x45, 0x00, 0x52, 0x00, 0x53, 0x00,
+                        0x49, 0x00, 0x4F, 0x00, 0x4E, 0x00, 0x5F,
+                        0x00, 0x49, 0x00, 0x4E, 0x00, 0x46, 0x00,
+                        0x4F, 0x00
+                    };
+
+
+                    for (var i = 0; i < buffer.Length; i++)
+                    {
+                        if (vsVersionInfo.SequenceEqual(buffer.AsSpan(i, 30)))
                         {
-                            version = versInfo.FileVersion.Replace(",", ".").Replace(" ", "").ToLower();
+                            var offset = i + 42; // 30 + 12
+
+                            var minorPart = BinaryPrimitives.ReadUInt16LittleEndian(buffer.AsSpan(offset));
+                            var majorPart = BinaryPrimitives.ReadUInt16LittleEndian(buffer.AsSpan(offset + 2));
+                            var privatePart = BinaryPrimitives.ReadUInt16LittleEndian(buffer.AsSpan(offset + 4));
+                            var buildPart = BinaryPrimitives.ReadUInt16LittleEndian(buffer.AsSpan(offset + 6));
+
+                            version = $"{majorPart}.{minorPart}.{buildPart}.{privatePart}";
 
                             return true;
                         }
                     }
-                }
+                } 
             }
 
             version = null;

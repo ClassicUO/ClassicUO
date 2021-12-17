@@ -39,7 +39,6 @@ using ClassicUO.Game;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
-using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 using TinyJson;
@@ -197,6 +196,9 @@ namespace ClassicUO.Configuration
 
         public Point OverrideContainerLocationPosition { get; set; } = new Point(200, 200);
         public bool DragSelectHumanoidsOnly { get; set; }
+        public int DragSelectStartX { get; set; } = 100;
+        public int DragSelectStartY { get; set; } = 100;
+        public bool DragSelectAsAnchor { get; set; } = false;
         public NameOverheadTypeAllowed NameOverheadTypeAllowed { get; set; } = NameOverheadTypeAllowed.All;
         public bool NameOverheadToggled { get; set; } = false;
         public bool ShowTargetRangeIndicator { get; set; }
@@ -343,8 +345,7 @@ namespace ClassicUO.Configuration
                         gumps.AddLast(gump);
                     }
                 }
-
-
+                
                 LinkedListNode<Gump> first = gumps.First;
 
                 while (first != null)
@@ -598,6 +599,11 @@ namespace ClassicUO.Configuration
                                 case GumpType.NetStats:
                                     gump = new NetworkStatsGump(100, 100);
 
+                                    break;
+
+                                case GumpType.NameOverHeadHandler:
+                                    NameOverHeadHandlerGump.LastPosition = new Point(x, y);
+                                    // Gump gets opened by NameOverHeadManager, we just want to save the last position from profile
                                     break;
                             }
 

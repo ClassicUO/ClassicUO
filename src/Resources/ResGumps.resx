@@ -1468,4 +1468,82 @@ Client version: '{0}'</value>
   <data name="HighlightPoisoned" xml:space="preserve">
     <value>Highlight poisoned</value>
   </data>
+  <data name="AddMarkerOnPlayer" xml:space="preserve">
+    <value>Add Marker on Player</value>
+  </data>
+  <data name="EnterMarkerName" xml:space="preserve">
+    <value>Marker Name</value>
+  </data>
+  <data name="InvalidMarkerName" xml:space="preserve">
+    <value>Invalid marker name.</value>
+  </data>
+  <data name="AddToIgnoreListExist" xml:space="preserve">
+    <value>Character {0} already exist in a list.</value>
+  </data>
+  <data name="AddToIgnoreListNotMobile" xml:space="preserve">
+    <value>This is not a player.</value>
+  </data>
+  <data name="AddToIgnoreListSuccess" xml:space="preserve">
+    <value>Added {0} to ignore list.</value>
+  </data>
+  <data name="IgnoreListAddButton" xml:space="preserve">
+    <value>Add person to ignore list</value>
+  </data>
+  <data name="IgnoreListManager" xml:space="preserve">
+    <value>Ignore List</value>
+  </data>
+  <data name="IgnoreListName" xml:space="preserve">
+    <value>Character name</value>
+  </data>
+  <data name="AddMarker" xml:space="preserve">
+    <value>Add Marker</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="CreateMarker" xml:space="preserve">
+    <value>Create</value>
+  </data>
+  <data name="Edit" xml:space="preserve">
+    <value>Edit</value>
+  </data>
+  <data name="EditMarker" xml:space="preserve">
+    <value>Edit Marker</value>
+  </data>
+  <data name="MarkerColor" xml:space="preserve">
+    <value>Color</value>
+  </data>
+  <data name="MarkerDefName" xml:space="preserve">
+    <value>MarkerName</value>
+  </data>
+  <data name="MarkerGoTo" xml:space="preserve">
+    <value>GoTo</value>
+  </data>
+  <data name="MarkerIcon" xml:space="preserve">
+    <value>Icon</value>
+  </data>
+  <data name="MarkerName" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="MarkerSearch" xml:space="preserve">
+    <value>Search:</value>
+  </data>
+  <data name="MarkersManager" xml:space="preserve">
+    <value>Markers Manager</value>
+  </data>
+  <data name="MarkerX" xml:space="preserve">
+    <value>X</value>
+  </data>
+  <data name="MarkerY" xml:space="preserve">
+    <value>Y</value>
+  </data>
+  <data name="DragSelectAnchoredHB" xml:space="preserve">
+    <value>Anchored Healthbar</value>
+  </data>
+  <data name="DragSelectStartingPosX" xml:space="preserve">
+    <value>Starting X position of health bars</value>
+  </data>
+  <data name="DragSelectStartingPosY" xml:space="preserve">
+    <value>Starting Y position of health bars</value>
+  </data>
 </root>

@@ -161,6 +161,8 @@ namespace ClassicUO.Game.UI.Gumps
         private InputField _spellFormatBox;
         private ClickableColorBox _tooltip_font_hue;
         private FontSelector _tooltip_font_selector;
+        private HSliderBar _dragSelectStartX, _dragSelectStartY;
+        private Checkbox _dragSelectAsAnchor;
 
         // video
         private Checkbox _use_old_status_gump, _windowBorderless, _enableDeathScreen, _enableBlackWhiteEffect, _altLights, _enableLight, _enableShadows, _enableShadowsStatics, _auraMouse, _runMouseInSeparateThread, _useColoredLights, _darkNights, _partyAura, _hideChatGradient;
@@ -179,7 +181,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             Add
             (
-                new AlphaBlendControl(0.05f)
+                new AlphaBlendControl(0.95f)
                 {
                     X = 1,
                     Y = 1,
@@ -348,6 +350,21 @@ namespace ClassicUO.Game.UI.Gumps
                 ) { ButtonParameter = 12 }
             );
 
+            Add
+            (
+                new NiceButton
+                (
+                    10,
+                    10 + 30 * i++,
+                    140,
+                    25,
+                    ButtonAction.Activate,
+                    ResGumps.IgnoreListManager
+                )
+                {
+                    ButtonParameter = (int)Buttons.OpenIgnoreList
+                }
+            );
 
             Add
             (
@@ -1221,6 +1238,20 @@ namespace ClassicUO.Game.UI.Gumps
                     ResGumps.DragHumanoidsOnly,
                     _currentProfile.DragSelectHumanoidsOnly,
                     startX,
+                    startY
+                )
+            );
+
+            section4.Add(new Label(ResGumps.DragSelectStartingPosX, true, HUE_FONT));
+            section4.Add(_dragSelectStartX = new HSliderBar(startX, startY, 200, 0, _currentProfile.GameWindowSize.X, _currentProfile.DragSelectStartX, HSliderBarStyle.MetalWidgetRecessedBar, true, 0, HUE_FONT));
+
+            section4.Add(new Label(ResGumps.DragSelectStartingPosY, true, HUE_FONT));
+            section4.Add(_dragSelectStartY = new HSliderBar(startX, startY, 200, 0, _currentProfile.GameWindowSize.Y, _currentProfile.DragSelectStartY, HSliderBarStyle.MetalWidgetRecessedBar, true, 0, HUE_FONT));
+            section4.Add
+            (
+                _dragSelectAsAnchor = AddCheckBox
+                (
+                    null, ResGumps.DragSelectAnchoredHB, _currentProfile.DragSelectAsAnchor, startX,
                     startY
                 )
             );
@@ -3393,6 +3424,12 @@ namespace ClassicUO.Game.UI.Gumps
                 case Buttons.NewMacro: break;
 
                 case Buttons.DeleteMacro: break;
+                case Buttons.OpenIgnoreList:
+                    // If other IgnoreManagerGump exist - Dispose it
+                    UIManager.GetGump<IgnoreManagerGump>()?.Dispose();
+                    // Open new
+                    UIManager.Add(new IgnoreManagerGump());
+                    break;
             }
         }
 
@@ -3462,6 +3499,10 @@ namespace ClassicUO.Game.UI.Gumps
                     _showSkillsMessage.IsChecked = true;
                     _showSkillsMessageDelta.Value = 1;
                     _showStatsMessage.IsChecked = true;
+
+                    _dragSelectStartX.Value = 100;
+                    _dragSelectStartY.Value = 100;
+                    _dragSelectAsAnchor.IsChecked = false;
 
                     break;
 
@@ -4045,6 +4086,9 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.EnableDragSelect = _enableDragSelect.IsChecked;
             _currentProfile.DragSelectModifierKey = _dragSelectModifierKey.SelectedIndex;
             _currentProfile.DragSelectHumanoidsOnly = _dragSelectHumanoidsOnly.IsChecked;
+            _currentProfile.DragSelectStartX = _dragSelectStartX.Value;
+            _currentProfile.DragSelectStartY = _dragSelectStartY.Value;
+            _currentProfile.DragSelectAsAnchor = _dragSelectAsAnchor.IsChecked;
 
             _currentProfile.ShowSkillsChangedMessage = _showSkillsMessage.IsChecked;
             _currentProfile.ShowSkillsChangedDeltaValue = _showSkillsMessageDelta.Value;
@@ -4181,16 +4225,19 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            ResetHueVector();
+            Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
-            batcher.Draw2D
+            batcher.Draw
             (
                 LogoTexture,
-                x + 190,
-                y + 20,
-                WIDTH - 250,
-                400,
-                ref HueVector
+                new Rectangle
+                (
+                    x + 190,
+                    y + 20,
+                    WIDTH - 250,
+                    400
+                ),
+                hueVector
             );
 
             batcher.DrawRectangle
@@ -4200,7 +4247,7 @@ namespace ClassicUO.Game.UI.Gumps
                 y,
                 Width,
                 Height,
-                ref HueVector
+                hueVector
             );
 
             return base.Draw(batcher, x, y);
@@ -4394,6 +4441,7 @@ namespace ClassicUO.Game.UI.Gumps
             EnemyColor,
             MurdererColor,
 
+            OpenIgnoreList,
             NewMacro,
             DeleteMacro,
 

@@ -210,12 +210,12 @@ namespace ClassicUO.Game.GameObjects
                 }
                 else
                 {
-                    ArtTexture texture = ArtLoader.Instance.GetTexture(Parent.Graphic);
+                    var texture = ArtLoader.Instance.GetStaticTexture(Parent.Graphic, out var bounds);
 
                     if (texture != null)
                     {
                         p.X += 22;
-                        int yValue = texture.Height >> 1;
+                        int yValue = bounds.Height >> 1;
 
                         if (Parent is Item it)
                         {
@@ -246,7 +246,7 @@ namespace ClassicUO.Game.GameObjects
                 item.X = p.X - (item.RenderedText.Width >> 1);
                 item.Y = p.Y - offY - item.RenderedText.Height - item.OffsetY;
 
-                item.RenderedText.Draw(batcher, item.X, item.Y, item.Alpha);
+                item.RenderedText.Draw(batcher, item.X, item.Y, item.Alpha / 255f);
                 offY += item.RenderedText.Height;
             }
         }

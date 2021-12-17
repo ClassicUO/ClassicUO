@@ -32,57 +32,160 @@
 
 using System;
 using ClassicUO.Configuration;
+using ClassicUO.Game.Data;
 using ClassicUO.Renderer;
+using ClassicUO.Resources;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using MathHelper = Microsoft.Xna.Framework.MathHelper;
 
 namespace ClassicUO.Game
 {
+    enum WEATHER_TYPE
+    {
+        WT_RAIN = 0,
+        WT_FIERCE_STORM,
+        WT_SNOW,
+        WT_STORM,
+
+        WT_INVALID_0 = 0xFE,
+        WT_INVALID_1 = 0xFF
+    }
+
     internal class Weather
     {
         private const int MAX_WEATHER_EFFECT = 70;
+        private const float SIMULATION_TIME = 37.0f;
 
         private readonly WeatherEffect[] _effects = new WeatherEffect[MAX_WEATHER_EFFECT];
-        private Vector3 _hueVector;
-        public sbyte? CurrentWeather { get; set; }
-        public float SimulationRation = 37.0f;
-        public uint Timer, WindTimer, LastTick;
+        private uint _timer, _windTimer, _lastTick;
 
 
-        public byte Type, Count, CurrentCount, Temperature;
-        public sbyte Wind;
+        public WEATHER_TYPE? CurrentWeather { get; private set; }
+        public WEATHER_TYPE Type { get; private set; }
+        public byte Count { get; private set; }
+        public byte CurrentCount { get; private set; }
+        public byte Temperature{ get; private set; }
+        public sbyte Wind { get; private set; }
 
-        private float SinOscillate(float freq, int range, uint current_tick)
+
+
+        private static float SinOscillate(float freq, int range, uint current_tick)
         {
             float anglef = (int) (current_tick / 2.7777f * freq) % 360;
 
             return Math.Sign(MathHelper.ToRadians(anglef)) * range;
         }
 
+
         public void Reset()
         {
-            Type = Count = CurrentCount = Temperature = 0;
+            Type = 0;
+            Count = CurrentCount = Temperature = 0;
             Wind = 0;
-            WindTimer = Timer = 0;
+            _windTimer = _timer = 0;
             CurrentWeather = null;
         }
 
-        public void Generate()
+        public void Generate(WEATHER_TYPE type, byte count, byte temp)
         {
-            LastTick = Time.Ticks;
-
-            if (Type == 0xFF || Type == 0xFE)
+            if (CurrentWeather.HasValue && CurrentWeather == type)
             {
                 return;
             }
 
-            if (Count > MAX_WEATHER_EFFECT)
+            Reset();
+
+            Type = type;
+            Count = (byte) Math.Min(MAX_WEATHER_EFFECT, (int) count);
+            Temperature = temp;
+            _timer = Time.Ticks + Constants.WEATHER_TIMER;
+
+            _lastTick = Time.Ticks;
+
+            if (Type == WEATHER_TYPE.WT_INVALID_0 || Type == WEATHER_TYPE.WT_INVALID_1)
             {
-                Count = MAX_WEATHER_EFFECT;
+                _timer = 0;
+                CurrentWeather = null;
+
+                return;
             }
 
-            WindTimer = 0;
+            bool showMessage = Count > 0;
+
+            switch (type)
+            {
+                case WEATHER_TYPE.WT_RAIN:
+                    if (showMessage)
+                    {
+                        GameActions.Print
+                        (
+                            ResGeneral.ItBeginsToRain,
+                            1154,
+                            MessageType.System,
+                            3,
+                            false
+                        );
+
+                        CurrentWeather = type;
+                    }
+
+                    break;
+
+                case WEATHER_TYPE.WT_FIERCE_STORM:
+                    if (showMessage)
+                    {
+                        GameActions.Print
+                        (
+                            ResGeneral.AFierceStormApproaches,
+                            1154,
+                            MessageType.System,
+                            3,
+                            false
+                        );
+
+                        CurrentWeather = type;
+                    }
+
+                    break;
+
+                case WEATHER_TYPE.WT_SNOW:
+                    if (showMessage)
+                    {
+                        GameActions.Print
+                        (
+                            ResGeneral.ItBeginsToSnow,
+                            1154,
+                            MessageType.System,
+                            3,
+                            false
+                        );
+
+                        CurrentWeather = type;
+                    }
+
+                    break;
+
+                case WEATHER_TYPE.WT_STORM:
+                    if (showMessage)
+                    {
+                        GameActions.Print
+                        (
+                            ResGeneral.AStormIsBrewing,
+                            1154,
+                            MessageType.System,
+                            3,
+                            false
+                        );
+
+                        CurrentWeather = type;
+                    }
+
+                    break;
+            }
+
+
+            _windTimer = 0;
 
             while (CurrentCount < Count)
             {
@@ -96,7 +199,7 @@ namespace ClassicUO.Game
         {
             bool removeEffects = false;
 
-            if (Timer < Time.Ticks)
+            if (_timer < Time.Ticks)
             {
                 if (CurrentCount == 0)
                 {
@@ -105,29 +208,29 @@ namespace ClassicUO.Game
 
                 removeEffects = true;
             }
-            else if (Type == 0xFF || Type == 0xFE)
+            else if (Type == WEATHER_TYPE.WT_INVALID_0 || Type == WEATHER_TYPE.WT_INVALID_1)
             {
                 return;
             }
 
-            uint passed = Time.Ticks - LastTick;
+            uint passed = Time.Ticks - _lastTick;
 
             if (passed > 7000)
             {
-                LastTick = Time.Ticks;
+                _lastTick = Time.Ticks;
                 passed = 25;
             }
 
             bool windChanged = false;
 
-            if (WindTimer < Time.Ticks)
+            if (_windTimer < Time.Ticks)
             {
-                if (WindTimer == 0)
+                if (_windTimer == 0)
                 {
                     windChanged = true;
                 }
 
-                WindTimer = Time.Ticks + (uint) (RandomHelper.GetValue(7, 13) * 1000);
+                _windTimer = Time.Ticks + (uint) (RandomHelper.GetValue(7, 13) * 1000);
 
                 sbyte lastWind = Wind;
 
@@ -170,6 +273,8 @@ namespace ClassicUO.Game
             //Point winpos = ProfileManager.CurrentProfile.GameWindowPosition;
             Point winsize = ProfileManager.CurrentProfile.GameWindowSize;
 
+            Rectangle rect = new Rectangle(0, 0, 2, 2);
+
             for (int i = 0; i < CurrentCount; i++)
             {
                 ref WeatherEffect effect = ref _effects[i];
@@ -195,7 +300,7 @@ namespace ClassicUO.Game
                 }
 
 
-                switch ((WEATHER_TYPE) Type)
+                switch (Type)
                 {
                     case WEATHER_TYPE.WT_RAIN:
                         float scaleRation = effect.ScaleRatio;
@@ -213,7 +318,7 @@ namespace ClassicUO.Game
                     case WEATHER_TYPE.WT_SNOW:
                     case WEATHER_TYPE.WT_STORM:
 
-                        if (Type == (byte) WEATHER_TYPE.WT_SNOW)
+                        if (Type == WEATHER_TYPE.WT_SNOW)
                         {
                             effect.SpeedX = Wind;
                             effect.SpeedY = 1.0f;
@@ -245,7 +350,7 @@ namespace ClassicUO.Game
                         break;
                 }
 
-                float speedOffset = passed / SimulationRation;
+                float speedOffset = passed / SIMULATION_TIME;
 
                 switch ((WEATHER_TYPE) Type)
                 {
@@ -281,20 +386,16 @@ namespace ClassicUO.Game
                             oldY = (int) (effect.Y + MAX_OFFSET_XY);
                         }
 
-                        int startX = x + oldX;
-                        int startY = y + oldY;
-                        int endX = x + (int) effect.X;
-                        int endY = y + (int) effect.Y;
+                        Vector2 start = new Vector2(x + oldX, y + oldY);
+                        Vector2 end = new Vector2(x + effect.X, y + effect.Y);
 
                         batcher.DrawLine
                         (
-                            SolidColorTextureCache.GetTexture(Color.Gray),
-                            startX,
-                            startY,
-                            endX,
-                            endY,
-                            startX + (endX - startX) / 2,
-                            startY + (endY - startY) / 2
+                           SolidColorTextureCache.GetTexture(Color.Gray),
+                           start,
+                           end,
+                           Vector3.Zero,
+                           1
                         );
 
                         break;
@@ -305,21 +406,21 @@ namespace ClassicUO.Game
                         effect.X += effect.SpeedX * speedOffset;
                         effect.Y += effect.SpeedY * speedOffset;
 
-                        batcher.Draw2D
+                        rect.X = x + (int) effect.X;
+                        rect.Y = y + (int) effect.Y;
+
+                        batcher.Draw
                         (
                             SolidColorTextureCache.GetTexture(Color.White),
-                            x + (int) effect.X,
-                            y + (int) effect.Y,
-                            2,
-                            2,
-                            ref _hueVector
+                            rect,
+                            Vector3.Zero
                         );
 
                         break;
                 }
             }
 
-            LastTick = Time.Ticks;
+            _lastTick = Time.Ticks;
         }
 
 
@@ -327,14 +428,6 @@ namespace ClassicUO.Game
         {
             public float SpeedX, SpeedY, X, Y, ScaleRatio, SpeedAngle, SpeedMagnitude;
             public uint ID;
-        }
-
-        private enum WEATHER_TYPE
-        {
-            WT_RAIN = 0,
-            WT_FIERCE_STORM,
-            WT_SNOW,
-            WT_STORM
         }
     }
 }

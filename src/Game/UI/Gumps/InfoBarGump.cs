@@ -58,7 +58,7 @@ namespace ClassicUO.Game.UI.Gumps
             CanCloseWithRightClick = false;
             Height = 20;
 
-            Add(_background = new AlphaBlendControl(0.3f) { Width = Width, Height = Height });
+            Add(_background = new AlphaBlendControl(0.7f) { Width = Width, Height = Height });
 
             ResetItems();
         }
@@ -217,30 +217,34 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Draw(batcher, x, y);
 
-            ResetHueVector();
-
             if (Var != InfoBarVars.NameNotoriety && ProfileManager.CurrentProfile.InfoBarHighlightType == 1 && _warningLinesHue != 0x0481)
             {
-                ShaderHueTranslator.GetHueVector(ref HueVector, _warningLinesHue);
+                Vector3 hueVector = ShaderHueTranslator.GetHueVector(_warningLinesHue);
 
-                batcher.Draw2D
+                batcher.Draw
                 (
                     SolidColorTextureCache.GetTexture(Color.White),
-                    _data.ScreenCoordinateX,
-                    _data.ScreenCoordinateY,
-                    _data.Width,
-                    2,
-                    ref HueVector
+                    new Rectangle
+                    (
+                        _data.ScreenCoordinateX,
+                        _data.ScreenCoordinateY,
+                        _data.Width,
+                        2
+                    ),
+                    hueVector
                 );
 
-                batcher.Draw2D
+                batcher.Draw
                 (
                     SolidColorTextureCache.GetTexture(Color.White),
-                    _data.ScreenCoordinateX,
-                    _data.ScreenCoordinateY + Parent.Height - 2,
-                    _data.Width,
-                    2,
-                    ref HueVector
+                    new Rectangle
+                    (
+                        _data.ScreenCoordinateX,
+                        _data.ScreenCoordinateY + Parent.Height - 2,
+                        _data.Width,
+                        2
+                    ),
+                    hueVector
                 );
             }
 

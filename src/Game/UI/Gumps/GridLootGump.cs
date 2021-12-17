@@ -308,9 +308,9 @@ namespace ClassicUO.Game.UI.Gumps
                 return false;
             }
 
-            ResetHueVector();
             base.Draw(batcher, x, y);
-            ResetHueVector();
+
+            Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
             batcher.DrawRectangle
             (
@@ -319,7 +319,7 @@ namespace ClassicUO.Game.UI.Gumps
                 y,
                 Width,
                 Height,
-                ref HueVector
+                hueVector
             );
 
             return true;
@@ -385,7 +385,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private class GridLootItem : Control
         {
-            private readonly TextureControl _texture;
+            private readonly HitBox _hit;
 
             public GridLootItem(uint serial, int size)
             {
@@ -429,25 +429,15 @@ namespace ClassicUO.Game.UI.Gumps
                 Add(background);
 
 
-                _texture = new TextureControl();
-                _texture.IsPartial = item.ItemData.IsPartialHue;
-                _texture.ScaleTexture = true;
-                _texture.Hue = item.Hue;
-                _texture.Texture = ArtLoader.Instance.GetTexture(item.DisplayedGraphic);
-                _texture.Y = 15;
-                _texture.Width = size;
-                _texture.Height = size;
-                _texture.CanMove = false;
+                _hit = new HitBox(0, 15, size, size, null, 0f);
+                Add(_hit);
 
                 if (World.ClientFeatures.TooltipsEnabled)
                 {
-                    _texture.SetTooltip(item);
+                    _hit.SetTooltip(item);
                 }
 
-                Add(_texture);
-
-
-                _texture.MouseUp += (sender, e) =>
+                _hit.MouseUp += (sender, e) =>
                 {
                     if (e.Button == MouseButtonType.Left)
                     {
@@ -463,9 +453,56 @@ namespace ClassicUO.Game.UI.Gumps
 
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
-                ResetHueVector();
                 base.Draw(batcher, x, y);
-                ResetHueVector();
+
+                Item item = World.Items.Get(LocalSerial);
+
+                Vector3 hueVector;
+
+                if (item != null)
+                {
+                    var texture = ArtLoader.Instance.GetStaticTexture(item.DisplayedGraphic, out var bounds);
+                    var rect = ArtLoader.Instance.GetRealArtBounds(item.DisplayedGraphic);
+
+                    hueVector = ShaderHueTranslator.GetHueVector(item.Hue, item.ItemData.IsPartialHue, 1f);
+
+                    Point originalSize = new Point(_hit.Width, _hit.Height);
+                    Point point = new Point();
+
+                    if (rect.Width < _hit.Width)
+                    {
+                        originalSize.X = rect.Width;
+                        point.X = (_hit.Width >> 1) - (originalSize.X >> 1);
+                    }
+
+                    if (rect.Height < _hit.Height)
+                    {
+                        originalSize.Y = rect.Height;
+                        point.Y = (_hit.Height >> 1) - (originalSize.Y >> 1);
+                    }
+
+                    batcher.Draw
+                    (
+                        texture,
+                        new Rectangle
+                        (
+                            x + point.X,
+                            y + point.Y + _hit.Y,
+                            originalSize.X,
+                            originalSize.Y
+                        ),
+                        new Rectangle
+                        (
+                            bounds.X + rect.X,
+                            bounds.Y + rect.Y,
+                            rect.Width,
+                            rect.Height
+                        ),
+                        hueVector
+                    );
+                }
+                
+                hueVector = ShaderHueTranslator.GetHueVector(0);
 
                 batcher.DrawRectangle
                 (
@@ -474,24 +511,27 @@ namespace ClassicUO.Game.UI.Gumps
                     y + 15,
                     Width,
                     Height - 15,
-                    ref HueVector
+                    hueVector
                 );
 
-                if (_texture.MouseIsOver)
+                if (_hit.MouseIsOver)
                 {
-                    HueVector.Z = 0.7f;
+                    hueVector.Z = 0.7f;
 
-                    batcher.Draw2D
+                    batcher.Draw
                     (
                         SolidColorTextureCache.GetTexture(Color.Yellow),
-                        x + 1,
-                        y + 15,
-                        Width - 1,
-                        Height - 15,
-                        ref HueVector
+                        new Rectangle
+                        (
+                            x + 1,
+                            y + 15,
+                            Width - 1,
+                            Height - 15
+                        ),
+                        hueVector
                     );
 
-                    HueVector.Z = 0;
+                    hueVector.Z = 1;
                 }
 
                 return true;

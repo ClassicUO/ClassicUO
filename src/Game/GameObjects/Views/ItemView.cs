@@ -30,6 +30,7 @@
 
 #endregion
 
+using System;
 using System.Collections.Generic;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
@@ -39,6 +40,7 @@ using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using MathHelper = ClassicUO.Utility.MathHelper;
 
 namespace ClassicUO.Game.GameObjects
@@ -47,7 +49,7 @@ namespace ClassicUO.Game.GameObjects
     {
         private static EquipConvData? _equipConvData;
 
-        public override bool Draw(UltimaBatcher2D batcher, int posX, int posY, ref Vector3 hueVec)
+        public override bool Draw(UltimaBatcher2D batcher, int posX, int posY, float depth)
         {
             if (!AllowedToDraw || IsDestroyed)
             {
@@ -55,27 +57,17 @@ namespace ClassicUO.Game.GameObjects
             }
 
             //Engine.DebugInfo.ItemsRendered++;
-
-            hueVec = Vector3.Zero;
-
-            DrawTransparent = false;
+            Vector3 hueVec;
 
             posX += (int) Offset.X;
             posY += (int) (Offset.Y + Offset.Z);
 
-            if (ItemData.IsTranslucent)
-            {
-                hueVec.Z = 0.5f;
-            }
-
-            if (AlphaHue != 255)
-            {
-                hueVec.Z = 1f - AlphaHue / 255f;
-            }
+            float alpha = AlphaHue / 255f;
 
             if (IsCorpse)
             {
-                return DrawCorpse(batcher, posX, posY - 3, ref hueVec);
+                hueVec = ShaderHueTranslator.GetHueVector(0, false, alpha);
+                return DrawCorpse(batcher, posX, posY - 3, hueVec, depth);
             }
 
 
@@ -151,7 +143,7 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-            ShaderHueTranslator.GetHueVector(ref hueVec, hue, partial, hueVec.Z);
+            hueVec = ShaderHueTranslator.GetHueVector(hue, partial, alpha);
 
             if (!IsMulti && !IsCoin && Amount > 1 && ItemData.IsStackable)
             {
@@ -161,9 +153,9 @@ namespace ClassicUO.Game.GameObjects
                     graphic,
                     posX - 5,
                     posY - 5,
-                    ref hueVec,
-                    ref DrawTransparent,
-                    false
+                    hueVec,
+                    false,
+                    depth
                 );
             }
 
@@ -183,52 +175,15 @@ namespace ClassicUO.Game.GameObjects
                 graphic,
                 posX,
                 posY,
-                ref hueVec,
-                ref DrawTransparent,
-                false
+                hueVec,
+                false,
+                depth
             );
-
-            if (ReferenceEquals(SelectedObject.Object, this) || TargetManager.TargetingState == CursorTarget.MultiPlacement)
-            {
-                return false;
-            }
-
-            ArtTexture texture = ArtLoader.Instance.GetTexture(graphic);
-
-            if (texture != null)
-            {
-                ref UOFileIndex index = ref ArtLoader.Instance.GetValidRefEntry(graphic + 0x4000);
-
-                posX -= index.Width;
-                posY -= index.Height;
-
-                if (ArtLoader.Instance.PixelCheck
-                (
-                    graphic,
-                    SelectedObject.TranslatedMousePositionByViewport.X - posX,
-                    SelectedObject.TranslatedMousePositionByViewport.Y - posY
-                ))
-                {
-                    SelectedObject.Object = this;
-                }
-                else if (!IsMulti && !IsCoin && Amount > 1 && ItemData.IsStackable)
-                {
-                    if (ArtLoader.Instance.PixelCheck
-                    (
-                        graphic,
-                        SelectedObject.TranslatedMousePositionByViewport.X - posX + 5,
-                        SelectedObject.TranslatedMousePositionByViewport.Y - posY + 5
-                    ))
-                    {
-                        SelectedObject.Object = this;
-                    }
-                }
-            }
 
             return true;
         }
 
-        private bool DrawCorpse(UltimaBatcher2D batcher, int posX, int posY, ref Vector3 hueVec)
+        private bool DrawCorpse(UltimaBatcher2D batcher, int posX, int posY, Vector3 hueVec, float depth)
         {
             if (IsDestroyed || World.CorpseManager.Exists(Serial, 0))
             {
@@ -262,7 +217,8 @@ namespace ClassicUO.Game.GameObjects
                 hueVec.Z,
                 group,
                 direction,
-                ref hueVec
+                hueVec,
+                depth
             );
 
             for (int i = 0; i < Constants.USED_LAYER_COUNT; i++)
@@ -283,7 +239,8 @@ namespace ClassicUO.Game.GameObjects
                     hueVec.Z,
                     group,
                     direction,
-                    ref hueVec
+                    hueVec,
+                    depth
                 );
             }
 
@@ -304,7 +261,8 @@ namespace ClassicUO.Game.GameObjects
             float alpha,
             byte animGroup,
             byte dir,
-            ref Vector3 hueVec
+            Vector3 hueVec,
+            float depth
         )
         {
             _equipConvData = null;
@@ -360,12 +318,11 @@ namespace ClassicUO.Game.GameObjects
                 return;
             }
 
-            if ((direction.FrameCount == 0 || direction.Frames == null) && !AnimationsLoader.Instance.LoadAnimationFrames(graphic, animGroup, dir, ref direction))
+            if ((direction.FrameCount == 0 || direction.SpriteInfos == null) && !AnimationsLoader.Instance.LoadAnimationFrames(graphic, animGroup, dir, ref direction))
             {
                 return;
             }
 
-            direction.LastAccessTime = Time.Ticks;
             int fc = direction.FrameCount;
 
             if (fc > 0 && animIndex >= fc)
@@ -375,25 +332,23 @@ namespace ClassicUO.Game.GameObjects
 
             if (animIndex < direction.FrameCount)
             {
-                AnimationFrameTexture frame = direction.Frames[animIndex];
+                ref var spriteInfo = ref direction.SpriteInfos[animIndex];
 
-                if (frame == null || frame.IsDisposed)
+                if (spriteInfo.Texture == null)
                 {
                     return;
                 }
 
-                frame.Ticks = Time.Ticks;
-
                 if (flipped)
                 {
-                    posX -= frame.Width - frame.CenterX;
+                    posX -= spriteInfo.UV.Width - spriteInfo.Center.X;
                 }
                 else
                 {
-                    posX -= frame.CenterX;
+                    posX -= spriteInfo.Center.X;
                 }
 
-                posY -= frame.Height + frame.CenterY;
+                posY -= spriteInfo.UV.Height + spriteInfo.Center.Y;
 
 
                 if (color == 0)
@@ -411,17 +366,13 @@ namespace ClassicUO.Game.GameObjects
                     }
                 }
 
-                hueVec = Vector3.Zero;
-
                 if (ProfileManager.CurrentProfile.NoColorObjectsOutOfRange && owner.Distance > World.ClientViewRange)
                 {
-                    hueVec.X = Constants.OUT_RANGE_COLOR;
-                    hueVec.Y = 1;
+                    hueVec = ShaderHueTranslator.GetHueVector(Constants.OUT_RANGE_COLOR + 1, false, 1);
                 }
                 else if (World.Player.IsDead && ProfileManager.CurrentProfile.EnableBlackWhiteEffect)
                 {
-                    hueVec.X = Constants.DEAD_RANGE_COLOR;
-                    hueVec.Y = 1;
+                    hueVec = ShaderHueTranslator.GetHueVector(Constants.DEAD_RANGE_COLOR + 1, false, 1);
                 }
                 else
                 {
@@ -434,33 +385,253 @@ namespace ClassicUO.Game.GameObjects
                         color = Constants.HIGHLIGHT_CURRENT_OBJECT_HUE;
                     }
 
-                    ShaderHueTranslator.GetHueVector(ref hueVec, color, ispartialhue, alpha);
+                    hueVec = ShaderHueTranslator.GetHueVector(color, ispartialhue, alpha);
                 }
 
-                batcher.DrawSprite
-                (
-                    frame,
-                    posX,
-                    posY,
-                    flipped,
-                    ref hueVec
-                );
+                Vector2 pos = new Vector2(posX, posY);
+                Rectangle rect = spriteInfo.UV;
 
-                if (!SerialHelper.IsValid(owner))
-                {
-                    return;
-                }
+                int diffY = (spriteInfo.UV.Height + spriteInfo.Center.Y);
+                int value = /*!isMounted && diffX <= 44 ? spriteInfo.UV.Height * 2 :*/ Math.Max(1, diffY);
+                int count = Math.Max((spriteInfo.UV.Height / value) + 1, 2);
 
-                if (ReferenceEquals(SelectedObject.Object, owner))
-                {
-                    return;
-                }
+                rect.Height = Math.Min(value, rect.Height);
+                int remains = spriteInfo.UV.Height - rect.Height;
 
-                if (AnimationsLoader.Instance.PixelCheck(graphic, animGroup, dir, direction.IsUOP, animIndex, flipped ? posX + frame.Width - SelectedObject.TranslatedMousePositionByViewport.X : SelectedObject.TranslatedMousePositionByViewport.X - posX, SelectedObject.TranslatedMousePositionByViewport.Y - posY))
+                int tiles = (byte)owner.Direction % 2 == 0 ? 2 : 2;
+
+
+                for (int i = 0; i < count; ++i)
                 {
-                    SelectedObject.Object = owner;
+                    //hueVec.Y = 1;
+                    //hueVec.X = 0x44 + (i * 20);
+
+                    batcher.Draw
+                    (
+                        spriteInfo.Texture,
+                        pos,
+                        rect,
+                        hueVec,
+                        0f,
+                        Vector2.Zero,
+                        1f,
+                        flipped ? SpriteEffects.FlipHorizontally : SpriteEffects.None,
+                        depth + 1f + (i * tiles)
+                    //depth + (i * tiles) + (owner.PriorityZ * 0.001f)
+                    );
+
+                    pos.Y += rect.Height;
+                    rect.Y += rect.Height;
+                    rect.Height = remains; // Math.Min(value, remains);
+                    remains -= rect.Height;
                 }
             }
+        }
+
+        public override bool CheckMouseSelection()
+        {
+            if (!IsCorpse)
+            {
+                if (ReferenceEquals(SelectedObject.Object, this) || TargetManager.TargetingState == CursorTarget.MultiPlacement)
+                {
+                    return false;
+                }
+
+                ushort graphic = DisplayedGraphic;
+
+                if (OnGround && ItemData.IsAnimated)
+                {
+                    if (ProfileManager.CurrentProfile.FieldsType == 2)
+                    {
+                        if (StaticFilters.IsFireField(Graphic) ||
+                            StaticFilters.IsParalyzeField(Graphic) ||
+                            StaticFilters.IsEnergyField(Graphic) ||
+                            StaticFilters.IsPoisonField(Graphic) ||
+                            StaticFilters.IsWallOfStone(Graphic))
+                        {
+                            graphic = Constants.FIELD_REPLACE_GRAPHIC;
+                        }
+                    }
+                }
+
+                if (ArtLoader.Instance.GetStaticTexture(graphic, out _) != null)
+                {
+                    ref UOFileIndex index = ref ArtLoader.Instance.GetValidRefEntry(graphic + 0x4000);
+
+                    Point position = RealScreenPosition;
+                    position.X += (int)Offset.X;
+                    position.Y += (int)(Offset.Y + Offset.Z);
+                    position.X -= index.Width;
+                    position.Y -= index.Height;
+
+                    if (ArtLoader.Instance.PixelCheck
+                    (
+                        graphic,
+                        SelectedObject.TranslatedMousePositionByViewport.X - position.X,
+                        SelectedObject.TranslatedMousePositionByViewport.Y - position.Y
+                    ))
+                    {
+                        return true;
+                    }
+                    else if (!IsMulti && !IsCoin && Amount > 1 && ItemData.IsStackable)
+                    {
+                        if (ArtLoader.Instance.PixelCheck
+                        (
+                            graphic,
+                            SelectedObject.TranslatedMousePositionByViewport.X - position.X + 5,
+                            SelectedObject.TranslatedMousePositionByViewport.Y - position.Y + 5
+                        ))
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                if (!SerialHelper.IsValid(Serial))
+                {
+                    return false;
+                }
+
+                if (ReferenceEquals(SelectedObject.Object, this))
+                {
+                    return true;
+                }
+
+                Point position = RealScreenPosition;
+                position.X += 22;
+                position.Y += 22;
+
+                byte direction = (byte)((byte)Layer & 0x7F & 7);
+                AnimationsLoader.Instance.GetAnimDirection(ref direction, ref IsFlipped);
+                byte animIndex = AnimIndex;
+                bool ishuman = MathHelper.InRange(Amount, 0x0190, 0x0193) ||
+                    MathHelper.InRange(Amount, 0x00B7, 0x00BA) ||
+                    MathHelper.InRange(Amount, 0x025D, 0x0260) ||
+                    MathHelper.InRange(Amount, 0x029A, 0x029B) ||
+                    MathHelper.InRange(Amount, 0x02B6, 0x02B7) ||
+                    Amount == 0x03DB || Amount == 0x03DF || Amount == 0x03E2 ||
+                    Amount == 0x02E8 || Amount == 0x02E9;
+
+
+                for (int i = -1; i < Constants.USED_LAYER_COUNT; i++)
+                {
+                    // yes im lazy
+                    Layer layer = i == -1 ? Layer.Invalid : LayerOrder.UsedLayers[direction, i];
+
+                    ushort graphic;
+
+                    if (layer == Layer.Invalid)
+                    {
+                        graphic = GetGraphicForAnimation();
+                        AnimationsLoader.Instance.ConvertBodyIfNeeded(ref graphic);
+                    }
+                    else if (ishuman)
+                    {
+                        Item itemEquip = FindItemByLayer(layer);
+
+                        if (itemEquip == null)
+                        {
+                            continue;
+                        }
+
+                        graphic = itemEquip.ItemData.AnimID;
+
+                        if (AnimationsLoader.Instance.EquipConversions.TryGetValue(graphic, out Dictionary<ushort, EquipConvData> map))
+                        {
+                            if (map.TryGetValue(graphic, out EquipConvData data))
+                            {
+                                _equipConvData = data;
+                                graphic = data.Graphic;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        continue;
+                    }
+
+                    byte group = AnimationsLoader.Instance.GetDieGroupIndex(graphic, UsedLayer);
+
+                    if (GetTexture(ref graphic, ref group, ref animIndex, direction, out var spriteInfo, out var isUop))
+                    {
+                        int x = position.X - (IsFlipped ? spriteInfo.UV.Width - spriteInfo.Center.X : spriteInfo.Center.X);
+                        int y = position.Y - (spriteInfo.UV.Height + spriteInfo.Center.Y);
+
+                        if (AnimationsLoader.Instance.PixelCheck
+                        (
+                            graphic,
+                            group,
+                            direction,
+                            isUop,
+                            animIndex,
+                            IsFlipped ? x + spriteInfo.UV.Width - SelectedObject.TranslatedMousePositionByViewport.X : SelectedObject.TranslatedMousePositionByViewport.X - x,
+                            SelectedObject.TranslatedMousePositionByViewport.Y - y
+                        ))
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private static bool GetTexture(ref ushort graphic, ref byte animGroup, ref byte animIndex, byte direction, out SpriteInfo spriteInfo, out bool isUOP)
+        {
+            spriteInfo = default;
+            isUOP = false;
+
+            ushort hue = 0;
+
+            AnimationDirection animationSet = AnimationsLoader.Instance.GetBodyAnimationGroup
+            (
+                ref graphic,
+                ref animGroup,
+                ref hue,
+                true,
+                false
+            )
+            .Direction[direction];
+
+            if (animationSet == null ||
+                animationSet.Address == -1 ||
+                animationSet.FileIndex == -1 ||
+                animationSet.FrameCount == 0 ||
+                animationSet.SpriteInfos == null
+               )
+            {
+                return false;
+            }
+
+            int fc = animationSet.FrameCount;
+
+            if (fc > 0 && animIndex >= fc)
+            {
+                animIndex = (byte)(fc - 1);
+            }
+            else if (animIndex < 0)
+            {
+                animIndex = 0;
+            }
+
+            if (animIndex >= animationSet.FrameCount)
+            {
+                return false;
+            }
+
+            spriteInfo = animationSet.SpriteInfos[animIndex % animationSet.FrameCount];
+
+            if (spriteInfo.Texture == null)
+            {
+                return false;
+            }
+
+            isUOP = animationSet.IsUOP;
+
+            return true;
         }
     }
 }

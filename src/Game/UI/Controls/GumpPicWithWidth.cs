@@ -32,6 +32,7 @@
 
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -48,22 +49,27 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            ResetHueVector();
-            ShaderHueTranslator.GetHueVector(ref HueVector, Hue);
+            Vector3 hueVector = ShaderHueTranslator.GetHueVector(Hue);
 
-            UOTexture texture = GumpsLoader.Instance.GetTexture(Graphic);
+            var texture = GumpsLoader.Instance.GetGumpTexture(Graphic, out var bounds);
 
             if (texture != null)
             {
-                return batcher.Draw2DTiled
+                batcher.DrawTiled
                 (
                     texture,
-                    x,
-                    y,
-                    Percent,
-                    Height,
-                    ref HueVector
+                    new Rectangle
+                    (
+                        x,
+                        y,
+                        Percent,
+                        Height
+                    ),
+                    bounds,
+                    hueVector
                 );
+
+                return true;
             }
 
             return false;

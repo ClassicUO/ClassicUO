@@ -124,11 +124,56 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Add Marker.
+        /// </summary>
+        public static string AddMarker {
+            get {
+                return ResourceManager.GetString("AddMarker", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Add Marker on Player.
+        /// </summary>
+        public static string AddMarkerOnPlayer {
+            get {
+                return ResourceManager.GetString("AddMarkerOnPlayer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Add New Member.
         /// </summary>
         public static string AddNewMember {
             get {
                 return ResourceManager.GetString("AddNewMember", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Character {0} already exist in a list..
+        /// </summary>
+        public static string AddToIgnoreListExist {
+            get {
+                return ResourceManager.GetString("AddToIgnoreListExist", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to This is not a player..
+        /// </summary>
+        public static string AddToIgnoreListNotMobile {
+            get {
+                return ResourceManager.GetString("AddToIgnoreListNotMobile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Added {0} to ignore list..
+        /// </summary>
+        public static string AddToIgnoreListSuccess {
+            get {
+                return ResourceManager.GetString("AddToIgnoreListSuccess", resourceCulture);
             }
         }
         
@@ -480,6 +525,15 @@ namespace ClassicUO.Resources {
         public static string CanAttackColor {
             get {
                 return ResourceManager.GetString("CanAttackColor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cancel.
+        /// </summary>
+        public static string Cancel {
+            get {
+                return ResourceManager.GetString("Cancel", resourceCulture);
             }
         }
         
@@ -880,6 +934,15 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Create.
+        /// </summary>
+        public static string CreateMarker {
+            get {
+                return ResourceManager.GetString("CreateMarker", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Criminal Color.
         /// </summary>
         public static string CriminalColor {
@@ -1150,11 +1213,56 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Anchored Healthbar.
+        /// </summary>
+        public static string DragSelectAnchoredHB {
+            get {
+                return ResourceManager.GetString("DragSelectAnchoredHB", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Starting X position of health bars.
+        /// </summary>
+        public static string DragSelectStartingPosX {
+            get {
+                return ResourceManager.GetString("DragSelectStartingPosX", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Starting Y position of health bars.
+        /// </summary>
+        public static string DragSelectStartingPosY {
+            get {
+                return ResourceManager.GetString("DragSelectStartingPosY", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Dump.
         /// </summary>
         public static string Dump {
             get {
                 return ResourceManager.GetString("Dump", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Edit.
+        /// </summary>
+        public static string Edit {
+            get {
+                return ResourceManager.GetString("Edit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Edit Marker.
+        /// </summary>
+        public static string EditMarker {
+            get {
+                return ResourceManager.GetString("EditMarker", resourceCulture);
             }
         }
         
@@ -1291,6 +1399,15 @@ namespace ClassicUO.Resources {
         public static string EnterLocation {
             get {
                 return ResourceManager.GetString("EnterLocation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Marker Name.
+        /// </summary>
+        public static string EnterMarkerName {
+            get {
+                return ResourceManager.GetString("EnterMarkerName", resourceCulture);
             }
         }
         
@@ -1898,6 +2015,33 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Add person to ignore list.
+        /// </summary>
+        public static string IgnoreListAddButton {
+            get {
+                return ResourceManager.GetString("IgnoreListAddButton", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Ignore List.
+        /// </summary>
+        public static string IgnoreListManager {
+            get {
+                return ResourceManager.GetString("IgnoreListManager", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Character name.
+        /// </summary>
+        public static string IgnoreListName {
+            get {
+                return ResourceManager.GetString("IgnoreListName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Impossible to define the client version.
         ///Client version: &apos;{0}&apos;.
         /// </summary>
@@ -1967,6 +2111,15 @@ namespace ClassicUO.Resources {
         public static string InvalidLocation {
             get {
                 return ResourceManager.GetString("InvalidLocation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid marker name..
+        /// </summary>
+        public static string InvalidMarkerName {
+            get {
+                return ResourceManager.GetString("InvalidMarkerName", resourceCulture);
             }
         }
         
@@ -2284,6 +2437,87 @@ namespace ClassicUO.Resources {
         public static string MarkCaveTiles {
             get {
                 return ResourceManager.GetString("MarkCaveTiles", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Color.
+        /// </summary>
+        public static string MarkerColor {
+            get {
+                return ResourceManager.GetString("MarkerColor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to MarkerName.
+        /// </summary>
+        public static string MarkerDefName {
+            get {
+                return ResourceManager.GetString("MarkerDefName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to GoTo.
+        /// </summary>
+        public static string MarkerGoTo {
+            get {
+                return ResourceManager.GetString("MarkerGoTo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Icon.
+        /// </summary>
+        public static string MarkerIcon {
+            get {
+                return ResourceManager.GetString("MarkerIcon", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Name.
+        /// </summary>
+        public static string MarkerName {
+            get {
+                return ResourceManager.GetString("MarkerName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Search:.
+        /// </summary>
+        public static string MarkerSearch {
+            get {
+                return ResourceManager.GetString("MarkerSearch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Markers Manager.
+        /// </summary>
+        public static string MarkersManager {
+            get {
+                return ResourceManager.GetString("MarkersManager", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to X.
+        /// </summary>
+        public static string MarkerX {
+            get {
+                return ResourceManager.GetString("MarkerX", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Y.
+        /// </summary>
+        public static string MarkerY {
+            get {
+                return ResourceManager.GetString("MarkerY", resourceCulture);
             }
         }
         

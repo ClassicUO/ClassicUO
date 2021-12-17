@@ -87,7 +87,7 @@ namespace ClassicUO.Game.GameObjects
         );
 
 
-        public override bool Draw(UltimaBatcher2D batcher, int posX, int posY, ref Vector3 hueVec)
+        public override bool Draw(UltimaBatcher2D batcher, int posX, int posY, float depth)
         {
             if (IsDestroyed || !AllowedToDraw)
             {
@@ -98,8 +98,6 @@ namespace ClassicUO.Game.GameObjects
             {
                 return false;
             }
-
-            hueVec = Vector3.Zero;
 
             ref StaticTiles data = ref TileDataLoader.Instance.StaticData[Graphic];
 
@@ -117,7 +115,12 @@ namespace ClassicUO.Game.GameObjects
                 hue = Constants.DEAD_RANGE_COLOR;
             }
 
-            ShaderHueTranslator.GetHueVector(ref hueVec, hue, data.IsPartialHue, data.IsTranslucent ? .5f : 0, effect: true);
+            Vector3 hueVec = ShaderHueTranslator.GetHueVector(hue, data.IsPartialHue, data.IsTranslucent ? .5f : 1f, effect: true);
+
+            if (Source != null)
+            {
+                depth = Source.CalculateDepthZ() + 1f;
+            }
 
             switch (Blend)
             {
@@ -131,7 +134,8 @@ namespace ClassicUO.Game.GameObjects
                         posX,
                         posY,
                         AngleToTarget,
-                        ref hueVec
+                        hueVec,
+                        depth
                     );
 
                     batcher.SetBlendState(null);
@@ -149,7 +153,8 @@ namespace ClassicUO.Game.GameObjects
                         posX,
                         posY,
                         AngleToTarget,
-                        ref hueVec
+                        hueVec,
+                        depth
                     );
 
                     batcher.SetBlendState(null);
@@ -166,7 +171,8 @@ namespace ClassicUO.Game.GameObjects
                         posX,
                         posY,
                         AngleToTarget,
-                        ref hueVec
+                        hueVec,
+                        depth
                     );
 
                     batcher.SetBlendState(null);
@@ -183,7 +189,8 @@ namespace ClassicUO.Game.GameObjects
                         posX,
                         posY,
                         AngleToTarget,
-                        ref hueVec
+                        hueVec,
+                        depth
                     );
 
                     batcher.SetBlendState(null);
@@ -200,7 +207,8 @@ namespace ClassicUO.Game.GameObjects
                         posX,
                         posY,
                         AngleToTarget,
-                        ref hueVec
+                        hueVec,
+                        depth
                     );
 
                     batcher.SetBlendState(null);
@@ -210,7 +218,7 @@ namespace ClassicUO.Game.GameObjects
                 default:
                     //if (Graphic == 0x36BD)
                     //{
-                    //    ResetHueVector();
+                    //    hueVector = ShaderHueTranslator.GetHueVector(0);
                     //    HueVector.X = 0;
                     //    HueVector.Y = ShaderHueTranslator.SHADER_LIGHTS;
                     //    HueVector.Z = 0;
@@ -227,7 +235,8 @@ namespace ClassicUO.Game.GameObjects
                         posX,
                         posY,
                         AngleToTarget,
-                        ref hueVec
+                        hueVec,
+                        depth
                     );
 
                     break;
@@ -242,6 +251,11 @@ namespace ClassicUO.Game.GameObjects
             }
 
             return true;
+        }
+
+        public override bool CheckMouseSelection()
+        {
+            return false;
         }
 
     }

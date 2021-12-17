@@ -1290,7 +1290,7 @@ namespace ClassicUO.Network
                         switch (graphic)
                         {
                             case 0x0048:
-                                if (loader.GetTexture(0x06E8) != null)
+                                if (loader.GetGumpTexture(0x06E8, out _) != null)
                                 {
                                     graphic = 0x06E8;
                                 }
@@ -1298,7 +1298,7 @@ namespace ClassicUO.Network
                                 break;
 
                             case 0x0049:
-                                if (loader.GetTexture(0x9CDF) != null)
+                                if (loader.GetGumpTexture(0x9CDF, out _) != null)
                                 {
                                     graphic = 0x9CDF;
                                 }
@@ -1306,7 +1306,7 @@ namespace ClassicUO.Network
                                 break;
 
                             case 0x0051:
-                                if (loader.GetTexture(0x06E7) != null)
+                                if (loader.GetGumpTexture(0x06E7, out _) != null)
                                 {
                                     graphic = 0x06E7;
                                 }
@@ -1314,7 +1314,7 @@ namespace ClassicUO.Network
                                 break;
 
                             case 0x003E:
-                                if (loader.GetTexture(0x06E9) != null)
+                                if (loader.GetGumpTexture(0x06E9, out _) != null)
                                 {
                                     graphic = 0x06E9;
                                 }
@@ -1322,7 +1322,7 @@ namespace ClassicUO.Network
                                 break;
 
                             case 0x004D:
-                                if (loader.GetTexture(0x06EA) != null)
+                                if (loader.GetGumpTexture(0x06EA, out _) != null)
                                 {
                                     graphic = 0x06EA;
                                 }
@@ -1330,7 +1330,7 @@ namespace ClassicUO.Network
                                 break;
 
                             case 0x004E:
-                                if (loader.GetTexture(0x06E6) != null)
+                                if (loader.GetGumpTexture(0x06E6, out _) != null)
                                 {
                                     graphic = 0x06E6;
                                 }
@@ -1338,7 +1338,7 @@ namespace ClassicUO.Network
                                 break;
 
                             case 0x004F:
-                                if (loader.GetTexture(0x06E5) != null)
+                                if (loader.GetGumpTexture(0x06E5, out _) != null)
                                 {
                                     graphic = 0x06E5;
                                 }
@@ -1346,7 +1346,7 @@ namespace ClassicUO.Network
                                 break;
 
                             case 0x004A:
-                                if (loader.GetTexture(0x9CDD) != null)
+                                if (loader.GetGumpTexture(0x9CDD, out _) != null)
                                 {
                                     graphic = 0x9CDD;
                                 }
@@ -1354,7 +1354,7 @@ namespace ClassicUO.Network
                                 break;
 
                             case 0x0044:
-                                if (loader.GetTexture(0x9CE3) != null)
+                                if (loader.GetGumpTexture(0x9CE3, out _) != null)
                                 {
                                     graphic = 0x9CE3;
                                 }
@@ -2141,103 +2141,14 @@ namespace ClassicUO.Network
             }
 
             Weather weather = scene.Weather;
-            byte type = p.ReadUInt8();
+            WEATHER_TYPE type = (WEATHER_TYPE) p.ReadUInt8();
 
             if (weather.CurrentWeather != type)
             {
-                weather.Reset();
+                byte count = p.ReadUInt8();
+                byte temp = p.ReadUInt8();
 
-                weather.Type = type;
-                weather.Count = p.ReadUInt8();
-
-                bool showMessage = weather.Count > 0;
-
-                if (weather.Count > 70)
-                {
-                    weather.Count = 70;
-                }
-
-                weather.Temperature = p.ReadUInt8();
-                weather.Timer = Time.Ticks + Constants.WEATHER_TIMER;
-                weather.Generate();
-
-                switch (type)
-                {
-                    case 0:
-                        if (showMessage)
-                        {
-                            GameActions.Print
-                            (
-                                ResGeneral.ItBeginsToRain,
-                                1154,
-                                MessageType.System,
-                                3,
-                                false
-                            );
-
-                            weather.CurrentWeather = 0;
-                        }
-
-                        break;
-
-                    case 1:
-                        if (showMessage)
-                        {
-                            GameActions.Print
-                            (
-                                ResGeneral.AFierceStormApproaches,
-                                1154,
-                                MessageType.System,
-                                3,
-                                false
-                            );
-
-                            weather.CurrentWeather = 1;
-                        }
-
-                        break;
-
-                    case 2:
-                        if (showMessage)
-                        {
-                            GameActions.Print
-                            (
-                                ResGeneral.ItBeginsToSnow,
-                                1154,
-                                MessageType.System,
-                                3,
-                                false
-                            );
-
-                            weather.CurrentWeather = 2;
-                        }
-
-                        break;
-
-                    case 3:
-                        if (showMessage)
-                        {
-                            GameActions.Print
-                            (
-                                ResGeneral.AStormIsBrewing,
-                                1154,
-                                MessageType.System,
-                                3,
-                                false
-                            );
-
-                            weather.CurrentWeather = 3;
-                        }
-
-                        break;
-
-                    case 0xFE:
-                    case 0xFF:
-                        weather.Timer = 0;
-                        weather.CurrentWeather = null;
-
-                        break;
-                }
+                weather.Generate(type, count, temp);
             }
         }
 
@@ -2321,10 +2232,9 @@ namespace ClassicUO.Network
                 (byte) frame_count,
                 (byte) repeat_count,
                 repeat,
-                forward
+                forward,
+                true
             );
-
-            mobile.AnimationFromServer = true;
         }
 
         private static void GraphicEffect(ref StackDataReader p)
@@ -2907,12 +2817,12 @@ namespace ClassicUO.Network
                     ushort graphic = p.ReadUInt16BE();
                     ushort hue = p.ReadUInt16BE();
                     name = p.ReadASCII(p.ReadUInt8());
+      
+                    _ = ArtLoader.Instance.GetStaticTexture(graphic, out var bounds);
 
-                    Rectangle rect = ArtLoader.Instance.GetTexture(graphic)?.Bounds ?? Rectangle.Empty;
-
-                    if (rect.Width != 0 && rect.Height != 0)
+                    if (bounds.Width != 0 && bounds.Height != 0)
                     {
-                        int posY = rect.Height;
+                        int posY = bounds.Height;
 
                         if (posY >= 47)
                         {
@@ -2933,7 +2843,7 @@ namespace ClassicUO.Network
                             i + 1
                         );
 
-                        posX += rect.Width;
+                        posX += bounds.Width;
                     }
                 }
 
@@ -3221,10 +3131,10 @@ namespace ClassicUO.Network
             p.Skip(2);
             ushort graphic = p.ReadUInt16BE();
 
-            Rectangle rect = GumpsLoader.Instance.GetTexture(0x0906).Bounds;
+            _ = GumpsLoader.Instance.GetGumpTexture(0x0906, out var bounds);
 
-            int x = (Client.Game.Window.ClientBounds.Width >> 1) - (rect.Width >> 1);
-            int y = (Client.Game.Window.ClientBounds.Height >> 1) - (rect.Height >> 1);
+            int x = (Client.Game.Window.ClientBounds.Width >> 1) - (bounds.Width >> 1);
+            int y = (Client.Game.Window.ClientBounds.Height >> 1) - (bounds.Height >> 1);
 
             ColorPickerGump gump = UIManager.GetGump<ColorPickerGump>(serial);
 
@@ -4419,9 +4329,9 @@ namespace ClassicUO.Network
 
                                 if (mobile != null)
                                 {
-                                    // TODO: animation for statues
-                                    //mobile.SetAnimation(Mobile.GetReplacedObjectAnimation(mobile.Graphic, animation), 0, (byte) frame, 0, false, false);
-                                    //mobile.AnimationFromServer = true;
+                                    mobile.SetAnimation(Mobile.GetReplacedObjectAnimation(mobile.Graphic, animation));
+                                    mobile.ExecuteAnimation = false;
+                                    mobile.AnimIndex = (byte) frame;
                                 }
                             }
                             else if (World.Player != null && serial == World.Player)
@@ -4635,23 +4545,17 @@ namespace ClassicUO.Network
                     byte animID = p.ReadUInt8();
                     byte frameCount = p.ReadUInt8();
 
-                    //foreach (Mobile m in World.Mobiles)
-                    //{
-                    //    if ((m.Serial & 0xFFFF) == serial)
-                    //    {
-                    //       // byte group = Mobile.GetObjectNewAnimation(m, animID, action, mode);
-                    //        m.SetAnimation(animID);
-                    //        //m.AnimationRepeatMode = 1;
-                    //        //m.AnimationForwardDirection = true;
-                    //        //if ((type == 1 || type == 2) && mobile.Graphic == 0x0015)
-                    //        //    mobile.AnimationRepeat = true;
-                    //        //mobile.AnimationFromServer = true;
+                    foreach (Mobile m in World.Mobiles.Values)
+                    {
+                        if ((m.Serial & 0xFFFF) == serial)
+                        {
+                            m.SetAnimation(animID);
+                            m.AnimIndex = frameCount;
+                            m.ExecuteAnimation = false;
 
-                    //        //m.SetAnimation(Mobile.GetReplacedObjectAnimation(m.Graphic, animID), 0, frameCount);
-                    //       // m.AnimationFromServer = true;
-                    //        break;
-                    //    }
-                    //}
+                            break;
+                        }
+                    }
 
                     break;
 
@@ -5531,16 +5435,8 @@ namespace ClassicUO.Network
             ushort action = p.ReadUInt16BE();
             byte mode = p.ReadUInt8();
             byte group = Mobile.GetObjectNewAnimation(mobile, type, action, mode);
-            mobile.SetAnimation(group);
-            mobile.AnimationRepeatMode = 1;
-            mobile.AnimationForwardDirection = true;
 
-            if ((type == 1 || type == 2) && mobile.Graphic == 0x0015)
-            {
-                mobile.AnimationRepeat = true;
-            }
-
-            mobile.AnimationFromServer = true;
+            mobile.SetAnimation(group, repeatCount: 1, repeat: (type == 1 || type == 2) && mobile.Graphic == 0x0015, forward: true, fromServer: true);
         }
 
         private static void KREncryptionResponse(ref StackDataReader p)

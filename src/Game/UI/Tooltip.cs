@@ -76,18 +76,18 @@ namespace ClassicUO.Game.UI
 
 
             byte font = 1;
-            float alpha = 0.3f;
+            float alpha = 0.7f;
             ushort hue = 0xFFFF;
             float zoom = 1;
 
             if (ProfileManager.CurrentProfile != null)
             {
                 font = ProfileManager.CurrentProfile.TooltipFont;
-                alpha = 1f - ProfileManager.CurrentProfile.TooltipBackgroundOpacity / 100f;
+                alpha = ProfileManager.CurrentProfile.TooltipBackgroundOpacity / 100f;
 
                 if (float.IsNaN(alpha))
                 {
-                    alpha = 1f;
+                    alpha = 0f;
                 }
 
                 hue = ProfileManager.CurrentProfile.TooltipTextHue;
@@ -180,18 +180,21 @@ namespace ClassicUO.Game.UI
             }
 
 
-            Vector3 hue_vec = Vector3.Zero;
-            ShaderHueTranslator.GetHueVector(ref hue_vec, 0, false, alpha);
+            Vector3 hue_vec = ShaderHueTranslator.GetHueVector(0, false, alpha);
 
-            batcher.Draw2D
+            batcher.Draw
             (
                 SolidColorTextureCache.GetTexture(Color.Black),
-                x - 4,
-                y - 2,
-                z_width * zoom,
-                z_height * zoom,
-                ref hue_vec
+                new Rectangle
+                (
+                    x - 4,
+                    y - 2,
+                    (int)(z_width * zoom),
+                    (int)(z_height * zoom)
+                ),
+                hue_vec
             );
+
 
             batcher.DrawRectangle
             (
@@ -200,26 +203,24 @@ namespace ClassicUO.Game.UI
                 y - 2,
                 (int) (z_width * zoom),
                 (int) (z_height * zoom),
-                ref hue_vec
+                hue_vec
             );
 
-            hue_vec.X = 0;
-            hue_vec.Y = 0;
-            hue_vec.Z = 0;
-
-            return batcher.Draw2D
+            batcher.Draw
             (
                 _renderedText.Texture,
-                x + 3,
-                y + 3,
-                z_width * zoom,
-                z_height * zoom,
-                0,
-                0,
-                z_width,
-                z_height,
-                ref hue_vec
+                new Rectangle
+                (
+                    x + 3,
+                    y + 3,
+                    (int)(_renderedText.Texture.Width * zoom),
+                    (int)(_renderedText.Texture.Height * zoom)
+                ),
+                null,
+                Vector3.UnitZ
             );
+
+            return true;
         }
 
         public void Clear()

@@ -136,7 +136,7 @@ namespace ClassicUO.Game.UI.Controls
             AcceptMouseInput = true;
 
 
-            _background = new AlphaBlendControl(0.3f);
+            _background = new AlphaBlendControl(0.7f);
             Add(_background);
 
             int y = 0;
@@ -181,7 +181,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            ResetHueVector();
+            Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
             batcher.DrawRectangle
             (
@@ -190,7 +190,7 @@ namespace ClassicUO.Game.UI.Controls
                 y - 1,
                 _background.Width + 1,
                 _background.Height + 1,
-                ref HueVector
+                hueVector
             );
 
             return base.Draw(batcher, x, y);
@@ -354,16 +354,19 @@ namespace ClassicUO.Game.UI.Controls
             {
                 if (!string.IsNullOrWhiteSpace(_label.Text) && MouseIsOver)
                 {
-                    ResetHueVector();
+                    Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
-                    batcher.Draw2D
+                    batcher.Draw
                     (
                         SolidColorTextureCache.GetTexture(Color.Gray),
-                        x + 2,
-                        y + 5,
-                        Width - 4,
-                        Height - 10,
-                        ref HueVector
+                        new Rectangle
+                        (
+                            x + 2,
+                            y + 5,
+                            Width - 4,
+                            Height - 10
+                        ),
+                        hueVector
                     );
                 }
 

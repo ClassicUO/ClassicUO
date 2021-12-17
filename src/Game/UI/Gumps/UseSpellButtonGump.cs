@@ -46,6 +46,8 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class UseSpellButtonGump : AnchorableGump
     {
+        const ushort LOCK_GRAPHIC = 0x1086;
+
         private GumpPic _background;
         private SpellDefinition _spell;
 
@@ -102,21 +104,25 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (ShowEdit)
             {
-                ResetHueVector();
+                Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
-                UOTexture lockTexture = GumpsLoader.Instance.GetTexture(0x1086);
+                var texture = GumpsLoader.Instance.GetGumpTexture(LOCK_GRAPHIC, out var bounds);
 
-                if (lockTexture != null)
+                if (texture != null)
                 {
-                    lockTexture.Ticks = Time.Ticks;
-
                     if (UIManager.MouseOverControl != null && (UIManager.MouseOverControl == this || UIManager.MouseOverControl.RootParent == this))
                     {
-                        HueVector.X = 34;
-                        HueVector.Y = 1;
+                        hueVector.X = 34;
+                        hueVector.Y = 1;
                     }
 
-                    batcher.Draw2D(lockTexture, x + (Width - lockTexture.Width), y, ref HueVector);
+                    batcher.Draw
+                    (
+                        texture, 
+                        new Vector2(x + (Width - bounds.Width), y),
+                        bounds,
+                        hueVector
+                    );
                 }
             }
 

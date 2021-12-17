@@ -34,6 +34,7 @@ using System.Collections.Generic;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -41,52 +42,55 @@ namespace ClassicUO.Game.UI.Controls
     {
         private readonly ushort _hue;
         private readonly bool _isPartial;
-        private readonly UOTexture _texture;
         private readonly int _tileX, _tileY;
+        private ushort _graphic;
 
         public ButtonTileArt(List<string> gparams) : base(gparams)
         {
             X = int.Parse(gparams[1]);
             Y = int.Parse(gparams[2]);
-            ushort graphic = UInt16Converter.Parse(gparams[8]);
+            _graphic = UInt16Converter.Parse(gparams[8]);
             _hue = UInt16Converter.Parse(gparams[9]);
             _tileX = int.Parse(gparams[10]);
             _tileY = int.Parse(gparams[11]);
             ContainsByBounds = true;
             IsFromServer = true;
-            _texture = ArtLoader.Instance.GetTexture(graphic);
 
-            if (_texture == null)
+            var texture = ArtLoader.Instance.GetStaticTexture(_graphic, out _);
+
+            if (texture == null)
             {
                 Dispose();
 
                 return;
             }
 
-            _isPartial = TileDataLoader.Instance.StaticData[graphic].IsPartialHue;
-        }
-
-        public override void Update(double totalTime, double frameTime)
-        {
-            base.Update(totalTime, frameTime);
-
-            if (_texture != null)
-            {
-                _texture.Ticks = Time.Ticks;
-            }
+            _isPartial = TileDataLoader.Instance.StaticData[_graphic].IsPartialHue;
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            ResetHueVector();
-
             base.Draw(batcher, x, y);
 
-            ResetHueVector();
+            Vector3 hueVector = ShaderHueTranslator.GetHueVector(_hue, _isPartial, 1f);
 
-            ShaderHueTranslator.GetHueVector(ref HueVector, _hue, _isPartial, 0);
+            var texture = ArtLoader.Instance.GetStaticTexture(_graphic, out var bounds);
 
-            return batcher.Draw2D(_texture, x + _tileX, y + _tileY, ref HueVector);
+            if (texture != null)
+            {
+                batcher.Draw
+                (
+                    texture, 
+                    new Vector2(x + _tileX, y + _tileY),
+                    bounds,
+                    hueVector
+                );
+
+                return true;
+            }
+
+            return false;
+
         }
     }
 }

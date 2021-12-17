@@ -39,7 +39,6 @@ using ClassicUO.Game.Managers;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
-using IUpdateable = ClassicUO.Interfaces.IUpdateable;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -48,7 +47,7 @@ namespace ClassicUO.Game.GameObjects
         public Point RealScreenPosition;
     }
 
-    internal abstract partial class GameObject : BaseGameObject, IUpdateable
+    internal abstract partial class GameObject : BaseGameObject
     {
         private Point _screenPosition;
 
@@ -90,6 +89,8 @@ namespace ClassicUO.Game.GameObjects
         {
         }
 
+        public abstract bool CheckMouseSelection();
+
         public int CurrentRenderIndex;
         // FIXME: remove it
         public sbyte FoliageIndex = -1;
@@ -102,11 +103,19 @@ namespace ClassicUO.Game.GameObjects
         public byte UseInRender;
         public ushort X, Y;
         public sbyte Z;
-
-#if RENDER_LIST_LINKED_LIST
         public GameObject RenderListNext;
-#endif
 
+    
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Vector2 GetScreenPosition()
+        {
+           return new Vector2
+            (
+                RealScreenPosition.X + Offset.X,
+                RealScreenPosition.Y + (Offset.Y - Offset.Z)
+            );
+        }
 
         public void AddToTile(int x, int y)
         {
@@ -200,12 +209,9 @@ namespace ClassicUO.Game.GameObjects
 
             Point p = RealScreenPosition;
 
-            ArtTexture texture = ArtLoader.Instance.GetTexture(Graphic);
+            var bounds = ArtLoader.Instance.GetRealArtBounds(Graphic);
 
-            if (texture != null)
-            {
-                p.Y -= texture.ImageRectangle.Height >> 1;
-            }
+            p.Y -= bounds.Height >> 1;
 
             p.X += (int) Offset.X + 22;
             p.Y += (int) (Offset.Y - Offset.Z) + 44;
@@ -353,10 +359,7 @@ namespace ClassicUO.Game.GameObjects
 
             Next = null;
             Previous = null;
-
-#if RENDER_LIST_LINKED_LIST
             RenderListNext = null;
-#endif
 
             Clear();
             RemoveFromTile();

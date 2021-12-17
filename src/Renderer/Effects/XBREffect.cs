@@ -30,11 +30,20 @@
 
 #endregion
 
-namespace ClassicUO.Interfaces
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+
+namespace ClassicUO.Renderer
 {
-    internal interface IPoolable
+    internal class XBREffect : Effect
     {
-        void OnPickup();
-        void OnReturn();
+        public XBREffect(GraphicsDevice graphicsDevice) : base(graphicsDevice, Resources.xBREffect)
+        {
+            MatrixTransform = Parameters["MatrixTransform"];
+            TextureSize = Parameters["textureSize"];
+        }
+
+        public EffectParameter MatrixTransform { get; }
+        public EffectParameter TextureSize { get; }
     }
 }

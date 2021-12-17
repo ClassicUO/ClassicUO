@@ -69,6 +69,7 @@ namespace ClassicUO
         private uint _totalFrames;
         private UltimaBatcher2D _uoSpriteBatch;
         private bool _suppressedDraw;
+        private UOFontRenderer _fontRenderer;
 
         public GameController()
         {
@@ -111,6 +112,7 @@ namespace ClassicUO
 
             base.Initialize();
         }
+        
 
         protected override void LoadContent()
         {
@@ -158,6 +160,12 @@ namespace ClassicUO
             GraphicsDevice.Textures[1] = _hueSamplers[0];
             GraphicsDevice.Textures[2] = _hueSamplers[1];
             GraphicsDevice.Textures[3] = _hueSamplers[2];
+
+            GumpsLoader.Instance.CreateAtlas(GraphicsDevice);
+            LightsLoader.Instance.CreateAtlas(GraphicsDevice);
+            AnimationsLoader.Instance.CreateAtlas(GraphicsDevice);
+
+            _fontRenderer = new UOFontRenderer(GraphicsDevice);
 
             UIManager.InitializeGameCursor();
             AnimatedStaticsManager.Initialize();
@@ -493,6 +501,26 @@ namespace ClassicUO
 
             SelectedObject.HealthbarObject = null;
             SelectedObject.SelectedContainer = null;
+
+            //_uoSpriteBatch.Begin();
+            //_fontRenderer.Draw
+            //(
+            //    _uoSpriteBatch,
+            //    $"New Engine ❤ 😁".AsSpan(),
+            //    new Vector2(200, 100),
+            //    5f,
+            //    new FontSettings() 
+            //    { 
+            //        IsUnicode = true, 
+            //        FontIndex = 0, 
+            //        Italic = false,
+            //        Bold = false, 
+            //        Border = true,
+            //        Underline = true,
+            //    },
+            //    new Vector3(0x44, 0, 0)
+            //);
+            //_uoSpriteBatch.End();
 
             base.Draw(gameTime);
 

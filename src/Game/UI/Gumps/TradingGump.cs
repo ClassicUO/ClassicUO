@@ -204,18 +204,18 @@ namespace ClassicUO.Game.UI.Gumps
                 int x = g.X;
                 int y = g.Y;
 
-                ArtTexture texture = loader.GetTexture(it.DisplayedGraphic);
+                var texture = loader.GetStaticTexture(it.DisplayedGraphic, out var bounds);
 
                 if (texture != null)
                 {
-                    if (x + texture.Width > _myBox.Width)
+                    if (x + bounds.Width > _myBox.Width)
                     {
-                        x = _myBox.Width - texture.Width;
+                        x = _myBox.Width - bounds.Width;
                     }
 
-                    if (y + texture.Height > _myBox.Height)
+                    if (y + bounds.Height > _myBox.Height)
                     {
-                        y = _myBox.Height - texture.Height;
+                        y = _myBox.Height - bounds.Height;
                     }
                 }
 
@@ -267,18 +267,18 @@ namespace ClassicUO.Game.UI.Gumps
                 int x = g.X;
                 int y = g.Y;
 
-                ArtTexture texture = loader.GetTexture(it.DisplayedGraphic);
+                var texture = loader.GetStaticTexture(it.DisplayedGraphic, out var bounds);
 
                 if (texture != null)
                 {
-                    if (x + texture.Width > _myBox.Width)
+                    if (x + bounds.Width > _myBox.Width)
                     {
-                        x = _myBox.Width - texture.Width;
+                        x = _myBox.Width - bounds.Width;
                     }
 
-                    if (y + texture.Height > _myBox.Height)
+                    if (y + bounds.Height > _myBox.Height)
                     {
-                        y = _myBox.Height - texture.Height;
+                        y = _myBox.Height - bounds.Height;
                     }
                 }
 
@@ -308,24 +308,24 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (_myBox != null && _myBox.Bounds.Contains(x, y))
                     {
-                        ArtTexture texture = ArtLoader.Instance.GetTexture(ItemHold.DisplayedGraphic);
+                        var texture = ArtLoader.Instance.GetStaticTexture(ItemHold.DisplayedGraphic, out var bounds);
 
                         x -= _myBox.X;
                         y -= _myBox.Y;
 
                         if (texture != null)
                         {
-                            x -= texture.Width >> 1;
-                            y -= texture.Height >> 1;
+                            x -= bounds.Width >> 1;
+                            y -= bounds.Height >> 1;
 
-                            if (x + texture.Width > _myBox.Width)
+                            if (x + bounds.Width > _myBox.Width)
                             {
-                                x = _myBox.Width - texture.Width;
+                                x = _myBox.Width - bounds.Width;
                             }
 
-                            if (y + texture.Height > _myBox.Height)
+                            if (y + bounds.Height > _myBox.Height)
                             {
-                                y = _myBox.Height - texture.Height;
+                                y = _myBox.Height - bounds.Height;
                             }
                         }
 

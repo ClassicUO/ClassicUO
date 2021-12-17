@@ -704,8 +704,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             internal void DrawSelection(UltimaBatcher2D batcher, int x, int y, int starty, int endy)
             {
-                ResetHueVector();
-                HueVector.Z = 0.5f;
+                Vector3 hueVector = ShaderHueTranslator.GetHueVector(0, false, 0.5f);
 
                 int selectStart = Math.Min(Stb.SelectStart, Stb.SelectEnd);
                 int selectEnd = Math.Max(Stb.SelectStart, Stb.SelectEnd);
@@ -747,14 +746,17 @@ namespace ClassicUO.Game.UI.Gumps
 
                                 if (drawY >= starty && drawY <= endy)
                                 {
-                                    batcher.Draw2D
+                                    batcher.Draw
                                     (
                                         SolidColorTextureCache.GetTexture(SELECTION_COLOR),
-                                        x + drawX,
-                                        y + drawY - starty,
-                                        endX,
-                                        info.MaxHeight + 1,
-                                        ref HueVector
+                                        new Rectangle
+                                        (
+                                            x + drawX,
+                                            y + drawY - starty,
+                                            endX,
+                                            info.MaxHeight + 1
+                                        ),
+                                        hueVector
                                     );
                                 }
 
@@ -765,14 +767,17 @@ namespace ClassicUO.Game.UI.Gumps
                             // do the whole line
                             if (drawY >= starty && drawY <= endy)
                             {
-                                batcher.Draw2D
+                                batcher.Draw
                                 (
                                     SolidColorTextureCache.GetTexture(SELECTION_COLOR),
-                                    x + drawX,
-                                    y + drawY - starty,
-                                    info.Width - drawX,
-                                    info.MaxHeight + 1,
-                                    ref HueVector
+                                    new Rectangle
+                                    (
+                                        x + drawX,
+                                        y + drawY - starty,
+                                        info.Width - drawX,
+                                        info.MaxHeight + 1
+                                    ),
+                                    hueVector
                                 );
                             }
 

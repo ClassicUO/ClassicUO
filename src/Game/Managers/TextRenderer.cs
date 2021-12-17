@@ -121,13 +121,13 @@ namespace ClassicUO.Game.Managers
 
                 ushort hue = 0;
 
-                float alpha = 1f - o.Alpha / 255f;
+                float alpha = o.Alpha / 255f;
 
                 if (o.IsTransparent)
                 {
                     if (o.Alpha == 0xFF)
                     {
-                        alpha = 1f - 0x7F / 255f;
+                        alpha = 0x7F / 255f;
                     }
                 }
 

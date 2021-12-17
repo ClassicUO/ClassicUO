@@ -33,14 +33,13 @@
 using System;
 using ClassicUO.Game.Managers;
 using ClassicUO.Input;
-using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using SDL2;
 
 namespace ClassicUO.Game.Scenes
 {
-    internal abstract class Scene : IUpdateable, IDisposable
+    internal abstract class Scene : IDisposable
     {
         private uint _time_cleanup = Time.Ticks + 5000;
 
@@ -80,15 +79,7 @@ namespace ClassicUO.Game.Scenes
 
             if (_time_cleanup < Time.Ticks)
             {
-                ArtLoader.Instance.CleaUnusedResources(Constants.MAX_ART_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR);
-                GumpsLoader.Instance.CleaUnusedResources(Constants.MAX_GUMP_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR);
-                TexmapsLoader.Instance.CleaUnusedResources(Constants.MAX_ART_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR);
-
-                AnimationsLoader.Instance.CleaUnusedResources(Constants.MAX_ANIMATIONS_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR);
-
                 World.Map?.ClearUnusedBlocks();
-                LightsLoader.Instance.CleaUnusedResources(20);
-
                 _time_cleanup = Time.Ticks + 500;
             }
         }

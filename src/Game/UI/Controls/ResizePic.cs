@@ -36,42 +36,28 @@ using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.UI.Controls
 {
     internal class ResizePic : Control
     {
-        private readonly UOTexture[] _gumpTexture = new UOTexture[9];
+        private int _maxIndex;
 
         public ResizePic(ushort graphic)
         {
             CanMove = true;
             CanCloseWithRightClick = true;
+            Graphic = graphic;
 
-            for (int i = 0; i < _gumpTexture.Length; i++)
+
+            for (_maxIndex = 0; _maxIndex < 9; ++_maxIndex)
             {
-                UOTexture t = GumpsLoader.Instance.GetTexture((ushort) (graphic + i));
-
-                if (t == null)
+                if (GumpsLoader.Instance.GetGumpTexture((ushort)(Graphic + _maxIndex), out _) == null)
                 {
-                    return;
-                }
-
-                if (i == 4)
-                {
-                    _gumpTexture[8] = t;
-                }
-                else if (i > 4)
-                {
-                    _gumpTexture[i - 1] = t;
-                }
-                else
-                {
-                    _gumpTexture[i] = t;
+                    break;
                 }
             }
-
-            Graphic = graphic;
         }
 
         public ResizePic(List<string> parts) : this(UInt16Converter.Parse(parts[3]))
@@ -85,239 +71,134 @@ namespace ClassicUO.Game.UI.Controls
 
         public ushort Graphic { get; }
 
-        public override void Update(double totalTime, double frameTime)
-        {
-            for (int i = 0; i < _gumpTexture.Length; i++)
-            {
-                if (_gumpTexture[i] != null)
-                {
-                    _gumpTexture[i].Ticks = (long) totalTime;
-                }
-            }
-
-            base.Update(totalTime, frameTime);
-        }
 
         public override bool Contains(int x, int y)
         {
             x -= Offset.X;
             y -= Offset.Y;
 
-            int th_0_width = _gumpTexture[0]?.Width ?? 0;
 
-            int th_0_height = _gumpTexture[0]?.Height ?? 0;
+            var texture0 = GetTexture(0, out var bounds0);
+            var texture1 = GetTexture(1, out var bounds1);
+            var texture2 = GetTexture(2, out var bounds2);
+            var texture3 = GetTexture(3, out var bounds3);
+            var texture4 = GetTexture(4, out var bounds4);
+            var texture5 = GetTexture(5, out var bounds5);
+            var texture6 = GetTexture(6, out var bounds6);
+            var texture7 = GetTexture(7, out var bounds7);
+            var texture8 = GetTexture(8, out var bounds8);
 
-            int th_1_width = _gumpTexture[1]?.Width ?? 0;
-
-            int th_1_height = _gumpTexture[1]?.Height ?? 0;
-
-            int th_2_width = _gumpTexture[2]?.Width ?? 0;
-
-            int th_2_height = _gumpTexture[2]?.Height ?? 0;
-
-            int th_3_width = _gumpTexture[3]?.Width ?? 0;
-
-            int th_3_height = _gumpTexture[3]?.Height ?? 0;
-
-            int th_4_width = _gumpTexture[4]?.Width ?? 0;
-
-            int th_4_height = _gumpTexture[4]?.Height ?? 0;
-
-            int th_5_width = _gumpTexture[5]?.Width ?? 0;
-
-            int th_5_height = _gumpTexture[5]?.Height ?? 0;
-
-            int th_6_width = _gumpTexture[6]?.Width ?? 0;
-
-            int th_6_height = _gumpTexture[6]?.Height ?? 0;
-
-            int th_7_width = _gumpTexture[7]?.Width ?? 0;
-
-            int th_7_height = _gumpTexture[7]?.Height ?? 0;
-
-            int th_8_width = _gumpTexture[8]?.Width ?? 0;
-
-            int th_8_height = _gumpTexture[8]?.Height ?? 0;
+            int offsetTop = Math.Max(bounds0.Height, bounds2.Height) - bounds1.Height;
+            int offsetBottom = Math.Max(bounds5.Height, bounds7.Height) - bounds6.Height;
+            int offsetLeft = Math.Abs(Math.Max(bounds0.Width, bounds5.Width) - bounds2.Width);
+            int offsetRight = Math.Max(bounds2.Width, bounds7.Width) - bounds4.Width;
 
 
-            int offsetTop = Math.Max(th_0_height, th_2_height) - th_1_height;
-            int offsetBottom = Math.Max(th_5_height, th_7_height) - th_6_height;
-            int offsetLeft = Math.Abs(Math.Max(th_0_width, th_5_width) - th_2_width);
-            int offsetRight = Math.Max(th_2_width, th_7_width) - th_4_width;
-
-
-            for (int i = 0; i < 9; i++)
+            if (PixelsInXY(ref bounds0, Graphic, x, y))
             {
-                if (_gumpTexture[i] == null)
-                {
-                    continue;
-                }
-
-                switch (i)
-                {
-                    case 0:
-                        if (PixelsInXY(GumpsLoader.Instance.GetTexture(Graphic), Graphic, x, y))
-                        {
-                            return true;
-                        }
-
-                        break;
-
-                    case 1:
-                        int DW = Width - th_0_width - th_2_width;
-
-                        if (DW < 1)
-                        {
-                            break;
-                        }
-
-                        if (PixelsInXY(GumpsLoader.Instance.GetTexture((ushort) (Graphic + 1)), (ushort)(Graphic + 1), x - th_0_width, y, DW))
-                        {
-                            return true;
-                        }
-
-                        break;
-
-                    case 2:
-
-                        if (PixelsInXY(GumpsLoader.Instance.GetTexture((ushort) (Graphic + 2)), (ushort)(Graphic + 2), x - (Width - th_2_width), y - offsetTop))
-                        {
-                            return true;
-                        }
-
-                        break;
-
-                    case 3:
-
-                        int DH = Height - th_0_height - th_5_height;
-
-                        if (DH < 1)
-                        {
-                            break;
-                        }
-
-                        if (PixelsInXY
-                        (
-                            GumpsLoader.Instance.GetTexture((ushort) (Graphic + 3)), (ushort)(Graphic + 3),
-                            x /*- offsetLeft*/,
-                            y - th_0_height,
-                            0,
-                            DH
-                        ))
-                        {
-                            return true;
-                        }
+                return true;
+            }
 
 
-                        break;
+            int DW = Width - bounds0.Width - bounds2.Width;
 
-                    case 4:
-
-                        DH = Height - th_2_height - th_7_height;
-
-                        if (DH < 1)
-                        {
-                            break;
-                        }
-
-                        if (PixelsInXY
-                        (
-                            GumpsLoader.Instance.GetTexture((ushort) (Graphic + 5)), (ushort)(Graphic + 5),
-                            x - (Width - th_4_width /*- offsetRight*/),
-                            y - th_2_height,
-                            0,
-                            DH
-                        ))
-                        {
-                            return true;
-                        }
-
-                        break;
-
-                    case 5:
-
-                        if (PixelsInXY(GumpsLoader.Instance.GetTexture((ushort) (Graphic + 6)), (ushort)(Graphic + 6), x, y - (Height - th_5_height)))
-                        {
-                            return true;
-                        }
-
-                        break;
-
-                    case 6:
-
-                        DW = Width - th_5_width - th_2_width;
-
-                        if (DW < 1)
-                        {
-                            break;
-                        }
-
-                        if (PixelsInXY(GumpsLoader.Instance.GetTexture((ushort) (Graphic + 7)), (ushort)(Graphic + 7), x - th_5_width, y - (Height - th_6_height - offsetBottom), DW))
-                        {
-                            return true;
-                        }
+            if (DW >= 1 && PixelsInXY(ref bounds1, (ushort)(Graphic + 1), x - bounds0.Width, y, DW))
+            {
+                return true;
+            }
 
 
-                        break;
-
-                    case 7:
-
-                        if (PixelsInXY(GumpsLoader.Instance.GetTexture((ushort) (Graphic + 8)), (ushort)(Graphic + 8), x - (Width - th_7_width), y - (Height - th_7_height)))
-                        {
-                            return true;
-                        }
-
-                        break;
-
-                    case 8:
-
-                        DW = Width - th_0_width - th_2_width;
-
-                        DW += offsetLeft + offsetRight;
-
-                        if (DW < 1)
-                        {
-                            break;
-                        }
-
-                        DH = Height - th_2_height - th_7_height;
-
-                        if (DH < 1)
-                        {
-                            break;
-                        }
-
-                        if (PixelsInXY
-                        (
-                            GumpsLoader.Instance.GetTexture((ushort) (Graphic + 4)), 
-                            (ushort)(Graphic + 4),
-                            x - th_0_width,
-                            y - th_0_height,
-                            DW,
-                            DH
-                        ))
-                        {
-                            return true;
-                        }
+            if (PixelsInXY(ref bounds2, (ushort)(Graphic + 2), x - (Width - bounds2.Width), y - offsetTop))
+            {
+                return true;
+            }
 
 
-                        break;
-                }
+            int DH = Height - bounds0.Height - bounds5.Height;
+
+            if (DH >= 1 && PixelsInXY
+            (
+                ref bounds3, (ushort)(Graphic + 3),
+                x /*- offsetLeft*/,
+                y - bounds0.Height,
+                0,
+                DH
+            ))
+            {
+                return true;
+            }
+
+
+            DH = Height - bounds2.Height - bounds7.Height;
+          
+            if (DH >= 1 && PixelsInXY
+            (
+                ref bounds4, (ushort)(Graphic + 5),
+                x - (Width - bounds4.Width /*- offsetRight*/),
+                y - bounds2.Height,
+                0,
+                DH
+            ))
+            {
+                return true;
+            }
+
+
+            if (PixelsInXY(ref bounds5, (ushort)(Graphic + 6), x, y - (Height - bounds5.Height)))
+            {
+                return true;
+            }
+
+
+            DW = Width - bounds5.Width - bounds2.Width;
+
+            if (DH >= 1 && PixelsInXY(ref bounds6, (ushort)(Graphic + 7), x - bounds5.Width, y - (Height - bounds6.Height - offsetBottom), DW))
+            {
+                return true;
+            }
+
+           
+            if (PixelsInXY(ref bounds7, (ushort)(Graphic + 8), x - (Width - bounds7.Width), y - (Height - bounds7.Height)))
+            {
+                return true;
+            }
+
+
+            DW = Width - bounds0.Width - bounds2.Width;
+            DW += offsetLeft + offsetRight;
+            DH = Height - bounds2.Height - bounds7.Height;
+
+            if (DW >= 1 && DH >= 1 && PixelsInXY
+            (
+                ref bounds8,
+                (ushort)(Graphic + 4),
+                x - bounds0.Width,
+                y - bounds0.Height,
+                DW,
+                DH
+            ))
+            {
+                return true;
             }
 
             return false;
         }
 
 
-        private static bool PixelsInXY(UOTexture texture, ushort graphic, int x, int y, int width = 0, int height = 0)
+        private static bool PixelsInXY(ref Rectangle bounds, ushort graphic, int x, int y, int width = 0, int height = 0)
         {
             if (x < 0 || y < 0 || width > 0 && x >= width || height > 0 && y >= height)
             {
                 return false;
             }
 
-            int textureWidth = texture.Width;
-            int textureHeight = texture.Height;
+            if (bounds.Width == 0 || bounds.Height == 0)
+            {
+                return false;
+            }
+
+            int textureWidth = bounds.Width;
+            int textureHeight = bounds.Height;
 
             if (width == 0)
             {
@@ -357,20 +238,17 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            ResetHueVector();
-
             if (batcher.ClipBegin(x, y, Width, Height))
             {
-                ShaderHueTranslator.GetHueVector
-                (
-                    ref HueVector,
-                    0,
-                    false,
-                    Alpha,
-                    true
-                );
+                Vector3 hueVector = ShaderHueTranslator.GetHueVector
+                                    (
+                                        0,
+                                        false,
+                                        Alpha,
+                                        true
+                                    );
 
-                DrawInternal(batcher, x, y, ref HueVector);
+                DrawInternal(batcher, x, y, hueVector);
                 base.Draw(batcher, x, y);
 
                 batcher.ClipEnd();
@@ -379,216 +257,174 @@ namespace ClassicUO.Game.UI.Controls
             return true;
         }
 
-        private void DrawInternal(UltimaBatcher2D batcher, int x, int y, ref Vector3 color)
+        private void DrawInternal(UltimaBatcher2D batcher, int x, int y, Vector3 color)
         {
-            int th_0_width = _gumpTexture[0]?.Width ?? 0;
+            var texture0 = GetTexture(0, out var bounds0);
+            var texture1 = GetTexture(1, out var bounds1);
+            var texture2 = GetTexture(2, out var bounds2);
+            var texture3 = GetTexture(3, out var bounds3);
+            var texture4 = GetTexture(4, out var bounds4);
+            var texture5 = GetTexture(5, out var bounds5);
+            var texture6 = GetTexture(6, out var bounds6);
+            var texture7 = GetTexture(7, out var bounds7);
+            var texture8 = GetTexture(8, out var bounds8);
 
-            int th_0_height = _gumpTexture[0]?.Height ?? 0;
-
-            int th_1_width = _gumpTexture[1]?.Width ?? 0;
-
-            int th_1_height = _gumpTexture[1]?.Height ?? 0;
-
-            int th_2_width = _gumpTexture[2]?.Width ?? 0;
-
-            int th_2_height = _gumpTexture[2]?.Height ?? 0;
-
-            int th_3_width = _gumpTexture[3]?.Width ?? 0;
-
-            int th_3_height = _gumpTexture[3]?.Height ?? 0;
-
-            int th_4_width = _gumpTexture[4]?.Width ?? 0;
-
-            int th_4_height = _gumpTexture[4]?.Height ?? 0;
-
-            int th_5_width = _gumpTexture[5]?.Width ?? 0;
-
-            int th_5_height = _gumpTexture[5]?.Height ?? 0;
-
-            int th_6_width = _gumpTexture[6]?.Width ?? 0;
-
-            int th_6_height = _gumpTexture[6]?.Height ?? 0;
-
-            int th_7_width = _gumpTexture[7]?.Width ?? 0;
-
-            int th_7_height = _gumpTexture[7]?.Height ?? 0;
-
-            int th_8_width = _gumpTexture[8]?.Width ?? 0;
-
-            int th_8_height = _gumpTexture[8]?.Height ?? 0;
+            int offsetTop = Math.Max(bounds0.Height, bounds2.Height) - bounds1.Height;
+            int offsetBottom = Math.Max(bounds5.Height, bounds7.Height) - bounds6.Height;
+            int offsetLeft = Math.Abs(Math.Max(bounds0.Width, bounds5.Width) - bounds2.Width);
+            int offsetRight = Math.Max(bounds2.Width, bounds7.Width) - bounds4.Width;
 
 
-            int offsetTop = Math.Max(th_0_height, th_2_height) - th_1_height;
-            int offsetBottom = Math.Max(th_5_height, th_7_height) - th_6_height;
-            int offsetLeft = Math.Abs(Math.Max(th_0_width, th_5_width) - th_2_width);
-            int offsetRight = Math.Max(th_2_width, th_7_width) - th_4_width;
 
-
-            for (int i = 0; i < 9; i++)
+            if (texture0 != null)
             {
-                UOTexture t = _gumpTexture[i];
+                batcher.Draw
+               (
+                   texture0,
+                   new Vector2(x, y),
+                   bounds0,
+                   color
+               );
+            }
+           
+            if (texture1 != null)
+            {
+                batcher.DrawTiled
+                (
+                    texture1,
+                    new Rectangle
+                    (
+                        x + bounds0.Width,
+                        y,
+                        Width - bounds0.Width - bounds2.Width,
+                        bounds1.Height
+                    ),
+                    bounds1,
+                    color
+                );
+            }         
 
-                if (t == null)
-                {
-                    continue;
-                }
+            if (texture2 != null)
+            {
+                batcher.Draw
+                (
+                    texture2,
+                    new Vector2(x + (Width - bounds2.Width), y + offsetTop),
+                    bounds2,
+                    color
+                );
+            }
 
-                int drawWidth = t.Width;
-                int drawHeight = t.Height;
-                int drawX = x;
-                int drawY = y;
+            if (texture3 != null)
+            {
+                batcher.DrawTiled
+                (
+                    texture3,
+                    new Rectangle
+                    (
+                        x,
+                        y + bounds0.Height,
+                        bounds3.Width,
+                        Height - bounds0.Height - bounds5.Height
+                    ),
+                    bounds3,
+                    color
+                );
+            }
+            
+            if (texture4 != null)
+            {
+                batcher.DrawTiled
+                (
+                    texture4,
+                    new Rectangle
+                    (
+                        x + (Width - bounds4.Width),
+                        y + bounds2.Height,
+                        bounds4.Width,
+                        Height - bounds2.Height - bounds7.Height
+                    ),
+                    bounds4,
+                    color
+                );
+            }
 
-                switch (i)
-                {
-                    case 0:
-
-                        batcher.Draw2D
-                        (
-                            t,
-                            drawX,
-                            drawY,
-                            drawWidth,
-                            drawHeight,
-                            ref color
-                        );
-
-                        break;
-
-                    case 1:
-                        drawX += th_0_width;
-                        drawWidth = Width - th_0_width - th_2_width;
-
-                        batcher.Draw2DTiled
-                        (
-                            t,
-                            drawX,
-                            drawY,
-                            drawWidth,
-                            drawHeight,
-                            ref color
-                        );
-
-                        break;
-
-                    case 2:
-                        drawX += Width - drawWidth;
-                        drawY += offsetTop;
-
-                        batcher.Draw2D
-                        (
-                            t,
-                            drawX,
-                            drawY,
-                            drawWidth,
-                            drawHeight,
-                            ref color
-                        );
-
-                        break;
-
-                    case 3:
-                        //drawX += offsetLeft;
-                        drawY += th_0_height;
-                        drawHeight = Height - th_0_height - th_5_height;
-
-                        batcher.Draw2DTiled
-                        (
-                            t,
-                            drawX,
-                            drawY,
-                            drawWidth,
-                            drawHeight,
-                            ref color
-                        );
-
-                        break;
-
-                    case 4:
-                        drawX += Width - drawWidth /*- offsetRight*/;
-                        drawY += th_2_height;
-                        drawHeight = Height - th_2_height - th_7_height;
-
-                        batcher.Draw2DTiled
-                        (
-                            t,
-                            drawX,
-                            drawY,
-                            drawWidth,
-                            drawHeight,
-                            ref color
-                        );
-
-                        break;
-
-                    case 5:
-                        drawY += Height - drawHeight;
-
-                        batcher.Draw2D
-                        (
-                            t,
-                            drawX,
-                            drawY,
-                            drawWidth,
-                            drawHeight,
-                            ref color
-                        );
-
-                        break;
-
-                    case 6:
-                        drawX += th_5_width;
-                        drawY += Height - drawHeight - offsetBottom;
-                        drawWidth = Width - th_5_width - th_7_width;
-
-                        batcher.Draw2DTiled
-                        (
-                            t,
-                            drawX,
-                            drawY,
-                            drawWidth,
-                            drawHeight,
-                            ref color
-                        );
-
-                        break;
-
-                    case 7:
-                        drawX += Width - drawWidth;
-                        drawY += Height - drawHeight;
-
-                        batcher.Draw2D
-                        (
-                            t,
-                            drawX,
-                            drawY,
-                            drawWidth,
-                            drawHeight,
-                            ref color
-                        );
-
-                        break;
-
-                    case 8:
-                        drawX += th_0_width;
-                        drawY += th_0_height;
-                        drawWidth = Width - th_0_width - th_2_width;
-                        drawHeight = Height - th_2_height - th_7_height;
-
-                        drawWidth += offsetLeft + offsetRight;
-
-                        batcher.Draw2DTiled
-                        (
-                            t,
-                            drawX,
-                            drawY,
-                            drawWidth,
-                            drawHeight,
-                            ref color
-                        );
-
-                        break;
-                }
+            if (texture5 != null)
+            {
+                batcher.Draw
+                (
+                    texture5,
+                    new Vector2(x, y + (Height - bounds5.Height)),
+                    bounds5,
+                    color
+                );
+            }
+            
+            if (texture6 != null)
+            {
+                batcher.DrawTiled
+                (
+                    texture6,
+                    new Rectangle
+                    (
+                        x + bounds5.Width,
+                        y + (Height - bounds6.Height - offsetBottom),
+                        Width - bounds5.Width - bounds7.Width,
+                        bounds6.Height
+                    ),
+                    bounds6,
+                    color
+                );
+            }
+            
+            if (texture7 != null)
+            {
+                batcher.Draw
+                (
+                    texture7,
+                    new Vector2(x + (Width - bounds7.Width), y + (Height - bounds7.Height)),
+                    bounds7,
+                    color
+                );
+            }
+            
+            if (texture8 != null)
+            {
+                batcher.DrawTiled
+                (
+                    texture8,
+                    new Rectangle
+                    (
+                        x + bounds0.Width,
+                        y + bounds0.Height,
+                        (Width - bounds0.Width - bounds2.Width) + (offsetLeft + offsetRight),
+                        Height - bounds2.Height - bounds7.Height
+                    ),
+                    bounds8,
+                    color
+                );
             }
         }
+       
+        private Texture2D GetTexture(int index, out Rectangle bounds)
+        {
+            if (index >= 0 && index <= _maxIndex)
+            {
+                if (index >= 8)
+                {
+                    index = 4;
+                }
+                else if (index >= 4)
+                {
+                    ++index;
+                }
+
+                return GumpsLoader.Instance.GetGumpTexture((ushort)(Graphic + index), out bounds);
+            }
+
+            bounds = Rectangle.Empty;
+            return null;
+        }
+
     }
 }

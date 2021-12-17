@@ -46,10 +46,10 @@ namespace ClassicUO.Game.UI.Gumps
             CanCloseWithRightClick = true;
             Add(new GumpPic(0, 0, 0x0816, 0));
 
-            UOTexture t = GumpsLoader.Instance.GetTexture(0x0816);
+            GumpsLoader.Instance.GetGumpTexture(0x0816, out var bounds);
 
-            Width = t.Width;
-            Height = t.Height;
+            Width = bounds.Width;
+            Height = bounds.Height;
 
 
             Add

@@ -80,7 +80,7 @@ namespace ClassicUO.Game.GameObjects
             return e != null && Serial == e.Serial;
         }
 
-        public sbyte AnimIndex;
+        public byte AnimIndex;
 
         public Flags Flags;
         public ushort Hits;
@@ -93,7 +93,7 @@ namespace ClassicUO.Game.GameObjects
         public uint LastStepTime;
         public string Name;
         public uint Serial;
-
+        public bool ExecuteAnimation = true;
         internal long LastAnimationChangeTime;
         public HitsRequestStatus HitsRequest;
 
@@ -144,7 +144,7 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public virtual void CheckGraphicChange(sbyte animIndex = 0)
+        public virtual void CheckGraphicChange(byte animIndex = 0)
         {
         }
 

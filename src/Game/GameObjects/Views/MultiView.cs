@@ -61,14 +61,12 @@ namespace ClassicUO.Game.GameObjects
             return r;
         }
 
-        public override bool Draw(UltimaBatcher2D batcher, int posX, int posY, ref Vector3 hueVec)
+        public override bool Draw(UltimaBatcher2D batcher, int posX, int posY, float depth)
         {
             if (!AllowedToDraw || IsDestroyed)
             {
                 return false;
             }
-
-            hueVec = Vector3.Zero;
 
             ushort hue = Hue;
 
@@ -112,22 +110,15 @@ namespace ClassicUO.Game.GameObjects
                 partial = false;
             }
 
-            ShaderHueTranslator.GetHueVector(ref hueVec, hue, partial, 0);
-
-            //Engine.DebugInfo.MultiRendered++;
+            Vector3 hueVec = ShaderHueTranslator.GetHueVector(hue, partial, AlphaHue / 255f);
 
             if (IsHousePreview)
             {
-                hueVec.Z = 0.5f;
+                hueVec.Z *= 0.5f;
             }
 
             posX += (int) Offset.X;
             posY += (int) (Offset.Y + Offset.Z);
-
-            if (AlphaHue != 255)
-            {
-                hueVec.Z = 1f - AlphaHue / 255f;
-            }
 
             DrawStaticAnimated
             (
@@ -135,9 +126,9 @@ namespace ClassicUO.Game.GameObjects
                 graphic,
                 posX,
                 posY,
-                ref hueVec,
-                ref DrawTransparent,
-                false
+                hueVec,
+                false,
+                depth
             );
 
             if (ItemData.IsLight)
@@ -145,38 +136,36 @@ namespace ClassicUO.Game.GameObjects
                 Client.Game.GetScene<GameScene>().AddLight(this, this, posX + 22, posY + 22);
             }
 
+            return true;
+        }
+
+        public override bool CheckMouseSelection()
+        {
             if (!(SelectedObject.Object == this || IsHousePreview || FoliageIndex != -1 && Client.Game.GetScene<GameScene>().FoliageIndex == FoliageIndex))
             {
                 if (State != 0)
                 {
                     if ((State & (CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_PREVIEW)) != 0)
                     {
-                        return true;
+                        return false;
                     }
                 }
+  
+                ref UOFileIndex index = ref ArtLoader.Instance.GetValidRefEntry(Graphic + 0x4000);
 
-                if (DrawTransparent)
-                {
-                    return true;
-                }
+                Point position = RealScreenPosition;
+                position.X -= index.Width;
+                position.Y -= index.Height;
 
-                ref UOFileIndex index = ref ArtLoader.Instance.GetValidRefEntry(graphic + 0x4000);
-
-                posX -= index.Width;
-                posY -= index.Height;
-
-                if (ArtLoader.Instance.PixelCheck
+                return ArtLoader.Instance.PixelCheck
                 (
-                    graphic,
-                    SelectedObject.TranslatedMousePositionByViewport.X - posX,
-                    SelectedObject.TranslatedMousePositionByViewport.Y - posY
-                ))
-                {
-                    SelectedObject.Object = this;
-                }
+                    Graphic,
+                    SelectedObject.TranslatedMousePositionByViewport.X - position.X,
+                    SelectedObject.TranslatedMousePositionByViewport.Y - position.Y
+                );
             }
 
-            return true;
+            return false;
         }
     }
 }

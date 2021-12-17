@@ -60,7 +60,7 @@ namespace ClassicUO.Game.GameObjects
             return r;
         }
 
-        public override bool Draw(UltimaBatcher2D batcher, int posX, int posY, ref Vector3 hueVec)
+        public override bool Draw(UltimaBatcher2D batcher, int posX, int posY, float depth)
         {
             if (!AllowedToDraw || IsDestroyed)
             {
@@ -70,8 +70,6 @@ namespace ClassicUO.Game.GameObjects
             ushort graphic = Graphic;
             ushort hue = Hue;
             bool partial = ItemData.IsPartialHue;
-
-            hueVec = Vector3.Zero;
 
             if (ProfileManager.CurrentProfile.HighlightGameObjects && SelectedObject.LastObject == this)
             {
@@ -89,7 +87,7 @@ namespace ClassicUO.Game.GameObjects
                 partial = false;
             }
 
-            ShaderHueTranslator.GetHueVector(ref hueVec, hue, partial, 0);
+            Vector3 hueVec = ShaderHueTranslator.GetHueVector(hue, partial, AlphaHue / 255f);
 
             bool isTree = StaticFilters.IsTree(graphic, out _);
 
@@ -98,20 +96,15 @@ namespace ClassicUO.Game.GameObjects
                 graphic = Constants.TREE_REPLACE_GRAPHIC;
             }
 
-            if (AlphaHue != 255)
-            {
-                hueVec.Z = 1f - AlphaHue / 255f;
-            }
-
             DrawStaticAnimated
             (
                 batcher,
                 graphic,
                 posX,
                 posY,
-                ref hueVec,
-                ref DrawTransparent,
-                ProfileManager.CurrentProfile.ShadowsEnabled && ProfileManager.CurrentProfile.ShadowsStatics && (isTree || ItemData.IsFoliage || StaticFilters.IsRock(graphic))
+                hueVec,
+                ProfileManager.CurrentProfile.ShadowsEnabled && ProfileManager.CurrentProfile.ShadowsStatics && (isTree || ItemData.IsFoliage || StaticFilters.IsRock(graphic)),
+                depth
             );
 
             if (ItemData.IsLight)
@@ -119,30 +112,37 @@ namespace ClassicUO.Game.GameObjects
                 Client.Game.GetScene<GameScene>().AddLight(this, this, posX + 22, posY + 22);
             }
 
+            return true;
+        }
+
+        public override bool CheckMouseSelection()
+        {
             if (!(SelectedObject.Object == this || FoliageIndex != -1 && Client.Game.GetScene<GameScene>().FoliageIndex == FoliageIndex))
             {
-                if (DrawTransparent)
+                ushort graphic = Graphic;
+
+                bool isTree = StaticFilters.IsTree(graphic, out _);
+
+                if (isTree && ProfileManager.CurrentProfile.TreeToStumps)
                 {
-                    return true;
+                    graphic = Constants.TREE_REPLACE_GRAPHIC;
                 }
 
                 ref UOFileIndex index = ref ArtLoader.Instance.GetValidRefEntry(graphic + 0x4000);
 
-                posX -= index.Width;
-                posY -= index.Height;
+                Point position = RealScreenPosition;
+                position.X -= index.Width;
+                position.Y -= index.Height;
 
-                if (ArtLoader.Instance.PixelCheck
+                return ArtLoader.Instance.PixelCheck
                 (
-                graphic,
-                    SelectedObject.TranslatedMousePositionByViewport.X - posX, 
-                    SelectedObject.TranslatedMousePositionByViewport.Y - posY
-                ))
-                {
-                    SelectedObject.Object = this;
-                }
+                    graphic,
+                    SelectedObject.TranslatedMousePositionByViewport.X - position.X,
+                    SelectedObject.TranslatedMousePositionByViewport.Y - position.Y
+                );
             }
 
-            return true;
+            return false;
         }
     }
 }

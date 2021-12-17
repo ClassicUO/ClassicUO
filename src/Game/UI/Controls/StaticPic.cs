@@ -34,6 +34,7 @@ using System.Collections.Generic;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -67,7 +68,7 @@ namespace ClassicUO.Game.UI.Controls
             {
                 _graphic = value;
 
-                ArtTexture texture = ArtLoader.Instance.GetTexture(value);
+                var texture = ArtLoader.Instance.GetStaticTexture(value, out var bounds);
 
                 if (texture == null)
                 {
@@ -76,8 +77,8 @@ namespace ClassicUO.Game.UI.Controls
                     return;
                 }
 
-                Width = texture.Width;
-                Height = texture.Height;
+                Width = bounds.Width;
+                Height = bounds.Height;
 
                 IsPartialHue = TileDataLoader.Instance.StaticData[value].IsPartialHue;
             }
@@ -86,21 +87,18 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            ResetHueVector();
-            ShaderHueTranslator.GetHueVector(ref HueVector, Hue, IsPartialHue, 0);
+            Vector3 hueVector = ShaderHueTranslator.GetHueVector(Hue, IsPartialHue, 1);
 
-            ArtTexture texture = ArtLoader.Instance.GetTexture(Graphic);
+            var texture = ArtLoader.Instance.GetStaticTexture(Graphic, out var bounds);
 
             if (texture != null)
             {
-                batcher.Draw2D
+                batcher.Draw
                 (
                     texture,
-                    x,
-                    y,
-                    Width,
-                    Height,
-                    ref HueVector
+                    new Rectangle(x, y, Width, Height),
+                    bounds,
+                    hueVector
                 );
             }
 

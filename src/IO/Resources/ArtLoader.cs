@@ -40,23 +40,21 @@ using ClassicUO.Game.Data;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using SDL2;
 
 namespace ClassicUO.IO.Resources
 {
-    internal class ArtLoader : UOFileLoader<ArtTexture>
+    internal class ArtLoader : UOFileLoader
     {
         private static ArtLoader _instance;
         private UOFile _file;
         private readonly ushort _graphicMask;
-        private readonly UOTexture[] _landResources;
-        private readonly LinkedList<uint> _usedLandTextureIds = new LinkedList<uint>();
         private readonly PixelPicker _picker = new PixelPicker();
 
-        private ArtLoader(int staticCount, int landCount) : base(staticCount)
+        private ArtLoader(int staticCount, int landCount)
         {
             _graphicMask = Client.IsUOPInstallation ? (ushort) 0xFFFF : (ushort) 0x3FFF;
-            _landResources = new UOTexture[landCount];
         }
 
         public static ArtLoader Instance => _instance ?? (_instance = new ArtLoader(Constants.MAX_STATIC_DATA_INDEX_COUNT, Constants.MAX_LAND_DATA_INDEX_COUNT));
@@ -87,61 +85,159 @@ namespace ClassicUO.IO.Resources
                     }
 
                     _file.FillEntries(ref Entries);
+                    _spriteInfos = new SpriteInfo[Entries.Length];
                 }
             );
         }
 
-        public override ArtTexture GetTexture(uint g)
+        struct SpriteInfo
         {
-            if (g >= Resources.Length)
+            public Texture2D Texture;
+            public Rectangle UV;
+            public Rectangle ArtBounds;
+        }
+
+        private SpriteInfo[] _spriteInfos;
+
+
+        public Rectangle GetRealArtBounds(int index) => index + 0x4000 >= _spriteInfos.Length ? Rectangle.Empty : _spriteInfos[index + 0x4000].ArtBounds;
+
+        private void AddSpriteToAtlas(TextureAtlas atlas, int g, bool isTerrain)
+        {
+            ref UOFileIndex entry = ref GetValidRefEntry(g);
+
+            if (isTerrain)
             {
-                return null;
-            }
-
-            ref ArtTexture texture = ref Resources[g];
-
-            if (texture == null || texture.IsDisposed)
-            {
-                ReadStaticArt(ref texture, (ushort) g);
-
-                if (texture != null)
+                if (entry.Length == 0)
                 {
-                    SaveId(g);
+                    return;
                 }
+
+                Span<uint> data = stackalloc uint[44 * 44];
+
+                _file.SetData(entry.Address, entry.FileSize);
+                _file.Seek(entry.Offset);
+
+                for (int i = 0; i < 22; ++i)
+                {
+                    int start = 22 - (i + 1);
+                    int pos = i * 44 + start;
+                    int end = start + ((i + 1) << 1);
+
+                    for (int j = start; j < end; ++j)
+                    {
+                        data[pos++] = HuesHelper.Color16To32(_file.ReadUShort()) | 0xFF_00_00_00;
+                    }
+                }
+
+                for (int i = 0; i < 22; ++i)
+                {
+                    int pos = (i + 22) * 44 + i;
+                    int end = i + ((22 - i) << 1);
+
+                    for (int j = i; j < end; ++j)
+                    {
+                        data[pos++] = HuesHelper.Color16To32(_file.ReadUShort()) | 0xFF_00_00_00;
+                    }
+                }
+
+                ref var spriteInfo = ref _spriteInfos[g];
+
+                spriteInfo.Texture = atlas.AddSprite(data, 44, 44, out spriteInfo.UV);
             }
             else
             {
-                texture.Ticks = Time.Ticks;
-            }
-
-            return texture;
-        }
-
-        public UOTexture GetLandTexture(uint g)
-        {
-            if (g >= _landResources.Length)
-            {
-                return null;
-            }
-
-            ref UOTexture texture = ref _landResources[g];
-
-            if (texture == null || texture.IsDisposed)
-            {
-                ReadLandArt(ref texture, (ushort) g);
-
-                if (texture != null)
+                if (ReadHeader(_file, ref entry, out short width, out short height))
                 {
-                    _usedLandTextureIds.AddLast(g);
+                    uint[] buffer = null;
+
+                    Span<uint> artPixels = width * height <= 1024 ? stackalloc uint[1024] : (buffer = System.Buffers.ArrayPool<uint>.Shared.Rent(width * height));
+
+                    try
+                    {
+                        ushort fixedGraphic = (ushort)(g - 0x4000);
+
+                        if (ReadData(artPixels, width, height, _file))
+                        {
+                            // keep the cursor graphic check to cleanup edges
+                            if ((fixedGraphic >= 0x2053 && fixedGraphic <= 0x2062) || (fixedGraphic >= 0x206A && fixedGraphic <= 0x2079))
+                            {
+                                for (int i = 0; i < width; i++)
+                                {
+                                    artPixels[i] = 0;
+                                    artPixels[(height - 1) * width + i] = 0;
+                                }
+
+                                for (int i = 0; i < height; i++)
+                                {
+                                    artPixels[i * width] = 0;
+                                    artPixels[i * width + width - 1] = 0;
+                                }
+                            }
+
+                            ref var spriteInfo = ref _spriteInfos[g];
+
+                            FinalizeData
+                            (
+                                artPixels,
+                                ref entry,
+                                fixedGraphic,
+                                width,
+                                height,
+                                out spriteInfo.ArtBounds
+                            );
+
+                            _picker.Set(fixedGraphic, width, height, artPixels);
+                            spriteInfo.Texture = atlas.AddSprite(artPixels, width, height, out spriteInfo.UV);
+                        }
+                    }
+                    finally
+                    {
+                        if (buffer != null)
+                        {
+                            System.Buffers.ArrayPool<uint>.Shared.Return(buffer, true);
+                        }
+                    }
                 }
             }
-            else
+        }
+      
+        public Texture2D GetLandTexture(uint g, out Rectangle bounds)
+        {
+            g &= _graphicMask;
+
+            var atlas = TextureAtlas.Shared;
+
+            ref var spriteInfo = ref _spriteInfos[g];
+
+            if (spriteInfo.Texture == null)
             {
-                texture.Ticks = Time.Ticks;
+                AddSpriteToAtlas(atlas, (int)g, true);
             }
 
-            return texture;
+            bounds = spriteInfo.UV;
+
+            return spriteInfo.Texture;
         }
+
+        public Texture2D GetStaticTexture(uint g, out Rectangle bounds)
+        {
+            g += 0x4000;
+
+            var atlas = TextureAtlas.Shared;
+
+            ref var spriteInfo = ref _spriteInfos[g];
+
+            if (spriteInfo.Texture == null)
+            {
+                AddSpriteToAtlas(atlas, (int)g, false);
+            }
+
+            bounds = spriteInfo.UV;
+
+            return spriteInfo.Texture;
+        }
+
 
         public unsafe IntPtr CreateCursorSurfacePtr(int index, ushort customHue, out int hotX, out int hotY)
         {
@@ -151,7 +247,7 @@ namespace ClassicUO.IO.Resources
 
             if (ReadHeader(_file, ref entry, out short w, out short h))
             {
-                uint[] pixels = new uint[w * h];
+                Span<uint> pixels = new uint[w * h];
 
                 if (ReadData(pixels, w, h, _file))
                 {
@@ -246,56 +342,6 @@ namespace ClassicUO.IO.Resources
             return _picker.Get((ulong) index, x, y);
         }
 
-        public override bool TryGetEntryInfo(int entry, out long address, out long size, out long compressedSize)
-        {
-            entry += 0x4000;
-
-            if (entry < _file.Length && entry >= 0)
-            {
-                ref UOFileIndex e = ref GetValidRefEntry(entry);
-
-                address = _file.StartAddress.ToInt64() + e.Offset;
-                size = e.DecompressedLength == 0 ? e.Length : e.DecompressedLength;
-                compressedSize = e.Length;
-
-                return true;
-            }
-
-            return base.TryGetEntryInfo(entry, out address, out size, out compressedSize);
-        }
-
-        public override void ClearResources()
-        {
-            base.ClearResources();
-
-            LinkedListNode<uint> first = _usedLandTextureIds.First;
-
-            while (first != null)
-            {
-                LinkedListNode<uint> next = first.Next;
-                uint idx = first.Value;
-
-                if (idx < _landResources.Length)
-                {
-                    ref UOTexture texture = ref _landResources[idx];
-                    texture?.Dispose();
-                    texture = null;
-                }
-
-                _usedLandTextureIds.Remove(first);
-
-                first = next;
-            }
-        }
-
-        public override void CleaUnusedResources(int count)
-        {
-            base.CleaUnusedResources(count);
-            ClearUnusedResources(_landResources, count);
-        }
-
-
-
         private bool ReadHeader(DataReader file, ref UOFileIndex entry, out short width, out short height)
         {
             if (entry.Length == 0)
@@ -386,8 +432,6 @@ namespace ClassicUO.IO.Resources
                 }
             }
 
-            _picker.Set(graphic, width, height, pixels);
-
             entry.Width = (short)((width >> 1) - 22);
             entry.Height = (short)(height - 44);
 
@@ -397,115 +441,6 @@ namespace ClassicUO.IO.Resources
             bounds.Height = maxY - minY;
         }
 
-        private unsafe void ReadStaticArt(ref ArtTexture texture, ushort graphic)
-        {
-            ref UOFileIndex entry = ref GetValidRefEntry(graphic + 0x4000);
-
-            if (ReadHeader(_file, ref entry, out short width, out short height))
-            {
-                uint[] buffer = null;
-
-                Span<uint> pixels = width * height <= 1024 ? stackalloc uint[1024] : (buffer = System.Buffers.ArrayPool<uint>.Shared.Rent(width * height));
-
-                try
-                {
-                    if (ReadData(pixels, width, height, _file))
-                    {
-                        // keep the cursor graphic check to cleanup edges
-                        if ((graphic >= 0x2053 && graphic <= 0x2062) || (graphic >= 0x206A && graphic <= 0x2079))
-                        {
-                            for (int i = 0; i < width; i++)
-                            {
-                                pixels[i] = 0;
-                                pixels[(height - 1) * width + i] = 0;
-                            }
-
-                            for (int i = 0; i < height; i++)
-                            {
-                                pixels[i * width] = 0;
-                                pixels[i * width + width - 1] = 0;
-                            }
-                        }
-
-                        texture = new ArtTexture(width, height);
-
-                        FinalizeData
-                        (
-                            pixels,
-                            ref entry,
-                            graphic,
-                            width,
-                            height,
-                            out texture.ImageRectangle
-                        );
-
-
-                        fixed (uint* ptr = pixels)
-                        {
-                            texture.SetDataPointerEXT(0, null, (IntPtr) ptr, width * height * sizeof(uint));
-                        }
-                    }
-                }
-                finally
-                {
-                    if (buffer != null)
-                    {
-                        System.Buffers.ArrayPool<uint>.Shared.Return(buffer, true);
-                    }
-                }
-            }
-        }
-
-        private unsafe void ReadLandArt(ref UOTexture texture, ushort graphic)
-        {
-            const int SIZE = 44 * 44;
-
-            graphic &= _graphicMask;
-            ref UOFileIndex entry = ref GetValidRefEntry(graphic);
-
-            if (entry.Length == 0)
-            {
-                texture = null;
-
-                return;
-            }
-
-            _file.SetData(entry.Address, entry.FileSize);
-            _file.Seek(entry.Offset);
-
-            uint* data = stackalloc uint[SIZE];
-
-            for (int i = 0; i < 22; ++i)
-            {
-                int start = 22 - (i + 1);
-                int pos = i * 44 + start;
-                int end = start + ((i + 1) << 1);
-
-                for (int j = start; j < end; ++j)
-                {
-                    data[pos++] = HuesHelper.Color16To32(_file.ReadUShort()) | 0xFF_00_00_00;
-                }
-            }
-
-            for (int i = 0; i < 22; ++i)
-            {
-                int pos = (i + 22) * 44 + i;
-                int end = i + ((22 - i) << 1);
-
-                for (int j = i; j < end; ++j)
-                {
-                    data[pos++] = HuesHelper.Color16To32(_file.ReadUShort()) | 0xFF_00_00_00;
-                }
-            }
-
-
-            //AddBlackBorder(data, 44, 44);
-
-            texture = new UOTexture(44, 44);
-            // we don't need to store the data[] pointer because
-            // land is always hoverable
-            texture.SetDataPointerEXT(0, null, (IntPtr) data, SIZE * sizeof(uint));
-        }
 
         private void AddBlackBorder(Span<uint> pixels, int width, int height)
         {

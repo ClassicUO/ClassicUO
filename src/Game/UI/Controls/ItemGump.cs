@@ -84,7 +84,10 @@ namespace ClassicUO.Game.UI.Controls
             {
                 _graphic = value;
 
-                UOTexture texture = _is_gump ? GumpsLoader.Instance.GetTexture(value) : ArtLoader.Instance.GetTexture(value);
+                var texture = _is_gump ?
+                    GumpsLoader.Instance.GetGumpTexture(value, out Rectangle bounds)
+                    :
+                    ArtLoader.Instance.GetStaticTexture(value, out bounds);
 
                 if (texture == null)
                 {
@@ -93,8 +96,8 @@ namespace ClassicUO.Game.UI.Controls
                     return;
                 }
 
-                Width = texture.Width;
-                Height = texture.Height;
+                Width = bounds.Width;
+                Height = bounds.Height;
 
                 IsPartialHue = !_is_gump && TileDataLoader.Instance.StaticData[value].IsPartialHue;
             }
@@ -136,8 +139,6 @@ namespace ClassicUO.Game.UI.Controls
             }
 
             base.Draw(batcher, x, y);
-
-            ResetHueVector();
             
             bool partialHue = IsPartialHue;
             ushort hue = Hue;
@@ -148,34 +149,38 @@ namespace ClassicUO.Game.UI.Controls
                 partialHue = false;
             }
             
-            ShaderHueTranslator.GetHueVector(ref HueVector, hue, partialHue, 0);
+            Vector3 hueVector = ShaderHueTranslator.GetHueVector(hue, partialHue, 1);
 
-            UOTexture texture = _is_gump ? GumpsLoader.Instance.GetTexture(Graphic) : ArtLoader.Instance.GetTexture(Graphic);
+            var texture = _is_gump ?
+                   GumpsLoader.Instance.GetGumpTexture(Graphic, out Rectangle bounds)
+                   :
+                   ArtLoader.Instance.GetStaticTexture(Graphic, out bounds);
 
             if (texture != null)
             {
-                batcher.Draw2D
+                Rectangle rect = new Rectangle(x, y, Width, Height);
+
+                batcher.Draw
                 (
                     texture,
-                    x,
-                    y,
-                    Width,
-                    Height,
-                    ref HueVector
+                    rect,
+                    bounds,
+                    hueVector
                 );
 
                 Item item = World.Items.Get(LocalSerial);
 
                 if (item != null && !item.IsMulti && !item.IsCoin && item.Amount > 1 && item.ItemData.IsStackable)
                 {
-                    batcher.Draw2D
+                    rect.X += 5;
+                    rect.Y += 5;
+
+                    batcher.Draw
                     (
-                        texture,
-                        x + 5,
-                        y + 5,
-                        Width,
-                        Height,
-                        ref HueVector
+                       texture,
+                       rect,
+                       bounds,
+                       hueVector
                     );
                 }
             }
@@ -185,7 +190,10 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Contains(int x, int y)
         {
-            UOTexture texture = _is_gump ? GumpsLoader.Instance.GetTexture(Graphic) : ArtLoader.Instance.GetTexture(Graphic);
+            var texture = _is_gump ?
+                   GumpsLoader.Instance.GetGumpTexture(Graphic, out Rectangle bounds)
+                   :
+                   ArtLoader.Instance.GetStaticTexture(Graphic, out bounds);
 
             if (texture == null)
             {
@@ -304,9 +312,11 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (CanPickUp)
             {
-                UOTexture texture = _is_gump ? GumpsLoader.Instance.GetTexture(Graphic) : ArtLoader.Instance.GetTexture(Graphic);
+                _ = _is_gump ?
+                   GumpsLoader.Instance.GetGumpTexture(Graphic, out Rectangle bounds)
+                   :
+                   ArtLoader.Instance.GetStaticTexture(Graphic, out bounds);
 
-                Rectangle bounds = texture.Bounds;
                 int centerX = bounds.Width >> 1;
                 int centerY = bounds.Height >> 1;
 

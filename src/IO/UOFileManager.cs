@@ -41,6 +41,7 @@ using ClassicUO.Data;
 using ClassicUO.Game;
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility.Logging;
+using ClassicUO.Utility.Platforms;
 
 namespace ClassicUO.IO
 {
@@ -48,12 +49,39 @@ namespace ClassicUO.IO
     {
         public static string GetUOFilePath(string file)
         {
-            if (UOFilesOverrideMap.Instance.TryGetValue(file.ToLowerInvariant(), out string uoFilePath))
+            if (!UOFilesOverrideMap.Instance.TryGetValue(file.ToLowerInvariant(), out string uoFilePath))
             {
-                return uoFilePath;
+                uoFilePath = Path.Combine(Settings.GlobalSettings.UltimaOnlineDirectory, file);
             }
 
-            return Path.Combine(Settings.GlobalSettings.UltimaOnlineDirectory, file);
+            //If the file with the given name doesn't exist, check for it with alternative casing if not on windows
+            if (!PlatformHelper.IsWindows && !File.Exists(uoFilePath))
+            {
+                FileInfo finfo = new FileInfo(uoFilePath);
+                var dir = Path.GetFullPath(finfo.DirectoryName ?? Settings.GlobalSettings.UltimaOnlineDirectory);
+
+                if (Directory.Exists(dir))
+                {
+                    var files = Directory.GetFiles(dir);
+                    var matches = 0;
+                    
+                    foreach (var f in files)
+                    {
+                        if (string.Equals(f, uoFilePath, StringComparison.OrdinalIgnoreCase))
+                        {
+                            matches++;
+                            uoFilePath = f;
+                        }
+                    }
+
+                    if (matches > 1)
+                    {
+                        Log.Warn($"Multiple files with ambiguous case found for {file}, using {Path.GetFileName(uoFilePath)}. Check your data directory for duplicate files.");
+                    }
+                }             
+            }
+
+            return uoFilePath;
         }
 
 
@@ -343,6 +371,7 @@ namespace ClassicUO.IO
                             }
 
                             if (index >= Constants.MAX_LAND_DATA_INDEX_COUNT && checkIndex >= Constants.MAX_LAND_DATA_INDEX_COUNT &&
+                                index < tiledataLoader.StaticData.Length && checkIndex < tiledataLoader.StaticData.Length &&
                                 tiledataLoader.StaticData[index].Equals(default) && !tiledataLoader.StaticData[checkIndex].Equals(default))
                             {
                                 tiledataLoader.StaticData[index] = tiledataLoader.StaticData[checkIndex];

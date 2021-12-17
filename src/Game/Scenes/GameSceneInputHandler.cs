@@ -61,7 +61,7 @@ namespace ClassicUO.Game.Scenes
         private bool _requestedWarMode;
         private bool _rightMousePressed, _continueRunning;
         private Point _selectionStart, _selectionEnd;
-
+        private int AnchorOffset => ProfileManager.CurrentProfile.DragSelectAsAnchor ? 0 : 2;
 
         private bool MoveCharacterByMouseInput()
         {
@@ -179,12 +179,21 @@ namespace ClassicUO.Game.Scenes
             _rectangleObj.Width = _selectionEnd.X - Camera.Bounds.X - _rectangleObj.X;
             _rectangleObj.Height = _selectionEnd.Y - Camera.Bounds.Y - _rectangleObj.Y;
 
-            int finalX = 100;
-            int finalY = 100;
+            int finalX = ProfileManager.CurrentProfile.DragSelectStartX;
+            int finalY = ProfileManager.CurrentProfile.DragSelectStartY;
 
             bool useCHB = ProfileManager.CurrentProfile.CustomBarsToggled;
 
-            Rectangle rect = useCHB ? new Rectangle(0, 0, HealthBarGumpCustom.HPB_BAR_WIDTH, HealthBarGumpCustom.HPB_HEIGHT_MULTILINE) : GumpsLoader.Instance.GetTexture(0x0804).Bounds;
+            Rectangle rect;
+
+            if (useCHB)
+            {
+                rect = new Rectangle(0, 0, HealthBarGumpCustom.HPB_BAR_WIDTH, HealthBarGumpCustom.HPB_HEIGHT_MULTILINE);
+            }
+            else
+            {
+                _ = GumpsLoader.Instance.GetGumpTexture(0x0804, out rect);
+            }
 
             foreach (Mobile mobile in World.Mobiles.Values)
             {
@@ -196,7 +205,7 @@ namespace ClassicUO.Game.Scenes
                 Point p = mobile.RealScreenPosition;
 
                 p.X += (int) mobile.Offset.X + 22 + 5;
-                p.Y += (int) (mobile.Offset.Y - mobile.Offset.Z) + 22 + 5;
+                p.Y += (int)(mobile.Offset.Y - mobile.Offset.Z) + 12 * AnchorOffset;
                 p.X -= mobile.FrameInfo.X;
                 p.Y -= mobile.FrameInfo.Y;
 
@@ -231,15 +240,15 @@ namespace ClassicUO.Game.Scenes
                             hbgc = new HealthBarGump(mobile);
                         }
 
-                        if (finalY >= ProfileManager.CurrentProfile.GameWindowPosition.Y + ProfileManager.CurrentProfile.GameWindowSize.Y - 100)
+                        if (finalY >= ProfileManager.CurrentProfile.GameWindowPosition.Y + ProfileManager.CurrentProfile.GameWindowSize.Y - 20)
                         {
-                            finalY = 100;
+                            finalY = ProfileManager.CurrentProfile.DragSelectStartY;
                             finalX += rect.Width + 2;
                         }
 
-                        if (finalX >= ProfileManager.CurrentProfile.GameWindowPosition.X + ProfileManager.CurrentProfile.GameWindowSize.X - 100)
+                        if (finalX >= ProfileManager.CurrentProfile.GameWindowPosition.X + ProfileManager.CurrentProfile.GameWindowSize.X - 20)
                         {
-                            finalX = 100;
+                            finalX = ProfileManager.CurrentProfile.DragSelectStartX;
                         }
 
                         hbgc.X = finalX;
@@ -254,26 +263,29 @@ namespace ClassicUO.Game.Scenes
                         {
                             if (bar.Bounds.Intersects(hbgc.Bounds))
                             {
-                                finalY = bar.Bounds.Bottom + 2;
+                                finalY = bar.Bounds.Bottom + AnchorOffset;
 
                                 if (finalY >= ProfileManager.CurrentProfile.GameWindowPosition.Y + ProfileManager.CurrentProfile.GameWindowSize.Y - 100)
                                 {
-                                    finalY = 100;
-                                    finalX = bar.Bounds.Right + 2;
+                                    finalY = ProfileManager.CurrentProfile.DragSelectStartY;
+                                    finalX = bar.Bounds.Right + AnchorOffset;
                                 }
 
                                 if (finalX >= ProfileManager.CurrentProfile.GameWindowPosition.X + ProfileManager.CurrentProfile.GameWindowSize.X - 100)
                                 {
-                                    finalX = 100;
+                                    finalX = ProfileManager.CurrentProfile.DragSelectStartX;
                                 }
 
                                 hbgc.X = finalX;
                                 hbgc.Y = finalY;
+                                if (ProfileManager.CurrentProfile.DragSelectAsAnchor)
+                                    hbgc.TryAttacheToExist();
                             }
                         }
 
 
-                        finalY += rect.Height + 2;
+                        if (!ProfileManager.CurrentProfile.DragSelectAsAnchor)
+                            finalY += rect.Height + 2;
 
 
                         UIManager.Add(hbgc);
@@ -602,6 +614,13 @@ namespace ClassicUO.Game.Scenes
                             CommandManager.OnHueTarget(selectedEntity);
                         }
 
+                        break;
+                    case CursorTarget.IgnorePlayerTarget:
+                        if (SelectedObject.Object is Entity pmEntity)
+                        {
+                            IgnoreManager.AddIgnoredTarget(pmEntity);
+                        }
+                        TargetManager.CancelTarget();
                         break;
                 }
             }
@@ -966,21 +985,21 @@ namespace ClassicUO.Game.Scenes
                                 (
                                     customgump = new HealthBarGumpCustom(obj)
                                     {
-                                        X = Mouse.Position.X - (rect.Width >> 1),
-                                        Y = Mouse.Position.Y - (rect.Height >> 1)
+                                        X = Mouse.LClickPosition.X - (rect.Width >> 1),
+                                        Y = Mouse.LClickPosition.Y - (rect.Height >> 1)
                                     }
                                 );
                             }
                             else
                             {
-                                Rectangle rect = GumpsLoader.Instance.GetTexture(0x0804).Bounds;
+                                _ = GumpsLoader.Instance.GetGumpTexture(0x0804, out var bounds);
 
                                 UIManager.Add
                                 (
                                     customgump = new HealthBarGump(obj)
                                     {
-                                        X = Mouse.LClickPosition.X - (rect.Width >> 1),
-                                        Y = Mouse.LClickPosition.Y - (rect.Height >> 1)
+                                        X = Mouse.LClickPosition.X - (bounds.Width >> 1),
+                                        Y = Mouse.LClickPosition.Y - (bounds.Height >> 1)
                                     }
                                 );
                             }
@@ -1214,6 +1233,11 @@ namespace ClassicUO.Game.Scenes
 
         internal override void OnKeyUp(SDL.SDL_KeyboardEvent e)
         {
+            if (!World.InGame)
+            {
+                return;
+            }
+
             if (ProfileManager.CurrentProfile.EnableMousewheelScaleZoom && ProfileManager.CurrentProfile.RestoreScaleAfterUnpressCtrl && !Keyboard.Ctrl)
             {
                 Camera.Zoom = ProfileManager.CurrentProfile.DefaultScale;

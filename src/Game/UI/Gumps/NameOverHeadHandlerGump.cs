@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -34,20 +34,34 @@ using System;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Resources;
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
     internal class NameOverHeadHandlerGump : Gump
     {
-        private static int _lastX = 100, _lastY = 100;
+        public static Point? LastPosition;
+
+        public override GumpType GumpType => GumpType.NameOverHeadHandler;
+
 
         public NameOverHeadHandlerGump() : base(0, 0)
         {
             CanMove = true;
             AcceptMouseInput = true;
             CanCloseWithRightClick = true;
-            X = _lastX;
-            Y = _lastY;
+
+            if (LastPosition == null)
+            {
+                X = 100;
+                Y = 100;
+            }
+            else
+            {
+                X = LastPosition.Value.X;
+                Y = LastPosition.Value.Y;
+            }
+
             WantUpdateSize = false;
 
             LayerOrder = UILayer.Over;
@@ -57,7 +71,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                alpha = new AlphaBlendControl(0.2f)
+                alpha = new AlphaBlendControl(0.7f)
                 {
                     Hue = 34
                 }
@@ -169,8 +183,8 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnDragEnd(int x, int y)
         {
-            _lastX = ScreenCoordinateX;
-            _lastY = ScreenCoordinateY;
+            LastPosition = new Point(ScreenCoordinateX, ScreenCoordinateY);
+
             SetInScreen();
 
             base.OnDragEnd(x, y);

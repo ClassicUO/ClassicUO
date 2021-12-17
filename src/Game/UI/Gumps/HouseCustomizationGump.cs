@@ -680,7 +680,7 @@ namespace ClassicUO.Game.UI.Gumps
                         continue;
                     }
 
-                    Rectangle bounds = ArtLoader.Instance.GetTexture((ushort) vec[0].East1).Bounds;
+                    _ = ArtLoader.Instance.GetStaticTexture((ushort)vec[0].East1, out var bounds);
 
                     int offsetX = x + 121 + (48 - bounds.Width) / 2;
                     int offsetY = y + 36;
@@ -750,7 +750,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         if (graphic != 0)
                         {
-                            Rectangle bounds = ArtLoader.Instance.GetTexture(graphic).Bounds;
+                            _ = ArtLoader.Instance.GetStaticTexture(graphic, out var bounds);
 
                             int offsetX = x + 130 + (48 - bounds.Width) / 2;
                             int offsetY = y + 36 + (120 - bounds.Height) / 2;
@@ -843,7 +843,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (graphic != 0)
                     {
-                        Rectangle bounds = ArtLoader.Instance.GetTexture(graphic).Bounds;
+                        _ = ArtLoader.Instance.GetStaticTexture(graphic, out var bounds);
 
                         int offsetX = x + 138 + (48 - bounds.Width) / 2;
 
@@ -994,7 +994,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         if (graphic != 0)
                         {
-                            Rectangle bounds = ArtLoader.Instance.GetTexture(graphic).Bounds;
+                            _ = ArtLoader.Instance.GetStaticTexture(graphic, out var bounds);
 
                             int offsetX = x + 123 + (48 - bounds.Width) / 2;
                             int offsetY = y + 36 + (60 - bounds.Height) / 2;
@@ -1074,7 +1074,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         if (graphic != 0)
                         {
-                            Rectangle bounds = ArtLoader.Instance.GetTexture(graphic).Bounds;
+                            _ = ArtLoader.Instance.GetStaticTexture(graphic, out var bounds);
 
                             int offsetX = x + 123 + (48 - bounds.Width) / 2;
                             int offsetY = y + 36 + (60 - bounds.Height) / 2;
@@ -1146,7 +1146,7 @@ namespace ClassicUO.Game.UI.Gumps
                         continue;
                     }
 
-                    Rectangle bounds = ArtLoader.Instance.GetTexture((ushort) vec[0].NSCrosspiece).Bounds;
+                    _ = ArtLoader.Instance.GetStaticTexture((ushort)vec[0].NSCrosspiece, out var bounds);
 
                     int offsetX = x + 121 + (48 - bounds.Width) / 2;
                     int offsetY = y + 36;
@@ -1223,7 +1223,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                             if (graphic != 0)
                             {
-                                Rectangle bounds = ArtLoader.Instance.GetTexture(graphic).Bounds;
+                                _ = ArtLoader.Instance.GetStaticTexture(graphic, out var bounds);
 
                                 int offsetX = x + 130 + (48 - bounds.Width) / 2;
                                 int offsetY = y + 44 + (60 - bounds.Height) / 2;
@@ -1234,7 +1234,7 @@ namespace ClassicUO.Game.UI.Gumps
                                     Y = offsetY,
                                     CanMove = false,
                                     LocalSerial = (uint) (ID_GUMP_CUSTOM_HOUSE.ID_GCH_ITEM_IN_LIST + index),
-                                    Height = 120
+                                    //Height = 120
                                 };
 
                                 pic.MouseUp += (sender, e) => { OnButtonClick((int) pic.LocalSerial); };
@@ -1333,7 +1333,7 @@ namespace ClassicUO.Game.UI.Gumps
                         continue;
                     }
 
-                    Rectangle bounds = ArtLoader.Instance.GetTexture((ushort) vec[0].Piece5).Bounds;
+                    _ = ArtLoader.Instance.GetStaticTexture((ushort)vec[0].Piece5, out var bounds);
 
                     int offsetX = x + 121 + (48 - bounds.Width) / 2;
                     int offsetY = y + 36;
@@ -1405,7 +1405,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         if (graphic != 0)
                         {
-                            Rectangle bounds = ArtLoader.Instance.GetTexture(graphic).Bounds;
+                            _ = ArtLoader.Instance.GetStaticTexture(graphic, out var bounds);
 
                             int offsetX = x + 130 + (48 - bounds.Width) / 2;
                             int offsetY = y + 44 + (120 - bounds.Height) / 2;
@@ -1416,7 +1416,7 @@ namespace ClassicUO.Game.UI.Gumps
                                 Y = offsetY,
                                 CanMove = false,
                                 LocalSerial = (uint) (ID_GUMP_CUSTOM_HOUSE.ID_GCH_ITEM_IN_LIST + i),
-                                Height = 120
+                                //Height = 120
                             };
 
                             pic.MouseUp += (sender, e) => { OnButtonClick((int) pic.LocalSerial); };
@@ -1446,8 +1446,6 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void AddMenu()
         {
-            const int TEXT_WIDTH = 108;
-
             Button button = new Button
             (
                 (int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_MENU_BACKUP,

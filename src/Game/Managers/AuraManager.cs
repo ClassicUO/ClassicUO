@@ -52,7 +52,6 @@ namespace ClassicUO.Game.Managers
 
         private readonly Texture2D _texture;
 
-
         public Aura(int radius)
         {
             short w = 0;
@@ -82,15 +81,15 @@ namespace ClassicUO.Game.Managers
 
 
 
-        public void Draw(UltimaBatcher2D batcher, int x, int y, ushort hue)
+        public void Draw(UltimaBatcher2D batcher, int x, int y, ushort hue, float depth)
         {
             x -= (_texture.Width >> 1);
             y -= (_texture.Height >> 1);
 
-            Vector3 hueVec = new Vector3(hue, 1, 0);
+            Vector3 hueVec = ShaderHueTranslator.GetHueVector(hue, false, 1);
 
             batcher.SetBlendState(_blend.Value);
-            batcher.Draw2D(_texture, x, y, ref hueVec);
+            batcher.Draw(_texture, new Vector2(x, y), null, hueVec, 0f, Vector2.Zero, 1f, SpriteEffects.None, depth);
             batcher.SetBlendState(null);
         }
 
@@ -146,9 +145,9 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public static void Draw(UltimaBatcher2D batcher, int x, int y, ushort hue)
+        public static void Draw(UltimaBatcher2D batcher, int x, int y, ushort hue, float depth)
         {
-            _aura.Draw(batcher, x, y, hue);
+            _aura.Draw(batcher, x, y, hue, depth);
         }
     }
 }

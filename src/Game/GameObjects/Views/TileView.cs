@@ -38,7 +38,7 @@ namespace ClassicUO.Game.GameObjects
 {
     internal sealed partial class Land
     {
-        public override bool Draw(UltimaBatcher2D batcher, int posX, int posY, ref Vector3 hueVec)
+        public override bool Draw(UltimaBatcher2D batcher, int posX, int posY, float depth)
         {
             if (!AllowedToDraw || IsDestroyed)
             {
@@ -46,8 +46,6 @@ namespace ClassicUO.Game.GameObjects
             }
 
             //Engine.DebugInfo.LandsRendered++;
-
-            hueVec = Vector3.Zero;
 
             ushort hue = Hue;
 
@@ -64,7 +62,7 @@ namespace ClassicUO.Game.GameObjects
                 hue = Constants.DEAD_RANGE_COLOR;
             }
 
-
+            Vector3 hueVec;
             if (hue != 0)
             {
                 hueVec.X = hue - 1;
@@ -72,8 +70,10 @@ namespace ClassicUO.Game.GameObjects
             }
             else
             {
+                hueVec.X = 0;
                 hueVec.Y = IsStretched ? ShaderHueTranslator.SHADER_LAND : ShaderHueTranslator.SHADER_NONE;
             }
+            hueVec.Z = 1f;
 
             if (IsStretched)
             {
@@ -90,13 +90,9 @@ namespace ClassicUO.Game.GameObjects
                     ref NormalRight,
                     ref NormalLeft,
                     ref NormalBottom,
-                    ref hueVec
+                    hueVec,
+                    depth
                 );
-
-                if (SelectedObject.IsPointInStretchedLand(ref YOffsets, posX, posY))
-                {
-                    SelectedObject.Object = this;
-                }
             }
             else
             {
@@ -106,16 +102,22 @@ namespace ClassicUO.Game.GameObjects
                     Graphic,
                     posX,
                     posY,
-                    ref hueVec
+                    hueVec,
+                    depth
                 );
-
-                if (SelectedObject.IsPointInLand(posX, posY))
-                {
-                    SelectedObject.Object = this;
-                }
             }
 
             return true;
+        }
+
+        public override bool CheckMouseSelection()
+        {
+            if (IsStretched)
+            {
+                return SelectedObject.IsPointInStretchedLand(ref YOffsets, RealScreenPosition.X, RealScreenPosition.Y + (Z << 2));
+            }
+
+            return SelectedObject.IsPointInLand(RealScreenPosition.X, RealScreenPosition.Y);
         }
     }
 }

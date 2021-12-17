@@ -106,18 +106,20 @@ namespace ClassicUO.Game.UI.Controls
 
             //return true;
 
-            ResetHueVector();
-            HueVector.Z = 0.5f;
+            Vector3 hueVector = ShaderHueTranslator.GetHueVector(0, false, 0.5f);
 
             //batcher.SetStencil(_checkerStencil.Value);
-            batcher.Draw2D
+            batcher.Draw
             (
                 SolidColorTextureCache.GetTexture(Color.Black),
-                x,
-                y,
-                Width,
-                Height,
-                ref HueVector
+                new Rectangle
+                (
+                    x,
+                    y,
+                    Width,
+                    Height
+                ),
+                hueVector
             );
 
             //batcher.SetStencil(null);

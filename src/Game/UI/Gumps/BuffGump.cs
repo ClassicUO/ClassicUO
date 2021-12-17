@@ -41,6 +41,7 @@ using ClassicUO.Game.UI.Controls;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Resources;
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -331,7 +332,7 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                         else
                         {
-                            _gText.Text = span.Minutes > 0 ? $"{span.Minutes}:{span.Seconds}" : $"{span.Seconds}";
+                            _gText.Text = span.Minutes > 0 ? $"{span.Minutes}:{span.Seconds:00}" : $"{span.Seconds:00}s";
                         }
                     }
 
@@ -375,32 +376,33 @@ namespace ClassicUO.Game.UI.Gumps
 
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
-                ResetHueVector();
+                Vector3 hueVector = ShaderHueTranslator.GetHueVector
+                                    (
+                                        0,
+                                        false,
+                                        _alpha / 255f,
+                                        true
+                                    );
 
-                ShaderHueTranslator.GetHueVector
-                (
-                    ref HueVector,
-                    0,
-                    false,
-                    1.0f - _alpha / 255f,
-                    true
-                );
-
-                UOTexture texture = GumpsLoader.Instance.GetTexture(Graphic);
+                var texture = GumpsLoader.Instance.GetGumpTexture(Graphic, out var bounds);
 
                 if (texture != null)
                 {
+                    batcher.Draw
+                    (
+                        texture, 
+                        new Vector2(x, y),
+                        bounds,
+                        hueVector
+                    );
+                   
                     if (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.BuffBarTime)
                     {
-                        batcher.Draw2D(texture, x, y, ref HueVector);
-
-                        return _gText.Draw(batcher, x - 3, y + texture.Height / 2 - 3, HueVector.Z);
+                        _gText.Draw(batcher, x - 3, y + bounds.Height / 2 - 3, hueVector.Z);
                     }
-
-                    return batcher.Draw2D(texture, x, y, ref HueVector);
                 }
 
-                return false;
+                return true;
             }
 
             public override void Dispose()

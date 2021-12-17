@@ -52,18 +52,22 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            ResetHueVector();
-            ShaderHueTranslator.GetHueVector(ref HueVector, 0, false, Alpha);
+            Vector3 hueVector = ShaderHueTranslator.GetHueVector(0, false, Alpha);
 
-            return batcher.Draw2D
+            batcher.Draw
             (
                 _texture,
-                x,
-                y,
-                Width,
-                Height,
-                ref HueVector
+                new Rectangle
+                (
+                    x,
+                    y,
+                    Width,
+                    Height
+                ),
+                hueVector
             );
+
+            return true;
         }
     }
 }

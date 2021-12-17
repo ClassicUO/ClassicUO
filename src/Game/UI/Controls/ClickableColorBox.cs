@@ -63,26 +63,27 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            ResetHueVector();
-
             if (Children.Count != 0)
             {
                 Children[0].Draw(batcher, x, y);
             }
 
-            ResetHueVector();
+            Vector3 hueVector = ShaderHueTranslator.GetHueVector(Hue);
 
-            ShaderHueTranslator.GetHueVector(ref HueVector, Hue);
-
-            return batcher.Draw2D
+            batcher.Draw
             (
-                SolidColorTextureCache.GetTexture(Color.White),
-                x + 3,
-                y + 3,
-                Width - 6,
-                Height - 6,
-                ref HueVector
+               SolidColorTextureCache.GetTexture(Color.White),
+               new Rectangle
+               (
+                   x + 3,
+                   y + 3,
+                   Width - 6,
+                   Height - 6
+                ),
+                hueVector
             );
+
+            return true;
         }
 
         protected override void OnMouseUp(int x, int y, MouseButtonType button)

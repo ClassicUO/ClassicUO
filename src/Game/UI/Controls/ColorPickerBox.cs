@@ -165,39 +165,44 @@ namespace ClassicUO.Game.UI.Controls
         {
             Texture2D texture = SolidColorTextureCache.GetTexture(Color.White);
 
+            Rectangle rect = new Rectangle(0, 0, _cellWidth, _cellHeight);
+
+            Vector3 hueVector;
+
             for (int i = 0; i < _rows; i++)
             {
                 for (int j = 0; j < _columns; j++)
                 {
-                    ShaderHueTranslator.GetHueVector(ref HueVector, _hues[i * _columns + j]);
+                    hueVector = ShaderHueTranslator.GetHueVector(_hues[i * _columns + j]);
 
-                    batcher.Draw2D
+                    rect.X = x + j * _cellWidth;
+                    rect.Y = y + i * _cellHeight;
+
+                    batcher.Draw
                     (
                         texture,
-                        x + j * _cellWidth, 
-                        y + i * _cellHeight,
-                        _cellWidth, _cellHeight,
-                        ref HueVector
+                        rect,
+                        hueVector
                     );
                 }
             }
 
-            ResetHueVector();
+            hueVector = ShaderHueTranslator.GetHueVector(0);
 
             if (_hues.Length > 1)
             {
-                batcher.Draw2D
+                rect.X = (int) (x + Width / _columns * (SelectedIndex % _columns + .5f) - 1);
+                rect.Y = (int)(y + Height / _rows * (SelectedIndex / _columns + .5f) - 1);
+                rect.Width = 2;
+                rect.Height = 2;
+
+                batcher.Draw
                 (
                     SolidColorTextureCache.GetTexture(Color.White),
-                    (int) (x + Width / _columns * (SelectedIndex % _columns + .5f) - 1),
-                    (int) (y + Height / _rows * (SelectedIndex / _columns + .5f) - 1),
-                    2,
-                    2,
-                    ref HueVector
+                    rect,
+                    hueVector
                 );
             }
-
-            ResetHueVector();
 
             return base.Draw(batcher, x, y);
         }
