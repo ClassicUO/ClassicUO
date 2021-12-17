@@ -4,8 +4,8 @@ on:
   push:
     branches: "dev"
     paths:
-      - 'src/'
-      - 'external/'
+      - 'src/**/*'
+      - 'external/**/*'
   workflow_dispatch:
 
 
