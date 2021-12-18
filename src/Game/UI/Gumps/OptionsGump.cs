@@ -123,7 +123,15 @@ namespace ClassicUO.Game.UI.Gumps
                          _chatAdditionalButtonsCheckbox,
                          _chatShiftEnterCheckbox,
                          _enableCaveBorder;
-        private Checkbox _holdShiftForContext, _holdShiftToSplitStack, _reduceFPSWhenInactive, _sallosEasyGrab, _partyInviteGump, _objectsFading, _textFading, _holdAltToMoveGumps;
+        private Checkbox _holdShiftForContext,
+                         _holdShiftToSplitStack,
+                         _reduceFPSWhenInactive,
+                         _sallosEasyGrab,
+                         _partyInviteGump,
+                         _objectsFading,
+                         _textFading,
+                         _holdAltToMoveGumps,
+                         _lockOverheadNameGumps;
         private Combobox _hpComboBox, _healtbarType, _fieldsType, _hpComboBoxShowWhen;
 
         // infobar
@@ -1098,6 +1106,17 @@ namespace ClassicUO.Game.UI.Gumps
                 )
             );
 
+            section3.Add
+            (
+                _lockOverheadNameGumps = AddCheckBox
+                (
+                    null,
+                    ResGumps.LockOverheadNameGumps,
+                    _currentProfile.LockOverheadNameGumps,
+                    0,
+                    0
+                )
+            );
 
             SettingsSection section4 = AddSettingsSection(box, "Miscellaneous");
             section4.Y = section3.Bounds.Bottom + 40;
@@ -3448,6 +3467,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _holdShiftForContext.IsChecked = false;
                     _holdAltToMoveGumps.IsChecked = false;
                     _holdShiftToSplitStack.IsChecked = false;
+                    _lockOverheadNameGumps.IsChecked = false;
                     _enablePathfind.IsChecked = false;
                     _useShiftPathfind.IsChecked = false;
                     _alwaysRun.IsChecked = false;
@@ -4099,33 +4119,42 @@ namespace ClassicUO.Game.UI.Gumps
 
             _currentProfile.ShowTargetRangeIndicator = _showTargetRangeIndicator.IsChecked;
 
+            var updateHealthBars = _currentProfile.CustomBarsToggled != _customBars.IsChecked;
 
-            bool updateHealthBars = _currentProfile.CustomBarsToggled != _customBars.IsChecked;
             _currentProfile.CustomBarsToggled = _customBars.IsChecked;
 
             if (updateHealthBars)
             {
-                if (_currentProfile.CustomBarsToggled)
+                var healthBarGumps = UIManager.Gumps.OfType<BaseHealthBarGump>().ToList();
+                
+                foreach (var gump in healthBarGumps)
                 {
-                    List<HealthBarGump> hbgstandard = UIManager.Gumps.OfType<HealthBarGump>().ToList();
-
-                    foreach (HealthBarGump healthbar in hbgstandard)
+                    if (_currentProfile.CustomBarsToggled)
                     {
-                        UIManager.Add(new HealthBarGumpCustom(healthbar.LocalSerial) { X = healthbar.X, Y = healthbar.Y });
-
-                        healthbar.Dispose();
+                        UIManager.Add(new HealthBarGumpCustom(gump.LocalSerial) { X = gump.X, Y = gump.Y });
                     }
+                    else
+                    {
+                        UIManager.Add(new HealthBarGump(gump.LocalSerial) { X = gump.X, Y = gump.Y });
+                    }
+
+                    gump.Dispose();
                 }
-                else
+            }
+
+            var updateOverheadNames = _currentProfile.LockOverheadNameGumps != _lockOverheadNameGumps.IsChecked;
+
+            _currentProfile.LockOverheadNameGumps = _lockOverheadNameGumps.IsChecked;
+
+            if (updateOverheadNames)
+            {
+                var nameOverheadGumps = UIManager.Gumps.OfType<NameOverheadGump>().ToList();
+
+                foreach (var gump in nameOverheadGumps)
                 {
-                    List<HealthBarGumpCustom> hbgcustom = UIManager.Gumps.OfType<HealthBarGumpCustom>().ToList();
+                    UIManager.Add(new NameOverheadGump(gump.LocalSerial));
 
-                    foreach (HealthBarGumpCustom customhealthbar in hbgcustom)
-                    {
-                        UIManager.Add(new HealthBarGump(customhealthbar.LocalSerial) { X = customhealthbar.X, Y = customhealthbar.Y });
-
-                        customhealthbar.Dispose();
-                    }
+                    gump.Dispose();
                 }
             }
 

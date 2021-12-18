@@ -55,9 +55,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         public NameOverheadGump(uint serial) : base(serial, 0)
         {
-            CanMove = false;
             AcceptMouseInput = true;
-            CanCloseWithRightClick = true;
+            AllowPlayerWorldMovement = ProfileManager.CurrentProfile.LockOverheadNameGumps;
+            CanCloseWithRightClick = !ProfileManager.CurrentProfile.LockOverheadNameGumps;
 
             Entity entity = World.Get(serial);
 
@@ -250,8 +250,8 @@ namespace ClassicUO.Game.UI.Gumps
                     (
                         gump = new HealthBarGumpCustom(entity)
                         {
-                            X = Mouse.Position.X - (rect.Width >> 1),
-                            Y = Mouse.Position.Y - (rect.Height >> 1)
+                            X = Mouse.LClickPosition.X - (rect.Width >> 1),
+                            Y = Mouse.LClickPosition.Y - (rect.Height >> 1)
                         }
                     );
                 }
@@ -446,7 +446,7 @@ namespace ClassicUO.Game.UI.Gumps
                     return;
                 }
 
-                _positionLocked = true;
+                _positionLocked = !ProfileManager.CurrentProfile.LockOverheadNameGumps;
 
                 AnimationsLoader.Instance.GetAnimationDimensions
                 (

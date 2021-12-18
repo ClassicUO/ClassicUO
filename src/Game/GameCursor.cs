@@ -38,6 +38,7 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI;
+using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
@@ -349,18 +350,35 @@ namespace ClassicUO.Game
 
                 if (ProfileManager.CurrentProfile.ShowTargetRangeIndicator)
                 {
+                    var dist = string.Empty;
+
                     if (UIManager.IsMouseOverWorld)
                     {
                         if (SelectedObject.Object is GameObject obj)
                         {
-                            string dist = obj.Distance.ToString();
-
-                            Vector3 hue = new Vector3(0, 1, 1f);
-                            sb.DrawString(Fonts.Bold, dist, Mouse.Position.X - 26, Mouse.Position.Y - 21, hue);
-                            
-                            hue.Y = 0;
-                            sb.DrawString(Fonts.Bold, dist, Mouse.Position.X - 25, Mouse.Position.Y - 20, hue);
+                            dist = obj.Distance.ToString();
                         }
+                    }
+                    else
+                    {
+                        if (UIManager.MouseOverControl is NameOverheadGump)
+                        {
+                            var mobile = World.Mobiles.Get(UIManager.MouseOverControl.LocalSerial);
+
+                            if (mobile != null)
+                            {
+                                dist = mobile.Distance.ToString();
+                            }
+                        }
+                    }
+
+                    if (!string.IsNullOrEmpty(dist))
+                    {
+                        Vector3 hue = new Vector3(0, 1, 1f);
+                        sb.DrawString(Fonts.Bold, dist, Mouse.Position.X - 26, Mouse.Position.Y - 21, hue);
+
+                        hue.Y = 0;
+                        sb.DrawString(Fonts.Bold, dist, Mouse.Position.X - 25, Mouse.Position.Y - 20, hue);
                     }
                 }
             }
@@ -565,7 +583,7 @@ namespace ClassicUO.Game
 
             ushort result = _cursorData[war, 9];
 
-            if (!UIManager.IsMouseOverWorld)
+            if (!UIManager.IsMouseOverWorld && (UIManager.MouseOverControl != null && !UIManager.MouseOverControl.AllowPlayerWorldMovement))
             {
                 return result;
             }

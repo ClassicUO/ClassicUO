@@ -70,6 +70,8 @@ namespace ClassicUO.Game.UI.Controls
             IsEnabled = true;
         }
 
+        public bool AllowPlayerWorldMovement { get; set; }
+
         public virtual ClickPriority Priority { get; set; } = ClickPriority.Default;
 
         public uint ServerSerial { get; set; }
