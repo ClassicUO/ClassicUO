@@ -363,11 +363,11 @@ namespace ClassicUO.Game
                     {
                         if (UIManager.MouseOverControl is NameOverheadGump)
                         {
-                            var mobile = World.Mobiles.Get(UIManager.MouseOverControl.LocalSerial);
+                            var entity = World.Get(UIManager.MouseOverControl.LocalSerial);
 
-                            if (mobile != null)
+                            if (entity != null)
                             {
-                                dist = mobile.Distance.ToString();
+                                dist = entity.Distance.ToString();
                             }
                         }
                     }
