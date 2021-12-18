@@ -1647,6 +1647,30 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void DrawAll(UltimaBatcher2D batcher, int gX, int gY, int halfWidth, int halfHeight)
         {
+            if (_showMultis)
+            {
+                foreach (House house in World.HouseManager.Houses)
+                {
+                    Item item = World.Items.Get(house.Serial);
+
+                    if (item != null)
+                    {
+                        DrawMulti
+                        (
+                            batcher,
+                            house,
+                            item.X,
+                            item.Y,
+                            gX,
+                            gY,
+                            halfWidth,
+                            halfHeight,
+                            Zoom
+                        );
+                    }
+                }
+            }
+
             if (_showMarkers && _mapMarkersLoaded)
             {
                 WMapMarker lastMarker = null;
@@ -1694,30 +1718,6 @@ namespace ClassicUO.Game.UI.Gumps
                     halfHeight,
                     Zoom
                 );
-            }
-
-            if (_showMultis)
-            {
-                foreach (House house in World.HouseManager.Houses)
-                {
-                    Item item = World.Items.Get(house.Serial);
-
-                    if (item != null)
-                    {
-                        DrawMulti
-                        (
-                            batcher,
-                            house,
-                            item.X,
-                            item.Y,
-                            gX,
-                            gY,
-                            halfWidth,
-                            halfHeight,
-                            Zoom
-                        );
-                    }
-                }
             }
 
             if (_showMobiles)
