@@ -219,13 +219,7 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
-            if (TargetManager.IsTargeting)
-            {
-                _targetBroke = true;
-                TargetManager.Target(LocalSerial);
-                Mouse.LastLeftButtonClickTime = 0;
-            }
-            else if (_canChangeName)
+            if (_canChangeName)
             {
                 if (_textBox != null)
                 {
@@ -237,6 +231,19 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             base.OnMouseDown(x, y, button);
+        }
+
+        protected override void OnMouseUp(int x, int y, MouseButtonType button)
+        {
+            if (TargetManager.IsTargeting && UIManager.DraggingControl == null)
+            {
+                _targetBroke = true;
+
+                TargetManager.Target(LocalSerial);
+                Mouse.LastLeftButtonClickTime = 0;
+            }
+
+            base.OnMouseUp(x, y, button);
         }
 
         protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
