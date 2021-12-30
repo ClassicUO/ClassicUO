@@ -272,7 +272,7 @@ namespace ClassicUO.Game.GameObjects
                     ),
                     bounds,
                     hue,
-                    MathHelper.ToRadians(angle),
+                    angle,
                     Vector2.Zero,
                     SpriteEffects.None,
                     depth + 0.5f
