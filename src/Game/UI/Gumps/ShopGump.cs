@@ -57,6 +57,9 @@ namespace ClassicUO.Game.UI.Gumps
             RightScrollUp,
             RightScrollDown
         }
+        // Scroll Delay (in ms)
+        private const int SCROLL_DELAY = 60;
+        private DateTime _lastMouseEventTime = DateTime.Now;
 
         private ButtonScroll _buttonScroll = ButtonScroll.None;
         private readonly Dictionary<uint, ShopItem> _shopItems;
@@ -243,7 +246,7 @@ namespace ClassicUO.Game.UI.Gumps
             leftUp.MouseDown += (sender, e) => { _buttonScroll = ButtonScroll.LeftScrollUp; };
             leftDown.MouseDown += (sender, e) => { _buttonScroll = ButtonScroll.LeftScrollDown; };
             rightUp.MouseDown += (sender, e) => { _buttonScroll = ButtonScroll.RightScrollUp; };
-            rightDown.MouseDown += (sender, e) => { _buttonScroll = ButtonScroll.RightScrollUp; };
+            rightDown.MouseDown += (sender, e) => { _buttonScroll = ButtonScroll.RightScrollDown; };
             Add(leftUp);
             Add(leftDown);
             Add(rightUp);
@@ -405,20 +408,9 @@ namespace ClassicUO.Game.UI.Gumps
                 Dispose();
             }
 
-            switch (_buttonScroll)
+            if (_buttonScroll != ButtonScroll.None)
             {
-                case ButtonScroll.LeftScrollUp:
-                    _shopScrollArea.Scroll(true);
-                    break;
-                case ButtonScroll.LeftScrollDown:
-                    _shopScrollArea.Scroll(false);
-                    break;
-                case ButtonScroll.RightScrollUp:
-                    _transactionScrollArea.Scroll(true);
-                    break;
-                case ButtonScroll.RightScrollDown:
-                    _transactionScrollArea.Scroll(false);
-                    break;
+                ProcessListScroll();
             }
 
             if (_updateTotal)
@@ -446,6 +438,30 @@ namespace ClassicUO.Game.UI.Gumps
         {
             return base.Draw(batcher, x, y);
         }
+
+        private void ProcessListScroll()
+        {
+            if ((DateTime.Now - _lastMouseEventTime).TotalMilliseconds >= SCROLL_DELAY)
+            {
+                switch (_buttonScroll)
+                {
+                    case ButtonScroll.LeftScrollUp:
+                        _shopScrollArea.Scroll(true);
+                        break;
+                    case ButtonScroll.LeftScrollDown:
+                        _shopScrollArea.Scroll(false);
+                        break;
+                    case ButtonScroll.RightScrollUp:
+                        _transactionScrollArea.Scroll(true);
+                        break;
+                    case ButtonScroll.RightScrollDown:
+                        _transactionScrollArea.Scroll(false);
+                        break;
+                }
+                _lastMouseEventTime = DateTime.Now;
+            }
+        }
+
 
         private void ShopItem_MouseDoubleClick(object sender, MouseDoubleClickEventArgs e)
         {
