@@ -545,7 +545,7 @@ namespace ClassicUO.Game.Scenes
                     return;
                 }
 
-                light.Color = ProfileManager.CurrentProfile.UseColoredLights ? LightColors.GetHue(graphic) : (ushort) 0;
+                light.Color = ProfileManager.CurrentProfile.UseColoredLights ? LightColors.GetHue(graphic, out light.IsHue) : (ushort) 0;
 
                 if (light.Color != 0)
                 {
@@ -1147,7 +1147,7 @@ namespace ClassicUO.Game.Scenes
             batcher.SetBlendState(BlendState.Additive);
 
             Vector3 hue = Vector3.Zero;
-            hue.Y = ShaderHueTranslator.SHADER_LIGHTS;
+
             hue.Z = 1f;
 
             for (int i = 0; i < _lightCount; i++)
@@ -1162,6 +1162,7 @@ namespace ClassicUO.Game.Scenes
                 }
 
                 hue.X = l.Color;
+                hue.Y = l.IsHue ? ShaderHueTranslator.SHADER_HUED : ShaderHueTranslator.SHADER_LIGHTS;
 
                 batcher.Draw
                 (
@@ -1291,6 +1292,7 @@ namespace ClassicUO.Game.Scenes
         {
             public byte ID;
             public ushort Color;
+            public bool IsHue;
             public int DrawX, DrawY;
         }
     }

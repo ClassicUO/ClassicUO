@@ -136,12 +136,11 @@ namespace ClassicUO
                 _hueSamplers[0].SetDataPointerEXT(0, null, (IntPtr) ptr, TEXTURE_WIDTH * TEXTURE_HEIGHT * sizeof(uint));
                 _hueSamplers[1].SetDataPointerEXT(0, null, (IntPtr) ptr + TEXTURE_WIDTH * TEXTURE_HEIGHT * sizeof(uint), TEXTURE_WIDTH * TEXTURE_HEIGHT * sizeof(uint));
 
-                LightColors.CreateLookupTables(buffer);
+                LightColors.CreateLightTextures(buffer, LIGHTS_TEXTURE_HEIGHT);
                 _hueSamplers[2].SetDataPointerEXT(0, null, (IntPtr)ptr, LIGHTS_TEXTURE_WIDTH * LIGHTS_TEXTURE_HEIGHT * sizeof(uint));
             }      
         
             System.Buffers.ArrayPool<uint>.Shared.Return(buffer, true);
-
 
             GraphicsDevice.Textures[1] = _hueSamplers[0];
             GraphicsDevice.Textures[2] = _hueSamplers[1];
@@ -150,6 +149,8 @@ namespace ClassicUO
             GumpsLoader.Instance.CreateAtlas(GraphicsDevice);
             LightsLoader.Instance.CreateAtlas(GraphicsDevice);
             AnimationsLoader.Instance.CreateAtlas(GraphicsDevice);
+
+            LightColors.LoadLights();
 
             AnimatedStaticsManager.Initialize();
 
