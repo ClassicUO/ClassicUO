@@ -46,7 +46,7 @@ namespace ClassicUO.Game.UI.Gumps
     internal class GridLootGump : Gump
     {
         private const int MAX_WIDTH = 300;
-        private const int MAX_HEIGHT = 400;
+        private const int MAX_HEIGHT = 420;
 
         private static int _lastX = ProfileManager.CurrentProfile.GridLootType == 2 ? 200 : 100;
         private static int _lastY = 100;
@@ -56,6 +56,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private int _currentPage = 1;
         private readonly Label _currentPageLabel;
+        private readonly Label _corpseNameLabel;
         private readonly bool _hideIfEmpty;
         private int _pagesCount;
 
@@ -141,8 +142,17 @@ namespace ClassicUO.Game.UI.Gumps
                     Y = Height - 20
                 }
             );
-        }
 
+            Add
+            (
+                _corpseNameLabel = new Label(GetCorpseName(), true, 0x0481, align: TEXT_ALIGN_TYPE.TS_CENTER, maxwidth:300)
+                {
+                    Width = 300,
+                    X = 0,
+                    Y = 0
+                }
+            );
+        }
 
         public override void OnButtonClick(int buttonID)
         {
@@ -227,7 +237,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         y += gridItem.Height + 20;
 
-                        if (y >= MAX_HEIGHT - 40)
+                        if (y >= MAX_HEIGHT - 60)
                         {
                             _pagesCount++;
                             y = 20;
@@ -236,7 +246,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
 
                     gridItem.X = x;
-                    gridItem.Y = y;
+                    gridItem.Y = y + 20;
                     Add(gridItem, _pagesCount);
 
                     x += gridItem.Width + 20;
@@ -246,7 +256,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             _background.Width = (GRID_ITEM_SIZE + 20) * row + 20;
-            _background.Height = 20 + 40 + (GRID_ITEM_SIZE + 20) * line + 20;
+            _background.Height = 20 + 40 + (GRID_ITEM_SIZE + 20) * line + 40;
 
 
             if (_background.Height >= MAX_HEIGHT - 40)
@@ -347,9 +357,9 @@ namespace ClassicUO.Game.UI.Gumps
                 _background.Width = 100;
             }
 
-            if (_background.Height < 100)
+            if (_background.Height < 120)
             {
-                _background.Height = 100;
+                _background.Height = 120;
             }
 
             Width = _background.Width;
@@ -363,6 +373,8 @@ namespace ClassicUO.Game.UI.Gumps
             _setlootbag.Y = Height - 23;
             _currentPageLabel.X = Width / 2 - 5;
             _currentPageLabel.Y = Height - 20;
+
+            _corpseNameLabel.Text = GetCorpseName();
 
             WantUpdateSize = true;
 
@@ -382,7 +394,11 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-
+        private string GetCorpseName()
+        {
+            return _corpse.Name?.Length > 0 ? _corpse.Name : "a corpse";
+        }
+        
         private class GridLootItem : Control
         {
             private readonly HitBox _hit;
