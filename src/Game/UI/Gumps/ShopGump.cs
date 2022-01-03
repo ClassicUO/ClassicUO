@@ -59,7 +59,7 @@ namespace ClassicUO.Game.UI.Gumps
         }
         // Scroll Delay (in ms)
         private const int SCROLL_DELAY = 60;
-        private DateTime _lastMouseEventTime = DateTime.Now;
+        private uint _lastMouseEventTime = Time.Ticks;
 
         private ButtonScroll _buttonScroll = ButtonScroll.None;
         private readonly Dictionary<uint, ShopItem> _shopItems;
@@ -441,7 +441,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void ProcessListScroll()
         {
-            if ((DateTime.Now - _lastMouseEventTime).TotalMilliseconds >= SCROLL_DELAY)
+            if (Time.Ticks - _lastMouseEventTime >= SCROLL_DELAY)
             {
                 switch (_buttonScroll)
                 {
@@ -458,7 +458,7 @@ namespace ClassicUO.Game.UI.Gumps
                         _transactionScrollArea.Scroll(false);
                         break;
                 }
-                _lastMouseEventTime = DateTime.Now;
+                _lastMouseEventTime = Time.Ticks;
             }
         }
 
