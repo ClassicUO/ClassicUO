@@ -151,6 +151,7 @@ namespace ClassicUO.Game.Scenes
             // #########################################################
 
             Macros.Load();
+            NameOverHeadManager.Load();
 
             _animatedStaticsManager = new AnimatedStaticsManager();
             _animatedStaticsManager.Initialize();
@@ -349,6 +350,7 @@ namespace ClassicUO.Game.Scenes
 
             Macros.Save();
             InfoBars.Save();
+            NameOverHeadManager.Save();
             ProfileManager.UnLoadProfile();
 
             StaticFilters.CleanCaveTextures();
