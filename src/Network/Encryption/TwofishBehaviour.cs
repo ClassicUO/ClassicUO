@@ -200,7 +200,7 @@ namespace ClassicUO.Network.Encryption
             }
         }
 
-        public void Encrypt(ref byte[] src, ref byte[] dst, int size)
+        public void Encrypt(Span<byte> src, Span<byte> dst, int size)
         {
             for (int i = 0; i < size; ++i)
             {
@@ -215,7 +215,7 @@ namespace ClassicUO.Network.Encryption
             }
         }
 
-        public void Decrypt(ref byte[] src, ref byte[] dst, int size)
+        public void Decrypt(Span<byte> src, Span<byte> dst, int size)
         {
             for (int i = 0; i < size; ++i)
             {

@@ -132,7 +132,7 @@ namespace ClassicUO.Network.Encryption
             _block_pos = 0;
         }
 
-        public void Encrypt(ref byte[] src, ref byte[] dst, int size, ref int index_in, ref int index_out)
+        public void Encrypt(Span<byte> src, Span<byte> dst, int size, ref int index_in, ref int index_out)
         {
             while (_stream_pos + size > Crypt_Constants.CRYPT_GAME_TABLE_TRIGGER)
             {
@@ -140,8 +140,8 @@ namespace ClassicUO.Network.Encryption
 
                 Encrypt
                 (
-                    ref src,
-                    ref dst,
+                    src,
+                    dst,
                     len_remaining,
                     ref index_in,
                     ref index_out

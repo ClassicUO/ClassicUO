@@ -44,9 +44,9 @@ namespace ClassicUO.Network
         /// <summary>
         ///     Constructs a new instance of a byte queue.
         /// </summary>
-        public CircularBuffer()
+        public CircularBuffer(int size = 4096)
         {
-            _buffer = new byte[0x10000];
+            _buffer = new byte[size];
         }
 
         /// <summary>
@@ -88,6 +88,8 @@ namespace ClassicUO.Network
             _tail = Length;
             _buffer = newBuffer;
         }
+
+        public void Enqueue(Span<byte> buffer) => Enqueue(buffer, 0, buffer.Length);
 
         /// <summary>
         ///     Enqueues a buffer to the queue and inserts it to a correct position
