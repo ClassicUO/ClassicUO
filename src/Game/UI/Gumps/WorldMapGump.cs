@@ -990,7 +990,10 @@ namespace ClassicUO.Game.UI.Gumps
 
         #region Loading
 
+        private void LoadMapChunks(Span<uint> buffer, Span<byte> allZ, int mapWidth, int mapHeight, int chunkSize)
+        {
 
+        }
 
         private unsafe Task Load()
         {
@@ -1051,9 +1054,18 @@ namespace ClassicUO.Game.UI.Gumps
                             sbyte[] allZ = _zBuffer;
                             uint[] buffer = _pixelBuffer;
 
+                            // horrible tweak to cleanup texture... but works!
+                            buffer.AsSpan().Fill(0);
+
+                            fixed (uint* pixels = &buffer[0])
+                            {
+                                _mapTexture.SetDataPointerEXT(0, null, (IntPtr)pixels, sizeof(uint) * _mapTexture.Width * _mapTexture.Height);
+                            }
+
+
                             var huesLoader = HuesLoader.Instance;
 
-                            int bx, by, mapX, mapY, x, y;
+                            int bx, by, mapX = 0, mapY = 0, x, y;
 
                             for (bx = 0; bx < fixedWidth; ++bx)
                             {
@@ -1164,8 +1176,7 @@ namespace ClassicUO.Game.UI.Gumps
                                         cc = (uint)(r | (g << 8) | (b << 16) | (a << 24));
                                     }
                                 }
-                            }
-
+                            }                         
                             if (OFFSET_PIX > 0)
                             {
                                 realWidth += OFFSET_PIX;
@@ -1634,7 +1645,7 @@ namespace ClassicUO.Game.UI.Gumps
                         srcRect.Width / 2f,
                         srcRect.Height / 2f
                     );
-            
+
                     batcher.Draw
                     (
                         _mapTexture,
