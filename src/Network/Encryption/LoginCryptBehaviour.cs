@@ -30,6 +30,8 @@
 
 #endregion
 
+using System;
+
 namespace ClassicUO.Network.Encryption
 {
     internal sealed class LoginCryptBehaviour
@@ -57,7 +59,7 @@ namespace ClassicUO.Network.Encryption
         }
 
 
-        public void Encrypt(ref byte[] src, ref byte[] dst, int size)
+        public void Encrypt(Span<byte> src, Span<byte> dst, int size)
         {
             for (int i = 0; i < size; i++)
             {
@@ -71,7 +73,7 @@ namespace ClassicUO.Network.Encryption
             }
         }
 
-        public void Encrypt_OLD(ref byte[] src, ref byte[] dst, int size)
+        public void Encrypt_OLD(Span<byte> src, Span<byte> dst, int size)
         {
             for (int i = 0; i < size; i++)
             {
@@ -85,7 +87,7 @@ namespace ClassicUO.Network.Encryption
             }
         }
 
-        public void Encrypt_1_25_36(ref byte[] src, ref byte[] dst, int size)
+        public void Encrypt_1_25_36(Span<byte> src, Span<byte> dst, int size)
         {
             for (int i = 0; i < size; i++)
             {

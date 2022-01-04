@@ -31,6 +31,7 @@
 #endregion
 
 using ClassicUO.Data;
+using System;
 
 namespace ClassicUO.Network.Encryption
 {
@@ -134,7 +135,7 @@ namespace ClassicUO.Network.Encryption
         }
 
 
-        public static void Encrypt(bool is_login, ref byte[] src, ref byte[] dst, int size)
+        public static void Encrypt(bool is_login, Span<byte> src, Span<byte> dst, int size)
         {
             if (Type == ENCRYPTION_TYPE.NONE)
             {
@@ -145,15 +146,15 @@ namespace ClassicUO.Network.Encryption
             {
                 if (Type == ENCRYPTION_TYPE.OLD_BFISH)
                 {
-                    _loginCrypt.Encrypt_OLD(ref src, ref dst, size);
+                    _loginCrypt.Encrypt_OLD(src, dst, size);
                 }
                 else if (Type == ENCRYPTION_TYPE.BLOWFISH__1_25_36)
                 {
-                    _loginCrypt.Encrypt_1_25_36(ref src, ref dst, size);
+                    _loginCrypt.Encrypt_1_25_36(src, dst, size);
                 }
                 else if (Type != ENCRYPTION_TYPE.NONE)
                 {
-                    _loginCrypt.Encrypt(ref src, ref dst, size);
+                    _loginCrypt.Encrypt(src, dst, size);
                 }
             }
             else if (Type == ENCRYPTION_TYPE.BLOWFISH__2_0_3)
@@ -162,18 +163,18 @@ namespace ClassicUO.Network.Encryption
 
                 _blowfishEncryption.Encrypt
                 (
-                    ref src,
-                    ref dst,
+                    src,
+                    dst,
                     size,
                     ref index_s,
                     ref index_d
                 );
 
-                _twoFishBehaviour.Encrypt(ref dst, ref dst, size);
+                _twoFishBehaviour.Encrypt(dst, dst, size);
             }
             else if (Type == ENCRYPTION_TYPE.TWOFISH_MD5)
             {
-                _twoFishBehaviour.Encrypt(ref src, ref dst, size);
+                _twoFishBehaviour.Encrypt(src, dst, size);
             }
             else
             {
@@ -181,8 +182,8 @@ namespace ClassicUO.Network.Encryption
 
                 _blowfishEncryption.Encrypt
                 (
-                    ref src,
-                    ref dst,
+                    src,
+                    dst,
                     size,
                     ref index_s,
                     ref index_d
@@ -190,11 +191,11 @@ namespace ClassicUO.Network.Encryption
             }
         }
 
-        public static void Decrypt(ref byte[] src, ref byte[] dst, int size)
+        public static void Decrypt(Span<byte> src, Span<byte> dst, int size)
         {
             if (Type == ENCRYPTION_TYPE.TWOFISH_MD5)
             {
-                _twoFishBehaviour.Decrypt(ref src, ref dst, size);
+                _twoFishBehaviour.Decrypt(src, dst, size);
             }
         }
     }
