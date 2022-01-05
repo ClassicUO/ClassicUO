@@ -229,7 +229,6 @@ namespace ClassicUO.Configuration
         public bool ShowStatsChangedMessage { get; set; } = true;
 
 
-        public int FilterType { get; set; } = 0;
         public bool ShadowsEnabled { get; set; } = true;
         public bool ShadowsStatics { get; set; } = true;
         public int TerrainShadowsLevel { get; set; } = 15;
