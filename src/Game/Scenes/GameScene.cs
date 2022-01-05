@@ -889,11 +889,6 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-        public override void FixedUpdate(double totalTime, double frameTime)
-        {
-            //FillGameObjectList();
-        }
-
 
         public override bool Draw(UltimaBatcher2D batcher)
         {
