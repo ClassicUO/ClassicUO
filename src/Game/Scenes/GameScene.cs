@@ -88,7 +88,6 @@ namespace ClassicUO.Game.Scenes
         private bool _forceStopScene;
         private HealthLinesManager _healthLinesManager;
 
-        private bool _isListReady;
         private Point _lastSelectedMultiPositionInHouseCustomization;
         private int _lightCount;
         private readonly LightData[] _lights = new LightData[Constants.MAX_LIGHTS_DATA_INDEX_COUNT];
@@ -578,7 +577,6 @@ namespace ClassicUO.Game.Scenes
                 return;
             }
 
-            _isListReady = false;
             _alphaChanged = _alphaTimer < Time.Ticks;
 
             if (_alphaChanged)
@@ -694,7 +692,6 @@ namespace ClassicUO.Game.Scenes
             }
 
             UpdateDrawPosition = false;
-            _isListReady = true;
         }
 
         private void UpdateTextServerEntities<T>(IEnumerable<T> entities, bool force) where T : Entity
@@ -892,7 +889,7 @@ namespace ClassicUO.Game.Scenes
 
         public override bool Draw(UltimaBatcher2D batcher)
         {
-            if (!World.InGame /*|| !_isListReady*/)
+            if (!World.InGame)
             {
                 return false;
             }
