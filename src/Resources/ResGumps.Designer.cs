@@ -1466,24 +1466,6 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Filter type [TEST]:.
-        /// </summary>
-        public static string FilterType {
-            get {
-                return ResourceManager.GetString("FilterType", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to {0} [{1}].
-        /// </summary>
-        public static string FilterTypeFormatON {
-            get {
-                return ResourceManager.GetString("FilterTypeFormatON", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Fire Resistance.
         /// </summary>
         public static string FireResistance {

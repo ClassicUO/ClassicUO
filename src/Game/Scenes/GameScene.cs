@@ -1042,24 +1042,7 @@ namespace ClassicUO.Game.Scenes
             }
             else
             {
-                switch (ProfileManager.CurrentProfile.FilterType)
-                {
-                    default:
-                    case 0:
-                        batcher.SetSampler(SamplerState.PointClamp);
-
-                        break;
-
-                    case 1:
-                        batcher.SetSampler(SamplerState.AnisotropicClamp);
-
-                        break;
-
-                    case 2:
-                        batcher.SetSampler(SamplerState.LinearClamp);
-
-                        break;
-                }
+                batcher.SetSampler(SamplerState.PointClamp);
             }
 
 
