@@ -423,15 +423,6 @@ namespace ClassicUO
 
             if (_totalElapsed > x)
             {
-                if (Scene != null && Scene.IsLoaded && !Scene.IsDestroyed)
-                {
-                    Profiler.EnterContext("FixedUpdate");
-
-                    Scene.FixedUpdate(gameTime.TotalGameTime.TotalMilliseconds, gameTime.ElapsedGameTime.TotalMilliseconds);
-
-                    Profiler.ExitContext("FixedUpdate");
-                }
-
                 _totalElapsed %= x;
             }
             else
