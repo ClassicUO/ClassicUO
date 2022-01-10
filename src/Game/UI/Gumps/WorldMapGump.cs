@@ -1192,11 +1192,11 @@ namespace ClassicUO.Game.UI.Gumps
                             int fixedWidth = MapLoader.Instance.MapBlocksSize[World.MapIndex, 0];
                             int fixedHeight = MapLoader.Instance.MapBlocksSize[World.MapIndex, 1];
 
-                            const int CHUNK_LOAD_SIZE = 1;
-                            const int CHUNK_LAND_SIZE = (8 + OFFSET_PIX_HALF) * (8 + OFFSET_PIX_HALF);
+                            const int CHUNK_UNIT_SIZE = 8;
+                            const int CHUNK_LAND_SIZE = (CHUNK_UNIT_SIZE + OFFSET_PIX_HALF) * (CHUNK_UNIT_SIZE + OFFSET_PIX_HALF);
 
-                            Span<sbyte> allZ = stackalloc sbyte[CHUNK_LOAD_SIZE * CHUNK_LAND_SIZE];
-                            Span<uint> buffer = stackalloc uint[CHUNK_LOAD_SIZE * CHUNK_LAND_SIZE];
+                            Span<sbyte> allZ = stackalloc sbyte[CHUNK_LAND_SIZE];
+                            Span<uint> buffer = stackalloc uint[CHUNK_LAND_SIZE];
 
                             fixed (uint* bufferPtr = buffer)
                             {
@@ -1215,8 +1215,8 @@ namespace ClassicUO.Game.UI.Gumps
                                 //    }
                                 //}
 
-                                var realAllZ = allZ.Slice(OFFSET_PIX_HALF * 8, 64);
-                                var realBuffer = buffer.Slice(OFFSET_PIX_HALF * 8, 64);
+                                var realAllZ = allZ.Slice(OFFSET_PIX_HALF * CHUNK_UNIT_SIZE, CHUNK_UNIT_SIZE * CHUNK_UNIT_SIZE);
+                                var realBuffer = buffer.Slice(OFFSET_PIX_HALF * CHUNK_UNIT_SIZE, CHUNK_UNIT_SIZE * CHUNK_UNIT_SIZE);
 
                                 for (int x = 0; x < fixedWidth; x += 1)
                                 {
@@ -1228,8 +1228,8 @@ namespace ClassicUO.Game.UI.Gumps
                                         _mapTexture.SetDataPointerEXT
                                         (
                                             0,
-                                            new Rectangle(x * 8 + OFFSET_PIX_HALF, y * 8 + OFFSET_PIX_HALF, 8, 8),
-                                            (IntPtr)(bufferPtr + (OFFSET_PIX_HALF * 8)),
+                                            new Rectangle(x * CHUNK_UNIT_SIZE + OFFSET_PIX_HALF, y * CHUNK_UNIT_SIZE + OFFSET_PIX_HALF, CHUNK_UNIT_SIZE, CHUNK_UNIT_SIZE),
+                                            (IntPtr)(bufferPtr + (OFFSET_PIX_HALF * CHUNK_UNIT_SIZE)),
                                             sizeof(uint) * realBuffer.Length
                                         );
                                     }
