@@ -2141,7 +2141,7 @@ namespace ClassicUO.Network
             }
 
             Weather weather = scene.Weather;
-            WEATHER_TYPE type = (WEATHER_TYPE) p.ReadUInt8();
+            WeatherType type = (WeatherType) p.ReadUInt8();
 
             if (weather.CurrentWeather != type)
             {
