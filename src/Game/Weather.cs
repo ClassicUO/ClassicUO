@@ -394,7 +394,7 @@ namespace ClassicUO.Game
                            SolidColorTextureCache.GetTexture(Color.Gray),
                            start,
                            end,
-                           Vector3.Zero,
+                           Vector3.UnitZ,
                            1
                         );
 
@@ -413,7 +413,7 @@ namespace ClassicUO.Game
                         (
                             SolidColorTextureCache.GetTexture(Color.White),
                             rect,
-                            Vector3.Zero
+                            Vector3.UnitZ
                         );
 
                         break;

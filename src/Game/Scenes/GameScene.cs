@@ -1108,14 +1108,16 @@ namespace ClassicUO.Game.Scenes
             if (_multi != null && TargetManager.IsTargeting && TargetManager.TargetingState == CursorTarget.MultiPlacement)
             {
                 _multi.Draw(batcher, _multi.RealScreenPosition.X, _multi.RealScreenPosition.Y, _multi.CalculateDepthZ());
-            } 
+            }
 
+            batcher.SetSampler(null);
+            batcher.SetStencil(null);
 
             // draw weather
             Weather.Draw(batcher, 0, 0); // TODO: fix the depth
+
             batcher.End();
-            batcher.SetSampler(null);
-            batcher.SetStencil(null);
+           
 
             int flushes = batcher.FlushesDone;
             int switches = batcher.TextureSwitches;
