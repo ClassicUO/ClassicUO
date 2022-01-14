@@ -2432,6 +2432,51 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to WorldMap zones loaded &apos;{0}&apos; .
+        /// </summary>
+        public static string MapZoneFileLoaded {
+            get {
+                return ResourceManager.GetString("MapZoneFileLoaded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Show/Hide &apos;{0}&apos;.
+        /// </summary>
+        public static string MapZoneFileName {
+            get {
+                return ResourceManager.GetString("MapZoneFileName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;none&gt;.
+        /// </summary>
+        public static string MapZoneNone {
+            get {
+                return ResourceManager.GetString("MapZoneNone", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Map Zone Options.
+        /// </summary>
+        public static string MapZoneOptions {
+            get {
+                return ResourceManager.GetString("MapZoneOptions", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Reload Map Zones.
+        /// </summary>
+        public static string MapZoneReload {
+            get {
+                return ResourceManager.GetString("MapZoneReload", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Mark cave tiles.
         /// </summary>
         public static string MarkCaveTiles {
