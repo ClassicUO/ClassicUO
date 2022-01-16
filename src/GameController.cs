@@ -69,7 +69,6 @@ namespace ClassicUO
         private uint _totalFrames;
         private UltimaBatcher2D _uoSpriteBatch;
         private bool _suppressedDraw;
-        private UOFontRenderer _fontRenderer;
 
         public GameController()
         {
@@ -124,38 +123,25 @@ namespace ClassicUO
             const int LIGHTS_TEXTURE_WIDTH = 32;
             const int LIGHTS_TEXTURE_HEIGHT = 63;
 
-            uint[] buffer = System.Buffers.ArrayPool<uint>.Shared.Rent(TEXTURE_WIDTH * TEXTURE_HEIGHT * 2);
+            _hueSamplers[0] = new Texture2D(GraphicsDevice, TEXTURE_WIDTH, TEXTURE_HEIGHT);
+            _hueSamplers[1] = new Texture2D(GraphicsDevice, TEXTURE_WIDTH, TEXTURE_HEIGHT);
+            _hueSamplers[2] = new Texture2D(GraphicsDevice, LIGHTS_TEXTURE_WIDTH, LIGHTS_TEXTURE_HEIGHT);
 
-            try
+
+            uint[] buffer = System.Buffers.ArrayPool<uint>.Shared.Rent(Math.Max(LIGHTS_TEXTURE_WIDTH * LIGHTS_TEXTURE_HEIGHT, TEXTURE_WIDTH * TEXTURE_HEIGHT * 2));
+
+            fixed (uint* ptr = buffer)
             {
-                 HuesLoader.Instance.CreateShaderColors(buffer);
+                HuesLoader.Instance.CreateShaderColors(buffer);
+                _hueSamplers[0].SetDataPointerEXT(0, null, (IntPtr) ptr, TEXTURE_WIDTH * TEXTURE_HEIGHT * sizeof(uint));
+                _hueSamplers[1].SetDataPointerEXT(0, null, (IntPtr) ptr + TEXTURE_WIDTH * TEXTURE_HEIGHT * sizeof(uint), TEXTURE_WIDTH * TEXTURE_HEIGHT * sizeof(uint));
 
-                _hueSamplers[0] = new Texture2D(GraphicsDevice, TEXTURE_WIDTH, TEXTURE_HEIGHT);
-                _hueSamplers[0].SetData(buffer, 0, TEXTURE_WIDTH * TEXTURE_HEIGHT);
-
-                _hueSamplers[1] = new Texture2D(GraphicsDevice, TEXTURE_WIDTH, TEXTURE_HEIGHT);
-                _hueSamplers[1].SetData(buffer, TEXTURE_WIDTH * TEXTURE_HEIGHT, TEXTURE_WIDTH * TEXTURE_HEIGHT);
-            }
-            finally
-            {
-                System.Buffers.ArrayPool<uint>.Shared.Return(buffer, true);
-            }
-
-
-            buffer = System.Buffers.ArrayPool<uint>.Shared.Rent(LIGHTS_TEXTURE_WIDTH * LIGHTS_TEXTURE_HEIGHT);
-
-            try
-            {
                 LightColors.CreateLookupTables(buffer);
+                _hueSamplers[2].SetDataPointerEXT(0, null, (IntPtr)ptr, LIGHTS_TEXTURE_WIDTH * LIGHTS_TEXTURE_HEIGHT * sizeof(uint));
+            }      
+        
+            System.Buffers.ArrayPool<uint>.Shared.Return(buffer, true);
 
-                _hueSamplers[2] = new Texture2D(GraphicsDevice, LIGHTS_TEXTURE_WIDTH, LIGHTS_TEXTURE_HEIGHT);
-                _hueSamplers[2].SetData(buffer, 0, LIGHTS_TEXTURE_WIDTH * LIGHTS_TEXTURE_HEIGHT);
-            }
-            finally
-            {
-                System.Buffers.ArrayPool<uint>.Shared.Return(buffer, true);
-            }
-           
 
             GraphicsDevice.Textures[1] = _hueSamplers[0];
             GraphicsDevice.Textures[2] = _hueSamplers[1];
@@ -164,8 +150,6 @@ namespace ClassicUO
             GumpsLoader.Instance.CreateAtlas(GraphicsDevice);
             LightsLoader.Instance.CreateAtlas(GraphicsDevice);
             AnimationsLoader.Instance.CreateAtlas(GraphicsDevice);
-
-            _fontRenderer = new UOFontRenderer(GraphicsDevice);
 
             UIManager.InitializeGameCursor();
             AnimatedStaticsManager.Initialize();
