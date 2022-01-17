@@ -2077,13 +2077,13 @@ namespace ClassicUO.Game.Managers
         UseItemInHand,
         UsePotion,
         CloseAllHealthBars,
-        CloseInactiveHealthBars,
-        CloseCorpses,
         RazorMacro,
         ToggleDrawRoofs,
         ToggleTreeStumps,
         ToggleVegetation,
         ToggleCaveTiles
+        CloseInactiveHealthBars,
+        CloseCorpses,
     }
 
     internal enum MacroSubType
