@@ -2081,9 +2081,9 @@ namespace ClassicUO.Game.Managers
         ToggleDrawRoofs,
         ToggleTreeStumps,
         ToggleVegetation,
-        ToggleCaveTiles
+        ToggleCaveTiles,
         CloseInactiveHealthBars,
-        CloseCorpses,
+        CloseCorpses
     }
 
     internal enum MacroSubType
