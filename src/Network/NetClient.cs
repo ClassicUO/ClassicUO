@@ -61,7 +61,8 @@ namespace ClassicUO.Network
         private CircularBuffer _circularBuffer;
         private ConcurrentQueue<byte[]> _pluginRecvQueue = new ConcurrentQueue<byte[]>();
         private readonly bool _is_login_socket;
-        private Socket _socket;
+        private TcpClient _tcpClient;
+        private NetworkStream _netStream;
         private uint? _localIP;
 
 
@@ -77,7 +78,7 @@ namespace ClassicUO.Network
         public static NetClient Socket { get; } = new NetClient(false);
 
 
-        public bool IsConnected => _socket != null && _socket.Connected;
+        public bool IsConnected => _tcpClient != null && _tcpClient.Connected;
 
         public bool IsDisposed { get; private set; }
 
@@ -91,7 +92,7 @@ namespace ClassicUO.Network
                 {
                     try
                     {
-                        byte[] addressBytes = (_socket?.LocalEndPoint as IPEndPoint)?.Address.MapToIPv4().GetAddressBytes();
+                        byte[] addressBytes = (_tcpClient.Client?.LocalEndPoint as IPEndPoint)?.Address.MapToIPv4().GetAddressBytes();
 
                         if (addressBytes != null && addressBytes.Length != 0)
                         {
@@ -164,16 +165,14 @@ namespace ClassicUO.Network
                 return false;
             }
 
-            //_tcpClient = new TcpClient
-            //{
-            //    ReceiveBufferSize = BUFF_SIZE,
-            //    SendBufferSize = BUFF_SIZE,
-            //    NoDelay = true,
-            //    ReceiveTimeout = 0,
-            //    SendTimeout = 0
-            //};
-
-            _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            _tcpClient = new TcpClient
+            {
+                ReceiveBufferSize = BUFF_SIZE,
+                SendBufferSize = BUFF_SIZE,
+                NoDelay = true,
+                ReceiveTimeout = 0,
+                SendTimeout = 0
+            };
 
             _recvBuffer = new byte[BUFF_SIZE];
             _incompletePacketBuffer = new byte[BUFF_SIZE];
@@ -194,14 +193,15 @@ namespace ClassicUO.Network
         {
             try
             {
-                return await _socket
+                return await _tcpClient
                     .ConnectAsync(address, port)
                     .ContinueWith
                     (
                         (t) =>
                         {
-                            if (!t.IsFaulted && _socket.Connected)
+                            if (!t.IsFaulted && _tcpClient.Connected)
                             {
+                                _netStream = _tcpClient.GetStream();
                                 Status = ClientSocketStatus.Connected;
                                 Connected.Raise();
                                 Statistics.ConnectedFrom = DateTime.Now;
@@ -246,14 +246,14 @@ namespace ClassicUO.Network
             Status = ClientSocketStatus.Disconnected;
             IsDisposed = true;
 
-            if (_socket == null)
+            if (_tcpClient == null)
             {
                 return;
             }
 
             try
             {
-                _socket.Close();
+                _tcpClient.Close();
             }
             catch
             {
@@ -261,7 +261,7 @@ namespace ClassicUO.Network
 
             try
             {
-                _socket?.Dispose();
+                _netStream?.Dispose();
             }
             catch
             {
@@ -273,7 +273,8 @@ namespace ClassicUO.Network
             _incompletePacketLength = 0;
             _recvBuffer = null;
             _isCompressionEnabled = false;
-            _socket = null;
+            _tcpClient = null;
+            _netStream = null;
             _circularBuffer = null;
             _localIP = null;
             _sendingBuffer = null;
@@ -305,11 +306,15 @@ namespace ClassicUO.Network
 
         private void Send(byte[] data, int length, bool skip_encryption)
         {
-            if (_socket == null || IsDisposed || !_socket.Connected)
+            if (_tcpClient == null || IsDisposed)
             {
                 return;
             }
 
+            if (_netStream == null || !_tcpClient.Connected)
+            {
+                return;
+            }
 
             if (data != null && data.Length != 0 && length > 0)
             {
@@ -447,7 +452,12 @@ namespace ClassicUO.Network
                 return;
             }
 
-            int available = _socket.Available;
+            if (!_netStream.DataAvailable)
+            {
+                return;
+            }
+
+            int available = _tcpClient.Available;
 
             if (available <= 0)
             {
@@ -456,7 +466,7 @@ namespace ClassicUO.Network
 
             try
             {
-                int received = _socket.Receive(_recvBuffer, available, SocketFlags.None);
+                int received = _netStream.Read(_recvBuffer, 0, available);
 
                 if (received > 0)
                 {
@@ -540,7 +550,8 @@ namespace ClassicUO.Network
 
             try
             {
-                int sent = _socket.Send(_sendingBuffer, _sendingCount, SocketFlags.None);
+                _netStream.Write(_sendingBuffer, 0, _sendingCount);
+                _netStream.Flush();
 
                 _sendingCount = 0;
             }
@@ -555,7 +566,6 @@ namespace ClassicUO.Network
             {
                 if (ex.InnerException is SocketException socketEx)
                 {
-                    Log.Error("main exception:\n" + ex);
                     Log.Error("socket error when sending:\n" + socketEx);
 
                     _logFile?.Write($"disconnection  -  error during writing to the socket buffer [2]: {socketEx}");

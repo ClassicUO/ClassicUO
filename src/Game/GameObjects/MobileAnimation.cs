@@ -1307,11 +1307,11 @@ namespace ClassicUO.Game.GameObjects
                         {
                             if (isRun)
                             {
-                                result = (byte)(hand2 != null ? 3 : 2);
+                                result = 2;
                             }
                             else
                             {
-                                result = (byte)(hand2 != null ? 1 : 0);
+                                result = 0;
                             }
                         }
 

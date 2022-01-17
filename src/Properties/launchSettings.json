@@ -2,10 +2,15 @@
   "profiles": {
     "ClassicUO": {
       "commandName": "Project",
-      "commandLineArgs": "-skiploginscreen "
+      "commandLineArgs": "-skiploginscreen"
     },
-    "ClassicUO No SkipLoginScreen": {
-      "commandName": "Project"
+    "ClassicUO Outlands": {
+      "commandName": "Project",
+      "commandLineArgs": "-skiploginscreen -settings settings.outlands.json"
+    },
+    "ClassicUO Second Age": {
+      "commandName": "Project",
+      "commandLineArgs": "-skiploginscreen -settings settings.secondage.json"
     }
   }
 }

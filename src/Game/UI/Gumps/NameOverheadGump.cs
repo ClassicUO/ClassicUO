@@ -47,17 +47,20 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class NameOverheadGump : Gump
     {
+        const ushort LOCK_GRAPHIC = 0x082C;
+
         private AlphaBlendControl _background;
         private Point _lockedPosition;
         private bool _positionLocked;
         private readonly RenderedText _renderedText;
         private Texture2D _borderColor = SolidColorTextureCache.GetTexture(Color.Black);
 
+        public override bool AllowPlayerWorldMovement => ProfileManager.CurrentProfile.LockOverheadNameGumps && !Keyboard.Alt;
+        public override bool CanCloseWithRightClick => !ProfileManager.CurrentProfile.LockOverheadNameGumps && !Keyboard.Alt;
+
         public NameOverheadGump(uint serial) : base(serial, 0)
         {
-            CanMove = false;
             AcceptMouseInput = true;
-            CanCloseWithRightClick = true;
 
             Entity entity = World.Get(serial);
 
@@ -218,6 +221,11 @@ namespace ClassicUO.Game.UI.Gumps
                 entity.ObjectHandlesStatus = ObjectHandlesStatus.CLOSED;
             }
 
+            if (ProfileManager.CurrentProfile.LockOverheadNameGumps)
+            {
+                NameOverHeadManager.IgnoreEntity(entity);
+            }
+
             base.CloseWithRightClick();
         }
 
@@ -250,8 +258,8 @@ namespace ClassicUO.Game.UI.Gumps
                     (
                         gump = new HealthBarGumpCustom(entity)
                         {
-                            X = Mouse.Position.X - (rect.Width >> 1),
-                            Y = Mouse.Position.Y - (rect.Height >> 1)
+                            X = Mouse.LClickPosition.X - (rect.Width >> 1),
+                            Y = Mouse.LClickPosition.Y - (rect.Height >> 1)
                         }
                     );
                 }
@@ -424,6 +432,10 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 }
             }
+            else if (button == MouseButtonType.Right)
+            {
+                CloseWithRightClick();
+            }
 
             base.OnMouseUp(x, y, button);
         }
@@ -446,7 +458,7 @@ namespace ClassicUO.Game.UI.Gumps
                     return;
                 }
 
-                _positionLocked = true;
+                _positionLocked = !ProfileManager.CurrentProfile.LockOverheadNameGumps;
 
                 AnimationsLoader.Instance.GetAnimationDimensions
                 (
@@ -607,6 +619,28 @@ namespace ClassicUO.Game.UI.Gumps
             );
 
             base.Draw(batcher, x, y);
+
+            if (Keyboard.Alt && ProfileManager.CurrentProfile.LockOverheadNameGumps)
+            {
+                var lockTexture = GumpsLoader.Instance.GetGumpTexture(LOCK_GRAPHIC, out var lockBounds);
+
+                if (lockTexture != null)
+                {
+                    if (UIManager.MouseOverControl != null && (UIManager.MouseOverControl == this || UIManager.MouseOverControl.RootParent == this))
+                    {
+                        hueVector.X = 34;
+                        hueVector.Y = 1;
+                    }
+
+                    batcher.Draw
+                    (
+                        lockTexture,
+                        new Vector2(x + (Width - lockBounds.Width), y),
+                        lockBounds,
+                        hueVector
+                    );
+                }
+            }
 
             int renderedTextOffset = Math.Max(0, Width - _renderedText.Width - 4) >> 1;
 
