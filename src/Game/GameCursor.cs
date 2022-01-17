@@ -565,7 +565,7 @@ namespace ClassicUO.Game
 
             ushort result = _cursorData[war, 9];
 
-            if (!UIManager.IsMouseOverWorld)
+            if (!UIManager.IsMouseOverWorld && (UIManager.MouseOverControl != null && !UIManager.MouseOverControl.AllowPlayerWorldMovement))
             {
                 return result;
             }

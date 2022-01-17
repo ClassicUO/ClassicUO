@@ -70,6 +70,8 @@ namespace ClassicUO.Game.UI.Controls
             IsEnabled = true;
         }
 
+        public virtual bool AllowPlayerWorldMovement { get; set; }
+
         public virtual ClickPriority Priority { get; set; } = ClickPriority.Default;
 
         public uint ServerSerial { get; set; }
@@ -107,7 +109,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public virtual bool CanMove { get; set; }
 
-        public bool CanCloseWithRightClick { get; set; } = true;
+        public virtual bool CanCloseWithRightClick { get; set; } = true;
 
         public bool CanCloseWithEsc { get; set; }
 

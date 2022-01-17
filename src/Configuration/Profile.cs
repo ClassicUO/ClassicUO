@@ -170,6 +170,7 @@ namespace ClassicUO.Configuration
         public bool HoldDownKeyAltToCloseAnchored { get; set; } = true;
         public bool CloseAllAnchoredGumpsInGroupWithRightClick { get; set; } = false;
         public bool HoldAltToMoveGumps { get; set; }
+        public bool LockOverheadNameGumps { get; set; }
 
         public bool HideScreenshotStoredInMessage { get; set; }
 

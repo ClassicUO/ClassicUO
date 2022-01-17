@@ -31,6 +31,7 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Gumps;
@@ -50,6 +51,7 @@ namespace ClassicUO.Game.Managers
     internal static class NameOverHeadManager
     {
         private static NameOverHeadHandlerGump _gump;
+        private static HashSet<uint> _ignoredEntities = new HashSet<uint>();
 
         public static NameOverheadTypeAllowed TypeAllowed
         {
@@ -95,6 +97,8 @@ namespace ClassicUO.Game.Managers
 
         public static void Open()
         {
+            ClearIgnoredEntities();
+
             if (_gump == null || _gump.IsDisposed)
             {
                 _gump = new NameOverHeadHandlerGump();
@@ -117,6 +121,31 @@ namespace ClassicUO.Game.Managers
         public static void ToggleOverheads()
         {
             IsToggled = !IsToggled;
+        }
+
+        public static void ClearIgnoredEntities()
+        {
+            _ignoredEntities.Clear();
+        }
+
+        public static void IgnoreEntity(Entity entity)
+        {
+            if (entity == null)
+            {
+                return;
+            }
+
+            _ignoredEntities.Add(entity.Serial);
+        }
+
+        public static bool IsIngoredEntity(Entity entity)
+        {
+            if (entity == null)
+            {
+                return false;
+            }
+
+            return _ignoredEntities.Contains(entity.Serial);
         }
     }
 }

@@ -123,7 +123,15 @@ namespace ClassicUO.Game.UI.Gumps
                          _chatAdditionalButtonsCheckbox,
                          _chatShiftEnterCheckbox,
                          _enableCaveBorder;
-        private Checkbox _holdShiftForContext, _holdShiftToSplitStack, _reduceFPSWhenInactive, _sallosEasyGrab, _partyInviteGump, _objectsFading, _textFading, _holdAltToMoveGumps;
+        private Checkbox _holdShiftForContext,
+                        _holdShiftToSplitStack,
+                        _reduceFPSWhenInactive,
+                        _sallosEasyGrab,
+                        _partyInviteGump,
+                        _objectsFading,
+                        _textFading,
+                        _holdAltToMoveGumps,
+                        _lockOverheadNameGumps;
         private Combobox _hpComboBox, _healtbarType, _fieldsType, _hpComboBoxShowWhen;
 
         // infobar
@@ -1093,6 +1101,18 @@ namespace ClassicUO.Game.UI.Gumps
                     null,
                     ResGumps.ShiftStack,
                     _currentProfile.HoldShiftToSplitStack,
+                    0,
+                    0
+                )
+            );
+
+            section3.Add
+            (
+                _lockOverheadNameGumps = AddCheckBox
+                (
+                    null,
+                    ResGumps.LockOverheadNameGumps,
+                    _currentProfile.LockOverheadNameGumps,
                     0,
                     0
                 )
@@ -3448,6 +3468,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _holdShiftForContext.IsChecked = false;
                     _holdAltToMoveGumps.IsChecked = false;
                     _holdShiftToSplitStack.IsChecked = false;
+                    _lockOverheadNameGumps.IsChecked = false;
                     _enablePathfind.IsChecked = false;
                     _useShiftPathfind.IsChecked = false;
                     _alwaysRun.IsChecked = false;
@@ -4127,6 +4148,14 @@ namespace ClassicUO.Game.UI.Gumps
                         customhealthbar.Dispose();
                     }
                 }
+            }
+
+            var updateOverheadNames = _currentProfile.LockOverheadNameGumps != _lockOverheadNameGumps.IsChecked;
+            _currentProfile.LockOverheadNameGumps = _lockOverheadNameGumps.IsChecked;
+
+            if (updateOverheadNames)
+            {
+                NameOverHeadManager.IsToggled = false;
             }
 
             _currentProfile.CBBlackBGToggled = _customBarsBBG.IsChecked;
