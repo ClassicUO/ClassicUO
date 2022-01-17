@@ -3540,7 +3540,7 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Inform when skills change by.
+        ///   Looks up a localized string similar to Inform when skills change by (in tenths).
         /// </summary>
         public static string ShowSkillsChangedMessageBy {
             get {

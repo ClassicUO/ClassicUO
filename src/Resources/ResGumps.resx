@@ -1418,7 +1418,7 @@ Client version: '{0}'</value>
     <value>You must have three unique skills chosen!</value>
   </data>
   <data name="ShowSkillsChangedMessageBy" xml:space="preserve">
-    <value>Inform when skills change by</value>
+    <value>Inform when skills change by (in tenths)</value>
   </data>
   <data name="ShowStatsChangedMessage" xml:space="preserve">
     <value>Inform when stats change</value>

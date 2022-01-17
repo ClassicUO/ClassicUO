@@ -1294,7 +1294,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _currentProfile.ShowSkillsChangedDeltaValue,
                     startX,
                     startY,
-                    200
+                    150
                 )
             );
 
