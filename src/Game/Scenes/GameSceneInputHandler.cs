@@ -807,7 +807,7 @@ namespace ClassicUO.Game.Scenes
                 UIManager.ShowGamePopup(null);
             }
 
-            if (!UIManager.IsMouseOverWorld)
+            if (!UIManager.IsMouseOverWorld && !(UIManager.MouseOverControl != null && UIManager.MouseOverControl.AllowPlayerWorldMovement))
             {
                 return false;
             }

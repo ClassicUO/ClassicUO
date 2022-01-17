@@ -163,7 +163,10 @@ namespace ClassicUO.Game.GameObjects
                     Socket.Send_NameRequest(Serial);
                 }
 
-                UIManager.Add(new NameOverheadGump(this));
+                if (!NameOverHeadManager.IsIngoredEntity(this))
+                {
+                    UIManager.Add(new NameOverheadGump(this));
+                }
             }
 
 

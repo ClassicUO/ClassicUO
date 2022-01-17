@@ -581,6 +581,11 @@ namespace ClassicUO.Game.Managers
             {
                 for (LinkedListNode<Gump> el = Gumps.First; el != null; el = el.Next)
                 {
+                    if (el.Value is NameOverheadGump)
+                    {
+                        SortHealthBarOverNameplate(el);
+                    }
+
                     Gump c = el.Value;
 
                     if (c.LayerOrder == UILayer.Default)
@@ -616,6 +621,25 @@ namespace ClassicUO.Game.Managers
                 }
 
                 _needSort = false;
+            }
+        }
+
+        private static void SortHealthBarOverNameplate(LinkedListNode<Gump> nameplateNode)
+        {
+            var currentProfile = ProfileManager.CurrentProfile;
+
+            if (currentProfile == null || !currentProfile.LockOverheadNameGumps)
+            {
+                return;
+            }
+
+            for (LinkedListNode<Gump> current = Gumps.First; current != null; current = current.Next)
+            {
+                if (current.Value is BaseHealthBarGump)
+                {
+                    Gumps.Remove(current);
+                    Gumps.AddBefore(nameplateNode, current);
+                }
             }
         }
 

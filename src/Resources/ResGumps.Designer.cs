@@ -2313,6 +2313,15 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Lock Overhead Name Gumps.
+        /// </summary>
+        public static string LockOverheadNameGumps {
+            get {
+                return ResourceManager.GetString("LockOverheadNameGumps", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Login music.
         /// </summary>
         public static string LoginMusic {

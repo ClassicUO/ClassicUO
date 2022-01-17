@@ -1546,4 +1546,7 @@ Client version: '{0}'</value>
   <data name="DragSelectStartingPosY" xml:space="preserve">
     <value>Starting Y position of health bars</value>
   </data>
+  <data name="LockOverheadNameGumps" xml:space="preserve">
+    <value>Lock Overhead Name Gumps</value>
+  </data>
 </root>
