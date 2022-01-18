@@ -399,17 +399,16 @@ namespace ClassicUO.Game.UI.Gumps
         {
             ContextMenuItemEntry zoneOptions = new ContextMenuItemEntry(ResGumps.MapZoneOptions);
 
-            // XXX Is it a good idea to call BuildContextMenu() from within an action stored in the context menu?
             zoneOptions.Add(new ContextMenuItemEntry(ResGumps.MapZoneReload, () => { LoadZones(); BuildContextMenu(); }));
             zoneOptions.Add(new ContextMenuItemEntry(""));
 
-            if (_zoneSets.zoneSetDict.Count < 1)
+            if (_zoneSets.ZoneSetDict.Count < 1)
             {
                 zoneOptions.Add(new ContextMenuItemEntry(ResGumps.MapZoneNone));
             }
             else
             {
-                foreach (KeyValuePair<string, ZoneSet> entry in _zoneSets.zoneSetDict)
+                foreach (KeyValuePair<string, ZoneSet> entry in _zoneSets.ZoneSetDict)
                 {
                     string filename = entry.Key;
                     ZoneSet zoneSet = entry.Value;
@@ -418,11 +417,11 @@ namespace ClassicUO.Game.UI.Gumps
                     (
                         new ContextMenuItemEntry
                         (
-                            String.Format(ResGumps.MapZoneFileName, zoneSet.niceFileName),
+                            String.Format(ResGumps.MapZoneFileName, zoneSet.NiceFileName),
                             () => {
-                                zoneSet.hidden = !zoneSet.hidden;
+                                zoneSet.Hidden = !zoneSet.Hidden;
 
-                                if (!zoneSet.hidden)
+                                if (!zoneSet.Hidden)
                                 {
                                     string hiddenFile = _hiddenZoneFiles.FirstOrDefault(x => x.Equals(filename));
 
@@ -437,7 +436,7 @@ namespace ClassicUO.Game.UI.Gumps
                                 }
                             },
                             true,
-                            !entry.Value.hidden
+                            !entry.Value.Hidden
                         )
                     );
                 }
@@ -1518,44 +1517,44 @@ namespace ClassicUO.Game.UI.Gumps
         internal class ZonesFileZoneData
         {
             [DataMember]
-            public string label = null;
+            public string Label = null;
 
             [DataMember]
-            public string color = null;
+            public string Color = null;
 
             [DataMember]
-            public List<List<int>> polygon = null;
+            public List<List<int>> Polygon = null;
         }
 
         [DataContract]
         internal class ZonesFile
         {
             [DataMember]
-            public int mapIndex;
+            public int MapIndex;
 
             [DataMember]
-            public List<ZonesFileZoneData> zones;
+            public List<ZonesFileZoneData> Zones;
         }
 
         private class Zone {
-            public string label;
-            public Color color;
-            public Rectangle boundingRectangle;
-            public List<Point> vertices;
+            public string Label;
+            public Color Color;
+            public Rectangle BoundingRectangle;
+            public List<Point> Vertices;
 
             public Zone(ZonesFileZoneData data)
             {
-                label = data.label;
-                color = _colorMap[data.color];
+                Label = data.Label;
+                Color = _colorMap[data.Color];
 
-                vertices = new List<Point>();
+                Vertices = new List<Point>();
 
                 int xmin = int.MaxValue;
                 int xmax = int.MinValue;
                 int ymin = int.MaxValue;
                 int ymax = int.MinValue;
 
-                foreach (List<int> rawPoint in data.polygon)
+                foreach (List<int> rawPoint in data.Polygon)
                 {
                     Point p = new Point(rawPoint[0], rawPoint[1]);
 
@@ -1564,33 +1563,33 @@ namespace ClassicUO.Game.UI.Gumps
                     if (p.Y < ymin) ymin = p.Y;
                     if (p.Y > ymax) ymax = p.Y;
 
-                    vertices.Add(p);
+                    Vertices.Add(p);
                 }
 
-                boundingRectangle = new Rectangle(xmin, ymin, xmax - xmin, ymax - ymin);
+                BoundingRectangle = new Rectangle(xmin, ymin, xmax - xmin, ymax - ymin);
             }
         }
 
         private class ZoneSet
         {
-            public int mapIndex;
-            public List<Zone> zones = new List<Zone>();
-            public bool hidden = false;
-            public string niceFileName;
+            public int MapIndex;
+            public List<Zone> Zones = new List<Zone>();
+            public bool Hidden = false;
+            public string NiceFileName;
 
-            public ZoneSet(ZonesFile zf, string filename, bool initiallyHidden)
+            public ZoneSet(ZonesFile zf, string filename, bool hidden)
             {
-                mapIndex = zf.mapIndex;
-                foreach (ZonesFileZoneData data in zf.zones)
+                MapIndex = zf.MapIndex;
+                foreach (ZonesFileZoneData data in zf.Zones)
                 {
-                    zones.Add(new Zone(data));
+                    Zones.Add(new Zone(data));
                 }
 
-                hidden = initiallyHidden;
-                niceFileName = makeNiceFileName(filename);
+                Hidden = hidden;
+                NiceFileName = MakeNiceFileName(filename);
             }
 
-            public static string makeNiceFileName(string filename)
+            public static string MakeNiceFileName(string filename)
             {
                 // Yes, we invoke the same method twice, because our filenames have two layers of extension
                 // we want to strip off (.zones.json)
@@ -1600,9 +1599,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         private class ZoneSets
         {
-            public Dictionary<string, ZoneSet> zoneSetDict = new Dictionary<string, ZoneSet>();
+            public Dictionary<string, ZoneSet> ZoneSetDict = new Dictionary<string, ZoneSet>();
 
-            public void addZoneSetByFileName(string filename, bool hidden)
+            public void AddZoneSetByFileName(string filename, bool hidden)
             {
                 FileStream fs = new FileStream(filename, FileMode.Open, FileAccess.Read);
                 DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ZonesFile));
@@ -1623,21 +1622,21 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (!(zf is null))
                 {
-                    zoneSetDict[filename] = new ZoneSet(zf, filename, hidden);
-                    GameActions.Print(String.Format(ResGumps.MapZoneFileLoaded, zoneSetDict[filename].niceFileName), 0x3A /* yellow green */);
+                    ZoneSetDict[filename] = new ZoneSet(zf, filename, hidden);
+                    GameActions.Print(String.Format(ResGumps.MapZoneFileLoaded, ZoneSetDict[filename].NiceFileName), 0x3A /* yellow green */);
                 }
             }
 
-            public IEnumerable<Zone> getZonesForMapIndex(int mapIndex)
+            public IEnumerable<Zone> GetZonesForMapIndex(int mapIndex)
             {
-                foreach (KeyValuePair<string, ZoneSet> entry in zoneSetDict)
+                foreach (KeyValuePair<string, ZoneSet> entry in ZoneSetDict)
                 {
-                    if (entry.Value.mapIndex != mapIndex)
+                    if (entry.Value.MapIndex != mapIndex)
                         continue;
-                    else if (entry.Value.hidden)
+                    else if (entry.Value.Hidden)
                         continue;
 
-                    foreach (Zone zone in entry.Value.zones)
+                    foreach (Zone zone in entry.Value.Zones)
                     {
                         yield return zone;
                     }
@@ -1646,7 +1645,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             public void Clear()
             {
-                zoneSetDict.Clear();
+                ZoneSetDict.Clear();
             }
         }
 
@@ -1663,7 +1662,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _hiddenZoneFiles.FirstOrDefault(x => x.Contains(filename))
                 );
 
-                _zoneSets.addZoneSetByFileName(filename, shouldHide);
+                _zoneSets.AddZoneSetByFileName(filename, shouldHide);
             }
         }
 
@@ -2152,9 +2151,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void DrawAll(UltimaBatcher2D batcher, Rectangle srcRect, int gX, int gY, int halfWidth, int halfHeight)
         {
-            foreach (Zone zone in _zoneSets.getZonesForMapIndex(World.MapIndex))
+            foreach (Zone zone in _zoneSets.GetZonesForMapIndex(World.MapIndex))
             {
-                if (zone.boundingRectangle.Intersects(srcRect))
+                if (zone.BoundingRectangle.Intersects(srcRect))
                 {
                     DrawZone(batcher, zone, gX, gY, halfWidth, halfHeight, Zoom);
                 }
@@ -2850,14 +2849,14 @@ namespace ClassicUO.Game.UI.Gumps
         )
         {
             Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
-            Texture2D texture = SolidColorTextureCache.GetTexture(zone.color);
+            Texture2D texture = SolidColorTextureCache.GetTexture(zone.Color);
 
-            for (int i = 0, j = 1; i < zone.vertices.Count; i++, j++)
+            for (int i = 0, j = 1; i < zone.Vertices.Count; i++, j++)
             {
-                if (j >= zone.vertices.Count) j = 0;
+                if (j >= zone.Vertices.Count) j = 0;
 
-                Vector2 start = WorldPointToGumpPoint(zone.vertices[i].X, zone.vertices[i].Y, x, y, width, height, zoom);
-                Vector2 end = WorldPointToGumpPoint(zone.vertices[j].X, zone.vertices[j].Y, x, y, width, height, zoom);
+                Vector2 start = WorldPointToGumpPoint(zone.Vertices[i].X, zone.Vertices[i].Y, x, y, width, height, zoom);
+                Vector2 end = WorldPointToGumpPoint(zone.Vertices[j].X, zone.Vertices[j].Y, x, y, width, height, zoom);
 
                 batcher.DrawLine(texture, start, end, hueVector, 1);
             }
