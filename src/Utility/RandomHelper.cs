@@ -58,5 +58,10 @@ namespace ClassicUO.Utility
         {
             return list[_random.Next(list.Length)];
         }
+
+        public static bool RandomBool()
+        {
+            return _random.NextDouble() >= 0.5;
+        }
     }
 }
