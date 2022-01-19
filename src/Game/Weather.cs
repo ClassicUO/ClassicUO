@@ -264,7 +264,7 @@ namespace ClassicUO.Game
                     windChanged = true;
                 }
 
-                _windTimer = Time.Ticks + (uint) (RandomHelper.GetValue(7, 13) * 1000);
+                _windTimer = Time.Ticks + (uint) (RandomHelper.GetValue(13, 19) * 1000);
 
                 sbyte lastWind = Wind;
 
