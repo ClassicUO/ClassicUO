@@ -57,6 +57,8 @@ namespace ClassicUO.Game.UI.Gumps
         private HitBox _hitBox;
         private bool _isMinimized;
 
+        internal const int CORPSES_GUMP = 0x0009;
+
         public ContainerGump() : base(0, 0)
         {
         }
@@ -114,7 +116,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             BuildGump();
 
-            if (Graphic == 0x0009)
+            if (Graphic == CORPSES_GUMP)
             {
                 if (World.Player.ManualOpenedCorpses.Contains(LocalSerial))
                 {
@@ -198,7 +200,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add(_gumpPicContainer = new GumpPicContainer(0, 0, g, 0));
             _gumpPicContainer.MouseDoubleClick += GumpPicContainerOnMouseDoubleClick;
 
-            if (Graphic == 0x0009)
+            if (Graphic == CORPSES_GUMP)
             {
                 _eyeGumpPic?.Dispose();
                 Add(_eyeGumpPic = new GumpPic((int) (45 * scale), (int) (30 * scale), 0x0045, 0));
@@ -445,7 +447,7 @@ namespace ClassicUO.Game.UI.Gumps
                 SelectedObject.SelectedContainer = item;
             }
 
-            if (Graphic == 0x0009 && _corpseEyeTicks < totalTime)
+            if (Graphic == CORPSES_GUMP && _corpseEyeTicks < totalTime)
             {
                 _eyeCorspeOffset = _eyeCorspeOffset == 0 ? 1 : 0;
                 _corpseEyeTicks = (long) totalTime + 750;

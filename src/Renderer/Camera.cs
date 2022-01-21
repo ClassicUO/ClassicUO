@@ -40,55 +40,19 @@ namespace ClassicUO.Renderer
     internal class Camera
     {
         private float[] _cameraZoomValues = new float[1] { 1f };
-        private Matrix _projection;
-        private Matrix _transform = Matrix.Identity, _inverseTransform = Matrix.Identity;
-        private bool _updateMatrixes = true, _updateProjection = true;
+        private Matrix _transform = Matrix.Identity;
+        private Matrix _inverseTransform = Matrix.Identity;
+        private bool _updateMatrixes = true;
         private int _zoomIndex;
 
 
-        public Matrix ViewTransformMatrix => TransformMatrix /** ProjectionMatrix*/;
-
-        public Matrix ProjectionMatrix
-        {
-            get
-            {
-                if (_updateProjection)
-                {
-                    Matrix.CreateOrthographicOffCenter
-                    (
-                        0,
-                        Bounds.Width,
-                        Bounds.Height,
-                        0,
-                        0,
-                        -1,
-                        out _projection
-                    );
-
-                    _updateProjection = false;
-                }
-
-                return _projection;
-            }
-        }
-
-        public Matrix TransformMatrix
+        public Matrix ViewTransformMatrix
         {
             get
             {
                 UpdateMatrices();
 
                 return _transform;
-            }
-        }
-
-        public Matrix InverseTransformMatrix
-        {
-            get
-            {
-                UpdateMatrices();
-
-                return _inverseTransform;
             }
         }
 
@@ -157,10 +121,7 @@ namespace ClassicUO.Renderer
                 Origin.X = width / 2f;
                 Origin.Y = height / 2f;
 
-                //Position = Origin;
-
                 _updateMatrixes = true;
-                _updateProjection = true;
             }
         }
 
@@ -173,11 +134,6 @@ namespace ClassicUO.Renderer
 
                 _updateMatrixes = true;
             }
-        }
-
-        public void SetPositionOffset(int x, int y)
-        {
-            SetPosition(Position.X + x, Position.Y + y);
         }
 
         public Viewport GetViewport()

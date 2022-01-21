@@ -207,6 +207,47 @@ namespace ClassicUO.Game.Managers
             Add(HotkeyAction.CastPerseverance, () => GameActions.CastSpell(704));
             Add(HotkeyAction.CastTribulation, () => GameActions.CastSpell(705));
             Add(HotkeyAction.CastDespair, () => GameActions.CastSpell(706));
+
+
+            Add(HotkeyAction.CastDeathRay, () => GameActions.CastSpell(707));
+            Add(HotkeyAction.CastEtherealBurst, () => GameActions.CastSpell(708));
+            Add(HotkeyAction.CastNetherBlast, () => GameActions.CastSpell(709));
+            Add(HotkeyAction.CastMysticWeapon, () => GameActions.CastSpell(710));
+            Add(HotkeyAction.CastCommandUndead, () => GameActions.CastSpell(711));
+            Add(HotkeyAction.CastConduit, () => GameActions.CastSpell(712));
+            Add(HotkeyAction.CastManaShield, () => GameActions.CastSpell(713));
+            Add(HotkeyAction.CastSummonReaper, () => GameActions.CastSpell(714));
+            Add(HotkeyAction.CastEnchantedSummoning, () => GameActions.CastSpell(715));
+            Add(HotkeyAction.CastAnticipateHit, () => GameActions.CastSpell(716));
+            Add(HotkeyAction.CastWarcry, () => GameActions.CastSpell(717));
+            Add(HotkeyAction.CastIntuition, () => GameActions.CastSpell(718));
+            Add(HotkeyAction.CastRejuvenate, () => GameActions.CastSpell(719));
+            Add(HotkeyAction.CastHolyFist, () => GameActions.CastSpell(720));
+            Add(HotkeyAction.CastShadow, () => GameActions.CastSpell(721));
+            Add(HotkeyAction.CastWhiteTigerForm, () => GameActions.CastSpell(722));
+            Add(HotkeyAction.CastFlamingShot, () => GameActions.CastSpell(723));
+            Add(HotkeyAction.CastPlayingTheOdds, () => GameActions.CastSpell(724));
+            Add(HotkeyAction.CastThrust, () => GameActions.CastSpell(725));
+            Add(HotkeyAction.CastPierce, () => GameActions.CastSpell(726));
+            Add(HotkeyAction.CastStagger, () => GameActions.CastSpell(727));
+            Add(HotkeyAction.CastToughness, () => GameActions.CastSpell(728));
+            Add(HotkeyAction.CastOnslaught, () => GameActions.CastSpell(729));
+            Add(HotkeyAction.CastFocusedEye, () => GameActions.CastSpell(730));
+            Add(HotkeyAction.CastElementalFury, () => GameActions.CastSpell(731));
+            Add(HotkeyAction.CastCalledShot, () => GameActions.CastSpell(732));
+            Add(HotkeyAction.CastWarriorsGifts, () => GameActions.CastSpell(733));
+            Add(HotkeyAction.CastShieldBash, () => GameActions.CastSpell(734));
+            Add(HotkeyAction.CastBodyguard, () => GameActions.CastSpell(735));
+            Add(HotkeyAction.CastHeightenSenses, () => GameActions.CastSpell(736));
+            Add(HotkeyAction.CastTolerance, () => GameActions.CastSpell(737));
+            Add(HotkeyAction.CastInjectedStrike, () => GameActions.CastSpell(738));
+            Add(HotkeyAction.CastPotency, () => GameActions.CastSpell(739));
+            Add(HotkeyAction.CastRampage, () => GameActions.CastSpell(740));
+            Add(HotkeyAction.CastFistsofFury, () => GameActions.CastSpell(741));
+            Add(HotkeyAction.CastKnockout, () => GameActions.CastSpell(742));
+            Add(HotkeyAction.CastWhispering, () => GameActions.CastSpell(743));
+            Add(HotkeyAction.CastCombatTraining, () => GameActions.CastSpell(744));
+            Add(HotkeyAction.CastBoarding, () => GameActions.CastSpell(745));
         }
 
 
@@ -466,6 +507,48 @@ namespace ClassicUO.Game.Managers
         CastTribulation,
         CastDespair,
 
+        #endregion
+
+        #region Other mastery spells
+        CastDeathRay,
+        CastEtherealBurst,
+        CastNetherBlast,
+        CastMysticWeapon,
+        CastCommandUndead,
+        CastConduit,
+        CastManaShield,
+        CastSummonReaper,
+        CastEnchantedSummoning,
+        CastAnticipateHit,
+        CastWarcry,
+        CastIntuition,
+        CastRejuvenate,
+        CastHolyFist,
+        CastShadow,
+        CastWhiteTigerForm,
+        CastFlamingShot,
+        CastPlayingTheOdds,
+        CastThrust,
+        CastPierce,
+        CastStagger,
+        CastToughness,
+        CastOnslaught,
+        CastFocusedEye,
+        CastElementalFury,
+        CastCalledShot,
+        CastWarriorsGifts,
+        CastShieldBash,
+        CastBodyguard,
+        CastHeightenSenses,
+        CastTolerance,
+        CastInjectedStrike,
+        CastPotency,
+        CastRampage,
+        CastFistsofFury,
+        CastKnockout,
+        CastWhispering,
+        CastCombatTraining,
+        CastBoarding,
         #endregion
 
         #region Skills

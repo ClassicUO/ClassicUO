@@ -36,6 +36,8 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Json;
 using System.Threading.Tasks;
 using System.Xml;
 using ClassicUO.Configuration;
@@ -75,6 +77,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         private int _mapIndex;
         private bool _mapMarkersLoaded;
+
+        private List<string> _hiddenZoneFiles;
+        private ZoneSets _zoneSets = new ZoneSets();
 
         private static Texture2D _mapTexture;
         private static uint[] _pixelBuffer;
@@ -128,6 +133,7 @@ namespace ClassicUO.Game.UI.Gumps
             OnResize();
 
             LoadMarkers();
+            LoadZones();
 
             World.WMapManager.SetEnable(true);
 
@@ -204,6 +210,7 @@ namespace ClassicUO.Game.UI.Gumps
 
 
             _hiddenMarkerFiles = string.IsNullOrEmpty(ProfileManager.CurrentProfile.WorldMapHiddenMarkerFiles) ? new List<string>() : ProfileManager.CurrentProfile.WorldMapHiddenMarkerFiles.Split(',').ToList();
+            _hiddenZoneFiles = string.IsNullOrEmpty(ProfileManager.CurrentProfile.WorldMapHiddenZoneFiles) ? new List<string>() : ProfileManager.CurrentProfile.WorldMapHiddenZoneFiles.Split(',').ToList();
         }
 
         public void SaveSettings()
@@ -236,6 +243,7 @@ namespace ClassicUO.Game.UI.Gumps
             ProfileManager.CurrentProfile.WorldMapShowMarkersNames = _showMarkerNames;
 
             ProfileManager.CurrentProfile.WorldMapHiddenMarkerFiles = string.Join(",", _hiddenMarkerFiles);
+            ProfileManager.CurrentProfile.WorldMapHiddenZoneFiles = string.Join(",", _hiddenZoneFiles);
         }
 
         private bool ParseBool(string boolStr)
@@ -387,6 +395,56 @@ namespace ClassicUO.Game.UI.Gumps
             _center.Y = y;
         }
 
+        private void BuildContextMenuForZones(ContextMenuControl parent)
+        {
+            ContextMenuItemEntry zoneOptions = new ContextMenuItemEntry(ResGumps.MapZoneOptions);
+
+            zoneOptions.Add(new ContextMenuItemEntry(ResGumps.MapZoneReload, () => { LoadZones(); BuildContextMenu(); }));
+            zoneOptions.Add(new ContextMenuItemEntry(""));
+
+            if (_zoneSets.ZoneSetDict.Count < 1)
+            {
+                zoneOptions.Add(new ContextMenuItemEntry(ResGumps.MapZoneNone));
+            }
+            else
+            {
+                foreach (KeyValuePair<string, ZoneSet> entry in _zoneSets.ZoneSetDict)
+                {
+                    string filename = entry.Key;
+                    ZoneSet zoneSet = entry.Value;
+
+                    zoneOptions.Add
+                    (
+                        new ContextMenuItemEntry
+                        (
+                            String.Format(ResGumps.MapZoneFileName, zoneSet.NiceFileName),
+                            () => {
+                                zoneSet.Hidden = !zoneSet.Hidden;
+
+                                if (!zoneSet.Hidden)
+                                {
+                                    string hiddenFile = _hiddenZoneFiles.FirstOrDefault(x => x.Equals(filename));
+
+                                    if (!string.IsNullOrEmpty(hiddenFile))
+                                    {
+                                        _hiddenZoneFiles.Remove(hiddenFile);
+                                    }
+                                }
+                                else
+                                {
+                                    _hiddenZoneFiles.Add(filename);
+                                }
+                            },
+                            true,
+                            !entry.Value.Hidden
+                        )
+                    );
+                }
+            }
+
+            parent.Add(zoneOptions);
+        }
+
         private void BuildContextMenu()
         {
             BuildOptionDictionary();
@@ -453,6 +511,8 @@ namespace ClassicUO.Game.UI.Gumps
 
 
             ContextMenu.Add(markersEntry);
+
+            BuildContextMenuForZones(ContextMenu);
 
             ContextMenuItemEntry namesHpBarEntry = new ContextMenuItemEntry(ResGumps.NamesHealthbars);
             namesHpBarEntry.Add(_options["show_your_name"]);
@@ -1453,6 +1513,159 @@ namespace ClassicUO.Game.UI.Gumps
             );
         }
 
+        [DataContract]
+        internal class ZonesFileZoneData
+        {
+            [DataMember]
+            public string Label = null;
+
+            [DataMember]
+            public string Color = null;
+
+            [DataMember]
+            public List<List<int>> Polygon = null;
+        }
+
+        [DataContract]
+        internal class ZonesFile
+        {
+            [DataMember]
+            public int MapIndex;
+
+            [DataMember]
+            public List<ZonesFileZoneData> Zones;
+        }
+
+        private class Zone {
+            public string Label;
+            public Color Color;
+            public Rectangle BoundingRectangle;
+            public List<Point> Vertices;
+
+            public Zone(ZonesFileZoneData data)
+            {
+                Label = data.Label;
+                Color = _colorMap[data.Color];
+
+                Vertices = new List<Point>();
+
+                int xmin = int.MaxValue;
+                int xmax = int.MinValue;
+                int ymin = int.MaxValue;
+                int ymax = int.MinValue;
+
+                foreach (List<int> rawPoint in data.Polygon)
+                {
+                    Point p = new Point(rawPoint[0], rawPoint[1]);
+
+                    if (p.X < xmin) xmin = p.X;
+                    if (p.X > xmax) xmax = p.X;
+                    if (p.Y < ymin) ymin = p.Y;
+                    if (p.Y > ymax) ymax = p.Y;
+
+                    Vertices.Add(p);
+                }
+
+                BoundingRectangle = new Rectangle(xmin, ymin, xmax - xmin, ymax - ymin);
+            }
+        }
+
+        private class ZoneSet
+        {
+            public int MapIndex;
+            public List<Zone> Zones = new List<Zone>();
+            public bool Hidden = false;
+            public string NiceFileName;
+
+            public ZoneSet(ZonesFile zf, string filename, bool hidden)
+            {
+                MapIndex = zf.MapIndex;
+                foreach (ZonesFileZoneData data in zf.Zones)
+                {
+                    Zones.Add(new Zone(data));
+                }
+
+                Hidden = hidden;
+                NiceFileName = MakeNiceFileName(filename);
+            }
+
+            public static string MakeNiceFileName(string filename)
+            {
+                // Yes, we invoke the same method twice, because our filenames have two layers of extension
+                // we want to strip off (.zones.json)
+                return Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(filename));
+            }
+        }
+
+        private class ZoneSets
+        {
+            public Dictionary<string, ZoneSet> ZoneSetDict = new Dictionary<string, ZoneSet>();
+
+            public void AddZoneSetByFileName(string filename, bool hidden)
+            {
+                FileStream fs = new FileStream(filename, FileMode.Open, FileAccess.Read);
+                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ZonesFile));
+                ZonesFile zf = null;
+
+                try
+                {
+                    zf = (ZonesFile) ser.ReadObject(fs);
+                }
+                catch (Exception ee)
+                {
+                    Log.Error($"{ee}");
+                }
+                finally
+                {
+                    fs.Dispose();
+                }
+
+                if (!(zf is null))
+                {
+                    ZoneSetDict[filename] = new ZoneSet(zf, filename, hidden);
+                    GameActions.Print(String.Format(ResGumps.MapZoneFileLoaded, ZoneSetDict[filename].NiceFileName), 0x3A /* yellow green */);
+                }
+            }
+
+            public IEnumerable<Zone> GetZonesForMapIndex(int mapIndex)
+            {
+                foreach (KeyValuePair<string, ZoneSet> entry in ZoneSetDict)
+                {
+                    if (entry.Value.MapIndex != mapIndex)
+                        continue;
+                    else if (entry.Value.Hidden)
+                        continue;
+
+                    foreach (Zone zone in entry.Value.Zones)
+                    {
+                        yield return zone;
+                    }
+                }
+            }
+
+            public void Clear()
+            {
+                ZoneSetDict.Clear();
+            }
+        }
+
+        private void LoadZones()
+        {
+            Log.Trace("LoadZones()...");
+
+            _zoneSets.Clear();
+
+            foreach (String filename in Directory.GetFiles(_mapFilesPath, "*.zones.json"))
+            {
+                bool shouldHide = !string.IsNullOrEmpty
+                (
+                    _hiddenZoneFiles.FirstOrDefault(x => x.Contains(filename))
+                );
+
+                _zoneSets.AddZoneSetByFileName(filename, shouldHide);
+            }
+        }
+
         private void LoadMarkers()
         {
             //return Task.Run(() =>
@@ -1913,6 +2126,7 @@ namespace ClassicUO.Game.UI.Gumps
                     DrawAll
                     (
                         batcher,
+                        srcRect,
                         gX,
                         gY,
                         halfWidth,
@@ -1935,8 +2149,16 @@ namespace ClassicUO.Game.UI.Gumps
             return base.Draw(batcher, x, y);
         }
 
-        private void DrawAll(UltimaBatcher2D batcher, int gX, int gY, int halfWidth, int halfHeight)
+        private void DrawAll(UltimaBatcher2D batcher, Rectangle srcRect, int gX, int gY, int halfWidth, int halfHeight)
         {
+            foreach (Zone zone in _zoneSets.GetZonesForMapIndex(World.MapIndex))
+            {
+                if (zone.BoundingRectangle.Intersects(srcRect))
+                {
+                    DrawZone(batcher, zone, gX, gY, halfWidth, halfHeight, Zoom);
+                }
+            }
+
             if (_showMultis)
             {
                 foreach (House house in World.HouseManager.Houses)
@@ -2590,6 +2812,54 @@ namespace ClassicUO.Game.UI.Gumps
                 SpriteEffects.None,
                 0
             );
+        }
+
+        private Vector2 WorldPointToGumpPoint(int wpx, int wpy, int x, int y, int width, int height, float zoom)
+        {
+            int sx = wpx - _center.X;
+            int sy = wpy - _center.Y;
+
+            Point rot = RotatePoint
+            (
+                sx,
+                sy,
+                zoom,
+                1,
+                _flipMap ? 45f : 0f
+            );
+
+            /* N.B. You don't want AdjustPosition() here if you want to draw rects
+             * that extend beyond the gump's viewport without distoring them. */
+
+            rot.X += x + width;
+            rot.Y += y + height;
+
+            return new Vector2(rot.X, rot.Y);
+        }
+
+        private void DrawZone
+        (
+            UltimaBatcher2D batcher,
+            Zone zone,
+            int x,
+            int y,
+            int width,
+            int height,
+            float zoom
+        )
+        {
+            Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
+            Texture2D texture = SolidColorTextureCache.GetTexture(zone.Color);
+
+            for (int i = 0, j = 1; i < zone.Vertices.Count; i++, j++)
+            {
+                if (j >= zone.Vertices.Count) j = 0;
+
+                Vector2 start = WorldPointToGumpPoint(zone.Vertices[i].X, zone.Vertices[i].Y, x, y, width, height, zoom);
+                Vector2 end = WorldPointToGumpPoint(zone.Vertices[j].X, zone.Vertices[j].Y, x, y, width, height, zoom);
+
+                batcher.DrawLine(texture, start, end, hueVector, 1);
+            }
         }
 
         private void DrawWMEntity

@@ -61,7 +61,7 @@ namespace ClassicUO.Game.UI.Gumps
         private const int TEXTBOX_HEIGHT = 25;
 
         private static Texture2D _logoTexture2D;
-        private Combobox _auraType, _filterType;
+        private Combobox _auraType;
         private Combobox _autoOpenCorpseOptions;
         private InputField _autoOpenCorpseRange;
 
@@ -1294,7 +1294,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _currentProfile.ShowSkillsChangedDeltaValue,
                     startX,
                     startY,
-                    200
+                    150
                 )
             );
 
@@ -1860,30 +1860,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             section5.Add(AddLabel(null, ResGumps.TerrainShadowsLevel, startX, startY));
             section5.AddRight(_terrainShadowLevel = AddHSlider(null, Constants.MIN_TERRAIN_SHADOWS_LEVEL, Constants.MAX_TERRAIN_SHADOWS_LEVEL, _currentProfile.TerrainShadowsLevel, startX, startY, 200));
-
-
-            SettingsSection section6 = AddSettingsSection(box, "Filters");
-            section6.Y = section5.Bounds.Bottom + 40;
-            section6.Add(AddLabel(null, ResGumps.FilterType, startX, startY));
-
-            section6.AddRight
-            (
-                _filterType = AddCombobox
-                (
-                    null,
-                    new[]
-                    {
-                        ResGumps.OFF,
-                        string.Format(ResGumps.FilterTypeFormatON, ResGumps.ON, ResGumps.AnisotropicClamp),
-                        string.Format(ResGumps.FilterTypeFormatON, ResGumps.ON, ResGumps.LinearClamp)
-                    },
-                    _currentProfile.FilterType,
-                    startX,
-                    startY,
-                    200
-                )
-            );
-
 
             Add(rightArea, PAGE);
         }
@@ -3946,7 +3922,6 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.ShadowsStatics = _enableShadowsStatics.IsChecked;
             _currentProfile.TerrainShadowsLevel = _terrainShadowLevel.Value;
             _currentProfile.AuraUnderFeetType = _auraType.SelectedIndex;
-            _currentProfile.FilterType = _filterType.SelectedIndex;
 
             Client.Game.IsMouseVisible = Settings.GlobalSettings.RunMouseInASeparateThread = _runMouseInSeparateThread.IsChecked;
 

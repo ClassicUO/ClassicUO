@@ -61,7 +61,7 @@ namespace ClassicUO.Game.Managers
             ProcessWorldText(false);
         }
 
-        public void Select(int startX, int startY, int renderIndex, bool isGump = false)
+        public void Select(int startX, int startY, bool isGump = false)
         {
             int mouseX = Mouse.Position.X;
             int mouseY = Mouse.Position.Y;
@@ -75,7 +75,7 @@ namespace ClassicUO.Game.Managers
 
                 if (item.Time >= ClassicUO.Time.Ticks)
                 {
-                    if (item.Owner == null || item.Owner.UseInRender != renderIndex)
+                    if (item.Owner == null)
                     {
                         continue;
                     }
@@ -103,7 +103,7 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public virtual void Draw(UltimaBatcher2D batcher, int startX, int startY, int renderIndex, bool isGump = false)
+        public virtual void Draw(UltimaBatcher2D batcher, int startX, int startY, bool isGump = false)
         {
             ProcessWorldText(false);
 
@@ -114,7 +114,7 @@ namespace ClassicUO.Game.Managers
 
             for (TextObject o = DrawPointer; o != null; o = o.DLeft)
             {
-                if (o.IsDestroyed || o.RenderedText == null || o.RenderedText.IsDestroyed || o.RenderedText.Texture == null || o.Time < ClassicUO.Time.Ticks || o.Owner.UseInRender != renderIndex && !isGump)
+                if (o.IsDestroyed || o.RenderedText == null || o.RenderedText.IsDestroyed || o.RenderedText.Texture == null || o.Time < ClassicUO.Time.Ticks)
                 {
                     continue;
                 }

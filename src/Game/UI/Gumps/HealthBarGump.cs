@@ -95,6 +95,7 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
         public override GumpType GumpType => GumpType.HealthBar;
+        internal bool IsInactive => (_isDead || _outOfRange) && !_canChangeName;
         protected bool _canChangeName;
         protected bool _isDead;
         protected string _name;

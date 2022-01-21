@@ -203,12 +203,30 @@ namespace ClassicUO.Game
 
         private static void PlayWind()
         {
-            Client.Game.Scene.Audio.PlaySound(RandomHelper.RandomList(0x014, 0x015, 0x016));
+            PlaySound(RandomHelper.RandomList(0x014, 0x015, 0x016));
         }
 
         private static void PlayThunder()
         {
-            Client.Game.Scene.Audio.PlaySound(RandomHelper.RandomList(0x028, 0x206));
+           PlaySound(RandomHelper.RandomList(0x028, 0x206));
+        }
+
+        private static void PlaySound(int sound)
+        {
+            // randomize the sound of the weather around the player
+            int randX = RandomHelper.GetValue(10, 18);
+            if (RandomHelper.RandomBool())
+            {
+                randX *= -1;
+            }
+
+            int randY = RandomHelper.GetValue(10, 18);
+            if (RandomHelper.RandomBool())
+            {
+                randY *= -1;
+            }
+
+            Client.Game.Scene.Audio.PlaySoundWithDistance(sound, World.Player.X + randX, World.Player.Y + randY);
         }
 
         public void Draw(UltimaBatcher2D batcher, int x, int y)
@@ -246,7 +264,7 @@ namespace ClassicUO.Game
                     windChanged = true;
                 }
 
-                _windTimer = Time.Ticks + (uint) (RandomHelper.GetValue(7, 13) * 1000);
+                _windTimer = Time.Ticks + (uint) (RandomHelper.GetValue(13, 19) * 1000);
 
                 sbyte lastWind = Wind;
 

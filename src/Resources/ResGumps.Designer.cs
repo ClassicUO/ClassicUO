@@ -1466,24 +1466,6 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Filter type [TEST]:.
-        /// </summary>
-        public static string FilterType {
-            get {
-                return ResourceManager.GetString("FilterType", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to {0} [{1}].
-        /// </summary>
-        public static string FilterTypeFormatON {
-            get {
-                return ResourceManager.GetString("FilterTypeFormatON", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Fire Resistance.
         /// </summary>
         public static string FireResistance {
@@ -2428,6 +2410,51 @@ namespace ClassicUO.Resources {
         public static string MapMarkerOptions {
             get {
                 return ResourceManager.GetString("MapMarkerOptions", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to WorldMap zones loaded &apos;{0}&apos; .
+        /// </summary>
+        public static string MapZoneFileLoaded {
+            get {
+                return ResourceManager.GetString("MapZoneFileLoaded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Show/Hide &apos;{0}&apos;.
+        /// </summary>
+        public static string MapZoneFileName {
+            get {
+                return ResourceManager.GetString("MapZoneFileName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;none&gt;.
+        /// </summary>
+        public static string MapZoneNone {
+            get {
+                return ResourceManager.GetString("MapZoneNone", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Map Zone Options.
+        /// </summary>
+        public static string MapZoneOptions {
+            get {
+                return ResourceManager.GetString("MapZoneOptions", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Reload Map Zones.
+        /// </summary>
+        public static string MapZoneReload {
+            get {
+                return ResourceManager.GetString("MapZoneReload", resourceCulture);
             }
         }
         
@@ -3540,7 +3567,7 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Inform when skills change by.
+        ///   Looks up a localized string similar to Inform when skills change by (in tenths).
         /// </summary>
         public static string ShowSkillsChangedMessageBy {
             get {
