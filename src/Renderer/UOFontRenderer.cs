@@ -96,8 +96,7 @@ namespace ClassicUO.Renderer
             bool allowSelection = false
         )
         {
-            Vector3 hueVec = new Vector3();
-            ShaderHueTranslator.GetHueVector(ref hueVec, hue);
+            Vector3 hueVec = ShaderHueTranslator.GetHueVector(hue);
             return Draw(batcher, text, position, scale, settings, hueVec, allowSelection);
         }
 
@@ -114,7 +113,7 @@ namespace ClassicUO.Renderer
         {
             // TODO: shaders should support RGBA without using the UO colors
 
-            Vector3 hueVec = new Vector3(0, -1, 0);
+            Vector3 hueVec = new Vector3(0, -1, 1f);
             return Draw(batcher, text, position, scale, settings, hueVec, allowSelection);
         }
 
@@ -167,7 +166,7 @@ namespace ClassicUO.Renderer
             if (CUOEnviroment.Debug)
             {
                 Vector3 hueVec2 = Vector3.Zero;
-                batcher.DrawRectangle(SolidColorTextureCache.GetTexture(Color.Red), (int)startPosition.X - 1, (int)startPosition.Y - 1, (int)fullSize.X + 2, (int)fullSize.Y + 2, ref hueVec2);
+                batcher.DrawRectangle(SolidColorTextureCache.GetTexture(Color.Red), (int)startPosition.X - 1, (int)startPosition.Y - 1, (int)fullSize.X + 2, (int)fullSize.Y + 2, hueVec2);
             }
 
             RenderDrawCommands(batcher);
@@ -695,8 +694,20 @@ namespace ClassicUO.Renderer
             }
 
             uv = Rectangle.Empty;
-            
-            uint* table = (uint*)_unicodeFontFiles[settings.FontIndex].StartAddress;
+
+            var file = _unicodeFontFiles[settings.FontIndex];
+
+            if (file == null)
+            {
+                file = _unicodeFontFiles[0];
+
+                if (file == null)
+                {
+                    return null;
+                }
+            }
+
+            uint* table = (uint*)file.StartAddress;
             
             if (c == '\r')
             {

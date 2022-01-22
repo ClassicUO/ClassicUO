@@ -115,7 +115,7 @@ float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 		return color;
 	}
 
-	float alpha = 1 - IN.Hue.z;
+	float alpha = IN.Hue.z;
 
 	if (mode == NONE)
 	{

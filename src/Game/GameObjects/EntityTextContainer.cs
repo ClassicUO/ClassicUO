@@ -259,7 +259,7 @@ namespace ClassicUO.Game.GameObjects
                 item.X = p.X - (int) (item.TextSize.X * 0.5f);
                 item.Y = p.Y - offY - (int) item.TextSize.Y - item.OffsetY;
 
-                ShaderHueTranslator.GetHueVector(ref hueVec, item.Hue, false, item.Alpha);
+                hueVec = ShaderHueTranslator.GetHueVector(item.Hue, false, item.Alpha);
 
                 UOFontRenderer.Shared.Draw
                 (

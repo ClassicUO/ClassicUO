@@ -403,8 +403,7 @@ namespace ClassicUO.Game.UI.Gumps
                     if (!string.IsNullOrWhiteSpace(_text) && ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.BuffBarTime)
                     {
                         Vector2 position = new Vector2(x, y + bounds.Height * 0.5f);
-                        Vector3 hueVec = new Vector3(1, 1, 0);
-                        ShaderHueTranslator.GetHueVector(ref hueVec, 0, false, HueVector.Z);
+                        var hueVec = ShaderHueTranslator.GetHueVector(0, false, Alpha);
 
                         UOFontRenderer.Shared.Draw
                         (

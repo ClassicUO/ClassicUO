@@ -96,8 +96,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             Vector2 position = new Vector2(x, y);
 
-            Vector3 hueVec = new Vector3();
-            ShaderHueTranslator.GetHueVector(ref hueVec, _hue);
+            var hueVec = ShaderHueTranslator.GetHueVector(_hue);
 
             UOFontRenderer.Shared.Draw
             (

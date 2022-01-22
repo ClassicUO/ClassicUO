@@ -60,13 +60,6 @@ namespace ClassicUO.Renderer
 
         public static Vector3 GetHueVector(ushort hue)
         {
-            Vector3 hueVec = new Vector3();
-            GetHueVector(ref hueVec, hue);
-            return hueVec;
-        }
-
-        public static void GetHueVector(ref Vector3 hueVector, ushort hue)
-        {
             return GetHueVector(hue, false, 1f);
         }
 

@@ -64,20 +64,18 @@ namespace ClassicUO.Game.Managers
         }
 
 
-        public virtual void Draw(UltimaBatcher2D batcher, int startX, int startY, int renderIndex, bool isGump = false)
+        public virtual void Draw(UltimaBatcher2D batcher, int startX, int startY, bool isGump = false)
         {
             ProcessWorldText(false);
 
-            Vector3 hueVec = new Vector3();
-
             for (TextObject o = DrawPointer; o != null; o = o.DLeft)
             {
-                if (o.IsDestroyed || string.IsNullOrEmpty(o.Text) || o.Time < ClassicUO.Time.Ticks || o.Owner.UseInRender != renderIndex && !isGump)
+                if (o.IsDestroyed || string.IsNullOrEmpty(o.Text) || o.Time < ClassicUO.Time.Ticks)
                 {
                     continue;
                 }
 
-                float alpha = 1f - o.Alpha / 255f;
+                float alpha = o.Alpha / 255f;
 
                 if (o.IsTransparent)
                 {
@@ -96,7 +94,7 @@ namespace ClassicUO.Game.Managers
                     y += startY;
                 }
 
-                ShaderHueTranslator.GetHueVector(ref hueVec, o.Hue, false, alpha);
+                var hueVec = ShaderHueTranslator.GetHueVector(o.Hue, false, alpha);
 
                 bool selected = UOFontRenderer.Shared.Draw
                 (

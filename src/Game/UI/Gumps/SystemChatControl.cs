@@ -936,8 +936,7 @@ namespace ClassicUO.Game.UI.Gumps
                     return false;
                 }
 
-                Vector3 hueVec = new Vector3();
-                ShaderHueTranslator.GetHueVector(ref hueVec, _hue);
+                Vector3 hueVec = ShaderHueTranslator.GetHueVector(_hue);
 
                 UOFontRenderer.Shared.Draw
                 (

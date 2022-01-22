@@ -462,9 +462,6 @@ namespace ClassicUO.Game.UI.Controls
                 return;
             }
 
-            ResetHueVector();
-            HueVector.Z = 0.5f;
-
             int selectStart = Math.Min(_textEdit.SelectStart, _textEdit.SelectEnd);
             int selectEnd = Math.Max(_textEdit.SelectStart, _textEdit.SelectEnd);
           
@@ -475,6 +472,8 @@ namespace ClassicUO.Game.UI.Controls
 
 
                 Vector2 startPosition = Vector2.Zero;
+                Vector3 hueVec = new Vector3(0, 0, 0.5f);
+
                 int i = 0;
 
                 for (; i < selectStart; ++i)
@@ -507,7 +506,7 @@ namespace ClassicUO.Game.UI.Controls
                         (
                             texture,
                             new Rectangle(x + (int)startPosition.X, y + (int)startPosition.Y, Math.Max(4, (int)(size.X)), (int)fontHeight),
-                            HueVector
+                            hueVec
                         );
 
                         startPosition.X = 0;
@@ -531,12 +530,10 @@ namespace ClassicUO.Game.UI.Controls
                     (
                         texture,
                         new Rectangle(x + (int)startPosition.X, y + (int)startPosition.Y, (int)sizeEnd.X, (int)fontHeight),
-                        HueVector
+                        hueVec
                     );
                 }
             }
-
-            ResetHueVector();
         }
 
         protected virtual void DrawCaret(UltimaBatcher2D batcher, int x, int y)
