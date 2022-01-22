@@ -62,7 +62,6 @@ namespace ClassicUO.Game.GameObjects
                 return false;
             }
 
-            Vector3 hueVec = Vector3.Zero;
             bool charSitting = false;
             ushort overridedHue = 0;
 
@@ -98,10 +97,7 @@ namespace ClassicUO.Game.GameObjects
 
             bool isGargoyle = Client.Version >= ClientVersion.CV_7000 && (Graphic == 666 || Graphic == 667 || Graphic == 0x02B7 || Graphic == 0x02B6);
 
-            if (AlphaHue != 255)
-            {
-                hueVec.Z = 1f - AlphaHue / 255f;
-            }
+            Vector3 hueVec = ShaderHueTranslator.GetHueVector(0, false, AlphaHue / 255f);
 
             if (ProfileManager.CurrentProfile.HighlightGameObjects && ReferenceEquals(SelectedObject.LastObject, this))
             {
@@ -206,7 +202,7 @@ namespace ClassicUO.Game.GameObjects
                             null,
                             drawX,
                             drawY + 10,
-                            ref hueVec,
+                            hueVec,
                             IsFlipped,
                             animIndex,
                             true,
@@ -232,7 +228,7 @@ namespace ClassicUO.Game.GameObjects
                             mount,
                             drawX,
                             drawY,
-                            ref hueVec,
+                            hueVec,
                             IsFlipped,
                             animIndex,
                             true,
@@ -261,7 +257,7 @@ namespace ClassicUO.Game.GameObjects
                         mount,
                         drawX,
                         drawY,
-                        ref hueVec,
+                        hueVec,
                         IsFlipped,
                         animIndex,
                         false,
@@ -331,7 +327,7 @@ namespace ClassicUO.Game.GameObjects
                         null,
                         drawX,
                         drawY,
-                        ref hueVec,
+                        hueVec,
                         IsFlipped,
                         animIndex,
                         true,
@@ -357,7 +353,7 @@ namespace ClassicUO.Game.GameObjects
                 null,
                 drawX,
                 drawY,
-                ref hueVec,
+                hueVec,
                 IsFlipped,
                 animIndex,
                 false,
@@ -424,7 +420,7 @@ namespace ClassicUO.Game.GameObjects
                                 item,
                                 drawX,
                                 drawY,
-                                ref hueVec,
+                                hueVec,
                                 IsFlipped,
                                 animIndex,
                                 false,
@@ -675,7 +671,7 @@ namespace ClassicUO.Game.GameObjects
             Item entity,
             int x,
             int y,
-            ref Vector3 hueVec,
+            Vector3 hueVec,
             bool mirror,
             byte frameIndex,
             bool hasShadow,
@@ -801,18 +797,7 @@ namespace ClassicUO.Game.GameObjects
                         }
                     }
 
-                    ShaderHueTranslator.GetHueVector(ref hueVec, hue, partialHue, hueVec.Z);
-
-                    // this is an hack to make entities partially hued. OG client seems to ignore this.
-                    /*if (entity != null && entity.ItemData.AnimID == 0 && entity.ItemData.IsLight)
-                    {
-                        HueVector.X = entity.Hue == 0 ? owner.Hue : entity.Hue;
-                        HueVector.Y = ShaderHueTranslator.SHADER_LIGHTS;
-                        HueVector.Z = alpha;
-                    }
-                    */
-
-                    
+                    hueVec = ShaderHueTranslator.GetHueVector(hue, partialHue, hueVec.Z);
 
                     if (spriteInfo.Texture != null)
                     {

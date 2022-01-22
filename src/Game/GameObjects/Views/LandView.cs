@@ -31,8 +31,10 @@
 #endregion
 
 using ClassicUO.Configuration;
+using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -46,8 +48,6 @@ namespace ClassicUO.Game.GameObjects
             }
 
             //Engine.DebugInfo.LandsRendered++;
-
-            Vector3 hueVec = Vector3.Zero;
 
             ushort hue = Hue;
 
@@ -64,7 +64,7 @@ namespace ClassicUO.Game.GameObjects
                 hue = Constants.DEAD_RANGE_COLOR;
             }
 
-
+            Vector3 hueVec;
             if (hue != 0)
             {
                 hueVec.X = hue - 1;
@@ -72,39 +72,65 @@ namespace ClassicUO.Game.GameObjects
             }
             else
             {
+                hueVec.X = 0;
                 hueVec.Y = IsStretched ? ShaderHueTranslator.SHADER_LAND : ShaderHueTranslator.SHADER_NONE;
             }
+            hueVec.Z = 1f;
 
             if (IsStretched)
             {
                 posY += Z << 2;
 
-                DrawLand
-                (
-                    batcher,
-                    Graphic,
-                    posX,
-                    posY,
-                    ref YOffsets,
-                    ref NormalTop,
-                    ref NormalRight,
-                    ref NormalLeft,
-                    ref NormalBottom,
-                    ref hueVec,
-                    depth
-                );
+                var texture = TexmapsLoader.Instance.GetLandTexture(TileDataLoader.Instance.LandData[Graphic].TexID, out var bounds);
+
+                if (texture != null)
+                {
+                    batcher.DrawStretchedLand
+                    (
+                        texture,
+                        new Vector2(posX, posY),
+                        bounds,
+                        ref YOffsets,
+                        ref NormalTop,
+                        ref NormalRight,
+                        ref NormalLeft,
+                        ref NormalBottom,
+                        hueVec,
+                        depth + 0.5f
+                    );
+                }
+                else
+                {
+                    DrawStatic
+                    (
+                        batcher,
+                        Graphic,
+                        posX,
+                        posY,
+                        hueVec,
+                        depth
+                    );
+                }
             }
             else
             {
-                DrawLand
-                (
-                    batcher,
-                    Graphic,
-                    posX,
-                    posY,
-                    ref hueVec,
-                    depth
-                );
+                var texture = ArtLoader.Instance.GetLandTexture(Graphic, out var bounds);
+
+                if (texture != null)
+                {
+                    batcher.Draw
+                    (
+                        texture,
+                        new Vector2(posX, posY),
+                        bounds,
+                        hueVec,
+                        0f,
+                        Vector2.Zero,
+                        1f,
+                        SpriteEffects.None,
+                        depth + 0.5f
+                    );
+                }
             }
 
             return true;

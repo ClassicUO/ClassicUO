@@ -609,7 +609,7 @@ namespace ClassicUO.Game.GameObjects
 
                             case 0x143A:
                             case 0x143B: // Mauls
-                                Abilities[0] = Ability.CrushingBlow;
+                                Abilities[0] = Ability.DoubleStrike;
                                 Abilities[1] = Ability.ConcussionBlow;
 
                                 goto done;

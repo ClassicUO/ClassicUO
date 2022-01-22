@@ -151,8 +151,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            ResetHueVector();
-            HueVector.Z = 0.1f;
+            Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
             batcher.Draw
             (
@@ -164,10 +163,8 @@ namespace ClassicUO.Game.UI.Gumps
                     Width,
                     Height
                 ),
-                HueVector
+                hueVector
             );
-
-            HueVector.Z = 0;
 
             batcher.DrawRectangle
             (
@@ -176,7 +173,7 @@ namespace ClassicUO.Game.UI.Gumps
                 y,
                 Width,
                 Height,
-                ref HueVector
+                hueVector
             );
 
             base.Draw(batcher, x, y);

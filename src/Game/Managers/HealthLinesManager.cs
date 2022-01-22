@@ -274,13 +274,10 @@ namespace ClassicUO.Game.Managers
             Mobile mobile = entity as Mobile;
 
 
-            float alpha = passive ? 0.5f : 0.0f;
+            float alpha = passive ? 0.5f : 1.0f;
+            ushort hue = mobile != null ? Notoriety.GetHue(mobile.NotorietyFlag) : Notoriety.GetHue(NotorietyFlag.Gray);
 
-            Vector3 hueVec = new Vector3();
-
-            hueVec.X = mobile != null ? Notoriety.GetHue(mobile.NotorietyFlag) : Notoriety.GetHue(NotorietyFlag.Gray);
-            hueVec.Y = 1;
-            hueVec.Z = alpha;
+            Vector3 hueVec = ShaderHueTranslator.GetHueVector(hue, false, alpha);
 
             if (mobile == null)
             {
@@ -337,7 +334,7 @@ namespace ClassicUO.Game.Managers
                 );
             }
 
-            ushort hue = 90;
+            hue = 90;
 
             if (per > 0)
             {

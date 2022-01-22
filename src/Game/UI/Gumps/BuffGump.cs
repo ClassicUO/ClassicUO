@@ -380,16 +380,13 @@ namespace ClassicUO.Game.UI.Gumps
 
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
-                ResetHueVector();
-
-                ShaderHueTranslator.GetHueVector
-                (
-                    ref HueVector,
-                    0,
-                    false,
-                    1.0f - _alpha / 255f,
-                    true
-                );
+                Vector3 hueVector = ShaderHueTranslator.GetHueVector
+                                    (
+                                        0,
+                                        false,
+                                        _alpha / 255f,
+                                        true
+                                    );
 
                 var texture = GumpsLoader.Instance.GetGumpTexture(Graphic, out var bounds);
 
@@ -400,7 +397,7 @@ namespace ClassicUO.Game.UI.Gumps
                         texture, 
                         new Vector2(x, y),
                         bounds,
-                        HueVector
+                        hueVector
                     );
                    
                     if (!string.IsNullOrWhiteSpace(_text) && ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.BuffBarTime)

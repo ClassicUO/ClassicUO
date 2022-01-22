@@ -218,23 +218,20 @@ namespace ClassicUO.Game.UI.Controls
                 return false;
             }
 
-            ShaderHueTranslator.GetHueVector
-            (
-                ref HueVector,
-                Hue,
-                false,
-                Alpha,
-                true
-            );
-
-            HueVector.Z = Alpha;
+            Vector3 hue = ShaderHueTranslator.GetHueVector
+                            (
+                                Hue,
+                                false,
+                                Alpha,
+                                true
+                            );
 
             batcher.Draw
             (
                 texture,
                 new Rectangle(x, y, Width, Height),
                 bounds,
-                HueVector
+                hue
             );
 
             if (!string.IsNullOrEmpty(_caption))

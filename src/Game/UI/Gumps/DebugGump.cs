@@ -74,7 +74,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                _alphaBlendControl = new AlphaBlendControl(.3f)
+                _alphaBlendControl = new AlphaBlendControl(.7f)
                 {
                     Width = Width, Height = Height
                 }
@@ -193,7 +193,7 @@ namespace ClassicUO.Game.UI.Gumps
                 return false;
             }
 
-            ResetHueVector();
+            Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
             batcher.DrawString
             (
@@ -201,7 +201,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _cacheText,
                 x + 10,
                 y + 10,
-                ref HueVector
+                hueVector
             );
 
             return true;

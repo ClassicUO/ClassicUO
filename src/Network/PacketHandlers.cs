@@ -1871,7 +1871,7 @@ namespace ClassicUO.Network
                             {
                                 float change = realVal / 10.0f - skill.Value;
 
-                                if (change != 0.0f && !float.IsNaN(change) && ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.ShowSkillsChangedMessage && Math.Abs(change) >= ProfileManager.CurrentProfile.ShowSkillsChangedDeltaValue)
+                                if (change != 0.0f && !float.IsNaN(change) && ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.ShowSkillsChangedMessage && Math.Abs(change * 10) >= ProfileManager.CurrentProfile.ShowSkillsChangedDeltaValue)
                                 {
                                     GameActions.Print
                                     (
@@ -2141,7 +2141,7 @@ namespace ClassicUO.Network
             }
 
             Weather weather = scene.Weather;
-            WEATHER_TYPE type = (WEATHER_TYPE) p.ReadUInt8();
+            WeatherType type = (WeatherType) p.ReadUInt8();
 
             if (weather.CurrentWeather != type)
             {

@@ -223,7 +223,10 @@ namespace ClassicUO.Game.Managers
 
             if (button == MouseButtonType.Right)
             {
-                _mouseDownControls[index]?.InvokeMouseCloseGumpWithRClick();
+                var mouseDownControl = _mouseDownControls[index];
+                // only attempt to close the gump if the mouse is still on the gump when right click mouse up occurs
+                if(mouseDownControl != null && MouseOverControl == mouseDownControl)
+                    mouseDownControl.InvokeMouseCloseGumpWithRClick();
             }
 
             _mouseDownControls[index] = null;

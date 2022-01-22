@@ -83,7 +83,7 @@ namespace ClassicUO.Game.Managers
                 {
                     if (o.Alpha == 0xFF)
                     {
-                        alpha = 1f - 0x7F / 255f;
+                        alpha = 0x7F / 255f;
                     }
                 }
 

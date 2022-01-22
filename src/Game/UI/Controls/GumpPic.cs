@@ -158,11 +158,8 @@ namespace ClassicUO.Game.UI.Controls
                 return false;
             }
 
-            ResetHueVector();
-
-            ShaderHueTranslator.GetHueVector
+            Vector3 hueVector = ShaderHueTranslator.GetHueVector
             (
-                ref HueVector,
                 Hue,
                 IsPartialHue,
                 Alpha,
@@ -178,7 +175,7 @@ namespace ClassicUO.Game.UI.Controls
                     texture,
                     new Rectangle(x, y, Width, Height),
                     bounds,
-                    HueVector
+                    hueVector
                 );
             }
 

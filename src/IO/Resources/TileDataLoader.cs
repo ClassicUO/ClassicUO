@@ -388,6 +388,7 @@ namespace ClassicUO.IO.Resources
         public bool IsNoShoot => (Flags & TileFlag.NoShoot) != 0;
         public bool IsWeapon => (Flags & TileFlag.Weapon) != 0;
         public bool IsMultiMovable => (Flags & TileFlag.MultiMovable) != 0;
+        public bool IsWindow => (Flags & TileFlag.Window) != 0;
     }
 
     // old

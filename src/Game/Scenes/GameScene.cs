@@ -88,7 +88,6 @@ namespace ClassicUO.Game.Scenes
         private bool _forceStopScene;
         private HealthLinesManager _healthLinesManager;
 
-        private bool _isListReady;
         private Point _lastSelectedMultiPositionInHouseCustomization;
         private int _lightCount;
         private readonly LightData[] _lights = new LightData[Constants.MAX_LIGHTS_DATA_INDEX_COUNT];
@@ -195,7 +194,6 @@ namespace ClassicUO.Game.Scenes
 
                 Client.Game.SetWindowSize(w, h);
             }
-
 
             CircleOfTransparency.Create(ProfileManager.CurrentProfile.CircleOfTransparencyRadius);
             Plugin.OnConnected();
@@ -579,7 +577,6 @@ namespace ClassicUO.Game.Scenes
                 return;
             }
 
-            _isListReady = false;
             _alphaChanged = _alphaTimer < Time.Ticks;
 
             if (_alphaChanged)
@@ -596,15 +593,18 @@ namespace ClassicUO.Game.Scenes
 
             GetViewPort();
 
-            _useObjectHandles = NameOverHeadManager.IsToggled || Keyboard.Ctrl && Keyboard.Shift;
-
-            if (_useObjectHandles)
+            var useObjectHandles = NameOverHeadManager.IsToggled || Keyboard.Ctrl && Keyboard.Shift;
+            if (useObjectHandles != _useObjectHandles)
             {
-                NameOverHeadManager.Open();
-            }
-            else
-            {
-                NameOverHeadManager.Close();
+                _useObjectHandles = useObjectHandles;
+                if (_useObjectHandles)
+                {
+                    NameOverHeadManager.Open();
+                }
+                else
+                {
+                    NameOverHeadManager.Close();
+                }
             }
 
             _rectanglePlayer.X = (int) (World.Player.RealScreenPosition.X - World.Player.FrameInfo.X + 22 + World.Player.Offset.X);
@@ -684,25 +684,16 @@ namespace ClassicUO.Game.Scenes
             UpdateTextServerEntities(World.Mobiles.Values, true);
             UpdateTextServerEntities(World.Items.Values, false);
 
-            _renderIndex++;
-
-            if (_renderIndex >= 100)
-            {
-                _renderIndex = 1;
-            }
-
             UpdateDrawPosition = false;
-            _isListReady = true;
         }
 
         private void UpdateTextServerEntities<T>(IEnumerable<T> entities, bool force) where T : Entity
         {
             foreach (T e in entities)
             {
-                if (e.UseInRender != _renderIndex && e.TextContainer != null && !e.TextContainer.IsEmpty && (force || e.Graphic == 0x2006))
+                if (e.TextContainer != null && !e.TextContainer.IsEmpty && (force || e.Graphic == 0x2006))
                 {
                     e.UpdateRealScreenPosition(_offset.X, _offset.Y);
-                    e.UseInRender = (byte) _renderIndex;
                 }
             }
         }
@@ -887,15 +878,10 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-        public override void FixedUpdate(double totalTime, double frameTime)
-        {
-            //FillGameObjectList();
-        }
-
 
         public override bool Draw(UltimaBatcher2D batcher)
         {
-            if (!World.InGame /*|| !_isListReady*/)
+            if (!World.InGame)
             {
                 return false;
             }
@@ -943,6 +929,7 @@ namespace ClassicUO.Game.Scenes
 
             // draw world rt
             Vector3 hue = Vector3.Zero;
+            hue.Z = 1f;
 
 
             if (_use_render_target)
@@ -1020,7 +1007,7 @@ namespace ClassicUO.Game.Scenes
                 batcher.SetBlendState(null);
                 batcher.End();
 
-                hue.Z = 0f;
+                hue.Z = 1f;
             }
 
 
@@ -1047,24 +1034,7 @@ namespace ClassicUO.Game.Scenes
             }
             else
             {
-                switch (ProfileManager.CurrentProfile.FilterType)
-                {
-                    default:
-                    case 0:
-                        batcher.SetSampler(SamplerState.PointClamp);
-
-                        break;
-
-                    case 1:
-                        batcher.SetSampler(SamplerState.AnisotropicClamp);
-
-                        break;
-
-                    case 2:
-                        batcher.SetSampler(SamplerState.LinearClamp);
-
-                        break;
-                }
+                batcher.SetSampler(SamplerState.PointClamp);
             }
 
 
@@ -1102,20 +1072,19 @@ namespace ClassicUO.Game.Scenes
             //}
 
 
-
-            Vector3 hueVec = Vector3.Zero;
             if (_multi != null && TargetManager.IsTargeting && TargetManager.TargetingState == CursorTarget.MultiPlacement)
             {
-                hueVec = Vector3.Zero;
                 _multi.Draw(batcher, _multi.RealScreenPosition.X, _multi.RealScreenPosition.Y, _multi.CalculateDepthZ());
-            } 
+            }
 
+            batcher.SetSampler(null);
+            batcher.SetStencil(null);
 
             // draw weather
             Weather.Draw(batcher, 0, 0); // TODO: fix the depth
+
             batcher.End();
-            batcher.SetSampler(null);
-            batcher.SetStencil(null);
+           
 
             int flushes = batcher.FlushesDone;
             int switches = batcher.TextureSwitches;
@@ -1129,7 +1098,7 @@ namespace ClassicUO.Game.Scenes
             //batcher.Begin();
             //hueVec.X = 0;
             //hueVec.Y = 1;
-            //hueVec.Z = 0;
+            //hueVec.Z = 1;
             //string s = $"Flushes: {flushes}\nSwitches: {switches}\nArt texture count: {TextureAtlas.Shared.TexturesCount}\nMaxZ: {_maxZ}\nMaxGround: {_maxGroundZ}";
             //batcher.DrawString(Fonts.Bold, s, 200, 200, ref hueVec);
             //hueVec = Vector3.Zero;
@@ -1184,7 +1153,7 @@ namespace ClassicUO.Game.Scenes
 
             Vector3 hue = Vector3.Zero;
             hue.Y = ShaderHueTranslator.SHADER_LIGHTS;
-            hue.Z = 0;
+            hue.Z = 1f;
 
             for (int i = 0; i < _lightCount; i++)
             {
@@ -1222,20 +1191,13 @@ namespace ClassicUO.Game.Scenes
         {
             _healthLinesManager.Draw(batcher);
 
-            int renderIndex = _renderIndex - 1;
-
-            if (renderIndex < 1)
-            {
-                renderIndex = 99;
-            }
-
             if (!UIManager.IsMouseOverWorld)
             {
                 SelectedObject.Object = null;
             }
 
             World.WorldTextManager.ProcessWorldText(true);
-            World.WorldTextManager.Draw(batcher, x, y, renderIndex);
+            World.WorldTextManager.Draw(batcher, x, y);
 
             SelectedObject.LastObject = SelectedObject.Object;
         }
@@ -1245,31 +1207,38 @@ namespace ClassicUO.Game.Scenes
             if (_isSelectionActive)
             {
                 Vector3 selectionHue = new Vector3();
-                selectionHue.Z = 0.3f;
+                selectionHue.Z = 0.7f;
+
+                int minX = Math.Min(_selectionStart.X, Mouse.Position.X);
+                int maxX = Math.Max(_selectionStart.X, Mouse.Position.X);
+                int minY = Math.Min(_selectionStart.Y, Mouse.Position.Y);
+                int maxY = Math.Max(_selectionStart.Y, Mouse.Position.Y);
+
+                Rectangle selectionRect = new Rectangle
+                (
+                    minX - Camera.Bounds.X,
+                    minY - Camera.Bounds.Y,
+                    maxX - minX,
+                    maxY - minY
+                );
 
                 batcher.Draw
                 (
                     SolidColorTextureCache.GetTexture(Color.Black),
-                    new Rectangle
-                    (
-                        _selectionStart.X - Camera.Bounds.X,
-                        _selectionStart.Y - Camera.Bounds.Y,
-                        Mouse.Position.X - _selectionStart.X,
-                        Mouse.Position.Y - _selectionStart.Y
-                    ),
+                    selectionRect,
                     selectionHue
                 );
 
-                selectionHue.Z = 0.7f;
+                selectionHue.Z = 0.3f;
 
                 batcher.DrawRectangle
                 (
                     SolidColorTextureCache.GetTexture(Color.DeepSkyBlue),
-                    _selectionStart.X - Camera.Bounds.X,
-                    _selectionStart.Y - Camera.Bounds.Y,
-                    Mouse.Position.X - _selectionStart.X,
-                    Mouse.Position.Y - _selectionStart.Y,
-                    ref selectionHue
+                    selectionRect.X,
+                    selectionRect.Y,
+                    selectionRect.Width,
+                    selectionRect.Height,
+                    selectionHue
                 );
             }
         }

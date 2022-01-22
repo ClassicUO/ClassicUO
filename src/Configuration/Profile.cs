@@ -196,6 +196,9 @@ namespace ClassicUO.Configuration
 
         public Point OverrideContainerLocationPosition { get; set; } = new Point(200, 200);
         public bool DragSelectHumanoidsOnly { get; set; }
+        public int DragSelectStartX { get; set; } = 100;
+        public int DragSelectStartY { get; set; } = 100;
+        public bool DragSelectAsAnchor { get; set; } = false;
         public NameOverheadTypeAllowed NameOverheadTypeAllowed { get; set; } = NameOverheadTypeAllowed.All;
         public bool NameOverheadToggled { get; set; } = false;
         public bool ShowTargetRangeIndicator { get; set; }
@@ -226,7 +229,6 @@ namespace ClassicUO.Configuration
         public bool ShowStatsChangedMessage { get; set; } = true;
 
 
-        public int FilterType { get; set; } = 0;
         public bool ShadowsEnabled { get; set; } = true;
         public bool ShadowsStatics { get; set; } = true;
         public int TerrainShadowsLevel { get; set; } = 15;
@@ -300,6 +302,7 @@ namespace ClassicUO.Configuration
         public bool WorldMapShowMarkersNames { get; set; } = true;
         public bool WorldMapShowMultis { get; set; } = true;
         public string WorldMapHiddenMarkerFiles { get; set; } = string.Empty;
+        public string WorldMapHiddenZoneFiles { get; set; } = string.Empty;
 
 
         public static uint GumpsVersion { get; private set; }

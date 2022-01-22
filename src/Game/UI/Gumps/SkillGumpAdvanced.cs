@@ -80,7 +80,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                new AlphaBlendControl(0.05f)
+                new AlphaBlendControl(0.95f)
                 {
                     X = 1,
                     Y = 1,
@@ -315,7 +315,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            ResetHueVector();
+            Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
             batcher.DrawRectangle
             (
@@ -324,7 +324,7 @@ namespace ClassicUO.Game.UI.Gumps
                 y,
                 Width,
                 Height,
-                ref HueVector
+                hueVector
             );
 
             return base.Draw(batcher, x, y);

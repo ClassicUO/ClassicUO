@@ -355,11 +355,11 @@ namespace ClassicUO.Game
                         {
                             string dist = obj.Distance.ToString();
 
-                            Vector3 hue = new Vector3(0, 1, 0);
-                            sb.DrawString(Fonts.Bold, dist, Mouse.Position.X - 26, Mouse.Position.Y - 21, ref hue);
+                            Vector3 hue = new Vector3(0, 1, 1f);
+                            sb.DrawString(Fonts.Bold, dist, Mouse.Position.X - 26, Mouse.Position.Y - 21, hue);
                             
                             hue.Y = 0;
-                            sb.DrawString(Fonts.Bold, dist, Mouse.Position.X - 25, Mouse.Position.Y - 20, ref hue);
+                            sb.DrawString(Fonts.Bold, dist, Mouse.Position.X - 25, Mouse.Position.Y - 20, hue);
                         }
                     }
                 }
@@ -390,9 +390,7 @@ namespace ClassicUO.Game
                     int x = (ItemHold.IsFixedPosition ? ItemHold.FixedX : Mouse.Position.X) - offset.X;
                     int y = (ItemHold.IsFixedPosition ? ItemHold.FixedY : Mouse.Position.Y) - offset.Y;
 
-                    Vector3 hue = Vector3.Zero;
-
-                    ShaderHueTranslator.GetHueVector(ref hue, ItemHold.Hue, ItemHold.IsPartialHue, ItemHold.HasAlpha ? .5f : 0);
+                    Vector3 hue = ShaderHueTranslator.GetHueVector(ItemHold.Hue, ItemHold.IsPartialHue, ItemHold.HasAlpha ? .5f : 1f);
 
                     var rect = new Rectangle
                     (
@@ -446,11 +444,15 @@ namespace ClassicUO.Game
                 int offX = _cursorOffset[0, graphic];
                 int offY = _cursorOffset[1, graphic];
 
-                Vector3 hueVec = Vector3.Zero;
+                Vector3 hueVec;
 
                 if (World.InGame && World.MapIndex != 0 && !World.Player.InWarMode)
                 {
-                    ShaderHueTranslator.GetHueVector(ref hueVec, 0x0033);
+                    hueVec = ShaderHueTranslator.GetHueVector(0x0033);
+                }
+                else
+                {
+                    hueVec = ShaderHueTranslator.GetHueVector(0);
                 }
 
                 var texture = ArtLoader.Instance.GetStaticTexture(Graphic, out var bounds);

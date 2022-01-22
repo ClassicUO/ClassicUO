@@ -43,8 +43,6 @@ namespace ClassicUO.Game.GameObjects
     {
         public override bool Draw(UltimaBatcher2D batcher, int posX, int posY, float depth)
         {
-            Vector3 hueVec = Vector3.Zero;
-
             ushort hue = Hue;
 
             if (ProfileManager.CurrentProfile.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
@@ -56,7 +54,7 @@ namespace ClassicUO.Game.GameObjects
                 hue = Constants.DEAD_RANGE_COLOR;
             }
 
-            ShaderHueTranslator.GetHueVector(ref hueVec, hue, false, 0);
+            Vector3 hueVec = ShaderHueTranslator.GetHueVector(hue, false, 1);
             hueVec.Y = ShaderHueTranslator.SHADER_LIGHTS;
 
             //Engine.DebugInfo.EffectsRendered++;
@@ -74,7 +72,7 @@ namespace ClassicUO.Game.GameObjects
                 AnimationGraphic,
                 posX,
                 posY,
-                ref hueVec,
+                hueVec,
                 depth
             );
 

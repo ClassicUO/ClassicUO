@@ -131,8 +131,6 @@ namespace ClassicUO.Game.UI.Controls
                 return false;
             }
 
-            ResetHueVector();
-
             bool ok = base.Draw(batcher, x, y);
 
             var texture = GumpsLoader.Instance.GetGumpTexture(IsChecked ? _active : _inactive, out var bounds);
@@ -144,7 +142,7 @@ namespace ClassicUO.Game.UI.Controls
                 texture,
                 pos,
                 bounds,
-                HueVector
+                ShaderHueTranslator.GetHueVector(0)
             );
 
 

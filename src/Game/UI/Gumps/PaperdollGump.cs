@@ -918,7 +918,7 @@ namespace ClassicUO.Game.UI.Gumps
                                 _rect.Width,
                                 _rect.Height
                             ),
-                            HueVector
+                            hueVector
                         );
 
                         return true;

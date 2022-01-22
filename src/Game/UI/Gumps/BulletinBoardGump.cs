@@ -74,7 +74,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             HitBox hitbox = new HitBox(15, 170, 80, 80)
             {
-                Alpha = 1
+                Alpha = 0f
             };
 
             hitbox.MouseUp += (sender, e) =>

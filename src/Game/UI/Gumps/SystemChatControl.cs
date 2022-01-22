@@ -108,7 +108,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Height = CHAT_HEIGHT
             };
 
-            float gradientTransparency = ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.HideChatGradient ? 1.0f : 0.5f;
+            float gradientTransparency = ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.HideChatGradient ? 0.0f : 0.5f;
 
             Add
             (
@@ -474,7 +474,7 @@ namespace ClassicUO.Game.UI.Gumps
                 TextBoxControl.Hue = ProfileManager.CurrentProfile.SpeechHue;
             }
 
-            _trans.Alpha = ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.HideChatGradient ? 1.0f : 0.5f;
+            _trans.Alpha = ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.HideChatGradient ? 0.0f : 0.5f;
 
             base.Update(totalTime, frameTime);
         }

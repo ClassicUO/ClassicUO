@@ -36,6 +36,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using ClassicUO.Utility;
+using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.IO
 {
@@ -54,6 +55,8 @@ namespace ClassicUO.IO
         internal IntPtr StartAddress => (IntPtr) _data;
 
         internal IntPtr PositionAddress => (IntPtr) (_data + Position);
+
+        public bool IsEOF => Position >= Length;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void ReleaseData()
@@ -253,7 +256,11 @@ namespace ClassicUO.IO
         {
             if (Position + size > Length)
             {
+#if DEBUG
                 throw new IndexOutOfRangeException();
+#else
+                Log.Error($"size out of range. {Position + size} > {Length}");
+#endif
             }
         }
 

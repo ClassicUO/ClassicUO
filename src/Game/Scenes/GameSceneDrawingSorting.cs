@@ -69,7 +69,6 @@ namespace ClassicUO.Game.Scenes
         private bool _noDrawRoofs;
         private Point _offset, _maxTile, _minTile, _last_scaled_offset;
         private int _oldPlayerX, _oldPlayerY, _oldPlayerZ;
-        private int _renderIndex = 1;
         private int _foliageCount;
       
 
@@ -366,8 +365,6 @@ namespace ClassicUO.Game.Scenes
 
                 if (!changed)
                 {
-                    obj.UseInRender = (byte)_renderIndex;
-
                     return false;
                 }
             }
@@ -536,7 +533,7 @@ namespace ClassicUO.Game.Scenes
                         {
                             ref var itemData = ref TileDataLoader.Instance.StaticData[tile.Graphic];
 
-                            if (itemData.IsSurface || itemData.IsBackground)
+                            if (itemData.IsNoShoot || itemData.IsWindow)
                             {
                                 if (_maxZ - tile.Z + 5 >= tile.Z - obj.Z)
                                 {
@@ -573,22 +570,6 @@ namespace ClassicUO.Game.Scenes
                 SelectedObject.Object = obj;
             }
 
-            //if (_renderListStaticsHead == null)
-            //{
-            //    _renderListStaticsHead = _renderList = obj;
-            //}
-            //else
-            //{
-            //    _renderList.RenderListNext = obj;
-            //    _renderList = obj;
-            //}
-
-            //obj.RenderListNext = null;
-
-            //++_renderListStaticsCount;
-
-
-
             if (obj.AlphaHue != byte.MaxValue)
             {
                 if (_renderListTransparentObjectsHead == null)
@@ -597,9 +578,6 @@ namespace ClassicUO.Game.Scenes
                 }
                 else
                 {
-                    //obj.RenderListNext = _renderListTransparentObjectsHead;
-                    //_renderListTransparentObjectsHead = obj;
-
                     _renderListTransparentObjects.RenderListNext = obj;
                     _renderListTransparentObjects = obj;
                 }
@@ -624,9 +602,6 @@ namespace ClassicUO.Game.Scenes
 
                 ++renderListCount;
             }
-
-
-            obj.UseInRender = (byte)_renderIndex;
         }
 
         private unsafe bool AddTileToRenderList
@@ -642,18 +617,10 @@ namespace ClassicUO.Game.Scenes
         {
             for (; obj != null; obj = obj.TNext)
             {
-                // i think we can remove this property. It's used to the "odd sorting system"
-                //if (obj.CurrentRenderIndex == _renderIndex)
-                //{
-                //    continue;
-                //}
-
-                if (UpdateDrawPosition && obj.CurrentRenderIndex != _renderIndex || obj.IsPositionChanged)
+                if (UpdateDrawPosition || obj.IsPositionChanged)
                 {
                     obj.UpdateRealScreenPosition(_offset.X, _offset.Y);
                 }
-
-                obj.UseInRender = 0xFF;
 
                 int screenX = obj.RealScreenPosition.X;
 
@@ -671,8 +638,6 @@ namespace ClassicUO.Game.Scenes
                     {
                         return false;
                     }
-
-                    obj.CurrentRenderIndex = _renderIndex;
 
                     if (screenY > _maxPixel.Y)
                     {
@@ -734,8 +699,6 @@ namespace ClassicUO.Game.Scenes
                         return itemData.Height != 0 && maxObjectZ - maxZ < height;
                     }
 
-                    obj.CurrentRenderIndex = _renderIndex;
-
                     if (screenY < _minPixel.Y || screenY > _maxPixel.Y)
                     {
                         continue;
@@ -750,7 +713,17 @@ namespace ClassicUO.Game.Scenes
                     }
                     else
                     {
+                        var alpha = obj.AlphaHue;
+
+                        // hack to fix transparent objects at the same level of a opaque one
+                        if (itemData.IsTranslucent || itemData.IsTransparent)
+                        {
+                            obj.AlphaHue = 0xFF;
+                        }
+
                         PushToRenderList(obj, ref _renderList, ref _renderListStaticsHead, ref _renderListStaticsCount, allowSelection);
+
+                        obj.AlphaHue = alpha;
                     } 
                 }
                 else if (obj is Multi multi)
@@ -794,20 +767,32 @@ namespace ClassicUO.Game.Scenes
                         return itemData.Height != 0 && maxObjectZ - maxZ < height;
                     }
 
-                    obj.CurrentRenderIndex = _renderIndex;
-
                     if (screenY < _minPixel.Y || screenY > _maxPixel.Y)
                     {
                         continue;
                     }
 
-                    if (multi.IsMovable)
-                    {
-                    }
-
                     CheckIfBehindATree(obj, worldX, worldY, ref itemData);
 
-                    PushToRenderList(obj, ref _renderList, ref _renderListStaticsHead, ref _renderListStaticsCount, allowSelection);
+                    // hacky way to render shadows without z-fight
+                    if (ProfileManager.CurrentProfile.ShadowsEnabled && ProfileManager.CurrentProfile.ShadowsStatics && (StaticFilters.IsTree(obj.Graphic, out _) || itemData.IsFoliage || StaticFilters.IsRock(obj.Graphic)))
+                    {
+                        PushToRenderList(obj, ref _renderListTransparentObjects, ref _renderListTransparentObjectsHead, ref _renderListTransparentObjectsCount, allowSelection);
+                    }
+                    else
+                    {
+                        var alpha = obj.AlphaHue;
+
+                        // hack to fix transparent objects at the same level of a opaque one
+                        if (itemData.IsTranslucent || itemData.IsTransparent)
+                        {
+                            obj.AlphaHue = 0xFF;
+                        }
+
+                        PushToRenderList(obj, ref _renderList, ref _renderListStaticsHead, ref _renderListStaticsCount, allowSelection);
+
+                        obj.AlphaHue = alpha;
+                    }
                 }
                 else if (obj is Mobile mobile)
                 {
@@ -826,8 +811,6 @@ namespace ClassicUO.Game.Scenes
                     {
                         continue;
                     }
-
-                    obj.CurrentRenderIndex = _renderIndex;
 
                     if (screenY < _minPixel.Y || screenY > _maxPixel.Y)
                     {
@@ -879,8 +862,6 @@ namespace ClassicUO.Game.Scenes
                         return itemData.Height != 0 && maxObjectZ - maxZ < height;
                     }
 
-                    obj.CurrentRenderIndex = _renderIndex;
-
                     if (screenY < _minPixel.Y || screenY > _maxPixel.Y)
                     {
                         continue;
@@ -913,8 +894,6 @@ namespace ClassicUO.Game.Scenes
                     {
                         continue;
                     }
-
-                    obj.CurrentRenderIndex = _renderIndex;
 
                     if (screenY < _minPixel.Y || screenY > _maxPixel.Y)
                     {

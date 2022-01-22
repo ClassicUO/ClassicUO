@@ -150,7 +150,7 @@ namespace ClassicUO.Renderer
             _basicUOEffect.Brighlight.SetValue(f);
         }
 
-        public void DrawString(SpriteFont spriteFont, string text, int x, int y, ref Vector3 color)
+        public void DrawString(SpriteFont spriteFont, string text, int x, int y, Vector3 color)
         {
             if (string.IsNullOrEmpty(text))
             {
@@ -665,7 +665,7 @@ namespace ClassicUO.Renderer
             int y,
             int width,
             int height,
-            ref Vector3 hue,
+            Vector3 hue,
             float depth = 0f
         )
         {

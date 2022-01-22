@@ -84,7 +84,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            ResetHueVector();
+            Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
             var textureFlag = GumpsLoader.Instance.GetGumpTexture(BUTTON_FLAG, out var boundsFlag);
             var textureButtonUp = GumpsLoader.Instance.GetGumpTexture(BUTTON_UP, out var boundsButtonUp);
@@ -98,7 +98,7 @@ namespace ClassicUO.Game.UI.Controls
                     textureFlag,
                     new Vector2(x,  y + _sliderPosition),
                     boundsFlag,
-                    HueVector
+                    hueVector
                 );
             }
 
@@ -111,7 +111,7 @@ namespace ClassicUO.Game.UI.Controls
                         textureButtonUp,
                         new Vector2(x, y),
                         boundsButtonUp,
-                        HueVector
+                        hueVector
                     );
                 }
 
@@ -122,7 +122,7 @@ namespace ClassicUO.Game.UI.Controls
                         textureButtonDown,
                         new Vector2(x, y + Height),
                         boundsButtonDown,
-                        HueVector
+                        hueVector
                     );
                 }
             }

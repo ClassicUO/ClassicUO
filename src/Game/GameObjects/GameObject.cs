@@ -91,7 +91,6 @@ namespace ClassicUO.Game.GameObjects
 
         public abstract bool CheckMouseSelection();
 
-        public int CurrentRenderIndex;
         // FIXME: remove it
         public sbyte FoliageIndex = -1;
         public ushort Graphic;
@@ -100,7 +99,6 @@ namespace ClassicUO.Game.GameObjects
         public short PriorityZ;
         public GameObject TNext;
         public GameObject TPrevious;
-        public byte UseInRender;
         public ushort X, Y;
         public sbyte Z;
         public GameObject RenderListNext;
@@ -370,8 +368,6 @@ namespace ClassicUO.Game.GameObjects
             IsPositionChanged = false;
             Hue = 0;
             Offset = Vector3.Zero;
-            CurrentRenderIndex = 0;
-            UseInRender = 0;
             RealScreenPosition = Point.Zero;
             _screenPosition = Point.Zero;
             IsFlipped = false;

@@ -71,7 +71,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                alpha = new AlphaBlendControl(0.2f)
+                alpha = new AlphaBlendControl(0.7f)
                 {
                     Hue = 34
                 }

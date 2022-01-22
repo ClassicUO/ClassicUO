@@ -17,7 +17,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Height = 200,
                 X = ProfileManager.CurrentProfile.GameWindowSize.X / 2 - 125,
                 Y = 150,
-                Alpha = 0.2f
+                Alpha = 0.8f
             };
 
             Label text = new Label($"Edit macro: {name}", true, 15)

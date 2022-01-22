@@ -128,75 +128,7 @@ namespace ClassicUO.Game.GameObjects
             return false;
         }
 
-        protected static void DrawLand(UltimaBatcher2D batcher, ushort graphic, int x, int y, ref Vector3 hue, float depth)
-        {
-            var texture = ArtLoader.Instance.GetLandTexture(graphic, out var bounds);
-
-            if (texture != null)
-            {
-                batcher.Draw
-                (
-                    texture,
-                    new Vector2(x, y), 
-                    bounds,
-                    hue,
-                    0f,
-                    Vector2.Zero,
-                    1f, 
-                    SpriteEffects.None,
-                    depth
-                );
-            }
-        }
-
-        protected static void DrawLand
-        (
-            UltimaBatcher2D batcher,
-            ushort graphic,
-            int x,
-            int y,
-            ref UltimaBatcher2D.YOffsets yOffsets,
-            ref Vector3 nTop,
-            ref Vector3 nRight,
-            ref Vector3 nLeft,
-            ref Vector3 nBottom,
-            ref Vector3 hue,
-            float depth
-        )
-        {
-            var texture = TexmapsLoader.Instance.GetLandTexture(TileDataLoader.Instance.LandData[graphic].TexID, out var bounds);
-
-            if (texture != null)
-            {
-                batcher.DrawStretchedLand
-                (
-                    texture,
-                    new Vector2(x, y),
-                    bounds,
-                    ref yOffsets,
-                    ref nTop,
-                    ref nRight,
-                    ref nLeft,
-                    ref nBottom,
-                    hue,
-                    depth + 0.5f
-                );
-            }
-            else
-            {
-                DrawStatic
-                (
-                    batcher,
-                    graphic,
-                    x,
-                    y,
-                    ref hue,
-                    depth
-                );
-            }
-        }
-
-        protected static void DrawStatic(UltimaBatcher2D batcher, ushort graphic, int x, int y, ref Vector3 hue, float depth)
+        protected static void DrawStatic(UltimaBatcher2D batcher, ushort graphic, int x, int y, Vector3 hue, float depth)
         {
             var texture = ArtLoader.Instance.GetStaticTexture(graphic, out var bounds);
 
@@ -222,7 +154,7 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        protected static void DrawGump(UltimaBatcher2D batcher, ushort graphic, int x, int y, ref Vector3 hue, float depth)
+        protected static void DrawGump(UltimaBatcher2D batcher, ushort graphic, int x, int y, Vector3 hue, float depth)
         {
             var texture = GumpsLoader.Instance.GetGumpTexture(graphic, out var bounds);
 
@@ -250,7 +182,7 @@ namespace ClassicUO.Game.GameObjects
             int x,
             int y,
             float angle,
-            ref Vector3 hue,
+            Vector3 hue,
             float depth
         )
         {
@@ -272,7 +204,7 @@ namespace ClassicUO.Game.GameObjects
                     ),
                     bounds,
                     hue,
-                    MathHelper.ToRadians(angle),
+                    angle,
                     Vector2.Zero,
                     SpriteEffects.None,
                     depth + 0.5f
@@ -286,7 +218,7 @@ namespace ClassicUO.Game.GameObjects
             ushort graphic,
             int x,
             int y,
-            ref Vector3 hue,
+            Vector3 hue,
             bool shadow,
             float depth
         )

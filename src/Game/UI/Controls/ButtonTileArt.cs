@@ -70,13 +70,9 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            ResetHueVector();
-
             base.Draw(batcher, x, y);
 
-            ResetHueVector();
-
-            ShaderHueTranslator.GetHueVector(ref HueVector, _hue, _isPartial, 0);
+            Vector3 hueVector = ShaderHueTranslator.GetHueVector(_hue, _isPartial, 1f);
 
             var texture = ArtLoader.Instance.GetStaticTexture(_graphic, out var bounds);
 
@@ -87,7 +83,7 @@ namespace ClassicUO.Game.UI.Controls
                     texture, 
                     new Vector2(x + _tileX, y + _tileY),
                     bounds,
-                    HueVector
+                    hueVector
                 );
 
                 return true;

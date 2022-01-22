@@ -168,7 +168,7 @@ namespace ClassicUO.Game.UI.Controls
       
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            ResetHueVector();
+            Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
 
             if (_style == HSliderBarStyle.MetalWidgetRecessedBar)
@@ -183,7 +183,7 @@ namespace ClassicUO.Game.UI.Controls
                     texture0,
                     new Vector2(x, y),
                     bounds0,
-                    HueVector
+                    hueVector
                 );
 
                 batcher.DrawTiled
@@ -197,7 +197,7 @@ namespace ClassicUO.Game.UI.Controls
                         bounds1.Height
                     ),
                     bounds1,
-                    HueVector
+                    hueVector
                 );
 
                 batcher.Draw
@@ -205,7 +205,7 @@ namespace ClassicUO.Game.UI.Controls
                     texture2,
                     new Vector2(x + BarWidth - bounds2.Width, y),
                     bounds2,
-                    HueVector
+                    hueVector
                 );
     
                 batcher.Draw
@@ -213,7 +213,7 @@ namespace ClassicUO.Game.UI.Controls
                     texture3,
                     new Vector2(x + _sliderX, y),
                     bounds3,
-                    HueVector
+                    hueVector
                 );
             }
             else
@@ -225,7 +225,7 @@ namespace ClassicUO.Game.UI.Controls
                     texture,
                     new Vector2(x + _sliderX, y),
                     bounds,
-                    HueVector
+                    hueVector
                 );
             }
 

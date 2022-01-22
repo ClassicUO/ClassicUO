@@ -161,7 +161,7 @@ namespace ClassicUO.Game.UI.Gumps
                 return false;
             }
 
-            ResetHueVector();
+            Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
             var texture = GumpsLoader.Instance.GetGumpTexture(_useLargeMap ? BIG_MAP_GRAPHIC : SMALL_MAP_GRAPHIC, out var bounds);
 
@@ -177,11 +177,11 @@ namespace ClassicUO.Game.UI.Gumps
                 texture,
                 new Vector2(x, y),
                 bounds,
-                HueVector
+                hueVector
             );
 
             CreateMiniMapTexture();
-            batcher.Draw(_mapTexture, new Vector2(x, y), HueVector);
+            batcher.Draw(_mapTexture, new Vector2(x, y), hueVector);
 
             if (_draw)
             {
@@ -203,9 +203,7 @@ namespace ClassicUO.Game.UI.Gumps
                     int gx = xx - yy;
                     int gy = xx + yy;
 
-                    HueVector.Z = 0;
-
-                    ShaderHueTranslator.GetHueVector(ref HueVector, Notoriety.GetHue(mob.NotorietyFlag));
+                    hueVector = ShaderHueTranslator.GetHueVector(Notoriety.GetHue(mob.NotorietyFlag));
 
                     batcher.Draw
                     (
@@ -217,12 +215,12 @@ namespace ClassicUO.Game.UI.Gumps
                             2,
                             2
                         ),
-                        HueVector
+                        hueVector
                     );
                 }
 
                 //DRAW PLAYER DOT
-                ResetHueVector();
+                hueVector = ShaderHueTranslator.GetHueVector(0);
 
                 batcher.Draw
                 (
@@ -234,7 +232,7 @@ namespace ClassicUO.Game.UI.Gumps
                         2,
                         2
                     ),
-                    HueVector
+                    hueVector
                 );
             }
 
