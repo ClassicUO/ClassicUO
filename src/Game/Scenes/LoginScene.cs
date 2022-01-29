@@ -199,8 +199,10 @@ namespace ClassicUO.Game.Scenes
                 }
             }
 
-            if (CUOEnviroment.NoServerPing == false && CurrentLoginStep == LoginSteps.CharacterCreation && Time.Ticks > _pingTime)
+            if ((CurrentLoginStep == LoginSteps.CharacterCreation || CurrentLoginStep == LoginSteps.CharacterSelection) && Time.Ticks > _pingTime)
             {
+                // Note that this will not be an ICMP ping, so it's better that this *not* be affected by -no_server_ping.
+
                 if (NetClient.Socket != null && NetClient.Socket.IsConnected)
                 {
                     NetClient.Socket.Statistics.SendPing();
