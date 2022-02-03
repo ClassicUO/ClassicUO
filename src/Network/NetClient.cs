@@ -159,6 +159,7 @@ namespace ClassicUO.Network
             }
 
             _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            _socket.NoDelay = true; // it's important to disable the Nagle algo or it will cause lag
 
             _sendingBuffer = new byte[4096];
             _sendingCount = 0;
