@@ -80,6 +80,7 @@
 
   <ItemGroup>
     <Folder Include="Properties\" />
+    <Folder Include="Utility\HTML\" />
   </ItemGroup>
 
   <ItemGroup>

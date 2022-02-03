@@ -64,6 +64,12 @@ namespace ClassicUO.Game.UI.Controls
 
             if (textIndex >= 0 && textIndex < lines.Length)
             {
+                HtmlRenderer renderer = new HtmlRenderer();
+
+                renderer.Draw(null, Vector2.Zero, lines[textIndex]);
+
+                renderer.Dispose();
+
                 InternalBuild(lines[textIndex], 0);
             }
         }
