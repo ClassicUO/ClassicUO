@@ -441,16 +441,20 @@ namespace ClassicUO.Game.GameObjects
 
                 if (OnGround && ItemData.IsAnimated)
                 {
-                    if (ProfileManager.CurrentProfile.FieldsType == 2)
+                    if (ProfileManager.CurrentProfile.FieldsType == 2 &&
+                        (StaticFilters.IsFireField(Graphic) ||
+                         StaticFilters.IsParalyzeField(Graphic) ||
+                         StaticFilters.IsEnergyField(Graphic) ||
+                         StaticFilters.IsPoisonField(Graphic) ||
+                         StaticFilters.IsWallOfStone(Graphic)))
                     {
-                        if (StaticFilters.IsFireField(Graphic) ||
-                            StaticFilters.IsParalyzeField(Graphic) ||
-                            StaticFilters.IsEnergyField(Graphic) ||
-                            StaticFilters.IsPoisonField(Graphic) ||
-                            StaticFilters.IsWallOfStone(Graphic))
-                        {
-                            graphic = Constants.FIELD_REPLACE_GRAPHIC;
-                        }
+                        graphic = Constants.FIELD_REPLACE_GRAPHIC;
+                    }
+                    else
+                    {
+                        ref UOFileIndex index = ref ArtLoader.Instance.GetValidRefEntry(graphic + 0x4000);
+
+                        graphic += (ushort)index.AnimOffset;
                     }
                 }
 
