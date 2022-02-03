@@ -233,7 +233,7 @@ namespace ClassicUO.Game.Managers
 
             if (World.InGame && _lastPacketSend < Time.Ticks)
             {
-                GameActions.Print($"SENDING PACKET! {Time.Ticks}");
+                //GameActions.Print($"SENDING PACKET! {Time.Ticks}");
 
                 _lastPacketSend = Time.Ticks + 250;
 
