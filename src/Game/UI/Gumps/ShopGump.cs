@@ -415,7 +415,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_updateTotal)
             {
-                int sum = 0;
+                long sum = 0;
 
                 foreach (TransactionItem t in _transactionItems.Values)
                 {
@@ -487,7 +487,7 @@ namespace ClassicUO.Game.UI.Gumps
                     shopItem.Graphic,
                     shopItem.Hue,
                     total,
-                    (ushort) shopItem.Price,
+                    shopItem.Price,
                     shopItem.ShopItemName
                 );
 
@@ -863,7 +863,7 @@ namespace ClassicUO.Game.UI.Gumps
                 ushort graphic,
                 ushort hue,
                 int amount,
-                ushort price,
+                uint price,
                 string realname
             )
             {
@@ -1034,7 +1034,7 @@ namespace ClassicUO.Game.UI.Gumps
             public ushort Graphic { get; }
             public ushort Hue { get; }
 
-            public ushort Price { get; }
+            public uint Price { get; }
 
             public int Amount
             {
