@@ -104,10 +104,12 @@ namespace ClassicUO.Game.UI.Gumps
         private bool _showPlayerBar = true;
         private bool _showPlayerName = true;
         private int _zoomIndex = 4;
+        private bool _showGridIfZoomed = true;
 
         private WMapMarker _gotoMarker;
 
         private readonly float[] _zooms = new float[10] { 0.125f, 0.25f, 0.5f, 0.75f, 1f, 1.5f, 2f, 4f, 6f, 8f };
+        private readonly Color _semiTransparentWhiteForGrid = new Color(255, 255, 255, 56);
 
         public WorldMapGump() : base
         (
@@ -217,7 +219,7 @@ namespace ClassicUO.Game.UI.Gumps
             _hiddenMarkerFiles = string.IsNullOrEmpty(ProfileManager.CurrentProfile.WorldMapHiddenMarkerFiles) ? new List<string>() : ProfileManager.CurrentProfile.WorldMapHiddenMarkerFiles.Split(',').ToList();
             _hiddenZoneFiles = string.IsNullOrEmpty(ProfileManager.CurrentProfile.WorldMapHiddenZoneFiles) ? new List<string>() : ProfileManager.CurrentProfile.WorldMapHiddenZoneFiles.Split(',').ToList();
 
-
+            _showGridIfZoomed = ProfileManager.CurrentProfile.WorldMapShowGridIfZoomed;
             TopMost = ProfileManager.CurrentProfile.WorldMapTopMost;
             FreeView = ProfileManager.CurrentProfile.WorldMapFreeView;
         }
@@ -253,6 +255,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             ProfileManager.CurrentProfile.WorldMapHiddenMarkerFiles = string.Join(",", _hiddenMarkerFiles);
             ProfileManager.CurrentProfile.WorldMapHiddenZoneFiles = string.Join(",", _hiddenZoneFiles);
+
+            ProfileManager.CurrentProfile.WorldMapShowGridIfZoomed = _showGridIfZoomed;
         }
 
         private bool ParseBool(string boolStr)
@@ -381,6 +385,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             _options["add_marker_on_player"] = new ContextMenuItemEntry(ResGumps.AddMarkerOnPlayer, () => AddMarkerOnPlayer());
             _options["saveclose"] = new ContextMenuItemEntry(ResGumps.SaveClose, Dispose);
+
+            _options["show_grid_if_zoomed"] = new ContextMenuItemEntry(ResGumps.GridIfZoomed, () => { _showGridIfZoomed = !_showGridIfZoomed; SaveSettings();  }, true, _showGridIfZoomed);
+
         }
 
         public void GoToMarker(int x, int y, bool isManualType)
@@ -405,6 +412,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             ContextMenuItemEntry zoneOptions = new ContextMenuItemEntry(ResGumps.MapZoneOptions);
 
+            zoneOptions.Add(_options["show_grid_if_zoomed"]);
             zoneOptions.Add(new ContextMenuItemEntry(ResGumps.MapZoneReload, () => { LoadZones(); BuildContextMenu(); }));
             zoneOptions.Add(new ContextMenuItemEntry(""));
 
@@ -1672,6 +1680,11 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
+        private bool ShouldDrawGrid()
+        {
+            return (_showGridIfZoomed && Zoom >= 4);
+        }
+
         private void LoadMarkers()
         {
             //return Task.Run(() =>
@@ -2405,6 +2418,10 @@ namespace ClassicUO.Game.UI.Gumps
                 _showPlayerBar
             );
 
+            if (ShouldDrawGrid())
+            {
+                DrawGrid(batcher, srcRect, gX, gY, halfWidth, halfHeight, Zoom);
+            }
 
             if (_showCoordinates)
             {
@@ -2866,6 +2883,42 @@ namespace ClassicUO.Game.UI.Gumps
 
                 batcher.DrawLine(texture, start, end, hueVector, 1);
             }
+        }
+
+        private void DrawGrid
+        (
+            UltimaBatcher2D batcher,
+            Rectangle srcRect,
+            int x,
+            int y,
+            int width,
+            int height,
+            float zoom
+        )
+        {
+            const int GRID_SKIP = 8;
+            Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
+            Texture2D colorTexture = SolidColorTextureCache.GetTexture(_semiTransparentWhiteForGrid);
+
+            batcher.SetBlendState(BlendState.Additive);
+
+            for (int worldY = (srcRect.Y / GRID_SKIP) * GRID_SKIP; worldY < srcRect.Y + srcRect.Height; worldY += GRID_SKIP)
+            {
+                Vector2 start = WorldPointToGumpPoint(srcRect.X, worldY, x, y, width, height, zoom);
+                Vector2 end = WorldPointToGumpPoint(srcRect.X + srcRect.Width, worldY, x, y, width, height, zoom);
+
+                batcher.DrawLine(colorTexture, start, end, hueVector, 1);
+            }
+
+            for (int worldX = (srcRect.X / GRID_SKIP) * GRID_SKIP; worldX < srcRect.X + srcRect.Width; worldX += GRID_SKIP)
+            {
+                Vector2 start = WorldPointToGumpPoint(worldX, srcRect.Y, x, y, width, height, zoom);
+                Vector2 end = WorldPointToGumpPoint(worldX, srcRect.Y + srcRect.Height, x, y, width, height, zoom);
+
+                batcher.DrawLine(colorTexture, start, end, hueVector, 1);
+            }
+
+            batcher.SetBlendState(null);
         }
 
         private void DrawWMEntity
