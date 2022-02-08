@@ -57,7 +57,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                new AlphaBlendControl(0.05f)
+                new AlphaBlendControl(0.95f)
                 {
                     X = 1,
                     Y = 1,
