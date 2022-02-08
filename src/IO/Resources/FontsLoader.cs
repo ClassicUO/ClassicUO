@@ -800,7 +800,19 @@ namespace ClassicUO.IO.Resources
 
                 renderedText.Links.Clear();
                 renderedText.LinesCount = linesCount;
-                renderedText.Texture.SetData(pData, 0, width * height);
+
+                fixed (uint* dataPtr = pData)
+                {
+                    renderedText.Texture.SetDataPointerEXT
+                    (
+                        0,
+                        null,
+                        (IntPtr)dataPtr,
+                        width * height * sizeof(uint)
+                    );
+                }
+
+
 
                 if (saveHitmap)
                 {
@@ -2336,7 +2348,17 @@ namespace ClassicUO.IO.Resources
                 renderedText.Links.Clear();
                 renderedText.Links.AddRange(links);
                 renderedText.LinesCount = linesCount;
-                renderedText.Texture.SetData(pData, 0, width * height);
+
+                fixed (uint* dataPtr = pData)
+                {
+                    renderedText.Texture.SetDataPointerEXT
+                    (
+                        0,
+                        null,
+                        (IntPtr) dataPtr,
+                        width * height * sizeof(uint)
+                    );
+                }
 
                 if (saveHitmap)
                 {
