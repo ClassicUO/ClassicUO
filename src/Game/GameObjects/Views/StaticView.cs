@@ -71,7 +71,7 @@ namespace ClassicUO.Game.GameObjects
             ushort hue = Hue;
             bool partial = ItemData.IsPartialHue;
 
-            if (ProfileManager.CurrentProfile.HighlightGameObjects && SelectedObject.LastObject == this)
+            if (ProfileManager.CurrentProfile.HighlightGameObjects && SelectedObject.Object == this)
             {
                 hue = Constants.HIGHLIGHT_CURRENT_OBJECT_HUE;
                 partial = false;

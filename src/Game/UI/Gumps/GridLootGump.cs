@@ -381,7 +381,6 @@ namespace ClassicUO.Game.UI.Gumps
             if (_corpse != null && !_corpse.IsDestroyed && UIManager.MouseOverControl != null && (UIManager.MouseOverControl == this || UIManager.MouseOverControl.RootParent == this))
             {
                 SelectedObject.Object = _corpse;
-                SelectedObject.LastObject = _corpse;
                 SelectedObject.CorpseObject = _corpse;
             }
         }

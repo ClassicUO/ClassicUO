@@ -61,48 +61,6 @@ namespace ClassicUO.Game.Managers
             ProcessWorldText(false);
         }
 
-        public void Select(int startX, int startY, bool isGump = false)
-        {
-            int mouseX = Mouse.Position.X;
-            int mouseY = Mouse.Position.Y;
-
-            for (TextObject item = DrawPointer; item != null; item = item.DLeft)
-            {
-                if (item.RenderedText == null || item.RenderedText.IsDestroyed || item.RenderedText.Texture == null)
-                {
-                    continue;
-                }
-
-                if (item.Time >= ClassicUO.Time.Ticks)
-                {
-                    if (item.Owner == null)
-                    {
-                        continue;
-                    }
-                }
-
-                if (item.RenderedText.PixelCheck(mouseX - startX - item.RealScreenPosition.X, mouseY - startY - item.RealScreenPosition.Y))
-                {
-                    SelectedObject.LastObject = item;
-                }
-            }
-
-            if (SelectedObject.LastObject is TextObject t)
-            {
-                if (isGump)
-                {
-                    if (t.IsTextGump)
-                    {
-                        t.ToTopD();
-                    }
-                }
-                else
-                {
-                    MoveToTop(t);
-                }
-            }
-        }
-
         public virtual void Draw(UltimaBatcher2D batcher, int startX, int startY, bool isGump = false)
         {
             ProcessWorldText(false);
@@ -110,7 +68,7 @@ namespace ClassicUO.Game.Managers
             int mouseX = Mouse.Position.X;
             int mouseY = Mouse.Position.Y;
 
-            BaseGameObject last = SelectedObject.LastObject;
+            BaseGameObject last = SelectedObject.Object;
 
             for (TextObject o = DrawPointer; o != null; o = o.DLeft)
             {
@@ -136,14 +94,7 @@ namespace ClassicUO.Game.Managers
 
                 if (o.RenderedText.PixelCheck(mouseX - x - startX, mouseY - y - startY))
                 {
-                    if (isGump)
-                    {
-                        SelectedObject.LastObject = o;
-                    }
-                    else
-                    {
-                        SelectedObject.Object = o;
-                    }
+                    SelectedObject.Object = o;
                 }
 
                 if (!isGump)

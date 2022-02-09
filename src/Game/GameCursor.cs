@@ -258,7 +258,7 @@ namespace ClassicUO.Game
 
                         if (_componentsList.Length != 0)
                         {
-                            if (SelectedObject.LastObject is GameObject selectedObj)
+                            if (SelectedObject.Object is GameObject selectedObj)
                             {
                                 int z = 0;
 
