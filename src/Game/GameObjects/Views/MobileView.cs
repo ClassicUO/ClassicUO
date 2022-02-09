@@ -99,7 +99,7 @@ namespace ClassicUO.Game.GameObjects
 
             Vector3 hueVec = ShaderHueTranslator.GetHueVector(0, false, AlphaHue / 255f);
 
-            if (ProfileManager.CurrentProfile.HighlightGameObjects && ReferenceEquals(SelectedObject.LastObject, this))
+            if (ProfileManager.CurrentProfile.HighlightGameObjects && ReferenceEquals(SelectedObject.Object, this))
             {
                 overridedHue = Constants.HIGHLIGHT_CURRENT_OBJECT_HUE;
                 hueVec.Y = 1;
@@ -161,7 +161,7 @@ namespace ClassicUO.Game.GameObjects
 
 
             bool isAttack = Serial == TargetManager.LastAttack;
-            bool isUnderMouse = TargetManager.IsTargeting && ReferenceEquals(SelectedObject.LastObject, this);
+            bool isUnderMouse = TargetManager.IsTargeting && ReferenceEquals(SelectedObject.Object, this);
 
             if (Serial != World.Player.Serial)
             {

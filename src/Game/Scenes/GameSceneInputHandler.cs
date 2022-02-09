@@ -347,7 +347,7 @@ namespace ClassicUO.Game.Scenes
             {
                 _isMouseLeftDown = true;
 
-                if (TargetManager.IsTargeting && TargetManager.TargetingState == CursorTarget.MultiPlacement && (World.CustomHouseManager.SelectedGraphic != 0 || World.CustomHouseManager.Erasing || World.CustomHouseManager.SeekTile) && SelectedObject.LastObject is GameObject obj)
+                if (TargetManager.IsTargeting && TargetManager.TargetingState == CursorTarget.MultiPlacement && (World.CustomHouseManager.SelectedGraphic != 0 || World.CustomHouseManager.Erasing || World.CustomHouseManager.SeekTile) && SelectedObject.Object is GameObject obj)
                 {
                     World.CustomHouseManager.OnTargetWorld(obj);
                     _lastSelectedMultiPositionInHouseCustomization.X = obj.X;
@@ -418,7 +418,7 @@ namespace ClassicUO.Game.Scenes
                 _continueRunning = true;
             }
 
-            BaseGameObject lastObj = SelectedObject.LastObject;// SelectedObject.LastLeftDownObject; <-- this makes the target cursor less responsive if you move the mouse fast
+            BaseGameObject lastObj = SelectedObject.Object;
             SelectedObject.LastLeftDownObject = null;
 
             if (UIManager.IsDragging)
@@ -434,7 +434,7 @@ namespace ClassicUO.Game.Scenes
                 ushort dropY = 0;
                 sbyte dropZ = 0;
 
-                GameObject gobj = SelectedObject.LastObject as GameObject;
+                GameObject gobj = SelectedObject.Object as GameObject;
 
                 if (gobj is Entity obj)
                 {
@@ -751,7 +751,7 @@ namespace ClassicUO.Game.Scenes
                 return false;
             }
 
-            BaseGameObject obj = SelectedObject.LastObject;
+            BaseGameObject obj = SelectedObject.Object;
 
             switch (obj)
             {
@@ -956,7 +956,7 @@ namespace ClassicUO.Game.Scenes
                 {
                     Entity obj;
 
-                    if (ProfileManager.CurrentProfile.SallosEasyGrab && SelectedObject.LastObject is Entity ent && SelectedObject.LastLeftDownObject == null)
+                    if (ProfileManager.CurrentProfile.SallosEasyGrab && SelectedObject.Object is Entity ent && SelectedObject.LastLeftDownObject == null)
                     {
                         obj = ent;
                     }

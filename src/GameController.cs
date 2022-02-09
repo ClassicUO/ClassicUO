@@ -462,7 +462,7 @@ namespace ClassicUO
 
             UIManager.Draw(_uoSpriteBatch);
 
-            if (World.InGame && SelectedObject.LastObject is TextObject t)
+            if (World.InGame && SelectedObject.Object is TextObject t)
             {
                 if (t.IsTextGump)
                 {
