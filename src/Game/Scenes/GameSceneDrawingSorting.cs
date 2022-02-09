@@ -567,7 +567,17 @@ namespace ClassicUO.Game.Scenes
             // slow as fuck
             if (allowSelection && obj.Z <= _maxGroundZ && obj.AllowedToDraw && obj.CheckMouseSelection())
             {
-                SelectedObject.Object = obj;
+                if (SelectedObject.Object is GameObject prev)
+                {
+                    if (obj.CalculateDepthZ() >= prev.CalculateDepthZ())
+                    {
+                        SelectedObject.Object = obj;
+                    }
+                }
+                else
+                {
+                    SelectedObject.Object = obj;
+                }
             }
 
             if (obj.AlphaHue != byte.MaxValue)
