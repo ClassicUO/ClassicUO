@@ -68,8 +68,6 @@ namespace ClassicUO.Game.Managers
             int mouseX = Mouse.Position.X;
             int mouseY = Mouse.Position.Y;
 
-            BaseGameObject last = SelectedObject.Object;
-
             for (TextObject o = DrawPointer; o != null; o = o.DLeft)
             {
                 if (o.IsDestroyed || o.RenderedText == null || o.RenderedText.IsDestroyed || o.RenderedText.Texture == null || o.Time < ClassicUO.Time.Ticks)
@@ -99,7 +97,7 @@ namespace ClassicUO.Game.Managers
 
                 if (!isGump)
                 {
-                    if (o.Owner is Entity && last == o)
+                    if (o.Owner is Entity && SelectedObject.Object == o)
                     {
                         hue = 0x0035;
                     }
