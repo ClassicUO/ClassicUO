@@ -48,8 +48,8 @@ namespace ClassicUO.Game.UI.Gumps
     internal class NameOverheadGump : Gump
     {
         private AlphaBlendControl _background;
-        private Point _lockedPosition;
-        private bool _positionLocked;
+        private Point _lockedPosition, _lastLeftMousePositionDown;
+        private bool _positionLocked, _leftMouseIsDown;
         private readonly RenderedText _renderedText;
         private Texture2D _borderColor = SolidColorTextureCache.GetTexture(Color.Black);
 
@@ -219,7 +219,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             base.CloseWithRightClick();
-        }
+        }     
 
         protected override void OnDragBegin(int x, int y)
         {
@@ -280,6 +280,8 @@ namespace ClassicUO.Game.UI.Gumps
                 //else
                 //    GameActions.PickUp(LocalSerial, 0, 0);
             }
+
+            base.OnDragBegin(x, y);
         }
 
         protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
@@ -311,10 +313,23 @@ namespace ClassicUO.Game.UI.Gumps
             return false;
         }
 
+        protected override void OnMouseDown(int x, int y, MouseButtonType button)
+        {
+            if (button == MouseButtonType.Left)
+            {
+                _lastLeftMousePositionDown = Mouse.Position;
+                _leftMouseIsDown = true;
+            }
+
+            base.OnMouseDown(x, y, button);
+        }
+
         protected override void OnMouseUp(int x, int y, MouseButtonType button)
         {
             if (button == MouseButtonType.Left)
             {
+                _leftMouseIsDown = false;
+
                 if (!ItemHold.Enabled)
                 {
                     if (UIManager.IsDragging || Math.Max(Math.Abs(Mouse.LDragOffset.X), Math.Abs(Mouse.LDragOffset.Y)) >= 1)
@@ -430,12 +445,17 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseOver(int x, int y)
         {
-            if (_positionLocked)
+            if (_leftMouseIsDown)
             {
-                return;
+                var delta = Mouse.Position - _lastLeftMousePositionDown;
+
+                if (Math.Abs(delta.X) > Constants.MIN_GUMP_DRAG_DISTANCE || Math.Abs(delta.Y) > Constants.MIN_GUMP_DRAG_DISTANCE)
+                {
+                    OnDragBegin(x, y);
+                }
             }
 
-            if (SerialHelper.IsMobile(LocalSerial))
+            if (!_positionLocked && SerialHelper.IsMobile(LocalSerial))
             {
                 Mobile m = World.Mobiles.Get(LocalSerial);
 
