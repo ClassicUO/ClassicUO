@@ -434,7 +434,7 @@ namespace ClassicUO.Game.Scenes
                 ushort dropY = 0;
                 sbyte dropZ = 0;
 
-                GameObject gobj = lastObj as GameObject;
+                GameObject gobj = SelectedObject.Object as GameObject;
 
                 if (gobj is Entity obj)
                 {
@@ -609,14 +609,14 @@ namespace ClassicUO.Game.Scenes
 
                     case CursorTarget.HueCommandTarget:
 
-                        if (lastObj is Entity selectedEntity)
+                        if (SelectedObject.Object is Entity selectedEntity)
                         {
                             CommandManager.OnHueTarget(selectedEntity);
                         }
 
                         break;
                     case CursorTarget.IgnorePlayerTarget:
-                        if (lastObj is Entity pmEntity)
+                        if (SelectedObject.Object is Entity pmEntity)
                         {
                             IgnoreManager.AddIgnoredTarget(pmEntity);
                         }

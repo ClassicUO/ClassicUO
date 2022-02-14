@@ -621,7 +621,6 @@ namespace ClassicUO.Game.Scenes
             bool use_handles = _useObjectHandles;
             int maxCotZ = World.Player.Z + 5;
             Vector2 playerPos = World.Player.GetScreenPosition();
-            bool canMouseSelect = UIManager.IsMouseOverWorld;
 
             for (int i = 0; i < 2; ++i)
             {
@@ -655,8 +654,7 @@ namespace ClassicUO.Game.Scenes
                             use_handles,
                             150,
                             maxCotZ,
-                            ref playerPos,
-                            canMouseSelect
+                            ref playerPos
                         );
 
                         ++x;
