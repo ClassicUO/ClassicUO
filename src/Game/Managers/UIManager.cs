@@ -645,12 +645,10 @@ namespace ClassicUO.Game.Managers
                     DraggingControl = dragTarget;
                     _dragOrigin = Mouse.LClickPosition;
 
-                    /* we need to keep the mouse down controls to invoke the mouseup
                      for (int i = 0; i < (int) MouseButtonType.Size; i++)
                      {
                         _mouseDownControls[i] = null;
                      }
-                    */
                 }
 
                 Point delta = Mouse.Position - _dragOrigin;
