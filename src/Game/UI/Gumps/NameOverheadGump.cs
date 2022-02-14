@@ -452,6 +452,8 @@ namespace ClassicUO.Game.UI.Gumps
                 if (Math.Abs(delta.X) > Constants.MIN_GUMP_DRAG_DISTANCE || Math.Abs(delta.Y) > Constants.MIN_GUMP_DRAG_DISTANCE)
                 {
                     OnDragBegin(x, y);
+
+                    _leftMouseIsDown = false;
                 }
             }
 
