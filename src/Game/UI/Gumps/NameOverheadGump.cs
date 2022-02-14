@@ -221,8 +221,16 @@ namespace ClassicUO.Game.UI.Gumps
             base.CloseWithRightClick();
         }     
 
-        protected override void OnDragBegin(int x, int y)
+        private void DoDrag()
         {
+            var delta = Mouse.Position - _lastLeftMousePositionDown;
+
+            if (Math.Abs(delta.X) <= Constants.MIN_GUMP_DRAG_DISTANCE && Math.Abs(delta.Y) <= Constants.MIN_GUMP_DRAG_DISTANCE)
+            {
+                return;
+            }
+
+            _leftMouseIsDown = false;
             _positionLocked = false;
 
             Entity entity = World.Get(LocalSerial);
@@ -280,8 +288,6 @@ namespace ClassicUO.Game.UI.Gumps
                 //else
                 //    GameActions.PickUp(LocalSerial, 0, 0);
             }
-
-            base.OnDragBegin(x, y);
         }
 
         protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
@@ -447,14 +453,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (_leftMouseIsDown)
             {
-                var delta = Mouse.Position - _lastLeftMousePositionDown;
-
-                if (Math.Abs(delta.X) > Constants.MIN_GUMP_DRAG_DISTANCE || Math.Abs(delta.Y) > Constants.MIN_GUMP_DRAG_DISTANCE)
-                {
-                    OnDragBegin(x, y);
-
-                    _leftMouseIsDown = false;
-                }
+                DoDrag();
             }
 
             if (!_positionLocked && SerialHelper.IsMobile(LocalSerial))
