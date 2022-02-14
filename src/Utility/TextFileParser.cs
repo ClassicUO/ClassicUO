@@ -81,9 +81,15 @@ namespace ClassicUO.Utility
         {
             for (int i = _pos; i < _Size; i++)
             {
-                if (_string[i] == '\n' || i + 1 >= _Size)
+                if (_string[i] == '\n')
                 {
                     _eol = i;
+
+                    break;
+                }
+                else if (i + 1 >= _Size)
+                {
+                    _eol = i + 1;
 
                     break;
                 }
