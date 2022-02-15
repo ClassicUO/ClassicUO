@@ -37,6 +37,7 @@ using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Resources;
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -203,7 +204,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     pic.DragBegin += (sender, e) =>
                     {
-                        if (UIManager.IsDragging)
+                        if (UIManager.DraggingControl != this || UIManager.MouseOverControl != sender)
                         {
                             return;
                         }
@@ -244,6 +245,26 @@ namespace ClassicUO.Game.UI.Gumps
                     page1
                 );
             }
+        }
+
+        protected override void OnDragBegin(int x, int y)
+        {
+            if (UIManager.MouseOverControl?.RootParent == this)
+            {
+                UIManager.MouseOverControl.InvokeDragBegin(new Point(x, y));
+            }
+
+            base.OnDragBegin(x, y);
+        }
+
+        protected override void OnDragEnd(int x, int y)
+        {
+            if (UIManager.MouseOverControl?.RootParent == this)
+            {
+                UIManager.MouseOverControl.InvokeDragEnd(new Point(x, y));
+            }
+
+            base.OnDragEnd(x, y);
         }
 
         private void GetSummaryBookInfo(ref int abilityOnPage, ref ushort iconStartGraphic)
