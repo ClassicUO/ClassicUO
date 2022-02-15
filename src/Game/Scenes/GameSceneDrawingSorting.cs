@@ -622,8 +622,7 @@ namespace ClassicUO.Game.Scenes
             bool useObjectHandles, 
             int maxZ,
             int cotZ, 
-            ref Vector2 playerScreePos,
-            bool canMouseSelect
+            ref Vector2 playerScreePos
         )
         {
             for (; obj != null; obj = obj.TNext)
@@ -666,7 +665,7 @@ namespace ClassicUO.Game.Scenes
                         continue;
                     }
 
-                    PushToRenderList(obj, ref _renderList, ref _renderListStaticsHead, ref _renderListStaticsCount, canMouseSelect);
+                    PushToRenderList(obj, ref _renderList, ref _renderListStaticsHead, ref _renderListStaticsCount, true);
                 }
                 else if (obj is Static staticc)
                 {
@@ -720,7 +719,7 @@ namespace ClassicUO.Game.Scenes
                     // hacky way to render shadows without z-fight
                     if (ProfileManager.CurrentProfile.ShadowsEnabled && ProfileManager.CurrentProfile.ShadowsStatics && (StaticFilters.IsTree(obj.Graphic, out _) || itemData.IsFoliage || StaticFilters.IsRock(obj.Graphic)))
                     {
-                        PushToRenderList(obj, ref _renderListTransparentObjects, ref _renderListTransparentObjectsHead, ref _renderListTransparentObjectsCount, allowSelection && canMouseSelect);
+                        PushToRenderList(obj, ref _renderListTransparentObjects, ref _renderListTransparentObjectsHead, ref _renderListTransparentObjectsCount, allowSelection);
                     }
                     else
                     {
@@ -732,7 +731,7 @@ namespace ClassicUO.Game.Scenes
                             obj.AlphaHue = 0xFF;
                         }
 
-                        PushToRenderList(obj, ref _renderList, ref _renderListStaticsHead, ref _renderListStaticsCount, allowSelection && canMouseSelect);
+                        PushToRenderList(obj, ref _renderList, ref _renderListStaticsHead, ref _renderListStaticsCount, allowSelection);
 
                         obj.AlphaHue = alpha;
                     } 
@@ -788,7 +787,7 @@ namespace ClassicUO.Game.Scenes
                     // hacky way to render shadows without z-fight
                     if (ProfileManager.CurrentProfile.ShadowsEnabled && ProfileManager.CurrentProfile.ShadowsStatics && (StaticFilters.IsTree(obj.Graphic, out _) || itemData.IsFoliage || StaticFilters.IsRock(obj.Graphic)))
                     {
-                        PushToRenderList(obj, ref _renderListTransparentObjects, ref _renderListTransparentObjectsHead, ref _renderListTransparentObjectsCount, allowSelection && canMouseSelect);
+                        PushToRenderList(obj, ref _renderListTransparentObjects, ref _renderListTransparentObjectsHead, ref _renderListTransparentObjectsCount, allowSelection);
                     }
                     else
                     {
@@ -800,7 +799,7 @@ namespace ClassicUO.Game.Scenes
                             obj.AlphaHue = 0xFF;
                         }
 
-                        PushToRenderList(obj, ref _renderList, ref _renderListStaticsHead, ref _renderListStaticsCount, allowSelection && canMouseSelect);
+                        PushToRenderList(obj, ref _renderList, ref _renderListStaticsHead, ref _renderListStaticsCount, allowSelection);
 
                         obj.AlphaHue = alpha;
                     }
@@ -830,7 +829,7 @@ namespace ClassicUO.Game.Scenes
 
                     obj.AllowedToDraw = !HasSurfaceOverhead(mobile);
 
-                    PushToRenderList(obj, ref _renderListAnimations, ref _renderListAnimationsHead, ref _renderListAnimationCount, allowSelection && canMouseSelect);
+                    PushToRenderList(obj, ref _renderListAnimations, ref _renderListAnimationsHead, ref _renderListAnimationCount, allowSelection);
                 }
                 else if (obj is Item item)
                 {
@@ -892,11 +891,11 @@ namespace ClassicUO.Game.Scenes
 
                     if (item.IsCorpse)
                     {
-                        PushToRenderList(obj, ref _renderListAnimations, ref _renderListAnimationsHead, ref _renderListAnimationCount, allowSelection && canMouseSelect);
+                        PushToRenderList(obj, ref _renderListAnimations, ref _renderListAnimationsHead, ref _renderListAnimationCount, allowSelection);
                     }
                     else
                     {
-                        PushToRenderList(obj, ref _renderList, ref _renderListStaticsHead, ref _renderListStaticsCount, canMouseSelect);
+                        PushToRenderList(obj, ref _renderList, ref _renderListStaticsHead, ref _renderListStaticsCount, true);
                     }         
                 }
                 else if (obj is GameEffect effect)

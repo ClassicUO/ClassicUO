@@ -499,18 +499,13 @@ namespace ClassicUO.Game.Managers
 
             MouseOverControl = gump;
 
-
-            // NOTE:
-            // This is causes the SelectObject.Object = null when dragging an item from the paperdoll
-            // I've no idea why i wrote this code.
-
-            //for (int i = 0; i < (int) MouseButtonType.Size; i++)
-            //{
-            //    if (_mouseDownControls[i] != null && _mouseDownControls[i] != gump)
-            //    {
-            //        _mouseDownControls[i].InvokeMouseOver(Mouse.Position);
-            //    }
-            //}
+            for (int i = 0; i < (int) MouseButtonType.Size; i++)
+            {
+                if (_mouseDownControls[i] != null && _mouseDownControls[i] != gump)
+                {
+                    _mouseDownControls[i].InvokeMouseOver(Mouse.Position);
+                }
+            }
         }
 
         private static Control GetMouseOverControl(Point position)

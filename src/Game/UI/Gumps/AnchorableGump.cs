@@ -199,7 +199,7 @@ namespace ClassicUO.Game.UI.Gumps
                         hueVector
                     );
 
-                    hueVector.Z = 0;
+                    hueVector.Z = 1f;
 
                     // double rectangle for thicker "stroke"
                     batcher.DrawRectangle
