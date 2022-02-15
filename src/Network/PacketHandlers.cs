@@ -65,6 +65,7 @@ namespace ClassicUO.Network
 
 
         private List<uint> _clilocRequests = new List<uint>();
+        private List<uint> _customHouseRequests = new List<uint>();
         private readonly OnPacketBufferReader[] _handlers = new OnPacketBufferReader[0x100];
 
 
@@ -235,6 +236,16 @@ namespace ClassicUO.Network
                     Handlers._clilocRequests.Clear();
                 }
             }
+
+            if (Handlers._customHouseRequests.Count > 0)
+            {
+                for (int i = 0; i < Handlers._customHouseRequests.Count; ++i)
+                {
+                    NetClient.Socket.Send_CustomHouseDataRequest(Handlers._customHouseRequests[i]);
+                }
+
+                Handlers._customHouseRequests.Clear();
+            } 
         }
 
         public static void AddMegaClilocRequest(uint serial)
@@ -4398,7 +4409,7 @@ namespace ClassicUO.Network
 
                     if (!World.HouseManager.TryGetHouse(serial, out House house) || !house.IsCustom || house.Revision != revision)
                     {
-                        NetClient.Socket.Send_CustomHouseDataRequest(serial);
+                        Handlers._customHouseRequests.Add(serial);
                     }
                     else
                     {
