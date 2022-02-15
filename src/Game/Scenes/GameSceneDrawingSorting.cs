@@ -877,13 +877,6 @@ namespace ClassicUO.Game.Scenes
                         continue;
                     }
 
-                    if (item.IsCorpse)
-                    {
-                    }
-                    else if (itemData.IsMultiMovable)
-                    {
-                    }
-
                     if (!item.IsCorpse)
                     {
                         CheckIfBehindATree(obj, worldX, worldY, ref itemData);

@@ -673,7 +673,7 @@ namespace ClassicUO.Game.Scenes
                     {
                         CalculateAlpha(ref f.AlphaHue, Constants.FOLIAGE_ALPHA);
                     }
-                    else
+                    else if (f.Z < _maxZ)
                     {
                         CalculateAlpha(ref f.AlphaHue, 0xFF);
                     }
