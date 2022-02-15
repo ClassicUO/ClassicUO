@@ -33,8 +33,7 @@ namespace ClassicUO.Game.Managers
         /// <param name="entity">Targeted Entity</param>
         public static void AddIgnoredTarget(Entity entity)
         {
-            //If is mobile, Human and Invul
-            if (entity is Mobile m && m.IsHuman && !m.IsYellowHits && m.Serial != World.Player.Serial)
+            if (entity is Mobile m && !m.IsYellowHits && m.Serial != World.Player.Serial)
             {
                 var charName = m.Name;
 
