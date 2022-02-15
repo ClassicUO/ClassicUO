@@ -621,7 +621,7 @@ namespace ClassicUO.Game.Managers
 
         public static void AttemptDragControl(Control control, bool attemptAlwaysSuccessful = false)
         {
-            if (_isDraggingControl || ItemHold.Enabled && !ItemHold.IsFixedPosition)
+            if ((_isDraggingControl && !attemptAlwaysSuccessful) || ItemHold.Enabled && !ItemHold.IsFixedPosition)
             {
                 return;
             }
