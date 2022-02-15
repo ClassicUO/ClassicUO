@@ -850,7 +850,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void OnIconDragBegin(object sender, EventArgs e)
         {
-            if (UIManager.IsDragging)
+            if (UIManager.DraggingControl != this || UIManager.MouseOverControl != sender)
             {
                 return;
             }
@@ -1152,6 +1152,26 @@ namespace ClassicUO.Game.UI.Gumps
 
                     break;
             }
+        }
+
+        protected override void OnDragBegin(int x, int y)
+        {
+            if (UIManager.MouseOverControl?.RootParent == this)
+            {
+                UIManager.MouseOverControl.InvokeDragBegin(new Point(x, y));
+            }
+
+            base.OnDragBegin(x, y);
+        }
+
+        protected override void OnDragEnd(int x, int y)
+        {
+            if (UIManager.MouseOverControl?.RootParent == this)
+            {
+                UIManager.MouseOverControl.InvokeDragEnd(new Point(x, y));
+            }
+
+            base.OnDragEnd(x, y);
         }
 
         private void GetSpellRequires(int offset, out int y, out string text)
