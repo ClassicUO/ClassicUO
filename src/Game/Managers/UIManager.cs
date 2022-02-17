@@ -213,12 +213,15 @@ namespace ClassicUO.Game.Managers
                 }
                 else if (_mouseDownControls[index] != null && MouseOverControl != _mouseDownControls[index])
                 {
-                    _mouseDownControls[index].InvokeMouseUp(Mouse.Position, button);
+                    if (!_mouseDownControls[index].IsDisposed)
+                    {
+                        _mouseDownControls[index].InvokeMouseUp(Mouse.Position, button);
+                    }                   
                 }
             }
-            else
+            else if (_mouseDownControls[index] != null && !_mouseDownControls[index].IsDisposed)
             {
-                _mouseDownControls[index]?.InvokeMouseUp(Mouse.Position, button);
+                _mouseDownControls[index].InvokeMouseUp(Mouse.Position, button);
             }
 
             if (button == MouseButtonType.Right)
@@ -226,7 +229,9 @@ namespace ClassicUO.Game.Managers
                 var mouseDownControl = _mouseDownControls[index];
                 // only attempt to close the gump if the mouse is still on the gump when right click mouse up occurs
                 if(mouseDownControl != null && MouseOverControl == mouseDownControl)
+                {
                     mouseDownControl.InvokeMouseCloseGumpWithRClick();
+                }                
             }
 
             _mouseDownControls[index] = null;
@@ -241,7 +246,9 @@ namespace ClassicUO.Game.Managers
                 if (MouseOverControl.InvokeMouseDoubleClick(Mouse.Position, button))
                 {
                     if (button == MouseButtonType.Left)
+                    {
                         DelayedObjectClickManager.Clear();
+                    }
 
                     return true;
                 }
@@ -499,13 +506,13 @@ namespace ClassicUO.Game.Managers
 
             MouseOverControl = gump;
 
-            for (int i = 0; i < (int) MouseButtonType.Size; i++)
-            {
-                if (_mouseDownControls[i] != null && _mouseDownControls[i] != gump)
-                {
-                    _mouseDownControls[i].InvokeMouseOver(Mouse.Position);
-                }
-            }
+            //for (int i = 0; i < (int) MouseButtonType.Size; i++)
+            //{
+            //    if (_mouseDownControls[i] != null && _mouseDownControls[i] != gump)
+            //    {
+            //        _mouseDownControls[i].InvokeMouseOver(Mouse.Position);
+            //    }
+            //}
         }
 
         private static Control GetMouseOverControl(Point position)
