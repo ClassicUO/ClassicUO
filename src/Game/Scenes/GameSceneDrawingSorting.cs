@@ -925,8 +925,8 @@ namespace ClassicUO.Game.Scenes
 
             int winGamePosX = 0;
             int winGamePosY = 0;
-            int winGameWidth = ProfileManager.CurrentProfile.GameWindowSize.X;
-            int winGameHeight = ProfileManager.CurrentProfile.GameWindowSize.Y;
+            int winGameWidth = Camera.Bounds.Width;
+            int winGameHeight = Camera.Bounds.Height;
             int winGameCenterX = winGamePosX + (winGameWidth >> 1);
             int winGameCenterY = winGamePosY + (winGameHeight >> 1) + (World.Player.Z << 2);
             winGameCenterX -= (int) World.Player.Offset.X;
@@ -943,7 +943,7 @@ namespace ClassicUO.Game.Scenes
             int winGameScaledWidth;
             int winGameScaledHeight;
 
-            if (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.EnableMousewheelScaleZoom)
+            if (zoom != 1f)
             {
                 float left = winGamePosX;
                 float right = winGameWidth + left;
@@ -972,65 +972,12 @@ namespace ClassicUO.Game.Scenes
             //    winDrawOffsetY += winGameScaledOffsetY >> 1;
             //}
 
-            int width = (int) ((winGameWidth / 44 + 1) * zoom);
-            int height = (int) ((winGameHeight / 44 + 1) * zoom);
+            int size = (int)(Math.Max(winGameWidth / 44f + 1, winGameHeight / 44f + 1) * zoom);
 
-
-            if (width < height)
-            {
-                width = height;
-            }
-            else
-            {
-                height = width;
-            }
-
-            int realMinRangeX = tileOffX - width;
-
-            if (realMinRangeX < 0)
-            {
-                realMinRangeX = 0;
-            }
-
-            int realMaxRangeX = tileOffX + width;
-            //if (realMaxRangeX >= FileManager.Map.MapsDefaultSize[World.Map.Index][0])
-            //    realMaxRangeX = FileManager.Map.MapsDefaultSize[World.Map.Index][0];
-
-            int realMinRangeY = tileOffY - height;
-
-            if (realMinRangeY < 0)
-            {
-                realMinRangeY = 0;
-            }
-
-            int realMaxRangeY = tileOffY + height;
-            //if (realMaxRangeY >= FileManager.Map.MapsDefaultSize[World.Map.Index][1])
-            //    realMaxRangeY = FileManager.Map.MapsDefaultSize[World.Map.Index][1];
-
-            int minBlockX = (realMinRangeX >> 3) - 1;
-            int minBlockY = (realMinRangeY >> 3) - 1;
-            int maxBlockX = (realMaxRangeX >> 3) + 1;
-            int maxBlockY = (realMaxRangeY >> 3) + 1;
-
-            if (minBlockX < 0)
-            {
-                minBlockX = 0;
-            }
-
-            if (minBlockY < 0)
-            {
-                minBlockY = 0;
-            }
-
-            if (maxBlockX >= MapLoader.Instance.MapsDefaultSize[World.Map.Index, 0])
-            {
-                maxBlockX = MapLoader.Instance.MapsDefaultSize[World.Map.Index, 0] - 1;
-            }
-
-            if (maxBlockY >= MapLoader.Instance.MapsDefaultSize[World.Map.Index, 1])
-            {
-                maxBlockY = MapLoader.Instance.MapsDefaultSize[World.Map.Index, 1] - 1;
-            }
+            int realMinRangeX = Math.Max(0, tileOffX - size);
+            int realMaxRangeX = tileOffX + size;
+            int realMinRangeY = Math.Max(0, tileOffY - size);
+            int realMaxRangeY = tileOffY + size;
 
             int drawOffset = (int) (44 / zoom);
 
