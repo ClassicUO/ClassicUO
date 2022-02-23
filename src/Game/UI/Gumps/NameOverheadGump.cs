@@ -49,8 +49,8 @@ namespace ClassicUO.Game.UI.Gumps
     internal class NameOverheadGump : Gump
     {
         private AlphaBlendControl _background;
-        private Point _lockedPosition;
-        private bool _positionLocked;
+        private Point _lockedPosition, _lastLeftMousePositionDown;
+        private bool _positionLocked, _leftMouseIsDown;
         private Texture2D _borderColor = SolidColorTextureCache.GetTexture(Color.Black);
 
         private string _text;

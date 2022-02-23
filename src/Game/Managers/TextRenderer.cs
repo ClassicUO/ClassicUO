@@ -68,8 +68,6 @@ namespace ClassicUO.Game.Managers
         {
             ProcessWorldText(false);
 
-            BaseGameObject last = SelectedObject.LastObject;
-
             for (TextObject o = DrawPointer; o != null; o = o.DLeft)
             {
                 if (o.IsDestroyed || string.IsNullOrEmpty(o.Text) || o.Time < ClassicUO.Time.Ticks)
@@ -106,27 +104,16 @@ namespace ClassicUO.Game.Managers
                     1f,
                     o.FontSettings,
                     hueVec,
-                    o.ObjectTextType == Data.TextType.OBJECT,
+                    o.ObjectTextType == Data.TextType.OBJECT && !isGump,
                     o.MaxTextWidth
                 );
 
+                if (selected && o.Owner is Entity)
+                {
                     SelectedObject.Object = o;
-                }
-
-                if (!isGump)
-                {
-                    if (o.Owner is Entity && SelectedObject.Object == o)
-                    {
-                        hue = 0x0035;
-                    }
-                }
-                else
-                {
-                    x += startX;
-                    y += startY;
-                }
-                    y += startY;
-                }
+                }                
+            }
+        }
 
         public void MoveToTop(TextObject obj)
         {
