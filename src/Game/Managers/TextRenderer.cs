@@ -187,7 +187,7 @@ namespace ClassicUO.Game.Managers
                         delta = 0;
                     }
 
-                    delta = 255 * delta / 100;
+                    delta = (int) MathHelper.Clamp(255 * delta / 100, 0, 255);
 
                     if (!msg.IsTransparent || delta <= 0x7F)
                     {
