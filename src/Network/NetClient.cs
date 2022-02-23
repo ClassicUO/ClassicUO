@@ -159,6 +159,7 @@ namespace ClassicUO.Network
             }
 
             _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            _socket.NoDelay = true; // it's important to disable the Nagle algo or it will cause lag
 
             _sendingBuffer = new byte[4096];
             _sendingCount = 0;
@@ -435,7 +436,7 @@ namespace ClassicUO.Network
 
             const int SIZE_TO_READ = 4096;
 
-            byte[] buffer = System.Buffers.ArrayPool<byte>.Shared.Rent(SIZE_TO_READ * 4 + 2);
+            byte[] buffer = System.Buffers.ArrayPool<byte>.Shared.Rent((_incompleteBuffer.Length + SIZE_TO_READ) * 4 + 2);
 
             while (available > 0)
             { 
@@ -573,7 +574,7 @@ namespace ClassicUO.Network
             int arrayLen = sourcelength * 4 + 2;
 
             byte[] sourceBufferObj = null;
-            Span<byte> source = arrayLen <= 1024 ? stackalloc byte[1024] : (sourceBufferObj = System.Buffers.ArrayPool<byte>.Shared.Rent(arrayLen));
+            Span<byte> source = arrayLen <= 1024 ? stackalloc byte[1024] : (sourceBufferObj = System.Buffers.ArrayPool<byte>.Shared.Rent(arrayLen)).AsSpan(0, arrayLen);
 
             if (incompletelength > 0)
             {

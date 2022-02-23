@@ -1466,6 +1466,24 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Filter type [TEST]:.
+        /// </summary>
+        public static string FilterType {
+            get {
+                return ResourceManager.GetString("FilterType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} [{1}].
+        /// </summary>
+        public static string FilterTypeFormatON {
+            get {
+                return ResourceManager.GetString("FilterTypeFormatON", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Fire Resistance.
         /// </summary>
         public static string FireResistance {
@@ -1642,6 +1660,15 @@ namespace ClassicUO.Resources {
         public static string GoToStory0 {
             get {
                 return ResourceManager.GetString("GoToStory0", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Show/Hide 8x8 Grid if Zoomed.
+        /// </summary>
+        public static string GridIfZoomed {
+            get {
+                return ResourceManager.GetString("GridIfZoomed", resourceCulture);
             }
         }
         
@@ -2441,7 +2468,7 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Map Zone Options.
+        ///   Looks up a localized string similar to Grid and Zone Options.
         /// </summary>
         public static string MapZoneOptions {
             get {

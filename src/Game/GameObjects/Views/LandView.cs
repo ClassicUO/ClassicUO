@@ -51,7 +51,7 @@ namespace ClassicUO.Game.GameObjects
 
             ushort hue = Hue;
 
-            if (ProfileManager.CurrentProfile.HighlightGameObjects && SelectedObject.LastObject == this)
+            if (ProfileManager.CurrentProfile.HighlightGameObjects && SelectedObject.Object == this)
             {
                 hue = Constants.HIGHLIGHT_CURRENT_OBJECT_HUE;
             }

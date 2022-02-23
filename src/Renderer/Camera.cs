@@ -100,9 +100,8 @@ namespace ClassicUO.Renderer
         public int ZoomValuesCount => _cameraZoomValues.Length;
         public Rectangle Bounds;
         public Vector2 Origin;
-
-
         public Point Position;
+
 
         public void SetZoomValues(float[] values)
         {

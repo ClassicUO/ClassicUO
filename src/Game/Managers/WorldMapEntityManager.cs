@@ -31,8 +31,10 @@
 #endregion
 
 using System.Collections.Generic;
+using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Network;
 using ClassicUO.Network.Encryption;
 using ClassicUO.Utility.Logging;
@@ -72,40 +74,40 @@ namespace ClassicUO.Game.Managers
 
     internal class WorldMapEntityManager
     {
-        private bool _ack_received;
-
-        private bool _can_send;
-
+        private bool _ackReceived;
         private uint _lastUpdate, _lastPacketSend, _lastPacketRecv;
-
         private readonly List<WMapEntity> _toRemove = new List<WMapEntity>();
 
-        /// <summary>
-        ///     If WorldMapGump is not visible, disable it
-        /// </summary>
-        public bool Enabled { get; private set; }
+        public bool Enabled
+        {
+            get
+            {
+                return ((World.ClientFeatures.Flags & CharacterListFlags.CLF_NEW_MOVEMENT_SYSTEM) == 0 || _ackReceived) &&
+                        EncryptionHelper.Type == 0 &&
+                        ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.WorldMapShowParty && 
+                        UIManager.GetGump<WorldMapGump>() != null; // horrible, but works
+            }
+        }
 
         public readonly Dictionary<uint, WMapEntity> Entities = new Dictionary<uint, WMapEntity>();
 
         public void SetACKReceived()
         {
-            _ack_received = true;
+            _ackReceived = true;
         }
 
         public void SetEnable(bool v)
         {
-            if ((World.ClientFeatures.Flags & CharacterListFlags.CLF_NEW_MOVEMENT_SYSTEM) != 0 && !_ack_received)
+            if ((World.ClientFeatures.Flags & CharacterListFlags.CLF_NEW_MOVEMENT_SYSTEM) != 0 && !_ackReceived)
             {
                 Log.Warn("Server support new movement system. Can't use the 0xF0 packet to query guild/party position");
                 v = false;
             }
-            else if (EncryptionHelper.Type != 0 && !_ack_received)
+            else if (EncryptionHelper.Type != 0 && !_ackReceived)
             {
                 Log.Warn("Server has encryption. Can't use the 0xF0 packet to query guild/party position");
                 v = false;
             }
-
-            Enabled = v;
 
             if (v)
             {
@@ -127,7 +129,6 @@ namespace ClassicUO.Game.Managers
         {
             if (from_packet)
             {
-                _can_send = true;
                 _lastPacketRecv = Time.Ticks + 10000;
             }
             else if (_lastPacketRecv < Time.Ticks)
@@ -232,6 +233,8 @@ namespace ClassicUO.Game.Managers
 
             if (World.InGame && _lastPacketSend < Time.Ticks)
             {
+                //GameActions.Print($"SENDING PACKET! {Time.Ticks}");
+
                 _lastPacketSend = Time.Ticks + 250;
 
                 //if (!force && !_can_send)
@@ -264,7 +267,7 @@ namespace ClassicUO.Game.Managers
         public void Clear()
         {
             Entities.Clear();
-            _ack_received = false;
+            _ackReceived = false;
             SetEnable(false);
         }
     }

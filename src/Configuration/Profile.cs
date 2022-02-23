@@ -303,6 +303,7 @@ namespace ClassicUO.Configuration
         public bool WorldMapShowMultis { get; set; } = true;
         public string WorldMapHiddenMarkerFiles { get; set; } = string.Empty;
         public string WorldMapHiddenZoneFiles { get; set; } = string.Empty;
+        public bool WorldMapShowGridIfZoomed { get; set; } = true;
 
 
         public static uint GumpsVersion { get; private set; }

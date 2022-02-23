@@ -41,7 +41,6 @@ namespace ClassicUO.Game
     {
         public static Point TranslatedMousePositionByViewport;
         public static BaseGameObject Object;
-        public static BaseGameObject LastObject;
         public static BaseGameObject LastLeftDownObject;
         public static Entity HealthbarObject;
         public static Item SelectedContainer;

@@ -40,6 +40,7 @@ using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -277,10 +278,29 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
+        protected override void OnDragBegin(int x, int y)
+        {
+            if (UIManager.MouseOverControl?.RootParent == this)
+            {
+                UIManager.MouseOverControl.InvokeDragBegin(new Point(x, y));
+            }
+
+            base.OnDragBegin(x, y);
+        }
+
+        protected override void OnDragEnd(int x, int y)
+        {
+            if (UIManager.MouseOverControl?.RootParent == this)
+            {
+                UIManager.MouseOverControl.InvokeDragEnd(new Point(x, y));
+            }
+
+            base.OnDragEnd(x, y);
+        }
 
         private void OnGumpicDragBeginPrimary(object sender, EventArgs e)
         {
-            if (UIManager.IsDragging)
+            if (UIManager.DraggingControl != this || UIManager.MouseOverControl != sender)
             {
                 return;
             }
@@ -301,7 +321,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void OnGumpicDragBeginSecondary(object sender, EventArgs e)
         {
-            if (UIManager.IsDragging)
+            if (UIManager.DraggingControl != this || UIManager.MouseOverControl != sender)
             {
                 return;
             }

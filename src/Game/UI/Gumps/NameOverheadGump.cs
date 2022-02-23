@@ -189,10 +189,18 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             base.CloseWithRightClick();
-        }
+        }     
 
-        protected override void OnDragBegin(int x, int y)
+        private void DoDrag()
         {
+            var delta = Mouse.Position - _lastLeftMousePositionDown;
+
+            if (Math.Abs(delta.X) <= Constants.MIN_GUMP_DRAG_DISTANCE && Math.Abs(delta.Y) <= Constants.MIN_GUMP_DRAG_DISTANCE)
+            {
+                return;
+            }
+
+            _leftMouseIsDown = false;
             _positionLocked = false;
 
             Entity entity = World.Get(LocalSerial);
@@ -281,10 +289,23 @@ namespace ClassicUO.Game.UI.Gumps
             return false;
         }
 
+        protected override void OnMouseDown(int x, int y, MouseButtonType button)
+        {
+            if (button == MouseButtonType.Left)
+            {
+                _lastLeftMousePositionDown = Mouse.Position;
+                _leftMouseIsDown = true;
+            }
+
+            base.OnMouseDown(x, y, button);
+        }
+
         protected override void OnMouseUp(int x, int y, MouseButtonType button)
         {
             if (button == MouseButtonType.Left)
             {
+                _leftMouseIsDown = false;
+
                 if (!ItemHold.Enabled)
                 {
                     if (UIManager.IsDragging || Math.Max(Math.Abs(Mouse.LDragOffset.X), Math.Abs(Mouse.LDragOffset.Y)) >= 1)
@@ -400,12 +421,12 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseOver(int x, int y)
         {
-            if (_positionLocked)
+            if (_leftMouseIsDown)
             {
-                return;
+                DoDrag();
             }
 
-            if (SerialHelper.IsMobile(LocalSerial))
+            if (!_positionLocked && SerialHelper.IsMobile(LocalSerial))
             {
                 Mobile m = World.Mobiles.Get(LocalSerial);
 

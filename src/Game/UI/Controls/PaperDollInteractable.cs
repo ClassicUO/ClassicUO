@@ -382,15 +382,15 @@ namespace ClassicUO.Game.UI.Controls
                 }
             }
 
-            if (GumpsLoader.Instance.GetGumpTexture((uint) (animID + offset), out _) == null)
+            if (animID + offset > Constants.MAX_GUMP_DATA_INDEX_COUNT || GumpsLoader.Instance.GetGumpTexture((ushort)(animID + offset), out _) == null)
             {
                 // inverse
                 offset = isfemale ? Constants.MALE_GUMP_OFFSET : Constants.FEMALE_GUMP_OFFSET;
             }
 
-            if (GumpsLoader.Instance.GetGumpTexture((uint) (animID + offset), out _) == null)
+            if (GumpsLoader.Instance.GetGumpTexture((ushort)(animID + offset), out _) == null)
             {
-                Log.Error($"Texture not found in paperdoll: gump_graphic: {(uint) (animID + offset)}");
+                Log.Error($"Texture not found in paperdoll: gump_graphic: {(ushort) (animID + offset)}");
             }
 
             return (ushort) (animID + offset);

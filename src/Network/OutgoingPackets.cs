@@ -1895,7 +1895,8 @@ namespace ClassicUO.Network
 
             writer.WriteUInt64BE(MessageManager.PromptData.Data);
             writer.WriteUInt32BE((uint) (cancel ? 0 : 1));
-            writer.WriteASCII(lang);
+            writer.WriteASCII(lang, 3);
+            writer.WriteUInt8(0x00);
             writer.WriteUnicodeLE(text, text.Length);
 
             if (length < 0)

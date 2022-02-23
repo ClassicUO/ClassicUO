@@ -68,6 +68,8 @@ namespace ClassicUO.Game.Managers
         {
             ProcessWorldText(false);
 
+            BaseGameObject last = SelectedObject.LastObject;
+
             for (TextObject o = DrawPointer; o != null; o = o.DLeft)
             {
                 if (o.IsDestroyed || string.IsNullOrEmpty(o.Text) || o.Time < ClassicUO.Time.Ticks)
@@ -108,19 +110,23 @@ namespace ClassicUO.Game.Managers
                     o.MaxTextWidth
                 );
 
-                if (selected)
+                    SelectedObject.Object = o;
+                }
+
+                if (!isGump)
                 {
-                    if (isGump)
+                    if (o.Owner is Entity && SelectedObject.Object == o)
                     {
-                        SelectedObject.LastObject = o;
-                    }
-                    else
-                    {
-                        SelectedObject.Object = o;
+                        hue = 0x0035;
                     }
                 }
-            }
-        }
+                else
+                {
+                    x += startX;
+                    y += startY;
+                }
+                    y += startY;
+                }
 
         public void MoveToTop(TextObject obj)
         {
