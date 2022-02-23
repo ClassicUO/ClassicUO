@@ -2914,87 +2914,87 @@ namespace ClassicUO.IO.Resources
 
                 ReadOnlySpan<char> span = str.Slice(startIndex, cmdLen);
 
-                if (span.Equals("b".AsSpan(), StringComparison.InvariantCultureIgnoreCase))
+                if (span.EqualsInvariantNoCase("b"))
                 {
                     tag = HTML_TAG_TYPE.HTT_B;
                 }
-                else if (span.Equals("i".AsSpan(), StringComparison.InvariantCultureIgnoreCase))
+                else if (span.EqualsInvariantNoCase("i"))
                 {
                     tag = HTML_TAG_TYPE.HTT_I;
                 }
-                else if (span.Equals("a".AsSpan(), StringComparison.InvariantCultureIgnoreCase))
+                else if (span.EqualsInvariantNoCase("a"))
                 {
                     tag = HTML_TAG_TYPE.HTT_A;
                 }
-                else if (span.Equals("u".AsSpan(), StringComparison.InvariantCultureIgnoreCase))
+                else if (span.EqualsInvariantNoCase("u"))
                 {
                     tag = HTML_TAG_TYPE.HTT_U;
                 }
-                else if (span.Equals("p".AsSpan(), StringComparison.InvariantCultureIgnoreCase))
+                else if (span.EqualsInvariantNoCase("p"))
                 {
                     tag = HTML_TAG_TYPE.HTT_P;
                 }
-                else if (span.Equals("big".AsSpan(), StringComparison.InvariantCultureIgnoreCase))
+                else if (span.EqualsInvariantNoCase("big"))
                 {
                     tag = HTML_TAG_TYPE.HTT_BIG;
                 }
-                else if (span.Equals("small".AsSpan(), StringComparison.InvariantCultureIgnoreCase))
+                else if (span.EqualsInvariantNoCase("small"))
                 {
                     tag = HTML_TAG_TYPE.HTT_SMALL;
                 }
-                else if (span.Equals("body".AsSpan(), StringComparison.InvariantCultureIgnoreCase))
+                else if (span.EqualsInvariantNoCase("body"))
                 {
                     tag = HTML_TAG_TYPE.HTT_BODY;
                 }
-                else if (span.Equals("basefont".AsSpan(), StringComparison.InvariantCultureIgnoreCase))
+                else if (span.EqualsInvariantNoCase("basefont"))
                 {
                     tag = HTML_TAG_TYPE.HTT_BASEFONT;
                 }
-                else if (span.Equals("h1".AsSpan(), StringComparison.InvariantCultureIgnoreCase))
+                else if (span.EqualsInvariantNoCase("h1"))
                 {
                     tag = HTML_TAG_TYPE.HTT_H1;
                 }
-                else if (span.Equals("h2".AsSpan(), StringComparison.InvariantCultureIgnoreCase))
+                else if (span.EqualsInvariantNoCase("h2"))
                 {
                     tag = HTML_TAG_TYPE.HTT_H2;
                 }
-                else if (span.Equals("h3".AsSpan(), StringComparison.InvariantCultureIgnoreCase))
+                else if (span.EqualsInvariantNoCase("h3"))
                 {
                     tag = HTML_TAG_TYPE.HTT_H3;
                 }
-                else if (span.Equals("h4".AsSpan(), StringComparison.InvariantCultureIgnoreCase))
+                else if (span.EqualsInvariantNoCase("h4"))
                 {
                     tag = HTML_TAG_TYPE.HTT_H4;
                 }
-                else if (span.Equals("h5".AsSpan(), StringComparison.InvariantCultureIgnoreCase))
+                else if (span.EqualsInvariantNoCase("h5"))
                 {
                     tag = HTML_TAG_TYPE.HTT_H5;
                 }
-                else if (span.Equals("h6".AsSpan(), StringComparison.InvariantCultureIgnoreCase))
+                else if (span.EqualsInvariantNoCase("h6"))
                 {
                     tag = HTML_TAG_TYPE.HTT_H6;
                 }
-                else if (span.Equals("br".AsSpan(), StringComparison.InvariantCultureIgnoreCase))
+                else if (span.EqualsInvariantNoCase("br"))
                 {
                     tag = HTML_TAG_TYPE.HTT_BR;
                 }
-                else if (span.Equals("bq".AsSpan(), StringComparison.InvariantCultureIgnoreCase))
+                else if (span.EqualsInvariantNoCase("bq"))
                 {
                     tag = HTML_TAG_TYPE.HTT_BQ;
                 }
-                else if (span.Equals("left".AsSpan(), StringComparison.InvariantCultureIgnoreCase))
+                else if (span.EqualsInvariantNoCase("left"))
                 {
                     tag = HTML_TAG_TYPE.HTT_LEFT;
                 }
-                else if (span.Equals("center".AsSpan(), StringComparison.InvariantCultureIgnoreCase))
+                else if (span.EqualsInvariantNoCase("center"))
                 {
                     tag = HTML_TAG_TYPE.HTT_CENTER;
                 }
-                else if (span.Equals("right".AsSpan(), StringComparison.InvariantCultureIgnoreCase))
+                else if (span.EqualsInvariantNoCase("right"))
                 {
                     tag = HTML_TAG_TYPE.HTT_RIGHT;
                 }
-                else if (span.Equals("div".AsSpan(), StringComparison.InvariantCultureIgnoreCase))
+                else if (span.EqualsInvariantNoCase("div"))
                 {
                     tag = HTML_TAG_TYPE.HTT_DIV;
                 }
@@ -3054,171 +3054,214 @@ namespace ClassicUO.IO.Resources
             return tag;
         }
 
-
-        private unsafe void GetHTMLInfoFromContent(ref HTMLDataInfo info, ReadOnlySpan<char> content, int start, int length)
+        private static void TrimWhiteSpaces(ref ReadOnlySpan<char> content)
         {
             int i = 0;
+            while (i < content.Length && char.IsWhiteSpace(content[i]))
+            {
+                ++i;
+            }
+
+            int end = content.IsEmpty ? -1 : 0;
+            while (end >= 0 && char.IsWhiteSpace(content[content.Length - end - 1]))
+            {
+                ++end;
+            }
 
             if (!content.IsEmpty)
             {
-                while (i < length && char.IsWhiteSpace(content[i + start]))
-                {
-                    ++i;
-                }
+                content = content.Slice(i, content.Length - end - i);
             }
-            else
+        }
+
+        private unsafe void GetHTMLInfoFromContent(ref HTMLDataInfo info, ReadOnlySpan<char> content, int start, int length)
+        {
+            content = content.Slice(start, length);
+            TrimWhiteSpaces(ref content);
+
+            if (content.IsEmpty)
             {
                 return;
             }
 
-            char* bufferCmd = stackalloc char[128];
-            char* bufferValue = stackalloc char[128];
+            int realIndex = 0;
 
-            for (int cmdLenght = 0; i < length; ++i)
+            while (realIndex < content.Length)
             {
-                char c = content[i + start];
+                int i = 0;
+                ReadOnlySpan<char> cmd = content.Slice(realIndex);
+                TrimWhiteSpaces(ref cmd);
 
-                bufferCmd[cmdLenght++] = char.IsLetter(c) ? char.ToLowerInvariant(c) : c;
-
-                if (c == ' ' || c == '=' || c == '\\')
+                for (; i < cmd.Length; ++i, ++realIndex)
                 {
-                    ++i;
-                    bool inside = false;
-                    int valueLength = 0;
-                    for (; i < length; ++i)
+                    char c = cmd[i];
+
+                    if (c == ' ' || c == '=' || c == '\\')
                     {
-                        c = content[i + start];
+                        cmd = cmd.Slice(0, i);
 
-                        if (c == ' ' || c == '\\' || c == '<' || c == '>' || (c == '=' && !inside))
+                        ++realIndex;
+
+                        break;
+                    }
+                }
+
+                TrimWhiteSpaces(ref cmd);
+
+                if (cmd.IsEmpty)
+                {
+                    return;
+                }
+
+                ReadOnlySpan<char> value = content.Slice(realIndex);
+                TrimWhiteSpaces(ref value);
+
+                bool inside = false;
+
+                for (i = 0; i < value.Length; ++i, ++realIndex)
+                {
+                    char c = value[i];
+
+                    if (/*c == ' ' ||*/ c == '\\' || c == '<' || c == '>' /*|| (c == '=' && !inside)*/)
+                    {
+                        value = value.Slice(0, i);
+                        ++realIndex;
+
+                        break;
+                    }
+
+                    if (c == '"')
+                    {
+                        if (inside)
                         {
+                            value = value.Slice(0, i);
+                            ++realIndex;
+
                             break;
-                        }
-
-                        if (c != '"')
-                        {
-                            bufferValue[valueLength++] = char.IsLetter(c) ? char.ToLowerInvariant(c) : c;
                         }
                         else
                         {
-                            inside = !inside;
+                            value = value.Slice(i + 1);
+                            ++realIndex;
                         }
-                    }
 
-                    if (valueLength != 0)
+                        inside = !inside;
+                    }
+                }
+
+                TrimWhiteSpaces(ref value);
+
+                if (!value.IsEmpty)
+                {
+                    switch (info.Tag)
                     {
-                        switch (info.Tag)
-                        {
-                            case HTML_TAG_TYPE.HTT_BODY:
-                            case HTML_TAG_TYPE.HTT_BODYBGCOLOR:
+                        case HTML_TAG_TYPE.HTT_BODY:
+                        case HTML_TAG_TYPE.HTT_BODYBGCOLOR:
 
-                                if (StringHelper.UnsafeCompare(bufferCmd, "text", cmdLenght))
+                            if (cmd.EqualsInvariantNoCase("text"))
+                            {
+                                ReadColorFromTextBuffer(value, ref info.Color);
+                            }
+                            else if (cmd.EqualsInvariantNoCase("bgcolor"))
+                            {
+                                if (_htmlStatus.IsHtmlBackgroundColored)
                                 {
-                                    ReadColorFromTextBuffer(bufferValue, valueLength, ref info.Color);
+                                    ReadColorFromTextBuffer(value, ref _htmlStatus.BackgroundColor);
                                 }
-                                else if (StringHelper.UnsafeCompare(bufferCmd, "bgcolor", cmdLenght))
-                                {
-                                    if (_htmlStatus.IsHtmlBackgroundColored)
-                                    {
-                                        ReadColorFromTextBuffer(bufferValue, valueLength, ref _htmlStatus.BackgroundColor);
-                                    }
-                                }
-                                else if (StringHelper.UnsafeCompare(bufferCmd, "link", cmdLenght))
-                                {
-                                    ReadColorFromTextBuffer(bufferValue, valueLength, ref _htmlStatus.WebLinkColor);
-                                }
-                                else if (StringHelper.UnsafeCompare(bufferCmd, "vlink", cmdLenght))
-                                {
-                                    ReadColorFromTextBuffer(bufferValue, valueLength, ref _htmlStatus.VisitedWebLinkColor);
-                                }
-                                else if (StringHelper.UnsafeCompare(bufferCmd, "leftmargin", cmdLenght))
-                                {
-                                    _htmlStatus.Margins.X = int.Parse(new string(bufferValue, 0, valueLength));
-                                }
-                                else if (StringHelper.UnsafeCompare(bufferCmd, "topmargin", cmdLenght))
-                                {
-                                    _htmlStatus.Margins.Y = int.Parse(new string(bufferValue, 0, valueLength));
-                                }
-                                else if (StringHelper.UnsafeCompare(bufferCmd, "rightmargin", cmdLenght))
-                                {
-                                    _htmlStatus.Margins.Width = int.Parse(new string(bufferValue, 0, valueLength));
-                                }
-                                else if (StringHelper.UnsafeCompare(bufferCmd, "bottommargin", cmdLenght))
-                                {
-                                    _htmlStatus.Margins.Height = int.Parse(new string(bufferValue, 0, valueLength));
-                                }
+                            }
+                            else if (cmd.EqualsInvariantNoCase("link"))
+                            {
+                                ReadColorFromTextBuffer(value, ref _htmlStatus.WebLinkColor);
+                            }
+                            else if (cmd.EqualsInvariantNoCase("vlink"))
+                            {
+                                ReadColorFromTextBuffer(value, ref _htmlStatus.VisitedWebLinkColor);
+                            }
+                            else if (cmd.EqualsInvariantNoCase("leftmargin"))
+                            {
+                                _htmlStatus.Margins.X = int.Parse(value.ToString());
+                            }
+                            else if (cmd.EqualsInvariantNoCase("topmargin"))
+                            {
+                                _htmlStatus.Margins.Y = int.Parse(value.ToString());
+                            }
+                            else if (cmd.EqualsInvariantNoCase("rightmargin"))
+                            {
+                                _htmlStatus.Margins.Width = int.Parse(value.ToString());
+                            }
+                            else if (cmd.EqualsInvariantNoCase("bottommargin"))
+                            {
+                                _htmlStatus.Margins.Height = int.Parse(value.ToString());
+                            }
 
-                                break;
+                            break;
 
-                            case HTML_TAG_TYPE.HTT_BASEFONT:
+                        case HTML_TAG_TYPE.HTT_BASEFONT:
 
-                                if (StringHelper.UnsafeCompare(bufferCmd, "color", cmdLenght))
+                            if (cmd.EqualsInvariantNoCase("color"))
+                            {
+                                ReadColorFromTextBuffer(value, ref info.Color);
+                            }
+                            else if (cmd.EqualsInvariantNoCase("size"))
+                            {
+                                byte font = byte.Parse(value.ToString());
+
+                                if (font == 0 || font == 4)
                                 {
-                                    ReadColorFromTextBuffer(bufferValue, valueLength, ref info.Color);
+                                    info.Font = 1;
                                 }
-                                else if (StringHelper.UnsafeCompare(bufferCmd, "size", cmdLenght))
+                                else if (font < 4)
                                 {
-                                    byte font = byte.Parse(new string(bufferValue, 0, valueLength));
-
-                                    if (font == 0 || font == 4)
-                                    {
-                                        info.Font = 1;
-                                    }
-                                    else if (font < 4)
-                                    {
-                                        info.Font = 2;
-                                    }
-                                    else
-                                    {
-                                        info.Font = 0;
-                                    }
+                                    info.Font = 2;
                                 }
-
-                                break;
-
-                            case HTML_TAG_TYPE.HTT_A:
-
-                                if (StringHelper.UnsafeCompare(bufferCmd, "href", cmdLenght))
+                                else
                                 {
-                                    info.Flags = UOFONT_UNDERLINE;
-                                    info.Color = _htmlStatus.WebLinkColor;
-                                    info.Link = GetWebLinkID(bufferValue, valueLength, ref info.Color);
+                                    info.Font = 0;
                                 }
+                            }
 
-                                break;
+                            break;
 
-                            case HTML_TAG_TYPE.HTT_P:
-                            case HTML_TAG_TYPE.HTT_DIV:
+                        case HTML_TAG_TYPE.HTT_A:
+                            if (cmd.EqualsInvariantNoCase("href"))
+                            {
+                                info.Flags = UOFONT_UNDERLINE;
+                                info.Color = _htmlStatus.WebLinkColor;
+                                info.Link = GetWebLinkID(value, ref info.Color);
+                            }
 
-                                if (StringHelper.UnsafeCompare(bufferCmd, "align", cmdLenght))
+                            break;
+
+                        case HTML_TAG_TYPE.HTT_P:
+                        case HTML_TAG_TYPE.HTT_DIV:
+
+                            if (cmd.EqualsInvariantNoCase("align"))
+                            {
+                                if (value.EqualsInvariantNoCase("left"))
                                 {
-                                    if (StringHelper.UnsafeCompare(bufferValue, "left", valueLength))
-                                    {
-                                        info.Align = TEXT_ALIGN_TYPE.TS_LEFT;
-                                    }
-                                    else if (StringHelper.UnsafeCompare(bufferValue, "center", valueLength))
-                                    {
-                                        info.Align = TEXT_ALIGN_TYPE.TS_CENTER;
-                                    }
-                                    else if (StringHelper.UnsafeCompare(bufferValue, "right", valueLength))
-                                    {
-                                        info.Align = TEXT_ALIGN_TYPE.TS_RIGHT;
-                                    }
+                                    info.Align = TEXT_ALIGN_TYPE.TS_LEFT;
                                 }
+                                else if (value.EqualsInvariantNoCase("center"))
+                                {
+                                    info.Align = TEXT_ALIGN_TYPE.TS_CENTER;
+                                }
+                                else if (value.EqualsInvariantNoCase("right"))
+                                {
+                                    info.Align = TEXT_ALIGN_TYPE.TS_RIGHT;
+                                }
+                            }
 
-                                break;
-                        }
+                            break;
                     }
-
-                    cmdLenght = 0;
                 }
             }
         }
 
-        private unsafe ushort GetWebLinkID(char* link, int linkLength, ref uint color)
+        private unsafe ushort GetWebLinkID(ReadOnlySpan<char> link, ref uint color)
         {
             foreach (KeyValuePair<ushort, WebLink> ll in _webLinks)
             {
-                if (ll.Value.Link.Length == linkLength && StringHelper.UnsafeCompare(link, ll.Value.Link, linkLength))
+                if (link.EqualsInvariantNoCase(ll.Value.Link))
                 {
                     if (ll.Value.IsVisited)
                     {
@@ -3235,7 +3278,7 @@ namespace ClassicUO.IO.Resources
             {
                 webLink = new WebLink();
                 webLink.IsVisited = false;
-                webLink.Link = new string(link, 0, linkLength);
+                webLink.Link = link.ToString();
 
                 _webLinks[linkID] = webLink;
             }
@@ -3256,19 +3299,19 @@ namespace ClassicUO.IO.Resources
         }
 
 
-        private unsafe void ReadColorFromTextBuffer(char* buffer, int length, ref uint color)
+        private static unsafe void ReadColorFromTextBuffer(ReadOnlySpan<char> buffer, ref uint color)
         {
             color = 0x00_00_00_00;
 
-            if (length > 0)
+            if (!buffer.IsEmpty)
             {
                 if (buffer[0] == '#')
                 {
-                    if (length > 1)
+                    if (buffer.Length > 1)
                     {
                         int startIndex = buffer[1] == '0' && buffer[2] == 'x' ? 3 : 1;
 
-                        string temp = new string(buffer, startIndex, length - startIndex);
+                        string temp = buffer.Slice(startIndex).ToString();
                         uint.TryParse(temp, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var cc);
 
                         byte* clrbuf = (byte*)&cc;
@@ -3277,79 +3320,79 @@ namespace ClassicUO.IO.Resources
                 }
                 else if (char.IsNumber(buffer[0]))
                 {
-                    color = Convert.ToUInt32(new string(buffer, 0, length), 16);
+                    color = Convert.ToUInt32(buffer.ToString(), 16);
                 }
                 else
                 {
-                    if (StringHelper.UnsafeCompare(buffer, "red", length))
+                    if (buffer.EqualsInvariantNoCase("red"))
                     {
                         color = 0x0000FFFF;
                     }
-                    else if (StringHelper.UnsafeCompare(buffer, "cyan", length))
+                    else if (buffer.EqualsInvariantNoCase("cyan"))
                     {
                         color = 0xFFFF00FF;
                     }
-                    else if (StringHelper.UnsafeCompare(buffer, "blue", length))
+                    else if (buffer.EqualsInvariantNoCase("blue"))
                     {
                         color = 0xFF0000FF;
                     }
-                    else if (StringHelper.UnsafeCompare(buffer, "darkblue", length))
+                    else if (buffer.EqualsInvariantNoCase("darkblue"))
                     {
                         color = 0xA00000FF;
                     }
-                    else if (StringHelper.UnsafeCompare(buffer, "lightblue", length))
+                    else if (buffer.EqualsInvariantNoCase("lightblue"))
                     {
                         color = 0xE6D8ADFF;
                     }
-                    else if (StringHelper.UnsafeCompare(buffer, "purple", length))
+                    else if (buffer.EqualsInvariantNoCase("purple"))
                     {
                         color = 0x800080FF;
                     }
-                    else if (StringHelper.UnsafeCompare(buffer, "yellow", length))
+                    else if (buffer.EqualsInvariantNoCase("yellow"))
                     {
                         color = 0x00FFFFFF;
                     }
-                    else if (StringHelper.UnsafeCompare(buffer, "lime", length))
+                    else if (buffer.EqualsInvariantNoCase("lime"))
                     {
                         color = 0x00FF00FF;
                     }
-                    else if (StringHelper.UnsafeCompare(buffer, "magenta", length))
+                    else if (buffer.EqualsInvariantNoCase("magenta"))
                     {
                         color = 0xFF00FFFF;
                     }
-                    else if (StringHelper.UnsafeCompare(buffer, "white", length))
+                    else if (buffer.EqualsInvariantNoCase("white"))
                     {
                         color = 0xFFFEFEFF;
                     }
-                    else if (StringHelper.UnsafeCompare(buffer, "silver", length))
+                    else if (buffer.EqualsInvariantNoCase("silver"))
                     {
                         color = 0xC0C0C0FF;
                     }
-                    else if (StringHelper.UnsafeCompare(buffer, "gray", length) || StringHelper.UnsafeCompare(buffer, "grey", length))
+                    else if (buffer.EqualsInvariantNoCase("gray") || buffer.EqualsInvariantNoCase("grey"))
                     {
                         color = 0x808080FF;
                     }
-                    else if (StringHelper.UnsafeCompare(buffer, "black", length))
+                    else if (buffer.EqualsInvariantNoCase("black"))
                     {
                         color = 0x010101FF;
                     }
-                    else if (StringHelper.UnsafeCompare(buffer, "orange", length))
+                    else if (buffer.EqualsInvariantNoCase("orange"))
                     {
                         color = 0x00A5FFFF;
                     }
-                    else if (StringHelper.UnsafeCompare(buffer, "brown", length))
+                    else if (buffer.EqualsInvariantNoCase("brown"))
                     {
                         color = 0x2A2AA5FF;
                     }
-                    else if (StringHelper.UnsafeCompare(buffer, "maroon", length))
+                    else if (buffer.EqualsInvariantNoCase("maroon"))
                     {
                         color = 0x000080FF;
                     }
-                    else if (StringHelper.UnsafeCompare(buffer, "green", length))
+                    else if (buffer.EqualsInvariantNoCase("green"))
                     {
                         color = 0x008000FF;
                     }
-                    else if (StringHelper.UnsafeCompare(buffer, "olive", length))
+                    else if (buffer.EqualsInvariantNoCase("olive"))
                     {
                         color = 0x008080FF;
                     }
