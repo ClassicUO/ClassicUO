@@ -57,8 +57,6 @@ namespace ClassicUO
 {
     internal unsafe class GameController : Microsoft.Xna.Framework.Game
     {
-        private bool _dragStarted;
-
         private SDL_EventFilter _filter;
 
         private readonly Texture2D[] _hueSamplers = new Texture2D[3];
@@ -90,6 +88,7 @@ namespace ClassicUO
         }
 
         public Scene Scene { get; private set; }
+        public GameCursor GameCursor { get; private set; }
 
         public GraphicsDeviceManager GraphicManager { get; }
         public readonly uint[] FrameDelay = new uint[2];
@@ -150,8 +149,9 @@ namespace ClassicUO
             LightsLoader.Instance.CreateAtlas(GraphicsDevice);
             AnimationsLoader.Instance.CreateAtlas(GraphicsDevice);
 
-            UIManager.InitializeGameCursor();
             AnimatedStaticsManager.Initialize();
+
+            GameCursor = new GameCursor();
 
             SetScene(new LoginScene());
             SetWindowPositionBySettings();
@@ -435,6 +435,8 @@ namespace ClassicUO
                 }
             }
 
+            GameCursor?.Update(gameTime.ElapsedGameTime.TotalMilliseconds, gameTime.TotalGameTime.TotalMilliseconds);
+
             base.Update(gameTime);
         }
 
@@ -476,25 +478,9 @@ namespace ClassicUO
             SelectedObject.HealthbarObject = null;
             SelectedObject.SelectedContainer = null;
 
-            //_uoSpriteBatch.Begin();
-            //_fontRenderer.Draw
-            //(
-            //    _uoSpriteBatch,
-            //    $"New Engine ❤ 😁".AsSpan(),
-            //    new Vector2(200, 100),
-            //    5f,
-            //    new FontSettings() 
-            //    { 
-            //        IsUnicode = true, 
-            //        FontIndex = 0, 
-            //        Italic = false,
-            //        Bold = false, 
-            //        Border = true,
-            //        Underline = true,
-            //    },
-            //    new Vector3(0x44, 0, 0)
-            //);
-            //_uoSpriteBatch.End();
+            _uoSpriteBatch.Begin();
+            GameCursor.Draw(_uoSpriteBatch);
+            _uoSpriteBatch.End();
 
             base.Draw(gameTime);
 
@@ -566,9 +552,9 @@ namespace ClassicUO
             {
                 if (sdlEvent->type == SDL_EventType.SDL_MOUSEMOTION)
                 {
-                    if (UIManager.GameCursor != null)
+                    if (GameCursor != null)
                     {
-                        UIManager.GameCursor.AllowDrawSDLCursor = false;
+                        GameCursor.AllowDrawSDLCursor = false;
                     }
                 }
 
@@ -676,10 +662,10 @@ namespace ClassicUO
 
                 case SDL_EventType.SDL_MOUSEMOTION:
 
-                    if (UIManager.GameCursor != null && !UIManager.GameCursor.AllowDrawSDLCursor)
+                    if (GameCursor != null && !GameCursor.AllowDrawSDLCursor)
                     {
-                        UIManager.GameCursor.AllowDrawSDLCursor = true;
-                        UIManager.GameCursor.Graphic = 0xFFFF;
+                        GameCursor.AllowDrawSDLCursor = true;
+                        GameCursor.Graphic = 0xFFFF;
                     }
 
                     Mouse.Update();
@@ -690,11 +676,6 @@ namespace ClassicUO
                         {
                             UIManager.OnMouseDragging();
                         }
-                    }
-
-                    if (Mouse.IsDragging && !_dragStarted)
-                    {
-                        _dragStarted = true;
                     }
 
                     break;
@@ -805,11 +786,6 @@ namespace ClassicUO
 
                 case SDL_EventType.SDL_MOUSEBUTTONUP:
                 {
-                    if (_dragStarted)
-                    {
-                        _dragStarted = false;
-                    }
-
                     SDL_MouseButtonEvent mouse = sdlEvent->button;
 
                     // The values in MouseButtonType are chosen to exactly match the SDL values

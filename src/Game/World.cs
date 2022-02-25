@@ -141,9 +141,9 @@ namespace ClassicUO.Game
                     }
 
                     // force cursor update when switching map
-                    if (UIManager.GameCursor != null)
+                    if (Client.Game.GameCursor != null)
                     {
-                        UIManager.GameCursor.Graphic = 0xFFFF;
+                        Client.Game.GameCursor.Graphic = 0xFFFF;
                     }
                     
                     UoAssist.SignalMapChanged(value);
