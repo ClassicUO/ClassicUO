@@ -107,11 +107,10 @@ namespace ClassicUO
             _uoSpriteBatch = new UltimaBatcher2D(GraphicsDevice);
 
             _filter = HandleSdlEvent;
-            SDL_AddEventWatch(_filter, IntPtr.Zero);
+            SDL_SetEventFilter(_filter, IntPtr.Zero);
 
             base.Initialize();
         }
-        
 
         protected override void LoadContent()
         {
@@ -573,7 +572,7 @@ namespace ClassicUO
                     }
                 }
 
-                return 0;
+                return 1;
             }
 
             switch (sdlEvent->type)
@@ -856,7 +855,7 @@ namespace ClassicUO
                 }
             }
 
-            return 0;
+            return 1;
         }
 
         private void TakeScreenshot()
