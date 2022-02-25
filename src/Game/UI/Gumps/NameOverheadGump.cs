@@ -336,7 +336,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _leftMouseIsDown = false;
 
-                if (!ItemHold.Enabled)
+                if (!Client.Game.GameCursor.ItemHold.Enabled)
                 {
                     if (UIManager.IsDragging || Math.Max(Math.Abs(Mouse.LDragOffset.X), Math.Abs(Mouse.LDragOffset.Y)) >= 1)
                     {
@@ -374,7 +374,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else
                 {
-                    if (ItemHold.Enabled && !ItemHold.IsFixedPosition)
+                    if (Client.Game.GameCursor.ItemHold.Enabled && !Client.Game.GameCursor.ItemHold.IsFixedPosition)
                     {
                         uint drop_container = 0xFFFF_FFFF;
                         bool can_drop = false;
@@ -397,7 +397,7 @@ namespace ClassicUO.Game.UI.Gumps
                                     dropZ = 0;
                                     drop_container = obj.Serial;
                                 }
-                                else if (obj is Item it2 && (it2.ItemData.IsSurface || it2.ItemData.IsStackable && it2.DisplayedGraphic == ItemHold.DisplayedGraphic))
+                                else if (obj is Item it2 && (it2.ItemData.IsSurface || it2.ItemData.IsStackable && it2.DisplayedGraphic == Client.Game.GameCursor.ItemHold.DisplayedGraphic))
                                 {
                                     dropX = obj.X;
                                     dropY = obj.Y;
@@ -429,7 +429,7 @@ namespace ClassicUO.Game.UI.Gumps
                                 {
                                     GameActions.DropItem
                                     (
-                                        ItemHold.Serial,
+                                        Client.Game.GameCursor.ItemHold.Serial,
                                         dropX,
                                         dropY,
                                         dropZ,

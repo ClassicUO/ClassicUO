@@ -369,17 +369,17 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (button == MouseButtonType.Left)
                 {
-                    if (ItemHold.Enabled)
+                    if (Client.Game.GameCursor.ItemHold.Enabled)
                     {
-                        SetGraphic(ItemHold.Graphic, ItemHold.Hue);
+                        SetGraphic(Client.Game.GameCursor.ItemHold.Graphic, Client.Game.GameCursor.ItemHold.Hue);
 
                         GameActions.DropItem
                         (
-                            ItemHold.Serial,
-                            ItemHold.X,
-                            ItemHold.Y,
+                            Client.Game.GameCursor.ItemHold.Serial,
+                            Client.Game.GameCursor.ItemHold.X,
+                            Client.Game.GameCursor.ItemHold.Y,
                             0,
-                            ItemHold.Container
+                           Client.Game.GameCursor.ItemHold.Container
                         );
                     }
                 }

@@ -118,6 +118,8 @@ namespace ClassicUO.Game
         public bool IsDraggingCursorForced { get; set; }
         public bool AllowDrawSDLCursor { get; set; } = true;
 
+        public ItemHold ItemHold { get; } = new ItemHold();
+
         private ushort GetDraggingItemGraphic()
         {
             if (ItemHold.Enabled)

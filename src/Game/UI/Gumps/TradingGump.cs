@@ -304,11 +304,11 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (button == MouseButtonType.Left)
             {
-                if (ItemHold.Enabled && !ItemHold.IsFixedPosition)
+                if (Client.Game.GameCursor.ItemHold.Enabled && !Client.Game.GameCursor.ItemHold.IsFixedPosition)
                 {
                     if (_myBox != null && _myBox.Bounds.Contains(x, y))
                     {
-                        var texture = ArtLoader.Instance.GetStaticTexture(ItemHold.DisplayedGraphic, out var bounds);
+                        var texture = ArtLoader.Instance.GetStaticTexture(Client.Game.GameCursor.ItemHold.DisplayedGraphic, out var bounds);
 
                         x -= _myBox.X;
                         y -= _myBox.Y;
@@ -341,7 +341,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         GameActions.DropItem
                         (
-                            ItemHold.Serial,
+                            Client.Game.GameCursor.ItemHold.Serial,
                             x,
                             y,
                             0,
