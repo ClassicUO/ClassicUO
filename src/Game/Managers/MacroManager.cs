@@ -1064,7 +1064,7 @@ namespace ClassicUO.Game.Managers
                     int handIndex = 1 - (macro.SubCode - MacroSubType.LeftHand);
                     GameScene gs = Client.Game.GetScene<GameScene>();
 
-                    if (handIndex < 0 || handIndex > 1 || ItemHold.Enabled)
+                    if (handIndex < 0 || handIndex > 1 || Client.Game.GameCursor.ItemHold.Enabled)
                     {
                         break;
                     }
@@ -1096,7 +1096,7 @@ namespace ClassicUO.Game.Managers
 
                             GameActions.DropItem
                             (
-                                ItemHold.Serial,
+                                Client.Game.GameCursor.ItemHold.Serial,
                                 0xFFFF,
                                 0xFFFF,
                                 0,

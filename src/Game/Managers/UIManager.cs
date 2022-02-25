@@ -205,7 +205,7 @@ namespace ClassicUO.Game.Managers
 
             if (MouseOverControl != null)
             {
-                if (_mouseDownControls[index] != null && MouseOverControl == _mouseDownControls[index] || ItemHold.Enabled)
+                if (_mouseDownControls[index] != null && MouseOverControl == _mouseDownControls[index] || Client.Game.GameCursor.ItemHold.Enabled)
                 {
                     MouseOverControl.InvokeMouseUp(Mouse.Position, button);
                 }
@@ -617,7 +617,7 @@ namespace ClassicUO.Game.Managers
 
         public static void AttemptDragControl(Control control, bool attemptAlwaysSuccessful = false)
         {
-            if ((_isDraggingControl && !attemptAlwaysSuccessful) || ItemHold.Enabled && !ItemHold.IsFixedPosition)
+            if ((_isDraggingControl && !attemptAlwaysSuccessful) || Client.Game.GameCursor.ItemHold.Enabled && !Client.Game.GameCursor.ItemHold.IsFixedPosition)
             {
                 return;
             }

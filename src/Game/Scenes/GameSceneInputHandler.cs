@@ -426,7 +426,7 @@ namespace ClassicUO.Game.Scenes
                 return false;
             }
 
-            if (ItemHold.Enabled && !ItemHold.IsFixedPosition)
+            if (Client.Game.GameCursor.ItemHold.Enabled && !Client.Game.GameCursor.ItemHold.IsFixedPosition)
             {
                 uint drop_container = 0xFFFF_FFFF;
                 bool can_drop = false;
@@ -449,7 +449,7 @@ namespace ClassicUO.Game.Scenes
                             dropZ = 0;
                             drop_container = obj.Serial;
                         }
-                        else if (obj is Item it2 && (it2.ItemData.IsSurface || it2.ItemData.IsStackable && it2.Graphic == ItemHold.Graphic))
+                        else if (obj is Item it2 && (it2.ItemData.IsSurface || it2.ItemData.IsStackable && it2.Graphic == Client.Game.GameCursor.ItemHold.Graphic))
                         {
                             dropX = obj.X;
                             dropY = obj.Y;
@@ -512,7 +512,7 @@ namespace ClassicUO.Game.Scenes
                     {
                         GameActions.DropItem
                         (
-                            ItemHold.Serial,
+                            Client.Game.GameCursor.ItemHold.Serial,
                             dropX,
                             dropY,
                             dropZ,
@@ -905,17 +905,17 @@ namespace ClassicUO.Game.Scenes
 
         internal override bool OnMouseWheel(bool up)
         {
-            if (Keyboard.Ctrl && ItemHold.Enabled)
+            if (Keyboard.Ctrl && Client.Game.GameCursor.ItemHold.Enabled)
             {
-                if (!up && !ItemHold.IsFixedPosition)
+                if (!up && !Client.Game.GameCursor.ItemHold.IsFixedPosition)
                 {
-                    ItemHold.IsFixedPosition = true;
-                    ItemHold.IgnoreFixedPosition = true;
-                    ItemHold.FixedX = Mouse.Position.X;
-                    ItemHold.FixedY = Mouse.Position.Y;
+                    Client.Game.GameCursor.ItemHold.IsFixedPosition = true;
+                    Client.Game.GameCursor.ItemHold.IgnoreFixedPosition = true;
+                    Client.Game.GameCursor.ItemHold.FixedX = Mouse.Position.X;
+                    Client.Game.GameCursor.ItemHold.FixedY = Mouse.Position.Y;
                 }
 
-                if (ItemHold.IgnoreFixedPosition)
+                if (Client.Game.GameCursor.ItemHold.IgnoreFixedPosition)
                 {
                     return true;
                 }
@@ -946,7 +946,7 @@ namespace ClassicUO.Game.Scenes
 
             bool ok = true;
 
-            if (Mouse.LButtonPressed && !ItemHold.Enabled)
+            if (Mouse.LButtonPressed && !Client.Game.GameCursor.ItemHold.Enabled)
             {
                 Point offset = Mouse.LDragOffset;
 

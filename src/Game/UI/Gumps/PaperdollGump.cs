@@ -488,15 +488,15 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 bool force_false = SelectedObject.Object is Item item && (item.Layer == Layer.Backpack || item.ItemData.IsContainer);
 
-                if (_paperDollInteractable.HasFakeItem && !ItemHold.Enabled || force_false)
+                if (_paperDollInteractable.HasFakeItem && !Client.Game.GameCursor.ItemHold.Enabled || force_false)
                 {
                     _paperDollInteractable.SetFakeItem(false);
                 }
-                else if (!_paperDollInteractable.HasFakeItem && ItemHold.Enabled && !ItemHold.IsFixedPosition && UIManager.MouseOverControl?.RootParent == this)
+                else if (!_paperDollInteractable.HasFakeItem && Client.Game.GameCursor.ItemHold.Enabled && !Client.Game.GameCursor.ItemHold.IsFixedPosition && UIManager.MouseOverControl?.RootParent == this)
                 {
-                    if (ItemHold.ItemData.AnimID != 0)
+                    if (Client.Game.GameCursor.ItemHold.ItemData.AnimID != 0)
                     {
-                        if (mobile != null && mobile.FindItemByLayer((Layer) ItemHold.ItemData.Layer) == null)
+                        if (mobile != null && mobile.FindItemByLayer((Layer)Client.Game.GameCursor.ItemHold.ItemData.Layer) == null)
                         {
                             _paperDollInteractable.SetFakeItem(true);
                         }
@@ -517,7 +517,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Mobile container = World.Mobiles.Get(LocalSerial);
 
-                if (ItemHold.Enabled)
+                if (Client.Game.GameCursor.ItemHold.Enabled)
                 {
                     if (CanLift || LocalSerial == World.Player.Serial)
                     {
@@ -525,7 +525,7 @@ namespace ClassicUO.Game.UI.Gumps
                         {
                             GameActions.DropItem
                             (
-                                ItemHold.Serial,
+                                Client.Game.GameCursor.ItemHold.Serial,
                                 0xFFFF,
                                 0xFFFF,
                                 0,
@@ -536,9 +536,9 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                         else
                         {
-                            if (ItemHold.ItemData.IsWearable)
+                            if (Client.Game.GameCursor.ItemHold.ItemData.IsWearable)
                             {
-                                Item equipment = container.FindItemByLayer((Layer) ItemHold.ItemData.Layer);
+                                Item equipment = container.FindItemByLayer((Layer)Client.Game.GameCursor.ItemHold.ItemData.Layer);
 
                                 if (equipment == null)
                                 {
@@ -627,7 +627,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void OnButtonClick(int buttonID)
         {
-            if (ItemHold.Enabled && !ItemHold.IsFixedPosition)
+            if (Client.Game.GameCursor.ItemHold.Enabled && !Client.Game.GameCursor.ItemHold.IsFixedPosition)
             {
                 OnMouseUp(0, 0, MouseButtonType.Left);
 

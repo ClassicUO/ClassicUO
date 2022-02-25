@@ -216,7 +216,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void HitBoxOnMouseUp(object sender, MouseEventArgs e)
         {
-            if (e.Button == MouseButtonType.Left && !IsMinimized && !ItemHold.Enabled)
+            if (e.Button == MouseButtonType.Left && !IsMinimized && !Client.Game.GameCursor.ItemHold.Enabled)
             {
                 Point offset = Mouse.LDragOffset;
 
@@ -247,7 +247,7 @@ namespace ClassicUO.Game.UI.Gumps
             uint serial = it != null ? it.Serial : 0;
             uint dropcontainer = LocalSerial;
 
-            if (TargetManager.IsTargeting && !ItemHold.Enabled && SerialHelper.IsValid(serial))
+            if (TargetManager.IsTargeting && !Client.Game.GameCursor.ItemHold.Enabled && SerialHelper.IsValid(serial))
             {
                 TargetManager.Target(serial);
                 Mouse.CancelDoubleClick = true;
@@ -279,7 +279,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     candrop = false;
 
-                    if (ItemHold.Enabled && !ItemHold.IsFixedPosition)
+                    if (Client.Game.GameCursor.ItemHold.Enabled && !Client.Game.GameCursor.ItemHold.IsFixedPosition)
                     {
                         candrop = true;
 
@@ -293,7 +293,7 @@ namespace ClassicUO.Game.UI.Gumps
                                 x = 0xFFFF;
                                 y = 0xFFFF;
                             }
-                            else if (target.ItemData.IsStackable && target.Graphic == ItemHold.Graphic)
+                            else if (target.ItemData.IsStackable && target.Graphic == Client.Game.GameCursor.ItemHold.Graphic)
                             {
                                 dropcontainer = target.Serial;
                                 x = target.X;
@@ -322,12 +322,12 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 }
 
-                if (!candrop && ItemHold.Enabled && !ItemHold.IsFixedPosition)
+                if (!candrop && Client.Game.GameCursor.ItemHold.Enabled && !Client.Game.GameCursor.ItemHold.IsFixedPosition)
                 {
                     Client.Game.Scene.Audio.PlaySound(0x0051);
                 }
 
-                if (candrop && ItemHold.Enabled && !ItemHold.IsFixedPosition)
+                if (candrop && Client.Game.GameCursor.ItemHold.Enabled && !Client.Game.GameCursor.ItemHold.IsFixedPosition)
                 {
                     ContainerGump gump = UIManager.GetGump<ContainerGump>(dropcontainer);
 
@@ -341,9 +341,9 @@ namespace ClassicUO.Game.UI.Gumps
                         Rectangle containerBounds = ContainerManager.Get(gump.Graphic).Bounds;
 
                         var texture = gump.IsChessboard ?
-                            GumpsLoader.Instance.GetGumpTexture((ushort) (ItemHold.DisplayedGraphic - Constants.ITEM_GUMP_TEXTURE_OFFSET), out var bounds) 
+                            GumpsLoader.Instance.GetGumpTexture((ushort) (Client.Game.GameCursor.ItemHold.DisplayedGraphic - Constants.ITEM_GUMP_TEXTURE_OFFSET), out var bounds) 
                             : 
-                            ArtLoader.Instance.GetStaticTexture(ItemHold.DisplayedGraphic, out bounds);
+                            ArtLoader.Instance.GetStaticTexture(Client.Game.GameCursor.ItemHold.DisplayedGraphic, out bounds);
 
                         float scale = GetScale();
 
@@ -369,8 +369,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                             if (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.RelativeDragAndDropItems)
                             {
-                                x += ItemHold.MouseOffset.X;
-                                y += ItemHold.MouseOffset.Y;
+                                x += Client.Game.GameCursor.ItemHold.MouseOffset.X;
+                                y += Client.Game.GameCursor.ItemHold.MouseOffset.Y;
                             }
 
                             x -= textureW >> 1;
@@ -403,7 +403,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     GameActions.DropItem
                     (
-                        ItemHold.Serial,
+                        Client.Game.GameCursor.ItemHold.Serial,
                         x,
                         y,
                         0,
@@ -412,7 +412,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     Mouse.CancelDoubleClick = true;
                 }
-                else if (!ItemHold.Enabled && SerialHelper.IsValid(serial))
+                else if (!Client.Game.GameCursor.ItemHold.Enabled && SerialHelper.IsValid(serial))
                 {
                     if (!DelayedObjectClickManager.IsEnabled)
                     {
