@@ -57,8 +57,6 @@ namespace ClassicUO
 {
     internal unsafe class GameController : Microsoft.Xna.Framework.Game
     {
-        private bool _dragStarted;
-
         private SDL_EventFilter _filter;
 
         private readonly Texture2D[] _hueSamplers = new Texture2D[3];
@@ -90,6 +88,7 @@ namespace ClassicUO
         }
 
         public Scene Scene { get; private set; }
+        public GameCursor GameCursor { get; private set; }
 
         public GraphicsDeviceManager GraphicManager { get; }
         public readonly uint[] FrameDelay = new uint[2];
@@ -107,11 +106,10 @@ namespace ClassicUO
             _uoSpriteBatch = new UltimaBatcher2D(GraphicsDevice);
 
             _filter = HandleSdlEvent;
-            SDL_AddEventWatch(_filter, IntPtr.Zero);
+            SDL_SetEventFilter(_filter, IntPtr.Zero);
 
             base.Initialize();
         }
-        
 
         protected override void LoadContent()
         {
@@ -152,8 +150,9 @@ namespace ClassicUO
             AnimationsLoader.Instance.CreateAtlas(GraphicsDevice);
             UOFontRenderer.Create(GraphicsDevice);
 
-            UIManager.InitializeGameCursor();
             AnimatedStaticsManager.Initialize();
+
+            GameCursor = new GameCursor();
 
             SetScene(new LoginScene());
             SetWindowPositionBySettings();
@@ -437,6 +436,8 @@ namespace ClassicUO
                 }
             }
 
+            GameCursor?.Update(gameTime.ElapsedGameTime.TotalMilliseconds, gameTime.TotalGameTime.TotalMilliseconds);
+
             base.Update(gameTime);
         }
 
@@ -571,13 +572,13 @@ namespace ClassicUO
             {
                 if (sdlEvent->type == SDL_EventType.SDL_MOUSEMOTION)
                 {
-                    if (UIManager.GameCursor != null)
+                    if (GameCursor != null)
                     {
-                        UIManager.GameCursor.AllowDrawSDLCursor = false;
+                        GameCursor.AllowDrawSDLCursor = false;
                     }
                 }
 
-                return 0;
+                return 1;
             }
 
             switch (sdlEvent->type)
@@ -681,10 +682,10 @@ namespace ClassicUO
 
                 case SDL_EventType.SDL_MOUSEMOTION:
 
-                    if (UIManager.GameCursor != null && !UIManager.GameCursor.AllowDrawSDLCursor)
+                    if (GameCursor != null && !GameCursor.AllowDrawSDLCursor)
                     {
-                        UIManager.GameCursor.AllowDrawSDLCursor = true;
-                        UIManager.GameCursor.Graphic = 0xFFFF;
+                        GameCursor.AllowDrawSDLCursor = true;
+                        GameCursor.Graphic = 0xFFFF;
                     }
 
                     Mouse.Update();
@@ -695,11 +696,6 @@ namespace ClassicUO
                         {
                             UIManager.OnMouseDragging();
                         }
-                    }
-
-                    if (Mouse.IsDragging && !_dragStarted)
-                    {
-                        _dragStarted = true;
                     }
 
                     break;
@@ -810,11 +806,6 @@ namespace ClassicUO
 
                 case SDL_EventType.SDL_MOUSEBUTTONUP:
                 {
-                    if (_dragStarted)
-                    {
-                        _dragStarted = false;
-                    }
-
                     SDL_MouseButtonEvent mouse = sdlEvent->button;
 
                     // The values in MouseButtonType are chosen to exactly match the SDL values
@@ -860,7 +851,7 @@ namespace ClassicUO
                 }
             }
 
-            return 0;
+            return 1;
         }
 
         private void TakeScreenshot()

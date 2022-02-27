@@ -939,7 +939,7 @@ namespace ClassicUO.Game.UI.Gumps
                     return;
                 }
 
-                UIManager.GameCursor.IsDraggingCursorForced = false;
+                Client.Game.GameCursor.IsDraggingCursorForced = false;
 
                 if (UIManager.LastControlMouseDown(MouseButtonType.Left) == this && World.Player.Skills[Index].IsClickable)
                 {
@@ -972,7 +972,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (button == MouseButtonType.Left)
                 {
-                    UIManager.GameCursor.IsDraggingCursorForced = true;
+                    Client.Game.GameCursor.IsDraggingCursorForced = true;
                 }
             }
 

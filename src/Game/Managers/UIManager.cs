@@ -71,13 +71,11 @@ namespace ClassicUO.Game.Managers
                 Point mouse = Mouse.Position;
                 Profile profile = ProfileManager.CurrentProfile;
 
-                return profile != null && GameCursor.AllowDrawSDLCursor && DraggingControl == null && MouseOverControl == null && !IsModalOpen && mouse.X >= profile.GameWindowPosition.X + 5 && mouse.X < profile.GameWindowPosition.X + 5 + profile.GameWindowSize.X && mouse.Y >= profile.GameWindowPosition.Y + 5 && mouse.Y < profile.GameWindowPosition.Y + 5 + profile.GameWindowSize.Y;
+                return profile != null && Client.Game.GameCursor.AllowDrawSDLCursor && DraggingControl == null && MouseOverControl == null && !IsModalOpen && mouse.X >= profile.GameWindowPosition.X + 5 && mouse.X < profile.GameWindowPosition.X + 5 + profile.GameWindowSize.X && mouse.Y >= profile.GameWindowPosition.Y + 5 && mouse.Y < profile.GameWindowPosition.Y + 5 + profile.GameWindowSize.Y;
             }
         }
 
         public static Control DraggingControl { get; private set; }
-
-        public static GameCursor GameCursor { get; private set; }
 
         public static SystemChatControl SystemChat { get; set; }
 
@@ -207,7 +205,7 @@ namespace ClassicUO.Game.Managers
 
             if (MouseOverControl != null)
             {
-                if (_mouseDownControls[index] != null && MouseOverControl == _mouseDownControls[index] || ItemHold.Enabled)
+                if (_mouseDownControls[index] != null && MouseOverControl == _mouseDownControls[index] || Client.Game.GameCursor.ItemHold.Enabled)
                 {
                     MouseOverControl.InvokeMouseUp(Mouse.Position, button);
                 }
@@ -268,12 +266,6 @@ namespace ClassicUO.Game.Managers
         public static Control LastControlMouseDown(MouseButtonType button)
         {
             return _mouseDownControls[(int) button];
-        }
-
-
-        public static void InitializeGameCursor()
-        {
-            GameCursor = new GameCursor();
         }
 
         public static void SavePosition(uint serverSerial, Point point)
@@ -385,7 +377,6 @@ namespace ClassicUO.Game.Managers
                 first = next;
             }
 
-            GameCursor?.Update(totalTime, frameTime);
             HandleKeyboardInput();
             HandleMouseInput();
         }
@@ -401,8 +392,6 @@ namespace ClassicUO.Game.Managers
                 Control g = last.Value;
                 g.Draw(batcher, g.X, g.Y);
             }
-
-            GameCursor?.Draw(batcher);
 
             batcher.End();
         }
@@ -628,7 +617,7 @@ namespace ClassicUO.Game.Managers
 
         public static void AttemptDragControl(Control control, bool attemptAlwaysSuccessful = false)
         {
-            if ((_isDraggingControl && !attemptAlwaysSuccessful) || ItemHold.Enabled && !ItemHold.IsFixedPosition)
+            if ((_isDraggingControl && !attemptAlwaysSuccessful) || Client.Game.GameCursor.ItemHold.Enabled && !Client.Game.GameCursor.ItemHold.IsFixedPosition)
             {
                 return;
             }

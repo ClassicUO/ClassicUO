@@ -131,7 +131,7 @@ namespace ClassicUO.Game.Scenes
         {
             base.Load();
 
-            ItemHold.Clear();
+            Client.Game.GameCursor.ItemHold.Clear();
             Hotkeys = new HotkeysManager();
             Macros = new MacroManager();
 
@@ -332,7 +332,7 @@ namespace ClassicUO.Game.Scenes
         {
             Client.Game.SetWindowTitle(string.Empty);
 
-            ItemHold.Clear();
+            Client.Game.GameCursor.ItemHold.Clear();
 
             try
             {
@@ -855,7 +855,7 @@ namespace ClassicUO.Game.Scenes
             }
 
 
-            if (_isMouseLeftDown && !ItemHold.Enabled)
+            if (_isMouseLeftDown && !Client.Game.GameCursor.ItemHold.Enabled)
             {
                 if (World.CustomHouseManager != null && World.CustomHouseManager.SelectedGraphic != 0 && !World.CustomHouseManager.SeekTile && !World.CustomHouseManager.Erasing && Time.Ticks > _timeToPlaceMultiInHouseCustomization)
                 {
