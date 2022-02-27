@@ -130,6 +130,13 @@ namespace ClassicUO.Game.UI.Controls
         {
             base.Update(totalTime, frameTime);
 
+            if (_btnSliderClicked)
+            {
+                int x = Mouse.Position.X - X - ParentX;
+                int y = Mouse.Position.Y - Y - ParentY;
+
+                CalculateByPosition(x, y);
+            }
 
             if (MaxValue <= MinValue)
             {
@@ -218,14 +225,6 @@ namespace ClassicUO.Game.UI.Controls
             _btUpClicked = false;
             _btnSliderClicked = false;
             _StepChanger = _StepsDone = 1;
-        }
-
-        protected override void OnMouseOver(int x, int y)
-        {
-            if (_btnSliderClicked)
-            {
-                CalculateByPosition(x, y);
-            }
         }
 
         protected int GetSliderYPosition()

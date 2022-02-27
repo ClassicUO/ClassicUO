@@ -267,8 +267,6 @@ namespace ClassicUO.Game.UI.Controls
                 return false;
             }
 
-            ResetHueVector();
-
             if (batcher.ClipBegin(x, y, Width, Height))
             {
                 base.Draw(batcher, x, y);
@@ -278,8 +276,12 @@ namespace ClassicUO.Game.UI.Controls
                 _gameText.Draw
                 (
                     batcher,
-                    x + offset - ScrollX, 
-                    y + offset - ScrollY
+                    x + offset, 
+                    y + offset,
+                    ScrollX,
+                    ScrollY,
+                    Width + ScrollX,
+                    Height + ScrollY
                 );
 
                 batcher.ClipEnd();

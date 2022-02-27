@@ -1895,7 +1895,8 @@ namespace ClassicUO.Network
 
             writer.WriteUInt64BE(MessageManager.PromptData.Data);
             writer.WriteUInt32BE((uint) (cancel ? 0 : 1));
-            writer.WriteASCII(lang);
+            writer.WriteASCII(lang, 3);
+            writer.WriteUInt8(0x00);
             writer.WriteUnicodeLE(text, text.Length);
 
             if (length < 0)
@@ -3323,7 +3324,7 @@ namespace ClassicUO.Network
             writer.Dispose();
         }
 
-        public static void Send_BookPageData(this NetClient socket, uint serial, string[] text, int page)
+        public static void Send_BookPageData(this NetClient socket, uint serial, List<string> lines, int page)
         {
             const byte ID = 0x66;
 
@@ -3341,42 +3342,13 @@ namespace ClassicUO.Network
             writer.WriteUInt32BE(serial);
             writer.WriteUInt16BE(0x01);
             writer.WriteUInt16BE((ushort) page);
-            writer.WriteUInt16BE((ushort) text.Length);
+            writer.WriteUInt16BE((ushort) lines.Count);
 
-            for (int i = 0; i < text.Length; ++i)
+            foreach (var line in lines)
             {
-                if (!string.IsNullOrEmpty(text[i]))
-                {
-                    string t = text[i].Replace("\n", "");
-
-                    if (t.Length > 0)
-                    {
-                        byte[] buffer = ArrayPool<byte>.Shared.Rent(t.Length * 2);//we have to assume we are using all two byte chars
-
-                        try
-                        {
-                            int written = Encoding.UTF8.GetBytes
-                            (
-                                t,
-                                0,
-                                t.Length,
-                                buffer,
-                                0
-                            );
-
-                            writer.Write(buffer.AsSpan(0, written));
-                        }
-                        finally
-                        {
-                            ArrayPool<byte>.Shared.Return(buffer);
-                        }
-                    }
-                }
-
+                writer.WriteUTF8(line, line.Length);
                 writer.WriteUInt8(0x00);
             }
-
-            writer.WriteUInt8(0x00);
 
             if (length < 0)
             {

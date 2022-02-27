@@ -41,15 +41,18 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class PopupMenuGump : Gump
     {
+        private ushort _selectedItem;
+        private readonly PopupMenuData _data;
+
         public PopupMenuGump(PopupMenuData data) : base(0, 0)
         {
             CanMove = false;
             CanCloseWithRightClick = true;
-
+            _data = data;
 
             ResizePic pic = new ResizePic(0x0A3C)
             {
-                Alpha = 0.25f
+                Alpha = 0.75f
             };
 
             Add(pic);
@@ -85,14 +88,9 @@ namespace ClassicUO.Game.UI.Gumps
                     Tag = item.Index
                 };
 
-                box.MouseUp += (sender, e) =>
+                box.MouseEnter += (sender, e) =>
                 {
-                    if (e.Button == MouseButtonType.Left)
-                    {
-                        HitBox l = (HitBox) sender;
-                        GameActions.ResponsePopupMenu(data.Serial, (ushort) l.Tag);
-                        Dispose();
-                    }
+                    _selectedItem = (ushort)(sender as HitBox).Tag;
                 };
 
                 Add(box);
@@ -143,6 +141,15 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     box.Width = width - 20;
                 }
+            }
+        }
+
+        protected override void OnMouseUp(int x, int y, MouseButtonType button)
+        {
+            if (button == MouseButtonType.Left)
+            {
+                GameActions.ResponsePopupMenu(_data.Serial, _selectedItem);
+                Dispose();
             }
         }
     }

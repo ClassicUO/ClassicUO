@@ -104,7 +104,7 @@ namespace ClassicUO.Game.UI.Gumps
             Width = _rectSize * _columns + 1;
             Height = _rectSize * _rows + 1;
 
-            Add(_background = new AlphaBlendControl(0.3f) { Width = Width, Height = Height });
+            Add(_background = new AlphaBlendControl(0.7f) { Width = Width, Height = Height });
 
             for (int row = 0; row < _rows; row++)
             {
@@ -369,17 +369,17 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (button == MouseButtonType.Left)
                 {
-                    if (ItemHold.Enabled)
+                    if (Client.Game.GameCursor.ItemHold.Enabled)
                     {
-                        SetGraphic(ItemHold.Graphic, ItemHold.Hue);
+                        SetGraphic(Client.Game.GameCursor.ItemHold.Graphic, Client.Game.GameCursor.ItemHold.Hue);
 
                         GameActions.DropItem
                         (
-                            ItemHold.Serial,
-                            ItemHold.X,
-                            ItemHold.Y,
+                            Client.Game.GameCursor.ItemHold.Serial,
+                            Client.Game.GameCursor.ItemHold.X,
+                            Client.Game.GameCursor.ItemHold.Y,
                             0,
-                            ItemHold.Container
+                           Client.Game.GameCursor.ItemHold.Container
                         );
                     }
                 }
@@ -469,7 +469,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Texture2D color = SolidColorTextureCache.GetTexture(MouseIsOver ? Color.Yellow : ProfileManager.CurrentProfile.CounterBarHighlightOnAmount && _amount < ProfileManager.CurrentProfile.CounterBarHighlightAmount && Graphic != 0 ? Color.Red : Color.Gray);
 
-                ResetHueVector();
+                Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
                 batcher.DrawRectangle
                 (
@@ -478,7 +478,7 @@ namespace ClassicUO.Game.UI.Gumps
                     y,
                     Width,
                     Height,
-                    ref HueVector
+                    hueVector
                 );
 
                 return true;
@@ -544,14 +544,12 @@ namespace ClassicUO.Game.UI.Gumps
 
                 public override bool Draw(UltimaBatcher2D batcher, int x, int y)
                 {
-                    ResetHueVector();
-
                     if (_graphic != 0)
                     {
                         var texture = ArtLoader.Instance.GetStaticTexture(_graphic, out var bounds);
                         var rect = ArtLoader.Instance.GetRealArtBounds(_graphic);
 
-                        ShaderHueTranslator.GetHueVector(ref HueVector, _hue, _partial, 0f);
+                        Vector3 hueVector = ShaderHueTranslator.GetHueVector(_hue, _partial, 1f);
 
                         Point originalSize = new Point(Width, Height);
                         Point point = new Point();
@@ -585,7 +583,7 @@ namespace ClassicUO.Game.UI.Gumps
                                 rect.Width,
                                 rect.Height
                             ),
-                            HueVector
+                            hueVector
                         );
                     }
                         

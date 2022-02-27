@@ -74,7 +74,7 @@ namespace ClassicUO.Renderer
                     0,
                     pr,
                     (IntPtr)src,
-                    sizeof(T) * pixels.Length
+                    sizeof(T) * width * height
                 );
             }
 
@@ -83,6 +83,7 @@ namespace ClassicUO.Renderer
 
         private void CreateNewTexture2D()
         {
+            Utility.Logging.Log.Trace($"creating texture: {_width}x{_height} {_format}");
             Texture2D texture = new Texture2D(_device, _width, _height, false, _format);
             _textureList.Add(texture);
 

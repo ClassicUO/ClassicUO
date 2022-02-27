@@ -106,16 +106,27 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnDragEnd(int x, int y)
         {
+            Attache();
+
+            base.OnDragEnd(x, y);
+        }
+
+        public void TryAttacheToExist()
+        {
+            _anchorCandidate = UIManager.AnchorManager.GetAnchorableControlUnder(this);
+
+            Attache();
+        }
+
+        private void Attache()
+        {
             if (_anchorCandidate != null)
             {
                 Location = UIManager.AnchorManager.GetCandidateDropLocation(this, _anchorCandidate);
                 UIManager.AnchorManager.DropControl(this, _anchorCandidate);
                 _anchorCandidate = null;
             }
-
-            base.OnDragEnd(x, y);
         }
-
 
         protected override void OnMouseUp(int x, int y, MouseButtonType button)
         {
@@ -138,9 +149,11 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Draw(batcher, x, y);
 
+            Vector3 hueVector;
+
             if (ShowLock)
             {
-                ResetHueVector();
+                hueVector = ShaderHueTranslator.GetHueVector(0);
 
                 var texture = GumpsLoader.Instance.GetGumpTexture(LOCK_GRAPHIC, out var bounds);
 
@@ -148,8 +161,8 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (UIManager.MouseOverControl != null && (UIManager.MouseOverControl == this || UIManager.MouseOverControl.RootParent == this))
                     {
-                        HueVector.X = 34;
-                        HueVector.Y = 1;
+                        hueVector.X = 34;
+                        hueVector.Y = 1;
                     }
 
                     batcher.Draw
@@ -157,12 +170,12 @@ namespace ClassicUO.Game.UI.Gumps
                         texture, 
                         new Vector2(x + (Width - bounds.Width), y), 
                         bounds,
-                        HueVector
+                        hueVector
                     );
                 }
             }
 
-            ResetHueVector();
+            hueVector = ShaderHueTranslator.GetHueVector(0);
 
             if (_anchorCandidate != null)
             {
@@ -171,8 +184,7 @@ namespace ClassicUO.Game.UI.Gumps
                 if (drawLoc != Location)
                 {
                     Texture2D previewColor = SolidColorTextureCache.GetTexture(Color.Silver);
-                    ResetHueVector();
-                    HueVector.Z = 0.5f;
+                    hueVector = ShaderHueTranslator.GetHueVector(0, false, 0.5f);
 
                     batcher.Draw
                     (
@@ -184,10 +196,10 @@ namespace ClassicUO.Game.UI.Gumps
                             Width,
                             Height
                         ),
-                        HueVector
+                        hueVector
                     );
 
-                    HueVector.Z = 0;
+                    hueVector.Z = 1f;
 
                     // double rectangle for thicker "stroke"
                     batcher.DrawRectangle
@@ -197,7 +209,7 @@ namespace ClassicUO.Game.UI.Gumps
                         drawLoc.Y,
                         Width,
                         Height,
-                        ref HueVector
+                        hueVector
                     );
 
                     batcher.DrawRectangle
@@ -207,7 +219,7 @@ namespace ClassicUO.Game.UI.Gumps
                         drawLoc.Y + 1,
                         Width - 2,
                         Height - 2,
-                        ref HueVector
+                        hueVector
                     );
                 }
             }

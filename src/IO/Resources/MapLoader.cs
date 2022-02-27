@@ -498,14 +498,20 @@ namespace ClassicUO.IO.Resources
                     difi.Seek(0);
 
                     int sizeOfStaicsBlock = sizeof(StaticsBlock);
+                    int sizeOfStaidxBlock = sizeof(StaidxBlock);
 
                     for (int j = 0; j < staticPatchesCount; j++)
                     {
+                        if (difl.IsEOF || difi.IsEOF)
+                        {
+                            break;
+                        }
+
                         uint blockIndex = difl.ReadUInt();
 
                         StaidxBlock* sidx = (StaidxBlock*) difi.PositionAddress;
 
-                        difi.Skip(sizeof(StaidxBlock));
+                        difi.Skip(sizeOfStaidxBlock);
 
                         if (blockIndex < maxBlockCount)
                         {

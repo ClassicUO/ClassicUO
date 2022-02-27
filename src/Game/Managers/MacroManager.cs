@@ -1064,7 +1064,7 @@ namespace ClassicUO.Game.Managers
                     int handIndex = 1 - (macro.SubCode - MacroSubType.LeftHand);
                     GameScene gs = Client.Game.GetScene<GameScene>();
 
-                    if (handIndex < 0 || handIndex > 1 || ItemHold.Enabled)
+                    if (handIndex < 0 || handIndex > 1 || Client.Game.GameCursor.ItemHold.Enabled)
                     {
                         break;
                     }
@@ -1096,7 +1096,7 @@ namespace ClassicUO.Game.Managers
 
                             GameActions.DropItem
                             (
-                                ItemHold.Serial,
+                                Client.Game.GameCursor.ItemHold.Serial,
                                 0xFFFF,
                                 0xFFFF,
                                 0,
@@ -1532,6 +1532,44 @@ namespace ClassicUO.Game.Managers
                         }
                     }
 
+                    break;
+
+                case MacroType.CloseInactiveHealthBars:
+                    IEnumerable<BaseHealthBarGump> inactiveHealthBarGumps = UIManager.Gumps.OfType<BaseHealthBarGump>().Where(hb => hb.IsInactive);
+
+                    foreach (var healthbar in inactiveHealthBarGumps)
+                    {
+                        if (healthbar.LocalSerial == World.Player) continue;
+
+                        if (UIManager.AnchorManager[healthbar] != null)
+                        {
+                            UIManager.AnchorManager[healthbar].DetachControl(healthbar);
+                        }
+
+                        healthbar.Dispose();
+                    }
+                    break;
+
+                case MacroType.CloseCorpses:
+                    var gridLootType = ProfileManager.CurrentProfile?.GridLootType; // 0 = none, 1 = only grid, 2 = both
+                    if (gridLootType == 0 || gridLootType == 2)
+                    {
+                        IEnumerable<ContainerGump> containerGumps = UIManager.Gumps.OfType<ContainerGump>().Where(cg => cg.Graphic == ContainerGump.CORPSES_GUMP);
+
+                        foreach (var containerGump in containerGumps)
+                        {
+                            containerGump.Dispose();
+                        }
+                    }
+                    if (gridLootType == 1 || gridLootType == 2)
+                    {
+                        IEnumerable<GridLootGump> gridLootGumps = UIManager.Gumps.OfType<GridLootGump>();
+
+                        foreach (var gridLootGump in gridLootGumps)
+                        {
+                            gridLootGump.Dispose();
+                        }
+                    }
                     break;
 
                 case MacroType.ToggleDrawRoofs:
@@ -2043,7 +2081,9 @@ namespace ClassicUO.Game.Managers
         ToggleDrawRoofs,
         ToggleTreeStumps,
         ToggleVegetation,
-        ToggleCaveTiles
+        ToggleCaveTiles,
+        CloseInactiveHealthBars,
+        CloseCorpses
     }
 
     internal enum MacroSubType

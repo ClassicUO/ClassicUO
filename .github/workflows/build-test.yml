@@ -1,10 +1,17 @@
-name: Build
+name: Build-Test
 
 on:
   push:
     branches: "*"
+    paths-ignore:
+      - '**/build-release.yml'
+      - 'appveyor.yml'
   pull_request:
     branches: "*"
+    paths-ignore:
+      - '**/build-release.yml'
+      - 'appveyor.yml'
+
 
 env:
   DOTNET_NOLOGO: false
@@ -22,16 +29,22 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       
-    - name: Install FNA
-      run: git submodule update --init --recursive
+    - name: Get submodules
+      run: |
+        git config --global url."https://".insteadOf git://
+        git submodule update --init --recursive
         
     - name: Setup .NET 5
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 5.0.100
-            
+        dotnet-version: 5.0.x
+        
+    - name: Restore
+      run: dotnet restore
+      
     - name: Build
       run: dotnet build -c Release
       
     - name: Test
       run: dotnet test --verbosity normal
+   

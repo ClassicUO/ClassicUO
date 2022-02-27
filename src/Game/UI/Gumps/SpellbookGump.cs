@@ -850,7 +850,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void OnIconDragBegin(object sender, EventArgs e)
         {
-            if (UIManager.IsDragging)
+            if (UIManager.DraggingControl != this || UIManager.MouseOverControl != sender)
             {
                 return;
             }
@@ -1152,6 +1152,26 @@ namespace ClassicUO.Game.UI.Gumps
 
                     break;
             }
+        }
+
+        protected override void OnDragBegin(int x, int y)
+        {
+            if (UIManager.MouseOverControl?.RootParent == this)
+            {
+                UIManager.MouseOverControl.InvokeDragBegin(new Point(x, y));
+            }
+
+            base.OnDragBegin(x, y);
+        }
+
+        protected override void OnDragEnd(int x, int y)
+        {
+            if (UIManager.MouseOverControl?.RootParent == this)
+            {
+                UIManager.MouseOverControl.InvokeDragEnd(new Point(x, y));
+            }
+
+            base.OnDragEnd(x, y);
         }
 
         private void GetSpellRequires(int offset, out int y, out string text)
@@ -1462,7 +1482,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (ShowEdit)
                 {
-                    ResetHueVector();
+                    Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
                     var texture = GumpsLoader.Instance.GetGumpTexture(0x09CF, out var bounds);
 
@@ -1470,13 +1490,13 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         if (UIManager.MouseOverControl != null && (UIManager.MouseOverControl == this || UIManager.MouseOverControl.RootParent == this))
                         {
-                            HueVector.X = 34;
-                            HueVector.Y = 1;
+                            hueVector.X = 34;
+                            hueVector.Y = 1;
                         }
                         else
                         {
-                            HueVector.X = 0x44;
-                            HueVector.Y = 1;
+                            hueVector.X = 0x44;
+                            hueVector.Y = 1;
                         }
 
                         batcher.Draw
@@ -1484,7 +1504,7 @@ namespace ClassicUO.Game.UI.Gumps
                             texture,
                             new Vector2(x + (Width - bounds.Width),  y), 
                             bounds,
-                            HueVector
+                            hueVector
                         );
                     }
                 }

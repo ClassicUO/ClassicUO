@@ -80,20 +80,20 @@ namespace ClassicUO.Game.GameObjects
             return e != null && Serial == e.Serial;
         }
 
-        public sbyte AnimIndex;
+        public byte AnimIndex;
 
         public Flags Flags;
         public ushort Hits;
         public ushort HitsMax;
 
 
+        public string HitsPercentageString = string.Empty;
         public byte HitsPercentage;
-        public RenderedText HitsTexture;
         public bool IsClicked;
         public uint LastStepTime;
         public string Name;
         public uint Serial;
-
+        public bool ExecuteAnimation = true;
         internal long LastAnimationChangeTime;
         public HitsRequestStatus HitsRequest;
 
@@ -120,31 +120,14 @@ namespace ClassicUO.Game.GameObjects
 
         public void UpdateHits(byte perc)
         {
-            if (perc != HitsPercentage || HitsTexture == null || HitsTexture.IsDestroyed)
+            if (perc != HitsPercentage)
             {
                 HitsPercentage = perc;
-
-                ushort color = 0x0044;
-
-                if (perc < 30)
-                {
-                    color = 0x0021;
-                }
-                else if (perc < 50)
-                {
-                    color = 0x0030;
-                }
-                else if (perc < 80)
-                {
-                    color = 0x0058;
-                }
-
-                HitsTexture?.Destroy();
-                HitsTexture = RenderedText.Create($"[{perc}%]", color, 3, false);
+                HitsPercentageString = $"[{perc}%]";
             }
         }
 
-        public virtual void CheckGraphicChange(sbyte animIndex = 0)
+        public virtual void CheckGraphicChange(byte animIndex = 0)
         {
         }
 
@@ -194,8 +177,6 @@ namespace ClassicUO.Game.GameObjects
 
             AnimIndex = 0;
             LastAnimationChangeTime = 0;
-            HitsTexture?.Destroy();
-            HitsTexture = null;
         }
 
         public Item FindItem(ushort graphic, ushort hue = 0xFFFF)

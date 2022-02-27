@@ -76,18 +76,18 @@ namespace ClassicUO.Game.UI
 
 
             byte font = 1;
-            float alpha = 0.3f;
+            float alpha = 0.7f;
             ushort hue = 0xFFFF;
             float zoom = 1;
 
             if (ProfileManager.CurrentProfile != null)
             {
                 font = ProfileManager.CurrentProfile.TooltipFont;
-                alpha = 1f - ProfileManager.CurrentProfile.TooltipBackgroundOpacity / 100f;
+                alpha = ProfileManager.CurrentProfile.TooltipBackgroundOpacity / 100f;
 
                 if (float.IsNaN(alpha))
                 {
-                    alpha = 1f;
+                    alpha = 0f;
                 }
 
                 hue = ProfileManager.CurrentProfile.TooltipTextHue;
@@ -180,8 +180,7 @@ namespace ClassicUO.Game.UI
             }
 
 
-            Vector3 hue_vec = Vector3.Zero;
-            ShaderHueTranslator.GetHueVector(ref hue_vec, 0, false, alpha);
+            Vector3 hue_vec = ShaderHueTranslator.GetHueVector(0, false, alpha);
 
             batcher.Draw
             (
@@ -204,12 +203,8 @@ namespace ClassicUO.Game.UI
                 y - 2,
                 (int) (z_width * zoom),
                 (int) (z_height * zoom),
-                ref hue_vec
+                hue_vec
             );
-
-            hue_vec.X = 0;
-            hue_vec.Y = 0;
-            hue_vec.Z = 0;
 
             batcher.Draw
             (
@@ -222,7 +217,7 @@ namespace ClassicUO.Game.UI
                     (int)(_renderedText.Texture.Height * zoom)
                 ),
                 null,
-                hue_vec
+                Vector3.UnitZ
             );
 
             return true;

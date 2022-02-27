@@ -10,6 +10,7 @@
 #define LIGHTS 9
 #define EFFECT_HUED 10
 #define GUMP 20
+#define USE_RGBA -1
 
 const static float3 LIGHT_DIRECTION = float3(0.0f, 1.0f, 1.0f);
 
@@ -32,6 +33,7 @@ struct VS_INPUT
 	float3 Normal	: NORMAL0;
 	float3 TexCoord : TEXCOORD0;
 	float3 Hue		: TEXCOORD1;
+	float4 Col		: COLOR0;
 };
 
 struct PS_INPUT
@@ -40,6 +42,7 @@ struct PS_INPUT
 	float3 TexCoord : TEXCOORD0;
 	float3 Normal	: TEXCOORD1;
 	float3 Hue		: TEXCOORD2;
+	float4 Col		: COLOR0;
 };
 
 float3 get_rgb(float gray, float hue)
@@ -88,6 +91,7 @@ PS_INPUT VertexShaderFunction(VS_INPUT IN)
 	OUT.TexCoord = IN.TexCoord; 
 	OUT.Normal = IN.Normal;
 	OUT.Hue = IN.Hue;
+	OUT.Col = IN.Col;
 	
 	return OUT;
 }
@@ -100,7 +104,18 @@ float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 		discard;
 
 	int mode = int(IN.Hue.y);
-	float alpha = 1 - IN.Hue.z;
+
+	if (mode == USE_RGBA)
+	{
+		if (color.r == color.g && color.r == color.b)
+		{
+			return IN.Col;
+		}
+		
+		return color;
+	}
+
+	float alpha = IN.Hue.z;
 
 	if (mode == NONE)
 	{
@@ -180,6 +195,9 @@ float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 	return color * alpha;
 }
 
+
+
+
 technique HueTechnique
 {
 	pass p0
@@ -189,3 +207,49 @@ technique HueTechnique
 	}
 }
 
+/*
+technique PartialHueTechnique
+{
+	pass p0
+	{
+		VertexShader = compile vs_3_0 VertexShaderFunction();
+		PixelShader = compile ps_3_0 PixelShader_Hue();
+	}
+}
+
+technique TextHueNoBorderTechnique
+{
+	pass p0
+	{
+		VertexShader = compile vs_3_0 VertexShaderFunction();
+		PixelShader = compile ps_3_0 PixelShader_Hue();
+	}
+}
+
+technique TextHueTechnique
+{
+	pass p0
+	{
+		VertexShader = compile vs_3_0 VertexShaderFunction();
+		PixelShader = compile ps_3_0 PixelShader_Hue();
+	}
+}
+
+technique LandNoHueTechnique
+{
+	pass p0
+	{
+		VertexShader = compile vs_3_0 VertexShaderFunction();
+		PixelShader = compile ps_3_0 PixelShader_Hue();
+	}
+}
+
+technique LandHueTechnique
+{
+	pass p0
+	{
+		VertexShader = compile vs_3_0 VertexShaderFunction();
+		PixelShader = compile ps_3_0 PixelShader_Hue();
+	}
+}
+*/

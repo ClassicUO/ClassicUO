@@ -118,6 +118,8 @@ namespace ClassicUO.Game
         public bool IsDraggingCursorForced { get; set; }
         public bool AllowDrawSDLCursor { get; set; } = true;
 
+        public ItemHold ItemHold { get; } = new ItemHold();
+
         private ushort GetDraggingItemGraphic()
         {
             if (ItemHold.Enabled)
@@ -148,7 +150,7 @@ namespace ClassicUO.Game
                     scale = UIManager.ContainerScale;
                 }
 
-                return  new Point((int)((bounds.Width >> 1) * scale) - ItemHold.MouseOffset.X, (int)((bounds.Height >> 1) * scale) - ItemHold.MouseOffset.Y);
+                return new Point((int)((bounds.Width >> 1) * scale) - ItemHold.MouseOffset.X, (int)((bounds.Height >> 1) * scale) - ItemHold.MouseOffset.Y);
             }
 
             return Point.Zero;
@@ -258,7 +260,7 @@ namespace ClassicUO.Game
 
                         if (_componentsList.Length != 0)
                         {
-                            if (SelectedObject.LastObject is GameObject selectedObj)
+                            if (SelectedObject.Object is GameObject selectedObj)
                             {
                                 int z = 0;
 
@@ -285,15 +287,10 @@ namespace ClassicUO.Game
                                     }
 
                                     _temp[i].X = (ushort) (selectedObj.X + item.X);
-
                                     _temp[i].Y = (ushort) (selectedObj.Y + item.Y);
-
                                     _temp[i].Z = (sbyte) (selectedObj.Z + z + item.Z);
-
                                     _temp[i].UpdateRealScreenPosition(gs.ScreenOffset.X, gs.ScreenOffset.Y);
-
                                     _temp[i].UpdateScreenPosition();
-
                                     _temp[i].AddToTile();
                                 }
                             }
@@ -355,11 +352,11 @@ namespace ClassicUO.Game
                         {
                             string dist = obj.Distance.ToString();
 
-                            Vector3 hue = new Vector3(0, 1, 0);
-                            sb.DrawString(Fonts.Bold, dist, Mouse.Position.X - 26, Mouse.Position.Y - 21, ref hue);
+                            Vector3 hue = new Vector3(0, 1, 1f);
+                            sb.DrawString(Fonts.Bold, dist, Mouse.Position.X - 26, Mouse.Position.Y - 21, hue);
                             
                             hue.Y = 0;
-                            sb.DrawString(Fonts.Bold, dist, Mouse.Position.X - 25, Mouse.Position.Y - 20, ref hue);
+                            sb.DrawString(Fonts.Bold, dist, Mouse.Position.X - 25, Mouse.Position.Y - 20, hue);
                         }
                     }
                 }
@@ -383,35 +380,22 @@ namespace ClassicUO.Game
 
                 var texture = ArtLoader.Instance.GetStaticTexture(draggingGraphic, out var bounds);
 
-                Point offset = GetDraggingItemOffset();
-
-                int x = (ItemHold.IsFixedPosition ? ItemHold.FixedX : Mouse.Position.X) - offset.X;
-                int y = (ItemHold.IsFixedPosition ? ItemHold.FixedY : Mouse.Position.Y) - offset.Y;
-
-                Vector3 hue = Vector3.Zero;
-
-                ShaderHueTranslator.GetHueVector(ref hue, ItemHold.Hue, ItemHold.IsPartialHue, ItemHold.HasAlpha ? .5f : 0);
-
-                var rect = new Rectangle
-                (
-                    x,
-                    y,
-                    (int)(bounds.Width * scale),
-                    (int)(bounds.Height * scale)
-                );
-
-                sb.Draw
-                (
-                    texture,
-                    rect,
-                    bounds,
-                    hue
-                );
-
-                if (ItemHold.Amount > 1 && ItemHold.DisplayedGraphic == ItemHold.Graphic && ItemHold.IsStackable)
+                if (texture != null)
                 {
-                    rect.X += 5;
-                    rect.Y += 5;
+                    Point offset = GetDraggingItemOffset();
+
+                    int x = (ItemHold.IsFixedPosition ? ItemHold.FixedX : Mouse.Position.X) - offset.X;
+                    int y = (ItemHold.IsFixedPosition ? ItemHold.FixedY : Mouse.Position.Y) - offset.Y;
+
+                    Vector3 hue = ShaderHueTranslator.GetHueVector(ItemHold.Hue, ItemHold.IsPartialHue, ItemHold.HasAlpha ? .5f : 1f);
+
+                    var rect = new Rectangle
+                    (
+                        x,
+                        y,
+                        (int)(bounds.Width * scale),
+                        (int)(bounds.Height * scale)
+                    );
 
                     sb.Draw
                     (
@@ -420,6 +404,20 @@ namespace ClassicUO.Game
                         bounds,
                         hue
                     );
+
+                    if (ItemHold.Amount > 1 && ItemHold.DisplayedGraphic == ItemHold.Graphic && ItemHold.IsStackable)
+                    {
+                        rect.X += 5;
+                        rect.Y += 5;
+
+                        sb.Draw
+                        (
+                            texture,
+                            rect,
+                            bounds,
+                            hue
+                        );
+                    }
                 }
             }
 
@@ -443,11 +441,15 @@ namespace ClassicUO.Game
                 int offX = _cursorOffset[0, graphic];
                 int offY = _cursorOffset[1, graphic];
 
-                Vector3 hueVec = Vector3.Zero;
+                Vector3 hueVec;
 
                 if (World.InGame && World.MapIndex != 0 && !World.Player.InWarMode)
                 {
-                    ShaderHueTranslator.GetHueVector(ref hueVec, 0x0033);
+                    hueVec = ShaderHueTranslator.GetHueVector(0x0033);
+                }
+                else
+                {
+                    hueVec = ShaderHueTranslator.GetHueVector(0);
                 }
 
                 var texture = ArtLoader.Instance.GetStaticTexture(Graphic, out var bounds);

@@ -49,8 +49,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            ResetHueVector();
-            ShaderHueTranslator.GetHueVector(ref HueVector, Hue);
+            Vector3 hueVector = ShaderHueTranslator.GetHueVector(Hue);
 
             var texture = GumpsLoader.Instance.GetGumpTexture(Graphic, out var bounds);
 
@@ -67,7 +66,7 @@ namespace ClassicUO.Game.UI.Controls
                         Height
                     ),
                     bounds,
-                    HueVector
+                    hueVector
                 );
 
                 return true;

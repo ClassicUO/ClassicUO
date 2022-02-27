@@ -34,6 +34,7 @@ using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility.Collections;
 using Microsoft.Xna.Framework;
+using System;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -106,8 +107,18 @@ namespace ClassicUO.Game.GameObjects
         {
             TextObject text_obj = TextObject.Create();
 
-            text_obj.RenderedText = RenderedText.Create(damage.ToString(), (ushort) (ReferenceEquals(Parent, World.Player) ? 0x0034 : 0x0021), 3, false);
+            text_obj.Text = damage.ToString();
+            text_obj.Hue = (ushort)(ReferenceEquals(Parent, World.Player) ? 0x0034 : 0x0021);
+        
+            FontSettings settings = new FontSettings()
+            {
+                IsUnicode = false,
+                FontIndex = 3
+            };
 
+            text_obj.TextSize = UOFontRenderer.Shared.MeasureString(text_obj.Text.AsSpan(), settings, 1f);
+
+            //text_obj.RenderedText = RenderedText.Create(damage.ToString(), (ushort) (ReferenceEquals(Parent, World.Player) ? 0x0034 : 0x0021), 3, false);
             text_obj.Time = Time.Ticks + 1500;
 
             _messages.AddToFront(text_obj);
@@ -141,17 +152,17 @@ namespace ClassicUO.Game.GameObjects
 
                 if (delta <= 0)
                 {
-                    _rectangle.Height -= c.RenderedText?.Height ?? 0;
+                    _rectangle.Height -= (int) c.TextSize.Y;
                     c.Destroy();
                     _messages.RemoveAt(i--);
                 }
                 //else if (delta < 250)
                 //    c.Alpha = 1f - delta / 250;
-                else if (c.RenderedText != null)
+                else if (!string.IsNullOrEmpty(c.Text))
                 {
-                    if (_rectangle.Width < c.RenderedText.Width)
+                    if (_rectangle.Width < (int) c.TextSize.X)
                     {
-                        _rectangle.Width = c.RenderedText.Width;
+                        _rectangle.Width = (int)c.TextSize.X;
                     }
                 }
             }
@@ -236,18 +247,33 @@ namespace ClassicUO.Game.GameObjects
 
             p = Client.Game.Scene.Camera.WorldToScreen(p);
 
+            Vector3 hueVec = new Vector3();
+
             foreach (TextObject item in _messages)
             {
-                if (item.IsDestroyed || item.RenderedText == null || item.RenderedText.IsDestroyed)
+                if (item.IsDestroyed || string.IsNullOrEmpty(item.Text))
                 {
                     continue;
                 }
 
-                item.X = p.X - (item.RenderedText.Width >> 1);
-                item.Y = p.Y - offY - item.RenderedText.Height - item.OffsetY;
+                item.X = p.X - (int) (item.TextSize.X * 0.5f);
+                item.Y = p.Y - offY - (int) item.TextSize.Y - item.OffsetY;
 
-                item.RenderedText.Draw(batcher, item.X, item.Y, item.Alpha);
-                offY += item.RenderedText.Height;
+                hueVec = ShaderHueTranslator.GetHueVector(item.Hue, false, item.Alpha);
+
+                UOFontRenderer.Shared.Draw
+                (
+                    batcher,
+                    item.Text.AsSpan(),
+                    new Vector2(item.X, item.Y),
+                    1f,
+                    item.FontSettings,
+                    hueVec,
+                    false,
+                    item.MaxTextWidth
+                );
+
+                offY += (int) item.TextSize.Y;
             }
         }
 

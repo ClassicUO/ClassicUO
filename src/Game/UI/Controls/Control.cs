@@ -50,10 +50,8 @@ namespace ClassicUO.Game.UI.Controls
         internal static int _StepsDone = 1;
         internal static int _StepChanger = 1;
 
-        protected static Vector3 HueVector = Vector3.Zero;
-        private bool _acceptKeyboardInput, _acceptMouseInput, _mouseIsDown;
+        private bool _acceptKeyboardInput, _acceptMouseInput;
         private int _activePage;
-        private bool _attempToDrag;
         private Rectangle _bounds;
         private bool _handlesKeyboardFocus;
         private Point _offset;
@@ -116,7 +114,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public bool IsFocused { get; set; }
 
-        public float Alpha { get; set; }
+        public float Alpha { get; set; } = 1.0f;
 
         public List<Control> Children { get; }
 
@@ -263,14 +261,6 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        protected static void ResetHueVector()
-        {
-            HueVector.X = 0;
-            HueVector.Y = 0;
-            HueVector.Z = 0;
-        }
-
-
         
 
         public virtual bool Draw(UltimaBatcher2D batcher, int x, int y)
@@ -369,7 +359,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (IsVisible && CUOEnviroment.Debug)
             {
-                ResetHueVector();
+                Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
                 batcher.DrawRectangle
                 (
@@ -378,7 +368,7 @@ namespace ClassicUO.Game.UI.Controls
                     y,
                     Width,
                     Height,
-                    ref HueVector
+                    hueVector
                 );
             }
         }
@@ -661,20 +651,11 @@ namespace ClassicUO.Game.UI.Controls
 
         protected virtual void OnMouseDown(int x, int y, MouseButtonType button)
         {
-            _mouseIsDown = true;
             Parent?.OnMouseDown(X + x, Y + y, button);
         }
 
         protected virtual void OnMouseUp(int x, int y, MouseButtonType button)
         {
-            _mouseIsDown = false;
-
-            if (_attempToDrag)
-            {
-                _attempToDrag = false;
-                InvokeDragEnd(new Point(x, y));
-            }
-
             Parent?.OnMouseUp(X + x, Y + y, button);
 
             if (button == MouseButtonType.Right && !IsDisposed && !CanCloseWithRightClick && !Keyboard.Alt && !Keyboard.Shift && !Keyboard.Ctrl)
@@ -690,21 +671,7 @@ namespace ClassicUO.Game.UI.Controls
 
         protected virtual void OnMouseOver(int x, int y)
         {
-            if (_mouseIsDown && !_attempToDrag)
-            {
-                Point offset = Mouse.LButtonPressed ? Mouse.LDragOffset : Mouse.MButtonPressed ? Mouse.MDragOffset : Point.Zero;
-
-                if (Math.Abs(offset.X) > Constants.MIN_GUMP_DRAG_DISTANCE || Math.Abs(offset.Y) > Constants.MIN_GUMP_DRAG_DISTANCE)
-
-                {
-                    InvokeDragBegin(new Point(x, y));
-                    _attempToDrag = true;
-                }
-            }
-            else
-            {
-                Parent?.OnMouseOver(X + x, Y + y);
-            }
+            Parent?.OnMouseOver(X + x, Y + y);
         }
 
         protected virtual void OnMouseEnter(int x, int y)
@@ -713,7 +680,6 @@ namespace ClassicUO.Game.UI.Controls
 
         protected virtual void OnMouseExit(int x, int y)
         {
-            _attempToDrag = false;
         }
 
         protected virtual bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
@@ -727,7 +693,6 @@ namespace ClassicUO.Game.UI.Controls
 
         protected virtual void OnDragEnd(int x, int y)
         {
-            _mouseIsDown = false;
         }
 
         protected virtual void OnTextInput(string c)
@@ -857,12 +822,15 @@ namespace ClassicUO.Game.UI.Controls
                 return;
             }
 
-            foreach (Control c in Children)
+            if (Children != null)
             {
-                c.Dispose();
-            }
+                foreach (Control c in Children)
+                {
+                    c.Dispose();
+                }
 
-            Children.Clear();
+                Children.Clear();
+            } 
 
             IsDisposed = true;
         }

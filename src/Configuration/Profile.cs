@@ -39,7 +39,6 @@ using ClassicUO.Game;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
-using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 using TinyJson;
@@ -197,6 +196,9 @@ namespace ClassicUO.Configuration
 
         public Point OverrideContainerLocationPosition { get; set; } = new Point(200, 200);
         public bool DragSelectHumanoidsOnly { get; set; }
+        public int DragSelectStartX { get; set; } = 100;
+        public int DragSelectStartY { get; set; } = 100;
+        public bool DragSelectAsAnchor { get; set; } = false;
         public NameOverheadTypeAllowed NameOverheadTypeAllowed { get; set; } = NameOverheadTypeAllowed.All;
         public bool NameOverheadToggled { get; set; } = false;
         public bool ShowTargetRangeIndicator { get; set; }
@@ -227,7 +229,6 @@ namespace ClassicUO.Configuration
         public bool ShowStatsChangedMessage { get; set; } = true;
 
 
-        public int FilterType { get; set; } = 0;
         public bool ShadowsEnabled { get; set; } = true;
         public bool ShadowsStatics { get; set; } = true;
         public int TerrainShadowsLevel { get; set; } = 15;
@@ -301,6 +302,8 @@ namespace ClassicUO.Configuration
         public bool WorldMapShowMarkersNames { get; set; } = true;
         public bool WorldMapShowMultis { get; set; } = true;
         public string WorldMapHiddenMarkerFiles { get; set; } = string.Empty;
+        public string WorldMapHiddenZoneFiles { get; set; } = string.Empty;
+        public bool WorldMapShowGridIfZoomed { get; set; } = true;
 
 
         public static uint GumpsVersion { get; private set; }
@@ -343,8 +346,7 @@ namespace ClassicUO.Configuration
                         gumps.AddLast(gump);
                     }
                 }
-
-
+                
                 LinkedListNode<Gump> first = gumps.First;
 
                 while (first != null)
@@ -598,6 +600,11 @@ namespace ClassicUO.Configuration
                                 case GumpType.NetStats:
                                     gump = new NetworkStatsGump(100, 100);
 
+                                    break;
+
+                                case GumpType.NameOverHeadHandler:
+                                    NameOverHeadHandlerGump.LastPosition = new Point(x, y);
+                                    // Gump gets opened by NameOverHeadManager, we just want to save the last position from profile
                                     break;
                             }
 

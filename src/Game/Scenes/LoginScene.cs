@@ -154,7 +154,7 @@ namespace ClassicUO.Game.Scenes
             NetClient.LoginSocket.Disconnected -= Login_NetClient_Disconnected;
             //NetClient.PacketReceived -= NetClient_PacketReceived;
 
-            UIManager.GameCursor.IsLoading = false;
+            Client.Game.GameCursor.IsLoading = false;
             base.Unload();
         }
 
@@ -164,7 +164,7 @@ namespace ClassicUO.Game.Scenes
 
             if (_lastLoginStep != CurrentLoginStep)
             {
-                UIManager.GameCursor.IsLoading = false;
+                Client.Game.GameCursor.IsLoading = false;
 
                 // this trick avoid the flickering
                 Gump g = _currentGump;
@@ -199,8 +199,10 @@ namespace ClassicUO.Game.Scenes
                 }
             }
 
-            if (CUOEnviroment.NoServerPing == false && CurrentLoginStep == LoginSteps.CharacterCreation && Time.Ticks > _pingTime)
+            if ((CurrentLoginStep == LoginSteps.CharacterCreation || CurrentLoginStep == LoginSteps.CharacterSelection) && Time.Ticks > _pingTime)
             {
+                // Note that this will not be an ICMP ping, so it's better that this *not* be affected by -no_server_ping.
+
                 if (NetClient.Socket != null && NetClient.Socket.IsConnected)
                 {
                     NetClient.Socket.Statistics.SendPing();
@@ -242,7 +244,7 @@ namespace ClassicUO.Game.Scenes
                 case LoginSteps.EnteringBritania:
                 case LoginSteps.PopUpMessage:
                 case LoginSteps.CharacterCreationDone:
-                    UIManager.GameCursor.IsLoading = CurrentLoginStep != LoginSteps.PopUpMessage;
+                    Client.Game.GameCursor.IsLoading = CurrentLoginStep != LoginSteps.PopUpMessage;
 
                     return GetLoadingScreen();
 

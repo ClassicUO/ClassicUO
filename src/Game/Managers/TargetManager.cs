@@ -51,7 +51,8 @@ namespace ClassicUO.Game.Managers
         SetTargetClientSide = 3,
         Grab,
         SetGrabBag,
-        HueCommandTarget
+        HueCommandTarget,
+        IgnorePlayerTarget
     }
 
     internal class CursorType
@@ -395,6 +396,13 @@ namespace ClassicUO.Game.Managers
 
                         ClearTargetingWithoutTargetCancelPacket();
 
+                        return;
+                    case CursorTarget.IgnorePlayerTarget:
+                        if (SelectedObject.Object is Entity pmEntity)
+                        {
+                            IgnoreManager.AddIgnoredTarget(pmEntity);
+                        }
+                        CancelTarget();
                         return;
                 }
             }

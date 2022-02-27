@@ -68,8 +68,6 @@ namespace ClassicUO.Game.GameObjects
                 return false;
             }
 
-            Vector3 hueVec = Vector3.Zero;
-
             ushort hue = Hue;
 
             if (State != 0)
@@ -96,7 +94,7 @@ namespace ClassicUO.Game.GameObjects
 
             Profile currentProfile = ProfileManager.CurrentProfile;
 
-            if (currentProfile.HighlightGameObjects && SelectedObject.LastObject == this)
+            if (currentProfile.HighlightGameObjects && SelectedObject.Object == this)
             {
                 hue = Constants.HIGHLIGHT_CURRENT_OBJECT_HUE;
                 partial = false;
@@ -112,22 +110,15 @@ namespace ClassicUO.Game.GameObjects
                 partial = false;
             }
 
-            ShaderHueTranslator.GetHueVector(ref hueVec, hue, partial, 0);
-
-            //Engine.DebugInfo.MultiRendered++;
+            Vector3 hueVec = ShaderHueTranslator.GetHueVector(hue, partial, AlphaHue / 255f);
 
             if (IsHousePreview)
             {
-                hueVec.Z = 0.5f;
+                hueVec.Z *= 0.5f;
             }
 
             posX += (int) Offset.X;
             posY += (int) (Offset.Y + Offset.Z);
-
-            if (AlphaHue != 255)
-            {
-                hueVec.Z = 1f - AlphaHue / 255f;
-            }
 
             DrawStaticAnimated
             (
@@ -135,7 +126,7 @@ namespace ClassicUO.Game.GameObjects
                 graphic,
                 posX,
                 posY,
-                ref hueVec,
+                hueVec,
                 false,
                 depth
             );

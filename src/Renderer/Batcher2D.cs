@@ -150,7 +150,7 @@ namespace ClassicUO.Renderer
             _basicUOEffect.Brighlight.SetValue(f);
         }
 
-        public void DrawString(SpriteFont spriteFont, string text, int x, int y, ref Vector3 color)
+        public void DrawString(SpriteFont spriteFont, string text, int x, int y, Vector3 color)
         {
             if (string.IsNullOrEmpty(text))
             {
@@ -665,7 +665,7 @@ namespace ClassicUO.Renderer
             int y,
             int width,
             int height,
-            ref Vector3 hue,
+            Vector3 hue,
             float depth = 0f
         )
         {
@@ -1153,6 +1153,9 @@ namespace ClassicUO.Renderer
             sprite.Normal3.X = 0;
             sprite.Normal3.Y = 0;
             sprite.Normal3.Z = 1;
+
+
+            sprite.Col0 = sprite.Col1 = sprite.Col2 = sprite.Col3 = Color.Red;
         }
 
 
@@ -1461,21 +1464,25 @@ namespace ClassicUO.Renderer
             public Vector3 Normal0;
             public Vector3 TextureCoordinate0;
             public Vector3 Hue0;
+            public Color Col0;
 
             public Vector3 Position1;
             public Vector3 Normal1;
             public Vector3 TextureCoordinate1;
             public Vector3 Hue1;
+            public Color Col1;
 
             public Vector3 Position2;
             public Vector3 Normal2;
             public Vector3 TextureCoordinate2;
             public Vector3 Hue2;
+            public Color Col2;
 
             public Vector3 Position3;
             public Vector3 Normal3;
             public Vector3 TextureCoordinate3;
             public Vector3 Hue3;
+            public Color Col3;
 
             VertexDeclaration IVertexType.VertexDeclaration => VertexDeclaration;
 
@@ -1484,10 +1491,11 @@ namespace ClassicUO.Renderer
                 new VertexElement(0, VertexElementFormat.Vector3, VertexElementUsage.Position, 0),                          // position
                 new VertexElement(sizeof(float) * 3, VertexElementFormat.Vector3, VertexElementUsage.Normal, 0),            // normal
                 new VertexElement(sizeof(float) * 6, VertexElementFormat.Vector3, VertexElementUsage.TextureCoordinate, 0), // tex coord
-                new VertexElement(sizeof(float) * 9, VertexElementFormat.Vector3, VertexElementUsage.TextureCoordinate, 1)  // hue
+                new VertexElement(sizeof(float) * 9, VertexElementFormat.Vector3, VertexElementUsage.TextureCoordinate, 1),  // hue
+                new VertexElement(sizeof(float) * 12, VertexElementFormat.Color, VertexElementUsage.Color, 0)
             );
 
-            public const int SIZE_IN_BYTES = sizeof(float) * 12 * 4;            
+            public const int SIZE_IN_BYTES = sizeof(float) * 12 * 4 + sizeof(uint) * 4;            
         }
     }
 

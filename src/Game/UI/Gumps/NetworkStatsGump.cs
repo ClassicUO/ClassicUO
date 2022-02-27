@@ -69,7 +69,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                _trans = new AlphaBlendControl(.3f)
+                _trans = new AlphaBlendControl(.7f)
                 {
                     Width = Width,
                     Height = Height
@@ -150,26 +150,26 @@ namespace ClassicUO.Game.UI.Gumps
                 return false;
             }
 
-            ResetHueVector();
+            Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
             if (_ping < 150)
             {
-                HueVector.X = 0x44; // green
+                hueVector.X = 0x44; // green
             }
             else if (_ping < 200)
             {
-                HueVector.X = 0x34; // yellow
+                hueVector.X = 0x34; // yellow
             }
             else if (_ping < 300)
             {
-                HueVector.X = 0x31; // orange
+                hueVector.X = 0x31; // orange
             }
             else
             {
-                HueVector.X = 0x20; // red
+                hueVector.X = 0x20; // red
             }
 
-            HueVector.Y = 1;
+            hueVector.Y = 1;
 
             batcher.DrawString
             (
@@ -177,7 +177,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _cacheText,
                 x + 10,
                 y + 10,
-                ref HueVector
+                hueVector
             );
 
             return true;

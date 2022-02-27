@@ -41,6 +41,7 @@ using ClassicUO.Game.UI.Gumps;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Managers
 {
@@ -170,6 +171,10 @@ namespace ClassicUO.Game.Managers
                         break;
                     }
 
+                    // If person who send that message is in ignores list - but filter out Spell Text
+                    if (IgnoreManager.IgnoredCharsList.Contains(parent.Name) && type != MessageType.Spell)
+                        break;
+
                     TextObject msg = CreateMessage
                     (
                         text,
@@ -268,34 +273,6 @@ namespace ClassicUO.Game.Managers
                 isunicode = ProfileManager.CurrentProfile.OverrideAllFontsIsUnicode;
             }
 
-            int width = isunicode ? FontsLoader.Instance.GetWidthUnicode(font, msg) : FontsLoader.Instance.GetWidthASCII(font, msg);
-
-            if (width > 200)
-            {
-                width = isunicode ?
-                    FontsLoader.Instance.GetWidthExUnicode
-                    (
-                        font,
-                        msg,
-                        200,
-                        TEXT_ALIGN_TYPE.TS_LEFT,
-                        (ushort) FontStyle.BlackBorder
-                    ) :
-                    FontsLoader.Instance.GetWidthExASCII
-                    (
-                        font,
-                        msg,
-                        200,
-                        TEXT_ALIGN_TYPE.TS_LEFT,
-                        (ushort) FontStyle.BlackBorder
-                    );
-            }
-            else
-            {
-                width = 0;
-            }
-
-
             ushort fixedColor = (ushort)(hue & 0x3FFF);
 
             if (fixedColor != 0)
@@ -312,39 +289,35 @@ namespace ClassicUO.Game.Managers
                 fixedColor = (ushort)(hue & 0x8000);
             }
 
-
             TextObject textObject = TextObject.Create();
             textObject.Alpha = 0xFF;
             textObject.Type = type;
             textObject.Hue = fixedColor;
+            textObject.Text = msg;
+            textObject.ObjectTextType = textType;
 
-            if (!isunicode && textType == TextType.OBJECT)
-            {
-                fixedColor = 0x7FFF;
-            }
-            
-            textObject.RenderedText = RenderedText.Create
+            textObject.FontSettings.FontIndex = font;
+            textObject.FontSettings.IsUnicode = isunicode;
+            textObject.FontSettings.Border = true;
+
+            textObject.MaxTextWidth = 200;
+            textObject.TextSize = UOFontRenderer.Shared.MeasureString
             (
-                msg,
-                fixedColor,
-                font,
-                isunicode,
-                FontStyle.BlackBorder,
-                TEXT_ALIGN_TYPE.TS_LEFT,
-                width,
-                30,
-                false,
-                false,
-                textType == TextType.OBJECT
+                textObject.Text.AsSpan(),
+                textObject.FontSettings,
+                1f,
+                textObject.MaxTextWidth,
+                Vector2.Zero
             );
 
-            textObject.Time = CalculateTimeToLive(textObject.RenderedText);
-            textObject.RenderedText.Hue = textObject.Hue;
+            float fontHeight = UOFontRenderer.Shared.GetFontHeight(textObject.FontSettings);
+
+            textObject.Time = CalculateTimeToLive(Math.Min(1, (int) (textObject.TextSize.Y / fontHeight)));
 
             return textObject;
         }
 
-        private static long CalculateTimeToLive(RenderedText rtext)
+        private static long CalculateTimeToLive(int lines)
         {
             Profile currentProfile = ProfileManager.CurrentProfile;
 
@@ -364,7 +337,7 @@ namespace ClassicUO.Game.Managers
                     delay = 10;
                 }
 
-                timeToLive = (long) (4000 * rtext.LinesCount * delay / 100.0f);
+                timeToLive = (long) (4000 * lines * delay / 100.0f);
             }
             else
             {

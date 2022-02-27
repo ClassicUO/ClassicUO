@@ -86,7 +86,7 @@ namespace ClassicUO.Game.UI.Gumps
 
 
 
-            _hit = new HitBox(24, 31, width, height, null, 1f);
+            _hit = new HitBox(24, 31, width, height, null, 0f);
             Add(_hit);
 
             _hit.MouseUp += TextureControlOnMouseUp;
@@ -235,38 +235,36 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Draw(batcher, x, y);
 
-            ResetHueVector();
+            Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
             batcher.Draw
             (
                 _mapTexture,
                 new Rectangle(x + _hit.X, y + _hit.Y, _hit.Width, _hit.Height),
-                HueVector
+                hueVector
             );
 
             var texture = SolidColorTextureCache.GetTexture(Color.White);
 
             for (int i = 0; i < _container.Count; i++)
             {
+                // HACK: redraw because pins are drawn when calling base.Draw(batcher, x, y);
+                _container[i].Draw(batcher, x + _container[i].X, y + _container[i].Y);
+
                 if (i + 1 >= _container.Count)
                 {
                     break;
                 }
 
-                // HACK: redraw because pins are drawn when calling base.Draw(batcher, x, y);
-                ResetHueVector();
-                _container[i].Draw(batcher, x + _container[i].X, y + _container[i].Y);
-
                 Control c0 = _container[i];
                 Control c1 = _container[i + 1];
 
-                ResetHueVector();
                 batcher.DrawLine
                 (
                     texture,
                     new Vector2(c0.ScreenCoordinateX, c0.ScreenCoordinateY),
                     new Vector2(c1.ScreenCoordinateX, c1.ScreenCoordinateY),
-                    HueVector,
+                    hueVector,
                     1
                 );
             }
@@ -397,15 +395,18 @@ namespace ClassicUO.Game.UI.Gumps
         private class PinControl : Control
         {
             private readonly GumpPic _pic;
-            private readonly RenderedText _text;
+            private string _text = string.Empty;
+            private FontSettings _fontSettings = new FontSettings()
+            {
+                FontIndex = 0,
+                IsUnicode = false
+            };
+            private Vector2 _textSize;
 
             public PinControl(int x, int y)
             {
                 X = x;
                 Y = y;
-
-
-                _text = RenderedText.Create(string.Empty, font: 0, isunicode: false);
 
                 _pic = new GumpPic(0, 0, 0x139B, 0);
                 Add(_pic);
@@ -433,8 +434,15 @@ namespace ClassicUO.Game.UI.Gumps
 
             public string NumberText
             {
-                get => _text.Text;
-                set => _text.Text = value;
+                get => _text;
+                set
+                {
+                    if (_text != value)
+                    {
+                        _text = value;
+                        _textSize = UOFontRenderer.Shared.MeasureString(_text.AsSpan(), _fontSettings, 1f);
+                    }
+                }
             }
 
 
@@ -450,16 +458,19 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
                 base.Draw(batcher, x, y);
-                _text.Draw(batcher, x - _text.Width - 1, y);
+
+                UOFontRenderer.Shared.Draw
+                (
+                    batcher,
+                    _text.AsSpan(),
+                    new Vector2(x - _textSize.X - 1, y),
+                    1f,
+                    _fontSettings,
+                    Vector3.Zero,
+                    false
+                );
 
                 return true;
-            }
-
-            public override void Dispose()
-            {
-                _text?.Destroy();
-
-                base.Dispose();
             }
         }
     }

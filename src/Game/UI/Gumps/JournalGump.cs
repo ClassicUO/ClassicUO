@@ -42,6 +42,7 @@ using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Resources;
 using ClassicUO.Utility.Collections;
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -296,7 +297,13 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void AddJournalEntry(object sender, JournalEntry entry)
         {
-            string text = $"{(entry.Name != string.Empty ? $"{entry.Name}: " : string.Empty)}{entry.Text}";
+            var usrSend = entry.Name != string.Empty ? $"{entry.Name}" : string.Empty;
+
+            // Check if ignored person
+            if (!string.IsNullOrEmpty(usrSend) && IgnoreManager.IgnoredCharsList.Contains(usrSend))
+                return;
+
+            string text = $"{usrSend}: {entry.Text}";
 
             _journalEntries.AddEntry
             (
@@ -354,9 +361,21 @@ namespace ClassicUO.Game.UI.Gumps
 
         private class RenderedTextList : Control
         {
-            private readonly Deque<RenderedText> _entries, _hours;
+            const float TIME_MAX_WIDTH = 50;
+
+            class LineEntry
+            {
+                public TextType Type;
+                public string Text;
+                public ushort Hue;
+                public string Time;
+                public FontSettings FontSettings;
+                public float MaxWidth;
+                public Vector2 Size;
+            }
+
+            private readonly Deque<LineEntry> _entries;
             private readonly ScrollBarBase _scrollBar;
-            private readonly Deque<TextType> _text_types;
 
             public RenderedTextList(int x, int y, int width, int height, ScrollBarBase scrollBarControl)
             {
@@ -369,9 +388,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Width = width;
                 Height = height;
 
-                _entries = new Deque<RenderedText>();
-                _hours = new Deque<RenderedText>();
-                _text_types = new Deque<TextType>();
+                _entries = new Deque<LineEntry>();
 
                 WantUpdateSize = false;
             }
@@ -383,105 +400,54 @@ namespace ClassicUO.Game.UI.Gumps
                 int mx = x;
                 int my = y;
 
-                int height = 0;
-                int maxheight = _scrollBar.Value + _scrollBar.Height;
-
-                for (int i = 0; i < _entries.Count; i++)
+                if (batcher.ClipBegin(x, y, Width, Height))
                 {
-                    RenderedText t = _entries[i];
-                    RenderedText hour = _hours[i];
-                    TextType type = _text_types[i];
+                    var renderer = UOFontRenderer.Shared;
 
-
-                    if (!CanBeDrawn(type))
+                    for (int i = 0, height = 0; i < _entries.Count; i++)
                     {
-                        continue;
-                    }
+                        var entry = _entries[i];
 
-
-                    if (height + t.Height <= _scrollBar.Value)
-                    {
-                        // this entry is above the renderable area.
-                        height += t.Height;
-                    }
-                    else if (height + t.Height <= maxheight)
-                    {
-                        int yy = height - _scrollBar.Value;
-
-                        if (yy < 0)
+                        if (!CanBeDrawn(entry.Type))
                         {
-                            // this entry starts above the renderable area, but exists partially within it.
-                            hour.Draw
-                            (
-                                batcher,
-                                hour.Width,
-                                hour.Height,
-                                mx,
-                                y,
-                                t.Width,
-                                t.Height + yy,
-                                0,
-                                -yy
-                            );
-
-                            t.Draw
-                            (
-                                batcher,
-                                t.Width,
-                                t.Height,
-                                mx + hour.Width,
-                                y,
-                                t.Width,
-                                t.Height + yy,
-                                0,
-                                -yy
-                            );
-
-                            my += t.Height + yy;
-                        }
-                        else
-                        {
-                            // this entry is completely within the renderable area.
-                            hour.Draw(batcher, mx, my);
-                            t.Draw(batcher, mx + hour.Width, my);
-                            my += t.Height;
+                            continue;
                         }
 
-                        height += t.Height;
-                    }
-                    else
-                    {
-                        int yyy = maxheight - height;
+                        var fontBck = entry.FontSettings.FontIndex;
+                        var isUnicodeBck = entry.FontSettings.IsUnicode;
+                        entry.FontSettings.FontIndex = 1;
+                        entry.FontSettings.IsUnicode = true;
 
-                        hour.Draw
+                        renderer.Draw
                         (
-                            batcher,
-                            hour.Width,
-                            hour.Height,
-                            mx,
-                            y + _scrollBar.Height - yyy,
-                            t.Width,
-                            yyy,
-                            0,
-                            0
+                           batcher,
+                           entry.Time.AsSpan(),
+                           new Vector2(mx, my + (height - _scrollBar.Value)),
+                           1f,
+                           entry.FontSettings,
+                           new Vector3(0, 0, 0),
+                           false,
+                           TIME_MAX_WIDTH
                         );
 
-                        t.Draw
+                        entry.FontSettings.FontIndex = fontBck;
+                        entry.FontSettings.IsUnicode = isUnicodeBck;
+                        renderer.Draw
                         (
                             batcher,
-                            t.Width,
-                            t.Height,
-                            mx + hour.Width,
-                            y + _scrollBar.Height - yyy,
-                            t.Width,
-                            yyy,
-                            0,
-                            0
+                            entry.Text.AsSpan(),
+                            new Vector2(mx + TIME_MAX_WIDTH, my + (height - _scrollBar.Value)),
+                            1f,
+                            entry.FontSettings,
+                            new Vector3(entry.Hue, 1f, 0),
+                            false,
+                            entry.MaxWidth - TIME_MAX_WIDTH
                         );
 
-                        // can't fit any more entries - so we break!
-                        break;
+                        height += (int)entry.Size.Y;
                     }
+
+                    batcher.ClipEnd();
                 }
 
                 return true;
@@ -509,9 +475,9 @@ namespace ClassicUO.Game.UI.Gumps
 
                 for (int i = 0; i < _entries.Count; i++)
                 {
-                    if (i < _text_types.Count && CanBeDrawn(_text_types[i]))
+                    if (CanBeDrawn(_entries[i].Type))
                     {
-                        height += _entries[i].Height;
+                        height += (int) _entries[i].Size.Y;
                     }
                 }
 
@@ -545,41 +511,33 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 bool maxScroll = _scrollBar.Value == _scrollBar.MaxValue;
 
+                LineEntry entry = null;
+
                 while (_entries.Count > 199)
                 {
-                    _entries.RemoveFromFront().Destroy();
-
-                    _hours.RemoveFromFront().Destroy();
-
-                    _text_types.RemoveFromFront();
+                    entry = _entries.RemoveFromFront();
                 }
 
-                RenderedText h = RenderedText.Create
-                (
-                    $"{time:t} ",
-                    1150,
-                    1,
-                    true,
-                    FontStyle.BlackBorder
-                );
+                if (entry == null)
+                {
+                    entry = new LineEntry();
+                }
 
-                _hours.AddToBack(h);
 
-                RenderedText rtext = RenderedText.Create
-                (
-                    text,
-                    hue,
-                    (byte) font,
-                    isUnicode,
-                    FontStyle.Indention | FontStyle.BlackBorder,
-                    maxWidth: Width - (18 + h.Width)
-                );
+                entry.Type = text_type;
+                entry.Text = text;
+                entry.Time = $"{time:t}";
+                entry.Hue = (ushort) (hue - 1);
+                entry.FontSettings.FontIndex = (byte) font;
+                entry.FontSettings.IsUnicode = isUnicode;
+                entry.FontSettings.Border = true;
+                entry.MaxWidth = Width - 18;
+                entry.Size = UOFontRenderer.Shared.MeasureString(entry.Text.AsSpan(), entry.FontSettings, 1f, entry.MaxWidth - TIME_MAX_WIDTH);
+                entry.Size.Y += 10;
 
-                _entries.AddToBack(rtext);
+                _entries.AddToBack(entry);
 
-                _text_types.AddToBack(text_type);
-
-                _scrollBar.MaxValue += rtext.Height;
+                _scrollBar.MaxValue += (int) entry.Size.Y;
 
                 if (maxScroll)
                 {
@@ -614,16 +572,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             public override void Dispose()
             {
-                for (int i = 0; i < _entries.Count; i++)
-                {
-                    _entries[i].Destroy();
-
-                    _hours[i].Destroy();
-                }
-
                 _entries.Clear();
-                _hours.Clear();
-                _text_types.Clear();
 
                 base.Dispose();
             }

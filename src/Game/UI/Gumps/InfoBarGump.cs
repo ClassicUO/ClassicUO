@@ -58,7 +58,7 @@ namespace ClassicUO.Game.UI.Gumps
             CanCloseWithRightClick = false;
             Height = 20;
 
-            Add(_background = new AlphaBlendControl(0.3f) { Width = Width, Height = Height });
+            Add(_background = new AlphaBlendControl(0.7f) { Width = Width, Height = Height });
 
             ResetItems();
         }
@@ -217,11 +217,9 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Draw(batcher, x, y);
 
-            ResetHueVector();
-
             if (Var != InfoBarVars.NameNotoriety && ProfileManager.CurrentProfile.InfoBarHighlightType == 1 && _warningLinesHue != 0x0481)
             {
-                ShaderHueTranslator.GetHueVector(ref HueVector, _warningLinesHue);
+                Vector3 hueVector = ShaderHueTranslator.GetHueVector(_warningLinesHue);
 
                 batcher.Draw
                 (
@@ -233,7 +231,7 @@ namespace ClassicUO.Game.UI.Gumps
                         _data.Width,
                         2
                     ),
-                    HueVector
+                    hueVector
                 );
 
                 batcher.Draw
@@ -246,7 +244,7 @@ namespace ClassicUO.Game.UI.Gumps
                         _data.Width,
                         2
                     ),
-                    HueVector
+                    hueVector
                 );
             }
 

@@ -38,8 +38,10 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
+using ClassicUO.Renderer;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -74,6 +76,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             BuildGump();
+            SetActivePage(1);
         }
 
         private void BuildGump()
@@ -159,10 +162,15 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (spellsOnPage == 4)
                     {
-                        byte bab1 = (byte) (((byte) World.Player.PrimaryAbility & 0x7F) - 1);
-
-                        _primAbility = new GumpPic(215, 105, (ushort) (0x5200 + bab1), 0);
-
+                        if(_primAbility == null)
+                        {
+                            byte bab1 = (byte)(((byte)World.Player.PrimaryAbility & 0x7F) - 1);
+                            _primAbility = new GumpPic(215, 105, (ushort)(0x5200 + bab1), (ushort)(((byte)World.Player.PrimaryAbility & 0x80) != 0 ? 38 : 0));
+                            _primAbility.SetTooltip(ClilocLoader.Instance.GetString(1028838 + bab1));
+                            _primAbility.DragBegin += OnGumpicDragBeginPrimary;
+                            _primAbility.MouseDoubleClick += PrimaryAbilityMouseDoubleClick;
+                        }
+                        
                         text = new Label
                         (
                             ResGumps.PrimaryAbilityIcon,
@@ -171,17 +179,20 @@ namespace ClassicUO.Game.UI.Gumps
                             80,
                             6
                         ) { X = 265, Y = 105 };
-
-                        Add(_primAbility, page);
+      
                         Add(text, page);
-                        _primAbility.SetTooltip(ClilocLoader.Instance.GetString(1028838 + bab1));
-                        _primAbility.DragBegin += OnGumpicDragBeginPrimary;
+                        Add(_primAbility, page);
 
 
-                        byte bab2 = (byte) (((byte) World.Player.SecondaryAbility & 0x7F) - 1);
-
-                        _secAbility = new GumpPic(215, 150, (ushort) (0x5200 + bab2), 0);
-
+                        if (_secAbility == null)
+                        {
+                            byte bab2 = (byte)(((byte)World.Player.SecondaryAbility & 0x7F) - 1);
+                            _secAbility = new GumpPic(215, 150, (ushort)(0x5200 + bab2), (ushort)(((byte)World.Player.SecondaryAbility & 0x80) != 0 ? 38 : 0));
+                            _secAbility.SetTooltip(ClilocLoader.Instance.GetString(1028838 + bab2));
+                            _secAbility.DragBegin += OnGumpicDragBeginSecondary;
+                            _secAbility.MouseDoubleClick += SecondaryAbilityMouseDoubleClick;
+                        }
+                        
                         text = new Label
                         (
                             ResGumps.SecondaryAbilityIcon,
@@ -191,10 +202,9 @@ namespace ClassicUO.Game.UI.Gumps
                             6
                         ) { X = 265, Y = 150 };
 
+                        
+                        Add(text, page);              
                         Add(_secAbility, page);
-                        Add(text, page);
-                        _secAbility.SetTooltip(ClilocLoader.Instance.GetString(1028838 + bab2));
-                        _secAbility.DragBegin += OnGumpicDragBeginSecondary;
                     }
                 }
             }
@@ -278,9 +288,49 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
+        private void PrimaryAbilityMouseDoubleClick(object sender, MouseDoubleClickEventArgs e)
+        {
+            if (e.Button == MouseButtonType.Left)
+            {
+                GameActions.UsePrimaryAbility();
+
+                e.Result = true;
+            }        
+        }
+
+        private void SecondaryAbilityMouseDoubleClick(object sender, MouseDoubleClickEventArgs e)
+        {
+            if (e.Button == MouseButtonType.Left)
+            {
+                GameActions.UseSecondaryAbility();
+
+                e.Result = true;
+            }
+        }
+
+        protected override void OnDragBegin(int x, int y)
+        {
+            if (UIManager.MouseOverControl?.RootParent == this)
+            {
+                UIManager.MouseOverControl.InvokeDragBegin(new Point(x, y));
+            }
+
+            base.OnDragBegin(x, y);
+        }
+
+        protected override void OnDragEnd(int x, int y)
+        {
+            if (UIManager.MouseOverControl?.RootParent == this)
+            {
+                UIManager.MouseOverControl.InvokeDragEnd(new Point(x, y));
+            }
+
+            base.OnDragEnd(x, y);
+        }
+
         private void OnGumpicDragBeginPrimary(object sender, EventArgs e)
         {
-            if (UIManager.IsDragging)
+            if (UIManager.DraggingControl != this || UIManager.MouseOverControl != sender)
             {
                 return;
             }
@@ -301,7 +351,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void OnGumpicDragBeginSecondary(object sender, EventArgs e)
         {
-            if (UIManager.IsDragging)
+            if (UIManager.DraggingControl != this || UIManager.MouseOverControl != sender)
             {
                 return;
             }
@@ -342,27 +392,41 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
-            for (int i = 0; i < 2; i++)
+
+            byte index = (byte)World.Player.Abilities[0];
+            ref readonly AbilityDefinition def = ref AbilityData.Abilities[(index & 0x7F) - 1];
+
+            if ((index & 0x80) != 0)
             {
-                int index = ((byte) (i == 0 ? World.Player.PrimaryAbility : World.Player.SecondaryAbility) & 0x7F) - 1;
-
-                ref readonly AbilityDefinition def = ref AbilityData.Abilities[index];
-
-                if (i == 0)
-                {
-                    if (_primAbility.Graphic != def.Icon)
-                    {
-                        _primAbility.Graphic = def.Icon;
-                    }
-                }
-                else
-                {
-                    if (_secAbility.Graphic != def.Icon)
-                    {
-                        _secAbility.Graphic = def.Icon;
-                    }
-                }
+                _primAbility.Hue = 38;
             }
+            else if (_primAbility.Hue != 0)
+            {
+                _primAbility.Hue = 0;
+            }
+
+            if (_primAbility.Graphic != def.Icon)
+            {
+                _primAbility.Graphic = def.Icon;
+            }
+
+            index = (byte)World.Player.Abilities[1];
+            def = ref AbilityData.Abilities[(index & 0x7F) - 1];
+
+            if ((index & 0x80) != 0)
+            {
+                _secAbility.Hue = 38;
+            }
+            else if (_secAbility.Hue != 0)
+            {
+                _secAbility.Hue = 0;
+            }
+
+            if (_secAbility.Graphic != def.Icon)
+            {
+                _secAbility.Graphic = def.Icon;
+            }
+
 
             if (IsDisposed)
             {
@@ -398,7 +462,6 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-
         private void SetActivePage(int page)
         {
             if (page < 1)
@@ -413,6 +476,11 @@ namespace ClassicUO.Game.UI.Gumps
             ActivePage = page;
             _pageCornerLeft.Page = ActivePage != 1 ? 0 : int.MaxValue;
             _pageCornerRight.Page = ActivePage != _dictionaryPagesCount ? 0 : int.MaxValue;
+
+            _primAbility.Page = page;
+            _secAbility.Page = page;
+
+            _primAbility.IsVisible = _secAbility.IsVisible = page <= _dictionaryPagesCount - _abilityCount;
 
             Client.Game.Scene.Audio.PlaySound(0x0055);
         }

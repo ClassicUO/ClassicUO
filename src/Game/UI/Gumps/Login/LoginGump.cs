@@ -52,7 +52,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
         private readonly Checkbox _checkboxAutologin;
         private readonly Checkbox _checkboxSaveAccount;
         private readonly Button _nextArrow0;
-        private readonly PasswordStbTextBox _passwordFake;
+        private readonly StbTextBox _passwordFake;
         private readonly StbTextBox _textboxAccount;
 
         private float _time;
@@ -371,7 +371,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             Add
             (
-                _passwordFake = new PasswordStbTextBox
+                _passwordFake = new StbTextBox
                 (
                     5,
                     16,
@@ -383,11 +383,12 @@ namespace ClassicUO.Game.UI.Gumps.Login
                     X = offsetX,
                     Y = offsetY + offtextY + 2,
                     Width = 190,
-                    Height = 25
+                    Height = 25,
+                    IsPassword = true
                 }
             );
 
-            _passwordFake.RealText = Crypter.Decrypt(Settings.GlobalSettings.Password);
+            _passwordFake.SetText(Crypter.Decrypt(Settings.GlobalSettings.Password));
 
             _checkboxSaveAccount.IsChecked = Settings.GlobalSettings.SaveAccount;
             _checkboxAutologin.IsChecked = Settings.GlobalSettings.AutoLogin;
@@ -523,7 +524,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             if (ls.CurrentLoginStep == LoginSteps.Main)
             {
-                ls.Connect(_textboxAccount.Text, _passwordFake.RealText);
+                ls.Connect(_textboxAccount.Text, _passwordFake.Text);
             }
         }
 
@@ -583,7 +584,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
                     if (!_textboxAccount.IsDisposed)
                     {
-                        Client.Game.GetScene<LoginScene>().Connect(_textboxAccount.Text, _passwordFake.RealText);
+                        Client.Game.GetScene<LoginScene>().Connect(_textboxAccount.Text, _passwordFake.Text);
                     }
 
                     break;
@@ -599,160 +600,6 @@ namespace ClassicUO.Game.UI.Gumps.Login
                     break;
             }
         }
-
-        private class PasswordStbTextBox : StbTextBox
-        {
-            private new Point _caretScreenPosition;
-            private new readonly RenderedText _rendererCaret;
-
-            private new readonly RenderedText _rendererText;
-
-            public PasswordStbTextBox
-            (
-                byte font,
-                int max_char_count = -1,
-                int maxWidth = 0,
-                bool isunicode = true,
-                FontStyle style = FontStyle.None,
-                ushort hue = 0,
-                TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT
-            ) : base
-            (
-                font,
-                max_char_count,
-                maxWidth,
-                isunicode,
-                style,
-                hue,
-                align
-            )
-            {
-                _rendererText = RenderedText.Create
-                (
-                    string.Empty,
-                    hue,
-                    font,
-                    isunicode,
-                    style,
-                    align,
-                    maxWidth
-                );
-
-                _rendererCaret = RenderedText.Create
-                (
-                    "_",
-                    hue,
-                    font,
-                    isunicode,
-                    (style & FontStyle.BlackBorder) != 0 ? FontStyle.BlackBorder : FontStyle.None,
-                    align
-                );
-
-                NoSelection = true;
-            }
-
-            internal string RealText
-            {
-                get => Text;
-                set => SetText(value);
-            }
-
-            public new ushort Hue
-            {
-                get => _rendererText.Hue;
-                set
-                {
-                    if (_rendererText.Hue != value)
-                    {
-                        _rendererText.Hue = value;
-                        _rendererCaret.Hue = value;
-
-                        _rendererText.CreateTexture();
-                        _rendererCaret.CreateTexture();
-                    }
-                }
-            }
-
-            protected override void DrawCaret(UltimaBatcher2D batcher, int x, int y)
-            {
-                if (HasKeyboardFocus)
-                {
-                    _rendererCaret.Draw(batcher, x + _caretScreenPosition.X, y + _caretScreenPosition.Y);
-                }
-            }
-
-            protected override void OnMouseDown(int x, int y, MouseButtonType button)
-            {
-                base.OnMouseDown(x, y, button);
-
-                if (button == MouseButtonType.Left)
-                {
-                    UpdateCaretScreenPosition();
-                }
-            }
-
-            protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
-            {
-                base.OnKeyDown(key, mod);
-                UpdateCaretScreenPosition();
-            }
-
-            public override void Dispose()
-            {
-                _rendererText?.Destroy();
-                _rendererCaret?.Destroy();
-
-                base.Dispose();
-            }
-
-            protected override void OnTextInput(string c)
-            {
-                base.OnTextInput(c);
-            }
-
-            protected override void OnTextChanged()
-            {
-                if (Text.Length > 0)
-                {
-                    _rendererText.Text = new string('*', Text.Length);
-                }
-                else
-                {
-                    _rendererText.Text = string.Empty;
-                }
-
-                base.OnTextChanged();
-                UpdateCaretScreenPosition();
-            }
-
-            internal override void OnFocusEnter()
-            {
-                base.OnFocusEnter();
-                CaretIndex = Text?.Length ?? 0;
-                UpdateCaretScreenPosition();
-            }
-
-            private new void UpdateCaretScreenPosition()
-            {
-                _caretScreenPosition = _rendererText.GetCaretPosition(Stb.CursorIndex);
-            }
-
-            public override bool Draw(UltimaBatcher2D batcher, int x, int y)
-            {
-                if (batcher.ClipBegin(x, y, Width, Height))
-                {
-                    DrawSelection(batcher, x, y);
-
-                    _rendererText.Draw(batcher, x, y);
-
-                    DrawCaret(batcher, x, y);
-                    batcher.ClipEnd();
-                }
-
-                return true;
-            }
-        }
-
 
         private enum Buttons
         {

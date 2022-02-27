@@ -109,7 +109,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             HitBox left = new HitBox(25, 60, 10, 15)
             {
-                Alpha = 1
+                Alpha = 0f
             };
 
             left.MouseDown += (sender, e) =>
@@ -124,7 +124,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             HitBox right = new HitBox(260, 60, 10, 15)
             {
-                Alpha = 1
+                Alpha = 0f
             };
 
             right.MouseDown += (sender, e) =>
@@ -218,20 +218,18 @@ namespace ClassicUO.Game.UI.Gumps
 
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
-                ResetHueVector();
-
                 if (_graphic != 0)
                 {
                     var texture = ArtLoader.Instance.GetStaticTexture(_graphic, out var bounds);
 
-                    ShaderHueTranslator.GetHueVector(ref HueVector, _hue, _isPartial, 0f);
+                    Vector3 hueVector = ShaderHueTranslator.GetHueVector(_hue, _isPartial, 1f);
 
                     batcher.Draw
                     (
                         texture,
                         new Vector2(x, y),
                         bounds,
-                        HueVector
+                        hueVector
                     );
                 }
 

@@ -57,6 +57,9 @@ namespace ClassicUO.Game.UI.Gumps
             RightScrollUp,
             RightScrollDown
         }
+        // Scroll Delay (in ms)
+        private const int SCROLL_DELAY = 60;
+        private uint _lastMouseEventTime = Time.Ticks;
 
         private ButtonScroll _buttonScroll = ButtonScroll.None;
         private readonly Dictionary<uint, ShopItem> _shopItems;
@@ -219,7 +222,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add(expander);
 
 
-            const float ALPHA_HIT_BUTTON = 1f;
+            const float ALPHA_HIT_BUTTON = 0f;
 
             HitBox accept = new HitBox(RIGHT_OFFSET + rightTop.X, (rightBottom.Y + rightBottom.Height) - 50, 34, 30, "Accept", ALPHA_HIT_BUTTON);
             HitBox clear = new HitBox(accept.X + 175, accept.Y, 20, 20, "Clear", ALPHA_HIT_BUTTON);
@@ -243,7 +246,7 @@ namespace ClassicUO.Game.UI.Gumps
             leftUp.MouseDown += (sender, e) => { _buttonScroll = ButtonScroll.LeftScrollUp; };
             leftDown.MouseDown += (sender, e) => { _buttonScroll = ButtonScroll.LeftScrollDown; };
             rightUp.MouseDown += (sender, e) => { _buttonScroll = ButtonScroll.RightScrollUp; };
-            rightDown.MouseDown += (sender, e) => { _buttonScroll = ButtonScroll.RightScrollUp; };
+            rightDown.MouseDown += (sender, e) => { _buttonScroll = ButtonScroll.RightScrollDown; };
             Add(leftUp);
             Add(leftDown);
             Add(rightUp);
@@ -405,25 +408,14 @@ namespace ClassicUO.Game.UI.Gumps
                 Dispose();
             }
 
-            switch (_buttonScroll)
+            if (_buttonScroll != ButtonScroll.None)
             {
-                case ButtonScroll.LeftScrollUp:
-                    _shopScrollArea.Scroll(true);
-                    break;
-                case ButtonScroll.LeftScrollDown:
-                    _shopScrollArea.Scroll(false);
-                    break;
-                case ButtonScroll.RightScrollUp:
-                    _transactionScrollArea.Scroll(true);
-                    break;
-                case ButtonScroll.RightScrollDown:
-                    _transactionScrollArea.Scroll(false);
-                    break;
+                ProcessListScroll();
             }
 
             if (_updateTotal)
             {
-                int sum = 0;
+                long sum = 0;
 
                 foreach (TransactionItem t in _transactionItems.Values)
                 {
@@ -446,6 +438,30 @@ namespace ClassicUO.Game.UI.Gumps
         {
             return base.Draw(batcher, x, y);
         }
+
+        private void ProcessListScroll()
+        {
+            if (Time.Ticks - _lastMouseEventTime >= SCROLL_DELAY)
+            {
+                switch (_buttonScroll)
+                {
+                    case ButtonScroll.LeftScrollUp:
+                        _shopScrollArea.Scroll(true);
+                        break;
+                    case ButtonScroll.LeftScrollDown:
+                        _shopScrollArea.Scroll(false);
+                        break;
+                    case ButtonScroll.RightScrollUp:
+                        _transactionScrollArea.Scroll(true);
+                        break;
+                    case ButtonScroll.RightScrollDown:
+                        _transactionScrollArea.Scroll(false);
+                        break;
+                }
+                _lastMouseEventTime = Time.Ticks;
+            }
+        }
+
 
         private void ShopItem_MouseDoubleClick(object sender, MouseDoubleClickEventArgs e)
         {
@@ -471,7 +487,7 @@ namespace ClassicUO.Game.UI.Gumps
                     shopItem.Graphic,
                     shopItem.Hue,
                     total,
-                    (ushort) shopItem.Price,
+                    shopItem.Price,
                     shopItem.ShopItemName
                 );
 
@@ -761,7 +777,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
-                ResetHueVector();
+                Vector3 hueVector;
 
                 if (SerialHelper.IsMobile(LocalSerial))
                 {
@@ -770,7 +786,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (direction != null && direction.SpriteInfos != null && direction.FrameCount != 0)
                     {
-                        ShaderHueTranslator.GetHueVector(ref HueVector, hue2, TileDataLoader.Instance.StaticData[Graphic].IsPartialHue, 0f);
+                        hueVector = ShaderHueTranslator.GetHueVector(hue2, TileDataLoader.Instance.StaticData[Graphic].IsPartialHue, 1f);
 
                         batcher.Draw
                         (
@@ -783,7 +799,7 @@ namespace ClassicUO.Game.UI.Gumps
                                 Math.Min(direction.SpriteInfos[0].UV.Height, 45)
                             ),
                             direction.SpriteInfos[0].UV,
-                            HueVector
+                            hueVector
                         );
                     }
                 }
@@ -791,7 +807,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     var texture = ArtLoader.Instance.GetStaticTexture(Graphic, out var bounds);
 
-                    ShaderHueTranslator.GetHueVector(ref HueVector, Hue, TileDataLoader.Instance.StaticData[Graphic].IsPartialHue, 0f);
+                    hueVector = ShaderHueTranslator.GetHueVector(Hue, TileDataLoader.Instance.StaticData[Graphic].IsPartialHue, 1f);
 
                     var rect = ArtLoader.Instance.GetRealArtBounds(Graphic);
 
@@ -829,7 +845,7 @@ namespace ClassicUO.Game.UI.Gumps
                             rect.Width,
                             rect.Height
                         ),
-                        HueVector
+                        hueVector
                     );
                 }
 
@@ -847,7 +863,7 @@ namespace ClassicUO.Game.UI.Gumps
                 ushort graphic,
                 ushort hue,
                 int amount,
-                ushort price,
+                uint price,
                 string realname
             )
             {
@@ -1018,7 +1034,7 @@ namespace ClassicUO.Game.UI.Gumps
             public ushort Graphic { get; }
             public ushort Hue { get; }
 
-            public ushort Price { get; }
+            public uint Price { get; }
 
             public int Amount
             {
@@ -1070,16 +1086,13 @@ namespace ClassicUO.Game.UI.Gumps
                 var texture1 = GumpsLoader.Instance.GetGumpTexture((ushort)(_graphic + 1), out var bounds1);
                 var texture2 = GumpsLoader.Instance.GetGumpTexture((ushort)(_graphic + 2), out var bounds2);
 
-                ResetHueVector();
-
-                ShaderHueTranslator.GetHueVector
-                (
-                    ref HueVector,
-                    0,
-                    false,
-                    Alpha,
-                    true
-                );
+                Vector3 hueVector = ShaderHueTranslator.GetHueVector
+                                    (
+                                        0,
+                                        false,
+                                        Alpha,
+                                        true
+                                    );
 
                 int middleWidth = Width - bounds0.Width - bounds2.Width;
 
@@ -1088,7 +1101,7 @@ namespace ClassicUO.Game.UI.Gumps
                     texture0,
                     new Vector2(x, y),
                     bounds0,
-                    HueVector
+                    hueVector
                 );
 
                 batcher.DrawTiled
@@ -1102,7 +1115,7 @@ namespace ClassicUO.Game.UI.Gumps
                         bounds1.Height
                     ),
                     bounds1,
-                    HueVector
+                    hueVector
                 );
 
                 batcher.Draw
@@ -1110,7 +1123,7 @@ namespace ClassicUO.Game.UI.Gumps
                     texture2,
                     new Vector2(x + Width - bounds2.Width, y),
                     bounds2,
-                    HueVector
+                    hueVector
                 );
 
                 return base.Draw(batcher, x, y);
@@ -1142,7 +1155,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 var texture = GumpsLoader.Instance.GetGumpTexture(_graphic, out var bounds);
 
-                ResetHueVector();
+                Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
                 if (_tiled)
                 {
@@ -1163,7 +1176,7 @@ namespace ClassicUO.Game.UI.Gumps
                             _rect.Width,
                             _rect.Height
                         ),
-                        HueVector
+                        hueVector
                     );
                 }
                 else
@@ -1185,7 +1198,7 @@ namespace ClassicUO.Game.UI.Gumps
                             _rect.Width,
                             _rect.Height
                         ),
-                        HueVector
+                        hueVector
                     );
                 }
 

@@ -120,7 +120,7 @@ namespace ClassicUO.Game.UI.Controls
 
             if (World.InGame)
             {
-                if (CanPickUp && !ItemHold.Enabled && Mouse.LButtonPressed && UIManager.LastControlMouseDown(MouseButtonType.Left) == this && (Mouse.LastLeftButtonClickTime != 0xFFFF_FFFF && Mouse.LastLeftButtonClickTime != 0 && Mouse.LastLeftButtonClickTime + Mouse.MOUSE_DELAY_DOUBLE_CLICK < Time.Ticks || CanPickup()))
+                if (CanPickUp && !Client.Game.GameCursor.ItemHold.Enabled && Mouse.LButtonPressed && UIManager.LastControlMouseDown(MouseButtonType.Left) == this && (Mouse.LastLeftButtonClickTime != 0xFFFF_FFFF && Mouse.LastLeftButtonClickTime != 0 && Mouse.LastLeftButtonClickTime + Mouse.MOUSE_DELAY_DOUBLE_CLICK < Time.Ticks || CanPickup()))
                 {
                     AttemptPickUp();
                 }
@@ -139,8 +139,6 @@ namespace ClassicUO.Game.UI.Controls
             }
 
             base.Draw(batcher, x, y);
-
-            ResetHueVector();
             
             bool partialHue = IsPartialHue;
             ushort hue = Hue;
@@ -151,7 +149,7 @@ namespace ClassicUO.Game.UI.Controls
                 partialHue = false;
             }
             
-            ShaderHueTranslator.GetHueVector(ref HueVector, hue, partialHue, 0);
+            Vector3 hueVector = ShaderHueTranslator.GetHueVector(hue, partialHue, 1);
 
             var texture = _is_gump ?
                    GumpsLoader.Instance.GetGumpTexture(Graphic, out Rectangle bounds)
@@ -167,7 +165,7 @@ namespace ClassicUO.Game.UI.Controls
                     texture,
                     rect,
                     bounds,
-                    HueVector
+                    hueVector
                 );
 
                 Item item = World.Items.Get(LocalSerial);
@@ -182,7 +180,7 @@ namespace ClassicUO.Game.UI.Controls
                        texture,
                        rect,
                        bounds,
-                       HueVector
+                       hueVector
                     );
                 }
             }

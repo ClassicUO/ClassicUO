@@ -124,6 +124,11 @@ namespace ClassicUO.IO.Resources
                     for (int j = 0; j < entry.Width; j++)
                     {
                         ushort val = _file.ReadByte();
+                        // Light can be from -31 to 31. When they are below 0 they are bit inverted
+                        if (val > 0x1F)
+                        {
+                            val = (ushort)(~val & 0x1F);
+                        }
                         uint rgb24 = (uint) ((val << 19) | (val << 11) | (val << 3));
 
                         if (val != 0)

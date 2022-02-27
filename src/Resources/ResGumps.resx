@@ -1418,7 +1418,7 @@ Client version: '{0}'</value>
     <value>You must have three unique skills chosen!</value>
   </data>
   <data name="ShowSkillsChangedMessageBy" xml:space="preserve">
-    <value>Inform when skills change by</value>
+    <value>Inform when skills change by (in tenths)</value>
   </data>
   <data name="ShowStatsChangedMessage" xml:space="preserve">
     <value>Inform when stats change</value>
@@ -1476,5 +1476,92 @@ Client version: '{0}'</value>
   </data>
   <data name="InvalidMarkerName" xml:space="preserve">
     <value>Invalid marker name.</value>
+  </data>
+  <data name="AddToIgnoreListExist" xml:space="preserve">
+    <value>Character {0} already exist in a list.</value>
+  </data>
+  <data name="AddToIgnoreListNotMobile" xml:space="preserve">
+    <value>This is not a player.</value>
+  </data>
+  <data name="AddToIgnoreListSuccess" xml:space="preserve">
+    <value>Added {0} to ignore list.</value>
+  </data>
+  <data name="IgnoreListAddButton" xml:space="preserve">
+    <value>Add person to ignore list</value>
+  </data>
+  <data name="IgnoreListManager" xml:space="preserve">
+    <value>Ignore List</value>
+  </data>
+  <data name="IgnoreListName" xml:space="preserve">
+    <value>Character name</value>
+  </data>
+  <data name="AddMarker" xml:space="preserve">
+    <value>Add Marker</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="CreateMarker" xml:space="preserve">
+    <value>Create</value>
+  </data>
+  <data name="Edit" xml:space="preserve">
+    <value>Edit</value>
+  </data>
+  <data name="EditMarker" xml:space="preserve">
+    <value>Edit Marker</value>
+  </data>
+  <data name="MarkerColor" xml:space="preserve">
+    <value>Color</value>
+  </data>
+  <data name="MarkerDefName" xml:space="preserve">
+    <value>MarkerName</value>
+  </data>
+  <data name="MarkerGoTo" xml:space="preserve">
+    <value>GoTo</value>
+  </data>
+  <data name="MarkerIcon" xml:space="preserve">
+    <value>Icon</value>
+  </data>
+  <data name="MarkerName" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="MarkerSearch" xml:space="preserve">
+    <value>Search:</value>
+  </data>
+  <data name="MarkersManager" xml:space="preserve">
+    <value>Markers Manager</value>
+  </data>
+  <data name="MarkerX" xml:space="preserve">
+    <value>X</value>
+  </data>
+  <data name="MarkerY" xml:space="preserve">
+    <value>Y</value>
+  </data>
+  <data name="DragSelectAnchoredHB" xml:space="preserve">
+    <value>Anchored Healthbar</value>
+  </data>
+  <data name="DragSelectStartingPosX" xml:space="preserve">
+    <value>Starting X position of health bars</value>
+  </data>
+  <data name="DragSelectStartingPosY" xml:space="preserve">
+    <value>Starting Y position of health bars</value>
+  </data>
+  <data name="MapZoneFileName" xml:space="preserve">
+    <value>Show/Hide '{0}'</value>
+  </data>
+  <data name="MapZoneNone" xml:space="preserve">
+    <value>&lt;none&gt;</value>
+  </data>
+  <data name="MapZoneOptions" xml:space="preserve">
+    <value>Grid and Zone Options</value>
+  </data>
+  <data name="MapZoneReload" xml:space="preserve">
+    <value>Reload Map Zones</value>
+  </data>
+  <data name="MapZoneFileLoaded" xml:space="preserve">
+    <value>WorldMap zones loaded '{0}' </value>
+  </data>
+  <data name="GridIfZoomed" xml:space="preserve">
+    <value>Show/Hide 8x8 Grid if Zoomed</value>
   </data>
 </root>

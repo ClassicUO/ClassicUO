@@ -254,12 +254,12 @@ namespace StbTextEditSharp
 
         public void Click(float x, float y)
         {
-            /*if (SingleLine)
-            {
-                var r = new TextEditRow();
-                r = Handler.LayoutRow(0);
-                y = r.ymin;
-            }*/
+            //if (SingleLine)
+            //{
+            //    var r = new TextEditRow();
+            //    r = Handler.LayoutRow(0);
+            //    y = r.ymin;
+            //}
 
             CursorIndex = LocateCoord(x, y);
             SelectStart = CursorIndex;
@@ -270,12 +270,12 @@ namespace StbTextEditSharp
         public void Drag(float x, float y)
         {
             int p = 0;
-            /*if (SingleLine)
-            {
-                var r = new TextEditRow();
-                r = Handler.LayoutRow(0);
-                y = r.ymin;
-            }*/
+            //if (SingleLine)
+            //{
+            //    var r = new TextEditRow();
+            //    r = Handler.LayoutRow(0);
+            //    y = r.ymin;
+            //}
 
             if (SelectStart == SelectEnd)
             {

@@ -91,7 +91,6 @@ namespace ClassicUO.Game.GameObjects
 
         public abstract bool CheckMouseSelection();
 
-        public int CurrentRenderIndex;
         // FIXME: remove it
         public sbyte FoliageIndex = -1;
         public ushort Graphic;
@@ -100,7 +99,6 @@ namespace ClassicUO.Game.GameObjects
         public short PriorityZ;
         public GameObject TNext;
         public GameObject TPrevious;
-        public byte UseInRender;
         public ushort X, Y;
         public sbyte Z;
         public GameObject RenderListNext;
@@ -220,7 +218,7 @@ namespace ClassicUO.Game.GameObjects
 
             for (; last != null; last = (TextObject) last.Previous)
             {
-                if (last.RenderedText != null && !last.RenderedText.IsDestroyed)
+                if (!string.IsNullOrEmpty(last.Text))
                 {
                     if (offY == 0 && last.Time < Time.Ticks)
                     {
@@ -228,9 +226,9 @@ namespace ClassicUO.Game.GameObjects
                     }
 
                     last.OffsetY = offY;
-                    offY += last.RenderedText.Height;
+                    offY += (int) last.TextSize.Y;
 
-                    last.RealScreenPosition.X = p.X - (last.RenderedText.Width >> 1);
+                    last.RealScreenPosition.X = p.X - (int)(last.TextSize.X * 0.5f);
                     last.RealScreenPosition.Y = p.Y - offY;
                 }
             }
@@ -254,13 +252,13 @@ namespace ClassicUO.Game.GameObjects
 
             for (TextObject item = (TextObject) TextContainer.Items; item != null; item = (TextObject) item.Next)
             {
-                if (item.RenderedText == null || item.RenderedText.IsDestroyed || item.RenderedText.Texture == null || item.Time < Time.Ticks)
+                if (string.IsNullOrEmpty(item.Text) || item.Time < Time.Ticks)
                 {
                     continue;
                 }
 
                 int startX = item.RealScreenPosition.X;
-                int endX = startX + item.RenderedText.Width;
+                int endX = startX + (int) item.TextSize.Y;
 
                 if (startX < minX)
                 {
@@ -370,8 +368,6 @@ namespace ClassicUO.Game.GameObjects
             IsPositionChanged = false;
             Hue = 0;
             Offset = Vector3.Zero;
-            CurrentRenderIndex = 0;
-            UseInRender = 0;
             RealScreenPosition = Point.Zero;
             _screenPosition = Point.Zero;
             IsFlipped = false;

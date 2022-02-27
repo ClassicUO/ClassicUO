@@ -141,9 +141,9 @@ namespace ClassicUO.Game
                     }
 
                     // force cursor update when switching map
-                    if (UIManager.GameCursor != null)
+                    if (Client.Game.GameCursor != null)
                     {
-                        UIManager.GameCursor.Graphic = 0xFFFF;
+                        Client.Game.GameCursor.Graphic = 0xFFFF;
                     }
                     
                     UoAssist.SignalMapChanged(value);
@@ -178,7 +178,7 @@ namespace ClassicUO.Game
                 {
                     for (int y = 0; y < 8; y++)
                     {
-                        for (GameObject obj = chunk.GetHeadObject(x, y); obj != null; obj = obj.TNext)
+                        for (GameObject obj = chunk?.GetHeadObject(x, y); obj != null; obj = obj.TNext)
                         {
                             obj.UpdateGraphicBySeason();
                         }

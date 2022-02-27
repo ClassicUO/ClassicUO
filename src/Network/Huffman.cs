@@ -30,6 +30,8 @@
 
 #endregion
 
+using System;
+
 namespace ClassicUO.Network
 {
     internal static class Huffman
@@ -1069,10 +1071,10 @@ namespace ClassicUO.Network
 
         public static bool DecompressChunk
         (
-            ref byte[] src,
+            Span<byte> src,
             ref int srcOffset,
             int srcLength,
-            ref byte[] dest,
+            Span<byte> dest,
             int destOffset,
             out int destLength
         )
