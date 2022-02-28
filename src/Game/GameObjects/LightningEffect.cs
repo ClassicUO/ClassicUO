@@ -36,7 +36,7 @@ namespace ClassicUO.Game.GameObjects
 {
     internal sealed partial class LightningEffect : GameEffect
     {
-        public LightningEffect(EffectManager manager, uint src, int x, int y, int z, ushort hue) 
+        public LightningEffect(EffectManager manager, uint src, ushort x, ushort y, sbyte z, ushort hue) 
             : base(manager, 0x4E20, hue, 400, 0)
         {
             IsEnabled = true;
@@ -72,15 +72,11 @@ namespace ClassicUO.Game.GameObjects
                         NextChangeFrameTime = (long) totalTime + IntervalInMs;
                     }
 
-                    (int x, int y, int z) = GetSource();
+                    (var x, var y, var z) = GetSource();
 
                     if (X != x || Y != y || Z != z)
                     {
-                        X = (ushort) x;
-                        Y = (ushort) y;
-                        Z = (sbyte) z;
-                        UpdateScreenPosition();
-                        AddToTile();
+                        SetInWorldTile(x, y, z);
                     }
                 }
             }

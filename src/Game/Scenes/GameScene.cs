@@ -828,22 +828,15 @@ namespace ClassicUO.Game.Scenes
                     y = (ushort) (y - TargetManager.MultiTargetInfo.YOff);
                     z = (sbyte) (groundZ - TargetManager.MultiTargetInfo.ZOff);
 
-                    _multi.X = x;
-                    _multi.Y = y;
-                    _multi.Z = z;
-                    _multi.UpdateScreenPosition();
+                    _multi.SetInWorldTile(x, y, z);
                     _multi.CheckGraphicChange();
-                    _multi.AddToTile();
+
                     World.HouseManager.TryGetHouse(_multi.Serial, out House house);
 
                     foreach (Multi s in house.Components)
                     {
                         s.IsHousePreview = true;
-                        s.X = (ushort) (_multi.X + s.MultiOffsetX);
-                        s.Y = (ushort) (_multi.Y + s.MultiOffsetY);
-                        s.Z = (sbyte) (_multi.Z + s.MultiOffsetZ);
-                        s.UpdateScreenPosition();
-                        s.AddToTile();
+                        s.SetInWorldTile((ushort)(_multi.X + s.MultiOffsetX), (ushort)(_multi.Y + s.MultiOffsetY), (sbyte)(_multi.Z + s.MultiOffsetZ));
                     }
                 }
             }

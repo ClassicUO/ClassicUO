@@ -780,16 +780,9 @@ namespace ClassicUO.Network
             {
                 World.MapIndex = 0;
             }
-
-            Direction direction = (Direction) (p.ReadUInt8() & 0x7);
-
-            World.Player.X = x;
-            World.Player.Y = y;
-            World.Player.Z = z;
-            World.Player.UpdateScreenPosition();
-            World.Player.Direction = direction;
-            World.Player.AddToTile();
-
+            
+            World.Player.SetInWorldTile(x, y, z);
+            World.Player.Direction = (Direction)(p.ReadUInt8() & 0x7);
             World.RangeSize.X = x;
             World.RangeSize.Y = y;
 
@@ -1536,8 +1529,8 @@ namespace ClassicUO.Network
                                 Console.WriteLine("=== DENY === ADD TO TERRAIN");
 
                                 World.RemoveItemFromContainer(item);
-                                item.AddToTile();
-                                item.UpdateScreenPosition();
+                               
+                                item.SetInWorldTile(item.X, item.Y, item.Z);
                             }
                         }
                     }
@@ -5668,11 +5661,8 @@ namespace ClassicUO.Network
                 //                 0, 
                 //                 2, 
                 //                 1);
-                multi.X = x;
-                multi.Y = y;
-                multi.Z = (sbyte) z;
-                multi.AddToTile();
-                multi.UpdateScreenPosition();
+
+                multi.SetInWorldTile(x, y, (sbyte)z);
 
                 if (World.HouseManager.TryGetHouse(serial, out House house))
                 {
@@ -6108,9 +6098,7 @@ namespace ClassicUO.Network
                 if (type == 2)
                 {
                     item.IsMulti = true;
-
                     item.WantUpdateMulti = (graphic & 0x3FFF) != item.Graphic || item.X != x || item.Y != y || item.Z != z;
-
                     item.Graphic = (ushort) (graphic & 0x3FFF);
                 }
                 else
@@ -6205,8 +6193,7 @@ namespace ClassicUO.Network
 
             if (mobile != null)
             {
-                mobile.AddToTile();
-                mobile.UpdateScreenPosition();
+                mobile.SetInWorldTile(mobile.X, mobile.Y, mobile.Z);
 
                 if (created)
                 {
@@ -6233,8 +6220,7 @@ namespace ClassicUO.Network
 
                 if (item.OnGround)
                 {
-                    item.AddToTile();
-                    item.UpdateScreenPosition();
+                    item.SetInWorldTile(item.X, item.Y, item.Z);
 
                     if (graphic == 0x2006 && ProfileManager.CurrentProfile.AutoOpenCorpses)
                     {
@@ -6260,27 +6246,20 @@ namespace ClassicUO.Network
         {
             if (serial == World.Player)
             {
-                World.Player.CloseBank();
-
-                World.Player.Walker.WalkingFailed = false;
-
-                World.Player.X = x;
-                World.Player.Y = y;
-                World.Player.Z = z;
-
                 World.RangeSize.X = x;
                 World.RangeSize.Y = y;
 
                 bool olddead = World.Player.IsDead;
                 ushort old_graphic = World.Player.Graphic;
 
+                World.Player.CloseBank();
+                World.Player.Walker.WalkingFailed = false;
                 World.Player.Graphic = graphic;
                 World.Player.Direction = direction & Direction.Mask;
                 World.Player.FixHue(hue);
-
                 World.Player.Flags = flags;
-
                 World.Player.Walker.DenyWalk(0xFF, -1, -1, -1);
+
                 GameScene gs = Client.Game.GetScene<GameScene>();
 
                 if (gs != null)
@@ -6311,10 +6290,7 @@ namespace ClassicUO.Network
 
                 World.Player.Walker.ResendPacketResync = false;
                 World.Player.CloseRangedGumps();
-
-                World.Player.UpdateScreenPosition();
-                World.Player.AddToTile();
-
+                World.Player.SetInWorldTile(x, y, z);
                 World.Player.UpdateAbilities();
             }
         }

@@ -127,12 +127,7 @@ namespace ClassicUO.Game
 
                         Map = new Map.Map(value);
 
-                        Player.X = x;
-                        Player.Y = y;
-                        Player.Z = z;
-                        Player.UpdateScreenPosition();
-                        Player.AddToTile();
-
+                        Player.SetInWorldTile(x, y, z);
                         Player.ClearSteps();
                     }
                     else

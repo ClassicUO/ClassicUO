@@ -79,13 +79,10 @@ namespace ClassicUO.Game.GameObjects
         {
             Multi m = Multi.Create(graphic);
             m.Hue = hue;
-            m.X = x;
-            m.Y = y;
-            m.Z = z;
-            m.UpdateScreenPosition();
             m.IsCustom = iscustom;
             m.IsMovable = ismovable;
-            m.AddToTile();
+
+            m.SetInWorldTile(x, y, z);
 
             Components.Add(m);
 
@@ -146,13 +143,8 @@ namespace ClassicUO.Game.GameObjects
                 {
                     if (recalculate)
                     {
-                        s.X = (ushort) (item.X + s.MultiOffsetX);
-                        s.Y = (ushort) (item.Y + s.MultiOffsetY);
-                        s.Z = (sbyte) (item.Z + s.MultiOffsetZ);
-                        s.UpdateScreenPosition();
+                        s.SetInWorldTile((ushort)(item.X + s.MultiOffsetX), (ushort)(item.Y + s.MultiOffsetY), (sbyte)(item.Z + s.MultiOffsetZ));
                         s.Offset = Vector3.Zero;
-                        //s.LastX = s.X;
-                        //s.LastY = s.Y;
                     }
 
 
@@ -166,9 +158,9 @@ namespace ClassicUO.Game.GameObjects
                     //s.IsCustom = IsCustom;
                 }
 
-                if (pushtotile)
+                if (!pushtotile)
                 {
-                    s.AddToTile();
+                    s.RemoveFromTile();
                 }
             }
 

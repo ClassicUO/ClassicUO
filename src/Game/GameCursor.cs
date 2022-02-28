@@ -286,12 +286,8 @@ namespace ClassicUO.Game
                                         break;
                                     }
 
-                                    _temp[i].X = (ushort) (selectedObj.X + item.X);
-                                    _temp[i].Y = (ushort) (selectedObj.Y + item.Y);
-                                    _temp[i].Z = (sbyte) (selectedObj.Z + z + item.Z);
+                                    _temp[i].SetInWorldTile((ushort)(selectedObj.X + item.X), (ushort)(selectedObj.Y + item.Y), (sbyte)(selectedObj.Z + z + item.Z));
                                     _temp[i].UpdateRealScreenPosition(gs.ScreenOffset.X, gs.ScreenOffset.Y);
-                                    _temp[i].UpdateScreenPosition();
-                                    _temp[i].AddToTile();
                                 }
                             }
                         }

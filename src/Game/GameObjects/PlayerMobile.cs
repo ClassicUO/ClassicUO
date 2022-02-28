@@ -60,138 +60,76 @@ namespace ClassicUO.Game.GameObjects
         }
 
         public Skill[] Skills { get; }
-
         public override bool InWarMode { get; set; }
-
         public IReadOnlyDictionary<BuffIconType, BuffIcon> BuffIcons => _buffIcons;
 
-
-        public Ability PrimaryAbility
-        {
-            get => Abilities[0];
-            set => Abilities[0] = value;
-        }
-
-        public Ability SecondaryAbility
-        {
-            get => Abilities[1];
-            set => Abilities[1] = value;
-        }
-
+        public ref Ability PrimaryAbility => ref Abilities[0];
+        public ref Ability SecondaryAbility => ref Abilities[1];
         protected override bool IsWalking => LastStepTime > Time.Ticks - Constants.PLAYER_WALKING_DELAY;
-
 
         internal WalkerManager Walker { get; } = new WalkerManager();
         public Ability[] Abilities = new Ability[2]
         {
             Ability.Invalid, Ability.Invalid
         };
+
         //private bool _lastRun, _lastMount;
         //private int _lastDir = -1, _lastDelta, _lastStepTime;
 
 
         public readonly HashSet<uint> AutoOpenedCorpses = new HashSet<uint>();
-
-        public short ColdResistance;
-
-        public short DamageIncrease;
-
-        public short DamageMax;
-
-        public short DamageMin;
-
-        public long DeathScreenTimer;
-
-        public short DefenseChanceIncrease;
-
-        public Lock DexLock;
-
-        public ushort Dexterity;
-
-        public short DexterityIncrease;
-
-        public short EnergyResistance;
-
-        public short EnhancePotions;
-
-        public short FasterCasting;
-
-        public short FasterCastRecovery;
-
-        public short FireResistance;
-
-        public byte Followers;
-
-        public byte FollowersMax;
-
-        public uint Gold;
-
-        public short HitChanceIncrease;
-
-        public short HitPointsIncrease;
-
-        public short HitPointsRegeneration;
-
-        public ushort Intelligence;
-
-        public short IntelligenceIncrease;
-
-        public Lock IntLock;
-
-        public short LowerManaCost;
-
-        public short LowerReagentCost;
-
-        public ushort Luck;
-
-        public short ManaIncrease;
-
-        public short ManaRegeneration;
         public readonly HashSet<uint> ManualOpenedCorpses = new HashSet<uint>();
 
+        public short ColdResistance;
+        public short DamageIncrease;
+        public short DamageMax;
+        public short DamageMin;
+        public long DeathScreenTimer;
+        public short DefenseChanceIncrease;
+        public Lock DexLock;
+        public ushort Dexterity;
+        public short DexterityIncrease;
+        public short EnergyResistance;
+        public short EnhancePotions;
+        public short FasterCasting;
+        public short FasterCastRecovery;
+        public short FireResistance;
+        public byte Followers;
+        public byte FollowersMax;
+        public uint Gold;
+        public short HitChanceIncrease;
+        public short HitPointsIncrease;
+        public short HitPointsRegeneration;
+        public ushort Intelligence;
+        public short IntelligenceIncrease;
+        public Lock IntLock;
+        public short LowerManaCost;
+        public short LowerReagentCost;
+        public ushort Luck;
+        public short ManaIncrease;
+        public short ManaRegeneration;      
         public short MaxColdResistence;
-
         public short MaxDefenseChanceIncrease;
-
         public short MaxEnergyResistence;
-
         public short MaxFireResistence;
-
         public short MaxHitPointsIncrease;
-
         public short MaxManaIncrease;
-
         public short MaxPhysicResistence;
-
         public short MaxPoisonResistence;
-
         public short MaxStaminaIncrease;
-
         public short PhysicalResistance;
-
         public short PoisonResistance;
-
         public short ReflectPhysicalDamage;
         public short SpellDamageIncrease;
-
         public short StaminaIncrease;
-
         public short StaminaRegeneration;
-
         public short StatsCap;
-
         public ushort Strength;
-
         public short StrengthIncrease;
-
         public Lock StrLock;
-
         public short SwingSpeedIncrease;
-
         public uint TithingPoints;
-
         public ushort Weight;
-
         public ushort WeightMax;
 
         public Item FindBandage()
@@ -1503,30 +1441,30 @@ namespace ClassicUO.Game.GameObjects
         }
 
 
-        public override void Update(double totalTime, double frameTime)
-        {
-            base.Update(totalTime, frameTime);
+        //public override void Update(double totalTime, double frameTime)
+        //{
+        //    base.Update(totalTime, frameTime);
 
-            //const int TIME_TURN_TO_LASTTARGET = 2000;
+        //    //const int TIME_TURN_TO_LASTTARGET = 2000;
 
-            //if (TargetManager.LastAttack != 0 && 
-            //    InWarMode && 
-            //    Walker.LastStepRequestTime + TIME_TURN_TO_LASTTARGET < Time.Ticks)
-            //{
-            //    Mobile enemy = World.Mobiles.Get(TargetManager.LastAttack);
+        //    //if (TargetManager.LastAttack != 0 && 
+        //    //    InWarMode && 
+        //    //    Walker.LastStepRequestTime + TIME_TURN_TO_LASTTARGET < Time.Ticks)
+        //    //{
+        //    //    Mobile enemy = World.Mobiles.Get(TargetManager.LastAttack);
 
-            //    if (enemy != null && enemy.Distance <= 1)
-            //    {
-            //        Direction pdir = DirectionHelper.GetDirectionAB(World.Player.X,
-            //                                                        World.Player.Y, 
-            //                                                        enemy.X,
-            //                                                        enemy.Y);
+        //    //    if (enemy != null && enemy.Distance <= 1)
+        //    //    {
+        //    //        Direction pdir = DirectionHelper.GetDirectionAB(World.Player.X,
+        //    //                                                        World.Player.Y, 
+        //    //                                                        enemy.X,
+        //    //                                                        enemy.Y);
 
-            //        if (Direction != pdir)
-            //            Walk(pdir, false);
-            //    }
-            //}
-        }
+        //    //        if (Direction != pdir)
+        //    //            Walk(pdir, false);
+        //    //    }
+        //    //}
+        //}
 
         // ############# DO NOT DELETE IT! #############
         //protected override bool NoIterateAnimIndex()
