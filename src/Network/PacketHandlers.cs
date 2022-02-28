@@ -4128,28 +4128,31 @@ namespace ClassicUO.Network
                         short charges = (short)p.ReadUInt16BE();
                         string attr = ClilocLoader.Instance.GetString((int)next);
 
-                        if (charges == -1)
+                        if (attr != null)
                         {
-                            if (count > 0)
+                            if (charges == -1)
                             {
-                                strBuffer.Append("/");
-                                strBuffer.Append(attr);
+                                if (count > 0)
+                                {
+                                    strBuffer.Append("/");
+                                    strBuffer.Append(attr);
+                                }
+                                else
+                                {
+                                    strBuffer.Append(" [");
+                                    strBuffer.Append(attr);
+                                }
                             }
                             else
                             {
-                                strBuffer.Append(" [");
+                                strBuffer.Append("\n[");
                                 strBuffer.Append(attr);
+                                strBuffer.Append(" : ");
+                                strBuffer.Append(charges.ToString());
+                                strBuffer.Append("]");
+                                count += 20;
                             }
-                        }
-                        else
-                        {
-                            strBuffer.Append("\n[");
-                            strBuffer.Append(attr);
-                            strBuffer.Append(" : ");
-                            strBuffer.Append(charges.ToString());
-                            strBuffer.Append("]");
-                            count += 20;
-                        }
+                        }                      
 
                         count++;
                     }

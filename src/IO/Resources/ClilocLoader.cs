@@ -176,7 +176,7 @@ namespace ClassicUO.IO.Resources
         {
             _entries.TryGetValue(number, out string text);
 
-            return text ?? string.Empty;
+            return text;
         }
 
         public string GetString(int number, string replace)
