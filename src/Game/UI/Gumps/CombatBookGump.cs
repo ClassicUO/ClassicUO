@@ -482,7 +482,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             _primAbility.IsVisible = _secAbility.IsVisible = page <= _dictionaryPagesCount - _abilityCount;
 
-            Client.Game.Scene.Audio.PlaySound(0x0055);
+            Client.Game.Audio.PlaySound(0x0055);
         }
 
 

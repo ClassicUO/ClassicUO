@@ -89,6 +89,8 @@ namespace ClassicUO
 
         public Scene Scene { get; private set; }
         public GameCursor GameCursor { get; private set; }
+        public AudioManager Audio { get; private set; }
+
 
         public GraphicsDeviceManager GraphicManager { get; }
         public readonly uint[] FrameDelay = new uint[2];
@@ -152,6 +154,8 @@ namespace ClassicUO
             AnimatedStaticsManager.Initialize();
 
             GameCursor = new GameCursor();
+            Audio = new AudioManager();
+            Audio.Initialize();
 
             SetScene(new LoginScene());
             SetWindowPositionBySettings();
@@ -170,7 +174,7 @@ namespace ClassicUO
 
             Settings.GlobalSettings.WindowPosition = new Point(Math.Max(0, Window.ClientBounds.X - left), Math.Max(0, Window.ClientBounds.Y - top));
 
-            Scene?.Unload();
+            Audio?.StopMusic();
             Settings.GlobalSettings.Save();
             Plugin.OnClosing();
 
@@ -436,6 +440,7 @@ namespace ClassicUO
             }
 
             GameCursor?.Update(gameTime.ElapsedGameTime.TotalMilliseconds, gameTime.TotalGameTime.TotalMilliseconds);
+            Audio?.Update();
 
             base.Update(gameTime);
         }

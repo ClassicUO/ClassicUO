@@ -43,11 +43,10 @@ namespace ClassicUO.Game.Scenes
     {
         private uint _time_cleanup = Time.Ticks + 5000;
 
-        protected Scene(int sceneID, bool canresize, bool maximized, bool loadaudio)
+        protected Scene(int sceneID, bool canresize, bool maximized)
         {
             CanResize = canresize;
             CanBeMaximized = maximized;
-            CanLoadAudio = loadaudio;
             Camera = new Camera();
         }
 
@@ -56,8 +55,6 @@ namespace ClassicUO.Game.Scenes
         public bool IsLoaded { get; private set; }
 
         public int RenderedObjectsCount { get; protected set; }
-
-        public AudioManager Audio { get; set; }
 
         public Camera Camera { get; }
 
@@ -73,8 +70,7 @@ namespace ClassicUO.Game.Scenes
         }
 
         public virtual void Update(double totalTime, double frameTime)
-        {
-            Audio?.Update();
+        {           
             Camera.Update();
 
             if (_time_cleanup < Time.Ticks)
@@ -94,18 +90,12 @@ namespace ClassicUO.Game.Scenes
 
         public virtual void Load()
         {
-            if (CanLoadAudio)
-            {
-                Audio = new AudioManager();
-                Audio.Initialize();
-            }
-
             IsLoaded = true;
         }
 
         public virtual void Unload()
         {
-            Audio?.StopMusic();
+            
         }
 
         public virtual bool Draw(UltimaBatcher2D batcher)

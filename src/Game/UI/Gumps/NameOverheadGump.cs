@@ -415,7 +415,7 @@ namespace ClassicUO.Game.UI.Gumps
                             }
                             else
                             {
-                                Client.Game.Scene.Audio.PlaySound(0x0051);
+                                Client.Game.Audio.PlaySound(0x0051);
                             }
 
                             if (can_drop)

@@ -226,7 +226,7 @@ namespace ClassicUO.Game
                 randY *= -1;
             }
 
-            Client.Game.Scene.Audio.PlaySoundWithDistance(sound, World.Player.X + randX, World.Player.Y + randY);
+            Client.Game.Audio.PlaySoundWithDistance(sound, World.Player.X + randX, World.Player.Y + randY);
         }
 
         public void Draw(UltimaBatcher2D batcher, int x, int y)

@@ -79,7 +79,7 @@ namespace ClassicUO.Game.Scenes
         private int _reconnectTryCounter = 1;
         private bool _autoLogin;
 
-        public LoginScene() : base((int) SceneType.Login, false, false, true)
+        public LoginScene() : base((int) SceneType.Login, false, false)
         {
         }
 
@@ -98,7 +98,7 @@ namespace ClassicUO.Game.Scenes
 
         public byte ServerIndex { get; private set; }
 
-        public static string Account { get; private set; }
+        public static string Account { get; internal set; }
 
         public string Password { get; private set; }
 
@@ -120,7 +120,7 @@ namespace ClassicUO.Game.Scenes
             NetClient.LoginSocket.Connected += NetClient_Connected;
             NetClient.LoginSocket.Disconnected += Login_NetClient_Disconnected;
 
-            Audio.PlayMusic(Audio.LoginMusicIndex, false, true);
+            Client.Game.Audio.PlayMusic(Client.Game.Audio.LoginMusicIndex, false, true);
 
             if (CanAutologin && CurrentLoginStep != LoginSteps.Main || CUOEnviroment.SkipLoginScreen)
             {
@@ -143,6 +143,9 @@ namespace ClassicUO.Game.Scenes
 
         public override void Unload()
         {
+            Client.Game.Audio?.StopMusic();
+            Client.Game.Audio?.StopSounds();
+
             UIManager.GetGump<LoginBackground>()?.Dispose();
 
             _currentGump?.Dispose();
