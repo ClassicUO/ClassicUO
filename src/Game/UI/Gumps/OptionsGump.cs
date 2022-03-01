@@ -3774,17 +3774,17 @@ namespace ClassicUO.Game.UI.Gumps
             Settings.GlobalSettings.LoginMusicVolume = _loginMusicVolume.Value;
             Settings.GlobalSettings.LoginMusic = _loginMusic.IsChecked;
 
-            Client.Game.Scene.Audio.UpdateCurrentMusicVolume();
-            Client.Game.Scene.Audio.UpdateCurrentSoundsVolume();
+            Client.Game.Audio.UpdateCurrentMusicVolume();
+            Client.Game.Audio.UpdateCurrentSoundsVolume();
 
             if (!_currentProfile.EnableMusic)
             {
-                Client.Game.Scene.Audio.StopMusic();
+                Client.Game.Audio.StopMusic();
             }
 
             if (!_currentProfile.EnableSound)
             {
-                Client.Game.Scene.Audio.StopSounds();
+                Client.Game.Audio.StopSounds();
             }
 
             // speech

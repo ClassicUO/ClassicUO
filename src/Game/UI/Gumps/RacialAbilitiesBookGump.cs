@@ -366,7 +366,7 @@ namespace ClassicUO.Game.UI.Gumps
             _pageCornerLeft.Page = ActivePage != 1 ? 0 : int.MaxValue;
             _pageCornerRight.Page = ActivePage != _pagesCount ? 0 : int.MaxValue;
 
-            Client.Game.Scene.Audio.PlaySound(0x0055);
+            Client.Game.Audio.PlaySound(0x0055);
         }
 
         public override void Update(double totalTime, double frameTime)

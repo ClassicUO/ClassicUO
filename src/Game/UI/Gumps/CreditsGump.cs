@@ -41,7 +41,7 @@ Ultima Online(R) 2021 Electronic Arts Inc. All Rights Reserved.
 
         public CreditsGump() : base(0, 0)
         {
-            Client.Game.Scene.Audio.PlayMusic(8, false, true);
+            Client.Game.Audio.PlayMusic(8, false, true);
 
             LayerOrder = UILayer.Over;
             CanCloseWithRightClick = true;

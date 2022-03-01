@@ -259,7 +259,7 @@ namespace ClassicUO.Game.UI.Gumps
             ActivePage = 1;
             UpdatePageButtonVisibility();
 
-            Client.Game.Scene.Audio.PlaySound(0x0055);
+            Client.Game.Audio.PlaySound(0x0055);
         }
 
         private void PageZero_TextChanged(object sender, EventArgs e)
@@ -304,7 +304,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (page != ActivePage)
             {
-                Client.Game.Scene.Audio.PlaySound(0x0055);
+                Client.Game.Audio.PlaySound(0x0055);
             }
 
             //Non-editable books may only have data for the currently displayed pages,

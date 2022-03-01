@@ -467,7 +467,7 @@ namespace ClassicUO.Game.Scenes
                     }
                     else
                     {
-                        Client.Game.Scene.Audio.PlaySound(0x0051);
+                        Client.Game.Audio.PlaySound(0x0051);
                     }
                 }
                 else if (gobj is Land || gobj is Static || gobj is Multi)
@@ -496,7 +496,7 @@ namespace ClassicUO.Game.Scenes
                     }
                     else
                     {
-                        Client.Game.Scene.Audio.PlaySound(0x0051);
+                        Client.Game.Audio.PlaySound(0x0051);
                     }
                 }
 

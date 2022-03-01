@@ -579,7 +579,7 @@ namespace ClassicUO.Game.GameObjects
 
                     StepSoundOffset = (incID + 1) % 2;
 
-                    Client.Game.Scene.Audio.PlaySoundWithDistance(soundID, step.X, step.Y);
+                    Client.Game.Audio.PlaySoundWithDistance(soundID, step.X, step.Y);
                     LastStepSoundTime = ticks + delaySound;
                 }
             }

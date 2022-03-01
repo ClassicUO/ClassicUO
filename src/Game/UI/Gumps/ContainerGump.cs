@@ -131,7 +131,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_data.OpenSound != 0 && playsound)
             {
-                Client.Game.Scene.Audio.PlaySound(_data.OpenSound);
+                Client.Game.Audio.PlaySound(_data.OpenSound);
             }
         }
 
@@ -324,7 +324,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (!candrop && Client.Game.GameCursor.ItemHold.Enabled && !Client.Game.GameCursor.ItemHold.IsFixedPosition)
                 {
-                    Client.Game.Scene.Audio.PlaySound(0x0051);
+                    Client.Game.Audio.PlaySound(0x0051);
                 }
 
                 if (candrop && Client.Game.GameCursor.ItemHold.Enabled && !Client.Game.GameCursor.ItemHold.IsFixedPosition)
@@ -651,7 +651,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_data.ClosedSound != 0)
             {
-                Client.Game.Scene.Audio.PlaySound(_data.ClosedSound);
+                Client.Game.Audio.PlaySound(_data.ClosedSound);
             }
         }
 

@@ -182,7 +182,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             RequestUpdateContents();
 
-            Client.Game.Scene.Audio.PlaySound(0x0055);
+            Client.Game.Audio.PlaySound(0x0055);
         }
 
 
@@ -204,7 +204,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Dispose()
         {
-            Client.Game.Scene.Audio.PlaySound(0x0055);
+            Client.Game.Audio.PlaySound(0x0055);
             UIManager.SavePosition(LocalSerial, Location);
             base.Dispose();
         }
@@ -1265,7 +1265,7 @@ namespace ClassicUO.Game.UI.Gumps
             _pageCornerLeft.Page = _dataBox.ActivePage != 1 ? 0 : int.MaxValue;
             _pageCornerRight.Page = _dataBox.ActivePage != _maxPage ? 0 : int.MaxValue;
 
-            Client.Game.Scene.Audio.PlaySound(0x0055);
+            Client.Game.Audio.PlaySound(0x0055);
         }
 
 

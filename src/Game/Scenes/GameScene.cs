@@ -102,7 +102,7 @@ namespace ClassicUO.Game.Scenes
         private RenderTarget2D _world_render_target, _lightRenderTarget;
 
 
-        public GameScene() : base((int) SceneType.Game, true, true, false)
+        public GameScene() : base((int) SceneType.Game, true, true)
         {
         }
 
@@ -330,8 +330,10 @@ namespace ClassicUO.Game.Scenes
 
         public override void Unload()
         {
-            Client.Game.SetWindowTitle(string.Empty);
+            Client.Game.Audio?.StopMusic();
+            Client.Game.Audio?.StopSounds();
 
+            Client.Game.SetWindowTitle(string.Empty);
             Client.Game.GameCursor.ItemHold.Clear();
 
             try

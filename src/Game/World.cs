@@ -41,6 +41,9 @@ using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Utility.Platforms;
 using Microsoft.Xna.Framework;
 using MathHelper = ClassicUO.Utility.MathHelper;
+using ClassicUO.Configuration;
+using ClassicUO.Game.Scenes;
+using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game
 {
@@ -52,7 +55,7 @@ namespace ClassicUO.Game
 
         public static Point RangeSize;
 
-        public static PlayerMobile Player;
+        public static PlayerMobile Player { get; private set; }
 
         public static HouseCustomizationManager CustomHouseManager;
 
@@ -163,6 +166,26 @@ namespace ClassicUO.Game
         public static string ServerName { get; set; }
 
 
+
+        public static void CreatePlayer(uint serial)
+        {
+            if (ProfileManager.CurrentProfile == null)
+            {
+                string lastChar = LastCharacterManager.GetLastCharacter(LoginScene.Account, World.ServerName);
+                ProfileManager.Load(World.ServerName, LoginScene.Account, lastChar);
+            }
+
+            if (Player != null)
+            {
+                Clear();
+            }
+
+            Player = new PlayerMobile(serial);
+            Mobiles.Add(Player);
+
+            Log.Trace($"Player [0x{serial:X8}] created");
+        }
+
         public static void ChangeSeason(Season season, int music)
         {
             Season = season;
@@ -182,10 +205,10 @@ namespace ClassicUO.Game
             }
 
             //TODO(deccer): refactor this out into _audioPlayer.PlayMusic(...)
-            UOMusic currentMusic = Client.Game.Scene.Audio.GetCurrentMusic();
-            if (currentMusic == null || currentMusic.Index == Client.Game.Scene.Audio.LoginMusicIndex)
+            UOMusic currentMusic = Client.Game.Audio.GetCurrentMusic();
+            if (currentMusic == null || currentMusic.Index == Client.Game.Audio.LoginMusicIndex)
             {
-                Client.Game.Scene.Audio.PlayMusic(music, false);
+                Client.Game.Audio.PlayMusic(music, false);
             }
         }
 

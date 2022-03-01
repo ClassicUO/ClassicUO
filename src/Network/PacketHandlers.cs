@@ -756,19 +756,11 @@ namespace ClassicUO.Network
         }
 
         private static void EnterWorld(ref StackDataReader p)
-        {
-            if (ProfileManager.CurrentProfile == null)
-            {
-                string lastChar = LastCharacterManager.GetLastCharacter(LoginScene.Account, World.ServerName);
-                ProfileManager.Load(World.ServerName, LoginScene.Account, lastChar);
-            }
+        {         
+            uint serial = p.ReadUInt32BE();
 
-            if (World.Player != null)
-            {
-                World.Clear();
-            }
+            World.CreatePlayer(serial);
 
-            World.Mobiles.Add(World.Player = new PlayerMobile(p.ReadUInt32BE()));
             p.Skip(4);
             World.Player.Graphic = p.ReadUInt16BE();
             World.Player.CheckGraphicChange();
@@ -791,7 +783,7 @@ namespace ClassicUO.Network
                 World.Light.Overall = ProfileManager.CurrentProfile.LightLevel;
             }
 
-            Client.Game.Scene.Audio.UpdateCurrentMusicVolume();
+            Client.Game.Audio.UpdateCurrentMusicVolume();
 
             if (Client.Version >= Data.ClientVersion.CV_200)
             {
@@ -1200,7 +1192,7 @@ namespace ClassicUO.Network
                 spellbookGump.Location = location;
                 UIManager.Add(spellbookGump);
 
-                Client.Game.Scene.Audio.PlaySound(0x0055);
+                Client.Game.Audio.PlaySound(0x0055);
             }
             else if (graphic == 0x0030)
             {
@@ -1604,7 +1596,7 @@ namespace ClassicUO.Network
             {
                 Client.Game.GetScene<GameScene>()?.Weather?.Reset();
 
-                Client.Game.Scene.Audio.PlayMusic(Client.Game.Scene.Audio.DeathMusicIndex, true);
+                Client.Game.Audio.PlayMusic(Client.Game.Audio.DeathMusicIndex, true);
 
                 if (ProfileManager.CurrentProfile.EnableDeathScreen)
                 {
@@ -2038,23 +2030,21 @@ namespace ClassicUO.Network
             ushort y = p.ReadUInt16BE();
             short z = (short) p.ReadUInt16BE();
 
-            Client.Game.Scene.Audio.PlaySoundWithDistance(index, x, y);
+            Client.Game.Audio.PlaySoundWithDistance(index, x, y);
         }
 
         private static void PlayMusic(ref StackDataReader p)
         {
             ushort index = p.ReadUInt16BE();
 
-            Client.Game.Scene.Audio.PlayMusic(index);
+            Client.Game.Audio.PlayMusic(index);
         }
 
         private static void LoginComplete(ref StackDataReader p)
         {
             if (World.Player != null && Client.Game.Scene is LoginScene)
             {
-                GameScene scene = new GameScene();
-                scene.Audio = Client.Game.Scene.Audio;
-                Client.Game.Scene.Audio = null;
+                var scene = new GameScene();
                 Client.Game.SetScene(scene);
 
                 //GameActions.OpenPaperdoll(World.Player);

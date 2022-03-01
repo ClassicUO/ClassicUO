@@ -64,11 +64,11 @@ namespace ClassicUO.Game
             {
                 if (war && ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.EnableMusic)
                 {
-                    Client.Game.Scene.Audio.PlayMusic((RandomHelper.GetValue(0, 3) % 3) + 38, true);
+                    Client.Game.Audio.PlayMusic((RandomHelper.GetValue(0, 3) % 3) + 38, true);
                 }
                 else if (!war)
                 {
-                    Client.Game.Scene.Audio.StopWarMusic();
+                    Client.Game.Audio.StopWarMusic();
                 }
             }
 
@@ -128,7 +128,7 @@ namespace ClassicUO.Game
 
         public static void OpenStatusBar()
         {
-            Client.Game.Scene.Audio.StopWarMusic();
+            Client.Game.Audio.StopWarMusic();
 
             if (StatusGumpBase.GetStatusGump() == null)
             {
