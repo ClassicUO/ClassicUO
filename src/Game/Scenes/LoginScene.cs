@@ -284,6 +284,8 @@ namespace ClassicUO.Game.Scenes
                 {
                     case LoginSteps.Connecting:
                         labelText = ClilocLoader.Instance.GetString(3000002, ResGeneral.Connecting); // "Connecting..."
+                        
+                        showButtons = LoginButtons.Cancel;
 
                         break;
 
