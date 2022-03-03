@@ -87,7 +87,7 @@ namespace ClassicUO.Game.GameObjects
                 i.IsClicked = false;
                 i.IsDamageable = false;
                 i.Offset = Vector3.Zero;
-
+                i.HitsPercentage = 0;
                 i.Opened = false;
                 i.TextContainer?.Clear();
                 i.IsFlipped = false;

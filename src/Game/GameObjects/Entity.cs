@@ -38,6 +38,7 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
+using ClassicUO.Utility;
 using static ClassicUO.Network.NetClient;
 
 namespace ClassicUO.Game.GameObjects
@@ -88,7 +89,7 @@ namespace ClassicUO.Game.GameObjects
 
 
         public byte HitsPercentage;
-        public RenderedText HitsTexture;
+        public RenderedText HitsTexture => _hitsPercText[HitsPercentage % _hitsPercText.Length];
         public bool IsClicked;
         public uint LastStepTime;
         public string Name;
@@ -118,29 +119,35 @@ namespace ClassicUO.Game.GameObjects
             Hue = fixedColor;
         }
 
+        private static readonly RenderedText[] _hitsPercText = new RenderedText[101];
+
         public void UpdateHits(byte perc)
         {
-            if (perc != HitsPercentage || HitsTexture == null || HitsTexture.IsDestroyed)
+            if (perc != HitsPercentage)
             {
                 HitsPercentage = perc;
 
-                ushort color = 0x0044;
+                ref var rtext = ref _hitsPercText[perc % _hitsPercText.Length];
 
-                if (perc < 30)
+                if (rtext == null || rtext.IsDestroyed)
                 {
-                    color = 0x0021;
-                }
-                else if (perc < 50)
-                {
-                    color = 0x0030;
-                }
-                else if (perc < 80)
-                {
-                    color = 0x0058;
-                }
+                    ushort color = 0x0044;
 
-                HitsTexture?.Destroy();
-                HitsTexture = RenderedText.Create($"[{perc}%]", color, 3, false);
+                    if (perc < 30)
+                    {
+                        color = 0x0021;
+                    }
+                    else if (perc < 50)
+                    {
+                        color = 0x0030;
+                    }
+                    else if (perc < 80)
+                    {
+                        color = 0x0058;
+                    }
+
+                    rtext = RenderedText.Create($"[{perc}%]", color, 3, false);
+                }
             }
         }
 
@@ -169,20 +176,10 @@ namespace ClassicUO.Game.GameObjects
 
             if (HitsMax > 0)
             {
-                int hits_max = HitsMax;
+                var perc = MathHelper.PercetangeOf(Hits, HitsMax);
+                perc = perc > 100 ? 100 : perc < 0 ? 0 : perc;
 
-                hits_max = Hits * 100 / hits_max;
-
-                if (hits_max > 100)
-                {
-                    hits_max = 100;
-                }
-                else if (hits_max < 1)
-                {
-                    hits_max = 0;
-                }
-
-                UpdateHits((byte) hits_max);
+                UpdateHits((byte)perc);
             }
         }
 
@@ -194,8 +191,6 @@ namespace ClassicUO.Game.GameObjects
 
             AnimIndex = 0;
             LastAnimationChangeTime = 0;
-            HitsTexture?.Destroy();
-            HitsTexture = null;
         }
 
         public Item FindItem(ushort graphic, ushort hue = 0xFFFF)

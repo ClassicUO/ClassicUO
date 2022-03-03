@@ -90,8 +90,6 @@ namespace ClassicUO.Game.GameObjects
                 mobile.LastAnimationChangeTime = Time.Ticks;
                 mobile.TextContainer?.Clear();
                 mobile.HitsPercentage = 0;
-                mobile.HitsTexture?.Destroy();
-                mobile.HitsTexture = null;
                 mobile.IsFlipped = false;
                 mobile.FrameInfo = Rectangle.Empty;
                 mobile.ObjectHandlesStatus = ObjectHandlesStatus.NONE;
