@@ -568,31 +568,26 @@ namespace ClassicUO.Game.GameObjects
             { 0x3ECD, 0x0580 }, // Palomino
             { 0x3ECF, 0x05A0 }, // Eowmu
             { 0x3ED3, 0x05F7 }, // capybara
-          
-
-            //{ 0xFFFF, 0x060A }, // an orange dog?
-
-            { 0x3ED5, 0x060B }, // a wolf
-           
-            //{ 0xFFFF, 0x060C }, // an orange dog 2?
-            //{ 0xFFFF, 0x060E }, // a brown/white dog?
-            //{ 0xFFFF, 0x060F }, // a black dog?
-            //{ 0xFFFF, 0x0610 }, // a dobberman?
+            { 0x3ED4, 0x060A },
+            { 0x3ED5, 0x060B }, // a wolf      
+            { 0x3ED6, 0x060C }, // an orange dog 2?
+            { 0x3ED7, 0x060D },
+            { 0x3ED8, 0x060F }, // a black dog?
+            { 0x3ED9, 0x0610 }, // a dobberman?
         };
 
         public override ushort GetGraphicForAnimation()
         {
-            ushort graphic = Graphic;
-
             if (Layer == Layer.Mount)
             {
                 if (ItemData.AnimID != 0)
                 {
-                    graphic = ItemData.AnimID;
+                    return ItemData.AnimID;
                 }
-                else if (_mounts.TryGetValue(graphic, out var newGraphic))
+                
+                if (_mounts.TryGetValue(Graphic, out var newGraphic))
                 {
-                    graphic = newGraphic;
+                    return newGraphic;
                 }
             }
             else if (IsCorpse)
@@ -600,7 +595,7 @@ namespace ClassicUO.Game.GameObjects
                 return Amount;
             }
 
-            return graphic;
+            return Graphic;
         }
 
         public override void UpdateTextCoordsV()
