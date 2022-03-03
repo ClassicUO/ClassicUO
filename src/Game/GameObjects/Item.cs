@@ -580,14 +580,14 @@ namespace ClassicUO.Game.GameObjects
         {
             if (Layer == Layer.Mount)
             {
-                if (ItemData.AnimID != 0)
-                {
-                    return ItemData.AnimID;
-                }
-                
                 if (_mounts.TryGetValue(Graphic, out var newGraphic))
                 {
                     return newGraphic;
+                }
+
+                if (ItemData.AnimID != 0)
+                {
+                    return ItemData.AnimID;
                 }
             }
             else if (IsCorpse)
