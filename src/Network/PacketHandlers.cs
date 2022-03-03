@@ -91,7 +91,7 @@ namespace ClassicUO.Network
             }
         }
 
-        public static void Load()
+        static PacketHandlers()
         {
             Handlers.Add(0x1B, EnterWorld);
             Handlers.Add(0x55, LoginComplete);
@@ -760,7 +760,7 @@ namespace ClassicUO.Network
             uint serial = p.ReadUInt32BE();
 
             World.CreatePlayer(serial);
-
+              
             p.Skip(4);
             World.Player.Graphic = p.ReadUInt16BE();
             World.Player.CheckGraphicChange();
