@@ -173,11 +173,8 @@ namespace ClassicUO.IO.Resources
 
                     Initialize();
 
-                    var result = Parallel.For(0, Constants.MAPS_COUNT, i =>
+                    for (var i = 0; i < Constants.MAPS_COUNT; ++i)
                     {
-                        MapBlocksSize[i, 0] = MapsDefaultSize[i, 0] >> 3;
-                        MapBlocksSize[i, 1] = MapsDefaultSize[i, 1] >> 3;
-
                         string path = UOFileManager.GetUOFilePath($"map{i}LegacyMUL.uop");
 
                         if (Client.IsUOPInstallation && File.Exists(path))
@@ -221,10 +218,7 @@ namespace ClassicUO.IO.Resources
                         {
                             _filesIdxStatics[i] = new UOFileMul(path);
                         }
-
-                        LoadMap(i);
-                    });
-
+                    }
 
                     if (!foundOneMap)
                     {
@@ -246,6 +240,13 @@ namespace ClassicUO.IO.Resources
                         _filesStatics[1] = _filesStatics[0];
                         _filesIdxStatics[1] = _filesIdxStatics[0];
                     }
+
+                    var res = Parallel.For(0, Constants.MAPS_COUNT, i =>
+                    {
+                        MapBlocksSize[i, 0] = MapsDefaultSize[i, 0] >> 3;
+                        MapBlocksSize[i, 1] = MapsDefaultSize[i, 1] >> 3;
+                        LoadMap(i);
+                    });          
                 }
             );
         }
