@@ -355,6 +355,11 @@ namespace ClassicUO.IO.Resources
                 data.OriginalStaticAddress = realstaticaddress;
                 data.OriginalStaticCount = realstaticcount;
             }
+
+            if (isuop)
+            {
+                ((UOFileUop)file)?.ClearHashes();
+            }
         }
 
         public void PatchMapBlock(ulong block, ulong address)
