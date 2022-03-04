@@ -534,31 +534,18 @@ namespace ClassicUO.Network
                         if (type >= 6)
                         {
                             World.Player.MaxPhysicResistence = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUInt16BE();
-
                             World.Player.MaxFireResistence = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUInt16BE();
-
                             World.Player.MaxColdResistence = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUInt16BE();
-
                             World.Player.MaxPoisonResistence = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUInt16BE();
-
                             World.Player.MaxEnergyResistence = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUInt16BE();
-
                             World.Player.DefenseChanceIncrease = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUInt16BE();
-
                             World.Player.MaxDefenseChanceIncrease = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUInt16BE();
-
                             World.Player.HitChanceIncrease = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUInt16BE();
-
                             World.Player.SwingSpeedIncrease = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUInt16BE();
-
                             World.Player.DamageIncrease = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUInt16BE();
-
                             World.Player.LowerReagentCost = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUInt16BE();
-
                             World.Player.SpellDamageIncrease = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUInt16BE();
-
                             World.Player.FasterCastRecovery = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUInt16BE();
-
                             World.Player.FasterCasting = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUInt16BE();
                             World.Player.LowerManaCost = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUInt16BE();
                         }
@@ -605,7 +592,6 @@ namespace ClassicUO.Network
             {
                 ushort type = p.ReadUInt16BE();
                 bool enabled = p.ReadBool();
-                byte flags = (byte) mobile.Flags;
 
                 if (type == 1)
                 {
@@ -617,7 +603,7 @@ namespace ClassicUO.Network
                         }
                         else
                         {
-                            flags |= 0x04;
+                            mobile.Flags |= Flags.Poisoned;
                         }
                     }
                     else
@@ -628,7 +614,7 @@ namespace ClassicUO.Network
                         }
                         else
                         {
-                            flags = (byte) (flags & ~0x04);
+                            mobile.Flags &= ~Flags.Poisoned;
                         }
                     }
                 }
@@ -636,18 +622,17 @@ namespace ClassicUO.Network
                 {
                     if (enabled)
                     {
-                        flags |= 0x08;
+                        mobile.Flags |= Flags.YellowBar;
                     }
                     else
                     {
-                        flags &= (byte) (flags & ~0x08);
+                        mobile.Flags &= ~Flags.YellowBar;
                     }
                 }
                 else if (type == 3)
                 {
+                    // ???
                 }
-
-                mobile.Flags = (Flags) flags;
             }
         }
 

@@ -381,7 +381,7 @@ namespace ClassicUO.Game.GameObjects
             return (int) Serial;
         }
 
-        public abstract void ProcessAnimation(out byte dir, bool evalutate = false);
+        public abstract void ProcessAnimation(bool evalutate = false);
 
         public abstract ushort GetGraphicForAnimation();
     }

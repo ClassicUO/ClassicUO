@@ -505,7 +505,7 @@ namespace ClassicUO.Game.GameObjects
 
             base.Update(totalTime, frameTime);
 
-            ProcessAnimation(out _);
+            ProcessAnimation();
         }
 
         private static readonly Dictionary<ushort, ushort> _mounts = new Dictionary<ushort, ushort>()
@@ -671,13 +671,11 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public override void ProcessAnimation(out byte dir, bool evalutate = false)
+        public override void ProcessAnimation(bool evalutate = false)
         {
-            dir = 0;
-
             if (IsCorpse)
             {
-                dir = (byte) Layer;
+                var dir = (byte) Layer;
 
                 if (LastAnimationChangeTime < Time.Ticks)
                 {

@@ -58,10 +58,7 @@ namespace ClassicUO.Game.GameObjects
         public ref LandTiles TileData => ref TileDataLoader.Instance.LandData[Graphic];
         public sbyte AverageZ;
         public bool IsStretched;
-
         public sbyte MinZ;
-
-
         public Vector3 NormalTop, NormalRight, NormalLeft, NormalBottom;
         public ushort OriginalGraphic;
         public UltimaBatcher2D.YOffsets YOffsets;
@@ -213,9 +210,6 @@ namespace ClassicUO.Game.GameObjects
             v.Z = (bottom - tile) * 4;
 
             Vector3.Cross(ref v, ref u, out ret);
-
-            //Vector3.Cross(ref v, ref u, out normal);
-            //Vector3.Normalize(ref normal, out ret);
             // ========================== 
 
 
@@ -229,7 +223,6 @@ namespace ClassicUO.Game.GameObjects
             v.Z = (right - tile) * 4;
 
             Vector3.Cross(ref v, ref u, out normal);
-            //Vector3.Normalize(ref normal, out normal);
             Vector3.Add(ref ret, ref normal, out ret);
             // ========================== 
 
@@ -244,7 +237,6 @@ namespace ClassicUO.Game.GameObjects
             v.Z = (top - tile) * 4;
 
             Vector3.Cross(ref v, ref u, out normal);
-            //Vector3.Normalize(ref normal, out normal);
             Vector3.Add(ref ret, ref normal, out ret);
             // ========================== 
 
@@ -259,9 +251,9 @@ namespace ClassicUO.Game.GameObjects
             v.Z = (left - tile) * 4;
 
             Vector3.Cross(ref v, ref u, out normal);
-            //Vector3.Normalize(ref normal, out normal);
             Vector3.Add(ref ret, ref normal, out ret);
             // ========================== 
+
 
             Vector3.Normalize(ref ret, out normal);
 
