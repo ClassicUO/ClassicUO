@@ -578,16 +578,18 @@ namespace ClassicUO.Game.GameObjects
 
         public override ushort GetGraphicForAnimation()
         {
+            var graphic = Graphic;
+
             if (Layer == Layer.Mount)
             {
-                if (_mounts.TryGetValue(Graphic, out var newGraphic))
+                if (_mounts.TryGetValue(graphic, out var newGraphic))
                 {
-                    return newGraphic;
+                    graphic = newGraphic;
                 }
 
                 if (ItemData.AnimID != 0)
                 {
-                    return ItemData.AnimID;
+                    graphic = ItemData.AnimID;
                 }
             }
             else if (IsCorpse)
@@ -595,7 +597,7 @@ namespace ClassicUO.Game.GameObjects
                 return Amount;
             }
 
-            return Graphic;
+            return graphic;
         }
 
         public override void UpdateTextCoordsV()
