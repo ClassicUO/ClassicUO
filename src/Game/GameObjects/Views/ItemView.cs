@@ -304,7 +304,7 @@ namespace ClassicUO.Game.GameObjects
 
             ushort newHue = 0;
 
-            AnimationGroup gr = layer == Layer.Invalid ? AnimationsLoader.Instance.GetCorpseAnimationGroup(ref graphic, ref animGroup, ref newHue) : AnimationsLoader.Instance.GetBodyAnimationGroup(ref graphic, ref animGroup, ref newHue);
+            AnimationGroup gr =  AnimationsLoader.Instance.GetBodyAnimationGroup(ref graphic, ref animGroup, ref newHue, isCorpse: layer == Layer.Invalid);
 
             if (color == 0)
             {
