@@ -700,7 +700,7 @@ namespace ClassicUO.Game.GameObjects
 
                         ushort hue = 0;
 
-                        AnimationDirection direction = AnimationsLoader.Instance.GetCorpseAnimationGroup(ref id, ref animGroup, ref hue).Direction[dir];
+                        AnimationDirection direction = AnimationsLoader.Instance.GetBodyAnimationGroup(ref id, ref animGroup, ref hue, isCorpse: true).Direction[dir];
 
                         if (direction.FrameCount == 0 || direction.SpriteInfos == null)
                         {

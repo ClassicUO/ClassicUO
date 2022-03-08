@@ -892,13 +892,13 @@ namespace ClassicUO.IO.Resources
             }
         }
 
-        public AnimationGroup GetBodyAnimationGroup(ref ushort graphic, ref byte group, ref ushort hue, bool isParent = false, bool forceUOP = false)
+        public AnimationGroup GetBodyAnimationGroup(ref ushort graphic, ref byte group, ref ushort hue, bool isParent = false, bool forceUOP = false, bool isCorpse = false)
         {
             if (graphic < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT && group < 100)
             {
                 IndexAnimation index = DataIndex[graphic];
 
-                if ((index.IsUOP && (isParent || !index.IsValidMUL)) || forceUOP)
+                if ((index.IsUOP && (isCorpse || isParent || !index.IsValidMUL)) || forceUOP)
                 {
                     AnimationGroupUop uop = index.GetUopGroup(ref group);
 
@@ -914,9 +914,16 @@ namespace ClassicUO.IO.Resources
                         if (graphic != newGraphic)
                         {
                             graphic = newGraphic;
-                            hue = index.Color;
-
-                            newGraphic = DataIndex[graphic].Graphic;
+                            if (isCorpse)
+                            {
+                                hue = index.CorpseColor;
+                                newGraphic = DataIndex[graphic].CorpseGraphic;
+                            }
+                            else
+                            {
+                                hue = index.Color;
+                                newGraphic = DataIndex[graphic].Graphic;
+                            }
                         }
                     }
                     else
@@ -935,50 +942,6 @@ namespace ClassicUO.IO.Resources
                 {
                     return DataIndex[graphic].Groups[group];
                 }
-            }
-
-            return _empty;
-        }
-
-        public AnimationGroup GetCorpseAnimationGroup(ref ushort graphic, ref byte group, ref ushort hue)
-        {
-            if (graphic < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT && group < 100)
-            {
-                IndexAnimation index = DataIndex[graphic];
-
-                if (index.IsUOP)
-                {
-                    AnimationGroupUop uop = index.GetUopGroup(ref group);
-
-                    return uop ?? _empty;
-                }
-
-                ushort newGraphic = index.CorpseGraphic;
-
-                do
-                {
-                    if ((DataIndex[newGraphic].HasBodyConversion || !index.HasBodyConversion) && !(DataIndex[newGraphic].HasBodyConversion && index.HasBodyConversion))
-                    {
-                        if (graphic != newGraphic)
-                        {
-                            graphic = newGraphic;
-                            hue = index.CorpseColor;
-
-                            newGraphic = DataIndex[graphic].CorpseGraphic;
-                        }
-                    }
-                    else
-                    {
-                        break;
-                    }
-                } while (graphic != newGraphic);
-
-                if (DataIndex[graphic].HasBodyConversion)
-                {
-                    return DataIndex[graphic].BodyConvGroups != null ? DataIndex[graphic].BodyConvGroups[group] : _empty;
-                }
-
-                return DataIndex[graphic].Groups != null ? DataIndex[graphic].Groups[group] ?? _empty : _empty;
             }
 
             return _empty;
@@ -1339,11 +1302,7 @@ namespace ClassicUO.IO.Resources
             {
                 ushort hue = 0;
 
-                AnimationDirection direction = isCorpse ? 
-                    GetCorpseAnimationGroup(ref graphic, ref group, ref hue)?.Direction[0] 
-                    : 
-                    GetBodyAnimationGroup(ref graphic, ref group, ref hue, true, false)?.Direction[0];
-
+                AnimationDirection direction = GetBodyAnimationGroup(ref graphic, ref group, ref hue, true, false, isCorpse)?.Direction[0];
 
                 return direction != null && (direction.Address != 0 && direction.Size != 0 || direction.IsUOP);
             }
