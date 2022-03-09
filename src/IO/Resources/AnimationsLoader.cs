@@ -1438,77 +1438,68 @@ namespace ClassicUO.IO.Resources
             animDirection.FrameCount = (byte)(type < ANIMATION_GROUPS_TYPE.EQUIPMENT ? Math.Round(fc / 5f) : 10);
             animDirection.SpriteInfos = new SpriteInfo[animDirection.FrameCount];
 
-            int headerSize = sizeof(UOPAnimationHeader);
-            int count = 0;
-
+            /* If the UOP files didn't omit frames, we could just do this:
+             * reader.Skip(sizeof(UOPAnimationHeader) * direction * animDirection.FrameCount);
+             * but we can't. So we have to walk through the frames to seek to where we need to go.
+             */
             UOPAnimationHeader* animHeaderInfo = (UOPAnimationHeader*)reader.PositionAddress;
 
-            for (ushort i = 0, id = animHeaderInfo->FrameID, currentDir = 0; animHeaderInfo->FrameID < fc; ++i, ++id)
+            for (ushort currentDir = 0; currentDir <= direction; currentDir++)
             {
-                if (/*animHeaderInfo->FrameID != id*/ animHeaderInfo->FrameID - 1 == id || i >= animDirection.FrameCount)
+                for (ushort frameNum = 0; frameNum < animDirection.FrameCount; frameNum++)
                 {
-                    if (currentDir != direction)
+                    long start = reader.Position;
+                    animHeaderInfo = (UOPAnimationHeader*)reader.PositionAddress;
+
+                    if (animHeaderInfo->Group != animGroup)
                     {
-                        ++currentDir;
+                        /* Something bad has happened. Just return. */
+                        return false;
                     }
 
-                    id = animHeaderInfo->FrameID;
-                    i = 0;
-                    dataStart = (uint)reader.Position;
-                }
-                else if (animHeaderInfo->FrameID - id > 1)
-                {
-                    // error handler?  
-                    // reason:
-                    //    - anim: 337
-                    //    - dir: 3
-                    //    - it skips 2 frames )35 --> 38(
+                    /* FrameID is 1's based and just keeps increasing, regardless of direction.
+                     * So north will be 1-22, northeast will be 23-44, etc. And it's possible for frames
+                     * to be missing. */
+                    ushort headerFrameNum = (ushort)((animHeaderInfo->FrameID - 1) % animDirection.FrameCount);
 
-                    i += (ushort)(animHeaderInfo->FrameID - id);
-                    id = animHeaderInfo->FrameID;
-                }
-
-                if (i == 0 && currentDir == direction)
-                {
-                    break;
-                }
-
-                reader.Skip(headerSize);
-
-                animHeaderInfo = (UOPAnimationHeader*)reader.PositionAddress;
-            }
-
-            reader.Seek(dataStart);
-            animHeaderInfo = (UOPAnimationHeader*)reader.PositionAddress;
-
-            for (ushort id = animHeaderInfo->FrameID; id == animHeaderInfo->FrameID && count < animDirection.FrameCount; ++id, ++count)
-            {
-                long start = reader.Position;
-
-                if (animHeaderInfo->Group == animGroup && start + animHeaderInfo->DataOffset < reader.Length)
-                {
-                    int index = animHeaderInfo->FrameID % animDirection.FrameCount;
-
-                    if (animDirection.SpriteInfos[index].Texture == null)
+                    if (frameNum < headerFrameNum)
                     {
-                        unchecked
+                        /* Missing frame. Keep walking forward. */
+                        continue;
+                    }
+
+                    if (frameNum > headerFrameNum)
+                    {
+                        /* We've reached the next direction early */
+                        break;
+                    }
+
+                    if (currentDir == direction)
+                    {
+                        /* We're on the direction we actually wanted to read */
+                        if (animDirection.SpriteInfos[frameNum].Texture == null)
                         {
+                            if (start + animHeaderInfo->DataOffset >= reader.Length)
+                            {
+                                /* File seems to be corrupt? Skip loading. */
+                                continue;
+                            }
+
                             reader.Skip((int)animHeaderInfo->DataOffset);
 
                             ushort* palette = (ushort*)reader.PositionAddress;
 
                             reader.Skip(512);
                             uint packed32 = (uint)((animGroup | (direction << 8) | (0x01 << 16)));
-                            uint packed32_2 = (uint)((animID | (index << 16)));
+                            uint packed32_2 = (uint)((animID | (frameNum << 16)));
                             ulong packed = (packed32_2 | ((ulong)packed32 << 32));
 
-                            ReadSpriteData(ref reader, palette, packed, ref animDirection.SpriteInfos[index], true);
+                            ReadSpriteData(ref reader, palette, packed, ref animDirection.SpriteInfos[frameNum], true);
                         }
                     }
-                }
 
-                reader.Seek(start + headerSize);
-                animHeaderInfo = (UOPAnimationHeader*)reader.PositionAddress;
+                    reader.Seek(start + sizeof(UOPAnimationHeader));
+                }
             }
 
             reader.Release();
