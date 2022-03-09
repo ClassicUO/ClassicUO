@@ -191,7 +191,7 @@ namespace ClassicUO.Game.GameObjects
 
                 if (mountGraphic != 0xFFFF && mountGraphic < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
                 {
-                    mountOffsetY = AnimationsLoader.Instance.DataIndex[mountGraphic].MountedHeightOffset;
+                    mountOffsetY = AnimationsLoader.Instance.GetMountedHeightOffset(mountGraphic);
 
                     if (hasShadow)
                     {
@@ -1023,7 +1023,7 @@ namespace ClassicUO.Game.GameObjects
                                 return true;
                             }
 
-                            position.Y += AnimationsLoader.Instance.DataIndex[mountGraphic].MountedHeightOffset;
+                            position.Y += AnimationsLoader.Instance.GetMountedHeightOffset(mountGraphic);
                         }
                     }
                 }

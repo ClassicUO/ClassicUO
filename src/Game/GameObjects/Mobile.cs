@@ -404,37 +404,15 @@ namespace ClassicUO.Game.GameObjects
                     return;
                 }
 
-                ANIMATION_GROUPS_TYPE type = AnimationsLoader.Instance.DataIndex[graphic].Type;
+                byte action = 0;
+                ushort hue = 0;
 
-                if (AnimationsLoader.Instance.DataIndex[graphic].IsUOP && !AnimationsLoader.Instance.DataIndex[graphic].IsValidMUL)
-                {
-                    // do nothing ?
-                }
-                else
-                {
-                    if (!AnimationsLoader.Instance.DataIndex[graphic].HasBodyConversion)
-                    {
-                        ushort newGraphic = AnimationsLoader.Instance.DataIndex[graphic].Graphic;
-
-                        if (graphic != newGraphic)
-                        {
-                            graphic = newGraphic;
-
-                            ANIMATION_GROUPS_TYPE newType = AnimationsLoader.Instance.DataIndex[graphic].Type;
-
-                            if (newType != type)
-                            {
-                                type = newType;
-                            }
-                        }
-                    }
-                }
-
-                ANIMATION_FLAGS flags = AnimationsLoader.Instance.DataIndex[graphic].Flags;
+                AnimationsLoader.Instance.ReplaceAnimationValues(ref graphic, ref action, ref hue, out var useUOP);
+                ANIMATION_GROUPS_TYPE type = AnimationsLoader.Instance.GetAnimType(graphic);
+                ANIMATION_FLAGS flags = AnimationsLoader.Instance.GetAnimFlags(graphic);
                 ANIMATION_GROUPS animGroup = ANIMATION_GROUPS.AG_NONE;
 
                 bool isLowExtended = false;
-                bool isLow = false;
 
                 if ((flags & ANIMATION_FLAGS.AF_CALCULATE_OFFSET_LOW_GROUP_EXTENDED) != 0)
                 {
@@ -444,7 +422,6 @@ namespace ClassicUO.Game.GameObjects
                 else if ((flags & ANIMATION_FLAGS.AF_CALCULATE_OFFSET_BY_LOW_GROUP) != 0)
                 {
                     type = ANIMATION_GROUPS_TYPE.ANIMAL;
-                    isLow = true;
                 }
 
                 switch (type)

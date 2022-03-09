@@ -82,7 +82,7 @@ namespace ClassicUO.IO.Resources
 
         public static AnimationsLoader Instance => _instance ?? (_instance = new AnimationsLoader());
 
-        public IndexAnimation[] DataIndex { get; } = new IndexAnimation[Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT];
+        private IndexAnimation[] DataIndex { get; } = new IndexAnimation[Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT];
 
         public IReadOnlyDictionary<ushort, Dictionary<ushort, EquipConvData>> EquipConversions => _equipConv;
 
@@ -831,6 +831,14 @@ namespace ClassicUO.IO.Resources
             animSeq.Dispose();
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ANIMATION_GROUPS_TYPE GetAnimType(ushort graphic) => DataIndex[graphic].Type;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ANIMATION_FLAGS GetAnimFlags(ushort graphic) => DataIndex[graphic].Flags;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public sbyte GetMountedHeightOffset(ushort graphic) => DataIndex[graphic].MountedHeightOffset;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe uint CalculatePeopleGroupOffset(ushort graphic)
