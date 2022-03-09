@@ -593,7 +593,7 @@ namespace ClassicUO.Game.GameObjects
             if (LastAnimationChangeTime < Time.Ticks && !NoIterateAnimIndex())
             {
                 ushort id = GetGraphicForAnimation();
-                byte animGroup = GetGroupForAnimation(this, id, true);
+                byte action = GetGroupForAnimation(this, id, true);
 
                 bool mirror = false;
                 AnimationsLoader.Instance.GetAnimDirection(ref dir, ref mirror);
@@ -602,17 +602,14 @@ namespace ClassicUO.Game.GameObjects
                 if (id < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT && dir < 5)
                 {
                     ushort hue = 0;
+                    bool useUOP;
 
-                    AnimationDirection direction = AnimationsLoader.Instance.GetBodyAnimationGroup(ref id, ref animGroup, ref hue, true).Direction[dir];
+                    AnimationsLoader.Instance.ReplaceAnimationValues(ref id, ref action, ref hue, out useUOP);
+                    int frameCount = AnimationsLoader.Instance.LoadAnimationFrames(id, action, dir, useUOP);
 
-                    if (direction != null && (direction.FrameCount == 0 || direction.SpriteInfos == null))
+                    if (frameCount != 0)
                     {
-                        AnimationsLoader.Instance.LoadAnimationFrames(id, animGroup, dir, ref direction);
-                    }
-
-                    if (direction != null && direction.FrameCount != 0)
-                    {
-                        int fc = direction.FrameCount;
+                        int fc = frameCount;
 
                         int frameIndex = AnimIndex + (AnimationFromServer && !_isAnimationForwardDirection ? -1 : 1);
 
@@ -641,7 +638,7 @@ namespace ClassicUO.Game.GameObjects
                                 }
                                 else
                                 {
-                                    frameIndex = (byte)(direction.FrameCount - 1);
+                                    frameIndex = (byte)(frameCount - 1);
                                 }
                             }
                             else
@@ -687,7 +684,7 @@ namespace ClassicUO.Game.GameObjects
                             }
                         }
 
-                        AnimIndex = (byte) (frameIndex % direction.FrameCount);
+                        AnimIndex = (byte) (frameIndex % frameCount);
                     }
                     else if ((Serial & 0x80000000) != 0)
                     {
