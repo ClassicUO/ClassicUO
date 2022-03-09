@@ -701,27 +701,16 @@ namespace ClassicUO.Game.GameObjects
 
                     if (id < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT && dir < 5)
                     {
-                        byte animGroup = AnimationsLoader.Instance.GetDeathAction(id, UsedLayer);
-
+                        byte action = AnimationsLoader.Instance.GetDeathAction(id, UsedLayer);
                         ushort hue = 0;
+                        bool useUOP;
 
-                        AnimationDirection direction = AnimationsLoader.Instance.GetBodyAnimationGroup(ref id, ref animGroup, ref hue, isCorpse: true).Direction[dir];
+                        AnimationsLoader.Instance.ReplaceAnimationValues(ref id, ref action, ref hue, out useUOP, isCorpse: true);
+                        int frameCount = AnimationsLoader.Instance.LoadAnimationFrames(id, action, dir, useUOP);
 
-                        if (direction.FrameCount == 0 || direction.SpriteInfos == null)
+                        if (frameCount > 0)
                         {
-                            AnimationsLoader.Instance.LoadAnimationFrames(id, animGroup, dir, ref direction);
-                        }
-
-                        if (direction.Address != 0 && direction.Size != 0 || direction.IsUOP)
-                        {
-                            int fc = direction.FrameCount;
-
-                            if (frameIndex >= fc)
-                            {
-                                frameIndex = (byte) (fc - 1);
-                            }
-
-                            AnimIndex = (byte) (frameIndex % direction.FrameCount);
+                            AnimIndex = (byte) (frameIndex % frameCount);
                         }
                     }
 

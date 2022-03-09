@@ -303,36 +303,31 @@ namespace ClassicUO.Game.GameObjects
             }
 
             ushort newHue = 0;
+            bool useUOP;
 
-            AnimationGroup gr =  AnimationsLoader.Instance.GetBodyAnimationGroup(ref graphic, ref animGroup, ref newHue, isCorpse: layer == Layer.Invalid);
+            AnimationsLoader.Instance.ReplaceAnimationValues(ref graphic, ref animGroup, ref newHue, out useUOP, isEquip: layer != Layer.Invalid, isCorpse: layer == Layer.Invalid);
+            int frameCount = AnimationsLoader.Instance.LoadAnimationFrames(graphic, animGroup, dir, useUOP);
 
             if (color == 0)
             {
                 color = newHue;
             }
 
-            AnimationDirection direction = gr.Direction[dir];
-
-            if (direction == null)
+            if (frameCount == 0)
             {
                 return;
             }
 
-            if ((direction.FrameCount == 0 || direction.SpriteInfos == null) && !AnimationsLoader.Instance.LoadAnimationFrames(graphic, animGroup, dir, ref direction))
-            {
-                return;
-            }
-
-            int fc = direction.FrameCount;
+            int fc = frameCount;
 
             if (fc > 0 && animIndex >= fc)
             {
                 animIndex = (byte) (fc - 1);
             }
 
-            if (animIndex < direction.FrameCount)
+            if (animIndex < frameCount)
             {
-                ref var spriteInfo = ref direction.SpriteInfos[animIndex];
+                ref var spriteInfo = ref AnimationsLoader.Instance.GetAnimationFrame(graphic, animGroup, dir, animIndex, useUOP);
 
                 if (spriteInfo.Texture == null)
                 {
@@ -557,8 +552,23 @@ namespace ClassicUO.Game.GameObjects
                     }
 
                     byte group = AnimationsLoader.Instance.GetDeathAction(graphic, UsedLayer);
+                    ushort hue = 0;
 
-                    if (GetTexture(ref graphic, ref group, ref animIndex, direction, out var spriteInfo, out var isUop))
+                    AnimationsLoader.Instance.ReplaceAnimationValues(ref graphic, ref group, ref hue, out var isUop);
+                    int fc = AnimationsLoader.Instance.LoadAnimationFrames(graphic, group, direction, isUop);
+
+                    if (fc > 0 && animIndex >= 0)
+                    {
+                        animIndex = (byte)(animIndex % fc);
+                    }
+                    else if (animIndex < 0)
+                    {
+                        animIndex = 0;
+                    }
+
+                    ref var spriteInfo = ref AnimationsLoader.Instance.GetAnimationFrame(graphic, group, direction, animIndex, isUop);
+
+                    if (spriteInfo.Texture != null)
                     {
                         int x = position.X - (IsFlipped ? spriteInfo.UV.Width - spriteInfo.Center.X : spriteInfo.Center.X);
                         int y = position.Y - (spriteInfo.UV.Height + spriteInfo.Center.Y);
@@ -581,61 +591,6 @@ namespace ClassicUO.Game.GameObjects
             }
 
             return false;
-        }
-
-        private static bool GetTexture(ref ushort graphic, ref byte animGroup, ref byte animIndex, byte direction, out SpriteInfo spriteInfo, out bool isUOP)
-        {
-            spriteInfo = default;
-            isUOP = false;
-
-            ushort hue = 0;
-
-            AnimationDirection animationSet = AnimationsLoader.Instance.GetBodyAnimationGroup
-            (
-                ref graphic,
-                ref animGroup,
-                ref hue,
-                true,
-                false
-            )
-            .Direction[direction];
-
-            if (animationSet == null ||
-                animationSet.Address == -1 ||
-                animationSet.FileIndex == -1 ||
-                animationSet.FrameCount == 0 ||
-                animationSet.SpriteInfos == null
-               )
-            {
-                return false;
-            }
-
-            int fc = animationSet.FrameCount;
-
-            if (fc > 0 && animIndex >= fc)
-            {
-                animIndex = (byte)(fc - 1);
-            }
-            else if (animIndex < 0)
-            {
-                animIndex = 0;
-            }
-
-            if (animIndex >= animationSet.FrameCount)
-            {
-                return false;
-            }
-
-            spriteInfo = animationSet.SpriteInfos[animIndex % animationSet.FrameCount];
-
-            if (spriteInfo.Texture == null)
-            {
-                return false;
-            }
-
-            isUOP = animationSet.IsUOP;
-
-            return true;
         }
     }
 }

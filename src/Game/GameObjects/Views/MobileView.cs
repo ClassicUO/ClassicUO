@@ -210,7 +210,7 @@ namespace ClassicUO.Game.GameObjects
                             animGroup,
                             dir,
                             isHuman,
-                            true,
+                            false,
                             false,
                             false,
                             depth,
@@ -236,7 +236,7 @@ namespace ClassicUO.Game.GameObjects
                             animGroupMount,
                             dir,
                             isHuman,
-                            true,
+                            false,
                             false,
                             false,
                             depth,
@@ -265,7 +265,7 @@ namespace ClassicUO.Game.GameObjects
                         animGroupMount,
                         dir,
                         isHuman,
-                        true,
+                        false,
                         true,
                         false,
                         depth,
@@ -335,7 +335,7 @@ namespace ClassicUO.Game.GameObjects
                         animGroup,
                         dir,
                         isHuman,
-                        true,
+                        false,
                         false,
                         false,
                         depth,
@@ -361,7 +361,7 @@ namespace ClassicUO.Game.GameObjects
                 animGroup,
                 dir,
                 isHuman,
-                true,
+                false,
                 false,
                 isGargoyle,
                 depth,
@@ -428,7 +428,7 @@ namespace ClassicUO.Game.GameObjects
                                 isGargoyle /*&& item.ItemData.IsWeapon*/ && seatData.Graphic == 0 ? GetGroupForAnimation(this, graphic, true) : animGroup,
                                 dir,
                                 isHuman,
-                                false,
+                                true,
                                 false,
                                 isGargoyle,
                                 depth,
@@ -612,54 +612,30 @@ namespace ClassicUO.Game.GameObjects
         private static bool GetTexture(ref ushort graphic, ref byte animGroup, ref byte animIndex, byte direction, out SpriteInfo spriteInfo, out bool isUOP)
         {
             spriteInfo = default;
-            isUOP = false;
 
             ushort hue = 0;
 
-            AnimationDirection animationSet = AnimationsLoader.Instance.GetBodyAnimationGroup
-            (
-                ref graphic,
-                ref animGroup,
-                ref hue,
-                true,
-                false
-            )
-            .Direction[direction];
+            AnimationsLoader.Instance.ReplaceAnimationValues(ref graphic, ref animGroup, ref hue, out isUOP);
+            int fc = AnimationsLoader.Instance.LoadAnimationFrames(graphic, animGroup, direction, isUOP);
 
-            if (animationSet == null ||
-                animationSet.Address == -1 ||
-                animationSet.FileIndex == -1 ||
-                animationSet.FrameCount == 0 || 
-                animationSet.SpriteInfos == null
-               )
+            if (fc == 0)
             {
                 return false;
             }
 
-            int fc = animationSet.FrameCount;
-
-            if (fc > 0 && animIndex >= fc)
-            {
-                animIndex = (byte)(fc - 1);
-            }
-            else if (animIndex < 0)
+            if (animIndex < 0)
             {
                 animIndex = 0;
             }
 
-            if (animIndex >= animationSet.FrameCount)
-            {
-                return false;
-            }
+            animIndex = (byte)(animIndex % fc);
 
-            spriteInfo = animationSet.SpriteInfos[animIndex % animationSet.FrameCount];
+            spriteInfo = AnimationsLoader.Instance.GetAnimationFrame(graphic, animGroup, direction, animIndex, isUOP);
 
             if (spriteInfo.Texture == null)
             {
                 return false;
             }
-
-            isUOP = animationSet.IsUOP;
 
             return true;
         }
@@ -679,7 +655,7 @@ namespace ClassicUO.Game.GameObjects
             byte animGroup,
             byte dir,
             bool isHuman,
-            bool isParent,
+            bool isEquip,
             bool isMount,
             bool forceUOP,
             float depth,
@@ -694,233 +670,171 @@ namespace ClassicUO.Game.GameObjects
             }
 
             ushort hueFromFile = overridedHue;
-            
-            AnimationDirection direction = AnimationsLoader.Instance.GetBodyAnimationGroup
-                                                           (
-                                                               ref id,
-                                                               ref animGroup,
-                                                               ref hueFromFile,
-                                                               isParent,
-                                                               forceUOP
-                                                           )
-                                                           .Direction[dir];
+            bool useUOP;
 
-            if (direction == null || direction.Address == -1 || direction.FileIndex == -1)
-            {
-                if (!(charIsSitting && entity == null && !hasShadow))
-                {
-                    return;
-                }
-            }
+            AnimationsLoader.Instance.ReplaceAnimationValues(ref id, ref animGroup, ref hueFromFile, out useUOP, isEquip: isEquip, forceUOP);
+            int frameCount = AnimationsLoader.Instance.LoadAnimationFrames(id, animGroup, dir, useUOP);
 
-            if (direction == null || (direction.FrameCount == 0 || direction.SpriteInfos == null) && !AnimationsLoader.Instance.LoadAnimationFrames(id, animGroup, dir, ref direction))
-            {
-                if (!(charIsSitting && entity == null && !hasShadow))
-                {
-                    return;
-                }
-            }
-
-            if (direction == null)
+            if (frameCount == 0)
             {
                 return;
             }
 
-            int fc = direction.FrameCount;
-
-            if (fc > 0 && frameIndex >= fc)
+            if (frameIndex >= frameCount)
             {
-                frameIndex = (byte) (fc - 1);
+                frameIndex = (byte) (frameCount - 1);
             }
             else if (frameIndex < 0)
             {
                 frameIndex = 0;
             }
 
-            if (frameIndex < direction.FrameCount)
+            ref var spriteInfo = ref AnimationsLoader.Instance.GetAnimationFrame(id, animGroup, dir, (byte)(frameIndex % frameCount), useUOP);
+
+            if (spriteInfo.Texture == null)
             {
-                ref var spriteInfo = ref direction.SpriteInfos[frameIndex % direction.FrameCount];
-
-                if (spriteInfo.Texture == null)
+                if (!(charIsSitting && entity == null && !hasShadow))
                 {
-                    if (!(charIsSitting && entity == null && !hasShadow))
+                    return;
+                }
+
+                goto SKIP;
+            }
+
+            if (mirror)
+            {
+                x -= spriteInfo.UV.Width - spriteInfo.Center.X;
+            }
+            else
+            {
+                x -= spriteInfo.Center.X;
+            }
+
+            y -= spriteInfo.UV.Height + spriteInfo.Center.Y;
+
+            SKIP:
+
+            if (hasShadow)
+            {
+                batcher.DrawShadow(spriteInfo.Texture, new Vector2(x, y), spriteInfo.UV, mirror, depth);
+            }
+            else
+            {
+                ushort hue = overridedHue;
+                bool partialHue = false;
+
+                if (hue == 0)
+                {
+                    hue = entity?.Hue ?? owner.Hue;
+                    partialHue = !isMount && entity != null && entity.ItemData.IsPartialHue;
+
+                    if ((hue & 0x8000) != 0)
                     {
-                        return;
+                        partialHue = true;
+                        hue &= 0x7FFF;
                     }
-
-                    goto SKIP;
-                }
-
-                if (mirror)
-                {
-                    x -= spriteInfo.UV.Width - spriteInfo.Center.X;
-                }
-                else
-                {
-                    x -= spriteInfo.Center.X;
-                }
-
-                y -= spriteInfo.UV.Height + spriteInfo.Center.Y;
-
-                SKIP:
-
-                if (hasShadow)
-                {
-                    batcher.DrawShadow(spriteInfo.Texture, new Vector2(x, y), spriteInfo.UV, mirror, depth);
-                }
-                else
-                {
-                    ushort hue = overridedHue;
-                    bool partialHue = false;
 
                     if (hue == 0)
                     {
-                        hue = entity?.Hue ?? owner.Hue;
-                        partialHue = !isMount && entity != null && entity.ItemData.IsPartialHue;
+                        hue = hueFromFile;
 
-                        if ((hue & 0x8000) != 0)
+                        if (hue == 0 && _equipConvData.HasValue)
                         {
-                            partialHue = true;
-                            hue &= 0x7FFF;
+                            hue = _equipConvData.Value.Color;
                         }
 
-                        if (hue == 0)
-                        {
-                            hue = hueFromFile;
-
-                            if (hue == 0 && _equipConvData.HasValue)
-                            {
-                                hue = _equipConvData.Value.Color;
-                            }
-
-                            partialHue = false;
-                        }
+                        partialHue = false;
                     }
+                }
 
-                    hueVec = ShaderHueTranslator.GetHueVector(hue, partialHue, hueVec.Z);
+                hueVec = ShaderHueTranslator.GetHueVector(hue, partialHue, hueVec.Z);
 
-                    if (spriteInfo.Texture != null)
+                if (spriteInfo.Texture != null)
+                {
+                    Vector2 pos = new Vector2(x, y);
+                    Rectangle rect = spriteInfo.UV;
+
+                    if (charIsSitting)
                     {
-                        Vector2 pos = new Vector2(x, y);
-                        Rectangle rect = spriteInfo.UV;
+                        Vector3 mod = CalculateSitAnimation(y, entity, isHuman, ref spriteInfo);
 
-                        if (charIsSitting)
+                        batcher.DrawCharacterSitted
+                        (
+                            spriteInfo.Texture,
+                            pos,
+                            rect,
+                            mod,
+                            hueVec,
+                            mirror,
+                            depth + 1f
+                        );
+                    }
+                    else
+                    {
+                        int diffY = (spriteInfo.UV.Height + spriteInfo.Center.Y) - mountOffset;
+
+                        int value = Math.Max(1, diffY);
+                        int count = Math.Max((spriteInfo.UV.Height / value) + 1, 2);
+
+                        rect.Height = Math.Min(value, rect.Height);
+                        int remains = spriteInfo.UV.Height - rect.Height;
+
+                        int tiles = (byte)owner.Direction % 2 == 0 ? 2 : 2;
+
+                        for (int i = 0; i < count; ++i)
                         {
-                            Vector3 mod = CalculateSitAnimation(y, entity, isHuman, ref spriteInfo);
-
-                            batcher.DrawCharacterSitted
+                            batcher.Draw
                             (
                                 spriteInfo.Texture,
                                 pos,
                                 rect,
-                                mod,
                                 hueVec,
-                                mirror,
-                                depth + 1f
+                                0f,
+                                Vector2.Zero,
+                                1f,
+                                mirror ? SpriteEffects.FlipHorizontally : SpriteEffects.None,
+                                depth + 1f + (i * tiles)
                             );
-                        }
-                        else
-                        {
 
-                            //bool isMounted = isHuman && owner.IsMounted;
-
-
-                            //int diffX = spriteInfo.UV.Width /*- spriteInfo.Center.X*/;
-
-                            //if (isMounted)
-                            //{
-                            //if (mountOffset != 0)
-                            //{
-                            //    mountOffset += 10;
-                            //}
-                            //else
-                            //{
-                            //mountOffset = (sbyte)Math.Abs(spriteInfo.Center.Y);
-                            //}                          
-                            //}
-
-                            //var flags = AnimationsLoader.Instance.DataIndex[id].Flags;
-                            //if (AnimationsLoader.Instance.DataIndex[id].Type == ANIMATION_GROUPS_TYPE.HUMAN)
-                            //{
-
-                            //}
-
-
-                            int diffY = (spriteInfo.UV.Height + spriteInfo.Center.Y) - mountOffset;
-
-                            //if (owner.Serial == World.Player.Serial && entity == null)
-                            //{
-
-                            //}
-
-                            int value = /*!isMounted && diffX <= 44 ? spriteInfo.UV.Height * 2 :*/ Math.Max(1, diffY);
-                            int count = Math.Max((spriteInfo.UV.Height / value) + 1, 2);
-
-                            rect.Height = Math.Min(value, rect.Height);
-                            int remains = spriteInfo.UV.Height - rect.Height;
-
-                            int tiles = (byte)owner.Direction % 2 == 0 ? 2 : 2;
-                            //tiles = 999;
-
-                            for (int i = 0; i < count; ++i)
-                            {
-                                //hueVec.Y = 1;
-                                //hueVec.X = 0x44 + (i * 20);
-
-                                batcher.Draw
-                                (
-                                    spriteInfo.Texture,
-                                    pos,
-                                    rect,
-                                    hueVec,
-                                    0f,
-                                    Vector2.Zero,
-                                    1f,
-                                    mirror ? SpriteEffects.FlipHorizontally : SpriteEffects.None,
-                                    depth + 1f + (i * tiles)
-                                //depth + (i * tiles) + (owner.PriorityZ * 0.001f)
-                                );
-
-                                pos.Y += rect.Height;
-                                rect.Y += rect.Height;
-                                rect.Height = remains; // Math.Min(value, remains);
-                                remains -= rect.Height;
-                            }
-                        }
-
-                        int xx = -spriteInfo.Center.X;
-                        int yy = -(spriteInfo.UV.Height + spriteInfo.Center.Y + 3);
-
-                        if (mirror)
-                        {
-                            xx = -(spriteInfo.UV.Width - spriteInfo.Center.X);
-                        }
-
-                        if (xx < owner.FrameInfo.X)
-                        {
-                            owner.FrameInfo.X = xx;
-                        }
-
-                        if (yy < owner.FrameInfo.Y)
-                        {
-                            owner.FrameInfo.Y = yy;
-                        }
-
-                        if (owner.FrameInfo.Width < xx + spriteInfo.UV.Width)
-                        {
-                            owner.FrameInfo.Width = xx + spriteInfo.UV.Width;
-                        }
-
-                        if (owner.FrameInfo.Height < yy + spriteInfo.UV.Height)
-                        {
-                            owner.FrameInfo.Height = yy + spriteInfo.UV.Height;
+                            pos.Y += rect.Height;
+                            rect.Y += rect.Height;
+                            rect.Height = remains;
+                            remains -= rect.Height;
                         }
                     }
 
-                    if (entity != null && entity.ItemData.IsLight)
+                    int xx = -spriteInfo.Center.X;
+                    int yy = -(spriteInfo.UV.Height + spriteInfo.Center.Y + 3);
+
+                    if (mirror)
                     {
-                        Client.Game.GetScene<GameScene>().AddLight(owner, entity, mirror ? x + spriteInfo.UV.Width : x, y);
+                        xx = -(spriteInfo.UV.Width - spriteInfo.Center.X);
                     }
+
+                    if (xx < owner.FrameInfo.X)
+                    {
+                        owner.FrameInfo.X = xx;
+                    }
+
+                    if (yy < owner.FrameInfo.Y)
+                    {
+                        owner.FrameInfo.Y = yy;
+                    }
+
+                    if (owner.FrameInfo.Width < xx + spriteInfo.UV.Width)
+                    {
+                        owner.FrameInfo.Width = xx + spriteInfo.UV.Width;
+                    }
+
+                    if (owner.FrameInfo.Height < yy + spriteInfo.UV.Height)
+                    {
+                        owner.FrameInfo.Height = yy + spriteInfo.UV.Height;
+                    }
+                }
+
+                if (entity != null && entity.ItemData.IsLight)
+                {
+                    Client.Game.GetScene<GameScene>().AddLight(owner, entity, mirror ? x + spriteInfo.UV.Width : x, y);
                 }
             }
         }
