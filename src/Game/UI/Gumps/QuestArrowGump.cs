@@ -113,8 +113,8 @@ namespace ClassicUO.Game.UI.Gumps
             int goy = World.Player.Y - _my;
 
 
-            int x = (ProfileManager.CurrentProfile.GameWindowSize.X >> 1) - (gox - goy) * 22;
-            int y = (ProfileManager.CurrentProfile.GameWindowSize.Y >> 1) - (gox + goy) * 22;
+            int x = (Client.Game.Scene.Camera.Bounds.Width >> 1) - (gox - goy) * 22;
+            int y = (Client.Game.Scene.Camera.Bounds.Height >> 1) - (gox + goy) * 22;
 
             x -= (int) World.Player.Offset.X;
             y -= (int) (World.Player.Offset.Y - World.Player.Offset.Z);

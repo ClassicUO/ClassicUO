@@ -52,20 +52,20 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Width = 270 + nameWidthAdjustment,
                 Height = 80,
-                X = ProfileManager.CurrentProfile.GameWindowSize.X / 2 - 125,
+                X = Client.Game.Scene.Camera.Bounds.Width / 2 - 125,
                 Y = 150,
                 Alpha = 0.8f
             };
 
             Label text = new Label(string.Format(ResGumps.P0HasInvitedYouToParty, mobile == null || string.IsNullOrEmpty(mobile.Name) ? ResGumps.NoName : mobile.Name), true, 15)
             {
-                X = ProfileManager.CurrentProfile.GameWindowSize.X / 2 - 115,
+                X = Client.Game.Scene.Camera.Bounds.Width / 2 - 115,
                 Y = 165
             };
 
             NiceButton acceptButton = new NiceButton
             (
-                ProfileManager.CurrentProfile.GameWindowSize.X / 2 + 99 + nameWidthAdjustment,
+                Client.Game.Scene.Camera.Bounds.Width / 2 + 99 + nameWidthAdjustment,
                 205,
                 45,
                 25,
@@ -75,7 +75,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             NiceButton declineButton = new NiceButton
             (
-                ProfileManager.CurrentProfile.GameWindowSize.X / 2 + 39 + nameWidthAdjustment,
+                Client.Game.Scene.Camera.Bounds.Width / 2 + 39 + nameWidthAdjustment,
                 205,
                 45,
                 25,
