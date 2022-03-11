@@ -41,8 +41,6 @@ namespace ClassicUO.Game.Scenes
 {
     internal abstract class Scene : IDisposable
     {
-        private uint _time_cleanup = Time.Ticks + 5000;
-
         protected Scene(int sceneID, bool canresize, bool maximized)
         {
             CanResize = canresize;
@@ -50,13 +48,15 @@ namespace ClassicUO.Game.Scenes
             Camera = new Camera();
         }
 
+        public readonly bool CanResize, CanBeMaximized, CanLoadAudio;
+        public readonly int ID;
+
+
         public bool IsDestroyed { get; private set; }
-
         public bool IsLoaded { get; private set; }
-
         public int RenderedObjectsCount { get; protected set; }
-
         public Camera Camera { get; }
+
 
         public virtual void Dispose()
         {
@@ -72,19 +72,11 @@ namespace ClassicUO.Game.Scenes
         public virtual void Update()
         {           
             Camera.Update();
-
-            if (_time_cleanup < Time.Ticks)
-            {
-                World.Map?.ClearUnusedBlocks();
-                _time_cleanup = Time.Ticks + 500;
-            }
         }
 
-        public readonly bool CanResize, CanBeMaximized, CanLoadAudio;
-        public readonly int ID;
-
-        public virtual void FixedUpdate()
+        public virtual bool Draw(UltimaBatcher2D batcher)
         {
+            return true;
         }
 
 
@@ -97,11 +89,7 @@ namespace ClassicUO.Game.Scenes
         {
             
         }
-
-        public virtual bool Draw(UltimaBatcher2D batcher)
-        {
-            return true;
-        }
+       
 
         internal virtual bool OnMouseUp(MouseButtonType button) => false;
         internal virtual bool OnMouseDown(MouseButtonType button) => false;
