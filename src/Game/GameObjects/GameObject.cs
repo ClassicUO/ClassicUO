@@ -254,7 +254,7 @@ namespace ClassicUO.Game.GameObjects
             int offsetY = 0;
 
             int minX = 6;
-            int maxX = minX + ProfileManager.CurrentProfile.GameWindowSize.X - 6;
+            int maxX = minX + Client.Game.Scene.Camera.Bounds.Width - 6;
             int minY = 0;
             //int maxY = minY + ProfileManager.CurrentProfile.GameWindowSize.Y - 6;
 

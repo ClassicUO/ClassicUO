@@ -1606,7 +1606,9 @@ namespace ClassicUO.Game.UI.Gumps
                 4
             );
 
-            _gameWindowPositionX.SetText(_currentProfile.GameWindowPosition.X.ToString());
+            var camera = Client.Game.Scene.Camera;
+
+            _gameWindowPositionX.SetText(camera.Bounds.X.ToString());
 
             section.AddRight
             (
@@ -1624,7 +1626,7 @@ namespace ClassicUO.Game.UI.Gumps
                 )
             );
 
-            _gameWindowPositionY.SetText(_currentProfile.GameWindowPosition.Y.ToString());
+            _gameWindowPositionY.SetText(camera.Bounds.Y.ToString());
 
 
             section.Add(AddLabel(null, ResGumps.GamePlayWindowSize, startX, startY));
@@ -1645,7 +1647,7 @@ namespace ClassicUO.Game.UI.Gumps
                 )
             );
 
-            _gameWindowWidth.SetText(_currentProfile.GameWindowSize.X.ToString());
+            _gameWindowWidth.SetText(camera.Bounds.Width.ToString());
 
             section.AddRight
             (
@@ -1663,7 +1665,7 @@ namespace ClassicUO.Game.UI.Gumps
                 )
             );
 
-            _gameWindowHeight.SetText(_currentProfile.GameWindowSize.Y.ToString());
+            _gameWindowHeight.SetText(camera.Bounds.Height.ToString());
 
 
             SettingsSection section2 = AddSettingsSection(box, "Zoom");
@@ -3849,11 +3851,13 @@ namespace ClassicUO.Game.UI.Gumps
             int.TryParse(_gameWindowPositionX.Text, out int gameWindowPositionX);
             int.TryParse(_gameWindowPositionY.Text, out int gameWindowPositionY);
 
-            if (gameWindowPositionX != _currentProfile.GameWindowPosition.X || gameWindowPositionY != _currentProfile.GameWindowPosition.Y)
+            var camera = Client.Game.Scene.Camera;
+
+            if (gameWindowPositionX != camera.Bounds.X || gameWindowPositionY != camera.Bounds.Y)
             {
                 if (vp != null)
                 {
-                    vp.Location = _currentProfile.GameWindowPosition = new Point(gameWindowPositionX, gameWindowPositionY);
+                    camera.Bounds.Location = vp.Location = _currentProfile.GameWindowPosition = new Point(gameWindowPositionX, gameWindowPositionY);
                 }
             }
 
@@ -3885,7 +3889,7 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         n = vp.ResizeGameWindow(new Point(Client.Game.Window.ClientBounds.Width, Client.Game.Window.ClientBounds.Height));
 
-                        loc = _currentProfile.GameWindowPosition = vp.Location = new Point(-5, -5);
+                        camera.Bounds.Location = loc = _currentProfile.GameWindowPosition = vp.Location = new Point(-5, -5);
                     }
                 }
                 else
@@ -3893,7 +3897,7 @@ namespace ClassicUO.Game.UI.Gumps
                     if (vp != null)
                     {
                         n = vp.ResizeGameWindow(new Point(600, 480));
-                        loc = vp.Location = _currentProfile.GameWindowPosition = new Point(20, 20);
+                        camera.Bounds.Location = loc = vp.Location = _currentProfile.GameWindowPosition = new Point(20, 20);
                     }
                 }
 
@@ -4202,10 +4206,12 @@ namespace ClassicUO.Game.UI.Gumps
 
         internal void UpdateVideo()
         {
-            _gameWindowWidth.SetText(_currentProfile.GameWindowSize.X.ToString());
-            _gameWindowHeight.SetText(_currentProfile.GameWindowSize.Y.ToString());
-            _gameWindowPositionX.SetText(_currentProfile.GameWindowPosition.X.ToString());
-            _gameWindowPositionY.SetText(_currentProfile.GameWindowPosition.Y.ToString());
+            var camera = Client.Game.Scene.Camera;
+
+            _gameWindowWidth.SetText(camera.Bounds.X.ToString());
+            _gameWindowHeight.SetText(camera.Bounds.Y.ToString());
+            _gameWindowPositionX.SetText(camera.Bounds.Width.ToString());
+            _gameWindowPositionY.SetText(camera.Bounds.Height.ToString());
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)

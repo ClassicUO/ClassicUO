@@ -568,9 +568,10 @@ namespace ClassicUO.Game
                 return result;
             }
 
-            int windowCenterX = ProfileManager.CurrentProfile.GameWindowPosition.X + (ProfileManager.CurrentProfile.GameWindowSize.X >> 1);
+            var camera = Client.Game.Scene.Camera;
 
-            int windowCenterY = ProfileManager.CurrentProfile.GameWindowPosition.Y + (ProfileManager.CurrentProfile.GameWindowSize.Y >> 1);
+            int windowCenterX = camera.Bounds.X + (camera.Bounds.Width >> 1);
+            int windowCenterY = camera.Bounds.Y + (camera.Bounds.Height >> 1);
 
             return _cursorData[war,
                                GetMouseDirection

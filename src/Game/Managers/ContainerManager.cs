@@ -194,18 +194,19 @@ namespace ClassicUO.Game.Managers
             }
 
             Item bank = World.Player.FindItemByLayer(Layer.Bank);
+            var camera = Client.Game.Scene.Camera;
 
             if (bank != null && serial == bank)
             {
                 // open bank near player
-                X = World.Player.RealScreenPosition.X + ProfileManager.CurrentProfile.GameWindowPosition.X + 40;
-                Y = World.Player.RealScreenPosition.Y + ProfileManager.CurrentProfile.GameWindowPosition.Y - (height >> 1);
+                X = World.Player.RealScreenPosition.X + camera.Bounds.X + 40;
+                Y = World.Player.RealScreenPosition.Y + camera.Bounds.Y - (height >> 1);
             }
             else if (item.OnGround)
             {
                 // item is in world
-                X = item.RealScreenPosition.X + ProfileManager.CurrentProfile.GameWindowPosition.X + 40;
-                Y = item.RealScreenPosition.Y + ProfileManager.CurrentProfile.GameWindowPosition.Y - (height >> 1);
+                X = item.RealScreenPosition.X + camera.Bounds.X + 40;
+                Y = item.RealScreenPosition.Y + camera.Bounds.Y - (height >> 1);
             }
             else if (SerialHelper.IsMobile(item.Container))
             {
@@ -214,8 +215,8 @@ namespace ClassicUO.Game.Managers
 
                 if (mobile != null)
                 {
-                    X = mobile.RealScreenPosition.X + ProfileManager.CurrentProfile.GameWindowPosition.X + 40;
-                    Y = mobile.RealScreenPosition.Y + ProfileManager.CurrentProfile.GameWindowPosition.Y - (height >> 1);
+                    X = mobile.RealScreenPosition.X + camera.Bounds.X + 40;
+                    Y = mobile.RealScreenPosition.Y + camera.Bounds.Y - (height >> 1);
                 }
             }
             else
