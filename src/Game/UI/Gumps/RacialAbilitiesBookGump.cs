@@ -52,12 +52,11 @@ namespace ClassicUO.Game.UI.Gumps
         };
         private static readonly string[] _gargoyleNames = { "Flying", "Berserk", "Master Artisan", "Deadly Aim", "Mystic Insight" };
         private int _abilityCount = 4;
-        private uint _clickTiming;
         private int _dictionaryPagesCount = 1;
-        private Control _lastPressed;
         private GumpPic _pageCornerLeft, _pageCornerRight;
         private int _pagesCount = 3;
         private int _tooltipOffset = 1112198;
+        private int _enqueuePage = -1;
 
         public RacialAbilitiesBookGump(int x, int y) : base(0, 0)
         {
@@ -324,12 +323,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (sender is HoveredLabel l && e.Button == MouseButtonType.Left)
             {
-                _clickTiming = Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK;
-
-                if (_clickTiming > 0)
-                {
-                    _lastPressed = l;
-                }
+                _enqueuePage = (int)l.LocalSerial;
             }
         }
 
@@ -378,14 +372,10 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
-            if (_lastPressed != null)
+            if (_enqueuePage >= 0 && Time.Ticks - Mouse.LastLeftButtonClickTime >= Mouse.MOUSE_DELAY_DOUBLE_CLICK)
             {
-                if (Time.Ticks > _clickTiming)
-                {
-                    _clickTiming = Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK;
-                    SetActivePage((int) _lastPressed.LocalSerial);
-                    _lastPressed = null;
-                }
+                SetActivePage(_enqueuePage);
+                _enqueuePage = -1;
             }
         }
     }

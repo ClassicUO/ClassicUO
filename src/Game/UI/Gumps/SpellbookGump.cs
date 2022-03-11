@@ -50,15 +50,14 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class SpellbookGump : Gump
     {
-        private uint _clickTiming;
         private DataBox _dataBox;
         private HitBox _hitBox;
         private bool _isMinimized;
-        private Control _lastPressed;
         private int _maxPage;
         private GumpPic _pageCornerLeft, _pageCornerRight, _picBase;
         private SpellBookType _spellBookType;
         private readonly bool[] _spells = new bool[64];
+        private int _enqueuePage = -1;
 
         public SpellbookGump(uint item) : this()
         {
@@ -505,8 +504,8 @@ namespace ClassicUO.Game.UI.Gumps
                                     CanMove = true
                                 };
 
-                                text.MouseUp += OnClicked;
-                                text.MouseDoubleClick += OnDoubleClicked;
+                                text.MouseUp += OnLabelMouseUp;
+                                text.MouseDoubleClick += OnLabelMouseDoubleClick;
                                 _dataBox.Add(text, page);
 
                                 y += 15;
@@ -548,8 +547,8 @@ namespace ClassicUO.Game.UI.Gumps
                                     CanMove = true
                                 };
 
-                                text.MouseUp += OnClicked;
-                                text.MouseDoubleClick += OnDoubleClicked;
+                                text.MouseUp += OnLabelMouseUp;
+                                text.MouseDoubleClick += OnLabelMouseDoubleClick;
                                 _dataBox.Add(text, page);
 
                                 y += 15;
@@ -1269,32 +1268,27 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-        private void OnClicked(object sender, MouseEventArgs e)
+        private void OnLabelMouseUp(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtonType.Left && Mouse.LDragOffset == Point.Zero && sender is HoveredLabel l)
             {
-                _clickTiming = Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK;
-
-                if (_clickTiming > 0)
-                {
-                    _lastPressed = l;
-                }
+                _enqueuePage = (int)l.LocalSerial;
             }
         }
 
-        private void OnDoubleClicked(object sender, MouseDoubleClickEventArgs e)
+        private void OnLabelMouseDoubleClick(object sender, MouseDoubleClickEventArgs e)
         {
-            if (_lastPressed != null && e.Button == MouseButtonType.Left)
+            if (e.Button == MouseButtonType.Left && sender is HoveredLabel l)
             {
-                _clickTiming = Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK;
-                SpellDefinition def = GetSpellDefinition((int) _lastPressed.Tag);
+                SpellDefinition def = GetSpellDefinition((int)l.Tag);
 
                 if (def != null)
                 {
                     GameActions.CastSpell(def.ID);
                 }
 
-                _lastPressed = null;
+                _enqueuePage = -1;
+                e.Result = true;
             }
         }
 
@@ -1307,24 +1301,17 @@ namespace ClassicUO.Game.UI.Gumps
             if (item == null)
             {
                 Dispose();
-
-                return;
             }
-
 
             if (IsDisposed)
             {
                 return;
             }
 
-            if (_lastPressed != null)
+            if (_enqueuePage >= 0 && Time.Ticks - Mouse.LastLeftButtonClickTime >= Mouse.MOUSE_DELAY_DOUBLE_CLICK)
             {
-                if (Time.Ticks > _clickTiming)
-                {
-                    _clickTiming = Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK;
-                    SetActivePage((int) _lastPressed.LocalSerial);
-                    _lastPressed = null;
-                }
+                SetActivePage(_enqueuePage);
+                _enqueuePage = -1;
             }
         }
 
