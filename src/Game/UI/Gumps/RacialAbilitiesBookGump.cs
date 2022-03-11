@@ -52,7 +52,7 @@ namespace ClassicUO.Game.UI.Gumps
         };
         private static readonly string[] _gargoyleNames = { "Flying", "Berserk", "Master Artisan", "Deadly Aim", "Mystic Insight" };
         private int _abilityCount = 4;
-        private float _clickTiming;
+        private uint _clickTiming;
         private int _dictionaryPagesCount = 1;
         private Control _lastPressed;
         private GumpPic _pageCornerLeft, _pageCornerRight;
@@ -324,7 +324,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (sender is HoveredLabel l && e.Button == MouseButtonType.Left)
             {
-                _clickTiming += Mouse.MOUSE_DELAY_DOUBLE_CLICK;
+                _clickTiming = Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK;
 
                 if (_clickTiming > 0)
                 {
@@ -369,9 +369,9 @@ namespace ClassicUO.Game.UI.Gumps
             Client.Game.Audio.PlaySound(0x0055);
         }
 
-        public override void Update(double totalTime, double frameTime)
+        public override void Update()
         {
-            base.Update(totalTime, frameTime);
+            base.Update();
 
             if (IsDisposed)
             {
@@ -380,11 +380,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_lastPressed != null)
             {
-                _clickTiming -= (float) frameTime;
-
-                if (_clickTiming <= 0)
+                if (Time.Ticks > _clickTiming)
                 {
-                    _clickTiming = 0;
+                    _clickTiming = Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK;
                     SetActivePage((int) _lastPressed.LocalSerial);
                     _lastPressed = null;
                 }

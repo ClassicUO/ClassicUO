@@ -50,7 +50,7 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class SpellbookGump : Gump
     {
-        private float _clickTiming;
+        private uint _clickTiming;
         private DataBox _dataBox;
         private HitBox _hitBox;
         private bool _isMinimized;
@@ -1273,7 +1273,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (e.Button == MouseButtonType.Left && Mouse.LDragOffset == Point.Zero && sender is HoveredLabel l)
             {
-                _clickTiming += Mouse.MOUSE_DELAY_DOUBLE_CLICK;
+                _clickTiming = Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK;
 
                 if (_clickTiming > 0)
                 {
@@ -1286,7 +1286,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (_lastPressed != null && e.Button == MouseButtonType.Left)
             {
-                _clickTiming = -Mouse.MOUSE_DELAY_DOUBLE_CLICK;
+                _clickTiming = Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK;
                 SpellDefinition def = GetSpellDefinition((int) _lastPressed.Tag);
 
                 if (def != null)
@@ -1298,9 +1298,9 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        public override void Update(double totalTime, double frameTime)
+        public override void Update()
         {
-            base.Update(totalTime, frameTime);
+            base.Update();
 
             Item item = World.Items.Get(LocalSerial);
 
@@ -1319,11 +1319,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_lastPressed != null)
             {
-                _clickTiming -= (float) frameTime;
-
-                if (_clickTiming <= 0)
+                if (Time.Ticks > _clickTiming)
                 {
-                    _clickTiming = 0;
+                    _clickTiming = Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK;
                     SetActivePage((int) _lastPressed.LocalSerial);
                     _lastPressed = null;
                 }
@@ -1455,9 +1453,9 @@ namespace ClassicUO.Game.UI.Gumps
                 _mm = Client.Game.GetScene<GameScene>().Macros;
             }
 
-            public override void Update(double totalTime, double frameTime)
+            public override void Update()
             {
-                base.Update(totalTime, frameTime);
+                base.Update();
 
                 if (World.ActiveSpellIcons.IsActive(_spellID))
                 {

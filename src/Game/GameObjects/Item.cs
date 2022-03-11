@@ -496,14 +496,14 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public override void Update(double totalTime, double frameTime)
+        public override void Update()
         {
             if (IsDestroyed)
             {
                 return;
             }
 
-            base.Update(totalTime, frameTime);
+            base.Update();
 
             ProcessAnimation();
         }

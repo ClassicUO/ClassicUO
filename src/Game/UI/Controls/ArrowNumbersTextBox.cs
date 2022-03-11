@@ -40,7 +40,7 @@ namespace ClassicUO.Game.UI.Controls
         private const int TIME_BETWEEN_CLICKS = 250;
         private readonly int _Min, _Max;
         private readonly StbTextBox _textBox;
-        private float _timeUntilNextClick;
+        private uint _timeUntilNextClick;
         private readonly Button _up, _down;
 
         public ArrowNumbersTextBox
@@ -170,7 +170,7 @@ namespace ClassicUO.Game.UI.Controls
             _textBox.SetText(val.ToString());
         }
 
-        public override void Update(double totalTime, double frameTime)
+        public override void Update()
         {
             if (IsDisposed)
             {
@@ -179,16 +179,15 @@ namespace ClassicUO.Game.UI.Controls
 
             if (_up.IsClicked || _down.IsClicked)
             {
-                if (_timeUntilNextClick <= 0f)
+                if (Time.Ticks > _timeUntilNextClick)
                 {
-                    _timeUntilNextClick += TIME_BETWEEN_CLICKS;
+                    _timeUntilNextClick = Time.Ticks + TIME_BETWEEN_CLICKS;
+
                     UpdateValue();
                 }
-
-                _timeUntilNextClick -= (float) frameTime;
             }
 
-            base.Update(totalTime, frameTime);
+            base.Update();
         }
     }
 }

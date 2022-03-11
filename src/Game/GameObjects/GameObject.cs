@@ -84,7 +84,7 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public virtual void Update(double totalTime, double frameTime)
+        public virtual void Update()
         {
         }
 

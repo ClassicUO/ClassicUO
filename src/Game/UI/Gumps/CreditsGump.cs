@@ -59,9 +59,9 @@ Ultima Online(R) 2021 Electronic Arts Inc. All Rights Reserved.
             _offset.Y = Height;
         }
 
-        public override void Update(double totalTime, double frameTime)
+        public override void Update()
         {
-            base.Update(totalTime, frameTime);
+            base.Update();
 
             if (_lastUpdate < Time.Ticks)
             {

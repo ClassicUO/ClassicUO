@@ -336,7 +336,7 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-        public override void Update(double totalTime, double frameTime)
+        public override void Update()
         {
             if (_corpse == null || _corpse.IsDestroyed || _corpse.OnGround && _corpse.Distance > 3)
             {
@@ -345,7 +345,7 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
-            base.Update(totalTime, frameTime);
+            base.Update();
 
             if (IsDisposed)
             {

@@ -57,10 +57,10 @@ namespace ClassicUO.Game.UI.Gumps
             TextRenderer.AddMessage(msg);
         }
 
-        public override void Update(double totalTime, double frameTime)
+        public override void Update()
         {
-            base.Update(totalTime, frameTime);
-            TextRenderer.Update(totalTime, frameTime);
+            base.Update();
+            TextRenderer.Update();
         }
 
         public override void Dispose()

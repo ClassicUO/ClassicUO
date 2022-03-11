@@ -355,7 +355,7 @@ namespace ClassicUO.Game.Managers
             return null;
         }
 
-        public static void Update(double totalTime, double frameTime)
+        public static void Update()
         {
             SortControlsByInfo();
 
@@ -367,7 +367,7 @@ namespace ClassicUO.Game.Managers
 
                 Control g = first.Value;
 
-                g.Update(totalTime, frameTime);
+                g.Update();
 
                 if (g.IsDisposed)
                 {

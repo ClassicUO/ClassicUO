@@ -286,7 +286,7 @@ namespace ClassicUO.Game.UI.Controls
             return true;
         }
 
-        public virtual void Update(double totalTime, double frameTime)
+        public virtual void Update()
         {
             if (IsDisposed)
             {
@@ -310,7 +310,7 @@ namespace ClassicUO.Game.UI.Controls
                         continue;
                     }
 
-                    c.Update(totalTime, frameTime);
+                    c.Update();
 
                     if (WantUpdateSize)
                     {

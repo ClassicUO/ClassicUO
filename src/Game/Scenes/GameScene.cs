@@ -700,14 +700,14 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-        public override void Update(double totalTime, double frameTime)
+        public override void Update()
         {
             Profile currentProfile = ProfileManager.CurrentProfile;
             Camera.SetGameWindowBounds(currentProfile.GameWindowPosition.X + 5, currentProfile.GameWindowPosition.Y + 5, currentProfile.GameWindowSize.X, currentProfile.GameWindowSize.Y);
 
             SelectedObject.TranslatedMousePositionByViewport = Camera.MouseToWorldPosition();
 
-            base.Update(totalTime, frameTime);
+            base.Update();
 
             PacketHandlers.SendMegaClilocRequests();
 
@@ -725,7 +725,7 @@ namespace ClassicUO.Game.Scenes
                 return;
             }
 
-            World.Update(totalTime, frameTime);
+            World.Update();
             AnimatedStaticsManager.Process();
             BoatMovingManager.Update();
             Pathfinder.ProcessAutoWalk();
@@ -765,10 +765,10 @@ namespace ClassicUO.Game.Scenes
             }
 
 
-            if (totalTime > _timePing)
+            if (Time.Ticks > _timePing)
             {
                 NetClient.Socket.Statistics.SendPing();
-                _timePing = (long) totalTime + 1000;
+                _timePing = (long)Time.Ticks + 1000;
             }
 
             Macros.Update();
@@ -778,7 +778,7 @@ namespace ClassicUO.Game.Scenes
                 _useItemQueue.ClearCorpses();
             }
 
-            _useItemQueue.Update(totalTime, frameTime);
+            _useItemQueue.Update();
 
             if (!UIManager.IsMouseOverWorld)
             {

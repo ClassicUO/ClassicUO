@@ -404,7 +404,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        public override void Update(double totalTime, double frameTime)
+        public override void Update()
         {
             if (_buttonPost != null)
             {
@@ -432,7 +432,7 @@ namespace ClassicUO.Game.UI.Gumps
             //    }
             //}
 
-            base.Update(totalTime, frameTime);
+            base.Update();
         }
 
 

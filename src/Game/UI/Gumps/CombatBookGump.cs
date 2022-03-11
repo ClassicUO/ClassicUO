@@ -48,7 +48,7 @@ namespace ClassicUO.Game.UI.Gumps
     internal class CombatBookGump : Gump
     {
         private readonly int _abilityCount = Constants.MAX_ABILITIES_COUNT;
-        private float _clickTiming;
+        private uint _clickTiming;
         private int _dictionaryPagesCount = 3;
         private Control _lastPressed;
         private GumpPic _pageCornerLeft, _pageCornerRight, _primAbility, _secAbility;
@@ -144,7 +144,7 @@ namespace ClassicUO.Game.UI.Gumps
                         {
                             if (s is HoveredLabel l && e.Button == MouseButtonType.Left)
                             {
-                                _clickTiming += Mouse.MOUSE_DELAY_DOUBLE_CLICK;
+                                _clickTiming = Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK;
 
                                 if (_clickTiming > 0)
                                 {
@@ -383,9 +383,9 @@ namespace ClassicUO.Game.UI.Gumps
             return null;
         }
 
-        public override void Update(double totalTime, double frameTime)
+        public override void Update()
         {
-            base.Update(totalTime, frameTime);
+            base.Update();
 
             if (IsDisposed)
             {
@@ -435,11 +435,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_lastPressed != null)
             {
-                _clickTiming -= (float) frameTime;
-
-                if (_clickTiming <= 0)
+                if (Time.Ticks > _clickTiming)
                 {
-                    _clickTiming = 0;
+                    _clickTiming = Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK;
                     SetActivePage((int) _lastPressed.LocalSerial);
                     _lastPressed = null;
                 }

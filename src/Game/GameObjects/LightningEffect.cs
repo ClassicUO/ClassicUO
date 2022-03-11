@@ -54,11 +54,11 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public override void Update(double totalTime, double frameTime)
+        public override void Update()
         {
             if (!IsDestroyed)
             {
-                if (AnimIndex >= 10 || (Duration < totalTime && Duration >= 0))
+                if (AnimIndex >= 10 || (Duration < Time.Ticks && Duration >= 0))
                 {
                     Destroy();
                 }
@@ -66,10 +66,10 @@ namespace ClassicUO.Game.GameObjects
                 {
                     AnimationGraphic = (ushort) (Graphic + AnimIndex);
 
-                    if (NextChangeFrameTime < totalTime)
+                    if (NextChangeFrameTime < Time.Ticks)
                     {
                         AnimIndex++;
-                        NextChangeFrameTime = (long) totalTime + IntervalInMs;
+                        NextChangeFrameTime = (long)Time.Ticks + IntervalInMs;
                     }
 
                     (var x, var y, var z) = GetSource();

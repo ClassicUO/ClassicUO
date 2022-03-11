@@ -223,7 +223,7 @@ namespace ClassicUO.Game
         }
         */
 
-        public static void Update(double totalTime, double frameTime)
+        public static void Update()
         {
             if (Player != null)
             {
@@ -271,7 +271,7 @@ namespace ClassicUO.Game
 
                 foreach (Mobile mob in Mobiles.Values)
                 {
-                    mob.Update(totalTime, frameTime);
+                    mob.Update();
 
                     if (do_delete && mob.Distance > ClientViewRange /*CheckToRemove(mob, ClientViewRange)*/)
                     {
@@ -325,7 +325,7 @@ namespace ClassicUO.Game
 
                 foreach (Item item in Items.Values)
                 {
-                    item.Update(totalTime, frameTime);
+                    item.Update();
 
                     if (do_delete && item.OnGround && item.Distance > ClientViewRange /*CheckToRemove(item, ClientViewRange)*/)
                     {
@@ -358,8 +358,8 @@ namespace ClassicUO.Game
                     _toRemove.Clear();
                 }
 
-                _effectManager.Update(totalTime, frameTime);
-                WorldTextManager.Update(totalTime, frameTime);
+                _effectManager.Update();
+                WorldTextManager.Update();
                 WMapManager.RemoveUnupdatedWEntity();
             }
         }

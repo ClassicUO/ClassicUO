@@ -32,7 +32,6 @@
 
 using System;
 using System.Runtime.CompilerServices;
-using ClassicUO.Data;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
@@ -52,12 +51,28 @@ namespace ClassicUO.Game.GameObjects
 
     internal abstract class Entity : GameObject, IEquatable<Entity>
     {
+        private static readonly RenderedText[] _hitsPercText = new RenderedText[101];
         private Direction _direction;
+
 
         protected Entity(uint serial)
         {
             Serial = serial;
         }
+
+        public byte AnimIndex;
+        public bool ExecuteAnimation = true;
+        internal long LastAnimationChangeTime;
+        public Flags Flags;
+        public ushort Hits;
+        public ushort HitsMax;
+        public byte HitsPercentage;
+        public bool IsClicked;
+        public uint LastStepTime;
+        public string Name;
+        public uint Serial;
+        public HitsRequestStatus HitsRequest;
+
 
         public bool IsHidden => (Flags & Flags.Hidden) != 0;
 
@@ -76,27 +91,13 @@ namespace ClassicUO.Game.GameObjects
 
         public bool Exists => World.Contains(Serial);
 
+        public RenderedText HitsTexture => _hitsPercText[HitsPercentage % _hitsPercText.Length];
+
+
         public bool Equals(Entity e)
         {
             return e != null && Serial == e.Serial;
         }
-
-        public byte AnimIndex;
-
-        public Flags Flags;
-        public ushort Hits;
-        public ushort HitsMax;
-
-
-        public byte HitsPercentage;
-        public RenderedText HitsTexture => _hitsPercText[HitsPercentage % _hitsPercText.Length];
-        public bool IsClicked;
-        public uint LastStepTime;
-        public string Name;
-        public uint Serial;
-        public bool ExecuteAnimation = true;
-        internal long LastAnimationChangeTime;
-        public HitsRequestStatus HitsRequest;
 
         public void FixHue(ushort hue)
         {
@@ -118,8 +119,6 @@ namespace ClassicUO.Game.GameObjects
 
             Hue = fixedColor;
         }
-
-        private static readonly RenderedText[] _hitsPercText = new RenderedText[101];
 
         public void UpdateHits(byte perc)
         {
@@ -155,9 +154,9 @@ namespace ClassicUO.Game.GameObjects
         {
         }
 
-        public override void Update(double totalTime, double frameTime)
+        public override void Update()
         {
-            base.Update(totalTime, frameTime);
+            base.Update();
 
             if (ObjectHandlesStatus == ObjectHandlesStatus.OPEN)
             {
@@ -297,64 +296,6 @@ namespace ClassicUO.Game.GameObjects
 
             return null;
         }
-
-        //public new void Clear()
-        //{
-        //    if (!IsEmpty)
-        //    {
-        //        var obj = Items;
-
-        //        while (obj != null)
-        //        {
-        //            var next = obj.Next;
-        //            Item it = (Item) obj;
-
-        //            it.Container = 0xFFFF_FFFF;
-        //            World.Items.Remove(it);
-
-        //            Remove(obj);
-
-        //            obj = next;
-        //        }
-        //    }
-        //}
-
-        public void ClearUnequipped()
-        {
-            if (!IsEmpty)
-            {
-                LinkedObject new_first = null;
-                LinkedObject obj = Items;
-
-                while (obj != null)
-                {
-                    LinkedObject next = obj.Next;
-
-                    Item it = (Item) obj;
-
-                    if (it.Layer != 0)
-                    {
-                        if (new_first == null)
-                        {
-                            new_first = obj;
-                        }
-                    }
-                    else
-                    {
-                        it.Container = 0xFFFF_FFFF;
-                        World.Items.Remove(it);
-                        it.Destroy();
-                        Remove(obj);
-                    }
-
-                    obj = next;
-                }
-
-
-                Items = new_first;
-            }
-        }
-
 
         public static implicit operator uint(Entity entity)
         {

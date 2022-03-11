@@ -424,9 +424,9 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        public override void Update(double totalTime, double frameTime)
+        public override void Update()
         {
-            base.Update(totalTime, frameTime);
+            base.Update();
 
             if (IsDisposed)
             {
@@ -447,10 +447,10 @@ namespace ClassicUO.Game.UI.Gumps
                 SelectedObject.SelectedContainer = item;
             }
 
-            if (Graphic == CORPSES_GUMP && _corpseEyeTicks < totalTime)
+            if (Graphic == CORPSES_GUMP && _corpseEyeTicks < Time.Ticks)
             {
                 _eyeCorspeOffset = _eyeCorspeOffset == 0 ? 1 : 0;
-                _corpseEyeTicks = (long) totalTime + 750;
+                _corpseEyeTicks = (long)Time.Ticks + 750;
                 _eyeGumpPic.Graphic = (ushort) (0x0045 + _eyeCorspeOffset);
                 float scale = GetScale();
                 _eyeGumpPic.Width = (int) (_eyeGumpPic.Width * scale);

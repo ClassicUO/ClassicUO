@@ -403,9 +403,9 @@ namespace ClassicUO.Game.UI.Gumps
                 return true;
             }
 
-            public override void Update(double totalTime, double frameTime)
+            public override void Update()
             {
-                base.Update(totalTime, frameTime);
+                base.Update();
 
                 if (_time < Time.Ticks)
                 {
@@ -531,9 +531,9 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 }
 
-                public override void Update(double totalTime, double frameTime)
+                public override void Update()
                 {
-                    base.Update(totalTime, frameTime);
+                    base.Update();
 
                     if (Parent != null)
                     {

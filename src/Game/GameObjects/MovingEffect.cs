@@ -97,9 +97,9 @@ namespace ClassicUO.Game.GameObjects
         public readonly bool FixedDir;
 
 
-        public override void Update(double totalTime, double frameTime)
+        public override void Update()
         {
-            base.Update(totalTime, frameTime);
+            base.Update();
 
             if (_lastMoveTime < Time.Ticks)
             {

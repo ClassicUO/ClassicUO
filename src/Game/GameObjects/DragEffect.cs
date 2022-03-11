@@ -88,7 +88,7 @@ namespace ClassicUO.Game.GameObjects
             Graphic = graphic;
         }
 
-        public override void Update(double totalTime, double frameTime)
+        public override void Update()
         {
             if (_lastMoveTime > Time.Ticks)
             {
@@ -100,7 +100,7 @@ namespace ClassicUO.Game.GameObjects
 
             _lastMoveTime = Time.Ticks + 20;
 
-            base.Update(totalTime, frameTime);
+            base.Update();
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int posX, int posY, float depth)
