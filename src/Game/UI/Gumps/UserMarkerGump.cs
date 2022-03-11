@@ -72,7 +72,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Width = 320,
                 Height = 220,
-                X = ProfileManager.CurrentProfile.GameWindowSize.X / 2 - 125,
+                X = Client.Game.Scene.Camera.Bounds.Width / 2 - 125,
                 Y = 150,
                 Alpha = 0.7f,
                 CanMove = true,

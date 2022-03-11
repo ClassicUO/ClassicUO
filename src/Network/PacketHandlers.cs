@@ -774,7 +774,7 @@ namespace ClassicUO.Network
             {
                 if (ProfileManager.CurrentProfile != null)
                 {
-                    NetClient.Socket.Send_GameWindowSize((uint)ProfileManager.CurrentProfile.GameWindowSize.X, (uint)ProfileManager.CurrentProfile.GameWindowSize.Y);
+                    NetClient.Socket.Send_GameWindowSize((uint)Client.Game.Scene.Camera.Bounds.Width, (uint)Client.Game.Scene.Camera.Bounds.Height);
                 }
 
                 NetClient.Socket.Send_Language(Settings.GlobalSettings.Language);

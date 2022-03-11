@@ -1243,10 +1243,10 @@ namespace ClassicUO.Game.UI.Gumps
             );
 
             section4.Add(new Label(ResGumps.DragSelectStartingPosX, true, HUE_FONT));
-            section4.Add(_dragSelectStartX = new HSliderBar(startX, startY, 200, 0, _currentProfile.GameWindowSize.X, _currentProfile.DragSelectStartX, HSliderBarStyle.MetalWidgetRecessedBar, true, 0, HUE_FONT));
+            section4.Add(_dragSelectStartX = new HSliderBar(startX, startY, 200, 0, Client.Game.Scene.Camera.Bounds.Width, _currentProfile.DragSelectStartX, HSliderBarStyle.MetalWidgetRecessedBar, true, 0, HUE_FONT));
 
             section4.Add(new Label(ResGumps.DragSelectStartingPosY, true, HUE_FONT));
-            section4.Add(_dragSelectStartY = new HSliderBar(startX, startY, 200, 0, _currentProfile.GameWindowSize.Y, _currentProfile.DragSelectStartY, HSliderBarStyle.MetalWidgetRecessedBar, true, 0, HUE_FONT));
+            section4.Add(_dragSelectStartY = new HSliderBar(startX, startY, 200, 0, Client.Game.Scene.Camera.Bounds.Height, _currentProfile.DragSelectStartY, HSliderBarStyle.MetalWidgetRecessedBar, true, 0, HUE_FONT));
             section4.Add
             (
                 _dragSelectAsAnchor = AddCheckBox
@@ -3837,7 +3837,7 @@ namespace ClassicUO.Game.UI.Gumps
             int.TryParse(_gameWindowWidth.Text, out int gameWindowSizeWidth);
             int.TryParse(_gameWindowHeight.Text, out int gameWindowSizeHeight);
 
-            if (gameWindowSizeWidth != _currentProfile.GameWindowSize.X || gameWindowSizeHeight != _currentProfile.GameWindowSize.Y)
+            if (gameWindowSizeWidth != Client.Game.Scene.Camera.Bounds.Width || gameWindowSizeHeight != Client.Game.Scene.Camera.Bounds.Height)
             {
                 if (vp != null)
                 {
@@ -4208,10 +4208,10 @@ namespace ClassicUO.Game.UI.Gumps
         {
             var camera = Client.Game.Scene.Camera;
 
-            _gameWindowWidth.SetText(camera.Bounds.X.ToString());
-            _gameWindowHeight.SetText(camera.Bounds.Y.ToString());
-            _gameWindowPositionX.SetText(camera.Bounds.Width.ToString());
-            _gameWindowPositionY.SetText(camera.Bounds.Height.ToString());
+            _gameWindowPositionX.SetText(camera.Bounds.X.ToString());
+            _gameWindowPositionY.SetText(camera.Bounds.Y.ToString());
+            _gameWindowWidth.SetText(camera.Bounds.Width.ToString());
+            _gameWindowHeight.SetText(camera.Bounds.Height.ToString());
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)

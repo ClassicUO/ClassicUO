@@ -234,8 +234,10 @@ namespace ClassicUO.Game.UI.Gumps
             _borderControl.Height = Height;
             _button.X = Width - (_button.Width >> 1);
             _button.Y = Height - (_button.Height >> 1);
-            _systemChatControl.Width = _scene.Camera.Bounds.Width = Width - BORDER_WIDTH * 2;
-            _systemChatControl.Height = _scene.Camera.Bounds.Height = Height - BORDER_WIDTH * 2;
+            _scene.Camera.Bounds.Width = Width - BORDER_WIDTH;
+            _scene.Camera.Bounds.Height = Height - BORDER_WIDTH;
+            _systemChatControl.Width = Width - BORDER_WIDTH * 2;
+            _systemChatControl.Height = Height - BORDER_WIDTH * 2;
             _systemChatControl.Resize();
             WantUpdateSize = true;
 
@@ -255,7 +257,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             //Resize();
-            _lastSize = _savedSize = ProfileManager.CurrentProfile.GameWindowSize = newSize;
+            _lastSize = _savedSize = newSize;
 
             if (_scene.Camera.Bounds.Width != _lastSize.X || _scene.Camera.Bounds.Height != _lastSize.Y)
             {
@@ -263,7 +265,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _scene.Camera.Bounds.Height = _lastSize.Y;
                 Width = _scene.Camera.Bounds.Width + BORDER_WIDTH * 2;
                 Height = _scene.Camera.Bounds.Height + BORDER_WIDTH * 2;
-                ProfileManager.CurrentProfile.GameWindowSize = _lastSize;
+
                 Resize();
             }
 
