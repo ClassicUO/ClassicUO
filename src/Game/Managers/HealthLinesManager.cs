@@ -55,22 +55,21 @@ namespace ClassicUO.Game.Managers
 
         public void Draw(UltimaBatcher2D batcher)
         {
-            int screenW = ProfileManager.CurrentProfile.GameWindowSize.X;
-            int screenH = ProfileManager.CurrentProfile.GameWindowSize.Y;
+            var camera = Client.Game.Scene.Camera;
 
             if (SerialHelper.IsMobile(TargetManager.LastTargetInfo.Serial))
             {
-                DrawHealthLineWithMath(batcher, TargetManager.LastTargetInfo.Serial, screenW, screenH);
+                DrawHealthLineWithMath(batcher, TargetManager.LastTargetInfo.Serial, camera.Bounds.Width, camera.Bounds.Height);
             }
 
             if (SerialHelper.IsMobile(TargetManager.SelectedTarget))
             {
-                DrawHealthLineWithMath(batcher, TargetManager.SelectedTarget, screenW, screenH);
+                DrawHealthLineWithMath(batcher, TargetManager.SelectedTarget, camera.Bounds.Width, camera.Bounds.Height);
             }
 
             if (SerialHelper.IsMobile(TargetManager.LastAttack))
             {
-                DrawHealthLineWithMath(batcher, TargetManager.LastAttack, screenW, screenH);
+                DrawHealthLineWithMath(batcher, TargetManager.LastAttack, camera.Bounds.Width, camera.Bounds.Height);
             }
 
             if (!IsEnabled)
@@ -156,7 +155,7 @@ namespace ClassicUO.Game.Managers
                                 p1.Y -= Constants.OBJECT_HANDLES_GUMP_HEIGHT + 5;
                             }
 
-                            if (!(p1.X < 0 || p1.X > screenW - mobile.HitsTexture.Width || p1.Y < 0 || p1.Y > screenH))
+                            if (!(p1.X < 0 || p1.X > camera.Bounds.Width - mobile.HitsTexture.Width || p1.Y < 0 || p1.Y > camera.Bounds.Height))
                             {
                                 mobile.HitsTexture.Draw(batcher, p1.X, p1.Y);
                             }
@@ -174,12 +173,12 @@ namespace ClassicUO.Game.Managers
                 p.X -= BAR_WIDTH_HALF;
                 p.Y -= BAR_HEIGHT_HALF;
 
-                if (p.X < 0 || p.X > screenW - BAR_WIDTH)
+                if (p.X < 0 || p.X > camera.Bounds.Width - BAR_WIDTH)
                 {
                     continue;
                 }
 
-                if (p.Y < 0 || p.Y > screenH - BAR_HEIGHT)
+                if (p.Y < 0 || p.Y > camera.Bounds.Height - BAR_HEIGHT)
                 {
                     continue;
                 }

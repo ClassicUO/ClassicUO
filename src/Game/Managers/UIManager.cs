@@ -71,7 +71,12 @@ namespace ClassicUO.Game.Managers
                 Point mouse = Mouse.Position;
                 Profile profile = ProfileManager.CurrentProfile;
 
-                return profile != null && Client.Game.GameCursor.AllowDrawSDLCursor && DraggingControl == null && MouseOverControl == null && !IsModalOpen && mouse.X >= profile.GameWindowPosition.X + 5 && mouse.X < profile.GameWindowPosition.X + 5 + profile.GameWindowSize.X && mouse.Y >= profile.GameWindowPosition.Y + 5 && mouse.Y < profile.GameWindowPosition.Y + 5 + profile.GameWindowSize.Y;
+                return profile != null && 
+                    Client.Game.GameCursor.AllowDrawSDLCursor &&
+                    DraggingControl == null &&
+                    MouseOverControl == null && 
+                    !IsModalOpen && 
+                    Client.Game.Scene.Camera.Bounds.Contains(mouse);
             }
         }
 
