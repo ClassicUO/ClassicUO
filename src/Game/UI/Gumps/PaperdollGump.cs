@@ -612,7 +612,7 @@ namespace ClassicUO.Game.UI.Gumps
                 UpdateTitle(mobile.Title);
             }
 
-            _paperDollInteractable.Update();
+            _paperDollInteractable.RequestUpdate();
 
             if (mobile != null)
             {
