@@ -354,7 +354,6 @@ namespace ClassicUO.Game.UI.Controls
             _updateUI = true;
         }
 
-
         private static ushort GetAnimID(ushort graphic, ushort animID, bool isfemale)
         {
             int offset = isfemale ? Constants.FEMALE_GUMP_OFFSET : Constants.MALE_GUMP_OFFSET;
