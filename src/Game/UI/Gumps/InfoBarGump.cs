@@ -122,16 +122,16 @@ namespace ClassicUO.Game.UI.Gumps
             //}
         }
 
-        public override void Update(double totalTime, double frameTime)
+        public override void Update()
         {
             if (IsDisposed)
             {
                 return;
             }
 
-            if (_refreshTime < totalTime)
+            if (_refreshTime < Time.Ticks)
             {
-                _refreshTime = (long) totalTime + 125;
+                _refreshTime = (long)Time.Ticks + 125;
 
                 int x = 5;
 
@@ -142,7 +142,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            base.Update(totalTime, frameTime);
+            base.Update();
 
             Control last = Children.LastOrDefault();
 
@@ -182,16 +182,16 @@ namespace ClassicUO.Game.UI.Gumps
         public ushort Hue => _label.Hue;
         protected long _refreshTime;
 
-        public override void Update(double totalTime, double frameTime)
+        public override void Update()
         {
             if (IsDisposed)
             {
                 return;
             }
 
-            if (_refreshTime < totalTime)
+            if (_refreshTime < Time.Ticks)
             {
-                _refreshTime = (long) totalTime + 125;
+                _refreshTime = (long)Time.Ticks + 125;
 
                 _data.Text = GetVarData(Var);
 
@@ -210,7 +210,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             WantUpdateSize = true;
 
-            base.Update(totalTime, frameTime);
+            base.Update();
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)

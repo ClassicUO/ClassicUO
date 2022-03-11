@@ -396,7 +396,7 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-        public override void Update(double totalTime, double frameTime)
+        public override void Update()
         {
             if (!World.InGame || IsDisposed)
             {
@@ -431,7 +431,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _playerGoldLabel.Text = World.Player.Gold.ToString();
             }
 
-            base.Update(totalTime, frameTime);
+            base.Update();
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)

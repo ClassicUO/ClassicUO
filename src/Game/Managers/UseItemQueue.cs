@@ -46,7 +46,7 @@ namespace ClassicUO.Game.Managers
             _timer = Time.Ticks + 1000;
         }
 
-        public void Update(double totalTime, double frameTime)
+        public void Update()
         {
             if (_timer < Time.Ticks)
             {

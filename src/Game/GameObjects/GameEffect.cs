@@ -103,9 +103,9 @@ namespace ClassicUO.Game.GameObjects
         protected sbyte TargetZ;
 
       
-        public override void Update(double totalTime, double frameTime)
+        public override void Update()
         {
-            base.Update(totalTime, frameTime);
+            base.Update();
 
 
             if (Source != null && Source.IsDestroyed)
@@ -122,11 +122,11 @@ namespace ClassicUO.Game.GameObjects
 
             if (IsEnabled)
             {
-                if (Duration < totalTime && Duration >= 0)
+                if (Duration < Time.Ticks && Duration >= 0)
                 {
                     Destroy();
                 }
-                else if (NextChangeFrameTime < totalTime)
+                else if (NextChangeFrameTime < Time.Ticks)
                 {
                     if (AnimDataFrame.FrameCount != 0)
                     {
@@ -147,7 +147,7 @@ namespace ClassicUO.Game.GameObjects
                         AnimationGraphic = Graphic;
                     }
 
-                    NextChangeFrameTime = (long) totalTime + IntervalInMs;
+                    NextChangeFrameTime = (long)Time.Ticks + IntervalInMs;
                 }
             }
             else

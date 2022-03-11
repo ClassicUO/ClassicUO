@@ -56,7 +56,7 @@ namespace ClassicUO.Game.Managers
             //Clear();
         }
 
-        public virtual void Update(double totalTime, double frameTime)
+        public virtual void Update()
         {
             ProcessWorldText(false);
         }

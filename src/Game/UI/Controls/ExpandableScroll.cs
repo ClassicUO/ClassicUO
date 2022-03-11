@@ -245,7 +245,7 @@ namespace ClassicUO.Game.UI.Controls
             return false;
         }
 
-        public override void Update(double totalTime, double frameTime)
+        public override void Update()
         {
             if (Mouse.LButtonPressed && _isExpanding)
             {
@@ -304,7 +304,7 @@ namespace ClassicUO.Game.UI.Controls
             WantUpdateSize = true;
             Parent?.OnPageChanged();
 
-            base.Update(totalTime, frameTime);
+            base.Update();
         }
 
 

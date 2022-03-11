@@ -109,14 +109,14 @@ namespace ClassicUO.Game.UI.Controls
         public bool CanPickUp { get; set; }
 
 
-        public override void Update(double totalTime, double frameTime)
+        public override void Update()
         {
             if (IsDisposed)
             {
                 return;
             }
 
-            base.Update(totalTime, frameTime);
+            base.Update();
 
             if (World.InGame)
             {

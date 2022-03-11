@@ -137,9 +137,9 @@ namespace ClassicUO.Game.UI.Gumps
             Add(right);
         }
 
-        public override void Update(double totalTime, double frameTime)
+        public override void Update()
         {
-            base.Update(totalTime, frameTime);
+            base.Update();
 
             if (_isDown)
             {

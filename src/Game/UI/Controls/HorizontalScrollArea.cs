@@ -55,9 +55,9 @@ namespace ClassicUO.Game.UI.Controls
     //    }
 
 
-    //    public override void Update(double totalTime, double frameTime)
+    //    public override void Update()
     //    {
-    //        base.Update(totalTime, frameTime);
+    //        base.Update();
     //    }
 
     //    public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)

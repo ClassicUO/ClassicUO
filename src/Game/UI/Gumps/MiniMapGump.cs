@@ -113,7 +113,7 @@ namespace ClassicUO.Game.UI.Gumps
             CreateMiniMapTexture(true);
         }
 
-        public override void Update(double totalTime, double frameTime)
+        public override void Update()
         {
             if (!World.InGame)
             {
@@ -126,10 +126,10 @@ namespace ClassicUO.Game.UI.Gumps
                 _lastMap = World.MapIndex;
             }
 
-            if (_timeMS < totalTime)
+            if (_timeMS < Time.Ticks)
             {
                 _draw = !_draw;
-                _timeMS = (long) totalTime + 500;
+                _timeMS = (long)Time.Ticks + 500;
             }
         }
 

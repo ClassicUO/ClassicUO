@@ -6764,7 +6764,7 @@ namespace ClassicUO.Network
                 UIManager.Add(gump);
             }
 
-            gump.Update(Time.Ticks, 0);
+            gump.Update();
             gump.SetInScreen();
 
             return gump;

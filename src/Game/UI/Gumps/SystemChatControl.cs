@@ -369,7 +369,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        public override void Update(double totalTime, double frameTime)
+        public override void Update()
         {
             LinkedListNode<ChatLineTime> first = _textEntries.First;
 
@@ -377,7 +377,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 LinkedListNode<ChatLineTime> next = first.Next;
 
-                first.Value.Update(totalTime, frameTime);
+                first.Value.Update();
 
                 if (first.Value.IsDisposed)
                 {
@@ -475,7 +475,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             _trans.Alpha = ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.HideChatGradient ? 0.0f : 0.5f;
 
-            base.Update(totalTime, frameTime);
+            base.Update();
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
@@ -905,7 +905,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             public int TextHeight => _renderedText?.Height ?? 0;
 
-            public void Update(double totalTime, double frameTime)
+            public void Update()
             {
                 if (Time.Ticks > _createdTime)
                 {

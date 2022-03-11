@@ -399,17 +399,17 @@ namespace ClassicUO
             Time.Ticks = (uint) gameTime.TotalGameTime.TotalMilliseconds;
 
             Mouse.Update();
-            OnNetworkUpdate(gameTime.TotalGameTime.TotalMilliseconds, gameTime.ElapsedGameTime.TotalMilliseconds);
+            OnNetworkUpdate();
             Plugin.Tick();
 
             if (Scene != null && Scene.IsLoaded && !Scene.IsDestroyed)
             {
                 Profiler.EnterContext("Update");
-                Scene.Update(gameTime.TotalGameTime.TotalMilliseconds, gameTime.ElapsedGameTime.TotalMilliseconds);
+                Scene.Update();
                 Profiler.ExitContext("Update");
             }
 
-            UIManager.Update(gameTime.TotalGameTime.TotalMilliseconds, gameTime.ElapsedGameTime.TotalMilliseconds);
+            UIManager.Update();
 
             _totalElapsed += gameTime.ElapsedGameTime.TotalMilliseconds;
             _currentFpsTime += gameTime.ElapsedGameTime.TotalMilliseconds;
@@ -440,7 +440,7 @@ namespace ClassicUO
                 }
             }
 
-            GameCursor?.Update(gameTime.ElapsedGameTime.TotalMilliseconds, gameTime.TotalGameTime.TotalMilliseconds);
+            GameCursor?.Update();
             Audio?.Update();
 
             base.Update(gameTime);
@@ -496,7 +496,7 @@ namespace ClassicUO
             Plugin.ProcessDrawCmdList(GraphicsDevice);
         }
 
-        private void OnNetworkUpdate(double totalTime, double frameTime)
+        private void OnNetworkUpdate()
         {
             if (NetClient.LoginSocket.IsDisposed && NetClient.LoginSocket.IsConnected)
             {
@@ -505,12 +505,12 @@ namespace ClassicUO
             else if (!NetClient.Socket.IsConnected)
             {
                 NetClient.LoginSocket.Update();
-                UpdateSocketStats(NetClient.LoginSocket, totalTime);
+                UpdateSocketStats(NetClient.LoginSocket);
             }
             else if (!NetClient.Socket.IsDisposed)
             {
                 NetClient.Socket.Update();
-                UpdateSocketStats(NetClient.Socket, totalTime);
+                UpdateSocketStats(NetClient.Socket);
             }
         }
 
@@ -519,12 +519,12 @@ namespace ClassicUO
             return !_suppressedDraw && base.BeginDraw();
         }
 
-        private void UpdateSocketStats(NetClient socket, double totalTime)
+        private void UpdateSocketStats(NetClient socket)
         {
-            if (_statisticsTimer < totalTime)
+            if (_statisticsTimer < Time.Ticks)
             {
                 socket.Statistics.Update();
-                _statisticsTimer = totalTime + 500;
+                _statisticsTimer = Time.Ticks + 500;
             }
         }
 

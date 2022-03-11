@@ -455,7 +455,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        public override void Update(double totalTime, double frameTime)
+        public override void Update()
         {
             if (IsDisposed)
             {
@@ -481,7 +481,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _warModeBtn.ButtonGraphicOver = btngumps[2];
             }
 
-            base.Update(totalTime, frameTime);
+            base.Update();
 
 
             if (_paperDollInteractable != null && (CanLift || LocalSerial == World.Player.Serial))
@@ -785,7 +785,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             public Layer Layer { get; }
 
-            public override void Update(double totalTime, double frameTime)
+            public override void Update()
             {
                 Item item = World.Items.Get(LocalSerial);
 
@@ -831,7 +831,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 }
 
-                base.Update(totalTime, frameTime);
+                base.Update();
             }
 
             private class ItemGumpFixed : ItemGump

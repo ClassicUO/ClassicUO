@@ -158,7 +158,7 @@ namespace ClassicUO.Game
 
 
 
-        public void Update(double totalTime, double frameTime)
+        public void Update()
         {
             Graphic = AssignGraphicByState();
 

@@ -39,13 +39,13 @@ namespace ClassicUO.Game.Managers
 {
     internal class EffectManager : LinkedObject
     {
-        public void Update(double totalTime, double frameTime)
+        public void Update()
         {
             for (GameEffect f = (GameEffect) Items; f != null;)
             {
                 GameEffect next = (GameEffect) f.Next;
 
-                f.Update(totalTime, frameTime);
+                f.Update();
 
                 if (!f.IsDestroyed && f.Distance > World.ClientViewRange)
                 {

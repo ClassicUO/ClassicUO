@@ -527,16 +527,16 @@ namespace ClassicUO.Game.UI.Gumps
             _point = p;
         }
 
-        public override void Update(double totalTime, double frameTime)
+        public override void Update()
         {
             if (IsDisposed)
             {
                 return;
             }
 
-            if (_refreshTime < totalTime)
+            if (_refreshTime < Time.Ticks)
             {
-                _refreshTime = (long) totalTime + 250;
+                _refreshTime = (long)Time.Ticks + 250;
 
                 _labels[(int) MobileStats.Name].Text = !string.IsNullOrEmpty(World.Player.Name) ? World.Player.Name : string.Empty;
 
@@ -561,7 +561,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _labels[(int) MobileStats.WeightCurrent].Text = $"{World.Player.Weight}/{World.Player.WeightMax}";
             }
 
-            base.Update(totalTime, frameTime);
+            base.Update();
         }
 
 
@@ -1390,16 +1390,16 @@ namespace ClassicUO.Game.UI.Gumps
             Add(label);
         }
 
-        public override void Update(double totalTime, double frameTime)
+        public override void Update()
         {
             if (IsDisposed)
             {
                 return;
             }
 
-            if (_refreshTime < totalTime)
+            if (_refreshTime < Time.Ticks)
             {
-                _refreshTime = (long) totalTime + 250;
+                _refreshTime = (long)Time.Ticks + 250;
 
                 _labels[(int) MobileStats.Name].Text = !string.IsNullOrEmpty(World.Player.Name) ? World.Player.Name : string.Empty;
 
@@ -1491,7 +1491,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            base.Update(totalTime, frameTime);
+            base.Update();
         }
 
 
@@ -1884,16 +1884,16 @@ namespace ClassicUO.Game.UI.Gumps
             );
         }
 
-        public override void Update(double totalTime, double frameTime)
+        public override void Update()
         {
             if (IsDisposed)
             {
                 return;
             }
 
-            if (_refreshTime < totalTime)
+            if (_refreshTime < Time.Ticks)
             {
-                _refreshTime = (long) totalTime + 250;
+                _refreshTime = (long)Time.Ticks + 250;
 
                 UpdateStatusFillBar(FillStats.Hits, World.Player.Hits, World.Player.HitsMax);
                 UpdateStatusFillBar(FillStats.Mana, World.Player.Mana, World.Player.ManaMax);
@@ -1944,7 +1944,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _labels[(int) MobileStats.BandageTimerSeconds].Text = World.Player.EnergyResistance.ToString(); // FIXME: packet handling
             }
 
-            base.Update(totalTime, frameTime);
+            base.Update();
         }
 
         protected override void OnMouseUp(int x, int y, MouseButtonType button)
