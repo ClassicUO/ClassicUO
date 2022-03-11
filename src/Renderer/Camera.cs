@@ -45,7 +45,6 @@ namespace ClassicUO.Renderer
         private bool _updateMatrixes = true;
         private int _zoomIndex;
 
-
         public Matrix ViewTransformMatrix
         {
             get
@@ -99,7 +98,6 @@ namespace ClassicUO.Renderer
 
         public int ZoomValuesCount => _cameraZoomValues.Length;
         public Rectangle Bounds;
-        public Vector2 Origin;
         public Point Position;
 
 
@@ -116,9 +114,6 @@ namespace ClassicUO.Renderer
                 Bounds.Y = y;
                 Bounds.Width = width;
                 Bounds.Height = height;
-
-                Origin.X = width / 2f;
-                Origin.Y = height / 2f;
 
                 _updateMatrixes = true;
             }
@@ -140,8 +135,13 @@ namespace ClassicUO.Renderer
             return new Viewport(Bounds.X, Bounds.Y, Bounds.Width, Bounds.Height);
         }
 
-        public void Update()
+        public void Update(bool force)
         {
+            if (force)
+            {
+                _updateMatrixes = true;
+            }
+
             UpdateMatrices();
         }
 
@@ -192,7 +192,9 @@ namespace ClassicUO.Renderer
 
             Matrix temp;
 
-            Matrix.CreateTranslation(-Origin.X, -Origin.Y, 0f, out _transform);
+            var origin = new Vector2(Bounds.Width * 0.5f, Bounds.Height * 0.5f);
+
+            Matrix.CreateTranslation(-origin.X, -origin.Y, 0f, out _transform);
 
             float zoom = 1f / Zoom;
 
@@ -202,7 +204,7 @@ namespace ClassicUO.Renderer
                 Matrix.Multiply(ref _transform, ref temp, out _transform);
             }
 
-            Matrix.CreateTranslation(Origin.X, Origin.Y, 0f, out temp);
+            Matrix.CreateTranslation(origin.X, origin.Y, 0f, out temp);
             Matrix.Multiply(ref _transform, ref temp, out _transform);
 
 
