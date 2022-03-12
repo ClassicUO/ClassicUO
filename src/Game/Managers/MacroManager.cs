@@ -1462,12 +1462,12 @@ namespace ClassicUO.Game.Managers
                             break;
 
                         case MacroSubType.ZoomIn:
-                            --Client.Game.Scene.Camera.ZoomIndex;
+                            Client.Game.Scene.Camera.ZoomIn();
 
                             break;
 
                         case MacroSubType.ZoomOut:
-                            ++Client.Game.Scene.Camera.ZoomIndex;
+                            Client.Game.Scene.Camera.ZoomOut();
 
                             break;
                     }

@@ -1672,14 +1672,17 @@ namespace ClassicUO.Game.UI.Gumps
             section2.Y = section.Bounds.Bottom + 40;
             section2.Add(AddLabel(null, ResGumps.DefaultZoom, startX, startY));
 
+            var cameraZoomCount = (int)((camera.ZoomMax - camera.ZoomMin) / camera.ZoomStep);
+            var cameraZoomIndex = cameraZoomCount - (int)((camera.ZoomMax - camera.Zoom) / camera.ZoomStep);
+
             section2.AddRight
             (
                 _sliderZoom = AddHSlider
                 (
                     null,
                     0,
-                    Client.Game.Scene.Camera.ZoomValuesCount,
-                    Client.Game.Scene.Camera.ZoomIndex,
+                    cameraZoomCount,
+                    cameraZoomIndex,
                     startX,
                     startY,
                     100
@@ -3815,8 +3818,9 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.EnableDeathScreen = _enableDeathScreen.IsChecked;
             _currentProfile.EnableBlackWhiteEffect = _enableBlackWhiteEffect.IsChecked;
 
-            Client.Game.Scene.Camera.ZoomIndex = _sliderZoom.Value;
-            _currentProfile.DefaultScale = Client.Game.Scene.Camera.Zoom;
+            var camera = Client.Game.Scene.Camera;
+            _currentProfile.DefaultScale = camera.Zoom = (_sliderZoom.Value * camera.ZoomStep) + camera.ZoomMin;
+
             _currentProfile.EnableMousewheelScaleZoom = _zoomCheckbox.IsChecked;
             _currentProfile.RestoreScaleAfterUnpressCtrl = _restorezoomCheckbox.IsChecked;
 
@@ -3850,8 +3854,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             int.TryParse(_gameWindowPositionX.Text, out int gameWindowPositionX);
             int.TryParse(_gameWindowPositionY.Text, out int gameWindowPositionY);
-
-            var camera = Client.Game.Scene.Camera;
 
             if (gameWindowPositionX != camera.Bounds.X || gameWindowPositionY != camera.Bounds.Y)
             {

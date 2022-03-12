@@ -44,7 +44,7 @@ namespace ClassicUO.Game.Scenes
         public bool IsDestroyed { get; private set; }
         public bool IsLoaded { get; private set; }
         public int RenderedObjectsCount { get; protected set; }
-        public Camera Camera { get; } = new Camera();
+        public Camera Camera { get; } = new Camera(0.5f, 2.5f);
 
 
         public virtual void Dispose()

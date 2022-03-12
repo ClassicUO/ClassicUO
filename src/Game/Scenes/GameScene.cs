@@ -123,15 +123,6 @@ namespace ClassicUO.Game.Scenes
 
             Client.Game.Window.AllowUserResizing = true;
 
-            Camera.SetZoomValues
-            (
-                new[]
-                {
-                    .5f, .6f, .7f, .8f, 0.9f, 1f, 1.1f, 1.2f, 1.3f, 1.5f, 1.6f, 1.7f, 1.8f, 1.9f, 2.0f, 2.1f, 2.2f,
-                    2.3f, 2.4f, 2.5f
-                }
-            );
-
             Camera.Zoom = ProfileManager.CurrentProfile.DefaultScale;
             Camera.SetGameWindowBounds
             (

@@ -38,14 +38,34 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Renderer
 {
-    internal class Camera
+    class Camera
     {
-        private float[] _cameraZoomValues = new float[1] { 1f };
+        private static readonly float[] _cameraZoomValues = new[]
+        {
+            .5f, .6f, .7f, .8f, 
+            0.9f, 1f, 1.1f, 1.2f,
+            1.3f, 1.5f, 1.6f, 1.7f,
+            1.8f, 1.9f, 2.0f, 2.1f, 
+            2.2f, 2.3f, 2.4f, 2.5f
+        };
+
         private Matrix _transform = Matrix.Identity;
         private Matrix _inverseTransform = Matrix.Identity;
         private bool _updateMatrixes = true;
-        private int _zoomIndex;
         private float _lerpZoom;
+        private float _zoom;
+
+        public Camera(float minZoomValue, float maxZoomValue, float zoomStep = 0.1f)
+        {
+            ZoomMin = minZoomValue;
+            ZoomMax = maxZoomValue;
+            ZoomStep = zoomStep;
+        }
+
+
+        public Rectangle Bounds;
+        public Point Position;
+
 
         public Matrix ViewTransformMatrix
         {
@@ -57,56 +77,24 @@ namespace ClassicUO.Renderer
             }
         }
 
+        public float ZoomStep { get; private set; }
+        public float ZoomMin { get; private set; }
+        public float ZoomMax { get; private set; }
         public float Zoom
         {
-            get => _cameraZoomValues[_zoomIndex];
+            get => _zoom;
             set
             {
-                if (_cameraZoomValues[_zoomIndex] != value)
-                {
-                    // TODO: coding a better way to set zoom
-                    for (_zoomIndex = 0; _zoomIndex < _cameraZoomValues.Length; ++_zoomIndex)
-                    {
-                        if (_cameraZoomValues[_zoomIndex] == value)
-                        {
-                            break;
-                        }
-                    }
-
-                    // hack to trigger the bounds check and update matrices
-                    ZoomIndex = _zoomIndex;
-                }
-            }
-        }
-
-        public int ZoomIndex
-        {
-            get => _zoomIndex;
-            set
-            {
+                _zoom = MathHelper.Clamp(value, ZoomMin, ZoomMax);
                 _updateMatrixes = true;
-                _zoomIndex = value;
-
-                if (_zoomIndex < 0)
-                {
-                    _zoomIndex = 0;
-                }
-                else if (_zoomIndex >= _cameraZoomValues.Length)
-                {
-                    _zoomIndex = _cameraZoomValues.Length - 1;
-                }
             }
         }
 
-        public int ZoomValuesCount => _cameraZoomValues.Length;
-        public Rectangle Bounds;
-        public Point Position;
 
 
-        public void SetZoomValues(float[] values)
-        {
-            _cameraZoomValues = values;
-        }
+        public void ZoomIn() => Zoom += ZoomStep;
+
+        public void ZoomOut() => Zoom -= ZoomStep;
 
         public void SetGameWindowBounds(int x, int y, int width, int height)
         {
