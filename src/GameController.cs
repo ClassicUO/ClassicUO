@@ -397,6 +397,7 @@ namespace ClassicUO
             }
 
             Time.Ticks = (uint) gameTime.TotalGameTime.TotalMilliseconds;
+            Time.Delta = (float) gameTime.ElapsedGameTime.TotalSeconds;
 
             Mouse.Update();
             OnNetworkUpdate();
