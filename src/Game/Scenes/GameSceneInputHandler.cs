@@ -928,7 +928,14 @@ namespace ClassicUO.Game.Scenes
 
             if (Keyboard.Ctrl && ProfileManager.CurrentProfile.EnableMousewheelScaleZoom)
             {
-                Camera.ZoomIndex += up ? -1 : 1;
+                if (up)
+                {
+                    Camera.ZoomOut();
+                }
+                else
+                {
+                    Camera.ZoomIn();
+                }
 
                 return true;
             }
