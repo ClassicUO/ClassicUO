@@ -841,6 +841,13 @@ namespace ClassicUO
             return 1;
         }
 
+        protected override void OnExiting(object sender, EventArgs args)
+        {
+            Scene?.Dispose();
+
+            base.OnExiting(sender, args);
+        }
+
         private void TakeScreenshot()
         {
             string screenshotsFolder = FileSystemHelper.CreateFolderIfNotExists(CUOEnviroment.ExecutablePath, "Data", "Client", "Screenshots");

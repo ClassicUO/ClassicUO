@@ -144,8 +144,8 @@ namespace ClassicUO.Game.Scenes
             Camera.Zoom = ProfileManager.CurrentProfile.DefaultScale;
             Camera.SetGameWindowBounds
             (
-                ProfileManager.CurrentProfile.GameWindowPosition.X + 5, 
-                ProfileManager.CurrentProfile.GameWindowPosition.Y + 5, 
+                ProfileManager.CurrentProfile.GameWindowPosition.X, 
+                ProfileManager.CurrentProfile.GameWindowPosition.Y, 
                 ProfileManager.CurrentProfile.GameWindowSize.X, 
                 ProfileManager.CurrentProfile.GameWindowSize.Y
             );
@@ -335,8 +335,14 @@ namespace ClassicUO.Game.Scenes
 
         public override void Unload()
         {
+            if (IsDestroyed)
+            {
+                return;
+            }
+
             ProfileManager.CurrentProfile.GameWindowPosition = new Point(Camera.Bounds.X, Camera.Bounds.Y);
             ProfileManager.CurrentProfile.GameWindowSize = new Point(Camera.Bounds.Width, Camera.Bounds.Height);
+            ProfileManager.CurrentProfile.DefaultScale = Camera.Zoom;
 
             Client.Game.Audio?.StopMusic();
             Client.Game.Audio?.StopSounds();
