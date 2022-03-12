@@ -30,6 +30,7 @@
 
 #endregion
 
+using System;
 using System.Runtime.CompilerServices;
 using ClassicUO.Input;
 using Microsoft.Xna.Framework;
@@ -44,6 +45,7 @@ namespace ClassicUO.Renderer
         private Matrix _inverseTransform = Matrix.Identity;
         private bool _updateMatrixes = true;
         private int _zoomIndex;
+        private float _lerpZoom;
 
         public Matrix ViewTransformMatrix
         {
@@ -198,11 +200,14 @@ namespace ClassicUO.Renderer
 
             float zoom = 1f / Zoom;
 
-            if (zoom != 1f)
-            {
-                Matrix.CreateScale(zoom, zoom, 1f, out temp);
-                Matrix.Multiply(ref _transform, ref temp, out _transform);
-            }
+            const float FADE_TIME = 12.0f;
+            const float SMOOTHING_FACTOR = (1.0f / FADE_TIME) * 60.0f;
+
+            _lerpZoom = MathHelper.Lerp(_lerpZoom, zoom, SMOOTHING_FACTOR * Time.Delta);
+            zoom = _lerpZoom;
+
+            Matrix.CreateScale(zoom, zoom, 1f, out temp);
+            Matrix.Multiply(ref _transform, ref temp, out _transform);
 
             Matrix.CreateTranslation(origin.X, origin.Y, 0f, out temp);
             Matrix.Multiply(ref _transform, ref temp, out _transform);
