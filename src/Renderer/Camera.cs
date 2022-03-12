@@ -40,22 +40,14 @@ namespace ClassicUO.Renderer
 {
     class Camera
     {
-        private static readonly float[] _cameraZoomValues = new[]
-        {
-            .5f, .6f, .7f, .8f, 
-            0.9f, 1f, 1.1f, 1.2f,
-            1.3f, 1.5f, 1.6f, 1.7f,
-            1.8f, 1.9f, 2.0f, 2.1f, 
-            2.2f, 2.3f, 2.4f, 2.5f
-        };
-
         private Matrix _transform = Matrix.Identity;
         private Matrix _inverseTransform = Matrix.Identity;
         private bool _updateMatrixes = true;
         private float _lerpZoom;
         private float _zoom;
 
-        public Camera(float minZoomValue, float maxZoomValue, float zoomStep = 0.1f)
+
+        public Camera(float minZoomValue = 1f, float maxZoomValue = 1f, float zoomStep = 0.1f)
         {
             ZoomMin = minZoomValue;
             ZoomMax = maxZoomValue;
@@ -120,10 +112,7 @@ namespace ClassicUO.Renderer
             }
         }
 
-        public Viewport GetViewport()
-        {
-            return new Viewport(Bounds.X, Bounds.Y, Bounds.Width, Bounds.Height);
-        }
+        public Viewport GetViewport() => new Viewport(Bounds.X, Bounds.Y, Bounds.Width, Bounds.Height);
 
         public void Update(bool force)
         {
