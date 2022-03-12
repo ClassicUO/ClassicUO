@@ -3871,14 +3871,6 @@ namespace ClassicUO.Game.UI.Gumps
                 _currentProfile.GameWindowLock = _gameWindowLock.IsChecked;
             }
 
-            if (_gameWindowFullsize.IsChecked && (gameWindowPositionX != -5 || gameWindowPositionY != -5))
-            {
-                if (_currentProfile.GameWindowFullSize == _gameWindowFullsize.IsChecked)
-                {
-                    _gameWindowFullsize.IsChecked = false;
-                }
-            }
-
             if (_currentProfile.GameWindowFullSize != _gameWindowFullsize.IsChecked)
             {
                 Point n = Point.Zero, loc = Point.Zero;
