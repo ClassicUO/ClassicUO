@@ -233,12 +233,7 @@ namespace ClassicUO
         {
             Scene?.Dispose();
             Scene = scene;
-
-            if (scene != null)
-            {
-                Window.AllowUserResizing = scene.CanResize;
-                scene.Load();
-            }
+            Scene?.Load();
         }
 
         public void SetVSync(bool value)

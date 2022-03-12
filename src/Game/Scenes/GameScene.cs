@@ -102,25 +102,15 @@ namespace ClassicUO.Game.Scenes
         private RenderTarget2D _world_render_target, _lightRenderTarget;
 
 
-        public GameScene() : base((int) SceneType.Game, true, true)
-        {
-        }
-
         public bool UpdateDrawPosition { get; set; }
-
         public HotkeysManager Hotkeys { get; private set; }
-
         public MacroManager Macros { get; private set; }
-
         public InfoBarManager InfoBars { get; private set; }
-
         public Weather Weather { get; private set; }
-
         public bool DisconnectionRequested { get; set; }
-
         public bool UseLights => ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.UseCustomLightLevel ? World.Light.Personal < World.Light.Overall : World.Light.RealPersonal < World.Light.RealOverall;
-
         public bool UseAltLights => ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.UseAlternativeLights;
+
 
         public void DoubleClickDelayed(uint serial)
         {
@@ -131,6 +121,7 @@ namespace ClassicUO.Game.Scenes
         {
             base.Load();
 
+            Client.Game.Window.AllowUserResizing = true;
 
             Camera.SetZoomValues
             (
