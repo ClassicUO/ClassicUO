@@ -41,21 +41,10 @@ namespace ClassicUO.Game.Scenes
 {
     internal abstract class Scene : IDisposable
     {
-        protected Scene(int sceneID, bool canresize, bool maximized)
-        {
-            CanResize = canresize;
-            CanBeMaximized = maximized;
-            Camera = new Camera();
-        }
-
-        public readonly bool CanResize, CanBeMaximized, CanLoadAudio;
-        public readonly int ID;
-
-
         public bool IsDestroyed { get; private set; }
         public bool IsLoaded { get; private set; }
         public int RenderedObjectsCount { get; protected set; }
-        public Camera Camera { get; }
+        public Camera Camera { get; } = new Camera();
 
 
         public virtual void Dispose()

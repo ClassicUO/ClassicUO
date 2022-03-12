@@ -79,35 +79,24 @@ namespace ClassicUO.Game.Scenes
         private int _reconnectTryCounter = 1;
         private bool _autoLogin;
 
-        public LoginScene() : base((int) SceneType.Login, false, false)
-        {
-        }
-
 
         public bool Reconnect { get; set; }
-
         public LoginSteps CurrentLoginStep { get; set; } = LoginSteps.Main;
-
         public ServerListEntry[] Servers { get; private set; }
-
         public CityInfo[] Cities { get; set; }
-
         public string[] Characters { get; private set; }
-
         public string PopupMessage { get; set; }
-
         public byte ServerIndex { get; private set; }
-
         public static string Account { get; internal set; }
-
         public string Password { get; private set; }
-
         public bool CanAutologin => _autoLogin || Reconnect;
         
 
         public override void Load()
         {
             base.Load();
+
+            Client.Game.Window.AllowUserResizing = false;
 
             _autoLogin = Settings.GlobalSettings.AutoLogin;
 
