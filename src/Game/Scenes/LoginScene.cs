@@ -143,6 +143,11 @@ namespace ClassicUO.Game.Scenes
 
         public override void Unload()
         {
+            if (IsDestroyed)
+            {
+                return;
+            }
+
             Client.Game.Audio?.StopMusic();
             Client.Game.Audio?.StopSounds();
 

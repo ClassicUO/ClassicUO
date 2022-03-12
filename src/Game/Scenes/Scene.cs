@@ -65,8 +65,8 @@ namespace ClassicUO.Game.Scenes
                 return;
             }
 
-            IsDestroyed = true;
             Unload();
+            IsDestroyed = true;          
         }
 
         public virtual void Update()
@@ -87,7 +87,7 @@ namespace ClassicUO.Game.Scenes
 
         public virtual void Unload()
         {
-            
+            IsLoaded = false;
         }
        
 
