@@ -87,20 +87,6 @@ namespace ClassicUO.Renderer
 
         public void ZoomOut() => Zoom -= ZoomStep;
 
-        public void SetGameWindowBounds(int x, int y, int width, int height)
-        {
-            if (Bounds.X != x || Bounds.Y != y || Bounds.Width != width || Bounds.Height != height)
-            {
-                Bounds.X = x;
-                Bounds.Y = y;
-                Bounds.Width = width;
-                Bounds.Height = height;
-
-                _updateMatrixes = true;
-            }
-        }
-
-
         public Viewport GetViewport() => new Viewport(Bounds.X, Bounds.Y, Bounds.Width, Bounds.Height);
 
         public void Update(bool force)
