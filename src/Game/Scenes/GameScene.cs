@@ -124,13 +124,10 @@ namespace ClassicUO.Game.Scenes
             Client.Game.Window.AllowUserResizing = true;
 
             Camera.Zoom = ProfileManager.CurrentProfile.DefaultScale;
-            Camera.SetGameWindowBounds
-            (
-                ProfileManager.CurrentProfile.GameWindowPosition.X, 
-                ProfileManager.CurrentProfile.GameWindowPosition.Y, 
-                ProfileManager.CurrentProfile.GameWindowSize.X, 
-                ProfileManager.CurrentProfile.GameWindowSize.Y
-            );
+            Camera.Bounds.X = ProfileManager.CurrentProfile.GameWindowPosition.X;
+            Camera.Bounds.Y = ProfileManager.CurrentProfile.GameWindowPosition.Y;
+            Camera.Bounds.Width = ProfileManager.CurrentProfile.GameWindowSize.X;
+            Camera.Bounds.Height = ProfileManager.CurrentProfile.GameWindowSize.Y;
 
             Client.Game.GameCursor.ItemHold.Clear();
             Hotkeys = new HotkeysManager();
