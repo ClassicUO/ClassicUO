@@ -57,8 +57,6 @@ namespace ClassicUO.Renderer
 
 
         public Rectangle Bounds;
-        public Point Position;
-
 
         public Matrix ViewTransformMatrix
         {
@@ -102,16 +100,6 @@ namespace ClassicUO.Renderer
             }
         }
 
-        public void SetPosition(int x, int y)
-        {
-            if (Position.X != x || Position.Y != y)
-            {
-                Position.X = x;
-                Position.Y = y;
-
-                _updateMatrixes = true;
-            }
-        }
 
         public Viewport GetViewport() => new Viewport(Bounds.X, Bounds.Y, Bounds.Width, Bounds.Height);
 
