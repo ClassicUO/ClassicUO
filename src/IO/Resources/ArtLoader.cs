@@ -99,10 +99,9 @@ namespace ClassicUO.IO.Resources
 
         private SpriteInfo[] _spriteInfos;
 
-
         public Rectangle GetRealArtBounds(int index) => index + 0x4000 >= _spriteInfos.Length ? Rectangle.Empty : _spriteInfos[index + 0x4000].ArtBounds;
 
-        private void AddSpriteToAtlas(TextureAtlas atlas, int g, bool isTerrain)
+        private bool LoadData(Span<uint> data, int g, out short width, out short height, bool isTerrain)
         {
             ref UOFileIndex entry = ref GetValidRefEntry(g);
 
@@ -110,10 +109,25 @@ namespace ClassicUO.IO.Resources
             {
                 if (entry.Length == 0)
                 {
-                    return;
+                    width = 0;
+                    height = 0;
+                    return false;
                 }
 
-                Span<uint> data = stackalloc uint[44 * 44];
+                width = 44;
+                height = 44;
+
+                if (data == null || data.Length < (width * height))
+                {
+                    return false;
+                }
+
+                /* 
+                 * Since the data only contains the diamond shape, we may not actually read
+                 * into every pixel in 'data'. We must zero the buffer here since it is
+                 * re-used. But we only have to zero out the (44 * 44) worth.
+                 */
+                data.Slice(0, (width * height)).Fill(0);
 
                 _file.SetData(entry.Address, entry.FileSize);
                 _file.Seek(entry.Offset);
@@ -139,84 +153,93 @@ namespace ClassicUO.IO.Resources
                     {
                         data[pos++] = HuesHelper.Color16To32(_file.ReadUShort()) | 0xFF_00_00_00;
                     }
-                }
-
-                ref var spriteInfo = ref _spriteInfos[g];
-
-                spriteInfo.Texture = atlas.AddSprite(data, 44, 44, out spriteInfo.UV);
+                };
             }
             else
             {
-                if (ReadHeader(_file, ref entry, out short width, out short height))
+                if (ReadHeader(_file, ref entry, out width, out height))
                 {
-                    uint[] buffer = null;
-
-                    Span<uint> artPixels = width * height <= 1024 ? stackalloc uint[1024] : (buffer = System.Buffers.ArrayPool<uint>.Shared.Rent(width * height));
-
-                    try
+                    if (data.Length < (width * height))
                     {
-                        ushort fixedGraphic = (ushort)(g - 0x4000);
+                        return false;
+                    }
 
-                        if (ReadData(artPixels, width, height, _file))
+                    /* 
+                     * Since the data is run-length-encoded, we may not actually read
+                     * into every pixel in 'data'. We must zero the buffer here since it is
+                     * re-used. But we only have to zero out the (width * height) worth.
+                     */
+                    data.Slice(0, (width * height)).Fill(0);
+
+                    ushort fixedGraphic = (ushort)(g - 0x4000);
+
+                    if (ReadData(data, width, height, _file))
+                    {
+                        // keep the cursor graphic check to cleanup edges
+                        if ((fixedGraphic >= 0x2053 && fixedGraphic <= 0x2062) || (fixedGraphic >= 0x206A && fixedGraphic <= 0x2079))
                         {
-                            // keep the cursor graphic check to cleanup edges
-                            if ((fixedGraphic >= 0x2053 && fixedGraphic <= 0x2062) || (fixedGraphic >= 0x206A && fixedGraphic <= 0x2079))
+                            for (int i = 0; i < width; i++)
                             {
-                                for (int i = 0; i < width; i++)
-                                {
-                                    artPixels[i] = 0;
-                                    artPixels[(height - 1) * width + i] = 0;
-                                }
-
-                                for (int i = 0; i < height; i++)
-                                {
-                                    artPixels[i * width] = 0;
-                                    artPixels[i * width + width - 1] = 0;
-                                }
+                                data[i] = 0;
+                                data[(height - 1) * width + i] = 0;
                             }
 
-                            ref var spriteInfo = ref _spriteInfos[g];
-
-                            FinalizeData
-                            (
-                                artPixels,
-                                ref entry,
-                                fixedGraphic,
-                                width,
-                                height,
-                                out spriteInfo.ArtBounds
-                            );
-
-                            _picker.Set(fixedGraphic, width, height, artPixels);
-                            spriteInfo.Texture = atlas.AddSprite(artPixels, width, height, out spriteInfo.UV);
+                            for (int i = 0; i < height; i++)
+                            {
+                                data[i * width] = 0;
+                                data[i * width + width - 1] = 0;
+                            }
                         }
-                    }
-                    finally
-                    {
-                        if (buffer != null)
-                        {
-                            System.Buffers.ArrayPool<uint>.Shared.Return(buffer, true);
-                        }
+
+                        ref var spriteInfo = ref _spriteInfos[g];
+
+                        FinalizeData
+                        (
+                            data,
+                            ref entry,
+                            fixedGraphic,
+                            width,
+                            height,
+                            out spriteInfo.ArtBounds
+                        );
                     }
                 }
             }
+
+            return true;
         }
-      
+
+        [ThreadStatic] private static uint[] _data = null;
+
         public Texture2D GetLandTexture(uint g, out Rectangle bounds)
         {
             g &= _graphicMask;
-
-            var atlas = TextureAtlas.Shared;
 
             ref var spriteInfo = ref _spriteInfos[g];
 
             if (spriteInfo.Texture == null)
             {
-                AddSpriteToAtlas(atlas, (int)g, true);
+                if (!LoadData(_data, (int)g, out var width, out var height, true))
+                {
+                    if (_data != null && width * height < _data.Length)
+                    {
+                        bounds = Rectangle.Empty;
+                        return null;
+                    }
+
+                    _data = new uint[width * height];
+
+                    if (!LoadData(_data, (int)g, out width, out height, true))
+                    {
+                        bounds = Rectangle.Empty;
+                        return null;
+                    }
+                }
+
+                spriteInfo.Texture = TextureAtlas.Shared.AddSprite(_data.AsSpan(), 44, 44, out spriteInfo.UV);
             }
 
             bounds = spriteInfo.UV;
-
             return spriteInfo.Texture;
         }
 
@@ -224,17 +247,32 @@ namespace ClassicUO.IO.Resources
         {
             g += 0x4000;
 
-            var atlas = TextureAtlas.Shared;
-
             ref var spriteInfo = ref _spriteInfos[g];
 
             if (spriteInfo.Texture == null)
             {
-                AddSpriteToAtlas(atlas, (int)g, false);
+                if (!LoadData(_data, (int)g, out var width, out var height, false))
+                {
+                    if (_data != null && width * height < _data.Length)
+                    {
+                        bounds = Rectangle.Empty;
+                        return null;
+                    }
+
+                    _data = new uint[width * height];
+
+                    if (!LoadData(_data, (int)g, out width, out height, false))
+                    {
+                        bounds = Rectangle.Empty;
+                        return null;
+                    }
+                }
+
+                _picker.Set(g - 0x4000, width, height, _data);
+                spriteInfo.Texture = TextureAtlas.Shared.AddSprite(_data.AsSpan(), width, height, out spriteInfo.UV);
             }
 
             bounds = spriteInfo.UV;
-
             return spriteInfo.Texture;
         }
 

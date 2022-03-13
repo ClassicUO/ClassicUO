@@ -41,21 +41,11 @@ namespace ClassicUO.Game.Scenes
 {
     internal abstract class Scene : IDisposable
     {
-        protected Scene(int sceneID, bool canresize, bool maximized)
-        {
-            CanResize = canresize;
-            CanBeMaximized = maximized;
-            Camera = new Camera();
-        }
-
-        public readonly bool CanResize, CanBeMaximized, CanLoadAudio;
-        public readonly int ID;
-
-
         public bool IsDestroyed { get; private set; }
         public bool IsLoaded { get; private set; }
         public int RenderedObjectsCount { get; protected set; }
-        public Camera Camera { get; }
+        public Camera Camera { get; } = new Camera(0.5f, 2.5f, 0.1f);
+
 
 
         public virtual void Dispose()
@@ -65,13 +55,13 @@ namespace ClassicUO.Game.Scenes
                 return;
             }
 
-            IsDestroyed = true;
             Unload();
+            IsDestroyed = true;          
         }
 
         public virtual void Update()
         {           
-            Camera.Update();
+            Camera.Update(true);
         }
 
         public virtual bool Draw(UltimaBatcher2D batcher)
@@ -87,7 +77,7 @@ namespace ClassicUO.Game.Scenes
 
         public virtual void Unload()
         {
-            
+            IsLoaded = false;
         }
        
 

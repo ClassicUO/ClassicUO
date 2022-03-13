@@ -102,25 +102,15 @@ namespace ClassicUO.Game.Scenes
         private RenderTarget2D _world_render_target, _lightRenderTarget;
 
 
-        public GameScene() : base((int) SceneType.Game, true, true)
-        {
-        }
-
         public bool UpdateDrawPosition { get; set; }
-
         public HotkeysManager Hotkeys { get; private set; }
-
         public MacroManager Macros { get; private set; }
-
         public InfoBarManager InfoBars { get; private set; }
-
         public Weather Weather { get; private set; }
-
         public bool DisconnectionRequested { get; set; }
-
         public bool UseLights => ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.UseCustomLightLevel ? World.Light.Personal < World.Light.Overall : World.Light.RealPersonal < World.Light.RealOverall;
-
         public bool UseAltLights => ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.UseAlternativeLights;
+
 
         public void DoubleClickDelayed(uint serial)
         {
@@ -130,6 +120,14 @@ namespace ClassicUO.Game.Scenes
         public override void Load()
         {
             base.Load();
+
+            Client.Game.Window.AllowUserResizing = true;
+
+            Camera.Zoom = ProfileManager.CurrentProfile.DefaultScale;
+            Camera.Bounds.X = ProfileManager.CurrentProfile.GameWindowPosition.X;
+            Camera.Bounds.Y = ProfileManager.CurrentProfile.GameWindowPosition.Y;
+            Camera.Bounds.Width = ProfileManager.CurrentProfile.GameWindowSize.X;
+            Camera.Bounds.Height = ProfileManager.CurrentProfile.GameWindowSize.Y;
 
             Client.Game.GameCursor.ItemHold.Clear();
             Hotkeys = new HotkeysManager();
@@ -169,9 +167,7 @@ namespace ClassicUO.Game.Scenes
 
             CommandManager.Initialize();
             NetClient.Socket.Disconnected += SocketOnDisconnected;
-
             MessageManager.MessageReceived += ChatOnMessageReceived;
-
             UIManager.ContainerScale = ProfileManager.CurrentProfile.ContainersScale / 100f;
 
             SDL.SDL_SetWindowMinimumSize(Client.Game.Window.Handle, 640, 480);
@@ -197,18 +193,6 @@ namespace ClassicUO.Game.Scenes
 
             CircleOfTransparency.Create(ProfileManager.CurrentProfile.CircleOfTransparencyRadius);
             Plugin.OnConnected();
-
-
-            Camera.SetZoomValues
-            (
-                new[]
-                {
-                    .5f, .6f, .7f, .8f, 0.9f, 1f, 1.1f, 1.2f, 1.3f, 1.5f, 1.6f, 1.7f, 1.8f, 1.9f, 2.0f, 2.1f, 2.2f,
-                    2.3f, 2.4f, 2.5f
-                }
-            );
-
-            Camera.Zoom = ProfileManager.CurrentProfile.DefaultScale;
         }
 
         private void ChatOnMessageReceived(object sender, MessageEventArgs e)
@@ -330,6 +314,15 @@ namespace ClassicUO.Game.Scenes
 
         public override void Unload()
         {
+            if (IsDestroyed)
+            {
+                return;
+            }
+
+            ProfileManager.CurrentProfile.GameWindowPosition = new Point(Camera.Bounds.X, Camera.Bounds.Y);
+            ProfileManager.CurrentProfile.GameWindowSize = new Point(Camera.Bounds.Width, Camera.Bounds.Height);
+            ProfileManager.CurrentProfile.DefaultScale = Camera.Zoom;
+
             Client.Game.Audio?.StopMusic();
             Client.Game.Audio?.StopSounds();
 
@@ -703,7 +696,6 @@ namespace ClassicUO.Game.Scenes
         public override void Update()
         {
             Profile currentProfile = ProfileManager.CurrentProfile;
-            Camera.SetGameWindowBounds(currentProfile.GameWindowPosition.X + 5, currentProfile.GameWindowPosition.Y + 5, currentProfile.GameWindowSize.X, currentProfile.GameWindowSize.Y);
 
             SelectedObject.TranslatedMousePositionByViewport = Camera.MouseToWorldPosition();
 
@@ -878,7 +870,6 @@ namespace ClassicUO.Game.Scenes
                 }
             }
         }
-
 
         public override bool Draw(UltimaBatcher2D batcher)
         {

@@ -196,8 +196,8 @@ namespace ClassicUO.Game
             while (CurrentCount < Count)
             {
                 ref WeatherEffect effect = ref _effects[CurrentCount++];
-                effect.X = RandomHelper.GetValue(0, ProfileManager.CurrentProfile.GameWindowSize.X);
-                effect.Y = RandomHelper.GetValue(0, ProfileManager.CurrentProfile.GameWindowSize.Y);
+                effect.X = RandomHelper.GetValue(0, Client.Game.Scene.Camera.Bounds.Width);
+                effect.Y = RandomHelper.GetValue(0, Client.Game.Scene.Camera.Bounds.Height);
             }
         }
 
@@ -305,7 +305,7 @@ namespace ClassicUO.Game
             //}
 
             //Point winpos = ProfileManager.CurrentProfile.GameWindowPosition;
-            Point winsize = ProfileManager.CurrentProfile.GameWindowSize;
+            Point winsize = new Point(Client.Game.Scene.Camera.Bounds.Width, Client.Game.Scene.Camera.Bounds.Height);
 
             Rectangle snowRect = new Rectangle(0, 0, 2, 2);
 

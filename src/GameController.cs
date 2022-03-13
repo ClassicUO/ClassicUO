@@ -233,12 +233,7 @@ namespace ClassicUO
         {
             Scene?.Dispose();
             Scene = scene;
-
-            if (scene != null)
-            {
-                Window.AllowUserResizing = scene.CanResize;
-                scene.Load();
-            }
+            Scene?.Load();
         }
 
         public void SetVSync(bool value)
@@ -397,6 +392,7 @@ namespace ClassicUO
             }
 
             Time.Ticks = (uint) gameTime.TotalGameTime.TotalMilliseconds;
+            Time.Delta = (float) gameTime.ElapsedGameTime.TotalSeconds;
 
             Mouse.Update();
             OnNetworkUpdate();
@@ -838,6 +834,13 @@ namespace ClassicUO
             }
 
             return 1;
+        }
+
+        protected override void OnExiting(object sender, EventArgs args)
+        {
+            Scene?.Dispose();
+
+            base.OnExiting(sender, args);
         }
 
         private void TakeScreenshot()

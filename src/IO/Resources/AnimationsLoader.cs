@@ -1385,6 +1385,8 @@ namespace ClassicUO.IO.Resources
             return true;
         }
 
+        [ThreadStatic] private static byte[] _decompressedData = null;
+
         private bool ReadUOPAnimationFrame(ushort animID, byte animGroup, byte direction, ref AnimationDirection animDirection)
         {
             AnimationGroupUop animData = DataIndex[animID].GetUopGroup(ref animGroup);
@@ -1405,11 +1407,12 @@ namespace ClassicUO.IO.Resources
             UOFileUop file = _filesUop[animData.FileIndex];
             file.Seek(animData.Offset);
 
-            byte[] buffer = null;
+            if (_decompressedData == null || decLen > _decompressedData.Length)
+            {
+                _decompressedData = new byte[decLen];
+            }
 
-            Span<byte> span = decLen <= 1024 ? stackalloc byte[decLen] : (buffer = System.Buffers.ArrayPool<byte>.Shared.Rent(decLen));
-
-            fixed (byte* ptr = span)
+            fixed (byte* ptr = _decompressedData.AsSpan())
             {
                 ZLib.Decompress
                 (
@@ -1421,106 +1424,87 @@ namespace ClassicUO.IO.Resources
                 );
             }
 
-            try
+            StackDataReader reader = new StackDataReader(_decompressedData.AsSpan().Slice(0, decLen));
+            reader.Skip(32);
+
+            long end = (long)reader.StartAddress + reader.Length;
+
+            int fc = reader.ReadInt32LE();
+            uint dataStart = reader.ReadUInt32LE();
+            reader.Seek(dataStart);
+
+            ANIMATION_GROUPS_TYPE type = DataIndex[animID].Type;
+
+            animDirection.FrameCount = (byte)(type < ANIMATION_GROUPS_TYPE.EQUIPMENT ? Math.Round(fc / 5f) : 10);
+            animDirection.SpriteInfos = new SpriteInfo[animDirection.FrameCount];
+
+            /* If the UOP files didn't omit frames, we could just do this:
+             * reader.Skip(sizeof(UOPAnimationHeader) * direction * animDirection.FrameCount);
+             * but we can't. So we have to walk through the frames to seek to where we need to go.
+             */
+            UOPAnimationHeader* animHeaderInfo = (UOPAnimationHeader*)reader.PositionAddress;
+
+            for (ushort currentDir = 0; currentDir <= direction; currentDir++)
             {
-                StackDataReader reader = new StackDataReader(span.Slice(0, decLen));
-                reader.Skip(32);
-
-                long end = (long)reader.StartAddress + reader.Length;
-
-                int fc = reader.ReadInt32LE();
-                uint dataStart = reader.ReadUInt32LE();
-                reader.Seek(dataStart);
-
-                ANIMATION_GROUPS_TYPE type = DataIndex[animID].Type;
-
-                animDirection.FrameCount = (byte)(type < ANIMATION_GROUPS_TYPE.EQUIPMENT ? Math.Round(fc / 5f) : 10);
-                animDirection.SpriteInfos = new SpriteInfo[animDirection.FrameCount];
-
-                int headerSize = sizeof(UOPAnimationHeader);
-                int count = 0;
-
-                UOPAnimationHeader* animHeaderInfo = (UOPAnimationHeader*)reader.PositionAddress;
-
-                for (ushort i = 0, id = animHeaderInfo->FrameID, currentDir = 0; animHeaderInfo->FrameID < fc; ++i, ++id)
+                for (ushort frameNum = 0; frameNum < animDirection.FrameCount; frameNum++)
                 {
-                    if (/*animHeaderInfo->FrameID != id*/ animHeaderInfo->FrameID - 1 == id || i >= animDirection.FrameCount)
-                    {
-                        if (currentDir != direction)
-                        {
-                            ++currentDir;
-                        }
+                    long start = reader.Position;
+                    animHeaderInfo = (UOPAnimationHeader*)reader.PositionAddress;
 
-                        id = animHeaderInfo->FrameID;
-                        i = 0;
-                        dataStart = (uint)reader.Position;
-                    }
-                    else if (animHeaderInfo->FrameID - id > 1)
+                    if (animHeaderInfo->Group != animGroup)
                     {
-                        // error handler?  
-                        // reason:
-                        //    - anim: 337
-                        //    - dir: 3
-                        //    - it skips 2 frames )35 --> 38(
-
-                        i += (ushort)(animHeaderInfo->FrameID - id);
-                        id = animHeaderInfo->FrameID;
+                        /* Something bad has happened. Just return. */
+                        return false;
                     }
 
-                    if (i == 0 && currentDir == direction)
+                    /* FrameID is 1's based and just keeps increasing, regardless of direction.
+                     * So north will be 1-22, northeast will be 23-44, etc. And it's possible for frames
+                     * to be missing. */
+                    ushort headerFrameNum = (ushort)((animHeaderInfo->FrameID - 1) % animDirection.FrameCount);
+
+                    if (frameNum < headerFrameNum)
                     {
+                        /* Missing frame. Keep walking forward. */
+                        continue;
+                    }
+
+                    if (frameNum > headerFrameNum)
+                    {
+                        /* We've reached the next direction early */
                         break;
                     }
 
-                    reader.Skip(headerSize);
-
-                    animHeaderInfo = (UOPAnimationHeader*)reader.PositionAddress;
-                }
-
-                reader.Seek(dataStart);
-                animHeaderInfo = (UOPAnimationHeader*)reader.PositionAddress;
-
-                for (ushort id = animHeaderInfo->FrameID; id == animHeaderInfo->FrameID && count < animDirection.FrameCount; ++id, ++count)
-                {
-                    long start = reader.Position;
-
-                    if (animHeaderInfo->Group == animGroup && start + animHeaderInfo->DataOffset < reader.Length)
+                    if (currentDir == direction)
                     {
-                        int index = animHeaderInfo->FrameID % animDirection.FrameCount;
-
-                        if (animDirection.SpriteInfos[index].Texture == null)
+                        /* We're on the direction we actually wanted to read */
+                        if (animDirection.SpriteInfos[frameNum].Texture == null)
                         {
-                            unchecked
+                            if (start + animHeaderInfo->DataOffset >= reader.Length)
                             {
-                                reader.Skip((int)animHeaderInfo->DataOffset);
-
-                                ushort* palette = (ushort*)reader.PositionAddress;
-
-                                reader.Skip(512);
-                                uint packed32 = (uint)((animGroup | (direction << 8) | (0x01 << 16)));
-                                uint packed32_2 = (uint)((animID | (index << 16)));
-                                ulong packed = (packed32_2 | ((ulong)packed32 << 32));
-
-                                ReadSpriteData(ref reader, palette, packed, ref animDirection.SpriteInfos[index], true);
+                                /* File seems to be corrupt? Skip loading. */
+                                continue;
                             }
+
+                            reader.Skip((int)animHeaderInfo->DataOffset);
+
+                            ushort* palette = (ushort*)reader.PositionAddress;
+
+                            reader.Skip(512);
+                            uint packed32 = (uint)((animGroup | (direction << 8) | (0x01 << 16)));
+                            uint packed32_2 = (uint)((animID | (frameNum << 16)));
+                            ulong packed = (packed32_2 | ((ulong)packed32 << 32));
+
+                            ReadSpriteData(ref reader, palette, packed, ref animDirection.SpriteInfos[frameNum], true);
                         }
                     }
 
-                    reader.Seek(start + headerSize);
-                    animHeaderInfo = (UOPAnimationHeader*)reader.PositionAddress;
-                }
-
-                reader.Release();
-
-                return true;
-            }
-            finally
-            {
-                if (buffer != null)
-                {
-                    System.Buffers.ArrayPool<byte>.Shared.Return(buffer);
+                    reader.Seek(start + sizeof(UOPAnimationHeader));
                 }
             }
+
+            reader.Release();
+
+            return true;
         }
 
         private void ReadMULAnimationFrame(ushort animID, byte animGroup, byte direction, ref AnimationDirection animDir, UOFile file)
