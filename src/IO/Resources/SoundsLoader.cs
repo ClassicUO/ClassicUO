@@ -263,7 +263,7 @@ namespace ClassicUO.IO.Resources
 
             _file.Seek(offset);
 
-            const int STRING_BUFFER_SIZE = 32;
+            const int STRING_BUFFER_SIZE = 40;
 
             for (int i = 0; i < STRING_BUFFER_SIZE; ++i)
             {
