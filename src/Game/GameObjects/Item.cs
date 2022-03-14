@@ -582,6 +582,18 @@ namespace ClassicUO.Game.GameObjects
 
             if (Layer == Layer.Mount)
             {
+                // ethereal unicorn
+                if (graphic == 0x3E9B || graphic == 0x3E9D)
+                {
+                    return 0x00C0;
+                }
+
+                // ethereal kirin
+                if (graphic == 0x3E9C)
+                {
+                    return 0x00BF;
+                }
+
                 if (_mounts.TryGetValue(graphic, out var newGraphic))
                 {
                     graphic = newGraphic;
