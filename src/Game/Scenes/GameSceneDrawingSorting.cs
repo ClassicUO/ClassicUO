@@ -723,17 +723,7 @@ namespace ClassicUO.Game.Scenes
                     }
                     else
                     {
-                        var alpha = obj.AlphaHue;
-
-                        // hack to fix transparent objects at the same level of a opaque one
-                        if (itemData.IsTranslucent || itemData.IsTransparent)
-                        {
-                            obj.AlphaHue = 0xFF;
-                        }
-
                         PushToRenderList(obj, ref _renderList, ref _renderListStaticsHead, ref _renderListStaticsCount, allowSelection);
-
-                        obj.AlphaHue = alpha;
                     } 
                 }
                 else if (obj is Multi multi)
@@ -791,17 +781,7 @@ namespace ClassicUO.Game.Scenes
                     }
                     else
                     {
-                        var alpha = obj.AlphaHue;
-
-                        // hack to fix transparent objects at the same level of a opaque one
-                        if (itemData.IsTranslucent || itemData.IsTransparent)
-                        {
-                            obj.AlphaHue = 0xFF;
-                        }
-
                         PushToRenderList(obj, ref _renderList, ref _renderListStaticsHead, ref _renderListStaticsCount, allowSelection);
-
-                        obj.AlphaHue = alpha;
                     }
                 }
                 else if (obj is Mobile mobile)

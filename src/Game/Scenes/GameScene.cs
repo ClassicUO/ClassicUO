@@ -1023,14 +1023,16 @@ namespace ClassicUO.Game.Scenes
 
             RenderedObjectsCount = 0;
             RenderedObjectsCount += DrawRenderList(batcher, _renderListStaticsHead, _renderListStaticsCount);
-            RenderedObjectsCount += DrawRenderList(batcher, _renderListAnimationsHead, _renderListAnimationCount);
          
             if (_renderListTransparentObjectsCount > 0)
             {
                 batcher.SetStencil(DepthStencilState.DepthRead);
                 RenderedObjectsCount += DrawRenderList(batcher, _renderListTransparentObjectsHead, _renderListTransparentObjectsCount);
+                batcher.SetStencil(DepthStencilState.Default);
             }
-           
+
+            RenderedObjectsCount += DrawRenderList(batcher, _renderListAnimationsHead, _renderListAnimationCount);
+
             batcher.SetStencil(null);
 
 
