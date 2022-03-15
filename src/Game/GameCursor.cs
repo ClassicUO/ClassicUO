@@ -275,8 +275,6 @@ namespace ClassicUO.Game
                                     }
                                 }
 
-                                GameScene gs = Client.Game.GetScene<GameScene>();
-
                                 for (int i = 0; i < _componentsList.Length; i++)
                                 {
                                     ref readonly CustomBuildObject item = ref _componentsList[i];
@@ -287,7 +285,6 @@ namespace ClassicUO.Game
                                     }
 
                                     _temp[i].SetInWorldTile((ushort)(selectedObj.X + item.X), (ushort)(selectedObj.Y + item.Y), (sbyte)(selectedObj.Z + z + item.Z));
-                                    _temp[i].UpdateRealScreenPosition(gs.ScreenOffset.X, gs.ScreenOffset.Y);
                                 }
                             }
                         }

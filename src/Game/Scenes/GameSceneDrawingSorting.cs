@@ -85,10 +85,6 @@ namespace ClassicUO.Game.Scenes
         private int _renderListAnimationCount;
 
 
-
-
-
-        public Point ScreenOffset => _offset;
         public sbyte FoliageIndex { get; private set; }
 
 
