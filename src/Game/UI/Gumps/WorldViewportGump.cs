@@ -46,7 +46,7 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class WorldViewportGump : Gump
     {
-        private const int BORDER_WIDTH = 5;
+        public const int BORDER_WIDTH = 5;
         private readonly BorderControl _borderControl;
         private readonly Button _button;
         private bool _clicked;
@@ -63,8 +63,8 @@ namespace ClassicUO.Game.UI.Gumps
             CanCloseWithEsc = false;
             CanCloseWithRightClick = false;
             LayerOrder = UILayer.Under;
-            X = scene.Camera.Bounds.X;
-            Y = scene.Camera.Bounds.Y;
+            X = scene.Camera.Bounds.X - BORDER_WIDTH;
+            Y = scene.Camera.Bounds.Y - BORDER_WIDTH;
             _savedSize = _lastSize = new Point(scene.Camera.Bounds.Width, scene.Camera.Bounds.Height);
 
             _button = new Button(0, 0x837, 0x838, 0x838);
@@ -201,8 +201,8 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             Location = position;
-            _scene.Camera.Bounds.X = position.X;
-            _scene.Camera.Bounds.Y = position.Y;
+            _scene.Camera.Bounds.X = position.X + BORDER_WIDTH;
+            _scene.Camera.Bounds.Y = position.Y + BORDER_WIDTH;
 
 
             UIManager.GetGump<OptionsGump>()?.UpdateVideo();
@@ -213,8 +213,8 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.OnMove(x, y);
 
-            _scene.Camera.Bounds.X = ScreenCoordinateX;
-            _scene.Camera.Bounds.Y = ScreenCoordinateY;
+            _scene.Camera.Bounds.X = ScreenCoordinateX + BORDER_WIDTH;
+            _scene.Camera.Bounds.Y = ScreenCoordinateY + BORDER_WIDTH;
 
             UpdateGameWindowPos();
         }
@@ -234,10 +234,8 @@ namespace ClassicUO.Game.UI.Gumps
             _borderControl.Height = Height;
             _button.X = Width - (_button.Width >> 1);
             _button.Y = Height - (_button.Height >> 1);
-            _scene.Camera.Bounds.Width = Width - BORDER_WIDTH;
-            _scene.Camera.Bounds.Height = Height - BORDER_WIDTH;
-            _systemChatControl.Width = Width - BORDER_WIDTH * 2;
-            _systemChatControl.Height = Height - BORDER_WIDTH * 2;
+            _scene.Camera.Bounds.Width = _systemChatControl.Width = Width - BORDER_WIDTH * 2;
+            _scene.Camera.Bounds.Height = _systemChatControl.Height = Height - BORDER_WIDTH * 2;
             _systemChatControl.Resize();
             WantUpdateSize = true;
 
