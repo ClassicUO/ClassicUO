@@ -3578,7 +3578,7 @@ namespace ClassicUO.Network
             }
 
 
-            byte group = AnimationsLoader.Instance.GetDieGroupIndex(owner.Graphic, running != 0, true);
+            byte group = AnimationsLoader.Instance.GetDeathAction(owner.Graphic, running != 0, true);
             owner.SetAnimation(group, 0, 5, 1);
             owner.AnimIndex = 0;
 

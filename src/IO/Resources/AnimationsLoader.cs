@@ -1243,7 +1243,7 @@ namespace ClassicUO.IO.Resources
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public byte GetDieGroupIndex(ushort id, bool second, bool isRunning = false)
+        public byte GetDeathAction(ushort id, bool second, bool isRunning = false)
         {
             if (id >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
             {
