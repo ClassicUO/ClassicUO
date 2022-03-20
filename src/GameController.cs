@@ -152,8 +152,6 @@ namespace ClassicUO
 
             LightColors.LoadLights();
 
-            AnimatedStaticsManager.Initialize();
-
             GameCursor = new GameCursor();
             Audio = new AudioManager();
             Audio.Initialize();

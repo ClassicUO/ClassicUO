@@ -38,21 +38,14 @@ using ClassicUO.Utility.Collections;
 
 namespace ClassicUO.Game.Managers
 {
-    internal static class AnimatedStaticsManager
+    class AnimatedStaticsManager
     {
-        private static RawList<static_animation_info> _static_infos;
+        private readonly FastList<StaticAnimationInfo> _staticInfos = new FastList<StaticAnimationInfo>();
+        private uint _processTime;
 
-        public static uint ProcessTime;
 
-
-        public static unsafe void Initialize()
+        public unsafe void Initialize()
         {
-            if (_static_infos != null)
-            {
-                return;
-            }
-
-            _static_infos = new RawList<static_animation_info>();
             UOFile file = AnimDataLoader.Instance.AnimDataFile;
 
             if (file == null)
@@ -72,12 +65,12 @@ namespace ClassicUO.Game.Managers
 
                     if (offset <= lastaddr)
                     {
-                        _static_infos.Add
+                        _staticInfos.Add
                         (
-                            new static_animation_info
+                            new StaticAnimationInfo
                             {
-                                index = (ushort) i,
-                                is_field = StaticFilters.IsField((ushort) i)
+                                Index = (ushort) i,
+                                IsField = StaticFilters.IsField((ushort) i)
                             }
                         );
                     }
@@ -85,9 +78,9 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public static unsafe void Process()
+        public unsafe void Process()
         {
-            if (_static_infos == null || _static_infos.Count == 0 || ProcessTime >= Time.Ticks)
+            if (_staticInfos == null || _staticInfos.Length == 0 || _processTime >= Time.Ticks)
             {
                 return;
             }
@@ -106,36 +99,36 @@ namespace ClassicUO.Game.Managers
             long startAddr = file.StartAddress.ToInt64();
             UOFileIndex[] static_data = ArtLoader.Instance.Entries;
 
-            for (int i = 0; i < _static_infos.Count; i++)
+            for (int i = 0; i < _staticInfos.Length; i++)
             {
-                ref static_animation_info o = ref _static_infos[i];
+                ref StaticAnimationInfo o = ref _staticInfos.Buffer[i];
 
-                if (no_animated_field && o.is_field)
+                if (no_animated_field && o.IsField)
                 {
-                    o.anim_index = 0;
+                    o.AnimIndex = 0;
 
                     continue;
                 }
 
-                if (o.time < Time.Ticks)
+                if (o.Time < Time.Ticks)
                 {
-                    uint addr = (uint) (o.index * 68 + 4 * (o.index / 8 + 1));
+                    uint addr = (uint) (o.Index * 68 + 4 * (o.Index / 8 + 1));
                     AnimDataFrame* info = (AnimDataFrame*) (startAddr + addr);
 
-                    byte offset = o.anim_index;
+                    byte offset = o.AnimIndex;
 
                     if (info->FrameInterval > 0)
                     {
-                        o.time = Time.Ticks + info->FrameInterval * delay + 1;
+                        o.Time = Time.Ticks + info->FrameInterval * delay + 1;
                     }
                     else
                     {
-                        o.time = Time.Ticks + delay;
+                        o.Time = Time.Ticks + delay;
                     }
 
-                    if (offset < info->FrameCount && o.index + 0x4000 < static_data.Length)
+                    if (offset < info->FrameCount && o.Index + 0x4000 < static_data.Length)
                     {
-                        static_data[o.index + 0x4000].AnimOffset = info->FrameData[offset++];
+                        static_data[o.Index + 0x4000].AnimOffset = info->FrameData[offset++];
                     }
 
                     if (offset >= info->FrameCount)
@@ -143,25 +136,25 @@ namespace ClassicUO.Game.Managers
                         offset = 0;
                     }
 
-                    o.anim_index = offset;
+                    o.AnimIndex = offset;
                 }
 
-                if (o.time < next_time)
+                if (o.Time < next_time)
                 {
-                    next_time = o.time;
+                    next_time = o.Time;
                 }
             }
 
-            ProcessTime = next_time;
+            _processTime = next_time;
         }
 
 
-        private struct static_animation_info
+        private struct StaticAnimationInfo
         {
-            public uint time;
-            public ushort index;
-            public byte anim_index;
-            public bool is_field;
+            public uint Time;
+            public ushort Index;
+            public byte AnimIndex;
+            public bool IsField;
         }
     }
 }

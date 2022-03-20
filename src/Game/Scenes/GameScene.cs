@@ -100,6 +100,7 @@ namespace ClassicUO.Game.Scenes
         private UseItemQueue _useItemQueue = new UseItemQueue();
         private bool _useObjectHandles;
         private RenderTarget2D _world_render_target, _lightRenderTarget;
+        private AnimatedStaticsManager _animatedStaticsManager;
 
 
         public bool UpdateDrawPosition { get; set; }
@@ -151,6 +152,8 @@ namespace ClassicUO.Game.Scenes
 
             Macros.Load();
 
+            _animatedStaticsManager = new AnimatedStaticsManager();
+            _animatedStaticsManager.Initialize();
             InfoBars = new InfoBarManager();
             InfoBars.Load();
             _healthLinesManager = new HealthLinesManager();
@@ -724,7 +727,7 @@ namespace ClassicUO.Game.Scenes
             }
 
             World.Update();
-            AnimatedStaticsManager.Process();
+            _animatedStaticsManager.Process();
             BoatMovingManager.Update();
             Pathfinder.ProcessAutoWalk();
             DelayedObjectClickManager.Update();
@@ -884,7 +887,7 @@ namespace ClassicUO.Game.Scenes
             }
 
             Viewport r_viewport = batcher.GraphicsDevice.Viewport;
-            Viewport camera_viewport = Camera.GetViewport();
+            Viewport camera_viewport = Camera.GetViewport(); 
             Matrix matrix = _use_render_target ? Matrix.Identity : Camera.ViewTransformMatrix;
 
 
