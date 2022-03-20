@@ -509,7 +509,7 @@ namespace ClassicUO.IO.Resources
                                     DataIndex[index].MountedHeightOffset = mountedHeightOffset;
                                 }
 
-                                DataIndex[index].GraphicConversion = (ushort)(realAnimID | 0x8000);
+                                DataIndex[index].HasBodyConversion = false;
                                 DataIndex[index].FileIndex = (byte)animFile;
 
                                 addressOffset += currentIdxFile.StartAddress.ToInt64();
@@ -1041,9 +1041,9 @@ namespace ClassicUO.IO.Resources
 
                 if (replace)
                 {
-                    if (!DataIndex[i].HasBodyConversion)
+                    if (DataIndex[i].BodyConvGroups != null)
                     {
-                        DataIndex[i].GraphicConversion = (ushort) (DataIndex[i].GraphicConversion & ~0x8000);
+                        DataIndex[i].HasBodyConversion = true;
                     }
                 }
             }
@@ -1937,7 +1937,7 @@ namespace ClassicUO.IO.Resources
         private byte[] _uopReplaceGroupIndex;
         public bool IsUOP => (Flags & ANIMATION_FLAGS.AF_USE_UOP_ANIMATION) != 0;
 
-        public bool HasBodyConversion => (GraphicConversion & 0x8000) == 0 && BodyConvGroups != null;
+        public bool HasBodyConversion = false;
         public AnimationGroup[] BodyConvGroups;
         public ushort Color;
         public ushort CorpseColor;
@@ -1948,8 +1948,6 @@ namespace ClassicUO.IO.Resources
         public ANIMATION_FLAGS Flags;
 
         public ushort Graphic;
-
-        public ushort GraphicConversion = 0x8000;
 
         // 100
         public AnimationGroup[] Groups;
