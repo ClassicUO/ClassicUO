@@ -708,7 +708,7 @@ namespace ClassicUO.Game.GameObjects
 
                     if (id < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT && dir < 5)
                     {
-                        byte animGroup = AnimationsLoader.Instance.GetDieGroupIndex(id, UsedLayer);
+                        byte animGroup = AnimationsLoader.Instance.GetDeathAction(id, UsedLayer);
 
                         ushort hue = 0;
 
