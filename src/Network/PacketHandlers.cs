@@ -2042,6 +2042,11 @@ namespace ClassicUO.Network
         {
             if (World.Player != null && Client.Game.Scene is LoginScene)
             {
+                if (!AnimationsLoader.Instance.FlagsApplied)
+                {
+                    AnimationsLoader.Instance.UpdateAnimationTable(0);
+                }
+
                 var scene = new GameScene();
                 Client.Game.SetScene(scene);
 
