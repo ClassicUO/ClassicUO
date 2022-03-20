@@ -696,13 +696,6 @@ namespace ClassicUO.Game.GameObjects
                     byte frameIndex = (byte) (AnimIndex + (ExecuteAnimation ? 1 : 0));
                     ushort id = GetGraphicForAnimation();
 
-                    //FileManager.Animations.GetCorpseAnimationGroup(ref graphic, ref animGroup, ref newHue);
-
-                    //ushort corpseGraphic = FileManager.Animations.DataIndex[id].CorpseGraphic;
-
-                    //if (corpseGraphic != id && corpseGraphic != 0) 
-                    //    id = corpseGraphic;
-
                     bool mirror = false;
                     AnimationsLoader.Instance.GetAnimDirection(ref dir, ref mirror);
 
@@ -735,114 +728,6 @@ namespace ClassicUO.Game.GameObjects
                     LastAnimationChangeTime = Time.Ticks + Constants.CHARACTER_ANIMATION_DELAY;
                 }
             }
-            /*else if (evalutate && SerialHelper.IsMobile(Container) && Layer != Layer.Invalid)
-            {
-                ushort id = ItemData.AnimID;
-
-                if (id == 0)
-                {
-                    return;
-                }
-
-                Mobile parent = World.Mobiles.Get(Container);
-
-                if (parent != null)
-                {
-                    byte animGroup = Mobile.GetGroupForAnimation(parent, id, true);
-
-                    bool mirror = false;
-                    AnimationsLoader.Instance.GetAnimDirection(ref dir, ref mirror);
-                    int currentDelay = Constants.CHARACTER_ANIMATION_DELAY;
-
-                    if (id < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT && dir < 5)
-                    {
-                        ushort hue = 0;
-
-                        sbyte frameIndex = AnimIndex;
-
-                        if (parent.AnimationFromServer && !parent.AnimationForwardDirection)
-                        {
-                            frameIndex--;
-                        }
-                        else
-                        {
-                            frameIndex++;
-                        }
-
-                        AnimationDirection direction = AnimationsLoader.Instance.GetBodyAnimationGroup(ref id, ref animGroup, ref hue, true).Direction[dir];
-
-                        if (direction != null && (direction.FrameCount == 0 || direction.Frames == null))
-                        {
-                            AnimationsLoader.Instance.LoadAnimationFrames(id, animGroup, dir, ref direction);
-                        }
-
-                        if (direction != null && direction.FrameCount != 0)
-                        {
-                            direction.LastAccessTime = Time.Ticks;
-                            int fc = direction.FrameCount;
-
-                            if (parent.AnimationFromServer)
-                            {
-                                currentDelay += currentDelay * (parent.AnimationInterval + 1);
-
-                                if (parent.AnimationFrameCount == 0)
-                                {
-                                    parent.AnimationFrameCount = (byte)fc;
-                                }
-                                else
-                                {
-                                    fc = parent.AnimationFrameCount;
-                                }
-
-                                if (parent.AnimationForwardDirection)
-                                {
-                                    if (frameIndex >= fc)
-                                    {
-                                        frameIndex = 0;
-
-                                        if (parent.AnimationRepeat)
-                                        {
-                                            byte repCount = parent.AnimationRepeatMode;
-
-                                            if (repCount == 2)
-                                            {
-                                                repCount--;
-                                                parent.AnimationRepeatMode = repCount;
-                                            }
-                                        }
-                                    }
-                                }
-                                else
-                                {
-                                    if (frameIndex < 0)
-                                    {
-                                        if (fc == 0)
-                                        {
-                                            frameIndex = 0;
-                                        }
-                                        else
-                                        {
-                                            frameIndex = (sbyte)(fc - 1);
-                                        }
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                if (frameIndex >= fc)
-                                {
-                                    frameIndex = 0;
-                                }
-                            }
-
-                            AnimIndex = frameIndex;
-                        }
-                    }
-
-                    //LastAnimationChangeTime = Time.Ticks + currentDelay;
-                }
-            }
-            */
         }
     }
 }
