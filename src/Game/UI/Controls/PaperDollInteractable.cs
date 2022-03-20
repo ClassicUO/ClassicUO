@@ -364,8 +364,6 @@ namespace ClassicUO.Game.UI.Controls
                 animID = 0x0223;
             }
 
-            AnimationsLoader.Instance.ConvertBodyIfNeeded(ref graphic);
-
             if (AnimationsLoader.Instance.EquipConversions.TryGetValue(graphic, out Dictionary<ushort, EquipConvData> dict))
             {
                 if (dict.TryGetValue(animID, out EquipConvData data))
