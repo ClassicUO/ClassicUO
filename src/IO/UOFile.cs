@@ -30,6 +30,8 @@
 
 #endregion
 
+#define USE_MMF
+
 using System;
 using System.IO;
 using System.IO.MemoryMappedFiles;
@@ -52,8 +54,10 @@ namespace ClassicUO.IO
         }
 
         public string FilePath { get; }
+#if USE_MMF
         private protected MemoryMappedViewAccessor _accessor;
         private protected MemoryMappedFile _file;
+#endif
 
         protected virtual void Load()
         {
@@ -72,6 +76,7 @@ namespace ClassicUO.IO
 
             if (size > 0)
             {
+#if USE_MMF
                 _file = MemoryMappedFile.CreateFromFile
                 (
                     File.Open(fileInfo.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite),
@@ -97,6 +102,7 @@ namespace ClassicUO.IO
 
                     throw new Exception("Something goes wrong...");
                 }
+#endif
             }
             else
             {
@@ -110,50 +116,12 @@ namespace ClassicUO.IO
 
         public virtual void Dispose()
         {
+#if USE_MMF
             _accessor.SafeMemoryMappedViewHandle.ReleasePointer();
             _accessor.Dispose();
             _file.Dispose();
+#endif
             Log.Trace($"Unloaded:\t\t{FilePath}");
-        }
-
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal void Fill(ref byte[] buffer, int count)
-        {
-            byte* ptr = (byte*) PositionAddress;
-
-            for (int i = 0; i < count; i++)
-            {
-                buffer[i] = ptr[i];
-            }
-
-            Position += count;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal T[] ReadArray<T>(int count) where T : struct
-        {
-            T[] t = ReadArray<T>(Position, count);
-            Position += Unsafe.SizeOf<T>() * count;
-
-            return t;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private T[] ReadArray<T>(long position, int count) where T : struct
-        {
-            T[] array = new T[count];
-            _accessor.ReadArray(position, array, 0, count);
-
-            return array;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal T ReadStruct<T>(long position) where T : struct
-        {
-            _accessor.Read(position, out T s);
-
-            return s;
         }
     }
 }

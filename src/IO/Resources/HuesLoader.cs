@@ -56,7 +56,7 @@ namespace ClassicUO.IO.Resources
 
         public ushort[] RadarCol { get; private set; }
 
-        public override Task Load()
+        public override unsafe Task Load()
         {
             return Task.Run
             (
@@ -83,7 +83,13 @@ namespace ClassicUO.IO.Resources
                     FileSystemHelper.EnsureFileExists(path);
 
                     UOFileMul radarcol = new UOFileMul(path);
-                    RadarCol = radarcol.ReadArray<ushort>((int) radarcol.Length >> 1);
+                    RadarCol = new ushort[(int)(radarcol.Length >> 1)];
+
+                    fixed (ushort* ptr = RadarCol)
+                    {
+                        Unsafe.CopyBlockUnaligned((void*)(byte*)ptr, radarcol.PositionAddress.ToPointer(), (uint)radarcol.Length);
+                    }
+                    
                     file.Dispose();
                     radarcol.Dispose();
                 }

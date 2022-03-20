@@ -30,11 +30,13 @@
 
 #endregion
 
+using System.Runtime.CompilerServices;
+
 namespace ClassicUO.IO.Resources
 {
     internal static class Verdata
     {
-        static Verdata()
+        unsafe static Verdata()
         {
             string path = UOFileManager.GetUOFilePath("verdata.mul");
 
@@ -50,7 +52,13 @@ namespace ClassicUO.IO.Resources
                 // the scope of this try/catch is to avoid unexpected crashes if servers redestribuite wrong verdata
                 try
                 {
-                    Patches = File.ReadArray<UOFileIndex5D>(File.ReadInt());
+                    int len = File.ReadInt();
+                    Patches = new UOFileIndex5D[len];
+
+                    fixed (UOFileIndex5D* ptr = Patches)
+                    {
+                        Unsafe.CopyBlockUnaligned((void*)ptr, (void*) File.PositionAddress, (uint) (len * Unsafe.SizeOf<UOFileIndex5D>()));
+                    }
                 }
                 catch
                 {
