@@ -90,253 +90,252 @@ namespace ClassicUO.IO.Resources
             new List<Tuple<ushort, byte>>(), new List<Tuple<ushort, byte>>()
         };
 
-        public override unsafe Task Load()
+        private unsafe void LoadInternal()
         {
-            return Task.Run
-            (
-                () =>
+            bool loaduop = false;
+            int[] un = { 0x40000, 0x10000, 0x20000, 0x20000, 0x20000 };
+
+            for (int i = 0; i < 5; i++)
+            {
+                string pathmul = UOFileManager.GetUOFilePath("anim" + (i == 0 ? string.Empty : (i + 1).ToString()) + ".mul");
+
+                string pathidx = UOFileManager.GetUOFilePath("anim" + (i == 0 ? string.Empty : (i + 1).ToString()) + ".idx");
+
+                if (File.Exists(pathmul) && File.Exists(pathidx))
                 {
-                    bool loaduop = false;
-                    int[] un = { 0x40000, 0x10000, 0x20000, 0x20000, 0x20000 };
+                    _files[i] = new UOFileMul(pathmul, pathidx, un[i], i == 0 ? 6 : -1);
+                }
 
-                    for (int i = 0; i < 5; i++)
+                if (i > 0 && Client.IsUOPInstallation)
+                {
+                    string pathuop = UOFileManager.GetUOFilePath($"AnimationFrame{i}.uop");
+
+                    if (File.Exists(pathuop))
                     {
-                        string pathmul = UOFileManager.GetUOFilePath("anim" + (i == 0 ? string.Empty : (i + 1).ToString()) + ".mul");
+                        _filesUop[i - 1] = new UOFileUop(pathuop, "build/animationlegacyframe/{0:D6}/{0:D2}.bin");
 
-                        string pathidx = UOFileManager.GetUOFilePath("anim" + (i == 0 ? string.Empty : (i + 1).ToString()) + ".idx");
-
-                        if (File.Exists(pathmul) && File.Exists(pathidx))
+                        if (!loaduop)
                         {
-                            _files[i] = new UOFileMul(pathmul, pathidx, un[i], i == 0 ? 6 : -1);
-                        }
-
-                        if (i > 0 && Client.IsUOPInstallation)
-                        {
-                            string pathuop = UOFileManager.GetUOFilePath($"AnimationFrame{i}.uop");
-
-                            if (File.Exists(pathuop))
-                            {
-                                _filesUop[i - 1] = new UOFileUop(pathuop, "build/animationlegacyframe/{0:D6}/{0:D2}.bin");
-
-                                if (!loaduop)
-                                {
-                                    loaduop = true;
-                                }
-                            }
+                            loaduop = true;
                         }
                     }
+                }
+            }
 
-                    if (loaduop)
+            if (loaduop)
+            {
+                LoadUop();
+            }
+
+            if (Client.Version >= ClientVersion.CV_500A)
+            {
+                string path = UOFileManager.GetUOFilePath("mobtypes.txt");
+
+                if (File.Exists(path))
+                {
+                    string[] typeNames = new string[5]
                     {
-                        LoadUop();
-                    }
-
-                    if (Client.Version >= ClientVersion.CV_500A)
-                    {
-                        string path = UOFileManager.GetUOFilePath("mobtypes.txt");
-
-                        if (File.Exists(path))
-                        {
-                            string[] typeNames = new string[5]
-                            {
                                 "monster", "sea_monster", "animal", "human", "equipment"
-                            };
+                    };
 
-                            using (StreamReader reader = new StreamReader(File.OpenRead(path)))
-                            {
-                                string line;
-
-                                while ((line = reader.ReadLine()) != null)
-                                {
-                                    line = line.Trim();
-
-                                    if (line.Length == 0 || line[0] == '#' || !char.IsNumber(line[0]))
-                                    {
-                                        continue;
-                                    }
-
-                                    string[] parts = line.Split
-                                    (
-                                        new[]
-                                        {
-                                            '\t', ' '
-                                        },
-                                        StringSplitOptions.RemoveEmptyEntries
-                                    );
-
-                                    if (parts.Length < 3)
-                                    {
-                                        continue;
-                                    }
-
-                                    int id = int.Parse(parts[0]);
-
-                                    if (id >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
-                                    {
-                                        continue;
-                                    }
-
-                                    string testType = parts[1].ToLower();
-
-                                    int commentIdx = parts[2].IndexOf('#');
-
-                                    if (commentIdx > 0)
-                                    {
-                                        parts[2] = parts[2].Substring(0, commentIdx - 1);
-                                    }
-                                    else if (commentIdx == 0)
-                                    {
-                                        continue;
-                                    }
-
-                                    uint number = uint.Parse(parts[2], NumberStyles.HexNumber);
-
-                                    for (int i = 0; i < 5; i++)
-                                    {
-                                        if (testType == typeNames[i])
-                                        {
-                                            ref IndexAnimation index = ref DataIndex[id];
-
-                                            if (index == null)
-                                            {
-                                                index = new IndexAnimation();
-                                            }
-
-                                            index.Type = (ANIMATION_GROUPS_TYPE) i;
-                                            index.Flags = (ANIMATION_FLAGS) (0x80000000 | number);
-
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    for (ushort i = 0; i < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT; i++)
+                    using (StreamReader reader = new StreamReader(File.OpenRead(path)))
                     {
-                        var idxFile = _files[0].IdxFile;
+                        string line;
 
-                        if (DataIndex[i] == null)
+                        while ((line = reader.ReadLine()) != null)
                         {
-                            DataIndex[i] = new IndexAnimation();
-                        }
+                            line = line.Trim();
 
-                        if (DataIndex[i].Type == ANIMATION_GROUPS_TYPE.UNKNOWN)
-                        {
-                            DataIndex[i].Type = CalculateTypeByGraphic(i);
-                        }
-
-                        DataIndex[i].Graphic = i;
-
-                        DataIndex[i].CorpseGraphic = i;
-
-                        long offsetToData = DataIndex[i].CalculateOffset(i, DataIndex[i].Type, out int count);
-                        long maxaddress = idxFile.StartAddress.ToInt64() + idxFile.Length;
-
-                        if (offsetToData >= idxFile.Length)
-                        {
-                            continue;
-                        }
-
-                        bool isValid = false;
-
-                        long address = idxFile.StartAddress.ToInt64() + offsetToData;
-
-                        DataIndex[i].Groups = new AnimationGroup[100];
-
-                        int offset = 0;
-
-                        for (byte j = 0; j < 100; j++)
-                        {
-                            DataIndex[i].Groups[j] = new AnimationGroup
-                            {
-                                Direction = new AnimationDirection[5]
-                            };
-
-                            if (j >= count)
+                            if (line.Length == 0 || line[0] == '#' || !char.IsNumber(line[0]))
                             {
                                 continue;
                             }
 
-                            for (byte d = 0; d < 5; d++)
+                            string[] parts = line.Split
+                            (
+                                new[]
+                                {
+                                            '\t', ' '
+                                },
+                                StringSplitOptions.RemoveEmptyEntries
+                            );
+
+                            if (parts.Length < 3)
                             {
-                                if (DataIndex[i].Groups[j].Direction[d] == null)
+                                continue;
+                            }
+
+                            int id = int.Parse(parts[0]);
+
+                            if (id >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
+                            {
+                                continue;
+                            }
+
+                            string testType = parts[1].ToLower();
+
+                            int commentIdx = parts[2].IndexOf('#');
+
+                            if (commentIdx > 0)
+                            {
+                                parts[2] = parts[2].Substring(0, commentIdx - 1);
+                            }
+                            else if (commentIdx == 0)
+                            {
+                                continue;
+                            }
+
+                            uint number = uint.Parse(parts[2], NumberStyles.HexNumber);
+
+                            for (int i = 0; i < 5; i++)
+                            {
+                                if (testType == typeNames[i])
                                 {
-                                    DataIndex[i].Groups[j].Direction[d] = new AnimationDirection();
-                                }
+                                    ref IndexAnimation index = ref DataIndex[id];
 
-                                AnimIdxBlock* aidx = (AnimIdxBlock*) (address + offset * sizeof(AnimIdxBlock));
-                                ++offset;
+                                    if (index == null)
+                                    {
+                                        index = new IndexAnimation();
+                                    }
 
-                                if ((long) aidx < maxaddress && aidx->Size != 0 && aidx->Position != 0xFFFFFFFF && aidx->Size != 0xFFFFFFFF)
-                                {
-                                    DataIndex[i].Groups[j].Direction[d].Address = aidx->Position;
-                                    DataIndex[i].Groups[j].Direction[d].Size = aidx->Size;
+                                    index.Type = (ANIMATION_GROUPS_TYPE)i;
+                                    index.Flags = (ANIMATION_FLAGS)(0x80000000 | number);
 
-                                    isValid = true;
+                                    break;
                                 }
                             }
                         }
-
-                        DataIndex[i].IsValidMUL = isValid;
                     }
-
-                    string file = UOFileManager.GetUOFilePath("Anim1.def");
-
-                    if (File.Exists(file))
-                    {
-                        using (DefReader defReader = new DefReader(file))
-                        {
-                            while (defReader.Next())
-                            {
-                                ushort group = (ushort) defReader.ReadInt();
-
-                                if (group == 0xFFFF)
-                                {
-                                    continue;
-                                }
-
-                                int replace = defReader.ReadGroupInt();
-
-                                GroupReplaces[0].Add(new Tuple<ushort, byte>(group, (byte) replace));
-                            }
-                        }
-                    }
-
-                    file = UOFileManager.GetUOFilePath("Anim2.def");
-
-                    if (File.Exists(file))
-                    {
-                        using (DefReader defReader = new DefReader(file))
-                        {
-                            while (defReader.Next())
-                            {
-                                ushort group = (ushort) defReader.ReadInt();
-
-                                if (group == 0xFFFF)
-                                {
-                                    continue;
-                                }
-
-                                int replace = defReader.ReadGroupInt();
-
-                                GroupReplaces[1].Add(new Tuple<ushort, byte>(group, (byte) replace));
-                            }
-                        }
-                    }
-
-                    if (Client.Version < ClientVersion.CV_300)
-                    {
-                        return;
-                    }
-
-                    ProcessEquipConvDef();
-                    ProcessBodyConvDef();
-                    ProcessBodyDef();
-                    ProcessCorpseDef();
                 }
-            );
+            }
+
+            for (ushort i = 0; i < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT; i++)
+            {
+                var idxFile = _files[0].IdxFile;
+
+                if (DataIndex[i] == null)
+                {
+                    DataIndex[i] = new IndexAnimation();
+                }
+
+                if (DataIndex[i].Type == ANIMATION_GROUPS_TYPE.UNKNOWN)
+                {
+                    DataIndex[i].Type = CalculateTypeByGraphic(i);
+                }
+
+                DataIndex[i].Graphic = i;
+
+                DataIndex[i].CorpseGraphic = i;
+
+                long offsetToData = DataIndex[i].CalculateOffset(i, DataIndex[i].Type, out int count);
+                long maxaddress = idxFile.StartAddress.ToInt64() + idxFile.Length;
+
+                if (offsetToData >= idxFile.Length)
+                {
+                    continue;
+                }
+
+                bool isValid = false;
+
+                long address = idxFile.StartAddress.ToInt64() + offsetToData;
+
+                DataIndex[i].Groups = new AnimationGroup[100];
+
+                int offset = 0;
+
+                for (byte j = 0; j < 100; j++)
+                {
+                    DataIndex[i].Groups[j] = new AnimationGroup
+                    {
+                        Direction = new AnimationDirection[5]
+                    };
+
+                    if (j >= count)
+                    {
+                        continue;
+                    }
+
+                    for (byte d = 0; d < 5; d++)
+                    {
+                        if (DataIndex[i].Groups[j].Direction[d] == null)
+                        {
+                            DataIndex[i].Groups[j].Direction[d] = new AnimationDirection();
+                        }
+
+                        AnimIdxBlock* aidx = (AnimIdxBlock*)(address + offset * sizeof(AnimIdxBlock));
+                        ++offset;
+
+                        if ((long)aidx < maxaddress && aidx->Size != 0 && aidx->Position != 0xFFFFFFFF && aidx->Size != 0xFFFFFFFF)
+                        {
+                            DataIndex[i].Groups[j].Direction[d].Address = aidx->Position;
+                            DataIndex[i].Groups[j].Direction[d].Size = aidx->Size;
+
+                            isValid = true;
+                        }
+                    }
+                }
+
+                DataIndex[i].IsValidMUL = isValid;
+            }
+
+            string file = UOFileManager.GetUOFilePath("Anim1.def");
+
+            if (File.Exists(file))
+            {
+                using (DefReader defReader = new DefReader(file))
+                {
+                    while (defReader.Next())
+                    {
+                        ushort group = (ushort)defReader.ReadInt();
+
+                        if (group == 0xFFFF)
+                        {
+                            continue;
+                        }
+
+                        int replace = defReader.ReadGroupInt();
+
+                        GroupReplaces[0].Add(new Tuple<ushort, byte>(group, (byte)replace));
+                    }
+                }
+            }
+
+            file = UOFileManager.GetUOFilePath("Anim2.def");
+
+            if (File.Exists(file))
+            {
+                using (DefReader defReader = new DefReader(file))
+                {
+                    while (defReader.Next())
+                    {
+                        ushort group = (ushort)defReader.ReadInt();
+
+                        if (group == 0xFFFF)
+                        {
+                            continue;
+                        }
+
+                        int replace = defReader.ReadGroupInt();
+
+                        GroupReplaces[1].Add(new Tuple<ushort, byte>(group, (byte)replace));
+                    }
+                }
+            }
+
+            if (Client.Version < ClientVersion.CV_300)
+            {
+                return;
+            }
+
+            ProcessEquipConvDef();
+            ProcessBodyConvDef();
+            ProcessBodyDef();
+            ProcessCorpseDef();
+        }
+
+        public override unsafe Task Load()
+        {
+            return Task.Run(LoadInternal);
         }
 
         private void ProcessEquipConvDef()
@@ -1012,8 +1011,21 @@ namespace ClassicUO.IO.Resources
             return _picker.Get(packed, x, y);
         }
 
+        private static uint _lastFlags = 0xFFFFFFFF;
+
         public void UpdateAnimationTable(uint flags)
         {
+            if (_lastFlags != 0xFFFFFFFF && flags != _lastFlags)
+            {
+                /* This happens when you log out of an account then into another
+                 * one with different expansions activated. Just reload the anim
+                 * files from scratch. */
+                Array.Clear(DataIndex, 0, DataIndex.Length);
+                LoadInternal();
+            }
+
+            _lastFlags = flags;
+
             for (ushort i = 0; i < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT; i++)
             {
                 bool replace = DataIndex[i].FileIndex >= 3;
