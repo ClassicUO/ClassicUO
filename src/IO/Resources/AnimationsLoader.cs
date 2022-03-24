@@ -905,7 +905,7 @@ namespace ClassicUO.IO.Resources
                     return uop ?? _empty;
                 }
 
-                ushort newGraphic = index.Graphic;
+                ushort newGraphic = isCorpse ? index.CorpseGraphic : index.Graphic;
 
                 do
                 {
