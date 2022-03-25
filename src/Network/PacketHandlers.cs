@@ -121,6 +121,7 @@ namespace ClassicUO.Network
             Handlers.Add(0x32, Unknown_0x32);
             Handlers.Add(0x38, Pathfinding);
             Handlers.Add(0x3A, UpdateSkills);
+            Handlers.Add(0x3B, CloseVendorBuy);
             Handlers.Add(0x3C, UpdateContainedItems);
             Handlers.Add(0x4E, PersonalLightLevel);
             Handlers.Add(0x4F, LightLevel);
@@ -1951,6 +1952,18 @@ namespace ClassicUO.Network
                     containerSerial
                 );
             }
+        }
+
+        public static void CloseVendorBuy(ref StackDataReader p)
+        {
+            if (!World.InGame)
+            {
+                return;
+            }
+
+            uint serial = p.ReadUInt32BE();
+
+            UIManager.GetGump<ShopGump>(serial)?.Dispose();
         }
 
         private static void PersonalLightLevel(ref StackDataReader p)
