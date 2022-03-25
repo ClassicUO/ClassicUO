@@ -981,7 +981,7 @@ namespace ClassicUO.IO.Resources
 
             if (index.Groups != null && index.Groups[action] != null)
             {
-                return index.Groups[action];
+                return index.Groups[action] ?? _empty;
             }
 
             return _empty;
@@ -1372,7 +1372,7 @@ namespace ClassicUO.IO.Resources
         {
             AnimationDirection animDir = GetAnimationAction(animID, animGroup, useUOP).Direction[direction];
 
-            if (animDir.FileIndex == -1 && animDir.Address == -1)
+            if (animDir == null || (animDir.FileIndex == -1 && animDir.Address == -1))
             {
                 return 0;
             }
