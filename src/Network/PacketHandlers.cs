@@ -1963,16 +1963,7 @@ namespace ClassicUO.Network
 
             uint serial = p.ReadUInt32BE();
 
-            ShopGump buyList = UIManager.GetGump<ShopGump>(serial);
-            if (buyList == null)
-            {
-                return;
-            }
-
-            if (buyList.IsBuyGump)
-            {
-                buyList.Dispose();
-            }
+            UIManager.GetGump<ShopGump>(serial)?.Dispose();
         }
 
         private static void PersonalLightLevel(ref StackDataReader p)
