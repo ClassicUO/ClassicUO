@@ -713,7 +713,7 @@ namespace ClassicUO.Game.GameObjects
                             // when the animation is done, stop to animate the corpse
                             if (frameIndex >= frameCount)
                             {
-                                ExecuteAnimation = false;
+                                frameIndex = (byte)(frameCount - 1);
                             }
 
                             AnimIndex = (byte) (frameIndex % frameCount);
