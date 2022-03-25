@@ -479,7 +479,7 @@ namespace ClassicUO.Game.GameObjects
                     {
                         UsedLayer = false;
                     }
-
+                    
                     Layer = (Layer) Direction;
                     AllowedToDraw = true;
                 }
@@ -710,6 +710,12 @@ namespace ClassicUO.Game.GameObjects
 
                         if (frameCount > 0)
                         {
+                            // when the animation is done, stop to animate the corpse
+                            if (frameIndex >= frameCount)
+                            {
+                                ExecuteAnimation = false;
+                            }
+
                             AnimIndex = (byte) (frameIndex % frameCount);
                         }
                     }
