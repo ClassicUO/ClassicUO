@@ -1954,7 +1954,7 @@ namespace ClassicUO.Network
             }
         }
 
-        public static void CloseVendorInterface(ref StackDataReader p)
+        private static void CloseVendorInterface(ref StackDataReader p)
         {
             if (!World.InGame)
             {
