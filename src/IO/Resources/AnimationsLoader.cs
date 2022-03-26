@@ -929,7 +929,7 @@ namespace ClassicUO.IO.Resources
                     }
                 }
 
-                ushort newGraphic = index.Graphic;
+                ushort newGraphic = isCorpse ? index.CorpseGraphic : index.Graphic;
 
                 do
                 {
