@@ -910,30 +910,11 @@ namespace ClassicUO.IO.Resources
             {
                 IndexAnimation index = DataIndex[graphic];
 
-                if (forceUOP)
+                if (forceUOP || (index.IsUOP && (!index.IsValidMUL || isEquip)))
                 {
                     index.GetUopGroup(ref action);
                     useUOP = true;
                     return;
-                }
-
-                if (index.IsUOP)
-                {
-                    if (!index.IsValidMUL)
-                    {
-                        /* Regardless of flags, there is only a UOP version so use that. */
-                        index.GetUopGroup(ref action);
-                        useUOP = true;
-                        return;
-                    }
-
-                    /* For equipment, prefer the mul version. */
-                    if (!isEquip)
-                    {
-                        index.GetUopGroup(ref action);
-                        useUOP = true;
-                        return;
-                    }
                 }
 
                 ushort newGraphic = isCorpse ? index.CorpseGraphic : index.Graphic;
@@ -1344,7 +1325,7 @@ namespace ClassicUO.IO.Resources
             Span<FrameInfo> frames;
             int uopFlag = 0;
 
-            if (animDir.IsUOP || animDir.Address == 0 && animDir.Size == 0)
+            if (animDir.IsUOP || (animDir.Address == 0 && animDir.Size == 0))
             {
                 AnimationGroupUop animData = DataIndex[animID].GetUopGroup(ref animGroup);
 
