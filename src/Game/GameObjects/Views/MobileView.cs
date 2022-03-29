@@ -672,7 +672,16 @@ namespace ClassicUO.Game.GameObjects
             ushort hueFromFile = overridedHue;
             bool useUOP;
 
-            AnimationsLoader.Instance.ReplaceAnimationValues(ref id, ref animGroup, ref hueFromFile, out useUOP, isEquip: isEquip, forceUOP);
+            AnimationsLoader.Instance.ReplaceAnimationValues
+            (
+                ref id,
+                ref animGroup,
+                ref hueFromFile, 
+                out useUOP,
+                isEquip: isEquip,
+                isCorpse: false,
+                forceUOP: forceUOP
+            );
             int frameCount = AnimationsLoader.Instance.LoadAnimationFrames(id, animGroup, dir, useUOP);
 
             if (frameCount == 0)

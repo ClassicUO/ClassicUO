@@ -910,7 +910,7 @@ namespace ClassicUO.IO.Resources
             {
                 IndexAnimation index = DataIndex[graphic];
 
-                if (forceUOP || (index.IsUOP && (!index.IsValidMUL || isEquip)))
+                if (forceUOP || (index.IsUOP && (!index.IsValidMUL || !isEquip)))
                 {
                     index.GetUopGroup(ref action);
                     useUOP = true;
@@ -1292,7 +1292,7 @@ namespace ClassicUO.IO.Resources
             {
                 ushort hue = 0;
 
-                ReplaceAnimationValues(ref graphic, ref group, ref hue, out var useUOP, true, false, isCorpse);
+                ReplaceAnimationValues(ref graphic, ref group, ref hue, out var useUOP, false, false, isCorpse);
                 AnimationDirection direction = GetAnimationAction(graphic, group, useUOP)?.Direction[0];
 
                 return direction != null && (direction.Address != 0 && direction.Size != 0 || direction.IsUOP);
