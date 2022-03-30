@@ -171,7 +171,7 @@ namespace ClassicUO.Renderer
             const float FADE_TIME = 12.0f;
             const float SMOOTHING_FACTOR = (1.0f / FADE_TIME) * 60.0f;
 
-            _lerpZoom = MathHelper.Lerp(_lerpZoom, zoom, SMOOTHING_FACTOR * Time.Delta);
+            _lerpZoom = zoom; // MathHelper.Lerp(_lerpZoom, zoom, SMOOTHING_FACTOR * Time.Delta);
         }
     }
 }
