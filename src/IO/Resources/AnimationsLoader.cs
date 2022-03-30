@@ -1344,7 +1344,7 @@ namespace ClassicUO.IO.Resources
             Span<FrameInfo> frames;
             int uopFlag = 0;
 
-            if (animDir.IsUOP || (animDir.Address == 0 && animDir.Size == 0))
+            if (animDir.IsUOP)
             {
                 AnimationGroupUop animData = DataIndex[animID].GetUopGroup(ref animGroup);
 
@@ -1358,7 +1358,17 @@ namespace ClassicUO.IO.Resources
             }
             else if (animDir.Address == 0 && animDir.Size == 0)
             {
-                return 0;
+                /* If it's not flagged as UOP, but there is no mul data, try to load
+                 * it as a UOP anyway. */
+                AnimationGroupUop animData = DataIndex[animID].GetUopGroup(ref animGroup);
+
+                if (animData == null || animData.Offset == 0)
+                {
+                    return 0;
+                }
+
+                frames = ReadUOPAnimationFrames(animID, animGroup, direction);
+                uopFlag = 1;
             }
             else
             {
