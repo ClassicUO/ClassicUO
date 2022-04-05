@@ -6766,6 +6766,11 @@ namespace ClassicUO.Network
                 {
                     gump.MasterGumpSerial = gparams.Count > 0 ? SerialHelper.Parse(gparams[1]) : 0;
                 }
+                else if (string.Equals(entry, "\0", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    //This gump is null terminated: Breaking
+                    break;
+                }
                 else
                 {
                     Log.Warn($"Invalid Gump Command: \"{gparams[0]}\"");
