@@ -6768,7 +6768,7 @@ namespace ClassicUO.Network
                 }
                 else
                 {
-                    Log.Warn(gparams[0]);
+                    Log.Warn($"Invalid Gump Command: \"{gparams[0]}\"");
                 }
             }
 
