@@ -66,7 +66,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             LayerOrder = UILayer.Over;
 
-            RadioButton all, mobiles, items, mobilesCorpses;
             AlphaBlendControl alpha;
 
             Add
@@ -77,107 +76,47 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             );
 
+            int biggestWidth = 100;
+            for (int i = 0; i < NameOverHeadManager.Options.Count; i++)
+            {
+                biggestWidth = Math.Max(biggestWidth, AddOverheadOptionButton(NameOverHeadManager.Options[i], i).Width);
+            }
 
-            Add
-            (
-                all = new RadioButton
-                (
-                    0,
-                    0x00D0,
-                    0x00D1,
-                    ResGumps.All,
-                    color: 0xFFFF
-                )
-                {
-                    IsChecked = NameOverHeadManager.TypeAllowed == NameOverheadTypeAllowed.All
-                }
-            );
-
-            Add
-            (
-                mobiles = new RadioButton
-                (
-                    0,
-                    0x00D0,
-                    0x00D1,
-                    ResGumps.MobilesOnly,
-                    color: 0xFFFF
-                )
-                {
-                    Y = all.Y + all.Height,
-                    IsChecked = NameOverHeadManager.TypeAllowed == NameOverheadTypeAllowed.Mobiles
-                }
-            );
-
-            Add
-            (
-                items = new RadioButton
-                (
-                    0,
-                    0x00D0,
-                    0x00D1,
-                    ResGumps.ItemsOnly,
-                    color: 0xFFFF
-                )
-                {
-                    Y = mobiles.Y + mobiles.Height,
-                    IsChecked = NameOverHeadManager.TypeAllowed == NameOverheadTypeAllowed.Items
-                }
-            );
-
-            Add
-            (
-                mobilesCorpses = new RadioButton
-                (
-                    0,
-                    0x00D0,
-                    0x00D1,
-                    ResGumps.MobilesAndCorpsesOnly,
-                    color: 0xFFFF
-                )
-                {
-                    Y = items.Y + items.Height,
-                    IsChecked = NameOverHeadManager.TypeAllowed == NameOverheadTypeAllowed.MobilesCorpses
-                }
-            );
-
-            alpha.Width = Math.Max(mobilesCorpses.Width, Math.Max(items.Width, Math.Max(all.Width, mobiles.Width)));
-            alpha.Height = all.Height + mobiles.Height + items.Height + mobilesCorpses.Height;
+            // alpha.Width = Math.Max(mobilesCorpses.Width, Math.Max(items.Width, Math.Max(all.Width, mobiles.Width)));
+            // alpha.Height = all.Height + mobiles.Height + items.Height + mobilesCorpses.Height;
+            alpha.Width = biggestWidth;
+            alpha.Height = Math.Max(30, NameOverHeadManager.Options.Count * 20);
 
             Width = alpha.Width;
             Height = alpha.Height;
+        }
 
-            all.ValueChanged += (sender, e) =>
-            {
-                if (all.IsChecked)
+        private RadioButton AddOverheadOptionButton(NameOverheadOption option, int index)
+        {
+            RadioButton button;
+
+            Add
+            (
+                button = new RadioButton
+                (
+                    0, 0x00D0, 0x00D1, option.Name,
+                    color: 0xFFFF
+                )
                 {
-                    NameOverHeadManager.TypeAllowed = NameOverheadTypeAllowed.All;
+                    Y = 10 + 20 * index,
+                    IsChecked = NameOverHeadManager.LastActiveNameOverheadOption == option.Name,
+                }
+            );
+
+            button.ValueChanged += (sender, e) =>
+            {
+                if (button.IsChecked)
+                {
+                    NameOverHeadManager.ActiveOverheadOptions = (NameOverheadOptions)option.NameOverheadOptionFlags;
                 }
             };
 
-            mobiles.ValueChanged += (sender, e) =>
-            {
-                if (mobiles.IsChecked)
-                {
-                    NameOverHeadManager.TypeAllowed = NameOverheadTypeAllowed.Mobiles;
-                }
-            };
-
-            items.ValueChanged += (sender, e) =>
-            {
-                if (items.IsChecked)
-                {
-                    NameOverHeadManager.TypeAllowed = NameOverheadTypeAllowed.Items;
-                }
-            };
-
-            mobilesCorpses.ValueChanged += (sender, e) =>
-            {
-                if (mobilesCorpses.IsChecked)
-                {
-                    NameOverHeadManager.TypeAllowed = NameOverheadTypeAllowed.MobilesCorpses;
-                }
-            };
+            return button;
         }
 
 
