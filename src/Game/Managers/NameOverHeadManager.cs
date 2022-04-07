@@ -85,6 +85,10 @@ namespace ClassicUO.Game.Managers
         Enemy = 1 << 14,
         Murderer = 1 << 15,
         Invulnerable = 1 << 16,
+
+        AllItems = Containers | Gold | Stackable | Other,
+        AllMobiles = Humanoid | Monster,
+        MobilesAndCorpses = AllMobiles | MonsterCorpses | HumanoidCorpses,
     }
 
     internal static class NameOverHeadManager
@@ -165,7 +169,7 @@ namespace ClassicUO.Game.Managers
 
             if (ActiveOverheadOptions.HasFlag(NameOverheadOptions.Invulnerable) && mobile.NotorietyFlag == NotorietyFlag.Invulnerable)
                 return true;
-            
+
             return false;
         }
 
@@ -309,11 +313,14 @@ namespace ClassicUO.Game.Managers
             (
                 new[]
                 {
-                    new NameOverheadOption("All", 0),
-                    new NameOverheadOption("Mobiles only", 0),
-                    new NameOverheadOption("Items only", 0),
-                    new NameOverheadOption("Mobiles & Corpses only", 0),
-                    new NameOverheadOption("All Items", 0),
+                    new NameOverheadOption("All", int.MaxValue),
+                    new NameOverheadOption("Mobiles only", (int)NameOverheadOptions.AllMobiles),
+                    new NameOverheadOption("Items only", (int)NameOverheadOptions.AllItems),
+                    new NameOverheadOption("Mobiles & Corpses only", (int)NameOverheadOptions.MobilesAndCorpses),
+                    new NameOverheadOption("Only Allies", (int)(NameOverheadOptions.Ally | NameOverheadOptions.Innocent | NameOverheadOptions.OwnFollowers)),
+                    new NameOverheadOption("My Followers", (int)NameOverheadOptions.OwnFollowers),
+                    new NameOverheadOption("Stackable items", (int)NameOverheadOptions.Stackable),
+                    new NameOverheadOption("Stuff I can attack", (int)(NameOverheadOptions.Monster | NameOverheadOptions.Gray | NameOverheadOptions.Murderer)),
                 }
             );
         }

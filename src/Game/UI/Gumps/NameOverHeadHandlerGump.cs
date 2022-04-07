@@ -103,7 +103,7 @@ namespace ClassicUO.Game.UI.Gumps
                     color: 0xFFFF
                 )
                 {
-                    Y = 10 + 20 * index,
+                    Y = 20 * index,
                     IsChecked = NameOverHeadManager.LastActiveNameOverheadOption == option.Name,
                 }
             );
