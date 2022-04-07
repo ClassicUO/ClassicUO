@@ -33,9 +33,11 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Xml;
 using ClassicUO.Configuration;
+using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Utility.Logging;
@@ -53,6 +55,38 @@ namespace ClassicUO.Game.Managers
         MobilesCorpses = Mobiles | Corpses
     }
 
+
+    [Flags]
+    internal enum NameOverheadOptions
+    {
+        None = 0,
+
+        // Items
+        Containers = 1 << 0,
+        Gold = 1 << 1,
+        Stackable = 1 << 2,
+        Other = 1 << 3,
+
+        // Corpses
+        MonsterCorpses = 1 << 4,
+        HumanoidCorpses = 1 << 5,
+        OwnCorpses = 1 << 6,
+
+        // Mobiles (type)
+        Humanoid = 1 << 7,
+        Monster = 1 << 8,
+        OwnFollowers = 1 << 9,
+
+        // Mobiles (notoriety)
+        Innocent = 1 << 10,
+        Ally = 1 << 11,
+        Gray = 1 << 12,
+        Criminal = 1 << 13,
+        Enemy = 1 << 14,
+        Murderer = 1 << 15,
+        Invulnerable = 1 << 16,
+    }
+
     internal static class NameOverHeadManager
     {
         private static NameOverHeadHandlerGump _gump;
@@ -63,41 +97,113 @@ namespace ClassicUO.Game.Managers
             set => ProfileManager.CurrentProfile.NameOverheadTypeAllowed = value;
         }
 
+        public static string LastActiveNameOverheadOption
+        {
+            get => ProfileManager.CurrentProfile.LastActiveNameOverheadOption;
+            set => ProfileManager.CurrentProfile.LastActiveNameOverheadOption = value;
+        }
+
+        public static NameOverheadOptions ActiveOverheadOptions { get; set; }
+
         public static bool IsToggled
         {
             get => ProfileManager.CurrentProfile.NameOverheadToggled;
             set => ProfileManager.CurrentProfile.NameOverheadToggled = value;
         }
 
-        public static List<NameOverheadOption> Options { get; set; } = new List<NameOverheadOption>();
+        public static List<NameOverheadOption> Options { get; set; } = new();
 
         public static bool IsAllowed(Entity serial)
         {
             if (serial == null)
-            {
                 return false;
-            }
 
-            if (TypeAllowed == NameOverheadTypeAllowed.All)
-            {
+            if (SerialHelper.IsItem(serial))
+                return HandleItemOverhead(serial);
+
+            if (SerialHelper.IsMobile(serial))
+                return HandleMobileOverhead(serial);
+
+            return false;
+        }
+
+        private static bool HandleMobileOverhead(Entity serial)
+        {
+            var mobile = serial as Mobile;
+
+            if (mobile == null)
+                return false;
+
+            // Mobile types
+            if (ActiveOverheadOptions.HasFlag(NameOverheadOptions.Humanoid) && mobile.IsHuman)
                 return true;
-            }
 
-            if (SerialHelper.IsItem(serial.Serial) && TypeAllowed == NameOverheadTypeAllowed.Items)
-            {
+            if (ActiveOverheadOptions.HasFlag(NameOverheadOptions.Monster) && !mobile.IsHuman)
                 return true;
-            }
 
-            if (SerialHelper.IsMobile(serial.Serial) && TypeAllowed.HasFlag(NameOverheadTypeAllowed.Mobiles))
-            {
+            if (ActiveOverheadOptions.HasFlag(NameOverheadOptions.OwnFollowers) && mobile.IsRenamable && mobile.NotorietyFlag != NotorietyFlag.Invulnerable && mobile.NotorietyFlag != NotorietyFlag.Enemy)
                 return true;
-            }
 
-            if (TypeAllowed.HasFlag(NameOverheadTypeAllowed.Corpses) && SerialHelper.IsItem(serial.Serial) && World.Items.Get(serial)?.IsCorpse == true)
-            {
+            // Mobile notorieties
+            if (ActiveOverheadOptions.HasFlag(NameOverheadOptions.Innocent) && mobile.NotorietyFlag == NotorietyFlag.Innocent)
                 return true;
+
+            if (ActiveOverheadOptions.HasFlag(NameOverheadOptions.Ally) && mobile.NotorietyFlag == NotorietyFlag.Ally)
+                return true;
+
+            if (ActiveOverheadOptions.HasFlag(NameOverheadOptions.Gray) && mobile.NotorietyFlag == NotorietyFlag.Gray)
+                return true;
+
+            if (ActiveOverheadOptions.HasFlag(NameOverheadOptions.Criminal) && mobile.NotorietyFlag == NotorietyFlag.Criminal)
+                return true;
+
+            if (ActiveOverheadOptions.HasFlag(NameOverheadOptions.Enemy) && mobile.NotorietyFlag == NotorietyFlag.Enemy)
+                return true;
+
+            if (ActiveOverheadOptions.HasFlag(NameOverheadOptions.Murderer) && mobile.NotorietyFlag == NotorietyFlag.Murderer)
+                return true;
+
+            if (ActiveOverheadOptions.HasFlag(NameOverheadOptions.Invulnerable) && mobile.NotorietyFlag == NotorietyFlag.Invulnerable)
+                return true;
+            
+            return false;
+        }
+
+        private static bool HandleItemOverhead(Entity serial)
+        {
+            var item = serial as Item;
+
+            if (item == null)
+                return false;
+
+            if (item.IsCorpse)
+            {
+                return HandleCorpseOverhead(item);
             }
 
+            if (item.ItemData.IsContainer && ActiveOverheadOptions.HasFlag(NameOverheadOptions.Containers))
+                return true;
+
+            if (item.IsCoin && ActiveOverheadOptions.HasFlag(NameOverheadOptions.Gold))
+                return true;
+
+            if (item.ItemData.IsStackable && ActiveOverheadOptions.HasFlag(NameOverheadOptions.Stackable))
+                return true;
+
+            return !item.ItemData.IsContainer && !item.IsCoin && !item.ItemData.IsStackable && ActiveOverheadOptions.HasFlag(NameOverheadOptions.Other);
+        }
+
+        private static bool HandleCorpseOverhead(Item item)
+        {
+            var isHumanCorpse = item.IsHumanCorpse;
+
+            if (isHumanCorpse && ActiveOverheadOptions.HasFlag(NameOverheadOptions.HumanoidCorpses))
+                return true;
+
+            if (!isHumanCorpse && ActiveOverheadOptions.HasFlag(NameOverheadOptions.MonsterCorpses))
+                return true;
+
+            // TODO: Add support for IsOwnCorpse, which was coded by Dyru
             return false;
         }
 
@@ -178,11 +284,11 @@ namespace ClassicUO.Game.Managers
             string path = Path.Combine(ProfileManager.ProfilePath, "nameoverhead.xml");
 
             using (XmlTextWriter xml = new XmlTextWriter(path, Encoding.UTF8)
-            {
-                Formatting = Formatting.Indented,
-                IndentChar = '\t',
-                Indentation = 1
-            })
+                   {
+                       Formatting = Formatting.Indented,
+                       IndentChar = '\t',
+                       Indentation = 1
+                   })
             {
                 xml.WriteStartDocument(true);
                 xml.WriteStartElement("nameoverhead");
@@ -257,7 +363,7 @@ namespace ClassicUO.Game.Managers
         {
             writer.WriteStartElement("nameoverheadoption");
             writer.WriteAttributeString("name", Name);
-            writer.WriteAttributeString("key", ((int) Key).ToString());
+            writer.WriteAttributeString("key", ((int)Key).ToString());
             writer.WriteAttributeString("alt", Alt.ToString());
             writer.WriteAttributeString("ctrl", Ctrl.ToString());
             writer.WriteAttributeString("shift", Shift.ToString());
@@ -273,7 +379,7 @@ namespace ClassicUO.Game.Managers
                 return;
             }
 
-            Key = (SDL.SDL_Keycode) int.Parse(xml.GetAttribute("key"));
+            Key = (SDL.SDL_Keycode)int.Parse(xml.GetAttribute("key"));
             Alt = bool.Parse(xml.GetAttribute("alt"));
             Ctrl = bool.Parse(xml.GetAttribute("ctrl"));
             Shift = bool.Parse(xml.GetAttribute("shift"));
