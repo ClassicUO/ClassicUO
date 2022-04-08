@@ -91,39 +91,59 @@ namespace ClassicUO.Game.UI.Controls
 
         private void SetupOptionCheckboxes()
         {
-            var i = 0;
-            AddCheckbox("Containers", NameOverheadOptions.Containers, 0, 60 + 20 * i++);
-            AddCheckbox("Gold", NameOverheadOptions.Gold, 0, 60 + 20 * i++);
-            AddCheckbox("Stackable", NameOverheadOptions.Stackable, 0, 60 + 20 * i++);
-            AddCheckbox("Other items", NameOverheadOptions.Other, 0, 60 + 20 * i++);
+            var y = 60;
+            AddLabel("Items", 75, y);
+            y += 28;
 
-            AddCheckbox("Monster corpses", NameOverheadOptions.MonsterCorpses, 0, 60 + 20 * i++);
-            AddCheckbox("Humanoid corpses", NameOverheadOptions.HumanoidCorpses, 0, 60 + 20 * i++);
-            AddCheckbox("Own corpses", NameOverheadOptions.OwnCorpses, 0, 60 + 20 * i++);
-            // Items
-            // Containers = 1 << 0,
-            // Gold = 1 << 1,
-            // Stackable = 1 << 2,
-            // Other = 1 << 3,
-            //
-            // // Corpses
-            // MonsterCorpses = 1 << 4,
-            // HumanoidCorpses = 1 << 5,
-            // OwnCorpses = 1 << 6,
-            //
-            // // Mobiles (type)
-            // Humanoid = 1 << 7,
-            // Monster = 1 << 8,
-            // OwnFollowers = 1 << 9,
-            //
-            // // Mobiles (notoriety)
-            // Innocent = 1 << 10,
-            // Ally = 1 << 11,
-            // Gray = 1 << 12,
-            // Criminal = 1 << 13,
-            // Enemy = 1 << 14,
-            // Murderer = 1 << 15,
-            // Invulnerable = 1 << 16,
+            AddCheckbox("Containers", NameOverheadOptions.Containers, 0, y);
+            AddCheckbox("Gold", NameOverheadOptions.Gold, 150, y);
+            y += 22;
+            AddCheckbox("Stackable", NameOverheadOptions.Stackable, 0, y);
+            AddCheckbox("Other items", NameOverheadOptions.Other, 150, y);
+            y += 28;
+
+            AddLabel("Corpses", 75, y);
+            y += 28;
+
+            AddCheckbox("Monster corpses", NameOverheadOptions.MonsterCorpses, 0, y);
+            AddCheckbox("Humanoid corpses", NameOverheadOptions.HumanoidCorpses, 150, y);
+            y += 22;
+            AddCheckbox("Own corpses", NameOverheadOptions.OwnCorpses, 0, y);
+            y += 28;
+            
+            AddLabel("Mobiles by type", 75, y);
+            y += 28;
+
+            AddCheckbox("Humanoid", NameOverheadOptions.Humanoid, 0, y);
+            AddCheckbox("Monster", NameOverheadOptions.Monster, 150, y);
+            y += 22;
+            AddCheckbox("Own Followes", NameOverheadOptions.OwnFollowers, 0, y);
+            y += 28;
+            
+            AddLabel("Mobiles by notoriety", 75, y);
+            y += 28;
+
+            AddCheckbox("Innocent (blue)", NameOverheadOptions.Innocent, 0, y);
+            AddCheckbox("Allied (green)", NameOverheadOptions.Ally, 150, y);
+            y += 22;
+            AddCheckbox("Attackable (gray)", NameOverheadOptions.Gray, 0, y);
+            AddCheckbox("Criminal (gray)", NameOverheadOptions.Criminal, 150, y);
+            y += 22;
+            AddCheckbox("Enemy (orange)", NameOverheadOptions.Enemy, 0, y);
+            AddCheckbox("Murderer (red)", NameOverheadOptions.Murderer, 150, y);
+            y += 22;
+            AddCheckbox("Invulnerable (yellow)", NameOverheadOptions.Invulnerable, 0, y);
+        }
+
+        private void AddLabel(string name, int x, int y)
+        {
+            var label = new Label(name, true, 0xFFFF)
+            {
+                X = x,
+                Y = y,
+            };
+
+            Add(label);
         }
 
         private void AddCheckbox(string checkboxName, NameOverheadOptions optionFlag, int x, int y)
