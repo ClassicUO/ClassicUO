@@ -324,9 +324,14 @@ namespace ClassicUO.Game.Managers
                 }
             );
         }
+
+        public static NameOverheadOption FindOption(string name)
+        {
+            return Options.Find(o => o.Name == name);
+        }
     }
 
-    internal class NameOverheadOption : LinkedObject, IEquatable<NameOverheadOption>
+    internal class NameOverheadOption
     {
         public NameOverheadOption(string name, SDL.SDL_Keycode key, bool alt, bool ctrl, bool shift, int optionflagscode) : this(name)
         {
