@@ -46,17 +46,6 @@ using SDL2;
 namespace ClassicUO.Game.Managers
 {
     [Flags]
-    internal enum NameOverheadTypeAllowed
-    {
-        All,
-        Mobiles,
-        Items,
-        Corpses,
-        MobilesCorpses = Mobiles | Corpses
-    }
-
-
-    [Flags]
     internal enum NameOverheadOptions
     {
         None = 0,
@@ -95,12 +84,6 @@ namespace ClassicUO.Game.Managers
     {
         private static NameOverHeadHandlerGump _gump;
 
-        public static NameOverheadTypeAllowed TypeAllowed
-        {
-            get => ProfileManager.CurrentProfile.NameOverheadTypeAllowed;
-            set => ProfileManager.CurrentProfile.NameOverheadTypeAllowed = value;
-        }
-
         public static string LastActiveNameOverheadOption
         {
             get => ProfileManager.CurrentProfile.LastActiveNameOverheadOption;
@@ -115,7 +98,7 @@ namespace ClassicUO.Game.Managers
             set => ProfileManager.CurrentProfile.NameOverheadToggled = value;
         }
 
-        public static List<NameOverheadOption> Options { get; set; } = new();
+        private static List<NameOverheadOption> Options { get; set; } = new();
 
         public static bool IsAllowed(Entity serial)
         {
@@ -254,7 +237,7 @@ namespace ClassicUO.Game.Managers
             }
 
             Options.Clear();
-            XmlDocument doc = new XmlDocument();
+            XmlDocument doc = new();
 
             try
             {
@@ -287,24 +270,23 @@ namespace ClassicUO.Game.Managers
 
             string path = Path.Combine(ProfileManager.ProfilePath, "nameoverhead.xml");
 
-            using (XmlTextWriter xml = new XmlTextWriter(path, Encoding.UTF8)
-                   {
-                       Formatting = Formatting.Indented,
-                       IndentChar = '\t',
-                       Indentation = 1
-                   })
+            using XmlTextWriter xml = new(path, Encoding.UTF8)
             {
-                xml.WriteStartDocument(true);
-                xml.WriteStartElement("nameoverhead");
+                Formatting = Formatting.Indented,
+                IndentChar = '\t',
+                Indentation = 1
+            };
 
-                foreach (var option in list)
-                {
-                    option.Save(xml);
-                }
+            xml.WriteStartDocument(true);
+            xml.WriteStartElement("nameoverhead");
 
-                xml.WriteEndElement();
-                xml.WriteEndDocument();
+            foreach (var option in list)
+            {
+                option.Save(xml);
             }
+
+            xml.WriteEndElement();
+            xml.WriteEndDocument();
         }
 
         private static void CreateDefaultEntries()
@@ -317,10 +299,6 @@ namespace ClassicUO.Game.Managers
                     new NameOverheadOption("Mobiles only", (int)NameOverheadOptions.AllMobiles),
                     new NameOverheadOption("Items only", (int)NameOverheadOptions.AllItems),
                     new NameOverheadOption("Mobiles & Corpses only", (int)NameOverheadOptions.MobilesAndCorpses),
-                    new NameOverheadOption("Only Allies", (int)(NameOverheadOptions.Ally | NameOverheadOptions.Innocent | NameOverheadOptions.OwnFollowers)),
-                    new NameOverheadOption("My Followers", (int)NameOverheadOptions.OwnFollowers),
-                    new NameOverheadOption("Stackable items", (int)NameOverheadOptions.Stackable),
-                    new NameOverheadOption("Stuff I can attack", (int)(NameOverheadOptions.Monster | NameOverheadOptions.Gray | NameOverheadOptions.Murderer)),
                 }
             );
         }
@@ -329,6 +307,39 @@ namespace ClassicUO.Game.Managers
         {
             return Options.Find(o => o.Name == name);
         }
+
+        public static void AddOption(NameOverheadOption option)
+        {
+            Options.Add(option);
+            var handlerGump = UIManager.GetGump<NameOverHeadHandlerGump>();
+
+            if (handlerGump != null)
+            {
+                handlerGump.Dispose();
+                handlerGump = new NameOverHeadHandlerGump();
+                UIManager.Add(handlerGump);
+            }
+        }
+
+        public static void RemoveOption(NameOverheadOption option)
+        {
+            Options.Remove(option);
+            var handlerGump = UIManager.GetGump<NameOverHeadHandlerGump>();
+
+            if (handlerGump != null)
+            {
+                handlerGump.Dispose();
+                handlerGump = new NameOverHeadHandlerGump();
+                UIManager.Add(handlerGump);
+            }
+        }
+
+        public static NameOverheadOption FindOptionByHotkey(SDL.SDL_Keycode key, bool alt, bool ctrl, bool shift)
+        {
+            return Options.FirstOrDefault(o => o.Key == key && o.Alt == alt && o.Ctrl == ctrl && o.Shift == shift);
+        }
+
+        public static List<NameOverheadOption> GetAllOptions() => Options;
     }
 
     internal class NameOverheadOption

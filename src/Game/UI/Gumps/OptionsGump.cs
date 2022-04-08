@@ -3516,7 +3516,7 @@ namespace ClassicUO.Game.UI.Gumps
                         _nameOverheadControl?.Dispose();
 
                         var option = new NameOverheadOption(name);
-                        NameOverHeadManager.Options.Add(option);
+                        NameOverHeadManager.AddOption(option);
 
                         _nameOverheadControl = new NameOverheadAssignControl(option)
                         {
@@ -3565,7 +3565,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                             if (_nameOverheadControl != null)
                             {
-                                NameOverHeadManager.Options.Remove(_nameOverheadControl.Option);
+                                NameOverHeadManager.RemoveOption(_nameOverheadControl.Option);
 
                                 _nameOverheadControl.Dispose();
                             }
@@ -3580,7 +3580,7 @@ namespace ClassicUO.Game.UI.Gumps
             };
 
 
-            foreach (var option in NameOverHeadManager.Options)
+            foreach (var option in NameOverHeadManager.GetAllOptions())
             {
                 NiceButton nb;
 

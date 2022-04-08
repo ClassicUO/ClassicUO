@@ -77,15 +77,16 @@ namespace ClassicUO.Game.UI.Gumps
             );
 
             int biggestWidth = 100;
-            for (int i = 0; i < NameOverHeadManager.Options.Count; i++)
+            var options = NameOverHeadManager.GetAllOptions();
+            for (int i = 0; i < options.Count; i++)
             {
-                biggestWidth = Math.Max(biggestWidth, AddOverheadOptionButton(NameOverHeadManager.Options[i], i).Width);
+                biggestWidth = Math.Max(biggestWidth, AddOverheadOptionButton(options[i], i).Width);
             }
 
             // alpha.Width = Math.Max(mobilesCorpses.Width, Math.Max(items.Width, Math.Max(all.Width, mobiles.Width)));
             // alpha.Height = all.Height + mobiles.Height + items.Height + mobilesCorpses.Height;
             alpha.Width = biggestWidth;
-            alpha.Height = Math.Max(30, NameOverHeadManager.Options.Count * 20);
+            alpha.Height = Math.Max(30, options.Count * 20);
 
             Width = alpha.Width;
             Height = alpha.Height;
@@ -113,6 +114,7 @@ namespace ClassicUO.Game.UI.Gumps
                 if (button.IsChecked)
                 {
                     NameOverHeadManager.ActiveOverheadOptions = (NameOverheadOptions)option.NameOverheadOptionFlags;
+                    NameOverHeadManager.LastActiveNameOverheadOption = option.Name;
                 }
             };
 

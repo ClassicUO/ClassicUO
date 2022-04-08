@@ -58,10 +58,15 @@ namespace ClassicUO.Game.UI.Controls
 
             CanMove = true;
 
-            _hotkeyBox = new HotkeyBox();
+            AddLabel("Set hotkey:", 0, 0);
+
+            _hotkeyBox = new HotkeyBox
+            {
+                X = 80
+            };
+
             _hotkeyBox.HotkeyChanged += BoxOnHotkeyChanged;
             _hotkeyBox.HotkeyCancelled += BoxOnHotkeyCancelled;
-
 
             Add(_hotkeyBox);
 
@@ -69,7 +74,7 @@ namespace ClassicUO.Game.UI.Controls
             (
                 new NiceButton
                 (
-                    0, _hotkeyBox.Height + 3, 170, 25,
+                    0, _hotkeyBox.Height + 3, 100, 25,
                     ButtonAction.Activate, "Uncheck all", 0, TEXT_ALIGN_TYPE.TS_LEFT
                 ) { ButtonParameter = (int)ButtonType.UncheckAll, IsSelectable = false }
             );
@@ -78,7 +83,7 @@ namespace ClassicUO.Game.UI.Controls
             (
                 new NiceButton
                 (
-                    150, _hotkeyBox.Height + 3, 170, 25,
+                    120, _hotkeyBox.Height + 3, 100, 25,
                     ButtonAction.Activate, "Check all", 0, TEXT_ALIGN_TYPE.TS_LEFT
                 ) { ButtonParameter = (int)ButtonType.CheckAll, IsSelectable = false }
             );
@@ -110,7 +115,7 @@ namespace ClassicUO.Game.UI.Controls
             y += 22;
             AddCheckbox("Own corpses", NameOverheadOptions.OwnCorpses, 0, y);
             y += 28;
-            
+
             AddLabel("Mobiles by type", 75, y);
             y += 28;
 
@@ -119,7 +124,7 @@ namespace ClassicUO.Game.UI.Controls
             y += 22;
             AddCheckbox("Own Followes", NameOverheadOptions.OwnFollowers, 0, y);
             y += 28;
-            
+
             AddLabel("Mobiles by notoriety", 75, y);
             y += 28;
 
@@ -167,6 +172,9 @@ namespace ClassicUO.Game.UI.Controls
                     Option.NameOverheadOptionFlags |= (int)optionFlag;
                 else
                     Option.NameOverheadOptionFlags &= ~(int)optionFlag;
+
+                if (NameOverHeadManager.LastActiveNameOverheadOption == Option.Name)
+                    NameOverHeadManager.ActiveOverheadOptions = (NameOverheadOptions)Option.NameOverheadOptionFlags;
             };
 
             checkboxDict.Add(optionFlag, checkbox);
@@ -215,7 +223,7 @@ namespace ClassicUO.Game.UI.Controls
             if (_hotkeyBox.Key == SDL.SDL_Keycode.SDLK_UNKNOWN)
                 return;
 
-            NameOverheadOption option = NameOverHeadManager.Options.FirstOrDefault(o => o.Key == _hotkeyBox.Key && o.Alt == alt && o.Ctrl == ctrl && o.Shift == shift);
+            NameOverheadOption option = NameOverHeadManager.FindOptionByHotkey(_hotkeyBox.Key, alt, ctrl, shift);
 
             if (option == null)
             {
@@ -244,8 +252,17 @@ namespace ClassicUO.Game.UI.Controls
         {
             switch ((ButtonType)buttonID)
             {
-                case ButtonType.CheckAll: break;
-                case ButtonType.UncheckAll: break;
+                case ButtonType.CheckAll:
+                    Option.NameOverheadOptionFlags = int.MaxValue;
+                    UpdateCheckboxesByCurrentOptionFlags();
+
+                    break;
+
+                case ButtonType.UncheckAll:
+                    Option.NameOverheadOptionFlags = 0x0;
+                    UpdateCheckboxesByCurrentOptionFlags();
+
+                    break;
             }
         }
 
