@@ -3859,7 +3859,8 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (vp != null)
                 {
-                    camera.Bounds.Location = vp.Location = _currentProfile.GameWindowPosition = new Point(gameWindowPositionX, gameWindowPositionY);
+                    vp.SetGameWindowPosition(new Point(gameWindowPositionX, gameWindowPositionY));
+                    _currentProfile.GameWindowPosition = vp.Location;
                 }
             }
 
@@ -3882,8 +3883,8 @@ namespace ClassicUO.Game.UI.Gumps
                     if (vp != null)
                     {
                         n = vp.ResizeGameWindow(new Point(Client.Game.Window.ClientBounds.Width, Client.Game.Window.ClientBounds.Height));
-
-                        camera.Bounds.Location = loc = _currentProfile.GameWindowPosition = vp.Location = new Point(-5, -5);
+                        vp.SetGameWindowPosition(new Point(-5, -5));
+                        _currentProfile.GameWindowPosition = vp.Location;
                     }
                 }
                 else
@@ -3891,7 +3892,8 @@ namespace ClassicUO.Game.UI.Gumps
                     if (vp != null)
                     {
                         n = vp.ResizeGameWindow(new Point(600, 480));
-                        camera.Bounds.Location = loc = vp.Location = _currentProfile.GameWindowPosition = new Point(20, 20);
+                        vp.SetGameWindowPosition(new Point(20, 20));
+                        _currentProfile.GameWindowPosition = vp.Location;
                     }
                 }
 

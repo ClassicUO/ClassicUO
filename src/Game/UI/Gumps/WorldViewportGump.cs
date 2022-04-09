@@ -242,6 +242,16 @@ namespace ClassicUO.Game.UI.Gumps
             UpdateGameWindowPos();
         }
 
+        public void SetGameWindowPosition(Point pos)
+        {
+            Location = pos;
+
+            _scene.Camera.Bounds.X = ScreenCoordinateX + BORDER_WIDTH;
+            _scene.Camera.Bounds.Y = ScreenCoordinateY + BORDER_WIDTH;
+
+            UpdateGameWindowPos();
+        }
+
         public Point ResizeGameWindow(Point newSize)
         {
             if (newSize.X < 640)
