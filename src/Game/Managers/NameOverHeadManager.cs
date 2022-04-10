@@ -40,6 +40,7 @@ using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Gumps;
+using ClassicUO.Input;
 using ClassicUO.Utility.Logging;
 using SDL2;
 
@@ -83,6 +84,8 @@ namespace ClassicUO.Game.Managers
     internal static class NameOverHeadManager
     {
         private static NameOverHeadHandlerGump _gump;
+        private static SDL.SDL_Keycode _lastKeySym = SDL.SDL_Keycode.SDLK_UNKNOWN;
+        private static SDL.SDL_Keymod _lastKeyMod = SDL.SDL_Keymod.KMOD_NONE;
 
         public static string LastActiveNameOverheadOption
         {
@@ -92,11 +95,14 @@ namespace ClassicUO.Game.Managers
 
         public static NameOverheadOptions ActiveOverheadOptions { get; set; }
 
-        public static bool IsToggled
+        public static bool IsPermaToggled
         {
             get => ProfileManager.CurrentProfile.NameOverheadToggled;
             set => ProfileManager.CurrentProfile.NameOverheadToggled = value;
         }
+
+        public static bool IsTemporarilyShowing { get; private set; }
+        public static bool IsShowing => IsPermaToggled || IsTemporarilyShowing || Keyboard.Ctrl && Keyboard.Shift;
 
         private static List<NameOverheadOption> Options { get; set; } = new();
 
@@ -217,7 +223,7 @@ namespace ClassicUO.Game.Managers
 
         public static void ToggleOverheads()
         {
-            IsToggled = !IsToggled;
+            IsPermaToggled = !IsPermaToggled;
         }
 
         public static void Load()
@@ -311,27 +317,18 @@ namespace ClassicUO.Game.Managers
         public static void AddOption(NameOverheadOption option)
         {
             Options.Add(option);
-            var handlerGump = UIManager.GetGump<NameOverHeadHandlerGump>();
+            UpdateHandlerGump();
+        }
 
-            if (handlerGump != null)
-            {
-                handlerGump.Dispose();
-                handlerGump = new NameOverHeadHandlerGump();
-                UIManager.Add(handlerGump);
-            }
+        private static void UpdateHandlerGump()
+        {
+            _gump.UpdateCheckboxes();
         }
 
         public static void RemoveOption(NameOverheadOption option)
         {
             Options.Remove(option);
-            var handlerGump = UIManager.GetGump<NameOverHeadHandlerGump>();
-
-            if (handlerGump != null)
-            {
-                handlerGump.Dispose();
-                handlerGump = new NameOverHeadHandlerGump();
-                UIManager.Add(handlerGump);
-            }
+            UpdateHandlerGump();
         }
 
         public static NameOverheadOption FindOptionByHotkey(SDL.SDL_Keycode key, bool alt, bool ctrl, bool shift)
@@ -340,6 +337,50 @@ namespace ClassicUO.Game.Managers
         }
 
         public static List<NameOverheadOption> GetAllOptions() => Options;
+
+        public static void RegisterKeyDown(SDL.SDL_Keysym key)
+        {
+            if (_lastKeySym == key.sym && _lastKeyMod == key.mod)
+                return;
+
+            _lastKeySym = key.sym;
+            _lastKeyMod = key.mod;
+
+            bool shift = (key.mod & SDL.SDL_Keymod.KMOD_SHIFT) != SDL.SDL_Keymod.KMOD_NONE;
+            bool alt = (key.mod & SDL.SDL_Keymod.KMOD_ALT) != SDL.SDL_Keymod.KMOD_NONE;
+            bool ctrl = (key.mod & SDL.SDL_Keymod.KMOD_CTRL) != SDL.SDL_Keymod.KMOD_NONE;
+
+            var option = FindOptionByHotkey(key.sym, alt, ctrl, shift);
+
+            if (option == null)
+                return;
+
+            SetActiveOption(option);
+
+            IsTemporarilyShowing = true;
+        }
+
+        public static void RegisterKeyUp(SDL.SDL_Keysym key)
+        {
+            if (key.sym != _lastKeySym)
+                return;
+
+            _lastKeySym = SDL.SDL_Keycode.SDLK_UNKNOWN;
+
+            IsTemporarilyShowing = false;
+        }
+
+        public static void SetActiveOption(string name)
+        {
+            SetActiveOption(FindOption(name));
+        }
+
+        public static void SetActiveOption(NameOverheadOption option)
+        {
+            ActiveOverheadOptions = (NameOverheadOptions)option.NameOverheadOptionFlags;
+            LastActiveNameOverheadOption = option.Name;
+            UpdateHandlerGump();
+        }
     }
 
     internal class NameOverheadOption

@@ -31,6 +31,7 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Resources;
@@ -44,6 +45,8 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override GumpType GumpType => GumpType.NameOverHeadHandler;
 
+        private static List<Control> _overheadButtons = new();
+        private static Control _alpha;
 
         public NameOverHeadHandlerGump() : base(0, 0)
         {
@@ -66,30 +69,50 @@ namespace ClassicUO.Game.UI.Gumps
 
             LayerOrder = UILayer.Over;
 
-            AlphaBlendControl alpha;
-
             Add
             (
-                alpha = new AlphaBlendControl(0.7f)
+                _alpha = new AlphaBlendControl(0.7f)
                 {
                     Hue = 34
                 }
             );
 
+            DrawChoiceButtons();
+        }
+
+
+        public void UpdateCheckboxes()
+        {
+            foreach (var button in _overheadButtons)
+                Remove(button);
+
+            DrawChoiceButtons();
+        }
+
+        protected override void OnDragEnd(int x, int y)
+        {
+            LastPosition = new Point(ScreenCoordinateX, ScreenCoordinateY);
+
+            SetInScreen();
+
+            base.OnDragEnd(x, y);
+        }
+
+        private void DrawChoiceButtons()
+        {
             int biggestWidth = 100;
             var options = NameOverHeadManager.GetAllOptions();
+
             for (int i = 0; i < options.Count; i++)
             {
                 biggestWidth = Math.Max(biggestWidth, AddOverheadOptionButton(options[i], i).Width);
             }
 
-            // alpha.Width = Math.Max(mobilesCorpses.Width, Math.Max(items.Width, Math.Max(all.Width, mobiles.Width)));
-            // alpha.Height = all.Height + mobiles.Height + items.Height + mobilesCorpses.Height;
-            alpha.Width = biggestWidth;
-            alpha.Height = Math.Max(30, options.Count * 20);
+            _alpha.Width = biggestWidth;
+            _alpha.Height = Math.Max(30, options.Count * 20);
 
-            Width = alpha.Width;
-            Height = alpha.Height;
+            Width = _alpha.Width;
+            Height = _alpha.Height;
         }
 
         private RadioButton AddOverheadOptionButton(NameOverheadOption option, int index)
@@ -113,22 +136,13 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (button.IsChecked)
                 {
-                    NameOverHeadManager.ActiveOverheadOptions = (NameOverheadOptions)option.NameOverheadOptionFlags;
-                    NameOverHeadManager.LastActiveNameOverheadOption = option.Name;
+                    NameOverHeadManager.SetActiveOption(option);
                 }
             };
 
+            _overheadButtons.Add(button);
+
             return button;
-        }
-
-
-        protected override void OnDragEnd(int x, int y)
-        {
-            LastPosition = new Point(ScreenCoordinateX, ScreenCoordinateY);
-
-            SetInScreen();
-
-            base.OnDragEnd(x, y);
         }
     }
 }
