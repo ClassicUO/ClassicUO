@@ -313,22 +313,17 @@ namespace ClassicUO.Game.Managers
         {
             return Options.Find(o => o.Name == name);
         }
-
+        
         public static void AddOption(NameOverheadOption option)
         {
             Options.Add(option);
-            UpdateHandlerGump();
-        }
-
-        private static void UpdateHandlerGump()
-        {
-            _gump.UpdateCheckboxes();
+            _gump.RedrawOverheadOptions();
         }
 
         public static void RemoveOption(NameOverheadOption option)
         {
             Options.Remove(option);
-            UpdateHandlerGump();
+            _gump.RedrawOverheadOptions();
         }
 
         public static NameOverheadOption FindOptionByHotkey(SDL.SDL_Keycode key, bool alt, bool ctrl, bool shift)
@@ -369,17 +364,12 @@ namespace ClassicUO.Game.Managers
 
             IsTemporarilyShowing = false;
         }
-
-        public static void SetActiveOption(string name)
-        {
-            SetActiveOption(FindOption(name));
-        }
-
+        
         public static void SetActiveOption(NameOverheadOption option)
         {
             ActiveOverheadOptions = (NameOverheadOptions)option.NameOverheadOptionFlags;
             LastActiveNameOverheadOption = option.Name;
-            UpdateHandlerGump();
+            _gump.UpdateCheckboxes();
         }
     }
 

@@ -45,7 +45,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override GumpType GumpType => GumpType.NameOverHeadHandler;
 
-        private static List<Control> _overheadButtons = new();
+        private static readonly List<RadioButton> _overheadButtons = new();
         private static Control _alpha;
 
         public NameOverHeadHandlerGump() : base(0, 0)
@@ -80,13 +80,12 @@ namespace ClassicUO.Game.UI.Gumps
             DrawChoiceButtons();
         }
 
-
         public void UpdateCheckboxes()
         {
             foreach (var button in _overheadButtons)
-                Remove(button);
-
-            DrawChoiceButtons();
+            {
+                button.IsChecked = NameOverHeadManager.LastActiveNameOverheadOption == button.Text;
+            }
         }
 
         protected override void OnDragEnd(int x, int y)
@@ -96,6 +95,14 @@ namespace ClassicUO.Game.UI.Gumps
             SetInScreen();
 
             base.OnDragEnd(x, y);
+        }
+
+        public void RedrawOverheadOptions()
+        {
+            foreach (var button in _overheadButtons)
+                Remove(button);
+
+            DrawChoiceButtons();
         }
 
         private void DrawChoiceButtons()
