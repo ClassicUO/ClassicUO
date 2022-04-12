@@ -45,8 +45,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override GumpType GumpType => GumpType.NameOverHeadHandler;
 
-        private static readonly List<RadioButton> _overheadButtons = new();
-        private static Control _alpha;
+        private readonly List<RadioButton> _overheadButtons = new();
+        private Control _alpha;
+        private readonly Checkbox _keepOpenCheckbox;
 
         public NameOverHeadHandlerGump() : base(0, 0)
         {
@@ -77,6 +78,20 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             );
 
+            Add
+            (
+                _keepOpenCheckbox = new Checkbox
+                (
+                    0x00D2, 0x00D3, "Keep open", 0xFF,
+                    0xFFFF
+                )
+                {
+                    IsChecked = NameOverHeadManager.IsPermaToggled
+                }
+            );
+
+            _keepOpenCheckbox.ValueChanged += (sender, args) => NameOverHeadManager.SetOverheadToggled(_keepOpenCheckbox.IsChecked);
+
             DrawChoiceButtons();
         }
 
@@ -86,6 +101,8 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 button.IsChecked = NameOverHeadManager.LastActiveNameOverheadOption == button.Text;
             }
+
+            _keepOpenCheckbox.IsChecked = NameOverHeadManager.IsPermaToggled;
         }
 
         protected override void OnDragEnd(int x, int y)
@@ -116,7 +133,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             _alpha.Width = biggestWidth;
-            _alpha.Height = Math.Max(30, options.Count * 20);
+            _alpha.Height = Math.Max(30, options.Count * 20) + 22;
 
             Width = _alpha.Width;
             Height = _alpha.Height;
@@ -134,7 +151,7 @@ namespace ClassicUO.Game.UI.Gumps
                     color: 0xFFFF
                 )
                 {
-                    Y = 20 * index,
+                    Y = 20 * index + 22,
                     IsChecked = NameOverHeadManager.LastActiveNameOverheadOption == option.Name,
                 }
             );
