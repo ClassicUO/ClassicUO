@@ -55,7 +55,7 @@ namespace ClassicUO.Game.Managers
         Containers = 1 << 0,
         Gold = 1 << 1,
         Stackable = 1 << 2,
-        Other = 1 << 3,
+        LockedDown = 1 << 3,
 
         // Corpses
         MonsterCorpses = 1 << 4,
@@ -76,7 +76,7 @@ namespace ClassicUO.Game.Managers
         Murderer = 1 << 15,
         Invulnerable = 1 << 16,
 
-        AllItems = Containers | Gold | Stackable | Other,
+        AllItems = Containers | Gold | Stackable | LockedDown,
         AllMobiles = Humanoid | Monster,
         MobilesAndCorpses = AllMobiles | MonsterCorpses | HumanoidCorpses,
     }
@@ -183,7 +183,10 @@ namespace ClassicUO.Game.Managers
             if (item.ItemData.IsStackable && ActiveOverheadOptions.HasFlag(NameOverheadOptions.Stackable))
                 return true;
 
-            return !item.ItemData.IsContainer && !item.IsCoin && !item.ItemData.IsStackable && ActiveOverheadOptions.HasFlag(NameOverheadOptions.Other);
+            if (item.IsLocked && ActiveOverheadOptions.HasFlag(NameOverheadOptions.LockedDown))
+                return true;
+
+            return false;
         }
 
         private static bool HandleCorpseOverhead(Item item)

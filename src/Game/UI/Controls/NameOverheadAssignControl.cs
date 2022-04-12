@@ -104,7 +104,7 @@ namespace ClassicUO.Game.UI.Controls
             AddCheckbox("Gold", NameOverheadOptions.Gold, 150, y);
             y += 22;
             AddCheckbox("Stackable", NameOverheadOptions.Stackable, 0, y);
-            AddCheckbox("Other items", NameOverheadOptions.Other, 150, y);
+            AddCheckbox("Locked down", NameOverheadOptions.LockedDown, 150, y);
             y += 28;
 
             AddLabel("Corpses", 75, y);
