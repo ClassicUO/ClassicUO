@@ -417,7 +417,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _labelX.Text = editedMarker.X.ToString();
                     _labelY.Text = editedMarker.Y.ToString();
                     if (editedMarker.MarkerIcon != null)
-                        _iconTexture.Texture = editedMarker.MarkerIcon;
+                        _iconTexture = new DrawTexture(editedMarker.MarkerIcon);
 
                     EditMarkerEvent.Raise();
                 }
