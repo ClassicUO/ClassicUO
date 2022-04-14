@@ -421,84 +421,54 @@ namespace ClassicUO.IO.Resources
                             continue;
                         }
 
-                        int[] anim =
+                        for (int i = 1; i < defReader.PartsCount; i++)
                         {
-                            defReader.ReadInt(), -1, -1, -1
-                        };
+                            int body = defReader.ReadInt();
 
-                        if (defReader.PartsCount >= 3)
-                        {
-                            anim[1] = defReader.ReadInt();
-
-                            if (defReader.PartsCount >= 4)
-                            {
-                                anim[2] = defReader.ReadInt();
-
-                                if (defReader.PartsCount >= 5)
-                                {
-                                    anim[3] = defReader.ReadInt();
-                                }
-                            }
-                        }
-
-                        int animFile = 0;
-                        ushort realAnimID = 0xFFFF;
-                        sbyte mountedHeightOffset = 0;
-
-                        if (anim[0] != -1)
-                        {
-                            animFile = 1;
-                            realAnimID = (ushort)anim[0];
-
-                            if (index == 0x00C0 || index == 793)
-                            {
-                                mountedHeightOffset = -9;
-                            }
-                        }
-                        else if (anim[1] != -1)
-                        {
-                            animFile = 2;
-                            realAnimID = (ushort)anim[1];
-
-                            if (index == 0x0579)
-                            {
-                                mountedHeightOffset = 9;
-                            }
-                        }
-                        else if (anim[2] != -1)
-                        {
-                            animFile = 3;
-                            realAnimID = (ushort)anim[2];
-                        }
-                        else if (anim[3] != -1)
-                        {
-                            animFile = 4;
-                            realAnimID = (ushort)anim[3];
-                            mountedHeightOffset = -9;
-
-                            if (index == 0x0115 || index == 0x00C0)
-                            {
-                                mountedHeightOffset = 0;
-                            }
-                            else if (index == 0x042D)
-                            {
-                                mountedHeightOffset = 3;
-                            }
-                        }
-
-
-                        if (realAnimID != 0xFFFF && animFile != 0)
-                        {
-                            if (_files[animFile] == null)
+                            if (body >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT || body < 0)
                             {
                                 continue;
                             }
 
-                            UOFile currentIdxFile = _files[animFile].IdxFile;
+                            sbyte mountedHeightOffset = 0;
+                            if (i == 1)
+                            {
+                                if (index == 0x00C0 || index == 793)
+                                {
+                                    mountedHeightOffset = -9;
+                                }
+                            }
+                            else if (i == 2)
+                            {
+                                if (index == 0x0579)
+                                {
+                                    mountedHeightOffset = 9;
+                                }
+                            }
+                            else if (i == 4)
+                            {
+                                mountedHeightOffset = -9;
 
-                            ANIMATION_GROUPS_TYPE realType = Client.Version < ClientVersion.CV_500A ? CalculateTypeByGraphic(realAnimID) : DataIndex[index].Type;
+                                if (index == 0x0115 || index == 0x00C0)
+                                {
+                                    mountedHeightOffset = 0;
+                                }
+                                else if (index == 0x042D)
+                                {
+                                    mountedHeightOffset = 3;
+                                }
+                            }
 
-                            long addressOffset = DataIndex[index].CalculateOffset(realAnimID, realType, out int count);
+                            if (_files[i] == null)
+                            {
+                                continue;
+                            }
+
+                            UOFile currentIdxFile = _files[i].IdxFile;
+
+                            ANIMATION_GROUPS_TYPE realType = Client.Version < ClientVersion.CV_500A ? CalculateTypeByGraphic((ushort)body) : DataIndex[index].Type;
+
+                            long addressOffset = DataIndex[index].CalculateOffset((ushort)body, realType, out int count);
 
                             if (addressOffset < currentIdxFile.Length)
                             {
@@ -510,7 +480,7 @@ namespace ClassicUO.IO.Resources
                                 }
 
                                 DataIndex[index].HasBodyConversion = false;
-                                DataIndex[index].FileIndex = (byte)animFile;
+                                DataIndex[index].FileIndex = (byte)i;
 
                                 addressOffset += currentIdxFile.StartAddress.ToInt64();
                                 long maxaddress = currentIdxFile.StartAddress.ToInt64() + currentIdxFile.Length;
@@ -545,7 +515,7 @@ namespace ClassicUO.IO.Resources
 
                                             dataindex.Address = aidx->Position;
                                             dataindex.Size = Math.Max(1, aidx->Size);
-                                            dataindex.FileIndex = animFile;
+                                            dataindex.FileIndex = i;
                                         }
                                     }
                                 }
@@ -554,7 +524,6 @@ namespace ClassicUO.IO.Resources
                     }
                 }
             }
-
         }
 
         private void ProcessBodyDef()
