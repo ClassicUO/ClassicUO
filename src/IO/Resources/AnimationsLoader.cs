@@ -1033,7 +1033,7 @@ namespace ClassicUO.IO.Resources
                 if (DataIndex[i].FileIndex == 1)
                 {
                     // TODO: Find out what client version introduced this negative feature flag change.
-                    replace = (World.ClientLockedFeatures.Flags & (LockedFeatureFlags.TheSecondAge | LockedFeatureFlags.Renaissance) == 0;
+                    replace = (World.ClientLockedFeatures.Flags & (LockedFeatureFlags.TheSecondAge | LockedFeatureFlags.Renaissance)) == 0;
                 }
                 else if (DataIndex[i].FileIndex == 2)
                 {
