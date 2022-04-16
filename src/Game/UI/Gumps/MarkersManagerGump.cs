@@ -318,6 +318,14 @@ namespace ClassicUO.Game.UI.Gumps
             public DrawTexture(Texture2D texture)
             {
                 Texture = texture;
+                Width = Height = 15;
+            }
+
+            public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+            {
+                Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
+                batcher.Draw(Texture, new Rectangle(x, y + 7, Width, Height), hueVector);
+                return true;
             }
         }
 
