@@ -1977,7 +1977,8 @@ namespace ClassicUO.Game.UI.Gumps
                                 name
                             )
                             {
-                                ButtonParameter = (int) Buttons.Last + 1 + rightArea.Children.Count
+                                ButtonParameter = (int) Buttons.Last + 1 + rightArea.Children.Count,
+                                CanMove = true
                             }
                         );
 
@@ -2004,11 +2005,6 @@ namespace ClassicUO.Game.UI.Gumps
                                 return;
                             }
 
-                            if (Math.Max(Math.Abs(Mouse.LDragOffset.X), Math.Abs(Mouse.LDragOffset.Y)) < 5 || nb.ScreenCoordinateX > Mouse.LClickPosition.X || nb.ScreenCoordinateX < Mouse.LClickPosition.X - nb.Width || nb.ScreenCoordinateY > Mouse.LClickPosition.Y || nb.ScreenCoordinateY + nb.Height < Mouse.LClickPosition.Y)
-                            {
-                                return;
-                            }
-
                             MacroControl control = _macroControl.FindControls<MacroControl>().SingleOrDefault();
 
                             if (control == null)
@@ -2020,8 +2016,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                             MacroButtonGump macroButtonGump = new MacroButtonGump(control.Macro, Mouse.Position.X, Mouse.Position.Y);
 
-                            macroButtonGump.X = Mouse.LClickPosition.X + (macroButtonGump.Width >> 1);
-                            macroButtonGump.Y = Mouse.LClickPosition.Y + (macroButtonGump.Height >> 1);
+                            macroButtonGump.X = Mouse.Position.X - (macroButtonGump.Width >> 1);
+                            macroButtonGump.Y = Mouse.Position.Y - (macroButtonGump.Height >> 1);
 
                             UIManager.Add(macroButtonGump);
 
@@ -2103,7 +2099,8 @@ namespace ClassicUO.Game.UI.Gumps
                     )
                     {
                         ButtonParameter = (int) Buttons.Last + 1 + rightArea.Children.Count,
-                        Tag = macro
+                        Tag = macro,
+                        CanMove = true
                     }
                 );
 
@@ -2125,17 +2122,12 @@ namespace ClassicUO.Game.UI.Gumps
                         return;
                     }
 
-                    if (Math.Max(Math.Abs(Mouse.LDragOffset.X), Math.Abs(Mouse.LDragOffset.Y)) < 5 || nb.ScreenCoordinateX > Mouse.LClickPosition.X || nb.ScreenCoordinateX < Mouse.LClickPosition.X - nb.Width || nb.ScreenCoordinateY > Mouse.LClickPosition.Y || nb.ScreenCoordinateY + nb.Height < Mouse.LClickPosition.Y)
-                    {
-                        return;
-                    }
-
                     UIManager.Gumps.OfType<MacroButtonGump>().FirstOrDefault(s => s._macro == m)?.Dispose();
 
                     MacroButtonGump macroButtonGump = new MacroButtonGump(m, Mouse.Position.X, Mouse.Position.Y);
 
-                    macroButtonGump.X = Mouse.LClickPosition.X + (macroButtonGump.Width >> 1);
-                    macroButtonGump.Y = Mouse.LClickPosition.Y + (macroButtonGump.Height >> 1);
+                    macroButtonGump.X = Mouse.Position.X - (macroButtonGump.Width >> 1);
+                    macroButtonGump.Y = Mouse.Position.Y - (macroButtonGump.Height >> 1);
 
                     UIManager.Add(macroButtonGump);
 
