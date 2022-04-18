@@ -105,6 +105,11 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Update();
 
+            if (IsDisposed)
+            {
+                return;
+            }
+
             if (Time.Ticks > _timeToUpdate)
             {
                 _timeToUpdate = Time.Ticks + 100;
