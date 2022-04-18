@@ -83,9 +83,9 @@ namespace ClassicUO.Renderer
 
 
 
-        public void ZoomIn() => Zoom += ZoomStep;
+        public void ZoomIn() => Zoom -= ZoomStep;
 
-        public void ZoomOut() => Zoom -= ZoomStep;
+        public void ZoomOut() => Zoom += ZoomStep;
 
         public Viewport GetViewport() => new Viewport(Bounds.X, Bounds.Y, Bounds.Width, Bounds.Height);
 

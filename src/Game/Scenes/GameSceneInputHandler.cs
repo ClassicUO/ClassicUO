@@ -930,11 +930,11 @@ namespace ClassicUO.Game.Scenes
             {
                 if (up)
                 {
-                    Camera.ZoomOut();
+                    Camera.ZoomIn();
                 }
                 else
                 {
-                    Camera.ZoomIn();
+                    Camera.ZoomOut();
                 }
 
                 return true;
