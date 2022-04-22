@@ -459,7 +459,7 @@ namespace ClassicUO.IO.Resources
                                 }
                             }
 
-                            if (_files[i] == null)
+                            if (i >= _files.Length || _files[i] == null)
                             {
                                 continue;
                             }
