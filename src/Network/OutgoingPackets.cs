@@ -1929,7 +1929,7 @@ namespace ClassicUO.Network
             }
 
             writer.WriteUInt32BE(serial);
-            writer.WriteUInt16BE(graphic);
+            writer.WriteUInt16BE(0);
             writer.WriteUInt16BE(hue);
 
             if (length < 0)
