@@ -52,7 +52,7 @@ namespace ClassicUO.Utility
                 {
                     //Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
                     //_cp1252Encoding = Encoding.GetEncoding(1252);
-                    _cp1252Encoding = Encoding.ASCII;
+                    _cp1252Encoding = Encoding.GetEncoding("iso-8859-1");
                 }
                 return _cp1252Encoding;
             }
