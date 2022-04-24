@@ -194,7 +194,6 @@ namespace ClassicUO.Game.Scenes
                 Client.Game.SetWindowSize(w, h);
             }
 
-            CircleOfTransparency.Create(ProfileManager.CurrentProfile.CircleOfTransparencyRadius);
             Plugin.OnConnected();
         }
 
@@ -1021,6 +1020,17 @@ namespace ClassicUO.Game.Scenes
             batcher.Begin(null, matrix);
             batcher.SetBrightlight(ProfileManager.CurrentProfile.TerrainShadowsLevel * 0.1f);
 
+            if (ProfileManager.CurrentProfile.UseCircleOfTransparency)
+            {
+                batcher.SetCircleOfTransparencyRadius(Camera.Zoom *
+                                                      (float)(ProfileManager.CurrentProfile.CircleOfTransparencyRadius * 2) /
+                                                      batcher.GraphicsDevice.Viewport.Width);
+            }
+            else
+            {
+                batcher.SetCircleOfTransparencyRadius(0f);
+            }
+
             // https://shawnhargreaves.com/blog/depth-sorting-alpha-blended-objects.html
             batcher.SetStencil(DepthStencilState.Default);
 
@@ -1035,6 +1045,7 @@ namespace ClassicUO.Game.Scenes
             }
 
             batcher.SetStencil(null);
+            batcher.SetCircleOfTransparencyRadius(0f);
 
 
             //var worldPoint = Camera.MouseToWorldPosition() + _offset;

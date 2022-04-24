@@ -118,7 +118,6 @@ namespace ClassicUO.Configuration
         public bool NoColorObjectsOutOfRange { get; set; }
         public bool UseCircleOfTransparency { get; set; }
         public int CircleOfTransparencyRadius { get; set; } = Constants.MAX_CIRCLE_OF_TRANSPARENCY_RADIUS / 2;
-        public int CircleOfTransparencyType { get; set; } // 0 = normal, 1 = like original client
         public int VendorGumpHeight { get; set; } = 60;   //original vendor gump size
         public float DefaultScale { get; set; } = 1.0f;
         public bool EnableMousewheelScaleZoom { get; set; }

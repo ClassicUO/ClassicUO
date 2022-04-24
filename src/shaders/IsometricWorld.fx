@@ -18,6 +18,7 @@ float4x4 MatrixTransform;
 float4x4 WorldMatrix;
 float2 Viewport;
 float Brightlight;
+float CircleOfTransparencyRadius;
 const float HuesPerTexture = 2048;
 
 
@@ -37,9 +38,10 @@ struct VS_INPUT
 struct PS_INPUT
 {
 	float4 Position : POSITION0;
-	float3 TexCoord : TEXCOORD0;
-	float3 Normal	: TEXCOORD1;
-	float3 Hue		: TEXCOORD2;
+	float3 TexCoord : TEXCOORD1;
+	float3 Normal	: TEXCOORD2;
+	float3 Hue		: TEXCOORD3;
+	float3 PixelPos : TEXCOORD4;
 };
 
 float3 get_rgb(float gray, float hue)
@@ -88,13 +90,14 @@ PS_INPUT VertexShaderFunction(VS_INPUT IN)
 	OUT.TexCoord = IN.TexCoord; 
 	OUT.Normal = IN.Normal;
 	OUT.Hue = IN.Hue;
+	OUT.PixelPos = OUT.Position.xyz;
 	
 	return OUT;
 }
 
 float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 {	
-	float4 color = tex2D(DrawSampler, IN.TexCoord);
+	float4 color = tex2D(DrawSampler, IN.TexCoord.xy);
 		
 	if (color.a == 0.0f)
 		discard;
@@ -102,9 +105,11 @@ float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 	int mode = int(IN.Hue.y);
 	float alpha = IN.Hue.z;
 
-	if (mode == NONE)
+	bool useTrans = false;
+	if (alpha > 1.0f)
 	{
-		return color * alpha;
+		useTrans = true;
+		alpha -= 1.0f;
 	}
 
 	float hue = IN.Hue.x;
@@ -175,6 +180,14 @@ float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 	else if (mode == EFFECT_HUED)
 	{
 		color.rgb = get_rgb(color.g, hue);
+	}
+
+	if (useTrans && CircleOfTransparencyRadius > 0)
+	{
+		float factor = min(1.0f, length(IN.PixelPos.xy) / CircleOfTransparencyRadius);
+		alpha *= factor;
+		alpha *= factor;
+		alpha *= factor;
 	}
 
 	return color * alpha;

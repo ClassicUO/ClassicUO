@@ -63,7 +63,7 @@ namespace ClassicUO.Renderer
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector3 GetHueVector(int hue, bool partial, float alpha, bool gump = false, bool effect = false)
+        public static Vector3 GetHueVector(int hue, bool partial, float alpha, bool gump = false, bool effect = false, bool circletrans = false)
         {
             Vector3 hueVector;
             byte type;
@@ -102,6 +102,13 @@ namespace ClassicUO.Renderer
             hueVector.X = hue;
             hueVector.Y = type;
             hueVector.Z = alpha;
+
+            if (circletrans)
+            {
+                /* hue.Z is the alpha. Alpha greater than 1 indicates a texture is eligible to
+                 * be transparent from circle of transparency. */
+                hueVector.Z += 1f;
+            }
 
             return hueVector;
         }

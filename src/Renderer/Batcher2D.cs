@@ -150,6 +150,11 @@ namespace ClassicUO.Renderer
             _basicUOEffect.Brighlight.SetValue(f);
         }
 
+        public void SetCircleOfTransparencyRadius(float radius)
+        {
+            _basicUOEffect.CircleOfTransparencyRadius.SetValue(radius);
+        }
+
         public void DrawString(SpriteFont spriteFont, string text, int x, int y, Vector3 color)
         {
             if (string.IsNullOrEmpty(text))

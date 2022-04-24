@@ -171,12 +171,6 @@
   <data name="AutoOpenDoors" xml:space="preserve">
     <value>Auto Open Doors</value>
   </data>
-  <data name="CircleTransType_Full" xml:space="preserve">
-    <value>Full</value>
-  </data>
-  <data name="CircleTransType_Gradient" xml:space="preserve">
-    <value>Gradient</value>
-  </data>
   <data name="ClickCloseAllGumps" xml:space="preserve">
     <value>Close all Anchored gumps when right click on a group</value>
   </data>
@@ -353,9 +347,6 @@
   </data>
   <data name="UseCustomHPBars" xml:space="preserve">
     <value>Use custom healthbars gump</value>
-  </data>
-  <data name="CircleTransType" xml:space="preserve">
-    <value>Transparency type:</value>
   </data>
   <data name="CloseHPGumpWhen" xml:space="preserve">
     <value>Close healthbar gump when:</value>

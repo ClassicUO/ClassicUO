@@ -1128,32 +1128,6 @@ namespace ClassicUO.Game.UI.Gumps
                 )
             );
 
-            section4.PushIndent();
-            section4.Add(AddLabel(null, ResGumps.CircleTransType, startX, startY));
-            int cottypeindex = _currentProfile.CircleOfTransparencyType;
-            string[] cotTypes = { ResGumps.CircleTransType_Full, ResGumps.CircleTransType_Gradient };
-
-            if (cottypeindex < 0 || cottypeindex > cotTypes.Length)
-            {
-                cottypeindex = 0;
-            }
-
-            section4.AddRight
-            (
-                _cotType = AddCombobox
-                (
-                    null,
-                    cotTypes,
-                    cottypeindex,
-                    startX,
-                    startY,
-                    150
-                ),
-                2
-            );
-
-            section4.PopIndent();
-
             section4.Add
             (
                 _hideScreenshotStoredInMessage = AddCheckBox
@@ -3708,10 +3682,8 @@ namespace ClassicUO.Game.UI.Gumps
             if (_currentProfile.CircleOfTransparencyRadius != _circleOfTranspRadius.Value)
             {
                 _currentProfile.CircleOfTransparencyRadius = _circleOfTranspRadius.Value;
-                CircleOfTransparency.Create(_currentProfile.CircleOfTransparencyRadius);
             }
 
-            _currentProfile.CircleOfTransparencyType = _cotType.SelectedIndex;
             _currentProfile.StandardSkillsGump = _useStandardSkillsGump.IsChecked;
 
             if (_useStandardSkillsGump.IsChecked)
