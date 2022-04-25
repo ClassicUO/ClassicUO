@@ -86,8 +86,9 @@ namespace ClassicUO.Renderer
             else if (hue != 0)
             {
                 hue -= 1;
-
-                type = effect ? SHADER_EFFECT_HUED : partial ? SHADER_PARTIAL_HUED : SHADER_HUED;
+                
+                // TODO: check if effect + partial is a thing. Because on shader the effect uses the G component instead of R to get the hue index
+                type = effect && !partial ? SHADER_EFFECT_HUED : partial ? SHADER_PARTIAL_HUED : SHADER_HUED;
 
                 if (gump && !effect)
                 {
