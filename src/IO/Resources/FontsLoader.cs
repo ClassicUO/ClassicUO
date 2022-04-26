@@ -31,12 +31,12 @@
 #endregion
 
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading.Tasks;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
@@ -675,7 +675,7 @@ namespace ClassicUO.IO.Resources
             }
 
             int blocksize = height * width;
-            uint[] pData = System.Buffers.ArrayPool<uint>.Shared.Rent(blocksize);
+            uint[] pData = CleanArrayPool<uint>.Shared.Rent(blocksize);
 
             try
             {
@@ -818,7 +818,7 @@ namespace ClassicUO.IO.Resources
             }
             finally
             {
-                System.Buffers.ArrayPool<uint>.Shared.Return(pData, true);
+                CleanArrayPool<uint>.Shared.Return(pData);
             }
         }
 
@@ -1824,7 +1824,7 @@ namespace ClassicUO.IO.Resources
 
             height += _htmlStatus.Margins.Y + _htmlStatus.Margins.Height + 4;
             int blocksize = height * width;
-            uint[] pData = System.Buffers.ArrayPool<uint>.Shared.Rent(blocksize);
+            uint[] pData = CleanArrayPool<uint>.Shared.Rent(blocksize);
 
             try
             {
@@ -2364,7 +2364,7 @@ namespace ClassicUO.IO.Resources
             }
             finally
             {
-                System.Buffers.ArrayPool<uint>.Shared.Return(pData, true);
+                CleanArrayPool<uint>.Shared.Return(pData);
             }
         }
 

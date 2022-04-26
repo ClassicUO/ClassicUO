@@ -37,6 +37,7 @@ using System.Threading.Tasks;
 using ClassicUO.Game;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
+using ClassicUO.Utility.Collections;
 using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -278,7 +279,7 @@ namespace ClassicUO.IO.Resources
             int pwidth = endX - startX;
             int pheight = endY - startY;
 
-            uint[] map = System.Buffers.ArrayPool<uint>.Shared.Rent(pwidth * pheight);
+            uint[] map = CleanArrayPool<uint>.Shared.Rent(pwidth * pheight);
             Texture2D texture = new Texture2D(Client.Game.GraphicsDevice, pwidth, pheight, false, SurfaceFormat.Color);
 
             try
@@ -311,7 +312,7 @@ namespace ClassicUO.IO.Resources
             }
             finally
             {
-                System.Buffers.ArrayPool<uint>.Shared.Return(map, true);
+                CleanArrayPool<uint>.Shared.Return(map);
             }
 
 

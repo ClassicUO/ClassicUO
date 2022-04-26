@@ -47,6 +47,7 @@ using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
+using ClassicUO.Utility.Collections;
 using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -128,7 +129,7 @@ namespace ClassicUO
             _hueSamplers[2] = new Texture2D(GraphicsDevice, LIGHTS_TEXTURE_WIDTH, LIGHTS_TEXTURE_HEIGHT);
 
 
-            uint[] buffer = System.Buffers.ArrayPool<uint>.Shared.Rent(Math.Max(LIGHTS_TEXTURE_WIDTH * LIGHTS_TEXTURE_HEIGHT, TEXTURE_WIDTH * TEXTURE_HEIGHT * 2));
+            uint[] buffer = CleanArrayPool<uint>.Shared.Rent(Math.Max(LIGHTS_TEXTURE_WIDTH * LIGHTS_TEXTURE_HEIGHT, TEXTURE_WIDTH * TEXTURE_HEIGHT * 2));
 
             fixed (uint* ptr = buffer)
             {
@@ -140,7 +141,7 @@ namespace ClassicUO
                 _hueSamplers[2].SetDataPointerEXT(0, null, (IntPtr)ptr, LIGHTS_TEXTURE_WIDTH * LIGHTS_TEXTURE_HEIGHT * sizeof(uint));
             }      
         
-            System.Buffers.ArrayPool<uint>.Shared.Return(buffer, true);
+            CleanArrayPool<uint>.Shared.Return(buffer);
 
             GraphicsDevice.Textures[1] = _hueSamplers[0];
             GraphicsDevice.Textures[2] = _hueSamplers[1];
