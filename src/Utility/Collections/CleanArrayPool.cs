@@ -9,11 +9,16 @@ namespace ClassicUO.Utility.Collections
 
         private ArrayPool<T> _pool = ArrayPool<T>.Create(0x100000, 8);
 
-        public T[] Rent(int minimumLength) => _pool.Rent(minimumLength);
-
-        public void Return(T[] array)
+        public T[] Rent(int minimumLength)
         {
-            _pool.Return(array, true);
+            var array = _pool.Rent(minimumLength);
+#if NETCOREAPP3_1_OR_GREATER
+            Array.Clear(array, 0, minimumLength);
+#endif
+
+            return array;
         }
+
+        public void Return(T[] array) => _pool.Return(array);
     }
 }
