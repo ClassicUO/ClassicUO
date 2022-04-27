@@ -1354,7 +1354,7 @@ namespace ClassicUO.IO.Resources
             }
             else
             {
-                frames = ReadMULAnimationFrames(animID, animGroup, direction, animDir);
+                frames = ReadMULAnimationFrames(animID, animGroup, direction, ref animDir);
             }
 
             if (frames.Length == 0)
@@ -1570,7 +1570,7 @@ namespace ClassicUO.IO.Resources
             return frames;
         }
 
-        private Span<FrameInfo> ReadMULAnimationFrames(ushort animID, byte animGroup, byte direction, AnimationDirection animDir)
+        private Span<FrameInfo> ReadMULAnimationFrames(ushort animID, byte animGroup, byte direction, ref AnimationDirection animDir)
         {
             UOFile file = _files[animDir.FileIndex];
             StackDataReader reader = new StackDataReader(new ReadOnlySpan<byte>((byte*)file.StartAddress.ToPointer(), (int)file.Length));
