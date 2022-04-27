@@ -224,7 +224,6 @@ namespace ClassicUO.IO.Resources
                 }
 
                 DataIndex[i].Graphic = i;
-
                 DataIndex[i].CorpseGraphic = i;
 
                 long offsetToData = DataIndex[i].CalculateOffset(i, DataIndex[i].Type, out int count);
@@ -245,11 +244,11 @@ namespace ClassicUO.IO.Resources
 
                 for (byte j = 0; j < 100; j++)
                 {
-                    DataIndex[i].Groups[j] = new AnimationGroup
+                    if (DataIndex[i].Groups[j] == null)
                     {
-                        Direction = new AnimationDirection[5]
-                    };
-
+                        DataIndex[i].Groups[j] = new AnimationGroup();
+                    }
+                    
                     if (j >= count)
                     {
                         continue;
@@ -257,11 +256,6 @@ namespace ClassicUO.IO.Resources
 
                     for (byte d = 0; d < 5; d++)
                     {
-                        if (DataIndex[i].Groups[j].Direction[d] == null)
-                        {
-                            DataIndex[i].Groups[j].Direction[d] = new AnimationDirection();
-                        }
-
                         AnimIdxBlock* aidx = (AnimIdxBlock*)(address + offset * sizeof(AnimIdxBlock));
                         ++offset;
 
@@ -531,25 +525,15 @@ namespace ClassicUO.IO.Resources
                                         DataIndex[index].Groups[j] = new AnimationGroup();
                                     }
 
-                                    if (DataIndex[index].Groups[j].Direction == null)
-                                    {
-                                        DataIndex[index].Groups[j].Direction = new AnimationDirection[5];
-                                    }
-
                                     for (byte d = 0; d < 5; d++)
                                     {
-                                        if (DataIndex[index].Groups[j].Direction[d] == null)
-                                        {
-                                            DataIndex[index].Groups[j].Direction[d] = new AnimationDirection();
-                                        }
-
                                         AnimIdxBlock* aidx = (AnimIdxBlock*)(addressOffset + offset * sizeof(AnimIdxBlock));
 
                                         ++offset;
 
                                         if ((long)aidx < maxaddress && aidx->Position != 0xFFFFFFFF && aidx->Size != 0xFFFFFFFF)
                                         {
-                                            AnimationDirection dataindex = DataIndex[index].Groups[j].Direction[d];
+                                            ref var dataindex = ref DataIndex[index].Groups[j].Direction[d];
 
                                             dataindex.Address = aidx->Position;
                                             dataindex.Size = Math.Max(1, aidx->Size);
@@ -719,9 +703,9 @@ namespace ClassicUO.IO.Resources
                                 {
                                     UopGroups = new AnimationGroupUop[100]
                                 };
-
-                                DataIndex[animID].InitializeUOP();
                             }
+
+                            DataIndex[animID].InitializeUOP();
 
                             ref AnimationGroupUop g = ref DataIndex[animID].UopGroups[grpID];
 
@@ -731,16 +715,10 @@ namespace ClassicUO.IO.Resources
                                 CompressedLength = (uint)data.Length,
                                 DecompressedLength = (uint)data.DecompressedLength,
                                 FileIndex = i,
-                                Direction = new AnimationDirection[5]
                             };
 
                             for (int d = 0; d < 5; d++)
                             {
-                                if (g.Direction[d] == null)
-                                {
-                                    g.Direction[d] = new AnimationDirection();
-                                }
-
                                 g.Direction[d].IsUOP = true;
                             }
                         }
@@ -1303,9 +1281,16 @@ namespace ClassicUO.IO.Resources
                 ushort hue = 0;
 
                 ReplaceAnimationValues(ref graphic, ref group, ref hue, out var useUOP, false, false, isCorpse);
-                AnimationDirection direction = GetAnimationAction(graphic, group, useUOP)?.Direction[0];
+                var animGroup = GetAnimationAction(graphic, group, useUOP);
 
-                return direction != null && (direction.Address != 0 && direction.Size != 0 || direction.IsUOP);
+                if (animGroup != null)
+                {
+                    ref var direction = ref animGroup.Direction[0];
+
+                    return (direction.Address != 0 && direction.Size != 0 || direction.IsUOP);
+                }
+
+                return false;
             }
 
             return false;
@@ -1314,9 +1299,15 @@ namespace ClassicUO.IO.Resources
         // Returns the number of frames
         public int LoadAnimationFrames(ushort animID, byte animGroup, byte direction, bool useUOP)
         {
-            AnimationDirection animDir = GetAnimationAction(animID, animGroup, useUOP).Direction[direction];
+            var gropObj = GetAnimationAction(animID, animGroup, useUOP);
+            if (gropObj == null)
+            {
+                return 0;
+            }
 
-            if (animDir == null || (animDir.FileIndex == -1 && animDir.Address == -1))
+            ref var animDir = ref gropObj.Direction[direction];
+
+            if (animDir.FileIndex == -1 && animDir.Address == -1)
             {
                 return 0;
             }
@@ -1399,7 +1390,14 @@ namespace ClassicUO.IO.Resources
 
         public ref SpriteInfo GetAnimationFrame(ushort id, byte action, byte dir, byte frameNumber, bool useUOP)
         {
-            AnimationDirection animDir = GetAnimationAction(id, action, useUOP).Direction[dir];
+            var groupObj = GetAnimationAction(id, action, useUOP);
+
+            if (groupObj == null)
+            {
+                return ref SpriteInfo.Empty;
+            }
+
+            ref var animDir = ref groupObj.Direction[dir];
 
             if (animDir.FileIndex == -1 && animDir.Address == -1)
             {
@@ -1909,27 +1907,21 @@ namespace ClassicUO.IO.Resources
     internal class IndexAnimation
     {
         private byte[] _uopReplaceGroupIndex;
+
         public bool IsUOP => (Flags & ANIMATION_FLAGS.AF_USE_UOP_ANIMATION) != 0;
 
-        public ushort Color;
-        public ushort CorpseColor;
-
-        public ushort CorpseGraphic;
-
-        public byte FileIndex;
-        public ANIMATION_FLAGS Flags;
 
         public ushort Graphic;
-
-        // 100
+        public ushort CorpseGraphic;
+        public ushort Color;
+        public ushort CorpseColor;
+        public byte FileIndex;
+        public ANIMATION_FLAGS Flags;
         public AnimationGroup[] Groups;
-
+        public AnimationGroupUop[] UopGroups;
         public bool IsValidMUL;
         public sbyte MountedHeightOffset;
-
         public ANIMATION_GROUPS_TYPE Type = ANIMATION_GROUPS_TYPE.UNKNOWN;
-        public AnimationGroupUop[] UopGroups;
-
 
         public AnimationGroupUop GetUopGroup(ref byte group)
         {
@@ -2051,7 +2043,7 @@ namespace ClassicUO.IO.Resources
 
     internal class AnimationGroup
     {
-        public AnimationDirection[] Direction { get; set; }
+        public AnimationDirection[] Direction = new AnimationDirection[5];
     }
 
     internal class AnimationGroupUop : AnimationGroup
@@ -2062,13 +2054,12 @@ namespace ClassicUO.IO.Resources
         public uint Offset;
     }
 
-    internal class AnimationDirection
+    struct AnimationDirection
     {
         public long Address;
         public int FileIndex;
         public byte FrameCount;
         public SpriteInfo[] SpriteInfos;
-        //public AnimationFrameTexture[] Frames;
         public bool IsUOP;
         public bool IsVerdata;
         public uint Size;
