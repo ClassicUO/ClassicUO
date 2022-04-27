@@ -328,6 +328,9 @@ namespace ClassicUO.IO.Resources
             }
 
             ProcessEquipConvDef();
+            ProcessBodyConvDef();
+            ProcessBodyDef();
+            ProcessCorpseDef();
         }
 
         public override unsafe Task Load()
@@ -401,7 +404,7 @@ namespace ClassicUO.IO.Resources
 
         }
 
-        private void ProcessBodyConvDef(LockedFeatureFlags flags)
+        private void ProcessBodyConvDef()
         {
             var file = UOFileManager.GetUOFilePath("Bodyconv.def");
 
@@ -425,36 +428,6 @@ namespace ClassicUO.IO.Resources
                             if (body >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT || body < 0)
                             {
                                 continue;
-                            }
-
-                            // Ensure the client is allowed to use these new graphics
-                            if (i == 1)
-                            {
-                                if ((flags & LockedFeatureFlags.LordBlackthornsRevenge) == 0)
-                                {
-                                    continue;
-                                }
-                            }
-                            else if (i == 2)
-                            {
-                                if ((flags & LockedFeatureFlags.AgeOfShadows) == 0)
-                                {
-                                    continue;
-                                }
-                            }
-                            else if (i == 3)
-                            {
-                                if ((flags & LockedFeatureFlags.SamuraiEmpire) == 0)
-                                {
-                                    continue;
-                                }
-                            }
-                            else if (i == 4)
-                            {
-                                if ((flags & LockedFeatureFlags.MondainsLegacy) == 0)
-                                {
-                                    continue;
-                                }
                             }
 
                             sbyte mountedHeightOffset = 0;
@@ -499,8 +472,6 @@ namespace ClassicUO.IO.Resources
 
                             if (addressOffset < currentIdxFile.Length)
                             {
-
-                                DataIndex[index].Graphic = (ushort)body;
                                 DataIndex[index].Type = realType;
 
                                 if (DataIndex[index].MountedHeightOffset == 0)
@@ -508,61 +479,47 @@ namespace ClassicUO.IO.Resources
                                     DataIndex[index].MountedHeightOffset = mountedHeightOffset;
                                 }
 
+                                DataIndex[index].HasBodyConversion = false;
                                 DataIndex[index].FileIndex = (byte)i;
 
-                                bool isValid = false;
                                 addressOffset += currentIdxFile.StartAddress.ToInt64();
                                 long maxaddress = currentIdxFile.StartAddress.ToInt64() + currentIdxFile.Length;
 
                                 int offset = 0;
 
-                                if (DataIndex[index].Groups == null)
-                                {
-                                    DataIndex[index].Groups = new AnimationGroup[100];
-                                }
+                                DataIndex[index].BodyConvGroups = new AnimationGroup[100];
 
                                 for (int j = 0; j < count; j++)
                                 {
+                                    DataIndex[index].BodyConvGroups[j] = new AnimationGroup();
 
-                                    if (DataIndex[index].Groups[j] == null)
+                                    if (DataIndex[index].BodyConvGroups[j].Direction == null)
                                     {
-                                        DataIndex[index].Groups[j] = new AnimationGroup();
-                                    }
-
-                                    if (DataIndex[index].Groups[j].Direction == null)
-                                    {
-                                        DataIndex[index].Groups[j].Direction = new AnimationDirection[5];
+                                        DataIndex[index].BodyConvGroups[j].Direction = new AnimationDirection[5];
                                     }
 
                                     for (byte d = 0; d < 5; d++)
                                     {
-                                        if (DataIndex[index].Groups[j].Direction[d] == null)
+                                        if (DataIndex[index].BodyConvGroups[j].Direction[d] == null)
                                         {
-                                            DataIndex[index].Groups[j].Direction[d] = new AnimationDirection();
+                                            DataIndex[index].BodyConvGroups[j].Direction[d] = new AnimationDirection();
                                         }
 
                                         AnimIdxBlock* aidx = (AnimIdxBlock*)(addressOffset + offset * sizeof(AnimIdxBlock));
 
                                         ++offset;
 
-                                        if ((long)aidx < maxaddress && aidx->Position != 0xFFFFFFFF && aidx->Size != 0xFFFFFFFF)
+                                        if ((long)aidx < maxaddress && /*aidx->Size != 0 &&*/ aidx->Position != 0xFFFFFFFF && aidx->Size != 0xFFFFFFFF)
                                         {
-                                            AnimationDirection dataindex = DataIndex[index].Groups[j].Direction[d];
+                                            AnimationDirection dataindex = DataIndex[index].BodyConvGroups[j].Direction[d];
 
                                             dataindex.Address = aidx->Position;
                                             dataindex.Size = Math.Max(1, aidx->Size);
                                             dataindex.FileIndex = i;
-
-                                            isValid = true;
                                         }
                                     }
                                 }
-
-                                DataIndex[index].IsValidMUL = isValid;
-
-                                break;
                             }
-
                         }
                     }
                 }
@@ -725,9 +682,9 @@ namespace ClassicUO.IO.Resources
 
                             g = new AnimationGroupUop
                             {
-                                Offset = (uint) data.Offset,
-                                CompressedLength = (uint) data.Length,
-                                DecompressedLength = (uint) data.DecompressedLength,
+                                Offset = (uint)data.Offset,
+                                CompressedLength = (uint)data.Length,
+                                DecompressedLength = (uint)data.DecompressedLength,
                                 FileIndex = i,
                                 Direction = new AnimationDirection[5]
                             };
@@ -782,7 +739,7 @@ namespace ClassicUO.IO.Resources
                 byte[] buffer = null;
 
                 Span<byte> span = entry.DecompressedLength <= 1024 ? spanAlloc : (buffer = System.Buffers.ArrayPool<byte>.Shared.Rent(entry.DecompressedLength));
-                
+
                 try
                 {
                     fixed (byte* destPtr = span)
@@ -858,19 +815,19 @@ namespace ClassicUO.IO.Resources
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe uint CalculatePeopleGroupOffset(ushort graphic)
         {
-            return (uint) (((graphic - 400) * 175 + 35000) * sizeof(AnimIdxBlock));
+            return (uint)(((graphic - 400) * 175 + 35000) * sizeof(AnimIdxBlock));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe uint CalculateHighGroupOffset(ushort graphic)
         {
-            return (uint) (graphic * 110 * sizeof(AnimIdxBlock));
+            return (uint)(graphic * 110 * sizeof(AnimIdxBlock));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe uint CalculateLowGroupOffset(ushort graphic)
         {
-            return (uint) (((graphic - 200) * 65 + 22000) * sizeof(AnimIdxBlock));
+            return (uint)(((graphic - 200) * 65 + 22000) * sizeof(AnimIdxBlock));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -896,11 +853,22 @@ namespace ClassicUO.IO.Resources
             {
                 ushort newGraphic = dataIndex.Graphic;
 
-                while (graphic != newGraphic)
+                do
                 {
-                    graphic = newGraphic;
-                    newGraphic = DataIndex[graphic].Graphic;
-                }
+                    if (!dataIndex.HasBodyConversion)
+                    {
+                        if (graphic != newGraphic)
+                        {
+                            graphic = newGraphic;
+
+                            newGraphic = DataIndex[graphic].Graphic;
+                        }
+                    }
+                    else
+                    {
+                        break;
+                    }
+                } while (graphic != newGraphic);
             }
         }
 
@@ -943,22 +911,30 @@ namespace ClassicUO.IO.Resources
 
                 ushort newGraphic = isCorpse ? index.CorpseGraphic : index.Graphic;
 
-                while (graphic != newGraphic)
+                do
                 {
-                    graphic = newGraphic;
-                    if (isCorpse)
+                    if (!index.HasBodyConversion)
                     {
-                        hue = DataIndex[graphic].CorpseColor;
-                        newGraphic = DataIndex[graphic].CorpseGraphic;
+                        if (graphic != newGraphic)
+                        {
+                            graphic = newGraphic;
+                            if (isCorpse)
+                            {
+                                hue = index.CorpseColor;
+                                newGraphic = DataIndex[graphic].CorpseGraphic;
+                            }
+                            else
+                            {
+                                hue = index.Color;
+                                newGraphic = DataIndex[graphic].Graphic;
+                            }
+                        }
                     }
                     else
                     {
-                        hue = DataIndex[graphic].Color;
-                        newGraphic = DataIndex[graphic].Graphic;
+                        break;
                     }
-                }
-
-
+                } while (graphic != newGraphic);
             }
         }
 
@@ -976,6 +952,11 @@ namespace ClassicUO.IO.Resources
                 AnimationGroupUop uop = index.GetUopGroup(ref action);
 
                 return uop ?? _empty;
+            }
+
+            if (index.HasBodyConversion && index.BodyConvGroups != null)
+            {
+                return index.BodyConvGroups[action] ?? _empty;
             }
 
             if (index.Groups != null && index.Groups[action] != null)
@@ -1001,27 +982,42 @@ namespace ClassicUO.IO.Resources
 
         private static uint _lastFlags = 0xFFFFFFFF;
 
-        public bool FlagsApplied => _lastFlags != 0xFFFFFFFF;
-
         public void UpdateAnimationTable(uint flags)
         {
-            if (flags != _lastFlags)
+            if (_lastFlags != 0xFFFFFFFF && flags != _lastFlags)
             {
-                if (_lastFlags != 0xFFFFFFFF)
-                {
-                    /* This happens when you log out of an account then into another
-                     * one with different expansions activated. Just reload the anim
-                     * files from scratch. */
-                    Array.Clear(DataIndex, 0, DataIndex.Length);
-                    LoadInternal();
-                }
-
-                ProcessBodyConvDef((LockedFeatureFlags)flags);
-                ProcessBodyDef();
-                ProcessCorpseDef();
+                /* This happens when you log out of an account then into another
+                 * one with different expansions activated. Just reload the anim
+                 * files from scratch. */
+                Array.Clear(DataIndex, 0, DataIndex.Length);
+                LoadInternal();
             }
 
             _lastFlags = flags;
+
+            for (ushort i = 0; i < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT; i++)
+            {
+                bool replace = DataIndex[i].FileIndex >= 3;
+
+                if (DataIndex[i].FileIndex == 1)
+                {
+                    // TODO: Find out what client version introduced this negative feature flag change.
+                    //replace = (World.ClientLockedFeatures.Flags & (LockedFeatureFlags.TheSecondAge | LockedFeatureFlags.Renaissance)) == 0;
+                    replace = (World.ClientLockedFeatures.Flags & LockedFeatureFlags.LordBlackthornsRevenge) != 0;
+                }
+                else if (DataIndex[i].FileIndex == 2)
+                {
+                    replace = (World.ClientLockedFeatures.Flags & LockedFeatureFlags.AgeOfShadows) != 0;
+                }
+
+                if (replace)
+                {
+                    if (DataIndex[i].BodyConvGroups != null)
+                    {
+                        DataIndex[i].HasBodyConversion = true;
+                    }
+                }
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1100,91 +1096,91 @@ namespace ClassicUO.IO.Resources
             {
                 case 7:
                 case 0:
-                {
-                    if (data.Direction1 == -1)
                     {
-                        if (direction == 7)
+                        if (data.Direction1 == -1)
                         {
-                            direction = (byte) data.Direction4;
+                            if (direction == 7)
+                            {
+                                direction = (byte)data.Direction4;
+                            }
+                            else
+                            {
+                                direction = (byte)data.Direction2;
+                            }
                         }
                         else
                         {
-                            direction = (byte) data.Direction2;
+                            direction = (byte)data.Direction1;
                         }
-                    }
-                    else
-                    {
-                        direction = (byte) data.Direction1;
-                    }
 
-                    break;
-                }
+                        break;
+                    }
 
                 case 1:
                 case 2:
-                {
-                    if (data.Direction2 == -1)
                     {
-                        if (direction == 1)
+                        if (data.Direction2 == -1)
                         {
-                            direction = (byte) data.Direction1;
+                            if (direction == 1)
+                            {
+                                direction = (byte)data.Direction1;
+                            }
+                            else
+                            {
+                                direction = (byte)data.Direction3;
+                            }
                         }
                         else
                         {
-                            direction = (byte) data.Direction3;
+                            direction = (byte)data.Direction2;
                         }
-                    }
-                    else
-                    {
-                        direction = (byte) data.Direction2;
-                    }
 
-                    break;
-                }
+                        break;
+                    }
 
                 case 3:
                 case 4:
-                {
-                    if (data.Direction3 == -1)
                     {
-                        if (direction == 3)
+                        if (data.Direction3 == -1)
                         {
-                            direction = (byte) data.Direction2;
+                            if (direction == 3)
+                            {
+                                direction = (byte)data.Direction2;
+                            }
+                            else
+                            {
+                                direction = (byte)data.Direction4;
+                            }
                         }
                         else
                         {
-                            direction = (byte) data.Direction4;
+                            direction = (byte)data.Direction3;
                         }
-                    }
-                    else
-                    {
-                        direction = (byte) data.Direction3;
-                    }
 
-                    break;
-                }
+                        break;
+                    }
 
                 case 5:
                 case 6:
-                {
-                    if (data.Direction4 == -1)
                     {
-                        if (direction == 5)
+                        if (data.Direction4 == -1)
                         {
-                            direction = (byte) data.Direction3;
+                            if (direction == 5)
+                            {
+                                direction = (byte)data.Direction3;
+                            }
+                            else
+                            {
+                                direction = (byte)data.Direction1;
+                            }
                         }
                         else
                         {
-                            direction = (byte) data.Direction1;
+                            direction = (byte)data.Direction4;
                         }
-                    }
-                    else
-                    {
-                        direction = (byte) data.Direction4;
-                    }
 
-                    break;
-                }
+                        break;
+                    }
             }
 
             GetSittingAnimDirection(ref direction, ref mirror, ref x, ref y);
@@ -1264,33 +1260,33 @@ namespace ClassicUO.IO.Resources
 
                     if ((flags & ANIMATION_FLAGS.AF_USE_UOP_ANIMATION) != 0)
                     {
-                        return (byte) (second ? 3 : 2);
+                        return (byte)(second ? 3 : 2);
                     }
 
-                    return (byte) (second ? LOW_ANIMATION_GROUP.LAG_DIE_2 : LOW_ANIMATION_GROUP.LAG_DIE_1);
+                    return (byte)(second ? LOW_ANIMATION_GROUP.LAG_DIE_2 : LOW_ANIMATION_GROUP.LAG_DIE_1);
 
                 case ANIMATION_GROUPS_TYPE.SEA_MONSTER:
 
-                {
-                    if (!isRunning)
                     {
-                        return 8;
-                    }
+                        if (!isRunning)
+                        {
+                            return 8;
+                        }
 
-                    goto case ANIMATION_GROUPS_TYPE.MONSTER;
-                }
+                        goto case ANIMATION_GROUPS_TYPE.MONSTER;
+                    }
 
                 case ANIMATION_GROUPS_TYPE.MONSTER:
 
                     if ((flags & ANIMATION_FLAGS.AF_USE_UOP_ANIMATION) != 0)
                     {
-                        return (byte) (second ? 3 : 2);
+                        return (byte)(second ? 3 : 2);
                     }
 
-                    return (byte) (second ? HIGHT_ANIMATION_GROUP.HAG_DIE_2 : HIGHT_ANIMATION_GROUP.HAG_DIE_1);
+                    return (byte)(second ? HIGHT_ANIMATION_GROUP.HAG_DIE_2 : HIGHT_ANIMATION_GROUP.HAG_DIE_1);
 
                 case ANIMATION_GROUPS_TYPE.HUMAN:
-                case ANIMATION_GROUPS_TYPE.EQUIPMENT: return (byte) (second ? PEOPLE_ANIMATION_GROUP.PAG_DIE_2 : PEOPLE_ANIMATION_GROUP.PAG_DIE_1);
+                case ANIMATION_GROUPS_TYPE.EQUIPMENT: return (byte)(second ? PEOPLE_ANIMATION_GROUP.PAG_DIE_2 : PEOPLE_ANIMATION_GROUP.PAG_DIE_1);
             }
 
             return 0;
@@ -1455,7 +1451,7 @@ namespace ClassicUO.IO.Resources
                 return _frames.AsSpan().Slice(0, 0);
             }
 
-            int decLen = (int) animData.DecompressedLength;
+            int decLen = (int)animData.DecompressedLength;
             UOFileUop file = _filesUop[animData.FileIndex];
             file.Seek(animData.Offset);
 
@@ -1471,7 +1467,7 @@ namespace ClassicUO.IO.Resources
                     file.PositionAddress,
                     (int)animData.CompressedLength,
                     0,
-                    (IntPtr) ptr,
+                    (IntPtr)ptr,
                     decLen
                 );
             }
@@ -1555,7 +1551,7 @@ namespace ClassicUO.IO.Resources
                             frames[frameNum].Height = 0;
                             continue;
                         }
-                         reader.Skip((int)animHeaderInfo->DataOffset);
+                        reader.Skip((int)animHeaderInfo->DataOffset);
 
                         ushort* palette = (ushort*)reader.PositionAddress;
                         reader.Skip(512);
@@ -1579,7 +1575,7 @@ namespace ClassicUO.IO.Resources
             StackDataReader reader = new StackDataReader(new ReadOnlySpan<byte>((byte*)file.StartAddress.ToPointer(), (int)file.Length));
             reader.Seek(animDir.Address);
 
-            ushort* palette = (ushort*) reader.PositionAddress;
+            ushort* palette = (ushort*)reader.PositionAddress;
             reader.Skip(512);
 
             long dataStart = reader.Position;
@@ -1699,7 +1695,7 @@ namespace ClassicUO.IO.Resources
 
             if (frameIndex == 0xFF)
             {
-                frameIndex = (byte) animIndex;
+                frameIndex = (byte)animIndex;
             }
 
             ushort hue = 0;
@@ -1912,6 +1908,8 @@ namespace ClassicUO.IO.Resources
         private byte[] _uopReplaceGroupIndex;
         public bool IsUOP => (Flags & ANIMATION_FLAGS.AF_USE_UOP_ANIMATION) != 0;
 
+        public bool HasBodyConversion = false;
+        public AnimationGroup[] BodyConvGroups;
         public ushort Color;
         public ushort CorpseColor;
 
@@ -1941,7 +1939,7 @@ namespace ClassicUO.IO.Resources
                 return UopGroups[group];
             }
 
-            return  null;
+            return null;
         }
 
         public void InitializeUOP()
@@ -1990,7 +1988,7 @@ namespace ClassicUO.IO.Resources
 
                 case ANIMATION_GROUPS_TYPE.SEA_MONSTER:
                     result = AnimationsLoader.CalculateHighGroupOffset(graphic);
-                    groupCount = (int) LOW_ANIMATION_GROUP.LAG_ANIMATION_COUNT;
+                    groupCount = (int)LOW_ANIMATION_GROUP.LAG_ANIMATION_COUNT;
 
                     break;
 
@@ -2028,19 +2026,19 @@ namespace ClassicUO.IO.Resources
             {
                 case ANIMATION_GROUPS.AG_LOW:
                     result = AnimationsLoader.CalculateLowGroupOffset(graphic);
-                    groupCount = (int) LOW_ANIMATION_GROUP.LAG_ANIMATION_COUNT;
+                    groupCount = (int)LOW_ANIMATION_GROUP.LAG_ANIMATION_COUNT;
 
                     break;
 
                 case ANIMATION_GROUPS.AG_HIGHT:
                     result = AnimationsLoader.CalculateHighGroupOffset(graphic);
-                    groupCount = (int) HIGHT_ANIMATION_GROUP.HAG_ANIMATION_COUNT;
+                    groupCount = (int)HIGHT_ANIMATION_GROUP.HAG_ANIMATION_COUNT;
 
                     break;
 
                 case ANIMATION_GROUPS.AG_PEOPLE:
                     result = AnimationsLoader.CalculatePeopleGroupOffset(graphic);
-                    groupCount = (int) PEOPLE_ANIMATION_GROUP.PAG_ANIMATION_COUNT;
+                    groupCount = (int)PEOPLE_ANIMATION_GROUP.PAG_ANIMATION_COUNT;
 
                     break;
             }
