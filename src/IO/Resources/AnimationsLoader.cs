@@ -328,7 +328,6 @@ namespace ClassicUO.IO.Resources
             }
 
             ProcessEquipConvDef();
-            ProcessBodyConvDef();
             ProcessBodyDef();
             ProcessCorpseDef();
         }
@@ -404,7 +403,7 @@ namespace ClassicUO.IO.Resources
 
         }
 
-        private void ProcessBodyConvDef()
+        private void ProcessBodyConvDef(LockedFeatureFlags flags)
         {
             var file = UOFileManager.GetUOFilePath("Bodyconv.def");
 
@@ -428,6 +427,36 @@ namespace ClassicUO.IO.Resources
                             if (body >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT || body < 0)
                             {
                                 continue;
+                            }
+
+                            // Ensure the client is allowed to use these new graphics
+                            if (i == 1)
+                            {
+                                if ((flags & LockedFeatureFlags.LordBlackthornsRevenge) == 0)
+                                {
+                                    continue;
+                                }
+                            }
+                            else if (i == 2)
+                            {
+                                if ((flags & LockedFeatureFlags.AgeOfShadows) == 0)
+                                {
+                                    continue;
+                                }
+                            }
+                            else if (i == 3)
+                            {
+                                if ((flags & LockedFeatureFlags.SamuraiEmpire) == 0)
+                                {
+                                    continue;
+                                }
+                            }
+                            else if (i == 4)
+                            {
+                                if ((flags & LockedFeatureFlags.MondainsLegacy) == 0)
+                                {
+                                    continue;
+                                }
                             }
 
                             sbyte mountedHeightOffset = 0;
@@ -472,6 +501,8 @@ namespace ClassicUO.IO.Resources
 
                             if (addressOffset < currentIdxFile.Length)
                             {
+
+                                DataIndex[index].Graphic = (ushort)body;
                                 DataIndex[index].Type = realType;
 
                                 if (DataIndex[index].MountedHeightOffset == 0)
@@ -479,47 +510,61 @@ namespace ClassicUO.IO.Resources
                                     DataIndex[index].MountedHeightOffset = mountedHeightOffset;
                                 }
 
-                                DataIndex[index].HasBodyConversion = false;
                                 DataIndex[index].FileIndex = (byte)i;
 
+                                bool isValid = false;
                                 addressOffset += currentIdxFile.StartAddress.ToInt64();
                                 long maxaddress = currentIdxFile.StartAddress.ToInt64() + currentIdxFile.Length;
 
                                 int offset = 0;
 
-                                DataIndex[index].BodyConvGroups = new AnimationGroup[100];
+                                if (DataIndex[index].Groups == null)
+                                {
+                                    DataIndex[index].Groups = new AnimationGroup[100];
+                                }
 
                                 for (int j = 0; j < count; j++)
                                 {
-                                    DataIndex[index].BodyConvGroups[j] = new AnimationGroup();
 
-                                    if (DataIndex[index].BodyConvGroups[j].Direction == null)
+                                    if (DataIndex[index].Groups[j] == null)
                                     {
-                                        DataIndex[index].BodyConvGroups[j].Direction = new AnimationDirection[5];
+                                        DataIndex[index].Groups[j] = new AnimationGroup();
+                                    }
+
+                                    if (DataIndex[index].Groups[j].Direction == null)
+                                    {
+                                        DataIndex[index].Groups[j].Direction = new AnimationDirection[5];
                                     }
 
                                     for (byte d = 0; d < 5; d++)
                                     {
-                                        if (DataIndex[index].BodyConvGroups[j].Direction[d] == null)
+                                        if (DataIndex[index].Groups[j].Direction[d] == null)
                                         {
-                                            DataIndex[index].BodyConvGroups[j].Direction[d] = new AnimationDirection();
+                                            DataIndex[index].Groups[j].Direction[d] = new AnimationDirection();
                                         }
 
                                         AnimIdxBlock* aidx = (AnimIdxBlock*)(addressOffset + offset * sizeof(AnimIdxBlock));
 
                                         ++offset;
 
-                                        if ((long)aidx < maxaddress && /*aidx->Size != 0 &&*/ aidx->Position != 0xFFFFFFFF && aidx->Size != 0xFFFFFFFF)
+                                        if ((long)aidx < maxaddress && aidx->Position != 0xFFFFFFFF && aidx->Size != 0xFFFFFFFF)
                                         {
-                                            AnimationDirection dataindex = DataIndex[index].BodyConvGroups[j].Direction[d];
+                                            AnimationDirection dataindex = DataIndex[index].Groups[j].Direction[d];
 
                                             dataindex.Address = aidx->Position;
                                             dataindex.Size = Math.Max(1, aidx->Size);
                                             dataindex.FileIndex = i;
+
+                                            isValid = true;
                                         }
                                     }
                                 }
+
+                                DataIndex[index].IsValidMUL = isValid;
+
+                                break;
                             }
+
                         }
                     }
                 }
@@ -851,30 +896,21 @@ namespace ClassicUO.IO.Resources
             }
             else
             {
-                ushort newGraphic = dataIndex.Graphic;
-
-                do
+                if (dataIndex.FileIndex == 0 || !dataIndex.IsValidMUL)
                 {
-                    if (!dataIndex.HasBodyConversion)
-                    {
-                        if (graphic != newGraphic)
-                        {
-                            graphic = newGraphic;
+                    ushort newGraphic = dataIndex.Graphic;
 
-                            newGraphic = DataIndex[graphic].Graphic;
-                        }
-                    }
-                    else
+                    while (graphic != newGraphic)
                     {
-                        break;
+                        graphic = newGraphic;
+                        newGraphic = DataIndex[graphic].Graphic;
                     }
-                } while (graphic != newGraphic);
+                }                
             }
         }
 
         // Do all of the conversion handling for (graphic, action, dir) triples. After they've been through the mapping,
         // they can be used in LoadAnimationFrames() to correctly load the right set of frames.
-
         public void ReplaceAnimationValues(ref ushort graphic, ref byte action, ref ushort hue, out bool useUOP, bool isEquip = false, bool isCorpse = false, bool forceUOP = false)
         {
             useUOP = false;
@@ -908,33 +944,22 @@ namespace ClassicUO.IO.Resources
                         return;
                     }
                 }
-
-                ushort newGraphic = isCorpse ? index.CorpseGraphic : index.Graphic;
-
-                do
+         
+                // Body.def replaces animations always at fileindex == 0.
+                // Bodyconv.def instead uses always fileindex >= 1 when replacing animations. So we don't need to replace the animations here. The values have been already replaced.
+                // If the animation has been replaced by Body.def means it doesn't exist
+                if (index.FileIndex == 0 || !index.IsValidMUL)
                 {
-                    if (!index.HasBodyConversion)
+                    hue = isCorpse ? DataIndex[graphic].CorpseColor : DataIndex[graphic].Color;
+
+                    ushort newGraphic = isCorpse ? index.CorpseGraphic : index.Graphic;
+                  
+                    while (graphic != newGraphic)
                     {
-                        if (graphic != newGraphic)
-                        {
-                            graphic = newGraphic;
-                            if (isCorpse)
-                            {
-                                hue = index.CorpseColor;
-                                newGraphic = DataIndex[graphic].CorpseGraphic;
-                            }
-                            else
-                            {
-                                hue = index.Color;
-                                newGraphic = DataIndex[graphic].Graphic;
-                            }
-                        }
+                        graphic = newGraphic;
+                        newGraphic = isCorpse ? DataIndex[graphic].CorpseGraphic : DataIndex[graphic].Graphic;
                     }
-                    else
-                    {
-                        break;
-                    }
-                } while (graphic != newGraphic);
+                }
             }
         }
 
@@ -952,11 +977,6 @@ namespace ClassicUO.IO.Resources
                 AnimationGroupUop uop = index.GetUopGroup(ref action);
 
                 return uop ?? _empty;
-            }
-
-            if (index.HasBodyConversion && index.BodyConvGroups != null)
-            {
-                return index.BodyConvGroups[action] ?? _empty;
             }
 
             if (index.Groups != null && index.Groups[action] != null)
@@ -982,42 +1002,25 @@ namespace ClassicUO.IO.Resources
 
         private static uint _lastFlags = 0xFFFFFFFF;
 
+        public bool FlagsApplied => _lastFlags != 0xFFFFFFFF;
+
         public void UpdateAnimationTable(uint flags)
         {
-            if (_lastFlags != 0xFFFFFFFF && flags != _lastFlags)
+            if (flags != _lastFlags)
             {
-                /* This happens when you log out of an account then into another
-                 * one with different expansions activated. Just reload the anim
-                 * files from scratch. */
-                Array.Clear(DataIndex, 0, DataIndex.Length);
-                LoadInternal();
+                if (_lastFlags != 0xFFFFFFFF)
+                {
+                    /* This happens when you log out of an account then into another
+                     * one with different expansions activated. Just reload the anim
+                     * files from scratch. */
+                    Array.Clear(DataIndex, 0, DataIndex.Length);
+                    LoadInternal();
+                }
+
+                ProcessBodyConvDef((LockedFeatureFlags)flags);             
             }
 
             _lastFlags = flags;
-
-            for (ushort i = 0; i < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT; i++)
-            {
-                bool replace = DataIndex[i].FileIndex >= 3;
-
-                if (DataIndex[i].FileIndex == 1)
-                {
-                    // TODO: Find out what client version introduced this negative feature flag change.
-                    //replace = (World.ClientLockedFeatures.Flags & (LockedFeatureFlags.TheSecondAge | LockedFeatureFlags.Renaissance)) == 0;
-                    replace = (World.ClientLockedFeatures.Flags & LockedFeatureFlags.LordBlackthornsRevenge) != 0;
-                }
-                else if (DataIndex[i].FileIndex == 2)
-                {
-                    replace = (World.ClientLockedFeatures.Flags & LockedFeatureFlags.AgeOfShadows) != 0;
-                }
-
-                if (replace)
-                {
-                    if (DataIndex[i].BodyConvGroups != null)
-                    {
-                        DataIndex[i].HasBodyConversion = true;
-                    }
-                }
-            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1908,8 +1911,6 @@ namespace ClassicUO.IO.Resources
         private byte[] _uopReplaceGroupIndex;
         public bool IsUOP => (Flags & ANIMATION_FLAGS.AF_USE_UOP_ANIMATION) != 0;
 
-        public bool HasBodyConversion = false;
-        public AnimationGroup[] BodyConvGroups;
         public ushort Color;
         public ushort CorpseColor;
 
