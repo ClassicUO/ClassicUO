@@ -609,16 +609,13 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        private static bool GetTexture(ref ushort graphic, ref byte animGroup, ref byte animIndex, byte direction, out SpriteInfo spriteInfo, out bool isUOP)
+        private static bool GetTexture(ushort graphic, byte animGroup, byte animIndex, byte direction, out SpriteInfo spriteInfo, out bool isUOP)
         {
             spriteInfo = default;
 
-            ushort hue = 0;
+            var frames = AnimationsLoader.Instance.GetAnimationFrames(graphic, animGroup, direction, out _, out isUOP);
 
-            AnimationsLoader.Instance.ReplaceAnimationValues(ref graphic, ref animGroup, ref hue, out isUOP);
-            int fc = AnimationsLoader.Instance.LoadAnimationFrames(graphic, animGroup, direction, isUOP);
-
-            if (fc == 0)
+            if (frames.Length == 0)
             {
                 return false;
             }
@@ -628,9 +625,9 @@ namespace ClassicUO.Game.GameObjects
                 animIndex = 0;
             }
 
-            animIndex = (byte)(animIndex % fc);
+            animIndex = (byte)(animIndex % frames.Length);
 
-            spriteInfo = AnimationsLoader.Instance.GetAnimationFrame(graphic, animGroup, direction, animIndex, isUOP);
+            spriteInfo = frames[animIndex];
 
             if (spriteInfo.Texture == null)
             {
@@ -669,36 +666,28 @@ namespace ClassicUO.Game.GameObjects
                 return;
             }
 
-            ushort hueFromFile = overridedHue;
-            bool useUOP;
+            var frames = AnimationsLoader.Instance.GetAnimationFrames(id, animGroup, dir, out var hueFromFile, out _, isEquip, false, forceUOP);
 
-            AnimationsLoader.Instance.ReplaceAnimationValues
-            (
-                ref id,
-                ref animGroup,
-                ref hueFromFile, 
-                out useUOP,
-                isEquip: isEquip,
-                isCorpse: false,
-                forceUOP: forceUOP
-            );
-            int frameCount = AnimationsLoader.Instance.LoadAnimationFrames(id, animGroup, dir, useUOP);
+            if (hueFromFile == 0)
+            {
+                hueFromFile = overridedHue;
+            }
 
-            if (frameCount == 0)
+            if (frames.Length == 0)
             {
                 return;
             }
 
-            if (frameIndex >= frameCount)
+            if (frameIndex >= frames.Length)
             {
-                frameIndex = (byte) (frameCount - 1);
+                frameIndex = (byte) (frames.Length - 1);
             }
             else if (frameIndex < 0)
             {
                 frameIndex = 0;
             }
 
-            ref var spriteInfo = ref AnimationsLoader.Instance.GetAnimationFrame(id, animGroup, dir, (byte)(frameIndex % frameCount), useUOP);
+            ref var spriteInfo = ref frames[frameIndex % frames.Length];
 
             if (spriteInfo.Texture == null)
             {
@@ -1013,7 +1002,7 @@ namespace ClassicUO.Game.GameObjects
                     {
                         var animGroupMount = GetGroupForAnimation(this, mountGraphic);
 
-                        if (GetTexture(ref mountGraphic, ref animGroupMount, ref animIndex, dir, out spriteInfo, out isUop))
+                        if (GetTexture(mountGraphic, animGroupMount, animIndex, dir, out spriteInfo, out isUop))
                         {
                             int x = position.X - (isFlipped ? spriteInfo.UV.Width - spriteInfo.Center.X : spriteInfo.Center.X);
                             int y = position.Y - (spriteInfo.UV.Height + spriteInfo.Center.Y);
@@ -1038,8 +1027,7 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
             
-
-            if (GetTexture(ref graphic, ref animGroup, ref animIndex, dir, out spriteInfo, out isUop))
+            if (GetTexture(graphic, animGroup, animIndex, dir, out spriteInfo, out isUop))
             {
                 int x = position.X - (isFlipped ? spriteInfo.UV.Width - spriteInfo.Center.X : spriteInfo.Center.X);
                 int y = position.Y - (spriteInfo.UV.Height + spriteInfo.Center.Y);
@@ -1078,7 +1066,7 @@ namespace ClassicUO.Game.GameObjects
                         animGroup = animGroupBackup;
                         animIndex = animIndexBackup;
 
-                        if (GetTexture(ref graphic, ref animGroup, ref animIndex, dir, out spriteInfo, out isUop))
+                        if (GetTexture(graphic, animGroup, animIndex, dir, out spriteInfo, out isUop))
                         {
                             int x = position.X - (isFlipped ? spriteInfo.UV.Width - spriteInfo.Center.X : spriteInfo.Center.X);
                             int y = position.Y - (spriteInfo.UV.Height + spriteInfo.Center.Y);

@@ -750,7 +750,6 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (SerialHelper.IsMobile(LocalSerial))
                 {
-                    ushort hue2 = Hue;
                     ushort graphic = Graphic;
 
                     if (graphic >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
@@ -759,15 +758,13 @@ namespace ClassicUO.Game.UI.Gumps
                     }
 
                     byte group = GetAnimGroup(graphic);
+                    var frames = AnimationsLoader.Instance.GetAnimationFrames(graphic, group, 1, out var hue2, out _, true);
 
-                    AnimationsLoader.Instance.ReplaceAnimationValues(ref graphic, ref group, ref hue2, out var isUOP, isEquip: true);
-                    int frameCount = AnimationsLoader.Instance.LoadAnimationFrames(graphic, group, 1, false);
-
-                    if (frameCount != 0)
+                    if (frames.Length != 0)
                     {
                         hueVector = ShaderHueTranslator.GetHueVector(hue2, TileDataLoader.Instance.StaticData[Graphic].IsPartialHue, 1f);
 
-                        ref var spriteInfo = ref AnimationsLoader.Instance.GetAnimationFrame(graphic, group, 1, 0, isUOP);
+                        ref var spriteInfo = ref frames[0];
 
                         if (spriteInfo.Texture != null)
                         {
