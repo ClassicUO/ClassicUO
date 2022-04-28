@@ -58,7 +58,6 @@ namespace ClassicUO.IO.Resources
         [ThreadStatic] private static FrameInfo[] _frames;
         [ThreadStatic] private static byte[] _decompressedData;
 
-        private readonly Dictionary<ushort, byte> _animationSequenceReplacing = new Dictionary<ushort, byte>();
         private readonly Dictionary<ushort, Dictionary<ushort, EquipConvData>> _equipConv = new Dictionary<ushort, Dictionary<ushort, EquipConvData>>();
         private readonly UOFileMul[] _files = new UOFileMul[5];
         private readonly UOFileUop[] _filesUop = new UOFileUop[4];
