@@ -50,23 +50,15 @@ namespace ClassicUO.IO.Resources
 {
     internal unsafe class AnimationsLoader : UOFileLoader
     {
+        internal const int MAX_ACTIONS = 80; // gargoyle is like 78
+        internal const int MAX_DIRECTIONS = 5;
+
         private static AnimationsLoader _instance;
         private static uint _lastFlags = 0xFFFFFFFF;
         [ThreadStatic] private static FrameInfo[] _frames;
         [ThreadStatic] private static byte[] _decompressedData;
 
         private readonly Dictionary<ushort, byte> _animationSequenceReplacing = new Dictionary<ushort, byte>();
-        private readonly AnimationGroup _empty = new AnimationGroup
-        {
-            Direction = new AnimationDirection[5]
-            {
-                new AnimationDirection { Address = -1 },
-                new AnimationDirection { Address = -1 },
-                new AnimationDirection { Address = -1 },
-                new AnimationDirection { Address = -1 },
-                new AnimationDirection { Address = -1 }
-            }
-        };
         private readonly Dictionary<ushort, Dictionary<ushort, EquipConvData>> _equipConv = new Dictionary<ushort, Dictionary<ushort, EquipConvData>>();
         private readonly UOFileMul[] _files = new UOFileMul[5];
         private readonly UOFileUop[] _filesUop = new UOFileUop[4];
@@ -138,7 +130,7 @@ namespace ClassicUO.IO.Resources
                 {
                     string[] typeNames = new string[5]
                     {
-                                "monster", "sea_monster", "animal", "human", "equipment"
+                        "monster", "sea_monster", "animal", "human", "equipment"
                     };
 
                     using (StreamReader reader = new StreamReader(File.OpenRead(path)))
@@ -241,11 +233,11 @@ namespace ClassicUO.IO.Resources
 
                 long address = idxFile.StartAddress.ToInt64() + offsetToData;
 
-                DataIndex[i].Groups = new AnimationGroup[100];
+                DataIndex[i].Groups = new AnimationGroup[MAX_ACTIONS];
 
                 int offset = 0;
 
-                for (byte j = 0; j < 100; j++)
+                for (byte j = 0; j < MAX_ACTIONS; j++)
                 {
                     if (DataIndex[i].Groups[j] == null)
                     {
@@ -257,7 +249,7 @@ namespace ClassicUO.IO.Resources
                         continue;
                     }
 
-                    for (byte d = 0; d < 5; d++)
+                    for (byte d = 0; d < MAX_DIRECTIONS; d++)
                     {
                         AnimIdxBlock* aidx = (AnimIdxBlock*)(address + offset * sizeof(AnimIdxBlock));
                         ++offset;
@@ -496,6 +488,8 @@ namespace ClassicUO.IO.Resources
 
                             long addressOffset = DataIndex[index].CalculateOffset((ushort)body, realType, out int count);
 
+                            count = Math.Min(count, MAX_ACTIONS);
+
                             if (addressOffset < currentIdxFile.Length)
                             {
                                 DataIndex[index].Graphic = (ushort)body;
@@ -516,7 +510,7 @@ namespace ClassicUO.IO.Resources
 
                                 if (DataIndex[index].Groups == null)
                                 {
-                                    DataIndex[index].Groups = new AnimationGroup[100];
+                                    DataIndex[index].Groups = new AnimationGroup[MAX_ACTIONS];
                                 }
 
                                 for (int j = 0; j < count; j++)
@@ -526,7 +520,7 @@ namespace ClassicUO.IO.Resources
                                         DataIndex[index].Groups[j] = new AnimationGroup();
                                     }
 
-                                    for (byte d = 0; d < 5; d++)
+                                    for (byte d = 0; d < MAX_DIRECTIONS; d++)
                                     {
                                         AnimIdxBlock* aidx = (AnimIdxBlock*)(addressOffset + offset * sizeof(AnimIdxBlock));
 
@@ -684,7 +678,7 @@ namespace ClassicUO.IO.Resources
 
             for (ushort animID = 0; animID < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT; animID++)
             {
-                for (byte grpID = 0; grpID < 100; grpID++)
+                for (byte grpID = 0; grpID < MAX_ACTIONS; grpID++)
                 {
                     string hashstring = $"build/animationlegacyframe/{animID:D6}/{grpID:D2}.bin";
                     ulong hash = UOFileUop.CreateHash(hashstring);
@@ -699,7 +693,7 @@ namespace ClassicUO.IO.Resources
                             {
                                 DataIndex[animID] = new IndexAnimation
                                 {
-                                    UopGroups = new AnimationGroupUop[100]
+                                    UopGroups = new AnimationGroupUop[MAX_ACTIONS]
                                 };
                             }
 
@@ -886,7 +880,7 @@ namespace ClassicUO.IO.Resources
         {
             useUOP = false;
 
-            if (graphic < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT && action < 100)
+            if (graphic < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT && action < MAX_ACTIONS)
             {
                 IndexAnimation index = DataIndex[graphic];
 
@@ -1246,7 +1240,7 @@ namespace ClassicUO.IO.Resources
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsAnimationExists(ushort graphic, byte group, bool isCorpse = false)
         {
-            if (graphic < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT && group < 100)
+            if (graphic < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT && group < MAX_ACTIONS)
             {
                 var frames = GetAnimationFrames(graphic, group, 0, out var _, out _, false, isCorpse);
 
@@ -1271,7 +1265,7 @@ namespace ClassicUO.IO.Resources
             hue = 0;
             useUOP = false;
 
-            if (id >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT || action >= 100)
+            if (id >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT || action >= MAX_ACTIONS || dir >= MAX_DIRECTIONS)
             {
                 return Span<SpriteInfo>.Empty;
             }
@@ -1869,7 +1863,7 @@ namespace ClassicUO.IO.Resources
 
         public AnimationGroupUop GetUopGroup(ref byte group)
         {
-            if (group < 100 && UopGroups != null)
+            if (group < AnimationsLoader.MAX_ACTIONS && UopGroups != null)
             {
                 group = _uopReplaceGroupIndex[group];
 
@@ -1883,9 +1877,9 @@ namespace ClassicUO.IO.Resources
         {
             if (_uopReplaceGroupIndex == null)
             {
-                _uopReplaceGroupIndex = new byte[100];
+                _uopReplaceGroupIndex = new byte[AnimationsLoader.MAX_ACTIONS];
 
-                for (byte i = 0; i < 100; i++)
+                for (byte i = 0; i < AnimationsLoader.MAX_ACTIONS; i++)
                 {
                     _uopReplaceGroupIndex[i] = i;
                 }
@@ -1894,7 +1888,10 @@ namespace ClassicUO.IO.Resources
 
         public void ReplaceUopGroup(byte old, byte newG)
         {
-            _uopReplaceGroupIndex[old] = newG;
+            if (old < AnimationsLoader.MAX_ACTIONS && newG < AnimationsLoader.MAX_ACTIONS)
+            {
+                _uopReplaceGroupIndex[old] = newG;
+            }   
         }
 
         public long CalculateOffset(ushort graphic, ANIMATION_GROUPS_TYPE type, out int groupCount)
@@ -1987,7 +1984,7 @@ namespace ClassicUO.IO.Resources
 
     internal class AnimationGroup
     {
-        public AnimationDirection[] Direction = new AnimationDirection[5];
+        public AnimationDirection[] Direction = new AnimationDirection[AnimationsLoader.MAX_DIRECTIONS];
     }
 
     internal class AnimationGroupUop : AnimationGroup
