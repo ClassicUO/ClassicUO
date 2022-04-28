@@ -578,15 +578,11 @@ namespace ClassicUO.Game.GameObjects
 
                 if (id < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT && dir < 5)
                 {
-                    ushort hue = 0;
-                    bool useUOP;
+                    var frames = AnimationsLoader.Instance.GetAnimationFrames(id, action, dir, out _, out _);
 
-                    AnimationsLoader.Instance.ReplaceAnimationValues(ref id, ref action, ref hue, out useUOP);
-                    int frameCount = AnimationsLoader.Instance.LoadAnimationFrames(id, action, dir, useUOP);
-
-                    if (frameCount != 0)
+                    if (frames.Length != 0)
                     {
-                        int fc = frameCount;
+                        int fc = frames.Length;
 
                         int frameIndex = AnimIndex + (AnimationFromServer && !_isAnimationForwardDirection ? -1 : 1);
 
@@ -615,7 +611,7 @@ namespace ClassicUO.Game.GameObjects
                                 }
                                 else
                                 {
-                                    frameIndex = (byte)(frameCount - 1);
+                                    frameIndex = (byte)(frames.Length - 1);
                                 }
                             }
                             else
@@ -661,7 +657,7 @@ namespace ClassicUO.Game.GameObjects
                             }
                         }
 
-                        AnimIndex = (byte) (frameIndex % frameCount);
+                        AnimIndex = (byte) (frameIndex % frames.Length);
                     }
                     else if ((Serial & 0x80000000) != 0)
                     {

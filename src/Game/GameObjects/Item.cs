@@ -702,21 +702,17 @@ namespace ClassicUO.Game.GameObjects
                     if (id < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT && dir < 5)
                     {
                         byte action = AnimationsLoader.Instance.GetDeathAction(id, UsedLayer);
-                        ushort hue = 0;
-                        bool useUOP;
+                        var frames = AnimationsLoader.Instance.GetAnimationFrames(id, action, dir, out _, out _, isCorpse : true);
 
-                        AnimationsLoader.Instance.ReplaceAnimationValues(ref id, ref action, ref hue, out useUOP, isCorpse: true);
-                        int frameCount = AnimationsLoader.Instance.LoadAnimationFrames(id, action, dir, useUOP);
-
-                        if (frameCount > 0)
+                        if (frames.Length > 0)
                         {
                             // when the animation is done, stop to animate the corpse
-                            if (frameIndex >= frameCount)
+                            if (frameIndex >= frames.Length)
                             {
-                                frameIndex = (byte)(frameCount - 1);
+                                frameIndex = (byte)(frames.Length - 1);
                             }
 
-                            AnimIndex = (byte) (frameIndex % frameCount);
+                            AnimIndex = (byte) (frameIndex % frames.Length);
                         }
                     }
 

@@ -302,32 +302,28 @@ namespace ClassicUO.Game.GameObjects
                 return;
             }
 
-            ushort newHue = 0;
-            bool useUOP;
-
-            AnimationsLoader.Instance.ReplaceAnimationValues(ref graphic, ref animGroup, ref newHue, out useUOP, isEquip: layer != Layer.Invalid, isCorpse: layer == Layer.Invalid);
-            int frameCount = AnimationsLoader.Instance.LoadAnimationFrames(graphic, animGroup, dir, useUOP);
+            var frames = AnimationsLoader.Instance.GetAnimationFrames(graphic, animGroup, dir, out var newHue, out _, isEquip: layer != Layer.Invalid, isCorpse: layer == Layer.Invalid);
 
             if (color == 0)
             {
                 color = newHue;
             }
 
-            if (frameCount == 0)
+            if (frames.Length == 0)
             {
                 return;
             }
 
-            int fc = frameCount;
+            int fc = frames.Length;
 
             if (fc > 0 && animIndex >= fc)
             {
                 animIndex = (byte) (fc - 1);
             }
 
-            if (animIndex < frameCount)
+            if (animIndex < frames.Length)
             {
-                ref var spriteInfo = ref AnimationsLoader.Instance.GetAnimationFrame(graphic, animGroup, dir, animIndex, useUOP);
+                ref var spriteInfo = ref frames[animIndex];
 
                 if (spriteInfo.Texture == null)
                 {
@@ -552,21 +548,18 @@ namespace ClassicUO.Game.GameObjects
                     }
 
                     byte group = AnimationsLoader.Instance.GetDeathAction(graphic, UsedLayer);
-                    ushort hue = 0;
+                    var frames = AnimationsLoader.Instance.GetAnimationFrames(graphic, group, direction, out _, out var isUOP);
 
-                    AnimationsLoader.Instance.ReplaceAnimationValues(ref graphic, ref group, ref hue, out var isUop);
-                    int fc = AnimationsLoader.Instance.LoadAnimationFrames(graphic, group, direction, isUop);
-
-                    if (fc > 0 && animIndex >= 0)
+                    if (frames.Length > 0 && animIndex >= 0)
                     {
-                        animIndex = (byte)(animIndex % fc);
+                        animIndex = (byte)(animIndex % frames.Length);
                     }
                     else if (animIndex < 0)
                     {
                         animIndex = 0;
                     }
 
-                    ref var spriteInfo = ref AnimationsLoader.Instance.GetAnimationFrame(graphic, group, direction, animIndex, isUop);
+                    ref var spriteInfo = ref frames[animIndex];
 
                     if (spriteInfo.Texture != null)
                     {
@@ -578,7 +571,7 @@ namespace ClassicUO.Game.GameObjects
                             graphic,
                             group,
                             direction,
-                            isUop,
+                            isUOP,
                             animIndex,
                             IsFlipped ? x + spriteInfo.UV.Width - SelectedObject.TranslatedMousePositionByViewport.X : SelectedObject.TranslatedMousePositionByViewport.X - x,
                             SelectedObject.TranslatedMousePositionByViewport.Y - y
