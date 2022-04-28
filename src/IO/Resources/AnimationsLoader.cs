@@ -51,6 +51,9 @@ namespace ClassicUO.IO.Resources
     internal unsafe class AnimationsLoader : UOFileLoader
     {
         private static AnimationsLoader _instance;
+        private static uint _lastFlags = 0xFFFFFFFF;
+        [ThreadStatic] private static FrameInfo[] _frames;
+        [ThreadStatic] private static byte[] _decompressedData;
 
         private readonly Dictionary<ushort, byte> _animationSequenceReplacing = new Dictionary<ushort, byte>();
         private readonly AnimationGroup _empty = new AnimationGroup
@@ -952,10 +955,6 @@ namespace ClassicUO.IO.Resources
             return _picker.Get(packed, x, y);
         }
 
-        private static uint _lastFlags = 0xFFFFFFFF;
-
-        public bool FlagsApplied => _lastFlags != 0xFFFFFFFF;
-
         public void UpdateAnimationTable(uint flags)
         {
             if (flags != _lastFlags)
@@ -1374,20 +1373,6 @@ namespace ClassicUO.IO.Resources
             return animDir.SpriteInfos;
         }
 
-        private struct FrameInfo
-        {
-            public int Num;
-            public short CenterX;
-            public short CenterY;
-            public short Width;
-            public short Height;
-            public uint[] Pixels;
-        }
-
-        [ThreadStatic] private static FrameInfo[] _frames;
-
-        [ThreadStatic] private static byte[] _decompressedData = null;
-
         private Span<FrameInfo> ReadUOPAnimationFrames(ushort animID, byte animGroup, byte direction)
         {
             AnimationGroupUop animData = DataIndex[animID].GetUopGroup(ref animGroup);
@@ -1671,6 +1656,17 @@ namespace ClassicUO.IO.Resources
             centerY = 0;
             width = 0;
             height = ismounted ? 100 : 60;
+        }
+
+
+        private struct FrameInfo
+        {
+            public int Num;
+            public short CenterX;
+            public short CenterY;
+            public short Width;
+            public short Height;
+            public uint[] Pixels;
         }
 
         public struct SittingInfoData
