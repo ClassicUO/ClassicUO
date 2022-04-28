@@ -946,9 +946,9 @@ namespace ClassicUO.IO.Resources
         public bool PixelCheck(ushort animID, byte group, byte direction, bool uop, int frame, int x, int y)
         {
             ushort hue = 0;
-            ReplaceAnimationValues(ref animID, ref group, ref hue, out uop, forceUOP: uop);
+            ReplaceAnimationValues(ref animID, ref group, ref hue, out var isUOP, forceUOP: uop);
 
-            uint packed32 = (uint)((group | (direction << 8) | ((uop ? 0x01 : 0x00) << 16)));
+            uint packed32 = (uint)((group | (direction << 8) | ((isUOP ? 0x01 : 0x00) << 16)));
             uint packed32_2 = (uint)((animID | (frame << 16)));
             ulong packed = (packed32_2 | ((ulong)packed32 << 32));
 
@@ -1200,6 +1200,8 @@ namespace ClassicUO.IO.Resources
             {
                 return 0;
             }
+
+            ConvertBodyIfNeeded(ref id);
 
             ANIMATION_FLAGS flags = DataIndex[id].Flags;
 
