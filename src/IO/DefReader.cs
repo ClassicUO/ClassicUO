@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -128,7 +128,7 @@ namespace ClassicUO.IO
                     continue;
                 }
 
-                int comment = line.IndexOf('#');
+                int comment = line.IndexOf(COMMENT);
 
                 if (comment >= 0)
                 {
@@ -276,12 +276,30 @@ namespace ClassicUO.IO
         private int ReadInt(int line, int index)
         {
             string token = TokenAt(line, index);
+           
+            SanitizeStringNumber(ref token);
 
             if (!string.IsNullOrEmpty(token))
             {
-                SanitizeStringNumber(ref token);
-
-                return token.StartsWith("0x") ? int.Parse(token.Remove(0, 2), NumberStyles.HexNumber) : int.Parse(token);
+                if (token.StartsWith("0x"))
+                {
+                    if (int.TryParse(token.Remove(0, 2), NumberStyles.HexNumber, null, out var res))
+                    {
+                        return res;
+                    }
+                    else
+                    {
+                        Log.Error($"error while parsing {_file} - Line: {line}, index: {index}");
+                    }
+                }
+                else if (int.TryParse(token, out var res))
+                {
+                    return res;
+                }
+                else
+                {
+                    Log.Error($"error while parsing {_file} - Line: {line}, index: {index}");
+                }
             }
 
             return -1;
