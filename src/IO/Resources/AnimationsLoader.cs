@@ -860,7 +860,7 @@ namespace ClassicUO.IO.Resources
             }
             else
             {
-                if (dataIndex.FileIndex == 0 || !dataIndex.IsValidMUL)
+                if (dataIndex.FileIndex == 0 /*|| !dataIndex.IsValidMUL*/)
                 {
                     ushort newGraphic = dataIndex.Graphic;
 
@@ -912,10 +912,9 @@ namespace ClassicUO.IO.Resources
                 // Body.def replaces animations always at fileindex == 0.
                 // Bodyconv.def instead uses always fileindex >= 1 when replacing animations. So we don't need to replace the animations here. The values have been already replaced.
                 // If the animation has been replaced by Body.def means it doesn't exist
-                if (index.FileIndex == 0 || !index.IsValidMUL)
+                if (index.FileIndex == 0 /*|| !index.IsValidMUL*/)
                 {
-                    hue = isCorpse ? DataIndex[graphic].CorpseColor : DataIndex[graphic].Color;
-
+                    hue = isCorpse ? index.CorpseColor : index.Color;
                     ushort newGraphic = isCorpse ? index.CorpseGraphic : index.Graphic;
                   
                     while (graphic != newGraphic)
@@ -1273,10 +1272,6 @@ namespace ClassicUO.IO.Resources
 
             IndexAnimation index = DataIndex[id];
 
-            if (index.FileIndex >= _files.Length)
-            {
-                return Span<SpriteInfo>.Empty;
-            }
 
 
             // NOTE:
@@ -1501,9 +1496,9 @@ namespace ClassicUO.IO.Resources
                 return Span<FrameInfo>.Empty;
             }
 
-            UOFile file = _files[fileIndex];
-            StackDataReader reader = new StackDataReader(new ReadOnlySpan<byte>((byte*)file.StartAddress.ToPointer(), (int)file.Length));
-            reader.Seek(dir.Address);
+            UOFile file = _files[fileIndex];           
+            StackDataReader reader = new StackDataReader(new ReadOnlySpan<byte>((byte*)file.StartAddress.ToPointer() + dir.Address, (int)dir.Size));
+            reader.Seek(0);
 
             ushort* palette = (ushort*)reader.PositionAddress;
             reader.Skip(512);
@@ -1532,18 +1527,17 @@ namespace ClassicUO.IO.Resources
 
         private void ReadSpriteData(ref StackDataReader reader, ushort* palette, ref FrameInfo frame, bool alphaCheck)
         {
-            short imageCenterX = reader.ReadInt16LE();
-            short imageCenterY = reader.ReadInt16LE();
-            short imageWidth = reader.ReadInt16LE();
-            short imageHeight = reader.ReadInt16LE();
+            frame.CenterX = reader.ReadInt16LE();
+            frame.CenterY = reader.ReadInt16LE();
+            frame.Width = reader.ReadInt16LE();
+            frame.Height = reader.ReadInt16LE();
 
-            if (imageWidth == 0 || imageHeight == 0)
+            if (frame.Width <= 0 || frame.Height <= 0)
             {
                 return;
             }
 
-            long end = (long)reader.StartAddress + reader.Length;
-            int bufferSize = imageWidth * imageHeight;
+            int bufferSize = frame.Width * frame.Height;
 
             if (frame.Pixels == null || frame.Pixels.Length < bufferSize)
             {
@@ -1557,9 +1551,8 @@ namespace ClassicUO.IO.Resources
             Span<uint> data = frame.Pixels;
 
             uint header = reader.ReadUInt32LE();
-            long pos = reader.Position;
 
-            while (header != 0x7FFF7FFF && pos < end)
+            while (header != 0x7FFF7FFF && reader.Position < reader.Length)
             {
                 ushort runLength = (ushort)(header & 0x0FFF);
                 int x = (int)((header >> 22) & 0x03FF);
@@ -1576,10 +1569,10 @@ namespace ClassicUO.IO.Resources
                     y |= unchecked((int)0xFFFFFE00);
                 }
 
-                x += imageCenterX;
-                y += imageCenterY + imageHeight;
+                x += frame.CenterX;
+                y += frame.CenterY + frame.Height;
 
-                int block = y * imageWidth + x;
+                int block = y * frame.Width + x;
 
                 for (int k = 0; k < runLength; ++k, ++block)
                 {
@@ -1598,11 +1591,6 @@ namespace ClassicUO.IO.Resources
 
                 header = reader.ReadUInt32LE();
             }
-
-            frame.Width = imageWidth;
-            frame.Height = imageHeight;
-            frame.CenterX = imageCenterX;
-            frame.CenterY = imageCenterY;
         }
 
         public void GetAnimationDimensions
