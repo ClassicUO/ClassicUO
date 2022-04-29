@@ -871,13 +871,7 @@ namespace ClassicUO.IO.Resources
             {
                 if (dataIndex.FileIndex == 0 /*|| !dataIndex.IsValidMUL*/)
                 {
-                    ushort newGraphic = dataIndex.Graphic;
-
-                    while (graphic != newGraphic)
-                    {
-                        graphic = newGraphic;
-                        newGraphic = DataIndex[graphic].Graphic;
-                    }
+                    graphic = dataIndex.Graphic;
                 }                
             }
         }
@@ -924,13 +918,7 @@ namespace ClassicUO.IO.Resources
                 if (index.FileIndex == 0 /*|| !index.IsValidMUL*/)
                 {
                     hue = isCorpse ? index.CorpseColor : index.Color;
-                    ushort newGraphic = isCorpse ? index.CorpseGraphic : index.Graphic;
-                  
-                    while (graphic != newGraphic)
-                    {
-                        graphic = newGraphic;
-                        newGraphic = isCorpse ? DataIndex[graphic].CorpseGraphic : DataIndex[graphic].Graphic;
-                    }
+                    graphic = isCorpse ? index.CorpseGraphic : index.Graphic;
                 }
             }
         }
