@@ -309,12 +309,7 @@ namespace ClassicUO.IO.Resources
                     }
                 }
             }
-
-            if (Client.Version < ClientVersion.CV_300)
-            {
-                return;
-            }
-
+        
             ProcessEquipConvDef();
             ProcessBodyDef();
             ProcessCorpseDef();
@@ -327,6 +322,11 @@ namespace ClassicUO.IO.Resources
 
         private void ProcessEquipConvDef()
         {
+            if (Client.Version < ClientVersion.CV_300)
+            {
+                return;
+            }
+
             var file = UOFileManager.GetUOFilePath("Equipconv.def");
 
             if (File.Exists(file))
@@ -374,25 +374,24 @@ namespace ClassicUO.IO.Resources
 
                         ushort color = (ushort)defReader.ReadInt();
 
-                        if (!_equipConv.TryGetValue(body, out Dictionary<ushort, EquipConvData> dict))
+                        if (!_equipConv.TryGetValue(body, out var dict))
                         {
-                            _equipConv.Add(body, new Dictionary<ushort, EquipConvData>());
-
-                            if (!_equipConv.TryGetValue(body, out dict))
-                            {
-                                continue;
-                            }
+                            _equipConv[body] = (dict = new Dictionary<ushort, EquipConvData>());
                         }
 
                         dict[graphic] = new EquipConvData(newGraphic, (ushort)gump, color);
                     }
                 }
             }
-
         }
 
         private void ProcessBodyConvDef(LockedFeatureFlags flags)
         {
+            if (Client.Version < ClientVersion.CV_300)
+            {
+                return;
+            }
+
             var file = UOFileManager.GetUOFilePath("Bodyconv.def");
 
             if (File.Exists(file))
@@ -550,6 +549,11 @@ namespace ClassicUO.IO.Resources
 
         private void ProcessBodyDef()
         {
+            if (Client.Version < ClientVersion.CV_300)
+            {
+                return;
+            }
+
             var file = UOFileManager.GetUOFilePath("Body.def");
             Dictionary<int, bool> filter = new Dictionary<int, bool>();
 
@@ -610,6 +614,11 @@ namespace ClassicUO.IO.Resources
 
         private void ProcessCorpseDef()
         {
+            if (Client.Version < ClientVersion.CV_300)
+            {
+                return;
+            }
+
             var file = UOFileManager.GetUOFilePath("Corpse.def");
             Dictionary<int, bool> filter = new Dictionary<int, bool>();
 
@@ -1323,7 +1332,7 @@ namespace ClassicUO.IO.Resources
                 {
                     ref var frame = ref frames[i];
 
-                    if (frame.Width == 0 || frame.Height == 0)
+                    if (frame.Width <= 0 || frame.Height <= 0)
                     {
                         /* Missing frame. */
                         continue;
@@ -1434,6 +1443,8 @@ namespace ClassicUO.IO.Resources
                      * to be missing. */
                     ushort headerFrameNum = (ushort)((animHeaderInfo->FrameID - 1) % frameCount);
 
+                    ref var frame = ref frames[frameNum];
+
                     if (frameNum < headerFrameNum)
                     {
                         /* Missing frame. Keep walking forward. */
@@ -1442,11 +1453,11 @@ namespace ClassicUO.IO.Resources
                         {
                             /* If the missing frame is for the direction we wanted, make sure
                              * to zero out the entry in the frames array. */
-                            frames[frameNum].Num = frameNum;
-                            frames[frameNum].CenterX = 0;
-                            frames[frameNum].CenterY = 0;
-                            frames[frameNum].Width = 0;
-                            frames[frameNum].Height = 0;
+                            frame.Num = frameNum;
+                            frame.CenterX = 0;
+                            frame.CenterY = 0;
+                            frame.Width = 0;
+                            frame.Height = 0;
                         }
 
                         continue;
@@ -1464,11 +1475,11 @@ namespace ClassicUO.IO.Resources
                         if (start + animHeaderInfo->DataOffset >= reader.Length)
                         {
                             /* File seems to be corrupt? Skip loading. */
-                            frames[frameNum].Num = frameNum;
-                            frames[frameNum].CenterX = 0;
-                            frames[frameNum].CenterY = 0;
-                            frames[frameNum].Width = 0;
-                            frames[frameNum].Height = 0;
+                            frame.Num = frameNum;
+                            frame.CenterX = 0;
+                            frame.CenterY = 0;
+                            frame.Width = 0;
+                            frame.Height = 0;
                             continue;
                         }
                         reader.Skip((int)animHeaderInfo->DataOffset);
@@ -1476,8 +1487,8 @@ namespace ClassicUO.IO.Resources
                         ushort* palette = (ushort*)reader.PositionAddress;
                         reader.Skip(512);
 
-                        frames[frameNum].Num = frameNum;
-                        ReadSpriteData(ref reader, palette, ref frames[frameNum], true);
+                        frame.Num = frameNum;
+                        ReadSpriteData(ref reader, palette, ref frame, true);
                     }
 
                     reader.Seek(start + sizeof(UOPAnimationHeader));
