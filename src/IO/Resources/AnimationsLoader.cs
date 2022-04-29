@@ -238,15 +238,15 @@ namespace ClassicUO.IO.Resources
 
                 for (byte j = 0; j < MAX_ACTIONS; j++)
                 {
-                    if (DataIndex[i].Groups[j] == null)
-                    {
-                        DataIndex[i].Groups[j] = new AnimationGroup();
-                    }
-                    
                     if (j >= count)
                     {
                         continue;
                     }
+
+                    if (DataIndex[i].Groups[j] == null)
+                    {
+                        DataIndex[i].Groups[j] = new AnimationGroup();
+                    }    
 
                     for (byte d = 0; d < MAX_DIRECTIONS; d++)
                     {
