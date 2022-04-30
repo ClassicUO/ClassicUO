@@ -527,11 +527,19 @@ namespace ClassicUO.IO.Resources
                                         if ((long)aidx < maxaddress && aidx->Position != 0xFFFFFFFF && aidx->Size != 0xFFFFFFFF)
                                         {
                                             ref var direction = ref DataIndex[index].Groups[j].Direction[d];
-
                                             direction.Address = aidx->Position;
                                             direction.Size = Math.Max(1, aidx->Size);
 
                                             isValid = true;
+                                        }
+                                        else
+                                        {
+                                            // we need to nullify the bad address or we will read invalid data.
+                                            // we dont touch the isValid parameter because sometime the mul exists but some frames don't
+                                            // see: https://github.com/ClassicUO/ClassicUO/issues/1532
+                                            ref var direction = ref DataIndex[index].Groups[j].Direction[d];
+                                            direction.Address = 0;
+                                            direction.Size = 0;
                                         }
                                     }
                                 }
@@ -1315,7 +1323,7 @@ namespace ClassicUO.IO.Resources
 
                 animDir.FrameCount = (byte)frames.Length;
                 animDir.SpriteInfos = new SpriteInfo[frames.Length];
-
+                
                 for (int i = 0; i < frames.Length; i++)
                 {
                     ref var frame = ref frames[i];
