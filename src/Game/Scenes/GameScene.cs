@@ -125,10 +125,10 @@ namespace ClassicUO.Game.Scenes
             Client.Game.Window.AllowUserResizing = true;
 
             Camera.Zoom = ProfileManager.CurrentProfile.DefaultScale;
-            Camera.Bounds.X = ProfileManager.CurrentProfile.GameWindowPosition.X;
-            Camera.Bounds.Y = ProfileManager.CurrentProfile.GameWindowPosition.Y;
-            Camera.Bounds.Width = ProfileManager.CurrentProfile.GameWindowSize.X;
-            Camera.Bounds.Height = ProfileManager.CurrentProfile.GameWindowSize.Y;
+            Camera.Bounds.X = Math.Max(0, ProfileManager.CurrentProfile.GameWindowPosition.X);
+            Camera.Bounds.Y = Math.Max(0, ProfileManager.CurrentProfile.GameWindowPosition.Y);
+            Camera.Bounds.Width = Math.Max(0, ProfileManager.CurrentProfile.GameWindowSize.X);
+            Camera.Bounds.Height = Math.Max(0, ProfileManager.CurrentProfile.GameWindowSize.Y);
 
             Client.Game.GameCursor.ItemHold.Clear();
             Hotkeys = new HotkeysManager();
@@ -567,6 +567,10 @@ namespace ClassicUO.Game.Scenes
             _renderListAnimationsHead = null;
             _renderListAnimations = null;
             _renderListAnimationCount = 0;
+
+            _renderListEffectsHead = null;
+            _renderListEffects = null;
+            _renderListEffectCount = 0;
 
             _foliageCount = 0;
 
@@ -1027,6 +1031,7 @@ namespace ClassicUO.Game.Scenes
             RenderedObjectsCount = 0;
             RenderedObjectsCount += DrawRenderList(batcher, _renderListStaticsHead, _renderListStaticsCount);
             RenderedObjectsCount += DrawRenderList(batcher, _renderListAnimationsHead, _renderListAnimationCount);
+            RenderedObjectsCount += DrawRenderList(batcher, _renderListEffectsHead, _renderListEffectCount);
 
             if (_renderListTransparentObjectsCount > 0)
             {

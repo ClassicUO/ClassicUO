@@ -84,6 +84,8 @@ namespace ClassicUO.Game.Scenes
         private GameObject _renderListAnimationsHead, _renderListAnimations;
         private int _renderListAnimationCount;
 
+        private GameObject _renderListEffectsHead, _renderListEffects;
+        private int _renderListEffectCount;
 
         public sbyte FoliageIndex { get; private set; }
 
@@ -883,7 +885,9 @@ namespace ClassicUO.Game.Scenes
                     {
                     }
 
-                    PushToRenderList(obj, ref _renderList, ref _renderListStaticsHead, ref _renderListStaticsCount, false);
+                    //PushToRenderList(obj, ref _renderList, ref _renderListStaticsHead, ref _renderListStaticsCount, false);
+
+                    PushToRenderList(obj, ref _renderListEffects, ref _renderListEffectsHead, ref _renderListEffectCount, false);
                 }
             }
 
