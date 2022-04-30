@@ -548,13 +548,19 @@ namespace ClassicUO.Game.GameObjects
                     byte group = AnimationsLoader.Instance.GetDeathAction(graphic, UsedLayer);
                     var frames = AnimationsLoader.Instance.GetAnimationFrames(graphic, group, direction, out _, out var isUOP);
 
-                    if (frames.Length > 0 && animIndex >= 0)
+                    if (frames.IsEmpty)
                     {
-                        animIndex = (byte)(animIndex % frames.Length);
+                        continue;
                     }
-                    else if (animIndex < 0)
+
+                    if (animIndex < 0)
                     {
                         animIndex = 0;
+                    }
+
+                    if (animIndex >= 0)
+                    {
+                        animIndex = (byte)(animIndex % frames.Length);
                     }
 
                     ref var spriteInfo = ref frames[animIndex];
