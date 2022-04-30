@@ -439,7 +439,10 @@ namespace ClassicUO.Game.UI.Gumps
                 _mapTexture = new Texture2D(Client.Game.GraphicsDevice, Width, Height, false, SurfaceFormat.Color);
             }
 
-            _mapTexture.SetData(data);
+            fixed (uint* ptr = data)
+            {
+                _mapTexture.SetDataPointerEXT(0, null, (IntPtr)ptr, data.Length * sizeof(uint));
+            }         
         }
 
         private unsafe void CreatePixels
