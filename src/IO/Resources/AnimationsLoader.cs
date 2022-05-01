@@ -1327,9 +1327,12 @@ namespace ClassicUO.IO.Resources
                 for (int i = 0; i < frames.Length; i++)
                 {
                     ref var frame = ref frames[i];
+                    ref var spriteInfo = ref animDir.SpriteInfos[frame.Num];
 
                     if (frame.Width <= 0 || frame.Height <= 0)
                     {
+                        spriteInfo = SpriteInfo.Empty;
+
                         /* Missing frame. */
                         continue;
                     }
@@ -1339,8 +1342,7 @@ namespace ClassicUO.IO.Resources
                     ulong key = (keyLower | ((ulong)keyUpper << 32));
 
                     _picker.Set(key, frame.Width, frame.Height, frame.Pixels);
-
-                    ref var spriteInfo = ref animDir.SpriteInfos[frame.Num];
+               
                     spriteInfo.Center.X = frame.CenterX;
                     spriteInfo.Center.Y = frame.CenterY;
                     spriteInfo.Texture = _atlas.AddSprite(frame.Pixels.AsSpan(), frame.Width, frame.Height, out spriteInfo.UV);
@@ -1441,21 +1443,16 @@ namespace ClassicUO.IO.Resources
 
                     ref var frame = ref frames[frameNum];
 
+                    // we need to zero-out the frame or we will see ghost animations coming from other animation queries
+                    frame.Num = frameNum;
+                    frame.CenterX = 0;
+                    frame.CenterY = 0;
+                    frame.Width = 0;
+                    frame.Height = 0;
+
                     if (frameNum < headerFrameNum)
                     {
                         /* Missing frame. Keep walking forward. */
-
-                        if (currentDir == direction)
-                        {
-                            /* If the missing frame is for the direction we wanted, make sure
-                             * to zero out the entry in the frames array. */
-                            frame.Num = frameNum;
-                            frame.CenterX = 0;
-                            frame.CenterY = 0;
-                            frame.Width = 0;
-                            frame.Height = 0;
-                        }
-
                         continue;
                     }
 
@@ -1471,19 +1468,14 @@ namespace ClassicUO.IO.Resources
                         if (start + animHeaderInfo->DataOffset >= reader.Length)
                         {
                             /* File seems to be corrupt? Skip loading. */
-                            frame.Num = frameNum;
-                            frame.CenterX = 0;
-                            frame.CenterY = 0;
-                            frame.Width = 0;
-                            frame.Height = 0;
                             continue;
                         }
+
                         reader.Skip((int)animHeaderInfo->DataOffset);
 
                         ushort* palette = (ushort*)reader.PositionAddress;
                         reader.Skip(512);
 
-                        frame.Num = frameNum;
                         ReadSpriteData(ref reader, palette, ref frame, true);
                     }
 
