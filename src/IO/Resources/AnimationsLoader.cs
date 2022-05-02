@@ -419,9 +419,14 @@ namespace ClassicUO.IO.Resources
                             // Ensure the client is allowed to use these new graphics
                             if (i == 1)
                             {
-                                if ((flags & LockedFeatureFlags.LordBlackthornsRevenge) == 0)
+                                // adaption of this PR: https://github.com/ClassicUO/ClassicUO/pull/1525
+                                // old server sends 0x03 as flags. Original client allows the bodyconv.
+                                if ((flags & (LockedFeatureFlags.TheSecondAge | LockedFeatureFlags.Renaissance)) == 0)
                                 {
-                                    continue;
+                                    if ((flags & LockedFeatureFlags.LordBlackthornsRevenge) == 0)
+                                    {
+                                        continue;
+                                    }
                                 }
                             }
                             else if (i == 2)
@@ -431,7 +436,10 @@ namespace ClassicUO.IO.Resources
                                     continue;
                                 }
                             }
-                            else if (i == 3)
+
+                            // NOTE: for fileindex >= 3 the client automatically accepts body conversion. 
+                            //       Probably it ignores the flags
+                            /*else if (i == 3)
                             {
                                 if ((flags & LockedFeatureFlags.SamuraiEmpire) == 0)
                                 {
@@ -445,6 +453,7 @@ namespace ClassicUO.IO.Resources
                                     continue;
                                 }
                             }
+                            */
 
                             sbyte mountedHeightOffset = 0;
                             if (i == 1)
