@@ -416,27 +416,27 @@ namespace ClassicUO.IO.Resources
                                 continue;
                             }
 
-                            // Ensure the client is allowed to use these new graphics
-                            if (i == 1)
+                            // adaption of this PR: https://github.com/ClassicUO/ClassicUO/pull/1525
+                            // old server sends 0x03 as flags. Original client allows the bodyconv. [tested with 7.0.95.0]
+                            if ((flags & (LockedFeatureFlags.TheSecondAge | LockedFeatureFlags.Renaissance)) == 0)
                             {
-                                // adaption of this PR: https://github.com/ClassicUO/ClassicUO/pull/1525
-                                // old server sends 0x03 as flags. Original client allows the bodyconv.
-                                if ((flags & (LockedFeatureFlags.TheSecondAge | LockedFeatureFlags.Renaissance)) == 0)
+                                // Ensure the client is allowed to use these new graphics
+                                if (i == 1)
                                 {
                                     if ((flags & LockedFeatureFlags.LordBlackthornsRevenge) == 0)
                                     {
                                         continue;
                                     }
                                 }
-                            }
-                            else if (i == 2)
-                            {
-                                if ((flags & LockedFeatureFlags.AgeOfShadows) == 0)
+                                else if (i == 2)
                                 {
-                                    continue;
+                                    if ((flags & LockedFeatureFlags.AgeOfShadows) == 0)
+                                    {
+                                        continue;
+                                    }
                                 }
                             }
-
+                        
                             // NOTE: for fileindex >= 3 the client automatically accepts body conversion. 
                             //       Probably it ignores the flags
                             /*else if (i == 3)
