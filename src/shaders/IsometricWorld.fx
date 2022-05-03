@@ -14,6 +14,7 @@
 const static float3 LIGHT_DIRECTION = float3(0.0f, 1.0f, 1.0f);
 
 
+
 float4x4 MatrixTransform;
 float4x4 WorldMatrix;
 float2 Viewport;
@@ -94,7 +95,7 @@ PS_INPUT VertexShaderFunction(VS_INPUT IN)
 
 float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 {	
-	float4 color = tex2D(DrawSampler, IN.TexCoord);
+	float4 color = tex2D(DrawSampler, IN.TexCoord.xy);
 		
 	if (color.a == 0.0f)
 		discard;
@@ -153,7 +154,7 @@ float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 	}
 	else if (mode == SPECTRAL)
 	{
-		alpha = 1 - (color.r * 1.5f);
+		alpha = 1.0f - (color.r * 1.5f);
 		color.r = 0;
 		color.g = 0;
 		color.b = 0;
@@ -167,10 +168,7 @@ float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 	}
 	else if (mode == LIGHTS)
 	{
-		if (IN.Hue.x > 1.0f)
-		{
-			color.rgb = get_colored_light(IN.Hue.x - 1, color.r);
-		}
+		color.rgb = get_colored_light(IN.Hue.x - 1, color.r);
 	}
 	else if (mode == EFFECT_HUED)
 	{

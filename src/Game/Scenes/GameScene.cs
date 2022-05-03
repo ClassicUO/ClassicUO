@@ -1152,7 +1152,7 @@ namespace ClassicUO.Game.Scenes
                 }
 
                 hue.X = l.Color;
-                hue.Y = l.IsHue ? ShaderHueTranslator.SHADER_HUED : ShaderHueTranslator.SHADER_LIGHTS;
+                hue.Y = hue.X > 1.0f ? l.IsHue ? ShaderHueTranslator.SHADER_HUED : ShaderHueTranslator.SHADER_LIGHTS : ShaderHueTranslator.SHADER_NONE;
 
                 batcher.Draw
                 (
