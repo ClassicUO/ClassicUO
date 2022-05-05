@@ -51,7 +51,17 @@ namespace ClassicUO.Game.GameObjects
 
         public override bool Draw(UltimaBatcher2D batcher, int posX, int posY, float depth)
         {
-            if (!AllowedToDraw || IsDestroyed)
+            if (IsDestroyed)
+            {
+                return false;
+            }
+
+            if (ItemData.IsLight || DisplayedGraphic >= 0x3E02 && DisplayedGraphic <= 0x3E0B || DisplayedGraphic >= 0x3914 && DisplayedGraphic <= 0x3929)
+            {
+                Client.Game.GetScene<GameScene>().AddLight(this, this, posX + 22, posY + 22);
+            }
+
+            if (!AllowedToDraw)
             {
                 return false;
             }
@@ -157,11 +167,6 @@ namespace ClassicUO.Game.GameObjects
                     false,
                     depth
                 );
-            }
-
-            if (ItemData.IsLight || graphic >= 0x3E02 && graphic <= 0x3E0B || graphic >= 0x3914 && graphic <= 0x3929)
-            {
-                Client.Game.GetScene<GameScene>().AddLight(this, this, posX + 22, posY + 22);
             }
 
             if (!SerialHelper.IsValid(Serial) && IsMulti && TargetManager.TargetingState == CursorTarget.MultiPlacement)

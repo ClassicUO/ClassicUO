@@ -43,18 +43,18 @@ namespace ClassicUO.Game.Data
         private static readonly Dictionary<ushort, LightShaderData> _shaderdata = new Dictionary<ushort, LightShaderData>();
         private static readonly Dictionary<ushort, ItemLightData> _itemlightdata = new Dictionary<ushort, ItemLightData>();
 
-        public static ushort GetHue(ushort id, out bool ishue)
+        public static bool GetHue(ushort id, out ushort color, out bool ishue)
         {
 
             ishue = false;
+            color = ushort.MaxValue;
 
             if (_itemlightdata.TryGetValue(id, out ItemLightData lightdata))
             {
                 ishue = lightdata.IsHue;
-                return lightdata.Color;
+                color = lightdata.Color;
+                return true;
             }
-
-            ushort color = 0;
 
             switch (id)
             {
@@ -294,7 +294,12 @@ namespace ClassicUO.Game.Data
                 color = 62;
             }
 
-            return color;
+            if (color == ushort.MaxValue)
+            {
+                return false;
+            }
+
+            return true;
         }
 
         private static void MakeDefaultShaders(int count)

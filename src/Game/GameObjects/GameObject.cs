@@ -390,6 +390,10 @@ namespace ClassicUO.Game.GameObjects
             {
                 case 0x0001:
                 case 0x21BC:
+                case 0xA1FE:
+                case 0xA1FF:
+                case 0xA200:
+                case 0xA201:
                     //case 0x5690:
                     return false;
 

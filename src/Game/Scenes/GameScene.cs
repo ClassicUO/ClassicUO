@@ -469,7 +469,6 @@ namespace ClassicUO.Game.Scenes
                 }
             }
 
-
             if (canBeAdded)
             {
                 ref LightData light = ref _lights[_lightCount];
@@ -536,12 +535,28 @@ namespace ClassicUO.Game.Scenes
                     }
                 }
 
+                light.Color = 0;
+                light.IsHue = false;
+
+                if (ProfileManager.CurrentProfile.UseColoredLights)
+                {
+                    if (light.ID > 200)
+                    {
+                        light.Color = (ushort) (light.ID - 200);
+                        light.ID = 1;
+                    }
+
+                    if (LightColors.GetHue(graphic, out ushort color, out bool ishue))
+                    {
+                        light.Color = color;
+                        light.IsHue = ishue;
+                    }
+                }
+
                 if (light.ID >= Constants.MAX_LIGHTS_DATA_INDEX_COUNT)
                 {
                     return;
                 }
-
-                light.Color = ProfileManager.CurrentProfile.UseColoredLights ? LightColors.GetHue(graphic, out light.IsHue) : (ushort) 0;
 
                 if (light.Color != 0)
                 {
