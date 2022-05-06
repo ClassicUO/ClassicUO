@@ -4762,7 +4762,7 @@ namespace ClassicUO.Network
                 entity = World.Items.Get(serial);
             }
 
-            List<(int, string)> list = new List<(int, string)>();
+            List<(int, string, int)> list = new List<(int, string, int)>();
             int totalLength = 0;
 
             while (p.Position < p.Length)
@@ -4790,6 +4790,15 @@ namespace ClassicUO.Network
                     continue;
                 }
 
+                int argcliloc = 0;
+
+                string[] argcheck = argument.Split('#');
+
+                if (argcheck.Length == 2)
+                {
+                    int.TryParse(argcheck[1], out argcliloc);
+                }
+
                 // horrible fix for (Imbued) hue
                 if (Client.Version >= Data.ClientVersion.CV_60143 && cliloc == 1080418)
                 {
@@ -4808,7 +4817,7 @@ namespace ClassicUO.Network
                     }
                 }
 
-                list.Add((cliloc, str));
+                list.Add((cliloc, str, argcliloc));
 
                 totalLength += str.Length;
             }
@@ -4849,6 +4858,7 @@ namespace ClassicUO.Network
                         if (entity != null && !SerialHelper.IsMobile(serial))
                         {
                             entity.Name = str;
+                            entity.NameCliloc = s.Item3 > 0 ? s.Item3 : s.Item1;
                         }
 
                         first = false;

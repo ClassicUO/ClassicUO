@@ -157,6 +157,18 @@ namespace ClassicUO.Game.GameObjects
             return null;
         }
 
+        public Item FindItemByCliloc(int cliloc)
+        {
+            Item backpack = FindItemByLayer(Layer.Backpack);
+
+            if (backpack != null)
+            {
+                return FindItemByClilocInContainerRecursive(backpack, cliloc);
+            }
+
+            return null;
+        }
+
         private Item FindItemInContainerRecursive(Item container, ushort graphic)
         {
             Item found = null;
@@ -185,6 +197,53 @@ namespace ClassicUO.Game.GameObjects
             }
 
             return found;
+        }
+
+        private Item FindItemByClilocInContainerRecursive(Item container, int cliloc)
+        {
+            Item found = null;
+
+            if (container != null)
+            {
+                for (LinkedObject i = container.Items; i != null; i = i.Next)
+                {
+                    Item item = (Item) i;
+
+                    if (item.NameCliloc == cliloc)
+                    {
+                        return item;
+                    }
+
+                    if (!item.IsEmpty)
+                    {
+                        found = FindItemByClilocInContainerRecursive(item, cliloc);
+
+                        if (found != null && found.NameCliloc == cliloc)
+                        {
+                            return found;
+                        }
+                    }
+                }
+            }
+
+            return found;
+        }
+
+        public Item FindPreferredItemByCliloc(System.Span<int> clilocs)
+        {
+            Item item = null;
+
+            for (int i = 0; i < clilocs.Length; i++)
+            {
+                item = World.Player.FindItemByCliloc(clilocs[i]);
+
+                if (item != null)
+                {
+                    break;
+                }
+            }
+
+            return item;
         }
 
         public void AddBuff(BuffIconType type, ushort graphic, uint time, string text)
