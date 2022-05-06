@@ -1519,6 +1519,170 @@ namespace ClassicUO.Game.Managers
 
                     break;
 
+                case MacroType.UseObject:
+                    Item obj;
+
+                    switch (macro.SubCode)
+                    {
+                        case MacroSubType.BestHealPotion:
+                            Span<int> healpotion_clilocs = stackalloc int[3] { 1041330, 1041329, 1041329 };
+
+                            obj = World.Player.FindPreferredItemByCliloc(healpotion_clilocs);
+
+                            if (obj != null)
+                            {
+                                GameActions.DoubleClick(obj);
+                            }
+
+                            break;
+
+                        case MacroSubType.BestCurePotion:
+                            Span<int> curepotion_clilocs = stackalloc int[3] { 1041317, 1041316, 1041315 };
+
+                            obj = World.Player.FindPreferredItemByCliloc(curepotion_clilocs);
+
+                            if (obj != null)
+                            {
+                                GameActions.DoubleClick(obj);
+                            }
+
+                            break;
+
+                        case MacroSubType.BestRefreshPotion:
+                            Span<int> refreshpotion_clilocs = stackalloc int[2] { 1041327, 1041326 };
+
+                            obj = World.Player.FindPreferredItemByCliloc(refreshpotion_clilocs);
+
+                            if (obj != null)
+                            {
+                                GameActions.DoubleClick(obj);
+                            }
+
+                            break;
+
+                        case MacroSubType.BestStrengthPotion:
+                            Span<int> strpotion_clilocs = stackalloc int[2] { 1041321, 1041320 };
+
+                            obj = World.Player.FindPreferredItemByCliloc(strpotion_clilocs);
+
+                            if (obj != null)
+                            {
+                                GameActions.DoubleClick(obj);
+                            }
+
+                            break;
+
+                        case MacroSubType.BestAgiPotion:
+                            Span<int> agipotion_clilocs = stackalloc int[2] { 1041319, 1041318 };
+
+                            obj = World.Player.FindPreferredItemByCliloc(agipotion_clilocs);
+
+                            if (obj != null)
+                            {
+                                GameActions.DoubleClick(obj);
+                            }
+
+                            break;
+
+                        case MacroSubType.BestExplosionPotion:
+                            Span<int> explopotion_clilocs = stackalloc int[3] { 1041333, 1041332, 1041331 };
+
+                            obj = World.Player.FindPreferredItemByCliloc(explopotion_clilocs);
+
+                            if (obj != null)
+                            {
+                                GameActions.DoubleClick(obj);
+                            }
+
+                            break;
+
+                        case MacroSubType.BestConflagPotion:
+                            Span<int> conflagpotion_clilocs = stackalloc int[2] { 1072098, 1072095 };
+
+                            obj = World.Player.FindPreferredItemByCliloc(conflagpotion_clilocs);
+
+                            if (obj != null)
+                            {
+                                GameActions.DoubleClick(obj);
+                            }
+
+                            break;
+
+                        case MacroSubType.HealStone:
+                            obj = World.Player.FindItemByCliloc(1095376);
+
+                            if (obj != null)
+                            {
+                                GameActions.DoubleClick(obj);
+                            }
+
+                            break;
+
+                        case MacroSubType.SpellStone:
+                            obj = World.Player.FindItemByCliloc(1095377);
+
+                            if (obj != null)
+                            {
+                                GameActions.DoubleClick(obj);
+                            }
+
+                            break;
+
+                        case MacroSubType.EnchantedApple:
+                            obj = World.Player.FindItemByCliloc(1032248);
+
+                            if (obj != null)
+                            {
+                                GameActions.DoubleClick(obj);
+                            }
+
+                            break;
+
+                        case MacroSubType.PetalsOfTrinsic:
+                            obj = World.Player.FindItemByCliloc(1062926);
+
+                            if (obj != null)
+                            {
+                                GameActions.DoubleClick(obj);
+                            }
+
+                            break;
+
+                        case MacroSubType.OrangePetals:
+                            obj = World.Player.FindItemByCliloc(1053122);
+
+                            if (obj != null)
+                            {
+                                GameActions.DoubleClick(obj);
+                            }
+
+                            break;
+
+                        case MacroSubType.SmokeBomb:
+                            obj = World.Player.FindItemByGraphic(0x2808);
+
+                            if (obj != null)
+                            {
+                                GameActions.DoubleClick(obj);
+                            }
+
+                            break;
+
+                        case MacroSubType.TrappedBox:
+                            Span<int> trapbox_clilocs = stackalloc int[7] { 1015093, 1022473, 1044309, 1022474, 1023709, 1027808, 1027809 };
+
+                            obj = World.Player.FindPreferredItemByCliloc(trapbox_clilocs);
+
+                            if (obj != null)
+                            {
+                                GameActions.DoubleClick(obj);
+                            }
+
+                            break;
+                    }
+
+                    break;
+
                 case MacroType.CloseAllHealthBars:
 
                     //Includes HealthBarGump/HealthBarGumpCustom
@@ -1920,6 +2084,12 @@ namespace ClassicUO.Game.Managers
                     count = 1 + MacroSubType.ZoomOut - MacroSubType.DefaultZoom;
 
                     break;
+
+                case MacroType.UseObject:
+                    offset = (int) MacroSubType.BestHealPotion;
+                    count = 1 + MacroSubType.SpellStone - MacroSubType.BestHealPotion;
+
+                    break;
             }
         }
     }
@@ -1948,6 +2118,7 @@ namespace ClassicUO.Game.Managers
                 case MacroType.SelectNearest:
                 case MacroType.UsePotion:
                 case MacroType.Zoom:
+                case MacroType.UseObject:
 
                     if (sub == MacroSubType.MSC_NONE)
                     {
@@ -2083,7 +2254,8 @@ namespace ClassicUO.Game.Managers
         ToggleVegetation,
         ToggleCaveTiles,
         CloseInactiveHealthBars,
-        CloseCorpses
+        CloseCorpses,
+        UseObject
     }
 
     internal enum MacroSubType
@@ -2318,6 +2490,21 @@ namespace ClassicUO.Game.Managers
 
         DefaultZoom,
         ZoomIn,
-        ZoomOut
+        ZoomOut,
+
+        BestHealPotion,
+        BestCurePotion,
+        BestRefreshPotion,
+        BestStrengthPotion,
+        BestAgiPotion,
+        BestExplosionPotion,
+        BestConflagPotion,
+        EnchantedApple,
+        PetalsOfTrinsic,
+        OrangePetals,
+        TrappedBox,
+        SmokeBomb,
+        HealStone,
+        SpellStone
     }
 }
