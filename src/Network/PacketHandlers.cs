@@ -4792,7 +4792,7 @@ namespace ClassicUO.Network
 
                 int argcliloc = 0;
 
-                string[] argcheck = argument.Split('#');
+                string[] argcheck = argument.Split(new[] {'#'}, StringSplitOptions.RemoveEmptyEntries);
 
                 if (argcheck.Length == 2)
                 {
