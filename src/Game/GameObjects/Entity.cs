@@ -70,7 +70,6 @@ namespace ClassicUO.Game.GameObjects
         public bool IsClicked;
         public uint LastStepTime;
         public string Name;
-        public int NameCliloc;
         public uint Serial;
         public HitsRequestStatus HitsRequest;
 

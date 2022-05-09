@@ -209,7 +209,8 @@ namespace ClassicUO.Game.GameObjects
                 {
                     Item item = (Item) i;
 
-                    if (item.NameCliloc == cliloc)
+
+                    if (cliloc == World.OPL.GetNameCliloc(item.Serial))
                     {
                         return item;
                     }
@@ -218,7 +219,7 @@ namespace ClassicUO.Game.GameObjects
                     {
                         found = FindItemByClilocInContainerRecursive(item, cliloc);
 
-                        if (found != null && found.NameCliloc == cliloc)
+                        if (found != null && cliloc == World.OPL.GetNameCliloc(found.Serial))
                         {
                             return found;
                         }

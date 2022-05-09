@@ -4841,6 +4841,7 @@ namespace ClassicUO.Network
 
             string name = string.Empty;
             string data = string.Empty;
+            int namecliloc = 0;
 
             if (list.Count != 0)
             {
@@ -4858,7 +4859,7 @@ namespace ClassicUO.Network
                         if (entity != null && !SerialHelper.IsMobile(serial))
                         {
                             entity.Name = str;
-                            entity.NameCliloc = s.Item3 > 0 ? s.Item3 : s.Item1;
+                            namecliloc = s.Item3 > 0 ? s.Item3 : s.Item1;
                         }
 
                         first = false;
@@ -4879,7 +4880,7 @@ namespace ClassicUO.Network
                 sb.Dispose();
             }
 
-            World.OPL.Add(serial, revision, name, data);
+            World.OPL.Add(serial, revision, name, data, namecliloc);
 
             if (inBuyList && container != null && SerialHelper.IsValid(container.Serial))
             {
