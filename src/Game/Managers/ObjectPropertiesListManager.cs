@@ -40,7 +40,7 @@ namespace ClassicUO.Game.Managers
         private readonly Dictionary<uint, ItemProperty> _itemsProperties = new Dictionary<uint, ItemProperty>();
 
 
-        public void Add(uint serial, uint revision, string name, string data)
+        public void Add(uint serial, uint revision, string name, string data, int namecliloc)
         {
             if (!_itemsProperties.TryGetValue(serial, out ItemProperty prop))
             {
@@ -56,6 +56,7 @@ namespace ClassicUO.Game.Managers
             prop.Revision = revision;
             prop.Name = name;
             prop.Data = data;
+            prop.NameCliloc = namecliloc;
         }
 
 
@@ -114,6 +115,16 @@ namespace ClassicUO.Game.Managers
             return false;
         }
 
+        public int GetNameCliloc(uint serial)
+        {
+            if (_itemsProperties.TryGetValue(serial, out ItemProperty p))
+            {
+                return p.NameCliloc;
+            }
+
+            return 0;
+        }
+
         public void Remove(uint serial)
         {
             _itemsProperties.Remove(serial);
@@ -132,6 +143,7 @@ namespace ClassicUO.Game.Managers
         public string Name;
         public uint Revision;
         public uint Serial;
+        public int NameCliloc;
 
         public string CreateData(bool extended)
         {
