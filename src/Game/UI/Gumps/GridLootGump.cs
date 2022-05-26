@@ -306,7 +306,8 @@ namespace ClassicUO.Game.UI.Gumps
         private bool ItemBelongsToGroup(Item it, int group)
         {
             // Note: items must be assigned to groups in a mutually-exclusive manner, so that each item occurs only once in the grid
-            if (it.IsMulti || it.Amount > 1)
+
+            if (it.ItemData.IsStackable)
                 return group > 0;
             else
                 return group == 0;
