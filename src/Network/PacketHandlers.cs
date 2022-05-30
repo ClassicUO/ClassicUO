@@ -2049,8 +2049,7 @@ namespace ClassicUO.Network
                 GameActions.RequestMobileStatus(World.Player);
                 NetClient.Socket.Send_OpenChat("");
 
-
-                //NetClient.Socket.Send(new PSkillsRequest(World.Player));
+                NetClient.Socket.Send_SkillsRequest(World.Player);
                 scene.DoubleClickDelayed(World.Player);
 
                 if (Client.Version >= Data.ClientVersion.CV_306E)
@@ -2720,8 +2719,14 @@ namespace ClassicUO.Network
             {
                 p.Skip(6);
             }
-
+          
             uint itemSerial = p.ReadUInt32BE();
+
+            // NOTE: ServUO doesn't send the (itemid + 0x8000) when the item has the hue and clientversion is under 70331.
+            //       It sends hue every time.
+            //       The patch is a workaround to figure when data contains the hue
+
+            var hasHue = (p.Remaining % 9) == 0;
 
             while (itemSerial != 0 && p.Position < p.Length)
             {
@@ -2736,7 +2741,7 @@ namespace ClassicUO.Network
                 {
                     item_hue = p.ReadUInt16BE();
                 }
-                else if ((itemGraphic & 0x8000) != 0)
+                else if (hasHue || (itemGraphic & 0x8000) != 0)
                 {
                     itemGraphic &= 0x7FFF;
                     item_hue = p.ReadUInt16BE();
