@@ -2722,12 +2722,6 @@ namespace ClassicUO.Network
           
             uint itemSerial = p.ReadUInt32BE();
 
-            // NOTE: ServUO doesn't send the (itemid + 0x8000) when the item has the hue and clientversion is under 70331.
-            //       It sends hue every time.
-            //       The patch is a workaround to figure when data contains the hue
-
-            var hasHue = (p.Remaining % 9) == 0;
-
             while (itemSerial != 0 && p.Position < p.Length)
             {
                 //if (!SerialHelper.IsItem(itemSerial))
@@ -2741,7 +2735,7 @@ namespace ClassicUO.Network
                 {
                     item_hue = p.ReadUInt16BE();
                 }
-                else if (hasHue || (itemGraphic & 0x8000) != 0)
+                else if ((itemGraphic & 0x8000) != 0)
                 {
                     itemGraphic &= 0x7FFF;
                     item_hue = p.ReadUInt16BE();
