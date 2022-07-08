@@ -45,7 +45,7 @@ namespace ClassicUO.IO.Resources
     internal class MultiMapLoader : UOFileLoader
     {
         private static MultiMapLoader _instance;
-        private readonly UOFileMul[] _facets = new UOFileMul[6];
+        private readonly UOFileMul[] _facets = new UOFileMul[256];
         private UOFile _file;
 
         private MultiMapLoader()
@@ -72,7 +72,7 @@ namespace ClassicUO.IO.Resources
                         _file = new UOFile(path, true);
                     }
 
-                    for (int i = 0; i < 6; i++)
+                    for (int i = 0; i < _facets.Length; i++)
                     {
                         path = UOFileManager.GetUOFilePath($"facet0{i}.mul");
 
