@@ -165,7 +165,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        public bool IsChessboard => Graphic == 0x091A || Graphic == 0x092E;
+        public bool IsChessboard => Graphic == 0x091A /*|| Graphic == 0x092E*/;
 
 
         private void BuildGump()
