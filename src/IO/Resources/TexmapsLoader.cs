@@ -69,43 +69,40 @@ namespace ClassicUO.IO.Resources
                     _file.FillEntries(ref Entries);
                     string pathdef = UOFileManager.GetUOFilePath("TexTerr.def");
 
-                    if (!File.Exists(pathdef))
+                    if (File.Exists(pathdef))
                     {
-                        return;
-                    }
-
-                    using (DefReader defReader = new DefReader(pathdef))
-                    {
-                        while (defReader.Next())
+                        using (DefReader defReader = new DefReader(pathdef))
                         {
-                            int index = defReader.ReadInt();
-
-                            if (index < 0 || index >= Entries.Length)
+                            while (defReader.Next())
                             {
-                                continue;
-                            }
+                                int index = defReader.ReadInt();
 
-                            int[] group = defReader.ReadGroup();
-
-                            if (group == null)
-                            {
-                                continue;
-                            }
-
-                            for (int i = 0; i < group.Length; i++)
-                            {
-                                int checkindex = group[i];
-
-                                if (checkindex < 0 || checkindex >= Entries.Length)
+                                if (index < 0 || index >= Entries.Length)
                                 {
                                     continue;
                                 }
 
-                                Entries[index] = Entries[checkindex];
+                                int[] group = defReader.ReadGroup();
+
+                                if (group == null)
+                                {
+                                    continue;
+                                }
+
+                                for (int i = 0; i < group.Length; i++)
+                                {
+                                    int checkindex = group[i];
+
+                                    if (checkindex < 0 || checkindex >= Entries.Length)
+                                    {
+                                        continue;
+                                    }
+
+                                    Entries[index] = Entries[checkindex];
+                                }
                             }
                         }
                     }
-
                     _spriteInfos = new SpriteInfo[Entries.Length];
                 }
             );

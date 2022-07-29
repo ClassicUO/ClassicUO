@@ -93,47 +93,44 @@ namespace ClassicUO.IO.Resources
 
                     string pathdef = UOFileManager.GetUOFilePath("gump.def");
 
-                    if (!File.Exists(pathdef))
+                    if (File.Exists(pathdef))
                     {
-                        return;
-                    }
-
-                    using (DefReader defReader = new DefReader(pathdef, 3))
-                    {
-                        while (defReader.Next())
+                        using (DefReader defReader = new DefReader(pathdef, 3))
                         {
-                            int ingump = defReader.ReadInt();
-
-                            if (ingump < 0 || ingump >= Constants.MAX_GUMP_DATA_INDEX_COUNT || ingump >= Entries.Length || Entries[ingump].Length > 0)
+                            while (defReader.Next())
                             {
-                                continue;
-                            }
+                                int ingump = defReader.ReadInt();
 
-                            int[] group = defReader.ReadGroup();
-
-                            if (group == null)
-                            {
-                                continue;
-                            }
-
-                            for (int i = 0; i < group.Length; i++)
-                            {
-                                int checkIndex = group[i];
-
-                                if (checkIndex < 0 || checkIndex >= Constants.MAX_GUMP_DATA_INDEX_COUNT || checkIndex >= Entries.Length || Entries[checkIndex].Length <= 0)
+                                if (ingump < 0 || ingump >= Constants.MAX_GUMP_DATA_INDEX_COUNT || ingump >= Entries.Length || Entries[ingump].Length > 0)
                                 {
                                     continue;
                                 }
 
-                                Entries[ingump] = Entries[checkIndex];
+                                int[] group = defReader.ReadGroup();
 
-                                Entries[ingump].Hue = (ushort) defReader.ReadInt();
+                                if (group == null)
+                                {
+                                    continue;
+                                }
 
-                                break;
+                                for (int i = 0; i < group.Length; i++)
+                                {
+                                    int checkIndex = group[i];
+
+                                    if (checkIndex < 0 || checkIndex >= Constants.MAX_GUMP_DATA_INDEX_COUNT || checkIndex >= Entries.Length || Entries[checkIndex].Length <= 0)
+                                    {
+                                        continue;
+                                    }
+
+                                    Entries[ingump] = Entries[checkIndex];
+
+                                    Entries[ingump].Hue = (ushort)defReader.ReadInt();
+
+                                    break;
+                                }
                             }
                         }
                     }
-
                     _spriteInfos = new SpriteInfo[Entries.Length];
                 }
             );
