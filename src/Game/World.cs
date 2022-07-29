@@ -163,7 +163,7 @@ namespace ClassicUO.Game
 
         public static ClientFeatures ClientFeatures { get; } = new ClientFeatures();
 
-        public static string ServerName { get; set; }
+        public static string ServerName { get; set; } = "_";
 
 
 
