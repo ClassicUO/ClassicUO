@@ -378,7 +378,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add(_paperDollInteractable);
 
             // Name and title
-            _titleLabel = new Label("", false, 0x0386, 185)
+            _titleLabel = new Label("", false, 0x0386, 185, font: 1)
             {
                 X = 39,
                 Y = 262
