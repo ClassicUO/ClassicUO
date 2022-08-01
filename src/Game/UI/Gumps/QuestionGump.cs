@@ -54,7 +54,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                new Label(message, false, 0x0386, 165)
+                new Label(message, false, 0x0386, 165, font: 1)
                 {
                     X = 33, Y = 30
                 }
