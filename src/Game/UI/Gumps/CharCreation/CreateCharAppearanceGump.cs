@@ -602,7 +602,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 1
             );
 
-            _paperDoll.Update();
+            _paperDoll.RequestUpdate();
         }
 
         private void AddCustomColorPicker
@@ -678,21 +678,21 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 _character.Hue = e.SelectedHue;
             }
 
-            _paperDoll.Update();
+            _paperDoll.RequestUpdate();
         }
 
         private void Facial_OnOptionSelected(object sender, int e)
         {
             CurrentOption[Layer.Beard] = e;
             UpdateEquipments();
-            _paperDoll.Update();
+            _paperDoll.RequestUpdate();
         }
 
         private void Hair_OnOptionSelected(object sender, int e)
         {
             CurrentOption[Layer.Hair] = e;
             UpdateEquipments();
-            _paperDoll.Update();
+            _paperDoll.RequestUpdate();
         }
 
         public override void OnButtonClick(int buttonID)

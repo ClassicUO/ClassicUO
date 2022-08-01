@@ -396,7 +396,7 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-        public override void Update(double totalTime, double frameTime)
+        public override void Update()
         {
             if (!World.InGame || IsDisposed)
             {
@@ -415,7 +415,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_updateTotal)
             {
-                int sum = 0;
+                long sum = 0;
 
                 foreach (TransactionItem t in _transactionItems.Values)
                 {
@@ -431,7 +431,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _playerGoldLabel.Text = World.Player.Gold.ToString();
             }
 
-            base.Update(totalTime, frameTime);
+            base.Update();
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
@@ -487,7 +487,7 @@ namespace ClassicUO.Game.UI.Gumps
                     shopItem.Graphic,
                     shopItem.Hue,
                     total,
-                    (ushort) shopItem.Price,
+                    shopItem.Price,
                     shopItem.ShopItemName
                 );
 
@@ -733,37 +733,6 @@ namespace ClassicUO.Game.UI.Gumps
                 return 0;
             }
 
-            private static AnimationDirection GetMobileAnimationDirection(ushort graphic, ref ushort hue, byte dirIndex)
-            {
-                if (graphic >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
-                {
-                    return null;
-                }
-
-                byte group = GetAnimGroup(graphic);
-                IndexAnimation index = AnimationsLoader.Instance.DataIndex[graphic];
-
-                AnimationDirection direction = index.Groups[group].Direction[dirIndex];
-
-                for (int i = 0; i < 2 && direction.FrameCount == 0; i++)
-                {
-                    if (!AnimationsLoader.Instance.LoadAnimationFrames(graphic, group, dirIndex, ref direction))
-                    {
-                        //direction = AnimationsLoader.Instance.GetCorpseAnimationGroup(ref graphic, ref group, ref hue2).Direction[dirIndex];
-                        //graphic = item.ItemData.AnimID;
-                        //group = GetAnimGroup(graphic);
-                        //index = AnimationsLoader.Instance.DataIndex[graphic];
-                        //direction = AnimationsLoader.Instance.GetBodyAnimationGroup(ref graphic, ref group, ref hue2, true).Direction[dirIndex];
-                        ////direction = index.Groups[group].Direction[1];
-                        //AnimationsLoader.Instance.AnimID = graphic;
-                        //AnimationsLoader.Instance.AnimGroup = group;
-                        //AnimationsLoader.Instance.Direction = dirIndex;
-                    }
-                }
-
-                return direction;
-            }
-
             public void SetName(string s, bool new_name)
             {
                 _name.Text = new_name ? $"{s}: {Price}" : string.Format(ResGumps.Item0Price1, s, Price);
@@ -781,26 +750,38 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (SerialHelper.IsMobile(LocalSerial))
                 {
-                    ushort hue2 = Hue;
-                    AnimationDirection direction = GetMobileAnimationDirection(Graphic, ref hue2, 1);
+                    ushort graphic = Graphic;
 
-                    if (direction != null && direction.SpriteInfos != null && direction.FrameCount != 0)
+                    if (graphic >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
+                    {
+                        return false;
+                    }
+
+                    byte group = GetAnimGroup(graphic);
+                    var frames = AnimationsLoader.Instance.GetAnimationFrames(graphic, group, 1, out var hue2, out _, true);
+
+                    if (frames.Length != 0)
                     {
                         hueVector = ShaderHueTranslator.GetHueVector(hue2, TileDataLoader.Instance.StaticData[Graphic].IsPartialHue, 1f);
 
-                        batcher.Draw
-                        (
-                            direction.SpriteInfos[0].Texture,
-                            new Rectangle
+                        ref var spriteInfo = ref frames[0];
+
+                        if (spriteInfo.Texture != null)
+                        {
+                            batcher.Draw
                             (
-                                x - 3, 
-                                y + 5 + 15,
-                                Math.Min(direction.SpriteInfos[0].UV.Width, 45),
-                                Math.Min(direction.SpriteInfos[0].UV.Height, 45)
-                            ),
-                            direction.SpriteInfos[0].UV,
-                            hueVector
-                        );
+                                spriteInfo.Texture,
+                                new Rectangle
+                                (
+                                    x - 3,
+                                    y + 5 + 15,
+                                    Math.Min(spriteInfo.UV.Width, 45),
+                                    Math.Min(spriteInfo.UV.Height, 45)
+                                ),
+                                spriteInfo.UV,
+                                hueVector
+                            );
+                        }
                     }
                 }
                 else if (SerialHelper.IsItem(LocalSerial))
@@ -863,7 +844,7 @@ namespace ClassicUO.Game.UI.Gumps
                 ushort graphic,
                 ushort hue,
                 int amount,
-                ushort price,
+                uint price,
                 string realname
             )
             {
@@ -1034,7 +1015,7 @@ namespace ClassicUO.Game.UI.Gumps
             public ushort Graphic { get; }
             public ushort Hue { get; }
 
-            public ushort Price { get; }
+            public uint Price { get; }
 
             public int Amount
             {

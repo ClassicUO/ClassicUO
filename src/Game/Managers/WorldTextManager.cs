@@ -44,12 +44,12 @@ namespace ClassicUO.Game.Managers
         private readonly List<uint> _toRemoveDamages = new List<uint>();
 
 
-        public override void Update(double totalTime, double frameTime)
+        public override void Update()
         {
-            base.Update(totalTime, frameTime);
+            base.Update();
 
 
-            UpdateDamageOverhead(totalTime, frameTime);
+            UpdateDamageOverhead();
 
             if (_toRemoveDamages.Count > 0)
             {
@@ -63,14 +63,13 @@ namespace ClassicUO.Game.Managers
         }
 
 
-        public override void Draw(UltimaBatcher2D batcher, int startX, int startY, int renderIndex, bool isGump = false)
+        public override void Draw(UltimaBatcher2D batcher, int startX, int startY, bool isGump = false)
         {
             base.Draw
             (
                 batcher,
                 startX,
                 startY,
-                renderIndex,
                 isGump
             );
 
@@ -102,7 +101,7 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        private void UpdateDamageOverhead(double totalTime, double frameTime)
+        private void UpdateDamageOverhead()
         {
             if (_subst.Count != 0)
             {

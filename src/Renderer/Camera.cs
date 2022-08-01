@@ -30,6 +30,7 @@
 
 #endregion
 
+using System;
 using System.Runtime.CompilerServices;
 using ClassicUO.Input;
 using Microsoft.Xna.Framework;
@@ -37,42 +38,27 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Renderer
 {
-    internal class Camera
+    class Camera
     {
-        private float[] _cameraZoomValues = new float[1] { 1f };
-        private Matrix _projection;
-        private Matrix _transform = Matrix.Identity, _inverseTransform = Matrix.Identity;
-        private bool _updateMatrixes = true, _updateProjection = true;
-        private int _zoomIndex;
+        private Matrix _transform = Matrix.Identity;
+        private Matrix _inverseTransform = Matrix.Identity;
+        private bool _updateMatrixes = true;
+        private float _lerpZoom;
+        private float _zoom;
 
 
-        public Matrix ViewTransformMatrix => TransformMatrix /** ProjectionMatrix*/;
-
-        public Matrix ProjectionMatrix
+        public Camera(float minZoomValue = 1f, float maxZoomValue = 1f, float zoomStep = 0.1f)
         {
-            get
-            {
-                if (_updateProjection)
-                {
-                    Matrix.CreateOrthographicOffCenter
-                    (
-                        0,
-                        Bounds.Width,
-                        Bounds.Height,
-                        0,
-                        0,
-                        -1,
-                        out _projection
-                    );
-
-                    _updateProjection = false;
-                }
-
-                return _projection;
-            }
+            ZoomMin = minZoomValue;
+            ZoomMax = maxZoomValue;
+            ZoomStep = zoomStep;
+            Zoom = _lerpZoom = 1f;
         }
 
-        public Matrix TransformMatrix
+
+        public Rectangle Bounds;
+
+        public Matrix ViewTransformMatrix
         {
             get
             {
@@ -82,111 +68,34 @@ namespace ClassicUO.Renderer
             }
         }
 
-        public Matrix InverseTransformMatrix
-        {
-            get
-            {
-                UpdateMatrices();
-
-                return _inverseTransform;
-            }
-        }
-
+        public float ZoomStep { get; private set; }
+        public float ZoomMin { get; private set; }
+        public float ZoomMax { get; private set; }
         public float Zoom
         {
-            get => _cameraZoomValues[_zoomIndex];
+            get => _zoom;
             set
             {
-                if (_cameraZoomValues[_zoomIndex] != value)
-                {
-                    // TODO: coding a better way to set zoom
-                    for (_zoomIndex = 0; _zoomIndex < _cameraZoomValues.Length; ++_zoomIndex)
-                    {
-                        if (_cameraZoomValues[_zoomIndex] == value)
-                        {
-                            break;
-                        }
-                    }
-
-                    // hack to trigger the bounds check and update matrices
-                    ZoomIndex = _zoomIndex;
-                }
-            }
-        }
-
-        public int ZoomIndex
-        {
-            get => _zoomIndex;
-            set
-            {
-                _updateMatrixes = true;
-                _zoomIndex = value;
-
-                if (_zoomIndex < 0)
-                {
-                    _zoomIndex = 0;
-                }
-                else if (_zoomIndex >= _cameraZoomValues.Length)
-                {
-                    _zoomIndex = _cameraZoomValues.Length - 1;
-                }
-            }
-        }
-
-        public int ZoomValuesCount => _cameraZoomValues.Length;
-        public Rectangle Bounds;
-        public Vector2 Origin;
-
-
-        public Point Position;
-
-        public void SetZoomValues(float[] values)
-        {
-            _cameraZoomValues = values;
-        }
-
-        public void SetGameWindowBounds(int x, int y, int width, int height)
-        {
-            if (Bounds.X != x || Bounds.Y != y || Bounds.Width != width || Bounds.Height != height)
-            {
-                Bounds.X = x;
-                Bounds.Y = y;
-                Bounds.Width = width;
-                Bounds.Height = height;
-
-                Origin.X = width / 2f;
-                Origin.Y = height / 2f;
-
-                //Position = Origin;
-
-                _updateMatrixes = true;
-                _updateProjection = true;
-            }
-        }
-
-        public void SetPosition(int x, int y)
-        {
-            if (Position.X != x || Position.Y != y)
-            {
-                Position.X = x;
-                Position.Y = y;
-
+                _zoom = MathHelper.Clamp(value, ZoomMin, ZoomMax);
                 _updateMatrixes = true;
             }
         }
 
-        public void SetPositionOffset(int x, int y)
-        {
-            SetPosition(Position.X + x, Position.Y + y);
-        }
 
-        public Viewport GetViewport()
-        {
-            return new Viewport(Bounds.X, Bounds.Y, Bounds.Width, Bounds.Height);
-        }
 
-        public void Update()
+        public void ZoomIn() => Zoom -= ZoomStep;
+
+        public void ZoomOut() => Zoom += ZoomStep;
+
+        public Viewport GetViewport() => new Viewport(Bounds.X, Bounds.Y, Bounds.Width, Bounds.Height);
+
+        public void Update(bool force)
         {
+            if (force)
+            {
+                _updateMatrixes = true;
+            }
+
             UpdateMatrices();
         }
 
@@ -237,23 +146,32 @@ namespace ClassicUO.Renderer
 
             Matrix temp;
 
-            Matrix.CreateTranslation(-Origin.X, -Origin.Y, 0f, out _transform);
+            var origin = new Vector2(Bounds.Width * 0.5f, Bounds.Height * 0.5f);
 
-            float zoom = 1f / Zoom;
+            Matrix.CreateTranslation(-origin.X, -origin.Y, 0f, out _transform);
 
-            if (zoom != 1f)
-            {
-                Matrix.CreateScale(zoom, zoom, 1f, out temp);
-                Matrix.Multiply(ref _transform, ref temp, out _transform);
-            }
+            CalculateLerpZoom();
 
-            Matrix.CreateTranslation(Origin.X, Origin.Y, 0f, out temp);
+            Matrix.CreateScale(_lerpZoom, _lerpZoom, 1f, out temp);
+            Matrix.Multiply(ref _transform, ref temp, out _transform);
+
+            Matrix.CreateTranslation(origin.X, origin.Y, 0f, out temp);
             Matrix.Multiply(ref _transform, ref temp, out _transform);
 
 
             Matrix.Invert(ref _transform, out _inverseTransform);
 
             _updateMatrixes = false;
+        }
+
+        private void CalculateLerpZoom()
+        {
+            float zoom = 1f / Zoom;
+
+            const float FADE_TIME = 12.0f;
+            const float SMOOTHING_FACTOR = (1.0f / FADE_TIME) * 60.0f;
+
+            _lerpZoom = zoom; // MathHelper.Lerp(_lerpZoom, zoom, SMOOTHING_FACTOR * Time.Delta);
         }
     }
 }

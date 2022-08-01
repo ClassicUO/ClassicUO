@@ -238,7 +238,7 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        public override void Update(double totalTime, double frameTime)
+        public override void Update()
         {
             if (HasScrollbar)
             {
@@ -257,7 +257,7 @@ namespace ClassicUO.Game.UI.Controls
                 ScrollY = _scrollBar.Value;
             }
 
-            base.Update(totalTime, frameTime);
+            base.Update();
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)

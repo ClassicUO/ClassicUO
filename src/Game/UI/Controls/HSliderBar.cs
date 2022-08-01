@@ -149,7 +149,19 @@ namespace ClassicUO.Game.UI.Controls
 
         public event EventHandler ValueChanged;
 
-      
+        public override void Update()
+        {
+            base.Update();
+
+            if (_clicked)
+            {
+                int x = Mouse.Position.X - X - ParentX;
+                int y = Mouse.Position.Y - Y - ParentY;
+
+                CalculateNew(x);
+            }
+        }
+
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
@@ -278,14 +290,6 @@ namespace ClassicUO.Game.UI.Controls
             }
 
             CalculateOffset();
-        }
-
-        protected override void OnMouseOver(int x, int y)
-        {
-            if (_clicked)
-            {
-                CalculateNew(x);
-            }
         }
 
         private void CalculateNew(int x)

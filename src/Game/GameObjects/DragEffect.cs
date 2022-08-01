@@ -48,12 +48,12 @@ namespace ClassicUO.Game.GameObjects
             EffectManager manager,
             uint src,
             uint trg,
-            int xSource,
-            int ySource,
-            int zSource,
-            int xTarget,
-            int yTarget,
-            int zTarget,
+            ushort xSource,
+            ushort ySource,
+            sbyte zSource,
+            ushort xTarget,
+            ushort yTarget,
+            sbyte zTarget,
             ushort graphic,
             ushort hue,
             int duration,
@@ -88,7 +88,7 @@ namespace ClassicUO.Game.GameObjects
             Graphic = graphic;
         }
 
-        public override void Update(double totalTime, double frameTime)
+        public override void Update()
         {
             if (_lastMoveTime > Time.Ticks)
             {
@@ -100,7 +100,7 @@ namespace ClassicUO.Game.GameObjects
 
             _lastMoveTime = Time.Ticks + 20;
 
-            base.Update(totalTime, frameTime);
+            base.Update();
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int posX, int posY, float depth)

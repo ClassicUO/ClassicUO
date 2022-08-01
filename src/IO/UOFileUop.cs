@@ -32,7 +32,6 @@
 
 using System;
 using System.Collections.Generic;
-using ClassicUO.Utility;
 
 namespace ClassicUO.IO
 {
@@ -51,12 +50,9 @@ namespace ClassicUO.IO
         }
 
         public int TotalEntriesCount { get; private set; }
+        public string Pattern => _pattern;
 
-        public bool TryGetUOPData(ulong hash, out UOFileIndex data)
-        {
-            return _hashes.TryGetValue(hash, out data);
-        }
-
+        
         protected override void Load()
         {
             base.Load();
@@ -162,6 +158,12 @@ namespace ClassicUO.IO
             base.Dispose();
         }
 
+
+        public bool TryGetUOPData(ulong hash, out UOFileIndex data)
+        {
+            return _hashes.TryGetValue(hash, out data);
+        }
+
         public override void FillEntries(ref UOFileIndex[] entries)
         {
             for (int i = 0; i < entries.Length; i++)
@@ -175,25 +177,6 @@ namespace ClassicUO.IO
                 }
             }
         }
-
-        public void FillEntries(ref UOFileIndex[] entries, bool clearHashes)
-        {
-            FillEntries(ref entries);
-
-            if (clearHashes)
-            {
-                ClearHashes();
-            }
-        }
-
-        //public unsafe T[] GetData<T>(int compressedSize, int uncompressedSize) where T : struct
-        //{
-        //    T[] data = new T[uncompressedSize];
-        //    IntPtr destPtr = (IntPtr) UnsafeMemoryManager.AsPointer(ref data);
-        //    ZLib.Decompress(PositionAddress, compressedSize, 0, destPtr, uncompressedSize);
-
-        //    return data;
-        //}
 
         internal static ulong CreateHash(string s)
         {

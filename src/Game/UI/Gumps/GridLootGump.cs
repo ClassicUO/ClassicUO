@@ -336,7 +336,7 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-        public override void Update(double totalTime, double frameTime)
+        public override void Update()
         {
             if (_corpse == null || _corpse.IsDestroyed || _corpse.OnGround && _corpse.Distance > 3)
             {
@@ -345,7 +345,7 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
-            base.Update(totalTime, frameTime);
+            base.Update();
 
             if (IsDisposed)
             {
@@ -381,7 +381,6 @@ namespace ClassicUO.Game.UI.Gumps
             if (_corpse != null && !_corpse.IsDestroyed && UIManager.MouseOverControl != null && (UIManager.MouseOverControl == this || UIManager.MouseOverControl.RootParent == this))
             {
                 SelectedObject.Object = _corpse;
-                SelectedObject.LastObject = _corpse;
                 SelectedObject.CorpseObject = _corpse;
             }
         }

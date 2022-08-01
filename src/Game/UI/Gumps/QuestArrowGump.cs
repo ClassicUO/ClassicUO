@@ -65,9 +65,9 @@ namespace ClassicUO.Game.UI.Gumps
             _my = y;
         }
 
-        public override void Update(double totalTime, double frameTime)
+        public override void Update()
         {
-            base.Update(totalTime, frameTime);
+            base.Update();
 
             if (!World.InGame)
             {
@@ -113,8 +113,8 @@ namespace ClassicUO.Game.UI.Gumps
             int goy = World.Player.Y - _my;
 
 
-            int x = (ProfileManager.CurrentProfile.GameWindowSize.X >> 1) - (gox - goy) * 22;
-            int y = (ProfileManager.CurrentProfile.GameWindowSize.Y >> 1) - (gox + goy) * 22;
+            int x = (Client.Game.Scene.Camera.Bounds.Width >> 1) - (gox - goy) * 22;
+            int y = (Client.Game.Scene.Camera.Bounds.Height >> 1) - (gox + goy) * 22;
 
             x -= (int) World.Player.Offset.X;
             y -= (int) (World.Player.Offset.Y - World.Player.Offset.Z);
@@ -166,31 +166,32 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
             }
 
+            var camera = scene.Camera;
 
             Point p = new Point(x, y);
             p = Client.Game.Scene.Camera.WorldToScreen(p);
-            p.X += ProfileManager.CurrentProfile.GameWindowPosition.X;
-            p.Y += ProfileManager.CurrentProfile.GameWindowPosition.Y;
+            p.X += camera.Bounds.X;
+            p.Y += camera.Bounds.Y;
             x = p.X;
             y = p.Y;
 
-            if (x < ProfileManager.CurrentProfile.GameWindowPosition.X)
+            if (x < camera.Bounds.X)
             {
-                x = ProfileManager.CurrentProfile.GameWindowPosition.X;
+                x = camera.Bounds.X;
             }
-            else if (x > ProfileManager.CurrentProfile.GameWindowPosition.X + ProfileManager.CurrentProfile.GameWindowSize.X - _arrow.Width)
+            else if (x > camera.Bounds.Right - _arrow.Width)
             {
-                x = ProfileManager.CurrentProfile.GameWindowPosition.X + ProfileManager.CurrentProfile.GameWindowSize.X - _arrow.Width;
+                x = camera.Bounds.Right - _arrow.Width;
             }
 
 
-            if (y < ProfileManager.CurrentProfile.GameWindowPosition.Y)
+            if (y < camera.Bounds.Y)
             {
-                y = ProfileManager.CurrentProfile.GameWindowPosition.Y;
+                y = camera.Bounds.Y;
             }
-            else if (y > ProfileManager.CurrentProfile.GameWindowPosition.Y + ProfileManager.CurrentProfile.GameWindowSize.Y - _arrow.Height)
+            else if (y > camera.Bounds.Bottom - _arrow.Height)
             {
-                y = ProfileManager.CurrentProfile.GameWindowPosition.Y + ProfileManager.CurrentProfile.GameWindowSize.Y - _arrow.Height;
+                y = camera.Bounds.Bottom - _arrow.Height;
             }
 
             X = x;

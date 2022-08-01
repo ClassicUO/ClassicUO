@@ -109,18 +109,18 @@ namespace ClassicUO.Game.UI.Controls
         public bool CanPickUp { get; set; }
 
 
-        public override void Update(double totalTime, double frameTime)
+        public override void Update()
         {
             if (IsDisposed)
             {
                 return;
             }
 
-            base.Update(totalTime, frameTime);
+            base.Update();
 
             if (World.InGame)
             {
-                if (CanPickUp && !ItemHold.Enabled && Mouse.LButtonPressed && UIManager.LastControlMouseDown(MouseButtonType.Left) == this && (Mouse.LastLeftButtonClickTime != 0xFFFF_FFFF && Mouse.LastLeftButtonClickTime != 0 && Mouse.LastLeftButtonClickTime + Mouse.MOUSE_DELAY_DOUBLE_CLICK < Time.Ticks || CanPickup()))
+                if (CanPickUp && !Client.Game.GameCursor.ItemHold.Enabled && Mouse.LButtonPressed && UIManager.LastControlMouseDown(MouseButtonType.Left) == this && (Mouse.LastLeftButtonClickTime != 0xFFFF_FFFF && Mouse.LastLeftButtonClickTime != 0 && Mouse.LastLeftButtonClickTime + Mouse.MOUSE_DELAY_DOUBLE_CLICK < Time.Ticks || CanPickup()))
                 {
                     AttemptPickUp();
                 }

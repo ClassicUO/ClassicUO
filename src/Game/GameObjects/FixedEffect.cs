@@ -46,9 +46,9 @@ namespace ClassicUO.Game.GameObjects
         public FixedEffect
         (
             EffectManager manager,
-            int sourceX,
-            int sourceY,
-            int sourceZ,
+            ushort sourceX,
+            ushort sourceY,
+            sbyte sourceZ,
             ushort graphic,
             ushort hue,
             int duration,
@@ -62,9 +62,9 @@ namespace ClassicUO.Game.GameObjects
         (
             EffectManager manager,
             uint sourceSerial,
-            int sourceX,
-            int sourceY,
-            int sourceZ,
+            ushort sourceX,
+            ushort sourceY,
+            sbyte sourceZ,
             ushort graphic,
             ushort hue,
             int duration,
@@ -83,13 +83,13 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public override void Update(double totalTime, double frameTime)
+        public override void Update()
         {
-            base.Update(totalTime, frameTime);
+            base.Update();
 
             if (!IsDestroyed)
             {
-                (int x, int y, int z) = GetSource();
+                (var x, var y, var z) = GetSource();
 
                 if (Source != null)
                 {
@@ -98,11 +98,7 @@ namespace ClassicUO.Game.GameObjects
 
                 if (X != x || Y != y || Z != z)
                 {
-                    X = (ushort) x;
-                    Y = (ushort) y;
-                    Z = (sbyte) z;
-                    UpdateScreenPosition();
-                    AddToTile();
+                    SetInWorldTile(x, y, z);
                 }
             }
         }

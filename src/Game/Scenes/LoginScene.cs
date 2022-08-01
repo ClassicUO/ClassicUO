@@ -79,35 +79,24 @@ namespace ClassicUO.Game.Scenes
         private int _reconnectTryCounter = 1;
         private bool _autoLogin;
 
-        public LoginScene() : base((int) SceneType.Login, false, false, true)
-        {
-        }
-
 
         public bool Reconnect { get; set; }
-
         public LoginSteps CurrentLoginStep { get; set; } = LoginSteps.Main;
-
         public ServerListEntry[] Servers { get; private set; }
-
         public CityInfo[] Cities { get; set; }
-
         public string[] Characters { get; private set; }
-
         public string PopupMessage { get; set; }
-
         public byte ServerIndex { get; private set; }
-
-        public static string Account { get; private set; }
-
+        public static string Account { get; internal set; }
         public string Password { get; private set; }
-
         public bool CanAutologin => _autoLogin || Reconnect;
         
 
         public override void Load()
         {
             base.Load();
+
+            Client.Game.Window.AllowUserResizing = false;
 
             _autoLogin = Settings.GlobalSettings.AutoLogin;
 
@@ -120,7 +109,7 @@ namespace ClassicUO.Game.Scenes
             NetClient.LoginSocket.Connected += NetClient_Connected;
             NetClient.LoginSocket.Disconnected += Login_NetClient_Disconnected;
 
-            Audio.PlayMusic(Audio.LoginMusicIndex, false, true);
+            Client.Game.Audio.PlayMusic(Client.Game.Audio.LoginMusicIndex, false, true);
 
             if (CanAutologin && CurrentLoginStep != LoginSteps.Main || CUOEnviroment.SkipLoginScreen)
             {
@@ -143,6 +132,14 @@ namespace ClassicUO.Game.Scenes
 
         public override void Unload()
         {
+            if (IsDestroyed)
+            {
+                return;
+            }
+
+            Client.Game.Audio?.StopMusic();
+            Client.Game.Audio?.StopSounds();
+
             UIManager.GetGump<LoginBackground>()?.Dispose();
 
             _currentGump?.Dispose();
@@ -154,17 +151,17 @@ namespace ClassicUO.Game.Scenes
             NetClient.LoginSocket.Disconnected -= Login_NetClient_Disconnected;
             //NetClient.PacketReceived -= NetClient_PacketReceived;
 
-            UIManager.GameCursor.IsLoading = false;
+            Client.Game.GameCursor.IsLoading = false;
             base.Unload();
         }
 
-        public override void Update(double totalTime, double frameTime)
+        public override void Update()
         {
-            base.Update(totalTime, frameTime);
+            base.Update();
 
             if (_lastLoginStep != CurrentLoginStep)
             {
-                UIManager.GameCursor.IsLoading = false;
+                Client.Game.GameCursor.IsLoading = false;
 
                 // this trick avoid the flickering
                 Gump g = _currentGump;
@@ -176,7 +173,7 @@ namespace ClassicUO.Game.Scenes
 
             if (Reconnect && (CurrentLoginStep == LoginSteps.PopUpMessage || CurrentLoginStep == LoginSteps.Main) && !NetClient.Socket.IsConnected && !NetClient.LoginSocket.IsConnected)
             {
-                if (_reconnectTime < totalTime)
+                if (_reconnectTime < Time.Ticks)
                 {
                     if (!string.IsNullOrEmpty(Account))
                     {
@@ -194,13 +191,15 @@ namespace ClassicUO.Game.Scenes
                         timeT = 1000;
                     }
 
-                    _reconnectTime = (long) totalTime + timeT;
+                    _reconnectTime = (long)Time.Ticks + timeT;
                     _reconnectTryCounter++;
                 }
             }
 
-            if (CUOEnviroment.NoServerPing == false && CurrentLoginStep == LoginSteps.CharacterCreation && Time.Ticks > _pingTime)
+            if ((CurrentLoginStep == LoginSteps.CharacterCreation || CurrentLoginStep == LoginSteps.CharacterSelection) && Time.Ticks > _pingTime)
             {
+                // Note that this will not be an ICMP ping, so it's better that this *not* be affected by -no_server_ping.
+
                 if (NetClient.Socket != null && NetClient.Socket.IsConnected)
                 {
                     NetClient.Socket.Statistics.SendPing();
@@ -242,7 +241,7 @@ namespace ClassicUO.Game.Scenes
                 case LoginSteps.EnteringBritania:
                 case LoginSteps.PopUpMessage:
                 case LoginSteps.CharacterCreationDone:
-                    UIManager.GameCursor.IsLoading = CurrentLoginStep != LoginSteps.PopUpMessage;
+                    Client.Game.GameCursor.IsLoading = CurrentLoginStep != LoginSteps.PopUpMessage;
 
                     return GetLoadingScreen();
 
@@ -279,6 +278,8 @@ namespace ClassicUO.Game.Scenes
                 {
                     case LoginSteps.Connecting:
                         labelText = ClilocLoader.Instance.GetString(3000002, ResGeneral.Connecting); // "Connecting..."
+                        
+                        showButtons = LoginButtons.Cancel;
 
                         break;
 

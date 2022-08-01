@@ -61,7 +61,7 @@ namespace ClassicUO.Game.UI.Gumps
         private const int TEXTBOX_HEIGHT = 25;
 
         private static Texture2D _logoTexture2D;
-        private Combobox _auraType, _filterType;
+        private Combobox _auraType;
         private Combobox _autoOpenCorpseOptions;
         private InputField _autoOpenCorpseRange;
 
@@ -1243,10 +1243,10 @@ namespace ClassicUO.Game.UI.Gumps
             );
 
             section4.Add(new Label(ResGumps.DragSelectStartingPosX, true, HUE_FONT));
-            section4.Add(_dragSelectStartX = new HSliderBar(startX, startY, 200, 0, _currentProfile.GameWindowSize.X, _currentProfile.DragSelectStartX, HSliderBarStyle.MetalWidgetRecessedBar, true, 0, HUE_FONT));
+            section4.Add(_dragSelectStartX = new HSliderBar(startX, startY, 200, 0, Client.Game.Scene.Camera.Bounds.Width, _currentProfile.DragSelectStartX, HSliderBarStyle.MetalWidgetRecessedBar, true, 0, HUE_FONT));
 
             section4.Add(new Label(ResGumps.DragSelectStartingPosY, true, HUE_FONT));
-            section4.Add(_dragSelectStartY = new HSliderBar(startX, startY, 200, 0, _currentProfile.GameWindowSize.Y, _currentProfile.DragSelectStartY, HSliderBarStyle.MetalWidgetRecessedBar, true, 0, HUE_FONT));
+            section4.Add(_dragSelectStartY = new HSliderBar(startX, startY, 200, 0, Client.Game.Scene.Camera.Bounds.Height, _currentProfile.DragSelectStartY, HSliderBarStyle.MetalWidgetRecessedBar, true, 0, HUE_FONT));
             section4.Add
             (
                 _dragSelectAsAnchor = AddCheckBox
@@ -1294,7 +1294,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _currentProfile.ShowSkillsChangedDeltaValue,
                     startX,
                     startY,
-                    200
+                    150
                 )
             );
 
@@ -1606,7 +1606,9 @@ namespace ClassicUO.Game.UI.Gumps
                 4
             );
 
-            _gameWindowPositionX.SetText(_currentProfile.GameWindowPosition.X.ToString());
+            var camera = Client.Game.Scene.Camera;
+
+            _gameWindowPositionX.SetText(camera.Bounds.X.ToString());
 
             section.AddRight
             (
@@ -1624,7 +1626,7 @@ namespace ClassicUO.Game.UI.Gumps
                 )
             );
 
-            _gameWindowPositionY.SetText(_currentProfile.GameWindowPosition.Y.ToString());
+            _gameWindowPositionY.SetText(camera.Bounds.Y.ToString());
 
 
             section.Add(AddLabel(null, ResGumps.GamePlayWindowSize, startX, startY));
@@ -1645,7 +1647,7 @@ namespace ClassicUO.Game.UI.Gumps
                 )
             );
 
-            _gameWindowWidth.SetText(_currentProfile.GameWindowSize.X.ToString());
+            _gameWindowWidth.SetText(camera.Bounds.Width.ToString());
 
             section.AddRight
             (
@@ -1663,12 +1665,15 @@ namespace ClassicUO.Game.UI.Gumps
                 )
             );
 
-            _gameWindowHeight.SetText(_currentProfile.GameWindowSize.Y.ToString());
+            _gameWindowHeight.SetText(camera.Bounds.Height.ToString());
 
 
             SettingsSection section2 = AddSettingsSection(box, "Zoom");
             section2.Y = section.Bounds.Bottom + 40;
             section2.Add(AddLabel(null, ResGumps.DefaultZoom, startX, startY));
+
+            var cameraZoomCount = (int)((camera.ZoomMax - camera.ZoomMin) / camera.ZoomStep);
+            var cameraZoomIndex = cameraZoomCount - (int)((camera.ZoomMax - camera.Zoom) / camera.ZoomStep);
 
             section2.AddRight
             (
@@ -1676,8 +1681,8 @@ namespace ClassicUO.Game.UI.Gumps
                 (
                     null,
                     0,
-                    Client.Game.Scene.Camera.ZoomValuesCount,
-                    Client.Game.Scene.Camera.ZoomIndex,
+                    cameraZoomCount,
+                    cameraZoomIndex,
                     startX,
                     startY,
                     100
@@ -1861,30 +1866,6 @@ namespace ClassicUO.Game.UI.Gumps
             section5.Add(AddLabel(null, ResGumps.TerrainShadowsLevel, startX, startY));
             section5.AddRight(_terrainShadowLevel = AddHSlider(null, Constants.MIN_TERRAIN_SHADOWS_LEVEL, Constants.MAX_TERRAIN_SHADOWS_LEVEL, _currentProfile.TerrainShadowsLevel, startX, startY, 200));
 
-
-            SettingsSection section6 = AddSettingsSection(box, "Filters");
-            section6.Y = section5.Bounds.Bottom + 40;
-            section6.Add(AddLabel(null, ResGumps.FilterType, startX, startY));
-
-            section6.AddRight
-            (
-                _filterType = AddCombobox
-                (
-                    null,
-                    new[]
-                    {
-                        ResGumps.OFF,
-                        string.Format(ResGumps.FilterTypeFormatON, ResGumps.ON, ResGumps.AnisotropicClamp),
-                        string.Format(ResGumps.FilterTypeFormatON, ResGumps.ON, ResGumps.LinearClamp)
-                    },
-                    _currentProfile.FilterType,
-                    startX,
-                    startY,
-                    200
-                )
-            );
-
-
             Add(rightArea, PAGE);
         }
 
@@ -1996,7 +1977,8 @@ namespace ClassicUO.Game.UI.Gumps
                                 name
                             )
                             {
-                                ButtonParameter = (int) Buttons.Last + 1 + rightArea.Children.Count
+                                ButtonParameter = (int) Buttons.Last + 1 + rightArea.Children.Count,
+                                CanMove = true
                             }
                         );
 
@@ -2018,24 +2000,17 @@ namespace ClassicUO.Game.UI.Gumps
 
                         nb.DragBegin += (sss, eee) =>
                         {
-                            if (UIManager.IsDragging || Math.Max(Math.Abs(Mouse.LDragOffset.X), Math.Abs(Mouse.LDragOffset.Y)) < 5 || nb.ScreenCoordinateX > Mouse.LClickPosition.X || nb.ScreenCoordinateX < Mouse.LClickPosition.X - nb.Width || nb.ScreenCoordinateY > Mouse.LClickPosition.Y || nb.ScreenCoordinateY + nb.Height < Mouse.LClickPosition.Y)
+                            if (UIManager.DraggingControl != this || UIManager.MouseOverControl != sss)
                             {
                                 return;
                             }
 
-                            MacroControl control = _macroControl.FindControls<MacroControl>().SingleOrDefault();
+                            UIManager.Gumps.OfType<MacroButtonGump>().FirstOrDefault(s => s._macro == _macroControl.Macro)?.Dispose();
 
-                            if (control == null)
-                            {
-                                return;
-                            }
+                            MacroButtonGump macroButtonGump = new MacroButtonGump(_macroControl.Macro, Mouse.Position.X, Mouse.Position.Y);
 
-                            UIManager.Gumps.OfType<MacroButtonGump>().FirstOrDefault(s => s._macro == control.Macro)?.Dispose();
-
-                            MacroButtonGump macroButtonGump = new MacroButtonGump(control.Macro, Mouse.Position.X, Mouse.Position.Y);
-
-                            macroButtonGump.X = Mouse.LClickPosition.X + (macroButtonGump.Width >> 1);
-                            macroButtonGump.Y = Mouse.LClickPosition.Y + (macroButtonGump.Height >> 1);
+                            macroButtonGump.X = Mouse.Position.X - (macroButtonGump.Width >> 1);
+                            macroButtonGump.Y = Mouse.Position.Y - (macroButtonGump.Height >> 1);
 
                             UIManager.Add(macroButtonGump);
 
@@ -2117,7 +2092,8 @@ namespace ClassicUO.Game.UI.Gumps
                     )
                     {
                         ButtonParameter = (int) Buttons.Last + 1 + rightArea.Children.Count,
-                        Tag = macro
+                        Tag = macro,
+                        CanMove = true
                     }
                 );
 
@@ -2134,7 +2110,7 @@ namespace ClassicUO.Game.UI.Gumps
                         return;
                     }
 
-                    if (UIManager.IsDragging || Math.Max(Math.Abs(Mouse.LDragOffset.X), Math.Abs(Mouse.LDragOffset.Y)) < 5 || nb.ScreenCoordinateX > Mouse.LClickPosition.X || nb.ScreenCoordinateX < Mouse.LClickPosition.X - nb.Width || nb.ScreenCoordinateY > Mouse.LClickPosition.Y || nb.ScreenCoordinateY + nb.Height < Mouse.LClickPosition.Y)
+                    if (UIManager.DraggingControl != this || UIManager.MouseOverControl != sss)
                     {
                         return;
                     }
@@ -2143,8 +2119,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                     MacroButtonGump macroButtonGump = new MacroButtonGump(m, Mouse.Position.X, Mouse.Position.Y);
 
-                    macroButtonGump.X = Mouse.LClickPosition.X + (macroButtonGump.Width >> 1);
-                    macroButtonGump.Y = Mouse.LClickPosition.Y + (macroButtonGump.Height >> 1);
+                    macroButtonGump.X = Mouse.Position.X - (macroButtonGump.Width >> 1);
+                    macroButtonGump.Y = Mouse.Position.Y - (macroButtonGump.Height >> 1);
 
                     UIManager.Add(macroButtonGump);
 
@@ -3788,17 +3764,17 @@ namespace ClassicUO.Game.UI.Gumps
             Settings.GlobalSettings.LoginMusicVolume = _loginMusicVolume.Value;
             Settings.GlobalSettings.LoginMusic = _loginMusic.IsChecked;
 
-            Client.Game.Scene.Audio.UpdateCurrentMusicVolume();
-            Client.Game.Scene.Audio.UpdateCurrentSoundsVolume();
+            Client.Game.Audio.UpdateCurrentMusicVolume();
+            Client.Game.Audio.UpdateCurrentSoundsVolume();
 
             if (!_currentProfile.EnableMusic)
             {
-                Client.Game.Scene.Audio.StopMusic();
+                Client.Game.Audio.StopMusic();
             }
 
             if (!_currentProfile.EnableSound)
             {
-                Client.Game.Scene.Audio.StopSounds();
+                Client.Game.Audio.StopSounds();
             }
 
             // speech
@@ -3827,8 +3803,9 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.EnableDeathScreen = _enableDeathScreen.IsChecked;
             _currentProfile.EnableBlackWhiteEffect = _enableBlackWhiteEffect.IsChecked;
 
-            Client.Game.Scene.Camera.ZoomIndex = _sliderZoom.Value;
-            _currentProfile.DefaultScale = Client.Game.Scene.Camera.Zoom;
+            var camera = Client.Game.Scene.Camera;
+            _currentProfile.DefaultScale = camera.Zoom = (_sliderZoom.Value * camera.ZoomStep) + camera.ZoomMin;
+
             _currentProfile.EnableMousewheelScaleZoom = _zoomCheckbox.IsChecked;
             _currentProfile.RestoreScaleAfterUnpressCtrl = _restorezoomCheckbox.IsChecked;
 
@@ -3849,7 +3826,7 @@ namespace ClassicUO.Game.UI.Gumps
             int.TryParse(_gameWindowWidth.Text, out int gameWindowSizeWidth);
             int.TryParse(_gameWindowHeight.Text, out int gameWindowSizeHeight);
 
-            if (gameWindowSizeWidth != _currentProfile.GameWindowSize.X || gameWindowSizeHeight != _currentProfile.GameWindowSize.Y)
+            if (gameWindowSizeWidth != Client.Game.Scene.Camera.Bounds.Width || gameWindowSizeHeight != Client.Game.Scene.Camera.Bounds.Height)
             {
                 if (vp != null)
                 {
@@ -3863,11 +3840,12 @@ namespace ClassicUO.Game.UI.Gumps
             int.TryParse(_gameWindowPositionX.Text, out int gameWindowPositionX);
             int.TryParse(_gameWindowPositionY.Text, out int gameWindowPositionY);
 
-            if (gameWindowPositionX != _currentProfile.GameWindowPosition.X || gameWindowPositionY != _currentProfile.GameWindowPosition.Y)
+            if (gameWindowPositionX != camera.Bounds.X || gameWindowPositionY != camera.Bounds.Y)
             {
                 if (vp != null)
                 {
-                    vp.Location = _currentProfile.GameWindowPosition = new Point(gameWindowPositionX, gameWindowPositionY);
+                    vp.SetGameWindowPosition(new Point(gameWindowPositionX, gameWindowPositionY));
+                    _currentProfile.GameWindowPosition = vp.Location;
                 }
             }
 
@@ -3881,14 +3859,6 @@ namespace ClassicUO.Game.UI.Gumps
                 _currentProfile.GameWindowLock = _gameWindowLock.IsChecked;
             }
 
-            if (_gameWindowFullsize.IsChecked && (gameWindowPositionX != -5 || gameWindowPositionY != -5))
-            {
-                if (_currentProfile.GameWindowFullSize == _gameWindowFullsize.IsChecked)
-                {
-                    _gameWindowFullsize.IsChecked = false;
-                }
-            }
-
             if (_currentProfile.GameWindowFullSize != _gameWindowFullsize.IsChecked)
             {
                 Point n = Point.Zero, loc = Point.Zero;
@@ -3898,8 +3868,8 @@ namespace ClassicUO.Game.UI.Gumps
                     if (vp != null)
                     {
                         n = vp.ResizeGameWindow(new Point(Client.Game.Window.ClientBounds.Width, Client.Game.Window.ClientBounds.Height));
-
-                        loc = _currentProfile.GameWindowPosition = vp.Location = new Point(-5, -5);
+                        vp.SetGameWindowPosition(new Point(-5, -5));
+                        _currentProfile.GameWindowPosition = vp.Location;
                     }
                 }
                 else
@@ -3907,7 +3877,8 @@ namespace ClassicUO.Game.UI.Gumps
                     if (vp != null)
                     {
                         n = vp.ResizeGameWindow(new Point(600, 480));
-                        loc = vp.Location = _currentProfile.GameWindowPosition = new Point(20, 20);
+                        vp.SetGameWindowPosition(new Point(20, 20));
+                        _currentProfile.GameWindowPosition = vp.Location;
                     }
                 }
 
@@ -3946,7 +3917,6 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.ShadowsStatics = _enableShadowsStatics.IsChecked;
             _currentProfile.TerrainShadowsLevel = _terrainShadowLevel.Value;
             _currentProfile.AuraUnderFeetType = _auraType.SelectedIndex;
-            _currentProfile.FilterType = _filterType.SelectedIndex;
 
             Client.Game.IsMouseVisible = Settings.GlobalSettings.RunMouseInASeparateThread = _runMouseInSeparateThread.IsChecked;
 
@@ -4217,10 +4187,12 @@ namespace ClassicUO.Game.UI.Gumps
 
         internal void UpdateVideo()
         {
-            _gameWindowWidth.SetText(_currentProfile.GameWindowSize.X.ToString());
-            _gameWindowHeight.SetText(_currentProfile.GameWindowSize.Y.ToString());
-            _gameWindowPositionX.SetText(_currentProfile.GameWindowPosition.X.ToString());
-            _gameWindowPositionY.SetText(_currentProfile.GameWindowPosition.Y.ToString());
+            var camera = Client.Game.Scene.Camera;
+
+            _gameWindowPositionX.SetText(camera.Bounds.X.ToString());
+            _gameWindowPositionY.SetText(camera.Bounds.Y.ToString());
+            _gameWindowWidth.SetText(camera.Bounds.Width.ToString());
+            _gameWindowHeight.SetText(camera.Bounds.Height.ToString());
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
@@ -4421,6 +4393,26 @@ namespace ClassicUO.Game.UI.Gumps
             //area.ReArrangeChildren();
 
             return section;
+        }
+
+        protected override void OnDragBegin(int x, int y)
+        {
+            if (UIManager.MouseOverControl?.RootParent == this)
+            {
+                UIManager.MouseOverControl.InvokeDragBegin(new Point(x, y));
+            }
+
+            base.OnDragBegin(x, y);
+        }
+
+        protected override void OnDragEnd(int x, int y)
+        {
+            if (UIManager.MouseOverControl?.RootParent == this)
+            {
+                UIManager.MouseOverControl.InvokeDragEnd(new Point(x, y));
+            }
+
+            base.OnDragEnd(x, y);
         }
 
         private enum Buttons

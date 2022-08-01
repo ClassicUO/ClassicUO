@@ -90,8 +90,6 @@ namespace ClassicUO.Game.GameObjects
                 mobile.LastAnimationChangeTime = Time.Ticks;
                 mobile.TextContainer?.Clear();
                 mobile.HitsPercentage = 0;
-                mobile.HitsTexture?.Destroy();
-                mobile.HitsTexture = null;
                 mobile.IsFlipped = false;
                 mobile.FrameInfo = Rectangle.Empty;
                 mobile.ObjectHandlesStatus = ObjectHandlesStatus.NONE;
@@ -113,18 +111,22 @@ namespace ClassicUO.Game.GameObjects
         private static readonly byte[,] _animationIdle =
         {
             {
-                (byte) LOW_ANIMATION_GROUP.LAG_FIDGET_1, (byte) LOW_ANIMATION_GROUP.LAG_FIDGET_2,
+                (byte) LOW_ANIMATION_GROUP.LAG_FIDGET_1, 
+                (byte) LOW_ANIMATION_GROUP.LAG_FIDGET_2,
                 (byte) LOW_ANIMATION_GROUP.LAG_FIDGET_1
             },
             {
-                (byte) HIGHT_ANIMATION_GROUP.HAG_FIDGET_1, (byte) HIGHT_ANIMATION_GROUP.HAG_FIDGET_2,
+                (byte) HIGHT_ANIMATION_GROUP.HAG_FIDGET_1,
+                (byte) HIGHT_ANIMATION_GROUP.HAG_FIDGET_2,
                 (byte) HIGHT_ANIMATION_GROUP.HAG_FIDGET_1
             },
             {
-                (byte) PEOPLE_ANIMATION_GROUP.PAG_FIDGET_1, (byte) PEOPLE_ANIMATION_GROUP.PAG_FIDGET_2,
+                (byte) PEOPLE_ANIMATION_GROUP.PAG_FIDGET_1,
+                (byte) PEOPLE_ANIMATION_GROUP.PAG_FIDGET_2,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_FIDGET_3
             }
         };
+
         private bool _isDead;
         private bool _isSA_Poisoned;
         private long _lastAnimationIdleDelay;
@@ -147,30 +149,32 @@ namespace ClassicUO.Game.GameObjects
 
 
         public Deque<Step> Steps { get; } = new Deque<Step>(Constants.MAX_STEP_COUNT);
-
-        public bool IsParalyzed => ((byte) Flags & 0x01) != 0;
-        public bool IsYellowHits => ((byte) Flags & 0x08) != 0;
-        public bool IsPoisoned => Client.Version >= ClientVersion.CV_7000 ? _isSA_Poisoned : ((byte) Flags & 0x04) != 0;
-        public bool IgnoreCharacters => ((byte) Flags & 0x10) != 0;
-
+        public bool IsParalyzed => (Flags & Flags.Frozen) != 0;
+        public bool IsYellowHits => (Flags & Flags.YellowBar) != 0;
+        public bool IsPoisoned => Client.Version >= ClientVersion.CV_7000 ? _isSA_Poisoned : (Flags & Flags.Poisoned) != 0;
+        public bool IgnoreCharacters => (Flags & Flags.IgnoreMobiles) != 0;
+       
         public bool IsDead
         {
-            get => Graphic == 0x0192 || Graphic == 0x0193 || Graphic >= 0x025F && Graphic <= 0x0260 || Graphic == 0x2B6 || Graphic == 0x02B7 || _isDead;
+            get => Graphic == 0x0192 || Graphic == 0x0193 ||
+                   (Graphic >= 0x025F && Graphic <= 0x0260) ||
+                   Graphic == 0x2B6 || Graphic == 0x02B7 ||
+                   _isDead;
             set => _isDead = value;
         }
 
-        public bool IsFlying => Client.Version >= ClientVersion.CV_7000 && ((byte) Flags & 0x04) != 0;
+        public bool IsFlying => Client.Version >= ClientVersion.CV_7000 && (Flags & Flags.Poisoned) != 0;
 
         public virtual bool InWarMode
         {
-            get => ((byte) Flags & 0x40) != 0;
+            get => (Flags & Flags.WarMode) != 0;
             set { }
         }
 
         public bool IsHuman => Graphic >= 0x0190 && Graphic <= 0x0193 || Graphic >= 0x00B7 && Graphic <= 0x00BA || Graphic >= 0x025D && Graphic <= 0x0260 || Graphic == 0x029A || Graphic == 0x029B || Graphic == 0x02B6 || Graphic == 0x02B7 || Graphic == 0x03DB || Graphic == 0x03DF || Graphic == 0x03E2 || Graphic == 0x02E8 || Graphic == 0x02E9 || Graphic == 0x04E5;
-
+      
         public bool IsGargoyle => Client.Version >= ClientVersion.CV_7000 && Graphic == 0x029A || Graphic == 0x029B;
-
+       
         public bool IsMounted
         {
             get
@@ -204,13 +208,13 @@ namespace ClassicUO.Game.GameObjects
         public bool IsRenamable;
         public bool IsRunning;
         public long LastStepSoundTime;
-        public ushort Mana;
-        public ushort ManaMax;
         public NotorietyFlag NotorietyFlag;
         public RaceType Race;
         public CharacterSpeedType SpeedMode = CharacterSpeedType.Normal;
         public ushort Stamina;
         public ushort StaminaMax;
+        public ushort Mana;
+        public ushort ManaMax;
         public int StepSoundOffset;
         public string Title = string.Empty;
 
@@ -250,21 +254,21 @@ namespace ClassicUO.Game.GameObjects
             _lastAnimationIdleDelay = Time.Ticks + (TIME + RandomHelper.GetValue(0, TIME));
         }
 
-        public override void Update(double totalTime, double frameTime)
+        public override void Update()
         {
             if (IsDestroyed)
             {
                 return;
             }
 
-            base.Update(totalTime, frameTime);
+            base.Update();
 
             if (_lastAnimationIdleDelay < Time.Ticks)
             {
                 SetIdleAnimation();
             }
 
-            ProcessAnimation(out _, true);
+            ProcessAnimation(true);
         }
 
         public void ClearSteps()
@@ -352,7 +356,6 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-
         public void SetAnimation
         (
             byte id,
@@ -401,38 +404,15 @@ namespace ClassicUO.Game.GameObjects
                     return;
                 }
 
-                ANIMATION_GROUPS_TYPE type = AnimationsLoader.Instance.DataIndex[graphic].Type;
+                byte action = 0;
+                ushort hue = 0;
 
-                if (AnimationsLoader.Instance.DataIndex[graphic].IsUOP && !AnimationsLoader.Instance.DataIndex[graphic].IsValidMUL)
-                {
-                    // do nothing ?
-                }
-                else
-                {
-                    if (!AnimationsLoader.Instance.DataIndex[graphic].HasBodyConversion)
-                    {
-                        ushort newGraphic = AnimationsLoader.Instance.DataIndex[graphic].Graphic;
-
-                        if (graphic != newGraphic)
-                        {
-                            graphic = newGraphic;
-
-                            ANIMATION_GROUPS_TYPE newType = AnimationsLoader.Instance.DataIndex[graphic].Type;
-
-                            if (newType != type)
-                            {
-                                type = newType;
-                            }
-                        }
-                    }
-                }
-
-                ANIMATION_FLAGS flags = AnimationsLoader.Instance.DataIndex[graphic].Flags;
-
+                AnimationsLoader.Instance.ReplaceAnimationValues(ref graphic, ref action, ref hue, out var useUOP);
+                ANIMATION_GROUPS_TYPE type = AnimationsLoader.Instance.GetAnimType(graphic);
+                ANIMATION_FLAGS flags = AnimationsLoader.Instance.GetAnimFlags(graphic);
                 ANIMATION_GROUPS animGroup = ANIMATION_GROUPS.AG_NONE;
 
                 bool isLowExtended = false;
-                bool isLow = false;
 
                 if ((flags & ANIMATION_FLAGS.AF_CALCULATE_OFFSET_LOW_GROUP_EXTENDED) != 0)
                 {
@@ -442,7 +422,6 @@ namespace ClassicUO.Game.GameObjects
                 else if ((flags & ANIMATION_FLAGS.AF_CALCULATE_OFFSET_BY_LOW_GROUP) != 0)
                 {
                     type = ANIMATION_GROUPS_TYPE.ANIMAL;
-                    isLow = true;
                 }
 
                 switch (type)
@@ -540,7 +519,7 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        protected virtual bool NoIterateAnimIndex()
+        private bool NoIterateAnimIndex()
         {
             return !ExecuteAnimation || (LastStepTime > Time.Ticks - Constants.WALKING_DELAY && Steps.Count == 0);
         }
@@ -549,9 +528,7 @@ namespace ClassicUO.Game.GameObjects
         {
             if (ProfileManager.CurrentProfile.EnableFootstepsSound && IsHuman && !IsHidden && !IsDead && !IsFlying)
             {
-                long ticks = Time.Ticks;
-
-                if (Steps.Count != 0 && LastStepSoundTime < ticks)
+                if (Steps.Count != 0 && LastStepSoundTime < Time.Ticks)
                 {
                     ref Step step = ref Steps.Back();
 
@@ -579,22 +556,21 @@ namespace ClassicUO.Game.GameObjects
 
                     StepSoundOffset = (incID + 1) % 2;
 
-                    Client.Game.Scene.Audio.PlaySoundWithDistance(soundID, step.X, step.Y);
-                    LastStepSoundTime = ticks + delaySound;
+                    Client.Game.Audio.PlaySoundWithDistance(soundID, step.X, step.Y);
+                    LastStepSoundTime = Time.Ticks + delaySound;
                 }
             }
         }
 
-        public override void ProcessAnimation(out byte dir, bool evalutate = false)
+        public override void ProcessAnimation(bool evalutate = false)
         {
-            ProcessSteps(out dir, evalutate);
-
+            ProcessSteps(out var dir, evalutate);
             ProcessFootstepsSound();
 
             if (LastAnimationChangeTime < Time.Ticks && !NoIterateAnimIndex())
             {
                 ushort id = GetGraphicForAnimation();
-                byte animGroup = GetGroupForAnimation(this, id, true);
+                byte action = GetGroupForAnimation(this, id, true);
 
                 bool mirror = false;
                 AnimationsLoader.Instance.GetAnimDirection(ref dir, ref mirror);
@@ -602,18 +578,11 @@ namespace ClassicUO.Game.GameObjects
 
                 if (id < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT && dir < 5)
                 {
-                    ushort hue = 0;
+                    var frames = AnimationsLoader.Instance.GetAnimationFrames(id, action, dir, out _, out _);
 
-                    AnimationDirection direction = AnimationsLoader.Instance.GetBodyAnimationGroup(ref id, ref animGroup, ref hue, true).Direction[dir];
-
-                    if (direction != null && (direction.FrameCount == 0 || direction.SpriteInfos == null))
+                    if (frames.Length != 0)
                     {
-                        AnimationsLoader.Instance.LoadAnimationFrames(id, animGroup, dir, ref direction);
-                    }
-
-                    if (direction != null && direction.FrameCount != 0)
-                    {
-                        int fc = direction.FrameCount;
+                        int fc = frames.Length;
 
                         int frameIndex = AnimIndex + (AnimationFromServer && !_isAnimationForwardDirection ? -1 : 1);
 
@@ -642,7 +611,7 @@ namespace ClassicUO.Game.GameObjects
                                 }
                                 else
                                 {
-                                    frameIndex = (byte)(direction.FrameCount - 1);
+                                    frameIndex = (byte)(frames.Length - 1);
                                 }
                             }
                             else
@@ -688,7 +657,7 @@ namespace ClassicUO.Game.GameObjects
                             }
                         }
 
-                        AnimIndex = (byte) (frameIndex % direction.FrameCount);
+                        AnimIndex = (byte) (frameIndex % frames.Length);
                     }
                     else if ((Serial & 0x80000000) != 0)
                     {

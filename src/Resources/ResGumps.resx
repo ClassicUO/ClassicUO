@@ -1418,7 +1418,7 @@ Client version: '{0}'</value>
     <value>You must have three unique skills chosen!</value>
   </data>
   <data name="ShowSkillsChangedMessageBy" xml:space="preserve">
-    <value>Inform when skills change by</value>
+    <value>Inform when skills change by (in tenths)</value>
   </data>
   <data name="ShowStatsChangedMessage" xml:space="preserve">
     <value>Inform when stats change</value>
@@ -1545,5 +1545,23 @@ Client version: '{0}'</value>
   </data>
   <data name="DragSelectStartingPosY" xml:space="preserve">
     <value>Starting Y position of health bars</value>
+  </data>
+  <data name="MapZoneFileName" xml:space="preserve">
+    <value>Show/Hide '{0}'</value>
+  </data>
+  <data name="MapZoneNone" xml:space="preserve">
+    <value>&lt;none&gt;</value>
+  </data>
+  <data name="MapZoneOptions" xml:space="preserve">
+    <value>Grid and Zone Options</value>
+  </data>
+  <data name="MapZoneReload" xml:space="preserve">
+    <value>Reload Map Zones</value>
+  </data>
+  <data name="MapZoneFileLoaded" xml:space="preserve">
+    <value>WorldMap zones loaded '{0}' </value>
+  </data>
+  <data name="GridIfZoomed" xml:space="preserve">
+    <value>Show/Hide 8x8 Grid if Zoomed</value>
   </data>
 </root>

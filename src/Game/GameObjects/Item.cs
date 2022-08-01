@@ -31,6 +31,7 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
@@ -86,7 +87,7 @@ namespace ClassicUO.Game.GameObjects
                 i.IsClicked = false;
                 i.IsDamageable = false;
                 i.Offset = Vector3.Zero;
-
+                i.HitsPercentage = 0;
                 i.Opened = false;
                 i.TextContainer?.Clear();
                 i.IsFlipped = false;
@@ -223,9 +224,7 @@ namespace ClassicUO.Game.GameObjects
             if (Opened)
             {
                 UIManager.GetGump<ContainerGump>(Serial)?.Dispose();
-
                 UIManager.GetGump<SpellbookGump>(Serial)?.Dispose();
-
                 UIManager.GetGump<MapGump>(Serial)?.Dispose();
 
                 if (IsCorpse)
@@ -234,7 +233,6 @@ namespace ClassicUO.Game.GameObjects
                 }
 
                 UIManager.GetGump<BulletinBoardGump>(Serial)?.Dispose();
-
                 UIManager.GetGump<SplitMenuGump>(Serial)?.Dispose();
 
                 Opened = false;
@@ -331,10 +329,6 @@ namespace ClassicUO.Game.GameObjects
                                 if (block->Flags == 0 || block->Flags == 0x100)
                                 {
                                     Multi m = Multi.Create(block->ID);
-                                    m.X = (ushort)(X + block->X);
-                                    m.Y = (ushort)(Y + block->Y);
-                                    m.Z = (sbyte)(Z + block->Z);
-                                    m.UpdateScreenPosition();
                                     m.MultiOffsetX = block->X;
                                     m.MultiOffsetY = block->Y;
                                     m.MultiOffsetZ = block->Z;
@@ -343,7 +337,9 @@ namespace ClassicUO.Game.GameObjects
                                     m.IsCustom = false;
                                     m.State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_DONT_REMOVE;
                                     m.IsMovable = ItemData.IsMultiMovable;
-                                    m.AddToTile();
+
+                                    m.SetInWorldTile((ushort)(X + block->X), (ushort)(Y + block->Y), (sbyte)(Z + block->Z));
+
                                     house.Components.Add(m);
 
                                     if (m.ItemData.IsMultiMovable)
@@ -405,10 +401,6 @@ namespace ClassicUO.Game.GameObjects
                     if (block->Flags != 0)
                     {
                         Multi m = Multi.Create(block->ID);
-                        m.X = (ushort) (X + block->X);
-                        m.Y = (ushort) (Y + block->Y);
-                        m.Z = (sbyte) (Z + block->Z);
-                        m.UpdateScreenPosition();
                         m.MultiOffsetX = block->X;
                         m.MultiOffsetY = block->Y;
                         m.MultiOffsetZ = block->Z;
@@ -417,7 +409,9 @@ namespace ClassicUO.Game.GameObjects
                         m.IsCustom = false;
                         m.State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_DONT_REMOVE;
                         m.IsMovable = ItemData.IsMultiMovable;
-                        m.AddToTile();
+
+                        m.SetInWorldTile((ushort)(X + block->X), (ushort)(Y + block->Y), (sbyte)(Z + block->Z));
+
                         house.Components.Add(m);
 
                         if (m.ItemData.IsMultiMovable)
@@ -485,7 +479,7 @@ namespace ClassicUO.Game.GameObjects
                     {
                         UsedLayer = false;
                     }
-
+                    
                     Layer = (Layer) Direction;
                     AllowedToDraw = true;
                 }
@@ -502,473 +496,113 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public override void Update(double totalTime, double frameTime)
+        public override void Update()
         {
             if (IsDestroyed)
             {
                 return;
             }
 
-            base.Update(totalTime, frameTime);
+            base.Update();
 
-            ProcessAnimation(out _);
+            ProcessAnimation();
         }
+
+        private static readonly Dictionary<ushort, ushort> _mounts = new Dictionary<ushort, ushort>()
+        {
+            { 0x3E90, 0x0114 }, // 16016 Reptalon
+            { 0x3E91, 0x0115 }, // 16017
+            { 0x3E92, 0x011C }, // 16018
+            { 0x3E94, 0x00F3 }, // 16020
+            { 0x3E95, 0x00A9 }, // 16021
+            { 0x3E97, 0x00C3 }, // 16023 Ethereal Giant Beetle
+            { 0x3E98, 0x00C2 }, // 16024 Ethereal Swamp Dragon
+            { 0x3E9A, 0x00C1 }, // 16026 Ethereal Ridgeback
+            { 0x3E9B, 0x00C0 }, // 16027
+            { 0x3E9D, 0x00C0 }, // 16029 Ethereal Unicorn
+            { 0x3E9C, 0x00BF }, // 16028 Ethereal Kirin
+            { 0x3E9E, 0x00BE }, // 16030
+            { 0x3EA0, 0x00E2 }, // 16032 light grey/horse3
+            { 0x3EA1, 0x00E4 }, // 16033 greybrown/horse4
+            { 0x3EA2, 0x00CC }, // 16034 dark brown/horse
+            { 0x3EA3, 0x00D2 }, // 16035 desert ostard
+            { 0x3EA4, 0x00DA }, // 16036 frenzied ostard (=zostrich)
+            { 0x3EA5, 0x00DB }, // 16037 forest ostard
+            { 0x3EA6, 0x00DC }, // 16038 Llama
+            { 0x3EA7, 0x0074 }, // 16039 Nightmare / Vortex
+            { 0x3EA8, 0x0075 }, // 16040 Silver Steed
+            { 0x3EA9, 0x0072 }, // 16041 Nightmare
+            { 0x3EAA, 0x0073 }, // 16042 Ethereal Horse
+            { 0x3EAB, 0x00AA }, // 16043 Ethereal Llama
+            { 0x3EAC, 0x00AB }, // 16044 Ethereal Ostard
+            { 0x3EAD, 0x0084 }, // 16045 Kirin
+            { 0x3EAF, 0x0078 }, // 16047 War Horse (Blood Red)
+            { 0x3EB0, 0x0079 }, // 16048 War Horse (Light Green)
+            { 0x3EB1, 0x0077 }, // 16049 War Horse (Light Blue)
+            { 0x3EB2, 0x0076 }, // 16050 War Horse (Purple)
+            { 0x3EB3, 0x0090 }, // 16051 Sea Horse (Medium Blue)
+            { 0x3EB4, 0x007A }, // 16052 Unicorn
+            { 0x3EB5, 0x00B1 }, // 16053 Nightmare
+            { 0x3EB6, 0x00B2 }, // 16054 Nightmare 4
+            { 0x3EB7, 0x00B3 }, // 16055 Dark Steed
+            { 0x3EB8, 0x00BC }, // 16056 Ridgeback
+            { 0x3EBA, 0x00BB }, // 16058 Ridgeback, Savage
+            { 0x3EBB, 0x0319 }, // 16059 Skeletal Mount
+            { 0x3EBC, 0x0317 }, // 16060 Beetle
+            { 0x3EBD, 0x031A }, // 16061 SwampDragon
+            { 0x3EBE, 0x031F }, // 16062 Armored Swamp Dragon
+            { 0x3EC3, 0x02D4 }, // 16067 Beetle
+            { 0x3ECE, 0x059A }, // serpentine dragon
+            { 0x3EC5, 0x00D5 }, // 16069
+            { 0x3F3A, 0x00D5 }, // 16186 snow bear ???
+            { 0x3EC6, 0x01B0 }, // 16070 Boura
+            { 0x3EC7, 0x04E6 }, // 16071 Tiger
+            { 0x3EC8, 0x04E7 }, // 16072 Tiger
+            { 0x3EC9, 0x042D }, // 16073
+            { 0x3ECA, 0x0579 }, // tarantula
+            { 0x3ECC, 0x0582 }, // 16016
+            { 0x3ED1, 0x05E6 }, // CoconutCrab
+            { 0x3ECB, 0x057F }, // Lasher
+            { 0x3ED0, 0x05A1 }, // SkeletalCat
+            { 0x3ED2, 0x05F6 }, // war boar
+            { 0x3ECD, 0x0580 }, // Palomino
+            { 0x3ECF, 0x05A0 }, // Eowmu
+            { 0x3ED3, 0x05F7 }, // capybara
+            { 0x3ED4, 0x060A },
+            { 0x3ED5, 0x060B }, // a wolf      
+            { 0x3ED6, 0x060C }, // an orange dog 2?
+            { 0x3ED7, 0x060D },
+            { 0x3ED8, 0x060F }, // a black dog?
+            { 0x3ED9, 0x0610 }, // a dobberman?
+        };
 
         public override ushort GetGraphicForAnimation()
         {
-            ushort graphic = Graphic;
+            var graphic = Graphic;
 
             if (Layer == Layer.Mount)
             {
-                switch (graphic)
+                // ethereal unicorn
+                if (graphic == 0x3E9B || graphic == 0x3E9D)
                 {
-                    case 0x3E90: // 16016 Reptalon
-
-                    {
-                        graphic = 0x0114;
-
-                        break;
-                    }
-
-                    case 0x3E91: // 16017
-
-                    {
-                        graphic = 0x0115;
-
-                        break;
-                    }
-
-                    case 0x3E92: // 16018
-
-                    {
-                        graphic = 0x011C;
-
-                        break;
-                    }
-
-                    case 0x3E94: // 16020
-
-                    {
-                        graphic = 0x00F3;
-
-                        break;
-                    }
-
-                    case 0x3E95: // 16021
-
-                    {
-                        graphic = 0x00A9;
-
-                        break;
-                    }
-
-                    case 0x3E97: // 16023 Ethereal Giant Beetle
-
-                    {
-                        graphic = 0x00C3;
-
-                        break;
-                    }
-
-                    case 0x3E98: // 16024 Ethereal Swamp Dragon
-
-                    {
-                        graphic = 0x00C2;
-
-                        break;
-                    }
-
-                    case 0x3E9A: // 16026 Ethereal Ridgeback
-
-                    {
-                        graphic = 0x00C1;
-
-                        break;
-                    }
-
-                    case 0x3E9B: // 16027
-                    case 0x3E9D: // 16029 Ethereal Unicorn
-
-                    {
-                        return 0x00C0;
-                    }
-
-                    case 0x3E9C: // 16028 Ethereal Kirin
-
-                    {
-                        graphic = 0x00BF;
-
-                        return graphic;
-                    }
-
-                    case 0x3E9E: // 16030
-
-                    {
-                        graphic = 0x00BE;
-
-                        break;
-                    }
-
-                    case 0x3EA0: // 16032 light grey/horse3
-
-                    {
-                        graphic = 0x00E2;
-
-                        break;
-                    }
-
-                    case 0x3EA1: // 16033 greybrown/horse4
-
-                    {
-                        graphic = 0x00E4;
-
-                        break;
-                    }
-
-                    case 0x3EA2: // 16034 dark brown/horse
-
-                    {
-                        graphic = 0x00CC;
-
-                        break;
-                    }
-
-                    case 0x3EA3: // 16035 desert ostard
-
-                    {
-                        graphic = 0x00D2;
-
-                        break;
-                    }
-
-                    case 0x3EA4: // 16036 frenzied ostard (=zostrich)
-
-                    {
-                        graphic = 0x00DA;
-
-                        break;
-                    }
-
-                    case 0x3EA5: // 16037 forest ostard
-
-                    {
-                        graphic = 0x00DB;
-
-                        break;
-                    }
-
-                    case 0x3EA6: // 16038 Llama
-
-                    {
-                        graphic = 0x00DC;
-
-                        break;
-                    }
-
-                    case 0x3EA7: // 16039 Nightmare / Vortex
-
-                    {
-                        graphic = 0x0074;
-
-                        break;
-                    }
-
-                    case 0x3EA8: // 16040 Silver Steed
-
-                    {
-                        graphic = 0x0075;
-
-                        break;
-                    }
-
-                    case 0x3EA9: // 16041 Nightmare
-
-                    {
-                        graphic = 0x0072;
-
-                        break;
-                    }
-
-                    case 0x3EAA: // 16042 Ethereal Horse
-
-                    {
-                        graphic = 0x0073;
-
-                        break;
-                    }
-
-                    case 0x3EAB: // 16043 Ethereal Llama
-
-                    {
-                        graphic = 0x00AA;
-
-                        break;
-                    }
-
-                    case 0x3EAC: // 16044 Ethereal Ostard
-
-                    {
-                        graphic = 0x00AB;
-
-                        break;
-                    }
-
-                    case 0x3EAD: // 16045 Kirin
-
-                    {
-                        graphic = 0x0084;
-
-                        break;
-                    }
-
-                    case 0x3EAF: // 16047 War Horse (Blood Red)
-
-                    {
-                        graphic = 0x0078;
-
-                        break;
-                    }
-
-                    case 0x3EB0: // 16048 War Horse (Light Green)
-
-                    {
-                        graphic = 0x0079;
-
-                        break;
-                    }
-
-                    case 0x3EB1: // 16049 War Horse (Light Blue)
-
-                    {
-                        graphic = 0x0077;
-
-                        break;
-                    }
-
-                    case 0x3EB2: // 16050 War Horse (Purple)
-
-                    {
-                        graphic = 0x0076;
-
-                        break;
-                    }
-
-                    case 0x3EB3: // 16051 Sea Horse (Medium Blue)
-
-                    {
-                        graphic = 0x0090;
-
-                        break;
-                    }
-
-                    case 0x3EB4: // 16052 Unicorn
-
-                    {
-                        graphic = 0x007A;
-
-                        break;
-                    }
-
-                    case 0x3EB5: // 16053 Nightmare
-
-                    {
-                        graphic = 0x00B1;
-
-                        break;
-                    }
-
-                    case 0x3EB6: // 16054 Nightmare 4
-
-                    {
-                        graphic = 0x00B2;
-
-                        break;
-                    }
-
-                    case 0x3EB7: // 16055 Dark Steed
-
-                    {
-                        graphic = 0x00B3;
-
-                        break;
-                    }
-
-                    case 0x3EB8: // 16056 Ridgeback
-
-                    {
-                        graphic = 0x00BC;
-
-                        break;
-                    }
-
-                    case 0x3EBA: // 16058 Ridgeback, Savage
-
-                    {
-                        graphic = 0x00BB;
-
-                        break;
-                    }
-
-                    case 0x3EBB: // 16059 Skeletal Mount
-
-                    {
-                        graphic = 0x0319;
-
-                        break;
-                    }
-
-                    case 0x3EBC: // 16060 Beetle
-
-                    {
-                        graphic = 0x0317;
-
-                        break;
-                    }
-
-                    case 0x3EBD: // 16061 SwampDragon
-
-                    {
-                        graphic = 0x031A;
-
-                        break;
-                    }
-
-                    case 0x3EBE: // 16062 Armored Swamp Dragon
-
-                    {
-                        graphic = 0x031F;
-
-                        break;
-                    }
-
-                    case 0x3EC3: //16067 Beetle
-
-                    {
-                        graphic = 0x02D4;
-
-                        break;
-                    }
-
-                    case 0x3ECE: // serpentine dragon
-                    {
-                        graphic = 0x059A;
-
-                        break;
-                    }
-
-                    case 0x3EC5: // 16069
-                    case 0x3F3A: // 16186 snow bear ???
-
-                    {
-                        graphic = 0x00D5;
-
-                        break;
-                    }
-
-                    case 0x3EC6: // 16070 Boura
-
-                    {
-                        graphic = 0x01B0;
-
-                        break;
-                    }
-
-                    case 0x3EC7: // 16071 Tiger
-
-                    {
-                        graphic = 0x04E6;
-
-                        break;
-                    }
-
-                    case 0x3EC8: // 16072 Tiger
-
-                    {
-                        graphic = 0x04E7;
-
-                        break;
-                    }
-
-                    case 0x3EC9: // 16073
-
-                    {
-                        graphic = 0x042D;
-
-                        break;
-                    }
-
-                    case 0x3ECA: // tarantula
-
-                    {
-                        graphic = 0x0579;
-
-                        break;
-                    }
-
-                    case 0x3ECC:
-                    {
-                        graphic = 0x0582;
-
-                        break;
-                    }
-
-                    case 0x3ED1: // CoconutCrab
-                    {
-                        graphic = 0x05E6;
-
-                        break;
-                    }
-
-                    case 0x3ECB: // Lasher
-                    {
-                        graphic = 0x057F;
-
-                        break;
-                    }
-
-                    case 0x3ED0: //SkeletalCat
-                    {
-                        graphic = 0x05A1;
-
-                        break;
-                    }
-
-                    case 0x3ED2: // war boar
-                    {
-                        graphic = 0x05F6;
-
-                        break;
-                    }
-
-                    case 0x3ECD: //Palomino
-                    {
-                        graphic = 0x0580;
-
-                        break;
-                    }
-
-                    case 0x3ECF: //Eowmu
-                    {
-                        graphic = 0x05A0;
-
-                        break;
-                    }
-
-                    case 0x3ED3: // capybara
-                    {
-                        graphic = 0x05F7;
-
-                        break;
-                    }
+                    return 0x00C0;
+                }
+
+                // ethereal kirin
+                if (graphic == 0x3E9C)
+                {
+                    return 0x00BF;
+                }
+
+                if (_mounts.TryGetValue(graphic, out var newGraphic))
+                {
+                    graphic = newGraphic;
                 }
 
                 if (ItemData.AnimID != 0)
                 {
                     graphic = ItemData.AnimID;
                 }
-
-                //else
-                //    graphic = 0xFFFF;
             }
             else if (IsCorpse)
             {
@@ -1051,166 +685,40 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public override void ProcessAnimation(out byte dir, bool evalutate = false)
+        public override void ProcessAnimation(bool evalutate = false)
         {
-            dir = 0;
-
             if (IsCorpse)
             {
-                dir = (byte) Layer;
+                var dir = (byte) Layer;
 
                 if (LastAnimationChangeTime < Time.Ticks)
                 {
                     byte frameIndex = (byte) (AnimIndex + (ExecuteAnimation ? 1 : 0));
                     ushort id = GetGraphicForAnimation();
 
-                    //FileManager.Animations.GetCorpseAnimationGroup(ref graphic, ref animGroup, ref newHue);
-
-                    //ushort corpseGraphic = FileManager.Animations.DataIndex[id].CorpseGraphic;
-
-                    //if (corpseGraphic != id && corpseGraphic != 0) 
-                    //    id = corpseGraphic;
-
                     bool mirror = false;
                     AnimationsLoader.Instance.GetAnimDirection(ref dir, ref mirror);
 
                     if (id < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT && dir < 5)
                     {
-                        byte animGroup = AnimationsLoader.Instance.GetDieGroupIndex(id, UsedLayer);
+                        byte action = AnimationsLoader.Instance.GetDeathAction(id, UsedLayer);
+                        var frames = AnimationsLoader.Instance.GetAnimationFrames(id, action, dir, out _, out _, isCorpse : true);
 
-                        ushort hue = 0;
-
-                        AnimationDirection direction = AnimationsLoader.Instance.GetCorpseAnimationGroup(ref id, ref animGroup, ref hue).Direction[dir];
-
-                        if (direction.FrameCount == 0 || direction.SpriteInfos == null)
+                        if (frames.Length > 0)
                         {
-                            AnimationsLoader.Instance.LoadAnimationFrames(id, animGroup, dir, ref direction);
-                        }
-
-                        if (direction.Address != 0 && direction.Size != 0 || direction.IsUOP)
-                        {
-                            int fc = direction.FrameCount;
-
-                            if (frameIndex >= fc)
+                            // when the animation is done, stop to animate the corpse
+                            if (frameIndex >= frames.Length)
                             {
-                                frameIndex = (byte) (fc - 1);
+                                frameIndex = (byte)(frames.Length - 1);
                             }
 
-                            AnimIndex = (byte) (frameIndex % direction.FrameCount);
+                            AnimIndex = (byte) (frameIndex % frames.Length);
                         }
                     }
 
                     LastAnimationChangeTime = Time.Ticks + Constants.CHARACTER_ANIMATION_DELAY;
                 }
             }
-            /*else if (evalutate && SerialHelper.IsMobile(Container) && Layer != Layer.Invalid)
-            {
-                ushort id = ItemData.AnimID;
-
-                if (id == 0)
-                {
-                    return;
-                }
-
-                Mobile parent = World.Mobiles.Get(Container);
-
-                if (parent != null)
-                {
-                    byte animGroup = Mobile.GetGroupForAnimation(parent, id, true);
-
-                    bool mirror = false;
-                    AnimationsLoader.Instance.GetAnimDirection(ref dir, ref mirror);
-                    int currentDelay = Constants.CHARACTER_ANIMATION_DELAY;
-
-                    if (id < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT && dir < 5)
-                    {
-                        ushort hue = 0;
-
-                        sbyte frameIndex = AnimIndex;
-
-                        if (parent.AnimationFromServer && !parent.AnimationForwardDirection)
-                        {
-                            frameIndex--;
-                        }
-                        else
-                        {
-                            frameIndex++;
-                        }
-
-                        AnimationDirection direction = AnimationsLoader.Instance.GetBodyAnimationGroup(ref id, ref animGroup, ref hue, true).Direction[dir];
-
-                        if (direction != null && (direction.FrameCount == 0 || direction.Frames == null))
-                        {
-                            AnimationsLoader.Instance.LoadAnimationFrames(id, animGroup, dir, ref direction);
-                        }
-
-                        if (direction != null && direction.FrameCount != 0)
-                        {
-                            direction.LastAccessTime = Time.Ticks;
-                            int fc = direction.FrameCount;
-
-                            if (parent.AnimationFromServer)
-                            {
-                                currentDelay += currentDelay * (parent.AnimationInterval + 1);
-
-                                if (parent.AnimationFrameCount == 0)
-                                {
-                                    parent.AnimationFrameCount = (byte)fc;
-                                }
-                                else
-                                {
-                                    fc = parent.AnimationFrameCount;
-                                }
-
-                                if (parent.AnimationForwardDirection)
-                                {
-                                    if (frameIndex >= fc)
-                                    {
-                                        frameIndex = 0;
-
-                                        if (parent.AnimationRepeat)
-                                        {
-                                            byte repCount = parent.AnimationRepeatMode;
-
-                                            if (repCount == 2)
-                                            {
-                                                repCount--;
-                                                parent.AnimationRepeatMode = repCount;
-                                            }
-                                        }
-                                    }
-                                }
-                                else
-                                {
-                                    if (frameIndex < 0)
-                                    {
-                                        if (fc == 0)
-                                        {
-                                            frameIndex = 0;
-                                        }
-                                        else
-                                        {
-                                            frameIndex = (sbyte)(fc - 1);
-                                        }
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                if (frameIndex >= fc)
-                                {
-                                    frameIndex = 0;
-                                }
-                            }
-
-                            AnimIndex = frameIndex;
-                        }
-                    }
-
-                    //LastAnimationChangeTime = Time.Ticks + currentDelay;
-                }
-            }
-            */
         }
     }
 }

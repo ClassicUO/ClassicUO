@@ -239,7 +239,7 @@ namespace ClassicUO.IO.Resources
             );
         }
 
-        private bool TryGetSound(int sound, out byte[] data, out string name)
+        private unsafe bool TryGetSound(int sound, out byte[] data, out string name)
         {
             data = null;
             name = null;
@@ -263,17 +263,27 @@ namespace ClassicUO.IO.Resources
 
             _file.Seek(offset);
 
-            byte[] stringBuffer = _file.ReadArray<byte>(40);
-            data = _file.ReadArray<byte>(entry.Length - 40);
+            const int STRING_BUFFER_SIZE = 40;
 
-            name = Encoding.UTF8.GetString(stringBuffer);
-            int end = name.IndexOf('\0');
-
-            if (end >= 0)
+            for (int i = 0; i < STRING_BUFFER_SIZE; ++i)
             {
-                name = name.Substring(0, end);
+                if (_file.ReadByte() == 0)
+                {
+                    name = Encoding.UTF8.GetString((byte*)(_file.StartAddress.ToInt64() + offset), i);
+
+                    break;
+                }
             }
 
+            _file.Seek(offset + STRING_BUFFER_SIZE);
+
+            data = new byte[entry.Length - STRING_BUFFER_SIZE];
+
+            for (int i = 0; i < data.Length; ++i)
+            {
+                data[i] = _file.ReadByte();
+            }
+            
             return true;
         }
 
@@ -403,14 +413,12 @@ namespace ClassicUO.IO.Resources
                 if (_sounds[i] != null)
                 {
                     _sounds[i].Dispose();
-
                     _sounds[i] = null;
                 }
 
                 if (_musics[i] != null)
                 {
                     _musics[i].Dispose();
-
                     _musics[i] = null;
                 }
             }

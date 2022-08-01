@@ -370,7 +370,7 @@ namespace ClassicUO.Renderer
 
                     if (x >= 0)
                     {
-                        char c = x >= info.Data.Count ? '\n' : info.Data[x].Item;
+                        char c = x >= info.Data.Length ? '\n' : info.Data[x].Item;
 
                         if (IsUnicode)
                         {

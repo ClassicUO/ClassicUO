@@ -71,7 +71,7 @@ namespace ClassicUO.Game.UI.Controls
         public bool DrawBackgroundCurrentIndex;
         public bool IsSelected, ForceHover;
 
-        public override void Update(double totalTime, double frameTime)
+        public override void Update()
         {
             if (IsSelected)
             {
@@ -93,7 +93,7 @@ namespace ClassicUO.Game.UI.Controls
             }
 
 
-            base.Update(totalTime, frameTime);
+            base.Update();
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)

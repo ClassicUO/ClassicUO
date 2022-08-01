@@ -64,11 +64,11 @@ namespace ClassicUO.Game
             {
                 if (war && ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.EnableMusic)
                 {
-                    Client.Game.Scene.Audio.PlayMusic((RandomHelper.GetValue(0, 3) % 3) + 38, true);
+                    Client.Game.Audio.PlayMusic((RandomHelper.GetValue(0, 3) % 3) + 38, true);
                 }
                 else if (!war)
                 {
-                    Client.Game.Scene.Audio.StopWarMusic();
+                    Client.Game.Audio.StopWarMusic();
                 }
             }
 
@@ -128,7 +128,7 @@ namespace ClassicUO.Game
 
         public static void OpenStatusBar()
         {
-            Client.Game.Scene.Audio.StopWarMusic();
+            Client.Game.Audio.StopWarMusic();
 
             if (StatusGumpBase.GetStatusGump() == null)
             {
@@ -463,7 +463,7 @@ namespace ClassicUO.Game
             bool is_gump = false
         )
         {
-            if (World.Player.IsDead || ItemHold.Enabled)
+            if (World.Player.IsDead || Client.Game.GameCursor.ItemHold.Enabled)
             {
                 return false;
             }
@@ -504,9 +504,9 @@ namespace ClassicUO.Game
                 amount = item.Amount;
             }
 
-            ItemHold.Clear();
-            ItemHold.Set(item, (ushort) amount, offset);
-            ItemHold.IsGumpTexture = is_gump;
+            Client.Game.GameCursor.ItemHold.Clear();
+            Client.Game.GameCursor.ItemHold.Set(item, (ushort) amount, offset);
+            Client.Game.GameCursor.ItemHold.IsGumpTexture = is_gump;
             Socket.Send_PickUpRequest(item, (ushort) amount);
 
             if (item.OnGround)
@@ -523,7 +523,7 @@ namespace ClassicUO.Game
 
         public static void DropItem(uint serial, int x, int y, int z, uint container)
         {
-            if (ItemHold.Enabled && !ItemHold.IsFixedPosition && (ItemHold.Serial != container || ItemHold.ItemData.IsStackable))
+            if (Client.Game.GameCursor.ItemHold.Enabled && !Client.Game.GameCursor.ItemHold.IsFixedPosition && (Client.Game.GameCursor.ItemHold.Serial != container || Client.Game.GameCursor.ItemHold.ItemData.IsStackable))
             {
                 if (Client.Version >= ClientVersion.CV_6017)
                 {
@@ -543,24 +543,24 @@ namespace ClassicUO.Game
                                                 container);
                 }
 
-                ItemHold.Enabled = false;
-                ItemHold.Dropped = true;
+                Client.Game.GameCursor.ItemHold.Enabled = false;
+                Client.Game.GameCursor.ItemHold.Dropped = true;
             }
         }
 
         public static void Equip(uint container = 0)
         {
-            if (ItemHold.Enabled && !ItemHold.IsFixedPosition && ItemHold.ItemData.IsWearable)
+            if (Client.Game.GameCursor.ItemHold.Enabled && !Client.Game.GameCursor.ItemHold.IsFixedPosition && Client.Game.GameCursor.ItemHold.ItemData.IsWearable)
             {
                 if (!SerialHelper.IsValid(container))
                 {
                     container = World.Player.Serial;
                 }
 
-                Socket.Send_EquipRequest(ItemHold.Serial, (Layer)ItemHold.ItemData.Layer, container);
+                Socket.Send_EquipRequest(Client.Game.GameCursor.ItemHold.Serial, (Layer)Client.Game.GameCursor.ItemHold.ItemData.Layer, container);
 
-                ItemHold.Enabled = false;
-                ItemHold.Dropped = true;
+                Client.Game.GameCursor.ItemHold.Enabled = false;
+                Client.Game.GameCursor.ItemHold.Dropped = true;
             }
         }
 

@@ -54,6 +54,8 @@ namespace ClassicUO.Network
         /// </summary>
         public int Length { get; private set; }
 
+        public byte this[int index] => _buffer[(_head + index) % _buffer.Length];
+
         /// <summary>
         ///     Clears the byte queue
         /// </summary>
@@ -177,26 +179,38 @@ namespace ClassicUO.Network
             return size;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public byte GetID()
+        public int DequeSegment(int size, out ArraySegment<byte> segment)
         {
-            if (Length >= 1)
+            if (size > Length)
             {
-                return _buffer[_head];
+                size = Length;
             }
 
-            return 0xFF;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int GetLength()
-        {
-            if (Length >= 3)
+            if (size == 0)
             {
-                return _buffer[(_head + 2) % _buffer.Length] | (_buffer[(_head + 1) % _buffer.Length] << 8);
+                segment = new ArraySegment<byte>();
+
+                return 0;
             }
 
-            return 0;
+            if (_head >= _tail)
+            {
+                int rightLength = _buffer.Length - _head;
+                size = Math.Min(size, rightLength);
+            }
+
+            segment = new ArraySegment<byte>(_buffer, _head, size);
+
+            _head = (_head + size) % _buffer.Length;
+            Length -= size;
+
+            if (Length == 0)
+            {
+                _head = 0;
+                _tail = 0;
+            }
+
+            return size;
         }
     }
 }

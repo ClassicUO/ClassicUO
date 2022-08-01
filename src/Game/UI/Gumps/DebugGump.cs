@@ -46,12 +46,12 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class DebugGump : Gump
     {
-        private const string DEBUG_STRING_0 = "- FPS: {0} (Min={1}, Max={2}), Zoom: {3}, Total Objs: {4}\n";
+        private const string DEBUG_STRING_0 = "- FPS: {0} (Min={1}, Max={2}), Zoom: {3:0.00}, Total Objs: {4}\n";
         private const string DEBUG_STRING_1 = "- Mobiles: {0}   Items: {1}   Statics: {2}   Multi: {3}   Lands: {4}   Effects: {5}\n";
         private const string DEBUG_STRING_2 = "- CharPos: {0}\n- Mouse: {1}\n- InGamePos: {2}\n";
         private const string DEBUG_STRING_3 = "- Selected: {0}";
 
-        private const string DEBUG_STRING_SMALL = "FPS: {0}\nZoom: {1}";
+        private const string DEBUG_STRING_SMALL = "FPS: {0}\nZoom: {1:0.00}";
         private const string DEBUG_STRING_SMALL_NO_ZOOM = "FPS: {0}";
         private static Point _last_position = new Point(-1, -1);
 
@@ -101,9 +101,14 @@ namespace ClassicUO.Game.UI.Gumps
             return false;
         }
 
-        public override void Update(double totalTime, double frameTime)
+        public override void Update()
         {
-            base.Update(totalTime, frameTime);
+            base.Update();
+
+            if (IsDisposed)
+            {
+                return;
+            }
 
             if (Time.Ticks > _timeToUpdate)
             {
@@ -164,14 +169,21 @@ namespace ClassicUO.Game.UI.Gumps
                         );
                     }
                 }
-                else if (scene != null && scene.Camera.Zoom != 1f)
-                {
-                    sb.Append(string.Format(DEBUG_STRING_SMALL, CUOEnviroment.CurrentRefreshRate, !World.InGame ? 1f : scene.Camera.Zoom));
-                }
                 else
                 {
-                    sb.Append(string.Format(DEBUG_STRING_SMALL_NO_ZOOM, CUOEnviroment.CurrentRefreshRate));
+                    var cameraZoomCount = (int)((scene.Camera.ZoomMax - scene.Camera.ZoomMin) / scene.Camera.ZoomStep);
+                    var cameraZoomIndex = cameraZoomCount - (int)((scene.Camera.ZoomMax - scene.Camera.Zoom) / scene.Camera.ZoomStep);
+
+                    if (scene != null && cameraZoomIndex != 5)
+                    {
+                        sb.Append(string.Format(DEBUG_STRING_SMALL, CUOEnviroment.CurrentRefreshRate, !World.InGame ? 1f : scene.Camera.Zoom));
+                    }
+                    else
+                    {
+                        sb.Append(string.Format(DEBUG_STRING_SMALL_NO_ZOOM, CUOEnviroment.CurrentRefreshRate));
+                    }
                 }
+                
 
                 _cacheText = sb.ToString();
 

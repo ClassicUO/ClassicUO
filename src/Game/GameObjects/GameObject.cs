@@ -36,6 +36,7 @@ using ClassicUO.Configuration;
 using ClassicUO.Data;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
+using ClassicUO.Game.Map;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
@@ -49,8 +50,6 @@ namespace ClassicUO.Game.GameObjects
 
     internal abstract partial class GameObject : BaseGameObject
     {
-        private Point _screenPosition;
-
         public bool IsDestroyed { get; protected set; }
         public bool IsPositionChanged { get; protected set; }
         public TextContainer TextContainer { get; private set; }
@@ -85,13 +84,12 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public virtual void Update(double totalTime, double frameTime)
+        public virtual void Update()
         {
         }
 
         public abstract bool CheckMouseSelection();
 
-        public int CurrentRenderIndex;
         // FIXME: remove it
         public sbyte FoliageIndex = -1;
         public ushort Graphic;
@@ -100,7 +98,6 @@ namespace ClassicUO.Game.GameObjects
         public short PriorityZ;
         public GameObject TNext;
         public GameObject TPrevious;
-        public byte UseInRender;
         public ushort X, Y;
         public sbyte Z;
         public GameObject RenderListNext;
@@ -117,23 +114,26 @@ namespace ClassicUO.Game.GameObjects
             );
         }
 
-        public void AddToTile(int x, int y)
-        {
-            if (World.Map != null)
-            {
-                RemoveFromTile();
-
-                if (!IsDestroyed)
-                {
-                    World.Map.GetChunk(x, y)?.AddGameObject(this, x % 8, y % 8);
-                }
-            }
-        }
 
         public void AddToTile()
         {
             AddToTile(X, Y);
         }
+
+        public void AddToTile(int x, int y)
+        {
+            AddToTile(World.Map?.GetChunk(x, y), x % 8, y % 8);
+        }
+
+       public void AddToTile(Chunk chunk, int chunkX, int chunkY)
+       {
+            RemoveFromTile();
+
+            if (!IsDestroyed && chunk != null)
+            {
+                chunk.AddGameObject(this, chunkX, chunkY);
+            }
+       }
 
         public void RemoveFromTile()
         {
@@ -157,21 +157,27 @@ namespace ClassicUO.Game.GameObjects
 
         public void UpdateScreenPosition()
         {
-            _screenPosition.X = (X - Y) * 22;
-            _screenPosition.Y = (X + Y) * 22 - (Z << 2);
             IsPositionChanged = true;
             OnPositionChanged();
         }
 
         public void UpdateRealScreenPosition(int offsetX, int offsetY)
         {
-            RealScreenPosition.X = _screenPosition.X - offsetX - 22;
-            RealScreenPosition.Y = _screenPosition.Y - offsetY - 22;
+            RealScreenPosition.X = ((X - Y) * 22) - offsetX - 22;
+            RealScreenPosition.Y = ((X + Y) * 22 - (Z << 2)) - offsetY - 22;
             IsPositionChanged = false;
 
             UpdateTextCoordsV();
         }
 
+        public void SetInWorldTile(ushort x, ushort y, sbyte z)
+        {
+            X = x;
+            Y = y;
+            Z = z;
+            UpdateScreenPosition();
+            AddToTile(x, y);
+        }
 
         public void AddMessage(MessageType type, string message, TextType text_type)
         {
@@ -248,7 +254,7 @@ namespace ClassicUO.Game.GameObjects
             int offsetY = 0;
 
             int minX = 6;
-            int maxX = minX + ProfileManager.CurrentProfile.GameWindowSize.X - 6;
+            int maxX = minX + Client.Game.Scene.Camera.Bounds.Width - 6;
             int minY = 0;
             //int maxY = minY + ProfileManager.CurrentProfile.GameWindowSize.Y - 6;
 
@@ -370,10 +376,7 @@ namespace ClassicUO.Game.GameObjects
             IsPositionChanged = false;
             Hue = 0;
             Offset = Vector3.Zero;
-            CurrentRenderIndex = 0;
-            UseInRender = 0;
             RealScreenPosition = Point.Zero;
-            _screenPosition = Point.Zero;
             IsFlipped = false;
             Graphic = 0;
             ObjectHandlesStatus = ObjectHandlesStatus.NONE;
@@ -387,6 +390,10 @@ namespace ClassicUO.Game.GameObjects
             {
                 case 0x0001:
                 case 0x21BC:
+                case 0xA1FE:
+                case 0xA1FF:
+                case 0xA200:
+                case 0xA201:
                     //case 0x5690:
                     return false;
 

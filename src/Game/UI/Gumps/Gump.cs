@@ -71,7 +71,7 @@ namespace ClassicUO.Game.UI.Gumps
         public uint MasterGumpSerial { get; set; }
 
 
-        public override void Update(double totalTime, double frameTime)
+        public override void Update()
         {
             if (InvalidateContents)
             {
@@ -84,7 +84,7 @@ namespace ClassicUO.Game.UI.Gumps
                 ActivePage = 1;
             }
 
-            base.Update(totalTime, frameTime);
+            base.Update();
         }
 
         public override void Dispose()

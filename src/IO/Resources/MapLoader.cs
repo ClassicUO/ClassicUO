@@ -100,7 +100,6 @@ namespace ClassicUO.IO.Resources
         public int[] MapPatchCount { get; private set; }
         public int[] StaticPatchCount { get; private set; }
 
-        public new UOFileIndex[][] Entries;
         private protected UOFileMul[] _filesIdxStatics;
         private protected UOFile[] _filesMap;
         private protected UOFileMul[] _filesStatics;
@@ -115,8 +114,6 @@ namespace ClassicUO.IO.Resources
             _filesMap = new UOFile[Constants.MAPS_COUNT];
             _filesStatics = new UOFileMul[Constants.MAPS_COUNT];
             _filesIdxStatics = new UOFileMul[Constants.MAPS_COUNT];
-
-            Entries = new UOFileIndex[Constants.MAPS_COUNT][];
 
             MapPatchCount = new int[Constants.MAPS_COUNT];
             StaticPatchCount = new int[Constants.MAPS_COUNT];
@@ -176,15 +173,13 @@ namespace ClassicUO.IO.Resources
 
                     Initialize();
 
-                    for (int i = 0; i < Constants.MAPS_COUNT; i++)
+                    for (var i = 0; i < Constants.MAPS_COUNT; ++i)
                     {
                         string path = UOFileManager.GetUOFilePath($"map{i}LegacyMUL.uop");
 
                         if (Client.IsUOPInstallation && File.Exists(path))
                         {
                             _filesMap[i] = new UOFileUop(path, $"build/map{i}legacymul/{{0:D8}}.dat");
-                            Entries[i] = new UOFileIndex[((UOFileUop) _filesMap[i]).TotalEntriesCount];
-                            ((UOFileUop) _filesMap[i]).FillEntries(ref Entries[i], false);
                             foundOneMap = true;
                         }
                         else
@@ -246,20 +241,12 @@ namespace ClassicUO.IO.Resources
                         _filesIdxStatics[1] = _filesIdxStatics[0];
                     }
 
-                    //for (int i = 0; i < MAPS_COUNT; i++)
-                    Parallel.For
-                    (
-                        0,
-                        Constants.MAPS_COUNT,
-                        i =>
-                        {
-                            MapBlocksSize[i, 0] = MapsDefaultSize[i, 0] >> 3;
-                            MapBlocksSize[i, 1] = MapsDefaultSize[i, 1] >> 3;
-                            LoadMap(i);
-                        }
-                    );
-
-                    Entries = null;
+                    var res = Parallel.For(0, Constants.MAPS_COUNT, i =>
+                    {
+                        MapBlocksSize[i, 0] = MapsDefaultSize[i, 0] >> 3;
+                        MapBlocksSize[i, 1] = MapsDefaultSize[i, 1] >> 3;
+                        LoadMap(i);
+                    });          
                 }
             );
         }
@@ -321,10 +308,16 @@ namespace ClassicUO.IO.Resources
                     if (fileNumber != shifted)
                     {
                         fileNumber = shifted;
+                        var uop = file as UOFileUop;
 
-                        if (shifted < Entries[i].Length)
+                        if (shifted < uop.TotalEntriesCount)
                         {
-                            uopoffset = (ulong) Entries[i][shifted].Offset;
+                            var hash = UOFileUop.CreateHash(string.Format(uop.Pattern, shifted));
+
+                            if (uop.TryGetUOPData(hash, out var dataIndex))
+                            {
+                                uopoffset = (ulong)dataIndex.Offset;
+                            }
                         }
                     }
                 }
@@ -362,6 +355,12 @@ namespace ClassicUO.IO.Resources
                 data.OriginalMapAddress = realmapaddress;
                 data.OriginalStaticAddress = realstaticaddress;
                 data.OriginalStaticCount = realstaticcount;
+            }
+
+            if (isuop)
+            {
+                // TODO: UOLive needs hashes! we need to find out a better solution, but keep 'em for the moment
+                //((UOFileUop)file)?.ClearHashes();
             }
         }
 

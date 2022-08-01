@@ -49,7 +49,6 @@ namespace ClassicUO.Game.UI.Gumps
     internal class MiniMapGump : Gump
     {
         private bool _draw;
-        private Texture2D _mapTexture;
         private int _lastMap = -1;
         private long _timeMS;
         private bool _useLargeMap;
@@ -91,29 +90,19 @@ namespace ClassicUO.Game.UI.Gumps
             if (_blankGumpsPixels[index] == null)
             {
                 int size = bounds.Width * bounds.Height;
-                uint[] data = System.Buffers.ArrayPool<uint>.Shared.Rent(size);
+                _blankGumpsPixels[index] = new uint[size];
+                _blankGumpsPixels[index + 2] = new uint[size];
+                texture.GetData(0, bounds, _blankGumpsPixels[index], 0, size);
 
-                try
-                {
-                    texture.GetData(0, bounds, data, 0, size);
-
-                    _blankGumpsPixels[index] = new uint[size];
-                    _blankGumpsPixels[index + 2] = new uint[size];
-
-                    Array.Copy(data, 0, _blankGumpsPixels[index], 0, size);
-                }
-                finally
-                {
-                    System.Buffers.ArrayPool<uint>.Shared.Return(data, true);
-                }
+                Array.Copy(_blankGumpsPixels[index], 0, _blankGumpsPixels[index + 2], 0, size);
             }
 
             Width = bounds.Width;
             Height = bounds.Height;
-            CreateMiniMapTexture(true);
+            CreateMiniMapTexture(texture, bounds, true);
         }
 
-        public override void Update(double totalTime, double frameTime)
+        public override void Update()
         {
             if (!World.InGame)
             {
@@ -126,10 +115,10 @@ namespace ClassicUO.Game.UI.Gumps
                 _lastMap = World.MapIndex;
             }
 
-            if (_timeMS < totalTime)
+            if (_timeMS < Time.Ticks)
             {
                 _draw = !_draw;
-                _timeMS = (long) totalTime + 500;
+                _timeMS = (long)Time.Ticks + 500;
             }
         }
 
@@ -142,11 +131,6 @@ namespace ClassicUO.Game.UI.Gumps
             else
             {
                 _useLargeMap = !_useLargeMap;
-            }
-
-            if (_mapTexture != null && !_mapTexture.IsDisposed)
-            {
-                _mapTexture.Dispose();
             }
 
             CreateMap();
@@ -180,8 +164,9 @@ namespace ClassicUO.Game.UI.Gumps
                 hueVector
             );
 
-            CreateMiniMapTexture();
-            batcher.Draw(_mapTexture, new Vector2(x, y), hueVector);
+            CreateMiniMapTexture(texture, bounds);
+
+            batcher.Draw(texture, new Vector2(x, y), bounds, hueVector);
 
             if (_draw)
             {
@@ -256,7 +241,7 @@ namespace ClassicUO.Game.UI.Gumps
             CreateMap();
         }
 
-        private unsafe void CreateMiniMapTexture(bool force = false)
+        private unsafe void CreateMiniMapTexture(Texture2D texture, Rectangle bounds, bool force = false)
         {
             ushort lastX = World.Player.X;
             ushort lastY = World.Player.Y;
@@ -434,12 +419,10 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            if (_mapTexture == null || _mapTexture.IsDisposed)
+            fixed (uint* ptr = data)
             {
-                _mapTexture = new Texture2D(Client.Game.GraphicsDevice, Width, Height, false, SurfaceFormat.Color);
-            }
-
-            _mapTexture.SetData(data);
+                texture.SetDataPointerEXT(0, bounds, (IntPtr)ptr, data.Length * sizeof(uint));
+            }         
         }
 
         private unsafe void CreatePixels
@@ -502,12 +485,6 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             return false;
-        }
-
-        public override void Dispose()
-        {
-            _mapTexture?.Dispose();
-            base.Dispose();
         }
     }
 }

@@ -57,7 +57,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                new AlphaBlendControl(0.05f)
+                new AlphaBlendControl(0.95f)
                 {
                     X = 1,
                     Y = 1,
@@ -318,6 +318,14 @@ namespace ClassicUO.Game.UI.Gumps
             public DrawTexture(Texture2D texture)
             {
                 Texture = texture;
+                Width = Height = 15;
+            }
+
+            public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+            {
+                Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
+                batcher.Draw(Texture, new Rectangle(x, y + 7, Width, Height), hueVector);
+                return true;
             }
         }
 
@@ -417,7 +425,11 @@ namespace ClassicUO.Game.UI.Gumps
                     _labelX.Text = editedMarker.X.ToString();
                     _labelY.Text = editedMarker.Y.ToString();
                     if (editedMarker.MarkerIcon != null)
-                        _iconTexture.Texture = editedMarker.MarkerIcon;
+                    {
+                        _iconTexture?.Dispose();
+                        _iconTexture = new DrawTexture(editedMarker.MarkerIcon);
+                    }
+                        
 
                     EditMarkerEvent.Raise();
                 }

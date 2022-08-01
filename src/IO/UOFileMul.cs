@@ -86,9 +86,8 @@ namespace ClassicUO.IO
 
         private class UOFileIdxMul : UOFile
         {
-            public UOFileIdxMul(string idxpath) : base(idxpath)
+            public UOFileIdxMul(string idxpath) : base(idxpath, true)
             {
-                Load();
             }
 
             public override void FillEntries(ref UOFileIndex[] entries)

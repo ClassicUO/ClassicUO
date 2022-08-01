@@ -135,7 +135,7 @@ namespace ClassicUO.Game.UI.Controls
         public ushort SelectedHue => SelectedIndex < 0 || SelectedIndex >= _hues.Length ? (ushort) 0 : _hues[SelectedIndex];
 
         
-        public override void Update(double totalTime, double frameTime)
+        public override void Update()
         {
             if (IsDisposed)
             {
@@ -158,7 +158,7 @@ namespace ClassicUO.Game.UI.Controls
                 }
             }
 
-            base.Update(totalTime, frameTime);
+            base.Update();
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)

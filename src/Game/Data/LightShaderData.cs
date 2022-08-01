@@ -30,73 +30,32 @@
 
 #endregion
 
-using System;
-using ClassicUO.Game.Managers;
-using ClassicUO.Input;
-using ClassicUO.IO.Resources;
-using ClassicUO.Renderer;
-using SDL2;
+using static ClassicUO.Game.Data.LightColors;
 
-namespace ClassicUO.Game.Scenes
+namespace ClassicUO.Game.Data
 {
-    internal abstract class Scene : IDisposable
+    internal struct LightShaderData
     {
-        public bool IsDestroyed { get; private set; }
-        public bool IsLoaded { get; private set; }
-        public int RenderedObjectsCount { get; protected set; }
-        public Camera Camera { get; } = new Camera(0.5f, 2.5f, 0.1f);
-
-
-
-        public virtual void Dispose()
+        public LightShaderData(uint rgb, LightShaderCurve redcurve = LightShaderCurve.Standard, LightShaderCurve greencurve = LightShaderCurve.Standard, LightShaderCurve bluecurve = LightShaderCurve.Standard)
         {
-            if (IsDestroyed)
-            {
-                return;
-            }
-
-            Unload();
-            IsDestroyed = true;          
+            RGB = rgb;
+            Hue = 0;
+            RedCurve = redcurve;
+            GreenCurve = greencurve;
+            BlueCurve = bluecurve;
         }
 
-        public virtual void Update()
-        {           
-            Camera.Update(true);
-        }
-
-        public virtual bool Draw(UltimaBatcher2D batcher)
+        public LightShaderData(ushort hue)
         {
-            return true;
+            RGB = 0;
+            Hue = hue;
+            RedCurve = GreenCurve = BlueCurve = LightShaderCurve.Standard;
         }
 
-
-        public virtual void Load()
-        {
-            IsLoaded = true;
-        }
-
-        public virtual void Unload()
-        {
-            IsLoaded = false;
-        }
-       
-
-        internal virtual bool OnMouseUp(MouseButtonType button) => false;
-        internal virtual bool OnMouseDown(MouseButtonType button) => false;
-        internal virtual bool OnMouseDoubleClick(MouseButtonType button) => false;
-        internal virtual bool OnMouseWheel(bool up) => false;
-        internal virtual bool OnMouseDragging() => false;
-
-        internal virtual void OnTextInput(string text)
-        {
-        }
-
-        internal virtual void OnKeyDown(SDL.SDL_KeyboardEvent e)
-        {
-        }
-
-        internal virtual void OnKeyUp(SDL.SDL_KeyboardEvent e)
-        {
-        }
+        public uint RGB;
+        public ushort Hue;
+        public LightShaderCurve RedCurve;
+        public LightShaderCurve GreenCurve;
+        public LightShaderCurve BlueCurve;
     }
 }

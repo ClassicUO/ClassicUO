@@ -98,14 +98,14 @@ namespace ClassicUO.Game.GameObjects
         public long NextChangeFrameTime;
         public GameObject Source;
         protected GameObject Target;
-        protected int TargetX;
-        protected int TargetY;
-        protected int TargetZ;
+        protected ushort TargetX;
+        protected ushort TargetY;
+        protected sbyte TargetZ;
 
       
-        public override void Update(double totalTime, double frameTime)
+        public override void Update()
         {
-            base.Update(totalTime, frameTime);
+            base.Update();
 
 
             if (Source != null && Source.IsDestroyed)
@@ -122,11 +122,11 @@ namespace ClassicUO.Game.GameObjects
 
             if (IsEnabled)
             {
-                if (Duration < totalTime && Duration >= 0)
+                if (Duration < Time.Ticks && Duration >= 0)
                 {
                     Destroy();
                 }
-                else if (NextChangeFrameTime < totalTime)
+                else if (NextChangeFrameTime < Time.Ticks)
                 {
                     if (AnimDataFrame.FrameCount != 0)
                     {
@@ -147,7 +147,7 @@ namespace ClassicUO.Game.GameObjects
                         AnimationGraphic = Graphic;
                     }
 
-                    NextChangeFrameTime = (long) totalTime + IntervalInMs;
+                    NextChangeFrameTime = (long)Time.Ticks + IntervalInMs;
                 }
             }
             else
@@ -156,7 +156,7 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        protected (int x, int y, int z) GetSource()
+        protected (ushort x, ushort y, sbyte z) GetSource()
         {
             return Source == null ? (X, Y, Z) : (Source.X, Source.Y, Source.Z);
         }
@@ -165,7 +165,7 @@ namespace ClassicUO.Game.GameObjects
         {
             if (CanCreateExplosionEffect)
             {
-                (int targetX, int targetY, int targetZ) = GetTarget();
+                (var targetX, var targetY, var targetZ) = GetTarget();
 
                 FixedEffect effect = new FixedEffect(_manager, 0x36CB, Hue, 400, 0);
                 effect.Blend = Blend;
@@ -178,24 +178,17 @@ namespace ClassicUO.Game.GameObjects
         public void SetSource(GameObject source)
         {
             Source = source;
-            X = source.X;
-            Y = source.Y;
-            Z = source.Z;
-            UpdateScreenPosition();
-            AddToTile();
+            SetInWorldTile(source.X, source.Y, source.Z);
         }
 
-        public void SetSource(int x, int y, int z)
+        public void SetSource(ushort x, ushort y, sbyte z)
         {
             Source = null;
-            X = (ushort) x;
-            Y = (ushort) y;
-            Z = (sbyte) z;
-            UpdateScreenPosition();
-            AddToTile();
+
+            SetInWorldTile(x, y,z);
         }
 
-        protected (int x, int y, int z) GetTarget()
+        protected (ushort x, ushort y, sbyte z) GetTarget()
         {
             return Target == null ? (TargetX, TargetY, TargetZ) : (Target.X, Target.Y, Target.Z);
         }
@@ -205,7 +198,7 @@ namespace ClassicUO.Game.GameObjects
             Target = target;
         }
 
-        public void SetTarget(int x, int y, int z)
+        public void SetTarget(ushort x, ushort y, sbyte z)
         {
             Target = null;
             TargetX = x;

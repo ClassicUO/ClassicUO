@@ -50,15 +50,14 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class SpellbookGump : Gump
     {
-        private float _clickTiming;
         private DataBox _dataBox;
         private HitBox _hitBox;
         private bool _isMinimized;
-        private Control _lastPressed;
         private int _maxPage;
         private GumpPic _pageCornerLeft, _pageCornerRight, _picBase;
         private SpellBookType _spellBookType;
         private readonly bool[] _spells = new bool[64];
+        private int _enqueuePage = -1;
 
         public SpellbookGump(uint item) : this()
         {
@@ -182,7 +181,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             RequestUpdateContents();
 
-            Client.Game.Scene.Audio.PlaySound(0x0055);
+            Client.Game.Audio.PlaySound(0x0055);
         }
 
 
@@ -204,7 +203,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Dispose()
         {
-            Client.Game.Scene.Audio.PlaySound(0x0055);
+            Client.Game.Audio.PlaySound(0x0055);
             UIManager.SavePosition(LocalSerial, Location);
             base.Dispose();
         }
@@ -505,8 +504,8 @@ namespace ClassicUO.Game.UI.Gumps
                                     CanMove = true
                                 };
 
-                                text.MouseUp += OnClicked;
-                                text.MouseDoubleClick += OnDoubleClicked;
+                                text.MouseUp += OnLabelMouseUp;
+                                text.MouseDoubleClick += OnLabelMouseDoubleClick;
                                 _dataBox.Add(text, page);
 
                                 y += 15;
@@ -548,8 +547,8 @@ namespace ClassicUO.Game.UI.Gumps
                                     CanMove = true
                                 };
 
-                                text.MouseUp += OnClicked;
-                                text.MouseDoubleClick += OnDoubleClicked;
+                                text.MouseUp += OnLabelMouseUp;
+                                text.MouseDoubleClick += OnLabelMouseDoubleClick;
                                 _dataBox.Add(text, page);
 
                                 y += 15;
@@ -850,7 +849,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void OnIconDragBegin(object sender, EventArgs e)
         {
-            if (UIManager.IsDragging)
+            if (UIManager.DraggingControl != this || UIManager.MouseOverControl != sender)
             {
                 return;
             }
@@ -1154,6 +1153,26 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
+        protected override void OnDragBegin(int x, int y)
+        {
+            if (UIManager.MouseOverControl?.RootParent == this)
+            {
+                UIManager.MouseOverControl.InvokeDragBegin(new Point(x, y));
+            }
+
+            base.OnDragBegin(x, y);
+        }
+
+        protected override void OnDragEnd(int x, int y)
+        {
+            if (UIManager.MouseOverControl?.RootParent == this)
+            {
+                UIManager.MouseOverControl.InvokeDragEnd(new Point(x, y));
+            }
+
+            base.OnDragEnd(x, y);
+        }
+
         private void GetSpellRequires(int offset, out int y, out string text)
         {
             y = 162;
@@ -1245,68 +1264,54 @@ namespace ClassicUO.Game.UI.Gumps
             _pageCornerLeft.Page = _dataBox.ActivePage != 1 ? 0 : int.MaxValue;
             _pageCornerRight.Page = _dataBox.ActivePage != _maxPage ? 0 : int.MaxValue;
 
-            Client.Game.Scene.Audio.PlaySound(0x0055);
+            Client.Game.Audio.PlaySound(0x0055);
         }
 
 
-        private void OnClicked(object sender, MouseEventArgs e)
+        private void OnLabelMouseUp(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtonType.Left && Mouse.LDragOffset == Point.Zero && sender is HoveredLabel l)
             {
-                _clickTiming += Mouse.MOUSE_DELAY_DOUBLE_CLICK;
-
-                if (_clickTiming > 0)
-                {
-                    _lastPressed = l;
-                }
+                _enqueuePage = (int)l.LocalSerial;
             }
         }
 
-        private void OnDoubleClicked(object sender, MouseDoubleClickEventArgs e)
+        private void OnLabelMouseDoubleClick(object sender, MouseDoubleClickEventArgs e)
         {
-            if (_lastPressed != null && e.Button == MouseButtonType.Left)
+            if (e.Button == MouseButtonType.Left && sender is HoveredLabel l)
             {
-                _clickTiming = -Mouse.MOUSE_DELAY_DOUBLE_CLICK;
-                SpellDefinition def = GetSpellDefinition((int) _lastPressed.Tag);
+                SpellDefinition def = GetSpellDefinition((int)l.Tag);
 
                 if (def != null)
                 {
                     GameActions.CastSpell(def.ID);
                 }
 
-                _lastPressed = null;
+                _enqueuePage = -1;
+                e.Result = true;
             }
         }
 
-        public override void Update(double totalTime, double frameTime)
+        public override void Update()
         {
-            base.Update(totalTime, frameTime);
+            base.Update();
 
             Item item = World.Items.Get(LocalSerial);
 
             if (item == null)
             {
                 Dispose();
-
-                return;
             }
-
 
             if (IsDisposed)
             {
                 return;
             }
 
-            if (_lastPressed != null)
+            if (_enqueuePage >= 0 && Time.Ticks - Mouse.LastLeftButtonClickTime >= Mouse.MOUSE_DELAY_DOUBLE_CLICK)
             {
-                _clickTiming -= (float) frameTime;
-
-                if (_clickTiming <= 0)
-                {
-                    _clickTiming = 0;
-                    SetActivePage((int) _lastPressed.LocalSerial);
-                    _lastPressed = null;
-                }
+                SetActivePage(_enqueuePage);
+                _enqueuePage = -1;
             }
         }
 
@@ -1435,9 +1440,9 @@ namespace ClassicUO.Game.UI.Gumps
                 _mm = Client.Game.GetScene<GameScene>().Macros;
             }
 
-            public override void Update(double totalTime, double frameTime)
+            public override void Update()
             {
-                base.Update(totalTime, frameTime);
+                base.Update();
 
                 if (World.ActiveSpellIcons.IsActive(_spellID))
                 {

@@ -17,7 +17,7 @@ namespace ClassicUO.Game.UI.Gumps
         private const ushort GUMP_WIDTH = 300;
         private const ushort GUMP_HEIGHT = 400;
 
-        private readonly int _gumpPosX = ProfileManager.CurrentProfile.GameWindowSize.X / 2 - 125;
+        private readonly int _gumpPosX = Client.Game.Scene.Camera.Bounds.Width / 2 - 125;
         private readonly int _gumpPosY = 100;
 
         private static ScrollArea _scrollArea;
@@ -35,7 +35,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                new AlphaBlendControl(0.05f)
+                new AlphaBlendControl(0.95f)
                 {
                     X = _gumpPosX,
                     Y = _gumpPosY,

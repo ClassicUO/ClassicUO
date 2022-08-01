@@ -30,16 +30,18 @@
 
 #endregion
 
+using ClassicUO.Game.Managers;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
     internal class ExpandableScroll : Control
     {
         private const int c_ExpandableScrollHeight_Min = 274;
-        private const int c_ExpandableScrollHeight_Max = 1000;
+        private const int c_ExpandableScrollHeight_Max = 800;
         private const int c_GumplingExpanderY_Offset = 2; // this is the gap between the pixels of the btm Control texture and the height of the btm Control texture.
         private const int c_GumplingExpander_ButtonID = 0x7FBEEF;
         private readonly GumpPic _gumpBottom;
@@ -51,8 +53,8 @@ namespace ClassicUO.Game.UI.Controls
         private readonly GumpPicTiled _gumpRight;
         private readonly GumpPic _gumpTop;
         private bool _isExpanding;
-        private int _isExpanding_InitialX, _isExpanding_InitialY, _isExpanding_InitialHeight;
         private readonly bool _isResizable = true;
+        private Point _lastExpanderPosition;
 
         public ExpandableScroll(int x, int y, int height, ushort graphic, bool isResizable = true)
         {
@@ -140,7 +142,6 @@ namespace ClassicUO.Game.UI.Controls
 
                 _gumpExpander.MouseDown += expander_OnMouseDown;
                 _gumpExpander.MouseUp += expander_OnMouseUp;
-                _gumpExpander.MouseOver += expander_OnMouseOver;
             }
 
             int off = w0 - w3;
@@ -191,7 +192,6 @@ namespace ClassicUO.Game.UI.Controls
             {
                 _gumpExpander.MouseDown -= expander_OnMouseDown;
                 _gumpExpander.MouseUp -= expander_OnMouseUp;
-                _gumpExpander.MouseOver -= expander_OnMouseOver;
                 _gumpExpander.Dispose();
                 _gumpExpander = null;
             }
@@ -245,15 +245,23 @@ namespace ClassicUO.Game.UI.Controls
             return false;
         }
 
-        public override void Update(double totalTime, double frameTime)
+        public override void Update()
         {
+            if (Mouse.LButtonPressed && _isExpanding)
+            {
+                SpecialHeight += Mouse.Position.Y - _lastExpanderPosition.Y;
+                _lastExpanderPosition = Mouse.Position;
+            }
+
             if (SpecialHeight < c_ExpandableScrollHeight_Min)
             {
+                _lastExpanderPosition.Y += c_ExpandableScrollHeight_Min - SpecialHeight;
                 SpecialHeight = c_ExpandableScrollHeight_Min;
             }
 
             if (SpecialHeight > c_ExpandableScrollHeight_Max)
             {
+                _lastExpanderPosition.Y -= SpecialHeight - c_ExpandableScrollHeight_Max;
                 SpecialHeight = c_ExpandableScrollHeight_Max;
             }
 
@@ -265,81 +273,53 @@ namespace ClassicUO.Game.UI.Controls
                 Add(_gumplingTitle = new GumpPic(0, 0, (ushort) _gumplingTitleGumpID, 0));
             }
 
+            //if (!IsVisible)
+            //    IsVisible = true;
+            //TOP
+            _gumpTop.X = 0;
+            _gumpTop.Y = 0;
+            _gumpTop.WantUpdateSize = true;
+            //MIDDLE
+            _gumpRight.Y = _gumpMiddle.Y = _gumplingMidY;
+            _gumpRight.Height = _gumpMiddle.Height = _gumplingMidHeight;
+            _gumpRight.WantUpdateSize = _gumpMiddle.WantUpdateSize = true;
+            //BOTTOM
+            _gumpBottom.Y = _gumplingBottomY;
+            _gumpBottom.WantUpdateSize = true;
 
+            if (_isResizable)
             {
-                //if (!IsVisible)
-                //    IsVisible = true;
-                //TOP
-                _gumpTop.X = 0;
-                _gumpTop.Y = 0;
-                _gumpTop.WantUpdateSize = true;
-                //MIDDLE
-                _gumpRight.Y = _gumpMiddle.Y = _gumplingMidY;
-                _gumpRight.Height = _gumpMiddle.Height = _gumplingMidHeight;
-                _gumpRight.WantUpdateSize = _gumpMiddle.WantUpdateSize = true;
-                //BOTTOM
-                _gumpBottom.Y = _gumplingBottomY;
-                _gumpBottom.WantUpdateSize = true;
-
-                if (_isResizable)
-                {
-                    _gumpExpander.X = _gumplingExpanderX;
-                    _gumpExpander.Y = _gumplingExpanderY;
-                    _gumpExpander.WantUpdateSize = true;
-                }
-
-                if (_gumplingTitle != null)
-                {
-                    _gumplingTitle.X = (_gumpTop.Width - _gumplingTitle.Width) >> 1;
-                    _gumplingTitle.Y = (_gumpTop.Height - _gumplingTitle.Height) >> 1;
-                    _gumplingTitle.WantUpdateSize = true;
-                }
-
-                WantUpdateSize = true;
-                Parent?.OnPageChanged();
+                _gumpExpander.X = _gumplingExpanderX;
+                _gumpExpander.Y = _gumplingExpanderY;
+                _gumpExpander.WantUpdateSize = true;
             }
 
-            base.Update(totalTime, frameTime);
+            if (_gumplingTitle != null)
+            {
+                _gumplingTitle.X = (_gumpTop.Width - _gumplingTitle.Width) >> 1;
+                _gumplingTitle.Y = (_gumpTop.Height - _gumplingTitle.Height) >> 1;
+                _gumplingTitle.WantUpdateSize = true;
+            }
+
+            WantUpdateSize = true;
+            Parent?.OnPageChanged();
+
+            base.Update();
         }
 
 
-        //new MouseEventArgs(x, y, button, ButtonState.Pressed)
         private void expander_OnMouseDown(object sender, MouseEventArgs args)
         {
-            int y = args.Y;
-            int x = args.X;
-            y += _gumpExpander.Y + ScreenCoordinateY - Y;
-
             if (args.Button == MouseButtonType.Left)
             {
                 _isExpanding = true;
-                _isExpanding_InitialHeight = SpecialHeight;
-                _isExpanding_InitialX = x;
-                _isExpanding_InitialY = y;
+                _lastExpanderPosition = Mouse.Position;
             }
         }
 
         private void expander_OnMouseUp(object sender, MouseEventArgs args)
         {
-            int y = args.Y;
-            y += _gumpExpander.Y + ScreenCoordinateY - Y;
-
-            if (_isExpanding)
-            {
-                _isExpanding = false;
-                SpecialHeight = _isExpanding_InitialHeight + (y - _isExpanding_InitialY);
-            }
-        }
-
-        private void expander_OnMouseOver(object sender, MouseEventArgs args)
-        {
-            int y = args.Y;
-            y += _gumpExpander.Y + ScreenCoordinateY - Y;
-
-            if (_isExpanding && y != _isExpanding_InitialY)
-            {
-                SpecialHeight = _isExpanding_InitialHeight + (y - _isExpanding_InitialY);
-            }
+            _isExpanding = false;
         }
     }
 }

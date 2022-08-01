@@ -186,4 +186,4 @@ Backend:
 This work is released under the BSD 4 license. This project does not distribute any copyrighted game assets. In order to run this client you'll need to legally obtain a copy of the Ultima Online Classic Client.
 Using a custom client to connect to official UO servers is strictly forbidden. We do not assume any responsibility of the usage of this client.
 
-Ultima Online(R) © 2020 Electronic Arts Inc. All Rights Reserved.
+Ultima Online(R) © 2022 Electronic Arts Inc. All Rights Reserved.

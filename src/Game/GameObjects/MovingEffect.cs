@@ -48,12 +48,12 @@ namespace ClassicUO.Game.GameObjects
             EffectManager manager,
             uint src,
             uint trg,
-            int xSource,
-            int ySource,
-            int zSource,
-            int xTarget,
-            int yTarget,
-            int zTarget,
+            ushort xSource,
+            ushort ySource,
+            sbyte zSource,
+            ushort xTarget,
+            ushort yTarget,
+            sbyte zTarget,
             ushort graphic,
             ushort hue,
             bool fixedDir,
@@ -97,9 +97,9 @@ namespace ClassicUO.Game.GameObjects
         public readonly bool FixedDir;
 
 
-        public override void Update(double totalTime, double frameTime)
+        public override void Update()
         {
-            base.Update(totalTime, frameTime);
+            base.Update();
 
             if (_lastMoveTime < Time.Ticks)
             {
@@ -174,7 +174,7 @@ namespace ClassicUO.Game.GameObjects
             if (newX != sX || newY != sY)
             {
                 // TODO: Z is wrong. We have to calculate an average
-                SetSource(newX, newY, sZ);
+                SetSource((ushort) newX, (ushort) newY, (sbyte)sZ);
 
                 Vector2 nextSource = new Vector2((newCoordX - newCoordY) * 22, (newCoordX + newCoordY) * 22 - offsetSourceZ * 4);
 

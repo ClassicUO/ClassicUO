@@ -53,7 +53,7 @@ namespace ClassicUO.IO.Resources
         public readonly List<SkillEntry> Skills = new List<SkillEntry>();
         public readonly List<SkillEntry> SortedSkills = new List<SkillEntry>();
 
-        public override Task Load()
+        public override unsafe Task Load()
         {
             return Task.Run
             (
@@ -81,13 +81,11 @@ namespace ClassicUO.IO.Resources
                         {
                             _file.SetData(entry.Address, entry.FileSize);
                             _file.Seek(entry.Offset);
+                          
                             bool hasAction = _file.ReadBool();
+                            string name = Encoding.UTF8.GetString((byte*)_file.PositionAddress, entry.Length - 1).TrimEnd('\0');
 
-                            string name = Encoding.UTF8.GetString(_file.ReadArray<byte>(entry.Length - 1)).TrimEnd('\0');
-
-                            SkillEntry skill = new SkillEntry(count++, name, hasAction);
-
-                            Skills.Add(skill);
+                            Skills.Add(new SkillEntry(count++, name, hasAction));
                         }
                     }
 

@@ -118,6 +118,8 @@ namespace ClassicUO.Game
         public bool IsDraggingCursorForced { get; set; }
         public bool AllowDrawSDLCursor { get; set; } = true;
 
+        public ItemHold ItemHold { get; } = new ItemHold();
+
         private ushort GetDraggingItemGraphic()
         {
             if (ItemHold.Enabled)
@@ -148,7 +150,7 @@ namespace ClassicUO.Game
                     scale = UIManager.ContainerScale;
                 }
 
-                return  new Point((int)((bounds.Width >> 1) * scale) - ItemHold.MouseOffset.X, (int)((bounds.Height >> 1) * scale) - ItemHold.MouseOffset.Y);
+                return new Point((int)((bounds.Width >> 1) * scale) - ItemHold.MouseOffset.X, (int)((bounds.Height >> 1) * scale) - ItemHold.MouseOffset.Y);
             }
 
             return Point.Zero;
@@ -156,7 +158,7 @@ namespace ClassicUO.Game
 
 
 
-        public void Update(double totalTime, double frameTime)
+        public void Update()
         {
             Graphic = AssignGraphicByState();
 
@@ -258,7 +260,7 @@ namespace ClassicUO.Game
 
                         if (_componentsList.Length != 0)
                         {
-                            if (SelectedObject.LastObject is GameObject selectedObj)
+                            if (SelectedObject.Object is GameObject selectedObj)
                             {
                                 int z = 0;
 
@@ -273,8 +275,6 @@ namespace ClassicUO.Game
                                     }
                                 }
 
-                                GameScene gs = Client.Game.GetScene<GameScene>();
-
                                 for (int i = 0; i < _componentsList.Length; i++)
                                 {
                                     ref readonly CustomBuildObject item = ref _componentsList[i];
@@ -284,17 +284,7 @@ namespace ClassicUO.Game
                                         break;
                                     }
 
-                                    _temp[i].X = (ushort) (selectedObj.X + item.X);
-
-                                    _temp[i].Y = (ushort) (selectedObj.Y + item.Y);
-
-                                    _temp[i].Z = (sbyte) (selectedObj.Z + z + item.Z);
-
-                                    _temp[i].UpdateRealScreenPosition(gs.ScreenOffset.X, gs.ScreenOffset.Y);
-
-                                    _temp[i].UpdateScreenPosition();
-
-                                    _temp[i].AddToTile();
+                                    _temp[i].SetInWorldTile((ushort)(selectedObj.X + item.X), (ushort)(selectedObj.Y + item.Y), (sbyte)(selectedObj.Z + z + item.Z));
                                 }
                             }
                         }
@@ -575,9 +565,10 @@ namespace ClassicUO.Game
                 return result;
             }
 
-            int windowCenterX = ProfileManager.CurrentProfile.GameWindowPosition.X + (ProfileManager.CurrentProfile.GameWindowSize.X >> 1);
+            var camera = Client.Game.Scene.Camera;
 
-            int windowCenterY = ProfileManager.CurrentProfile.GameWindowPosition.Y + (ProfileManager.CurrentProfile.GameWindowSize.Y >> 1);
+            int windowCenterX = camera.Bounds.X + (camera.Bounds.Width >> 1);
+            int windowCenterY = camera.Bounds.Y + (camera.Bounds.Height >> 1);
 
             return _cursorData[war,
                                GetMouseDirection

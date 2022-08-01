@@ -95,6 +95,7 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
         public override GumpType GumpType => GumpType.HealthBar;
+        internal bool IsInactive => (_isDead || _outOfRange) && !_canChangeName;
         protected bool _canChangeName;
         protected bool _isDead;
         protected string _name;
@@ -394,9 +395,9 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-        public override void Update(double totalTime, double frameTime)
+        public override void Update()
         {
-            base.Update(totalTime, frameTime);
+            base.Update();
 
             if (IsDisposed)
             {
@@ -1592,9 +1593,9 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-        public override void Update(double totalTime, double frameTime)
+        public override void Update()
         {
-            base.Update(totalTime, frameTime);
+            base.Update();
 
             if (IsDisposed /* || (_textBox != null && _textBox.IsDisposed)*/)
             {

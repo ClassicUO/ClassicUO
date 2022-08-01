@@ -55,9 +55,7 @@ namespace ClassicUO.Network
         private const int BUFF_SIZE = 0x10000;
 
         private bool _isCompressionEnabled;
-        private int _sendingCount;
-        private byte[] _sendingBuffer;
-        private CircularBuffer _circularBuffer, _incompleteBuffer;
+        private CircularBuffer _circularBuffer, _incompleteBuffer, _sendingBuffer;
         private ConcurrentQueue<byte[]> _pluginRecvQueue = new ConcurrentQueue<byte[]>();
         private readonly bool _is_login_socket;
         private Socket _socket;
@@ -159,11 +157,11 @@ namespace ClassicUO.Network
             }
 
             _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            _socket.NoDelay = true; // it's important to disable the Nagle algo or it will cause lag
 
-            _sendingBuffer = new byte[4096];
-            _sendingCount = 0;
             _circularBuffer = new CircularBuffer(BUFF_SIZE);
             _incompleteBuffer = new CircularBuffer(512);
+            _sendingBuffer = new CircularBuffer(2048);
             _pluginRecvQueue = new ConcurrentQueue<byte[]>();
             Statistics.Reset();
 
@@ -248,9 +246,9 @@ namespace ClassicUO.Network
             _socket = null;
             _circularBuffer = null;
             _incompleteBuffer = null;
+            _sendingBuffer = null;
             _localIP = null;
             _sendingBuffer = null;
-            _sendingCount = 0;
 
             if (error != 0)
             {
@@ -294,13 +292,7 @@ namespace ClassicUO.Network
                     EncryptionHelper.Encrypt(_is_login_socket, data, data, length);
                 }
 
-                if (_sendingCount + length >= _sendingBuffer.Length)
-                {
-                    ProcessSend();
-                }
-
-                data.AsSpan(0, length).CopyTo(_sendingBuffer.AsSpan(_sendingCount, length));
-                _sendingCount += length;
+                _sendingBuffer.Enqueue(data.AsSpan(0, length));
 
                 Statistics.TotalBytesSent += (uint)length;
                 Statistics.TotalPacketsSent++;
@@ -395,7 +387,7 @@ namespace ClassicUO.Network
                 return false;
             }
 
-            length = PacketsTable.GetPacketLength(buffer.GetID());
+            length = PacketsTable.GetPacketLength(buffer[0]);
             offset = 1;
 
             if (length == -1)
@@ -405,7 +397,8 @@ namespace ClassicUO.Network
                     return false;
                 }
 
-                length = buffer.GetLength();
+                length = buffer[2] | (buffer[1] << 8);
+
                 offset = 3;
             }
 
@@ -435,7 +428,7 @@ namespace ClassicUO.Network
 
             const int SIZE_TO_READ = 4096;
 
-            byte[] buffer = System.Buffers.ArrayPool<byte>.Shared.Rent(SIZE_TO_READ * 4 + 2);
+            byte[] buffer = System.Buffers.ArrayPool<byte>.Shared.Rent((_incompleteBuffer.Length + SIZE_TO_READ) * 4 + 2);
 
             while (available > 0)
             { 
@@ -525,16 +518,28 @@ namespace ClassicUO.Network
                 return;
             }
 
-            if (_sendingCount <= 0)
+            int length = _sendingBuffer.Length;
+
+            if (length <= 0)
             {
                 return;
             }
 
             try
             {
-                int sent = _socket.Send(_sendingBuffer, _sendingCount, SocketFlags.None);
+                while (length > 0)
+                {
+                    int read = _sendingBuffer.DequeSegment(length, out var segment);
 
-                _sendingCount = 0;
+                    if (segment.Count <= 0)
+                    {
+                        break;
+                    }
+
+                    int sent = _socket.Send(segment.Array, segment.Offset, read, SocketFlags.None);
+
+                    length -= read;
+                }
             }
             catch (SocketException ex)
             {
@@ -573,7 +578,7 @@ namespace ClassicUO.Network
             int arrayLen = sourcelength * 4 + 2;
 
             byte[] sourceBufferObj = null;
-            Span<byte> source = arrayLen <= 1024 ? stackalloc byte[1024] : (sourceBufferObj = System.Buffers.ArrayPool<byte>.Shared.Rent(arrayLen));
+            Span<byte> source = arrayLen <= 1024 ? stackalloc byte[1024] : (sourceBufferObj = System.Buffers.ArrayPool<byte>.Shared.Rent(arrayLen)).AsSpan(0, arrayLen);
 
             if (incompletelength > 0)
             {

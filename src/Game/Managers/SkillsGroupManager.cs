@@ -198,10 +198,12 @@ namespace ClassicUO.Game.Managers
         {
             if (Groups[0] == g)
             {
+                var camera = Client.Game.Scene.Camera;
+
                 MessageBoxGump messageBox = new MessageBoxGump(200, 125, ResGeneral.CannotDeleteThisGroup, null)
                 {
-                    X = ProfileManager.CurrentProfile.GameWindowPosition.X + ProfileManager.CurrentProfile.GameWindowSize.X / 2 - 100,
-                    Y = ProfileManager.CurrentProfile.GameWindowPosition.Y + ProfileManager.CurrentProfile.GameWindowSize.Y / 2 - 62
+                    X = camera.Bounds.X + camera.Bounds.Width / 2 - 100,
+                    Y = camera.Bounds.Y + camera.Bounds.Height / 2 - 62
                 };
 
                 UIManager.Add(messageBox);

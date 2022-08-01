@@ -494,7 +494,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             loginmusic_checkbox.ValueChanged += (sender, e) =>
             {
                 Settings.GlobalSettings.LoginMusic = loginmusic_checkbox.IsChecked;
-                scene.Audio.UpdateCurrentMusicVolume(true);
+                Client.Game.Audio.UpdateCurrentMusicVolume(true);
 
                 login_music.IsVisible = Settings.GlobalSettings.LoginMusic;
             };
@@ -502,7 +502,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             login_music.ValueChanged += (sender, e) =>
             {
                 Settings.GlobalSettings.LoginMusicVolume = login_music.Value;
-                scene.Audio.UpdateCurrentMusicVolume(true);
+                Client.Game.Audio.UpdateCurrentMusicVolume(true);
             };
 
 
@@ -533,18 +533,18 @@ namespace ClassicUO.Game.UI.Gumps.Login
             Settings.GlobalSettings.AutoLogin = _checkboxAutologin.IsChecked;
         }
 
-        public override void Update(double totalTime, double frameTime)
+        public override void Update()
         {
             if (IsDisposed)
             {
                 return;
             }
 
-            base.Update(totalTime, frameTime);
+            base.Update();
 
-            if (_time < totalTime)
+            if (_time < Time.Ticks)
             {
-                _time = (float) totalTime + 1000;
+                _time = (float)Time.Ticks + 1000;
 
                 _nextArrow0.ButtonGraphicNormal = _nextArrow0.ButtonGraphicNormal == _buttonNormal ? _buttonOver : _buttonNormal;
             }

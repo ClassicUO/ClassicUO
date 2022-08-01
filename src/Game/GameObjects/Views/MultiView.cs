@@ -94,7 +94,7 @@ namespace ClassicUO.Game.GameObjects
 
             Profile currentProfile = ProfileManager.CurrentProfile;
 
-            if (currentProfile.HighlightGameObjects && SelectedObject.LastObject == this)
+            if (currentProfile.HighlightGameObjects && SelectedObject.Object == this)
             {
                 hue = Constants.HIGHLIGHT_CURRENT_OBJECT_HUE;
                 partial = false;

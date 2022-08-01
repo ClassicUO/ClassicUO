@@ -35,5 +35,6 @@ namespace ClassicUO
     internal static class Time
     {
         public static uint Ticks;
+        public static float Delta;
     }
 }

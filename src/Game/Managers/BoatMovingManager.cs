@@ -48,7 +48,7 @@ namespace ClassicUO.Game.Managers
 
         private static readonly Dictionary<uint, Deque<BoatStep>> _steps = new Dictionary<uint, Deque<BoatStep>>();
         private static readonly List<uint> _toRemove = new List<uint>();
-        private static readonly Dictionary<uint, RawList<ItemInside>> _items = new Dictionary<uint, RawList<ItemInside>>();
+        private static readonly Dictionary<uint, FastList<ItemInside>> _items = new Dictionary<uint, FastList<ItemInside>>();
 
         private static uint _timePacket;
 
@@ -156,11 +156,11 @@ namespace ClassicUO.Game.Managers
                     multiItem.Offset.Z = 0;
                 }
 
-                if (_items.TryGetValue(serial, out RawList<ItemInside> list))
+                if (_items.TryGetValue(serial, out var list))
                 {
-                    for (int i = 0; i < list.Count; i++)
+                    for (int i = 0; i < list.Length; i++)
                     {
-                        ref ItemInside it = ref list[i];
+                        ref var it = ref list.Buffer[i];
 
                         Entity ent = World.Get(it.Serial);
 
@@ -174,7 +174,7 @@ namespace ClassicUO.Game.Managers
                         ent.Offset.Z = 0;
                     }
 
-                    list.Count = 0;
+                    list.Clear();
                 }
 
                 deque.Clear();
@@ -194,16 +194,16 @@ namespace ClassicUO.Game.Managers
 
         public static void PushItemToList(uint serial, uint objSerial, int x, int y, int z)
         {
-            if (!_items.TryGetValue(serial, out RawList<ItemInside> list))
+            if (!_items.TryGetValue(serial, out var list))
             {
-                list = new RawList<ItemInside>();
+                list = new FastList<ItemInside>();
 
                 _items[serial] = list;
             }
 
-            for (int i = 0; i < list.Count; i++)
+            for (int i = 0; i < list.Length; i++)
             {
-                ref ItemInside item = ref list[i];
+                ref var item = ref list.Buffer[i];
 
                 if (!SerialHelper.IsValid(item.Serial))
                 {
@@ -365,13 +365,13 @@ namespace ClassicUO.Game.Managers
             Direction direction
         )
         {
-            if (_items.TryGetValue(serial, out RawList<ItemInside> list))
+            if (_items.TryGetValue(serial, out var list))
             {
                 Item item = World.Items.Get(serial);
 
-                for (int i = 0; i < list.Count; i++)
+                for (int i = 0; i < list.Length; i++)
                 {
-                    ref ItemInside it = ref list[i];
+                    ref var it = ref list.Buffer[i];
 
                     //if (!SerialHelper.IsValid(it.Serial))
                     //    break;

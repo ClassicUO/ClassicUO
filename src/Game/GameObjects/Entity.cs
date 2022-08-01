@@ -32,12 +32,12 @@
 
 using System;
 using System.Runtime.CompilerServices;
-using ClassicUO.Data;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
+using ClassicUO.Utility;
 using static ClassicUO.Network.NetClient;
 
 namespace ClassicUO.Game.GameObjects
@@ -51,12 +51,28 @@ namespace ClassicUO.Game.GameObjects
 
     internal abstract class Entity : GameObject, IEquatable<Entity>
     {
+        private static readonly RenderedText[] _hitsPercText = new RenderedText[101];
         private Direction _direction;
+
 
         protected Entity(uint serial)
         {
             Serial = serial;
         }
+
+        public byte AnimIndex;
+        public bool ExecuteAnimation = true;
+        internal long LastAnimationChangeTime;
+        public Flags Flags;
+        public ushort Hits;
+        public ushort HitsMax;
+        public byte HitsPercentage;
+        public bool IsClicked;
+        public uint LastStepTime;
+        public string Name;
+        public uint Serial;
+        public HitsRequestStatus HitsRequest;
+
 
         public bool IsHidden => (Flags & Flags.Hidden) != 0;
 
@@ -75,27 +91,13 @@ namespace ClassicUO.Game.GameObjects
 
         public bool Exists => World.Contains(Serial);
 
+        public RenderedText HitsTexture => _hitsPercText[HitsPercentage % _hitsPercText.Length];
+
+
         public bool Equals(Entity e)
         {
             return e != null && Serial == e.Serial;
         }
-
-        public byte AnimIndex;
-
-        public Flags Flags;
-        public ushort Hits;
-        public ushort HitsMax;
-
-
-        public byte HitsPercentage;
-        public RenderedText HitsTexture;
-        public bool IsClicked;
-        public uint LastStepTime;
-        public string Name;
-        public uint Serial;
-        public bool ExecuteAnimation = true;
-        internal long LastAnimationChangeTime;
-        public HitsRequestStatus HitsRequest;
 
         public void FixHue(ushort hue)
         {
@@ -120,27 +122,31 @@ namespace ClassicUO.Game.GameObjects
 
         public void UpdateHits(byte perc)
         {
-            if (perc != HitsPercentage || HitsTexture == null || HitsTexture.IsDestroyed)
+            if (perc != HitsPercentage)
             {
                 HitsPercentage = perc;
 
-                ushort color = 0x0044;
+                ref var rtext = ref _hitsPercText[perc % _hitsPercText.Length];
 
-                if (perc < 30)
+                if (rtext == null || rtext.IsDestroyed)
                 {
-                    color = 0x0021;
-                }
-                else if (perc < 50)
-                {
-                    color = 0x0030;
-                }
-                else if (perc < 80)
-                {
-                    color = 0x0058;
-                }
+                    ushort color = 0x0044;
 
-                HitsTexture?.Destroy();
-                HitsTexture = RenderedText.Create($"[{perc}%]", color, 3, false);
+                    if (perc < 30)
+                    {
+                        color = 0x0021;
+                    }
+                    else if (perc < 50)
+                    {
+                        color = 0x0030;
+                    }
+                    else if (perc < 80)
+                    {
+                        color = 0x0058;
+                    }
+
+                    rtext = RenderedText.Create($"[{perc}%]", color, 3, false);
+                }
             }
         }
 
@@ -148,9 +154,9 @@ namespace ClassicUO.Game.GameObjects
         {
         }
 
-        public override void Update(double totalTime, double frameTime)
+        public override void Update()
         {
-            base.Update(totalTime, frameTime);
+            base.Update();
 
             if (ObjectHandlesStatus == ObjectHandlesStatus.OPEN)
             {
@@ -169,20 +175,10 @@ namespace ClassicUO.Game.GameObjects
 
             if (HitsMax > 0)
             {
-                int hits_max = HitsMax;
+                var perc = MathHelper.PercetangeOf(Hits, HitsMax);
+                perc = perc > 100 ? 100 : perc < 0 ? 0 : perc;
 
-                hits_max = Hits * 100 / hits_max;
-
-                if (hits_max > 100)
-                {
-                    hits_max = 100;
-                }
-                else if (hits_max < 1)
-                {
-                    hits_max = 0;
-                }
-
-                UpdateHits((byte) hits_max);
+                UpdateHits((byte)perc);
             }
         }
 
@@ -194,8 +190,6 @@ namespace ClassicUO.Game.GameObjects
 
             AnimIndex = 0;
             LastAnimationChangeTime = 0;
-            HitsTexture?.Destroy();
-            HitsTexture = null;
         }
 
         public Item FindItem(ushort graphic, ushort hue = 0xFFFF)
@@ -303,64 +297,6 @@ namespace ClassicUO.Game.GameObjects
             return null;
         }
 
-        //public new void Clear()
-        //{
-        //    if (!IsEmpty)
-        //    {
-        //        var obj = Items;
-
-        //        while (obj != null)
-        //        {
-        //            var next = obj.Next;
-        //            Item it = (Item) obj;
-
-        //            it.Container = 0xFFFF_FFFF;
-        //            World.Items.Remove(it);
-
-        //            Remove(obj);
-
-        //            obj = next;
-        //        }
-        //    }
-        //}
-
-        public void ClearUnequipped()
-        {
-            if (!IsEmpty)
-            {
-                LinkedObject new_first = null;
-                LinkedObject obj = Items;
-
-                while (obj != null)
-                {
-                    LinkedObject next = obj.Next;
-
-                    Item it = (Item) obj;
-
-                    if (it.Layer != 0)
-                    {
-                        if (new_first == null)
-                        {
-                            new_first = obj;
-                        }
-                    }
-                    else
-                    {
-                        it.Container = 0xFFFF_FFFF;
-                        World.Items.Remove(it);
-                        it.Destroy();
-                        Remove(obj);
-                    }
-
-                    obj = next;
-                }
-
-
-                Items = new_first;
-            }
-        }
-
-
         public static implicit operator uint(Entity entity)
         {
             return entity.Serial;
@@ -386,7 +322,7 @@ namespace ClassicUO.Game.GameObjects
             return (int) Serial;
         }
 
-        public abstract void ProcessAnimation(out byte dir, bool evalutate = false);
+        public abstract void ProcessAnimation(bool evalutate = false);
 
         public abstract ushort GetGraphicForAnimation();
     }

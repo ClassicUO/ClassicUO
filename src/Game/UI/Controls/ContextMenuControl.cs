@@ -82,10 +82,6 @@ namespace ClassicUO.Game.UI.Controls
             UIManager.ShowContextMenu
             (
                 new ContextMenuShowMenu(_items)
-                {
-                    X = Mouse.Position.X + 5,
-                    Y = Mouse.Position.Y - 20
-                }
             );
         }
 
@@ -162,6 +158,18 @@ namespace ClassicUO.Game.UI.Controls
                 y += item.Height;
             }
 
+            X = Mouse.Position.X + 5;
+            Y = Mouse.Position.Y - 20;
+
+            if (X + _background.Width > Client.Game.Window.ClientBounds.Width)
+            {
+                X = Client.Game.Window.ClientBounds.Width - _background.Width;
+            }
+
+            if (Y + _background.Height > Client.Game.Window.ClientBounds.Height)
+            {
+                Y = Client.Game.Window.ClientBounds.Height - _background.Height;
+            }
 
             foreach (ContextMenuItem mitem in FindControls<ContextMenuItem>())
             {
@@ -173,9 +181,9 @@ namespace ClassicUO.Game.UI.Controls
         }
 
 
-        public override void Update(double totalTime, double frameTime)
+        public override void Update()
         {
-            base.Update(totalTime, frameTime);
+            base.Update();
             WantUpdateSize = true;
         }
 
@@ -293,9 +301,9 @@ namespace ClassicUO.Game.UI.Controls
             }
 
 
-            public override void Update(double totalTime, double frameTime)
+            public override void Update()
             {
-                base.Update(totalTime, frameTime);
+                base.Update();
 
                 if (Width > _label.Width)
                 {

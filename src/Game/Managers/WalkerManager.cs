@@ -98,11 +98,7 @@ namespace ClassicUO.Game.Managers
         public long LastStepRequestTime;
         public ushort NewPlayerZ;
         public bool ResendPacketResync;
-        public StepInfo[] StepInfos = new StepInfo[Constants.MAX_STEP_COUNT]
-        {
-            new StepInfo(), new StepInfo(), new StepInfo(),
-            new StepInfo(), new StepInfo()
-        };
+        public readonly StepInfo[] StepInfos = new StepInfo[Constants.MAX_STEP_COUNT];
         public int StepsCount;
         public int UnacceptedPacketsCount;
         public bool WalkingFailed;
@@ -117,15 +113,10 @@ namespace ClassicUO.Game.Managers
 
             if (x != -1)
             {
-                World.Player.X = (ushort) x;
-                World.Player.Y = (ushort) y;
-                World.Player.Z = z;
-                World.Player.UpdateScreenPosition();
-
                 World.RangeSize.X = x;
                 World.RangeSize.Y = y;
 
-                World.Player.AddToTile();
+                World.Player.SetInWorldTile((ushort) x, (ushort) y, z);
             }
         }
 
@@ -158,13 +149,11 @@ namespace ClassicUO.Game.Managers
                     StepInfos[stepIndex].Accepted = true;
 
                     World.RangeSize.X = StepInfos[stepIndex].X;
-
                     World.RangeSize.Y = StepInfos[stepIndex].Y;
                 }
                 else if (stepIndex == 0)
                 {
                     World.RangeSize.X = StepInfos[0].X;
-
                     World.RangeSize.Y = StepInfos[0].Y;
 
                     for (int i = 1; i < StepsCount; i++)

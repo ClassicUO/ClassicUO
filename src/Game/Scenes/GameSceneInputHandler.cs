@@ -72,8 +72,8 @@ namespace ClassicUO.Game.Scenes
                     Pathfinder.StopAutoWalk();
                 }
 
-                int x = ProfileManager.CurrentProfile.GameWindowPosition.X + (ProfileManager.CurrentProfile.GameWindowSize.X >> 1);
-                int y = ProfileManager.CurrentProfile.GameWindowPosition.Y + (ProfileManager.CurrentProfile.GameWindowSize.Y >> 1);
+                int x = Camera.Bounds.X + (Camera.Bounds.Width >> 1);
+                int y = Camera.Bounds.Y + (Camera.Bounds.Height >> 1);
 
                 Direction direction = (Direction) GameCursor.GetMouseDirection
                 (
@@ -240,13 +240,13 @@ namespace ClassicUO.Game.Scenes
                             hbgc = new HealthBarGump(mobile);
                         }
 
-                        if (finalY >= ProfileManager.CurrentProfile.GameWindowPosition.Y + ProfileManager.CurrentProfile.GameWindowSize.Y - 20)
+                        if (finalY >= Camera.Bounds.Bottom - 20)
                         {
                             finalY = ProfileManager.CurrentProfile.DragSelectStartY;
                             finalX += rect.Width + 2;
                         }
 
-                        if (finalX >= ProfileManager.CurrentProfile.GameWindowPosition.X + ProfileManager.CurrentProfile.GameWindowSize.X - 20)
+                        if (finalX >= Camera.Bounds.Right - 20)
                         {
                             finalX = ProfileManager.CurrentProfile.DragSelectStartX;
                         }
@@ -265,13 +265,13 @@ namespace ClassicUO.Game.Scenes
                             {
                                 finalY = bar.Bounds.Bottom + AnchorOffset;
 
-                                if (finalY >= ProfileManager.CurrentProfile.GameWindowPosition.Y + ProfileManager.CurrentProfile.GameWindowSize.Y - 100)
+                                if (finalY >= Camera.Bounds.Bottom - 100)
                                 {
                                     finalY = ProfileManager.CurrentProfile.DragSelectStartY;
                                     finalX = bar.Bounds.Right + AnchorOffset;
                                 }
 
-                                if (finalX >= ProfileManager.CurrentProfile.GameWindowPosition.X + ProfileManager.CurrentProfile.GameWindowSize.X - 100)
+                                if (finalX >= Camera.Bounds.Right - 100)
                                 {
                                     finalX = ProfileManager.CurrentProfile.DragSelectStartX;
                                 }
@@ -347,7 +347,7 @@ namespace ClassicUO.Game.Scenes
             {
                 _isMouseLeftDown = true;
 
-                if (TargetManager.IsTargeting && TargetManager.TargetingState == CursorTarget.MultiPlacement && (World.CustomHouseManager.SelectedGraphic != 0 || World.CustomHouseManager.Erasing || World.CustomHouseManager.SeekTile) && SelectedObject.LastObject is GameObject obj)
+                if (TargetManager.IsTargeting && TargetManager.TargetingState == CursorTarget.MultiPlacement && (World.CustomHouseManager.SelectedGraphic != 0 || World.CustomHouseManager.Erasing || World.CustomHouseManager.SeekTile) && SelectedObject.Object is GameObject obj)
                 {
                     World.CustomHouseManager.OnTargetWorld(obj);
                     _lastSelectedMultiPositionInHouseCustomization.X = obj.X;
@@ -418,7 +418,7 @@ namespace ClassicUO.Game.Scenes
                 _continueRunning = true;
             }
 
-            BaseGameObject lastObj = SelectedObject.LastObject;// SelectedObject.LastLeftDownObject; <-- this makes the target cursor less responsive if you move the mouse fast
+            BaseGameObject lastObj = SelectedObject.Object;
             SelectedObject.LastLeftDownObject = null;
 
             if (UIManager.IsDragging)
@@ -426,7 +426,7 @@ namespace ClassicUO.Game.Scenes
                 return false;
             }
 
-            if (ItemHold.Enabled && !ItemHold.IsFixedPosition)
+            if (Client.Game.GameCursor.ItemHold.Enabled && !Client.Game.GameCursor.ItemHold.IsFixedPosition)
             {
                 uint drop_container = 0xFFFF_FFFF;
                 bool can_drop = false;
@@ -434,7 +434,7 @@ namespace ClassicUO.Game.Scenes
                 ushort dropY = 0;
                 sbyte dropZ = 0;
 
-                GameObject gobj = SelectedObject.LastObject as GameObject;
+                GameObject gobj = SelectedObject.Object as GameObject;
 
                 if (gobj is Entity obj)
                 {
@@ -449,7 +449,7 @@ namespace ClassicUO.Game.Scenes
                             dropZ = 0;
                             drop_container = obj.Serial;
                         }
-                        else if (obj is Item it2 && (it2.ItemData.IsSurface || it2.ItemData.IsStackable && it2.Graphic == ItemHold.Graphic))
+                        else if (obj is Item it2 && (it2.ItemData.IsSurface || it2.ItemData.IsStackable && it2.Graphic == Client.Game.GameCursor.ItemHold.Graphic))
                         {
                             dropX = obj.X;
                             dropY = obj.Y;
@@ -467,7 +467,7 @@ namespace ClassicUO.Game.Scenes
                     }
                     else
                     {
-                        Client.Game.Scene.Audio.PlaySound(0x0051);
+                        Client.Game.Audio.PlaySound(0x0051);
                     }
                 }
                 else if (gobj is Land || gobj is Static || gobj is Multi)
@@ -496,7 +496,7 @@ namespace ClassicUO.Game.Scenes
                     }
                     else
                     {
-                        Client.Game.Scene.Audio.PlaySound(0x0051);
+                        Client.Game.Audio.PlaySound(0x0051);
                     }
                 }
 
@@ -512,7 +512,7 @@ namespace ClassicUO.Game.Scenes
                     {
                         GameActions.DropItem
                         (
-                            ItemHold.Serial,
+                            Client.Game.GameCursor.ItemHold.Serial,
                             dropX,
                             dropY,
                             dropZ,
@@ -751,7 +751,7 @@ namespace ClassicUO.Game.Scenes
                 return false;
             }
 
-            BaseGameObject obj = SelectedObject.LastObject;
+            BaseGameObject obj = SelectedObject.Object;
 
             switch (obj)
             {
@@ -905,17 +905,17 @@ namespace ClassicUO.Game.Scenes
 
         internal override bool OnMouseWheel(bool up)
         {
-            if (Keyboard.Ctrl && ItemHold.Enabled)
+            if (Keyboard.Ctrl && Client.Game.GameCursor.ItemHold.Enabled)
             {
-                if (!up && !ItemHold.IsFixedPosition)
+                if (!up && !Client.Game.GameCursor.ItemHold.IsFixedPosition)
                 {
-                    ItemHold.IsFixedPosition = true;
-                    ItemHold.IgnoreFixedPosition = true;
-                    ItemHold.FixedX = Mouse.Position.X;
-                    ItemHold.FixedY = Mouse.Position.Y;
+                    Client.Game.GameCursor.ItemHold.IsFixedPosition = true;
+                    Client.Game.GameCursor.ItemHold.IgnoreFixedPosition = true;
+                    Client.Game.GameCursor.ItemHold.FixedX = Mouse.Position.X;
+                    Client.Game.GameCursor.ItemHold.FixedY = Mouse.Position.Y;
                 }
 
-                if (ItemHold.IgnoreFixedPosition)
+                if (Client.Game.GameCursor.ItemHold.IgnoreFixedPosition)
                 {
                     return true;
                 }
@@ -928,7 +928,14 @@ namespace ClassicUO.Game.Scenes
 
             if (Keyboard.Ctrl && ProfileManager.CurrentProfile.EnableMousewheelScaleZoom)
             {
-                Camera.ZoomIndex += up ? -1 : 1;
+                if (up)
+                {
+                    Camera.ZoomIn();
+                }
+                else
+                {
+                    Camera.ZoomOut();
+                }
 
                 return true;
             }
@@ -946,17 +953,17 @@ namespace ClassicUO.Game.Scenes
 
             bool ok = true;
 
-            if (Mouse.LButtonPressed && !ItemHold.Enabled)
+            if (Mouse.LButtonPressed && !Client.Game.GameCursor.ItemHold.Enabled)
             {
                 Point offset = Mouse.LDragOffset;
 
-                if (!UIManager.GameCursor.IsDraggingCursorForced && // don't trigger "sallos ez grab" when dragging wmap or skill
+                if (!Client.Game.GameCursor.IsDraggingCursorForced && // don't trigger "sallos ez grab" when dragging wmap or skill
                     !_isSelectionActive &&                          // and ofc when selection is enabled
                     (Math.Abs(offset.X) > Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS || Math.Abs(offset.Y) > Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS))
                 {
                     Entity obj;
 
-                    if (ProfileManager.CurrentProfile.SallosEasyGrab && SelectedObject.LastObject is Entity ent && SelectedObject.LastLeftDownObject == null)
+                    if (ProfileManager.CurrentProfile.SallosEasyGrab && SelectedObject.Object is Entity ent && SelectedObject.LastLeftDownObject == null)
                     {
                         obj = ent;
                     }

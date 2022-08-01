@@ -119,7 +119,7 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-        public override void Update(double totalTime, double frameTime)
+        public override void Update()
         {
             if (IsDisposed)
             {
@@ -156,7 +156,7 @@ namespace ClassicUO.Game.UI.Gumps
                 OnResize();
             }
 
-            base.Update(totalTime, frameTime);
+            base.Update();
         }
 
 

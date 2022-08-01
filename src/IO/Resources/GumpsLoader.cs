@@ -90,6 +90,7 @@ namespace ClassicUO.IO.Resources
                     }
 
                     _file.FillEntries(ref Entries);
+                    _spriteInfos = new SpriteInfo[Entries.Length];
 
                     string pathdef = UOFileManager.GetUOFilePath("gump.def");
 
@@ -131,7 +132,6 @@ namespace ClassicUO.IO.Resources
                             }
                         }
                     }
-                    _spriteInfos = new SpriteInfo[Entries.Length];
                 }
             );
         }
