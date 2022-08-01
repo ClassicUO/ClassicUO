@@ -186,16 +186,32 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 );
 
-                // QUESTS BUTTON
-                Add
-                (
-                    new Button((int) Buttons.Quests, 0x57b5, 0x57b7, 0x57b6)
-                    {
-                        X = 185,
-                        Y = 44 + 27 * 3,
-                        ButtonAction = ButtonAction.Activate
-                    }
-                );
+                if (Client.Version < ClientVersion.CV_500A)
+                {
+                    // JOURNAL BUTTON
+                    Add
+                    (
+                        new Button((int)Buttons.Journal, 0x7dc, 0x7dd, 0x7de)
+                        {
+                            X = 185,
+                            Y = 44 + 27 * 3,
+                            ButtonAction = ButtonAction.Activate
+                        }
+                    );
+                }
+                else
+                {
+                    // QUESTS BUTTON
+                    Add
+                    (
+                        new Button((int)Buttons.Quests, 0x57b5, 0x57b7, 0x57b6)
+                        {
+                            X = 185,
+                            Y = 44 + 27 * 3,
+                            ButtonAction = ButtonAction.Activate
+                        }
+                    );
+                }
 
                 // SKILLS BUTTON
                 Add
@@ -651,6 +667,11 @@ namespace ClassicUO.Game.UI.Gumps
 
                     break;
 
+                case Buttons.Journal:
+                    GameActions.OpenJournal();
+
+                    break;
+
                 case Buttons.Quests:
                     GameActions.RequestQuestMenu();
 
@@ -732,6 +753,7 @@ namespace ClassicUO.Game.UI.Gumps
             Help,
             Options,
             LogOut,
+            Journal,
             Quests,
             Skills,
             Guild,
