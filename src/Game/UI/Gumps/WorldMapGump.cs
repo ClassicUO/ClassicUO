@@ -63,6 +63,7 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private static Point _last_position = new Point(100, 100);
         private Point _center, _lastScroll, _mouseCenter;
+        private Point? _lastMousePosition = null;
 
         private bool _flipMap = true;
         private bool _freeView;
@@ -93,6 +94,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private readonly Dictionary<string, ContextMenuItemEntry> _options = new Dictionary<string, ContextMenuItemEntry>();
         private bool _showCoordinates;
+        private bool _showMouseCoordinates;
         private bool _showGroupBar = true;
         private bool _showGroupName = true;
         private bool _showMarkerIcons = true;
@@ -205,6 +207,7 @@ namespace ClassicUO.Game.UI.Gumps
             _zoomIndex = ProfileManager.CurrentProfile.WorldMapZoomIndex;
 
             _showCoordinates = ProfileManager.CurrentProfile.WorldMapShowCoordinates;
+            _showMouseCoordinates = ProfileManager.CurrentProfile.WorldMapShowMouseCoordinates;
             _showMobiles = ProfileManager.CurrentProfile.WorldMapShowMobiles;
 
             _showPlayerName = ProfileManager.CurrentProfile.WorldMapShowPlayerName;
@@ -243,6 +246,7 @@ namespace ClassicUO.Game.UI.Gumps
             ProfileManager.CurrentProfile.WorldMapZoomIndex = _zoomIndex;
 
             ProfileManager.CurrentProfile.WorldMapShowCoordinates = _showCoordinates;
+            ProfileManager.CurrentProfile.WorldMapShowMouseCoordinates = _showMouseCoordinates;
             ProfileManager.CurrentProfile.WorldMapShowMobiles = _showMobiles;
 
             ProfileManager.CurrentProfile.WorldMapShowPlayerName = _showPlayerName;
@@ -373,6 +377,8 @@ namespace ClassicUO.Game.UI.Gumps
             _options["show_party_healthbar"] = new ContextMenuItemEntry(ResGumps.ShowGroupHealthbar, () => { _showGroupBar = !_showGroupBar; SaveSettings(); }, true, _showGroupBar);
 
             _options["show_coordinates"] = new ContextMenuItemEntry(ResGumps.ShowYourCoordinates, () => { _showCoordinates = !_showCoordinates; SaveSettings(); }, true, _showCoordinates);
+
+            _options["show_mouse_coordinates"] = new ContextMenuItemEntry(ResGumps.ShowMouseCoordinates, () => { _showMouseCoordinates = !_showMouseCoordinates; }, true, _showMouseCoordinates);
 
             _options["markers_manager"] = new ContextMenuItemEntry(ResGumps.MarkersManager,
                 () =>
@@ -546,6 +552,7 @@ namespace ClassicUO.Game.UI.Gumps
             ContextMenu.Add(_options["show_mobiles"]);
             ContextMenu.Add(_options["show_multis"]);
             ContextMenu.Add(_options["show_coordinates"]);
+            ContextMenu.Add(_options["show_mouse_coordinates"]);
             ContextMenu.Add("", null);
             ContextMenu.Add(_options["markers_manager"]);
             ContextMenu.Add(_options["add_marker_on_player"]);
@@ -636,6 +643,44 @@ namespace ClassicUO.Game.UI.Gumps
 
             newX = x;
             newY = y;
+        }
+
+        private void CanvasToWorld
+        (
+            int a_x,
+            int a_y,
+            out int out_x,
+            out int out_y
+        )
+        {
+            // Scale width to Zoom
+            var newWidth = Width / Zoom;
+            var newHeight = Height / Zoom;
+
+            // Scale mouse cords to Zoom
+            var newX = a_x / Zoom;
+            var newY = a_y / Zoom;
+
+            // Rotate Cords if map fliped
+            // x' = (x + y)/Sqrt(2)
+            // y' = (y - x)/Sqrt(2)
+            if (_flipMap)
+            {
+                var nw = (newWidth + newHeight) / 1.41f;
+                var nh = (newHeight - newWidth) / 1.41f;
+                newWidth = (int)nw;
+                newHeight = (int)nh;
+
+                var nx = (newX + newY) / 1.41f;
+                var ny = (newY - newX) / 1.41f;
+                newX = (int)nx;
+                newY = (int)ny;
+            }
+
+            // Calulate Click cords to Map Cords
+            // (x,y) = MapCenter - ScaeldMapWidth/2 + ScaledMouseCords
+            out_x = _center.X - (int)(newWidth / 2) + (int)newX;
+            out_y = _center.Y - (int)(newHeight / 2) + (int)newY;
         }
 
         private int GetOffset(int x, int y, int centerX, int centerY)
@@ -2447,6 +2492,41 @@ namespace ClassicUO.Game.UI.Gumps
                     hueVector
                 );
             }
+
+            if (_showMouseCoordinates && _lastMousePosition != null)
+            {
+
+                int mouseWorldX;
+                int mouseWorldY;
+                CanvasToWorld(_lastMousePosition.Value.X, _lastMousePosition.Value.Y, out mouseWorldX, out mouseWorldY);
+
+                string mouseCoordinateString = $"{mouseWorldX} {mouseWorldY}";
+                Vector2 size = Fonts.Regular.MeasureString(mouseCoordinateString);
+                int mx = gX + 5;
+                int my = gY + Height - (int)Math.Ceiling(size.Y) - 15;
+
+                Vector3 hueVector = new Vector3(0f, 1f, 1f);
+
+                batcher.DrawString
+                (
+                    Fonts.Bold,
+                    mouseCoordinateString,
+                    mx + 1,
+                    my + 1,
+                    hueVector
+                );
+
+                hueVector = ShaderHueTranslator.GetHueVector(0);
+
+                batcher.DrawString
+                (
+                    Fonts.Bold,
+                    mouseCoordinateString,
+                    mx,
+                    my,
+                    hueVector
+                );
+            }
         }
 
         private void DrawMobile
@@ -3231,6 +3311,8 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseOver(int x, int y)
         {
+            _lastMousePosition = new Point(x, y);
+
             Point offset = Mouse.LButtonPressed ? Mouse.LDragOffset : Mouse.MButtonPressed ? Mouse.MDragOffset : Point.Zero;
 
             if (_isScrolling && offset != Point.Zero)
@@ -3320,6 +3402,12 @@ namespace ClassicUO.Game.UI.Gumps
             TopMost = !TopMost;
 
             return true;
+        }
+
+        protected override void OnMouseExit(int x, int y)
+        {
+            _lastMousePosition = null;
+            base.OnMouseExit(x, y);
         }
 
         protected override void OnMove(int x, int y)

@@ -1563,5 +1563,7 @@ Client version: '{0}'</value>
   </data>
   <data name="GridIfZoomed" xml:space="preserve">
     <value>Show/Hide 8x8 Grid if Zoomed</value>
+  <data name="ShowMouseCoordinates" xml:space="preserve">
+    <value>Show mouse coordinates</value>
   </data>
 </root>

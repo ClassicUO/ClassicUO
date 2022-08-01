@@ -293,6 +293,7 @@ namespace ClassicUO.Configuration
         public bool WorldMapShowParty { get; set; } = true;
         public int WorldMapZoomIndex { get; set; } = 4;
         public bool WorldMapShowCoordinates { get; set; } = true;
+        public bool WorldMapShowMouseCoordinates { get; set; } = true;
         public bool WorldMapShowMobiles { get; set; } = true;
         public bool WorldMapShowPlayerName { get; set; } = true;
         public bool WorldMapShowPlayerBar { get; set; } = true;
