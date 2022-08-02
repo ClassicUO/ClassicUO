@@ -491,10 +491,10 @@ namespace ClassicUO.IO.Resources
 
                             UOFile currentIdxFile = _files[i].IdxFile;
 
-                            ANIMATION_GROUPS_TYPE realType = Client.Version < ClientVersion.CV_500A ? CalculateTypeByGraphic((ushort)body) : DataIndex[index].Type;
+                            ANIMATION_GROUPS_TYPE realType = Client.Version < ClientVersion.CV_500A ? CalculateTypeByGraphic((ushort)body, i) : DataIndex[index].Type;
 
                             long addressOffset = DataIndex[index].CalculateOffset((ushort)body, realType, out int count);
-
+                          
                             count = Math.Min(count, MAX_ACTIONS);
 
                             if (addressOffset < currentIdxFile.Length)
@@ -866,8 +866,18 @@ namespace ClassicUO.IO.Resources
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private ANIMATION_GROUPS_TYPE CalculateTypeByGraphic(ushort graphic)
+        private ANIMATION_GROUPS_TYPE CalculateTypeByGraphic(ushort graphic, int fileIndex = 0)
         {
+            if (fileIndex == 1) // anim2
+            {
+                return graphic < 200 ? ANIMATION_GROUPS_TYPE.MONSTER : ANIMATION_GROUPS_TYPE.ANIMAL;
+            }
+
+            if (fileIndex == 2) // anim3
+            {
+                return graphic < 300 ? ANIMATION_GROUPS_TYPE.ANIMAL : graphic < 400 ? ANIMATION_GROUPS_TYPE.MONSTER : ANIMATION_GROUPS_TYPE.HUMAN;
+            }
+
             return graphic < 200 ? ANIMATION_GROUPS_TYPE.MONSTER : graphic < 400 ? ANIMATION_GROUPS_TYPE.ANIMAL : ANIMATION_GROUPS_TYPE.HUMAN;
         }
 
