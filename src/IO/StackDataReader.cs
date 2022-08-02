@@ -274,14 +274,92 @@ namespace ClassicUO.IO
             return v;
         }
 
+        private string ReadRawString(int length, int sizeT, bool safe)
+        {
+            if (length == 0 || Position + sizeT > Length)
+            {
+                return string.Empty;
+            }
+
+            bool fixedLength = length > 0;
+            int remaining = Remaining;
+            int size;
+
+            if (fixedLength)
+            {
+                size = length * sizeT;
+
+                if (size > remaining)
+                {
+                    size = remaining;
+                }
+            }
+            else
+            {
+                size = remaining - (remaining & (sizeT - 1));
+            }
+
+            ReadOnlySpan<byte> slice = _data.Slice(Position, size);
+
+            int index = GetIndexOfZero(slice, sizeT);
+            size = index < 0 ? size : index;
+
+            string result;
+
+            fixed (byte* ptr = slice)
+            {
+                result = new string((sbyte*)ptr, 0, size);
+            }
+
+            if (safe)
+            {
+                Span<char> buff = stackalloc char[256];
+                ReadOnlySpan<char> chars = result.AsSpan();
+
+                ValueStringBuilder sb = new ValueStringBuilder(buff);
+
+                bool hasDoneAnyReplacements = false;
+                int last = 0;
+                for (int i = 0; i < chars.Length; i++)
+                {
+                    if (!StringHelper.IsSafeChar(chars[i]))
+                    {
+                        hasDoneAnyReplacements = true;
+                        sb.Append(chars.Slice(last, i - last));
+                        last = i + 1; // Skip the unsafe char
+                    }
+                }
+
+                if (hasDoneAnyReplacements)
+                {
+                    // append the rest of the string
+                    if (last < chars.Length)
+                    {
+                        sb.Append(chars.Slice(last, chars.Length - last));
+                    }
+
+                    result = sb.ToString();
+                }
+
+                sb.Dispose();
+            }
+
+            Position += Math.Max(size + (!fixedLength && index >= 0 ? sizeT : 0), length * sizeT);
+
+            return result;
+        }
+
         public string ReadASCII(bool safe = false)
         {
-            return ReadString(StringHelper.Cp1252Encoding, -1, 1, safe);
+            return ReadRawString(-1, 1, safe);
+            //return ReadString(StringHelper.Cp1252Encoding, -1, 1, safe);
         }
 
         public string ReadASCII(int length, bool safe = false)
         {
-            return ReadString(StringHelper.Cp1252Encoding, length, 1, safe);
+            return ReadRawString(length, 1, safe);
+
+            //return ReadString(StringHelper.Cp1252Encoding, length, 1, safe);
         }
 
         public string ReadUnicodeBE(bool safe = false)
