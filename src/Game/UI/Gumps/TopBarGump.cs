@@ -109,9 +109,18 @@ namespace ClassicUO.Game.UI.Gumps
 
             string[] texts =
             {
-                ResGumps.Map, ResGumps.Paperdoll, ResGumps.Inventory, ResGumps.Journal, ResGumps.Chat, ResGumps.Help,
-                ResGumps.WorldMap, ResGumps.Info, ResGumps.Debug, ResGumps.NetStats, ResGumps.UOStore,
-                ResGumps.GlobalChat
+                cliloc.GetString(3000430,ResGumps.Map), 
+                cliloc.GetString(3000133,ResGumps.Paperdoll), 
+                cliloc.GetString(3000431,ResGumps.Inventory), 
+                cliloc.GetString(3000129,ResGumps.Journal), 
+                cliloc.GetString(3000131,ResGumps.Chat), 
+                cliloc.GetString(3000134,ResGumps.Help),     
+                ResGumps.WorldMap), 
+                ResGumps.Info), 
+                ResGumps.Debug), 
+                ResGumps.NetStats), 
+                ResGumps.UOStore),
+                ResGumps.GlobalChat)
             };
 
             bool hasUOStore = Client.Version >= ClientVersion.CV_706400;
