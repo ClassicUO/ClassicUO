@@ -107,6 +107,8 @@ namespace ClassicUO.Game.UI.Gumps
                 new[] { 1, (int) Buttons.GlobalChat }
             };
 
+            cliloc = ClilocLoader.Instance;
+
             string[] texts =
             {
                 cliloc.GetString(3000430,ResGumps.Map), 
@@ -115,10 +117,10 @@ namespace ClassicUO.Game.UI.Gumps
                 cliloc.GetString(3000129,ResGumps.Journal), 
                 cliloc.GetString(3000131,ResGumps.Chat), 
                 cliloc.GetString(3000134,ResGumps.Help),     
-                ResGumps.WorldMap), 
-                ResGumps.Info), 
-                ResGumps.Debug), 
-                ResGumps.NetStats), 
+                cliloc.GetString(1015233,ResGumps.WorldMap), 
+                cliloc.GetString(1079449,ResGumps.Info), 
+                cliloc.GetString(1042237,ResGumps.Debug), 
+                cliloc.GetString(3000169,ResGumps.NetStats), 
                 cliloc.GetString(1158008, ResGumps.UOStore),
                 cliloc.GetString(1158390, ResGumps.GlobalChat)
             };
