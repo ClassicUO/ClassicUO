@@ -111,16 +111,16 @@ namespace ClassicUO.Game.UI.Gumps
 
             string[] texts =
             {
-                cliloc.GetString(3000430,ResGumps.Map), 
-                cliloc.GetString(3000133,ResGumps.Paperdoll), 
-                cliloc.GetString(3000431,ResGumps.Inventory), 
-                cliloc.GetString(3000129,ResGumps.Journal), 
-                cliloc.GetString(3000131,ResGumps.Chat), 
-                cliloc.GetString(3000134,ResGumps.Help),     
-                cliloc.GetString(1015233,ResGumps.WorldMap), 
-                cliloc.GetString(1079449,ResGumps.Info), 
-                cliloc.GetString(1042237,ResGumps.Debug), 
-                cliloc.GetString(3000169,ResGumps.NetStats), 
+                cliloc.GetString(3000430, ResGumps.Map), 
+                cliloc.GetString(3000133, ResGumps.Paperdoll), 
+                cliloc.GetString(3000431, ResGumps.Inventory), 
+                cliloc.GetString(3000129, ResGumps.Journal), 
+                cliloc.GetString(3000131, ResGumps.Chat), 
+                cliloc.GetString(3000134, ResGumps.Help),     
+                cliloc.GetString(1015233, ResGumps.WorldMap), 
+                cliloc.GetString(1079449, ResGumps.Info), 
+                cliloc.GetString(1042237, ResGumps.Debug), 
+                cliloc.GetString(3000169, ResGumps.NetStats), 
                 cliloc.GetString(1158008, ResGumps.UOStore),
                 cliloc.GetString(1158390, ResGumps.GlobalChat)
             };
