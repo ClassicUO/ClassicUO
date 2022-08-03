@@ -306,42 +306,46 @@ namespace ClassicUO.IO
 
             string result;
 
-            fixed (byte* ptr = slice)
+            if (size <= 0)
             {
-                result = new string((sbyte*)ptr, 0, size);
+                result = String.Empty;
             }
-
-            if (safe)
+            else
             {
-                Span<char> buff = stackalloc char[256];
-                ReadOnlySpan<char> chars = result.AsSpan();
+                result = StringHelper.Cp1252ToString(slice.Slice(0, size));
 
-                ValueStringBuilder sb = new ValueStringBuilder(buff);
-
-                bool hasDoneAnyReplacements = false;
-                int last = 0;
-                for (int i = 0; i < chars.Length; i++)
+                if (safe)
                 {
-                    if (!StringHelper.IsSafeChar(chars[i]))
-                    {
-                        hasDoneAnyReplacements = true;
-                        sb.Append(chars.Slice(last, i - last));
-                        last = i + 1; // Skip the unsafe char
-                    }
-                }
+                    Span<char> buff = stackalloc char[256];
+                    ReadOnlySpan<char> chars = result.AsSpan();
 
-                if (hasDoneAnyReplacements)
-                {
-                    // append the rest of the string
-                    if (last < chars.Length)
+                    ValueStringBuilder sb = new ValueStringBuilder(buff);
+
+                    bool hasDoneAnyReplacements = false;
+                    int last = 0;
+                    for (int i = 0; i < chars.Length; i++)
                     {
-                        sb.Append(chars.Slice(last, chars.Length - last));
+                        if (!StringHelper.IsSafeChar(chars[i]))
+                        {
+                            hasDoneAnyReplacements = true;
+                            sb.Append(chars.Slice(last, i - last));
+                            last = i + 1; // Skip the unsafe char
+                        }
                     }
 
-                    result = sb.ToString();
-                }
+                    if (hasDoneAnyReplacements)
+                    {
+                        // append the rest of the string
+                        if (last < chars.Length)
+                        {
+                            sb.Append(chars.Slice(last, chars.Length - last));
+                        }
 
-                sb.Dispose();
+                        result = sb.ToString();
+                    }
+
+                    sb.Dispose();
+                }
             }
 
             Position += Math.Max(size + (!fixedLength && index >= 0 ? sizeT : 0), length * sizeT);

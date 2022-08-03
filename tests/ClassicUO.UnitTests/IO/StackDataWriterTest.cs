@@ -85,5 +85,19 @@ namespace ClassicUO.UnitTests.IO
 
             writer.Dispose();
         }
+
+        [Theory]
+        [InlineData("ClassicUO", new byte[] { 0x43, 0x6C, 0x61, 0x73, 0x73, 0x69, 0x63, 0x55, 0x4F, 0x00 })]
+        [InlineData("ÀÁÂÃÄÅ", new byte[] { 0xC0, 0xC1, 0xC2, 0xC3, 0xC4, 0xC5, 0x00 })]
+        public void Write_CP1252String(string a, byte[] b)
+        {
+            StackDataWriter writer = new StackDataWriter();
+
+            writer.WriteASCII(a);
+
+            Assert.True(b.AsSpan().SequenceEqual(writer.Buffer.Slice(0, writer.BytesWritten)));
+
+            writer.Dispose();
+        }
     }
 }

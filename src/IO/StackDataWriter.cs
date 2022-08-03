@@ -285,14 +285,39 @@ namespace ClassicUO.IO
         [MethodImpl(IMPL_OPTION)]
         public void WriteASCII(string str)
         {
-            WriteString<byte>(StringHelper.Cp1252Encoding, str, -1);
+            //WriteString<byte>(StringHelper.Cp1252Encoding, str, -1);
+            //WriteUInt8(0x00);
+
+            if (!string.IsNullOrEmpty(str))
+            {
+                foreach (var b in StringHelper.StringToCp1252Bytes(str))
+                {
+                    WriteUInt8(b);
+                }
+            }
+
             WriteUInt8(0x00);
         }
 
         [MethodImpl(IMPL_OPTION)]
         public void WriteASCII(string str, int length)
         {
-            WriteString<byte>(StringHelper.Cp1252Encoding, str, length);
+            //WriteString<byte>(StringHelper.Cp1252Encoding, str, length);
+
+            int start = Position;
+
+            if (!string.IsNullOrEmpty(str))
+            {
+                foreach (var b in StringHelper.StringToCp1252Bytes(str, length))
+                {
+                    WriteUInt8(b);
+                }
+            }
+
+            if (length > -1 && Position > start)
+            {
+                WriteZero(length * sizeof(byte) - (Position - start));
+            }
         }
 
 
