@@ -119,8 +119,8 @@ namespace ClassicUO.Game.UI.Gumps
                 ResGumps.Info), 
                 ResGumps.Debug), 
                 ResGumps.NetStats), 
-                ResGumps.UOStore),
-                ResGumps.GlobalChat)
+                cliloc.GetString(1158008, ResGumps.UOStore),
+                cliloc.GetString(1158390, ResGumps.GlobalChat)
             };
 
             bool hasUOStore = Client.Version >= ClientVersion.CV_706400;
