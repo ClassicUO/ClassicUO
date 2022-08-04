@@ -107,7 +107,7 @@ namespace ClassicUO.Game.UI.Gumps
                 new[] { 1, (int) Buttons.GlobalChat }
             };
 
-            cliloc = ClilocLoader.Instance;
+            var cliloc = ClilocLoader.Instance;
 
             string[] texts =
             {
