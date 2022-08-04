@@ -3262,34 +3262,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (button == MouseButtonType.Left && Keyboard.Ctrl)
                 {
-                    // Scale width to Zoom
-                    var newWidth = Width / Zoom;
-                    var newHeight = Height / Zoom;
-
-                    // Scale mouse cords to Zoom
-                    var newX = x / Zoom;
-                    var newY = y / Zoom;
-
-                    // Rotate Cords if map fliped
-                    // x' = (x + y)/Sqrt(2)
-                    // y' = (y - x)/Sqrt(2)
-                    if (_flipMap)
-                    {
-                        var nw = (newWidth + newHeight) / 1.41f;
-                        var nh = (newHeight - newWidth) / 1.41f;
-                        newWidth = (int)nw;
-                        newHeight = (int)nh;
-
-                        var nx = (newX + newY) / 1.41f;
-                        var ny = (newY - newX) / 1.41f;
-                        newX = (int)nx;
-                        newY = (int)ny;
-                    }
-
-                    // Calulate Click cords to Map Cords
-                    // (x,y) = MapCenter - ScaeldMapWidth/2 + ScaledMouseCords
-                    _mouseCenter.X = _center.X - (int)(newWidth / 2) + (int)newX;
-                    _mouseCenter.Y = _center.Y - (int)(newHeight / 2) + (int)newY;
+                    CanvasToWorld(x, y, out _mouseCenter.X, out _mouseCenter.Y);
 
                     // Check if file is loaded and contain markers
                     var userFile = _markerFiles.Where(f => f.Name == USER_MARKERS_FILE).FirstOrDefault();
