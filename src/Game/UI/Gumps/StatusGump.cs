@@ -402,7 +402,7 @@ namespace ClassicUO.Game.UI.Gumps
                     61,
                     34,
                     12,
-                    ClilocLoader.Instance.GetString(3000077, ResGump.Strength),
+                    ClilocLoader.Instance.GetString(3000077, ResGumps.Strength),
                     0
                 ) { CanMove = true }
             );
@@ -415,7 +415,7 @@ namespace ClassicUO.Game.UI.Gumps
                     73,
                     34,
                     12,
-                    ClilocLoader.Instance.GetString(3000078, ResGump.Dex),
+                    ClilocLoader.Instance.GetString(3000078, ResGumps.Dex),
                     0
                 ) { CanMove = true }
             );
@@ -428,7 +428,7 @@ namespace ClassicUO.Game.UI.Gumps
                     85,
                     34,
                     12,
-                    ClilocLoader.Instance.GetString(3000079, ResGump.Intelligence),
+                    ClilocLoader.Instance.GetString(3000079, ResGumps.Intelligence),
                     0
                 ) { CanMove = true }
             );
@@ -441,7 +441,7 @@ namespace ClassicUO.Game.UI.Gumps
                     97,
                     34,
                     12,
-                    ClilocLoader.Instance.GetString(3000076, ResGump.Sex),
+                    ClilocLoader.Instance.GetString(3000076, ResGumps.Sex),
                     0
                 ) { CanMove = true }
             );
@@ -454,7 +454,7 @@ namespace ClassicUO.Game.UI.Gumps
                     109,
                     34,
                     12,
-                    ClilocLoader.Instance.GetString(1062760, ResGump.Armor),
+                    ClilocLoader.Instance.GetString(1062760, ResGumps.Armor),
                     0
                 ) { CanMove = true }
             );
