@@ -189,7 +189,7 @@ namespace ClassicUO.Game.GameObjects
                 ushort mountGraphic = mount.GetGraphicForAnimation();
                 byte animGroupMount = 0;
 
-                if (mountGraphic != 0xFFFF && mountGraphic < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
+                if (mountGraphic != 0xFFFF && mountGraphic < AnimationsLoader.Instance.MAX_ANIMATIONS_DATA_INDEX_COUNT)
                 {
                     mountOffsetY = AnimationsLoader.Instance.GetMountedHeightOffset(mountGraphic);
 
@@ -661,7 +661,7 @@ namespace ClassicUO.Game.GameObjects
             bool charIsSitting
         )
         {
-            if (id >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT || owner == null)
+            if (id >= AnimationsLoader.Instance.MAX_ANIMATIONS_DATA_INDEX_COUNT || owner == null)
             {
                 return;
             }

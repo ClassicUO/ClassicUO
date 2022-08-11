@@ -399,7 +399,7 @@ namespace ClassicUO.Game.GameObjects
 
                 ushort graphic = GetGraphicForAnimation();
 
-                if (graphic >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
+                if (graphic >= AnimationsLoader.Instance.MAX_ANIMATIONS_DATA_INDEX_COUNT)
                 {
                     return;
                 }
@@ -576,7 +576,7 @@ namespace ClassicUO.Game.GameObjects
                 AnimationsLoader.Instance.GetAnimDirection(ref dir, ref mirror);
                 int currentDelay = Constants.CHARACTER_ANIMATION_DELAY;
 
-                if (id < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT && dir < 5)
+                if (id < AnimationsLoader.Instance.MAX_ANIMATIONS_DATA_INDEX_COUNT && dir < 5)
                 {
                     var frames = AnimationsLoader.Instance.GetAnimationFrames(id, action, dir, out _, out _);
 
