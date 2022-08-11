@@ -85,6 +85,27 @@ namespace ClassicUO.IO.Resources
             new List<Tuple<ushort, byte>>(), new List<Tuple<ushort, byte>>()
         };
 
+        private void GrowIfNeeded(int index)
+        {
+            if (index >= _dataIndex.Length)
+            {
+                Array.Resize(ref _dataIndex, index + 1);
+            }
+
+            if (_dataIndex[index] == null)
+            {
+                _dataIndex[index] = new IndexAnimation
+                {
+                    Groups = new AnimationGroup[MAX_ACTIONS]
+                };
+
+                for (int i = 0; i < MAX_ACTIONS; i++)
+                {
+                    _dataIndex[index].Groups[i] = new AnimationGroup();
+                }
+            }
+        }
+
         private unsafe void LoadInternal()
         {
             bool loaduop = false;
@@ -485,7 +506,7 @@ namespace ClassicUO.IO.Resources
                                 }
                             }
 
-                            if (i >= _files.Length || _files[i] == null)
+                            if (i >= _files.Length || _files[i] == null || _dataIndex[index] == null)
                             {
                                 continue;
                             }
@@ -588,24 +609,7 @@ namespace ClassicUO.IO.Resources
                         //    continue;
                         //}
 
-                        if (index >= _dataIndex.Length)
-                        {
-                            Array.Resize(ref _dataIndex, index + 1);
-                        }
-
-                        if (_dataIndex[index] == null)
-                        {
-                            _dataIndex[index] = new IndexAnimation
-                            {
-                                Groups = new AnimationGroup[MAX_ACTIONS]
-                            };
-
-                            for (int i = 0; i < MAX_ACTIONS; i++)
-                            {
-                                _dataIndex[index].Groups[i] = new AnimationGroup();
-                            }
-                        }
-
+                        GrowIfNeeded(index);
 
                         if (filter.TryGetValue(index, out bool b) && b)
                         {
@@ -667,10 +671,12 @@ namespace ClassicUO.IO.Resources
                     {
                         int index = defReader.ReadInt();
 
-                        if (index >= AnimationsLoader.Instance.MAX_ANIMATIONS_DATA_INDEX_COUNT)
-                        {
-                            continue;
-                        }
+                        //if (index >= AnimationsLoader.Instance.MAX_ANIMATIONS_DATA_INDEX_COUNT)
+                        //{
+                        //    continue;
+                        //}
+
+                        GrowIfNeeded(index);
 
                         if (filter.TryGetValue(index, out bool b) && b)
                         {
@@ -703,9 +709,7 @@ namespace ClassicUO.IO.Resources
                         }
 
                         _dataIndex[index].CorpseGraphic = (ushort)checkIndex;
-
                         _dataIndex[index].CorpseColor = (ushort)color;
-
                         _dataIndex[index].IsValidMUL = true;
 
                         filter[index] = true;
@@ -859,13 +863,13 @@ namespace ClassicUO.IO.Resources
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ANIMATION_GROUPS_TYPE GetAnimType(ushort graphic) => _dataIndex[graphic].Type;
+        public ANIMATION_GROUPS_TYPE GetAnimType(ushort graphic) => _dataIndex[graphic]?.Type ?? 0;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ANIMATION_FLAGS GetAnimFlags(ushort graphic) => _dataIndex[graphic].Flags;
+        public ANIMATION_FLAGS GetAnimFlags(ushort graphic) => _dataIndex[graphic]?.Flags ?? 0;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public sbyte GetMountedHeightOffset(ushort graphic) => _dataIndex[graphic].MountedHeightOffset;
+        public sbyte GetMountedHeightOffset(ushort graphic) => _dataIndex[graphic]?.MountedHeightOffset ?? 0;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe uint CalculatePeopleGroupOffset(ushort graphic)
@@ -910,6 +914,11 @@ namespace ClassicUO.IO.Resources
 
             IndexAnimation dataIndex = _dataIndex[graphic];
 
+            if (dataIndex == null)
+            {
+                return;
+            }
+
             if ((dataIndex.IsUOP && (isParent || !dataIndex.IsValidMUL)) || forceUOP)
             {
                 // do nothing ?
@@ -929,9 +938,14 @@ namespace ClassicUO.IO.Resources
         {
             useUOP = false;
 
-            if (graphic < AnimationsLoader.Instance.MAX_ANIMATIONS_DATA_INDEX_COUNT && action < MAX_ACTIONS)
+            if (graphic < MAX_ANIMATIONS_DATA_INDEX_COUNT && action < MAX_ACTIONS)
             {
                 IndexAnimation index = _dataIndex[graphic];
+
+                if (index == null)
+                {
+                    return;
+                }
 
                 if (forceUOP)
                 {
@@ -1205,7 +1219,7 @@ namespace ClassicUO.IO.Resources
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ANIMATION_GROUPS GetGroupIndex(ushort graphic)
         {
-            if (graphic >= AnimationsLoader.Instance.MAX_ANIMATIONS_DATA_INDEX_COUNT)
+            if (graphic >= AnimationsLoader.Instance.MAX_ANIMATIONS_DATA_INDEX_COUNT || _dataIndex[graphic] == null)
             {
                 return ANIMATION_GROUPS.AG_HIGHT;
             }
@@ -1227,7 +1241,7 @@ namespace ClassicUO.IO.Resources
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public byte GetDeathAction(ushort id, bool second, bool isRunning = false)
         {
-            if (id >= AnimationsLoader.Instance.MAX_ANIMATIONS_DATA_INDEX_COUNT)
+            if (id >= AnimationsLoader.Instance.MAX_ANIMATIONS_DATA_INDEX_COUNT || _dataIndex[id] == null)
             {
                 return 0;
             }
@@ -1316,7 +1330,10 @@ namespace ClassicUO.IO.Resources
 
             IndexAnimation index = _dataIndex[id];
 
-
+            if (index == null)
+            {
+                return Span<SpriteInfo>.Empty;
+            }
 
             // NOTE:
             // for UOP: we don't call the method index.GetUopGroup(ref x) because the action has been already changed by the method ReplaceAnimationValues
@@ -1393,7 +1410,7 @@ namespace ClassicUO.IO.Resources
 
         private Span<FrameInfo> ReadUOPAnimationFrames(ushort animID, byte animGroup, byte direction)
         {
-            AnimationGroupUop animData = _dataIndex[animID].UopGroups?[animGroup];
+            AnimationGroupUop animData = _dataIndex[animID]?.UopGroups?[animGroup];
 
             if (animData == null)
             {
