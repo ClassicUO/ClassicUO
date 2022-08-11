@@ -590,20 +590,21 @@ namespace ClassicUO.IO.Resources
                         if (index >= _dataIndex.Length)
                         {
                             Array.Resize(ref _dataIndex, index + 1);
-
-                            if (_dataIndex[index] == null)
-                            {
-                                _dataIndex[index] = new IndexAnimation
-                                {
-                                    Groups = new AnimationGroup[MAX_ACTIONS]
-                                };
-
-                                for (int i = 0; i < MAX_ACTIONS; i++)
-                                {
-                                    _dataIndex[index].Groups[i] = new AnimationGroup();
-                                }
-                            }             
                         }
+
+                        if (_dataIndex[index] == null)
+                        {
+                            _dataIndex[index] = new IndexAnimation
+                            {
+                                Groups = new AnimationGroup[MAX_ACTIONS]
+                            };
+
+                            for (int i = 0; i < MAX_ACTIONS; i++)
+                            {
+                                _dataIndex[index].Groups[i] = new AnimationGroup();
+                            }
+                        }
+
 
                         if (filter.TryGetValue(index, out bool b) && b)
                         {
