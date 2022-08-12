@@ -335,6 +335,7 @@ namespace ClassicUO.IO.Resources
             ProcessEquipConvDef();
             ProcessBodyDef();
             ProcessCorpseDef();
+            ProcessMountsDef();
         }
 
         public override unsafe Task Load()
@@ -342,6 +343,25 @@ namespace ClassicUO.IO.Resources
             return Task.Run(LoadInternal);
         }
 
+        internal void ProcessMountsDef()
+        {
+            var file = UOFileManager.GetUOFilePath("Mounts.def");
+
+            if (File.Exists(file))
+            {
+                using (DefReader defReader = new DefReader(file, 3))
+                {
+                    while (defReader.Next())
+                    {
+                        ushort bodyId = (ushort)defReader.ReadInt();
+                        ushort animationId = (ushort)defReader.ReadInt();
+                        ClassicUO.Game.GameObjects.Item.AddMount(bodyId, animationId);
+                        sbyte replacementMountedHeight = (sbyte)defReader.ReadInt();
+                        _dataIndex[animationId].MountedHeightOffset = replacementMountedHeight;
+                    }
+                }
+            }
+        }
         private void ProcessEquipConvDef()
         {
             if (Client.Version < ClientVersion.CV_300)
