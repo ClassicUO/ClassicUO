@@ -53,20 +53,12 @@ namespace ClassicUO.Game.UI.Gumps
             AcceptKeyboardInput = false;
         }
 
-        public bool BlockMovement { get; set; }
 
         public bool CanBeSaved => GumpType != Gumps.GumpType.None;
 
         public virtual GumpType GumpType { get; }
 
         public bool InvalidateContents { get; set; }
-
-
-        public override bool CanMove
-        {
-            get => !BlockMovement && base.CanMove;
-            set => base.CanMove = value;
-        }
 
         public uint MasterGumpSerial { get; set; }
 

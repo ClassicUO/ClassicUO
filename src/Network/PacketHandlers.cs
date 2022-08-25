@@ -6692,7 +6692,7 @@ namespace ClassicUO.Network
                 }
                 else if (string.Equals(entry, "nomove", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    gump.BlockMovement = true;
+                    gump.CanMove = false;
                 }
                 else if (string.Equals(entry, "group", StringComparison.InvariantCultureIgnoreCase) ||
                          string.Equals(entry, "endgroup", StringComparison.InvariantCultureIgnoreCase))

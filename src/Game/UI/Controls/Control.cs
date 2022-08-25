@@ -104,7 +104,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public bool MouseIsOver => UIManager.MouseOverControl == this;
 
-        public virtual bool CanMove { get; set; }
+        public bool CanMove { get; set; }
 
         public bool CanCloseWithRightClick { get; set; } = true;
 
