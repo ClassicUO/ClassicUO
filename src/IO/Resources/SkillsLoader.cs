@@ -180,7 +180,10 @@ namespace ClassicUO.IO.Resources
             Chivalry,
             Bushido,
             Ninjitsu,
-            Spellweaving
+            Spellweaving,
+            Mysticism,
+            Imbuing,
+            Throwing
         }
     }
 }

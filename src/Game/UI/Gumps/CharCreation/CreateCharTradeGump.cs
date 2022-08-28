@@ -40,6 +40,7 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.IO.Resources;
 using ClassicUO.Resources;
+using System.Collections.Generic;
 
 namespace ClassicUO.Game.UI.Gumps.CharCreation
 {
@@ -47,8 +48,11 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
     {
         private readonly HSliderBar[] _attributeSliders;
         private readonly PlayerMobile _character;
-        private readonly Combobox[] _skills;
+        private readonly Combobox[] _skillsCombobox;
         private readonly HSliderBar[] _skillSliders;
+        private readonly List<SkillEntry> _skillList;
+
+
 
         public CreateCharTradeGump(PlayerMobile character, ProfessionInfo profession) : base(0, 0)
         {
@@ -167,37 +171,35 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 )
             );
 
-            string[] skillList = new string[SkillsLoader.Instance.SortedSkills.Count];
+            
+            _skillList = SkillsLoader.Instance.SortedSkills
+                         .Where(s => 
+                                     (World.ClientFeatures.Flags.HasFlag(CharacterListFlags.CLF_SAMURAI_NINJA) ||
+                                     (
+                                         s.Index != 47 &&   // Stealth
+                                         s.Index != 52 &&   // Bushido
+                                         s.Index != 53 &&   // Ninjitsu
+                                         s.Index != 54      // Spellweaving
+                                     ))
+                                 )  
+                         .ToList();
 
-            for (int i = 0; i < skillList.Length; ++i)
-            {
-                SkillEntry entry = SkillsLoader.Instance.SortedSkills[i];
-
-                if ((World.ClientFeatures.Flags & CharacterListFlags.CLF_SAMURAI_NINJA) == 0 && (entry.Index == 52 || entry.Index == 47 || entry.Index == 53) || entry.Index == 54)
-                {
-                    skillList[i] = string.Empty;
-                }
-                else
-                {
-                    skillList[i] = entry.Name;
-                }
-            }
-
+            var skillNames = _skillList.Select(s => s.Name).ToArray();
 
             int y = 172;
             _skillSliders = new HSliderBar[CharCreationGump._skillsCount];
-            _skills = new Combobox[CharCreationGump._skillsCount];
+            _skillsCombobox = new Combobox[CharCreationGump._skillsCount];
 
             for (int i = 0; i < CharCreationGump._skillsCount; i++)
             {
                 Add
                 (
-                    _skills[i] = new Combobox
+                    _skillsCombobox[i] = new Combobox
                     (
                         344,
                         y,
                         182,
-                        skillList,
+                        skillNames,
                         -1,
                         200,
                         false,
@@ -277,14 +279,12 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
                     if (ValidateValues())
                     {
-                        for (int i = 0; i < _skills.Length; i++)
+                        for (int i = 0; i < _skillsCombobox.Length; i++)
                         {
-                            if (_skills[i].SelectedIndex != -1)
+                            if (_skillsCombobox[i].SelectedIndex != -1)
                             {
-                                Skill skill = _character.Skills[SkillsLoader.Instance.SortedSkills[_skills[i].SelectedIndex].Index];
-
+                                Skill skill = _character.Skills[_skillList[_skillsCombobox[i].SelectedIndex].Index];
                                 skill.ValueFixed = (ushort) _skillSliders[i].Value;
-
                                 skill.BaseFixed = 0;
                                 skill.CapFixed = 0;
                                 skill.Lock = Lock.Locked;
@@ -292,9 +292,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                         }
 
                         _character.Strength = (ushort) _attributeSliders[0].Value;
-
                         _character.Intelligence = (ushort) _attributeSliders[1].Value;
-
                         _character.Dexterity = (ushort) _attributeSliders[2].Value;
 
                         charCreationGump.SetAttributes(true);
@@ -308,9 +306,9 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
         private bool ValidateValues()
         {
-            if (_skills.All(s => s.SelectedIndex >= 0))
+            if (_skillsCombobox.All(s => s.SelectedIndex >= 0))
             {
-                int duplicated = _skills.GroupBy(o => o.SelectedIndex).Count(o => o.Count() > 1);
+                int duplicated = _skillsCombobox.GroupBy(o => o.SelectedIndex).Count(o => o.Count() > 1);
 
                 if (duplicated > 0)
                 {
