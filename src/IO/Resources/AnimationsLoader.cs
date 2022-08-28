@@ -440,19 +440,19 @@ namespace ClassicUO.IO.Resources
 
                             // adaption of this PR: https://github.com/ClassicUO/ClassicUO/pull/1525
                             // old server sends 0x03 as flags. Original client allows the bodyconv. [tested with 7.0.95.0]
-                            if ((flags & (LockedFeatureFlags.TheSecondAge | LockedFeatureFlags.Renaissance)) == 0)
+                            if (!flags.HasFlag(LockedFeatureFlags.ExpansionUOR))
                             {
                                 // Ensure the client is allowed to use these new graphics
                                 if (i == 1)
                                 {
-                                    if ((flags & LockedFeatureFlags.LordBlackthornsRevenge) == 0)
+                                    if (!flags.HasFlag(LockedFeatureFlags.LBR))
                                     {
                                         continue;
                                     }
                                 }
                                 else if (i == 2)
                                 {
-                                    if ((flags & LockedFeatureFlags.AgeOfShadows) == 0)
+                                    if (!flags.HasFlag(LockedFeatureFlags.AOS))
                                     {
                                         continue;
                                     }

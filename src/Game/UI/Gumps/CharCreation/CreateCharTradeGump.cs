@@ -171,17 +171,42 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 )
             );
 
-            
+            var clientFlags = World.ClientLockedFeatures.Flags;
+
             _skillList = SkillsLoader.Instance.SortedSkills
-                         .Where(s => 
-                                     (World.ClientFeatures.Flags.HasFlag(CharacterListFlags.CLF_SAMURAI_NINJA) ||
-                                     (
-                                         s.Index != 47 &&   // Stealth
-                                         s.Index != 52 &&   // Bushido
-                                         s.Index != 53 &&   // Ninjitsu
-                                         s.Index != 54      // Spellweaving
-                                     ))
-                                 )  
+                         .Where(s =>
+                                     // All standard client versions ignore these skills by defualt
+                                     s.Index != 26 && // MagicResist
+                                     s.Index != 47 && // Stealth
+                                     s.Index != 48 && // RemoveTrap
+                                     s.Index != 54 && // Spellweaving
+                                     s.Index != 57    // Throwing
+                                 )
+
+                          .Where(s =>
+                                    clientFlags.HasFlag(LockedFeatureFlags.ExpansionAOS) ||
+                                    (   
+                                        s.Index != 51 && // Chivlary
+                                        s.Index != 50 && // Focus
+                                        s.Index != 49    // Necromancy
+                                    )
+                                )
+
+                          .Where(s =>
+                                    clientFlags.HasFlag(LockedFeatureFlags.ExpansionSE) ||
+                                    (
+                                        s.Index != 52 && // Bushido
+                                        s.Index != 53    // Ninjitsu
+                                    )
+                                )
+
+                          .Where(s =>
+                                    clientFlags.HasFlag(LockedFeatureFlags.ExpansionSA) ||
+                                    (
+                                        s.Index != 55 && // Mysticism
+                                        s.Index != 56    // Imbuing
+                                    )
+                                )
                          .ToList();
 
             var skillNames = _skillList.Select(s => s.Name).ToArray();

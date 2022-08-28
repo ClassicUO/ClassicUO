@@ -397,9 +397,8 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             CharacterListFlags flags = World.ClientFeatures.Flags;
             LockedFeatureFlags locks = World.ClientLockedFeatures.Flags;
 
-            bool allowElf = (flags & CharacterListFlags.CLF_ELVEN_RACE) != 0 && (locks & LockedFeatureFlags.MondainsLegacy) != 0;
-
-            bool allowGarg = (locks & LockedFeatureFlags.StygianAbyss) != 0;
+            bool allowElf = (flags & CharacterListFlags.CLF_ELVEN_RACE) != 0 && locks.HasFlag(LockedFeatureFlags.ML);
+            bool allowGarg = locks.HasFlag(LockedFeatureFlags.SA);
 
             if (race == RaceType.ELF && !allowElf)
             {

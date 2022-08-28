@@ -129,7 +129,7 @@ namespace ClassicUO.IO.Resources
             Alchemy,
             Anatomy,
             AnimalLore,
-            ItemID,
+            ItemID, // T2A
             ArmsLore,
             Parrying,
             Begging,

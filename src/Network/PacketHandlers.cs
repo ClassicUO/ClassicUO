@@ -3864,7 +3864,7 @@ namespace ClassicUO.Network
 
             World.ClientLockedFeatures.SetFlags((LockedFeatureFlags) flags);
 
-            ChatManager.ChatIsEnabled = World.ClientLockedFeatures.T2A ? ChatStatus.Enabled : 0;
+            ChatManager.ChatIsEnabled = World.ClientLockedFeatures.Flags.HasFlag(LockedFeatureFlags.T2A) ? ChatStatus.Enabled : 0;
 
             AnimationsLoader.Instance.UpdateAnimationTable(flags);
         }

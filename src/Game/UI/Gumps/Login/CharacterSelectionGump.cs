@@ -123,9 +123,9 @@ namespace ClassicUO.Game.UI.Gumps.Login
                         break;
                     }
 
-                    if (World.ClientLockedFeatures.Flags != 0 && !World.ClientLockedFeatures.CharSlots7)
+                    if (World.ClientLockedFeatures.Flags != 0 && !World.ClientLockedFeatures.Flags.HasFlag(LockedFeatureFlags.SeventhCharacterSlot))
                     {
-                        if (valid == 6 && !World.ClientLockedFeatures.CharSlots6)
+                        if (valid == 6 && !World.ClientLockedFeatures.Flags.HasFlag(LockedFeatureFlags.SixthCharacterSlot))
                         {
                             break;
                         }
