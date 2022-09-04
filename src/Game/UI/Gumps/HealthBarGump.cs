@@ -1617,7 +1617,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (entity == null || entity.IsDestroyed)
             {
-                if (LocalSerial != World.Player && (ProfileManager.CurrentProfile.CloseHealthBarType == 1 || ProfileManager.CurrentProfile.CloseHealthBarType == 2 && World.CorpseManager.Exists(0, LocalSerial | 0x8000_0000)))
+                if (LocalSerial != World.Player && !inparty && (ProfileManager.CurrentProfile.CloseHealthBarType == 1 || ProfileManager.CurrentProfile.CloseHealthBarType == 2 && World.CorpseManager.Exists(0, LocalSerial | 0x8000_0000)))
                 {
                     if (CheckIfAnchoredElseDispose())
                     {
@@ -1699,7 +1699,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Mobile mobile = entity as Mobile;
 
-                if (!_isDead && entity != World.Player && mobile != null && mobile.IsDead && ProfileManager.CurrentProfile.CloseHealthBarType == 2) // is dead
+                if (!_isDead && entity != World.Player && mobile != null && mobile.IsDead && !inparty && ProfileManager.CurrentProfile.CloseHealthBarType == 2) // is dead
                 {
                     if (CheckIfAnchoredElseDispose())
                     {
