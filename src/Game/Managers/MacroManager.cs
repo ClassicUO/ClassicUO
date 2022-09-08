@@ -1013,7 +1013,7 @@ namespace ClassicUO.Game.Managers
                         //}
                         //else 
 
-                        if (TargetManager.TargetingState != CursorTarget.Object)
+                        if (TargetManager.TargetingState != CursorTarget.Object && !TargetManager.LastTargetInfo.IsEntity)
                         {
                             TargetManager.TargetLast();
                         }
