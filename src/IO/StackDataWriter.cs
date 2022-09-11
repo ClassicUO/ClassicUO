@@ -306,7 +306,11 @@ namespace ClassicUO.IO
 
             int start = Position;
 
-            if (!string.IsNullOrEmpty(str))
+            if (string.IsNullOrEmpty(str))
+            {
+                WriteZero(sizeof(byte));
+            }
+            else
             {
                 foreach (var b in StringHelper.StringToCp1252Bytes(str, length))
                 {
