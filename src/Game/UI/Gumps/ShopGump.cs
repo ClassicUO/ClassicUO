@@ -754,7 +754,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (graphic >= AnimationsLoader.Instance.MAX_ANIMATIONS_DATA_INDEX_COUNT)
                     {
-                        return false;
+                        graphic = 0;
                     }
 
                     byte group = GetAnimGroup(graphic);
