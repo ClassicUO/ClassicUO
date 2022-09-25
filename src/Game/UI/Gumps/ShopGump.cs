@@ -377,7 +377,8 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 X = 5,
                 Y = y + 2,
-                NameFromCliloc = fromcliloc
+                NameFromCliloc = fromcliloc,
+                InBuyGump = IsBuyGump
             };
 
             _shopScrollArea.Add(shopItem);
@@ -718,6 +719,8 @@ namespace ClassicUO.Game.UI.Gumps
             public string Name { get; }
 
             public bool NameFromCliloc { get; set; }
+            
+            public bool InBuyGump { get; set; }
 
             private static byte GetAnimGroup(ushort graphic)
             {
@@ -748,7 +751,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Vector3 hueVector;
 
-                if (SerialHelper.IsMobile(LocalSerial))
+                if (InBuyGump && SerialHelper.IsMobile(LocalSerial))
                 {
                     ushort graphic = Graphic;
 
@@ -784,7 +787,7 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                     }
                 }
-                else if (SerialHelper.IsItem(LocalSerial))
+                else
                 {
                     var texture = ArtLoader.Instance.GetStaticTexture(Graphic, out var bounds);
 
