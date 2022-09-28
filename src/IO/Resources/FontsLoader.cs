@@ -3074,7 +3074,7 @@ namespace ClassicUO.IO.Resources
             {
                 char c = content[i + start];
 
-                bufferCmd[cmdLenght++] = char.IsLetter(c) ? char.ToLowerInvariant(c) : c;
+                bufferCmd[cmdLenght++] = /*char.IsLetter(c) ? char.ToLowerInvariant(c) :*/ c;
 
                 if (c == ' ' || c == '=' || c == '\\')
                 {
@@ -3092,7 +3092,7 @@ namespace ClassicUO.IO.Resources
 
                         if (c != '"')
                         {
-                            bufferValue[valueLength++] = char.IsLetter(c) ? char.ToLowerInvariant(c) : c;
+                            bufferValue[valueLength++] = /*char.IsLetter(c) ? char.ToLowerInvariant(c) :*/ c;
                         }
                         else
                         {

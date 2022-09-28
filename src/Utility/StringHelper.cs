@@ -394,7 +394,10 @@ namespace ClassicUO.Utility
         {
             for (int i = 0; i < length && i < str.Length; ++i)
             {
-                if (buffer[i] != str[i])
+                var c0 = char.IsLetter(buffer[i]) ? char.ToLowerInvariant(buffer[i]) : buffer[i];
+                var c1 = char.IsLetter(str[i]) ? char.ToLowerInvariant(str[i]) : str[i];
+
+                if (c0 != c1)
                 {
                     return false;
                 }
