@@ -250,26 +250,34 @@ namespace ClassicUO.Game.UI.Controls
                 return;
             }
 
+            SDL.SDL_Keymod mod = SDL.SDL_Keymod.KMOD_NONE;
+
+            if (Macro.Alt)
+            {
+                mod |= SDL.SDL_Keymod.KMOD_ALT;
+            }
+
+            if (Macro.Shift)
+            {
+                mod |= SDL.SDL_Keymod.KMOD_SHIFT;
+            }
+
+            if (Macro.Ctrl)
+            {
+                mod |= SDL.SDL_Keymod.KMOD_CTRL;
+            }
+
             if (Macro.Key != SDL.SDL_Keycode.SDLK_UNKNOWN)
             {
-                SDL.SDL_Keymod mod = SDL.SDL_Keymod.KMOD_NONE;
-
-                if (Macro.Alt)
-                {
-                    mod |= SDL.SDL_Keymod.KMOD_ALT;
-                }
-
-                if (Macro.Shift)
-                {
-                    mod |= SDL.SDL_Keymod.KMOD_SHIFT;
-                }
-
-                if (Macro.Ctrl)
-                {
-                    mod |= SDL.SDL_Keymod.KMOD_CTRL;
-                }
-
                 _hotkeyBox.SetKey(Macro.Key, mod);
+            }
+            else if (Macro.MouseButton != MouseButtonType.None)
+            {
+                _hotkeyBox.SetMouseButton(Macro.MouseButton, mod);
+            }
+            else if (Macro.WheelScroll == true)
+            {
+                _hotkeyBox.SetMouseWheel(Macro.WheelUp, mod);
             }
         }
 
@@ -296,6 +304,40 @@ namespace ClassicUO.Game.UI.Controls
                     return;
                 }
             }
+            else if (_hotkeyBox.MouseButton != MouseButtonType.None)
+            {
+                Macro macro = Client.Game.GetScene<GameScene>().Macros.FindMacro(_hotkeyBox.MouseButton, alt, ctrl, shift);
+
+                if (macro != null)
+                {
+                    if (Macro == macro)
+                    {
+                        return;
+                    }
+
+                    SetupKeyByDefault();
+                    UIManager.Add(new MessageBoxGump(250, 150, string.Format(ResGumps.ThisKeyCombinationAlreadyExists, macro.Name), null));
+
+                    return;
+                }
+            }
+            else if (_hotkeyBox.WheelScroll == true)
+            {
+                Macro macro = Client.Game.GetScene<GameScene>().Macros.FindMacro(_hotkeyBox.WheelUp, alt, ctrl, shift);
+
+                if (macro != null)
+                {
+                    if (Macro == macro)
+                    {
+                        return;
+                    }
+
+                    SetupKeyByDefault();
+                    UIManager.Add(new MessageBoxGump(250, 150, string.Format(ResGumps.ThisKeyCombinationAlreadyExists, macro.Name), null));
+
+                    return;
+                }
+            }
             else
             {
                 return;
@@ -303,6 +345,9 @@ namespace ClassicUO.Game.UI.Controls
 
             Macro m = Macro;
             m.Key = _hotkeyBox.Key;
+            m.MouseButton = _hotkeyBox.MouseButton;
+            m.WheelScroll = _hotkeyBox.WheelScroll;
+            m.WheelUp = _hotkeyBox.WheelUp;
             m.Shift = shift;
             m.Alt = alt;
             m.Ctrl = ctrl;
@@ -313,6 +358,8 @@ namespace ClassicUO.Game.UI.Controls
             Macro m = Macro;
             m.Alt = m.Ctrl = m.Shift = false;
             m.Key = SDL.SDL_Keycode.SDLK_UNKNOWN;
+            m.MouseButton = MouseButtonType.None;
+            m.WheelScroll = false;
         }
 
         public override void OnButtonClick(int buttonID)

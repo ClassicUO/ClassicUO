@@ -42,6 +42,7 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Gumps;
+using ClassicUO.Input;
 using ClassicUO.Network;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
@@ -318,6 +319,40 @@ namespace ClassicUO.Game.Managers
             while (obj != null)
             {
                 if (obj.Key == key && obj.Alt == alt && obj.Ctrl == ctrl && obj.Shift == shift)
+                {
+                    break;
+                }
+
+                obj = (Macro) obj.Next;
+            }
+
+            return obj;
+        }
+
+        public Macro FindMacro(MouseButtonType button, bool alt, bool ctrl, bool shift)
+        {
+            Macro obj = (Macro) Items;
+
+            while (obj != null)
+            {
+                if (obj.MouseButton == button && obj.Alt == alt && obj.Ctrl == ctrl && obj.Shift == shift)
+                {
+                    break;
+                }
+
+                obj = (Macro) obj.Next;
+            }
+
+            return obj;
+        }
+
+        public Macro FindMacro(bool wheelUp, bool alt, bool ctrl, bool shift)
+        {
+            Macro obj = (Macro) Items;
+
+            while (obj != null)
+            {
+                if (obj.WheelScroll == true && obj.WheelUp == wheelUp && obj.Alt == alt && obj.Ctrl == ctrl && obj.Shift == shift)
                 {
                     break;
                 }
@@ -1809,6 +1844,23 @@ namespace ClassicUO.Game.Managers
             Shift = shift;
         }
 
+        public Macro(string name, MouseButtonType button, bool alt, bool ctrl, bool shift) : this(name)
+        {
+            MouseButton = button;
+            Alt = alt;
+            Ctrl = ctrl;
+            Shift = shift;
+        }
+
+        public Macro(string name, bool wheelUp, bool alt, bool ctrl, bool shift) : this(name)
+        {
+            WheelScroll = true;
+            WheelUp = wheelUp;
+            Alt = alt;
+            Ctrl = ctrl;
+            Shift = shift;
+        }
+
         public Macro(string name)
         {
             Name = name;
@@ -1817,6 +1869,9 @@ namespace ClassicUO.Game.Managers
         public string Name { get; }
 
         public SDL.SDL_Keycode Key { get; set; }
+        public MouseButtonType MouseButton { get; set; }
+        public bool WheelScroll { get; set; }
+        public bool WheelUp { get; set; }
         public bool Alt { get; set; }
         public bool Ctrl { get; set; }
         public bool Shift { get; set; }
@@ -1860,6 +1915,9 @@ namespace ClassicUO.Game.Managers
             writer.WriteStartElement("macro");
             writer.WriteAttributeString("name", Name);
             writer.WriteAttributeString("key", ((int) Key).ToString());
+            writer.WriteAttributeString("mousebutton", ((int) MouseButton).ToString());
+            writer.WriteAttributeString("wheelscroll", WheelScroll.ToString());
+            writer.WriteAttributeString("wheelup", WheelUp.ToString());
             writer.WriteAttributeString("alt", Alt.ToString());
             writer.WriteAttributeString("ctrl", Ctrl.ToString());
             writer.WriteAttributeString("shift", Shift.ToString());
@@ -1897,6 +1955,21 @@ namespace ClassicUO.Game.Managers
             Alt = bool.Parse(xml.GetAttribute("alt"));
             Ctrl = bool.Parse(xml.GetAttribute("ctrl"));
             Shift = bool.Parse(xml.GetAttribute("shift"));
+
+            if (xml.HasAttribute("mousebutton"))
+            {
+                MouseButton = (MouseButtonType) int.Parse(xml.GetAttribute("mousebutton"));
+            }
+
+            if (xml.HasAttribute("wheelscroll"))
+            {
+                WheelScroll = bool.Parse(xml.GetAttribute("wheelscroll"));
+            }
+
+            if (xml.HasAttribute("wheelup"))
+            {
+                WheelUp = bool.Parse(xml.GetAttribute("wheelup"));
+            }
 
             XmlElement actions = xml["actions"];
 
@@ -1991,7 +2064,7 @@ namespace ClassicUO.Game.Managers
             Macro macro = new Macro
             (
                 name,
-                0,
+                (SDL.SDL_Keycode) 0,
                 false,
                 false,
                 false
@@ -2009,7 +2082,7 @@ namespace ClassicUO.Game.Managers
             Macro macro = new Macro
               (
                   name,
-                  0,
+                  (SDL.SDL_Keycode) 0,
                   false,
                   false,
                   false

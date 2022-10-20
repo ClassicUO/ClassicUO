@@ -719,6 +719,10 @@ namespace ClassicUO
 
                             break;
 
+                        case MouseButtonType.XButton1:
+                        case MouseButtonType.XButton2:
+                            break;
+
                         default: 
                             Log.Warn($"No mouse button handled: {mouse.button}");
 

@@ -32,6 +32,7 @@
 
 using System.Collections.Generic;
 using System.Text;
+using ClassicUO.Input;
 using SDL2;
 
 namespace ClassicUO.Utility
@@ -297,26 +298,7 @@ namespace ClassicUO.Utility
             {
                 StringBuilder sb = new StringBuilder();
 
-                bool isshift = (mod & SDL.SDL_Keymod.KMOD_SHIFT) != SDL.SDL_Keymod.KMOD_NONE;
-                bool isctrl = (mod & SDL.SDL_Keymod.KMOD_CTRL) != SDL.SDL_Keymod.KMOD_NONE;
-                bool isalt = (mod & SDL.SDL_Keymod.KMOD_ALT) != SDL.SDL_Keymod.KMOD_NONE;
-
-
-                if (isshift)
-                {
-                    sb.Append("Shift ");
-                }
-
-                if (isctrl)
-                {
-                    sb.Append("Ctrl ");
-                }
-
-                if (isalt)
-                {
-                    sb.Append("Alt ");
-                }
-
+                AddPrefix(sb, mod);
 
                 sb.Append(value);
 
@@ -324,6 +306,50 @@ namespace ClassicUO.Utility
             }
 
             return string.Empty;
+        }
+
+        public static string GetMouseButton(MouseButtonType button, SDL.SDL_Keymod mod)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            AddPrefix(sb, mod);
+
+            sb.Append(button.ToString());
+
+            return sb.ToString();
+        }
+
+        public static string GetMouseWheel(bool wheelUp, SDL.SDL_Keymod mod)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            AddPrefix(sb, mod);
+
+            sb.Append(wheelUp ? "WheelUp" : "WheelDown");
+
+            return sb.ToString();
+        }
+
+        private static void AddPrefix(StringBuilder sb, SDL.SDL_Keymod mod)
+        {
+            bool isshift = (mod & SDL.SDL_Keymod.KMOD_SHIFT) != SDL.SDL_Keymod.KMOD_NONE;
+            bool isctrl = (mod & SDL.SDL_Keymod.KMOD_CTRL) != SDL.SDL_Keymod.KMOD_NONE;
+            bool isalt = (mod & SDL.SDL_Keymod.KMOD_ALT) != SDL.SDL_Keymod.KMOD_NONE;
+
+            if (isshift)
+            {
+                sb.Append("Shift ");
+            }
+
+            if (isctrl)
+            {
+                sb.Append("Ctrl ");
+            }
+
+            if (isalt)
+            {
+                sb.Append("Alt ");
+            }
         }
     }
 }
