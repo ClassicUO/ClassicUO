@@ -914,7 +914,7 @@ namespace ClassicUO.Game.Scenes
 
                 if (macro != null && button != MouseButtonType.None)
                 {
-                    if (macro.Items != null && macro.Items is MacroObject mac)
+                    if (macro.Items is MacroObject mac)
                     {
                         ExecuteMacro(mac);
 
@@ -951,7 +951,7 @@ namespace ClassicUO.Game.Scenes
 
                 if (macro != null)
                 {
-                    if (macro.Items != null && macro.Items is MacroObject mac)
+                    if (macro.Items is MacroObject mac)
                     {
                         ExecuteMacro(mac);
 
@@ -1181,7 +1181,7 @@ namespace ClassicUO.Game.Scenes
 
                 if (macro != null && e.keysym.sym != SDL.SDL_Keycode.SDLK_UNKNOWN)
                 {
-                    if (macro.Items != null && macro.Items is MacroObject mac)
+                    if (macro.Items is MacroObject mac)
                     {
                         if (mac.Code == MacroType.Walk)
                         {
@@ -1290,7 +1290,7 @@ namespace ClassicUO.Game.Scenes
 
                 if (macro != null && e.keysym.sym != SDL.SDL_Keycode.SDLK_UNKNOWN)
                 {
-                    if (macro.Items != null && macro.Items is MacroObject mac && mac.Code == MacroType.Walk)
+                    if (macro.Items is MacroObject mac && mac.Code == MacroType.Walk)
                     {
                         _flags[4] = false;
 
