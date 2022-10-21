@@ -1474,8 +1474,8 @@ namespace ClassicUO.Game.GameObjects
 
                 case 8: return GetObjectNewAnimationType_8(mobile, action, mode);
 
-                case 9:
-                case 10: return GetObjectNewAnimationType_9_10(mobile, action, mode);
+                case 9: return GetObjectNewAnimationType_9(mobile, action, mode);
+                case 10: return GetObjectNewAnimationType_10(mobile, action, mode);
 
                 case 11: return GetObjectNewAnimationType_11(mobile, action, mode);
             }
@@ -1871,7 +1871,7 @@ namespace ClassicUO.Game.GameObjects
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static byte GetObjectNewAnimationType_9_10(Mobile mobile, ushort action, byte mode)
+        private static byte GetObjectNewAnimationType_9(Mobile mobile, ushort action, byte mode)
         {
             ANIMATION_FLAGS flags = AnimationsLoader.Instance.GetAnimFlags(mobile.Graphic);
             ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
@@ -1885,19 +1885,36 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (mobile.IsGargoyle)
                 {
-                    if (mobile.IsFlying)
+                    if (action == 0)
                     {
-                        if (action == 0)
-                        {
-                            return 60;
-                        }
+                        return 60;
                     }
-                    else
+                }
+
+                return 0xFF;
+            }
+
+            return 20;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static byte GetObjectNewAnimationType_10(Mobile mobile, ushort action, byte mode)
+        {
+            ANIMATION_FLAGS flags = AnimationsLoader.Instance.GetAnimFlags(mobile.Graphic);
+            ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
+
+            if ((flags & ANIMATION_FLAGS.AF_FOUND) != 0)
+            {
+                type = AnimationsLoader.Instance.GetAnimType(mobile.Graphic);
+            }
+
+            if (type != ANIMATION_GROUPS_TYPE.MONSTER)
+            {
+                if (mobile.IsGargoyle)
+                {
+                    if (action == 0)
                     {
-                        if (action == 0)
-                        {
-                            return 61;
-                        }
+                        return 61;
                     }
                 }
 
