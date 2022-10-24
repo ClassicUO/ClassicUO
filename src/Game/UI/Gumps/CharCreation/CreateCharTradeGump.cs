@@ -176,7 +176,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             _skillList = SkillsLoader.Instance.SortedSkills
                          .Where(s =>
                                      // All standard client versions ignore these skills by defualt
-                                     s.Index != 26 && // MagicResist
+                                     //s.Index != 26 && // MagicResist
                                      s.Index != 47 && // Stealth
                                      s.Index != 48 && // RemoveTrap
                                      s.Index != 54 && // Spellweaving
