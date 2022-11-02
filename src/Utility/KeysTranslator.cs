@@ -279,6 +279,17 @@ namespace ClassicUO.Utility
             //{ SDL.SDL_Keycode.SDLK_SLEEP = 1073742106, // 0x4000011A
         };
 
+        static KeysTranslator()
+        {
+            for (int i = 1; i < 256; i++)
+            {
+                if (!_keys.ContainsKey((SDL.SDL_Keycode)i))
+                {
+                    _keys.Add((SDL.SDL_Keycode)i, $"{(char)(i)}");
+                }
+            }
+        }
+
         private static readonly Dictionary<SDL.SDL_Keymod, string> _mods = new Dictionary<SDL.SDL_Keymod, string>
         {
             { SDL.SDL_Keymod.KMOD_LSHIFT, "Shift" },

@@ -53,7 +53,7 @@ namespace ClassicUO.Game.UI.Controls
 
 
             Width = 210;
-            Height = 20;
+            Height = 25;
 
             ResizePic pic;
 
@@ -74,19 +74,20 @@ namespace ClassicUO.Game.UI.Controls
                 _label = new HoveredLabel
                 (
                     string.Empty,
-                    false,
+                    true,
                     1,
                     0x0021,
                     0x0021,
                     150,
                     1,
-                    FontStyle.Italic,
+                    FontStyle.BlackBorder,
                     TEXT_ALIGN_TYPE.TS_CENTER
                 )
                 {
                     Y = 5
                 }
             );
+
 
             _label.MouseUp += LabelOnMouseUp;
 
