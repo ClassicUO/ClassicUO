@@ -279,16 +279,6 @@ namespace ClassicUO.Utility
             //{ SDL.SDL_Keycode.SDLK_SLEEP = 1073742106, // 0x4000011A
         };
 
-        static KeysTranslator()
-        {
-            for (int i = 1; i < 256; i++)
-            {
-                if (!_keys.ContainsKey((SDL.SDL_Keycode)i))
-                {
-                    _keys.Add((SDL.SDL_Keycode)i, $"{(char)(i)}");
-                }
-            }
-        }
 
         private static readonly Dictionary<SDL.SDL_Keymod, string> _mods = new Dictionary<SDL.SDL_Keymod, string>
         {
@@ -315,8 +305,19 @@ namespace ClassicUO.Utility
 
                 return sb.ToString();
             }
-
-            return string.Empty;
+            else
+            {
+                string sKey;
+                if ((int)key < 256)
+                    sKey = $"{(char)key}";
+                else
+                    sKey = $"{key}";
+                _keys.Add(key, sKey);
+                StringBuilder sb = new StringBuilder();
+                AddPrefix(sb, mod);
+                sb.Append(sKey);
+                return sb.ToString();
+            }
         }
 
         public static string GetMouseButton(MouseButtonType button, SDL.SDL_Keymod mod)
