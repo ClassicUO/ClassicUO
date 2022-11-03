@@ -80,7 +80,7 @@ namespace ClassicUO.Game.UI.Controls
                     0x0021,
                     150,
                     1,
-                    FontStyle.BlackBorder,
+                    FontStyle.None,
                     TEXT_ALIGN_TYPE.TS_CENTER
                 )
                 {
