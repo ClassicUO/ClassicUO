@@ -86,6 +86,6 @@ jobs:
         username: ${{ secrets.FTP_USER }}
         password: ${{ secrets.FTP_PSW }}
         protocol: ftps
-        server-dir: /www.classicuo.eu/dev/deploy2/
+        server-dir: /www.classicuo.eu/dev/deploy/
         local-dir: upload/
         
