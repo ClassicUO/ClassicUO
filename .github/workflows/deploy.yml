@@ -24,7 +24,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-       os: [ windows-latest ]
+       os: [ ubuntu-latest ]
 
     steps:
     - uses: actions/checkout@v2
@@ -34,10 +34,11 @@ jobs:
         git config --global url."https://".insteadOf git://
         git submodule update --init --recursive
         
-    - name: Setup .NET 6
-      uses: actions/setup-dotnet@v1
+    - name: Setup .NET 7
+      uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: 6.0.x
+        dotnet-version: 7.0.x
+        include-prerelease: true
             
     - name: Build
       run: dotnet publish ${{ env.CUO_PROJECT_PATH }} -c Release -o ${{ env.CUO_OUTPUT_PATH }} -p:IS_DEV_BUILD=true -p:AssemblyVersion=${{ env.CUO_ASSEMBLY_VERSION }} -p:FileVersion=${{ env.CUO_ASSEMBLY_VERSION }}
