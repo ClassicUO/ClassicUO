@@ -13,6 +13,7 @@ env:
   CUO_ASSEMBLY_VERSION: '0.1.11.${{ github.run_number }}'
   CUO_OUTPUT_PATH: 'bin/dist'
   CUO_PROJECT_PATH: "src/ClassicUO.csproj"
+  CUO_ZIP_NAME: "ClassicUO-dev-preview-release.zip"
 
   DOTNET_NOLOGO: false
   DOTNET_CLI_TELEMETRY_OPTOUT: 1
@@ -49,36 +50,36 @@ jobs:
       with:
         type: 'zip'
         directory: ${{ env.CUO_OUTPUT_PATH }}
-        filename: 'ClassicUO-dev-preview-release.zip'
+        filename: ${{ env.CUO_ZIP_NAME }}
         exclusions: 'ClassicUO.exe.config'
         
     - name: Create manifest
-      run: dotnet run --project tools/ManifestCreator/ManifestCreator.csproj "${{ env.CUO_OUTPUT_PATH }}" "dev-preview" "ClassicUO-dev-preview-release.zip"
+      run: dotnet run --project tools/ManifestCreator/ManifestCreator.csproj "${{ env.CUO_OUTPUT_PATH }}" "dev-preview" "${{ env.CUO_ZIP_NAME }}"
     
     - name: Move output
       run: |
         mkdir upload
-        mv "${{ env.CUO_OUTPUT_PATH }}/ClassicUO-dev-preview-release.zip" upload
+        mv "${{ env.CUO_OUTPUT_PATH }}/${{ env.CUO_ZIP_NAME }}" upload
         mv manifest.xml upload
       
-    #    
-    #- name: Remove old Release
-    #  uses: dev-drprasad/delete-tag-and-release@v0.2.0
-    #  with:
-    #    delete_release: true
-    #    tag_name: ClassicUO-dev-release
-    #  env:
-    #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    #    
-    #- name: Upload Release
-    #  uses: ncipollo/release-action@v1
-    #  with:
-    #    artifacts: "${{ env.CUO_OUTPUT_PATH }}/ClassicUO-dev-release.zip"
-    #    name: 'ClassicUO dev preview'
-    #    body: 'This build may not be safe: use it at your own risk.'
-    #    prerelease: true
-    #    tag: ClassicUO-dev-release
-    #    token: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Remove old Release
+      uses: dev-drprasad/delete-tag-and-release@v0.2.0
+      with:
+        delete_release: true
+        tag_name: ClassicUO-dev-release
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Upload Release
+      uses: ncipollo/release-action@v1
+      with:
+        artifacts: "${{ env.CUO_OUTPUT_PATH }}/${{ env.CUO_ZIP_NAME }}"
+        name: 'ClassicUO dev preview'
+        body: 'This build may not be safe: use it at your own risk.'
+        prerelease: true
+        tag: ClassicUO-dev-release
+        token: ${{ secrets.GITHUB_TOKEN }}
         
     - name: FTP Deploy
       uses: SamKirkland/FTP-Deploy-Action@4.3.2
