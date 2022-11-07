@@ -68,17 +68,17 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly DataBox _transactionDataBox;
         private readonly Dictionary<uint, TransactionItem> _transactionItems;
         private bool _updateTotal;
-        private bool _IsPressing = false;
-        private GumpPicTexture _LeftMiddle;
-        private int _InitialHeight = 0;
-        private int _InitialHeightRight = 0;
-        private int _MinHeight = 0;
-        private int _MinHeightRight = 0;
-        private GumpPicTexture _RightMiddle;
-        private GumpPicTexture _LeftBottom;
-        private Button _Expander;
-        private GumpPicTexture _RightBottom;
-        private HitBox _Accept, _Clear, _LeftDown, _RightDown;
+        private bool _isPressing = false;
+        private GumpPicTexture _leftMiddle;
+        private int _initialHeight = 0;
+        private int _initialHeightRight = 0;
+        private int _minHeight = 0;
+        private int _minHeightRight = 0;
+        private GumpPicTexture _rightMiddle;
+        private GumpPicTexture _leftBottom;
+        private Button _expander;
+        private GumpPicTexture _rightBottom;
+        private HitBox _accept, _clear, _leftDown, _rightDown;
 
         private const int LEFT_TOP_HEIGHT = 64;
         private const int LEFT_BOTTOM_HEIGHT = 116;
@@ -127,16 +127,16 @@ namespace ClassicUO.Game.UI.Gumps
 
             offset.Y += LEFT_TOP_HEIGHT;
             offset.Height = boundsLeft.Height - (LEFT_BOTTOM_HEIGHT + LEFT_TOP_HEIGHT);
-            _LeftMiddle = new GumpPicTexture(graphicLeft, 0, LEFT_TOP_HEIGHT, offset, true);
-            int diff = height - _LeftMiddle.Height;
-            _LeftMiddle.Height = height;
-            Add(_LeftMiddle);
+            _leftMiddle = new GumpPicTexture(graphicLeft, 0, LEFT_TOP_HEIGHT, offset, true);
+            int diff = height - _leftMiddle.Height;
+            _leftMiddle.Height = height;
+            Add(_leftMiddle);
 
 
             offset.Y += offset.Height;
             offset.Height = LEFT_BOTTOM_HEIGHT;
-            _LeftBottom = new GumpPicTexture(graphicLeft, 0, _LeftMiddle.Y + _LeftMiddle.Height, offset, false);
-            Add(_LeftBottom);
+            _leftBottom = new GumpPicTexture(graphicLeft, 0, _leftMiddle.Y + _leftMiddle.Height, offset, false);
+            Add(_leftBottom);
 
 
             int rightX = boundsLeft.Width - RIGHT_OFFSET;
@@ -148,26 +148,26 @@ namespace ClassicUO.Game.UI.Gumps
 
             offset.Y += LEFT_TOP_HEIGHT;
             offset.Height = boundsRight.Height - (RIGHT_BOTTOM_HEIGHT + LEFT_TOP_HEIGHT);
-            _RightMiddle = new GumpPicTexture(graphicRight, rightX, rightY + LEFT_TOP_HEIGHT, offset, true);
-            _RightMiddle.Height += diff;
-            Add(_RightMiddle);
+            _rightMiddle = new GumpPicTexture(graphicRight, rightX, rightY + LEFT_TOP_HEIGHT, offset, true);
+            _rightMiddle.Height += diff;
+            Add(_rightMiddle);
 
 
             offset.Y += offset.Height;
             offset.Height = RIGHT_BOTTOM_HEIGHT;
-            _RightBottom = new GumpPicTexture(graphicRight, rightX, _RightMiddle.Y + _RightMiddle.Height, offset, false);
-            Add(_RightBottom);
+            _rightBottom = new GumpPicTexture(graphicRight, rightX, _rightMiddle.Y + _rightMiddle.Height, offset, false);
+            Add(_rightBottom);
 
 
 
             _shopScrollArea = new ScrollArea
             (
                 RIGHT_OFFSET,
-                _LeftMiddle.Y,
+                _leftMiddle.Y,
                 boundsLeft.Width - RIGHT_OFFSET * 2 + 5,
-                _LeftMiddle.Height + 50,
+                _leftMiddle.Height + 50,
                 false,
-                _LeftMiddle.Height
+                _leftMiddle.Height
             );
 
             Add(_shopScrollArea);
@@ -178,7 +178,7 @@ namespace ClassicUO.Game.UI.Gumps
                 RIGHT_OFFSET / 2 + rightTop.X,
                 LEFT_TOP_HEIGHT + rightTop.Y,
                 boundsRight.Width - RIGHT_OFFSET * 2 + RIGHT_OFFSET / 2 + 5,
-                _RightMiddle.Height,
+                _rightMiddle.Height,
                 false
             );
 
@@ -192,7 +192,7 @@ namespace ClassicUO.Game.UI.Gumps
             _totalLabel = new Label("0", true, 0x0386, 0, 1)
             {
                 X = RIGHT_OFFSET + rightTop.X + 32 + 4,
-                Y = _RightBottom.Y + _RightBottom.Height - 32 * 3 + 15,
+                Y = _rightBottom.Y + _rightBottom.Height - 32 * 3 + 15,
             };
 
             Add(_totalLabel);
@@ -222,57 +222,57 @@ namespace ClassicUO.Game.UI.Gumps
 
 
 
-            _Expander = new Button(2, 0x082E, 0x82F)
+            _expander = new Button(2, 0x082E, 0x82F)
             {
                 ButtonAction = ButtonAction.Activate,
                 X = boundsLeft.Width / 2 - 10,
-                Y = _LeftBottom.Y + _LeftBottom.Height - 5
+                Y = _leftBottom.Y + _leftBottom.Height - 5
             };
 
-            Add(_Expander);
+            Add(_expander);
 
 
             const float ALPHA_HIT_BUTTON = 0f;
 
-            _Accept = new HitBox(RIGHT_OFFSET + rightTop.X, (_RightBottom.Y + _RightBottom.Height) - 50, 34, 30, "Accept", ALPHA_HIT_BUTTON);
-            _Clear = new HitBox(_Accept.X + 175, _Accept.Y, 20, 20, "Clear", ALPHA_HIT_BUTTON);
-            _Accept.MouseUp += (sender, e) => { OnButtonClick((int)Buttons.Accept); };
-            _Clear.MouseUp += (sender, e) => { OnButtonClick((int)Buttons.Clear); };
-            Add(_Accept);
-            Add(_Clear);
+            _accept = new HitBox(RIGHT_OFFSET + rightTop.X, (_rightBottom.Y + _rightBottom.Height) - 50, 34, 30, "Accept", ALPHA_HIT_BUTTON);
+            _clear = new HitBox(_accept.X + 175, _accept.Y, 20, 20, "Clear", ALPHA_HIT_BUTTON);
+            _accept.MouseUp += (sender, e) => { OnButtonClick((int)Buttons.Accept); };
+            _clear.MouseUp += (sender, e) => { OnButtonClick((int)Buttons.Clear); };
+            Add(_accept);
+            Add(_clear);
 
 
 
             HitBox leftUp = new HitBox((leftTop.X + leftTop.Width) - 50, (leftTop.Y + leftTop.Height) - 18, 18, 16, "Scroll Up", ALPHA_HIT_BUTTON);
-            _LeftDown = new HitBox(leftUp.X, _LeftBottom.Y, 18, 16, "Scroll Down", ALPHA_HIT_BUTTON);
+            _leftDown = new HitBox(leftUp.X, _leftBottom.Y, 18, 16, "Scroll Down", ALPHA_HIT_BUTTON);
 
             HitBox rightUp = new HitBox((rightTop.X + rightTop.Width - 50), (rightTop.Y + rightTop.Height) - 18, 18, 16, "Scroll Up", ALPHA_HIT_BUTTON);
-            _RightDown = new HitBox(rightUp.X, _RightBottom.Y, 18, 16, "Scroll Down", ALPHA_HIT_BUTTON);
+            _rightDown = new HitBox(rightUp.X, _rightBottom.Y, 18, 16, "Scroll Down", ALPHA_HIT_BUTTON);
 
             leftUp.MouseUp += ButtonMouseUp;
-            _LeftDown.MouseUp += ButtonMouseUp;
+            _leftDown.MouseUp += ButtonMouseUp;
             rightUp.MouseUp += ButtonMouseUp;
-            _RightDown.MouseUp += ButtonMouseUp;
+            _rightDown.MouseUp += ButtonMouseUp;
             leftUp.MouseDown += (sender, e) => { _buttonScroll = ButtonScroll.LeftScrollUp; };
-            _LeftDown.MouseDown += (sender, e) => { _buttonScroll = ButtonScroll.LeftScrollDown; };
+            _leftDown.MouseDown += (sender, e) => { _buttonScroll = ButtonScroll.LeftScrollDown; };
             rightUp.MouseDown += (sender, e) => { _buttonScroll = ButtonScroll.RightScrollUp; };
-            _RightDown.MouseDown += (sender, e) => { _buttonScroll = ButtonScroll.RightScrollDown; };
+            _rightDown.MouseDown += (sender, e) => { _buttonScroll = ButtonScroll.RightScrollDown; };
             Add(leftUp);
-            Add(_LeftDown);
+            Add(_leftDown);
             Add(rightUp);
-            Add(_RightDown);
+            Add(_rightDown);
 
-            _MinHeight = boundsLeft.Height - (LEFT_BOTTOM_HEIGHT + LEFT_TOP_HEIGHT);
-            _MinHeightRight = boundsRight.Height - (RIGHT_BOTTOM_HEIGHT + LEFT_TOP_HEIGHT);
+            _minHeight = boundsLeft.Height - (LEFT_BOTTOM_HEIGHT + LEFT_TOP_HEIGHT);
+            _minHeightRight = boundsRight.Height - (RIGHT_BOTTOM_HEIGHT + LEFT_TOP_HEIGHT);
 
-            _Expander.MouseDown += (sender, args) =>
+            _expander.MouseDown += (sender, args) =>
             {
-                _IsPressing = true;
-                _InitialHeight = _LeftMiddle.Height;
-                _InitialHeightRight = _RightMiddle.Height;
+                _isPressing = true;
+                _initialHeight = _leftMiddle.Height;
+                _initialHeightRight = _rightMiddle.Height;
             };
 
-            _Expander.MouseUp += (sender, args) => { _IsPressing = false; };
+            _expander.MouseUp += (sender, args) => { _isPressing = false; };
 
 
             //Label name = new Label(World.Player.Name, false, 0x0386, font: 5)
@@ -359,44 +359,44 @@ namespace ClassicUO.Game.UI.Gumps
 
             int steps = Mouse.LDragOffset.Y;
 
-            if (_IsPressing && steps != 0)
+            if (_isPressing && steps != 0)
             {
-                _LeftMiddle.Height = _InitialHeight + steps;
+                _leftMiddle.Height = _initialHeight + steps;
 
-                if (_LeftMiddle.Height < _MinHeight)
+                if (_leftMiddle.Height < _minHeight)
                 {
-                    _LeftMiddle.Height = _MinHeight;
+                    _leftMiddle.Height = _minHeight;
                 }
-                else if (_LeftMiddle.Height > 640)
+                else if (_leftMiddle.Height > 640)
                 {
-                    _LeftMiddle.Height = 640;
-                }
-
-                _RightMiddle.Height = _InitialHeightRight + steps;
-
-                if (_RightMiddle.Height < _MinHeightRight)
-                {
-                    _RightMiddle.Height = _MinHeightRight;
-                }
-                else if (_RightMiddle.Height > 640 - LEFT_TOP_HEIGHT)
-                {
-                    _RightMiddle.Height = 640 - LEFT_TOP_HEIGHT;
+                    _leftMiddle.Height = 640;
                 }
 
-                ProfileManager.CurrentProfile.VendorGumpHeight = _LeftMiddle.Height;
+                _rightMiddle.Height = _initialHeightRight + steps;
 
-                _LeftBottom.Y = _LeftMiddle.Y + _LeftMiddle.Height;
-                _Expander.Y = _LeftBottom.Y + _LeftBottom.Height - 5;
-                _RightBottom.Y = _RightMiddle.Y + _RightMiddle.Height;
+                if (_rightMiddle.Height < _minHeightRight)
+                {
+                    _rightMiddle.Height = _minHeightRight;
+                }
+                else if (_rightMiddle.Height > 640 - LEFT_TOP_HEIGHT)
+                {
+                    _rightMiddle.Height = 640 - LEFT_TOP_HEIGHT;
+                }
 
-                _shopScrollArea.Height = _LeftMiddle.Height + 50;
-                _shopScrollArea.ScrollMaxHeight = _LeftMiddle.Height;
+                ProfileManager.CurrentProfile.VendorGumpHeight = _leftMiddle.Height;
 
-                _transactionDataBox.Height = _transactionScrollArea.Height = _RightMiddle.Height;
-                _totalLabel.Y = _RightBottom.Y + _RightBottom.Height - RIGHT_OFFSET * 3 + 15;
-                _Accept.Y = _Clear.Y = (_RightBottom.Y + _RightBottom.Height) - 50;
-                _LeftDown.Y = _LeftBottom.Y;
-                _RightDown.Y = _RightBottom.Y;
+                _leftBottom.Y = _leftMiddle.Y + _leftMiddle.Height;
+                _expander.Y = _leftBottom.Y + _leftBottom.Height - 5;
+                _rightBottom.Y = _rightMiddle.Y + _rightMiddle.Height;
+
+                _shopScrollArea.Height = _leftMiddle.Height + 50;
+                _shopScrollArea.ScrollMaxHeight = _leftMiddle.Height;
+
+                _transactionDataBox.Height = _transactionScrollArea.Height = _rightMiddle.Height;
+                _totalLabel.Y = _rightBottom.Y + _rightBottom.Height - RIGHT_OFFSET * 3 + 15;
+                _accept.Y = _clear.Y = (_rightBottom.Y + _rightBottom.Height) - 50;
+                _leftDown.Y = _leftBottom.Y;
+                _rightDown.Y = _rightBottom.Y;
 
                 if (_playerGoldLabel != null)
                 {
