@@ -68,6 +68,23 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly DataBox _transactionDataBox;
         private readonly Dictionary<uint, TransactionItem> _transactionItems;
         private bool _updateTotal;
+        private bool _isPressing = false;
+        private GumpPicTexture _leftMiddle;
+        private int _initialHeight = 0;
+        private int _initialHeightRight = 0;
+        private int _minHeight = 0;
+        private int _minHeightRight = 0;
+        private GumpPicTexture _rightMiddle;
+        private GumpPicTexture _leftBottom;
+        private Button _expander;
+        private GumpPicTexture _rightBottom;
+        private HitBox _accept, _clear, _leftDown, _rightDown;
+
+        private const int LEFT_TOP_HEIGHT = 64;
+        private const int LEFT_BOTTOM_HEIGHT = 116;
+
+        private const int RIGHT_OFFSET = 32;
+        private const int RIGHT_BOTTOM_HEIGHT = 93;
 
         public ShopGump(uint serial, bool isBuyGump, int x, int y) : base(serial, 0) //60 is the base height, original size
         {
@@ -101,33 +118,26 @@ namespace ClassicUO.Game.UI.Gumps
 
 
 
-            const int LEFT_TOP_HEIGHT = 64;
-            const int LEFT_BOTTOM_HEIGHT = 116;
-
             Rectangle offset = new Rectangle(0, 0, boundsLeft.Width, LEFT_TOP_HEIGHT);
             GumpPicTexture leftTop = new GumpPicTexture(graphicLeft, 0, 0, offset, false);
             Add(leftTop);
 
 
-            
+
 
             offset.Y += LEFT_TOP_HEIGHT;
             offset.Height = boundsLeft.Height - (LEFT_BOTTOM_HEIGHT + LEFT_TOP_HEIGHT);
-            GumpPicTexture leftmiddle = new GumpPicTexture(graphicLeft, 0, LEFT_TOP_HEIGHT, offset, true);
-            int diff = height - leftmiddle.Height;
-            leftmiddle.Height = height;
-            Add(leftmiddle);
+            _leftMiddle = new GumpPicTexture(graphicLeft, 0, LEFT_TOP_HEIGHT, offset, true);
+            int diff = height - _leftMiddle.Height;
+            _leftMiddle.Height = height;
+            Add(_leftMiddle);
 
 
             offset.Y += offset.Height;
             offset.Height = LEFT_BOTTOM_HEIGHT;
-            GumpPicTexture leftBottom = new GumpPicTexture(graphicLeft, 0, leftmiddle.Y + leftmiddle.Height, offset, false);
-            Add(leftBottom);
+            _leftBottom = new GumpPicTexture(graphicLeft, 0, _leftMiddle.Y + _leftMiddle.Height, offset, false);
+            Add(_leftBottom);
 
-
-
-            const int RIGHT_OFFSET = 32;
-            const int RIGHT_BOTTOM_HEIGHT = 93;
 
             int rightX = boundsLeft.Width - RIGHT_OFFSET;
             int rightY = boundsLeft.Height / 2 - RIGHT_OFFSET;
@@ -138,26 +148,26 @@ namespace ClassicUO.Game.UI.Gumps
 
             offset.Y += LEFT_TOP_HEIGHT;
             offset.Height = boundsRight.Height - (RIGHT_BOTTOM_HEIGHT + LEFT_TOP_HEIGHT);
-            GumpPicTexture rightMiddle = new GumpPicTexture(graphicRight, rightX, rightY + LEFT_TOP_HEIGHT, offset, true);
-            rightMiddle.Height += diff;
-            Add(rightMiddle);
+            _rightMiddle = new GumpPicTexture(graphicRight, rightX, rightY + LEFT_TOP_HEIGHT, offset, true);
+            _rightMiddle.Height += diff;
+            Add(_rightMiddle);
 
 
             offset.Y += offset.Height;
             offset.Height = RIGHT_BOTTOM_HEIGHT;
-            GumpPicTexture rightBottom = new GumpPicTexture(graphicRight, rightX, rightMiddle.Y + rightMiddle.Height, offset, false);
-            Add(rightBottom);
+            _rightBottom = new GumpPicTexture(graphicRight, rightX, _rightMiddle.Y + _rightMiddle.Height, offset, false);
+            Add(_rightBottom);
 
 
 
             _shopScrollArea = new ScrollArea
             (
                 RIGHT_OFFSET,
-                leftmiddle.Y,
+                _leftMiddle.Y,
                 boundsLeft.Width - RIGHT_OFFSET * 2 + 5,
-                leftmiddle.Height + 50,
+                _leftMiddle.Height + 50,
                 false,
-                leftmiddle.Height
+                _leftMiddle.Height
             );
 
             Add(_shopScrollArea);
@@ -167,8 +177,8 @@ namespace ClassicUO.Game.UI.Gumps
             (
                 RIGHT_OFFSET / 2 + rightTop.X,
                 LEFT_TOP_HEIGHT + rightTop.Y,
-                boundsRight.Width - RIGHT_OFFSET * 2 + RIGHT_OFFSET / 2 + 5, 
-                rightMiddle.Height,
+                boundsRight.Width - RIGHT_OFFSET * 2 + RIGHT_OFFSET / 2 + 5,
+                _rightMiddle.Height,
                 false
             );
 
@@ -182,7 +192,7 @@ namespace ClassicUO.Game.UI.Gumps
             _totalLabel = new Label("0", true, 0x0386, 0, 1)
             {
                 X = RIGHT_OFFSET + rightTop.X + 32 + 4,
-                Y = rightBottom.Y + rightBottom.Height - 32 * 3 + 15,
+                Y = _rightBottom.Y + _rightBottom.Height - 32 * 3 + 15,
             };
 
             Add(_totalLabel);
@@ -212,114 +222,57 @@ namespace ClassicUO.Game.UI.Gumps
 
 
 
-            Button expander = new Button(2, 0x082E, 0x82F)
+            _expander = new Button(2, 0x082E, 0x82F)
             {
                 ButtonAction = ButtonAction.Activate,
                 X = boundsLeft.Width / 2 - 10,
-                Y = leftBottom.Y + leftBottom.Height - 5
+                Y = _leftBottom.Y + _leftBottom.Height - 5
             };
 
-            Add(expander);
+            Add(_expander);
 
 
             const float ALPHA_HIT_BUTTON = 0f;
 
-            HitBox accept = new HitBox(RIGHT_OFFSET + rightTop.X, (rightBottom.Y + rightBottom.Height) - 50, 34, 30, "Accept", ALPHA_HIT_BUTTON);
-            HitBox clear = new HitBox(accept.X + 175, accept.Y, 20, 20, "Clear", ALPHA_HIT_BUTTON);
-            accept.MouseUp += (sender, e) => { OnButtonClick((int)Buttons.Accept); };
-            clear.MouseUp += (sender, e) => { OnButtonClick((int)Buttons.Clear); };
-            Add(accept);
-            Add(clear);
+            _accept = new HitBox(RIGHT_OFFSET + rightTop.X, (_rightBottom.Y + _rightBottom.Height) - 50, 34, 30, "Accept", ALPHA_HIT_BUTTON);
+            _clear = new HitBox(_accept.X + 175, _accept.Y, 20, 20, "Clear", ALPHA_HIT_BUTTON);
+            _accept.MouseUp += (sender, e) => { OnButtonClick((int)Buttons.Accept); };
+            _clear.MouseUp += (sender, e) => { OnButtonClick((int)Buttons.Clear); };
+            Add(_accept);
+            Add(_clear);
 
 
 
             HitBox leftUp = new HitBox((leftTop.X + leftTop.Width) - 50, (leftTop.Y + leftTop.Height) - 18, 18, 16, "Scroll Up", ALPHA_HIT_BUTTON);
-            HitBox leftDown = new HitBox(leftUp.X, leftBottom.Y, 18, 16, "Scroll Down", ALPHA_HIT_BUTTON);
+            _leftDown = new HitBox(leftUp.X, _leftBottom.Y, 18, 16, "Scroll Down", ALPHA_HIT_BUTTON);
 
             HitBox rightUp = new HitBox((rightTop.X + rightTop.Width - 50), (rightTop.Y + rightTop.Height) - 18, 18, 16, "Scroll Up", ALPHA_HIT_BUTTON);
-            HitBox rightDown = new HitBox(rightUp.X, rightBottom.Y, 18, 16, "Scroll Down", ALPHA_HIT_BUTTON);
+            _rightDown = new HitBox(rightUp.X, _rightBottom.Y, 18, 16, "Scroll Down", ALPHA_HIT_BUTTON);
 
             leftUp.MouseUp += ButtonMouseUp;
-            leftDown.MouseUp += ButtonMouseUp;
+            _leftDown.MouseUp += ButtonMouseUp;
             rightUp.MouseUp += ButtonMouseUp;
-            rightDown.MouseUp += ButtonMouseUp;
+            _rightDown.MouseUp += ButtonMouseUp;
             leftUp.MouseDown += (sender, e) => { _buttonScroll = ButtonScroll.LeftScrollUp; };
-            leftDown.MouseDown += (sender, e) => { _buttonScroll = ButtonScroll.LeftScrollDown; };
+            _leftDown.MouseDown += (sender, e) => { _buttonScroll = ButtonScroll.LeftScrollDown; };
             rightUp.MouseDown += (sender, e) => { _buttonScroll = ButtonScroll.RightScrollUp; };
-            rightDown.MouseDown += (sender, e) => { _buttonScroll = ButtonScroll.RightScrollDown; };
+            _rightDown.MouseDown += (sender, e) => { _buttonScroll = ButtonScroll.RightScrollDown; };
             Add(leftUp);
-            Add(leftDown);
+            Add(_leftDown);
             Add(rightUp);
-            Add(rightDown);
+            Add(_rightDown);
 
+            _minHeight = boundsLeft.Height - (LEFT_BOTTOM_HEIGHT + LEFT_TOP_HEIGHT);
+            _minHeightRight = boundsRight.Height - (RIGHT_BOTTOM_HEIGHT + LEFT_TOP_HEIGHT);
 
-
-            bool is_pressing = false;
-            int initial_height = 0, initialHeightRight = 0;
-            int minHeight = boundsLeft.Height - (LEFT_BOTTOM_HEIGHT + LEFT_TOP_HEIGHT);
-            int minHeightRight = boundsRight.Height - (RIGHT_BOTTOM_HEIGHT + LEFT_TOP_HEIGHT);
-
-            expander.MouseDown += (sender, args) =>
+            _expander.MouseDown += (sender, args) =>
             {
-                is_pressing = true;
-                initial_height = leftmiddle.Height;
-                initialHeightRight = rightMiddle.Height;
+                _isPressing = true;
+                _initialHeight = _leftMiddle.Height;
+                _initialHeightRight = _rightMiddle.Height;
             };
 
-            expander.MouseUp += (sender, args) => { is_pressing = false; };
-
-            expander.MouseOver += (sender, args) =>
-            {
-                int steps = Mouse.LDragOffset.Y;
-
-                if (is_pressing && steps != 0)
-                {
-                    leftmiddle.Height = initial_height + steps;
-
-                    if (leftmiddle.Height < minHeight)
-                    {
-                        leftmiddle.Height = minHeight;
-                    }
-                    else if (leftmiddle.Height > 640)
-                    {
-                        leftmiddle.Height = 640;
-                    }
-
-                    rightMiddle.Height = initialHeightRight + steps;
-
-                    if (rightMiddle.Height < minHeightRight)
-                    {
-                        rightMiddle.Height = minHeightRight;
-                    }
-                    else if (rightMiddle.Height > 640 - LEFT_TOP_HEIGHT)
-                    {
-                        rightMiddle.Height = 640 - LEFT_TOP_HEIGHT;
-                    }
-
-                    ProfileManager.CurrentProfile.VendorGumpHeight = leftmiddle.Height;
-
-                    leftBottom.Y = leftmiddle.Y + leftmiddle.Height;
-                    expander.Y = leftBottom.Y + leftBottom.Height - 5; 
-                    rightBottom.Y = rightMiddle.Y + rightMiddle.Height;
-
-                    _shopScrollArea.Height = leftmiddle.Height + 50;
-                    _shopScrollArea.ScrollMaxHeight = leftmiddle.Height;
-
-                    _transactionDataBox.Height = _transactionScrollArea.Height = rightMiddle.Height;
-                    _totalLabel.Y = rightBottom.Y + rightBottom.Height - RIGHT_OFFSET * 3 + 15;
-                    accept.Y = clear.Y = (rightBottom.Y + rightBottom.Height) - 50;
-                    leftDown.Y = leftBottom.Y;
-                    rightDown.Y = rightBottom.Y;
-
-                    if (_playerGoldLabel != null)
-                    {
-                        _playerGoldLabel.Y = _totalLabel.Y;
-                    }
-
-                    _transactionDataBox.ReArrangeChildren();
-                    WantUpdateSize = true;
-                }
-            };
+            _expander.MouseUp += (sender, args) => { _isPressing = false; };
 
 
             //Label name = new Label(World.Player.Name, false, 0x0386, font: 5)
@@ -404,6 +357,56 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
+            int steps = Mouse.LDragOffset.Y;
+
+            if (_isPressing && steps != 0)
+            {
+                _leftMiddle.Height = _initialHeight + steps;
+
+                if (_leftMiddle.Height < _minHeight)
+                {
+                    _leftMiddle.Height = _minHeight;
+                }
+                else if (_leftMiddle.Height > 640)
+                {
+                    _leftMiddle.Height = 640;
+                }
+
+                _rightMiddle.Height = _initialHeightRight + steps;
+
+                if (_rightMiddle.Height < _minHeightRight)
+                {
+                    _rightMiddle.Height = _minHeightRight;
+                }
+                else if (_rightMiddle.Height > 640 - LEFT_TOP_HEIGHT)
+                {
+                    _rightMiddle.Height = 640 - LEFT_TOP_HEIGHT;
+                }
+
+                ProfileManager.CurrentProfile.VendorGumpHeight = _leftMiddle.Height;
+
+                _leftBottom.Y = _leftMiddle.Y + _leftMiddle.Height;
+                _expander.Y = _leftBottom.Y + _leftBottom.Height - 5;
+                _rightBottom.Y = _rightMiddle.Y + _rightMiddle.Height;
+
+                _shopScrollArea.Height = _leftMiddle.Height + 50;
+                _shopScrollArea.ScrollMaxHeight = _leftMiddle.Height;
+
+                _transactionDataBox.Height = _transactionScrollArea.Height = _rightMiddle.Height;
+                _totalLabel.Y = _rightBottom.Y + _rightBottom.Height - RIGHT_OFFSET * 3 + 15;
+                _accept.Y = _clear.Y = (_rightBottom.Y + _rightBottom.Height) - 50;
+                _leftDown.Y = _leftBottom.Y;
+                _rightDown.Y = _rightBottom.Y;
+
+                if (_playerGoldLabel != null)
+                {
+                    _playerGoldLabel.Y = _totalLabel.Y;
+                }
+
+                _transactionDataBox.ReArrangeChildren();
+                WantUpdateSize = true;
+            }
+
             if (_shopItems.Count == 0)
             {
                 Dispose();
@@ -466,7 +469,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void ShopItem_MouseDoubleClick(object sender, MouseDoubleClickEventArgs e)
         {
-            ShopItem shopItem = (ShopItem) sender;
+            ShopItem shopItem = (ShopItem)sender;
 
             if (shopItem.Amount <= 0)
             {
@@ -506,7 +509,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void TransactionItem_OnDecreaseButtomClicked(object sender, EventArgs e)
         {
-            TransactionItem transactionItem = (TransactionItem) sender;
+            TransactionItem transactionItem = (TransactionItem)sender;
 
             int total = Keyboard.Shift ? transactionItem.Amount : 1;
 
@@ -540,7 +543,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void TransactionItem_OnIncreaseButtomClicked(object sender, EventArgs e)
         {
-            TransactionItem transactionItem = (TransactionItem) sender;
+            TransactionItem transactionItem = (TransactionItem)sender;
 
             if (_shopItems[transactionItem.LocalSerial].Amount > 0)
             {
@@ -562,10 +565,10 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void OnButtonClick(int buttonID)
         {
-            switch ((Buttons) buttonID)
+            switch ((Buttons)buttonID)
             {
                 case Buttons.Accept:
-                    Tuple<uint, ushort>[] items = _transactionItems.Select(t => new Tuple<uint, ushort>(t.Key, (ushort) t.Value.Amount)).ToArray();
+                    Tuple<uint, ushort>[] items = _transactionItems.Select(t => new Tuple<uint, ushort>(t.Key, (ushort)t.Value.Amount)).ToArray();
 
                     if (IsBuyGump)
                     {
@@ -633,7 +636,7 @@ namespace ClassicUO.Game.UI.Gumps
                     return;
                 }
 
-               
+
                 string subname = string.Format(ResGumps.Item0Price1, itemName, Price);
 
                 Add
@@ -708,7 +711,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     foreach (Label label in Children.OfType<Label>())
                     {
-                        label.Hue = (ushort) (value ? 0x0021 : 0x0219);
+                        label.Hue = (ushort)(value ? 0x0021 : 0x0219);
                     }
                 }
             }
@@ -719,18 +722,18 @@ namespace ClassicUO.Game.UI.Gumps
             public string Name { get; }
 
             public bool NameFromCliloc { get; set; }
-            
+
             public bool InBuyGump { get; set; }
 
             private static byte GetAnimGroup(ushort graphic)
             {
                 switch (AnimationsLoader.Instance.GetGroupIndex(graphic))
                 {
-                    case ANIMATION_GROUPS.AG_LOW: return (byte) LOW_ANIMATION_GROUP.LAG_STAND;
+                    case ANIMATION_GROUPS.AG_LOW: return (byte)LOW_ANIMATION_GROUP.LAG_STAND;
 
-                    case ANIMATION_GROUPS.AG_HIGHT: return (byte) HIGHT_ANIMATION_GROUP.HAG_STAND;
+                    case ANIMATION_GROUPS.AG_HIGHT: return (byte)HIGHT_ANIMATION_GROUP.HAG_STAND;
 
-                    case ANIMATION_GROUPS.AG_PEOPLE: return (byte) PEOPLE_ANIMATION_GROUP.PAG_STAND;
+                    case ANIMATION_GROUPS.AG_PEOPLE: return (byte)PEOPLE_ANIMATION_GROUP.PAG_STAND;
                 }
 
                 return 0;
