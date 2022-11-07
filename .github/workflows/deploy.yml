@@ -57,7 +57,7 @@ jobs:
       run: |
         mkdir upload
         mv "${{ env.CUO_OUTPUT_PATH }}/ClassicUO-dev-preview-release.zip" upload
-        mv "${{ env.CUO_OUTPUT_PATH }}/manifest.xml" upload
+        mv manifest.xml upload
       
     #    
     #- name: Remove old Release
