@@ -85,6 +85,7 @@ jobs:
         server: ftp.classicuo.eu
         username: ${{ secrets.FTP_USER }}
         password: ${{ secrets.FTP_PSW }}
+        protocol: ftps-legacy
         server-dir: /www.classicuo.eu/dev/deploy2/
         local-dir: upload/
         
