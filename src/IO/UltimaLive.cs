@@ -523,8 +523,6 @@ namespace ClassicUO.IO
                             continue;
                         }
 
-                        LinkedList<int> linkedList = mapChunk.Node?.List;
-
                         List<GameObject> gameObjects = new List<GameObject>();
 
                         for (int x = 0; x < 8; x++)
@@ -788,7 +786,7 @@ namespace ClassicUO.IO
 
                 _feedCancel = new CancellationTokenSource();
                 NumMaps = maps;
-                int[,] old = MapsDefaultSize;
+                var old = _UL.MapSizeWrapSize;
                 MapsDefaultSize = new int[NumMaps, 2];
 
                 for (int i = 0; i < NumMaps; i++)
