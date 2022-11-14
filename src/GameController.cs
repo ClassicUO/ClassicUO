@@ -308,7 +308,7 @@ namespace ClassicUO
             }
 
             SDL_SetWindowBordered(Window.Handle, borderless ? SDL_bool.SDL_FALSE : SDL_bool.SDL_TRUE);
-            SDL_GetCurrentDisplayMode(0, out SDL_DisplayMode displayMode);
+            SDL_GetCurrentDisplayMode(SDL_GetWindowDisplayIndex(Window.Handle), out SDL_DisplayMode displayMode);
 
             int width = displayMode.w;
             int height = displayMode.h;
@@ -316,7 +316,8 @@ namespace ClassicUO
             if (borderless)
             {
                 SetWindowSize(width, height);
-                SDL_SetWindowPosition(Window.Handle, 0, 0);
+                SDL_GetDisplayUsableBounds(SDL_GetWindowDisplayIndex(Window.Handle), out SDL_Rect rect);
+                SDL_SetWindowPosition(Window.Handle, rect.x, rect.y);
             }
             else
             {
