@@ -184,7 +184,7 @@ namespace ClassicUO.Game
 
                             case Item item when item.IsMulti || item.ItemData.IsInternal:
                             {
-                                canBeAdd = false;
+                                //canBeAdd = false;
 
                                 break;
                             }
@@ -226,7 +226,8 @@ namespace ClassicUO.Game
 
                             if (!(obj is Mobile))
                             {
-                                ref StaticTiles itemdata = ref TileDataLoader.Instance.StaticData[obj.Graphic];
+                                var graphic = obj is Item it && it.IsMulti ? it.MultiGraphic : obj.Graphic;
+                                ref StaticTiles itemdata = ref TileDataLoader.Instance.StaticData[graphic];
 
                                 if (stepState == (int) PATH_STEP_STATE.PSS_ON_SEA_HORSE)
                                 {
