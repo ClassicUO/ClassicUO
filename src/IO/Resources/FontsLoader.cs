@@ -3068,7 +3068,7 @@ namespace ClassicUO.IO.Resources
             }
 
             char* bufferCmd = stackalloc char[128];
-            char* bufferValue = stackalloc char[128];
+            char* bufferValue = stackalloc char[512];
 
             for (int cmdLenght = 0; i < length; ++i)
             {
