@@ -33,6 +33,7 @@
 using System;
 using System.Buffers;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -43,6 +44,7 @@ using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
+using ClassicUO.Game.UI.Controls;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 
@@ -2401,6 +2403,10 @@ namespace ClassicUO.Network
                 writer.WriteZero(2);
             }
 
+            // cleanup windows CR
+            subject = subject.Replace("\r\n", "\n");
+            text = text.Replace("\r\n", "\n");
+
             writer.WriteUInt8(0x05);
             writer.WriteUInt32BE(serial);
             writer.WriteUInt32BE(msgSerial);
@@ -2410,60 +2416,29 @@ namespace ClassicUO.Network
             writer.Write(title);
             writer.WriteUInt8(0x00);
 
-            int numOfLinesPosition = writer.Position;
-            int numOfLines = 0;
+            var lines = text.Split('\n');
 
-            for (int i = 0, startIndex = 0; i < text.Length; ++i)
+            if (lines.Length > 0)
             {
-                if (text[i] == '\n')
+                writer.WriteUInt8((byte)lines.Length);
+
+                foreach (var line in lines)
                 {
-                    ++numOfLines;
-
-                    int len = i - startIndex;
-
-                    if (len > 0)
-                    {
-                        byte[] buffer = ArrayPool<byte>.Shared.Rent(len * 2);
-
-                        try
-                        {
-                            int written = Encoding.UTF8.GetBytes
-                            (
-                                text,
-                                startIndex,
-                                len,
-                                buffer,
-                                0
-                            );
-
-                            writer.WriteUInt8((byte) (written + 1));
-                            writer.Write(buffer.AsSpan(0, written));
-                            writer.WriteUInt8(0x00);
-                        }
-                        finally
-                        {
-                            ArrayPool<byte>.Shared.Return(buffer);
-                        }
-                    }
-                    else
-                    {
-                        writer.WriteUInt8(0x01);
-                        writer.WriteUInt8(0x00);
-                    }
-
-                    startIndex = i;
+                    var bytes = Encoding.UTF8.GetBytes(line);
+                    writer.WriteUInt8((byte)(bytes.Length + 1));
+                    writer.Write(bytes.AsSpan());
+                    writer.WriteUInt8(0x00);
                 }
             }
-
-            if (numOfLines == 0)
+            else
             {
-                writer.WriteUInt8((byte) (text.Length + 1));
-                writer.WriteASCII(text);
+                writer.WriteUInt8(0x01);
+                var bytes = Encoding.UTF8.GetBytes(text);
+                writer.WriteUInt8((byte)(bytes.Length + 1));
+                writer.Write(bytes.AsSpan());
                 writer.WriteUInt8(0x00);
             }
 
-            writer.Seek(numOfLinesPosition, SeekOrigin.Begin);
-            writer.WriteUInt8((byte) numOfLines);
 
             if (length < 0)
             {
