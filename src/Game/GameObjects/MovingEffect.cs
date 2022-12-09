@@ -143,8 +143,8 @@ namespace ClassicUO.Game.GameObjects
             Vector2.Subtract(ref target, ref source, out Vector2 offset);
             Vector2.Distance(ref source, ref target, out float distance);
             //distance -= 22;
-            Vector2.Multiply(ref offset, IntervalInMs / distance, out Vector2 s0);
-            
+            Vector2.Multiply(ref offset, (IntervalInMs / distance) * Time.Delta * 1000, out Vector2 s0);
+
             if (distance <= 22)
             {
                 RemoveMe();
