@@ -407,7 +407,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 base.Update();
 
-                if (_time < Time.Ticks)
+                if (Parent != null && Parent.IsEnabled && _time < Time.Ticks)
                 {
                     _time = Time.Ticks + 100;
 
