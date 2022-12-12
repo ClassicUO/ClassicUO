@@ -1453,6 +1453,9 @@ Client version: '{0}'</value>
   <data name="IgnoreAllianceMessages" xml:space="preserve">
     <value>Hide alliance chat</value>
   </data>
+  <data name="SpeechMaxWidth" xml:space="preserve">
+    <value>- Speech Max Width:</value>
+  </data>
   <data name="OpenMacroSettings" xml:space="preserve">
     <value>Open Macro Settings</value>
   </data>

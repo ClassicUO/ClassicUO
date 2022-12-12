@@ -69,6 +69,7 @@ namespace ClassicUO.Configuration
         public bool ForceUnicodeJournal { get; set; }
         public bool IgnoreAllianceMessages { get; set; }
         public bool IgnoreGuildMessages { get; set; }
+        public int SpeechMaxWidth { get; set; } = 200;
 
         // hues
         public ushort SpeechHue { get; set; } = 0x02B2;

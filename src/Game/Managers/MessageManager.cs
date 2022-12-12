@@ -266,22 +266,27 @@ namespace ClassicUO.Game.Managers
             TextType textType
         )
         {
-            if (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.OverrideAllFonts)
+            int maxWidth = 200;
+            if (ProfileManager.CurrentProfile != null)
             {
-                font = ProfileManager.CurrentProfile.ChatFont;
-                isunicode = ProfileManager.CurrentProfile.OverrideAllFontsIsUnicode;
+                if (ProfileManager.CurrentProfile.OverrideAllFonts)
+                {
+                    font = ProfileManager.CurrentProfile.ChatFont;
+                    isunicode = ProfileManager.CurrentProfile.OverrideAllFontsIsUnicode;
+                }
+                maxWidth = ProfileManager.CurrentProfile.SpeechMaxWidth;
             }
 
             int width = isunicode ? FontsLoader.Instance.GetWidthUnicode(font, msg) : FontsLoader.Instance.GetWidthASCII(font, msg);
 
-            if (width > 200)
+            if (width > maxWidth)
             {
                 width = isunicode ?
                     FontsLoader.Instance.GetWidthExUnicode
                     (
                         font,
                         msg,
-                        200,
+                        maxWidth,
                         TEXT_ALIGN_TYPE.TS_LEFT,
                         (ushort) FontStyle.BlackBorder
                     ) :
@@ -289,7 +294,7 @@ namespace ClassicUO.Game.Managers
                     (
                         font,
                         msg,
-                        200,
+                        maxWidth,
                         TEXT_ALIGN_TYPE.TS_LEFT,
                         (ushort) FontStyle.BlackBorder
                     );
