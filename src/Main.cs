@@ -112,6 +112,9 @@ namespace ClassicUO
                 }
             };
 #endif
+            // Initialize HardwareInfo for Send_ packet 0xD9
+            HardwareInfo.Initialize();
+
             ReadSettingsFromArgs(args);
 
             if (CUOEnviroment.IsHighDPI)
