@@ -30,6 +30,7 @@
 
 #endregion
 
+using System;
 using System.IO;
 using Microsoft.Xna.Framework;
 using TinyJson;
@@ -78,6 +79,8 @@ namespace ClassicUO.Configuration
         [JsonProperty("reconnect")] public bool Reconnect { get; set; }
 
         [JsonProperty("reconnect_time")] public int ReconnectTime { get; set; } = 1;
+
+        [JsonProperty("last_hardware_info")] public DateTime LastHardwareInfo { get; set; } = DateTime.MinValue;
 
         [JsonProperty("login_music")] public bool LoginMusic { get; set; } = true;
 
