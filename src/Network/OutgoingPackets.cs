@@ -47,6 +47,7 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
+using ClassicUO.Utility;    // HardwareInfo Send_ packet 0xD9
 
 namespace ClassicUO.Network
 {
@@ -331,7 +332,49 @@ namespace ClassicUO.Network
 
             writer.Dispose();
         }
+        public static void Send_HardwareInfo(this NetClient socket)
+        {
+            const byte ID = 0xD9;   // Spy On Client
 
+            int length = PacketsTable.GetPacketLength(ID);
+
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
+            writer.WriteUInt8(ID);
+
+            writer.WriteUInt8(HardwareInfo.Version);            // 1: <4.0.1a, 2>=4.0.1a
+            writer.WriteInt32BE(HardwareInfo.InstanceID);       // InstanceID
+            writer.WriteInt32BE(HardwareInfo.OSMajor);          // OSMajor
+            writer.WriteInt32BE(HardwareInfo.OSMinor);          // OSMinor 
+            writer.WriteInt32BE(HardwareInfo.OSRevision);       // OSRevision
+            writer.WriteUInt8(HardwareInfo.CpuManufacturer);    // CpuManufacturer
+            writer.WriteInt32BE(HardwareInfo.CpuFamily);        // CpuFamily
+            writer.WriteInt32BE(HardwareInfo.CpuModel);         // CpuModel
+            writer.WriteInt32BE(HardwareInfo.CpuClockSpeed);    // CpuClockSpeed
+            writer.WriteUInt8(HardwareInfo.CpuQuantity);        // CpuQuantity
+            writer.WriteInt32BE(HardwareInfo.PhysicalMemory);   // PhysicalMemory
+            writer.WriteInt32BE(HardwareInfo.ScreenWidth);      // ScreenWidth
+            writer.WriteInt32BE(HardwareInfo.ScreenHeight);     // ScreenHeight
+            writer.WriteInt32BE(HardwareInfo.ScreenDepth);      // ScreenDepth
+            writer.WriteInt16BE(HardwareInfo.DXMajor);          // DXMajor
+            writer.WriteInt16BE(HardwareInfo.DXMinor);          // DXMinor
+            writer.WriteUnicodeLE(HardwareInfo.VCDescription, 64);  // VCDescription
+            writer.WriteInt32BE(HardwareInfo.VCVendorID);       // VCVendorID
+            writer.WriteInt32BE(HardwareInfo.VCDeviceID);       // VCDeviceID
+            writer.WriteInt32BE(HardwareInfo.VCMemory);         // VCMemory
+            writer.WriteUInt8(HardwareInfo.Distribution);       // Distribution 
+            writer.WriteUInt8(HardwareInfo.ClientsRunning);     // ClientsRunning 
+            writer.WriteUInt8(HardwareInfo.ClientsInstalled);   // ClientsInstalled
+            writer.WriteUInt8(HardwareInfo.PartialInstalled);   // PartialInstalled
+            writer.WriteUnicodeLE(HardwareInfo.Language, 4);    // Language
+            writer.WriteASCII("", 64);                          // Unknown 
+
+            // finish up
+            writer.WriteZero(length - writer.BytesWritten);
+
+            socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+
+            writer.Dispose();
+        }
         public static void Send_CreateCharacter
         (
             this NetClient socket,
