@@ -2284,13 +2284,9 @@ namespace ClassicUO.Network
             else
             {
                 hue = (ushort)p.ReadUInt32BE();
-                blendmode = (GraphicEffectBlendMode)(p.ReadUInt32BE() % 7);
-
-                if (speed > 7)
-                {
-                    speed = 7;
-                }
+                blendmode = (GraphicEffectBlendMode)(p.ReadUInt32BE() % 7);           
             }
+
 
             World.SpawnEffect
             (
