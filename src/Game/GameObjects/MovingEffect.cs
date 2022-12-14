@@ -31,18 +31,13 @@
 #endregion
 
 using System;
-using ClassicUO.Configuration;
 using ClassicUO.Game.Managers;
-using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
-using MathHelper = Microsoft.Xna.Framework.MathHelper;
 
 namespace ClassicUO.Game.GameObjects
 {
     internal sealed class MovingEffect : GameEffect
-    {
-        private uint _lastMoveTime;
-        
+    {        
         public MovingEffect
         (
             EffectManager manager,
