@@ -2265,8 +2265,8 @@ namespace ClassicUO.Network
             ushort targetY = p.ReadUInt16BE();
             sbyte targetZ = p.ReadInt8();
             byte speed = p.ReadUInt8();
-            ushort duration = p.ReadUInt8();
-            p.Skip(2);
+            byte duration = p.ReadUInt8();
+            ushort unk = p.ReadUInt16BE();
             bool fixedDirection = p.ReadBool();
             bool doesExplode = p.ReadBool();
             ushort hue = 0;
@@ -2274,19 +2274,12 @@ namespace ClassicUO.Network
 
             if (p[0] == 0x70)
             {
-                if (speed > 20)
-                {
-                    speed = (byte)(speed - 20);
-                }
-
-                speed = (byte)(20 - speed);
             }
             else
             {
                 hue = (ushort)p.ReadUInt32BE();
-                blendmode = (GraphicEffectBlendMode)(p.ReadUInt32BE() % 7);           
+                blendmode = (GraphicEffectBlendMode)(p.ReadUInt32BE() % 7);
             }
-
 
             World.SpawnEffect
             (

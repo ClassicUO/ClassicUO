@@ -59,8 +59,9 @@ namespace ClassicUO.Game.GameObjects
             FixedDir = fixedDir;
 
             // we override interval time with speed
-            IntervalInMs = speed;
-            //_lastMoveTime = Time.Ticks + IntervalInMs;
+            var d = Constants.ITEM_EFFECT_ANIMATION_DELAY * 2;
+
+            IntervalInMs = (uint)(d + (speed * d));
 
             // moving effects want a +22 to the X
             Offset.X += 22;
@@ -131,7 +132,7 @@ namespace ClassicUO.Game.GameObjects
 
             var offset = target - source;
             var distance = offset.Length();
-            var frameIndependentSpeed = (100f * IntervalInMs) * Time.Delta;
+            var frameIndependentSpeed = IntervalInMs * Time.Delta;
             Vector2 s0;
 
             if (distance > frameIndependentSpeed)
