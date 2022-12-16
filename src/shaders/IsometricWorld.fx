@@ -47,13 +47,13 @@ float3 get_rgb(float gray, float hue)
 {
 	if (hue < HuesPerTexture)
 	{
-		float2 texcoord = float2(gray % 32, hue / HuesPerTexture);
+		float2 texcoord = float2(gray, hue / HuesPerTexture);
 
 		return tex2D(HueSampler0, texcoord).rgb;
 	}
 	else
 	{
-		float2 texcoord = float2(gray % 32, (hue - HuesPerTexture) / HuesPerTexture);
+		float2 texcoord = float2(gray, (hue - HuesPerTexture) / HuesPerTexture);
 
 		return tex2D(HueSampler1, texcoord).rgb;
 	}
@@ -120,29 +120,21 @@ float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 		}
 	}
 
-	if (mode == HUED)
+	if (mode == HUED || (mode == PARTIAL_HUED && color.r == color.g && color.r == color.b))
 	{
 		color.rgb = get_rgb(color.r, hue);
-	}
-	else if (mode == PARTIAL_HUED)
-	{
-		if (color.r == color.g && color.r == color.b)
-		{
-			// Gray pixels are hued
-			color.rgb = get_rgb(color.r, hue);
-		}
 	}
 	else if (mode == HUE_TEXT_NO_BLACK)
 	{
 		if (color.r > 0.04f || color.g > 0.04f || color.b > 0.04f)
 		{
-			color.rgb = get_rgb(31, hue);
+			color.rgb = get_rgb(1.0f, hue);
 		}
 	}
 	else if (mode == HUE_TEXT)
 	{
 		// 31 is max red, so this is just selecting the color of the darkest pixel in the hue
-		color.rgb = get_rgb(31, hue);
+		color.rgb = get_rgb(1.0f, hue);
 	}
 	else if (mode == LAND)
 	{
