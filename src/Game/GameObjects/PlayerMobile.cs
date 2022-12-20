@@ -1264,7 +1264,7 @@ namespace ClassicUO.Game.GameObjects
 
                                 goto done;
 
-                            case 0xA28A: // Spiked Whip
+                            case 0xA292: // Spiked Whip
                                 Abilities[0] = Ability.ArmorPierce;
                                 Abilities[1] = Ability.WhirlwindAttack;
 
