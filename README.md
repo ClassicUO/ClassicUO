@@ -22,6 +22,9 @@ ClassicUO is an open source implementation of the Ultima Online Classic Client. 
 
 The client is currently under heavy development but is functional. The code is based on the [FNA-XNA](https://fna-xna.github.io/) framework. C# is chosen because there is a large community of developers working on Ultima Online server emulators in C#, because FNA-XNA exists and seems reasonably suitable for creating this type of game.
 
+![screenshot_2020-07-06_12-29-02](https://user-images.githubusercontent.com/20810422/208747312-04f6782f-3dc8-4951-b0a0-73d2305bbfca.png)
+
+
 ClassicUO is natively cross platform and supports:
 * Browser [Chrome]
 * Windows [DirectX 11, OpenGL, Vulkan]
