@@ -2269,7 +2269,7 @@ namespace ClassicUO.Network
             ushort unk = p.ReadUInt16BE();
             bool fixedDirection = p.ReadBool();
             bool doesExplode = p.ReadBool();
-            ushort hue = 0;
+            uint hue = 0;
             GraphicEffectBlendMode blendmode = 0;
 
             if (p[0] == 0x70)
@@ -2277,8 +2277,18 @@ namespace ClassicUO.Network
             }
             else
             {
-                hue = (ushort)p.ReadUInt32BE();
+                hue = p.ReadUInt32BE();
                 blendmode = (GraphicEffectBlendMode)(p.ReadUInt32BE() % 7);
+
+                if (p[0] == 0xC7)
+                {
+                    var tileID = p.ReadUInt16BE();
+                    var explodeEffect = p.ReadUInt16BE();
+                    var explodeSound = p.ReadUInt16BE();
+                    var serial = p.ReadUInt32BE();
+                    var layer = p.ReadUInt8();
+                    p.Skip(2);
+                }
             }
 
             World.SpawnEffect
@@ -2287,7 +2297,7 @@ namespace ClassicUO.Network
                 source,
                 target,
                 graphic,
-                hue,
+                (ushort) hue,
                 srcX,
                 srcY,
                 srcZ,
@@ -2752,7 +2762,10 @@ namespace ClassicUO.Network
                 {
                     if (World.Player.IsDead)
                     {
-                        NetClient.Socket.Send_DeathScreen();
+                        // NOTE: This packet causes some weird issue on sphere servers.
+                        //       When the character dies, this packet trigger a "reset" and
+                        //       somehow it messes up the packet reading server side
+                        //NetClient.Socket.Send_DeathScreen();
                         World.ChangeSeason(Game.Managers.Season.Desolation, 42);
                     }
                     else
