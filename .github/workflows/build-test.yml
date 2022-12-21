@@ -6,11 +6,13 @@ on:
     paths-ignore:
       - '**/build-release.yml'
       - 'appveyor.yml'
+      - '**/README.md'
   pull_request:
     branches: "*"
     paths-ignore:
       - '**/build-release.yml'
       - 'appveyor.yml'
+      - '**/README.md'
 
 
 env:
