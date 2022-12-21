@@ -284,7 +284,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             _pinTimer = Time.Ticks + 300;
 
-            if (UIManager.MouseOverControl is PinControl pin)
+            if (PlotState != 0 && UIManager.MouseOverControl is PinControl pin)
             {
                 _currentPin = pin;
             }
