@@ -160,6 +160,7 @@ namespace ClassicUO.Configuration
         public bool UseAlternativeLights { get; set; }
         public bool UseCustomLightLevel { get; set; }
         public byte LightLevel { get; set; }
+        public int LightLevelType { get; set; } // 0 = absolute, 1 = minimum
         public bool UseColoredLights { get; set; } = true;
         public bool UseDarkNights { get; set; }
         public int CloseHealthBarType { get; set; } // 0 = none, 1 == not exists, 2 == is dead

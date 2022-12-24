@@ -2286,6 +2286,33 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Light Level Setting Type.
+        /// </summary>
+        public static string LightLevelType {
+            get {
+                return ResourceManager.GetString("LightLevelType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Absolute.
+        /// </summary>
+        public static string LightLevelTypeAbsolute {
+            get {
+                return ResourceManager.GetString("LightLevelTypeAbsolute", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Minimum.
+        /// </summary>
+        public static string LightLevelTypeMinimum {
+            get {
+                return ResourceManager.GetString("LightLevelTypeMinimum", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Linear Clamp.
         /// </summary>
         public static string LinearClamp {

@@ -166,6 +166,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         // video
         private Checkbox _use_old_status_gump, _windowBorderless, _enableDeathScreen, _enableBlackWhiteEffect, _altLights, _enableLight, _enableShadows, _enableShadowsStatics, _auraMouse, _runMouseInSeparateThread, _useColoredLights, _darkNights, _partyAura, _hideChatGradient;
+        private Combobox _lightLevelType;
         private Checkbox _use_smooth_boat_movement;
         private HSliderBar _terrainShadowLevel;
 
@@ -1752,6 +1753,21 @@ namespace ClassicUO.Game.UI.Gumps
                     startX,
                     startY,
                     250
+                )
+            );
+
+            section3.Add(AddLabel(null, ResGumps.LightLevelType, startX, startY));
+
+            section3.AddRight
+            (
+                _lightLevelType = AddCombobox
+                (
+                    null,
+                    new[] { ResGumps.LightLevelTypeAbsolute, ResGumps.LightLevelTypeMinimum },
+                    _currentProfile.LightLevelType,
+                    startX,
+                    startY,
+                    150
                 )
             );
 
@@ -3513,6 +3529,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _currentProfile.DefaultScale = 1f;
                     _lightBar.Value = 0;
                     _enableLight.IsChecked = false;
+                    _lightLevelType.SelectedIndex = 0;
                     _useColoredLights.IsChecked = false;
                     _darkNights.IsChecked = false;
                     _enableShadows.IsChecked = true;
@@ -3899,10 +3916,11 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.UseAlternativeLights = _altLights.IsChecked;
             _currentProfile.UseCustomLightLevel = _enableLight.IsChecked;
             _currentProfile.LightLevel = (byte) (_lightBar.MaxValue - _lightBar.Value);
+            _currentProfile.LightLevelType = _lightLevelType.SelectedIndex;
 
             if (_enableLight.IsChecked)
             {
-                World.Light.Overall = _currentProfile.LightLevel;
+                World.Light.Overall = _currentProfile.LightLevelType == 1 ? Math.Min(World.Light.RealOverall, _currentProfile.LightLevel) : _currentProfile.LightLevel;
                 World.Light.Personal = 0;
             }
             else
