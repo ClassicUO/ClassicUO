@@ -196,6 +196,7 @@ namespace ClassicUO.Configuration
         public int OverrideContainerLocationSetting { get; set; } // 0 = container position, 1 = top right of screen, 2 = last dragged position, 3 = remember every container
 
         public Point OverrideContainerLocationPosition { get; set; } = new Point(200, 200);
+        public bool HueContainerGumps { get; set; } = true;
         public bool DragSelectHumanoidsOnly { get; set; }
         public int DragSelectStartX { get; set; } = 100;
         public int DragSelectStartY { get; set; } = 100;

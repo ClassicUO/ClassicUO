@@ -208,7 +208,10 @@ namespace ClassicUO.Game.UI.Gumps
                 _eyeGumpPic.Width = (int) (_eyeGumpPic.Width * scale);
                 _eyeGumpPic.Height = (int) (_eyeGumpPic.Height * scale);
             }
-
+            else if (ProfileManager.CurrentProfile.HueContainerGumps)
+            {
+                _gumpPicContainer.Hue = item.Hue;
+            }
 
             Width = _gumpPicContainer.Width = (int) (_gumpPicContainer.Width * scale);
             Height = _gumpPicContainer.Height = (int) (_gumpPicContainer.Height * scale);

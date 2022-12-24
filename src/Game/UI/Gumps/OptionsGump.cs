@@ -78,6 +78,7 @@ namespace ClassicUO.Game.UI.Gumps
         private HSliderBar _delay_before_display_tooltip, _tooltip_zoom, _tooltip_background_opacity;
         private Combobox _dragSelectModifierKey;
         private Combobox _backpackStyle;
+        private Checkbox _hueContainerGumps;
 
 
         //counters
@@ -3330,6 +3331,17 @@ namespace ClassicUO.Game.UI.Gumps
 
             startY += _highlightContainersWhenMouseIsOver.Height + 2;
 
+            _hueContainerGumps = AddCheckBox
+            (
+                rightArea,
+                ResGumps.HueContainerGumps,
+                _currentProfile.HueContainerGumps,
+                startX,
+                startY
+            );
+
+            startY += _hueContainerGumps.Height + 2;
+
             _overrideContainerLocation = AddCheckBox
             (
                 rightArea,
@@ -3633,6 +3645,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _overrideContainerLocation.IsChecked = false;
                     _overrideContainerLocationSetting.SelectedIndex = 0;
                     _backpackStyle.SelectedIndex = 0;
+                    _hueContainerGumps.IsChecked = true;
 
                     break;
 
@@ -4182,6 +4195,7 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.DoubleClickToLootInsideContainers = _containerDoubleClickToLoot.IsChecked;
             _currentProfile.RelativeDragAndDropItems = _relativeDragAnDropItems.IsChecked;
             _currentProfile.HighlightContainerWhenSelected = _highlightContainersWhenMouseIsOver.IsChecked;
+            _currentProfile.HueContainerGumps = _hueContainerGumps.IsChecked;
 
             if (_currentProfile.BackpackStyle != _backpackStyle.SelectedIndex)
             {
