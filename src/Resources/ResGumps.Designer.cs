@@ -1997,6 +1997,15 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Recolor container gump by item hue.
+        /// </summary>
+        public static string HueContainerGumps {
+            get {
+                return ResourceManager.GetString("HueContainerGumps", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Hide alliance chat.
         /// </summary>
         public static string IgnoreAllianceMessages {
