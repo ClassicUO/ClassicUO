@@ -766,8 +766,8 @@ namespace ClassicUO.Network
 
             if (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.UseCustomLightLevel)
             {
-                World.Light.Overall = ProfileManager.CurrentProfile.LightLevel;
-            }
+                World.Light.Overall = ProfileManager.CurrentProfile.LightLevelType == 1 ? Math.Min(World.Light.Overall, ProfileManager.CurrentProfile.LightLevel) : ProfileManager.CurrentProfile.LightLevel;
+             }
 
             Client.Game.Audio.UpdateCurrentMusicVolume();
 
@@ -2007,9 +2007,9 @@ namespace ClassicUO.Network
 
             World.Light.RealOverall = level;
 
-            if (!ProfileManager.CurrentProfile.UseCustomLightLevel)
+            if (!ProfileManager.CurrentProfile.UseCustomLightLevel || ProfileManager.CurrentProfile.LightLevelType == 1)
             {
-                World.Light.Overall = level;
+                World.Light.Overall = ProfileManager.CurrentProfile.LightLevelType == 1 ? Math.Min(level, ProfileManager.CurrentProfile.LightLevel) : level;
             }
         }
 
