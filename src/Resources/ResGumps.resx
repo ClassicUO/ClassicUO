@@ -596,8 +596,8 @@ Murderers, Criminals, Grays (Monsters/Animals)</value>
   <data name="EnableOverheadSpellHue" xml:space="preserve">
     <value>Enable Overhead Spell Hue</value>
   </data>
-  <data name="CastSpellsByOneClick" xml:space="preserve">
-    <value>Cast spells by one click</value>
+  <data name="UIButtonsSingleClick" xml:space="preserve">
+    <value>Single-click UI buttons</value>
   </data>
   <data name="ShowBuffDuration" xml:space="preserve">
     <value>Show buff duration</value>
