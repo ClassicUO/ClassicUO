@@ -547,15 +547,6 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Cast spells by one click.
-        /// </summary>
-        public static string CastSpellsByOneClick {
-            get {
-                return ResourceManager.GetString("CastSpellsByOneClick", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Cell size:.
         /// </summary>
         public static string CellSize {
@@ -4115,6 +4106,15 @@ namespace ClassicUO.Resources {
         public static string TreesStumps {
             get {
                 return ResourceManager.GetString("TreesStumps", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Single-click UI buttons.
+        /// </summary>
+        public static string UIButtonsSingleClick {
+            get {
+                return ResourceManager.GetString("UIButtonsSingleClick", resourceCulture);
             }
         }
         

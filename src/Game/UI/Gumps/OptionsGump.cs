@@ -133,7 +133,7 @@ namespace ClassicUO.Game.UI.Gumps
         // combat & spells
         private ClickableColorBox _innocentColorPickerBox, _friendColorPickerBox, _crimialColorPickerBox, _canAttackColorPickerBox, _enemyColorPickerBox, _murdererColorPickerBox, _neutralColorPickerBox, _beneficColorPickerBox, _harmfulColorPickerBox;
         private HSliderBar _lightBar;
-        private Checkbox _buffBarTime, _castSpellsByOneClick, _queryBeforAttackCheckbox, _queryBeforeBeneficialCheckbox, _spellColoringCheckbox, _spellFormatCheckbox, _enableFastSpellsAssign;
+        private Checkbox _buffBarTime, _uiButtonsSingleClick, _queryBeforAttackCheckbox, _queryBeforeBeneficialCheckbox, _spellColoringCheckbox, _spellFormatCheckbox, _enableFastSpellsAssign;
 
         // macro
         private MacroControl _macroControl;
@@ -2659,16 +2659,16 @@ namespace ClassicUO.Game.UI.Gumps
 
             startY += _spellColoringCheckbox.Height + 2;
 
-            _castSpellsByOneClick = AddCheckBox
+            _uiButtonsSingleClick = AddCheckBox
             (
                 rightArea,
-                ResGumps.CastSpellsByOneClick,
+                ResGumps.UIButtonsSingleClick,
                 _currentProfile.CastSpellsByOneClick,
                 startX,
                 startY
             );
 
-            startY += _castSpellsByOneClick.Height + 2;
+            startY += _uiButtonsSingleClick.Height + 2;
 
             _buffBarTime = AddCheckBox
             (
@@ -3576,7 +3576,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _enemyColorPickerBox.Hue = 0x0031;
                     _queryBeforAttackCheckbox.IsChecked = true;
                     _queryBeforeBeneficialCheckbox.IsChecked = false;
-                    _castSpellsByOneClick.IsChecked = false;
+                    _uiButtonsSingleClick.IsChecked = false;
                     _buffBarTime.IsChecked = false;
                     _enableFastSpellsAssign.IsChecked = false;
                     _beneficColorPickerBox.Hue = 0x0059;
@@ -3948,7 +3948,7 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.MurdererHue = _murdererColorPickerBox.Hue;
             _currentProfile.EnabledCriminalActionQuery = _queryBeforAttackCheckbox.IsChecked;
             _currentProfile.EnabledBeneficialCriminalActionQuery = _queryBeforeBeneficialCheckbox.IsChecked;
-            _currentProfile.CastSpellsByOneClick = _castSpellsByOneClick.IsChecked;
+            _currentProfile.CastSpellsByOneClick = _uiButtonsSingleClick.IsChecked;
             _currentProfile.BuffBarTime = _buffBarTime.IsChecked;
             _currentProfile.FastSpellsAssign = _enableFastSpellsAssign.IsChecked;
 
