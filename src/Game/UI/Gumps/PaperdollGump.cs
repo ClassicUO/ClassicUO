@@ -255,6 +255,14 @@ namespace ClassicUO.Game.UI.Gumps
                 int profileX = 25;
                 const int SCROLLS_STEP = 14;
 
+                if (World.ClientFeatures.PaperdollBooks && Client.Version >= ClientVersion.CV_7000)
+                {
+                    profileX += SCROLLS_STEP;
+                }
+
+                Add(_profilePic = new GumpPic(profileX, 196, 0x07D2, 0));
+                _profilePic.MouseDoubleClick += Profile_MouseDoubleClickEvent;
+
                 if (World.ClientFeatures.PaperdollBooks)
                 {
                     Add(_combatBook = new GumpPic(156, 200, 0x2B34, 0));
@@ -271,19 +279,13 @@ namespace ClassicUO.Game.UI.Gumps
                                 UIManager.Add(new RacialAbilitiesBookGump(100, 100));
                             }
                         };
-
-                        profileX += SCROLLS_STEP;
                     }
                 }
-
-                Add(_profilePic = new GumpPic(profileX, 196, 0x07D2, 0));
-                _profilePic.MouseDoubleClick += Profile_MouseDoubleClickEvent;
 
                 profileX += SCROLLS_STEP;
 
                 Add(_partyManifestPic = new GumpPic(profileX, 196, 0x07D2, 0));
                 _partyManifestPic.MouseDoubleClick += PartyManifest_MouseDoubleClickEvent;
-
 
                 _hitBox = new HitBox(228, 260, 16, 16);
                 _hitBox.MouseUp += _hitBox_MouseUp;
