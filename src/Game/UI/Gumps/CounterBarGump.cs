@@ -382,6 +382,10 @@ namespace ClassicUO.Game.UI.Gumps
                            Client.Game.GameCursor.ItemHold.Container
                         );
                     }
+                    else if (ProfileManager.CurrentProfile.CastSpellsByOneClick)
+                    {
+                        Use();
+                    }
                 }
                 else if (button == MouseButtonType.Right && Keyboard.Alt && Graphic != 0)
                 {
@@ -395,7 +399,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
             {
-                if (button == MouseButtonType.Left)
+                if (button == MouseButtonType.Left && !ProfileManager.CurrentProfile.CastSpellsByOneClick)
                 {
                     Use();
                 }

@@ -547,15 +547,6 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Cast spells by one click.
-        /// </summary>
-        public static string CastSpellsByOneClick {
-            get {
-                return ResourceManager.GetString("CastSpellsByOneClick", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Cell size:.
         /// </summary>
         public static string CellSize {
@@ -2006,6 +1997,15 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Recolor container gump by item hue.
+        /// </summary>
+        public static string HueContainerGumps {
+            get {
+                return ResourceManager.GetString("HueContainerGumps", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Hide alliance chat.
         /// </summary>
         public static string IgnoreAllianceMessages {
@@ -2282,6 +2282,33 @@ namespace ClassicUO.Resources {
         public static string LightLevel {
             get {
                 return ResourceManager.GetString("LightLevel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Light Level Setting Type.
+        /// </summary>
+        public static string LightLevelType {
+            get {
+                return ResourceManager.GetString("LightLevelType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Absolute.
+        /// </summary>
+        public static string LightLevelTypeAbsolute {
+            get {
+                return ResourceManager.GetString("LightLevelTypeAbsolute", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Minimum.
+        /// </summary>
+        public static string LightLevelTypeMinimum {
+            get {
+                return ResourceManager.GetString("LightLevelTypeMinimum", resourceCulture);
             }
         }
         
@@ -4115,6 +4142,15 @@ namespace ClassicUO.Resources {
         public static string TreesStumps {
             get {
                 return ResourceManager.GetString("TreesStumps", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Single-click UI buttons.
+        /// </summary>
+        public static string UIButtonsSingleClick {
+            get {
+                return ResourceManager.GetString("UIButtonsSingleClick", resourceCulture);
             }
         }
         
