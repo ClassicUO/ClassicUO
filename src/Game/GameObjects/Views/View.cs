@@ -220,7 +220,8 @@ namespace ClassicUO.Game.GameObjects
             int y,
             Vector3 hue,
             bool shadow,
-            float depth
+            float depth,
+            bool iswet = false
         )
         {
             ref UOFileIndex index = ref ArtLoader.Instance.GetValidRefEntry(graphic + 0x4000);
@@ -243,6 +244,14 @@ namespace ClassicUO.Game.GameObjects
                     batcher.DrawShadow(texture, pos, bounds, false, depth + 0.25f);
                 }
 
+                var scale = Vector2.One;
+                if (iswet)
+                {
+                    var sin = (float)Math.Sin(Time.Ticks / 1000f);
+                    var cos = (float)Math.Cos(Time.Ticks / 1000f);
+                    scale = new Vector2(1.1f + sin * 0.1f, 1.1f + cos * 0.5f * 0.1f);
+                }
+
                 batcher.Draw
                 (
                     texture,
@@ -251,7 +260,7 @@ namespace ClassicUO.Game.GameObjects
                     hue,
                     0f,
                     Vector2.Zero,
-                    1f,
+                    scale,
                     SpriteEffects.None,
                     depth + 0.5f
                 );

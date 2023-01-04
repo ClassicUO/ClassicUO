@@ -104,7 +104,8 @@ namespace ClassicUO.Game.GameObjects
                 posY,
                 hueVec,
                 ProfileManager.CurrentProfile.ShadowsEnabled && ProfileManager.CurrentProfile.ShadowsStatics && (isTree || ItemData.IsFoliage || StaticFilters.IsRock(graphic)),
-                depth
+                depth,
+                ItemData.IsWet
             );
 
             if (ItemData.IsLight)
