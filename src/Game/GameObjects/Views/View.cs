@@ -128,7 +128,7 @@ namespace ClassicUO.Game.GameObjects
             return false;
         }
 
-        protected static void DrawStatic(UltimaBatcher2D batcher, ushort graphic, int x, int y, Vector3 hue, float depth)
+        protected static void DrawStatic(UltimaBatcher2D batcher, ushort graphic, int x, int y, Vector3 hue, float depth, bool isWet = false)
         {
             var texture = ArtLoader.Instance.GetStaticTexture(graphic, out var bounds);
 
@@ -139,15 +139,37 @@ namespace ClassicUO.Game.GameObjects
                 x -= index.Width;
                 y -= index.Height;
 
+                var pos = new Vector2(x, y);
+                var scale = Vector2.One;
+                if (isWet)
+                {
+                    batcher.Draw
+                    (
+                        texture,
+                        pos,
+                        bounds,
+                        hue,
+                        0f,
+                        Vector2.Zero,
+                        scale,
+                        SpriteEffects.None,
+                        depth + 0.5f
+                    );
+
+                    var sin = (float)Math.Sin(Time.Ticks / 1000f);
+                    var cos = (float)Math.Cos(Time.Ticks / 1000f);
+                    scale = new Vector2(1.1f + sin * 0.1f, 1.1f + cos * 0.5f * 0.1f);
+                }
+
                 batcher.Draw
                 (
                     texture,
-                    new Vector2(x, y),
+                    pos,
                     bounds,
                     hue,
                     0f,
                     Vector2.Zero,
-                    1f,
+                    scale,
                     SpriteEffects.None, 
                     depth + 0.5f
                 );
@@ -221,7 +243,7 @@ namespace ClassicUO.Game.GameObjects
             Vector3 hue,
             bool shadow,
             float depth,
-            bool iswet = false
+            bool isWet = false
         )
         {
             ref UOFileIndex index = ref ArtLoader.Instance.GetValidRefEntry(graphic + 0x4000);
@@ -245,8 +267,21 @@ namespace ClassicUO.Game.GameObjects
                 }
 
                 var scale = Vector2.One;
-                if (iswet)
+                if (isWet)
                 {
+                    batcher.Draw
+                    (
+                        texture,
+                        pos,
+                        bounds,
+                        hue,
+                        0f,
+                        Vector2.Zero,
+                        scale,
+                        SpriteEffects.None,
+                        depth + 0.5f
+                    );
+
                     var sin = (float)Math.Sin(Time.Ticks / 1000f);
                     var cos = (float)Math.Cos(Time.Ticks / 1000f);
                     scale = new Vector2(1.1f + sin * 0.1f, 1.1f + cos * 0.5f * 0.1f);

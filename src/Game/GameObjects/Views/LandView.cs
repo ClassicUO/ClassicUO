@@ -35,6 +35,7 @@ using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -108,7 +109,8 @@ namespace ClassicUO.Game.GameObjects
                         posX,
                         posY,
                         hueVec,
-                        depth
+                        depth,
+                        TileData.IsWet
                     );
                 }
             }
@@ -118,15 +120,38 @@ namespace ClassicUO.Game.GameObjects
 
                 if (texture != null)
                 {
+                    var pos = new Vector2(posX, posY);
+                    var scale = Vector2.One;
+
+                    if (TileData.IsWet)
+                    {
+                        batcher.Draw
+                        (
+                            texture,
+                            pos,
+                            bounds,
+                            hueVec,
+                            0f,
+                            Vector2.Zero,
+                            scale,
+                            SpriteEffects.None,
+                            depth + 0.5f
+                        );
+
+                        var sin = (float)Math.Sin(Time.Ticks / 1000f);
+                        var cos = (float)Math.Cos(Time.Ticks / 1000f);
+                        scale = new Vector2(1.1f + sin * 0.1f, 1.1f + cos * 0.5f * 0.1f);
+                    }
+
                     batcher.Draw
                     (
                         texture,
-                        new Vector2(posX, posY),
+                        pos,
                         bounds,
                         hueVec,
                         0f,
                         Vector2.Zero,
-                        1f,
+                        scale,
                         SpriteEffects.None,
                         depth + 0.5f
                     );
