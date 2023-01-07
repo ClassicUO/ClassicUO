@@ -480,6 +480,9 @@
   <data name="AuraOnMouseTarget" xml:space="preserve">
     <value>Aura on mouse target</value>
   </data>
+  <data name="AnimatedWaterEffect" xml:space="preserve">
+    <value>Animated water effect</value>
+  </data>
   <data name="UseXBREffectBETA" xml:space="preserve">
     <value>Use xBR effect [BETA]</value>
   </data>

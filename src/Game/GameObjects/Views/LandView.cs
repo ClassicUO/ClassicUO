@@ -110,7 +110,7 @@ namespace ClassicUO.Game.GameObjects
                         posY,
                         hueVec,
                         depth,
-                        TileData.IsWet
+                        ProfileManager.CurrentProfile.AnimatedWaterEffect && TileData.IsWet
                     );
                 }
             }
@@ -123,7 +123,7 @@ namespace ClassicUO.Game.GameObjects
                     var pos = new Vector2(posX, posY);
                     var scale = Vector2.One;
 
-                    if (TileData.IsWet)
+                    if (ProfileManager.CurrentProfile.AnimatedWaterEffect && TileData.IsWet)
                     {
                         batcher.Draw
                         (
