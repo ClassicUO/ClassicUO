@@ -166,7 +166,7 @@ namespace ClassicUO.Game.UI.Gumps
         private Checkbox _dragSelectAsAnchor;
 
         // video
-        private Checkbox _use_old_status_gump, _windowBorderless, _enableDeathScreen, _enableBlackWhiteEffect, _altLights, _enableLight, _enableShadows, _enableShadowsStatics, _auraMouse, _runMouseInSeparateThread, _useColoredLights, _darkNights, _partyAura, _hideChatGradient;
+        private Checkbox _use_old_status_gump, _windowBorderless, _enableDeathScreen, _enableBlackWhiteEffect, _altLights, _enableLight, _enableShadows, _enableShadowsStatics, _auraMouse, _runMouseInSeparateThread, _useColoredLights, _darkNights, _partyAura, _hideChatGradient, _animatedWaterEffect;
         private Combobox _lightLevelType;
         private Checkbox _use_smooth_boat_movement;
         private HSliderBar _terrainShadowLevel;
@@ -1843,6 +1843,18 @@ namespace ClassicUO.Game.UI.Gumps
                     null,
                     ResGumps.AuraOnMouseTarget,
                     _currentProfile.AuraOnMouse,
+                    startX,
+                    startY
+                )
+            );
+            
+            section4.Add
+            (
+                _animatedWaterEffect = AddCheckBox
+                (
+                    null,
+                    ResGumps.AnimatedWaterEffect,
+                    _currentProfile.AnimatedWaterEffect,
                     startX,
                     startY
                 )
@@ -3550,6 +3562,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _runMouseInSeparateThread.IsChecked = true;
                     _auraMouse.IsChecked = true;
                     _partyAura.IsChecked = true;
+                    _animatedWaterEffect.IsChecked = false;
                     _partyAuraColorPickerBox.Hue = 0x0044;
 
                     break;
@@ -3952,6 +3965,7 @@ namespace ClassicUO.Game.UI.Gumps
             Client.Game.IsMouseVisible = Settings.GlobalSettings.RunMouseInASeparateThread = _runMouseInSeparateThread.IsChecked;
 
             _currentProfile.AuraOnMouse = _auraMouse.IsChecked;
+            _currentProfile.AnimatedWaterEffect = _animatedWaterEffect.IsChecked;
             _currentProfile.PartyAura = _partyAura.IsChecked;
             _currentProfile.PartyAuraHue = _partyAuraColorPickerBox.Hue;
             _currentProfile.HideChatGradient = _hideChatGradient.IsChecked;
