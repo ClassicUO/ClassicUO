@@ -1,7 +1,7 @@
 name: Deploy
 
-on:
-  workflow_dispatch:
+on: [workflow_dispatch]
+  #workflow_dispatch:
   #workflow_run:
   #  branches: [main]
   #  workflows: [Build-Test]
