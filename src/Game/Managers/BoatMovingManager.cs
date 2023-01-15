@@ -64,7 +64,7 @@ namespace ClassicUO.Game.Managers
 
                 case 0x04: return FAST_INTERVAL;
 
-                case > 0x04: return speed;
+                case > 0x04: return speed * 10;
             }
         }
 
