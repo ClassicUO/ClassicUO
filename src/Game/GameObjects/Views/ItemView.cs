@@ -181,7 +181,7 @@ namespace ClassicUO.Game.GameObjects
                 posX,
                 posY,
                 hueVec,
-                false,
+                StaticFilters.IsCustomTree(graphic),
                 depth
             );
 

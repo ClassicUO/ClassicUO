@@ -323,6 +323,12 @@ namespace ClassicUO.Game.Data
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsCustomTree(ushort g)
+        {
+            return g >= 15293 && g <= 15391;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsField(ushort g)
         {
             return g >= 0x398C && g <= 0x399F || g >= 0x3967 && g <= 0x397A || g >= 0x3946 && g <= 0x3964 || g >= 0x3914 && g <= 0x3929;
