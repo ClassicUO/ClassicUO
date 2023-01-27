@@ -319,6 +319,10 @@ namespace ClassicUO.Game.Scenes
             {
                 case MouseButtonType.Left: return OnLeftMouseUp();
                 case MouseButtonType.Right: return OnRightMouseUp();
+                case MouseButtonType.Middle:
+                case MouseButtonType.XButton1:
+                case MouseButtonType.XButton2:
+                    return OnExtraMouseUp(button);
             }
 
             return false;
@@ -916,11 +920,40 @@ namespace ClassicUO.Game.Scenes
                 {
                     if (macro.Items is MacroObject mac)
                     {
+                        if (mac.Code == MacroType.LookAtMouse)
+                        {
+                            Client.Game.Scene.Camera.PeekingToMouse = true;
+
+                            if (mac.SubCode == MacroSubType.LookBackwards)
+                            {
+                                Client.Game.Scene.Camera.PeekBackwards = true;
+                            }
+
+                            return true;
+                        }
+
                         ExecuteMacro(mac);
 
                         return true;
                     }
                 }
+            }
+
+            return false;
+        }
+
+        private bool OnExtraMouseUp(MouseButtonType button)
+        {
+            if (Client.Game.Scene.Camera.PeekingToMouse)
+            {
+                Macro macro = Macros.FindMacro(button, Keyboard.Alt, Keyboard.Ctrl, Keyboard.Shift);
+
+                if (macro != null && macro.Items is MacroObject mac && mac.Code == MacroType.LookAtMouse)
+                {
+                    Client.Game.Scene.Camera.PeekingToMouse = Client.Game.Scene.Camera.PeekBackwards = false;
+                }
+
+                return true;
             }
 
             return false;
@@ -1183,7 +1216,16 @@ namespace ClassicUO.Game.Scenes
                 {
                     if (macro.Items is MacroObject mac)
                     {
-                        if (mac.Code == MacroType.Walk)
+                        if (mac.Code == MacroType.LookAtMouse)
+                        {
+                            Client.Game.Scene.Camera.PeekingToMouse = true;
+
+                            if (mac.SubCode == MacroSubType.LookBackwards)
+                            {
+                                Client.Game.Scene.Camera.PeekBackwards = true;
+                            }
+                        }
+                        else if (mac.Code == MacroType.Walk)
                         {
                             _flags[4] = true;
 
@@ -1284,74 +1326,81 @@ namespace ClassicUO.Game.Scenes
                 Camera.Zoom = ProfileManager.CurrentProfile.DefaultScale;
             }
 
-            if (_flags[4])
+            if (_flags[4] || Client.Game.Scene.Camera.PeekingToMouse)
             {
                 Macro macro = Macros.FindMacro(e.keysym.sym, Keyboard.Alt, Keyboard.Ctrl, Keyboard.Shift);
 
                 if (macro != null && e.keysym.sym != SDL.SDL_Keycode.SDLK_UNKNOWN)
                 {
-                    if (macro.Items is MacroObject mac && mac.Code == MacroType.Walk)
+                    if (macro.Items is MacroObject mac)
                     {
-                        _flags[4] = false;
-
-                        switch (mac.SubCode)
+                        if (mac.Code == MacroType.LookAtMouse)
                         {
-                            case MacroSubType.NW:
-                                _flags[0] = false;
-
-                                break;
-
-                            case MacroSubType.SW:
-                                _flags[1] = false;
-
-                                break;
-
-                            case MacroSubType.SE:
-                                _flags[2] = false;
-
-                                break;
-
-                            case MacroSubType.NE:
-                                _flags[3] = false;
-
-                                break;
-
-                            case MacroSubType.N:
-                                _flags[0] = false;
-                                _flags[3] = false;
-
-                                break;
-
-                            case MacroSubType.S:
-                                _flags[1] = false;
-                                _flags[2] = false;
-
-                                break;
-
-                            case MacroSubType.E:
-                                _flags[3] = false;
-                                _flags[2] = false;
-
-                                break;
-
-                            case MacroSubType.W:
-                                _flags[0] = false;
-                                _flags[1] = false;
-
-                                break;
+                            Client.Game.Scene.Camera.PeekingToMouse = Client.Game.Scene.Camera.PeekBackwards = false;
                         }
-
-                        Macros.SetMacroToExecute(mac);
-                        Macros.WaitForTargetTimer = 0;
-                        Macros.Update();
-
-                        for (int i = 0; i < 4; i++)
+                        else if (mac.Code == MacroType.Walk)
                         {
-                            if (_flags[i])
-                            {
-                                _flags[4] = true;
+                            _flags[4] = false;
 
-                                break;
+                            switch (mac.SubCode)
+                            {
+                                case MacroSubType.NW:
+                                    _flags[0] = false;
+
+                                    break;
+
+                                case MacroSubType.SW:
+                                    _flags[1] = false;
+
+                                    break;
+
+                                case MacroSubType.SE:
+                                    _flags[2] = false;
+
+                                    break;
+
+                                case MacroSubType.NE:
+                                    _flags[3] = false;
+
+                                    break;
+
+                                case MacroSubType.N:
+                                    _flags[0] = false;
+                                    _flags[3] = false;
+
+                                    break;
+
+                                case MacroSubType.S:
+                                    _flags[1] = false;
+                                    _flags[2] = false;
+
+                                    break;
+
+                                case MacroSubType.E:
+                                    _flags[3] = false;
+                                    _flags[2] = false;
+
+                                    break;
+
+                                case MacroSubType.W:
+                                    _flags[0] = false;
+                                    _flags[1] = false;
+
+                                    break;
+                            }
+
+                            Macros.SetMacroToExecute(mac);
+                            Macros.WaitForTargetTimer = 0;
+                            Macros.Update();
+
+                            for (int i = 0; i < 4; i++)
+                            {
+                                if (_flags[i])
+                                {
+                                    _flags[4] = true;
+
+                                    break;
+                                }
                             }
                         }
                     }
