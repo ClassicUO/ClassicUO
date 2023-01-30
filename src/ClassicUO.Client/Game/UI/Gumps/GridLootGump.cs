@@ -222,36 +222,44 @@ namespace ClassicUO.Game.UI.Gumps
             int line = 1;
             int row = 0;
 
-            for (LinkedObject i = _corpse.Items; i != null; i = i.Next)
+            for (int displayGroup = 0; displayGroup < 2; displayGroup++)
             {
-                Item it = (Item) i;
-
-                if (it.IsLootable)
+                for (LinkedObject i = _corpse.Items; i != null; i = i.Next)
                 {
-                    GridLootItem gridItem = new GridLootItem(it, GRID_ITEM_SIZE);
+                    Item it = (Item)i;
 
-                    if (x >= MAX_WIDTH - 20)
+                    if (!ItemBelongsToGroup(it, displayGroup))
                     {
-                        x = 20;
-                        ++line;
-
-                        y += gridItem.Height + 20;
-
-                        if (y >= MAX_HEIGHT - 60)
-                        {
-                            _pagesCount++;
-                            y = 20;
-                            //line = 1;
-                        }
+                        continue;
                     }
 
-                    gridItem.X = x;
-                    gridItem.Y = y + 20;
-                    Add(gridItem, _pagesCount);
+                    if (it.IsLootable)
+                    {
+                        GridLootItem gridItem = new GridLootItem(it, GRID_ITEM_SIZE);
 
-                    x += gridItem.Width + 20;
-                    ++row;
-                    ++count;
+                        if (x >= MAX_WIDTH - 20)
+                        {
+                            x = 20;
+                            ++line;
+
+                            y += gridItem.Height + 20;
+
+                            if (y >= MAX_HEIGHT - 60)
+                            {
+                                _pagesCount++;
+                                y = 20;
+                                //line = 1;
+                            }
+                        }
+
+                        gridItem.X = x;
+                        gridItem.Y = y + 20;
+                        Add(gridItem, _pagesCount);
+
+                        x += gridItem.Width + 20;
+                        ++row;
+                        ++count;
+                    }
                 }
             }
 
@@ -295,6 +303,14 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
+        private bool ItemBelongsToGroup(Item it, int group)
+        {
+            // Note: items must be assigned to groups in a mutually-exclusive manner, so that each item occurs only once in the grid
+            if (it.ItemData.IsStackable)
+                return group > 0;
+            else
+                return group == 0;
+        }
         public override void Dispose()
         {
             if (_corpse != null)
