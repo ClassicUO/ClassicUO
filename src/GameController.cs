@@ -347,6 +347,10 @@ namespace ClassicUO
         public void MaximizeWindow()
         {
             SDL_MaximizeWindow(Window.Handle);
+
+            GraphicManager.PreferredBackBufferWidth = Client.Game.Window.ClientBounds.Width;
+            GraphicManager.PreferredBackBufferHeight = Client.Game.Window.ClientBounds.Height;
+            GraphicManager.ApplyChanges();
         }
 
         public bool IsWindowMaximized()
