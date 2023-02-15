@@ -110,7 +110,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                     else
                     {
-                        t += StringHelper.CapitalizeAllWords(item.ItemData.Name);
+                        t += StringHelper.CapitalizeAllWords(StringHelper.GetPluralAdjustedString(item.ItemData.Name, item.Amount > 1));
                     }
                 }
 
