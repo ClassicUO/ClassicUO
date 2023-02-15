@@ -2903,8 +2903,8 @@ namespace ClassicUO.Game.UI.Gumps
                 texture,
                 new Rectangle
                 (
-                    rot.X - (int)(sW / 2f),
-                    rot.Y - (int)(sH / 2f),
+                    rot.X,
+                    rot.Y,
                     (int)(sW * zoom),
                     (int)(sH * zoom)
                 ),
