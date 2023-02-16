@@ -83,7 +83,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ClassicUO.SDK.AssetsManagement\ClassicUO.SDK.Assets.csproj" />
+    <ProjectReference Include="..\ClassicUO.SDK.Assets\ClassicUO.SDK.Assets.csproj" />
     <ProjectReference Include="..\external\FNA\FNA.Core.csproj" />
     <ProjectReference Include="..\external\MP3Sharp\MP3Sharp\MP3Sharp.csproj" />
   </ItemGroup>
