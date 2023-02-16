@@ -509,7 +509,6 @@ namespace ClassicUO
             else if (!NetClient.Socket.IsDisposed)
             {
                 NetClient.Socket.Update();
-                NetClient.Socket.Statistics.SendPing(1000);
                 UpdateSocketStats(NetClient.Socket);
             }
         }

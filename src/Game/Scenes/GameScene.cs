@@ -93,6 +93,7 @@ namespace ClassicUO.Game.Scenes
         private readonly LightData[] _lights = new LightData[Constants.MAX_LIGHTS_DATA_INDEX_COUNT];
         private Item _multi;
         private Rectangle _rectangleObj = Rectangle.Empty, _rectanglePlayer;
+        private long _timePing;
 
         private uint _timeToPlaceMultiInHouseCustomization;
         private readonly bool _use_render_target = false;
@@ -742,6 +743,12 @@ namespace ClassicUO.Game.Scenes
             if (!World.InGame)
             {
                 return;
+            }
+
+            if (Time.Ticks > _timePing)
+            {
+                NetClient.Socket.Statistics.SendPing();
+                _timePing = (long)Time.Ticks + 1000;
             }
 
             World.Update();

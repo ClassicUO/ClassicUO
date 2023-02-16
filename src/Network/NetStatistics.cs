@@ -40,7 +40,6 @@ namespace ClassicUO.Network
         private NetClient _socket;
         private uint _lastTotalBytesReceived, _lastTotalBytesSent, _lastTotalPacketsReceived, _lastTotalPacketsSent;
         private byte _pingIdx;
-        private uint _pingTime;
 
         private readonly uint[] _pings = new uint[5];
         private readonly Stopwatch _pingStopwatch = new Stopwatch();
@@ -107,16 +106,15 @@ namespace ClassicUO.Network
             _pingStopwatch.Stop();
         }
 
-        public void SendPing(uint time = 0)
+        public void SendPing()
         {
-            if (!_socket.IsConnected || _socket.IsDisposed || Time.Ticks < _pingTime)
+            if (!_socket.IsConnected || _socket.IsDisposed)
             {
                 return;
             }
 
             _pingStopwatch.Restart();
             _socket.Send_Ping();
-            _pingTime = Time.Ticks + time;
         }
 
         public void Reset()
