@@ -837,7 +837,7 @@ namespace ClassicUO.IO.Resources
 
                         if (_dataIndex[animID] != null)
                         {
-                            if (animID == 0x04E7 || animID == 0x042D || animID == 0x04E6 || animID == 0x05F7)
+                            if (animID == 0x04E7 || animID == 0x042D || animID == 0x04E6 || animID == 0x05F7 || animID == 0x05A1)
                             {
                                 _dataIndex[animID].MountedHeightOffset = 18;
                             }

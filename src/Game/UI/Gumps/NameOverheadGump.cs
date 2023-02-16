@@ -99,11 +99,18 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (!World.OPL.TryGetNameAndData(item, out string t, out _))
                 {
-                    t = StringHelper.CapitalizeAllWords(item.ItemData.Name);
-
-                    if (string.IsNullOrEmpty(t))
+                    if (!item.IsCorpse && item.Amount > 1)
                     {
-                        t = ClilocLoader.Instance.GetString(1020000 + item.Graphic, true, t);
+                        t = item.Amount.ToString() + ' ';
+                    }
+
+                    if (string.IsNullOrEmpty(item.ItemData.Name))
+                    {
+                        t += ClilocLoader.Instance.GetString(1020000 + item.Graphic, true, t);
+                    }
+                    else
+                    {
+                        t += StringHelper.CapitalizeAllWords(StringHelper.GetPluralAdjustedString(item.ItemData.Name, item.Amount > 1));
                     }
                 }
 
@@ -112,10 +119,6 @@ namespace ClassicUO.Game.UI.Gumps
                     return false;
                 }
 
-                if (!item.IsCorpse && item.Amount > 1)
-                {
-                    t += ": " + item.Amount;
-                }
 
                 FontsLoader.Instance.SetUseHTML(true);
                 FontsLoader.Instance.RecalculateWidthByInfo = true;

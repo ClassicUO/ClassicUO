@@ -32,6 +32,7 @@
 
 using System;
 using System.Runtime.CompilerServices;
+using ClassicUO.Game;
 using ClassicUO.Input;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -40,11 +41,16 @@ namespace ClassicUO.Renderer
 {
     class Camera
     {
+        private const float MAX_PEEK_DISTANCE = 250f;
+        private const float MIN_PEEK_SPEED = 0.01f;
+        private const float PEEK_TIME_FACTOR = 5;
+
         private Matrix _transform = Matrix.Identity;
         private Matrix _inverseTransform = Matrix.Identity;
         private bool _updateMatrixes = true;
         private float _lerpZoom;
         private float _zoom;
+        private Vector2 _lerpOffset;
 
 
         public Camera(float minZoomValue = 1f, float maxZoomValue = 1f, float zoomStep = 0.1f)
@@ -88,6 +94,12 @@ namespace ClassicUO.Renderer
         public void ZoomOut() => Zoom += ZoomStep;
 
         public Viewport GetViewport() => new Viewport(Bounds.X, Bounds.Y, Bounds.Width, Bounds.Height);
+
+        public Vector2 Offset => _lerpOffset;
+
+        public bool PeekingToMouse;
+
+        public bool PeekBackwards;
 
         public void Update(bool force)
         {
@@ -143,7 +155,6 @@ namespace ClassicUO.Renderer
                 return;
             }
 
-
             Matrix temp;
 
             var origin = new Vector2(Bounds.Width * 0.5f, Bounds.Height * 0.5f);
@@ -155,7 +166,9 @@ namespace ClassicUO.Renderer
             Matrix.CreateScale(_lerpZoom, _lerpZoom, 1f, out temp);
             Matrix.Multiply(ref _transform, ref temp, out _transform);
 
-            Matrix.CreateTranslation(origin.X, origin.Y, 0f, out temp);
+            CalculatePeek(origin);
+
+            Matrix.CreateTranslation(origin.X - _lerpOffset.X, origin.Y - _lerpOffset.Y, 0f, out temp);
             Matrix.Multiply(ref _transform, ref temp, out _transform);
 
 
@@ -172,6 +185,43 @@ namespace ClassicUO.Renderer
             const float SMOOTHING_FACTOR = (1.0f / FADE_TIME) * 60.0f;
 
             _lerpZoom = zoom; // MathHelper.Lerp(_lerpZoom, zoom, SMOOTHING_FACTOR * Time.Delta);
+        }
+
+        private void CalculatePeek(Vector2 origin)
+        {
+            Vector2 target_offset = new Vector2();
+
+            if (PeekingToMouse)
+            {
+                Vector2 target = new Vector2(Mouse.Position.X - Bounds.X, Mouse.Position.Y - Bounds.Y);
+
+                if (PeekBackwards)
+                {
+                    target.X = 2 * origin.X - target.X;
+                    target.Y = 2 * origin.Y - target.Y;
+                }
+
+                target_offset = target - origin;
+                float length = target_offset.Length();
+
+                if (length > 0)
+                {
+                    float length_factor = Math.Min(length / (Bounds.Height >> 1), 1f);
+                    target_offset = Vector2.Normalize(target_offset) * Utility.Easings.OutQuad(length_factor) * MAX_PEEK_DISTANCE / Zoom;
+                }
+            }
+
+            float dist = Vector2.Distance(target_offset, _lerpOffset);
+
+            if (dist > 1f)
+            {
+                float time = Math.Max(Utility.Easings.OutQuart(dist / MAX_PEEK_DISTANCE) * Time.Delta * PEEK_TIME_FACTOR, MIN_PEEK_SPEED);
+                _lerpOffset = Vector2.Lerp(_lerpOffset, target_offset, time);
+            }
+            else
+            {
+                _lerpOffset = target_offset;
+            }
         }
     }
 }

@@ -62,7 +62,7 @@ namespace ClassicUO.Game.UI.Gumps
     internal class WorldMapGump : ResizableGump
     {
         private static Point _last_position = new Point(100, 100);
-        private Point _center, _lastScroll, _mouseCenter;
+        private Point _center, _lastScroll, _mouseCenter, _scroll;
         private Point? _lastMousePosition = null;
 
         private bool _flipMap = true;
@@ -2903,8 +2903,8 @@ namespace ClassicUO.Game.UI.Gumps
                 texture,
                 new Rectangle
                 (
-                    rot.X - (int)(sW / 2f),
-                    rot.Y - (int)(sH / 2f),
+                    rot.X,
+                    rot.Y,
                     (int)(sW * zoom),
                     (int)(sH * zoom)
                 ),
@@ -3233,6 +3233,12 @@ namespace ClassicUO.Game.UI.Gumps
                 CanMove = true;
             }
 
+            if (button == MouseButtonType.Left || button == MouseButtonType.Middle)
+            {
+                _lastScroll.X = _center.X;
+                _lastScroll.Y = _center.Y;
+            }
+
             Client.Game.GameCursor.IsDraggingCursorForced = false;
 
             base.OnMouseUp(x, y, button);
@@ -3251,8 +3257,8 @@ namespace ClassicUO.Game.UI.Gumps
                             FreeView = true;
                         }
 
-                        _lastScroll.X = x;
-                        _lastScroll.Y = y;
+                        _lastScroll.X = _center.X;
+                        _lastScroll.Y = _center.Y;
                         _isScrolling = true;
                         CanMove = false;
 
@@ -3290,26 +3296,35 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_isScrolling && offset != Point.Zero)
             {
-                Point scroll = _lastScroll;
-                scroll.X -= x;
-                scroll.Y -= y;
+                _scroll.X = _scroll.Y = 0;
 
-                if (scroll == Point.Zero)
+                if (Mouse.LButtonPressed)
+                {
+                    _scroll.X = x - (Mouse.LClickPosition.X - X);
+                    _scroll.Y = y - (Mouse.LClickPosition.Y - Y);
+                }
+                else if (Mouse.MButtonPressed)
+                {
+                    _scroll.X = x - (Mouse.MClickPosition.X - X);
+                    _scroll.Y = y - (Mouse.MClickPosition.Y - Y);
+                }
+
+                if (_scroll == Point.Zero)
                 {
                     return;
                 }
 
-                scroll = RotatePoint
+                _scroll = RotatePoint
                 (
-                    scroll.X,
-                    scroll.Y,
+                    _scroll.X,
+                    _scroll.Y,
                     1f / Zoom,
                     -1,
                     _flipMap ? 45f : 0f
                 );
 
-                _center.X += scroll.X;
-                _center.Y += scroll.Y;
+                _center.X = _lastScroll.X - _scroll.X;
+                _center.Y = _lastScroll.Y - _scroll.Y;
 
                 if (_center.X < 0)
                 {
@@ -3330,9 +3345,6 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     _center.Y = MapLoader.Instance.MapsDefaultSize[World.MapIndex, 1];
                 }
-
-                _lastScroll.X = x;
-                _lastScroll.Y = y;
             }
             else
             {

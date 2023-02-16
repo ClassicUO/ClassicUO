@@ -1792,6 +1792,10 @@ namespace ClassicUO.Game.Managers
                     ProfileManager.CurrentProfile.EnableCaveBorder = !ProfileManager.CurrentProfile.EnableCaveBorder;
 
                     break;
+
+                case MacroType.LookAtMouse:
+                    // handle in gamesceneinput
+                    break;
             }
 
 
@@ -2163,6 +2167,12 @@ namespace ClassicUO.Game.Managers
                     count = 1 + MacroSubType.SpellStone - MacroSubType.BestHealPotion;
 
                     break;
+
+                case MacroType.LookAtMouse:
+                    offset = (int) MacroSubType.LookForwards;
+                    count = 1 + MacroSubType.LookBackwards - MacroSubType.LookForwards;
+
+                    break;
             }
         }
     }
@@ -2192,6 +2202,7 @@ namespace ClassicUO.Game.Managers
                 case MacroType.UsePotion:
                 case MacroType.Zoom:
                 case MacroType.UseObject:
+                case MacroType.LookAtMouse:
 
                     if (sub == MacroSubType.MSC_NONE)
                     {
@@ -2328,7 +2339,8 @@ namespace ClassicUO.Game.Managers
         ToggleCaveTiles,
         CloseInactiveHealthBars,
         CloseCorpses,
-        UseObject
+        UseObject,
+        LookAtMouse
     }
 
     internal enum MacroSubType
@@ -2578,6 +2590,9 @@ namespace ClassicUO.Game.Managers
         TrappedBox,
         SmokeBomb,
         HealStone,
-        SpellStone
+        SpellStone,
+
+        LookForwards,
+        LookBackwards
     }
 }
