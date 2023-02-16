@@ -37,14 +37,6 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using ClassicUO.Data;
-using ClassicUO.Game;
-using ClassicUO.Game.Data;
-using ClassicUO.Renderer;
-using ClassicUO.Utility;
-using ClassicUO.Utility.Logging;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.IO.Resources
 {
@@ -53,31 +45,25 @@ namespace ClassicUO.IO.Resources
         internal const int MAX_ACTIONS = 80; // gargoyle is like 78
         internal const int MAX_DIRECTIONS = 5;
 
-        private static AnimationsLoader _instance;
         private static uint _lastFlags = 0xFFFFFFFF;
-        [ThreadStatic] private static FrameInfo[] _frames;
-        [ThreadStatic] private static byte[] _decompressedData;
+        private static FrameInfo[] _frames;
+        private static byte[] _decompressedData;
 
         private readonly Dictionary<ushort, Dictionary<ushort, EquipConvData>> _equipConv = new Dictionary<ushort, Dictionary<ushort, EquipConvData>>();
         private readonly UOFileMul[] _files = new UOFileMul[5];
         private readonly UOFileUop[] _filesUop = new UOFileUop[4];
         private readonly PixelPicker _picker = new PixelPicker();
-        private TextureAtlas _atlas;
+        private int _animationCount;
 
-        private AnimationsLoader()
+        public AnimationsLoader(int animationCount)
         {
+            _animationCount = animationCount;
+            _dataIndex = new IndexAnimation[animationCount];
         }
 
-        public void CreateAtlas(GraphicsDevice device)
-        {
-            _atlas = new TextureAtlas(device, 4096, 4096, SurfaceFormat.Color);
-        }
 
-        public static AnimationsLoader Instance => _instance ?? (_instance = new AnimationsLoader());
 
-        private IndexAnimation[] _dataIndex = new IndexAnimation[Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT];
-        public  int MAX_ANIMATIONS_DATA_INDEX_COUNT { get { return _dataIndex.Length; } }
-
+        private IndexAnimation[] _dataIndex;
         public IReadOnlyDictionary<ushort, Dictionary<ushort, EquipConvData>> EquipConversions => _equipConv;
 
         public List<Tuple<ushort, byte>>[] GroupReplaces { get; } = new List<Tuple<ushort, byte>>[2]
@@ -89,7 +75,8 @@ namespace ClassicUO.IO.Resources
         {
             if (index >= _dataIndex.Length)
             {
-                Array.Resize(ref _dataIndex, index + 1);
+                _animationCount = index + 1;
+                Array.Resize(ref _dataIndex, _animationCount);
             }
 
             if (_dataIndex[index] == null)
@@ -183,7 +170,7 @@ namespace ClassicUO.IO.Resources
 
                             int id = int.Parse(parts[0]);
 
-                            if (id >= AnimationsLoader.Instance.MAX_ANIMATIONS_DATA_INDEX_COUNT)
+                            if (id >= _animationCount)
                             {
                                 continue;
                             }
@@ -225,7 +212,7 @@ namespace ClassicUO.IO.Resources
                 }
             }
 
-            for (ushort i = 0; i < AnimationsLoader.Instance.MAX_ANIMATIONS_DATA_INDEX_COUNT; i++)
+            for (ushort i = 0; i < _animationCount; i++)
             {
                 var idxFile = _files[0].IdxFile;
 
@@ -268,7 +255,7 @@ namespace ClassicUO.IO.Resources
                     if (_dataIndex[i].Groups[j] == null)
                     {
                         _dataIndex[i].Groups[j] = new AnimationGroup();
-                    }    
+                    }
 
                     for (byte d = 0; d < MAX_DIRECTIONS; d++)
                     {
@@ -331,7 +318,7 @@ namespace ClassicUO.IO.Resources
                     }
                 }
             }
-        
+
             ProcessEquipConvDef();
             ProcessBodyDef();
             ProcessCorpseDef();
@@ -351,58 +338,60 @@ namespace ClassicUO.IO.Resources
 
             var file = UOFileManager.GetUOFilePath("Equipconv.def");
 
-            if (File.Exists(file))
+            if (!File.Exists(file))
             {
-                using (DefReader defReader = new DefReader(file, 5))
+                return;
+            }
+
+            using (DefReader defReader = new DefReader(file, 5))
+            {
+                while (defReader.Next())
                 {
-                    while (defReader.Next())
+                    ushort body = (ushort)defReader.ReadInt();
+
+                    if (body >= _animationCount)
                     {
-                        ushort body = (ushort)defReader.ReadInt();
-
-                        if (body >= AnimationsLoader.Instance.MAX_ANIMATIONS_DATA_INDEX_COUNT)
-                        {
-                            continue;
-                        }
-
-                        ushort graphic = (ushort)defReader.ReadInt();
-
-                        if (graphic >= AnimationsLoader.Instance.MAX_ANIMATIONS_DATA_INDEX_COUNT)
-                        {
-                            continue;
-                        }
-
-                        ushort newGraphic = (ushort)defReader.ReadInt();
-
-                        if (newGraphic >= AnimationsLoader.Instance.MAX_ANIMATIONS_DATA_INDEX_COUNT)
-                        {
-                            continue;
-                        }
-
-                        int gump = defReader.ReadInt();
-
-                        if (gump > ushort.MaxValue)
-                        {
-                            continue;
-                        }
-
-                        if (gump == 0)
-                        {
-                            gump = graphic;
-                        }
-                        else if (gump == 0xFFFF || gump == -1)
-                        {
-                            gump = newGraphic;
-                        }
-
-                        ushort color = (ushort)defReader.ReadInt();
-
-                        if (!_equipConv.TryGetValue(body, out var dict))
-                        {
-                            _equipConv[body] = (dict = new Dictionary<ushort, EquipConvData>());
-                        }
-
-                        dict[graphic] = new EquipConvData(newGraphic, (ushort)gump, color);
+                        continue;
                     }
+
+                    ushort graphic = (ushort)defReader.ReadInt();
+
+                    if (graphic >= _animationCount)
+                    {
+                        continue;
+                    }
+
+                    ushort newGraphic = (ushort)defReader.ReadInt();
+
+                    if (newGraphic >= _animationCount)
+                    {
+                        continue;
+                    }
+
+                    int gump = defReader.ReadInt();
+
+                    if (gump > ushort.MaxValue)
+                    {
+                        continue;
+                    }
+
+                    if (gump == 0)
+                    {
+                        gump = graphic;
+                    }
+                    else if (gump == 0xFFFF || gump == -1)
+                    {
+                        gump = newGraphic;
+                    }
+
+                    ushort color = (ushort)defReader.ReadInt();
+
+                    if (!_equipConv.TryGetValue(body, out var dict))
+                    {
+                        _equipConv[body] = (dict = new Dictionary<ushort, EquipConvData>());
+                    }
+
+                    dict[graphic] = new EquipConvData(newGraphic, (ushort)gump, color);
                 }
             }
         }
@@ -416,171 +405,173 @@ namespace ClassicUO.IO.Resources
 
             var file = UOFileManager.GetUOFilePath("Bodyconv.def");
 
-            if (File.Exists(file))
+            if (!File.Exists(file))
             {
-                using (DefReader defReader = new DefReader(file))
-                {
-                    while (defReader.Next())
-                    {
-                        ushort index = (ushort)defReader.ReadInt();
+                return;
+            }
 
-                        if (index >= AnimationsLoader.Instance.MAX_ANIMATIONS_DATA_INDEX_COUNT)
+            using (DefReader defReader = new DefReader(file))
+            {
+                while (defReader.Next())
+                {
+                    ushort index = (ushort)defReader.ReadInt();
+
+                    if (index >= _animationCount)
+                    {
+                        continue;
+                    }
+
+                    for (int i = 1; i < defReader.PartsCount; i++)
+                    {
+                        int body = defReader.ReadInt();
+
+                        if (body >= _animationCount || body < 0)
                         {
                             continue;
                         }
 
-                        for (int i = 1; i < defReader.PartsCount; i++)
+                        // adaption of this PR: https://github.com/ClassicUO/ClassicUO/pull/1525
+                        // old server sends 0x03 as flags. Original client allows the bodyconv. [tested with 7.0.95.0]
+                        if (!flags.HasFlag(LockedFeatureFlags.ExpansionUOR))
                         {
-                            int body = defReader.ReadInt();
-
-                            if (body >= AnimationsLoader.Instance.MAX_ANIMATIONS_DATA_INDEX_COUNT || body < 0)
-                            {
-                                continue;
-                            }
-
-                            // adaption of this PR: https://github.com/ClassicUO/ClassicUO/pull/1525
-                            // old server sends 0x03 as flags. Original client allows the bodyconv. [tested with 7.0.95.0]
-                            if (!flags.HasFlag(LockedFeatureFlags.ExpansionUOR))
-                            {
-                                // Ensure the client is allowed to use these new graphics
-                                if (i == 1)
-                                {
-                                    if (!flags.HasFlag(LockedFeatureFlags.LBR))
-                                    {
-                                        continue;
-                                    }
-                                }
-                                else if (i == 2)
-                                {
-                                    if (!flags.HasFlag(LockedFeatureFlags.AOS))
-                                    {
-                                        continue;
-                                    }
-                                }
-                            }
-                        
-                            // NOTE: for fileindex >= 3 the client automatically accepts body conversion. 
-                            //       Probably it ignores the flags
-                            /*else if (i == 3)
-                            {
-                                if ((flags & LockedFeatureFlags.SamuraiEmpire) == 0)
-                                {
-                                    continue;
-                                }
-                            }
-                            else if (i == 4)
-                            {
-                                if ((flags & LockedFeatureFlags.MondainsLegacy) == 0)
-                                {
-                                    continue;
-                                }
-                            }
-                            */
-
-                            sbyte mountedHeightOffset = 0;
+                            // Ensure the client is allowed to use these new graphics
                             if (i == 1)
                             {
-                                if (index == 0x00C0 || index == 793)
+                                if (!flags.HasFlag(LockedFeatureFlags.LBR))
                                 {
-                                    mountedHeightOffset = -9;
+                                    continue;
                                 }
                             }
                             else if (i == 2)
                             {
-                                if (index == 0x0579)
+                                if (!flags.HasFlag(LockedFeatureFlags.AOS))
                                 {
-                                    mountedHeightOffset = 9;
+                                    continue;
                                 }
                             }
-                            else if (i == 4)
-                            {
-                                mountedHeightOffset = -9;
+                        }
 
-                                if (index == 0x0115 || index == 0x00C0)
-                                {
-                                    mountedHeightOffset = 0;
-                                }
-                                else if (index == 0x042D)
-                                {
-                                    mountedHeightOffset = 3;
-                                }
-                            }
-
-                            if (i >= _files.Length || _files[i] == null || _dataIndex[index] == null)
+                        // NOTE: for fileindex >= 3 the client automatically accepts body conversion. 
+                        //       Probably it ignores the flags
+                        /*else if (i == 3)
+                        {
+                            if ((flags & LockedFeatureFlags.SamuraiEmpire) == 0)
                             {
                                 continue;
                             }
-
-                            UOFile currentIdxFile = _files[i].IdxFile;
-
-                            ANIMATION_GROUPS_TYPE realType = Client.Version < ClientVersion.CV_500A ? CalculateTypeByGraphic((ushort)body, i) : _dataIndex[index].Type;
-
-                            long addressOffset = _dataIndex[index].CalculateOffset((ushort)body, realType, out int count);
-                          
-                            count = Math.Min(count, MAX_ACTIONS);
-
-                            if (addressOffset < currentIdxFile.Length)
+                        }
+                        else if (i == 4)
+                        {
+                            if ((flags & LockedFeatureFlags.MondainsLegacy) == 0)
                             {
-                                _dataIndex[index].Graphic = (ushort)body;
-                                _dataIndex[index].Type = realType;
+                                continue;
+                            }
+                        }
+                        */
 
-                                if (_dataIndex[index].MountedHeightOffset == 0)
-                                {
-                                    _dataIndex[index].MountedHeightOffset = mountedHeightOffset;
-                                }
+                        sbyte mountedHeightOffset = 0;
+                        if (i == 1)
+                        {
+                            if (index == 0x00C0 || index == 793)
+                            {
+                                mountedHeightOffset = -9;
+                            }
+                        }
+                        else if (i == 2)
+                        {
+                            if (index == 0x0579)
+                            {
+                                mountedHeightOffset = 9;
+                            }
+                        }
+                        else if (i == 4)
+                        {
+                            mountedHeightOffset = -9;
 
-                                _dataIndex[index].FileIndex = (byte)i;
+                            if (index == 0x0115 || index == 0x00C0)
+                            {
+                                mountedHeightOffset = 0;
+                            }
+                            else if (index == 0x042D)
+                            {
+                                mountedHeightOffset = 3;
+                            }
+                        }
 
-                                bool isValid = false;
-                                addressOffset += currentIdxFile.StartAddress.ToInt64();
-                                long maxaddress = currentIdxFile.StartAddress.ToInt64() + currentIdxFile.Length;
+                        if (i >= _files.Length || _files[i] == null || _dataIndex[index] == null)
+                        {
+                            continue;
+                        }
 
-                                int offset = 0;
+                        UOFile currentIdxFile = _files[i].IdxFile;
 
-                                if (_dataIndex[index].Groups == null)
-                                {
-                                    _dataIndex[index].Groups = new AnimationGroup[MAX_ACTIONS];
-                                }
+                        ANIMATION_GROUPS_TYPE realType = Client.Version < ClientVersion.CV_500A ? CalculateTypeByGraphic((ushort)body, i) : _dataIndex[index].Type;
 
-                                for (int j = 0; j < count; j++)
-                                {
-                                    if (_dataIndex[index].Groups[j] == null)
-                                    {
-                                        _dataIndex[index].Groups[j] = new AnimationGroup();
-                                    }
+                        long addressOffset = _dataIndex[index].CalculateOffset((ushort)body, realType, out int count);
 
-                                    for (byte d = 0; d < MAX_DIRECTIONS; d++)
-                                    {
-                                        AnimIdxBlock* aidx = (AnimIdxBlock*)(addressOffset + offset * sizeof(AnimIdxBlock));
+                        count = Math.Min(count, MAX_ACTIONS);
 
-                                        ++offset;
+                        if (addressOffset < currentIdxFile.Length)
+                        {
+                            _dataIndex[index].Graphic = (ushort)body;
+                            _dataIndex[index].Type = realType;
 
-                                        if ((long)aidx < maxaddress && aidx->Position != 0xFFFFFFFF && aidx->Size != 0xFFFFFFFF)
-                                        {
-                                            ref var direction = ref _dataIndex[index].Groups[j].Direction[d];
-                                            direction.Address = aidx->Position;
-                                            direction.Size = Math.Max(1, aidx->Size);
-
-                                            isValid = true;
-                                        }
-                                        else
-                                        {
-                                            // we need to nullify the bad address or we will read invalid data.
-                                            // we dont touch the isValid parameter because sometime the mul exists but some frames don't
-                                            // see: https://github.com/ClassicUO/ClassicUO/issues/1532
-                                            ref var direction = ref _dataIndex[index].Groups[j].Direction[d];
-                                            direction.Address = 0;
-                                            direction.Size = 0;
-                                        }
-                                    }
-                                }
-
-                                _dataIndex[index].IsValidMUL = isValid;
-
-                                break;
+                            if (_dataIndex[index].MountedHeightOffset == 0)
+                            {
+                                _dataIndex[index].MountedHeightOffset = mountedHeightOffset;
                             }
 
+                            _dataIndex[index].FileIndex = (byte)i;
+
+                            bool isValid = false;
+                            addressOffset += currentIdxFile.StartAddress.ToInt64();
+                            long maxaddress = currentIdxFile.StartAddress.ToInt64() + currentIdxFile.Length;
+
+                            int offset = 0;
+
+                            if (_dataIndex[index].Groups == null)
+                            {
+                                _dataIndex[index].Groups = new AnimationGroup[MAX_ACTIONS];
+                            }
+
+                            for (int j = 0; j < count; j++)
+                            {
+                                if (_dataIndex[index].Groups[j] == null)
+                                {
+                                    _dataIndex[index].Groups[j] = new AnimationGroup();
+                                }
+
+                                for (byte d = 0; d < MAX_DIRECTIONS; d++)
+                                {
+                                    AnimIdxBlock* aidx = (AnimIdxBlock*)(addressOffset + offset * sizeof(AnimIdxBlock));
+
+                                    ++offset;
+
+                                    if ((long)aidx < maxaddress && aidx->Position != 0xFFFFFFFF && aidx->Size != 0xFFFFFFFF)
+                                    {
+                                        ref var direction = ref _dataIndex[index].Groups[j].Direction[d];
+                                        direction.Address = aidx->Position;
+                                        direction.Size = Math.Max(1, aidx->Size);
+
+                                        isValid = true;
+                                    }
+                                    else
+                                    {
+                                        // we need to nullify the bad address or we will read invalid data.
+                                        // we dont touch the isValid parameter because sometime the mul exists but some frames don't
+                                        // see: https://github.com/ClassicUO/ClassicUO/issues/1532
+                                        ref var direction = ref _dataIndex[index].Groups[j].Direction[d];
+                                        direction.Address = 0;
+                                        direction.Size = 0;
+                                    }
+                                }
+                            }
+
+                            _dataIndex[index].IsValidMUL = isValid;
+
+                            break;
                         }
+
                     }
                 }
             }
@@ -594,60 +585,62 @@ namespace ClassicUO.IO.Resources
             }
 
             var file = UOFileManager.GetUOFilePath("Body.def");
-            Dictionary<int, bool> filter = new Dictionary<int, bool>();
+            var filter = new Dictionary<int, bool>();
 
-            if (File.Exists(file))
+            if (!File.Exists(file))
             {
-                using (DefReader defReader = new DefReader(file, 1))
+                return;
+            }
+
+            using (DefReader defReader = new DefReader(file, 1))
+            {
+                while (defReader.Next())
                 {
-                    while (defReader.Next())
+                    int index = defReader.ReadInt();
+
+                    //if (index >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
+                    //{
+                    //    continue;
+                    //}
+
+                    GrowIfNeeded(index);
+
+                    if (filter.TryGetValue(index, out bool b) && b)
                     {
-                        int index = defReader.ReadInt();
-
-                        //if (index >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
-                        //{
-                        //    continue;
-                        //}
-
-                        GrowIfNeeded(index);
-
-                        if (filter.TryGetValue(index, out bool b) && b)
-                        {
-                            continue;
-                        }
-
-                        int[] group = defReader.ReadGroup();
-
-                        if (group == null)
-                        {
-                            continue;
-                        }
-
-                        int color = defReader.ReadInt();
-
-                        int checkIndex;
-
-                        //Yes, this is actually how this is supposed to work.
-                        if (group.Length >= 3)
-                        {
-                            checkIndex = group[2];
-                        }
-                        else
-                        {
-                            checkIndex = group[0];
-                        }
-
-                        if (checkIndex >= AnimationsLoader.Instance.MAX_ANIMATIONS_DATA_INDEX_COUNT)
-                        {
-                            continue;
-                        }
-
-                        _dataIndex[index].Graphic = (ushort)checkIndex;
-                        _dataIndex[index].Color = (ushort)color;
-                        _dataIndex[index].IsValidMUL = true;
-
-                        filter[index] = true;
+                        continue;
                     }
+
+                    int[] group = defReader.ReadGroup();
+
+                    if (group == null)
+                    {
+                        continue;
+                    }
+
+                    int color = defReader.ReadInt();
+
+                    int checkIndex;
+
+                    //Yes, this is actually how this is supposed to work.
+                    if (group.Length >= 3)
+                    {
+                        checkIndex = group[2];
+                    }
+                    else
+                    {
+                        checkIndex = group[0];
+                    }
+
+                    if (checkIndex >= _animationCount)
+                    {
+                        continue;
+                    }
+
+                    _dataIndex[index].Graphic = (ushort)checkIndex;
+                    _dataIndex[index].Color = (ushort)color;
+                    _dataIndex[index].IsValidMUL = true;
+
+                    filter[index] = true;
                 }
             }
 
@@ -663,57 +656,59 @@ namespace ClassicUO.IO.Resources
             var file = UOFileManager.GetUOFilePath("Corpse.def");
             Dictionary<int, bool> filter = new Dictionary<int, bool>();
 
-            if (File.Exists(file))
+            if (!File.Exists(file))
             {
-                using (DefReader defReader = new DefReader(file, 1))
+                return;
+            }
+
+            using (DefReader defReader = new DefReader(file, 1))
+            {
+                while (defReader.Next())
                 {
-                    while (defReader.Next())
+                    int index = defReader.ReadInt();
+
+                    //if (index >= AnimationsLoader.Instance.MAX_ANIMATIONS_DATA_INDEX_COUNT)
+                    //{
+                    //    continue;
+                    //}
+
+                    GrowIfNeeded(index);
+
+                    if (filter.TryGetValue(index, out bool b) && b)
                     {
-                        int index = defReader.ReadInt();
-
-                        //if (index >= AnimationsLoader.Instance.MAX_ANIMATIONS_DATA_INDEX_COUNT)
-                        //{
-                        //    continue;
-                        //}
-
-                        GrowIfNeeded(index);
-
-                        if (filter.TryGetValue(index, out bool b) && b)
-                        {
-                            continue;
-                        }
-
-                        int[] group = defReader.ReadGroup();
-
-                        if (group == null)
-                        {
-                            continue;
-                        }
-
-                        int color = defReader.ReadInt();
-
-                        int checkIndex;
-
-                        if (group.Length >= 3)
-                        {
-                            checkIndex = group[2];
-                        }
-                        else
-                        {
-                            checkIndex = group[0];
-                        }
-
-                        if (checkIndex >= AnimationsLoader.Instance.MAX_ANIMATIONS_DATA_INDEX_COUNT)
-                        {
-                            continue;
-                        }
-
-                        _dataIndex[index].CorpseGraphic = (ushort)checkIndex;
-                        _dataIndex[index].CorpseColor = (ushort)color;
-                        _dataIndex[index].IsValidMUL = true;
-
-                        filter[index] = true;
+                        continue;
                     }
+
+                    int[] group = defReader.ReadGroup();
+
+                    if (group == null)
+                    {
+                        continue;
+                    }
+
+                    int color = defReader.ReadInt();
+
+                    int checkIndex;
+
+                    if (group.Length >= 3)
+                    {
+                        checkIndex = group[2];
+                    }
+                    else
+                    {
+                        checkIndex = group[0];
+                    }
+
+                    if (checkIndex >= _animationCount)
+                    {
+                        continue;
+                    }
+
+                    _dataIndex[index].CorpseGraphic = (ushort)checkIndex;
+                    _dataIndex[index].CorpseColor = (ushort)color;
+                    _dataIndex[index].IsValidMUL = true;
+
+                    filter[index] = true;
                 }
             }
         }
@@ -725,7 +720,7 @@ namespace ClassicUO.IO.Resources
                 return;
             }
 
-            for (ushort animID = 0; animID < AnimationsLoader.Instance.MAX_ANIMATIONS_DATA_INDEX_COUNT; animID++)
+            for (ushort animID = 0; animID < _animationCount; animID++)
             {
                 for (byte grpID = 0; grpID < MAX_ACTIONS; grpID++)
                 {
@@ -736,28 +731,30 @@ namespace ClassicUO.IO.Resources
                     {
                         UOFileUop uopFile = _filesUop[i];
 
-                        if (uopFile != null && uopFile.TryGetUOPData(hash, out UOFileIndex data))
+                        if (uopFile == null || !uopFile.TryGetUOPData(hash, out UOFileIndex data))
                         {
-                            if (_dataIndex[animID] == null)
+                            continue;
+                        }
+
+                        if (_dataIndex[animID] == null)
+                        {
+                            _dataIndex[animID] = new IndexAnimation
                             {
-                                _dataIndex[animID] = new IndexAnimation
-                                {
-                                    UopGroups = new AnimationGroupUop[MAX_ACTIONS]
-                                };
-                            }
-
-                            _dataIndex[animID].InitializeUOP();
-
-                            ref AnimationGroupUop g = ref _dataIndex[animID].UopGroups[grpID];
-
-                            g = new AnimationGroupUop
-                            {
-                                Offset = (uint)data.Offset,
-                                CompressedLength = (uint)data.Length,
-                                DecompressedLength = (uint)data.DecompressedLength,
-                                FileIndex = i,
+                                UopGroups = new AnimationGroupUop[MAX_ACTIONS]
                             };
                         }
+
+                        _dataIndex[animID].InitializeUOP();
+
+                        ref AnimationGroupUop g = ref _dataIndex[animID].UopGroups[grpID];
+
+                        g = new AnimationGroupUop
+                        {
+                            Offset = (uint)data.Offset,
+                            CompressedLength = (uint)data.Length,
+                            DecompressedLength = (uint)data.DecompressedLength,
+                            FileIndex = i,
+                        };
                     }
                 }
             }
@@ -772,13 +769,11 @@ namespace ClassicUO.IO.Resources
 
             if (!File.Exists(animationSequencePath))
             {
-                Log.Warn("AnimationSequence.uop not found");
-
                 return;
             }
 
             UOFileUop animSeq = new UOFileUop(animationSequencePath, "build/animationsequence/{0:D8}.bin");
-            UOFileIndex[] animseqEntries = new UOFileIndex[Math.Max(animSeq.TotalEntriesCount, AnimationsLoader.Instance.MAX_ANIMATIONS_DATA_INDEX_COUNT)];
+            UOFileIndex[] animseqEntries = new UOFileIndex[Math.Max(animSeq.TotalEntriesCount, _animationCount)];
             animSeq.FillEntries(ref animseqEntries);
 
             Span<byte> spanAlloc = stackalloc byte[1024];
@@ -907,7 +902,7 @@ namespace ClassicUO.IO.Resources
 
         public void ConvertBodyIfNeeded(ref ushort graphic, bool isParent = false, bool forceUOP = false)
         {
-            if (graphic >= AnimationsLoader.Instance.MAX_ANIMATIONS_DATA_INDEX_COUNT)
+            if (graphic >= _animationCount)
             {
                 return;
             }
@@ -928,7 +923,7 @@ namespace ClassicUO.IO.Resources
                 if (dataIndex.FileIndex == 0 /*|| !dataIndex.IsValidMUL*/)
                 {
                     graphic = dataIndex.Graphic;
-                }                
+                }
             }
         }
 
@@ -938,49 +933,51 @@ namespace ClassicUO.IO.Resources
         {
             useUOP = false;
 
-            if (graphic < MAX_ANIMATIONS_DATA_INDEX_COUNT && action < MAX_ACTIONS)
+            if (graphic >= _animationCount || action >= MAX_ACTIONS)
             {
-                IndexAnimation index = _dataIndex[graphic];
+                return;
+            }
 
-                if (index == null)
-                {
-                    return;
-                }
+            IndexAnimation index = _dataIndex[graphic];
 
-                if (forceUOP)
+            if (index == null)
+            {
+                return;
+            }
+
+            if (forceUOP)
+            {
+                index.GetUopGroup(ref action);
+                useUOP = true;
+                return;
+            }
+
+            if (index.IsUOP)
+            {
+                if (!index.IsValidMUL)
                 {
+                    /* Regardless of flags, there is only a UOP version so use that. */
                     index.GetUopGroup(ref action);
                     useUOP = true;
                     return;
                 }
 
-                if (index.IsUOP)
+                /* For equipment, prefer the mul version. */
+                if (!isEquip)
                 {
-                    if (!index.IsValidMUL)
-                    {
-                        /* Regardless of flags, there is only a UOP version so use that. */
-                        index.GetUopGroup(ref action);
-                        useUOP = true;
-                        return;
-                    }
+                    index.GetUopGroup(ref action);
+                    useUOP = true;
+                    return;
+                }
+            }
 
-                    /* For equipment, prefer the mul version. */
-                    if (!isEquip)
-                    {
-                        index.GetUopGroup(ref action);
-                        useUOP = true;
-                        return;
-                    }
-                }
-         
-                // Body.def replaces animations always at fileindex == 0.
-                // Bodyconv.def instead uses always fileindex >= 1 when replacing animations. So we don't need to replace the animations here. The values have been already replaced.
-                // If the animation has been replaced by Body.def means it doesn't exist
-                if (index.FileIndex == 0 /*|| !index.IsValidMUL*/)
-                {
-                    hue = isCorpse ? index.CorpseColor : index.Color;
-                    graphic = isCorpse ? index.CorpseGraphic : index.Graphic;
-                }
+            // Body.def replaces animations always at fileindex == 0.
+            // Bodyconv.def instead uses always fileindex >= 1 when replacing animations. So we don't need to replace the animations here. The values have been already replaced.
+            // If the animation has been replaced by Body.def means it doesn't exist
+            if (index.FileIndex == 0 /*|| !index.IsValidMUL*/)
+            {
+                hue = isCorpse ? index.CorpseColor : index.Color;
+                graphic = isCorpse ? index.CorpseGraphic : index.Graphic;
             }
         }
 
@@ -1219,7 +1216,7 @@ namespace ClassicUO.IO.Resources
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ANIMATION_GROUPS GetGroupIndex(ushort graphic)
         {
-            if (graphic >= AnimationsLoader.Instance.MAX_ANIMATIONS_DATA_INDEX_COUNT || _dataIndex[graphic] == null)
+            if (graphic >= _animationCount || _dataIndex[graphic] == null)
             {
                 return ANIMATION_GROUPS.AG_HIGHT;
             }
@@ -1241,7 +1238,7 @@ namespace ClassicUO.IO.Resources
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public byte GetDeathAction(ushort id, bool second, bool isRunning = false)
         {
-            if (id >= AnimationsLoader.Instance.MAX_ANIMATIONS_DATA_INDEX_COUNT || _dataIndex[id] == null)
+            if (id >= _animationCount || _dataIndex[id] == null)
             {
                 return 0;
             }
@@ -1296,7 +1293,7 @@ namespace ClassicUO.IO.Resources
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsAnimationExists(ushort graphic, byte group, bool isCorpse = false)
         {
-            if (graphic < AnimationsLoader.Instance.MAX_ANIMATIONS_DATA_INDEX_COUNT && group < MAX_ACTIONS)
+            if (graphic < _animationCount && group < MAX_ACTIONS)
             {
                 var frames = GetAnimationFrames(graphic, group, 0, out var _, out _, false, isCorpse);
 
@@ -1308,20 +1305,20 @@ namespace ClassicUO.IO.Resources
 
         public Span<SpriteInfo> GetAnimationFrames
         (
-            ushort id, 
-            byte action, 
-            byte dir, 
+            ushort id,
+            byte action,
+            byte dir,
             out ushort hue,
             out bool useUOP,
-            bool isEquip = false, 
-            bool isCorpse = false, 
+            bool isEquip = false,
+            bool isCorpse = false,
             bool forceUOP = false
         )
         {
             hue = 0;
             useUOP = false;
 
-            if (id >= AnimationsLoader.Instance.MAX_ANIMATIONS_DATA_INDEX_COUNT || action >= MAX_ACTIONS || dir >= MAX_DIRECTIONS)
+            if (id >= _animationCount || action >= MAX_ACTIONS || dir >= MAX_DIRECTIONS)
             {
                 return Span<SpriteInfo>.Empty;
             }
@@ -1379,7 +1376,7 @@ namespace ClassicUO.IO.Resources
 
                 animDir.FrameCount = (byte)frames.Length;
                 animDir.SpriteInfos = new SpriteInfo[frames.Length];
-                
+
                 for (int i = 0; i < frames.Length; i++)
                 {
                     ref var frame = ref frames[i];
@@ -1398,7 +1395,7 @@ namespace ClassicUO.IO.Resources
                     ulong key = (keyLower | ((ulong)keyUpper << 32));
 
                     _picker.Set(key, frame.Width, frame.Height, frame.Pixels);
-               
+
                     spriteInfo.Center.X = frame.CenterX;
                     spriteInfo.Center.Y = frame.CenterY;
                     spriteInfo.Texture = _atlas.AddSprite(frame.Pixels.AsSpan(), frame.Width, frame.Height, out spriteInfo.UV);
@@ -1429,8 +1426,6 @@ namespace ClassicUO.IO.Resources
 
             if (animData.FileIndex == 0 && animData.CompressedLength == 0 && animData.DecompressedLength == 0 && animData.Offset == 0)
             {
-                Log.Warn("uop animData is null");
-
                 return _frames.AsSpan().Slice(0, 0);
             }
 
@@ -1551,7 +1546,7 @@ namespace ClassicUO.IO.Resources
                 return Span<FrameInfo>.Empty;
             }
 
-            UOFile file = _files[fileIndex];           
+            UOFile file = _files[fileIndex];
             StackDataReader reader = new StackDataReader(new ReadOnlySpan<byte>((byte*)file.StartAddress.ToPointer() + dir.Address, (int)dir.Size));
             reader.Seek(0);
 
@@ -1664,7 +1659,7 @@ namespace ClassicUO.IO.Resources
         {
             dir &= 0x7F;
             bool mirror = false;
-            Instance.GetAnimDirection(ref dir, ref mirror);
+            GetAnimDirection(ref dir, ref mirror);
 
             if (frameIndex == 0xFF)
             {
@@ -1933,7 +1928,7 @@ namespace ClassicUO.IO.Resources
             if (old < AnimationsLoader.MAX_ACTIONS && newG < AnimationsLoader.MAX_ACTIONS)
             {
                 _uopReplaceGroupIndex[old] = newG;
-            }   
+            }
         }
 
         public long CalculateOffset(ushort graphic, ANIMATION_GROUPS_TYPE type, out int groupCount)

@@ -51,13 +51,14 @@ namespace ClassicUO.IO.Resources
         private UOFile _file;
         private readonly ushort _graphicMask;
         private readonly PixelPicker _picker = new PixelPicker();
+        private readonly int _staticsCount, _landCount;
 
         private ArtLoader(int staticCount, int landCount)
         {
+            _staticsCount = staticCount;
+            _landCount = landCount;
             _graphicMask = Client.IsUOPInstallation ? (ushort) 0xFFFF : (ushort) 0x3FFF;
         }
-
-        public static ArtLoader Instance => _instance ?? (_instance = new ArtLoader(Constants.MAX_STATIC_DATA_INDEX_COUNT, Constants.MAX_LAND_DATA_INDEX_COUNT));
 
 
         public override Task Load()
@@ -71,7 +72,7 @@ namespace ClassicUO.IO.Resources
                     if (Client.IsUOPInstallation && File.Exists(filePath))
                     {
                         _file = new UOFileUop(filePath, "build/artlegacymul/{0:D8}.tga");
-                        Entries = new UOFileIndex[Math.Max(((UOFileUop) _file).TotalEntriesCount, Constants.MAX_STATIC_DATA_INDEX_COUNT)];
+                        Entries = new UOFileIndex[Math.Max(((UOFileUop) _file).TotalEntriesCount, _staticsCount)];
                     }
                     else
                     {
@@ -80,7 +81,7 @@ namespace ClassicUO.IO.Resources
 
                         if (File.Exists(filePath) && File.Exists(idxPath))
                         {
-                            _file = new UOFileMul(filePath, idxPath, Constants.MAX_STATIC_DATA_INDEX_COUNT);
+                            _file = new UOFileMul(filePath, idxPath, _staticsCount);
                         }
                     }
 

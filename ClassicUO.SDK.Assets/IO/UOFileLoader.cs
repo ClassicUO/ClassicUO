@@ -31,10 +31,7 @@
 #endregion
 
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
-using ClassicUO.Game;
-using ClassicUO.Renderer;
 
 namespace ClassicUO.IO
 {

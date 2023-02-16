@@ -30,14 +30,9 @@
 
 #endregion
 
-#define USE_MMF
-
 using System;
 using System.IO;
 using System.IO.MemoryMappedFiles;
-using System.Runtime.CompilerServices;
-using ClassicUO.Utility;
-using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.IO
 {
@@ -45,7 +40,7 @@ namespace ClassicUO.IO
     {
         public UOFile(string filepath, bool loadFile = false)
         {
-            FilePath = filepath;
+            FilePath = new FileInfo(filepath);
 
             if (loadFile)
             {
@@ -53,60 +48,46 @@ namespace ClassicUO.IO
             }
         }
 
-        public string FilePath { get; }
-#if USE_MMF
+        public FileInfo FilePath { get; }
         private protected MemoryMappedViewAccessor _accessor;
         private protected MemoryMappedFile _file;
-#endif
 
         protected virtual void Load()
         {
-            Log.Trace($"Loading file:\t\t{FilePath}");
-
-            FileInfo fileInfo = new FileInfo(FilePath);
-
-            if (!fileInfo.Exists)
+            if (!FilePath.Exists)
             {
-                Log.Error($"{FilePath}  not exists.");
-
                 return;
             }
 
-            long size = fileInfo.Length;
-
-            if (size > 0)
+            if (FilePath.Length <= 0)
             {
-#if USE_MMF
-                _file = MemoryMappedFile.CreateFromFile
-                (
-                    File.Open(fileInfo.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite),
-                    null,
-                    0,
-                    MemoryMappedFileAccess.Read,
-                    HandleInheritability.None,
-                    false
-                );
-
-                _accessor = _file.CreateViewAccessor(0, size, MemoryMappedFileAccess.Read);
-
-                byte* ptr = null;
-
-                try
-                {
-                    _accessor.SafeMemoryMappedViewHandle.AcquirePointer(ref ptr);
-                    SetData(ptr, (long) _accessor.SafeMemoryMappedViewHandle.ByteLength);
-                }
-                catch
-                {
-                    _accessor.SafeMemoryMappedViewHandle.ReleasePointer();
-
-                    throw new Exception("Something goes wrong...");
-                }
-#endif
+                return;
             }
-            else
+
+            _file = MemoryMappedFile.CreateFromFile
+            (
+                File.Open(FilePath.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite),
+                null,
+                0,
+                MemoryMappedFileAccess.Read,
+                HandleInheritability.None,
+                false
+            );
+
+            _accessor = _file.CreateViewAccessor(0, FilePath.Length, MemoryMappedFileAccess.Read);
+
+            byte* ptr = null;
+
+            try
             {
-                Log.Error($"{FilePath}  size must be > 0");
+                _accessor.SafeMemoryMappedViewHandle.AcquirePointer(ref ptr);
+                SetData(ptr, (long)_accessor.SafeMemoryMappedViewHandle.ByteLength);
+            }
+            catch
+            {
+                _accessor.SafeMemoryMappedViewHandle.ReleasePointer();
+
+                throw new Exception("Something goes wrong...");
             }
         }
 
@@ -116,12 +97,9 @@ namespace ClassicUO.IO
 
         public virtual void Dispose()
         {
-#if USE_MMF
             _accessor.SafeMemoryMappedViewHandle.ReleasePointer();
             _accessor.Dispose();
             _file.Dispose();
-#endif
-            Log.Trace($"Unloaded:\t\t{FilePath}");
         }
     }
 }

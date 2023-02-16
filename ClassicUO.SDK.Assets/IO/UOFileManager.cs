@@ -85,7 +85,7 @@ namespace ClassicUO.IO
         }
 
 
-        public static void Load()
+        public static void Load(string language)
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
 
@@ -97,7 +97,7 @@ namespace ClassicUO.IO
                 AnimDataLoader.Instance.Load(),
                 ArtLoader.Instance.Load(),
                 MapLoader.Instance.Load(),
-                ClilocLoader.Instance.Load(Settings.GlobalSettings.Language),
+                ClilocLoader.Instance.Load(language),
                 GumpsLoader.Instance.Load(),
                 FontsLoader.Instance.Load(),
                 HuesLoader.Instance.Load(),

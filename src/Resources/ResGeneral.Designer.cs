@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace ClassicUO.Resources {
+namespace ClassicUO.SDK.AssetsManagement.Resources {
     using System;
     
     
@@ -19,7 +19,7 @@ namespace ClassicUO.Resources {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     public class ResGeneral {
@@ -39,7 +39,7 @@ namespace ClassicUO.Resources {
         public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("ClassicUO.Resources.ResGeneral", typeof(ResGeneral).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("ClassicUO.SDK.AssetsManagement.Resources.ResGeneral", typeof(ResGeneral).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -269,7 +269,7 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to CurrentProfile DateTime.Now is {0}.
+        ///   Looks up a localized string similar to Current DateTime.Now is {0}.
         /// </summary>
         public static string CurrentDateTimeNowIs0 {
             get {
