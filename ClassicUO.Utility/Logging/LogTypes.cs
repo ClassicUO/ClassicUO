@@ -31,35 +31,20 @@
 #endregion
 
 using System;
-using System.IO;
-using System.Reflection;
-using System.Threading;
 
-namespace ClassicUO
+namespace ClassicUO.Utility.Logging
 {
-    internal static class CUOEnviroment
+    [Flags]
+    public enum LogTypes : byte
     {
-        public static Thread GameThread;
-        public static float DPIScaleFactor = 1.0f;
-        public static bool NoSound;
-        public static string[] Args;
-        public static string[] Plugins;
-        public static bool Debug;
-        public static bool IsHighDPI;
-        public static uint CurrentRefreshRate;
-        public static bool SkipLoginScreen;
-        public static bool IsOutlands;
-        public static bool PacketLog;
-        public static bool NoServerPing;
-
-        public static readonly bool IsUnix = Environment.OSVersion.Platform != PlatformID.Win32NT && Environment.OSVersion.Platform != PlatformID.Win32Windows && Environment.OSVersion.Platform != PlatformID.Win32S && Environment.OSVersion.Platform != PlatformID.WinCE;
-
-        public static readonly Version Version = Assembly.GetExecutingAssembly().GetName().Version;
-        public static readonly string ExecutablePath = 
-#if NETFRAMEWORK
-            Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location);
-#else
-            Environment.CurrentDirectory;
-#endif
+        None = 0x00,
+        Info = 0x01,
+        Debug = 0x02,
+        Trace = 0x04,
+        Warning = 0x08,
+        Error = 0x10,
+        Panic = 0x20,
+        Table = 0x30,
+        All = byte.MaxValue
     }
 }

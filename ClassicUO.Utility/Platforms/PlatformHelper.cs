@@ -31,35 +31,47 @@
 #endregion
 
 using System;
-using System.IO;
-using System.Reflection;
-using System.Threading;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
+using ClassicUO.Utility.Logging;
 
-namespace ClassicUO
+namespace ClassicUO.Utility.Platforms
 {
-    internal static class CUOEnviroment
+    public static class PlatformHelper
     {
-        public static Thread GameThread;
-        public static float DPIScaleFactor = 1.0f;
-        public static bool NoSound;
-        public static string[] Args;
-        public static string[] Plugins;
-        public static bool Debug;
-        public static bool IsHighDPI;
-        public static uint CurrentRefreshRate;
-        public static bool SkipLoginScreen;
-        public static bool IsOutlands;
-        public static bool PacketLog;
-        public static bool NoServerPing;
+        public static readonly bool IsMonoRuntime = Type.GetType("Mono.Runtime") != null;
 
-        public static readonly bool IsUnix = Environment.OSVersion.Platform != PlatformID.Win32NT && Environment.OSVersion.Platform != PlatformID.Win32Windows && Environment.OSVersion.Platform != PlatformID.Win32S && Environment.OSVersion.Platform != PlatformID.WinCE;
+        public static readonly bool IsWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+        public static readonly bool IsLinux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
+        public static readonly bool IsOSX = RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
 
-        public static readonly Version Version = Assembly.GetExecutingAssembly().GetName().Version;
-        public static readonly string ExecutablePath = 
-#if NETFRAMEWORK
-            Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location);
-#else
-            Environment.CurrentDirectory;
-#endif
+        public static void LaunchBrowser(string url)
+        {
+            try
+            {
+                if (IsWindows)
+                {
+                    ProcessStartInfo psi = new ProcessStartInfo
+                    {
+                        FileName = url,
+                        UseShellExecute = true
+                    };
+
+                    Process.Start(psi);
+                }
+                else if (IsOSX)
+                {
+                    Process.Start("open", url);
+                }
+                else
+                {
+                    Process.Start("xdg-open", url);
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex.ToString());
+            }
+        }
     }
 }

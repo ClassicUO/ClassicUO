@@ -31,7 +31,6 @@
 #endregion
 
 using System;
-using System.Text;
 using System.Xml;
 using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
@@ -138,7 +137,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     sb.Append(string.Format(DEBUG_STRING_3, ReadObject(SelectedObject.Object)));
 
-                    if (CUOEnviroment.Profiler)
+                    if (Profiler.Enabled)
                     {
                         double timeDraw = Profiler.GetContext("RenderFrame").TimeInContext;
 

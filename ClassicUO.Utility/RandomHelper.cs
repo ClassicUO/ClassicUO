@@ -31,35 +31,37 @@
 #endregion
 
 using System;
-using System.IO;
-using System.Reflection;
-using System.Threading;
 
-namespace ClassicUO
+namespace ClassicUO.Utility
 {
-    internal static class CUOEnviroment
+    public static class RandomHelper
     {
-        public static Thread GameThread;
-        public static float DPIScaleFactor = 1.0f;
-        public static bool NoSound;
-        public static string[] Args;
-        public static string[] Plugins;
-        public static bool Debug;
-        public static bool IsHighDPI;
-        public static uint CurrentRefreshRate;
-        public static bool SkipLoginScreen;
-        public static bool IsOutlands;
-        public static bool PacketLog;
-        public static bool NoServerPing;
+        private static readonly Random _random = new Random();
 
-        public static readonly bool IsUnix = Environment.OSVersion.Platform != PlatformID.Win32NT && Environment.OSVersion.Platform != PlatformID.Win32Windows && Environment.OSVersion.Platform != PlatformID.Win32S && Environment.OSVersion.Platform != PlatformID.WinCE;
+        /// <summary>
+        ///     Returns a random number between low and high, inclusive of both low and high.
+        /// </summary>
+        public static int GetValue(int low, int high)
+        {
+            return _random.Next(low, high + 1);
+        }
 
-        public static readonly Version Version = Assembly.GetExecutingAssembly().GetName().Version;
-        public static readonly string ExecutablePath = 
-#if NETFRAMEWORK
-            Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location);
-#else
-            Environment.CurrentDirectory;
-#endif
+        /// <summary>
+        ///     Returns a non-negative random integer.
+        /// </summary>
+        public static int GetValue()
+        {
+            return _random.Next();
+        }
+
+        public static int RandomList(params int[] list)
+        {
+            return list[_random.Next(list.Length)];
+        }
+
+        public static bool RandomBool()
+        {
+            return _random.NextDouble() >= 0.5;
+        }
     }
 }

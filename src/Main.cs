@@ -375,7 +375,7 @@ namespace ClassicUO
                         break;
 
                     case "profiler":
-                        CUOEnviroment.Profiler = bool.Parse(value);
+                        Profiler.Enabled = bool.Parse(value);
 
                         break;
 
