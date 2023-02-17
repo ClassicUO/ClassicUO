@@ -1372,7 +1372,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             _mapIndex = World.MapIndex;
 
-            if (_mapIndex < 0 || _mapIndex > Constants.MAPS_COUNT)
+            if (_mapIndex < 0 || _mapIndex > MapLoader.MAPS_COUNT)
             {
                 return Task.CompletedTask;
             }

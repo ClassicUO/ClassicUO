@@ -32,7 +32,6 @@
 
 using System;
 using System.Collections.Generic;
-using ClassicUO.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
@@ -40,6 +39,7 @@ using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Resources;
+using ClassicUO.Utility;
 
 namespace ClassicUO.Game.UI.Gumps
 {

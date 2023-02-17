@@ -31,7 +31,6 @@
 #endregion
 
 using System.Collections.Generic;
-using ClassicUO.Data;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 

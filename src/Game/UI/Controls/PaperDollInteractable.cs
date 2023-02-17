@@ -32,13 +32,13 @@
 
 using System.Collections.Generic;
 using ClassicUO.Configuration;
-using ClassicUO.Data;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
+using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 
@@ -381,7 +381,7 @@ namespace ClassicUO.Game.UI.Controls
                 }
             }
 
-            if (animID + offset > Constants.MAX_GUMP_DATA_INDEX_COUNT || GumpsLoader.Instance.GetGumpTexture((ushort)(animID + offset), out _) == null)
+            if (animID + offset > GumpsLoader.MAX_GUMP_DATA_INDEX_COUNT || GumpsLoader.Instance.GetGumpTexture((ushort)(animID + offset), out _) == null)
             {
                 // inverse
                 offset = isfemale ? Constants.MALE_GUMP_OFFSET : Constants.FEMALE_GUMP_OFFSET;

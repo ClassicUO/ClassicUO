@@ -32,7 +32,7 @@
 
 using System;
 using System.Collections.Generic;
-using ClassicUO.Data;
+using ClassicUO.Game.UI.Controls;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
@@ -640,7 +640,7 @@ namespace ClassicUO.Renderer
             return true;
         }
 
-        public void CreateTexture()
+        public unsafe void CreateTexture()
         {
             if (Texture != null && !Texture.IsDisposed)
             {
@@ -655,12 +655,11 @@ namespace ClassicUO.Renderer
 
             FontsLoader.Instance.RecalculateWidthByInfo = RecalculateWidthByInfo;
 
-
+            FontsLoader.FontInfo fi;
             if (IsUnicode)
             {
-                FontsLoader.Instance.GenerateUnicode
+                fi = FontsLoader.Instance.GenerateUnicode
                 (
-                    this,
                     Font,
                     Text,
                     Hue,
@@ -675,9 +674,8 @@ namespace ClassicUO.Renderer
             }
             else
             {
-                FontsLoader.Instance.GenerateASCII
+                fi = FontsLoader.Instance.GenerateASCII
                 (
-                    this,
                     Font,
                     Text,
                     Hue,
@@ -687,6 +685,33 @@ namespace ClassicUO.Renderer
                     SaveHitMap,
                     MaxHeight,
                     _picker
+                );
+            }
+
+            if (Texture == null || Texture.IsDisposed)
+            {
+                Texture = new Texture2D(Client.Game.GraphicsDevice, fi.Width, fi.Height, false, SurfaceFormat.Color);
+            }
+
+            Links.Clear();
+            if (fi.Links != null)
+            {
+                for (int i = 0; i < fi.Links.Length; ++i)
+                {
+                    Links.Add(fi.Links[i]);
+                }
+            }
+
+            LinesCount = fi.LineCount;
+
+            fixed (uint* dataPtr = fi.Data)
+            {
+                Texture.SetDataPointerEXT
+                (
+                    0,
+                    null,
+                    (IntPtr)dataPtr,
+                    fi.Width * fi.Height * sizeof(uint)
                 );
             }
 

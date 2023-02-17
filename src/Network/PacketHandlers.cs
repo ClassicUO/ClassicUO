@@ -220,7 +220,7 @@ namespace ClassicUO.Network
         {
             if (World.ClientFeatures.TooltipsEnabled && Handlers._clilocRequests.Count != 0)
             {
-                if (Client.Version >= Data.ClientVersion.CV_5090)
+                if (Client.Version >= Utility.ClientVersion.CV_5090)
                 {
                     if (Handlers._clilocRequests.Count != 0)
                     {
@@ -503,7 +503,7 @@ namespace ClassicUO.Network
                         }
                         else
                         {
-                            if (Client.Version >= Data.ClientVersion.CV_500A)
+                            if (Client.Version >= Utility.ClientVersion.CV_500A)
                             {
                                 World.Player.WeightMax = (ushort) (7 * (World.Player.Strength >> 1) + 40);
                             }
@@ -575,7 +575,7 @@ namespace ClassicUO.Network
                 return;
             }
 
-            if (p[0] == 0x16 && Client.Version < Data.ClientVersion.CV_500A)
+            if (p[0] == 0x16 && Client.Version < Utility.ClientVersion.CV_500A)
             {
                 return;
             }
@@ -598,7 +598,7 @@ namespace ClassicUO.Network
                 {
                     if (enabled)
                     {
-                        if (Client.Version >= Data.ClientVersion.CV_7000)
+                        if (Client.Version >= Utility.ClientVersion.CV_7000)
                         {
                             mobile.SetSAPoison(true);
                         }
@@ -609,7 +609,7 @@ namespace ClassicUO.Network
                     }
                     else
                     {
-                        if (Client.Version >= Data.ClientVersion.CV_7000)
+                        if (Client.Version >= Utility.ClientVersion.CV_7000)
                         {
                             mobile.SetSAPoison(false);
                         }
@@ -771,7 +771,7 @@ namespace ClassicUO.Network
 
             Client.Game.Audio.UpdateCurrentMusicVolume();
 
-            if (Client.Version >= Data.ClientVersion.CV_200)
+            if (Client.Version >= Utility.ClientVersion.CV_200)
             {
                 if (ProfileManager.CurrentProfile != null)
                 {
@@ -791,7 +791,7 @@ namespace ClassicUO.Network
                 World.ChangeSeason(Game.Managers.Season.Desolation, 42);
             }
 
-            if (Client.Version >= Data.ClientVersion.CV_70796 && ProfileManager.CurrentProfile != null)
+            if (Client.Version >= Utility.ClientVersion.CV_70796 && ProfileManager.CurrentProfile != null)
             {
                 NetClient.Socket.Send_ShowPublicHouseContent(ProfileManager.CurrentProfile.ShowHouseContent);
             }
@@ -1265,7 +1265,7 @@ namespace ClassicUO.Network
                     int x, y;
 
                     // TODO: check client version ?
-                    if (Client.Version >= Data.ClientVersion.CV_706000 && ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.UseLargeContainerGumps)
+                    if (Client.Version >= Utility.ClientVersion.CV_706000 && ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.UseLargeContainerGumps)
                     {
                         GumpsLoader loader = GumpsLoader.Instance;
 
@@ -1409,7 +1409,7 @@ namespace ClassicUO.Network
             ushort x = p.ReadUInt16BE();
             ushort y = p.ReadUInt16BE();
 
-            if (Client.Version >= Data.ClientVersion.CV_6017)
+            if (Client.Version >= Utility.ClientVersion.CV_6017)
             {
                 p.Skip(1);
             }
@@ -1923,7 +1923,7 @@ namespace ClassicUO.Network
                 ushort x = p.ReadUInt16BE();
                 ushort y = p.ReadUInt16BE();
 
-                if (Client.Version >= Data.ClientVersion.CV_6017)
+                if (Client.Version >= Utility.ClientVersion.CV_6017)
                 {
                     p.Skip(1);
                 }
@@ -2052,12 +2052,12 @@ namespace ClassicUO.Network
                 NetClient.Socket.Send_SkillsRequest(World.Player);
                 scene.DoubleClickDelayed(World.Player);
 
-                if (Client.Version >= Data.ClientVersion.CV_306E)
+                if (Client.Version >= Utility.ClientVersion.CV_306E)
                 {
                     NetClient.Socket.Send_ClientType();
                 }
 
-                if (Client.Version >= Data.ClientVersion.CV_305D)
+                if (Client.Version >= Utility.ClientVersion.CV_305D)
                 {
                     NetClient.Socket.Send_ClientViewRange(World.ClientViewRange);
                 }
@@ -2730,7 +2730,7 @@ namespace ClassicUO.Network
                 byte layer = p.ReadUInt8();
                 ushort item_hue = 0;
 
-                if (Client.Version >= Data.ClientVersion.CV_70331)
+                if (Client.Version >= Utility.ClientVersion.CV_70331)
                 {
                     item_hue = p.ReadUInt16BE();
                 }
@@ -2997,7 +2997,7 @@ namespace ClassicUO.Network
 
             MapGump gump = new MapGump(serial, gumpid, width, height);
 
-            if (p[0] == 0xF5 || Client.Version >= Data.ClientVersion.CV_308Z)
+            if (p[0] == 0xF5 || Client.Version >= Utility.ClientVersion.CV_308Z)
             {
                 ushort facet = 0;
 
@@ -3012,6 +3012,7 @@ namespace ClassicUO.Network
                     (
                         MultiMapLoader.Instance.LoadFacet
                         (
+                            Client.Game.GraphicsDevice,
                             facet,
                             width,
                             height,
@@ -3028,6 +3029,7 @@ namespace ClassicUO.Network
                     (
                         MultiMapLoader.Instance.LoadMap
                         (
+                            Client.Game.GraphicsDevice,
                             width,
                             height,
                             startX,
@@ -3044,6 +3046,7 @@ namespace ClassicUO.Network
                 (
                     MultiMapLoader.Instance.LoadMap
                     (
+                        Client.Game.GraphicsDevice,
                         width,
                         height,
                         startX,
@@ -3853,22 +3856,34 @@ namespace ClassicUO.Network
 
         private static void EnableLockedFeatures(ref StackDataReader p)
         {
-            uint flags = 0;
+            LockedFeatureFlags flags = 0;
 
-            if (Client.Version >= Data.ClientVersion.CV_60142)
+            if (Client.Version >= Utility.ClientVersion.CV_60142)
             {
-                flags = p.ReadUInt32BE();
+                flags = (LockedFeatureFlags)p.ReadUInt32BE();
             }
             else
             {
-                flags = p.ReadUInt16BE();
+                flags = (LockedFeatureFlags)p.ReadUInt16BE();
             }
 
-            World.ClientLockedFeatures.SetFlags((LockedFeatureFlags) flags);
+            World.ClientLockedFeatures.SetFlags(flags);
 
             ChatManager.ChatIsEnabled = World.ClientLockedFeatures.Flags.HasFlag(LockedFeatureFlags.T2A) ? ChatStatus.Enabled : 0;
 
-            AnimationsLoader.Instance.UpdateAnimationTable(flags);
+            AnimationsLoader.BodyConvFlags bcFlags = 0;
+            if (flags.HasFlag(LockedFeatureFlags.UOR))
+                bcFlags |= AnimationsLoader.BodyConvFlags.Anim1 | AnimationsLoader.BodyConvFlags.Anim2;
+            if (flags.HasFlag(LockedFeatureFlags.LBR))
+                bcFlags |= AnimationsLoader.BodyConvFlags.Anim1;
+            if (flags.HasFlag(LockedFeatureFlags.AOS))
+                bcFlags |= AnimationsLoader.BodyConvFlags.Anim2;
+            if (flags.HasFlag(LockedFeatureFlags.SE))
+                bcFlags |= AnimationsLoader.BodyConvFlags.Anim3;
+            if (flags.HasFlag(LockedFeatureFlags.ML))
+                bcFlags |= AnimationsLoader.BodyConvFlags.Anim4;
+
+            AnimationsLoader.Instance.UpdateAnimationTable(bcFlags);
         }
 
         private static void DisplayQuestArrow(ref StackDataReader p)
@@ -3879,7 +3894,7 @@ namespace ClassicUO.Network
 
             uint serial = 0;
 
-            if (Client.Version >= Data.ClientVersion.CV_7090)
+            if (Client.Version >= Utility.ClientVersion.CV_7090)
             {
                 serial = p.ReadUInt32BE();
             }
@@ -4801,7 +4816,7 @@ namespace ClassicUO.Network
                 }
 
                 // horrible fix for (Imbued) hue
-                if (Client.Version >= Data.ClientVersion.CV_60143 && cliloc == 1080418)
+                if (Client.Version >= Utility.ClientVersion.CV_60143 && cliloc == 1080418)
                 {
                     str = str.Insert(0, "<basefont color=#42a5ff>");
                     str += "</basefont>";

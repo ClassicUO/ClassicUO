@@ -34,12 +34,12 @@ using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using ClassicUO.Configuration;
-using ClassicUO.Data;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Resources;
+using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using SDL2;
 

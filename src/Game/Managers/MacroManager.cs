@@ -37,7 +37,6 @@ using System.Linq;
 using System.Text;
 using System.Xml;
 using ClassicUO.Configuration;
-using ClassicUO.Data;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
