@@ -30,6 +30,7 @@
 
 #endregion
 
+using ClassicUO.IO.Resources;
 using System;
 using System.IO;
 
@@ -59,17 +60,17 @@ namespace ClassicUO.Game.Managers
 
         public static void LoadSeasonFile()
         {
-            _springLandTile = new ushort[Constants.MAX_LAND_DATA_INDEX_COUNT];
-            _summerLandTile = new ushort[Constants.MAX_LAND_DATA_INDEX_COUNT];
-            _fallLandTile = new ushort[Constants.MAX_LAND_DATA_INDEX_COUNT];
-            _winterLandTile = new ushort[Constants.MAX_LAND_DATA_INDEX_COUNT];
-            _desolationLandTile = new ushort[Constants.MAX_LAND_DATA_INDEX_COUNT];
+            _springLandTile = new ushort[ArtLoader.MAX_LAND_DATA_INDEX_COUNT];
+            _summerLandTile = new ushort[ArtLoader.MAX_LAND_DATA_INDEX_COUNT];
+            _fallLandTile = new ushort[ArtLoader.MAX_LAND_DATA_INDEX_COUNT];
+            _winterLandTile = new ushort[ArtLoader.MAX_LAND_DATA_INDEX_COUNT];
+            _desolationLandTile = new ushort[ArtLoader.MAX_LAND_DATA_INDEX_COUNT];
 
-            _springGraphic = new ushort[Constants.MAX_STATIC_DATA_INDEX_COUNT];
-            _summerGraphic = new ushort[Constants.MAX_STATIC_DATA_INDEX_COUNT];
-            _fallGraphic = new ushort[Constants.MAX_STATIC_DATA_INDEX_COUNT];
-            _winterGraphic = new ushort[Constants.MAX_STATIC_DATA_INDEX_COUNT];
-            _desolationGraphic = new ushort[Constants.MAX_STATIC_DATA_INDEX_COUNT];
+            _springGraphic = new ushort[ArtLoader.MAX_STATIC_DATA_INDEX_COUNT];
+            _summerGraphic = new ushort[ArtLoader.MAX_STATIC_DATA_INDEX_COUNT];
+            _fallGraphic = new ushort[ArtLoader.MAX_STATIC_DATA_INDEX_COUNT];
+            _winterGraphic = new ushort[ArtLoader.MAX_STATIC_DATA_INDEX_COUNT];
+            _desolationGraphic = new ushort[ArtLoader.MAX_STATIC_DATA_INDEX_COUNT];
 
             if (!File.Exists(_seasonsFile))
             {

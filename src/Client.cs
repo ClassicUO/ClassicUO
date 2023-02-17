@@ -30,19 +30,20 @@
 
 #endregion
 
-using System;
-using System.Diagnostics;
-using System.IO;
 using ClassicUO.Configuration;
-using ClassicUO.Data;
+using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.IO;
 using ClassicUO.Network;
 using ClassicUO.Network.Encryption;
 using ClassicUO.Resources;
+using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using ClassicUO.Utility.Platforms;
 using SDL2;
+using System;
+using System.Diagnostics;
+using System.IO;
 
 namespace ClassicUO
 {
@@ -51,8 +52,6 @@ namespace ClassicUO
         public static ClientVersion Version { get; private set; }
         public static ClientFlags Protocol { get; set; }
         public static string ClientPath { get; private set; }
-        public static bool IsUOPInstallation { get; private set; }
-        public static bool UseUOPGumps { get; set; }
         public static GameController Game { get; private set; }
 
 
@@ -144,8 +143,6 @@ namespace ClassicUO
             Version = clientVersion;
             ClientPath = clientPath;
 
-            IsUOPInstallation = Version >= ClientVersion.CV_7000 && File.Exists(UOFileManager.GetUOFilePath("MainMisc.uop"));
-
             Protocol = ClientFlags.CF_T2A;
 
             if (Version >= ClientVersion.CV_200)
@@ -181,10 +178,9 @@ namespace ClassicUO
             Log.Trace($"Client path: '{clientPath}'");
             Log.Trace($"Client version: {clientVersion}");
             Log.Trace($"Protocol: {Protocol}");
-            Log.Trace("UOP? " + (IsUOPInstallation ? "yes" : "no"));
 
             // ok now load uo files
-            UOFileManager.Load();
+            UOFileManager.Load(Version, Settings.GlobalSettings.UltimaOnlineDirectory, Settings.GlobalSettings.UseVerdata, Settings.GlobalSettings.Language);
             StaticFilters.Load();
 
             BuffTable.Load();

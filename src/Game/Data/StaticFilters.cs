@@ -53,7 +53,7 @@ namespace ClassicUO.Game.Data
 
     internal static class StaticFilters
     {
-        private static readonly STATIC_TILES_FILTER_FLAGS[] _filteredTiles = new STATIC_TILES_FILTER_FLAGS[Constants.MAX_STATIC_DATA_INDEX_COUNT];
+        private static readonly STATIC_TILES_FILTER_FLAGS[] _filteredTiles = new STATIC_TILES_FILTER_FLAGS[ArtLoader.MAX_STATIC_DATA_INDEX_COUNT];
 
         public static readonly List<ushort> CaveTiles = new List<ushort>();
         public static readonly List<ushort> TreeTiles = new List<ushort>();

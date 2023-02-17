@@ -33,13 +33,13 @@
 using System;
 using System.Collections.Generic;
 using ClassicUO.Configuration;
-using ClassicUO.Data;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -189,7 +189,7 @@ namespace ClassicUO.Game.GameObjects
                 ushort mountGraphic = mount.GetGraphicForAnimation();
                 byte animGroupMount = 0;
 
-                if (mountGraphic != 0xFFFF && mountGraphic < AnimationsLoader.Instance.MAX_ANIMATIONS_DATA_INDEX_COUNT)
+                if (mountGraphic != 0xFFFF && mountGraphic < AnimationsLoader.MAX_ANIMATIONS_DATA_INDEX_COUNT)
                 {
                     mountOffsetY = AnimationsLoader.Instance.GetMountedHeightOffset(mountGraphic);
 
@@ -661,7 +661,7 @@ namespace ClassicUO.Game.GameObjects
             bool charIsSitting
         )
         {
-            if (id >= AnimationsLoader.Instance.MAX_ANIMATIONS_DATA_INDEX_COUNT || owner == null)
+            if (id >= AnimationsLoader.MAX_ANIMATIONS_DATA_INDEX_COUNT || owner == null)
             {
                 return;
             }

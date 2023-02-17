@@ -30,8 +30,8 @@
 
 #endregion
 
-using ClassicUO.Data;
 using ClassicUO.Game.UI.Controls;
+using ClassicUO.Utility;
 
 namespace ClassicUO.Game.UI.Gumps.Login
 {

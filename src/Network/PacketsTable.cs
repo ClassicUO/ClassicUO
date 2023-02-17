@@ -30,7 +30,7 @@
 
 #endregion
 
-using ClassicUO.Data;
+using ClassicUO.Utility;
 
 namespace ClassicUO.Network
 {

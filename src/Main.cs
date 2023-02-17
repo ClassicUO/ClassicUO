@@ -38,7 +38,6 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using ClassicUO.Configuration;
-using ClassicUO.Data;
 using ClassicUO.Game;
 using ClassicUO.Game.Managers;
 using ClassicUO.IO;
@@ -189,7 +188,7 @@ namespace ClassicUO
 
             uint flags = 0;
 
-            if (!Directory.Exists(Settings.GlobalSettings.UltimaOnlineDirectory) || !File.Exists(UOFileManager.GetUOFilePath("tiledata.mul")))
+            if (!Directory.Exists(Settings.GlobalSettings.UltimaOnlineDirectory) || !File.Exists(Path.Combine(Settings.GlobalSettings.UltimaOnlineDirectory, "tiledata.mul")))
             {
                 flags |= INVALID_UO_DIRECTORY;
             }
