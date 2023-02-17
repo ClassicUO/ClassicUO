@@ -30,36 +30,27 @@
 
 #endregion
 
-using System;
-using System.IO;
-using System.Reflection;
-using System.Threading;
+using System.Globalization;
 
-namespace ClassicUO
+namespace ClassicUO.Utility
 {
-    internal static class CUOEnviroment
+    public static class UInt16Converter
     {
-        public static Thread GameThread;
-        public static float DPIScaleFactor = 1.0f;
-        public static bool NoSound;
-        public static string[] Args;
-        public static string[] Plugins;
-        public static bool Debug;
-        public static bool IsHighDPI;
-        public static uint CurrentRefreshRate;
-        public static bool SkipLoginScreen;
-        public static bool IsOutlands;
-        public static bool PacketLog;
-        public static bool NoServerPing;
+        public static ushort Parse(string str)
+        {
+            if (str.StartsWith("0x"))
+            {
+                return ushort.Parse(str.Remove(0, 2), NumberStyles.HexNumber);
+            }
 
-        public static readonly bool IsUnix = Environment.OSVersion.Platform != PlatformID.Win32NT && Environment.OSVersion.Platform != PlatformID.Win32Windows && Environment.OSVersion.Platform != PlatformID.Win32S && Environment.OSVersion.Platform != PlatformID.WinCE;
+            if (str.Length > 1 && str[0] == '-')
+            {
+                return (ushort) short.Parse(str);
+            }
 
-        public static readonly Version Version = Assembly.GetExecutingAssembly().GetName().Version;
-        public static readonly string ExecutablePath = 
-#if NETFRAMEWORK
-            Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location);
-#else
-            Environment.CurrentDirectory;
-#endif
+            uint.TryParse(str, out uint v);
+
+            return (ushort) v; // some server send 0xFFFF_FFFF in decimal form. C# doesn't like it. It needs a specific conversion
+        }
     }
 }
