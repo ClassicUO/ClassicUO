@@ -38,7 +38,6 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using ClassicUO.Configuration;
-using ClassicUO.Data;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
@@ -46,6 +45,7 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
+using ClassicUO.Utility;
 
 namespace ClassicUO.Network
 {

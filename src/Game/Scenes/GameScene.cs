@@ -90,7 +90,7 @@ namespace ClassicUO.Game.Scenes
 
         private Point _lastSelectedMultiPositionInHouseCustomization;
         private int _lightCount;
-        private readonly LightData[] _lights = new LightData[Constants.MAX_LIGHTS_DATA_INDEX_COUNT];
+        private readonly LightData[] _lights = new LightData[LightsLoader.MAX_LIGHTS_DATA_INDEX_COUNT];
         private Item _multi;
         private Rectangle _rectangleObj = Rectangle.Empty, _rectanglePlayer;
         private long _timePing;
@@ -437,7 +437,7 @@ namespace ClassicUO.Game.Scenes
 
         public void AddLight(GameObject obj, GameObject lightObject, int x, int y)
         {
-            if (_lightCount >= Constants.MAX_LIGHTS_DATA_INDEX_COUNT || !UseLights && !UseAltLights || obj == null)
+            if (_lightCount >= LightsLoader.MAX_LIGHTS_DATA_INDEX_COUNT || !UseLights && !UseAltLights || obj == null)
             {
                 return;
             }
@@ -553,7 +553,7 @@ namespace ClassicUO.Game.Scenes
                     }
                 }
 
-                if (light.ID >= Constants.MAX_LIGHTS_DATA_INDEX_COUNT)
+                if (light.ID >= LightsLoader.MAX_LIGHTS_DATA_INDEX_COUNT)
                 {
                     return;
                 }

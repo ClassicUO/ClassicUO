@@ -30,7 +30,7 @@
 
 #endregion
 
-using ClassicUO.Data;
+using ClassicUO.Utility;
 using System;
 
 namespace ClassicUO.Network.Encryption

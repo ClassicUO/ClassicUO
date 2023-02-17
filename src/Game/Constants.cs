@@ -91,15 +91,8 @@ namespace ClassicUO.Game
         public const int CONTAINER_RECT_LINESTEP = 800;
         public const int ITEM_GUMP_TEXTURE_OFFSET = 11369;
 
-        public const int MAX_LAND_DATA_INDEX_COUNT = 0x4000;
-        public const int MAX_STATIC_DATA_INDEX_COUNT = 0x14000;
-        public const int MAX_LAND_TEXTURES_DATA_INDEX_COUNT = 0x4000;
-        public const int MAX_GUMP_DATA_INDEX_COUNT = 0x10000;
-        public const int MAX_SOUND_DATA_INDEX_COUNT = 0xFFFF;
-        public const int MAX_MULTI_DATA_INDEX_COUNT = 0x2200;
         public const int MAX_MUSIC_DATA_INDEX_COUNT = 150;
-        public const int MAX_ANIMATIONS_DATA_INDEX_COUNT = 2048;
-        public const int MAX_LIGHTS_DATA_INDEX_COUNT = 100;
+
 
         public const ushort FIELD_REPLACE_GRAPHIC = 0x1826;
         public const ushort TREE_REPLACE_GRAPHIC = 0x0E59;
@@ -120,7 +113,6 @@ namespace ClassicUO.Game
         public const int OUT_RANGE_COLOR = 0x038B;
         public const int DEAD_RANGE_COLOR = 0x038E;
         public const int DEATH_SCREEN_TIMER = 1500;
-        public const float SOUND_DELTA = 250;
 
         public const ushort HIGHLIGHT_CURRENT_OBJECT_HUE = 0x014;
 
@@ -138,9 +130,6 @@ namespace ClassicUO.Game
         public const int PREDICTABLE_TILE_COUNT = 64 * PREDICTABLE_CHUNKS;
         public const int PREDICTABLE_STATICS = PREDICTABLE_TILE_COUNT * 2;
         public const int PREDICTABLE_MULTIS = PREDICTABLE_TILE_COUNT * 4;
-
-        // cannot be a const, due to UOLive implementation
-        public static int MAPS_COUNT = 6;
 
         public static readonly bool[] BAD_CONTAINER_LAYERS =
         {

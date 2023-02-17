@@ -31,7 +31,6 @@
 #endregion
 
 using ClassicUO.Configuration;
-using ClassicUO.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
@@ -40,6 +39,7 @@ using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Resources;
+using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps

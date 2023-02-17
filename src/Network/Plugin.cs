@@ -359,7 +359,7 @@ namespace ClassicUO.Network
             ref string name
         )
         {
-            if (index >= 0 && index < Constants.MAX_STATIC_DATA_INDEX_COUNT)
+            if (index >= 0 && index < ArtLoader.MAX_STATIC_DATA_INDEX_COUNT)
             {
                 ref StaticTiles st = ref TileDataLoader.Instance.StaticData[index];
 
@@ -380,7 +380,7 @@ namespace ClassicUO.Network
 
         private static bool GetTileData(int index, ref ulong flags, ref ushort textid, ref string name)
         {
-            if (index >= 0 && index < Constants.MAX_STATIC_DATA_INDEX_COUNT)
+            if (index >= 0 && index < ArtLoader.MAX_STATIC_DATA_INDEX_COUNT)
             {
                 ref LandTiles st = ref TileDataLoader.Instance.LandData[index];
 

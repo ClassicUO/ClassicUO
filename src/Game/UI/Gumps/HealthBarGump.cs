@@ -34,7 +34,6 @@ using System;
 using System.IO;
 using System.Xml;
 using ClassicUO.Configuration;
-using ClassicUO.Data;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
