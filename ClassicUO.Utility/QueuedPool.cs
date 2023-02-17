@@ -31,35 +31,62 @@
 #endregion
 
 using System;
-using System.IO;
-using System.Reflection;
-using System.Threading;
+using System.Collections.Generic;
 
-namespace ClassicUO
+namespace ClassicUO.Utility
 {
-    internal static class CUOEnviroment
+    public class QueuedPool<T> where T : class, new()
     {
-        public static Thread GameThread;
-        public static float DPIScaleFactor = 1.0f;
-        public static bool NoSound;
-        public static string[] Args;
-        public static string[] Plugins;
-        public static bool Debug;
-        public static bool IsHighDPI;
-        public static uint CurrentRefreshRate;
-        public static bool SkipLoginScreen;
-        public static bool IsOutlands;
-        public static bool PacketLog;
-        public static bool NoServerPing;
+        private readonly Action<T> _on_pickup;
+        private readonly Stack<T> _pool;
 
-        public static readonly bool IsUnix = Environment.OSVersion.Platform != PlatformID.Win32NT && Environment.OSVersion.Platform != PlatformID.Win32Windows && Environment.OSVersion.Platform != PlatformID.Win32S && Environment.OSVersion.Platform != PlatformID.WinCE;
 
-        public static readonly Version Version = Assembly.GetExecutingAssembly().GetName().Version;
-        public static readonly string ExecutablePath = 
-#if NETFRAMEWORK
-            Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location);
-#else
-            Environment.CurrentDirectory;
-#endif
+        public QueuedPool(int size, Action<T> onpickup = null)
+        {
+            MaxSize = size;
+            _pool = new Stack<T>(size);
+            _on_pickup = onpickup;
+
+            for (int i = 0; i < size; i++)
+            {
+                _pool.Push(new T());
+            }
+        }
+
+
+        public int MaxSize { get; }
+
+        public int Remains => MaxSize - _pool.Count;
+
+        public T GetOne()
+        {
+            T result;
+
+            if (_pool.Count != 0)
+            {
+                result = _pool.Pop(); 
+            }
+            else
+            {
+                result = new T();
+            }
+
+            _on_pickup?.Invoke(result);
+
+            return result;
+        }
+
+        public void ReturnOne(T obj)
+        {
+            if (obj != null)
+            {
+                _pool.Push(obj);
+            }
+        }
+
+        public void Clear()
+        {
+            _pool.Clear();
+        }
     }
 }
