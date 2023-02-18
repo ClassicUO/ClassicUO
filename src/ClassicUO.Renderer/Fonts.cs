@@ -30,73 +30,32 @@
 
 #endregion
 
-using System;
-using ClassicUO.Game.Managers;
-using ClassicUO.Input;
-using ClassicUO.IO.Resources;
-using ClassicUO.Renderer;
-using SDL2;
+using Microsoft.Xna.Framework.Graphics;
 
-namespace ClassicUO.Game.Scenes
+namespace ClassicUO.Renderer
 {
-    internal abstract class Scene : IDisposable
+    public static class Fonts
     {
-        public bool IsDestroyed { get; private set; }
-        public bool IsLoaded { get; private set; }
-        public int RenderedObjectsCount { get; protected set; }
-        public Camera Camera { get; } = new Camera(0.5f, 2.5f, 0.1f);
-
-
-
-        public virtual void Dispose()
+        public static void Initialize(GraphicsDevice device)
         {
-            if (IsDestroyed)
-            {
-                return;
-            }
+            Regular = SpriteFont.Create(device, "ClassicUO.Renderer.fonts.regular_font.xnb");
+            Bold = SpriteFont.Create(device, "ClassicUO.Renderer.fonts.bold_font.xnb");
 
-            Unload();
-            IsDestroyed = true;          
+            Map1 = SpriteFont.Create(device, "ClassicUO.Renderer.fonts.map1_font.xnb");
+            Map2 = SpriteFont.Create(device, "ClassicUO.Renderer.fonts.map2_font.xnb");
+            Map3 = SpriteFont.Create(device, "ClassicUO.Renderer.fonts.map3_font.xnb");
+            Map4 = SpriteFont.Create(device, "ClassicUO.Renderer.fonts.map4_font.xnb");
+            Map5 = SpriteFont.Create(device, "ClassicUO.Renderer.fonts.map5_font.xnb");
+            Map6 = SpriteFont.Create(device, "ClassicUO.Renderer.fonts.map6_font.xnb");
         }
 
-        public virtual void Update()
-        {           
-            Camera.Update(true, Time.Delta, Mouse.Position);
-        }
-
-        public virtual bool Draw(UltimaBatcher2D batcher)
-        {
-            return true;
-        }
-
-
-        public virtual void Load()
-        {
-            IsLoaded = true;
-        }
-
-        public virtual void Unload()
-        {
-            IsLoaded = false;
-        }
-       
-
-        internal virtual bool OnMouseUp(MouseButtonType button) => false;
-        internal virtual bool OnMouseDown(MouseButtonType button) => false;
-        internal virtual bool OnMouseDoubleClick(MouseButtonType button) => false;
-        internal virtual bool OnMouseWheel(bool up) => false;
-        internal virtual bool OnMouseDragging() => false;
-
-        internal virtual void OnTextInput(string text)
-        {
-        }
-
-        internal virtual void OnKeyDown(SDL.SDL_KeyboardEvent e)
-        {
-        }
-
-        internal virtual void OnKeyUp(SDL.SDL_KeyboardEvent e)
-        {
-        }
+        public static SpriteFont Regular { get; private set; }
+        public static SpriteFont Bold { get; private set; }
+        public static SpriteFont Map1 { get; private set; }
+        public static SpriteFont Map2 { get; private set; }
+        public static SpriteFont Map3 { get; private set; }
+        public static SpriteFont Map4 { get; private set; }
+        public static SpriteFont Map5 { get; private set; }
+        public static SpriteFont Map6 { get; private set; }
     }
 }

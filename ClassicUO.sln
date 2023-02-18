@@ -71,6 +71,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClassicUO.Utility", "src\Cl
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "external", "external", "{FA5D7AB8-3570-4E55-95B0-35BA6842FEE3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClassicUO.Renderer", "src\ClassicUO.Renderer\ClassicUO.Renderer.csproj", "{535BE739-1314-4F8D-B24B-06890DDD3B8D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -101,6 +103,10 @@ Global
 		{6B932930-D24C-43BB-8877-85B4F3F7A57B}.Release|x64.Build.0 = Release|x64
 		{6F193271-70B3-48EC-9CE5-B8EE1A5CA89E}.Debug|x64.ActiveCfg = Debug|x64
 		{6F193271-70B3-48EC-9CE5-B8EE1A5CA89E}.Release|x64.ActiveCfg = Release|x64
+		{535BE739-1314-4F8D-B24B-06890DDD3B8D}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{535BE739-1314-4F8D-B24B-06890DDD3B8D}.Debug|x64.Build.0 = Debug|Any CPU
+		{535BE739-1314-4F8D-B24B-06890DDD3B8D}.Release|x64.ActiveCfg = Release|Any CPU
+		{535BE739-1314-4F8D-B24B-06890DDD3B8D}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -114,6 +120,7 @@ Global
 		{DDF690A2-7588-44BC-8E2E-9080C746A49C} = {36371756-8DDA-41A4-BB9A-B7651459ADC1}
 		{6B932930-D24C-43BB-8877-85B4F3F7A57B} = {36371756-8DDA-41A4-BB9A-B7651459ADC1}
 		{6F193271-70B3-48EC-9CE5-B8EE1A5CA89E} = {D5E764E7-2719-4937-AC10-0D2D789A1134}
+		{535BE739-1314-4F8D-B24B-06890DDD3B8D} = {36371756-8DDA-41A4-BB9A-B7651459ADC1}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0A99E91A-ADAB-45C3-8170-2656140F6EFA}

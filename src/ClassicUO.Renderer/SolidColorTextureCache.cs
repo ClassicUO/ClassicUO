@@ -30,73 +30,43 @@
 
 #endregion
 
-using System;
-using ClassicUO.Game.Managers;
-using ClassicUO.Input;
-using ClassicUO.IO.Resources;
-using ClassicUO.Renderer;
-using SDL2;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using System.Collections.Generic;
 
-namespace ClassicUO.Game.Scenes
+namespace ClassicUO.Renderer
 {
-    internal abstract class Scene : IDisposable
+    public static class SolidColorTextureCache
     {
-        public bool IsDestroyed { get; private set; }
-        public bool IsLoaded { get; private set; }
-        public int RenderedObjectsCount { get; protected set; }
-        public Camera Camera { get; } = new Camera(0.5f, 2.5f, 0.1f);
+        private static readonly Dictionary<Color, Texture2D> _textures = new Dictionary<Color, Texture2D>();
 
+        private static GraphicsDevice _device;
 
-
-        public virtual void Dispose()
+        public static void Initialize(GraphicsDevice device)
         {
-            if (IsDestroyed)
+            _device = device;
+        }
+
+        public static Texture2D GetTexture(Color color)
+        {
+            if (_textures.TryGetValue(color, out Texture2D texture))
             {
-                return;
+                return texture;
             }
 
-            Unload();
-            IsDestroyed = true;          
-        }
+            texture = new Texture2D
+            (
+                _device,
+                1,
+                1,
+                false,
+                SurfaceFormat.Color
+            );
 
-        public virtual void Update()
-        {           
-            Camera.Update(true, Time.Delta, Mouse.Position);
-        }
+            texture.SetData(new[] { color });
+            _textures[color] = texture;
 
-        public virtual bool Draw(UltimaBatcher2D batcher)
-        {
-            return true;
-        }
-
-
-        public virtual void Load()
-        {
-            IsLoaded = true;
-        }
-
-        public virtual void Unload()
-        {
-            IsLoaded = false;
-        }
-       
-
-        internal virtual bool OnMouseUp(MouseButtonType button) => false;
-        internal virtual bool OnMouseDown(MouseButtonType button) => false;
-        internal virtual bool OnMouseDoubleClick(MouseButtonType button) => false;
-        internal virtual bool OnMouseWheel(bool up) => false;
-        internal virtual bool OnMouseDragging() => false;
-
-        internal virtual void OnTextInput(string text)
-        {
-        }
-
-        internal virtual void OnKeyDown(SDL.SDL_KeyboardEvent e)
-        {
-        }
-
-        internal virtual void OnKeyUp(SDL.SDL_KeyboardEvent e)
-        {
+            return texture;
         }
     }
 }
