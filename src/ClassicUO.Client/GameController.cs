@@ -148,6 +148,9 @@ namespace ClassicUO
 
             MapLoader.MapsLayouts = Settings.GlobalSettings.MapsLayouts;
 
+            Fonts.Initialize(GraphicsDevice);
+            SolidColorTextureCache.Initialize(GraphicsDevice);
+
             IO.TextureAtlas.InitializeSharedTexture(GraphicsDevice);
             GumpsLoader.Instance.CreateAtlas(GraphicsDevice);
             LightsLoader.Instance.CreateAtlas(GraphicsDevice);

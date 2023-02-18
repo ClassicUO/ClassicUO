@@ -20,16 +20,6 @@
 
   <ItemGroup>
     <EmbeddedResource Include="cuologo.png" />
-    <EmbeddedResource Include="Renderer\fonts\bold_font.xnb" />
-    <EmbeddedResource Include="Renderer\fonts\map1_font.xnb" />
-    <EmbeddedResource Include="Renderer\fonts\map2_font.xnb" />
-    <EmbeddedResource Include="Renderer\fonts\map3_font.xnb" />
-    <EmbeddedResource Include="Renderer\fonts\map4_font.xnb" />
-    <EmbeddedResource Include="Renderer\fonts\map5_font.xnb" />
-    <EmbeddedResource Include="Renderer\fonts\map6_font.xnb" />
-    <EmbeddedResource Include="Renderer\fonts\regular_font.xnb" />
-    <EmbeddedResource Include="shaders\IsometricWorld.fxc" />
-    <EmbeddedResource Include="shaders\xBR.fxc" />
   </ItemGroup>
 
 
@@ -45,6 +35,7 @@
     <ProjectReference Include="..\..\external\FNA\FNA.Core.csproj" />
     <ProjectReference Include="..\..\external\MP3Sharp\MP3Sharp\MP3Sharp.csproj" />
     <ProjectReference Include="..\ClassicUO.Assets\ClassicUO.Assets.csproj" />
+    <ProjectReference Include="..\ClassicUO.Renderer\ClassicUO.Renderer.csproj" />
     <ProjectReference Include="..\ClassicUO.Utility\ClassicUO.Utility.csproj" />
   </ItemGroup>
 

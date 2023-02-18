@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ClassicUO.Utility\ClassicUO.Utility.csproj" />
+    <ProjectReference Include="..\..\external\FNA\FNA.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="fonts\bold_font.xnb" />
+    <EmbeddedResource Include="fonts\map1_font.xnb" />
+    <EmbeddedResource Include="fonts\map2_font.xnb" />
+    <EmbeddedResource Include="fonts\map3_font.xnb" />
+    <EmbeddedResource Include="fonts\map4_font.xnb" />
+    <EmbeddedResource Include="fonts\map5_font.xnb" />
+    <EmbeddedResource Include="fonts\map6_font.xnb" />
+    <EmbeddedResource Include="fonts\regular_font.xnb" />
+    <EmbeddedResource Include="shaders\IsometricWorld.fxc" />
+    <EmbeddedResource Include="shaders\xBR.fxc" />
+  </ItemGroup>
+
+</Project>

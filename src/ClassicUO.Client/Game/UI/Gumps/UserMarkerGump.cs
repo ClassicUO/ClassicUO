@@ -83,13 +83,13 @@ namespace ClassicUO.Game.UI.Gumps
             Add(markersGumpBackground);
 
             if (!isEdit)
-                Add(new Label(ResGumps.AddMarker, true, HUE_FONT, 0, 255, Renderer.FontStyle.BlackBorder)
+                Add(new Label(ResGumps.AddMarker, true, HUE_FONT, 0, 255, FontStyle.BlackBorder)
                 {
                     X = markersGumpBackground.X + 100,
                     Y = markersGumpBackground.Y + 3,
                 });
             else
-                Add(new Label(ResGumps.EditMarker, true, HUE_FONT, 0, 255, Renderer.FontStyle.BlackBorder)
+                Add(new Label(ResGumps.EditMarker, true, HUE_FONT, 0, 255, FontStyle.BlackBorder)
                 {
                     X = markersGumpBackground.X + 100,
                     Y = markersGumpBackground.Y + 3,
@@ -111,7 +111,7 @@ namespace ClassicUO.Game.UI.Gumps
                 MAX_CORD_LEN,
                 90,
                 true,
-                Renderer.FontStyle.BlackBorder | Renderer.FontStyle.Fixed
+                FontStyle.BlackBorder | FontStyle.Fixed
             )
             {
                 X = fx + LABEL_OFFSET,
@@ -121,7 +121,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Text = x.ToString()
             };
             Add(_textBoxX);
-            Add(new Label(ResGumps.MarkerX, true, HUE_FONT, 0, 255, Renderer.FontStyle.BlackBorder) { X = fx, Y = fy });
+            Add(new Label(ResGumps.MarkerX, true, HUE_FONT, 0, 255, FontStyle.BlackBorder) { X = fx, Y = fy });
 
             // Y Field
             fy += Y_OFFSET;
@@ -138,7 +138,7 @@ namespace ClassicUO.Game.UI.Gumps
                 MAX_CORD_LEN,
                 90,
                 true,
-                Renderer.FontStyle.BlackBorder | Renderer.FontStyle.Fixed
+                FontStyle.BlackBorder | FontStyle.Fixed
             )
             {
                 X = fx + LABEL_OFFSET,
@@ -148,7 +148,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Text = y.ToString()
             };
             Add(_textBoxY);
-            Add(new Label(ResGumps.MarkerY, true, HUE_FONT, 0, 255, Renderer.FontStyle.BlackBorder) { X = fx, Y = fy });
+            Add(new Label(ResGumps.MarkerY, true, HUE_FONT, 0, 255, FontStyle.BlackBorder) { X = fx, Y = fy });
 
             // Marker Name field
             fy += Y_OFFSET;
@@ -165,7 +165,7 @@ namespace ClassicUO.Game.UI.Gumps
                 MAX_NAME_LEN,
                 250,
                 true,
-                Renderer.FontStyle.BlackBorder | Renderer.FontStyle.Fixed
+                FontStyle.BlackBorder | FontStyle.Fixed
             )
             {
                 X = fx + LABEL_OFFSET,
@@ -175,7 +175,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Text = markerName
             };
             Add(_markerName);
-            Add(new Label(ResGumps.MarkerName, true, HUE_FONT, 0, 255, Renderer.FontStyle.BlackBorder) { X = fx, Y = fy });
+            Add(new Label(ResGumps.MarkerName, true, HUE_FONT, 0, 255, FontStyle.BlackBorder) { X = fx, Y = fy });
 
             // Color Combobox
             fy += Y_OFFSET;
@@ -188,7 +188,7 @@ namespace ClassicUO.Game.UI.Gumps
                     selectedColor
                 );
             Add(_colorsCombo);
-            Add(new Label(ResGumps.MarkerColor, true, HUE_FONT, 0, 255, Renderer.FontStyle.BlackBorder) { X = fx, Y = fy });
+            Add(new Label(ResGumps.MarkerColor, true, HUE_FONT, 0, 255, FontStyle.BlackBorder) { X = fx, Y = fy });
 
             if (_icons.Length > 0)
             {
@@ -203,7 +203,7 @@ namespace ClassicUO.Game.UI.Gumps
                         selectedIcon
                     );
                 Add(_iconsCombo);
-                Add(new Label(ResGumps.MarkerIcon, true, HUE_FONT, 0, 255, Renderer.FontStyle.BlackBorder) { X = fx, Y = fy });
+                Add(new Label(ResGumps.MarkerIcon, true, HUE_FONT, 0, 255, FontStyle.BlackBorder) { X = fx, Y = fy });
             }
 
             // Buttons Add and Edit depend of state
