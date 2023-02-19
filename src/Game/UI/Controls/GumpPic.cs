@@ -182,4 +182,61 @@ namespace ClassicUO.Game.UI.Controls
             return base.Draw(batcher, x, y);
         }
     }
+
+    internal class GumpPicInPic : GumpPicBase
+    {
+        private int _SX, _SY;
+
+        public GumpPicInPic(int x, int y, ushort graphic, ushort width, ushort height, ushort sx, ushort sy)
+        {
+            X = x;
+            Y = y;
+            Graphic = graphic;
+            Width = width;
+            Height = height;
+            _SX = sx;
+            _SY = sy;
+            IsFromServer = true;
+        }
+
+        public GumpPicInPic(List<string> parts) : this(int.Parse(parts[1]), int.Parse(parts[2]), UInt16Converter.Parse(parts[3]), UInt16Converter.Parse(parts[4]), UInt16Converter.Parse(parts[5]), UInt16Converter.Parse(parts[6]), UInt16Converter.Parse(parts[7]))
+        {
+        }
+
+        public override bool Contains(int x, int y)
+        {
+            return true;
+        }
+
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        {
+            if (IsDisposed)
+            {
+                return false;
+            }
+
+            Vector3 hueVector = ShaderHueTranslator.GetHueVector
+            (
+                Hue,
+                false,
+                Alpha,
+                true
+            );
+
+            var texture = GumpsLoader.Instance.GetGumpTexture(Graphic, out var bounds);
+
+            if (texture != null)
+            {
+                batcher.Draw
+                (
+                    texture,
+                    new Rectangle(x + _SX, y + _SY, Width, Height),
+                    bounds,
+                    hueVector
+                );
+            }
+
+            return base.Draw(batcher, x, y);
+        }
+    }
 }
