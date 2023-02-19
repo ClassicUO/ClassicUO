@@ -1937,7 +1937,7 @@ namespace ClassicUO.Network
 
                     if (container != null)
                     {
-                        ClearContainerAndRemoveItems(container, container.Graphic == 0x2006);
+                        ClearContainer(container);
                     }
                 }
 
@@ -5911,11 +5911,6 @@ namespace ClassicUO.Network
                 Log.Warn("AddItemToContainer function adds mobile as Item");
             }
 
-            if (item != null && (container.Graphic != 0x2006 || item.Layer == Layer.Invalid))
-            {
-                World.RemoveItem(item, true);
-            }
-
             item = World.GetOrCreateItem(serial);
             item.Graphic = graphic;
             item.CheckGraphicChange();
@@ -6330,6 +6325,29 @@ namespace ClassicUO.Network
             }
 
             container.Items = remove_unequipped ? new_first : null;
+        }
+
+        private static void ClearContainer(Entity container)
+        {
+            if (container == null || container.IsEmpty)
+            {
+                return;
+            }
+            
+            LinkedObject first = container.Items;
+            LinkedObject new_first = null;
+
+            while (first != null)
+            {
+                LinkedObject next = first.Next;
+                Item it = (Item) first;
+                
+                World.RemoveItemFromContainer(it);
+
+                first = next;
+            }
+
+            container.Items = null;
         }
 
         private static Gump CreateGump
