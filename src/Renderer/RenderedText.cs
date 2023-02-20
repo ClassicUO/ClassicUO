@@ -688,7 +688,7 @@ namespace ClassicUO.Renderer
                 );
             }
 
-            if (Texture == null || Texture.IsDisposed)
+            if (fi.Data != null && fi.Data.Length > 0 && (Texture == null || Texture.IsDisposed))
             {
                 Texture = new Texture2D(Client.Game.GraphicsDevice, fi.Width, fi.Height, false, SurfaceFormat.Color);
             }
@@ -703,20 +703,20 @@ namespace ClassicUO.Renderer
             }
 
             LinesCount = fi.LineCount;
-
-            fixed (uint* dataPtr = fi.Data)
-            {
-                Texture.SetDataPointerEXT
-                (
-                    0,
-                    null,
-                    (IntPtr)dataPtr,
-                    fi.Width * fi.Height * sizeof(uint)
-                );
-            }
-
+ 
             if (Texture != null)
             {
+                fixed (uint* dataPtr = fi.Data)
+                {
+                    Texture.SetDataPointerEXT
+                    (
+                        0,
+                        null,
+                        (IntPtr)dataPtr,
+                        fi.Width * fi.Height * sizeof(uint)
+                    );
+                }
+
                 Width = Texture.Width;
                 Height = Texture.Height;
             }
