@@ -185,7 +185,7 @@ namespace ClassicUO.Game.UI.Controls
 
     internal class GumpPicInPic : GumpPicBase
     {
-        private int _SX, _SY;
+        private int _sX, _sY;
 
         public GumpPicInPic(int x, int y, ushort graphic, ushort width, ushort height, ushort sx, ushort sy)
         {
@@ -194,8 +194,8 @@ namespace ClassicUO.Game.UI.Controls
             Graphic = graphic;
             Width = width;
             Height = height;
-            _SX = sx;
-            _SY = sy;
+            _sX = sx;
+            _sY = sy;
             IsFromServer = true;
         }
 
@@ -230,7 +230,7 @@ namespace ClassicUO.Game.UI.Controls
                 batcher.Draw
                 (
                     texture,
-                    new Rectangle(x + _SX, y + _SY, Width, Height),
+                    new Rectangle(x + _sX, y + _sY, Width, Height),
                     bounds,
                     hueVector
                 );
