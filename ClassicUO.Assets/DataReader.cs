@@ -257,7 +257,7 @@ namespace ClassicUO.IO
 #if DEBUG
                 throw new IndexOutOfRangeException();
 #else
-                Log.Error($"size out of range. {Position + size} > {Length}");
+                ClassicUO.Utility.Logging.Log.Error($"size out of range. {Position + size} > {Length}");
 #endif
             }
         }
