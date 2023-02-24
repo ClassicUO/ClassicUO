@@ -11,8 +11,8 @@ on:
 
 env:
   CUO_ASSEMBLY_VERSION: '0.1.11.${{ github.run_number }}'
-  CUO_OUTPUT_PATH: 'bin/dist'
-  CUO_PROJECT_PATH: "src/ClassicUO.csproj"
+  CUO_OUTPUT_PATH: '../../bin/dist'
+  CUO_PROJECT_PATH: "src/ClassicUO.Client/ClassicUO.Client.csproj"
   CUO_ZIP_NAME: "ClassicUO-dev-preview-release.zip"
 
   DOTNET_NOLOGO: false
