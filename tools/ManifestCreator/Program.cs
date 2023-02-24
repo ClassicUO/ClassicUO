@@ -12,10 +12,12 @@ namespace ManifestCreator
     {
         private static readonly MD5 _md5 = MD5.Create();
 
-        private static string[] _file_list =
+        private static string[] _fileList =
         {
             "ClassicUO.exe",
             "ClassicUO",
+            "ClassicUO.Assets.dll",
+            "ClassicUO.Utility.dll",
             "ClassicUO.bin.osx",
             "ClassicUO.bin.x86_64",
             //"ClassicUO.exe.config",  
@@ -128,7 +130,7 @@ namespace ManifestCreator
                     name = name
                 };
 
-                foreach (var f in _file_list)
+                foreach (var f in _fileList)
                 {
                     string path = Path.Combine(cuo_path, f);
 

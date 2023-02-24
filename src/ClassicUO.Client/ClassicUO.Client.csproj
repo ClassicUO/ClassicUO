@@ -3,26 +3,13 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <ApplicationIcon>cuoicon.ico</ApplicationIcon>
+    <AssemblyName>ClassicUO</AssemblyName>
+    <RootNamespace>ClassicUO</RootNamespace>
   </PropertyGroup>
-
-
 
   <PropertyGroup Condition="'$(IS_DEV_BUILD)' == 'true'">
     <OutputType>WinExe</OutputType>
   </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)'=='Release'">
-    <OutputPath>$(ProjectDir)..\bin\Release\</OutputPath>
-    <PublishDir>$(ProjectDir)..\bin\dist\</PublishDir>
-    <Optimize>true</Optimize>
-    <DefineConstants>$(DefineConstants)TRACE</DefineConstants>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)'=='Debug'">
-    <OutputPath>$(ProjectDir)..\bin\Debug\</OutputPath>
-    <DefineConstants>$(DefineConstants)TRACE</DefineConstants>
-  </PropertyGroup>
-
 
   <ItemGroup>
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
@@ -55,15 +42,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\external\FNA\FNA.Core.csproj" />
+    <ProjectReference Include="..\..\external\MP3Sharp\MP3Sharp\MP3Sharp.csproj" />
     <ProjectReference Include="..\ClassicUO.Assets\ClassicUO.Assets.csproj" />
     <ProjectReference Include="..\ClassicUO.Utility\ClassicUO.Utility.csproj" />
-    <ProjectReference Include="..\external\FNA\FNA.Core.csproj" />
-    <ProjectReference Include="..\external\MP3Sharp\MP3Sharp\MP3Sharp.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="cuoapi">
-      <HintPath>..\external\cuoapi\cuoapi.dll</HintPath>
-    </Reference>
   </ItemGroup>
 
   <ItemGroup>
@@ -100,10 +82,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <DataFiles_x64 Include="$(ProjectDir)..\external\x64\*.*" />
-    <DataFiles_lib64 Include="$(ProjectDir)..\external\lib64\*.*" />
-    <DataFiles_osx Include="$(ProjectDir)..\external\osx\*.*" />
-    <DataFiles_vulkan Include="$(ProjectDir)..\external\vulkan\icd.d\*.*" />
+    <DataFiles_x64 Include="$(ProjectDir)..\..\external\x64\*.*" />
+    <DataFiles_lib64 Include="$(ProjectDir)..\..\external\lib64\*.*" />
+    <DataFiles_osx Include="$(ProjectDir)..\..\external\osx\*.*" />
+    <DataFiles_vulkan Include="$(ProjectDir)..\..\external\vulkan\icd.d\*.*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="cuoapi">
+      <HintPath>..\..\external\cuoapi\cuoapi.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
   <ItemGroup>
@@ -123,7 +111,7 @@
 
   <Target Name="CopyExternalDeps_publish" AfterTargets="Publish">
     <ItemGroup>
-      <MonockickstartPath Include="$(ProjectDir)..\tools\monokickstart\*.*" />
+      <MonockickstartPath Include="$(ProjectDir)..\..\tools\monokickstart\*.*" />
     </ItemGroup>
 
     <Copy SourceFiles="@(DataFiles_x64)" DestinationFolder="$(PublishDir)\x64\" SkipUnchangedFiles="true" />
