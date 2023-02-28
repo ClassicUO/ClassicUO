@@ -253,6 +253,9 @@ namespace ClassicUO.Game
                             else if (SerialHelper.IsItem(container.Serial))
                             {
                                 UIManager.GetGump<ContainerGump>(container.Serial)?.RequestUpdateContents();
+                                #region GridContainer
+                                UIManager.GetGump<GridContainer>(container)?.RequestUpdateContents();
+                                #endregion
 
                                 if (container.Graphic == 0x2006)
                                 {
@@ -469,6 +472,9 @@ namespace ClassicUO.Game
                 else if (SerialHelper.IsItem(containerSerial))
                 {
                     UIManager.GetGump<ContainerGump>(containerSerial)?.RequestUpdateContents();
+                    #region GridContainer
+                    UIManager.GetGump<GridContainer>(containerSerial)?.RequestUpdateContents();
+                    #endregion
                 }
 
                 Entity container = Get(containerSerial);

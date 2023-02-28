@@ -265,6 +265,10 @@ namespace ClassicUO.Game
 
             ContainerGump backpackGump = UIManager.GetGump<ContainerGump>(backpack);
 
+            #region GridContainer
+            UIManager.GetGump<GridContainer>(backpack);
+            #endregion
+
             if (backpackGump == null)
             {
                 GameActions.DoubleClick(backpack);

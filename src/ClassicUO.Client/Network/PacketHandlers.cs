@@ -914,6 +914,9 @@ namespace ClassicUO.Network
                     }
 
                     UIManager.GetGump<ContainerGump>(cont)?.RequestUpdateContents();
+                    #region GridContainer
+                    UIManager.GetGump<GridContainer>(cont)?.RequestUpdateContents();
+                    #endregion
 
                     if (top != null && top.Graphic == 0x2006 && (ProfileManager.CurrentProfile.GridLootType == 1 || ProfileManager.CurrentProfile.GridLootType == 2))
                     {
@@ -1259,6 +1262,11 @@ namespace ClassicUO.Network
                             return;
                         }
                     }
+
+                    #region GridContainer
+                    UIManager.GetGump<GridContainer>(serial)?.Dispose();
+                    UIManager.Add(new GridContainer(serial));
+                    #endregion
 
                     ContainerGump container = UIManager.GetGump<ContainerGump>(serial);
                     bool playsound = false;
@@ -5978,6 +5986,15 @@ namespace ClassicUO.Network
                         {
                             ((ContainerGump) gump).CheckItemControlPosition(item);
                         }
+
+                        #region GridContainer
+                        gump = UIManager.GetGump<GridContainer>(containerSerial);
+
+                        if (gump != null)
+                        {
+                            ((GridContainer)gump)?.RequestUpdateContents();
+                        }
+                        #endregion
 
                         if (ProfileManager.CurrentProfile.GridLootType > 0)
                         {

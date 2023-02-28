@@ -1416,6 +1416,9 @@ namespace ClassicUO.Game.GameObjects
                 }
 
                 UIManager.GetGump<ContainerGump>(bank.Serial)?.Dispose();
+                #region GridContainer
+                UIManager.GetGump<GridContainer>(bank.Serial)?.Dispose();
+                #endregion
 
                 bank.Opened = false;
             }
@@ -1496,6 +1499,36 @@ namespace ClassicUO.Game.GameObjects
                         }
 
                         break;
+                    #region GridContainer
+                    case GridContainer _:
+                        distance = int.MaxValue;
+
+                        ent = World.Get(gump.LocalSerial);
+
+                        if (ent != null)
+                        {
+                            if (SerialHelper.IsItem(ent.Serial))
+                            {
+                                Entity top = World.Get(((Item)ent).RootContainer);
+
+                                if (top != null)
+                                {
+                                    distance = top.Distance;
+                                }
+                            }
+                            else
+                            {
+                                distance = ent.Distance;
+                            }
+                        }
+
+                        if (distance > Constants.MAX_CONTAINER_OPENED_ON_GROUND_RANGE)
+                        {
+                            gump.Dispose();
+                        }
+
+                        break;
+                        #endregion
                 }
             }
         }
