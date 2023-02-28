@@ -32,7 +32,7 @@
 
 using System.Collections.Generic;
 using ClassicUO.Input;
-using ClassicUO.IO.Resources;
+using ClassicUO.Assets;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;

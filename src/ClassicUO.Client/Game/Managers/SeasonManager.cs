@@ -30,7 +30,7 @@
 
 #endregion
 
-using ClassicUO.IO.Resources;
+using ClassicUO.Assets;
 using System;
 using System.IO;
 

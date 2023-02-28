@@ -34,7 +34,7 @@ using System;
 using System.Runtime.CompilerServices;
 using ClassicUO.Configuration;
 using ClassicUO.IO;
-using ClassicUO.IO.Resources;
+using ClassicUO.Assets;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;

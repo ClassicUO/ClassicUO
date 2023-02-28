@@ -33,7 +33,7 @@
 using System;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
-using ClassicUO.IO.Resources;
+using ClassicUO.Assets;
 using ClassicUO.Network;
 
 namespace ClassicUO.Game.UI.Gumps

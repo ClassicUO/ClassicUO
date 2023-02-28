@@ -37,7 +37,7 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
-using ClassicUO.IO.Resources;
+using ClassicUO.Assets;
 using ClassicUO.Network;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;

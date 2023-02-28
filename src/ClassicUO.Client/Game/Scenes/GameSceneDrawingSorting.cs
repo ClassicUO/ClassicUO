@@ -38,7 +38,7 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Map;
-using ClassicUO.IO.Resources;
+using ClassicUO.Assets;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;

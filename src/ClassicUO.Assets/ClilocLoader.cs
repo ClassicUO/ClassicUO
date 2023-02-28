@@ -30,6 +30,7 @@
 
 #endregion
 
+using ClassicUO.IO;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
@@ -39,7 +40,7 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ClassicUO.IO.Resources
+namespace ClassicUO.Assets
 {
     public class ClilocLoader : UOFileLoader
     {

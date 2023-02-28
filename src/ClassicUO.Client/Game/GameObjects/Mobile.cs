@@ -35,7 +35,7 @@ using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
-using ClassicUO.IO.Resources;
+using ClassicUO.Assets;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Collections;

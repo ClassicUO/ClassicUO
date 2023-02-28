@@ -38,7 +38,7 @@ using System.Xml;
 using ClassicUO.Configuration;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.IO;
-using ClassicUO.IO.Resources;
+using ClassicUO.Assets;
 using ClassicUO.Resources;
 using ClassicUO.Utility.Logging;
 

@@ -32,7 +32,7 @@
 
 using System.Linq;
 using ClassicUO.Game.UI.Controls;
-using ClassicUO.IO.Resources;
+using ClassicUO.Assets;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Utility.Logging;

@@ -31,7 +31,7 @@
 #endregion
 
 using System.Linq;
-using ClassicUO.IO.Resources;
+using ClassicUO.Assets;
 
 namespace ClassicUO.Game.Data
 {

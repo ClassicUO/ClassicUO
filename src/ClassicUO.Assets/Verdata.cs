@@ -30,9 +30,10 @@
 
 #endregion
 
+using ClassicUO.IO;
 using System.Runtime.CompilerServices;
 
-namespace ClassicUO.IO.Resources
+namespace ClassicUO.Assets
 {
     public static class Verdata
     {
