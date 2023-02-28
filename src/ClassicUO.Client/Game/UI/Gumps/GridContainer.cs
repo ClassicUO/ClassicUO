@@ -48,7 +48,7 @@ namespace ClassicUO.Game.UI.Gumps
     internal class GridContainer : Gump
     {
 
-        private static int _lastX = ProfileManager.CurrentProfile.GridLootType == 2 ? 200 : 100;
+        private static int _lastX = 100;
         private static int _lastY = 100;
         private readonly AlphaBlendControl _background;
         private readonly NiceButton _buttonPrev, _buttonNext;
@@ -56,12 +56,13 @@ namespace ClassicUO.Game.UI.Gumps
         private const int X_SPACING = 1;
         private const int Y_SPACING = 1;
         private const int GRID_ITEM_SIZE = 50;
-        private const int DEFAULT_WIDTH = 3 + (GRID_ITEM_SIZE + X_SPACING) * 5;
-        private const int DEFAULT_HEIGHT = 3 + (GRID_ITEM_SIZE + Y_SPACING) * 7;
+        private const int DEFAULT_WIDTH = 3 + 14 + (GRID_ITEM_SIZE + X_SPACING) * 4;
+        private const int DEFAULT_HEIGHT = 3 + (GRID_ITEM_SIZE + Y_SPACING) * 4;
         private int _currentPage = 1;
         private readonly Label _currentPageLabel;
         private readonly Label _containerNameLabel;
         private int _pagesCount;
+        private readonly ScrollArea _scrollArea;
 
         public GridContainer(uint local) : base(local, 0)
         {
@@ -85,19 +86,6 @@ namespace ClassicUO.Game.UI.Gumps
             _background.Width = DEFAULT_WIDTH;
             _background.Height = DEFAULT_HEIGHT;
             Add(_background);
-
-            MouseUp += (sender, e) =>
-            {
-                if (e.Button == MouseButtonType.Left)
-                {
-                    Console.WriteLine("Mouse up");
-                    if (Client.Game.GameCursor.ItemHold.Enabled)
-                    {
-                        Console.WriteLine("Drag end");
-                        GameActions.DropItem(Client.Game.GameCursor.ItemHold.Serial, 0xFFFF, 0xFFFF, 0, _container);
-                    }
-                }
-            };
 
             Width = _background.Width;
             Height = _background.Height;
@@ -147,6 +135,25 @@ namespace ClassicUO.Game.UI.Gumps
                     Y = 0
                 }
             );
+
+
+            _scrollArea = new ScrollArea(0, _containerNameLabel.Height + 1, _background.Width, _background.Height - (_containerNameLabel.Height + 1), true);
+            _scrollArea.AcceptMouseInput = true;
+            _scrollArea.CanMove = true;
+            Add(_scrollArea);
+
+            _scrollArea.MouseUp += (sender, e) =>
+            {
+                if (e.Button == MouseButtonType.Left)
+                {
+                    Console.WriteLine("Mouse up");
+                    if (Client.Game.GameCursor.ItemHold.Enabled)
+                    {
+                        Console.WriteLine("Drag end");
+                        GameActions.DropItem(Client.Game.GameCursor.ItemHold.Serial, 0xFFFF, 0xFFFF, 0, _container);
+                    }
+                }
+            };
         }
 
         public override void OnButtonClick(int buttonID)
@@ -201,10 +208,15 @@ namespace ClassicUO.Game.UI.Gumps
             int x = X_SPACING;
             int y = Y_SPACING + _containerNameLabel.Height;
 
-            foreach (GridLootItem gridLootItem in Children.OfType<GridLootItem>())
-            {
-                gridLootItem.Dispose();
+            foreach (Control child in _scrollArea.Children) {
+                if (child is GridLootItem)
+                    child.Dispose();
             }
+
+            //foreach (GridLootItem gridLootItem in Children.OfType<GridLootItem>())
+            //{
+            //    gridLootItem.Dispose();
+            //}
 
             int count = 0;
             _pagesCount = 1;
@@ -217,23 +229,23 @@ namespace ClassicUO.Game.UI.Gumps
 
                 GridLootItem gridItem = new GridLootItem(it, GRID_ITEM_SIZE, _container);
 
-                if (x + GRID_ITEM_SIZE >= _background.Width - X_SPACING)
+                if (x + GRID_ITEM_SIZE >= _scrollArea.Width - 14 - X_SPACING) //14 is the scroll bar width
                 {
                     x = X_SPACING;
                     ++line;
 
                     y += gridItem.Height + Y_SPACING;
 
-                    if (y >= _background.Height - _currentPageLabel.Height)
-                    {
-                        _pagesCount++;
-                        y = Y_SPACING;
-                    }
+                    //if (y >= _background.Height - _currentPageLabel.Height)
+                    //{
+                    //    _pagesCount++;
+                    //    y = Y_SPACING;
+                    //}
                 }
 
                 gridItem.X = x + X_SPACING;
                 gridItem.Y = y;
-                Add(gridItem, _pagesCount);
+                _scrollArea.Add(gridItem);//, _pagesCount);
 
                 x += gridItem.Width + X_SPACING;
                 ++count;
