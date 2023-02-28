@@ -10,4 +10,8 @@
     <ProjectReference Include="..\..\external\MP3Sharp\MP3Sharp\MP3Sharp.csproj" />
   </ItemGroup>
 
+  <!--<ItemGroup>
+    <PackageReference Include="MP3Sharp" Version="1.0.5" />
+  </ItemGroup>-->
+  
 </Project>

@@ -240,8 +240,8 @@ namespace ClassicUO.Renderer
                     textureValue,
                     new Vector2
                     (
-                        x + (int) Math.Round(offsetX),
-                        y + (int) Math.Round(offsetY)
+                        x + (int)Math.Round(offsetX),
+                        y + (int)Math.Round(offsetY)
                     ),
                     cGlyph,
                     color
@@ -379,7 +379,7 @@ namespace ClassicUO.Renderer
             vertex.TextureCoordinate1.Z = 0;
             vertex.TextureCoordinate2.Z = 0;
             vertex.TextureCoordinate3.Z = 0;
-           
+
             vertex.Normal0.X = 0;
             vertex.Normal0.Y = 0;
             vertex.Normal0.Z = 1;
@@ -624,7 +624,7 @@ namespace ClassicUO.Renderer
             Rectangle sourceRectangle,
             Vector3 hue
         )
-        {         
+        {
             int h = destinationRectangle.Height;
 
             Rectangle rect = sourceRectangle;
@@ -706,24 +706,24 @@ namespace ClassicUO.Renderer
 
             Draw
             (
-                texture, 
+                texture,
                 start,
                 texture.Bounds,
                 color,
-                radians, 
+                radians,
                 Vector2.Zero,
-                new Vector2(length, stroke), 
+                new Vector2(length, stroke),
                 SpriteEffects.None,
                 0
             );
         }
 
-      
+
 
 
         public void Draw
         (
-            Texture2D texture, 
+            Texture2D texture,
             Vector2 position,
             Vector3 color
         )
@@ -733,7 +733,7 @@ namespace ClassicUO.Renderer
 
         public void Draw
         (
-            Texture2D texture, 
+            Texture2D texture,
             Vector2 position,
             Rectangle? sourceRectangle,
             Vector3 color
@@ -771,8 +771,8 @@ namespace ClassicUO.Renderer
             Rectangle? sourceRectangle,
             Vector3 color,
             float rotation,
-            Vector2 origin, 
-            float scale, 
+            Vector2 origin,
+            float scale,
             SpriteEffects effects,
             float layerDepth
         )
@@ -780,7 +780,7 @@ namespace ClassicUO.Renderer
             float sourceX, sourceY, sourceW, sourceH;
             float destW = scale;
             float destH = scale;
-            
+
             if (sourceRectangle.HasValue)
             {
                 sourceX = sourceRectangle.Value.X / (float)texture.Width;
@@ -1118,7 +1118,7 @@ namespace ClassicUO.Renderer
             sprite.TextureCoordinate2.Y = (_cornerOffsetY[2 ^ effects] * sourceH) + sourceY;
             sprite.TextureCoordinate3.X = (_cornerOffsetX[3 ^ effects] * sourceW) + sourceX;
             sprite.TextureCoordinate3.Y = (_cornerOffsetY[3 ^ effects] * sourceH) + sourceY;
-           
+
             sprite.TextureCoordinate0.Z = 0;
             sprite.TextureCoordinate1.Z = 0;
             sprite.TextureCoordinate2.Z = 0;
@@ -1334,7 +1334,7 @@ namespace ClassicUO.Renderer
 
                 return true;
             }
-            
+
             return false;
         }
 
@@ -1404,15 +1404,15 @@ namespace ClassicUO.Renderer
 
             fixed (PositionNormalTextureColor4* p = &_vertexInfo[start])
             {
-               _vertexBuffer.SetDataPointerEXT
-               (
-                   offset * PositionNormalTextureColor4.SIZE_IN_BYTES,
-                   (IntPtr)p,
-                   count * PositionNormalTextureColor4.SIZE_IN_BYTES,
-                   hint
-               );
+                _vertexBuffer.SetDataPointerEXT
+                (
+                    offset * PositionNormalTextureColor4.SIZE_IN_BYTES,
+                    (IntPtr)p,
+                    count * PositionNormalTextureColor4.SIZE_IN_BYTES,
+                    hint
+                );
             }
-           
+
             _currentBufferPosition = offset + count;
 
             return offset;
@@ -1424,12 +1424,12 @@ namespace ClassicUO.Renderer
 
             for (int i = 0, j = 0; i < MAX_INDICES; i += 6, j += 4)
             {
-                result[i] = (short) j;
-                result[i + 1] = (short) (j + 1);
-                result[i + 2] = (short) (j + 2);
-                result[i + 3] = (short) (j + 1);
-                result[i + 4] = (short) (j + 3);
-                result[i + 5] = (short) (j + 2);
+                result[i] = (short)j;
+                result[i + 1] = (short)(j + 1);
+                result[i + 2] = (short)(j + 2);
+                result[i + 3] = (short)(j + 1);
+                result[i + 4] = (short)(j + 3);
+                result[i + 5] = (short)(j + 2);
             }
 
             return result;
@@ -1487,7 +1487,7 @@ namespace ClassicUO.Renderer
                 new VertexElement(sizeof(float) * 9, VertexElementFormat.Vector3, VertexElementUsage.TextureCoordinate, 1)  // hue
             );
 
-            public const int SIZE_IN_BYTES = sizeof(float) * 12 * 4;            
+            public const int SIZE_IN_BYTES = sizeof(float) * 12 * 4;
         }
     }
 
@@ -1496,7 +1496,7 @@ namespace ClassicUO.Renderer
     {
         private static byte[] _isometricEffect, _xBREffect;
 
-        public static byte[] IsometricEffect => _isometricEffect ?? (_isometricEffect = GetResource("ClassicUO.shaders.IsometricWorld.fxc"));
+        public static byte[] IsometricEffect => _isometricEffect ?? (_isometricEffect = GetResource("ClassicUO.Renderer.shaders.IsometricWorld.fxc"));
 
         public static byte[] xBREffect => _xBREffect ?? (_xBREffect = GetResource("ClassicUO.shaders.xBR.fxc"));
 

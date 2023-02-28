@@ -398,8 +398,13 @@ namespace ClassicUO.Assets
 
                 if (music == null && TryGetMusicData(index, out string name, out bool loop))
                 {
-                    music = _useDigitalMusicFolder ? new UOMusic(index, name, loop, UOFileManager.GetUOFilePath($"Music/Digital/{name}.mp3")) :
-                                                     new UOMusic(index, name, loop, UOFileManager.GetUOFilePath($"Music/{name}.mp3"));
+                    var path = _useDigitalMusicFolder ? $"Music/Digital/{name}" : $"Music/{name}";
+                    if (!path.EndsWith(".mp3", StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        path += ".mp3";
+                    }
+
+                    music = new UOMusic(index, name, loop, UOFileManager.GetUOFilePath(path));
                 }
 
                 return music;
