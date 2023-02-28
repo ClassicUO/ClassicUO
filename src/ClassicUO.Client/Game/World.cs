@@ -44,7 +44,7 @@ using MathHelper = ClassicUO.Utility.MathHelper;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Utility.Logging;
-using ClassicUO.IO.Resources;
+using ClassicUO.Assets;
 
 namespace ClassicUO.Game
 {

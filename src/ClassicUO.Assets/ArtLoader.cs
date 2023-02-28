@@ -30,6 +30,7 @@
 
 #endregion
 
+using ClassicUO.IO;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -38,7 +39,7 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace ClassicUO.IO.Resources
+namespace ClassicUO.Assets
 {
     public class ArtLoader : UOFileLoader
     {

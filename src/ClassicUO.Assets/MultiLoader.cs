@@ -30,11 +30,12 @@
 
 #endregion
 
+using ClassicUO.IO;
 using ClassicUO.Utility;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
-namespace ClassicUO.IO.Resources
+namespace ClassicUO.Assets
 {
     public class MultiLoader : UOFileLoader
     {

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace ClassicUO.IO
+namespace ClassicUO.Assets
 {
     public class PixelPicker
     {

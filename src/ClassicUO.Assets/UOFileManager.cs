@@ -30,7 +30,7 @@
 
 #endregion
 
-using ClassicUO.IO.Resources;
+using ClassicUO.IO;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using ClassicUO.Utility.Platforms;
@@ -41,7 +41,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
-namespace ClassicUO.IO
+namespace ClassicUO.Assets
 {
     public static class UOFileManager
     {

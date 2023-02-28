@@ -46,14 +46,14 @@ namespace ClassicUO.IO.Audio
         private readonly byte[] m_WaveBuffer = new byte[NUMBER_OF_PCM_BYTES_TO_READ_PER_CHUNK];
 
 
-        public UOMusic(int index, string name, bool loop, string basePath) : base(name, index)
+        public UOMusic(int index, string name, bool loop, string fileName) : base(name, index)
         {
             m_Repeat = loop;
             m_Playing = false;
             Channels = AudioChannels.Stereo;
             Delay = 0;
             
-            Path = UOFileManager.GetUOFilePath($"{basePath}/{Name}.mp3");
+            Path = fileName;
         }
 
         private string Path { get; }

@@ -30,6 +30,7 @@
 
 #endregion
 
+using ClassicUO.IO;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Collections;
 using ClassicUO.Utility.Logging;
@@ -43,7 +44,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
-namespace ClassicUO.IO.Resources
+namespace ClassicUO.Assets
 {
     public class FontsLoader : UOFileLoader
     {

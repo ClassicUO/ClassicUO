@@ -40,7 +40,7 @@ using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.IO;
-using ClassicUO.IO.Resources;
+using ClassicUO.Assets;
 using ClassicUO.Renderer;
 using ClassicUO.Renderer.Batching;
 using ClassicUO.Utility.Logging;

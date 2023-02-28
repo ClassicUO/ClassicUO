@@ -30,13 +30,14 @@
 
 #endregion
 
+using ClassicUO.IO;
 using System;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
-namespace ClassicUO.IO.Resources
+namespace ClassicUO.Assets
 {
     public class AnimDataLoader : UOFileLoader
     {

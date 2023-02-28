@@ -33,7 +33,7 @@
 using System;
 using System.Runtime.CompilerServices;
 using ClassicUO.Game.Managers;
-using ClassicUO.IO.Resources;
+using ClassicUO.Assets;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;

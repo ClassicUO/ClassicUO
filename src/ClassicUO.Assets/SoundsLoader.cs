@@ -30,6 +30,7 @@
 
 #endregion
 
+using ClassicUO.IO;
 using ClassicUO.IO.Audio;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
@@ -40,7 +41,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace ClassicUO.IO.Resources
+namespace ClassicUO.Assets
 {
     public class SoundsLoader : UOFileLoader
     {
@@ -397,7 +398,8 @@ namespace ClassicUO.IO.Resources
 
                 if (music == null && TryGetMusicData(index, out string name, out bool loop))
                 {
-                    music = _useDigitalMusicFolder ? new UOMusic(index, name, loop, "Music/Digital/") : new UOMusic(index, name, loop, "Music/");
+                    music = _useDigitalMusicFolder ? new UOMusic(index, name, loop, UOFileManager.GetUOFilePath($"Music/Digital/{name}.mp3")) :
+                                                     new UOMusic(index, name, loop, UOFileManager.GetUOFilePath($"Music/{name}.mp3"));
                 }
 
                 return music;

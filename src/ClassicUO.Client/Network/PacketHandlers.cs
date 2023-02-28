@@ -44,7 +44,7 @@ using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.IO;
-using ClassicUO.IO.Resources;
+using ClassicUO.Assets;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Collections;

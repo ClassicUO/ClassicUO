@@ -37,7 +37,7 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
-using ClassicUO.IO.Resources;
+using ClassicUO.Assets;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;

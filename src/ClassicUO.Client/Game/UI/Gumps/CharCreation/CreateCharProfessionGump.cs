@@ -36,7 +36,7 @@ using System.Collections.Generic;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
-using ClassicUO.IO.Resources;
+using ClassicUO.Assets;
 
 namespace ClassicUO.Game.UI.Gumps.CharCreation
 {

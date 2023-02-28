@@ -37,7 +37,7 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.IO;
-using ClassicUO.IO.Resources;
+using ClassicUO.Assets;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;

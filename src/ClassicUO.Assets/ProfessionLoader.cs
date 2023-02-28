@@ -30,12 +30,13 @@
 
 #endregion
 
+using ClassicUO.IO;
 using ClassicUO.Utility;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace ClassicUO.IO.Resources
+namespace ClassicUO.Assets
 {
     public class ProfessionInfo
     {
