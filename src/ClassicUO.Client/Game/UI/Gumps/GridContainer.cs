@@ -31,8 +31,6 @@
 #endregion
 
 using System;
-using System.Linq;
-using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
@@ -41,7 +39,6 @@ using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Resources;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Input;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -51,17 +48,13 @@ namespace ClassicUO.Game.UI.Gumps
         private static int _lastX = 100;
         private static int _lastY = 100;
         private readonly AlphaBlendControl _background;
-        private readonly NiceButton _buttonPrev, _buttonNext;
         private readonly Item _container;
         private const int X_SPACING = 1;
         private const int Y_SPACING = 1;
         private const int GRID_ITEM_SIZE = 50;
         private const int DEFAULT_WIDTH = 3 + 14 + (GRID_ITEM_SIZE + X_SPACING) * 4;
         private const int DEFAULT_HEIGHT = 3 + (GRID_ITEM_SIZE + Y_SPACING) * 4;
-        private int _currentPage = 1;
-        private readonly Label _currentPageLabel;
         private readonly Label _containerNameLabel;
-        private int _pagesCount;
         private readonly ScrollArea _scrollArea;
 
         public GridContainer(uint local) : base(local, 0)
@@ -90,48 +83,11 @@ namespace ClassicUO.Game.UI.Gumps
             Width = _background.Width;
             Height = _background.Height;
 
-            _buttonPrev = new NiceButton
-            (
-                Width - 80,
-                Height - 20,
-                40,
-                20,
-                ButtonAction.Activate,
-                ResGumps.Prev
-            )
-            { ButtonParameter = 0, IsSelectable = false };
-
-            _buttonNext = new NiceButton
-            (
-                Width - 40,
-                Height - 20,
-                40,
-                20,
-                ButtonAction.Activate,
-                ResGumps.Next
-            )
-            { ButtonParameter = 1, IsSelectable = false };
-
-            _buttonNext.IsVisible = _buttonPrev.IsVisible = false;
-
-
-            Add(_buttonPrev);
-            Add(_buttonNext);
-
-            Add
-            (
-                _currentPageLabel = new Label("1", true, 999)
-                {
-                    X = _background.Width / 2 - Width,
-                    Y = Height - 20
-                }
-            );
-
             Add
             (
                 _containerNameLabel = new Label(GetContainerName(), true, 0x0481)
                 {
-                    X = 0,
+                    X = 1,
                     Y = 0
                 }
             );
@@ -158,48 +114,6 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void OnButtonClick(int buttonID)
         {
-            if (buttonID == 0)
-            {
-                _currentPage--;
-
-                if (_currentPage <= 1)
-                {
-                    _currentPage = 1;
-                    _buttonPrev.IsVisible = false;
-                }
-
-                _buttonNext.IsVisible = true;
-                ChangePage(_currentPage);
-
-                _currentPageLabel.Text = ActivePage.ToString();
-                _currentPageLabel.X = Width / 2 - _currentPageLabel.Width / 2;
-            }
-            else if (buttonID == 1)
-            {
-                _currentPage++;
-
-                if (_currentPage >= _pagesCount)
-                {
-                    _currentPage = _pagesCount;
-                    _buttonNext.IsVisible = false;
-                }
-
-                _buttonPrev.IsVisible = true;
-
-                ChangePage(_currentPage);
-
-                _currentPageLabel.Text = ActivePage.ToString();
-                _currentPageLabel.X = Width / 2 - _currentPageLabel.Width / 2;
-            }
-            else if (buttonID == 2)
-            {
-                GameActions.Print(ResGumps.TargetContainerToGrabItemsInto);
-                TargetManager.SetTargeting(CursorTarget.SetGrabBag, 0, TargetType.Neutral);
-            }
-            else
-            {
-                base.OnButtonClick(buttonID);
-            }
         }
 
 
@@ -213,13 +127,7 @@ namespace ClassicUO.Game.UI.Gumps
                     child.Dispose();
             }
 
-            //foreach (GridLootItem gridLootItem in Children.OfType<GridLootItem>())
-            //{
-            //    gridLootItem.Dispose();
-            //}
-
             int count = 0;
-            _pagesCount = 1;
 
             int line = 1;
 
@@ -236,11 +144,6 @@ namespace ClassicUO.Game.UI.Gumps
 
                     y += gridItem.Height + Y_SPACING;
 
-                    //if (y >= _background.Height - _currentPageLabel.Height)
-                    //{
-                    //    _pagesCount++;
-                    //    y = Y_SPACING;
-                    //}
                 }
 
                 gridItem.X = x + X_SPACING;
@@ -249,24 +152,6 @@ namespace ClassicUO.Game.UI.Gumps
 
                 x += gridItem.Width + X_SPACING;
                 ++count;
-            }
-
-            if (ActivePage <= 1)
-            {
-                ActivePage = 1;
-                _buttonNext.IsVisible = _pagesCount > 1;
-                _buttonPrev.IsVisible = false;
-            }
-            else if (ActivePage >= _pagesCount)
-            {
-                ActivePage = _pagesCount;
-                _buttonNext.IsVisible = false;
-                _buttonPrev.IsVisible = _pagesCount > 1;
-            }
-            else if (ActivePage > 1 && ActivePage < _pagesCount)
-            {
-                _buttonNext.IsVisible = true;
-                _buttonPrev.IsVisible = true;
             }
 
         }
@@ -333,13 +218,6 @@ namespace ClassicUO.Game.UI.Gumps
             Width = _background.Width;
             Height = _background.Height;
 
-            _buttonPrev.X = Width - 80;
-            _buttonPrev.Y = Height - 23;
-            _buttonNext.X = Width - 40;
-            _buttonNext.Y = Height - 20;
-            _currentPageLabel.X = Width / 2 - 5;
-            _currentPageLabel.Y = Height - 20;
-
             _containerNameLabel.Text = GetContainerName();
 
             WantUpdateSize = true;
@@ -384,7 +262,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Add(background);
 
                 Label _count = new Label((item.ItemData.IsStackable ? item.Amount : 1).ToString(), true, 0x0481, align: TEXT_ALIGN_TYPE.TS_LEFT, maxwidth: size);
-                _count.X = 0;
+                _count.X = 1;
                 _count.Y = size - _count.Height;
 
                 Add(_count);
