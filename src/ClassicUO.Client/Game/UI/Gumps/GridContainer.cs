@@ -37,12 +37,11 @@ using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
-using ClassicUO.Resources;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    internal class GridContainer : Gump
+    internal class GridContainer : ResizableGump
     {
 
         private static int _lastX = 100;
@@ -52,12 +51,23 @@ namespace ClassicUO.Game.UI.Gumps
         private const int X_SPACING = 1;
         private const int Y_SPACING = 1;
         private const int GRID_ITEM_SIZE = 50;
-        private const int DEFAULT_WIDTH = 3 + 14 + (GRID_ITEM_SIZE + X_SPACING) * 4;
-        private const int DEFAULT_HEIGHT = 3 + (GRID_ITEM_SIZE + Y_SPACING) * 4;
+        private const int BORDER_WIDTH = 4;
+        private const int DEFAULT_WIDTH =
+            (BORDER_WIDTH * 2)     //The borders around the container, one on the left and one on the right
+            + 15                   //The width of the scroll bar
+            + (GRID_ITEM_SIZE * 4) //How many items to fit in left to right
+            + (X_SPACING * 4)      //Spacing between each grid item(x4 items)
+            + 4;                   //Because the border acts weird
+        private const int DEFAULT_HEIGHT = (BORDER_WIDTH * 2) + (GRID_ITEM_SIZE + Y_SPACING) * 4;
         private readonly Label _containerNameLabel;
-        private readonly ScrollArea _scrollArea;
+        private ScrollArea _scrollArea;
+        private static int lastWidth = DEFAULT_WIDTH;
+        private static int lastHeight = DEFAULT_HEIGHT;
 
-        public GridContainer(uint local) : base(local, 0)
+        private bool tryDragContainer = false;
+        private Point pointDragContainer = new Point(0, 0);
+
+        public GridContainer(uint local) : base(DEFAULT_WIDTH, DEFAULT_HEIGHT, DEFAULT_WIDTH, DEFAULT_HEIGHT, local, 0)
         {
             _container = World.Items.Get(local);
 
@@ -75,40 +85,81 @@ namespace ClassicUO.Game.UI.Gumps
             AcceptMouseInput = true;
             WantUpdateSize = true;
             CanCloseWithRightClick = true;
-            _background = new AlphaBlendControl();
-            _background.Width = DEFAULT_WIDTH;
-            _background.Height = DEFAULT_HEIGHT;
-            Add(_background);
 
-            Width = _background.Width;
-            Height = _background.Height;
+            _background = new AlphaBlendControl();
+            _background.Width = Width - (BORDER_WIDTH * 2);
+            _background.Height = Height - (BORDER_WIDTH * 2);
+            _background.X = BORDER_WIDTH;
+            _background.Y = BORDER_WIDTH;
+            Add(_background);
 
             Add
             (
                 _containerNameLabel = new Label(GetContainerName(), true, 0x0481)
                 {
-                    X = 1,
-                    Y = 0
+                    X = _background.X + 2,
+                    Y = 2
                 }
             );
 
 
-            _scrollArea = new ScrollArea(0, _containerNameLabel.Height + 1, _background.Width, _background.Height - (_containerNameLabel.Height + 1), true);
+            updateScrollArea();
+        }
+
+        private void updateScrollArea()
+        {
+            if (_scrollArea != null)
+                foreach (Control child in _scrollArea.Children)
+                {
+                    if (child is GridItem)
+                        child.Dispose();
+                }
+            Remove(_scrollArea);
+            _scrollArea = new ScrollArea(
+                _background.X,
+                _containerNameLabel.Height + _background.Y + 1,
+                _background.Width - 2,
+                _background.Height - BORDER_WIDTH - (_containerNameLabel.Height + 1),
+                true
+                );
             _scrollArea.AcceptMouseInput = true;
             _scrollArea.CanMove = true;
+            _scrollArea.ScrollbarBehaviour = ScrollbarBehaviour.ShowAlways;
             Add(_scrollArea);
 
             _scrollArea.MouseUp += (sender, e) =>
             {
                 if (e.Button == MouseButtonType.Left)
                 {
-                    Console.WriteLine("Mouse up");
                     if (Client.Game.GameCursor.ItemHold.Enabled)
                     {
-                        Console.WriteLine("Drag end");
                         GameActions.DropItem(Client.Game.GameCursor.ItemHold.Serial, 0xFFFF, 0xFFFF, 0, _container);
+                    } else if (tryDragContainer) {
+                        if (pointDragContainer != e.Location)
+                        {
+                            this.InvokeDragBegin(e.Location);
+                        }
+                        tryDragContainer = false;
                     }
                 }
+                else if (e.Button == MouseButtonType.Right)
+                {
+                    this.InvokeMouseCloseGumpWithRClick();
+                }
+            };
+
+            _scrollArea.MouseDown += (sender, e) =>
+            {
+                if (e.Button == MouseButtonType.Left)
+                {
+                    tryDragContainer = true;
+                    pointDragContainer = e.Location;
+                }
+            };
+
+            _scrollArea.DragBegin += (sender, e) =>
+            {
+                this.InvokeDragBegin(e.Location);
             };
         }
 
@@ -116,28 +167,24 @@ namespace ClassicUO.Game.UI.Gumps
         {
         }
 
-
-        protected override void UpdateContents()
+        private void updateItems()
         {
             int x = X_SPACING;
-            int y = Y_SPACING + _containerNameLabel.Height;
+            int y = Y_SPACING;
 
-            foreach (Control child in _scrollArea.Children) {
-                if (child is GridLootItem)
-                    child.Dispose();
-            }
+            _background.Width = Width - (BORDER_WIDTH * 2);
+            _background.Height = Height - (BORDER_WIDTH * 2);
 
             int count = 0;
-
             int line = 1;
 
             for (LinkedObject i = _container.Items; i != null; i = i.Next)
             {
                 Item it = (Item)i;
 
-                GridLootItem gridItem = new GridLootItem(it, GRID_ITEM_SIZE, _container);
+                GridItem gridItem = new GridItem(it, GRID_ITEM_SIZE, _container);
 
-                if (x + GRID_ITEM_SIZE >= _scrollArea.Width - 14 - X_SPACING) //14 is the scroll bar width
+                if (x + GRID_ITEM_SIZE + X_SPACING >= _scrollArea.Width - 14) //14 is the scroll bar width
                 {
                     x = X_SPACING;
                     ++line;
@@ -153,7 +200,14 @@ namespace ClassicUO.Game.UI.Gumps
                 x += gridItem.Width + X_SPACING;
                 ++count;
             }
+        }
 
+        protected override void UpdateContents()
+        {
+            updateScrollArea();
+            updateItems();
+            lastHeight = Height;
+            lastWidth = Width;
         }
 
         public override void Dispose()
@@ -175,16 +229,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
-            batcher.DrawRectangle
-            (
-                SolidColorTextureCache.GetTexture(Color.Gray),
-                x,
-                y,
-                Width,
-                Height,
-                hueVector
-            );
-
             return true;
         }
 
@@ -205,20 +249,10 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
-            if (_background.Width < 100)
+            if (lastWidth != Width || lastHeight != Height)
             {
-                _background.Width = 100;
+                UpdateContents();
             }
-
-            if (_background.Height < 120)
-            {
-                _background.Height = 120;
-            }
-
-            Width = _background.Width;
-            Height = _background.Height;
-
-            _containerNameLabel.Text = GetContainerName();
 
             WantUpdateSize = true;
 
@@ -233,11 +267,11 @@ namespace ClassicUO.Game.UI.Gumps
             return _container.Name?.Length > 0 ? _container.Name : "a container";
         }
 
-        private class GridLootItem : Control
+        private class GridItem : Control
         {
             private readonly HitBox _hit;
 
-            public GridLootItem(uint serial, int size, Item container)
+            public GridItem(uint serial, int size, Item container)
             {
                 Point startDrag = new Point(0, 0);
                 bool potentialDrag = false;
@@ -259,15 +293,20 @@ namespace ClassicUO.Game.UI.Gumps
                 AlphaBlendControl background = new AlphaBlendControl();
                 background.Width = size;
                 background.Height = size;
+                Width = Height = size;
                 Add(background);
 
-                Label _count = new Label((item.ItemData.IsStackable ? item.Amount : 1).ToString(), true, 0x0481, align: TEXT_ALIGN_TYPE.TS_LEFT, maxwidth: size);
-                _count.X = 1;
-                _count.Y = size - _count.Height;
+                int itemAmt = (item.ItemData.IsStackable ? item.Amount : 1);
+                if (itemAmt > 1)
+                {
+                    Label _count = new Label(itemAmt.ToString(), true, 0x0481, align: TEXT_ALIGN_TYPE.TS_LEFT, maxwidth: size);
+                    _count.X = 1;
+                    _count.Y = size - _count.Height;
 
-                Add(_count);
+                    Add(_count);
+                }
 
-                _hit = new HitBox(0, 0, size, size, null, 0.25f);
+                _hit = new HitBox(0, 0, size, size, null, 0f);
                 Add(_hit);
 
                 if (World.ClientFeatures.TooltipsEnabled)
@@ -289,6 +328,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (potentialDrag && startDrag != e.Location)
                     {
+                        Console.WriteLine("Mouse Exit Event");
                         GameActions.PickUp(item, startDrag.X, startDrag.Y);
                         potentialDrag = false;
                     }
@@ -307,6 +347,10 @@ namespace ClassicUO.Game.UI.Gumps
                             else
                                 GameActions.DropItem(Client.Game.GameCursor.ItemHold.Serial, item.X, item.Y, 0, container);
                         }
+                        if (TargetManager.IsTargeting)
+                        {
+                            TargetManager.Target(item);
+                        }
                         else
                             GameActions.SingleClick(item);
                         potentialDrag = false;
@@ -316,10 +360,8 @@ namespace ClassicUO.Game.UI.Gumps
                 _hit.MouseDoubleClick += (sender, e) =>
                 {
                     GameActions.DoubleClick(item);
+                    e.Result = true;
                 };
-
-                Width = background.Width;
-                Height = background.Height;
 
                 WantUpdateSize = false;
             }
@@ -389,7 +431,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (_hit.MouseIsOver)
                 {
-                    hueVector.Z = 0.7f;
+                    hueVector.Z = 0.3f;
 
                     batcher.Draw
                     (
