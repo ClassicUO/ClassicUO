@@ -59,7 +59,7 @@ namespace ClassicUO.Network
         private Socket _socket;
         private uint? _localIP;
         private readonly MemoryStream _recvCompressedStream, _recvUncompressedStream, _recvCompressedUnfinishedStream, _sendStream;
-
+        private readonly byte[] _recvFixedBuffer = new byte[4096];
 
         private NetClient(bool is_login_socket)
         {
@@ -160,10 +160,13 @@ namespace ClassicUO.Network
                 return false;
             }
 
-            _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            _socket.NoDelay = true; // it's important to disable the Nagle algo or it will cause lag
-
-
+            if (_socket == null)
+            {
+                _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                _socket.NoDelay = true; // it's important to disable the Nagle algo or it will cause lag
+                _socket.LingerState.Enabled = true; // Close the socket gracefully without lingering.
+            }
+            
             _recvCompressedStream.Seek(0, SeekOrigin.Begin);
             _recvUncompressedStream.Seek(0, SeekOrigin.Begin);
             _recvCompressedUnfinishedStream.Seek(0, SeekOrigin.Begin);
@@ -232,25 +235,19 @@ namespace ClassicUO.Network
 
             try
             {
-                _socket.Close();
+                _socket.Shutdown(SocketShutdown.Both);
+                _socket.Disconnect(true);
             }
             catch
             {
-            }
-
-            try
-            {
+                _socket?.Close();
                 _socket?.Dispose();
-            }
-            catch
-            {
+                _socket = null;
             }
 
             Log.Trace($"Disconnected [{(_isLoginSocket ? "login socket" : "game socket")}]");
 
-
             _isCompressionEnabled = false;
-            _socket = null;
             _localIP = null;
 
             if (error != 0)
@@ -399,7 +396,6 @@ namespace ClassicUO.Network
             buffer.Seek(-packetOffset, SeekOrigin.Current);
 
             return true;
-            //return bufferLength >= length;
         }
 
         private void ProcessRecv()
@@ -423,16 +419,12 @@ namespace ClassicUO.Network
                 return;
             }
 
-            const int SIZE_TO_READ = 4096;
-
-
-            var buffer = System.Buffers.ArrayPool<byte>.Shared.Rent(SIZE_TO_READ);
             try
             {
                 while (available > 0)
                 {
-                    var toRead = Math.Min(SIZE_TO_READ, available);
-                    var received = _socket.Receive(buffer, 0, toRead, SocketFlags.None, out var errorCode);
+                    var toRead = Math.Min(_recvFixedBuffer.Length, available);
+                    var received = _socket.Receive(_recvFixedBuffer, 0, toRead, SocketFlags.None, out var errorCode);
 
                     // TODO: add a check if the toRead != received ??
                     available -= toRead;
@@ -447,19 +439,19 @@ namespace ClassicUO.Network
                         break;
                     }
 
-                    Statistics.TotalBytesReceived += (uint)received;
-                    _recvCompressedStream.Write(buffer, 0, received);
+                    _recvCompressedStream.Write(_recvFixedBuffer, 0, received);
                 }
 
 
                 var pos = (int)_recvCompressedStream.Position;
+                Statistics.TotalBytesReceived += (uint)pos;
 
                 if (pos == 0 || pos < available)
                 {
                     // ERROR
                 }
 
-                var compressedBuffer = System.Buffers.ArrayPool<byte>.Shared.Rent(0x10000); // pos?
+                var compressedBuffer = System.Buffers.ArrayPool<byte>.Shared.Rent(BUFF_SIZE); // pos?
 
                 try
                 {
@@ -484,10 +476,6 @@ namespace ClassicUO.Network
             catch (Exception ex)
             {
                 throw;
-            }
-            finally
-            {
-                System.Buffers.ArrayPool<byte>.Shared.Return(buffer);
             }
         }
 
@@ -587,9 +575,7 @@ namespace ClassicUO.Network
         {
             if (!_isCompressionEnabled) return;
 
-            const int HUFFMAN_BUFFER_LEN = 0x10000;
-
-            var source = System.Buffers.ArrayPool<byte>.Shared.Rent(HUFFMAN_BUFFER_LEN);
+            var source = System.Buffers.ArrayPool<byte>.Shared.Rent(BUFF_SIZE);
 
             try
             {
