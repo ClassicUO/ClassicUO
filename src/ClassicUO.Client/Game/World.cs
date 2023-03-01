@@ -254,7 +254,7 @@ namespace ClassicUO.Game
                             {
                                 UIManager.GetGump<ContainerGump>(container.Serial)?.RequestUpdateContents();
                                 #region GridContainer
-                                UIManager.GetGump<GridContainer>(container)?.RequestUpdateContents();
+                                UIManager.GetGump<GridContainer>(container.Serial)?.RequestUpdateContents();
                                 #endregion
 
                                 if (container.Graphic == 0x2006)
