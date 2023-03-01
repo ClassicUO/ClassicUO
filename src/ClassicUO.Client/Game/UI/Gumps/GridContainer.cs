@@ -47,8 +47,8 @@ namespace ClassicUO.Game.UI.Gumps
     internal class GridContainer : ResizableGump
     {
 
-        private static int _lastX = 100;
-        private static int _lastY = 100;
+        private int _lastX = 100;
+        private int _lastY = 100;
         private readonly AlphaBlendControl _background;
         private readonly Item _container;
         private const int X_SPACING = 1;
@@ -64,11 +64,11 @@ namespace ClassicUO.Game.UI.Gumps
         private const int DEFAULT_HEIGHT = 27 + (BORDER_WIDTH * 2) + (GRID_ITEM_SIZE + Y_SPACING) * 4;
         private readonly Label _containerNameLabel;
         private GridScrollArea _scrollArea;
-        private static int _lastWidth = DEFAULT_WIDTH;
-        private static int _lastHeight = DEFAULT_HEIGHT;
+        private int _lastWidth = DEFAULT_WIDTH;
+        private int _lastHeight = DEFAULT_HEIGHT;
         private readonly StbTextBox _searchBox;
         private readonly NiceButton _openRegularGump;
-        private static ushort _ogContainer;
+        private ushort _ogContainer;
         private readonly bool _DEBUG = false;
 
         public GridContainer(uint local, ushort ogContainer) : base(DEFAULT_WIDTH, DEFAULT_HEIGHT, DEFAULT_WIDTH, DEFAULT_HEIGHT, local, 0)
@@ -408,15 +408,15 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 return;
             }
-
-            if (_lastWidth != Width || _lastHeight != Height)
+            
+            if (this._lastWidth != this.Width ||this. _lastHeight != this.Height)
             {
                 _scrollArea.Width = _background.Width - BORDER_WIDTH;
                 _scrollArea.Height = _background.Height - BORDER_WIDTH - (_containerNameLabel.Height + 1);
-                _lastHeight = Height;
-                _lastWidth = Width;
-                RequestUpdateContents();
-                UpdateContents();
+                _lastHeight = this.Height;
+                _lastWidth = this.Width;
+                this.RequestUpdateContents();
+                this.UpdateContents();
             }
 
             WantUpdateSize = true;
