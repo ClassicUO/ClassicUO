@@ -367,8 +367,7 @@ namespace ClassicUO.Game.UI.Gumps
                             Point offset = Mouse.LDragOffset;
                             if (Math.Abs(offset.X) < Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS && Math.Abs(offset.Y) < Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS)
                             {
-                                GameActions.OpenPopupMenu(item);
-                                //GameActions.SingleClick(item);
+                                DelayedObjectClickManager.Set(item, X + GRID_ITEM_SIZE, Y + GRID_ITEM_SIZE, 1);
                             }
                         }
                     }
