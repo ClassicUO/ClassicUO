@@ -114,21 +114,17 @@ namespace ClassicUO.Game.UI.Gumps
                 Width = 100,
                 Height = 20
             };
-            _searchBox.TextChanged += (sender, e) =>
-            {
-                UpdateContents();
-            };
+            _searchBox.TextChanged += (sender, e) => { UpdateContents(); };
+            _searchBox.DragBegin += (sender, e) => { InvokeDragBegin(e.Location); };
 
-            Add(
-                new AlphaBlendControl(0.5f)
+            Add(new AlphaBlendControl(0.5f)
                 {
                     Hue = 0x0481,
                     X = _searchBox.X,
                     Y = _searchBox.Y,
                     Width = _searchBox.Width,
                     Height = _searchBox.Height
-                }
-            );
+                }); //Search box background
             Add(_searchBox);
 
             _openRegularGump = new NiceButton(Width - 20 - BORDER_WIDTH, BORDER_WIDTH, 20, 20, ButtonAction.Activate, "[X]", 1, TEXT_ALIGN_TYPE.TS_CENTER, 0x0481)
@@ -137,7 +133,7 @@ namespace ClassicUO.Game.UI.Gumps
                 IsSelectable = false,
             };
             _openRegularGump.SetTooltip("Open the original style container");
-            
+
             Add(_openRegularGump);
 
             updateScrollArea();
@@ -145,12 +141,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void updateScrollArea()
         {
-            if (_scrollArea != null)
-                foreach (Control child in _scrollArea.Children)
-                {
-                    if (child is GridItem)
-                        child.Dispose();
-                }
+            _scrollArea?.Dispose();
             Remove(_scrollArea);
             _scrollArea = new ScrollArea(
                 _background.X,
@@ -162,27 +153,29 @@ namespace ClassicUO.Game.UI.Gumps
             _scrollArea.AcceptMouseInput = true;
             _scrollArea.CanMove = true;
             _scrollArea.ScrollbarBehaviour = ScrollbarBehaviour.ShowAlways;
+            _scrollArea.MouseUp += _scrollArea_MouseUp;
+            _scrollArea.DragBegin += _scrollArea_DragBegin;
             Add(_scrollArea);
+        }
 
-            _scrollArea.MouseUp += (sender, e) =>
-            {
-                if (e.Button == MouseButtonType.Left)
-                {
-                    if (Client.Game.GameCursor.ItemHold.Enabled)
-                    {
-                        GameActions.DropItem(Client.Game.GameCursor.ItemHold.Serial, 0xFFFF, 0xFFFF, 0, _container);
-                    }
-                }
-                else if (e.Button == MouseButtonType.Right)
-                {
-                    this.InvokeMouseCloseGumpWithRClick();
-                }
-            };
+        private void _scrollArea_DragBegin(object sender, MouseEventArgs e)
+        {
+            InvokeDragBegin(e.Location);
+        }
 
-            _scrollArea.DragBegin += (sender, e) =>
+        private void _scrollArea_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtonType.Left)
             {
-                this.InvokeDragBegin(e.Location);
-            };
+                if (Client.Game.GameCursor.ItemHold.Enabled)
+                {
+                    GameActions.DropItem(Client.Game.GameCursor.ItemHold.Serial, 0xFFFF, 0xFFFF, 0, _container);
+                }
+            }
+            else if (e.Button == MouseButtonType.Right)
+            {
+                InvokeMouseCloseGumpWithRClick();
+            }
         }
 
         public override void OnButtonClick(int buttonID)
@@ -369,7 +362,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             updateScrollArea();
             updateItems();
-            _openRegularGump.X = Width - 20 - (BORDER_WIDTH*2);
+            _openRegularGump.X = Width - 20 - (BORDER_WIDTH * 2);
             lastHeight = Height;
             lastWidth = Width;
         }
@@ -435,6 +428,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             private readonly HitBox _hit;
             private bool mousePressedWhenEntered = false;
+            private readonly Item _item;
 
             public GridItem(uint serial, int size, Item container)
             {
@@ -442,9 +436,9 @@ namespace ClassicUO.Game.UI.Gumps
 
                 LocalSerial = serial;
 
-                Item item = World.Items.Get(serial);
+                _item = World.Items.Get(serial);
 
-                if (item == null)
+                if (_item == null)
                 {
                     Dispose();
 
@@ -459,7 +453,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Width = Height = size;
                 Add(background);
 
-                int itemAmt = (item.ItemData.IsStackable ? item.Amount : 1);
+                int itemAmt = (_item.ItemData.IsStackable ? _item.Amount : 1);
                 if (itemAmt > 1)
                 {
                     Label _count = new Label(itemAmt.ToString(), true, 0x0481, align: TEXT_ALIGN_TYPE.TS_LEFT, maxwidth: size);
@@ -472,71 +466,75 @@ namespace ClassicUO.Game.UI.Gumps
                 _hit = new HitBox(0, 0, size, size, null, 0f);
                 Add(_hit);
 
-                _hit.SetTooltip(item);
-
-                _hit.MouseEnter += (sender, e) =>
-                {
-                    Console.WriteLine("Mouse Entered");
-                    if (Mouse.LButtonPressed)
-                        mousePressedWhenEntered = true;
-                    else
-                        mousePressedWhenEntered = false;
-                };
-
-                _hit.MouseExit += (sender, e) =>
-                {
-                    Console.WriteLine("Mouse Exit");
-                    if (Mouse.LButtonPressed && !mousePressedWhenEntered)
-                    {
-                        Point offset = Mouse.LDragOffset;
-                        if (Math.Abs(offset.X) >= Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS || Math.Abs(offset.Y) >= Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS)
-                        {
-                            GameActions.PickUp(item, startDrag.X, startDrag.Y);
-                        }
-                    }
-                };
-
-                _hit.MouseUp += (sender, e) =>
-                {
-                    Console.WriteLine("Mouse Up");
-                    if (e.Button == MouseButtonType.Left)
-                    {
-                        if (Client.Game.GameCursor.ItemHold.Enabled)
-                        {
-                            if (item.ItemData.IsContainer)
-                                GameActions.DropItem(Client.Game.GameCursor.ItemHold.Serial, 0xFFFF, 0xFFFF, 0, item);
-                            else if (item.ItemData.IsStackable && item.Graphic == Client.Game.GameCursor.ItemHold.Graphic)
-                                GameActions.DropItem(Client.Game.GameCursor.ItemHold.Serial, item.X, item.Y, 0, item);
-                            else
-                                GameActions.DropItem(Client.Game.GameCursor.ItemHold.Serial, item.X, item.Y, 0, container);
-                        }
-                        if (TargetManager.IsTargeting)
-                        {
-                            TargetManager.Target(item);
-                        }
-                        else
-                        {
-                            Point offset = Mouse.LDragOffset;
-                            if (Math.Abs(offset.X) < Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS && Math.Abs(offset.Y) < Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS)
-                            {
-                                DelayedObjectClickManager.Set(item, X + GRID_ITEM_SIZE, Y + GRID_ITEM_SIZE, 1);
-                            }
-                        }
-                    }
-                    else if (e.Button == MouseButtonType.Right)
-                    {
-                        //Possibly menu for locking a slot?
-                    }
-                };
-
-                _hit.MouseDoubleClick += (sender, e) =>
-                {
-                    Console.WriteLine("Mouse D click");
-                    GameActions.DoubleClick(item);
-                    e.Result = true;
-                };
+                _hit.SetTooltip(_item);
+                _hit.MouseEnter += _hit_MouseEnter;
+                _hit.MouseExit += _hit_MouseExit;
+                _hit.MouseUp += _hit_MouseUp;
+                _hit.MouseDoubleClick += _hit_MouseDoubleClick;
 
                 WantUpdateSize = false;
+            }
+
+            private void _hit_MouseDoubleClick(object sender, MouseDoubleClickEventArgs e)
+            {
+                Console.WriteLine("Mouse D click");
+                GameActions.DoubleClick(_item);
+                e.Result = true;
+            }
+
+            private void _hit_MouseUp(object sender, MouseEventArgs e)
+            {
+                Console.WriteLine("Mouse Up");
+                if (e.Button == MouseButtonType.Left)
+                {
+                    if (Client.Game.GameCursor.ItemHold.Enabled)
+                    {
+                        if (_item.ItemData.IsContainer)
+                            GameActions.DropItem(Client.Game.GameCursor.ItemHold.Serial, 0xFFFF, 0xFFFF, 0, _item);
+                        else if (_item.ItemData.IsStackable && _item.Graphic == Client.Game.GameCursor.ItemHold.Graphic)
+                            GameActions.DropItem(Client.Game.GameCursor.ItemHold.Serial, _item.X, _item.Y, 0, _item);
+                        else
+                            GameActions.DropItem(Client.Game.GameCursor.ItemHold.Serial, _item.X, _item.Y, 0, _item);
+                    }
+                    if (TargetManager.IsTargeting)
+                    {
+                        TargetManager.Target(_item);
+                    }
+                    else
+                    {
+                        Point offset = Mouse.LDragOffset;
+                        if (Math.Abs(offset.X) < Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS && Math.Abs(offset.Y) < Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS)
+                        {
+                            DelayedObjectClickManager.Set(_item, X + GRID_ITEM_SIZE, Y + GRID_ITEM_SIZE, 1);
+                        }
+                    }
+                }
+                else if (e.Button == MouseButtonType.Right)
+                {
+                    //Possibly menu for locking a slot?
+                }
+            }
+
+            private void _hit_MouseExit(object sender, MouseEventArgs e)
+            {
+                Console.WriteLine("Mouse Exit");
+                if (Mouse.LButtonPressed && !mousePressedWhenEntered)
+                {
+                    Point offset = Mouse.LDragOffset;
+                    if (Math.Abs(offset.X) >= Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS || Math.Abs(offset.Y) >= Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS)
+                    {
+                        GameActions.PickUp(_item, e.X, e.Y);
+                    }
+                }
+            }
+
+            private void _hit_MouseEnter(object sender, MouseEventArgs e)
+            {
+                Console.WriteLine("Mouse Entered");
+                if (Mouse.LButtonPressed)
+                    mousePressedWhenEntered = true;
+                else
+                    mousePressedWhenEntered = false;
             }
 
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
