@@ -33,14 +33,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
-using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
-using ClassicUO.Resources;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
@@ -477,6 +476,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _hit.MouseEnter += (sender, e) =>
                 {
+                    Console.WriteLine("Mouse Entered");
                     if (Mouse.LButtonPressed)
                         mousePressedWhenEntered = true;
                     else
@@ -485,6 +485,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _hit.MouseExit += (sender, e) =>
                 {
+                    Console.WriteLine("Mouse Exit");
                     if (Mouse.LButtonPressed && !mousePressedWhenEntered)
                     {
                         Point offset = Mouse.LDragOffset;
@@ -497,6 +498,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _hit.MouseUp += (sender, e) =>
                 {
+                    Console.WriteLine("Mouse Up");
                     if (e.Button == MouseButtonType.Left)
                     {
                         if (Client.Game.GameCursor.ItemHold.Enabled)
@@ -523,12 +525,13 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                     else if (e.Button == MouseButtonType.Right)
                     {
-                        //Context menu
+                        //Possibly menu for locking a slot?
                     }
                 };
 
                 _hit.MouseDoubleClick += (sender, e) =>
                 {
+                    Console.WriteLine("Mouse D click");
                     GameActions.DoubleClick(item);
                     e.Result = true;
                 };
