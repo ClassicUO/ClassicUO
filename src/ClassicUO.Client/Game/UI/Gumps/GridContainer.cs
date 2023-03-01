@@ -33,6 +33,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
@@ -65,6 +66,7 @@ namespace ClassicUO.Game.UI.Gumps
         private ScrollArea _scrollArea;
         private static int lastWidth = DEFAULT_WIDTH;
         private static int lastHeight = DEFAULT_HEIGHT;
+        private readonly StbTextBox _searchBox;
 
         public GridContainer(uint local) : base(DEFAULT_WIDTH, DEFAULT_HEIGHT, DEFAULT_WIDTH, DEFAULT_HEIGHT, local, 0)
         {
@@ -100,6 +102,21 @@ namespace ClassicUO.Game.UI.Gumps
                     Y = 2
                 }
             );
+
+            Add(
+                _searchBox = new StbTextBox(0xFF, 20, 100, true, FontStyle.Solid, 0x0481)
+                {
+                    X = _containerNameLabel.Width + 5,
+                    Y = 2,
+                    Multiline = false,
+                    Width = 100,
+                    Height = 20
+                }
+            );
+            _searchBox.TextChanged += (sender, e) =>
+            {
+                UpdateContents();
+            };
 
 
             updateScrollArea();
@@ -171,10 +188,14 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 List<Item> sortedContents = contents.OrderBy((x) => x.Name).ToList<Item>();
 
-                //for (LinkedObject i = _container.Items; i != null; i = i.Next)
-                //{
-                foreach(Item it in sortedContents) { 
-                    //Item it = (Item)i;
+
+                if (_searchBox.Text != "")
+                {
+                    sortedContents = sortedContents.FindAll((x) => x.Name.ToLower().Contains(_searchBox.Text.ToLower()));
+                }
+
+                foreach (Item it in sortedContents)
+                {
 
                     GridItem gridItem = new GridItem(it, GRID_ITEM_SIZE, _container);
 
@@ -265,6 +286,7 @@ namespace ClassicUO.Game.UI.Gumps
         private class GridItem : Control
         {
             private readonly HitBox _hit;
+            private bool mousePressedWhenEntered = false;
 
             public GridItem(uint serial, int size, Item container)
             {
@@ -304,9 +326,16 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _hit.SetTooltip(item);
 
+                _hit.MouseEnter += (sender, e) => {
+                    if (Mouse.LButtonPressed)
+                        mousePressedWhenEntered = true;
+                    else
+                        mousePressedWhenEntered = false;
+                };
+
                 _hit.MouseExit += (sender, e) =>
                 {
-                    if (Mouse.LButtonPressed)
+                    if (Mouse.LButtonPressed && !mousePressedWhenEntered)
                     {
                         Point offset = Mouse.LDragOffset;
                         if (Math.Abs(offset.X) >= Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS || Math.Abs(offset.Y) >= Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS)
@@ -338,6 +367,7 @@ namespace ClassicUO.Game.UI.Gumps
                             Point offset = Mouse.LDragOffset;
                             if (Math.Abs(offset.X) < Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS && Math.Abs(offset.Y) < Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS)
                             {
+                                GameActions.OpenPopupMenu(item);
                                 //GameActions.SingleClick(item);
                             }
                         }
