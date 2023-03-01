@@ -34,7 +34,7 @@ using System;
 using System.Collections.Generic;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
-using ClassicUO.IO.Resources;
+using ClassicUO.Assets;
 using ClassicUO.Utility;
 
 namespace ClassicUO.Game.GameObjects

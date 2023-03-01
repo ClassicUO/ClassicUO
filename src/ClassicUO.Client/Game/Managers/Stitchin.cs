@@ -1,4 +1,5 @@
-﻿using ClassicUO.Game.Data;
+﻿using ClassicUO.Assets;
+using ClassicUO.Game.Data;
 using ClassicUO.IO;
 using ClassicUO.Utility.Logging;
 using System;

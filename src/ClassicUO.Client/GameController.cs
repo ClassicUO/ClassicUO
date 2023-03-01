@@ -30,10 +30,7 @@
 
 #endregion
 
-using System;
-using System.IO;
-using System.Runtime.CompilerServices;
-using System.Threading;
+using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
@@ -42,7 +39,6 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
-using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Resources;
@@ -50,7 +46,10 @@ using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using SDL2;
+using System;
+using System.IO;
+using System.Runtime.CompilerServices;
+using System.Threading;
 using static SDL2.SDL;
 
 namespace ClassicUO
@@ -148,7 +147,10 @@ namespace ClassicUO
 
             MapLoader.MapsLayouts = Settings.GlobalSettings.MapsLayouts;
 
-            IO.TextureAtlas.InitializeSharedTexture(GraphicsDevice);
+            Fonts.Initialize(GraphicsDevice);
+            SolidColorTextureCache.Initialize(GraphicsDevice);
+
+            TextureAtlas.InitializeSharedTexture(GraphicsDevice);
             GumpsLoader.Instance.CreateAtlas(GraphicsDevice);
             LightsLoader.Instance.CreateAtlas(GraphicsDevice);
             AnimationsLoader.Instance.CreateAtlas(GraphicsDevice);

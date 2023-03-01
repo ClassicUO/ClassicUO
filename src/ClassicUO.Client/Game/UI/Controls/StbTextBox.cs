@@ -35,7 +35,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using ClassicUO.Game.Managers;
 using ClassicUO.Input;
-using ClassicUO.IO.Resources;
+using ClassicUO.Assets;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;

@@ -32,7 +32,7 @@
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
-using ClassicUO.IO.Resources;
+using ClassicUO.Assets;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 

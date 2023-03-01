@@ -1,7 +1,7 @@
 ﻿using ClassicUO.Utility;
 using System.Collections.Generic;
 using System.IO;
-using static ClassicUO.IO.Resources.AnimationsLoader;
+using static ClassicUO.Assets.AnimationsLoader;
 
 namespace ClassicUO.Game.Data
 {

@@ -32,7 +32,7 @@
 
 using System;
 using ClassicUO.Game.UI.Controls;
-using ClassicUO.IO.Resources;
+using ClassicUO.Assets;
 using ClassicUO.Renderer;
 
 namespace ClassicUO.Game.UI.Gumps

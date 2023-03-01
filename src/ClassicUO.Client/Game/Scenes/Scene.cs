@@ -33,7 +33,7 @@
 using System;
 using ClassicUO.Game.Managers;
 using ClassicUO.Input;
-using ClassicUO.IO.Resources;
+using ClassicUO.Assets;
 using ClassicUO.Renderer;
 using SDL2;
 
@@ -61,7 +61,7 @@ namespace ClassicUO.Game.Scenes
 
         public virtual void Update()
         {           
-            Camera.Update(true);
+            Camera.Update(true, Time.Delta, Mouse.Position);
         }
 
         public virtual bool Draw(UltimaBatcher2D batcher)
