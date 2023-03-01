@@ -31,6 +31,8 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
@@ -57,15 +59,12 @@ namespace ClassicUO.Game.UI.Gumps
             + 15                   //The width of the scroll bar
             + (GRID_ITEM_SIZE * 4) //How many items to fit in left to right
             + (X_SPACING * 4)      //Spacing between each grid item(x4 items)
-            + 4;                   //Because the border acts weird
+            + 6;                   //Because the border acts weird
         private const int DEFAULT_HEIGHT = (BORDER_WIDTH * 2) + (GRID_ITEM_SIZE + Y_SPACING) * 4;
         private readonly Label _containerNameLabel;
         private ScrollArea _scrollArea;
         private static int lastWidth = DEFAULT_WIDTH;
         private static int lastHeight = DEFAULT_HEIGHT;
-
-        private bool tryDragContainer = false;
-        private Point pointDragContainer = new Point(0, 0);
 
         public GridContainer(uint local) : base(DEFAULT_WIDTH, DEFAULT_HEIGHT, DEFAULT_WIDTH, DEFAULT_HEIGHT, local, 0)
         {
@@ -118,7 +117,7 @@ namespace ClassicUO.Game.UI.Gumps
             _scrollArea = new ScrollArea(
                 _background.X,
                 _containerNameLabel.Height + _background.Y + 1,
-                _background.Width - 2,
+                _background.Width - BORDER_WIDTH,
                 _background.Height - BORDER_WIDTH - (_containerNameLabel.Height + 1),
                 true
                 );
@@ -134,26 +133,11 @@ namespace ClassicUO.Game.UI.Gumps
                     if (Client.Game.GameCursor.ItemHold.Enabled)
                     {
                         GameActions.DropItem(Client.Game.GameCursor.ItemHold.Serial, 0xFFFF, 0xFFFF, 0, _container);
-                    } else if (tryDragContainer) {
-                        if (pointDragContainer != e.Location)
-                        {
-                            this.InvokeDragBegin(e.Location);
-                        }
-                        tryDragContainer = false;
                     }
                 }
                 else if (e.Button == MouseButtonType.Right)
                 {
                     this.InvokeMouseCloseGumpWithRClick();
-                }
-            };
-
-            _scrollArea.MouseDown += (sender, e) =>
-            {
-                if (e.Button == MouseButtonType.Left)
-                {
-                    tryDragContainer = true;
-                    pointDragContainer = e.Location;
                 }
             };
 
@@ -178,27 +162,38 @@ namespace ClassicUO.Game.UI.Gumps
             int count = 0;
             int line = 1;
 
-            for (LinkedObject i = _container.Items; i != null; i = i.Next)
+            if (_container != null && _container.Items != null)
             {
-                Item it = (Item)i;
-
-                GridItem gridItem = new GridItem(it, GRID_ITEM_SIZE, _container);
-
-                if (x + GRID_ITEM_SIZE + X_SPACING >= _scrollArea.Width - 14) //14 is the scroll bar width
+                List<Item> contents = new List<Item>();
+                for (LinkedObject i = _container.Items; i != null; i = i.Next)
                 {
-                    x = X_SPACING;
-                    ++line;
-
-                    y += gridItem.Height + Y_SPACING;
-
+                    contents.Add((Item)i);
                 }
+                List<Item> sortedContents = contents.OrderBy((x) => x.Name).ToList<Item>();
 
-                gridItem.X = x + X_SPACING;
-                gridItem.Y = y;
-                _scrollArea.Add(gridItem);//, _pagesCount);
+                //for (LinkedObject i = _container.Items; i != null; i = i.Next)
+                //{
+                foreach(Item it in sortedContents) { 
+                    //Item it = (Item)i;
 
-                x += gridItem.Width + X_SPACING;
-                ++count;
+                    GridItem gridItem = new GridItem(it, GRID_ITEM_SIZE, _container);
+
+                    if (x + GRID_ITEM_SIZE + X_SPACING >= _scrollArea.Width - 14) //14 is the scroll bar width
+                    {
+                        x = X_SPACING;
+                        ++line;
+
+                        y += gridItem.Height + Y_SPACING;
+
+                    }
+
+                    gridItem.X = x + X_SPACING;
+                    gridItem.Y = y;
+                    _scrollArea.Add(gridItem);//, _pagesCount);
+
+                    x += gridItem.Width + X_SPACING;
+                    ++count;
+                }
             }
         }
 
@@ -274,8 +269,6 @@ namespace ClassicUO.Game.UI.Gumps
             public GridItem(uint serial, int size, Item container)
             {
                 Point startDrag = new Point(0, 0);
-                bool potentialDrag = false;
-
 
                 LocalSerial = serial;
 
@@ -309,28 +302,17 @@ namespace ClassicUO.Game.UI.Gumps
                 _hit = new HitBox(0, 0, size, size, null, 0f);
                 Add(_hit);
 
-                if (World.ClientFeatures.TooltipsEnabled)
-                {
-                    _hit.SetTooltip(item);
-                }
-
-
-                _hit.MouseDown += (sender, e) =>
-                {
-                    if (e.Button == MouseButtonType.Left)
-                    {
-                        startDrag = e.Location;
-                        potentialDrag = true;
-                    }
-                };
+                _hit.SetTooltip(item);
 
                 _hit.MouseExit += (sender, e) =>
                 {
-                    if (potentialDrag && startDrag != e.Location)
+                    if (Mouse.LButtonPressed)
                     {
-                        Console.WriteLine("Mouse Exit Event");
-                        GameActions.PickUp(item, startDrag.X, startDrag.Y);
-                        potentialDrag = false;
+                        Point offset = Mouse.LDragOffset;
+                        if (Math.Abs(offset.X) >= Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS || Math.Abs(offset.Y) >= Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS)
+                        {
+                            GameActions.PickUp(item, startDrag.X, startDrag.Y);
+                        }
                     }
                 };
 
@@ -352,8 +334,17 @@ namespace ClassicUO.Game.UI.Gumps
                             TargetManager.Target(item);
                         }
                         else
-                            GameActions.SingleClick(item);
-                        potentialDrag = false;
+                        {
+                            Point offset = Mouse.LDragOffset;
+                            if (Math.Abs(offset.X) < Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS && Math.Abs(offset.Y) < Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS)
+                            {
+                                //GameActions.SingleClick(item);
+                            }
+                        }
+                    }
+                    else if (e.Button == MouseButtonType.Right)
+                    {
+                        //Context menu
                     }
                 };
 
