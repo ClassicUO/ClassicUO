@@ -1071,10 +1071,10 @@ namespace ClassicUO.Network
 
         public static bool DecompressChunk
         (
-            Span<byte> src,
+            byte[] src,
             ref int srcOffset,
             int srcLength,
-            Span<byte> dest,
+            byte[] dest,
             int destOffset,
             out int destLength
         )
