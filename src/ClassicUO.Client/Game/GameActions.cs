@@ -266,11 +266,9 @@ namespace ClassicUO.Game
             ContainerGump backpackGump = UIManager.GetGump<ContainerGump>(backpack);
 
             #region GridContainer
-            UIManager.GetGump<GridContainer>(backpack);
-            #endregion
-
-            if (backpackGump == null)
+            if (UIManager.GetGump<GridContainer>(backpack) == null && backpackGump == null)
             {
+                #endregion
                 GameActions.DoubleClick(backpack);
             }
             else
@@ -508,9 +506,9 @@ namespace ClassicUO.Game
             }
 
             Client.Game.GameCursor.ItemHold.Clear();
-            Client.Game.GameCursor.ItemHold.Set(item, (ushort) amount, offset);
+            Client.Game.GameCursor.ItemHold.Set(item, (ushort)amount, offset);
             Client.Game.GameCursor.ItemHold.IsGumpTexture = is_gump;
-            Socket.Send_PickUpRequest(item, (ushort) amount);
+            Socket.Send_PickUpRequest(item, (ushort)amount);
 
             if (item.OnGround)
             {
@@ -769,11 +767,11 @@ namespace ClassicUO.Game
         {
             ref Ability ability = ref World.Player.Abilities[0];
 
-            if (((byte) ability & 0x80) == 0)
+            if (((byte)ability & 0x80) == 0)
             {
                 for (int i = 0; i < 2; i++)
                 {
-                    World.Player.Abilities[i] &= (Ability) 0x7F;
+                    World.Player.Abilities[i] &= (Ability)0x7F;
                 }
 
                 Socket.Send_UseCombatAbility((byte)ability);
@@ -783,18 +781,18 @@ namespace ClassicUO.Game
                 Socket.Send_UseCombatAbility(0);
             }
 
-            ability ^= (Ability) 0x80;
+            ability ^= (Ability)0x80;
         }
 
         public static void UseSecondaryAbility()
         {
             ref Ability ability = ref World.Player.Abilities[1];
 
-            if (((byte) ability & 0x80) == 0)
+            if (((byte)ability & 0x80) == 0)
             {
                 for (int i = 0; i < 2; i++)
                 {
-                    World.Player.Abilities[i] &= (Ability) 0x7F;
+                    World.Player.Abilities[i] &= (Ability)0x7F;
                 }
 
                 Socket.Send_UseCombatAbility((byte)ability);
@@ -804,7 +802,7 @@ namespace ClassicUO.Game
                 Socket.Send_UseCombatAbility(0);
             }
 
-            ability ^= (Ability) 0x80;
+            ability ^= (Ability)0x80;
         }
 
         public static void QuestArrow(bool rightClick)
