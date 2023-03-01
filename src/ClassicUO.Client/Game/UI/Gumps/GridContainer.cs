@@ -70,6 +70,7 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly NiceButton _openRegularGump;
         private ushort _ogContainer;
         private readonly bool _DEBUG = false;
+        private Dictionary<uint, Point> lockedSpots = new Dictionary<uint, Point>();
 
         public GridContainer(uint local, ushort ogContainer) : base(DEFAULT_WIDTH, DEFAULT_HEIGHT, DEFAULT_WIDTH, DEFAULT_HEIGHT, local, 0)
         {
