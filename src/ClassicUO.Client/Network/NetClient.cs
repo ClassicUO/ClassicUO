@@ -30,16 +30,15 @@
 
 #endregion
 
-using System;
-using System.Collections.Concurrent;
-using System.Linq;
-using System.Net;
-using System.Net.Sockets;
-using System.Text;
-using System.Threading.Tasks;
 using ClassicUO.Network.Encryption;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
+using System;
+using System.Collections.Concurrent;
+using System.IO;
+using System.Net;
+using System.Net.Sockets;
+using System.Threading.Tasks;
 
 namespace ClassicUO.Network
 {
@@ -55,17 +54,22 @@ namespace ClassicUO.Network
         private const int BUFF_SIZE = 0x10000;
 
         private bool _isCompressionEnabled;
-        private CircularBuffer _circularBuffer, _incompleteBuffer, _sendingBuffer;
         private ConcurrentQueue<byte[]> _pluginRecvQueue = new ConcurrentQueue<byte[]>();
-        private readonly bool _is_login_socket;
+        private readonly bool _isLoginSocket;
         private Socket _socket;
         private uint? _localIP;
+        private readonly MemoryStream _recvCompressedStream, _recvUncompressedStream, _recvCompressedUnfinishedStream, _sendStream;
 
 
         private NetClient(bool is_login_socket)
         {
-            _is_login_socket = is_login_socket;
+            _isLoginSocket = is_login_socket;
             Statistics = new NetStatistics(this);
+
+            _recvCompressedStream = new MemoryStream();
+            _recvUncompressedStream = new MemoryStream();
+            _recvCompressedUnfinishedStream = new MemoryStream();
+            _sendStream = new MemoryStream();
         }
 
 
@@ -159,9 +163,12 @@ namespace ClassicUO.Network
             _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             _socket.NoDelay = true; // it's important to disable the Nagle algo or it will cause lag
 
-            _circularBuffer = new CircularBuffer(BUFF_SIZE);
-            _incompleteBuffer = new CircularBuffer(512);
-            _sendingBuffer = new CircularBuffer(2048);
+
+            _recvCompressedStream.Seek(0, SeekOrigin.Begin);
+            _recvUncompressedStream.Seek(0, SeekOrigin.Begin);
+            _recvCompressedUnfinishedStream.Seek(0, SeekOrigin.Begin);
+            _sendStream.Seek(0, SeekOrigin.Begin);
+
             _pluginRecvQueue = new ConcurrentQueue<byte[]>();
             Statistics.Reset();
 
@@ -239,16 +246,12 @@ namespace ClassicUO.Network
             {
             }
 
-            Log.Trace($"Disconnected [{(_is_login_socket ? "login socket" : "game socket")}]");
+            Log.Trace($"Disconnected [{(_isLoginSocket ? "login socket" : "game socket")}]");
 
 
             _isCompressionEnabled = false;
             _socket = null;
-            _circularBuffer = null;
-            _incompleteBuffer = null;
-            _sendingBuffer = null;
             _localIP = null;
-            _sendingBuffer = null;
 
             if (error != 0)
             {
@@ -289,10 +292,10 @@ namespace ClassicUO.Network
 
                 if (!skip_encryption)
                 {
-                    EncryptionHelper.Encrypt(_is_login_socket, data, data, length);
+                    EncryptionHelper.Encrypt(_isLoginSocket, data, data, length);
                 }
 
-                _sendingBuffer.Enqueue(data.AsSpan(0, length));
+                _sendStream.Write(data, 0, length);
 
                 Statistics.TotalBytesSent += (uint)length;
                 Statistics.TotalPacketsSent++;
@@ -303,106 +306,100 @@ namespace ClassicUO.Network
         public void Update()
         {
             ProcessRecv();
-
-            while (_pluginRecvQueue.TryDequeue(out byte[] data) && data != null && data.Length != 0)
-            {
-                int length = PacketsTable.GetPacketLength(data[0]);
-                int offset = 1;
-
-                if (length == -1)
-                {
-                    if (data.Length < 3)
-                    {
-                        continue;
-                    }
-
-                    offset = 3;
-                }
-
-                PacketHandlers.Handlers.AnalyzePacket(data, offset, data.Length);
-            }
-
+            ExtractPackets();
+            ProcessPluginPackets();
             ProcessSend();
         }
 
         private void ExtractPackets()
         {
-            if (!IsConnected || _circularBuffer == null || _circularBuffer.Length <= 0)
+            if (!IsConnected || _recvUncompressedStream.Position <= 0)
             {
                 return;
             }
 
-            lock (_circularBuffer)
+            var length = (int)_recvUncompressedStream.Position;
+            var done = 0;
+
+            _recvUncompressedStream.Seek(0, SeekOrigin.Begin);
+            var packetBuffer = System.Buffers.ArrayPool<byte>.Shared.Rent(512);
+
+            while (done < length && IsConnected)
             {
-                int length = _circularBuffer.Length;
-                byte[] packetBuffer = System.Buffers.ArrayPool<byte>.Shared.Rent(512);
-
-                while (length > 0 && IsConnected)
+                if (!GetPacketInfo(_recvUncompressedStream, length, out int offset, out int packetlength))
                 {
-                    if (!GetPacketInfo(_circularBuffer, length, out int offset, out int packetlength))
-                    {
-                        break;
-                    }
-
-                    if (packetlength > 0)
-                    {
-                        if (packetlength > packetBuffer.Length)
-                        {
-                            System.Buffers.ArrayPool<byte>.Shared.Return(packetBuffer, false); // TODO: clear?
-                            packetBuffer = System.Buffers.ArrayPool<byte>.Shared.Rent(packetlength);
-                        }
-
-                        _circularBuffer.Dequeue(packetBuffer, 0, packetlength);
-
-                        if (CUOEnviroment.PacketLog)
-                        {
-                            LogPacket(packetBuffer, packetlength, false);
-                        }
-
-                        // TODO: the pluging function should allow Span<byte> or unsafe type only.
-                        // The current one is a bad style decision.
-                        // It will be fixed once the new plugin system is done.
-                        if (Plugin.ProcessRecvPacket(packetBuffer, ref packetlength))
-                        {
-                            PacketHandlers.Handlers.AnalyzePacket(packetBuffer, offset, packetlength);
-
-                            Statistics.TotalPacketsReceived++;
-                        }
-                    }
-
-                    length = _circularBuffer?.Length ?? 0;
+                    break;
                 }
 
-                System.Buffers.ArrayPool<byte>.Shared.Return(packetBuffer, false); // TODO: clear?
+                if ((length - done) < packetlength)
+                {
+                    // need more data
+                    break;
+                }
+
+                if (packetlength > packetBuffer.Length)
+                {
+                    System.Buffers.ArrayPool<byte>.Shared.Return(packetBuffer, false); // TODO: clear?
+                    packetBuffer = System.Buffers.ArrayPool<byte>.Shared.Rent(packetlength);
+                }
+
+                _ = _recvUncompressedStream.Read(packetBuffer, 0, packetlength);
+
+                if (CUOEnviroment.PacketLog)
+                {
+                    LogPacket(packetBuffer, packetlength, false);
+                }
+
+                // TODO: the pluging function should allow Span<byte> or unsafe type only.
+                // The current one is a bad style decision.
+                // It will be fixed once the new plugin system is done.
+                if (Plugin.ProcessRecvPacket(packetBuffer, ref packetlength))
+                {
+                    PacketHandlers.Handlers.AnalyzePacket(packetBuffer, offset, packetlength);
+
+                    Statistics.TotalPacketsReceived++;
+                }
+
+                done += packetlength;
             }
+
+            // if length < done the packet is not fully processed, so keep this data
+            _recvUncompressedStream.Seek(length - done, SeekOrigin.Begin);
+            System.Buffers.ArrayPool<byte>.Shared.Return(packetBuffer, false); // TODO: clear?
         }
 
-        private static bool GetPacketInfo(CircularBuffer buffer, int bufferLength, out int offset, out int length)
+        private static bool GetPacketInfo(MemoryStream buffer, int bufferLength, out int packetOffset, out int packetLen)
         {
             if (buffer == null || bufferLength <= 0)
             {
-                length = 0;
-                offset = 0;
+                packetLen = 0;
+                packetOffset = 0;
 
                 return false;
             }
 
-            length = PacketsTable.GetPacketLength(buffer[0]);
-            offset = 1;
+            packetLen = PacketsTable.GetPacketLength(buffer.ReadByte());
+            packetOffset = 1;
 
-            if (length == -1)
+            if (packetLen == -1)
             {
                 if (bufferLength < 3)
                 {
                     return false;
                 }
 
-                length = buffer[2] | (buffer[1] << 8);
+                var b0 = buffer.ReadByte();
+                var b1 = buffer.ReadByte();
 
-                offset = 3;
+                packetLen = b1 | (b0 << 8);
+
+                packetOffset = 3;
             }
 
-            return bufferLength >= length;
+            buffer.Seek(-packetOffset, SeekOrigin.Current);
+
+            return true;
+            //return bufferLength >= length;
         }
 
         private void ProcessRecv()
@@ -428,80 +425,98 @@ namespace ClassicUO.Network
 
             const int SIZE_TO_READ = 4096;
 
-            byte[] buffer = System.Buffers.ArrayPool<byte>.Shared.Rent((_incompleteBuffer.Length + SIZE_TO_READ) * 4 + 2);
 
-            while (available > 0)
-            { 
+            var buffer = System.Buffers.ArrayPool<byte>.Shared.Rent(SIZE_TO_READ);
+            try
+            {
+                while (available > 0)
+                {
+                    var toRead = Math.Min(SIZE_TO_READ, available);
+                    var received = _socket.Receive(buffer, 0, toRead, SocketFlags.None, out var errorCode);
+
+                    // TODO: add a check if the toRead != received ??
+                    available -= toRead;
+
+                    if (errorCode != SocketError.Success)
+                    {
+                        break;
+                    }
+
+                    if (received <= 0)
+                    {
+                        break;
+                    }
+
+                    Statistics.TotalBytesReceived += (uint)received;
+                    _recvCompressedStream.Write(buffer, 0, received);
+                }
+
+
+                var pos = (int)_recvCompressedStream.Position;
+
+                if (pos == 0 || pos < available)
+                {
+                    // ERROR
+                }
+
+                var compressedBuffer = System.Buffers.ArrayPool<byte>.Shared.Rent(0x10000); // pos?
+
                 try
                 {
-                    int wanted = Math.Min(SIZE_TO_READ, available);
-                    int received = _socket.Receive(buffer, 0, wanted, SocketFlags.None, out var errorCode);
+                    _recvCompressedStream.Seek(0, SeekOrigin.Begin);
+                    _ = _recvCompressedStream.Read(compressedBuffer, 0, pos);
+                    _recvCompressedStream.Seek(0, SeekOrigin.Begin);
 
-                    if (received > 0 && errorCode == SocketError.Success)
-                    {
-                        available -= received;
+                    ProcessEncryption(compressedBuffer, pos);
+                    DecompressBuffer(compressedBuffer, ref pos);
 
-                        Statistics.TotalBytesReceived += (uint)received;
-
-                        if (!_is_login_socket)
-                        {
-                            EncryptionHelper.Decrypt(buffer, buffer, received);
-                        }
-
-                        if (_isCompressionEnabled)
-                        {
-                            DecompressBuffer(buffer, ref received);
-                        }
-
-                        _circularBuffer.Enqueue(buffer.AsSpan(0, received));
-
-                        ExtractPackets();
-                    }
-                    else
-                    {
-                        Log.Warn("Server sent 0 bytes. Closing connection");
-
-                        _logFile?.Write($"disconnection  -  received {received} bytes from server. ErrorCode: {errorCode}");
-
-                        Disconnect(SocketError.SocketError);
-
-                        break;
-                    }
+                    _recvUncompressedStream.Write(compressedBuffer, 0, pos);
                 }
-                catch (SocketException socketException)
+                finally
                 {
-                    Log.Error("socket error when receiving:\n" + socketException);
-
-                    _logFile?.Write($"disconnection  -  error while reading from socket: {socketException}");
-
-                    Disconnect(socketException.SocketErrorCode);
-
-                    break;
-                }
-                catch (Exception ex)
-                {
-                    if (ex.InnerException is SocketException socketEx)
-                    {
-                        Log.Error("socket error when receiving:\n" + socketEx);
-                        _logFile?.Write($"disconnection  -  error while reading from socket [1]: {socketEx}");
-
-                        Disconnect(socketEx.SocketErrorCode);
-
-                        break;
-                    }
-                    else
-                    {
-                        Log.Error("fatal error when receiving:\n" + ex);
-                        _logFile?.Write($"disconnection  -  error while reading from socket [2]: {ex}");
-
-                        Disconnect();
-
-                        throw;
-                    }
+                    System.Buffers.ArrayPool<byte>.Shared.Return(compressedBuffer);
                 }
             }
+            catch (SocketException socketEx)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+            finally
+            {
+                System.Buffers.ArrayPool<byte>.Shared.Return(buffer);
+            }
+        }
 
-            System.Buffers.ArrayPool<byte>.Shared.Return(buffer, false); // TODO: clear?
+        private void ProcessEncryption(byte[] buffer, int received)
+        {
+            if (_isLoginSocket) return;
+
+            EncryptionHelper.Decrypt(buffer, buffer, received);
+        }
+
+        private void ProcessPluginPackets()
+        {
+            while (_pluginRecvQueue.TryDequeue(out byte[] data) && data != null && data.Length != 0)
+            {
+                int length = PacketsTable.GetPacketLength(data[0]);
+                int offset = 1;
+
+                if (length == -1)
+                {
+                    if (data.Length < 3)
+                    {
+                        continue;
+                    }
+
+                    offset = 3;
+                }
+
+                PacketHandlers.Handlers.AnalyzePacket(data, offset, data.Length);
+            }
         }
 
         private void ProcessSend()
@@ -518,28 +533,21 @@ namespace ClassicUO.Network
                 return;
             }
 
-            int length = _sendingBuffer.Length;
+            var length = (int)_sendStream.Position;
 
             if (length <= 0)
             {
                 return;
             }
 
+            _sendStream.Seek(0, SeekOrigin.Begin);
+            var buffer = System.Buffers.ArrayPool<byte>.Shared.Rent(length);
+
             try
             {
-                while (length > 0)
-                {
-                    int read = _sendingBuffer.DequeSegment(length, out var segment);
-
-                    if (segment.Count <= 0)
-                    {
-                        break;
-                    }
-
-                    int sent = _socket.Send(segment.Array, segment.Offset, read, SocketFlags.None);
-
-                    length -= read;
-                }
+                var read = _sendStream.Read(buffer, 0, length);
+                var sent = _socket.Send(buffer, 0, read, SocketFlags.None);
+                _sendStream.Seek(0, SeekOrigin.Begin);
             }
             catch (SocketException ex)
             {
@@ -569,53 +577,62 @@ namespace ClassicUO.Network
                     throw;
                 }
             }
+            finally
+            {
+                System.Buffers.ArrayPool<byte>.Shared.Return(buffer);
+            }
         }
 
-        private void DecompressBuffer(Span<byte> buffer, ref int length)
+        private void DecompressBuffer(byte[] buffer, ref int length)
         {
-            int incompletelength = _incompleteBuffer.Length;
-            int sourcelength = incompletelength + length;
-            int arrayLen = sourcelength * 4 + 2;
+            if (!_isCompressionEnabled) return;
 
-            byte[] sourceBufferObj = null;
-            Span<byte> source = arrayLen <= 1024 ? stackalloc byte[1024] : (sourceBufferObj = System.Buffers.ArrayPool<byte>.Shared.Rent(arrayLen)).AsSpan(0, arrayLen);
+            const int HUFFMAN_BUFFER_LEN = 0x10000;
 
-            if (incompletelength > 0)
+            var source = System.Buffers.ArrayPool<byte>.Shared.Rent(HUFFMAN_BUFFER_LEN);
+
+            try
             {
-                _incompleteBuffer.Dequeue(source, 0, incompletelength);
-                _incompleteBuffer.Clear();
+                var incompletelength = (int)_recvCompressedUnfinishedStream.Position;
+                var sourcelength = incompletelength + length;
+
+                if (incompletelength > 0)
+                {
+                    _recvCompressedUnfinishedStream.Seek(0, SeekOrigin.Begin);
+                    _recvCompressedUnfinishedStream.Read(source, 0, incompletelength);
+                    _recvCompressedUnfinishedStream.Seek(0, SeekOrigin.Begin);
+                }
+
+                Buffer.BlockCopy(buffer, 0, source, incompletelength, length);
+
+                int processedOffset = 0;
+                int sourceOffset = 0;
+                int offset = 0;
+
+                while (Huffman.DecompressChunk
+                (
+                    source,
+                    ref sourceOffset,
+                    sourcelength,
+                    buffer,
+                    offset,
+                    out int outSize
+                ))
+                {
+                    processedOffset = sourceOffset;
+                    offset += outSize;
+                }
+
+                length = offset;
+
+                if (processedOffset < sourcelength)
+                {
+                    _recvCompressedUnfinishedStream.Write(source, processedOffset, sourcelength - processedOffset);
+                }
             }
-
-            buffer.Slice(0, length).CopyTo(source.Slice(incompletelength));
-            
-            int processedOffset = 0;
-            int sourceOffset = 0;
-            int offset = 0;
-
-            while (Huffman.DecompressChunk
-            (
-                source,
-                ref sourceOffset,
-                sourcelength,
-                buffer,
-                offset,
-                out int outSize
-            ))
+            finally
             {
-                processedOffset = sourceOffset;
-                offset += outSize;
-            }
-
-            length = offset;
-
-            if (processedOffset < sourcelength)
-            {
-                _incompleteBuffer.Enqueue(source, processedOffset, sourcelength - processedOffset);
-            }
-
-            if (sourceBufferObj != null)
-            {
-                System.Buffers.ArrayPool<byte>.Shared.Return(sourceBufferObj, false); // TODO: clear?
+                System.Buffers.ArrayPool<byte>.Shared.Return(source, false); // TODO: clear?
             }
         }
 
