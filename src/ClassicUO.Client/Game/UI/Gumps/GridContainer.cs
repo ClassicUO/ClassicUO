@@ -40,6 +40,7 @@ using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+using ClassicUO.Resources;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
@@ -67,9 +68,12 @@ namespace ClassicUO.Game.UI.Gumps
         private static int lastWidth = DEFAULT_WIDTH;
         private static int lastHeight = DEFAULT_HEIGHT;
         private readonly StbTextBox _searchBox;
+        private readonly NiceButton _openRegularGump;
+        private static ushort _ogContainer;
 
-        public GridContainer(uint local) : base(DEFAULT_WIDTH, DEFAULT_HEIGHT, DEFAULT_WIDTH, DEFAULT_HEIGHT, local, 0)
+        public GridContainer(uint local, ushort ogContainer) : base(DEFAULT_WIDTH, DEFAULT_HEIGHT, DEFAULT_WIDTH, DEFAULT_HEIGHT, local, 0)
         {
+            _ogContainer = ogContainer;
             _container = World.Items.Get(local);
 
             if (_container == null)
@@ -103,21 +107,39 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             );
 
-            Add(
-                _searchBox = new StbTextBox(0xFF, 20, 100, true, FontStyle.Solid, 0x0481)
-                {
-                    X = _containerNameLabel.Width + 5,
-                    Y = 2,
-                    Multiline = false,
-                    Width = 100,
-                    Height = 20
-                }
-            );
+            _searchBox = new StbTextBox(0xFF, 20, 100, true, FontStyle.Solid, 0x0481)
+            {
+                X = _containerNameLabel.Width + 5,
+                Y = BORDER_WIDTH,
+                Multiline = false,
+                Width = 100,
+                Height = 20
+            };
             _searchBox.TextChanged += (sender, e) =>
             {
                 UpdateContents();
             };
 
+            Add(
+                new AlphaBlendControl(0.5f)
+                {
+                    Hue = 0x0481,
+                    X = _searchBox.X,
+                    Y = _searchBox.Y,
+                    Width = _searchBox.Width,
+                    Height = _searchBox.Height
+                }
+            );
+            Add(_searchBox);
+
+            _openRegularGump = new NiceButton(Width - 20 - BORDER_WIDTH, BORDER_WIDTH, 20, 20, ButtonAction.Activate, "[X]", 1, TEXT_ALIGN_TYPE.TS_CENTER, 0x0481)
+            {
+                ButtonParameter = 1,
+                IsSelectable = false,
+            };
+            _openRegularGump.SetTooltip("Open the original style container");
+            
+            Add(_openRegularGump);
 
             updateScrollArea();
         }
@@ -166,6 +188,132 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void OnButtonClick(int buttonID)
         {
+            switch (buttonID)
+            {
+                case 1:
+                    OpenOldContainer(_container);
+                    break;
+            }
+        }
+
+        private void OpenOldContainer(uint serial)
+        {
+            ContainerGump container = UIManager.GetGump<ContainerGump>(serial);
+            bool playsound = false;
+            int x, y;
+            Item item = World.Items.Get<Item>(serial);
+
+            if (item == null || item.IsDestroyed) return;
+
+            ushort graphic = _ogContainer;
+            if (Client.Version >= Utility.ClientVersion.CV_706000 && ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.UseLargeContainerGumps)
+            {
+                GumpsLoader loader = GumpsLoader.Instance;
+
+                switch (graphic)
+                {
+                    case 0x0048:
+                        if (loader.GetGumpTexture(0x06E8, out _) != null)
+                        {
+                            graphic = 0x06E8;
+                        }
+
+                        break;
+
+                    case 0x0049:
+                        if (loader.GetGumpTexture(0x9CDF, out _) != null)
+                        {
+                            graphic = 0x9CDF;
+                        }
+
+                        break;
+
+                    case 0x0051:
+                        if (loader.GetGumpTexture(0x06E7, out _) != null)
+                        {
+                            graphic = 0x06E7;
+                        }
+
+                        break;
+
+                    case 0x003E:
+                        if (loader.GetGumpTexture(0x06E9, out _) != null)
+                        {
+                            graphic = 0x06E9;
+                        }
+
+                        break;
+
+                    case 0x004D:
+                        if (loader.GetGumpTexture(0x06EA, out _) != null)
+                        {
+                            graphic = 0x06EA;
+                        }
+
+                        break;
+
+                    case 0x004E:
+                        if (loader.GetGumpTexture(0x06E6, out _) != null)
+                        {
+                            graphic = 0x06E6;
+                        }
+
+                        break;
+
+                    case 0x004F:
+                        if (loader.GetGumpTexture(0x06E5, out _) != null)
+                        {
+                            graphic = 0x06E5;
+                        }
+
+                        break;
+
+                    case 0x004A:
+                        if (loader.GetGumpTexture(0x9CDD, out _) != null)
+                        {
+                            graphic = 0x9CDD;
+                        }
+
+                        break;
+
+                    case 0x0044:
+                        if (loader.GetGumpTexture(0x9CE3, out _) != null)
+                        {
+                            graphic = 0x9CE3;
+                        }
+
+                        break;
+                }
+            }
+
+
+            if (container != null)
+            {
+                x = container.ScreenCoordinateX;
+                y = container.ScreenCoordinateY;
+                container.Dispose();
+            }
+            else
+            {
+                ContainerManager.CalculateContainerPosition(serial, graphic);
+                x = ContainerManager.X;
+                y = ContainerManager.Y;
+                playsound = true;
+            }
+
+
+            UIManager.Add
+            (
+                new ContainerGump(item, graphic, playsound)
+                {
+                    X = x,
+                    Y = y,
+                    InvalidateContents = true
+                }
+            );
+
+            UIManager.RemovePosition(serial);
+            this.Dispose();
         }
 
         private void updateItems()
@@ -222,6 +370,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             updateScrollArea();
             updateItems();
+            _openRegularGump.X = Width - 20 - (BORDER_WIDTH*2);
             lastHeight = Height;
             lastWidth = Width;
         }
@@ -326,7 +475,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _hit.SetTooltip(item);
 
-                _hit.MouseEnter += (sender, e) => {
+                _hit.MouseEnter += (sender, e) =>
+                {
                     if (Mouse.LButtonPressed)
                         mousePressedWhenEntered = true;
                     else
