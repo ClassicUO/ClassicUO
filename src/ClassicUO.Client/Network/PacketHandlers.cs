@@ -5989,6 +5989,14 @@ namespace ClassicUO.Network
                             ((ContainerGump)gump).CheckItemControlPosition(item);
                         }
 
+                        #region GridContainer
+                        GridContainer gridGump = UIManager.GetGump<GridContainer>(containerSerial);
+                        if(gridGump != null)
+                        {
+                            gridGump.RequestUpdateContents();
+                        }
+                        #endregion
+
                         if (ProfileManager.CurrentProfile.GridLootType > 0)
                         {
                             GridLootGump grid_gump = UIManager.GetGump<GridLootGump>(containerSerial);

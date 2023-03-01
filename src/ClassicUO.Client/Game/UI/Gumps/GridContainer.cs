@@ -58,17 +58,18 @@ namespace ClassicUO.Game.UI.Gumps
         private const int DEFAULT_WIDTH =
             (BORDER_WIDTH * 2)     //The borders around the container, one on the left and one on the right
             + 15                   //The width of the scroll bar
-            + (GRID_ITEM_SIZE * 4) //How many items to fit in left to right
-            + (X_SPACING * 4)      //Spacing between each grid item(x4 items)
+            + (GRID_ITEM_SIZE * 5) //How many items to fit in left to right
+            + (X_SPACING * 5)      //Spacing between each grid item(x4 items)
             + 6;                   //Because the border acts weird
-        private const int DEFAULT_HEIGHT = (BORDER_WIDTH * 2) + (GRID_ITEM_SIZE + Y_SPACING) * 4;
+        private const int DEFAULT_HEIGHT = 27 + (BORDER_WIDTH * 2) + (GRID_ITEM_SIZE + Y_SPACING) * 4;
         private readonly Label _containerNameLabel;
         private GridScrollArea _scrollArea;
-        private static int lastWidth = DEFAULT_WIDTH;
-        private static int lastHeight = DEFAULT_HEIGHT;
+        private static int _lastWidth = DEFAULT_WIDTH;
+        private static int _lastHeight = DEFAULT_HEIGHT;
         private readonly StbTextBox _searchBox;
         private readonly NiceButton _openRegularGump;
         private static ushort _ogContainer;
+        private readonly bool _DEBUG = false;
 
         public GridContainer(uint local, ushort ogContainer) : base(DEFAULT_WIDTH, DEFAULT_HEIGHT, DEFAULT_WIDTH, DEFAULT_HEIGHT, local, 0)
         {
@@ -114,7 +115,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Width = 100,
                 Height = 20
             };
-            _searchBox.TextChanged += (sender, e) => { UpdateContents(); };
+            _searchBox.TextChanged += (sender, e) => { updateItems(); };
             _searchBox.DragBegin += (sender, e) => { InvokeDragBegin(e.Location); };
 
             Add(new AlphaBlendControl(0.5f)
@@ -147,6 +148,7 @@ namespace ClassicUO.Game.UI.Gumps
             _scrollArea.MouseUp += _scrollArea_MouseUp;
             _scrollArea.DragBegin += _scrollArea_DragBegin;
             Add(_scrollArea);
+            InvalidateContents = true;
         }
 
         private void _scrollArea_DragBegin(object sender, MouseEventArgs e)
@@ -160,7 +162,11 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (Client.Game.GameCursor.ItemHold.Enabled)
                 {
-                    GameActions.DropItem(Client.Game.GameCursor.ItemHold.Serial, 0xFFFF, 0xFFFF, 0, _container);
+                    if (_DEBUG)
+                        Console.WriteLine("Scroll Area Mouse Up Item Drop");
+                    GameActions.DropItem(Client.Game.GameCursor.ItemHold.Serial, 0xFFFF, 0xFFFF, 0, _container.Serial);
+                    InvalidateContents = true;
+                    UpdateContents();
                 }
             }
             else if (e.Button == MouseButtonType.Right)
@@ -301,6 +307,8 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void updateItems()
         {
+            if (_DEBUG)
+                Console.WriteLine($"{Width}x{Height} Update Items called");
             int x = X_SPACING;
             int y = Y_SPACING;
             _background.Width = Width - (BORDER_WIDTH * 2);
@@ -312,7 +320,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             int count = 0;
             int line = 1;
-
             if (_container != null && _container.Items != null)
             {
                 List<Item> contents = new List<Item>();
@@ -330,8 +337,9 @@ namespace ClassicUO.Game.UI.Gumps
 
                 foreach (Item it in sortedContents)
                 {
-
-                    GridItem gridItem = new GridItem(it, GRID_ITEM_SIZE, _container);
+                    if (_DEBUG)
+                        Console.Write($"[{it.Name}]");
+                    GridItem gridItem = new GridItem(it, GRID_ITEM_SIZE, _container, this);
 
                     if (x + GRID_ITEM_SIZE + X_SPACING >= _scrollArea.Width - 14) //14 is the scroll bar width
                     {
@@ -350,14 +358,16 @@ namespace ClassicUO.Game.UI.Gumps
                     ++count;
                 }
             }
+            InvalidateContents = false;
         }
 
         protected override void UpdateContents()
         {
-            updateItems();
+            if (_DEBUG)
+                Console.WriteLine("contents called");
+            if (InvalidateContents && !IsDisposed && IsVisible)
+                updateItems();
             _openRegularGump.X = Width - 20 - (BORDER_WIDTH * 2);
-            lastHeight = Height;
-            lastWidth = Width;
         }
 
         public override void Dispose()
@@ -399,10 +409,13 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
-            if (lastWidth != Width || lastHeight != Height)
+            if (_lastWidth != Width || _lastHeight != Height)
             {
                 _scrollArea.Width = _background.Width - BORDER_WIDTH;
                 _scrollArea.Height = _background.Height - BORDER_WIDTH - (_containerNameLabel.Height + 1);
+                _lastHeight = Height;
+                _lastWidth = Width;
+                RequestUpdateContents();
                 UpdateContents();
             }
 
@@ -424,9 +437,14 @@ namespace ClassicUO.Game.UI.Gumps
             private readonly HitBox _hit;
             private bool mousePressedWhenEntered = false;
             private readonly Item _item;
+            private readonly GridContainer _gridContainer;
+            private readonly Item _container;
+            private readonly bool _DEBUG = false;
 
-            public GridItem(uint serial, int size, Item container)
+            public GridItem(uint serial, int size, Item container, GridContainer gridContainer)
             {
+                _container = container;
+                _gridContainer = gridContainer;
                 Point startDrag = new Point(0, 0);
 
                 LocalSerial = serial;
@@ -472,26 +490,30 @@ namespace ClassicUO.Game.UI.Gumps
 
             private void _hit_MouseDoubleClick(object sender, MouseDoubleClickEventArgs e)
             {
-                Console.WriteLine("Mouse D click");
+                if (_DEBUG)
+                    Console.WriteLine("Mouse D click");
                 GameActions.DoubleClick(_item);
                 e.Result = true;
             }
 
             private void _hit_MouseUp(object sender, MouseEventArgs e)
             {
-                Console.WriteLine("Mouse Up");
-                if (e.Button == MouseButtonType.Left)
+                if (_DEBUG)
+                    Console.WriteLine("Mouse Up");
+                if (e.Button == MouseButtonType.Left && Mouse.LDragOffset == Point.Zero)
                 {
                     if (Client.Game.GameCursor.ItemHold.Enabled)
                     {
                         if (_item.ItemData.IsContainer)
-                            GameActions.DropItem(Client.Game.GameCursor.ItemHold.Serial, 0xFFFF, 0xFFFF, 0, _item);
+                            GameActions.DropItem(Client.Game.GameCursor.ItemHold.Serial, 0xFFFF, 0xFFFF, 0, _item.Serial);
                         else if (_item.ItemData.IsStackable && _item.Graphic == Client.Game.GameCursor.ItemHold.Graphic)
-                            GameActions.DropItem(Client.Game.GameCursor.ItemHold.Serial, _item.X, _item.Y, 0, _item);
+                            GameActions.DropItem(Client.Game.GameCursor.ItemHold.Serial, _item.X, _item.Y, 0, _item.Serial);
                         else
-                            GameActions.DropItem(Client.Game.GameCursor.ItemHold.Serial, _item.X, _item.Y, 0, _item);
+                            GameActions.DropItem(Client.Game.GameCursor.ItemHold.Serial, 0xFFFF, 0xFFFF, 0, _container.Serial);
+                        _gridContainer.InvalidateContents = true;
+                        _gridContainer.UpdateContents();
                     }
-                    if (TargetManager.IsTargeting)
+                    else if (TargetManager.IsTargeting)
                     {
                         TargetManager.Target(_item);
                     }
@@ -512,7 +534,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             private void _hit_MouseExit(object sender, MouseEventArgs e)
             {
-                Console.WriteLine("Mouse Exit");
+                if (_DEBUG)
+                    Console.WriteLine("Mouse Exit");
                 if (Mouse.LButtonPressed && !mousePressedWhenEntered)
                 {
                     Point offset = Mouse.LDragOffset;
@@ -525,7 +548,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             private void _hit_MouseEnter(object sender, MouseEventArgs e)
             {
-                Console.WriteLine("Mouse Entered");
+                if (_DEBUG)
+                    Console.WriteLine("Mouse Entered");
                 if (Mouse.LButtonPressed)
                     mousePressedWhenEntered = true;
                 else
