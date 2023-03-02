@@ -489,13 +489,33 @@ namespace ClassicUO.Network
                     System.Buffers.ArrayPool<byte>.Shared.Return(compressedBuffer);
                 }
             }
-            catch (SocketException socketEx)
+            catch (SocketException ex)
             {
-                throw;
+                Log.Error("socket error when receving:\n" + ex);
+                _logFile?.Write($"disconnection  -  error when reading to the socket buffer: {ex}");
+
+                Disconnect(ex.SocketErrorCode);
             }
             catch (Exception ex)
             {
-                throw;
+                if (ex.InnerException is SocketException socketEx)
+                {
+                    Log.Error("main exception:\n" + ex);
+                    Log.Error("socket error when receving:\n" + socketEx);
+
+                    _logFile?.Write($"disconnection  -  error when reading to the socket buffer [2]: {socketEx}");
+                    Disconnect(socketEx.SocketErrorCode);
+                }
+                else
+                {
+                    Log.Error("fatal error when receving:\n" + ex);
+
+                    _logFile?.Write($"disconnection  -  error when reading to the socket buffer [3]: {ex}");
+
+                    Disconnect();
+
+                    throw;
+                }
             }
         }
 
