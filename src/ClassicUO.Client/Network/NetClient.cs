@@ -34,7 +34,6 @@ using ClassicUO.Network.Encryption;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using System;
-using System.Collections.Concurrent;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
@@ -54,11 +53,14 @@ namespace ClassicUO.Network
         private const int BUFF_SIZE = 0x10000;
 
         private bool _isCompressionEnabled;
-        private ConcurrentQueue<byte[]> _pluginRecvQueue = new ConcurrentQueue<byte[]>();
         private readonly bool _isLoginSocket;
         private Socket _socket;
         private uint? _localIP;
-        private readonly MemoryStream _recvCompressedStream, _recvUncompressedStream, _recvCompressedUnfinishedStream, _sendStream;
+        private readonly MemoryStream _recvCompressedStream,
+            _recvUncompressedStream,
+            _recvCompressedUnfinishedStream,
+            _sendStream,
+            _pluginPackets;
         private readonly byte[] _recvFixedBuffer = new byte[4096];
 
         private NetClient(bool is_login_socket)
@@ -70,6 +72,7 @@ namespace ClassicUO.Network
             _recvUncompressedStream = new MemoryStream();
             _recvCompressedUnfinishedStream = new MemoryStream();
             _sendStream = new MemoryStream();
+            _pluginPackets = new MemoryStream();
         }
 
 
@@ -122,12 +125,12 @@ namespace ClassicUO.Network
         {
             if (LoginSocket.IsDisposed && Socket.IsConnected)
             {
-                Socket._pluginRecvQueue.Enqueue(data);
+                Socket._pluginPackets.Write(data, 0, length);
                 Socket.Statistics.TotalPacketsReceived++;
             }
             else if (Socket.IsDisposed && LoginSocket.IsConnected)
             {
-                LoginSocket._pluginRecvQueue.Enqueue(data);
+                LoginSocket._pluginPackets.Write(data, 0, length);
                 LoginSocket.Statistics.TotalPacketsReceived++;
             }
             else
@@ -166,13 +169,13 @@ namespace ClassicUO.Network
                 _socket.NoDelay = true; // it's important to disable the Nagle algo or it will cause lag
                 _socket.LingerState.Enabled = true; // Close the socket gracefully without lingering.
             }
-            
+
             _recvCompressedStream.Seek(0, SeekOrigin.Begin);
             _recvUncompressedStream.Seek(0, SeekOrigin.Begin);
             _recvCompressedUnfinishedStream.Seek(0, SeekOrigin.Begin);
             _sendStream.Seek(0, SeekOrigin.Begin);
+            _pluginPackets.Seek(0, SeekOrigin.Begin);
 
-            _pluginRecvQueue = new ConcurrentQueue<byte[]>();
             Statistics.Reset();
 
             Status = ClientSocketStatus.Connecting;
@@ -214,7 +217,8 @@ namespace ClassicUO.Network
             }
         }
 
-        public void Disconnect() => Disconnect(SocketError.Success);
+        public void Disconnect()
+            => Disconnect(SocketError.Success);
 
         private void Disconnect(SocketError error)
         {
@@ -303,84 +307,95 @@ namespace ClassicUO.Network
         public void Update()
         {
             ProcessRecv();
-            ExtractPackets();
-            ProcessPluginPackets();
+
+            ExtractPackets(_recvUncompressedStream, true);
+            ExtractPackets(_pluginPackets, false);
+
             ProcessSend();
         }
 
-        private void ExtractPackets()
+        private void ExtractPackets(MemoryStream stream, bool allowPlugins)
         {
-            if (!IsConnected || _recvUncompressedStream.Position <= 0)
+            if (!IsConnected || stream.Position <= 0 || !stream.CanRead || !stream.CanSeek)
             {
                 return;
             }
 
-            var length = (int)_recvUncompressedStream.Position;
+            var length = (int)stream.Position;
             var done = 0;
 
-            _recvUncompressedStream.Seek(0, SeekOrigin.Begin);
-            var packetBuffer = System.Buffers.ArrayPool<byte>.Shared.Rent(512);
+            stream.Seek(0, SeekOrigin.Begin);
+            var packetBuffer = System.Buffers.ArrayPool<byte>.Shared.Rent(4096);
 
-            while (done < length && IsConnected)
+            try
             {
-                if (!GetPacketInfo(_recvUncompressedStream, length, out int offset, out int packetlength))
+                while (done < length)
                 {
-                    break;
+                    if (!GetPacketInfo(stream, length, out var packetID, out int offset, out int packetlength))
+                    {
+                        Log.Warn($"Invalid ID: {packetID:X2} | off: {offset} | len: {packetlength} | stream.pos: {stream.Position}/{stream.Length}");
+
+                        break;
+                    }
+
+                    if ((length - done) < packetlength)
+                    {
+                        // need more data
+                        break;
+                    }
+
+                    if (packetlength > packetBuffer.Length)
+                    {
+                        System.Buffers.ArrayPool<byte>.Shared.Return(packetBuffer, false); // TODO: clear?
+                        packetBuffer = System.Buffers.ArrayPool<byte>.Shared.Rent(packetlength);
+                    }
+
+                    _ = stream.Read(packetBuffer, 0, packetlength);
+
+                    if (CUOEnviroment.PacketLog)
+                    {
+                        LogPacket(packetBuffer, packetlength, false);
+                    }
+
+                    // TODO: the pluging function should allow Span<byte> or unsafe type only.
+                    // The current one is a bad style decision.
+                    // It will be fixed once the new plugin system is done.
+                    if (!allowPlugins || Plugin.ProcessRecvPacket(packetBuffer, ref packetlength))
+                    {
+                        PacketHandlers.Handlers.AnalyzePacket(packetBuffer, offset, packetlength);
+
+                        Statistics.TotalPacketsReceived++;
+                    }
+
+                    done += packetlength;
                 }
 
-                if ((length - done) < packetlength)
-                {
-                    // need more data
-                    break;
-                }
-
-                if (packetlength > packetBuffer.Length)
-                {
-                    System.Buffers.ArrayPool<byte>.Shared.Return(packetBuffer, false); // TODO: clear?
-                    packetBuffer = System.Buffers.ArrayPool<byte>.Shared.Rent(packetlength);
-                }
-
-                _ = _recvUncompressedStream.Read(packetBuffer, 0, packetlength);
-
-                if (CUOEnviroment.PacketLog)
-                {
-                    LogPacket(packetBuffer, packetlength, false);
-                }
-
-                // TODO: the pluging function should allow Span<byte> or unsafe type only.
-                // The current one is a bad style decision.
-                // It will be fixed once the new plugin system is done.
-                if (Plugin.ProcessRecvPacket(packetBuffer, ref packetlength))
-                {
-                    PacketHandlers.Handlers.AnalyzePacket(packetBuffer, offset, packetlength);
-
-                    Statistics.TotalPacketsReceived++;
-                }
-
-                done += packetlength;
+                // if length < done the packet is not fully processed, so keep this data
+                stream.Seek(length - done, SeekOrigin.Begin);
             }
-
-            // if length < done the packet is not fully processed, so keep this data
-            _recvUncompressedStream.Seek(length - done, SeekOrigin.Begin);
-            System.Buffers.ArrayPool<byte>.Shared.Return(packetBuffer, false); // TODO: clear?
+            finally
+            {
+                System.Buffers.ArrayPool<byte>.Shared.Return(packetBuffer, false); // TODO: clear?
+            }
         }
 
-        private static bool GetPacketInfo(MemoryStream buffer, int bufferLength, out int packetOffset, out int packetLen)
+        private static bool GetPacketInfo(MemoryStream buffer, int bufferLen, out byte packetID, out int packetOffset, out int packetLen)
         {
-            if (buffer == null || bufferLength <= 0)
+            if (buffer == null || bufferLen <= 0 || buffer.Position >= buffer.Length)
             {
+                packetID = 0xFF;
                 packetLen = 0;
                 packetOffset = 0;
 
                 return false;
             }
 
-            packetLen = PacketsTable.GetPacketLength(buffer.ReadByte());
+            packetLen = PacketsTable.GetPacketLength(packetID = (byte)buffer.ReadByte());
             packetOffset = 1;
 
             if (packetLen == -1)
             {
-                if (bufferLength < 3)
+                if (bufferLen < 3)
                 {
                     return false;
                 }
@@ -389,7 +404,6 @@ namespace ClassicUO.Network
                 var b1 = buffer.ReadByte();
 
                 packetLen = b1 | (b0 << 8);
-
                 packetOffset = 3;
             }
 
@@ -484,27 +498,6 @@ namespace ClassicUO.Network
             if (_isLoginSocket) return;
 
             EncryptionHelper.Decrypt(buffer, buffer, received);
-        }
-
-        private void ProcessPluginPackets()
-        {
-            while (_pluginRecvQueue.TryDequeue(out byte[] data) && data != null && data.Length != 0)
-            {
-                int length = PacketsTable.GetPacketLength(data[0]);
-                int offset = 1;
-
-                if (length == -1)
-                {
-                    if (data.Length < 3)
-                    {
-                        continue;
-                    }
-
-                    offset = 3;
-                }
-
-                PacketHandlers.Handlers.AnalyzePacket(data, offset, data.Length);
-            }
         }
 
         private void ProcessSend()
