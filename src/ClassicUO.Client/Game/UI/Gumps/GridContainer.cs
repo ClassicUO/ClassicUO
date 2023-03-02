@@ -167,7 +167,7 @@ namespace ClassicUO.Game.UI.Gumps
                 if (Client.Game.GameCursor.ItemHold.Enabled)
                 {
                     if (_DEBUG)
-                        Console.WriteLine("Scroll Area Mouse Up Item Drop");
+                        Console.WriteLine("_scrollArea MouseUp Item Drop");
                     GameActions.DropItem(Client.Game.GameCursor.ItemHold.Serial, 0xFFFF, 0xFFFF, 0, _container.Serial);
                     InvalidateContents = true;
                     UpdateContents();
@@ -312,7 +312,7 @@ namespace ClassicUO.Game.UI.Gumps
         private void updateItems()
         {
             if (_DEBUG)
-                Console.WriteLine($"{Width}x{Height} Update Items called");
+                Console.WriteLine("updateItems called");
             int x = X_SPACING;
             int y = Y_SPACING;
             _background.Width = Width - (BORDER_WIDTH * 2);
@@ -335,7 +335,6 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (_searchBox.Text != "")
                 {
-                    //sortedContents = sortedContents.FindAll((x) => x.Name.ToLower().Contains(_searchBox.Text.ToLower()));
                     List<Item> filteredContents = new List<Item>();
                     foreach (Item i in sortedContents)
                     {
@@ -417,7 +416,7 @@ namespace ClassicUO.Game.UI.Gumps
         protected override void UpdateContents()
         {
             if (_DEBUG)
-                Console.WriteLine("contents called");
+                Console.WriteLine("UpdateContents called");
             if (InvalidateContents && !IsDisposed && IsVisible)
                 updateItems();
             _openRegularGump.X = Width - 20 - (BORDER_WIDTH * 2);
@@ -554,11 +553,13 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         _gridContainer.lockedSpots.Add(slot, _item);
                         itemGridLocked = true;
+                        lockIconHit.SetTooltip("Unlock this slot");
                     }
                     else
                     {
                         _gridContainer.lockedSpots.Remove(slot);
                         itemGridLocked = false;
+                        lockIconHit.SetTooltip("Lock this item in this slot");
                     }
                 };
                 lockIcon.Add(lockIconHit);
@@ -571,7 +572,7 @@ namespace ClassicUO.Game.UI.Gumps
             private void _hit_MouseDoubleClick(object sender, MouseDoubleClickEventArgs e)
             {
                 if (_DEBUG)
-                    Console.WriteLine("Mouse D click");
+                    Console.WriteLine("Mouse Double click");
                 GameActions.DoubleClick(_item);
                 e.Result = true;
             }
@@ -579,7 +580,7 @@ namespace ClassicUO.Game.UI.Gumps
             private void _hit_MouseUp(object sender, MouseEventArgs e)
             {
                 if (_DEBUG)
-                    Console.WriteLine("Mouse Up");
+                    Console.WriteLine("GridItem Mouse Up");
                 if (e.Button == MouseButtonType.Left && Mouse.LDragOffset == Point.Zero)
                 {
                     if (Client.Game.GameCursor.ItemHold.Enabled)
@@ -611,7 +612,7 @@ namespace ClassicUO.Game.UI.Gumps
             private void _hit_MouseExit(object sender, MouseEventArgs e)
             {
                 if (_DEBUG)
-                    Console.WriteLine("Mouse Exit");
+                    Console.WriteLine("Grid Item Mouse Exit");
                 if (Mouse.LButtonPressed && !mousePressedWhenEntered)
                 {
                     Point offset = Mouse.LDragOffset;
@@ -625,7 +626,7 @@ namespace ClassicUO.Game.UI.Gumps
             private void _hit_MouseEnter(object sender, MouseEventArgs e)
             {
                 if (_DEBUG)
-                    Console.WriteLine("Mouse Entered");
+                    Console.WriteLine("Grid Item Mouse Entered");
                 if (Mouse.LButtonPressed)
                     mousePressedWhenEntered = true;
                 else
