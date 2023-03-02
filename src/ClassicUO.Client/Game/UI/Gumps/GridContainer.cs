@@ -70,6 +70,10 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly NiceButton _openRegularGump;
         private ushort _ogContainer;
         private readonly bool _DEBUG = false;
+        /// <summary>
+        /// Grid position, Item serial
+        /// </summary>
+        private Dictionary<int, Item> lockedSpots = new Dictionary<int, Item>();
 
         public GridContainer(uint local, ushort ogContainer) : base(DEFAULT_WIDTH, DEFAULT_HEIGHT, DEFAULT_WIDTH, DEFAULT_HEIGHT, local, 0)
         {
@@ -327,19 +331,52 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     contents.Add((Item)i);
                 }
-                List<Item> sortedContents = contents.OrderBy((x) => x.Name).ToList<Item>();
-
+                List<Item> sortedContents = contents.OrderBy((x) => x.Graphic).ToList();
 
                 if (_searchBox.Text != "")
                 {
                     sortedContents = sortedContents.FindAll((x) => x.Name.ToLower().Contains(_searchBox.Text.ToLower()));
                 }
 
+                #region Sort Locked Slots
+                List<int> removeFromDictionary = new List<int>();
+                foreach (var spot in lockedSpots)
+                {
+                    int index = sortedContents.IndexOf(spot.Value);
+                    if (index != -1)
+                    {
+                        if (spot.Key < sortedContents.Count)
+                        {
+                            Item moveItem = sortedContents[index];
+                            sortedContents.RemoveAt(index);
+                            sortedContents.Insert(spot.Key, moveItem);
+                        }
+                    }
+                    else
+                    {
+                        removeFromDictionary.Add(spot.Key);
+                    }
+                }
+                if (_DEBUG)
+                    Console.WriteLine($"Need to remove {removeFromDictionary.Count()} items");
+                foreach (int index in removeFromDictionary)
+                {
+                    if (_DEBUG)
+                        Console.WriteLine($"Try removing {lockedSpots[index].Name} from locked spots");
+                    if (!contents.Contains(lockedSpots[index]))
+                        lockedSpots.Remove(index);
+                }
+                #endregion
+
                 foreach (Item it in sortedContents)
                 {
                     if (_DEBUG)
                         Console.Write($"[{it.Name}]");
-                    GridItem gridItem = new GridItem(it, GRID_ITEM_SIZE, _container, this);
+
+                    GridItem gridItem = new GridItem(it, GRID_ITEM_SIZE, _container, this, count);
+
+                    if (lockedSpots.Values.Contains(it))
+                        gridItem.itemGridLocked = true;
 
                     if (x + GRID_ITEM_SIZE + X_SPACING >= _scrollArea.Width - 14) //14 is the scroll bar width
                     {
@@ -408,8 +445,8 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 return;
             }
-            
-            if (this._lastWidth != this.Width ||this. _lastHeight != this.Height)
+
+            if (this._lastWidth != this.Width || this._lastHeight != this.Height)
             {
                 _scrollArea.Width = _background.Width - BORDER_WIDTH;
                 _scrollArea.Height = _background.Height - BORDER_WIDTH - (_containerNameLabel.Height + 1);
@@ -440,9 +477,12 @@ namespace ClassicUO.Game.UI.Gumps
             private readonly GridContainer _gridContainer;
             private readonly Item _container;
             private readonly bool _DEBUG = false;
+            public bool itemGridLocked = false;
+            private int slot;
 
-            public GridItem(uint serial, int size, Item container, GridContainer gridContainer)
+            public GridItem(uint serial, int size, Item container, GridContainer gridContainer, int count)
             {
+                slot = count;
                 _container = container;
                 _gridContainer = gridContainer;
                 Point startDrag = new Point(0, 0);
@@ -485,6 +525,30 @@ namespace ClassicUO.Game.UI.Gumps
                 _hit.MouseUp += _hit_MouseUp;
                 _hit.MouseDoubleClick += _hit_MouseDoubleClick;
 
+                GumpPic lockIcon = new GumpPic(40, 1, 0x082C, 0)
+                {
+                    AcceptMouseInput = true,
+                };
+                HitBox lockIconHit = new HitBox(0, 0, lockIcon.Width, lockIcon.Height, itemGridLocked ? "Unlock this slot" : "Lock this item in this slot");
+                lockIconHit.MouseUp += (o, e) =>
+                {
+                    if (_DEBUG)
+                        Console.WriteLine("lockIcon.MouseUp");
+                    if (!_gridContainer.lockedSpots.Values.Contains(_item))
+                    {
+                        _gridContainer.lockedSpots.Add(slot, _item);
+                        itemGridLocked = true;
+                    }
+                    else
+                    {
+                        _gridContainer.lockedSpots.Remove(slot);
+                        itemGridLocked = false;
+                    }
+                };
+                lockIcon.Add(lockIconHit);
+                Add(lockIcon);
+
+
                 WantUpdateSize = false;
             }
 
@@ -525,10 +589,6 @@ namespace ClassicUO.Game.UI.Gumps
                             DelayedObjectClickManager.Set(_item, X + GRID_ITEM_SIZE, Y + GRID_ITEM_SIZE, 1);
                         }
                     }
-                }
-                else if (e.Button == MouseButtonType.Right)
-                {
-                    //Possibly menu for locking a slot?
                 }
             }
 
@@ -607,11 +667,12 @@ namespace ClassicUO.Game.UI.Gumps
                     );
                 }
 
+
                 hueVector = ShaderHueTranslator.GetHueVector(0);
 
                 batcher.DrawRectangle
                 (
-                    SolidColorTextureCache.GetTexture(Color.Gray),
+                    SolidColorTextureCache.GetTexture(itemGridLocked ? Color.Blue : Color.Gray),
                     x,
                     y,
                     Width,
