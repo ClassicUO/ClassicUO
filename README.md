@@ -8,9 +8,13 @@
 This version of CUO adds grid containers to the regular CUO client
 
 Searchable
+
 Resizable
+
 Scrollable
+
 Can lock items in specific place
+
 ------------------------------------------------------------------
 
 An open source implementation of the Ultima Online Classic Client.
