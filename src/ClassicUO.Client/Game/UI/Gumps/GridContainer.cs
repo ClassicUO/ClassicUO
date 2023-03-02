@@ -335,7 +335,23 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (_searchBox.Text != "")
                 {
-                    sortedContents = sortedContents.FindAll((x) => x.Name.ToLower().Contains(_searchBox.Text.ToLower()));
+                    //sortedContents = sortedContents.FindAll((x) => x.Name.ToLower().Contains(_searchBox.Text.ToLower()));
+                    List<Item> filteredContents = new List<Item>();
+                    foreach (Item i in sortedContents)
+                    {
+                        if (i.Name.ToLower().Contains(_searchBox.Text.ToLower()))
+                        {
+                            filteredContents.Add(i);
+                            continue;
+                        }
+                        if(World.OPL.TryGetNameAndData(i.Serial, out string name, out string data))
+                        {
+                            if (data.ToLower().Contains(_searchBox.Text.ToLower()))
+                                filteredContents.Add(i);
+                        }
+
+                    }
+                    sortedContents = filteredContents;
                 }
 
                 #region Sort Locked Slots
