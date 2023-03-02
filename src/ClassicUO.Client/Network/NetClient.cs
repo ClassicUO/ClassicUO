@@ -37,6 +37,7 @@ using System;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace ClassicUO.Network
@@ -125,12 +126,14 @@ namespace ClassicUO.Network
         {
             if (LoginSocket.IsDisposed && Socket.IsConnected)
             {
-                Socket._pluginPackets.Write(data, 0, length);
+                lock (Socket._pluginPackets)
+                    Socket._pluginPackets.Write(data, 0, length);
                 Socket.Statistics.TotalPacketsReceived++;
             }
             else if (Socket.IsDisposed && LoginSocket.IsConnected)
             {
-                LoginSocket._pluginPackets.Write(data, 0, length);
+                lock (LoginSocket._pluginPackets)
+                    LoginSocket._pluginPackets.Write(data, 0, length);
                 LoginSocket.Statistics.TotalPacketsReceived++;
             }
             else
@@ -316,66 +319,69 @@ namespace ClassicUO.Network
 
         private void ExtractPackets(MemoryStream stream, bool allowPlugins)
         {
-            if (!IsConnected || stream.Position <= 0 || !stream.CanRead || !stream.CanSeek)
+            lock (stream)
             {
-                return;
-            }
-
-            var length = (int)stream.Position;
-            var done = 0;
-
-            stream.Seek(0, SeekOrigin.Begin);
-            var packetBuffer = System.Buffers.ArrayPool<byte>.Shared.Rent(4096);
-
-            try
-            {
-                while (done < length)
+                if (!IsConnected || stream.Position <= 0 || !stream.CanRead || !stream.CanSeek)
                 {
-                    if (!GetPacketInfo(stream, length, out var packetID, out int offset, out int packetlength))
-                    {
-                        Log.Warn($"Invalid ID: {packetID:X2} | off: {offset} | len: {packetlength} | stream.pos: {stream.Position}/{stream.Length}");
-
-                        break;
-                    }
-
-                    if ((length - done) < packetlength)
-                    {
-                        // need more data
-                        break;
-                    }
-
-                    if (packetlength > packetBuffer.Length)
-                    {
-                        System.Buffers.ArrayPool<byte>.Shared.Return(packetBuffer, false); // TODO: clear?
-                        packetBuffer = System.Buffers.ArrayPool<byte>.Shared.Rent(packetlength);
-                    }
-
-                    _ = stream.Read(packetBuffer, 0, packetlength);
-
-                    if (CUOEnviroment.PacketLog)
-                    {
-                        LogPacket(packetBuffer, packetlength, false);
-                    }
-
-                    // TODO: the pluging function should allow Span<byte> or unsafe type only.
-                    // The current one is a bad style decision.
-                    // It will be fixed once the new plugin system is done.
-                    if (!allowPlugins || Plugin.ProcessRecvPacket(packetBuffer, ref packetlength))
-                    {
-                        PacketHandlers.Handlers.AnalyzePacket(packetBuffer, offset, packetlength);
-
-                        Statistics.TotalPacketsReceived++;
-                    }
-
-                    done += packetlength;
+                    return;
                 }
 
-                // if length < done the packet is not fully processed, so keep this data
-                stream.Seek(length - done, SeekOrigin.Begin);
-            }
-            finally
-            {
-                System.Buffers.ArrayPool<byte>.Shared.Return(packetBuffer, false); // TODO: clear?
+                var length = (int)stream.Position;
+                var done = 0;
+
+                stream.Seek(0, SeekOrigin.Begin);
+                var packetBuffer = System.Buffers.ArrayPool<byte>.Shared.Rent(4096);
+
+                try
+                {
+                    while (done < length)
+                    {
+                        if (!GetPacketInfo(stream, length, out var packetID, out int offset, out int packetlength))
+                        {
+                            Log.Warn($"Invalid ID: {packetID:X2} | off: {offset} | len: {packetlength} | stream.pos: {stream.Position}/{stream.Length}");
+
+                            break;
+                        }
+
+                        if ((length - done) < packetlength)
+                        {
+                            // need more data
+                            break;
+                        }
+
+                        if (packetlength > packetBuffer.Length)
+                        {
+                            System.Buffers.ArrayPool<byte>.Shared.Return(packetBuffer, false); // TODO: clear?
+                            packetBuffer = System.Buffers.ArrayPool<byte>.Shared.Rent(packetlength);
+                        }
+
+                        _ = stream.Read(packetBuffer, 0, packetlength);
+
+                        if (CUOEnviroment.PacketLog)
+                        {
+                            LogPacket(packetBuffer, packetlength, false);
+                        }
+
+                        // TODO: the pluging function should allow Span<byte> or unsafe type only.
+                        // The current one is a bad style decision.
+                        // It will be fixed once the new plugin system is done.
+                        if (!allowPlugins || Plugin.ProcessRecvPacket(packetBuffer, ref packetlength))
+                        {
+                            PacketHandlers.Handlers.AnalyzePacket(packetBuffer, offset, packetlength);
+
+                            Statistics.TotalPacketsReceived++;
+                        }
+
+                        done += packetlength;
+                    }
+
+                    // if length < done the packet is not fully processed, so keep this data
+                    stream.Seek(length - done, SeekOrigin.Begin);
+                }
+                finally
+                {
+                    System.Buffers.ArrayPool<byte>.Shared.Return(packetBuffer, false); // TODO: clear?
+                }
             }
         }
 
