@@ -68,6 +68,7 @@ namespace ClassicUO.Game.UI.Gumps
         private int _lastHeight = DEFAULT_HEIGHT;
         private readonly StbTextBox _searchBox;
         private readonly NiceButton _openRegularGump;
+        private readonly NiceButton _helpToolTip;
         private ushort _ogContainer;
         private readonly bool _DEBUG = false;
         /// <summary>
@@ -138,6 +139,13 @@ namespace ClassicUO.Game.UI.Gumps
                 IsSelectable = false,
             };
             _openRegularGump.SetTooltip("Open the original style container");
+
+            _helpToolTip = new NiceButton(Width - 40 - BORDER_WIDTH, BORDER_WIDTH, 20, 20, ButtonAction.Default, "[?]", 1, TEXT_ALIGN_TYPE.TS_CENTER, 0x0481);
+            _helpToolTip.SetTooltip(
+                "Ctrl + Click a slot -> Click another slot to lock that item into a specific slot." +
+                "<br>Use the [X] button to open the original style gump."
+                );
+            Add(_helpToolTip);
 
             Add(_openRegularGump);
             _scrollArea = new GridScrollArea(
@@ -343,7 +351,7 @@ namespace ClassicUO.Game.UI.Gumps
                             filteredContents.Add(i);
                             continue;
                         }
-                        if(World.OPL.TryGetNameAndData(i.Serial, out string name, out string data))
+                        if (World.OPL.TryGetNameAndData(i.Serial, out string name, out string data))
                         {
                             if (data.ToLower().Contains(_searchBox.Text.ToLower()))
                                 filteredContents.Add(i);
@@ -420,6 +428,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (InvalidateContents && !IsDisposed && IsVisible)
                 updateItems();
             _openRegularGump.X = Width - 20 - (BORDER_WIDTH * 2);
+            _helpToolTip.X = Width - 40 - (BORDER_WIDTH * 2);
         }
 
         public override void Dispose()
@@ -461,14 +470,14 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
-            if (this._lastWidth != this.Width || this._lastHeight != this.Height)
+            if (_lastWidth != Width || _lastHeight != Height)
             {
                 _scrollArea.Width = _background.Width - BORDER_WIDTH;
                 _scrollArea.Height = _background.Height - BORDER_WIDTH - (_containerNameLabel.Height + 1);
                 _lastHeight = this.Height;
                 _lastWidth = this.Width;
-                this.RequestUpdateContents();
-                this.UpdateContents();
+                RequestUpdateContents();
+                UpdateContents();
             }
 
             WantUpdateSize = true;
@@ -493,7 +502,11 @@ namespace ClassicUO.Game.UI.Gumps
             private readonly Item _container;
             private readonly bool _DEBUG = false;
             public bool itemGridLocked = false;
-            private int slot;
+            private readonly int slot;
+
+            private static Item _dragSlotItem;
+            private static Item _dragSlotContainer;
+            private static bool _dragSlotEnabled = false;
 
             public GridItem(uint serial, int size, Item container, GridContainer gridContainer, int count)
             {
@@ -551,8 +564,7 @@ namespace ClassicUO.Game.UI.Gumps
                         Console.WriteLine("lockIcon.MouseUp");
                     if (!_gridContainer.lockedSpots.Values.Contains(_item))
                     {
-                        _gridContainer.lockedSpots.Add(slot, _item);
-                        itemGridLocked = true;
+                        AddLockedItemSlot(_item, slot);
                         lockIconHit.SetTooltip("Unlock this slot");
                     }
                     else
@@ -577,13 +589,47 @@ namespace ClassicUO.Game.UI.Gumps
                 e.Result = true;
             }
 
+            private void AddLockedItemSlot(Item item, int specificSlot)
+            {
+                if (_gridContainer.lockedSpots.Values.Contains(item)) //Is this item already locked? Lets remove it from lock status for now
+                {
+                    int removeSlot = _gridContainer.lockedSpots.First((x) => x.Value == item).Key;
+                    _gridContainer.lockedSpots.Remove(removeSlot);
+                }
+
+                if (_gridContainer.lockedSpots.ContainsKey(specificSlot)) //Is the slot they wanted this item in already taken? Lets remove that item
+                    _gridContainer.lockedSpots.Remove(specificSlot);
+                _gridContainer.lockedSpots.Add(specificSlot, item); //Now we add this item at the desired slot
+                itemGridLocked = true;
+                _gridContainer.InvalidateContents = true; //Let the client know the contents have been changed so it can redraw them.
+            }
+
             private void _hit_MouseUp(object sender, MouseEventArgs e)
             {
                 if (_DEBUG)
-                    Console.WriteLine("GridItem Mouse Up");
-                if (e.Button == MouseButtonType.Left && Mouse.LDragOffset == Point.Zero)
+                    Console.WriteLine($"GridItem Mouse Up {slot}");
+                if (e.Button == MouseButtonType.Left)
                 {
-                    if (Client.Game.GameCursor.ItemHold.Enabled)
+                    if (_dragSlotEnabled)
+                    {
+                        if (_DEBUG)
+                            Console.WriteLine($"_dragSlotEnabled during mouse up on slot {slot}");
+                        if (_dragSlotContainer == _container)
+                        {
+                            AddLockedItemSlot(_dragSlotItem, slot);
+                            _gridContainer.InvalidateContents = true;
+                        }
+                        _dragSlotEnabled = false;
+                    }
+                    else if (Keyboard.Ctrl)
+                    {
+                        if (_DEBUG)
+                            Console.WriteLine("Drag grid item, Ctrl is down");
+                        _dragSlotContainer = _container;
+                        _dragSlotItem = _item;
+                        _dragSlotEnabled = true;
+                    }
+                    else if (Client.Game.GameCursor.ItemHold.Enabled)
                     {
                         if (_item.ItemData.IsContainer)
                             GameActions.DropItem(Client.Game.GameCursor.ItemHold.Serial, 0xFFFF, 0xFFFF, 0, _item.Serial);
