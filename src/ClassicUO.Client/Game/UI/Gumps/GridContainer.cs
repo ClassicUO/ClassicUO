@@ -65,13 +65,17 @@ namespace ClassicUO.Game.UI.Gumps
         private const int DEFAULT_HEIGHT = 27 + (BORDER_WIDTH * 2) + (GRID_ITEM_SIZE + Y_SPACING) * 4;
         private readonly Label _containerNameLabel;
         private GridScrollArea _scrollArea;
-        private static int _lastWidth = DEFAULT_WIDTH;
-        private static int _lastHeight = DEFAULT_HEIGHT;
+        private int _lastWidth = DEFAULT_WIDTH;
+        private int _lastHeight = DEFAULT_HEIGHT;
         private readonly StbTextBox _searchBox;
         private readonly NiceButton _openRegularGump;
         private readonly NiceButton _helpToolTip;
         private ushort _ogContainer;
         private readonly bool _DEBUG = false;
+
+        private Item _dragSlotItem;
+        private Item _dragSlotContainer;
+        private bool _dragSlotEnabled = false;
         /// <summary>
         /// Grid position, Item serial
         /// </summary>
@@ -89,12 +93,8 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
-            X = _lastX + 40;
-            Y = _lastY + 40;
-            if (X > Client.Game.Window.ClientBounds.Right)
-                X = 100;
-            if (Y > Client.Game.Window.ClientBounds.Bottom)
-                Y = 100;
+            X = _lastX;
+            Y = _lastY;
 
             CanMove = true;
             AcceptMouseInput = true;
@@ -553,13 +553,9 @@ namespace ClassicUO.Game.UI.Gumps
             private readonly Item _item;
             private readonly GridContainer _gridContainer;
             private readonly Item _container;
-            private readonly bool _DEBUG = false;
+            private readonly bool _DEBUG = true;
             public bool itemGridLocked = false;
             private readonly int slot;
-
-            private static Item _dragSlotItem;
-            private static Item _dragSlotContainer;
-            private static bool _dragSlotEnabled = false;
 
             public GridItem(uint serial, int size, Item container, GridContainer gridContainer, int count)
             {
@@ -663,26 +659,27 @@ namespace ClassicUO.Game.UI.Gumps
                     Console.WriteLine($"GridItem Mouse Up {slot}");
                 if (e.Button == MouseButtonType.Left)
                 {
-                    if (_dragSlotEnabled)
+                    if (_gridContainer._dragSlotEnabled)
                     {
                         if (_DEBUG)
                             Console.WriteLine($"_dragSlotEnabled during mouse up on slot {slot}");
-                        if (_dragSlotContainer == _container)
+                        if (_gridContainer._dragSlotContainer == _container)
                         {
-                            AddLockedItemSlot(_dragSlotItem, slot);
+                            AddLockedItemSlot(_gridContainer._dragSlotItem, slot);
                             _gridContainer.InvalidateContents = true;
                         }
-                        _dragSlotEnabled = false;
+                        _gridContainer._dragSlotEnabled = false;
                     }
                     else if (Keyboard.Ctrl)
                     {
                         if (_DEBUG)
                             Console.WriteLine("Drag grid item, Ctrl is down");
-                        _dragSlotContainer = _container;
-                        _dragSlotItem = _item;
-                        _dragSlotEnabled = true;
+                        _gridContainer._dragSlotContainer = _container;
+                        _gridContainer._dragSlotItem = _item;
+                        _gridContainer._dragSlotEnabled = true;
                     }
-                    else if (Client.Game.GameCursor.ItemHold.Enabled)
+                    else 
+                    if (Client.Game.GameCursor.ItemHold.Enabled)
                     {
                         if (_item.ItemData.IsContainer)
                             GameActions.DropItem(Client.Game.GameCursor.ItemHold.Serial, 0xFFFF, 0xFFFF, 0, _item.Serial);
