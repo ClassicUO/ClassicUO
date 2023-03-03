@@ -83,7 +83,6 @@ namespace ClassicUO.Game.UI.Gumps
 
         public GridContainer(uint local, ushort ogContainer) : base(DEFAULT_WIDTH, DEFAULT_HEIGHT, DEFAULT_WIDTH, DEFAULT_HEIGHT, local, 0)
         {
-            Console.WriteLine("NEw fucking gump fucking peice of fucking shit fucking gump fuck you cuo devs you fukcin suck dick bitch");
             _ogContainer = ogContainer;
             _container = World.Items.Get(local);
 

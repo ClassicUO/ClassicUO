@@ -1264,8 +1264,14 @@ namespace ClassicUO.Network
                     }
 
                     #region GridContainer
-                    UIManager.GetGump<GridContainer>(serial)?.Dispose();
-                    UIManager.Add(new GridContainer(serial, graphic));
+                    GridContainer gridContainer = UIManager.GetGump<GridContainer>(serial);
+                    if (gridContainer != null)
+                    {
+                        gridContainer.InvalidateContents = true;
+                    } else
+                    {
+                        UIManager.Add(new GridContainer(serial, graphic));
+                    }
                     UIManager.GetGump<ContainerGump>(serial)?.Dispose();
                     //Uncomment the below section if removing grid containers
                     #endregion
