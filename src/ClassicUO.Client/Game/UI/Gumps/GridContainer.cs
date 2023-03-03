@@ -47,8 +47,8 @@ namespace ClassicUO.Game.UI.Gumps
     internal class GridContainer : ResizableGump
     {
 
-        private int _lastX = 100;
-        private int _lastY = 100;
+        private static int _lastX = 100;
+        private static int _lastY = 100;
         private readonly AlphaBlendControl _background;
         private readonly Item _container;
         private const int X_SPACING = 1;
@@ -88,8 +88,12 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
-            X = _lastX;
-            Y = _lastY;
+            X = _lastX + 40;
+            Y = _lastY + 40;
+            if (X > Client.Game.Window.ClientBounds.Right)
+                X = 100;
+            if (Y > Client.Game.Window.ClientBounds.Bottom)
+                Y = 100;
 
             CanMove = true;
             AcceptMouseInput = true;
