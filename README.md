@@ -15,6 +15,8 @@ Scrollable
 
 Can lock items in specific place
 
+![Grid Containers](https://user-images.githubusercontent.com/3859393/222730248-4c5a053a-853f-4750-b7dd-ff4049638c6f.gif)
+
 ------------------------------------------------------------------
 
 An open source implementation of the Ultima Online Classic Client.
