@@ -58,6 +58,8 @@ namespace ClassicUO.Game.UI.Gumps
         Debug,
         NetStats,
 
-        NameOverHeadHandler
+        NameOverHeadHandler,
+
+        GridContainer = 8787,
     }
 }

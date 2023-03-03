@@ -610,6 +610,10 @@ namespace ClassicUO.Configuration
                                     NameOverHeadHandlerGump.LastPosition = new Point(x, y);
                                     // Gump gets opened by NameOverHeadManager, we just want to save the last position from profile
                                     break;
+                                case GumpType.GridContainer:
+                                    ushort ogContainer = ushort.Parse(xml.GetAttribute("ogContainer"));
+                                    gump = new GridContainer(serial, ogContainer);
+                                    break;
                             }
 
                             if (gump == null)

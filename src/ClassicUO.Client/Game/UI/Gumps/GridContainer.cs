@@ -33,6 +33,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml;
 using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
@@ -54,18 +55,18 @@ namespace ClassicUO.Game.UI.Gumps
         private const int X_SPACING = 1;
         private const int Y_SPACING = 1;
         private const int GRID_ITEM_SIZE = 50;
-        private const int BORDER_WIDTH = 4;
+        private const int BORDER_WIDTH = 3;
         private const int DEFAULT_WIDTH =
             (BORDER_WIDTH * 2)     //The borders around the container, one on the left and one on the right
             + 15                   //The width of the scroll bar
-            + (GRID_ITEM_SIZE * 5) //How many items to fit in left to right
-            + (X_SPACING * 5)      //Spacing between each grid item(x4 items)
+            + (GRID_ITEM_SIZE * 4) //How many items to fit in left to right
+            + (X_SPACING * 4)      //Spacing between each grid item(x4 items)
             + 6;                   //Because the border acts weird
         private const int DEFAULT_HEIGHT = 27 + (BORDER_WIDTH * 2) + (GRID_ITEM_SIZE + Y_SPACING) * 4;
         private readonly Label _containerNameLabel;
         private GridScrollArea _scrollArea;
-        private int _lastWidth = DEFAULT_WIDTH;
-        private int _lastHeight = DEFAULT_HEIGHT;
+        private static int _lastWidth = DEFAULT_WIDTH;
+        private static int _lastHeight = DEFAULT_HEIGHT;
         private readonly StbTextBox _searchBox;
         private readonly NiceButton _openRegularGump;
         private readonly NiceButton _helpToolTip;
@@ -164,7 +165,26 @@ namespace ClassicUO.Game.UI.Gumps
             _scrollArea.MouseUp += _scrollArea_MouseUp;
             _scrollArea.DragBegin += _scrollArea_DragBegin;
             Add(_scrollArea);
+            ResizeWindow(new Point(_lastWidth, _lastHeight));
             InvalidateContents = true;
+        }
+        public override GumpType GumpType => GumpType.GridContainer;
+
+        public override void Save(XmlTextWriter writer)
+        {
+            base.Save(writer);
+            writer.WriteAttributeString("ogContainer", _ogContainer.ToString());
+            writer.WriteAttributeString("width", Width.ToString());
+            writer.WriteAttributeString("height", Height.ToString());
+        }
+
+        public override void Restore(XmlElement xml)
+        {
+            base.Restore(xml);
+            int rW = int.Parse(xml.GetAttribute("width"));
+            int rH = int.Parse(xml.GetAttribute("height"));
+            ResizeWindow(new Point(rW, rH));
+            Console.WriteLine($"{rW} x {rH}");
         }
 
         private void _scrollArea_DragBegin(object sender, MouseEventArgs e)
