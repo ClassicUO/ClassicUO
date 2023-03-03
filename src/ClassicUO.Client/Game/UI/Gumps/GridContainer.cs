@@ -83,6 +83,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public GridContainer(uint local, ushort ogContainer) : base(DEFAULT_WIDTH, DEFAULT_HEIGHT, DEFAULT_WIDTH, DEFAULT_HEIGHT, local, 0)
         {
+            Console.WriteLine("NEw fucking gump fucking peice of fucking shit fucking gump fuck you cuo devs you fukcin suck dick bitch");
             _ogContainer = ogContainer;
             _container = World.Items.Get(local);
 
@@ -166,12 +167,16 @@ namespace ClassicUO.Game.UI.Gumps
             _scrollArea.DragBegin += _scrollArea_DragBegin;
             Add(_scrollArea);
             ResizeWindow(new Point(_lastWidth, _lastHeight));
+            _lastWidth = Width;
+            _lastHeight = Height;
             InvalidateContents = true;
         }
         public override GumpType GumpType => GumpType.GridContainer;
 
         public override void Save(XmlTextWriter writer)
         {
+            if (_DEBUG)
+                Console.WriteLine("Save()");
             base.Save(writer);
             writer.WriteAttributeString("ogContainer", _ogContainer.ToString());
             writer.WriteAttributeString("width", Width.ToString());
@@ -191,10 +196,12 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Restore(XmlElement xml)
         {
+            if (_DEBUG)
+                Console.WriteLine("Restore()");
             base.Restore(xml);
             int rW = int.Parse(xml.GetAttribute("width"));
             int rH = int.Parse(xml.GetAttribute("height"));
-            ResizeWindow(new Point(rW, rH));
+
             foreach (XmlElement ele in xml["lockedSlots"])
             {
                 int key;
@@ -207,6 +214,10 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 }
             }
+            ResizeWindow(new Point(rW, rH));
+            _lastWidth = Width = rW;
+            _lastHeight = Height = rH;
+            InvalidateContents = true;
         }
 
         private void _scrollArea_DragBegin(object sender, MouseEventArgs e)
@@ -408,13 +419,11 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
                 #region Sort Locked Slots
-                List<int> removeFromDictionary = new List<int>();
                 foreach (var spot in lockedSpots)
                 {
                     Item item = World.Items.Get(spot.Value);
                     if (item == null)
                     {
-                        removeFromDictionary.Add(spot.Key);
                         continue;
                     }
                     int index = sortedContents.IndexOf(item);
@@ -427,20 +436,6 @@ namespace ClassicUO.Game.UI.Gumps
                             sortedContents.Insert(spot.Key, moveItem);
                         }
                     }
-                    else
-                    {
-                        removeFromDictionary.Add(spot.Key);
-                    }
-                }
-                if (_DEBUG)
-                    Console.WriteLine($"Need to remove {removeFromDictionary.Count()} items");
-                foreach (int index in removeFromDictionary)
-                {
-                    Item item = World.Items.Get(lockedSpots[index]);
-                    if (item == null)
-                        lockedSpots.Remove(index);
-                    else if (!contents.Contains(item))
-                        lockedSpots.Remove(index);
                 }
                 #endregion
 
@@ -611,7 +606,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (_DEBUG)
                         Console.WriteLine("lockIcon.MouseUp");
-                    if (!_gridContainer.lockedSpots.Values.Contains(_item))
+                    if (!_gridContainer.lockedSpots.Values.Contains(_item.Serial))
                     {
                         AddLockedItemSlot(_item, slot);
                         lockIconHit.SetTooltip("Unlock this slot");
@@ -640,7 +635,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             private void AddLockedItemSlot(Item item, int specificSlot)
             {
-                if (_gridContainer.lockedSpots.Values.Contains(item)) //Is this item already locked? Lets remove it from lock status for now
+                if (_gridContainer.lockedSpots.Values.Contains(item.Serial)) //Is this item already locked? Lets remove it from lock status for now
                 {
                     int removeSlot = _gridContainer.lockedSpots.First((x) => x.Value == item).Key;
                     _gridContainer.lockedSpots.Remove(removeSlot);
@@ -648,7 +643,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (_gridContainer.lockedSpots.ContainsKey(specificSlot)) //Is the slot they wanted this item in already taken? Lets remove that item
                     _gridContainer.lockedSpots.Remove(specificSlot);
-                _gridContainer.lockedSpots.Add(specificSlot, item); //Now we add this item at the desired slot
+                _gridContainer.lockedSpots.Add(specificSlot, item.Serial); //Now we add this item at the desired slot
                 itemGridLocked = true;
                 _gridContainer.InvalidateContents = true; //Let the client know the contents have been changed so it can redraw them.
             }
@@ -678,7 +673,7 @@ namespace ClassicUO.Game.UI.Gumps
                         _gridContainer._dragSlotItem = _item;
                         _gridContainer._dragSlotEnabled = true;
                     }
-                    else 
+                    else
                     if (Client.Game.GameCursor.ItemHold.Enabled)
                     {
                         if (_item.ItemData.IsContainer)
