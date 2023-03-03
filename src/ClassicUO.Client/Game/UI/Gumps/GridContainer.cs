@@ -75,7 +75,7 @@ namespace ClassicUO.Game.UI.Gumps
         /// <summary>
         /// Grid position, Item serial
         /// </summary>
-        private Dictionary<int, Item> lockedSpots = new Dictionary<int, Item>();
+        private Dictionary<int, uint> lockedSpots = new Dictionary<int, uint>();
 
         public GridContainer(uint local, ushort ogContainer) : base(DEFAULT_WIDTH, DEFAULT_HEIGHT, DEFAULT_WIDTH, DEFAULT_HEIGHT, local, 0)
         {
@@ -176,6 +176,17 @@ namespace ClassicUO.Game.UI.Gumps
             writer.WriteAttributeString("ogContainer", _ogContainer.ToString());
             writer.WriteAttributeString("width", Width.ToString());
             writer.WriteAttributeString("height", Height.ToString());
+
+            writer.WriteStartElement("lockedSlots");
+            foreach (var slot in lockedSpots)
+            {
+                writer.WriteStartElement("lockedSlot");
+                writer.WriteAttributeString("key", slot.Key.ToString());
+                writer.WriteAttributeString("serial", slot.Value.ToString());
+                writer.WriteEndElement();
+            }
+            writer.WriteEndElement();
+
         }
 
         public override void Restore(XmlElement xml)
@@ -184,7 +195,18 @@ namespace ClassicUO.Game.UI.Gumps
             int rW = int.Parse(xml.GetAttribute("width"));
             int rH = int.Parse(xml.GetAttribute("height"));
             ResizeWindow(new Point(rW, rH));
-            Console.WriteLine($"{rW} x {rH}");
+            foreach (XmlElement ele in xml["lockedSlots"])
+            {
+                int key;
+                if (int.TryParse(ele.GetAttribute("key"), out key))
+                {
+                    uint serial;
+                    if (uint.TryParse(ele.GetAttribute("serial"), out serial))
+                    {
+                        lockedSpots.Add(key, serial);
+                    }
+                }
+            }
         }
 
         private void _scrollArea_DragBegin(object sender, MouseEventArgs e)
@@ -389,7 +411,13 @@ namespace ClassicUO.Game.UI.Gumps
                 List<int> removeFromDictionary = new List<int>();
                 foreach (var spot in lockedSpots)
                 {
-                    int index = sortedContents.IndexOf(spot.Value);
+                    Item item = World.Items.Get(spot.Value);
+                    if (item == null)
+                    {
+                        removeFromDictionary.Add(spot.Key);
+                        continue;
+                    }
+                    int index = sortedContents.IndexOf(item);
                     if (index != -1)
                     {
                         if (spot.Key < sortedContents.Count)
@@ -408,9 +436,10 @@ namespace ClassicUO.Game.UI.Gumps
                     Console.WriteLine($"Need to remove {removeFromDictionary.Count()} items");
                 foreach (int index in removeFromDictionary)
                 {
-                    if (_DEBUG)
-                        Console.WriteLine($"Try removing {lockedSpots[index].Name} from locked spots");
-                    if (!contents.Contains(lockedSpots[index]))
+                    Item item = World.Items.Get(lockedSpots[index]);
+                    if (item == null)
+                        lockedSpots.Remove(index);
+                    else if (!contents.Contains(item))
                         lockedSpots.Remove(index);
                 }
                 #endregion
