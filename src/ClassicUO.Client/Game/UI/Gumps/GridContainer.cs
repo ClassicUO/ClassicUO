@@ -112,17 +112,17 @@ namespace ClassicUO.Game.UI.Gumps
             (
                 _containerNameLabel = new Label(GetContainerName(), true, 0x0481)
                 {
-                    X = _background.X + 2,
-                    Y = 2
+                    X = BORDER_WIDTH,
+                    Y = -20
                 }
             );
 
             _searchBox = new StbTextBox(0xFF, 20, 100, true, FontStyle.Solid, 0x0481)
             {
-                X = _containerNameLabel.Width + 5,
+                X = BORDER_WIDTH,
                 Y = BORDER_WIDTH,
                 Multiline = false,
-                Width = 100,
+                Width = 150,
                 Height = 20
             };
             _searchBox.TextChanged += (sender, e) => { updateItems(); };
@@ -547,7 +547,7 @@ namespace ClassicUO.Game.UI.Gumps
             private readonly Item _item;
             private readonly GridContainer _gridContainer;
             private readonly Item _container;
-            private readonly bool _DEBUG = true;
+            private readonly bool _DEBUG = false;
             public bool itemGridLocked = false;
             private readonly int slot;
 
