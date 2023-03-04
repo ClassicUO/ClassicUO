@@ -33,6 +33,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Xml;
 using ClassicUO.Assets;
 using ClassicUO.Configuration;
@@ -550,6 +552,7 @@ namespace ClassicUO.Game.UI.Gumps
             private readonly bool _DEBUG = false;
             public bool itemGridLocked = false;
             private readonly int slot;
+            private GridContainerPreview _preview;
 
             public GridItem(uint serial, int size, Item container, GridContainer gridContainer, int count)
             {
@@ -711,6 +714,12 @@ namespace ClassicUO.Game.UI.Gumps
                         GameActions.PickUp(_item, e.X, e.Y);
                     }
                 }
+
+                GridContainerPreview g;
+                while ((g = UIManager.GetGump<GridContainerPreview>()) != null)
+                {
+                    g.Dispose();
+                }
             }
 
             private void _hit_MouseEnter(object sender, MouseEventArgs e)
@@ -721,6 +730,12 @@ namespace ClassicUO.Game.UI.Gumps
                     mousePressedWhenEntered = true;
                 else
                     mousePressedWhenEntered = false;
+                if (_item != null)
+                    if (_item.ItemData.IsContainer && _item.Items != null)
+                    {
+                        _preview = new GridContainerPreview(_item, Mouse.Position.X, Mouse.Position.Y);
+                        UIManager.Add(_preview);
+                    }
             }
 
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
@@ -1008,6 +1023,96 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     Children[i].UpdateOffset(0, -_scrollBar.Value + ScissorRectangle.Y);
                 }
+            }
+        }
+
+        private class GridContainerPreview : Gump
+        {
+            private readonly AlphaBlendControl _background;
+            private readonly Item _container;
+
+            private const int WIDTH = 170;
+            private const int HEIGHT = 150;
+            private const int GRIDSIZE = 50;
+
+            public GridContainerPreview(uint serial, int x, int y) : base(serial, 0)
+            {
+                _container = World.Items.Get(serial);
+                if (_container == null)
+                {
+                    Dispose();
+                    return;
+                }
+
+                X = x - WIDTH - 20;
+                Y = y - HEIGHT - 20;
+                _background = new AlphaBlendControl();
+                _background.Width = WIDTH;
+                _background.Height = HEIGHT;
+
+                CanCloseWithRightClick = true;
+                Add(_background);
+                InvalidateContents = true;
+            }
+
+            protected override void UpdateContents()
+            {
+                base.UpdateContents();
+                if (InvalidateContents && !IsDisposed && IsVisible)
+                {
+                    if (_container != null && _container.Items != null)
+                    {
+                        int currentCount = 0, lastX = 0, lastY = 0;
+                        for (LinkedObject i = _container.Items; i != null; i = i.Next)
+                        {
+
+                            Item item = (Item)i;
+                            if (item == null)
+                                continue;
+
+                            if (currentCount > 8)
+                                break;
+
+                            StaticPic gridItem = new StaticPic(item.DisplayedGraphic, item.Hue);
+                            gridItem.X = lastX;
+                            if (gridItem.X + GRIDSIZE > WIDTH)
+                            {
+                                gridItem.X = 0;
+                                lastX = 0;
+                                lastY += GRIDSIZE;
+
+                            }
+                            lastX += GRIDSIZE;
+                            gridItem.Y = lastY;
+                            //gridItem.Width = GRIDSIZE;
+                            //gridItem.Height = GRIDSIZE;
+                            Add(gridItem);
+
+                            currentCount++;
+
+
+                        }
+                    }
+                }
+            }
+
+            public override void Update()
+            {
+                if (_container == null || _container.IsDestroyed || _container.OnGround && _container.Distance > 3)
+                {
+                    Dispose();
+
+                    return;
+                }
+
+                base.Update();
+
+                if (IsDisposed)
+                {
+                    return;
+                }
+
+                base.Update();
             }
         }
     }
