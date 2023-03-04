@@ -319,7 +319,7 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-        public async void Connect(string account, string password)
+        public void Connect(string account, string password)
         {
             if (CurrentLoginStep == LoginSteps.Connecting)
             {
@@ -344,13 +344,14 @@ namespace ClassicUO.Game.Scenes
             {
                 CurrentLoginStep = LoginSteps.Connecting;
             }
-            
-            if (!await NetClient.LoginSocket.Connect(Settings.GlobalSettings.IP, Settings.GlobalSettings.Port))
-            {
-                PopupMessage = ResGeneral.CheckYourConnectionAndTryAgain;
-                CurrentLoginStep = LoginSteps.PopUpMessage;
-                Log.Error("No Internet Access");
-            }
+
+            //NetClient.LoginSocket.Disconnected += (o, e) => {
+            //    PopupMessage = ResGeneral.CheckYourConnectionAndTryAgain;
+            //    CurrentLoginStep = LoginSteps.PopUpMessage;
+            //    Log.Error("No Internet Access");
+            //};
+
+            NetClient.LoginSocket.Connect(Settings.GlobalSettings.IP, Settings.GlobalSettings.Port);
         }
 
         public int GetServerIndexByName(string name)
@@ -699,28 +700,25 @@ namespace ClassicUO.Game.Scenes
             NetClient.LoginSocket.Disconnect();
             EncryptionHelper.Initialize(false, seed, (ENCRYPTION_TYPE) Settings.GlobalSettings.Encryption);
 
-            NetClient.Socket.Connect(new IPAddress(ip), port)
-                     .ContinueWith
-                     (
-                         t =>
-                         {
-                             if (!t.IsFaulted)
-                             {
-                                 NetClient.Socket.EnableCompression();
 
-                                 unsafe
-                                 {
-                                     Span<byte> b = stackalloc byte[4] { (byte)(seed >> 24), (byte)(seed >> 16), (byte)(seed >> 8), (byte)seed };
-                                     StackDataWriter writer = new StackDataWriter(b);
-                                     NetClient.Socket.Send(writer.AllocatedBuffer, writer.BytesWritten, true, true);
-                                     writer.Dispose();
-                                 }
+            void onConnected(object sender, EventArgs e)
+            {
+                NetClient.Socket.Connected -= onConnected;
+                NetClient.Socket.EnableCompression();
 
-                                 NetClient.Socket.Send_SecondLogin(Account, Password, seed);
-                             }
-                         },
-                         TaskContinuationOptions.ExecuteSynchronously
-                     );
+                unsafe
+                {
+                    Span<byte> b = stackalloc byte[4] { (byte)(seed >> 24), (byte)(seed >> 16), (byte)(seed >> 8), (byte)seed };
+                    StackDataWriter writer = new StackDataWriter(b);
+                    NetClient.Socket.Send(writer.AllocatedBuffer, writer.BytesWritten, true, true);
+                    writer.Dispose();
+                }
+
+                NetClient.Socket.Send_SecondLogin(Account, Password, seed);
+            }
+
+            NetClient.Socket.Connected += onConnected;
+            NetClient.Socket.Connect(new IPAddress(ip).ToString(), port);
         }
 
 

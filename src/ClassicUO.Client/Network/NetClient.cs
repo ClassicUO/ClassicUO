@@ -34,19 +34,110 @@ using ClassicUO.Network.Encryption;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using System;
+using System.Buffers;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace ClassicUO.Network
 {
-    enum ClientSocketStatus
+    sealed class NetworkDataRader : IDisposable
     {
-        Disconnected,
-        Connecting,
-        Connected,
+        private Socket _socket;
+
+
+        public bool IsConnected => _socket?.Connected ?? false;
+        public EndPoint LocalEndPoint => _socket?.LocalEndPoint;
+
+
+        public event EventHandler OnConnected, OnDisconnected;
+        public event EventHandler<SocketError> OnError;
+        public event EventHandler<ArraySegment<byte>> OnPacketReceived;
+
+
+        public void Connect(string ip, int port)
+        {
+            if (IsConnected) return;
+
+            _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp)
+            {
+                NoDelay = true,
+                LingerState = new LingerOption(true, 0)
+            };
+
+            _socket.BeginConnect(ip, port, e =>
+            {
+                _socket.EndConnect(e);
+
+                if (!IsConnected)
+                {
+                    OnError?.Invoke(this, SocketError.NotConnected);
+                    return;
+                }
+
+                OnConnected?.Invoke(this, EventArgs.Empty);
+                BeginRead(new byte[1024 * 4]);
+            }, this);
+        }
+
+        public void Send(byte[] buffer, int offset, int count)
+        {
+            _socket.Send(buffer, offset, count, SocketFlags.None);
+        }
+
+        public void Disconnect()
+        {
+            Dispose();
+        }
+
+        public void Dispose()
+        {
+            _socket.Dispose();
+        }
+
+        private void EndRead(IAsyncResult asyncResult)
+        {
+            var buffer = (byte[])asyncResult.AsyncState;
+
+            try
+            {
+                if (!IsConnected)
+                    return;
+       
+                var available = _socket.EndReceive(asyncResult, out var error);
+                if (available <= 0 || error != SocketError.Success)
+                {
+                    OnDisconnected?.Invoke(this, EventArgs.Empty);
+
+                    if (error != SocketError.Success)
+                    {
+                        OnError?.Invoke(this, error);
+                    }
+
+                    _socket.Close();
+                    _socket.Dispose();
+
+                    return;
+                }
+
+                OnPacketReceived?.Invoke(this, new ArraySegment<byte>(buffer, 0, available));
+
+                BeginRead(buffer);
+            }
+            catch (Exception ex)
+            {
+
+            }
+            finally
+            {
+                //ArrayPool<byte>.Shared.Return(buffer);
+            }
+        }
+
+        private void BeginRead(byte[] buffer)
+        {
+            _socket.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, EndRead, buffer);
+        }
     }
 
     internal sealed class NetClient
@@ -55,33 +146,37 @@ namespace ClassicUO.Network
 
         private bool _isCompressionEnabled;
         private readonly bool _isLoginSocket;
-        private Socket _socket;
+        private readonly NetworkDataRader _socket;
         private uint? _localIP;
         private readonly MemoryStream _recvCompressedStream,
             _recvUncompressedStream,
             _recvCompressedUnfinishedStream,
             _sendStream,
-            _pluginPackets;
-        private readonly byte[] _recvFixedBuffer = new byte[4096];
+            _pluginsDataStream;
 
-        private NetClient(bool is_login_socket)
+        private NetClient(bool isLoginSocket)
         {
-            _isLoginSocket = is_login_socket;
+            _isLoginSocket = isLoginSocket;
             Statistics = new NetStatistics(this);
-
             _recvCompressedStream = new MemoryStream();
             _recvUncompressedStream = new MemoryStream();
             _recvCompressedUnfinishedStream = new MemoryStream();
             _sendStream = new MemoryStream();
-            _pluginPackets = new MemoryStream();
+            _pluginsDataStream = new MemoryStream();
+
+            _socket = new NetworkDataRader();
+            _socket.OnPacketReceived += OnDataReceived;
+            _socket.OnConnected += (o, e) => Connected?.Invoke(this, EventArgs.Empty);
+            _socket.OnDisconnected += (o, e) => Disconnected?.Invoke(this, SocketError.Success);
+            _socket.OnError += (o, e) => Disconnected?.Invoke(this, SocketError.SocketError);
         }
+
 
 
         public static NetClient LoginSocket { get; } = new NetClient(true);
         public static NetClient Socket { get; } = new NetClient(false);
-        public bool IsConnected => _socket != null && _socket.Connected;
+        public bool IsConnected => _socket != null && _socket.IsConnected;
         public bool IsDisposed { get; private set; }
-        public ClientSocketStatus Status { get; private set; }
         public uint LocalIP
         {
             get
@@ -113,6 +208,7 @@ namespace ClassicUO.Network
                 return _localIP.Value;
             }
         }
+
         public NetStatistics Statistics { get; }
 
 
@@ -126,14 +222,14 @@ namespace ClassicUO.Network
         {
             if (LoginSocket.IsDisposed && Socket.IsConnected)
             {
-                lock (Socket._pluginPackets)
-                    Socket._pluginPackets.Write(data, 0, length);
+                lock (Socket._pluginsDataStream)
+                    Socket._pluginsDataStream.Write(data, 0, length);
                 Socket.Statistics.TotalPacketsReceived++;
             }
             else if (Socket.IsDisposed && LoginSocket.IsConnected)
             {
-                lock (LoginSocket._pluginPackets)
-                    LoginSocket._pluginPackets.Write(data, 0, length);
+                lock (LoginSocket._pluginsDataStream)
+                    LoginSocket._pluginsDataStream.Write(data, 0, length);
                 LoginSocket.Statistics.TotalPacketsReceived++;
             }
             else
@@ -142,127 +238,38 @@ namespace ClassicUO.Network
             }
         }
 
-        public async Task<bool> Connect(string ip, ushort port)
+        public void Connect(string ip, ushort port)
         {
-            IsDisposed = false;
-            IPAddress address = ResolveIP(ip);
-
-            if (address == null)
-            {
-                return false;
-            }
-
-            return await Connect(address, port);
-        }
-
-        public async Task<bool> Connect(IPAddress address, ushort port)
-        {
-            IsDisposed = false;
-
-            if (Status != ClientSocketStatus.Disconnected)
-            {
-                Log.Warn($"Socket status: {Status}");
-
-                return false;
-            }
-
-            if (_socket == null)
-            {
-                _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                _socket.NoDelay = true; // it's important to disable the Nagle algo or it will cause lag
-                _socket.LingerState.Enabled = true; // Close the socket gracefully without lingering.
-            }
+            Statistics.Reset();
 
             _recvCompressedStream.Seek(0, SeekOrigin.Begin);
             _recvUncompressedStream.Seek(0, SeekOrigin.Begin);
             _recvCompressedUnfinishedStream.Seek(0, SeekOrigin.Begin);
             _sendStream.Seek(0, SeekOrigin.Begin);
-            _pluginPackets.Seek(0, SeekOrigin.Begin);
+            _pluginsDataStream.Seek(0, SeekOrigin.Begin);
 
-            Statistics.Reset();
-
-            Status = ClientSocketStatus.Connecting;
+            IsDisposed = false;
 
             try
             {
-                return await _socket
-                    .ConnectAsync(address, port)
-                    .ContinueWith
-                    (
-                        (t) =>
-                        {
-                            if (!t.IsFaulted && _socket.Connected)
-                            {
-                                Status = ClientSocketStatus.Connected;
-                                Connected.Raise();
-                                Statistics.ConnectedFrom = DateTime.Now;
-
-                                return true;
-                            }
-
-
-                            Status = ClientSocketStatus.Disconnected;
-                            Log.Error("socket not connected");
-
-                            return false;
-                        },
-                        TaskContinuationOptions.ExecuteSynchronously
-                    );
+                _socket.Connect(ip, port);
             }
-            catch (SocketException e)
+            catch (Exception ex)
             {
-                Log.Error($"Socket error when connecting:\n{e}");
-                _logFile?.Write($"connection error: {e}");
+                //Log.Error($"Socket error when connecting:\n{e}");
+                //_logFile?.Write($"connection error: {e}");
 
-                Disconnect(e.SocketErrorCode);
-
-                return false;
+                //Disconnect(e.SocketErrorCode);
             }
         }
 
+
         public void Disconnect()
-            => Disconnect(SocketError.Success);
-
-        private void Disconnect(SocketError error)
         {
-            _logFile?.Write($"disconnection  -  socket_error: {error}");
-
-            if (IsDisposed)
-            {
-                return;
-            }
-
-            Status = ClientSocketStatus.Disconnected;
             IsDisposed = true;
-
-            if (_socket == null)
-            {
-                return;
-            }
-
-            try
-            {
-                _socket.Shutdown(SocketShutdown.Both);
-                _socket.Disconnect(true);
-            }
-            catch
-            {
-                _socket?.Close();
-                _socket?.Dispose();
-                _socket = null;
-            }
-
-            Log.Trace($"Disconnected [{(_isLoginSocket ? "login socket" : "game socket")}]");
-
             _isCompressionEnabled = false;
-            _localIP = null;
-
-            if (error != 0)
-            {
-                Disconnected.Raise(error);
-            }
-
             Statistics.Reset();
+            _socket.Disconnect();
         }
 
         public void EnableCompression()
@@ -282,7 +289,7 @@ namespace ClassicUO.Network
 
         private void Send(byte[] data, int length, bool skip_encryption)
         {
-            if (_socket == null || IsDisposed || !_socket.Connected)
+            if (_socket == null || IsDisposed || !_socket.IsConnected)
             {
                 return;
             }
@@ -312,7 +319,7 @@ namespace ClassicUO.Network
             ProcessRecv();
 
             ExtractPackets(_recvUncompressedStream, true);
-            ExtractPackets(_pluginPackets, false);
+            ExtractPackets(_pluginsDataStream, false);
 
             ProcessSend();
         }
@@ -418,75 +425,56 @@ namespace ClassicUO.Network
             return true;
         }
 
+        private void OnDataReceived(object sender, ArraySegment<byte> e)
+        {
+            lock (_recvCompressedStream)
+                _recvCompressedStream.Write(e.Array, e.Offset, e.Count);
+        }
+
         private void ProcessRecv()
         {
-            if (IsDisposed || Status != ClientSocketStatus.Connected)
+            if (IsDisposed)
             {
                 return;
             }
 
             if (!IsConnected && !IsDisposed)
             {
-                Disconnect();
+                //Disconnect();
 
-                return;
-            }
-
-            int available = _socket.Available;
-
-            if (available <= 0)
-            {
                 return;
             }
 
             try
             {
-                while (available > 0)
+                lock (_recvCompressedStream)
                 {
-                    var toRead = Math.Min(_recvFixedBuffer.Length, available);
-                    var received = _socket.Receive(_recvFixedBuffer, 0, toRead, SocketFlags.None, out var errorCode);
+                    var pos = (int)_recvCompressedStream.Position;
 
-                    // TODO: add a check if the toRead != received ??
-                    available -= toRead;
-
-                    if (errorCode != SocketError.Success)
+                    if (pos <= 0)
                     {
-                        break;
+                        return;
                     }
 
-                    if (received <= 0)
+                    Statistics.TotalBytesReceived += (uint)pos;
+
+                    var compressedBuffer = System.Buffers.ArrayPool<byte>.Shared.Rent(BUFF_SIZE); // pos?
+
+                    try
                     {
-                        break;
+                        _recvCompressedStream.Seek(0, SeekOrigin.Begin);
+                        _ = _recvCompressedStream.Read(compressedBuffer, 0, pos);
+                        _recvCompressedStream.Seek(0, SeekOrigin.Begin);
+
+                        ProcessEncryption(compressedBuffer, pos);
+                        DecompressBuffer(compressedBuffer, ref pos);
+
+                        _recvUncompressedStream.Write(compressedBuffer, 0, pos);
                     }
-
-                    _recvCompressedStream.Write(_recvFixedBuffer, 0, received);
-                }
-
-
-                var pos = (int)_recvCompressedStream.Position;
-                Statistics.TotalBytesReceived += (uint)pos;
-
-                if (pos == 0 || pos < available)
-                {
-                    // ERROR
-                }
-
-                var compressedBuffer = System.Buffers.ArrayPool<byte>.Shared.Rent(BUFF_SIZE); // pos?
-
-                try
-                {
-                    _recvCompressedStream.Seek(0, SeekOrigin.Begin);
-                    _ = _recvCompressedStream.Read(compressedBuffer, 0, pos);
-                    _recvCompressedStream.Seek(0, SeekOrigin.Begin);
-
-                    ProcessEncryption(compressedBuffer, pos);
-                    DecompressBuffer(compressedBuffer, ref pos);
-
-                    _recvUncompressedStream.Write(compressedBuffer, 0, pos);
-                }
-                finally
-                {
-                    System.Buffers.ArrayPool<byte>.Shared.Return(compressedBuffer);
+                    finally
+                    {
+                        System.Buffers.ArrayPool<byte>.Shared.Return(compressedBuffer);
+                    }
                 }
             }
             catch (SocketException ex)
@@ -494,7 +482,7 @@ namespace ClassicUO.Network
                 Log.Error("socket error when receving:\n" + ex);
                 _logFile?.Write($"disconnection  -  error when reading to the socket buffer: {ex}");
 
-                Disconnect(ex.SocketErrorCode);
+                // Disconnect(ex.SocketErrorCode);
             }
             catch (Exception ex)
             {
@@ -504,7 +492,7 @@ namespace ClassicUO.Network
                     Log.Error("socket error when receving:\n" + socketEx);
 
                     _logFile?.Write($"disconnection  -  error when reading to the socket buffer [2]: {socketEx}");
-                    Disconnect(socketEx.SocketErrorCode);
+                    // Disconnect(socketEx.SocketErrorCode);
                 }
                 else
                 {
@@ -528,14 +516,14 @@ namespace ClassicUO.Network
 
         private void ProcessSend()
         {
-            if (IsDisposed || Status != ClientSocketStatus.Connected)
+            if (IsDisposed)
             {
                 return;
             }
 
             if (!IsConnected && !IsDisposed)
             {
-                Disconnect();
+                //Disconnect();
 
                 return;
             }
@@ -553,7 +541,7 @@ namespace ClassicUO.Network
             try
             {
                 var read = _sendStream.Read(buffer, 0, length);
-                var sent = _socket.Send(buffer, 0, read, SocketFlags.None);
+                _socket.Send(buffer, 0, read);
                 _sendStream.Seek(0, SeekOrigin.Begin);
             }
             catch (SocketException ex)
@@ -561,7 +549,7 @@ namespace ClassicUO.Network
                 Log.Error("socket error when sending:\n" + ex);
                 _logFile?.Write($"disconnection  -  error during writing to the socket buffer: {ex}");
 
-                Disconnect(ex.SocketErrorCode);
+                //Disconnect(ex.SocketErrorCode);
             }
             catch (Exception ex)
             {
@@ -571,7 +559,7 @@ namespace ClassicUO.Network
                     Log.Error("socket error when sending:\n" + socketEx);
 
                     _logFile?.Write($"disconnection  -  error during writing to the socket buffer [2]: {socketEx}");
-                    Disconnect(socketEx.SocketErrorCode);
+                    //Disconnect(socketEx.SocketErrorCode);
                 }
                 else
                 {
