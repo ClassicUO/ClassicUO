@@ -108,6 +108,7 @@ namespace ClassicUO.Game.UI.Gumps
             _background.Height = Height - (BORDER_WIDTH * 2);
             _background.X = BORDER_WIDTH;
             _background.Y = BORDER_WIDTH;
+            _background.Alpha = (float)ProfileManager.CurrentProfile.ContainerOpacity/100;
             #endregion
 
             #region TOP BAR AREA
@@ -487,7 +488,10 @@ namespace ClassicUO.Game.UI.Gumps
         protected override void UpdateContents()
         {
             if (InvalidateContents && !IsDisposed && IsVisible)
+            {
+                _background.Alpha = (float)ProfileManager.CurrentProfile.ContainerOpacity / 100;
                 updateItems();
+            }
         }
 
         public override void Dispose()

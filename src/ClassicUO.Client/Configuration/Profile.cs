@@ -171,7 +171,7 @@ namespace ClassicUO.Configuration
         public bool HoldDownKeyAltToCloseAnchored { get; set; } = true;
         public bool CloseAllAnchoredGumpsInGroupWithRightClick { get; set; } = false;
         public bool HoldAltToMoveGumps { get; set; }
-
+        public byte JournalOpacity { get; set; } = 50;
         public bool HideScreenshotStoredInMessage { get; set; }
 
         // Experimental
@@ -263,6 +263,8 @@ namespace ClassicUO.Configuration
         public bool JournalDarkMode { get; set; }
 
         public byte ContainersScale { get; set; } = 100;
+
+        public byte ContainerOpacity { get; set; } = 50;
 
         public bool ScaleItemsInsideContainers { get; set; }
 
