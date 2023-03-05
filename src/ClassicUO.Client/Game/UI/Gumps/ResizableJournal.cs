@@ -6,6 +6,7 @@ using ClassicUO.Input;
 using ClassicUO.Renderer;
 using ClassicUO.Utility.Collections;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 
 namespace ClassicUO.Game.UI.Gumps
@@ -13,14 +14,27 @@ namespace ClassicUO.Game.UI.Gumps
     internal class ResizableJournal : ResizableGump
     {
         #region CONSTANTS
-        private const int MIN_WIDTH = 350;
+        private const int MIN_WIDTH = 410;
         private const int MIN_HEIGHT = 350;
         private const int LINE_SPACING = 4;
         private const int BORDER_WIDTH = 5;
-        private const int SCROLL_BAR_WIDTH = 15;
+        private const int SCROLL_BAR_WIDTH = 18;
+        #region TABS
+        private const int TAB_WIDTH = 100;
+        private const int TAB_HEIGHT = 30;
+        #endregion
         #endregion
 
         #region CONTROLS
+
+        #region TABS
+        private AlphaBlendControl _tabBackground;
+        private List<NiceButton> _tab = new List<NiceButton>();
+        private List<string> _tabName = new List<string>();
+        private List<MessageType[]> _tabTypes = new List<MessageType[]>();
+        private MessageType[] _currentFilter;
+        #endregion
+
         private AlphaBlendControl _background;
         private RenderedTextList _journalArea;
         private ScrollBar _scrollBarBase;
@@ -32,22 +46,78 @@ namespace ClassicUO.Game.UI.Gumps
         #endregion
         public ResizableJournal() : base(_lastWidth, _lastHeight, MIN_WIDTH, MIN_HEIGHT, 0, 0)
         {
+            CanMove = true;
+            AcceptMouseInput = true;
+            WantUpdateSize = true;
+            CanCloseWithRightClick = true;
+
             X = _lastX;
             Y = _lastY;
 
             #region Background
-            _background = new AlphaBlendControl();
-            _background.Width = Width;
-            _background.Height = Height;
-            Add(_background);
+            _background = new AlphaBlendControl(0.7f);
+            _background.Width = Width - (BORDER_WIDTH * 2);
+            _background.Height = Height - (BORDER_WIDTH * 2);
+            _background.X = BORDER_WIDTH;
+            _background.Y = BORDER_WIDTH;
+            _background.CanCloseWithRightClick = true;
+            _background.DragBegin += (sender, e) =>
+            {
+                InvokeDragBegin(e.Location);
+            };
+            #endregion
+
+            #region Tab area
+            _tabBackground = new AlphaBlendControl()
+            {
+                Hue = 42,
+                X = BORDER_WIDTH,
+                Y = BORDER_WIDTH,
+            };
+            _tabBackground.Width = Width - (BORDER_WIDTH*2);
+            _tabBackground.Height = TAB_HEIGHT;
+            
+            AddTab("All", new MessageType[] {
+                MessageType.Alliance, MessageType.Command, MessageType.Emote,
+                MessageType.Encoded, MessageType.Focus, MessageType.Guild,
+                MessageType.Label, MessageType.Limit3Spell, MessageType.Party,
+                MessageType.Regular, MessageType.Spell, MessageType.System,
+                MessageType.Whisper, MessageType.Yell
+            });
+            AddTab("Chat", new MessageType[] { MessageType.Regular, MessageType.Guild, MessageType.Alliance, MessageType.Emote, MessageType.Party, MessageType.Whisper, MessageType.Yell });
+            AddTab("Guild|Party", new MessageType[] { MessageType.Guild, MessageType.Alliance, MessageType.Party });
+            AddTab("System", new MessageType[] { MessageType.System });
             #endregion
 
             #region Journal Area
-            _scrollBarBase = new ScrollBar(Width - SCROLL_BAR_WIDTH -BORDER_WIDTH, 0, Height);
+            _scrollBarBase = new ScrollBar(
+                Width - SCROLL_BAR_WIDTH - BORDER_WIDTH,
+                BORDER_WIDTH + TAB_HEIGHT,
+                Height - TAB_HEIGHT - (BORDER_WIDTH * 2));
             Add(_scrollBarBase);
-            _journalArea = new RenderedTextList(BORDER_WIDTH, BORDER_WIDTH, Width - SCROLL_BAR_WIDTH - (BORDER_WIDTH * 2), Height - (BORDER_WIDTH * 2), _scrollBarBase);
+            _journalArea = new RenderedTextList(
+                BORDER_WIDTH,
+                BORDER_WIDTH + TAB_HEIGHT,
+                Width - SCROLL_BAR_WIDTH - (BORDER_WIDTH * 2),
+                Height - (BORDER_WIDTH * 2) - TAB_HEIGHT,
+                _scrollBarBase,
+                this);
+            _journalArea.CanCloseWithRightClick = true;
+            _journalArea.DragBegin += (sender, e) => { InvokeDragBegin(e.Location); };
+             #endregion
+
+            Add(_background);
+            Add(_tabBackground);
+
             Add(_journalArea);
-            #endregion
+            for (int i = 0; i < _tab.Count; i++)
+            {
+                Add(_tab[i]);
+            //    _tab[i].MouseUp += (sender, e) => {
+            //        if (e.Button == MouseButtonType.Left)
+            //            OnButtonClick(_tab[i].ButtonParameter);
+            //    };
+            }
 
             InitJournalEntries();
             World.Journal.EntryAdded += (sender, e) => { AddJournalEntry(e); };
@@ -55,17 +125,35 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override GumpType GumpType => GumpType.Journal;
 
+        public override void OnButtonClick(int buttonID)
+        {
+            if (_tab.Count >= buttonID)
+            {
+                _tab[buttonID].IsSelected = true;
+                _currentFilter = _tabTypes[buttonID];
+            }
+        }
+
+        private void AddTab(string Name, MessageType[] filters)
+        {
+            _tab.Add(new NiceButton((_tab.Count * TAB_WIDTH) + BORDER_WIDTH, BORDER_WIDTH, TAB_WIDTH, TAB_HEIGHT, ButtonAction.Activate, Name, 1) { ButtonParameter = _tab.Count, IsSelectable = false });
+            _tabName.Add(Name);
+            _tabTypes.Add(filters);
+        }
+
         private void AddJournalEntry(JournalEntry journalEntry)
         {
             if (journalEntry == null)
                 return;
-            _journalArea.AddEntry($"{journalEntry.Name}: {journalEntry.Text}", journalEntry.Font, journalEntry.Hue, journalEntry.IsUnicode, journalEntry.Time, journalEntry.TextType);
+            _journalArea.AddEntry($"{journalEntry.Name}: {journalEntry.Text}", journalEntry.Font, journalEntry.Hue, journalEntry.IsUnicode, journalEntry.Time, journalEntry.TextType, journalEntry.MessageType);
         }
 
         private void InitJournalEntries()
         {
             foreach (JournalEntry entry in JournalManager.Entries)
             {
+                if (entry == null)
+                    continue;
                 AddJournalEntry(entry);
             }
         }
@@ -76,31 +164,31 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (X != _lastX) _lastX = X;
             if (Y != _lastY) _lastY = Y;
-            if (Width != _lastWidth)
+            if ((Width != _lastWidth || Height != _lastHeight) && !Mouse.LButtonPressed)
             {
                 _lastWidth = Width;
-                _background.Width = Width;
+                _background.Width = Width - (BORDER_WIDTH * 2);
                 _scrollBarBase.X = Width - SCROLL_BAR_WIDTH - BORDER_WIDTH;
-                _journalArea.Width = Width - SCROLL_BAR_WIDTH - (BORDER_WIDTH*2);
-            }
-            if (Height != _lastHeight)
-            {
+                _journalArea.Width = Width - SCROLL_BAR_WIDTH - (BORDER_WIDTH * 2);
                 _lastHeight = Height;
-                _background.Height = Height;
-                _journalArea.Height = Height - (BORDER_WIDTH * 2);
-                _scrollBarBase.Height = Height - (BORDER_WIDTH * 2);
+                _background.Height = Height - (BORDER_WIDTH * 2);
+                _journalArea.Height = Height - (BORDER_WIDTH * 2) - TAB_HEIGHT;
+                _scrollBarBase.Height = Height - (BORDER_WIDTH * 2) - TAB_HEIGHT;
             }
         }
 
         private class RenderedTextList : Control
         {
-            private readonly Deque<RenderedText> _entries, _hours;
+            private Deque<RenderedText> _entries, _hours;
             private readonly ScrollBarBase _scrollBar;
             private readonly Deque<TextType> _text_types;
+            private readonly Deque<MessageType> _message_types;
             private int lastWidth = 0, lastHeight = 0;
+            private ResizableJournal _resizableJournal;
 
-            public RenderedTextList(int x, int y, int width, int height, ScrollBarBase scrollBarControl)
+            public RenderedTextList(int x, int y, int width, int height, ScrollBarBase scrollBarControl, ResizableJournal resizableJournal)
             {
+                _resizableJournal = resizableJournal;
                 _scrollBar = scrollBarControl;
                 _scrollBar.IsVisible = false;
                 AcceptMouseInput = true;
@@ -113,6 +201,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _entries = new Deque<RenderedText>();
                 _hours = new Deque<RenderedText>();
                 _text_types = new Deque<TextType>();
+                _message_types = new Deque<MessageType>();
 
                 WantUpdateSize = false;
             }
@@ -126,20 +215,19 @@ namespace ClassicUO.Game.UI.Gumps
 
                 int height = 0;
                 int maxheight = _scrollBar.Value + _scrollBar.Height;
-                Console.WriteLine("TEST DRAW");
+
                 for (int i = 0; i < _entries.Count; i++)
                 {
                     RenderedText t = _entries[i];
                     RenderedText hour = _hours[i];
-
                     TextType type = _text_types[i];
+                    MessageType messageType = _message_types[i];
 
 
-                    if (!CanBeDrawn(type))
+                    if (!CanBeDrawn(type, messageType))
                     {
                         continue;
                     }
-
 
                     if (height + t.Height <= _scrollBar.Value)
                     {
@@ -237,11 +325,20 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     return;
                 }
-                if(Width != lastWidth || Height != lastHeight)
+                _scrollBar.IsVisible = _scrollBar.MaxValue > _scrollBar.MinValue;
+                if (Width != lastWidth || Height != lastHeight)
                 {
                     lastWidth = Width;
                     lastHeight = Height;
-                    _scrollBar.IsVisible = true;
+
+                    Deque<RenderedText> newList = new Deque<RenderedText>();
+                    for (int i = 0; i < _entries.Count; i++)
+                    {
+                        RenderedText t = _entries[i];
+                        newList.AddToBack(RenderedText.Create(t.Text, t.Hue, t.Font, t.IsUnicode, t.FontStyle, t.Align, Width - SCROLL_BAR_WIDTH - BORDER_WIDTH - _hours[i].Width));
+                    }
+                    _entries = newList;
+
                     CalculateScrollBarMaxValue();
                 }
 
@@ -254,7 +351,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 for (int i = 0; i < _entries.Count; i++)
                 {
-                    if (i < _text_types.Count && CanBeDrawn(_text_types[i]))
+                    if (i < _text_types.Count && CanBeDrawn(_text_types[i], _message_types[i]))
                     {
                         height += _entries[i].Height;
                     }
@@ -285,7 +382,8 @@ namespace ClassicUO.Game.UI.Gumps
                 ushort hue,
                 bool isUnicode,
                 DateTime time,
-                TextType text_type
+                TextType text_type,
+                MessageType messageType
             )
             {
                 bool maxScroll = _scrollBar.Value == _scrollBar.MaxValue;
@@ -297,6 +395,8 @@ namespace ClassicUO.Game.UI.Gumps
                     _hours.RemoveFromFront().Destroy();
 
                     _text_types.RemoveFromFront();
+
+                    _message_types.RemoveFromFront();
                 }
 
                 RenderedText h = RenderedText.Create
@@ -324,33 +424,34 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _text_types.AddToBack(text_type);
 
+                _message_types.AddToBack(messageType);
+
                 _scrollBar.MaxValue += rtext.Height;
 
                 if (maxScroll)
                 {
                     _scrollBar.Value = _scrollBar.MaxValue;
                 }
+                CalculateScrollBarMaxValue();
             }
 
-            private static bool CanBeDrawn(TextType type)
+            private bool CanBeDrawn(TextType type, MessageType messageType)
             {
-                if (type == TextType.CLIENT && !ProfileManager.CurrentProfile.ShowJournalClient)
+                if (_resizableJournal._currentFilter != null)
                 {
-                    return false;
-                }
+                    for (int i = 0; i < _resizableJournal._currentFilter.Length; i++)
+                    {
+                        MessageType currentfilter = _resizableJournal._currentFilter[i];
 
-                if (type == TextType.SYSTEM && !ProfileManager.CurrentProfile.ShowJournalSystem)
-                {
-                    return false;
-                }
+                        if (type == TextType.SYSTEM && currentfilter == MessageType.System)
+                            return true;
 
-                if (type == TextType.OBJECT && !ProfileManager.CurrentProfile.ShowJournalObjects)
-                {
-                    return false;
-                }
+                        if (type == TextType.SYSTEM && currentfilter != MessageType.System)
+                            continue;
 
-                if (type == TextType.GUILD_ALLY && !ProfileManager.CurrentProfile.ShowJournalGuildAlly)
-                {
+                        if (currentfilter == messageType)
+                            return true;
+                    }
                     return false;
                 }
 
@@ -369,6 +470,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _entries.Clear();
                 _hours.Clear();
                 _text_types.Clear();
+                _message_types.Clear();
 
                 base.Dispose();
             }

@@ -310,7 +310,8 @@ namespace ClassicUO.Game.Scenes
                     hue,
                     name,
                     e.TextType,
-                    e.IsUnicode
+                    e.IsUnicode,
+                    e.Type
                 );
             }
         }

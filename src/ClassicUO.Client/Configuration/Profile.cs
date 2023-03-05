@@ -529,7 +529,6 @@ namespace ClassicUO.Configuration
                                 case GumpType.Journal:
                                     //gump = new JournalGump();
                                     gump = new ResizableJournal();
-
                                     break;
 
                                 case GumpType.MacroButton:
