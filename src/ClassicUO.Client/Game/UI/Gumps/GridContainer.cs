@@ -33,8 +33,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Xml;
 using ClassicUO.Assets;
 using ClassicUO.Configuration;
@@ -56,15 +54,16 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly Item _container;
         private const int X_SPACING = 1;
         private const int Y_SPACING = 1;
-        private const int GRID_ITEM_SIZE = 50;
-        private const int BORDER_WIDTH = 3;
-        private const int DEFAULT_WIDTH =
+        private static int GRID_ITEM_SIZE = (int)Math.Round(50 * UIManager.ContainerScale);
+        private float _lastGridItemScale = UIManager.ContainerScale;
+        private const int BORDER_WIDTH = 5;
+        private static int DEFAULT_WIDTH =
             (BORDER_WIDTH * 2)     //The borders around the container, one on the left and one on the right
             + 15                   //The width of the scroll bar
             + (GRID_ITEM_SIZE * 4) //How many items to fit in left to right
             + (X_SPACING * 4)      //Spacing between each grid item(x4 items)
             + 6;                   //Because the border acts weird
-        private const int DEFAULT_HEIGHT = 27 + (BORDER_WIDTH * 2) + (GRID_ITEM_SIZE + Y_SPACING) * 4;
+        private static int DEFAULT_HEIGHT = 27 + (BORDER_WIDTH * 2) + (GRID_ITEM_SIZE + Y_SPACING) * 4;
         private readonly Label _containerNameLabel;
         private GridScrollArea _scrollArea;
         private int _lastWidth = DEFAULT_WIDTH;
@@ -73,7 +72,6 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly NiceButton _openRegularGump;
         private readonly NiceButton _helpToolTip;
         private ushort _ogContainer;
-        private readonly bool _DEBUG = false;
 
         private Item _dragSlotItem;
         private Item _dragSlotContainer;
@@ -85,13 +83,13 @@ namespace ClassicUO.Game.UI.Gumps
 
         public GridContainer(uint local, ushort ogContainer) : base(DEFAULT_WIDTH, DEFAULT_HEIGHT, DEFAULT_WIDTH, DEFAULT_HEIGHT, local, 0)
         {
+            #region SET VARS
             _ogContainer = ogContainer;
             _container = World.Items.Get(local);
 
             if (_container == null)
             {
                 Dispose();
-
                 return;
             }
 
@@ -102,22 +100,22 @@ namespace ClassicUO.Game.UI.Gumps
             AcceptMouseInput = true;
             WantUpdateSize = true;
             CanCloseWithRightClick = true;
+            #endregion
 
+            #region background
             _background = new AlphaBlendControl();
             _background.Width = Width - (BORDER_WIDTH * 2);
             _background.Height = Height - (BORDER_WIDTH * 2);
             _background.X = BORDER_WIDTH;
             _background.Y = BORDER_WIDTH;
-            Add(_background);
+            #endregion
 
-            Add
-            (
-                _containerNameLabel = new Label(GetContainerName(), true, 0x0481)
-                {
-                    X = BORDER_WIDTH,
-                    Y = -20
-                }
-            );
+            #region TOP BAR AREA
+            _containerNameLabel = new Label(GetContainerName(), true, 0x0481)
+            {
+                X = BORDER_WIDTH,
+                Y = -20
+            };
 
             _searchBox = new StbTextBox(0xFF, 20, 100, true, FontStyle.Solid, 0x0481)
             {
@@ -130,31 +128,22 @@ namespace ClassicUO.Game.UI.Gumps
             _searchBox.TextChanged += (sender, e) => { updateItems(); };
             _searchBox.DragBegin += (sender, e) => { InvokeDragBegin(e.Location); };
 
-            Add(new AlphaBlendControl(0.5f)
-            {
-                Hue = 0x0481,
-                X = _searchBox.X,
-                Y = _searchBox.Y,
-                Width = _searchBox.Width,
-                Height = _searchBox.Height
-            }); //Search box background
-            Add(_searchBox);
-
-            _openRegularGump = new NiceButton(Width - 20 - BORDER_WIDTH, BORDER_WIDTH, 20, 20, ButtonAction.Activate, "[X]", 1, TEXT_ALIGN_TYPE.TS_CENTER, 0x0481)
+            _openRegularGump = new NiceButton(_background.Width - 20 - BORDER_WIDTH, BORDER_WIDTH, 20, 20, ButtonAction.Activate, "[X]", 1, TEXT_ALIGN_TYPE.TS_CENTER, 0x0481)
             {
                 ButtonParameter = 1,
                 IsSelectable = false,
             };
             _openRegularGump.SetTooltip("Open the original style container");
 
-            _helpToolTip = new NiceButton(Width - 40 - BORDER_WIDTH, BORDER_WIDTH, 20, 20, ButtonAction.Default, "[?]", 1, TEXT_ALIGN_TYPE.TS_CENTER, 0x0481);
+            _helpToolTip = new NiceButton(_background.Width - 20 - BORDER_WIDTH, BORDER_WIDTH, 20, 20, ButtonAction.Default, "[?]", 1, TEXT_ALIGN_TYPE.TS_CENTER, 0x0481);
             _helpToolTip.SetTooltip(
                 "Ctrl + Click a slot -> Click another slot to lock that item into a specific slot." +
                 "<br>Use the [X] button to open the original style gump."
                 );
-            Add(_helpToolTip);
 
-            Add(_openRegularGump);
+            #endregion
+
+            #region Scroll Area
             _scrollArea = new GridScrollArea(
                 _background.X,
                 _containerNameLabel.Height + _background.Y + 1,
@@ -166,18 +155,38 @@ namespace ClassicUO.Game.UI.Gumps
             _scrollArea.ScrollbarBehaviour = ScrollbarBehaviour.ShowAlways;
             _scrollArea.MouseUp += _scrollArea_MouseUp;
             _scrollArea.DragBegin += _scrollArea_DragBegin;
+            #endregion
+
+            #region Add controls
+            Add(_background);
+            Add(_containerNameLabel);
+            Add(new AlphaBlendControl(0.5f)
+            {
+                Hue = 0x0481,
+                X = _searchBox.X,
+                Y = _searchBox.Y,
+                Width = _searchBox.Width,
+                Height = _searchBox.Height
+            }); //Search box background
+            Add(_searchBox);
+            Add(_helpToolTip);
+            Add(_openRegularGump);
             Add(_scrollArea);
+            #endregion
+
             ResizeWindow(new Point(_lastWidth, _lastHeight));
-            _lastWidth = Width;
-            _lastHeight = Height;
             InvalidateContents = true;
         }
         public override GumpType GumpType => GumpType.GridContainer;
 
+        public override void OnResize()
+        {
+            base.OnResize();
+            Console.WriteLine("onresize");
+        }
+
         public override void Save(XmlTextWriter writer)
         {
-            if (_DEBUG)
-                Console.WriteLine("Save()");
             base.Save(writer);
             writer.WriteAttributeString("ogContainer", _ogContainer.ToString());
             writer.WriteAttributeString("width", Width.ToString());
@@ -197,8 +206,6 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Restore(XmlElement xml)
         {
-            if (_DEBUG)
-                Console.WriteLine("Restore()");
             base.Restore(xml);
             int rW = int.Parse(xml.GetAttribute("width"));
             int rH = int.Parse(xml.GetAttribute("height"));
@@ -216,8 +223,6 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
             ResizeWindow(new Point(rW, rH));
-            _lastWidth = Width = rW;
-            _lastHeight = Height = rH;
             InvalidateContents = true;
         }
 
@@ -232,8 +237,6 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (Client.Game.GameCursor.ItemHold.Enabled)
                 {
-                    if (_DEBUG)
-                        Console.WriteLine("_scrollArea MouseUp Item Drop");
                     GameActions.DropItem(Client.Game.GameCursor.ItemHold.Serial, 0, 0, 0, _container.Serial);
                     InvalidateContents = true;
                     UpdateContents();
@@ -377,114 +380,114 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void updateItems()
         {
-            if (_DEBUG)
-                Console.WriteLine("updateItems called");
+            #region VARS
             int x = X_SPACING;
             int y = Y_SPACING;
-            _background.Width = Width - (BORDER_WIDTH * 2);
-            _background.Height = Height - (BORDER_WIDTH * 2);
+            int count = 0;
+            int line = 1;
+            #endregion
 
+            //Remove preview items from view
             foreach (Control child in _scrollArea.Children)
                 if (child is GridItem)
                     child.Dispose();
 
-            int count = 0;
-            int line = 1;
-            if (_container != null && _container.Items != null)
+            //Container doesn't exist or has no items
+            if (_container == null || _container.Items == null)
             {
-                List<Item> contents = new List<Item>();
-                for (LinkedObject i = _container.Items; i != null; i = i.Next)
-                {
-                    contents.Add((Item)i);
-                }
-                List<Item> sortedContents = contents.OrderBy((x) => x.Graphic).ToList();
+                InvalidateContents = false;
+                return;
+            }
 
-                if (_searchBox.Text != "")
+            #region Convert items into a sorted list
+            List<Item> contents = new List<Item>();
+            for (LinkedObject i = _container.Items; i != null; i = i.Next)
+            {
+                contents.Add((Item)i);
+            }
+            List<Item> sortedContents = contents.OrderBy((x) => x.Graphic).ToList();
+            #endregion
+
+            #region Filter contents via search box
+            if (_searchBox.Text != "")
+            {
+                List<Item> filteredContents = new List<Item>();
+                foreach (Item i in sortedContents)
                 {
-                    List<Item> filteredContents = new List<Item>();
-                    foreach (Item i in sortedContents)
+                    if (i == null)
+                        continue;
+                    if (i.Name == null)
+                        continue;
+
+                    if (i.Name.ToLower().Contains(_searchBox.Text.ToLower()))
                     {
-                        if (i != null)
-                        {
-                            if (i.Name != null)
-                            {
-                                if (i.Name.ToLower().Contains(_searchBox.Text.ToLower()))
-                                {
-                                    filteredContents.Add(i);
-                                    continue;
-                                }
-                                if (World.OPL.TryGetNameAndData(i.Serial, out string name, out string data))
-                                {
-                                    if (data != null)
-                                        if (data.ToLower().Contains(_searchBox.Text.ToLower()))
-                                            filteredContents.Add(i);
-                                }
-                            }
-                        }
-
-                    }
-                    sortedContents = filteredContents;
-                }
-
-                #region Sort Locked Slots
-                foreach (var spot in lockedSpots)
-                {
-                    Item item = World.Items.Get(spot.Value);
-                    if (item == null)
-                    {
+                        filteredContents.Add(i);
                         continue;
                     }
-                    int index = sortedContents.IndexOf(item);
-                    if (index != -1)
+                    if (World.OPL.TryGetNameAndData(i.Serial, out string name, out string data))
                     {
-                        if (spot.Key < sortedContents.Count)
-                        {
-                            Item moveItem = sortedContents[index];
-                            sortedContents.RemoveAt(index);
-                            sortedContents.Insert(spot.Key, moveItem);
-                        }
+                        if (data != null)
+                            if (data.ToLower().Contains(_searchBox.Text.ToLower()))
+                                filteredContents.Add(i);
                     }
                 }
-                #endregion
+                sortedContents = filteredContents;
+            }
+            #endregion
 
-                foreach (Item it in sortedContents)
+            #region Sort Locked Slots
+            foreach (var spot in lockedSpots)
+            {
+                Item item = World.Items.Get(spot.Value);
+                if (item == null)
                 {
-                    if (_DEBUG)
-                        Console.Write($"[{it.Name}]");
-
-                    GridItem gridItem = new GridItem(it, GRID_ITEM_SIZE, _container, this, count);
-
-                    if (lockedSpots.Values.Contains(it))
-                        gridItem.itemGridLocked = true;
-
-                    if (x + GRID_ITEM_SIZE + X_SPACING >= _scrollArea.Width - 14) //14 is the scroll bar width
+                    continue;
+                }
+                int index = sortedContents.IndexOf(item);
+                if (index != -1)
+                {
+                    if (spot.Key < sortedContents.Count)
                     {
-                        x = X_SPACING;
-                        ++line;
-
-                        y += gridItem.Height + Y_SPACING;
-
+                        Item moveItem = sortedContents[index];
+                        sortedContents.RemoveAt(index);
+                        sortedContents.Insert(spot.Key, moveItem);
                     }
-
-                    gridItem.X = x + X_SPACING;
-                    gridItem.Y = y;
-                    _scrollArea.Add(gridItem);//, _pagesCount);
-
-                    x += gridItem.Width + X_SPACING;
-                    ++count;
                 }
             }
+            #endregion
+
+            #region Add the grid items to the gump
+            foreach (Item it in sortedContents)
+            {
+                GridItem gridItem = new GridItem(it, GRID_ITEM_SIZE, _container, this, count);
+
+                if (lockedSpots.Values.Contains(it))
+                    gridItem.itemGridLocked = true;
+
+                if (x + GRID_ITEM_SIZE + X_SPACING >= _scrollArea.Width - 14) //14 is the scroll bar width
+                {
+                    x = X_SPACING;
+                    ++line;
+
+                    y += gridItem.Height + Y_SPACING;
+                }
+
+                gridItem.X = x + X_SPACING;
+                gridItem.Y = y;
+                _scrollArea.Add(gridItem);
+
+                x += gridItem.Width + X_SPACING;
+                ++count;
+            }
+            #endregion
+
             InvalidateContents = false;
         }
 
         protected override void UpdateContents()
         {
-            if (_DEBUG)
-                Console.WriteLine("UpdateContents called");
             if (InvalidateContents && !IsDisposed && IsVisible)
                 updateItems();
-            _openRegularGump.X = Width - 20 - (BORDER_WIDTH * 2);
-            _helpToolTip.X = Width - 40 - (BORDER_WIDTH * 2);
         }
 
         public override void Dispose()
@@ -515,28 +518,30 @@ namespace ClassicUO.Game.UI.Gumps
             if (_container == null || _container.IsDestroyed || _container.OnGround && _container.Distance > 3)
             {
                 Dispose();
-
                 return;
             }
-
-            base.Update();
 
             if (IsDisposed)
             {
                 return;
             }
 
-            if (_lastWidth != Width || _lastHeight != Height)
+            base.Update();
+
+            if ((_lastWidth != Width || _lastHeight != Height) || _lastGridItemScale != UIManager.ContainerScale)
             {
+                _lastGridItemScale = UIManager.ContainerScale;
+                GRID_ITEM_SIZE = (int)Math.Round(50 * UIManager.ContainerScale);
+                _background.Width = Width - (BORDER_WIDTH * 2);
+                _background.Height = Height - (BORDER_WIDTH * 2);
                 _scrollArea.Width = _background.Width - BORDER_WIDTH;
                 _scrollArea.Height = _background.Height - BORDER_WIDTH - (_containerNameLabel.Height + 1);
-                _lastHeight = this.Height;
-                _lastWidth = this.Width;
+                _openRegularGump.X = _background.Width - 20 - BORDER_WIDTH;
+                _helpToolTip.X = _background.Width - 40 - BORDER_WIDTH;
+                _lastHeight = Height;
+                _lastWidth = Width;
                 RequestUpdateContents();
-                UpdateContents();
             }
-
-            WantUpdateSize = true;
 
             if (_container != null && !_container.IsDestroyed && UIManager.MouseOverControl != null && (UIManager.MouseOverControl == this || UIManager.MouseOverControl.RootParent == this))
             {
@@ -560,6 +565,7 @@ namespace ClassicUO.Game.UI.Gumps
             public bool itemGridLocked = false;
             private readonly int slot;
             private GridContainerPreview _preview;
+            private GumpPic _lockIcon;
 
             public GridItem(uint serial, int size, Item container, GridContainer gridContainer, int count)
             {
@@ -606,29 +612,22 @@ namespace ClassicUO.Game.UI.Gumps
                 _hit.MouseUp += _hit_MouseUp;
                 _hit.MouseDoubleClick += _hit_MouseDoubleClick;
 
-                GumpPic lockIcon = new GumpPic(40, 1, 0x082C, 0)
+                _lockIcon = new GumpPic(Width - 10, 1, 0x082C, 0)
                 {
                     AcceptMouseInput = true,
                 };
-                HitBox lockIconHit = new HitBox(0, 0, lockIcon.Width, lockIcon.Height, itemGridLocked ? "Unlock this slot" : "Lock this item in this slot");
+                HitBox lockIconHit = new HitBox(0, 0, _lockIcon.Width, _lockIcon.Height, "Unlock this slot");
                 lockIconHit.MouseUp += (o, e) =>
                 {
-                    if (_DEBUG)
-                        Console.WriteLine("lockIcon.MouseUp");
-                    if (!_gridContainer.lockedSpots.Values.Contains(_item.Serial))
-                    {
-                        AddLockedItemSlot(_item, slot);
-                        lockIconHit.SetTooltip("Unlock this slot");
-                    }
-                    else
+                    if (_gridContainer.lockedSpots.Values.Contains(_item.Serial))
                     {
                         _gridContainer.lockedSpots.Remove(slot);
                         itemGridLocked = false;
-                        lockIconHit.SetTooltip("Lock this item in this slot");
                     }
                 };
-                lockIcon.Add(lockIconHit);
-                Add(lockIcon);
+                _lockIcon.Add(lockIconHit);
+                _lockIcon.IsVisible = itemGridLocked;
+                Add(_lockIcon);
 
 
                 WantUpdateSize = false;
@@ -670,6 +669,7 @@ namespace ClassicUO.Game.UI.Gumps
                         if (_gridContainer._dragSlotContainer == _container)
                         {
                             AddLockedItemSlot(_gridContainer._dragSlotItem, slot);
+                            itemGridLocked = true;
                             _gridContainer.InvalidateContents = true;
                         }
                         _gridContainer._dragSlotEnabled = false;
@@ -747,6 +747,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
+                _lockIcon.IsVisible = itemGridLocked;
+
                 base.Draw(batcher, x, y);
 
                 Item item = World.Items.Get(LocalSerial);
@@ -758,6 +760,17 @@ namespace ClassicUO.Game.UI.Gumps
                     var texture = ArtLoader.Instance.GetStaticTexture(item.DisplayedGraphic, out var bounds);
                     var rect = ArtLoader.Instance.GetRealArtBounds(item.DisplayedGraphic);
 
+                    if (ProfileManager.CurrentProfile.ScaleItemsInsideContainers)
+                    {
+                        //bounds.X = (ushort)(bounds.X * UIManager.ContainerScale);
+                        //bounds.Y = (ushort)(bounds.Y * UIManager.ContainerScale);
+                        //bounds.Width = (ushort)(bounds.Width * UIManager.ContainerScale);
+                        //bounds.Height = (ushort)(bounds.Height * UIManager.ContainerScale);
+
+                        //rect.Width = (ushort)(rect.Width * UIManager.ContainerScale);
+                        //rect.Height = (ushort)(rect.Height * UIManager.ContainerScale);
+                    }
+
                     hueVector = ShaderHueTranslator.GetHueVector(item.Hue, item.ItemData.IsPartialHue, 1f);
 
                     Point originalSize = new Point(_hit.Width, _hit.Height);
@@ -765,13 +778,21 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (rect.Width < _hit.Width)
                     {
-                        originalSize.X = rect.Width;
+                        if (ProfileManager.CurrentProfile.ScaleItemsInsideContainers)
+                            originalSize.X = (ushort)(rect.Width * UIManager.ContainerScale);
+                        else
+                            originalSize.X = rect.Width;
+
                         point.X = (_hit.Width >> 1) - (originalSize.X >> 1);
                     }
 
                     if (rect.Height < _hit.Height)
                     {
-                        originalSize.Y = rect.Height;
+                        if (ProfileManager.CurrentProfile.ScaleItemsInsideContainers)
+                            originalSize.Y = (ushort)(rect.Height * UIManager.ContainerScale);
+                        else
+                            originalSize.Y = rect.Height;
+
                         point.Y = (_hit.Height >> 1) - (originalSize.Y >> 1);
                     }
 
