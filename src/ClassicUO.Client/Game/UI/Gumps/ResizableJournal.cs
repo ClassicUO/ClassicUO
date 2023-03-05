@@ -94,7 +94,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Width - SCROLL_BAR_WIDTH - BORDER_WIDTH,
                 BORDER_WIDTH + TAB_HEIGHT,
                 Height - TAB_HEIGHT - (BORDER_WIDTH * 2));
-            Add(_scrollBarBase);
+
             _journalArea = new RenderedTextList(
                 BORDER_WIDTH,
                 BORDER_WIDTH + TAB_HEIGHT,
@@ -107,6 +107,7 @@ namespace ClassicUO.Game.UI.Gumps
              #endregion
 
             Add(_background);
+            Add(_scrollBarBase);
             Add(_tabBackground);
 
             Add(_journalArea);
@@ -125,12 +126,20 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override GumpType GumpType => GumpType.Journal;
 
+        protected override void OnMouseWheel(MouseEventType delta)
+        {
+            base.OnMouseWheel(delta);
+            if(_scrollBarBase != null)
+                _scrollBarBase.InvokeMouseWheel(delta);
+        }
+
         public override void OnButtonClick(int buttonID)
         {
             if (_tab.Count >= buttonID)
             {
                 _tab[buttonID].IsSelected = true;
                 _currentFilter = _tabTypes[buttonID];
+                _scrollBarBase.Value = _scrollBarBase.MinValue;
             }
         }
 
