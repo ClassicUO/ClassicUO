@@ -74,7 +74,7 @@ namespace ClassicUO.Game.UI.Gumps
                 X = BORDER_WIDTH,
                 Y = BORDER_WIDTH,
             };
-            _tabBackground.Width = Width - (BORDER_WIDTH*2);
+            _tabBackground.Width = MIN_WIDTH - (BORDER_WIDTH*2);
             _tabBackground.Height = TAB_HEIGHT;
             
             AddTab("All", new MessageType[] {
