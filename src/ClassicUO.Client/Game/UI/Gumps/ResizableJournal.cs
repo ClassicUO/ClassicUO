@@ -16,8 +16,7 @@ namespace ClassicUO.Game.UI.Gumps
         #region CONSTANTS
         private const int MIN_WIDTH = 410;
         private const int MIN_HEIGHT = 350;
-        private const int LINE_SPACING = 4;
-        private const int BORDER_WIDTH = 5;
+        private const int BORDER_WIDTH = 4;
         private const int SCROLL_BAR_WIDTH = 18;
         #region TABS
         private const int TAB_WIDTH = 100;
@@ -55,7 +54,7 @@ namespace ClassicUO.Game.UI.Gumps
             Y = _lastY;
 
             #region Background
-            _background = new AlphaBlendControl(0.7f);
+            _background = new AlphaBlendControl(ProfileManager.CurrentProfile.JournalOpacity);
             _background.Width = Width - (BORDER_WIDTH * 2);
             _background.Height = Height - (BORDER_WIDTH * 2);
             _background.X = BORDER_WIDTH;
@@ -175,6 +174,12 @@ namespace ClassicUO.Game.UI.Gumps
                     continue;
                 AddJournalEntry(entry);
             }
+        }
+
+        protected override void UpdateContents()
+        {
+            base.UpdateContents();
+            _background.Alpha = (float)ProfileManager.CurrentProfile.JournalOpacity / 100;
         }
 
         public override void Update()

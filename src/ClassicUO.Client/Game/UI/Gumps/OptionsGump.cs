@@ -78,6 +78,7 @@ namespace ClassicUO.Game.UI.Gumps
         private Combobox _dragSelectModifierKey;
         private Combobox _backpackStyle;
         private Checkbox _hueContainerGumps;
+        private HSliderBar _containerOpacity;
 
 
         //counters
@@ -163,6 +164,7 @@ namespace ClassicUO.Game.UI.Gumps
         private FontSelector _tooltip_font_selector;
         private HSliderBar _dragSelectStartX, _dragSelectStartY;
         private Checkbox _dragSelectAsAnchor;
+        private HSliderBar _journalOpacity;
 
         // video
         private Checkbox _use_old_status_gump, _windowBorderless, _enableDeathScreen, _enableBlackWhiteEffect, _altLights, _enableLight, _enableShadows, _enableShadowsStatics, _auraMouse, _runMouseInSeparateThread, _useColoredLights, _darkNights, _partyAura, _hideChatGradient, _animatedWaterEffect;
@@ -688,6 +690,22 @@ namespace ClassicUO.Game.UI.Gumps
             );
 
             _use_smooth_boat_movement.IsVisible = Client.Version >= ClientVersion.CV_7090;
+
+            section.Add(AddLabel(null, "Journal Opacity", startX, startY));
+
+            section.AddRight
+            (
+                _journalOpacity = AddHSlider(
+                    null, 
+                    0,
+                    100,
+                    _currentProfile.JournalOpacity,
+                    startX,
+                    startY,
+                    200
+                ),
+                2
+            );
 
 
             SettingsSection section2 = AddSettingsSection(box, "Mobiles");
@@ -3265,6 +3283,23 @@ namespace ClassicUO.Game.UI.Gumps
                 startY += _backpackStyle.Height + 2 + 10;
             }
 
+            text = AddLabel(rightArea, "Grid container opacity", startX, startY);
+            startX += text.Width + 5;
+
+            _containerOpacity = AddHSlider
+            (
+                rightArea,
+                0,
+                100,
+                _currentProfile.ContainerOpacity,
+                startX,
+                startY,
+                200
+            );
+
+            startY += text.Height + 2;
+            startX = 5;
+
             text = AddLabel(rightArea, ResGumps.ContainerScale, startX, startY);
             startX += text.Width + 5;
 
@@ -3510,6 +3545,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _use_old_status_gump.IsChecked = false;
                     _auraType.SelectedIndex = 0;
                     _fieldsType.SelectedIndex = 0;
+                    _journalOpacity.Value = 50;
 
                     _showSkillsMessage.IsChecked = true;
                     _showSkillsMessageDelta.Value = 1;
@@ -3648,6 +3684,7 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
 
                 case 11: // containers
+                    _containerOpacity.Value = 50;
                     _containersScale.Value = 100;
                     _containerScaleItems.IsChecked = false;
                     _useLargeContianersGumps.IsChecked = false;
@@ -3787,6 +3824,12 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.UseObjectsFading = _objectsFading.IsChecked;
             _currentProfile.TextFading = _textFading.IsChecked;
             _currentProfile.UseSmoothBoatMovement = _use_smooth_boat_movement.IsChecked;
+
+            if(_currentProfile.JournalOpacity != _journalOpacity.Value)
+            {
+                _currentProfile.JournalOpacity = (byte)_journalOpacity.Value;
+                UIManager.GetGump<ResizableJournal>()?.RequestUpdateContents();
+            }
 
             if (_currentProfile.ShowHouseContent != _showHouseContent.IsChecked)
             {
@@ -4190,6 +4233,13 @@ namespace ClassicUO.Game.UI.Gumps
 
 
             // containers
+            if(_containerOpacity.Value != _currentProfile.ContainerOpacity)
+            {
+                _currentProfile.ContainerOpacity = (byte)_containerOpacity.Value;
+                foreach (GridContainer gridContainer in UIManager.Gumps.OfType<GridContainer>())
+                    gridContainer.RequestUpdateContents();
+            }
+
             int containerScale = _currentProfile.ContainersScale;
 
             if ((byte) _containersScale.Value != containerScale || _currentProfile.ScaleItemsInsideContainers != _containerScaleItems.IsChecked)
