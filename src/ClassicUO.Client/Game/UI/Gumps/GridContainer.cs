@@ -404,15 +404,22 @@ namespace ClassicUO.Game.UI.Gumps
                     List<Item> filteredContents = new List<Item>();
                     foreach (Item i in sortedContents)
                     {
-                        if (i.Name.ToLower().Contains(_searchBox.Text.ToLower()))
+                        if (i != null)
                         {
-                            filteredContents.Add(i);
-                            continue;
-                        }
-                        if (World.OPL.TryGetNameAndData(i.Serial, out string name, out string data))
-                        {
-                            if (data.ToLower().Contains(_searchBox.Text.ToLower()))
-                                filteredContents.Add(i);
+                            if (i.Name != null)
+                            {
+                                if (i.Name.ToLower().Contains(_searchBox.Text.ToLower()))
+                                {
+                                    filteredContents.Add(i);
+                                    continue;
+                                }
+                                if (World.OPL.TryGetNameAndData(i.Serial, out string name, out string data))
+                                {
+                                    if (data != null)
+                                        if (data.ToLower().Contains(_searchBox.Text.ToLower()))
+                                            filteredContents.Add(i);
+                                }
+                            }
                         }
 
                     }
