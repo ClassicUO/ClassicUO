@@ -263,25 +263,27 @@ namespace ClassicUO.Game
                 return false;
             }
 
-            ContainerGump backpackGump = UIManager.GetGump<ContainerGump>(backpack);
-
-            #region GridContainer
-            if (UIManager.GetGump<GridContainer>(backpack) == null && backpackGump == null)
+            Gump backpackGump = UIManager.GetGump<ContainerGump>(backpack);
+            if (backpackGump == null)
             {
-                #endregion
-                GameActions.DoubleClick(backpack);
+                backpackGump = UIManager.GetGump<GridContainer>(backpack);
+                if (backpackGump == null)
+                {
+                    GameActions.DoubleClick(backpack);
+                    return true;
+                }
+                else
+                {
+                    backpackGump.SetInScreen();
+                    backpackGump.BringOnTop();
+                }
             }
             else
             {
-                if (backpackGump.IsMinimized)
-                {
-                    backpackGump.IsMinimized = false;
-                }
-
+                ((ContainerGump)backpackGump).IsMinimized = false;
                 backpackGump.SetInScreen();
                 backpackGump.BringOnTop();
             }
-
             return true;
         }
 
