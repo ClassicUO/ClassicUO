@@ -20,6 +20,9 @@ Quick preview for containers inside *if the client has already cached that bag*
 ![Grid Containers](https://user-images.githubusercontent.com/3859393/222730248-4c5a053a-853f-4750-b7dd-ff4049638c6f.gif)
 ![Grid Previe](https://user-images.githubusercontent.com/3859393/222873187-c88ad321-8b19-4cfd-9617-7e23b2443b6a.gif)
 
+This also has an improved journal!
+
+![Journal](https://user-images.githubusercontent.com/3859393/222942915-e31d26aa-e9a7-41df-9c99-570bcc00d1fb.gif)
 
 ------------------------------------------------------------------
 
