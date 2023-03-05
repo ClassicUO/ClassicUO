@@ -139,7 +139,9 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _tab[buttonID].IsSelected = true;
                 _currentFilter = _tabTypes[buttonID];
-                _scrollBarBase.Value = _scrollBarBase.MinValue;
+                _journalArea.CalculateScrollBarMaxValue();
+                _journalArea.Update();
+                _scrollBarBase.Value = _scrollBarBase.MaxValue;
             }
         }
 
@@ -368,7 +370,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             }
 
-            private void CalculateScrollBarMaxValue()
+            public void CalculateScrollBarMaxValue()
             {
                 bool maxValue = _scrollBar.Value == _scrollBar.MaxValue;
                 int height = 0;
