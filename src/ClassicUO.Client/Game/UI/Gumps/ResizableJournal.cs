@@ -74,9 +74,9 @@ namespace ClassicUO.Game.UI.Gumps
                 X = BORDER_WIDTH,
                 Y = BORDER_WIDTH,
             };
-            _tabBackground.Width = MIN_WIDTH - (BORDER_WIDTH*2);
+            _tabBackground.Width = MIN_WIDTH - (BORDER_WIDTH * 2);
             _tabBackground.Height = TAB_HEIGHT;
-            
+
             AddTab("All", new MessageType[] {
                 MessageType.Alliance, MessageType.Command, MessageType.Emote,
                 MessageType.Encoded, MessageType.Focus, MessageType.Guild,
@@ -104,7 +104,7 @@ namespace ClassicUO.Game.UI.Gumps
                 this);
             _journalArea.CanCloseWithRightClick = true;
             _journalArea.DragBegin += (sender, e) => { InvokeDragBegin(e.Location); };
-             #endregion
+            #endregion
 
             Add(_background);
             Add(_scrollBarBase);
@@ -114,10 +114,10 @@ namespace ClassicUO.Game.UI.Gumps
             for (int i = 0; i < _tab.Count; i++)
             {
                 Add(_tab[i]);
-            //    _tab[i].MouseUp += (sender, e) => {
-            //        if (e.Button == MouseButtonType.Left)
-            //            OnButtonClick(_tab[i].ButtonParameter);
-            //    };
+                //    _tab[i].MouseUp += (sender, e) => {
+                //        if (e.Button == MouseButtonType.Left)
+                //            OnButtonClick(_tab[i].ButtonParameter);
+                //    };
             }
 
             InitJournalEntries();
@@ -129,7 +129,7 @@ namespace ClassicUO.Game.UI.Gumps
         protected override void OnMouseWheel(MouseEventType delta)
         {
             base.OnMouseWheel(delta);
-            if(_scrollBarBase != null)
+            if (_scrollBarBase != null)
                 _scrollBarBase.InvokeMouseWheel(delta);
         }
 
@@ -154,7 +154,15 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (journalEntry == null)
                 return;
-            _journalArea.AddEntry($"{journalEntry.Name}: {journalEntry.Text}", journalEntry.Font, journalEntry.Hue, journalEntry.IsUnicode, journalEntry.Time, journalEntry.TextType, journalEntry.MessageType);
+            byte font = journalEntry.Font;
+            bool unicode = journalEntry.IsUnicode;
+            if (ProfileManager.CurrentProfile.ForceUnicodeJournal)
+            {
+                font = ProfileManager.CurrentProfile.ChatFont;
+                unicode = true;
+            }
+
+            _journalArea.AddEntry($"{journalEntry.Name}: {journalEntry.Text}", font, journalEntry.Hue, unicode, journalEntry.Time, journalEntry.TextType, journalEntry.MessageType);
         }
 
         private void InitJournalEntries()
@@ -344,7 +352,14 @@ namespace ClassicUO.Game.UI.Gumps
                     for (int i = 0; i < _entries.Count; i++)
                     {
                         RenderedText t = _entries[i];
-                        newList.AddToBack(RenderedText.Create(t.Text, t.Hue, t.Font, t.IsUnicode, t.FontStyle, t.Align, Width - SCROLL_BAR_WIDTH - BORDER_WIDTH - _hours[i].Width));
+                        byte font = t.Font;
+                        bool unicode = t.IsUnicode;
+                        if (ProfileManager.CurrentProfile.ForceUnicodeJournal)
+                        {
+                            font = ProfileManager.CurrentProfile.ChatFont;
+                            unicode = true;
+                        }
+                        newList.AddToBack(RenderedText.Create(t.Text, t.Hue, font, unicode, t.FontStyle, t.Align, Width - SCROLL_BAR_WIDTH - BORDER_WIDTH - _hours[i].Width));
                     }
                     _entries = newList;
 
