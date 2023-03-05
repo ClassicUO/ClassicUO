@@ -527,7 +527,8 @@ namespace ClassicUO.Configuration
                                     break;
 
                                 case GumpType.Journal:
-                                    gump = new JournalGump();
+                                    //gump = new JournalGump();
+                                    gump = new ResizableJournal();
 
                                     break;
 
