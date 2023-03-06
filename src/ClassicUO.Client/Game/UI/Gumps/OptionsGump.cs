@@ -3696,7 +3696,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _containerOpacity.Value = 50;
                     _containersScale.Value = 100;
                     _containerScaleItems.IsChecked = false;
-                    _useGridLayoutContainerGumps.IsChecked = false;
+                    _useGridLayoutContainerGumps.IsChecked = true;
                     _useLargeContianersGumps.IsChecked = false;
                     _containerDoubleClickToLoot.IsChecked = false;
                     _relativeDragAnDropItems.IsChecked = false;

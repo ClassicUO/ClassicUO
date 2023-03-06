@@ -1253,8 +1253,8 @@ namespace ClassicUO.Network
                 {
                     if (item.IsCorpse && (ProfileManager.CurrentProfile.GridLootType == 1 || ProfileManager.CurrentProfile.GridLootType == 2))
                     {
-                        //UIManager.GetGump<GridLootGump>(serial)?.Dispose();
-                        //UIManager.Add(new GridLootGump(serial));
+                        UIManager.GetGump<GridLootGump>(serial)?.Dispose();
+                        UIManager.Add(new GridLootGump(serial));
                         _requestedGridLoot = serial;
 
                         if (ProfileManager.CurrentProfile.GridLootType == 1)
@@ -1278,7 +1278,7 @@ namespace ClassicUO.Network
                     }
                     else
                     {
-                        ContainerGump container = new GridContainer(serial, graphic).GetOriginalContainerGump(serial);
+                        ContainerGump container = new ContainerGump(serial, graphic, true);
                         if (container != null)
                         {
                             UIManager.Add(container);

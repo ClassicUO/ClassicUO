@@ -343,7 +343,6 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-
             if (container != null)
             {
                 x = container.ScreenCoordinateX;
@@ -369,14 +368,11 @@ namespace ClassicUO.Game.UI.Gumps
         {
             ContainerGump container = GetOriginalContainerGump(serial);
             if (container == null)
-            {
                 return;
-            }
 
             UIManager.Add(container);
             UIManager.RemovePosition(serial);
             this.Dispose();
-
         }
 
         private void updateItems()
