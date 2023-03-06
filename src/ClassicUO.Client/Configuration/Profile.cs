@@ -95,6 +95,8 @@ namespace ClassicUO.Configuration
         public ushort PoisonHue { get; set; } = 0x0044;
         public ushort ParalyzedHue { get; set; } = 0x014C;
         public ushort InvulnerableHue { get; set; } = 0x0030;
+        public ushort AltJournalBackgroundHue { get; set; } = 0x0000;
+        public ushort AltGridContainerBackgroundHue { get; set; } = 0x0000;
 
         // visual
         public bool EnabledCriminalActionQuery { get; set; } = true;

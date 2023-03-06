@@ -72,6 +72,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         // containers
         private HSliderBar _containersScale;
+        private ColorBox _altGridContainerBackgroundHue;
         private Combobox _cotType;
         private DataBox _databox;
         private HSliderBar _delay_before_display_tooltip, _tooltip_zoom, _tooltip_background_opacity;
@@ -165,6 +166,7 @@ namespace ClassicUO.Game.UI.Gumps
         private HSliderBar _dragSelectStartX, _dragSelectStartY;
         private Checkbox _dragSelectAsAnchor;
         private HSliderBar _journalOpacity;
+        private ClickableColorBox _journalBackgroundColor;
 
         // video
         private Checkbox _use_old_status_gump, _windowBorderless, _enableDeathScreen, _enableBlackWhiteEffect, _altLights, _enableLight, _enableShadows, _enableShadowsStatics, _auraMouse, _runMouseInSeparateThread, _useColoredLights, _darkNights, _partyAura, _hideChatGradient, _animatedWaterEffect;
@@ -707,6 +709,17 @@ namespace ClassicUO.Game.UI.Gumps
                 2
             );
 
+            section.Add
+            (
+                _journalBackgroundColor = AddColorBox(
+                    null, 
+                    startX,
+                    startY,
+                    _currentProfile.AltJournalBackgroundHue,
+                    ""
+                    )
+            );
+            section.AddRight(AddLabel(null, "Journal Background", startX, startY));
 
             SettingsSection section2 = AddSettingsSection(box, "Mobiles");
             section2.Y = section.Bounds.Bottom + 40;
@@ -3300,6 +3313,17 @@ namespace ClassicUO.Game.UI.Gumps
             startY += text.Height + 2;
             startX = 5;
 
+            _altGridContainerBackgroundHue = AddColorBox(
+                rightArea,
+                startX,
+                startY,
+                _currentProfile.AltGridContainerBackgroundHue,
+                "Grid container background hue"
+                );
+
+            startY += _altGridContainerBackgroundHue.Height + 2;
+            startX = 5;
+
             text = AddLabel(rightArea, ResGumps.ContainerScale, startX, startY);
             startX += text.Width + 5;
 
@@ -3792,6 +3816,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             _currentProfile.CircleOfTransparencyType = _cotType.SelectedIndex;
             _currentProfile.StandardSkillsGump = _useStandardSkillsGump.IsChecked;
+
+            _currentProfile.AltJournalBackgroundHue = _journalBackgroundColor.Hue;
+            _currentProfile.AltGridContainerBackgroundHue = _altGridContainerBackgroundHue.Hue;
 
             if (_useStandardSkillsGump.IsChecked)
             {

@@ -55,6 +55,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             #region Background
             _background = new AlphaBlendControl((float)ProfileManager.CurrentProfile.JournalOpacity/100);
+            _background.Hue = ProfileManager.CurrentProfile.AltJournalBackgroundHue;
             _background.Width = Width - (BORDER_WIDTH * 2);
             _background.Height = Height - (BORDER_WIDTH * 2);
             _background.X = BORDER_WIDTH;
@@ -69,7 +70,7 @@ namespace ClassicUO.Game.UI.Gumps
             #region Tab area
             _tabBackground = new AlphaBlendControl()
             {
-                Hue = 42,
+                Hue = ProfileManager.CurrentProfile.AltJournalBackgroundHue,
                 X = BORDER_WIDTH,
                 Y = BORDER_WIDTH,
             };

@@ -109,6 +109,7 @@ namespace ClassicUO.Game.UI.Gumps
             _background.X = BORDER_WIDTH;
             _background.Y = BORDER_WIDTH;
             _background.Alpha = (float)ProfileManager.CurrentProfile.ContainerOpacity/100;
+            _background.Hue = ProfileManager.CurrentProfile.AltGridContainerBackgroundHue;
             #endregion
 
             #region TOP BAR AREA
@@ -591,7 +592,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 CanMove = false;
 
-                AlphaBlendControl background = new AlphaBlendControl();
+                AlphaBlendControl background = new AlphaBlendControl(0.25f);
                 background.Width = size;
                 background.Height = size;
                 Width = Height = size;
