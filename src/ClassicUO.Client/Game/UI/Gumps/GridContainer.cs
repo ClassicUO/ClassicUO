@@ -254,7 +254,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        public ContainerGump GetOriginalContainerGump(uint serial)
+        private ContainerGump GetOriginalContainerGump(uint serial)
         {
             ContainerGump container = UIManager.GetGump<ContainerGump>(serial);
             Item item = World.Items.Get<Item>(serial);
