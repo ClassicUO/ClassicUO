@@ -36,6 +36,7 @@ using System.Linq;
 using System.Xml;
 using ClassicUO.Assets;
 using ClassicUO.Configuration;
+using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
@@ -640,7 +641,22 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (_DEBUG)
                     Console.WriteLine("Mouse Double click");
-                GameActions.DoubleClick(_item);
+                if (e.Button != MouseButtonType.Left || TargetManager.IsTargeting)
+                {
+                    return;
+                }
+
+                Item item = _item;
+                Item container;
+
+                if (!Keyboard.Ctrl && ProfileManager.CurrentProfile.DoubleClickToLootInsideContainers && item != null && !item.IsDestroyed && !item.ItemData.IsContainer && item.IsEmpty && (container = World.Items.Get(item.RootContainer)) != null && container != World.Player.FindItemByLayer(Layer.Backpack))
+                {
+                    GameActions.GrabItem(LocalSerial, item.Amount);
+                }
+                else
+                {
+                    GameActions.DoubleClick(LocalSerial);
+                }
                 e.Result = true;
             }
 
