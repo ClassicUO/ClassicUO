@@ -48,6 +48,7 @@ using ClassicUO.Resources;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System.ComponentModel;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -67,7 +68,7 @@ namespace ClassicUO.Game.UI.Gumps
         //experimental
         private Checkbox _autoOpenDoors, _autoOpenCorpse, _skipEmptyCorpse, _disableTabBtn, _disableCtrlQWBtn, _disableDefaultHotkeys, _disableArrowBtn, _disableAutoMove, _overrideContainerLocation, _smoothDoors, _showTargetRangeIndicator, _customBars, _customBarsBBG, _saveHealthbars;
         private HSliderBar _cellSize;
-        private Checkbox _containerScaleItems, _containerDoubleClickToLoot, _relativeDragAnDropItems, _useLargeContianersGumps, _highlightContainersWhenMouseIsOver;
+        private Checkbox _containerScaleItems, _containerDoubleClickToLoot, _relativeDragAnDropItems, _useLargeContianersGumps, _highlightContainersWhenMouseIsOver, _useGridLayoutContainerGumps;
 
 
         // containers
@@ -3327,7 +3328,15 @@ namespace ClassicUO.Game.UI.Gumps
             );
 
             startY += _containerScaleItems.Height + 2;
+            _useGridLayoutContainerGumps = AddCheckBox(
+                rightArea,
+                ResGumps.UseGridLayoutContainerGump,
+                _currentProfile.UseGridLayoutContainerGumps,
+                startX,
+                startY
+            );
 
+            startY += _useGridLayoutContainerGumps.Height + 2;
             _useLargeContianersGumps = AddCheckBox
             (
                 rightArea,
@@ -3687,6 +3696,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _containerOpacity.Value = 50;
                     _containersScale.Value = 100;
                     _containerScaleItems.IsChecked = false;
+                    _useGridLayoutContainerGumps.IsChecked = false;
                     _useLargeContianersGumps.IsChecked = false;
                     _containerDoubleClickToLoot.IsChecked = false;
                     _relativeDragAnDropItems.IsChecked = false;
@@ -4254,11 +4264,74 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
+            _currentProfile.UseGridLayoutContainerGumps = _useGridLayoutContainerGumps.IsChecked;
             _currentProfile.UseLargeContainerGumps = _useLargeContianersGumps.IsChecked;
             _currentProfile.DoubleClickToLootInsideContainers = _containerDoubleClickToLoot.IsChecked;
             _currentProfile.RelativeDragAndDropItems = _relativeDragAnDropItems.IsChecked;
             _currentProfile.HighlightContainerWhenSelected = _highlightContainersWhenMouseIsOver.IsChecked;
             _currentProfile.HueContainerGumps = _hueContainerGumps.IsChecked;
+
+
+            if (_currentProfile.UseGridLayoutContainerGumps)
+            {
+                for (LinkedListNode<Gump> g = UIManager.Gumps.Last; g != null; g = g.Previous)
+                {
+                    if (g.Value is ContainerGump cg)
+                    {
+                        cg.InvalidateContents = true;
+                        cg.RequestUpdateContents();
+                        GridContainer gridContainer = UIManager.GetGump<GridContainer>(cg.LocalSerial);
+                        if (gridContainer == null)
+                        {
+                            gridContainer = new GridContainer(cg.LocalSerial, cg.Graphic)
+                            {
+                                X = cg.X,
+                                Y = cg.Y
+                            };
+                            if (gridContainer != null)
+                            {
+                                UIManager.Add(gridContainer);
+                            }
+                        }
+                        else
+                        {
+                            gridContainer.InvalidateContents = true;
+                            gridContainer.RequestUpdateContents();
+                        }
+                        cg.Dispose();
+                    }
+                }
+            }
+            else
+            {
+                for (LinkedListNode<Gump> g = UIManager.Gumps.Last; g != null; g = g.Previous)
+                {
+                    if (g.Value is GridContainer gridContainer)
+                    {
+                        gridContainer.InvalidateContents = true;
+                        gridContainer.RequestUpdateContents();
+                        ContainerGump container = UIManager.GetGump<ContainerGump>(gridContainer.LocalSerial);
+                        if (container == null)
+                        {
+                            container = gridContainer.GetOriginalContainerGump(gridContainer.LocalSerial);
+                            if (container != null)
+                            {
+                                container.X = gridContainer.X;
+                                container.Y = gridContainer.Y;
+                                UIManager.Add(container);
+                                UIManager.RemovePosition(gridContainer.LocalSerial);
+                            }
+                        }
+                        else
+                        {
+                            container.InvalidateContents = true;
+                            container.RequestUpdateContents();
+                        }                        
+                        gridContainer.Dispose();
+                    }
+                }                
+            }
+
 
             if (_currentProfile.BackpackStyle != _backpackStyle.SelectedIndex)
             {

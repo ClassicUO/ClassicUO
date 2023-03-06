@@ -4238,6 +4238,15 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Use grid layout containers gump *Experimental*.
+        /// </summary>
+        public static string UseGridLayoutContainerGump {
+            get {
+                return ResourceManager.GetString("UseGridLayoutContainerGump", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Use large containers gump.
         /// </summary>
         public static string UseLargeContainersGump {

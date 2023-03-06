@@ -1262,132 +1262,30 @@ namespace ClassicUO.Network
                             return;
                         }
                     }
-
-                    #region GridContainer
-                    GridContainer gridContainer = UIManager.GetGump<GridContainer>(serial);
-                    if (gridContainer != null)
+                    
+                    if (ProfileManager.CurrentProfile.UseGridLayoutContainerGumps)
                     {
-                        gridContainer.InvalidateContents = true;
-                    } else
-                    {
-                        UIManager.Add(new GridContainer(serial, graphic));
+                        GridContainer gridContainer = UIManager.GetGump<GridContainer>(serial);
+                        if (gridContainer != null)
+                        {
+                            gridContainer.InvalidateContents = true;
+                        }
+                        else
+                        {
+                            UIManager.Add(new GridContainer(serial, graphic));
+                        }
+                        UIManager.GetGump<ContainerGump>(serial)?.Dispose();
                     }
-                    UIManager.GetGump<ContainerGump>(serial)?.Dispose();
-                    //Uncomment the below section if removing grid containers
-                    #endregion
-
-                    //ContainerGump container = UIManager.GetGump<ContainerGump>(serial);
-                    //bool playsound = false;
-                    //int x, y;
-
-                    //// TODO: check client version ?
-                    //if (Client.Version >= Utility.ClientVersion.CV_706000 && ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.UseLargeContainerGumps)
-                    //{
-                    //    GumpsLoader loader = GumpsLoader.Instance;
-
-                    //    switch (graphic)
-                    //    {
-                    //        case 0x0048:
-                    //            if (loader.GetGumpTexture(0x06E8, out _) != null)
-                    //            {
-                    //                graphic = 0x06E8;
-                    //            }
-
-                    //            break;
-
-                    //        case 0x0049:
-                    //            if (loader.GetGumpTexture(0x9CDF, out _) != null)
-                    //            {
-                    //                graphic = 0x9CDF;
-                    //            }
-
-                    //            break;
-
-                    //        case 0x0051:
-                    //            if (loader.GetGumpTexture(0x06E7, out _) != null)
-                    //            {
-                    //                graphic = 0x06E7;
-                    //            }
-
-                    //            break;
-
-                    //        case 0x003E:
-                    //            if (loader.GetGumpTexture(0x06E9, out _) != null)
-                    //            {
-                    //                graphic = 0x06E9;
-                    //            }
-
-                    //            break;
-
-                    //        case 0x004D:
-                    //            if (loader.GetGumpTexture(0x06EA, out _) != null)
-                    //            {
-                    //                graphic = 0x06EA;
-                    //            }
-
-                    //            break;
-
-                    //        case 0x004E:
-                    //            if (loader.GetGumpTexture(0x06E6, out _) != null)
-                    //            {
-                    //                graphic = 0x06E6;
-                    //            }
-
-                    //            break;
-
-                    //        case 0x004F:
-                    //            if (loader.GetGumpTexture(0x06E5, out _) != null)
-                    //            {
-                    //                graphic = 0x06E5;
-                    //            }
-
-                    //            break;
-
-                    //        case 0x004A:
-                    //            if (loader.GetGumpTexture(0x9CDD, out _) != null)
-                    //            {
-                    //                graphic = 0x9CDD;
-                    //            }
-
-                    //            break;
-
-                    //        case 0x0044:
-                    //            if (loader.GetGumpTexture(0x9CE3, out _) != null)
-                    //            {
-                    //                graphic = 0x9CE3;
-                    //            }
-
-                    //            break;
-                    //    }
-                    //}
-
-
-                    //if (container != null)
-                    //{
-                    //    x = container.ScreenCoordinateX;
-                    //    y = container.ScreenCoordinateY;
-                    //    container.Dispose();
-                    //}
-                    //else
-                    //{
-                    //    ContainerManager.CalculateContainerPosition(serial, graphic);
-                    //    x = ContainerManager.X;
-                    //    y = ContainerManager.Y;
-                    //    playsound = true;
-                    //}
-
-
-                    //UIManager.Add
-                    //(
-                    //    new ContainerGump(item, graphic, playsound)
-                    //    {
-                    //        X = x,
-                    //        Y = y,
-                    //        InvalidateContents = true
-                    //    }
-                    //);
-
-                    //UIManager.RemovePosition(serial);
+                    else
+                    {
+                        ContainerGump container = new GridContainer(serial, graphic).GetOriginalContainerGump(serial);
+                        if (container != null)
+                        {
+                            UIManager.Add(container);
+                            UIManager.RemovePosition(serial);
+                        }
+                        UIManager.GetGump<GridContainer>(serial)?.Dispose();
+                    }                    
                 }
                 else
                 {

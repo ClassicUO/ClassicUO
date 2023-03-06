@@ -134,6 +134,10 @@ namespace ClassicUO.Game.UI.Gumps
                 ButtonParameter = 1,
                 IsSelectable = false,
             };
+            _openRegularGump.MouseUp += (sender, e) =>
+            {
+                OpenOldContainer(_container);
+            };
             _openRegularGump.SetTooltip("Open the original style container");
 
             _helpToolTip = new NiceButton(_background.Width - 20 - BORDER_WIDTH, BORDER_WIDTH, 20, 20, ButtonAction.Default, "[?]", 1, TEXT_ALIGN_TYPE.TS_CENTER, 0x0481);
@@ -249,24 +253,13 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        public override void OnButtonClick(int buttonID)
-        {
-            switch (buttonID)
-            {
-                case 1:
-                    OpenOldContainer(_container);
-                    break;
-            }
-        }
-
-        private void OpenOldContainer(uint serial)
+        public ContainerGump GetOriginalContainerGump(uint serial)
         {
             ContainerGump container = UIManager.GetGump<ContainerGump>(serial);
+            Item item = World.Items.Get<Item>(serial);
             bool playsound = false;
             int x, y;
-            Item item = World.Items.Get<Item>(serial);
-
-            if (item == null || item.IsDestroyed) return;
+            if (item == null || item.IsDestroyed) return null;
 
             ushort graphic = _ogContainer;
             if (Client.Version >= Utility.ClientVersion.CV_706000 && ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.UseLargeContainerGumps)
@@ -364,19 +357,25 @@ namespace ClassicUO.Game.UI.Gumps
                 playsound = true;
             }
 
+            return new ContainerGump(item, graphic, playsound)
+            {
+                X = x,
+                Y = y,
+                InvalidateContents = true
+            };
+        }
+        private void OpenOldContainer(uint serial)
+        {
+            ContainerGump container = GetOriginalContainerGump(serial);
+            if (container == null)
+            {
+                return;
+            }
 
-            UIManager.Add
-            (
-                new ContainerGump(item, graphic, playsound)
-                {
-                    X = x,
-                    Y = y,
-                    InvalidateContents = true
-                }
-            );
-
+            UIManager.Add(container);
             UIManager.RemovePosition(serial);
             this.Dispose();
+
         }
 
         private void updateItems()
