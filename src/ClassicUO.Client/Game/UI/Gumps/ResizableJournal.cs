@@ -54,7 +54,7 @@ namespace ClassicUO.Game.UI.Gumps
             Y = _lastY;
 
             #region Background
-            _background = new AlphaBlendControl(ProfileManager.CurrentProfile.JournalOpacity);
+            _background = new AlphaBlendControl((float)ProfileManager.CurrentProfile.JournalOpacity/100);
             _background.Width = Width - (BORDER_WIDTH * 2);
             _background.Height = Height - (BORDER_WIDTH * 2);
             _background.X = BORDER_WIDTH;
