@@ -273,6 +273,7 @@ namespace ClassicUO.Configuration
         public bool DoubleClickToLootInsideContainers { get; set; }
 
         public bool UseLargeContainerGumps { get; set; } = false;
+        public bool UseGridLayoutContainerGumps { get; set; } = true;
 
         public bool RelativeDragAndDropItems { get; set; }
 

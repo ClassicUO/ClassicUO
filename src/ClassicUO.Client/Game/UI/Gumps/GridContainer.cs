@@ -36,6 +36,7 @@ using System.Linq;
 using System.Xml;
 using ClassicUO.Assets;
 using ClassicUO.Configuration;
+using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
@@ -71,7 +72,7 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly StbTextBox _searchBox;
         private readonly NiceButton _openRegularGump;
         private readonly NiceButton _helpToolTip;
-        private ushort _ogContainer;
+        public readonly ushort OgContainerGraphic;
 
         private Item _dragSlotItem;
         private Item _dragSlotContainer;
@@ -84,7 +85,7 @@ namespace ClassicUO.Game.UI.Gumps
         public GridContainer(uint local, ushort ogContainer) : base(DEFAULT_WIDTH, DEFAULT_HEIGHT, DEFAULT_WIDTH, DEFAULT_HEIGHT, local, 0)
         {
             #region SET VARS
-            _ogContainer = ogContainer;
+            OgContainerGraphic = ogContainer;
             _container = World.Items.Get(local);
 
             if (_container == null)
@@ -134,6 +135,10 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 ButtonParameter = 1,
                 IsSelectable = false,
+            };
+            _openRegularGump.MouseUp += (sender, e) =>
+            {
+                OpenOldContainer(_container);
             };
             _openRegularGump.SetTooltip("Open the original style container");
 
@@ -190,7 +195,7 @@ namespace ClassicUO.Game.UI.Gumps
         public override void Save(XmlTextWriter writer)
         {
             base.Save(writer);
-            writer.WriteAttributeString("ogContainer", _ogContainer.ToString());
+            writer.WriteAttributeString("ogContainer", OgContainerGraphic.ToString());
             writer.WriteAttributeString("width", Width.ToString());
             writer.WriteAttributeString("height", Height.ToString());
 
@@ -250,26 +255,15 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        public override void OnButtonClick(int buttonID)
-        {
-            switch (buttonID)
-            {
-                case 1:
-                    OpenOldContainer(_container);
-                    break;
-            }
-        }
-
-        private void OpenOldContainer(uint serial)
+        private ContainerGump GetOriginalContainerGump(uint serial)
         {
             ContainerGump container = UIManager.GetGump<ContainerGump>(serial);
+            Item item = World.Items.Get<Item>(serial);
             bool playsound = false;
             int x, y;
-            Item item = World.Items.Get<Item>(serial);
+            if (item == null || item.IsDestroyed) return null;
 
-            if (item == null || item.IsDestroyed) return;
-
-            ushort graphic = _ogContainer;
+            ushort graphic = OgContainerGraphic;
             if (Client.Version >= Utility.ClientVersion.CV_706000 && ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.UseLargeContainerGumps)
             {
                 GumpsLoader loader = GumpsLoader.Instance;
@@ -350,7 +344,6 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-
             if (container != null)
             {
                 x = container.ScreenCoordinateX;
@@ -365,17 +358,20 @@ namespace ClassicUO.Game.UI.Gumps
                 playsound = true;
             }
 
+            return new ContainerGump(item, graphic, playsound)
+            {
+                X = x,
+                Y = y,
+                InvalidateContents = true
+            };
+        }
+        private void OpenOldContainer(uint serial)
+        {
+            ContainerGump container = GetOriginalContainerGump(serial);
+            if (container == null)
+                return;
 
-            UIManager.Add
-            (
-                new ContainerGump(item, graphic, playsound)
-                {
-                    X = x,
-                    Y = y,
-                    InvalidateContents = true
-                }
-            );
-
+            UIManager.Add(container);
             UIManager.RemovePosition(serial);
             this.Dispose();
         }
@@ -578,9 +574,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _container = container;
                 _gridContainer = gridContainer;
                 Point startDrag = new Point(0, 0);
-
                 LocalSerial = serial;
-
                 _item = World.Items.Get(serial);
 
                 if (_item == null)
@@ -642,7 +636,19 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (_DEBUG)
                     Console.WriteLine("Mouse Double click");
-                GameActions.DoubleClick(_item);
+                if (e.Button != MouseButtonType.Left || TargetManager.IsTargeting)
+                {
+                    return;
+                }
+
+                if (!Keyboard.Ctrl && ProfileManager.CurrentProfile.DoubleClickToLootInsideContainers && _item != null && !_item.IsDestroyed && !_item.ItemData.IsContainer && _container != World.Player.FindItemByLayer(Layer.Backpack))
+                {
+                    GameActions.GrabItem(_item, _item.Amount);
+                }
+                else
+                {
+                    GameActions.DoubleClick(LocalSerial);
+                }
                 e.Result = true;
             }
 
