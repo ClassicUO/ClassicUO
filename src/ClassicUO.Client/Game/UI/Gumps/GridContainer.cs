@@ -258,10 +258,9 @@ namespace ClassicUO.Game.UI.Gumps
         private ContainerGump GetOriginalContainerGump(uint serial)
         {
             ContainerGump container = UIManager.GetGump<ContainerGump>(serial);
-            Item item = World.Items.Get<Item>(serial);
             bool playsound = false;
             int x, y;
-            if (item == null || item.IsDestroyed) return null;
+            if (_container == null || _container.IsDestroyed) return null;
 
             ushort graphic = OgContainerGraphic;
             if (Client.Version >= Utility.ClientVersion.CV_706000 && ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.UseLargeContainerGumps)
@@ -358,7 +357,7 @@ namespace ClassicUO.Game.UI.Gumps
                 playsound = true;
             }
 
-            return new ContainerGump(item, graphic, playsound)
+            return new ContainerGump(_container.Serial, graphic, playsound)
             {
                 X = x,
                 Y = y,
@@ -372,8 +371,7 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
 
             UIManager.Add(container);
-            UIManager.RemovePosition(serial);
-            this.Dispose();
+            Dispose();
         }
 
         private void updateItems()
