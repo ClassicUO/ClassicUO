@@ -72,7 +72,7 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly StbTextBox _searchBox;
         private readonly NiceButton _openRegularGump;
         private readonly NiceButton _helpToolTip;
-        private ushort _ogContainer;
+        public readonly ushort OgContainerGraphic;
 
         private Item _dragSlotItem;
         private Item _dragSlotContainer;
@@ -85,7 +85,7 @@ namespace ClassicUO.Game.UI.Gumps
         public GridContainer(uint local, ushort ogContainer) : base(DEFAULT_WIDTH, DEFAULT_HEIGHT, DEFAULT_WIDTH, DEFAULT_HEIGHT, local, 0)
         {
             #region SET VARS
-            _ogContainer = ogContainer;
+            OgContainerGraphic = ogContainer;
             _container = World.Items.Get(local);
 
             if (_container == null)
@@ -194,7 +194,7 @@ namespace ClassicUO.Game.UI.Gumps
         public override void Save(XmlTextWriter writer)
         {
             base.Save(writer);
-            writer.WriteAttributeString("ogContainer", _ogContainer.ToString());
+            writer.WriteAttributeString("ogContainer", OgContainerGraphic.ToString());
             writer.WriteAttributeString("width", Width.ToString());
             writer.WriteAttributeString("height", Height.ToString());
 
@@ -262,7 +262,7 @@ namespace ClassicUO.Game.UI.Gumps
             int x, y;
             if (item == null || item.IsDestroyed) return null;
 
-            ushort graphic = _ogContainer;
+            ushort graphic = OgContainerGraphic;
             if (Client.Version >= Utility.ClientVersion.CV_706000 && ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.UseLargeContainerGumps)
             {
                 GumpsLoader loader = GumpsLoader.Instance;
