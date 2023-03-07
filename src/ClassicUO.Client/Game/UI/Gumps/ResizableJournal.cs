@@ -7,7 +7,7 @@ using ClassicUO.Renderer;
 using ClassicUO.Utility.Collections;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -52,6 +52,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             X = _lastX;
             Y = _lastY;
+            ResizeWindow(ProfileManager.CurrentProfile.ResizeJournalSize);
 
             #region Background
             _background = new AlphaBlendControl((float)ProfileManager.CurrentProfile.JournalOpacity/100);
@@ -112,13 +113,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(_journalArea);
             for (int i = 0; i < _tab.Count; i++)
-            {
                 Add(_tab[i]);
-                //    _tab[i].MouseUp += (sender, e) => {
-                //        if (e.Button == MouseButtonType.Left)
-                //            OnButtonClick(_tab[i].ButtonParameter);
-                //    };
-            }
 
             InitJournalEntries();
             World.Journal.EntryAdded += (sender, e) => { AddJournalEntry(e); };
@@ -199,6 +194,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _background.Height = Height - (BORDER_WIDTH * 2);
                 _journalArea.Height = Height - (BORDER_WIDTH * 2) - TAB_HEIGHT;
                 _scrollBarBase.Height = Height - (BORDER_WIDTH * 2) - TAB_HEIGHT;
+                ProfileManager.CurrentProfile.ResizeJournalSize = new Point(Width, Height);
             }
         }
 
