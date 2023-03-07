@@ -573,9 +573,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _container = container;
                 _gridContainer = gridContainer;
                 Point startDrag = new Point(0, 0);
-
                 LocalSerial = serial;
-
                 _item = World.Items.Get(serial);
 
                 if (_item == null)
@@ -642,12 +640,9 @@ namespace ClassicUO.Game.UI.Gumps
                     return;
                 }
 
-                Item item = _item;
-                Item container;
-
-                if (!Keyboard.Ctrl && ProfileManager.CurrentProfile.DoubleClickToLootInsideContainers && item != null && !item.IsDestroyed && !item.ItemData.IsContainer && item.IsEmpty && (container = World.Items.Get(item.RootContainer)) != null && container != World.Player.FindItemByLayer(Layer.Backpack))
+                if (!Keyboard.Ctrl && ProfileManager.CurrentProfile.DoubleClickToLootInsideContainers && _item != null && !_item.IsDestroyed && !_item.ItemData.IsContainer && _container != World.Player.FindItemByLayer(Layer.Backpack))
                 {
-                    GameActions.GrabItem(LocalSerial, item.Amount);
+                    GameActions.GrabItem(_item, _item.Amount);
                 }
                 else
                 {
