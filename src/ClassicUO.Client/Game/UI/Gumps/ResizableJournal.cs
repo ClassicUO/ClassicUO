@@ -7,9 +7,7 @@ using ClassicUO.Renderer;
 using ClassicUO.Utility.Collections;
 using System;
 using System.Collections.Generic;
-using System.Xml;
 using Microsoft.Xna.Framework;
-using System.IO;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -54,6 +52,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             X = _lastX;
             Y = _lastY;
+            ResizeWindow(ProfileManager.CurrentProfile.ResizeJournalSize);
 
             #region Background
             _background = new AlphaBlendControl((float)ProfileManager.CurrentProfile.JournalOpacity/100);
@@ -113,17 +112,10 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(_journalArea);
             for (int i = 0; i < _tab.Count; i++)
-            {
                 Add(_tab[i]);
-                //    _tab[i].MouseUp += (sender, e) => {
-                //        if (e.Button == MouseButtonType.Left)
-                //            OnButtonClick(_tab[i].ButtonParameter);
-                //    };
-            }
 
             InitJournalEntries();
             World.Journal.EntryAdded += (sender, e) => { AddJournalEntry(e); };
-            LoadSettings();
         }
 
         public override GumpType GumpType => GumpType.Journal;
@@ -201,24 +193,10 @@ namespace ClassicUO.Game.UI.Gumps
                 _background.Height = Height - (BORDER_WIDTH * 2);
                 _journalArea.Height = Height - (BORDER_WIDTH * 2) - TAB_HEIGHT;
                 _scrollBarBase.Height = Height - (BORDER_WIDTH * 2) - TAB_HEIGHT;
-                ProfileManager.CurrentProfile?.Save(ProfileManager.ProfilePath);
+                ProfileManager.CurrentProfile.ResizeJournalSize = new Point(Width, Height);
             }
         }
-        public void SaveSettings()
-        {
-            if (ProfileManager.CurrentProfile == null)
-            {
-                return;
-            }
-            ProfileManager.CurrentProfile.ResizeJournalSize = new Point(Width, Height);
-        }
-        private void LoadSettings()
-        {
-            Width = ProfileManager.CurrentProfile.ResizeJournalSize.X;
-            Height = ProfileManager.CurrentProfile.ResizeJournalSize.Y;
 
-            ResizeWindow(new Point(Width, Height));
-        }
         private class RenderedTextList : Control
         {
             private Deque<RenderedText> _entries, _hours;

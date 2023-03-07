@@ -345,8 +345,6 @@ namespace ClassicUO.Game.Scenes
 
             // special case for wmap. this allow us to save settings
             UIManager.GetGump<WorldMapGump>()?.SaveSettings();
-            // special case for resizeJournal. this allow us to save settings
-            UIManager.GetGump<ResizableJournal>()?.SaveSettings();
 
             ProfileManager.CurrentProfile?.Save(ProfileManager.ProfilePath);
 
