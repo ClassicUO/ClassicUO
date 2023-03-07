@@ -432,7 +432,7 @@ namespace ClassicUO.Game.UI.Gumps
             #endregion
 
             #region Sort Locked Slots
-            foreach (var spot in lockedSpots)
+            foreach (var spot in lockedSpots.OrderBy((x) => x.Key))
             {
                 Item item = World.Items.Get(spot.Value);
                 if (item == null)
