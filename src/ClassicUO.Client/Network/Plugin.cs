@@ -450,10 +450,15 @@ namespace ClassicUO.Network
             {
                 if (plugin._onRecv_new != null)
                 {
-                    if (!plugin._onRecv_new(data, ref length))
+                    byte[] tmp = new byte[length];
+                    Array.Copy(data, tmp, length);
+
+                    if (!plugin._onRecv_new(tmp, ref length))
                     {
                         result = false;
                     }
+
+                    Array.Copy(tmp, data, length);
                 }
                 else if (plugin._onRecv != null)
                 {
@@ -480,10 +485,15 @@ namespace ClassicUO.Network
             {
                 if (plugin._onSend_new != null)
                 {
-                    if (!plugin._onSend_new(data, ref length))
+                    byte[] tmp = new byte[length];
+                    Array.Copy(data, tmp, length);
+
+                    if (!plugin._onSend_new(tmp, ref length))
                     {
                         result = false;
                     }
+
+                    Array.Copy(tmp, data, length);
                 }
                 else if (plugin._onSend != null)
                 {
