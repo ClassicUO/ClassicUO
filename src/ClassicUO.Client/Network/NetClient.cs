@@ -35,6 +35,7 @@ using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using System;
 using System.Buffers;
+using System.Drawing;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
@@ -62,7 +63,7 @@ namespace ClassicUO.Network
             _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp)
             {
                 NoDelay = true,
-                LingerState = new LingerOption(true, 0)
+                DontFragment = true
             };
 
             _socket.BeginConnect(ip, port, e =>
@@ -76,13 +77,54 @@ namespace ClassicUO.Network
                 }
 
                 OnConnected?.Invoke(this, EventArgs.Empty);
-                BeginRead(new byte[1024 * 4]);
+                //BeginRead(new byte[1024 * 4]);
             }, this);
         }
 
         public void Send(byte[] buffer, int offset, int count)
         {
             _socket.Send(buffer, offset, count, SocketFlags.None);
+        }
+
+        private readonly byte[] _readBuffer = new byte[4096];
+
+        public int Read(CircularBuffer dest)
+        {
+            var available = _socket.Available;
+            if (available <= 0)
+                return available;
+
+            var done = 0;
+            var buffer = _readBuffer;
+            try
+            {
+                while (done < available)
+                {
+                    var toRead = Math.Min(buffer.Length, available - done);
+                    var read = _socket.Receive(buffer, 0, toRead, SocketFlags.None, out var errorCode);
+
+                    if (read <= 0 || errorCode != SocketError.Success)
+                    {
+                        Disconnect();
+
+                        return 0;
+                    }
+
+                    dest.Enqueue(buffer, 0, read);
+
+                    done += read;
+                }
+            }
+            finally
+            {
+            }
+
+            if (done != available)
+            {
+
+            }
+
+            return done;
         }
 
         public void Disconnect()
@@ -92,7 +134,7 @@ namespace ClassicUO.Network
 
         public void Dispose()
         {
-            _socket.Dispose();
+            _socket?.Dispose();
         }
 
         private void EndRead(IAsyncResult asyncResult)
@@ -103,9 +145,9 @@ namespace ClassicUO.Network
             {
                 if (!IsConnected)
                     return;
-       
-                var available = _socket.EndReceive(asyncResult, out var error);
-                if (available <= 0 || error != SocketError.Success)
+
+                var read = _socket.EndReceive(asyncResult, out var error);
+                if (read <= 0 || error != SocketError.Success)
                 {
                     OnDisconnected?.Invoke(this, EventArgs.Empty);
 
@@ -120,7 +162,7 @@ namespace ClassicUO.Network
                     return;
                 }
 
-                OnPacketReceived?.Invoke(this, new ArraySegment<byte>(buffer, 0, available));
+                OnPacketReceived?.Invoke(this, new ArraySegment<byte>(buffer, 0, read));
 
                 BeginRead(buffer);
             }
@@ -148,8 +190,9 @@ namespace ClassicUO.Network
         private readonly bool _isLoginSocket;
         private readonly NetworkDataRader _socket;
         private uint? _localIP;
-        private readonly MemoryStream _recvCompressedStream,
+        private readonly CircularBuffer _recvCompressedStream,
             _recvUncompressedStream,
+            _recvUncompressedUnfinishedStream,
             _recvCompressedUnfinishedStream,
             _sendStream,
             _pluginsDataStream;
@@ -158,11 +201,12 @@ namespace ClassicUO.Network
         {
             _isLoginSocket = isLoginSocket;
             Statistics = new NetStatistics(this);
-            _recvCompressedStream = new MemoryStream();
-            _recvUncompressedStream = new MemoryStream();
-            _recvCompressedUnfinishedStream = new MemoryStream();
-            _sendStream = new MemoryStream();
-            _pluginsDataStream = new MemoryStream();
+            _recvCompressedStream = new CircularBuffer();
+            _recvUncompressedStream = new CircularBuffer();
+            _recvCompressedUnfinishedStream = new CircularBuffer();
+            _sendStream = new CircularBuffer();
+            _pluginsDataStream = new CircularBuffer();
+            _recvUncompressedUnfinishedStream = new CircularBuffer();
 
             _socket = new NetworkDataRader();
             _socket.OnPacketReceived += OnDataReceived;
@@ -223,13 +267,13 @@ namespace ClassicUO.Network
             if (LoginSocket.IsDisposed && Socket.IsConnected)
             {
                 lock (Socket._pluginsDataStream)
-                    Socket._pluginsDataStream.Write(data, 0, length);
+                    Socket._pluginsDataStream.Enqueue(data, 0, length);
                 Socket.Statistics.TotalPacketsReceived++;
             }
             else if (Socket.IsDisposed && LoginSocket.IsConnected)
             {
                 lock (LoginSocket._pluginsDataStream)
-                    LoginSocket._pluginsDataStream.Write(data, 0, length);
+                    LoginSocket._pluginsDataStream.Enqueue(data, 0, length);
                 LoginSocket.Statistics.TotalPacketsReceived++;
             }
             else
@@ -242,25 +286,16 @@ namespace ClassicUO.Network
         {
             Statistics.Reset();
 
-            _recvCompressedStream.Seek(0, SeekOrigin.Begin);
-            _recvUncompressedStream.Seek(0, SeekOrigin.Begin);
-            _recvCompressedUnfinishedStream.Seek(0, SeekOrigin.Begin);
-            _sendStream.Seek(0, SeekOrigin.Begin);
-            _pluginsDataStream.Seek(0, SeekOrigin.Begin);
+            _recvCompressedStream.Clear();
+            _recvUncompressedStream.Clear();
+            _recvCompressedUnfinishedStream.Clear();
+            _sendStream.Clear();
+            _pluginsDataStream.Clear();
+            _recvUncompressedUnfinishedStream.Clear();
 
             IsDisposed = false;
 
-            try
-            {
-                _socket.Connect(ip, port);
-            }
-            catch (Exception ex)
-            {
-                //Log.Error($"Socket error when connecting:\n{e}");
-                //_logFile?.Write($"connection error: {e}");
-
-                //Disconnect(e.SocketErrorCode);
-            }
+            _socket.Connect(ip, port);
         }
 
 
@@ -306,7 +341,7 @@ namespace ClassicUO.Network
                     EncryptionHelper.Encrypt(_isLoginSocket, data, data, length);
                 }
 
-                _sendStream.Write(data, 0, length);
+                _sendStream.Enqueue(data, 0, length);
 
                 Statistics.TotalBytesSent += (uint)length;
                 Statistics.TotalPacketsSent++;
@@ -324,20 +359,21 @@ namespace ClassicUO.Network
             ProcessSend();
         }
 
-        private void ExtractPackets(MemoryStream stream, bool allowPlugins)
+        private byte[] _readingBuffer = new byte[4096];
+
+        private void ExtractPackets(CircularBuffer stream, bool allowPlugins)
         {
             lock (stream)
             {
-                if (!IsConnected || stream.Position <= 0 || !stream.CanRead || !stream.CanSeek)
-                {
-                    return;
-                }
+                if (!IsConnected) return;
 
-                var length = (int)stream.Position;
+                var length = stream.Length;
+
+                if (length <= 0) return;
+
                 var done = 0;
 
-                stream.Seek(0, SeekOrigin.Begin);
-                var packetBuffer = System.Buffers.ArrayPool<byte>.Shared.Rent(4096);
+                var packetBuffer = _readingBuffer;
 
                 try
                 {
@@ -345,24 +381,25 @@ namespace ClassicUO.Network
                     {
                         if (!GetPacketInfo(stream, length, out var packetID, out int offset, out int packetlength))
                         {
-                            Log.Warn($"Invalid ID: {packetID:X2} | off: {offset} | len: {packetlength} | stream.pos: {stream.Position}/{stream.Length}");
+                            Log.Warn($"Invalid ID: {packetID:X2} | off: {offset} | len: {packetlength} | stream.pos: {stream.Length}");
 
                             break;
                         }
 
                         if ((length - done) < packetlength)
                         {
+                            Log.Warn($"need more data ID: {packetID:X2} | off: {offset} | len: {packetlength} | stream.pos: {stream.Length} {done}/{length}");
+
                             // need more data
                             break;
                         }
 
-                        if (packetlength > packetBuffer.Length)
+                        while (packetlength > packetBuffer.Length)
                         {
-                            System.Buffers.ArrayPool<byte>.Shared.Return(packetBuffer, false); // TODO: clear?
-                            packetBuffer = System.Buffers.ArrayPool<byte>.Shared.Rent(packetlength);
+                            Array.Resize(ref packetBuffer, packetBuffer.Length * 2);
                         }
 
-                        _ = stream.Read(packetBuffer, 0, packetlength);
+                        var r = stream.Dequeue(packetBuffer, 0, packetlength);
 
                         if (CUOEnviroment.PacketLog)
                         {
@@ -382,19 +419,31 @@ namespace ClassicUO.Network
                         done += packetlength;
                     }
 
-                    // if length < done the packet is not fully processed, so keep this data
-                    stream.Seek(length - done, SeekOrigin.Begin);
+                    //if (length - done > 0)
+                    //{
+                    //    Span<byte> tmp = stackalloc byte[4096];
+                    //    var max = length - done;
+                    //    done = 0;
+                    //    while (done < max)
+                    //    {
+                    //        var toRead = Math.Min(tmp.Length, max);
+
+                    //        stream.Dequeue(tmp, 0, toRead);
+                    //        _recvCompressedUnfinishedStream.Enqueue(tmp, 0, toRead);
+
+                    //        done += toRead;
+                    //    }
+                    //}
                 }
                 finally
                 {
-                    System.Buffers.ArrayPool<byte>.Shared.Return(packetBuffer, false); // TODO: clear?
                 }
             }
         }
 
-        private static bool GetPacketInfo(MemoryStream buffer, int bufferLen, out byte packetID, out int packetOffset, out int packetLen)
+        private static bool GetPacketInfo(CircularBuffer buffer, int bufferLen, out byte packetID, out int packetOffset, out int packetLen)
         {
-            if (buffer == null || bufferLen <= 0 || buffer.Position >= buffer.Length)
+            if (buffer == null || bufferLen <= 0)
             {
                 packetID = 0xFF;
                 packetLen = 0;
@@ -403,7 +452,7 @@ namespace ClassicUO.Network
                 return false;
             }
 
-            packetLen = PacketsTable.GetPacketLength(packetID = (byte)buffer.ReadByte());
+            packetLen = PacketsTable.GetPacketLength(packetID = buffer[0]);
             packetOffset = 1;
 
             if (packetLen == -1)
@@ -413,14 +462,17 @@ namespace ClassicUO.Network
                     return false;
                 }
 
-                var b0 = buffer.ReadByte();
-                var b1 = buffer.ReadByte();
+                var b0 = buffer[1];
+                var b1 = buffer[2];
 
                 packetLen = b1 | (b0 << 8);
                 packetOffset = 3;
-            }
 
-            buffer.Seek(-packetOffset, SeekOrigin.Current);
+                if (packetLen <= 0)
+                {
+
+                }
+            }
 
             return true;
         }
@@ -428,8 +480,34 @@ namespace ClassicUO.Network
         private void OnDataReceived(object sender, ArraySegment<byte> e)
         {
             lock (_recvCompressedStream)
-                _recvCompressedStream.Write(e.Array, e.Offset, e.Count);
+            {
+                lock (_recvUncompressedUnfinishedStream)
+                {
+                    if (_recvUncompressedUnfinishedStream.Length != 0)
+                    {
+                        Span<byte> tmp = stackalloc byte[4096];
+                        var max = _recvUncompressedUnfinishedStream.Length;
+                        var done = 0;
+                        while (done < max)
+                        {
+                            var toRead = Math.Min(tmp.Length, max);
+
+                            _recvUncompressedUnfinishedStream.Dequeue(tmp, 0, toRead);
+                            _recvCompressedStream.Enqueue(tmp, 0, toRead);
+
+                            done += toRead;
+                        }
+
+                        _recvUncompressedUnfinishedStream.Clear();
+                    }
+                }
+
+                _recvCompressedStream.Enqueue(e.Array, e.Offset, e.Count);
+            }
         }
+
+        private readonly byte[] _compressedBuffer = new byte[BUFF_SIZE];
+        private readonly byte[] _uncompressedBuffer = new byte[BUFF_SIZE];
 
         private void ProcessRecv()
         {
@@ -449,32 +527,25 @@ namespace ClassicUO.Network
             {
                 lock (_recvCompressedStream)
                 {
-                    var pos = (int)_recvCompressedStream.Position;
+                    _ = _socket.Read(_recvCompressedStream);
 
-                    if (pos <= 0)
+                    var size = _recvCompressedStream.Length;
+
+                    if (size <= 0)
                     {
                         return;
                     }
 
-                    Statistics.TotalBytesReceived += (uint)pos;
+                    Statistics.TotalBytesReceived += (uint)size;
 
-                    var compressedBuffer = System.Buffers.ArrayPool<byte>.Shared.Rent(BUFF_SIZE); // pos?
+                    _ = _recvCompressedStream.Dequeue(_compressedBuffer, 0, size);
 
-                    try
-                    {
-                        _recvCompressedStream.Seek(0, SeekOrigin.Begin);
-                        _ = _recvCompressedStream.Read(compressedBuffer, 0, pos);
-                        _recvCompressedStream.Seek(0, SeekOrigin.Begin);
+                    ProcessEncryption(_compressedBuffer.AsSpan(0, size));
 
-                        ProcessEncryption(compressedBuffer, pos);
-                        DecompressBuffer(compressedBuffer, ref pos);
+                    var uncompressedData = DecompressBuffer(_compressedBuffer.AsSpan(0, size));
 
-                        _recvUncompressedStream.Write(compressedBuffer, 0, pos);
-                    }
-                    finally
-                    {
-                        System.Buffers.ArrayPool<byte>.Shared.Return(compressedBuffer);
-                    }
+                    lock (_recvUncompressedStream)
+                        _recvUncompressedStream.Enqueue(uncompressedData);
                 }
             }
             catch (SocketException ex)
@@ -507,11 +578,11 @@ namespace ClassicUO.Network
             }
         }
 
-        private void ProcessEncryption(byte[] buffer, int received)
+        private void ProcessEncryption(Span<byte> buffer)
         {
             if (_isLoginSocket) return;
 
-            EncryptionHelper.Decrypt(buffer, buffer, received);
+            EncryptionHelper.Decrypt(buffer, buffer, buffer.Length);
         }
 
         private void ProcessSend()
@@ -528,21 +599,17 @@ namespace ClassicUO.Network
                 return;
             }
 
-            var length = (int)_sendStream.Position;
+            var length = _sendStream.Length;
 
             if (length <= 0)
             {
                 return;
             }
 
-            _sendStream.Seek(0, SeekOrigin.Begin);
-            var buffer = System.Buffers.ArrayPool<byte>.Shared.Rent(length);
-
             try
             {
-                var read = _sendStream.Read(buffer, 0, length);
-                _socket.Send(buffer, 0, read);
-                _sendStream.Seek(0, SeekOrigin.Begin);
+                var read = _sendStream.DequeSegment(length, out var segment);
+                _socket.Send(segment.Array, segment.Offset, segment.Count);
             }
             catch (SocketException ex)
             {
@@ -574,59 +641,58 @@ namespace ClassicUO.Network
             }
             finally
             {
-                System.Buffers.ArrayPool<byte>.Shared.Return(buffer);
             }
         }
 
-        private void DecompressBuffer(byte[] buffer, ref int length)
+        private readonly Huffman _huffman = new Huffman();
+
+        private Span<byte> DecompressBuffer(Span<byte> buffer)
         {
-            if (!_isCompressionEnabled) return;
+            if (!_isCompressionEnabled) 
+                return buffer;
 
-            var source = System.Buffers.ArrayPool<byte>.Shared.Rent(BUFF_SIZE);
+            var size = /*buffer.Length * 4 + 2; //*/ 65536;
+            _huffman.Decompress(buffer, _uncompressedBuffer.AsSpan(0, buffer.Length * 4 + 2), ref size);
 
-            try
-            {
-                var incompletelength = (int)_recvCompressedUnfinishedStream.Position;
-                var sourcelength = incompletelength + length;
+            return _uncompressedBuffer.AsSpan(0, size);
+            //var incompletelength = _recvCompressedUnfinishedStream.Length;
+            //var sourcelength = incompletelength + buffer.Length;
+            //var dest = _uncompressedBuffer;
 
-                if (incompletelength > 0)
-                {
-                    _recvCompressedUnfinishedStream.Seek(0, SeekOrigin.Begin);
-                    _recvCompressedUnfinishedStream.Read(source, 0, incompletelength);
-                    _recvCompressedUnfinishedStream.Seek(0, SeekOrigin.Begin);
-                }
+            //if (incompletelength > 0)
+            //{
+            //    _recvCompressedUnfinishedStream.Dequeue(dest, 0, incompletelength);
+            //    _recvCompressedUnfinishedStream.Clear();
+            //}
 
-                Buffer.BlockCopy(buffer, 0, source, incompletelength, length);
+            ////buffer.CopyTo(dest);
 
-                int processedOffset = 0;
-                int sourceOffset = 0;
-                int offset = 0;
+            ////Buffer.BlockCopy(buffer, 0, source, incompletelength, length);
 
-                while (Huffman.DecompressChunk
-                (
-                    source,
-                    ref sourceOffset,
-                    sourcelength,
-                    buffer,
-                    offset,
-                    out int outSize
-                ))
-                {
-                    processedOffset = sourceOffset;
-                    offset += outSize;
-                }
+            //int processedOffset = 0;
+            //int sourceOffset = 0;
+            //int offset = 0;
 
-                length = offset;
+            //while (Huffman.DecompressChunk
+            //(
+            //    buffer,
+            //    ref sourceOffset,
+            //    sourcelength,
+            //    dest,
+            //    offset,
+            //    out int outSize
+            //))
+            //{
+            //    processedOffset = sourceOffset;
+            //    offset += outSize;
+            //}
 
-                if (processedOffset < sourcelength)
-                {
-                    _recvCompressedUnfinishedStream.Write(source, processedOffset, sourcelength - processedOffset);
-                }
-            }
-            finally
-            {
-                System.Buffers.ArrayPool<byte>.Shared.Return(source, false); // TODO: clear?
-            }
+            //if (processedOffset < sourcelength)
+            //{
+            //    _recvCompressedUnfinishedStream.Enqueue(dest, processedOffset, sourcelength - processedOffset);
+            //}
+
+            //return dest.AsSpan(0, offset);
         }
 
         private static IPAddress ResolveIP(string addr)
