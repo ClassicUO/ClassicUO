@@ -62,8 +62,7 @@ namespace ClassicUO.Network
 
             _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp)
             {
-                NoDelay = true,
-                DontFragment = true
+                NoDelay = true
             };
 
             _socket.BeginConnect(ip, port, e =>
@@ -96,6 +95,7 @@ namespace ClassicUO.Network
 
             var done = 0;
             var buffer = _readBuffer;
+
             try
             {
                 while (done < available)
@@ -108,6 +108,12 @@ namespace ClassicUO.Network
                         Disconnect();
 
                         return 0;
+                    }
+
+
+                    if (toRead != read)
+                    {
+
                     }
 
                     dest.Enqueue(buffer, 0, read);
@@ -367,76 +373,46 @@ namespace ClassicUO.Network
             {
                 if (!IsConnected) return;
 
-                var length = stream.Length;
-
-                if (length <= 0) return;
-
-                var done = 0;
-
                 var packetBuffer = _readingBuffer;
 
-                try
+                while (stream.Length > 0)
                 {
-                    while (done < length)
+                    if (!GetPacketInfo(stream, stream.Length, out var packetID, out int offset, out int packetlength))
                     {
-                        if (!GetPacketInfo(stream, length, out var packetID, out int offset, out int packetlength))
-                        {
-                            Log.Warn($"Invalid ID: {packetID:X2} | off: {offset} | len: {packetlength} | stream.pos: {stream.Length}");
+                        Log.Warn($"Invalid ID: {packetID:X2} | off: {offset} | len: {packetlength} | stream.pos: {stream.Length}");
 
-                            break;
-                        }
-
-                        if ((length - done) < packetlength)
-                        {
-                            Log.Warn($"need more data ID: {packetID:X2} | off: {offset} | len: {packetlength} | stream.pos: {stream.Length} {done}/{length}");
-
-                            // need more data
-                            break;
-                        }
-
-                        while (packetlength > packetBuffer.Length)
-                        {
-                            Array.Resize(ref packetBuffer, packetBuffer.Length * 2);
-                        }
-
-                        var r = stream.Dequeue(packetBuffer, 0, packetlength);
-
-                        if (CUOEnviroment.PacketLog)
-                        {
-                            LogPacket(packetBuffer, packetlength, false);
-                        }
-
-                        // TODO: the pluging function should allow Span<byte> or unsafe type only.
-                        // The current one is a bad style decision.
-                        // It will be fixed once the new plugin system is done.
-                        if (!allowPlugins || Plugin.ProcessRecvPacket(packetBuffer, ref packetlength))
-                        {
-                            PacketHandlers.Handlers.AnalyzePacket(packetBuffer, offset, packetlength);
-
-                            Statistics.TotalPacketsReceived++;
-                        }
-
-                        done += packetlength;
+                        break;
                     }
 
-                    //if (length - done > 0)
-                    //{
-                    //    Span<byte> tmp = stackalloc byte[4096];
-                    //    var max = length - done;
-                    //    done = 0;
-                    //    while (done < max)
-                    //    {
-                    //        var toRead = Math.Min(tmp.Length, max);
+                    if (stream.Length < packetlength)
+                    {
+                        Log.Warn($"need more data ID: {packetID:X2} | off: {offset} | len: {packetlength} | stream.pos: {stream.Length}");
 
-                    //        stream.Dequeue(tmp, 0, toRead);
-                    //        _recvCompressedUnfinishedStream.Enqueue(tmp, 0, toRead);
+                        // need more data
+                        break;
+                    }
 
-                    //        done += toRead;
-                    //    }
-                    //}
-                }
-                finally
-                {
+                    while (packetlength > packetBuffer.Length)
+                    {
+                        Array.Resize(ref packetBuffer, packetBuffer.Length * 2);
+                    }
+
+                    var r = stream.Dequeue(packetBuffer, 0, packetlength);
+
+                    if (CUOEnviroment.PacketLog)
+                    {
+                        LogPacket(packetBuffer, packetlength, false);
+                    }
+
+                    // TODO: the pluging function should allow Span<byte> or unsafe type only.
+                    // The current one is a bad style decision.
+                    // It will be fixed once the new plugin system is done.
+                    if (!allowPlugins || Plugin.ProcessRecvPacket(packetBuffer, ref packetlength))
+                    {
+                        PacketHandlers.Handlers.AnalyzePacket(packetBuffer, offset, packetlength);
+
+                        Statistics.TotalPacketsReceived++;
+                    }
                 }
             }
         }
