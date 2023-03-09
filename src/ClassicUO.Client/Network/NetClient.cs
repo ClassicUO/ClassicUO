@@ -199,7 +199,6 @@ namespace ClassicUO.Network
         private readonly CircularBuffer _recvCompressedStream,
             _recvUncompressedStream,
             _recvUncompressedUnfinishedStream,
-            _recvCompressedUnfinishedStream,
             _sendStream,
             _pluginsDataStream;
 
@@ -209,13 +208,10 @@ namespace ClassicUO.Network
             Statistics = new NetStatistics(this);
             _recvCompressedStream = new CircularBuffer();
             _recvUncompressedStream = new CircularBuffer();
-            _recvCompressedUnfinishedStream = new CircularBuffer();
             _sendStream = new CircularBuffer();
             _pluginsDataStream = new CircularBuffer();
-            _recvUncompressedUnfinishedStream = new CircularBuffer();
 
             _socket = new NetworkDataRader();
-            _socket.OnPacketReceived += OnDataReceived;
             _socket.OnConnected += (o, e) => Connected?.Invoke(this, EventArgs.Empty);
             _socket.OnDisconnected += (o, e) => Disconnected?.Invoke(this, SocketError.Success);
             _socket.OnError += (o, e) => Disconnected?.Invoke(this, SocketError.SocketError);
@@ -294,10 +290,8 @@ namespace ClassicUO.Network
 
             _recvCompressedStream.Clear();
             _recvUncompressedStream.Clear();
-            _recvCompressedUnfinishedStream.Clear();
             _sendStream.Clear();
             _pluginsDataStream.Clear();
-            _recvUncompressedUnfinishedStream.Clear();
 
             IsDisposed = false;
 
@@ -451,35 +445,6 @@ namespace ClassicUO.Network
             }
 
             return true;
-        }
-
-        private void OnDataReceived(object sender, ArraySegment<byte> e)
-        {
-            lock (_recvCompressedStream)
-            {
-                lock (_recvUncompressedUnfinishedStream)
-                {
-                    if (_recvUncompressedUnfinishedStream.Length != 0)
-                    {
-                        Span<byte> tmp = stackalloc byte[4096];
-                        var max = _recvUncompressedUnfinishedStream.Length;
-                        var done = 0;
-                        while (done < max)
-                        {
-                            var toRead = Math.Min(tmp.Length, max);
-
-                            _recvUncompressedUnfinishedStream.Dequeue(tmp, 0, toRead);
-                            _recvCompressedStream.Enqueue(tmp, 0, toRead);
-
-                            done += toRead;
-                        }
-
-                        _recvUncompressedUnfinishedStream.Clear();
-                    }
-                }
-
-                _recvCompressedStream.Enqueue(e.Array, e.Offset, e.Count);
-            }
         }
 
         private readonly byte[] _compressedBuffer = new byte[BUFF_SIZE];
