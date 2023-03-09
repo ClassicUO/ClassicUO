@@ -48,7 +48,6 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class GridContainer : ResizableGump
     {
-
         private static int _lastX = 100;
         private static int _lastY = 100;
         private readonly AlphaBlendControl _background;
@@ -94,6 +93,15 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
+            Mobile m = World.Mobiles.Get(_container.RootContainer);
+            if (m != null)
+            {
+                if (m.NotorietyFlag == NotorietyFlag.Invulnerable)
+                {
+                    OpenOldContainer(ogContainer);
+                }
+            }
+
             X = _lastX;
             Y = _lastY;
 
@@ -109,7 +117,7 @@ namespace ClassicUO.Game.UI.Gumps
             _background.Height = Height - (BORDER_WIDTH * 2);
             _background.X = BORDER_WIDTH;
             _background.Y = BORDER_WIDTH;
-            _background.Alpha = (float)ProfileManager.CurrentProfile.ContainerOpacity/100;
+            _background.Alpha = (float)ProfileManager.CurrentProfile.ContainerOpacity / 100;
             _background.Hue = ProfileManager.CurrentProfile.AltGridContainerBackgroundHue;
             #endregion
 
@@ -186,12 +194,6 @@ namespace ClassicUO.Game.UI.Gumps
         }
         public override GumpType GumpType => GumpType.GridContainer;
 
-        public override void OnResize()
-        {
-            base.OnResize();
-            Console.WriteLine("onresize");
-        }
-
         public override void Save(XmlTextWriter writer)
         {
             base.Save(writer);
@@ -244,7 +246,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (Client.Game.GameCursor.ItemHold.Enabled)
                 {
-                    GameActions.DropItem(Client.Game.GameCursor.ItemHold.Serial, 0, 0, 0, _container.Serial);
+                    GameActions.DropItem(Client.Game.GameCursor.ItemHold.Serial, 0xFFFF, 0xFFFF, 0, _container.Serial);
                     InvalidateContents = true;
                     UpdateContents();
                 }
@@ -258,8 +260,6 @@ namespace ClassicUO.Game.UI.Gumps
         private ContainerGump GetOriginalContainerGump(uint serial)
         {
             ContainerGump container = UIManager.GetGump<ContainerGump>(serial);
-            bool playsound = false;
-            int x, y;
             if (_container == null || _container.IsDestroyed) return null;
 
             ushort graphic = OgContainerGraphic;
@@ -345,24 +345,22 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (container != null)
             {
-                x = container.ScreenCoordinateX;
-                y = container.ScreenCoordinateY;
-                container.Dispose();
+                ContainerManager.CalculateContainerPosition(serial, graphic);
+                container.X = ContainerManager.X;
+                container.Y = ContainerManager.Y;
+                container.InvalidateContents = true;
+                return container;
             }
             else
             {
                 ContainerManager.CalculateContainerPosition(serial, graphic);
-                x = ContainerManager.X;
-                y = ContainerManager.Y;
-                playsound = true;
+                return new ContainerGump(_container.Serial, graphic, true)
+                {
+                    X = ContainerManager.X,
+                    Y = ContainerManager.Y,
+                    InvalidateContents = true
+                };
             }
-
-            return new ContainerGump(_container.Serial, graphic, playsound)
-            {
-                X = x,
-                Y = y,
-                InvalidateContents = true
-            };
         }
         private void OpenOldContainer(uint serial)
         {
@@ -371,7 +369,6 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
 
             UIManager.Add(container);
-            Dispose();
         }
 
         private void updateItems()
@@ -699,7 +696,7 @@ namespace ClassicUO.Game.UI.Gumps
                         else if (_item.ItemData.IsStackable && _item.Graphic == Client.Game.GameCursor.ItemHold.Graphic)
                             GameActions.DropItem(Client.Game.GameCursor.ItemHold.Serial, _item.X, _item.Y, 0, _item.Serial);
                         else
-                            GameActions.DropItem(Client.Game.GameCursor.ItemHold.Serial, 10, 10, 0, _container.Serial);
+                            GameActions.DropItem(Client.Game.GameCursor.ItemHold.Serial, 0xFFFF, 0xFFFF, 0, _container.Serial);
                         _gridContainer.InvalidateContents = true;
                         _gridContainer.UpdateContents();
                     }
