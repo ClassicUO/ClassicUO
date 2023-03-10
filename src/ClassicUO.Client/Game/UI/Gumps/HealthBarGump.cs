@@ -275,7 +275,7 @@ namespace ClassicUO.Game.UI.Gumps
                 else
                 {
                     UIManager.Add(StatusGumpBase.AddStatusGump(ScreenCoordinateX, ScreenCoordinateY));
-                    Dispose();
+                    //Dispose();
                 }
             }
 
