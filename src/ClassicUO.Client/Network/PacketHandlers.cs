@@ -1274,7 +1274,7 @@ namespace ClassicUO.Network
                         {
                             UIManager.Add(new GridContainer(serial, graphic));
                         }
-                        UIManager.GetGump<ContainerGump>(serial)?.Dispose();
+                        //UIManager.GetGump<ContainerGump>(serial)?.Dispose();
                     }
                     else
                     {
