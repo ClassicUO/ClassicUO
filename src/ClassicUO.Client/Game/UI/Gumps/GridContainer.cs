@@ -635,9 +635,8 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     return;
                 }
-
-                if (!Keyboard.Ctrl && ProfileManager.CurrentProfile.DoubleClickToLootInsideContainers && _item != null && !_item.IsDestroyed && !_item.ItemData.IsContainer && _container != World.Player.FindItemByLayer(Layer.Backpack))
-                {
+                if (!Keyboard.Ctrl && ProfileManager.CurrentProfile.DoubleClickToLootInsideContainers && _item != null && !_item.IsDestroyed && !_item.ItemData.IsContainer && _container != World.Player.FindItemByLayer(Layer.Backpack) && !_item.IsLocked && _item.IsLootable)
+                { 
                     GameActions.GrabItem(_item, _item.Amount);
                 }
                 else
