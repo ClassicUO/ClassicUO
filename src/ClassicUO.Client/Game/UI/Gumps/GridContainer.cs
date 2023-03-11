@@ -56,7 +56,7 @@ namespace ClassicUO.Game.UI.Gumps
         private const int Y_SPACING = 1;
         private static int GRID_ITEM_SIZE = (int)Math.Round(50 * UIManager.ContainerScale);
         private float _lastGridItemScale = UIManager.ContainerScale;
-        private const int BORDER_WIDTH = 5;
+        private const int BORDER_WIDTH = 4;
         private static int DEFAULT_WIDTH =
             (BORDER_WIDTH * 2)     //The borders around the container, one on the left and one on the right
             + 15                   //The width of the scroll bar
@@ -69,8 +69,8 @@ namespace ClassicUO.Game.UI.Gumps
         private int _lastWidth = DEFAULT_WIDTH;
         private int _lastHeight = DEFAULT_HEIGHT;
         private readonly StbTextBox _searchBox;
-        private readonly NiceButton _openRegularGump;
-        private readonly NiceButton _helpToolTip;
+        private readonly GumpPic _openRegularGump;
+        private readonly GumpPic _helpToolTip;
         public readonly ushort OgContainerGraphic;
 
         private Item _dragSlotItem;
@@ -139,21 +139,21 @@ namespace ClassicUO.Game.UI.Gumps
             _searchBox.TextChanged += (sender, e) => { updateItems(); };
             _searchBox.DragBegin += (sender, e) => { InvokeDragBegin(e.Location); };
 
-            _openRegularGump = new NiceButton(_background.Width - 20 - BORDER_WIDTH, BORDER_WIDTH, 20, 20, ButtonAction.Activate, "[X]", 1, TEXT_ALIGN_TYPE.TS_CENTER, 0x0481)
-            {
-                ButtonParameter = 1,
-                IsSelectable = false,
-            };
+            _openRegularGump = new GumpPic(_background.Width - 25 - BORDER_WIDTH, BORDER_WIDTH, 5839, 0);
             _openRegularGump.MouseUp += (sender, e) =>
             {
                 OpenOldContainer(_container);
             };
+            _openRegularGump.MouseEnter += (sender, e) => { _openRegularGump.Graphic = 5840; };
+            _openRegularGump.MouseExit += (sender, e) => { _openRegularGump.Graphic = 5839; };
             _openRegularGump.SetTooltip("Open the original style container");
 
-            _helpToolTip = new NiceButton(_background.Width - 20 - BORDER_WIDTH, BORDER_WIDTH, 20, 20, ButtonAction.Default, "[?]", 1, TEXT_ALIGN_TYPE.TS_CENTER, 0x0481);
+            _helpToolTip = new GumpPic(_background.Width - 25 - 16 - BORDER_WIDTH, BORDER_WIDTH, 22153, 0);
+            _helpToolTip.MouseEnter += (sender, e) => { _helpToolTip.Graphic = 22154; };
+            _helpToolTip.MouseExit += (sender, e) => { _helpToolTip.Graphic = 22153; };
             _helpToolTip.SetTooltip(
                 "Ctrl + Click a slot -> Click another slot to lock that item into a specific slot." +
-                "<br>Use the [X] button to open the original style gump."
+                "<br>Use the corner button to open the original style gump."
                 );
 
             #endregion
@@ -532,8 +532,8 @@ namespace ClassicUO.Game.UI.Gumps
                 _background.Height = Height - (BORDER_WIDTH * 2);
                 _scrollArea.Width = _background.Width - BORDER_WIDTH;
                 _scrollArea.Height = _background.Height - BORDER_WIDTH - (_containerNameLabel.Height + 1);
-                _openRegularGump.X = _background.Width - 20 - BORDER_WIDTH;
-                _helpToolTip.X = _background.Width - 40 - BORDER_WIDTH;
+                _openRegularGump.X = Width - 25 - BORDER_WIDTH;
+                _helpToolTip.X = Width - 16 - 25 - BORDER_WIDTH;
                 _lastHeight = Height;
                 _lastWidth = Width;
                 RequestUpdateContents();
