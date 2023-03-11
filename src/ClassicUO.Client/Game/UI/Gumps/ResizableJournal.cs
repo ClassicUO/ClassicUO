@@ -142,7 +142,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void AddTab(string Name, MessageType[] filters)
         {
-            _tab.Add(new NiceButton((_tab.Count * TAB_WIDTH) + BORDER_WIDTH, BORDER_WIDTH, TAB_WIDTH, TAB_HEIGHT, ButtonAction.Activate, Name, 1) { ButtonParameter = _tab.Count, IsSelectable = false });
+            _tab.Add(new NiceButton((_tab.Count * TAB_WIDTH) + BORDER_WIDTH, BORDER_WIDTH, TAB_WIDTH, TAB_HEIGHT, ButtonAction.Activate, Name, 1) { ButtonParameter = _tab.Count, IsSelectable = true });
             _tabName.Add(Name);
             _tabTypes.Add(filters);
         }
