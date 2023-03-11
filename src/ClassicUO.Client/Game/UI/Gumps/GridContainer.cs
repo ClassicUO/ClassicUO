@@ -97,7 +97,7 @@ namespace ClassicUO.Game.UI.Gumps
             Mobile m = World.Mobiles.Get(_container.RootContainer);
             if (m != null)
             {
-                if (m.NotorietyFlag == NotorietyFlag.Invulnerable)
+                if (m.NotorietyFlag == NotorietyFlag.Invulnerable && m.Serial != World.Player.Serial)
                 {
                     OpenOldContainer(ogContainer);
                 }
