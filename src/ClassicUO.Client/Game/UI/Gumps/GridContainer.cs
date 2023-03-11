@@ -628,6 +628,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Add(_hit);
 
                 _hit.SetTooltip(_item);
+
                 _hit.MouseEnter += _hit_MouseEnter;
                 _hit.MouseExit += _hit_MouseExit;
                 _hit.MouseUp += _hit_MouseUp;
@@ -718,11 +719,19 @@ namespace ClassicUO.Game.UI.Gumps
                     if (Client.Game.GameCursor.ItemHold.Enabled)
                     {
                         if (_item.ItemData.IsContainer)
-                            GameActions.DropItem(Client.Game.GameCursor.ItemHold.Serial, 0xFFFF, 0xFFFF, 0, _item.Serial);
+                        {
+                            Rectangle containerBounds = ContainerManager.Get(_item.Graphic).Bounds;
+                            GameActions.DropItem(Client.Game.GameCursor.ItemHold.Serial, containerBounds.X / 2, containerBounds.Y / 2, 0, _item.Serial);
+                        }
                         else if (_item.ItemData.IsStackable && _item.Graphic == Client.Game.GameCursor.ItemHold.Graphic)
+                        {
                             GameActions.DropItem(Client.Game.GameCursor.ItemHold.Serial, _item.X, _item.Y, 0, _item.Serial);
+                        }
                         else
-                            GameActions.DropItem(Client.Game.GameCursor.ItemHold.Serial, 0xFFFF, 0xFFFF, 0, _container.Serial);
+                        {
+                            Rectangle containerBounds = ContainerManager.Get(_container.Graphic).Bounds;
+                            GameActions.DropItem(Client.Game.GameCursor.ItemHold.Serial, containerBounds.X / 2, containerBounds.Y / 2, 0, _container.Serial);
+                        }
                         _gridContainer.InvalidateContents = true;
                         _gridContainer.UpdateContents();
                     }
@@ -735,7 +744,7 @@ namespace ClassicUO.Game.UI.Gumps
                         Point offset = Mouse.LDragOffset;
                         if (Math.Abs(offset.X) < Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS && Math.Abs(offset.Y) < Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS)
                         {
-                            DelayedObjectClickManager.Set(_item, X + GRID_ITEM_SIZE, Y + GRID_ITEM_SIZE, 1);
+                            DelayedObjectClickManager.Set(_item.Serial, _gridContainer.X, _gridContainer.Y - 80, Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK);
                         }
                     }
                 }
@@ -792,17 +801,6 @@ namespace ClassicUO.Game.UI.Gumps
                     var texture = ArtLoader.Instance.GetStaticTexture(item.DisplayedGraphic, out var bounds);
                     var rect = ArtLoader.Instance.GetRealArtBounds(item.DisplayedGraphic);
 
-                    if (ProfileManager.CurrentProfile.ScaleItemsInsideContainers)
-                    {
-                        //bounds.X = (ushort)(bounds.X * UIManager.ContainerScale);
-                        //bounds.Y = (ushort)(bounds.Y * UIManager.ContainerScale);
-                        //bounds.Width = (ushort)(bounds.Width * UIManager.ContainerScale);
-                        //bounds.Height = (ushort)(bounds.Height * UIManager.ContainerScale);
-
-                        //rect.Width = (ushort)(rect.Width * UIManager.ContainerScale);
-                        //rect.Height = (ushort)(rect.Height * UIManager.ContainerScale);
-                    }
-
                     hueVector = ShaderHueTranslator.GetHueVector(item.Hue, item.ItemData.IsPartialHue, 1f);
 
                     Point originalSize = new Point(_hit.Width, _hit.Height);
@@ -848,7 +846,6 @@ namespace ClassicUO.Game.UI.Gumps
                         hueVector
                     );
                 }
-
 
                 hueVector = ShaderHueTranslator.GetHueVector(0);
 
