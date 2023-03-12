@@ -127,7 +127,7 @@ namespace ClassicUO.Game.GameObjects
                 posX,
                 posY,
                 hueVec,
-                false,
+                true,
                 depth
             );
 

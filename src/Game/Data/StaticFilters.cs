@@ -215,6 +215,8 @@ namespace ClassicUO.Game.Data
                     if (ushort.TryParse(ss[0], out ushort graphic))
                     {
                         _filteredTiles[graphic] |= flag;
+
+                        if (graphic >= 15293 && graphic <= 15391)
                         TreeTiles.Add(graphic);
                     }
                 }
@@ -325,7 +327,7 @@ namespace ClassicUO.Game.Data
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsCustomTree(ushort g)
         {
-            return g >= 15293 && g <= 15391;
+            return g >= 15293 && g <= 15391 || g >= 44947 && g <= 0xAFAC || g >= 44988 && g <= 44997;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

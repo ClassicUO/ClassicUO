@@ -295,8 +295,8 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private readonly int _borderSize;
 
-        const ushort H_BORDER = 0x0A8C;
-        const ushort V_BORDER = 0x0A8D;
+        const ushort H_BORDER = 9277;
+        const ushort V_BORDER = 9275;
 
         public BorderControl(int x, int y, int w, int h, int borderSize)
         {

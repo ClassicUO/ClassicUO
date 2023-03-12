@@ -131,6 +131,9 @@ namespace ClassicUO.Game.GameObjects
         public uint TithingPoints;
         public ushort Weight;
         public ushort WeightMax;
+        public short HeatTimer;
+        public short CriminalTimer;
+        public short BandageTimer;
 
         public Item FindBandage()
         {

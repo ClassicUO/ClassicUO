@@ -174,6 +174,11 @@ namespace ClassicUO.Game.GameObjects
                 hueVec.Z = 0.5f;
             }
 
+            if (graphic >= 15293 && graphic <= 15391 && ProfileManager.CurrentProfile.TreeToStumps)
+            {
+                graphic = Constants.TREE_REPLACE_GRAPHIC;
+            }
+
             DrawStaticAnimated
             (
                 batcher,

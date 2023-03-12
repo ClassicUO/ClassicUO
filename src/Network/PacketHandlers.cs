@@ -500,6 +500,7 @@ namespace ClassicUO.Network
                             }
 
                             World.Player.Race = (RaceType) race;
+
                         }
                         else
                         {
@@ -522,6 +523,7 @@ namespace ClassicUO.Network
 
                         if (type >= 4) //AOS
                         {
+
                             World.Player.FireResistance = (short) p.ReadUInt16BE();
                             World.Player.ColdResistance = (short) p.ReadUInt16BE();
                             World.Player.PoisonResistance = (short) p.ReadUInt16BE();
@@ -531,6 +533,8 @@ namespace ClassicUO.Network
                             World.Player.DamageMax = (short) p.ReadUInt16BE();
                             World.Player.TithingPoints = p.ReadUInt32BE();
                         }
+
+                        
 
                         if (type >= 6)
                         {
@@ -549,6 +553,10 @@ namespace ClassicUO.Network
                             World.Player.FasterCastRecovery = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUInt16BE();
                             World.Player.FasterCasting = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUInt16BE();
                             World.Player.LowerManaCost = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUInt16BE();
+
+                            World.Player.HeatTimer = (short)p.ReadUInt16BE();
+                            World.Player.CriminalTimer = (short)p.ReadUInt16BE();
+                            World.Player.BandageTimer = (short)p.ReadUInt16BE();
                         }
                     }
                 }

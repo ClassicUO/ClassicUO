@@ -118,7 +118,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             x -= (int) World.Player.Offset.X;
             y -= (int) (World.Player.Offset.Y - World.Player.Offset.Z);
-            y += World.Player.Z << 2;
+            //y += World.Player.Z << 2;
 
 
             switch (dir)
