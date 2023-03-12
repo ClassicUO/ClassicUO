@@ -101,7 +101,7 @@ namespace ClassicUO.Network
         /// <param name="size">The number of bytes to enqueue</param>
         public void Enqueue(Span<byte> buffer, int offset, int size)
         {
-            if (Length + size > _buffer.Length)
+            if (Length + size >= _buffer.Length)
             {
                 SetCapacity((Length + size + 2047) & ~2047);
             }
