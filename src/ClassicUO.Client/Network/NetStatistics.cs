@@ -35,14 +35,14 @@ using System.Diagnostics;
 
 namespace ClassicUO.Network
 {
-    internal class NetStatistics
+    sealed class NetStatistics
     {
-        private NetClient _socket;
+        private readonly NetClient _socket;
         private uint _lastTotalBytesReceived, _lastTotalBytesSent, _lastTotalPacketsReceived, _lastTotalPacketsSent;
         private byte _pingIdx;
 
         private readonly uint[] _pings = new uint[5];
-        private readonly Stopwatch _pingStopwatch = new Stopwatch();
+        private uint _startTickValue;
 
 
         public NetStatistics(NetClient socket)
@@ -96,14 +96,12 @@ namespace ClassicUO.Network
 
         public void PingReceived()
         {
-            _pings[_pingIdx++] = (uint) _pingStopwatch.ElapsedMilliseconds;
+            _pings[_pingIdx++] = Time.Ticks - _startTickValue;
 
             if (_pingIdx >= _pings.Length)
             {
                 _pingIdx = 0;
             }
-
-            _pingStopwatch.Stop();
         }
 
         public void SendPing()
@@ -113,13 +111,13 @@ namespace ClassicUO.Network
                 return;
             }
 
-            _pingStopwatch.Restart();
+            _startTickValue = Time.Ticks;
             _socket.Send_Ping();
         }
 
         public void Reset()
         {
-            _pingStopwatch.Reset();
+            _startTickValue = 0;
             ConnectedFrom = DateTime.MinValue;
             _lastTotalBytesReceived = _lastTotalBytesSent = _lastTotalPacketsReceived = _lastTotalPacketsSent = 0;
             TotalBytesReceived = TotalBytesSent = TotalPacketsReceived = TotalPacketsSent = 0;
