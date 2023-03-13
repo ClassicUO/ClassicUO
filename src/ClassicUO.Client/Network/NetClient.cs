@@ -190,9 +190,7 @@ namespace ClassicUO.Network
         public static NetClient Socket { get; } = new NetClient(false);
        
         public bool IsConnected => _socket != null && _socket.IsConnected;
-       
-        public bool IsDisposed { get; private set; }
-     
+            
         public NetStatistics Statistics { get; }
 
         public uint LocalIP
@@ -235,13 +233,13 @@ namespace ClassicUO.Network
 
         public static void EnqueuePacketFromPlugin(byte[] data, int length)
         {
-            if (LoginSocket.IsDisposed && Socket.IsConnected)
+            if (Socket.IsConnected)
             {
                 lock (Socket._pluginsDataStream)
                     Socket._pluginsDataStream.Enqueue(data, 0, length);
                 Socket.Statistics.TotalPacketsReceived++;
             }
-            else if (Socket.IsDisposed && LoginSocket.IsConnected)
+            else if (LoginSocket.IsConnected)
             {
                 lock (LoginSocket._pluginsDataStream)
                     LoginSocket._pluginsDataStream.Enqueue(data, 0, length);
@@ -261,15 +259,12 @@ namespace ClassicUO.Network
             _sendStream.Clear();
             _pluginsDataStream.Clear();
 
-            IsDisposed = false;
-
             _socket.Connect(ip, port);
         }
 
 
         public void Disconnect()
         {
-            IsDisposed = true;
             _isCompressionEnabled = false;
             Statistics.Reset();
             _socket.Disconnect();
@@ -302,7 +297,7 @@ namespace ClassicUO.Network
 
         private void Send(byte[] data, int length, bool skipEncryption)
         {
-            if (_socket == null || IsDisposed || !_socket.IsConnected)
+            if (_socket == null || !_socket.IsConnected)
             {
                 return;
             }

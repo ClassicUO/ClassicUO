@@ -660,11 +660,11 @@ namespace ClassicUO.Network
 
         private static bool OnPluginSend(ref byte[] data, ref int length)
         {
-            if (NetClient.LoginSocket.IsDisposed && NetClient.Socket.IsConnected)
+            if (NetClient.Socket.IsConnected)
             {
                 NetClient.Socket.Send(data, length, true);
             }
-            else if (NetClient.Socket.IsDisposed && NetClient.LoginSocket.IsConnected)
+            else if (NetClient.LoginSocket.IsConnected)
             {
                 NetClient.LoginSocket.Send(data, length, true);
             }
@@ -691,11 +691,11 @@ namespace ClassicUO.Network
             {
                 StackDataWriter writer = new StackDataWriter(new Span<byte>((void*)buffer, length));
 
-                if (NetClient.LoginSocket.IsDisposed && NetClient.Socket.IsConnected)
+                if (NetClient.Socket.IsConnected)
                 {
                     NetClient.Socket.Send(writer.AllocatedBuffer, writer.BytesWritten, true);
                 }
-                else if (NetClient.Socket.IsDisposed && NetClient.LoginSocket.IsConnected)
+                else if (NetClient.LoginSocket.IsConnected)
                 {
                     NetClient.LoginSocket.Send(writer.AllocatedBuffer, writer.BytesWritten, true);
                 }

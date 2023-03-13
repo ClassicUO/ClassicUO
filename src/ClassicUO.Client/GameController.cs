@@ -502,16 +502,12 @@ namespace ClassicUO
 
         private void OnNetworkUpdate()
         {
-            if (NetClient.LoginSocket.IsDisposed && NetClient.LoginSocket.IsConnected)
-            {
-                NetClient.LoginSocket.Disconnect();
-            }
-            else if (!NetClient.Socket.IsConnected)
+            if (NetClient.LoginSocket.IsConnected)
             {
                 NetClient.LoginSocket.Update();
                 UpdateSocketStats(NetClient.LoginSocket);
             }
-            else if (!NetClient.Socket.IsDisposed)
+            else if (NetClient.Socket.IsConnected)
             {
                 NetClient.Socket.Update();
                 UpdateSocketStats(NetClient.Socket);
