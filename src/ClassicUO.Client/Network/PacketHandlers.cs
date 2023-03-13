@@ -2462,11 +2462,11 @@ namespace ClassicUO.Network
 
         private static void Ping(ref StackDataReader p)
         {
-            if (NetClient.Socket.IsConnected && !NetClient.Socket.IsDisposed)
+            if (NetClient.Socket.IsConnected)
             {
                 NetClient.Socket.Statistics.PingReceived();
             }
-            else if (NetClient.LoginSocket.IsConnected && !NetClient.LoginSocket.IsDisposed)
+            else if (NetClient.LoginSocket.IsConnected)
             {
                 NetClient.LoginSocket.Statistics.PingReceived();
             }

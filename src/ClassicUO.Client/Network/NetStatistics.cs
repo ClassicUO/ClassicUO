@@ -106,7 +106,7 @@ namespace ClassicUO.Network
 
         public void SendPing()
         {
-            if (!_socket.IsConnected || _socket.IsDisposed)
+            if (!_socket.IsConnected)
             {
                 return;
             }
