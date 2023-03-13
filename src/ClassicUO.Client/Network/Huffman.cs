@@ -299,6 +299,14 @@ namespace ClassicUO.Network
         private int _bitNum = 8;
         private int _value, _mask, _treePos;
 
+        public void Reset()
+        {
+            _bitNum = 8;
+            _value = 0;
+            _mask = 0;
+            _treePos = 0;
+        }
+
         public bool Decompress(Span<byte> src, Span<byte> dest, ref int size)
         {
             var destIndex = 0;

@@ -94,14 +94,9 @@ namespace ClassicUO.Network
             }
         }
 
-        public void PingReceived()
+        public void PingReceived(byte idx)
         {
-            _pings[_pingIdx++] = Time.Ticks - _startTickValue;
-
-            if (_pingIdx >= _pings.Length)
-            {
-                _pingIdx = 0;
-            }
+            _pings[idx % _pings.Length] = Time.Ticks - _startTickValue;
         }
 
         public void SendPing()
@@ -112,7 +107,8 @@ namespace ClassicUO.Network
             }
 
             _startTickValue = Time.Ticks;
-            _socket.Send_Ping();
+            _socket.Send_Ping(_pingIdx);
+            _pingIdx = (byte)((_pingIdx + 1) % _pings.Length);
         }
 
         public void Reset()
