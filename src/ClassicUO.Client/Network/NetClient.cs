@@ -303,12 +303,17 @@ namespace ClassicUO.Network
 
         public void Update()
         {
+            if (!IsConnected)
+                return;
+
             ProcessRecv();
 
             ExtractPackets(_recvUncompressedStream, true);
             ExtractPackets(_pluginsDataStream, false);
 
             ProcessSend();
+
+            Statistics.Update();
         }
 
         public void Send(byte[] data, int length, bool ignorePlugin = false, bool skipEncryption = false)
@@ -423,11 +428,6 @@ namespace ClassicUO.Network
 
                 packetLen = (b0 << 8) | b1;
                 packetOffset = 3;
-
-                if (packetLen <= 0)
-                {
-
-                }
             }
 
             return true;
@@ -568,34 +568,7 @@ namespace ClassicUO.Network
             return _uncompressedBuffer.AsSpan(0, size);
         }
 
-        private static IPAddress ResolveIP(string addr)
-        {
-            IPAddress result = IPAddress.None;
-
-            if (string.IsNullOrEmpty(addr))
-            {
-                return result;
-            }
-
-            if (!IPAddress.TryParse(addr, out result))
-            {
-                try
-                {
-                    IPHostEntry hostEntry = Dns.GetHostEntry(addr);
-
-                    if (hostEntry.AddressList.Length != 0)
-                    {
-                        result = hostEntry.AddressList[hostEntry.AddressList.Length - 1];
-                    }
-                }
-                catch
-                {
-                }
-            }
-
-            return result;
-        }
-
+        
         private static void LogPacket(Span<byte> buffer, int length, bool toServer)
         {
             if (_logFile == null)

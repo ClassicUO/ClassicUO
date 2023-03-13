@@ -31,7 +31,6 @@
 #endregion
 
 using System;
-using System.Diagnostics;
 
 namespace ClassicUO.Network
 {
@@ -42,7 +41,7 @@ namespace ClassicUO.Network
         private byte _pingIdx;
 
         private readonly uint[] _pings = new uint[5];
-        private uint _startTickValue;
+        private uint _startTickValue, _statisticsTimer;
 
 
         public NetStatistics(NetClient socket)
@@ -122,6 +121,10 @@ namespace ClassicUO.Network
 
         public void Update()
         {
+            if (_statisticsTimer > Time.Ticks) return;
+
+            _statisticsTimer = Time.Ticks + 500;
+
             DeltaBytesReceived = TotalBytesReceived - _lastTotalBytesReceived;
             DeltaBytesSent = TotalBytesSent - _lastTotalBytesSent;
             DeltaPacketsReceived = TotalPacketsReceived - _lastTotalPacketsReceived;
