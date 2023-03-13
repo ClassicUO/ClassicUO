@@ -118,7 +118,7 @@ namespace ClassicUO.Network
             writer.Dispose();
         }
 
-        public static void Send_Ping(this NetClient socket)
+        public static void Send_Ping(this NetClient socket, byte idx)
         {
             const byte ID = 0x73;
 
@@ -132,7 +132,7 @@ namespace ClassicUO.Network
                 writer.WriteZero(2);
             }
 
-            writer.WriteUInt8(0x00);
+            writer.WriteUInt8(idx);
 
             if (length < 0)
             {

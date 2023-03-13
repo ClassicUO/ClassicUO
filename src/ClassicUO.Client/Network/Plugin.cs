@@ -664,10 +664,6 @@ namespace ClassicUO.Network
             {
                 NetClient.Socket.Send(data, length, true);
             }
-            else if (NetClient.LoginSocket.IsConnected)
-            {
-                NetClient.LoginSocket.Send(data, length, true);
-            }
 
             return true;
         }
@@ -691,14 +687,7 @@ namespace ClassicUO.Network
             {
                 StackDataWriter writer = new StackDataWriter(new Span<byte>((void*)buffer, length));
 
-                if (NetClient.Socket.IsConnected)
-                {
-                    NetClient.Socket.Send(writer.AllocatedBuffer, writer.BytesWritten, true);
-                }
-                else if (NetClient.LoginSocket.IsConnected)
-                {
-                    NetClient.LoginSocket.Send(writer.AllocatedBuffer, writer.BytesWritten, true);
-                }
+                NetClient.Socket.Send(writer.AllocatedBuffer, writer.BytesWritten, true);
 
                 writer.Dispose();
             }

@@ -57,14 +57,16 @@ namespace ClassicUO.Network
         {
             if (IsConnected) return;
 
+            Console.WriteLine("conneting to: {0},{1}", ip, port);
+
             _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp)
             {
                 NoDelay = true
             };
 
-            _socket.BeginConnect(ip, port, e =>
+            try
             {
-                _socket.EndConnect(e);
+                _socket.Connect(ip, port);
 
                 if (!IsConnected)
                 {
@@ -73,8 +75,32 @@ namespace ClassicUO.Network
                 }
 
                 OnConnected?.Invoke(this, EventArgs.Empty);
-                //BeginRead(new byte[1024 * 4]);
-            }, this);
+            }
+            catch (SocketException socketEx)
+            {
+                Log.Error($"error while connecting {socketEx}");
+                OnError?.Invoke(this, socketEx.SocketErrorCode);
+            }
+            catch (Exception ex)
+            {
+                Log.Error($"error while connecting {ex}");
+                OnError?.Invoke(this, SocketError.SocketError);
+            }
+           
+
+            //_socket.BeginConnect(ip, port, e =>
+            //{
+            //    _socket.EndConnect(e);
+
+            //    if (!IsConnected)
+            //    {
+            //        OnError?.Invoke(this, SocketError.NotConnected);
+            //        return;
+            //    }
+
+            //    OnConnected?.Invoke(this, EventArgs.Empty);
+            //    //BeginRead(new byte[1024 * 4]);
+            //}, this);
         }
 
         public void Send(byte[] buffer, int offset, int count)
@@ -84,6 +110,8 @@ namespace ClassicUO.Network
 
         public int Read(byte[] buffer, int length = 4096)
         {
+            if (!IsConnected) return 0;
+
             var available = _socket.Available;
             var done = 0;
 
@@ -166,29 +194,27 @@ namespace ClassicUO.Network
         private byte[] _readingBuffer = new byte[4096];
         private readonly Huffman _huffman = new Huffman();
         private bool _isCompressionEnabled;
-        private readonly bool _isLoginSocket;
         private readonly SocketWrapper _socket;
         private uint? _localIP;
         private readonly CircularBuffer _recvUncompressedStream, _sendStream, _pluginsDataStream;
 
-        private NetClient(bool isLoginSocket)
+        private NetClient()
         {
-            _isLoginSocket = isLoginSocket;
             Statistics = new NetStatistics(this);
             _recvUncompressedStream = new CircularBuffer();
             _sendStream = new CircularBuffer();
             _pluginsDataStream = new CircularBuffer();
 
             _socket = new SocketWrapper();
-            _socket.OnConnected += (o, e) => Connected?.Invoke(this, EventArgs.Empty);
+            _socket.OnConnected += (o, e) => { Statistics.Reset(); Connected?.Invoke(this, EventArgs.Empty); };
             _socket.OnDisconnected += (o, e) => Disconnected?.Invoke(this, SocketError.Success);
             _socket.OnError += (o, e) => Disconnected?.Invoke(this, SocketError.SocketError);
         }
 
 
-        public static NetClient LoginSocket { get; } = new NetClient(true);
-        public static NetClient Socket { get; } = new NetClient(false);
+        public static NetClient Socket { get; } = new NetClient();
        
+
         public bool IsConnected => _socket != null && _socket.IsConnected;
             
         public NetStatistics Statistics { get; }
@@ -239,12 +265,6 @@ namespace ClassicUO.Network
                     Socket._pluginsDataStream.Enqueue(data, 0, length);
                 Socket.Statistics.TotalPacketsReceived++;
             }
-            else if (LoginSocket.IsConnected)
-            {
-                lock (LoginSocket._pluginsDataStream)
-                    LoginSocket._pluginsDataStream.Enqueue(data, 0, length);
-                LoginSocket.Statistics.TotalPacketsReceived++;
-            }
             else
             {
                 Log.Error("Attempt to write into a dead socket");
@@ -253,11 +273,12 @@ namespace ClassicUO.Network
 
         public void Connect(string ip, ushort port)
         {
-            Statistics.Reset();
-
             _recvUncompressedStream.Clear();
             _sendStream.Clear();
             _pluginsDataStream.Clear();
+
+            _huffman.Reset();
+            Statistics.Reset();
 
             _socket.Connect(ip, port);
         }
@@ -273,6 +294,11 @@ namespace ClassicUO.Network
         public void EnableCompression()
         {
             _isCompressionEnabled = true;
+            _huffman.Reset();
+
+            _recvUncompressedStream.Clear();
+            _sendStream.Clear();
+            _pluginsDataStream.Clear();
         }
 
         public void Update()
@@ -297,7 +323,7 @@ namespace ClassicUO.Network
 
         private void Send(byte[] data, int length, bool skipEncryption)
         {
-            if (_socket == null || !_socket.IsConnected)
+            if (!IsConnected)
             {
                 return;
             }
@@ -311,7 +337,7 @@ namespace ClassicUO.Network
 
                 if (!skipEncryption)
                 {
-                    EncryptionHelper.Encrypt(_isLoginSocket, data, data, length);
+                    EncryptionHelper.Encrypt(!_isCompressionEnabled, data, data, length);
                 }
 
                 _sendStream.Enqueue(data, 0, length);
@@ -397,6 +423,11 @@ namespace ClassicUO.Network
 
                 packetLen = (b0 << 8) | b1;
                 packetOffset = 3;
+
+                if (packetLen <= 0)
+                {
+
+                }
             }
 
             return true;
@@ -465,7 +496,7 @@ namespace ClassicUO.Network
 
         private void ProcessEncryption(Span<byte> buffer)
         {
-            if (_isLoginSocket) return;
+            if (!_isCompressionEnabled) return;
 
             EncryptionHelper.Decrypt(buffer, buffer, buffer.Length);
         }
