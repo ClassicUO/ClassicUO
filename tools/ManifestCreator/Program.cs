@@ -18,8 +18,8 @@ namespace ManifestCreator
             "ClassicUO",
             "ClassicUO.Assets.dll",
             "ClassicUO.Utility.dll",
-            "ClassicUO.IO",
-            "ClassicUO.Renderer",
+            "ClassicUO.IO.dll",
+            "ClassicUO.Renderer.dll",
 
             "ClassicUO.bin.osx",
             "ClassicUO.bin.x86_64",
