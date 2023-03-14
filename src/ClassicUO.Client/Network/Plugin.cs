@@ -450,10 +450,15 @@ namespace ClassicUO.Network
             {
                 if (plugin._onRecv_new != null)
                 {
-                    if (!plugin._onRecv_new(data, ref length))
+                    byte[] tmp = new byte[length];
+                    Array.Copy(data, tmp, length);
+
+                    if (!plugin._onRecv_new(tmp, ref length))
                     {
                         result = false;
                     }
+
+                    Array.Copy(tmp, data, length);
                 }
                 else if (plugin._onRecv != null)
                 {
@@ -480,10 +485,15 @@ namespace ClassicUO.Network
             {
                 if (plugin._onSend_new != null)
                 {
-                    if (!plugin._onSend_new(data, ref length))
+                    byte[] tmp = new byte[length];
+                    Array.Copy(data, tmp, length);
+
+                    if (!plugin._onSend_new(tmp, ref length))
                     {
                         result = false;
                     }
+
+                    Array.Copy(tmp, data, length);
                 }
                 else if (plugin._onSend != null)
                 {
@@ -650,13 +660,9 @@ namespace ClassicUO.Network
 
         private static bool OnPluginSend(ref byte[] data, ref int length)
         {
-            if (NetClient.LoginSocket.IsDisposed && NetClient.Socket.IsConnected)
+            if (NetClient.Socket.IsConnected)
             {
                 NetClient.Socket.Send(data, length, true);
-            }
-            else if (NetClient.Socket.IsDisposed && NetClient.LoginSocket.IsConnected)
-            {
-                NetClient.LoginSocket.Send(data, length, true);
             }
 
             return true;
@@ -681,14 +687,7 @@ namespace ClassicUO.Network
             {
                 StackDataWriter writer = new StackDataWriter(new Span<byte>((void*)buffer, length));
 
-                if (NetClient.LoginSocket.IsDisposed && NetClient.Socket.IsConnected)
-                {
-                    NetClient.Socket.Send(writer.AllocatedBuffer, writer.BytesWritten, true);
-                }
-                else if (NetClient.Socket.IsDisposed && NetClient.LoginSocket.IsConnected)
-                {
-                    NetClient.LoginSocket.Send(writer.AllocatedBuffer, writer.BytesWritten, true);
-                }
+                NetClient.Socket.Send(writer.AllocatedBuffer, writer.BytesWritten, true);
 
                 writer.Dispose();
             }
