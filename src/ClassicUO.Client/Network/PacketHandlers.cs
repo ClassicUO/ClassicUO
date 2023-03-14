@@ -2476,14 +2476,7 @@ namespace ClassicUO.Network
 
         private static void Ping(ref StackDataReader p)
         {
-            if (NetClient.Socket.IsConnected && !NetClient.Socket.IsDisposed)
-            {
-                NetClient.Socket.Statistics.PingReceived();
-            }
-            else if (NetClient.LoginSocket.IsConnected && !NetClient.LoginSocket.IsDisposed)
-            {
-                NetClient.LoginSocket.Statistics.PingReceived();
-            }
+            NetClient.Socket.Statistics.PingReceived(p.ReadUInt8());
         }
 
 
