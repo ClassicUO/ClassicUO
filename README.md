@@ -27,6 +27,9 @@ This also has an improved journal!
 
 ![Journal](https://user-images.githubusercontent.com/3859393/222942915-e31d26aa-e9a7-41df-9c99-570bcc00d1fb.gif)
 
+![image](https://user-images.githubusercontent.com/3859393/225168130-5ce83950-853d-43ce-9583-65ec4b0ae9d6.png)
+
+
 ------------------------------------------------------------------
 
 An open source implementation of the Ultima Online Classic Client.
