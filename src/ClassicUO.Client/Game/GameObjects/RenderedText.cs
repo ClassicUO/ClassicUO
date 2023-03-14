@@ -687,7 +687,9 @@ namespace ClassicUO.Game
                 );
             }
 
-            if (fi.Data != null && fi.Data.Length > 0 && (Texture == null || Texture.IsDisposed))
+            var isValid = fi.Data != null && fi.Data.Length > 0;
+
+            if (isValid && (Texture == null || Texture.IsDisposed))
             {
                 Texture = new Texture2D(Client.Game.GraphicsDevice, fi.Width, fi.Height, false, SurfaceFormat.Color);
             }
@@ -703,7 +705,7 @@ namespace ClassicUO.Game
 
             LinesCount = fi.LineCount;
  
-            if (Texture != null)
+            if (Texture != null && isValid)
             {
                 fixed (uint* dataPtr = fi.Data)
                 {
