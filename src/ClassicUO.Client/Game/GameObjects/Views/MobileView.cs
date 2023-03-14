@@ -120,7 +120,8 @@ namespace ClassicUO.Game.GameObjects
             }
             else if (IsHidden)
             {
-                overridedHue = 0x038E;
+                overridedHue = ProfileManager.CurrentProfile.HiddenBodyHue;
+                hueVec = ShaderHueTranslator.GetHueVector(0, false, ((float)ProfileManager.CurrentProfile.HiddenBodyAlpha/100));
             }
             else
             {
