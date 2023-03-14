@@ -235,7 +235,7 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-        public override void Update()
+        public new void Update()
         {
             _dataBox.Clear();
             _dataBoxGUI.Clear();
