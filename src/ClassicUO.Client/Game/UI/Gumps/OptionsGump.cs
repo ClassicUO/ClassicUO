@@ -160,6 +160,8 @@ namespace ClassicUO.Game.UI.Gumps
         private HSliderBar _sliderSpeechDelay;
         private HSliderBar _sliderZoom;
         private HSliderBar _soundsVolume, _musicVolume, _loginMusicVolume;
+        private HSliderBar _hiddenBodyAlpha;
+        private ClickableColorBox _hiddenBodyHue;
         private ClickableColorBox _speechColorPickerBox, _emoteColorPickerBox, _yellColorPickerBox, _whisperColorPickerBox, _partyMessageColorPickerBox, _guildMessageColorPickerBox, _allyMessageColorPickerBox, _chatMessageColorPickerBox, _partyAuraColorPickerBox;
         private InputField _spellFormatBox;
         private ClickableColorBox _tooltip_font_hue;
@@ -961,6 +963,38 @@ namespace ClassicUO.Game.UI.Gumps
             );
 
             section2.AddRight(AddLabel(null, ResGumps.PartyAuraColor, 0, 0));
+
+            section2.PopIndent();
+            section2.PopIndent();
+
+            section2.Add(AddLabel(null, "Hidden Body Opacity", startX, startY));
+
+            section2.AddRight
+            (
+                _hiddenBodyAlpha = AddHSlider(
+                    null,
+                    0,
+                    100,
+                    _currentProfile.HiddenBodyAlpha,
+                    startX,
+                    startY,
+                    200
+                ),
+                2
+            );
+
+            section2.Add
+            (
+                _hiddenBodyHue = AddColorBox(
+                    null,
+                    startX,
+                    startY,
+                    _currentProfile.HiddenBodyHue,
+                    ""
+                    )
+            );
+            section2.AddRight(AddLabel(null, "Hidden Body Hue", startX, startY));
+
             section2.PopIndent();
             section2.PopIndent();
 
@@ -3609,6 +3643,8 @@ namespace ClassicUO.Game.UI.Gumps
                     _dragSelectStartX.Value = 100;
                     _dragSelectStartY.Value = 100;
                     _dragSelectAsAnchor.IsChecked = false;
+                    _hiddenBodyAlpha.Value = 40;
+                    _hiddenBodyHue.Hue = 0x038E;
 
                     break;
 
@@ -3801,6 +3837,9 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.HoldShiftToSplitStack = _holdShiftToSplitStack.IsChecked;
             _currentProfile.CloseHealthBarType = _healtbarType.SelectedIndex;
             _currentProfile.HideScreenshotStoredInMessage = _hideScreenshotStoredInMessage.IsChecked;
+
+            _currentProfile.HiddenBodyHue = _hiddenBodyHue.Hue;
+            _currentProfile.HiddenBodyAlpha = (byte)_hiddenBodyAlpha.Value;
 
             if (_currentProfile.DrawRoofs == _drawRoofs.IsChecked)
             {
