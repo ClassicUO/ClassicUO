@@ -48,7 +48,7 @@ using Microsoft.Xna.Framework.Graphics;
 namespace ClassicUO.Game.Scenes
 {
     internal partial class GameScene
-    {      
+    {
         private static GameObject[] _foliages = new GameObject[100];
         private static readonly TreeUnion[] _treeInfos =
         {
@@ -70,7 +70,7 @@ namespace ClassicUO.Game.Scenes
         private Point _offset, _maxTile, _minTile, _last_scaled_offset;
         private int _oldPlayerX, _oldPlayerY, _oldPlayerZ;
         private int _foliageCount;
-      
+
 
         // statics
         private GameObject _renderListStaticsHead, _renderList;
@@ -134,8 +134,8 @@ namespace ClassicUO.Game.Scenes
 
                         if (pz16 <= tileZ)
                         {
-                            maxGroundZ = (sbyte) pz16;
-                            _maxGroundZ = (sbyte) pz16;
+                            maxGroundZ = (sbyte)pz16;
+                            _maxGroundZ = (sbyte)pz16;
                             _maxZ = _maxGroundZ;
 
                             break;
@@ -158,7 +158,7 @@ namespace ClassicUO.Game.Scenes
                         ref StaticTiles itemdata = ref TileDataLoader.Instance.StaticData[obj.Graphic];
 
                         //if (GameObjectHelper.TryGetStaticData(obj, out var itemdata) && ((ulong) itemdata.Flags & 0x20004) == 0 && (!itemdata.IsRoof || itemdata.IsSurface))
-                        if (((ulong) itemdata.Flags & 0x20004) == 0 && (!itemdata.IsRoof || itemdata.IsSurface))
+                        if (((ulong)itemdata.Flags & 0x20004) == 0 && (!itemdata.IsRoof || itemdata.IsSurface))
                         {
                             _maxZ = tileZ;
                             _noDrawRoofs = true;
@@ -167,7 +167,7 @@ namespace ClassicUO.Game.Scenes
                 }
 
                 int tempZ = _maxZ;
-                _maxGroundZ = (sbyte) _maxZ;
+                _maxGroundZ = (sbyte)_maxZ;
                 playerX++;
                 playerY++;
                 bx = playerX;
@@ -197,7 +197,7 @@ namespace ClassicUO.Game.Scenes
                             {
                                 ref StaticTiles itemdata = ref TileDataLoader.Instance.StaticData[obj2.Graphic];
 
-                                if (((ulong) itemdata.Flags & 0x204) == 0 && itemdata.IsRoof)
+                                if (((ulong)itemdata.Flags & 0x204) == 0 && itemdata.IsRoof)
                                 {
                                     _maxZ = tileZ;
                                     World.Map.ClearBockAccess();
@@ -224,7 +224,7 @@ namespace ClassicUO.Game.Scenes
                 if (tempZ < pz16)
                 {
                     _maxZ = pz16;
-                    _maxGroundZ = (sbyte) pz16;
+                    _maxGroundZ = (sbyte)pz16;
                 }
 
                 _maxGroundZ = maxGroundZ;
@@ -294,7 +294,7 @@ namespace ClassicUO.Game.Scenes
                 obj.UpdateTextCoordsV();
             }
         }
-     
+
         private void CheckIfBehindATree(GameObject obj, int worldX, int worldY, ref StaticTiles itemData)
         {
             if (obj.Z < _maxZ && itemData.IsFoliage)
@@ -347,7 +347,33 @@ namespace ClassicUO.Game.Scenes
         private bool ProcessAlpha(GameObject obj, ref StaticTiles itemData, bool useCoT, ref Vector2 playerPos, int cotZ, out bool allowSelection)
         {
             allowSelection = true;
+            if (ProfileManager.CurrentProfile.UseCircleOfTransparency && ProfileManager.CurrentProfile.CircleOfTransparencyType == 2)
+            {
+                if (Vector2.Distance(new Vector2(obj.RealScreenPosition.X, obj.RealScreenPosition.Y), playerPos) < ProfileManager.CurrentProfile.CircleOfTransparencyRadius)
+                {
+                    if(obj.Z >= _maxZ)
+                    {
+                        CalculateAlpha(ref obj.AlphaHue, 0);
+                    }
+                    else if (itemData.IsWall || itemData.IsWindow)
+                    {
+                        obj.AlphaHue = 65;
+                        allowSelection = false;
+                        return true;
+                    }
+                    else if (itemData.IsDoor || itemData.IsRoof)
+                    {
+                        obj.AlphaHue = 65;
+                        allowSelection = true;
+                        return true;
+                    }
+                    else if (itemData.IsRoof && _noDrawRoofs)
+                    {
+                        return false;
+                    }
+                }
 
+            }
             if (obj.Z >= _maxZ)
             {
                 bool changed;
@@ -512,9 +538,9 @@ namespace ClassicUO.Game.Scenes
             {
                 return false;
             }
-            
+
             bool found = false;
-            
+
             for (int y = -1; y <= 2; ++y)
             {
                 for (int x = -1; x <= 2; ++x)
@@ -614,12 +640,12 @@ namespace ClassicUO.Game.Scenes
 
         private unsafe bool AddTileToRenderList
         (
-            GameObject obj, 
+            GameObject obj,
             int worldX,
             int worldY,
-            bool useObjectHandles, 
+            bool useObjectHandles,
             int maxZ,
-            int cotZ, 
+            int cotZ,
             ref Vector2 playerScreePos
         )
         {
@@ -722,7 +748,7 @@ namespace ClassicUO.Game.Scenes
                     else
                     {
                         PushToRenderList(obj, ref _renderList, ref _renderListStaticsHead, ref _renderListStaticsCount, allowSelection);
-                    } 
+                    }
                 }
                 else if (obj is Multi multi)
                 {
@@ -751,7 +777,7 @@ namespace ClassicUO.Game.Scenes
                         {
                             continue;
                         }
-                    }          
+                    }
 
                     byte height = 0;
 
@@ -867,7 +893,7 @@ namespace ClassicUO.Game.Scenes
                     else
                     {
                         PushToRenderList(obj, ref _renderList, ref _renderListStaticsHead, ref _renderListStaticsCount, true);
-                    }         
+                    }
                 }
                 else if (obj is GameEffect effect)
                 {
@@ -909,8 +935,8 @@ namespace ClassicUO.Game.Scenes
             int winGameHeight = Camera.Bounds.Height;
             int winGameCenterX = winGamePosX + (winGameWidth >> 1);
             int winGameCenterY = winGamePosY + (winGameHeight >> 1) + (World.Player.Z << 2);
-            winGameCenterX -= (int) World.Player.Offset.X;
-            winGameCenterY -= (int) (World.Player.Offset.Y - World.Player.Offset.Z);
+            winGameCenterX -= (int)World.Player.Offset.X;
+            winGameCenterY -= (int)(World.Player.Offset.Y - World.Player.Offset.Z);
 
             int tileOffX = World.Player.X;
             int tileOffY = World.Player.Y;
@@ -932,10 +958,10 @@ namespace ClassicUO.Game.Scenes
                 float newRight = right * zoom;
                 float newBottom = bottom * zoom;
 
-                winGameScaledOffsetX = (int) (left * zoom - (newRight - right));
-                winGameScaledOffsetY = (int) (top * zoom - (newBottom - bottom));
-                winGameScaledWidth = (int) (newRight - winGameScaledOffsetX);
-                winGameScaledHeight = (int) (newBottom - winGameScaledOffsetY);
+                winGameScaledOffsetX = (int)(left * zoom - (newRight - right));
+                winGameScaledOffsetY = (int)(top * zoom - (newBottom - bottom));
+                winGameScaledWidth = (int)(newRight - winGameScaledOffsetX);
+                winGameScaledHeight = (int)(newBottom - winGameScaledOffsetY);
             }
             else
             {
@@ -956,8 +982,8 @@ namespace ClassicUO.Game.Scenes
 
             if (Camera.Offset.X != 0 || Camera.Offset.Y != 0)
             {
-                tileOffX += (int) (zoom * (Camera.Offset.X + Camera.Offset.Y) / 44);
-                tileOffY += (int) (zoom * (Camera.Offset.Y - Camera.Offset.X) / 44);
+                tileOffX += (int)(zoom * (Camera.Offset.X + Camera.Offset.Y) / 44);
+                tileOffY += (int)(zoom * (Camera.Offset.Y - Camera.Offset.X) / 44);
             };
 
             int realMinRangeX = Math.Max(0, tileOffX - size);
@@ -965,7 +991,7 @@ namespace ClassicUO.Game.Scenes
             int realMinRangeY = Math.Max(0, tileOffY - size);
             int realMaxRangeY = tileOffY + size;
 
-            int drawOffset = (int) (44 / zoom);
+            int drawOffset = (int)(44 / zoom);
 
             Point p = Point.Zero;
             p.X -= drawOffset;
@@ -986,7 +1012,7 @@ namespace ClassicUO.Game.Scenes
                 _lastCamOffset = Camera.Offset;
 
 
-                if (_use_render_target && (_world_render_target == null || _world_render_target.Width != (int) (winGameWidth * zoom) || _world_render_target.Height != (int) (winGameHeight * zoom)))
+                if (_use_render_target && (_world_render_target == null || _world_render_target.Width != (int)(winGameWidth * zoom) || _world_render_target.Height != (int)(winGameHeight * zoom)))
                 {
                     _world_render_target?.Dispose();
 
