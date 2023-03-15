@@ -29,6 +29,8 @@ This also has an improved journal!
 
 ![image](https://user-images.githubusercontent.com/3859393/225168130-5ce83950-853d-43ce-9583-65ec4b0ae9d6.png)
 
+![image](https://user-images.githubusercontent.com/3859393/225307385-c8e8014f-9b84-4fe4-a2cd-f33fbeee9563.png)
+
 
 ------------------------------------------------------------------
 
