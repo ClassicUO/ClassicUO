@@ -140,16 +140,18 @@ namespace ClassicUO.Game.UI.Gumps
             _searchBox.TextChanged += (sender, e) => { updateItems(); };
             _searchBox.DragBegin += (sender, e) => { InvokeDragBegin(e.Location); };
 
-            _openRegularGump = new GumpPic(_background.Width - 25 - BORDER_WIDTH, BORDER_WIDTH, 5839, 0);
+            var regularGumpIcon = GumpsLoader.Instance.GetGumpTexture(5839, out var bounds);
+            _openRegularGump = new GumpPic(_background.Width - 25 - BORDER_WIDTH, BORDER_WIDTH, regularGumpIcon == null ? (ushort)1209 : (ushort)5839, 0);
             _openRegularGump.MouseUp += (sender, e) =>
             {
                 OpenOldContainer(_container);
             };
-            _openRegularGump.MouseEnter += (sender, e) => { _openRegularGump.Graphic = 5840; };
-            _openRegularGump.MouseExit += (sender, e) => { _openRegularGump.Graphic = 5839; };
+            _openRegularGump.MouseEnter += (sender, e) => { _openRegularGump.Graphic = regularGumpIcon == null ? (ushort)1210 : (ushort)5840; };
+            _openRegularGump.MouseExit += (sender, e) => { _openRegularGump.Graphic = regularGumpIcon == null ? (ushort)1209 : (ushort)5839; };
             _openRegularGump.SetTooltip("Open the original style container");
 
-            _quickDropBackpack = new GumpPic(Width - _openRegularGump.Width - 20 - BORDER_WIDTH, BORDER_WIDTH, 1625, 0);
+            var quickDropIcon = GumpsLoader.Instance.GetGumpTexture(1625, out var bounds1);
+            _quickDropBackpack = new GumpPic(Width - _openRegularGump.Width - 20 - BORDER_WIDTH, BORDER_WIDTH, quickDropIcon == null ? (ushort)1209 : (ushort)1625, 0);
             _quickDropBackpack.MouseUp += (sender, e) =>
             {
                 if (e.Button == MouseButtonType.Left && _quickDropBackpack.MouseIsOver)
@@ -168,9 +170,9 @@ namespace ClassicUO.Game.UI.Gumps
             };
             _quickDropBackpack.MouseEnter += (sender, e) =>
             {
-                if (Client.Game.GameCursor.ItemHold.Enabled) _quickDropBackpack.Graphic = 1626;
+                if (Client.Game.GameCursor.ItemHold.Enabled) _quickDropBackpack.Graphic = quickDropIcon == null ? (ushort)1210 : (ushort)1626;
             };
-            _quickDropBackpack.MouseExit += (sender, e) => { _quickDropBackpack.Graphic = 1625; };
+            _quickDropBackpack.MouseExit += (sender, e) => { _quickDropBackpack.Graphic = quickDropIcon == null ? (ushort)1209 : (ushort)1625; };
             _quickDropBackpack.SetTooltip("Drop an item here to send it to your backpack.");
 
             _helpToolTip = new GumpPic(_background.Width - _openRegularGump.Width - _quickDropBackpack.Width - 16 - BORDER_WIDTH, BORDER_WIDTH, 22153, 0);
@@ -558,9 +560,9 @@ namespace ClassicUO.Game.UI.Gumps
                 _background.Height = Height - (BORDER_WIDTH * 2);
                 _scrollArea.Width = _background.Width - BORDER_WIDTH;
                 _scrollArea.Height = _background.Height - BORDER_WIDTH - (_containerNameLabel.Height + 1);
-                _openRegularGump.X = Width - 25 - BORDER_WIDTH;
-                _quickDropBackpack.X = Width - _openRegularGump.Width - 20 - BORDER_WIDTH;
-                _helpToolTip.X = Width - 20 - _openRegularGump.Width - _quickDropBackpack.Width - BORDER_WIDTH;
+                _openRegularGump.X = Width - _openRegularGump.Width - BORDER_WIDTH;
+                _quickDropBackpack.X = Width - _openRegularGump.Width - _quickDropBackpack.Width - BORDER_WIDTH;
+                _helpToolTip.X = Width - _helpToolTip.Width - _openRegularGump.Width - _quickDropBackpack.Width - BORDER_WIDTH;
                 _lastHeight = Height;
                 _lastWidth = Width;
                 RequestUpdateContents();
