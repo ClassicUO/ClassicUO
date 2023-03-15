@@ -112,7 +112,7 @@ namespace ClassicUO.Network
         {
             if (!IsConnected) return 0;
 
-            var available = _socket.Available;
+            var available = Math.Min(length, _socket.Available);
             var done = 0;
 
             while (done < available)
@@ -515,6 +515,9 @@ namespace ClassicUO.Network
             try
             {
                 var read = _sendStream.DequeSegment(length, out var segment);
+                if (read <= 0 || segment.Count <= 0)
+                    return;
+
                 _socket.Send(segment.Array, segment.Offset, segment.Count);
             }
             catch (SocketException ex)
