@@ -463,14 +463,12 @@ namespace ClassicUO.Game.UI.Gumps
             foreach (var spot in lockedSpots.OrderBy((x) => x.Key))
             {
                 Item item = World.Items.Get(spot.Value);
-                if (item == null)
-                {
+                if (item == null) //Locked item doesn't appear to exist in the client, ignoring it
                     continue;
-                }
                 int index = sortedContents.IndexOf(item);
-                if (index != -1)
+                if (index != -1) //The item is in the container
                 {
-                    if (spot.Key < sortedContents.Count)
+                    if (spot.Key < sortedContents.Count) //The items locked spot is less than the container count, can't lock an item in a spot that doesn't exist
                     {
                         Item moveItem = sortedContents[index];
                         sortedContents.RemoveAt(index);
@@ -534,7 +532,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             base.Draw(batcher, x, y);
 
-            Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
+            //Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
             return true;
         }
@@ -650,6 +648,7 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         _gridContainer.lockedSpots.Remove(slot);
                         itemGridLocked = false;
+                        _gridContainer.RequestUpdateContents();
                     }
                 };
                 _lockIcon.Add(lockIconHit);
