@@ -277,6 +277,9 @@ namespace ClassicUO.Game.UI.Gumps
                     GameActions.DropItem(Client.Game.GameCursor.ItemHold.Serial, 0xFFFF, 0xFFFF, 0, _container.Serial);
                     InvalidateContents = true;
                     UpdateContents();
+                } else if (TargetManager.IsTargeting)
+                {
+                    TargetManager.Target(_container.Serial);
                 }
             }
             else if (e.Button == MouseButtonType.Right)
