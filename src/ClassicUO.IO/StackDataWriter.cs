@@ -40,8 +40,13 @@ namespace ClassicUO.IO
 
 
         public byte[] AllocatedBuffer => _allocatedBuffer;
+      
         public Span<byte> RawBuffer => _buffer;
+       
         public ReadOnlySpan<byte> Buffer => _buffer.Slice(0, Position);
+       
+        public Span<byte> BufferWritten => _buffer.Slice(0, BytesWritten);
+      
         public int Position
         {
             [MethodImpl(IMPL_OPTION)]

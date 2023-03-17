@@ -683,12 +683,6 @@ namespace ClassicUO.Game.Scenes
             NetClient.Socket = new NetClient();
             EncryptionHelper.Initialize(false, seed, (ENCRYPTION_TYPE) Settings.GlobalSettings.Encryption);
 
-            //void onConnected(object sender, EventArgs e)
-            //{
-               
-            //}
-
-            //NetClient.Socket.Connected += onConnected;
             NetClient.Socket.Connect(new IPAddress(ip).ToString(), port);
 
             if (NetClient.Socket.IsConnected)
@@ -697,9 +691,7 @@ namespace ClassicUO.Game.Scenes
                 unsafe
                 {
                     Span<byte> b = stackalloc byte[4] { (byte)(seed >> 24), (byte)(seed >> 16), (byte)(seed >> 8), (byte)seed };
-                    StackDataWriter writer = new StackDataWriter(b);
-                    NetClient.Socket.Send(writer.AllocatedBuffer, writer.BytesWritten, true, true);
-                    writer.Dispose();
+                    NetClient.Socket.Send(b, true, true);
                 }
 
                 NetClient.Socket.Send_SecondLogin(Account, Password, seed);

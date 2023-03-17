@@ -403,9 +403,9 @@ namespace ClassicUO
 
             Mouse.Update();
 
-            var handler = PacketHandlers.Handlers;
-            var span = NetClient.Socket.GetNetworkData();
-            handler.ParsePackets(span);
+            var data = NetClient.Socket.CollectAvailableData();
+            var packetsCount = PacketHandlers.Handler.ParsePackets(data);
+            NetClient.Socket.Statistics.TotalPacketsReceived += (uint) packetsCount;
             NetClient.Socket.Flush();
 
             Plugin.Tick();
