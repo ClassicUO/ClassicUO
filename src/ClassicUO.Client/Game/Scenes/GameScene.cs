@@ -768,9 +768,9 @@ namespace ClassicUO.Game.Scenes
                 }
             }
 
-            if (_followingMode && SerialHelper.IsMobile(_followingTarget) && !Pathfinder.AutoWalking)
+            if (currentProfile.FollowingMode && SerialHelper.IsMobile(currentProfile.FollowingTarget) && !Pathfinder.AutoWalking)
             {
-                Mobile follow = World.Mobiles.Get(_followingTarget);
+                Mobile follow = World.Mobiles.Get(currentProfile.FollowingTarget);
 
                 if (follow != null)
                 {
@@ -1274,10 +1274,10 @@ namespace ClassicUO.Game.Scenes
 
         private void StopFollowing()
         {
-            if (_followingMode)
+            if (ProfileManager.CurrentProfile.FollowingMode)
             {
-                _followingMode = false;
-                _followingTarget = 0;
+                ProfileManager.CurrentProfile.FollowingMode = false;
+                ProfileManager.CurrentProfile.FollowingTarget = 0;
                 Pathfinder.StopAutoWalk();
 
                 MessageManager.HandleMessage

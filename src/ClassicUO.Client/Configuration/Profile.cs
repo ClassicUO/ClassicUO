@@ -319,6 +319,8 @@ namespace ClassicUO.Configuration
         public int GridContainerSearchMode { get; set; } = 0;
         public int AutoFollowDistance { get; set; } = 2;
         public Point ResizeJournalSize { get; set; } = new Point(410, 350);
+        public bool FollowingMode { get; set; } = false;
+        public uint FollowingTarget { get; set; }
 
         public static uint GumpsVersion { get; private set; }
 

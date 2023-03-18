@@ -212,6 +212,27 @@ namespace ClassicUO.Game.UI.Gumps
             base.OnDragEnd(x, y);
         }
 
+        protected override void OnMouseUp(int x, int y, MouseButtonType button)
+        {
+            base.OnMouseUp(x, y, button);
+
+            if(button == MouseButtonType.Left && Keyboard.Alt)
+            {
+                MessageManager.HandleMessage
+                (
+                    World.Player,
+                    ResGeneral.NowFollowing,
+                    string.Empty,
+                    0,
+                    MessageType.Regular,
+                    3,
+                    TextType.CLIENT
+                );
+                ProfileManager.CurrentProfile.FollowingMode = true;
+                ProfileManager.CurrentProfile.FollowingTarget = LocalSerial;
+            }
+        }
+
         protected override void OnMouseDown(int x, int y, MouseButtonType button)
         {
             if (button != MouseButtonType.Left)
