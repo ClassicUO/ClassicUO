@@ -603,9 +603,8 @@ namespace ClassicUO.Game.UI.Gumps
         {
             private readonly HitBox _hit;
             private bool mousePressedWhenEntered = false;
-            private readonly Item _item;
+            private readonly Item _item, _container;
             private readonly GridContainer _gridContainer;
-            private readonly Item _container;
             public bool ItemGridLocked = false;
             private readonly int slot;
             private GridContainerPreview _preview;
@@ -614,19 +613,20 @@ namespace ClassicUO.Game.UI.Gumps
 
             public GridItem(uint serial, int size, Item container, GridContainer gridContainer, int count)
             {
+                #region VARS
                 slot = count;
                 _container = container;
                 _gridContainer = gridContainer;
-                Point startDrag = new Point(0, 0);
                 LocalSerial = serial;
                 _item = World.Items.Get(serial);
+                CanMove = false;
+                WantUpdateSize = false;
+                #endregion
 
                 if (_item == null)
                 {
                     return;
                 }
-
-                CanMove = false;
 
                 AlphaBlendControl background = new AlphaBlendControl(0.25f);
                 background.Width = size;
@@ -670,9 +670,6 @@ namespace ClassicUO.Game.UI.Gumps
                 _lockIcon.Add(lockIconHit);
                 _lockIcon.IsVisible = ItemGridLocked;
                 Add(_lockIcon);
-
-
-                WantUpdateSize = false;
             }
 
             private void _hit_MouseDoubleClick(object sender, MouseDoubleClickEventArgs e)
