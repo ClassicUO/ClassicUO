@@ -317,7 +317,7 @@ namespace ClassicUO.Configuration
         public bool WorldMapShowGridIfZoomed { get; set; } = true;
 
         public int GridContainerSearchMode { get; set; } = 0;
-
+        public int AutoFollowDistance { get; set; } = 2;
         public Point ResizeJournalSize { get; set; } = new Point(410, 350);
 
         public static uint GumpsVersion { get; private set; }
