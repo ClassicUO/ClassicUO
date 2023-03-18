@@ -626,14 +626,6 @@ namespace ClassicUO.Game.UI.Gumps
                     Add(_count);
                 }
 
-                #region REMOVE ME
-                Label _slot = new Label(slot.ToString(), true, 32, align: TEXT_ALIGN_TYPE.TS_LEFT, maxwidth: size);
-                _slot.X = 1;
-                _slot.Y = 1; ;
-
-                Add(_slot);
-                #endregion
-
                 _hit = new HitBox(0, 0, size, size, null, 0f);
                 Add(_hit);
 
@@ -653,7 +645,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (_gridContainer.lockedSpots.Values.Contains(_item.Serial))
                     {
-                        _gridContainer.lockedSpots.Remove(slot);
+                        _gridContainer.lockedSpots.Remove(_gridContainer.lockedSpots.First((x) => x.Value == _item.Serial).Key);
                         _gridContainer.RequestUpdateContents();
                     }
                 };
