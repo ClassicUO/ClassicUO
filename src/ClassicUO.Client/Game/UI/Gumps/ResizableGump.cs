@@ -36,7 +36,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    internal abstract class ResizableGump : Gump
+    internal abstract class ResizableGump : AnchorableGump
     {
         private readonly BorderControl _borderControl;
         private readonly Button _button;

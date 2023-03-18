@@ -79,6 +79,10 @@ namespace ClassicUO.Game.UI.Gumps
         public GridContainer(uint local, ushort ogContainer) : base(DEFAULT_WIDTH, DEFAULT_HEIGHT, DEFAULT_WIDTH, DEFAULT_HEIGHT, local, 0)
         {
             #region SET VARS
+            AnchorType = ANCHOR_TYPE.NONE;
+            GroupMatrixHeight = Height;
+            GroupMatrixWidth = Width;
+
             OgContainerGraphic = ogContainer;
             _container = World.Items.Get(local);
 
@@ -585,6 +589,8 @@ namespace ClassicUO.Game.UI.Gumps
                 _helpToolTip.X = Width - _helpToolTip.Width - _openRegularGump.Width - _quickDropBackpack.Width - BORDER_WIDTH;
                 _lastHeight = Height;
                 _lastWidth = Width;
+                GroupMatrixHeight = Height;
+                GroupMatrixWidth = Width;
                 RequestUpdateContents();
             }
 
