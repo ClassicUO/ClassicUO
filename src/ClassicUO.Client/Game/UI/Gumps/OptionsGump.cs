@@ -163,7 +163,7 @@ namespace ClassicUO.Game.UI.Gumps
         private HSliderBar _hiddenBodyAlpha;
         private ClickableColorBox _hiddenBodyHue;
         private ClickableColorBox _speechColorPickerBox, _emoteColorPickerBox, _yellColorPickerBox, _whisperColorPickerBox, _partyMessageColorPickerBox, _guildMessageColorPickerBox, _allyMessageColorPickerBox, _chatMessageColorPickerBox, _partyAuraColorPickerBox;
-        private InputField _spellFormatBox;
+        private InputField _spellFormatBox, _autoFollowDistance;
         private ClickableColorBox _tooltip_font_hue;
         private FontSelector _tooltip_font_selector;
         private HSliderBar _dragSelectStartX, _dragSelectStartY;
@@ -1386,6 +1386,23 @@ namespace ClassicUO.Game.UI.Gumps
             );
 
             section4.PopIndent();
+
+            Label autoFollowLabel;
+            section4.Add(
+                autoFollowLabel = AddLabel(null, "Auto Follow Distance", startX, startY)
+                );
+            section4.AddRight(
+                _autoFollowDistance = AddInputField(
+                    null,
+                    startX,
+                    startY,
+                    50,
+                    TEXTBOX_HEIGHT,
+                    numbersOnly: true,
+                    maxCharCount: 10
+                    )
+                );
+            _autoFollowDistance.SetText(_currentProfile.AutoFollowDistance.ToString());
 
 
             SettingsSection section5 = AddSettingsSection(box, "Terrain & Statics");
@@ -3831,6 +3848,9 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             _currentProfile.GridContainerSearchMode = _gridContainerSearchAlternative.SelectedIndex;
+
+            int val = int.Parse(_autoFollowDistance.Text);
+            _currentProfile.AutoFollowDistance = val < 1 ? 1 : val;
 
             _currentProfile.HighlightGameObjects = _highlightObjects.IsChecked;
             _currentProfile.ReduceFPSWhenInactive = _reduceFPSWhenInactive.IsChecked;
