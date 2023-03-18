@@ -30,6 +30,7 @@
 
 #endregion
 
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using Microsoft.Xna.Framework;
@@ -166,6 +167,7 @@ namespace ClassicUO.Game.UI.Gumps
             _borderControl.Height = Height;
             _button.X = Width - (_button.Width >> 0) + 2;
             _button.Y = Height - (_button.Height >> 0) + 2;
+            UIManager.AnchorManager.DetachControl(this);
         }
     }
 }
