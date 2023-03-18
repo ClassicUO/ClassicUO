@@ -78,7 +78,7 @@ namespace ClassicUO.Game.UI.Gumps
         private DataBox _databox;
         private HSliderBar _delay_before_display_tooltip, _tooltip_zoom, _tooltip_background_opacity;
         private Combobox _dragSelectModifierKey;
-        private Combobox _backpackStyle;
+        private Combobox _backpackStyle, _gridContainerSearchAlternative;
         private Checkbox _hueContainerGumps;
         private HSliderBar _containerOpacity;
 
@@ -3382,6 +3382,24 @@ namespace ClassicUO.Game.UI.Gumps
             startY += _altGridContainerBackgroundHue.Height + 2;
             startX = 5;
 
+            Label _gridSearchLabel = AddLabel(rightArea, "Grid Container Search Style", startX, startY);
+            startX = _gridSearchLabel.Width + 5;
+
+            _gridContainerSearchAlternative = AddCombobox(
+                rightArea,
+                new string[] {
+                    "Only show",
+                    "Highlight"
+                },
+            _currentProfile.GridContainerSearchMode,
+            startX,
+            startY,
+            200
+                );
+
+            startY += _gridContainerSearchAlternative.Height + 2;
+            startX = 5;
+
             text = AddLabel(rightArea, ResGumps.ContainerScale, startX, startY);
             startX += text.Width + 5;
 
@@ -3811,6 +3829,8 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Client.Game.SetRefreshRate(_sliderFPS.Value);
             }
+
+            _currentProfile.GridContainerSearchMode = _gridContainerSearchAlternative.SelectedIndex;
 
             _currentProfile.HighlightGameObjects = _highlightObjects.IsChecked;
             _currentProfile.ReduceFPSWhenInactive = _reduceFPSWhenInactive.IsChecked;

@@ -430,27 +430,30 @@ namespace ClassicUO.Game.UI.Gumps
             #region Filter contents via search box
             if (_searchBox.Text != "")
             {
-                List<Item> filteredContents = new List<Item>();
-                foreach (Item i in sortedContents)
+                if (ProfileManager.CurrentProfile.GridContainerSearchMode == 0) //Hide search mode
                 {
-                    if (i == null)
-                        continue;
-                    if (i.Name == null)
-                        continue;
+                    List<Item> filteredContents = new List<Item>();
+                    foreach (Item i in sortedContents)
+                    {
+                        if (i == null)
+                            continue;
+                        if (i.Name == null)
+                            continue;
 
-                    if (i.Name.ToLower().Contains(_searchBox.Text.ToLower()))
-                    {
-                        filteredContents.Add(i);
-                        continue;
+                        if (i.Name.ToLower().Contains(_searchBox.Text.ToLower()))
+                        {
+                            filteredContents.Add(i);
+                            continue;
+                        }
+                        if (World.OPL.TryGetNameAndData(i.Serial, out string name, out string data))
+                        {
+                            if (data != null)
+                                if (data.ToLower().Contains(_searchBox.Text.ToLower()))
+                                    filteredContents.Add(i);
+                        }
                     }
-                    if (World.OPL.TryGetNameAndData(i.Serial, out string name, out string data))
-                    {
-                        if (data != null)
-                            if (data.ToLower().Contains(_searchBox.Text.ToLower()))
-                                filteredContents.Add(i);
-                    }
+                    sortedContents = filteredContents;
                 }
-                sortedContents = filteredContents;
             }
             #endregion
 
@@ -490,7 +493,7 @@ namespace ClassicUO.Game.UI.Gumps
                 GridItem gridItem = new GridItem(it, GRID_ITEM_SIZE, _container, this, count);
 
                 if (lockedSpots.Values.Contains(it))
-                    gridItem.itemGridLocked = true;
+                    gridItem.ItemGridLocked = true;
 
                 if (x + GRID_ITEM_SIZE + X_SPACING >= _scrollArea.Width - 14) //14 is the scroll bar width
                 {
@@ -498,6 +501,20 @@ namespace ClassicUO.Game.UI.Gumps
                     ++line;
 
                     y += gridItem.Height + Y_SPACING;
+                }
+
+                if (ProfileManager.CurrentProfile.GridContainerSearchMode == 1 && _searchBox.Text.Length > 0)
+                {
+                    if (it.Name != null && it.Name.ToLower().Contains(_searchBox.Text.ToLower()))
+                    {
+                        gridItem.Hightlight = true;
+                    }
+                    else if (World.OPL.TryGetNameAndData(it.Serial, out string name, out string data))
+                    {
+                        if (data != null)
+                            if (data.ToLower().Contains(_searchBox.Text.ToLower()))
+                                gridItem.Hightlight = true;
+                    }
                 }
 
                 gridItem.X = x + X_SPACING;
@@ -586,29 +603,30 @@ namespace ClassicUO.Game.UI.Gumps
         {
             private readonly HitBox _hit;
             private bool mousePressedWhenEntered = false;
-            private readonly Item _item;
+            private readonly Item _item, _container;
             private readonly GridContainer _gridContainer;
-            private readonly Item _container;
-            public bool itemGridLocked = false;
+            public bool ItemGridLocked = false;
             private readonly int slot;
             private GridContainerPreview _preview;
             private GumpPic _lockIcon;
+            public bool Hightlight = false;
 
             public GridItem(uint serial, int size, Item container, GridContainer gridContainer, int count)
             {
+                #region VARS
                 slot = count;
                 _container = container;
                 _gridContainer = gridContainer;
-                Point startDrag = new Point(0, 0);
                 LocalSerial = serial;
                 _item = World.Items.Get(serial);
+                CanMove = false;
+                WantUpdateSize = false;
+                #endregion
 
                 if (_item == null)
                 {
                     return;
                 }
-
-                CanMove = false;
 
                 AlphaBlendControl background = new AlphaBlendControl(0.25f);
                 background.Width = size;
@@ -650,11 +668,8 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 };
                 _lockIcon.Add(lockIconHit);
-                _lockIcon.IsVisible = itemGridLocked;
+                _lockIcon.IsVisible = ItemGridLocked;
                 Add(_lockIcon);
-
-
-                WantUpdateSize = false;
             }
 
             private void _hit_MouseDoubleClick(object sender, MouseDoubleClickEventArgs e)
@@ -697,7 +712,7 @@ namespace ClassicUO.Game.UI.Gumps
                         if (_gridContainer._dragSlotContainer == _container)
                         {
                             AddLockedItemSlot(_gridContainer._dragSlotItem, slot);
-                            itemGridLocked = true;
+                            ItemGridLocked = true;
                             _gridContainer.InvalidateContents = true;
                         }
                         _gridContainer._dragSlotEnabled = false;
@@ -776,7 +791,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
-                _lockIcon.IsVisible = itemGridLocked;
+                _lockIcon.IsVisible = ItemGridLocked;
 
                 base.Draw(batcher, x, y);
 
@@ -837,9 +852,15 @@ namespace ClassicUO.Game.UI.Gumps
 
                 hueVector = ShaderHueTranslator.GetHueVector(0);
 
+                Color borderColor = Color.Gray;
+                if (ItemGridLocked)
+                    borderColor = Color.Blue;
+                if (Hightlight)
+                    borderColor = Color.Yellow;
+
                 batcher.DrawRectangle
                 (
-                    SolidColorTextureCache.GetTexture(itemGridLocked ? Color.Blue : Color.Gray),
+                    SolidColorTextureCache.GetTexture(borderColor),
                     x,
                     y,
                     Width,
