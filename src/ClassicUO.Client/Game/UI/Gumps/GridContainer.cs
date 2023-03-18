@@ -277,7 +277,8 @@ namespace ClassicUO.Game.UI.Gumps
                     GameActions.DropItem(Client.Game.GameCursor.ItemHold.Serial, 0xFFFF, 0xFFFF, 0, _container.Serial);
                     InvalidateContents = true;
                     UpdateContents();
-                } else if (TargetManager.IsTargeting)
+                }
+                else if (TargetManager.IsTargeting)
                 {
                     TargetManager.Target(_container.Serial);
                 }
@@ -411,7 +412,7 @@ namespace ClassicUO.Game.UI.Gumps
             int line = 1;
             #endregion
 
-            //Remove preview items from view
+            //Remove previous items from view
             foreach (Control child in _scrollArea.Children)
                 if (child is GridItem)
                     child.Dispose();
@@ -460,21 +461,32 @@ namespace ClassicUO.Game.UI.Gumps
             #endregion
 
             #region Sort Locked Slots
+            Dictionary<int, Item> addAfter = new Dictionary<int, Item>();
+            int sortedCount = sortedContents.Count;
             foreach (var spot in lockedSpots.OrderBy((x) => x.Key))
             {
                 Item item = World.Items.Get(spot.Value);
                 if (item == null) //Locked item doesn't appear to exist in the client, ignoring it
                     continue;
                 int index = sortedContents.IndexOf(item);
-                if (index != -1) //The item is in the container
+                if (index != -1) //The item exists
                 {
-                    if (spot.Key < sortedContents.Count) //The items locked spot is less than the container count, can't lock an item in a spot that doesn't exist
+                    if (spot.Key < sortedCount) //The items locked spot is less than the container count, can't lock an item in a spot that doesn't exist
                     {
-                        Item moveItem = sortedContents[index];
                         sortedContents.RemoveAt(index);
-                        sortedContents.Insert(spot.Key, moveItem);
+                        addAfter.Add(spot.Key, item);
+                    }
+                    else //If the locked slot doesn't exist(ex: 5 items in the container, this item was locked at slot 7), add to the end of the list
+                    {
+                        sortedContents.RemoveAt(index);
+                        sortedContents.Add(item);
                     }
                 }
+            }
+
+            foreach(var item in addAfter)
+            {
+                sortedContents.Insert(item.Key, item.Value);
             }
             #endregion
 
@@ -531,9 +543,6 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             base.Draw(batcher, x, y);
-
-            //Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
-
             return true;
         }
 
@@ -604,8 +613,6 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (_item == null)
                 {
-                    Dispose();
-
                     return;
                 }
 
@@ -627,6 +634,14 @@ namespace ClassicUO.Game.UI.Gumps
                     Add(_count);
                 }
 
+                #region REMOVE ME
+                Label _slot = new Label(slot.ToString(), true, 32, align: TEXT_ALIGN_TYPE.TS_LEFT, maxwidth: size);
+                _slot.X = 1;
+                _slot.Y = 1; ;
+
+                Add(_slot);
+                #endregion
+
                 _hit = new HitBox(0, 0, size, size, null, 0f);
                 Add(_hit);
 
@@ -647,7 +662,6 @@ namespace ClassicUO.Game.UI.Gumps
                     if (_gridContainer.lockedSpots.Values.Contains(_item.Serial))
                     {
                         _gridContainer.lockedSpots.Remove(slot);
-                        itemGridLocked = false;
                         _gridContainer.RequestUpdateContents();
                     }
                 };
@@ -689,8 +703,7 @@ namespace ClassicUO.Game.UI.Gumps
                 if (_gridContainer.lockedSpots.ContainsKey(specificSlot)) //Is the slot they wanted this item in already taken? Lets remove that item
                     _gridContainer.lockedSpots.Remove(specificSlot);
                 _gridContainer.lockedSpots.Add(specificSlot, item.Serial); //Now we add this item at the desired slot
-                itemGridLocked = true;
-                _gridContainer.InvalidateContents = true; //Let the client know the contents have been changed so it can redraw them.
+                _gridContainer.RequestUpdateContents(); //Let the client know the contents have been changed so it can redraw them.
             }
 
             private void _hit_MouseUp(object sender, MouseEventArgs e)
