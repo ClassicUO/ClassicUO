@@ -31,7 +31,12 @@ This also has an improved journal!
 
 ![image](https://user-images.githubusercontent.com/3859393/225307385-c8e8014f-9b84-4fe4-a2cd-f33fbeee9563.png)
 
+![image](https://user-images.githubusercontent.com/3859393/226114408-28c6556d-6ba8-43c7-bf1a-079342aaeacd.png)
 
+![image](https://user-images.githubusercontent.com/3859393/226114417-e68b1653-f719-49b3-b799-0beb07e0a211.png)
+
+
+Original CUO Readme:
 ------------------------------------------------------------------
 
 An open source implementation of the Ultima Online Classic Client.
