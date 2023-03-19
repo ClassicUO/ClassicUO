@@ -32,8 +32,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text;
 using System.Xml;
+using System.Xml.Linq;
 using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
@@ -74,11 +77,20 @@ namespace ClassicUO.Game.UI.Gumps
         /// <summary>
         /// Grid position, Item serial
         /// </summary>
-        private Dictionary<int, uint> lockedSpots = new Dictionary<int, uint>();
+        private Dictionary<int, uint> lockedSpots;
+
+        private static GridSaveSystem gridSaveSystem = new GridSaveSystem();
 
         public GridContainer(uint local, ushort ogContainer) : base(DEFAULT_WIDTH, DEFAULT_HEIGHT, DEFAULT_WIDTH, DEFAULT_HEIGHT, local, 0)
         {
             #region SET VARS
+            lockedSpots = gridSaveSystem.GetItemSlots(LocalSerial);
+            Point savedSize = gridSaveSystem.GetLastSize(LocalSerial);
+            _lastWidth = Width = savedSize.X;
+            _lastHeight = Height = savedSize.Y;
+            Point lastPos = gridSaveSystem.GetLastPosition(LocalSerial);
+            _lastX = X = lastPos.X;
+            _lastY = Y = lastPos.Y;
             AnchorType = ANCHOR_TYPE.NONE;
 
             OgContainerGraphic = ogContainer;
@@ -220,6 +232,9 @@ namespace ClassicUO.Game.UI.Gumps
         public override void Save(XmlTextWriter writer)
         {
             base.Save(writer);
+
+            gridSaveSystem.SaveContainer(LocalSerial, lockedSpots, Width, Height, X, Y);
+
             writer.WriteAttributeString("ogContainer", OgContainerGraphic.ToString());
             writer.WriteAttributeString("width", Width.ToString());
             writer.WriteAttributeString("height", Height.ToString());
@@ -240,20 +255,6 @@ namespace ClassicUO.Game.UI.Gumps
             int rW = int.Parse(xml.GetAttribute("width"));
             int rH = int.Parse(xml.GetAttribute("height"));
 
-            int lockedCount = int.Parse(xml.GetAttribute("lockedCount"));
-            if (lockedCount > 0)
-                for (int i = 0; i < lockedCount; i++)
-                {
-                    int key;
-                    if (int.TryParse(xml.GetAttribute($"key{i}"), out key))
-                    {
-                        uint serial;
-                        if (uint.TryParse(xml.GetAttribute($"serial{i}"), out serial))
-                        {
-                            lockedSpots.Add(key, serial);
-                        }
-                    }
-                }
             ResizeWindow(new Point(rW, rH));
             InvalidateContents = true;
         }
@@ -389,6 +390,7 @@ namespace ClassicUO.Game.UI.Gumps
                 };
             }
         }
+
         private void OpenOldContainer(uint serial)
         {
             ContainerGump container = GetOriginalContainerGump(serial);
@@ -543,6 +545,9 @@ namespace ClassicUO.Game.UI.Gumps
         {
             _lastX = X;
             _lastY = Y;
+
+            if (lockedSpots.Count > 0)
+                gridSaveSystem.SaveContainer(LocalSerial, lockedSpots, Width, Height, X, Y);
 
             base.Dispose();
         }
@@ -1189,6 +1194,183 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
                 base.Update();
+            }
+        }
+
+        private class GridSaveSystem
+        {
+            /// <summary>
+            /// Time cutoff in seconds
+            /// 60*60 = 1 hour
+            ///      * 24 = 1 day
+            ///          * 60 = ~2 month
+            /// </summary>
+            private const long TIME_CUTOFF = ((60 * 60) * 24)*60;
+            private string gridSavePath = Path.Combine(ProfileManager.ProfilePath, "GridContainers.xml");
+            private XDocument saveDocument;
+            private XElement rootElement;
+            private bool enabled = false;
+
+            public GridSaveSystem()
+            {
+                if (!SaveFileCheck())
+                {
+                    enabled = false;
+                    return;
+                }
+
+                try
+                {
+                    saveDocument = XDocument.Load(gridSavePath);
+                }
+                catch
+                {
+                    saveDocument = new XDocument();
+                }
+
+                rootElement = saveDocument.Element("grid_gumps");
+                if (rootElement == null)
+                {
+                    saveDocument.Add(new XElement("grid_gumps"));
+                    rootElement = saveDocument.Root;
+                }
+                enabled = true;
+            }
+
+            public bool SaveContainer(uint serial, Dictionary<int, uint> lockedSpots, int width, int height, int lastX = 100, int lastY = 100)
+            {
+                if (!enabled)
+                    return false;
+
+                XElement thisContainer = rootElement.Element("container_" + serial.ToString());
+                if (thisContainer == null)
+                {
+                    thisContainer = new XElement("container_" + serial.ToString());
+                    rootElement.Add(thisContainer);
+                }
+                else
+                    thisContainer.RemoveNodes();
+
+                thisContainer.SetAttributeValue("last_opened", DateTimeOffset.Now.ToUnixTimeSeconds().ToString());
+                thisContainer.SetAttributeValue("width", width.ToString());
+                thisContainer.SetAttributeValue("height", height.ToString());
+                thisContainer.SetAttributeValue("lastX", lastX.ToString());
+                thisContainer.SetAttributeValue("lastY", lastY.ToString());
+
+                foreach (var slot in lockedSpots)
+                {
+                    XElement item_slot = new XElement("item");
+                    item_slot.SetAttributeValue("serial", slot.Value.ToString());
+                    item_slot.SetAttributeValue("slot", slot.Key.ToString());
+                    thisContainer.Add(item_slot);
+                }
+                RemoveOldContainers();
+
+                saveDocument.Save(gridSavePath);
+
+                return true;
+            }
+
+            public Dictionary<int, uint> GetItemSlots(uint container)
+            {
+                Dictionary<int, uint> itemSlots = new Dictionary<int, uint>();
+
+                XElement thisContainer = rootElement.Element("container_" + container.ToString());
+                if (thisContainer != null)
+                {
+                    foreach (XElement itemSlot in thisContainer.Elements("item"))
+                    {
+                        XAttribute slot, serial;
+                        slot = itemSlot.Attribute("slot");
+                        serial = itemSlot.Attribute("serial");
+                        if (slot != null && serial != null)
+                        {
+                            int slotV;
+                            uint serialV;
+
+                            if (int.TryParse(slot.Value, out slotV))
+                                if (uint.TryParse(serial.Value, out serialV))
+                                    itemSlots.Add(slotV, serialV);
+                        }
+                    }
+                }
+
+                return itemSlots;
+            }
+
+            public Point GetLastSize(uint container)
+            {
+                Point lastSize = new Point(GridContainer.DEFAULT_WIDTH, GridContainer.DEFAULT_HEIGHT);
+
+                XElement thisContainer = rootElement.Element("container_" + container.ToString());
+                if (thisContainer != null)
+                {
+                    XAttribute width, height;
+                    width = thisContainer.Attribute("width");
+                    height = thisContainer.Attribute("height");
+                    if (width != null && height != null)
+                    {
+                        int.TryParse(width.Value, out lastSize.X);
+                        int.TryParse(height.Value, out lastSize.Y);
+                    }
+                }
+
+                return lastSize;
+            }
+
+            public Point GetLastPosition(uint container)
+            {
+                Point LastPos = new Point(100, 100);
+
+                XElement thisContainer = rootElement.Element("container_" + container.ToString());
+                if (thisContainer != null)
+                {
+                    XAttribute lastX, lastY;
+                    lastX = thisContainer.Attribute("lastX");
+                    lastY = thisContainer.Attribute("lastY");
+                    if (lastX != null && lastY != null)
+                    {
+                        int.TryParse(lastX.Value, out LastPos.X);
+                        int.TryParse(lastY.Value, out LastPos.Y);
+                    }
+                }
+
+                return LastPos;
+            }
+
+            private void RemoveOldContainers()
+            {
+                long cutOffTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds() - TIME_CUTOFF;
+                List<XElement> removeMe = new List<XElement>();
+                foreach(XElement container in rootElement.Elements())
+                {
+                    XAttribute lastOpened = container.Attribute("last_opened");
+                    if(lastOpened != null)
+                    {
+                        long lo = cutOffTime;
+                        long.TryParse(lastOpened.Value, out lo);
+
+                        if(lo < cutOffTime)
+                            removeMe.Add(container);
+                    }
+                }
+                foreach(XElement container in removeMe)
+                    container.Remove();
+            }
+
+            private bool SaveFileCheck()
+            {
+                try
+                {
+                    if (!File.Exists(gridSavePath))
+                        File.Create(gridSavePath);
+                }
+                catch
+                {
+                    Console.WriteLine("Could not create file: " + gridSavePath);
+                    return false;
+                }
+                return true;
             }
         }
     }
