@@ -5,6 +5,8 @@
 
 ------------------------------------------------------------------
 
+Join TazUO's discord for ideas/support/updates -> https://discord.gg/SqwtB5g95H
+
 This version of CUO adds grid containers to the regular CUO client
 
 Searchable
