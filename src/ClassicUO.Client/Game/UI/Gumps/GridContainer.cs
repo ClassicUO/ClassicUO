@@ -155,8 +155,7 @@ namespace ClassicUO.Game.UI.Gumps
                     if (Client.Game.GameCursor.ItemHold.Enabled)
                     {
                         GameActions.DropItem(Client.Game.GameCursor.ItemHold.Serial, 0xFFFF, 0xFFFF, 0, World.Player.FindItemByLayer(Layer.Backpack));
-                        InvalidateContents = true;
-                        UpdateContents();
+                        RequestUpdateContents();
                     }
                 }
                 else if (e.Button == MouseButtonType.Right)
@@ -242,7 +241,7 @@ namespace ClassicUO.Game.UI.Gumps
             int rH = int.Parse(xml.GetAttribute("height"));
 
             int lockedCount = int.Parse(xml.GetAttribute("lockedCount"));
-            if(lockedCount > 0)
+            if (lockedCount > 0)
                 for (int i = 0; i < lockedCount; i++)
                 {
                     int key;
@@ -561,16 +560,26 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Update()
         {
-            if (_container == null || _container.IsDestroyed || _container.OnGround && _container.Distance > 3)
+            base.Update();
+
+            if (IsDisposed)
+                return;
+
+
+            if (_container == null || _container.IsDestroyed)
             {
                 Dispose();
                 return;
             }
 
-            if (IsDisposed)
-                return;
-
-            base.Update();
+            if (_container.IsCorpse)
+            {
+                if (_container.Distance > 3)
+                {
+                    Dispose();
+                    return;
+                }
+            }
 
             if ((_lastWidth != Width || _lastHeight != Height) || _lastGridItemScale != UIManager.ContainerScale)
             {
@@ -625,6 +634,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (_item == null)
                 {
+                    Dispose();
                     return;
                 }
 
