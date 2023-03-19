@@ -46,8 +46,6 @@ namespace ClassicUO.Game.UI.Gumps
         public ResizableJournal() : base(_lastWidth, _lastHeight, MIN_WIDTH, MIN_HEIGHT, 0, 0)
         {
             AnchorType = ANCHOR_TYPE.NONE;
-            GroupMatrixHeight = Height;
-            GroupMatrixWidth = Width;
             CanMove = true;
             AcceptMouseInput = true;
             WantUpdateSize = true;
@@ -198,8 +196,6 @@ namespace ClassicUO.Game.UI.Gumps
                 _journalArea.Height = Height - (BORDER_WIDTH * 2) - TAB_HEIGHT;
                 _scrollBarBase.Height = Height - (BORDER_WIDTH * 2) - TAB_HEIGHT;
                 ProfileManager.CurrentProfile.ResizeJournalSize = new Point(Width, Height);
-                GroupMatrixHeight = Height;
-                GroupMatrixWidth = Width;
             }
         }
 

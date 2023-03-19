@@ -709,6 +709,16 @@ namespace ClassicUO.Configuration
                                         gump = new MacroButtonGump();
 
                                         break;
+                                    case GumpType.GridContainer:
+                                        ushort ogContainer = ushort.Parse(xml.GetAttribute("ogContainer"));
+                                        gump = new GridContainer(serial, ogContainer);
+                                        break;
+                                    case GumpType.Journal:
+                                        gump = new ResizableJournal();
+                                        break;
+                                    case GumpType.WorldMap:
+                                        gump = new WorldMapGump();
+                                        break;
                                 }
 
                                 if (gump != null)

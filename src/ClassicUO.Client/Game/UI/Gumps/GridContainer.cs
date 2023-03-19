@@ -80,8 +80,6 @@ namespace ClassicUO.Game.UI.Gumps
         {
             #region SET VARS
             AnchorType = ANCHOR_TYPE.NONE;
-            GroupMatrixHeight = Height;
-            GroupMatrixWidth = Width;
 
             OgContainerGraphic = ogContainer;
             _container = World.Items.Get(local);
@@ -226,17 +224,15 @@ namespace ClassicUO.Game.UI.Gumps
             writer.WriteAttributeString("ogContainer", OgContainerGraphic.ToString());
             writer.WriteAttributeString("width", Width.ToString());
             writer.WriteAttributeString("height", Height.ToString());
+            writer.WriteAttributeString("lockedCount", lockedSpots.Count.ToString());
 
-            writer.WriteStartElement("lockedSlots");
+            int i = 0; //Ugly way of doing this, but if it works it works
             foreach (var slot in lockedSpots)
             {
-                writer.WriteStartElement("lockedSlot");
-                writer.WriteAttributeString("key", slot.Key.ToString());
-                writer.WriteAttributeString("serial", slot.Value.ToString());
-                writer.WriteEndElement();
+                writer.WriteAttributeString($"key{i}", slot.Key.ToString());
+                writer.WriteAttributeString($"serial{i}", slot.Value.ToString());
+                i++;
             }
-            writer.WriteEndElement();
-
         }
 
         public override void Restore(XmlElement xml)
@@ -245,18 +241,20 @@ namespace ClassicUO.Game.UI.Gumps
             int rW = int.Parse(xml.GetAttribute("width"));
             int rH = int.Parse(xml.GetAttribute("height"));
 
-            foreach (XmlElement ele in xml["lockedSlots"])
-            {
-                int key;
-                if (int.TryParse(ele.GetAttribute("key"), out key))
+            int lockedCount = int.Parse(xml.GetAttribute("lockedCount"));
+            if(lockedCount > 0)
+                for (int i = 0; i < lockedCount; i++)
                 {
-                    uint serial;
-                    if (uint.TryParse(ele.GetAttribute("serial"), out serial))
+                    int key;
+                    if (int.TryParse(xml.GetAttribute($"key{i}"), out key))
                     {
-                        lockedSpots.Add(key, serial);
+                        uint serial;
+                        if (uint.TryParse(xml.GetAttribute($"serial{i}"), out serial))
+                        {
+                            lockedSpots.Add(key, serial);
+                        }
                     }
                 }
-            }
             ResizeWindow(new Point(rW, rH));
             InvalidateContents = true;
         }
@@ -570,9 +568,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             if (IsDisposed)
-            {
                 return;
-            }
 
             base.Update();
 
@@ -589,8 +585,6 @@ namespace ClassicUO.Game.UI.Gumps
                 _helpToolTip.X = Width - _helpToolTip.Width - _openRegularGump.Width - _quickDropBackpack.Width - BORDER_WIDTH;
                 _lastHeight = Height;
                 _lastWidth = Width;
-                GroupMatrixHeight = Height;
-                GroupMatrixWidth = Width;
                 RequestUpdateContents();
             }
 
