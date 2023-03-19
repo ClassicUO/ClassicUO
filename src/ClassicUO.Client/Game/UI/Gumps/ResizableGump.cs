@@ -36,7 +36,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    internal abstract class ResizableGump : Gump
+    internal abstract class ResizableGump : AnchorableGump
     {
         private readonly BorderControl _borderControl;
         private readonly Button _button;
@@ -85,6 +85,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             Width = _lastSize.X = width;
             Height = _lastSize.Y = height;
+            GroupMatrixHeight = Height;
+            GroupMatrixWidth = Width;
             _savedSize = _lastSize;
 
             _minW = minW;
@@ -147,6 +149,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _lastSize.X = w;
                 _lastSize.Y = h;
+                GroupMatrixHeight = Height;
+                GroupMatrixWidth = Width;
             }
 
             if (Width != _lastSize.X || Height != _lastSize.Y)
@@ -166,6 +170,8 @@ namespace ClassicUO.Game.UI.Gumps
             _borderControl.Height = Height;
             _button.X = Width - (_button.Width >> 0) + 2;
             _button.Y = Height - (_button.Height >> 0) + 2;
+            GroupMatrixHeight = Height;
+            GroupMatrixWidth = Width;
         }
     }
 }

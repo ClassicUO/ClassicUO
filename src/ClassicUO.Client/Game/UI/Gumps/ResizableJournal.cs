@@ -45,6 +45,7 @@ namespace ClassicUO.Game.UI.Gumps
         #endregion
         public ResizableJournal() : base(_lastWidth, _lastHeight, MIN_WIDTH, MIN_HEIGHT, 0, 0)
         {
+            AnchorType = ANCHOR_TYPE.NONE;
             CanMove = true;
             AcceptMouseInput = true;
             WantUpdateSize = true;
