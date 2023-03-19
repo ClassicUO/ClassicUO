@@ -30,12 +30,9 @@
 
 #endregion
 
-using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using Microsoft.Xna.Framework;
-using System;
-using static ClassicUO.Game.Managers.AnchorManager;
 
 namespace ClassicUO.Game.UI.Gumps
 {
