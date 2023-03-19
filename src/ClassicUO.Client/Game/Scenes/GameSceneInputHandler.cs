@@ -1049,11 +1049,6 @@ namespace ClassicUO.Game.Scenes
                             BaseHealthBarGump customgump = UIManager.GetGump<BaseHealthBarGump>(obj);
                             customgump?.Dispose();
 
-                            if (obj == World.Player)
-                            {
-                                StatusGumpBase.GetStatusGump()?.Dispose();
-                            }
-
                             if (ProfileManager.CurrentProfile.CustomBarsToggled)
                             {
                                 Rectangle rect = new Rectangle(0, 0, HealthBarGumpCustom.HPB_WIDTH, HealthBarGumpCustom.HPB_HEIGHT_SINGLELINE);
