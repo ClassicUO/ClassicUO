@@ -31,6 +31,7 @@
 #endregion
 
 using System;
+using ClassicUO.Configuration;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Resources;
@@ -66,6 +67,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             LayerOrder = UILayer.Over;
 
+            Checkbox stayActive;
             RadioButton all, mobiles, items, mobilesCorpses;
             AlphaBlendControl alpha;
 
@@ -77,6 +79,20 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             );
 
+            Add
+            (
+                stayActive = new Checkbox
+                (
+                    0x00D2,
+                    0x00D3,
+                    "Stay active",
+                    color: 0xFFFF
+                )
+                {
+                    IsChecked = ProfileManager.CurrentProfile.NameOverheadToggled,
+                }
+            );
+            stayActive.ValueChanged += (sender, e) => { ProfileManager.CurrentProfile.NameOverheadToggled = stayActive.IsChecked; };
 
             Add
             (
@@ -89,6 +105,7 @@ namespace ClassicUO.Game.UI.Gumps
                     color: 0xFFFF
                 )
                 {
+                    Y = stayActive.Height + stayActive.Y,
                     IsChecked = NameOverHeadManager.TypeAllowed == NameOverheadTypeAllowed.All
                 }
             );
@@ -142,7 +159,7 @@ namespace ClassicUO.Game.UI.Gumps
             );
 
             alpha.Width = Math.Max(mobilesCorpses.Width, Math.Max(items.Width, Math.Max(all.Width, mobiles.Width)));
-            alpha.Height = all.Height + mobiles.Height + items.Height + mobilesCorpses.Height;
+            alpha.Height = stayActive.Height + all.Height + mobiles.Height + items.Height + mobilesCorpses.Height;
 
             Width = alpha.Width;
             Height = alpha.Height;

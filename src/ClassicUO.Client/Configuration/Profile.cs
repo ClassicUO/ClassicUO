@@ -321,6 +321,7 @@ namespace ClassicUO.Configuration
         public Point ResizeJournalSize { get; set; } = new Point(410, 350);
         public bool FollowingMode { get; set; } = false;
         public uint FollowingTarget { get; set; }
+        public bool NamePlateHealthBar { get; set; } = true;
 
         public static uint GumpsVersion { get; private set; }
 
