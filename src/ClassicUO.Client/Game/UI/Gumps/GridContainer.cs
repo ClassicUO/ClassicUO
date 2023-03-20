@@ -191,7 +191,7 @@ namespace ClassicUO.Game.UI.Gumps
                 );
 
             //_searchBox.Width = Math.Min(Width - (BORDER_WIDTH * 2) - _openRegularGump.Width - _quickDropBackpack.Width - _helpToolTip.Width, 150);
-            
+
             #endregion
 
             #region Scroll Area
@@ -659,32 +659,29 @@ namespace ClassicUO.Game.UI.Gumps
                 WantUpdateSize = false;
                 #endregion
 
-                if (_item == null)
-                {
-                    Dispose();
-                    return;
-                }
-
                 AlphaBlendControl background = new AlphaBlendControl(0.25f);
                 background.Width = size;
                 background.Height = size;
                 Width = Height = size;
                 Add(background);
 
-                int itemAmt = (_item.ItemData.IsStackable ? _item.Amount : 1);
-                if (itemAmt > 1)
-                {
-                    Label _count = new Label(itemAmt.ToString(), true, 0x0481, align: TEXT_ALIGN_TYPE.TS_LEFT, maxwidth: size);
-                    _count.X = 1;
-                    _count.Y = size - _count.Height;
-
-                    Add(_count);
-                }
-
                 _hit = new HitBox(0, 0, size, size, null, 0f);
                 Add(_hit);
 
-                _hit.SetTooltip(_item);
+                if (_item != null)
+                {
+                    int itemAmt = (_item.ItemData.IsStackable ? _item.Amount : 1);
+                    if (itemAmt > 1)
+                    {
+                        Label _count = new Label(itemAmt.ToString(), true, 0x0481, align: TEXT_ALIGN_TYPE.TS_LEFT, maxwidth: size);
+                        _count.X = 1;
+                        _count.Y = size - _count.Height;
+
+                        Add(_count);
+                    }
+                    _hit.SetTooltip(_item);
+                }
+
 
                 _hit.MouseEnter += _hit_MouseEnter;
                 _hit.MouseExit += _hit_MouseExit;
@@ -698,11 +695,12 @@ namespace ClassicUO.Game.UI.Gumps
                 HitBox lockIconHit = new HitBox(0, 0, _lockIcon.Width, _lockIcon.Height, "Unlock this slot");
                 lockIconHit.MouseUp += (o, e) =>
                 {
-                    if (_gridContainer.lockedSpots.Values.Contains(_item.Serial))
-                    {
-                        _gridContainer.lockedSpots.Remove(_gridContainer.lockedSpots.First((x) => x.Value == _item.Serial).Key);
-                        _gridContainer.RequestUpdateContents();
-                    }
+                    if (_item != null)
+                        if (_gridContainer.lockedSpots.Values.Contains(_item.Serial))
+                        {
+                            _gridContainer.lockedSpots.Remove(_gridContainer.lockedSpots.First((x) => x.Value == _item.Serial).Key);
+                            _gridContainer.RequestUpdateContents();
+                        }
                 };
                 _lockIcon.Add(lockIconHit);
                 _lockIcon.IsVisible = ItemGridLocked;
@@ -711,7 +709,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             private void _hit_MouseDoubleClick(object sender, MouseDoubleClickEventArgs e)
             {
-                if (e.Button != MouseButtonType.Left || TargetManager.IsTargeting)
+                if (e.Button != MouseButtonType.Left || TargetManager.IsTargeting || _item == null)
                 {
                     return;
                 }
@@ -754,7 +752,7 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                         _gridContainer._dragSlotEnabled = false;
                     }
-                    else if (Keyboard.Ctrl)
+                    else if (Keyboard.Ctrl && _item != null)
                     {
                         _gridContainer._dragSlotContainer = _container;
                         _gridContainer._dragSlotItem = _item;
@@ -781,9 +779,12 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                     else if (TargetManager.IsTargeting)
                     {
-                        TargetManager.Target(_item);
+                        if (_item != null)
+                            TargetManager.Target(_item);
+                        else
+                            TargetManager.Target(_container);
                     }
-                    else
+                    else if(_item != null)
                     {
                         Point offset = Mouse.LDragOffset;
                         if (Math.Abs(offset.X) < Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS && Math.Abs(offset.Y) < Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS)
@@ -796,7 +797,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             private void _hit_MouseExit(object sender, MouseEventArgs e)
             {
-                if (Mouse.LButtonPressed && !mousePressedWhenEntered)
+                if (Mouse.LButtonPressed && !mousePressedWhenEntered && _item != null)
                 {
                     Point offset = Mouse.LDragOffset;
                     if (Math.Abs(offset.X) >= Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS || Math.Abs(offset.Y) >= Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS)
@@ -1227,7 +1228,7 @@ namespace ClassicUO.Game.UI.Gumps
             ///      * 24 = 1 day
             ///          * 60 = ~2 month
             /// </summary>
-            private const long TIME_CUTOFF = ((60 * 60) * 24)*60;
+            private const long TIME_CUTOFF = ((60 * 60) * 24) * 60;
             private string gridSavePath = Path.Combine(ProfileManager.ProfilePath, "GridContainers.xml");
             private XDocument saveDocument;
             private XElement rootElement;
@@ -1364,19 +1365,19 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 long cutOffTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds() - TIME_CUTOFF;
                 List<XElement> removeMe = new List<XElement>();
-                foreach(XElement container in rootElement.Elements())
+                foreach (XElement container in rootElement.Elements())
                 {
                     XAttribute lastOpened = container.Attribute("last_opened");
-                    if(lastOpened != null)
+                    if (lastOpened != null)
                     {
                         long lo = cutOffTime;
                         long.TryParse(lastOpened.Value, out lo);
 
-                        if(lo < cutOffTime)
+                        if (lo < cutOffTime)
                             removeMe.Add(container);
                     }
                 }
-                foreach(XElement container in removeMe)
+                foreach (XElement container in removeMe)
                     container.Remove();
             }
 
