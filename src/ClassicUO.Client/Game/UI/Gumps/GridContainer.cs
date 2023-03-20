@@ -550,6 +550,26 @@ namespace ClassicUO.Game.UI.Gumps
             }
             #endregion
 
+            #region Add dummy slots
+            int remaining = 125 - sortedContents.Count;
+            for (int i = 0; i < remaining; i++)
+            {
+                GridItem dummy = new GridItem(0, GRID_ITEM_SIZE, _container, this, 1);
+                if (x + GRID_ITEM_SIZE + X_SPACING >= _scrollArea.Width - 14) //14 is the scroll bar width
+                {
+                    x = X_SPACING;
+                    ++line;
+
+                    y += dummy.Height + Y_SPACING;
+                }
+                dummy.X = x + X_SPACING;
+                dummy.Y = y;
+                _scrollArea.Add(dummy);
+
+                x += dummy.Width + X_SPACING;
+            }
+            #endregion
+
             InvalidateContents = false;
         }
 
