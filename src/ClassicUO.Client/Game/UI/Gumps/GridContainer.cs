@@ -425,7 +425,19 @@ namespace ClassicUO.Game.UI.Gumps
             List<Item> contents = new List<Item>();
             for (LinkedObject i = _container.Items; i != null; i = i.Next)
             {
-                contents.Add((Item)i);
+                Item item = (Item)i;
+                var layer = (Layer)item.ItemData.Layer;
+
+                if (_container.IsCorpse && item.Layer > 0 && !Constants.BAD_CONTAINER_LAYERS[(int)layer])
+                {
+                    continue;
+                }
+                if (item.ItemData.IsWearable && (layer == Layer.Face || layer == Layer.Beard || layer == Layer.Hair))
+                {
+                    continue;
+                }
+
+                contents.Add(item);
             }
             List<Item> sortedContents = contents.OrderBy((x) => x.Graphic).ToList();
             #endregion
