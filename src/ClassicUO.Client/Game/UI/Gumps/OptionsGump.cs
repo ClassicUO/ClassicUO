@@ -167,7 +167,7 @@ namespace ClassicUO.Game.UI.Gumps
         private ClickableColorBox _tooltip_font_hue;
         private FontSelector _tooltip_font_selector;
         private HSliderBar _dragSelectStartX, _dragSelectStartY;
-        private Checkbox _dragSelectAsAnchor;
+        private Checkbox _dragSelectAsAnchor, _namePlateHealthBar;
         private HSliderBar _journalOpacity;
         private ClickableColorBox _journalBackgroundColor;
 
@@ -995,8 +995,11 @@ namespace ClassicUO.Game.UI.Gumps
             );
             section2.AddRight(AddLabel(null, "Hidden Body Hue", startX, startY));
 
-            section2.PopIndent();
-            section2.PopIndent();
+            section2.Add(
+                _namePlateHealthBar = AddCheckBox(null, "", _currentProfile.NamePlateHealthBar, startX, startY)
+                );
+
+            section2.AddRight(AddLabel(null, "Name plates also act as health bar", startX, startY));
 
             SettingsSection section3 = AddSettingsSection(box, "Gumps & Context");
             section3.Y = section2.Bounds.Bottom + 40;
@@ -3847,6 +3850,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Client.Game.SetRefreshRate(_sliderFPS.Value);
             }
 
+            _currentProfile.NamePlateHealthBar = _namePlateHealthBar.IsChecked;
             _currentProfile.GridContainerSearchMode = _gridContainerSearchAlternative.SelectedIndex;
 
             int val = int.Parse(_autoFollowDistance.Text);
