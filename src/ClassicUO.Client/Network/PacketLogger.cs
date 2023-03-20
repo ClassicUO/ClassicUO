@@ -6,16 +6,26 @@ namespace ClassicUO.Network
 {
     sealed class PacketLogger
     {
+        public static PacketLogger Default { get; set; } = new PacketLogger();
+
+
+
+        private LogFile _logFile;
+
+        public bool Enabled { get; set; }
+
+
+
         public LogFile CreateFile()
         {
-            return new LogFile(FileSystemHelper.CreateFolderIfNotExists(CUOEnviroment.ExecutablePath, "Logs", "Network"), "packets.log");
+            _logFile?.Dispose();
+            return _logFile = new LogFile(FileSystemHelper.CreateFolderIfNotExists(CUOEnviroment.ExecutablePath, "Logs", "Network"), "packets.log");
         }
 
         public void Log(Span<byte> message, bool toServer)
-            => Log(null, message, toServer);
-
-        public void Log(LogFile log, Span<byte> message, bool toServer)
         {
+            if (!Enabled) return;
+
             Span<char> span = stackalloc char[256];
             var output = new ValueStringBuilder(span);
             {
@@ -85,9 +95,9 @@ namespace ClassicUO.Network
 
                 var s = output.ToString();
 
-                if (log != null)
+                if (_logFile != null)
                 {
-                    log.Write(s);
+                    _logFile.Write(s);
                 }
                 else
                 {
