@@ -578,7 +578,7 @@ namespace ClassicUO.Game.UI.Gumps
                     );
 
                     x = (int) (m.RealScreenPosition.X + m.Offset.X + 22 + 5);
-                    y = (int) (m.RealScreenPosition.Y + (m.Offset.Y - m.Offset.Z) - (height + centerY + 8) + (m.IsGargoyle && m.IsFlying ? -22 : !m.IsMounted ? 22 : 0));
+                    y = (int) (m.RealScreenPosition.Y + (m.Offset.Y - m.Offset.Z) - (height + centerY + 15) + (m.IsGargoyle && m.IsFlying ? -22 : !m.IsMounted ? 22 : 0));
 
                 }
             }
