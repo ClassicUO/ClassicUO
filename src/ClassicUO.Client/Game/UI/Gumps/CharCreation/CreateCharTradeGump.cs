@@ -94,7 +94,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             (
                 new Label(ClilocLoader.Instance.GetString(3000326), unicode, hue, font: font)
                 {
-                    X = 148, Y = 132
+                    X = 158, Y = 132
                 }
             );
 
@@ -180,6 +180,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                                      s.Index != 47 && // Stealth
                                      s.Index != 48 && // RemoveTrap
                                      s.Index != 54 && // Spellweaving
+                                     s.Index != 19 &&  // Archaeology
                                      (character.Race == RaceType.GARGOYLE || s.Index != 57) // Throwing for gargoyle only
                                  )
 
@@ -331,7 +332,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
         private bool ValidateValues()
         {
-            if (_skillsCombobox.All(s => s.SelectedIndex >= 0))
+            if (_skillsCombobox.Where(s => s.SelectedIndex >= 0).ToList().Count >= 3)
             {
                 int duplicated = _skillsCombobox.GroupBy(o => o.SelectedIndex).Count(o => o.Count() > 1);
 

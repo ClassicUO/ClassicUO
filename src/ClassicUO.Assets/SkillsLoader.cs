@@ -86,6 +86,11 @@ namespace ClassicUO.Assets
                             bool hasAction = _file.ReadBool();
                             string name = Encoding.UTF8.GetString((byte*)_file.PositionAddress, entry.Length - 1).TrimEnd('\0');
 
+                            if (name.Contains("Evaluat"))
+                            {
+                                Console.WriteLine("WOW");
+                            }
+
                             Skills.Add(new SkillEntry(count++, name, hasAction));
                         }
                     }

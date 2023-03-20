@@ -37,6 +37,7 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.Assets;
+using ClassicUO.Game.Data;
 
 namespace ClassicUO.Game.UI.Gumps.CharCreation
 {
@@ -192,7 +193,47 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 }
             );
 
-            Add(new GumpPic(121, -12, info.Graphic, 0));
+            GumpPic pic = new GumpPic(121, -12, info.Graphic, 0);
+
+            Add(pic);
+
+            var templateSkills = "";
+
+            if (info.Name == "Advanced")
+            {
+                pic.SetTooltip("Create your own build.  Players can choose up to 150 skill points and 90 stat points.");
+            }
+            else
+            {
+                var totalSkills = (ushort)info.SkillDefVal[0, 1] + (ushort)info.SkillDefVal[1, 1] + (ushort)info.SkillDefVal[2, 1] + (ushort)info.SkillDefVal[3, 1];
+                var totalStats = info.StatsVal[0] + info.StatsVal[1] + info.StatsVal[2];
+
+                templateSkills += $"{AddPadding(SkillsLoader.Instance.Skills[info.SkillDefVal[0, 0]] + ": " + (ushort)info.SkillDefVal[0, 1], 20)}\n";
+                templateSkills += $"{AddPadding(SkillsLoader.Instance.Skills[info.SkillDefVal[1, 0]] + ": " + (ushort)info.SkillDefVal[1, 1], 20)}\n";
+                templateSkills += $"{AddPadding(SkillsLoader.Instance.Skills[info.SkillDefVal[2, 0]] + ": " + (ushort)info.SkillDefVal[2, 1], 20)}\n";
+                templateSkills += $"{AddPadding(SkillsLoader.Instance.Skills[info.SkillDefVal[3, 0]] + ": " + (ushort)info.SkillDefVal[3, 1], 20)}\n\n";
+                templateSkills += $"{AddPadding("STR: " + info.StatsVal[0], 13)}\n";
+                templateSkills += $"{AddPadding("DEX: " + info.StatsVal[2], 13)}\n";
+                templateSkills += $"{AddPadding("INT: " + info.StatsVal[1], 13)}\n\n";
+
+                templateSkills += $"{AddPadding("Total Skills: " + totalSkills, 13)}\n";
+                templateSkills += $"{AddPadding("Total Stats: " + totalStats, 13)}";
+
+                pic.SetTooltip(templateSkills);
+            }
+        }
+
+        public static string AddPadding(string s, int width)
+        {
+            if (s.Length >= width)
+            {
+                return s;
+            }
+
+            int leftPadding = (width - s.Length) / 2;
+            int rightPadding = width - s.Length - leftPadding;
+
+            return new string(' ', leftPadding) + s + new string(' ', rightPadding);
         }
 
         public Action<ProfessionInfo> Selected;

@@ -117,7 +117,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             (
                 _maleRadio = new Button((int)Buttons.MaleButton, 0x0768, 0x0767)
                 {
-                    X = 425, Y = 435, ButtonAction = ButtonAction.Activate
+                     X = 160, Y = 455, ButtonAction = ButtonAction.Activate
                 },
                 1
             );
@@ -135,7 +135,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             (
                 new Button((int) Buttons.MaleButton, 0x0710, 0x0712, 0x0711)
                 {
-                    X = 445, Y = 435, ButtonAction = ButtonAction.Activate
+                    X = 180, Y = 455, ButtonAction = ButtonAction.Activate
                 },
                 1
             );
@@ -167,63 +167,63 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 1
             );
 
-            // Races
-            Add
-            (
-                _humanRadio = new Button((int)Buttons.HumanButton, 0x0768, 0x0767)
-                {
-                    X = 180, Y = 435, ButtonAction = ButtonAction.Activate
-                },
-                1
-            );
+            //// Races
+            //Add
+            //(
+            //    _humanRadio = new Button((int)Buttons.HumanButton, 0x0768, 0x0767)
+            //    {
+            //        X = 180, Y = 435, ButtonAction = ButtonAction.Activate
+            //    },
+            //    1
+            //);
 
-            Add
-            (
-                new Button((int) Buttons.HumanButton, 0x0702, 0x0704, 0x0703)
-                {
-                    X = 200, Y = 435, ButtonAction = ButtonAction.Activate
-                },
-                1
-            );
+            //Add
+            //(
+            //    new Button((int) Buttons.HumanButton, 0x0702, 0x0704, 0x0703)
+            //    {
+            //        X = 200, Y = 435, ButtonAction = ButtonAction.Activate
+            //    },
+            //    1
+            //);
 
-            Add
-            (
-                _elfRadio = new Button((int)Buttons.ElfButton, 0x0768, 0x0767, 0x0768)
-                {
-                    X = 180, Y = 455, ButtonAction = ButtonAction.Activate
-                },
-                1
-            );
+            //Add
+            //(
+            //    _elfRadio = new Button((int)Buttons.ElfButton, 0x0768, 0x0767, 0x0768)
+            //    {
+            //        X = 180, Y = 455, ButtonAction = ButtonAction.Activate
+            //    },
+            //    1
+            //);
 
-            Add
-            (
-                new Button((int) Buttons.ElfButton, 0x0705, 0x0707, 0x0706)
-                {
-                    X = 200, Y = 455, ButtonAction = ButtonAction.Activate
-                },
-                1
-            );
+            //Add
+            //(
+            //    new Button((int) Buttons.ElfButton, 0x0705, 0x0707, 0x0706)
+            //    {
+            //        X = 200, Y = 455, ButtonAction = ButtonAction.Activate
+            //    },
+            //    1
+            //);
 
-            if (Client.Version >= ClientVersion.CV_60144)
-            {
-                Add
-                (
-                    _gargoyleRadio = new Button((int)Buttons.GargoyleButton, 0x0768, 0x0767)
-                    {
-                        X = 60, Y = 435, ButtonAction = ButtonAction.Activate
-                    },
-                    1
-                );
+            //if (Client.Version >= ClientVersion.CV_60144)
+            //{
+            //    Add
+            //    (
+            //        _gargoyleRadio = new Button((int)Buttons.GargoyleButton, 0x0768, 0x0767)
+            //        {
+            //            X = 60, Y = 435, ButtonAction = ButtonAction.Activate
+            //        },
+            //        1
+            //    );
 
-                Add
-                (
-                    new Button((int) Buttons.GargoyleButton, 0x07D3, 0x07D5, 0x07D4)
-                    {
-                        X = 80, Y = 435, ButtonAction = ButtonAction.Activate
-                    },
-                    1
-                );
-            }
+            //    Add
+            //    (
+            //        new Button((int) Buttons.GargoyleButton, 0x07D3, 0x07D5, 0x07D4)
+            //        {
+            //            X = 80, Y = 435, ButtonAction = ButtonAction.Activate
+            //        },
+            //        1
+            //    );
+            //}
 
             // Prev/Next
             Add
@@ -245,7 +245,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             );
 
             _maleRadio.IsClicked = true;
-            _humanRadio.IsClicked = true;
+            //_humanRadio.IsClicked = true;
             _characterInfo.IsFemale = false;
             _characterInfo.Race = RaceType.HUMAN;
 

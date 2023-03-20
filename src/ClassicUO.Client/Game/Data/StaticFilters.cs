@@ -327,7 +327,7 @@ namespace ClassicUO.Game.Data
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsCustomTree(ushort g)
         {
-            return g >= 15293 && g <= 15391 || g >= 44947 && g <= 0xAFAC || g >= 44988 && g <= 44997;
+            return g >= 15293 && g <= 15391 || g >= 44947 && g <= 44972 || g >= 44988 && g <= 44997;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

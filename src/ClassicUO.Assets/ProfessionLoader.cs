@@ -43,10 +43,10 @@ namespace ClassicUO.Assets
         public static readonly int[,] _VoidSkills = new int[4, 2]
         {
             { 0, InitialSkillValue }, { 0, InitialSkillValue },
-            { 0, UOFileManager.Version < ClientVersion.CV_70160 ? 0 : InitialSkillValue }, { 0, InitialSkillValue }
+            { 0,  InitialSkillValue }, { 0, 0 }
         };
         public static readonly int[] _VoidStats = new int[3] { 60, RemainStatValue, RemainStatValue };
-        public static int InitialSkillValue => UOFileManager.Version >= ClientVersion.CV_70160 ? 30 : 50;
+        public static int InitialSkillValue => 50 ;
         public static int RemainStatValue => UOFileManager.Version >= ClientVersion.CV_70160 ? 15 : 10;
         public string Name { get; set; }
         public string TrueName { get; set; }
