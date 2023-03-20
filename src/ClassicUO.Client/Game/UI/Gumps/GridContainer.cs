@@ -81,7 +81,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private static GridSaveSystem gridSaveSystem = new GridSaveSystem();
 
-        public GridContainer(uint local, ushort ogContainer) : base(DEFAULT_WIDTH, DEFAULT_HEIGHT, DEFAULT_WIDTH, DEFAULT_HEIGHT, local, 0)
+        public GridContainer(uint local, ushort ogContainer) : base(DEFAULT_WIDTH, DEFAULT_HEIGHT, GetWidth(2), GRID_ITEM_SIZE + BORDER_WIDTH + 31, local, 0)
         {
             #region SET VARS
             lockedSpots = gridSaveSystem.GetItemSlots(LocalSerial);
@@ -137,7 +137,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = -20
             };
 
-            _searchBox = new StbTextBox(0xFF, 20, 100, true, FontStyle.Solid, 0x0481)
+            _searchBox = new StbTextBox(0xFF, 20, 150, true, FontStyle.None, 0x0481)
             {
                 X = BORDER_WIDTH,
                 Y = BORDER_WIDTH,
@@ -190,6 +190,8 @@ namespace ClassicUO.Game.UI.Gumps
                 "<br>Use the corner button to open the original style gump."
                 );
 
+            //_searchBox.Width = Math.Min(Width - (BORDER_WIDTH * 2) - _openRegularGump.Width - _quickDropBackpack.Width - _helpToolTip.Width, 150);
+            
             #endregion
 
             #region Scroll Area
@@ -209,14 +211,12 @@ namespace ClassicUO.Game.UI.Gumps
             #region Add controls
             Add(_background);
             Add(_containerNameLabel);
-            Add(new AlphaBlendControl(0.5f)
+            _searchBox.Add(new AlphaBlendControl(0.5f)
             {
                 Hue = 0x0481,
-                X = _searchBox.X,
-                Y = _searchBox.Y,
                 Width = _searchBox.Width,
                 Height = _searchBox.Height
-            }); //Search box background
+            });
             Add(_searchBox);
             Add(_helpToolTip);
             Add(_openRegularGump);
@@ -228,6 +228,15 @@ namespace ClassicUO.Game.UI.Gumps
             InvalidateContents = true;
         }
         public override GumpType GumpType => GumpType.GridContainer;
+
+        private static int GetWidth(int columns)
+        {
+            return (BORDER_WIDTH * 2)     //The borders around the container, one on the left and one on the right
+            + 15                   //The width of the scroll bar
+            + (GRID_ITEM_SIZE * columns) //How many items to fit in left to right
+            + (X_SPACING * columns)      //Spacing between each grid item(x4 items)
+            + 6;                   //Because the border acts weird
+        }
 
         public override void Save(XmlTextWriter writer)
         {
@@ -611,6 +620,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _helpToolTip.X = Width - _helpToolTip.Width - _openRegularGump.Width - _quickDropBackpack.Width - BORDER_WIDTH;
                 _lastHeight = Height;
                 _lastWidth = Width;
+                _searchBox.Width = Math.Min(Width - (BORDER_WIDTH * 2) - _openRegularGump.Width - _quickDropBackpack.Width - _helpToolTip.Width, 150);
                 RequestUpdateContents();
             }
 
