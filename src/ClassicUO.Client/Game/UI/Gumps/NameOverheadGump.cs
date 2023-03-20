@@ -535,6 +535,9 @@ namespace ClassicUO.Game.UI.Gumps
                 return false;
             }
 
+            bool _isMobile = false;
+            double _hpPercent = 1;
+
             if (SerialHelper.IsMobile(LocalSerial))
             {
                 Mobile m = World.Mobiles.Get(LocalSerial);
@@ -545,6 +548,10 @@ namespace ClassicUO.Game.UI.Gumps
 
                     return false;
                 }
+
+                _isMobile = true;
+                _hpPercent = (double)m.Hits / (double)m.HitsMax;
+
 
                 if (_positionLocked)
                 {
@@ -572,6 +579,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     x = (int) (m.RealScreenPosition.X + m.Offset.X + 22 + 5);
                     y = (int) (m.RealScreenPosition.Y + (m.Offset.Y - m.Offset.Z) - (height + centerY + 8) + (m.IsGargoyle && m.IsFlying ? -22 : !m.IsMounted ? 22 : 0));
+
                 }
             }
             else if (SerialHelper.IsItem(LocalSerial))
@@ -614,6 +622,18 @@ namespace ClassicUO.Game.UI.Gumps
 
             X = x;
             Y = y;
+
+            if (ProfileManager.CurrentProfile.NamePlateHealthBar && _isMobile)
+            {
+
+                batcher.Draw
+                (
+                    SolidColorTextureCache.GetTexture(Color.White),
+                    new Vector2(x, y),
+                    new Rectangle(x, y, (int)(Width * _hpPercent), Height),
+                    ShaderHueTranslator.GetHueVector(_background.Hue, false, 0.75f)
+                );
+            }
 
             batcher.DrawRectangle
             (
