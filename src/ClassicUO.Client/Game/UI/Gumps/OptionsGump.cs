@@ -73,14 +73,14 @@ namespace ClassicUO.Game.UI.Gumps
 
         // containers
         private HSliderBar _containersScale;
-        private ColorBox _altGridContainerBackgroundHue;
+        private ColorBox _altGridContainerBackgroundHue, _gridBorderHue;
         private Combobox _cotType;
         private DataBox _databox;
         private HSliderBar _delay_before_display_tooltip, _tooltip_zoom, _tooltip_background_opacity;
         private Combobox _dragSelectModifierKey;
         private Combobox _backpackStyle, _gridContainerSearchAlternative;
         private Checkbox _hueContainerGumps;
-        private HSliderBar _containerOpacity;
+        private HSliderBar _containerOpacity, _gridBorderOpacity;
 
 
         //counters
@@ -3561,6 +3561,44 @@ namespace ClassicUO.Game.UI.Gumps
             button.MouseUp += (sender, e) => { ContainerManager.BuildContainerFile(true); };
             rightArea.Add(button);
 
+            startX = 5;
+            startY += button.Height + 2;
+
+            #region Grid Container Settings
+            SettingsSection gridSection = new SettingsSection("Grid Containers", rightArea.Width);
+            gridSection.X = startX;
+            gridSection.Y = startY;
+
+            gridSection.Add(AddLabel(null, "Grid Border Opacity", 0, 0));
+            gridSection.AddRight
+                (
+                    _gridBorderOpacity = AddHSlider
+                    (
+                        null,
+                        0,
+                        100,
+                        _currentProfile.GridBorderAlpha,
+                        0,
+                        0,
+                        200
+                    )
+                );
+
+            gridSection.Add
+                (
+                    _gridBorderHue = AddColorBox
+                    (
+                        null, 0, 0,
+                        _currentProfile.GridBorderHue,
+                        ""
+                    )
+                );
+            gridSection.AddRight(AddLabel(null, "Grid Border Hue", 0, 0));
+            
+
+            rightArea.Add(gridSection);
+            #endregion
+
             Add(rightArea, PAGE);
         }
 
@@ -3849,6 +3887,9 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Client.Game.SetRefreshRate(_sliderFPS.Value);
             }
+
+            _currentProfile.GridBorderAlpha = (byte)_gridBorderOpacity.Value;
+            _currentProfile.GridBorderHue = _gridBorderHue.Hue;
 
             _currentProfile.NamePlateHealthBar = _namePlateHealthBar.IsChecked;
             _currentProfile.GridContainerSearchMode = _gridContainerSearchAlternative.SelectedIndex;

@@ -322,7 +322,7 @@ namespace ClassicUO.Configuration
         public bool FollowingMode { get; set; } = false;
         public uint FollowingTarget { get; set; }
         public bool NamePlateHealthBar { get; set; } = true;
-        public byte GridBorderAlpha { get; set; } = (byte)0.7f;
+        public byte GridBorderAlpha { get; set; } = 75;
         public ushort GridBorderHue { get; set; } = 0;
 
         public static uint GumpsVersion { get; private set; }
