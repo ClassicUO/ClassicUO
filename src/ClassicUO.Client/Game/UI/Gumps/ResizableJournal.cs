@@ -14,12 +14,12 @@ namespace ClassicUO.Game.UI.Gumps
     internal class ResizableJournal : ResizableGump
     {
         #region CONSTANTS
-        private const int MIN_WIDTH = 410;
-        private const int MIN_HEIGHT = 350;
         private const int BORDER_WIDTH = 4;
+        private const int MIN_WIDTH = (BORDER_WIDTH * 2) + (TAB_WIDTH * 4);
+        private const int MIN_HEIGHT = 100;
         private const int SCROLL_BAR_WIDTH = 18;
         #region TABS
-        private const int TAB_WIDTH = 100;
+        private const int TAB_WIDTH = 80;
         private const int TAB_HEIGHT = 30;
         #endregion
         #endregion
@@ -41,7 +41,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         #region OTHER
         private static int _lastX = 100, _lastY = 100;
-        private static int _lastWidth = MIN_WIDTH, _lastHeight = MIN_HEIGHT;
+        private static int _lastWidth = MIN_WIDTH, _lastHeight = 300;
         #endregion
         public ResizableJournal() : base(_lastWidth, _lastHeight, MIN_WIDTH, MIN_HEIGHT, 0, 0)
         {
@@ -89,6 +89,7 @@ namespace ClassicUO.Game.UI.Gumps
             AddTab("Chat", new MessageType[] { MessageType.Regular, MessageType.Guild, MessageType.Alliance, MessageType.Emote, MessageType.Party, MessageType.Whisper, MessageType.Yell });
             AddTab("Guild|Party", new MessageType[] { MessageType.Guild, MessageType.Alliance, MessageType.Party });
             AddTab("System", new MessageType[] { MessageType.System });
+            _tab[0].IsSelected = true;
             #endregion
 
             #region Journal Area
