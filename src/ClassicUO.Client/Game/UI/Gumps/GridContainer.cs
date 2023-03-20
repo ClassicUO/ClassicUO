@@ -908,17 +908,16 @@ namespace ClassicUO.Game.UI.Gumps
                     );
                 }
 
-                hueVector = ShaderHueTranslator.GetHueVector(0);
+                hueVector = ShaderHueTranslator.GetHueVector(ProfileManager.CurrentProfile.GridBorderHue, false, (float)ProfileManager.CurrentProfile.GridBorderAlpha/100);
 
-                Color borderColor = Color.Gray;
                 if (ItemGridLocked)
-                    borderColor = Color.Blue;
+                    hueVector.X = 0x1;
                 if (Hightlight)
-                    borderColor = Color.Yellow;
+                    hueVector.X = 0x34;
 
                 batcher.DrawRectangle
                 (
-                    SolidColorTextureCache.GetTexture(borderColor),
+                    SolidColorTextureCache.GetTexture(Color.Gray),
                     x,
                     y,
                     Width,
