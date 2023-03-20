@@ -119,10 +119,7 @@ namespace ClassicUO.Network
 
                     _ = stream.Dequeue(packetBuffer, 0, packetlength);
 
-                    if (CUOEnviroment.PacketLog)
-                    {
-                        _packetLogger.Log(packetBuffer.AsSpan(0, packetlength), false);
-                    }
+                    PacketLogger.Default?.Log(packetBuffer.AsSpan(0, packetlength), false);
 
                     // TODO: the pluging function should allow Span<byte> or unsafe type only.
                     // The current one is a bad style decision.

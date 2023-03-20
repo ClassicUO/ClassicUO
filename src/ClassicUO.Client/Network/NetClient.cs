@@ -214,7 +214,6 @@ namespace ClassicUO.Network
             _socket.Connect(ip, port);
         }
 
-
         public void Disconnect()
         {
             _isCompressionEnabled = false;
@@ -230,52 +229,6 @@ namespace ClassicUO.Network
         }
 
         public Span<byte> CollectAvailableData()
-            => ProcessRecv();
-
-        public void Flush()
-        {
-            ProcessSend();
-            Statistics.Update();
-        }
-
-        public void Send(Span<byte> message, bool ignorePlugin = false, bool skipEncryption = false)
-        {
-            if (!ignorePlugin && !Plugin.ProcessSendPacket(ref message))
-            {
-                return;
-            }
-
-            Send(message, skipEncryption);
-        }
-
-        private void Send(Span<byte> message, bool skipEncryption)
-        {
-            if (!IsConnected || message.IsEmpty)
-            {
-                return;
-            }
-
-            lock (_sendStream)
-            {
-                if (CUOEnviroment.PacketLog)
-                {
-                    //LogPacket(message, message.Length, true);
-                }
-
-                if (!skipEncryption)
-                {
-                    EncryptionHelper.Encrypt(!_isCompressionEnabled, message, message, message.Length);
-                }
-
-                //_socket.Send(data, 0, length);
-                _sendStream.Enqueue(message);
-
-                Statistics.TotalBytesSent += (uint)message.Length;
-                Statistics.TotalPacketsSent++;
-            }   
-        }
-
-        private Span<byte> ProcessRecv()
         {
             try
             {
@@ -297,7 +250,7 @@ namespace ClassicUO.Network
             catch (SocketException ex)
             {
                 Log.Error("socket error when receving:\n" + ex);
-                
+
                 Disconnect();
                 Disconnected?.Invoke(this, ex.SocketErrorCode);
             }
@@ -307,7 +260,7 @@ namespace ClassicUO.Network
                 {
                     Log.Error("main exception:\n" + ex);
                     Log.Error("socket error when receving:\n" + socketEx);
-                   
+
                     Disconnect();
                     Disconnected?.Invoke(this, socketEx.SocketErrorCode);
                 }
@@ -323,6 +276,43 @@ namespace ClassicUO.Network
             }
 
             return Span<byte>.Empty;
+        }
+
+        public void Flush()
+        {
+            ProcessSend();
+            Statistics.Update();
+        }
+
+        public void Send(Span<byte> message, bool ignorePlugin = false, bool skipEncryption = false)
+        {
+            if (!IsConnected || message.IsEmpty)
+            {
+                return;
+            }
+
+            if (!ignorePlugin && !Plugin.ProcessSendPacket(ref message))
+            {
+                return;
+            }
+
+            if (message.IsEmpty) return;
+
+            PacketLogger.Default?.Log(message, true);
+
+            if (!skipEncryption)
+            {
+                EncryptionHelper.Encrypt(!_isCompressionEnabled, message, message, message.Length);
+            }
+
+            lock (_sendStream)
+            {
+                //_socket.Send(data, 0, length);
+                _sendStream.Enqueue(message);
+            }
+
+            Statistics.TotalBytesSent += (uint)message.Length;
+            Statistics.TotalPacketsSent++;
         }
 
         private void ProcessEncryption(Span<byte> buffer)
