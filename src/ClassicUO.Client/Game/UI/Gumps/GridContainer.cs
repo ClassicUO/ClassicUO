@@ -55,8 +55,8 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly AlphaBlendControl _background;
         private readonly Item _container;
         private const int X_SPACING = 1, Y_SPACING = 1;
-        private static int GRID_ITEM_SIZE = (int)Math.Round(50 * UIManager.ContainerScale);
-        private float _lastGridItemScale = UIManager.ContainerScale;
+        private static int GRID_ITEM_SIZE { get { return (int)Math.Round(50 * (ProfileManager.CurrentProfile.GridContainersScale / 100f)); } }
+        private float _lastGridItemScale = (ProfileManager.CurrentProfile.GridContainersScale / 100f);
         private const int BORDER_WIDTH = 4;
         private static int DEFAULT_WIDTH =
             (BORDER_WIDTH * 2)     //The borders around the container, one on the left and one on the right
@@ -435,7 +435,7 @@ namespace ClassicUO.Game.UI.Gumps
             _lastX = X;
             _lastY = Y;
 
-            if (gridSlotManager.ItemPositions.Count > 0)
+            if (gridSlotManager.ItemPositions.Count > 0 && !_container.IsCorpse)
                 gridSaveSystem.SaveContainer(LocalSerial, gridSlotManager.ItemPositions, Width, Height, X, Y);
 
             base.Dispose();
@@ -475,10 +475,9 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            if ((_lastWidth != Width || _lastHeight != Height) || _lastGridItemScale != UIManager.ContainerScale)
+            if ((_lastWidth != Width || _lastHeight != Height) || _lastGridItemScale != GRID_ITEM_SIZE)
             {
-                _lastGridItemScale = UIManager.ContainerScale;
-                GRID_ITEM_SIZE = (int)Math.Round(50 * UIManager.ContainerScale);
+                _lastGridItemScale = GRID_ITEM_SIZE;
                 _background.Width = Width - (BORDER_WIDTH * 2);
                 _background.Height = Height - (BORDER_WIDTH * 2);
                 _scrollArea.Width = _background.Width - BORDER_WIDTH;
@@ -731,8 +730,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (rect.Width < hit.Width)
                     {
-                        if (ProfileManager.CurrentProfile.ScaleItemsInsideContainers)
-                            originalSize.X = (ushort)(rect.Width * UIManager.ContainerScale);
+                        if (ProfileManager.CurrentProfile.GridContainerScaleItems)
+                            originalSize.X = (ushort)(rect.Width * (ProfileManager.CurrentProfile.GridContainersScale / 100f));
                         else
                             originalSize.X = rect.Width;
 
@@ -741,8 +740,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (rect.Height < hit.Height)
                     {
-                        if (ProfileManager.CurrentProfile.ScaleItemsInsideContainers)
-                            originalSize.Y = (ushort)(rect.Height * UIManager.ContainerScale);
+                        if (ProfileManager.CurrentProfile.GridContainerScaleItems)
+                            originalSize.Y = (ushort)(rect.Height * (ProfileManager.CurrentProfile.GridContainersScale / 100f));
                         else
                             originalSize.Y = rect.Height;
 

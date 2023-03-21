@@ -324,6 +324,8 @@ namespace ClassicUO.Configuration
         public bool NamePlateHealthBar { get; set; } = true;
         public byte GridBorderAlpha { get; set; } = 75;
         public ushort GridBorderHue { get; set; } = 0;
+        public byte GridContainersScale { get; set; } = 100;
+        public bool GridContainerScaleItems { get; set; } = true;
 
         public static uint GumpsVersion { get; private set; }
 

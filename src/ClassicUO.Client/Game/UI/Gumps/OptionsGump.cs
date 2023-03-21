@@ -79,8 +79,8 @@ namespace ClassicUO.Game.UI.Gumps
         private HSliderBar _delay_before_display_tooltip, _tooltip_zoom, _tooltip_background_opacity;
         private Combobox _dragSelectModifierKey;
         private Combobox _backpackStyle, _gridContainerSearchAlternative;
-        private Checkbox _hueContainerGumps;
-        private HSliderBar _containerOpacity, _gridBorderOpacity;
+        private Checkbox _hueContainerGumps, _gridContainerItemScale;
+        private HSliderBar _containerOpacity, _gridBorderOpacity, _gridContainerScale;
 
 
         //counters
@@ -735,7 +735,7 @@ namespace ClassicUO.Game.UI.Gumps
             section.Add
             (
                 _journalBackgroundColor = AddColorBox(
-                    null, 
+                    null,
                     startX,
                     startY,
                     _currentProfile.AltJournalBackgroundHue,
@@ -3522,7 +3522,34 @@ namespace ClassicUO.Game.UI.Gumps
                     0,
                     0
                 ));
-            }
+            } //Use grid containers
+
+            {
+                gridSection.Add(AddLabel(null, "Grid container scale", 0, 0));
+
+                gridSection.AddRight(_gridContainerScale = AddHSlider(
+                        null,
+                        50, 200,
+                        _currentProfile.GridContainersScale,
+                        0, 0,
+                        200
+                    ));
+            } //Grid container scale
+
+            {
+                gridSection.PushIndent();
+
+                gridSection.Add(_gridContainerItemScale = AddCheckBox(
+                    null,
+                    "",
+                    _currentProfile.GridContainerScaleItems,
+                    0, 0
+                    ));
+
+                gridSection.AddRight(AddLabel(null, "Also scale items", 0, 0));
+
+                gridSection.PopIndent();
+            } //Grid container item scales
 
             {
                 gridSection.Add(AddLabel(null, "Border opacity", 0, 0));
@@ -3899,9 +3926,10 @@ namespace ClassicUO.Game.UI.Gumps
 
             _currentProfile.GridBorderAlpha = (byte)_gridBorderOpacity.Value;
             _currentProfile.GridBorderHue = _gridBorderHue.Hue;
-
+            _currentProfile.GridContainersScale = (byte)_gridContainerScale.Value;
             _currentProfile.NamePlateHealthBar = _namePlateHealthBar.IsChecked;
             _currentProfile.GridContainerSearchMode = _gridContainerSearchAlternative.SelectedIndex;
+            _currentProfile.GridContainerScaleItems = _gridContainerItemScale.IsChecked;
 
             int val = int.Parse(_autoFollowDistance.Text);
             _currentProfile.AutoFollowDistance = val < 1 ? 1 : val;
