@@ -60,7 +60,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
         }
 
-        public ANCHOR_TYPE AnchorType { get; protected set; }
+        public ANCHOR_TYPE AnchorType { get; set; }
         public virtual int GroupMatrixWidth { get; protected set; }
         public virtual int GroupMatrixHeight { get; protected set; }
         public int WidthMultiplier { get; protected set; } = 1;
