@@ -639,7 +639,7 @@ namespace ClassicUO.Game.UI.Gumps
                     SolidColorTextureCache.GetTexture(Color.White),
                     new Vector2(x, y),
                     new Rectangle(x, y, (int)(Width * _hpPercent), Height),
-                    ShaderHueTranslator.GetHueVector(_background.Hue, false, 0.75f)
+                    ShaderHueTranslator.GetHueVector(_background.Hue, false, ProfileManager.CurrentProfile.NamePlateHealthBarOpacity/100f)
                 );
             }
 
