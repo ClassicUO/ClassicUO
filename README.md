@@ -21,7 +21,7 @@ Quick preview for containers inside *if the client has already cached that bag*
 
 Item scaling!
 
-![Grid Containers](https://user-images.githubusercontent.com/3859393/222730248-4c5a053a-853f-4750-b7dd-ff4049638c6f.gif)
+![SlottedInv](https://user-images.githubusercontent.com/3859393/226514464-32919a68-ebad-4ec0-8bcf-8614a5055f7d.gif)
 ![Grid Previe](https://user-images.githubusercontent.com/3859393/222873187-c88ad321-8b19-4cfd-9617-7e23b2443b6a.gif)
 ![image](https://user-images.githubusercontent.com/3859393/222975241-319e5fa6-2c1e-441d-97e6-b04a5e1f6f3b.png)
 
