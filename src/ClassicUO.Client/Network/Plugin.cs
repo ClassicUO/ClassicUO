@@ -477,7 +477,7 @@ namespace ClassicUO.Network
             return result;
         }
 
-        internal static bool ProcessSendPacket(byte[] data, ref int length)
+        internal static bool ProcessSendPacket(ref Span<byte> message)
         {
             bool result = true;
 
@@ -485,27 +485,29 @@ namespace ClassicUO.Network
             {
                 if (plugin._onSend_new != null)
                 {
-                    byte[] tmp = new byte[length];
-                    Array.Copy(data, tmp, length);
+                    var tmp = message.ToArray();
+                    var length = tmp.Length;
 
                     if (!plugin._onSend_new(tmp, ref length))
                     {
                         result = false;
                     }
 
-                    Array.Copy(tmp, data, length);
+                    message = message.Slice(0, length);
+                    tmp.AsSpan(0, length).CopyTo(message);
                 }
                 else if (plugin._onSend != null)
                 {
-                    byte[] tmp = new byte[length];
-                    Array.Copy(data, tmp, length);
+                    var tmp = message.ToArray();
+                    var length = tmp.Length;
 
                     if (!plugin._onSend(ref tmp, ref length))
                     {
                         result = false;
                     }
 
-                    Array.Copy(tmp, data, length);
+                    message = message.Slice(0, length);
+                    tmp.AsSpan(0, length).CopyTo(message);
                 }
             }
 
@@ -653,7 +655,10 @@ namespace ClassicUO.Network
 
         private static bool OnPluginRecv(ref byte[] data, ref int length)
         {
-            NetClient.EnqueuePacketFromPlugin(data, length);
+            lock (PacketHandlers.Handler)
+            {
+                PacketHandlers.Handler.Append(data.AsSpan(0, length), true);
+            }
 
             return true;
         }
@@ -662,7 +667,7 @@ namespace ClassicUO.Network
         {
             if (NetClient.Socket.IsConnected)
             {
-                NetClient.Socket.Send(data, length, true);
+                NetClient.Socket.Send(data.AsSpan(0, length), true);
             }
 
             return true;
@@ -672,10 +677,10 @@ namespace ClassicUO.Network
         {        
             if (buffer != IntPtr.Zero && length > 0)
             {
-                byte[] data = new byte[length];
-                Marshal.Copy(buffer, data, 0, length);
-
-                NetClient.EnqueuePacketFromPlugin(data, length);
+                lock (PacketHandlers.Handler)
+                {
+                    PacketHandlers.Handler.Append(new Span<byte>(buffer.ToPointer(), length), true);
+                }
             }
 
             return true;
@@ -685,11 +690,7 @@ namespace ClassicUO.Network
         {
             if (buffer != IntPtr.Zero && length > 0)
             {
-                StackDataWriter writer = new StackDataWriter(new Span<byte>((void*)buffer, length));
-
-                NetClient.Socket.Send(writer.AllocatedBuffer, writer.BytesWritten, true);
-
-                writer.Dispose();
+                NetClient.Socket.Send(new Span<byte>((void*)buffer, length), true);
             }
 
             return true;
