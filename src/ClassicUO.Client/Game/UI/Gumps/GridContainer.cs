@@ -438,17 +438,6 @@ namespace ClassicUO.Game.UI.Gumps
             base.Dispose();
         }
 
-        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
-        {
-            if (!IsVisible || IsDisposed)
-            {
-                return false;
-            }
-
-            base.Draw(batcher, x, y);
-            return true;
-        }
-
         public override void Update()
         {
             base.Update();
