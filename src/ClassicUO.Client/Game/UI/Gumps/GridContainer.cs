@@ -649,6 +649,8 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         if (_item != null)
                             GameActions.PickUp(_item, e.X, e.Y);
+                        else
+                            UIManager.AttemptDragControl(gridContainer);
                     }
                 }
 
