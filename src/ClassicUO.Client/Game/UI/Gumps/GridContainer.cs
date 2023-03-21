@@ -414,7 +414,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             List<Item> sortedContents = ProfileManager.CurrentProfile.GridContainerSearchMode == 0 ? gridSlotManager.SearchResults(_searchBox.Text) : GridSlotManager.GetItemsInContainer(_container);
             gridSlotManager.RebuildContainer(sortedContents, _searchBox.Text);
-
+            _containerNameLabel.Text = GetContainerName();
             InvalidateContents = false;
         }
 
