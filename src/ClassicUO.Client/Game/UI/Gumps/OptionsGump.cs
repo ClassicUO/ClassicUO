@@ -167,7 +167,7 @@ namespace ClassicUO.Game.UI.Gumps
         private ClickableColorBox _tooltip_font_hue;
         private FontSelector _tooltip_font_selector;
         private HSliderBar _dragSelectStartX, _dragSelectStartY;
-        private Checkbox _dragSelectAsAnchor, _namePlateHealthBar;
+        private Checkbox _dragSelectAsAnchor, _namePlateHealthBar, _disableSystemChat;
         private HSliderBar _journalOpacity, _namePlateOpacity, _namePlateHealthBarOpacity;
         private ClickableColorBox _journalBackgroundColor;
 
@@ -716,33 +716,46 @@ namespace ClassicUO.Game.UI.Gumps
 
             _use_smooth_boat_movement.IsVisible = Client.Version >= ClientVersion.CV_7090;
 
-            section.Add(AddLabel(null, "Journal Opacity", startX, startY));
+            {
+                section.Add(AddLabel(null, "Journal Opacity", startX, startY));
 
-            section.AddRight
-            (
-                _journalOpacity = AddHSlider(
-                    null,
-                    0,
-                    100,
-                    _currentProfile.JournalOpacity,
-                    startX,
-                    startY,
-                    200
-                ),
-                2
-            );
+                section.AddRight
+                (
+                    _journalOpacity = AddHSlider(
+                        null,
+                        0,
+                        100,
+                        _currentProfile.JournalOpacity,
+                        startX,
+                        startY,
+                        200
+                    ),
+                    2
+                );
+                section.PushIndent();
+                section.Add
+                (
+                    _journalBackgroundColor = AddColorBox(
+                        null,
+                        startX,
+                        startY,
+                        _currentProfile.AltJournalBackgroundHue,
+                        ""
+                        )
+                );
+                section.AddRight(AddLabel(null, "Journal Background", startX, startY));
+                section.PopIndent();
+            } //Journal opac and hue
 
-            section.Add
-            (
-                _journalBackgroundColor = AddColorBox(
-                    null,
-                    startX,
-                    startY,
-                    _currentProfile.AltJournalBackgroundHue,
-                    ""
-                    )
-            );
-            section.AddRight(AddLabel(null, "Journal Background", startX, startY));
+            {
+                section.Add(_disableSystemChat = AddCheckBox(
+                        null,
+                        "",
+                        _currentProfile.DisableSystemChat,
+                        0, 0
+                    ));
+                section.AddRight(AddLabel(null, "Disable system chat", 0, 0));
+            } //Disable system chat
 
             SettingsSection section2 = AddSettingsSection(box, "Mobiles");
             section2.Y = section.Bounds.Bottom + 40;
@@ -3980,6 +3993,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
+            _currentProfile.DisableSystemChat = _disableSystemChat.IsChecked;
             _currentProfile.GridBorderAlpha = (byte)_gridBorderOpacity.Value;
             _currentProfile.GridBorderHue = _gridBorderHue.Hue;
             _currentProfile.GridContainersScale = (byte)_gridContainerScale.Value;

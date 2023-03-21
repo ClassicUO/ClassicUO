@@ -69,7 +69,7 @@ namespace ClassicUO.Game.UI.Gumps
         private GridScrollArea _scrollArea;
         private int _lastWidth = DEFAULT_WIDTH, _lastHeight = DEFAULT_HEIGHT;
         private readonly StbTextBox _searchBox;
-        private readonly GumpPic _openRegularGump, _helpToolTip, _quickDropBackpack;
+        private readonly GumpPic _openRegularGump, _quickDropBackpack;
         public readonly ushort OgContainerGraphic;
 
         private GridSlotManager gridSlotManager;
@@ -175,17 +175,6 @@ namespace ClassicUO.Game.UI.Gumps
             };
             _quickDropBackpack.MouseExit += (sender, e) => { _quickDropBackpack.Graphic = quickDropIcon == null ? (ushort)1209 : (ushort)1625; };
             _quickDropBackpack.SetTooltip("Drop an item here to send it to your backpack.");
-
-            _helpToolTip = new GumpPic(_background.Width - _openRegularGump.Width - _quickDropBackpack.Width - 16 - BORDER_WIDTH, BORDER_WIDTH, 22153, 0);
-            _helpToolTip.MouseEnter += (sender, e) => { _helpToolTip.Graphic = 22154; };
-            _helpToolTip.MouseExit += (sender, e) => { _helpToolTip.Graphic = 22153; };
-            _helpToolTip.SetTooltip(
-                "Ctrl + Click a slot -> Click another slot to lock that item into a specific slot." +
-                "<br>Use the corner button to open the original style gump."
-                );
-
-            //_searchBox.Width = Math.Min(Width - (BORDER_WIDTH * 2) - _openRegularGump.Width - _quickDropBackpack.Width - _helpToolTip.Width, 150);
-
             #endregion
 
             #region Scroll Area
@@ -212,7 +201,6 @@ namespace ClassicUO.Game.UI.Gumps
                 Height = _searchBox.Height
             });
             Add(_searchBox);
-            Add(_helpToolTip);
             Add(_openRegularGump);
             Add(_quickDropBackpack);
             Add(_scrollArea);
@@ -470,10 +458,9 @@ namespace ClassicUO.Game.UI.Gumps
                 _scrollArea.Height = _background.Height - BORDER_WIDTH - (_containerNameLabel.Height + 1);
                 _openRegularGump.X = Width - _openRegularGump.Width - BORDER_WIDTH;
                 _quickDropBackpack.X = Width - _openRegularGump.Width - _quickDropBackpack.Width - BORDER_WIDTH;
-                _helpToolTip.X = Width - _helpToolTip.Width - _openRegularGump.Width - _quickDropBackpack.Width - BORDER_WIDTH;
                 _lastHeight = Height;
                 _lastWidth = Width;
-                _searchBox.Width = Math.Min(Width - (BORDER_WIDTH * 2) - _openRegularGump.Width - _quickDropBackpack.Width - _helpToolTip.Width, 150);
+                _searchBox.Width = Math.Min(Width - (BORDER_WIDTH * 2) - _openRegularGump.Width - _quickDropBackpack.Width, 150);
                 RequestUpdateContents();
             }
 

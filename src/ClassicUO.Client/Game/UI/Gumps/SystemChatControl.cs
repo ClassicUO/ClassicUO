@@ -254,6 +254,9 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
+            if (ProfileManager.CurrentProfile.DisableSystemChat)
+                return;
+
             switch (e.Type)
             {
                 case MessageType.Regular when e.Parent == null || !SerialHelper.IsValid(e.Parent.Serial):
