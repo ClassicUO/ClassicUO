@@ -526,7 +526,7 @@ namespace ClassicUO.Game.UI.Gumps
                 this.gridContainer = gridContainer;
                 LocalSerial = serial;
                 _item = World.Items.Get(serial);
-                CanMove = false;
+                CanMove = true;
                 #endregion
 
                 background = new AlphaBlendControl(0.25f);
@@ -547,6 +547,8 @@ namespace ClassicUO.Game.UI.Gumps
                 hit.MouseDoubleClick += _hit_MouseDoubleClick;
             }
 
+
+
             public void Resize()
             {
                 Width = GRID_ITEM_SIZE;
@@ -559,14 +561,15 @@ namespace ClassicUO.Game.UI.Gumps
 
             public void SetGridItem(Item item)
             {
-                if(item == null)
+                if (item == null)
                 {
                     _item = null;
                     LocalSerial = 0;
                     hit.ClearTooltip();
                     Remove(count);
                     Hightlight = false;
-                } else
+                }
+                else
                 {
                     _item = item;
                     LocalSerial = item.Serial;
@@ -611,7 +614,7 @@ namespace ClassicUO.Game.UI.Gumps
                             Rectangle containerBounds = ContainerManager.Get(_item.Graphic).Bounds;
                             GameActions.DropItem(Client.Game.GameCursor.ItemHold.Serial, containerBounds.X / 2, containerBounds.Y / 2, 0, _item.Serial);
                         }
-                        else if (_item != null &&  _item.ItemData.IsStackable && _item.Graphic == Client.Game.GameCursor.ItemHold.Graphic)
+                        else if (_item != null && _item.ItemData.IsStackable && _item.Graphic == Client.Game.GameCursor.ItemHold.Graphic)
                         {
                             GameActions.DropItem(Client.Game.GameCursor.ItemHold.Serial, _item.X, _item.Y, 0, _item.Serial);
                         }
@@ -642,12 +645,13 @@ namespace ClassicUO.Game.UI.Gumps
 
             private void _hit_MouseExit(object sender, MouseEventArgs e)
             {
-                if (Mouse.LButtonPressed && !mousePressedWhenEntered && _item != null)
+                if (Mouse.LButtonPressed && !mousePressedWhenEntered)
                 {
                     Point offset = Mouse.LDragOffset;
                     if (Math.Abs(offset.X) >= Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS || Math.Abs(offset.Y) >= Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS)
                     {
-                        GameActions.PickUp(_item, e.X, e.Y);
+                        if (_item != null)
+                            GameActions.PickUp(_item, e.X, e.Y);
                     }
                 }
 
@@ -700,7 +704,7 @@ namespace ClassicUO.Game.UI.Gumps
                     hueVector
                 );
 
-                if (hit.MouseIsOver)
+                if (hit.MouseIsOver && _item != null)
                 {
                     hueVector.Z = 0.3f;
 
@@ -844,9 +848,9 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                 }
 
-                foreach(Item i in filteredItems)
+                foreach (Item i in filteredItems)
                 {
-                    foreach(var slot in gridSlots)
+                    foreach (var slot in gridSlots)
                     {
                         if (slot.Value.SlotItem != null)
                             continue;
