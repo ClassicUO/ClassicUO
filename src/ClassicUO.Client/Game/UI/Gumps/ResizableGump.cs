@@ -30,8 +30,11 @@
 
 #endregion
 
+using ClassicUO.Assets;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
+using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
@@ -44,6 +47,8 @@ namespace ClassicUO.Game.UI.Gumps
         private Point _lastSize, _savedSize;
         private readonly int _minH;
         private readonly int _minW;
+        private bool _isLocked = false;
+        private bool _prevCanMove, _prevCloseWithRightClick, _prevBorder;
 
 
         protected ResizableGump
@@ -172,6 +177,68 @@ namespace ClassicUO.Game.UI.Gumps
             _button.Y = Height - (_button.Height >> 0) + 2;
             GroupMatrixHeight = Height;
             GroupMatrixWidth = Width;
+        }
+
+        protected override void OnMouseUp(int x, int y, MouseButtonType button)
+        {
+            if (button == MouseButtonType.Left && Keyboard.Alt && UIManager.MouseOverControl != null && (UIManager.MouseOverControl == this || UIManager.MouseOverControl.RootParent == this))
+            {
+                if (GumpsLoader.Instance.GetGumpTexture(0x82C, out var bounds) != null)
+                {
+                    if (x >= 0 && x < bounds.Width && y >= 0 && y <= bounds.Height)
+                    {
+                        _isLocked = !_isLocked;
+                        if (_isLocked)
+                        {
+                            _prevCanMove = CanMove;
+                            _prevCloseWithRightClick = CanCloseWithRightClick;
+                            _prevBorder = ShowBorder;
+
+                            CanMove = false;
+                            CanCloseWithRightClick = false;
+                            ShowBorder = false;
+                        }
+                        else
+                        {
+                            CanMove = _prevCanMove;
+                            CanCloseWithRightClick = _prevCloseWithRightClick;
+                            ShowBorder = _prevBorder;
+                        }
+                    }
+                }
+            }
+
+            base.OnMouseUp(x, y, button);
+        }
+
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        {
+            base.Draw(batcher, x, y);
+
+            if (Keyboard.Alt && UIManager.MouseOverControl != null && (UIManager.MouseOverControl == this || UIManager.MouseOverControl.RootParent == this))
+            {
+                Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
+
+                var texture = GumpsLoader.Instance.GetGumpTexture(0x82C, out var bounds);
+
+                if (texture != null)
+                {
+                    if (_isLocked)
+                    {
+                        hueVector.X = 34;
+                        hueVector.Y = 1;
+                    }
+                    batcher.Draw
+                    (
+                        texture,
+                        new Vector2(x, y),
+                        bounds,
+                        hueVector
+                    );
+                }
+            }
+
+            return true;
         }
     }
 }
