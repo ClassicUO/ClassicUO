@@ -30,11 +30,7 @@
 
 #endregion
 
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
+using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
@@ -44,17 +40,18 @@ using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.IO;
-using ClassicUO.Assets;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
-using ClassicUO.Utility.Collections;
 using ClassicUO.Utility.Logging;
 using ClassicUO.Utility.Platforms;
 using Microsoft.Xna.Framework;
+using System;
+using System.Collections.Generic;
+using System.Text;
 
 namespace ClassicUO.Network
 {
-    internal class PacketHandlers
+    sealed class PacketHandlers
     {
         public delegate void OnPacketBufferReader(ref StackDataReader p);
 
@@ -69,189 +66,291 @@ namespace ClassicUO.Network
         private readonly OnPacketBufferReader[] _handlers = new OnPacketBufferReader[0x100];
 
 
-        public static PacketHandlers Handlers { get; } = new PacketHandlers();
+        public static PacketHandlers Handler { get; } = new PacketHandlers();
 
 
         public void Add(byte id, OnPacketBufferReader handler)
+            => _handlers[id] = handler;
+
+
+        private byte[] _readingBuffer = new byte[4096];
+        private readonly PacketLogger _packetLogger = new PacketLogger();
+        private readonly CircularBuffer _buffer = new CircularBuffer();
+        private readonly CircularBuffer _pluginsBuffer = new CircularBuffer();
+
+
+        public int ParsePackets(Span<byte> data)
         {
-            _handlers[id] = handler;
+            Append(data, false);
+
+            return ParsePackets(_buffer, true) +
+                   ParsePackets(_pluginsBuffer, false);
         }
 
-
-        public void AnalyzePacket(byte[] data, int offset, int length)
+        private int ParsePackets(CircularBuffer stream, bool allowPlugins)
         {
-            OnPacketBufferReader bufferReader = _handlers[data[0]];
+            var packetsCount = 0;
+
+            lock (stream)
+            {
+                ref var packetBuffer = ref _readingBuffer;
+
+                while (stream.Length > 0)
+                {
+                    if (!GetPacketInfo(stream, stream.Length, out var packetID, out int offset, out int packetlength))
+                    {
+                        Log.Warn($"Invalid ID: {packetID:X2} | off: {offset} | len: {packetlength} | stream.pos: {stream.Length}");
+
+                        break;
+                    }
+
+                    if (stream.Length < packetlength)
+                    {
+                        Log.Warn($"need more data ID: {packetID:X2} | off: {offset} | len: {packetlength} | stream.pos: {stream.Length}");
+
+                        // need more data
+                        break;
+                    }
+
+                    while (packetlength > packetBuffer.Length)
+                    {
+                        Array.Resize(ref packetBuffer, packetBuffer.Length * 2);
+                    }
+
+                    _ = stream.Dequeue(packetBuffer, 0, packetlength);
+
+                    PacketLogger.Default?.Log(packetBuffer.AsSpan(0, packetlength), false);
+
+                    // TODO: the pluging function should allow Span<byte> or unsafe type only.
+                    // The current one is a bad style decision.
+                    // It will be fixed once the new plugin system is done.
+                    if (!allowPlugins || Plugin.ProcessRecvPacket(packetBuffer, ref packetlength))
+                    {
+                        AnalyzePacket(packetBuffer, offset, packetlength);
+
+                        ++packetsCount;
+                    }
+                }
+            }
+
+            return packetsCount;
+        }
+
+        public void Append(Span<byte> data, bool fromPlugins)
+        {
+            if (data.IsEmpty)
+                return;
+
+            (fromPlugins ? _pluginsBuffer : _buffer).Enqueue(data);
+        }
+
+        private void AnalyzePacket(byte[] data, int offset, int length)
+        {
+            var bufferReader = _handlers[data[0]];
 
             if (bufferReader != null)
             {
-                StackDataReader buffer = new StackDataReader(data.AsSpan(0, length));
+                var buffer = new StackDataReader(data.AsSpan(0, length));
                 buffer.Seek(offset);
 
                 bufferReader(ref buffer);
             }
         }
 
+
+        private static bool GetPacketInfo(CircularBuffer buffer, int bufferLen, out byte packetID, out int packetOffset, out int packetLen)
+        {
+            if (buffer == null || bufferLen <= 0)
+            {
+                packetID = 0xFF;
+                packetLen = 0;
+                packetOffset = 0;
+
+                return false;
+            }
+
+            packetLen = PacketsTable.GetPacketLength(packetID = buffer[0]);
+            packetOffset = 1;
+
+            if (packetLen == -1)
+            {
+                if (bufferLen < 3)
+                {
+                    return false;
+                }
+
+                var b0 = buffer[1];
+                var b1 = buffer[2];
+
+                packetLen = (b0 << 8) | b1;
+                packetOffset = 3;
+            }
+
+            return true;
+        }
+
+
         static PacketHandlers()
         {
-            Handlers.Add(0x1B, EnterWorld);
-            Handlers.Add(0x55, LoginComplete);
-            Handlers.Add(0xBD, ClientVersion);
-            Handlers.Add(0x03, ClientTalk);
-            Handlers.Add(0x0B, Damage);
-            Handlers.Add(0x11, CharacterStatus);
-            Handlers.Add(0x15, FollowR);
-            Handlers.Add(0x16, NewHealthbarUpdate);
-            Handlers.Add(0x17, NewHealthbarUpdate);
-            Handlers.Add(0x1A, UpdateItem);
-            Handlers.Add(0x1C, Talk);
-            Handlers.Add(0x1D, DeleteObject);
-            Handlers.Add(0x20, UpdatePlayer);
-            Handlers.Add(0x21, DenyWalk);
-            Handlers.Add(0x22, ConfirmWalk);
-            Handlers.Add(0x23, DragAnimation);
-            Handlers.Add(0x24, OpenContainer);
-            Handlers.Add(0x25, UpdateContainedItem);
-            Handlers.Add(0x27, DenyMoveItem);
-            Handlers.Add(0x28, EndDraggingItem);
-            Handlers.Add(0x29, DropItemAccepted);
-            Handlers.Add(0x2C, DeathScreen);
-            Handlers.Add(0x2D, MobileAttributes);
-            Handlers.Add(0x2E, EquipItem);
-            Handlers.Add(0x2F, Swing);
-            Handlers.Add(0x32, Unknown_0x32);
-            Handlers.Add(0x38, Pathfinding);
-            Handlers.Add(0x3A, UpdateSkills);
-            Handlers.Add(0x3B, CloseVendorInterface);
-            Handlers.Add(0x3C, UpdateContainedItems);
-            Handlers.Add(0x4E, PersonalLightLevel);
-            Handlers.Add(0x4F, LightLevel);
-            Handlers.Add(0x54, PlaySoundEffect);
-            Handlers.Add(0x56, MapData);
-            Handlers.Add(0x5B, SetTime);
-            Handlers.Add(0x65, SetWeather);
-            Handlers.Add(0x66, BookData);
-            Handlers.Add(0x6C, TargetCursor);
-            Handlers.Add(0x6D, PlayMusic);
-            Handlers.Add(0x6F, SecureTrading);
-            Handlers.Add(0x6E, CharacterAnimation);
-            Handlers.Add(0x70, GraphicEffect);
-            Handlers.Add(0x71, BulletinBoardData);
-            Handlers.Add(0x72, Warmode);
-            Handlers.Add(0x73, Ping);
-            Handlers.Add(0x74, BuyList);
-            Handlers.Add(0x77, UpdateCharacter);
-            Handlers.Add(0x78, UpdateObject);
-            Handlers.Add(0x7C, OpenMenu);
-            Handlers.Add(0x88, OpenPaperdoll);
-            Handlers.Add(0x89, CorpseEquipment);
-            Handlers.Add(0x90, DisplayMap);
-            Handlers.Add(0x93, OpenBook);
-            Handlers.Add(0x95, DyeData);
-            Handlers.Add(0x97, MovePlayer);
-            Handlers.Add(0x98, UpdateName);
-            Handlers.Add(0x99, MultiPlacement);
-            Handlers.Add(0x9A, ASCIIPrompt);
-            Handlers.Add(0x9E, SellList);
-            Handlers.Add(0xA1, UpdateHitpoints);
-            Handlers.Add(0xA2, UpdateMana);
-            Handlers.Add(0xA3, UpdateStamina);
-            Handlers.Add(0xA5, OpenUrl);
-            Handlers.Add(0xA6, TipWindow);
-            Handlers.Add(0xAA, AttackCharacter);
-            Handlers.Add(0xAB, TextEntryDialog);
-            Handlers.Add(0xAF, DisplayDeath);
-            Handlers.Add(0xAE, UnicodeTalk);
-            Handlers.Add(0xB0, OpenGump);
-            Handlers.Add(0xB2, ChatMessage);
-            Handlers.Add(0xB7, Help);
-            Handlers.Add(0xB8, CharacterProfile);
-            Handlers.Add(0xB9, EnableLockedFeatures);
-            Handlers.Add(0xBA, DisplayQuestArrow);
-            Handlers.Add(0xBB, UltimaMessengerR);
-            Handlers.Add(0xBC, Season);
-            Handlers.Add(0xBE, AssistVersion);
-            Handlers.Add(0xBF, ExtendedCommand);
-            Handlers.Add(0xC0, GraphicEffect);
-            Handlers.Add(0xC1, DisplayClilocString);
-            Handlers.Add(0xC2, UnicodePrompt);
-            Handlers.Add(0xC4, Semivisible);
-            Handlers.Add(0xC6, InvalidMapEnable);
-            Handlers.Add(0xC7, GraphicEffect);
-            Handlers.Add(0xC8, ClientViewRange);
-            Handlers.Add(0xCA, GetUserServerPingGodClientR);
-            Handlers.Add(0xCB, GlobalQueCount);
-            Handlers.Add(0xCC, DisplayClilocString);
-            Handlers.Add(0xD0, ConfigurationFileR);
-            Handlers.Add(0xD1, Logout);
-            Handlers.Add(0xD2, UpdateCharacter);
-            Handlers.Add(0xD3, UpdateObject);
-            Handlers.Add(0xD4, OpenBook);
-            Handlers.Add(0xD6, MegaCliloc);
-            Handlers.Add(0xD7, GenericAOSCommandsR);
-            Handlers.Add(0xD8, CustomHouse);
-            Handlers.Add(0xDB, CharacterTransferLog);
-            Handlers.Add(0xDC, OPLInfo);
-            Handlers.Add(0xDD, OpenCompressedGump);
-            Handlers.Add(0xDE, UpdateMobileStatus);
-            Handlers.Add(0xDF, BuffDebuff);
-            Handlers.Add(0xE2, NewCharacterAnimation);
-            Handlers.Add(0xE3, KREncryptionResponse);
-            Handlers.Add(0xE5, DisplayWaypoint);
-            Handlers.Add(0xE6, RemoveWaypoint);
-            Handlers.Add(0xF0, KrriosClientSpecial);
-            Handlers.Add(0xF1, FreeshardListR);
-            Handlers.Add(0xF3, UpdateItemSA);
-            Handlers.Add(0xF5, DisplayMap);
-            Handlers.Add(0xF6, BoatMoving);
-            Handlers.Add(0xF7, PacketList);
+            Handler.Add(0x1B, EnterWorld);
+            Handler.Add(0x55, LoginComplete);
+            Handler.Add(0xBD, ClientVersion);
+            Handler.Add(0x03, ClientTalk);
+            Handler.Add(0x0B, Damage);
+            Handler.Add(0x11, CharacterStatus);
+            Handler.Add(0x15, FollowR);
+            Handler.Add(0x16, NewHealthbarUpdate);
+            Handler.Add(0x17, NewHealthbarUpdate);
+            Handler.Add(0x1A, UpdateItem);
+            Handler.Add(0x1C, Talk);
+            Handler.Add(0x1D, DeleteObject);
+            Handler.Add(0x20, UpdatePlayer);
+            Handler.Add(0x21, DenyWalk);
+            Handler.Add(0x22, ConfirmWalk);
+            Handler.Add(0x23, DragAnimation);
+            Handler.Add(0x24, OpenContainer);
+            Handler.Add(0x25, UpdateContainedItem);
+            Handler.Add(0x27, DenyMoveItem);
+            Handler.Add(0x28, EndDraggingItem);
+            Handler.Add(0x29, DropItemAccepted);
+            Handler.Add(0x2C, DeathScreen);
+            Handler.Add(0x2D, MobileAttributes);
+            Handler.Add(0x2E, EquipItem);
+            Handler.Add(0x2F, Swing);
+            Handler.Add(0x32, Unknown_0x32);
+            Handler.Add(0x38, Pathfinding);
+            Handler.Add(0x3A, UpdateSkills);
+            Handler.Add(0x3B, CloseVendorInterface);
+            Handler.Add(0x3C, UpdateContainedItems);
+            Handler.Add(0x4E, PersonalLightLevel);
+            Handler.Add(0x4F, LightLevel);
+            Handler.Add(0x54, PlaySoundEffect);
+            Handler.Add(0x56, MapData);
+            Handler.Add(0x5B, SetTime);
+            Handler.Add(0x65, SetWeather);
+            Handler.Add(0x66, BookData);
+            Handler.Add(0x6C, TargetCursor);
+            Handler.Add(0x6D, PlayMusic);
+            Handler.Add(0x6F, SecureTrading);
+            Handler.Add(0x6E, CharacterAnimation);
+            Handler.Add(0x70, GraphicEffect);
+            Handler.Add(0x71, BulletinBoardData);
+            Handler.Add(0x72, Warmode);
+            Handler.Add(0x73, Ping);
+            Handler.Add(0x74, BuyList);
+            Handler.Add(0x77, UpdateCharacter);
+            Handler.Add(0x78, UpdateObject);
+            Handler.Add(0x7C, OpenMenu);
+            Handler.Add(0x88, OpenPaperdoll);
+            Handler.Add(0x89, CorpseEquipment);
+            Handler.Add(0x90, DisplayMap);
+            Handler.Add(0x93, OpenBook);
+            Handler.Add(0x95, DyeData);
+            Handler.Add(0x97, MovePlayer);
+            Handler.Add(0x98, UpdateName);
+            Handler.Add(0x99, MultiPlacement);
+            Handler.Add(0x9A, ASCIIPrompt);
+            Handler.Add(0x9E, SellList);
+            Handler.Add(0xA1, UpdateHitpoints);
+            Handler.Add(0xA2, UpdateMana);
+            Handler.Add(0xA3, UpdateStamina);
+            Handler.Add(0xA5, OpenUrl);
+            Handler.Add(0xA6, TipWindow);
+            Handler.Add(0xAA, AttackCharacter);
+            Handler.Add(0xAB, TextEntryDialog);
+            Handler.Add(0xAF, DisplayDeath);
+            Handler.Add(0xAE, UnicodeTalk);
+            Handler.Add(0xB0, OpenGump);
+            Handler.Add(0xB2, ChatMessage);
+            Handler.Add(0xB7, Help);
+            Handler.Add(0xB8, CharacterProfile);
+            Handler.Add(0xB9, EnableLockedFeatures);
+            Handler.Add(0xBA, DisplayQuestArrow);
+            Handler.Add(0xBB, UltimaMessengerR);
+            Handler.Add(0xBC, Season);
+            Handler.Add(0xBE, AssistVersion);
+            Handler.Add(0xBF, ExtendedCommand);
+            Handler.Add(0xC0, GraphicEffect);
+            Handler.Add(0xC1, DisplayClilocString);
+            Handler.Add(0xC2, UnicodePrompt);
+            Handler.Add(0xC4, Semivisible);
+            Handler.Add(0xC6, InvalidMapEnable);
+            Handler.Add(0xC7, GraphicEffect);
+            Handler.Add(0xC8, ClientViewRange);
+            Handler.Add(0xCA, GetUserServerPingGodClientR);
+            Handler.Add(0xCB, GlobalQueCount);
+            Handler.Add(0xCC, DisplayClilocString);
+            Handler.Add(0xD0, ConfigurationFileR);
+            Handler.Add(0xD1, Logout);
+            Handler.Add(0xD2, UpdateCharacter);
+            Handler.Add(0xD3, UpdateObject);
+            Handler.Add(0xD4, OpenBook);
+            Handler.Add(0xD6, MegaCliloc);
+            Handler.Add(0xD7, GenericAOSCommandsR);
+            Handler.Add(0xD8, CustomHouse);
+            Handler.Add(0xDB, CharacterTransferLog);
+            Handler.Add(0xDC, OPLInfo);
+            Handler.Add(0xDD, OpenCompressedGump);
+            Handler.Add(0xDE, UpdateMobileStatus);
+            Handler.Add(0xDF, BuffDebuff);
+            Handler.Add(0xE2, NewCharacterAnimation);
+            Handler.Add(0xE3, KREncryptionResponse);
+            Handler.Add(0xE5, DisplayWaypoint);
+            Handler.Add(0xE6, RemoveWaypoint);
+            Handler.Add(0xF0, KrriosClientSpecial);
+            Handler.Add(0xF1, FreeshardListR);
+            Handler.Add(0xF3, UpdateItemSA);
+            Handler.Add(0xF5, DisplayMap);
+            Handler.Add(0xF6, BoatMoving);
+            Handler.Add(0xF7, PacketList);
 
             // login
-            Handlers.Add(0xA8, ServerListReceived);
-            Handlers.Add(0x8C, ReceiveServerRelay);
-            Handlers.Add(0x86, UpdateCharacterList);
-            Handlers.Add(0xA9, ReceiveCharacterList);
-            Handlers.Add(0x82, ReceiveLoginRejection);
-            Handlers.Add(0x85, ReceiveLoginRejection);
-            Handlers.Add(0x53, ReceiveLoginRejection);
+            Handler.Add(0xA8, ServerListReceived);
+            Handler.Add(0x8C, ReceiveServerRelay);
+            Handler.Add(0x86, UpdateCharacterList);
+            Handler.Add(0xA9, ReceiveCharacterList);
+            Handler.Add(0x82, ReceiveLoginRejection);
+            Handler.Add(0x85, ReceiveLoginRejection);
+            Handler.Add(0x53, ReceiveLoginRejection);
         }
 
 
         public static void SendMegaClilocRequests()
         {
-            if (World.ClientFeatures.TooltipsEnabled && Handlers._clilocRequests.Count != 0)
+            if (World.ClientFeatures.TooltipsEnabled && Handler._clilocRequests.Count != 0)
             {
                 if (Client.Version >= Utility.ClientVersion.CV_5090)
                 {
-                    if (Handlers._clilocRequests.Count != 0)
+                    if (Handler._clilocRequests.Count != 0)
                     {
-                        NetClient.Socket.Send_MegaClilocRequest(ref Handlers._clilocRequests);
+                        NetClient.Socket.Send_MegaClilocRequest(ref Handler._clilocRequests);
                     }
                 }
                 else
                 {
-                    foreach (uint serial in Handlers._clilocRequests)
+                    foreach (uint serial in Handler._clilocRequests)
                     {
                         NetClient.Socket.Send_MegaClilocRequest_Old(serial);
                     }
 
-                    Handlers._clilocRequests.Clear();
+                    Handler._clilocRequests.Clear();
                 }
             }
 
-            if (Handlers._customHouseRequests.Count > 0)
+            if (Handler._customHouseRequests.Count > 0)
             {
-                for (int i = 0; i < Handlers._customHouseRequests.Count; ++i)
+                for (int i = 0; i < Handler._customHouseRequests.Count; ++i)
                 {
-                    NetClient.Socket.Send_CustomHouseDataRequest(Handlers._customHouseRequests[i]);
+                    NetClient.Socket.Send_CustomHouseDataRequest(Handler._customHouseRequests[i]);
                 }
 
-                Handlers._customHouseRequests.Clear();
+                Handler._customHouseRequests.Clear();
             }
         }
 
         public static void AddMegaClilocRequest(uint serial)
         {
-            foreach (uint s in Handlers._clilocRequests)
+            foreach (uint s in Handler._clilocRequests)
             {
                 if (s == serial)
                 {
@@ -259,7 +358,7 @@ namespace ClassicUO.Network
                 }
             }
 
-            Handlers._clilocRequests.Add(serial);
+            Handler._clilocRequests.Add(serial);
         }
 
         private static void TargetCursor(ref StackDataReader p)
@@ -1262,107 +1361,109 @@ namespace ClassicUO.Network
                             return;
                         }
                     }
-                    
+
+                    // TODO: check client version ?
+                    if (Client.Version >= Utility.ClientVersion.CV_706000 && ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.UseLargeContainerGumps)
+                    {
+                        GumpsLoader loader = GumpsLoader.Instance;
+
+                        switch (graphic)
+                        {
+                            case 0x0048:
+                                if (loader.GetGumpTexture(0x06E8, out _) != null)
+                                {
+                                    graphic = 0x06E8;
+                                }
+
+                                break;
+
+                            case 0x0049:
+                                if (loader.GetGumpTexture(0x9CDF, out _) != null)
+                                {
+                                    graphic = 0x9CDF;
+                                }
+
+                                break;
+
+                            case 0x0051:
+                                if (loader.GetGumpTexture(0x06E7, out _) != null)
+                                {
+                                    graphic = 0x06E7;
+                                }
+
+                                break;
+
+                            case 0x003E:
+                                if (loader.GetGumpTexture(0x06E9, out _) != null)
+                                {
+                                    graphic = 0x06E9;
+                                }
+
+                                break;
+
+                            case 0x004D:
+                                if (loader.GetGumpTexture(0x06EA, out _) != null)
+                                {
+                                    graphic = 0x06EA;
+                                }
+
+                                break;
+
+                            case 0x004E:
+                                if (loader.GetGumpTexture(0x06E6, out _) != null)
+                                {
+                                    graphic = 0x06E6;
+                                }
+
+                                break;
+
+                            case 0x004F:
+                                if (loader.GetGumpTexture(0x06E5, out _) != null)
+                                {
+                                    graphic = 0x06E5;
+                                }
+
+                                break;
+
+                            case 0x004A:
+                                if (loader.GetGumpTexture(0x9CDD, out _) != null)
+                                {
+                                    graphic = 0x9CDD;
+                                }
+
+                                break;
+
+                            case 0x0044:
+                                if (loader.GetGumpTexture(0x9CE3, out _) != null)
+                                {
+                                    graphic = 0x9CE3;
+                                }
+
+                                break;
+                        }
+                    }
+
+
                     if (ProfileManager.CurrentProfile.UseGridLayoutContainerGumps)
                     {
                         GridContainer gridContainer = UIManager.GetGump<GridContainer>(serial);
                         if (gridContainer != null)
                         {
-                            gridContainer.InvalidateContents = true;
+                            gridContainer.RequestUpdateContents();
                         }
                         else
                         {
                             UIManager.Add(new GridContainer(serial, graphic));
                         }
-                        //UIManager.GetGump<ContainerGump>(serial)?.Dispose();
                     }
                     else
                     {
-                        UIManager.GetGump<GridContainer>(serial)?.Dispose();
 
                         ContainerGump container = UIManager.GetGump<ContainerGump>(serial);
                         bool playsound = false;
                         int x, y;
 
-                        if (Client.Version >= Utility.ClientVersion.CV_706000 && ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.UseLargeContainerGumps)
-                        {
-                            GumpsLoader loader = GumpsLoader.Instance;
 
-                            switch (graphic)
-                            {
-                                case 0x0048:
-                                    if (loader.GetGumpTexture(0x06E8, out _) != null)
-                                    {
-                                        graphic = 0x06E8;
-                                    }
-
-                                    break;
-
-                                case 0x0049:
-                                    if (loader.GetGumpTexture(0x9CDF, out _) != null)
-                                    {
-                                        graphic = 0x9CDF;
-                                    }
-
-                                    break;
-
-                                case 0x0051:
-                                    if (loader.GetGumpTexture(0x06E7, out _) != null)
-                                    {
-                                        graphic = 0x06E7;
-                                    }
-
-                                    break;
-
-                                case 0x003E:
-                                    if (loader.GetGumpTexture(0x06E9, out _) != null)
-                                    {
-                                        graphic = 0x06E9;
-                                    }
-
-                                    break;
-
-                                case 0x004D:
-                                    if (loader.GetGumpTexture(0x06EA, out _) != null)
-                                    {
-                                        graphic = 0x06EA;
-                                    }
-
-                                    break;
-
-                                case 0x004E:
-                                    if (loader.GetGumpTexture(0x06E6, out _) != null)
-                                    {
-                                        graphic = 0x06E6;
-                                    }
-
-                                    break;
-
-                                case 0x004F:
-                                    if (loader.GetGumpTexture(0x06E5, out _) != null)
-                                    {
-                                        graphic = 0x06E5;
-                                    }
-
-                                    break;
-
-                                case 0x004A:
-                                    if (loader.GetGumpTexture(0x9CDD, out _) != null)
-                                    {
-                                        graphic = 0x9CDD;
-                                    }
-
-                                    break;
-
-                                case 0x0044:
-                                    if (loader.GetGumpTexture(0x9CE3, out _) != null)
-                                    {
-                                        graphic = 0x9CE3;
-                                    }
-
-                                    break;
-                            }
-                        }
 
                         if (container != null)
                         {
@@ -1378,14 +1479,19 @@ namespace ClassicUO.Network
                             playsound = true;
                         }
 
-                        UIManager.Add(new ContainerGump(item, graphic, playsound)
-                        {
-                            X = x,
-                            Y = y,
-                            InvalidateContents = true
-                        });
 
+                        UIManager.Add
+                        (
+                            new ContainerGump(item, graphic, playsound)
+                            {
+                                X = x,
+                                Y = y,
+                                InvalidateContents = true
+                            }
+                        );
                     }
+
+                    UIManager.RemovePosition(serial);
                 }
                 else
                 {
@@ -3509,7 +3615,7 @@ namespace ClassicUO.Network
 
             if (serial == 0 && graphic == 0 && type == MessageType.Regular && font == 0xFFFF && hue == 0xFFFF && name.ToLower() == "system")
             {
-                byte[] buffer =
+                Span<byte> buffer = stackalloc byte[]
                 {
                     0x03, 0x00, 0x28, 0x20, 0x00, 0x34, 0x00, 0x03, 0xdb, 0x13,
                     0x14, 0x3f, 0x45, 0x2c, 0x58, 0x0f, 0x5d, 0x44, 0x2e, 0x50,
@@ -3517,7 +3623,7 @@ namespace ClassicUO.Network
                     0x05, 0x4e, 0x18, 0x1e, 0x72, 0x0f, 0x59, 0xad, 0xf5, 0x00
                 };
 
-                NetClient.Socket.Send(buffer, buffer.Length);
+                NetClient.Socket.Send(buffer);
 
                 return;
             }
@@ -4416,7 +4522,7 @@ namespace ClassicUO.Network
 
                     if (!World.HouseManager.TryGetHouse(serial, out House house) || !house.IsCustom || house.Revision != revision)
                     {
-                        Handlers._customHouseRequests.Add(serial);
+                        Handler._customHouseRequests.Add(serial);
                     }
                     else
                     {
@@ -5988,7 +6094,7 @@ namespace ClassicUO.Network
 
                         #region GridContainer
                         GridContainer gridGump = UIManager.GetGump<GridContainer>(containerSerial);
-                        if(gridGump != null)
+                        if (gridGump != null)
                         {
                             gridGump.RequestUpdateContents();
                         }

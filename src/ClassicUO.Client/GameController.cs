@@ -402,7 +402,12 @@ namespace ClassicUO
             Time.Delta = (float) gameTime.ElapsedGameTime.TotalSeconds;
 
             Mouse.Update();
-            NetClient.Socket.Update();
+
+            var data = NetClient.Socket.CollectAvailableData();
+            var packetsCount = PacketHandlers.Handler.ParsePackets(data);
+            NetClient.Socket.Statistics.TotalPacketsReceived += (uint) packetsCount;
+            NetClient.Socket.Flush();
+
             Plugin.Tick();
 
             if (Scene != null && Scene.IsLoaded && !Scene.IsDestroyed)
