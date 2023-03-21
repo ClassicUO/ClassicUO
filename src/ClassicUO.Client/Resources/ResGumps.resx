@@ -702,9 +702,6 @@ when amount is or exceeds</value>
   <data name="UseLargeContainersGump" xml:space="preserve">
     <value>Use large containers gump</value>
   </data>
-  <data name="UseGridLayoutContainerGump" xml:space="preserve">
-    <value>Use grid layout containers gump *Experimental*</value>
-  </data>
   <data name="DoubleClickLootContainers" xml:space="preserve">
     <value>Double click to loot items inside containers</value>
   </data>

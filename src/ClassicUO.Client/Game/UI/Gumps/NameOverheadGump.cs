@@ -248,11 +248,6 @@ namespace ClassicUO.Game.UI.Gumps
                 BaseHealthBarGump gump = UIManager.GetGump<BaseHealthBarGump>(LocalSerial);
                 gump?.Dispose();
 
-                if (entity == World.Player)
-                {
-                    StatusGumpBase.GetStatusGump()?.Dispose();
-                }
-
                 if (ProfileManager.CurrentProfile.CustomBarsToggled)
                 {
                     Rectangle rect = new Rectangle(0, 0, HealthBarGumpCustom.HPB_WIDTH, HealthBarGumpCustom.HPB_HEIGHT_SINGLELINE);
@@ -491,7 +486,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _lockedPosition.X = (int) (m.RealScreenPosition.X + m.Offset.X + 22 + 5);
 
-                _lockedPosition.Y = (int) (m.RealScreenPosition.Y + (m.Offset.Y - m.Offset.Z) - (height + centerY + 8) + (m.IsGargoyle && m.IsFlying ? -22 : !m.IsMounted ? 22 : 0));
+                _lockedPosition.Y = (int) (m.RealScreenPosition.Y + (m.Offset.Y - m.Offset.Z) - (height + centerY + 15) + (m.IsGargoyle && m.IsFlying ? -22 : !m.IsMounted ? 22 : 0));
             }
 
             base.OnMouseOver(x, y);

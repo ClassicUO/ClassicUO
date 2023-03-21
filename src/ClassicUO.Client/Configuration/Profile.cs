@@ -316,12 +316,17 @@ namespace ClassicUO.Configuration
         public string WorldMapHiddenZoneFiles { get; set; } = string.Empty;
         public bool WorldMapShowGridIfZoomed { get; set; } = true;
 
-        public int GridContainerSearchMode { get; set; } = 0;
+        public int GridContainerSearchMode { get; set; } = 1;
         public int AutoFollowDistance { get; set; } = 2;
         public Point ResizeJournalSize { get; set; } = new Point(410, 350);
         public bool FollowingMode { get; set; } = false;
         public uint FollowingTarget { get; set; }
         public bool NamePlateHealthBar { get; set; } = true;
+        public byte GridBorderAlpha { get; set; } = 75;
+        public ushort GridBorderHue { get; set; } = 0;
+        public byte GridContainersScale { get; set; } = 100;
+        public bool GridContainerScaleItems { get; set; } = true;
+        public bool GridEnableContPreview {  get; set; } = true;
 
         public static uint GumpsVersion { get; private set; }
 
