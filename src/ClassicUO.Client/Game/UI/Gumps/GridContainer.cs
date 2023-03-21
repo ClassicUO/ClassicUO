@@ -85,7 +85,7 @@ namespace ClassicUO.Game.UI.Gumps
             Point lastPos = gridSaveSystem.GetLastPosition(LocalSerial);
             _lastX = X = lastPos.X;
             _lastY = Y = lastPos.Y;
-            AnchorType = ANCHOR_TYPE.NONE;
+            AnchorType = ProfileManager.CurrentProfile.EnableGridContainerAnchor ? ANCHOR_TYPE.NONE : ANCHOR_TYPE.DISABLED;
 
             OgContainerGraphic = ogContainer;
             _container = World.Items.Get(local);

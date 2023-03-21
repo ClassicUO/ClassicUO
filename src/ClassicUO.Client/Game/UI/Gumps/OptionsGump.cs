@@ -79,7 +79,7 @@ namespace ClassicUO.Game.UI.Gumps
         private HSliderBar _delay_before_display_tooltip, _tooltip_zoom, _tooltip_background_opacity;
         private Combobox _dragSelectModifierKey;
         private Combobox _backpackStyle, _gridContainerSearchAlternative;
-        private Checkbox _hueContainerGumps, _gridContainerItemScale, _gridContainerPreview;
+        private Checkbox _hueContainerGumps, _gridContainerItemScale, _gridContainerPreview, _gridContainerAnchorable;
         private HSliderBar _containerOpacity, _gridBorderOpacity, _gridContainerScale;
 
 
@@ -3643,6 +3643,17 @@ namespace ClassicUO.Game.UI.Gumps
                 gridSection.AddRight(AddLabel(null, "Enable container preview", 0, 0));
             } //Grid preview
 
+            {
+                gridSection.Add(_gridContainerAnchorable = AddCheckBox(
+                        null, "",
+                        _currentProfile.EnableGridContainerAnchor,
+                        0, 0
+                    ));
+                _gridContainerAnchorable.SetTooltip("This will allow grid containers to be anchored to other containers/world map/journal");
+
+                gridSection.AddRight(AddLabel(null, "Make anchorable", 0, 0));
+            }
+
             rightArea.Add(gridSection);
             #endregion
 
@@ -3933,6 +3944,16 @@ namespace ClassicUO.Game.UI.Gumps
             if (Settings.GlobalSettings.FPS != _sliderFPS.Value)
             {
                 Client.Game.SetRefreshRate(_sliderFPS.Value);
+            }
+
+
+            if (_currentProfile.EnableGridContainerAnchor != _gridContainerAnchorable.IsChecked)
+            {
+                _currentProfile.EnableGridContainerAnchor = _gridContainerAnchorable.IsChecked;
+                foreach (GridContainer _ in UIManager.Gumps.OfType<GridContainer>())
+                {
+                    _.AnchorType = _currentProfile.EnableGridContainerAnchor ? ANCHOR_TYPE.NONE : ANCHOR_TYPE.DISABLED;
+                }
             }
 
             _currentProfile.GridBorderAlpha = (byte)_gridBorderOpacity.Value;
