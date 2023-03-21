@@ -100,11 +100,7 @@ namespace ClassicUO.Game.Scenes
             _autoLogin = Settings.GlobalSettings.AutoLogin;
 
             UIManager.Add(new LoginBackground());
-            UIManager.Add(_currentGump = new LoginGump(this));
-
-            // Registering Packet Events
-            NetClient.Socket.Connected += NetClient_Connected;
-            NetClient.Socket.Disconnected += Login_NetClient_Disconnected;
+            UIManager.Add(_currentGump = new LoginGump(this));          
 
             Client.Game.Audio.PlayMusic(Client.Game.Audio.LoginMusicIndex, false, true);
 
@@ -142,8 +138,8 @@ namespace ClassicUO.Game.Scenes
             _currentGump?.Dispose();
 
             // UnRegistering Packet Events           
-            NetClient.Socket.Connected -= NetClient_Connected;
-            NetClient.Socket.Disconnected -= Login_NetClient_Disconnected;
+            NetClient.Socket.Connected -= OnNetClientConnected;
+            NetClient.Socket.Disconnected -= OnNetClientDisconnected;
 
             Client.Game.GameCursor.IsLoading = false;
             base.Unload();
@@ -342,8 +338,14 @@ namespace ClassicUO.Game.Scenes
             //    Log.Error("No Internet Access");
             //};
 
+            NetClient.Socket.Connected -= OnNetClientConnected;
+            NetClient.Socket.Disconnected -= OnNetClientDisconnected;
+            NetClient.Socket.Connected += OnNetClientConnected;
+            NetClient.Socket.Disconnected += OnNetClientDisconnected;
             NetClient.Socket.Connect(Settings.GlobalSettings.IP, Settings.GlobalSettings.Port);
         }
+
+
 
         public int GetServerIndexByName(string name)
         {
@@ -510,7 +512,7 @@ namespace ClassicUO.Game.Scenes
             return null;
         }
 
-        private void NetClient_Connected(object sender, EventArgs e)
+        private void OnNetClientConnected(object sender, EventArgs e)
         {
             Log.Info("Connected!");
             CurrentLoginStep = LoginSteps.VerifyingAccount;
@@ -539,7 +541,7 @@ namespace ClassicUO.Game.Scenes
             NetClient.Socket.Send_FirstLogin(Account, Password);
         }
 
-        private void Login_NetClient_Disconnected(object sender, SocketError e)
+        private void OnNetClientDisconnected(object sender, SocketError e)
         {
             Log.Warn("Disconnected");
 
@@ -678,27 +680,22 @@ namespace ClassicUO.Game.Scenes
             uint seed = p.ReadUInt32BE();
 
             NetClient.Socket.Disconnect();
+            NetClient.Socket = new NetClient();
             EncryptionHelper.Initialize(false, seed, (ENCRYPTION_TYPE) Settings.GlobalSettings.Encryption);
 
+            NetClient.Socket.Connect(new IPAddress(ip).ToString(), port);
 
-            void onConnected(object sender, EventArgs e)
+            if (NetClient.Socket.IsConnected)
             {
-                NetClient.Socket.Connected -= onConnected;
                 NetClient.Socket.EnableCompression();
-
                 unsafe
                 {
                     Span<byte> b = stackalloc byte[4] { (byte)(seed >> 24), (byte)(seed >> 16), (byte)(seed >> 8), (byte)seed };
-                    StackDataWriter writer = new StackDataWriter(b);
-                    NetClient.Socket.Send(writer.AllocatedBuffer, writer.BytesWritten, true, true);
-                    writer.Dispose();
+                    NetClient.Socket.Send(b, true, true);
                 }
 
                 NetClient.Socket.Send_SecondLogin(Account, Password, seed);
             }
-
-            NetClient.Socket.Connected += onConnected;
-            NetClient.Socket.Connect(new IPAddress(ip).ToString(), port);
         }
 
 
