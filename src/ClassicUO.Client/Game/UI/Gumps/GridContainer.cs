@@ -72,9 +72,6 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly GumpPic _openRegularGump, _helpToolTip, _quickDropBackpack;
         public readonly ushort OgContainerGraphic;
 
-        private Item _dragSlotItem, _dragSlotContainer;
-        private bool _dragSlotEnabled = false;
-
         private GridSlotManager gridSlotManager;
 
         private static GridSaveSystem gridSaveSystem = new GridSaveSystem();
