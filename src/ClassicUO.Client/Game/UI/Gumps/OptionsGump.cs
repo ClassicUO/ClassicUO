@@ -79,7 +79,7 @@ namespace ClassicUO.Game.UI.Gumps
         private HSliderBar _delay_before_display_tooltip, _tooltip_zoom, _tooltip_background_opacity;
         private Combobox _dragSelectModifierKey;
         private Combobox _backpackStyle, _gridContainerSearchAlternative;
-        private Checkbox _hueContainerGumps, _gridContainerItemScale;
+        private Checkbox _hueContainerGumps, _gridContainerItemScale, _gridContainerPreview;
         private HSliderBar _containerOpacity, _gridBorderOpacity, _gridContainerScale;
 
 
@@ -3631,6 +3631,17 @@ namespace ClassicUO.Game.UI.Gumps
                     );
             } //Grid container search mode
 
+            {
+                gridSection.Add(_gridContainerPreview = AddCheckBox(
+                        null,
+                        "",
+                        _currentProfile.GridEnableContPreview,
+                        0,
+                        0
+                    ));
+                _gridContainerPreview.SetTooltip("This only works on containers that you have opened, otherwise the client does not have that information yet.");
+                gridSection.AddRight(AddLabel(null, "Enable container preview", 0, 0));
+            } //Grid preview
 
             rightArea.Add(gridSection);
             #endregion
@@ -3930,6 +3941,7 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.NamePlateHealthBar = _namePlateHealthBar.IsChecked;
             _currentProfile.GridContainerSearchMode = _gridContainerSearchAlternative.SelectedIndex;
             _currentProfile.GridContainerScaleItems = _gridContainerItemScale.IsChecked;
+            _currentProfile.GridEnableContPreview = _gridContainerPreview.IsChecked;
 
             int val = int.Parse(_autoFollowDistance.Text);
             _currentProfile.AutoFollowDistance = val < 1 ? 1 : val;

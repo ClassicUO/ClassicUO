@@ -665,7 +665,7 @@ namespace ClassicUO.Game.UI.Gumps
                 else
                     mousePressedWhenEntered = false;
                 if (_item != null)
-                    if (_item.ItemData.IsContainer && _item.Items != null)
+                    if (_item.ItemData.IsContainer && _item.Items != null && ProfileManager.CurrentProfile.GridEnableContPreview)
                     {
                         preview = new GridContainerPreview(_item, Mouse.Position.X, Mouse.Position.Y);
                         UIManager.Add(preview);

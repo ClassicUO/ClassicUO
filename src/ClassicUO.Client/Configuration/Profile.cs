@@ -326,6 +326,7 @@ namespace ClassicUO.Configuration
         public ushort GridBorderHue { get; set; } = 0;
         public byte GridContainersScale { get; set; } = 100;
         public bool GridContainerScaleItems { get; set; } = true;
+        public bool GridEnableContPreview {  get; set; } = true;
 
         public static uint GumpsVersion { get; private set; }
 
