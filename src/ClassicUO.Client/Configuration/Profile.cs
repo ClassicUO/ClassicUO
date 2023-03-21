@@ -330,6 +330,7 @@ namespace ClassicUO.Configuration
         public bool GridContainerScaleItems { get; set; } = true;
         public bool GridEnableContPreview {  get; set; } = true;
         public bool EnableGridContainerAnchor { get; set; } = false;
+        public bool DisableSystemChat { get; set; } = false;
 
         public static uint GumpsVersion { get; private set; }
 
