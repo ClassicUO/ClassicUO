@@ -316,7 +316,7 @@ namespace ClassicUO.Configuration
         public string WorldMapHiddenZoneFiles { get; set; } = string.Empty;
         public bool WorldMapShowGridIfZoomed { get; set; } = true;
 
-        public int GridContainerSearchMode { get; set; } = 0;
+        public int GridContainerSearchMode { get; set; } = 1;
         public int AutoFollowDistance { get; set; } = 2;
         public Point ResizeJournalSize { get; set; } = new Point(410, 350);
         public bool FollowingMode { get; set; } = false;

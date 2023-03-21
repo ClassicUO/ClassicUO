@@ -3374,52 +3374,6 @@ namespace ClassicUO.Game.UI.Gumps
                 startY += _backpackStyle.Height + 2 + 10;
             }
 
-            text = AddLabel(rightArea, "Grid container opacity", startX, startY);
-            startX += text.Width + 5;
-
-            _containerOpacity = AddHSlider
-            (
-                rightArea,
-                0,
-                100,
-                _currentProfile.ContainerOpacity,
-                startX,
-                startY,
-                200
-            );
-
-            startY += text.Height + 2;
-            startX = 5;
-
-            _altGridContainerBackgroundHue = AddColorBox(
-                rightArea,
-                startX,
-                startY,
-                _currentProfile.AltGridContainerBackgroundHue,
-                "Grid container background hue"
-                );
-
-            startY += _altGridContainerBackgroundHue.Height + 2;
-            startX = 5;
-
-            Label _gridSearchLabel = AddLabel(rightArea, "Grid Container Search Style", startX, startY);
-            startX = _gridSearchLabel.Width + 5;
-
-            _gridContainerSearchAlternative = AddCombobox(
-                rightArea,
-                new string[] {
-                    "Only show",
-                    "Highlight"
-                },
-            _currentProfile.GridContainerSearchMode,
-            startX,
-            startY,
-            200
-                );
-
-            startY += _gridContainerSearchAlternative.Height + 2;
-            startX = 5;
-
             text = AddLabel(rightArea, ResGumps.ContainerScale, startX, startY);
             startX += text.Width + 5;
 
@@ -3435,7 +3389,7 @@ namespace ClassicUO.Game.UI.Gumps
             );
 
             startX = 5;
-            startY += text.Height + 2;
+            startY += _containersScale.Height + 2;
 
             _containerScaleItems = AddCheckBox
             (
@@ -3461,15 +3415,6 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 startY += _useLargeContianersGumps.Height + 2;
             }
-
-            _useGridLayoutContainerGumps = AddCheckBox(
-                rightArea,
-                ResGumps.UseGridLayoutContainerGump,
-                _currentProfile.UseGridLayoutContainerGumps,
-                startX,
-                startY
-            );
-            startY += _useGridLayoutContainerGumps.Height + 2;
 
             _containerDoubleClickToLoot = AddCheckBox
             (
@@ -3569,32 +3514,96 @@ namespace ClassicUO.Game.UI.Gumps
             gridSection.X = startX;
             gridSection.Y = startY;
 
-            gridSection.Add(AddLabel(null, "Grid Border Opacity", 0, 0));
-            gridSection.AddRight
-                (
-                    _gridBorderOpacity = AddHSlider
+            {
+                gridSection.Add(_useGridLayoutContainerGumps = AddCheckBox(
+                    null,
+                    "Use grid containers",
+                    _currentProfile.UseGridLayoutContainerGumps,
+                    0,
+                    0
+                ));
+            }
+
+            {
+                gridSection.Add(AddLabel(null, "Border opacity", 0, 0));
+                gridSection.AddRight
                     (
+                        _gridBorderOpacity = AddHSlider
+                        (
+                            null,
+                            0,
+                            100,
+                            _currentProfile.GridBorderAlpha,
+                            0,
+                            0,
+                            200
+                        )
+                    );
+            } //Grid border opacity
+
+            {
+                gridSection.PushIndent();
+                gridSection.Add
+                    (
+                        _gridBorderHue = AddColorBox
+                        (
+                            null, 0, 0,
+                            _currentProfile.GridBorderHue,
+                            ""
+                        )
+                    );
+                gridSection.AddRight(AddLabel(null, "Border hue", 0, 0));
+                gridSection.PopIndent();
+            } //Grid border hue
+
+            {
+                gridSection.Add(AddLabel(null, "Background opacity", 0, 0));
+                gridSection.AddRight(_containerOpacity = AddHSlider
+                (
+                    null,
+                    0,
+                    100,
+                    _currentProfile.ContainerOpacity,
+                    0,
+                    0,
+                    200
+                ));
+            } //Grid container opacity
+
+            {
+                gridSection.PushIndent();
+                gridSection.Add(_altGridContainerBackgroundHue = AddColorBox(
                         null,
                         0,
-                        100,
-                        _currentProfile.GridBorderAlpha,
                         0,
-                        0,
-                        200
-                    )
-                );
-
-            gridSection.Add
-                (
-                    _gridBorderHue = AddColorBox
-                    (
-                        null, 0, 0,
-                        _currentProfile.GridBorderHue,
+                        _currentProfile.AltGridContainerBackgroundHue,
                         ""
                     )
                 );
-            gridSection.AddRight(AddLabel(null, "Grid Border Hue", 0, 0));
-            
+                gridSection.AddRight(AddLabel(null, "Background hue", 0, 0));
+                gridSection.PopIndent();
+            } //Grid container background hue
+
+            {
+                gridSection.Add(
+                        AddLabel(null, "Search Style", 0, 0)
+                    );
+
+                gridSection.AddRight(
+                    _gridContainerSearchAlternative = AddCombobox(
+                            null,
+                            new string[] {
+                                "Only show",
+                                "Highlight"
+                            },
+                            _currentProfile.GridContainerSearchMode,
+                            0,
+                            0,
+                            200
+                        )
+                    );
+            } //Grid container search mode
+
 
             rightArea.Add(gridSection);
             #endregion
