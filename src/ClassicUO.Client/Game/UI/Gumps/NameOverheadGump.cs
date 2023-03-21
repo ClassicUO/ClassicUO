@@ -204,7 +204,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                _background = new AlphaBlendControl(.7f)
+                _background = new AlphaBlendControl(ProfileManager.CurrentProfile.NamePlateOpacity / 100f)
                 {
                     WantUpdateSize = false,
                     Hue = entity is Mobile m ? Notoriety.GetHue(m.NotorietyFlag) : (ushort) 0x0481
@@ -618,17 +618,7 @@ namespace ClassicUO.Game.UI.Gumps
             X = x;
             Y = y;
 
-            if (ProfileManager.CurrentProfile.NamePlateHealthBar && _isMobile)
-            {
 
-                batcher.Draw
-                (
-                    SolidColorTextureCache.GetTexture(Color.White),
-                    new Vector2(x, y),
-                    new Rectangle(x, y, (int)(Width * _hpPercent), Height),
-                    ShaderHueTranslator.GetHueVector(_background.Hue, false, 0.75f)
-                );
-            }
 
             batcher.DrawRectangle
             (
@@ -641,6 +631,17 @@ namespace ClassicUO.Game.UI.Gumps
             );
 
             base.Draw(batcher, x, y);
+
+            if (ProfileManager.CurrentProfile.NamePlateHealthBar && _isMobile)
+            {
+                batcher.Draw
+                (
+                    SolidColorTextureCache.GetTexture(Color.White),
+                    new Vector2(x, y),
+                    new Rectangle(x, y, (int)(Width * _hpPercent), Height),
+                    ShaderHueTranslator.GetHueVector(_background.Hue, false, 0.75f)
+                );
+            }
 
             int renderedTextOffset = Math.Max(0, Width - _renderedText.Width - 4) >> 1;
 
