@@ -322,6 +322,8 @@ namespace ClassicUO.Configuration
         public bool FollowingMode { get; set; } = false;
         public uint FollowingTarget { get; set; }
         public bool NamePlateHealthBar { get; set; } = true;
+        public byte NamePlateOpacity { get; set; } = 75;
+        public byte NamePlateHealthBarOpacity { get; set; } = 50;
         public byte GridBorderAlpha { get; set; } = 75;
         public ushort GridBorderHue { get; set; } = 0;
         public byte GridContainersScale { get; set; } = 100;

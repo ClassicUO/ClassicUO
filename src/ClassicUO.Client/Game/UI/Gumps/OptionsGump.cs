@@ -168,7 +168,7 @@ namespace ClassicUO.Game.UI.Gumps
         private FontSelector _tooltip_font_selector;
         private HSliderBar _dragSelectStartX, _dragSelectStartY;
         private Checkbox _dragSelectAsAnchor, _namePlateHealthBar;
-        private HSliderBar _journalOpacity;
+        private HSliderBar _journalOpacity, _namePlateOpacity, _namePlateHealthBarOpacity;
         private ClickableColorBox _journalBackgroundColor;
 
         // video
@@ -995,11 +995,35 @@ namespace ClassicUO.Game.UI.Gumps
             );
             section2.AddRight(AddLabel(null, "Hidden Body Hue", startX, startY));
 
-            section2.Add(
-                _namePlateHealthBar = AddCheckBox(null, "", _currentProfile.NamePlateHealthBar, startX, startY)
-                );
+            {
+                section2.Add(
+                    _namePlateHealthBar = AddCheckBox(null, "", _currentProfile.NamePlateHealthBar, startX, startY)
+                    );
 
-            section2.AddRight(AddLabel(null, "Name plates also act as health bar", startX, startY));
+                section2.AddRight(AddLabel(null, "Name plates also act as health bar", startX, startY));
+
+                section2.PushIndent();
+                section2.Add(AddLabel(null, "HP opacity", 0, 0));
+                section2.AddRight(_namePlateHealthBarOpacity = AddHSlider(
+                        null,
+                        0, 100,
+                        _currentProfile.NamePlateHealthBarOpacity,
+                        0, 0,
+                        200
+                    ));
+                section2.PopIndent();
+            } //Name plate health bar
+
+            {
+                section2.Add(AddLabel(null, "Name plate background opacity", 0, 0));
+                section2.AddRight(_namePlateOpacity = AddHSlider(
+                        null,
+                        0, 100,
+                        _currentProfile.NamePlateOpacity,
+                        0, 0,
+                        200
+                    ));
+            } //Name plate background opacity
 
             SettingsSection section3 = AddSettingsSection(box, "Gumps & Context");
             section3.Y = section2.Bounds.Bottom + 40;
@@ -3652,7 +3676,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _gridContainerAnchorable.SetTooltip("This will allow grid containers to be anchored to other containers/world map/journal");
 
                 gridSection.AddRight(AddLabel(null, "Make anchorable", 0, 0));
-            }
+            } //Grid anchors
 
             rightArea.Add(gridSection);
             #endregion
@@ -3960,6 +3984,8 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.GridBorderHue = _gridBorderHue.Hue;
             _currentProfile.GridContainersScale = (byte)_gridContainerScale.Value;
             _currentProfile.NamePlateHealthBar = _namePlateHealthBar.IsChecked;
+            _currentProfile.NamePlateOpacity = (byte)_namePlateOpacity.Value;
+            _currentProfile.NamePlateHealthBarOpacity = (byte)_namePlateHealthBarOpacity.Value;
             _currentProfile.GridContainerSearchMode = _gridContainerSearchAlternative.SelectedIndex;
             _currentProfile.GridContainerScaleItems = _gridContainerItemScale.IsChecked;
             _currentProfile.GridEnableContPreview = _gridContainerPreview.IsChecked;
