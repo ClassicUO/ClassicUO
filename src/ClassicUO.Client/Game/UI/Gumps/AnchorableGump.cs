@@ -44,7 +44,8 @@ namespace ClassicUO.Game.UI.Gumps
     {
         NONE,
         SPELL,
-        HEALTHBAR
+        HEALTHBAR,
+        DISABLED
     }
 
     internal abstract class AnchorableGump : Gump
@@ -96,7 +97,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseOver(int x, int y)
         {
-            if (!IsDisposed && UIManager.IsDragging && UIManager.DraggingControl == this)
+            if (!IsDisposed && UIManager.IsDragging && UIManager.DraggingControl == this && AnchorType != ANCHOR_TYPE.DISABLED)
             {
                 _anchorCandidate = UIManager.AnchorManager.GetAnchorableControlUnder(this);
             }
