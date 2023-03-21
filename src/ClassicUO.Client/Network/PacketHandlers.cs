@@ -1013,6 +1013,9 @@ namespace ClassicUO.Network
                     }
 
                     UIManager.GetGump<ContainerGump>(cont)?.RequestUpdateContents();
+                    #region GridContainer
+                    UIManager.GetGump<GridContainer>(cont)?.RequestUpdateContents();
+                    #endregion
 
                     if (top != null && top.Graphic == 0x2006 && (ProfileManager.CurrentProfile.GridLootType == 1 || ProfileManager.CurrentProfile.GridLootType == 2))
                     {
@@ -1349,8 +1352,8 @@ namespace ClassicUO.Network
                 {
                     if (item.IsCorpse && (ProfileManager.CurrentProfile.GridLootType == 1 || ProfileManager.CurrentProfile.GridLootType == 2))
                     {
-                        //UIManager.GetGump<GridLootGump>(serial)?.Dispose();
-                        //UIManager.Add(new GridLootGump(serial));
+                        UIManager.GetGump<GridLootGump>(serial)?.Dispose();
+                        UIManager.Add(new GridLootGump(serial));
                         _requestedGridLoot = serial;
 
                         if (ProfileManager.CurrentProfile.GridLootType == 1)
@@ -1358,10 +1361,6 @@ namespace ClassicUO.Network
                             return;
                         }
                     }
-
-                    ContainerGump container = UIManager.GetGump<ContainerGump>(serial);
-                    bool playsound = false;
-                    int x, y;
 
                     // TODO: check client version ?
                     if (Client.Version >= Utility.ClientVersion.CV_706000 && ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.UseLargeContainerGumps)
@@ -1445,30 +1444,52 @@ namespace ClassicUO.Network
                     }
 
 
-                    if (container != null)
+                    if (ProfileManager.CurrentProfile.UseGridLayoutContainerGumps)
                     {
-                        x = container.ScreenCoordinateX;
-                        y = container.ScreenCoordinateY;
-                        container.Dispose();
+                        GridContainer gridContainer = UIManager.GetGump<GridContainer>(serial);
+                        if (gridContainer != null)
+                        {
+                            gridContainer.RequestUpdateContents();
+                        }
+                        else
+                        {
+                            UIManager.Add(new GridContainer(serial, graphic));
+                        }
                     }
                     else
                     {
-                        ContainerManager.CalculateContainerPosition(serial, graphic);
-                        x = ContainerManager.X;
-                        y = ContainerManager.Y;
-                        playsound = true;
-                    }
+
+                        ContainerGump container = UIManager.GetGump<ContainerGump>(serial);
+                        bool playsound = false;
+                        int x, y;
 
 
-                    UIManager.Add
-                    (
-                        new ContainerGump(item, graphic, playsound)
+
+                        if (container != null)
                         {
-                            X = x,
-                            Y = y,
-                            InvalidateContents = true
+                            x = container.ScreenCoordinateX;
+                            y = container.ScreenCoordinateY;
+                            container.Dispose();
                         }
-                    );
+                        else
+                        {
+                            ContainerManager.CalculateContainerPosition(serial, graphic);
+                            x = ContainerManager.X;
+                            y = ContainerManager.Y;
+                            playsound = true;
+                        }
+
+
+                        UIManager.Add
+                        (
+                            new ContainerGump(item, graphic, playsound)
+                            {
+                                X = x,
+                                Y = y,
+                                InvalidateContents = true
+                            }
+                        );
+                    }
 
                     UIManager.RemovePosition(serial);
                 }
@@ -6070,6 +6091,14 @@ namespace ClassicUO.Network
                         {
                             ((ContainerGump)gump).CheckItemControlPosition(item);
                         }
+
+                        #region GridContainer
+                        GridContainer gridGump = UIManager.GetGump<GridContainer>(containerSerial);
+                        if (gridGump != null)
+                        {
+                            gridGump.RequestUpdateContents();
+                        }
+                        #endregion
 
                         if (ProfileManager.CurrentProfile.GridLootType > 0)
                         {
