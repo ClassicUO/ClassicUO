@@ -3731,22 +3731,7 @@ namespace ClassicUO.Game.UI.Gumps
             );
 
 
-            SettingsSection section = new SettingsSection("Testing", rightArea.Width);
-
-            {
-                NiceButton test;
-                section.Add(test = new NiceButton(0, 0, 200, 25, ButtonAction.Activate, "Test cooldown"));
-                test.MouseUp += (sender, e) =>
-                {
-                    CoolDownBar.CoolDownBarManager.AddCoolDownBar(TimeSpan.FromSeconds(10), "Dummy", 45);
-                };
-            }
-
-            rightArea.Add(section);
-
-
             SettingsSection _coolDowns = new SettingsSection("Cooldown bars", rightArea.Width);
-            _coolDowns.Y = section.Y + section.Height;
 
             {
                 _coolDowns.Add(AddLabel(null, "Position", 0, 0));
@@ -3765,10 +3750,87 @@ namespace ClassicUO.Game.UI.Gumps
                 _coolDownY.SetText(_currentProfile.CoolDownY.ToString());
 
             }//Cooldown position
-
             rightArea.Add(_coolDowns);
 
+            #region Cooldown conditions
+            SettingsSection conditions = new SettingsSection("Condition", rightArea.Width);
+            conditions.Y = _coolDowns.Y + _coolDowns.Height;
+
+            {
+                NiceButton _button;
+                conditions.Add(_button = new NiceButton(
+                        0, 0,
+                        100, TEXTBOX_HEIGHT,
+                        ButtonAction.Activate,
+                        "+ Condition"
+                    ));
+                _button.IsSelectable = false;
+                _button.MouseUp += (sender, e) => {
+                    conditions.Add(GenConditionControl(0, conditions.Width - 5));
+                };
+            } //Add condition
+
+            rightArea.Add(conditions);
+            #endregion
+
             Add(rightArea, PAGE);
+        }
+
+        public Control GenConditionControl(int key, int width)
+        {
+            Area main = new Area();
+            main.Width = width;
+            main.Height = 60;
+
+            AlphaBlendControl _background = new AlphaBlendControl();
+            _background.Width = width;
+            _background.Height = main.Height;
+            main.Add(_background);
+
+            NiceButton _delete = new NiceButton(1, 1, 25, TEXTBOX_HEIGHT, ButtonAction.Activate, "X");
+            main.Add(_delete);
+
+            Label _hueLabel = new Label("Cooldown hue", true, HUE_FONT, 75, FONT);
+            _hueLabel.X = _delete.X + _delete.Width;
+            _hueLabel.Y = 1;
+            main.Add(_hueLabel);
+
+            ClickableColorBox _hueSelector = new ClickableColorBox(_hueLabel.X + _hueLabel.Width + 5, 1, 13, 14, 42);
+            main.Add(_hueSelector);
+
+            InputField _cooldown = AddInputField(
+                null, 0, 1,
+                25, TEXTBOX_HEIGHT,
+                numbersOnly: true
+                );
+            _cooldown.X = main.Width - _cooldown.Width - 1;
+            _cooldown.SetText(10.ToString());
+            main.Add(_cooldown);
+
+            InputField _name = AddInputField(null, _hueSelector.X + _hueSelector.Width + 5, 1, 100, TEXTBOX_HEIGHT);
+            _name.SetText("Label");
+            main.Add(_name);
+
+            NiceButton _preview = new NiceButton(_name.X + _name.Width + 5, 1, 60, TEXTBOX_HEIGHT, ButtonAction.Activate, "Preview");
+            _preview.IsSelectable = false;
+            _preview.MouseUp += (s, e) => {
+                CoolDownBar.CoolDownBarManager.AddCoolDownBar(TimeSpan.FromSeconds(int.Parse(_cooldown.Text)), _name.Text, _hueSelector.Hue);
+            };
+            main.Add(_preview);
+
+            Label _cooldownLabel = new Label("Cooldown", true, HUE_FONT, 50, FONT);
+            _cooldownLabel.X = _cooldown.X - _cooldownLabel.Width - 5;
+            _cooldownLabel.Y = 1;
+            main.Add(_cooldownLabel);
+
+            InputField _conditionText = AddInputField(
+                null, 1, _delete.Height + 5,
+                main.Width, TEXTBOX_HEIGHT
+                );
+            _conditionText.SetText("Text to trigger from");
+            main.Add(_conditionText);
+
+            return main;
         }
 
         public override void OnButtonClick(int buttonID)
