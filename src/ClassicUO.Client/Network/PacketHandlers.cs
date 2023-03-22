@@ -5541,7 +5541,7 @@ namespace ClassicUO.Network
 
                         string text = $"<left>{title}{description}{wtf}</left>";
                         bool alreadyExists = World.Player.IsBuffIconExists(ic);
-                        World.Player.AddBuff(ic, BuffTable.Table[iconID], timer, text);
+                        World.Player.AddBuff(ic, BuffTable.Table[iconID], timer, text, title);
 
                         if (!alreadyExists)
                         {
