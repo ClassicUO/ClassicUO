@@ -249,13 +249,13 @@ namespace ClassicUO.Game.GameObjects
 
         public void AddBuff(BuffIconType type, ushort graphic, uint time, string text, string title = "")
         {
-            _buffIcons[type] = new BuffIcon(type, graphic, time, text);
+            _buffIcons[type] = new BuffIcon(type, graphic, time, text, title);
 
             if (ProfileManager.CurrentProfile.UseImprovedBuffBar)
             {
                 ImprovedBuffGump gump = UIManager.GetGump<ImprovedBuffGump>();
                 if (gump != null)
-                    gump.AddBuff(new BuffIcon(type, graphic, time, title));
+                    gump.AddBuff(new BuffIcon(type, graphic, time, text, title));
             }
         }
 

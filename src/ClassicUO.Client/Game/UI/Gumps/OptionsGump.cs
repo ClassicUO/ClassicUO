@@ -2887,9 +2887,9 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _improvedBuffBarHue = AddColorBox(
                     rightArea,
-                    startX, startY,
+                    startX + 30, startY,
                     _currentProfile.ImprovedBuffBarHue,
-                    ""
+                    "Buff Bar Hue"
                     );
                 startY += _improvedBuffBarHue.Height + 2;
             }//Improved buff gump
@@ -3783,7 +3783,8 @@ namespace ClassicUO.Game.UI.Gumps
                         "+ Condition"
                     ));
                 _button.IsSelectable = false;
-                _button.MouseUp += (sender, e) => {
+                _button.MouseUp += (sender, e) =>
+                {
                     conditions.Add(GenConditionControl(_currentProfile.CoolDownConditionCount, WIDTH - 240, true));
                 };
 
@@ -3864,14 +3865,16 @@ namespace ClassicUO.Game.UI.Gumps
 
             NiceButton _save = new NiceButton(main.Width - 37, 1, 37, TEXTBOX_HEIGHT, ButtonAction.Activate, "Save");
             _save.IsSelectable = false;
-            _save.MouseUp += (s, e) => {
+            _save.MouseUp += (s, e) =>
+            {
                 CoolDownBar.CoolDownConditionData.SaveCondition(key, _hueSelector.Hue, _name.Text, _conditionText.Text, int.Parse(_cooldown.Text), false);
             };
             main.Add(_save);
 
             NiceButton _preview = new NiceButton(_save.X - 54, 1, 54, TEXTBOX_HEIGHT, ButtonAction.Activate, "Preview");
             _preview.IsSelectable = false;
-            _preview.MouseUp += (s, e) => {
+            _preview.MouseUp += (s, e) =>
+            {
                 CoolDownBarManager.AddCoolDownBar(TimeSpan.FromSeconds(int.Parse(_cooldown.Text)), _name.Text, _hueSelector.Hue);
             };
             main.Add(_preview);
@@ -4172,8 +4175,23 @@ namespace ClassicUO.Game.UI.Gumps
                     _.AnchorType = _currentProfile.EnableGridContainerAnchor ? ANCHOR_TYPE.NONE : ANCHOR_TYPE.DISABLED;
                 }
             }
+            if (_currentProfile.UseImprovedBuffBar != _enableImprovedBuffGump.IsChecked)
+            {
+                _currentProfile.UseImprovedBuffBar = _enableImprovedBuffGump.IsChecked;
+                if (_currentProfile.UseImprovedBuffBar)
+                {
+                    foreach (Gump g in UIManager.Gumps.OfType<BuffGump>())
+                        g.Dispose();
+                    UIManager.Add(new ImprovedBuffGump());
+                }
+                else
+                {
+                    foreach (Gump g in UIManager.Gumps.OfType<ImprovedBuffGump>())
+                        g.Dispose();
+                    UIManager.Add(new BuffGump(100, 100));
+                }
+            }
 
-            _currentProfile.UseImprovedBuffBar = _enableImprovedBuffGump.IsChecked;
             _currentProfile.ImprovedBuffBarHue = _improvedBuffBarHue.Hue;
 
             _currentProfile.DisableSystemChat = _disableSystemChat.IsChecked;

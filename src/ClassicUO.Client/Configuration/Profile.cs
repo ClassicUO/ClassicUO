@@ -538,7 +538,10 @@ namespace ClassicUO.Configuration
                             switch (type)
                             {
                                 case GumpType.Buff:
-                                    gump = new BuffGump();
+                                    if (ProfileManager.CurrentProfile.UseImprovedBuffBar)
+                                        gump = new ImprovedBuffGump();
+                                    else
+                                        gump = new BuffGump(100, 100);
 
                                     break;
 

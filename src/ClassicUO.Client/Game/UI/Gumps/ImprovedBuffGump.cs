@@ -3,6 +3,7 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Renderer;
 using System;
+using System.Collections.Generic;
 using System.Xml;
 
 namespace ClassicUO.Game.UI.Gumps
@@ -17,6 +18,8 @@ namespace ClassicUO.Game.UI.Gumps
 
         public ImprovedBuffGump() : base(0, 0)
         {
+            X = 100;
+            Y = 100;
             CanMove = true;
             CanCloseWithRightClick = true;
             AcceptMouseInput = true;
@@ -26,11 +29,19 @@ namespace ClassicUO.Game.UI.Gumps
             _graphic = 0x7580;
 
             BuildGump();
+
+            if (World.Player != null)
+            {
+                foreach (KeyValuePair<BuffIconType, BuffIcon> k in World.Player.BuffIcons)
+                {
+                    AddBuff(k.Value);
+                }
+            }
         }
 
         public void AddBuff(BuffIcon icon)
         {
-            CoolDownBar coolDownBar = new CoolDownBar(TimeSpan.FromMilliseconds(icon.Timer - Time.Ticks), icon.Text, ProfileManager.CurrentProfile.ImprovedBuffBarHue, 0, 0, icon.Graphic);
+            CoolDownBar coolDownBar = new CoolDownBar(TimeSpan.FromMilliseconds(icon.Timer - Time.Ticks), icon.Title, ProfileManager.CurrentProfile.ImprovedBuffBarHue, 0, 0, icon.Graphic);
             int x = 0;
             bool upsideDown = false;
             switch (_direction)
@@ -164,7 +175,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             _graphic = ushort.Parse(xml.GetAttribute("graphic"));
             _direction = (GumpDirection)byte.Parse(xml.GetAttribute("direction"));
-            BuildGump();
+            RequestUpdateContents();
         }
 
         public override GumpType GumpType => GumpType.Buff;

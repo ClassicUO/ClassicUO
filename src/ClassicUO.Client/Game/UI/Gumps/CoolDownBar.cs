@@ -72,6 +72,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = 0
             };
             cooldownLabel.Y = COOL_DOWN_HEIGHT - cooldownLabel.Height - 2;
+            cooldownLabel.Text = "";
             #endregion
 
             #region ADD CONTROLS
