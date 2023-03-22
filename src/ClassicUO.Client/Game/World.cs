@@ -93,6 +93,8 @@ namespace ClassicUO.Game
 
         public static JournalManager Journal { get; } = new JournalManager();
 
+        public static CoolDownBarManager CoolDownBarManager { get; } = new CoolDownBarManager();
+
 
         public static int MapIndex
         {
@@ -144,7 +146,7 @@ namespace ClassicUO.Game
                     {
                         Client.Game.GameCursor.Graphic = 0xFFFF;
                     }
-                    
+
                     UoAssist.SignalMapChanged(value);
                 }
             }
@@ -500,7 +502,7 @@ namespace ClassicUO.Game
             {
                 return false;
             }
-            
+
             LinkedObject first = item.Items;
             RemoveItemFromContainer(item);
 
@@ -532,7 +534,7 @@ namespace ClassicUO.Game
             {
                 return false;
             }
-     
+
             LinkedObject first = mobile.Items;
 
             while (first != null)
@@ -752,7 +754,7 @@ namespace ClassicUO.Game
             return 0;
         }
 
-       
+
         public static void Clear()
         {
             foreach (Mobile mobile in Mobiles.Values)

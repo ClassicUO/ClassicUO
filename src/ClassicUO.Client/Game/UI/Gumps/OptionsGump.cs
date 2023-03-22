@@ -3754,7 +3754,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             #region Cooldown conditions
             SettingsSection conditions = new SettingsSection("Condition", rightArea.Width);
-            conditions.Y = _coolDowns.Y + _coolDowns.Height;
+            conditions.Y = _coolDowns.Y + _coolDowns.Height + 5;
 
             {
                 NiceButton _button;
@@ -3766,8 +3766,14 @@ namespace ClassicUO.Game.UI.Gumps
                     ));
                 _button.IsSelectable = false;
                 _button.MouseUp += (sender, e) => {
-                    conditions.Add(GenConditionControl(0, conditions.Width - 5));
+                    conditions.Add(GenConditionControl(_currentProfile.CoolDownConditionCount, WIDTH - 240, true));
                 };
+
+                int count = _currentProfile.CoolDownConditionCount;
+                for (int i = 0; i < count; i++)
+                {
+                    conditions.Add(GenConditionControl(i, WIDTH - 240, false));
+                }
             } //Add condition
 
             rightArea.Add(conditions);
@@ -3776,9 +3782,9 @@ namespace ClassicUO.Game.UI.Gumps
             Add(rightArea, PAGE);
         }
 
-        public Control GenConditionControl(int key, int width)
+        public Control GenConditionControl(int key, int width, bool createIfNotExists)
         {
-            CoolDownBar.CoolDownConditionData data = CoolDownBar.CoolDownConditionData.GetConditionData(key, true);
+            CoolDownBar.CoolDownConditionData data = CoolDownBar.CoolDownConditionData.GetConditionData(key, createIfNotExists);
             Area main = new Area();
             main.Width = width;
             main.Height = 60;
@@ -3788,41 +3794,48 @@ namespace ClassicUO.Game.UI.Gumps
             _background.Height = main.Height;
             main.Add(_background);
 
-            NiceButton _delete = new NiceButton(1, 1, 25, TEXTBOX_HEIGHT, ButtonAction.Activate, "X");
+
+            NiceButton _delete = new NiceButton(1, 1, 22, TEXTBOX_HEIGHT, ButtonAction.Activate, "X");
+            _delete.SetTooltip("Delete this cooldown bar");
+            _delete.MouseUp += (sender, e) =>
+            {
+                if (e.Button == MouseButtonType.Left)
+                {
+                    CoolDownBar.CoolDownConditionData.RemoveCondition(key);
+                    main.Dispose();
+                }
+            };
             main.Add(_delete);
 
-            Label _hueLabel = new Label("Cooldown hue", true, HUE_FONT, 75, FONT);
-            _hueLabel.X = _delete.X + _delete.Width;
+
+            Label _hueLabel = new Label("Hue:", true, HUE_FONT, 25, FONT);
+            _hueLabel.X = _delete.X + _delete.Width + 5;
             _hueLabel.Y = 1;
             main.Add(_hueLabel);
 
-            ClickableColorBox _hueSelector = new ClickableColorBox(_hueLabel.X + _hueLabel.Width + 5, 1, 13, 14, data.hue);
+            ClickableColorBox _hueSelector = new ClickableColorBox(_hueLabel.X + _hueLabel.Width + 2, 1, 13, 14, data.hue);
             main.Add(_hueSelector);
+
+
+            InputField _name = AddInputField(null, _hueSelector.X + _hueSelector.Width + 10, 1, 100, TEXTBOX_HEIGHT);
+            _name.SetText(data.label);
+            main.Add(_name);
+
+
+
+            Label _cooldownLabel = new Label("Cooldown:", true, HUE_FONT, 52, FONT);
+            _cooldownLabel.X = _name.X + _name.Width + 5;
+            _cooldownLabel.Y = 1;
+            main.Add(_cooldownLabel);
 
             InputField _cooldown = AddInputField(
                 null, 0, 1,
                 25, TEXTBOX_HEIGHT,
                 numbersOnly: true
                 );
-            _cooldown.X = main.Width - _cooldown.Width - 1;
+            _cooldown.X = _cooldownLabel.X + _cooldownLabel.Width + 5;
             _cooldown.SetText(data.cooldown.ToString());
             main.Add(_cooldown);
-
-            InputField _name = AddInputField(null, _hueSelector.X + _hueSelector.Width + 5, 1, 100, TEXTBOX_HEIGHT);
-            _name.SetText(data.label);
-            main.Add(_name);
-
-            NiceButton _preview = new NiceButton(_name.X + _name.Width + 5, 1, 60, TEXTBOX_HEIGHT, ButtonAction.Activate, "Preview");
-            _preview.IsSelectable = false;
-            _preview.MouseUp += (s, e) => {
-                CoolDownBar.CoolDownBarManager.AddCoolDownBar(TimeSpan.FromSeconds(int.Parse(_cooldown.Text)), _name.Text, _hueSelector.Hue);
-            };
-            main.Add(_preview);
-
-            Label _cooldownLabel = new Label("Cooldown", true, HUE_FONT, 50, FONT);
-            _cooldownLabel.X = _cooldown.X - _cooldownLabel.Width - 5;
-            _cooldownLabel.Y = 1;
-            main.Add(_cooldownLabel);
 
             InputField _conditionText = AddInputField(
                 null, 1, _delete.Height + 5,
@@ -3831,6 +3844,19 @@ namespace ClassicUO.Game.UI.Gumps
             _conditionText.SetText(data.trigger);
             main.Add(_conditionText);
 
+            NiceButton _save = new NiceButton(main.Width - 37, 1, 37, TEXTBOX_HEIGHT, ButtonAction.Activate, "Save");
+            _save.IsSelectable = false;
+            _save.MouseUp += (s, e) => {
+                CoolDownBar.CoolDownConditionData.SaveCondition(key, _hueSelector.Hue, _name.Text, _conditionText.Text, int.Parse(_cooldown.Text), false);
+            };
+            main.Add(_save);
+
+            NiceButton _preview = new NiceButton(_save.X - 54, 1, 54, TEXTBOX_HEIGHT, ButtonAction.Activate, "Preview");
+            _preview.IsSelectable = false;
+            _preview.MouseUp += (s, e) => {
+                CoolDownBarManager.AddCoolDownBar(TimeSpan.FromSeconds(int.Parse(_cooldown.Text)), _name.Text, _hueSelector.Hue);
+            };
+            main.Add(_preview);
             return main;
         }
 

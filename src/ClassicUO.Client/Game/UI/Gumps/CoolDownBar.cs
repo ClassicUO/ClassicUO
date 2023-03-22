@@ -9,9 +9,9 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class CoolDownBar : Gump
     {
-        private const int COOL_DOWN_WIDTH = 180, COOL_DOWN_HEIGHT = 30;
-        private static int DEFAULT_X { get { return ProfileManager.CurrentProfile.CoolDownX; } }
-        private static int DEFAULT_Y { get { return ProfileManager.CurrentProfile.CoolDownY; } }
+        public const int COOL_DOWN_WIDTH = 180, COOL_DOWN_HEIGHT = 30;
+        public static int DEFAULT_X { get { return ProfileManager.CurrentProfile.CoolDownX; } }
+        public static int DEFAULT_Y { get { return ProfileManager.CurrentProfile.CoolDownY; } }
 
         private AlphaBlendControl background, foreground;
         private Label textLabel, cooldownLabel;
@@ -117,7 +117,7 @@ namespace ClassicUO.Game.UI.Gumps
             public static CoolDownConditionData GetConditionData(int key, bool createIfNotExist)
             {
                 CoolDownConditionData data = new CoolDownConditionData();
-                if(ProfileManager.CurrentProfile.CoolDownConditionCount < key)
+                if(ProfileManager.CurrentProfile.CoolDownConditionCount > key)
                 {
                     data.hue = ProfileManager.CurrentProfile.Condition_Hue[key];
                     data.label = ProfileManager.CurrentProfile.Condition_Label[key];
@@ -132,26 +132,35 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 return data;
             }
-        }
 
-        public static class CoolDownBarManager
-        {
-            private const int MAX_COOLDOWN_BARS = 15;
-            private static CoolDownBar[] coolDownBars = new CoolDownBar[MAX_COOLDOWN_BARS];
-
-            public static void AddCoolDownBar(TimeSpan _duration, string _name, ushort _hue)
+            public static void SaveCondition(int key, ushort hue, string label, string trigger, int cooldown, bool createIfNotExist)
             {
-                for (int i = 0; i < coolDownBars.Length; i++)
+                if (ProfileManager.CurrentProfile.CoolDownConditionCount > key)
                 {
-                    if (coolDownBars[i] == null || coolDownBars[i].IsDisposed)
+                    ProfileManager.CurrentProfile.Condition_Hue[key] = hue;
+                    ProfileManager.CurrentProfile.Condition_Label[key] = label;
+                    ProfileManager.CurrentProfile.Condition_Trigger[key] = trigger;
+                    ProfileManager.CurrentProfile.Condition_Duration[key] = cooldown;
+                } else if (createIfNotExist)
                     {
-                        coolDownBars[i] = new CoolDownBar(_duration, _name, _hue, DEFAULT_X, DEFAULT_Y + (i * (COOL_DOWN_HEIGHT + 5)));
-                        UIManager.Add(coolDownBars[i]);
-                        return;
+                        ProfileManager.CurrentProfile.Condition_Hue.Add(hue);
+                        ProfileManager.CurrentProfile.Condition_Label.Add(label);
+                        ProfileManager.CurrentProfile.Condition_Trigger.Add(trigger);
+                        ProfileManager.CurrentProfile.Condition_Duration.Add(cooldown);
                     }
-                }
-
             }
+
+            public static void RemoveCondition(int key)
+            {
+                if(ProfileManager.CurrentProfile.CoolDownConditionCount > key)
+                {
+                    ProfileManager.CurrentProfile.Condition_Hue.RemoveAt(key);
+                    ProfileManager.CurrentProfile.Condition_Label.RemoveAt(key);
+                    ProfileManager.CurrentProfile.Condition_Trigger.RemoveAt(key);
+                    ProfileManager.CurrentProfile.Condition_Duration.RemoveAt(key);
+                }
+            }
+
         }
     }
 }
