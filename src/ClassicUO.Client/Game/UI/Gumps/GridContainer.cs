@@ -69,7 +69,7 @@ namespace ClassicUO.Game.UI.Gumps
         private GridScrollArea _scrollArea;
         private int _lastWidth = DEFAULT_WIDTH, _lastHeight = DEFAULT_HEIGHT;
         private readonly StbTextBox _searchBox;
-        private readonly GumpPic _openRegularGump, _quickDropBackpack;
+        private readonly GumpPic _openRegularGump, _quickDropBackpack, _sortContents;
         public readonly ushort OgContainerGraphic;
 
         private GridSlotManager gridSlotManager;
@@ -150,7 +150,7 @@ namespace ClassicUO.Game.UI.Gumps
             };
             _openRegularGump.MouseEnter += (sender, e) => { _openRegularGump.Graphic = regularGumpIcon == null ? (ushort)1210 : (ushort)5840; };
             _openRegularGump.MouseExit += (sender, e) => { _openRegularGump.Graphic = regularGumpIcon == null ? (ushort)1209 : (ushort)5839; };
-            _openRegularGump.SetTooltip("Open the original style container");
+            _openRegularGump.SetTooltip("Open the original style container.");
 
             var quickDropIcon = GumpsLoader.Instance.GetGumpTexture(1625, out var bounds1);
             _quickDropBackpack = new GumpPic(Width - _openRegularGump.Width - 20 - BORDER_WIDTH, BORDER_WIDTH, quickDropIcon == null ? (ushort)1209 : (ushort)1625, 0);
@@ -175,6 +175,12 @@ namespace ClassicUO.Game.UI.Gumps
             };
             _quickDropBackpack.MouseExit += (sender, e) => { _quickDropBackpack.Graphic = quickDropIcon == null ? (ushort)1209 : (ushort)1625; };
             _quickDropBackpack.SetTooltip("Drop an item here to send it to your backpack.");
+
+            _sortContents = new GumpPic(_quickDropBackpack.X - 20, BORDER_WIDTH, 1210, 0);
+            _sortContents.MouseUp += (sender, e) => { };
+            _sortContents.MouseEnter += (sender, e) => { _sortContents.Graphic = 1209; };
+            _sortContents.MouseExit += (sender, e) => { _sortContents.Graphic = 1210; };
+            _sortContents.SetTooltip("Sort this container.");
             #endregion
 
             #region Scroll Area
@@ -203,6 +209,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add(_searchBox);
             Add(_openRegularGump);
             Add(_quickDropBackpack);
+            Add(_sortContents);
             Add(_scrollArea);
             #endregion
 
