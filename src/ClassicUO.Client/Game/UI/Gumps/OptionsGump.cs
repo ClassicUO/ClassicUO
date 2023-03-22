@@ -182,6 +182,10 @@ namespace ClassicUO.Game.UI.Gumps
         private Checkbox _showStatsMessage, _showSkillsMessage;
         private HSliderBar _showSkillsMessageDelta;
 
+        #region Cooldowns
+        private InputField _coolDownX, _coolDownY;
+        #endregion
+
 
         private Profile _currentProfile = ProfileManager.CurrentProfile;
 
@@ -388,6 +392,22 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
+                new NiceButton
+                (
+                    10,
+                    10 + 30 * i++,
+                    140,
+                    25,
+                    ButtonAction.SwitchPage,
+                    "Cooldowns"
+                )
+                {
+                    ButtonParameter = 8787 //They didn't use enums so putting this here until I fix it
+                }
+            );
+
+            Add
+            (
                 new Line
                 (
                     160,
@@ -469,6 +489,7 @@ namespace ClassicUO.Game.UI.Gumps
             BuildInfoBar();
             BuildContainers();
             BuildExperimental();
+            BuildCooldowns();
 
             ChangePage(1);
         }
@@ -3233,7 +3254,6 @@ namespace ClassicUO.Game.UI.Gumps
             Add(rightArea, PAGE);
         }
 
-
         private void BuildInfoBar()
         {
             const int PAGE = 10;
@@ -3697,6 +3717,59 @@ namespace ClassicUO.Game.UI.Gumps
             Add(rightArea, PAGE);
         }
 
+        private void BuildCooldowns()
+        {
+            const int PAGE = 8787;
+
+            ScrollArea rightArea = new ScrollArea
+            (
+                190,
+                20,
+                WIDTH - 210,
+                420,
+                true
+            );
+
+
+            SettingsSection section = new SettingsSection("Testing", rightArea.Width);
+
+            {
+                NiceButton test;
+                section.Add(test = new NiceButton(0, 0, 200, 25, ButtonAction.Activate, "Test cooldown"));
+                test.MouseUp += (sender, e) =>
+                {
+                    CoolDownBar.CoolDownBarManager.AddCoolDownBar(TimeSpan.FromSeconds(10), "Dummy", 45);
+                };
+            }
+
+            rightArea.Add(section);
+
+
+            SettingsSection _coolDowns = new SettingsSection("Cooldown bars", rightArea.Width);
+            _coolDowns.Y = section.Y + section.Height;
+
+            {
+                _coolDowns.Add(AddLabel(null, "Position", 0, 0));
+                _coolDowns.AddRight(_coolDownX = AddInputField(
+                        null, 0, 0,
+                        50, TEXTBOX_HEIGHT,
+                        numbersOnly: true
+                    ));
+                _coolDownX.SetText(_currentProfile.CoolDownX.ToString());
+
+                _coolDowns.AddRight(_coolDownY = AddInputField(
+                        null, 0, 0,
+                        50, TEXTBOX_HEIGHT,
+                        numbersOnly: true
+                    ));
+                _coolDownY.SetText(_currentProfile.CoolDownY.ToString());
+
+            }//Cooldown position
+
+            rightArea.Add(_coolDowns);
+
+            Add(rightArea, PAGE);
+        }
 
         public override void OnButtonClick(int buttonID)
         {
@@ -4003,6 +4076,11 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.GridContainerSearchMode = _gridContainerSearchAlternative.SelectedIndex;
             _currentProfile.GridContainerScaleItems = _gridContainerItemScale.IsChecked;
             _currentProfile.GridEnableContPreview = _gridContainerPreview.IsChecked;
+
+            {
+                _currentProfile.CoolDownX = int.Parse(_coolDownX.Text);
+                _currentProfile.CoolDownY = int.Parse(_coolDownY.Text);
+            } //Cooldown bars
 
             int val = int.Parse(_autoFollowDistance.Text);
             _currentProfile.AutoFollowDistance = val < 1 ? 1 : val;

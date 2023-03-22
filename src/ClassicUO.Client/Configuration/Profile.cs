@@ -332,6 +332,9 @@ namespace ClassicUO.Configuration
         public bool EnableGridContainerAnchor { get; set; } = false;
         public bool DisableSystemChat { get; set; } = false;
 
+        public int CoolDownX { get; set; } = 50;
+        public int CoolDownY { get; set; } = 50;
+
         public static uint GumpsVersion { get; private set; }
 
         public void Save(string path)
