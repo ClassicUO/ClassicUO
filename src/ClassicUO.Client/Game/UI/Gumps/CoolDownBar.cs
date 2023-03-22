@@ -1,4 +1,5 @@
 ﻿using ClassicUO.Configuration;
+using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Renderer;
@@ -20,7 +21,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         private GumpPic gumpPic;
 
-        public CoolDownBar(TimeSpan _duration, string _name, ushort _hue, int x, int y, ushort graphic = ushort.MaxValue) : base(0, 0)
+        public BuffIconType buffIconType;
+
+        public CoolDownBar(TimeSpan _duration, string _name, ushort _hue, int x, int y, ushort graphic = ushort.MaxValue, BuffIconType type = BuffIconType.Unknown2) : base(0, 0)
         {
             #region VARS
             Width = COOL_DOWN_WIDTH;
@@ -32,6 +35,7 @@ namespace ClassicUO.Game.UI.Gumps
             CanCloseWithRightClick = true;
             CanMove = true;
             AcceptMouseInput = true;
+            buffIconType = type;
             #endregion
 
             #region BACK/FORE GROUND

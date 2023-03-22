@@ -50,6 +50,11 @@ namespace ClassicUO.Game.UI.Gumps
             _box.Add(coolDownBar);
         }
 
+        public void RemoveBuff(BuffIconType graphic)
+        {
+            BuffBarManager.RemoveBuffType(graphic);
+        }
+
         protected override void UpdateContents()
         {
             base.UpdateContents();
@@ -211,6 +216,18 @@ namespace ClassicUO.Game.UI.Gumps
                         {
                             coolDownBars[i].Y = -(i * (CoolDownBar.COOL_DOWN_HEIGHT + 5)) + 5;
                         }
+                    }
+                }
+            }
+
+            public static void RemoveBuffType(BuffIconType type)
+            {
+                for (int i = 0; i < coolDownBars.Length; i++)
+                {
+                    if (coolDownBars[i] != null && !coolDownBars[i].IsDisposed)
+                    {
+                        if (coolDownBars[i].buffIconType == type)
+                            coolDownBars[i].Dispose();
                     }
                 }
             }

@@ -1199,7 +1199,7 @@ namespace ClassicUO.Game.Managers
 
                 case MacroType.CloseGump:
 
-                    UIManager.Gumps.Where(s => !(s is TopBarGump) && !(s is BuffGump) && !(s is WorldViewportGump)).ToList().ForEach(s => s.Dispose());
+                    UIManager.Gumps.Where(s => !(s is TopBarGump) && !(s is BuffGump) && !(s is ImprovedBuffGump) && !(s is WorldViewportGump)).ToList().ForEach(s => s.Dispose());
 
                     break;
 
@@ -1438,17 +1438,31 @@ namespace ClassicUO.Game.Managers
                     break;
 
                 case MacroType.ToggleBuffIconGump:
-                    BuffGump buff = UIManager.GetGump<BuffGump>();
-
-                    if (buff != null)
+                    if (ProfileManager.CurrentProfile.UseImprovedBuffBar)
                     {
-                        buff.Dispose();
+                        ImprovedBuffGump buff = UIManager.GetGump<ImprovedBuffGump>();
+                        if (buff != null)
+                        {
+                            buff.Dispose();
+                        }
+                        else
+                        {
+                            UIManager.Add(new ImprovedBuffGump());
+                        }
                     }
                     else
                     {
-                        UIManager.Add(new BuffGump(100, 100));
-                    }
+                        BuffGump buff = UIManager.GetGump<BuffGump>();
 
+                        if (buff != null)
+                        {
+                            buff.Dispose();
+                        }
+                        else
+                        {
+                            UIManager.Add(new BuffGump(100, 100));
+                        }
+                    }
                     break;
 
                 case MacroType.InvokeVirtue:

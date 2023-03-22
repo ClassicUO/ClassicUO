@@ -251,14 +251,12 @@ namespace ClassicUO.Game.GameObjects
         {
             _buffIcons[type] = new BuffIcon(type, graphic, time, text);
 
-            ImprovedBuffGump gump = UIManager.GetGump<ImprovedBuffGump>();
-            if (gump == null)
+            if (ProfileManager.CurrentProfile.UseImprovedBuffBar)
             {
-                gump = new ImprovedBuffGump();
-                UIManager.Add(gump);
+                ImprovedBuffGump gump = UIManager.GetGump<ImprovedBuffGump>();
+                if (gump != null)
+                    gump.AddBuff(new BuffIcon(type, graphic, time, title));
             }
-            gump.AddBuff(new BuffIcon(type, graphic, time, title));
-
         }
 
 
@@ -270,6 +268,12 @@ namespace ClassicUO.Game.GameObjects
         public void RemoveBuff(BuffIconType graphic)
         {
             _buffIcons.Remove(graphic);
+            if (ProfileManager.CurrentProfile.UseImprovedBuffBar)
+            {
+                ImprovedBuffGump gump = UIManager.GetGump<ImprovedBuffGump>();
+                if (gump != null)
+                    gump.RemoveBuff(graphic);
+            }
         }
 
         public void UpdateAbilities()
