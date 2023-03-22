@@ -328,9 +328,28 @@ namespace ClassicUO.Configuration
         public ushort GridBorderHue { get; set; } = 0;
         public byte GridContainersScale { get; set; } = 100;
         public bool GridContainerScaleItems { get; set; } = true;
-        public bool GridEnableContPreview {  get; set; } = true;
+        public bool GridEnableContPreview { get; set; } = true;
         public bool EnableGridContainerAnchor { get; set; } = false;
         public bool DisableSystemChat { get; set; } = false;
+
+        #region COOLDOWNS
+        public int CoolDownX { get; set; } = 50;
+        public int CoolDownY { get; set; } = 50;
+
+        public List<ushort> Condition_Hue { get; set; } = new List<ushort>();
+        public List<string> Condition_Label { get; set; } = new List<string>();
+        public List<int> Condition_Duration { get; set; } = new List<int>();
+        public List<string> Condition_Trigger { get; set; } = new List<string>();
+        public int CoolDownConditionCount
+        {
+            get
+            {
+                return Math.Min((Math.Min(Condition_Hue.Count, Condition_Label.Count)), (Math.Min(Condition_Duration.Count, Condition_Trigger.Count)));
+            }
+            set { }
+        }
+
+        #endregion
 
         public static uint GumpsVersion { get; private set; }
 
@@ -372,7 +391,7 @@ namespace ClassicUO.Configuration
                         gumps.AddLast(gump);
                     }
                 }
-                
+
                 LinkedListNode<Gump> first = gumps.First;
 
                 while (first != null)
@@ -429,11 +448,11 @@ namespace ClassicUO.Configuration
             {
                 SaveItemsGump(parent, xml, list);
 
-                Item first = (Item) parent.Items;
+                Item first = (Item)parent.Items;
 
                 while (first != null)
                 {
-                    Item next = (Item) first.Next;
+                    Item next = (Item)first.Next;
 
                     SaveItemsGumpRecursive(first, xml, list);
 
@@ -507,7 +526,7 @@ namespace ClassicUO.Configuration
 
                         try
                         {
-                            GumpType type = (GumpType) int.Parse(xml.GetAttribute(nameof(type)));
+                            GumpType type = (GumpType)int.Parse(xml.GetAttribute(nameof(type)));
                             int x = int.Parse(xml.GetAttribute(nameof(x)));
                             int y = int.Parse(xml.GetAttribute(nameof(y)));
                             uint serial = uint.Parse(xml.GetAttribute(nameof(serial)));
@@ -676,7 +695,7 @@ namespace ClassicUO.Configuration
                         {
                             try
                             {
-                                GumpType type = (GumpType) int.Parse(xml.GetAttribute("type"));
+                                GumpType type = (GumpType)int.Parse(xml.GetAttribute("type"));
                                 int x = int.Parse(xml.GetAttribute("x"));
                                 int y = int.Parse(xml.GetAttribute("y"));
                                 uint serial = uint.Parse(xml.GetAttribute("serial"));
