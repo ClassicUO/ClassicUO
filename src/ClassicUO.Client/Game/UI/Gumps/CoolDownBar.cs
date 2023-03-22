@@ -18,7 +18,9 @@ namespace ClassicUO.Game.UI.Gumps
         private DateTime expire;
         private TimeSpan duration;
 
-        public CoolDownBar(TimeSpan _duration, string _name, ushort _hue, int x, int y) : base(0, 0)
+        private GumpPic gumpPic;
+
+        public CoolDownBar(TimeSpan _duration, string _name, ushort _hue, int x, int y, ushort graphic = ushort.MaxValue) : base(0, 0)
         {
             #region VARS
             Width = COOL_DOWN_WIDTH;
@@ -33,7 +35,7 @@ namespace ClassicUO.Game.UI.Gumps
             #endregion
 
             #region BACK/FORE GROUND
-            background = new AlphaBlendControl(0.4f);
+            background = new AlphaBlendControl(0.3f);
             background.Width = COOL_DOWN_WIDTH;
             background.Height = COOL_DOWN_HEIGHT;
             background.Hue = _hue;
@@ -44,21 +46,33 @@ namespace ClassicUO.Game.UI.Gumps
             foreground.Hue = _hue;
             #endregion
 
-            #region LABELS
-            textLabel = new Label(_name, true, _hue, COOL_DOWN_WIDTH, style: FontStyle.BlackBorder, align: Assets.TEXT_ALIGN_TYPE.TS_CENTER)
+            if (graphic != ushort.MaxValue)
             {
-                X = 0,
-                Y = 0,
+                gumpPic = new GumpPic(0, 2, graphic, 0);
+                background.X = gumpPic.Width;
+                background.Width = COOL_DOWN_WIDTH - gumpPic.Width;
+
+                foreground.X = gumpPic.Width;
+                foreground.Width = COOL_DOWN_WIDTH - gumpPic.Width;
+            }
+
+            #region LABELS
+            textLabel = new Label(_name, true, _hue, background.Width, style: FontStyle.BlackBorder, align: Assets.TEXT_ALIGN_TYPE.TS_CENTER)
+            {
+                X = background.X
             };
 
-            cooldownLabel = new Label(_duration.TotalSeconds.ToString(), true, _hue, COOL_DOWN_WIDTH, style: FontStyle.BlackBorder, align: Assets.TEXT_ALIGN_TYPE.TS_CENTER)
+            cooldownLabel = new Label("------", true, _hue, background.Width, style: FontStyle.BlackBorder, align: Assets.TEXT_ALIGN_TYPE.TS_CENTER)
             {
-                X = 0
+                X = background.X,
+                Y = 0
             };
-            cooldownLabel.Y = COOL_DOWN_HEIGHT - cooldownLabel.Height;
+            cooldownLabel.Y = COOL_DOWN_HEIGHT - cooldownLabel.Height - 2;
             #endregion
 
             #region ADD CONTROLS
+            if (graphic != ushort.MaxValue)
+                Add(gumpPic);
             Add(background);
             Add(foreground);
             Add(textLabel);
@@ -76,8 +90,14 @@ namespace ClassicUO.Game.UI.Gumps
 
             TimeSpan remaing = expire - DateTime.Now;
 
-            foreground.Width = (int)((remaing.TotalSeconds / duration.TotalSeconds) * COOL_DOWN_WIDTH);
-            cooldownLabel.Text = ((int)remaing.TotalSeconds).ToString();
+            if (remaing < TimeSpan.FromMinutes(60))
+            {
+                int offset = 0;
+                if (gumpPic != null)
+                    offset = gumpPic.Width;
+                foreground.Width = (int)((remaing.TotalSeconds / duration.TotalSeconds) * (COOL_DOWN_WIDTH - offset));
+                cooldownLabel.Text = ((int)remaing.TotalSeconds).ToString();
+            }
 
             base.Draw(batcher, x, y);
 
