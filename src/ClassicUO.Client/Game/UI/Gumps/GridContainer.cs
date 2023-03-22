@@ -539,8 +539,8 @@ namespace ClassicUO.Game.UI.Gumps
                     _item = null;
                     LocalSerial = 0;
                     hit.ClearTooltip();
-                    Remove(count);
                     Hightlight = false;
+                    count = null;
                 }
                 else
                 {
@@ -552,8 +552,6 @@ namespace ClassicUO.Game.UI.Gumps
                         count = new Label(itemAmt.ToString(), true, 0x0481, align: TEXT_ALIGN_TYPE.TS_LEFT, maxwidth: Width - 3);
                         count.X = 1;
                         count.Y = Height - count.Height;
-
-                        Add(count);
                     }
                     hit.SetTooltip(_item);
                 }
@@ -746,6 +744,8 @@ namespace ClassicUO.Game.UI.Gumps
                         ),
                         hueVector
                     );
+                    if (count != null)
+                        count.Draw(batcher, x + count.X, y + count.Y);
                 }
 
 
