@@ -99,6 +99,41 @@ namespace ClassicUO.Game.UI.Gumps
             return true;
         }
 
+        public class CoolDownConditionData
+        {
+            public ushort hue;
+            public string label;
+            public string trigger;
+            public int cooldown;
+
+            private CoolDownConditionData(ushort hue = 42, string label = "Label", string trigger = "Text to trigger", int cooldown = 10)
+            {
+                this.hue = hue;
+                this.label = label;
+                this.trigger = trigger;
+                this.cooldown = cooldown;
+            }
+
+            public static CoolDownConditionData GetConditionData(int key, bool createIfNotExist)
+            {
+                CoolDownConditionData data = new CoolDownConditionData();
+                if(ProfileManager.CurrentProfile.CoolDownConditionCount < key)
+                {
+                    data.hue = ProfileManager.CurrentProfile.Condition_Hue[key];
+                    data.label = ProfileManager.CurrentProfile.Condition_Label[key];
+                    data.trigger = ProfileManager.CurrentProfile.Condition_Trigger[key];
+                    data.cooldown = ProfileManager.CurrentProfile.Condition_Duration[key];
+                } else if (createIfNotExist)
+                {
+                    ProfileManager.CurrentProfile.Condition_Hue.Add(data.hue);
+                    ProfileManager.CurrentProfile.Condition_Label.Add(data.label);
+                    ProfileManager.CurrentProfile.Condition_Trigger.Add(data.trigger);
+                    ProfileManager.CurrentProfile.Condition_Duration.Add(data.cooldown);
+                }
+                return data;
+            }
+        }
+
         public static class CoolDownBarManager
         {
             private const int MAX_COOLDOWN_BARS = 15;

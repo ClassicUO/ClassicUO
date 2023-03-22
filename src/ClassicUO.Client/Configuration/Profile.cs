@@ -336,11 +336,14 @@ namespace ClassicUO.Configuration
         public int CoolDownX { get; set; } = 50;
         public int CoolDownY { get; set; } = 50;
 
-        public int CoolDownConditionCount { get; set; } = 0;
         public List<ushort> Condition_Hue { get; set; } = new List<ushort>();
         public List<string> Condition_Label { get; set; } = new List<string>();
         public List<int> Condition_Duration { get; set; } = new List<int>();
         public List<string> Condition_Trigger { get; set; } = new List<string>();
+        public int CoolDownConditionCount { get {
+                return Math.Min((Math.Min(Condition_Hue.Count, Condition_Label.Count)), (Math.Min(Condition_Duration.Count, Condition_Trigger.Count)));
+            } }
+
         #endregion
 
         public static uint GumpsVersion { get; private set; }

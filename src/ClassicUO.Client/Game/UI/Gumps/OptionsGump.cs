@@ -3778,6 +3778,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public Control GenConditionControl(int key, int width)
         {
+            CoolDownBar.CoolDownConditionData data = CoolDownBar.CoolDownConditionData.GetConditionData(key, true);
             Area main = new Area();
             main.Width = width;
             main.Height = 60;
@@ -3795,7 +3796,7 @@ namespace ClassicUO.Game.UI.Gumps
             _hueLabel.Y = 1;
             main.Add(_hueLabel);
 
-            ClickableColorBox _hueSelector = new ClickableColorBox(_hueLabel.X + _hueLabel.Width + 5, 1, 13, 14, 42);
+            ClickableColorBox _hueSelector = new ClickableColorBox(_hueLabel.X + _hueLabel.Width + 5, 1, 13, 14, data.hue);
             main.Add(_hueSelector);
 
             InputField _cooldown = AddInputField(
@@ -3804,11 +3805,11 @@ namespace ClassicUO.Game.UI.Gumps
                 numbersOnly: true
                 );
             _cooldown.X = main.Width - _cooldown.Width - 1;
-            _cooldown.SetText(10.ToString());
+            _cooldown.SetText(data.cooldown.ToString());
             main.Add(_cooldown);
 
             InputField _name = AddInputField(null, _hueSelector.X + _hueSelector.Width + 5, 1, 100, TEXTBOX_HEIGHT);
-            _name.SetText("Label");
+            _name.SetText(data.label);
             main.Add(_name);
 
             NiceButton _preview = new NiceButton(_name.X + _name.Width + 5, 1, 60, TEXTBOX_HEIGHT, ButtonAction.Activate, "Preview");
@@ -3827,7 +3828,7 @@ namespace ClassicUO.Game.UI.Gumps
                 null, 1, _delete.Height + 5,
                 main.Width, TEXTBOX_HEIGHT
                 );
-            _conditionText.SetText("Text to trigger from");
+            _conditionText.SetText(data.trigger);
             main.Add(_conditionText);
 
             return main;
