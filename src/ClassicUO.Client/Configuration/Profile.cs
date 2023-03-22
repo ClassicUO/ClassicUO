@@ -348,8 +348,10 @@ namespace ClassicUO.Configuration
             }
             set { }
         }
-
         #endregion
+
+        public bool UseImprovedBuffBar { get; set; } = true;
+        public ushort ImprovedBuffBarHue { get; set; } = 905;
 
         public static uint GumpsVersion { get; private set; }
 
@@ -536,7 +538,10 @@ namespace ClassicUO.Configuration
                             switch (type)
                             {
                                 case GumpType.Buff:
-                                    gump = new BuffGump();
+                                    if (ProfileManager.CurrentProfile.UseImprovedBuffBar)
+                                        gump = new ImprovedBuffGump();
+                                    else
+                                        gump = new BuffGump(100, 100);
 
                                     break;
 

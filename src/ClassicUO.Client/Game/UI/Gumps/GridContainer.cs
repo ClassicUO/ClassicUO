@@ -69,7 +69,7 @@ namespace ClassicUO.Game.UI.Gumps
         private GridScrollArea _scrollArea;
         private int _lastWidth = DEFAULT_WIDTH, _lastHeight = DEFAULT_HEIGHT;
         private readonly StbTextBox _searchBox;
-        private readonly GumpPic _openRegularGump, _quickDropBackpack;
+        private readonly GumpPic _openRegularGump, _quickDropBackpack, _sortContents;
         public readonly ushort OgContainerGraphic;
 
         private GridSlotManager gridSlotManager;
@@ -150,7 +150,7 @@ namespace ClassicUO.Game.UI.Gumps
             };
             _openRegularGump.MouseEnter += (sender, e) => { _openRegularGump.Graphic = regularGumpIcon == null ? (ushort)1210 : (ushort)5840; };
             _openRegularGump.MouseExit += (sender, e) => { _openRegularGump.Graphic = regularGumpIcon == null ? (ushort)1209 : (ushort)5839; };
-            _openRegularGump.SetTooltip("Open the original style container");
+            _openRegularGump.SetTooltip("Open the original style container.");
 
             var quickDropIcon = GumpsLoader.Instance.GetGumpTexture(1625, out var bounds1);
             _quickDropBackpack = new GumpPic(Width - _openRegularGump.Width - 20 - BORDER_WIDTH, BORDER_WIDTH, quickDropIcon == null ? (ushort)1209 : (ushort)1625, 0);
@@ -175,6 +175,12 @@ namespace ClassicUO.Game.UI.Gumps
             };
             _quickDropBackpack.MouseExit += (sender, e) => { _quickDropBackpack.Graphic = quickDropIcon == null ? (ushort)1209 : (ushort)1625; };
             _quickDropBackpack.SetTooltip("Drop an item here to send it to your backpack.");
+
+            _sortContents = new GumpPic(_quickDropBackpack.X - 20, BORDER_WIDTH, 1210, 0);
+            _sortContents.MouseUp += (sender, e) => { updateItems(true); };
+            _sortContents.MouseEnter += (sender, e) => { _sortContents.Graphic = 1209; };
+            _sortContents.MouseExit += (sender, e) => { _sortContents.Graphic = 1210; };
+            _sortContents.SetTooltip("Sort this container.");
             #endregion
 
             #region Scroll Area
@@ -203,13 +209,13 @@ namespace ClassicUO.Game.UI.Gumps
             Add(_searchBox);
             Add(_openRegularGump);
             Add(_quickDropBackpack);
+            Add(_sortContents);
             Add(_scrollArea);
             #endregion
 
             gridSlotManager = new GridSlotManager(local, this, _scrollArea, gridSaveSystem.GetItemSlots(LocalSerial)); //Must come after scroll area
 
             ResizeWindow(new Point(_lastWidth, _lastHeight));
-            //InvalidateContents = true;
         }
         public override GumpType GumpType => GumpType.GridContainer;
 
@@ -384,15 +390,8 @@ namespace ClassicUO.Game.UI.Gumps
             UIManager.Add(container);
         }
 
-        private void updateItems()
+        private void updateItems(bool overrideSort = false)
         {
-            #region VARS
-            int x = X_SPACING;
-            int y = Y_SPACING;
-            int count = 0;
-            int line = 1;
-            #endregion
-
             //Container doesn't exist or has no items
             if (_container == null)
             {
@@ -401,7 +400,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             List<Item> sortedContents = ProfileManager.CurrentProfile.GridContainerSearchMode == 0 ? gridSlotManager.SearchResults(_searchBox.Text) : GridSlotManager.GetItemsInContainer(_container);
-            gridSlotManager.RebuildContainer(sortedContents, _searchBox.Text);
+            gridSlotManager.RebuildContainer(sortedContents, _searchBox.Text, overrideSort);
             _containerNameLabel.Text = GetContainerName();
             InvalidateContents = false;
         }
@@ -457,10 +456,11 @@ namespace ClassicUO.Game.UI.Gumps
                 _scrollArea.Width = _background.Width - BORDER_WIDTH;
                 _scrollArea.Height = _background.Height - BORDER_WIDTH - (_containerNameLabel.Height + 1);
                 _openRegularGump.X = Width - _openRegularGump.Width - BORDER_WIDTH;
-                _quickDropBackpack.X = Width - _openRegularGump.Width - _quickDropBackpack.Width - BORDER_WIDTH;
+                _quickDropBackpack.X = _openRegularGump.X - _quickDropBackpack.Width;
+                _sortContents.X = _quickDropBackpack.X - _sortContents.Width;
                 _lastHeight = Height;
                 _lastWidth = Width;
-                _searchBox.Width = Math.Min(Width - (BORDER_WIDTH * 2) - _openRegularGump.Width - _quickDropBackpack.Width, 150);
+                _searchBox.Width = Math.Min(Width - (BORDER_WIDTH * 2) - _openRegularGump.Width - _quickDropBackpack.Width - _sortContents.Width, 150);
                 RequestUpdateContents();
             }
 
@@ -539,8 +539,8 @@ namespace ClassicUO.Game.UI.Gumps
                     _item = null;
                     LocalSerial = 0;
                     hit.ClearTooltip();
-                    Remove(count);
                     Hightlight = false;
+                    count = null;
                 }
                 else
                 {
@@ -552,8 +552,6 @@ namespace ClassicUO.Game.UI.Gumps
                         count = new Label(itemAmt.ToString(), true, 0x0481, align: TEXT_ALIGN_TYPE.TS_LEFT, maxwidth: Width - 3);
                         count.X = 1;
                         count.Y = Height - count.Height;
-
-                        Add(count);
                     }
                     hit.SetTooltip(_item);
                 }
@@ -746,6 +744,8 @@ namespace ClassicUO.Game.UI.Gumps
                         ),
                         hueVector
                     );
+                    if (count != null)
+                        count.Draw(batcher, x + count.X, y + count.Y);
                 }
 
 
@@ -801,7 +801,7 @@ namespace ClassicUO.Game.UI.Gumps
                 ItemPositions.Add(specificSlot, serial); //Now we add this item at the desired slot
             }
 
-            public void RebuildContainer(List<Item> filteredItems, string searchText = "")
+            public void RebuildContainer(List<Item> filteredItems, string searchText = "", bool overrideSort = false)
             {
                 SetGridPositions();
                 foreach (var slot in gridSlots)
@@ -813,7 +813,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     Item i = World.Items.Get(spot.Value);
                     if (i != null)
-                        if (filteredItems.Contains(i))
+                        if (filteredItems.Contains(i) && !overrideSort)
                         {
                             if (spot.Key < gridSlots.Count)
                             {
