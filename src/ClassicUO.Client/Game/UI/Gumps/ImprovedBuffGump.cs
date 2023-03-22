@@ -1,4 +1,5 @@
-﻿using ClassicUO.Game.Data;
+﻿using ClassicUO.Configuration;
+using ClassicUO.Game.Data;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Renderer;
 using System;
@@ -29,7 +30,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public void AddBuff(BuffIcon icon)
         {
-            CoolDownBar coolDownBar = new CoolDownBar(TimeSpan.FromMilliseconds(icon.Timer - Time.Ticks), icon.Text, 905, 0, 0, icon.Graphic);
+            CoolDownBar coolDownBar = new CoolDownBar(TimeSpan.FromMilliseconds(icon.Timer - Time.Ticks), icon.Text, ProfileManager.CurrentProfile.ImprovedBuffBarHue, 0, 0, icon.Graphic);
             int x = 0;
             bool upsideDown = false;
             switch (_direction)

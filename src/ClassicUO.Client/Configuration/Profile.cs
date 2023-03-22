@@ -348,8 +348,10 @@ namespace ClassicUO.Configuration
             }
             set { }
         }
-
         #endregion
+
+        public bool UseImprovedBuffBar { get; set; } = true;
+        public ushort ImprovedBuffBarHue { get; set; } = 905;
 
         public static uint GumpsVersion { get; private set; }
 

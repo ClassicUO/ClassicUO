@@ -134,9 +134,9 @@ namespace ClassicUO.Game.UI.Gumps
         private Combobox _infoBarHighlightType;
 
         // combat & spells
-        private ClickableColorBox _innocentColorPickerBox, _friendColorPickerBox, _crimialColorPickerBox, _canAttackColorPickerBox, _enemyColorPickerBox, _murdererColorPickerBox, _neutralColorPickerBox, _beneficColorPickerBox, _harmfulColorPickerBox;
+        private ClickableColorBox _innocentColorPickerBox, _friendColorPickerBox, _crimialColorPickerBox, _canAttackColorPickerBox, _enemyColorPickerBox, _murdererColorPickerBox, _neutralColorPickerBox, _beneficColorPickerBox, _harmfulColorPickerBox, _improvedBuffBarHue;
         private HSliderBar _lightBar;
-        private Checkbox _buffBarTime, _uiButtonsSingleClick, _queryBeforAttackCheckbox, _queryBeforeBeneficialCheckbox, _spellColoringCheckbox, _spellFormatCheckbox, _enableFastSpellsAssign;
+        private Checkbox _buffBarTime, _uiButtonsSingleClick, _queryBeforAttackCheckbox, _queryBeforeBeneficialCheckbox, _spellColoringCheckbox, _spellFormatCheckbox, _enableFastSpellsAssign, _enableImprovedBuffGump;
 
         // macro
         private MacroControl _macroControl;
@@ -2876,6 +2876,24 @@ namespace ClassicUO.Game.UI.Gumps
 
             startY += _buffBarTime.Height + 2;
 
+            {
+                _enableImprovedBuffGump = AddCheckBox(
+                    rightArea,
+                    "Enable improved buff gump",
+                    _currentProfile.UseImprovedBuffBar,
+                    startX, startY
+                    );
+                startY += _enableImprovedBuffGump.Height + 2;
+
+                _improvedBuffBarHue = AddColorBox(
+                    rightArea,
+                    startX, startY,
+                    _currentProfile.ImprovedBuffBarHue,
+                    ""
+                    );
+                startY += _improvedBuffBarHue.Height + 2;
+            }//Improved buff gump
+
             _enableFastSpellsAssign = AddCheckBox
             (
                 rightArea,
@@ -4154,6 +4172,9 @@ namespace ClassicUO.Game.UI.Gumps
                     _.AnchorType = _currentProfile.EnableGridContainerAnchor ? ANCHOR_TYPE.NONE : ANCHOR_TYPE.DISABLED;
                 }
             }
+
+            _currentProfile.UseImprovedBuffBar = _enableImprovedBuffGump.IsChecked;
+            _currentProfile.ImprovedBuffBarHue = _improvedBuffBarHue.Hue;
 
             _currentProfile.DisableSystemChat = _disableSystemChat.IsChecked;
             _currentProfile.GridBorderAlpha = (byte)_gridBorderOpacity.Value;
