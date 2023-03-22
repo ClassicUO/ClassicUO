@@ -3856,6 +3856,9 @@ namespace ClassicUO.Game.UI.Gumps
             _cooldown.SetText(data.cooldown.ToString());
             main.Add(_cooldown);
 
+            Combobox _message_type = AddCombobox(null, new string[] { "All", "Self", "Other" }, data.message_type, _cooldown.X + _cooldown.Width + 5, 1, 80);
+            main.Add(_message_type);
+
             InputField _conditionText = AddInputField(
                 null, 1, _delete.Height + 5,
                 main.Width, TEXTBOX_HEIGHT
@@ -3867,7 +3870,7 @@ namespace ClassicUO.Game.UI.Gumps
             _save.IsSelectable = false;
             _save.MouseUp += (s, e) =>
             {
-                CoolDownBar.CoolDownConditionData.SaveCondition(key, _hueSelector.Hue, _name.Text, _conditionText.Text, int.Parse(_cooldown.Text), false);
+                CoolDownBar.CoolDownConditionData.SaveCondition(key, _hueSelector.Hue, _name.Text, _conditionText.Text, int.Parse(_cooldown.Text), false, _message_type.SelectedIndex);
             };
             main.Add(_save);
 

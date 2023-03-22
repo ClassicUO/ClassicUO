@@ -130,13 +130,15 @@ namespace ClassicUO.Game.UI.Gumps
             public string label;
             public string trigger;
             public int cooldown;
+            public int message_type;
 
-            private CoolDownConditionData(ushort hue = 42, string label = "Label", string trigger = "Text to trigger", int cooldown = 10)
+            private CoolDownConditionData(ushort hue = 42, string label = "Label", string trigger = "Text to trigger", int cooldown = 10, int message_type = (int)MESSAGE_TYPE.ALL)
             {
                 this.hue = hue;
                 this.label = label;
                 this.trigger = trigger;
                 this.cooldown = cooldown;
+                this.message_type = message_type;
             }
 
             public static CoolDownConditionData GetConditionData(int key, bool createIfNotExist)
@@ -148,17 +150,27 @@ namespace ClassicUO.Game.UI.Gumps
                     data.label = ProfileManager.CurrentProfile.Condition_Label[key];
                     data.trigger = ProfileManager.CurrentProfile.Condition_Trigger[key];
                     data.cooldown = ProfileManager.CurrentProfile.Condition_Duration[key];
+                    if (ProfileManager.CurrentProfile.Condition_Type.Count > key) //Remove me after a while to prevent index not found
+                        data.message_type = ProfileManager.CurrentProfile.Condition_Type[key];
+                    else
+                    {
+                        while (ProfileManager.CurrentProfile.Condition_Type.Count <= key)
+                        {
+                            ProfileManager.CurrentProfile.Condition_Type.Add((int)MESSAGE_TYPE.ALL);
+                        }
+                    }
                 } else if (createIfNotExist)
                 {
                     ProfileManager.CurrentProfile.Condition_Hue.Add(data.hue);
                     ProfileManager.CurrentProfile.Condition_Label.Add(data.label);
                     ProfileManager.CurrentProfile.Condition_Trigger.Add(data.trigger);
                     ProfileManager.CurrentProfile.Condition_Duration.Add(data.cooldown);
+                    ProfileManager.CurrentProfile.Condition_Type.Add(data.message_type);
                 }
                 return data;
             }
 
-            public static void SaveCondition(int key, ushort hue, string label, string trigger, int cooldown, bool createIfNotExist)
+            public static void SaveCondition(int key, ushort hue, string label, string trigger, int cooldown, bool createIfNotExist, int message_type)
             {
                 if (ProfileManager.CurrentProfile.CoolDownConditionCount > key)
                 {
@@ -166,6 +178,15 @@ namespace ClassicUO.Game.UI.Gumps
                     ProfileManager.CurrentProfile.Condition_Label[key] = label;
                     ProfileManager.CurrentProfile.Condition_Trigger[key] = trigger;
                     ProfileManager.CurrentProfile.Condition_Duration[key] = cooldown;
+                    if (ProfileManager.CurrentProfile.Condition_Type.Count > key) //Remove me after a while to prevent index not found
+                        ProfileManager.CurrentProfile.Condition_Type[key] = message_type;
+                    else
+                    {
+                        while (ProfileManager.CurrentProfile.Condition_Type.Count <= key)
+                        {
+                            ProfileManager.CurrentProfile.Condition_Type.Add((int)MESSAGE_TYPE.ALL);
+                        }
+                    }
                 } else if (createIfNotExist)
                     {
                         ProfileManager.CurrentProfile.Condition_Hue.Add(hue);
@@ -184,6 +205,13 @@ namespace ClassicUO.Game.UI.Gumps
                     ProfileManager.CurrentProfile.Condition_Trigger.RemoveAt(key);
                     ProfileManager.CurrentProfile.Condition_Duration.RemoveAt(key);
                 }
+            }
+
+            public enum MESSAGE_TYPE
+            {
+                ALL,
+                SELF,
+                OTHER
             }
 
         }

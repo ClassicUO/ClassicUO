@@ -22,6 +22,21 @@ namespace ClassicUO.Game.Managers
                 int count = ProfileManager.CurrentProfile.CoolDownConditionCount;
                 for (int i = 0; i < count; i++)
                 {
+                    switch (ProfileManager.CurrentProfile.Condition_Type[i])
+                    {
+                        default:
+                        case 0:
+                            break;
+                        case 1: //self
+                            if (e.Parent != null && e.Parent.Serial != World.Player.Serial)
+                                return;
+                            break;
+                        case 2:
+                            if (e.Parent != null && e.Parent.Serial == World.Player.Serial)
+                                return;
+                            break;
+
+                    }
                     if (e.Text.Contains(ProfileManager.CurrentProfile.Condition_Trigger[i]))
                     {
                         AddCoolDownBar(
