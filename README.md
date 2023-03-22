@@ -9,17 +9,19 @@ Join TazUO's discord for ideas/support/updates -> https://discord.gg/SqwtB5g95H
 
 This version of CUO adds grid containers to the regular CUO client
 
-Searchable
+    Searchable
 
-Resizable
+    Resizable
 
-Scrollable
+    Scrollable
 
-Can lock items in specific place
+    Can lock items in specific place
 
-Quick preview for containers inside *if the client has already cached that bag*
+    Quick preview for containers inside *if the client has already cached that bag*
 
-Item scaling!
+    Item scaling!
+
+[Cool down bars](wiki/TazUO.Cooldown-bars)
 
 ![SlottedInv](https://user-images.githubusercontent.com/3859393/226514464-32919a68-ebad-4ec0-8bcf-8614a5055f7d.gif)
 ![Grid Previe](https://user-images.githubusercontent.com/3859393/222873187-c88ad321-8b19-4cfd-9617-7e23b2443b6a.gif)
