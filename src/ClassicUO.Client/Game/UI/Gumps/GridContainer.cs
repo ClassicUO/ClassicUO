@@ -216,7 +216,6 @@ namespace ClassicUO.Game.UI.Gumps
             gridSlotManager = new GridSlotManager(local, this, _scrollArea, gridSaveSystem.GetItemSlots(LocalSerial)); //Must come after scroll area
 
             ResizeWindow(new Point(_lastWidth, _lastHeight));
-            //InvalidateContents = true;
         }
         public override GumpType GumpType => GumpType.GridContainer;
 
@@ -467,7 +466,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _quickDropBackpack.X = Width - _openRegularGump.Width - _quickDropBackpack.Width - BORDER_WIDTH;
                 _lastHeight = Height;
                 _lastWidth = Width;
-                _searchBox.Width = Math.Min(Width - (BORDER_WIDTH * 2) - _openRegularGump.Width - _quickDropBackpack.Width, 150);
+                _searchBox.Width = Math.Min(Width - (BORDER_WIDTH * 2) - _openRegularGump.Width - _quickDropBackpack.Width - _sortContents.Width, 150);
                 RequestUpdateContents();
             }
 
