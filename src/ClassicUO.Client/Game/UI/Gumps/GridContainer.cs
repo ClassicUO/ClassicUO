@@ -507,6 +507,9 @@ namespace ClassicUO.Game.UI.Gumps
                 case BorderStyle.Style7:
                     graphic = 9260; borderSize = 17;
                     break;
+                case BorderStyle.Style8:
+                    graphic = 83; borderSize = 16;
+                    break;
 
                 default:
                 case BorderStyle.Default:
@@ -603,7 +606,8 @@ namespace ClassicUO.Game.UI.Gumps
             Style4,
             Style5,
             Style6,
-            Style7
+            Style7,
+            Style8
         }
 
         private class GridItem : Control
