@@ -41,7 +41,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public void AddBuff(BuffIcon icon)
         {
-            CoolDownBar coolDownBar = new CoolDownBar(TimeSpan.FromMilliseconds(icon.Timer - Time.Ticks), icon.Title, ProfileManager.CurrentProfile.ImprovedBuffBarHue, 0, 0, icon.Graphic, icon.Type);
+            CoolDownBar coolDownBar = new CoolDownBar(TimeSpan.FromMilliseconds(icon.Timer - Time.Ticks), icon.Title.Replace("<br>", " "), ProfileManager.CurrentProfile.ImprovedBuffBarHue, 0, 0, icon.Graphic, icon.Type);
             int x = 0;
             bool upsideDown = false;
             switch (_direction)
