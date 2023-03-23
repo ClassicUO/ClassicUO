@@ -653,7 +653,7 @@ namespace ClassicUO.Game.UI.Gumps
                     if (_item.ItemData.Layer > 0)
                     {
                         Item compItem = World.Player.FindItemByLayer((Layer)_item.ItemData.Layer);
-                        if (compItem != null && _item.Serial != compItem.Serial)
+                        if (compItem != null && (Layer)_item.ItemData.Layer != Layer.Backpack)
                         {
                             if (World.OPL.TryGetNameAndData(compItem.Serial, out string name, out string data))
                                 if (World.OPL.TryGetNameAndData(_item.Serial, out string name1, out string data1))
