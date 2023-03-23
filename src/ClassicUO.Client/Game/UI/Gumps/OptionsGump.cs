@@ -81,6 +81,7 @@ namespace ClassicUO.Game.UI.Gumps
         private Combobox _backpackStyle, _gridContainerSearchAlternative;
         private Checkbox _hueContainerGumps, _gridContainerItemScale, _gridContainerPreview, _gridContainerAnchorable;
         private HSliderBar _containerOpacity, _gridBorderOpacity, _gridContainerScale;
+        private Checkbox _gridUseBGTexture;
 
 
         //counters
@@ -2061,7 +2062,6 @@ namespace ClassicUO.Game.UI.Gumps
             Add(rightArea, PAGE);
         }
 
-
         private void BuildCommands()
         {
             const int PAGE = 4;
@@ -3709,25 +3709,30 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 gridSection.Add(_gridContainerPreview = AddCheckBox(
                         null,
-                        "",
+                        "Enable container preview",
                         _currentProfile.GridEnableContPreview,
                         0,
                         0
                     ));
                 _gridContainerPreview.SetTooltip("This only works on containers that you have opened, otherwise the client does not have that information yet.");
-                gridSection.AddRight(AddLabel(null, "Enable container preview", 0, 0));
             } //Grid preview
 
             {
                 gridSection.Add(_gridContainerAnchorable = AddCheckBox(
-                        null, "",
+                        null, "Make anchorable",
                         _currentProfile.EnableGridContainerAnchor,
                         0, 0
                     ));
                 _gridContainerAnchorable.SetTooltip("This will allow grid containers to be anchored to other containers/world map/journal");
-
-                gridSection.AddRight(AddLabel(null, "Make anchorable", 0, 0));
             } //Grid anchors
+
+            {
+                gridSection.Add(_gridUseBGTexture = AddCheckBox(
+                        null, "Use BG Texture",
+                        ProfileManager.CurrentProfile.Grid_EnableBGTexture,
+                        0, 0
+                    ));
+            } //Grid BG Texture
 
             rightArea.Add(gridSection);
             #endregion
@@ -4207,6 +4212,7 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.GridContainerSearchMode = _gridContainerSearchAlternative.SelectedIndex;
             _currentProfile.GridContainerScaleItems = _gridContainerItemScale.IsChecked;
             _currentProfile.GridEnableContPreview = _gridContainerPreview.IsChecked;
+            _currentProfile.Grid_EnableBGTexture = _gridUseBGTexture.IsChecked;
 
             {
                 _currentProfile.CoolDownX = int.Parse(_coolDownX.Text);

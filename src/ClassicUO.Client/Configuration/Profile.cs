@@ -275,7 +275,6 @@ namespace ClassicUO.Configuration
         public bool DoubleClickToLootInsideContainers { get; set; }
 
         public bool UseLargeContainerGumps { get; set; } = false;
-        public bool UseGridLayoutContainerGumps { get; set; } = true;
 
         public bool RelativeDragAndDropItems { get; set; }
 
@@ -316,7 +315,6 @@ namespace ClassicUO.Configuration
         public string WorldMapHiddenZoneFiles { get; set; } = string.Empty;
         public bool WorldMapShowGridIfZoomed { get; set; } = true;
 
-        public int GridContainerSearchMode { get; set; } = 1;
         public int AutoFollowDistance { get; set; } = 2;
         public Point ResizeJournalSize { get; set; } = new Point(410, 350);
         public bool FollowingMode { get; set; } = false;
@@ -324,13 +322,22 @@ namespace ClassicUO.Configuration
         public bool NamePlateHealthBar { get; set; } = true;
         public byte NamePlateOpacity { get; set; } = 75;
         public byte NamePlateHealthBarOpacity { get; set; } = 50;
+
+
+
+        public bool DisableSystemChat { get; set; } = false;
+
+        #region GRID CONTAINER
+        public bool UseGridLayoutContainerGumps { get; set; } = true;
+        public int GridContainerSearchMode { get; set; } = 1;
+        public bool EnableGridContainerAnchor { get; set; } = false;
         public byte GridBorderAlpha { get; set; } = 75;
         public ushort GridBorderHue { get; set; } = 0;
         public byte GridContainersScale { get; set; } = 100;
         public bool GridContainerScaleItems { get; set; } = true;
         public bool GridEnableContPreview { get; set; } = true;
-        public bool EnableGridContainerAnchor { get; set; } = false;
-        public bool DisableSystemChat { get; set; } = false;
+        public bool Grid_EnableBGTexture { get; set; } = true;
+        #endregion
 
         #region COOLDOWNS
         public int CoolDownX { get; set; } = 50;
@@ -351,8 +358,10 @@ namespace ClassicUO.Configuration
         }
         #endregion
 
+        #region IMPROVED BUFF BAR
         public bool UseImprovedBuffBar { get; set; } = true;
         public ushort ImprovedBuffBarHue { get; set; } = 905;
+        #endregion
 
         public static uint GumpsVersion { get; private set; }
 

@@ -476,6 +476,40 @@ namespace ClassicUO.Game.UI.Gumps
             return _container.Name?.Length > 0 ? _container.Name : "a container";
         }
 
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        {
+            if(ProfileManager.CurrentProfile.Grid_EnableBGTexture)
+            {
+                Vector3 hueVector = ShaderHueTranslator.GetHueVector
+                (
+                    0,
+                    false,
+                    _background.Alpha,
+                    true
+                );
+
+                var texture = GumpsLoader.Instance.GetGumpTexture(3004, out var bounds);
+
+                if (texture != null)
+                {
+                    batcher.DrawTiled
+                    (
+                        texture,
+                        new Rectangle
+                        (
+                            _background.X + x,
+                            _background.Y + y,
+                            _background.Width,
+                            _background.Height
+                        ),
+                        bounds,
+                        hueVector
+                    );
+                }
+            } //Background texture
+            return base.Draw(batcher, x, y);
+        }
+
         private class GridItem : Control
         {
             private readonly HitBox hit;
@@ -770,10 +804,6 @@ namespace ClassicUO.Game.UI.Gumps
                     if (count != null)
                         count.Draw(batcher, x + count.X, y + count.Y);
                 }
-
-
-
-
 
                 return true;
             }
