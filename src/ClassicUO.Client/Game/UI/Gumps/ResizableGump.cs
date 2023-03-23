@@ -50,6 +50,7 @@ namespace ClassicUO.Game.UI.Gumps
         private bool _isLocked = false;
         private bool _prevCanMove, _prevCloseWithRightClick, _prevBorder;
 
+        public BorderControl BorderControl { get { return _borderControl; } }
 
         protected ResizableGump
         (

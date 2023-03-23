@@ -58,19 +58,20 @@ namespace ClassicUO.Game.UI.Gumps
         private const int X_SPACING = 1, Y_SPACING = 1;
         private static int GRID_ITEM_SIZE { get { return (int)Math.Round(50 * (ProfileManager.CurrentProfile.GridContainersScale / 100f)); } }
         private float _lastGridItemScale = (ProfileManager.CurrentProfile.GridContainersScale / 100f);
-        private const int BORDER_WIDTH = 4;
+        private static int BORDER_WIDTH = 4;
         private static int DEFAULT_WIDTH =
             (BORDER_WIDTH * 2)     //The borders around the container, one on the left and one on the right
             + 15                   //The width of the scroll bar
             + (GRID_ITEM_SIZE * 4) //How many items to fit in left to right
             + (X_SPACING * 4)      //Spacing between each grid item(x4 items)
-            + 6;                   //Because the border acts weird
-        private static int DEFAULT_HEIGHT = 27 + (BORDER_WIDTH * 2) + (GRID_ITEM_SIZE + Y_SPACING) * 4;
+            + 0;                   //Because the border acts weird
+        private static int DEFAULT_HEIGHT = 10 + (BORDER_WIDTH * 2) + (GRID_ITEM_SIZE + Y_SPACING) * 4;
         private readonly Label _containerNameLabel;
         private GridScrollArea _scrollArea;
         private int _lastWidth = DEFAULT_WIDTH, _lastHeight = DEFAULT_HEIGHT;
         private readonly StbTextBox _searchBox;
         private readonly GumpPic _openRegularGump, _quickDropBackpack, _sortContents;
+        private bool updatedBorder = false;
         public readonly ushort OgContainerGraphic;
 
         private GridSlotManager gridSlotManager;
@@ -215,6 +216,8 @@ namespace ClassicUO.Game.UI.Gumps
             #endregion
 
             gridSlotManager = new GridSlotManager(local, this, _scrollArea, gridSaveSystem.GetItemSlots(LocalSerial)); //Must come after scroll area
+
+            BuildBorder();
 
             ResizeWindow(new Point(_lastWidth, _lastHeight));
         }
@@ -449,19 +452,20 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            if ((_lastWidth != Width || _lastHeight != Height) || _lastGridItemScale != GRID_ITEM_SIZE)
+            if ((_lastWidth != Width || _lastHeight != Height) || _lastGridItemScale != GRID_ITEM_SIZE || updatedBorder)
             {
                 _lastGridItemScale = GRID_ITEM_SIZE;
                 _background.Width = Width - (BORDER_WIDTH * 2);
                 _background.Height = Height - (BORDER_WIDTH * 2);
-                _scrollArea.Width = _background.Width - BORDER_WIDTH;
-                _scrollArea.Height = _background.Height - BORDER_WIDTH - (_containerNameLabel.Height + 1);
+                _scrollArea.Width = _background.Width;
+                _scrollArea.Height = _background.Height - (_containerNameLabel.Height + 1);
                 _openRegularGump.X = Width - _openRegularGump.Width - BORDER_WIDTH;
                 _quickDropBackpack.X = _openRegularGump.X - _quickDropBackpack.Width;
                 _sortContents.X = _quickDropBackpack.X - _sortContents.Width;
                 _lastHeight = Height;
                 _lastWidth = Width;
                 _searchBox.Width = Math.Min(Width - (BORDER_WIDTH * 2) - _openRegularGump.Width - _quickDropBackpack.Width - _sortContents.Width, 150);
+                updatedBorder = false;
                 RequestUpdateContents();
             }
 
@@ -476,9 +480,89 @@ namespace ClassicUO.Game.UI.Gumps
             return _container.Name?.Length > 0 ? _container.Name : "a container";
         }
 
+        public void BuildBorder()
+        {
+            int graphic = 0, borderSize = 0;
+            updatedBorder = true;
+            switch ((BorderStyle)ProfileManager.CurrentProfile.Grid_BorderStyle)
+            {
+                case BorderStyle.Style1:
+                    graphic = 3500; borderSize = 26;
+                    break;
+                case BorderStyle.Style2:
+                    graphic = 5054; borderSize = 12;
+                    break;
+                case BorderStyle.Style3:
+                    graphic = 5120; borderSize = 10;
+                    break;
+                case BorderStyle.Style4:
+                    graphic = 9200; borderSize = 7;
+                    break;
+                case BorderStyle.Style5:
+                    graphic = 9270; borderSize = 10;
+                    break;
+                case BorderStyle.Style6:
+                    graphic = 9300; borderSize = 4;
+                    break;
+                case BorderStyle.Style7:
+                    graphic = 9260; borderSize = 17;
+                    break;
+
+                default:
+                case BorderStyle.Default:
+                    BorderControl.T_Left = 0xffff;
+                    BorderControl.H_Border = 0x0A8C;
+                    BorderControl.T_Right = 0xffff;
+                    BorderControl.V_Border = 0x0A8D;
+                    BorderControl.V_Right_Border = 0x0A8D;
+                    BorderControl.B_Left = 0xffff;
+                    BorderControl.H_Bottom_Border = 0x0A8C;
+                    BorderControl.B_Right = 0xffff;
+                    BorderControl.BorderSize = 4;
+                    BORDER_WIDTH = 4;
+                    RePosition();
+                    break;
+            }
+
+            if ((BorderStyle)ProfileManager.CurrentProfile.Grid_BorderStyle != BorderStyle.Default)
+            {
+                BorderControl.T_Left = (ushort)graphic;
+                BorderControl.H_Border = (ushort)(graphic + 1);
+                BorderControl.T_Right = (ushort)(graphic + 2);
+                BorderControl.V_Border = (ushort)(graphic + 3);
+                BorderControl.V_Right_Border = (ushort)(graphic + 5);
+                BorderControl.B_Left = (ushort)(graphic + 6);
+                BorderControl.H_Bottom_Border = (ushort)(graphic + 7);
+                BorderControl.B_Right = (ushort)(graphic + 8);
+                BorderControl.BorderSize = borderSize;
+                BORDER_WIDTH = borderSize;
+            }
+            RePosition();
+        }
+
+        public void RePosition()
+        {
+            DEFAULT_WIDTH =
+              (BORDER_WIDTH * 2)     //The borders around the container, one on the left and one on the right
+              + 15                   //The width of the scroll bar
+              + (GRID_ITEM_SIZE * 4) //How many items to fit in left to right
+              + (X_SPACING * 4)      //Spacing between each grid item(x4 items)
+              + 0;                   //Because the border acts weird
+            DEFAULT_HEIGHT = 10 + (BORDER_WIDTH * 2) + (GRID_ITEM_SIZE + Y_SPACING) * 4;
+            _background.X = BORDER_WIDTH;
+            _background.Y = BORDER_WIDTH;
+            _scrollArea.X = _background.X;
+            _scrollArea.Y = _containerNameLabel.Height + _background.Y + 1;
+            _searchBox.Y = BORDER_WIDTH;
+            _quickDropBackpack.Y = BORDER_WIDTH;
+            _sortContents.Y = BORDER_WIDTH;
+            _openRegularGump.Y = BORDER_WIDTH;
+            _searchBox.X = BORDER_WIDTH;
+        }
+
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            if(ProfileManager.CurrentProfile.Grid_EnableBGTexture)
+            if (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.Grid_EnableBGTexture)
             {
                 Vector3 hueVector = ShaderHueTranslator.GetHueVector
                 (
@@ -508,6 +592,18 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             } //Background texture
             return base.Draw(batcher, x, y);
+        }
+
+        public enum BorderStyle
+        {
+            Default,
+            Style1,
+            Style2,
+            Style3,
+            Style4,
+            Style5,
+            Style6,
+            Style7
         }
 
         private class GridItem : Control
@@ -696,7 +792,7 @@ namespace ClassicUO.Game.UI.Gumps
                                         name1 + "<br><basefont color=\"#FFFFFFFF\">" +
                                         data1 +
                                         "<basefont color=\"orange\"><br><br>Equiped Item<br>" +
-                                        name + "<basefont color=\"#FFFFFFFF\"><br>" + 
+                                        name + "<basefont color=\"#FFFFFFFF\"><br>" +
                                         data;
                                     hit.ClearTooltip();
                                     hit.SetTooltip(newToolTip);
