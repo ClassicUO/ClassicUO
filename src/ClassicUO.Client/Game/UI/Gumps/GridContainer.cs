@@ -42,6 +42,7 @@ using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
@@ -642,11 +643,33 @@ namespace ClassicUO.Game.UI.Gumps
                 else
                     mousePressedWhenEntered = false;
                 if (_item != null)
+                {
                     if (_item.ItemData.IsContainer && _item.Items != null && ProfileManager.CurrentProfile.GridEnableContPreview)
                     {
                         preview = new GridContainerPreview(_item, Mouse.Position.X, Mouse.Position.Y);
                         UIManager.Add(preview);
                     }
+                    hit.SetTooltip(_item);
+                    if (_item.ItemData.Layer > 0)
+                    {
+                        Item compItem = World.Player.FindItemByLayer((Layer)_item.ItemData.Layer);
+                        if (compItem != null && _item.Serial != compItem.Serial)
+                        {
+                            if (World.OPL.TryGetNameAndData(compItem.Serial, out string name, out string data))
+                                if (World.OPL.TryGetNameAndData(_item.Serial, out string name1, out string data1))
+                                {
+                                    string newToolTip = "<basefont color=\"yellow\">This Item<br>" +
+                                        name1 + "<br><basefont color=\"#FFFFFFFF\">" +
+                                        data1 +
+                                        "<basefont color=\"orange\"><br><br>Equiped Item<br>" +
+                                        name + "<basefont color=\"#FFFFFFFF\"><br>" + 
+                                        data;
+                                    hit.ClearTooltip();
+                                    hit.SetTooltip(newToolTip);
+                                }
+                        }
+                    }
+                }
             }
 
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
