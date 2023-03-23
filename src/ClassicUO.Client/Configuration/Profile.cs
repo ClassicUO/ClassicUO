@@ -336,6 +336,7 @@ namespace ClassicUO.Configuration
         public byte GridContainersScale { get; set; } = 100;
         public bool GridContainerScaleItems { get; set; } = true;
         public bool GridEnableContPreview { get; set; } = true;
+        public bool Grid_EnableBGTexture { get; set; } = true;
         #endregion
 
         #region COOLDOWNS
