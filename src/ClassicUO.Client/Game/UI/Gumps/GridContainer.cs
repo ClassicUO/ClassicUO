@@ -513,15 +513,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 default:
                 case BorderStyle.Default:
-                    BorderControl.T_Left = 0xffff;
-                    BorderControl.H_Border = 0x0A8C;
-                    BorderControl.T_Right = 0xffff;
-                    BorderControl.V_Border = 0x0A8D;
-                    BorderControl.V_Right_Border = 0x0A8D;
-                    BorderControl.B_Left = 0xffff;
-                    BorderControl.H_Bottom_Border = 0x0A8C;
-                    BorderControl.B_Right = 0xffff;
-                    BorderControl.BorderSize = 4;
+                    BorderControl.DefaultGraphics();
                     BORDER_WIDTH = 4;
                     RePosition();
                     break;
