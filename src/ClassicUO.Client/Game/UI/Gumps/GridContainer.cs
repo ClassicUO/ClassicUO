@@ -35,6 +35,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
 using ClassicUO.Assets;
@@ -614,6 +615,7 @@ namespace ClassicUO.Game.UI.Gumps
             private GridContainerPreview preview;
             Label count;
             AlphaBlendControl background;
+            private CustomToolTip toolTipThis, toolTipitem1, toolTipitem2;
 
             public bool Hightlight = false;
             public Item SlotItem { get { return _item; } set { _item = value; LocalSerial = value.Serial; } }
@@ -775,31 +777,45 @@ namespace ClassicUO.Game.UI.Gumps
                         preview = new GridContainerPreview(_item, Mouse.Position.X, Mouse.Position.Y);
                         UIManager.Add(preview);
                     }
-                    hit.SetTooltip(_item);
-                    if (_item.ItemData.Layer > 0)
-                    {
-                        Item compItem = World.Player.FindItemByLayer((Layer)_item.ItemData.Layer);
-                        if (compItem != null && (Layer)_item.ItemData.Layer != Layer.Backpack)
-                        {
-                            if (World.OPL.TryGetNameAndData(compItem.Serial, out string name, out string data))
-                                if (World.OPL.TryGetNameAndData(_item.Serial, out string name1, out string data1))
-                                {
-                                    string newToolTip = "<basefont color=\"yellow\">This Item<br>" +
-                                        name1 + "<br><basefont color=\"#FFFFFFFF\">" +
-                                        data1 +
-                                        "<basefont color=\"orange\"><br><br>Equiped Item<br>" +
-                                        name + "<basefont color=\"#FFFFFFFF\"><br>" +
-                                        data;
-                                    hit.ClearTooltip();
-                                    hit.SetTooltip(newToolTip);
-                                }
-                        }
-                    }
+                    if (!hit.HasTooltip)
+                        hit.SetTooltip(_item);
                 }
             }
 
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
+                if (_item != null && _item.ItemData.Layer > 0 && hit.MouseIsOver && Keyboard.Ctrl && (toolTipThis == null || toolTipThis.IsDisposed) && (toolTipitem1 == null || toolTipitem1.IsDisposed) && (toolTipitem2 == null || toolTipitem2.IsDisposed))
+                {
+                    Item compItem = World.Player.FindItemByLayer((Layer)_item.ItemData.Layer);
+                    if (compItem != null && (Layer)_item.ItemData.Layer != Layer.Backpack)
+                    {
+                        hit.ClearTooltip();
+                        toolTipThis = new CustomToolTip(_item, Mouse.Position.X + 5, Mouse.Position.Y + 5, hit);
+                        UIManager.Add(toolTipThis);
+                        toolTipitem1 = new CustomToolTip(compItem, toolTipThis.X + toolTipThis.Width + 10, toolTipThis.Y, hit, "<basefont color=\"orange\">Equipped Item<br>");
+                        UIManager.Add(toolTipitem1);
+
+                        if ((Layer)_item.ItemData.Layer == Layer.OneHanded)
+                        {
+                            Item compItem2 = World.Player.FindItemByLayer(Layer.TwoHanded);
+                            if (compItem2 != null)
+                            {
+                                toolTipitem2 = new CustomToolTip(compItem2, toolTipitem1.X + toolTipitem1.Width + 10, toolTipitem1.Y, hit, "<basefont color=\"orange\">Equipped Item<br>");
+                                UIManager.Add(toolTipitem2);
+                            }
+                        }
+                        else if ((Layer)_item.ItemData.Layer == Layer.TwoHanded)
+                        {
+                            Item compItem2 = World.Player.FindItemByLayer(Layer.OneHanded);
+                            if (compItem2 != null)
+                            {
+                                toolTipitem2 = new CustomToolTip(compItem2, toolTipitem1.X + toolTipitem1.Width + 10, toolTipitem1.Y, hit, "<basefont color=\"orange\">Equipped Item<br>");
+                                UIManager.Add(toolTipitem2);
+                            }
+                        }
+                    }
+                }
+
                 base.Draw(batcher, x, y);
 
                 Item item = World.Items.Get(LocalSerial);
