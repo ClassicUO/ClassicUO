@@ -11,7 +11,11 @@ namespace ClassicUO.Game.UI.Gumps
         private const int HEIGHT = 400;
 
 
-        private readonly string[] SUPPORTERS = { "TazmanianTad - Developer" };
+        private readonly string[] SUPPORTERS = { 
+            "TazmanianTad - Developer",
+            "Doskan - Random coffee bringer",
+            "Auburok - Don't leave Brit Bank without TazUO"
+        };
         private AlphaBlendControl _background;
 
         public Supporters() : base(0, 0)
@@ -45,7 +49,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Label l = new Label(SUPPORTER, true, 0xffff, WIDTH, 255, FontStyle.BlackBorder, Assets.TEXT_ALIGN_TYPE.TS_CENTER, true);
                 l.Y = y;
-                y += 5;
+                y += l.Height + 1;
                 Add(l);
             }
         }
