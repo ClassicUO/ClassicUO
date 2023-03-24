@@ -50,12 +50,10 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class GridContainer : ResizableGump
     {
-        private static int _lastX = 100, _lastY = 100;
-        private readonly AlphaBlendControl _background;
-        private readonly Item _container;
         private const int X_SPACING = 1, Y_SPACING = 1;
+
+        private static int _lastX = 100, _lastY = 100;
         private static int GRID_ITEM_SIZE { get { return (int)Math.Round(50 * (ProfileManager.CurrentProfile.GridContainersScale / 100f)); } }
-        private float _lastGridItemScale = (ProfileManager.CurrentProfile.GridContainersScale / 100f);
         private static int BORDER_WIDTH = 4;
         private static int DEFAULT_WIDTH =
             (BORDER_WIDTH * 2)     //The borders around the container, one on the left and one on the right
@@ -64,17 +62,21 @@ namespace ClassicUO.Game.UI.Gumps
             + (X_SPACING * 4)      //Spacing between each grid item(x4 items)
             + 0;                   //Because the border acts weird
         private static int DEFAULT_HEIGHT = 10 + (BORDER_WIDTH * 2) + (GRID_ITEM_SIZE + Y_SPACING) * 4;
+        private static GridSaveSystem gridSaveSystem = new GridSaveSystem();
+
+        public readonly ushort OgContainerGraphic;
+        private readonly AlphaBlendControl _background;
+        private readonly Item _container;
         private readonly Label _containerNameLabel;
-        private GridScrollArea _scrollArea;
-        private int _lastWidth = DEFAULT_WIDTH, _lastHeight = DEFAULT_HEIGHT;
         private readonly StbTextBox _searchBox;
         private readonly GumpPic _openRegularGump, _quickDropBackpack, _sortContents;
+
+        private float _lastGridItemScale = (ProfileManager.CurrentProfile.GridContainersScale / 100f);
+        private int _lastWidth = DEFAULT_WIDTH, _lastHeight = DEFAULT_HEIGHT;
         private bool updatedBorder = false;
-        public readonly ushort OgContainerGraphic;
 
+        private GridScrollArea _scrollArea;
         private GridSlotManager gridSlotManager;
-
-        private static GridSaveSystem gridSaveSystem = new GridSaveSystem();
 
         public GridContainer(uint local, ushort ogContainer) : base(DEFAULT_WIDTH, DEFAULT_HEIGHT, GetWidth(2), GRID_ITEM_SIZE + BORDER_WIDTH + 31, local, 0)
         {
