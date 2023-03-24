@@ -34,7 +34,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Xml;
 using System.Xml.Linq;
 using ClassicUO.Assets;
@@ -42,7 +41,6 @@ using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
-using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
@@ -52,12 +50,10 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class GridContainer : ResizableGump
     {
-        private static int _lastX = 100, _lastY = 100;
-        private readonly AlphaBlendControl _background;
-        private readonly Item _container;
         private const int X_SPACING = 1, Y_SPACING = 1;
+
+        private static int _lastX = 100, _lastY = 100;
         private static int GRID_ITEM_SIZE { get { return (int)Math.Round(50 * (ProfileManager.CurrentProfile.GridContainersScale / 100f)); } }
-        private float _lastGridItemScale = (ProfileManager.CurrentProfile.GridContainersScale / 100f);
         private static int BORDER_WIDTH = 4;
         private static int DEFAULT_WIDTH =
             (BORDER_WIDTH * 2)     //The borders around the container, one on the left and one on the right
@@ -66,17 +62,22 @@ namespace ClassicUO.Game.UI.Gumps
             + (X_SPACING * 4)      //Spacing between each grid item(x4 items)
             + 0;                   //Because the border acts weird
         private static int DEFAULT_HEIGHT = 10 + (BORDER_WIDTH * 2) + (GRID_ITEM_SIZE + Y_SPACING) * 4;
+        private static GridSaveSystem gridSaveSystem = new GridSaveSystem();
+
+        public readonly ushort OgContainerGraphic;
+        private readonly AlphaBlendControl _background;
+        private readonly Item _container;
         private readonly Label _containerNameLabel;
-        private GridScrollArea _scrollArea;
-        private int _lastWidth = DEFAULT_WIDTH, _lastHeight = DEFAULT_HEIGHT;
         private readonly StbTextBox _searchBox;
         private readonly GumpPic _openRegularGump, _quickDropBackpack, _sortContents;
-        private bool updatedBorder = false;
-        public readonly ushort OgContainerGraphic;
+        private readonly GumpPicTiled _backgroundTexture;
 
+        private float _lastGridItemScale = (ProfileManager.CurrentProfile.GridContainersScale / 100f);
+        private int _lastWidth = DEFAULT_WIDTH, _lastHeight = DEFAULT_HEIGHT;
+        private bool updatedBorder = true;
+
+        private GridScrollArea _scrollArea;
         private GridSlotManager gridSlotManager;
-
-        private static GridSaveSystem gridSaveSystem = new GridSaveSystem();
 
         public GridContainer(uint local, ushort ogContainer) : base(DEFAULT_WIDTH, DEFAULT_HEIGHT, GetWidth(2), GRID_ITEM_SIZE + BORDER_WIDTH + 31, local, 0)
         {
@@ -124,6 +125,9 @@ namespace ClassicUO.Game.UI.Gumps
             _background.Y = BORDER_WIDTH;
             _background.Alpha = (float)ProfileManager.CurrentProfile.ContainerOpacity / 100;
             _background.Hue = ProfileManager.CurrentProfile.AltGridContainerBackgroundHue;
+
+            _backgroundTexture = new GumpPicTiled(0);
+            _backgroundTexture.IsVisible = true;
             #endregion
 
             #region TOP BAR AREA
@@ -201,6 +205,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             #region Add controls
             Add(_background);
+            Add(_backgroundTexture);
             Add(_containerNameLabel);
             _searchBox.Add(new AlphaBlendControl(0.5f)
             {
@@ -466,6 +471,9 @@ namespace ClassicUO.Game.UI.Gumps
                 _lastWidth = Width;
                 _searchBox.Width = Math.Min(Width - (BORDER_WIDTH * 2) - _openRegularGump.Width - _quickDropBackpack.Width - _sortContents.Width, 150);
                 updatedBorder = false;
+                _backgroundTexture.Width = _background.Width;
+                _backgroundTexture.Height = _background.Height;
+                _backgroundTexture.Alpha = _background.Alpha;
                 RequestUpdateContents();
             }
 
@@ -513,15 +521,9 @@ namespace ClassicUO.Game.UI.Gumps
 
                 default:
                 case BorderStyle.Default:
-                    BorderControl.T_Left = 0xffff;
-                    BorderControl.H_Border = 0x0A8C;
-                    BorderControl.T_Right = 0xffff;
-                    BorderControl.V_Border = 0x0A8D;
-                    BorderControl.V_Right_Border = 0x0A8D;
-                    BorderControl.B_Left = 0xffff;
-                    BorderControl.H_Bottom_Border = 0x0A8C;
-                    BorderControl.B_Right = 0xffff;
-                    BorderControl.BorderSize = 4;
+                    BorderControl.DefaultGraphics();
+                    _backgroundTexture.IsVisible = false;
+                    _background.IsVisible = true;
                     BORDER_WIDTH = 4;
                     RePosition();
                     break;
@@ -533,6 +535,14 @@ namespace ClassicUO.Game.UI.Gumps
                 BorderControl.H_Border = (ushort)(graphic + 1);
                 BorderControl.T_Right = (ushort)(graphic + 2);
                 BorderControl.V_Border = (ushort)(graphic + 3);
+
+                _backgroundTexture.Graphic = (ushort)(graphic + 4);
+                _backgroundTexture.IsVisible = true;
+                _backgroundTexture.Hue = _background.Hue;
+                BorderControl.Hue = _background.Hue;
+                BorderControl.Alpha = _background.Alpha;
+                _background.IsVisible = false;
+
                 BorderControl.V_Right_Border = (ushort)(graphic + 5);
                 BorderControl.B_Left = (ushort)(graphic + 6);
                 BorderControl.H_Bottom_Border = (ushort)(graphic + 7);
@@ -561,40 +571,8 @@ namespace ClassicUO.Game.UI.Gumps
             _sortContents.Y = BORDER_WIDTH;
             _openRegularGump.Y = BORDER_WIDTH;
             _searchBox.X = BORDER_WIDTH;
-        }
-
-        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
-        {
-            if (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.Grid_EnableBGTexture)
-            {
-                Vector3 hueVector = ShaderHueTranslator.GetHueVector
-                (
-                    0,
-                    false,
-                    _background.Alpha,
-                    true
-                );
-
-                var texture = GumpsLoader.Instance.GetGumpTexture(3004, out var bounds);
-
-                if (texture != null)
-                {
-                    batcher.DrawTiled
-                    (
-                        texture,
-                        new Rectangle
-                        (
-                            _background.X + x,
-                            _background.Y + y,
-                            _background.Width,
-                            _background.Height
-                        ),
-                        bounds,
-                        hueVector
-                    );
-                }
-            } //Background texture
-            return base.Draw(batcher, x, y);
+            _backgroundTexture.X = _background.X;
+            _backgroundTexture.Y = _background.Y;
         }
 
         public enum BorderStyle
@@ -622,9 +600,12 @@ namespace ClassicUO.Game.UI.Gumps
             private GridContainerPreview preview;
             Label count;
             AlphaBlendControl background;
+            private CustomToolTip toolTipThis, toolTipitem1, toolTipitem2;
 
             public bool Hightlight = false;
             public Item SlotItem { get { return _item; } set { _item = value; LocalSerial = value.Serial; } }
+
+            private readonly int[] spellbooks = { 0x0EFA, 0x2253, 0x2252, 0x238C, 0x23A0, 0x2D50, 0x2D9D, 0x225A };
 
             public GridItem(uint serial, int size, Item _container, GridContainer gridContainer, int count)
             {
@@ -778,36 +759,50 @@ namespace ClassicUO.Game.UI.Gumps
                     mousePressedWhenEntered = false;
                 if (_item != null)
                 {
-                    if (_item.ItemData.IsContainer && _item.Items != null && ProfileManager.CurrentProfile.GridEnableContPreview)
+                    if (_item.ItemData.IsContainer && _item.Items != null && ProfileManager.CurrentProfile.GridEnableContPreview && !spellbooks.Contains(_item.Graphic))
                     {
                         preview = new GridContainerPreview(_item, Mouse.Position.X, Mouse.Position.Y);
                         UIManager.Add(preview);
                     }
-                    hit.SetTooltip(_item);
-                    if (_item.ItemData.Layer > 0)
-                    {
-                        Item compItem = World.Player.FindItemByLayer((Layer)_item.ItemData.Layer);
-                        if (compItem != null && (Layer)_item.ItemData.Layer != Layer.Backpack)
-                        {
-                            if (World.OPL.TryGetNameAndData(compItem.Serial, out string name, out string data))
-                                if (World.OPL.TryGetNameAndData(_item.Serial, out string name1, out string data1))
-                                {
-                                    string newToolTip = "<basefont color=\"yellow\">This Item<br>" +
-                                        name1 + "<br><basefont color=\"#FFFFFFFF\">" +
-                                        data1 +
-                                        "<basefont color=\"orange\"><br><br>Equiped Item<br>" +
-                                        name + "<basefont color=\"#FFFFFFFF\"><br>" +
-                                        data;
-                                    hit.ClearTooltip();
-                                    hit.SetTooltip(newToolTip);
-                                }
-                        }
-                    }
+                    if (!hit.HasTooltip)
+                        hit.SetTooltip(_item);
                 }
             }
 
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
+                if (_item != null && _item.ItemData.Layer > 0 && hit.MouseIsOver && Keyboard.Ctrl && (toolTipThis == null || toolTipThis.IsDisposed) && (toolTipitem1 == null || toolTipitem1.IsDisposed) && (toolTipitem2 == null || toolTipitem2.IsDisposed))
+                {
+                    Item compItem = World.Player.FindItemByLayer((Layer)_item.ItemData.Layer);
+                    if (compItem != null && (Layer)_item.ItemData.Layer != Layer.Backpack)
+                    {
+                        hit.ClearTooltip();
+                        toolTipThis = new CustomToolTip(_item, Mouse.Position.X + 5, Mouse.Position.Y + 5, hit);
+                        UIManager.Add(toolTipThis);
+                        toolTipitem1 = new CustomToolTip(compItem, toolTipThis.X + toolTipThis.Width + 10, toolTipThis.Y, hit, "<basefont color=\"orange\">Equipped Item<br>");
+                        UIManager.Add(toolTipitem1);
+
+                        if ((Layer)_item.ItemData.Layer == Layer.OneHanded)
+                        {
+                            Item compItem2 = World.Player.FindItemByLayer(Layer.TwoHanded);
+                            if (compItem2 != null)
+                            {
+                                toolTipitem2 = new CustomToolTip(compItem2, toolTipitem1.X + toolTipitem1.Width + 10, toolTipitem1.Y, hit, "<basefont color=\"orange\">Equipped Item<br>");
+                                UIManager.Add(toolTipitem2);
+                            }
+                        }
+                        else if ((Layer)_item.ItemData.Layer == Layer.TwoHanded)
+                        {
+                            Item compItem2 = World.Player.FindItemByLayer(Layer.OneHanded);
+                            if (compItem2 != null)
+                            {
+                                toolTipitem2 = new CustomToolTip(compItem2, toolTipitem1.X + toolTipitem1.Width + 10, toolTipitem1.Y, hit, "<basefont color=\"orange\">Equipped Item<br>");
+                                UIManager.Add(toolTipitem2);
+                            }
+                        }
+                    }
+                }
+
                 base.Draw(batcher, x, y);
 
                 Item item = World.Items.Get(LocalSerial);

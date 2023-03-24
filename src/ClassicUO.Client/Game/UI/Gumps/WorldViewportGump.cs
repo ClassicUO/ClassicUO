@@ -324,6 +324,15 @@ namespace ClassicUO.Game.UI.Gumps
 
         public ushort Hue { get; set; }
 
+        public void DefaultGraphics()
+        {
+            h_border = 0x0A8C;
+            v_border = 0x0A8D;
+            h_bottom_border = 0x0A8C;
+            v_right_border = 0x0A8D;
+            t_left = 0xffff; t_right = 0xffff; b_left = 0xffff; b_right = 0xffff;
+            _borderSize = 4;
+        }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
@@ -334,6 +343,7 @@ namespace ClassicUO.Game.UI.Gumps
                 hueVector.X = Hue;
                 hueVector.Y = 1;
             }
+            hueVector.Z = Alpha;
 
             var texture = GumpsLoader.Instance.GetGumpTexture(h_border, out var bounds);
             Rectangle pos = new Rectangle
@@ -343,7 +353,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Width,
                 _borderSize
             );
-            if(t_left != 0xffff)
+            if (t_left != 0xffff)
             {
                 pos.X += _borderSize;
                 pos.Width -= _borderSize;

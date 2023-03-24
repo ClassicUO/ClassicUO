@@ -31,6 +31,8 @@
 #endregion
 
 using ClassicUO.Assets;
+using ClassicUO.Game.Data;
+using ClassicUO.Game.Managers;
 using ClassicUO.Renderer;
 using ClassicUO.Utility.Collections;
 using Microsoft.Xna.Framework;
@@ -47,7 +49,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (Size >= MaxSize)
             {
-                ((TextObject) Items)?.Destroy();
+                ((TextObject)Items)?.Destroy();
                 Remove(Items);
             }
             else
@@ -59,12 +61,12 @@ namespace ClassicUO.Game.GameObjects
 
         public new void Clear()
         {
-            TextObject item = (TextObject) Items;
+            TextObject item = (TextObject)Items;
             Items = null;
 
             while (item != null)
             {
-                TextObject next = (TextObject) item.Next;
+                TextObject next = (TextObject)item.Next;
                 item.Next = null;
                 item.Destroy();
                 Remove(item);
@@ -106,7 +108,23 @@ namespace ClassicUO.Game.GameObjects
         {
             TextObject text_obj = TextObject.Create();
 
-            text_obj.RenderedText = RenderedText.Create(damage.ToString(), (ushort) (ReferenceEquals(Parent, World.Player) ? 0x0034 : 0x0021), 3, false);
+            ushort hue = 0x0021;
+
+            if (ReferenceEquals(Parent, World.Player))
+                hue = 0x0034;
+            else if (Parent is Mobile)
+            {
+                Mobile _parent = (Mobile)Parent;
+                if (_parent.IsRenamable && _parent.NotorietyFlag != NotorietyFlag.Invulnerable && _parent.NotorietyFlag != NotorietyFlag.Enemy)
+                    hue = 0x0033;
+                else if (_parent.NotorietyFlag == NotorietyFlag.Ally)
+                    hue = 0x0030;
+
+                if (_parent.Serial == TargetManager.LastAttack)
+                    hue = 0x1F;
+            }
+
+            text_obj.RenderedText = RenderedText.Create(damage.ToString(), hue, 3, false);
 
             text_obj.Time = Time.Ticks + 1500;
 
@@ -205,8 +223,8 @@ namespace ClassicUO.Game.GameObjects
                         out int height
                     );
 
-                    p.X += (int) m.Offset.X + 22;
-                    p.Y += (int) (m.Offset.Y - m.Offset.Z - (height + centerY + 8));
+                    p.X += (int)m.Offset.X + 22;
+                    p.Y += (int)(m.Offset.Y - m.Offset.Z - (height + centerY + 8));
                 }
                 else
                 {

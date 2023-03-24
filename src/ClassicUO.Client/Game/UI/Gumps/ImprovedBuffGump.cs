@@ -12,21 +12,18 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private GumpPic _background;
         private Button _button;
-        private GumpDirection _direction;
-        private ushort _graphic;
+        private bool _direction = true;
+        private ushort _graphic = 2091;
         private DataBox _box;
 
         public ImprovedBuffGump() : base(0, 0)
         {
             X = 100;
             Y = 100;
+            Width = CoolDownBar.COOL_DOWN_WIDTH;
             CanMove = true;
             CanCloseWithRightClick = true;
             AcceptMouseInput = true;
-
-
-            _direction = GumpDirection.LEFT_HORIZONTAL;
-            _graphic = 0x7580;
 
             BuildGump();
 
@@ -41,23 +38,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         public void AddBuff(BuffIcon icon)
         {
-            CoolDownBar coolDownBar = new CoolDownBar(TimeSpan.FromMilliseconds(icon.Timer - Time.Ticks), icon.Title, ProfileManager.CurrentProfile.ImprovedBuffBarHue, 0, 0, icon.Graphic, icon.Type);
-            int x = 0;
-            bool upsideDown = false;
-            switch (_direction)
-            {
-                case GumpDirection.LEFT_HORIZONTAL:
-                    upsideDown = true;
-                    x = 25;
-                    break;
+            CoolDownBar coolDownBar = new CoolDownBar(TimeSpan.FromMilliseconds(icon.Timer - Time.Ticks), icon.Title.Replace("<br>", " "), ProfileManager.CurrentProfile.ImprovedBuffBarHue, 0, 0, icon.Graphic, icon.Type);
 
-                case GumpDirection.LEFT_VERTICAL:
-                    x = 25;
-                    break;
-
-            }
-
-            BuffBarManager.AddCoolDownBar(coolDownBar, x, upsideDown);
+            BuffBarManager.AddCoolDownBar(coolDownBar, _direction);
             _box.Add(coolDownBar);
         }
 
@@ -69,42 +52,15 @@ namespace ClassicUO.Game.UI.Gumps
         protected override void UpdateContents()
         {
             base.UpdateContents();
-            _background.Graphic = _graphic;
-            switch (_direction)
-            {
-                case GumpDirection.LEFT_HORIZONTAL:
-                    _button.X = -2;
-                    _button.Y = 36;
 
-                    break;
-
-                case GumpDirection.LEFT_VERTICAL:
-                default:
-                    _button.X = 0;
-                    _button.Y = 0;
-
-                    break;
-            }
-            BuffBarManager.UpdatePositions(_direction == GumpDirection.LEFT_HORIZONTAL);
+            BuffBarManager.UpdatePositions(_direction);
         }
 
         public override void OnButtonClick(int buttonID)
         {
             if (buttonID == 0)
             {
-                switch (_graphic)
-                {
-                    case 0x7580:
-                        _direction = GumpDirection.LEFT_VERTICAL;
-                        _graphic = 0x757F;
-                        break;
-
-                    case 0x757F:
-                    default:
-                        _direction = GumpDirection.LEFT_HORIZONTAL;
-                        _graphic = 0x7580;
-                        break;
-                }
+                _direction = !_direction;
                 RequestUpdateContents();
             }
         }
@@ -119,8 +75,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             );
             _background.Graphic = _graphic;
-            _background.X = 0;
-            _background.Y = 0;
+            _background.Width = CoolDownBar.COOL_DOWN_WIDTH;
 
             Add
             (
@@ -131,21 +86,9 @@ namespace ClassicUO.Game.UI.Gumps
             );
 
 
-            switch (_direction)
-            {
-                case GumpDirection.LEFT_HORIZONTAL:
-                    _button.X = -2;
-                    _button.Y = 36;
+            _button.X = -5;
+            _button.Y = -5;
 
-                    break;
-
-                case GumpDirection.LEFT_VERTICAL:
-                default:
-                    _button.X = 0;
-                    _button.Y = 0;
-
-                    break;
-            }
 
             Add
             (
@@ -166,7 +109,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Save(writer);
             writer.WriteAttributeString("graphic", _graphic.ToString());
-            writer.WriteAttributeString("direction", ((int)_direction).ToString());
+            writer.WriteAttributeString("updown", _direction.ToString());
         }
 
         public override void Restore(XmlElement xml)
@@ -174,17 +117,11 @@ namespace ClassicUO.Game.UI.Gumps
             base.Restore(xml);
 
             _graphic = ushort.Parse(xml.GetAttribute("graphic"));
-            _direction = (GumpDirection)byte.Parse(xml.GetAttribute("direction"));
+            _direction = bool.Parse(xml.GetAttribute("updown"));
             RequestUpdateContents();
         }
 
         public override GumpType GumpType => GumpType.Buff;
-
-        private enum GumpDirection
-        {
-            LEFT_VERTICAL,
-            LEFT_HORIZONTAL
-        }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
@@ -195,17 +132,16 @@ namespace ClassicUO.Game.UI.Gumps
         {
             private const int MAX_COOLDOWN_BARS = 20;
             private static CoolDownBar[] coolDownBars = new CoolDownBar[MAX_COOLDOWN_BARS];
-            public static void AddCoolDownBar(CoolDownBar coolDownBar, int x, bool bottomUp)
+            public static void AddCoolDownBar(CoolDownBar coolDownBar, bool bottomUp)
             {
                 for (int i = 0; i < coolDownBars.Length; i++)
                 {
                     if (coolDownBars[i] == null || coolDownBars[i].IsDisposed)
                     {
-                        coolDownBar.X = x;
-                        if (!bottomUp)
-                            coolDownBar.Y = (i * (CoolDownBar.COOL_DOWN_HEIGHT + 5)) + 20;
+                        if (bottomUp)
+                            coolDownBar.Y = (i * (CoolDownBar.COOL_DOWN_HEIGHT + 5)) + 15;
                         else
-                            coolDownBar.Y = -(i * (CoolDownBar.COOL_DOWN_HEIGHT + 5)) + 5;
+                            coolDownBar.Y = -(i * (CoolDownBar.COOL_DOWN_HEIGHT + 5) + 35);
 
                         coolDownBars[i] = coolDownBar;
                         return;
@@ -219,13 +155,13 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (coolDownBars[i] != null && !coolDownBars[i].IsDisposed)
                     {
-                        if (!bottomUp)
+                        if (bottomUp)
                         {
-                            coolDownBars[i].Y = (i * (CoolDownBar.COOL_DOWN_HEIGHT + 5)) + 20;
+                            coolDownBars[i].Y = (i * (CoolDownBar.COOL_DOWN_HEIGHT + 2)) + 15;
                         }
                         else
                         {
-                            coolDownBars[i].Y = -(i * (CoolDownBar.COOL_DOWN_HEIGHT + 5)) + 5;
+                            coolDownBars[i].Y = -(i * (CoolDownBar.COOL_DOWN_HEIGHT + 2) + 35);
                         }
                     }
                 }

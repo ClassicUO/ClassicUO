@@ -80,7 +80,6 @@ namespace ClassicUO.Game.UI.Gumps
         private Combobox _dragSelectModifierKey, _backpackStyle, _gridContainerSearchAlternative, _gridBorderStyle;
         private Checkbox _hueContainerGumps, _gridContainerItemScale, _gridContainerPreview, _gridContainerAnchorable;
         private HSliderBar _containerOpacity, _gridBorderOpacity, _gridContainerScale;
-        private Checkbox _gridUseBGTexture;
 
 
         //counters
@@ -134,7 +133,8 @@ namespace ClassicUO.Game.UI.Gumps
         private Combobox _infoBarHighlightType;
 
         // combat & spells
-        private ClickableColorBox _innocentColorPickerBox, _friendColorPickerBox, _crimialColorPickerBox, _canAttackColorPickerBox, _enemyColorPickerBox, _murdererColorPickerBox, _neutralColorPickerBox, _beneficColorPickerBox, _harmfulColorPickerBox, _improvedBuffBarHue;
+        private ClickableColorBox _innocentColorPickerBox, _friendColorPickerBox, _crimialColorPickerBox, _canAttackColorPickerBox, _enemyColorPickerBox, _murdererColorPickerBox, _neutralColorPickerBox, _beneficColorPickerBox, _harmfulColorPickerBox, _improvedBuffBarHue,
+            _damageHueSelf, _damageHuePet, _damageHueAlly, _damageHueLastAttack, _damageHueOther;
         private HSliderBar _lightBar;
         private Checkbox _buffBarTime, _uiButtonsSingleClick, _queryBeforAttackCheckbox, _queryBeforeBeneficialCheckbox, _spellColoringCheckbox, _spellFormatCheckbox, _enableFastSpellsAssign, _enableImprovedBuffGump;
 
@@ -3027,6 +3027,32 @@ namespace ClassicUO.Game.UI.Gumps
 
             _spellFormatBox.SetText(_currentProfile.SpellDisplayFormat);
 
+            startX = 5;
+            startY += (_spellFormatBox.Height * 2) + 2;
+
+            SettingsSection _damageHues = new SettingsSection("Damage number hues", rightArea.Width);
+            _damageHues.X = startX;
+            _damageHues.Y = startY;
+
+            _damageHues.Add(_damageHueSelf = AddColorBox(null, 0, 0, _currentProfile.DamageHueSelf, ""));
+            _damageHues.AddRight(new Label("Damage to self", true, HUE_FONT, font: FONT));
+
+            _damageHues.AddRight(_damageHueOther = AddColorBox(null, 0, 0, _currentProfile.DamageHueOther, ""));
+            _damageHues.AddRight(new Label("Damage to others", true, HUE_FONT, font: FONT));
+
+            _damageHues.Add(_damageHuePet = AddColorBox(null, 0, 0, _currentProfile.DamageHuePet, ""));
+            _damageHues.AddRight(new Label("Damage to pets", true, HUE_FONT, font: FONT));
+            _damageHuePet.SetTooltip("Due to client limitations magic summons don't work here.");
+
+            _damageHues.Add(_damageHueAlly = AddColorBox(null, 0, 0, _currentProfile.DamageHueAlly, ""));
+            _damageHues.AddRight(new Label("Damage to allies", true, HUE_FONT, font: FONT));
+
+            _damageHues.Add(_damageHueLastAttack = AddColorBox(null, 0, 0, _currentProfile.DamageHueLastAttck, ""));
+            _damageHues.AddRight(new Label("Damage to last attack", true, HUE_FONT, font: FONT));
+            _damageHueLastAttack.SetTooltip("Damage done to the last mobile you attacked, due to client limitations this is not neccesarily the damage YOU did to them.");
+
+            rightArea.Add(_damageHues);
+
             Add(rightArea, PAGE);
         }
 
@@ -3726,15 +3752,7 @@ namespace ClassicUO.Game.UI.Gumps
             } //Grid anchors
 
             {
-                gridSection.Add(_gridUseBGTexture = AddCheckBox(
-                        null, "Use BG Texture",
-                        ProfileManager.CurrentProfile.Grid_EnableBGTexture,
-                        0, 0
-                    ));
-            } //Grid BG Texture
-
-            {
-                gridSection.Add(AddLabel(null, "Border Style", 0, 0));
+                gridSection.Add(AddLabel(null, "Container Style", 0, 0));
 
                 gridSection.AddRight(_gridBorderStyle = AddCombobox(
                         null,
@@ -4185,6 +4203,10 @@ namespace ClassicUO.Game.UI.Gumps
                 Client.Game.SetRefreshRate(_sliderFPS.Value);
             }
 
+            _currentProfile.DamageHueSelf = _damageHueSelf.Hue;
+            _currentProfile.DamageHuePet = _damageHuePet.Hue;
+            _currentProfile.DamageHueAlly = _damageHueAlly.Hue;
+            _currentProfile.DamageHueLastAttck = _damageHueLastAttack.Hue;
 
             if (_currentProfile.EnableGridContainerAnchor != _gridContainerAnchorable.IsChecked)
             {
@@ -4211,10 +4233,10 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            if(_currentProfile.Grid_BorderStyle != _gridBorderStyle.SelectedIndex)
+            if (_currentProfile.Grid_BorderStyle != _gridBorderStyle.SelectedIndex)
             {
                 _currentProfile.Grid_BorderStyle = _gridBorderStyle.SelectedIndex;
-                foreach(GridContainer gridContainer in UIManager.Gumps.OfType<GridContainer>())
+                foreach (GridContainer gridContainer in UIManager.Gumps.OfType<GridContainer>())
                 {
                     gridContainer.BuildBorder();
                 }
@@ -4232,7 +4254,6 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.GridContainerSearchMode = _gridContainerSearchAlternative.SelectedIndex;
             _currentProfile.GridContainerScaleItems = _gridContainerItemScale.IsChecked;
             _currentProfile.GridEnableContPreview = _gridContainerPreview.IsChecked;
-            _currentProfile.Grid_EnableBGTexture = _gridUseBGTexture.IsChecked;
 
             {
                 _currentProfile.CoolDownX = int.Parse(_coolDownX.Text);

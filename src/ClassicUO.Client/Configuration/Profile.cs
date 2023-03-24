@@ -336,7 +336,6 @@ namespace ClassicUO.Configuration
         public byte GridContainersScale { get; set; } = 100;
         public bool GridContainerScaleItems { get; set; } = true;
         public bool GridEnableContPreview { get; set; } = true;
-        public bool Grid_EnableBGTexture { get; set; } = true;
         public int Grid_BorderStyle { get; set; } = 0;
         #endregion
 
@@ -362,6 +361,14 @@ namespace ClassicUO.Configuration
         #region IMPROVED BUFF BAR
         public bool UseImprovedBuffBar { get; set; } = true;
         public ushort ImprovedBuffBarHue { get; set; } = 905;
+        #endregion
+
+        #region DAMAGE NUMBER HUES
+        public ushort DamageHueSelf { get; set; } = 0x0034;
+        public ushort DamageHuePet { get; set; } = 0x0033;
+        public ushort DamageHueAlly { get; set; } = 0x0030;
+        public ushort DamageHueLastAttck { get; set; } = 0x1F;
+        public ushort DamageHueOther { get; set; } = 0x0021;
         #endregion
 
         public static uint GumpsVersion { get; private set; }
