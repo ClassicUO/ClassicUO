@@ -620,6 +620,8 @@ namespace ClassicUO.Game.UI.Gumps
             public bool Hightlight = false;
             public Item SlotItem { get { return _item; } set { _item = value; LocalSerial = value.Serial; } }
 
+            private readonly int[] spellbooks = { 0x0EFA, 0x2253, 0x2252, 0x238C, 0x23A0, 0x2D50, 0x2D9D, 0x225A };
+
             public GridItem(uint serial, int size, Item _container, GridContainer gridContainer, int count)
             {
                 #region VARS
@@ -772,7 +774,7 @@ namespace ClassicUO.Game.UI.Gumps
                     mousePressedWhenEntered = false;
                 if (_item != null)
                 {
-                    if (_item.ItemData.IsContainer && _item.Items != null && ProfileManager.CurrentProfile.GridEnableContPreview)
+                    if (_item.ItemData.IsContainer && _item.Items != null && ProfileManager.CurrentProfile.GridEnableContPreview && !spellbooks.Contains(_item.Graphic))
                     {
                         preview = new GridContainerPreview(_item, Mouse.Position.X, Mouse.Position.Y);
                         UIManager.Add(preview);
