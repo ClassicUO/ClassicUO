@@ -80,7 +80,6 @@ namespace ClassicUO.Game.UI.Gumps
         private Combobox _dragSelectModifierKey, _backpackStyle, _gridContainerSearchAlternative, _gridBorderStyle;
         private Checkbox _hueContainerGumps, _gridContainerItemScale, _gridContainerPreview, _gridContainerAnchorable;
         private HSliderBar _containerOpacity, _gridBorderOpacity, _gridContainerScale;
-        private Checkbox _gridUseBGTexture;
 
 
         //counters
@@ -3726,15 +3725,7 @@ namespace ClassicUO.Game.UI.Gumps
             } //Grid anchors
 
             {
-                gridSection.Add(_gridUseBGTexture = AddCheckBox(
-                        null, "Use BG Texture",
-                        ProfileManager.CurrentProfile.Grid_EnableBGTexture,
-                        0, 0
-                    ));
-            } //Grid BG Texture
-
-            {
-                gridSection.Add(AddLabel(null, "Border Style", 0, 0));
+                gridSection.Add(AddLabel(null, "Container Style", 0, 0));
 
                 gridSection.AddRight(_gridBorderStyle = AddCombobox(
                         null,
@@ -4232,7 +4223,6 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.GridContainerSearchMode = _gridContainerSearchAlternative.SelectedIndex;
             _currentProfile.GridContainerScaleItems = _gridContainerItemScale.IsChecked;
             _currentProfile.GridEnableContPreview = _gridContainerPreview.IsChecked;
-            _currentProfile.Grid_EnableBGTexture = _gridUseBGTexture.IsChecked;
 
             {
                 _currentProfile.CoolDownX = int.Parse(_coolDownX.Text);

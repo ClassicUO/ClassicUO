@@ -70,10 +70,11 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly Label _containerNameLabel;
         private readonly StbTextBox _searchBox;
         private readonly GumpPic _openRegularGump, _quickDropBackpack, _sortContents;
+        private readonly GumpPicTiled _backgroundTexture;
 
         private float _lastGridItemScale = (ProfileManager.CurrentProfile.GridContainersScale / 100f);
         private int _lastWidth = DEFAULT_WIDTH, _lastHeight = DEFAULT_HEIGHT;
-        private bool updatedBorder = false;
+        private bool updatedBorder = true;
 
         private GridScrollArea _scrollArea;
         private GridSlotManager gridSlotManager;
@@ -124,6 +125,9 @@ namespace ClassicUO.Game.UI.Gumps
             _background.Y = BORDER_WIDTH;
             _background.Alpha = (float)ProfileManager.CurrentProfile.ContainerOpacity / 100;
             _background.Hue = ProfileManager.CurrentProfile.AltGridContainerBackgroundHue;
+
+            _backgroundTexture = new GumpPicTiled(0);
+            _backgroundTexture.IsVisible = true;
             #endregion
 
             #region TOP BAR AREA
@@ -201,6 +205,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             #region Add controls
             Add(_background);
+            Add(_backgroundTexture);
             Add(_containerNameLabel);
             _searchBox.Add(new AlphaBlendControl(0.5f)
             {
@@ -466,6 +471,9 @@ namespace ClassicUO.Game.UI.Gumps
                 _lastWidth = Width;
                 _searchBox.Width = Math.Min(Width - (BORDER_WIDTH * 2) - _openRegularGump.Width - _quickDropBackpack.Width - _sortContents.Width, 150);
                 updatedBorder = false;
+                _backgroundTexture.Width = _background.Width;
+                _backgroundTexture.Height = _background.Height;
+                _backgroundTexture.Alpha = _background.Alpha;
                 RequestUpdateContents();
             }
 
@@ -514,6 +522,8 @@ namespace ClassicUO.Game.UI.Gumps
                 default:
                 case BorderStyle.Default:
                     BorderControl.DefaultGraphics();
+                    _backgroundTexture.IsVisible = false;
+                    _background.IsVisible = true;
                     BORDER_WIDTH = 4;
                     RePosition();
                     break;
@@ -525,6 +535,14 @@ namespace ClassicUO.Game.UI.Gumps
                 BorderControl.H_Border = (ushort)(graphic + 1);
                 BorderControl.T_Right = (ushort)(graphic + 2);
                 BorderControl.V_Border = (ushort)(graphic + 3);
+
+                _backgroundTexture.Graphic = (ushort)(graphic + 4);
+                _backgroundTexture.IsVisible = true;
+                _backgroundTexture.Hue = _background.Hue;
+                BorderControl.Hue = _background.Hue;
+                BorderControl.Alpha = _background.Alpha;
+                _background.IsVisible = false;
+
                 BorderControl.V_Right_Border = (ushort)(graphic + 5);
                 BorderControl.B_Left = (ushort)(graphic + 6);
                 BorderControl.H_Bottom_Border = (ushort)(graphic + 7);
@@ -553,40 +571,8 @@ namespace ClassicUO.Game.UI.Gumps
             _sortContents.Y = BORDER_WIDTH;
             _openRegularGump.Y = BORDER_WIDTH;
             _searchBox.X = BORDER_WIDTH;
-        }
-
-        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
-        {
-            if (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.Grid_EnableBGTexture)
-            {
-                Vector3 hueVector = ShaderHueTranslator.GetHueVector
-                (
-                    0,
-                    false,
-                    _background.Alpha,
-                    true
-                );
-
-                var texture = GumpsLoader.Instance.GetGumpTexture(3004, out var bounds);
-
-                if (texture != null)
-                {
-                    batcher.DrawTiled
-                    (
-                        texture,
-                        new Rectangle
-                        (
-                            _background.X + x,
-                            _background.Y + y,
-                            _background.Width,
-                            _background.Height
-                        ),
-                        bounds,
-                        hueVector
-                    );
-                }
-            } //Background texture
-            return base.Draw(batcher, x, y);
+            _backgroundTexture.X = _background.X;
+            _backgroundTexture.Y = _background.Y;
         }
 
         public enum BorderStyle

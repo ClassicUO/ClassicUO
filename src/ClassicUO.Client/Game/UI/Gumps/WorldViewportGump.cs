@@ -343,6 +343,7 @@ namespace ClassicUO.Game.UI.Gumps
                 hueVector.X = Hue;
                 hueVector.Y = 1;
             }
+            hueVector.Z = Alpha;
 
             var texture = GumpsLoader.Instance.GetGumpTexture(h_border, out var bounds);
             Rectangle pos = new Rectangle
