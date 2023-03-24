@@ -363,6 +363,14 @@ namespace ClassicUO.Configuration
         public ushort ImprovedBuffBarHue { get; set; } = 905;
         #endregion
 
+        #region DAMAGE NUMBER HUES
+        public ushort DamageHueSelf { get; set; } = 0x0034;
+        public ushort DamageHuePet { get; set; } = 0x0033;
+        public ushort DamageHueAlly { get; set; } = 0x0030;
+        public ushort DamageHueLastAttck { get; set; } = 0x1F;
+        public ushort DamageHueOther { get; set; } = 0x0021;
+        #endregion
+
         public static uint GumpsVersion { get; private set; }
 
         public void Save(string path)
