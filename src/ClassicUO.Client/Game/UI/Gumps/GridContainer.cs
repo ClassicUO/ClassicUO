@@ -223,7 +223,7 @@ namespace ClassicUO.Game.UI.Gumps
             gridSlotManager = new GridSlotManager(local, this, _scrollArea, gridSaveSystem.GetItemSlots(LocalSerial)); //Must come after scroll area
 
             BuildBorder();
-
+            updatedBorder = true;
             ResizeWindow(new Point(_lastWidth, _lastHeight));
         }
         public override GumpType GumpType => GumpType.GridContainer;
@@ -284,10 +284,10 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        private ContainerGump GetOriginalContainerGump(uint serial)
+        private void OpenOldContainer(uint serial)
         {
             ContainerGump container = UIManager.GetGump<ContainerGump>(serial);
-            if (_container == null || _container.IsDestroyed) return null;
+            if (_container == null || _container.IsDestroyed) return;
 
             ushort graphic = OgContainerGraphic;
             if (Client.Version >= Utility.ClientVersion.CV_706000 && ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.UseLargeContainerGumps)
@@ -373,30 +373,20 @@ namespace ClassicUO.Game.UI.Gumps
             if (container != null)
             {
                 ContainerManager.CalculateContainerPosition(serial, graphic);
-                container.X = ContainerManager.X;
-                container.Y = ContainerManager.Y;
                 container.InvalidateContents = true;
-                return container;
             }
             else
             {
                 ContainerManager.CalculateContainerPosition(serial, graphic);
-                return new ContainerGump(_container.Serial, graphic, true)
+
+                container = new ContainerGump(_container.Serial, graphic, true)
                 {
                     X = ContainerManager.X,
                     Y = ContainerManager.Y,
                     InvalidateContents = true
                 };
+                UIManager.Add(container);
             }
-        }
-
-        private void OpenOldContainer(uint serial)
-        {
-            ContainerGump container = GetOriginalContainerGump(serial);
-            if (container == null)
-                return;
-
-            UIManager.Add(container);
         }
 
         private void updateItems(bool overrideSort = false)
