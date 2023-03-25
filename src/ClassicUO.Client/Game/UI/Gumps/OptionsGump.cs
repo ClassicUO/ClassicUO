@@ -167,7 +167,7 @@ namespace ClassicUO.Game.UI.Gumps
         private ClickableColorBox _tooltip_font_hue;
         private FontSelector _tooltip_font_selector;
         private HSliderBar _dragSelectStartX, _dragSelectStartY;
-        private Checkbox _dragSelectAsAnchor, _namePlateHealthBar, _disableSystemChat;
+        private Checkbox _dragSelectAsAnchor, _namePlateHealthBar, _disableSystemChat, _namePlateShowAtFullHealth;
         private HSliderBar _journalOpacity, _namePlateOpacity, _namePlateHealthBarOpacity;
         private ClickableColorBox _journalBackgroundColor;
 
@@ -1045,6 +1045,9 @@ namespace ClassicUO.Game.UI.Gumps
                         0, 0,
                         200
                     ));
+                section2.Add(_namePlateShowAtFullHealth = AddCheckBox(null, "", _currentProfile.NamePlateHideAtFullHealth, 0, 0));
+                _namePlateShowAtFullHealth.SetTooltip("This is only applied while in war mode.");
+                section2.AddRight(new Label("Hide nameplates above 100% hp.", true, HUE_FONT, font: FONT));
                 section2.PopIndent();
             } //Name plate health bar
 
@@ -4202,6 +4205,8 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Client.Game.SetRefreshRate(_sliderFPS.Value);
             }
+
+            _currentProfile.NamePlateHideAtFullHealth = _namePlateShowAtFullHealth.IsChecked;
 
             _currentProfile.DamageHueSelf = _damageHueSelf.Hue;
             _currentProfile.DamageHuePet = _damageHuePet.Hue;

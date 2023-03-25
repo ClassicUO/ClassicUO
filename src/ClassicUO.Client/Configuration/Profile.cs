@@ -322,6 +322,7 @@ namespace ClassicUO.Configuration
         public bool NamePlateHealthBar { get; set; } = true;
         public byte NamePlateOpacity { get; set; } = 75;
         public byte NamePlateHealthBarOpacity { get; set; } = 50;
+        public bool NamePlateHideAtFullHealth { get; set; } = true;
 
 
 
