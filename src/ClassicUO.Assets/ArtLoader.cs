@@ -246,6 +246,13 @@ namespace ClassicUO.Assets
         {
             g += 0x4000;
 
+            Texture2D png = PNGLoader.LoadArtTexture(g);
+            if (png != null)
+            {
+                bounds = png.Bounds;
+                return png;
+            }
+
             ref var spriteInfo = ref _spriteInfos[g];
 
             if (spriteInfo.Texture == null)

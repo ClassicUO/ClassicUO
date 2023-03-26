@@ -1,5 +1,4 @@
 ﻿using ClassicUO.Assets;
-using ClassicUO.Game.UI.Controls;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -9,7 +8,7 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class TestGump : Gump
     {
-        private Texture2D image = PNGLoader.GetImageTexture(Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "tazuo.png"), Client.Game.GraphicsDevice);
+        private Texture2D image = PNGLoader.GetImageTexture(Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "tazuo.png"));
 
         public TestGump() : base(0, 0)
         {

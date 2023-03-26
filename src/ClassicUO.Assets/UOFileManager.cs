@@ -114,10 +114,11 @@ namespace ClassicUO.Assets
                 SpeechesLoader.Instance.Load(),
                 LightsLoader.Instance.Load(),
                 SoundsLoader.Instance.Load(),
-                MultiMapLoader.Instance.Load()
+                MultiMapLoader.Instance.Load(),
+                PNGLoader.Load()
             };
 
-            if (!Task.WhenAll(tasks).Wait(TimeSpan.FromSeconds(10)))
+            if (!Task.WhenAll(tasks).Wait(TimeSpan.FromSeconds(15)))
             {
                 Log.Panic("Loading files timeout.");
             }
