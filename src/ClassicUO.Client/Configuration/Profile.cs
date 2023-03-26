@@ -340,6 +340,7 @@ namespace ClassicUO.Configuration
         public int Grid_BorderStyle { get; set; } = 0;
         public int Grid_DefaultColumns { get; set; } = 4;
         public int Grid_DefaultRows { get; set; } = 4;
+        public bool Grid_UseContainerHue { get; set; } = false;
         #endregion
 
         #region COOLDOWNS

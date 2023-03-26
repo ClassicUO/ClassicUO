@@ -78,7 +78,7 @@ namespace ClassicUO.Game.UI.Gumps
         private DataBox _databox;
         private HSliderBar _delay_before_display_tooltip, _tooltip_zoom, _tooltip_background_opacity;
         private Combobox _dragSelectModifierKey, _backpackStyle, _gridContainerSearchAlternative, _gridBorderStyle;
-        private Checkbox _hueContainerGumps, _gridContainerItemScale, _gridContainerPreview, _gridContainerAnchorable;
+        private Checkbox _hueContainerGumps, _gridContainerItemScale, _gridContainerPreview, _gridContainerAnchorable, _gridOverrideWithContainerHue;
         private HSliderBar _containerOpacity, _gridBorderOpacity, _gridContainerScale;
         private InputField _gridDefaultColumns, _gridDefaultRows;
 
@@ -3704,6 +3704,12 @@ namespace ClassicUO.Game.UI.Gumps
             } //Grid container background hue
 
             {
+                gridSection.PushIndent();
+                gridSection.Add(_gridOverrideWithContainerHue = AddCheckBox(null, "Override hue with the container's hue", _currentProfile.Grid_UseContainerHue, 0, 0));
+                gridSection.PopIndent();
+            }
+
+            {
                 gridSection.Add(
                         AddLabel(null, "Search Style", 0, 0)
                     );
@@ -4258,6 +4264,7 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.GridEnableContPreview = _gridContainerPreview.IsChecked;
             _currentProfile.Grid_DefaultColumns = int.Parse(_gridDefaultColumns.Text);
             _currentProfile.Grid_DefaultRows = int.Parse(_gridDefaultRows.Text);
+            _currentProfile.Grid_UseContainerHue = _gridOverrideWithContainerHue.IsChecked;
 
             {
                 _currentProfile.CoolDownX = int.Parse(_coolDownX.Text);

@@ -120,7 +120,7 @@ namespace ClassicUO.Game.UI.Gumps
             _background.X = BORDER_WIDTH;
             _background.Y = BORDER_WIDTH;
             _background.Alpha = (float)ProfileManager.CurrentProfile.ContainerOpacity / 100;
-            _background.Hue = ProfileManager.CurrentProfile.AltGridContainerBackgroundHue;
+            _background.Hue = ProfileManager.CurrentProfile.Grid_UseContainerHue ? _container.Hue : ProfileManager.CurrentProfile.AltGridContainerBackgroundHue;
 
             _backgroundTexture = new GumpPicTiled(0);
             _backgroundTexture.IsVisible = true;
