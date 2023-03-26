@@ -10,9 +10,10 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class ImprovedBuffGump : Gump
     {
+        private const int FUCKINGHEIGHT = CoolDownBar.COOL_DOWN_HEIGHT * (BuffBarManager.MAX_COOLDOWN_BARS + 2);
         private GumpPic _background;
         private Button _button;
-        private bool _direction = true;
+        private bool _direction = false;
         private ushort _graphic = 2091;
         private DataBox _box;
 
@@ -21,26 +22,19 @@ namespace ClassicUO.Game.UI.Gumps
             X = 100;
             Y = 100;
             Width = CoolDownBar.COOL_DOWN_WIDTH;
+            Height = FUCKINGHEIGHT;
             CanMove = true;
             CanCloseWithRightClick = true;
-            AcceptMouseInput = true;
+            AcceptMouseInput = false;
 
             BuildGump();
-
-            if (World.Player != null)
-            {
-                foreach (KeyValuePair<BuffIconType, BuffIcon> k in World.Player.BuffIcons)
-                {
-                    AddBuff(k.Value);
-                }
-            }
         }
 
         public void AddBuff(BuffIcon icon)
         {
             CoolDownBar coolDownBar = new CoolDownBar(TimeSpan.FromMilliseconds(icon.Timer - Time.Ticks), icon.Title.Replace("<br>", " "), ProfileManager.CurrentProfile.ImprovedBuffBarHue, 0, 0, icon.Graphic, icon.Type);
-
-            BuffBarManager.AddCoolDownBar(coolDownBar, _direction);
+            coolDownBar.SetTooltip(icon.Text);
+            BuffBarManager.AddCoolDownBar(coolDownBar, _direction, _box);
             _box.Add(coolDownBar);
         }
 
@@ -49,11 +43,44 @@ namespace ClassicUO.Game.UI.Gumps
             BuffBarManager.RemoveBuffType(graphic);
         }
 
+        private void SwitchDirections()
+        {
+            _box.Height = FUCKINGHEIGHT;
+            _box.Y = 0;
+            if (!_direction)
+            {
+                _background.Y = FUCKINGHEIGHT - 11;
+                Y -= FUCKINGHEIGHT - 11;
+            }
+            else
+            {
+                _background.Y = 0;
+                Y += FUCKINGHEIGHT - 11;
+            }
+            _button.Y = _background.Y - 5;
+            BuffBarManager.UpdatePositions(_direction, _box);
+        }
+
         protected override void UpdateContents()
         {
             base.UpdateContents();
+            _box.Height = FUCKINGHEIGHT;
+            _box.Y = 0;
+            if (!_direction)
+            {
+                _background.Y = FUCKINGHEIGHT - 11;
+            }
+            else
+            {
+                _background.Y = 0;
+            }
+            _button.Y = _background.Y - 5;
+            BuffBarManager.UpdatePositions(_direction, _box);
+        }
 
-            BuffBarManager.UpdatePositions(_direction);
+        public override void Update()
+        {
+            base.Update();
         }
 
         public override void OnButtonClick(int buttonID)
@@ -61,42 +88,37 @@ namespace ClassicUO.Game.UI.Gumps
             if (buttonID == 0)
             {
                 _direction = !_direction;
-                RequestUpdateContents();
+                SwitchDirections();
             }
         }
 
         private void BuildGump()
         {
-            Add
-            (
-                _background = new GumpPic(0, 0, _graphic, 0)
-                {
-                    LocalSerial = 1
-                }
-            );
-            _background.Graphic = _graphic;
+            _background = new GumpPic(0, 0, _graphic, 0);
             _background.Width = CoolDownBar.COOL_DOWN_WIDTH;
 
-            Add
-            (
-                _button = new Button(0, 0x7585, 0x7589, 0x7589)
+            _button = new Button(0, 0x7585, 0x7589, 0x7589)
+            {
+                ButtonAction = ButtonAction.Activate
+            };
+
+            _box = new DataBox(0, 0, Width, FUCKINGHEIGHT);
+
+            
+
+            Add(_background);
+            Add(_button);
+            Add(_box);
+            
+            BuffBarManager.Clear();
+            if (World.Player != null)
+            {
+                foreach (KeyValuePair<BuffIconType, BuffIcon> k in World.Player.BuffIcons)
                 {
-                    ButtonAction = ButtonAction.Activate
+                    AddBuff(k.Value);
                 }
-            );
-
-
-            _button.X = -5;
-            _button.Y = -5;
-
-
-            Add
-            (
-                _box = new DataBox(0, 0, 0, 0)
-                {
-                    WantUpdateSize = true
-                }
-            );
+            }
+            UpdateContents();
         }
 
         public ImprovedBuffGump(int x, int y) : this()
@@ -110,6 +132,8 @@ namespace ClassicUO.Game.UI.Gumps
             base.Save(writer);
             writer.WriteAttributeString("graphic", _graphic.ToString());
             writer.WriteAttributeString("updown", _direction.ToString());
+            writer.WriteAttributeString("lastX", X.ToString());
+            writer.WriteAttributeString("lastY", Y.ToString());
         }
 
         public override void Restore(XmlElement xml)
@@ -118,6 +142,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             _graphic = ushort.Parse(xml.GetAttribute("graphic"));
             _direction = bool.Parse(xml.GetAttribute("updown"));
+            int.TryParse(xml.GetAttribute("lastX"), out X);
+            int.TryParse(xml.GetAttribute("lastY"), out Y);
             RequestUpdateContents();
         }
 
@@ -130,38 +156,34 @@ namespace ClassicUO.Game.UI.Gumps
 
         private static class BuffBarManager
         {
-            private const int MAX_COOLDOWN_BARS = 20;
+            public const int MAX_COOLDOWN_BARS = 20;
             private static CoolDownBar[] coolDownBars = new CoolDownBar[MAX_COOLDOWN_BARS];
-            public static void AddCoolDownBar(CoolDownBar coolDownBar, bool bottomUp)
+            public static void AddCoolDownBar(CoolDownBar coolDownBar, bool topDown, DataBox _boxContainer)
             {
                 for (int i = 0; i < coolDownBars.Length; i++)
                 {
                     if (coolDownBars[i] == null || coolDownBars[i].IsDisposed)
                     {
-                        if (bottomUp)
-                            coolDownBar.Y = (i * (CoolDownBar.COOL_DOWN_HEIGHT + 5)) + 15;
-                        else
-                            coolDownBar.Y = -(i * (CoolDownBar.COOL_DOWN_HEIGHT + 5) + 35);
-
                         coolDownBars[i] = coolDownBar;
+                        UpdatePositions(topDown, _boxContainer);
                         return;
                     }
                 }
             }
 
-            public static void UpdatePositions(bool bottomUp)
+            public static void UpdatePositions(bool topDown, DataBox _boxContainer)
             {
                 for (int i = 0; i < coolDownBars.Length; i++)
                 {
                     if (coolDownBars[i] != null && !coolDownBars[i].IsDisposed)
                     {
-                        if (bottomUp)
+                        if (topDown)
                         {
-                            coolDownBars[i].Y = (i * (CoolDownBar.COOL_DOWN_HEIGHT + 2)) + 15;
+                            coolDownBars[i].Y = (i * (CoolDownBar.COOL_DOWN_HEIGHT + 2)) + 13;
                         }
                         else
                         {
-                            coolDownBars[i].Y = -(i * (CoolDownBar.COOL_DOWN_HEIGHT + 2) + 35);
+                            coolDownBars[i].Y = _boxContainer.Height - ((i + 1) * (CoolDownBar.COOL_DOWN_HEIGHT + 2)) - 11;
                         }
                     }
                 }
@@ -174,9 +196,23 @@ namespace ClassicUO.Game.UI.Gumps
                     if (coolDownBars[i] != null && !coolDownBars[i].IsDisposed)
                     {
                         if (coolDownBars[i].buffIconType == type)
+                        {
                             coolDownBars[i].Dispose();
+                        }
                     }
                 }
+            }
+
+            public static void Clear()
+            {
+                for (int i = 0; i < coolDownBars.Length; i++)
+                {
+                    if (coolDownBars[i] != null)
+                    {
+                        coolDownBars[i].Dispose();
+                    }
+                }
+                coolDownBars = new CoolDownBar[MAX_COOLDOWN_BARS];
             }
         }
     }

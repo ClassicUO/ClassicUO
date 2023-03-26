@@ -3707,7 +3707,7 @@ namespace ClassicUO.Game.UI.Gumps
                 gridSection.PushIndent();
                 gridSection.Add(_gridOverrideWithContainerHue = AddCheckBox(null, "Override hue with the container's hue", _currentProfile.Grid_UseContainerHue, 0, 0));
                 gridSection.PopIndent();
-            }
+            } //Override grid hue with container hue
 
             {
                 gridSection.Add(
