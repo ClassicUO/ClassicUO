@@ -51,17 +51,13 @@ namespace ClassicUO.Game.UI.Gumps
     internal class GridContainer : ResizableGump
     {
         private const int X_SPACING = 1, Y_SPACING = 1;
+        private const int TOP_BAR_HEIGHT = 20;
 
         private static int _lastX = 100, _lastY = 100;
         private static int GRID_ITEM_SIZE { get { return (int)Math.Round(50 * (ProfileManager.CurrentProfile.GridContainersScale / 100f)); } }
         private static int BORDER_WIDTH = 4;
-        private static int DEFAULT_WIDTH =
-            (BORDER_WIDTH * 2)     //The borders around the container, one on the left and one on the right
-            + 15                   //The width of the scroll bar
-            + (GRID_ITEM_SIZE * 4) //How many items to fit in left to right
-            + (X_SPACING * 4)      //Spacing between each grid item(x4 items)
-            + 0;                   //Because the border acts weird
-        private static int DEFAULT_HEIGHT = 10 + (BORDER_WIDTH * 2) + (GRID_ITEM_SIZE + Y_SPACING) * 4;
+        private static int DEFAULT_WIDTH { get { return GetWidth(); } }
+        private static int DEFAULT_HEIGHT { get { return GetHeight(); } }
         private static GridSaveSystem gridSaveSystem = new GridSaveSystem();
 
         public readonly ushort OgContainerGraphic;
@@ -79,7 +75,7 @@ namespace ClassicUO.Game.UI.Gumps
         private GridScrollArea _scrollArea;
         private GridSlotManager gridSlotManager;
 
-        public GridContainer(uint local, ushort ogContainer) : base(DEFAULT_WIDTH, DEFAULT_HEIGHT, GetWidth(2), GRID_ITEM_SIZE + BORDER_WIDTH + 31, local, 0)
+        public GridContainer(uint local, ushort ogContainer) : base(GetWidth(), GetHeight(), GetWidth(2), GetHeight(1), local, 0)
         {
             #region SET VARS
             Point savedSize = gridSaveSystem.GetLastSize(LocalSerial);
@@ -192,9 +188,9 @@ namespace ClassicUO.Game.UI.Gumps
             #region Scroll Area
             _scrollArea = new GridScrollArea(
                 _background.X,
-                _containerNameLabel.Height + _background.Y + 1,
-                _background.Width - BORDER_WIDTH,
-                _background.Height - BORDER_WIDTH - (_containerNameLabel.Height + 1)
+                TOP_BAR_HEIGHT + _background.Y,
+                _background.Width,
+                _background.Height - (_containerNameLabel.Height + 1)
                 );
             _scrollArea.AcceptMouseInput = true;
             _scrollArea.CanMove = true;
@@ -223,18 +219,26 @@ namespace ClassicUO.Game.UI.Gumps
             gridSlotManager = new GridSlotManager(local, this, _scrollArea, gridSaveSystem.GetItemSlots(LocalSerial)); //Must come after scroll area
 
             BuildBorder();
+            ResizeWindow(savedSize);
             updatedBorder = true;
-            ResizeWindow(new Point(_lastWidth, _lastHeight));
         }
         public override GumpType GumpType => GumpType.GridContainer;
 
-        private static int GetWidth(int columns)
+        private static int GetWidth(int columns = -1)
         {
+            if (columns < 0)
+                columns = ProfileManager.CurrentProfile.Grid_DefaultColumns;
             return (BORDER_WIDTH * 2)     //The borders around the container, one on the left and one on the right
             + 15                   //The width of the scroll bar
             + (GRID_ITEM_SIZE * columns) //How many items to fit in left to right
-            + (X_SPACING * columns)      //Spacing between each grid item(x4 items)
-            + 6;                   //Because the border acts weird
+            + (X_SPACING * columns);      //Spacing between each grid item(x columns)
+        }
+
+        private static int GetHeight(int rows = -1)
+        {
+            if (rows < 0)
+                rows = ProfileManager.CurrentProfile.Grid_DefaultRows;
+            return TOP_BAR_HEIGHT + (BORDER_WIDTH * 2) + ((GRID_ITEM_SIZE + Y_SPACING) * rows);
         }
 
         public override void Save(XmlTextWriter writer)
@@ -412,6 +416,7 @@ namespace ClassicUO.Game.UI.Gumps
                 updateItems();
             }
         }
+
         protected override void OnMouseExit(int x, int y)
         {
             if (_container != null && !_container.IsDestroyed)
@@ -419,6 +424,7 @@ namespace ClassicUO.Game.UI.Gumps
                 SelectedObject.CorpseObject = null;
             }
         }
+
         public override void Dispose()
         {
             _lastX = X;
@@ -467,7 +473,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _background.Width = Width - (BORDER_WIDTH * 2);
                 _background.Height = Height - (BORDER_WIDTH * 2);
                 _scrollArea.Width = _background.Width;
-                _scrollArea.Height = _background.Height - (_containerNameLabel.Height + 1);
+                _scrollArea.Height = _background.Height - TOP_BAR_HEIGHT;
                 _openRegularGump.X = Width - _openRegularGump.Width - BORDER_WIDTH;
                 _quickDropBackpack.X = _openRegularGump.X - _quickDropBackpack.Width;
                 _sortContents.X = _quickDropBackpack.X - _sortContents.Width;
@@ -560,17 +566,10 @@ namespace ClassicUO.Game.UI.Gumps
 
         public void RePosition()
         {
-            DEFAULT_WIDTH =
-              (BORDER_WIDTH * 2)     //The borders around the container, one on the left and one on the right
-              + 15                   //The width of the scroll bar
-              + (GRID_ITEM_SIZE * 4) //How many items to fit in left to right
-              + (X_SPACING * 4)      //Spacing between each grid item(x4 items)
-              + 0;                   //Because the border acts weird
-            DEFAULT_HEIGHT = 10 + (BORDER_WIDTH * 2) + (GRID_ITEM_SIZE + Y_SPACING) * 4;
             _background.X = BORDER_WIDTH;
             _background.Y = BORDER_WIDTH;
             _scrollArea.X = _background.X;
-            _scrollArea.Y = _containerNameLabel.Height + _background.Y + 1;
+            _scrollArea.Y = TOP_BAR_HEIGHT + _background.Y;
             _searchBox.Y = BORDER_WIDTH;
             _quickDropBackpack.Y = BORDER_WIDTH;
             _sortContents.Y = BORDER_WIDTH;
@@ -1011,12 +1010,12 @@ namespace ClassicUO.Game.UI.Gumps
                 int x = X_SPACING, y = 0;
                 foreach (var slot in gridSlots)
                 {
-                    if (x + GRID_ITEM_SIZE + X_SPACING >= area.Width - 14) //14 is the scroll bar width
+                    if (x + GRID_ITEM_SIZE >= area.Width - 14) //14 is the scroll bar width
                     {
                         x = X_SPACING;
                         y += GRID_ITEM_SIZE + Y_SPACING;
                     }
-                    slot.Value.X = x + X_SPACING;
+                    slot.Value.X = x;
                     slot.Value.Y = y;
                     slot.Value.Resize();
                     x += GRID_ITEM_SIZE + X_SPACING;

@@ -80,6 +80,7 @@ namespace ClassicUO.Game.UI.Gumps
         private Combobox _dragSelectModifierKey, _backpackStyle, _gridContainerSearchAlternative, _gridBorderStyle;
         private Checkbox _hueContainerGumps, _gridContainerItemScale, _gridContainerPreview, _gridContainerAnchorable;
         private HSliderBar _containerOpacity, _gridBorderOpacity, _gridContainerScale;
+        private InputField _gridDefaultColumns, _gridDefaultRows;
 
 
         //counters
@@ -3766,6 +3767,14 @@ namespace ClassicUO.Game.UI.Gumps
                     ));
             } //Grid border style
 
+            {
+                gridSection.Add(AddLabel(null, "Default grid rows x columns",0 ,0));
+                gridSection.AddRight(_gridDefaultRows = AddInputField(null, 0, 0, 25, TEXTBOX_HEIGHT, numbersOnly: true));
+                _gridDefaultRows.SetText(_currentProfile.Grid_DefaultRows.ToString());
+                gridSection.AddRight(_gridDefaultColumns = AddInputField(null, 0, 0, 25, TEXTBOX_HEIGHT, numbersOnly: true));
+                _gridDefaultColumns.SetText(_currentProfile.Grid_DefaultColumns.ToString());
+            } //Grid default rows and columns
+
             rightArea.Add(gridSection);
             #endregion
 
@@ -4259,6 +4268,8 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.GridContainerSearchMode = _gridContainerSearchAlternative.SelectedIndex;
             _currentProfile.GridContainerScaleItems = _gridContainerItemScale.IsChecked;
             _currentProfile.GridEnableContPreview = _gridContainerPreview.IsChecked;
+            _currentProfile.Grid_DefaultColumns = int.Parse(_gridDefaultColumns.Text);
+            _currentProfile.Grid_DefaultRows = int.Parse(_gridDefaultRows.Text);
 
             {
                 _currentProfile.CoolDownX = int.Parse(_coolDownX.Text);
