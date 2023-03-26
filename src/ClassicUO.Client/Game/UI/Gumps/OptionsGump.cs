@@ -73,7 +73,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         // containers
         private HSliderBar _containersScale;
-        private ColorBox _altGridContainerBackgroundHue, _gridBorderHue;
+        private ModernColorPicker.HueDisplay _altGridContainerBackgroundHue, _gridBorderHue;
         private Combobox _cotType;
         private DataBox _databox;
         private HSliderBar _delay_before_display_tooltip, _tooltip_zoom, _tooltip_background_opacity;
@@ -3676,12 +3676,7 @@ namespace ClassicUO.Game.UI.Gumps
                 gridSection.PushIndent();
                 gridSection.Add
                     (
-                        _gridBorderHue = AddColorBox
-                        (
-                            null, 0, 0,
-                            _currentProfile.GridBorderHue,
-                            ""
-                        )
+                     _gridBorderHue = new ModernColorPicker.HueDisplay(_currentProfile.GridBorderHue, null, true)
                     );
                 gridSection.AddRight(AddLabel(null, "Border hue", 0, 0));
                 gridSection.PopIndent();
@@ -3703,14 +3698,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             {
                 gridSection.PushIndent();
-                gridSection.Add(_altGridContainerBackgroundHue = AddColorBox(
-                        null,
-                        0,
-                        0,
-                        _currentProfile.AltGridContainerBackgroundHue,
-                        ""
-                    )
-                );
+                gridSection.Add(_altGridContainerBackgroundHue = new ModernColorPicker.HueDisplay(_currentProfile.AltGridContainerBackgroundHue, null, true));
                 gridSection.AddRight(AddLabel(null, "Background hue", 0, 0));
                 gridSection.PopIndent();
             } //Grid container background hue
@@ -3768,7 +3756,7 @@ namespace ClassicUO.Game.UI.Gumps
             } //Grid border style
 
             {
-                gridSection.Add(AddLabel(null, "Default grid rows x columns",0 ,0));
+                gridSection.Add(AddLabel(null, "Default grid rows x columns", 0, 0));
                 gridSection.AddRight(_gridDefaultRows = AddInputField(null, 0, 0, 25, TEXTBOX_HEIGHT, numbersOnly: true));
                 _gridDefaultRows.SetText(_currentProfile.Grid_DefaultRows.ToString());
                 gridSection.AddRight(_gridDefaultColumns = AddInputField(null, 0, 0, 25, TEXTBOX_HEIGHT, numbersOnly: true));
