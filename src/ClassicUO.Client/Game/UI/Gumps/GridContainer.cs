@@ -412,7 +412,13 @@ namespace ClassicUO.Game.UI.Gumps
                 updateItems();
             }
         }
-
+        protected override void OnMouseExit(int x, int y)
+        {
+            if (_container != null && !_container.IsDestroyed)
+            {
+                SelectedObject.CorpseObject = null;
+            }
+        }
         public override void Dispose()
         {
             _lastX = X;
@@ -420,6 +426,14 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (gridSlotManager.ItemPositions.Count > 0 && !_container.IsCorpse)
                 gridSaveSystem.SaveContainer(LocalSerial, gridSlotManager.ItemPositions, Width, Height, X, Y);
+
+            if (_container != null)
+            {
+                if (_container == SelectedObject.CorpseObject)
+                {
+                    SelectedObject.CorpseObject = null;
+                }
+            }
 
             base.Dispose();
         }
@@ -470,6 +484,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (_container != null && !_container.IsDestroyed && UIManager.MouseOverControl != null && (UIManager.MouseOverControl == this || UIManager.MouseOverControl.RootParent == this))
             {
                 SelectedObject.Object = _container;
+                SelectedObject.CorpseObject = _container;
             }
         }
 
