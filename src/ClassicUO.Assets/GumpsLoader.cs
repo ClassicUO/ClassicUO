@@ -158,9 +158,6 @@ namespace ClassicUO.Assets
 
         private SpriteInfo[] _spriteInfos;
 
-        private static int c = 0;
-        private static double time = 0;
-
         public Texture2D GetGumpTexture(uint g, out Rectangle bounds)
         {
             Texture2D png = PNGLoader.LoadGumpTexture(g);
@@ -169,7 +166,6 @@ namespace ClassicUO.Assets
                 bounds = png.Bounds;
                 return png;
             }
-
 
             ref var spriteInfo = ref _spriteInfos[g];
 
