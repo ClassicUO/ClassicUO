@@ -322,6 +322,7 @@ namespace ClassicUO.Configuration
         public bool NamePlateHealthBar { get; set; } = true;
         public byte NamePlateOpacity { get; set; } = 75;
         public byte NamePlateHealthBarOpacity { get; set; } = 50;
+        public bool NamePlateHideAtFullHealth { get; set; } = true;
 
 
 
@@ -337,6 +338,9 @@ namespace ClassicUO.Configuration
         public bool GridContainerScaleItems { get; set; } = true;
         public bool GridEnableContPreview { get; set; } = true;
         public int Grid_BorderStyle { get; set; } = 0;
+        public int Grid_DefaultColumns { get; set; } = 4;
+        public int Grid_DefaultRows { get; set; } = 4;
+        public bool Grid_UseContainerHue { get; set; } = false;
         #endregion
 
         #region COOLDOWNS

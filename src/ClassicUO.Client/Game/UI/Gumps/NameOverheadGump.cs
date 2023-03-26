@@ -71,7 +71,7 @@ namespace ClassicUO.Game.UI.Gumps
             _renderedText = RenderedText.Create
             (
                 string.Empty,
-                entity is Mobile m ? Notoriety.GetHue(m.NotorietyFlag) : (ushort) 0x0481,
+                entity is Mobile m ? Notoriety.GetHue(m.NotorietyFlag) : (ushort)0x0481,
                 0xFF,
                 true,
                 FontStyle.BlackBorder,
@@ -135,7 +135,7 @@ namespace ClassicUO.Game.UI.Gumps
                         Constants.OBJECT_HANDLES_GUMP_WIDTH,
                         true,
                         TEXT_ALIGN_TYPE.TS_CENTER,
-                        (ushort) FontStyle.BlackBorder
+                        (ushort)FontStyle.BlackBorder
                     );
 
                     width = Constants.OBJECT_HANDLES_GUMP_WIDTH;
@@ -170,7 +170,7 @@ namespace ClassicUO.Game.UI.Gumps
                         Constants.OBJECT_HANDLES_GUMP_WIDTH,
                         true,
                         TEXT_ALIGN_TYPE.TS_CENTER,
-                        (ushort) FontStyle.BlackBorder
+                        (ushort)FontStyle.BlackBorder
                     );
 
                     width = Constants.OBJECT_HANDLES_GUMP_WIDTH;
@@ -207,7 +207,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _background = new AlphaBlendControl(ProfileManager.CurrentProfile.NamePlateOpacity / 100f)
                 {
                     WantUpdateSize = false,
-                    Hue = entity is Mobile m ? Notoriety.GetHue(m.NotorietyFlag) : (ushort) 0x0481
+                    Hue = entity is Mobile m ? Notoriety.GetHue(m.NotorietyFlag) : (ushort)0x0481
                 }
             );
         }
@@ -222,7 +222,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             base.CloseWithRightClick();
-        }     
+        }
 
         private void DoDrag()
         {
@@ -403,7 +403,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                                     if (it2.ItemData.IsSurface)
                                     {
-                                        dropZ += (sbyte) (it2.ItemData.Height == 0xFF ? 0 : it2.ItemData.Height);
+                                        dropZ += (sbyte)(it2.ItemData.Height == 0xFF ? 0 : it2.ItemData.Height);
                                     }
                                     else
                                     {
@@ -484,9 +484,9 @@ namespace ClassicUO.Game.UI.Gumps
                     out int height
                 );
 
-                _lockedPosition.X = (int) (m.RealScreenPosition.X + m.Offset.X + 22 + 5);
+                _lockedPosition.X = (int)(m.RealScreenPosition.X + m.Offset.X + 22 + 5);
 
-                _lockedPosition.Y = (int) (m.RealScreenPosition.Y + (m.Offset.Y - m.Offset.Z) - (height + centerY + 15) + (m.IsGargoyle && m.IsFlying ? -22 : !m.IsMounted ? 22 : 0));
+                _lockedPosition.Y = (int)(m.RealScreenPosition.Y + (m.Offset.Y - m.Offset.Z) - (height + centerY + 15) + (m.IsGargoyle && m.IsFlying ? -22 : !m.IsMounted ? 22 : 0));
             }
 
             base.OnMouseOver(x, y);
@@ -513,12 +513,12 @@ namespace ClassicUO.Game.UI.Gumps
                 if (entity == TargetManager.LastTargetInfo.Serial)
                 {
                     _borderColor = SolidColorTextureCache.GetTexture(Color.Red);
-                    _background.Hue = _renderedText.Hue = entity is Mobile m ? Notoriety.GetHue(m.NotorietyFlag) : (ushort) 0x0481;
+                    _background.Hue = _renderedText.Hue = entity is Mobile m ? Notoriety.GetHue(m.NotorietyFlag) : (ushort)0x0481;
                 }
                 else
                 {
                     _borderColor = SolidColorTextureCache.GetTexture(Color.Black);
-                    _background.Hue = _renderedText.Hue = entity is Mobile m ? Notoriety.GetHue(m.NotorietyFlag) : (ushort) 0x0481;
+                    _background.Hue = _renderedText.Hue = entity is Mobile m ? Notoriety.GetHue(m.NotorietyFlag) : (ushort)0x0481;
                 }
             }
         }
@@ -547,6 +547,11 @@ namespace ClassicUO.Game.UI.Gumps
                 _isMobile = true;
                 _hpPercent = (double)m.Hits / (double)m.HitsMax;
 
+                if (ProfileManager.CurrentProfile.NamePlateHideAtFullHealth && _hpPercent >= 1 && World.Player.InWarMode)
+                {
+                    Dispose();
+                    return false;
+                }
 
                 if (_positionLocked)
                 {
@@ -572,8 +577,8 @@ namespace ClassicUO.Game.UI.Gumps
                         out int height
                     );
 
-                    x = (int) (m.RealScreenPosition.X + m.Offset.X + 22 + 5);
-                    y = (int) (m.RealScreenPosition.Y + (m.Offset.Y - m.Offset.Z) - (height + centerY + 15) + (m.IsGargoyle && m.IsFlying ? -22 : !m.IsMounted ? 22 : 0));
+                    x = (int)(m.RealScreenPosition.X + m.Offset.X + 22 + 5);
+                    y = (int)(m.RealScreenPosition.Y + (m.Offset.Y - m.Offset.Z) - (height + centerY + 15) + (m.IsGargoyle && m.IsFlying ? -22 : !m.IsMounted ? 22 : 0));
 
                 }
             }
@@ -633,18 +638,17 @@ namespace ClassicUO.Game.UI.Gumps
             base.Draw(batcher, x, y);
 
             if (ProfileManager.CurrentProfile.NamePlateHealthBar && _isMobile)
-            {
+            { 
                 batcher.Draw
                 (
                     SolidColorTextureCache.GetTexture(Color.White),
                     new Vector2(x, y),
                     new Rectangle(x, y, (int)(Width * _hpPercent), Height),
-                    ShaderHueTranslator.GetHueVector(_background.Hue, false, ProfileManager.CurrentProfile.NamePlateHealthBarOpacity/100f)
+                    ShaderHueTranslator.GetHueVector(_background.Hue, false, ProfileManager.CurrentProfile.NamePlateHealthBarOpacity / 100f)
                 );
             }
 
             int renderedTextOffset = Math.Max(0, Width - _renderedText.Width - 4) >> 1;
-
             return _renderedText.Draw
             (
                 batcher,

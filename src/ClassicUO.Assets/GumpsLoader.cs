@@ -69,7 +69,7 @@ namespace ClassicUO.Assets
                     if (UOFileManager.IsUOPInstallation && File.Exists(path))
                     {
                         _file = new UOFileUop(path, "build/gumpartlegacymul/{0:D8}.tga", true);
-                        Entries = new UOFileIndex[Math.Max(((UOFileUop) _file).TotalEntriesCount, MAX_GUMP_DATA_INDEX_COUNT)];
+                        Entries = new UOFileIndex[Math.Max(((UOFileUop)_file).TotalEntriesCount, MAX_GUMP_DATA_INDEX_COUNT)];
                         UseUOPGumps = true;
                     }
                     else
@@ -131,7 +131,7 @@ namespace ClassicUO.Assets
 
                                 Entries[ingump] = Entries[checkIndex];
 
-                                Entries[ingump].Hue = (ushort) defReader.ReadInt();
+                                Entries[ingump].Hue = (ushort)defReader.ReadInt();
 
                                 break;
                             }
@@ -160,6 +160,13 @@ namespace ClassicUO.Assets
 
         public Texture2D GetGumpTexture(uint g, out Rectangle bounds)
         {
+            Texture2D png = PNGLoader.LoadGumpTexture(g);
+            if (png != null)
+            {
+                bounds = png.Bounds;
+                return png;
+            }
+
             ref var spriteInfo = ref _spriteInfos[g];
 
             if (spriteInfo.Texture == null)
@@ -247,15 +254,15 @@ namespace ClassicUO.Assets
                 if (buffer != null)
                 {
                     System.Buffers.ArrayPool<uint>.Shared.Return(buffer, true);
-                }             
+                }
             }
         }
 
 
-       
+
         public bool PixelCheck(int index, int x, int y)
         {
-            return _picker.Get((ulong) index, x, y);
+            return _picker.Get((ulong)index, x, y);
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]

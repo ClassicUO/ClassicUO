@@ -41,13 +41,16 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class ClickableColorBox : ColorBox
     {
+        private readonly bool useModernSelector;
+
         public ClickableColorBox
         (
             int x,
             int y,
             int w,
             int h,
-            ushort hue
+            ushort hue,
+            bool useModernSelector = false
         ) : base(w, h, hue)
         {
             X = x;
@@ -59,6 +62,7 @@ namespace ClassicUO.Game.UI.Controls
 
             Width = background.Width;
             Height = background.Height;
+            this.useModernSelector = useModernSelector;
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
@@ -91,17 +95,23 @@ namespace ClassicUO.Game.UI.Controls
             if (button == MouseButtonType.Left)
             {
                 UIManager.GetGump<ColorPickerGump>()?.Dispose();
+                if (useModernSelector)
+                {
+                    UIManager.Add(new ModernColorPicker(s => Hue = s) { X = 100, Y = 100 });
+                }
+                else
+                {
+                    ColorPickerGump pickerGump = new ColorPickerGump
+                    (
+                        0,
+                        0,
+                        100,
+                        100,
+                        s => Hue = s
+                    );
 
-                ColorPickerGump pickerGump = new ColorPickerGump
-                (
-                    0,
-                    0,
-                    100,
-                    100,
-                    s => Hue = s
-                );
-
-                UIManager.Add(pickerGump);
+                    UIManager.Add(pickerGump);
+                }
             }
         }
     }

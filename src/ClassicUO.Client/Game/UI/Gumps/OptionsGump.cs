@@ -73,13 +73,14 @@ namespace ClassicUO.Game.UI.Gumps
 
         // containers
         private HSliderBar _containersScale;
-        private ColorBox _altGridContainerBackgroundHue, _gridBorderHue;
+        private ModernColorPicker.HueDisplay _altGridContainerBackgroundHue, _gridBorderHue;
         private Combobox _cotType;
         private DataBox _databox;
         private HSliderBar _delay_before_display_tooltip, _tooltip_zoom, _tooltip_background_opacity;
         private Combobox _dragSelectModifierKey, _backpackStyle, _gridContainerSearchAlternative, _gridBorderStyle;
-        private Checkbox _hueContainerGumps, _gridContainerItemScale, _gridContainerPreview, _gridContainerAnchorable;
+        private Checkbox _hueContainerGumps, _gridContainerItemScale, _gridContainerPreview, _gridContainerAnchorable, _gridOverrideWithContainerHue;
         private HSliderBar _containerOpacity, _gridBorderOpacity, _gridContainerScale;
+        private InputField _gridDefaultColumns, _gridDefaultRows;
 
 
         //counters
@@ -167,7 +168,7 @@ namespace ClassicUO.Game.UI.Gumps
         private ClickableColorBox _tooltip_font_hue;
         private FontSelector _tooltip_font_selector;
         private HSliderBar _dragSelectStartX, _dragSelectStartY;
-        private Checkbox _dragSelectAsAnchor, _namePlateHealthBar, _disableSystemChat;
+        private Checkbox _dragSelectAsAnchor, _namePlateHealthBar, _disableSystemChat, _namePlateShowAtFullHealth;
         private HSliderBar _journalOpacity, _namePlateOpacity, _namePlateHealthBarOpacity;
         private ClickableColorBox _journalBackgroundColor;
 
@@ -1045,6 +1046,9 @@ namespace ClassicUO.Game.UI.Gumps
                         0, 0,
                         200
                     ));
+                section2.Add(_namePlateShowAtFullHealth = AddCheckBox(null, "", _currentProfile.NamePlateHideAtFullHealth, 0, 0));
+                _namePlateShowAtFullHealth.SetTooltip("This is only applied while in war mode.");
+                section2.AddRight(new Label("Hide nameplates above 100% hp.", true, HUE_FONT, font: FONT));
                 section2.PopIndent();
             } //Name plate health bar
 
@@ -3672,12 +3676,7 @@ namespace ClassicUO.Game.UI.Gumps
                 gridSection.PushIndent();
                 gridSection.Add
                     (
-                        _gridBorderHue = AddColorBox
-                        (
-                            null, 0, 0,
-                            _currentProfile.GridBorderHue,
-                            ""
-                        )
+                     _gridBorderHue = new ModernColorPicker.HueDisplay(_currentProfile.GridBorderHue, null, true)
                     );
                 gridSection.AddRight(AddLabel(null, "Border hue", 0, 0));
                 gridSection.PopIndent();
@@ -3699,17 +3698,16 @@ namespace ClassicUO.Game.UI.Gumps
 
             {
                 gridSection.PushIndent();
-                gridSection.Add(_altGridContainerBackgroundHue = AddColorBox(
-                        null,
-                        0,
-                        0,
-                        _currentProfile.AltGridContainerBackgroundHue,
-                        ""
-                    )
-                );
+                gridSection.Add(_altGridContainerBackgroundHue = new ModernColorPicker.HueDisplay(_currentProfile.AltGridContainerBackgroundHue, null, true));
                 gridSection.AddRight(AddLabel(null, "Background hue", 0, 0));
                 gridSection.PopIndent();
             } //Grid container background hue
+
+            {
+                gridSection.PushIndent();
+                gridSection.Add(_gridOverrideWithContainerHue = AddCheckBox(null, "Override hue with the container's hue", _currentProfile.Grid_UseContainerHue, 0, 0));
+                gridSection.PopIndent();
+            } //Override grid hue with container hue
 
             {
                 gridSection.Add(
@@ -3762,6 +3760,14 @@ namespace ClassicUO.Game.UI.Gumps
                         200
                     ));
             } //Grid border style
+
+            {
+                gridSection.Add(AddLabel(null, "Default grid rows x columns", 0, 0));
+                gridSection.AddRight(_gridDefaultRows = AddInputField(null, 0, 0, 25, TEXTBOX_HEIGHT, numbersOnly: true));
+                _gridDefaultRows.SetText(_currentProfile.Grid_DefaultRows.ToString());
+                gridSection.AddRight(_gridDefaultColumns = AddInputField(null, 0, 0, 25, TEXTBOX_HEIGHT, numbersOnly: true));
+                _gridDefaultColumns.SetText(_currentProfile.Grid_DefaultColumns.ToString());
+            } //Grid default rows and columns
 
             rightArea.Add(gridSection);
             #endregion
@@ -4203,6 +4209,8 @@ namespace ClassicUO.Game.UI.Gumps
                 Client.Game.SetRefreshRate(_sliderFPS.Value);
             }
 
+            _currentProfile.NamePlateHideAtFullHealth = _namePlateShowAtFullHealth.IsChecked;
+
             _currentProfile.DamageHueSelf = _damageHueSelf.Hue;
             _currentProfile.DamageHuePet = _damageHuePet.Hue;
             _currentProfile.DamageHueAlly = _damageHueAlly.Hue;
@@ -4254,6 +4262,9 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.GridContainerSearchMode = _gridContainerSearchAlternative.SelectedIndex;
             _currentProfile.GridContainerScaleItems = _gridContainerItemScale.IsChecked;
             _currentProfile.GridEnableContPreview = _gridContainerPreview.IsChecked;
+            _currentProfile.Grid_DefaultColumns = int.Parse(_gridDefaultColumns.Text);
+            _currentProfile.Grid_DefaultRows = int.Parse(_gridDefaultRows.Text);
+            _currentProfile.Grid_UseContainerHue = _gridOverrideWithContainerHue.IsChecked;
 
             {
                 _currentProfile.CoolDownX = int.Parse(_coolDownX.Text);
