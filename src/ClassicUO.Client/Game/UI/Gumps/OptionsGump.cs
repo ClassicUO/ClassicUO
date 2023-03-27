@@ -82,7 +82,6 @@ namespace ClassicUO.Game.UI.Gumps
         private HSliderBar _containerOpacity, _gridBorderOpacity, _gridContainerScale;
         private InputField _gridDefaultColumns, _gridDefaultRows;
 
-
         //counters
         private Checkbox _enableCounters, _highlightOnUse, _highlightOnAmount, _enableAbbreviatedAmount;
         private Checkbox _enableDragSelect, _dragSelectHumanoidsOnly;
@@ -3769,6 +3768,16 @@ namespace ClassicUO.Game.UI.Gumps
                 _gridDefaultColumns.SetText(_currentProfile.Grid_DefaultColumns.ToString());
             } //Grid default rows and columns
 
+            {
+                NiceButton _;
+                gridSection.Add(_ = new NiceButton(X, 0, 150, TEXTBOX_HEIGHT, ButtonAction.Activate, "Grid highlight settings"));
+                _.IsSelectable = false;
+                _.MouseUp += (s, e) => {
+                    UIManager.GetGump<GridHightlightMenu>()?.Dispose();
+                    UIManager.Add(new GridHightlightMenu());
+                };
+            } //Grid highlight settings
+
             rightArea.Add(gridSection);
             #endregion
 
@@ -5098,7 +5107,7 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-        private class SettingsSection : Control
+        public class SettingsSection : Control
         {
             private readonly DataBox _databox;
             private int _indent;
@@ -5259,7 +5268,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        private class InputField : Control
+        public class InputField : Control
         {
             private readonly StbTextBox _textbox;
 
