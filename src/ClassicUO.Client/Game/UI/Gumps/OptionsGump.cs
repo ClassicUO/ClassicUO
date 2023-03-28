@@ -5272,6 +5272,8 @@ namespace ClassicUO.Game.UI.Gumps
         {
             private readonly StbTextBox _textbox;
 
+            public event EventHandler TextChanged { add { _textbox.TextChanged += value; } remove { _textbox.TextChanged -= value; } }
+
             public InputField
             (
                 ushort backgroundGraphic,
