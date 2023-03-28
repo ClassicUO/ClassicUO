@@ -375,6 +375,13 @@ namespace ClassicUO.Configuration
         public ushort DamageHueOther { get; set; } = 0x0021;
         #endregion
 
+        #region GridHighlightingProps
+        public List<string> GridHighlight_Name { get; set; } = new List<string>();
+        public List<ushort> GridHighlight_Hue { get; set; } = new List<ushort>();
+        public List<List<string>> GridHighlight_PropNames { get; set; } = new List<List<string>>();
+        public List<List<int>> GridHighlight_PropMinVal { get; set; } = new List<List<int>>();
+        #endregion
+
         public static uint GumpsVersion { get; private set; }
 
         public void Save(string path)
