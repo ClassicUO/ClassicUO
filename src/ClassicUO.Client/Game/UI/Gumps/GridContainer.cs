@@ -100,7 +100,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (m.NotorietyFlag == NotorietyFlag.Invulnerable && m.Serial != World.Player.Serial)
                 {
-                    OpenOldContainer(ogContainer);
+                    OpenOldContainer(local);
                 }
             }
 
