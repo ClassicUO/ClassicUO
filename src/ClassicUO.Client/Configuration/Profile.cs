@@ -380,6 +380,7 @@ namespace ClassicUO.Configuration
         public List<ushort> GridHighlight_Hue { get; set; } = new List<ushort>();
         public List<List<string>> GridHighlight_PropNames { get; set; } = new List<List<string>>();
         public List<List<int>> GridHighlight_PropMinVal { get; set; } = new List<List<int>>();
+        public bool GridHighlight_CorpseOnly { get; set; } = false;
         #endregion
 
         public static uint GumpsVersion { get; private set; }

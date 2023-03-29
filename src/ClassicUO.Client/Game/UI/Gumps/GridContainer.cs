@@ -34,6 +34,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
 using ClassicUO.Assets;
@@ -430,9 +432,6 @@ namespace ClassicUO.Game.UI.Gumps
             _lastX = X;
             _lastY = Y;
 
-            if (gridSlotManager.ItemPositions.Count > 0 && !_container.IsCorpse)
-                gridSaveSystem.SaveContainer(LocalSerial, gridSlotManager.ItemPositions, Width, Height, X, Y);
-
             if (_container != null)
             {
                 if (_container == SelectedObject.CorpseObject)
@@ -440,6 +439,9 @@ namespace ClassicUO.Game.UI.Gumps
                     SelectedObject.CorpseObject = null;
                 }
             }
+
+            if (gridSlotManager.ItemPositions.Count > 0 && !_container.IsCorpse)
+                gridSaveSystem.SaveContainer(LocalSerial, gridSlotManager.ItemPositions, Width, Height, X, Y);
 
             base.Dispose();
         }
@@ -640,7 +642,10 @@ namespace ClassicUO.Game.UI.Gumps
                 hit.MouseDoubleClick += _hit_MouseDoubleClick;
             }
 
-
+            public void SetBackgroundHue(ushort hue)
+            {
+                background.Hue = hue;
+            }
 
             public void Resize()
             {
@@ -714,6 +719,7 @@ namespace ClassicUO.Game.UI.Gumps
                             Rectangle containerBounds = ContainerManager.Get(container.Graphic).Bounds;
                             gridContainer.gridSlotManager.AddLockedItemSlot(Client.Game.GameCursor.ItemHold.Serial, slot);
                             GameActions.DropItem(Client.Game.GameCursor.ItemHold.Serial, containerBounds.X / 2, containerBounds.Y / 2, 0, container.Serial);
+                            gridContainer.gridSlotManager.ApplyHighlightProperties();
                         }
                     }
                     else if (TargetManager.IsTargeting)
@@ -951,6 +957,7 @@ namespace ClassicUO.Game.UI.Gumps
                 if (ItemPositions.ContainsKey(specificSlot)) //Is the slot they wanted this item in already taken? Lets remove that item
                     ItemPositions.Remove(specificSlot);
                 ItemPositions.Add(specificSlot, serial); //Now we add this item at the desired slot
+                ApplyHighlightProperties();
             }
 
             public void RebuildContainer(List<Item> filteredItems, string searchText = "", bool overrideSort = false)
@@ -1003,6 +1010,8 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                     }
                 }
+
+                ApplyHighlightProperties();
             }
 
             private void SetGridPositions()
@@ -1086,6 +1095,49 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 return contents.OrderBy((x) => x.Graphic).ToList();
             }
+
+            public void ApplyHighlightProperties()
+            {
+                if (ProfileManager.CurrentProfile.GridHighlight_CorpseOnly && !container.IsCorpse)
+                    return;
+                Task.Factory.StartNew(() =>
+                {
+                    int propNameIndex = 0;
+                    foreach (var item in gridSlots)
+                    {
+                        item.Value.SetBackgroundHue(0);
+                        if (item.Value.SlotItem != null)
+                            for (int propNames = 0; propNames < ProfileManager.CurrentProfile.GridHighlight_PropNames.Count; propNames++)
+                                foreach (string text in ProfileManager.CurrentProfile.GridHighlight_PropNames[propNames])
+                                {
+                                    if (World.OPL.TryGetNameAndData(item.Value.SlotItem.Serial, out string name, out string data))
+                                    {
+                                        if (name != null && name.ToLower().Contains(text.ToLower()))
+                                        {
+                                            item.Value.SetBackgroundHue(ProfileManager.CurrentProfile.GridHighlight_Hue[propNames]);
+                                        }
+                                        else if (data != null)
+                                        {
+                                            string[] lines = data.Split(new string[] { "\n" }, StringSplitOptions.None);
+                                            foreach (string line in lines)
+                                            {
+                                                if (line.ToLower().Contains(text.ToLower()))
+                                                {
+                                                    Match m = Regex.Match(line, @"\d+");
+                                                    if (m.Success)
+                                                        if (int.TryParse(m.Value, out int val))
+                                                            if (val >= ProfileManager.CurrentProfile.GridHighlight_PropMinVal[propNames][propNameIndex])
+                                                                item.Value.SetBackgroundHue(ProfileManager.CurrentProfile.GridHighlight_Hue[propNames]);
+                                                }
+                                            }
+                                        }
+                                    }
+                                    propNameIndex++;
+                                }
+                    }
+                });
+            }
+
         }
 
         private class GridScrollArea : Control
