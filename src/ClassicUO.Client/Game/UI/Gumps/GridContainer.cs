@@ -34,6 +34,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
 using ClassicUO.Assets;
@@ -45,6 +47,7 @@ using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
+using static ClassicUO.Game.UI.Gumps.GridHightlightMenu;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -100,7 +103,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (m.NotorietyFlag == NotorietyFlag.Invulnerable && m.Serial != World.Player.Serial)
                 {
-                    OpenOldContainer(ogContainer);
+                    OpenOldContainer(local);
                 }
             }
 
@@ -430,9 +433,6 @@ namespace ClassicUO.Game.UI.Gumps
             _lastX = X;
             _lastY = Y;
 
-            if (gridSlotManager.ItemPositions.Count > 0 && !_container.IsCorpse)
-                gridSaveSystem.SaveContainer(LocalSerial, gridSlotManager.ItemPositions, Width, Height, X, Y);
-
             if (_container != null)
             {
                 if (_container == SelectedObject.CorpseObject)
@@ -440,6 +440,9 @@ namespace ClassicUO.Game.UI.Gumps
                     SelectedObject.CorpseObject = null;
                 }
             }
+
+            if (gridSlotManager.ItemPositions.Count > 0 && !_container.IsCorpse)
+                gridSaveSystem.SaveContainer(LocalSerial, gridSlotManager.ItemPositions, Width, Height, X, Y);
 
             base.Dispose();
         }
@@ -606,6 +609,9 @@ namespace ClassicUO.Game.UI.Gumps
             AlphaBlendControl background;
             private CustomToolTip toolTipThis, toolTipitem1, toolTipitem2;
 
+            private bool borderHighlight = false;
+            private ushort borderHighlightHue = 0;
+
             public bool Hightlight = false;
             public Item SlotItem { get { return _item; } set { _item = value; LocalSerial = value.Serial; } }
 
@@ -640,7 +646,11 @@ namespace ClassicUO.Game.UI.Gumps
                 hit.MouseDoubleClick += _hit_MouseDoubleClick;
             }
 
-
+            public void SetHighLightBorder(ushort hue)
+            {
+                borderHighlight = hue == 0 ? false : true;
+                borderHighlightHue = hue;
+            }
 
             public void Resize()
             {
@@ -833,6 +843,17 @@ namespace ClassicUO.Game.UI.Gumps
                     hueVector
                 );
 
+                if(borderHighlight)
+                    batcher.DrawRectangle
+                    (
+                        SolidColorTextureCache.GetTexture(Color.White),
+                        x + 6,
+                        y + 6,
+                        Width - 12,
+                        Height - 12,
+                        ShaderHueTranslator.GetHueVector(borderHighlightHue, false, 0.8f)
+                    );
+
                 if (hit.MouseIsOver && _item != null)
                 {
                     hueVector.Z = 0.3f;
@@ -1003,6 +1024,8 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                     }
                 }
+
+                ApplyHighlightProperties();
             }
 
             private void SetGridPositions()
@@ -1086,6 +1109,69 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 return contents.OrderBy((x) => x.Graphic).ToList();
             }
+
+            public int hcount = 0;
+
+            public void ApplyHighlightProperties()
+            {
+                if (ProfileManager.CurrentProfile.GridHighlight_CorpseOnly && !container.IsCorpse)
+                    return;
+                Task.Factory.StartNew(() =>
+                {
+                    var tcount = hcount;
+                    System.Threading.Thread.Sleep(1000);
+
+                    if(tcount != hcount) { return; } //Another call has already been made
+                    List<GridHighlightData> highlightConfigs = new List<GridHighlightData>();
+                    for (int propIndex = 0; propIndex < ProfileManager.CurrentProfile.GridHighlight_PropNames.Count; propIndex++)
+                    {
+                        highlightConfigs.Add(GridHighlightData.GetGridHighlightData(propIndex));
+                    }
+
+
+                    foreach (var item in gridSlots) //For each grid slot
+                    {
+                        item.Value.SetHighLightBorder(0);
+                        if (item.Value.SlotItem != null)
+                            foreach (GridHighlightData configData in highlightConfigs) //For each highlight configuration
+                            {
+                                for (int i = 0; i < configData.Properties.Count; i++) //For each property in the highlight config
+                                {
+                                    string propText = configData.Properties[i];
+
+                                    if (World.OPL.TryGetNameAndData(item.Value.SlotItem.Serial, out string name, out string data))
+                                    {
+                                        if (name != null && name.ToLower().Contains(propText.ToLower()))
+                                        {
+                                            item.Value.SetHighLightBorder(configData.Hue);
+                                        }
+                                        else if (data != null)
+                                        {
+                                            string[] lines = data.Split(new string[] { "\n" }, StringSplitOptions.None);
+                                            foreach (string line in lines) //For each property on the item
+                                            {
+                                                if (line.ToLower().Contains(propText.ToLower()))
+                                                {
+                                                    Match m = Regex.Match(line, @"\d+");
+                                                    if (m.Success)
+                                                    {
+                                                        if (int.TryParse(m.Value, out int val))
+                                                        {
+                                                            if (val >= configData.PropMinVal[i])
+                                                                item.Value.SetHighLightBorder(configData.Hue);
+                                                        }
+                                                    } else if (configData.PropMinVal[i] < 0)
+                                                        item.Value.SetHighLightBorder(configData.Hue);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                    }
+                });
+            }
+
         }
 
         private class GridScrollArea : Control
