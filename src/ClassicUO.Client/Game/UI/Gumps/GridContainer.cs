@@ -1154,11 +1154,14 @@ namespace ClassicUO.Game.UI.Gumps
                                                 {
                                                     Match m = Regex.Match(line, @"\d+");
                                                     if (m.Success)
+                                                    {
                                                         if (int.TryParse(m.Value, out int val))
                                                         {
                                                             if (val >= configData.PropMinVal[i])
                                                                 item.Value.SetHighLightBorder(configData.Hue);
                                                         }
+                                                    } else if (configData.PropMinVal[i] < 0)
+                                                        item.Value.SetHighLightBorder(configData.Hue);
                                                 }
                                             }
                                         }
