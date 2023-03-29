@@ -151,7 +151,7 @@ namespace ClassicUO.Game.UI.Gumps
             return true;
         }
 
-        private class GridHighlightData
+        public class GridHighlightData
         {
             private string name;
             private ushort hue;
