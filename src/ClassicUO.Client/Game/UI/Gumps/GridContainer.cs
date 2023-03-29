@@ -1141,7 +1141,6 @@ namespace ClassicUO.Game.UI.Gumps
 
                                     if (World.OPL.TryGetNameAndData(item.Value.SlotItem.Serial, out string name, out string data))
                                     {
-                                        if (name != null) Console.WriteLine(name);
                                         if (name != null && name.ToLower().Contains(propText.ToLower()))
                                         {
                                             item.Value.SetHighLightBorder(configData.Hue);
@@ -1159,7 +1158,6 @@ namespace ClassicUO.Game.UI.Gumps
                                                         {
                                                             if (val >= configData.PropMinVal[i])
                                                                 item.Value.SetHighLightBorder(configData.Hue);
-                                                            //Console.WriteLine($"{line} ---> {propText}-{val} >= {configData.PropMinVal[i]}");
                                                         }
                                                 }
                                             }
@@ -1168,7 +1166,6 @@ namespace ClassicUO.Game.UI.Gumps
                                 }
                             }
                     }
-                    Console.WriteLine($"Finished apply highlight {hcount++}");
                 });
             }
 
