@@ -843,7 +843,7 @@ namespace ClassicUO.Game.UI.Gumps
                     hueVector
                 );
 
-                if(borderHighlight)
+                if (borderHighlight)
                     batcher.DrawRectangle
                     (
                         SolidColorTextureCache.GetTexture(Color.White),
@@ -1121,7 +1121,7 @@ namespace ClassicUO.Game.UI.Gumps
                     var tcount = hcount;
                     System.Threading.Thread.Sleep(1000);
 
-                    if(tcount != hcount) { return; } //Another call has already been made
+                    if (tcount != hcount) { return; } //Another call has already been made
                     List<GridHighlightData> highlightConfigs = new List<GridHighlightData>();
                     for (int propIndex = 0; propIndex < ProfileManager.CurrentProfile.GridHighlight_PropNames.Count; propIndex++)
                     {
@@ -1141,11 +1141,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                                     if (World.OPL.TryGetNameAndData(item.Value.SlotItem.Serial, out string name, out string data))
                                     {
-                                        if (name != null && name.ToLower().Contains(propText.ToLower()))
-                                        {
-                                            item.Value.SetHighLightBorder(configData.Hue);
-                                        }
-                                        else if (data != null)
+                                        if (data != null)
                                         {
                                             string[] lines = data.Split(new string[] { "\n" }, StringSplitOptions.None);
                                             foreach (string line in lines) //For each property on the item
@@ -1160,7 +1156,8 @@ namespace ClassicUO.Game.UI.Gumps
                                                             if (val >= configData.PropMinVal[i])
                                                                 item.Value.SetHighLightBorder(configData.Hue);
                                                         }
-                                                    } else if (configData.PropMinVal[i] < 0)
+                                                    }
+                                                    else if (configData.PropMinVal[i] < 0)
                                                         item.Value.SetHighLightBorder(configData.Hue);
                                                 }
                                             }
