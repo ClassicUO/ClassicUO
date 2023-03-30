@@ -46,6 +46,7 @@ using ClassicUO.Network;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
+using Microsoft.Xna.Framework;
 using SDL2;
 
 namespace ClassicUO.Game.Managers
@@ -1848,6 +1849,7 @@ namespace ClassicUO.Game.Managers
 
             GameActions.Print(ResGeneral.EntityNotFound);
         }
+
     }
 
 
@@ -1942,10 +1944,10 @@ namespace ClassicUO.Game.Managers
             writer.WriteAttributeString("alt", Alt.ToString());
             writer.WriteAttributeString("ctrl", Ctrl.ToString());
             writer.WriteAttributeString("shift", Shift.ToString());
-            writer.WriteAttributeString(nameof(HideLabel).ToLower(), HideLabel.ToString());
-            writer.WriteAttributeString(nameof(Hue).ToLower(), Hue.ToString());
-            writer.WriteAttributeString(nameof(Graphic).ToLower(), Graphic.ToString());
-            writer.WriteAttributeString(nameof(Scale).ToLower(), Scale.ToString());
+            writer.WriteAttributeString("hidelabel", HideLabel.ToString());
+            writer.WriteAttributeString("hue", Hue.ToString());
+            writer.WriteAttributeString("graphic", Graphic.ToString());
+            writer.WriteAttributeString("scale", Scale.ToString());
 
             writer.WriteStartElement("actions");
 
@@ -1980,18 +1982,18 @@ namespace ClassicUO.Game.Managers
             Alt = bool.Parse(xml.GetAttribute("alt"));
             Ctrl = bool.Parse(xml.GetAttribute("ctrl"));
             Shift = bool.Parse(xml.GetAttribute("shift"));
-            if (bool.TryParse(xml.GetAttribute(nameof(HideLabel).ToLower()), out var hide)){
+            if (bool.TryParse(xml.GetAttribute("hidelabel"), out var hide)){
                 HideLabel = hide;
             }
-            if (ushort.TryParse(xml.GetAttribute(nameof(Hue).ToLower()), out var hue))
+            if (ushort.TryParse(xml.GetAttribute("hue"), out var hue))
             {
                 Hue = hue;
             }
-            if (ushort.TryParse(xml.GetAttribute(nameof(Graphic).ToLower()), out var graphic))
+            if (ushort.TryParse(xml.GetAttribute("graphic"), out var graphic))
             {
                 Graphic = graphic;
             }
-            if (byte.TryParse(xml.GetAttribute(nameof(Scale).ToLower()), out var scale))
+            if (byte.TryParse(xml.GetAttribute("scale"), out var scale))
             {
                 Scale = scale;
             }

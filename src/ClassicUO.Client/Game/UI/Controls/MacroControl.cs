@@ -66,7 +66,7 @@ namespace ClassicUO.Game.UI.Controls
             Label _keyBinding;
             Add(_keyBinding = new Label
                 (
-                    "Keybinding:",
+                    "HotKey:",
                     true,
                     0xFFFF,
                     60,
@@ -77,7 +77,7 @@ namespace ClassicUO.Game.UI.Controls
             _hotkeyBox = new HotkeyBox();
             _hotkeyBox.HotkeyChanged += BoxOnHotkeyChanged;
             _hotkeyBox.HotkeyCancelled += BoxOnHotkeyCancelled;
-            _hotkeyBox.X = _keyBinding.Width + 5;
+            _hotkeyBox.X = _keyBinding.X + _keyBinding.Width + 5;
 
 
             Add(_hotkeyBox);
@@ -181,13 +181,6 @@ namespace ClassicUO.Game.UI.Controls
 
             SetupKeyByDefault();
             SetupMacroUI();
-            var macroButtonEditor = UIManager.Gumps.OfType<MacroButtonEditorGump>().FirstOrDefault();
-            if (macroButtonEditor != null)
-            {
-                var pos = new Vector2(macroButtonEditor.X, macroButtonEditor.Y);
-                macroButtonEditor.Dispose();
-                GameActions.OpenMacroButtonEditor(Macro, pos);
-            }
         }
 
 
@@ -256,7 +249,9 @@ namespace ClassicUO.Game.UI.Controls
             {
                 Macro.Items = Macro.Create(MacroType.None);
             }
-            for (MacroObject obj = (MacroObject)Macro.Items; obj != null; obj = (MacroObject)obj.Next)
+
+            MacroObject obj = (MacroObject)Macro.Items;
+            while (obj != null)
             {
                 _databox.Add(new MacroEntry(this, obj, _allHotkeysNames));
 
@@ -264,6 +259,7 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     break;
                 }
+                obj = (MacroObject)obj.Next;
             }
 
             _databox.WantUpdateSize = true;
@@ -412,9 +408,35 @@ namespace ClassicUO.Game.UI.Controls
                     break;
                 case (int)buttonsOption.OpenButtonEditor:
                     UIManager.Gumps.OfType<MacroButtonEditorGump>().FirstOrDefault()?.Dispose();
-                    GameActions.OpenMacroButtonEditor(Macro, null);
+                    OpenMacroButtonEditor(Macro, null);
                     break;
             }
+        }
+
+        private void OpenMacroButtonEditor(Macro macro, Vector2? position = null)
+        {
+            MacroButtonEditorGump btnEditorGump = UIManager.GetGump<MacroButtonEditorGump>();
+
+            if (btnEditorGump == null)
+            {
+                var posX = (Client.Game.Window.ClientBounds.Width >> 1) - 300;
+                var posY = (Client.Game.Window.ClientBounds.Height >> 1) - 250;
+                OptionsGump opt = UIManager.GetGump<OptionsGump>();
+                if (opt != null)
+                {
+                    posX = opt.X + opt.Width + 5;
+                    posY = opt.Y;
+                }
+                if (position.HasValue)
+                {
+                    posX = (int)position.Value.X;
+                    posY = (int)position.Value.Y;
+                }
+                btnEditorGump = new MacroButtonEditorGump(macro, posX, posY);
+                UIManager.Add(btnEditorGump);
+            }
+            btnEditorGump.SetInScreen();
+            btnEditorGump.BringOnTop();
         }
 
 
