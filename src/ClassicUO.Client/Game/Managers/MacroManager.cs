@@ -1892,6 +1892,9 @@ namespace ClassicUO.Game.Managers
         public bool Alt { get; set; }
         public bool Ctrl { get; set; }
         public bool Shift { get; set; }
+        public bool HideLabel { get; set; } = false;
+        public ushort Hue { get; set; }
+        public ushort Graphic { get; set; } = 0x00;
 
         public bool Equals(Macro other)
         {
@@ -1938,6 +1941,9 @@ namespace ClassicUO.Game.Managers
             writer.WriteAttributeString("alt", Alt.ToString());
             writer.WriteAttributeString("ctrl", Ctrl.ToString());
             writer.WriteAttributeString("shift", Shift.ToString());
+            writer.WriteAttributeString(nameof(HideLabel).ToLower(), HideLabel.ToString());
+            writer.WriteAttributeString(nameof(Hue).ToLower(), Hue.ToString());
+            writer.WriteAttributeString(nameof(Graphic).ToLower(), Graphic.ToString());
 
             writer.WriteStartElement("actions");
 
@@ -1972,6 +1978,17 @@ namespace ClassicUO.Game.Managers
             Alt = bool.Parse(xml.GetAttribute("alt"));
             Ctrl = bool.Parse(xml.GetAttribute("ctrl"));
             Shift = bool.Parse(xml.GetAttribute("shift"));
+            if (bool.TryParse(xml.GetAttribute(nameof(HideLabel).ToLower()), out var hide)){
+                HideLabel = hide;
+            }
+            if (ushort.TryParse(xml.GetAttribute(nameof(Hue).ToLower()), out var hue))
+            {
+                Hue = hue;
+            }
+            if (ushort.TryParse(xml.GetAttribute(nameof(Graphic).ToLower()), out var graphic))
+            {
+                Graphic = graphic;
+            }
 
             if (xml.HasAttribute("mousebutton"))
             {

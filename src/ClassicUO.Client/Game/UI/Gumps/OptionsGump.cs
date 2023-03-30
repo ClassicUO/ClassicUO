@@ -2186,7 +2186,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         _macroControl = new MacroControl(name)
                         {
-                            X = 400,
+                            X = 350,
                             Y = 20
                         };
 
@@ -2219,7 +2219,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                             _macroControl = new MacroControl(name)
                             {
-                                X = 400,
+                                X = 350,
                                 Y = 20
                             };
 
@@ -2338,7 +2338,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     _macroControl = new MacroControl(m.Name)
                     {
-                        X = 400,
+                        X = 350,
                         Y = 20
                     };
 

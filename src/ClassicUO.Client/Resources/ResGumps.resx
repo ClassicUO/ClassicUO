@@ -1277,6 +1277,9 @@ Min. Skill: {1}</value>
   <data name="CreateMacroButton" xml:space="preserve">
     <value>+ Create macro button</value>
   </data>
+  <data name="MacroButtonEditor" xml:space="preserve">
+    <value>Button Editor</value>
+  </data>
   <data name="Add" xml:space="preserve">
     <value>Add</value>
   </data>

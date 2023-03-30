@@ -47,13 +47,22 @@ namespace ClassicUO.Game.UI.Gumps
     internal class MacroButtonGump : AnchorableGump
     {
         private Texture2D backgroundTexture;
+        private Vector3 hueVector;
         private Label label;
+        private ushort _graphic;
+        private ushort _hue;
+        private readonly int DEFAULT_WIDTH = 88;
+        private readonly int DEFAULT_HEIGHT = 44;
 
         public MacroButtonGump(Macro macro, int x, int y) : this()
         {
             X = x;
             Y = y;
+            Width = 88;
+            Height = 44;
             _macro = macro;
+            Graphic = macro.Graphic;
+            Hue = macro.Hue;
             BuildGump();
         }
 
@@ -72,12 +81,45 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override GumpType GumpType => GumpType.MacroButton;
         public Macro _macro;
+        public bool IsPartialHue { get; set; }
+        public ushort Hue { get => _hue; set
+            {
+                _hue = value;
+                hueVector = ShaderHueTranslator.GetHueVector(value);
+            }
+        }
+        public bool HideLabel { get; set; }
+        public ushort Graphic
+        {
+            get => _graphic;
+            set
+            {
+                _graphic = value;
+                if (value == 0)
+                {
+                    IsPartialHue = false;
+                    Width = DEFAULT_WIDTH;
+                    Height = DEFAULT_HEIGHT;
+                    return;
+                }
+                var texture = GumpsLoader.Instance.GetGumpTexture(value, out Rectangle bounds);
+
+                if (texture == null)
+                {
+                    Dispose();
+
+                    return;
+                }
+
+                Width = bounds.Width;
+                Height = bounds.Height;
+
+                IsPartialHue = TileDataLoader.Instance.StaticData[value].IsPartialHue;
+            }
+        }
 
         private void BuildGump()
         {
-            Width = 88;
-            Height = 44;
-
             label = new Label
             (
                 _macro.Name,
@@ -102,14 +144,14 @@ namespace ClassicUO.Game.UI.Gumps
         protected override void OnMouseEnter(int x, int y)
         {
             label.Hue = 53;
-            backgroundTexture = SolidColorTextureCache.GetTexture(Color.DimGray);
+            //backgroundTexture = SolidColorTextureCache.GetTexture(Color.DimGray);
             base.OnMouseEnter(x, y);
         }
 
         protected override void OnMouseExit(int x, int y)
         {
             label.Hue = 0x03b2;
-            backgroundTexture = SolidColorTextureCache.GetTexture(new Color(30, 30, 30));
+            //backgroundTexture = SolidColorTextureCache.GetTexture(new Color(30, 30, 30));
             base.OnMouseExit(x, y);
         }
 
@@ -151,7 +193,6 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
             batcher.Draw
             (
@@ -175,6 +216,21 @@ namespace ClassicUO.Game.UI.Gumps
                 Height,
                 hueVector
             );
+
+            var texture = GumpsLoader.Instance.GetGumpTexture(Graphic, out Rectangle bounds);
+
+
+            if (texture != null)
+            {
+                Rectangle rect = new Rectangle(x, y, Width, Height);
+                batcher.Draw
+                (
+                    texture,
+                    rect,
+                    bounds,
+                    hueVector
+                );
+            }
 
             base.Draw(batcher, x, y);
 

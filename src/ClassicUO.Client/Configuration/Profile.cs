@@ -611,6 +611,10 @@ namespace ClassicUO.Configuration
                                     gump = new MacroButtonGump();
 
                                     break;
+                                case GumpType.MacroButtonEditor:
+                                    gump = new MacroButtonEditorGump();
+
+                                    break;
 
                                 case GumpType.MiniMap:
                                     gump = new MiniMapGump();
@@ -772,7 +776,7 @@ namespace ClassicUO.Configuration
                                     case GumpType.MacroButton:
                                         gump = new MacroButtonGump();
 
-                                        break;
+                                        break;            
                                     case GumpType.GridContainer:
                                         ushort ogContainer = ushort.Parse(xml.GetAttribute("ogContainer"));
                                         gump = new GridContainer(serial, ogContainer);

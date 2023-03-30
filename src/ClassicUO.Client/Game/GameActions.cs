@@ -31,6 +31,7 @@
 #endregion
 
 using System;
+using System.Linq;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
@@ -101,7 +102,26 @@ namespace ClassicUO.Game
                 paperDollGump.BringOnTop();
             }
         }
-
+        public static void OpenMacroButtonEditor(Macro macro)
+        {
+            MacroButtonEditorGump btnEditorGump = UIManager.GetGump<MacroButtonEditorGump>();
+            
+            if (btnEditorGump == null)
+            {
+                var posX = (Client.Game.Window.ClientBounds.Width >> 1) - 300;
+                var posY = (Client.Game.Window.ClientBounds.Height >> 1) - 250;
+                OptionsGump opt = UIManager.GetGump<OptionsGump>();
+                if (opt != null)
+                {
+                    posX = opt.X + opt.Width + 5;
+                    posY = opt.Y;
+                }
+                btnEditorGump = new MacroButtonEditorGump(macro, posX, posY);
+                UIManager.Add(btnEditorGump);
+            }
+            btnEditorGump.SetInScreen();
+            btnEditorGump.BringOnTop();
+        }
         public static void OpenSettings(int page = 0)
         {
             OptionsGump opt = UIManager.GetGump<OptionsGump>();
