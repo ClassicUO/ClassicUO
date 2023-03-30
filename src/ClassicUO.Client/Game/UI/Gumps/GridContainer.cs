@@ -1116,6 +1116,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (ProfileManager.CurrentProfile.GridHighlight_CorpseOnly && !container.IsCorpse)
                     return;
+                hcount++;
                 Task.Factory.StartNew(() =>
                 {
                     var tcount = hcount;
@@ -1127,7 +1128,6 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         highlightConfigs.Add(GridHighlightData.GetGridHighlightData(propIndex));
                     }
-
 
                     foreach (var item in gridSlots) //For each grid slot
                     {

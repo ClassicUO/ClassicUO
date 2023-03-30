@@ -3239,6 +3239,12 @@ namespace ClassicUO.Game.UI.Gumps
                 _lastScroll.Y = _center.Y;
             }
 
+            if(button == MouseButtonType.Right && Keyboard.Ctrl)
+            {
+                CanvasToWorld(_lastMousePosition.Value.X, _lastMousePosition.Value.Y, out int wX, out int wY);
+                Pathfinder.WalkTo(wX, wY, 0, 1);
+            }
+
             Client.Game.GameCursor.IsDraggingCursorForced = false;
 
             base.OnMouseUp(x, y, button);
