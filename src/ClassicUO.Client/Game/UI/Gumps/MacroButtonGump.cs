@@ -41,7 +41,6 @@ using ClassicUO.Assets;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using ClassicUO.IO.Audio;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -57,13 +56,14 @@ namespace ClassicUO.Game.UI.Gumps
         private Macro _macr;
         private readonly int DEFAULT_WIDTH = 88;
         private readonly int DEFAULT_HEIGHT = 44;
+        private bool _isMouseOver;
 
         public MacroButtonGump(Macro macro, int x, int y) : this()
         {
             X = x;
             Y = y;
-            Width = 88;
-            Height = 44;
+            Width = DEFAULT_WIDTH;
+            Height = DEFAULT_HEIGHT;
             _macro = macro;           
             BuildGump();
         }
@@ -162,14 +162,14 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseEnter(int x, int y)
         {
-            //label.Hue = 53;
+            _isMouseOver = true;
             backgroundTexture = SolidColorTextureCache.GetTexture(Color.DimGray);
             base.OnMouseEnter(x, y);
         }
 
         protected override void OnMouseExit(int x, int y)
         {
-            //label.Hue = 0x03b2;
+            _isMouseOver = false;
             backgroundTexture = SolidColorTextureCache.GetTexture(new Color(30, 30, 30));
             base.OnMouseExit(x, y);
         }
@@ -260,7 +260,7 @@ namespace ClassicUO.Game.UI.Gumps
                 var _gText = RenderedText.Create
                    (
                        _macro.Name,
-                       0x03b2,
+                        (ushort)(_isMouseOver ? 53 : 0x03b2),
                        255,
                        true,
                        FontStyle.BlackBorder,

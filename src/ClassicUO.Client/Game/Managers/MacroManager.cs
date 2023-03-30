@@ -1893,7 +1893,7 @@ namespace ClassicUO.Game.Managers
         public bool Ctrl { get; set; }
         public bool Shift { get; set; }
         public bool HideLabel { get; set; } = false;
-        public ushort Hue { get; set; }
+        public ushort Hue { get; set; } = 0x00;
         public ushort Graphic { get; set; } = 0x00;
         public byte Scale { get; set; } = 100;
 
