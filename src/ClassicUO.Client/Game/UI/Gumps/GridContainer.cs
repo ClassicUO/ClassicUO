@@ -1135,34 +1135,54 @@ namespace ClassicUO.Game.UI.Gumps
                         if (item.Value.SlotItem != null)
                             foreach (GridHighlightData configData in highlightConfigs) //For each highlight configuration
                             {
+                                bool fullMatch = true;
                                 for (int i = 0; i < configData.Properties.Count; i++) //For each property in the highlight config
                                 {
+                                    if (!fullMatch)
+                                        break;
                                     string propText = configData.Properties[i];
 
                                     if (World.OPL.TryGetNameAndData(item.Value.SlotItem.Serial, out string name, out string data))
                                     {
                                         if (data != null)
                                         {
-                                            string[] lines = data.Split(new string[] { "\n" }, StringSplitOptions.None);
+                                            string[] lines = data.Split(new string[] { "\n", "<br>" }, StringSplitOptions.None);
+                                            bool hasProp = false;
                                             foreach (string line in lines) //For each property on the item
                                             {
                                                 if (line.ToLower().Contains(propText.ToLower()))
                                                 {
+                                                    hasProp = true;
                                                     Match m = Regex.Match(line, @"\d+");
-                                                    if (m.Success)
+                                                    if (m.Success) //There is a number
                                                     {
                                                         if (int.TryParse(m.Value, out int val))
                                                         {
                                                             if (val >= configData.PropMinVal[i])
-                                                                item.Value.SetHighLightBorder(configData.Hue);
+                                                                fullMatch = true;
+                                                            else
+                                                                fullMatch = false;
                                                         }
                                                     }
                                                     else if (configData.PropMinVal[i] < 0)
-                                                        item.Value.SetHighLightBorder(configData.Hue);
+                                                    {
+                                                        fullMatch = true;
+                                                    }
+                                                    else
+                                                    {
+                                                        fullMatch = false;
+                                                    }
                                                 }
                                             }
+                                            if (!hasProp) { fullMatch = false; break; }
                                         }
+                                        else fullMatch = false; //No OPL data(props)
                                     }
+                                    else fullMatch = false; //No OPL data(name/props)
+                                }
+                                if (fullMatch)
+                                {
+                                    item.Value.SetHighLightBorder(configData.Hue);
                                 }
                             }
                     }
