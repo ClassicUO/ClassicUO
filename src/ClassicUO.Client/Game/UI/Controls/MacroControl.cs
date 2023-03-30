@@ -181,6 +181,13 @@ namespace ClassicUO.Game.UI.Controls
 
             SetupKeyByDefault();
             SetupMacroUI();
+            var macroButtonEditor = UIManager.Gumps.OfType<MacroButtonEditorGump>().FirstOrDefault();
+            if (macroButtonEditor != null)
+            {
+                var pos = new Vector2(macroButtonEditor.X, macroButtonEditor.Y);
+                macroButtonEditor.Dispose();
+                GameActions.OpenMacroButtonEditor(Macro, pos);
+            }
         }
 
 
@@ -405,7 +412,7 @@ namespace ClassicUO.Game.UI.Controls
                     break;
                 case (int)buttonsOption.OpenButtonEditor:
                     UIManager.Gumps.OfType<MacroButtonEditorGump>().FirstOrDefault()?.Dispose();
-                    GameActions.OpenMacroButtonEditor(Macro);
+                    GameActions.OpenMacroButtonEditor(Macro, null);
                     break;
             }
         }

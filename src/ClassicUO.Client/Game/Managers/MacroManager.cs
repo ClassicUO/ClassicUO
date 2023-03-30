@@ -1895,6 +1895,7 @@ namespace ClassicUO.Game.Managers
         public bool HideLabel { get; set; } = false;
         public ushort Hue { get; set; }
         public ushort Graphic { get; set; } = 0x00;
+        public byte Scale { get; set; } = 100;
 
         public bool Equals(Macro other)
         {
@@ -1944,6 +1945,7 @@ namespace ClassicUO.Game.Managers
             writer.WriteAttributeString(nameof(HideLabel).ToLower(), HideLabel.ToString());
             writer.WriteAttributeString(nameof(Hue).ToLower(), Hue.ToString());
             writer.WriteAttributeString(nameof(Graphic).ToLower(), Graphic.ToString());
+            writer.WriteAttributeString(nameof(Scale).ToLower(), Scale.ToString());
 
             writer.WriteStartElement("actions");
 
@@ -1988,6 +1990,10 @@ namespace ClassicUO.Game.Managers
             if (ushort.TryParse(xml.GetAttribute(nameof(Graphic).ToLower()), out var graphic))
             {
                 Graphic = graphic;
+            }
+            if (byte.TryParse(xml.GetAttribute(nameof(Scale).ToLower()), out var scale))
+            {
+                Scale = scale;
             }
 
             if (xml.HasAttribute("mousebutton"))

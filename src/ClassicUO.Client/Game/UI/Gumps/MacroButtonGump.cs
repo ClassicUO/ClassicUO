@@ -41,6 +41,7 @@ using ClassicUO.Assets;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using ClassicUO.IO.Audio;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -51,6 +52,9 @@ namespace ClassicUO.Game.UI.Gumps
         private Label label;
         private ushort _graphic;
         private ushort _hue;
+        private float _scale;
+        private bool _hideLabel;
+        private Macro _macr;
         private readonly int DEFAULT_WIDTH = 88;
         private readonly int DEFAULT_HEIGHT = 44;
 
@@ -60,9 +64,7 @@ namespace ClassicUO.Game.UI.Gumps
             Y = y;
             Width = 88;
             Height = 44;
-            _macro = macro;
-            Graphic = macro.Graphic;
-            Hue = macro.Hue;
+            _macro = macro;           
             BuildGump();
         }
 
@@ -80,7 +82,17 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
         public override GumpType GumpType => GumpType.MacroButton;
-        public Macro _macro;
+
+        public Macro _macro { get => _macr;
+            set
+            {
+                _macr = value;
+                Scale = value.Scale;
+                Graphic = value.Graphic;
+                Hue = value.Hue;
+                HideLabel = value.HideLabel;
+            }
+        }
         public bool IsPartialHue { get; set; }
         public ushort Hue { get => _hue; set
             {
@@ -88,70 +100,77 @@ namespace ClassicUO.Game.UI.Gumps
                 hueVector = ShaderHueTranslator.GetHueVector(value);
             }
         }
-        public bool HideLabel { get; set; }
+        public bool HideLabel { get => _hideLabel; 
+            set
+            {
+                _hideLabel = value;
+            }
+        }
+        public float Scale { get => _scale; 
+            set
+            {
+                _scale = value;
+
+                var factor = value / 100F;
+
+                Width = (int)(Width * factor);
+                Height = (int)(Height * factor);
+                GroupMatrixHeight = Height;
+                GroupMatrixWidth = Width;
+                WidthMultiplier = 1;
+            } 
+        }
         public ushort Graphic
         {
             get => _graphic;
             set
             {
                 _graphic = value;
-                if (value == 0)
+                var factor = Scale / 100F;
+                if (_graphic != 0)
+                {
+                    var texture = GumpsLoader.Instance.GetGumpTexture(value, out Rectangle bounds);
+
+                    if (texture == null)
+                    {
+                        Dispose();
+
+                        return;
+                    }
+                    Width = (int)(bounds.Width * factor);
+                    Height = (int)(bounds.Height * factor);
+                    IsPartialHue = TileDataLoader.Instance.StaticData[value].IsPartialHue;
+                }
+                else
                 {
                     IsPartialHue = false;
-                    Width = DEFAULT_WIDTH;
-                    Height = DEFAULT_HEIGHT;
-                    return;
+                    Width = (int)(DEFAULT_WIDTH* factor);
+                    Height = (int)(DEFAULT_HEIGHT * factor);
                 }
-                var texture = GumpsLoader.Instance.GetGumpTexture(value, out Rectangle bounds);
+                               
 
-                if (texture == null)
-                {
-                    Dispose();
-
-                    return;
-                }
-
-                Width = bounds.Width;
-                Height = bounds.Height;
-
-                IsPartialHue = TileDataLoader.Instance.StaticData[value].IsPartialHue;
+                GroupMatrixHeight = Height;
+                GroupMatrixWidth = Width;
+                WidthMultiplier = 1;                
             }
         }
 
         private void BuildGump()
         {
-            label = new Label
-            (
-                _macro.Name,
-                true,
-                0x03b2,
-                Width,
-                255,
-                FontStyle.BlackBorder,
-                TEXT_ALIGN_TYPE.TS_CENTER
-            )
-            {
-                X = 0,
-                Width = Width - 10
-            };
-
-            label.Y = (Height >> 1) - (label.Height >> 1);
-            Add(label);
-
             backgroundTexture = SolidColorTextureCache.GetTexture(new Color(30, 30, 30));
         }
 
         protected override void OnMouseEnter(int x, int y)
         {
-            label.Hue = 53;
-            //backgroundTexture = SolidColorTextureCache.GetTexture(Color.DimGray);
+            //label.Hue = 53;
+            backgroundTexture = SolidColorTextureCache.GetTexture(Color.DimGray);
             base.OnMouseEnter(x, y);
         }
 
         protected override void OnMouseExit(int x, int y)
         {
-            label.Hue = 0x03b2;
-            //backgroundTexture = SolidColorTextureCache.GetTexture(new Color(30, 30, 30));
+            //label.Hue = 0x03b2;
+            backgroundTexture = SolidColorTextureCache.GetTexture(new Color(30, 30, 30));
             base.OnMouseExit(x, y);
         }
 
@@ -217,20 +236,40 @@ namespace ClassicUO.Game.UI.Gumps
                 hueVector
             );
 
-            var texture = GumpsLoader.Instance.GetGumpTexture(Graphic, out Rectangle bounds);
+            
 
-
-            if (texture != null)
+            if (Graphic != 0)
             {
-                Rectangle rect = new Rectangle(x, y, Width, Height);
-                batcher.Draw
-                (
-                    texture,
-                    rect,
-                    bounds,
-                    hueVector
-                );
+                var texture = GumpsLoader.Instance.GetGumpTexture(Graphic, out Rectangle bounds);
+                if (texture != null)
+                {
+                    Rectangle rect = new Rectangle(x, y, Width, Height);
+                    batcher.Draw
+                    (
+                        texture,
+                        rect,
+                        bounds,
+                        hueVector
+                    );
+                }
             }
+           
+
+            if (!HideLabel)
+            {
+                var _gText = RenderedText.Create
+                   (
+                       _macro.Name,
+                       0x03b2,
+                       255,
+                       true,
+                       FontStyle.BlackBorder,
+                       TEXT_ALIGN_TYPE.TS_CENTER,
+                       Width
+                   );
+                _gText.Draw(batcher, x, y + ((Height >> 1) - (_gText.Height >> 1)), Alpha);
+            }
+
 
             base.Draw(batcher, x, y);
 

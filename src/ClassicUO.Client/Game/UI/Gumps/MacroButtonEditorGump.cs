@@ -54,9 +54,9 @@ namespace ClassicUO.Game.UI.Gumps
         private Label label;
         private const int WIDTH = 400;
         private const int HEIGHT = 400;
-        private Area _previewArea;
+        private ScrollArea _scrollArea;
         private Area _optionsArea;
-        private ScrollArea _area;
+        private Area _previewArea;
 
         public MacroButtonEditorGump() : base(0, 0)
         {
@@ -75,10 +75,6 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override GumpType GumpType => GumpType.MacroButtonEditor;
         public Macro _macro;
-        private ushort _hue;
-        private bool _useScale;
-        private int _scaleValue;
-        private bool _useGraphic;
 
         private void BuildGump()
         {
@@ -86,8 +82,8 @@ namespace ClassicUO.Game.UI.Gumps
             (
                 new AlphaBlendControl(0.95f)
                 {
-                    X = 0,
-                    Y = 0,
+                    X = 2,
+                    Y = 2,
                     Width = WIDTH,
                     Height = HEIGHT,
                     Hue = 999
@@ -109,42 +105,37 @@ namespace ClassicUO.Game.UI.Gumps
             Add(_optionsArea);
 
 
+            _scrollArea = new ScrollArea(
+                5,
+                _optionsArea.Y + _optionsArea.Height + 15,
+                WIDTH - 15,
+                HEIGHT - _optionsArea.Height - 125,
+                false
+                );
+            _scrollArea.AcceptMouseInput = true;
+            _scrollArea.CanMove = true;
+
+
             _previewArea = new Area();
-            _previewArea.X = 5;
-            _previewArea.Y = _optionsArea.Y + _optionsArea.Height + 15;
-            _previewArea.Width = WIDTH - 10;
-            _previewArea.Height = HEIGHT - _previewArea.Y - 75;
-            Add(_previewArea);
+            _previewArea.X = 0;
+            _previewArea.Y = 5;
+            _previewArea.Width = _scrollArea.Width - 14;
+            _previewArea.Height = _scrollArea.Height - 5;
+            _scrollArea.Add(_previewArea);
+
+            Add(_scrollArea);
 
             AddPreview();
 
             Add
            (
-               new Button(2, 0x00F3, 0x00F1, 0x00F2)
-               {
-                   X = 50,
-                   Y = HEIGHT - 50,
-                   ButtonAction = ButtonAction.Default
-               }
-           );
-            Add
-           (
                new Button(1, 0x00EF, 0x00F0, 0x00EE)
                {
-                   X = 150,
+                   X = 165,
                    Y = HEIGHT - 50,
                    ButtonAction = ButtonAction.Activate
                }
            );
-            Add
-          (
-              new Button(0, 0x00F9, 0x00F8, 0x00F7)
-              {
-                  X = 250,
-                  Y = HEIGHT - 50,
-                  ButtonAction = ButtonAction.Default
-              }
-          );
 
         }
         private Area BuildOptionsArea(int? x, int? y)
@@ -154,6 +145,8 @@ namespace ClassicUO.Game.UI.Gumps
             area.Height = 80;
             area.X = x ?? 5;
             area.Y = y ?? 5;
+            area.AcceptMouseInput = true;
+            area.CanMove = true;
 
 
             Checkbox _hideLabelCheckbox = new Checkbox
@@ -166,7 +159,8 @@ namespace ClassicUO.Game.UI.Gumps
             )
             {
                 X = 10,
-                Y = 10
+                Y = 10,
+                IsChecked = _macro.HideLabel
             };
 
             _hideLabelCheckbox.ValueChanged += (sender, e) =>
@@ -177,40 +171,61 @@ namespace ClassicUO.Game.UI.Gumps
             area.Add(_hideLabelCheckbox);
 
 
-            Checkbox _useScale = new Checkbox
+            Label _ScaleLbl = new Label
             (
-                0x00D2,
-                0x00D3,
-                "Scale",
-                0xFF,
-                0xFFFF
+                    $"Scale",
+                    true,
+                    0xFFFF,
+                    50,
+                    0xFF,
+                    FontStyle.BlackBorder | FontStyle.Cropped, TEXT_ALIGN_TYPE.TS_LEFT
             )
             {
                 X = _hideLabelCheckbox.X + _hideLabelCheckbox.Width + 15,
                 Y = _hideLabelCheckbox.Y
             };
-            area.Add(_useScale);
+            area.Add(_ScaleLbl);
 
             HSliderBar _scale = new HSliderBar
             (
-                _useScale.X + _useScale.Width + 15,
-                _useScale.Y + 2,
-                200,
+                _ScaleLbl.X + _ScaleLbl.Width + 15,
+                _ScaleLbl.Y + 2,
+                180,
                 1,
-                10,
-                5,
-                HSliderBarStyle.MetalWidgetRecessedBar,
+                200,
+                100,
+                HSliderBarStyle.BlueWidgetNoBar,
                 true,
                 0xFF,
                 0xFFFF
             );
+            _scale.ValueChanged += (sender, e) =>
+            {
+                _macro.Scale = (byte)_scale.Value;
+                AddPreview();
+            };
+
+            _scale.Add(new AlphaBlendControl(0.3f)
+            {
+                Hue = 0x0481,
+                Width = _scale.Width,
+                Height = _scale.Height
+            });
+
             area.Add(_scale);
 
-            area.Add(new ModernColorPicker.HueDisplay((ushort)_macro.Hue, OnColorChange, true)
+
+            ModernColorPicker.HueDisplay _hueDisplay = new ModernColorPicker.HueDisplay(_macro.Hue, null, true)
             {
                 X = 10,
                 Y = _scale.Y + _scale.Height + 15
-            });
+            };
+            _hueDisplay.HueChanged += (sender, ee) =>
+            {
+                _macro.Hue = _hueDisplay.Hue;
+                AddPreview();
+            };
+            area.Add(_hueDisplay);
 
             Label _ColorLabel;
             area.Add(_ColorLabel = new Label
@@ -238,23 +253,27 @@ namespace ClassicUO.Game.UI.Gumps
                     FontStyle.BlackBorder | FontStyle.Cropped, TEXT_ALIGN_TYPE.TS_RIGHT
             )
             {
-                X = _useScale.X,
+                X = _ScaleLbl.X,
                 Y = _ColorLabel.Y
             });
 
-            StbTextBox _searchBox = new StbTextBox(0xFF, 20, 50, true, FontStyle.None, 0x0481)
+            StbTextBox _searchBox = new StbTextBox(0xFF, -1, 65, true, FontStyle.None, 0x0481)
             {
                 X = _scale.X,
                 Y = _ColorLabel.Y,
                 Multiline = false,
-                Width = 50,
-                Height = 20
+                Width = 65,
+                Height = 20,
+                Text = _macro.Graphic.ToString(),
+                NumbersOnly = true
             };
 
             _searchBox.TextChanged += (sender, e) => {
                 if (ushort.TryParse(_searchBox.Text, out var id)){
                     OnGraphicChange(id);
+                    return;
                 }
+                OnGraphicChange(0);
             };
             _searchBox.Add(new AlphaBlendControl(0.5f)
             {
@@ -263,25 +282,11 @@ namespace ClassicUO.Game.UI.Gumps
                 Height = _searchBox.Height
             });
 
-            //Combobox _graphicId = new Combobox(_scale.X, _ColorLabel.Y, 100, _graphics.Select(g => $"0x{g}").ToArray())
-            //{
-            //    SelectedIndex = 0
-            //};
-            //_graphicId.OnOptionSelected += (senderr, ee) =>
-            //{
-            //    ushort graphicId = _graphics.ElementAt(ee);
-            //    OnGraphicChange(graphicId);
-            //};
             area.Add(_searchBox);
 
 
             area.WantUpdateSize = false;
             return area;
-        }
-        private void OnColorChange(ushort hue)
-        {
-            _macro.Hue = hue;
-            AddPreview();
         }
         private void OnGraphicChange(ushort graphic)
         {
@@ -292,7 +297,6 @@ namespace ClassicUO.Game.UI.Gumps
         {
             _previewArea.Clear();
             _previewArea.Children.Clear();
-
             var _preview = new MacroButtonGump(_macro, 0, 0) { AcceptMouseInput = false };
 
             _preview.X = ((WIDTH - 10) >> 1) - (_preview.Width >> 1);
@@ -308,6 +312,11 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 case 1:
                     Client.Game.GetScene<GameScene>().Macros.Save();
+                    var existing = UIManager.Gumps.OfType<MacroButtonGump>().FirstOrDefault(s => s._macro == _macro);
+                    if (existing != null)
+                    {
+                        existing._macro = _macro;
+                    }                   
                     break;
             }
         }

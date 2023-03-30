@@ -2342,7 +2342,7 @@ namespace ClassicUO.Game.UI.Gumps
                         Y = 20
                     };
 
-                    Add(_macroControl, PAGE);
+                    Add(_macroControl, PAGE);                   
                 };
             }
 

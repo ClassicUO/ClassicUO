@@ -102,7 +102,7 @@ namespace ClassicUO.Game
                 paperDollGump.BringOnTop();
             }
         }
-        public static void OpenMacroButtonEditor(Macro macro)
+        public static void OpenMacroButtonEditor(Macro macro, Vector2? postion)
         {
             MacroButtonEditorGump btnEditorGump = UIManager.GetGump<MacroButtonEditorGump>();
             
@@ -115,6 +115,11 @@ namespace ClassicUO.Game
                 {
                     posX = opt.X + opt.Width + 5;
                     posY = opt.Y;
+                }
+                if (postion.HasValue)
+                {
+                    posX = (int)postion.Value.X;
+                    posY = (int)postion.Value.Y;
                 }
                 btnEditorGump = new MacroButtonEditorGump(macro, posX, posY);
                 UIManager.Add(btnEditorGump);
