@@ -36,6 +36,7 @@ using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
+using ClassicUO.Game.Map;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
@@ -47,7 +48,10 @@ using ClassicUO.Utility.Platforms;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using System.Xml.Linq;
+using static ClassicUO.Game.UI.Gumps.WorldMapGump;
 
 namespace ClassicUO.Network
 {
@@ -1350,6 +1354,10 @@ namespace ClassicUO.Network
 
                 if (item != null)
                 {
+                    if (item.IsCorpse && World.WMapManager._corpse != null && item.Serial == World.WMapManager._corpse.Serial)
+                    {
+                        World.WMapManager._corpse = null;
+                    }
                     if (item.IsCorpse && (ProfileManager.CurrentProfile.GridLootType == 1 || ProfileManager.CurrentProfile.GridLootType == 2))
                     {
                         UIManager.GetGump<GridLootGump>(serial)?.Dispose();
@@ -1710,6 +1718,16 @@ namespace ClassicUO.Network
                 }
 
                 GameActions.RequestWarMode(false);
+                World.WMapManager._corpse = new WMapEntity(World.Player.Serial)
+                {
+                    X = World.Player.X,
+                    Y = World.Player.Y,
+                    HP = 0,
+                    Map = World.Map.Index,
+                    LastUpdate = Time.Ticks + (1000 * 60 * 5),
+                    IsGuild = false,
+                    Name = $"Your Corpse"
+                };
             }
         }
 
