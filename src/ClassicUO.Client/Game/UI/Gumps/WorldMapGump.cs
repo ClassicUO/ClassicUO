@@ -100,6 +100,7 @@ namespace ClassicUO.Game.UI.Gumps
         private bool _showMarkerIcons = true;
         private bool _showMarkerNames = true;
         private bool _showMarkers = true;
+        private bool _showCorpse = true;
         private bool _showMobiles = true;
         private bool _showMultis = true;
         private bool _showPartyMembers = true;
@@ -209,6 +210,8 @@ namespace ClassicUO.Game.UI.Gumps
             _showCoordinates = ProfileManager.CurrentProfile.WorldMapShowCoordinates;
             _showMouseCoordinates = ProfileManager.CurrentProfile.WorldMapShowMouseCoordinates;
             _showMobiles = ProfileManager.CurrentProfile.WorldMapShowMobiles;
+            _showCorpse = ProfileManager.CurrentProfile.WorldMapShowCorpse;
+
 
             _showPlayerName = ProfileManager.CurrentProfile.WorldMapShowPlayerName;
             _showPlayerBar = ProfileManager.CurrentProfile.WorldMapShowPlayerBar;
@@ -248,6 +251,7 @@ namespace ClassicUO.Game.UI.Gumps
             ProfileManager.CurrentProfile.WorldMapShowCoordinates = _showCoordinates;
             ProfileManager.CurrentProfile.WorldMapShowMouseCoordinates = _showMouseCoordinates;
             ProfileManager.CurrentProfile.WorldMapShowMobiles = _showMobiles;
+            ProfileManager.CurrentProfile.WorldMapShowCorpse = _showCorpse;
 
             ProfileManager.CurrentProfile.WorldMapShowPlayerName = _showPlayerName;
             ProfileManager.CurrentProfile.WorldMapShowPlayerBar = _showPlayerBar;
@@ -363,6 +367,7 @@ namespace ClassicUO.Game.UI.Gumps
                 true,
                 _showPartyMembers
             );
+            _options["show_corpse"] = new ContextMenuItemEntry("Show my Corpse", () => { _showCorpse = !_showCorpse; SaveSettings(); }, true, _showCorpse);
 
             _options["show_mobiles"] = new ContextMenuItemEntry(ResGumps.ShowMobiles, () => { _showMobiles = !_showMobiles; SaveSettings(); }, true, _showMobiles);
 
@@ -549,6 +554,7 @@ namespace ClassicUO.Game.UI.Gumps
             ContextMenu.Add(_options["free_view"]);
             ContextMenu.Add("", null);
             ContextMenu.Add(_options["show_party_members"]);
+            ContextMenu.Add(_options["show_corpse"]);
             ContextMenu.Add(_options["show_mobiles"]);
             ContextMenu.Add(_options["show_multis"]);
             ContextMenu.Add(_options["show_coordinates"]);
@@ -2448,6 +2454,40 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
+            if ( _showCorpse && World.WMapManager._corpse != null)
+            {
+                DrawWMEntity
+                    (
+                        batcher,
+                        World.WMapManager._corpse,
+                        gX,
+                        gY,
+                        halfWidth,
+                        halfHeight,
+                        Zoom
+                    );
+                if (World.WMapManager._corpse.Map == World.Map.Index)
+                {
+                    Point pdrot = RotatePoint(World.WMapManager._corpse.X - _center.X, World.WMapManager._corpse.Y - _center.Y, Zoom, 1, _flipMap ? 45f : 0f);
+                    pdrot.X += gX + halfWidth;
+                    pdrot.Y += gY + halfHeight;
+
+                    Point prot = RotatePoint(World.Player.X - _center.X, World.Player.Y - _center.Y, Zoom, 1, _flipMap ? 45f : 0f);
+                    prot.X += gX + halfWidth;
+                    prot.Y += gY + halfHeight;
+
+                    batcher.DrawLine
+                    (
+                       SolidColorTextureCache.GetTexture(Color.YellowGreen),
+                       new Vector2(pdrot.X - 2, pdrot.Y - 2),
+                       new Vector2(prot.X, prot.Y),
+                       ShaderHueTranslator.GetHueVector(0),
+                       1
+                    );
+                }
+                
+            }
+
             DrawMobile
             (
                 batcher,
@@ -2462,6 +2502,8 @@ namespace ClassicUO.Game.UI.Gumps
                 false,
                 _showPlayerBar
             );
+
+            
 
             if (ShouldDrawGrid())
             {
