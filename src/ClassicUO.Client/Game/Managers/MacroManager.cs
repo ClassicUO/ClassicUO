@@ -36,7 +36,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml;
-using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
@@ -47,8 +46,6 @@ using ClassicUO.Network;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using SDL2;
 
 namespace ClassicUO.Game.Managers
