@@ -2456,8 +2456,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             if ( _showCorpse && World.WMapManager._corpse != null)
             {
-                const int DOT_SIZE = 4;
-                const int DOT_SIZE_HALF = DOT_SIZE >> 1;
                 DrawWMEntity
                     (
                         batcher,
@@ -2470,31 +2468,19 @@ namespace ClassicUO.Game.UI.Gumps
                     );
                 if (World.WMapManager._corpse.Map == World.Map.Index)
                 {
-                    int sx = World.WMapManager._corpse.X - _center.X;
-                    int sy = World.WMapManager._corpse.Y - _center.Y;
-
-                    Point pdrot = RotatePoint(sx, sy, Zoom, 1, _flipMap ? 45f : 0f);
-
+                    Point pdrot = RotatePoint(World.WMapManager._corpse.X - _center.X, World.WMapManager._corpse.Y - _center.Y, Zoom, 1, _flipMap ? 45f : 0f);
                     pdrot.X += gX + halfWidth;
                     pdrot.Y += gY + halfHeight;
 
-                    int psx = World.Player.X - _center.X;
-                    int psy = World.Player.Y - _center.Y;
-
-                    Point prot = RotatePoint(psx, psy, Zoom, 1, _flipMap ? 45f : 0f);
-
+                    Point prot = RotatePoint(World.Player.X - _center.X, World.Player.Y - _center.Y, Zoom, 1, _flipMap ? 45f : 0f);
                     prot.X += gX + halfWidth;
                     prot.Y += gY + halfHeight;
 
-                    Vector2 start = new Vector2(pdrot.X - DOT_SIZE_HALF, pdrot.Y - DOT_SIZE_HALF);
-                    Vector2 end = new Vector2(prot.X, prot.Y);
-
-                    //DRAW LINE FROM PLAYER TO DEATH LOCATION
                     batcher.DrawLine
                     (
                        SolidColorTextureCache.GetTexture(Color.YellowGreen),
-                       start,
-                       end,
+                       new Vector2(pdrot.X - 2, pdrot.Y - 2),
+                       new Vector2(prot.X, prot.Y),
                        ShaderHueTranslator.GetHueVector(0),
                        1
                     );
