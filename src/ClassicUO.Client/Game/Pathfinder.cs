@@ -44,7 +44,7 @@ namespace ClassicUO.Game
 {
     internal static class Pathfinder
     {
-        private const int PATHFINDER_MAX_NODES = 10000;
+        private const int PATHFINDER_MAX_NODES = 15000;
         private static int _goalNode;
         private static bool _goalFound;
         private static int _activeOpenNodes, _activeCloseNodes, _pathfindDistance;
