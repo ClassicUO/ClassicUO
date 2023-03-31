@@ -275,7 +275,7 @@ namespace ClassicUO.Game.UI.Gumps
                     OnGraphicChange(id);
                     return;
                 }
-                OnGraphicChange(0);
+                OnGraphicChange(null);
             };
             _searchBox.Add(new AlphaBlendControl(0.5f)
             {
@@ -283,37 +283,13 @@ namespace ClassicUO.Game.UI.Gumps
                 Width = _searchBox.Width,
                 Height = _searchBox.Height
             });
-
-
-            Checkbox _overrideGraphic = new Checkbox
-            (
-                0x00D2,
-                0x00D3,
-                "External Load",
-                0xFF,
-                0xFFFF
-            )
-            {
-                X = _searchBox.X + _searchBox.Width + 15,
-                Y = _searchBox.Y,
-                IsChecked = _macro.LoadFromExternal
-            };
-
-            _overrideGraphic.ValueChanged += (sender, e) =>
-            {
-                _macro.LoadFromExternal = _overrideGraphic.IsChecked;
-                AddPreview();
-            };
-            area.Add(_overrideGraphic);
-
-
             area.Add(_searchBox);
 
 
             area.WantUpdateSize = false;
             return area;
         }
-        private void OnGraphicChange(ushort graphic)
+        private void OnGraphicChange(ushort? graphic)
         {
             _macro.Graphic = graphic;
             AddPreview();
