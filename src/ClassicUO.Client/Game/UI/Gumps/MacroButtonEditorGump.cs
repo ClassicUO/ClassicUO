@@ -50,8 +50,6 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class MacroButtonEditorGump : Gump
     {
-        private Texture2D backgroundTexture;
-        private Label label;
         private const int WIDTH = 400;
         private const int HEIGHT = 400;
         private ScrollArea _scrollArea;
