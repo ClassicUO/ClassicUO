@@ -41,6 +41,7 @@ using ClassicUO.Assets;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System.IO;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -125,27 +126,21 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _graphic = value;
                 var factor = Scale / 100F;
-                if (_graphic != 0)
+                var texture = MacroManager.LoadGraphic(value, _macro.LoadFromExternal, out Rectangle bounds);
+
+                if (texture == null)
                 {
-                    var texture = GumpsLoader.Instance.GetGumpTexture(value, out Rectangle bounds);
-
-                    if (texture == null)
-                    {
-                        Dispose();
-
-                        return;
-                    }
-                    Width = (int)(bounds.Width * factor);
-                    Height = (int)(bounds.Height * factor);
-                    IsPartialHue = TileDataLoader.Instance.StaticData[value].IsPartialHue;
+                    bounds.Width = DEFAULT_WIDTH;
+                    bounds.Height = DEFAULT_HEIGHT;
+                    IsPartialHue = false;
                 }
                 else
                 {
-                    IsPartialHue = false;
-                    Width = (int)(DEFAULT_WIDTH* factor);
-                    Height = (int)(DEFAULT_HEIGHT * factor);
+                    IsPartialHue = TileDataLoader.Instance.StaticData[value].IsPartialHue;
                 }
-                               
+
+                Width = (int)(bounds.Width * factor);
+                Height = (int)(bounds.Height * factor);
 
                 GroupMatrixHeight = Height;
                 GroupMatrixWidth = Width;
@@ -232,24 +227,19 @@ namespace ClassicUO.Game.UI.Gumps
                 hueVector
             );
 
-            
-
-            if (Graphic != 0)
+            var texture = MacroManager.LoadGraphic(Graphic, _macro.LoadFromExternal, out Rectangle bounds);
+            if (texture != null)
             {
-                var texture = GumpsLoader.Instance.GetGumpTexture(Graphic, out Rectangle bounds);
-                if (texture != null)
-                {
-                    Rectangle rect = new Rectangle(x, y, Width, Height);
-                    batcher.Draw
-                    (
-                        texture,
-                        rect,
-                        bounds,
-                        hueVector
-                    );
-                }
+                Rectangle rect = new Rectangle(x, y, Width, Height);
+                batcher.Draw
+                (
+                    texture,
+                    rect,
+                    bounds,
+                    hueVector
+                );
             }
-           
+
 
             if (!HideLabel)
             {

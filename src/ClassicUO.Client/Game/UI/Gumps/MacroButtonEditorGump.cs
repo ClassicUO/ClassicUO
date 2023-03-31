@@ -121,7 +121,11 @@ namespace ClassicUO.Game.UI.Gumps
             _previewArea.Y = 5;
             _previewArea.Width = _scrollArea.Width - 14;
             _previewArea.Height = _scrollArea.Height - 5;
+            _previewArea.AcceptMouseInput = true;
+            _previewArea.CanMove = true;
+
             _scrollArea.Add(_previewArea);
+
 
             Add(_scrollArea);
 
@@ -193,7 +197,7 @@ namespace ClassicUO.Game.UI.Gumps
                 180,
                 1,
                 200,
-                100,
+                _macro.Scale,
                 HSliderBarStyle.BlueWidgetNoBar,
                 true,
                 0xFF,
@@ -282,6 +286,29 @@ namespace ClassicUO.Game.UI.Gumps
                 Height = _searchBox.Height
             });
 
+
+            Checkbox _overrideGraphic = new Checkbox
+            (
+                0x00D2,
+                0x00D3,
+                "External Load",
+                0xFF,
+                0xFFFF
+            )
+            {
+                X = _searchBox.X + _searchBox.Width + 15,
+                Y = _searchBox.Y,
+                IsChecked = _macro.LoadFromExternal
+            };
+
+            _overrideGraphic.ValueChanged += (sender, e) =>
+            {
+                _macro.LoadFromExternal = _overrideGraphic.IsChecked;
+                AddPreview();
+            };
+            area.Add(_overrideGraphic);
+
+
             area.Add(_searchBox);
 
 
@@ -335,128 +362,6 @@ namespace ClassicUO.Game.UI.Gumps
                 hueVector
             );
 
-            return base.Draw(batcher, x, y);
-        }
-    }
-
-    internal class MacroButtonPreview: Control
-    {
-        private Texture2D backgroundTexture;
-        private Vector3 hueVector;
-        private AlphaBlendControl _background;
-        private readonly RenderedText _renderedText;
-        private Macro _macro;
-        private ushort _graphic;
-        private Label _label;
-
-        public bool IsPartialHue { get; set; }
-        public ushort Graphic
-        {
-            get => _graphic;
-            set
-            {
-                _graphic = value;
-                if (_graphic == 0)
-                {
-                    return;
-                }
-                backgroundTexture = GumpsLoader.Instance.GetGumpTexture(Graphic, out Rectangle bounds);
-
-                if (backgroundTexture == null)
-                {
-                    Dispose();
-
-                    return;
-                }
-
-                Width = bounds.Width;
-                Height = bounds.Height;
-
-                IsPartialHue = TileDataLoader.Instance.StaticData[value].IsPartialHue;
-            }
-        }
-        public MacroButtonPreview(Macro macro)
-        {
-            _macro = macro;
-            Width = 88;
-            Height = 44;
-            Graphic = macro.Graphic;
-            _label = new Label
-               (
-                   _macro.Name,
-                   true,
-                   0x03b2,
-                   Width,
-                   255,
-                   FontStyle.BlackBorder,
-                   TEXT_ALIGN_TYPE.TS_CENTER
-               )
-            {
-                X = 0,
-                Width = Width - 10
-            };
-            Add(_label);
-
-            hueVector = ShaderHueTranslator.GetHueVector(_macro.Hue, IsPartialHue, 1);
-            
-        }
-        public void RePosition()
-        {
-            if (this.Parent == null)
-            {
-                return;
-            }
-            Vector2 newPostion = new Vector2((this.Parent.Width >> 1) - (Width >> 1), (this.Parent.Height >> 1) - (Height >> 1));
-            if (X == newPostion.X && Y == newPostion.Y)
-            {
-                return;
-            }
-            X = (int)newPostion.X;
-            Y = (int)newPostion.Y;
-
-            //_label.Y = (Height >> 1) - (_label.Height >> 1);
-        }
-        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
-        {
-            if (IsDisposed)
-            {
-                return false;
-            }
-
-            batcher.Draw
-            (
-                backgroundTexture,
-                new Rectangle
-                (
-                    x,
-                    y,
-                    Width,
-                    Height
-                ),
-                hueVector
-            );
-
-            if (Graphic == 0)
-            {
-                RePosition();
-                return base.Draw(batcher, x, y); ;
-            }
-            var texture = GumpsLoader.Instance.GetGumpTexture(Graphic, out Rectangle bounds);
-
-
-            if (texture != null)
-            {
-                Rectangle rect = new Rectangle(x, y, Width, Height);
-
-                batcher.Draw
-                (
-                    texture,
-                    rect,
-                    bounds,
-                    hueVector
-                );
-            }
-            RePosition();
             return base.Draw(batcher, x, y);
         }
     }

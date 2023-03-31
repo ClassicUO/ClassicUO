@@ -36,6 +36,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml;
+using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
@@ -47,6 +48,7 @@ using ClassicUO.Resources;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using SDL2;
 
 namespace ClassicUO.Game.Managers
@@ -1850,6 +1852,34 @@ namespace ClassicUO.Game.Managers
             GameActions.Print(ResGeneral.EntityNotFound);
         }
 
+        public static Texture2D LoadExternalGraphic(string name, out Rectangle bounds)
+        {
+            var path = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "ExternalImages", $"{name}.png");
+            Texture2D texture = null;
+            bounds = Rectangle.Empty;
+            texture = PNGLoader.GetImageTexture(path);
+            if (texture != null)
+            {
+                bounds = texture.Bounds;
+            }
+            return texture;
+        }
+        public static Texture2D LoadGraphic(ushort graphic, bool isExternal, out Rectangle bounds)
+        {
+            if (graphic == 0)
+            {
+                bounds = Rectangle.Empty;
+                return null;
+            }
+
+            if (isExternal)
+            {
+                return LoadExternalGraphic(graphic.ToString(), out bounds);
+            }
+
+            return GumpsLoader.Instance.GetGumpTexture(graphic, out bounds);
+        }
+
     }
 
 
@@ -1898,6 +1928,7 @@ namespace ClassicUO.Game.Managers
         public ushort Hue { get; set; } = 0x00;
         public ushort Graphic { get; set; } = 0x00;
         public byte Scale { get; set; } = 100;
+        public bool LoadFromExternal { get; set; } = false;
 
         public bool Equals(Macro other)
         {
@@ -1947,6 +1978,7 @@ namespace ClassicUO.Game.Managers
             writer.WriteAttributeString("hidelabel", HideLabel.ToString());
             writer.WriteAttributeString("hue", Hue.ToString());
             writer.WriteAttributeString("graphic", Graphic.ToString());
+            writer.WriteAttributeString("loadfromexternal", LoadFromExternal.ToString());
             writer.WriteAttributeString("scale", Scale.ToString());
 
             writer.WriteStartElement("actions");
@@ -1996,6 +2028,10 @@ namespace ClassicUO.Game.Managers
             if (byte.TryParse(xml.GetAttribute("scale"), out var scale))
             {
                 Scale = scale;
+            }
+            if (bool.TryParse(xml.GetAttribute("loadfromexternal"), out var externalLoad))
+            {
+               LoadFromExternal = externalLoad;
             }
 
             if (xml.HasAttribute("mousebutton"))
