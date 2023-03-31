@@ -1893,10 +1893,10 @@ namespace ClassicUO.Game.Managers
         public bool Alt { get; set; }
         public bool Ctrl { get; set; }
         public bool Shift { get; set; }
-        public bool HideLabel { get; set; } = false;
-        public ushort Hue { get; set; } = 0x00;
-        public ushort? Graphic { get; set; }
-        public byte Scale { get; set; } = 100;
+        public bool HideLabel = false;
+        public ushort Hue = 0x00;
+        public ushort? Graphic = null;
+        public byte Scale = 100;
 
         public bool Equals(Macro other)
         {
@@ -1981,20 +1981,12 @@ namespace ClassicUO.Game.Managers
             Alt = bool.Parse(xml.GetAttribute("alt"));
             Ctrl = bool.Parse(xml.GetAttribute("ctrl"));
             Shift = bool.Parse(xml.GetAttribute("shift"));
-            if (bool.TryParse(xml.GetAttribute("hidelabel"), out var hide)){
-                HideLabel = hide;
-            }
-            if (ushort.TryParse(xml.GetAttribute("hue"), out var hue))
-            {
-                Hue = hue;
-            }
+            bool.TryParse(xml.GetAttribute("hidelabel"), out HideLabel);
+            ushort.TryParse(xml.GetAttribute("hue"), out Hue);
+            byte.TryParse(xml.GetAttribute("scale"), out Scale);
             if (ushort.TryParse(xml.GetAttribute("graphic"), out var graphic))
             {
                 Graphic = graphic;
-            }
-            if (byte.TryParse(xml.GetAttribute("scale"), out var scale))
-            {
-                Scale = scale;
             }
 
             if (xml.HasAttribute("mousebutton"))
