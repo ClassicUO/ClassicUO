@@ -1710,6 +1710,16 @@ namespace ClassicUO.Network
                 }
 
                 GameActions.RequestWarMode(false);
+                World.WMapManager._corpse = new WMapEntity(World.Player.Serial)
+                {
+                    X = World.Player.X,
+                    Y = World.Player.Y,
+                    HP = 0,
+                    Map = World.Map.Index,
+                    LastUpdate = Time.Ticks + (1000 * 60 * 5),
+                    IsGuild = false,
+                    Name = $"Your Corpse"
+                };
             }
         }
 
@@ -3085,12 +3095,12 @@ namespace ClassicUO.Network
                 if (layer - 1 != Layer.Backpack)
                 {
                     Item item = World.GetOrCreateItem(item_serial);
-
+ 
                     World.RemoveItemFromContainer(item);
                     item.Container = serial;
                     item.Layer = layer - 1;
                     corpse.PushToBack(item);
-                }
+                }                
 
                 layer = (Layer)p.ReadUInt8();
             }
