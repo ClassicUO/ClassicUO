@@ -612,6 +612,10 @@ namespace ClassicUO.Configuration
                                     gump = new MacroButtonGump();
 
                                     break;
+                                case GumpType.MacroButtonEditor:
+                                    gump = new MacroButtonEditorGump();
+
+                                    break;
 
                                 case GumpType.MiniMap:
                                     gump = new MiniMapGump();

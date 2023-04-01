@@ -2412,6 +2412,15 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Button Editor.
+        /// </summary>
+        public static string MacroButtonEditor {
+            get {
+                return ResourceManager.GetString("MacroButtonEditor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Do you want
         ///delete it?.
         /// </summary>
