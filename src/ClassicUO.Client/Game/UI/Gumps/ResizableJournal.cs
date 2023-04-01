@@ -185,7 +185,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _backgroundTexture.IsVisible = true;
                 _backgroundTexture.Hue = _background.Hue;
                 BorderControl.Hue = _background.Hue;
-                BorderControl.Alpha = _background.Alpha;
+                BorderControl.Alpha = (float)ProfileManager.CurrentProfile.JournalOpacity / 100;
                 _background.IsVisible = false;
 
                 BorderControl.V_Right_Border = (ushort)(graphic + 5);
@@ -211,7 +211,8 @@ namespace ClassicUO.Game.UI.Gumps
             _backgroundTexture.Y = _background.Y;
             _backgroundTexture.Width = _background.Width;
             _backgroundTexture.Height = _background.Height;
-            _backgroundTexture.Alpha = _background.Alpha;
+            _backgroundTexture.Alpha = (float)ProfileManager.CurrentProfile.JournalOpacity / 100;
+            BorderControl.Alpha = (float)ProfileManager.CurrentProfile.JournalOpacity / 100;
 
             _journalArea.X = BORDER_WIDTH;
             _journalArea.Y = TAB_HEIGHT;
