@@ -176,6 +176,7 @@ namespace ClassicUO.Configuration
         public bool CloseAllAnchoredGumpsInGroupWithRightClick { get; set; } = false;
         public bool HoldAltToMoveGumps { get; set; }
         public byte JournalOpacity { get; set; } = 50;
+        public int JournalStyle { get; set; } = 0;
         public bool HideScreenshotStoredInMessage { get; set; }
 
         // Experimental

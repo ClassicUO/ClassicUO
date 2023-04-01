@@ -170,6 +170,7 @@ namespace ClassicUO.Game.UI.Gumps
         private Checkbox _dragSelectAsAnchor, _namePlateHealthBar, _disableSystemChat, _namePlateShowAtFullHealth;
         private HSliderBar _journalOpacity, _namePlateOpacity, _namePlateHealthBarOpacity;
         private ClickableColorBox _journalBackgroundColor;
+        private Combobox _journalStyle;
 
         // video
         private Checkbox _use_old_status_gump, _windowBorderless, _enableDeathScreen, _enableBlackWhiteEffect, _altLights, _enableLight, _enableShadows, _enableShadowsStatics, _auraMouse, _runMouseInSeparateThread, _useColoredLights, _darkNights, _partyAura, _hideChatGradient, _animatedWaterEffect;
@@ -766,6 +767,13 @@ namespace ClassicUO.Game.UI.Gumps
                 );
                 section.AddRight(AddLabel(null, "Journal Background", startX, startY));
                 section.PopIndent();
+
+                section.Add(AddLabel(null, "Journal style", 0, 0));
+                section.AddRight(_journalStyle = AddCombobox(
+                        null,
+                        Enum.GetNames(typeof(ResizableJournal.BorderStyle)),
+                        _currentProfile.JournalStyle, 0, 0, 150
+                    ));
             } //Journal opac and hue
 
             {
@@ -4216,6 +4224,12 @@ namespace ClassicUO.Game.UI.Gumps
             if (Settings.GlobalSettings.FPS != _sliderFPS.Value)
             {
                 Client.Game.SetRefreshRate(_sliderFPS.Value);
+            }
+
+            if (_currentProfile.JournalStyle != _journalStyle.SelectedIndex)
+            {
+                _currentProfile.JournalStyle = _journalStyle.SelectedIndex;
+                UIManager.GetGump<ResizableJournal>()?.BuildBorder();
             }
 
             _currentProfile.NamePlateHideAtFullHealth = _namePlateShowAtFullHealth.IsChecked;
