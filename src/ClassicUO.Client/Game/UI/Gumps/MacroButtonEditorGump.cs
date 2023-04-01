@@ -175,7 +175,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Label _ScaleLbl = new Label
             (
-                    $"Scale",
+                    "Scale",
                     true,
                     0xFFFF,
                     50,
