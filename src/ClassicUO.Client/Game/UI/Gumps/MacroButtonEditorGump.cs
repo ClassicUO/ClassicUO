@@ -193,7 +193,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _ScaleLbl.X + _ScaleLbl.Width + 15,
                 _ScaleLbl.Y + 2,
                 180,
-                1,
+                10,
                 200,
                 _macro.Scale,
                 HSliderBarStyle.BlueWidgetNoBar,
