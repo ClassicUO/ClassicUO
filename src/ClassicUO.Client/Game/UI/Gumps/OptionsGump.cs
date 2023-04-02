@@ -167,7 +167,7 @@ namespace ClassicUO.Game.UI.Gumps
         private ClickableColorBox _tooltip_font_hue;
         private FontSelector _tooltip_font_selector;
         private HSliderBar _dragSelectStartX, _dragSelectStartY;
-        private Checkbox _dragSelectAsAnchor, _namePlateHealthBar, _disableSystemChat, _namePlateShowAtFullHealth;
+        private Checkbox _dragSelectAsAnchor, _namePlateHealthBar, _disableSystemChat, _namePlateShowAtFullHealth, _useModernPaperdoll;
         private HSliderBar _journalOpacity, _namePlateOpacity, _namePlateHealthBarOpacity;
         private ClickableColorBox _journalBackgroundColor;
         private Combobox _journalStyle;
@@ -785,6 +785,14 @@ namespace ClassicUO.Game.UI.Gumps
                     ));
                 section.AddRight(AddLabel(null, "Disable system chat", 0, 0));
             } //Disable system chat
+
+            {
+                section.Add(_useModernPaperdoll = AddCheckBox(
+                        null, "",
+                        _currentProfile.UseModernPaperdoll, 0, 0
+                    ));
+                section.AddRight(AddLabel(null, "Use modern paperdoll", 0, 0));
+            }
 
             SettingsSection section2 = AddSettingsSection(box, "Mobiles");
             section2.Y = section.Bounds.Bottom + 40;
@@ -4231,6 +4239,8 @@ namespace ClassicUO.Game.UI.Gumps
                 _currentProfile.JournalStyle = _journalStyle.SelectedIndex;
                 UIManager.GetGump<ResizableJournal>()?.BuildBorder();
             }
+
+            _currentProfile.UseModernPaperdoll = _useModernPaperdoll.IsChecked;
 
             _currentProfile.NamePlateHideAtFullHealth = _namePlateShowAtFullHealth.IsChecked;
 
