@@ -251,7 +251,7 @@ namespace ClassicUO.Game.UI.Controls
                         {
                             AcceptMouseInput = true,
                             IsPartialHue = equipItem.ItemData.IsPartialHue,
-                            CanLift = World.InGame && !World.Player.IsDead && layer != Layer.Beard && layer != Layer.Hair && (_paperDollGump.CanLift || LocalSerial == World.Player)
+                            CanLift = World.InGame && !World.Player.IsDead && layer != Layer.Beard && layer != Layer.Hair && (_paperDollGump == null ? false : _paperDollGump.CanLift || LocalSerial == World.Player)
                         }
                     );
                 }

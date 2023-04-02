@@ -196,6 +196,8 @@ namespace ClassicUO.Game.Scenes
 
             CircleOfTransparency.Create(ProfileManager.CurrentProfile.CircleOfTransparencyRadius);
             Plugin.OnConnected();
+
+            UIManager.Add(new ModernPaperdoll(World.Player.Serial));
         }
 
         private void ChatOnMessageReceived(object sender, MessageEventArgs e)
