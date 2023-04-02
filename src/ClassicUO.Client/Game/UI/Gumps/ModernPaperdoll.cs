@@ -52,8 +52,10 @@ namespace ClassicUO.Game.UI.Gumps
             //Add(new AlphaBlendControl(0.8f) { Width = WIDTH, Height = HEIGHT, Hue = 10 });
             Add(new GumpPic(0, 0, 40312, 0));
 
-            MenuButton menu = new MenuButton(25, Color.White.PackedValue, 0.8f, "Open menu") { X = Width - 26, Y = 1 };
-            menu.MouseUp += (sender, e) =>
+            HitBox _menuHit = new HitBox(Width-26, 1, 25, 16, alpha: 0f);
+            Add(_menuHit);
+            _menuHit.SetTooltip("Open paperdoll menu");
+            _menuHit.MouseUp += (sender, e) =>
             {
                 if (e.Button == MouseButtonType.Left)
                 {
@@ -61,7 +63,6 @@ namespace ClassicUO.Game.UI.Gumps
                     UIManager.Add(new MenuGump(Mouse.Position.X - 145, Mouse.Position.Y - 5, localSerial));
                 }
             };
-            Add(menu);
 
             #region SET UP ITEM SLOTS
             ItemSlot _;
@@ -117,24 +118,24 @@ namespace ClassicUO.Game.UI.Gumps
 
 
 
-            _ = new ItemSlot(35, 35, new Layer[] { Layer.Talisman }) { X = 1, Y = 225 + CELL_SPACING + TOP_SPACING };
+            _ = new ItemSlot(33, 34, new Layer[] { Layer.Talisman }) { X = 3, Y = 225 + CELL_SPACING + TOP_SPACING };
             itemLayerSlots.Add(_.layers, _); //Talisman
 
-            _ = new ItemSlot(35, 35, new Layer[] { Layer.Backpack }) { X = Width - 36, Y = 225 + CELL_SPACING + TOP_SPACING };
+            _ = new ItemSlot(33, 34, new Layer[] { Layer.Backpack }) { X = Width - 36, Y = 225 + CELL_SPACING + TOP_SPACING };
             itemLayerSlots.Add(_.layers, _); //Backpack
 
 
-            _ = new ItemSlot(25, 25, new Layer[] { Layer.Tunic }) { X = 12, Y = 155 + CELL_SPACING + TOP_SPACING };
+            _ = new ItemSlot(24, 24, new Layer[] { Layer.Tunic }) { X = 8, Y = 163 + CELL_SPACING + TOP_SPACING };
             itemLayerSlots.Add(_.layers, _);
 
-            _ = new ItemSlot(25, 25, new Layer[] { Layer.Shirt }) { X = 12, Y = 190 + CELL_SPACING + TOP_SPACING };
+            _ = new ItemSlot(24, 24, new Layer[] { Layer.Shirt }) { X = 8, Y = 193 + CELL_SPACING + TOP_SPACING };
             itemLayerSlots.Add(_.layers, _);
 
 
-            _ = new ItemSlot(25, 25, new Layer[] { Layer.Skirt }) { X = Width - 45, Y = 155 + CELL_SPACING + TOP_SPACING };
+            _ = new ItemSlot(24, 24, new Layer[] { Layer.Skirt }) { X = Width - 32, Y = 163 + CELL_SPACING + TOP_SPACING };
             itemLayerSlots.Add(_.layers, _);
 
-            _ = new ItemSlot(25, 25, new Layer[] { Layer.Legs }) { X = Width - 45, Y = 190 + CELL_SPACING + TOP_SPACING };
+            _ = new ItemSlot(24, 24, new Layer[] { Layer.Legs }) { X = Width - 32, Y = 193 + CELL_SPACING + TOP_SPACING };
             itemLayerSlots.Add(_.layers, _);
             #endregion
 
@@ -158,16 +159,15 @@ namespace ClassicUO.Game.UI.Gumps
             };
             _virtueMenuPic.SetTooltip("Virtues");
 
-            Add(titleLabel = new Label("", true, 0xffff, maxwidth: WIDTH - 2, align: TEXT_ALIGN_TYPE.TS_CENTER) { X = 1, Y = 265 + CELL_SPACING + TOP_SPACING, AcceptMouseInput = false });
+            Add(titleLabel = new Label("", true, 0xffff, maxwidth: WIDTH - 10, align: TEXT_ALIGN_TYPE.TS_CENTER) { X = 5, Y = 270 + CELL_SPACING + TOP_SPACING, AcceptMouseInput = false });
 
-            GumpPic _minimize = new GumpPic(1, 1, 0x38, 0);
-            HitBox _minHit = new HitBox(1, 1, _minimize.Width, _minimize.Height, alpha: 0f);
+            HitBox _minHit = new HitBox(1, 1, 14, 18, alpha: 0f);
+            _minHit.SetTooltip("Minimize paperdoll");
             _minHit.MouseUp += (s, e) =>
             {
                 Dispose();
                 UIManager.Add(new MinimizedPaperdoll(LocalSerial) { X = X, Y = Y });
             };
-            Add(_minimize);
             Add(_minHit);
 
             RequestUpdateContents();
@@ -331,9 +331,9 @@ namespace ClassicUO.Game.UI.Gumps
                 Add(itemArea = new Area(false) { Width = Width, Height = Height, AcceptMouseInput = true, CanMove = true });
                 itemArea.SetTooltip(layers[0].ToString());
 
-                Add(durablityBar = new AlphaBlendControl() { Width = 8, Height = Height, Hue = 32, IsVisible = false });
+                Add(durablityBar = new AlphaBlendControl(0.75f) { Width = 8, Height = Height, Hue = 32, IsVisible = false });
 
-                Add(new SimpleBorder() { Width = Width, Height = Height, Alpha = 0.8f });
+                //Add(new SimpleBorder() { Width = Width, Height = Height, Alpha = 0.8f });
                 this.layers = layers;
             }
 
