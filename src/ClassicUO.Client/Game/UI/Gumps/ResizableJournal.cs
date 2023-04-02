@@ -161,7 +161,11 @@ namespace ClassicUO.Game.UI.Gumps
                     graphic = 9260; borderSize = 17;
                     break;
                 case BorderStyle.Style8:
-                    graphic = 83; borderSize = 16;
+                    if (Assets.GumpsLoader.Instance.GetGumpTexture(40303, out var bounds) != null)
+                        graphic = 40303;
+                    else
+                        graphic = 83;
+                    borderSize = 16;
                     break;
 
                 default:

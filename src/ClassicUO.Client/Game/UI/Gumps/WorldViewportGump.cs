@@ -337,6 +337,7 @@ namespace ClassicUO.Game.UI.Gumps
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
+            Rectangle pos;
 
             if (Hue != 0)
             {
@@ -346,115 +347,129 @@ namespace ClassicUO.Game.UI.Gumps
             hueVector.Z = Alpha;
 
             var texture = GumpsLoader.Instance.GetGumpTexture(h_border, out var bounds);
-            Rectangle pos = new Rectangle
-            (
-                x,
-                y,
-                Width,
-                _borderSize
-            );
-            if (t_left != 0xffff)
+            if (texture != null)
             {
-                pos.X += _borderSize;
-                pos.Width -= _borderSize;
+                pos = new Rectangle
+                (
+                    x,
+                    y,
+                    Width,
+                    _borderSize
+                );
+                if (t_left != 0xffff)
+                {
+                    pos.X += _borderSize;
+                    pos.Width -= _borderSize;
+                }
+                if (t_right != 0xffff)
+                    pos.Width -= _borderSize;
+                // sopra
+                batcher.DrawTiled
+                (
+                    texture,
+                    pos,
+                    bounds,
+                    hueVector
+                );
             }
-            if (t_right != 0xffff)
-                pos.Width -= _borderSize;
-            // sopra
-            batcher.DrawTiled
-            (
-                texture,
-                pos,
-                bounds,
-                hueVector
-            );
 
             texture = GumpsLoader.Instance.GetGumpTexture(h_bottom_border, out bounds);
-            pos = new Rectangle
-            (
-                x,
-                y + Height - _borderSize,
-                Width,
-                _borderSize
-            );
-            if (b_left != 0xffff)
+            if (texture != null)
             {
-                pos.X += _borderSize;
-                pos.Width -= _borderSize;
+                pos = new Rectangle
+                (
+                    x,
+                    y + Height - _borderSize,
+                    Width,
+                    _borderSize
+                );
+                if (b_left != 0xffff)
+                {
+                    pos.X += _borderSize;
+                    pos.Width -= _borderSize;
+                }
+                if (b_right != 0xffff)
+                    pos.Width -= _borderSize;
+                // sotto
+                batcher.DrawTiled
+                (
+                    texture,
+                    pos,
+                    bounds,
+                    hueVector
+                );
             }
-            if (b_right != 0xffff)
-                pos.Width -= _borderSize;
-            // sotto
-            batcher.DrawTiled
-            (
-                texture,
-                pos,
-                bounds,
-                hueVector
-            );
 
             texture = GumpsLoader.Instance.GetGumpTexture(v_border, out bounds);
-            pos = new Rectangle
-            (
-                x,
-                y,
-                _borderSize,
-                Height
-            );
-            if (t_left != 0xffff)
+            if (texture != null)
             {
-                pos.Y += _borderSize;
-                pos.Height -= _borderSize;
+                pos = new Rectangle
+                (
+                    x,
+                    y,
+                    _borderSize,
+                    Height
+                );
+                if (t_left != 0xffff)
+                {
+                    pos.Y += _borderSize;
+                    pos.Height -= _borderSize;
+                }
+                if (b_left != 0xffff)
+                    pos.Height -= _borderSize;
+                //sx
+                batcher.DrawTiled
+                (
+                    texture,
+                    pos,
+                    bounds,
+                    hueVector
+                );
             }
-            if (b_left != 0xffff)
-                pos.Height -= _borderSize;
-            //sx
-            batcher.DrawTiled
-            (
-                texture,
-                pos,
-                bounds,
-                hueVector
-            );
 
             texture = GumpsLoader.Instance.GetGumpTexture(v_right_border, out bounds);
-            pos = new Rectangle
-            (
-                x + Width - _borderSize,
-                y,
-                _borderSize,
-                Height
-            );
-            if (t_right != 0xffff)
+            if (texture != null)
             {
-                pos.Y += _borderSize;
-                pos.Height -= _borderSize;
+                pos = new Rectangle
+                (
+                    x + Width - _borderSize,
+                    y,
+                    _borderSize,
+                    Height
+                );
+                if (t_right != 0xffff)
+                {
+                    pos.Y += _borderSize;
+                    pos.Height -= _borderSize;
+                }
+                if (b_right != 0xffff)
+                    pos.Height -= _borderSize;
+                //dx
+                batcher.DrawTiled
+                (
+                    texture,
+                    pos,
+                    bounds,
+                    hueVector
+                );
             }
-            if (b_right != 0xffff)
-                pos.Height -= _borderSize;
-            //dx
-            batcher.DrawTiled
-            (
-                texture,
-                pos,
-                bounds,
-                hueVector
-            );
 
             if (t_left != 0xffff)
             {
                 texture = GumpsLoader.Instance.GetGumpTexture(t_left, out bounds);
-                batcher.Draw(
-                    texture,
-                    new Rectangle(x, y, bounds.Width, bounds.Height),
-                    bounds,
-                    hueVector
-                    );
+                if (texture != null)
+                    batcher.Draw(
+                        texture,
+                        new Rectangle(x, y, bounds.Width, bounds.Height),
+                        bounds,
+                        hueVector
+                        );
             }
             if (t_right != 0xffff)
             {
                 texture = GumpsLoader.Instance.GetGumpTexture(t_right, out bounds);
-                batcher.Draw(
+                if (texture != null)
+                    batcher.Draw(
                     texture,
                     new Rectangle(x + Width - _borderSize, y, bounds.Width, bounds.Height),
                     bounds,
@@ -464,7 +479,8 @@ namespace ClassicUO.Game.UI.Gumps
             if (b_left != 0xffff)
             {
                 texture = GumpsLoader.Instance.GetGumpTexture(b_left, out bounds);
-                batcher.Draw(
+                if (texture != null)
+                    batcher.Draw(
                     texture,
                     new Rectangle(x, y + Height - _borderSize, bounds.Width, bounds.Height),
                     bounds,
@@ -474,7 +490,8 @@ namespace ClassicUO.Game.UI.Gumps
             if (b_right != 0xffff)
             {
                 texture = GumpsLoader.Instance.GetGumpTexture(b_right, out bounds);
-                batcher.Draw(
+                if (texture != null)
+                    batcher.Draw(
                     texture,
                     new Rectangle(x + Width - _borderSize, y + Height - _borderSize, bounds.Width, bounds.Height),
                     bounds,
