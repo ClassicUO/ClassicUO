@@ -282,7 +282,7 @@ namespace ClassicUO.Game.UI.Controls
 
             equipItem = mobile.FindItemByLayer(Layer.Backpack);
 
-            if (equipItem != null && equipItem.ItemData.AnimID != 0)
+            if (equipItem != null && equipItem.ItemData.AnimID != 0 && _paperDollGump != null)
             {
                 ushort backpackGraphic = (ushort) (equipItem.ItemData.AnimID + Constants.MALE_GUMP_OFFSET);
                 
