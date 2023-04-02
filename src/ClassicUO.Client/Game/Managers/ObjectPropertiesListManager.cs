@@ -39,6 +39,8 @@ namespace ClassicUO.Game.Managers
     {
         private readonly Dictionary<uint, ItemProperty> _itemsProperties = new Dictionary<uint, ItemProperty>();
 
+        public delegate void OPLOnReceiveEvent(OPLEventArgs _args);
+        public event OPLOnReceiveEvent OPLOnReceive;
 
         public void Add(uint serial, uint revision, string name, string data, int namecliloc)
         {
@@ -49,7 +51,7 @@ namespace ClassicUO.Game.Managers
             }
             else
             {
-                
+                OPLOnReceive?.Invoke(new OPLEventArgs(serial, name, data));
             }
 
             prop.Serial = serial;
@@ -59,6 +61,19 @@ namespace ClassicUO.Game.Managers
             prop.NameCliloc = namecliloc;
         }
 
+        public class OPLEventArgs : System.EventArgs
+        {
+            public readonly uint Serial;
+            public readonly string Name;
+            public readonly string Data;
+
+            public OPLEventArgs(uint serial, string name, string data)
+            {
+                Serial = serial;
+                Name = name;
+                Data = data;
+            }
+        }
 
         public bool Contains(uint serial)
         {

@@ -10,6 +10,8 @@ using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Xml;
 
 namespace ClassicUO.Game.UI.Gumps
@@ -44,7 +46,8 @@ namespace ClassicUO.Game.UI.Gumps
             itemLayerSlots = new Dictionary<Layer[], ItemSlot>();
             #endregion
 
-            Add(new AlphaBlendControl(0.8f) { Width = WIDTH, Height = HEIGHT, Hue = 32 });
+            //Add(new AlphaBlendControl(0.8f) { Width = WIDTH, Height = HEIGHT, Hue = 10 });
+            Add(new GumpPic(0, 0, 40312, 0));
 
             MenuButton menu = new MenuButton(25, Color.White.PackedValue, 0.8f, "Open menu") { X = Width - 26, Y = 1 };
             menu.MouseUp += (sender, e) =>
@@ -150,7 +153,20 @@ namespace ClassicUO.Game.UI.Gumps
 
             RequestUpdateContents();
 
-            Add(new SimpleBorder() { Width = WIDTH, Height = HEIGHT, Alpha = 0.8f });
+            World.OPL.OPLOnReceive += OPL_OnOPLReceive;
+
+            //Add(new SimpleBorder() { Width = WIDTH, Height = HEIGHT, Alpha = 0.8f });
+        }
+
+        private void OPL_OnOPLReceive(ObjectPropertiesListManager.OPLEventArgs e)
+        {
+            Task.Factory.StartNew(() =>
+            {
+                foreach (var itemSlot in itemLayerSlots)
+                {
+                    itemSlot.Value.OPLChangeEvent(e);
+                }
+            });
         }
 
         public void UpdateTitle(string text)
@@ -206,6 +222,7 @@ namespace ClassicUO.Game.UI.Gumps
             base.Dispose();
             lastX = X;
             lastY = Y;
+            World.OPL.OPLOnReceive -= OPL_OnOPLReceive;
         }
 
         public override void Save(XmlTextWriter writer)
@@ -260,12 +277,20 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 }
             }
+            else if (TargetManager.IsTargeting)
+            {
+                if (SelectedObject.Object is Item item)
+                    TargetManager.Target(item.Serial);
+            }
         }
 
         private class ItemSlot : Control
         {
             public readonly Layer[] layers;
             private Area itemArea;
+            private int tcount = 0;
+
+            private AlphaBlendControl durablityBar;
 
             public ItemSlot(int width, int height, Layer[] layers)
             {
@@ -281,7 +306,9 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Add(itemArea = new Area(false) { Width = Width, Height = Height, AcceptMouseInput = true, CanMove = true });
 
-                Add(new SimpleBorder() { Width = Width, Height = Height, Alpha = 0.8f });
+                Add(durablityBar = new AlphaBlendControl() { Width = Width / 6, Height = Height, Hue = 32, IsVisible = false });
+
+                //Add(new SimpleBorder() { Width = Width, Height = Height, Alpha = 0.8f });
                 this.layers = layers;
             }
 
@@ -305,7 +332,59 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 }
                 if (highestLayer != null)
+                {
                     highestLayer.IsVisible = true;
+                    UpdateDurability(highestLayer.item);
+                }
+            }
+
+            private void UpdateDurability(Item item, bool isOPLEvent = false)
+            {//Need to check durability somehow, not receiving item updates as durability changes
+                if (!isOPLEvent)
+                    durablityBar.IsVisible = false;
+                tcount++;
+                Task.Factory.StartNew(() =>
+                {
+                    int currentTcount = tcount;
+                    if(!isOPLEvent)
+                        System.Threading.Thread.Sleep(1500);
+                    if (durablityBar.IsDisposed || currentTcount != tcount)
+                        return;
+                    if (World.OPL.TryGetNameAndData(item.Serial, out string name, out string data))
+                    {
+                        MatchCollection matches = Regex.Matches(data, @"(?<=Durability )(\d*) / (\d*)"); //This should match 45 / 255 for example
+                        if (matches.Count > 0)
+                        {
+                            string[] durability = data.Substring(matches[0].Index, matches[0].Length).Split('/');
+                            if (int.TryParse(durability[0].Trim(), out int min))
+                                if (int.TryParse(durability[1].Trim(), out int max))
+                                {
+                                    double perecentRemaining = (double)min / (double)max;
+                                    if (perecentRemaining > 0.9)
+                                        return;
+                                    durablityBar.Height = (int)(Height * perecentRemaining);
+                                    durablityBar.Y = Height - durablityBar.Height;
+                                    durablityBar.IsVisible = true;
+                                }
+                        }
+                    }
+                });
+            }
+
+            public void OPLChangeEvent(ObjectPropertiesListManager.OPLEventArgs e)
+            {
+                foreach (Control c in itemArea.Children)
+                {
+                    if (c is ItemGumpFixed)
+                    {
+                        ItemGumpFixed itemG = (ItemGumpFixed)c;
+                        if (itemG.IsVisible && !itemG.IsDisposed && itemG.item.Serial == e.Serial)
+                        {
+                            UpdateDurability(itemG.item, true);
+                            break;
+                        }
+                    }
+                }
             }
 
             public void ClearItems()
