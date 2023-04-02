@@ -196,8 +196,6 @@ namespace ClassicUO.Game.Scenes
 
             CircleOfTransparency.Create(ProfileManager.CurrentProfile.CircleOfTransparencyRadius);
             Plugin.OnConnected();
-
-            UIManager.Add(new ModernPaperdoll(World.Player.Serial));
         }
 
         private void ChatOnMessageReceived(object sender, MessageEventArgs e)
@@ -249,14 +247,14 @@ namespace ClassicUO.Game.Scenes
                     break;
 
                 case MessageType.Label:
-                
+
                     if (e.Parent == null || !SerialHelper.IsValid(e.Parent.Serial))
                     {
                         name = string.Empty;
                     }
-                    else if (string.IsNullOrEmpty(e.Name)) 
+                    else if (string.IsNullOrEmpty(e.Name))
                     {
-                        name = ResGeneral.YouSee;                      
+                        name = ResGeneral.YouSee;
                     }
                     else
                     {
@@ -454,7 +452,7 @@ namespace ClassicUO.Game.Scenes
 
             if (tile != null)
             {
-                sbyte z5 = (sbyte) (obj.Z + 5);
+                sbyte z5 = (sbyte)(obj.Z + 5);
 
                 for (GameObject o = tile; o != null; o = o.TNext)
                 {
@@ -490,7 +488,7 @@ namespace ClassicUO.Game.Scenes
                     }
                     else if (lightObject is Item it)
                     {
-                        light.ID = (byte) it.ItemData.LightIndex;
+                        light.ID = (byte)it.ItemData.LightIndex;
 
                         if (obj is Mobile mob)
                         {
@@ -545,7 +543,7 @@ namespace ClassicUO.Game.Scenes
                 {
                     if (light.ID > 200)
                     {
-                        light.Color = (ushort) (light.ID - 200);
+                        light.Color = (ushort)(light.ID - 200);
                         light.ID = 1;
                     }
 
@@ -627,8 +625,8 @@ namespace ClassicUO.Game.Scenes
                 }
             }
 
-            _rectanglePlayer.X = (int) (World.Player.RealScreenPosition.X - World.Player.FrameInfo.X + 22 + World.Player.Offset.X);
-            _rectanglePlayer.Y = (int) (World.Player.RealScreenPosition.Y - World.Player.FrameInfo.Y + 22 + (World.Player.Offset.Y - World.Player.Offset.Z));
+            _rectanglePlayer.X = (int)(World.Player.RealScreenPosition.X - World.Player.FrameInfo.X + 22 + World.Player.Offset.X);
+            _rectanglePlayer.Y = (int)(World.Player.RealScreenPosition.Y - World.Player.FrameInfo.Y + 22 + (World.Player.Offset.Y - World.Player.Offset.Z));
             _rectanglePlayer.Width = World.Player.FrameInfo.Width;
             _rectanglePlayer.Height = World.Player.FrameInfo.Height;
 
@@ -848,9 +846,9 @@ namespace ClassicUO.Game.Scenes
                         groundZ = gobj.Z;
                     }
 
-                    x = (ushort) (x - TargetManager.MultiTargetInfo.XOff);
-                    y = (ushort) (y - TargetManager.MultiTargetInfo.YOff);
-                    z = (sbyte) (groundZ - TargetManager.MultiTargetInfo.ZOff);
+                    x = (ushort)(x - TargetManager.MultiTargetInfo.XOff);
+                    y = (ushort)(y - TargetManager.MultiTargetInfo.YOff);
+                    z = (sbyte)(groundZ - TargetManager.MultiTargetInfo.ZOff);
 
                     _multi.SetInWorldTile(x, y, z);
                     _multi.CheckGraphicChange();
@@ -908,7 +906,7 @@ namespace ClassicUO.Game.Scenes
             }
 
             Viewport r_viewport = batcher.GraphicsDevice.Viewport;
-            Viewport camera_viewport = Camera.GetViewport(); 
+            Viewport camera_viewport = Camera.GetViewport();
             Matrix matrix = _use_render_target ? Matrix.Identity : Camera.ViewTransformMatrix;
 
 
@@ -1086,7 +1084,7 @@ namespace ClassicUO.Game.Scenes
             Weather.Draw(batcher, 0, 0); // TODO: fix the depth
 
             batcher.End();
-           
+
 
             int flushes = batcher.FlushesDone;
             int switches = batcher.TextureSwitches;
@@ -1146,7 +1144,7 @@ namespace ClassicUO.Game.Scenes
                 {
                     lightColor -= 0.04f;
                 }
-                
+
                 batcher.GraphicsDevice.Clear(ClearOptions.Target, new Vector4(lightColor, lightColor, lightColor, 1), 0f, 0);
             }
 
@@ -1174,7 +1172,7 @@ namespace ClassicUO.Game.Scenes
                 batcher.Draw
                 (
                     texture,
-                    new Vector2(l.DrawX - bounds.Width * 0.5f, l.DrawY - bounds.Height * 0.5f), 
+                    new Vector2(l.DrawX - bounds.Width * 0.5f, l.DrawY - bounds.Height * 0.5f),
                     bounds,
                     hue
                 );

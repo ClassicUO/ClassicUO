@@ -1443,6 +1443,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 switch (gump)
                 {
+                    case ModernPaperdoll _:
                     case PaperDollGump _:
                     case MapGump _:
                     case SpellbookGump _:

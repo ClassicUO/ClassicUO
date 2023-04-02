@@ -10,6 +10,7 @@ using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
+using System.Xml;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -23,9 +24,10 @@ namespace ClassicUO.Game.UI.Gumps
         #region VARS
         private readonly Dictionary<Layer[], ItemSlot> itemLayerSlots;
         private Label titleLabel;
-        private bool isMinimized = false;
         private static int lastX = 100, lastY = 100;
         #endregion
+
+        public override GumpType GumpType => GumpType.PaperDoll;
 
         public ModernPaperdoll(uint localSerial) : base(localSerial, 0)
         {
@@ -204,6 +206,22 @@ namespace ClassicUO.Game.UI.Gumps
             base.Dispose();
             lastX = X;
             lastY = Y;
+        }
+
+        public override void Save(XmlTextWriter writer)
+        {
+            base.Save(writer);
+
+            writer.WriteAttributeString("lastX", lastX.ToString());
+            writer.WriteAttributeString("lastY", lastY.ToString());
+        }
+
+        public override void Restore(XmlElement xml)
+        {
+            base.Restore(xml);
+
+            int.TryParse(xml.GetAttribute("lastX"), out X);
+            int.TryParse(xml.GetAttribute("lastY"), out Y);
         }
 
         protected override void OnMouseUp(int x, int y, MouseButtonType button)

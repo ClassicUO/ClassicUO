@@ -3042,39 +3042,48 @@ namespace ClassicUO.Network
             byte flags = p.ReadUInt8();
 
             mobile.Title = text;
-
-            PaperDollGump paperdoll = UIManager.GetGump<PaperDollGump>(mobile);
-
-            if (paperdoll == null)
+            if (ProfileManager.CurrentProfile.UseModernPaperdoll && mobile.Serial == World.Player.Serial)
             {
-                if (!UIManager.GetGumpCachePosition(mobile, out Point location))
+                ModernPaperdoll modernPaperdoll = UIManager.GetGump<ModernPaperdoll>(mobile.Serial);
+                if (modernPaperdoll != null)
                 {
-                    location = new Point(100, 100);
+                    modernPaperdoll.UpdateTitle(text);
+                    modernPaperdoll.SetInScreen();
+                    modernPaperdoll.BringOnTop();
+                } else
+                {
+                    UIManager.Add(new ModernPaperdoll(mobile.Serial));
                 }
-
-                UIManager.Add(new PaperDollGump(mobile, (flags & 0x02) != 0) { Location = location });
             }
             else
             {
-                bool old = paperdoll.CanLift;
-                bool newLift = (flags & 0x02) != 0;
+                PaperDollGump paperdoll = UIManager.GetGump<PaperDollGump>(mobile);
 
-                paperdoll.CanLift = newLift;
-                paperdoll.UpdateTitle(text);
-
-                if (old != newLift)
+                if (paperdoll == null)
                 {
-                    paperdoll.RequestUpdateContents();
+                    if (!UIManager.GetGumpCachePosition(mobile, out Point location))
+                    {
+                        location = new Point(100, 100);
+                    }
+
+                    UIManager.Add(new PaperDollGump(mobile, (flags & 0x02) != 0) { Location = location });
                 }
+                else
+                {
+                    bool old = paperdoll.CanLift;
+                    bool newLift = (flags & 0x02) != 0;
 
-                paperdoll.SetInScreen();
-                paperdoll.BringOnTop();
-            }
+                    paperdoll.CanLift = newLift;
+                    paperdoll.UpdateTitle(text);
 
-            ModernPaperdoll modernPaperdoll = UIManager.GetGump<ModernPaperdoll>(mobile.Serial);
-            if(modernPaperdoll != null)
-            {
-                modernPaperdoll.UpdateTitle(text);
+                    if (old != newLift)
+                    {
+                        paperdoll.RequestUpdateContents();
+                    }
+
+                    paperdoll.SetInScreen();
+                    paperdoll.BringOnTop();
+                }
             }
         }
 

@@ -4859,6 +4859,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _currentProfile.BackpackStyle = _backpackStyle.SelectedIndex;
                 UIManager.GetGump<PaperDollGump>(World.Player.Serial)?.RequestUpdateContents();
+                UIManager.GetGump<ModernPaperdoll>(World.Player.Serial)?.RequestUpdateContents();
                 Item backpack = World.Player.FindItemByLayer(Layer.Backpack);
                 GameActions.DoubleClick(backpack);
             }

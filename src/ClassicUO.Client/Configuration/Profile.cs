@@ -625,7 +625,10 @@ namespace ClassicUO.Configuration
                                     break;
 
                                 case GumpType.PaperDoll:
-                                    gump = new PaperDollGump();
+                                    if (ProfileManager.CurrentProfile.UseModernPaperdoll && serial == World.Player.Serial)
+                                        gump = new ModernPaperdoll(serial);
+                                    else
+                                        gump = new PaperDollGump();
 
                                     break;
 
