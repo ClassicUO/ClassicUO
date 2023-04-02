@@ -179,6 +179,7 @@ namespace ClassicUO.Configuration
         public int JournalStyle { get; set; } = 0;
         public bool HideScreenshotStoredInMessage { get; set; }
         public bool UseModernPaperdoll { get; set; } = false;
+        public bool OpenModernPaperdollAtMinimizeLoc { get; set; } = false;
 
         // Experimental
         public bool CastSpellsByOneClick { get; set; }

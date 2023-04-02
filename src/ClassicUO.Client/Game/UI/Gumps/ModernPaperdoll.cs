@@ -10,13 +10,14 @@ using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    internal class ModernPaperdoll : Gump
+    internal class ModernPaperdoll : AnchorableGump
     {
         #region CONST
         private const int WIDTH = 250, HEIGHT = 380;
@@ -41,6 +42,8 @@ namespace ClassicUO.Game.UI.Gumps
             #region SET VARS
             Width = WIDTH;
             Height = HEIGHT;
+            GroupMatrixHeight = Height;
+            GroupMatrixWidth = Width;
             X = lastX;
             Y = lastY;
             itemLayerSlots = new Dictionary<Layer[], ItemSlot>();
@@ -55,7 +58,7 @@ namespace ClassicUO.Game.UI.Gumps
                 if (e.Button == MouseButtonType.Left)
                 {
                     UIManager.GetGump<MenuGump>()?.Dispose();
-                    UIManager.Add(new MenuGump(Mouse.Position.X - 5, Mouse.Position.Y - 5, localSerial));
+                    UIManager.Add(new MenuGump(Mouse.Position.X - 145, Mouse.Position.Y - 5, localSerial));
                 }
             };
             Add(menu);
@@ -63,20 +66,20 @@ namespace ClassicUO.Game.UI.Gumps
             #region SET UP ITEM SLOTS
             ItemSlot _;
 
-            _ = new ItemSlot(35, 35, new Layer[] { Layer.Earrings }) { X = 100 - 35 - CELL_SPACING, Y = TOP_SPACING };
+            _ = new ItemSlot(35, 35, new Layer[] { Layer.Earrings }) { X = 100 - 35 - CELL_SPACING, Y = TOP_SPACING + 15 };
             itemLayerSlots.Add(_.layers, _); //Earrings
 
             _ = new ItemSlot(50, 50, new Layer[] { Layer.Helmet }) { X = 100, Y = TOP_SPACING };
             itemLayerSlots.Add(_.layers, _); //Head
 
-            _ = new ItemSlot(35, 35, new Layer[] { Layer.Necklace }) { X = 150 + CELL_SPACING, Y = TOP_SPACING };
+            _ = new ItemSlot(35, 35, new Layer[] { Layer.Necklace }) { X = 150 + CELL_SPACING, Y = TOP_SPACING + 15 };
             itemLayerSlots.Add(_.layers, _); //Amulet
 
 
             _ = new ItemSlot(50, 75, new Layer[] { Layer.OneHanded }) { X = 50 - CELL_SPACING, Y = 50 + CELL_SPACING + TOP_SPACING };
             itemLayerSlots.Add(_.layers, _); //L Wep
 
-            _ = new ItemSlot(50, 75, new Layer[] { Layer.Torso, Layer.Tunic, Layer.Shirt }) { X = 100, Y = 50 + CELL_SPACING + TOP_SPACING };
+            _ = new ItemSlot(50, 75, new Layer[] { Layer.Torso }) { X = 100, Y = 50 + CELL_SPACING + TOP_SPACING };
             itemLayerSlots.Add(_.layers, _); //Chest
 
             _ = new ItemSlot(50, 75, new Layer[] { Layer.TwoHanded }) { X = 150 + CELL_SPACING, Y = 50 + CELL_SPACING + TOP_SPACING };
@@ -106,7 +109,7 @@ namespace ClassicUO.Game.UI.Gumps
             _ = new ItemSlot(50, 50, new Layer[] { Layer.Gloves }) { X = 50 - CELL_SPACING, Y = 210 + CELL_SPACING + TOP_SPACING };
             itemLayerSlots.Add(_.layers, _); //Gloves
 
-            _ = new ItemSlot(50, 50, new Layer[] { Layer.Legs, Layer.Pants, Layer.Skirt }) { X = 100, Y = 210 + CELL_SPACING + TOP_SPACING };
+            _ = new ItemSlot(50, 50, new Layer[] { Layer.Pants }) { X = 100, Y = 210 + CELL_SPACING + TOP_SPACING };
             itemLayerSlots.Add(_.layers, _); //Legs
 
             _ = new ItemSlot(50, 50, new Layer[] { Layer.Shoes }) { X = 150 + CELL_SPACING, Y = 210 + CELL_SPACING + TOP_SPACING };
@@ -115,11 +118,24 @@ namespace ClassicUO.Game.UI.Gumps
 
 
             _ = new ItemSlot(35, 35, new Layer[] { Layer.Talisman }) { X = 1, Y = 225 + CELL_SPACING + TOP_SPACING };
-            itemLayerSlots.Add(_.layers, _);
+            itemLayerSlots.Add(_.layers, _); //Talisman
 
             _ = new ItemSlot(35, 35, new Layer[] { Layer.Backpack }) { X = Width - 36, Y = 225 + CELL_SPACING + TOP_SPACING };
+            itemLayerSlots.Add(_.layers, _); //Backpack
+
+
+            _ = new ItemSlot(25, 25, new Layer[] { Layer.Tunic }) { X = 12, Y = 155 + CELL_SPACING + TOP_SPACING };
             itemLayerSlots.Add(_.layers, _);
 
+            _ = new ItemSlot(25, 25, new Layer[] { Layer.Shirt }) { X = 12, Y = 190 + CELL_SPACING + TOP_SPACING };
+            itemLayerSlots.Add(_.layers, _);
+
+
+            _ = new ItemSlot(25, 25, new Layer[] { Layer.Skirt }) { X = Width - 45, Y = 155 + CELL_SPACING + TOP_SPACING };
+            itemLayerSlots.Add(_.layers, _);
+
+            _ = new ItemSlot(25, 25, new Layer[] { Layer.Legs }) { X = Width - 45, Y = 190 + CELL_SPACING + TOP_SPACING };
+            itemLayerSlots.Add(_.layers, _);
             #endregion
 
             BuildLayerSlots();
@@ -140,22 +156,23 @@ namespace ClassicUO.Game.UI.Gumps
                     new Tuple<ushort, string>[0]
                 );
             };
+            _virtueMenuPic.SetTooltip("Virtues");
 
             Add(titleLabel = new Label("", true, 0xffff, maxwidth: WIDTH - 2, align: TEXT_ALIGN_TYPE.TS_CENTER) { X = 1, Y = 265 + CELL_SPACING + TOP_SPACING, AcceptMouseInput = false });
 
             GumpPic _minimize = new GumpPic(1, 1, 0x38, 0);
-            _minimize.MouseUp += (s, e) =>
+            HitBox _minHit = new HitBox(1, 1, _minimize.Width, _minimize.Height, alpha: 0f);
+            _minHit.MouseUp += (s, e) =>
             {
                 Dispose();
                 UIManager.Add(new MinimizedPaperdoll(LocalSerial) { X = X, Y = Y });
             };
             Add(_minimize);
+            Add(_minHit);
 
             RequestUpdateContents();
 
             World.OPL.OPLOnReceive += OPL_OnOPLReceive;
-
-            //Add(new SimpleBorder() { Width = WIDTH, Height = HEIGHT, Alpha = 0.8f });
         }
 
         private void OPL_OnOPLReceive(ObjectPropertiesListManager.OPLEventArgs e)
@@ -284,6 +301,13 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
+        private static readonly Layer[] layerOrder =
+        {
+            Layer.Cloak, Layer.Shirt, Layer.Legs, Layer.Shoes, Layer.Skirt, Layer.Arms, Layer.Tunic, Layer.Torso,
+            Layer.Ring, Layer.Bracelet, Layer.Face, Layer.Gloves, Layer.Pants, Layer.Robe, Layer.Waist, Layer.Necklace,
+            Layer.Hair, Layer.Beard, Layer.Earrings, Layer.Helmet, Layer.OneHanded, Layer.TwoHanded, Layer.Talisman
+        };
+
         private class ItemSlot : Control
         {
             public readonly Layer[] layers;
@@ -305,10 +329,11 @@ namespace ClassicUO.Game.UI.Gumps
                 #endregion
 
                 Add(itemArea = new Area(false) { Width = Width, Height = Height, AcceptMouseInput = true, CanMove = true });
+                itemArea.SetTooltip(layers[0].ToString());
 
-                Add(durablityBar = new AlphaBlendControl() { Width = Width / 6, Height = Height, Hue = 32, IsVisible = false });
+                Add(durablityBar = new AlphaBlendControl() { Width = 8, Height = Height, Hue = 32, IsVisible = false });
 
-                //Add(new SimpleBorder() { Width = Width, Height = Height, Alpha = 0.8f });
+                Add(new SimpleBorder() { Width = Width, Height = Height, Alpha = 0.8f });
                 this.layers = layers;
             }
 
@@ -316,26 +341,27 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 itemArea.Add(new ItemGumpFixed(item, Width, Height) { HighlightOnMouseOver = false });
 
-                ItemGumpFixed highestLayer = null;
-                foreach (Control c in itemArea.Children)
-                {
-                    if (c is ItemGumpFixed)
-                    {
-                        ItemGumpFixed itemG = (ItemGumpFixed)c;
-                        itemG.IsVisible = false;
+                //ItemGumpFixed highestLayer = null;
+                //foreach (Layer layer in layerOrder)
+                //{
+                //    if (layers.Contains(layer))
+                //        foreach (Control c in itemArea.Children)
+                //        {
+                //            if (c is ItemGumpFixed)
+                //            {
+                //                ItemGumpFixed itemG = (ItemGumpFixed)c;
+                //                itemG.IsVisible = false;
+                //                if ((Layer)itemG.item.ItemData.Layer == layer)
+                //                    highestLayer = itemG;
+                //            }
+                //        }
+                //}
+                //if (highestLayer != null)
+                //{
+                //    highestLayer.IsVisible = true;
 
-                        if (highestLayer == null)
-                            highestLayer = itemG;
-
-                        if (itemG.item.ItemData.Layer < highestLayer.item.ItemData.Layer)
-                            highestLayer = itemG;
-                    }
-                }
-                if (highestLayer != null)
-                {
-                    highestLayer.IsVisible = true;
-                    UpdateDurability(highestLayer.item);
-                }
+                //}
+                UpdateDurability(item);
             }
 
             private void UpdateDurability(Item item, bool isOPLEvent = false)
@@ -346,7 +372,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Task.Factory.StartNew(() =>
                 {
                     int currentTcount = tcount;
-                    if(!isOPLEvent)
+                    if (!isOPLEvent)
                         System.Threading.Thread.Sleep(1500);
                     if (durablityBar.IsDisposed || currentTcount != tcount)
                         return;
@@ -401,9 +427,6 @@ namespace ClassicUO.Game.UI.Gumps
 
         private class ItemGumpFixed : ItemGump
         {
-            private readonly Point _originalSize;
-            private readonly Point _point;
-            private readonly Rectangle _rect;
             public readonly Item item;
 
             public ItemGumpFixed(Item item, int w, int h) : base
@@ -421,10 +444,71 @@ namespace ClassicUO.Game.UI.Gumps
                 Height = h;
                 WantUpdateSize = false;
 
-                _rect = ArtLoader.Instance.GetRealArtBounds(item.DisplayedGraphic);
+                this.item = item;
+            }
 
-                _originalSize.X = Width;
-                _originalSize.Y = Height;
+            private static ushort GetAnimID(ushort graphic, ushort animID, bool isfemale)
+            {
+                int offset = isfemale ? Constants.FEMALE_GUMP_OFFSET : Constants.MALE_GUMP_OFFSET;
+
+                if (Client.Version >= Utility.ClientVersion.CV_7000 && animID == 0x03CA                          // graphic for dead shroud
+                                                            && (graphic == 0x02B7 || graphic == 0x02B6)) // dead gargoyle graphics
+                {
+                    animID = 0x0223;
+                }
+
+                AnimationsLoader.Instance.ConvertBodyIfNeeded(ref graphic);
+
+                if (AnimationsLoader.Instance.EquipConversions.TryGetValue(graphic, out Dictionary<ushort, EquipConvData> dict))
+                {
+                    if (dict.TryGetValue(animID, out EquipConvData data))
+                    {
+                        if (data.Gump > Constants.MALE_GUMP_OFFSET)
+                        {
+                            animID = (ushort)(data.Gump >= Constants.FEMALE_GUMP_OFFSET ? data.Gump - Constants.FEMALE_GUMP_OFFSET : data.Gump - Constants.MALE_GUMP_OFFSET);
+                        }
+                        else
+                        {
+                            animID = data.Gump;
+                        }
+                    }
+                }
+
+                if (animID + offset > GumpsLoader.MAX_GUMP_DATA_INDEX_COUNT || GumpsLoader.Instance.GetGumpTexture((ushort)(animID + offset), out _) == null)
+                {
+                    // inverse
+                    offset = isfemale ? Constants.MALE_GUMP_OFFSET : Constants.FEMALE_GUMP_OFFSET;
+                }
+
+                return (ushort)(animID + offset);
+            }
+
+            public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+            {
+                if (item == null)
+                {
+                    Dispose();
+                }
+
+                if (IsDisposed)
+                {
+                    return false;
+                }
+
+                Vector3 hueVector = ShaderHueTranslator.GetHueVector
+                (
+                    MouseIsOver && HighlightOnMouseOver ? 0x0035 : item.Hue,
+                    item.ItemData.IsPartialHue,
+                    1,
+                    true
+                );
+
+                var texture = ArtLoader.Instance.GetStaticTexture(item.DisplayedGraphic, out var bounds);
+                Rectangle _rect = ArtLoader.Instance.GetRealArtBounds(item.DisplayedGraphic);
+
+
+                Point _originalSize = new Point(Width, Height);
+                Point _point = new Point((Width >> 1) - (_originalSize.X >> 1), (Height >> 1) - (_originalSize.Y >> 1));
 
                 if (_rect.Width < Width)
                 {
@@ -438,33 +522,17 @@ namespace ClassicUO.Game.UI.Gumps
                     _point.Y = (Height >> 1) - (_originalSize.Y >> 1);
                 }
 
-                this.item = item;
-            }
-
-
-            public override bool Draw(UltimaBatcher2D batcher, int x, int y)
-            {
-                Item item = World.Items.Get(LocalSerial);
-
-                if (item == null)
+                if (_rect.Width > Width)
                 {
-                    Dispose();
+                    _originalSize.X = Width;
+                    _point.X = 0;
                 }
 
-                if (IsDisposed)
+                if (_rect.Height > Height)
                 {
-                    return false;
+                    _originalSize.Y = Height;
+                    _point.Y = 0;
                 }
-
-                Vector3 hueVector = ShaderHueTranslator.GetHueVector
-                                    (
-                                        MouseIsOver && HighlightOnMouseOver ? 0x0035 : item.Hue,
-                                        item.ItemData.IsPartialHue,
-                                        1,
-                                        true
-                                    );
-
-                var texture = ArtLoader.Instance.GetStaticTexture(item.DisplayedGraphic, out var bounds);
 
                 if (texture != null)
                 {
@@ -722,7 +790,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             public CharacterPreview(uint localSerial) : base(localSerial, 0)
             {
-                Width = 200;
+                Width = 190;
                 Height = 250;
                 CanCloseWithRightClick = true;
                 CanMove = true;
@@ -739,13 +807,23 @@ namespace ClassicUO.Game.UI.Gumps
         {
             public MinimizedPaperdoll(uint localSerial) : base(localSerial, 0)
             {
-                Width = 66;
+                Width = 86;
                 Height = 23;
                 AcceptMouseInput = true;
                 CanMove = true;
                 CanCloseWithRightClick = true;
 
                 Add(new GumpPic(0, 0, 0x7EE, 0));
+
+                Checkbox _;
+
+                Add(_ = new Checkbox(0x00D2, 0x00D3) { X = 66, Y = 2 });
+                _.IsChecked = ProfileManager.CurrentProfile.OpenModernPaperdollAtMinimizeLoc;
+                _.SetTooltip("Open paperdoll at this location");
+                _.MouseUp += (s, e) =>
+                {
+                    ProfileManager.CurrentProfile.OpenModernPaperdollAtMinimizeLoc = _.IsChecked;
+                };
             }
 
             protected override void OnMouseUp(int x, int y, MouseButtonType button)
@@ -755,7 +833,16 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     Dispose();
                     UIManager.GetGump<ModernPaperdoll>()?.Dispose();
-                    UIManager.Add(new ModernPaperdoll(LocalSerial));
+
+                    ModernPaperdoll pd = new ModernPaperdoll(LocalSerial);
+
+                    if (ProfileManager.CurrentProfile.OpenModernPaperdollAtMinimizeLoc)
+                    {
+                        pd.X = X;
+                        pd.Y = Y;
+                    }
+
+                    UIManager.Add(pd);
                 }
             }
         }
