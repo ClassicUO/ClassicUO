@@ -65,7 +65,7 @@ namespace ClassicUO.Configuration
         public byte ChatFont { get; set; } = 1;
         public int SpeechDelay { get; set; } = 100;
         public bool ScaleSpeechDelay { get; set; } = true;
-        public bool SaveJournalToFile { get; set; } = true;
+        public bool SaveJournalToFile { get; set; } = false;
         public bool ForceUnicodeJournal { get; set; }
         public bool IgnoreAllianceMessages { get; set; }
         public bool IgnoreGuildMessages { get; set; }
