@@ -17,7 +17,7 @@ namespace ClassicUO.Game.Managers
 
         private void MessageManager_MessageReceived(object sender, MessageEventArgs e)
         {
-            new Task(() =>
+            Task.Factory.StartNew(() =>
             {
                 int count = ProfileManager.CurrentProfile.CoolDownConditionCount;
                 for (int i = 0; i < count; i++)
@@ -46,7 +46,7 @@ namespace ClassicUO.Game.Managers
                             );
                     }
                 }
-            }).Start();
+            });
 
         }
 
