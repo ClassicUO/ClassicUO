@@ -141,9 +141,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             BuildLayerSlots();
 
-            GumpPic _virtueMenuPic;
-            Add(_virtueMenuPic = new GumpPic((WIDTH / 2) - 16, 1, 0x0071, 0));
-            _virtueMenuPic.MouseDoubleClick += (s, e) =>
+            HitBox _virtueHitBox = new HitBox((WIDTH / 2) - 16, 1, 32, 32, "Virtues menu", 0f);
+            _virtueHitBox.MouseDoubleClick += (s, e) =>
             {
                 GameActions.ReplyGump
                 (
@@ -157,9 +156,9 @@ namespace ClassicUO.Game.UI.Gumps
                     new Tuple<ushort, string>[0]
                 );
             };
-            _virtueMenuPic.SetTooltip("Virtues");
+            Add(_virtueHitBox);
 
-            Add(titleLabel = new Label("", true, 0xffff, maxwidth: WIDTH - 10, align: TEXT_ALIGN_TYPE.TS_CENTER) { X = 5, Y = 270 + CELL_SPACING + TOP_SPACING, AcceptMouseInput = false });
+            Add(titleLabel = new Label("", true, 0xffff, maxwidth: WIDTH - 14, align: TEXT_ALIGN_TYPE.TS_CENTER) { X = 7, Y = 273 + CELL_SPACING + TOP_SPACING, AcceptMouseInput = false });
 
             HitBox _minHit = new HitBox(1, 1, 14, 18, alpha: 0f);
             _minHit.SetTooltip("Minimize paperdoll");
