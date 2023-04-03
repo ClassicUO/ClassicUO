@@ -77,6 +77,7 @@ namespace ManifestCreator
             "System.IO.Compression.FileSystem.dll",
             "System.Numerics.dll",
             "System.Runtime.Serialization.dll",
+            "System.ServiceModel.Internals.dll",
             "System.Windows.Forms.dll",
             "System.Xml.dll",
             "System.Xml.Linq.dll",
