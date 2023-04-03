@@ -387,6 +387,9 @@ namespace ClassicUO.Configuration
         public bool GridHighlight_CorpseOnly { get; set; } = false;
         #endregion
 
+        public ushort ModernPaperDollHue { get; set; } = 0;
+        public ushort ModernPaperDollDurabilityHue { get; set; } = 32;
+
         public static uint GumpsVersion { get; private set; }
 
         public void Save(string path)
