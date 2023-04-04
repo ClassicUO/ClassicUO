@@ -63,35 +63,38 @@ namespace ClassicUO.Game.Managers
 
         public void OnOPLRecieve(ObjectPropertiesListManager.OPLEventArgs e)
         {
-            var isItem = SerialHelper.IsValid(e.Serial) && SerialHelper.IsItem(e.Serial);
-            if (isItem)
+            System.Threading.Tasks.Task.Factory.StartNew(() =>
             {
-                if (World.Items.TryGetValue(e.Serial, out var item))
+                var isItem = SerialHelper.IsValid(e.Serial) && SerialHelper.IsItem(e.Serial);
+                if (isItem)
                 {
-                    if (!item.IsDestroyed)
+                    if (World.Items.TryGetValue(e.Serial, out var item))
                     {
-                        if (EquipLayers.Contains(item.Layer) && item.Container == World.Player.Serial)
+                        if (!item.IsDestroyed)
                         {
-                            var durability = ParseDurability((int)item.Serial, e.Data);
-                            if (_itemLayerSlots.TryGetValue(item.Serial, out var slot))
+                            if (EquipLayers.Contains(item.Layer) && item.Container == World.Player.Serial)
                             {
-                                slot.Durabilty = durability.Durabilty;
-                                slot.MaxDurabilty = durability.MaxDurabilty;
+                                var durability = ParseDurability((int)item.Serial, e.Data);
+                                if (_itemLayerSlots.TryGetValue(item.Serial, out var slot))
+                                {
+                                    slot.Durabilty = durability.Durabilty;
+                                    slot.MaxDurabilty = durability.MaxDurabilty;
+                                }
+                                else
+                                {
+                                    _itemLayerSlots.Add(item.Serial, durability);
+                                }
                             }
                             else
                             {
-                                _itemLayerSlots.Add(item.Serial, durability);
+                                _itemLayerSlots.Remove(item.Serial);
                             }
+
+                            UIManager.GetGump<DurabilitysGump>()?.RequestUpdateContents();
                         }
-                        else
-                        {
-                            _itemLayerSlots.Remove(item.Serial);
-                        }
-                       
-                        UIManager.GetGump<DurabilitysGump>()?.RequestUpdateContents();
                     }
                 }
-            }
+            });
         }
         public static DurabiltyProp ParseDurability(int serial, string data)
         {
@@ -118,16 +121,20 @@ namespace ClassicUO.Game.Managers
         public int Durabilty { get; set; }
         public int MaxDurabilty { get; set; }
 
-        public float Percentage { get
+        public float Percentage
+        {
+            get
             {
                 return MaxDurabilty > 0 ? ((float)Durabilty / (float)MaxDurabilty) : 0;
-            } }
+            }
+        }
 
-        public DurabiltyProp(int serial, int current, int max) {
+        public DurabiltyProp(int serial, int current, int max)
+        {
             Serial = serial;
             Durabilty = current;
             MaxDurabilty = max;
         }
-        public DurabiltyProp(): this(0,0,0) { }
+        public DurabiltyProp() : this(0, 0, 0) { }
     }
 }
