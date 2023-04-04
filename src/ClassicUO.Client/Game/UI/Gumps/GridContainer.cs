@@ -470,17 +470,10 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            var newAlpha = (float)ProfileManager.CurrentProfile.ContainerOpacity / 100;
-            var newHue = ProfileManager.CurrentProfile.Grid_UseContainerHue ? _container.Hue : ProfileManager.CurrentProfile.AltGridContainerBackgroundHue;
-
-
-            if ((_lastWidth != Width || _lastHeight != Height) || _lastGridItemScale != GRID_ITEM_SIZE || updatedBorder
-                || _background.Alpha != newAlpha || _background.Hue != newHue)
+            if ((_lastWidth != Width || _lastHeight != Height) || _lastGridItemScale != GRID_ITEM_SIZE || updatedBorder)
             {
                 _lastGridItemScale = GRID_ITEM_SIZE;
-                _background.Hue = newHue;
-                _background.Alpha = newAlpha;
-                _background.Width = Width - (BORDER_WIDTH * 2);
+                             _background.Width = Width - (BORDER_WIDTH * 2);
                 _background.Height = Height - (BORDER_WIDTH * 2);
                 _scrollArea.Width = _background.Width;
                 _scrollArea.Height = _background.Height - TOP_BAR_HEIGHT;
@@ -494,7 +487,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _backgroundTexture.Width = _background.Width;
                 _backgroundTexture.Height = _background.Height;
                 _backgroundTexture.Alpha = _background.Alpha;
-                _backgroundTexture.Hue = newHue;
+                _backgroundTexture.Hue = _background.Hue;
                 RequestUpdateContents();
             }
 
@@ -511,6 +504,18 @@ namespace ClassicUO.Game.UI.Gumps
         private string GetContainerName()
         {
             return _container.Name?.Length > 0 ? _container.Name : "a container";
+        }
+
+        public void OptionsUpdated()
+        {
+            var newAlpha = (float)ProfileManager.CurrentProfile.ContainerOpacity / 100;
+            var newHue = ProfileManager.CurrentProfile.Grid_UseContainerHue ? _container.Hue : ProfileManager.CurrentProfile.AltGridContainerBackgroundHue;
+            _background.Hue = newHue;
+            _background.Alpha = newAlpha;
+            _backgroundTexture.Alpha = _background.Alpha;
+            _backgroundTexture.Hue = _background.Hue;
+            BorderControl.Hue = _background.Hue;
+            BorderControl.Alpha = _background.Alpha;
         }
 
         public void BuildBorder()
