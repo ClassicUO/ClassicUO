@@ -596,7 +596,7 @@ namespace ClassicUO.Game.UI.Gumps
                 X = x;
                 Y = y;
                 Width = 150;
-                Height = 241;
+                Height = 261;
                 AcceptMouseInput = true;
 
                 Add(new AlphaBlendControl(0.85f) { Width = Width, Height = Height, AcceptMouseInput = false });
