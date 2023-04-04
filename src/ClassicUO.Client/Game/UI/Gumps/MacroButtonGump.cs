@@ -61,7 +61,7 @@ namespace ClassicUO.Game.UI.Gumps
             Y = y;
             Width = DEFAULT_WIDTH;
             Height = DEFAULT_HEIGHT;
-            _macro = macro;           
+            TheMacro = macro;           
             BuildGump();
         }
 
@@ -80,7 +80,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override GumpType GumpType => GumpType.MacroButton;
 
-        public Macro _macro { get => _macr;
+        public Macro TheMacro { get => _macr;
             set
             {
                 _macr = value;
@@ -185,10 +185,10 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void RunMacro()
         {
-            if (_macro != null)
+            if (TheMacro != null)
             {
                 GameScene gs = Client.Game.GetScene<GameScene>();
-                gs.Macros.SetMacroToExecute(_macro.Items as MacroObject);
+                gs.Macros.SetMacroToExecute(TheMacro.Items as MacroObject);
                 gs.Macros.WaitForTargetTimer = 0;
                 gs.Macros.Update();
             }
@@ -242,7 +242,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 var _gText = RenderedText.Create
                    (
-                       _macro.Name,
+                       TheMacro.Name,
                         (ushort)(MouseIsOver ? 53 : 0x03b2),
                        255,
                        true,
@@ -261,16 +261,16 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Save(XmlTextWriter writer)
         {
-            if (_macro != null)
+            if (TheMacro != null)
             {
                 // hack to give macro buttons a unique id for use in anchor groups
-                int macroid = Client.Game.GetScene<GameScene>().Macros.GetAllMacros().IndexOf(_macro);
+                int macroid = Client.Game.GetScene<GameScene>().Macros.GetAllMacros().IndexOf(TheMacro);
 
                 LocalSerial = (uint) macroid + 1000;
 
                 base.Save(writer);
 
-                writer.WriteAttributeString("name", _macro.Name);
+                writer.WriteAttributeString("name", TheMacro.Name);
             }
         }
 
@@ -282,7 +282,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (macro != null)
             {
-                _macro = macro;
+                TheMacro = macro;
                 BuildGump();
             }
         }
