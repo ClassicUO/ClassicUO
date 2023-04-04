@@ -384,7 +384,7 @@ namespace ClassicUO.Game.UI.Gumps
                                 if (int.TryParse(durability[1].Trim(), out int max))
                                 {
                                     double perecentRemaining = (double)min / (double)max;
-                                    if (perecentRemaining > 0.9)
+                                    if (perecentRemaining > (double)ProfileManager.CurrentProfile.ModernPaperDoll_DurabilityPercent/(double)100)
                                         return;
                                     durablityBar.Height = (int)(Height * perecentRemaining);
                                     durablityBar.Y = Height - durablityBar.Height;

@@ -163,7 +163,7 @@ namespace ClassicUO.Game.UI.Gumps
         private HSliderBar _hiddenBodyAlpha;
         private ClickableColorBox _hiddenBodyHue;
         private ClickableColorBox _speechColorPickerBox, _emoteColorPickerBox, _yellColorPickerBox, _whisperColorPickerBox, _partyMessageColorPickerBox, _guildMessageColorPickerBox, _allyMessageColorPickerBox, _chatMessageColorPickerBox, _partyAuraColorPickerBox;
-        private InputField _spellFormatBox, _autoFollowDistance;
+        private InputField _spellFormatBox, _autoFollowDistance, _modernPaperdollDurabilityPercent;
         private ClickableColorBox _tooltip_font_hue;
         private FontSelector _tooltip_font_selector;
         private HSliderBar _dragSelectStartX, _dragSelectStartY;
@@ -800,6 +800,12 @@ namespace ClassicUO.Game.UI.Gumps
 
                 section.Add(_durabilityBarHue = new ModernColorPicker.HueDisplay(ProfileManager.CurrentProfile.ModernPaperDollDurabilityHue, null, true));
                 section.AddRight(AddLabel(null, "Modern paperdoll durability bar hue", 0,0));
+
+                section.Add(_modernPaperdollDurabilityPercent = AddInputField(null, 0, 0, 75, TEXTBOX_HEIGHT));
+                _modernPaperdollDurabilityPercent.SetText(_currentProfile.ModernPaperDoll_DurabilityPercent.ToString());
+                section.AddRight(AddLabel(null, "Show durability bar below %", 0, 0));
+
+                section.PopIndent();
             }
 
             SettingsSection section2 = AddSettingsSection(box, "Mobiles");
@@ -4250,6 +4256,20 @@ namespace ClassicUO.Game.UI.Gumps
 
             _currentProfile.ModernPaperDollHue = _paperDollHue.Hue;
             _currentProfile.ModernPaperDollDurabilityHue = _durabilityBarHue.Hue;
+            if(_currentProfile.ModernPaperDoll_DurabilityPercent.ToString() != _modernPaperdollDurabilityPercent.Text)
+            {
+                if(int.TryParse(_modernPaperdollDurabilityPercent.Text, out int percent))
+                {
+                    if (percent > 100)
+                        percent = 100;
+                    if (percent < 1)
+                        percent = 1;
+                    _currentProfile.ModernPaperDoll_DurabilityPercent = percent;
+                } else
+                {
+                    _modernPaperdollDurabilityPercent.SetText(_currentProfile.ModernPaperDoll_DurabilityPercent.ToString());
+                }
+            }
 
             _currentProfile.UseModernPaperdoll = _useModernPaperdoll.IsChecked;
 
