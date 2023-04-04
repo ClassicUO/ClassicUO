@@ -4395,7 +4395,24 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.StandardSkillsGump = _useStandardSkillsGump.IsChecked;
 
             _currentProfile.AltJournalBackgroundHue = _journalBackgroundColor.Hue;
-            _currentProfile.AltGridContainerBackgroundHue = _altGridContainerBackgroundHue.Hue;
+
+            if (_currentProfile.AltGridContainerBackgroundHue != _altGridContainerBackgroundHue.Hue)
+            {
+                _currentProfile.AltGridContainerBackgroundHue = _altGridContainerBackgroundHue.Hue;
+                foreach (GridContainer _ in UIManager.Gumps.OfType<GridContainer>())
+                {
+                    _.OptionsUpdated();
+                }
+            }
+
+            if (_currentProfile.ContainerOpacity != (byte)_containerOpacity.Value)
+            {
+                _currentProfile.ContainerOpacity = (byte)_containerOpacity.Value;
+                foreach (GridContainer _ in UIManager.Gumps.OfType<GridContainer>())
+                {
+                    _.OptionsUpdated();
+                }
+            }
 
             if (_useStandardSkillsGump.IsChecked)
             {
@@ -4837,12 +4854,7 @@ namespace ClassicUO.Game.UI.Gumps
 
 
             // containers
-            if (_containerOpacity.Value != _currentProfile.ContainerOpacity)
-            {
-                _currentProfile.ContainerOpacity = (byte)_containerOpacity.Value;
-                foreach (GridContainer gridContainer in UIManager.Gumps.OfType<GridContainer>())
-                    gridContainer.RequestUpdateContents();
-            }
+
 
             int containerScale = _currentProfile.ContainersScale;
 
