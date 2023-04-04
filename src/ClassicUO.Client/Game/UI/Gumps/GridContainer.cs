@@ -1029,10 +1029,9 @@ namespace ClassicUO.Game.UI.Gumps
 
                 foreach (var slot in gridSlots)
                 {
-                    slot.Value.IsVisible = string.IsNullOrWhiteSpace(searchText);
+                    slot.Value.IsVisible = !(!string.IsNullOrWhiteSpace(searchText) && ProfileManager.CurrentProfile.GridContainerSearchMode == 0);
                     if (slot.Value.SlotItem != null && !string.IsNullOrWhiteSpace(searchText))
                     {
-                        slot.Value.IsVisible = ProfileManager.CurrentProfile.GridContainerSearchMode == 0 ? false : true;
                         if (slot.Value.SlotItem == null)
                         {
                             continue;
