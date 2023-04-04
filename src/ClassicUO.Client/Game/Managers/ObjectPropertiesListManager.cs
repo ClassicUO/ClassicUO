@@ -49,16 +49,14 @@ namespace ClassicUO.Game.Managers
                 prop = new ItemProperty();
                 _itemsProperties[serial] = prop;
             }
-            else
-            {
-                OPLOnReceive?.Invoke(new OPLEventArgs(serial, name, data));
-            }
 
             prop.Serial = serial;
             prop.Revision = revision;
             prop.Name = name;
             prop.Data = data;
             prop.NameCliloc = namecliloc;
+
+            OPLOnReceive?.Invoke(new OPLEventArgs(serial, name, data));
         }
 
         public class OPLEventArgs : System.EventArgs

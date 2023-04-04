@@ -704,6 +704,9 @@ namespace ClassicUO.Configuration
                                     ushort ogContainer = ushort.Parse(xml.GetAttribute("ogContainer"));
                                     gump = new GridContainer(serial, ogContainer);
                                     break;
+                                case GumpType.DurabilityGump:
+                                    gump = new DurabilitysGump();
+                                    break;
                             }
 
                             if (gump == null)

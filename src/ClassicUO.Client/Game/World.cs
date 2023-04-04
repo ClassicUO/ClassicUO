@@ -67,6 +67,7 @@ namespace ClassicUO.Game
         public static uint LastObject, ObjectToRemove;
 
         public static ObjectPropertiesListManager OPL { get; } = new ObjectPropertiesListManager();
+        public static DurabilityManager DurabilityManager { get; } = new DurabilityManager();
 
         public static CorpseManager CorpseManager { get; } = new CorpseManager();
 

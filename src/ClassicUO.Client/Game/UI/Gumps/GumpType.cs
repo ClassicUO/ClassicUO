@@ -60,6 +60,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         NameOverHeadHandler,
         MacroButtonEditor = 6464,
+        DurabilityGump = 6465,
         GridContainer = 8787
     }
 }
