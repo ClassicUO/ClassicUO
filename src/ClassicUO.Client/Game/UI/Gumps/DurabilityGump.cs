@@ -12,9 +12,9 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    internal class DurabilityGumpMinimized: Gump
+    internal class DurabilityGumpMinimized : Gump
     {
-        public DurabilityGumpMinimized(): base(0, 0)
+        public DurabilityGumpMinimized() : base(0, 0)
         {
             SetTooltip("Open Equipment Durability Tracker");
 
@@ -25,7 +25,7 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
-        {   
+        {
             var texture = GumpsLoader.Instance.GetGumpTexture(5587, out Rectangle bounds);
             if (texture != null)
             {
@@ -64,7 +64,7 @@ namespace ClassicUO.Game.UI.Gumps
         private DataBox _dataBox;
         public override GumpType GumpType => GumpType.DurabilityGump;
 
-        public DurabilitysGump() : base(0,0)
+        public DurabilitysGump() : base(0, 0)
         {
 
             LayerOrder = UILayer.Default;
@@ -109,12 +109,13 @@ namespace ClassicUO.Game.UI.Gumps
             UpdateContents();
         }
 
-       
+
         private void BuildHeader()
         {
             var a = new Area();
             a.Width = Width;
             a.WantUpdateSize = false;
+            a.CanMove = true;
 
             Label l;
             a.Add(l = new Label("Equipment Durability", true, 0xFF));
@@ -124,7 +125,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(a);
         }
-                 
+
         protected override void UpdateContents()
         {
             _dataBox.Clear();
@@ -149,7 +150,7 @@ namespace ClassicUO.Game.UI.Gumps
                 a.WantUpdateSize = false;
                 a.CanMove = true;
                 a.Height = 44;
-                a.Width = Width - a.X * 2;
+                a.Width = Width - (a.X * 2) - 40;
                 a.Y = startY;
 
                 Label name;
@@ -178,11 +179,11 @@ namespace ClassicUO.Game.UI.Gumps
                 a.Add(new Label($"{durability.Durabilty} / {durability.MaxDurabilty}", true, 0xFFFF)
                 {
                     Y = red.Y - 2,
-                    X = Width - 36 - durWidth
+                    X = Width - 38 - durWidth
                 });
                 _dataBox.Add(a);
 
-                startY += a.Height + 10;
+                startY += a.Height + 4;
             }
         }
 
