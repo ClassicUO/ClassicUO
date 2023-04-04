@@ -86,8 +86,6 @@ namespace ClassicUO.Game.UI.Gumps
                    4
                );
 
-            _borderControl.DefaultGraphics();
-
             Add(_borderControl);
             Add(new AlphaBlendControl(0.9f) { Width = Width, Height = Height });
             BuildHeader();
