@@ -160,7 +160,7 @@ namespace ClassicUO.Assets
 
         public Texture2D GetGumpTexture(uint g, out Rectangle bounds)
         {
-            Texture2D png = PNGLoader.LoadGumpTexture(g);
+            Texture2D png = PNGLoader.Instance.LoadGumpTexture(g);
             if (png != null)
             {
                 bounds = png.Bounds;

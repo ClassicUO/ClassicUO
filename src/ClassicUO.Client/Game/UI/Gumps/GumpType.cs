@@ -59,7 +59,7 @@ namespace ClassicUO.Game.UI.Gumps
         NetStats,
 
         NameOverHeadHandler,
-
-        GridContainer = 8787,
+        MacroButtonEditor = 6464,
+        GridContainer = 8787
     }
 }

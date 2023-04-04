@@ -65,7 +65,7 @@ namespace ClassicUO.Configuration
         public byte ChatFont { get; set; } = 1;
         public int SpeechDelay { get; set; } = 100;
         public bool ScaleSpeechDelay { get; set; } = true;
-        public bool SaveJournalToFile { get; set; } = true;
+        public bool SaveJournalToFile { get; set; } = false;
         public bool ForceUnicodeJournal { get; set; }
         public bool IgnoreAllianceMessages { get; set; }
         public bool IgnoreGuildMessages { get; set; }
@@ -176,7 +176,10 @@ namespace ClassicUO.Configuration
         public bool CloseAllAnchoredGumpsInGroupWithRightClick { get; set; } = false;
         public bool HoldAltToMoveGumps { get; set; }
         public byte JournalOpacity { get; set; } = 50;
+        public int JournalStyle { get; set; } = 0;
         public bool HideScreenshotStoredInMessage { get; set; }
+        public bool UseModernPaperdoll { get; set; } = false;
+        public bool OpenModernPaperdollAtMinimizeLoc { get; set; } = false;
 
         // Experimental
         public bool CastSpellsByOneClick { get; set; }
@@ -383,6 +386,9 @@ namespace ClassicUO.Configuration
         public List<List<int>> GridHighlight_PropMinVal { get; set; } = new List<List<int>>();
         public bool GridHighlight_CorpseOnly { get; set; } = false;
         #endregion
+
+        public ushort ModernPaperDollHue { get; set; } = 0;
+        public ushort ModernPaperDollDurabilityHue { get; set; } = 32;
 
         public static uint GumpsVersion { get; private set; }
 
@@ -612,6 +618,10 @@ namespace ClassicUO.Configuration
                                     gump = new MacroButtonGump();
 
                                     break;
+                                case GumpType.MacroButtonEditor:
+                                    gump = new MacroButtonEditorGump();
+
+                                    break;
 
                                 case GumpType.MiniMap:
                                     gump = new MiniMapGump();
@@ -619,7 +629,10 @@ namespace ClassicUO.Configuration
                                     break;
 
                                 case GumpType.PaperDoll:
-                                    gump = new PaperDollGump();
+                                    if (ProfileManager.CurrentProfile.UseModernPaperdoll && serial == World.Player.Serial)
+                                        gump = new ModernPaperdoll(serial);
+                                    else
+                                        gump = new PaperDollGump();
 
                                     break;
 

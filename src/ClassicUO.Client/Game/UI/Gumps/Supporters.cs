@@ -23,7 +23,7 @@ namespace ClassicUO.Game.UI.Gumps
         };
         private AlphaBlendControl _background;
 
-        private Texture2D image = PNGLoader.GetImageTexture(Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "tazuo.png"));
+        private Texture2D image = PNGLoader.Instance.GetImageTexture(Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "tazuo.png"));
 
         private Label[] supporterLabels = new Label[SUPPORTERS.Length];
 

@@ -84,21 +84,34 @@ namespace ClassicUO.Game
 
         public static void OpenPaperdoll(uint serial)
         {
-            PaperDollGump paperDollGump = UIManager.GetGump<PaperDollGump>(serial);
-
-            if (paperDollGump == null)
-            {
-                DoubleClick(serial | 0x80000000);
+            if (ProfileManager.CurrentProfile.UseModernPaperdoll && serial == World.Player.Serial) {
+                ModernPaperdoll modernPaperdoll = UIManager.GetGump<ModernPaperdoll>(serial);
+                if (modernPaperdoll == null)
+                    UIManager.Add(new ModernPaperdoll(serial));
+                else
+                {
+                    modernPaperdoll.SetInScreen();
+                    modernPaperdoll.BringOnTop();
+                }
             }
             else
             {
-                if (paperDollGump.IsMinimized)
-                {
-                    paperDollGump.IsMinimized = false;
-                }
+                PaperDollGump paperDollGump = UIManager.GetGump<PaperDollGump>(serial);
 
-                paperDollGump.SetInScreen();
-                paperDollGump.BringOnTop();
+                if (paperDollGump == null)
+                {
+                    DoubleClick(serial | 0x80000000);
+                }
+                else
+                {
+                    if (paperDollGump.IsMinimized)
+                    {
+                        paperDollGump.IsMinimized = false;
+                    }
+
+                    paperDollGump.SetInScreen();
+                    paperDollGump.BringOnTop();
+                }
             }
         }
 

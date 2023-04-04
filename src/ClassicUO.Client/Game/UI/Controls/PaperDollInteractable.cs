@@ -251,7 +251,7 @@ namespace ClassicUO.Game.UI.Controls
                         {
                             AcceptMouseInput = true,
                             IsPartialHue = equipItem.ItemData.IsPartialHue,
-                            CanLift = World.InGame && !World.Player.IsDead && layer != Layer.Beard && layer != Layer.Hair && (_paperDollGump.CanLift || LocalSerial == World.Player)
+                            CanLift = World.InGame && !World.Player.IsDead && layer != Layer.Beard && layer != Layer.Hair && (_paperDollGump == null ? false : _paperDollGump.CanLift || LocalSerial == World.Player)
                         }
                     );
                 }
@@ -282,7 +282,7 @@ namespace ClassicUO.Game.UI.Controls
 
             equipItem = mobile.FindItemByLayer(Layer.Backpack);
 
-            if (equipItem != null && equipItem.ItemData.AnimID != 0)
+            if (equipItem != null && equipItem.ItemData.AnimID != 0 && _paperDollGump != null)
             {
                 ushort backpackGraphic = (ushort) (equipItem.ItemData.AnimID + Constants.MALE_GUMP_OFFSET);
                 

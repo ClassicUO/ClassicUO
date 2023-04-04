@@ -40,6 +40,7 @@ using ClassicUO.Assets;
 using ClassicUO.Renderer;
 using ClassicUO.Resources;
 using SDL2;
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -55,16 +56,28 @@ namespace ClassicUO.Game.UI.Controls
             AddBtn,
             RemoveBtn,
             CreateNewMacro,
-            OpenMacroOptions
+            OpenMacroOptions,
+            OpenButtonEditor
         }
 
         public MacroControl(string name, bool isFastAssign = false)
         {
             CanMove = true;
+            Label _keyBinding;
+            Add(_keyBinding = new Label
+                (
+                    "HotKey:",
+                    true,
+                    0xFFFF,
+                    60,
+                    0xFF,
+                    FontStyle.BlackBorder | FontStyle.Cropped
+                 ));
 
             _hotkeyBox = new HotkeyBox();
             _hotkeyBox.HotkeyChanged += BoxOnHotkeyChanged;
             _hotkeyBox.HotkeyCancelled += BoxOnHotkeyCancelled;
+            _hotkeyBox.X = _keyBinding.X + _keyBinding.Width + 5;
 
 
             Add(_hotkeyBox);
@@ -75,23 +88,50 @@ namespace ClassicUO.Game.UI.Controls
                 (
                     0,
                     _hotkeyBox.Height + 3,
-                    170,
+                    150,
                     25,
                     ButtonAction.Activate,
                     ResGumps.CreateMacroButton,
                     0,
-                    TEXT_ALIGN_TYPE.TS_LEFT
-                ) { ButtonParameter = (int)buttonsOption.CreateNewMacro, IsSelectable = false }
+                    TEXT_ALIGN_TYPE.TS_CENTER
+                ) { ButtonParameter = (int)buttonsOption.CreateNewMacro, IsSelectable = true, IsSelected = true }
+            );
+            Add
+            (
+                new NiceButton
+                (
+                    170,
+                    _hotkeyBox.Height + 3,
+                    150,
+                    25,
+                    ButtonAction.Activate,
+                    ResGumps.MacroButtonEditor,
+                    0,
+                    TEXT_ALIGN_TYPE.TS_CENTER
+                )
+                { ButtonParameter = (int)buttonsOption.OpenButtonEditor, IsSelectable = true, IsSelected = true }
             );
 
-            if(!isFastAssign)
+            Add
+            (
+                new Line
+                (
+                    0,
+                    _hotkeyBox.Height + 30,
+                    325,
+                    1,
+                    Color.Gray.PackedValue
+                )
+            );
+
+            if (!isFastAssign)
             {
                 Add
                 (
                     new NiceButton
                     (
                         0,
-                        _hotkeyBox.Height + 30,
+                        _hotkeyBox.Height + 35,
                         50,
                         25,
                         ButtonAction.Activate,
@@ -100,21 +140,6 @@ namespace ClassicUO.Game.UI.Controls
                     { ButtonParameter = (int)buttonsOption.AddBtn, IsSelectable = false }
                 );
 
-                Add
-                (
-                    new NiceButton
-                    (
-                        52,
-                        _hotkeyBox.Height + 30,
-                        50,
-                        25,
-                        ButtonAction.Activate,
-                        ResGumps.Remove,
-                        0,
-                        TEXT_ALIGN_TYPE.TS_LEFT
-                    )
-                    { ButtonParameter = (int)buttonsOption.RemoveBtn, IsSelectable = false }
-                );
             } else {
                 Add
                 (
@@ -137,7 +162,7 @@ namespace ClassicUO.Game.UI.Controls
             ScrollArea area = new ScrollArea
             (
                 10,
-                _hotkeyBox.Bounds.Bottom + 80,
+                _hotkeyBox.Bounds.Bottom + 70,
                 scrollAreaW,
                 scrollAreaH,
                 true
@@ -225,8 +250,7 @@ namespace ClassicUO.Game.UI.Controls
                 Macro.Items = Macro.Create(MacroType.None);
             }
 
-            MacroObject obj = (MacroObject) Macro.Items;
-
+            MacroObject obj = (MacroObject)Macro.Items;
             while (obj != null)
             {
                 _databox.Add(new MacroEntry(this, obj, _allHotkeysNames));
@@ -235,8 +259,7 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     break;
                 }
-
-                obj = (MacroObject) obj.Next;
+                obj = (MacroObject)obj.Next;
             }
 
             _databox.WantUpdateSize = true;
@@ -373,7 +396,7 @@ namespace ClassicUO.Game.UI.Controls
                     RemoveLastCommand();
                     break;
                 case (int)buttonsOption.CreateNewMacro:
-                    UIManager.Gumps.OfType<MacroButtonGump>().FirstOrDefault(s => s._macro == Macro)?.Dispose();
+                    UIManager.Gumps.OfType<MacroButtonGump>().FirstOrDefault(s => s.TheMacro == Macro)?.Dispose();
 
                     MacroButtonGump macroButtonGump = new MacroButtonGump(Macro, Mouse.Position.X, Mouse.Position.Y);
                     UIManager.Add(macroButtonGump);
@@ -383,19 +406,52 @@ namespace ClassicUO.Game.UI.Controls
 
                     GameActions.OpenSettings(4);
                     break;
+                case (int)buttonsOption.OpenButtonEditor:
+                    UIManager.Gumps.OfType<MacroButtonEditorGump>().FirstOrDefault()?.Dispose();
+                    OpenMacroButtonEditor(Macro, null);
+                    break;
             }
+        }
+
+        private void OpenMacroButtonEditor(Macro macro, Vector2? position = null)
+        {
+            MacroButtonEditorGump btnEditorGump = UIManager.GetGump<MacroButtonEditorGump>();
+
+            if (btnEditorGump == null)
+            {
+                var posX = (Client.Game.Window.ClientBounds.Width >> 1) - 300;
+                var posY = (Client.Game.Window.ClientBounds.Height >> 1) - 250;
+                OptionsGump opt = UIManager.GetGump<OptionsGump>();
+                if (opt != null)
+                {
+                    posX = opt.X + opt.Width + 5;
+                    posY = opt.Y;
+                }
+                if (position.HasValue)
+                {
+                    posX = (int)position.Value.X;
+                    posY = (int)position.Value.Y;
+                }
+                btnEditorGump = new MacroButtonEditorGump(macro, posX, posY);
+                UIManager.Add(btnEditorGump);
+            }
+            btnEditorGump.SetInScreen();
+            btnEditorGump.BringOnTop();
         }
 
 
         private class MacroEntry : Control
         {
             private readonly MacroControl _control;
+            private readonly MacroObject _obj;
             private readonly string[] _items;
+            public event EventHandler<MacroObject> OnDelete;
 
             public MacroEntry(MacroControl control, MacroObject obj, string[] items)
             {
                 _control = control;
                 _items = items;
+                _obj = obj;
 
                 Combobox mainBox = new Combobox
                 (
@@ -415,6 +471,19 @@ namespace ClassicUO.Game.UI.Controls
 
                 Width = mainBox.Width;
                 Height = mainBox.Height;
+
+                Add(new NiceButton
+                    (
+                        mainBox.Width + 10,
+                        0,
+                        50,
+                        25,
+                        ButtonAction.Activate,
+                        ResGumps.Remove,
+                        0,
+                        TEXT_ALIGN_TYPE.TS_CENTER
+                    )
+                { ButtonParameter = (int)buttonsOption.RemoveBtn, IsSelectable = false });
 
                 AddSubMacro(obj);
 
@@ -515,6 +584,19 @@ namespace ClassicUO.Game.UI.Controls
                 _control._databox.ReArrangeChildren();
             }
 
+            public override void OnButtonClick(int buttonID)
+            {
+                switch (buttonID)
+                {
+                    case (int)buttonsOption.RemoveBtn: 
+                        _control.Macro.Remove(_obj);
+                        Dispose();
+                        _control.SetupMacroUI();
+                        OnDelete?.Invoke(this, _obj);
+                        break;                
+                }
+            }
+
 
             private void BoxOnOnOptionSelected(object sender, int e)
             {
@@ -543,7 +625,7 @@ namespace ClassicUO.Game.UI.Controls
                     box.Tag = newMacroObj;
 
 
-                    for (int i = 1; i < Children.Count; i++)
+                    for (int i = 2; i < Children.Count; i++)
                     {
                         Children[i]?.Dispose();
                     }

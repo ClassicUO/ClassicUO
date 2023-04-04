@@ -167,9 +167,11 @@ namespace ClassicUO.Game.UI.Gumps
         private ClickableColorBox _tooltip_font_hue;
         private FontSelector _tooltip_font_selector;
         private HSliderBar _dragSelectStartX, _dragSelectStartY;
-        private Checkbox _dragSelectAsAnchor, _namePlateHealthBar, _disableSystemChat, _namePlateShowAtFullHealth;
+        private Checkbox _dragSelectAsAnchor, _namePlateHealthBar, _disableSystemChat, _namePlateShowAtFullHealth, _useModernPaperdoll;
         private HSliderBar _journalOpacity, _namePlateOpacity, _namePlateHealthBarOpacity;
         private ClickableColorBox _journalBackgroundColor;
+        private Combobox _journalStyle;
+        private ModernColorPicker.HueDisplay _paperDollHue, _durabilityBarHue;
 
         // video
         private Checkbox _use_old_status_gump, _windowBorderless, _enableDeathScreen, _enableBlackWhiteEffect, _altLights, _enableLight, _enableShadows, _enableShadowsStatics, _auraMouse, _runMouseInSeparateThread, _useColoredLights, _darkNights, _partyAura, _hideChatGradient, _animatedWaterEffect;
@@ -766,6 +768,13 @@ namespace ClassicUO.Game.UI.Gumps
                 );
                 section.AddRight(AddLabel(null, "Journal Background", startX, startY));
                 section.PopIndent();
+
+                section.Add(AddLabel(null, "Journal style", 0, 0));
+                section.AddRight(_journalStyle = AddCombobox(
+                        null,
+                        Enum.GetNames(typeof(ResizableJournal.BorderStyle)),
+                        _currentProfile.JournalStyle, 0, 0, 150
+                    ));
             } //Journal opac and hue
 
             {
@@ -777,6 +786,21 @@ namespace ClassicUO.Game.UI.Gumps
                     ));
                 section.AddRight(AddLabel(null, "Disable system chat", 0, 0));
             } //Disable system chat
+
+            {
+                section.Add(_useModernPaperdoll = AddCheckBox(
+                        null, "",
+                        _currentProfile.UseModernPaperdoll, 0, 0
+                    ));
+                section.AddRight(AddLabel(null, "Use modern paperdoll", 0, 0));
+
+                section.PushIndent();
+                section.Add(_paperDollHue = new ModernColorPicker.HueDisplay(ProfileManager.CurrentProfile.ModernPaperDollHue, null, true));
+                section.AddRight(AddLabel(null, "Modern paperdoll hue", 0, 0));
+
+                section.Add(_durabilityBarHue = new ModernColorPicker.HueDisplay(ProfileManager.CurrentProfile.ModernPaperDollDurabilityHue, null, true));
+                section.AddRight(AddLabel(null, "Modern paperdoll durability bar hue", 0,0));
+            }
 
             SettingsSection section2 = AddSettingsSection(box, "Mobiles");
             section2.Y = section.Bounds.Bottom + 40;
@@ -2186,7 +2210,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         _macroControl = new MacroControl(name)
                         {
-                            X = 400,
+                            X = 350,
                             Y = 20
                         };
 
@@ -2201,7 +2225,7 @@ namespace ClassicUO.Game.UI.Gumps
                                 return;
                             }
 
-                            UIManager.Gumps.OfType<MacroButtonGump>().FirstOrDefault(s => s._macro == _macroControl.Macro)?.Dispose();
+                            UIManager.Gumps.OfType<MacroButtonGump>().FirstOrDefault(s => s.TheMacro == _macroControl.Macro)?.Dispose();
 
                             MacroButtonGump macroButtonGump = new MacroButtonGump(_macroControl.Macro, Mouse.Position.X, Mouse.Position.Y);
 
@@ -2219,7 +2243,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                             _macroControl = new MacroControl(name)
                             {
-                                X = 400,
+                                X = 350,
                                 Y = 20
                             };
 
@@ -2252,7 +2276,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                             if (_macroControl != null)
                             {
-                                UIManager.Gumps.OfType<MacroButtonGump>().FirstOrDefault(s => s._macro == _macroControl.Macro)?.Dispose();
+                                UIManager.Gumps.OfType<MacroButtonGump>().FirstOrDefault(s => s.TheMacro == _macroControl.Macro)?.Dispose();
 
                                 Client.Game.GetScene<GameScene>().Macros.Remove(_macroControl.Macro);
 
@@ -2311,7 +2335,7 @@ namespace ClassicUO.Game.UI.Gumps
                         return;
                     }
 
-                    UIManager.Gumps.OfType<MacroButtonGump>().FirstOrDefault(s => s._macro == m)?.Dispose();
+                    UIManager.Gumps.OfType<MacroButtonGump>().FirstOrDefault(s => s.TheMacro == m)?.Dispose();
 
                     MacroButtonGump macroButtonGump = new MacroButtonGump(m, Mouse.Position.X, Mouse.Position.Y);
 
@@ -2338,11 +2362,11 @@ namespace ClassicUO.Game.UI.Gumps
 
                     _macroControl = new MacroControl(m.Name)
                     {
-                        X = 400,
+                        X = 350,
                         Y = 20
                     };
 
-                    Add(_macroControl, PAGE);
+                    Add(_macroControl, PAGE);                   
                 };
             }
 
@@ -4218,6 +4242,17 @@ namespace ClassicUO.Game.UI.Gumps
                 Client.Game.SetRefreshRate(_sliderFPS.Value);
             }
 
+            if (_currentProfile.JournalStyle != _journalStyle.SelectedIndex)
+            {
+                _currentProfile.JournalStyle = _journalStyle.SelectedIndex;
+                UIManager.GetGump<ResizableJournal>()?.BuildBorder();
+            }
+
+            _currentProfile.ModernPaperDollHue = _paperDollHue.Hue;
+            _currentProfile.ModernPaperDollDurabilityHue = _durabilityBarHue.Hue;
+
+            _currentProfile.UseModernPaperdoll = _useModernPaperdoll.IsChecked;
+
             _currentProfile.NamePlateHideAtFullHealth = _namePlateShowAtFullHealth.IsChecked;
 
             _currentProfile.DamageHueSelf = _damageHueSelf.Hue;
@@ -4835,6 +4870,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _currentProfile.BackpackStyle = _backpackStyle.SelectedIndex;
                 UIManager.GetGump<PaperDollGump>(World.Player.Serial)?.RequestUpdateContents();
+                UIManager.GetGump<ModernPaperdoll>(World.Player.Serial)?.RequestUpdateContents();
                 Item backpack = World.Player.FindItemByLayer(Layer.Backpack);
                 GameActions.DoubleClick(backpack);
             }

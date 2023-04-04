@@ -13,11 +13,11 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class ResizableJournal : ResizableGump
     {
-        #region CONSTANTS
-        private const int BORDER_WIDTH = 4;
-        private const int MIN_WIDTH = (BORDER_WIDTH * 2) + (TAB_WIDTH * 4);
+        #region VARS
+        private static int BORDER_WIDTH = 4;
+        private static int MIN_WIDTH = (BORDER_WIDTH * 2) + (TAB_WIDTH * 4);
         private const int MIN_HEIGHT = 100;
-        private const int SCROLL_BAR_WIDTH = 18;
+        private const int SCROLL_BAR_WIDTH = 14;
         #region TABS
         private const int TAB_WIDTH = 80;
         private const int TAB_HEIGHT = 30;
@@ -42,6 +42,8 @@ namespace ClassicUO.Game.UI.Gumps
         #region OTHER
         private static int _lastX = 100, _lastY = 100;
         private static int _lastWidth = MIN_WIDTH, _lastHeight = 300;
+        private bool updatedBorder = false;
+        private readonly GumpPicTiled _backgroundTexture;
         #endregion
         public ResizableJournal() : base(_lastWidth, _lastHeight, MIN_WIDTH, MIN_HEIGHT, 0, 0)
         {
@@ -53,7 +55,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             X = _lastX;
             Y = _lastY;
-            ResizeWindow(ProfileManager.CurrentProfile.ResizeJournalSize);
+           
 
             #region Background
             _background = new AlphaBlendControl((float)ProfileManager.CurrentProfile.JournalOpacity/100);
@@ -67,18 +69,11 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 InvokeDragBegin(e.Location);
             };
+
+            _backgroundTexture = new GumpPicTiled(0);
             #endregion
 
             #region Tab area
-            _tabBackground = new AlphaBlendControl()
-            {
-                Hue = ProfileManager.CurrentProfile.AltJournalBackgroundHue,
-                X = BORDER_WIDTH,
-                Y = BORDER_WIDTH,
-            };
-            _tabBackground.Width = MIN_WIDTH - (BORDER_WIDTH * 2);
-            _tabBackground.Height = TAB_HEIGHT;
-
             AddTab("All", new MessageType[] {
                 MessageType.Alliance, MessageType.Command, MessageType.Emote,
                 MessageType.Encoded, MessageType.Focus, MessageType.Guild,
@@ -110,18 +105,132 @@ namespace ClassicUO.Game.UI.Gumps
             #endregion
 
             Add(_background);
+            Add(_backgroundTexture);
             Add(_scrollBarBase);
-            Add(_tabBackground);
 
             Add(_journalArea);
             for (int i = 0; i < _tab.Count; i++)
                 Add(_tab[i]);
 
             InitJournalEntries();
+            BuildBorder();
+            ResizeWindow(ProfileManager.CurrentProfile.ResizeJournalSize);
             World.Journal.EntryAdded += (sender, e) => { AddJournalEntry(e); };
         }
 
         public override GumpType GumpType => GumpType.Journal;
+
+        public enum BorderStyle
+        {
+            Default,
+            Style1,
+            Style2,
+            Style3,
+            Style4,
+            Style5,
+            Style6,
+            Style7,
+            Style8
+        }
+
+        public void BuildBorder()
+        {
+            int graphic = 0, borderSize = 0;
+            updatedBorder = true;
+            switch ((BorderStyle)ProfileManager.CurrentProfile.JournalStyle)
+            {
+                case BorderStyle.Style1:
+                    graphic = 3500; borderSize = 26;
+                    break;
+                case BorderStyle.Style2:
+                    graphic = 5054; borderSize = 12;
+                    break;
+                case BorderStyle.Style3:
+                    graphic = 5120; borderSize = 10;
+                    break;
+                case BorderStyle.Style4:
+                    graphic = 9200; borderSize = 7;
+                    break;
+                case BorderStyle.Style5:
+                    graphic = 9270; borderSize = 10;
+                    break;
+                case BorderStyle.Style6:
+                    graphic = 9300; borderSize = 4;
+                    break;
+                case BorderStyle.Style7:
+                    graphic = 9260; borderSize = 17;
+                    break;
+                case BorderStyle.Style8:
+                    if (Assets.GumpsLoader.Instance.GetGumpTexture(40303, out var bounds) != null)
+                        graphic = 40303;
+                    else
+                        graphic = 83;
+                    borderSize = 16;
+                    break;
+
+                default:
+                case BorderStyle.Default:
+                    BorderControl.DefaultGraphics();
+                    _backgroundTexture.IsVisible = false;
+                    _background.IsVisible = true;
+                    BORDER_WIDTH = 4;
+                    Reposition();
+                    break;
+            }
+
+            if ((BorderStyle)ProfileManager.CurrentProfile.JournalStyle != BorderStyle.Default)
+            {
+                BorderControl.T_Left = (ushort)graphic;
+                BorderControl.H_Border = (ushort)(graphic + 1);
+                BorderControl.T_Right = (ushort)(graphic + 2);
+                BorderControl.V_Border = (ushort)(graphic + 3);
+
+                _backgroundTexture.Graphic = (ushort)(graphic + 4);
+                _backgroundTexture.IsVisible = true;
+                _backgroundTexture.Hue = _background.Hue;
+                BorderControl.Hue = _background.Hue;
+                BorderControl.Alpha = (float)ProfileManager.CurrentProfile.JournalOpacity / 100;
+                _background.IsVisible = false;
+
+                BorderControl.V_Right_Border = (ushort)(graphic + 5);
+                BorderControl.B_Left = (ushort)(graphic + 6);
+                BorderControl.H_Bottom_Border = (ushort)(graphic + 7);
+                BorderControl.B_Right = (ushort)(graphic + 8);
+                BorderControl.BorderSize = borderSize;
+                BORDER_WIDTH = borderSize;
+            }
+            Reposition();
+        }
+
+        private void Reposition()
+        {
+            if (IsDisposed)
+                return;
+            _background.X = BORDER_WIDTH;
+            _background.Y = BORDER_WIDTH;
+            _background.Width = Width - (BORDER_WIDTH * 2);
+            _background.Height = Height - (BORDER_WIDTH * 2);
+
+            _backgroundTexture.X = _background.X;
+            _backgroundTexture.Y = _background.Y;
+            _backgroundTexture.Width = _background.Width;
+            _backgroundTexture.Height = _background.Height;
+            _backgroundTexture.Alpha = (float)ProfileManager.CurrentProfile.JournalOpacity / 100;
+            BorderControl.Alpha = (float)ProfileManager.CurrentProfile.JournalOpacity / 100;
+
+            _journalArea.X = BORDER_WIDTH;
+            _journalArea.Y = TAB_HEIGHT;
+            _journalArea.Width = Width - SCROLL_BAR_WIDTH - (BORDER_WIDTH * 2);
+            _journalArea.Height = Height - BORDER_WIDTH - TAB_HEIGHT;
+
+            _lastWidth = Width;
+            _lastHeight = Height;
+
+            _scrollBarBase.X = Width - SCROLL_BAR_WIDTH - BORDER_WIDTH;
+            _scrollBarBase.Y = _journalArea.Y;
+            _scrollBarBase.Height = Height - BORDER_WIDTH - TAB_HEIGHT;
+            ProfileManager.CurrentProfile.ResizeJournalSize = new Point(Width, Height);
+        }
 
         protected override void OnMouseWheel(MouseEventType delta)
         {
@@ -144,7 +253,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void AddTab(string Name, MessageType[] filters)
         {
-            _tab.Add(new NiceButton((_tab.Count * TAB_WIDTH) + BORDER_WIDTH, BORDER_WIDTH, TAB_WIDTH, TAB_HEIGHT, ButtonAction.Activate, Name, 1) { ButtonParameter = _tab.Count, IsSelectable = true });
+            _tab.Add(new NiceButton((_tab.Count * TAB_WIDTH) + BORDER_WIDTH, 0, TAB_WIDTH, TAB_HEIGHT, ButtonAction.Activate, Name, 1) { ButtonParameter = _tab.Count, IsSelectable = true });
             _tabName.Add(Name);
             _tabTypes.Add(filters);
         }
@@ -186,18 +295,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (X != _lastX) _lastX = X;
             if (Y != _lastY) _lastY = Y;
-            if ((Width != _lastWidth || Height != _lastHeight) && !Mouse.LButtonPressed)
-            {
-                _lastWidth = Width;
-                _background.Width = Width - (BORDER_WIDTH * 2);
-                _scrollBarBase.X = Width - SCROLL_BAR_WIDTH - BORDER_WIDTH;
-                _journalArea.Width = Width - SCROLL_BAR_WIDTH - (BORDER_WIDTH * 2);
-                _lastHeight = Height;
-                _background.Height = Height - (BORDER_WIDTH * 2);
-                _journalArea.Height = Height - (BORDER_WIDTH * 2) - TAB_HEIGHT;
-                _scrollBarBase.Height = Height - (BORDER_WIDTH * 2) - TAB_HEIGHT;
-                ProfileManager.CurrentProfile.ResizeJournalSize = new Point(Width, Height);
-            }
+            if (((Width != _lastWidth || Height != _lastHeight) && !Mouse.LButtonPressed) || updatedBorder)
+                Reposition();
         }
 
         private class RenderedTextList : Control

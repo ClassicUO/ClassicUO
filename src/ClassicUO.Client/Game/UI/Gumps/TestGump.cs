@@ -8,7 +8,7 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class TestGump : Gump
     {
-        private Texture2D image = PNGLoader.GetImageTexture(Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "tazuo.png"));
+        private Texture2D image = PNGLoader.Instance.GetImageTexture(Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "tazuo.png"));
 
         public TestGump() : base(0, 0)
         {
