@@ -246,7 +246,7 @@ namespace ClassicUO.Assets
         {
             g += 0x4000;
 
-            Texture2D png = PNGLoader.LoadArtTexture(g);
+            Texture2D png = PNGLoader.Instance.LoadArtTexture(g);
             if (png != null)
             {
                 bounds = png.Bounds;

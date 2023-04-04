@@ -65,7 +65,7 @@ namespace ClassicUO.Configuration
         public byte ChatFont { get; set; } = 1;
         public int SpeechDelay { get; set; } = 100;
         public bool ScaleSpeechDelay { get; set; } = true;
-        public bool SaveJournalToFile { get; set; } = true;
+        public bool SaveJournalToFile { get; set; } = false;
         public bool ForceUnicodeJournal { get; set; }
         public bool IgnoreAllianceMessages { get; set; }
         public bool IgnoreGuildMessages { get; set; }
@@ -386,6 +386,9 @@ namespace ClassicUO.Configuration
         public List<List<int>> GridHighlight_PropMinVal { get; set; } = new List<List<int>>();
         public bool GridHighlight_CorpseOnly { get; set; } = false;
         #endregion
+
+        public ushort ModernPaperDollHue { get; set; } = 0;
+        public ushort ModernPaperDollDurabilityHue { get; set; } = 32;
 
         public static uint GumpsVersion { get; private set; }
 

@@ -396,7 +396,7 @@ namespace ClassicUO.Game.UI.Controls
                     RemoveLastCommand();
                     break;
                 case (int)buttonsOption.CreateNewMacro:
-                    UIManager.Gumps.OfType<MacroButtonGump>().FirstOrDefault(s => s._macro == Macro)?.Dispose();
+                    UIManager.Gumps.OfType<MacroButtonGump>().FirstOrDefault(s => s.TheMacro == Macro)?.Dispose();
 
                     MacroButtonGump macroButtonGump = new MacroButtonGump(Macro, Mouse.Position.X, Mouse.Position.Y);
                     UIManager.Add(macroButtonGump);

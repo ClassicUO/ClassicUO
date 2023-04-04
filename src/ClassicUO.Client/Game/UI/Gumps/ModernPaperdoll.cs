@@ -49,10 +49,9 @@ namespace ClassicUO.Game.UI.Gumps
             itemLayerSlots = new Dictionary<Layer[], ItemSlot>();
             #endregion
 
-            //Add(new AlphaBlendControl(0.8f) { Width = WIDTH, Height = HEIGHT, Hue = 10 });
-            Add(new GumpPic(0, 0, 40312, 0));
+            Add(new GumpPic(0, 0, 40312, ProfileManager.CurrentProfile.ModernPaperDollHue));
 
-            HitBox _menuHit = new HitBox(Width-26, 1, 25, 16, alpha: 0f);
+            HitBox _menuHit = new HitBox(Width - 26, 1, 25, 16, alpha: 0f);
             Add(_menuHit);
             _menuHit.SetTooltip("Open paperdoll menu");
             _menuHit.MouseUp += (sender, e) =>
@@ -141,9 +140,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             BuildLayerSlots();
 
-            GumpPic _virtueMenuPic;
-            Add(_virtueMenuPic = new GumpPic((WIDTH / 2) - 16, 1, 0x0071, 0));
-            _virtueMenuPic.MouseDoubleClick += (s, e) =>
+            HitBox _virtueHitBox = new HitBox((WIDTH / 2) - 16, 1, 32, 32, "Virtues menu", 0f);
+            _virtueHitBox.MouseDoubleClick += (s, e) =>
             {
                 GameActions.ReplyGump
                 (
@@ -157,9 +155,9 @@ namespace ClassicUO.Game.UI.Gumps
                     new Tuple<ushort, string>[0]
                 );
             };
-            _virtueMenuPic.SetTooltip("Virtues");
+            Add(_virtueHitBox);
 
-            Add(titleLabel = new Label("", true, 0xffff, maxwidth: WIDTH - 10, align: TEXT_ALIGN_TYPE.TS_CENTER) { X = 5, Y = 270 + CELL_SPACING + TOP_SPACING, AcceptMouseInput = false });
+            Add(titleLabel = new Label("", true, 0xffff, maxwidth: WIDTH - 30, align: TEXT_ALIGN_TYPE.TS_CENTER) { X = 15, Y = 273 + CELL_SPACING + TOP_SPACING, AcceptMouseInput = false });
 
             HitBox _minHit = new HitBox(1, 1, 14, 18, alpha: 0f);
             _minHit.SetTooltip("Minimize paperdoll");
@@ -331,7 +329,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Add(itemArea = new Area(false) { Width = Width, Height = Height, AcceptMouseInput = true, CanMove = true });
                 itemArea.SetTooltip(layers[0].ToString());
 
-                Add(durablityBar = new AlphaBlendControl(0.75f) { Width = 8, Height = Height, Hue = 32, IsVisible = false });
+                Add(durablityBar = new AlphaBlendControl(0.75f) { Width = 7, Height = Height, Hue = ProfileManager.CurrentProfile.ModernPaperDollDurabilityHue, IsVisible = false });
 
                 //Add(new SimpleBorder() { Width = Width, Height = Height, Alpha = 0.8f });
                 this.layers = layers;

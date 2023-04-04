@@ -153,7 +153,7 @@ namespace ClassicUO
             GumpsLoader.Instance.CreateAtlas(GraphicsDevice);
             LightsLoader.Instance.CreateAtlas(GraphicsDevice);
             AnimationsLoader.Instance.CreateAtlas(GraphicsDevice);
-            PNGLoader.GraphicsDevice = GraphicsDevice;
+            PNGLoader.Instance.GraphicsDevice = GraphicsDevice;
 
             LightColors.LoadLights();
 

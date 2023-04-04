@@ -54,6 +54,7 @@ namespace ClassicUO.Game.UI.Gumps
         private Macro _macr;
         private readonly int DEFAULT_WIDTH = 88;
         private readonly int DEFAULT_HEIGHT = 44;
+        private RenderedText _gText;
 
         public MacroButtonGump(Macro macro, int x, int y) : this()
         {
@@ -61,7 +62,8 @@ namespace ClassicUO.Game.UI.Gumps
             Y = y;
             Width = DEFAULT_WIDTH;
             Height = DEFAULT_HEIGHT;
-            _macro = macro;           
+            TheMacro = macro;
+
             BuildGump();
         }
 
@@ -80,7 +82,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override GumpType GumpType => GumpType.MacroButton;
 
-        public Macro _macro { get => _macr;
+        public Macro TheMacro
+        {
+            get => _macr;
             set
             {
                 _macr = value;
@@ -91,19 +95,25 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
         public bool IsPartialHue { get; set; }
-        public ushort Hue { get => _hue; set
+        public ushort Hue
+        {
+            get => _hue; set
             {
                 _hue = value;
                 hueVector = ShaderHueTranslator.GetHueVector(value);
             }
         }
-        public bool HideLabel { get => _hideLabel; 
+        public bool HideLabel
+        {
+            get => _hideLabel;
             set
             {
                 _hideLabel = value;
             }
         }
-        public float Scale { get => _scale; 
+        public float Scale
+        {
+            get => _scale;
             set
             {
                 _scale = value;
@@ -115,7 +125,7 @@ namespace ClassicUO.Game.UI.Gumps
                 GroupMatrixHeight = Height;
                 GroupMatrixWidth = Width;
                 WidthMultiplier = 1;
-            } 
+            }
         }
         public ushort? Graphic
         {
@@ -124,26 +134,36 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _graphic = value;
                 var factor = Scale / 100F;
-                Rectangle _bounds = new Rectangle(0,0, DEFAULT_WIDTH, DEFAULT_HEIGHT);
+                Rectangle _bounds = new Rectangle(0, 0, DEFAULT_WIDTH, DEFAULT_HEIGHT);
 
                 if (value.HasValue)
                 {
                     var texture = GumpsLoader.Instance.GetGumpTexture(value.Value, out _bounds);
-                    IsPartialHue = texture == null ? false : TileDataLoader.Instance.StaticData[value.Value].IsPartialHue;                    
-                }               
+                    IsPartialHue = texture == null ? false : TileDataLoader.Instance.StaticData[value.Value].IsPartialHue;
+                }
 
                 Width = (int)(_bounds.Width * factor);
                 Height = (int)(_bounds.Height * factor);
 
                 GroupMatrixHeight = Height;
                 GroupMatrixWidth = Width;
-                WidthMultiplier = 1;                
+                WidthMultiplier = 1;
             }
         }
 
         private void BuildGump()
         {
             backgroundTexture = SolidColorTextureCache.GetTexture(new Color(30, 30, 30));
+            _gText = RenderedText.Create
+           (
+               TheMacro.Name,
+               0x03b2,
+               255,
+               true,
+               FontStyle.BlackBorder,
+               TEXT_ALIGN_TYPE.TS_CENTER,
+               Width
+           );
         }
 
         protected override void OnMouseEnter(int x, int y)
@@ -185,10 +205,10 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void RunMacro()
         {
-            if (_macro != null)
+            if (TheMacro != null)
             {
                 GameScene gs = Client.Game.GetScene<GameScene>();
-                gs.Macros.SetMacroToExecute(_macro.Items as MacroObject);
+                gs.Macros.SetMacroToExecute(TheMacro.Items as MacroObject);
                 gs.Macros.WaitForTargetTimer = 0;
                 gs.Macros.Update();
             }
@@ -235,21 +255,10 @@ namespace ClassicUO.Game.UI.Gumps
                     );
                 }
             }
-           
-
 
             if (!HideLabel)
             {
-                var _gText = RenderedText.Create
-                   (
-                       _macro.Name,
-                        (ushort)(MouseIsOver ? 53 : 0x03b2),
-                       255,
-                       true,
-                       FontStyle.BlackBorder,
-                       TEXT_ALIGN_TYPE.TS_CENTER,
-                       Width
-                   );
+                _gText.Hue = (ushort)(MouseIsOver ? 53 : 0x03b2);
                 _gText.Draw(batcher, x, y + ((Height >> 1) - (_gText.Height >> 1)), Alpha);
             }
 
@@ -261,16 +270,16 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Save(XmlTextWriter writer)
         {
-            if (_macro != null)
+            if (TheMacro != null)
             {
                 // hack to give macro buttons a unique id for use in anchor groups
-                int macroid = Client.Game.GetScene<GameScene>().Macros.GetAllMacros().IndexOf(_macro);
+                int macroid = Client.Game.GetScene<GameScene>().Macros.GetAllMacros().IndexOf(TheMacro);
 
-                LocalSerial = (uint) macroid + 1000;
+                LocalSerial = (uint)macroid + 1000;
 
                 base.Save(writer);
 
-                writer.WriteAttributeString("name", _macro.Name);
+                writer.WriteAttributeString("name", TheMacro.Name);
             }
         }
 
@@ -282,7 +291,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (macro != null)
             {
-                _macro = macro;
+                TheMacro = macro;
                 BuildGump();
             }
         }

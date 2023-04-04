@@ -313,10 +313,10 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 case 1:
                     Client.Game.GetScene<GameScene>().Macros.Save();
-                    var existing = UIManager.Gumps.OfType<MacroButtonGump>().FirstOrDefault(s => s._macro == _macro);
+                    var existing = UIManager.Gumps.OfType<MacroButtonGump>().FirstOrDefault(s => s.TheMacro == _macro);
                     if (existing != null)
                     {
-                        existing._macro = _macro;
+                        existing.TheMacro = _macro;
                     }                   
                     break;
             }
