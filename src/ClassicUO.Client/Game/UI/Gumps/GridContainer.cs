@@ -70,6 +70,7 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly StbTextBox _searchBox;
         private readonly GumpPic _openRegularGump, _quickDropBackpack, _sortContents;
         private readonly GumpPicTiled _backgroundTexture;
+        private readonly NiceButton _setLootBag;
 
         private float _lastGridItemScale = (ProfileManager.CurrentProfile.GridContainersScale / 100f);
         private int _lastWidth = DEFAULT_WIDTH, _lastHeight = DEFAULT_HEIGHT;
@@ -202,6 +203,16 @@ namespace ClassicUO.Game.UI.Gumps
             _scrollArea.DragBegin += _scrollArea_DragBegin;
             #endregion
 
+            #region Set loot bag
+            _setLootBag = new NiceButton(0, Height - 20, 100, 20, ButtonAction.Default, "Set loot bag") { IsSelectable = false };
+            _setLootBag.IsVisible = ProfileManager.CurrentProfile.DoubleClickToLootInsideContainers && _container.IsCorpse;
+            _setLootBag.SetTooltip("For double click looting only");
+            _setLootBag.MouseUp += (s, e) => {
+                GameActions.Print(Resources.ResGumps.TargetContainerToGrabItemsInto);
+                TargetManager.SetTargeting(CursorTarget.SetGrabBag, 0, TargetType.Neutral);
+            };
+            #endregion
+
             #region Add controls
             Add(_background);
             Add(_backgroundTexture);
@@ -217,6 +228,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add(_quickDropBackpack);
             Add(_sortContents);
             Add(_scrollArea);
+            Add(_setLootBag);
             #endregion
 
             gridSlotManager = new GridSlotManager(local, this, _scrollArea, gridSaveSystem.GetItemSlots(LocalSerial)); //Must come after scroll area
@@ -473,7 +485,7 @@ namespace ClassicUO.Game.UI.Gumps
             if ((_lastWidth != Width || _lastHeight != Height) || _lastGridItemScale != GRID_ITEM_SIZE || updatedBorder)
             {
                 _lastGridItemScale = GRID_ITEM_SIZE;
-                             _background.Width = Width - (BORDER_WIDTH * 2);
+                _background.Width = Width - (BORDER_WIDTH * 2);
                 _background.Height = Height - (BORDER_WIDTH * 2);
                 _scrollArea.Width = _background.Width;
                 _scrollArea.Height = _background.Height - TOP_BAR_HEIGHT;
@@ -488,10 +500,11 @@ namespace ClassicUO.Game.UI.Gumps
                 _backgroundTexture.Height = _background.Height;
                 _backgroundTexture.Alpha = _background.Alpha;
                 _backgroundTexture.Hue = _background.Hue;
+                _setLootBag.Y = Height - 20;
                 RequestUpdateContents();
             }
 
-                    
+
 
 
             if (_container != null && !_container.IsDestroyed && UIManager.MouseOverControl != null && (UIManager.MouseOverControl == this || UIManager.MouseOverControl.RootParent == this))
@@ -1048,7 +1061,7 @@ namespace ClassicUO.Game.UI.Gumps
                                 slot.Value.Hightlight = ProfileManager.CurrentProfile.GridContainerSearchMode == 1;
                                 slot.Value.IsVisible = true;
                             }
-                        }                       
+                        }
                     }
                 }
                 SetGridPositions();
@@ -1060,7 +1073,8 @@ namespace ClassicUO.Game.UI.Gumps
                 int x = X_SPACING, y = 0;
                 foreach (var slot in gridSlots)
                 {
-                    if (!slot.Value.IsVisible) {
+                    if (!slot.Value.IsVisible)
+                    {
                         continue;
                     }
                     if (x + GRID_ITEM_SIZE >= area.Width - 14) //14 is the scroll bar width
