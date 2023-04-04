@@ -470,9 +470,16 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            if ((_lastWidth != Width || _lastHeight != Height) || _lastGridItemScale != GRID_ITEM_SIZE || updatedBorder)
+            var newAlpha = (float)ProfileManager.CurrentProfile.ContainerOpacity / 100;
+            var newHue = ProfileManager.CurrentProfile.Grid_UseContainerHue ? _container.Hue : ProfileManager.CurrentProfile.AltGridContainerBackgroundHue;
+
+
+            if ((_lastWidth != Width || _lastHeight != Height) || _lastGridItemScale != GRID_ITEM_SIZE || updatedBorder
+                || _background.Alpha != newAlpha || _background.Hue != newHue)
             {
                 _lastGridItemScale = GRID_ITEM_SIZE;
+                _background.Hue = newHue;
+                _background.Alpha = newAlpha;
                 _background.Width = Width - (BORDER_WIDTH * 2);
                 _background.Height = Height - (BORDER_WIDTH * 2);
                 _scrollArea.Width = _background.Width;
@@ -487,8 +494,12 @@ namespace ClassicUO.Game.UI.Gumps
                 _backgroundTexture.Width = _background.Width;
                 _backgroundTexture.Height = _background.Height;
                 _backgroundTexture.Alpha = _background.Alpha;
+                _backgroundTexture.Hue = newHue;
                 RequestUpdateContents();
             }
+
+                    
+
 
             if (_container != null && !_container.IsDestroyed && UIManager.MouseOverControl != null && (UIManager.MouseOverControl == this || UIManager.MouseOverControl.RootParent == this))
             {
@@ -980,7 +991,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             public void RebuildContainer(List<Item> filteredItems, string searchText = "", bool overrideSort = false)
             {
-                SetGridPositions();
                 foreach (var slot in gridSlots)
                 {
                     slot.Value.SetGridItem(null);
@@ -1014,21 +1024,30 @@ namespace ClassicUO.Game.UI.Gumps
 
                 foreach (var slot in gridSlots)
                 {
-                    if (slot.Value.SlotItem != null && ProfileManager.CurrentProfile.GridContainerSearchMode == 1 && searchText.Length > 0)
+                    slot.Value.IsVisible = string.IsNullOrWhiteSpace(searchText);
+                    if (slot.Value.SlotItem != null && !string.IsNullOrWhiteSpace(searchText))
                     {
-                        if (slot.Value.SlotItem.Name != null && slot.Value.SlotItem.Name.ToLower().Contains(searchText.ToLower()))
+                        slot.Value.IsVisible = ProfileManager.CurrentProfile.GridContainerSearchMode == 0 ? false : true;
+                        if (slot.Value.SlotItem == null)
                         {
-                            slot.Value.Hightlight = true;
+                            continue;
                         }
-                        else if (World.OPL.TryGetNameAndData(slot.Value.SlotItem.Serial, out string name, out string data))
+                        if (World.OPL.TryGetNameAndData(slot.Value.SlotItem.Serial, out string name, out string data))
                         {
-                            if (data != null)
-                                if (data.ToLower().Contains(searchText.ToLower()))
-                                    slot.Value.Hightlight = true;
-                        }
+                            var searchList = new List<string>() { name };
+                            if (ProfileManager.CurrentProfile.GridHighlight_PropNames.Count > 0)
+                            {
+                                searchList.Add(data);
+                            }
+                            if (searchList.Exists(s => s.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) >= 0))
+                            {
+                                slot.Value.Hightlight = ProfileManager.CurrentProfile.GridContainerSearchMode == 1;
+                                slot.Value.IsVisible = true;
+                            }
+                        }                       
                     }
                 }
-
+                SetGridPositions();
                 ApplyHighlightProperties();
             }
 
@@ -1037,6 +1056,9 @@ namespace ClassicUO.Game.UI.Gumps
                 int x = X_SPACING, y = 0;
                 foreach (var slot in gridSlots)
                 {
+                    if (!slot.Value.IsVisible) {
+                        continue;
+                    }
                     if (x + GRID_ITEM_SIZE >= area.Width - 14) //14 is the scroll bar width
                     {
                         x = X_SPACING;

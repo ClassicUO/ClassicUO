@@ -4395,9 +4395,17 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.StandardSkillsGump = _useStandardSkillsGump.IsChecked;
 
             _currentProfile.AltJournalBackgroundHue = _journalBackgroundColor.Hue;
-            _currentProfile.AltGridContainerBackgroundHue = _altGridContainerBackgroundHue.Hue;
+            if (_currentProfile.AltGridContainerBackgroundHue != _altGridContainerBackgroundHue.Hue)
+            {
+                _currentProfile.AltGridContainerBackgroundHue = _altGridContainerBackgroundHue.Hue;
+                foreach (GridContainer _ in UIManager.Gumps.OfType<GridContainer>())
+                {
+                    _.Update();
+                }
+            }
 
-            if (_useStandardSkillsGump.IsChecked)
+
+                if (_useStandardSkillsGump.IsChecked)
             {
                 SkillGumpAdvanced newGump = UIManager.GetGump<SkillGumpAdvanced>();
 
