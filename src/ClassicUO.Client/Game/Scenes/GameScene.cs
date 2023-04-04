@@ -112,6 +112,16 @@ namespace ClassicUO.Game.Scenes
         public bool UseLights => ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.UseCustomLightLevel ? World.Light.Personal < World.Light.Overall : World.Light.RealPersonal < World.Light.RealOverall;
         public bool UseAltLights => ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.UseAlternativeLights;
 
+        private bool _followingMode
+        {
+            get { return ProfileManager.CurrentProfile.FollowingMode; }
+            set { ProfileManager.CurrentProfile.FollowingMode = value; }
+        }
+        private uint _followingTarget
+        {
+            get { return ProfileManager.CurrentProfile.FollowingTarget; }
+            set { ProfileManager.CurrentProfile.FollowingTarget = value; }
+        }
 
         public void DoubleClickDelayed(uint serial)
         {
