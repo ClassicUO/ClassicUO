@@ -979,33 +979,6 @@ namespace ClassicUO.Game.UI.Gumps
             section2.PopIndent();
             section2.PopIndent();
 
-            section2.Add(AddLabel(null, "Hidden Body Opacity", startX, startY));
-
-            section2.AddRight
-            (
-                _hiddenBodyAlpha = AddHSlider(
-                    null,
-                    0,
-                    100,
-                    _currentProfile.HiddenBodyAlpha,
-                    startX,
-                    startY,
-                    200
-                ),
-                2
-            );
-
-            section2.Add
-            (
-                _hiddenBodyHue = AddColorBox(
-                    null,
-                    startX,
-                    startY,
-                    _currentProfile.HiddenBodyHue,
-                    ""
-                    )
-            );
-            section2.AddRight(AddLabel(null, "Hidden Body Hue", startX, startY));
 
             {
                 section2.Add(
@@ -4014,6 +3987,36 @@ namespace ClassicUO.Game.UI.Gumps
                         ));
                     section.AddRight(AddLabel(null, "Disable system chat", 0, 0));
                 } //Disable system chat
+
+                {
+                    section.Add(AddLabel(null, "Hidden Body Opacity", 0, 0));
+
+                    section.AddRight
+                    (
+                        _hiddenBodyAlpha = AddHSlider(
+                            null,
+                            0,
+                            100,
+                            _currentProfile.HiddenBodyAlpha,
+                            0,
+                            0,
+                            200
+                        ),
+                        2
+                    );
+
+                    section.Add
+                    (
+                        _hiddenBodyHue = AddColorBox(
+                            null,
+                            0,
+                            0,
+                            _currentProfile.HiddenBodyHue,
+                            ""
+                            )
+                    );
+                    section.AddRight(AddLabel(null, "Hidden Body Hue", 0, 0));
+                } //Hidden body mods
 
                 rightArea.Add(section);
                 startY += section.Height + SPACING;
