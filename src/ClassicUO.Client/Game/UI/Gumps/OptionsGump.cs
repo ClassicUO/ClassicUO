@@ -184,6 +184,8 @@ namespace ClassicUO.Game.UI.Gumps
         private Checkbox _showStatsMessage, _showSkillsMessage;
         private HSliderBar _showSkillsMessageDelta;
 
+        private Checkbox _leftAlignToolTips;
+
         #region Cooldowns
         private InputField _coolDownX, _coolDownY;
         #endregion
@@ -4066,6 +4068,10 @@ namespace ClassicUO.Game.UI.Gumps
                     _improvedBuffBarHue.SetTooltip("Buff Bar Hue");
                 }//Improved buff gump
 
+                {
+                    section.Add(_leftAlignToolTips = AddCheckBox(null, "Align tooltips to the left side", _currentProfile.LeftAlignToolTips, 0, 0));
+                }//Left align tooltips
+
                 rightArea.Add(section);
                 startY += section.Height + SPACING;
             }//Misc
@@ -4476,6 +4482,8 @@ namespace ClassicUO.Game.UI.Gumps
                 _currentProfile.JournalStyle = _journalStyle.SelectedIndex;
                 UIManager.GetGump<ResizableJournal>()?.BuildBorder();
             }
+
+            _currentProfile.LeftAlignToolTips = _leftAlignToolTips.IsChecked;
 
             _currentProfile.ModernPaperDollHue = _paperDollHue.Hue;
             _currentProfile.ModernPaperDollDurabilityHue = _durabilityBarHue.Hue;
