@@ -979,41 +979,7 @@ namespace ClassicUO.Game.UI.Gumps
             section2.PopIndent();
             section2.PopIndent();
 
-
-            {
-                section2.Add(
-                    _namePlateHealthBar = AddCheckBox(null, "", _currentProfile.NamePlateHealthBar, startX, startY)
-                    );
-
-                section2.AddRight(AddLabel(null, "Name plates also act as health bar", startX, startY));
-
-                section2.PushIndent();
-                section2.Add(AddLabel(null, "HP opacity", 0, 0));
-                section2.AddRight(_namePlateHealthBarOpacity = AddHSlider(
-                        null,
-                        0, 100,
-                        _currentProfile.NamePlateHealthBarOpacity,
-                        0, 0,
-                        200
-                    ));
-                section2.Add(_namePlateShowAtFullHealth = AddCheckBox(null, "", _currentProfile.NamePlateHideAtFullHealth, 0, 0));
-                _namePlateShowAtFullHealth.SetTooltip("This is only applied while in war mode.");
-                section2.AddRight(new Label("Hide nameplates above 100% hp.", true, HUE_FONT, font: FONT));
-                section2.PopIndent();
-            } //Name plate health bar
-
-            {
-                section2.Add(AddLabel(null, "Name plate background opacity", 0, 0));
-                section2.AddRight(_namePlateOpacity = AddHSlider(
-                        null,
-                        0, 100,
-                        _currentProfile.NamePlateOpacity,
-                        0, 0,
-                        200
-                    ));
-            } //Name plate background opacity
-
-            SettingsSection section3 = AddSettingsSection(box, "Gumps & Context");
+                     SettingsSection section3 = AddSettingsSection(box, "Gumps & Context");
             section3.Y = section2.Bounds.Bottom + 40;
 
             section3.Add
@@ -3626,7 +3592,7 @@ namespace ClassicUO.Game.UI.Gumps
                 420,
                 true
             );
-            int startY = 0;
+            int startY = 5;
 
             {
                 SettingsSection gridSection = new SettingsSection("Grid Containers", rightArea.Width);
@@ -3934,6 +3900,68 @@ namespace ClassicUO.Game.UI.Gumps
                 rightArea.Add(section);
                 startY += section.Height + SPACING;
             }//Modern paperdoll
+
+            {
+                SettingsSection section = new SettingsSection("Nameplates", rightArea.Width) { Y = startY };
+
+                {
+                    NiceButton _;
+                    section.BaseAdd(_ = new NiceButton(0, 0, 20, TEXTBOX_HEIGHT, ButtonAction.Activate, "<>") { IsSelectable = false });
+                    _.SetTooltip("Minimize section");
+                    _.X = rightArea.Width - 45;
+                    _.MouseUp += (s, e) =>
+                    {
+                        if (e.Button == MouseButtonType.Left)
+                        {
+                            int diff = section.Height - 25;
+                            if (section.Children[2].IsVisible)
+                                diff = -section.Height + 25;
+                            for (int i = rightArea.Children.IndexOf(section) + 1; i < rightArea.Children.Count; i++)
+                            {
+                                if (rightArea.Children[i] != section)
+                                    rightArea.Children[i].Y += diff;
+                            }
+                            section.Children[2].IsVisible = !section.Children[2].IsVisible;
+                        }
+                    };
+                }
+
+                {
+                    section.Add(
+                        _namePlateHealthBar = AddCheckBox(null, "", _currentProfile.NamePlateHealthBar, 0, 0)
+                        );
+
+                    section.AddRight(AddLabel(null, "Name plates also act as health bar", 0, 0));
+
+                    section.PushIndent();
+                    section.Add(AddLabel(null, "HP opacity", 0, 0));
+                    section.AddRight(_namePlateHealthBarOpacity = AddHSlider(
+                            null,
+                            0, 100,
+                            _currentProfile.NamePlateHealthBarOpacity,
+                            0, 0,
+                            200
+                        ));
+                    section.Add(_namePlateShowAtFullHealth = AddCheckBox(null, "", _currentProfile.NamePlateHideAtFullHealth, 0, 0));
+                    _namePlateShowAtFullHealth.SetTooltip("This is only applied while in war mode.");
+                    section.AddRight(new Label("Hide nameplates above 100% hp.", true, HUE_FONT, font: FONT));
+                    section.PopIndent();
+                } //Name plate health bar
+
+                {
+                    section.Add(AddLabel(null, "Name plate background opacity", 0, 0));
+                    section.AddRight(_namePlateOpacity = AddHSlider(
+                            null,
+                            0, 100,
+                            _currentProfile.NamePlateOpacity,
+                            0, 0,
+                            200
+                        ));
+                } //Name plate background opacity
+
+                rightArea.Add(section);
+                startY += section.Height + SPACING;
+            } //Name plates
 
             {
                 SettingsSection section = new SettingsSection("Misc", rightArea.Width) { Y = startY };
