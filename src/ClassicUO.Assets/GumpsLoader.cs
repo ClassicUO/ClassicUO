@@ -172,6 +172,20 @@ namespace ClassicUO.Assets
             return spriteInfo.Texture;
         }
 
+        public Texture2D GetGumpPartialTexture(uint g, Rectangle partialBounds, out Rectangle bounds)
+        {
+            ref var spriteInfo = ref _spriteInfos[g];
+
+            if (spriteInfo.Texture == null)
+            {
+                AddSpriteToAtlas(_atlas, g);
+            }
+
+            bounds = new Rectangle(spriteInfo.UV.X + partialBounds.X, spriteInfo.UV.Y + partialBounds.Y, partialBounds.Width, partialBounds.Height);
+
+            return spriteInfo.Texture;
+        }
+
         private unsafe void AddSpriteToAtlas(TextureAtlas atlas, uint index)
         {
             ref UOFileIndex entry = ref GetValidRefEntry((int)index);
