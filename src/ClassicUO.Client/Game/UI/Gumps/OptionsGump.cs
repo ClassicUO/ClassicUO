@@ -184,7 +184,7 @@ namespace ClassicUO.Game.UI.Gumps
         private Checkbox _showStatsMessage, _showSkillsMessage;
         private HSliderBar _showSkillsMessageDelta;
 
-        private Checkbox _leftAlignToolTips;
+        private Checkbox _leftAlignToolTips, _namePlateHealthOnlyWarmode;
 
         #region Cooldowns
         private InputField _coolDownX, _coolDownY;
@@ -3903,8 +3903,11 @@ namespace ClassicUO.Game.UI.Gumps
                             200
                         ));
                     section.Add(_namePlateShowAtFullHealth = AddCheckBox(null, "", _currentProfile.NamePlateHideAtFullHealth, 0, 0));
-                    _namePlateShowAtFullHealth.SetTooltip("This is only applied while in war mode.");
                     section.AddRight(new Label("Hide nameplates above 100% hp.", true, HUE_FONT, font: FONT));
+                    section.PushIndent();
+                    section.Add(_namePlateHealthOnlyWarmode = AddCheckBox(null, "", _currentProfile.NamePlateHideAtFullHealthInWarmode, 0, 0));
+                    section.AddRight(new Label("Only while in warmode", true, HUE_FONT, font: FONT));
+                    section.PopIndent();
                     section.PopIndent();
                 } //Name plate health bar
 
@@ -4482,6 +4485,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _currentProfile.JournalStyle = _journalStyle.SelectedIndex;
                 UIManager.GetGump<ResizableJournal>()?.BuildBorder();
             }
+            _currentProfile.NamePlateHideAtFullHealthInWarmode = _namePlateHealthOnlyWarmode.IsChecked;
 
             _currentProfile.LeftAlignToolTips = _leftAlignToolTips.IsChecked;
 
