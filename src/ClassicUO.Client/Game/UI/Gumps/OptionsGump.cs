@@ -2913,30 +2913,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             startX = 5;
             startY += (_spellFormatBox.Height * 2) + 2;
-
-            SettingsSection _damageHues = new SettingsSection("Damage number hues", rightArea.Width);
-            _damageHues.X = startX;
-            _damageHues.Y = startY;
-
-            _damageHues.Add(_damageHueSelf = AddColorBox(null, 0, 0, _currentProfile.DamageHueSelf, ""));
-            _damageHues.AddRight(new Label("Damage to self", true, HUE_FONT, font: FONT));
-
-            _damageHues.AddRight(_damageHueOther = AddColorBox(null, 0, 0, _currentProfile.DamageHueOther, ""));
-            _damageHues.AddRight(new Label("Damage to others", true, HUE_FONT, font: FONT));
-
-            _damageHues.Add(_damageHuePet = AddColorBox(null, 0, 0, _currentProfile.DamageHuePet, ""));
-            _damageHues.AddRight(new Label("Damage to pets", true, HUE_FONT, font: FONT));
-            _damageHuePet.SetTooltip("Due to client limitations magic summons don't work here.");
-
-            _damageHues.Add(_damageHueAlly = AddColorBox(null, 0, 0, _currentProfile.DamageHueAlly, ""));
-            _damageHues.AddRight(new Label("Damage to allies", true, HUE_FONT, font: FONT));
-
-            _damageHues.Add(_damageHueLastAttack = AddColorBox(null, 0, 0, _currentProfile.DamageHueLastAttck, ""));
-            _damageHues.AddRight(new Label("Damage to last attack", true, HUE_FONT, font: FONT));
-            _damageHueLastAttack.SetTooltip("Damage done to the last mobile you attacked, due to client limitations this is not neccesarily the damage YOU did to them.");
-
-            rightArea.Add(_damageHues);
-
             Add(rightArea, PAGE);
         }
 
@@ -3944,6 +3920,52 @@ namespace ClassicUO.Game.UI.Gumps
                 rightArea.Add(section);
                 startY += section.Height + SPACING;
             } //Name plates
+
+            {
+                SettingsSection section = new SettingsSection("Mobiles", rightArea.Width) { Y = startY };
+
+                {
+                    NiceButton _;
+                    section.BaseAdd(_ = new NiceButton(0, 0, 20, TEXTBOX_HEIGHT, ButtonAction.Activate, "<>") { IsSelectable = false });
+                    _.SetTooltip("Minimize section");
+                    _.X = rightArea.Width - 45;
+                    _.MouseUp += (s, e) =>
+                    {
+                        if (e.Button == MouseButtonType.Left)
+                        {
+                            int diff = section.Height - 25;
+                            if (section.Children[2].IsVisible)
+                                diff = -section.Height + 25;
+                            for (int i = rightArea.Children.IndexOf(section) + 1; i < rightArea.Children.Count; i++)
+                            {
+                                if (rightArea.Children[i] != section)
+                                    rightArea.Children[i].Y += diff;
+                            }
+                            section.Children[2].IsVisible = !section.Children[2].IsVisible;
+                        }
+                    };
+                }
+
+                section.Add(_damageHueSelf = AddColorBox(null, 0, 0, _currentProfile.DamageHueSelf, ""));
+                section.AddRight(new Label("Damage to self", true, HUE_FONT, font: FONT));
+
+                section.AddRight(_damageHueOther = AddColorBox(null, 0, 0, _currentProfile.DamageHueOther, ""));
+                section.AddRight(new Label("Damage to others", true, HUE_FONT, font: FONT));
+
+                section.Add(_damageHuePet = AddColorBox(null, 0, 0, _currentProfile.DamageHuePet, ""));
+                section.AddRight(new Label("Damage to pets", true, HUE_FONT, font: FONT));
+                _damageHuePet.SetTooltip("Due to client limitations magic summons don't work here.");
+
+                section.Add(_damageHueAlly = AddColorBox(null, 0, 0, _currentProfile.DamageHueAlly, ""));
+                section.AddRight(new Label("Damage to allies", true, HUE_FONT, font: FONT));
+
+                section.Add(_damageHueLastAttack = AddColorBox(null, 0, 0, _currentProfile.DamageHueLastAttck, ""));
+                section.AddRight(new Label("Damage to last attack", true, HUE_FONT, font: FONT));
+                _damageHueLastAttack.SetTooltip("Damage done to the last mobile you attacked, due to client limitations this is not neccesarily the damage YOU did to them.");
+
+                rightArea.Add(section);
+                startY += section.Height + SPACING;
+            } //Mobiles
 
             {
                 SettingsSection section = new SettingsSection("Misc", rightArea.Width) { Y = startY };
