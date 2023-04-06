@@ -401,10 +401,26 @@ namespace ClassicUO.Game.UI.Gumps
                     140,
                     25,
                     ButtonAction.SwitchPage,
-                    "Cooldowns"
+                    "Cooldowns (TUO)"
                 )
                 {
-                    ButtonParameter = 8787 //They didn't use enums so putting this here until I fix it
+                    ButtonParameter = 8787
+                }
+            );
+
+            Add
+            (
+                new NiceButton
+                (
+                    10,
+                    10 + 30 * i++,
+                    140,
+                    25,
+                    ButtonAction.SwitchPage,
+                    "TazUO"
+                )
+                {
+                    ButtonParameter = 8788
                 }
             );
 
@@ -492,6 +508,7 @@ namespace ClassicUO.Game.UI.Gumps
             BuildContainers();
             BuildExperimental();
             BuildCooldowns();
+            BuildTazUO();
 
             ChangePage(1);
         }
@@ -3642,175 +3659,6 @@ namespace ClassicUO.Game.UI.Gumps
             startX = 5;
             startY += button.Height + 2;
 
-            #region Grid Container Settings
-            SettingsSection gridSection = new SettingsSection("Grid Containers", rightArea.Width);
-            gridSection.X = startX;
-            gridSection.Y = startY;
-
-            {
-                gridSection.Add(_useGridLayoutContainerGumps = AddCheckBox(
-                    null,
-                    "Use grid containers",
-                    _currentProfile.UseGridLayoutContainerGumps,
-                    0,
-                    0
-                ));
-            } //Use grid containers
-
-            {
-                gridSection.Add(AddLabel(null, "Grid container scale", 0, 0));
-
-                gridSection.AddRight(_gridContainerScale = AddHSlider(
-                        null,
-                        50, 200,
-                        _currentProfile.GridContainersScale,
-                        0, 0,
-                        200
-                    ));
-            } //Grid container scale
-
-            {
-                gridSection.PushIndent();
-
-                gridSection.Add(_gridContainerItemScale = AddCheckBox(
-                    null,
-                    "",
-                    _currentProfile.GridContainerScaleItems,
-                    0, 0
-                    ));
-
-                gridSection.AddRight(AddLabel(null, "Also scale items", 0, 0));
-
-                gridSection.PopIndent();
-            } //Grid container item scales
-
-            {
-                gridSection.Add(AddLabel(null, "Border opacity", 0, 0));
-                gridSection.AddRight
-                    (
-                        _gridBorderOpacity = AddHSlider
-                        (
-                            null,
-                            0,
-                            100,
-                            _currentProfile.GridBorderAlpha,
-                            0,
-                            0,
-                            200
-                        )
-                    );
-            } //Grid border opacity
-
-            {
-                gridSection.PushIndent();
-                gridSection.Add
-                    (
-                     _gridBorderHue = new ModernColorPicker.HueDisplay(_currentProfile.GridBorderHue, null, true)
-                    );
-                gridSection.AddRight(AddLabel(null, "Border hue", 0, 0));
-                gridSection.PopIndent();
-            } //Grid border hue
-
-            {
-                gridSection.Add(AddLabel(null, "Background opacity", 0, 0));
-                gridSection.AddRight(_containerOpacity = AddHSlider
-                (
-                    null,
-                    0,
-                    100,
-                    _currentProfile.ContainerOpacity,
-                    0,
-                    0,
-                    200
-                ));
-            } //Grid container opacity
-
-            {
-                gridSection.PushIndent();
-                gridSection.Add(_altGridContainerBackgroundHue = new ModernColorPicker.HueDisplay(_currentProfile.AltGridContainerBackgroundHue, null, true));
-                gridSection.AddRight(AddLabel(null, "Background hue", 0, 0));
-                gridSection.PopIndent();
-            } //Grid container background hue
-
-            {
-                gridSection.PushIndent();
-                gridSection.Add(_gridOverrideWithContainerHue = AddCheckBox(null, "Override hue with the container's hue", _currentProfile.Grid_UseContainerHue, 0, 0));
-                gridSection.PopIndent();
-            } //Override grid hue with container hue
-
-            {
-                gridSection.Add(
-                        AddLabel(null, "Search Style", 0, 0)
-                    );
-
-                gridSection.AddRight(
-                    _gridContainerSearchAlternative = AddCombobox(
-                            null,
-                            new string[] {
-                                "Only show",
-                                "Highlight"
-                            },
-                            _currentProfile.GridContainerSearchMode,
-                            0,
-                            0,
-                            200
-                        )
-                    );
-            } //Grid container search mode
-
-            {
-                gridSection.Add(_gridContainerPreview = AddCheckBox(
-                        null,
-                        "Enable container preview",
-                        _currentProfile.GridEnableContPreview,
-                        0,
-                        0
-                    ));
-                _gridContainerPreview.SetTooltip("This only works on containers that you have opened, otherwise the client does not have that information yet.");
-            } //Grid preview
-
-            {
-                gridSection.Add(_gridContainerAnchorable = AddCheckBox(
-                        null, "Make anchorable",
-                        _currentProfile.EnableGridContainerAnchor,
-                        0, 0
-                    ));
-                _gridContainerAnchorable.SetTooltip("This will allow grid containers to be anchored to other containers/world map/journal");
-            } //Grid anchors
-
-            {
-                gridSection.Add(AddLabel(null, "Container Style", 0, 0));
-
-                gridSection.AddRight(_gridBorderStyle = AddCombobox(
-                        null,
-                        Enum.GetNames(typeof(GridContainer.BorderStyle)),
-                        _currentProfile.Grid_BorderStyle,
-                        0, 0,
-                        200
-                    ));
-            } //Grid border style
-
-            {
-                gridSection.Add(AddLabel(null, "Default grid rows x columns", 0, 0));
-                gridSection.AddRight(_gridDefaultRows = AddInputField(null, 0, 0, 25, TEXTBOX_HEIGHT, numbersOnly: true));
-                _gridDefaultRows.SetText(_currentProfile.Grid_DefaultRows.ToString());
-                gridSection.AddRight(_gridDefaultColumns = AddInputField(null, 0, 0, 25, TEXTBOX_HEIGHT, numbersOnly: true));
-                _gridDefaultColumns.SetText(_currentProfile.Grid_DefaultColumns.ToString());
-            } //Grid default rows and columns
-
-            {
-                NiceButton _;
-                gridSection.Add(_ = new NiceButton(X, 0, 150, TEXTBOX_HEIGHT, ButtonAction.Activate, "Grid highlight settings"));
-                _.IsSelectable = false;
-                _.MouseUp += (s, e) => {
-                    UIManager.GetGump<GridHightlightMenu>()?.Dispose();
-                    UIManager.Add(new GridHightlightMenu());
-                };
-            } //Grid highlight settings
-
-            rightArea.Add(gridSection);
-            #endregion
-
             Add(rightArea, PAGE);
         }
 
@@ -3876,6 +3724,188 @@ namespace ClassicUO.Game.UI.Gumps
 
             rightArea.Add(conditions);
             #endregion
+
+            Add(rightArea, PAGE);
+        }
+
+        private void BuildTazUO()
+        {
+            const int PAGE = 8788;
+
+            ScrollArea rightArea = new ScrollArea
+            (
+                190,
+                20,
+                WIDTH - 210,
+                420,
+                true
+            );
+
+            {
+                SettingsSection gridSection = new SettingsSection("Grid Containers", rightArea.Width);
+                {
+                    gridSection.Add(_useGridLayoutContainerGumps = AddCheckBox(
+                        null,
+                        "Use grid containers",
+                        _currentProfile.UseGridLayoutContainerGumps,
+                        0,
+                        0
+                    ));
+                } //Use grid containers
+
+                {
+                    gridSection.Add(AddLabel(null, "Grid container scale", 0, 0));
+
+                    gridSection.AddRight(_gridContainerScale = AddHSlider(
+                            null,
+                            50, 200,
+                            _currentProfile.GridContainersScale,
+                            0, 0,
+                            200
+                        ));
+                } //Grid container scale
+
+                {
+                    gridSection.PushIndent();
+
+                    gridSection.Add(_gridContainerItemScale = AddCheckBox(
+                        null,
+                        "",
+                        _currentProfile.GridContainerScaleItems,
+                        0, 0
+                        ));
+
+                    gridSection.AddRight(AddLabel(null, "Also scale items", 0, 0));
+
+                    gridSection.PopIndent();
+                } //Grid container item scales
+
+                {
+                    gridSection.Add(AddLabel(null, "Border opacity", 0, 0));
+                    gridSection.AddRight
+                        (
+                            _gridBorderOpacity = AddHSlider
+                            (
+                                null,
+                                0,
+                                100,
+                                _currentProfile.GridBorderAlpha,
+                                0,
+                                0,
+                                200
+                            )
+                        );
+                } //Grid border opacity
+
+                {
+                    gridSection.PushIndent();
+                    gridSection.Add
+                        (
+                         _gridBorderHue = new ModernColorPicker.HueDisplay(_currentProfile.GridBorderHue, null, true)
+                        );
+                    gridSection.AddRight(AddLabel(null, "Border hue", 0, 0));
+                    gridSection.PopIndent();
+                } //Grid border hue
+
+                {
+                    gridSection.Add(AddLabel(null, "Background opacity", 0, 0));
+                    gridSection.AddRight(_containerOpacity = AddHSlider
+                    (
+                        null,
+                        0,
+                        100,
+                        _currentProfile.ContainerOpacity,
+                        0,
+                        0,
+                        200
+                    ));
+                } //Grid container opacity
+
+                {
+                    gridSection.PushIndent();
+                    gridSection.Add(_altGridContainerBackgroundHue = new ModernColorPicker.HueDisplay(_currentProfile.AltGridContainerBackgroundHue, null, true));
+                    gridSection.AddRight(AddLabel(null, "Background hue", 0, 0));
+                    gridSection.PopIndent();
+                } //Grid container background hue
+
+                {
+                    gridSection.PushIndent();
+                    gridSection.Add(_gridOverrideWithContainerHue = AddCheckBox(null, "Override hue with the container's hue", _currentProfile.Grid_UseContainerHue, 0, 0));
+                    gridSection.PopIndent();
+                } //Override grid hue with container hue
+
+                {
+                    gridSection.Add(
+                            AddLabel(null, "Search Style", 0, 0)
+                        );
+
+                    gridSection.AddRight(
+                        _gridContainerSearchAlternative = AddCombobox(
+                                null,
+                                new string[] {
+                                "Only show",
+                                "Highlight"
+                                },
+                                _currentProfile.GridContainerSearchMode,
+                                0,
+                                0,
+                                200
+                            )
+                        );
+                } //Grid container search mode
+
+                {
+                    gridSection.Add(_gridContainerPreview = AddCheckBox(
+                            null,
+                            "Enable container preview",
+                            _currentProfile.GridEnableContPreview,
+                            0,
+                            0
+                        ));
+                    _gridContainerPreview.SetTooltip("This only works on containers that you have opened, otherwise the client does not have that information yet.");
+                } //Grid preview
+
+                {
+                    gridSection.Add(_gridContainerAnchorable = AddCheckBox(
+                            null, "Make anchorable",
+                            _currentProfile.EnableGridContainerAnchor,
+                            0, 0
+                        ));
+                    _gridContainerAnchorable.SetTooltip("This will allow grid containers to be anchored to other containers/world map/journal");
+                } //Grid anchors
+
+                {
+                    gridSection.Add(AddLabel(null, "Container Style", 0, 0));
+
+                    gridSection.AddRight(_gridBorderStyle = AddCombobox(
+                            null,
+                            Enum.GetNames(typeof(GridContainer.BorderStyle)),
+                            _currentProfile.Grid_BorderStyle,
+                            0, 0,
+                            200
+                        ));
+                } //Grid border style
+
+                {
+                    gridSection.Add(AddLabel(null, "Default grid rows x columns", 0, 0));
+                    gridSection.AddRight(_gridDefaultRows = AddInputField(null, 0, 0, 25, TEXTBOX_HEIGHT, numbersOnly: true));
+                    _gridDefaultRows.SetText(_currentProfile.Grid_DefaultRows.ToString());
+                    gridSection.AddRight(_gridDefaultColumns = AddInputField(null, 0, 0, 25, TEXTBOX_HEIGHT, numbersOnly: true));
+                    _gridDefaultColumns.SetText(_currentProfile.Grid_DefaultColumns.ToString());
+                } //Grid default rows and columns
+
+                {
+                    NiceButton _;
+                    gridSection.Add(_ = new NiceButton(X, 0, 150, TEXTBOX_HEIGHT, ButtonAction.Activate, "Grid highlight settings"));
+                    _.IsSelectable = false;
+                    _.MouseUp += (s, e) => {
+                        UIManager.GetGump<GridHightlightMenu>()?.Dispose();
+                        UIManager.Add(new GridHightlightMenu());
+                    };
+                } //Grid highlight settings
+
+                rightArea.Add(gridSection);
+            }//Grid containers
 
             Add(rightArea, PAGE);
         }
