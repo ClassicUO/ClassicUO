@@ -2777,24 +2777,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             startY += _buffBarTime.Height + 2;
 
-            {
-                _enableImprovedBuffGump = AddCheckBox(
-                    rightArea,
-                    "Enable improved buff gump",
-                    _currentProfile.UseImprovedBuffBar,
-                    startX, startY
-                    );
-                startY += _enableImprovedBuffGump.Height + 2;
-
-                _improvedBuffBarHue = AddColorBox(
-                    rightArea,
-                    startX + 30, startY,
-                    _currentProfile.ImprovedBuffBarHue,
-                    "Buff Bar Hue"
-                    );
-                startY += _improvedBuffBarHue.Height + 2;
-            }//Improved buff gump
-
             _enableFastSpellsAssign = AddCheckBox
             (
                 rightArea,
@@ -4044,6 +4026,23 @@ namespace ClassicUO.Game.UI.Gumps
                         );
                     _autoFollowDistance.SetText(_currentProfile.AutoFollowDistance.ToString());
                 } //Auto follow distance
+
+                {
+                    section.Add(_enableImprovedBuffGump = AddCheckBox(
+                        null,
+                        "Enable improved buff gump",
+                        _currentProfile.UseImprovedBuffBar,
+                        0, 0
+                        ));
+
+                    section.AddRight(_improvedBuffBarHue = AddColorBox(
+                        null,
+                        0, 0,
+                        _currentProfile.ImprovedBuffBarHue,
+                        ""
+                        ));
+                    _improvedBuffBarHue.SetTooltip("Buff Bar Hue");
+                }//Improved buff gump
 
                 rightArea.Add(section);
                 startY += section.Height + SPACING;
