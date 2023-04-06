@@ -1402,24 +1402,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             section4.PopIndent();
 
-            Label autoFollowLabel;
-            section4.Add(
-                autoFollowLabel = AddLabel(null, "Auto Follow Distance", startX, startY)
-                );
-            section4.AddRight(
-                _autoFollowDistance = AddInputField(
-                    null,
-                    startX,
-                    startY,
-                    50,
-                    TEXTBOX_HEIGHT,
-                    numbersOnly: true,
-                    maxCharCount: 10
-                    )
-                );
-            _autoFollowDistance.SetText(_currentProfile.AutoFollowDistance.ToString());
-
-
             SettingsSection section5 = AddSettingsSection(box, "Terrain & Statics");
             section5.Y = section4.Bounds.Bottom + 40;
 
@@ -3650,7 +3632,7 @@ namespace ClassicUO.Game.UI.Gumps
                 SettingsSection gridSection = new SettingsSection("Grid Containers", rightArea.Width);
                 {
                     NiceButton _;
-                    gridSection.BaseAdd(_ = new NiceButton(0, 0, 20, TEXTBOX_HEIGHT, ButtonAction.Activate, "<>") { IsSelectable = false});
+                    gridSection.BaseAdd(_ = new NiceButton(0, 0, 20, TEXTBOX_HEIGHT, ButtonAction.Activate, "<>") { IsSelectable = false });
                     _.SetTooltip("Minimize section");
                     _.X = rightArea.Width - 45;
                     _.Y = 0;
@@ -3663,7 +3645,7 @@ namespace ClassicUO.Game.UI.Gumps
                                 diff = -gridSection.Height + 25;
                             foreach (SettingsSection section in rightArea.Children.OfType<SettingsSection>())
                             {
-                                if(section != gridSection)
+                                if (section != gridSection)
                                     section.Y += diff;
                             }
                             gridSection.Children[2].IsVisible = !gridSection.Children[2].IsVisible;
@@ -3838,7 +3820,7 @@ namespace ClassicUO.Game.UI.Gumps
             }//Grid containers
 
             {
-                SettingsSection section = new SettingsSection("Journal", rightArea.Width) { Y = startY};
+                SettingsSection section = new SettingsSection("Journal", rightArea.Width) { Y = startY };
 
                 {
                     NiceButton _;
@@ -4004,7 +3986,7 @@ namespace ClassicUO.Game.UI.Gumps
                         ),
                         2
                     );
-
+                    section.PushIndent();
                     section.Add
                     (
                         _hiddenBodyHue = AddColorBox(
@@ -4016,7 +3998,24 @@ namespace ClassicUO.Game.UI.Gumps
                             )
                     );
                     section.AddRight(AddLabel(null, "Hidden Body Hue", 0, 0));
+                    section.PopIndent();
                 } //Hidden body mods
+
+                {
+                    section.Add(AddLabel(null, "Auto Follow Distance", 0, 0));
+                    section.AddRight(
+                        _autoFollowDistance = AddInputField(
+                            null,
+                            0,
+                            0,
+                            50,
+                            TEXTBOX_HEIGHT,
+                            numbersOnly: true,
+                            maxCharCount: 10
+                            )
+                        );
+                    _autoFollowDistance.SetText(_currentProfile.AutoFollowDistance.ToString());
+                } //Auto follow distance
 
                 rightArea.Add(section);
                 startY += section.Height + SPACING;
