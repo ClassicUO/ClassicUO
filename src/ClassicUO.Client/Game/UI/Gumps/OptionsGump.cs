@@ -756,28 +756,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             _use_smooth_boat_movement.IsVisible = Client.Version >= ClientVersion.CV_7090;
 
-
-            {
-                section.Add(_useModernPaperdoll = AddCheckBox(
-                        null, "",
-                        _currentProfile.UseModernPaperdoll, 0, 0
-                    ));
-                section.AddRight(AddLabel(null, "Use modern paperdoll", 0, 0));
-
-                section.PushIndent();
-                section.Add(_paperDollHue = new ModernColorPicker.HueDisplay(ProfileManager.CurrentProfile.ModernPaperDollHue, null, true));
-                section.AddRight(AddLabel(null, "Modern paperdoll hue", 0, 0));
-
-                section.Add(_durabilityBarHue = new ModernColorPicker.HueDisplay(ProfileManager.CurrentProfile.ModernPaperDollDurabilityHue, null, true));
-                section.AddRight(AddLabel(null, "Modern paperdoll durability bar hue", 0, 0));
-
-                section.Add(_modernPaperdollDurabilityPercent = AddInputField(null, 0, 0, 75, TEXTBOX_HEIGHT));
-                _modernPaperdollDurabilityPercent.SetText(_currentProfile.ModernPaperDoll_DurabilityPercent.ToString());
-                section.AddRight(AddLabel(null, "Show durability bar below %", 0, 0));
-
-                section.PopIndent();
-            }
-
             SettingsSection section2 = AddSettingsSection(box, "Mobiles");
             section2.Y = section.Bounds.Bottom + 40;
 
@@ -3955,6 +3933,54 @@ namespace ClassicUO.Game.UI.Gumps
             }//Journal
 
             {
+                SettingsSection section = new SettingsSection("Modern Paperdoll", rightArea.Width) { Y = startY };
+
+                {
+                    NiceButton _;
+                    section.BaseAdd(_ = new NiceButton(0, 0, 20, TEXTBOX_HEIGHT, ButtonAction.Activate, "<>") { IsSelectable = false });
+                    _.SetTooltip("Minimize section");
+                    _.X = rightArea.Width - 45;
+                    _.MouseUp += (s, e) =>
+                    {
+                        if (e.Button == MouseButtonType.Left)
+                        {
+                            int diff = section.Height - 25;
+                            if (section.Children[2].IsVisible)
+                                diff = -section.Height + 25;
+                            for (int i = rightArea.Children.IndexOf(section) + 1; i < rightArea.Children.Count; i++)
+                            {
+                                if (rightArea.Children[i] != section)
+                                    rightArea.Children[i].Y += diff;
+                            }
+                            section.Children[2].IsVisible = !section.Children[2].IsVisible;
+                        }
+                    };
+                }
+
+                section.Add(_useModernPaperdoll = AddCheckBox(
+                    null, "",
+                    _currentProfile.UseModernPaperdoll, 0, 0
+                ));
+                section.AddRight(AddLabel(null, "Use modern paperdoll", 0, 0));
+
+                section.PushIndent();
+                section.Add(_paperDollHue = new ModernColorPicker.HueDisplay(ProfileManager.CurrentProfile.ModernPaperDollHue, null, true));
+                section.AddRight(AddLabel(null, "Modern paperdoll hue", 0, 0));
+
+                section.Add(_durabilityBarHue = new ModernColorPicker.HueDisplay(ProfileManager.CurrentProfile.ModernPaperDollDurabilityHue, null, true));
+                section.AddRight(AddLabel(null, "Modern paperdoll durability bar hue", 0, 0));
+
+                section.Add(_modernPaperdollDurabilityPercent = AddInputField(null, 0, 0, 75, TEXTBOX_HEIGHT));
+                _modernPaperdollDurabilityPercent.SetText(_currentProfile.ModernPaperDoll_DurabilityPercent.ToString());
+                section.AddRight(AddLabel(null, "Show durability bar below %", 0, 0));
+
+                section.PopIndent();
+
+                rightArea.Add(section);
+                startY += section.Height + SPACING;
+            }//Modern paperdoll
+
+            {
                 SettingsSection section = new SettingsSection("Misc", rightArea.Width) { Y = startY };
 
                 {
@@ -3991,7 +4017,37 @@ namespace ClassicUO.Game.UI.Gumps
 
                 rightArea.Add(section);
                 startY += section.Height + SPACING;
-            }
+            }//Misc
+
+
+            //{
+            //    SettingsSection section = new SettingsSection("Misc", rightArea.Width) { Y = startY };
+
+            //    {
+            //        NiceButton _;
+            //        section.BaseAdd(_ = new NiceButton(0, 0, 20, TEXTBOX_HEIGHT, ButtonAction.Activate, "<>") { IsSelectable = false });
+            //        _.SetTooltip("Minimize section");
+            //        _.X = rightArea.Width - 45;
+            //        _.MouseUp += (s, e) =>
+            //        {
+            //            if (e.Button == MouseButtonType.Left)
+            //            {
+            //                int diff = section.Height - 25;
+            //                if (section.Children[2].IsVisible)
+            //                    diff = -section.Height + 25;
+            //                for (int i = rightArea.Children.IndexOf(section) + 1; i < rightArea.Children.Count; i++)
+            //                {
+            //                    if (rightArea.Children[i] != section)
+            //                        rightArea.Children[i].Y += diff;
+            //                }
+            //                section.Children[2].IsVisible = !section.Children[2].IsVisible;
+            //            }
+            //        };
+            //    }
+
+            //    rightArea.Add(section);
+            //    startY += section.Height + SPACING;
+            //} Blank setting section
 
             Add(rightArea, PAGE);
         }
