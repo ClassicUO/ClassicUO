@@ -6887,6 +6887,13 @@ namespace ClassicUO.Network
                 {
                     gump.MasterGumpSerial = gparams.Count > 0 ? SerialHelper.Parse(gparams[1]) : 0;
                 }
+                else if (string.Equals(entry, "picinpic", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    if (gparams.Count > 7)
+                    {
+                        gump.Add(new GumpPicInPic(gparams), page);
+                    }
+                }
                 else if (string.Equals(entry, "\0", StringComparison.InvariantCultureIgnoreCase))
                 {
                     //This gump is null terminated: Breaking
