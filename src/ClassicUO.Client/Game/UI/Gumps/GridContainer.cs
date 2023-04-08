@@ -206,7 +206,8 @@ namespace ClassicUO.Game.UI.Gumps
             _setLootBag = new NiceButton(0, Height - 20, 100, 20, ButtonAction.Default, "Set loot bag") { IsSelectable = false };
             _setLootBag.IsVisible = ProfileManager.CurrentProfile.DoubleClickToLootInsideContainers && _container.IsCorpse;
             _setLootBag.SetTooltip("For double click looting only");
-            _setLootBag.MouseUp += (s, e) => {
+            _setLootBag.MouseUp += (s, e) =>
+            {
                 GameActions.Print(Resources.ResGumps.TargetContainerToGrabItemsInto);
                 TargetManager.SetTargeting(CursorTarget.SetGrabBag, 0, TargetType.Neutral);
             };
@@ -770,6 +771,11 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         gridContainer.gridSlotManager.SetLockedSlot(slot, !ItemGridLocked);
                     }
+                    else if (Keyboard.Alt)
+                    {
+                        MultiItemMoveGump.MoveItems.Enqueue(_item);
+                        MultiItemMoveGump.AddMultiItemMoveGumpToUI(gridContainer.X - 200, gridContainer.Y);
+                    }
                     else if (_item != null)
                     {
                         Point offset = Mouse.LDragOffset;
@@ -979,7 +985,7 @@ namespace ClassicUO.Game.UI.Gumps
             public Dictionary<int, GridItem> GridSlots { get { return gridSlots; } }
             public List<Item> ContainerContents { get { return containerContents; } }
             public Dictionary<int, uint> ItemPositions { get { return itemPositions; } }
-            
+
 
             public GridSlotManager(uint thisContainer, GridContainer gridContainer, Control controlArea, List<GridSaveSystem.GridItemSlotSaveData> gridItemSlotData)
             {
@@ -1566,12 +1572,15 @@ namespace ClassicUO.Game.UI.Gumps
             private bool enabled = false;
 
             private static GridSaveSystem instance;
-            public static GridSaveSystem Instance { 
-                get { 
-                    if(instance == null)
+            public static GridSaveSystem Instance
+            {
+                get
+                {
+                    if (instance == null)
                         instance = new GridSaveSystem();
                     return instance;
-                }}
+                }
+            }
 
             private GridSaveSystem()
             {
@@ -1654,7 +1663,7 @@ namespace ClassicUO.Game.UI.Gumps
                             if (int.TryParse(slot.Value, out int slotV))
                                 if (uint.TryParse(serial.Value, out uint serialV))
                                 {
-                                    if(isLockedAttribute != null && bool.TryParse(isLockedAttribute.Value, out bool isLocked))
+                                    if (isLockedAttribute != null && bool.TryParse(isLockedAttribute.Value, out bool isLocked))
                                         items.Add(new GridItemSlotSaveData(slotV, serialV, isLocked));
                                     else
                                         items.Add(new GridItemSlotSaveData(slotV, serialV, false));

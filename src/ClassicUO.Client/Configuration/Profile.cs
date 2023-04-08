@@ -396,6 +396,8 @@ namespace ClassicUO.Configuration
         public int ModernPaperDoll_DurabilityPercent { get; set; } = 90;
         #endregion
 
+        public int MoveMultiObjectDelay { get; set; } = 1000;
+
         public static uint GumpsVersion { get; private set; }
 
         public void Save(string path)
