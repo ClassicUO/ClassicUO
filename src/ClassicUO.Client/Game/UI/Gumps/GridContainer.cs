@@ -61,7 +61,6 @@ namespace ClassicUO.Game.UI.Gumps
         private static int BORDER_WIDTH = 4;
         private static int DEFAULT_WIDTH { get { return GetWidth(); } }
         private static int DEFAULT_HEIGHT { get { return GetHeight(); } }
-        private static GridSaveSystem gridSaveSystem = new GridSaveSystem();
 
         public readonly ushort OgContainerGraphic;
         private readonly AlphaBlendControl _background;
@@ -82,10 +81,10 @@ namespace ClassicUO.Game.UI.Gumps
         public GridContainer(uint local, ushort ogContainer) : base(GetWidth(), GetHeight(), GetWidth(2), GetHeight(1), local, 0)
         {
             #region SET VARS
-            Point savedSize = gridSaveSystem.GetLastSize(LocalSerial);
+            Point savedSize = GridSaveSystem.Instance.GetLastSize(LocalSerial);
             _lastWidth = Width = savedSize.X;
             _lastHeight = Height = savedSize.Y;
-            Point lastPos = gridSaveSystem.GetLastPosition(LocalSerial);
+            Point lastPos = GridSaveSystem.Instance.GetLastPosition(LocalSerial);
             _lastX = X = lastPos.X;
             _lastY = Y = lastPos.Y;
             AnchorType = ProfileManager.CurrentProfile.EnableGridContainerAnchor ? ANCHOR_TYPE.NONE : ANCHOR_TYPE.DISABLED;
@@ -231,7 +230,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add(_setLootBag);
             #endregion
 
-            gridSlotManager = new GridSlotManager(local, this, _scrollArea, gridSaveSystem.GetItemSlots(LocalSerial)); //Must come after scroll area
+            gridSlotManager = new GridSlotManager(local, this, _scrollArea, GridSaveSystem.Instance.GetItemSlots(LocalSerial)); //Must come after scroll area
 
             BuildBorder();
             ResizeWindow(savedSize);
@@ -260,7 +259,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Save(writer);
 
-            gridSaveSystem.SaveContainer(LocalSerial, gridSlotManager.ItemPositions, Width, Height, X, Y);
+            GridSaveSystem.Instance.SaveContainer(LocalSerial, gridSlotManager.ItemPositions, Width, Height, X, Y);
 
             writer.WriteAttributeString("ogContainer", OgContainerGraphic.ToString());
             writer.WriteAttributeString("width", Width.ToString());
@@ -454,7 +453,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             if (gridSlotManager.ItemPositions.Count > 0 && !_container.IsCorpse)
-                gridSaveSystem.SaveContainer(LocalSerial, gridSlotManager.ItemPositions, Width, Height, X, Y);
+                GridSaveSystem.Instance.SaveContainer(LocalSerial, gridSlotManager.ItemPositions, Width, Height, X, Y);
 
             base.Dispose();
         }
@@ -704,6 +703,7 @@ namespace ClassicUO.Game.UI.Gumps
                     hit.ClearTooltip();
                     Hightlight = false;
                     count = null;
+                    ItemGridLocked = false;
                 }
                 else
                 {
@@ -765,6 +765,10 @@ namespace ClassicUO.Game.UI.Gumps
                             TargetManager.Target(_item);
                         else
                             TargetManager.Target(container);
+                    }
+                    else if (Keyboard.Ctrl)
+                    {
+                        ItemGridLocked = true;
                     }
                     else if (_item != null)
                     {
@@ -1539,7 +1543,15 @@ namespace ClassicUO.Game.UI.Gumps
             private XElement rootElement;
             private bool enabled = false;
 
-            public GridSaveSystem()
+            private static GridSaveSystem instance;
+            public static GridSaveSystem Instance { 
+                get { 
+                    if(instance == null)
+                        instance = new GridSaveSystem();
+                    return instance;
+                }}
+
+            private GridSaveSystem()
             {
                 if (!SaveFileCheck())
                 {
