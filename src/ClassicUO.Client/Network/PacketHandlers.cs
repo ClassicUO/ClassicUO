@@ -126,7 +126,7 @@ namespace ClassicUO.Network
                     // It will be fixed once the new plugin system is done.
                     if (!allowPlugins || Plugin.ProcessRecvPacket(packetBuffer, ref packetlength))
                     {
-                        AnalyzePacket(packetBuffer, offset, packetlength);
+                        AnalyzePacket(packetBuffer.AsSpan(0, packetlength), offset);
 
                         ++packetsCount;
                     }
@@ -144,13 +144,15 @@ namespace ClassicUO.Network
             (fromPlugins ? _pluginsBuffer : _buffer).Enqueue(data);
         }
 
-        private void AnalyzePacket(byte[] data, int offset, int length)
+        private void AnalyzePacket(ReadOnlySpan<byte> data, int offset)
         {
+            if (data.IsEmpty) return;
+
             var bufferReader = _handlers[data[0]];
 
             if (bufferReader != null)
             {
-                var buffer = new StackDataReader(data.AsSpan(0, length));
+                var buffer = new StackDataReader(data);
                 buffer.Seek(offset);
 
                 bufferReader(ref buffer);
@@ -6948,6 +6950,13 @@ namespace ClassicUO.Network
                 else if (string.Equals(entry, "mastergump", StringComparison.InvariantCultureIgnoreCase))
                 {
                     gump.MasterGumpSerial = gparams.Count > 0 ? SerialHelper.Parse(gparams[1]) : 0;
+                }
+                else if (string.Equals(entry, "picinpic", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    if (gparams.Count > 7)
+                    {
+                        gump.Add(new GumpPicInPic(gparams), page);
+                    }
                 }
                 else if (string.Equals(entry, "\0", StringComparison.InvariantCultureIgnoreCase))
                 {
