@@ -218,14 +218,14 @@ namespace ClassicUO
             {
                 if ((flags & INVALID_UO_DIRECTORY) != 0)
                 {
-                    Client.ShowErrorMessage(ResGeneral.YourUODirectoryIsInvalid);
+                    Client.ShowErrorMessage("Make sure your settings.json file is correctly filled out, could not find the UO directory.");
                 }
                 else if ((flags & INVALID_UO_VERSION) != 0)
                 {
                     Client.ShowErrorMessage(ResGeneral.YourUOClientVersionIsInvalid);
                 }
 
-                PlatformHelper.LaunchBrowser(ResGeneral.ClassicUOLink);
+                //PlatformHelper.LaunchBrowser(ResGeneral.ClassicUOLink);
             }
             else
             {
