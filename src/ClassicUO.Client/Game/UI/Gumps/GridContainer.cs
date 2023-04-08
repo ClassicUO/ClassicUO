@@ -418,8 +418,6 @@ namespace ClassicUO.Game.UI.Gumps
             gridSlotManager.RebuildContainer(sortedContents, _searchBox.Text, overrideSort);
             _containerNameLabel.Text = GetContainerName();
             InvalidateContents = false;
-
-            Console.WriteLine("updateItems() called");
         }
 
         protected override void UpdateContents()
