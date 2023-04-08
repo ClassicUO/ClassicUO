@@ -259,7 +259,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Save(writer);
 
-            GridSaveSystem.Instance.SaveContainer(LocalSerial, gridSlotManager.ItemPositions, Width, Height, X, Y);
+            GridSaveSystem.Instance.SaveContainer(LocalSerial, gridSlotManager.GridSlots, Width, Height, X, Y);
 
             writer.WriteAttributeString("ogContainer", OgContainerGraphic.ToString());
             writer.WriteAttributeString("width", Width.ToString());
@@ -453,7 +453,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             if (gridSlotManager.ItemPositions.Count > 0 && !_container.IsCorpse)
-                GridSaveSystem.Instance.SaveContainer(LocalSerial, gridSlotManager.ItemPositions, Width, Height, X, Y);
+                GridSaveSystem.Instance.SaveContainer(LocalSerial, gridSlotManager.GridSlots, Width, Height, X, Y);
 
             base.Dispose();
         }
@@ -1577,7 +1577,7 @@ namespace ClassicUO.Game.UI.Gumps
                 enabled = true;
             }
 
-            public bool SaveContainer(uint serial, Dictionary<int, uint> lockedSpots, int width, int height, int lastX = 100, int lastY = 100)
+            public bool SaveContainer(uint serial, Dictionary<int, GridItem> gridSlots, int width, int height, int lastX = 100, int lastY = 100)
             {
                 if (!enabled)
                     return false;
@@ -1597,10 +1597,11 @@ namespace ClassicUO.Game.UI.Gumps
                 thisContainer.SetAttributeValue("lastX", lastX.ToString());
                 thisContainer.SetAttributeValue("lastY", lastY.ToString());
 
-                foreach (var slot in lockedSpots)
+                foreach (var slot in gridSlots)
                 {
                     XElement item_slot = new XElement("item");
-                    item_slot.SetAttributeValue("serial", slot.Value.ToString());
+                    item_slot.SetAttributeValue("serial", slot.Value.SlotItem.Serial.ToString());
+                    item_slot.SetAttributeValue("locked", slot.Value.ItemGridLocked.ToString());
                     item_slot.SetAttributeValue("slot", slot.Key.ToString());
                     thisContainer.Add(item_slot);
                 }
