@@ -61,7 +61,6 @@ namespace ClassicUO.Game.UI.Gumps
         private static int BORDER_WIDTH = 4;
         private static int DEFAULT_WIDTH { get { return GetWidth(); } }
         private static int DEFAULT_HEIGHT { get { return GetHeight(); } }
-        private static GridSaveSystem gridSaveSystem = new GridSaveSystem();
 
         public readonly ushort OgContainerGraphic;
         private readonly AlphaBlendControl _background;
@@ -82,10 +81,10 @@ namespace ClassicUO.Game.UI.Gumps
         public GridContainer(uint local, ushort ogContainer) : base(GetWidth(), GetHeight(), GetWidth(2), GetHeight(1), local, 0)
         {
             #region SET VARS
-            Point savedSize = gridSaveSystem.GetLastSize(LocalSerial);
+            Point savedSize = GridSaveSystem.Instance.GetLastSize(LocalSerial);
             _lastWidth = Width = savedSize.X;
             _lastHeight = Height = savedSize.Y;
-            Point lastPos = gridSaveSystem.GetLastPosition(LocalSerial);
+            Point lastPos = GridSaveSystem.Instance.GetLastPosition(LocalSerial);
             _lastX = X = lastPos.X;
             _lastY = Y = lastPos.Y;
             AnchorType = ProfileManager.CurrentProfile.EnableGridContainerAnchor ? ANCHOR_TYPE.NONE : ANCHOR_TYPE.DISABLED;
@@ -231,7 +230,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add(_setLootBag);
             #endregion
 
-            gridSlotManager = new GridSlotManager(local, this, _scrollArea, gridSaveSystem.GetItemSlots(LocalSerial)); //Must come after scroll area
+            gridSlotManager = new GridSlotManager(local, this, _scrollArea, GridSaveSystem.Instance.GetItemSlots(LocalSerial)); //Must come after scroll area
 
             BuildBorder();
             ResizeWindow(savedSize);
@@ -260,7 +259,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Save(writer);
 
-            gridSaveSystem.SaveContainer(LocalSerial, gridSlotManager.ItemPositions, Width, Height, X, Y);
+            GridSaveSystem.Instance.SaveContainer(LocalSerial, gridSlotManager.GridSlots, Width, Height, X, Y);
 
             writer.WriteAttributeString("ogContainer", OgContainerGraphic.ToString());
             writer.WriteAttributeString("width", Width.ToString());
@@ -454,7 +453,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             if (gridSlotManager.ItemPositions.Count > 0 && !_container.IsCorpse)
-                gridSaveSystem.SaveContainer(LocalSerial, gridSlotManager.ItemPositions, Width, Height, X, Y);
+                GridSaveSystem.Instance.SaveContainer(LocalSerial, gridSlotManager.GridSlots, Width, Height, X, Y);
 
             base.Dispose();
         }
@@ -704,6 +703,7 @@ namespace ClassicUO.Game.UI.Gumps
                     hit.ClearTooltip();
                     Hightlight = false;
                     count = null;
+                    ItemGridLocked = false;
                 }
                 else
                 {
@@ -765,6 +765,10 @@ namespace ClassicUO.Game.UI.Gumps
                             TargetManager.Target(_item);
                         else
                             TargetManager.Target(container);
+                    }
+                    else if (Keyboard.Ctrl)
+                    {
+                        gridContainer.gridSlotManager.SetLockedSlot(slot, !ItemGridLocked);
                     }
                     else if (_item != null)
                     {
@@ -969,17 +973,25 @@ namespace ClassicUO.Game.UI.Gumps
             private List<Item> containerContents;
             private int amount = 125;
             private Control area;
-            private Dictionary<int, uint> itemPositions;
+            private Dictionary<int, uint> itemPositions = new Dictionary<int, uint>();
+            private List<uint> itemLocks = new List<uint>();
 
             public Dictionary<int, GridItem> GridSlots { get { return gridSlots; } }
             public List<Item> ContainerContents { get { return containerContents; } }
             public Dictionary<int, uint> ItemPositions { get { return itemPositions; } }
+            
 
-            public GridSlotManager(uint thisContainer, GridContainer gridContainer, Control controlArea, Dictionary<int, uint> lockedItems)
+            public GridSlotManager(uint thisContainer, GridContainer gridContainer, Control controlArea, List<GridSaveSystem.GridItemSlotSaveData> gridItemSlotData)
             {
                 #region VARS
                 area = controlArea;
-                itemPositions = lockedItems;
+                foreach (GridSaveSystem.GridItemSlotSaveData item in gridItemSlotData)
+                {
+                    ItemPositions.Add(item.Slot, item.Serial);
+                    if (item.IsLocked)
+                        itemLocks.Add(item.Serial);
+
+                }
                 container = World.Items.Get(thisContainer);
                 UpdateItems();
                 if (containerContents.Count > 125)
@@ -1018,11 +1030,15 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     Item i = World.Items.Get(spot.Value);
                     if (i != null)
-                        if (filteredItems.Contains(i) && !overrideSort)
+                        if (filteredItems.Contains(i) && (!overrideSort || itemLocks.Contains(spot.Value)))
                         {
                             if (spot.Key < gridSlots.Count)
                             {
                                 gridSlots[spot.Key].SetGridItem(i);
+
+                                if (itemLocks.Contains(spot.Value))
+                                    gridSlots[spot.Key].ItemGridLocked = true;
+
                                 filteredItems.Remove(i);
                             }
                         }
@@ -1046,9 +1062,8 @@ namespace ClassicUO.Game.UI.Gumps
                     if (slot.Value.SlotItem != null && !string.IsNullOrWhiteSpace(searchText))
                     {
                         if (slot.Value.SlotItem == null)
-                        {
                             continue;
-                        }
+
                         if (World.OPL.TryGetNameAndData(slot.Value.SlotItem.Serial, out string name, out string data))
                         {
                             var searchList = new List<string>() { name };
@@ -1066,6 +1081,17 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 SetGridPositions();
                 ApplyHighlightProperties();
+            }
+
+            public void SetLockedSlot(int slot, bool locked)
+            {
+                if (gridSlots[slot].SlotItem == null)
+                    return;
+                gridSlots[slot].ItemGridLocked = locked;
+                if (!locked)
+                    itemLocks.Remove(gridSlots[slot].SlotItem);
+                else
+                    itemLocks.Add(gridSlots[slot].SlotItem);
             }
 
             private void SetGridPositions()
@@ -1539,7 +1565,15 @@ namespace ClassicUO.Game.UI.Gumps
             private XElement rootElement;
             private bool enabled = false;
 
-            public GridSaveSystem()
+            private static GridSaveSystem instance;
+            public static GridSaveSystem Instance { 
+                get { 
+                    if(instance == null)
+                        instance = new GridSaveSystem();
+                    return instance;
+                }}
+
+            private GridSaveSystem()
             {
                 if (!SaveFileCheck())
                 {
@@ -1565,7 +1599,7 @@ namespace ClassicUO.Game.UI.Gumps
                 enabled = true;
             }
 
-            public bool SaveContainer(uint serial, Dictionary<int, uint> lockedSpots, int width, int height, int lastX = 100, int lastY = 100)
+            public bool SaveContainer(uint serial, Dictionary<int, GridItem> gridSlots, int width, int height, int lastX = 100, int lastY = 100)
             {
                 if (!enabled)
                     return false;
@@ -1585,10 +1619,13 @@ namespace ClassicUO.Game.UI.Gumps
                 thisContainer.SetAttributeValue("lastX", lastX.ToString());
                 thisContainer.SetAttributeValue("lastY", lastY.ToString());
 
-                foreach (var slot in lockedSpots)
+                foreach (var slot in gridSlots)
                 {
+                    if (slot.Value.SlotItem == null)
+                        continue;
                     XElement item_slot = new XElement("item");
-                    item_slot.SetAttributeValue("serial", slot.Value.ToString());
+                    item_slot.SetAttributeValue("serial", slot.Value.SlotItem.Serial.ToString());
+                    item_slot.SetAttributeValue("locked", slot.Value.ItemGridLocked.ToString());
                     item_slot.SetAttributeValue("slot", slot.Key.ToString());
                     thisContainer.Add(item_slot);
                 }
@@ -1599,31 +1636,48 @@ namespace ClassicUO.Game.UI.Gumps
                 return true;
             }
 
-            public Dictionary<int, uint> GetItemSlots(uint container)
+            public List<GridItemSlotSaveData> GetItemSlots(uint container)
             {
-                Dictionary<int, uint> itemSlots = new Dictionary<int, uint>();
+                List<GridItemSlotSaveData> items = new List<GridItemSlotSaveData>();
 
                 XElement thisContainer = rootElement.Element("container_" + container.ToString());
                 if (thisContainer != null)
                 {
                     foreach (XElement itemSlot in thisContainer.Elements("item"))
                     {
-                        XAttribute slot, serial;
+                        XAttribute slot, serial, isLockedAttribute;
                         slot = itemSlot.Attribute("slot");
                         serial = itemSlot.Attribute("serial");
+                        isLockedAttribute = itemSlot.Attribute("locked");
                         if (slot != null && serial != null)
                         {
-                            int slotV;
-                            uint serialV;
-
-                            if (int.TryParse(slot.Value, out slotV))
-                                if (uint.TryParse(serial.Value, out serialV))
-                                    itemSlots.Add(slotV, serialV);
+                            if (int.TryParse(slot.Value, out int slotV))
+                                if (uint.TryParse(serial.Value, out uint serialV))
+                                {
+                                    if(isLockedAttribute != null && bool.TryParse(isLockedAttribute.Value, out bool isLocked))
+                                        items.Add(new GridItemSlotSaveData(slotV, serialV, isLocked));
+                                    else
+                                        items.Add(new GridItemSlotSaveData(slotV, serialV, false));
+                                }
                         }
                     }
                 }
 
-                return itemSlots;
+                return items;
+            }
+
+            public class GridItemSlotSaveData
+            {
+                public readonly int Slot;
+                public readonly uint Serial;
+                public readonly bool IsLocked;
+
+                public GridItemSlotSaveData(int slot, uint serial, bool isLocked)
+                {
+                    this.Slot = slot;
+                    this.Serial = serial;
+                    this.IsLocked = isLocked;
+                }
             }
 
             public Point GetLastSize(uint container)
