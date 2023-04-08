@@ -101,6 +101,20 @@ namespace ClassicUO.Game.UI.Gumps
         protected bool _outOfRange;
         protected StbTextBox _textBox;
 
+        private bool _locked = false;
+        private bool IsLocked { get { return _locked; } set {
+                _locked = value;
+                if (_locked)
+                {
+                    CanMove = false;
+                    CanCloseWithRightClick = false;
+                } else
+                {
+                    CanMove = true;
+                    CanCloseWithRightClick = true;
+                }
+            } }
+
         protected abstract void BuildGump();
 
 
@@ -123,6 +137,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (ProfileManager.CurrentProfile.SaveHealthbars)
             {
                 writer.WriteAttributeString("name", _name);
+                writer.WriteAttributeString("locked", IsLocked.ToString());
             }
         }
 
@@ -138,6 +153,8 @@ namespace ClassicUO.Game.UI.Gumps
             else if (ProfileManager.CurrentProfile.SaveHealthbars)
             {
                 _name = xml.GetAttribute("name");
+                if(bool.TryParse(xml.GetAttribute("locked"), out bool locked))
+                    IsLocked = locked;
                 _outOfRange = true;
                 BuildGump();
             }
@@ -218,6 +235,18 @@ namespace ClassicUO.Game.UI.Gumps
 
             if(button == MouseButtonType.Left && Keyboard.Alt)
             {
+                if (UIManager.MouseOverControl != null && (UIManager.MouseOverControl == this || UIManager.MouseOverControl.RootParent == this))
+                {
+                    if (GumpsLoader.Instance.GetGumpTexture(0x82C, out var bounds) != null)
+                    {
+                        if (x >= 0 && x < bounds.Width && y >= 0 && y <= bounds.Height)
+                        {
+                            IsLocked = !IsLocked;
+                            return;
+                        }
+                    }
+                }
+
                 MessageManager.HandleMessage
                 (
                     World.Player,
@@ -334,6 +363,35 @@ namespace ClassicUO.Game.UI.Gumps
             base.OnMouseOver(x, y);
         }
 
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        {
+            base.Draw(batcher, x, y);
+
+            if (Keyboard.Alt && UIManager.MouseOverControl != null && (UIManager.MouseOverControl == this || UIManager.MouseOverControl.RootParent == this))
+            {
+                Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
+
+                var texture = GumpsLoader.Instance.GetGumpTexture(0x82C, out var bounds);
+
+                if (texture != null)
+                {
+                    if (IsLocked)
+                    {
+                        hueVector.X = 34;
+                        hueVector.Y = 1;
+                    }
+                    batcher.Draw
+                    (
+                        texture,
+                        new Vector2(x, y),
+                        bounds,
+                        hueVector
+                    );
+                }
+            }
+
+            return true;
+        }
 
         protected bool CheckIfAnchoredElseDispose()
         {
