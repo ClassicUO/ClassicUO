@@ -768,7 +768,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                     else if (Keyboard.Ctrl)
                     {
-                        ItemGridLocked = true;
+                        ItemGridLocked = !ItemGridLocked;
                     }
                     else if (_item != null)
                     {
@@ -1599,6 +1599,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                 foreach (var slot in gridSlots)
                 {
+                    if (slot.Value.SlotItem == null)
+                        continue;
                     XElement item_slot = new XElement("item");
                     item_slot.SetAttributeValue("serial", slot.Value.SlotItem.Serial.ToString());
                     item_slot.SetAttributeValue("locked", slot.Value.ItemGridLocked.ToString());
