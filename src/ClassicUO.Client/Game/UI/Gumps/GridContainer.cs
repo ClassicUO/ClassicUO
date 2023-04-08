@@ -166,7 +166,6 @@ namespace ClassicUO.Game.UI.Gumps
                     if (Client.Game.GameCursor.ItemHold.Enabled)
                     {
                         GameActions.DropItem(Client.Game.GameCursor.ItemHold.Serial, 0xFFFF, 0xFFFF, 0, World.Player.FindItemByLayer(Layer.Backpack));
-                        RequestUpdateContents();
                     }
                 }
                 else if (e.Button == MouseButtonType.Right)
@@ -274,7 +273,7 @@ namespace ClassicUO.Game.UI.Gumps
             int rH = int.Parse(xml.GetAttribute("height"));
 
             ResizeWindow(new Point(rW, rH));
-            InvalidateContents = true;
+            //InvalidateContents = true;
         }
 
         private void _scrollArea_DragBegin(object sender, MouseEventArgs e)
@@ -289,8 +288,6 @@ namespace ClassicUO.Game.UI.Gumps
                 if (Client.Game.GameCursor.ItemHold.Enabled)
                 {
                     GameActions.DropItem(Client.Game.GameCursor.ItemHold.Serial, 0xFFFF, 0xFFFF, 0, _container.Serial);
-                    InvalidateContents = true;
-                    UpdateContents();
                 }
                 else if (TargetManager.IsTargeting)
                 {
@@ -421,6 +418,8 @@ namespace ClassicUO.Game.UI.Gumps
             gridSlotManager.RebuildContainer(sortedContents, _searchBox.Text, overrideSort);
             _containerNameLabel.Text = GetContainerName();
             InvalidateContents = false;
+
+            Console.WriteLine("updateItems() called");
         }
 
         protected override void UpdateContents()
@@ -717,6 +716,8 @@ namespace ClassicUO.Game.UI.Gumps
                         count.X = 1;
                         count.Y = Height - count.Height;
                     }
+                    if (MultiItemMoveGump.MoveItems.Contains(_item))
+                        Hightlight = true;
                     hit.SetTooltip(_item);
                 }
             }
@@ -773,8 +774,10 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                     else if (Keyboard.Alt)
                     {
-                        MultiItemMoveGump.MoveItems.Enqueue(_item);
+                        if (!MultiItemMoveGump.MoveItems.Contains(_item))
+                            MultiItemMoveGump.MoveItems.Enqueue(_item);
                         MultiItemMoveGump.AddMultiItemMoveGumpToUI(gridContainer.X - 200, gridContainer.Y);
+                        Hightlight = true;
                     }
                     else if (_item != null)
                     {
@@ -789,7 +792,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             private void _hit_MouseExit(object sender, MouseEventArgs e)
             {
-                if (Mouse.LButtonPressed && !mousePressedWhenEntered)
+                if (Mouse.LButtonPressed && !mousePressedWhenEntered && !Keyboard.Alt)
                 {
                     Point offset = Mouse.LDragOffset;
                     if (Math.Abs(offset.X) >= Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS || Math.Abs(offset.Y) >= Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS)
@@ -800,6 +803,14 @@ namespace ClassicUO.Game.UI.Gumps
                             UIManager.AttemptDragControl(gridContainer);
                     }
                 }
+                else if (Keyboard.Alt && Mouse.LButtonPressed)
+                {
+                    if (!MultiItemMoveGump.MoveItems.Contains(_item))
+                        MultiItemMoveGump.MoveItems.Enqueue(_item);
+                    MultiItemMoveGump.AddMultiItemMoveGumpToUI(gridContainer.X - 200, gridContainer.Y);
+                    Hightlight = true;
+                }
+
 
                 GridContainerPreview g;
                 while ((g = UIManager.GetGump<GridContainerPreview>()) != null)
@@ -821,6 +832,15 @@ namespace ClassicUO.Game.UI.Gumps
                         preview = new GridContainerPreview(_item, Mouse.Position.X, Mouse.Position.Y);
                         UIManager.Add(preview);
                     }
+
+                    if (Keyboard.Alt && Mouse.LButtonPressed)
+                    {
+                        if (!MultiItemMoveGump.MoveItems.Contains(_item))
+                            MultiItemMoveGump.MoveItems.Enqueue(_item);
+                        MultiItemMoveGump.AddMultiItemMoveGumpToUI(gridContainer.X - 200, gridContainer.Y);
+                        Hightlight = true;
+                    }
+
                     if (!hit.HasTooltip)
                         hit.SetTooltip(_item);
                 }
