@@ -112,6 +112,16 @@ namespace ClassicUO.Game.Scenes
         public bool UseLights => ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.UseCustomLightLevel ? World.Light.Personal < World.Light.Overall : World.Light.RealPersonal < World.Light.RealOverall;
         public bool UseAltLights => ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.UseAlternativeLights;
 
+        private bool _followingMode
+        {
+            get { return ProfileManager.CurrentProfile.FollowingMode; }
+            set { ProfileManager.CurrentProfile.FollowingMode = value; }
+        }
+        private uint _followingTarget
+        {
+            get { return ProfileManager.CurrentProfile.FollowingTarget; }
+            set { ProfileManager.CurrentProfile.FollowingTarget = value; }
+        }
 
         public void DoubleClickDelayed(uint serial)
         {
@@ -133,23 +143,6 @@ namespace ClassicUO.Game.Scenes
             Client.Game.GameCursor.ItemHold.Clear();
             Hotkeys = new HotkeysManager();
             Macros = new MacroManager();
-
-            // #########################################################
-            // [FILE_FIX]
-            // TODO: this code is a workaround to port old macros to the new xml system.
-            if (ProfileManager.CurrentProfile.Macros != null)
-            {
-                for (int i = 0; i < ProfileManager.CurrentProfile.Macros.Length; i++)
-                {
-                    Macros.PushToBack(ProfileManager.CurrentProfile.Macros[i]);
-                }
-
-                Macros.Save();
-
-                ProfileManager.CurrentProfile.Macros = null;
-            }
-            // #########################################################
-
             Macros.Load();
 
             _animatedStaticsManager = new AnimatedStaticsManager();

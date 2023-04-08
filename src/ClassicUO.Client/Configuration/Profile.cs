@@ -327,6 +327,9 @@ namespace ClassicUO.Configuration
         public byte NamePlateOpacity { get; set; } = 75;
         public byte NamePlateHealthBarOpacity { get; set; } = 50;
         public bool NamePlateHideAtFullHealth { get; set; } = true;
+        public bool NamePlateHideAtFullHealthInWarmode { get; set; } = true;
+
+        public bool LeftAlignToolTips { get; set; } = false;
 
 
 
@@ -387,8 +390,13 @@ namespace ClassicUO.Configuration
         public bool GridHighlight_CorpseOnly { get; set; } = false;
         #endregion
 
+        #region Modern paperdoll
         public ushort ModernPaperDollHue { get; set; } = 0;
         public ushort ModernPaperDollDurabilityHue { get; set; } = 32;
+        public int ModernPaperDoll_DurabilityPercent { get; set; } = 90;
+        #endregion
+
+        public int MoveMultiObjectDelay { get; set; } = 1000;
 
         public static uint GumpsVersion { get; private set; }
 
@@ -703,6 +711,9 @@ namespace ClassicUO.Configuration
                                 case GumpType.GridContainer:
                                     ushort ogContainer = ushort.Parse(xml.GetAttribute("ogContainer"));
                                     gump = new GridContainer(serial, ogContainer);
+                                    break;
+                                case GumpType.DurabilityGump:
+                                    gump = new DurabilitysGump();
                                     break;
                             }
 

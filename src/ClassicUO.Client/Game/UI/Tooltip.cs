@@ -107,7 +107,7 @@ namespace ClassicUO.Game.UI
                     style: FontStyle.BlackBorder,
                     cell: 5,
                     isHTML: true,
-                    align: TEXT_ALIGN_TYPE.TS_CENTER,
+                    align: ProfileManager.CurrentProfile.LeftAlignToolTips ? TEXT_ALIGN_TYPE.TS_LEFT : TEXT_ALIGN_TYPE.TS_CENTER,
                     recalculateWidthByInfo: true,
                     hue: hue
                 );
@@ -129,7 +129,7 @@ namespace ClassicUO.Game.UI
                         font,
                         Text,
                         width,
-                        TEXT_ALIGN_TYPE.TS_CENTER,
+                        ProfileManager.CurrentProfile.LeftAlignToolTips ? TEXT_ALIGN_TYPE.TS_LEFT : TEXT_ALIGN_TYPE.TS_CENTER,
                         (ushort) FontStyle.BlackBorder
                     );
 

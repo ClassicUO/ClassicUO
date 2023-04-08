@@ -163,7 +163,7 @@ namespace ClassicUO.Game.UI.Gumps
         private HSliderBar _hiddenBodyAlpha;
         private ClickableColorBox _hiddenBodyHue;
         private ClickableColorBox _speechColorPickerBox, _emoteColorPickerBox, _yellColorPickerBox, _whisperColorPickerBox, _partyMessageColorPickerBox, _guildMessageColorPickerBox, _allyMessageColorPickerBox, _chatMessageColorPickerBox, _partyAuraColorPickerBox;
-        private InputField _spellFormatBox, _autoFollowDistance;
+        private InputField _spellFormatBox, _autoFollowDistance, _modernPaperdollDurabilityPercent;
         private ClickableColorBox _tooltip_font_hue;
         private FontSelector _tooltip_font_selector;
         private HSliderBar _dragSelectStartX, _dragSelectStartY;
@@ -183,6 +183,8 @@ namespace ClassicUO.Game.UI.Gumps
         private Checkbox _useStandardSkillsGump, _showMobileNameIncoming, _showCorpseNameIncoming;
         private Checkbox _showStatsMessage, _showSkillsMessage;
         private HSliderBar _showSkillsMessageDelta;
+
+        private Checkbox _leftAlignToolTips, _namePlateHealthOnlyWarmode;
 
         #region Cooldowns
         private InputField _coolDownX, _coolDownY;
@@ -401,10 +403,26 @@ namespace ClassicUO.Game.UI.Gumps
                     140,
                     25,
                     ButtonAction.SwitchPage,
-                    "Cooldowns"
+                    "Cooldowns (TUO)"
                 )
                 {
-                    ButtonParameter = 8787 //They didn't use enums so putting this here until I fix it
+                    ButtonParameter = 8787
+                }
+            );
+
+            Add
+            (
+                new NiceButton
+                (
+                    10,
+                    10 + 30 * i++,
+                    140,
+                    25,
+                    ButtonAction.SwitchPage,
+                    "TazUO"
+                )
+                {
+                    ButtonParameter = 8788
                 }
             );
 
@@ -492,6 +510,7 @@ namespace ClassicUO.Game.UI.Gumps
             BuildContainers();
             BuildExperimental();
             BuildCooldowns();
+            BuildTazUO();
 
             ChangePage(1);
         }
@@ -739,69 +758,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             _use_smooth_boat_movement.IsVisible = Client.Version >= ClientVersion.CV_7090;
 
-            {
-                section.Add(AddLabel(null, "Journal Opacity", startX, startY));
-
-                section.AddRight
-                (
-                    _journalOpacity = AddHSlider(
-                        null,
-                        0,
-                        100,
-                        _currentProfile.JournalOpacity,
-                        startX,
-                        startY,
-                        200
-                    ),
-                    2
-                );
-                section.PushIndent();
-                section.Add
-                (
-                    _journalBackgroundColor = AddColorBox(
-                        null,
-                        startX,
-                        startY,
-                        _currentProfile.AltJournalBackgroundHue,
-                        ""
-                        )
-                );
-                section.AddRight(AddLabel(null, "Journal Background", startX, startY));
-                section.PopIndent();
-
-                section.Add(AddLabel(null, "Journal style", 0, 0));
-                section.AddRight(_journalStyle = AddCombobox(
-                        null,
-                        Enum.GetNames(typeof(ResizableJournal.BorderStyle)),
-                        _currentProfile.JournalStyle, 0, 0, 150
-                    ));
-            } //Journal opac and hue
-
-            {
-                section.Add(_disableSystemChat = AddCheckBox(
-                        null,
-                        "",
-                        _currentProfile.DisableSystemChat,
-                        0, 0
-                    ));
-                section.AddRight(AddLabel(null, "Disable system chat", 0, 0));
-            } //Disable system chat
-
-            {
-                section.Add(_useModernPaperdoll = AddCheckBox(
-                        null, "",
-                        _currentProfile.UseModernPaperdoll, 0, 0
-                    ));
-                section.AddRight(AddLabel(null, "Use modern paperdoll", 0, 0));
-
-                section.PushIndent();
-                section.Add(_paperDollHue = new ModernColorPicker.HueDisplay(ProfileManager.CurrentProfile.ModernPaperDollHue, null, true));
-                section.AddRight(AddLabel(null, "Modern paperdoll hue", 0, 0));
-
-                section.Add(_durabilityBarHue = new ModernColorPicker.HueDisplay(ProfileManager.CurrentProfile.ModernPaperDollDurabilityHue, null, true));
-                section.AddRight(AddLabel(null, "Modern paperdoll durability bar hue", 0,0));
-            }
-
             SettingsSection section2 = AddSettingsSection(box, "Mobiles");
             section2.Y = section.Bounds.Bottom + 40;
 
@@ -1025,68 +981,7 @@ namespace ClassicUO.Game.UI.Gumps
             section2.PopIndent();
             section2.PopIndent();
 
-            section2.Add(AddLabel(null, "Hidden Body Opacity", startX, startY));
-
-            section2.AddRight
-            (
-                _hiddenBodyAlpha = AddHSlider(
-                    null,
-                    0,
-                    100,
-                    _currentProfile.HiddenBodyAlpha,
-                    startX,
-                    startY,
-                    200
-                ),
-                2
-            );
-
-            section2.Add
-            (
-                _hiddenBodyHue = AddColorBox(
-                    null,
-                    startX,
-                    startY,
-                    _currentProfile.HiddenBodyHue,
-                    ""
-                    )
-            );
-            section2.AddRight(AddLabel(null, "Hidden Body Hue", startX, startY));
-
-            {
-                section2.Add(
-                    _namePlateHealthBar = AddCheckBox(null, "", _currentProfile.NamePlateHealthBar, startX, startY)
-                    );
-
-                section2.AddRight(AddLabel(null, "Name plates also act as health bar", startX, startY));
-
-                section2.PushIndent();
-                section2.Add(AddLabel(null, "HP opacity", 0, 0));
-                section2.AddRight(_namePlateHealthBarOpacity = AddHSlider(
-                        null,
-                        0, 100,
-                        _currentProfile.NamePlateHealthBarOpacity,
-                        0, 0,
-                        200
-                    ));
-                section2.Add(_namePlateShowAtFullHealth = AddCheckBox(null, "", _currentProfile.NamePlateHideAtFullHealth, 0, 0));
-                _namePlateShowAtFullHealth.SetTooltip("This is only applied while in war mode.");
-                section2.AddRight(new Label("Hide nameplates above 100% hp.", true, HUE_FONT, font: FONT));
-                section2.PopIndent();
-            } //Name plate health bar
-
-            {
-                section2.Add(AddLabel(null, "Name plate background opacity", 0, 0));
-                section2.AddRight(_namePlateOpacity = AddHSlider(
-                        null,
-                        0, 100,
-                        _currentProfile.NamePlateOpacity,
-                        0, 0,
-                        200
-                    ));
-            } //Name plate background opacity
-
-            SettingsSection section3 = AddSettingsSection(box, "Gumps & Context");
+                     SettingsSection section3 = AddSettingsSection(box, "Gumps & Context");
             section3.Y = section2.Bounds.Bottom + 40;
 
             section3.Add
@@ -1474,24 +1369,6 @@ namespace ClassicUO.Game.UI.Gumps
             );
 
             section4.PopIndent();
-
-            Label autoFollowLabel;
-            section4.Add(
-                autoFollowLabel = AddLabel(null, "Auto Follow Distance", startX, startY)
-                );
-            section4.AddRight(
-                _autoFollowDistance = AddInputField(
-                    null,
-                    startX,
-                    startY,
-                    50,
-                    TEXTBOX_HEIGHT,
-                    numbersOnly: true,
-                    maxCharCount: 10
-                    )
-                );
-            _autoFollowDistance.SetText(_currentProfile.AutoFollowDistance.ToString());
-
 
             SettingsSection section5 = AddSettingsSection(box, "Terrain & Statics");
             section5.Y = section4.Bounds.Bottom + 40;
@@ -2366,7 +2243,7 @@ namespace ClassicUO.Game.UI.Gumps
                         Y = 20
                     };
 
-                    Add(_macroControl, PAGE);                   
+                    Add(_macroControl, PAGE);
                 };
             }
 
@@ -2902,24 +2779,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             startY += _buffBarTime.Height + 2;
 
-            {
-                _enableImprovedBuffGump = AddCheckBox(
-                    rightArea,
-                    "Enable improved buff gump",
-                    _currentProfile.UseImprovedBuffBar,
-                    startX, startY
-                    );
-                startY += _enableImprovedBuffGump.Height + 2;
-
-                _improvedBuffBarHue = AddColorBox(
-                    rightArea,
-                    startX + 30, startY,
-                    _currentProfile.ImprovedBuffBarHue,
-                    "Buff Bar Hue"
-                    );
-                startY += _improvedBuffBarHue.Height + 2;
-            }//Improved buff gump
-
             _enableFastSpellsAssign = AddCheckBox
             (
                 rightArea,
@@ -3056,30 +2915,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             startX = 5;
             startY += (_spellFormatBox.Height * 2) + 2;
-
-            SettingsSection _damageHues = new SettingsSection("Damage number hues", rightArea.Width);
-            _damageHues.X = startX;
-            _damageHues.Y = startY;
-
-            _damageHues.Add(_damageHueSelf = AddColorBox(null, 0, 0, _currentProfile.DamageHueSelf, ""));
-            _damageHues.AddRight(new Label("Damage to self", true, HUE_FONT, font: FONT));
-
-            _damageHues.AddRight(_damageHueOther = AddColorBox(null, 0, 0, _currentProfile.DamageHueOther, ""));
-            _damageHues.AddRight(new Label("Damage to others", true, HUE_FONT, font: FONT));
-
-            _damageHues.Add(_damageHuePet = AddColorBox(null, 0, 0, _currentProfile.DamageHuePet, ""));
-            _damageHues.AddRight(new Label("Damage to pets", true, HUE_FONT, font: FONT));
-            _damageHuePet.SetTooltip("Due to client limitations magic summons don't work here.");
-
-            _damageHues.Add(_damageHueAlly = AddColorBox(null, 0, 0, _currentProfile.DamageHueAlly, ""));
-            _damageHues.AddRight(new Label("Damage to allies", true, HUE_FONT, font: FONT));
-
-            _damageHues.Add(_damageHueLastAttack = AddColorBox(null, 0, 0, _currentProfile.DamageHueLastAttck, ""));
-            _damageHues.AddRight(new Label("Damage to last attack", true, HUE_FONT, font: FONT));
-            _damageHueLastAttack.SetTooltip("Damage done to the last mobile you attacked, due to client limitations this is not neccesarily the damage YOU did to them.");
-
-            rightArea.Add(_damageHues);
-
             Add(rightArea, PAGE);
         }
 
@@ -3636,175 +3471,6 @@ namespace ClassicUO.Game.UI.Gumps
             startX = 5;
             startY += button.Height + 2;
 
-            #region Grid Container Settings
-            SettingsSection gridSection = new SettingsSection("Grid Containers", rightArea.Width);
-            gridSection.X = startX;
-            gridSection.Y = startY;
-
-            {
-                gridSection.Add(_useGridLayoutContainerGumps = AddCheckBox(
-                    null,
-                    "Use grid containers",
-                    _currentProfile.UseGridLayoutContainerGumps,
-                    0,
-                    0
-                ));
-            } //Use grid containers
-
-            {
-                gridSection.Add(AddLabel(null, "Grid container scale", 0, 0));
-
-                gridSection.AddRight(_gridContainerScale = AddHSlider(
-                        null,
-                        50, 200,
-                        _currentProfile.GridContainersScale,
-                        0, 0,
-                        200
-                    ));
-            } //Grid container scale
-
-            {
-                gridSection.PushIndent();
-
-                gridSection.Add(_gridContainerItemScale = AddCheckBox(
-                    null,
-                    "",
-                    _currentProfile.GridContainerScaleItems,
-                    0, 0
-                    ));
-
-                gridSection.AddRight(AddLabel(null, "Also scale items", 0, 0));
-
-                gridSection.PopIndent();
-            } //Grid container item scales
-
-            {
-                gridSection.Add(AddLabel(null, "Border opacity", 0, 0));
-                gridSection.AddRight
-                    (
-                        _gridBorderOpacity = AddHSlider
-                        (
-                            null,
-                            0,
-                            100,
-                            _currentProfile.GridBorderAlpha,
-                            0,
-                            0,
-                            200
-                        )
-                    );
-            } //Grid border opacity
-
-            {
-                gridSection.PushIndent();
-                gridSection.Add
-                    (
-                     _gridBorderHue = new ModernColorPicker.HueDisplay(_currentProfile.GridBorderHue, null, true)
-                    );
-                gridSection.AddRight(AddLabel(null, "Border hue", 0, 0));
-                gridSection.PopIndent();
-            } //Grid border hue
-
-            {
-                gridSection.Add(AddLabel(null, "Background opacity", 0, 0));
-                gridSection.AddRight(_containerOpacity = AddHSlider
-                (
-                    null,
-                    0,
-                    100,
-                    _currentProfile.ContainerOpacity,
-                    0,
-                    0,
-                    200
-                ));
-            } //Grid container opacity
-
-            {
-                gridSection.PushIndent();
-                gridSection.Add(_altGridContainerBackgroundHue = new ModernColorPicker.HueDisplay(_currentProfile.AltGridContainerBackgroundHue, null, true));
-                gridSection.AddRight(AddLabel(null, "Background hue", 0, 0));
-                gridSection.PopIndent();
-            } //Grid container background hue
-
-            {
-                gridSection.PushIndent();
-                gridSection.Add(_gridOverrideWithContainerHue = AddCheckBox(null, "Override hue with the container's hue", _currentProfile.Grid_UseContainerHue, 0, 0));
-                gridSection.PopIndent();
-            } //Override grid hue with container hue
-
-            {
-                gridSection.Add(
-                        AddLabel(null, "Search Style", 0, 0)
-                    );
-
-                gridSection.AddRight(
-                    _gridContainerSearchAlternative = AddCombobox(
-                            null,
-                            new string[] {
-                                "Only show",
-                                "Highlight"
-                            },
-                            _currentProfile.GridContainerSearchMode,
-                            0,
-                            0,
-                            200
-                        )
-                    );
-            } //Grid container search mode
-
-            {
-                gridSection.Add(_gridContainerPreview = AddCheckBox(
-                        null,
-                        "Enable container preview",
-                        _currentProfile.GridEnableContPreview,
-                        0,
-                        0
-                    ));
-                _gridContainerPreview.SetTooltip("This only works on containers that you have opened, otherwise the client does not have that information yet.");
-            } //Grid preview
-
-            {
-                gridSection.Add(_gridContainerAnchorable = AddCheckBox(
-                        null, "Make anchorable",
-                        _currentProfile.EnableGridContainerAnchor,
-                        0, 0
-                    ));
-                _gridContainerAnchorable.SetTooltip("This will allow grid containers to be anchored to other containers/world map/journal");
-            } //Grid anchors
-
-            {
-                gridSection.Add(AddLabel(null, "Container Style", 0, 0));
-
-                gridSection.AddRight(_gridBorderStyle = AddCombobox(
-                        null,
-                        Enum.GetNames(typeof(GridContainer.BorderStyle)),
-                        _currentProfile.Grid_BorderStyle,
-                        0, 0,
-                        200
-                    ));
-            } //Grid border style
-
-            {
-                gridSection.Add(AddLabel(null, "Default grid rows x columns", 0, 0));
-                gridSection.AddRight(_gridDefaultRows = AddInputField(null, 0, 0, 25, TEXTBOX_HEIGHT, numbersOnly: true));
-                _gridDefaultRows.SetText(_currentProfile.Grid_DefaultRows.ToString());
-                gridSection.AddRight(_gridDefaultColumns = AddInputField(null, 0, 0, 25, TEXTBOX_HEIGHT, numbersOnly: true));
-                _gridDefaultColumns.SetText(_currentProfile.Grid_DefaultColumns.ToString());
-            } //Grid default rows and columns
-
-            {
-                NiceButton _;
-                gridSection.Add(_ = new NiceButton(X, 0, 150, TEXTBOX_HEIGHT, ButtonAction.Activate, "Grid highlight settings"));
-                _.IsSelectable = false;
-                _.MouseUp += (s, e) => {
-                    UIManager.GetGump<GridHightlightMenu>()?.Dispose();
-                    UIManager.Add(new GridHightlightMenu());
-                };
-            } //Grid highlight settings
-
-            rightArea.Add(gridSection);
-            #endregion
-
             Add(rightArea, PAGE);
         }
 
@@ -3870,6 +3536,578 @@ namespace ClassicUO.Game.UI.Gumps
 
             rightArea.Add(conditions);
             #endregion
+
+            Add(rightArea, PAGE);
+        }
+
+        private void BuildTazUO()
+        {
+            const int PAGE = 8788;
+            const int SPACING = 15;
+            ScrollArea rightArea = new ScrollArea
+            (
+                190,
+                20,
+                WIDTH - 210,
+                420,
+                true
+            );
+            int startY = 5;
+
+            {
+                SettingsSection gridSection = new SettingsSection("Grid Containers", rightArea.Width);
+                {
+                    NiceButton _;
+                    gridSection.BaseAdd(_ = new NiceButton(0, 0, 20, TEXTBOX_HEIGHT, ButtonAction.Activate, "<>") { IsSelectable = false });
+                    _.SetTooltip("Minimize section");
+                    _.X = rightArea.Width - 45;
+                    _.Y = 0;
+                    _.MouseUp += (s, e) =>
+                    {
+                        if (e.Button == MouseButtonType.Left)
+                        {
+                            int diff = gridSection.Height - 25;
+                            if (gridSection.Children[2].IsVisible)
+                                diff = -gridSection.Height + 25;
+                            foreach (SettingsSection section in rightArea.Children.OfType<SettingsSection>())
+                            {
+                                if (section != gridSection)
+                                    section.Y += diff;
+                            }
+                            gridSection.Children[2].IsVisible = !gridSection.Children[2].IsVisible;
+                        }
+                    };
+                }
+
+                {
+                    gridSection.Add(_useGridLayoutContainerGumps = AddCheckBox(
+                        null,
+                        "Use grid containers",
+                        _currentProfile.UseGridLayoutContainerGumps,
+                        0,
+                        0
+                    ));
+                } //Use grid containers
+
+                {
+                    gridSection.Add(AddLabel(null, "Grid container scale", 0, 0));
+
+                    gridSection.AddRight(_gridContainerScale = AddHSlider(
+                            null,
+                            50, 200,
+                            _currentProfile.GridContainersScale,
+                            0, 0,
+                            200
+                        ));
+                } //Grid container scale
+
+                {
+                    gridSection.PushIndent();
+
+                    gridSection.Add(_gridContainerItemScale = AddCheckBox(
+                        null,
+                        "",
+                        _currentProfile.GridContainerScaleItems,
+                        0, 0
+                        ));
+
+                    gridSection.AddRight(AddLabel(null, "Also scale items", 0, 0));
+
+                    gridSection.PopIndent();
+                } //Grid container item scales
+
+                {
+                    gridSection.Add(AddLabel(null, "Border opacity", 0, 0));
+                    gridSection.AddRight
+                        (
+                            _gridBorderOpacity = AddHSlider
+                            (
+                                null,
+                                0,
+                                100,
+                                _currentProfile.GridBorderAlpha,
+                                0,
+                                0,
+                                200
+                            )
+                        );
+                } //Grid border opacity
+
+                {
+                    gridSection.PushIndent();
+                    gridSection.Add
+                        (
+                         _gridBorderHue = new ModernColorPicker.HueDisplay(_currentProfile.GridBorderHue, null, true)
+                        );
+                    gridSection.AddRight(AddLabel(null, "Border hue", 0, 0));
+                    gridSection.PopIndent();
+                } //Grid border hue
+
+                {
+                    gridSection.Add(AddLabel(null, "Background opacity", 0, 0));
+                    gridSection.AddRight(_containerOpacity = AddHSlider
+                    (
+                        null,
+                        0,
+                        100,
+                        _currentProfile.ContainerOpacity,
+                        0,
+                        0,
+                        200
+                    ));
+                } //Grid container opacity
+
+                {
+                    gridSection.PushIndent();
+                    gridSection.Add(_altGridContainerBackgroundHue = new ModernColorPicker.HueDisplay(_currentProfile.AltGridContainerBackgroundHue, null, true));
+                    gridSection.AddRight(AddLabel(null, "Background hue", 0, 0));
+                    gridSection.PopIndent();
+                } //Grid container background hue
+
+                {
+                    gridSection.PushIndent();
+                    gridSection.Add(_gridOverrideWithContainerHue = AddCheckBox(null, "Override hue with the container's hue", _currentProfile.Grid_UseContainerHue, 0, 0));
+                    gridSection.PopIndent();
+                } //Override grid hue with container hue
+
+                {
+                    gridSection.Add(
+                            AddLabel(null, "Search Style", 0, 0)
+                        );
+
+                    gridSection.AddRight(
+                        _gridContainerSearchAlternative = AddCombobox(
+                                null,
+                                new string[] {
+                                "Only show",
+                                "Highlight"
+                                },
+                                _currentProfile.GridContainerSearchMode,
+                                0,
+                                0,
+                                200
+                            )
+                        );
+                } //Grid container search mode
+
+                {
+                    gridSection.Add(_gridContainerPreview = AddCheckBox(
+                            null,
+                            "Enable container preview",
+                            _currentProfile.GridEnableContPreview,
+                            0,
+                            0
+                        ));
+                    _gridContainerPreview.SetTooltip("This only works on containers that you have opened, otherwise the client does not have that information yet.");
+                } //Grid preview
+
+                {
+                    gridSection.Add(_gridContainerAnchorable = AddCheckBox(
+                            null, "Make anchorable",
+                            _currentProfile.EnableGridContainerAnchor,
+                            0, 0
+                        ));
+                    _gridContainerAnchorable.SetTooltip("This will allow grid containers to be anchored to other containers/world map/journal");
+                } //Grid anchors
+
+                {
+                    gridSection.Add(AddLabel(null, "Container Style", 0, 0));
+
+                    gridSection.AddRight(_gridBorderStyle = AddCombobox(
+                            null,
+                            Enum.GetNames(typeof(GridContainer.BorderStyle)),
+                            _currentProfile.Grid_BorderStyle,
+                            0, 0,
+                            200
+                        ));
+                } //Grid border style
+
+                {
+                    gridSection.Add(AddLabel(null, "Default grid rows x columns", 0, 0));
+                    gridSection.AddRight(_gridDefaultRows = AddInputField(null, 0, 0, 25, TEXTBOX_HEIGHT, numbersOnly: true));
+                    _gridDefaultRows.SetText(_currentProfile.Grid_DefaultRows.ToString());
+                    gridSection.AddRight(_gridDefaultColumns = AddInputField(null, 0, 0, 25, TEXTBOX_HEIGHT, numbersOnly: true));
+                    _gridDefaultColumns.SetText(_currentProfile.Grid_DefaultColumns.ToString());
+                } //Grid default rows and columns
+
+                {
+                    NiceButton _;
+                    gridSection.Add(_ = new NiceButton(X, 0, 150, TEXTBOX_HEIGHT, ButtonAction.Activate, "Grid highlight settings"));
+                    _.IsSelectable = false;
+                    _.MouseUp += (s, e) =>
+                    {
+                        UIManager.GetGump<GridHightlightMenu>()?.Dispose();
+                        UIManager.Add(new GridHightlightMenu());
+                    };
+                } //Grid highlight settings
+
+                rightArea.Add(gridSection);
+                startY += gridSection.Height + SPACING;
+            }//Grid containers
+
+            {
+                SettingsSection section = new SettingsSection("Journal", rightArea.Width) { Y = startY };
+
+                {
+                    NiceButton _;
+                    section.BaseAdd(_ = new NiceButton(0, 0, 20, TEXTBOX_HEIGHT, ButtonAction.Activate, "<>") { IsSelectable = false });
+                    _.SetTooltip("Minimize section");
+                    _.X = rightArea.Width - 45;
+                    _.MouseUp += (s, e) =>
+                    {
+                        if (e.Button == MouseButtonType.Left)
+                        {
+                            int diff = section.Height - 25;
+                            if (section.Children[2].IsVisible)
+                                diff = -section.Height + 25;
+                            for (int i = rightArea.Children.IndexOf(section) + 1; i < rightArea.Children.Count; i++)
+                            {
+                                if (rightArea.Children[i] != section)
+                                    rightArea.Children[i].Y += diff;
+                            }
+                            section.Children[2].IsVisible = !section.Children[2].IsVisible;
+                        }
+                    };
+                }
+
+                {
+                    section.Add(AddLabel(null, "Journal Opacity", 0, 0));
+
+                    section.AddRight
+                    (
+                        _journalOpacity = AddHSlider(
+                            null,
+                            0,
+                            100,
+                            _currentProfile.JournalOpacity,
+                            0,
+                            0,
+                            200
+                        ),
+                        2
+                    );
+                    section.PushIndent();
+                    section.Add
+                    (
+                        _journalBackgroundColor = AddColorBox(
+                            null,
+                            0,
+                            0,
+                            _currentProfile.AltJournalBackgroundHue,
+                            ""
+                            )
+                    );
+                    section.AddRight(AddLabel(null, "Journal Background", 0, 0));
+                    section.PopIndent();
+
+                    section.Add(AddLabel(null, "Journal style", 0, 0));
+                    section.AddRight(_journalStyle = AddCombobox(
+                            null,
+                            Enum.GetNames(typeof(ResizableJournal.BorderStyle)),
+                            _currentProfile.JournalStyle, 0, 0, 150
+                        ));
+                } //Journal opac and hue
+
+
+                rightArea.Add(section);
+                startY += section.Height + SPACING;
+            }//Journal
+
+            {
+                SettingsSection section = new SettingsSection("Modern Paperdoll", rightArea.Width) { Y = startY };
+
+                {
+                    NiceButton _;
+                    section.BaseAdd(_ = new NiceButton(0, 0, 20, TEXTBOX_HEIGHT, ButtonAction.Activate, "<>") { IsSelectable = false });
+                    _.SetTooltip("Minimize section");
+                    _.X = rightArea.Width - 45;
+                    _.MouseUp += (s, e) =>
+                    {
+                        if (e.Button == MouseButtonType.Left)
+                        {
+                            int diff = section.Height - 25;
+                            if (section.Children[2].IsVisible)
+                                diff = -section.Height + 25;
+                            for (int i = rightArea.Children.IndexOf(section) + 1; i < rightArea.Children.Count; i++)
+                            {
+                                if (rightArea.Children[i] != section)
+                                    rightArea.Children[i].Y += diff;
+                            }
+                            section.Children[2].IsVisible = !section.Children[2].IsVisible;
+                        }
+                    };
+                }
+
+                section.Add(_useModernPaperdoll = AddCheckBox(
+                    null, "",
+                    _currentProfile.UseModernPaperdoll, 0, 0
+                ));
+                section.AddRight(AddLabel(null, "Use modern paperdoll", 0, 0));
+
+                section.PushIndent();
+                section.Add(_paperDollHue = new ModernColorPicker.HueDisplay(ProfileManager.CurrentProfile.ModernPaperDollHue, null, true));
+                section.AddRight(AddLabel(null, "Modern paperdoll hue", 0, 0));
+
+                section.Add(_durabilityBarHue = new ModernColorPicker.HueDisplay(ProfileManager.CurrentProfile.ModernPaperDollDurabilityHue, null, true));
+                section.AddRight(AddLabel(null, "Modern paperdoll durability bar hue", 0, 0));
+
+                section.Add(_modernPaperdollDurabilityPercent = AddInputField(null, 0, 0, 75, TEXTBOX_HEIGHT));
+                _modernPaperdollDurabilityPercent.SetText(_currentProfile.ModernPaperDoll_DurabilityPercent.ToString());
+                section.AddRight(AddLabel(null, "Show durability bar below %", 0, 0));
+
+                section.PopIndent();
+
+                rightArea.Add(section);
+                startY += section.Height + SPACING;
+            }//Modern paperdoll
+
+            {
+                SettingsSection section = new SettingsSection("Nameplates", rightArea.Width) { Y = startY };
+
+                {
+                    NiceButton _;
+                    section.BaseAdd(_ = new NiceButton(0, 0, 20, TEXTBOX_HEIGHT, ButtonAction.Activate, "<>") { IsSelectable = false });
+                    _.SetTooltip("Minimize section");
+                    _.X = rightArea.Width - 45;
+                    _.MouseUp += (s, e) =>
+                    {
+                        if (e.Button == MouseButtonType.Left)
+                        {
+                            int diff = section.Height - 25;
+                            if (section.Children[2].IsVisible)
+                                diff = -section.Height + 25;
+                            for (int i = rightArea.Children.IndexOf(section) + 1; i < rightArea.Children.Count; i++)
+                            {
+                                if (rightArea.Children[i] != section)
+                                    rightArea.Children[i].Y += diff;
+                            }
+                            section.Children[2].IsVisible = !section.Children[2].IsVisible;
+                        }
+                    };
+                }
+
+                {
+                    section.Add(
+                        _namePlateHealthBar = AddCheckBox(null, "", _currentProfile.NamePlateHealthBar, 0, 0)
+                        );
+
+                    section.AddRight(AddLabel(null, "Name plates also act as health bar", 0, 0));
+
+                    section.PushIndent();
+                    section.Add(AddLabel(null, "HP opacity", 0, 0));
+                    section.AddRight(_namePlateHealthBarOpacity = AddHSlider(
+                            null,
+                            0, 100,
+                            _currentProfile.NamePlateHealthBarOpacity,
+                            0, 0,
+                            200
+                        ));
+                    section.Add(_namePlateShowAtFullHealth = AddCheckBox(null, "", _currentProfile.NamePlateHideAtFullHealth, 0, 0));
+                    section.AddRight(new Label("Hide nameplates above 100% hp.", true, HUE_FONT, font: FONT));
+                    section.PushIndent();
+                    section.Add(_namePlateHealthOnlyWarmode = AddCheckBox(null, "", _currentProfile.NamePlateHideAtFullHealthInWarmode, 0, 0));
+                    section.AddRight(new Label("Only while in warmode", true, HUE_FONT, font: FONT));
+                    section.PopIndent();
+                    section.PopIndent();
+                } //Name plate health bar
+
+                {
+                    section.Add(AddLabel(null, "Name plate background opacity", 0, 0));
+                    section.AddRight(_namePlateOpacity = AddHSlider(
+                            null,
+                            0, 100,
+                            _currentProfile.NamePlateOpacity,
+                            0, 0,
+                            200
+                        ));
+                } //Name plate background opacity
+
+                rightArea.Add(section);
+                startY += section.Height + SPACING;
+            } //Name plates
+
+            {
+                SettingsSection section = new SettingsSection("Mobiles", rightArea.Width) { Y = startY };
+
+                {
+                    NiceButton _;
+                    section.BaseAdd(_ = new NiceButton(0, 0, 20, TEXTBOX_HEIGHT, ButtonAction.Activate, "<>") { IsSelectable = false });
+                    _.SetTooltip("Minimize section");
+                    _.X = rightArea.Width - 45;
+                    _.MouseUp += (s, e) =>
+                    {
+                        if (e.Button == MouseButtonType.Left)
+                        {
+                            int diff = section.Height - 25;
+                            if (section.Children[2].IsVisible)
+                                diff = -section.Height + 25;
+                            for (int i = rightArea.Children.IndexOf(section) + 1; i < rightArea.Children.Count; i++)
+                            {
+                                if (rightArea.Children[i] != section)
+                                    rightArea.Children[i].Y += diff;
+                            }
+                            section.Children[2].IsVisible = !section.Children[2].IsVisible;
+                        }
+                    };
+                }
+
+                section.Add(_damageHueSelf = AddColorBox(null, 0, 0, _currentProfile.DamageHueSelf, ""));
+                section.AddRight(new Label("Damage to self", true, HUE_FONT, font: FONT));
+
+                section.AddRight(_damageHueOther = AddColorBox(null, 0, 0, _currentProfile.DamageHueOther, ""));
+                section.AddRight(new Label("Damage to others", true, HUE_FONT, font: FONT));
+
+                section.Add(_damageHuePet = AddColorBox(null, 0, 0, _currentProfile.DamageHuePet, ""));
+                section.AddRight(new Label("Damage to pets", true, HUE_FONT, font: FONT));
+                _damageHuePet.SetTooltip("Due to client limitations magic summons don't work here.");
+
+                section.Add(_damageHueAlly = AddColorBox(null, 0, 0, _currentProfile.DamageHueAlly, ""));
+                section.AddRight(new Label("Damage to allies", true, HUE_FONT, font: FONT));
+
+                section.Add(_damageHueLastAttack = AddColorBox(null, 0, 0, _currentProfile.DamageHueLastAttck, ""));
+                section.AddRight(new Label("Damage to last attack", true, HUE_FONT, font: FONT));
+                _damageHueLastAttack.SetTooltip("Damage done to the last mobile you attacked, due to client limitations this is not neccesarily the damage YOU did to them.");
+
+                rightArea.Add(section);
+                startY += section.Height + SPACING;
+            } //Mobiles
+
+            {
+                SettingsSection section = new SettingsSection("Misc", rightArea.Width) { Y = startY };
+
+                {
+                    NiceButton _;
+                    section.BaseAdd(_ = new NiceButton(0, 0, 20, TEXTBOX_HEIGHT, ButtonAction.Activate, "<>") { IsSelectable = false });
+                    _.SetTooltip("Minimize section");
+                    _.X = rightArea.Width - 45;
+                    _.MouseUp += (s, e) =>
+                    {
+                        if (e.Button == MouseButtonType.Left)
+                        {
+                            int diff = section.Height - 25;
+                            if (section.Children[2].IsVisible)
+                                diff = -section.Height + 25;
+                            for (int i = rightArea.Children.IndexOf(section) + 1; i < rightArea.Children.Count; i++)
+                            {
+                                if (rightArea.Children[i] != section)
+                                    rightArea.Children[i].Y += diff;
+                            }
+                            section.Children[2].IsVisible = !section.Children[2].IsVisible;
+                        }
+                    };
+                }
+
+                {
+                    section.Add(_disableSystemChat = AddCheckBox(
+                            null,
+                            "",
+                            _currentProfile.DisableSystemChat,
+                            0, 0
+                        ));
+                    section.AddRight(AddLabel(null, "Disable system chat", 0, 0));
+                } //Disable system chat
+
+                {
+                    section.Add(AddLabel(null, "Hidden Body Opacity", 0, 0));
+
+                    section.AddRight
+                    (
+                        _hiddenBodyAlpha = AddHSlider(
+                            null,
+                            0,
+                            100,
+                            _currentProfile.HiddenBodyAlpha,
+                            0,
+                            0,
+                            200
+                        ),
+                        2
+                    );
+                    section.PushIndent();
+                    section.Add
+                    (
+                        _hiddenBodyHue = AddColorBox(
+                            null,
+                            0,
+                            0,
+                            _currentProfile.HiddenBodyHue,
+                            ""
+                            )
+                    );
+                    section.AddRight(AddLabel(null, "Hidden Body Hue", 0, 0));
+                    section.PopIndent();
+                } //Hidden body mods
+
+                {
+                    section.Add(AddLabel(null, "Auto Follow Distance", 0, 0));
+                    section.AddRight(
+                        _autoFollowDistance = AddInputField(
+                            null,
+                            0,
+                            0,
+                            50,
+                            TEXTBOX_HEIGHT,
+                            numbersOnly: true,
+                            maxCharCount: 10
+                            )
+                        );
+                    _autoFollowDistance.SetText(_currentProfile.AutoFollowDistance.ToString());
+                } //Auto follow distance
+
+                {
+                    section.Add(_enableImprovedBuffGump = AddCheckBox(
+                        null,
+                        "Enable improved buff gump",
+                        _currentProfile.UseImprovedBuffBar,
+                        0, 0
+                        ));
+
+                    section.AddRight(_improvedBuffBarHue = AddColorBox(
+                        null,
+                        0, 0,
+                        _currentProfile.ImprovedBuffBarHue,
+                        ""
+                        ));
+                    _improvedBuffBarHue.SetTooltip("Buff Bar Hue");
+                }//Improved buff gump
+
+                {
+                    section.Add(_leftAlignToolTips = AddCheckBox(null, "Align tooltips to the left side", _currentProfile.LeftAlignToolTips, 0, 0));
+                }//Left align tooltips
+
+                rightArea.Add(section);
+                startY += section.Height + SPACING;
+            }//Misc
+
+
+            //{
+            //    SettingsSection section = new SettingsSection("Misc", rightArea.Width) { Y = startY };
+
+            //    {
+            //        NiceButton _;
+            //        section.BaseAdd(_ = new NiceButton(0, 0, 20, TEXTBOX_HEIGHT, ButtonAction.Activate, "<>") { IsSelectable = false });
+            //        _.SetTooltip("Minimize section");
+            //        _.X = rightArea.Width - 45;
+            //        _.MouseUp += (s, e) =>
+            //        {
+            //            if (e.Button == MouseButtonType.Left)
+            //            {
+            //                int diff = section.Height - 25;
+            //                if (section.Children[2].IsVisible)
+            //                    diff = -section.Height + 25;
+            //                for (int i = rightArea.Children.IndexOf(section) + 1; i < rightArea.Children.Count; i++)
+            //                {
+            //                    if (rightArea.Children[i] != section)
+            //                        rightArea.Children[i].Y += diff;
+            //                }
+            //                section.Children[2].IsVisible = !section.Children[2].IsVisible;
+            //            }
+            //        };
+            //    }
+
+            //    rightArea.Add(section);
+            //    startY += section.Height + SPACING;
+            //} Blank setting section
 
             Add(rightArea, PAGE);
         }
@@ -4247,9 +4485,27 @@ namespace ClassicUO.Game.UI.Gumps
                 _currentProfile.JournalStyle = _journalStyle.SelectedIndex;
                 UIManager.GetGump<ResizableJournal>()?.BuildBorder();
             }
+            _currentProfile.NamePlateHideAtFullHealthInWarmode = _namePlateHealthOnlyWarmode.IsChecked;
+
+            _currentProfile.LeftAlignToolTips = _leftAlignToolTips.IsChecked;
 
             _currentProfile.ModernPaperDollHue = _paperDollHue.Hue;
             _currentProfile.ModernPaperDollDurabilityHue = _durabilityBarHue.Hue;
+            if (_currentProfile.ModernPaperDoll_DurabilityPercent.ToString() != _modernPaperdollDurabilityPercent.Text)
+            {
+                if (int.TryParse(_modernPaperdollDurabilityPercent.Text, out int percent))
+                {
+                    if (percent > 100)
+                        percent = 100;
+                    if (percent < 1)
+                        percent = 1;
+                    _currentProfile.ModernPaperDoll_DurabilityPercent = percent;
+                }
+                else
+                {
+                    _modernPaperdollDurabilityPercent.SetText(_currentProfile.ModernPaperDoll_DurabilityPercent.ToString());
+                }
+            }
 
             _currentProfile.UseModernPaperdoll = _useModernPaperdoll.IsChecked;
 
@@ -4395,7 +4651,24 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.StandardSkillsGump = _useStandardSkillsGump.IsChecked;
 
             _currentProfile.AltJournalBackgroundHue = _journalBackgroundColor.Hue;
-            _currentProfile.AltGridContainerBackgroundHue = _altGridContainerBackgroundHue.Hue;
+
+            if (_currentProfile.AltGridContainerBackgroundHue != _altGridContainerBackgroundHue.Hue)
+            {
+                _currentProfile.AltGridContainerBackgroundHue = _altGridContainerBackgroundHue.Hue;
+                foreach (GridContainer _ in UIManager.Gumps.OfType<GridContainer>())
+                {
+                    _.OptionsUpdated();
+                }
+            }
+
+            if (_currentProfile.ContainerOpacity != (byte)_containerOpacity.Value)
+            {
+                _currentProfile.ContainerOpacity = (byte)_containerOpacity.Value;
+                foreach (GridContainer _ in UIManager.Gumps.OfType<GridContainer>())
+                {
+                    _.OptionsUpdated();
+                }
+            }
 
             if (_useStandardSkillsGump.IsChecked)
             {
@@ -4837,12 +5110,7 @@ namespace ClassicUO.Game.UI.Gumps
 
 
             // containers
-            if (_containerOpacity.Value != _currentProfile.ContainerOpacity)
-            {
-                _currentProfile.ContainerOpacity = (byte)_containerOpacity.Value;
-                foreach (GridContainer gridContainer in UIManager.Gumps.OfType<GridContainer>())
-                    gridContainer.RequestUpdateContents();
-            }
+
 
             int containerScale = _currentProfile.ContainersScale;
 
@@ -5208,6 +5476,11 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _databox.Add(c);
                 _databox.WantUpdateSize = true;
+            }
+
+            public void BaseAdd(Control c, int page = 0)
+            {
+                base.Add(c, page);
             }
 
             public override void Add(Control c, int page = 0)

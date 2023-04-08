@@ -384,7 +384,7 @@ namespace ClassicUO.Game.UI.Gumps
                                 if (int.TryParse(durability[1].Trim(), out int max))
                                 {
                                     double perecentRemaining = (double)min / (double)max;
-                                    if (perecentRemaining > 0.9)
+                                    if (perecentRemaining > (double)ProfileManager.CurrentProfile.ModernPaperDoll_DurabilityPercent/(double)100)
                                         return;
                                     durablityBar.Height = (int)(Height * perecentRemaining);
                                     durablityBar.Y = Height - durablityBar.Height;
@@ -596,10 +596,12 @@ namespace ClassicUO.Game.UI.Gumps
                 X = x;
                 Y = y;
                 Width = 150;
-                Height = 241;
+                Height = 261;
                 AcceptMouseInput = true;
 
                 Add(new AlphaBlendControl(0.85f) { Width = Width, Height = Height, AcceptMouseInput = false });
+
+                var i = 1;
 
                 NiceButton preview = new NiceButton(1, 1, Width - 2, 20, ButtonAction.Activate, "Preview");
                 preview.MouseUp += (s, e) =>
@@ -611,7 +613,7 @@ namespace ClassicUO.Game.UI.Gumps
                 };
                 Add(preview);
 
-                NiceButton help = new NiceButton(1, 21, Width - 2, 20, ButtonAction.Activate, "Help");
+                NiceButton help = new NiceButton(1, 1 + 20 * i++, Width - 2, 20, ButtonAction.Activate, "Help");
                 help.MouseUp += (s, e) =>
                 {
                     if (e.Button == MouseButtonType.Left)
@@ -621,7 +623,7 @@ namespace ClassicUO.Game.UI.Gumps
                 };
                 Add(help);
 
-                NiceButton options = new NiceButton(1, 41, Width - 2, 20, ButtonAction.Activate, "Options");
+                NiceButton options = new NiceButton(1, 1 + 20 * i++, Width - 2, 20, ButtonAction.Activate, "Options");
                 options.MouseUp += (s, e) =>
                 {
                     if (e.Button == MouseButtonType.Left)
@@ -631,7 +633,7 @@ namespace ClassicUO.Game.UI.Gumps
                 };
                 Add(options);
 
-                NiceButton logout = new NiceButton(1, 61, Width - 2, 20, ButtonAction.Activate, "Log Out");
+                NiceButton logout = new NiceButton(1, 1 + 20 * i++, Width - 2, 20, ButtonAction.Activate, "Log Out");
                 logout.MouseUp += (s, e) =>
                 {
                     if (e.Button == MouseButtonType.Left)
@@ -641,7 +643,7 @@ namespace ClassicUO.Game.UI.Gumps
                 };
                 Add(logout);
 
-                NiceButton quests = new NiceButton(1, 81, Width - 2, 20, ButtonAction.Activate, "Quests");
+                NiceButton quests = new NiceButton(1, 1 + 20 * i++, Width - 2, 20, ButtonAction.Activate, "Quests");
                 quests.MouseUp += (s, e) =>
                 {
                     if (e.Button == MouseButtonType.Left)
@@ -651,7 +653,7 @@ namespace ClassicUO.Game.UI.Gumps
                 };
                 Add(quests);
 
-                NiceButton skills = new NiceButton(1, 101, Width - 2, 20, ButtonAction.Activate, "Skills");
+                NiceButton skills = new NiceButton(1, 1 + 20 * i++, Width - 2, 20, ButtonAction.Activate, "Skills");
                 skills.MouseUp += (s, e) =>
                 {
                     if (e.Button == MouseButtonType.Left)
@@ -661,7 +663,7 @@ namespace ClassicUO.Game.UI.Gumps
                 };
                 Add(skills);
 
-                NiceButton guild = new NiceButton(1, 121, Width - 2, 20, ButtonAction.Activate, "Guild");
+                NiceButton guild = new NiceButton(1, 1 + 20 * i++, Width - 2, 20, ButtonAction.Activate, "Guild");
                 guild.MouseUp += (s, e) =>
                 {
                     if (e.Button == MouseButtonType.Left)
@@ -671,7 +673,7 @@ namespace ClassicUO.Game.UI.Gumps
                 };
                 Add(guild);
 
-                NiceButton peace = new NiceButton(1, 141, Width - 2, 20, ButtonAction.Activate, "Peace/War");
+                NiceButton peace = new NiceButton(1, 1 + 20 * i++, Width - 2, 20, ButtonAction.Activate, "Peace/War");
                 peace.MouseUp += (s, e) =>
                 {
                     if (e.Button == MouseButtonType.Left)
@@ -681,7 +683,18 @@ namespace ClassicUO.Game.UI.Gumps
                 };
                 Add(peace);
 
-                NiceButton status = new NiceButton(1, 161, Width - 2, 20, ButtonAction.Activate, "Status");
+                NiceButton durability = new NiceButton(1, 1 + 20 * i++, Width - 2, 20, ButtonAction.Activate, "Durability Tracker");
+                durability.MouseUp += (s, e) =>
+                {
+                    if (e.Button == MouseButtonType.Left)
+                    {
+                        UIManager.GetGump<DurabilitysGump>()?.Dispose();
+                        UIManager.Add(new DurabilitysGump());
+                    }
+                };
+                Add(durability);
+
+                NiceButton status = new NiceButton(1, 1 + 20 * i++, Width - 2, 20, ButtonAction.Activate, "Status");
                 status.MouseUp += (s, e) =>
                 {
                     if (e.Button == MouseButtonType.Left)
@@ -739,7 +752,7 @@ namespace ClassicUO.Game.UI.Gumps
                 };
                 Add(status);
 
-                NiceButton party = new NiceButton(1, 181, Width - 2, 20, ButtonAction.Activate, "Party");
+                NiceButton party = new NiceButton(1, 1 + 20 * i++, Width - 2, 20, ButtonAction.Activate, "Party");
                 party.MouseUp += (s, e) =>
                 {
                     PartyGump party = UIManager.GetGump<PartyGump>();
@@ -757,14 +770,14 @@ namespace ClassicUO.Game.UI.Gumps
                 };
                 Add(party);
 
-                NiceButton profileEditor = new NiceButton(1, 201, Width - 2, 20, ButtonAction.Activate, "Profile");
+                NiceButton profileEditor = new NiceButton(1, 1 + 20 * i++, Width - 2, 20, ButtonAction.Activate, "Profile");
                 profileEditor.MouseUp += (s, e) =>
                 {
                     GameActions.RequestProfile(LocalSerial);
                 };
                 Add(profileEditor);
 
-                NiceButton abilities = new NiceButton(1, 221, Width - 2, 20, ButtonAction.Activate, "Abilities");
+                NiceButton abilities = new NiceButton(1, 1 + 20 * i++, Width - 2, 20, ButtonAction.Activate, "Abilities");
                 abilities.MouseUp += (s, e) =>
                 {
                     if (UIManager.GetGump<RacialAbilitiesBookGump>() == null)

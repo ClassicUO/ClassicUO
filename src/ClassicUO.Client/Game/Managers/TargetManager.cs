@@ -52,7 +52,8 @@ namespace ClassicUO.Game.Managers
         Grab,
         SetGrabBag,
         HueCommandTarget,
-        IgnorePlayerTarget
+        IgnorePlayerTarget,
+        MoveItemContainer,
     }
 
     internal class CursorType
@@ -403,6 +404,13 @@ namespace ClassicUO.Game.Managers
                             IgnoreManager.AddIgnoredTarget(pmEntity);
                         }
                         CancelTarget();
+                        return;
+                    case CursorTarget.MoveItemContainer:
+                        if (SerialHelper.IsItem(serial))
+                        {
+                            MultiItemMoveGump.OnContainerTarget(serial);
+                        }
+                        ClearTargetingWithoutTargetCancelPacket();
                         return;
                 }
             }

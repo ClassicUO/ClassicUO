@@ -27,7 +27,6 @@ namespace ClassicUO.Game.UI.Gumps
         #region CONTROLS
 
         #region TABS
-        private AlphaBlendControl _tabBackground;
         private List<NiceButton> _tab = new List<NiceButton>();
         private List<string> _tabName = new List<string>();
         private List<MessageType[]> _tabTypes = new List<MessageType[]>();
@@ -55,10 +54,10 @@ namespace ClassicUO.Game.UI.Gumps
 
             X = _lastX;
             Y = _lastY;
-           
+
 
             #region Background
-            _background = new AlphaBlendControl((float)ProfileManager.CurrentProfile.JournalOpacity/100);
+            _background = new AlphaBlendControl((float)ProfileManager.CurrentProfile.JournalOpacity / 100);
             _background.Hue = ProfileManager.CurrentProfile.AltJournalBackgroundHue;
             _background.Width = Width - (BORDER_WIDTH * 2);
             _background.Height = Height - (BORDER_WIDTH * 2);
@@ -113,8 +112,8 @@ namespace ClassicUO.Game.UI.Gumps
                 Add(_tab[i]);
 
             InitJournalEntries();
-            BuildBorder();
             ResizeWindow(ProfileManager.CurrentProfile.ResizeJournalSize);
+            BuildBorder();
             World.Journal.EntryAdded += (sender, e) => { AddJournalEntry(e); };
         }
 

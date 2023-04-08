@@ -127,7 +127,7 @@ namespace ClassicUO.Game.UI.Gumps
                 if (!isClickable)
                     SetTooltip(hue.ToString());
                 else
-                    SetTooltip("Click to select a hue");
+                    SetTooltip($"Click to select a hue ({hue})");
                 this.hue = hue;
                 this.hueChanged = hueChanged;
                 this.isClickable = isClickable;
