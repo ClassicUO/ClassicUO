@@ -790,18 +790,30 @@ namespace ClassicUO.Game.UI.Gumps
 
             private void _hit_MouseExit(object sender, MouseEventArgs e)
             {
-                if (Mouse.LButtonPressed && !mousePressedWhenEntered && !Keyboard.Alt)
+                if (Mouse.LButtonPressed && !mousePressedWhenEntered)
                 {
                     Point offset = Mouse.LDragOffset;
                     if (Math.Abs(offset.X) >= Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS || Math.Abs(offset.Y) >= Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS)
                     {
                         if (_item != null)
-                            GameActions.PickUp(_item, e.X, e.Y);
+                        {
+                            if (!Keyboard.Alt)
+                                GameActions.PickUp(_item, e.X, e.Y);
+                        }
                         else
-                            UIManager.AttemptDragControl(gridContainer);
+                        {
+                            if (ProfileManager.CurrentProfile.HoldAltToMoveGumps)
+                            {
+                                if (Keyboard.Alt)
+                                    UIManager.AttemptDragControl(gridContainer);
+                            }
+                            else
+                                UIManager.AttemptDragControl(gridContainer);
+                        }
                     }
                 }
-                else if (Keyboard.Alt && Mouse.LButtonPressed && _item != null)
+
+                if (Keyboard.Alt && Mouse.LButtonPressed && _item != null)
                 {
                     if (!MultiItemMoveGump.MoveItems.Contains(_item))
                         MultiItemMoveGump.MoveItems.Enqueue(_item);
@@ -877,6 +889,10 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                     }
                 }
+
+                if (_item != null && Hightlight)
+                    if (!MultiItemMoveGump.MoveItems.Contains(_item))
+                        Hightlight = false;
 
                 base.Draw(batcher, x, y);
 
