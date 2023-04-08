@@ -1426,14 +1426,14 @@ namespace ClassicUO.Assets
 
             if (animData.FileIndex < 0 || animData.FileIndex >= _filesUop.Length)
             {
-                return _frames.AsSpan().Slice(0, 0);
+                return Span<FrameInfo>.Empty;
             }
 
             if (animData.FileIndex == 0 && animData.CompressedLength == 0 && animData.DecompressedLength == 0 && animData.Offset == 0)
             {
                 Log.Warn("uop animData is null");
 
-                return _frames.AsSpan().Slice(0, 0);
+                return Span<FrameInfo>.Empty;
             }
 
             int decLen = (int)animData.DecompressedLength;
@@ -1473,7 +1473,7 @@ namespace ClassicUO.Assets
                 _frames = new FrameInfo[frameCount];
             }
 
-            Span<FrameInfo> frames = _frames.AsSpan().Slice(0, frameCount);
+            var frames = _frames.AsSpan(0, frameCount);
 
             /* If the UOP files didn't omit frames, we could just do this:
              * reader.Skip(sizeof(UOPAnimationHeader) * direction * frameCount);
@@ -1491,7 +1491,7 @@ namespace ClassicUO.Assets
                     if (animHeaderInfo->Group != animGroup)
                     {
                         /* Something bad has happened. Just return. */
-                        return _frames.AsSpan().Slice(0, 0);
+                        return Span<FrameInfo>.Empty;
                     }
 
                     /* FrameID is 1's based and just keeps increasing, regardless of direction.
