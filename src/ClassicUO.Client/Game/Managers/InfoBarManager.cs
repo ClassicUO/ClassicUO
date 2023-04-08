@@ -48,14 +48,6 @@ namespace ClassicUO.Game.Managers
         public InfoBarManager()
         {
             infoBarItems = new List<InfoBarItem>();
-
-            if (ProfileManager.CurrentProfile.InfoBarItems != null)
-            {
-                infoBarItems.AddRange(ProfileManager.CurrentProfile.InfoBarItems);
-
-                ProfileManager.CurrentProfile.InfoBarItems = null;
-                Save();
-            }
         }
 
         public List<InfoBarItem> GetInfoBars()
