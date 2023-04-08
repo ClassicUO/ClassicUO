@@ -770,7 +770,7 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         gridContainer.gridSlotManager.SetLockedSlot(slot, !ItemGridLocked);
                     }
-                    else if (Keyboard.Alt)
+                    else if (Keyboard.Alt && _item != null)
                     {
                         if (!MultiItemMoveGump.MoveItems.Contains(_item))
                             MultiItemMoveGump.MoveItems.Enqueue(_item);
@@ -801,7 +801,7 @@ namespace ClassicUO.Game.UI.Gumps
                             UIManager.AttemptDragControl(gridContainer);
                     }
                 }
-                else if (Keyboard.Alt && Mouse.LButtonPressed)
+                else if (Keyboard.Alt && Mouse.LButtonPressed && _item != null)
                 {
                     if (!MultiItemMoveGump.MoveItems.Contains(_item))
                         MultiItemMoveGump.MoveItems.Enqueue(_item);
@@ -831,7 +831,7 @@ namespace ClassicUO.Game.UI.Gumps
                         UIManager.Add(preview);
                     }
 
-                    if (Keyboard.Alt && Mouse.LButtonPressed)
+                    if (Keyboard.Alt && Mouse.LButtonPressed && _item != null)
                     {
                         if (!MultiItemMoveGump.MoveItems.Contains(_item))
                             MultiItemMoveGump.MoveItems.Enqueue(_item);
