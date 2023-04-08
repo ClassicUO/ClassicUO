@@ -88,7 +88,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             };
 
-            Add(new SimpleBorder() { Width = Width, Height = Height });
+            Add(new SimpleBorder() { Width = Width, Height = Height, Alpha = 0.75f });
         }
 
         public static void OnContainerTarget(uint serial)
