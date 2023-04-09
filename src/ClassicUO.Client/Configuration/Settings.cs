@@ -31,11 +31,18 @@
 #endregion
 
 using System.IO;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using ClassicUO.Configuration.Json;
 using Microsoft.Xna.Framework;
-using TinyJson;
 
 namespace ClassicUO.Configuration
 {
+    [JsonSourceGenerationOptions(WriteIndented = true, GenerationMode = JsonSourceGenerationMode.Metadata)]
+    [JsonSerializable(typeof(Settings), GenerationMode = JsonSourceGenerationMode.Metadata)]
+    sealed partial class SettingsJsonContext : JsonSerializerContext { }
+
+
     internal sealed class Settings
     {
         public const string SETTINGS_FILENAME = "settings.json";
@@ -43,62 +50,62 @@ namespace ClassicUO.Configuration
         public static string CustomSettingsFilepath = null;
 
 
-        [JsonProperty("username")] public string Username { get; set; } = string.Empty;
+        [JsonPropertyName("username")] public string Username { get; set; } = string.Empty;
 
-        [JsonProperty("password")] public string Password { get; set; } = string.Empty;
+        [JsonPropertyName("password")] public string Password { get; set; } = string.Empty;
 
-        [JsonProperty("ip")] public string IP { get; set; } = "127.0.0.1";
+        [JsonPropertyName("ip")] public string IP { get; set; } = "127.0.0.1";
 
-        [JsonProperty("port")] public ushort Port { get; set; } = 2593;
+        [JsonPropertyName("port")] public ushort Port { get; set; } = 2593;
 
-        [JsonProperty("ultimaonlinedirectory")]
+        [JsonPropertyName("ultimaonlinedirectory")]
         public string UltimaOnlineDirectory { get; set; } = "";
 
-        [JsonProperty("profilespath")] public string ProfilesPath { get; set; } = string.Empty;
+        [JsonPropertyName("profilespath")] public string ProfilesPath { get; set; } = string.Empty;
 
-        [JsonProperty("clientversion")] public string ClientVersion { get; set; } = string.Empty;
+        [JsonPropertyName("clientversion")] public string ClientVersion { get; set; } = string.Empty;
         
-        [JsonProperty("lang")] public string Language { get; set; } = "";
+        [JsonPropertyName("lang")] public string Language { get; set; } = "";
 
-        [JsonProperty("lastservernum")] public ushort LastServerNum { get; set; } = 1;
+        [JsonPropertyName("lastservernum")] public ushort LastServerNum { get; set; } = 1;
 
-        [JsonProperty("last_server_name")] public string LastServerName { get; set; } = string.Empty;
+        [JsonPropertyName("last_server_name")] public string LastServerName { get; set; } = string.Empty;
 
-        [JsonProperty("fps")] public int FPS { get; set; } = 60;
+        [JsonPropertyName("fps")] public int FPS { get; set; } = 60;
 
-        [JsonProperty("window_position")] public Point? WindowPosition { get; set; }
-        [JsonProperty("window_size")] public Point? WindowSize { get; set; }
+        [JsonConverter(typeof(NullablePoint2Converter))] [JsonPropertyName("window_position")] public Point? WindowPosition { get; set; }
+        [JsonConverter(typeof(NullablePoint2Converter))] [JsonPropertyName("window_size")] public Point? WindowSize { get; set; }
 
-        [JsonProperty("is_win_maximized")] public bool IsWindowMaximized { get; set; } = true;
+        [JsonPropertyName("is_win_maximized")] public bool IsWindowMaximized { get; set; } = true;
 
-        [JsonProperty("saveaccount")] public bool SaveAccount { get; set; }
+        [JsonPropertyName("saveaccount")] public bool SaveAccount { get; set; }
 
-        [JsonProperty("autologin")] public bool AutoLogin { get; set; }
+        [JsonPropertyName("autologin")] public bool AutoLogin { get; set; }
 
-        [JsonProperty("reconnect")] public bool Reconnect { get; set; }
+        [JsonPropertyName("reconnect")] public bool Reconnect { get; set; }
 
-        [JsonProperty("reconnect_time")] public int ReconnectTime { get; set; } = 1;
+        [JsonPropertyName("reconnect_time")] public int ReconnectTime { get; set; } = 1;
 
-        [JsonProperty("login_music")] public bool LoginMusic { get; set; } = true;
+        [JsonPropertyName("login_music")] public bool LoginMusic { get; set; } = true;
 
-        [JsonProperty("login_music_volume")] public int LoginMusicVolume { get; set; } = 70;
+        [JsonPropertyName("login_music_volume")] public int LoginMusicVolume { get; set; } = 70;
 
-        [JsonProperty("shard_type")] public int ShardType { get; set; } // 0 = normal (no customization), 1 = old, 2 = outlands??
+        [JsonPropertyName("shard_type")] public int ShardType { get; set; } // 0 = normal (no customization), 1 = old, 2 = outlands??
 
-        [JsonProperty("fixed_time_step")] public bool FixedTimeStep { get; set; } = true;
+        [JsonPropertyName("fixed_time_step")] public bool FixedTimeStep { get; set; } = true;
 
-        [JsonProperty("run_mouse_in_separate_thread")]
+        [JsonPropertyName("run_mouse_in_separate_thread")]
         public bool RunMouseInASeparateThread { get; set; } = true;
 
-        [JsonProperty("force_driver")] public byte ForceDriver { get; set; }
+        [JsonPropertyName("force_driver")] public byte ForceDriver { get; set; }
 
-        [JsonProperty("use_verdata")] public bool UseVerdata { get; set; }
+        [JsonPropertyName("use_verdata")] public bool UseVerdata { get; set; }
 
-        [JsonProperty("maps_layouts")] public string MapsLayouts { get; set; }
+        [JsonPropertyName("maps_layouts")] public string MapsLayouts { get; set; }
 
-        [JsonProperty("encryption")] public byte Encryption { get; set; }
+        [JsonPropertyName("encryption")] public byte Encryption { get; set; }
 
-        [JsonProperty("plugins")] public string[] Plugins { get; set; } = { @"./Assistant/Razor.dll" };
+        [JsonPropertyName("plugins")] public string[] Plugins { get; set; } = { @"./Assistant/Razor.dll" };
 
         public static string GetSettingsFilepath()
         {
@@ -119,9 +126,8 @@ namespace ClassicUO.Configuration
         public void Save()
         {
             // Make a copy of the settings object that we will use in the saving process
-            string json = this.Encode(true);
-
-            Settings settingsToSave = json.Decode<Settings>(); // JsonConvert.DeserializeObject<Settings>(JsonConvert.SerializeObject(this));
+            var json = JsonSerializer.Serialize(this, typeof(Settings), SettingsJsonContext.Default);
+            var settingsToSave = JsonSerializer.Deserialize(json, typeof(Settings), SettingsJsonContext.Default) as Settings;
 
             // Make sure we don't save username and password if `saveaccount` flag is not set
             // NOTE: Even if we pass username and password via command-line arguments they won't be saved
@@ -135,7 +141,7 @@ namespace ClassicUO.Configuration
 
             // NOTE: We can do any other settings clean-ups here before we save them
 
-            ConfigurationResolver.Save(settingsToSave, GetSettingsFilepath());
+            ConfigurationResolver.Save(settingsToSave, GetSettingsFilepath(), SettingsJsonContext.Default);
         }
     }
 }

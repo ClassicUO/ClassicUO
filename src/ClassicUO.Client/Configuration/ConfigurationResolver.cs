@@ -31,15 +31,16 @@
 #endregion
 
 using System.IO;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using ClassicUO.Utility.Logging;
-using TinyJson;
 
 namespace ClassicUO.Configuration
 {
     internal static class ConfigurationResolver
     {
-        public static T Load<T>(string file) where T : class
+        public static T Load<T>(string file, JsonSerializerContext ctx) where T : class
         {
             if (!File.Exists(file))
             {
@@ -48,7 +49,7 @@ namespace ClassicUO.Configuration
                 return null;
             }
 
-            string text = File.ReadAllText(file);
+            var text = File.ReadAllText(file);
 
             text = Regex.Replace
             (
@@ -60,24 +61,23 @@ namespace ClassicUO.Configuration
                 RegexOptions.IgnorePatternWhitespace
             );
 
-            T settings = text.Decode<T>();
-
-            return settings;
+            return JsonSerializer.Deserialize(text, typeof(T), ctx) as T;
         }
 
-        public static void Save<T>(T obj, string file) where T : class
+        public static void Save<T>(T obj, string file, JsonSerializerContext ctx) where T : class
         {
             // this try catch is necessary when multiples cuo instances points to this file.
             try
             {
-                FileInfo fileInfo = new FileInfo(file);
+                var fileInfo = new FileInfo(file);
 
                 if (fileInfo.Directory != null && !fileInfo.Directory.Exists)
                 {
                     fileInfo.Directory.Create();
                 }
-
-                File.WriteAllText(file, obj.Encode(true));
+                
+                var json = JsonSerializer.Serialize(obj, typeof(T), ctx);
+                File.WriteAllText(file, json);
             }
             catch (IOException e)
             {

@@ -35,6 +35,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Xml;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Scenes;
@@ -43,6 +44,10 @@ using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.Managers
 {
+    [JsonSerializable(typeof(LastCharacterInfo))]
+    [JsonSerializable(typeof(List<LastCharacterInfo>))]
+    sealed partial class LastCharacterJsonContext : JsonSerializerContext { }
+
     public static class LastCharacterManager
     {
         private static readonly string _lastCharacterFilePath = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Profiles");
@@ -58,10 +63,10 @@ namespace ClassicUO.Game.Managers
 
             if (!File.Exists(_lastCharacterFile))
             {
-                ConfigurationResolver.Save(LastCharacters, _lastCharacterFile);
+                ConfigurationResolver.Save(LastCharacters, _lastCharacterFile, LastCharacterJsonContext.Default);
             }
 
-            LastCharacters = ConfigurationResolver.Load<List<LastCharacterInfo>>(_lastCharacterFile);
+            LastCharacters = ConfigurationResolver.Load<List<LastCharacterInfo>>(_lastCharacterFile, LastCharacterJsonContext.Default);
 
             // safety check
             if (LastCharacters == null)
@@ -94,7 +99,7 @@ namespace ClassicUO.Game.Managers
                 });
             }
 
-            ConfigurationResolver.Save(LastCharacters, _lastCharacterFile);
+            ConfigurationResolver.Save(LastCharacters, _lastCharacterFile, LastCharacterJsonContext.Default);
         }
 
         public static string GetLastCharacter(string account, string server)

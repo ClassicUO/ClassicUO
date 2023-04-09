@@ -56,9 +56,17 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SDL2;
 using SpriteFont = ClassicUO.Renderer.SpriteFont;
+using System.Text.Json.Serialization;
+using static ClassicUO.Game.UI.Gumps.WorldMapGump;
 
 namespace ClassicUO.Game.UI.Gumps
 {
+    [JsonSourceGenerationOptions(WriteIndented = true, GenerationMode = JsonSourceGenerationMode.Metadata)]
+    [JsonSerializable(typeof(ZonesFile), GenerationMode = JsonSourceGenerationMode.Metadata)]
+    [JsonSerializable(typeof(List<ZonesFileZoneData>), GenerationMode = JsonSourceGenerationMode.Metadata)]
+    [JsonSerializable(typeof(ZonesFileZoneData), GenerationMode = JsonSourceGenerationMode.Metadata)]
+    sealed partial class ZonesJsonContext : JsonSerializerContext { }
+
     internal class WorldMapGump : ResizableGump
     {
         private static Point _last_position = new Point(100, 100);
@@ -1572,30 +1580,23 @@ namespace ClassicUO.Game.UI.Gumps
             );
         }
 
-        [DataContract]
         internal class ZonesFileZoneData
         {
-            [DataMember]
-            public string Label = null;
+            public string Label { get; set; }
 
-            [DataMember]
-            public string Color = null;
+            public string Color { get; set; }
 
-            [DataMember]
-            public List<List<int>> Polygon = null;
+            public List<List<int>> Polygon { get; set; }
         }
 
-        [DataContract]
         internal class ZonesFile
         {
-            [DataMember]
-            public int MapIndex;
-
-            [DataMember]
-            public List<ZonesFileZoneData> Zones;
+            public int MapIndex { get; set; }
+            public List<ZonesFileZoneData> Zones { get; set; }
         }
 
-        private class Zone {
+        private class Zone 
+        {
             public string Label;
             public Color Color;
             public Rectangle BoundingRectangle;
@@ -1658,31 +1659,19 @@ namespace ClassicUO.Game.UI.Gumps
 
         private class ZoneSets
         {
-            public Dictionary<string, ZoneSet> ZoneSetDict = new Dictionary<string, ZoneSet>();
+            public Dictionary<string, ZoneSet> ZoneSetDict { get; } = new Dictionary<string, ZoneSet>();
 
             public void AddZoneSetByFileName(string filename, bool hidden)
             {
-                FileStream fs = new FileStream(filename, FileMode.Open, FileAccess.Read);
-                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ZonesFile));
-                ZonesFile zf = null;
-
                 try
                 {
-                    zf = (ZonesFile) ser.ReadObject(fs);
+                    var zf = System.Text.Json.JsonSerializer.Deserialize(filename, ZonesJsonContext.Default.ZonesFile);
+                    ZoneSetDict[filename] = new ZoneSet(zf, filename, hidden);
+                    GameActions.Print(string.Format(ResGumps.MapZoneFileLoaded, ZoneSetDict[filename].NiceFileName), 0x3A /* yellow green */);
                 }
                 catch (Exception ee)
                 {
                     Log.Error($"{ee}");
-                }
-                finally
-                {
-                    fs.Dispose();
-                }
-
-                if (!(zf is null))
-                {
-                    ZoneSetDict[filename] = new ZoneSet(zf, filename, hidden);
-                    GameActions.Print(String.Format(ResGumps.MapZoneFileLoaded, ZoneSetDict[filename].NiceFileName), 0x3A /* yellow green */);
                 }
             }
 
