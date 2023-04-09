@@ -409,7 +409,6 @@ namespace ClassicUO.Game.UI.Gumps
             //Container doesn't exist or has no items
             if (_container == null)
             {
-                InvalidateContents = false;
                 Dispose();
                 return;
             }
@@ -424,7 +423,8 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (InvalidateContents && !IsDisposed && IsVisible)
             {
-                _background.Alpha = (float)ProfileManager.CurrentProfile.ContainerOpacity / 100;
+                if (ProfileManager.CurrentProfile != null)
+                    _background.Alpha = (float)ProfileManager.CurrentProfile.ContainerOpacity / 100;
                 updateItems();
             }
         }
