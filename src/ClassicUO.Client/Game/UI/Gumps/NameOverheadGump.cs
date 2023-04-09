@@ -547,10 +547,24 @@ namespace ClassicUO.Game.UI.Gumps
                 _isMobile = true;
                 _hpPercent = (double)m.Hits / (double)m.HitsMax;
 
-                if (ProfileManager.CurrentProfile.NamePlateHideAtFullHealth && _hpPercent >= 1 && (World.Player.InWarMode || !ProfileManager.CurrentProfile.NamePlateHideAtFullHealthInWarmode))
+                IsVisible = true;
+                if (ProfileManager.CurrentProfile.NamePlateHideAtFullHealth && _hpPercent >= 1)
                 {
-                    Dispose();
-                    return false;
+                    if (ProfileManager.CurrentProfile.NamePlateHideAtFullHealthInWarmode)
+                    {
+                        if (World.Player.InWarMode)
+                        {
+                            IsVisible = false;
+                            return false;
+                        }
+
+                    }
+                    else
+                    {
+                        IsVisible = false;
+                        return false;
+                    }
+                    
                 }
 
                 if (_positionLocked)
