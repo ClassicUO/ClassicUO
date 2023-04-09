@@ -656,9 +656,24 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (TargetManager.LastTargetInfo.Serial != World.Player && !_outOfRange && mobile != null)
                 {
+                    int tDistance = mobile.Distance;
                     if (mobile == TargetManager.LastTargetInfo.Serial)
                     {
                         _border[0].LineColor = HPB_COLOR_RED;
+                        _border[0].Hue = 0;
+                        if (tDistance < 15 && mobile != World.Player)
+                        {
+                            _border[0].LineColor = HPB_COLOR_YELLOW;
+                            _border[0].Hue = 42;
+                            if(tDistance < 10)
+                            {
+                                _border[0].Hue = 52;
+                                if(tDistance < 5)
+                                {
+                                    _border[0].Hue = 67;
+                                }
+                            }
+                        }
 
                         if (_border.Length >= 3)
                         {
@@ -668,6 +683,20 @@ namespace ClassicUO.Game.UI.Gumps
                     else if (mobile != TargetManager.LastTargetInfo.Serial)
                     {
                         _border[0].LineColor = HPB_COLOR_BLACK;
+                        _border[0].Hue = 0;
+                        if (tDistance < 15 && mobile != World.Player)
+                        {
+                            _border[0].LineColor = HPB_COLOR_YELLOW;
+                            _border[0].Hue = 42;
+                            if (tDistance < 10)
+                            {
+                                _border[0].Hue = 52;
+                                if (tDistance < 5)
+                                {
+                                    _border[0].Hue = 67;
+                                }
+                            }
+                        }
 
                         if (_border.Length >= 3)
                         {
@@ -1307,6 +1336,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private class LineCHB : Line
         {
+            public int Hue = 0;
             public LineCHB(int x, int y, int w, int h, uint color) : base
             (
                 x,
@@ -1328,7 +1358,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
-                Vector3 hueVector = ShaderHueTranslator.GetHueVector(0, false, Alpha);
+                Vector3 hueVector = ShaderHueTranslator.GetHueVector(Hue, false, Alpha);
 
                 batcher.Draw
                 (
