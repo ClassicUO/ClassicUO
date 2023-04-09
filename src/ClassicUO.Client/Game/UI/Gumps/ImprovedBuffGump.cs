@@ -162,6 +162,11 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 for (int i = 0; i < coolDownBars.Length; i++)
                 {
+                    if (coolDownBars[i] != null && coolDownBars[i].buffIconType == coolDownBar.buffIconType)
+                    {
+                        coolDownBar.Dispose();
+                        return;
+                    }
                     if (coolDownBars[i] == null || coolDownBars[i].IsDisposed)
                     {
                         coolDownBars[i] = coolDownBar;
