@@ -374,7 +374,7 @@ namespace ClassicUO.Game.UI.Gumps
                     int currentTcount = tcount;
                     //if (!isOPLEvent)
                     //    System.Threading.Thread.Sleep(1500);
-                    if (durablityBar.IsDisposed || currentTcount != tcount)
+                    if (durablityBar.IsDisposed || currentTcount != tcount || item == null)
                         return;
                     if (World.DurabilityManager.TryGetDurability(item.Serial, out DurabiltyProp durabilty))
                     {
@@ -401,6 +401,10 @@ namespace ClassicUO.Game.UI.Gumps
                                     durablityBar.IsVisible = true;
                                 }
                         }
+                    } else
+                    {
+                        System.Threading.Thread.Sleep(1500);
+                        UpdateDurability(item, isOPLEvent);
                     }
                 });
             }
