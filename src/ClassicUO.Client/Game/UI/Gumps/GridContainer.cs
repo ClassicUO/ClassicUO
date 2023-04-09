@@ -643,6 +643,7 @@ namespace ClassicUO.Game.UI.Gumps
             private ushort borderHighlightHue = 0;
 
             public bool Hightlight = false;
+            public bool SelectHighlight = false;
             public Item SlotItem { get { return _item; } set { _item = value; LocalSerial = value.Serial; } }
 
             private readonly int[] spellbooks = { 0x0EFA, 0x2253, 0x2252, 0x238C, 0x23A0, 0x2D50, 0x2D9D, 0x225A };
@@ -775,7 +776,7 @@ namespace ClassicUO.Game.UI.Gumps
                         if (!MultiItemMoveGump.MoveItems.Contains(_item))
                             MultiItemMoveGump.MoveItems.Enqueue(_item);
                         MultiItemMoveGump.AddMultiItemMoveGumpToUI(gridContainer.X - 200, gridContainer.Y);
-                        Hightlight = true;
+                        SelectHighlight = true;
                     }
                     else if (_item != null)
                     {
@@ -818,7 +819,7 @@ namespace ClassicUO.Game.UI.Gumps
                     if (!MultiItemMoveGump.MoveItems.Contains(_item))
                         MultiItemMoveGump.MoveItems.Enqueue(_item);
                     MultiItemMoveGump.AddMultiItemMoveGumpToUI(gridContainer.X - 200, gridContainer.Y);
-                    Hightlight = true;
+                    SelectHighlight = true;
                 }
 
 
@@ -848,7 +849,7 @@ namespace ClassicUO.Game.UI.Gumps
                         if (!MultiItemMoveGump.MoveItems.Contains(_item))
                             MultiItemMoveGump.MoveItems.Enqueue(_item);
                         MultiItemMoveGump.AddMultiItemMoveGumpToUI(gridContainer.X - 200, gridContainer.Y);
-                        Hightlight = true;
+                        SelectHighlight = true;
                     }
 
                     if (!hit.HasTooltip)
@@ -890,9 +891,9 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 }
 
-                if (_item != null && Hightlight)
+                if (_item != null && SelectHighlight)
                     if (!MultiItemMoveGump.MoveItems.Contains(_item))
-                        Hightlight = false;
+                        SelectHighlight = false;
 
                 base.Draw(batcher, x, y);
 
@@ -904,7 +905,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (ItemGridLocked)
                     hueVector.X = 0x1;
-                if (Hightlight)
+                if (Hightlight || SelectHighlight)
                 {
                     hueVector.X = 0x34;
                     hueVector.Z = 1;
