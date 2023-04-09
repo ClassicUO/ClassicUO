@@ -450,8 +450,9 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            if (gridSlotManager.ItemPositions.Count > 0 && !_container.IsCorpse)
-                GridSaveSystem.Instance.SaveContainer(LocalSerial, gridSlotManager.GridSlots, Width, Height, X, Y);
+            if (gridSlotManager != null)
+                if (gridSlotManager.ItemPositions.Count > 0 && !_container.IsCorpse)
+                    GridSaveSystem.Instance.SaveContainer(LocalSerial, gridSlotManager.GridSlots, Width, Height, X, Y);
 
             base.Dispose();
         }
