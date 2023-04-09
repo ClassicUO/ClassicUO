@@ -90,7 +90,6 @@ namespace ClassicUO.Game.UI.Gumps
             AnchorType = ProfileManager.CurrentProfile.EnableGridContainerAnchor ? ANCHOR_TYPE.NONE : ANCHOR_TYPE.DISABLED;
 
             OgContainerGraphic = ogContainer;
-            //_container = World.Items.Get(local);
 
             if (_container == null)
             {
