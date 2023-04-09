@@ -891,7 +891,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 }
 
-                if (_item != null && SelectHighlight)
+                if (SelectHighlight)
                     if (!MultiItemMoveGump.MoveItems.Contains(_item))
                         SelectHighlight = false;
 
