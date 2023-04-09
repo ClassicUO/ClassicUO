@@ -909,11 +909,10 @@ namespace ClassicUO.Game.UI.Gumps
                 hueVector = ShaderHueTranslator.GetHueVector(ProfileManager.CurrentProfile.GridBorderHue, false, (float)ProfileManager.CurrentProfile.GridBorderAlpha / 100);
 
                 if (ItemGridLocked)
-                    hueVector.X = 0x1;
+                    hueVector = ShaderHueTranslator.GetHueVector(0x2, false, (float)ProfileManager.CurrentProfile.GridBorderAlpha / 100);
                 if (Hightlight || SelectHighlight)
                 {
-                    hueVector.X = 0x34;
-                    hueVector.Z = 1;
+                    hueVector = ShaderHueTranslator.GetHueVector(0x34, false, 1);
                 }
 
                 batcher.DrawRectangle
