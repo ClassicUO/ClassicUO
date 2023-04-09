@@ -54,7 +54,7 @@ namespace ClassicUO.Utility
             }
 
             StringBuilder sb = new StringBuilder(source.Length * 2 + 2);
-            sb.Append("1+");
+            sb.Append("1-");
 
             for (int i = 0; i < buff.Length; i++)
             {
@@ -78,7 +78,7 @@ namespace ClassicUO.Utility
 
             byte[] buff = null;
 
-            if (source.Length > 2 && source[0] == '1' && source[1] == '+')
+            if (source.Length > 2 && source[0] == '1' && (source[1] == '-' || source[1] == '+'))
             {
                 buff = new byte[(source.Length - 2) >> 1];
                 string key = CalculateKey();
