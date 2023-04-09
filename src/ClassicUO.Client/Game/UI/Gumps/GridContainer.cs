@@ -670,7 +670,6 @@ namespace ClassicUO.Game.UI.Gumps
 
                 SetGridItem(_item);
 
-
                 hit.MouseEnter += _hit_MouseEnter;
                 hit.MouseExit += _hit_MouseExit;
                 hit.MouseUp += _hit_MouseUp;
@@ -832,6 +831,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             private void _hit_MouseEnter(object sender, MouseEventArgs e)
             {
+                SelectedObject.Object = World.Get(LocalSerial);
                 if (Mouse.LButtonPressed)
                     mousePressedWhenEntered = true;
                 else
