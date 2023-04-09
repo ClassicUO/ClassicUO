@@ -64,7 +64,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public readonly ushort OgContainerGraphic;
         private readonly AlphaBlendControl _background;
-        private readonly Item _container;
+        private Item _container { get { return World.Items.Get(LocalSerial); } }
         private readonly Label _containerNameLabel;
         private readonly StbTextBox _searchBox;
         private readonly GumpPic _openRegularGump, _quickDropBackpack, _sortContents;
@@ -90,7 +90,7 @@ namespace ClassicUO.Game.UI.Gumps
             AnchorType = ProfileManager.CurrentProfile.EnableGridContainerAnchor ? ANCHOR_TYPE.NONE : ANCHOR_TYPE.DISABLED;
 
             OgContainerGraphic = ogContainer;
-            _container = World.Items.Get(local);
+            //_container = World.Items.Get(local);
 
             if (_container == null)
             {
@@ -411,6 +411,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (_container == null)
             {
                 InvalidateContents = false;
+                Dispose();
                 return;
             }
 
@@ -464,9 +465,12 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
 
 
-            if (_container == null || _container.IsDestroyed)
+            Item item = World.Items.Get(LocalSerial);
+
+            if (item == null || item.IsDestroyed)
             {
                 Dispose();
+
                 return;
             }
 
@@ -507,7 +511,8 @@ namespace ClassicUO.Game.UI.Gumps
             if (_container != null && !_container.IsDestroyed && UIManager.MouseOverControl != null && (UIManager.MouseOverControl == this || UIManager.MouseOverControl.RootParent == this))
             {
                 SelectedObject.Object = _container;
-                SelectedObject.CorpseObject = _container;
+                if (_container.IsCorpse)
+                    SelectedObject.CorpseObject = _container;
             }
         }
 
