@@ -7,7 +7,9 @@
 
 Join TazUO's discord for ideas/support/updates -> https://discord.gg/SqwtB5g95H
 
-This version of CUO adds [grid containers](../../wiki/TazUO.Grid-Containers) to the regular CUO client
+Check out our [wiki](../../wiki) for details on all of the changes TazUO has made for players!
+
+This version of CUO adds [grid containers](../../wiki/TazUO.Grid-Containers) and many other features to the regular CUO client
 
     Searchable
 
