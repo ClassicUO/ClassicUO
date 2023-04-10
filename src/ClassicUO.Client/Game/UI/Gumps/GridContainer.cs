@@ -448,11 +448,11 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     SelectedObject.CorpseObject = null;
                 }
-            }
 
             if (gridSlotManager != null)
                 if (gridSlotManager.ItemPositions.Count > 0 && !_container.IsCorpse)
                     GridSaveSystem.Instance.SaveContainer(LocalSerial, gridSlotManager.GridSlots, Width, Height, X, Y);
+            }
 
             base.Dispose();
         }
