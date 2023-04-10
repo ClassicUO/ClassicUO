@@ -65,6 +65,7 @@ namespace ClassicUO
         private uint _totalFrames;
         private UltimaBatcher2D _uoSpriteBatch;
         private bool _suppressedDraw;
+        private Texture2D _background;
 
         public GameController()
         {
@@ -159,6 +160,10 @@ namespace ClassicUO
             GameCursor = new GameCursor();
             Audio = new AudioManager();
             Audio.Initialize();
+
+            var bytes = Loader.GetBackgroundImage().ToArray();
+            using var ms = new MemoryStream(bytes);
+            _background = Texture2D.FromStream(GraphicsDevice, ms);
 
             SetScene(new LoginScene());
             SetWindowPositionBySettings();
@@ -469,6 +474,12 @@ namespace ClassicUO
             _totalFrames++;
 
             GraphicsDevice.Clear(Color.Black);
+
+            _uoSpriteBatch.Begin();
+            var rect = new Rectangle(0, 0, GraphicManager.PreferredBackBufferWidth,GraphicManager.PreferredBackBufferHeight);
+            _uoSpriteBatch.Draw(SolidColorTextureCache.GetTexture(Color.Black), rect, Vector3.UnitZ);
+            _uoSpriteBatch.DrawTiled(_background, rect, _background.Bounds, new Vector3(0, 0, 0.3f));
+            _uoSpriteBatch.End();
 
             if (Scene != null && Scene.IsLoaded && !Scene.IsDestroyed)
             {
