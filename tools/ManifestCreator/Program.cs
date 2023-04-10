@@ -8,7 +8,7 @@ using System.Xml;
 
 using var md5 = MD5.Create();
 
-var ecludingList = new[]
+var ecludingList = new string[]
 {
     //"ClassicUO.exe.config"
 };
