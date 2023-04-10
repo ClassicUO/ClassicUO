@@ -10,7 +10,7 @@ using var md5 = MD5.Create();
 
 var ecludingList = new[]
 {
-    "ClassicUO.exe.config"
+    //"ClassicUO.exe.config"
 };
 
 
