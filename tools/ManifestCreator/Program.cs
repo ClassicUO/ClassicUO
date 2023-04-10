@@ -52,12 +52,13 @@ List<ManifestRelease> CreateManifestReleaseList(string cuo_path, string version,
     foreach (var f in dir.GetFiles("*.*", SearchOption.AllDirectories)
         .Where(s => !ecludingList.Contains(s.Name)))
     {
-        var path = f.FullName.Replace(cuo_path, "");
-        if (path.StartsWith(Path.DirectorySeparatorChar))
-        {
-            path = path.Remove(0, 1);
-        }
+        //var path = f.FullName.Replace(cuo_path, "");
+        //if (path.StartsWith(Path.DirectorySeparatorChar))
+        //{
+        //    path = path.Remove(0, 1);
+        //}
 
+        var path = Path.Combine(cuo_path, f.Name);
         var hash_file = new HashFile(path, CalculateMD5(f.FullName));
         release.Files.Add(hash_file);
         Console.WriteLine(hash_file);
