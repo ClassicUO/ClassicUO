@@ -70,6 +70,7 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly GumpPic _openRegularGump, _quickDropBackpack, _sortContents;
         private readonly GumpPicTiled _backgroundTexture;
         private readonly NiceButton _setLootBag;
+        private readonly bool isCorpse = false;
 
         private float _lastGridItemScale = (ProfileManager.CurrentProfile.GridContainersScale / 100f);
         private int _lastWidth = DEFAULT_WIDTH, _lastHeight = DEFAULT_HEIGHT;
@@ -96,6 +97,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Dispose();
                 return;
             }
+            isCorpse = _container.IsCorpse;
 
             Mobile m = World.Mobiles.Get(_container.RootContainer);
             if (m != null)
@@ -150,7 +152,7 @@ namespace ClassicUO.Game.UI.Gumps
             _openRegularGump = new GumpPic(_background.Width - 25 - BORDER_WIDTH, BORDER_WIDTH, regularGumpIcon == null ? (ushort)1209 : (ushort)5839, 0);
             _openRegularGump.MouseUp += (sender, e) =>
             {
-                OpenOldContainer(_container);
+                OpenOldContainer(LocalSerial);
             };
             _openRegularGump.MouseEnter += (sender, e) => { _openRegularGump.Graphic = regularGumpIcon == null ? (ushort)1210 : (ushort)5840; };
             _openRegularGump.MouseExit += (sender, e) => { _openRegularGump.Graphic = regularGumpIcon == null ? (ushort)1209 : (ushort)5839; };
@@ -202,7 +204,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             #region Set loot bag
             _setLootBag = new NiceButton(0, Height - 20, 100, 20, ButtonAction.Default, "Set loot bag") { IsSelectable = false };
-            _setLootBag.IsVisible = ProfileManager.CurrentProfile.DoubleClickToLootInsideContainers && _container.IsCorpse;
+            _setLootBag.IsVisible = ProfileManager.CurrentProfile.DoubleClickToLootInsideContainers && isCorpse;
             _setLootBag.SetTooltip("For double click looting only");
             _setLootBag.MouseUp += (s, e) =>
             {
@@ -286,11 +288,11 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (Client.Game.GameCursor.ItemHold.Enabled)
                 {
-                    GameActions.DropItem(Client.Game.GameCursor.ItemHold.Serial, 0xFFFF, 0xFFFF, 0, _container.Serial);
+                    GameActions.DropItem(Client.Game.GameCursor.ItemHold.Serial, 0xFFFF, 0xFFFF, 0, LocalSerial);
                 }
                 else if (TargetManager.IsTargeting)
                 {
-                    TargetManager.Target(_container.Serial);
+                    TargetManager.Target(LocalSerial);
                 }
             }
             else if (e.Button == MouseButtonType.Right)
@@ -431,7 +433,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseExit(int x, int y)
         {
-            if (_container != null && !_container.IsDestroyed)
+            if (isCorpse && _container != null && !_container.IsDestroyed)
             {
                 SelectedObject.CorpseObject = null;
             }
@@ -448,11 +450,11 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     SelectedObject.CorpseObject = null;
                 }
+            }
 
             if (gridSlotManager != null)
-                if (gridSlotManager.ItemPositions.Count > 0 && !_container.IsCorpse)
+                if (gridSlotManager.ItemPositions.Count > 0 && !isCorpse)
                     GridSaveSystem.Instance.SaveContainer(LocalSerial, gridSlotManager.GridSlots, Width, Height, X, Y);
-            }
 
             base.Dispose();
         }
@@ -474,9 +476,9 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
-            if (_container.IsCorpse)
+            if (item.IsCorpse)
             {
-                if (_container.Distance > 3)
+                if (item.Distance > 3)
                 {
                     Dispose();
                     return;
@@ -508,11 +510,11 @@ namespace ClassicUO.Game.UI.Gumps
 
 
 
-            if (_container != null && !_container.IsDestroyed && UIManager.MouseOverControl != null && (UIManager.MouseOverControl == this || UIManager.MouseOverControl.RootParent == this))
+            if (item != null && !item.IsDestroyed && UIManager.MouseOverControl != null && (UIManager.MouseOverControl == this || UIManager.MouseOverControl.RootParent == this))
             {
-                SelectedObject.Object = _container;
-                if (_container.IsCorpse)
-                    SelectedObject.CorpseObject = _container;
+                SelectedObject.Object = item;
+                if (item.IsCorpse)
+                    SelectedObject.CorpseObject = item;
             }
         }
 
