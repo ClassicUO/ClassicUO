@@ -14,7 +14,7 @@ var ecludingList = new[]
 };
 
 
-var cuoBinPath = args[0];
+var cuoBinPath = Path.GetFullPath(args[0]);
 Console.WriteLine("CUOPATH: {0}", cuoBinPath);
 
 var version = args[1];
@@ -52,13 +52,12 @@ List<ManifestRelease> CreateManifestReleaseList(string cuo_path, string version,
     foreach (var f in dir.GetFiles("*.*", SearchOption.AllDirectories)
         .Where(s => !ecludingList.Contains(s.Name)))
     {
-        //var path = f.FullName.Replace(cuo_path, "");
-        //if (path.StartsWith(Path.DirectorySeparatorChar))
-        //{
-        //    path = path.Remove(0, 1);
-        //}
+        var path = f.FullName.Remove(0, cuo_path.Length);
+        if (path.StartsWith(Path.DirectorySeparatorChar))
+        {
+            path = path.Remove(0, 1);
+        }
 
-        var path = Path.Combine(cuo_path, f.Name);
         if (!File.Exists(path)) 
         {
             Console.WriteLine("file not found {0}", path); 
