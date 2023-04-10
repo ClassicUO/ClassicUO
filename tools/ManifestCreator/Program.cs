@@ -59,6 +59,12 @@ List<ManifestRelease> CreateManifestReleaseList(string cuo_path, string version,
         //}
 
         var path = Path.Combine(cuo_path, f.Name);
+        if (!File.Exists(path)) 
+        {
+            Console.WriteLine("file not found {0}", path); 
+            continue; 
+        }
+
         var hash_file = new HashFile(path, CalculateMD5(f.FullName));
         release.Files.Add(hash_file);
         Console.WriteLine(hash_file);
