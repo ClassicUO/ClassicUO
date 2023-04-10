@@ -51,7 +51,7 @@ jobs:
         type: 'zip'
         directory: ${{ env.CUO_OUTPUT_PATH }}
         filename: ${{ env.CUO_ZIP_NAME }}
-        exclusions: 'ClassicUO.exe.config'
+      #  exclusions: 'ClassicUO.exe.config'
         
     - name: Create manifest
       run: dotnet run --project tools/ManifestCreator/ManifestCreator.csproj "${{ env.CUO_OUTPUT_PATH }}" "dev-preview" "${{ env.CUO_ZIP_NAME }}"
