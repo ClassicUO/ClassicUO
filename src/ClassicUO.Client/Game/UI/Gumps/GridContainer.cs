@@ -64,7 +64,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public readonly ushort OgContainerGraphic;
         private readonly AlphaBlendControl _background;
-        private readonly Item _container;
+        private Item _container { get { return World.Items.Get(LocalSerial); } }
         private readonly Label _containerNameLabel;
         private readonly StbTextBox _searchBox;
         private readonly GumpPic _openRegularGump, _quickDropBackpack, _sortContents;
@@ -90,7 +90,6 @@ namespace ClassicUO.Game.UI.Gumps
             AnchorType = ProfileManager.CurrentProfile.EnableGridContainerAnchor ? ANCHOR_TYPE.NONE : ANCHOR_TYPE.DISABLED;
 
             OgContainerGraphic = ogContainer;
-            _container = World.Items.Get(local);
 
             if (_container == null)
             {
@@ -410,7 +409,7 @@ namespace ClassicUO.Game.UI.Gumps
             //Container doesn't exist or has no items
             if (_container == null)
             {
-                InvalidateContents = false;
+                Dispose();
                 return;
             }
 
@@ -424,7 +423,8 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (InvalidateContents && !IsDisposed && IsVisible)
             {
-                _background.Alpha = (float)ProfileManager.CurrentProfile.ContainerOpacity / 100;
+                if (ProfileManager.CurrentProfile != null)
+                    _background.Alpha = (float)ProfileManager.CurrentProfile.ContainerOpacity / 100;
                 updateItems();
             }
         }
@@ -450,8 +450,9 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            if (gridSlotManager.ItemPositions.Count > 0 && !_container.IsCorpse)
-                GridSaveSystem.Instance.SaveContainer(LocalSerial, gridSlotManager.GridSlots, Width, Height, X, Y);
+            if (gridSlotManager != null)
+                if (gridSlotManager.ItemPositions.Count > 0 && !_container.IsCorpse)
+                    GridSaveSystem.Instance.SaveContainer(LocalSerial, gridSlotManager.GridSlots, Width, Height, X, Y);
 
             base.Dispose();
         }
@@ -464,9 +465,12 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
 
 
-            if (_container == null || _container.IsDestroyed)
+            Item item = World.Items.Get(LocalSerial);
+
+            if (item == null || item.IsDestroyed)
             {
                 Dispose();
+
                 return;
             }
 
@@ -507,7 +511,8 @@ namespace ClassicUO.Game.UI.Gumps
             if (_container != null && !_container.IsDestroyed && UIManager.MouseOverControl != null && (UIManager.MouseOverControl == this || UIManager.MouseOverControl.RootParent == this))
             {
                 SelectedObject.Object = _container;
-                SelectedObject.CorpseObject = _container;
+                if (_container.IsCorpse)
+                    SelectedObject.CorpseObject = _container;
             }
         }
 
@@ -670,7 +675,6 @@ namespace ClassicUO.Game.UI.Gumps
 
                 SetGridItem(_item);
 
-
                 hit.MouseEnter += _hit_MouseEnter;
                 hit.MouseExit += _hit_MouseExit;
                 hit.MouseUp += _hit_MouseUp;
@@ -832,6 +836,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             private void _hit_MouseEnter(object sender, MouseEventArgs e)
             {
+                SelectedObject.Object = World.Get(LocalSerial);
                 if (Mouse.LButtonPressed)
                     mousePressedWhenEntered = true;
                 else
@@ -891,7 +896,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 }
 
-                if (_item != null && SelectHighlight)
+                if (SelectHighlight)
                     if (!MultiItemMoveGump.MoveItems.Contains(_item))
                         SelectHighlight = false;
 
@@ -904,11 +909,10 @@ namespace ClassicUO.Game.UI.Gumps
                 hueVector = ShaderHueTranslator.GetHueVector(ProfileManager.CurrentProfile.GridBorderHue, false, (float)ProfileManager.CurrentProfile.GridBorderAlpha / 100);
 
                 if (ItemGridLocked)
-                    hueVector.X = 0x1;
+                    hueVector = ShaderHueTranslator.GetHueVector(0x2, false, (float)ProfileManager.CurrentProfile.GridBorderAlpha / 100);
                 if (Hightlight || SelectHighlight)
                 {
-                    hueVector.X = 0x34;
-                    hueVector.Z = 1;
+                    hueVector = ShaderHueTranslator.GetHueVector(0x34, false, 1);
                 }
 
                 batcher.DrawRectangle

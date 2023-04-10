@@ -295,6 +295,7 @@ namespace ClassicUO.Game
                 }
                 else
                 {
+                    backpackGump.RequestUpdateContents();
                     backpackGump.SetInScreen();
                     backpackGump.BringOnTop();
                 }

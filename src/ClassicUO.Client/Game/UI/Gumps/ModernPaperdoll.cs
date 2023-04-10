@@ -170,17 +170,19 @@ namespace ClassicUO.Game.UI.Gumps
 
             RequestUpdateContents();
 
-            World.OPL.OPLOnReceive += OPL_OnOPLReceive;
+            //World.OPL.OPLOnReceive += OPL_OnOPLReceive;
         }
 
         private void OPL_OnOPLReceive(ObjectPropertiesListManager.OPLEventArgs e)
         {
             Task.Factory.StartNew(() =>
             {
-                foreach (var itemSlot in itemLayerSlots)
-                {
-                    itemSlot.Value.OPLChangeEvent(e);
-                }
+                Item i = World.Items.Get(e.Serial);
+                if (i != null && i.RootContainer == World.Player.Serial)
+                    foreach (var itemSlot in itemLayerSlots)
+                    {
+                        itemSlot.Value.OPLChangeEvent(e);
+                    }
             });
         }
 
@@ -237,7 +239,7 @@ namespace ClassicUO.Game.UI.Gumps
             base.Dispose();
             lastX = X;
             lastY = Y;
-            World.OPL.OPLOnReceive -= OPL_OnOPLReceive;
+            //World.OPL.OPLOnReceive -= OPL_OnOPLReceive;
         }
 
         public override void Save(XmlTextWriter writer)
@@ -363,18 +365,26 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             private void UpdateDurability(Item item, bool isOPLEvent = false)
-            {//Need to check durability somehow, not receiving item updates as durability changes
+            {
                 if (!isOPLEvent)
                     durablityBar.IsVisible = false;
                 tcount++;
                 Task.Factory.StartNew(() =>
                 {
                     int currentTcount = tcount;
-                    if (!isOPLEvent)
-                        System.Threading.Thread.Sleep(1500);
-                    if (durablityBar.IsDisposed || currentTcount != tcount)
+                    //if (!isOPLEvent)
+                    //    System.Threading.Thread.Sleep(1500);
+                    if (durablityBar.IsDisposed || currentTcount != tcount || item == null)
                         return;
-                    if (World.OPL.TryGetNameAndData(item.Serial, out string name, out string data))
+                    if (World.DurabilityManager.TryGetDurability(item.Serial, out DurabiltyProp durabilty))
+                    {
+                        if (durabilty.Percentage > (float)ProfileManager.CurrentProfile.ModernPaperDoll_DurabilityPercent / (float)100)
+                            return;
+                        durablityBar.Height = (int)(Height * durabilty.Percentage);
+                        durablityBar.Y = Height - durablityBar.Height;
+                        durablityBar.IsVisible = true;
+                    }
+                    else if (World.OPL.TryGetNameAndData(item.Serial, out string name, out string data))
                     {
                         MatchCollection matches = Regex.Matches(data, @"(?<=Durability )(\d*) / (\d*)"); //This should match 45 / 255 for example
                         if (matches.Count > 0)
@@ -384,13 +394,17 @@ namespace ClassicUO.Game.UI.Gumps
                                 if (int.TryParse(durability[1].Trim(), out int max))
                                 {
                                     double perecentRemaining = (double)min / (double)max;
-                                    if (perecentRemaining > (double)ProfileManager.CurrentProfile.ModernPaperDoll_DurabilityPercent/(double)100)
+                                    if (perecentRemaining > (double)ProfileManager.CurrentProfile.ModernPaperDoll_DurabilityPercent / (double)100)
                                         return;
                                     durablityBar.Height = (int)(Height * perecentRemaining);
                                     durablityBar.Y = Height - durablityBar.Height;
                                     durablityBar.IsVisible = true;
                                 }
                         }
+                    } else
+                    {
+                        System.Threading.Thread.Sleep(1500);
+                        UpdateDurability(item, isOPLEvent);
                     }
                 });
             }
