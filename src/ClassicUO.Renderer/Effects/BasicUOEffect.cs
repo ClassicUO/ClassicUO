@@ -4,7 +4,7 @@ namespace ClassicUO.Renderer.Effects
 {
     internal class BasicUOEffect : Effect
     {
-        public BasicUOEffect(GraphicsDevice graphicsDevice) : base(graphicsDevice, Resources.IsometricEffect)
+        public BasicUOEffect(GraphicsDevice graphicsDevice) : base(graphicsDevice, Resources.GetUOShader().ToArray())
         {
             MatrixTransform = Parameters["MatrixTransform"];
             WorldMatrix = Parameters["WorldMatrix"];

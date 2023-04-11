@@ -17,12 +17,6 @@
     </AssemblyAttribute>
   </ItemGroup>
 
-
-  <ItemGroup>
-    <EmbeddedResource Include="cuologo.png" />
-  </ItemGroup>
-
-
   <ItemGroup Condition="$(TargetFramework.StartsWith('net4'))">
     <Reference Include="System.IO.Compression" />
   </ItemGroup>
@@ -82,13 +76,6 @@
     <Reference Include="cuoapi">
       <HintPath>..\..\external\cuoapi\cuoapi.dll</HintPath>
     </Reference>
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="cuologo.png">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
   </ItemGroup>
 
 

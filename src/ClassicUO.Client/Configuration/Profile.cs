@@ -33,19 +33,49 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Xml;
+using ClassicUO.Configuration.Json;
 using ClassicUO.Game;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
-using TinyJson;
 
 namespace ClassicUO.Configuration
 {
-    [MatchSnakeCase]
+    //[JsonSourceGenerationOptions(WriteIndented = true, PropertyNamingPolicy = JsonKnownNamingPolicy.Unspecified)]
+    [JsonSerializable(typeof(Profile), GenerationMode = JsonSourceGenerationMode.Metadata)]
+    sealed partial class ProfileJsonContext : JsonSerializerContext
+    {
+        sealed class SnakeCaseNamingPolicy : JsonNamingPolicy
+        {
+            public static SnakeCaseNamingPolicy Instance { get; } = new SnakeCaseNamingPolicy();
+
+            public override string ConvertName(string name)
+            {
+                // Conversion to other naming convention goes here. Like SnakeCase, KebabCase etc.
+                return string.Concat(name.Select((x, i) => i > 0 && char.IsUpper(x) ? "_" + x.ToString() : x.ToString())).ToLower();
+            }
+        }
+
+        private static Lazy<JsonSerializerOptions> _jsonOptions { get; } = new Lazy<JsonSerializerOptions>(() =>
+        {
+            var options = new JsonSerializerOptions();
+            options.WriteIndented = true;
+            options.PropertyNamingPolicy = SnakeCaseNamingPolicy.Instance;
+            return options;
+        });
+
+        public static ProfileJsonContext DefaultToUse { get; } = new ProfileJsonContext(_jsonOptions.Value);
+    }
+
+
+
     internal sealed class Profile
     {
         [JsonIgnore] public string Username { get; set; }
@@ -151,14 +181,14 @@ namespace ClassicUO.Configuration
         public bool HoldShiftToSplitStack { get; set; } = false;
 
         // general
-        public Point WindowClientBounds { get; set; } = new Point(600, 480);
-        public Point ContainerDefaultPosition { get; set; } = new Point(24, 24);
-        public Point GameWindowPosition { get; set; } = new Point(10, 10);
+        [JsonConverter(typeof(Point2Converter))] public Point WindowClientBounds { get; set; } = new Point(600, 480);
+        [JsonConverter(typeof(Point2Converter))] public Point ContainerDefaultPosition { get; set; } = new Point(24, 24);
+        [JsonConverter(typeof(Point2Converter))] public Point GameWindowPosition { get; set; } = new Point(10, 10);
         public bool GameWindowLock { get; set; }
         public bool GameWindowFullSize { get; set; }
         public bool WindowBorderless { get; set; } = false;
-        public Point GameWindowSize { get; set; } = new Point(600, 480);
-        public Point TopbarGumpPosition { get; set; } = new Point(0, 0);
+        [JsonConverter(typeof(Point2Converter))] public Point GameWindowSize { get; set; } = new Point(600, 480);
+        [JsonConverter(typeof(Point2Converter))] public Point TopbarGumpPosition { get; set; } = new Point(0, 0);
         public bool TopbarGumpIsMinimized { get; set; }
         public bool TopbarGumpIsDisabled { get; set; }
         public bool UseAlternativeLights { get; set; }
@@ -202,7 +232,7 @@ namespace ClassicUO.Configuration
 
         public int OverrideContainerLocationSetting { get; set; } // 0 = container position, 1 = top right of screen, 2 = last dragged position, 3 = remember every container
 
-        public Point OverrideContainerLocationPosition { get; set; } = new Point(200, 200);
+        [JsonConverter(typeof(Point2Converter))] public Point OverrideContainerLocationPosition { get; set; } = new Point(200, 200);
         public bool HueContainerGumps { get; set; } = true;
         public bool DragSelectHumanoidsOnly { get; set; }
         public int DragSelectStartX { get; set; } = 100;
@@ -217,11 +247,6 @@ namespace ClassicUO.Configuration
 
         public bool ShowInfoBar { get; set; }
         public int InfoBarHighlightType { get; set; } // 0 = text colour changes, 1 = underline
-
-
-        public InfoBarItem[] InfoBarItems { get; set; } // [FILE_FIX] TODO: REMOVE IT
-        public Macro[] Macros { get; set; }             // [FILE_FIX] TODO: REMOVE IT
-
 
         public bool CounterBarEnabled { get; set; }
         public bool CounterBarHighlightOnUse { get; set; }
@@ -320,7 +345,7 @@ namespace ClassicUO.Configuration
         public bool WorldMapShowGridIfZoomed { get; set; } = true;
 
         public int AutoFollowDistance { get; set; } = 2;
-        public Point ResizeJournalSize { get; set; } = new Point(410, 350);
+        [JsonConverter(typeof(Point2Converter))] public Point ResizeJournalSize { get; set; } = new Point(410, 350);
         public bool FollowingMode { get; set; } = false;
         public uint FollowingTarget { get; set; }
         public bool NamePlateHealthBar { get; set; } = true;
@@ -405,7 +430,7 @@ namespace ClassicUO.Configuration
             Log.Trace($"Saving path:\t\t{path}");
 
             // Save profile settings
-            ConfigurationResolver.Save(this, Path.Combine(path, "profile.json"));
+            ConfigurationResolver.Save(this, Path.Combine(path, "profile.json"), ProfileJsonContext.DefaultToUse);
 
             // Save opened gumps
             SaveGumps(path);
