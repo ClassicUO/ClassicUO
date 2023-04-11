@@ -37,7 +37,7 @@ namespace ClassicUO.Renderer
 {
     public class XBREffect : Effect
     {
-        public XBREffect(GraphicsDevice graphicsDevice) : base(graphicsDevice, Resources.xBREffect)
+        public XBREffect(GraphicsDevice graphicsDevice) : base(graphicsDevice, Resources.GetXBRShader().ToArray())
         {
             MatrixTransform = Parameters["MatrixTransform"];
             TextureSize = Parameters["textureSize"];
