@@ -421,6 +421,8 @@ namespace ClassicUO.Configuration
         public int ModernPaperDoll_DurabilityPercent { get; set; } = 90;
         #endregion
 
+        public ushort MainWindowBackgroundHue { get; set; } = 1;
+
         public int MoveMultiObjectDelay { get; set; } = 1000;
 
         public static uint GumpsVersion { get; private set; }

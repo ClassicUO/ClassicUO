@@ -185,6 +185,7 @@ namespace ClassicUO.Game.UI.Gumps
         private HSliderBar _showSkillsMessageDelta;
 
         private Checkbox _leftAlignToolTips, _namePlateHealthOnlyWarmode;
+        private ModernColorPicker.HueDisplay _mainWindowHuePicker;
 
         #region Cooldowns
         private InputField _coolDownX, _coolDownY;
@@ -4074,6 +4075,11 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     section.Add(_leftAlignToolTips = AddCheckBox(null, "Align tooltips to the left side", _currentProfile.LeftAlignToolTips, 0, 0));
                 }//Left align tooltips
+                
+                {
+                    section.Add(_mainWindowHuePicker = new ModernColorPicker.HueDisplay(_currentProfile.MainWindowBackgroundHue, null, true));
+                    section.AddRight(AddLabel(null, "Main game window background hue", 0, 0));
+                }//Main window background hue
 
                 rightArea.Add(section);
                 startY += section.Height + SPACING;
@@ -4485,6 +4491,13 @@ namespace ClassicUO.Game.UI.Gumps
                 _currentProfile.JournalStyle = _journalStyle.SelectedIndex;
                 UIManager.GetGump<ResizableJournal>()?.BuildBorder();
             }
+
+            if (_currentProfile.MainWindowBackgroundHue != _mainWindowHuePicker.Hue)
+            {
+                _currentProfile.MainWindowBackgroundHue = _mainWindowHuePicker.Hue;
+                GameController.UpdateBackgroundHueShader();
+            }
+
             _currentProfile.NamePlateHideAtFullHealthInWarmode = _namePlateHealthOnlyWarmode.IsChecked;
 
             _currentProfile.LeftAlignToolTips = _leftAlignToolTips.IsChecked;
