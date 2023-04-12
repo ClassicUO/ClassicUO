@@ -753,7 +753,7 @@ namespace ClassicUO.Game.UI.Gumps
                         if (_item != null && _item.ItemData.IsContainer)
                         {
                             Rectangle containerBounds = ContainerManager.Get(_item.Graphic).Bounds;
-                            GameActions.DropItem(Client.Game.GameCursor.ItemHold.Serial, containerBounds.X / 2, containerBounds.Y / 2, 0, _item.Serial);
+                            GameActions.DropItem(Client.Game.GameCursor.ItemHold.Serial, 0xFFFF, 0xFFFF, 0, _item.Serial);
                         }
                         else if (_item != null && _item.ItemData.IsStackable && _item.Graphic == Client.Game.GameCursor.ItemHold.Graphic)
                         {
