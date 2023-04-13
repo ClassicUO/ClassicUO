@@ -1666,7 +1666,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 try
                 {
-                    var zf = System.Text.Json.JsonSerializer.Deserialize(filename, ZonesJsonContext.Default.ZonesFile);
+                    var zf = System.Text.Json.JsonSerializer.Deserialize(File.ReadAllText(filename), ZonesJsonContext.Default.ZonesFile);
                     ZoneSetDict[filename] = new ZoneSet(zf, filename, hidden);
                     GameActions.Print(string.Format(ResGumps.MapZoneFileLoaded, ZoneSetDict[filename].NiceFileName), 0x3A /* yellow green */);
                 }
