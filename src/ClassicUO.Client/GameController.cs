@@ -170,7 +170,6 @@ namespace ClassicUO
 
             SetScene(new LoginScene());
             SetWindowPositionBySettings();
-            UpdateBackgroundHueShader();
         }
 
         protected override void UnloadContent()
