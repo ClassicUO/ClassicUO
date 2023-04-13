@@ -1281,7 +1281,7 @@ namespace ClassicUO.Game.UI.Gumps
                                                                 fullMatch = false;
                                                         }
                                                     }
-                                                    else if (configData.PropMinVal[i] < 0)
+                                                    else if (configData.PropMinVal[i] == -1)
                                                     {
                                                         fullMatch = true;
                                                     }
