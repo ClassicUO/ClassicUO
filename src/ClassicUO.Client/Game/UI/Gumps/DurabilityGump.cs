@@ -133,7 +133,19 @@ namespace ClassicUO.Game.UI.Gumps
             GumpsLoader.Instance.GetGumpTexture((uint)DurabilityColors.RED, out var barBounds);
             var startY = 0;
 
-            foreach (var durability in World.DurabilityManager.Durabilties.OrderBy(d => d.Percentage))
+            try
+            {
+                var lala = World.DurabilityManager?.Durabilities ?? new List<DurabiltyProp>();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+
+            var items = World.DurabilityManager?.Durabilities ?? new List<DurabiltyProp>();
+            
+            foreach (var durability in items.OrderBy(d => d.Percentage))
             {
                 if (durability.MaxDurabilty <= 0)
                 {

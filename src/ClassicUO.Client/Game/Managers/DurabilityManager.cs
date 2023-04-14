@@ -30,30 +30,35 @@
 
 #endregion
 
+using System;
+using System.Collections.Concurrent;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Gumps;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace ClassicUO.Game.Managers
 {
     internal class DurabilityManager
     {
-        private Dictionary<uint, DurabiltyProp> _itemLayerSlots = new Dictionary<uint, DurabiltyProp>();
-        public static readonly Layer[] EquipLayers =
+        private readonly ConcurrentDictionary<uint, DurabiltyProp> _itemLayerSlots = new ConcurrentDictionary<uint, DurabiltyProp>();
+        
+        private static readonly Layer[] _equipLayers =
         {
             Layer.Cloak, Layer.Shirt, Layer.Pants, Layer.Shoes, Layer.Legs, Layer.Arms, Layer.Torso, Layer.Tunic,
             Layer.Ring, Layer.Bracelet, Layer.Gloves, Layer.Skirt, Layer.Robe, Layer.Waist, Layer.Necklace,
             Layer.Beard, Layer.Earrings, Layer.Helmet, Layer.OneHanded, Layer.TwoHanded, Layer.Talisman
         };
 
-        public IReadOnlyCollection<DurabiltyProp> Durabilties => _itemLayerSlots.Values;
+        public List<DurabiltyProp> Durabilities => _itemLayerSlots.Values.ToList();
 
         public DurabilityManager()
         {
-            World.OPL.OPLOnReceive += OnOPLRecieve;
+            World.OPL.OPLOnReceive += OnOPLReceive;
         }
 
         public bool TryGetDurability(uint serial, out DurabiltyProp durability)
@@ -61,9 +66,9 @@ namespace ClassicUO.Game.Managers
             return _itemLayerSlots.TryGetValue(serial, out durability);
         }
 
-        public void OnOPLRecieve(ObjectPropertiesListManager.OPLEventArgs e)
+        private void OnOPLReceive(ObjectPropertiesListManager.OPLEventArgs e)
         {
-            System.Threading.Tasks.Task.Factory.StartNew(() =>
+            Task.Factory.StartNew(() =>
             {
                 var isItem = SerialHelper.IsValid(e.Serial) && SerialHelper.IsItem(e.Serial);
                 if (isItem)
@@ -72,22 +77,14 @@ namespace ClassicUO.Game.Managers
                     {
                         if (!item.IsDestroyed)
                         {
-                            if (EquipLayers.Contains(item.Layer) && item.Container == World.Player.Serial)
+                            if (item.Container == World.Player.Serial && _equipLayers.Contains(item.Layer))
                             {
                                 var durability = ParseDurability((int)item.Serial, e.Data);
-                                if (_itemLayerSlots.TryGetValue(item.Serial, out var slot))
-                                {
-                                    slot.Durabilty = durability.Durabilty;
-                                    slot.MaxDurabilty = durability.MaxDurabilty;
-                                }
-                                else
-                                {
-                                    _itemLayerSlots.Add(item.Serial, durability);
-                                }
+                                _itemLayerSlots.AddOrUpdate(item.Serial, durability, (_, _) => durability);
                             }
                             else
                             {
-                                _itemLayerSlots.Remove(item.Serial);
+                                _itemLayerSlots.TryRemove(item.Serial, out DurabiltyProp _);
                             }
 
                             UIManager.GetGump<DurabilitysGump>()?.RequestUpdateContents();
@@ -96,21 +93,19 @@ namespace ClassicUO.Game.Managers
                 }
             });
         }
-        public static DurabiltyProp ParseDurability(int serial, string data)
+
+        private static DurabiltyProp ParseDurability(int serial, string data)
         {
             MatchCollection matches = Regex.Matches(data, @"(?<=Durability )(\d*) / (\d*)"); //This should match 45 / 255 for example
-            if (matches == null || matches.Count == 0)
+            if (matches.Count == 0)
             {
                 return new DurabiltyProp();
             }
 
             string[] parts = data.Substring(matches[0].Index, matches[0].Length).Split('/');
 
-            if (int.TryParse(parts[0].Trim(), out int min))
-                if (int.TryParse(parts[1].Trim(), out int max))
-                    return new DurabiltyProp(serial, min, max);
-
-            return new DurabiltyProp();
+            return int.TryParse(parts[0].Trim(), out int min) && int.TryParse(parts[1].Trim(), out int max) ?
+                new DurabiltyProp(serial, min, max) : new DurabiltyProp();
         }
 
     }
@@ -121,13 +116,7 @@ namespace ClassicUO.Game.Managers
         public int Durabilty { get; set; }
         public int MaxDurabilty { get; set; }
 
-        public float Percentage
-        {
-            get
-            {
-                return MaxDurabilty > 0 ? ((float)Durabilty / (float)MaxDurabilty) : 0;
-            }
-        }
+        public float Percentage => MaxDurabilty > 0 ? ((float)Durabilty / (float)MaxDurabilty) : 0;
 
         public DurabiltyProp(int serial, int current, int max)
         {
