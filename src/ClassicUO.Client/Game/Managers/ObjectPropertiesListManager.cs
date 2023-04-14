@@ -31,6 +31,7 @@
 #endregion
 
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using ClassicUO.Network;
 
 namespace ClassicUO.Game.Managers
@@ -39,7 +40,7 @@ namespace ClassicUO.Game.Managers
     {
         private readonly Dictionary<uint, ItemProperty> _itemsProperties = new Dictionary<uint, ItemProperty>();
 
-        public delegate void OPLOnReceiveEvent(OPLEventArgs _args);
+        public delegate void OPLOnReceiveEvent(OPLEventArgs args);
         public event OPLOnReceiveEvent OPLOnReceive;
 
         public void Add(uint serial, uint revision, string name, string data, int namecliloc)
