@@ -77,7 +77,7 @@ namespace ClassicUO.Game.UI.Gumps
         private Combobox _cotType;
         private DataBox _databox;
         private HSliderBar _delay_before_display_tooltip, _tooltip_zoom, _tooltip_background_opacity;
-        private Combobox _dragSelectModifierKey, _backpackStyle, _gridContainerSearchAlternative, _gridBorderStyle;
+        private Combobox _dragSelectModifierKey, _backpackStyle, _gridContainerSearchAlternative, _gridBorderStyle, _dragSelectPlayersModifier, _dragSelectMonsertModifier, _dragSelectNameplateModifier;
         private Checkbox _hueContainerGumps, _gridContainerItemScale, _gridContainerPreview, _gridContainerAnchorable, _gridOverrideWithContainerHue;
         private HSliderBar _containerOpacity, _gridBorderOpacity, _gridContainerScale;
         private InputField _gridDefaultColumns, _gridDefaultRows;
@@ -1301,17 +1301,38 @@ namespace ClassicUO.Game.UI.Gumps
                 )
             );
 
-            section4.Add
-            (
-                _dragSelectHumanoidsOnly = AddCheckBox
-                (
-                    null,
-                    ResGumps.DragHumanoidsOnly,
-                    _currentProfile.DragSelectHumanoidsOnly,
-                    startX,
-                    startY
-                )
-            );
+            section4.Add(AddLabel(null, "Select players key", 0, 0));
+            section4.AddRight(_dragSelectPlayersModifier = AddCombobox(
+                null, new[] { "Disabled", "Ctrl", "Shift" },
+                _currentProfile.DragSelect_PlayersModifier,
+                0, 0, 100
+                ));
+
+            section4.Add(AddLabel(null, "Select monsters key", 0, 0));
+            section4.AddRight(_dragSelectMonsertModifier = AddCombobox(
+                null, new[] { "Disabled", "Ctrl", "Shift" },
+                _currentProfile.DragSelect_MonstersModifier,
+                0, 0, 100
+                ));
+
+            section4.Add(AddLabel(null, "Select visible nameplates key", 0, 0));
+            section4.AddRight(_dragSelectNameplateModifier = AddCombobox(
+                null, new[] { "Disabled", "Ctrl", "Shift" },
+                _currentProfile.DragSelect_NameplateModifier,
+                0, 0, 100
+                ));
+
+            //section4.Add
+            //(
+            //    _dragSelectHumanoidsOnly = AddCheckBox
+            //    (
+            //        null,
+            //        ResGumps.DragHumanoidsOnly,
+            //        _currentProfile.DragSelectHumanoidsOnly,
+            //        startX,
+            //        startY
+            //    )
+            //);
 
             section4.Add(new Label(ResGumps.DragSelectStartingPosX, true, HUE_FONT));
             section4.Add(_dragSelectStartX = new HSliderBar(startX, startY, 200, 0, Client.Game.Scene.Camera.Bounds.Width, _currentProfile.DragSelectStartX, HSliderBarStyle.MetalWidgetRecessedBar, true, 0, HUE_FONT));
@@ -4498,6 +4519,10 @@ namespace ClassicUO.Game.UI.Gumps
                 GameController.UpdateBackgroundHueShader();
             }
 
+            _currentProfile.DragSelect_PlayersModifier = _dragSelectPlayersModifier.SelectedIndex;
+            _currentProfile.DragSelect_MonstersModifier = _dragSelectMonsertModifier.SelectedIndex;
+            _currentProfile.DragSelect_NameplateModifier = _dragSelectNameplateModifier.SelectedIndex;
+
             _currentProfile.NamePlateHideAtFullHealthInWarmode = _namePlateHealthOnlyWarmode.IsChecked;
 
             _currentProfile.LeftAlignToolTips = _leftAlignToolTips.IsChecked;
@@ -5032,7 +5057,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             _currentProfile.EnableDragSelect = _enableDragSelect.IsChecked;
             _currentProfile.DragSelectModifierKey = _dragSelectModifierKey.SelectedIndex;
-            _currentProfile.DragSelectHumanoidsOnly = _dragSelectHumanoidsOnly.IsChecked;
+            //_currentProfile.DragSelectHumanoidsOnly = _dragSelectHumanoidsOnly.IsChecked;
             _currentProfile.DragSelectStartX = _dragSelectStartX.Value;
             _currentProfile.DragSelectStartY = _dragSelectStartY.Value;
             _currentProfile.DragSelectAsAnchor = _dragSelectAsAnchor.IsChecked;

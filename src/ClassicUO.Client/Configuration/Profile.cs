@@ -228,6 +228,9 @@ namespace ClassicUO.Configuration
         public bool DisableAutoMove { get; set; }
         public bool EnableDragSelect { get; set; }
         public int DragSelectModifierKey { get; set; } // 0 = none, 1 = control, 2 = shift
+        public int DragSelect_PlayersModifier { get; set; } = 0;
+        public int DragSelect_MonstersModifier { get; set; } = 0;
+        public int DragSelect_NameplateModifier { get; set; } = 0;
         public bool OverrideContainerLocation { get; set; }
 
         public int OverrideContainerLocationSetting { get; set; } // 0 = container position, 1 = top right of screen, 2 = last dragged position, 3 = remember every container

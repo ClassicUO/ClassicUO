@@ -125,7 +125,7 @@ namespace ClassicUO.Game.Scenes
         {
             // src: https://github.com/andreakarasho/ClassicUO/issues/621
             // drag-select should be disabled when using nameplates
-            if (Keyboard.Ctrl && Keyboard.Shift)
+            if ((Keyboard.Ctrl && Keyboard.Shift) && ProfileManager.CurrentProfile.DragSelect_NameplateModifier == 0)
             {
                 return false;
             }
@@ -151,6 +151,9 @@ namespace ClassicUO.Game.Scenes
 
         private void DoDragSelect()
         {
+            bool ctrl = Keyboard.Ctrl;
+            bool shift = Keyboard.Shift;
+
             if (_selectionStart.X > Mouse.Position.X)
             {
                 _selectionEnd.X = _selectionStart.X;
@@ -193,12 +196,37 @@ namespace ClassicUO.Game.Scenes
                 _ = GumpsLoader.Instance.GetGumpTexture(0x0804, out rect);
             }
 
+
             foreach (Mobile mobile in World.Mobiles.Values)
             {
-                if (ProfileManager.CurrentProfile.DragSelectHumanoidsOnly && !mobile.IsHuman)
-                {
+                if ((
+                        (ProfileManager.CurrentProfile.DragSelect_PlayersModifier == 1 && ctrl) ||
+                        (ProfileManager.CurrentProfile.DragSelect_PlayersModifier == 2 && shift)
+                    ) && !(mobile.IsHuman || mobile.IsGargoyle))
                     continue;
+                if ((
+                        (ProfileManager.CurrentProfile.DragSelect_MonstersModifier == 1 && ctrl) ||
+                        (ProfileManager.CurrentProfile.DragSelect_MonstersModifier == 2 && shift)
+                    ) && (mobile.IsHuman || mobile.IsGargoyle))
+                    continue;
+
+                bool skip = false;
+                if ((
+                        (ProfileManager.CurrentProfile.DragSelect_NameplateModifier == 1 && ctrl) ||
+                        (ProfileManager.CurrentProfile.DragSelect_NameplateModifier == 2 && shift)
+                    ))
+                {
+                    bool _skip = true;
+                    foreach (NameOverheadGump g in UIManager.Gumps.OfType<NameOverheadGump>())
+                        if (g.LocalSerial == mobile.Serial)
+                        {
+                            _skip = false;
+                            continue;
+                        }
+                    skip = _skip;
                 }
+
+                if (skip) continue;
 
                 Point p = mobile.RealScreenPosition;
 
