@@ -76,9 +76,23 @@ namespace ClassicUO.Game.UI.Gumps
         private float _lastGridItemScale = (ProfileManager.CurrentProfile.GridContainersScale / 100f);
         private int _lastWidth = DEFAULT_WIDTH, _lastHeight = DEFAULT_HEIGHT;
         private bool updatedBorder = true;
+        private bool quickLootThisContainer = false;
 
         private GridScrollArea _scrollArea;
         private GridSlotManager gridSlotManager;
+
+        private string quickLootStatus { get { return ProfileManager.CurrentProfile.CorpseSingleClickLoot ? "<basefont color=\"green\">Enabled" : "<basefont color=\"red\">Disabled"; } }
+        private string quickLootTooltip
+        {
+            get
+            {
+                if (isCorpse)
+                    return $"Drop an item here to send it to your backpack.<br><br>Click this icon to enable/disable single-click looting for corpses.<br>   Currently {quickLootStatus}";
+                else
+                    return $"Drop an item here to send it to your backpack.<br><br>Click this icon to enable/disable single-click loot for this container while it remains open.<br>   Currently " + (quickLootThisContainer ? "<basefont color=\"green\">Enabled" : "<basefont color=\"red\">Disabled");
+            }
+
+        }
 
         public GridContainer(uint local, ushort ogContainer) : base(GetWidth(), GetHeight(), GetWidth(2), GetHeight(1), local, 0)
         {
@@ -173,6 +187,16 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         GameActions.DropItem(Client.Game.GameCursor.ItemHold.Serial, 0xFFFF, 0xFFFF, 0, World.Player.FindItemByLayer(Layer.Backpack));
                     }
+                    else if (isCorpse)
+                    {
+                        ProfileManager.CurrentProfile.CorpseSingleClickLoot ^= true;
+                        _quickDropBackpack.SetTooltip(quickLootTooltip);
+                    }
+                    else
+                    {
+                        quickLootThisContainer ^= true;
+                        _quickDropBackpack.SetTooltip(quickLootTooltip);
+                    }
                 }
                 else if (e.Button == MouseButtonType.Right)
                 {
@@ -181,7 +205,7 @@ namespace ClassicUO.Game.UI.Gumps
             };
             _quickDropBackpack.MouseEnter += (sender, e) => { _quickDropBackpack.Hue = 0x34; };
             _quickDropBackpack.MouseExit += (sender, e) => { _quickDropBackpack.Hue = 0; };
-            _quickDropBackpack.SetTooltip("Drop an item here to send it to your backpack.");
+            _quickDropBackpack.SetTooltip(quickLootTooltip);
 
             _sortContents = new GumpPic(_quickDropBackpack.X - 20, BORDER_WIDTH, 1210, 0);
             _sortContents.MouseUp += (sender, e) => { updateItems(true); };
@@ -791,7 +815,12 @@ namespace ClassicUO.Game.UI.Gumps
                         Point offset = Mouse.LDragOffset;
                         if (Math.Abs(offset.X) < Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS && Math.Abs(offset.Y) < Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS)
                         {
-                            DelayedObjectClickManager.Set(_item.Serial, gridContainer.X, gridContainer.Y - 80, Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK);
+                            if ((gridContainer.isCorpse && ProfileManager.CurrentProfile.CorpseSingleClickLoot) || gridContainer.quickLootThisContainer)
+                            {
+                                GameActions.GrabItem(_item.Serial, _item.Amount);
+                            }
+                            else
+                                DelayedObjectClickManager.Set(_item.Serial, gridContainer.X, gridContainer.Y - 80, Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK);
                         }
                     }
                 }

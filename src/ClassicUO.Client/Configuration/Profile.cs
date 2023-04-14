@@ -359,7 +359,7 @@ namespace ClassicUO.Configuration
 
         public bool LeftAlignToolTips { get; set; } = false;
 
-
+        public bool CorpseSingleClickLoot { get; set; } = false;
 
         public bool DisableSystemChat { get; set; } = false;
 
