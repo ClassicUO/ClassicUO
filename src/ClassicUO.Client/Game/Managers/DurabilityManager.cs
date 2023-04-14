@@ -30,14 +30,11 @@
 
 #endregion
 
-using System;
 using System.Collections.Concurrent;
 using ClassicUO.Game.Data;
-using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Gumps;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
