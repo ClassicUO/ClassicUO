@@ -67,7 +67,8 @@ namespace ClassicUO.Game.UI.Gumps
         private Item _container { get { return World.Items.Get(LocalSerial); } }
         private readonly Label _containerNameLabel;
         private readonly StbTextBox _searchBox;
-        private readonly GumpPic _openRegularGump, _quickDropBackpack, _sortContents;
+        private readonly GumpPic _openRegularGump, _sortContents;
+        private readonly ResizableStaticPic _quickDropBackpack;
         private readonly GumpPicTiled _backgroundTexture;
         private readonly NiceButton _setLootBag;
         private readonly bool isCorpse = false;
@@ -159,7 +160,11 @@ namespace ClassicUO.Game.UI.Gumps
             _openRegularGump.SetTooltip("Open the original style container.");
 
             var quickDropIcon = GumpsLoader.Instance.GetGumpTexture(1625, out var bounds1);
-            _quickDropBackpack = new GumpPic(Width - _openRegularGump.Width - 20 - BORDER_WIDTH, BORDER_WIDTH, quickDropIcon == null ? (ushort)1209 : (ushort)1625, 0);
+            _quickDropBackpack = new ResizableStaticPic(World.Player.FindItemByLayer(Layer.Backpack).DisplayedGraphic, 20, 20)
+            {
+                X = Width - _openRegularGump.Width - 20 - BORDER_WIDTH,
+                Y = BORDER_WIDTH
+            };
             _quickDropBackpack.MouseUp += (sender, e) =>
             {
                 if (e.Button == MouseButtonType.Left && _quickDropBackpack.MouseIsOver)
@@ -174,11 +179,8 @@ namespace ClassicUO.Game.UI.Gumps
                     InvokeMouseCloseGumpWithRClick();
                 }
             };
-            _quickDropBackpack.MouseEnter += (sender, e) =>
-            {
-                if (Client.Game.GameCursor.ItemHold.Enabled) _quickDropBackpack.Graphic = quickDropIcon == null ? (ushort)1210 : (ushort)1626;
-            };
-            _quickDropBackpack.MouseExit += (sender, e) => { _quickDropBackpack.Graphic = quickDropIcon == null ? (ushort)1209 : (ushort)1625; };
+            _quickDropBackpack.MouseEnter += (sender, e) => { _quickDropBackpack.Hue = 0x34; };
+            _quickDropBackpack.MouseExit += (sender, e) => { _quickDropBackpack.Hue = 0; };
             _quickDropBackpack.SetTooltip("Drop an item here to send it to your backpack.");
 
             _sortContents = new GumpPic(_quickDropBackpack.X - 20, BORDER_WIDTH, 1210, 0);
