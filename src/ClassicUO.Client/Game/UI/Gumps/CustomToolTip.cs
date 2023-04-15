@@ -4,6 +4,7 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
+using System.Threading.Tasks;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -14,6 +15,8 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly string prepend;
         private readonly string append;
         private RenderedText text;
+        private readonly byte font = 1;
+        private readonly ushort hue = 0xFFFF;
 
         public CustomToolTip(Item item, int x, int y, Control hoverReference, string prepend = "", string append = "") : base(0, 0)
         {
@@ -23,29 +26,38 @@ namespace ClassicUO.Game.UI.Gumps
             this.append = append;
             X = x;
             Y = y;
+            Width = 175;
+            if (ProfileManager.CurrentProfile != null)
+            {
+                font = ProfileManager.CurrentProfile.TooltipFont;
+                hue = ProfileManager.CurrentProfile.TooltipTextHue;
+            }
             BuildGump();
         }
 
         private void BuildGump()
         {
-            if (item != null)
+            LoadOPLData(0);
+        }
+
+        private void LoadOPLData(int attempt)
+        {
+            if (attempt > 4 || IsDisposed)
+                return;
+            if (item == null)
+            {
+                Dispose();
+                return;
+            }
+
+            Task.Factory.StartNew(() =>
             {
                 if (World.OPL.TryGetNameAndData(item.Serial, out string name, out string data))
                 {
-                    byte font = 1;
-                    ushort hue = 0xFFFF;
-                    
-
-                    if (ProfileManager.CurrentProfile != null)
-                    {
-                        font = ProfileManager.CurrentProfile.TooltipFont;
-                        hue = ProfileManager.CurrentProfile.TooltipTextHue;
-                    }
-
-
                     text = RenderedText.Create
                         (
-                            FormatTooltip(name,data),
+                            FormatTooltip(name, data),
+                            maxWidth: Width,
                             font: font,
                             isunicode: true,
                             style: FontStyle.BlackBorder,
@@ -55,12 +67,14 @@ namespace ClassicUO.Game.UI.Gumps
                             recalculateWidthByInfo: true,
                             hue: hue
                         );
-                    text.MaxWidth = 600;
-                    Width = text.Width;
-                    return;
                 }
-            }
-            Dispose();
+                else
+                {
+                    World.OPL.Contains(item.Serial);
+                    Task.Delay(1000);
+                    LoadOPLData(attempt++);
+                }
+            });
         }
 
         private string FormatTooltip(string name, string data)
@@ -68,7 +82,7 @@ namespace ClassicUO.Game.UI.Gumps
             string text =
                 prepend +
                 "<basefont color=\"yellow\">" +
-                name + 
+                name +
                 "<br><basefont color=\"#FFFFFFFF\">" +
                 data +
                 append;
@@ -86,6 +100,8 @@ namespace ClassicUO.Game.UI.Gumps
                 Dispose();
                 return false;
             }
+            if (text == null) //Waiting for opl data to load the text tooltip
+                return true;
 
             float zoom = 1;
             float alpha = 0.7f;

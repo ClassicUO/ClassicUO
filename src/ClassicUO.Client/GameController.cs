@@ -65,6 +65,9 @@ namespace ClassicUO
         private uint _totalFrames;
         private UltimaBatcher2D _uoSpriteBatch;
         private bool _suppressedDraw;
+        private Texture2D _background;
+
+        private static Vector3 bgHueShader = new Vector3(0, 0, 0.3f);
 
         public GameController()
         {
@@ -131,13 +134,13 @@ namespace ClassicUO
             fixed (uint* ptr = buffer)
             {
                 HuesLoader.Instance.CreateShaderColors(buffer);
-                _hueSamplers[0].SetDataPointerEXT(0, null, (IntPtr) ptr, TEXTURE_WIDTH * TEXTURE_HEIGHT * sizeof(uint));
-                _hueSamplers[1].SetDataPointerEXT(0, null, (IntPtr) ptr + TEXTURE_WIDTH * TEXTURE_HEIGHT * sizeof(uint), TEXTURE_WIDTH * TEXTURE_HEIGHT * sizeof(uint));
+                _hueSamplers[0].SetDataPointerEXT(0, null, (IntPtr)ptr, TEXTURE_WIDTH * TEXTURE_HEIGHT * sizeof(uint));
+                _hueSamplers[1].SetDataPointerEXT(0, null, (IntPtr)ptr + TEXTURE_WIDTH * TEXTURE_HEIGHT * sizeof(uint), TEXTURE_WIDTH * TEXTURE_HEIGHT * sizeof(uint));
 
                 LightColors.CreateLightTextures(buffer, LIGHTS_TEXTURE_HEIGHT);
                 _hueSamplers[2].SetDataPointerEXT(0, null, (IntPtr)ptr, LIGHTS_TEXTURE_WIDTH * LIGHTS_TEXTURE_HEIGHT * sizeof(uint));
-            }      
-        
+            }
+
             System.Buffers.ArrayPool<uint>.Shared.Return(buffer, true);
 
             GraphicsDevice.Textures[1] = _hueSamplers[0];
@@ -160,6 +163,10 @@ namespace ClassicUO
             GameCursor = new GameCursor();
             Audio = new AudioManager();
             Audio.Initialize();
+
+            var bytes = Loader.GetBackgroundImage().ToArray();
+            using var ms = new MemoryStream(bytes);
+            _background = Texture2D.FromStream(GraphicsDevice, ms);
 
             SetScene(new LoginScene());
             SetWindowPositionBySettings();
@@ -213,7 +220,7 @@ namespace ClassicUO
 #if DEV_BUILD
                 Window.Title = $"ClassicUO [dev] - {CUOEnviroment.Version}";
 #else
-                Window.Title = $"ClassicUO - {CUOEnviroment.Version}";
+                Window.Title = $"ClassicUO [ TazUO ] - {CUOEnviroment.Version}";
 #endif
             }
             else
@@ -221,7 +228,7 @@ namespace ClassicUO
 #if DEV_BUILD
                 Window.Title = $"{title} - ClassicUO [dev] - {CUOEnviroment.Version}";
 #else
-                Window.Title = $"{title} - ClassicUO - {CUOEnviroment.Version}";
+                Window.Title = $"{title} - ClassicUO [ TazUO ] - {CUOEnviroment.Version}";
 #endif
             }
         }
@@ -267,7 +274,7 @@ namespace ClassicUO
                 frameDelay = 1000.0f / rate;
             }
 
-            FrameDelay[0] = FrameDelay[1] = (uint) frameDelay;
+            FrameDelay[0] = FrameDelay[1] = (uint)frameDelay;
             FrameDelay[1] = FrameDelay[1] >> 1;
 
             Settings.GlobalSettings.FPS = rate;
@@ -300,7 +307,7 @@ namespace ClassicUO
 
         public void SetWindowBorderless(bool borderless)
         {
-            SDL_WindowFlags flags = (SDL_WindowFlags) SDL_GetWindowFlags(Window.Handle);
+            SDL_WindowFlags flags = (SDL_WindowFlags)SDL_GetWindowFlags(Window.Handle);
 
             if ((flags & SDL_WindowFlags.SDL_WINDOW_BORDERLESS) != 0 && borderless)
             {
@@ -360,7 +367,7 @@ namespace ClassicUO
 
         public bool IsWindowMaximized()
         {
-            SDL_WindowFlags flags = (SDL_WindowFlags) SDL_GetWindowFlags(Window.Handle);
+            SDL_WindowFlags flags = (SDL_WindowFlags)SDL_GetWindowFlags(Window.Handle);
 
             return (flags & SDL_WindowFlags.SDL_WINDOW_MAXIMIZED) != 0;
         }
@@ -399,14 +406,14 @@ namespace ClassicUO
                 Profiler.ExitContext("OutOfContext");
             }
 
-            Time.Ticks = (uint) gameTime.TotalGameTime.TotalMilliseconds;
-            Time.Delta = (float) gameTime.ElapsedGameTime.TotalSeconds;
+            Time.Ticks = (uint)gameTime.TotalGameTime.TotalMilliseconds;
+            Time.Delta = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
             Mouse.Update();
 
             var data = NetClient.Socket.CollectAvailableData();
             var packetsCount = PacketHandlers.Handler.ParsePackets(data);
-            NetClient.Socket.Statistics.TotalPacketsReceived += (uint) packetsCount;
+            NetClient.Socket.Statistics.TotalPacketsReceived += (uint)packetsCount;
             NetClient.Socket.Flush();
 
             Plugin.Tick();
@@ -455,6 +462,12 @@ namespace ClassicUO
             base.Update(gameTime);
         }
 
+        public static void UpdateBackgroundHueShader()
+        {
+            if (ProfileManager.CurrentProfile != null)
+                bgHueShader = ShaderHueTranslator.GetHueVector(ProfileManager.CurrentProfile.MainWindowBackgroundHue, false, bgHueShader.Z);
+        }
+
         protected override void Draw(GameTime gameTime)
         {
             Profiler.EndFrame();
@@ -470,6 +483,13 @@ namespace ClassicUO
             _totalFrames++;
 
             GraphicsDevice.Clear(Color.Black);
+
+            _uoSpriteBatch.Begin();
+            var rect = new Rectangle(0, 0, GraphicManager.PreferredBackBufferWidth, GraphicManager.PreferredBackBufferHeight);
+            _uoSpriteBatch.Draw(SolidColorTextureCache.GetTexture(Color.Black), rect, Vector3.UnitZ);
+
+            _uoSpriteBatch.DrawTiled(_background, rect, _background.Bounds, bgHueShader);
+            _uoSpriteBatch.End();
 
             if (Scene != null && Scene.IsLoaded && !Scene.IsDestroyed)
             {
@@ -534,7 +554,7 @@ namespace ClassicUO
 
         private int HandleSdlEvent(IntPtr userData, IntPtr ptr)
         {
-            SDL_Event* sdlEvent = (SDL_Event*) ptr;
+            SDL_Event* sdlEvent = (SDL_Event*)ptr;
 
             if (Plugin.ProcessWndProc(sdlEvent) != 0)
             {
@@ -592,7 +612,7 @@ namespace ClassicUO
 
                     Keyboard.OnKeyDown(sdlEvent->key);
 
-                    if (Plugin.ProcessHotkeys((int) sdlEvent->key.keysym.sym, (int) sdlEvent->key.keysym.mod, true))
+                    if (Plugin.ProcessHotkeys((int)sdlEvent->key.keysym.sym, (int)sdlEvent->key.keysym.mod, true))
                     {
                         _ignoreNextTextInput = false;
 
@@ -618,7 +638,7 @@ namespace ClassicUO
                     {
                         TakeScreenshot();
                     }
-                    
+
                     break;
 
                 case SDL_EventType.SDL_TEXTINPUT:
@@ -638,7 +658,7 @@ namespace ClassicUO
                         }
                     }*/
 
-                    string s = UTF8_ToManaged((IntPtr) sdlEvent->text.text, false);
+                    string s = UTF8_ToManaged((IntPtr)sdlEvent->text.text, false);
 
                     if (!string.IsNullOrEmpty(s))
                     {
@@ -682,145 +702,145 @@ namespace ClassicUO
                     break;
 
                 case SDL_EventType.SDL_MOUSEBUTTONDOWN:
-                {
-                    SDL_MouseButtonEvent mouse = sdlEvent->button;
-
-                    // The values in MouseButtonType are chosen to exactly match the SDL values
-                    MouseButtonType buttonType = (MouseButtonType) mouse.button;
-
-                    uint lastClickTime = 0;
-
-                    switch (buttonType)
                     {
-                        case MouseButtonType.Left:
-                            lastClickTime = Mouse.LastLeftButtonClickTime;
+                        SDL_MouseButtonEvent mouse = sdlEvent->button;
 
-                            break;
+                        // The values in MouseButtonType are chosen to exactly match the SDL values
+                        MouseButtonType buttonType = (MouseButtonType)mouse.button;
 
-                        case MouseButtonType.Middle:
-                            lastClickTime = Mouse.LastMidButtonClickTime;
+                        uint lastClickTime = 0;
 
-                            break;
-
-                        case MouseButtonType.Right:
-                            lastClickTime = Mouse.LastRightButtonClickTime;
-
-                            break;
-
-                        case MouseButtonType.XButton1:
-                        case MouseButtonType.XButton2:
-                            break;
-
-                        default: 
-                            Log.Warn($"No mouse button handled: {mouse.button}");
-
-                            break;
-                    }
-
-                    Mouse.ButtonPress(buttonType);
-                    Mouse.Update();
-
-                    uint ticks = Time.Ticks;
-
-                    if (lastClickTime + Mouse.MOUSE_DELAY_DOUBLE_CLICK >= ticks)
-                    {
-                        lastClickTime = 0;
-
-                        bool res = Scene.OnMouseDoubleClick(buttonType) || UIManager.OnMouseDoubleClick(buttonType);
-
-                        if (!res)
+                        switch (buttonType)
                         {
-                            if (!Scene.OnMouseDown(buttonType))
+                            case MouseButtonType.Left:
+                                lastClickTime = Mouse.LastLeftButtonClickTime;
+
+                                break;
+
+                            case MouseButtonType.Middle:
+                                lastClickTime = Mouse.LastMidButtonClickTime;
+
+                                break;
+
+                            case MouseButtonType.Right:
+                                lastClickTime = Mouse.LastRightButtonClickTime;
+
+                                break;
+
+                            case MouseButtonType.XButton1:
+                            case MouseButtonType.XButton2:
+                                break;
+
+                            default:
+                                Log.Warn($"No mouse button handled: {mouse.button}");
+
+                                break;
+                        }
+
+                        Mouse.ButtonPress(buttonType);
+                        Mouse.Update();
+
+                        uint ticks = Time.Ticks;
+
+                        if (lastClickTime + Mouse.MOUSE_DELAY_DOUBLE_CLICK >= ticks)
+                        {
+                            lastClickTime = 0;
+
+                            bool res = Scene.OnMouseDoubleClick(buttonType) || UIManager.OnMouseDoubleClick(buttonType);
+
+                            if (!res)
                             {
-                                UIManager.OnMouseButtonDown(buttonType);
+                                if (!Scene.OnMouseDown(buttonType))
+                                {
+                                    UIManager.OnMouseButtonDown(buttonType);
+                                }
+                            }
+                            else
+                            {
+                                lastClickTime = 0xFFFF_FFFF;
                             }
                         }
                         else
                         {
-                            lastClickTime = 0xFFFF_FFFF;
+                            if (buttonType != MouseButtonType.Left && buttonType != MouseButtonType.Right)
+                            {
+                                Plugin.ProcessMouse(sdlEvent->button.button, 0);
+                            }
+
+                            if (!Scene.OnMouseDown(buttonType))
+                            {
+                                UIManager.OnMouseButtonDown(buttonType);
+                            }
+
+                            lastClickTime = Mouse.CancelDoubleClick ? 0 : ticks;
                         }
-                    }
-                    else
-                    {
-                        if (buttonType != MouseButtonType.Left && buttonType != MouseButtonType.Right)
+
+                        switch (buttonType)
                         {
-                            Plugin.ProcessMouse(sdlEvent->button.button, 0);
+                            case MouseButtonType.Left:
+                                Mouse.LastLeftButtonClickTime = lastClickTime;
+
+                                break;
+
+                            case MouseButtonType.Middle:
+                                Mouse.LastMidButtonClickTime = lastClickTime;
+
+                                break;
+
+                            case MouseButtonType.Right:
+                                Mouse.LastRightButtonClickTime = lastClickTime;
+
+                                break;
                         }
 
-                        if (!Scene.OnMouseDown(buttonType))
-                        {
-                            UIManager.OnMouseButtonDown(buttonType);
-                        }
-
-                        lastClickTime = Mouse.CancelDoubleClick ? 0 : ticks;
+                        break;
                     }
-
-                    switch (buttonType)
-                    {
-                        case MouseButtonType.Left:
-                            Mouse.LastLeftButtonClickTime = lastClickTime;
-
-                            break;
-
-                        case MouseButtonType.Middle:
-                            Mouse.LastMidButtonClickTime = lastClickTime;
-
-                            break;
-
-                        case MouseButtonType.Right:
-                            Mouse.LastRightButtonClickTime = lastClickTime;
-
-                            break;
-                    }
-
-                    break;
-                }
 
                 case SDL_EventType.SDL_MOUSEBUTTONUP:
-                {
-                    SDL_MouseButtonEvent mouse = sdlEvent->button;
-
-                    // The values in MouseButtonType are chosen to exactly match the SDL values
-                    MouseButtonType buttonType = (MouseButtonType) mouse.button;
-
-                    uint lastClickTime = 0;
-
-                    switch (buttonType)
                     {
-                        case MouseButtonType.Left:
-                            lastClickTime = Mouse.LastLeftButtonClickTime;
+                        SDL_MouseButtonEvent mouse = sdlEvent->button;
 
-                            break;
+                        // The values in MouseButtonType are chosen to exactly match the SDL values
+                        MouseButtonType buttonType = (MouseButtonType)mouse.button;
 
-                        case MouseButtonType.Middle:
-                            lastClickTime = Mouse.LastMidButtonClickTime;
+                        uint lastClickTime = 0;
 
-                            break;
-
-                        case MouseButtonType.Right:
-                            lastClickTime = Mouse.LastRightButtonClickTime;
-
-                            break;
-
-                        default:
-                            Log.Warn($"No mouse button handled: {mouse.button}");
-
-                            break;
-                        }
-
-                    if (lastClickTime != 0xFFFF_FFFF)
-                    {
-                        if (!Scene.OnMouseUp(buttonType) || UIManager.LastControlMouseDown(buttonType) != null)
+                        switch (buttonType)
                         {
-                            UIManager.OnMouseButtonUp(buttonType);
+                            case MouseButtonType.Left:
+                                lastClickTime = Mouse.LastLeftButtonClickTime;
+
+                                break;
+
+                            case MouseButtonType.Middle:
+                                lastClickTime = Mouse.LastMidButtonClickTime;
+
+                                break;
+
+                            case MouseButtonType.Right:
+                                lastClickTime = Mouse.LastRightButtonClickTime;
+
+                                break;
+
+                            default:
+                                Log.Warn($"No mouse button handled: {mouse.button}");
+
+                                break;
                         }
+
+                        if (lastClickTime != 0xFFFF_FFFF)
+                        {
+                            if (!Scene.OnMouseUp(buttonType) || UIManager.LastControlMouseDown(buttonType) != null)
+                            {
+                                UIManager.OnMouseButtonUp(buttonType);
+                            }
+                        }
+
+                        Mouse.ButtonRelease(buttonType);
+                        Mouse.Update();
+
+                        break;
                     }
-
-                    Mouse.ButtonRelease(buttonType);
-                    Mouse.Update();
-
-                    break;
-                }
             }
 
             return 1;

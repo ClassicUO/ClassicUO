@@ -77,7 +77,7 @@ namespace ClassicUO.Game.UI.Gumps
         private Combobox _cotType;
         private DataBox _databox;
         private HSliderBar _delay_before_display_tooltip, _tooltip_zoom, _tooltip_background_opacity;
-        private Combobox _dragSelectModifierKey, _backpackStyle, _gridContainerSearchAlternative, _gridBorderStyle;
+        private Combobox _dragSelectModifierKey, _backpackStyle, _gridContainerSearchAlternative, _gridBorderStyle, _dragSelectPlayersModifier, _dragSelectMonsertModifier, _dragSelectNameplateModifier;
         private Checkbox _hueContainerGumps, _gridContainerItemScale, _gridContainerPreview, _gridContainerAnchorable, _gridOverrideWithContainerHue;
         private HSliderBar _containerOpacity, _gridBorderOpacity, _gridContainerScale;
         private InputField _gridDefaultColumns, _gridDefaultRows;
@@ -185,6 +185,7 @@ namespace ClassicUO.Game.UI.Gumps
         private HSliderBar _showSkillsMessageDelta;
 
         private Checkbox _leftAlignToolTips, _namePlateHealthOnlyWarmode;
+        private ModernColorPicker.HueDisplay _mainWindowHuePicker;
 
         #region Cooldowns
         private InputField _coolDownX, _coolDownY;
@@ -521,7 +522,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (_logoTexture2D == null || _logoTexture2D.IsDisposed)
                 {
-                    Stream stream = typeof(CUOEnviroment).Assembly.GetManifestResourceStream("ClassicUO.cuologo.png");
+                    using var stream = new MemoryStream(Loader.GetCuoLogo().ToArray());
                     _logoTexture2D = Texture2D.FromStream(Client.Game.GraphicsDevice, stream);
                 }
 
@@ -981,7 +982,7 @@ namespace ClassicUO.Game.UI.Gumps
             section2.PopIndent();
             section2.PopIndent();
 
-                     SettingsSection section3 = AddSettingsSection(box, "Gumps & Context");
+            SettingsSection section3 = AddSettingsSection(box, "Gumps & Context");
             section3.Y = section2.Bounds.Bottom + 40;
 
             section3.Add
@@ -1300,17 +1301,38 @@ namespace ClassicUO.Game.UI.Gumps
                 )
             );
 
-            section4.Add
-            (
-                _dragSelectHumanoidsOnly = AddCheckBox
-                (
-                    null,
-                    ResGumps.DragHumanoidsOnly,
-                    _currentProfile.DragSelectHumanoidsOnly,
-                    startX,
-                    startY
-                )
-            );
+            section4.Add(AddLabel(null, "Select players key", 0, 0));
+            section4.AddRight(_dragSelectPlayersModifier = AddCombobox(
+                null, new[] { "Disabled", "Ctrl", "Shift" },
+                _currentProfile.DragSelect_PlayersModifier,
+                0, 0, 100
+                ));
+
+            section4.Add(AddLabel(null, "Select monsters key", 0, 0));
+            section4.AddRight(_dragSelectMonsertModifier = AddCombobox(
+                null, new[] { "Disabled", "Ctrl", "Shift" },
+                _currentProfile.DragSelect_MonstersModifier,
+                0, 0, 100
+                ));
+
+            section4.Add(AddLabel(null, "Select visible nameplates key", 0, 0));
+            section4.AddRight(_dragSelectNameplateModifier = AddCombobox(
+                null, new[] { "Disabled", "Ctrl", "Shift" },
+                _currentProfile.DragSelect_NameplateModifier,
+                0, 0, 100
+                ));
+
+            //section4.Add
+            //(
+            //    _dragSelectHumanoidsOnly = AddCheckBox
+            //    (
+            //        null,
+            //        ResGumps.DragHumanoidsOnly,
+            //        _currentProfile.DragSelectHumanoidsOnly,
+            //        startX,
+            //        startY
+            //    )
+            //);
 
             section4.Add(new Label(ResGumps.DragSelectStartingPosX, true, HUE_FONT));
             section4.Add(_dragSelectStartX = new HSliderBar(startX, startY, 200, 0, Client.Game.Scene.Camera.Bounds.Width, _currentProfile.DragSelectStartX, HSliderBarStyle.MetalWidgetRecessedBar, true, 0, HUE_FONT));
@@ -4075,10 +4097,89 @@ namespace ClassicUO.Game.UI.Gumps
                     section.Add(_leftAlignToolTips = AddCheckBox(null, "Align tooltips to the left side", _currentProfile.LeftAlignToolTips, 0, 0));
                 }//Left align tooltips
 
+                {
+                    section.Add(_mainWindowHuePicker = new ModernColorPicker.HueDisplay(_currentProfile.MainWindowBackgroundHue, null, true));
+                    section.AddRight(AddLabel(null, "Main game window background hue", 0, 0));
+                }//Main window background hue
+
                 rightArea.Add(section);
                 startY += section.Height + SPACING;
             }//Misc
 
+            {
+                SettingsSection section = new SettingsSection("Global Settings", rightArea.Width) { Y = startY };
+
+                {
+                    NiceButton _;
+                    section.BaseAdd(_ = new NiceButton(0, 0, 20, TEXTBOX_HEIGHT, ButtonAction.Activate, "<>") { IsSelectable = false });
+                    _.SetTooltip("Minimize section");
+                    _.X = rightArea.Width - 45;
+                    _.MouseUp += (s, e) =>
+                    {
+                        if (e.Button == MouseButtonType.Left)
+                        {
+                            int diff = section.Height - 25;
+                            if (section.Children[2].IsVisible)
+                                diff = -section.Height + 25;
+                            for (int i = rightArea.Children.IndexOf(section) + 1; i < rightArea.Children.Count; i++)
+                            {
+                                if (rightArea.Children[i] != section)
+                                    rightArea.Children[i].Y += diff;
+                            }
+                            section.Children[2].IsVisible = !section.Children[2].IsVisible;
+                        }
+                    };
+                }
+
+
+                string rootpath;
+
+                if (string.IsNullOrWhiteSpace(Settings.GlobalSettings.ProfilesPath))
+                {
+                    rootpath = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Profiles");
+                }
+                else
+                {
+                    rootpath = Settings.GlobalSettings.ProfilesPath;
+                }
+
+                List<ProfileLocationData> locations = new List<ProfileLocationData>();
+                string[] allAccounts = Directory.GetDirectories(rootpath);
+
+                foreach (string account in allAccounts)
+                {
+                    string[] allServers = Directory.GetDirectories(account);
+                    foreach (string server in allServers)
+                    {
+                        string[] allCharacters = Directory.GetDirectories(server);
+                        foreach (string character in allCharacters)
+                        {
+                            locations.Add(new ProfileLocationData(server, account, character));
+                        }
+                    }
+                }
+
+                section.Add(new Label(
+                    $"! Warning !<br>" +
+                    $"This will override all other character's profile options!<br>" +
+                    $"This is not reversable!<br>" +
+                    $"You have {locations.Count-1} other profiles that will be overridden with the settings in this profile.<br>" +
+                    $"<br>This will not override: Macros, skill groups, info bar, grid container data, or gump saved positions.<br>"
+                    , true, 32, section.Width - 32, align: TEXT_ALIGN_TYPE.TS_CENTER, ishtml: true));
+
+                NiceButton overrideButton;
+                section.Add(overrideButton = new NiceButton(0, 0, section.Width - 32, 20, ButtonAction.Activate, $"Override {locations.Count - 1} other profiles with this one.") { IsSelectable = false });
+                overrideButton.MouseUp += (s, e) =>
+                {
+                    if (e.Button == MouseButtonType.Left)
+                    {
+                        OverrideAllProfiles(locations);
+                        section.BaseAdd(new FadingLabel(7, $"{locations.Count - 1} profiles overriden.", true, 0xff) {X = overrideButton.X, Y = overrideButton.Y});
+                    }
+                };
+                rightArea.Add(section);
+                startY += section.Height + SPACING;
+            }// Global settings
 
             //{
             //    SettingsSection section = new SettingsSection("Misc", rightArea.Width) { Y = startY };
@@ -4107,9 +4208,36 @@ namespace ClassicUO.Game.UI.Gumps
 
             //    rightArea.Add(section);
             //    startY += section.Height + SPACING;
-            //} Blank setting section
+            //}// Blank setting section
 
             Add(rightArea, PAGE);
+        }
+
+        private class ProfileLocationData
+        {
+            public readonly DirectoryInfo Server;
+            public readonly DirectoryInfo Username;
+            public readonly DirectoryInfo Character;
+
+            public ProfileLocationData(string server, string username, string character)
+            {
+                this.Server = new DirectoryInfo(server);
+                this.Username = new DirectoryInfo(username);
+                this.Character = new DirectoryInfo(character);
+            }
+
+            public override string ToString()
+            {
+                return Character.ToString();
+            }
+        }
+
+        private void OverrideAllProfiles(List<ProfileLocationData> allProfiles)
+        {
+            foreach(var profile in allProfiles)
+            {
+                ProfileManager.CurrentProfile.Save(profile.ToString());
+            }
         }
 
         public Control GenConditionControl(int key, int width, bool createIfNotExists)
@@ -4485,6 +4613,17 @@ namespace ClassicUO.Game.UI.Gumps
                 _currentProfile.JournalStyle = _journalStyle.SelectedIndex;
                 UIManager.GetGump<ResizableJournal>()?.BuildBorder();
             }
+
+            if (_currentProfile.MainWindowBackgroundHue != _mainWindowHuePicker.Hue)
+            {
+                _currentProfile.MainWindowBackgroundHue = _mainWindowHuePicker.Hue;
+                GameController.UpdateBackgroundHueShader();
+            }
+
+            _currentProfile.DragSelect_PlayersModifier = _dragSelectPlayersModifier.SelectedIndex;
+            _currentProfile.DragSelect_MonstersModifier = _dragSelectMonsertModifier.SelectedIndex;
+            _currentProfile.DragSelect_NameplateModifier = _dragSelectNameplateModifier.SelectedIndex;
+
             _currentProfile.NamePlateHideAtFullHealthInWarmode = _namePlateHealthOnlyWarmode.IsChecked;
 
             _currentProfile.LeftAlignToolTips = _leftAlignToolTips.IsChecked;
@@ -5019,7 +5158,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             _currentProfile.EnableDragSelect = _enableDragSelect.IsChecked;
             _currentProfile.DragSelectModifierKey = _dragSelectModifierKey.SelectedIndex;
-            _currentProfile.DragSelectHumanoidsOnly = _dragSelectHumanoidsOnly.IsChecked;
+            //_currentProfile.DragSelectHumanoidsOnly = _dragSelectHumanoidsOnly.IsChecked;
             _currentProfile.DragSelectStartX = _dragSelectStartX.Value;
             _currentProfile.DragSelectStartY = _dragSelectStartY.Value;
             _currentProfile.DragSelectAsAnchor = _dragSelectAsAnchor.IsChecked;

@@ -73,7 +73,7 @@ namespace ClassicUO.Game.Scenes
                 int x = Camera.Bounds.X + (Camera.Bounds.Width >> 1);
                 int y = Camera.Bounds.Y + (Camera.Bounds.Height >> 1);
 
-                Direction direction = (Direction) GameCursor.GetMouseDirection
+                Direction direction = (Direction)GameCursor.GetMouseDirection
                 (
                     x,
                     y,
@@ -88,7 +88,7 @@ namespace ClassicUO.Game.Scenes
 
                 if (facing == Direction.North)
                 {
-                    facing = (Direction) 8;
+                    facing = (Direction)8;
                 }
 
                 bool run = mouseRange >= 190;
@@ -101,7 +101,7 @@ namespace ClassicUO.Game.Scenes
                         _lastBoatDirection = facing - 1;
                         _boatIsMoving = true;
 
-                        BoatMovingManager.MoveRequest(facing - 1, (byte) (run ? 2 : 1));
+                        BoatMovingManager.MoveRequest(facing - 1, (byte)(run ? 2 : 1));
                     }
                 }
                 else
@@ -125,7 +125,7 @@ namespace ClassicUO.Game.Scenes
         {
             // src: https://github.com/andreakarasho/ClassicUO/issues/621
             // drag-select should be disabled when using nameplates
-            if (Keyboard.Ctrl && Keyboard.Shift)
+            if ((Keyboard.Ctrl && Keyboard.Shift) && ProfileManager.CurrentProfile.DragSelect_NameplateModifier == 0)
             {
                 return false;
             }
@@ -151,6 +151,9 @@ namespace ClassicUO.Game.Scenes
 
         private void DoDragSelect()
         {
+            bool ctrl = Keyboard.Ctrl;
+            bool shift = Keyboard.Shift;
+
             if (_selectionStart.X > Mouse.Position.X)
             {
                 _selectionEnd.X = _selectionStart.X;
@@ -193,16 +196,41 @@ namespace ClassicUO.Game.Scenes
                 _ = GumpsLoader.Instance.GetGumpTexture(0x0804, out rect);
             }
 
+
             foreach (Mobile mobile in World.Mobiles.Values)
             {
-                if (ProfileManager.CurrentProfile.DragSelectHumanoidsOnly && !mobile.IsHuman)
-                {
+                if ((
+                        (ProfileManager.CurrentProfile.DragSelect_PlayersModifier == 1 && ctrl) ||
+                        (ProfileManager.CurrentProfile.DragSelect_PlayersModifier == 2 && shift)
+                    ) && !(mobile.IsHuman || mobile.IsGargoyle))
                     continue;
+                if ((
+                        (ProfileManager.CurrentProfile.DragSelect_MonstersModifier == 1 && ctrl) ||
+                        (ProfileManager.CurrentProfile.DragSelect_MonstersModifier == 2 && shift)
+                    ) && (mobile.IsHuman || mobile.IsGargoyle))
+                    continue;
+
+                bool skip = false;
+                if ((
+                        (ProfileManager.CurrentProfile.DragSelect_NameplateModifier == 1 && ctrl) ||
+                        (ProfileManager.CurrentProfile.DragSelect_NameplateModifier == 2 && shift)
+                    ))
+                {
+                    bool _skip = true;
+                    foreach (NameOverheadGump g in UIManager.Gumps.OfType<NameOverheadGump>())
+                        if (g.LocalSerial == mobile.Serial)
+                        {
+                            _skip = false;
+                            continue;
+                        }
+                    skip = _skip;
                 }
+
+                if (skip) continue;
 
                 Point p = mobile.RealScreenPosition;
 
-                p.X += (int) mobile.Offset.X + 22 + 5;
+                p.X += (int)mobile.Offset.X + 22 + 5;
                 p.Y += (int)(mobile.Offset.Y - mobile.Offset.Z) + 12 * AnchorOffset;
                 p.X -= mobile.FrameInfo.X;
                 p.Y -= mobile.FrameInfo.Y;
@@ -463,7 +491,7 @@ namespace ClassicUO.Game.Scenes
 
                             if (it2.ItemData.IsSurface)
                             {
-                                dropZ += (sbyte) (it2.ItemData.Height == 0xFF ? 0 : it2.ItemData.Height);
+                                dropZ += (sbyte)(it2.ItemData.Height == 0xFF ? 0 : it2.ItemData.Height);
                             }
                             else
                             {
@@ -536,80 +564,80 @@ namespace ClassicUO.Game.Scenes
                     case CursorTarget.Position:
                     case CursorTarget.Object:
                     case CursorTarget.MultiPlacement when World.CustomHouseManager == null:
-                    {
-                        BaseGameObject obj = lastObj;
-
-                        if (obj is TextObject ov)
                         {
-                            obj = ov.Owner;
+                            BaseGameObject obj = lastObj;
+
+                            if (obj is TextObject ov)
+                            {
+                                obj = ov.Owner;
+                            }
+
+                            switch (obj)
+                            {
+                                case Entity ent:
+                                    TargetManager.Target(ent.Serial);
+
+                                    break;
+
+                                case Land land:
+                                    TargetManager.Target
+                                    (
+                                        0,
+                                        land.X,
+                                        land.Y,
+                                        land.Z,
+                                        land.TileData.IsWet
+                                    );
+
+                                    break;
+
+                                case GameObject o:
+                                    TargetManager.Target(o.Graphic, o.X, o.Y, o.Z);
+
+                                    break;
+                            }
                         }
-
-                        switch (obj)
-                        {
-                            case Entity ent:
-                                TargetManager.Target(ent.Serial);
-
-                                break;
-
-                            case Land land:
-                                TargetManager.Target
-                                (
-                                    0,
-                                    land.X,
-                                    land.Y,
-                                    land.Z,
-                                    land.TileData.IsWet
-                                );
-
-                                break;
-
-                            case GameObject o:
-                                TargetManager.Target(o.Graphic, o.X, o.Y, o.Z);
-
-                                break;
-                        }
-                    }
 
                         Mouse.LastLeftButtonClickTime = 0;
 
                         break;
 
                     case CursorTarget.SetTargetClientSide:
-                    {
-                        BaseGameObject obj = lastObj;
-
-                        if (obj is TextObject ov)
                         {
-                            obj = ov.Owner;
+                            BaseGameObject obj = lastObj;
+
+                            if (obj is TextObject ov)
+                            {
+                                obj = ov.Owner;
+                            }
+                            else if (obj is GameEffect eff && eff.Source != null)
+                            {
+                                obj = eff.Source;
+                            }
+
+                            switch (obj)
+                            {
+                                case Entity ent:
+                                    TargetManager.Target(ent.Serial);
+                                    UIManager.Add(new InspectorGump(ent));
+
+                                    break;
+
+                                case Land land:
+                                    TargetManager.Target(0, land.X, land.Y, land.Z);
+                                    UIManager.Add(new InspectorGump(land));
+
+                                    break;
+
+                                case GameObject o:
+                                    TargetManager.Target(o.Graphic, o.X, o.Y, o.Z);
+                                    UIManager.Add(new InspectorGump(o));
+
+                                    break;
+                            }
+
+                            Mouse.LastLeftButtonClickTime = 0;
                         }
-                        else if (obj is GameEffect eff && eff.Source != null)
-                        {
-                            obj = eff.Source;
-                        }
-
-                        switch (obj)
-                        {
-                            case Entity ent:
-                                TargetManager.Target(ent.Serial);
-                                UIManager.Add(new InspectorGump(ent));
-
-                                break;
-
-                            case Land land:
-                                TargetManager.Target(0, land.X, land.Y, land.Z);
-                                UIManager.Add(new InspectorGump(land));
-
-                                break;
-
-                            case GameObject o:
-                                TargetManager.Target(o.Graphic, o.X, o.Y, o.Z);
-                                UIManager.Add(new InspectorGump(o));
-
-                                break;
-                        }
-
-                        Mouse.LastLeftButtonClickTime = 0;
-                    }
 
                         break;
 
@@ -627,6 +655,29 @@ namespace ClassicUO.Game.Scenes
                             IgnoreManager.AddIgnoredTarget(pmEntity);
                         }
                         TargetManager.CancelTarget();
+                        break;
+                    case CursorTarget.MoveItemContainer:
+                        {
+                            BaseGameObject obj = lastObj;
+
+                            if (obj is TextObject ov)
+                            {
+                                obj = ov.Owner;
+                            }
+
+                            switch (obj)
+                            {
+                                case Land land:
+                                    TargetManager.Reset();
+                                    MultiItemMoveGump.OnContainerTarget(land.X, land.Y, land.Z);
+                                    break;
+
+                                case GameObject o:
+                                    TargetManager.Reset();
+                                    MultiItemMoveGump.OnContainerTarget(o.X, o.Y, o.Z);
+                                    break;
+                            }
+                        }
                         break;
                 }
             }

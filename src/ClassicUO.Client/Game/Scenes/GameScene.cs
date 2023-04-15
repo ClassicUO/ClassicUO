@@ -189,6 +189,7 @@ namespace ClassicUO.Game.Scenes
 
             CircleOfTransparency.Create(ProfileManager.CurrentProfile.CircleOfTransparencyRadius);
             Plugin.OnConnected();
+            GameController.UpdateBackgroundHueShader();
         }
 
         private void ChatOnMessageReceived(object sender, MessageEventArgs e)

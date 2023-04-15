@@ -33,12 +33,22 @@
 using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Security.Cryptography;
 
 namespace ClassicUO.Network.Encryption
 {
-    internal class TwofishEncryption : TwofishBase, ICryptoTransform
+    enum CipherMode
     {
+        CBC = 1,
+        ECB,
+        OFB,
+        CFB,
+        CTS
+    }
+
+    internal class TwofishEncryption : TwofishBase
+    {
+
+
         private byte[] _cipher_table, _xor_data;
         private ushort _rect_pos;
         private byte _send_pos;
@@ -73,7 +83,7 @@ namespace ClassicUO.Network.Encryption
             // load it up
             for (int i = 0; i < 4; i++)
             {
-                x[i] = (uint) (inputBuffer[i * 4 + 3 + inputOffset] << 24) | (uint) (inputBuffer[i * 4 + 2 + inputOffset] << 16) | (uint) (inputBuffer[i * 4 + 1 + inputOffset] << 8) | inputBuffer[i * 4 + 0 + inputOffset];
+                x[i] = (uint)(inputBuffer[i * 4 + 3 + inputOffset] << 24) | (uint)(inputBuffer[i * 4 + 2 + inputOffset] << 16) | (uint)(inputBuffer[i * 4 + 1 + inputOffset] << 8) | inputBuffer[i * 4 + 0 + inputOffset];
             }
 
             if (encryptionDirection == EncryptionDirection.Encrypting)
@@ -111,7 +121,7 @@ namespace ClassicUO.Network.Encryption
                 // load it up
                 for (int i = 0; i < 4; i++) // should be okay as we have already said to pad with zeros
                 {
-                    x[i] = (uint) (inputBuffer[i * 4 + 3 + inputOffset] << 24) | (uint) (inputBuffer[i * 4 + 2 + inputOffset] << 16) | (uint) (inputBuffer[i * 4 + 1 + inputOffset] << 8) | inputBuffer[i * 4 + 0 + inputOffset];
+                    x[i] = (uint)(inputBuffer[i * 4 + 3 + inputOffset] << 24) | (uint)(inputBuffer[i * 4 + 2 + inputOffset] << 16) | (uint)(inputBuffer[i * 4 + 1 + inputOffset] << 8) | inputBuffer[i * 4 + 0 + inputOffset];
                 }
 
                 if (encryptionDirection == EncryptionDirection.Encrypting)
@@ -154,10 +164,10 @@ namespace ClassicUO.Network.Encryption
             int keyLen = 128;
             _cipher_table = new byte[0x100];
             Span<byte> key = stackalloc byte[16];
-            key[0] = key[4] = key[8] = key[12] = (byte) ((seed >> 24) & 0xff);
-            key[1] = key[5] = key[9] = key[13] = (byte) ((seed >> 16) & 0xff);
-            key[2] = key[6] = key[10] = key[14] = (byte) ((seed >> 8) & 0xff);
-            key[3] = key[7] = key[11] = key[15] = (byte) (seed & 0xff);
+            key[0] = key[4] = key[8] = key[12] = (byte)((seed >> 24) & 0xff);
+            key[1] = key[5] = key[9] = key[13] = (byte)((seed >> 16) & 0xff);
+            key[2] = key[6] = key[10] = key[14] = (byte)((seed >> 8) & 0xff);
+            key[3] = key[7] = key[11] = key[15] = (byte)(seed & 0xff);
 
             byte[] iv = new byte[0];
 
@@ -165,7 +175,7 @@ namespace ClassicUO.Network.Encryption
             // convert our key into an array of ints
             for (int i = 0; i < key.Length / 4; i++)
             {
-                Key[i] = (uint) (key[i * 4 + 3] << 24) | (uint) (key[i * 4 + 2] << 16) | (uint) (key[i * 4 + 1] << 8) | key[i * 4 + 0];
+                Key[i] = (uint)(key[i * 4 + 3] << 24) | (uint)(key[i * 4 + 2] << 16) | (uint)(key[i * 4 + 1] << 8) | key[i * 4 + 0];
             }
 
             cipherMode = CipherMode.ECB;
@@ -175,7 +185,7 @@ namespace ClassicUO.Network.Encryption
             {
                 for (int i = 0; i < 4; i++)
                 {
-                    IV[i] = (uint) (iv[i * 4 + 3] << 24) | (uint) (iv[i * 4 + 2] << 16) | (uint) (iv[i * 4 + 1] << 8) | iv[i * 4 + 0];
+                    IV[i] = (uint)(iv[i * 4 + 3] << 24) | (uint)(iv[i * 4 + 2] << 16) | (uint)(iv[i * 4 + 1] << 8) | iv[i * 4 + 0];
                 }
             }
 
@@ -184,7 +194,7 @@ namespace ClassicUO.Network.Encryption
 
             for (int i = 0; i < 256; ++i)
             {
-                _cipher_table[i] = (byte) i;
+                _cipher_table[i] = (byte)i;
             }
 
 
@@ -194,9 +204,24 @@ namespace ClassicUO.Network.Encryption
 
             if (use_md5)
             {
-                MD5 md5 = new MD5CryptoServiceProvider();
-                _xor_data = md5.ComputeHash(_cipher_table, 0, 256);
-                md5.Dispose();
+                var md5B = new MD5Behaviour();
+                var ctx = new MD5Behaviour.MD5Context();
+                md5B.Initialize(ref ctx);
+
+                md5B.Update(ref ctx, _cipher_table.AsSpan(0, 256));
+
+                md5B.Finalize(ref ctx);
+
+                _xor_data = new byte[16];
+                for (int i = 0; i < 16; ++i)
+                {
+                    _xor_data[i] = ctx.Digest(i);
+                }
+
+                //using (var md5 = MD5.Create())
+                //{
+                //    _xor_data = md5.ComputeHash(_cipher_table, 0, 256);
+                //}
             }
         }
 
@@ -211,7 +236,7 @@ namespace ClassicUO.Network.Encryption
                 }
 
                 // Simple XOR operation
-                dst[i] = (byte) (src[i] ^ _cipher_table[_rect_pos++]);
+                dst[i] = (byte)(src[i] ^ _cipher_table[_rect_pos++]);
             }
         }
 
@@ -219,7 +244,7 @@ namespace ClassicUO.Network.Encryption
         {
             for (int i = 0; i < size; ++i)
             {
-                dst[i] = (byte) (src[i] ^ _xor_data[_send_pos]);
+                dst[i] = (byte)(src[i] ^ _xor_data[_send_pos]);
                 _send_pos++;
                 _send_pos &= 0x0F; // Maximum Value is 0xF = 15, then 0xF + 1 = 0 again
             }
@@ -313,18 +338,18 @@ namespace ClassicUO.Network.Encryption
             switch (((keyLen + 63) / 64) & 3)
             {
                 case 0: /* 256 bits of key */
-                    b[0] = (byte) (P8x8[P_04, b[0]] ^ b0(k32[3]));
-                    b[1] = (byte) (P8x8[P_14, b[1]] ^ b1(k32[3]));
-                    b[2] = (byte) (P8x8[P_24, b[2]] ^ b2(k32[3]));
-                    b[3] = (byte) (P8x8[P_34, b[3]] ^ b3(k32[3]));
+                    b[0] = (byte)(P8x8[P_04, b[0]] ^ b0(k32[3]));
+                    b[1] = (byte)(P8x8[P_14, b[1]] ^ b1(k32[3]));
+                    b[2] = (byte)(P8x8[P_24, b[2]] ^ b2(k32[3]));
+                    b[3] = (byte)(P8x8[P_34, b[3]] ^ b3(k32[3]));
                     /* fall thru, having pre-processed b[0]..b[3] with k32[3] */
                     goto case 3;
 
                 case 3: /* 192 bits of key */
-                    b[0] = (byte) (P8x8[P_03, b[0]] ^ b0(k32[2]));
-                    b[1] = (byte) (P8x8[P_13, b[1]] ^ b1(k32[2]));
-                    b[2] = (byte) (P8x8[P_23, b[2]] ^ b2(k32[2]));
-                    b[3] = (byte) (P8x8[P_33, b[3]] ^ b3(k32[2]));
+                    b[0] = (byte)(P8x8[P_03, b[0]] ^ b0(k32[2]));
+                    b[1] = (byte)(P8x8[P_13, b[1]] ^ b1(k32[2]));
+                    b[2] = (byte)(P8x8[P_23, b[2]] ^ b2(k32[2]));
+                    b[3] = (byte)(P8x8[P_33, b[3]] ^ b3(k32[2]));
                     /* fall thru, having pre-processed b[0]..b[3] with k32[2] */
                     goto case 2;
 
@@ -339,7 +364,7 @@ namespace ClassicUO.Network.Encryption
 
 
             /* Now perform the MDS matrix multiply inline. */
-            return (uint) (M00(b[0]) ^ M01(b[1]) ^ M02(b[2]) ^ M03(b[3])) ^ (uint) ((M10(b[0]) ^ M11(b[1]) ^ M12(b[2]) ^ M13(b[3])) << 8) ^ (uint) ((M20(b[0]) ^ M21(b[1]) ^ M22(b[2]) ^ M23(b[3])) << 16) ^ (uint) ((M30(b[0]) ^ M31(b[1]) ^ M32(b[2]) ^ M33(b[3])) << 24);
+            return (uint)(M00(b[0]) ^ M01(b[1]) ^ M02(b[2]) ^ M03(b[3])) ^ (uint)((M10(b[0]) ^ M11(b[1]) ^ M12(b[2]) ^ M13(b[3])) << 8) ^ (uint)((M20(b[0]) ^ M21(b[1]) ^ M22(b[2]) ^ M23(b[3])) << 16) ^ (uint)((M30(b[0]) ^ M31(b[1]) ^ M32(b[2]) ^ M33(b[3])) << 24);
         }
 
         /*
@@ -382,8 +407,8 @@ namespace ClassicUO.Network.Encryption
 
             for (i = 0; i < subkeyCnt / 2; i++) /* compute round subkeys for PHT */
             {
-                A = f32((uint) (i * SK_STEP), ref k32e, keyLen);           /* A uses even key dwords */
-                B = f32((uint) (i * SK_STEP + SK_BUMP), ref k32o, keyLen); /* B uses odd  key dwords */
+                A = f32((uint)(i * SK_STEP), ref k32e, keyLen);           /* A uses even key dwords */
+                B = f32((uint)(i * SK_STEP + SK_BUMP), ref k32o, keyLen); /* B uses odd  key dwords */
                 B = ROL(B, 8);
                 subKeys[2 * i] = A + B; /* combine with a PHT */
                 subKeys[2 * i + 1] = ROL(A + 2 * B, SK_ROTL);
@@ -578,10 +603,10 @@ namespace ClassicUO.Network.Encryption
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void RS_rem(ref uint x)
         {
-            byte b = (byte) (x >> 24);
+            byte b = (byte)(x >> 24);
             // TODO: maybe change g2 and g3 to bytes			 
-            uint g2 = (uint) (((b << 1) ^ ((b & 0x80) == 0x80 ? RS_GF_FDBK : 0)) & 0xFF);
-            uint g3 = (uint) (((b >> 1) & 0x7F) ^ ((b & 1) == 1 ? RS_GF_FDBK >> 1 : 0) ^ g2);
+            uint g2 = (uint)(((b << 1) ^ ((b & 0x80) == 0x80 ? RS_GF_FDBK : 0)) & 0xFF);
+            uint g3 = (uint)(((b >> 1) & 0x7F) ^ ((b & 1) == 1 ? RS_GF_FDBK >> 1 : 0) ^ g2);
             x = (x << 8) ^ (g3 << 24) ^ (g2 << 16) ^ (g3 << 8) ^ b;
         }
 
@@ -910,28 +935,28 @@ namespace ClassicUO.Network.Encryption
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected static byte b0(uint x)
         {
-            return (byte) x; //& 0xFF);
+            return (byte)x; //& 0xFF);
         }
 
         // second byte
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected static byte b1(uint x)
         {
-            return (byte) (x >> 8); // & (0xFF));
+            return (byte)(x >> 8); // & (0xFF));
         }
 
         // third byte
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected static byte b2(uint x)
         {
-            return (byte) (x >> 16); // & (0xFF));
+            return (byte)(x >> 16); // & (0xFF));
         }
 
         // fourth byte
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected static byte b3(uint x)
         {
-            return (byte) (x >> 24); // & (0xFF));
+            return (byte)(x >> 24); // & (0xFF));
         }
 
         #endregion

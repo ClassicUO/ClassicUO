@@ -67,7 +67,8 @@ namespace ClassicUO.Game.UI.Gumps
         private Item _container { get { return World.Items.Get(LocalSerial); } }
         private readonly Label _containerNameLabel;
         private readonly StbTextBox _searchBox;
-        private readonly GumpPic _openRegularGump, _quickDropBackpack, _sortContents;
+        private readonly GumpPic _openRegularGump, _sortContents;
+        private readonly ResizableStaticPic _quickDropBackpack;
         private readonly GumpPicTiled _backgroundTexture;
         private readonly NiceButton _setLootBag;
         private readonly bool isCorpse = false;
@@ -75,13 +76,32 @@ namespace ClassicUO.Game.UI.Gumps
         private float _lastGridItemScale = (ProfileManager.CurrentProfile.GridContainersScale / 100f);
         private int _lastWidth = DEFAULT_WIDTH, _lastHeight = DEFAULT_HEIGHT;
         private bool updatedBorder = true;
+        private bool quickLootThisContainer = false;
+        private bool skipSave = false;
 
         private GridScrollArea _scrollArea;
         private GridSlotManager gridSlotManager;
 
-        public GridContainer(uint local, ushort ogContainer) : base(GetWidth(), GetHeight(), GetWidth(2), GetHeight(1), local, 0)
+        public bool? UseOldContainerStyle = null;
+
+        private string quickLootStatus { get { return ProfileManager.CurrentProfile.CorpseSingleClickLoot ? "<basefont color=\"green\">Enabled" : "<basefont color=\"red\">Disabled"; } }
+        private string quickLootTooltip
+        {
+            get
+            {
+                if (isCorpse)
+                    return $"Drop an item here to send it to your backpack.<br><br>Click this icon to enable/disable single-click looting for corpses.<br>   Currently {quickLootStatus}";
+                else
+                    return $"Drop an item here to send it to your backpack.<br><br>Click this icon to enable/disable single-click loot for this container while it remains open.<br>   Currently " + (quickLootThisContainer ? "<basefont color=\"green\">Enabled" : "<basefont color=\"red\">Disabled");
+            }
+
+        }
+
+        public GridContainer(uint local, ushort ogContainer, bool? useGridStyle = null) : base(GetWidth(), GetHeight(), GetWidth(2), GetHeight(1), local, 0)
         {
             #region SET VARS
+            if (useGridStyle != null)
+                UseOldContainerStyle = !useGridStyle;
             Point savedSize = GridSaveSystem.Instance.GetLastSize(LocalSerial);
             _lastWidth = Width = savedSize.X;
             _lastHeight = Height = savedSize.Y;
@@ -89,7 +109,6 @@ namespace ClassicUO.Game.UI.Gumps
             _lastX = X = lastPos.X;
             _lastY = Y = lastPos.Y;
             AnchorType = ProfileManager.CurrentProfile.EnableGridContainerAnchor ? ANCHOR_TYPE.NONE : ANCHOR_TYPE.DISABLED;
-
             OgContainerGraphic = ogContainer;
 
             if (_container == null)
@@ -99,17 +118,15 @@ namespace ClassicUO.Game.UI.Gumps
             }
             isCorpse = _container.IsCorpse;
 
-            Mobile m = World.Mobiles.Get(_container.RootContainer);
-            if (m != null)
-            {
-                if (m.NotorietyFlag == NotorietyFlag.Invulnerable && m.Serial != World.Player.Serial)
-                {
-                    OpenOldContainer(local);
-                }
-            }
-
-            X = _lastX;
-            Y = _lastY;
+            //Mobile m = World.Mobiles.Get(_container.RootContainer);
+            //if (m != null)
+            //{
+            //    if (m.NotorietyFlag == NotorietyFlag.Invulnerable && m.Serial != World.Player.Serial)
+            //    {
+            //        OpenOldContainer(local);
+            //        SetContainerType(false);
+            //    }
+            //}
 
             CanMove = true;
             AcceptMouseInput = true;
@@ -152,14 +169,22 @@ namespace ClassicUO.Game.UI.Gumps
             _openRegularGump = new GumpPic(_background.Width - 25 - BORDER_WIDTH, BORDER_WIDTH, regularGumpIcon == null ? (ushort)1209 : (ushort)5839, 0);
             _openRegularGump.MouseUp += (sender, e) =>
             {
-                OpenOldContainer(LocalSerial);
+                if (e.Button == MouseButtonType.Left)
+                {
+                    UseOldContainerStyle = true;
+                    OpenOldContainer(LocalSerial);
+                }
             };
             _openRegularGump.MouseEnter += (sender, e) => { _openRegularGump.Graphic = regularGumpIcon == null ? (ushort)1210 : (ushort)5840; };
             _openRegularGump.MouseExit += (sender, e) => { _openRegularGump.Graphic = regularGumpIcon == null ? (ushort)1209 : (ushort)5839; };
             _openRegularGump.SetTooltip("Open the original style container.");
 
             var quickDropIcon = GumpsLoader.Instance.GetGumpTexture(1625, out var bounds1);
-            _quickDropBackpack = new GumpPic(Width - _openRegularGump.Width - 20 - BORDER_WIDTH, BORDER_WIDTH, quickDropIcon == null ? (ushort)1209 : (ushort)1625, 0);
+            _quickDropBackpack = new ResizableStaticPic(World.Player.FindItemByLayer(Layer.Backpack).DisplayedGraphic, 20, 20)
+            {
+                X = Width - _openRegularGump.Width - 20 - BORDER_WIDTH,
+                Y = BORDER_WIDTH
+            };
             _quickDropBackpack.MouseUp += (sender, e) =>
             {
                 if (e.Button == MouseButtonType.Left && _quickDropBackpack.MouseIsOver)
@@ -168,18 +193,25 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         GameActions.DropItem(Client.Game.GameCursor.ItemHold.Serial, 0xFFFF, 0xFFFF, 0, World.Player.FindItemByLayer(Layer.Backpack));
                     }
+                    else if (isCorpse)
+                    {
+                        ProfileManager.CurrentProfile.CorpseSingleClickLoot ^= true;
+                        _quickDropBackpack.SetTooltip(quickLootTooltip);
+                    }
+                    else
+                    {
+                        quickLootThisContainer ^= true;
+                        _quickDropBackpack.SetTooltip(quickLootTooltip);
+                    }
                 }
                 else if (e.Button == MouseButtonType.Right)
                 {
                     InvokeMouseCloseGumpWithRClick();
                 }
             };
-            _quickDropBackpack.MouseEnter += (sender, e) =>
-            {
-                if (Client.Game.GameCursor.ItemHold.Enabled) _quickDropBackpack.Graphic = quickDropIcon == null ? (ushort)1210 : (ushort)1626;
-            };
-            _quickDropBackpack.MouseExit += (sender, e) => { _quickDropBackpack.Graphic = quickDropIcon == null ? (ushort)1209 : (ushort)1625; };
-            _quickDropBackpack.SetTooltip("Drop an item here to send it to your backpack.");
+            _quickDropBackpack.MouseEnter += (sender, e) => { _quickDropBackpack.Hue = 0x34; };
+            _quickDropBackpack.MouseExit += (sender, e) => { _quickDropBackpack.Hue = 0; };
+            _quickDropBackpack.SetTooltip(quickLootTooltip);
 
             _sortContents = new GumpPic(_quickDropBackpack.X - 20, BORDER_WIDTH, 1210, 0);
             _sortContents.MouseUp += (sender, e) => { updateItems(true); };
@@ -233,10 +265,18 @@ namespace ClassicUO.Game.UI.Gumps
 
             gridSlotManager = new GridSlotManager(local, this, _scrollArea, GridSaveSystem.Instance.GetItemSlots(LocalSerial)); //Must come after scroll area
 
+            if (GridSaveSystem.Instance.UseOriginalContainerGump(LocalSerial) && (UseOldContainerStyle == null || UseOldContainerStyle == true))
+            {
+                skipSave = true; //Avoid unsaving item slots because they have not be set up yet
+                OpenOldContainer(local);
+                return;
+            }
+
             BuildBorder();
             ResizeWindow(savedSize);
             updatedBorder = true;
         }
+
         public override GumpType GumpType => GumpType.GridContainer;
 
         private static int GetWidth(int columns = -1)
@@ -303,8 +343,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void OpenOldContainer(uint serial)
         {
-            ContainerGump container = UIManager.GetGump<ContainerGump>(serial);
-            if (_container == null || _container.IsDestroyed) return;
+            ContainerGump container;
+
+            UIManager.GetGump<ContainerGump>(serial)?.Dispose();
 
             ushort graphic = OgContainerGraphic;
             if (Client.Version >= Utility.ClientVersion.CV_706000 && ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.UseLargeContainerGumps)
@@ -387,23 +428,16 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            if (container != null)
-            {
-                ContainerManager.CalculateContainerPosition(serial, graphic);
-                container.InvalidateContents = true;
-            }
-            else
-            {
-                ContainerManager.CalculateContainerPosition(serial, graphic);
+            ContainerManager.CalculateContainerPosition(serial, graphic);
 
-                container = new ContainerGump(_container.Serial, graphic, true)
-                {
-                    X = ContainerManager.X,
-                    Y = ContainerManager.Y,
-                    InvalidateContents = true
-                };
-                UIManager.Add(container);
-            }
+            container = new ContainerGump(_container.Serial, graphic, true, true)
+            {
+                X = ContainerManager.X,
+                Y = ContainerManager.Y,
+                InvalidateContents = true
+            };
+            UIManager.Add(container);
+            Dispose();
         }
 
         private void updateItems(bool overrideSort = false)
@@ -452,9 +486,9 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            if (gridSlotManager != null)
+            if (gridSlotManager != null && !skipSave)
                 if (gridSlotManager.ItemPositions.Count > 0 && !isCorpse)
-                    GridSaveSystem.Instance.SaveContainer(LocalSerial, gridSlotManager.GridSlots, Width, Height, X, Y);
+                    GridSaveSystem.Instance.SaveContainer(LocalSerial, gridSlotManager.GridSlots, Width, Height, X, Y, UseOldContainerStyle);
 
             base.Dispose();
         }
@@ -753,7 +787,7 @@ namespace ClassicUO.Game.UI.Gumps
                         if (_item != null && _item.ItemData.IsContainer)
                         {
                             Rectangle containerBounds = ContainerManager.Get(_item.Graphic).Bounds;
-                            GameActions.DropItem(Client.Game.GameCursor.ItemHold.Serial, containerBounds.X / 2, containerBounds.Y / 2, 0, _item.Serial);
+                            GameActions.DropItem(Client.Game.GameCursor.ItemHold.Serial, 0xFFFF, 0xFFFF, 0, _item.Serial);
                         }
                         else if (_item != null && _item.ItemData.IsStackable && _item.Graphic == Client.Game.GameCursor.ItemHold.Graphic)
                         {
@@ -789,7 +823,12 @@ namespace ClassicUO.Game.UI.Gumps
                         Point offset = Mouse.LDragOffset;
                         if (Math.Abs(offset.X) < Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS && Math.Abs(offset.Y) < Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS)
                         {
-                            DelayedObjectClickManager.Set(_item.Serial, gridContainer.X, gridContainer.Y - 80, Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK);
+                            if ((gridContainer.isCorpse && ProfileManager.CurrentProfile.CorpseSingleClickLoot) || gridContainer.quickLootThisContainer)
+                            {
+                                GameActions.GrabItem(_item.Serial, _item.Amount);
+                            }
+                            else
+                                DelayedObjectClickManager.Set(_item.Serial, gridContainer.X, gridContainer.Y - 80, Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK);
                         }
                     }
                 }
@@ -1281,7 +1320,7 @@ namespace ClassicUO.Game.UI.Gumps
                                                                 fullMatch = false;
                                                         }
                                                     }
-                                                    else if (configData.PropMinVal[i] < 0)
+                                                    else if (configData.PropMinVal[i] == -1)
                                                     {
                                                         fullMatch = true;
                                                     }
@@ -1649,10 +1688,13 @@ namespace ClassicUO.Game.UI.Gumps
                 enabled = true;
             }
 
-            public bool SaveContainer(uint serial, Dictionary<int, GridItem> gridSlots, int width, int height, int lastX = 100, int lastY = 100)
+            public bool SaveContainer(uint serial, Dictionary<int, GridItem> gridSlots, int width, int height, int lastX = 100, int lastY = 100, bool? useOriginalContainer = false)
             {
                 if (!enabled)
                     return false;
+
+                if (useOriginalContainer == null)
+                    useOriginalContainer = false;
 
                 XElement thisContainer = rootElement.Element("container_" + serial.ToString());
                 if (thisContainer == null)
@@ -1668,6 +1710,7 @@ namespace ClassicUO.Game.UI.Gumps
                 thisContainer.SetAttributeValue("height", height.ToString());
                 thisContainer.SetAttributeValue("lastX", lastX.ToString());
                 thisContainer.SetAttributeValue("lastY", lastY.ToString());
+                thisContainer.SetAttributeValue("useOriginalContainer", useOriginalContainer.ToString());
 
                 foreach (var slot in gridSlots)
                 {
@@ -1768,6 +1811,24 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
                 return LastPos;
+            }
+
+            public bool UseOriginalContainerGump(uint container)
+            {
+                bool useOriginalContainer = false;
+
+                XElement thisContainer = rootElement.Element("container_" + container.ToString());
+                if (thisContainer != null)
+                {
+                    XAttribute useOriginal;
+                    useOriginal = thisContainer.Attribute("useOriginalContainer");
+                    if (useOriginal != null)
+                    {
+                        bool.TryParse(useOriginal.Value, out useOriginalContainer);
+                    }
+                }
+
+                return useOriginalContainer;
             }
 
             private void RemoveOldContainers()

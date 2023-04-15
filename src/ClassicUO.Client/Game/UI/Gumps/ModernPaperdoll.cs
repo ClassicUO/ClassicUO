@@ -34,6 +34,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public ModernPaperdoll(uint localSerial) : base(localSerial, 0)
         {
+            UIManager.GetGump<MinimizedPaperdoll>()?.Dispose();
             #region ASSIGN FIELDS
             AcceptMouseInput = true;
             CanMove = true;

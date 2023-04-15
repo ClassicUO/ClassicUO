@@ -36,7 +36,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(label = new Label($"Moving {MoveItems.Count} items.", true, 0xff, Width, align: Assets.TEXT_ALIGN_TYPE.TS_CENTER));
 
-            Add(new Label($"Object delay:", true, 0xff, 150) { Y = label.Height + 5});
+            Add(new Label($"Object delay:", true, 0xff, 150) { Y = label.Height + 5 });
             StbTextBox delay;
             Add(delay = new StbTextBox(0xFF, 3000, 50, true, FontStyle.None, 0x048)
             {
@@ -54,7 +54,8 @@ namespace ClassicUO.Game.UI.Gumps
                 Width = delay.Width,
                 Height = delay.Height
             });
-            delay.TextChanged += (s, e) => {
+            delay.TextChanged += (s, e) =>
+            {
                 if (int.TryParse(delay.Text, out int newDelay))
                 {
                     ObjDelay = newDelay;
@@ -76,15 +77,26 @@ namespace ClassicUO.Game.UI.Gumps
 
             NiceButton move;
             Add(move = new NiceButton(100, Height - 20, 100, 20, ButtonAction.Default, "Move to", align: Assets.TEXT_ALIGN_TYPE.TS_CENTER));
-            move.SetTooltip("Select a container to move these items to.");
+            move.SetTooltip("Select a container or a ground tile to move these items to.");
             move.MouseUp += (s, e) =>
             {
                 if (e.Button == MouseButtonType.Left)
                 {
-                    GameActions.Print("Select the container to move these items to");
+                    GameActions.Print("Where should we move these items?");
                     TargetManager.SetTargeting(CursorTarget.MoveItemContainer, CursorType.Target, TargetType.Neutral);
                     delay.IsEditable = false;
-                    move.Dispose();
+                }
+            };
+
+            NiceButton moveToBackpack;
+            Add(moveToBackpack = new NiceButton(0, Height - 40, Width, 20, ButtonAction.Default, "Move to backpack", align: Assets.TEXT_ALIGN_TYPE.TS_CENTER));
+            moveToBackpack.SetTooltip("Move selected items to your backpack.");
+            moveToBackpack.MouseUp += (s, e) =>
+            {
+                if (e.Button == MouseButtonType.Left)
+                {
+                    delay.IsEditable = false;
+                    processItemMoves(World.Player.FindItemByLayer(Data.Layer.Backpack));
                 }
             };
 
@@ -93,14 +105,21 @@ namespace ClassicUO.Game.UI.Gumps
 
         public static void OnContainerTarget(uint serial)
         {
-            Item moveToContainer = World.Items.Get(serial);
-            if (!moveToContainer.ItemData.IsContainer)
+            if (SerialHelper.IsItem(serial))
             {
-                GameActions.Print("That does not appear to be a container...");
-                return;
+                Item moveToContainer = World.Items.Get(serial);
+                if (!moveToContainer.ItemData.IsContainer)
+                {
+                    GameActions.Print("That does not appear to be a container...");
+                    return;
+                }
+                GameActions.Print("Moving items to the selected container..");
+                processItemMoves(moveToContainer);
             }
-            GameActions.Print("Moving items to the selected container..");
-            processItemMoves(moveToContainer);
+        }
+        public static void OnContainerTarget(int x, int y, int z)
+        {
+            processItemMoves(x, y, z);
         }
 
         public static void AddMultiItemMoveGumpToUI(int x, int y)
@@ -115,10 +134,24 @@ namespace ClassicUO.Game.UI.Gumps
 
         private static async Task processItemMoves(Item container)
         {
-            while(MoveItems.TryDequeue(out Item moveItem))
+            if (container != null)
             {
-                if(GameActions.PickUp(moveItem.Serial, 0, 0, moveItem.Amount))
-                    GameActions.DropItem(moveItem.Serial, 0xFFFF, 0xFFFF, 0, container);
+                while (MoveItems.TryDequeue(out Item moveItem))
+                {
+                    if (GameActions.PickUp(moveItem.Serial, 0, 0, moveItem.Amount))
+                        GameActions.DropItem(moveItem.Serial, 0xFFFF, 0xFFFF, 0, container);
+                }
+                await Task.Delay(ObjDelay);
+            }
+        }
+
+        private static async Task processItemMoves(int x, int y, int z)
+        {
+            while (MoveItems.TryDequeue(out Item moveItem))
+            {
+                Assets.StaticTiles itemData = Assets.TileDataLoader.Instance.StaticData[moveItem.Graphic];
+                if (GameActions.PickUp(moveItem.Serial, 0, 0, moveItem.Amount))
+                    GameActions.DropItem(moveItem.Serial, x, y, z + (sbyte)(itemData.Height == 0xFF ? 0 : itemData.Height), 0);
                 await Task.Delay(ObjDelay);
             }
         }
