@@ -4236,7 +4236,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             foreach(var profile in allProfiles)
             {
-                ProfileManager.CurrentProfile.Save(profile.ToString());
+                ProfileManager.CurrentProfile.Save(profile.ToString(), false);
             }
         }
 

@@ -430,7 +430,7 @@ namespace ClassicUO.Configuration
 
         public static uint GumpsVersion { get; private set; }
 
-        public void Save(string path)
+        public void Save(string path, bool saveGumps = true)
         {
             Log.Trace($"Saving path:\t\t{path}");
 
@@ -438,7 +438,8 @@ namespace ClassicUO.Configuration
             ConfigurationResolver.Save(this, Path.Combine(path, "profile.json"), ProfileJsonContext.DefaultToUse);
 
             // Save opened gumps
-            SaveGumps(path);
+            if (saveGumps)
+                SaveGumps(path);
 
             Log.Trace("Saving done!");
         }
