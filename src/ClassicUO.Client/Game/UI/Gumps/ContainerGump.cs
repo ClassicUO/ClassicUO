@@ -54,6 +54,7 @@ namespace ClassicUO.Game.UI.Gumps
         private GumpPic _eyeGumpPic;
         private GumpPicContainer _gumpPicContainer;
         private readonly bool _hideIfEmpty;
+        private readonly bool showGridToggle = false;
         private HitBox _hitBox;
         private bool _isMinimized;
 
@@ -135,6 +136,11 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
+        public ContainerGump(uint serial, ushort gumpid, bool playsound, bool showGridToggle) : this(serial, gumpid, playsound)
+        {
+            this.showGridToggle = showGridToggle;
+        }
+
         public ushort Graphic { get; }
 
         public override GumpType GumpType => GumpType.Container;
@@ -150,8 +156,8 @@ namespace ClassicUO.Game.UI.Gumps
                     _gumpPicContainer.Graphic = value ? _data.IconizedGraphic : Graphic;
                     float scale = GetScale();
 
-                    Width = _gumpPicContainer.Width = (int) (_gumpPicContainer.Width * scale);
-                    Height = _gumpPicContainer.Height = (int) (_gumpPicContainer.Height * scale);
+                    Width = _gumpPicContainer.Width = (int)(_gumpPicContainer.Width * scale);
+                    Height = _gumpPicContainer.Height = (int)(_gumpPicContainer.Height * scale);
 
                     foreach (Control c in Children)
                     {
@@ -183,6 +189,20 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
+            NiceButton _;
+            Add(_ = new NiceButton(0, 0, 20, 20, ButtonAction.Activate, "#") { IsSelectable = false });
+            _.SetTooltip("Return to grid container view");
+            _.MouseUp += (s, e) =>
+            {
+                if (e.Button == MouseButtonType.Left)
+                {
+                    UIManager.GetGump<GridContainer>(LocalSerial)?.Dispose();
+                    GridContainer c;
+                    UIManager.Add(c = new GridContainer(LocalSerial, Graphic, true));
+                    Dispose();
+                }
+            };
+
             float scale = GetScale();
 
             _data = ContainerManager.Get(Graphic);
@@ -192,7 +212,7 @@ namespace ClassicUO.Game.UI.Gumps
             _gumpPicContainer?.Dispose();
             _hitBox?.Dispose();
 
-            _hitBox = new HitBox((int) (_data.MinimizerArea.X * scale), (int) (_data.MinimizerArea.Y * scale), (int) (_data.MinimizerArea.Width * scale), (int) (_data.MinimizerArea.Height * scale));
+            _hitBox = new HitBox((int)(_data.MinimizerArea.X * scale), (int)(_data.MinimizerArea.Y * scale), (int)(_data.MinimizerArea.Width * scale), (int)(_data.MinimizerArea.Height * scale));
 
             _hitBox.MouseUp += HitBoxOnMouseUp;
             Add(_hitBox);
@@ -203,18 +223,18 @@ namespace ClassicUO.Game.UI.Gumps
             if (Graphic == CORPSES_GUMP)
             {
                 _eyeGumpPic?.Dispose();
-                Add(_eyeGumpPic = new GumpPic((int) (45 * scale), (int) (30 * scale), 0x0045, 0));
+                Add(_eyeGumpPic = new GumpPic((int)(45 * scale), (int)(30 * scale), 0x0045, 0));
 
-                _eyeGumpPic.Width = (int) (_eyeGumpPic.Width * scale);
-                _eyeGumpPic.Height = (int) (_eyeGumpPic.Height * scale);
+                _eyeGumpPic.Width = (int)(_eyeGumpPic.Width * scale);
+                _eyeGumpPic.Height = (int)(_eyeGumpPic.Height * scale);
             }
             else if (ProfileManager.CurrentProfile.HueContainerGumps)
             {
                 _gumpPicContainer.Hue = item.Hue;
             }
 
-            Width = _gumpPicContainer.Width = (int) (_gumpPicContainer.Width * scale);
-            Height = _gumpPicContainer.Height = (int) (_gumpPicContainer.Height * scale);
+            Width = _gumpPicContainer.Width = (int)(_gumpPicContainer.Width * scale);
+            Height = _gumpPicContainer.Height = (int)(_gumpPicContainer.Height * scale);
         }
 
         private void HitBoxOnMouseUp(object sender, MouseEventArgs e)
@@ -269,7 +289,7 @@ namespace ClassicUO.Game.UI.Gumps
                     return;
                 }
 
-                thisCont = World.Get(((Item) thisCont).RootContainer);
+                thisCont = World.Get(((Item)thisCont).RootContainer);
 
                 if (thisCont == null)
                 {
@@ -312,13 +332,13 @@ namespace ClassicUO.Game.UI.Gumps
                                     case 0x238C:
                                     case 0x23A0:
                                     case 0x2D50:
-                                    {
-                                        dropcontainer = target.Serial;
-                                        x = target.X;
-                                        y = target.Y;
+                                        {
+                                            dropcontainer = target.Serial;
+                                            x = target.X;
+                                            y = target.Y;
 
-                                        break;
-                                    }
+                                            break;
+                                        }
                                 }
                             }
                         }
@@ -344,16 +364,16 @@ namespace ClassicUO.Game.UI.Gumps
                         Rectangle containerBounds = ContainerManager.Get(gump.Graphic).Bounds;
 
                         var texture = gump.IsChessboard ?
-                            GumpsLoader.Instance.GetGumpTexture((ushort) (Client.Game.GameCursor.ItemHold.DisplayedGraphic - Constants.ITEM_GUMP_TEXTURE_OFFSET), out var bounds) 
-                            : 
+                            GumpsLoader.Instance.GetGumpTexture((ushort)(Client.Game.GameCursor.ItemHold.DisplayedGraphic - Constants.ITEM_GUMP_TEXTURE_OFFSET), out var bounds)
+                            :
                             ArtLoader.Instance.GetStaticTexture(Client.Game.GameCursor.ItemHold.DisplayedGraphic, out bounds);
 
                         float scale = GetScale();
 
-                        containerBounds.X = (int) (containerBounds.X * scale);
-                        containerBounds.Y = (int) (containerBounds.Y * scale);
-                        containerBounds.Width = (int) (containerBounds.Width * scale);
-                        containerBounds.Height = (int) ((containerBounds.Height + (gump.IsChessboard ? 20 : 0)) * scale);
+                        containerBounds.X = (int)(containerBounds.X * scale);
+                        containerBounds.Y = (int)(containerBounds.Y * scale);
+                        containerBounds.Width = (int)(containerBounds.Width * scale);
+                        containerBounds.Height = (int)((containerBounds.Height + (gump.IsChessboard ? 20 : 0)) * scale);
 
                         if (texture != null)
                         {
@@ -361,8 +381,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                             if (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.ScaleItemsInsideContainers)
                             {
-                                textureW = (int) (bounds.Width * scale);
-                                textureH = (int) (bounds.Height * scale);
+                                textureW = (int)(bounds.Width * scale);
+                                textureH = (int)(bounds.Height * scale);
                             }
                             else
                             {
@@ -400,8 +420,8 @@ namespace ClassicUO.Game.UI.Gumps
                             y = containerBounds.Y;
                         }
 
-                        x = (int) (x / scale);
-                        y = (int) (y / scale);
+                        x = (int)(x / scale);
+                        y = (int)(y / scale);
                     }
 
                     GameActions.DropItem
@@ -454,10 +474,10 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _eyeCorspeOffset = _eyeCorspeOffset == 0 ? 1 : 0;
                 _corpseEyeTicks = (long)Time.Ticks + 750;
-                _eyeGumpPic.Graphic = (ushort) (0x0045 + _eyeCorspeOffset);
+                _eyeGumpPic.Graphic = (ushort)(0x0045 + _eyeCorspeOffset);
                 float scale = GetScale();
-                _eyeGumpPic.Width = (int) (_eyeGumpPic.Width * scale);
-                _eyeGumpPic.Height = (int) (_eyeGumpPic.Height * scale);
+                _eyeGumpPic.Width = (int)(_eyeGumpPic.Width * scale);
+                _eyeGumpPic.Height = (int)(_eyeGumpPic.Height * scale);
             }
         }
 
@@ -512,7 +532,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             for (LinkedObject i = container.Items; i != null; i = i.Next)
             {
-                Item item = (Item) i;
+                Item item = (Item)i;
 
                 // NOTE: Switched from 'item.Layer' property which comes from server to 'ItemData.Layer' from tiledata.mul.
                 //       In the past I found some issues using the server property.
@@ -526,7 +546,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 var layer = (Layer)item.ItemData.Layer;
 
-                if (is_corpse && item.Layer > 0 && !Constants.BAD_CONTAINER_LAYERS[(int) layer])
+                if (is_corpse && item.Layer > 0 && !Constants.BAD_CONTAINER_LAYERS[(int)layer])
                 {
                     continue;
                 }
@@ -577,8 +597,8 @@ namespace ClassicUO.Game.UI.Gumps
             int boundWidth = dataBounds.Width;
             int boundHeight = dataBounds.Height + (IsChessboard ? 20 : 0);
 
-            var texture = IsChessboard ? 
-                GumpsLoader.Instance.GetGumpTexture((ushort) (item.DisplayedGraphic - (IsChessboard ? Constants.ITEM_GUMP_TEXTURE_OFFSET : 0)), out var bounds) 
+            var texture = IsChessboard ?
+                GumpsLoader.Instance.GetGumpTexture((ushort)(item.DisplayedGraphic - (IsChessboard ? Constants.ITEM_GUMP_TEXTURE_OFFSET : 0)), out var bounds)
                 :
                 ArtLoader.Instance.GetStaticTexture(item.DisplayedGraphic, out bounds);
 
@@ -586,26 +606,26 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 float scale = GetScale();
 
-                boundWidth -= (int) (bounds.Width / scale);
-                boundHeight -= (int) (bounds.Height / scale);
+                boundWidth -= (int)(bounds.Width / scale);
+                boundHeight -= (int)(bounds.Height / scale);
             }
 
             if (item.X < boundX)
             {
-                item.X = (ushort) boundX;
+                item.X = (ushort)boundX;
             }
             else if (item.X > boundWidth)
             {
-                item.X = (ushort) boundWidth;
+                item.X = (ushort)boundWidth;
             }
 
             if (item.Y < boundY)
             {
-                item.Y = (ushort) boundY;
+                item.Y = (ushort)boundY;
             }
             else if (item.Y > boundHeight)
             {
-                item.Y = (ushort) boundHeight;
+                item.Y = (ushort)boundHeight;
             }
         }
 
@@ -618,10 +638,10 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Rectangle bounds = _data.Bounds;
                 float scale = GetScale();
-                ushort boundX = (ushort) (bounds.X * scale);
-                ushort boundY = (ushort) (bounds.Y * scale);
-                ushort boundWidth = (ushort) (bounds.Width * scale);
-                ushort boundHeight = (ushort) (bounds.Height * scale);
+                ushort boundX = (ushort)(bounds.X * scale);
+                ushort boundY = (ushort)(bounds.Y * scale);
+                ushort boundWidth = (ushort)(bounds.Width * scale);
+                ushort boundHeight = (ushort)(bounds.Height * scale);
 
                 Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
@@ -653,7 +673,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 for (LinkedObject i = item.Items; i != null; i = i.Next)
                 {
-                    Item child = (Item) i;
+                    Item child = (Item)i;
 
                     if (child.Container == item)
                     {
@@ -696,8 +716,8 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 float scale = Graphic == 0x091A || Graphic == 0x092E ? 1f : UIManager.ContainerScale;
 
-                x = (int) (x / scale);
-                y = (int) (y / scale);
+                x = (int)(x / scale);
+                y = (int)(y / scale);
 
                 return base.Contains(x, y);
             }

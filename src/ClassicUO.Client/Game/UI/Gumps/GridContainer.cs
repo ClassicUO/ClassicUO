@@ -77,9 +77,12 @@ namespace ClassicUO.Game.UI.Gumps
         private int _lastWidth = DEFAULT_WIDTH, _lastHeight = DEFAULT_HEIGHT;
         private bool updatedBorder = true;
         private bool quickLootThisContainer = false;
+        private bool skipSave = false;
 
         private GridScrollArea _scrollArea;
         private GridSlotManager gridSlotManager;
+
+        public bool? UseOldContainerStyle = null;
 
         private string quickLootStatus { get { return ProfileManager.CurrentProfile.CorpseSingleClickLoot ? "<basefont color=\"green\">Enabled" : "<basefont color=\"red\">Disabled"; } }
         private string quickLootTooltip
@@ -94,9 +97,11 @@ namespace ClassicUO.Game.UI.Gumps
 
         }
 
-        public GridContainer(uint local, ushort ogContainer) : base(GetWidth(), GetHeight(), GetWidth(2), GetHeight(1), local, 0)
+        public GridContainer(uint local, ushort ogContainer, bool? useGridStyle = null) : base(GetWidth(), GetHeight(), GetWidth(2), GetHeight(1), local, 0)
         {
             #region SET VARS
+            if (useGridStyle != null)
+                UseOldContainerStyle = !useGridStyle;
             Point savedSize = GridSaveSystem.Instance.GetLastSize(LocalSerial);
             _lastWidth = Width = savedSize.X;
             _lastHeight = Height = savedSize.Y;
@@ -104,7 +109,6 @@ namespace ClassicUO.Game.UI.Gumps
             _lastX = X = lastPos.X;
             _lastY = Y = lastPos.Y;
             AnchorType = ProfileManager.CurrentProfile.EnableGridContainerAnchor ? ANCHOR_TYPE.NONE : ANCHOR_TYPE.DISABLED;
-
             OgContainerGraphic = ogContainer;
 
             if (_container == null)
@@ -114,17 +118,15 @@ namespace ClassicUO.Game.UI.Gumps
             }
             isCorpse = _container.IsCorpse;
 
-            Mobile m = World.Mobiles.Get(_container.RootContainer);
-            if (m != null)
-            {
-                if (m.NotorietyFlag == NotorietyFlag.Invulnerable && m.Serial != World.Player.Serial)
-                {
-                    OpenOldContainer(local);
-                }
-            }
-
-            X = _lastX;
-            Y = _lastY;
+            //Mobile m = World.Mobiles.Get(_container.RootContainer);
+            //if (m != null)
+            //{
+            //    if (m.NotorietyFlag == NotorietyFlag.Invulnerable && m.Serial != World.Player.Serial)
+            //    {
+            //        OpenOldContainer(local);
+            //        SetContainerType(false);
+            //    }
+            //}
 
             CanMove = true;
             AcceptMouseInput = true;
@@ -167,7 +169,11 @@ namespace ClassicUO.Game.UI.Gumps
             _openRegularGump = new GumpPic(_background.Width - 25 - BORDER_WIDTH, BORDER_WIDTH, regularGumpIcon == null ? (ushort)1209 : (ushort)5839, 0);
             _openRegularGump.MouseUp += (sender, e) =>
             {
-                OpenOldContainer(LocalSerial);
+                if (e.Button == MouseButtonType.Left)
+                {
+                    UseOldContainerStyle = true;
+                    OpenOldContainer(LocalSerial);
+                }
             };
             _openRegularGump.MouseEnter += (sender, e) => { _openRegularGump.Graphic = regularGumpIcon == null ? (ushort)1210 : (ushort)5840; };
             _openRegularGump.MouseExit += (sender, e) => { _openRegularGump.Graphic = regularGumpIcon == null ? (ushort)1209 : (ushort)5839; };
@@ -259,10 +265,18 @@ namespace ClassicUO.Game.UI.Gumps
 
             gridSlotManager = new GridSlotManager(local, this, _scrollArea, GridSaveSystem.Instance.GetItemSlots(LocalSerial)); //Must come after scroll area
 
+            if (GridSaveSystem.Instance.UseOriginalContainerGump(LocalSerial) && (UseOldContainerStyle == null || UseOldContainerStyle == true))
+            {
+                skipSave = true; //Avoid unsaving item slots because they have not be set up yet
+                OpenOldContainer(local);
+                return;
+            }
+
             BuildBorder();
             ResizeWindow(savedSize);
             updatedBorder = true;
         }
+
         public override GumpType GumpType => GumpType.GridContainer;
 
         private static int GetWidth(int columns = -1)
@@ -329,8 +343,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void OpenOldContainer(uint serial)
         {
-            ContainerGump container = UIManager.GetGump<ContainerGump>(serial);
-            if (_container == null || _container.IsDestroyed) return;
+            ContainerGump container;
+
+            UIManager.GetGump<ContainerGump>(serial)?.Dispose();
 
             ushort graphic = OgContainerGraphic;
             if (Client.Version >= Utility.ClientVersion.CV_706000 && ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.UseLargeContainerGumps)
@@ -413,23 +428,16 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            if (container != null)
-            {
-                ContainerManager.CalculateContainerPosition(serial, graphic);
-                container.InvalidateContents = true;
-            }
-            else
-            {
-                ContainerManager.CalculateContainerPosition(serial, graphic);
+            ContainerManager.CalculateContainerPosition(serial, graphic);
 
-                container = new ContainerGump(_container.Serial, graphic, true)
-                {
-                    X = ContainerManager.X,
-                    Y = ContainerManager.Y,
-                    InvalidateContents = true
-                };
-                UIManager.Add(container);
-            }
+            container = new ContainerGump(_container.Serial, graphic, true, true)
+            {
+                X = ContainerManager.X,
+                Y = ContainerManager.Y,
+                InvalidateContents = true
+            };
+            UIManager.Add(container);
+            Dispose();
         }
 
         private void updateItems(bool overrideSort = false)
@@ -478,9 +486,9 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            if (gridSlotManager != null)
+            if (gridSlotManager != null && !skipSave)
                 if (gridSlotManager.ItemPositions.Count > 0 && !isCorpse)
-                    GridSaveSystem.Instance.SaveContainer(LocalSerial, gridSlotManager.GridSlots, Width, Height, X, Y);
+                    GridSaveSystem.Instance.SaveContainer(LocalSerial, gridSlotManager.GridSlots, Width, Height, X, Y, UseOldContainerStyle);
 
             base.Dispose();
         }
@@ -1680,10 +1688,13 @@ namespace ClassicUO.Game.UI.Gumps
                 enabled = true;
             }
 
-            public bool SaveContainer(uint serial, Dictionary<int, GridItem> gridSlots, int width, int height, int lastX = 100, int lastY = 100)
+            public bool SaveContainer(uint serial, Dictionary<int, GridItem> gridSlots, int width, int height, int lastX = 100, int lastY = 100, bool? useOriginalContainer = false)
             {
                 if (!enabled)
                     return false;
+
+                if (useOriginalContainer == null)
+                    useOriginalContainer = false;
 
                 XElement thisContainer = rootElement.Element("container_" + serial.ToString());
                 if (thisContainer == null)
@@ -1699,6 +1710,7 @@ namespace ClassicUO.Game.UI.Gumps
                 thisContainer.SetAttributeValue("height", height.ToString());
                 thisContainer.SetAttributeValue("lastX", lastX.ToString());
                 thisContainer.SetAttributeValue("lastY", lastY.ToString());
+                thisContainer.SetAttributeValue("useOriginalContainer", useOriginalContainer.ToString());
 
                 foreach (var slot in gridSlots)
                 {
@@ -1799,6 +1811,24 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
                 return LastPos;
+            }
+
+            public bool UseOriginalContainerGump(uint container)
+            {
+                bool useOriginalContainer = false;
+
+                XElement thisContainer = rootElement.Element("container_" + container.ToString());
+                if (thisContainer != null)
+                {
+                    XAttribute useOriginal;
+                    useOriginal = thisContainer.Attribute("useOriginalContainer");
+                    if (useOriginal != null)
+                    {
+                        bool.TryParse(useOriginal.Value, out useOriginalContainer);
+                    }
+                }
+
+                return useOriginalContainer;
             }
 
             private void RemoveOldContainers()
