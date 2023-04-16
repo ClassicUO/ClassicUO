@@ -186,7 +186,7 @@ namespace ClassicUO.Game.UI.Gumps
         private HSliderBar _showSkillsMessageDelta;
 
         private Checkbox _leftAlignToolTips, _namePlateHealthOnlyWarmode, _enableHealthIndicator;
-        private InputField _healthIndicatorPercentage;
+        private InputField _healthIndicatorPercentage, _healthIndicatorWidth;
         private ModernColorPicker.HueDisplay _mainWindowHuePicker;
 
         #region Cooldowns
@@ -4121,6 +4121,10 @@ namespace ClassicUO.Game.UI.Gumps
                 section.Add(AddLabel(null, "Only show below hp %", 0, 0));
                 section.AddRight(_healthIndicatorPercentage = AddInputField(null, 0, 0, 150, TEXTBOX_HEIGHT, numbersOnly: true));
                 _healthIndicatorPercentage.SetText((_currentProfile.ShowHealthIndicatorBelow * 100).ToString());
+
+                section.Add(AddLabel(null, "Size", 0, 0));
+                section.AddRight(_healthIndicatorWidth = AddInputField(null, 0, 0, 150, TEXTBOX_HEIGHT, numbersOnly: true));
+                _healthIndicatorWidth.SetText(_currentProfile.HealthIndicatorWidth.ToString());
                 section.PopIndent();
 
                 rightArea.Add(section);
@@ -4644,6 +4648,8 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.EnableHealthIndicator = _enableHealthIndicator.IsChecked;
             if (int.TryParse(_healthIndicatorPercentage.Text, out int hpPercent))
                 _currentProfile.ShowHealthIndicatorBelow = (float)hpPercent / 100f;
+            if (int.TryParse(_healthIndicatorWidth.Text, out int healthWidth))
+                _currentProfile.HealthIndicatorWidth = healthWidth;
 
             _currentProfile.PathfindSingleClick = _pathFindSingleClick.IsChecked;
 

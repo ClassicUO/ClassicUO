@@ -301,7 +301,7 @@ namespace ClassicUO.Game.UI.Gumps
                 float hpPercent = (float)World.Player.Hits / (float)World.Player.HitsMax;
                 if (hpPercent <= ProfileManager.CurrentProfile.ShowHealthIndicatorBelow)
                 {
-                    int size = 10;
+                    int size = ProfileManager.CurrentProfile.HealthIndicatorWidth;
                     DamageWindowOutlineHue.Z = 1f - hpPercent;
                     batcher.Draw( //Top bar
                         damageWindowOutline,

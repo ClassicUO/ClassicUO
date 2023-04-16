@@ -428,6 +428,7 @@ namespace ClassicUO.Configuration
         #region Health indicator
         public float ShowHealthIndicatorBelow { get; set; } = 0.9f;
         public bool EnableHealthIndicator { get; set; } = true;
+        public int HealthIndicatorWidth { get; set; } = 10;
         #endregion
 
         public ushort MainWindowBackgroundHue { get; set; } = 1;
