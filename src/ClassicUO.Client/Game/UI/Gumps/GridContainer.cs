@@ -62,7 +62,7 @@ namespace ClassicUO.Game.UI.Gumps
         private static int DEFAULT_WIDTH { get { return GetWidth(); } }
         private static int DEFAULT_HEIGHT { get { return GetHeight(); } }
 
-        public readonly ushort OgContainerGraphic;
+        public readonly ushort OriginalContainerItemGraphic;
         private readonly AlphaBlendControl _background;
         private Item _container { get { return World.Items.Get(LocalSerial); } }
         private readonly Label _containerNameLabel;
@@ -75,7 +75,6 @@ namespace ClassicUO.Game.UI.Gumps
 
         private float _lastGridItemScale = (ProfileManager.CurrentProfile.GridContainersScale / 100f);
         private int _lastWidth = DEFAULT_WIDTH, _lastHeight = DEFAULT_HEIGHT;
-        private bool updatedBorder = true;
         private bool quickLootThisContainer = false;
         private bool skipSave = false;
 
@@ -97,8 +96,14 @@ namespace ClassicUO.Game.UI.Gumps
 
         }
 
-        public GridContainer(uint local, ushort ogContainer, bool? useGridStyle = null) : base(GetWidth(), GetHeight(), GetWidth(2), GetHeight(1), local, 0)
+        public GridContainer(uint local, ushort originalContainerGraphic, bool? useGridStyle = null) : base(GetWidth(), GetHeight(), GetWidth(2), GetHeight(1), local, 0)
         {
+            if (_container == null)
+            {
+                Dispose();
+                return;
+            }
+
             #region SET VARS
             if (useGridStyle != null)
                 UseOldContainerStyle = !useGridStyle;
@@ -109,42 +114,25 @@ namespace ClassicUO.Game.UI.Gumps
             _lastX = X = lastPos.X;
             _lastY = Y = lastPos.Y;
             AnchorType = ProfileManager.CurrentProfile.EnableGridContainerAnchor ? ANCHOR_TYPE.NONE : ANCHOR_TYPE.DISABLED;
-            OgContainerGraphic = ogContainer;
-
-            if (_container == null)
-            {
-                Dispose();
-                return;
-            }
+            OriginalContainerItemGraphic = originalContainerGraphic;
             isCorpse = _container.IsCorpse;
-
-            //Mobile m = World.Mobiles.Get(_container.RootContainer);
-            //if (m != null)
-            //{
-            //    if (m.NotorietyFlag == NotorietyFlag.Invulnerable && m.Serial != World.Player.Serial)
-            //    {
-            //        OpenOldContainer(local);
-            //        SetContainerType(false);
-            //    }
-            //}
-
             CanMove = true;
             AcceptMouseInput = true;
-            WantUpdateSize = true;
             CanCloseWithRightClick = true;
             #endregion
 
             #region background
-            _background = new AlphaBlendControl();
-            _background.Width = Width - (BORDER_WIDTH * 2);
-            _background.Height = Height - (BORDER_WIDTH * 2);
-            _background.X = BORDER_WIDTH;
-            _background.Y = BORDER_WIDTH;
-            _background.Alpha = (float)ProfileManager.CurrentProfile.ContainerOpacity / 100;
-            _background.Hue = ProfileManager.CurrentProfile.Grid_UseContainerHue ? _container.Hue : ProfileManager.CurrentProfile.AltGridContainerBackgroundHue;
+            _background = new AlphaBlendControl()
+            {
+                Width = Width - (BORDER_WIDTH * 2),
+                Height = Height - (BORDER_WIDTH * 2),
+                X = BORDER_WIDTH,
+                Y = BORDER_WIDTH,
+                Alpha = (float)ProfileManager.CurrentProfile.ContainerOpacity / 100,
+                Hue = ProfileManager.CurrentProfile.Grid_UseContainerHue ? _container.Hue : ProfileManager.CurrentProfile.AltGridContainerBackgroundHue
+            };
 
             _backgroundTexture = new GumpPicTiled(0);
-            _backgroundTexture.IsVisible = true;
             #endregion
 
             #region TOP BAR AREA
@@ -227,9 +215,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _background.Width,
                 _background.Height - (_containerNameLabel.Height + 1)
                 );
-            _scrollArea.AcceptMouseInput = true;
-            _scrollArea.CanMove = true;
-            _scrollArea.ScrollbarBehaviour = ScrollbarBehaviour.ShowAlways;
+
             _scrollArea.MouseUp += _scrollArea_MouseUp;
             _scrollArea.DragBegin += _scrollArea_DragBegin;
             #endregion
@@ -263,7 +249,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add(_setLootBag);
             #endregion
 
-            gridSlotManager = new GridSlotManager(local, this, _scrollArea, GridSaveSystem.Instance.GetItemSlots(LocalSerial)); //Must come after scroll area
+            gridSlotManager = new GridSlotManager(LocalSerial, this, _scrollArea); //Must come after scroll area
 
             if (GridSaveSystem.Instance.UseOriginalContainerGump(LocalSerial) && (UseOldContainerStyle == null || UseOldContainerStyle == true))
             {
@@ -274,7 +260,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             BuildBorder();
             ResizeWindow(savedSize);
-            updatedBorder = true;
         }
 
         public override GumpType GumpType => GumpType.GridContainer;
@@ -302,7 +287,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             GridSaveSystem.Instance.SaveContainer(LocalSerial, gridSlotManager.GridSlots, Width, Height, X, Y);
 
-            writer.WriteAttributeString("ogContainer", OgContainerGraphic.ToString());
+            writer.WriteAttributeString("ogContainer", OriginalContainerItemGraphic.ToString());
             writer.WriteAttributeString("width", Width.ToString());
             writer.WriteAttributeString("height", Height.ToString());
         }
@@ -347,7 +332,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             UIManager.GetGump<ContainerGump>(serial)?.Dispose();
 
-            ushort graphic = OgContainerGraphic;
+            ushort graphic = OriginalContainerItemGraphic;
             if (Client.Version >= Utility.ClientVersion.CV_706000 && ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.UseLargeContainerGumps)
             {
                 GumpsLoader loader = GumpsLoader.Instance;
@@ -442,6 +427,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void updateItems(bool overrideSort = false)
         {
+            World.Player.AddMessage(MessageType.Regular, "UpdateItems()", TextType.CLIENT);
             //Container doesn't exist or has no items
             if (_container == null)
             {
@@ -519,7 +505,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            if ((_lastWidth != Width || _lastHeight != Height) || _lastGridItemScale != GRID_ITEM_SIZE || updatedBorder)
+            if ((_lastWidth != Width || _lastHeight != Height) || _lastGridItemScale != GRID_ITEM_SIZE)
             {
                 _lastGridItemScale = GRID_ITEM_SIZE;
                 _background.Width = Width - (BORDER_WIDTH * 2);
@@ -532,7 +518,6 @@ namespace ClassicUO.Game.UI.Gumps
                 _lastHeight = Height;
                 _lastWidth = Width;
                 _searchBox.Width = Math.Min(Width - (BORDER_WIDTH * 2) - _openRegularGump.Width - _quickDropBackpack.Width - _sortContents.Width, 150);
-                updatedBorder = false;
                 _backgroundTexture.Width = _background.Width;
                 _backgroundTexture.Height = _background.Height;
                 _backgroundTexture.Alpha = _background.Alpha;
@@ -572,7 +557,6 @@ namespace ClassicUO.Game.UI.Gumps
         public void BuildBorder()
         {
             int graphic = 0, borderSize = 0;
-            updatedBorder = true;
             switch ((BorderStyle)ProfileManager.CurrentProfile.Grid_BorderStyle)
             {
                 case BorderStyle.Style1:
@@ -636,6 +620,7 @@ namespace ClassicUO.Game.UI.Gumps
                 BORDER_WIDTH = borderSize;
             }
             RePosition();
+            OnResize();
         }
 
         public void RePosition()
@@ -1074,11 +1059,11 @@ namespace ClassicUO.Game.UI.Gumps
             public Dictionary<int, uint> ItemPositions { get { return itemPositions; } }
 
 
-            public GridSlotManager(uint thisContainer, GridContainer gridContainer, Control controlArea, List<GridSaveSystem.GridItemSlotSaveData> gridItemSlotData)
+            public GridSlotManager(uint thisContainer, GridContainer gridContainer, Control controlArea)
             {
                 #region VARS
                 area = controlArea;
-                foreach (GridSaveSystem.GridItemSlotSaveData item in gridItemSlotData)
+                foreach (GridSaveSystem.GridItemSlotSaveData item in GridSaveSystem.Instance.GetItemSlots(thisContainer))
                 {
                     ItemPositions.Add(item.Slot, item.Serial);
                     if (item.IsLocked)
@@ -1359,7 +1344,6 @@ namespace ClassicUO.Game.UI.Gumps
             private readonly ScrollBarBase _scrollBar;
             private int _lastWidth;
             private int _lastHeight;
-            private int _lastScrollValue = 0;
 
             public GridScrollArea
             (
@@ -1389,7 +1373,7 @@ namespace ClassicUO.Game.UI.Gumps
                 AcceptMouseInput = true;
                 WantUpdateSize = false;
                 CanMove = true;
-                ScrollbarBehaviour = ScrollbarBehaviour.ShowWhenDataExceedFromView;
+                ScrollbarBehaviour = ScrollbarBehaviour.ShowAlways;
             }
 
 
@@ -1399,9 +1383,7 @@ namespace ClassicUO.Game.UI.Gumps
             public int ScrollMinValue => _scrollBar.MinValue;
             public int ScrollMaxValue => _scrollBar.MaxValue;
 
-
             public Rectangle ScissorRectangle;
-
 
             public override void Update()
             {
@@ -1432,12 +1414,10 @@ namespace ClassicUO.Game.UI.Gumps
                 if (isup)
                 {
                     _scrollBar.Value -= _scrollBar.ScrollStep;
-                    _lastScrollValue = _scrollBar.Value;
                 }
                 else
                 {
                     _scrollBar.Value += _scrollBar.ScrollStep;
-                    _lastScrollValue = _scrollBar.Value;
                 }
             }
 
@@ -1466,7 +1446,6 @@ namespace ClassicUO.Game.UI.Gumps
 
                 return true;
             }
-
 
             protected override void OnMouseWheel(MouseEventType delta)
             {
@@ -1802,7 +1781,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             public Point GetLastPosition(uint container)
             {
-                Point LastPos = new Point(100, 100);
+                Point LastPos = new Point(GridContainer._lastX, GridContainer._lastY);
 
                 XElement thisContainer = rootElement.Element("container_" + container.ToString());
                 if (thisContainer != null)
