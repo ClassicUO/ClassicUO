@@ -92,7 +92,45 @@ namespace ClassicUO.Game.UI.Gumps
                     IsChecked = ProfileManager.CurrentProfile.NameOverheadToggled,
                 }
             );
-            stayActive.ValueChanged += (sender, e) => { ProfileManager.CurrentProfile.NameOverheadToggled = stayActive.IsChecked; };
+            stayActive.ValueChanged += (sender, e) => { ProfileManager.CurrentProfile.NameOverheadToggled = stayActive.IsChecked; CanCloseWithRightClick = false; };
+
+
+            Checkbox hideFullHp;
+            Add
+            (
+                hideFullHp = new Checkbox
+                (
+                    0x00D2,
+                    0x00D3,
+                    color: 0xFFFF
+                )
+                {
+                    IsChecked = ProfileManager.CurrentProfile.NamePlateHideAtFullHealth,
+                    X = stayActive.Width + stayActive.X + 5
+                }
+            );
+            hideFullHp.SetTooltip("Hide nameplates above 100% health.");
+            hideFullHp.ValueChanged += (sender, e) => { ProfileManager.CurrentProfile.NamePlateHideAtFullHealth = hideFullHp.IsChecked; };
+
+
+            Checkbox hideInWarmode;
+            Add
+            (
+                hideInWarmode = new Checkbox
+                (
+                    0x00D2,
+                    0x00D3,
+                    color: 0xFFFF
+                )
+                {
+                    IsChecked = ProfileManager.CurrentProfile.NamePlateHideAtFullHealthInWarmode,
+                    X = hideFullHp.Width + hideFullHp.X + 5
+                }
+            );
+            hideInWarmode.SetTooltip("Only hide 100% hp nameplates in warmode.");
+            hideInWarmode.ValueChanged += (sender, e) => { ProfileManager.CurrentProfile.NamePlateHideAtFullHealthInWarmode = hideInWarmode.IsChecked; };
+
+
 
             Add
             (
@@ -196,7 +234,6 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             };
         }
-
 
         protected override void OnDragEnd(int x, int y)
         {

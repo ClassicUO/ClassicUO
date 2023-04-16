@@ -41,6 +41,7 @@ namespace ClassicUO.Game.UI.Gumps
         public void RemoveBuff(BuffIconType graphic)
         {
             BuffBarManager.RemoveBuffType(graphic);
+            BuffBarManager.UpdatePositions(_direction, _box);
         }
 
         private void SwitchDirections()
@@ -180,18 +181,20 @@ namespace ClassicUO.Game.UI.Gumps
 
             public static void UpdatePositions(bool topDown, DataBox _boxContainer)
             {
+                int actualI = 0;
                 for (int i = 0; i < coolDownBars.Length; i++)
                 {
                     if (coolDownBars[i] != null && !coolDownBars[i].IsDisposed)
                     {
                         if (topDown)
                         {
-                            coolDownBars[i].Y = (i * (CoolDownBar.COOL_DOWN_HEIGHT + 2)) + 13;
+                            coolDownBars[i].Y = (actualI * (CoolDownBar.COOL_DOWN_HEIGHT + 2)) + 13;
                         }
                         else
                         {
-                            coolDownBars[i].Y = _boxContainer.Height - ((i + 1) * (CoolDownBar.COOL_DOWN_HEIGHT + 2)) - 11;
+                            coolDownBars[i].Y = _boxContainer.Height - ((actualI + 1) * (CoolDownBar.COOL_DOWN_HEIGHT + 2)) - 11;
                         }
+                        actualI++;
                     }
                 }
             }

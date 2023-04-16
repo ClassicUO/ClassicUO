@@ -672,9 +672,9 @@ namespace ClassicUO.Game.Scenes
                                     MultiItemMoveGump.OnContainerTarget(land.X, land.Y, land.Z);
                                     break;
 
-                                case GameObject o:
+                                case Entity o:
                                     TargetManager.Reset();
-                                    MultiItemMoveGump.OnContainerTarget(o.X, o.Y, o.Z);
+                                    MultiItemMoveGump.OnContainerTarget(o.Serial);
                                     break;
                             }
                         }

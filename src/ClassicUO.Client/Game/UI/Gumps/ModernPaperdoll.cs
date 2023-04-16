@@ -611,7 +611,7 @@ namespace ClassicUO.Game.UI.Gumps
                 X = x;
                 Y = y;
                 Width = 150;
-                Height = 261;
+                Height = 281;
                 AcceptMouseInput = true;
 
                 Add(new AlphaBlendControl(0.85f) { Width = Width, Height = Height, AcceptMouseInput = false });
@@ -801,6 +801,12 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 };
                 Add(abilities);
+
+                NiceButton weaponAbilities = new NiceButton(1, 1 + 20 * i++, Width - 2, 20, ButtonAction.Activate, "Weapon abilities");
+                weaponAbilities.MouseUp += (s, e) => {
+                    GameActions.OpenAbilitiesBook();
+                };
+                Add(weaponAbilities);
 
                 Add(new SimpleBorder() { Width = Width, Height = Height });
             }

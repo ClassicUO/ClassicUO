@@ -5,6 +5,7 @@ using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
 using System.Collections.Concurrent;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace ClassicUO.Game.UI.Gumps
@@ -132,28 +133,35 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        private static async Task processItemMoves(Item container)
+        private static void processItemMoves(Item container)
         {
-            if (container != null)
+            Task.Factory.StartNew(() =>
+            {
+                if (container != null)
+                {
+                    while (MoveItems.TryDequeue(out Item moveItem))
+                    {
+                        if (GameActions.PickUp(moveItem.Serial, 0, 0, moveItem.Amount))
+                            GameActions.DropItem(moveItem.Serial, 0xFFFF, 0xFFFF, 0, container);
+                        Task.Delay(ObjDelay).Wait();
+                    }
+
+                }
+            });
+        }
+
+        private static void processItemMoves(int x, int y, int z)
+        {
+            Task.Factory.StartNew(() =>
             {
                 while (MoveItems.TryDequeue(out Item moveItem))
                 {
+                    Assets.StaticTiles itemData = Assets.TileDataLoader.Instance.StaticData[moveItem.Graphic];
                     if (GameActions.PickUp(moveItem.Serial, 0, 0, moveItem.Amount))
-                        GameActions.DropItem(moveItem.Serial, 0xFFFF, 0xFFFF, 0, container);
+                        GameActions.DropItem(moveItem.Serial, x, y, z + (sbyte)(itemData.Height == 0xFF ? 0 : itemData.Height), 0);
+                    Task.Delay(ObjDelay).Wait();
                 }
-                await Task.Delay(ObjDelay);
-            }
-        }
-
-        private static async Task processItemMoves(int x, int y, int z)
-        {
-            while (MoveItems.TryDequeue(out Item moveItem))
-            {
-                Assets.StaticTiles itemData = Assets.TileDataLoader.Instance.StaticData[moveItem.Graphic];
-                if (GameActions.PickUp(moveItem.Serial, 0, 0, moveItem.Amount))
-                    GameActions.DropItem(moveItem.Serial, x, y, z + (sbyte)(itemData.Height == 0xFF ? 0 : itemData.Height), 0);
-                await Task.Delay(ObjDelay);
-            }
+            });
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)

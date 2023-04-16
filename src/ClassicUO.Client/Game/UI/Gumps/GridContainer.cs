@@ -788,16 +788,19 @@ namespace ClassicUO.Game.UI.Gumps
                         {
                             Rectangle containerBounds = ContainerManager.Get(_item.Graphic).Bounds;
                             GameActions.DropItem(Client.Game.GameCursor.ItemHold.Serial, 0xFFFF, 0xFFFF, 0, _item.Serial);
+                            Mouse.CancelDoubleClick = true;
                         }
                         else if (_item != null && _item.ItemData.IsStackable && _item.Graphic == Client.Game.GameCursor.ItemHold.Graphic)
                         {
                             GameActions.DropItem(Client.Game.GameCursor.ItemHold.Serial, _item.X, _item.Y, 0, _item.Serial);
+                            Mouse.CancelDoubleClick = true;
                         }
                         else
                         {
                             Rectangle containerBounds = ContainerManager.Get(container.Graphic).Bounds;
                             gridContainer.gridSlotManager.AddLockedItemSlot(Client.Game.GameCursor.ItemHold.Serial, slot);
                             GameActions.DropItem(Client.Game.GameCursor.ItemHold.Serial, containerBounds.X / 2, containerBounds.Y / 2, 0, container.Serial);
+                            Mouse.CancelDoubleClick = true;
                         }
                     }
                     else if (TargetManager.IsTargeting)
@@ -806,10 +809,12 @@ namespace ClassicUO.Game.UI.Gumps
                             TargetManager.Target(_item);
                         else
                             TargetManager.Target(container);
+                        Mouse.CancelDoubleClick = true;
                     }
                     else if (Keyboard.Ctrl)
                     {
                         gridContainer.gridSlotManager.SetLockedSlot(slot, !ItemGridLocked);
+                        Mouse.CancelDoubleClick = true;
                     }
                     else if (Keyboard.Alt && _item != null)
                     {
@@ -817,6 +822,7 @@ namespace ClassicUO.Game.UI.Gumps
                             MultiItemMoveGump.MoveItems.Enqueue(_item);
                         MultiItemMoveGump.AddMultiItemMoveGumpToUI(gridContainer.X - 200, gridContainer.Y);
                         SelectHighlight = true;
+                        Mouse.CancelDoubleClick = true;
                     }
                     else if (_item != null)
                     {
@@ -826,6 +832,7 @@ namespace ClassicUO.Game.UI.Gumps
                             if ((gridContainer.isCorpse && ProfileManager.CurrentProfile.CorpseSingleClickLoot) || gridContainer.quickLootThisContainer)
                             {
                                 GameActions.GrabItem(_item.Serial, _item.Amount);
+                                Mouse.CancelDoubleClick = true;
                             }
                             else
                                 DelayedObjectClickManager.Set(_item.Serial, gridContainer.X, gridContainer.Y - 80, Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK);
