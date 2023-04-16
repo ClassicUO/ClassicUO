@@ -427,7 +427,6 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void updateItems(bool overrideSort = false)
         {
-            World.Player.AddMessage(MessageType.Regular, "UpdateItems()", TextType.CLIENT);
             //Container doesn't exist or has no items
             if (_container == null)
             {
