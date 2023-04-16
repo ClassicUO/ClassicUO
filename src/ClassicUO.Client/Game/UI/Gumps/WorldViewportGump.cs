@@ -301,28 +301,29 @@ namespace ClassicUO.Game.UI.Gumps
                 float hpPercent = (float)World.Player.Hits / (float)World.Player.HitsMax;
                 if (hpPercent <= ProfileManager.CurrentProfile.ShowHealthIndicatorBelow)
                 {
+                    int size = 10;
                     DamageWindowOutlineHue.Z = 1f - hpPercent;
                     batcher.Draw( //Top bar
                         damageWindowOutline,
-                        new Rectangle(x + BORDER_WIDTH, y + BORDER_WIDTH, Width - (BORDER_WIDTH * 3), 10),
+                        new Rectangle(x + BORDER_WIDTH, y + BORDER_WIDTH, Width - (BORDER_WIDTH * 3), size),
                         DamageWindowOutlineHue
                         );
 
                     batcher.Draw( //Left Bar
                         damageWindowOutline,
-                        new Rectangle(x + BORDER_WIDTH, y + BORDER_WIDTH + 10, 10, Height - (BORDER_WIDTH * 3) - 20),
+                        new Rectangle(x + BORDER_WIDTH, y + BORDER_WIDTH + size, size, Height - (BORDER_WIDTH * 3) - (size*2)),
                         DamageWindowOutlineHue
                         );
 
                     batcher.Draw( //Right Bar
                         damageWindowOutline,
-                        new Rectangle(x + Width - (BORDER_WIDTH * 2) - 10, y + BORDER_WIDTH + 10, 10, Height - (BORDER_WIDTH * 3) - 20),
+                        new Rectangle(x + Width - (BORDER_WIDTH * 2) - size, y + BORDER_WIDTH + size, size, Height - (BORDER_WIDTH * 3) - (size*2)),
                         DamageWindowOutlineHue
                         );
 
                     batcher.Draw( //Bottom bar
                         damageWindowOutline,
-                        new Rectangle(x + BORDER_WIDTH, y + Height - (BORDER_WIDTH * 2) - 10, Width - (BORDER_WIDTH * 3), 10),
+                        new Rectangle(x + BORDER_WIDTH, y + Height - (BORDER_WIDTH * 2) - size, Width - (BORDER_WIDTH * 3), size),
                         DamageWindowOutlineHue
                         );
                 }
