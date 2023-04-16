@@ -54,6 +54,8 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly GameScene _scene;
         private readonly SystemChatControl _systemChatControl;
 
+        private static Microsoft.Xna.Framework.Graphics.Texture2D damageWindowOutline = SolidColorTextureCache.GetTexture(Color.White);
+        public static Vector3 DamageWindowOutlineHue = ShaderHueTranslator.GetHueVector(32);
 
         public WorldViewportGump(GameScene scene) : base(0, 0)
         {
@@ -288,6 +290,45 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             return base.Contains(x, y);
+        }
+
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        {
+            bool res = base.Draw(batcher, x, y);
+
+            if (World.InGame && ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.EnableHealthIndicator)
+            {
+                float hpPercent = (float)World.Player.Hits / (float)World.Player.HitsMax;
+                if (hpPercent <= ProfileManager.CurrentProfile.ShowHealthIndicatorBelow)
+                {
+                    DamageWindowOutlineHue.Z = 1f - hpPercent;
+                    batcher.Draw( //Top bar
+                        damageWindowOutline,
+                        new Rectangle(x + BORDER_WIDTH, y + BORDER_WIDTH, Width - (BORDER_WIDTH * 3), 10),
+                        DamageWindowOutlineHue
+                        );
+
+                    batcher.Draw( //Left Bar
+                        damageWindowOutline,
+                        new Rectangle(x + BORDER_WIDTH, y + BORDER_WIDTH + 10, 10, Height - (BORDER_WIDTH * 3) - 20),
+                        DamageWindowOutlineHue
+                        );
+
+                    batcher.Draw( //Right Bar
+                        damageWindowOutline,
+                        new Rectangle(x + Width - (BORDER_WIDTH * 2) - 10, y + BORDER_WIDTH + 10, 10, Height - (BORDER_WIDTH * 3) - 20),
+                        DamageWindowOutlineHue
+                        );
+
+                    batcher.Draw( //Bottom bar
+                        damageWindowOutline,
+                        new Rectangle(x + BORDER_WIDTH, y + Height - (BORDER_WIDTH * 2) - 10, Width - (BORDER_WIDTH * 3), 10),
+                        DamageWindowOutlineHue
+                        );
+                }
+            }
+
+            return res;
         }
     }
 

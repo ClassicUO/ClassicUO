@@ -425,6 +425,11 @@ namespace ClassicUO.Configuration
         public int ModernPaperDoll_DurabilityPercent { get; set; } = 90;
         #endregion
 
+        #region Health indicator
+        public float ShowHealthIndicatorBelow { get; set; } = 0.9f;
+        public bool EnableHealthIndicator { get; set; } = true;
+        #endregion
+
         public ushort MainWindowBackgroundHue { get; set; } = 1;
 
         public int MoveMultiObjectDelay { get; set; } = 1000;

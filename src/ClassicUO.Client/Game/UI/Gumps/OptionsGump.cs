@@ -185,7 +185,8 @@ namespace ClassicUO.Game.UI.Gumps
         private Checkbox _showStatsMessage, _showSkillsMessage;
         private HSliderBar _showSkillsMessageDelta;
 
-        private Checkbox _leftAlignToolTips, _namePlateHealthOnlyWarmode;
+        private Checkbox _leftAlignToolTips, _namePlateHealthOnlyWarmode, _enableHealthIndicator;
+        private InputField _healthIndicatorPercentage;
         private ModernColorPicker.HueDisplay _mainWindowHuePicker;
 
         #region Cooldowns
@@ -4115,6 +4116,13 @@ namespace ClassicUO.Game.UI.Gumps
                     section.AddRight(AddLabel(null, "Main game window background hue", 0, 0));
                 }//Main window background hue
 
+                section.Add(_enableHealthIndicator = AddCheckBox(null, "Enable health indicator", _currentProfile.EnableHealthIndicator, 0, 0));
+                section.PushIndent();
+                section.Add(AddLabel(null, "Only show below hp %", 0, 0));
+                section.AddRight(_healthIndicatorPercentage = AddInputField(null, 0, 0, 150, TEXTBOX_HEIGHT, numbersOnly: true));
+                _healthIndicatorPercentage.SetText((_currentProfile.ShowHealthIndicatorBelow * 100).ToString());
+                section.PopIndent();
+
                 rightArea.Add(section);
                 startY += section.Height + SPACING;
             }//Misc
@@ -4176,7 +4184,7 @@ namespace ClassicUO.Game.UI.Gumps
                     $"! Warning !<br>" +
                     $"This will override all other character's profile options!<br>" +
                     $"This is not reversable!<br>" +
-                    $"You have {locations.Count-1} other profiles that will be overridden with the settings in this profile.<br>" +
+                    $"You have {locations.Count - 1} other profiles that will be overridden with the settings in this profile.<br>" +
                     $"<br>This will not override: Macros, skill groups, info bar, grid container data, or gump saved positions.<br>"
                     , true, 32, section.Width - 32, align: TEXT_ALIGN_TYPE.TS_CENTER, ishtml: true));
 
@@ -4187,7 +4195,7 @@ namespace ClassicUO.Game.UI.Gumps
                     if (e.Button == MouseButtonType.Left)
                     {
                         OverrideAllProfiles(locations);
-                        section.BaseAdd(new FadingLabel(7, $"{locations.Count - 1} profiles overriden.", true, 0xff) {X = overrideButton.X, Y = overrideButton.Y});
+                        section.BaseAdd(new FadingLabel(7, $"{locations.Count - 1} profiles overriden.", true, 0xff) { X = overrideButton.X, Y = overrideButton.Y });
                     }
                 };
                 rightArea.Add(section);
@@ -4247,7 +4255,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void OverrideAllProfiles(List<ProfileLocationData> allProfiles)
         {
-            foreach(var profile in allProfiles)
+            foreach (var profile in allProfiles)
             {
                 ProfileManager.CurrentProfile.Save(profile.ToString(), false);
             }
@@ -4632,6 +4640,10 @@ namespace ClassicUO.Game.UI.Gumps
                 _currentProfile.MainWindowBackgroundHue = _mainWindowHuePicker.Hue;
                 GameController.UpdateBackgroundHueShader();
             }
+
+            _currentProfile.EnableHealthIndicator = _enableHealthIndicator.IsChecked;
+            if (int.TryParse(_healthIndicatorPercentage.Text, out int hpPercent))
+                _currentProfile.ShowHealthIndicatorBelow = (float)hpPercent / 100f;
 
             _currentProfile.PathfindSingleClick = _pathFindSingleClick.IsChecked;
 
