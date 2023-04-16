@@ -92,7 +92,7 @@ namespace ClassicUO.Game.UI.Gumps
                     IsChecked = ProfileManager.CurrentProfile.NameOverheadToggled,
                 }
             );
-            stayActive.ValueChanged += (sender, e) => { ProfileManager.CurrentProfile.NameOverheadToggled = stayActive.IsChecked; };
+            stayActive.ValueChanged += (sender, e) => { ProfileManager.CurrentProfile.NameOverheadToggled = stayActive.IsChecked; CanCloseWithRightClick = false; };
 
             Add
             (
@@ -196,7 +196,6 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             };
         }
-
 
         protected override void OnDragEnd(int x, int y)
         {
