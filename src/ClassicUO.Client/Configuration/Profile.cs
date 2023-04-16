@@ -173,6 +173,7 @@ namespace ClassicUO.Configuration
         // movements
         public bool EnablePathfind { get; set; }
         public bool UseShiftToPathfind { get; set; }
+        public bool PathfindSingleClick { get; set; }
         public bool AlwaysRun { get; set; }
         public bool AlwaysRunUnlessHidden { get; set; }
         public bool SmoothMovements { get; set; } = true;

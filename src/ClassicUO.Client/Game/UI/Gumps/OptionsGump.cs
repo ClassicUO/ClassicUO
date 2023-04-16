@@ -106,6 +106,7 @@ namespace ClassicUO.Game.UI.Gumps
         private Checkbox _highlightObjects, /*_smoothMovements,*/
                          _enablePathfind,
                          _useShiftPathfind,
+                         _pathFindSingleClick,
                          _alwaysRun,
                          _alwaysRunUnlessHidden,
                          _showHpMobile,
@@ -586,6 +587,18 @@ namespace ClassicUO.Game.UI.Gumps
                     null,
                     ResGumps.ShiftPathfinding,
                     _currentProfile.UseShiftToPathfind,
+                    startX,
+                    startY
+                )
+            );
+
+            section.AddRight
+            (
+                _pathFindSingleClick = AddCheckBox
+                (
+                    null,
+                    "Single click",
+                    _currentProfile.PathfindSingleClick,
                     startX,
                     startY
                 )
@@ -4619,6 +4632,8 @@ namespace ClassicUO.Game.UI.Gumps
                 _currentProfile.MainWindowBackgroundHue = _mainWindowHuePicker.Hue;
                 GameController.UpdateBackgroundHueShader();
             }
+
+            _currentProfile.PathfindSingleClick = _pathFindSingleClick.IsChecked;
 
             _currentProfile.DragSelect_PlayersModifier = _dragSelectPlayersModifier.SelectedIndex;
             _currentProfile.DragSelect_MonstersModifier = _dragSelectMonsertModifier.SelectedIndex;
