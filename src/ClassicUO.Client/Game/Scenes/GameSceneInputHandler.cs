@@ -892,6 +892,51 @@ namespace ClassicUO.Game.Scenes
                 BoatMovingManager.MoveRequest(World.Player.Direction, 0);
             }
 
+            if (ProfileManager.CurrentProfile.EnablePathfind && ProfileManager.CurrentProfile.PathfindSingleClick)
+            {
+                if (ProfileManager.CurrentProfile.UseShiftToPathfind && !Keyboard.Shift)
+                {
+                    return false;
+                }
+
+                if (SelectedObject.Object is GameObject obj)
+                {
+                    if (obj is Static || obj is Multi || obj is Item)
+                    {
+                        ref StaticTiles itemdata = ref TileDataLoader.Instance.StaticData[obj.Graphic];
+
+                        if (itemdata.IsSurface && Pathfinder.WalkTo(obj.X, obj.Y, obj.Z, 0))
+                        {
+                            World.Player.AddMessage
+                            (
+                                MessageType.Label,
+                                ResGeneral.Pathfinding,
+                                3,
+                                0,
+                                false,
+                                TextType.CLIENT
+                            );
+
+                            return true;
+                        }
+                    }
+                    else if (obj is Land && Pathfinder.WalkTo(obj.X, obj.Y, obj.Z, 0))
+                    {
+                        World.Player.AddMessage
+                        (
+                            MessageType.Label,
+                            ResGeneral.Pathfinding,
+                            3,
+                            0,
+                            false,
+                            TextType.CLIENT
+                        );
+
+                        return true;
+                    }
+                }
+            }
+
             return UIManager.IsMouseOverWorld;
         }
 
@@ -905,7 +950,7 @@ namespace ClassicUO.Game.Scenes
 
             if (ProfileManager.CurrentProfile.EnablePathfind && !Pathfinder.AutoWalking)
             {
-                if (ProfileManager.CurrentProfile.UseShiftToPathfind && !Keyboard.Shift)
+                if (ProfileManager.CurrentProfile.UseShiftToPathfind && !Keyboard.Shift && !ProfileManager.CurrentProfile.PathfindSingleClick)
                 {
                     return false;
                 }

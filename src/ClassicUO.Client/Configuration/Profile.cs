@@ -173,6 +173,7 @@ namespace ClassicUO.Configuration
         // movements
         public bool EnablePathfind { get; set; }
         public bool UseShiftToPathfind { get; set; }
+        public bool PathfindSingleClick { get; set; }
         public bool AlwaysRun { get; set; }
         public bool AlwaysRunUnlessHidden { get; set; }
         public bool SmoothMovements { get; set; } = true;
@@ -422,6 +423,12 @@ namespace ClassicUO.Configuration
         public ushort ModernPaperDollHue { get; set; } = 0;
         public ushort ModernPaperDollDurabilityHue { get; set; } = 32;
         public int ModernPaperDoll_DurabilityPercent { get; set; } = 90;
+        #endregion
+
+        #region Health indicator
+        public float ShowHealthIndicatorBelow { get; set; } = 0.9f;
+        public bool EnableHealthIndicator { get; set; } = true;
+        public int HealthIndicatorWidth { get; set; } = 10;
         #endregion
 
         public ushort MainWindowBackgroundHue { get; set; } = 1;
