@@ -48,6 +48,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using static SDL2.SDL;
@@ -414,6 +415,7 @@ namespace ClassicUO
             NetClient.Socket.Flush();
 
             Plugin.Tick();
+            Client.Plugins.ForEach(s => s.SendFrameTick(Time.Ticks));
 
             if (Scene != null && Scene.IsLoaded && !Scene.IsDestroyed)
             {
@@ -587,11 +589,33 @@ namespace ClassicUO
 
                         case SDL_WindowEventID.SDL_WINDOWEVENT_FOCUS_GAINED:
                             Plugin.OnFocusGained();
+                            Client.Plugins.ForEach(s => s.SendWindowEvent(Plugins.PluginWindowEventType.FocusGain));
 
                             break;
 
                         case SDL_WindowEventID.SDL_WINDOWEVENT_FOCUS_LOST:
                             Plugin.OnFocusLost();
+                            Client.Plugins.ForEach(s => s.SendWindowEvent(Plugins.PluginWindowEventType.FocusLost));
+
+                            break;
+
+                        case SDL_WindowEventID.SDL_WINDOWEVENT_MINIMIZED:
+                            Client.Plugins.ForEach(s => s.SendWindowEvent(Plugins.PluginWindowEventType.Minimize));
+
+                            break;
+
+                        case SDL_WindowEventID.SDL_WINDOWEVENT_MAXIMIZED:
+                            Client.Plugins.ForEach(s => s.SendWindowEvent(Plugins.PluginWindowEventType.Maximize));
+
+                            break;
+
+                        case SDL_WindowEventID.SDL_WINDOWEVENT_MOVED:
+                            Client.Plugins.ForEach(s => s.SendWindowEvent(Plugins.PluginWindowEventType.PositionChanged));
+
+                            break;
+
+                        case SDL_WindowEventID.SDL_WINDOWEVENT_RESIZED:
+                            Client.Plugins.ForEach(s => s.SendWindowEvent(Plugins.PluginWindowEventType.SizeChanged));
 
                             break;
                     }
@@ -601,6 +625,11 @@ namespace ClassicUO
                 case SDL_EventType.SDL_KEYDOWN:
 
                     Keyboard.OnKeyDown(sdlEvent->key);
+
+                    if (!Client.Plugins.All(s => s.SendKeyboardEvent((int)sdlEvent->key.keysym.sym, (int)sdlEvent->key.keysym.mod, true) == 1))
+                    {
+                        _ignoreNextTextInput = true;
+                    }
 
                     if (Plugin.ProcessHotkeys((int) sdlEvent->key.keysym.sym, (int) sdlEvent->key.keysym.mod, true))
                     {
@@ -623,6 +652,7 @@ namespace ClassicUO
                     UIManager.KeyboardFocusControl?.InvokeKeyUp(sdlEvent->key.keysym.sym, sdlEvent->key.keysym.mod);
                     Scene.OnKeyUp(sdlEvent->key);
                     Plugin.ProcessHotkeys(0, 0, false);
+                    Client.Plugins.ForEach(s => s.SendKeyboardEvent((int)sdlEvent->key.keysym.sym, (int)sdlEvent->key.keysym.mod, false));
 
                     if (sdlEvent->key.keysym.sym == SDL_Keycode.SDLK_PRINTSCREEN)
                     {
@@ -648,12 +678,14 @@ namespace ClassicUO
                         }
                     }*/
 
-                    string s = UTF8_ToManaged((IntPtr) sdlEvent->text.text, false);
+                    var s = UTF8_ToManaged((IntPtr) sdlEvent->text.text, false);
 
                     if (!string.IsNullOrEmpty(s))
                     {
                         UIManager.KeyboardFocusControl?.InvokeTextInput(s);
                         Scene.OnTextInput(s);
+
+                        Client.Plugins.ForEach(k => k.SendInputTextEvent(s[0]));
                     }
 
                     break;
@@ -676,6 +708,8 @@ namespace ClassicUO
                         }
                     }
 
+                    Client.Plugins.ForEach(s => s.SendMouseEvent(MouseButtonType.None, Mouse.Position.X, Mouse.Position.Y, false));
+
                     break;
 
                 case SDL_EventType.SDL_MOUSEWHEEL:
@@ -688,6 +722,8 @@ namespace ClassicUO
                     {
                         UIManager.OnMouseWheel(isScrolledUp);
                     }
+
+                    Client.Plugins.ForEach(s => s.SendWheelEvent(sdlEvent->wheel.x, sdlEvent->wheel.y));
 
                     break;
 
@@ -729,6 +765,8 @@ namespace ClassicUO
 
                     Mouse.ButtonPress(buttonType);
                     Mouse.Update();
+
+                    Client.Plugins.ForEach(s => s.SendMouseEvent(buttonType, mouse.y, mouse.y, true));
 
                     uint ticks = Time.Ticks;
 
@@ -828,6 +866,7 @@ namespace ClassicUO
 
                     Mouse.ButtonRelease(buttonType);
                     Mouse.Update();
+                    Client.Plugins.ForEach(s => s.SendMouseEvent(buttonType, mouse.y, mouse.y, false));
 
                     break;
                 }
@@ -838,6 +877,7 @@ namespace ClassicUO
 
         protected override void OnExiting(object sender, EventArgs args)
         {
+            Client.Plugins.ForEach(s => s.SendQuitEvent());
             Scene?.Dispose();
 
             base.OnExiting(sender, args);

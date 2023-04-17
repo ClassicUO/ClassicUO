@@ -37,14 +37,17 @@ using ClassicUO.Game.Data;
 using ClassicUO.IO;
 using ClassicUO.Network;
 using ClassicUO.Network.Encryption;
+using ClassicUO.Plugins;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using ClassicUO.Utility.Platforms;
 using SDL2;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 
 namespace ClassicUO
 {
@@ -54,7 +57,7 @@ namespace ClassicUO
         public static ClientFlags Protocol { get; set; }
         public static string ClientPath { get; private set; }
         public static GameController Game { get; private set; }
-
+        public static List<PluginApi> Plugins { get; } = new List<PluginApi>();
 
         public static void Run()
         {
@@ -76,9 +79,17 @@ namespace ClassicUO
 
                 Log.Trace("Loading plugins...");
 
-                foreach (string p in Settings.GlobalSettings.Plugins)
+                var dir = new DirectoryInfo(ClientPath);
+                foreach (var p in Settings.GlobalSettings.Plugins
+                    .Select(s => new FileInfo(Path.GetFullPath(Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Plugins", s))) )
+                    .Where(s => s.Exists)
+                    )
                 {
-                    Plugin.Create(p);
+                    //Plugin.Create(p);
+                    var plu = new PluginApi();
+                    plu.Load(Game, dir, Version, p, "Install");
+
+                    Plugins.Add(plu);
                 }
 
                 Log.Trace("Done!");

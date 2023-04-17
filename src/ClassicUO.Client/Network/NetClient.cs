@@ -31,6 +31,7 @@
 #endregion
 
 using ClassicUO.Network.Encryption;
+using ClassicUO.Plugins;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using System;
@@ -212,6 +213,8 @@ namespace ClassicUO.Network
             Statistics.Reset();
 
             _socket.Connect(ip, port);
+
+            Client.Plugins.ForEach(s => s.SendConnectEvent(ip, port));
         }
 
         public void Disconnect()
@@ -219,6 +222,8 @@ namespace ClassicUO.Network
             _isCompressionEnabled = false;
             Statistics.Reset();
             _socket.Disconnect();
+
+            Client.Plugins.ForEach(s => s.SendDisconnectEvent());
         }
 
         public void EnableCompression()
@@ -291,7 +296,20 @@ namespace ClassicUO.Network
                 return;
             }
 
-            if (!ignorePlugin && !Plugin.ProcessSendPacket(ref message))
+            static bool pluginHooks(ReadOnlySpan<byte> msg)
+            {
+                foreach (var p in Client.Plugins)
+                {
+                    if (p.SendClientToServerPacketEvent(msg) != 1)
+                    {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+
+            if (!ignorePlugin && !pluginHooks(message))
             {
                 return;
             }

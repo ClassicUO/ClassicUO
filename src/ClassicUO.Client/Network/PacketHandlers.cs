@@ -91,6 +91,19 @@ namespace ClassicUO.Network
         {
             var packetsCount = 0;
 
+            static bool pluginHooks(ReadOnlySpan<byte> msg)
+            {
+                foreach (var p in Client.Plugins)
+                {
+                    if (p.SendServerToClientPacketEvent(msg) != 1)
+                    {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+
             lock (stream)
             {
                 ref var packetBuffer = ref _readingBuffer;
@@ -124,7 +137,7 @@ namespace ClassicUO.Network
                     // TODO: the pluging function should allow Span<byte> or unsafe type only.
                     // The current one is a bad style decision.
                     // It will be fixed once the new plugin system is done.
-                    if (!allowPlugins || Plugin.ProcessRecvPacket(packetBuffer, ref packetlength))
+                    if (!allowPlugins || pluginHooks(packetBuffer.AsSpan(0, packetlength)))
                     {
                         AnalyzePacket(packetBuffer.AsSpan(0, packetlength), offset);
 

@@ -41,22 +41,61 @@ using ClassicUO.Utility.Logging;
 using ClassicUO.Utility.Platforms;
 using SDL2;
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading;
 
 namespace ClassicUO
 {
-    internal static class Bootstrap
+    public static class Bootstrap
     {
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool SetDllDirectory(string lpPathName);
 
+
         [STAThread]
-        public static void Main(string[] args)
+        static unsafe void Main(string[] args)
         {
+            var arr = args?.Select(s =>
+            {
+                var count = Encoding.UTF8.GetByteCount(s);
+                var arr = new byte[count];
+                fixed (char* ptr = s)
+                fixed (byte* ptr2 = arr)
+                    Encoding.UTF8.GetBytes(ptr, s.Length, ptr2, count);
+                return arr;
+            }).ToArray();
+
+            delegate* unmanaged<nint*, int, void> f = &Initialize;
+          
+            if (arr.Length > 0)
+            {
+                fixed (byte* ptr = arr[0])
+                    f((nint*)&ptr, arr.Length);
+            }
+            else
+            {
+                f(null, 0);
+            }
+        }
+
+
+        [UnmanagedCallersOnly(EntryPoint = "Initialize")]
+        public static unsafe void Initialize(nint* argv, int argc)
+        {
+            var args = new string[argc];
+            for (int i = 0; i < argc; i++)
+            {
+                args[i] = SDL.UTF8_ToManaged(argv[i]);
+            }
+
             CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
 
 #if !NETFRAMEWORK
