@@ -1,17 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   
   <PropertyGroup>
+    <OutputType>Exe</OutputType>
     <AssemblyName>ClassicUO</AssemblyName>
     <RootNamespace>ClassicUO</RootNamespace>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="$(PublishAot) == false OR $(PublishAot) == ''">
-    <OutputType>Exe</OutputType>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="$(PublishAot) == true">
-    <DefineConstants>$(DefineConstants);CUO_RELEASE</DefineConstants>
-    <OutputType>Library</OutputType>
+    <ApplicationIcon>cuoicon.ico</ApplicationIcon>
   </PropertyGroup>
   
   <ItemGroup>

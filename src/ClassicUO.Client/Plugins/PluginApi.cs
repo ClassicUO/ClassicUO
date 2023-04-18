@@ -36,6 +36,15 @@ namespace ClassicUO.Plugins
         PositionChanged
     }
 
+    enum PluginAssetsType
+    {
+        Art,
+        Gump,
+        Cliloc,
+        Tiledata
+    }
+
+
     [StructLayout(LayoutKind.Explicit)]
     unsafe struct PluginEvent
     {
@@ -143,7 +152,7 @@ namespace ClassicUO.Plugins
         public uint ClientVersion;
         public nint AssetsPath;
         public nint PluginPath;
-        public nint PluginToClientPacket, PluginToServerPacket;
+        public delegate* unmanaged[Cdecl]<nint, int, int> PluginToClientPacket, PluginToServerPacket;
     }
 
     unsafe internal class PluginApi
@@ -165,8 +174,8 @@ namespace ClassicUO.Plugins
             s.ClientVersion = (uint)version;
             s.AssetsPath = (nint)Unsafe.AsPointer(ref MemoryMarshal.AsRef<byte>(encodeToUtf8(assetsPath.FullName)));
             s.PluginPath = (nint)Unsafe.AsPointer(ref MemoryMarshal.AsRef<byte>(encodeToUtf8(Path.GetDirectoryName(pluginFile.FullName))));
-            s.PluginToClientPacket = (nint)(delegate* unmanaged [Cdecl]<nint, int, int>)&pluginToClient;
-            s.PluginToServerPacket = (nint)(delegate* unmanaged [Cdecl]<nint, int, int>)&pluginToServer;
+            s.PluginToClientPacket = &pluginToClient;
+            s.PluginToServerPacket = &pluginToServer;
             
             var libPtr = Native.LoadLibrary(pluginFile.FullName);
             if (libPtr == 0)

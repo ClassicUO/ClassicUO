@@ -85,10 +85,9 @@ namespace ClassicUO
                     .Where(s => s.Exists)
                     )
                 {
-                    //Plugin.Create(p);
+                    Log.Trace($"plugin: {p.Name}");
                     var plu = new PluginApi();
                     plu.Load(Game, dir, Version, p, "Install");
-
                     Plugins.Add(plu);
                 }
 
