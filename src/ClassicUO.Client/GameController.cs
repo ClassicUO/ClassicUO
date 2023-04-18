@@ -515,6 +515,7 @@ namespace ClassicUO
             Profiler.EnterContext("OutOfContext");
 
             Plugin.ProcessDrawCmdList(GraphicsDevice);
+            Client.Plugins.ForEach(s => s.SendRenderCommandListEvent(GraphicsDevice, Time.Ticks));
         }
 
         protected override bool BeginDraw()
