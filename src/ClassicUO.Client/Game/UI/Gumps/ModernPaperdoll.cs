@@ -45,8 +45,14 @@ namespace ClassicUO.Game.UI.Gumps
             Height = HEIGHT;
             GroupMatrixHeight = Height;
             GroupMatrixWidth = Width;
+            if (ProfileManager.CurrentProfile != null)
+            {
+                lastX = ProfileManager.CurrentProfile.ModernPaperdollPosition.X;
+                lastY = ProfileManager.CurrentProfile.ModernPaperdollPosition.Y;
+            }
             X = lastX;
             Y = lastY;
+
             itemLayerSlots = new Dictionary<Layer[], ItemSlot>();
             #endregion
 
@@ -229,34 +235,34 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Update();
 
-            if (X != lastX)
+            if (X != lastX || Y != lastY)
+            {
                 lastX = X;
-            if (Y != lastY)
                 lastY = Y;
+                if (ProfileManager.CurrentProfile != null)
+                    ProfileManager.CurrentProfile.ModernPaperdollPosition = new Point(X, Y);
+            }
         }
 
         public override void Dispose()
         {
-            base.Dispose();
+            if (ProfileManager.CurrentProfile != null)
+                ProfileManager.CurrentProfile.ModernPaperdollPosition = new Point(X, Y);
             lastX = X;
             lastY = Y;
+
+            base.Dispose();
             //World.OPL.OPLOnReceive -= OPL_OnOPLReceive;
-        }
-
-        public override void Save(XmlTextWriter writer)
-        {
-            base.Save(writer);
-
-            writer.WriteAttributeString("lastX", lastX.ToString());
-            writer.WriteAttributeString("lastY", lastY.ToString());
         }
 
         public override void Restore(XmlElement xml)
         {
             base.Restore(xml);
-
-            int.TryParse(xml.GetAttribute("lastX"), out X);
-            int.TryParse(xml.GetAttribute("lastY"), out Y);
+            if (ProfileManager.CurrentProfile != null)
+            {
+                X = lastX = ProfileManager.CurrentProfile.ModernPaperdollPosition.X;
+                Y = lastY = ProfileManager.CurrentProfile.ModernPaperdollPosition.Y;
+            }
         }
 
         protected override void OnMouseUp(int x, int y, MouseButtonType button)
@@ -402,7 +408,8 @@ namespace ClassicUO.Game.UI.Gumps
                                     durablityBar.IsVisible = true;
                                 }
                         }
-                    } else
+                    }
+                    else
                     {
                         System.Threading.Thread.Sleep(1500);
                         UpdateDurability(item, isOPLEvent);
@@ -722,7 +729,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                             if (status == null)
                             {
-                                UIManager.Add(StatusGumpBase.AddStatusGump(Mouse.Position.X - 100, Mouse.Position.Y - 25));
+                                UIManager.Add(StatusGumpBase.AddStatusGump(ProfileManager.CurrentProfile.StatusGumpPosition.X, ProfileManager.CurrentProfile.StatusGumpPosition.Y));
                             }
                             else
                             {
@@ -803,7 +810,8 @@ namespace ClassicUO.Game.UI.Gumps
                 Add(abilities);
 
                 NiceButton weaponAbilities = new NiceButton(1, 1 + 20 * i++, Width - 2, 20, ButtonAction.Activate, "Weapon abilities");
-                weaponAbilities.MouseUp += (s, e) => {
+                weaponAbilities.MouseUp += (s, e) =>
+                {
                     GameActions.OpenAbilitiesBook();
                 };
                 Add(weaponAbilities);

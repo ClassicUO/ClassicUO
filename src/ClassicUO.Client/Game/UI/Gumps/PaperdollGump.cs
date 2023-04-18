@@ -77,6 +77,8 @@ namespace ClassicUO.Game.UI.Gumps
         {
             CanMove = true;
             CanCloseWithRightClick = true;
+            X = ProfileManager.CurrentProfile.PaperdollPosition.X;
+            Y = ProfileManager.CurrentProfile.PaperdollPosition.Y;
         }
 
         public PaperDollGump(uint serial, bool canLift) : this()
@@ -127,6 +129,8 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     _partyManifestPic.MouseDoubleClick -= PartyManifest_MouseDoubleClickEvent;
                 }
+                if (ProfileManager.CurrentProfile != null)
+                    ProfileManager.CurrentProfile.PaperdollPosition = Location;
             }
 
             Clear();
@@ -495,14 +499,20 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
-            // This is to update the state of the war mode button.
-            if (mobile != null && _isWarMode != mobile.InWarMode && LocalSerial == World.Player)
+            if (LocalSerial == World.Player)
             {
-                _isWarMode = mobile.InWarMode;
-                ushort[] btngumps = _isWarMode ? WarModeBtnGumps : PeaceModeBtnGumps;
-                _warModeBtn.ButtonGraphicNormal = btngumps[0];
-                _warModeBtn.ButtonGraphicPressed = btngumps[1];
-                _warModeBtn.ButtonGraphicOver = btngumps[2];
+                // This is to update the state of the war mode button.
+                if (mobile != null && _isWarMode != mobile.InWarMode)
+                {
+                    _isWarMode = mobile.InWarMode;
+                    ushort[] btngumps = _isWarMode ? WarModeBtnGumps : PeaceModeBtnGumps;
+                    _warModeBtn.ButtonGraphicNormal = btngumps[0];
+                    _warModeBtn.ButtonGraphicPressed = btngumps[1];
+                    _warModeBtn.ButtonGraphicOver = btngumps[2];
+                }
+
+                if(Location != ProfileManager.CurrentProfile.PaperdollPosition)
+                    ProfileManager.CurrentProfile.PaperdollPosition = Location;
             }
 
             base.Update();
@@ -605,6 +615,8 @@ namespace ClassicUO.Game.UI.Gumps
             base.Save(writer);
 
             writer.WriteAttributeString("isminimized", IsMinimized.ToString());
+            if (LocalSerial == World.Player.Serial)
+                ProfileManager.CurrentProfile.PaperdollPosition = Location;
         }
 
         public override void Restore(XmlElement xml)
@@ -619,6 +631,8 @@ namespace ClassicUO.Game.UI.Gumps
                 Client.Game.GetScene<GameScene>()?.DoubleClickDelayed(LocalSerial);
 
                 IsMinimized = bool.Parse(xml.GetAttribute("isminimized"));
+                X = ProfileManager.CurrentProfile.PaperdollPosition.X;
+                Y = ProfileManager.CurrentProfile.PaperdollPosition.Y;
             }
             else
             {
@@ -710,7 +724,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         if (status == null)
                         {
-                            UIManager.Add(StatusGumpBase.AddStatusGump(Mouse.Position.X - 100, Mouse.Position.Y - 25));
+                            UIManager.Add(StatusGumpBase.AddStatusGump(ProfileManager.CurrentProfile.StatusGumpPosition.X, ProfileManager.CurrentProfile.StatusGumpPosition.Y));
                         }
                         else
                         {

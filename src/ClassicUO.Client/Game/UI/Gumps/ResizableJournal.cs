@@ -51,7 +51,11 @@ namespace ClassicUO.Game.UI.Gumps
             AcceptMouseInput = true;
             WantUpdateSize = true;
             CanCloseWithRightClick = true;
-
+            if(ProfileManager.CurrentProfile != null)
+            {
+                _lastX = ProfileManager.CurrentProfile.JournalPosition.X;
+                _lastY = ProfileManager.CurrentProfile.JournalPosition.Y;
+            }
             X = _lastX;
             Y = _lastY;
 
@@ -292,8 +296,12 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Update();
 
-            if (X != _lastX) _lastX = X;
-            if (Y != _lastY) _lastY = Y;
+            if (X != _lastX || Y != _lastY)
+            {
+                _lastX = X;
+                _lastY = Y;
+                ProfileManager.CurrentProfile.JournalPosition = Location;
+            }
             if (((Width != _lastWidth || Height != _lastHeight) && !Mouse.LButtonPressed) || updatedBorder)
                 Reposition();
         }

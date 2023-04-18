@@ -144,7 +144,7 @@ namespace ClassicUO.Game
 
             if (StatusGumpBase.GetStatusGump() == null)
             {
-                UIManager.Add(StatusGumpBase.AddStatusGump(100, 100));
+                UIManager.Add(StatusGumpBase.AddStatusGump(ProfileManager.CurrentProfile.StatusGumpPosition.X, ProfileManager.CurrentProfile.StatusGumpPosition.Y));
             }
         }
 

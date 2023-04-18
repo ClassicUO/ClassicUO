@@ -57,6 +57,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             CanCloseWithRightClick = true;
             CanMove = true;
+            if (ProfileManager.CurrentProfile != null)
+                Location = ProfileManager.CurrentProfile.StatusGumpPosition;
+
         }
 
         public override GumpType GumpType => GumpType.StatusGump;
@@ -136,6 +139,12 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
+        public override void Update()
+        {
+            base.Update();
+            if (ProfileManager.CurrentProfile.StatusGumpPosition != Location)
+                ProfileManager.CurrentProfile.StatusGumpPosition = Location;
+        }
 
         protected override void OnMouseDown(int x, int y, MouseButtonType button)
         {

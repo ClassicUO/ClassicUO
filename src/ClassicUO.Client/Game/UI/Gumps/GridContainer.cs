@@ -83,6 +83,8 @@ namespace ClassicUO.Game.UI.Gumps
 
         public bool? UseOldContainerStyle = null;
 
+        public bool isPlayerBackpack = false;
+
         private string quickLootStatus { get { return ProfileManager.CurrentProfile.CorpseSingleClickLoot ? "<basefont color=\"green\">Enabled" : "<basefont color=\"red\">Disabled"; } }
         private string quickLootTooltip
         {
@@ -107,12 +109,25 @@ namespace ClassicUO.Game.UI.Gumps
             #region SET VARS
             if (useGridStyle != null)
                 UseOldContainerStyle = !useGridStyle;
-            Point savedSize = GridSaveSystem.Instance.GetLastSize(LocalSerial);
+            if (LocalSerial == World.Player.FindItemByLayer(Layer.Backpack).Serial)
+                isPlayerBackpack = true;
+
+            Point savedSize, lastPos;
+            if (isPlayerBackpack)
+            {
+                savedSize = ProfileManager.CurrentProfile.BackpackGridSize;
+                lastPos = ProfileManager.CurrentProfile.BackpackGridPosition;
+            }
+            else
+            {
+                savedSize = GridSaveSystem.Instance.GetLastSize(LocalSerial);
+                lastPos = GridSaveSystem.Instance.GetLastPosition(LocalSerial);
+            }
             _lastWidth = Width = savedSize.X;
             _lastHeight = Height = savedSize.Y;
-            Point lastPos = GridSaveSystem.Instance.GetLastPosition(LocalSerial);
             _lastX = X = lastPos.X;
             _lastY = Y = lastPos.Y;
+
             AnchorType = ProfileManager.CurrentProfile.EnableGridContainerAnchor ? ANCHOR_TYPE.NONE : ANCHOR_TYPE.DISABLED;
             OriginalContainerItemGraphic = originalContainerGraphic;
             isCorpse = _container.IsCorpse;
@@ -287,6 +302,12 @@ namespace ClassicUO.Game.UI.Gumps
 
             GridSaveSystem.Instance.SaveContainer(LocalSerial, gridSlotManager.GridSlots, Width, Height, X, Y);
 
+            if(isPlayerBackpack)
+            {
+                ProfileManager.CurrentProfile.BackpackGridPosition = Location;
+                ProfileManager.CurrentProfile.BackpackGridSize = new Point(Width, Height);
+            }
+
             writer.WriteAttributeString("ogContainer", OriginalContainerItemGraphic.ToString());
             writer.WriteAttributeString("width", Width.ToString());
             writer.WriteAttributeString("height", Height.ToString());
@@ -297,6 +318,12 @@ namespace ClassicUO.Game.UI.Gumps
             base.Restore(xml);
             int rW = int.Parse(xml.GetAttribute("width"));
             int rH = int.Parse(xml.GetAttribute("height"));
+
+            if (isPlayerBackpack)
+            {
+                rW = ProfileManager.CurrentProfile.BackpackGridSize.X;
+                rH = ProfileManager.CurrentProfile.BackpackGridSize.Y;
+            }
 
             ResizeWindow(new Point(rW, rH));
             //InvalidateContents = true;
@@ -522,10 +549,14 @@ namespace ClassicUO.Game.UI.Gumps
                 _backgroundTexture.Alpha = _background.Alpha;
                 _backgroundTexture.Hue = _background.Hue;
                 _setLootBag.Y = Height - 20;
+                if(isPlayerBackpack)
+                    ProfileManager.CurrentProfile.BackpackGridSize = new Point(Width, Height);
                 RequestUpdateContents();
             }
 
-
+            if(isPlayerBackpack)
+                if(Location != ProfileManager.CurrentProfile.BackpackGridPosition)
+                    ProfileManager.CurrentProfile.BackpackGridPosition = Location;
 
 
             if (item != null && !item.IsDestroyed && UIManager.MouseOverControl != null && (UIManager.MouseOverControl == this || UIManager.MouseOverControl.RootParent == this))

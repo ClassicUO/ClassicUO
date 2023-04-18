@@ -137,6 +137,9 @@ namespace ClassicUO.Game.UI.Gumps
             AcceptMouseInput = true;
             CanCloseWithRightClick = false;
 
+            if (ProfileManager.CurrentProfile != null)
+                _last_position = ProfileManager.CurrentProfile.WorldMapPosition;
+
             X = _last_position.X;
             Y = _last_position.Y;
 
@@ -164,7 +167,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     _isTopMost = value;
 
-                    SaveSettings();            
+                    SaveSettings();
                 }
 
                 ShowBorder = !_isTopMost;
@@ -209,7 +212,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             ResizeWindow(new Point(Width, Height));
 
-            _flipMap = ProfileManager.CurrentProfile.WorldMapFlipMap;    
+            _flipMap = ProfileManager.CurrentProfile.WorldMapFlipMap;
             _showPartyMembers = ProfileManager.CurrentProfile.WorldMapShowParty;
 
             World.WMapManager.SetEnable(_showPartyMembers);
@@ -274,6 +277,8 @@ namespace ClassicUO.Game.UI.Gumps
             ProfileManager.CurrentProfile.WorldMapHiddenZoneFiles = string.Join(",", _hiddenZoneFiles);
 
             ProfileManager.CurrentProfile.WorldMapShowGridIfZoomed = _showGridIfZoomed;
+
+            ProfileManager.CurrentProfile.WorldMapPosition = new Point(X, Y);
         }
 
         private bool ParseBool(string boolStr)
@@ -406,7 +411,7 @@ namespace ClassicUO.Game.UI.Gumps
             _options["add_marker_on_player"] = new ContextMenuItemEntry(ResGumps.AddMarkerOnPlayer, () => AddMarkerOnPlayer());
             _options["saveclose"] = new ContextMenuItemEntry(ResGumps.SaveClose, Dispose);
 
-            _options["show_grid_if_zoomed"] = new ContextMenuItemEntry(ResGumps.GridIfZoomed, () => { _showGridIfZoomed = !_showGridIfZoomed; SaveSettings();  }, true, _showGridIfZoomed);
+            _options["show_grid_if_zoomed"] = new ContextMenuItemEntry(ResGumps.GridIfZoomed, () => { _showGridIfZoomed = !_showGridIfZoomed; SaveSettings(); }, true, _showGridIfZoomed);
 
         }
 
@@ -452,7 +457,8 @@ namespace ClassicUO.Game.UI.Gumps
                         new ContextMenuItemEntry
                         (
                             String.Format(ResGumps.MapZoneFileName, zoneSet.NiceFileName),
-                            () => {
+                            () =>
+                            {
                                 zoneSet.Hidden = !zoneSet.Hidden;
 
                                 if (!zoneSet.Hidden)
@@ -600,8 +606,8 @@ namespace ClassicUO.Game.UI.Gumps
 
         private Point RotatePoint(int x, int y, float zoom, int dist, float angle = 45f)
         {
-            x = (int) (x * zoom);
-            y = (int) (y * zoom);
+            x = (int)(x * zoom);
+            y = (int)(y * zoom);
 
             if (angle == 0.0f)
             {
@@ -611,7 +617,7 @@ namespace ClassicUO.Game.UI.Gumps
             double cos = Math.Cos(dist * Math.PI / 4.0);
             double sin = Math.Sin(dist * Math.PI / 4.0);
 
-            return  new Point((int) Math.Round(cos * x - sin * y), (int) Math.Round(sin * x + cos * y));
+            return new Point((int)Math.Round(cos * x - sin * y), (int)Math.Round(sin * x + cos * y));
         }
 
         private void AdjustPosition
@@ -821,7 +827,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             public static unsafe Texture2D CreateTextureFromICO_Cur(Stream stream)
             {
-                byte[] buffer = System.Buffers.ArrayPool<byte>.Shared.Rent((int) stream.Length);
+                byte[] buffer = System.Buffers.ArrayPool<byte>.Shared.Rent((int)stream.Length);
 
                 try
                 {
@@ -1107,8 +1113,8 @@ namespace ClassicUO.Game.UI.Gumps
             private static unsafe IntPtr INTERNAL_convertSurfaceFormat(IntPtr surface)
             {
                 IntPtr result = surface;
-                SDL.SDL_Surface* surPtr = (SDL.SDL_Surface*) surface;
-                SDL.SDL_PixelFormat* pixelFormatPtr = (SDL.SDL_PixelFormat*) surPtr->format;
+                SDL.SDL_Surface* surPtr = (SDL.SDL_Surface*)surface;
+                SDL.SDL_PixelFormat* pixelFormatPtr = (SDL.SDL_PixelFormat*)surPtr->format;
 
                 // SurfaceFormat.Color is SDL_PIXELFORMAT_ABGR8888
                 if (pixelFormatPtr->format != SDL.SDL_PIXELFORMAT_ABGR8888)
@@ -1125,7 +1131,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         #region Loading
 
-       
+
         private unsafe void LoadMapChunk(Span<uint> buffer, Span<sbyte> allZ, int chunkX, int chunkY)
         {
             if (World.Map == null)
@@ -1270,7 +1276,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
 
                     cc = (uint)(r | (g << 8) | (b << 16) | (a << 24));
-                } 
+                }
             }
         }
 
@@ -1602,7 +1608,7 @@ namespace ClassicUO.Game.UI.Gumps
             public List<ZonesFileZoneData> Zones { get; set; }
         }
 
-        private class Zone 
+        private class Zone
         {
             public string Label;
             public Color Color;
@@ -2121,9 +2127,9 @@ namespace ClassicUO.Game.UI.Gumps
             int centerX = _center.X + 1;
             int centerY = _center.Y + 1;
 
-            int size = (int) Math.Max(gWidth * 1.75f, gHeight * 1.75f);
+            int size = (int)Math.Max(gWidth * 1.75f, gHeight * 1.75f);
 
-            int size_zoom = (int) (size / Zoom);
+            int size_zoom = (int)(size / Zoom);
             int size_zoom_half = size_zoom >> 1;
 
             int halfWidth = gWidth >> 1;
@@ -2444,7 +2450,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            if ( _showCorpse && World.WMapManager._corpse != null)
+            if (_showCorpse && World.WMapManager._corpse != null)
             {
                 DrawWMEntity
                     (
@@ -2475,7 +2481,7 @@ namespace ClassicUO.Game.UI.Gumps
                        1
                     );
                 }
-                
+
             }
 
             DrawMobile
@@ -2493,7 +2499,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _showPlayerBar
             );
 
-            
+
 
             if (ShouldDrawGrid())
             {
@@ -2645,24 +2651,24 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (rot.X + size.X / 2 > x + Width - 8)
                 {
-                    rot.X = x + Width - 8 - (int) (size.X / 2);
+                    rot.X = x + Width - 8 - (int)(size.X / 2);
                 }
                 else if (rot.X - size.X / 2 < x)
                 {
-                    rot.X = x + (int) (size.X / 2);
+                    rot.X = x + (int)(size.X / 2);
                 }
 
                 if (rot.Y + size.Y > y + Height)
                 {
-                    rot.Y = y + Height - (int) size.Y;
+                    rot.Y = y + Height - (int)size.Y;
                 }
                 else if (rot.Y - size.Y < y)
                 {
-                    rot.Y = y + (int) size.Y;
+                    rot.Y = y + (int)size.Y;
                 }
 
-                int xx = (int) (rot.X - size.X / 2);
-                int yy = (int) (rot.Y - size.Y);
+                int xx = (int)(rot.X - size.X / 2);
+                int yy = (int)(rot.Y - size.Y);
 
                 hueVector.X = 0;
                 hueVector.Y = 1;
@@ -2787,7 +2793,7 @@ namespace ClassicUO.Game.UI.Gumps
             else
             {
                 batcher.Draw(marker.MarkerIcon, new Vector2(rot.X - (marker.MarkerIcon.Width >> 1), rot.Y - (marker.MarkerIcon.Height >> 1)), hueVector);
-               
+
                 if (!showMarkerName)
                 {
                     if (Mouse.Position.X >= rot.X - (marker.MarkerIcon.Width >> 1) &&
@@ -2859,8 +2865,8 @@ namespace ClassicUO.Game.UI.Gumps
                 (
                     xx - 2,
                     yy - 2,
-                    (int) (size.X + 4),
-                    (int) (size.Y + 4)
+                    (int)(size.X + 4),
+                    (int)(size.Y + 4)
                 ),
                 hueVector
             );
@@ -2915,7 +2921,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _flipMap ? 45f : 0f
             );
 
-          
+
             rot.X += x + width;
             rot.Y += y + height;
 
@@ -3134,24 +3140,24 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (rot.X + size.X / 2 > x + Width - 8)
                 {
-                    rot.X = x + Width - 8 - (int) (size.X / 2);
+                    rot.X = x + Width - 8 - (int)(size.X / 2);
                 }
                 else if (rot.X - size.X / 2 < x)
                 {
-                    rot.X = x + (int) (size.X / 2);
+                    rot.X = x + (int)(size.X / 2);
                 }
 
                 if (rot.Y + size.Y > y + Height)
                 {
-                    rot.Y = y + Height - (int) size.Y;
+                    rot.Y = y + Height - (int)size.Y;
                 }
                 else if (rot.Y - size.Y < y)
                 {
-                    rot.Y = y + (int) size.Y;
+                    rot.Y = y + (int)size.Y;
                 }
 
-                int xx = (int) (rot.X - size.X / 2);
-                int yy = (int) (rot.Y - size.Y);
+                int xx = (int)(rot.X - size.X / 2);
+                int yy = (int)(rot.Y - size.Y);
 
                 hueVector.X = 0;
                 hueVector.Y = 1;
@@ -3271,7 +3277,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _lastScroll.Y = _center.Y;
             }
 
-            if(button == MouseButtonType.Right && Keyboard.Ctrl)
+            if (button == MouseButtonType.Right && Keyboard.Ctrl)
             {
                 CanvasToWorld(_lastMousePosition.Value.X, _lastMousePosition.Value.Y, out int wX, out int wY);
                 Pathfinder.WalkTo(wX, wY, 0, 1);
@@ -3528,11 +3534,11 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (yCoord.Substring(yCoord.Length - 1).Equals("N"))
             {
-                yAxis = (int) (1624 - (yMinute / 60) * (4096.0 / 360) - yDegree * (4096.0 / 360));
+                yAxis = (int)(1624 - (yMinute / 60) * (4096.0 / 360) - yDegree * (4096.0 / 360));
             }
             else
             {
-                yAxis = (int) (1624 + (yMinute / 60) * (4096.0 / 360) + yDegree * (4096.0 / 360));
+                yAxis = (int)(1624 + (yMinute / 60) * (4096.0 / 360) + yDegree * (4096.0 / 360));
             }
 
             // Calc X next
@@ -3542,11 +3548,11 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (xCoord.Substring(xCoord.Length - 1).Equals("W"))
             {
-                xAxis = (int) (1323 - (xMinute / 60) * (5120.0 / 360) - xDegree * (5120.0 / 360));
+                xAxis = (int)(1323 - (xMinute / 60) * (5120.0 / 360) - xDegree * (5120.0 / 360));
             }
             else
             {
-                xAxis = (int) (1323 + (xMinute / 60) * (5120.0 / 360) + xDegree * (5120.0 / 360));
+                xAxis = (int)(1323 + (xMinute / 60) * (5120.0 / 360) + xDegree * (5120.0 / 360));
             }
 
             // Normalize values outside of map range.
