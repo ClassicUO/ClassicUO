@@ -87,7 +87,7 @@ namespace ClassicUO.Plugins
 
         public int Keycode;
         public int Mods;
-        public bool IsDown;
+        public bool IsPressed;
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -155,77 +155,17 @@ namespace ClassicUO.Plugins
         public delegate* unmanaged[Cdecl]<nint, int, int> PluginToClientPacket, PluginToServerPacket;
     }
 
-    unsafe internal class PluginApi
+    unsafe internal sealed class PluginApi
     {
         private delegate* unmanaged[Cdecl]<nint, nint, int> _onEvent;
 
-        public void Load
-        (
-            Microsoft.Xna.Framework.Game game,
-            DirectoryInfo assetsPath,
-            ClientVersion version, 
-            FileInfo pluginFile, 
-            string installFuncName
-        )
+        private PluginApi(FileInfo pluginFile, delegate* unmanaged[Cdecl]<nint, nint, int> onEvent)
         {
-            var s = new PluginStruct();
-            s.ApiVersion = 1;
-            s.SdlWindow = game.Window.Handle;
-            s.ClientVersion = (uint)version;
-            s.AssetsPath = (nint)Unsafe.AsPointer(ref MemoryMarshal.AsRef<byte>(encodeToUtf8(assetsPath.FullName)));
-            s.PluginPath = (nint)Unsafe.AsPointer(ref MemoryMarshal.AsRef<byte>(encodeToUtf8(Path.GetDirectoryName(pluginFile.FullName))));
-            s.PluginToClientPacket = &pluginToClient;
-            s.PluginToServerPacket = &pluginToServer;
-            
-            var libPtr = Native.LoadLibrary(pluginFile.FullName);
-            if (libPtr == 0)
-            {
-                Console.WriteLine("plugi not found");
-                return;
-            }
-
-            var installPtr = Native.GetProcessAddress(libPtr, installFuncName);
-            if (installPtr == 0)
-            {
-                Console.WriteLine("function '{0}' not found", installFuncName);
-                return;
-            }
-
-            _onEvent = (delegate* unmanaged [Cdecl] <nint, nint, int>) ((delegate* unmanaged[Cdecl]<PluginStruct*, nint>)installPtr)(&s);
-
-            if (_onEvent == null)
-            {
-                Log.Warn("plugin didn't set the OnEvent function!");
-            }
-
-            [UnmanagedCallersOnly(CallConvs = new Type[] { typeof(CallConvCdecl) })]
-            static int pluginToClient(nint ptr, int size)
-            {
-                var span = new Span<byte>(ptr.ToPointer(), size);
-                Console.WriteLine("plugin to client -> {0:X2} - {1}", span[0], span.Length);
-                PacketHandlers.Handler.Append(span, true);
-                return 1;
-            }
-
-            [UnmanagedCallersOnly(CallConvs = new Type[] { typeof(CallConvCdecl) })]
-            static int pluginToServer(nint ptr, int size)
-            {
-                var span = new Span<byte>(ptr.ToPointer(), size);
-                Console.WriteLine("plugin to server -> {0:X2} - {1}", span[0], span.Length);
-                NetClient.Socket.Send(span, true);
-                return 1;
-            }
-
-            static Span<byte> encodeToUtf8(ReadOnlySpan<char> str)
-            {
-                var count = Encoding.UTF8.GetByteCount(str);
-                Span<byte> span = new byte[count];
-                fixed (char* ptr = str)
-                fixed (byte* ptr2 = span)
-                    Encoding.UTF8.GetBytes(ptr, str.Length, ptr2, count);
-                return span;
-            }
+            File = pluginFile;
+            _onEvent = onEvent;
         }
+
+        public FileInfo File { get; }
 
         public int SendMouseEvent(MouseButtonType button, int x, int y, bool pressed)
         {
@@ -255,7 +195,7 @@ namespace ClassicUO.Plugins
             ev.EventType = PluginEventType.Keyboard;
             ev.Keyboard.Keycode = keycode;
             ev.Keyboard.Mods = mods;
-            ev.Keyboard.IsDown = pressed;
+            ev.Keyboard.IsPressed = pressed;
 
             return SendEvent(&ev);
         }
@@ -350,5 +290,92 @@ namespace ClassicUO.Plugins
 
         private int SendEvent(PluginEvent* ev)
             => _onEvent == null ? 1 : _onEvent((nint)ev, 0);
+
+
+        public static PluginApi CreateFromLibrary
+        (
+            Microsoft.Xna.Framework.Game game,
+            DirectoryInfo assetsPath,
+            ClientVersion version,
+            FileInfo pluginFile,
+            string installFuncName
+        )
+        {
+            Log.Trace($"creating plugin from library: {pluginFile.Name}");
+
+            var libPtr = Native.LoadLibrary(pluginFile.FullName);
+            if (libPtr == 0)
+            {
+                Log.Warn("plugin not loaded");
+                return null;
+            }
+
+            var installPtr = (delegate* unmanaged[Cdecl]<PluginStruct*, nint>)Native.GetProcessAddress(libPtr, installFuncName);
+            if (installPtr == null)
+            {
+                Log.Warn($"function '{installFuncName}' not found");
+                return null;
+            }
+
+            return Create(game, assetsPath, version, pluginFile, installPtr);
+        }
+
+        public static PluginApi Create
+        (
+            Microsoft.Xna.Framework.Game game,
+            DirectoryInfo assetsPath,
+            ClientVersion version,
+            FileInfo pluginFile,
+            delegate* unmanaged[Cdecl]<PluginStruct*, nint> installFunc
+        )
+        {
+            Log.Trace($"creating plugin: {pluginFile.Name}");
+
+            var s = new PluginStruct();
+            s.ApiVersion = 1;
+            s.SdlWindow = game.Window.Handle;
+            s.ClientVersion = (uint)version;
+            s.AssetsPath = (nint)Unsafe.AsPointer(ref MemoryMarshal.AsRef<byte>(encodeToUtf8(assetsPath.FullName)));
+            s.PluginPath = (nint)Unsafe.AsPointer(ref MemoryMarshal.AsRef<byte>(encodeToUtf8(Path.GetDirectoryName(pluginFile.FullName))));
+            s.PluginToClientPacket = &pluginToClient;
+            s.PluginToServerPacket = &pluginToServer;
+
+            var onEvent = (delegate* unmanaged[Cdecl]<nint, nint, int>)installFunc(&s);
+            if (onEvent == null)
+            {
+                Log.Warn("plugin didn't set the OnEvent function!");
+            }
+
+            return new PluginApi(pluginFile, onEvent);
+
+
+            [UnmanagedCallersOnly(CallConvs = new Type[] { typeof(CallConvCdecl) })]
+            static int pluginToClient(nint ptr, int size)
+            {
+                var span = new Span<byte>(ptr.ToPointer(), size);
+                Log.Debug($"plugin to client -> {span[0]:X2} - {span.Length}");
+                PacketHandlers.Handler.Append(span, true);
+                return 1;
+            }
+
+            [UnmanagedCallersOnly(CallConvs = new Type[] { typeof(CallConvCdecl) })]
+            static int pluginToServer(nint ptr, int size)
+            {
+                var span = new Span<byte>(ptr.ToPointer(), size);
+                Log.Debug($"plugin to server -> {span[0]:X2} - {span.Length}");
+                NetClient.Socket.Send(span, true);
+                return 1;
+            }
+
+            static Span<byte> encodeToUtf8(ReadOnlySpan<char> str)
+            {
+                var count = Encoding.UTF8.GetByteCount(str);
+                Span<byte> span = new byte[count];
+                fixed (char* ptr = str)
+                fixed (byte* ptr2 = span)
+                    Encoding.UTF8.GetBytes(ptr, str.Length, ptr2, count);
+                return span;
+            }
+        }
     }
 }

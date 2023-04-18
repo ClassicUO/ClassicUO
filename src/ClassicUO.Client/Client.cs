@@ -81,13 +81,10 @@ namespace ClassicUO
 
                 var dir = new DirectoryInfo(ClientPath);
                 foreach (var p in Settings.GlobalSettings.Plugins
-                    .Select(s => new FileInfo(Path.GetFullPath(Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Plugins", s))) )
-                    .Where(s => s.Exists)
-                    )
+                    .Select(s => new FileInfo(Path.GetFullPath(Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Plugins", s))))
+                    .Where(s => s.Exists))
                 {
-                    Log.Trace($"plugin: {p.Name}");
-                    var plu = new PluginApi();
-                    plu.Load(Game, dir, Version, p, "Install");
+                    var plu = PluginApi.CreateFromLibrary(Game, dir, Version, p, "Install");
                     Plugins.Add(plu);
                 }
 
