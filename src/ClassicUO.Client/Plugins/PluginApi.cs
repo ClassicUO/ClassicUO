@@ -40,17 +40,16 @@ namespace ClassicUO.Plugins
     unsafe struct PluginEvent
     {
         [FieldOffset(0)] public PluginEventType EventType;
-
-        [FieldOffset(4)] public PluginMouseEvent Mouse;
-        [FieldOffset(4)] public PluginWheelEvent Wheel;
-        [FieldOffset(4)] public PluginKeyboardEvent Keyboard;
-        [FieldOffset(4)] public PluginInputTextEvent InputText;
-        [FieldOffset(4)] public PluginWindowEvent Window;
-        [FieldOffset(4)] public PluginQuitEvent Quit;
-        [FieldOffset(4)] public PluginConnectEvent Connect;
-        [FieldOffset(4)] public PluginDisconnectEvent Disconnect;
-        [FieldOffset(4)] public PluginFrameTickEvent FrameTick;
-        [FieldOffset(4)] public PluginOnPacketEvent OnPacket;
+        [FieldOffset(0)] public PluginMouseEvent Mouse;
+        [FieldOffset(0)] public PluginWheelEvent Wheel;
+        [FieldOffset(0)] public PluginKeyboardEvent Keyboard;
+        [FieldOffset(0)] public PluginInputTextEvent InputText;
+        [FieldOffset(0)] public PluginWindowEvent Window;
+        [FieldOffset(0)] public PluginQuitEvent Quit;
+        [FieldOffset(0)] public PluginConnectEvent Connect;
+        [FieldOffset(0)] public PluginDisconnectEvent Disconnect;
+        [FieldOffset(0)] public PluginFrameTickEvent FrameTick;
+        [FieldOffset(0)] public PluginOnPacketEvent OnPacket;
     }
 
 
@@ -168,7 +167,6 @@ namespace ClassicUO.Plugins
             s.PluginPath = (nint)Unsafe.AsPointer(ref MemoryMarshal.AsRef<byte>(encodeToUtf8(Path.GetDirectoryName(pluginFile.FullName))));
             s.PluginToClientPacket = (nint)(delegate* unmanaged [Cdecl]<nint, int, int>)&pluginToClient;
             s.PluginToServerPacket = (nint)(delegate* unmanaged [Cdecl]<nint, int, int>)&pluginToServer;
-
             
             var libPtr = Native.LoadLibrary(pluginFile.FullName);
             if (libPtr == 0)
