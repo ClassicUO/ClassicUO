@@ -1035,6 +1035,13 @@ namespace ClassicUO.Game.UI.Gumps
                             originalSize.X = rect.Width;
 
                         point.X = (hit.Width >> 1) - (originalSize.X >> 1);
+                    } else if (rect.Width > hit.Width)
+                    {
+                        if (ProfileManager.CurrentProfile.GridContainerScaleItems)
+                            originalSize.X = (ushort)(hit.Width * (ProfileManager.CurrentProfile.GridContainersScale / 100f));
+                        else
+                            originalSize.X = hit.Width;
+                        point.X = (hit.Width >> 1) - (originalSize.X >> 1);
                     }
 
                     if (rect.Height < hit.Height)
@@ -1043,6 +1050,14 @@ namespace ClassicUO.Game.UI.Gumps
                             originalSize.Y = (ushort)(rect.Height * (ProfileManager.CurrentProfile.GridContainersScale / 100f));
                         else
                             originalSize.Y = rect.Height;
+
+                        point.Y = (hit.Height >> 1) - (originalSize.Y >> 1);
+                    } else if (rect.Height > hit.Height)
+                    {
+                        if (ProfileManager.CurrentProfile.GridContainerScaleItems)
+                            originalSize.Y = (ushort)(hit.Height * (ProfileManager.CurrentProfile.GridContainersScale / 100f));
+                        else
+                            originalSize.Y = hit.Height;
 
                         point.Y = (hit.Height >> 1) - (originalSize.Y >> 1);
                     }
