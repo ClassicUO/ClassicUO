@@ -57,6 +57,7 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly bool showGridToggle = false;
         private HitBox _hitBox;
         private bool _isMinimized;
+        private NiceButton returnToGridView;
 
         internal const int CORPSES_GUMP = 0x0009;
 
@@ -189,20 +190,6 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
-            NiceButton _;
-            Add(_ = new NiceButton(0, 0, 20, 20, ButtonAction.Activate, "#") { IsSelectable = false });
-            _.SetTooltip("Return to grid container view");
-            _.MouseUp += (s, e) =>
-            {
-                if (e.Button == MouseButtonType.Left)
-                {
-                    UIManager.GetGump<GridContainer>(LocalSerial)?.Dispose();
-                    GridContainer c;
-                    UIManager.Add(c = new GridContainer(LocalSerial, Graphic, true));
-                    Dispose();
-                }
-            };
-
             float scale = GetScale();
 
             _data = ContainerManager.Get(Graphic);
@@ -235,6 +222,24 @@ namespace ClassicUO.Game.UI.Gumps
 
             Width = _gumpPicContainer.Width = (int)(_gumpPicContainer.Width * scale);
             Height = _gumpPicContainer.Height = (int)(_gumpPicContainer.Height * scale);
+
+            if (showGridToggle)
+            {
+                returnToGridView = new NiceButton(0, 0, 20, 20, ButtonAction.Activate, "#") { IsSelectable = false };
+                returnToGridView.SetTooltip("Return to grid container view");
+                returnToGridView.MouseUp += (s, e) =>
+                {
+                    if (e.Button == MouseButtonType.Left)
+                    {
+                        UIManager.GetGump<GridContainer>(LocalSerial)?.Dispose();
+                        GridContainer c;
+                        UIManager.Add(c = new GridContainer(LocalSerial, Graphic, true));
+                        Dispose();
+                    }
+                };
+
+                Add(returnToGridView);
+            }
         }
 
         private void HitBoxOnMouseUp(object sender, MouseEventArgs e)
