@@ -59,7 +59,7 @@ namespace ClassicUO.Network
         /// <summary>
         ///     Clears the byte queue
         /// </summary>
-        internal void Clear()
+        public void Clear()
         {
             _head = 0;
             _tail = 0;
@@ -99,9 +99,9 @@ namespace ClassicUO.Network
         /// <param name="buffer">Buffer to enqueue</param>
         /// <param name="offset">The zero-based byte offset in the buffer</param>
         /// <param name="size">The number of bytes to enqueue</param>
-        internal void Enqueue(Span<byte> buffer, int offset, int size)
+        public void Enqueue(Span<byte> buffer, int offset, int size)
         {
-            if (Length + size > _buffer.Length)
+            if (Length + size >= _buffer.Length)
             {
                 SetCapacity((Length + size + 2047) & ~2047);
             }
@@ -136,7 +136,7 @@ namespace ClassicUO.Network
         /// <param name="offset">The zero-based byte offset in the buffer</param>
         /// <param name="size">The number of bytes to dequeue</param>
         /// <returns>Number of bytes dequeued</returns>
-        internal int Dequeue(Span<byte> buffer, int offset, int size)
+        public int Dequeue(Span<byte> buffer, int offset, int size)
         {
             if (size > Length)
             {

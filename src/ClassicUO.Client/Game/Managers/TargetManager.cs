@@ -463,7 +463,7 @@ namespace ClassicUO.Game.Managers
             _lastDataBuffer[5] = (byte) _targetCursorId;
             _lastDataBuffer[6] = (byte) TargetingType;
 
-            NetClient.Socket.Send(_lastDataBuffer, _lastDataBuffer.Length);
+            NetClient.Socket.Send(_lastDataBuffer);
             Mouse.CancelDoubleClick = true;
             ClearTargetingWithoutTargetCancelPacket();
         }

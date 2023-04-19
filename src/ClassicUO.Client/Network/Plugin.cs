@@ -450,10 +450,15 @@ namespace ClassicUO.Network
             {
                 if (plugin._onRecv_new != null)
                 {
-                    if (!plugin._onRecv_new(data, ref length))
+                    byte[] tmp = new byte[length];
+                    Array.Copy(data, tmp, length);
+
+                    if (!plugin._onRecv_new(tmp, ref length))
                     {
                         result = false;
                     }
+
+                    Array.Copy(tmp, data, length);
                 }
                 else if (plugin._onRecv != null)
                 {
@@ -472,7 +477,7 @@ namespace ClassicUO.Network
             return result;
         }
 
-        internal static bool ProcessSendPacket(byte[] data, ref int length)
+        internal static bool ProcessSendPacket(ref Span<byte> message)
         {
             bool result = true;
 
@@ -480,22 +485,29 @@ namespace ClassicUO.Network
             {
                 if (plugin._onSend_new != null)
                 {
-                    if (!plugin._onSend_new(data, ref length))
+                    var tmp = message.ToArray();
+                    var length = tmp.Length;
+
+                    if (!plugin._onSend_new(tmp, ref length))
                     {
                         result = false;
                     }
+
+                    message = message.Slice(0, length);
+                    tmp.AsSpan(0, length).CopyTo(message);
                 }
                 else if (plugin._onSend != null)
                 {
-                    byte[] tmp = new byte[length];
-                    Array.Copy(data, tmp, length);
+                    var tmp = message.ToArray();
+                    var length = tmp.Length;
 
                     if (!plugin._onSend(ref tmp, ref length))
                     {
                         result = false;
                     }
 
-                    Array.Copy(tmp, data, length);
+                    message = message.Slice(0, length);
+                    tmp.AsSpan(0, length).CopyTo(message);
                 }
             }
 
@@ -643,20 +655,19 @@ namespace ClassicUO.Network
 
         private static bool OnPluginRecv(ref byte[] data, ref int length)
         {
-            NetClient.EnqueuePacketFromPlugin(data, length);
+            lock (PacketHandlers.Handler)
+            {
+                PacketHandlers.Handler.Append(data.AsSpan(0, length), true);
+            }
 
             return true;
         }
 
         private static bool OnPluginSend(ref byte[] data, ref int length)
         {
-            if (NetClient.LoginSocket.IsDisposed && NetClient.Socket.IsConnected)
+            if (NetClient.Socket.IsConnected)
             {
-                NetClient.Socket.Send(data, length, true);
-            }
-            else if (NetClient.Socket.IsDisposed && NetClient.LoginSocket.IsConnected)
-            {
-                NetClient.LoginSocket.Send(data, length, true);
+                NetClient.Socket.Send(data.AsSpan(0, length), true);
             }
 
             return true;
@@ -666,10 +677,10 @@ namespace ClassicUO.Network
         {        
             if (buffer != IntPtr.Zero && length > 0)
             {
-                byte[] data = new byte[length];
-                Marshal.Copy(buffer, data, 0, length);
-
-                NetClient.EnqueuePacketFromPlugin(data, length);
+                lock (PacketHandlers.Handler)
+                {
+                    PacketHandlers.Handler.Append(new Span<byte>(buffer.ToPointer(), length), true);
+                }
             }
 
             return true;
@@ -679,18 +690,7 @@ namespace ClassicUO.Network
         {
             if (buffer != IntPtr.Zero && length > 0)
             {
-                StackDataWriter writer = new StackDataWriter(new Span<byte>((void*)buffer, length));
-
-                if (NetClient.LoginSocket.IsDisposed && NetClient.Socket.IsConnected)
-                {
-                    NetClient.Socket.Send(writer.AllocatedBuffer, writer.BytesWritten, true);
-                }
-                else if (NetClient.Socket.IsDisposed && NetClient.LoginSocket.IsConnected)
-                {
-                    NetClient.LoginSocket.Send(writer.AllocatedBuffer, writer.BytesWritten, true);
-                }
-
-                writer.Dispose();
+                NetClient.Socket.Send(new Span<byte>((void*)buffer, length), true);
             }
 
             return true;

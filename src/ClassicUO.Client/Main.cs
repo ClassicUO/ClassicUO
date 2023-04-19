@@ -30,22 +30,21 @@
 
 #endregion
 
-using System;
-using System.Diagnostics;
-using System.Globalization;
-using System.IO;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading;
 using ClassicUO.Configuration;
 using ClassicUO.Game;
 using ClassicUO.Game.Managers;
 using ClassicUO.IO;
+using ClassicUO.Network;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using ClassicUO.Utility.Platforms;
 using SDL2;
+using System;
+using System.Globalization;
+using System.IO;
+using System.Runtime.InteropServices;
+using System.Threading;
 
 namespace ClassicUO
 {
@@ -135,7 +134,7 @@ namespace ClassicUO
                 }
             }
 
-            Settings.GlobalSettings = ConfigurationResolver.Load<Settings>(globalSettingsPath);
+            Settings.GlobalSettings = ConfigurationResolver.Load<Settings>(globalSettingsPath, SettingsJsonContext.Default);
             CUOEnviroment.IsOutlands = Settings.GlobalSettings.ShardType == 2;
 
             ReadSettingsFromArgs(args);
@@ -164,7 +163,7 @@ namespace ClassicUO
                     if (string.IsNullOrWhiteSpace(Settings.GlobalSettings.Language))
                     {
                         Log.Warn("cannot read the OS language. Rolled back to ENU");
-                       
+
                         Settings.GlobalSettings.Language = "ENU";
                     }
 
@@ -173,7 +172,7 @@ namespace ClassicUO
                 catch
                 {
                     Log.Warn("cannot read the OS language. Rolled back to ENU");
-                  
+
                     Settings.GlobalSettings.Language = "ENU";
                 }
             }
@@ -338,7 +337,7 @@ namespace ClassicUO
                         break;
 
                     case "lastcharactername":
-                    case "lastcharname": 
+                    case "lastcharname":
                         LastCharacterManager.OverrideLastCharacter(value);
 
                         break;
@@ -348,7 +347,7 @@ namespace ClassicUO
 
                         break;
 
-                    case "last_server_name": 
+                    case "last_server_name":
                         Settings.GlobalSettings.LastServerName = value;
                         break;
 
@@ -491,7 +490,8 @@ namespace ClassicUO
 
                     case "packetlog":
 
-                        CUOEnviroment.PacketLog = true;
+                        PacketLogger.Default.Enabled = true;
+                        PacketLogger.Default.CreateFile();
 
                         break;
 
@@ -509,7 +509,7 @@ namespace ClassicUO
                             case "ITA": Settings.GlobalSettings.Language = "ITA"; break;
                             case "CHT": Settings.GlobalSettings.Language = "CHT"; break;
                             default:
-                            
+
                                 Settings.GlobalSettings.Language = "ENU";
                                 break;
 

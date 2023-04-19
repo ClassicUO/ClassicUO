@@ -133,23 +133,6 @@ namespace ClassicUO.Game.Scenes
             Client.Game.GameCursor.ItemHold.Clear();
             Hotkeys = new HotkeysManager();
             Macros = new MacroManager();
-
-            // #########################################################
-            // [FILE_FIX]
-            // TODO: this code is a workaround to port old macros to the new xml system.
-            if (ProfileManager.CurrentProfile.Macros != null)
-            {
-                for (int i = 0; i < ProfileManager.CurrentProfile.Macros.Length; i++)
-                {
-                    Macros.PushToBack(ProfileManager.CurrentProfile.Macros[i]);
-                }
-
-                Macros.Save();
-
-                ProfileManager.CurrentProfile.Macros = null;
-            }
-            // #########################################################
-
             Macros.Load();
 
             _animatedStaticsManager = new AnimatedStaticsManager();

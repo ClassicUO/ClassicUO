@@ -452,7 +452,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (_logoTexture2D == null || _logoTexture2D.IsDisposed)
                 {
-                    Stream stream = typeof(CUOEnviroment).Assembly.GetManifestResourceStream("ClassicUO.cuologo.png");
+                    using var stream = new MemoryStream(Loader.GetCuoLogo().ToArray());
                     _logoTexture2D = Texture2D.FromStream(Client.Game.GraphicsDevice, stream);
                 }
 

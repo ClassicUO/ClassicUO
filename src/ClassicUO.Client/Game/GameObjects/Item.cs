@@ -574,6 +574,7 @@ namespace ClassicUO.Game.GameObjects
             { 0x3ED7, 0x060D },
             { 0x3ED8, 0x060F }, // a black dog?
             { 0x3ED9, 0x0610 }, // a dobberman?
+            { 0x3EDA, 0x0590 }  // Frostmites Beetles
         };
 
         public override ushort GetGraphicForAnimation()

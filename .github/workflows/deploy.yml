@@ -45,25 +45,25 @@ jobs:
     - name: Build
       run: dotnet publish ${{ env.CUO_PROJECT_PATH }} -c Release -o ${{ env.CUO_OUTPUT_PATH }} -p:IS_DEV_BUILD=true -p:AssemblyVersion=${{ env.CUO_ASSEMBLY_VERSION }} -p:FileVersion=${{ env.CUO_ASSEMBLY_VERSION }}
       
+    - name: Create manifest
+      run: |
+        dotnet run --project tools/ManifestCreator/ManifestCreator.csproj "${{ env.CUO_OUTPUT_PATH }}" "dev-preview" "${{ env.CUO_ZIP_NAME }}"
+        mkdir upload
+        mv manifest.xml upload
+      
     - name: Create package
       uses: thedoctor0/zip-release@master
       with:
         type: 'zip'
         directory: ${{ env.CUO_OUTPUT_PATH }}
         filename: ${{ env.CUO_ZIP_NAME }}
-        exclusions: 'ClassicUO.exe.config'
-        
-    - name: Create manifest
-      run: dotnet run --project tools/ManifestCreator/ManifestCreator.csproj "${{ env.CUO_OUTPUT_PATH }}" "dev-preview" "${{ env.CUO_ZIP_NAME }}"
-    
+        exclusions: '*.zip manifest.xml'
+            
     - name: Move output
-      run: |
-        mkdir upload
-        mv "${{ env.CUO_OUTPUT_PATH }}/${{ env.CUO_ZIP_NAME }}" upload
-        mv manifest.xml upload
+      run: mv "${{ env.CUO_OUTPUT_PATH }}/${{ env.CUO_ZIP_NAME }}" upload
               
     - name: Remove old Release
-      uses: dev-drprasad/delete-tag-and-release@v0.2.0
+      uses: dev-drprasad/delete-tag-and-release@v0.2.1
       with:
         delete_release: true
         tag_name: ClassicUO-dev-release

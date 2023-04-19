@@ -30,50 +30,143 @@
 
 #endregion
 
-using System;
-using System.Collections.Concurrent;
-using System.Linq;
-using System.Net;
-using System.Net.Sockets;
-using System.Text;
-using System.Threading.Tasks;
 using ClassicUO.Network.Encryption;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
+using System;
+using System.Net;
+using System.Net.Sockets;
 
 namespace ClassicUO.Network
 {
-    enum ClientSocketStatus
+    sealed class SocketWrapper : IDisposable
     {
-        Disconnected,
-        Connecting,
-        Connected,
+        private TcpClient _socket;
+
+        public bool IsConnected => _socket?.Client?.Connected ?? false;
+
+        public EndPoint LocalEndPoint => _socket?.Client?.LocalEndPoint;
+
+
+        public event EventHandler OnConnected, OnDisconnected;
+        public event EventHandler<SocketError> OnError;
+
+
+        public void Connect(string ip, int port)
+        {
+            if (IsConnected) return;
+
+            _socket = new TcpClient();
+            _socket.NoDelay = true;
+
+            try
+            {
+                _socket.Connect(ip, port);
+
+                if (!IsConnected)
+                {
+                    OnError?.Invoke(this, SocketError.NotConnected);
+                    return;
+                }
+
+                OnConnected?.Invoke(this, EventArgs.Empty);
+            }
+            catch (SocketException socketEx)
+            {
+                Log.Error($"error while connecting {socketEx}");
+                OnError?.Invoke(this, socketEx.SocketErrorCode);
+            }
+            catch (Exception ex)
+            {
+                Log.Error($"error while connecting {ex}");
+                OnError?.Invoke(this, SocketError.SocketError);
+            }  
+        }
+
+        public void Send(byte[] buffer, int offset, int count)
+        {
+            var stream = _socket.GetStream();
+            stream.Write(buffer, offset, count);
+            stream.Flush();
+        }
+
+        public int Read(byte[] buffer)
+        {
+            if (!IsConnected) return 0;
+
+            var available = Math.Min(buffer.Length, _socket.Available);
+            var done = 0;
+
+            var stream = _socket.GetStream();
+
+            while (done < available)
+            {
+                var toRead = Math.Min(buffer.Length, available - done);
+                var read = stream.Read(buffer, done, toRead);
+                
+                if (read <= 0)
+                {
+                    OnDisconnected?.Invoke(this, EventArgs.Empty);
+                    Disconnect();
+
+                    return 0;
+                }
+
+                done += read;
+            }
+
+            return done;
+        }
+
+        public void Disconnect()
+        {
+            _socket?.Close();
+            Dispose();
+        }
+
+        public void Dispose()
+        {
+            _socket?.Dispose();
+        }
     }
 
     internal sealed class NetClient
     {
         private const int BUFF_SIZE = 0x10000;
 
+        private readonly byte[] _compressedBuffer = new byte[4096];
+        private readonly byte[] _uncompressedBuffer = new byte[BUFF_SIZE];
+        private readonly byte[] _sendingBuffer = new byte[4096];
+        private readonly Huffman _huffman = new Huffman();
         private bool _isCompressionEnabled;
-        private CircularBuffer _circularBuffer, _incompleteBuffer, _sendingBuffer;
-        private ConcurrentQueue<byte[]> _pluginRecvQueue = new ConcurrentQueue<byte[]>();
-        private readonly bool _is_login_socket;
-        private Socket _socket;
+        private readonly SocketWrapper _socket;
         private uint? _localIP;
+        private readonly CircularBuffer _sendStream;
 
 
-        private NetClient(bool is_login_socket)
+        public NetClient()
         {
-            _is_login_socket = is_login_socket;
             Statistics = new NetStatistics(this);
+            _sendStream = new CircularBuffer();
+
+            _socket = new SocketWrapper();
+            _socket.OnConnected += (o, e) => 
+            {
+                Statistics.Reset();
+                Connected?.Invoke(this, EventArgs.Empty);
+            };
+            _socket.OnDisconnected += (o, e) => Disconnected?.Invoke(this, SocketError.Success);
+            _socket.OnError += (o, e) => Disconnected?.Invoke(this, SocketError.SocketError);
         }
 
 
-        public static NetClient LoginSocket { get; } = new NetClient(true);
-        public static NetClient Socket { get; } = new NetClient(false);
-        public bool IsConnected => _socket != null && _socket.Connected;
-        public bool IsDisposed { get; private set; }
-        public ClientSocketStatus Status { get; private set; }
+        public static NetClient Socket { get; set; } = new NetClient();
+       
+
+        public bool IsConnected => _socket != null && _socket.IsConnected;
+            
+        public NetStatistics Statistics { get; }
+
         public uint LocalIP
         {
             get
@@ -105,8 +198,6 @@ namespace ClassicUO.Network
                 return _localIP.Value;
             }
         }
-        public NetStatistics Statistics { get; }
-
 
 
         public event EventHandler Connected;
@@ -114,439 +205,149 @@ namespace ClassicUO.Network
 
 
 
-        public static void EnqueuePacketFromPlugin(byte[] data, int length)
+        public void Connect(string ip, ushort port)
         {
-            if (LoginSocket.IsDisposed && Socket.IsConnected)
-            {
-                Socket._pluginRecvQueue.Enqueue(data);
-                Socket.Statistics.TotalPacketsReceived++;
-            }
-            else if (Socket.IsDisposed && LoginSocket.IsConnected)
-            {
-                LoginSocket._pluginRecvQueue.Enqueue(data);
-                LoginSocket.Statistics.TotalPacketsReceived++;
-            }
-            else
-            {
-                Log.Error("Attempt to write into a dead socket");
-            }
-        }
-
-        public async Task<bool> Connect(string ip, ushort port)
-        {
-            IsDisposed = false;
-            IPAddress address = ResolveIP(ip);
-
-            if (address == null)
-            {
-                return false;
-            }
-
-            return await Connect(address, port);
-        }
-
-        public async Task<bool> Connect(IPAddress address, ushort port)
-        {
-            IsDisposed = false;
-
-            if (Status != ClientSocketStatus.Disconnected)
-            {
-                Log.Warn($"Socket status: {Status}");
-
-                return false;
-            }
-
-            _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            _socket.NoDelay = true; // it's important to disable the Nagle algo or it will cause lag
-
-            _circularBuffer = new CircularBuffer(BUFF_SIZE);
-            _incompleteBuffer = new CircularBuffer(512);
-            _sendingBuffer = new CircularBuffer(2048);
-            _pluginRecvQueue = new ConcurrentQueue<byte[]>();
+            _sendStream.Clear();
+            _huffman.Reset();
             Statistics.Reset();
 
-            Status = ClientSocketStatus.Connecting;
-
-            try
-            {
-                return await _socket
-                    .ConnectAsync(address, port)
-                    .ContinueWith
-                    (
-                        (t) =>
-                        {
-                            if (!t.IsFaulted && _socket.Connected)
-                            {
-                                Status = ClientSocketStatus.Connected;
-                                Connected.Raise();
-                                Statistics.ConnectedFrom = DateTime.Now;
-
-                                return true;
-                            }
-
-
-                            Status = ClientSocketStatus.Disconnected;
-                            Log.Error("socket not connected");
-
-                            return false;
-                        },
-                        TaskContinuationOptions.ExecuteSynchronously
-                    );
-            }
-            catch (SocketException e)
-            {
-                Log.Error($"Socket error when connecting:\n{e}");
-                _logFile?.Write($"connection error: {e}");
-
-                Disconnect(e.SocketErrorCode);
-
-                return false;
-            }
+            _socket.Connect(ip, port);
         }
 
-        public void Disconnect() => Disconnect(SocketError.Success);
-
-        private void Disconnect(SocketError error)
+        public void Disconnect()
         {
-            _logFile?.Write($"disconnection  -  socket_error: {error}");
-
-            if (IsDisposed)
-            {
-                return;
-            }
-
-            Status = ClientSocketStatus.Disconnected;
-            IsDisposed = true;
-
-            if (_socket == null)
-            {
-                return;
-            }
-
-            try
-            {
-                _socket.Close();
-            }
-            catch
-            {
-            }
-
-            try
-            {
-                _socket?.Dispose();
-            }
-            catch
-            {
-            }
-
-            Log.Trace($"Disconnected [{(_is_login_socket ? "login socket" : "game socket")}]");
-
-
             _isCompressionEnabled = false;
-            _socket = null;
-            _circularBuffer = null;
-            _incompleteBuffer = null;
-            _sendingBuffer = null;
-            _localIP = null;
-            _sendingBuffer = null;
-
-            if (error != 0)
-            {
-                Disconnected.Raise(error);
-            }
-
             Statistics.Reset();
+            _socket.Disconnect();
         }
 
         public void EnableCompression()
         {
             _isCompressionEnabled = true;
+            _huffman.Reset();
+            _sendStream.Clear();
         }
 
-        public void Send(byte[] data, int length, bool ignorePlugin = false, bool skip_encryption = false)
+        public Span<byte> CollectAvailableData()
         {
-            if (!ignorePlugin && !Plugin.ProcessSendPacket(data, ref length))
+            try
             {
-                return;
-            }
+                var size = _socket.Read(_compressedBuffer);
 
-            Send(data, length, skip_encryption);
-        }
-
-        private void Send(byte[] data, int length, bool skip_encryption)
-        {
-            if (_socket == null || IsDisposed || !_socket.Connected)
-            {
-                return;
-            }
-
-            if (data != null && data.Length != 0 && length > 0)
-            {
-                if (CUOEnviroment.PacketLog)
+                if (size <= 0)
                 {
-                    LogPacket(data, length, true);
+                    return Span<byte>.Empty;
                 }
 
-                if (!skip_encryption)
-                {
-                    EncryptionHelper.Encrypt(_is_login_socket, data, data, length);
-                }
+                Statistics.TotalBytesReceived += (uint)size;
 
-                _sendingBuffer.Enqueue(data.AsSpan(0, length));
+                var span = _compressedBuffer.AsSpan(0, size);
 
-                Statistics.TotalBytesSent += (uint)length;
-                Statistics.TotalPacketsSent++;
+                ProcessEncryption(span);
+
+                return DecompressBuffer(span);
             }
-        }
-
-
-        public void Update()
-        {
-            ProcessRecv();
-
-            while (_pluginRecvQueue.TryDequeue(out byte[] data) && data != null && data.Length != 0)
+            catch (SocketException ex)
             {
-                int length = PacketsTable.GetPacketLength(data[0]);
-                int offset = 1;
+                Log.Error("socket error when receving:\n" + ex);
 
-                if (length == -1)
-                {
-                    if (data.Length < 3)
-                    {
-                        continue;
-                    }
-
-                    offset = 3;
-                }
-
-                PacketHandlers.Handlers.AnalyzePacket(data, offset, data.Length);
-            }
-
-            ProcessSend();
-        }
-
-        private void ExtractPackets()
-        {
-            if (!IsConnected || _circularBuffer == null || _circularBuffer.Length <= 0)
-            {
-                return;
-            }
-
-            lock (_circularBuffer)
-            {
-                int length = _circularBuffer.Length;
-                byte[] packetBuffer = System.Buffers.ArrayPool<byte>.Shared.Rent(512);
-
-                while (length > 0 && IsConnected)
-                {
-                    if (!GetPacketInfo(_circularBuffer, length, out int offset, out int packetlength))
-                    {
-                        break;
-                    }
-
-                    if (packetlength > 0)
-                    {
-                        if (packetlength > packetBuffer.Length)
-                        {
-                            System.Buffers.ArrayPool<byte>.Shared.Return(packetBuffer, false); // TODO: clear?
-                            packetBuffer = System.Buffers.ArrayPool<byte>.Shared.Rent(packetlength);
-                        }
-
-                        _circularBuffer.Dequeue(packetBuffer, 0, packetlength);
-
-                        if (CUOEnviroment.PacketLog)
-                        {
-                            LogPacket(packetBuffer, packetlength, false);
-                        }
-
-                        // TODO: the pluging function should allow Span<byte> or unsafe type only.
-                        // The current one is a bad style decision.
-                        // It will be fixed once the new plugin system is done.
-                        if (Plugin.ProcessRecvPacket(packetBuffer, ref packetlength))
-                        {
-                            PacketHandlers.Handlers.AnalyzePacket(packetBuffer, offset, packetlength);
-
-                            Statistics.TotalPacketsReceived++;
-                        }
-                    }
-
-                    length = _circularBuffer?.Length ?? 0;
-                }
-
-                System.Buffers.ArrayPool<byte>.Shared.Return(packetBuffer, false); // TODO: clear?
-            }
-        }
-
-        private static bool GetPacketInfo(CircularBuffer buffer, int bufferLength, out int offset, out int length)
-        {
-            if (buffer == null || bufferLength <= 0)
-            {
-                length = 0;
-                offset = 0;
-
-                return false;
-            }
-
-            length = PacketsTable.GetPacketLength(buffer[0]);
-            offset = 1;
-
-            if (length == -1)
-            {
-                if (bufferLength < 3)
-                {
-                    return false;
-                }
-
-                length = buffer[2] | (buffer[1] << 8);
-
-                offset = 3;
-            }
-
-            return bufferLength >= length;
-        }
-
-        private void ProcessRecv()
-        {
-            if (IsDisposed || Status != ClientSocketStatus.Connected)
-            {
-                return;
-            }
-
-            if (!IsConnected && !IsDisposed)
-            {
                 Disconnect();
+                Disconnected?.Invoke(this, ex.SocketErrorCode);
+            }
+            catch (Exception ex)
+            {
+                if (ex.InnerException is SocketException socketEx)
+                {
+                    Log.Error("main exception:\n" + ex);
+                    Log.Error("socket error when receving:\n" + socketEx);
 
-                return;
+                    Disconnect();
+                    Disconnected?.Invoke(this, socketEx.SocketErrorCode);
+                }
+                else
+                {
+                    Log.Error("fatal error when receving:\n" + ex);
+
+                    Disconnect();
+                    Disconnected?.Invoke(this, SocketError.SocketError);
+
+                    throw;
+                }
             }
 
-            int available = _socket.Available;
+            return Span<byte>.Empty;
+        }
 
-            if (available <= 0)
+        public void Flush()
+        {
+            ProcessSend();
+            Statistics.Update();
+        }
+
+        public void Send(Span<byte> message, bool ignorePlugin = false, bool skipEncryption = false)
+        {
+            if (!IsConnected || message.IsEmpty)
             {
                 return;
             }
 
-            const int SIZE_TO_READ = 4096;
-
-            byte[] buffer = System.Buffers.ArrayPool<byte>.Shared.Rent((_incompleteBuffer.Length + SIZE_TO_READ) * 4 + 2);
-
-            while (available > 0)
-            { 
-                try
-                {
-                    int wanted = Math.Min(SIZE_TO_READ, available);
-                    int received = _socket.Receive(buffer, 0, wanted, SocketFlags.None, out var errorCode);
-
-                    if (received > 0 && errorCode == SocketError.Success)
-                    {
-                        available -= received;
-
-                        Statistics.TotalBytesReceived += (uint)received;
-
-                        if (!_is_login_socket)
-                        {
-                            EncryptionHelper.Decrypt(buffer, buffer, received);
-                        }
-
-                        if (_isCompressionEnabled)
-                        {
-                            DecompressBuffer(buffer, ref received);
-                        }
-
-                        _circularBuffer.Enqueue(buffer.AsSpan(0, received));
-
-                        ExtractPackets();
-                    }
-                    else
-                    {
-                        Log.Warn("Server sent 0 bytes. Closing connection");
-
-                        _logFile?.Write($"disconnection  -  received {received} bytes from server. ErrorCode: {errorCode}");
-
-                        Disconnect(SocketError.SocketError);
-
-                        break;
-                    }
-                }
-                catch (SocketException socketException)
-                {
-                    Log.Error("socket error when receiving:\n" + socketException);
-
-                    _logFile?.Write($"disconnection  -  error while reading from socket: {socketException}");
-
-                    Disconnect(socketException.SocketErrorCode);
-
-                    break;
-                }
-                catch (Exception ex)
-                {
-                    if (ex.InnerException is SocketException socketEx)
-                    {
-                        Log.Error("socket error when receiving:\n" + socketEx);
-                        _logFile?.Write($"disconnection  -  error while reading from socket [1]: {socketEx}");
-
-                        Disconnect(socketEx.SocketErrorCode);
-
-                        break;
-                    }
-                    else
-                    {
-                        Log.Error("fatal error when receiving:\n" + ex);
-                        _logFile?.Write($"disconnection  -  error while reading from socket [2]: {ex}");
-
-                        Disconnect();
-
-                        throw;
-                    }
-                }
+            if (!ignorePlugin && !Plugin.ProcessSendPacket(ref message))
+            {
+                return;
             }
 
-            System.Buffers.ArrayPool<byte>.Shared.Return(buffer, false); // TODO: clear?
+            if (message.IsEmpty) return;
+
+            PacketLogger.Default?.Log(message, true);
+
+            if (!skipEncryption)
+            {
+                EncryptionHelper.Encrypt(!_isCompressionEnabled, message, message, message.Length);
+            }
+
+            lock (_sendStream)
+            {
+                //_socket.Send(data, 0, length);
+                _sendStream.Enqueue(message);
+            }
+
+            Statistics.TotalBytesSent += (uint)message.Length;
+            Statistics.TotalPacketsSent++;
+        }
+
+        private void ProcessEncryption(Span<byte> buffer)
+        {
+            if (!_isCompressionEnabled) return;
+
+            EncryptionHelper.Decrypt(buffer, buffer, buffer.Length);
         }
 
         private void ProcessSend()
         {
-            if (IsDisposed || Status != ClientSocketStatus.Connected)
-            {
-                return;
-            }
-
-            if (!IsConnected && !IsDisposed)
-            {
-                Disconnect();
-
-                return;
-            }
-
-            int length = _sendingBuffer.Length;
-
-            if (length <= 0)
-            {
-                return;
-            }
+            if (!IsConnected) return;
 
             try
             {
-                while (length > 0)
+                lock (_sendStream)
                 {
-                    int read = _sendingBuffer.DequeSegment(length, out var segment);
-
-                    if (segment.Count <= 0)
+                    while (_sendStream.Length > 0)
                     {
-                        break;
+                        var read = _sendStream.Dequeue(_sendingBuffer, 0, _sendingBuffer.Length);
+                        if (read <= 0)
+                        {
+                            break;
+                        }
+
+                        _socket.Send(_sendingBuffer, 0, read);
                     }
-
-                    int sent = _socket.Send(segment.Array, segment.Offset, read, SocketFlags.None);
-
-                    length -= read;
                 }
             }
             catch (SocketException ex)
             {
                 Log.Error("socket error when sending:\n" + ex);
-                _logFile?.Write($"disconnection  -  error during writing to the socket buffer: {ex}");
 
-                Disconnect(ex.SocketErrorCode);
+                Disconnect();
+                Disconnected?.Invoke(this, ex.SocketErrorCode);
             }
             catch (Exception ex)
             {
@@ -554,177 +355,37 @@ namespace ClassicUO.Network
                 {
                     Log.Error("main exception:\n" + ex);
                     Log.Error("socket error when sending:\n" + socketEx);
-
-                    _logFile?.Write($"disconnection  -  error during writing to the socket buffer [2]: {socketEx}");
-                    Disconnect(socketEx.SocketErrorCode);
+                   
+                    Disconnect();
+                    Disconnected?.Invoke(this, socketEx.SocketErrorCode);
                 }
                 else
                 {
                     Log.Error("fatal error when sending:\n" + ex);
 
-                    _logFile?.Write($"disconnection  -  error during writing to the socket buffer [3]: {ex}");
-
                     Disconnect();
+                    Disconnected?.Invoke(this, SocketError.SocketError);
 
                     throw;
                 }
             }
         }
 
-        private void DecompressBuffer(Span<byte> buffer, ref int length)
+        private Span<byte> DecompressBuffer(Span<byte> buffer)
         {
-            int incompletelength = _incompleteBuffer.Length;
-            int sourcelength = incompletelength + length;
-            int arrayLen = sourcelength * 4 + 2;
+            if (!_isCompressionEnabled)
+                return buffer;
 
-            byte[] sourceBufferObj = null;
-            Span<byte> source = arrayLen <= 1024 ? stackalloc byte[1024] : (sourceBufferObj = System.Buffers.ArrayPool<byte>.Shared.Rent(arrayLen)).AsSpan(0, arrayLen);
-
-            if (incompletelength > 0)
+            var size = 65536;
+            if (!_huffman.Decompress(buffer, _uncompressedBuffer, ref size))
             {
-                _incompleteBuffer.Dequeue(source, 0, incompletelength);
-                _incompleteBuffer.Clear();
+                Disconnect();
+                Disconnected?.Invoke(this, SocketError.SocketError);
+
+                return Span<byte>.Empty;
             }
 
-            buffer.Slice(0, length).CopyTo(source.Slice(incompletelength));
-            
-            int processedOffset = 0;
-            int sourceOffset = 0;
-            int offset = 0;
-
-            while (Huffman.DecompressChunk
-            (
-                source,
-                ref sourceOffset,
-                sourcelength,
-                buffer,
-                offset,
-                out int outSize
-            ))
-            {
-                processedOffset = sourceOffset;
-                offset += outSize;
-            }
-
-            length = offset;
-
-            if (processedOffset < sourcelength)
-            {
-                _incompleteBuffer.Enqueue(source, processedOffset, sourcelength - processedOffset);
-            }
-
-            if (sourceBufferObj != null)
-            {
-                System.Buffers.ArrayPool<byte>.Shared.Return(sourceBufferObj, false); // TODO: clear?
-            }
-        }
-
-        private static IPAddress ResolveIP(string addr)
-        {
-            IPAddress result = IPAddress.None;
-
-            if (string.IsNullOrEmpty(addr))
-            {
-                return result;
-            }
-
-            if (!IPAddress.TryParse(addr, out result))
-            {
-                try
-                {
-                    IPHostEntry hostEntry = Dns.GetHostEntry(addr);
-
-                    if (hostEntry.AddressList.Length != 0)
-                    {
-                        result = hostEntry.AddressList[hostEntry.AddressList.Length - 1];
-                    }
-                }
-                catch
-                {
-                }
-            }
-
-            return result;
-        }
-
-        private static LogFile _logFile;
-
-        private static void LogPacket(Span<byte> buffer, int length, bool toServer)
-        {
-            if (_logFile == null)
-                _logFile = new LogFile(FileSystemHelper.CreateFolderIfNotExists(CUOEnviroment.ExecutablePath, "Logs", "Network"), "packets.log");
-
-            Span<char> span = stackalloc char[256];
-            ValueStringBuilder output = new ValueStringBuilder(span);
-            {
-                int off = sizeof(ulong) + 2;
-
-                output.Append(' ', off);
-                output.Append(string.Format("Ticks: {0} | {1} |  ID: {2:X2}   Length: {3}\n", Time.Ticks, (toServer ? "Client -> Server" : "Server -> Client"), buffer[0], length));
-
-                if (buffer[0] == 0x80 || buffer[0] == 0x91)
-                {
-                    output.Append(' ', off);
-                    output.Append("[ACCOUNT CREDENTIALS HIDDEN]\n");
-                }
-                else
-                {
-                    output.Append(' ', off);
-                    output.Append("0  1  2  3  4  5  6  7   8  9  A  B  C  D  E  F\n");
-
-                    output.Append(' ', off);
-                    output.Append("-- -- -- -- -- -- -- --  -- -- -- -- -- -- -- --\n");
-
-                    ulong address = 0;
-
-                    for (int i = 0; i < length; i += 16, address += 16)
-                    {
-                        output.Append($"{address:X8}");
-
-                        for (int j = 0; j < 16; ++j)
-                        {
-                            if ((j % 8) == 0)
-                            {
-                                output.Append(" ");
-                            }
-
-                            if (i + j < length)
-                            {
-                                output.Append($" {buffer[i + j]:X2}");
-                            }
-                            else
-                            {
-                                output.Append("   ");
-                            }
-                        }
-
-                        output.Append("  ");
-
-                        for (int j = 0; j < 16 && i + j < length; ++j)
-                        {
-                            byte c = buffer[i + j];
-
-                            if (c >= 0x20 && c < 0x80)
-                            {
-                                output.Append((char)c);
-                            }
-                            else
-                            {
-                                output.Append('.');
-                            }
-                        }
-
-                        output.Append('\n');
-                    }
-                }
-
-                output.Append('\n');
-                output.Append('\n');
-
-                _logFile.Write(output.ToString());
-
-                output.Dispose();
-            }
+            return _uncompressedBuffer.AsSpan(0, size);
         }
     }
 }

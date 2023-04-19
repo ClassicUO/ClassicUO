@@ -31,18 +31,17 @@
 #endregion
 
 using System;
-using System.Diagnostics;
 
 namespace ClassicUO.Network
 {
-    internal class NetStatistics
+    sealed class NetStatistics
     {
-        private NetClient _socket;
+        private readonly NetClient _socket;
         private uint _lastTotalBytesReceived, _lastTotalBytesSent, _lastTotalPacketsReceived, _lastTotalPacketsSent;
         private byte _pingIdx;
 
         private readonly uint[] _pings = new uint[5];
-        private readonly Stopwatch _pingStopwatch = new Stopwatch();
+        private uint _startTickValue, _statisticsTimer;
 
 
         public NetStatistics(NetClient socket)
@@ -94,32 +93,26 @@ namespace ClassicUO.Network
             }
         }
 
-        public void PingReceived()
+        public void PingReceived(byte idx)
         {
-            _pings[_pingIdx++] = (uint) _pingStopwatch.ElapsedMilliseconds;
-
-            if (_pingIdx >= _pings.Length)
-            {
-                _pingIdx = 0;
-            }
-
-            _pingStopwatch.Stop();
+            _pings[idx % _pings.Length] = Time.Ticks - _startTickValue;
         }
 
         public void SendPing()
         {
-            if (!_socket.IsConnected || _socket.IsDisposed)
+            if (!_socket.IsConnected)
             {
                 return;
             }
 
-            _pingStopwatch.Restart();
-            _socket.Send_Ping();
+            _startTickValue = Time.Ticks;
+            _socket.Send_Ping(_pingIdx);
+            _pingIdx = (byte)((_pingIdx + 1) % _pings.Length);
         }
 
         public void Reset()
         {
-            _pingStopwatch.Reset();
+            _startTickValue = 0;
             ConnectedFrom = DateTime.MinValue;
             _lastTotalBytesReceived = _lastTotalBytesSent = _lastTotalPacketsReceived = _lastTotalPacketsSent = 0;
             TotalBytesReceived = TotalBytesSent = TotalPacketsReceived = TotalPacketsSent = 0;
@@ -128,6 +121,10 @@ namespace ClassicUO.Network
 
         public void Update()
         {
+            if (_statisticsTimer > Time.Ticks) return;
+
+            _statisticsTimer = Time.Ticks + 500;
+
             DeltaBytesReceived = TotalBytesReceived - _lastTotalBytesReceived;
             DeltaBytesSent = TotalBytesSent - _lastTotalBytesSent;
             DeltaPacketsReceived = TotalPacketsReceived - _lastTotalPacketsReceived;

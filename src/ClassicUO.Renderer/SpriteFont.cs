@@ -177,11 +177,10 @@ namespace ClassicUO.Renderer
         }
 
 
-        internal static SpriteFont Create(GraphicsDevice device, string name)
+        internal static SpriteFont Create(GraphicsDevice device, ReadOnlySpan<byte> resource)
         {
-            Stream stream = typeof(SpriteFont).Assembly.GetManifestResourceStream(name);
-
-            using (BinReader reader = new BinReader(stream))
+            using (var ms = new MemoryStream(resource.ToArray()))
+            using (var reader = new BinReader(ms))
             {
                 reader.ReadByte();
                 reader.ReadByte();
@@ -239,7 +238,11 @@ namespace ClassicUO.Renderer
                     SurfaceFormat.Color
                 );
 
-                texture.SetData(levelData);
+                unsafe
+                {
+                    fixed (byte* ptr = levelData)
+                        texture.SetDataPointerEXT(0, null, (IntPtr)ptr, width * height * sizeof(byte));
+                }
 
                 reader.Read7BitEncodedInt();
                 int glyphCount = reader.ReadInt32();

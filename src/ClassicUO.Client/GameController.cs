@@ -61,11 +61,11 @@ namespace ClassicUO
         private readonly Texture2D[] _hueSamplers = new Texture2D[3];
         private bool _ignoreNextTextInput;
         private readonly float[] _intervalFixedUpdate = new float[2];
-        private double _statisticsTimer;
         private double _totalElapsed, _currentFpsTime;
         private uint _totalFrames;
         private UltimaBatcher2D _uoSpriteBatch;
         private bool _suppressedDraw;
+        private Texture2D _background;
 
         public GameController()
         {
@@ -160,6 +160,10 @@ namespace ClassicUO
             GameCursor = new GameCursor();
             Audio = new AudioManager();
             Audio.Initialize();
+
+            var bytes = Loader.GetBackgroundImage().ToArray();
+            using var ms = new MemoryStream(bytes);
+            _background = Texture2D.FromStream(GraphicsDevice, ms);
 
             SetScene(new LoginScene());
             SetWindowPositionBySettings();
@@ -403,7 +407,12 @@ namespace ClassicUO
             Time.Delta = (float) gameTime.ElapsedGameTime.TotalSeconds;
 
             Mouse.Update();
-            OnNetworkUpdate();
+
+            var data = NetClient.Socket.CollectAvailableData();
+            var packetsCount = PacketHandlers.Handler.ParsePackets(data);
+            NetClient.Socket.Statistics.TotalPacketsReceived += (uint) packetsCount;
+            NetClient.Socket.Flush();
+
             Plugin.Tick();
 
             if (Scene != null && Scene.IsLoaded && !Scene.IsDestroyed)
@@ -466,6 +475,12 @@ namespace ClassicUO
 
             GraphicsDevice.Clear(Color.Black);
 
+            _uoSpriteBatch.Begin();
+            var rect = new Rectangle(0, 0, GraphicManager.PreferredBackBufferWidth,GraphicManager.PreferredBackBufferHeight);
+            _uoSpriteBatch.Draw(SolidColorTextureCache.GetTexture(Color.Black), rect, Vector3.UnitZ);
+            _uoSpriteBatch.DrawTiled(_background, rect, _background.Bounds, new Vector3(0, 0, 0.3f));
+            _uoSpriteBatch.End();
+
             if (Scene != null && Scene.IsLoaded && !Scene.IsDestroyed)
             {
                 Scene.Draw(_uoSpriteBatch);
@@ -500,36 +515,9 @@ namespace ClassicUO
             Plugin.ProcessDrawCmdList(GraphicsDevice);
         }
 
-        private void OnNetworkUpdate()
-        {
-            if (NetClient.LoginSocket.IsDisposed && NetClient.LoginSocket.IsConnected)
-            {
-                NetClient.LoginSocket.Disconnect();
-            }
-            else if (!NetClient.Socket.IsConnected)
-            {
-                NetClient.LoginSocket.Update();
-                UpdateSocketStats(NetClient.LoginSocket);
-            }
-            else if (!NetClient.Socket.IsDisposed)
-            {
-                NetClient.Socket.Update();
-                UpdateSocketStats(NetClient.Socket);
-            }
-        }
-
         protected override bool BeginDraw()
         {
             return !_suppressedDraw && base.BeginDraw();
-        }
-
-        private void UpdateSocketStats(NetClient socket)
-        {
-            if (_statisticsTimer < Time.Ticks)
-            {
-                socket.Statistics.Update();
-                _statisticsTimer = Time.Ticks + 500;
-            }
         }
 
         private void WindowOnClientSizeChanged(object sender, EventArgs e)
