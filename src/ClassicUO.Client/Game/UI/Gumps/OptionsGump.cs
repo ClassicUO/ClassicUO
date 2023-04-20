@@ -182,7 +182,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private Checkbox _use_tooltip;
         private Checkbox _useStandardSkillsGump, _showMobileNameIncoming, _showCorpseNameIncoming;
-        private Checkbox _showStatsMessage, _showSkillsMessage;
+        private Checkbox _showStatsMessage, _showSkillsMessage, _displayPartyChatOverhead;
         private HSliderBar _showSkillsMessageDelta;
 
         private Checkbox _leftAlignToolTips, _namePlateHealthOnlyWarmode, _enableHealthIndicator;
@@ -4004,6 +4004,9 @@ namespace ClassicUO.Game.UI.Gumps
                 section.AddRight(new Label("Damage to last attack", true, HUE_FONT, font: FONT));
                 _damageHueLastAttack.SetTooltip("Damage done to the last mobile you attacked, due to client limitations this is not neccesarily the damage YOU did to them.");
 
+                section.Add(_displayPartyChatOverhead = AddCheckBox(null, "", _currentProfile.DisplayPartyChatOverhead, 0, 0));
+                section.AddRight(AddLabel(null, "Display party chat over players heads.", 0, 0));
+
                 rightArea.Add(section);
                 startY += section.Height + SPACING;
             } //Mobiles
@@ -4644,6 +4647,8 @@ namespace ClassicUO.Game.UI.Gumps
                 _currentProfile.MainWindowBackgroundHue = _mainWindowHuePicker.Hue;
                 GameController.UpdateBackgroundHueShader();
             }
+
+            _currentProfile.DisplayPartyChatOverhead = _displayPartyChatOverhead.IsChecked;
 
             _currentProfile.EnableHealthIndicator = _enableHealthIndicator.IsChecked;
             if (int.TryParse(_healthIndicatorPercentage.Text, out int hpPercent))

@@ -443,6 +443,8 @@ namespace ClassicUO.Configuration
         [JsonConverter(typeof(Point2Converter))] public Point BackpackGridPosition { get; set; } = new Point(100, 100);
         [JsonConverter(typeof(Point2Converter))] public Point BackpackGridSize { get; set; } = new Point(300, 300);
 
+        public bool DisplayPartyChatOverhead { get; set; } = true;
+
         public static uint GumpsVersion { get; private set; }
 
         public void Save(string path, bool saveGumps = true)
