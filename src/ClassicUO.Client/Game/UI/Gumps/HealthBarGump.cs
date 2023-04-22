@@ -325,7 +325,7 @@ namespace ClassicUO.Game.UI.Gumps
                 else
                 {
                     if(StatusGumpBase.GetStatusGump() == null)
-                        UIManager.Add(StatusGumpBase.AddStatusGump(ScreenCoordinateX, ScreenCoordinateY));
+                        UIManager.Add(StatusGumpBase.AddStatusGump(ProfileManager.CurrentProfile.StatusGumpPosition.X, ProfileManager.CurrentProfile.StatusGumpPosition.Y));
                 }
             }
 

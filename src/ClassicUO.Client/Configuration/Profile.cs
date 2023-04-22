@@ -423,6 +423,7 @@ namespace ClassicUO.Configuration
         public ushort ModernPaperDollHue { get; set; } = 0;
         public ushort ModernPaperDollDurabilityHue { get; set; } = 32;
         public int ModernPaperDoll_DurabilityPercent { get; set; } = 90;
+        [JsonConverter(typeof(Point2Converter))] public Point ModernPaperdollPosition { get; set; } = new Point(100, 100);
         #endregion
 
         #region Health indicator
@@ -434,6 +435,15 @@ namespace ClassicUO.Configuration
         public ushort MainWindowBackgroundHue { get; set; } = 1;
 
         public int MoveMultiObjectDelay { get; set; } = 1000;
+
+        [JsonConverter(typeof(Point2Converter))] public Point WorldMapPosition { get; set; } = new Point(100, 100);
+        [JsonConverter(typeof(Point2Converter))] public Point PaperdollPosition { get; set; } = new Point(100, 100);
+        [JsonConverter(typeof(Point2Converter))] public Point JournalPosition { get; set; } = new Point(100, 100);
+        [JsonConverter(typeof(Point2Converter))] public Point StatusGumpPosition { get; set; } = new Point(100, 100);
+        [JsonConverter(typeof(Point2Converter))] public Point BackpackGridPosition { get; set; } = new Point(100, 100);
+        [JsonConverter(typeof(Point2Converter))] public Point BackpackGridSize { get; set; } = new Point(300, 300);
+
+        public bool DisplayPartyChatOverhead { get; set; } = true;
 
         public static uint GumpsVersion { get; private set; }
 
@@ -658,6 +668,8 @@ namespace ClassicUO.Configuration
                                 case GumpType.Journal:
                                     //gump = new JournalGump();
                                     gump = new ResizableJournal();
+                                    x = ProfileManager.CurrentProfile.JournalPosition.X;
+                                    y = ProfileManager.CurrentProfile.JournalPosition.Y;
                                     break;
 
                                 case GumpType.MacroButton:
@@ -676,9 +688,17 @@ namespace ClassicUO.Configuration
 
                                 case GumpType.PaperDoll:
                                     if (ProfileManager.CurrentProfile.UseModernPaperdoll && serial == World.Player.Serial)
+                                    {
                                         gump = new ModernPaperdoll(serial);
+                                        x = ProfileManager.CurrentProfile.ModernPaperdollPosition.X;
+                                        y = ProfileManager.CurrentProfile.ModernPaperdollPosition.Y;
+                                    }
                                     else
+                                    {
                                         gump = new PaperDollGump();
+                                        x = ProfileManager.CurrentProfile.PaperdollPosition.X;
+                                        y = ProfileManager.CurrentProfile.PaperdollPosition.Y;
+                                    }
 
                                     break;
 
@@ -701,7 +721,8 @@ namespace ClassicUO.Configuration
 
                                 case GumpType.StatusGump:
                                     gump = StatusGumpBase.AddStatusGump(0, 0);
-
+                                    x = ProfileManager.CurrentProfile.StatusGumpPosition.X;
+                                    y = ProfileManager.CurrentProfile.StatusGumpPosition.Y;
                                     break;
 
                                 //case GumpType.TipNotice:
@@ -749,6 +770,10 @@ namespace ClassicUO.Configuration
                                 case GumpType.GridContainer:
                                     ushort ogContainer = ushort.Parse(xml.GetAttribute("ogContainer"));
                                     gump = new GridContainer(serial, ogContainer);
+                                    if (((GridContainer)gump).isPlayerBackpack){
+                                        x = ProfileManager.CurrentProfile.BackpackGridPosition.X;
+                                        y = ProfileManager.CurrentProfile.BackpackGridPosition.Y;
+                                    }
                                     break;
                                 case GumpType.DurabilityGump:
                                     gump = new DurabilitysGump();

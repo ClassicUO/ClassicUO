@@ -182,6 +182,8 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseUp(int x, int y, MouseButtonType button)
         {
+            base.OnMouseUp(x, y, button);
+
             if (button == MouseButtonType.Left && Keyboard.Alt && UIManager.MouseOverControl != null && (UIManager.MouseOverControl == this || UIManager.MouseOverControl.RootParent == this))
             {
                 if (GumpsLoader.Instance.GetGumpTexture(0x82C, out var bounds) != null)
@@ -208,8 +210,6 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 }
             }
-
-            base.OnMouseUp(x, y, button);
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)

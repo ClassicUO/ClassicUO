@@ -37,6 +37,7 @@ using System.Xml;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
+using ClassicUO.Input;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
@@ -45,6 +46,8 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class Gump : Control
     {
+        private bool isLocked = false;
+
         public Gump(uint local, uint server)
         {
             LocalSerial = local;
@@ -52,7 +55,6 @@ namespace ClassicUO.Game.UI.Gumps
             AcceptMouseInput = false;
             AcceptKeyboardInput = false;
         }
-
 
         public bool CanBeSaved => GumpType != Gumps.GumpType.None;
 
@@ -62,6 +64,23 @@ namespace ClassicUO.Game.UI.Gumps
 
         public uint MasterGumpSerial { get; set; }
 
+        public virtual bool IsLocked
+        {
+            get { return isLocked; }
+            set
+            {
+                isLocked = value;
+                if (isLocked)
+                {
+                    CanMove = false;
+                    CanCloseWithRightClick = false;
+                } else
+                {
+                    CanMove = true;
+                    CanCloseWithRightClick = true;
+                }
+            }
+        }
 
         public override void Update()
         {
@@ -91,13 +110,22 @@ namespace ClassicUO.Game.UI.Gumps
             base.Dispose();
         }
 
+        protected override void OnMouseUp(int x, int y, MouseButtonType button)
+        {
+            base.OnMouseUp(x, y, button);
+            if (Keyboard.Ctrl && Keyboard.Alt && UIManager.MouseOverControl != null && (UIManager.MouseOverControl == this || UIManager.MouseOverControl.RootParent == this))
+            {
+                IsLocked ^= true;
+            }
+        }
 
         public virtual void Save(XmlTextWriter writer)
         {
-            writer.WriteAttributeString("type", ((int) GumpType).ToString());
+            writer.WriteAttributeString("type", ((int)GumpType).ToString());
             writer.WriteAttributeString("x", X.ToString());
             writer.WriteAttributeString("y", Y.ToString());
             writer.WriteAttributeString("serial", LocalSerial.ToString());
+            writer.WriteAttributeString("isLocked", isLocked.ToString());
         }
 
         public void SetInScreen()
@@ -118,6 +146,8 @@ namespace ClassicUO.Game.UI.Gumps
 
         public virtual void Restore(XmlElement xml)
         {
+            if (bool.TryParse(xml.GetAttribute("isLocked"), out bool lockedStatus))
+                IsLocked = lockedStatus;
         }
 
         public void RequestUpdateContents()
@@ -180,7 +210,7 @@ namespace ClassicUO.Game.UI.Gumps
                             break;
 
                         case StbTextBox textBox:
-                            entries.Add(new Tuple<ushort, string>((ushort) textBox.LocalSerial, textBox.Text));
+                            entries.Add(new Tuple<ushort, string>((ushort)textBox.LocalSerial, textBox.Text));
 
                             break;
                     }
