@@ -37,6 +37,7 @@ using System.Xml;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
+using ClassicUO.Input;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
@@ -107,6 +108,15 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             base.Dispose();
+        }
+
+        protected override void OnMouseUp(int x, int y, MouseButtonType button)
+        {
+            base.OnMouseUp(x, y, button);
+            if (Keyboard.Ctrl && Keyboard.Alt && UIManager.MouseOverControl != null && (UIManager.MouseOverControl == this || UIManager.MouseOverControl.RootParent == this))
+            {
+                IsLocked ^= true;
+            }
         }
 
         public virtual void Save(XmlTextWriter writer)

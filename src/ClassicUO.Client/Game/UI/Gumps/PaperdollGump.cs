@@ -547,6 +547,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseUp(int x, int y, MouseButtonType button)
         {
+            base.OnMouseUp(x, y, button);
             if (button == MouseButtonType.Left && World.InGame)
             {
                 Mobile container = World.Mobiles.Get(LocalSerial);
@@ -603,10 +604,6 @@ namespace ClassicUO.Game.UI.Gumps
                         DelayedObjectClickManager.Set(item.Serial, Mouse.Position.X - off.X - ScreenCoordinateX, Mouse.Position.Y - off.Y - ScreenCoordinateY, Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK);
                     }
                 }
-            }
-            else
-            {
-                base.OnMouseUp(x, y, button);
             }
         }
 
