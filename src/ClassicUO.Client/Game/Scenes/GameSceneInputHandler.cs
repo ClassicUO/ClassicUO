@@ -950,7 +950,7 @@ namespace ClassicUO.Game.Scenes
 
             if (ProfileManager.CurrentProfile.EnablePathfind && !Pathfinder.AutoWalking)
             {
-                if (ProfileManager.CurrentProfile.UseShiftToPathfind && !Keyboard.Shift && !ProfileManager.CurrentProfile.PathfindSingleClick)
+                if ((ProfileManager.CurrentProfile.UseShiftToPathfind && !Keyboard.Shift) || ProfileManager.CurrentProfile.PathfindSingleClick)
                 {
                     return false;
                 }
