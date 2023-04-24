@@ -117,17 +117,18 @@ namespace ClassicUO.Game.Managers
                         {
                             bool handled = false;
                             foreach (PartyMember member in World.Party.Members)
-                                if (member.Name == name)
-                                {
-                                    Mobile m = World.Mobiles.Get(member.Serial);
-                                    if (m != null)
+                                if (member != null)
+                                    if (member.Name == name)
                                     {
-                                        parent = m;
-                                        handled = true;
-                                        break;
-                                    }
+                                        Mobile m = World.Mobiles.Get(member.Serial);
+                                        if (m != null)
+                                        {
+                                            parent = m;
+                                            handled = true;
+                                            break;
+                                        }
 
-                                }
+                                    }
                             if (!handled) break;
                         }
 
