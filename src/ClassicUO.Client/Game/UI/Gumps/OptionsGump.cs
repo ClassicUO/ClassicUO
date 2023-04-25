@@ -4328,16 +4328,20 @@ namespace ClassicUO.Game.UI.Gumps
 
             InputField _conditionText = AddInputField(
                 null, 1, _delete.Height + 5,
-                main.Width, TEXTBOX_HEIGHT
+                main.Width - 25, TEXTBOX_HEIGHT
                 );
             _conditionText.SetText(data.trigger);
             main.Add(_conditionText);
+
+            Checkbox _replaceIfExists = AddCheckBox(null, "", data.replace_if_exists, _conditionText.X + _conditionText.Width + 2, _conditionText.Y);
+            _replaceIfExists.SetTooltip("Replace any active cooldown of this type with a new one if triggered again.");
+            main.Add(_replaceIfExists);
 
             NiceButton _save = new NiceButton(main.Width - 37, 1, 37, TEXTBOX_HEIGHT, ButtonAction.Activate, "Save");
             _save.IsSelectable = false;
             _save.MouseUp += (s, e) =>
             {
-                CoolDownBar.CoolDownConditionData.SaveCondition(key, _hueSelector.Hue, _name.Text, _conditionText.Text, int.Parse(_cooldown.Text), false, _message_type.SelectedIndex);
+                CoolDownBar.CoolDownConditionData.SaveCondition(key, _hueSelector.Hue, _name.Text, _conditionText.Text, int.Parse(_cooldown.Text), false, _message_type.SelectedIndex, _replaceIfExists.IsChecked);
             };
             main.Add(_save);
 
@@ -4345,7 +4349,7 @@ namespace ClassicUO.Game.UI.Gumps
             _preview.IsSelectable = false;
             _preview.MouseUp += (s, e) =>
             {
-                CoolDownBarManager.AddCoolDownBar(TimeSpan.FromSeconds(int.Parse(_cooldown.Text)), _name.Text, _hueSelector.Hue);
+                CoolDownBarManager.AddCoolDownBar(TimeSpan.FromSeconds(int.Parse(_cooldown.Text)), _name.Text, _hueSelector.Hue, _replaceIfExists.IsChecked);
             };
             main.Add(_preview);
             return main;

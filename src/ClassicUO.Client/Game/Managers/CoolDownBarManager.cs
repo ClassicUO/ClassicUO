@@ -42,7 +42,8 @@ namespace ClassicUO.Game.Managers
                         AddCoolDownBar(
                             TimeSpan.FromSeconds(ProfileManager.CurrentProfile.Condition_Duration[i]),
                             ProfileManager.CurrentProfile.Condition_Label[i],
-                            ProfileManager.CurrentProfile.Condition_Hue[i]
+                            ProfileManager.CurrentProfile.Condition_Hue[i],
+                            ProfileManager.CurrentProfile.Condition_ReplaceIfExists.Count > i ? ProfileManager.CurrentProfile.Condition_ReplaceIfExists[i] : false
                             );
                     }
                 }
@@ -50,8 +51,19 @@ namespace ClassicUO.Game.Managers
 
         }
 
-        public static void AddCoolDownBar(TimeSpan _duration, string _name, ushort _hue)
+        public static void AddCoolDownBar(TimeSpan _duration, string _name, ushort _hue, bool replace)
         {
+            if (replace)
+                for (int i = 0; i < coolDownBars.Length; i++)
+                {
+                    if (coolDownBars[i] != null && !coolDownBars[i].IsDisposed && coolDownBars[i].textLabel.Text == _name)
+                    {
+                        coolDownBars[i].Dispose();
+                        coolDownBars[i] = new CoolDownBar(_duration, _name, _hue, CoolDownBar.DEFAULT_X, CoolDownBar.DEFAULT_Y + (i * (CoolDownBar.COOL_DOWN_HEIGHT + 5)));
+                        UIManager.Add(coolDownBars[i]);
+                        return;
+                    }
+                }
             for (int i = 0; i < coolDownBars.Length; i++)
             {
                 if (coolDownBars[i] == null || coolDownBars[i].IsDisposed)
@@ -61,7 +73,6 @@ namespace ClassicUO.Game.Managers
                     return;
                 }
             }
-
         }
     }
 }

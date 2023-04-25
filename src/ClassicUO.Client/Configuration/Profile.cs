@@ -388,6 +388,7 @@ namespace ClassicUO.Configuration
         public List<int> Condition_Duration { get; set; } = new List<int>();
         public List<string> Condition_Trigger { get; set; } = new List<string>();
         public List<int> Condition_Type { get; set; } = new List<int>();
+        public List<bool> Condition_ReplaceIfExists { get; set; } = new List<bool>();
         public int CoolDownConditionCount
         {
             get
