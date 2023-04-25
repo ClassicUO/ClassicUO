@@ -56,7 +56,7 @@ namespace ClassicUO.Game.UI.Gumps
         private const int X_SPACING = 1, Y_SPACING = 1;
         private const int TOP_BAR_HEIGHT = 20;
 
-        private static int _lastX = 100, _lastY = 100;
+        private static int _lastX = 100, _lastY = 100, _lastCorpseX = 100, _lastCorpseY = 100;
         private static int GRID_ITEM_SIZE { get { return (int)Math.Round(50 * (ProfileManager.CurrentProfile.GridContainersScale / 100f)); } }
         private static int BORDER_WIDTH = 4;
         private static int DEFAULT_WIDTH { get { return GetWidth(); } }
@@ -107,6 +107,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             #region SET VARS
+            isCorpse = _container.IsCorpse;
             if (useGridStyle != null)
                 UseOldContainerStyle = !useGridStyle;
             if (LocalSerial == World.Player.FindItemByLayer(Layer.Backpack).Serial)
@@ -125,12 +126,21 @@ namespace ClassicUO.Game.UI.Gumps
             }
             _lastWidth = Width = savedSize.X;
             _lastHeight = Height = savedSize.Y;
-            _lastX = X = lastPos.X;
-            _lastY = Y = lastPos.Y;
+
+            if (isCorpse)
+            {
+                X = _lastCorpseX;
+                Y = _lastCorpseY;
+            }
+            else
+            {
+                _lastX = X = lastPos.X;
+                _lastY = Y = lastPos.Y;
+            }
 
             AnchorType = ProfileManager.CurrentProfile.EnableGridContainerAnchor ? ANCHOR_TYPE.NONE : ANCHOR_TYPE.DISABLED;
             OriginalContainerItemGraphic = originalContainerGraphic;
-            isCorpse = _container.IsCorpse;
+            
             CanMove = true;
             AcceptMouseInput = true;
             CanCloseWithRightClick = true;
@@ -487,8 +497,16 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Dispose()
         {
-            _lastX = X;
-            _lastY = Y;
+            if (isCorpse)
+            {
+                _lastCorpseX = X;
+                _lastCorpseY = Y;
+            }
+            else
+            {
+                _lastX = X;
+                _lastY = Y;
+            }
 
             if (_container != null)
             {
