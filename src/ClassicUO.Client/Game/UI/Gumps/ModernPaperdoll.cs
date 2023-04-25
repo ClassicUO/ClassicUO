@@ -226,6 +226,8 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
+            UIManager.GetGump<CharacterPreview>()?.PaperDollPreview.RequestUpdate();
+
             Mobile m = World.Mobiles.Get(LocalSerial);
             if (m != null)
                 UpdateTitle(m.Title);
@@ -630,6 +632,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (e.Button == MouseButtonType.Left)
                     {
+                        UIManager.GetGump<CharacterPreview>()?.Dispose();
                         UIManager.Add(new CharacterPreview(localSerial) { X = 100, Y = 100 });
                     }
                 };
@@ -828,6 +831,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private class CharacterPreview : Gump
         {
+            public readonly PaperDollInteractable PaperDollPreview;
             public CharacterPreview(uint localSerial) : base(localSerial, 0)
             {
                 Width = 190;
@@ -837,7 +841,7 @@ namespace ClassicUO.Game.UI.Gumps
                 AcceptMouseInput = true;
                 Add(new AlphaBlendControl(0.75f) { CanCloseWithRightClick = true, CanMove = true, Width = Width, Height = Height });
 
-                Add(new PaperDollInteractable(0, 0, LocalSerial, null) { AcceptMouseInput = false });
+                Add(PaperDollPreview = new PaperDollInteractable(0, 0, LocalSerial, null) { AcceptMouseInput = false });
 
                 Add(new SimpleBorder() { Width = Width, Height = Height, Alpha = 0.85f });
             }

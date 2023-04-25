@@ -15,7 +15,7 @@ namespace ClassicUO.Game.UI.Gumps
         public static int DEFAULT_Y { get { return ProfileManager.CurrentProfile.CoolDownY; } }
 
         private AlphaBlendControl background, foreground;
-        private Label textLabel, cooldownLabel;
+        public readonly Label textLabel, cooldownLabel;
         private DateTime expire;
         private TimeSpan duration;
 
@@ -131,46 +131,52 @@ namespace ClassicUO.Game.UI.Gumps
             public string trigger;
             public int cooldown;
             public int message_type;
+            public bool replace_if_exists;
 
-            private CoolDownConditionData(ushort hue = 42, string label = "Label", string trigger = "Text to trigger", int cooldown = 10, int message_type = (int)MESSAGE_TYPE.ALL)
+            private CoolDownConditionData(ushort hue = 42, string label = "Label", string trigger = "Text to trigger", int cooldown = 10, int message_type = (int)MESSAGE_TYPE.ALL, bool replace_if_exists = false)
             {
                 this.hue = hue;
                 this.label = label;
                 this.trigger = trigger;
                 this.cooldown = cooldown;
                 this.message_type = message_type;
+                this.replace_if_exists = replace_if_exists;
             }
 
             public static CoolDownConditionData GetConditionData(int key, bool createIfNotExist)
             {
                 CoolDownConditionData data = new CoolDownConditionData();
-                if(ProfileManager.CurrentProfile.CoolDownConditionCount > key)
+                if (ProfileManager.CurrentProfile.CoolDownConditionCount > key)
                 {
                     data.hue = ProfileManager.CurrentProfile.Condition_Hue[key];
                     data.label = ProfileManager.CurrentProfile.Condition_Label[key];
                     data.trigger = ProfileManager.CurrentProfile.Condition_Trigger[key];
                     data.cooldown = ProfileManager.CurrentProfile.Condition_Duration[key];
-                    if (ProfileManager.CurrentProfile.Condition_Type.Count > key) //Remove me after a while to prevent index not found
-                        data.message_type = ProfileManager.CurrentProfile.Condition_Type[key];
+                    data.message_type = ProfileManager.CurrentProfile.Condition_Type[key];
+
+                    if (ProfileManager.CurrentProfile.Condition_ReplaceIfExists.Count > key) //Remove me after a while to prevent index not found
+                        data.replace_if_exists = ProfileManager.CurrentProfile.Condition_ReplaceIfExists[key];
                     else
                     {
-                        while (ProfileManager.CurrentProfile.Condition_Type.Count <= key)
+                        while (ProfileManager.CurrentProfile.Condition_ReplaceIfExists.Count <= key)
                         {
-                            ProfileManager.CurrentProfile.Condition_Type.Add((int)MESSAGE_TYPE.ALL);
+                            ProfileManager.CurrentProfile.Condition_ReplaceIfExists.Add(false);
                         }
                     }
-                } else if (createIfNotExist)
+                }
+                else if (createIfNotExist)
                 {
                     ProfileManager.CurrentProfile.Condition_Hue.Add(data.hue);
                     ProfileManager.CurrentProfile.Condition_Label.Add(data.label);
                     ProfileManager.CurrentProfile.Condition_Trigger.Add(data.trigger);
                     ProfileManager.CurrentProfile.Condition_Duration.Add(data.cooldown);
                     ProfileManager.CurrentProfile.Condition_Type.Add(data.message_type);
+                    ProfileManager.CurrentProfile.Condition_ReplaceIfExists.Add(data.replace_if_exists);
                 }
                 return data;
             }
 
-            public static void SaveCondition(int key, ushort hue, string label, string trigger, int cooldown, bool createIfNotExist, int message_type)
+            public static void SaveCondition(int key, ushort hue, string label, string trigger, int cooldown, bool createIfNotExist, int message_type, bool replace_if_exists)
             {
                 if (ProfileManager.CurrentProfile.CoolDownConditionCount > key)
                 {
@@ -178,32 +184,40 @@ namespace ClassicUO.Game.UI.Gumps
                     ProfileManager.CurrentProfile.Condition_Label[key] = label;
                     ProfileManager.CurrentProfile.Condition_Trigger[key] = trigger;
                     ProfileManager.CurrentProfile.Condition_Duration[key] = cooldown;
-                    if (ProfileManager.CurrentProfile.Condition_Type.Count > key) //Remove me after a while to prevent index not found
-                        ProfileManager.CurrentProfile.Condition_Type[key] = message_type;
+                    ProfileManager.CurrentProfile.Condition_Type[key] = message_type;
+
+                    if (ProfileManager.CurrentProfile.Condition_ReplaceIfExists.Count > key) //Remove me after a while to prevent index not found
+                        ProfileManager.CurrentProfile.Condition_ReplaceIfExists[key] = replace_if_exists;
                     else
                     {
-                        while (ProfileManager.CurrentProfile.Condition_Type.Count <= key)
+                        while (ProfileManager.CurrentProfile.Condition_ReplaceIfExists.Count <= key)
                         {
-                            ProfileManager.CurrentProfile.Condition_Type.Add((int)MESSAGE_TYPE.ALL);
+                            ProfileManager.CurrentProfile.Condition_ReplaceIfExists.Add(false);
                         }
+                        ProfileManager.CurrentProfile.Condition_ReplaceIfExists[key] = replace_if_exists;
                     }
-                } else if (createIfNotExist)
-                    {
-                        ProfileManager.CurrentProfile.Condition_Hue.Add(hue);
-                        ProfileManager.CurrentProfile.Condition_Label.Add(label);
-                        ProfileManager.CurrentProfile.Condition_Trigger.Add(trigger);
-                        ProfileManager.CurrentProfile.Condition_Duration.Add(cooldown);
-                    }
+                }
+                else if (createIfNotExist)
+                {
+                    ProfileManager.CurrentProfile.Condition_Hue.Add(hue);
+                    ProfileManager.CurrentProfile.Condition_Label.Add(label);
+                    ProfileManager.CurrentProfile.Condition_Trigger.Add(trigger);
+                    ProfileManager.CurrentProfile.Condition_Duration.Add(cooldown);
+                    ProfileManager.CurrentProfile.Condition_Type.Add(message_type);
+                    ProfileManager.CurrentProfile.Condition_ReplaceIfExists.Add(createIfNotExist);
+                }
             }
 
             public static void RemoveCondition(int key)
             {
-                if(ProfileManager.CurrentProfile.CoolDownConditionCount > key)
+                if (ProfileManager.CurrentProfile.CoolDownConditionCount > key)
                 {
                     ProfileManager.CurrentProfile.Condition_Hue.RemoveAt(key);
                     ProfileManager.CurrentProfile.Condition_Label.RemoveAt(key);
                     ProfileManager.CurrentProfile.Condition_Trigger.RemoveAt(key);
                     ProfileManager.CurrentProfile.Condition_Duration.RemoveAt(key);
+                    ProfileManager.CurrentProfile.Condition_Type.RemoveAt(key);
+                    ProfileManager.CurrentProfile.Condition_ReplaceIfExists.RemoveAt(key);
                 }
             }
 
