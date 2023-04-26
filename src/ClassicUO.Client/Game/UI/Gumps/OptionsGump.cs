@@ -185,9 +185,10 @@ namespace ClassicUO.Game.UI.Gumps
         private Checkbox _showStatsMessage, _showSkillsMessage, _displayPartyChatOverhead;
         private HSliderBar _showSkillsMessageDelta;
 
-        private Checkbox _leftAlignToolTips, _namePlateHealthOnlyWarmode, _enableHealthIndicator;
+        private Checkbox _leftAlignToolTips, _namePlateHealthOnlyWarmode, _enableHealthIndicator, _spellIconDisplayHotkey;
         private InputField _healthIndicatorPercentage, _healthIndicatorWidth;
-        private ModernColorPicker.HueDisplay _mainWindowHuePicker;
+        private ModernColorPicker.HueDisplay _mainWindowHuePicker, _spellIconHotkeyHue;
+        private HSliderBar _spellIconScale;
 
         #region Cooldowns
         private InputField _coolDownX, _coolDownY;
@@ -4130,6 +4131,18 @@ namespace ClassicUO.Game.UI.Gumps
                 _healthIndicatorWidth.SetText(_currentProfile.HealthIndicatorWidth.ToString());
                 section.PopIndent();
 
+                section.Add(AddLabel(null, "Spell Icon Scale", 0, 0));
+                section.AddRight(_spellIconScale = AddHSlider(null, 50, 300, _currentProfile.SpellIconScale, 0, 0, 200));
+                _spellIconScale.SetTooltip("This will take effect after you log out/back in or close and reopen the spell icon.");
+
+                section.Add(AddLabel(null, "Display matching macro hotkeys on spell icons", 0, 0));
+                section.AddRight(_spellIconDisplayHotkey = AddCheckBox(null, "", _currentProfile.SpellIcon_DisplayHotkey, 0, 0));
+
+                section.PushIndent();
+                section.Add(AddLabel(null, "Hotkey text hue", 0 ,0));
+                section.AddRight(_spellIconHotkeyHue = new ModernColorPicker.HueDisplay(_currentProfile.SpellIcon_HotkeyHue, null, true));
+                section.PopIndent();
+
                 rightArea.Add(section);
                 startY += section.Height + SPACING;
             }//Misc
@@ -4651,6 +4664,11 @@ namespace ClassicUO.Game.UI.Gumps
                 _currentProfile.MainWindowBackgroundHue = _mainWindowHuePicker.Hue;
                 GameController.UpdateBackgroundHueShader();
             }
+
+
+            _currentProfile.SpellIcon_DisplayHotkey = _spellIconDisplayHotkey.IsChecked;
+            _currentProfile.SpellIcon_HotkeyHue = _spellIconHotkeyHue.Hue;
+            _currentProfile.SpellIconScale = _spellIconScale.Value;
 
             _currentProfile.DisplayPartyChatOverhead = _displayPartyChatOverhead.IsChecked;
 
