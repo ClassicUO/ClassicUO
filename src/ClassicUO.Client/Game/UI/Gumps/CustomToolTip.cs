@@ -71,7 +71,7 @@ namespace ClassicUO.Game.UI.Gumps
                 else
                 {
                     World.OPL.Contains(item.Serial);
-                    Task.Delay(1000);
+                    Task.Delay(1000).Wait();
                     LoadOPLData(attempt++);
                 }
             });
@@ -95,7 +95,7 @@ namespace ClassicUO.Game.UI.Gumps
             base.Draw(batcher, x, y);
             if (IsDisposed)
                 return false;
-            if (!hoverReference.MouseIsOver)
+            if (hoverReference != null && !hoverReference.MouseIsOver)
             {
                 Dispose();
                 return false;
