@@ -31,6 +31,7 @@
 #endregion
 
 using ClassicUO.Renderer.Effects;
+using FontStashSharp.Interfaces;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -42,7 +43,7 @@ using System.Runtime.InteropServices;
 
 namespace ClassicUO.Renderer
 {
-    public sealed unsafe class UltimaBatcher2D : IDisposable
+    public sealed unsafe class UltimaBatcher2D : IDisposable, IFontStashRenderer
     {
         private static readonly float[] _cornerOffsetX = new float[] { 0.0f, 1.0f, 0.0f, 1.0f };
         private static readonly float[] _cornerOffsetY = new float[] { 0.0f, 0.0f, 1.0f, 1.0f };
@@ -148,6 +149,14 @@ namespace ClassicUO.Renderer
         public void SetBrightlight(float f)
         {
             _basicUOEffect.Brighlight.SetValue(f);
+        }
+
+        // For IFontStashRenderer
+        public void Draw(Texture2D texture, Vector2 pos, Rectangle? src, Color color, float rotation, Vector2 scale, float depth)
+        {
+            var hueVector = ShaderHueTranslator.GetHueVector((int)color.PackedValue);
+            hueVector.Y = ShaderHueTranslator.SHADER_TEXT_HUE;
+            Draw(texture, pos, src, hueVector, rotation, default(Vector2), scale, SpriteEffects.None, depth);
         }
 
         public void DrawString(SpriteFont spriteFont, string text, int x, int y, Vector3 color)
