@@ -41,7 +41,6 @@ namespace ClassicUO.Game.UI.Gumps
         #region OTHER
         private static int _lastX = 100, _lastY = 100;
         private static int _lastWidth = MIN_WIDTH, _lastHeight = 300;
-        private bool updatedBorder = false;
         private readonly GumpPicTiled _backgroundTexture;
         #endregion
         public ResizableJournal() : base(_lastWidth, _lastHeight, MIN_WIDTH, MIN_HEIGHT, 0, 0)
@@ -139,7 +138,6 @@ namespace ClassicUO.Game.UI.Gumps
         public void BuildBorder()
         {
             int graphic = 0, borderSize = 0;
-            updatedBorder = true;
             switch ((BorderStyle)ProfileManager.CurrentProfile.JournalStyle)
             {
                 case BorderStyle.Style1:
@@ -177,7 +175,6 @@ namespace ClassicUO.Game.UI.Gumps
                     _backgroundTexture.IsVisible = false;
                     _background.IsVisible = true;
                     BORDER_WIDTH = 4;
-                    Reposition();
                     break;
             }
 
@@ -302,7 +299,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _lastY = Y;
                 ProfileManager.CurrentProfile.JournalPosition = Location;
             }
-            if (((Width != _lastWidth || Height != _lastHeight) && !Mouse.LButtonPressed) || updatedBorder)
+            if (((Width != _lastWidth || Height != _lastHeight) && !Mouse.LButtonPressed))
                 Reposition();
         }
 
@@ -524,7 +521,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 bool maxScroll = _scrollBar.Value == _scrollBar.MaxValue;
 
-                while (_entries.Count > 199)
+                while (_entries.Count > Constants.MAX_JOURNAL_HISTORY_COUNT)
                 {
                     _entries.RemoveFromFront().Destroy();
 
