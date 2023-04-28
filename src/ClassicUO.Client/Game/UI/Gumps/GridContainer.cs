@@ -951,10 +951,13 @@ namespace ClassicUO.Game.UI.Gumps
                     if (compItem != null && (Layer)_item.ItemData.Layer != Layer.Backpack)
                     {
                         hit.ClearTooltip();
+                        List<CustomToolTip> toolTipList = new List<CustomToolTip>();
                         toolTipThis = new CustomToolTip(_item, Mouse.Position.X + 5, Mouse.Position.Y + 5, hit);
-                        UIManager.Add(toolTipThis);
+                        toolTipList.Add(toolTipThis);
+                        //UIManager.Add(toolTipThis);
                         toolTipitem1 = new CustomToolTip(compItem, toolTipThis.X + toolTipThis.Width + 10, toolTipThis.Y, hit, "<basefont color=\"orange\">Equipped Item<br>");
-                        UIManager.Add(toolTipitem1);
+                        //UIManager.Add(toolTipitem1);
+                        toolTipList.Add(toolTipitem1);
 
                         if ((Layer)_item.ItemData.Layer == Layer.OneHanded)
                         {
@@ -962,7 +965,8 @@ namespace ClassicUO.Game.UI.Gumps
                             if (compItem2 != null)
                             {
                                 toolTipitem2 = new CustomToolTip(compItem2, toolTipitem1.X + toolTipitem1.Width + 10, toolTipitem1.Y, hit, "<basefont color=\"orange\">Equipped Item<br>");
-                                UIManager.Add(toolTipitem2);
+                                //UIManager.Add(toolTipitem2);
+                                toolTipList.Add(toolTipitem2);
                             }
                         }
                         else if ((Layer)_item.ItemData.Layer == Layer.TwoHanded)
@@ -971,9 +975,13 @@ namespace ClassicUO.Game.UI.Gumps
                             if (compItem2 != null)
                             {
                                 toolTipitem2 = new CustomToolTip(compItem2, toolTipitem1.X + toolTipitem1.Width + 10, toolTipitem1.Y, hit, "<basefont color=\"orange\">Equipped Item<br>");
-                                UIManager.Add(toolTipitem2);
+                                //UIManager.Add(toolTipitem2);
+                                toolTipList.Add(toolTipitem2);
                             }
                         }
+
+                        MultipleToolTipGump multipleToolTipGump = new MultipleToolTipGump(Mouse.Position.X + 10, Mouse.Position.Y + 10, toolTipList.ToArray(), hit);
+                        UIManager.Add(multipleToolTipGump);
                     }
                 }
 

@@ -116,7 +116,7 @@ namespace ClassicUO.Game
 
         public const ushort HIGHLIGHT_CURRENT_OBJECT_HUE = 0x014;
 
-        public const int MAX_JOURNAL_HISTORY_COUNT = 100;
+        public const int MAX_JOURNAL_HISTORY_COUNT = 1000;
 
         public const byte MIN_CONTAINER_SIZE_PERC = 50;
         public const byte MAX_CONTAINER_SIZE_PERC = 200;

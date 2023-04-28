@@ -11,7 +11,7 @@ namespace ClassicUO.Game.UI.Gumps
     internal class CustomToolTip : Gump
     {
         private readonly Item item;
-        private readonly Control hoverReference;
+        private Control hoverReference;
         private readonly string prepend;
         private readonly string append;
         private RenderedText text;
@@ -33,6 +33,11 @@ namespace ClassicUO.Game.UI.Gumps
                 hue = ProfileManager.CurrentProfile.TooltipTextHue;
             }
             BuildGump();
+        }
+
+        public void RemoveHoverReference()
+        {
+            hoverReference = null;
         }
 
         private void BuildGump()
@@ -67,11 +72,12 @@ namespace ClassicUO.Game.UI.Gumps
                             recalculateWidthByInfo: true,
                             hue: hue
                         );
+                    Height = text.Height;
                 }
                 else
                 {
                     World.OPL.Contains(item.Serial);
-                    Task.Delay(1000);
+                    Task.Delay(1000).Wait();
                     LoadOPLData(attempt++);
                 }
             });
@@ -95,7 +101,7 @@ namespace ClassicUO.Game.UI.Gumps
             base.Draw(batcher, x, y);
             if (IsDisposed)
                 return false;
-            if (!hoverReference.MouseIsOver)
+            if (hoverReference != null && !hoverReference.MouseIsOver)
             {
                 Dispose();
                 return false;
