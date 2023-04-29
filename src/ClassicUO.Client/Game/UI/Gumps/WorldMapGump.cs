@@ -197,7 +197,6 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-
         public override void Restore(XmlElement xml)
         {
             base.Restore(xml);
@@ -500,6 +499,12 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             parent.Add(zoneOptions);
+        }
+
+        protected override void CloseWithRightClick()
+        {
+            ContextMenu?.Show();
+            return;
         }
 
         private void BuildContextMenu()
