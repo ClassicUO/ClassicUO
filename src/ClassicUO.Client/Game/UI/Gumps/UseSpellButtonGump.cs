@@ -118,7 +118,7 @@ namespace ClassicUO.Game.UI.Gumps
                         hotKeyString += macro.WheelScroll;
                     }
 
-                    Label hotkeyLabel = new Label(hotKeyString, true, ProfileManager.CurrentProfile.SpellIcon_HotkeyHue, Width);
+                    Label hotkeyLabel = new Label(hotKeyString, true, ProfileManager.CurrentProfile.SpellIcon_HotkeyHue, Width, style: FontStyle.BlackBorder);
                     Add(hotkeyLabel);
                 }
             }
