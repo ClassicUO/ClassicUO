@@ -1216,18 +1216,10 @@ namespace ClassicUO.Game.UI.Gumps
                     slot.Value.IsVisible = !(!string.IsNullOrWhiteSpace(searchText) && ProfileManager.CurrentProfile.GridContainerSearchMode == 0);
                     if (slot.Value.SlotItem != null && !string.IsNullOrWhiteSpace(searchText))
                     {
-                        if (World.OPL.TryGetNameAndData(slot.Value.SlotItem.Serial, out string name, out string data))
+                        if(SearchItemNameAndProps(searchText, slot.Value.SlotItem))
                         {
-                            var searchList = new List<string>() { name };
-                            if (ProfileManager.CurrentProfile.GridHighlight_PropNames.Count > 0)
-                            {
-                                searchList.Add(data);
-                            }
-                            if (searchList.Exists(s => s.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) >= 0))
-                            {
-                                slot.Value.Hightlight = ProfileManager.CurrentProfile.GridContainerSearchMode == 1;
-                                slot.Value.IsVisible = true;
-                            }
+                            slot.Value.Hightlight = ProfileManager.CurrentProfile.GridContainerSearchMode == 1;
+                            slot.Value.IsVisible = true;
                         }
                     }
                 }
@@ -1282,27 +1274,31 @@ namespace ClassicUO.Game.UI.Gumps
                         List<Item> filteredContents = new List<Item>();
                         foreach (Item i in containerContents)
                         {
-                            if (i == null)
-                                continue;
-                            if (i.Name == null)
-                                continue;
-
-                            if (i.Name.ToLower().Contains(search.ToLower()))
-                            {
+                            if (SearchItemNameAndProps(search, i))
                                 filteredContents.Add(i);
-                                continue;
-                            }
-                            if (World.OPL.TryGetNameAndData(i.Serial, out string name, out string data))
-                            {
-                                if (data != null)
-                                    if (data.ToLower().Contains(search.ToLower()))
-                                        filteredContents.Add(i);
-                            }
                         }
                         return filteredContents;
                     }
                 }
                 return containerContents;
+            }
+
+            private bool SearchItemNameAndProps(string search, Item item)
+            {
+                if (item == null)
+                    return false;
+
+                if (item.Name != null && item.Name.ToLower().Contains(search.ToLower()))
+                    return true;
+
+                if (World.OPL.TryGetNameAndData(item.Serial, out string name, out string data))
+                {
+                    if (data != null)
+                        if (data.ToLower().Contains(search.ToLower()))
+                            return true;
+                }
+
+                return false;
             }
 
             public void UpdateItems()
