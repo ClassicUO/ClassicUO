@@ -700,6 +700,11 @@ namespace ClassicUO.Game.UI.Gumps
             Style8
         }
 
+        public static void Clear()
+        {
+            GridSaveSystem.Instance.Clear();
+        }
+
         private class GridItem : Control
         {
             private readonly HitBox hit;
@@ -1954,6 +1959,11 @@ namespace ClassicUO.Game.UI.Gumps
                     return false;
                 }
                 return true;
+            }
+
+            public void Clear()
+            {
+                instance = null;
             }
         }
     }
