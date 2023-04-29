@@ -1216,9 +1216,6 @@ namespace ClassicUO.Game.UI.Gumps
                     slot.Value.IsVisible = !(!string.IsNullOrWhiteSpace(searchText) && ProfileManager.CurrentProfile.GridContainerSearchMode == 0);
                     if (slot.Value.SlotItem != null && !string.IsNullOrWhiteSpace(searchText))
                     {
-                        if (slot.Value.SlotItem == null)
-                            continue;
-
                         if (World.OPL.TryGetNameAndData(slot.Value.SlotItem.Serial, out string name, out string data))
                         {
                             var searchList = new List<string>() { name };
