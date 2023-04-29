@@ -118,6 +118,8 @@ namespace ClassicUO.Game.UI.Gumps
         private int _zoomIndex = 4;
         private bool _showGridIfZoomed = true;
 
+        private GumpPic _northIcon;
+
         private WMapMarker _gotoMarker;
 
         private readonly float[] _zooms = new float[10] { 0.125f, 0.25f, 0.5f, 0.75f, 1f, 1.5f, 2f, 4f, 6f, 8f };
@@ -289,6 +291,21 @@ namespace ClassicUO.Game.UI.Gumps
         private void BuildGump()
         {
             BuildContextMenu();
+
+            _northIcon = new GumpPic(0, 0, 5021, 0) { Width = 22, Height = 25 };
+            _northIcon.X = Width - _northIcon.Width - BorderControl.BorderSize;
+            _northIcon.Y = BorderControl.BorderSize;
+            Add(_northIcon);
+        }
+
+        public override void OnResize()
+        {
+            base.OnResize();
+            if (_northIcon != null)
+            {
+                _northIcon.X = Width - _northIcon.Width - BorderControl.BorderSize;
+                _northIcon.Y = BorderControl.BorderSize;
+            }
         }
 
         private void BuildOptionDictionary()
