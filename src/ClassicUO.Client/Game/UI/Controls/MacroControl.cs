@@ -157,7 +157,7 @@ namespace ClassicUO.Game.UI.Controls
             }
 
             var scrollAreaH = isFastAssign ? 80 : 280;
-            var scrollAreaW = isFastAssign ? 230 : 280;
+            var scrollAreaW = 280;
 
             ScrollArea area = new ScrollArea
             (
