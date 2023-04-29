@@ -46,6 +46,7 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
+using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 using static ClassicUO.Game.UI.Gumps.GridHightlightMenu;
 
@@ -1915,9 +1916,41 @@ namespace ClassicUO.Game.UI.Gumps
                     if (!File.Exists(gridSavePath))
                         File.Create(gridSavePath);
                 }
-                catch
+                catch(Exception e)
                 {
                     Console.WriteLine("Could not create file: " + gridSavePath);
+                    System.Text.StringBuilder sb = new System.Text.StringBuilder();
+                    sb.AppendLine("######################## [START LOG] ########################");
+
+                    sb.AppendLine($"TazUO - {CUOEnviroment.Version} - {DateTime.Now}");
+
+                    sb.AppendLine
+                        ($"OS: {Environment.OSVersion.Platform} {(Environment.Is64BitOperatingSystem ? "x64" : "x86")}");
+
+                    sb.AppendLine();
+
+                    if (Settings.GlobalSettings != null)
+                    {
+                        sb.AppendLine($"Shard: {Settings.GlobalSettings.IP}");
+                        sb.AppendLine($"ClientVersion: {Settings.GlobalSettings.ClientVersion}");
+                        sb.AppendLine();
+                    }
+
+                    sb.AppendFormat("Exception:\n{0}\n", e);
+                    sb.AppendLine("######################## [END LOG] ########################");
+                    sb.AppendLine();
+                    sb.AppendLine();
+
+                    Log.Panic(e.ToString());
+                    string path = Path.Combine(CUOEnviroment.ExecutablePath, "Logs");
+
+                    if (!Directory.Exists(path))
+                        Directory.CreateDirectory(path);
+
+                    using (LogFile crashfile = new LogFile(path, "crash.txt"))
+                    {
+                        crashfile.WriteAsync(sb.ToString()).RunSynchronously();
+                    }
                     return false;
                 }
                 return true;
