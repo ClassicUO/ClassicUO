@@ -3770,6 +3770,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     NiceButton _;
                     gridSection.Add(_ = new NiceButton(X, 0, 150, TEXTBOX_HEIGHT, ButtonAction.Activate, "Grid highlight settings"));
+                    _.DisplayBorder = true;
                     _.IsSelectable = false;
                     _.MouseUp += (s, e) =>
                     {
