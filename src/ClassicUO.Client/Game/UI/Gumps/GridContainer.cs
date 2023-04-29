@@ -1914,7 +1914,7 @@ namespace ClassicUO.Game.UI.Gumps
                 try
                 {
                     if (!File.Exists(gridSavePath))
-                        File.Create(gridSavePath);
+                        File.Create(gridSavePath).Dispose();
                 }
                 catch(Exception e)
                 {
