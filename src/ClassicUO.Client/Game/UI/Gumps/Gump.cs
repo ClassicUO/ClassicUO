@@ -64,6 +64,31 @@ namespace ClassicUO.Game.UI.Gumps
 
         public uint MasterGumpSerial { get; set; }
 
+        protected override void OnMouseWheel(MouseEventType delta)
+        {
+            base.OnMouseWheel(delta);
+
+            if (Keyboard.Alt)
+            {
+                if (delta == MouseEventType.WheelScrollUp)
+                {
+                    Alpha += 0.02f;
+                    if(Alpha > 1) Alpha = 1;
+                    foreach (Control c in Children)
+                    {
+                        c.Alpha += 0.02f;
+                        if (c.Alpha > 1) c.Alpha = 1;
+                    }
+                }
+                else
+                {
+                    Alpha -= 0.02f;
+                    foreach (Control c in Children)
+                        c.Alpha -= 0.02f;
+                }
+            }
+        }
+
         public virtual bool IsLocked
         {
             get { return isLocked; }
