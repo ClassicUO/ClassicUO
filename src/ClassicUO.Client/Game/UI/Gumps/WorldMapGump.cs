@@ -290,10 +290,10 @@ namespace ClassicUO.Game.UI.Gumps
         private void BuildGump()
         {
             BuildContextMenu();
-
+            _northIcon?.Dispose();
             _northIcon = new GumpPic(0, 0, 5021, 0) { Width = 22, Height = 25 };
             _northIcon.X = Width - _northIcon.Width - BorderControl.BorderSize;
-            _northIcon.Y = BorderControl.BorderSize;
+            _northIcon.Y = !_flipMap ? Height - _northIcon.Height - BorderControl.BorderSize : BorderControl.BorderSize;
             Add(_northIcon);
         }
 
@@ -303,7 +303,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (_northIcon != null)
             {
                 _northIcon.X = Width - _northIcon.Width - BorderControl.BorderSize;
-                _northIcon.Y = BorderControl.BorderSize;
+                _northIcon.Y = !_flipMap ? Height - _northIcon.Height - BorderControl.BorderSize : BorderControl.BorderSize;
             }
         }
 
@@ -314,7 +314,14 @@ namespace ClassicUO.Game.UI.Gumps
             _options["show_all_markers"] = new ContextMenuItemEntry(ResGumps.ShowAllMarkers, () => { _showMarkers = !_showMarkers; SaveSettings(); }, true, _showMarkers);
             _options["show_marker_names"] = new ContextMenuItemEntry(ResGumps.ShowMarkerNames, () => { _showMarkerNames = !_showMarkerNames; SaveSettings(); }, true, _showMarkerNames);
             _options["show_marker_icons"] = new ContextMenuItemEntry(ResGumps.ShowMarkerIcons, () => { _showMarkerIcons = !_showMarkerIcons; SaveSettings(); }, true, _showMarkerIcons);
-            _options["flip_map"] = new ContextMenuItemEntry(ResGumps.FlipMap, () => { _flipMap = !_flipMap; SaveSettings(); }, true, _flipMap);
+            _options["flip_map"] = new ContextMenuItemEntry(ResGumps.FlipMap, () => { 
+                _flipMap = !_flipMap; SaveSettings();
+                if (_northIcon != null)
+                {
+                    _northIcon.X = Width - _northIcon.Width - BorderControl.BorderSize;
+                    _northIcon.Y = !_flipMap ? Height - _northIcon.Height - BorderControl.BorderSize : BorderControl.BorderSize;
+                }
+            }, true, _flipMap);
 
             _options["goto_location"] = new ContextMenuItemEntry
             (
