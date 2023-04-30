@@ -92,7 +92,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             int[][] textTable =
             {
-                new[] { 0, (int) Buttons.Map },
                 new[] { 1, (int) Buttons.Paperdoll },
                 new[] { 1, (int) Buttons.Inventory },
                 new[] { 1, (int) Buttons.Journal },
@@ -111,7 +110,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             string[] texts =
             {
-                cliloc.GetString(3000430, ResGumps.Map), 
                 cliloc.GetString(3000133, ResGumps.Paperdoll), 
                 cliloc.GetString(3000431, ResGumps.Inventory), 
                 cliloc.GetString(3000129, ResGumps.Journal), 
@@ -278,11 +276,6 @@ namespace ClassicUO.Game.UI.Gumps
         {
             switch ((Buttons) buttonID)
             {
-                case Buttons.Map:
-                    GameActions.OpenMiniMap();
-
-                    break;
-
                 case Buttons.Paperdoll:
                     GameActions.OpenPaperdoll(World.Player);
 
@@ -364,7 +357,6 @@ namespace ClassicUO.Game.UI.Gumps
 
         private enum Buttons
         {
-            Map,
             Paperdoll,
             Inventory,
             Journal,
