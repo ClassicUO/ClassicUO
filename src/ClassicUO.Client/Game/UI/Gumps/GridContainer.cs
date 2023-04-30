@@ -141,7 +141,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             AnchorType = ProfileManager.CurrentProfile.EnableGridContainerAnchor ? ANCHOR_TYPE.NONE : ANCHOR_TYPE.DISABLED;
             OriginalContainerItemGraphic = originalContainerGraphic;
-            
+
             CanMove = true;
             AcceptMouseInput = true;
             CanCloseWithRightClick = true;
@@ -313,7 +313,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             GridSaveSystem.Instance.SaveContainer(LocalSerial, gridSlotManager.GridSlots, Width, Height, X, Y);
 
-            if(isPlayerBackpack)
+            if (isPlayerBackpack)
             {
                 ProfileManager.CurrentProfile.BackpackGridPosition = Location;
                 ProfileManager.CurrentProfile.BackpackGridSize = new Point(Width, Height);
@@ -568,13 +568,13 @@ namespace ClassicUO.Game.UI.Gumps
                 _backgroundTexture.Alpha = _background.Alpha;
                 _backgroundTexture.Hue = _background.Hue;
                 _setLootBag.Y = Height - 20;
-                if(isPlayerBackpack)
+                if (isPlayerBackpack)
                     ProfileManager.CurrentProfile.BackpackGridSize = new Point(Width, Height);
                 RequestUpdateContents();
             }
 
-            if(isPlayerBackpack)
-                if(Location != ProfileManager.CurrentProfile.BackpackGridPosition)
+            if (isPlayerBackpack)
+                if (Location != ProfileManager.CurrentProfile.BackpackGridPosition)
                     ProfileManager.CurrentProfile.BackpackGridPosition = Location;
 
 
@@ -850,7 +850,13 @@ namespace ClassicUO.Game.UI.Gumps
                     else if (TargetManager.IsTargeting)
                     {
                         if (_item != null)
+                        {
                             TargetManager.Target(_item);
+                            if (TargetManager.TargetingState == CursorTarget.SetTargetClientSide)
+                            {
+                                UIManager.Add(new InspectorGump(_item));
+                            }
+                        }
                         else
                             TargetManager.Target(container);
                         Mouse.CancelDoubleClick = true;
@@ -1072,7 +1078,8 @@ namespace ClassicUO.Game.UI.Gumps
                             originalSize.X = rect.Width;
 
                         point.X = (hit.Width >> 1) - (originalSize.X >> 1);
-                    } else if (rect.Width > hit.Width)
+                    }
+                    else if (rect.Width > hit.Width)
                     {
                         if (ProfileManager.CurrentProfile.GridContainerScaleItems)
                             originalSize.X = (ushort)(hit.Width * (ProfileManager.CurrentProfile.GridContainersScale / 100f));
@@ -1089,7 +1096,8 @@ namespace ClassicUO.Game.UI.Gumps
                             originalSize.Y = rect.Height;
 
                         point.Y = (hit.Height >> 1) - (originalSize.Y >> 1);
-                    } else if (rect.Height > hit.Height)
+                    }
+                    else if (rect.Height > hit.Height)
                     {
                         if (ProfileManager.CurrentProfile.GridContainerScaleItems)
                             originalSize.Y = (ushort)(hit.Height * (ProfileManager.CurrentProfile.GridContainersScale / 100f));
@@ -1221,7 +1229,7 @@ namespace ClassicUO.Game.UI.Gumps
                     slot.Value.IsVisible = !(!string.IsNullOrWhiteSpace(searchText) && ProfileManager.CurrentProfile.GridContainerSearchMode == 0);
                     if (slot.Value.SlotItem != null && !string.IsNullOrWhiteSpace(searchText))
                     {
-                        if(SearchItemNameAndProps(searchText, slot.Value.SlotItem))
+                        if (SearchItemNameAndProps(searchText, slot.Value.SlotItem))
                         {
                             slot.Value.Hightlight = ProfileManager.CurrentProfile.GridContainerSearchMode == 1;
                             slot.Value.IsVisible = true;
@@ -1919,7 +1927,7 @@ namespace ClassicUO.Game.UI.Gumps
                     if (!File.Exists(gridSavePath))
                         File.Create(gridSavePath).Dispose();
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     Console.WriteLine("Could not create file: " + gridSavePath);
                     System.Text.StringBuilder sb = new System.Text.StringBuilder();

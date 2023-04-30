@@ -307,6 +307,15 @@ namespace ClassicUO.Game.UI.Gumps
 
                     break;
 
+                case Buttons.Info:
+                    if (TargetManager.IsTargeting)
+                    {
+                        TargetManager.CancelTarget();
+                    }
+
+                    TargetManager.SetTargeting(CursorTarget.SetTargetClientSide, CursorType.Target, TargetType.Neutral);
+                    break;
+
                 case Buttons.Debug:
 
                     DebugGump debugGump = UIManager.GetGump<DebugGump>();
