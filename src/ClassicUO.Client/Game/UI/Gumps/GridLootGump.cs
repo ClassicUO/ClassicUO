@@ -228,38 +228,35 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     Item it = (Item)i;
 
-                    if (!ItemBelongsToGroup(it, displayGroup))
+                    if (!ItemBelongsToGroup(it, displayGroup) || !it.IsLootable)
                     {
                         continue;
                     }
 
-                    if (it.IsLootable)
+                    GridLootItem gridItem = new GridLootItem(it, GRID_ITEM_SIZE);
+
+                    if (x >= MAX_WIDTH - 20)
                     {
-                        GridLootItem gridItem = new GridLootItem(it, GRID_ITEM_SIZE);
+                        x = 20;
+                        ++line;
 
-                        if (x >= MAX_WIDTH - 20)
+                        y += gridItem.Height + 20;
+
+                        if (y >= MAX_HEIGHT - 60)
                         {
-                            x = 20;
-                            ++line;
-
-                            y += gridItem.Height + 20;
-
-                            if (y >= MAX_HEIGHT - 60)
-                            {
-                                _pagesCount++;
-                                y = 20;
-                                //line = 1;
-                            }
+                            _pagesCount++;
+                            y = 20;
+                            //line = 1;
                         }
-
-                        gridItem.X = x;
-                        gridItem.Y = y + 20;
-                        Add(gridItem, _pagesCount);
-
-                        x += gridItem.Width + 20;
-                        ++row;
-                        ++count;
                     }
+
+                    gridItem.X = x;
+                    gridItem.Y = y + 20;
+                    Add(gridItem, _pagesCount);
+
+                    x += gridItem.Width + 20;
+                    ++row;
+                    ++count;
                 }
             }
 
@@ -311,6 +308,7 @@ namespace ClassicUO.Game.UI.Gumps
             else
                 return group == 0;
         }
+
         public override void Dispose()
         {
             if (_corpse != null)
