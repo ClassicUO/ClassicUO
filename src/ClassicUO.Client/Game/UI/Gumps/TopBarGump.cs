@@ -103,7 +103,6 @@ namespace ClassicUO.Game.UI.Gumps
                 new[] { 1, (int) Buttons.NetStats },
 
                 new[] { 1, (int) Buttons.UOStore },
-                new[] { 1, (int) Buttons.GlobalChat }
             };
 
             var cliloc = ClilocLoader.Instance;
@@ -120,7 +119,6 @@ namespace ClassicUO.Game.UI.Gumps
                 cliloc.GetString(1042237, ResGumps.Debug), 
                 cliloc.GetString(3000169, ResGumps.NetStats), 
                 cliloc.GetString(1158008, ResGumps.UOStore),
-                cliloc.GetString(1158390, ResGumps.GlobalChat)
             };
 
             bool hasUOStore = Client.Version >= ClientVersion.CV_706400;
@@ -296,12 +294,6 @@ namespace ClassicUO.Game.UI.Gumps
 
                     break;
 
-                case Buttons.GlobalChat:
-                    Log.Warn(ResGumps.ChatButtonPushedNotImplementedYet);
-                    GameActions.Print(ResGumps.GlobalChatNotImplementedYet, 0x23, MessageType.System);
-
-                    break;
-
                 case Buttons.UOStore:
                     if (Client.Version >= ClientVersion.CV_706400)
                     {
@@ -367,7 +359,6 @@ namespace ClassicUO.Game.UI.Gumps
             Debug,
             NetStats,
             UOStore,
-            GlobalChat
         }
 
         private class RighClickableButton : Button
