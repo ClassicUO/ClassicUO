@@ -643,7 +643,6 @@ namespace ClassicUO.Game.UI.Gumps
                     _backgroundTexture.IsVisible = false;
                     _background.IsVisible = true;
                     BORDER_WIDTH = 4;
-                    RePosition();
                     break;
             }
 
@@ -685,6 +684,12 @@ namespace ClassicUO.Game.UI.Gumps
             _searchBox.X = BORDER_WIDTH;
             _backgroundTexture.X = _background.X;
             _backgroundTexture.Y = _background.Y;
+            _backgroundTexture.Width = Width - (BORDER_WIDTH * 2);
+            _backgroundTexture.Height = Height - (BORDER_WIDTH * 2);
+            _background.Width = Width - (BORDER_WIDTH * 2);
+            _background.Height = Height - (BORDER_WIDTH * 2);
+            _scrollArea.Width = _background.Width;
+            _scrollArea.Height = _background.Height - TOP_BAR_HEIGHT;
         }
 
         public enum BorderStyle
