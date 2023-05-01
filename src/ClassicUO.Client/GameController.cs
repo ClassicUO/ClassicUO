@@ -477,8 +477,7 @@ namespace ClassicUO
 
             _uoSpriteBatch.Begin();
             var rect = new Rectangle(0, 0, GraphicManager.PreferredBackBufferWidth,GraphicManager.PreferredBackBufferHeight);
-            _uoSpriteBatch.Draw(SolidColorTextureCache.GetTexture(Color.Black), rect, Vector3.UnitZ);
-            _uoSpriteBatch.DrawTiled(_background, rect, _background.Bounds, new Vector3(0, 0, 0.3f));
+            _uoSpriteBatch.DrawTiled(_background, rect, _background.Bounds, new Vector3(0, 0, 0.1f));
             _uoSpriteBatch.End();
 
             if (Scene != null && Scene.IsLoaded && !Scene.IsDestroyed)
