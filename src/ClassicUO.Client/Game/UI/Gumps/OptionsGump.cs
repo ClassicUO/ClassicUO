@@ -185,7 +185,7 @@ namespace ClassicUO.Game.UI.Gumps
         private Checkbox _showStatsMessage, _showSkillsMessage, _displayPartyChatOverhead;
         private HSliderBar _showSkillsMessageDelta;
 
-        private Checkbox _leftAlignToolTips, _namePlateHealthOnlyWarmode, _enableHealthIndicator, _spellIconDisplayHotkey;
+        private Checkbox _leftAlignToolTips, _namePlateHealthOnlyWarmode, _enableHealthIndicator, _spellIconDisplayHotkey, _enableAlphaScrollWheel;
         private InputField _healthIndicatorPercentage, _healthIndicatorWidth;
         private ModernColorPicker.HueDisplay _mainWindowHuePicker, _spellIconHotkeyHue;
         private HSliderBar _spellIconScale;
@@ -4144,6 +4144,10 @@ namespace ClassicUO.Game.UI.Gumps
                 section.AddRight(_spellIconHotkeyHue = new ModernColorPicker.HueDisplay(_currentProfile.SpellIcon_HotkeyHue, null, true));
                 section.PopIndent();
 
+                section.Add(AddLabel(null, "Enable opacity adjustment via Alt + Scroll", 0, 0));
+                section.AddRight(_enableAlphaScrollWheel = AddCheckBox(null, "", _currentProfile.EnableAlphaScrollingOnGumps, 0, 0));
+                _enableAlphaScrollWheel.SetTooltip("This is to quickly adjust a gump's opacity(Not all gumps are supported).");
+
                 rightArea.Add(section);
                 startY += section.Height + SPACING;
             }//Misc
@@ -4666,7 +4670,7 @@ namespace ClassicUO.Game.UI.Gumps
                 GameController.UpdateBackgroundHueShader();
             }
 
-
+            _currentProfile.EnableAlphaScrollingOnGumps = _enableAlphaScrollWheel.IsChecked;
             _currentProfile.SpellIcon_DisplayHotkey = _spellIconDisplayHotkey.IsChecked;
             _currentProfile.SpellIcon_HotkeyHue = _spellIconHotkeyHue.Hue;
             _currentProfile.SpellIconScale = _spellIconScale.Value;

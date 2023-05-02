@@ -127,6 +127,10 @@ namespace ClassicUO.Game.UI.Gumps
             GroupMatrixWidth = Width;
             GroupMatrixHeight = Height;
             AnchorType = ANCHOR_TYPE.SPELL;
+
+            Alpha += AlphaOffset;
+            foreach (Control c in Children)
+                c.Alpha += AlphaOffset;
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
