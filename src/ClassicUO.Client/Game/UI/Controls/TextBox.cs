@@ -34,6 +34,7 @@ using ClassicUO.Renderer;
 using ClassicUO.Assets;
 using FontStashSharp.RichText;
 using Microsoft.Xna.Framework;
+using System;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -68,7 +69,10 @@ namespace ClassicUO.Game.UI.Controls
             _font = font;
             _size = size;
 
-            _color.PackedValue = (uint)hue;
+            if (hue == 0xFFFF)
+                _color = Color.White;
+            else
+                _color.PackedValue = (uint)hue;
             _align = align;
             _dropShadow = dropShadow;
 
@@ -77,37 +81,78 @@ namespace ClassicUO.Game.UI.Controls
             Height = _rtl.Size.Y;
         }
 
-        public string Text {
+        public string Text
+        {
             get => _rtl.Text;
-            set {
+            set
+            {
                 _rtl.Text = value;
                 _dirty = true;
             }
         }
 
-        public int Hue {
+        public int Hue
+        {
             get => (int)_color.PackedValue;
-            set {
+            set
+            {
                 _color.PackedValue = (uint)value;
                 _dirty = true;
             }
         }
 
-        public string Font {
+        public string Font
+        {
             get => _font;
-            set {
+            set
+            {
                 _font = value;
                 _dirty = true;
             }
 
         }
 
-        public float Size {
+        public float Size
+        {
             get => _size;
-            set {
+            set
+            {
                 _size = value;
                 _dirty = true;
             }
+        }
+
+        public static string ConvertHtmlToFontStashSharpCommand(string text)
+        {
+            string finalString = "";
+
+            string[] lines = text.Split(new string[] { "<br>", "\n" }, StringSplitOptions.None);
+
+            foreach (string line in lines)
+            {
+                string tempLine = "/cd";
+                int bfInd = line.IndexOf("<basefont color=\"");
+                if (bfInd != -1)
+                {
+                    //<basefont color="yellow">  <-Example
+                    string color = line.Substring(bfInd + 17); //Should be something like red"> or #444444"> blah blah blah
+                    int endInd = color.IndexOf("\">");
+                    if (endInd > -1)
+                    {
+                        tempLine = $"/c[{color.Substring(0, endInd)}]" + color.Substring(endInd + 2);
+                    }
+                    else
+                    {
+                        tempLine += line;
+                    }
+                } else
+                {
+                    tempLine += line;
+                }
+                finalString += tempLine + "\n";
+            }
+            GameActions.Print(finalString);
+            return finalString;
         }
 
         public override void Update()

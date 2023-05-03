@@ -14,10 +14,9 @@ namespace ClassicUO.Game.UI.Gumps
         private Control hoverReference;
         private readonly string prepend;
         private readonly string append;
-        private RenderedText text;
-        private readonly byte font = 1;
-        private readonly ushort hue = 0xFFFF;
-        
+        private TextBox text;
+        private readonly uint hue = 0xFFFF;
+
         public event FinishedLoadingEvent OnOPLLoaded;
 
         public CustomToolTip(Item item, int x, int y, Control hoverReference, string prepend = "", string append = "") : base(0, 0)
@@ -30,8 +29,8 @@ namespace ClassicUO.Game.UI.Gumps
             Y = y;
             if (ProfileManager.CurrentProfile != null)
             {
-                font = ProfileManager.CurrentProfile.TooltipFont;
-                hue = ProfileManager.CurrentProfile.TooltipTextHue;
+                if (ProfileManager.CurrentProfile.TooltipTextHue != 0)
+                    hue = ProfileManager.CurrentProfile.TooltipTextHue;
             }
             BuildGump();
         }
@@ -60,40 +59,16 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (World.OPL.TryGetNameAndData(item.Serial, out string name, out string data))
                 {
-                    int width = FontsLoader.Instance.GetWidthUnicode(font, data);
 
-                    if (width > 600)
-                    {
-                        width = 600;
-                    }
-
-                    width = FontsLoader.Instance.GetWidthExUnicode
-                    (
-                        font,
-                        data,
-                        width,
-                        ProfileManager.CurrentProfile.LeftAlignToolTips ? TEXT_ALIGN_TYPE.TS_LEFT : TEXT_ALIGN_TYPE.TS_CENTER,
-                        (ushort)FontStyle.BlackBorder
-                    );
-
-                    if (width > 600)
-                    {
-                        width = 600;
-                    }
-
-                    text = RenderedText.Create
-                        (
-                            FormatTooltip(name, data),
-                            maxWidth: width,
-                            font: font,
-                            isunicode: true,
-                            style: FontStyle.BlackBorder,
-                            //cell: 5,
-                            isHTML: true,
-                            align: ProfileManager.CurrentProfile.LeftAlignToolTips ? TEXT_ALIGN_TYPE.TS_LEFT : TEXT_ALIGN_TYPE.TS_CENTER,
-                            recalculateWidthByInfo: true,
-                            hue: hue
+                    text = new TextBox(
+                        TextBox.ConvertHtmlToFontStashSharpCommand(FormatTooltip(name, data)),
+                        ProfileManager.CurrentProfile.SelectedToolTipFont,
+                        ProfileManager.CurrentProfile.SelectedToolTipFontSize,
+                        ProfileManager.CurrentProfile.SelectedToolTipFontSize * 15,
+                        (int)hue,
+                        align: ProfileManager.CurrentProfile.LeftAlignToolTips ? FontStashSharp.RichText.TextHorizontalAlignment.Left : FontStashSharp.RichText.TextHorizontalAlignment.Center
                         );
+
                     Height = text.Height;
                     Width = text.Width;
                     OnOPLLoaded?.Invoke();
@@ -113,7 +88,7 @@ namespace ClassicUO.Game.UI.Gumps
                 prepend +
                 "<basefont color=\"yellow\">" +
                 name +
-                "<br><basefont color=\"#FFFFFFFF\">" +
+                "\n<basefont color=\"#FFFFFF\">" +
                 data +
                 append;
 
@@ -130,10 +105,9 @@ namespace ClassicUO.Game.UI.Gumps
                 Dispose();
                 return false;
             }
-            if (text == null) //Waiting for opl data to load the text tooltip
-                return true;
+            //if (text == null) //Waiting for opl data to load the text tooltip
+            //    return true;
 
-            float zoom = 1;
             float alpha = 0.7f;
 
             if (ProfileManager.CurrentProfile != null)
@@ -143,7 +117,6 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     alpha = 0f;
                 }
-                zoom = ProfileManager.CurrentProfile.TooltipDisplayZoom / 100f;
             }
 
             Vector3 hue_vec = ShaderHueTranslator.GetHueVector(0, false, alpha);
@@ -155,8 +128,8 @@ namespace ClassicUO.Game.UI.Gumps
                 (
                     x - 4,
                     y - 2,
-                    (int)(text.Width + 8 * zoom),
-                    (int)(text.Height + 8 * zoom)
+                    (int)(Width + 8),
+                    (int)(Height + 8)
                 ),
                 hue_vec
             );
@@ -167,24 +140,14 @@ namespace ClassicUO.Game.UI.Gumps
                 SolidColorTextureCache.GetTexture(Color.Gray),
                 x - 4,
                 y - 2,
-                (int)(text.Width + 8 * zoom),
-                (int)(text.Height + 8 * zoom),
+                (int)(Width + 8),
+                (int)(Height + 8),
                 hue_vec
             );
 
-            batcher.Draw
-            (
-                text.Texture,
-                new Rectangle
-                (
-                    x + 3,
-                    y + 3,
-                    (int)(text.Texture.Width * zoom),
-                    (int)(text.Texture.Height * zoom)
-                ),
-                null,
-                Vector3.UnitZ
-            );
+            if (text != null)
+                text.Draw(batcher, x, y);
+
             return true;
         }
     }

@@ -456,7 +456,7 @@ namespace ClassicUO.Configuration
         public int SelectedJournalFont { get; set; } = 0;
         public int SelectedJournalFontSize { get; set; } = 15;
         [JsonIgnore]
-        public string TryGetFontName
+        public string TryGetJournalFontName
         {
             get
             {
@@ -466,6 +466,9 @@ namespace ClassicUO.Configuration
                 return "";
             }
         }
+
+        public string SelectedToolTipFont { get; set; } = "Roboto-Regular";
+        public int SelectedToolTipFontSize { get; set; } = 15;
 
         public static uint GumpsVersion { get; private set; }
 
