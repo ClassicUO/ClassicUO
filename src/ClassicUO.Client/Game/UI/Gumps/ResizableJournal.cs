@@ -50,7 +50,7 @@ namespace ClassicUO.Game.UI.Gumps
             AcceptMouseInput = true;
             WantUpdateSize = true;
             CanCloseWithRightClick = true;
-            if(ProfileManager.CurrentProfile != null)
+            if (ProfileManager.CurrentProfile != null)
             {
                 _lastX = ProfileManager.CurrentProfile.JournalPosition.X;
                 _lastY = ProfileManager.CurrentProfile.JournalPosition.Y;
@@ -306,6 +306,7 @@ namespace ClassicUO.Game.UI.Gumps
         private class RenderedTextList : Control
         {
             private Deque<RenderedText> _entries, _hours;
+            private Deque<TextBox> _textBoxEntries;
             private readonly ScrollBarBase _scrollBar;
             private readonly Deque<TextType> _text_types;
             private readonly Deque<MessageType> _message_types;
@@ -325,6 +326,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Height = lastHeight = height;
 
                 _entries = new Deque<RenderedText>();
+                _textBoxEntries = new Deque<TextBox>();
                 _hours = new Deque<RenderedText>();
                 _text_types = new Deque<TextType>();
                 _message_types = new Deque<MessageType>();
@@ -342,9 +344,14 @@ namespace ClassicUO.Game.UI.Gumps
                 int height = 0;
                 int maxheight = _scrollBar.Value + _scrollBar.Height;
 
-                for (int i = 0; i < _entries.Count; i++)
+                for (int i = 0; i < (ProfileManager.CurrentProfile.SelectedJournalFont > 0 ? _textBoxEntries.Count : _entries.Count); i++)
                 {
-                    RenderedText t = _entries[i];
+                    if (
+                        _hours.Count != (ProfileManager.CurrentProfile.SelectedJournalFont > 0 ? _textBoxEntries.Count : _entries.Count) ||
+                        _text_types.Count != (ProfileManager.CurrentProfile.SelectedJournalFont > 0 ? _textBoxEntries.Count : _entries.Count) ||
+                        _message_types.Count != (ProfileManager.CurrentProfile.SelectedJournalFont > 0 ? _textBoxEntries.Count : _entries.Count)
+                        )
+                        continue;
                     RenderedText hour = _hours[i];
                     TextType type = _text_types[i];
                     MessageType messageType = _message_types[i];
@@ -354,20 +361,42 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         continue;
                     }
+                    TextBox tb = null;
+                    RenderedText t = null;
 
-                    if (height + t.Height <= _scrollBar.Value)
+                    int entryHeight = 0;
+
+                    if (ProfileManager.CurrentProfile.SelectedJournalFont > 0)
+                    {
+                        tb = _textBoxEntries[i];
+                        entryHeight = tb.Height;
+                    }
+                    else
+                    {
+                        t = _entries[i];
+                        entryHeight = t.Height;
+                    }
+
+                    if (height + entryHeight <= _scrollBar.Value)
                     {
                         // this entry is above the renderable area.
-                        height += t.Height;
+                        height += entryHeight;
                     }
-                    else if (height + t.Height <= maxheight)
+                    else if (height + entryHeight <= maxheight)
                     {
                         int yy = height - _scrollBar.Value;
 
                         if (yy < 0)
                         {
-                            // this entry starts above the renderable area, but exists partially within it.
-                            hour.Draw
+                            if (ProfileManager.CurrentProfile.SelectedJournalFont > 0)
+                            {
+                                // this entry starts above the renderable area, but exists partially within it.
+                                //No draw method for partial draws yet for textbox
+                            }
+                            else
+                            {
+                                // this entry starts above the renderable area, but exists partially within it.
+                                hour.Draw
                             (
                                 batcher,
                                 hour.Width,
@@ -380,36 +409,52 @@ namespace ClassicUO.Game.UI.Gumps
                                 -yy
                             );
 
-                            t.Draw
-                            (
-                                batcher,
-                                t.Width,
-                                t.Height,
-                                mx + hour.Width,
-                                y,
-                                t.Width,
-                                t.Height + yy,
-                                0,
-                                -yy
-                            );
+                                t.Draw
+                                (
+                                    batcher,
+                                    t.Width,
+                                    t.Height,
+                                    mx + hour.Width,
+                                    y,
+                                    t.Width,
+                                    t.Height + yy,
+                                    0,
+                                    -yy
+                                );
 
-                            my += t.Height + yy;
+                                my += t.Height + yy;
+                            }
                         }
                         else
                         {
                             // this entry is completely within the renderable area.
                             hour.Draw(batcher, mx, my);
-                            t.Draw(batcher, mx + hour.Width, my);
-                            my += t.Height;
+                            if (ProfileManager.CurrentProfile.SelectedJournalFont > 0)
+                            {
+                                tb.Draw(batcher, mx + hour.Width, my);
+                                my += tb.Height;
+                            }
+                            else
+                            {
+                                t.Draw(batcher, mx + hour.Width, my);
+                                my += t.Height;
+                            }
                         }
-
-                        height += t.Height;
+                        if (ProfileManager.CurrentProfile.SelectedJournalFont > 0)
+                            height += tb.Height;
+                        else
+                            height += t.Height;
                     }
                     else
                     {
                         int yyy = maxheight - height;
-
-                        hour.Draw
+                        if (ProfileManager.CurrentProfile.SelectedJournalFont > 0)
+                        {
+                            //No partial draw for textbox yet
+                        }
+                        else
+                        {
+                            hour.Draw
                         (
                             batcher,
                             hour.Width,
@@ -422,18 +467,19 @@ namespace ClassicUO.Game.UI.Gumps
                             0
                         );
 
-                        t.Draw
-                        (
-                            batcher,
-                            t.Width,
-                            t.Height,
-                            mx + hour.Width,
-                            y + _scrollBar.Height - yyy,
-                            t.Width,
-                            yyy,
-                            0,
-                            0
-                        );
+                            t.Draw
+                            (
+                                batcher,
+                                t.Width,
+                                t.Height,
+                                mx + hour.Width,
+                                y + _scrollBar.Height - yyy,
+                                t.Width,
+                                yyy,
+                                0,
+                                0
+                            );
+                        }
 
                         // can't fit any more entries - so we break!
                         break;
@@ -457,20 +503,32 @@ namespace ClassicUO.Game.UI.Gumps
                     lastWidth = Width;
                     lastHeight = Height;
 
-                    Deque<RenderedText> newList = new Deque<RenderedText>();
-                    for (int i = 0; i < _entries.Count; i++)
+                    if (ProfileManager.CurrentProfile.SelectedJournalFont > 0)
                     {
-                        RenderedText t = _entries[i];
-                        byte font = t.Font;
-                        bool unicode = t.IsUnicode;
-                        if (ProfileManager.CurrentProfile.ForceUnicodeJournal)
+                        for (int i = 0; i < _textBoxEntries.Count; i++)
                         {
-                            font = ProfileManager.CurrentProfile.ChatFont;
-                            unicode = true;
+                            _textBoxEntries[i].Width = Width - SCROLL_BAR_WIDTH - BORDER_WIDTH - _hours[i].Width;
                         }
-                        newList.AddToBack(RenderedText.Create(t.Text, t.Hue, font, unicode, t.FontStyle, t.Align, Width - SCROLL_BAR_WIDTH - BORDER_WIDTH - _hours[i].Width));
                     }
-                    _entries = newList;
+                    else
+                    {
+                        Deque<RenderedText> newList = new Deque<RenderedText>();
+                        for (int i = 0; i < _entries.Count; i++)
+                        {
+                            RenderedText t = _entries[i];
+                            byte font = t.Font;
+                            bool unicode = t.IsUnicode;
+                            if (ProfileManager.CurrentProfile.ForceUnicodeJournal)
+                            {
+                                font = ProfileManager.CurrentProfile.ChatFont;
+                                unicode = true;
+                            }
+                            newList.AddToBack(RenderedText.Create(t.Text, t.Hue, font, unicode, t.FontStyle, t.Align, Width - SCROLL_BAR_WIDTH - BORDER_WIDTH - _hours[i].Width));
+                        }
+                        _entries = newList;
+                    }
+
+
 
                     CalculateScrollBarMaxValue();
                 }
@@ -481,12 +539,24 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 bool maxValue = _scrollBar.Value == _scrollBar.MaxValue;
                 int height = 0;
-
-                for (int i = 0; i < _entries.Count; i++)
+                if (ProfileManager.CurrentProfile.SelectedJournalFont > 0)
                 {
-                    if (i < _text_types.Count && CanBeDrawn(_text_types[i], _message_types[i]))
+                    for (int i = 0; i < _textBoxEntries.Count; i++)
                     {
-                        height += _entries[i].Height;
+                        if (i < _text_types.Count && CanBeDrawn(_text_types[i], _message_types[i]))
+                        {
+                            height += _textBoxEntries[i].Height;
+                        }
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < _entries.Count; i++)
+                    {
+                        if (i < _text_types.Count && CanBeDrawn(_text_types[i], _message_types[i]))
+                        {
+                            height += _entries[i].Height;
+                        }
                     }
                 }
 
@@ -521,9 +591,18 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 bool maxScroll = _scrollBar.Value == _scrollBar.MaxValue;
 
-                while (_entries.Count > Constants.MAX_JOURNAL_HISTORY_COUNT)
+
+
+                while ((ProfileManager.CurrentProfile.SelectedJournalFont > 0 ? _textBoxEntries.Count : _entries.Count) > Constants.MAX_JOURNAL_HISTORY_COUNT)
                 {
-                    _entries.RemoveFromFront().Destroy();
+                    if (ProfileManager.CurrentProfile.SelectedJournalFont > 0)
+                    {
+                        _textBoxEntries.RemoveFromFront().Dispose();
+                    }
+                    else
+                    {
+                        _entries.RemoveFromFront().Destroy();
+                    }
 
                     _hours.RemoveFromFront().Destroy();
 
@@ -543,23 +622,33 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _hours.AddToBack(h);
 
-                RenderedText rtext = RenderedText.Create
-                (
-                    text,
-                    hue,
-                    (byte)font,
-                    isUnicode,
-                    FontStyle.Indention | FontStyle.BlackBorder,
-                    maxWidth: Width - (18 + h.Width)
-                );
+                if (ProfileManager.CurrentProfile.SelectedJournalFont > 0)
+                {
+                    TextBox textBox = new TextBox(text, ProfileManager.CurrentProfile.TryGetFontName, ProfileManager.CurrentProfile.SelectedJournalFontSize, Width, hue);
+                    _textBoxEntries.AddToBack(textBox);
+                    _scrollBar.Height += textBox.Height;
+                }
+                else
+                {
+                    RenderedText rtext = RenderedText.Create
+                    (
+                        text,
+                        hue,
+                        (byte)font,
+                        isUnicode,
+                        FontStyle.Indention | FontStyle.BlackBorder,
+                        maxWidth: Width - (18 + h.Width)
+                    );
 
-                _entries.AddToBack(rtext);
+                    _entries.AddToBack(rtext);
+                    _scrollBar.MaxValue += rtext.Height;
+                }
+
 
                 _text_types.AddToBack(text_type);
 
                 _message_types.AddToBack(messageType);
 
-                _scrollBar.MaxValue += rtext.Height;
 
                 if (maxScroll)
                 {
@@ -600,6 +689,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _hours[i].Destroy();
                 }
 
+                _textBoxEntries.Clear();
                 _entries.Clear();
                 _hours.Clear();
                 _text_types.Clear();

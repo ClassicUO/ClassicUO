@@ -453,6 +453,20 @@ namespace ClassicUO.Configuration
 
         public bool DisplayPartyChatOverhead { get; set; } = true;
 
+        public int SelectedJournalFont { get; set; } = 0;
+        public int SelectedJournalFontSize { get; set; } = 15;
+        [JsonIgnore]
+        public string TryGetFontName
+        {
+            get
+            {
+                string[] fonts = Assets.TrueTypeLoader.Instance.Fonts;
+                if (fonts.Length > SelectedJournalFont - 1)
+                    return fonts[SelectedJournalFont - 1];
+                return "";
+            }
+        }
+
         public static uint GumpsVersion { get; private set; }
 
         public void Save(string path, bool saveGumps = true)
@@ -778,7 +792,8 @@ namespace ClassicUO.Configuration
                                 case GumpType.GridContainer:
                                     ushort ogContainer = ushort.Parse(xml.GetAttribute("ogContainer"));
                                     gump = new GridContainer(serial, ogContainer);
-                                    if (((GridContainer)gump).isPlayerBackpack){
+                                    if (((GridContainer)gump).isPlayerBackpack)
+                                    {
                                         x = ProfileManager.CurrentProfile.BackpackGridPosition.X;
                                         y = ProfileManager.CurrentProfile.BackpackGridPosition.Y;
                                     }

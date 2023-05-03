@@ -188,7 +188,8 @@ namespace ClassicUO.Game.UI.Gumps
         private Checkbox _leftAlignToolTips, _namePlateHealthOnlyWarmode, _enableHealthIndicator, _spellIconDisplayHotkey, _enableAlphaScrollWheel;
         private InputField _healthIndicatorPercentage, _healthIndicatorWidth;
         private ModernColorPicker.HueDisplay _mainWindowHuePicker, _spellIconHotkeyHue;
-        private HSliderBar _spellIconScale;
+        private HSliderBar _spellIconScale, _journalFontSize;
+        private Combobox _journalFontSelection;
 
         #region Cooldowns
         private InputField _coolDownX, _coolDownY;
@@ -3846,6 +3847,21 @@ namespace ClassicUO.Game.UI.Gumps
                         ));
                 } //Journal opac and hue
 
+                string[] availableFonts = new string[] { "Use original font" };
+                availableFonts = availableFonts.Concat(TrueTypeLoader.Instance.Fonts).ToArray();
+
+                section.Add(AddLabel(null, "Font selection", 0, 0));
+                section.AddRight(_journalFontSelection = AddCombobox(
+                        null,
+                        availableFonts,
+                        availableFonts.Length > _currentProfile.SelectedJournalFont ? _currentProfile.SelectedJournalFont : 0,
+                        0, 0, 200
+                    ));
+
+                section.PushIndent();
+                section.Add(AddLabel(null, "Font size", 0, 0));
+                section.Add(_journalFontSize = AddHSlider(null, 5, 40, _currentProfile.SelectedJournalFontSize, 0, 0, 200));
+                section.PopIndent();
 
                 rightArea.Add(section);
                 startY += section.Height + SPACING;
@@ -4140,7 +4156,7 @@ namespace ClassicUO.Game.UI.Gumps
                 section.AddRight(_spellIconDisplayHotkey = AddCheckBox(null, "", _currentProfile.SpellIcon_DisplayHotkey, 0, 0));
 
                 section.PushIndent();
-                section.Add(AddLabel(null, "Hotkey text hue", 0 ,0));
+                section.Add(AddLabel(null, "Hotkey text hue", 0, 0));
                 section.AddRight(_spellIconHotkeyHue = new ModernColorPicker.HueDisplay(_currentProfile.SpellIcon_HotkeyHue, null, true));
                 section.PopIndent();
 
@@ -4668,6 +4684,28 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _currentProfile.MainWindowBackgroundHue = _mainWindowHuePicker.Hue;
                 GameController.UpdateBackgroundHueShader();
+            }
+
+            if (_currentProfile.SelectedJournalFont != _journalFontSelection.SelectedIndex)
+            {
+                _currentProfile.SelectedJournalFont = _journalFontSelection.SelectedIndex;
+                Gump g = UIManager.GetGump<ResizableJournal>();
+                if (g != null)
+                {
+                    g.Dispose();
+                    UIManager.Add(new ResizableJournal());
+                }
+            }
+
+            if (_currentProfile.SelectedJournalFontSize != _journalFontSize.Value)
+            {
+                _currentProfile.SelectedJournalFontSize = _journalFontSize.Value;
+                Gump g = UIManager.GetGump<ResizableJournal>();
+                if (g != null)
+                {
+                    g.Dispose();
+                    UIManager.Add(new ResizableJournal());
+                }
             }
 
             _currentProfile.EnableAlphaScrollingOnGumps = _enableAlphaScrollWheel.IsChecked;
