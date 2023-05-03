@@ -6,4 +6,4 @@
 	url = https://github.com/andreakarasho/MP3Sharp.git
 [submodule "external/FontStashSharp"]
 	path = external/FontStashSharp
-	url = https://github.com/FontStashSharp/FontStashSharp
+	url = https://github.com/FontStashSharp/FontStashSharp.git
