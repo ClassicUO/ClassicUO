@@ -17,6 +17,8 @@ namespace ClassicUO.Game.UI.Gumps
         private RenderedText text;
         private readonly byte font = 1;
         private readonly ushort hue = 0xFFFF;
+        
+        public event FinishedLoadingEvent OnOPLLoaded;
 
         public CustomToolTip(Item item, int x, int y, Control hoverReference, string prepend = "", string append = "") : base(0, 0)
         {
@@ -26,7 +28,6 @@ namespace ClassicUO.Game.UI.Gumps
             this.append = append;
             X = x;
             Y = y;
-            Width = 175;
             if (ProfileManager.CurrentProfile != null)
             {
                 font = ProfileManager.CurrentProfile.TooltipFont;
@@ -59,20 +60,43 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (World.OPL.TryGetNameAndData(item.Serial, out string name, out string data))
                 {
+                    int width = FontsLoader.Instance.GetWidthUnicode(font, data);
+
+                    if (width > 600)
+                    {
+                        width = 600;
+                    }
+
+                    width = FontsLoader.Instance.GetWidthExUnicode
+                    (
+                        font,
+                        data,
+                        width,
+                        ProfileManager.CurrentProfile.LeftAlignToolTips ? TEXT_ALIGN_TYPE.TS_LEFT : TEXT_ALIGN_TYPE.TS_CENTER,
+                        (ushort)FontStyle.BlackBorder
+                    );
+
+                    if (width > 600)
+                    {
+                        width = 600;
+                    }
+
                     text = RenderedText.Create
                         (
                             FormatTooltip(name, data),
-                            maxWidth: Width,
+                            maxWidth: width,
                             font: font,
                             isunicode: true,
                             style: FontStyle.BlackBorder,
-                            cell: 5,
+                            //cell: 5,
                             isHTML: true,
                             align: ProfileManager.CurrentProfile.LeftAlignToolTips ? TEXT_ALIGN_TYPE.TS_LEFT : TEXT_ALIGN_TYPE.TS_CENTER,
                             recalculateWidthByInfo: true,
                             hue: hue
                         );
                     Height = text.Height;
+                    Width = text.Width;
+                    OnOPLLoaded?.Invoke();
                 }
                 else
                 {
@@ -164,4 +188,6 @@ namespace ClassicUO.Game.UI.Gumps
             return true;
         }
     }
+
+    public delegate void FinishedLoadingEvent();
 }
