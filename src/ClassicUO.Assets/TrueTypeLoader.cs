@@ -58,7 +58,12 @@ namespace ClassicUO.Assets
                 KernelHeight = 1
             };
 
-            foreach (var ttf in Directory.GetFiles(Path.Combine(UOFileManager.BasePath, "Data", "Client", "Fonts"), "*.ttf"))
+            string _fontPath = Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), "Fonts");
+
+            if (!Directory.Exists(_fontPath))
+                Directory.CreateDirectory(_fontPath);
+
+            foreach (var ttf in Directory.GetFiles(_fontPath, "*.ttf"))
             {
                 var fontSystem = new FontSystem(settings);
                 fontSystem.AddFont(File.ReadAllBytes(ttf));
