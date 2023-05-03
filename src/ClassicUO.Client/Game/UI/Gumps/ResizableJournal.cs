@@ -508,6 +508,7 @@ namespace ClassicUO.Game.UI.Gumps
                         for (int i = 0; i < _textBoxEntries.Count; i++)
                         {
                             _textBoxEntries[i].Width = Width - SCROLL_BAR_WIDTH - BORDER_WIDTH - _hours[i].Width;
+                            _textBoxEntries[i].Update();
                         }
                     }
                     else
@@ -624,9 +625,9 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (ProfileManager.CurrentProfile.SelectedJournalFont > 0)
                 {
-                    TextBox textBox = new TextBox(text, ProfileManager.CurrentProfile.TryGetFontName, ProfileManager.CurrentProfile.SelectedJournalFontSize, Width, hue);
+                    TextBox textBox = new TextBox(text, ProfileManager.CurrentProfile.TryGetJournalFontName, ProfileManager.CurrentProfile.SelectedJournalFontSize, Width - (18 + h.Width), hue);
                     _textBoxEntries.AddToBack(textBox);
-                    _scrollBar.Height += textBox.Height;
+                    _scrollBar.MaxValue += textBox.Height;
                 }
                 else
                 {
