@@ -20,6 +20,7 @@ namespace ClassicUO.Game.UI.Gumps
         private const int ROWS = 20;
         private const int COLUMNS = 10;
         private readonly Action<ushort> hueChanged;
+        private readonly uint serial;
         private int _cPage = 0;
         private int cPage
         {
@@ -47,6 +48,7 @@ namespace ClassicUO.Game.UI.Gumps
             CanMove = true;
             AcceptMouseInput = true;
             this.hueChanged = hueChanged;
+            this.serial = serial;
             borderControl = new BorderControl(0, 0, WIDTH, HEIGHT, 10);
             int graphic = 9270, borderSize = 10;
             backgroundTexture = new GumpPicTiled(borderSize, borderSize, WIDTH - borderSize * 2, HEIGHT - borderSize * 2, (ushort)(graphic + 4));
@@ -91,7 +93,7 @@ namespace ClassicUO.Game.UI.Gumps
                 for (int row = 1; row < ROWS + 1; row++)
                 {
                     int _ = row + ((col - 1) * ROWS);
-                    area.Add(new HueDisplay((ushort)(_ + (page * (ROWS * COLUMNS)) - 1), hueChanged) { X = (col - 1) * 18, Y = (row - 1) * 18 });
+                    area.Add(new HueDisplay((ushort)(_ + (page * (ROWS * COLUMNS)) - 1), hueChanged, sendSysMessage: serial == 8787 ? true : false) { X = (col - 1) * 18, Y = (row - 1) * 18 });
                 }
             }
         }
@@ -101,6 +103,7 @@ namespace ClassicUO.Game.UI.Gumps
             private ushort hue;
             private readonly Action<ushort> hueChanged;
             private readonly bool isClickable;
+            private readonly bool sendSysMessage;
             private Rectangle rect;
             private Rectangle bounds;
             private Texture2D texture;
@@ -113,7 +116,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             public event EventHandler HueChanged;
 
-            public HueDisplay(ushort hue, Action<ushort> hueChanged, bool isClickable = false)
+            public HueDisplay(ushort hue, Action<ushort> hueChanged, bool isClickable = false, bool sendSysMessage = false)
             {
                 hueVector = ShaderHueTranslator.GetHueVector(hue, true, 1);
                 texture = ArtLoader.Instance.GetStaticTexture(0x0FAB, out var bounds);
@@ -131,6 +134,7 @@ namespace ClassicUO.Game.UI.Gumps
                 this.hue = hue;
                 this.hueChanged = hueChanged;
                 this.isClickable = isClickable;
+                this.sendSysMessage = sendSysMessage;
             }
 
             protected override void OnMouseUp(int x, int y, MouseButtonType button)
@@ -149,6 +153,8 @@ namespace ClassicUO.Game.UI.Gumps
                         hueChanged?.Invoke(hue);
                         flash = true;
                     }
+                    if (sendSysMessage)
+                        GameActions.Print($"Selected hue: {hue}");
                 }
             }
 

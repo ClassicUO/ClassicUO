@@ -23,8 +23,8 @@ namespace ClassicUO.Game.UI.Gumps
             Width = 200;
             Height = 100;
 
-            X = x;
-            Y = y;
+            X = x < 0 ? 0 : x;
+            Y = y < 0 ? 0 : y;
             SetInScreen();
 
             CanMove = true;

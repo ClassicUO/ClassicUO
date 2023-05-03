@@ -95,6 +95,16 @@ namespace ClassicUO.Game.Managers
 
                 }
             );
+
+            Register
+            (
+                "colorpicker",
+                s =>
+                {
+                    UIManager.Add(new UI.Gumps.ModernColorPicker(null, 8787));
+
+                }
+            );
         }
 
 

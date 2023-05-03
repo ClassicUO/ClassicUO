@@ -118,6 +118,8 @@ namespace ClassicUO.Game.UI.Gumps
         private int _zoomIndex = 4;
         private bool _showGridIfZoomed = true;
 
+        private GumpPic _northIcon;
+
         private WMapMarker _gotoMarker;
 
         private readonly float[] _zooms = new float[10] { 0.125f, 0.25f, 0.5f, 0.75f, 1f, 1.5f, 2f, 4f, 6f, 8f };
@@ -194,7 +196,6 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
         }
-
 
         public override void Restore(XmlElement xml)
         {
@@ -289,6 +290,21 @@ namespace ClassicUO.Game.UI.Gumps
         private void BuildGump()
         {
             BuildContextMenu();
+            _northIcon?.Dispose();
+            _northIcon = new GumpPic(0, 0, 5021, 0) { Width = 22, Height = 25 };
+            _northIcon.X = Width - _northIcon.Width - BorderControl.BorderSize;
+            _northIcon.Y = !_flipMap ? Height - _northIcon.Height - BorderControl.BorderSize : BorderControl.BorderSize;
+            Add(_northIcon);
+        }
+
+        public override void OnResize()
+        {
+            base.OnResize();
+            if (_northIcon != null)
+            {
+                _northIcon.X = Width - _northIcon.Width - BorderControl.BorderSize;
+                _northIcon.Y = !_flipMap ? Height - _northIcon.Height - BorderControl.BorderSize : BorderControl.BorderSize;
+            }
         }
 
         private void BuildOptionDictionary()
@@ -298,7 +314,14 @@ namespace ClassicUO.Game.UI.Gumps
             _options["show_all_markers"] = new ContextMenuItemEntry(ResGumps.ShowAllMarkers, () => { _showMarkers = !_showMarkers; SaveSettings(); }, true, _showMarkers);
             _options["show_marker_names"] = new ContextMenuItemEntry(ResGumps.ShowMarkerNames, () => { _showMarkerNames = !_showMarkerNames; SaveSettings(); }, true, _showMarkerNames);
             _options["show_marker_icons"] = new ContextMenuItemEntry(ResGumps.ShowMarkerIcons, () => { _showMarkerIcons = !_showMarkerIcons; SaveSettings(); }, true, _showMarkerIcons);
-            _options["flip_map"] = new ContextMenuItemEntry(ResGumps.FlipMap, () => { _flipMap = !_flipMap; SaveSettings(); }, true, _flipMap);
+            _options["flip_map"] = new ContextMenuItemEntry(ResGumps.FlipMap, () => { 
+                _flipMap = !_flipMap; SaveSettings();
+                if (_northIcon != null)
+                {
+                    _northIcon.X = Width - _northIcon.Width - BorderControl.BorderSize;
+                    _northIcon.Y = !_flipMap ? Height - _northIcon.Height - BorderControl.BorderSize : BorderControl.BorderSize;
+                }
+            }, true, _flipMap);
 
             _options["goto_location"] = new ContextMenuItemEntry
             (
@@ -483,6 +506,12 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             parent.Add(zoneOptions);
+        }
+
+        protected override void CloseWithRightClick()
+        {
+            ContextMenu?.Show();
+            return;
         }
 
         private void BuildContextMenu()

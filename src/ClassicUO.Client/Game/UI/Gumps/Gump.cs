@@ -34,6 +34,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml;
+using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
@@ -64,6 +65,34 @@ namespace ClassicUO.Game.UI.Gumps
 
         public uint MasterGumpSerial { get; set; }
 
+        public float AlphaOffset = 0;
+
+        protected override void OnMouseWheel(MouseEventType delta)
+        {
+            base.OnMouseWheel(delta);
+
+            if (Keyboard.Alt && ProfileManager.CurrentProfile.EnableAlphaScrollingOnGumps)
+            {
+                if (delta == MouseEventType.WheelScrollUp && Alpha < 0.99)
+                {
+                    AlphaOffset += 0.02f;
+                    Alpha += 0.02f;
+                    foreach (Control c in Children)
+                    {
+                        c.Alpha += 0.02f;
+                        if (c.Alpha > 1) c.Alpha = 1;
+                    }
+                }
+                else if(Alpha > 0.1)
+                {
+                    AlphaOffset -= 0.02f;
+                    Alpha -= 0.02f;
+                    foreach (Control c in Children)
+                        c.Alpha -= 0.02f;
+                }
+            }
+        }
+
         public virtual bool IsLocked
         {
             get { return isLocked; }
@@ -74,7 +103,8 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     CanMove = false;
                     CanCloseWithRightClick = false;
-                } else
+                }
+                else
                 {
                     CanMove = true;
                     CanCloseWithRightClick = true;
@@ -126,6 +156,7 @@ namespace ClassicUO.Game.UI.Gumps
             writer.WriteAttributeString("y", Y.ToString());
             writer.WriteAttributeString("serial", LocalSerial.ToString());
             writer.WriteAttributeString("isLocked", isLocked.ToString());
+            writer.WriteAttributeString("alphaOffset", AlphaOffset.ToString());
         }
 
         public void SetInScreen()
@@ -148,6 +179,13 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (bool.TryParse(xml.GetAttribute("isLocked"), out bool lockedStatus))
                 IsLocked = lockedStatus;
+            if (float.TryParse(xml.GetAttribute("alphaOffset"), out float alpha))
+            {
+                AlphaOffset = alpha;
+                Alpha += alpha;
+                foreach (Control c in Children)
+                    c.Alpha += alpha;
+            }
         }
 
         public void RequestUpdateContents()

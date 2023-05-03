@@ -92,7 +92,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             int[][] textTable =
             {
-                new[] { 0, (int) Buttons.Map },
                 new[] { 1, (int) Buttons.Paperdoll },
                 new[] { 1, (int) Buttons.Inventory },
                 new[] { 1, (int) Buttons.Journal },
@@ -104,14 +103,12 @@ namespace ClassicUO.Game.UI.Gumps
                 new[] { 1, (int) Buttons.NetStats },
 
                 new[] { 1, (int) Buttons.UOStore },
-                new[] { 1, (int) Buttons.GlobalChat }
             };
 
             var cliloc = ClilocLoader.Instance;
 
             string[] texts =
             {
-                cliloc.GetString(3000430, ResGumps.Map), 
                 cliloc.GetString(3000133, ResGumps.Paperdoll), 
                 cliloc.GetString(3000431, ResGumps.Inventory), 
                 cliloc.GetString(3000129, ResGumps.Journal), 
@@ -122,7 +119,6 @@ namespace ClassicUO.Game.UI.Gumps
                 cliloc.GetString(1042237, ResGumps.Debug), 
                 cliloc.GetString(3000169, ResGumps.NetStats), 
                 cliloc.GetString(1158008, ResGumps.UOStore),
-                cliloc.GetString(1158390, ResGumps.GlobalChat)
             };
 
             bool hasUOStore = Client.Version >= ClientVersion.CV_706400;
@@ -278,11 +274,6 @@ namespace ClassicUO.Game.UI.Gumps
         {
             switch ((Buttons) buttonID)
             {
-                case Buttons.Map:
-                    GameActions.OpenMiniMap();
-
-                    break;
-
                 case Buttons.Paperdoll:
                     GameActions.OpenPaperdoll(World.Player);
 
@@ -303,12 +294,6 @@ namespace ClassicUO.Game.UI.Gumps
 
                     break;
 
-                case Buttons.GlobalChat:
-                    Log.Warn(ResGumps.ChatButtonPushedNotImplementedYet);
-                    GameActions.Print(ResGumps.GlobalChatNotImplementedYet, 0x23, MessageType.System);
-
-                    break;
-
                 case Buttons.UOStore:
                     if (Client.Version >= ClientVersion.CV_706400)
                     {
@@ -320,6 +305,15 @@ namespace ClassicUO.Game.UI.Gumps
                 case Buttons.Help:
                     GameActions.RequestHelp();
 
+                    break;
+
+                case Buttons.Info:
+                    if (TargetManager.IsTargeting)
+                    {
+                        TargetManager.CancelTarget();
+                    }
+
+                    TargetManager.SetTargeting(CursorTarget.SetTargetClientSide, CursorType.Target, TargetType.Neutral);
                     break;
 
                 case Buttons.Debug:
@@ -364,7 +358,6 @@ namespace ClassicUO.Game.UI.Gumps
 
         private enum Buttons
         {
-            Map,
             Paperdoll,
             Inventory,
             Journal,
@@ -375,7 +368,6 @@ namespace ClassicUO.Game.UI.Gumps
             Debug,
             NetStats,
             UOStore,
-            GlobalChat
         }
 
         private class RighClickableButton : Button

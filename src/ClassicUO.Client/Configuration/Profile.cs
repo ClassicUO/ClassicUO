@@ -442,6 +442,8 @@ namespace ClassicUO.Configuration
 
         public int SpellIconScale { get; set; } = 100;
 
+        public bool EnableAlphaScrollingOnGumps { get; set; } = true;
+
         [JsonConverter(typeof(Point2Converter))] public Point WorldMapPosition { get; set; } = new Point(100, 100);
         [JsonConverter(typeof(Point2Converter))] public Point PaperdollPosition { get; set; } = new Point(100, 100);
         [JsonConverter(typeof(Point2Converter))] public Point JournalPosition { get; set; } = new Point(100, 100);
