@@ -78,7 +78,11 @@ namespace ClassicUO.Game.UI.Controls
 
             AcceptMouseInput = false;
             Width = width;
-            Height = _rtl.Size.Y;
+        }
+
+        public int Height
+        {
+            get { return _rtl.Size.Y; }
         }
 
         public string Text
@@ -169,8 +173,6 @@ namespace ClassicUO.Game.UI.Controls
 
                 _dirty = false;
             }
-
-            Height = _rtl.Size.Y;
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
