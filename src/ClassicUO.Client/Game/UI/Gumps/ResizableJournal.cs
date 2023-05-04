@@ -34,7 +34,7 @@ namespace ClassicUO.Game.UI.Gumps
         #endregion
 
         private AlphaBlendControl _background;
-        private RenderedTextList _journalArea;
+        private JournalEntriesContainer _journalArea;
         private ScrollBar _scrollBarBase;
         #endregion
 
@@ -95,7 +95,7 @@ namespace ClassicUO.Game.UI.Gumps
                 BORDER_WIDTH + TAB_HEIGHT,
                 Height - TAB_HEIGHT - (BORDER_WIDTH * 2));
 
-            _journalArea = new RenderedTextList(
+            _journalArea = new JournalEntriesContainer(
                 BORDER_WIDTH,
                 BORDER_WIDTH + TAB_HEIGHT,
                 Width - SCROLL_BAR_WIDTH - (BORDER_WIDTH * 2),
@@ -295,17 +295,16 @@ namespace ClassicUO.Game.UI.Gumps
                 Reposition();
         }
 
-        private class RenderedTextList : Control
+        private class JournalEntriesContainer : Control
         {
-            private Deque<RenderedText> _hours;
-            private Deque<TextBox> _textBoxEntries;
+            private Deque<JournalData> journalDatas = new Deque<JournalData>();
+
+
             private readonly ScrollBarBase _scrollBar;
-            private readonly Deque<TextType> _text_types;
-            private readonly Deque<MessageType> _message_types;
             private int lastWidth = 0, lastHeight = 0;
             private ResizableJournal _resizableJournal;
 
-            public RenderedTextList(int x, int y, int width, int height, ScrollBarBase scrollBarControl, ResizableJournal resizableJournal)
+            public JournalEntriesContainer(int x, int y, int width, int height, ScrollBarBase scrollBarControl, ResizableJournal resizableJournal)
             {
                 _resizableJournal = resizableJournal;
                 _scrollBar = scrollBarControl;
@@ -317,11 +316,6 @@ namespace ClassicUO.Game.UI.Gumps
                 Width = lastWidth = width;
                 Height = lastHeight = height;
 
-                _textBoxEntries = new Deque<TextBox>();
-                _hours = new Deque<RenderedText>();
-                _text_types = new Deque<TextType>();
-                _message_types = new Deque<MessageType>();
-
                 WantUpdateSize = false;
             }
 
@@ -329,95 +323,53 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 base.Draw(batcher, x, y);
 
-                int mx = x;
                 int my = y;
 
                 int height = 0;
                 int maxheight = _scrollBar.Value + _scrollBar.Height;
-
-                for (int i = 0; i < _textBoxEntries.Count; i++)
+                Console.WriteLine();
+                Console.WriteLine();
+                Console.WriteLine();
+                foreach (JournalData journalEntry in journalDatas)
                 {
-                    if (_hours.Count != _textBoxEntries.Count || _text_types.Count != _textBoxEntries.Count || _message_types.Count != _textBoxEntries.Count)
-                    {
-                        Reset();
-                        _resizableJournal.InitJournalEntries();
-                    }
-
-                    RenderedText hour = _hours[i];
-                    TextType type = _text_types[i];
-                    MessageType messageType = _message_types[i];
-
-
-                    if (!CanBeDrawn(type, messageType))
-                    {
+                    if (journalEntry == null)
                         continue;
-                    }
-                    TextBox tb = _textBoxEntries[i];
 
+                    if (!CanBeDrawn(journalEntry.TextType, journalEntry.MessageType))
+                        continue;
 
-                    if (height + tb.Height <= _scrollBar.Value)
+                    Console.WriteLine($"TextBox height: {journalEntry.EntryText.Height}, TimeStamp height {journalEntry.TimeStamp.Height}, Text: {journalEntry.EntryText.Text}");
+
+                    if (height + journalEntry.EntryText.Height <= _scrollBar.Value)
                     {
-                        // this entry is above the renderable area.
-                        height += tb.Height;
+                        //This entry is above the visible scroll area so we aren't going to draw it
+                        //Still need to increase height to keep track of the total height
+                        height += journalEntry.EntryText.Height;
                     }
-                    else if (height + tb.Height <= maxheight)
+                    else if (height + journalEntry.EntryText.Height <= maxheight)
                     {
+                        //This entry is at least partially within the visible scroll area
                         int yy = height - _scrollBar.Value;
 
                         if (yy < 0)
                         {
-
-                            // this entry starts above the renderable area, but exists partially within it.
-                            //No draw method for partial draws yet for textbox
-
-                            //hour.Draw
-                            //    (
-                            //    batcher,
-                            //    hour.Width,
-                            //    hour.Height,
-                            //    mx,
-                            //    y,
-                            //    tb.Width,
-                            //    tb.Height + yy,
-                            //    0,
-                            //    -yy
-                            //    );
-
-                            //Insert TB partial draw here
-                            //my += t.Height + yy;
+                            //This entry is only partially within the renderable area,
+                            //we don't have a partial draw method for TextBox yet so we'll skip it.
                         }
                         else
                         {
-                            // this entry is completely within the renderable area.
-                            hour.Draw(batcher, mx, my);
-                            tb.Draw(batcher, mx + hour.Width, my);
-                            my += tb.Height;
-
+                            //This entry is completely inside the visible scroll area, time to draw
+                            journalEntry.TimeStamp.Draw(batcher, x, my);
+                            journalEntry.EntryText.Draw(batcher, x + journalEntry.TimeStamp.Width, my);
+                            my += journalEntry.EntryText.Height;
                         }
-                        height += tb.Height;
 
+                        height += journalEntry.EntryText.Height;
                     }
                     else
                     {
-                        int yyy = maxheight - height;
-                        //No partial draw for textbox yet
-                        //hour.Draw
-                        //(
-                        //    batcher,
-                        //    hour.Width,
-                        //    hour.Height,
-                        //    mx,
-                        //    y + _scrollBar.Height - yyy,
-                        //    tb.Width,
-                        //    yyy,
-                        //    0,
-                        //    0
-                        //);
-
-                        //Insert TB partial draw here
-
-                        // can't fit any more entries - so we break!
-                        break;
+                        //This entry is below, or partially below the visible scroll area so we'll need to skip it
+                        break; //Can't fit any more entries, no need to continue checking
                     }
                 }
 
@@ -429,19 +381,18 @@ namespace ClassicUO.Game.UI.Gumps
                 base.Update();
 
                 if (!IsVisible)
-                {
                     return;
-                }
+
                 _scrollBar.IsVisible = _scrollBar.MaxValue > _scrollBar.MinValue;
                 if (Width != lastWidth || Height != lastHeight)
                 {
                     lastWidth = Width;
                     lastHeight = Height;
 
-                    for (int i = 0; i < _textBoxEntries.Count; i++)
+                    foreach (JournalData _ in journalDatas)
                     {
-                        _textBoxEntries[i].Width = Width - SCROLL_BAR_WIDTH - BORDER_WIDTH - _hours[i].Width;
-                        _textBoxEntries[i].Update();
+                        _.EntryText.Width = Width - SCROLL_BAR_WIDTH - BORDER_WIDTH - _.TimeStamp.Width;
+                        _.EntryText.Update();
                     }
 
                     CalculateScrollBarMaxValue();
@@ -454,12 +405,10 @@ namespace ClassicUO.Game.UI.Gumps
                 bool maxValue = _scrollBar.Value == _scrollBar.MaxValue;
                 int height = 0;
 
-                for (int i = 0; i < _textBoxEntries.Count; i++)
+                foreach (JournalData _ in journalDatas)
                 {
-                    if (i < _text_types.Count && CanBeDrawn(_text_types[i], _message_types[i]))
-                    {
-                        height += _textBoxEntries[i].Height;
-                    }
+                    if (CanBeDrawn(_.TextType, _.MessageType))
+                        height += _.EntryText.Height;
                 }
 
 
@@ -481,49 +430,20 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            public void AddEntry
-            (
-                string text,
-                ushort hue,
-                DateTime time,
-                TextType text_type,
-                MessageType messageType
-            )
+            public void AddEntry(string text, ushort hue, DateTime time, TextType text_type, MessageType messageType)
             {
                 bool maxScroll = _scrollBar.Value == _scrollBar.MaxValue;
 
+                while (journalDatas.Count > Constants.MAX_JOURNAL_HISTORY_COUNT)
+                    journalDatas.RemoveFromFront().Destroy();
 
-
-                while (_textBoxEntries.Count > Constants.MAX_JOURNAL_HISTORY_COUNT)
-                {
-                    _textBoxEntries.RemoveFromFront().Dispose();
-
-                    _hours.RemoveFromFront().Destroy();
-
-                    _text_types.RemoveFromFront();
-
-                    _message_types.RemoveFromFront();
-                }
-
-                RenderedText h = RenderedText.Create
-                (
-                    $"{time:t} ",
-                    1150,
-                    1,
-                    true,
-                    FontStyle.BlackBorder
-                );
-
-                _hours.AddToBack(h);
-
-                TextBox textBox = new TextBox(text, ProfileManager.CurrentProfile.SelectedTTFJournalFont, ProfileManager.CurrentProfile.SelectedJournalFontSize, Width - (18 + h.Width), hue);
-                _textBoxEntries.AddToBack(textBox);
-                _scrollBar.MaxValue += textBox.Height;
-
-                _text_types.AddToBack(text_type);
-
-                _message_types.AddToBack(messageType);
-
+                journalDatas.AddToBack(
+                    new JournalData(
+                        new TextBox(text, ProfileManager.CurrentProfile.SelectedTTFJournalFont, ProfileManager.CurrentProfile.SelectedJournalFontSize, Width - (18 + (int)(2.6 * ProfileManager.CurrentProfile.SelectedJournalFontSize)), hue),
+                        new TextBox($"{time:t}", ProfileManager.CurrentProfile.SelectedTTFJournalFont, ProfileManager.CurrentProfile.SelectedJournalFontSize, (int)(2.6 * ProfileManager.CurrentProfile.SelectedJournalFontSize), 1150),
+                        text_type,
+                        messageType
+                    ));
 
                 if (maxScroll)
                 {
@@ -557,15 +477,10 @@ namespace ClassicUO.Game.UI.Gumps
 
             private void Reset()
             {
-                for (int i = 0; i < _hours.Count; i++)
-                {
-                    _hours[i].Destroy();
-                }
+                foreach (JournalData _ in journalDatas)
+                    _.Destroy();
 
-                _textBoxEntries.Clear();
-                _hours.Clear();
-                _text_types.Clear();
-                _message_types.Clear();
+                journalDatas.Clear();
             }
 
             public override void Dispose()
@@ -573,6 +488,28 @@ namespace ClassicUO.Game.UI.Gumps
                 Reset();
 
                 base.Dispose();
+            }
+
+            public class JournalData
+            {
+                public JournalData(TextBox textBox, TextBox timeStamp, TextType textType, MessageType messageType)
+                {
+                    EntryText = textBox;
+                    TimeStamp = timeStamp;
+                    TextType = textType;
+                    MessageType = messageType;
+                }
+
+                public void Destroy()
+                {
+                    EntryText?.Dispose();
+                    TimeStamp?.Dispose();
+                }
+
+                public TextBox EntryText { get; }
+                public TextBox TimeStamp { get; }
+                public TextType TextType { get; }
+                public MessageType MessageType { get; }
             }
         }
     }
