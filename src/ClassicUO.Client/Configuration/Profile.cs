@@ -453,19 +453,8 @@ namespace ClassicUO.Configuration
 
         public bool DisplayPartyChatOverhead { get; set; } = true;
 
-        public int SelectedJournalFont { get; set; } = 0;
+        public string SelectedTTFJournalFont { get; set; } = "Roboto-Regular";
         public int SelectedJournalFontSize { get; set; } = 15;
-        [JsonIgnore]
-        public string TryGetJournalFontName
-        {
-            get
-            {
-                string[] fonts = Assets.TrueTypeLoader.Instance.Fonts;
-                if (fonts.Length > SelectedJournalFont - 1)
-                    return fonts[SelectedJournalFont - 1];
-                return "";
-            }
-        }
 
         public string SelectedToolTipFont { get; set; } = "Roboto-Regular";
         public int SelectedToolTipFontSize { get; set; } = 15;

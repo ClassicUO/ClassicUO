@@ -29,8 +29,7 @@ namespace ClassicUO.Game.UI.Gumps
             Y = y;
             if (ProfileManager.CurrentProfile != null)
             {
-                if (ProfileManager.CurrentProfile.TooltipTextHue != 0)
-                    hue = ProfileManager.CurrentProfile.TooltipTextHue;
+                hue = ProfileManager.CurrentProfile.TooltipTextHue;
             }
             BuildGump();
         }
@@ -105,8 +104,8 @@ namespace ClassicUO.Game.UI.Gumps
                 Dispose();
                 return false;
             }
-            //if (text == null) //Waiting for opl data to load the text tooltip
-            //    return true;
+            if (text == null) //Waiting for opl data to load the text tooltip
+                return true;
 
             float alpha = 0.7f;
 

@@ -67,12 +67,12 @@ namespace ClassicUO.Game.UI.Controls
             };
 
             _font = font;
-            _size = size;
+            _color.PackedValue = (uint)hue;
 
-            if (hue == 0xFFFF)
-                _color = Color.White;
-            else
-                _color.PackedValue = (uint)hue;
+            if (hue == 0xFFFF || hue == ushort.MaxValue)
+                _color.PackedValue = (uint)191;
+
+
             _align = align;
             _dropShadow = dropShadow;
 

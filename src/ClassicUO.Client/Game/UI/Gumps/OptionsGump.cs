@@ -3847,14 +3847,16 @@ namespace ClassicUO.Game.UI.Gumps
                         ));
                 } //Journal opac and hue
 
-                string[] availableFonts = new string[] { "Use original font" };
-                availableFonts = availableFonts.Concat(TrueTypeLoader.Instance.Fonts).ToArray();
+                string[] availableFonts = TrueTypeLoader.Instance.Fonts;
 
                 section.Add(AddLabel(null, "Font selection", 0, 0));
+
+                string[] fontArray = TrueTypeLoader.Instance.Fonts;
+                int selectedFont = Array.IndexOf(fontArray, _currentProfile.SelectedTTFJournalFont);
                 section.AddRight(_journalFontSelection = AddCombobox(
                         null,
                         availableFonts,
-                        availableFonts.Length > _currentProfile.SelectedJournalFont ? _currentProfile.SelectedJournalFont : 0,
+                        selectedFont < 0 ? 0 : selectedFont,
                         0, 0, 200
                     ));
 
@@ -4731,9 +4733,9 @@ namespace ClassicUO.Game.UI.Gumps
                 GameController.UpdateBackgroundHueShader();
             }
 
-            if (_currentProfile.SelectedJournalFont != _journalFontSelection.SelectedIndex)
+            if (_currentProfile.SelectedTTFJournalFont != TrueTypeLoader.Instance.Fonts[_journalFontSelection.SelectedIndex])
             {
-                _currentProfile.SelectedJournalFont = _journalFontSelection.SelectedIndex;
+                _currentProfile.SelectedTTFJournalFont = TrueTypeLoader.Instance.Fonts[_journalFontSelection.SelectedIndex];
                 Gump g = UIManager.GetGump<ResizableJournal>();
                 if (g != null)
                 {
