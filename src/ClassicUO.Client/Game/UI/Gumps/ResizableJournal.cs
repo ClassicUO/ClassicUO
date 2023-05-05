@@ -387,7 +387,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     foreach (JournalData _ in journalDatas)
                     {
-                        _.EntryText.Width = Width - SCROLL_BAR_WIDTH - BORDER_WIDTH - _.TimeStamp.Width;
+                        _.EntryText.Width = Width - BORDER_WIDTH - _.TimeStamp.Width;
                         _.EntryText.Update();
                     }
 
@@ -435,7 +435,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 journalDatas.AddToBack(
                     new JournalData(
-                        new TextBox(text, ProfileManager.CurrentProfile.SelectedTTFJournalFont, ProfileManager.CurrentProfile.SelectedJournalFontSize, Width - (18 + (int)(2.6 * ProfileManager.CurrentProfile.SelectedJournalFontSize)), hue),
+                        new TextBox(text, ProfileManager.CurrentProfile.SelectedTTFJournalFont, ProfileManager.CurrentProfile.SelectedJournalFontSize, Width - ((int)(2.6 * ProfileManager.CurrentProfile.SelectedJournalFontSize)), hue),
                         new TextBox($"{time:t}", ProfileManager.CurrentProfile.SelectedTTFJournalFont, ProfileManager.CurrentProfile.SelectedJournalFontSize, (int)(2.6 * ProfileManager.CurrentProfile.SelectedJournalFontSize), 1150),
                         text_type,
                         messageType
