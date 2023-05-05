@@ -1301,14 +1301,21 @@ namespace ClassicUO.Game.UI.Gumps
                 if (item == null)
                     return false;
 
-                if (item.Name != null && item.Name.ToLower().Contains(search.ToLower()))
-                    return true;
-
                 if (World.OPL.TryGetNameAndData(item.Serial, out string name, out string data))
                 {
+                    if (name != null && name.ToLower().Contains(search.ToLower()))
+                        return true;
                     if (data != null)
                         if (data.ToLower().Contains(search.ToLower()))
                             return true;
+                }
+                else
+                {
+                    if (item.Name != null && item.Name.ToLower().Contains(search.ToLower()))
+                        return true;
+
+                    if (item.ItemData.Name.ToLower().Contains(search.ToLower()))
+                        return true;
                 }
 
                 return false;
