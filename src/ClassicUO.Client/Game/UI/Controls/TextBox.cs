@@ -156,6 +156,7 @@ namespace ClassicUO.Game.UI.Controls
                 }
                 finalString += tempLine + "\n";
             }
+            finalString = finalString.Substring(0, finalString.Length - 1);
             GameActions.Print(finalString);
             return finalString;
         }

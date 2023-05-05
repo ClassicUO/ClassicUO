@@ -41,6 +41,18 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void BuildGump()
         {
+            text = new TextBox(
+                "Loading item data...",
+                ProfileManager.CurrentProfile.SelectedToolTipFont,
+                ProfileManager.CurrentProfile.SelectedToolTipFontSize,
+                ProfileManager.CurrentProfile.SelectedToolTipFontSize * 15,
+                (int)hue,
+                align: ProfileManager.CurrentProfile.LeftAlignToolTips ? FontStashSharp.RichText.TextHorizontalAlignment.Left : FontStashSharp.RichText.TextHorizontalAlignment.Center
+                );
+
+            Height = text.Height;
+            Width = text.Width;
+
             LoadOPLData(0);
         }
 
@@ -54,11 +66,11 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
-            Task.Factory.StartNew(() =>
+            if (World.OPL.Contains(item.Serial))
             {
                 if (World.OPL.TryGetNameAndData(item.Serial, out string name, out string data))
                 {
-
+                    text?.Dispose();
                     text = new TextBox(
                         TextBox.ConvertHtmlToFontStashSharpCommand(FormatTooltip(name, data)),
                         ProfileManager.CurrentProfile.SelectedToolTipFont,
@@ -72,13 +84,18 @@ namespace ClassicUO.Game.UI.Gumps
                     Width = text.Width;
                     OnOPLLoaded?.Invoke();
                 }
-                else
+            }
+            else
+            {
+                Task.Factory.StartNew(() =>
                 {
-                    World.OPL.Contains(item.Serial);
-                    Task.Delay(1000).Wait();
+                    Task.Delay(1500).Wait();
                     LoadOPLData(attempt++);
-                }
-            });
+                });
+            }
+
+
+
         }
 
         private string FormatTooltip(string name, string data)
@@ -104,8 +121,8 @@ namespace ClassicUO.Game.UI.Gumps
                 Dispose();
                 return false;
             }
-            if (text == null) //Waiting for opl data to load the text tooltip
-                return true;
+            //if (text == null) //Waiting for opl data to load the text tooltip
+            //    return true;
 
             float alpha = 0.7f;
 
@@ -144,8 +161,7 @@ namespace ClassicUO.Game.UI.Gumps
                 hue_vec
             );
 
-            if (text != null)
-                text.Draw(batcher, x, y);
+            text.Draw(batcher, x, y);
 
             return true;
         }
