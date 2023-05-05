@@ -81,6 +81,9 @@ namespace ClassicUO.Assets
                 return font.GetFont(size);
             }
 
+            if (_fonts.Count > 0)
+                return _fonts.First().Value.GetFont(size);
+
             return null;
         }
 
