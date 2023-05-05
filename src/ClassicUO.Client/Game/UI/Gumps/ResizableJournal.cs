@@ -328,47 +328,24 @@ namespace ClassicUO.Game.UI.Gumps
                 int height = 0;
                 int maxheight = _scrollBar.Value + _scrollBar.Height;
 
-                foreach (JournalData journalEntry in journalDatas)
+
+                if (batcher.ClipBegin(x, y, Width, Height))
                 {
-                    if (journalEntry == null)
-                        continue;
-
-                    if (!CanBeDrawn(journalEntry.TextType, journalEntry.MessageType))
-                        continue;
-
-                    if (height + journalEntry.EntryText.Height <= _scrollBar.Value)
+                    foreach (JournalData journalEntry in journalDatas)
                     {
-                        //This entry is above the visible scroll area so we aren't going to draw it
-                        //Still need to increase height to keep track of the total height
-                        height += journalEntry.EntryText.Height;
-                    }
-                    else if (height + journalEntry.EntryText.Height <= maxheight)
-                    {
-                        //This entry is at least partially within the visible scroll area
-                        int yy = height - _scrollBar.Value;
+                        if (journalEntry == null)
+                            continue;
 
-                        if (yy < 0)
-                        {
-                            //This entry is only partially within the renderable area,
-                            //we don't have a partial draw method for TextBox yet so we'll skip it.
-                        }
-                        else
-                        {
-                            //This entry is completely inside the visible scroll area, time to draw
-                            journalEntry.TimeStamp.Draw(batcher, x, my);
-                            journalEntry.EntryText.Draw(batcher, x + journalEntry.TimeStamp.Width, my);
-                            my += journalEntry.EntryText.Height;
-                        }
+                        if (!CanBeDrawn(journalEntry.TextType, journalEntry.MessageType))
+                            continue;
 
-                        height += journalEntry.EntryText.Height;
+                        journalEntry.TimeStamp.Draw(batcher, x, my - _scrollBar.Value);
+                        journalEntry.EntryText.Draw(batcher, x + journalEntry.TimeStamp.Width, my - _scrollBar.Value);
+                        my += journalEntry.EntryText.Height;
                     }
-                    else
-                    {
-                        //This entry is below, or partially below the visible scroll area so we'll need to skip it
-                        break; //Can't fit any more entries, no need to continue checking
-                    }
+
+                    batcher.ClipEnd();
                 }
-
                 return true;
             }
 
