@@ -67,6 +67,7 @@ namespace ClassicUO.Game.UI.Controls
             };
 
             _font = font;
+            _size = size;
             _color.PackedValue = (uint)hue;
 
             if (hue == 0xFFFF || hue == ushort.MaxValue)

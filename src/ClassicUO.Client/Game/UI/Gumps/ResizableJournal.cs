@@ -327,9 +327,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 int height = 0;
                 int maxheight = _scrollBar.Value + _scrollBar.Height;
-                Console.WriteLine();
-                Console.WriteLine();
-                Console.WriteLine();
+
                 foreach (JournalData journalEntry in journalDatas)
                 {
                     if (journalEntry == null)
@@ -337,8 +335,6 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (!CanBeDrawn(journalEntry.TextType, journalEntry.MessageType))
                         continue;
-
-                    Console.WriteLine($"TextBox height: {journalEntry.EntryText.Height}, TimeStamp height {journalEntry.TimeStamp.Height}, Text: {journalEntry.EntryText.Text}");
 
                     if (height + journalEntry.EntryText.Height <= _scrollBar.Value)
                     {
