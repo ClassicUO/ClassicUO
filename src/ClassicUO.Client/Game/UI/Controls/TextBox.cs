@@ -131,9 +131,9 @@ namespace ClassicUO.Game.UI.Controls
         public static string ConvertHtmlToFontStashSharpCommand(string text)
         {
             string finalString;
-
-            finalString = Regex.Replace(text, "<basefont color=\"?'?(?<color>.*?)\"?'?>", " /c[${color}]", RegexOptions.Multiline);
-            finalString = finalString.Replace("</basefont>", "/cd").Replace("<br>", "\n").Replace("\n", "\n/cd");;
+           
+            finalString = Regex.Replace(text, "<basefont color=\"?'?(?<color>.*?)\"?'?>", " /c[${color}]", RegexOptions.Multiline | RegexOptions.IgnoreCase);
+            finalString = finalString.Replace("</basefont>", "/cd").Replace("</BASEFONT>", "/cd").Replace("<br>", "\n").Replace("\n", "\n/cd");
             Console.WriteLine(finalString);
             return finalString;
         }
