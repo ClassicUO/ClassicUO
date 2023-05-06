@@ -35,6 +35,7 @@ using ClassicUO.Assets;
 using FontStashSharp.RichText;
 using Microsoft.Xna.Framework;
 using System;
+using System.Text.RegularExpressions;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -129,35 +130,11 @@ namespace ClassicUO.Game.UI.Controls
 
         public static string ConvertHtmlToFontStashSharpCommand(string text)
         {
-            string finalString = "";
+            string finalString;
 
-            string[] lines = text.Split(new string[] { "<br>", "\n" }, StringSplitOptions.None);
-
-            foreach (string line in lines)
-            {
-                string tempLine = "/cd";
-                int bfInd = line.IndexOf("<basefont color=\"");
-                if (bfInd != -1)
-                {
-                    //<basefont color="yellow">  <-Example
-                    string color = line.Substring(bfInd + 17); //Should be something like red"> or #444444"> blah blah blah
-                    int endInd = color.IndexOf("\">");
-                    if (endInd > -1)
-                    {
-                        tempLine = $"/c[{color.Substring(0, endInd)}]" + color.Substring(endInd + 2);
-                    }
-                    else
-                    {
-                        tempLine += line;
-                    }
-                } else
-                {
-                    tempLine += line;
-                }
-                finalString += tempLine + "\n";
-            }
-            finalString = finalString.Substring(0, finalString.Length - 1);
-            GameActions.Print(finalString);
+            finalString = Regex.Replace(text, "<basefont color=\"?'?(?<color>.*?)\"?'?>", " /c[${color}]", RegexOptions.Multiline);
+            finalString = finalString.Replace("</basefont>", "/cd").Replace("<br>", "\n").Replace("\n", "\n/cd");;
+            Console.WriteLine(finalString);
             return finalString;
         }
 
