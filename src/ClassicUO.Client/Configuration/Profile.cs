@@ -459,6 +459,9 @@ namespace ClassicUO.Configuration
         public string SelectedToolTipFont { get; set; } = "Roboto-Regular";
         public int SelectedToolTipFontSize { get; set; } = 15;
 
+        public string GameWindowSideChatFont { get; set; } = "Roboto-Regular";
+        public int GameWindowSideChatFontSize { get; set; } = 20;
+
         public static uint GumpsVersion { get; private set; }
 
         public void Save(string path, bool saveGumps = true)

@@ -886,27 +886,19 @@ namespace ClassicUO.Game.UI.Gumps
         private class ChatLineTime
         {
             private uint _createdTime;
-            private RenderedText _renderedText;
+            private TextBox textBox;
 
             public ChatLineTime(string text, byte font, bool isunicode, ushort hue)
             {
-                _renderedText = RenderedText.Create
-                (
-                    text,
-                    hue,
-                    font,
-                    isunicode,
-                    FontStyle.BlackBorder,
-                    maxWidth: 320
-                );
+                textBox = new TextBox(text, ProfileManager.CurrentProfile.GameWindowSideChatFont, ProfileManager.CurrentProfile.GameWindowSideChatFontSize, 320, hue);
                 _createdTime = Time.Ticks + Constants.TIME_DISPLAY_SYSTEM_MESSAGE_TEXT;
             }
 
-            private string Text => _renderedText?.Text ?? string.Empty;
+            private string Text => textBox?.Text ?? string.Empty;
 
-            public bool IsDisposed => _renderedText == null || _renderedText.IsDestroyed;
+            public bool IsDisposed => textBox == null || textBox.IsDisposed;
 
-            public int TextHeight => _renderedText?.Height ?? 0;
+            public int TextHeight => textBox?.Height ?? 0;
 
             public void Update()
             {
@@ -919,7 +911,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             public bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
-                return !IsDisposed && _renderedText.Draw(batcher, x, y /*, ShaderHueTranslator.GetHueVector(0, false, _alpha, true)*/);
+                return !IsDisposed && textBox.Draw(batcher, x, y);
             }
 
             public override string ToString()
@@ -931,8 +923,8 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (!IsDisposed)
                 {
-                    _renderedText?.Destroy();
-                    _renderedText = null;
+                    textBox?.Dispose();
+                    textBox = null;
                 }
             }
         }

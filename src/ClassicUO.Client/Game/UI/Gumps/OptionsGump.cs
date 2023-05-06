@@ -188,8 +188,8 @@ namespace ClassicUO.Game.UI.Gumps
         private Checkbox _leftAlignToolTips, _namePlateHealthOnlyWarmode, _enableHealthIndicator, _spellIconDisplayHotkey, _enableAlphaScrollWheel;
         private InputField _healthIndicatorPercentage, _healthIndicatorWidth;
         private ModernColorPicker.HueDisplay _mainWindowHuePicker, _spellIconHotkeyHue;
-        private HSliderBar _spellIconScale, _journalFontSize, _tooltipFontSize;
-        private Combobox _journalFontSelection, _tooltipFontSelect;
+        private HSliderBar _spellIconScale, _journalFontSize, _tooltipFontSize, _gameWindowSideChatFontSize;
+        private Combobox _journalFontSelection, _tooltipFontSelect, _gameWindowSideChatFont;
 
         #region Cooldowns
         private InputField _coolDownX, _coolDownY;
@@ -4064,7 +4064,22 @@ namespace ClassicUO.Game.UI.Gumps
                             0, 0
                         ));
                     section.AddRight(AddLabel(null, "Disable system chat", 0, 0));
-                } //Disable system chat
+
+                    section.Add(AddLabel(null, "System chat font", 0, 0));
+                    string[] fontArray = TrueTypeLoader.Instance.Fonts;
+                    int selectedFont = Array.IndexOf(fontArray, _currentProfile.GameWindowSideChatFont);
+                    section.AddRight(_gameWindowSideChatFont = AddCombobox(
+                        null,
+                        fontArray,
+                        selectedFont < 0 ? 0 : selectedFont,
+                        0, 0, 200
+                        ));
+
+                    section.PushIndent();
+                    section.Add(AddLabel(null, "System chat font size", 0, 0));
+                    section.AddRight(_gameWindowSideChatFontSize = AddHSlider(null, 5, 40, _currentProfile.GameWindowSideChatFontSize, 0, 0, 200));
+                    section.PopIndent();
+                } //System chat
 
                 {
                     section.Add(AddLabel(null, "Hidden Body Opacity", 0, 0));
@@ -4754,6 +4769,9 @@ namespace ClassicUO.Game.UI.Gumps
                     UIManager.Add(new ResizableJournal());
                 }
             }
+
+            _currentProfile.GameWindowSideChatFont = TrueTypeLoader.Instance.Fonts[_gameWindowSideChatFont.SelectedIndex];
+            _currentProfile.GameWindowSideChatFontSize = _gameWindowSideChatFontSize.Value;
 
             _currentProfile.SelectedToolTipFont = TrueTypeLoader.Instance.Fonts[_tooltipFontSelect.SelectedIndex];
             _currentProfile.SelectedToolTipFontSize = _tooltipFontSize.Value;
