@@ -100,7 +100,15 @@ namespace ClassicUO.Game.UI.Gumps
                     WorldMapGump map = UIManager.GetGump<WorldMapGump>();
                     if (map != null)
                     {
-                        map.GoToMarker(mapX, mapY, true);
+                        if (mapFacet != -1)
+                        {
+                            if (World.MapIndex != mapFacet)
+                                GameActions.Print("You're on the wrong facet!", 32);
+                            else
+                                map.GoToMarker(mapX, mapY, true);
+                        }
+                        else
+                            map.GoToMarker(mapX, mapY, true);
                     }
                 }
             }));
@@ -124,13 +132,16 @@ namespace ClassicUO.Game.UI.Gumps
             WantUpdateSize = true;
         }
 
-        private int mapX = 0, mapY = 0;
+        private int mapX = 0, mapY = 0, mapFacet = -1, mapEndX = 0, mapEndY = 0;
         private bool foundMapLoc = false;
 
-        public void MapInfos(int x, int y, int facet = -1)
+        public void MapInfos(int x, int y, int endX, int endY, int facet = -1)
         {
             mapX = x;
             mapY = y;
+            mapEndX = endX;
+            mapEndY = endY;
+            mapFacet = facet;
         }
 
         public void AddPin(int x, int y)
@@ -143,10 +154,24 @@ namespace ClassicUO.Game.UI.Gumps
             Add(c);
             if (!foundMapLoc)
             {
-                mapX = mapX + x;
-                mapY = mapY + y;
+                //multiplier = float((mapinfo.MapEnd.X) - (mapinfo.MapOrigin.X)) / float(width)
+                //    multiX = mapinfo.PinPosition.X * multiplier
+                //    multiY = mapinfo.PinPosition.Y * multiplier
+                //    finalX = int(mapinfo.MapOrigin.X + multiX)
+                //    finalY = int(mapinfo.MapOrigin.Y + multiY)
+
+                float multiplier = (float)(mapEndX - mapX) / Width;
+                if (mapFacet == 5)
+                    multiplier = 0.666666666f;
+
+                mapX = (int)(mapX + (x * multiplier));
+                mapY = (int)(mapY + (y * multiplier));
+
+                //mapX = mapX + x;
+                //mapY = mapY + y;
                 foundMapLoc = true;
-                mapGump?.SetTooltip($"Estimated loc: {mapX}, {mapY}");
+                
+                _hit?.SetTooltip($"Estimated loc: {mapX}, {mapY}");
             }
         }
 
