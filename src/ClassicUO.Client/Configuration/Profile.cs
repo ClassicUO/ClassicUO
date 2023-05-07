@@ -462,6 +462,10 @@ namespace ClassicUO.Configuration
         public string GameWindowSideChatFont { get; set; } = "Roboto-Regular";
         public int GameWindowSideChatFontSize { get; set; } = 20;
 
+        public string OverheadChatFont { get; set; } = "Roboto-Regular";
+        public int OverheadChatFontSize { get; set; } = 20;
+        public int OverheadChatWidth { get; set; } = 200;
+
         public static uint GumpsVersion { get; private set; }
 
         public void Save(string path, bool saveGumps = true)

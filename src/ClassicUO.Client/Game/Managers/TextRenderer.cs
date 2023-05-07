@@ -70,7 +70,7 @@ namespace ClassicUO.Game.Managers
 
             for (TextObject o = DrawPointer; o != null; o = o.DLeft)
             {
-                if (o.IsDestroyed || o.RenderedText == null || o.RenderedText.IsDestroyed || o.RenderedText.Texture == null || o.Time < ClassicUO.Time.Ticks)
+                if (o.IsDestroyed || o.TextBox == null || o.TextBox.IsDisposed || o.Time < ClassicUO.Time.Ticks)
                 {
                     continue;
                 }
@@ -90,7 +90,7 @@ namespace ClassicUO.Game.Managers
                 int x = o.RealScreenPosition.X;
                 int y = o.RealScreenPosition.Y;
 
-                if (o.RenderedText.PixelCheck(mouseX - x - startX, mouseY - y - startY))
+                if (o.TextBox.MouseIsOver)
                 {
                     SelectedObject.Object = o;
                 }
@@ -107,14 +107,12 @@ namespace ClassicUO.Game.Managers
                     x += startX;
                     y += startY;
                 }
-
-                o.RenderedText.Draw
+                o.TextBox.Alpha = alpha;
+                o.TextBox.Draw
                 (
                     batcher,
                     x,
-                    y,
-                    alpha,
-                    hue
+                    y
                 );
             }
         }
@@ -155,7 +153,7 @@ namespace ClassicUO.Game.Managers
                 {
                     TextObject t = DrawPointer;
 
-                    if (t.Time >= ClassicUO.Time.Ticks && t.RenderedText != null && !t.RenderedText.IsDestroyed)
+                    if (t.Time >= ClassicUO.Time.Ticks && t.TextBox != null && !t.TextBox.IsDisposed)
                     {
                         if (t.Owner != null)
                         {
@@ -211,8 +209,8 @@ namespace ClassicUO.Game.Managers
             {
                 X = msg.RealScreenPosition.X,
                 Y = msg.RealScreenPosition.Y,
-                Width = msg.RenderedText.Width,
-                Height = msg.RenderedText.Height
+                Width = msg.TextBox.Width,
+                Height = msg.TextBox.Height
             };
 
             for (int i = 0; i < _bounds.Count; i++)
