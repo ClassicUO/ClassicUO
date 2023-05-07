@@ -112,6 +112,20 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 }
             }));
+            _hit.ContextMenu.Add(new ContextMenuItemEntry("Try to pathfind", () => {
+                if (foundMapLoc)
+                {
+                    if (mapFacet != -1)
+                    {
+                        if (World.MapIndex != mapFacet)
+                            GameActions.Print("You're on the wrong facet!", 32);
+                        else
+                            Pathfinder.WalkTo(mapX, mapY, 0, 1);
+                    }
+                    else
+                        Pathfinder.WalkTo(mapX, mapY, 0, 1);
+                }
+            }));
             _hit.ContextMenu.Add(new ContextMenuItemEntry("Close", () => { Dispose(); }));
             _hit.CanCloseWithRightClick = false;
 
@@ -160,9 +174,13 @@ namespace ClassicUO.Game.UI.Gumps
                 //    finalX = int(mapinfo.MapOrigin.X + multiX)
                 //    finalY = int(mapinfo.MapOrigin.Y + multiY)
 
-                float multiplier = (float)(mapEndX - mapX) / Width;
-                if (mapFacet == 5)
-                    multiplier = 0.666666666f;
+                float multiplier = (float)Width / 300f;
+                //if (Width == 200)
+                //    multiplier = 0.666666666f;
+                //if (Width == 600)
+                //    multiplier = 2f;
+                    if (CUOEnviroment.Debug)
+                        GameActions.Print($"Width: {Width}, Multiplier: {multiplier}, Facet: {mapFacet}, MapData: {mapX}, {mapY}, {mapEndX}, {mapEndY}");
 
                 mapX = (int)(mapX + (x * multiplier));
                 mapY = (int)(mapY + (y * multiplier));
@@ -170,7 +188,7 @@ namespace ClassicUO.Game.UI.Gumps
                 //mapX = mapX + x;
                 //mapY = mapY + y;
                 foundMapLoc = true;
-                
+
                 _hit?.SetTooltip($"Estimated loc: {mapX}, {mapY}");
             }
         }
