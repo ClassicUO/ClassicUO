@@ -3169,6 +3169,8 @@ namespace ClassicUO.Network
                             endY
                         )
                     );
+
+                    gump.MapInfos(startX, startY, facet);
                 }
                 else
                 {
@@ -3185,6 +3187,7 @@ namespace ClassicUO.Network
                             endY
                         )
                     );
+                    gump.MapInfos(startX, startY);
                 }
             }
             else
@@ -3202,6 +3205,7 @@ namespace ClassicUO.Network
                         endY
                     )
                 );
+                gump.MapInfos(startX, startY);
             }
 
             UIManager.Add(gump);
