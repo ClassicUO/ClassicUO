@@ -214,6 +214,15 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Allow Positional Targeting.
+        /// </summary>
+        public static string AllowPositionalTargeting {
+            get {
+                return ResourceManager.GetString("AllowPositionalTargeting", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Hold ALT key + right click to close Anchored gumps.
         /// </summary>
         public static string AltCloseGumps {
