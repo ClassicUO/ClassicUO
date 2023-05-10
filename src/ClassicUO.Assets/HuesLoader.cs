@@ -32,9 +32,12 @@
 
 using ClassicUO.IO;
 using ClassicUO.Utility;
+using Microsoft.Xna.Framework;
 using System;
+using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace ClassicUO.Assets
@@ -93,6 +96,8 @@ namespace ClassicUO.Assets
                     
                     file.Dispose();
                     radarcol.Dispose();
+
+                    Hues.Initialize();
                 }
             );
         }
@@ -286,6 +291,240 @@ namespace ClassicUO.Assets
 
             return 0;
         }
+    }
+
+
+    public static class Hues
+    {
+        private static int[] _header;
+
+        public static Hue[] List { get; private set; }
+
+        static Hues()
+        {
+            Initialize();
+        }
+
+        /// <summary>
+        /// Reads hues.mul and fills <see cref="List"/>
+        /// </summary>
+        public static void Initialize()
+        {
+            string path = UOFileManager.GetUOFilePath("hues.mul");
+            FileSystemHelper.EnsureFileExists(path);
+
+            int index = 0;
+
+            const int maxHueCount = 3000;
+            List = new Hue[maxHueCount];
+
+            if (path != null)
+            {
+                using (var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
+                {
+                    int blockCount = (int)fs.Length / 708;
+
+                    if (blockCount > 375)
+                    {
+                        blockCount = 375;
+                    }
+
+                    _header = new int[blockCount];
+                    int structSize = Marshal.SizeOf(typeof(HueDataMul));
+                    var buffer = new byte[blockCount * (4 + (8 * structSize))];
+                    GCHandle gc = GCHandle.Alloc(buffer, GCHandleType.Pinned);
+                    try
+                    {
+                        fs.Read(buffer, 0, buffer.Length);
+                        long currentPos = 0;
+
+                        for (int i = 0; i < blockCount; ++i) { 
+                            var ptrHeader = new IntPtr((long)gc.AddrOfPinnedObject() + currentPos);
+                            currentPos += 4;
+                            _header[i] = (int)Marshal.PtrToStructure(ptrHeader, typeof(int));
+
+                            for (int j = 0; j < 8; ++j, ++index)
+                            {
+                                var ptr = new IntPtr((long)gc.AddrOfPinnedObject() + currentPos);
+                                currentPos += structSize;
+                                var cur = (HueDataMul)Marshal.PtrToStructure(ptr, typeof(HueDataMul));
+                                List[index] = new Hue(index, cur);
+                            }
+                        }
+                    }
+                    finally
+                    {
+                        gc.Free();
+                    }
+                }
+            }
+
+            for (; index < List.Length; ++index)
+            {
+                List[index] = new Hue(index);
+            }
+        }
+
+        /// <summary>
+        /// Returns <see cref="Hue"/>
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        public static Hue GetHue(int index)
+        {
+            index &= 0x3FFF;
+
+            if (index >= 0 && index < 3000)
+            {
+                return List[index];
+            }
+
+            return List[0];
+        }
+
+        /// <summary>
+        /// Converts RGB value to Hue color
+        /// </summary>
+        /// <param name="color"></param>
+        /// <returns></returns>
+        public static ushort ColorToHue(Color color)
+        {
+            const double scale = 31.0 / 255;
+
+            ushort origRed = color.R;
+            var newRed = (ushort)(origRed * scale);
+            if (newRed == 0 && origRed != 0)
+            {
+                newRed = 1;
+            }
+
+            ushort origGreen = color.G;
+            var newGreen = (ushort)(origGreen * scale);
+            if (newGreen == 0 && origGreen != 0)
+            {
+                newGreen = 1;
+            }
+
+            ushort origBlue = color.B;
+            var newBlue = (ushort)(origBlue * scale);
+            if (newBlue == 0 && origBlue != 0)
+            {
+                newBlue = 1;
+            }
+
+            return (ushort)((newRed << 10) | (newGreen << 5) | newBlue);
+        }
+
+        public static int HueToColorR(ushort hue)
+        {
+            return ((hue & 0x7c00) >> 10) * (255 / 31);
+        }
+
+        public static int HueToColorG(ushort hue)
+        {
+            return ((hue & 0x3e0) >> 5) * (255 / 31);
+        }
+
+        public static int HueToColorB(ushort hue)
+        {
+            return (hue & 0x1f) * (255 / 31);
+        }
+    }
+
+    public sealed class Hue
+    {
+        public int Index { get; }
+        public ushort[] Colors { get; }
+        public string Name { get; set; }
+        public ushort TableStart { get; set; }
+        public ushort TableEnd { get; set; }
+
+        public Hue(int index)
+        {
+            Name = "Null";
+            Index = index;
+            Colors = new ushort[32];
+            TableStart = 0;
+            TableEnd = 0;
+        }
+
+        public Color GetColor(int index)
+        {
+            return HueToColor(Colors[index]);
+        }
+
+        /// <summary>
+        /// Converts Hue color to RGB color
+        /// </summary>
+        /// <param name="hue"></param>
+        private static Color HueToColor(ushort hue)
+        {
+            const int scale = 255 / 31;
+
+            return new Color(((hue & 0x7c00) >> 10) * scale,
+                ((hue & 0x3e0) >> 5) * scale,
+                (hue & 0x1f) * scale);
+        }
+
+        private static readonly byte[] _stringBuffer = new byte[20];
+
+        public Hue(int index, BinaryReader bin)
+        {
+            Index = index;
+            Colors = new ushort[32];
+
+            byte[] buffer = bin.ReadBytes(88);
+            unsafe
+            {
+                fixed (byte* bufferPtr = buffer)
+                {
+                    var buf = (ushort*)bufferPtr;
+                    for (int i = 0; i < 32; ++i)
+                    {
+                        Colors[i] = *buf++;
+                    }
+
+                    TableStart = *buf++;
+                    TableEnd = *buf++;
+
+                    var stringBuffer = (byte*)buf;
+                    int count;
+                    for (count = 0; count < 20 && *stringBuffer != 0; ++count)
+                    {
+                        _stringBuffer[count] = *stringBuffer++;
+                    }
+
+                    Name = Encoding.ASCII.GetString(_stringBuffer, 0, count);
+                    Name = Name.Replace("\n", " ");
+                }
+            }
+        }
+
+        public Hue(int index, HueDataMul mulStruct)
+        {
+            Index = index;
+            Colors = new ushort[32];
+            for (int i = 0; i < 32; ++i)
+            {
+                Colors[i] = mulStruct.colors[i];
+            }
+
+            TableStart = mulStruct.tableStart;
+            TableEnd = mulStruct.tableEnd;
+
+            Name = index.ToString();
+        }
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public readonly struct HueDataMul
+    {
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
+        public readonly ushort[] colors;
+        public readonly ushort tableStart;
+        public readonly ushort tableEnd;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 20)]
+        public readonly byte[] name;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
