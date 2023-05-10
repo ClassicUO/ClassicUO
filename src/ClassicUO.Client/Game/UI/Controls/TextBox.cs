@@ -200,7 +200,9 @@ namespace ClassicUO.Game.UI.Controls
 
             if (_dropShadow)
             {
-                _rtl.Draw(batcher, new Vector2(x + 1, y + 1), new Color(0, 0, 0, 0), horizontalAlignment: _align);
+                _rtl.IgnoreColorCommand = true;
+                _rtl.Draw(batcher, new Vector2(x + 1, y + 1), Color.Black, horizontalAlignment: _align);
+                _rtl.IgnoreColorCommand = false;
             }
 
             _rtl.Draw(batcher, new Vector2(x, y), _color, horizontalAlignment: _align);
