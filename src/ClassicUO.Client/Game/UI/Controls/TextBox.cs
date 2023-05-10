@@ -72,8 +72,36 @@ namespace ClassicUO.Game.UI.Controls
             _color.PackedValue = HuesLoader.Instance.GetHueColorRgba8888(31, (ushort)hue);
 
             if (hue == 0xFFFF || hue == ushort.MaxValue)
-                _color.PackedValue = (uint)191;
+                _color = Color.White;
 
+
+            _align = align;
+            _dropShadow = dropShadow;
+
+            AcceptMouseInput = false;
+            Width = width;
+        }
+        public TextBox
+            (
+                string text,
+                string font,
+                float size,
+                int width,
+                Color color,
+                TextHorizontalAlignment align = TextHorizontalAlignment.Left,
+                bool dropShadow = false
+            )
+        {
+            _rtl = new RichTextLayout
+            {
+                Font = TrueTypeLoader.Instance.GetFont(font, size),
+                Text = text,
+                Width = width,
+            };
+
+            _font = font;
+            _size = size;
+            _color = color;
 
             _align = align;
             _dropShadow = dropShadow;
