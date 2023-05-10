@@ -1300,6 +1300,9 @@ namespace ClassicUO.Network
                 ShopGump gump = new ShopGump(serial, true, 150, 5);
                 UIManager.Add(gump);
 
+                ModernShopGump modernShopGump;
+                UIManager.Add(modernShopGump = new ModernShopGump(vendor, true));
+
                 for (Layer layer = Layer.ShopBuyRestock; layer < Layer.ShopBuy + 1; layer++)
                 {
                     Item item = vendor.FindItemByLayer(layer);
@@ -1325,7 +1328,16 @@ namespace ClassicUO.Network
                     while (first != null)
                     {
                         Item it = (Item)first;
-
+                        modernShopGump.AddItem
+                        (
+                            it.Serial,
+                            it.Graphic,
+                            it.Hue,
+                            it.Amount,
+                            it.Price,
+                            it.Name,
+                            false
+                        );
                         gump.AddItem
                         (
                             it.Serial,
@@ -3052,7 +3064,8 @@ namespace ClassicUO.Network
                     modernPaperdoll.UpdateTitle(text);
                     modernPaperdoll.SetInScreen();
                     modernPaperdoll.BringOnTop();
-                } else
+                }
+                else
                 {
                     UIManager.Add(new ModernPaperdoll(mobile.Serial));
                 }
@@ -3119,12 +3132,12 @@ namespace ClassicUO.Network
                 if (layer - 1 != Layer.Backpack)
                 {
                     Item item = World.GetOrCreateItem(item_serial);
- 
+
                     World.RemoveItemFromContainer(item);
                     item.Container = serial;
                     item.Layer = layer - 1;
                     corpse.PushToBack(item);
-                }                
+                }
 
                 layer = (Layer)p.ReadUInt8();
             }
@@ -3655,10 +3668,46 @@ namespace ClassicUO.Network
             {
                 Span<byte> buffer = stackalloc byte[]
                 {
-                    0x03, 0x00, 0x28, 0x20, 0x00, 0x34, 0x00, 0x03, 0xdb, 0x13,
-                    0x14, 0x3f, 0x45, 0x2c, 0x58, 0x0f, 0x5d, 0x44, 0x2e, 0x50,
-                    0x11, 0xdf, 0x75, 0x5c, 0xe0, 0x3e, 0x71, 0x4f, 0x31, 0x34,
-                    0x05, 0x4e, 0x18, 0x1e, 0x72, 0x0f, 0x59, 0xad, 0xf5, 0x00
+                    0x03,
+                    0x00,
+                    0x28,
+                    0x20,
+                    0x00,
+                    0x34,
+                    0x00,
+                    0x03,
+                    0xdb,
+                    0x13,
+                    0x14,
+                    0x3f,
+                    0x45,
+                    0x2c,
+                    0x58,
+                    0x0f,
+                    0x5d,
+                    0x44,
+                    0x2e,
+                    0x50,
+                    0x11,
+                    0xdf,
+                    0x75,
+                    0x5c,
+                    0xe0,
+                    0x3e,
+                    0x71,
+                    0x4f,
+                    0x31,
+                    0x34,
+                    0x05,
+                    0x4e,
+                    0x18,
+                    0x1e,
+                    0x72,
+                    0x0f,
+                    0x59,
+                    0xad,
+                    0xf5,
+                    0x00
                 };
 
                 NetClient.Socket.Send(buffer);
