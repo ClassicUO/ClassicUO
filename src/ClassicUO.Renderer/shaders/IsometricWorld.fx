@@ -133,8 +133,9 @@ float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 	}
 	else if (mode == HUE_TEXT)
 	{
-		// 31 is max red, so this is just selecting the color of the darkest pixel in the hue
-		color.rgb *= get_rgb(1.0f, hue);
+		// For fonts the color is in the Normal
+		color.rgb = color.rgb * IN.Normal;
+
 	}
 	else if (mode == LAND)
 	{

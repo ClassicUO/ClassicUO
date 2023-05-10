@@ -69,7 +69,7 @@ namespace ClassicUO.Game.UI.Controls
 
             _font = font;
             _size = size;
-            _color.PackedValue = (uint)hue;
+            _color.PackedValue = HuesLoader.Instance.GetHueColorRgba8888(31, (ushort)hue);
 
             if (hue == 0xFFFF || hue == ushort.MaxValue)
                 _color.PackedValue = (uint)191;

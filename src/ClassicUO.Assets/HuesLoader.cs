@@ -56,8 +56,6 @@ namespace ClassicUO.Assets
 
         public int HuesCount { get; private set; }
 
-        public FloatHues[] Palette { get; private set; }
-
         public ushort[] RadarCol { get; private set; }
 
         public override unsafe Task Load()
@@ -79,7 +77,7 @@ namespace ClassicUO.Assets
 
                     for (int i = 0; i < entrycount; i++)
                     {
-                        HuesRange[i] = Marshal.PtrToStructure<HuesGroup>((IntPtr) (addr + (ulong) (i * groupSize)));
+                        HuesRange[i] = Marshal.PtrToStructure<HuesGroup>((IntPtr)(addr + (ulong) (i * groupSize)));
                     }
 
                     path = UOFileManager.GetUOFilePath("radarcol.mul");
@@ -96,53 +94,8 @@ namespace ClassicUO.Assets
                     
                     file.Dispose();
                     radarcol.Dispose();
-
-                    Hues.Initialize();
                 }
             );
-        }
-
-        public float[] CreateHuesPalette()
-        {
-            float[] p = new float[32 * 3 * HuesCount];
-
-            Palette = new FloatHues[HuesCount];
-            int entrycount = HuesCount >> 3;
-
-            for (int i = 0; i < entrycount; i++)
-            {
-                for (int j = 0; j < 8; j++)
-                {
-                    int idx = i * 8 + j;
-
-                    Palette[idx].Palette = new float[32 * 3];
-
-                    for (int h = 0; h < 32; h++)
-                    {
-                        int idx1 = h * 3;
-
-                        ushort c = HuesRange[i].Entries[j].ColorTable[h];
-
-                        Palette[idx].Palette[idx1] = ((c >> 10) & 0x1F) / 31.0f;
-
-                        Palette[idx].Palette[idx1 + 1] = ((c >> 5) & 0x1F) / 31.0f;
-
-                        Palette[idx].Palette[idx1 + 2] = (c & 0x1F) / 31.0f;
-
-                        p[idx * 96 + idx1 + 0] = Palette[idx].Palette[idx1];
-
-                        p[idx * 96 + idx1 + 1] = Palette[idx].Palette[idx1 + 1];
-
-                        p[idx * 96 + idx1 + 2] = Palette[idx].Palette[idx1 + 2];
-
-                        //p[iddd++] = Palette[idx].Palette[idx1];
-                        //p[iddd++] = Palette[idx].Palette[idx1 + 1];
-                        //p[iddd++] = Palette[idx].Palette[idx1 + 2];
-                    }
-                }
-            }
-
-            return p;
         }
 
         public void CreateShaderColors(uint[] buffer)
@@ -168,117 +121,61 @@ namespace ClassicUO.Assets
             }
         }
 
-        //public float[] GetColorForShader(ushort color)
-        //{
-        //    if (color != 0)
-        //    {
-        //        if (color >= HuesCount)
-        //        {
-        //            color %= (ushort)HuesCount;
-
-        //            if (color <= 0)
-        //                color = 1;
-        //        }
-
-        //        return Palette[color - 1].Palette;
-        //    }
-
-        //    return _empty;
-        //}
-
-        //public static void SetHuesBlock(int index, IntPtr ptr)
-        //{
-        //    VerdataHuesGroup group = Marshal.PtrToStructure<VerdataHuesGroup>(ptr);
-        //    SetHuesBlock(index, group);
-        //}
-
-        //public static void SetHuesBlock(int index, VerdataHuesGroup group)
-        //{
-        //    if (index < 0 || index >= HuesCount)
-        //        return;
-
-        //    HuesRange[index].Header = group.Header;
-        //    for (int i = 0; i < 8; i++) HuesRange[index].Entries[i].ColorTable = group.Entries[i].ColorTable;
-        //}
-
-        public ushort GetColor16(ushort c, ushort color)
+        /* Look up the hue and return the color for the given index. Index must be between 0 and 31.
+         * The returned color is a 16 bit color in R5B5G5A1 format. */
+        public ushort GetHueColorRgba5551(ushort index, ushort hue)
         {
-            if (color != 0 && color < HuesCount)
+            if (hue != 0 && hue < HuesCount)
             {
-                color -= 1;
-                int g = color >> 3;
-                int e = color % 8;
+                hue -= 1;
+                int g = hue >> 3;
+                int e = hue % 8;
 
-                return HuesRange[g].Entries[e].ColorTable[(c >> 10) & 0x1F];
+                return (ushort)(0x8000 | HuesRange[g].Entries[e].ColorTable[index]);
             }
 
-            return c;
+            return 0x8000;
         }
 
-        public uint GetPolygoneColor(ushort c, ushort color)
+        /* Look up the hue and return the color for the given index. Index must be between 0 and 31.
+         * The returned color is a 32 bit color in R8G8B8A8 format. */
+        public uint GetHueColorRgba8888(ushort index, ushort hue)
         {
-            if (color != 0 && color < HuesCount)
-            {
-                color -= 1;
-                int g = color >> 3;
-                int e = color % 8;
-
-                return HuesHelper.Color16To32(HuesRange[g].Entries[e].ColorTable[c]);
-            }
-
-            return 0xFF010101;
+            return HuesHelper.Color16To32(GetHueColorRgba5551(index, hue));
         }
 
-        public uint GetUnicodeFontColor(ushort c, ushort color)
+        /* Apply the hue to the given gray color, returning a 16 bit color. */
+        public ushort ApplyHueRgba5551(ushort gray, ushort hue)
         {
-            if (color != 0 && color < HuesCount)
-            {
-                color -= 1;
-                int g = color >> 3;
-                int e = color % 8;
-
-                return HuesRange[g].Entries[e].ColorTable[8];
-            }
-
-            return HuesHelper.Color16To32(c);
+            return GetHueColorRgba5551((ushort)((gray >> 10) & 0x1F), hue);
         }
 
-        public uint GetColor(ushort c, ushort color)
+        /* Apply the hue to the given gray color, returning a 32 bit color. */
+        public uint ApplyHueRgba8888(ushort gray, ushort hue)
         {
-            if (color != 0 && color < HuesCount)
-            {
-                color -= 1;
-                int g = color >> 3;
-                int e = color % 8;
-
-                return HuesHelper.Color16To32(HuesRange[g].Entries[e].ColorTable[(c >> 10) & 0x1F]);
-            }
-
-            return color != 0 ? HuesHelper.Color16To32(color) : HuesHelper.Color16To32(c);
+            return HuesHelper.Color16To32(ApplyHueRgba5551(gray, hue));
         }
 
-        public uint GetPartialHueColor(ushort c, ushort color)
+        public uint GetPartialHueColor(ushort color, ushort hue)
         {
-            if (color != 0 && color < HuesCount)
+            uint cl = HuesHelper.Color16To32(color);
+            byte R = (byte)(cl & 0xFF);
+            byte G = (byte)((cl >> 8) & 0xFF);
+            byte B = (byte)((cl >> 16) & 0xFF);
+
+            if (R != G || R != B)
             {
-                color -= 1;
-                int g = color >> 3;
-                int e = color % 8;
-                uint cl = HuesHelper.Color16To32(c);
-
-                byte R = (byte) (cl & 0xFF);
-                byte G = (byte) ((cl >> 8) & 0xFF);
-                byte B = (byte) ((cl >> 16) & 0xFF);
-
-                if (R == G && R == B)
-                {
-                    cl = HuesHelper.Color16To32(HuesRange[g].Entries[e].ColorTable[(c >> 10) & 0x1F]);
-                }
-
-                return cl;
+                /* Not gray. Don't apply hue. */
+                return HuesHelper.Color16To32(color);
             }
 
-            return HuesHelper.Color16To32(c);
+            if (hue == 0 || hue >= HuesCount)
+            {
+                /* Invalid hue. */
+                return HuesHelper.Color16To32(color);
+            }
+
+            return ApplyHueRgba5551(color, hue);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -291,240 +188,6 @@ namespace ClassicUO.Assets
 
             return 0;
         }
-    }
-
-
-    public static class Hues
-    {
-        private static int[] _header;
-
-        public static Hue[] List { get; private set; }
-
-        static Hues()
-        {
-            Initialize();
-        }
-
-        /// <summary>
-        /// Reads hues.mul and fills <see cref="List"/>
-        /// </summary>
-        public static void Initialize()
-        {
-            string path = UOFileManager.GetUOFilePath("hues.mul");
-            FileSystemHelper.EnsureFileExists(path);
-
-            int index = 0;
-
-            const int maxHueCount = 3000;
-            List = new Hue[maxHueCount];
-
-            if (path != null)
-            {
-                using (var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
-                {
-                    int blockCount = (int)fs.Length / 708;
-
-                    if (blockCount > 375)
-                    {
-                        blockCount = 375;
-                    }
-
-                    _header = new int[blockCount];
-                    int structSize = Marshal.SizeOf(typeof(HueDataMul));
-                    var buffer = new byte[blockCount * (4 + (8 * structSize))];
-                    GCHandle gc = GCHandle.Alloc(buffer, GCHandleType.Pinned);
-                    try
-                    {
-                        fs.Read(buffer, 0, buffer.Length);
-                        long currentPos = 0;
-
-                        for (int i = 0; i < blockCount; ++i) { 
-                            var ptrHeader = new IntPtr((long)gc.AddrOfPinnedObject() + currentPos);
-                            currentPos += 4;
-                            _header[i] = (int)Marshal.PtrToStructure(ptrHeader, typeof(int));
-
-                            for (int j = 0; j < 8; ++j, ++index)
-                            {
-                                var ptr = new IntPtr((long)gc.AddrOfPinnedObject() + currentPos);
-                                currentPos += structSize;
-                                var cur = (HueDataMul)Marshal.PtrToStructure(ptr, typeof(HueDataMul));
-                                List[index] = new Hue(index, cur);
-                            }
-                        }
-                    }
-                    finally
-                    {
-                        gc.Free();
-                    }
-                }
-            }
-
-            for (; index < List.Length; ++index)
-            {
-                List[index] = new Hue(index);
-            }
-        }
-
-        /// <summary>
-        /// Returns <see cref="Hue"/>
-        /// </summary>
-        /// <param name="index"></param>
-        /// <returns></returns>
-        public static Hue GetHue(int index)
-        {
-            index &= 0x3FFF;
-
-            if (index >= 0 && index < 3000)
-            {
-                return List[index];
-            }
-
-            return List[0];
-        }
-
-        /// <summary>
-        /// Converts RGB value to Hue color
-        /// </summary>
-        /// <param name="color"></param>
-        /// <returns></returns>
-        public static ushort ColorToHue(Color color)
-        {
-            const double scale = 31.0 / 255;
-
-            ushort origRed = color.R;
-            var newRed = (ushort)(origRed * scale);
-            if (newRed == 0 && origRed != 0)
-            {
-                newRed = 1;
-            }
-
-            ushort origGreen = color.G;
-            var newGreen = (ushort)(origGreen * scale);
-            if (newGreen == 0 && origGreen != 0)
-            {
-                newGreen = 1;
-            }
-
-            ushort origBlue = color.B;
-            var newBlue = (ushort)(origBlue * scale);
-            if (newBlue == 0 && origBlue != 0)
-            {
-                newBlue = 1;
-            }
-
-            return (ushort)((newRed << 10) | (newGreen << 5) | newBlue);
-        }
-
-        public static int HueToColorR(ushort hue)
-        {
-            return ((hue & 0x7c00) >> 10) * (255 / 31);
-        }
-
-        public static int HueToColorG(ushort hue)
-        {
-            return ((hue & 0x3e0) >> 5) * (255 / 31);
-        }
-
-        public static int HueToColorB(ushort hue)
-        {
-            return (hue & 0x1f) * (255 / 31);
-        }
-    }
-
-    public sealed class Hue
-    {
-        public int Index { get; }
-        public ushort[] Colors { get; }
-        public string Name { get; set; }
-        public ushort TableStart { get; set; }
-        public ushort TableEnd { get; set; }
-
-        public Hue(int index)
-        {
-            Name = "Null";
-            Index = index;
-            Colors = new ushort[32];
-            TableStart = 0;
-            TableEnd = 0;
-        }
-
-        public Color GetColor(int index)
-        {
-            return HueToColor(Colors[index]);
-        }
-
-        /// <summary>
-        /// Converts Hue color to RGB color
-        /// </summary>
-        /// <param name="hue"></param>
-        private static Color HueToColor(ushort hue)
-        {
-            const int scale = 255 / 31;
-
-            return new Color(((hue & 0x7c00) >> 10) * scale,
-                ((hue & 0x3e0) >> 5) * scale,
-                (hue & 0x1f) * scale);
-        }
-
-        private static readonly byte[] _stringBuffer = new byte[20];
-
-        public Hue(int index, BinaryReader bin)
-        {
-            Index = index;
-            Colors = new ushort[32];
-
-            byte[] buffer = bin.ReadBytes(88);
-            unsafe
-            {
-                fixed (byte* bufferPtr = buffer)
-                {
-                    var buf = (ushort*)bufferPtr;
-                    for (int i = 0; i < 32; ++i)
-                    {
-                        Colors[i] = *buf++;
-                    }
-
-                    TableStart = *buf++;
-                    TableEnd = *buf++;
-
-                    var stringBuffer = (byte*)buf;
-                    int count;
-                    for (count = 0; count < 20 && *stringBuffer != 0; ++count)
-                    {
-                        _stringBuffer[count] = *stringBuffer++;
-                    }
-
-                    Name = Encoding.ASCII.GetString(_stringBuffer, 0, count);
-                    Name = Name.Replace("\n", " ");
-                }
-            }
-        }
-
-        public Hue(int index, HueDataMul mulStruct)
-        {
-            Index = index;
-            Colors = new ushort[32];
-            for (int i = 0; i < 32; ++i)
-            {
-                Colors[i] = mulStruct.colors[i];
-            }
-
-            TableStart = mulStruct.tableStart;
-            TableEnd = mulStruct.tableEnd;
-
-            Name = index.ToString();
-        }
-    }
-
-    [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public readonly struct HueDataMul
-    {
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
-        public readonly ushort[] colors;
-        public readonly ushort tableStart;
-        public readonly ushort tableEnd;
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 20)]
-        public readonly byte[] name;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
