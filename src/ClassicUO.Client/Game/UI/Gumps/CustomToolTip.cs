@@ -45,7 +45,7 @@ namespace ClassicUO.Game.UI.Gumps
                 "Loading item data...",
                 ProfileManager.CurrentProfile.SelectedToolTipFont,
                 ProfileManager.CurrentProfile.SelectedToolTipFontSize,
-                ProfileManager.CurrentProfile.SelectedToolTipFontSize * 15,
+                150,
                 (int)hue,
                 align: ProfileManager.CurrentProfile.LeftAlignToolTips ? FontStashSharp.RichText.TextHorizontalAlignment.Left : FontStashSharp.RichText.TextHorizontalAlignment.Center
                 );
@@ -75,10 +75,13 @@ namespace ClassicUO.Game.UI.Gumps
                         TextBox.ConvertHtmlToFontStashSharpCommand(FormatTooltip(name, data)),
                         ProfileManager.CurrentProfile.SelectedToolTipFont,
                         ProfileManager.CurrentProfile.SelectedToolTipFontSize,
-                        ProfileManager.CurrentProfile.SelectedToolTipFontSize * 15,
+                        600,
                         (int)hue,
                         align: ProfileManager.CurrentProfile.LeftAlignToolTips ? FontStashSharp.RichText.TextHorizontalAlignment.Left : FontStashSharp.RichText.TextHorizontalAlignment.Center
                         );
+
+                    if (text.MeasuredSize.X + 10 < 600)
+                        text.Width = text.MeasuredSize.X + 10;
 
                     Height = text.Height;
                     Width = text.Width;

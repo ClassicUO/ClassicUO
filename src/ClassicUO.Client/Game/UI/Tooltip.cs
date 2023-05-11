@@ -99,11 +99,12 @@ namespace ClassicUO.Game.UI
                     TextBox.ConvertHtmlToFontStashSharpCommand(_textHTML),
                     ProfileManager.CurrentProfile.SelectedToolTipFont,
                     ProfileManager.CurrentProfile.SelectedToolTipFontSize,
-                    ProfileManager.CurrentProfile.SelectedToolTipFontSize * 15,
+                    600,
                     hue,
                     ProfileManager.CurrentProfile.LeftAlignToolTips ? FontStashSharp.RichText.TextHorizontalAlignment.Left : FontStashSharp.RichText.TextHorizontalAlignment.Center,
                     true
                     );
+                _textBox.Width = _textBox.MeasuredSize.X + 10;
                 if (_textBox.Width > 600)
                     _textBox.Width = 600;
             }
