@@ -170,6 +170,9 @@ namespace ClassicUO.Game.UI.Controls
         {
             string finalString;
 
+            if (String.IsNullOrEmpty(text))
+                return "";
+
             finalString = Regex.Replace(text, "<basefont color=\"?'?(?<color>.*?)\"?'?>", " /c[${color}]", RegexOptions.Multiline | RegexOptions.IgnoreCase);
             finalString = finalString.Replace("</basefont>", "/cd").Replace("</BASEFONT>", "/cd").Replace("<br>", "\n").Replace("\n", "\n/cd");
             return finalString;
