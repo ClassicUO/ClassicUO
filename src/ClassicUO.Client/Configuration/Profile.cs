@@ -468,8 +468,6 @@ namespace ClassicUO.Configuration
 
         public string DefaultTTFFont { get; set; } = "Roboto-Regular";
 
-        [JsonIgnore] public string EmbeddedFont { get; } = "Roboto-Regular";
-
         public static uint GumpsVersion { get; private set; }
 
         public void Save(string path, bool saveGumps = true)

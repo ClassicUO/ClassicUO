@@ -41,6 +41,8 @@ namespace ClassicUO.Assets
 {
     public class TrueTypeLoader
     {
+        public const string EMBEDDED_FONT = "Roboto-Regular";
+
         private Dictionary<string, FontSystem> _fonts = new();
 
         private TrueTypeLoader()
