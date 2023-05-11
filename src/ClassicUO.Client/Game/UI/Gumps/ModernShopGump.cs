@@ -15,7 +15,7 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class ModernShopGump : Gump
     {
-        const int WIDTH = 500;
+        const int WIDTH = 450;
         const int HEIGHT = 700;
 
         const int ITEM_DESCPTION_WIDTH = 300;
@@ -44,11 +44,18 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(new AlphaBlendControl(0.75f) { Width = Width, Height = Height, Hue = 999 });
 
-            Add(new AlphaBlendControl(0.75f) { Width = Width, Height = 75});
+            Add(new AlphaBlendControl(0.65f) { Width = Width, Height = 75, Hue = 999 });
 
             TextBox _;
-            Add(_ = new TextBox(isPurchaseGump ? "Shop Inventory" : "Your Inventory", ProfileManager.CurrentProfile.EmbeddedFont, 25, Width, Color.Orange, FontStashSharp.RichText.TextHorizontalAlignment.Center, true));
-            _.Y = 25 - (_.Height / 2);
+            Add(_ = new TextBox(isPurchaseGump ? "Shop Inventory" : "Your Inventory", TrueTypeLoader.EMBEDDED_FONT, 30, Width, Color.Gold, FontStashSharp.RichText.TextHorizontalAlignment.Center, true));
+            _.Y = (50 - _.MeasuredSize.Y) / 2;
+
+            Add(_ = new TextBox("Item", TrueTypeLoader.EMBEDDED_FONT, 20, 75, Color.White, dropShadow: true) { X = 5 });
+            _.Y = 55 - _.Height;
+
+            Add(_ = new TextBox("Avail.\nPrice per item", TrueTypeLoader.EMBEDDED_FONT, 20, 150, Color.White, FontStashSharp.RichText.TextHorizontalAlignment.Right, true));
+            _.Y = 55 - _.Height;
+            _.X = Width - 1 - _.Width - 5;
 
             searchBox = new StbTextBox(0xFF, 20, 150, true, FontStyle.None, 0x0481)
             {
@@ -141,11 +148,12 @@ namespace ClassicUO.Game.UI.Gumps
                 Add(new ResizableStaticPic(Graphic, Height, Height) { Hue = hue, AcceptMouseInput = false });
 
                 TextBox _;
-                Add(_ = new TextBox(Name, ProfileManager.CurrentProfile.EmbeddedFont, 25, ITEM_DESCPTION_WIDTH, Color.White, dropShadow: true) { X = 51, Y = 1 });
+                Add(_ = new TextBox(Name, TrueTypeLoader.EMBEDDED_FONT, 25, ITEM_DESCPTION_WIDTH, Color.White, dropShadow: true) { X = 51 });
+                _.Y = (Height - _.MeasuredSize.Y) / 2;
 
-                Add(_ = new TextBox(count.ToString(), ProfileManager.CurrentProfile.EmbeddedFont, 25, (Width - ITEM_DESCPTION_WIDTH - 55), Color.WhiteSmoke, FontStashSharp.RichText.TextHorizontalAlignment.Right, true) { X = _.X + _.Width });
+                Add(_ = new TextBox(count.ToString(), TrueTypeLoader.EMBEDDED_FONT, 25, (Width - ITEM_DESCPTION_WIDTH - 55), Color.WhiteSmoke, FontStashSharp.RichText.TextHorizontalAlignment.Right, true) { X = _.X + _.Width });
 
-                Add(_ = new TextBox($"{price}gp", ProfileManager.CurrentProfile.EmbeddedFont, 25, (Width - ITEM_DESCPTION_WIDTH - 55), Color.Gold, FontStashSharp.RichText.TextHorizontalAlignment.Right,  true) { X = _.X });
+                Add(_ = new TextBox($"{price}gp", TrueTypeLoader.EMBEDDED_FONT, 25, 300, Color.Gold, FontStashSharp.RichText.TextHorizontalAlignment.Right,  true) { X = Width - 300 });
                 _.Y = height - _.Height;
 
                 //Add(new TextBox($"Offering [{count}] at {price}gp each.", ProfileManager.CurrentProfile.DefaultTTFFont, 20, Width, Color.WhiteSmoke, dropShadow: true) { X = 51, Y = Height / 2 });
