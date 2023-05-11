@@ -34,6 +34,7 @@ using FontStashSharp;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace ClassicUO.Assets
@@ -69,6 +70,23 @@ namespace ClassicUO.Assets
                 fontSystem.AddFont(File.ReadAllBytes(ttf));
 
                 _fonts[Path.GetFileNameWithoutExtension(ttf)] = fontSystem;
+            }
+
+            if (!_fonts.ContainsKey("Roboto-Regular"))
+            {
+                var assembly = this.GetType().Assembly;
+                var resourceName = assembly.GetName().Name + ".Roboto-Regular.ttf";
+                System.Console.WriteLine(resourceName);
+                Stream stream = assembly.GetManifestResourceStream(resourceName);
+                if (stream != null)
+                {
+                    var memoryStream = new MemoryStream();
+
+                    stream.CopyTo(memoryStream);
+                    var fontSystem = new FontSystem(settings);
+                    fontSystem.AddFont(memoryStream.ToArray());
+                    _fonts["Roboto-Regular"] = fontSystem;
+                }
             }
 
             return Task.CompletedTask;
