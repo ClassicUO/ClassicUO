@@ -15,12 +15,15 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class ModernShopGump : Gump
     {
-        const int WIDTH = 400;
+        const int WIDTH = 500;
         const int HEIGHT = 700;
 
+        const int ITEM_DESCPTION_WIDTH = 300;
+
         private ScrollArea scrollArea;
-        private BorderControl borderControl;
-        private GumpPicTiled _backgroundTexture;
+        private StbTextBox searchBox;
+
+        private List<ShopItem> shopItems = new List<ShopItem>();
 
         private int itemY = 0;
 
@@ -37,36 +40,39 @@ namespace ClassicUO.Game.UI.Gumps
             CanMove = true;
             #endregion
 
-            int borderSize = 38;
+            scrollArea = new ScrollArea(1, 75, Width - 2, Height - 77, true) { ScrollbarBehaviour = ScrollbarBehaviour.ShowAlways };
 
-            Add(borderControl = new BorderControl(0, 0, Width, Height, borderSize));
+            Add(new AlphaBlendControl(0.75f) { Width = Width, Height = Height, Hue = 999 });
 
-
-            int graphic = 2520;
-            borderControl.T_Left = (ushort)graphic;
-            borderControl.H_Border = (ushort)(graphic + 1);
-            borderControl.T_Right = (ushort)(graphic + 2);
-            borderControl.V_Border = (ushort)(graphic + 3);
-
-            Add(_backgroundTexture = new GumpPicTiled(borderSize, borderSize, Width - (borderSize * 2), Height - (borderSize * 2), (ushort)(graphic + 4)));
-
-            borderControl.V_Right_Border = (ushort)(graphic + 5);
-            borderControl.B_Left = (ushort)(graphic + 6);
-            borderControl.H_Bottom_Border = (ushort)(graphic + 7);
-            borderControl.B_Right = (ushort)(graphic + 8);
-            borderControl.BorderSize = borderSize;
-
-            //Add(new AlphaBlendControl(0.3f) { Width = Width, Height = Height, Hue = 999 });
-
-            //Add(new AlphaBlendControl(0.3f) { Width = Width, Height = 50});
+            Add(new AlphaBlendControl(0.75f) { Width = Width, Height = 75});
 
             TextBox _;
-            Add(_ = new TextBox(isPurchaseGump ? "Shop Inventory" : "Your Inventory", ProfileManager.CurrentProfile.DefaultTTFFont, 25, Width, 148, FontStashSharp.RichText.TextHorizontalAlignment.Center, true));
+            Add(_ = new TextBox(isPurchaseGump ? "Shop Inventory" : "Your Inventory", ProfileManager.CurrentProfile.EmbeddedFont, 25, Width, Color.Orange, FontStashSharp.RichText.TextHorizontalAlignment.Center, true));
             _.Y = 25 - (_.Height / 2);
 
-            Add(scrollArea = new ScrollArea(1, 51, Width - 2, Height - 52, true) { ScrollbarBehaviour = ScrollbarBehaviour.ShowAlways });
+            searchBox = new StbTextBox(0xFF, 20, 150, true, FontStyle.None, 0x0481)
+            {
+                X = 1,
+                Y = 55,
+                Multiline = false,
+                Width = Width - 2,
+                Height = 20
+            };
+            searchBox.TextChanged += (s, e) => {
+                SearchContents(searchBox.Text);
+            };
+            searchBox.Add(new AlphaBlendControl(0.5f)
+            {
+                Hue = 0x0481,
+                Width = searchBox.Width,
+                Height = searchBox.Height
+            });
 
-            //Add(new SimpleBorder() { Width = Width, Height = Height, Hue = 0, Alpha = 0.3f });
+            Add(searchBox);
+
+            Add(scrollArea);
+
+            Add(new SimpleBorder() { Width = Width, Height = Height, Hue = 0, Alpha = 0.3f });
         }
 
         public void AddItem
@@ -80,8 +86,34 @@ namespace ClassicUO.Game.UI.Gumps
                 bool fromcliloc
             )
         {
-            scrollArea.Add(new ShopItem(serial, graphic, hue, amount, price, name, scrollArea.Width - scrollArea.ScrollBarWidth(), 50) { Y = itemY });
+            ShopItem _ = new ShopItem(serial, graphic, hue, amount, price, name, scrollArea.Width - scrollArea.ScrollBarWidth(), 50);
+            _.Y = itemY;
+            scrollArea.Add(_);
+            shopItems.Add(_);
             itemY += 50;
+        }
+
+        private void SearchContents(string text)
+        {
+            text = text.ToLower();
+
+            List<ShopItem> remove = new List<ShopItem>();
+            foreach(ShopItem i in scrollArea.Children.OfType<ShopItem>()) //Remove current shop items
+                remove.Add(i);
+            foreach (ShopItem i in remove)
+                scrollArea.Children.Remove(i); //Actually remove them since we can't modify enumerators
+
+            itemY = 0; //Reset positioning
+
+            foreach(ShopItem i in shopItems)
+            {
+                if (i.MatchSearch(text))
+                {
+                    i.Y = itemY;
+                    scrollArea.Add(i);
+                    itemY += 50;
+                }
+            }
         }
 
         private class ShopItem : Control
@@ -106,13 +138,19 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Add(backgound = new AlphaBlendControl(0.01f) { Width = Width, Height = Height });
 
-                Add(new ResizableStaticPic(Graphic, Height, Height) { Hue = hue });
+                Add(new ResizableStaticPic(Graphic, Height, Height) { Hue = hue, AcceptMouseInput = false });
 
-                Add(new TextBox(Name, ProfileManager.CurrentProfile.DefaultTTFFont, 25, Width, 52, dropShadow: true) { X = 51, Y = 1 });
+                TextBox _;
+                Add(_ = new TextBox(Name, ProfileManager.CurrentProfile.EmbeddedFont, 25, ITEM_DESCPTION_WIDTH, Color.White, dropShadow: true) { X = 51, Y = 1 });
 
-                Add(new TextBox($"Offering [{count}] at {price}gp each.", ProfileManager.CurrentProfile.DefaultTTFFont, 20, Width, 52, dropShadow: true) { X = 51, Y = Height / 2 });
+                Add(_ = new TextBox(count.ToString(), ProfileManager.CurrentProfile.EmbeddedFont, 25, (Width - ITEM_DESCPTION_WIDTH - 55), Color.WhiteSmoke, FontStashSharp.RichText.TextHorizontalAlignment.Right, true) { X = _.X + _.Width });
 
-                //Add(new SimpleBorder() { Width = Width, Height = Height, Hue = 0, Alpha = 0.2f });
+                Add(_ = new TextBox($"{price}gp", ProfileManager.CurrentProfile.EmbeddedFont, 25, (Width - ITEM_DESCPTION_WIDTH - 55), Color.Gold, FontStashSharp.RichText.TextHorizontalAlignment.Right,  true) { X = _.X });
+                _.Y = height - _.Height;
+
+                //Add(new TextBox($"Offering [{count}] at {price}gp each.", ProfileManager.CurrentProfile.DefaultTTFFont, 20, Width, Color.WhiteSmoke, dropShadow: true) { X = 51, Y = Height / 2 });
+
+                Add(new SimpleBorder() { Width = Width, Height = Height, Hue = 0, Alpha = 0.2f });
             }
 
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
@@ -122,6 +160,18 @@ namespace ClassicUO.Game.UI.Gumps
                 else
                     backgound.Alpha = 0.01f;
                 return base.Draw(batcher, x, y);
+            }
+
+            public bool MatchSearch(string text)
+            {
+                if (Name.ToLower().Contains(text))
+                    return true;
+                if (World.OPL.TryGetNameAndData(Serial, out string name, out string data))
+                {
+                    if (data.ToLower().Contains(text))
+                        return true;
+                }
+                return false;
             }
 
             public uint Serial { get; }
