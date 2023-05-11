@@ -115,6 +115,16 @@ namespace ClassicUO.Game.UI.Controls
             get { return _rtl.Size.Y; }
         }
 
+        public Point MeasuredSize
+        {
+            get
+            {
+                if (_rtl == null)
+                    return Point.Zero;
+                return _rtl.Size;
+            }
+        }
+
         public string Text
         {
             get => _rtl.Text;
@@ -159,10 +169,9 @@ namespace ClassicUO.Game.UI.Controls
         public static string ConvertHtmlToFontStashSharpCommand(string text)
         {
             string finalString;
-           
+
             finalString = Regex.Replace(text, "<basefont color=\"?'?(?<color>.*?)\"?'?>", " /c[${color}]", RegexOptions.Multiline | RegexOptions.IgnoreCase);
             finalString = finalString.Replace("</basefont>", "/cd").Replace("</BASEFONT>", "/cd").Replace("<br>", "\n").Replace("\n", "\n/cd");
-            Console.WriteLine(finalString);
             return finalString;
         }
 
