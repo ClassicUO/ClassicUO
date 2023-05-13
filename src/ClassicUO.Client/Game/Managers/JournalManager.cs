@@ -86,7 +86,7 @@ namespace ClassicUO.Game.Managers
                 CreateWriter();
             }
 
-            _fileWriter?.WriteLine($"[{timeNow:g}]  {name}: {text}");
+            _fileWriter?.WriteLine($"[{timeNow:G}]  {name}: {text}");
         }
 
         private void CreateWriter()
