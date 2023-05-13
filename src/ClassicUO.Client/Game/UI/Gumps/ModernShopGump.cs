@@ -29,6 +29,12 @@ namespace ClassicUO.Game.UI.Gumps
 
         public ModernShopGump(uint serial, bool isPurchaseGump) : base(serial, 0)
         {
+            if (!ProfileManager.CurrentProfile.EnableModernShopPreview)
+            {
+                Dispose();
+                return;
+            }
+
             #region VARS
             X = 200;
             Y = 200;
@@ -65,7 +71,8 @@ namespace ClassicUO.Game.UI.Gumps
                 Width = Width - 2,
                 Height = 20
             };
-            searchBox.TextChanged += (s, e) => {
+            searchBox.TextChanged += (s, e) =>
+            {
                 SearchContents(searchBox.Text);
             };
             searchBox.Add(new AlphaBlendControl(0.5f)
@@ -93,6 +100,8 @@ namespace ClassicUO.Game.UI.Gumps
                 bool fromcliloc
             )
         {
+            if (IsDisposed)
+                return;
             ShopItem _ = new ShopItem(serial, graphic, hue, amount, price, name, scrollArea.Width - scrollArea.ScrollBarWidth(), 50);
             _.Y = itemY;
             scrollArea.Add(_);
@@ -105,14 +114,14 @@ namespace ClassicUO.Game.UI.Gumps
             text = text.ToLower();
 
             List<ShopItem> remove = new List<ShopItem>();
-            foreach(ShopItem i in scrollArea.Children.OfType<ShopItem>()) //Remove current shop items
+            foreach (ShopItem i in scrollArea.Children.OfType<ShopItem>()) //Remove current shop items
                 remove.Add(i);
             foreach (ShopItem i in remove)
                 scrollArea.Children.Remove(i); //Actually remove them since we can't modify enumerators
 
             itemY = 0; //Reset positioning
 
-            foreach(ShopItem i in shopItems)
+            foreach (ShopItem i in shopItems)
             {
                 if (i.MatchSearch(text))
                 {
@@ -151,12 +160,10 @@ namespace ClassicUO.Game.UI.Gumps
                 Add(_ = new TextBox(Name, TrueTypeLoader.EMBEDDED_FONT, 25, ITEM_DESCPTION_WIDTH, Color.White, dropShadow: true) { X = 51 });
                 _.Y = (Height - _.MeasuredSize.Y) / 2;
 
-                Add(_ = new TextBox(count.ToString(), TrueTypeLoader.EMBEDDED_FONT, 25, (Width - ITEM_DESCPTION_WIDTH - 55), Color.WhiteSmoke, FontStashSharp.RichText.TextHorizontalAlignment.Right, true) { X = _.X + _.Width });
+                Add(_ = new TextBox($"x{count}", TrueTypeLoader.EMBEDDED_FONT, 25, (Width - ITEM_DESCPTION_WIDTH - 55), Color.WhiteSmoke, FontStashSharp.RichText.TextHorizontalAlignment.Right, true) { X = _.X + _.Width });
 
-                Add(_ = new TextBox($"{price}gp", TrueTypeLoader.EMBEDDED_FONT, 25, 300, Color.Gold, FontStashSharp.RichText.TextHorizontalAlignment.Right,  true) { X = Width - 300 });
+                Add(_ = new TextBox($"{price}gp", TrueTypeLoader.EMBEDDED_FONT, 25, 300, Color.Gold, FontStashSharp.RichText.TextHorizontalAlignment.Right, true) { X = Width - 300 });
                 _.Y = height - _.Height;
-
-                //Add(new TextBox($"Offering [{count}] at {price}gp each.", ProfileManager.CurrentProfile.DefaultTTFFont, 20, Width, Color.WhiteSmoke, dropShadow: true) { X = 51, Y = Height / 2 });
 
                 Add(new SimpleBorder() { Width = Width, Height = Height, Hue = 0, Alpha = 0.2f });
             }
