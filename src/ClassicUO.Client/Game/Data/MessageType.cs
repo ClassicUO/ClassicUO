@@ -50,6 +50,7 @@ namespace ClassicUO.Game.Data
         Alliance = 14,
         Command = 15,
         Encoded = 0xC0,
+        ChatSystem, //TazUO Addition, value unimportant
         Party = 0xFF // This is a CUO assigned type, value is unimportant
     }
 }

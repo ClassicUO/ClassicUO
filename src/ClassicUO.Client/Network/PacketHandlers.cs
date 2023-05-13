@@ -3917,6 +3917,7 @@ namespace ClassicUO.Network
                     p.Skip(4);
                     string username = p.ReadUnicodeBE();
                     ChatManager.ChatIsEnabled = ChatStatus.Enabled;
+                    ResizableJournal.HasReceivedChatSystemMessage = true;
                     NetClient.Socket.Send_ChatJoinCommand("General");
 
                     break;
@@ -3944,7 +3945,7 @@ namespace ClassicUO.Network
 
                     UIManager.GetGump<ChatGump>()?.UpdateConference();
 
-                    GameActions.Print(string.Format(ResGeneral.YouHaveJoinedThe0Channel, channelName), ProfileManager.CurrentProfile.ChatMessageHue, MessageType.Regular, 1);
+                    GameActions.Print(string.Format(ResGeneral.YouHaveJoinedThe0Channel, channelName), ProfileManager.CurrentProfile.ChatMessageHue, MessageType.ChatSystem, 1);
 
                     break;
 
@@ -3952,7 +3953,7 @@ namespace ClassicUO.Network
                     p.Skip(4);
                     channelName = p.ReadUnicodeBE();
 
-                    GameActions.Print(string.Format(ResGeneral.YouHaveLeftThe0Channel, channelName), ProfileManager.CurrentProfile.ChatMessageHue, MessageType.Regular, 1);
+                    GameActions.Print(string.Format(ResGeneral.YouHaveLeftThe0Channel, channelName), ProfileManager.CurrentProfile.ChatMessageHue, MessageType.ChatSystem, 1);
 
                     break;
 
@@ -3976,8 +3977,11 @@ namespace ClassicUO.Network
                     }
 
                     //Color c = new Color(49, 82, 156, 0);
-                    GameActions.Print($"{username}: {msgSent}", ProfileManager.CurrentProfile.ChatMessageHue, MessageType.Regular, 1);
+                    MessageManager.HandleMessage(null, msgSent, username, ProfileManager.CurrentProfile.ChatMessageHue, MessageType.ChatSystem, 3, TextType.OBJECT, true);
 
+        //GameActions.Print($"{username}: {msgSent}", ProfileManager.CurrentProfile.ChatMessageHue, MessageType.ChatSystem, 1);
+
+        ResizableJournal.HasReceivedChatSystemMessage = true;
                     break;
 
                 default:
@@ -4016,7 +4020,8 @@ namespace ClassicUO.Network
                             }
                         }
 
-                        GameActions.Print(msg, ProfileManager.CurrentProfile.ChatMessageHue, MessageType.Regular, 1);
+                        GameActions.Print(msg, ProfileManager.CurrentProfile.ChatMessageHue, MessageType.ChatSystem, 1);
+                        ResizableJournal.HasReceivedChatSystemMessage = true;
                     }
 
                     break;
@@ -7079,6 +7084,9 @@ namespace ClassicUO.Network
                                 UIManager.Add(gump);
                             }
                             gump.GoToMarker((int)location.X, (int)location.Y, true);
+                        }));
+                        gump.ContextMenu.Add(new ContextMenuItemEntry("Close", () => {
+                            gump.Dispose();
                         }));
                     }
                 }

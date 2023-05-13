@@ -105,6 +105,8 @@ namespace ClassicUO.Game.Managers
 
             switch (type)
             {
+                case MessageType.ChatSystem:
+                    break;
                 case MessageType.Command:
                 case MessageType.Encoded:
                 case MessageType.System:

@@ -206,6 +206,10 @@ namespace ClassicUO.Game.Scenes
 
             switch (e.Type)
             {
+                case MessageType.ChatSystem:
+                    name = e.Name;
+                    text = e.Text;
+                    break;
                 case MessageType.Regular:
                 case MessageType.Limit3Spell:
 
