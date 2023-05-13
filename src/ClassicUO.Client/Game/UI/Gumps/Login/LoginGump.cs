@@ -83,7 +83,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 // Quit Button
                 Add
                 (
-                    new Button((int) Buttons.Quit, 0x1589, 0x158B, 0x158A)
+                    new Button((int)Buttons.Quit, 0x1589, 0x158B, 0x158A)
                     {
                         X = 555,
                         Y = 4,
@@ -149,7 +149,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 // Arrow Button
                 Add
                 (
-                    _nextArrow0 = new Button((int) Buttons.NextArrow, 0x15A4, 0x15A6, 0x15A5)
+                    _nextArrow0 = new Button((int)Buttons.NextArrow, 0x15A4, 0x15A6, 0x15A5)
                     {
                         X = 610,
                         Y = 445,
@@ -228,7 +228,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 //// Quit Button
                 Add
                 (
-                    new Button((int) Buttons.Quit, 0x05CA, 0x05C9, 0x05C8)
+                    new Button((int)Buttons.Quit, 0x05CA, 0x05C9, 0x05C8)
                     {
                         X = 25,
                         Y = 240,
@@ -250,7 +250,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 // Arrow Button
                 Add
                 (
-                    _nextArrow0 = new Button((int) Buttons.NextArrow, 0x5CD, 0x5CC, 0x5CB)
+                    _nextArrow0 = new Button((int)Buttons.NextArrow, 0x5CD, 0x5CC, 0x5CB)
                     {
                         X = 280,
                         Y = 365,
@@ -392,16 +392,12 @@ namespace ClassicUO.Game.UI.Gumps.Login
             _checkboxAutologin.IsChecked = Settings.GlobalSettings.AutoLogin;
 
 
-            int htmlX = 130;
-            int htmlY = 442;
-
-
             Add
             (
                 new HtmlControl
                 (
-                    htmlX,
-                    htmlY,
+                    505,
+                    420,
                     150,
                     15,
                     false,
@@ -415,13 +411,13 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 )
             );
 
-          
+
             Add
             (
                 new HtmlControl
                 (
                     505,
-                    htmlY,
+                    440,
                     100,
                     15,
                     false,
@@ -440,7 +436,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 new HtmlControl
                 (
                     505,
-                    htmlY + 19,
+                    460,
                     100,
                     15,
                     false,
@@ -454,6 +450,21 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 )
             );
 
+            TextBox _;
+            HitBox _hit;
+            Add(_ = new TextBox("TazUO Wiki", TrueTypeLoader.EMBEDDED_FONT, 15, 200, Color.Orange, dropShadow: true) { X = 30, Y = 420, AcceptMouseInput = true });
+            Add(_hit = new HitBox(_.X, _.Y, _.MeasuredSize.X, _.MeasuredSize.Y));
+            _hit.MouseUp += (s, e) =>
+            {
+                Utility.Platforms.PlatformHelper.LaunchBrowser("https://github.com/bittiez/ClassicUO/wiki");
+            };
+
+            Add(_ = new TextBox("TazUO Discord", TrueTypeLoader.EMBEDDED_FONT, 15, 200, Color.Orange, dropShadow: true) { X = 30, Y = 440, AcceptMouseInput = true });
+            Add(_hit = new HitBox(_.X, _.Y, _.MeasuredSize.X, _.MeasuredSize.Y));
+            _hit.MouseUp += (s, e) =>
+            {
+                Utility.Platforms.PlatformHelper.LaunchBrowser("https://discord.gg/SqwtB5g95H");
+            };
 
             Checkbox loginmusic_checkbox = new Checkbox
             (
@@ -575,7 +586,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
         public override void OnButtonClick(int buttonID)
         {
-            switch ((Buttons) buttonID)
+            switch ((Buttons)buttonID)
             {
                 case Buttons.NextArrow:
                     SaveCheckboxStatus();

@@ -75,6 +75,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClassicUO.IO", "src\Classic
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MP3Sharp", "external\MP3Sharp\MP3Sharp\MP3Sharp.csproj", "{5AF00B6D-70C2-4CB0-A5D8-41F488F0DDF2}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FontStashSharp.FNA.Core", "external\FontStashSharp\src\XNA\FontStashSharp.FNA.Core.csproj", "{5ACA68DA-A282-434D-919F-B243A801D4C3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -113,6 +115,10 @@ Global
 		{5AF00B6D-70C2-4CB0-A5D8-41F488F0DDF2}.Debug|x64.Build.0 = Debug|x64
 		{5AF00B6D-70C2-4CB0-A5D8-41F488F0DDF2}.Release|x64.ActiveCfg = Release|x64
 		{5AF00B6D-70C2-4CB0-A5D8-41F488F0DDF2}.Release|x64.Build.0 = Release|x64
+		{5ACA68DA-A282-434D-919F-B243A801D4C3}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{5ACA68DA-A282-434D-919F-B243A801D4C3}.Debug|x64.Build.0 = Debug|Any CPU
+		{5ACA68DA-A282-434D-919F-B243A801D4C3}.Release|x64.ActiveCfg = Release|Any CPU
+		{5ACA68DA-A282-434D-919F-B243A801D4C3}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -128,6 +134,7 @@ Global
 		{535BE739-1314-4F8D-B24B-06890DDD3B8D} = {36371756-8DDA-41A4-BB9A-B7651459ADC1}
 		{69C1A629-F519-4F5A-85D5-4E0317CD267F} = {36371756-8DDA-41A4-BB9A-B7651459ADC1}
 		{5AF00B6D-70C2-4CB0-A5D8-41F488F0DDF2} = {FA5D7AB8-3570-4E55-95B0-35BA6842FEE3}
+		{5ACA68DA-A282-434D-919F-B243A801D4C3} = {FA5D7AB8-3570-4E55-95B0-35BA6842FEE3}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0A99E91A-ADAB-45C3-8170-2656140F6EFA}

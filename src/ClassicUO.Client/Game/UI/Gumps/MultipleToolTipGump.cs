@@ -21,6 +21,18 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void BuildGump()
         {
+            for (int i = 0; i < toolTips.Length; i++)
+            {
+                if (toolTips[i] == null)
+                    continue;
+                toolTips[i].OnOPLLoaded += () => { RepositionTooltips(); };
+                Add(toolTips[i]);
+            }
+            RepositionTooltips();
+        }
+
+        private void RepositionTooltips()
+        {
             int x = 0, totalWidth = 0, totalHeight = 0;
             for (int i = 0; i < toolTips.Length; i++)
             {
@@ -29,10 +41,9 @@ namespace ClassicUO.Game.UI.Gumps
                 toolTips[i].X = x;
                 toolTips[i].Y = 0;
                 toolTips[i].RemoveHoverReference();
-                Add(toolTips[i]);
                 totalWidth += toolTips[i].Width;
 
-                x += toolTips[i].Width + 16;
+                x += toolTips[i].Width + 14;
 
                 if (totalHeight < toolTips[i].Height)
                     totalHeight = toolTips[i].Height;
@@ -40,6 +51,8 @@ namespace ClassicUO.Game.UI.Gumps
             Width = totalWidth;
             Height = totalHeight;
         }
+
+        private int updateTickCount = 0;
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
@@ -53,7 +66,14 @@ namespace ClassicUO.Game.UI.Gumps
                         Height = c.Height;
             }
 
-            int z_width = Width + 16;
+            updateTickCount++;
+            if(updateTickCount > 5)
+            {
+                RepositionTooltips();
+                updateTickCount = 0;
+            }
+
+            int z_width = Width + 24;
             int z_height = Height + 8;
 
             if (x < 0)

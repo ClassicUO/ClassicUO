@@ -32,9 +32,12 @@
 
 using ClassicUO.IO;
 using ClassicUO.Utility;
+using Microsoft.Xna.Framework;
 using System;
+using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace ClassicUO.Assets
@@ -52,8 +55,6 @@ namespace ClassicUO.Assets
         public HuesGroup[] HuesRange { get; private set; }
 
         public int HuesCount { get; private set; }
-
-        public FloatHues[] Palette { get; private set; }
 
         public ushort[] RadarCol { get; private set; }
 
@@ -76,7 +77,7 @@ namespace ClassicUO.Assets
 
                     for (int i = 0; i < entrycount; i++)
                     {
-                        HuesRange[i] = Marshal.PtrToStructure<HuesGroup>((IntPtr) (addr + (ulong) (i * groupSize)));
+                        HuesRange[i] = Marshal.PtrToStructure<HuesGroup>((IntPtr)(addr + (ulong) (i * groupSize)));
                     }
 
                     path = UOFileManager.GetUOFilePath("radarcol.mul");
@@ -95,49 +96,6 @@ namespace ClassicUO.Assets
                     radarcol.Dispose();
                 }
             );
-        }
-
-        public float[] CreateHuesPalette()
-        {
-            float[] p = new float[32 * 3 * HuesCount];
-
-            Palette = new FloatHues[HuesCount];
-            int entrycount = HuesCount >> 3;
-
-            for (int i = 0; i < entrycount; i++)
-            {
-                for (int j = 0; j < 8; j++)
-                {
-                    int idx = i * 8 + j;
-
-                    Palette[idx].Palette = new float[32 * 3];
-
-                    for (int h = 0; h < 32; h++)
-                    {
-                        int idx1 = h * 3;
-
-                        ushort c = HuesRange[i].Entries[j].ColorTable[h];
-
-                        Palette[idx].Palette[idx1] = ((c >> 10) & 0x1F) / 31.0f;
-
-                        Palette[idx].Palette[idx1 + 1] = ((c >> 5) & 0x1F) / 31.0f;
-
-                        Palette[idx].Palette[idx1 + 2] = (c & 0x1F) / 31.0f;
-
-                        p[idx * 96 + idx1 + 0] = Palette[idx].Palette[idx1];
-
-                        p[idx * 96 + idx1 + 1] = Palette[idx].Palette[idx1 + 1];
-
-                        p[idx * 96 + idx1 + 2] = Palette[idx].Palette[idx1 + 2];
-
-                        //p[iddd++] = Palette[idx].Palette[idx1];
-                        //p[iddd++] = Palette[idx].Palette[idx1 + 1];
-                        //p[iddd++] = Palette[idx].Palette[idx1 + 2];
-                    }
-                }
-            }
-
-            return p;
         }
 
         public void CreateShaderColors(uint[] buffer)
@@ -163,117 +121,61 @@ namespace ClassicUO.Assets
             }
         }
 
-        //public float[] GetColorForShader(ushort color)
-        //{
-        //    if (color != 0)
-        //    {
-        //        if (color >= HuesCount)
-        //        {
-        //            color %= (ushort)HuesCount;
-
-        //            if (color <= 0)
-        //                color = 1;
-        //        }
-
-        //        return Palette[color - 1].Palette;
-        //    }
-
-        //    return _empty;
-        //}
-
-        //public static void SetHuesBlock(int index, IntPtr ptr)
-        //{
-        //    VerdataHuesGroup group = Marshal.PtrToStructure<VerdataHuesGroup>(ptr);
-        //    SetHuesBlock(index, group);
-        //}
-
-        //public static void SetHuesBlock(int index, VerdataHuesGroup group)
-        //{
-        //    if (index < 0 || index >= HuesCount)
-        //        return;
-
-        //    HuesRange[index].Header = group.Header;
-        //    for (int i = 0; i < 8; i++) HuesRange[index].Entries[i].ColorTable = group.Entries[i].ColorTable;
-        //}
-
-        public ushort GetColor16(ushort c, ushort color)
+        /* Look up the hue and return the color for the given index. Index must be between 0 and 31.
+         * The returned color is a 16 bit color in R5B5G5A1 format. */
+        public ushort GetHueColorRgba5551(ushort index, ushort hue)
         {
-            if (color != 0 && color < HuesCount)
+            if (hue != 0 && hue < HuesCount)
             {
-                color -= 1;
-                int g = color >> 3;
-                int e = color % 8;
+                hue -= 1;
+                int g = hue >> 3;
+                int e = hue % 8;
 
-                return HuesRange[g].Entries[e].ColorTable[(c >> 10) & 0x1F];
+                return (ushort)(0x8000 | HuesRange[g].Entries[e].ColorTable[index]);
             }
 
-            return c;
+            return 0x8000;
         }
 
-        public uint GetPolygoneColor(ushort c, ushort color)
+        /* Look up the hue and return the color for the given index. Index must be between 0 and 31.
+         * The returned color is a 32 bit color in R8G8B8A8 format. */
+        public uint GetHueColorRgba8888(ushort index, ushort hue)
         {
-            if (color != 0 && color < HuesCount)
-            {
-                color -= 1;
-                int g = color >> 3;
-                int e = color % 8;
-
-                return HuesHelper.Color16To32(HuesRange[g].Entries[e].ColorTable[c]);
-            }
-
-            return 0xFF010101;
+            return HuesHelper.Color16To32(GetHueColorRgba5551(index, hue));
         }
 
-        public uint GetUnicodeFontColor(ushort c, ushort color)
+        /* Apply the hue to the given gray color, returning a 16 bit color. */
+        public ushort ApplyHueRgba5551(ushort gray, ushort hue)
         {
-            if (color != 0 && color < HuesCount)
-            {
-                color -= 1;
-                int g = color >> 3;
-                int e = color % 8;
-
-                return HuesRange[g].Entries[e].ColorTable[8];
-            }
-
-            return HuesHelper.Color16To32(c);
+            return GetHueColorRgba5551((ushort)((gray >> 10) & 0x1F), hue);
         }
 
-        public uint GetColor(ushort c, ushort color)
+        /* Apply the hue to the given gray color, returning a 32 bit color. */
+        public uint ApplyHueRgba8888(ushort gray, ushort hue)
         {
-            if (color != 0 && color < HuesCount)
-            {
-                color -= 1;
-                int g = color >> 3;
-                int e = color % 8;
-
-                return HuesHelper.Color16To32(HuesRange[g].Entries[e].ColorTable[(c >> 10) & 0x1F]);
-            }
-
-            return color != 0 ? HuesHelper.Color16To32(color) : HuesHelper.Color16To32(c);
+            return HuesHelper.Color16To32(ApplyHueRgba5551(gray, hue));
         }
 
-        public uint GetPartialHueColor(ushort c, ushort color)
+        public uint GetPartialHueColor(ushort color, ushort hue)
         {
-            if (color != 0 && color < HuesCount)
+            uint cl = HuesHelper.Color16To32(color);
+            byte R = (byte)(cl & 0xFF);
+            byte G = (byte)((cl >> 8) & 0xFF);
+            byte B = (byte)((cl >> 16) & 0xFF);
+
+            if (R != G || R != B)
             {
-                color -= 1;
-                int g = color >> 3;
-                int e = color % 8;
-                uint cl = HuesHelper.Color16To32(c);
-
-                byte R = (byte) (cl & 0xFF);
-                byte G = (byte) ((cl >> 8) & 0xFF);
-                byte B = (byte) ((cl >> 16) & 0xFF);
-
-                if (R == G && R == B)
-                {
-                    cl = HuesHelper.Color16To32(HuesRange[g].Entries[e].ColorTable[(c >> 10) & 0x1F]);
-                }
-
-                return cl;
+                /* Not gray. Don't apply hue. */
+                return HuesHelper.Color16To32(color);
             }
 
-            return HuesHelper.Color16To32(c);
+            if (hue == 0 || hue >= HuesCount)
+            {
+                /* Invalid hue. */
+                return HuesHelper.Color16To32(color);
+            }
+
+            return ApplyHueRgba8888(color, hue);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

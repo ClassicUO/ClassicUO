@@ -453,6 +453,23 @@ namespace ClassicUO.Configuration
 
         public bool DisplayPartyChatOverhead { get; set; } = true;
 
+        public string SelectedTTFJournalFont { get; set; } = "avadonian";
+        public int SelectedJournalFontSize { get; set; } = 15;
+
+        public string SelectedToolTipFont { get; set; } = "Roboto-Regular";
+        public int SelectedToolTipFontSize { get; set; } = 15;
+
+        public string GameWindowSideChatFont { get; set; } = "avadonian";
+        public int GameWindowSideChatFontSize { get; set; } = 20;
+
+        public string OverheadChatFont { get; set; } = "avadonian";
+        public int OverheadChatFontSize { get; set; } = 20;
+        public int OverheadChatWidth { get; set; } = 200;
+
+        public string DefaultTTFFont { get; set; } = "Roboto-Regular";
+
+        [JsonIgnore] public bool EnableModernShopPreview { get; set; } = false;
+
         public static uint GumpsVersion { get; private set; }
 
         public void Save(string path, bool saveGumps = true)
@@ -778,7 +795,8 @@ namespace ClassicUO.Configuration
                                 case GumpType.GridContainer:
                                     ushort ogContainer = ushort.Parse(xml.GetAttribute("ogContainer"));
                                     gump = new GridContainer(serial, ogContainer);
-                                    if (((GridContainer)gump).isPlayerBackpack){
+                                    if (((GridContainer)gump).isPlayerBackpack)
+                                    {
                                         x = ProfileManager.CurrentProfile.BackpackGridPosition.X;
                                         y = ProfileManager.CurrentProfile.BackpackGridPosition.Y;
                                     }

@@ -188,7 +188,8 @@ namespace ClassicUO.Game.UI.Gumps
         private Checkbox _leftAlignToolTips, _namePlateHealthOnlyWarmode, _enableHealthIndicator, _spellIconDisplayHotkey, _enableAlphaScrollWheel;
         private InputField _healthIndicatorPercentage, _healthIndicatorWidth;
         private ModernColorPicker.HueDisplay _mainWindowHuePicker, _spellIconHotkeyHue;
-        private HSliderBar _spellIconScale;
+        private HSliderBar _spellIconScale, _journalFontSize, _tooltipFontSize, _gameWindowSideChatFontSize, _overheadFontSize, _overheadTextWidth;
+        private Combobox _journalFontSelection, _tooltipFontSelect, _gameWindowSideChatFont, _overheadFont;
 
         #region Cooldowns
         private InputField _coolDownX, _coolDownY;
@@ -3846,6 +3847,23 @@ namespace ClassicUO.Game.UI.Gumps
                         ));
                 } //Journal opac and hue
 
+                string[] availableFonts = TrueTypeLoader.Instance.Fonts;
+
+                section.Add(AddLabel(null, "Font selection", 0, 0));
+
+                string[] fontArray = TrueTypeLoader.Instance.Fonts;
+                int selectedFont = Array.IndexOf(fontArray, _currentProfile.SelectedTTFJournalFont);
+                section.AddRight(_journalFontSelection = AddCombobox(
+                        null,
+                        availableFonts,
+                        selectedFont < 0 ? 0 : selectedFont,
+                        0, 0, 200
+                    ));
+
+                section.PushIndent();
+                section.Add(AddLabel(null, "Font size", 0, 0));
+                section.Add(_journalFontSize = AddHSlider(null, 5, 40, _currentProfile.SelectedJournalFontSize, 0, 0, 200));
+                section.PopIndent();
 
                 rightArea.Add(section);
                 startY += section.Height + SPACING;
@@ -4009,6 +4027,17 @@ namespace ClassicUO.Game.UI.Gumps
                 section.Add(_displayPartyChatOverhead = AddCheckBox(null, "", _currentProfile.DisplayPartyChatOverhead, 0, 0));
                 section.AddRight(AddLabel(null, "Display party chat over players heads.", 0, 0));
 
+                section.Add(AddLabel(null, "Overhead text font", 0, 0));
+                section.AddRight(_overheadFont = GenerateFontSelector(_currentProfile.OverheadChatFont));
+
+                section.PushIndent();
+                section.Add(AddLabel(null, "Overhead text font size", 0, 0));
+                section.AddRight(_overheadFontSize = AddHSlider(null, 5, 40, _currentProfile.OverheadChatFontSize, 0, 0, 200));
+
+                section.Add(AddLabel(null,"Overhead text width", 0, 0));
+                section.AddRight(_overheadTextWidth = AddHSlider(null, 100, 600, _currentProfile.OverheadChatWidth, 0, 0, 200));
+                section.PopIndent();
+
                 rightArea.Add(section);
                 startY += section.Height + SPACING;
             } //Mobiles
@@ -4046,7 +4075,15 @@ namespace ClassicUO.Game.UI.Gumps
                             0, 0
                         ));
                     section.AddRight(AddLabel(null, "Disable system chat", 0, 0));
-                } //Disable system chat
+
+                    section.Add(AddLabel(null, "System chat font", 0, 0));
+                    section.AddRight(_gameWindowSideChatFont = GenerateFontSelector(_currentProfile.GameWindowSideChatFont));
+
+                    section.PushIndent();
+                    section.Add(AddLabel(null, "System chat font size", 0, 0));
+                    section.AddRight(_gameWindowSideChatFontSize = AddHSlider(null, 5, 40, _currentProfile.GameWindowSideChatFontSize, 0, 0, 200));
+                    section.PopIndent();
+                } //System chat
 
                 {
                     section.Add(AddLabel(null, "Hidden Body Opacity", 0, 0));
@@ -4140,7 +4177,7 @@ namespace ClassicUO.Game.UI.Gumps
                 section.AddRight(_spellIconDisplayHotkey = AddCheckBox(null, "", _currentProfile.SpellIcon_DisplayHotkey, 0, 0));
 
                 section.PushIndent();
-                section.Add(AddLabel(null, "Hotkey text hue", 0 ,0));
+                section.Add(AddLabel(null, "Hotkey text hue", 0, 0));
                 section.AddRight(_spellIconHotkeyHue = new ModernColorPicker.HueDisplay(_currentProfile.SpellIcon_HotkeyHue, null, true));
                 section.PopIndent();
 
@@ -4151,6 +4188,43 @@ namespace ClassicUO.Game.UI.Gumps
                 rightArea.Add(section);
                 startY += section.Height + SPACING;
             }//Misc
+
+            {
+                SettingsSection section = new SettingsSection("Tooltips", rightArea.Width) { Y = startY };
+
+                {
+                    NiceButton _;
+                    section.BaseAdd(_ = new NiceButton(0, 0, 20, TEXTBOX_HEIGHT, ButtonAction.Activate, "<>") { IsSelectable = false });
+                    _.SetTooltip("Minimize section");
+                    _.X = rightArea.Width - 45;
+                    _.MouseUp += (s, e) =>
+                    {
+                        if (e.Button == MouseButtonType.Left)
+                        {
+                            int diff = section.Height - 25;
+                            if (section.Children[2].IsVisible)
+                                diff = -section.Height + 25;
+                            for (int i = rightArea.Children.IndexOf(section) + 1; i < rightArea.Children.Count; i++)
+                            {
+                                if (rightArea.Children[i] != section)
+                                    rightArea.Children[i].Y += diff;
+                            }
+                            section.Children[2].IsVisible = !section.Children[2].IsVisible;
+                        }
+                    };
+                }
+
+                section.Add(AddLabel(null, "Tooltip font", 0, 0));
+                section.AddRight(_tooltipFontSelect = GenerateFontSelector(_currentProfile.SelectedToolTipFont));
+
+                section.PushIndent();
+                section.Add(AddLabel(null, "Tooltip font size", 0, 0));
+                section.AddRight(_tooltipFontSize = AddHSlider(null, 5, 40, _currentProfile.SelectedToolTipFontSize, 0, 0, 200));
+                section.PopIndent();
+
+                rightArea.Add(section);
+                startY += section.Height + SPACING;
+            }// Tooltip sections
 
             {
                 SettingsSection section = new SettingsSection("Global Settings", rightArea.Width) { Y = startY };
@@ -4227,6 +4301,7 @@ namespace ClassicUO.Game.UI.Gumps
                 startY += section.Height + SPACING;
             }// Global settings
 
+
             //{
             //    SettingsSection section = new SettingsSection("Misc", rightArea.Width) { Y = startY };
 
@@ -4284,6 +4359,18 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 ProfileManager.CurrentProfile.Save(profile.ToString(), false);
             }
+        }
+
+        public Combobox GenerateFontSelector(string selectedFont = "")
+        {
+            string[] fontArray = TrueTypeLoader.Instance.Fonts;
+            int selectedFontInd = Array.IndexOf(fontArray, selectedFont);
+            return AddCombobox(
+                null,
+                fontArray,
+                selectedFontInd < 0 ? 0 : selectedFontInd,
+                0, 0, 200
+                );
         }
 
         public Control GenConditionControl(int key, int width, bool createIfNotExists)
@@ -4669,6 +4756,38 @@ namespace ClassicUO.Game.UI.Gumps
                 _currentProfile.MainWindowBackgroundHue = _mainWindowHuePicker.Hue;
                 GameController.UpdateBackgroundHueShader();
             }
+
+            if (_currentProfile.SelectedTTFJournalFont != TrueTypeLoader.Instance.Fonts[_journalFontSelection.SelectedIndex])
+            {
+                _currentProfile.SelectedTTFJournalFont = TrueTypeLoader.Instance.Fonts[_journalFontSelection.SelectedIndex];
+                Gump g = UIManager.GetGump<ResizableJournal>();
+                if (g != null)
+                {
+                    g.Dispose();
+                    UIManager.Add(new ResizableJournal());
+                }
+            }
+
+            if (_currentProfile.SelectedJournalFontSize != _journalFontSize.Value)
+            {
+                _currentProfile.SelectedJournalFontSize = _journalFontSize.Value;
+                Gump g = UIManager.GetGump<ResizableJournal>();
+                if (g != null)
+                {
+                    g.Dispose();
+                    UIManager.Add(new ResizableJournal());
+                }
+            }
+
+            _currentProfile.OverheadChatFont = TrueTypeLoader.Instance.Fonts[_overheadFont.SelectedIndex];
+            _currentProfile.OverheadChatFontSize = _overheadFontSize.Value;
+            _currentProfile.OverheadChatWidth = _overheadTextWidth.Value;
+
+            _currentProfile.GameWindowSideChatFont = TrueTypeLoader.Instance.Fonts[_gameWindowSideChatFont.SelectedIndex];
+            _currentProfile.GameWindowSideChatFontSize = _gameWindowSideChatFontSize.Value;
+
+            _currentProfile.SelectedToolTipFont = TrueTypeLoader.Instance.Fonts[_tooltipFontSelect.SelectedIndex];
+            _currentProfile.SelectedToolTipFontSize = _tooltipFontSize.Value;
 
             _currentProfile.EnableAlphaScrollingOnGumps = _enableAlphaScrollWheel.IsChecked;
             _currentProfile.SpellIcon_DisplayHotkey = _spellIconDisplayHotkey.IsChecked;

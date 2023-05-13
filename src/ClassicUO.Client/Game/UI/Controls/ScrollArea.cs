@@ -117,6 +117,13 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
+        public int ScrollBarWidth()
+        {
+            if (_scrollBar == null)
+                return 0;
+            return _scrollBar.Width;
+        }
+
         public void Scroll(bool isup)
         {
             if (isup)

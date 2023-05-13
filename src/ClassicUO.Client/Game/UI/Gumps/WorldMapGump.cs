@@ -1209,7 +1209,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         if (sb->Z >= allZ[index])
                         {
-                            ushort color = (ushort)(0x8000 | (sb->Hue != 0 ? huesLoader.GetColor16(16384, sb->Hue) : huesLoader.GetRadarColorData(sb->Color + 0x4000)));
+                            ushort color = (ushort)(0x8000 | (sb->Hue != 0 ? huesLoader.GetHueColorRgba5551(16, sb->Hue) : huesLoader.GetRadarColorData(sb->Color + 0x4000)));
 
                             buffer[index] = HuesHelper.Color16To32(color) | 0xFF_00_00_00;
                             allZ[index] = sb->Z;
@@ -1538,7 +1538,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                                                 if (sb->Z >= allZ[block])
                                                 {
-                                                    ushort color = (ushort)(0x8000 | (sb->Hue != 0 ? huesLoader.GetColor16(16384, sb->Hue) : huesLoader.GetRadarColorData(sb->Color + 0x4000)));
+                                                    ushort color = (ushort)(0x8000 | (sb->Hue != 0 ? huesLoader.GetHueColorRgba5551(16, sb->Hue) : huesLoader.GetRadarColorData(sb->Color + 0x4000)));
 
                                                     buffer[block] = HuesHelper.Color16To32(color) | 0xFF_00_00_00;
                                                     allZ[block] = sb->Z;

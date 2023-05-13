@@ -48,6 +48,7 @@ using ClassicUO.Input;
 using ClassicUO.Renderer;
 using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using static ClassicUO.Game.UI.Gumps.GridHightlightMenu;
 
 namespace ClassicUO.Game.UI.Gumps
@@ -742,6 +743,11 @@ namespace ClassicUO.Game.UI.Gumps
                 LocalSerial = serial;
                 _item = World.Items.Get(serial);
                 CanMove = true;
+                if (_item != null)
+                {
+                    texture = ArtLoader.Instance.GetStaticTexture(_item.DisplayedGraphic, out bounds);
+                    rect = ArtLoader.Instance.GetRealArtBounds(_item.DisplayedGraphic);
+                }
                 #endregion
 
                 background = new AlphaBlendControl(0.25f);
@@ -790,6 +796,9 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else
                 {
+                    texture = ArtLoader.Instance.GetStaticTexture(item.DisplayedGraphic, out bounds);
+                    rect = ArtLoader.Instance.GetRealArtBounds(item.DisplayedGraphic);
+
                     _item = item;
                     LocalSerial = item.Serial;
                     int itemAmt = (_item.ItemData.IsStackable ? _item.Amount : 1);
@@ -960,6 +969,10 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
+            private Texture2D texture;
+            private Rectangle rect;
+            private Rectangle bounds;
+
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
                 if (_item != null && _item.ItemData.Layer > 0 && hit.MouseIsOver && Keyboard.Ctrl && (toolTipThis == null || toolTipThis.IsDisposed) && (toolTipitem1 == null || toolTipitem1.IsDisposed) && (toolTipitem2 == null || toolTipitem2.IsDisposed))
@@ -1007,8 +1020,6 @@ namespace ClassicUO.Game.UI.Gumps
                         SelectHighlight = false;
 
                 base.Draw(batcher, x, y);
-
-                Item item = World.Items.Get(LocalSerial);
 
                 Vector3 hueVector;
 
@@ -1060,20 +1071,18 @@ namespace ClassicUO.Game.UI.Gumps
                     );
                 }
 
-                if (item != null)
+                if (_item != null && texture != null & rect != null)
                 {
-                    var texture = ArtLoader.Instance.GetStaticTexture(item.DisplayedGraphic, out var bounds);
-                    var rect = ArtLoader.Instance.GetRealArtBounds(item.DisplayedGraphic);
-
-                    hueVector = ShaderHueTranslator.GetHueVector(item.Hue, item.ItemData.IsPartialHue, 1f);
+                    hueVector = ShaderHueTranslator.GetHueVector(_item.Hue, _item.ItemData.IsPartialHue, 1f);
 
                     Point originalSize = new Point(hit.Width, hit.Height);
                     Point point = new Point();
+                    var scale = (ProfileManager.CurrentProfile.GridContainersScale / 100f);
 
                     if (rect.Width < hit.Width)
                     {
                         if (ProfileManager.CurrentProfile.GridContainerScaleItems)
-                            originalSize.X = (ushort)(rect.Width * (ProfileManager.CurrentProfile.GridContainersScale / 100f));
+                            originalSize.X = (ushort)(rect.Width * scale);
                         else
                             originalSize.X = rect.Width;
 
@@ -1082,7 +1091,7 @@ namespace ClassicUO.Game.UI.Gumps
                     else if (rect.Width > hit.Width)
                     {
                         if (ProfileManager.CurrentProfile.GridContainerScaleItems)
-                            originalSize.X = (ushort)(hit.Width * (ProfileManager.CurrentProfile.GridContainersScale / 100f));
+                            originalSize.X = (ushort)(hit.Width * scale);
                         else
                             originalSize.X = hit.Width;
                         point.X = (hit.Width >> 1) - (originalSize.X >> 1);
@@ -1091,7 +1100,7 @@ namespace ClassicUO.Game.UI.Gumps
                     if (rect.Height < hit.Height)
                     {
                         if (ProfileManager.CurrentProfile.GridContainerScaleItems)
-                            originalSize.Y = (ushort)(rect.Height * (ProfileManager.CurrentProfile.GridContainersScale / 100f));
+                            originalSize.Y = (ushort)(rect.Height * scale);
                         else
                             originalSize.Y = rect.Height;
 
@@ -1100,7 +1109,7 @@ namespace ClassicUO.Game.UI.Gumps
                     else if (rect.Height > hit.Height)
                     {
                         if (ProfileManager.CurrentProfile.GridContainerScaleItems)
-                            originalSize.Y = (ushort)(hit.Height * (ProfileManager.CurrentProfile.GridContainersScale / 100f));
+                            originalSize.Y = (ushort)(hit.Height * scale);
                         else
                             originalSize.Y = hit.Height;
 
@@ -1129,7 +1138,6 @@ namespace ClassicUO.Game.UI.Gumps
                     if (count != null)
                         count.Draw(batcher, x + count.X, y + count.Y);
                 }
-
                 return true;
             }
         }
@@ -1301,14 +1309,21 @@ namespace ClassicUO.Game.UI.Gumps
                 if (item == null)
                     return false;
 
-                if (item.Name != null && item.Name.ToLower().Contains(search.ToLower()))
-                    return true;
-
                 if (World.OPL.TryGetNameAndData(item.Serial, out string name, out string data))
                 {
+                    if (name != null && name.ToLower().Contains(search.ToLower()))
+                        return true;
                     if (data != null)
                         if (data.ToLower().Contains(search.ToLower()))
                             return true;
+                }
+                else
+                {
+                    if (item.Name != null && item.Name.ToLower().Contains(search.ToLower()))
+                        return true;
+
+                    if (item.ItemData.Name.ToLower().Contains(search.ToLower()))
+                        return true;
                 }
 
                 return false;

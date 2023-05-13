@@ -105,6 +105,12 @@ namespace ClassicUO.Game.Managers
 
                 }
             );
+
+            Register("modern-shop", s => { 
+                Configuration.ProfileManager.CurrentProfile.EnableModernShopPreview ^= true;
+                string status = Configuration.ProfileManager.CurrentProfile.EnableModernShopPreview ? "/c[teal]on" : "/c[red]off";
+                GameActions.Print($"Modern shop /c[yellow]preview /cdtoggled {status}");
+            });
         }
 
 
