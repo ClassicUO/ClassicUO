@@ -347,7 +347,7 @@ namespace ClassicUO.Configuration
         public string WorldMapHiddenMarkerFiles { get; set; } = string.Empty;
         public string WorldMapHiddenZoneFiles { get; set; } = string.Empty;
         public bool WorldMapShowGridIfZoomed { get; set; } = true;
-        public bool WorldMapAllowPositionalTarget { get; set; } = false;
+        public bool WorldMapAllowPositionalTarget { get; set; } = true;
 
         public int AutoFollowDistance { get; set; } = 2;
         [JsonConverter(typeof(Point2Converter))] public Point ResizeJournalSize { get; set; } = new Point(410, 350);
