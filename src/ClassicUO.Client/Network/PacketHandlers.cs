@@ -48,6 +48,7 @@ using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace ClassicUO.Network
 {
@@ -7030,7 +7031,97 @@ namespace ClassicUO.Network
             gump.Update();
             gump.SetInScreen();
 
+            if (gumpID == 1426736667) //SOS message gump
+            {
+                for (int i = 0; i < gump.Children.Count; i++)
+                {
+                    if (gump.Children[i] is HtmlControl)
+                    {
+                        string pattern = @"(\d+('N)?('S)?('E)?('W)?)";
+
+                        string[] loc = new string[4];
+
+                        int c = 0;
+                        foreach (Match m in Regex.Matches(((HtmlControl)gump.Children[i]).Text, pattern, RegexOptions.Multiline))
+                        {
+                            if (c > 3)
+                                break;
+                            loc[c] = m.Value.Replace("'", "");
+                            c++;
+                        }
+
+                        int xlong = 0, ylat = 0, xmins = 0, ymins = 0;
+                        bool xeast = true, ysouth = true;
+
+                        if (loc[1].Contains("N"))
+                            ysouth = false;
+
+                        if (loc[3].Contains("W"))
+                            xeast = false;
+
+                        xlong = int.Parse(loc[2]);
+                        ylat = int.Parse(loc[0]); 
+                        xmins = int.Parse(loc[3].Substring(0, loc[3].Length - 1)); ;
+                        ymins = int.Parse(loc[1].Substring(0, loc[1].Length - 1));
+                        Vector3 location = ReverseLookup(xlong, ylat, xmins, ymins, xeast, ysouth);
+                        GameActions.Print($"If I am on the correct facet I think these coords should be somewhere near.. {location.X} and {location.Y}..");
+
+                        if (gump.ContextMenu == null)
+                        {
+                            gump.ContextMenu = new ContextMenuControl();
+                            gump.CanCloseWithRightClick = false;
+                        }
+                        gump.ContextMenu.Add(new ContextMenuItemEntry("Locate on world map", () => {
+                            WorldMapGump gump = UIManager.GetGump<WorldMapGump>();
+                            if (gump == null)
+                            {
+                                gump = new WorldMapGump();
+                                UIManager.Add(gump);
+                            }
+                            gump.GoToMarker((int)location.X, (int)location.Y, true);
+                        }));
+                    }
+                }
+            }
+
             return gump;
+        }
+
+        public static Vector3 ReverseLookup(int xLong, int yLat, int xMins, int yMins, bool xEast, bool ySouth)
+        {
+            int xCenter, yCenter;
+            int xWidth, yHeight;
+
+            xCenter = 1323;
+            yCenter = 1624;
+            xWidth = 5120;
+            yHeight = 4096;
+
+            double absLong = xLong + ((double)xMins / 60);
+            double absLat = yLat + ((double)yMins / 60);
+
+            if (!xEast)
+                absLong = 360.0 - absLong;
+
+            if (!ySouth)
+                absLat = 360.0 - absLat;
+
+            int x, y, z;
+
+            x = xCenter + (int)((absLong * xWidth) / 360);
+            y = yCenter + (int)((absLat * yHeight) / 360);
+
+            if (x < 0)
+                x += xWidth;
+            else if (x >= xWidth)
+                x -= xWidth;
+
+            if (y < 0)
+                y += yHeight;
+            else if (y >= yHeight)
+                y -= yHeight;
+
+            return new Vector3(x, y, 0);
         }
 
         private static void ApplyTrans(Gump gump, int current_page, int x, int y, int width, int height)
