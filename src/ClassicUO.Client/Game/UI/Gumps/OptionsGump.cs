@@ -3581,7 +3581,7 @@ namespace ClassicUO.Game.UI.Gumps
         private void BuildTazUO()
         {
             const int PAGE = 8788;
-            const int SPACING = 15;
+            const int SPACING = 25;
             ScrollArea rightArea = new ScrollArea
             (
                 190,
@@ -3600,21 +3600,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _.SetTooltip("Minimize section");
                     _.X = rightArea.Width - 45;
                     _.Y = 0;
-                    _.MouseUp += (s, e) =>
-                    {
-                        if (e.Button == MouseButtonType.Left)
-                        {
-                            int diff = gridSection.Height - 25;
-                            if (gridSection.Children[2].IsVisible)
-                                diff = -gridSection.Height + 25;
-                            foreach (SettingsSection section in rightArea.Children.OfType<SettingsSection>())
-                            {
-                                if (section != gridSection)
-                                    section.Y += diff;
-                            }
-                            gridSection.Children[2].IsVisible = !gridSection.Children[2].IsVisible;
-                        }
-                    };
+                    _.MouseUp += MinimizeSectionMouseUp;
                 }
 
                 {
@@ -3792,21 +3778,7 @@ namespace ClassicUO.Game.UI.Gumps
                     section.BaseAdd(_ = new NiceButton(0, 0, 20, TEXTBOX_HEIGHT, ButtonAction.Activate, "<>") { IsSelectable = false });
                     _.SetTooltip("Minimize section");
                     _.X = rightArea.Width - 45;
-                    _.MouseUp += (s, e) =>
-                    {
-                        if (e.Button == MouseButtonType.Left)
-                        {
-                            int diff = section.Height - 25;
-                            if (section.Children[2].IsVisible)
-                                diff = -section.Height + 25;
-                            for (int i = rightArea.Children.IndexOf(section) + 1; i < rightArea.Children.Count; i++)
-                            {
-                                if (rightArea.Children[i] != section)
-                                    rightArea.Children[i].Y += diff;
-                            }
-                            section.Children[2].IsVisible = !section.Children[2].IsVisible;
-                        }
-                    };
+                    _.MouseUp += MinimizeSectionMouseUp;
                 }
 
                 {
@@ -3877,21 +3849,7 @@ namespace ClassicUO.Game.UI.Gumps
                     section.BaseAdd(_ = new NiceButton(0, 0, 20, TEXTBOX_HEIGHT, ButtonAction.Activate, "<>") { IsSelectable = false });
                     _.SetTooltip("Minimize section");
                     _.X = rightArea.Width - 45;
-                    _.MouseUp += (s, e) =>
-                    {
-                        if (e.Button == MouseButtonType.Left)
-                        {
-                            int diff = section.Height - 25;
-                            if (section.Children[2].IsVisible)
-                                diff = -section.Height + 25;
-                            for (int i = rightArea.Children.IndexOf(section) + 1; i < rightArea.Children.Count; i++)
-                            {
-                                if (rightArea.Children[i] != section)
-                                    rightArea.Children[i].Y += diff;
-                            }
-                            section.Children[2].IsVisible = !section.Children[2].IsVisible;
-                        }
-                    };
+                    _.MouseUp += MinimizeSectionMouseUp;
                 }
 
                 section.Add(_useModernPaperdoll = AddCheckBox(
@@ -3925,21 +3883,7 @@ namespace ClassicUO.Game.UI.Gumps
                     section.BaseAdd(_ = new NiceButton(0, 0, 20, TEXTBOX_HEIGHT, ButtonAction.Activate, "<>") { IsSelectable = false });
                     _.SetTooltip("Minimize section");
                     _.X = rightArea.Width - 45;
-                    _.MouseUp += (s, e) =>
-                    {
-                        if (e.Button == MouseButtonType.Left)
-                        {
-                            int diff = section.Height - 25;
-                            if (section.Children[2].IsVisible)
-                                diff = -section.Height + 25;
-                            for (int i = rightArea.Children.IndexOf(section) + 1; i < rightArea.Children.Count; i++)
-                            {
-                                if (rightArea.Children[i] != section)
-                                    rightArea.Children[i].Y += diff;
-                            }
-                            section.Children[2].IsVisible = !section.Children[2].IsVisible;
-                        }
-                    };
+                    _.MouseUp += MinimizeSectionMouseUp;
                 }
 
                 {
@@ -3990,21 +3934,7 @@ namespace ClassicUO.Game.UI.Gumps
                     section.BaseAdd(_ = new NiceButton(0, 0, 20, TEXTBOX_HEIGHT, ButtonAction.Activate, "<>") { IsSelectable = false });
                     _.SetTooltip("Minimize section");
                     _.X = rightArea.Width - 45;
-                    _.MouseUp += (s, e) =>
-                    {
-                        if (e.Button == MouseButtonType.Left)
-                        {
-                            int diff = section.Height - 25;
-                            if (section.Children[2].IsVisible)
-                                diff = -section.Height + 25;
-                            for (int i = rightArea.Children.IndexOf(section) + 1; i < rightArea.Children.Count; i++)
-                            {
-                                if (rightArea.Children[i] != section)
-                                    rightArea.Children[i].Y += diff;
-                            }
-                            section.Children[2].IsVisible = !section.Children[2].IsVisible;
-                        }
-                    };
+                    _.MouseUp += MinimizeSectionMouseUp;
                 }
 
                 section.Add(_damageHueSelf = AddColorBox(null, 0, 0, _currentProfile.DamageHueSelf, ""));
@@ -4034,7 +3964,7 @@ namespace ClassicUO.Game.UI.Gumps
                 section.Add(AddLabel(null, "Overhead text font size", 0, 0));
                 section.AddRight(_overheadFontSize = AddHSlider(null, 5, 40, _currentProfile.OverheadChatFontSize, 0, 0, 200));
 
-                section.Add(AddLabel(null,"Overhead text width", 0, 0));
+                section.Add(AddLabel(null, "Overhead text width", 0, 0));
                 section.AddRight(_overheadTextWidth = AddHSlider(null, 100, 600, _currentProfile.OverheadChatWidth, 0, 0, 200));
                 section.PopIndent();
 
@@ -4050,21 +3980,7 @@ namespace ClassicUO.Game.UI.Gumps
                     section.BaseAdd(_ = new NiceButton(0, 0, 20, TEXTBOX_HEIGHT, ButtonAction.Activate, "<>") { IsSelectable = false });
                     _.SetTooltip("Minimize section");
                     _.X = rightArea.Width - 45;
-                    _.MouseUp += (s, e) =>
-                    {
-                        if (e.Button == MouseButtonType.Left)
-                        {
-                            int diff = section.Height - 25;
-                            if (section.Children[2].IsVisible)
-                                diff = -section.Height + 25;
-                            for (int i = rightArea.Children.IndexOf(section) + 1; i < rightArea.Children.Count; i++)
-                            {
-                                if (rightArea.Children[i] != section)
-                                    rightArea.Children[i].Y += diff;
-                            }
-                            section.Children[2].IsVisible = !section.Children[2].IsVisible;
-                        }
-                    };
+                    _.MouseUp += MinimizeSectionMouseUp;
                 }
 
                 {
@@ -4150,10 +4066,6 @@ namespace ClassicUO.Game.UI.Gumps
                 }//Improved buff gump
 
                 {
-                    section.Add(_leftAlignToolTips = AddCheckBox(null, "Align tooltips to the left side", _currentProfile.LeftAlignToolTips, 0, 0));
-                }//Left align tooltips
-
-                {
                     section.Add(_mainWindowHuePicker = new ModernColorPicker.HueDisplay(_currentProfile.MainWindowBackgroundHue, null, true));
                     section.AddRight(AddLabel(null, "Main game window background hue", 0, 0));
                 }//Main window background hue
@@ -4186,7 +4098,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _enableAlphaScrollWheel.SetTooltip("This is to quickly adjust a gump's opacity(Not all gumps are supported).");
 
                 rightArea.Add(section);
-                startY += section.Height + SPACING;
+                startY += section.Height + SPACING + 15;
             }//Misc
 
             {
@@ -4197,21 +4109,7 @@ namespace ClassicUO.Game.UI.Gumps
                     section.BaseAdd(_ = new NiceButton(0, 0, 20, TEXTBOX_HEIGHT, ButtonAction.Activate, "<>") { IsSelectable = false });
                     _.SetTooltip("Minimize section");
                     _.X = rightArea.Width - 45;
-                    _.MouseUp += (s, e) =>
-                    {
-                        if (e.Button == MouseButtonType.Left)
-                        {
-                            int diff = section.Height - 25;
-                            if (section.Children[2].IsVisible)
-                                diff = -section.Height + 25;
-                            for (int i = rightArea.Children.IndexOf(section) + 1; i < rightArea.Children.Count; i++)
-                            {
-                                if (rightArea.Children[i] != section)
-                                    rightArea.Children[i].Y += diff;
-                            }
-                            section.Children[2].IsVisible = !section.Children[2].IsVisible;
-                        }
-                    };
+                    _.MouseUp += MinimizeSectionMouseUp;
                 }
 
                 section.Add(AddLabel(null, "Tooltip font", 0, 0));
@@ -4221,6 +4119,10 @@ namespace ClassicUO.Game.UI.Gumps
                 section.Add(AddLabel(null, "Tooltip font size", 0, 0));
                 section.AddRight(_tooltipFontSize = AddHSlider(null, 5, 40, _currentProfile.SelectedToolTipFontSize, 0, 0, 200));
                 section.PopIndent();
+
+                {
+                    section.Add(_leftAlignToolTips = AddCheckBox(null, "Align tooltips to the left side", _currentProfile.LeftAlignToolTips, 0, 0));
+                }//Left align tooltips
 
                 rightArea.Add(section);
                 startY += section.Height + SPACING;
@@ -4242,10 +4144,8 @@ namespace ClassicUO.Game.UI.Gumps
                             if (section.Children[2].IsVisible)
                                 diff = -section.Height + 25;
                             for (int i = rightArea.Children.IndexOf(section) + 1; i < rightArea.Children.Count; i++)
-                            {
                                 if (rightArea.Children[i] != section)
                                     rightArea.Children[i].Y += diff;
-                            }
                             section.Children[2].IsVisible = !section.Children[2].IsVisible;
                         }
                     };
@@ -4310,21 +4210,7 @@ namespace ClassicUO.Game.UI.Gumps
             //        section.BaseAdd(_ = new NiceButton(0, 0, 20, TEXTBOX_HEIGHT, ButtonAction.Activate, "<>") { IsSelectable = false });
             //        _.SetTooltip("Minimize section");
             //        _.X = rightArea.Width - 45;
-            //        _.MouseUp += (s, e) =>
-            //        {
-            //            if (e.Button == MouseButtonType.Left)
-            //            {
-            //                int diff = section.Height - 25;
-            //                if (section.Children[2].IsVisible)
-            //                    diff = -section.Height + 25;
-            //                for (int i = rightArea.Children.IndexOf(section) + 1; i < rightArea.Children.Count; i++)
-            //                {
-            //                    if (rightArea.Children[i] != section)
-            //                        rightArea.Children[i].Y += diff;
-            //                }
-            //                section.Children[2].IsVisible = !section.Children[2].IsVisible;
-            //            }
-            //        };
+            //        _.MouseUp += MinimizeSectionMouseUp;
             //    }
 
             //    rightArea.Add(section);
@@ -4332,6 +4218,42 @@ namespace ClassicUO.Game.UI.Gumps
             //}// Blank setting section
 
             Add(rightArea, PAGE);
+
+            foreach (SettingsSection section in rightArea.Children.OfType<SettingsSection>())
+            {
+                section.Update();
+                int diff = section.Height - 25;
+                if (section.Children[2].IsVisible)
+                    diff = -section.Height + 25;
+                for (int i = rightArea.Children.IndexOf(section) + 1; i < rightArea.Children.Count; i++)
+                {
+                    if (rightArea.Children[i] != section)
+                        rightArea.Children[i].Y += diff;
+                }
+                section.Children[2].IsVisible = !section.Children[2].IsVisible;
+            }
+        }
+
+        private void MinimizeSectionMouseUp(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtonType.Left)
+            {
+                if (sender is NiceButton)
+                {
+                    SettingsSection section = ((NiceButton)sender).Parent as SettingsSection;
+
+                    ScrollArea rightArea = section.Parent as ScrollArea;
+
+                    int diff = section.Height - 25;
+                    if (section.Children[2].IsVisible)
+                        diff = -section.Height + 25;
+
+                    for (int i = rightArea.Children.IndexOf(section) + 1; i < rightArea.Children.Count; i++)
+                        if (rightArea.Children[i] != section)
+                            rightArea.Children[i].Y += diff;
+                    section.Children[2].IsVisible = !section.Children[2].IsVisible;
+                }
+            }
         }
 
         private class ProfileLocationData
