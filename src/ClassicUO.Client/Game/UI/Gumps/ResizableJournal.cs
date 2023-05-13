@@ -380,8 +380,9 @@ namespace ClassicUO.Game.UI.Gumps
 
                 foreach (JournalData _ in journalDatas)
                 {
-                    if (CanBeDrawn(_.TextType, _.MessageType))
-                        height += _.EntryText.Height;
+                    if (_ != null)
+                        if (CanBeDrawn(_.TextType, _.MessageType))
+                            height += _.EntryText.Height;
                 }
 
 
