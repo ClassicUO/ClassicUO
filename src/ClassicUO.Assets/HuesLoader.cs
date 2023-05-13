@@ -175,7 +175,7 @@ namespace ClassicUO.Assets
                 return HuesHelper.Color16To32(color);
             }
 
-            return ApplyHueRgba5551(color, hue);
+            return ApplyHueRgba8888(color, hue);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
