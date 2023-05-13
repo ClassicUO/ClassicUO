@@ -96,7 +96,7 @@ namespace ClassicUO.Game.UI
             if (_textBox == null || _dirty)
             {
                 _textBox = new TextBox(
-                    TextBox.ConvertHtmlToFontStashSharpCommand(_textHTML),
+                    TextBox.ConvertHtmlToFontStashSharpCommand(_textHTML).Trim(),
                     ProfileManager.CurrentProfile.SelectedToolTipFont,
                     ProfileManager.CurrentProfile.SelectedToolTipFontSize,
                     600,
