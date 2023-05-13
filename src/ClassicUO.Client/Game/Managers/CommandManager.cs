@@ -32,6 +32,7 @@
 
 using System;
 using System.Collections.Generic;
+using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Input;
 using ClassicUO.Resources;
@@ -110,6 +111,18 @@ namespace ClassicUO.Game.Managers
                 Configuration.ProfileManager.CurrentProfile.EnableModernShopPreview ^= true;
                 string status = Configuration.ProfileManager.CurrentProfile.EnableModernShopPreview ? "/c[teal]on" : "/c[red]off";
                 GameActions.Print($"Modern shop /c[yellow]preview /cdtoggled {status}");
+            });
+
+            Register("cast", s => {
+                string spell = "";
+                for (int i = 1; i < s.Length; i++)
+                {
+                    spell += s[i] + " ";
+                }
+                spell = spell.Trim();
+
+                if(SpellDefinition.TryGetSpellFromName(spell, out var spellDef))
+                    GameActions.CastSpell(spellDef.ID);
             });
         }
 
