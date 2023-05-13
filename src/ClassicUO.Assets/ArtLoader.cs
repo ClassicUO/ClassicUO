@@ -358,7 +358,7 @@ namespace ClassicUO.Assets
                                     else if (customHue > 0)
                                     {
                                         c.PackedValue = *pixels_ptr;
-                                        *pixels_ptr = HuesHelper.Color16To32(HuesLoader.Instance.GetColor16(HuesHelper.ColorToHue(c), customHue)) | 0xFF_00_00_00;
+                                        *pixels_ptr = HuesLoader.Instance.ApplyHueRgba8888(HuesHelper.Color32To16(*pixels_ptr), customHue);
                                     }
                                 }
 

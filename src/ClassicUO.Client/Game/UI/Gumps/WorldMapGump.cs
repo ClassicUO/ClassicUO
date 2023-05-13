@@ -117,6 +117,7 @@ namespace ClassicUO.Game.UI.Gumps
         private bool _showPlayerName = true;
         private int _zoomIndex = 4;
         private bool _showGridIfZoomed = true;
+        private bool _allowPositionalTarget = false;
 
         private GumpPic _northIcon;
 
@@ -239,6 +240,7 @@ namespace ClassicUO.Game.UI.Gumps
             _hiddenZoneFiles = string.IsNullOrEmpty(ProfileManager.CurrentProfile.WorldMapHiddenZoneFiles) ? new List<string>() : ProfileManager.CurrentProfile.WorldMapHiddenZoneFiles.Split(',').ToList();
 
             _showGridIfZoomed = ProfileManager.CurrentProfile.WorldMapShowGridIfZoomed;
+            _allowPositionalTarget = ProfileManager.CurrentProfile.WorldMapAllowPositionalTarget;
             TopMost = ProfileManager.CurrentProfile.WorldMapTopMost;
             FreeView = ProfileManager.CurrentProfile.WorldMapFreeView;
         }
@@ -278,8 +280,8 @@ namespace ClassicUO.Game.UI.Gumps
             ProfileManager.CurrentProfile.WorldMapHiddenZoneFiles = string.Join(",", _hiddenZoneFiles);
 
             ProfileManager.CurrentProfile.WorldMapShowGridIfZoomed = _showGridIfZoomed;
-
             ProfileManager.CurrentProfile.WorldMapPosition = new Point(X, Y);
+            ProfileManager.CurrentProfile.WorldMapAllowPositionalTarget = _allowPositionalTarget;
         }
 
         private bool ParseBool(string boolStr)
@@ -421,6 +423,10 @@ namespace ClassicUO.Game.UI.Gumps
             _options["show_coordinates"] = new ContextMenuItemEntry(ResGumps.ShowYourCoordinates, () => { _showCoordinates = !_showCoordinates; SaveSettings(); }, true, _showCoordinates);
 
             _options["show_mouse_coordinates"] = new ContextMenuItemEntry(ResGumps.ShowMouseCoordinates, () => { _showMouseCoordinates = !_showMouseCoordinates; }, true, _showMouseCoordinates);
+
+            _options["allow_positional_target"] = new ContextMenuItemEntry(
+                ResGumps.AllowPositionalTargeting, () => { _allowPositionalTarget = !_allowPositionalTarget; SaveSettings(); }, true, _allowPositionalTarget
+            );
 
             _options["markers_manager"] = new ContextMenuItemEntry(ResGumps.MarkersManager,
                 () =>
@@ -603,6 +609,7 @@ namespace ClassicUO.Game.UI.Gumps
             ContextMenu.Add(_options["show_multis"]);
             ContextMenu.Add(_options["show_coordinates"]);
             ContextMenu.Add(_options["show_mouse_coordinates"]);
+            ContextMenu.Add(_options["allow_positional_target"]);
             ContextMenu.Add("", null);
             ContextMenu.Add(_options["markers_manager"]);
             ContextMenu.Add(_options["add_marker_on_player"]);
@@ -758,6 +765,21 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             return offset + 8;
+        }
+
+        internal void HandlePositionTarget()
+        {
+            var position = Mouse.Position;
+            int x = position.X - X - ParentX;
+            int y = position.Y - Y - ParentY;
+            CanvasToWorld(x, y, out int xMap, out int yMap);
+            TargetManager.Target
+            (
+                0,
+                (ushort)xMap,
+                (ushort)yMap,
+                World.Map.GetTileZ(xMap, yMap)
+            );
         }
 
         public override void Dispose()
@@ -1209,7 +1231,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         if (sb->Z >= allZ[index])
                         {
-                            ushort color = (ushort)(0x8000 | (sb->Hue != 0 ? huesLoader.GetColor16(16384, sb->Hue) : huesLoader.GetRadarColorData(sb->Color + 0x4000)));
+                            ushort color = (ushort)(0x8000 | (sb->Hue != 0 ? huesLoader.GetHueColorRgba5551(16, sb->Hue) : huesLoader.GetRadarColorData(sb->Color + 0x4000)));
 
                             buffer[index] = HuesHelper.Color16To32(color) | 0xFF_00_00_00;
                             allZ[index] = sb->Z;
@@ -1538,7 +1560,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                                                 if (sb->Z >= allZ[block])
                                                 {
-                                                    ushort color = (ushort)(0x8000 | (sb->Hue != 0 ? huesLoader.GetColor16(16384, sb->Hue) : huesLoader.GetRadarColorData(sb->Color + 0x4000)));
+                                                    ushort color = (ushort)(0x8000 | (sb->Hue != 0 ? huesLoader.GetHueColorRgba5551(16, sb->Hue) : huesLoader.GetRadarColorData(sb->Color + 0x4000)));
 
                                                     buffer[block] = HuesHelper.Color16To32(color) | 0xFF_00_00_00;
                                                     allZ[block] = sb->Z;
@@ -3294,6 +3316,12 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseUp(int x, int y, MouseButtonType button)
         {
+            var allowTarget = _allowPositionalTarget && TargetManager.IsTargeting && TargetManager.TargetingState == CursorTarget.Position;
+            if (allowTarget && button == MouseButtonType.Left)
+            {
+                HandlePositionTarget();
+            }
+            
             if (button == MouseButtonType.Left && !Keyboard.Alt)
             {
                 _isScrolling = false;

@@ -240,7 +240,7 @@ namespace ClassicUO.Assets
 
                         if (color != 0 && val != 0)
                         {
-                            val = HuesLoader.Instance.GetColor16(gmul[i].Value, color);
+                            val = HuesLoader.Instance.ApplyHueRgba5551(gmul[i].Value, color);
                         }
 
                         if (val != 0)

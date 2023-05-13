@@ -31,6 +31,7 @@
 #endregion
 
 using ClassicUO.Assets;
+using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Renderer;
@@ -124,7 +125,7 @@ namespace ClassicUO.Game.GameObjects
                     hue = 0x1F;
             }
 
-            text_obj.RenderedText = RenderedText.Create(damage.ToString(), hue, 3, false);
+            text_obj.TextBox = new UI.Controls.TextBox(damage.ToString(), ProfileManager.CurrentProfile.OverheadChatFont, ProfileManager.CurrentProfile.OverheadChatFontSize, ProfileManager.CurrentProfile.OverheadChatWidth, hue, align: FontStashSharp.RichText.TextHorizontalAlignment.Center);
 
             text_obj.Time = Time.Ticks + 1500;
 
@@ -159,17 +160,17 @@ namespace ClassicUO.Game.GameObjects
 
                 if (delta <= 0)
                 {
-                    _rectangle.Height -= c.RenderedText?.Height ?? 0;
+                    _rectangle.Height -= c.TextBox?.Height ?? 0;
                     c.Destroy();
                     _messages.RemoveAt(i--);
                 }
                 //else if (delta < 250)
                 //    c.Alpha = 1f - delta / 250;
-                else if (c.RenderedText != null)
+                else if (c.TextBox != null)
                 {
-                    if (_rectangle.Width < c.RenderedText.Width)
+                    if (_rectangle.Width < c.TextBox.Width)
                     {
-                        _rectangle.Width = c.RenderedText.Width;
+                        _rectangle.Width = c.TextBox.Width;
                     }
                 }
             }
@@ -256,16 +257,16 @@ namespace ClassicUO.Game.GameObjects
 
             foreach (TextObject item in _messages)
             {
-                if (item.IsDestroyed || item.RenderedText == null || item.RenderedText.IsDestroyed)
+                if (item.IsDestroyed || item.TextBox == null || item.TextBox.IsDisposed)
                 {
                     continue;
                 }
 
-                item.X = p.X - (item.RenderedText.Width >> 1);
-                item.Y = p.Y - offY - item.RenderedText.Height - item.OffsetY;
-
-                item.RenderedText.Draw(batcher, item.X, item.Y, item.Alpha / 255f);
-                offY += item.RenderedText.Height;
+                item.X = p.X - (item.TextBox.Width >> 1);
+                item.Y = p.Y - offY - item.TextBox.Height - item.OffsetY;
+                item.TextBox.Alpha = item.TextBox.Alpha / 255f;
+                item.TextBox.Draw(batcher, item.X, item.Y);
+                offY += item.TextBox.Height;
             }
         }
 

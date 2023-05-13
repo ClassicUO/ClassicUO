@@ -84,7 +84,8 @@ namespace ClassicUO.Game
 
         public static void OpenPaperdoll(uint serial)
         {
-            if (ProfileManager.CurrentProfile.UseModernPaperdoll && serial == World.Player.Serial) {
+            if (ProfileManager.CurrentProfile.UseModernPaperdoll && serial == World.Player.Serial)
+            {
                 ModernPaperdoll modernPaperdoll = UIManager.GetGump<ModernPaperdoll>(serial);
                 if (modernPaperdoll == null)
                     UIManager.Add(new ModernPaperdoll(serial));
@@ -353,7 +354,17 @@ namespace ClassicUO.Game
             }
             else
             {
-                Socket.Send_DoubleClick(serial);
+                if (SerialHelper.IsItem(serial)) {
+                    Gump g = UIManager.GetGump<GridContainer>(serial);
+                    if (g != null)
+                    {
+                        g.SetInScreen();
+                        g.BringOnTop();
+                    }
+                    else
+                        Socket.Send_DoubleClick(serial);
+                } else
+                    Socket.Send_DoubleClick(serial);
             }
 
             if (SerialHelper.IsItem(serial))

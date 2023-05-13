@@ -305,39 +305,6 @@ namespace ClassicUO.Game.Managers
             TextType textType
         )
         {
-            if (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.OverrideAllFonts)
-            {
-                font = ProfileManager.CurrentProfile.ChatFont;
-                isunicode = ProfileManager.CurrentProfile.OverrideAllFontsIsUnicode;
-            }
-
-            int width = isunicode ? FontsLoader.Instance.GetWidthUnicode(font, msg) : FontsLoader.Instance.GetWidthASCII(font, msg);
-
-            if (width > 200)
-            {
-                width = isunicode ?
-                    FontsLoader.Instance.GetWidthExUnicode
-                    (
-                        font,
-                        msg,
-                        200,
-                        TEXT_ALIGN_TYPE.TS_LEFT,
-                        (ushort)FontStyle.BlackBorder
-                    ) :
-                    FontsLoader.Instance.GetWidthExASCII
-                    (
-                        font,
-                        msg,
-                        200,
-                        TEXT_ALIGN_TYPE.TS_LEFT,
-                        (ushort)FontStyle.BlackBorder
-                    );
-            }
-            else
-            {
-                width = 0;
-            }
-
 
             ushort fixedColor = (ushort)(hue & 0x3FFF);
 
@@ -359,35 +326,31 @@ namespace ClassicUO.Game.Managers
             TextObject textObject = TextObject.Create();
             textObject.Alpha = 0xFF;
             textObject.Type = type;
-            textObject.Hue = fixedColor;
+            //textObject.Hue = fixedColor;
 
             if (!isunicode && textType == TextType.OBJECT)
             {
                 fixedColor = 0x7FFF;
             }
 
-            textObject.RenderedText = RenderedText.Create
-            (
-                msg,
-                fixedColor,
-                font,
-                isunicode,
-                FontStyle.BlackBorder,
-                TEXT_ALIGN_TYPE.TS_LEFT,
-                width,
-                30,
-                false,
-                false,
-                textType == TextType.OBJECT
-            );
+            //Ignored the fixedColor in the textbox creation because it seems to interfere with correct colors, but if issues arrise I left the fixColor code here
 
-            textObject.Time = CalculateTimeToLive(textObject.RenderedText);
-            textObject.RenderedText.Hue = textObject.Hue;
+            textObject.TextBox = new TextBox(
+                    msg,
+                    ProfileManager.CurrentProfile.OverheadChatFont,
+                    ProfileManager.CurrentProfile.OverheadChatFontSize,
+                    ProfileManager.CurrentProfile.OverheadChatWidth,
+                    hue,
+                    FontStashSharp.RichText.TextHorizontalAlignment.Center,
+                    true
+                );
+
+            textObject.Time = CalculateTimeToLive(textObject.TextBox);
 
             return textObject;
         }
 
-        private static long CalculateTimeToLive(RenderedText rtext)
+        private static long CalculateTimeToLive(TextBox rtext)
         {
             Profile currentProfile = ProfileManager.CurrentProfile;
 
@@ -407,7 +370,16 @@ namespace ClassicUO.Game.Managers
                     delay = 10;
                 }
 
-                timeToLive = (long)(4000 * rtext.LinesCount * delay / 100.0f);
+                int fakeLines = 0;
+                if (rtext.Text.Length > 99)
+                    fakeLines = 3;
+                else if (rtext.Text.Length > 66)
+                    fakeLines = 2;
+                else
+                    fakeLines = 1;
+
+
+                timeToLive = (long)(4000 * fakeLines * delay / 100.0f);
             }
             else
             {

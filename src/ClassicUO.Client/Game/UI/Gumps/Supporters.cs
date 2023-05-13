@@ -19,7 +19,9 @@ namespace ClassicUO.Game.UI.Gumps
             "TazmanianTad - Developer",
             "Doskan - Random coffee bringer",
             "Auburok - Don't leave Brit Bank without TazUO",
-            "IDiivil - Happily Organized Now"
+            "IDiivil - Happily Organized Now",
+            "Avernal",
+            "d6punk - UO for life!"
         };
         private AlphaBlendControl _background;
 
