@@ -216,6 +216,9 @@ namespace ClassicUO.Game.UI.Controls
             {
                 _rtl.IgnoreColorCommand = true;
                 _rtl.Draw(batcher, new Vector2(x + 1, y + 1), Color.Black, horizontalAlignment: _align);
+                _rtl.Draw(batcher, new Vector2(x - 1, y - 1), Color.Black, horizontalAlignment: _align);
+                _rtl.Draw(batcher, new Vector2(x + 1, y - 1), Color.Black, horizontalAlignment: _align);
+                _rtl.Draw(batcher, new Vector2(x - 1, y + 1), Color.Black, horizontalAlignment: _align);
                 _rtl.IgnoreColorCommand = false;
             }
 
