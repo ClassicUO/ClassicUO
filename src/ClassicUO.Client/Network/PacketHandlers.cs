@@ -3979,9 +3979,9 @@ namespace ClassicUO.Network
                     //Color c = new Color(49, 82, 156, 0);
                     MessageManager.HandleMessage(null, msgSent, username, ProfileManager.CurrentProfile.ChatMessageHue, MessageType.ChatSystem, 3, TextType.OBJECT, true);
 
-        //GameActions.Print($"{username}: {msgSent}", ProfileManager.CurrentProfile.ChatMessageHue, MessageType.ChatSystem, 1);
+                    //GameActions.Print($"{username}: {msgSent}", ProfileManager.CurrentProfile.ChatMessageHue, MessageType.ChatSystem, 1);
 
-        ResizableJournal.HasReceivedChatSystemMessage = true;
+                    ResizableJournal.HasReceivedChatSystemMessage = true;
                     break;
 
                 default:
@@ -7065,7 +7065,7 @@ namespace ClassicUO.Network
                             xeast = false;
 
                         xlong = int.Parse(loc[2]);
-                        ylat = int.Parse(loc[0]); 
+                        ylat = int.Parse(loc[0]);
                         xmins = int.Parse(loc[3].Substring(0, loc[3].Length - 1)); ;
                         ymins = int.Parse(loc[1].Substring(0, loc[1].Length - 1));
                         Vector3 location = ReverseLookup(xlong, ylat, xmins, ymins, xeast, ysouth);
@@ -7076,7 +7076,8 @@ namespace ClassicUO.Network
                             gump.ContextMenu = new ContextMenuControl();
                             gump.CanCloseWithRightClick = false;
                         }
-                        gump.ContextMenu.Add(new ContextMenuItemEntry("Locate on world map", () => {
+                        gump.ContextMenu.Add(new ContextMenuItemEntry("Locate on world map", () =>
+                        {
                             WorldMapGump gump = UIManager.GetGump<WorldMapGump>();
                             if (gump == null)
                             {
@@ -7085,7 +7086,8 @@ namespace ClassicUO.Network
                             }
                             gump.GoToMarker((int)location.X, (int)location.Y, true);
                         }));
-                        gump.ContextMenu.Add(new ContextMenuItemEntry("Close", () => {
+                        gump.ContextMenu.Add(new ContextMenuItemEntry("Close", () =>
+                        {
                             gump.Dispose();
                         }));
                     }
