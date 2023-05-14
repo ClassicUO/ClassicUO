@@ -185,7 +185,7 @@ namespace ClassicUO.Game.UI.Gumps
         private Checkbox _showStatsMessage, _showSkillsMessage, _displayPartyChatOverhead;
         private HSliderBar _showSkillsMessageDelta;
 
-        private Checkbox _leftAlignToolTips, _namePlateHealthOnlyWarmode, _enableHealthIndicator, _spellIconDisplayHotkey, _enableAlphaScrollWheel;
+        private Checkbox _leftAlignToolTips, _namePlateHealthOnlyWarmode, _enableHealthIndicator, _spellIconDisplayHotkey, _enableAlphaScrollWheel, _useModernShop;
         private InputField _healthIndicatorPercentage, _healthIndicatorWidth;
         private ModernColorPicker.HueDisplay _mainWindowHuePicker, _spellIconHotkeyHue;
         private HSliderBar _spellIconScale, _journalFontSize, _tooltipFontSize, _gameWindowSideChatFontSize, _overheadFontSize, _overheadTextWidth;
@@ -4097,9 +4097,12 @@ namespace ClassicUO.Game.UI.Gumps
                 section.AddRight(_enableAlphaScrollWheel = AddCheckBox(null, "", _currentProfile.EnableAlphaScrollingOnGumps, 0, 0));
                 _enableAlphaScrollWheel.SetTooltip("This is to quickly adjust a gump's opacity(Not all gumps are supported).");
 
+                section.Add(AddLabel(null, "Use advanced shop gump", 0, 0));
+                section.AddRight(_useModernShop = AddCheckBox(null, "", _currentProfile.UseModernShopGump, 0, 0));
+
                 rightArea.Add(section);
                 startY += section.Height + SPACING + 15;
-            }//Misc
+            } //Misc
 
             {
                 SettingsSection section = new SettingsSection("Tooltips", rightArea.Width) { Y = startY };
@@ -4700,6 +4703,8 @@ namespace ClassicUO.Game.UI.Gumps
                     UIManager.Add(new ResizableJournal());
                 }
             }
+
+            _currentProfile.UseModernShopGump = _useModernShop.IsChecked;
 
             _currentProfile.OverheadChatFont = TrueTypeLoader.Instance.Fonts[_overheadFont.SelectedIndex];
             _currentProfile.OverheadChatFontSize = _overheadFontSize.Value;

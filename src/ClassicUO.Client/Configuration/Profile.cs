@@ -469,7 +469,7 @@ namespace ClassicUO.Configuration
 
         public string DefaultTTFFont { get; set; } = "Roboto-Regular";
 
-        [JsonIgnore] public bool EnableModernShopPreview { get; set; } = false;
+        public bool UseModernShopGump { get; set; } = false;
 
         public static uint GumpsVersion { get; private set; }
 

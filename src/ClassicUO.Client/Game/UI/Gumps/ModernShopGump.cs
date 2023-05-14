@@ -36,12 +36,6 @@ namespace ClassicUO.Game.UI.Gumps
 
         public ModernShopGump(uint serial, bool isPurchaseGump) : base(serial, 0)
         {
-            //if (!ProfileManager.CurrentProfile.EnableModernShopPreview)
-            //{
-            //    Dispose();
-            //    return;
-            //}
-
             #region VARS
             X = 200;
             Y = 200;

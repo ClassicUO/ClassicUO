@@ -1297,12 +1297,17 @@ namespace ClassicUO.Network
                 }
 
                 UIManager.GetGump<ShopGump>(serial)?.Dispose();
+                UIManager.GetGump<ModernShopGump>(serial)?.Dispose();
 
-                ShopGump gump = new ShopGump(serial, true, 150, 5);
-                UIManager.Add(gump);
+                ModernShopGump modernShopGump = null;
+                ShopGump gump = null;
 
-                ModernShopGump modernShopGump;
-                UIManager.Add(modernShopGump = new ModernShopGump(vendor, true));
+                if (ProfileManager.CurrentProfile.UseModernShopGump)
+                    UIManager.Add(modernShopGump = new ModernShopGump(vendor, true));
+                else
+                    UIManager.Add(gump = new ShopGump(serial, true, 150, 5));
+
+
 
                 for (Layer layer = Layer.ShopBuyRestock; layer < Layer.ShopBuy + 1; layer++)
                 {
@@ -1329,26 +1334,28 @@ namespace ClassicUO.Network
                     while (first != null)
                     {
                         Item it = (Item)first;
-                        modernShopGump.AddItem
-                        (
-                            it.Serial,
-                            it.Graphic,
-                            it.Hue,
-                            it.Amount,
-                            it.Price,
-                            it.Name,
-                            false
-                        );
-                        gump.AddItem
-                        (
-                            it.Serial,
-                            it.Graphic,
-                            it.Hue,
-                            it.Amount,
-                            it.Price,
-                            it.Name,
-                            false
-                        );
+                        if (ProfileManager.CurrentProfile.UseModernShopGump)
+                            modernShopGump.AddItem
+                            (
+                                it.Serial,
+                                it.Graphic,
+                                it.Hue,
+                                it.Amount,
+                                it.Price,
+                                it.Name,
+                                false
+                            );
+                        else
+                            gump.AddItem
+                            (
+                                it.Serial,
+                                it.Graphic,
+                                it.Hue,
+                                it.Amount,
+                                it.Price,
+                                it.Name,
+                                false
+                            );
 
                         if (reverse)
                         {
@@ -2639,17 +2646,26 @@ namespace ClassicUO.Network
 
 
             ShopGump gump = UIManager.GetGump<ShopGump>();
+            ModernShopGump modernGump = UIManager.GetGump<ModernShopGump>();
 
-            if (gump != null && (gump.LocalSerial != vendor || !gump.IsBuyGump))
+            if (ProfileManager.CurrentProfile.UseModernShopGump)
             {
-                gump.Dispose();
-                gump = null;
+                modernGump?.Dispose();
+                UIManager.Add(modernGump = new ModernShopGump(vendor, true));
             }
-
-            if (gump == null)
+            else
             {
-                gump = new ShopGump(vendor, true, 150, 5);
-                UIManager.Add(gump);
+                if (gump != null && (gump.LocalSerial != vendor || !gump.IsBuyGump))
+                {
+                    gump.Dispose();
+                    gump = null;
+                }
+
+                if (gump == null)
+                {
+                    gump = new ShopGump(vendor, true, 150, 5);
+                    UIManager.Add(gump);
+                }
             }
 
             if (container.Layer == Layer.ShopBuyRestock || container.Layer == Layer.ShopBuy)
@@ -3425,7 +3441,13 @@ namespace ClassicUO.Network
 
             ShopGump gump = UIManager.GetGump<ShopGump>(vendor);
             gump?.Dispose();
-            gump = new ShopGump(vendor, false, 100, 0);
+            ModernShopGump modernGump = UIManager.GetGump<ModernShopGump>(vendor);
+            modernGump?.Dispose();
+
+            if (ProfileManager.CurrentProfile.UseModernShopGump)
+                modernGump = new ModernShopGump(vendor, false);
+            else
+                gump = new ShopGump(vendor, false, 100, 0);
 
             for (int i = 0; i < countItems; i++)
             {
@@ -3454,20 +3476,34 @@ namespace ClassicUO.Network
 
                 //if (string.IsNullOrEmpty(item.Name))
                 //    item.Name = name;
-
-                gump.AddItem
-                (
-                    serial,
-                    graphic,
-                    hue,
-                    amount,
-                    price,
-                    name,
-                    fromcliloc
-                );
+                if (ProfileManager.CurrentProfile.UseModernShopGump)
+                    modernGump.AddItem
+                        (
+                        serial,
+                        graphic,
+                        hue,
+                        amount,
+                        price,
+                        name,
+                        fromcliloc
+                        );
+                else
+                    gump.AddItem
+                        (
+                            serial,
+                            graphic,
+                            hue,
+                            amount,
+                            price,
+                            name,
+                            fromcliloc
+                        );
             }
 
-            UIManager.Add(gump);
+            if (ProfileManager.CurrentProfile.UseModernShopGump)
+                UIManager.Add(modernGump);
+            else
+                UIManager.Add(gump);
         }
 
         private static void UpdateHitpoints(ref StackDataReader p)
