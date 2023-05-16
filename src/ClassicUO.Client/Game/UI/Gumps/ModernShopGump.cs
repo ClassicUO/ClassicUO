@@ -265,6 +265,9 @@ namespace ClassicUO.Game.UI.Gumps
                         quantity.MaxValue = count;
                         quantity.Value = 1;
                         countTB.Text = $"x{count}";
+
+                        itemInfo.IsVisible ^= true;
+                        purchaseSell.IsVisible ^= true;
                     }
                 };
 
