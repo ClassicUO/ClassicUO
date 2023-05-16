@@ -6,7 +6,7 @@ using System;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    internal class SimpleFadingTextGump : Gump
+    internal class SimpleTimedTextGump : Gump
     {
         private readonly TimeSpan duration;
         private readonly DateTime creation = DateTime.Now;
