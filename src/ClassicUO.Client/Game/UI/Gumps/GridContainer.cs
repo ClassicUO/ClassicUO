@@ -249,7 +249,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             #region Set loot bag
             _setLootBag = new NiceButton(0, Height - 20, 100, 20, ButtonAction.Default, "Set loot bag") { IsSelectable = false };
-            _setLootBag.IsVisible = ProfileManager.CurrentProfile.DoubleClickToLootInsideContainers && isCorpse;
+            _setLootBag.IsVisible = isCorpse;
             _setLootBag.SetTooltip("For double click looting only");
             _setLootBag.MouseUp += (s, e) =>
             {
@@ -820,7 +820,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     return;
                 }
-                if (!Keyboard.Ctrl && ProfileManager.CurrentProfile.DoubleClickToLootInsideContainers && _item != null && !_item.IsDestroyed && !_item.ItemData.IsContainer && container != World.Player.FindItemByLayer(Layer.Backpack) && !_item.IsLocked && _item.IsLootable)
+                if (!Keyboard.Ctrl && (ProfileManager.CurrentProfile.DoubleClickToLootInsideContainers && gridContainer.isCorpse) && !_item.IsDestroyed && !_item.ItemData.IsContainer && container != World.Player.FindItemByLayer(Layer.Backpack) && !_item.IsLocked && _item.IsLootable)
                 {
                     GameActions.GrabItem(_item, _item.Amount);
                 }
