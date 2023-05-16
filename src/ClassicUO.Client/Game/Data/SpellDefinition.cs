@@ -159,11 +159,19 @@ namespace ClassicUO.Game.Data
             }
         }
 
-        public static bool TryGetSpellFromName(string spellName, out SpellDefinition spell)
+        public static bool TryGetSpellFromName(string spellName, out SpellDefinition spell, bool partialMatch = true)
         {
-            foreach(var entry in SpellsMagery.GetAllSpells)
+            foreach (var entry in SpellsMagery.GetAllSpells)
             {
-                if(entry.Value.Name.Equals(spellName, StringComparison.InvariantCultureIgnoreCase))
+                if (partialMatch)
+                {
+                    if (entry.Value.Name.ToLower().Contains(spellName.ToLower()))
+                    {
+                        spell = entry.Value;
+                        return true;
+                    }
+                }
+                else if (entry.Value.Name.Equals(spellName, StringComparison.InvariantCultureIgnoreCase))
                 {
                     spell = entry.Value;
                     return true;
@@ -172,7 +180,15 @@ namespace ClassicUO.Game.Data
 
             foreach (var entry in SpellsNecromancy.GetAllSpells)
             {
-                if (entry.Value.Name.Equals(spellName, StringComparison.InvariantCultureIgnoreCase))
+                if (partialMatch)
+                {
+                    if (entry.Value.Name.ToLower().Contains(spellName.ToLower()))
+                    {
+                        spell = entry.Value;
+                        return true;
+                    }
+                }
+                else if (entry.Value.Name.Equals(spellName, StringComparison.InvariantCultureIgnoreCase))
                 {
                     spell = entry.Value;
                     return true;
@@ -181,7 +197,15 @@ namespace ClassicUO.Game.Data
 
             foreach (var entry in SpellsChivalry.GetAllSpells)
             {
-                if (entry.Value.Name.Equals(spellName, StringComparison.InvariantCultureIgnoreCase))
+                if (partialMatch)
+                {
+                    if (entry.Value.Name.ToLower().Contains(spellName.ToLower()))
+                    {
+                        spell = entry.Value;
+                        return true;
+                    }
+                }
+                else if (entry.Value.Name.Equals(spellName, StringComparison.InvariantCultureIgnoreCase))
                 {
                     spell = entry.Value;
                     return true;
@@ -190,7 +214,15 @@ namespace ClassicUO.Game.Data
 
             foreach (var entry in SpellsBushido.GetAllSpells)
             {
-                if (entry.Value.Name.Equals(spellName, StringComparison.InvariantCultureIgnoreCase))
+                if (partialMatch)
+                {
+                    if (entry.Value.Name.ToLower().Contains(spellName.ToLower()))
+                    {
+                        spell = entry.Value;
+                        return true;
+                    }
+                }
+                else if (entry.Value.Name.Equals(spellName, StringComparison.InvariantCultureIgnoreCase))
                 {
                     spell = entry.Value;
                     return true;
@@ -199,7 +231,15 @@ namespace ClassicUO.Game.Data
 
             foreach (var entry in SpellsNinjitsu.GetAllSpells)
             {
-                if (entry.Value.Name.Equals(spellName, StringComparison.InvariantCultureIgnoreCase))
+                if (partialMatch)
+                {
+                    if (entry.Value.Name.ToLower().Contains(spellName.ToLower()))
+                    {
+                        spell = entry.Value;
+                        return true;
+                    }
+                }
+                else if (entry.Value.Name.Equals(spellName, StringComparison.InvariantCultureIgnoreCase))
                 {
                     spell = entry.Value;
                     return true;
@@ -208,7 +248,15 @@ namespace ClassicUO.Game.Data
 
             foreach (var entry in SpellsSpellweaving.GetAllSpells)
             {
-                if (entry.Value.Name.Equals(spellName, StringComparison.InvariantCultureIgnoreCase))
+                if (partialMatch)
+                {
+                    if (entry.Value.Name.ToLower().Contains(spellName.ToLower()))
+                    {
+                        spell = entry.Value;
+                        return true;
+                    }
+                }
+                else if (entry.Value.Name.Equals(spellName, StringComparison.InvariantCultureIgnoreCase))
                 {
                     spell = entry.Value;
                     return true;
@@ -217,7 +265,15 @@ namespace ClassicUO.Game.Data
 
             foreach (var entry in SpellsMysticism.GetAllSpells)
             {
-                if (entry.Value.Name.Equals(spellName, StringComparison.InvariantCultureIgnoreCase))
+                if (partialMatch)
+                {
+                    if (entry.Value.Name.ToLower().Contains(spellName.ToLower()))
+                    {
+                        spell = entry.Value;
+                        return true;
+                    }
+                }
+                else if (entry.Value.Name.Equals(spellName, StringComparison.InvariantCultureIgnoreCase))
                 {
                     spell = entry.Value;
                     return true;
@@ -226,7 +282,15 @@ namespace ClassicUO.Game.Data
 
             foreach (var entry in SpellsMastery.GetAllSpells)
             {
-                if (entry.Value.Name.Equals(spellName, StringComparison.InvariantCultureIgnoreCase))
+                if (partialMatch)
+                {
+                    if (entry.Value.Name.ToLower().Contains(spellName.ToLower()))
+                    {
+                        spell = entry.Value;
+                        return true;
+                    }
+                }
+                else if (entry.Value.Name.Equals(spellName, StringComparison.InvariantCultureIgnoreCase))
                 {
                     spell = entry.Value;
                     return true;
