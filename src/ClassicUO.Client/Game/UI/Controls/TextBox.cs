@@ -57,7 +57,7 @@ namespace ClassicUO.Game.UI.Controls
             int width,
             int hue = 2996,
             TextHorizontalAlignment align = TextHorizontalAlignment.Left,
-            bool dropShadow = false
+            bool dropShadow = true
         )
         {
             _rtl = new RichTextLayout
@@ -89,7 +89,7 @@ namespace ClassicUO.Game.UI.Controls
                 int width,
                 Color color,
                 TextHorizontalAlignment align = TextHorizontalAlignment.Left,
-                bool dropShadow = false
+                bool dropShadow = true
             )
         {
             _rtl = new RichTextLayout
