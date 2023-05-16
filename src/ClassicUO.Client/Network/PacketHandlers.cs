@@ -48,6 +48,7 @@ using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace ClassicUO.Network
 {
@@ -1296,12 +1297,17 @@ namespace ClassicUO.Network
                 }
 
                 UIManager.GetGump<ShopGump>(serial)?.Dispose();
+                UIManager.GetGump<ModernShopGump>(serial)?.Dispose();
 
-                ShopGump gump = new ShopGump(serial, true, 150, 5);
-                UIManager.Add(gump);
+                ModernShopGump modernShopGump = null;
+                ShopGump gump = null;
 
-                ModernShopGump modernShopGump;
-                UIManager.Add(modernShopGump = new ModernShopGump(vendor, true));
+                if (ProfileManager.CurrentProfile.UseModernShopGump)
+                    UIManager.Add(modernShopGump = new ModernShopGump(vendor, true));
+                else
+                    UIManager.Add(gump = new ShopGump(serial, true, 150, 5));
+
+
 
                 for (Layer layer = Layer.ShopBuyRestock; layer < Layer.ShopBuy + 1; layer++)
                 {
@@ -1328,26 +1334,28 @@ namespace ClassicUO.Network
                     while (first != null)
                     {
                         Item it = (Item)first;
-                        modernShopGump.AddItem
-                        (
-                            it.Serial,
-                            it.Graphic,
-                            it.Hue,
-                            it.Amount,
-                            it.Price,
-                            it.Name,
-                            false
-                        );
-                        gump.AddItem
-                        (
-                            it.Serial,
-                            it.Graphic,
-                            it.Hue,
-                            it.Amount,
-                            it.Price,
-                            it.Name,
-                            false
-                        );
+                        if (ProfileManager.CurrentProfile.UseModernShopGump)
+                            modernShopGump.AddItem
+                            (
+                                it.Serial,
+                                it.Graphic,
+                                it.Hue,
+                                it.Amount,
+                                it.Price,
+                                it.Name,
+                                false
+                            );
+                        else
+                            gump.AddItem
+                            (
+                                it.Serial,
+                                it.Graphic,
+                                it.Hue,
+                                it.Amount,
+                                it.Price,
+                                it.Name,
+                                false
+                            );
 
                         if (reverse)
                         {
@@ -2638,17 +2646,26 @@ namespace ClassicUO.Network
 
 
             ShopGump gump = UIManager.GetGump<ShopGump>();
+            ModernShopGump modernGump = UIManager.GetGump<ModernShopGump>();
 
-            if (gump != null && (gump.LocalSerial != vendor || !gump.IsBuyGump))
+            if (ProfileManager.CurrentProfile.UseModernShopGump)
             {
-                gump.Dispose();
-                gump = null;
+                modernGump?.Dispose();
+                UIManager.Add(modernGump = new ModernShopGump(vendor, true));
             }
-
-            if (gump == null)
+            else
             {
-                gump = new ShopGump(vendor, true, 150, 5);
-                UIManager.Add(gump);
+                if (gump != null && (gump.LocalSerial != vendor || !gump.IsBuyGump))
+                {
+                    gump.Dispose();
+                    gump = null;
+                }
+
+                if (gump == null)
+                {
+                    gump = new ShopGump(vendor, true, 150, 5);
+                    UIManager.Add(gump);
+                }
             }
 
             if (container.Layer == Layer.ShopBuyRestock || container.Layer == Layer.ShopBuy)
@@ -3424,7 +3441,13 @@ namespace ClassicUO.Network
 
             ShopGump gump = UIManager.GetGump<ShopGump>(vendor);
             gump?.Dispose();
-            gump = new ShopGump(vendor, false, 100, 0);
+            ModernShopGump modernGump = UIManager.GetGump<ModernShopGump>(vendor);
+            modernGump?.Dispose();
+
+            if (ProfileManager.CurrentProfile.UseModernShopGump)
+                modernGump = new ModernShopGump(vendor, false);
+            else
+                gump = new ShopGump(vendor, false, 100, 0);
 
             for (int i = 0; i < countItems; i++)
             {
@@ -3453,20 +3476,34 @@ namespace ClassicUO.Network
 
                 //if (string.IsNullOrEmpty(item.Name))
                 //    item.Name = name;
-
-                gump.AddItem
-                (
-                    serial,
-                    graphic,
-                    hue,
-                    amount,
-                    price,
-                    name,
-                    fromcliloc
-                );
+                if (ProfileManager.CurrentProfile.UseModernShopGump)
+                    modernGump.AddItem
+                        (
+                        serial,
+                        graphic,
+                        hue,
+                        amount,
+                        price,
+                        name,
+                        fromcliloc
+                        );
+                else
+                    gump.AddItem
+                        (
+                            serial,
+                            graphic,
+                            hue,
+                            amount,
+                            price,
+                            name,
+                            fromcliloc
+                        );
             }
 
-            UIManager.Add(gump);
+            if (ProfileManager.CurrentProfile.UseModernShopGump)
+                UIManager.Add(modernGump);
+            else
+                UIManager.Add(gump);
         }
 
         private static void UpdateHitpoints(ref StackDataReader p)
@@ -3916,6 +3953,7 @@ namespace ClassicUO.Network
                     p.Skip(4);
                     string username = p.ReadUnicodeBE();
                     ChatManager.ChatIsEnabled = ChatStatus.Enabled;
+                    ResizableJournal.HasReceivedChatSystemMessage = true;
                     NetClient.Socket.Send_ChatJoinCommand("General");
 
                     break;
@@ -3943,7 +3981,7 @@ namespace ClassicUO.Network
 
                     UIManager.GetGump<ChatGump>()?.UpdateConference();
 
-                    GameActions.Print(string.Format(ResGeneral.YouHaveJoinedThe0Channel, channelName), ProfileManager.CurrentProfile.ChatMessageHue, MessageType.Regular, 1);
+                    GameActions.Print(string.Format(ResGeneral.YouHaveJoinedThe0Channel, channelName), ProfileManager.CurrentProfile.ChatMessageHue, MessageType.ChatSystem, 1);
 
                     break;
 
@@ -3951,7 +3989,7 @@ namespace ClassicUO.Network
                     p.Skip(4);
                     channelName = p.ReadUnicodeBE();
 
-                    GameActions.Print(string.Format(ResGeneral.YouHaveLeftThe0Channel, channelName), ProfileManager.CurrentProfile.ChatMessageHue, MessageType.Regular, 1);
+                    GameActions.Print(string.Format(ResGeneral.YouHaveLeftThe0Channel, channelName), ProfileManager.CurrentProfile.ChatMessageHue, MessageType.ChatSystem, 1);
 
                     break;
 
@@ -3975,8 +4013,11 @@ namespace ClassicUO.Network
                     }
 
                     //Color c = new Color(49, 82, 156, 0);
-                    GameActions.Print($"{username}: {msgSent}", ProfileManager.CurrentProfile.ChatMessageHue, MessageType.Regular, 1);
+                    MessageManager.HandleMessage(null, msgSent, username, ProfileManager.CurrentProfile.ChatMessageHue, MessageType.ChatSystem, 3, TextType.OBJECT, true);
 
+                    //GameActions.Print($"{username}: {msgSent}", ProfileManager.CurrentProfile.ChatMessageHue, MessageType.ChatSystem, 1);
+
+                    ResizableJournal.HasReceivedChatSystemMessage = true;
                     break;
 
                 default:
@@ -4015,7 +4056,8 @@ namespace ClassicUO.Network
                             }
                         }
 
-                        GameActions.Print(msg, ProfileManager.CurrentProfile.ChatMessageHue, MessageType.Regular, 1);
+                        GameActions.Print(msg, ProfileManager.CurrentProfile.ChatMessageHue, MessageType.ChatSystem, 1);
+                        ResizableJournal.HasReceivedChatSystemMessage = true;
                     }
 
                     break;
@@ -7030,7 +7072,102 @@ namespace ClassicUO.Network
             gump.Update();
             gump.SetInScreen();
 
+            if (gumpID == 1426736667) //SOS message gump
+            {
+                for (int i = 0; i < gump.Children.Count; i++)
+                {
+                    if (gump.Children[i] is HtmlControl)
+                    {
+                        string pattern = @"(\d+('N)?('S)?('E)?('W)?)";
+
+                        string[] loc = new string[4];
+
+                        int c = 0;
+                        foreach (Match m in Regex.Matches(((HtmlControl)gump.Children[i]).Text, pattern, RegexOptions.Multiline))
+                        {
+                            if (c > 3)
+                                break;
+                            loc[c] = m.Value.Replace("'", "");
+                            c++;
+                        }
+
+                        int xlong = 0, ylat = 0, xmins = 0, ymins = 0;
+                        bool xeast = true, ysouth = true;
+
+                        if (loc[1].Contains("N"))
+                            ysouth = false;
+
+                        if (loc[3].Contains("W"))
+                            xeast = false;
+
+                        xlong = int.Parse(loc[2]);
+                        ylat = int.Parse(loc[0]);
+                        xmins = int.Parse(loc[3].Substring(0, loc[3].Length - 1)); ;
+                        ymins = int.Parse(loc[1].Substring(0, loc[1].Length - 1));
+                        Vector3 location = ReverseLookup(xlong, ylat, xmins, ymins, xeast, ysouth);
+                        GameActions.Print($"If I am on the correct facet I think these coords should be somewhere near.. {location.X} and {location.Y}..");
+
+                        if (gump.ContextMenu == null)
+                        {
+                            gump.ContextMenu = new ContextMenuControl();
+                            gump.CanCloseWithRightClick = false;
+                        }
+                        gump.ContextMenu.Add(new ContextMenuItemEntry("Locate on world map", () =>
+                        {
+                            WorldMapGump gump = UIManager.GetGump<WorldMapGump>();
+                            if (gump == null)
+                            {
+                                gump = new WorldMapGump();
+                                UIManager.Add(gump);
+                            }
+                            gump.GoToMarker((int)location.X, (int)location.Y, true);
+                        }));
+                        gump.ContextMenu.Add(new ContextMenuItemEntry("Close", () =>
+                        {
+                            gump.Dispose();
+                        }));
+                    }
+                }
+            }
+
             return gump;
+        }
+
+        public static Vector3 ReverseLookup(int xLong, int yLat, int xMins, int yMins, bool xEast, bool ySouth)
+        {
+            int xCenter, yCenter;
+            int xWidth, yHeight;
+
+            xCenter = 1323;
+            yCenter = 1624;
+            xWidth = 5120;
+            yHeight = 4096;
+
+            double absLong = xLong + ((double)xMins / 60);
+            double absLat = yLat + ((double)yMins / 60);
+
+            if (!xEast)
+                absLong = 360.0 - absLong;
+
+            if (!ySouth)
+                absLat = 360.0 - absLat;
+
+            int x, y, z;
+
+            x = xCenter + (int)((absLong * xWidth) / 360);
+            y = yCenter + (int)((absLat * yHeight) / 360);
+
+            if (x < 0)
+                x += xWidth;
+            else if (x >= xWidth)
+                x -= xWidth;
+
+            if (y < 0)
+                y += yHeight;
+            else if (y >= yHeight)
+                y -= yHeight;
+
+            return new Vector3(x, y, 0);
         }
 
         private static void ApplyTrans(Gump gump, int current_page, int x, int y, int width, int height)

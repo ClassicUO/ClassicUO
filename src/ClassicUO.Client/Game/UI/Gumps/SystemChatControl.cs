@@ -291,7 +291,9 @@ namespace ClassicUO.Game.UI.Gumps
                     AddLine(string.Format(ResGumps.AllianceName0Text1, e.Name, e.Text), e.Font, ProfileManager.CurrentProfile.AllyMessageHue, e.IsUnicode);
 
                     break;
-
+                case MessageType.ChatSystem:
+                    AddLine($"{e.Name}: {e.Text}", e.Font, ProfileManager.CurrentProfile.ChatMessageHue, e.IsUnicode);
+                    break;
                 default:
 
                     if (e.Parent == null || !SerialHelper.IsValid(e.Parent.Serial))

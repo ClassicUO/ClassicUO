@@ -159,6 +159,147 @@ namespace ClassicUO.Game.Data
             }
         }
 
+        public static bool TryGetSpellFromName(string spellName, out SpellDefinition spell, bool partialMatch = true)
+        {
+            foreach (var entry in SpellsMagery.GetAllSpells)
+            {
+                if (partialMatch)
+                {
+                    if (entry.Value.Name.ToLower().Contains(spellName.ToLower()))
+                    {
+                        spell = entry.Value;
+                        return true;
+                    }
+                }
+                else if (entry.Value.Name.Equals(spellName, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    spell = entry.Value;
+                    return true;
+                }
+            }
+
+            foreach (var entry in SpellsNecromancy.GetAllSpells)
+            {
+                if (partialMatch)
+                {
+                    if (entry.Value.Name.ToLower().Contains(spellName.ToLower()))
+                    {
+                        spell = entry.Value;
+                        return true;
+                    }
+                }
+                else if (entry.Value.Name.Equals(spellName, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    spell = entry.Value;
+                    return true;
+                }
+            }
+
+            foreach (var entry in SpellsChivalry.GetAllSpells)
+            {
+                if (partialMatch)
+                {
+                    if (entry.Value.Name.ToLower().Contains(spellName.ToLower()))
+                    {
+                        spell = entry.Value;
+                        return true;
+                    }
+                }
+                else if (entry.Value.Name.Equals(spellName, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    spell = entry.Value;
+                    return true;
+                }
+            }
+
+            foreach (var entry in SpellsBushido.GetAllSpells)
+            {
+                if (partialMatch)
+                {
+                    if (entry.Value.Name.ToLower().Contains(spellName.ToLower()))
+                    {
+                        spell = entry.Value;
+                        return true;
+                    }
+                }
+                else if (entry.Value.Name.Equals(spellName, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    spell = entry.Value;
+                    return true;
+                }
+            }
+
+            foreach (var entry in SpellsNinjitsu.GetAllSpells)
+            {
+                if (partialMatch)
+                {
+                    if (entry.Value.Name.ToLower().Contains(spellName.ToLower()))
+                    {
+                        spell = entry.Value;
+                        return true;
+                    }
+                }
+                else if (entry.Value.Name.Equals(spellName, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    spell = entry.Value;
+                    return true;
+                }
+            }
+
+            foreach (var entry in SpellsSpellweaving.GetAllSpells)
+            {
+                if (partialMatch)
+                {
+                    if (entry.Value.Name.ToLower().Contains(spellName.ToLower()))
+                    {
+                        spell = entry.Value;
+                        return true;
+                    }
+                }
+                else if (entry.Value.Name.Equals(spellName, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    spell = entry.Value;
+                    return true;
+                }
+            }
+
+            foreach (var entry in SpellsMysticism.GetAllSpells)
+            {
+                if (partialMatch)
+                {
+                    if (entry.Value.Name.ToLower().Contains(spellName.ToLower()))
+                    {
+                        spell = entry.Value;
+                        return true;
+                    }
+                }
+                else if (entry.Value.Name.Equals(spellName, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    spell = entry.Value;
+                    return true;
+                }
+            }
+
+            foreach (var entry in SpellsMastery.GetAllSpells)
+            {
+                if (partialMatch)
+                {
+                    if (entry.Value.Name.ToLower().Contains(spellName.ToLower()))
+                    {
+                        spell = entry.Value;
+                        return true;
+                    }
+                }
+                else if (entry.Value.Name.Equals(spellName, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    spell = entry.Value;
+                    return true;
+                }
+            }
+
+            spell = null;
+            return false;
+        }
 
         public string CreateReagentListString(string separator)
         {

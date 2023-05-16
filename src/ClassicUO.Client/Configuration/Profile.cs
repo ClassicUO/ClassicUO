@@ -360,6 +360,7 @@ namespace ClassicUO.Configuration
         public bool NamePlateHideAtFullHealthInWarmode { get; set; } = true;
 
         public bool LeftAlignToolTips { get; set; } = false;
+        public bool ForceCenterAlignTooltipMobiles { get; set; } = false;
 
         public bool CorpseSingleClickLoot { get; set; } = false;
 
@@ -469,7 +470,7 @@ namespace ClassicUO.Configuration
 
         public string DefaultTTFFont { get; set; } = "Roboto-Regular";
 
-        [JsonIgnore] public bool EnableModernShopPreview { get; set; } = false;
+        public bool UseModernShopGump { get; set; } = false;
 
         public static uint GumpsVersion { get; private set; }
 

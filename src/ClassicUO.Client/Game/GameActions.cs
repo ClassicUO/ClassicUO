@@ -417,6 +417,23 @@ namespace ClassicUO.Game
 
         public static void Print(string message, ushort hue = 946, MessageType type = MessageType.Regular, byte font = 3, bool unicode = true)
         {
+            if(type == MessageType.ChatSystem)
+            {
+                MessageManager.HandleMessage
+                (
+                    null,
+                    message,
+                    "Chat",
+                    hue,
+                    type,
+                    font,
+                    TextType.OBJECT,
+                    unicode,
+                    Settings.GlobalSettings.Language
+                );
+                return;
+            }
+
             Print
             (
                 null,

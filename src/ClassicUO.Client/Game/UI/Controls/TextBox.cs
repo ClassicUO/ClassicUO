@@ -57,7 +57,7 @@ namespace ClassicUO.Game.UI.Controls
             int width,
             int hue = 2996,
             TextHorizontalAlignment align = TextHorizontalAlignment.Left,
-            bool dropShadow = false
+            bool dropShadow = true
         )
         {
             _rtl = new RichTextLayout
@@ -89,7 +89,7 @@ namespace ClassicUO.Game.UI.Controls
                 int width,
                 Color color,
                 TextHorizontalAlignment align = TextHorizontalAlignment.Left,
-                bool dropShadow = false
+                bool dropShadow = true
             )
         {
             _rtl = new RichTextLayout
@@ -175,6 +175,8 @@ namespace ClassicUO.Game.UI.Controls
 
             finalString = Regex.Replace(text, "<basefont color=\"?'?(?<color>.*?)\"?'?>", " /c[${color}]", RegexOptions.Multiline | RegexOptions.IgnoreCase);
             finalString = finalString.Replace("</basefont>", "/cd").Replace("</BASEFONT>", "/cd").Replace("<br>", "\n").Replace("\n", "\n/cd");
+            finalString = finalString.Replace("<left>", "").Replace("</left>", "");
+            finalString = finalString.Replace("<b>", "").Replace("</b>", "");
             return finalString;
         }
 
@@ -214,6 +216,9 @@ namespace ClassicUO.Game.UI.Controls
             {
                 _rtl.IgnoreColorCommand = true;
                 _rtl.Draw(batcher, new Vector2(x + 1, y + 1), Color.Black, horizontalAlignment: _align);
+                _rtl.Draw(batcher, new Vector2(x - 1, y - 1), Color.Black, horizontalAlignment: _align);
+                _rtl.Draw(batcher, new Vector2(x + 1, y - 1), Color.Black, horizontalAlignment: _align);
+                _rtl.Draw(batcher, new Vector2(x - 1, y + 1), Color.Black, horizontalAlignment: _align);
                 _rtl.IgnoreColorCommand = false;
             }
 

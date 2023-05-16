@@ -45,13 +45,15 @@ namespace ClassicUO.Game.UI.Controls
 
         public ushort Hue { get; set; }
 
+        public Color BaseColor { get; set; } = Color.Black;
+
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             Vector3 hueVector = ShaderHueTranslator.GetHueVector(Hue, false, Alpha);
 
             batcher.Draw
             (
-                SolidColorTextureCache.GetTexture(Color.Black),
+                SolidColorTextureCache.GetTexture(BaseColor),
                 new Rectangle
                 (
                     x,

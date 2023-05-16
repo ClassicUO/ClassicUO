@@ -38,6 +38,9 @@ namespace ClassicUO.Game.UI.Gumps
         private ScrollBar _scrollBarBase;
         #endregion
 
+        public static bool HasReceivedChatSystemMessage { get; set; } = false;
+        private bool _hasReceivedChatSystemMessage = HasReceivedChatSystemMessage;
+
         #region OTHER
         private static int _lastX = 100, _lastY = 100;
         private static int _lastWidth = MIN_WIDTH, _lastHeight = 300;
@@ -81,11 +84,13 @@ namespace ClassicUO.Game.UI.Gumps
                 MessageType.Encoded, MessageType.Focus, MessageType.Guild,
                 MessageType.Label, MessageType.Limit3Spell, MessageType.Party,
                 MessageType.Regular, MessageType.Spell, MessageType.System,
-                MessageType.Whisper, MessageType.Yell
+                MessageType.Whisper, MessageType.Yell, MessageType.ChatSystem
             });
-            AddTab("Chat", new MessageType[] { MessageType.Regular, MessageType.Guild, MessageType.Alliance, MessageType.Emote, MessageType.Party, MessageType.Whisper, MessageType.Yell });
+            AddTab("Chat", new MessageType[] { MessageType.Regular, MessageType.Guild, MessageType.Alliance, MessageType.Emote, MessageType.Party, MessageType.Whisper, MessageType.Yell, MessageType.ChatSystem });
             AddTab("Guild|Party", new MessageType[] { MessageType.Guild, MessageType.Alliance, MessageType.Party });
             AddTab("System", new MessageType[] { MessageType.System });
+            if (HasReceivedChatSystemMessage)
+                AddTab("Global Chat", new MessageType[] { MessageType.ChatSystem });
             _tab[0].IsSelected = true;
             #endregion
 
@@ -253,7 +258,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void AddTab(string Name, MessageType[] filters)
         {
-            _tab.Add(new NiceButton((_tab.Count * TAB_WIDTH) + BORDER_WIDTH, 0, TAB_WIDTH, TAB_HEIGHT, ButtonAction.Activate, Name, 1) { ButtonParameter = _tab.Count, IsSelectable = true });
+            _tab.Add(new NiceButton((_tab.Count * TAB_WIDTH) + 4, 0, TAB_WIDTH, TAB_HEIGHT, ButtonAction.Activate, Name, 1) { ButtonParameter = _tab.Count, IsSelectable = true });
             _tabName.Add(Name);
             _tabTypes.Add(filters);
         }
@@ -293,6 +298,16 @@ namespace ClassicUO.Game.UI.Gumps
             }
             if (((Width != _lastWidth || Height != _lastHeight) && !Mouse.LButtonPressed))
                 Reposition();
+            if (HasReceivedChatSystemMessage != _hasReceivedChatSystemMessage)
+            {
+                _hasReceivedChatSystemMessage = HasReceivedChatSystemMessage;
+
+                if (_hasReceivedChatSystemMessage)
+                {
+                    AddTab("Global Chat", new MessageType[] { MessageType.ChatSystem });
+                    Add(_tab[_tab.Count - 1]);
+                }
+            }
         }
 
         private class JournalEntriesContainer : Control
@@ -380,8 +395,9 @@ namespace ClassicUO.Game.UI.Gumps
 
                 foreach (JournalData _ in journalDatas)
                 {
-                    if (CanBeDrawn(_.TextType, _.MessageType))
-                        height += _.EntryText.Height;
+                    if (_ != null)
+                        if (CanBeDrawn(_.TextType, _.MessageType))
+                            height += _.EntryText.Height;
                 }
 
 
@@ -432,6 +448,9 @@ namespace ClassicUO.Game.UI.Gumps
                     for (int i = 0; i < _resizableJournal._currentFilter.Length; i++)
                     {
                         MessageType currentfilter = _resizableJournal._currentFilter[i];
+
+                        if (messageType == MessageType.ChatSystem && currentfilter == MessageType.ChatSystem)
+                            return true;
 
                         if (type == TextType.SYSTEM && currentfilter == MessageType.System)
                             return true;

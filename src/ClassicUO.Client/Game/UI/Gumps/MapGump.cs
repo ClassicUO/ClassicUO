@@ -115,6 +115,14 @@ namespace ClassicUO.Game.UI.Gumps
             _hit.ContextMenu.Add(new ContextMenuItemEntry("Try to pathfind", () => {
                 if (foundMapLoc)
                 {
+                    int distance =  Math.Max(Math.Abs(World.Player.X - mapX), Math.Abs(World.Player.Y - mapY));
+
+                    if(distance > 10)
+                    {
+                        GameActions.Print("You're too far away to try to pathfind, you need to be within 10 tiles.", 32);
+                        return;
+                    }
+
                     if (mapFacet != -1)
                     {
                         if (World.MapIndex != mapFacet)
