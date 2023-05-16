@@ -95,13 +95,19 @@ namespace ClassicUO.Game.UI
 
             if (_textBox == null || _dirty)
             {
+                FontStashSharp.RichText.TextHorizontalAlignment align = FontStashSharp.RichText.TextHorizontalAlignment.Center;
+                if (ProfileManager.CurrentProfile.LeftAlignToolTips)
+                    align = FontStashSharp.RichText.TextHorizontalAlignment.Left;
+                if (SerialHelper.IsMobile(Serial) && ProfileManager.CurrentProfile.ForceCenterAlignTooltipMobiles)
+                    align = FontStashSharp.RichText.TextHorizontalAlignment.Center;
+
                 _textBox = new TextBox(
                     TextBox.ConvertHtmlToFontStashSharpCommand(_textHTML).Trim(),
                     ProfileManager.CurrentProfile.SelectedToolTipFont,
                     ProfileManager.CurrentProfile.SelectedToolTipFontSize,
                     600,
                     hue,
-                    ProfileManager.CurrentProfile.LeftAlignToolTips ? FontStashSharp.RichText.TextHorizontalAlignment.Left : FontStashSharp.RichText.TextHorizontalAlignment.Center,
+                    align,
                     true
                     );
                 _textBox.Width = _textBox.MeasuredSize.X + 10;

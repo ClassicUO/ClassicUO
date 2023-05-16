@@ -360,6 +360,7 @@ namespace ClassicUO.Configuration
         public bool NamePlateHideAtFullHealthInWarmode { get; set; } = true;
 
         public bool LeftAlignToolTips { get; set; } = false;
+        public bool ForceCenterAlignTooltipMobiles { get; set; } = false;
 
         public bool CorpseSingleClickLoot { get; set; } = false;
 
