@@ -516,7 +516,8 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void CloseWithRightClick()
         {
-            ContextMenu?.Show();
+            if(!Keyboard.Ctrl)
+                ContextMenu?.Show();
             return;
         }
 
