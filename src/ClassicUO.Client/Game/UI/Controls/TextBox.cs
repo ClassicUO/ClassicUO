@@ -36,6 +36,7 @@ using FontStashSharp.RichText;
 using Microsoft.Xna.Framework;
 using System;
 using System.Text.RegularExpressions;
+using ClassicUO.Configuration;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -49,6 +50,16 @@ namespace ClassicUO.Game.UI.Controls
         private bool _dropShadow;
         private bool _dirty = false;
 
+        private int getStrokeSize
+        {
+            get
+            {
+                if (ProfileManager.CurrentProfile != null)
+                    return ProfileManager.CurrentProfile.TextBorderSize;
+                return 2;
+            }
+        }
+
         public TextBox
         (
             string text,
@@ -57,9 +68,12 @@ namespace ClassicUO.Game.UI.Controls
             int width,
             int hue = 2996,
             TextHorizontalAlignment align = TextHorizontalAlignment.Left,
-            bool dropShadow = true
+            bool strokeEffect = true
         )
         {
+            if (strokeEffect)
+                text = $"/es[{getStrokeSize}]" + text;
+
             _rtl = new RichTextLayout
             {
                 Font = TrueTypeLoader.Instance.GetFont(font, size),
@@ -76,7 +90,7 @@ namespace ClassicUO.Game.UI.Controls
 
 
             _align = align;
-            _dropShadow = dropShadow;
+            _dropShadow = strokeEffect;
 
             AcceptMouseInput = false;
             Width = width;
@@ -89,9 +103,12 @@ namespace ClassicUO.Game.UI.Controls
                 int width,
                 Color color,
                 TextHorizontalAlignment align = TextHorizontalAlignment.Left,
-                bool dropShadow = true
+                bool strokeEffect = true
             )
         {
+            if (strokeEffect)
+                text = $"/es[{getStrokeSize}]" + text;
+
             _rtl = new RichTextLayout
             {
                 Font = TrueTypeLoader.Instance.GetFont(font, size),
@@ -104,7 +121,7 @@ namespace ClassicUO.Game.UI.Controls
             _color = color;
 
             _align = align;
-            _dropShadow = dropShadow;
+            _dropShadow = strokeEffect;
 
             AcceptMouseInput = false;
             Width = width;
@@ -210,16 +227,6 @@ namespace ClassicUO.Game.UI.Controls
             else if (_align == TextHorizontalAlignment.Right)
             {
                 x += Width;
-            }
-
-            if (_dropShadow)
-            {
-                _rtl.IgnoreColorCommand = true;
-                _rtl.Draw(batcher, new Vector2(x + 1, y + 1), Color.Black, horizontalAlignment: _align);
-                _rtl.Draw(batcher, new Vector2(x - 1, y - 1), Color.Black, horizontalAlignment: _align);
-                _rtl.Draw(batcher, new Vector2(x + 1, y - 1), Color.Black, horizontalAlignment: _align);
-                _rtl.Draw(batcher, new Vector2(x - 1, y + 1), Color.Black, horizontalAlignment: _align);
-                _rtl.IgnoreColorCommand = false;
             }
 
             _rtl.Draw(batcher, new Vector2(x, y), _color, horizontalAlignment: _align);

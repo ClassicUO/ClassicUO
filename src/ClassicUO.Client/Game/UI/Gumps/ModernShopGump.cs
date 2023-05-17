@@ -61,7 +61,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add(_ = new TextBox(isPurchaseGump ? "Shop Inventory" : "Your Inventory", TrueTypeLoader.EMBEDDED_FONT, 30, Width, Color.LightBlue, FontStashSharp.RichText.TextHorizontalAlignment.Center, true));
             _.Y = (50 - _.MeasuredSize.Y) / 2;
 
-            Add(_ = new TextBox("Item", TrueTypeLoader.EMBEDDED_FONT, 20, 75, Color.White, dropShadow: true) { X = 5 });
+            Add(_ = new TextBox("Item", TrueTypeLoader.EMBEDDED_FONT, 20, 75, Color.White, strokeEffect: true) { X = 5 });
             _.Y = 55 - _.Height;
 
             Add(_ = new TextBox("/c[white]Avail.\n/cdPrice per item", TrueTypeLoader.EMBEDDED_FONT, 20, 150, Color.Gold, FontStashSharp.RichText.TextHorizontalAlignment.Right, true));
@@ -209,7 +209,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 #region ITEM INFO
                 TextBox _;
-                itemInfo.Add(_ = new TextBox(Name, TrueTypeLoader.EMBEDDED_FONT, 25, ITEM_DESCPTION_WIDTH - Height, Color.White, dropShadow: true));
+                itemInfo.Add(_ = new TextBox(Name, TrueTypeLoader.EMBEDDED_FONT, 25, ITEM_DESCPTION_WIDTH - Height, Color.White, strokeEffect: true));
                 _.Y = (itemInfo.Height - _.MeasuredSize.Y) / 2;
 
                 TextBox countTB;
@@ -222,7 +222,7 @@ namespace ClassicUO.Game.UI.Gumps
                 #endregion
 
                 #region PURCHASE OR SELL
-                purchaseSell.Add(new TextBox($"How many would you like to {(isPurchase ? "buy" : "sell")} at /c[gold]{price}gp /cdeach?", TrueTypeLoader.EMBEDDED_FONT, 18, purchaseSell.Width - 76, Color.White, dropShadow: true));
+                purchaseSell.Add(new TextBox($"How many would you like to {(isPurchase ? "buy" : "sell")} at /c[gold]{price}gp /cdeach?", TrueTypeLoader.EMBEDDED_FONT, 18, purchaseSell.Width - 76, Color.White, strokeEffect: true));
 
                 AlphaBlendControl sliderBG;
                 purchaseSell.Add(sliderBG = new AlphaBlendControl(0.5f) { Width = purchaseSell.Width - 78, Height = 5, Hue = 148, BaseColor = Color.White });
