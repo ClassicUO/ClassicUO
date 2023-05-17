@@ -428,8 +428,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                 journalDatas.AddToBack(
                     new JournalData(
-                        new TextBox(text, ProfileManager.CurrentProfile.SelectedTTFJournalFont, ProfileManager.CurrentProfile.SelectedJournalFontSize, Width - ((int)(2.6 * ProfileManager.CurrentProfile.SelectedJournalFontSize)), hue),
-                        new TextBox($"{time:t}", ProfileManager.CurrentProfile.SelectedTTFJournalFont, ProfileManager.CurrentProfile.SelectedJournalFontSize - 2, (int)(2.6 * ProfileManager.CurrentProfile.SelectedJournalFontSize), 1150),
+                        new TextBox(text, ProfileManager.CurrentProfile.SelectedTTFJournalFont, ProfileManager.CurrentProfile.SelectedJournalFontSize, Width - ((int)(2.6 * ProfileManager.CurrentProfile.SelectedJournalFontSize)), hue, strokeEffect: false),
+                        new TextBox($"{time:t}", ProfileManager.CurrentProfile.SelectedTTFJournalFont, ProfileManager.CurrentProfile.SelectedJournalFontSize - 2, (int)(2.6 * ProfileManager.CurrentProfile.SelectedJournalFontSize), 1150, strokeEffect: false),
                         text_type,
                         messageType
                     ));
