@@ -49,7 +49,7 @@ namespace ClassicUO.Assets
     {
         public const int MAX_ACTIONS = 80; // gargoyle is like 78
         public const int MAX_DIRECTIONS = 5;
-        public const int MAX_ANIMATIONS_DATA_INDEX_COUNT = 2048;
+        const int MAX_ANIMATIONS_DATA_INDEX_COUNT = 2048;
 
         private static AnimationsLoader _instance;
         private static BodyConvFlags _lastFlags = (BodyConvFlags)(-1);
@@ -74,6 +74,7 @@ namespace ClassicUO.Assets
         public static AnimationsLoader Instance => _instance ?? (_instance = new AnimationsLoader());
 
         private IndexAnimation[] _dataIndex = new IndexAnimation[MAX_ANIMATIONS_DATA_INDEX_COUNT];
+        public int MaxAnimationCount => _dataIndex.Length;
 
         public IReadOnlyDictionary<ushort, Dictionary<ushort, EquipConvData>> EquipConversions => _equipConv;
 
@@ -180,7 +181,7 @@ namespace ClassicUO.Assets
 
                             int id = int.Parse(parts[0]);
 
-                            if (id >= MAX_ANIMATIONS_DATA_INDEX_COUNT)
+                            if (id >= _dataIndex.Length)
                             {
                                 continue;
                             }
@@ -222,7 +223,7 @@ namespace ClassicUO.Assets
                 }
             }
 
-            for (ushort i = 0; i < MAX_ANIMATIONS_DATA_INDEX_COUNT; i++)
+            for (ushort i = 0; i < _dataIndex.Length; i++)
             {
                 var idxFile = _files[0].IdxFile;
 
@@ -356,21 +357,21 @@ namespace ClassicUO.Assets
                     {
                         ushort body = (ushort)defReader.ReadInt();
 
-                        if (body >= MAX_ANIMATIONS_DATA_INDEX_COUNT)
+                        if (body >= _dataIndex.Length)
                         {
                             continue;
                         }
 
                         ushort graphic = (ushort)defReader.ReadInt();
 
-                        if (graphic >= MAX_ANIMATIONS_DATA_INDEX_COUNT)
+                        if (graphic >= _dataIndex.Length)
                         {
                             continue;
                         }
 
                         ushort newGraphic = (ushort)defReader.ReadInt();
 
-                        if (newGraphic >= MAX_ANIMATIONS_DATA_INDEX_COUNT)
+                        if (newGraphic >= _dataIndex.Length)
                         {
                             continue;
                         }
@@ -431,7 +432,7 @@ namespace ClassicUO.Assets
                     {
                         ushort index = (ushort)defReader.ReadInt();
 
-                        if (index >= MAX_ANIMATIONS_DATA_INDEX_COUNT)
+                        if (index >= _dataIndex.Length)
                         {
                             continue;
                         }
@@ -440,7 +441,7 @@ namespace ClassicUO.Assets
                         {
                             int body = defReader.ReadInt();
 
-                            if (body >= MAX_ANIMATIONS_DATA_INDEX_COUNT || body < 0)
+                            if (body >= _dataIndex.Length || body < 0)
                             {
                                 continue;
                             }
@@ -639,7 +640,7 @@ namespace ClassicUO.Assets
                             checkIndex = group[0];
                         }
 
-                        if (checkIndex >= MAX_ANIMATIONS_DATA_INDEX_COUNT)
+                        if (checkIndex >= _dataIndex.Length)
                         {
                             continue;
                         }
@@ -705,7 +706,7 @@ namespace ClassicUO.Assets
                             checkIndex = group[0];
                         }
 
-                        if (checkIndex >= MAX_ANIMATIONS_DATA_INDEX_COUNT)
+                        if (checkIndex >= _dataIndex.Length)
                         {
                             continue;
                         }
@@ -727,7 +728,7 @@ namespace ClassicUO.Assets
                 return;
             }
 
-            for (ushort animID = 0; animID < MAX_ANIMATIONS_DATA_INDEX_COUNT; animID++)
+            for (ushort animID = 0; animID < _dataIndex.Length; animID++)
             {
                 for (byte grpID = 0; grpID < MAX_ACTIONS; grpID++)
                 {
@@ -780,7 +781,7 @@ namespace ClassicUO.Assets
             }
 
             UOFileUop animSeq = new UOFileUop(animationSequencePath, "build/animationsequence/{0:D8}.bin");
-            UOFileIndex[] animseqEntries = new UOFileIndex[Math.Max(animSeq.TotalEntriesCount, MAX_ANIMATIONS_DATA_INDEX_COUNT)];
+            UOFileIndex[] animseqEntries = new UOFileIndex[Math.Max(animSeq.TotalEntriesCount, _dataIndex.Length)];
             animSeq.FillEntries(ref animseqEntries);
 
             Span<byte> spanAlloc = stackalloc byte[1024];
@@ -909,7 +910,7 @@ namespace ClassicUO.Assets
 
         public void ConvertBodyIfNeeded(ref ushort graphic, bool isParent = false, bool forceUOP = false)
         {
-            if (graphic >= MAX_ANIMATIONS_DATA_INDEX_COUNT)
+            if (graphic >= _dataIndex.Length)
             {
                 return;
             }
@@ -940,7 +941,7 @@ namespace ClassicUO.Assets
         {
             useUOP = false;
 
-            if (graphic < MAX_ANIMATIONS_DATA_INDEX_COUNT && action < MAX_ACTIONS)
+            if (graphic < _dataIndex.Length && action < MAX_ACTIONS)
             {
                 IndexAnimation index = _dataIndex[graphic];
 
@@ -1221,7 +1222,7 @@ namespace ClassicUO.Assets
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ANIMATION_GROUPS GetGroupIndex(ushort graphic)
         {
-            if (graphic >= MAX_ANIMATIONS_DATA_INDEX_COUNT || _dataIndex[graphic] == null)
+            if (graphic >= _dataIndex.Length || _dataIndex[graphic] == null)
             {
                 return ANIMATION_GROUPS.AG_HIGHT;
             }
@@ -1243,7 +1244,7 @@ namespace ClassicUO.Assets
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public byte GetDeathAction(ushort id, bool second, bool isRunning = false)
         {
-            if (id >= MAX_ANIMATIONS_DATA_INDEX_COUNT || _dataIndex[id] == null)
+            if (id >= _dataIndex.Length || _dataIndex[id] == null)
             {
                 return 0;
             }
@@ -1298,7 +1299,7 @@ namespace ClassicUO.Assets
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsAnimationExists(ushort graphic, byte group, bool isCorpse = false)
         {
-            if (graphic < MAX_ANIMATIONS_DATA_INDEX_COUNT && group < MAX_ACTIONS)
+            if (graphic < _dataIndex.Length && group < MAX_ACTIONS)
             {
                 var frames = GetAnimationFrames(graphic, group, 0, out var _, out _, false, isCorpse);
 
@@ -1323,7 +1324,7 @@ namespace ClassicUO.Assets
             hue = 0;
             useUOP = false;
 
-            if (id >= MAX_ANIMATIONS_DATA_INDEX_COUNT || action >= MAX_ACTIONS || dir >= MAX_DIRECTIONS)
+            if (id >= _dataIndex.Length || action >= MAX_ACTIONS || dir >= MAX_DIRECTIONS)
             {
                 return Span<SpriteInfo>.Empty;
             }
