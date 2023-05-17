@@ -188,7 +188,7 @@ namespace ClassicUO.Game.UI.Gumps
         private Checkbox _leftAlignToolTips, _namePlateHealthOnlyWarmode, _enableHealthIndicator, _spellIconDisplayHotkey, _enableAlphaScrollWheel, _useModernShop, _forceCenterAlignMobileTooltips;
         private InputField _healthIndicatorPercentage, _healthIndicatorWidth;
         private ModernColorPicker.HueDisplay _mainWindowHuePicker, _spellIconHotkeyHue;
-        private HSliderBar _spellIconScale, _journalFontSize, _tooltipFontSize, _gameWindowSideChatFontSize, _overheadFontSize, _overheadTextWidth;
+        private HSliderBar _spellIconScale, _journalFontSize, _tooltipFontSize, _gameWindowSideChatFontSize, _overheadFontSize, _overheadTextWidth, _textStrokeSize;
         private Combobox _journalFontSelection, _tooltipFontSelect, _gameWindowSideChatFont, _overheadFont;
 
         #region Cooldowns
@@ -4100,6 +4100,9 @@ namespace ClassicUO.Game.UI.Gumps
                 section.Add(AddLabel(null, "Use advanced shop gump", 0, 0));
                 section.AddRight(_useModernShop = AddCheckBox(null, "", _currentProfile.UseModernShopGump, 0, 0));
 
+                section.Add(AddLabel(null, "TTF Font text border size", 0, 0));
+                section.AddRight(_textStrokeSize = AddHSlider(null, 0, 5, _currentProfile.TextBorderSize, 0, 0, 150));
+
                 rightArea.Add(section);
                 startY += section.Height + SPACING + 15;
             } //Misc
@@ -4704,6 +4707,8 @@ namespace ClassicUO.Game.UI.Gumps
                     UIManager.Add(new ResizableJournal());
                 }
             }
+
+            _currentProfile.TextBorderSize = _textStrokeSize.Value;
 
             _currentProfile.ForceCenterAlignTooltipMobiles = _forceCenterAlignMobileTooltips.IsChecked;
 
