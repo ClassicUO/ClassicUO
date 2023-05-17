@@ -1044,15 +1044,39 @@ namespace ClassicUO.Game.UI.Gumps
                 );
 
                 if (borderHighlight)
-                    batcher.DrawRectangle
-                    (
-                        SolidColorTextureCache.GetTexture(Color.White),
-                        x + 6,
-                        y + 6,
-                        Width - 12,
-                        Height - 12,
-                        ShaderHueTranslator.GetHueVector(borderHighlightHue, false, 0.8f)
-                    );
+                {
+                    int bx = x + 6;
+                    int by = y + 6;
+                    int bsize = ProfileManager.CurrentProfile.GridHightlightSize;
+
+
+                    Texture2D borderTexture = SolidColorTextureCache.GetTexture(Color.White);
+                    Vector3 borderHueVec = ShaderHueTranslator.GetHueVector(borderHighlightHue, false, 0.8f);
+
+                    batcher.Draw( //Top bar
+                        borderTexture,
+                        new Rectangle(bx, by, Width - 12, bsize),
+                        borderHueVec
+                        );
+
+                    batcher.Draw( //Left Bar
+                        borderTexture,
+                        new Rectangle(bx, by + bsize, bsize, Height - 12 - (bsize * 2)),
+                        borderHueVec
+                        );
+
+                    batcher.Draw( //Right Bar
+                        borderTexture,
+                        new Rectangle(bx + Width - 12 - bsize, by + bsize, bsize, Height - 12 - (bsize * 2)),
+                        borderHueVec
+                        );
+
+                    batcher.Draw( //Bottom bar
+                        borderTexture,
+                        new Rectangle(bx, by + Height - 12 - bsize, Width - 12, bsize),
+                        borderHueVec
+                        );
+                }
 
                 if (hit.MouseIsOver && _item != null)
                 {

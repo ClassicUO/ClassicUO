@@ -188,7 +188,7 @@ namespace ClassicUO.Game.UI.Gumps
         private Checkbox _leftAlignToolTips, _namePlateHealthOnlyWarmode, _enableHealthIndicator, _spellIconDisplayHotkey, _enableAlphaScrollWheel, _useModernShop, _forceCenterAlignMobileTooltips;
         private InputField _healthIndicatorPercentage, _healthIndicatorWidth;
         private ModernColorPicker.HueDisplay _mainWindowHuePicker, _spellIconHotkeyHue;
-        private HSliderBar _spellIconScale, _journalFontSize, _tooltipFontSize, _gameWindowSideChatFontSize, _overheadFontSize, _overheadTextWidth, _textStrokeSize;
+        private HSliderBar _spellIconScale, _journalFontSize, _tooltipFontSize, _gameWindowSideChatFontSize, _overheadFontSize, _overheadTextWidth, _textStrokeSize, _gridHightlightLineSize;
         private Combobox _journalFontSelection, _tooltipFontSelect, _gameWindowSideChatFont, _overheadFont;
 
         #region Cooldowns
@@ -3764,6 +3764,9 @@ namespace ClassicUO.Game.UI.Gumps
                         UIManager.GetGump<GridHightlightMenu>()?.Dispose();
                         UIManager.Add(new GridHightlightMenu());
                     };
+
+                    gridSection.Add(AddLabel(null, "Grid highlight line size", 0, 0));
+                    gridSection.AddRight(_gridHightlightLineSize = AddHSlider(null, 1, 10, _currentProfile.GridHightlightSize, 0, 0, 150));
                 } //Grid highlight settings
 
                 rightArea.Add(gridSection);
@@ -4823,6 +4826,7 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.Grid_DefaultColumns = int.Parse(_gridDefaultColumns.Text);
             _currentProfile.Grid_DefaultRows = int.Parse(_gridDefaultRows.Text);
             _currentProfile.Grid_UseContainerHue = _gridOverrideWithContainerHue.IsChecked;
+            _currentProfile.GridHightlightSize = _gridHightlightLineSize.Value;
 
             {
                 _currentProfile.CoolDownX = int.Parse(_coolDownX.Text);

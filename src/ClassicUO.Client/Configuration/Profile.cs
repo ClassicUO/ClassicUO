@@ -420,6 +420,7 @@ namespace ClassicUO.Configuration
         public List<List<string>> GridHighlight_PropNames { get; set; } = new List<List<string>>();
         public List<List<int>> GridHighlight_PropMinVal { get; set; } = new List<List<int>>();
         public bool GridHighlight_CorpseOnly { get; set; } = false;
+        public int GridHightlightSize { get; set; } = 1;
         #endregion
 
         #region Modern paperdoll
