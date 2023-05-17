@@ -49,6 +49,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 lastX = ProfileManager.CurrentProfile.ModernPaperdollPosition.X;
                 lastY = ProfileManager.CurrentProfile.ModernPaperdollPosition.Y;
+                IsLocked = ProfileManager.CurrentProfile.PaperdollLocked;
             }
             X = lastX;
             Y = lastY;

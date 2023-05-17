@@ -452,6 +452,11 @@ namespace ClassicUO.Configuration
         [JsonConverter(typeof(Point2Converter))] public Point StatusGumpPosition { get; set; } = new Point(100, 100);
         [JsonConverter(typeof(Point2Converter))] public Point BackpackGridPosition { get; set; } = new Point(100, 100);
         [JsonConverter(typeof(Point2Converter))] public Point BackpackGridSize { get; set; } = new Point(300, 300);
+        public bool WorldMapLocked { get; set; } = false;
+        public bool PaperdollLocked { get; set; } = false;
+        public bool JournalLocked { get; set; } = false;
+        public bool StatusGumpLocked { get; set; } = false;
+        public bool BackPackLocked { get; set; } = false;
 
         public bool DisplayPartyChatOverhead { get; set; } = true;
 

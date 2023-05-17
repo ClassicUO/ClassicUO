@@ -120,6 +120,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 savedSize = ProfileManager.CurrentProfile.BackpackGridSize;
                 lastPos = ProfileManager.CurrentProfile.BackpackGridPosition;
+                IsLocked = ProfileManager.CurrentProfile.BackPackLocked;
             }
             else
             {

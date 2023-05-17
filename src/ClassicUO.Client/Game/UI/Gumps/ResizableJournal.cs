@@ -57,6 +57,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _lastX = ProfileManager.CurrentProfile.JournalPosition.X;
                 _lastY = ProfileManager.CurrentProfile.JournalPosition.Y;
+                IsLocked = ProfileManager.CurrentProfile.JournalLocked;
             }
             X = _lastX;
             Y = _lastY;
