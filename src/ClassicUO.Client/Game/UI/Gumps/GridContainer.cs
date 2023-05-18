@@ -903,6 +903,15 @@ namespace ClassicUO.Game.UI.Gumps
                                     UIManager.Add(new SimpleTimedTextGump(String.IsNullOrEmpty(_item.Name) ? _item.ItemData.Name : _item.Name, Color.LightGray, TimeSpan.FromSeconds(3)) { X = Mouse.LClickPosition.X, Y = Mouse.LClickPosition.Y });
                                 }
                             }
+
+                            ItemPropertiesData itemPropertiesData = World.OPL.TryGetItemPropertiesData(_item.Serial);
+                            if(itemPropertiesData != null)
+                            {
+                                foreach(ItemPropertiesData.SinglePropertyData data in itemPropertiesData.singlePropertyData)
+                                {
+                                    GameActions.Print(data.ToString());
+                                }
+                            }
                         }
                     }
                 }
