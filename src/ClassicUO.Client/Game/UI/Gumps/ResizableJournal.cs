@@ -341,10 +341,6 @@ namespace ClassicUO.Game.UI.Gumps
 
                 int my = y;
 
-                int height = 0;
-                int maxheight = _scrollBar.Value + _scrollBar.Height;
-
-
                 if (batcher.ClipBegin(x, y, Width, Height))
                 {
                     foreach (JournalData journalEntry in journalDatas)
@@ -356,7 +352,7 @@ namespace ClassicUO.Game.UI.Gumps
                             continue;
 
                         journalEntry.TimeStamp.Draw(batcher, x, my - _scrollBar.Value);
-                        journalEntry.EntryText.Draw(batcher, x + journalEntry.TimeStamp.Width, my - _scrollBar.Value);
+                        journalEntry.EntryText.Draw(batcher, x + journalEntry.TimeStamp.Width + 5, my - _scrollBar.Value);
                         my += journalEntry.EntryText.Height;
                     }
 
@@ -427,10 +423,12 @@ namespace ClassicUO.Game.UI.Gumps
                 while (journalDatas.Count > Constants.MAX_JOURNAL_HISTORY_COUNT)
                     journalDatas.RemoveFromFront().Destroy();
 
+                TextBox timeS = new TextBox($"{time:t}", ProfileManager.CurrentProfile.SelectedTTFJournalFont, ProfileManager.CurrentProfile.SelectedJournalFontSize - 2, null, 1150, strokeEffect: false);
+
                 journalDatas.AddToBack(
                     new JournalData(
-                        new TextBox(text, ProfileManager.CurrentProfile.SelectedTTFJournalFont, ProfileManager.CurrentProfile.SelectedJournalFontSize, Width - ((int)(2.6 * ProfileManager.CurrentProfile.SelectedJournalFontSize)), hue, strokeEffect: false),
-                        new TextBox($"{time:t}", ProfileManager.CurrentProfile.SelectedTTFJournalFont, ProfileManager.CurrentProfile.SelectedJournalFontSize - 2, (int)(2.6 * ProfileManager.CurrentProfile.SelectedJournalFontSize), 1150, strokeEffect: false),
+                        new TextBox(text, ProfileManager.CurrentProfile.SelectedTTFJournalFont, ProfileManager.CurrentProfile.SelectedJournalFontSize, Width - timeS.Width, hue, strokeEffect: false),
+                        timeS,
                         text_type,
                         messageType
                     ));
