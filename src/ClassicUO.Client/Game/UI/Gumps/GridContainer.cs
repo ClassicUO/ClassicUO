@@ -895,7 +895,14 @@ namespace ClassicUO.Game.UI.Gumps
                                 Mouse.CancelDoubleClick = true;
                             }
                             else
-                                DelayedObjectClickManager.Set(_item.Serial, gridContainer.X, gridContainer.Y - 80, Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK);
+                            {
+                                if(World.ClientFeatures.TooltipsEnabled)
+                                    DelayedObjectClickManager.Set(_item.Serial, gridContainer.X, gridContainer.Y - 80, Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK);
+                                else
+                                {
+                                    UIManager.Add(new SimpleTimedTextGump(String.IsNullOrEmpty(_item.Name) ? _item.ItemData.Name : _item.Name, Color.LightGray, TimeSpan.FromSeconds(3)) { X = Mouse.LClickPosition.X, Y = Mouse.LClickPosition.Y });
+                                }
+                            }
                         }
                     }
                 }
