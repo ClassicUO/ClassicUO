@@ -338,7 +338,6 @@ namespace ClassicUO.Game.UI.Gumps
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
                 base.Draw(batcher, x, y);
-
                 int my = y;
 
                 if (batcher.ClipBegin(x, y, Width, Height))
@@ -351,8 +350,12 @@ namespace ClassicUO.Game.UI.Gumps
                         if (!CanBeDrawn(journalEntry.TextType, journalEntry.MessageType))
                             continue;
 
-                        journalEntry.TimeStamp.Draw(batcher, x, my - _scrollBar.Value);
-                        journalEntry.EntryText.Draw(batcher, x + journalEntry.TimeStamp.Width + 5, my - _scrollBar.Value);
+                        if (my + journalEntry.EntryText.Height - y >= _scrollBar.Value && my - y <= _scrollBar.Value + _scrollBar.Height)
+                        {
+                            
+                            journalEntry.TimeStamp.Draw(batcher, x, my - _scrollBar.Value);
+                            journalEntry.EntryText.Draw(batcher, x + journalEntry.TimeStamp.Width + 5, my - _scrollBar.Value);
+                        }
                         my += journalEntry.EntryText.Height;
                     }
 
