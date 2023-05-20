@@ -511,17 +511,36 @@ namespace ClassicUO.Game.UI.Gumps
                 _lastY = Y;
             }
 
-            if (_container != null)
+            Item _c = _container;
+            if (_c != null)
             {
-                if (_container == SelectedObject.CorpseObject)
+                if (_c == SelectedObject.CorpseObject)
                 {
                     SelectedObject.CorpseObject = null;
+                }
+
+                uint bankSerial = World.Player.FindItemByLayer(Layer.Bank).Serial;
+
+                if (_c.Serial == bankSerial || _c.Container == bankSerial)
+                {
+                    for (LinkedObject i = _c.Items; i != null; i = i.Next)
+                    {
+                        Item child = (Item)i;
+
+                        if (child.Container == _c)
+                        {
+                            UIManager.GetGump<GridContainer>(child)?.Dispose();
+                            UIManager.GetGump<ContainerGump>(child)?.Dispose();
+                        }
+                    }
                 }
             }
 
             if (gridSlotManager != null && !skipSave)
                 if (gridSlotManager.ItemPositions.Count > 0 && !isCorpse)
                     GridSaveSystem.Instance.SaveContainer(LocalSerial, gridSlotManager.GridSlots, Width, Height, X, Y, UseOldContainerStyle);
+
+            
 
             base.Dispose();
         }
