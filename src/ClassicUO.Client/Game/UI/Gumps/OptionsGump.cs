@@ -189,6 +189,7 @@ namespace ClassicUO.Game.UI.Gumps
         private InputField _healthIndicatorPercentage, _healthIndicatorWidth;
         private ModernColorPicker.HueDisplay _mainWindowHuePicker, _spellIconHotkeyHue;
         private HSliderBar _spellIconScale, _journalFontSize, _tooltipFontSize, _gameWindowSideChatFontSize, _overheadFontSize, _overheadTextWidth, _textStrokeSize, _gridHightlightLineSize, _maxJournalEntries;
+        private HSliderBar _healthLineSizeMultiplier;
         private Combobox _journalFontSelection, _tooltipFontSelect, _gameWindowSideChatFont, _overheadFont;
 
         #region Cooldowns
@@ -3974,6 +3975,9 @@ namespace ClassicUO.Game.UI.Gumps
                 section.AddRight(_overheadTextWidth = AddHSlider(null, 100, 600, _currentProfile.OverheadChatWidth, 0, 0, 200));
                 section.PopIndent();
 
+                section.Add(AddLabel(null, "Below mobile health line size", 0 ,0));
+                section.AddRight(_healthLineSizeMultiplier = AddHSlider(null, 1, 5, _currentProfile.HealthLineSizeMultiplier, 0, 0, 150));
+
                 rightArea.Add(section);
                 startY += section.Height + SPACING;
             } //Mobiles
@@ -4713,6 +4717,8 @@ namespace ClassicUO.Game.UI.Gumps
                     UIManager.Add(new ResizableJournal());
                 }
             }
+
+            _currentProfile.HealthLineSizeMultiplier = _healthLineSizeMultiplier.Value;
 
             _currentProfile.MaxJournalEntries = _maxJournalEntries.Value;
 

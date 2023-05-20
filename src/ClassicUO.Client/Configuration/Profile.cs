@@ -481,6 +481,8 @@ namespace ClassicUO.Configuration
 
         public int MaxJournalEntries { get; set; } = 750;
 
+        public int HealthLineSizeMultiplier { get; set; } = 1;
+
         public static uint GumpsVersion { get; private set; }
 
         public void Save(string path, bool saveGumps = true)
