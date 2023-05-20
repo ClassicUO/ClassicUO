@@ -483,6 +483,8 @@ namespace ClassicUO.Configuration
 
         public int HealthLineSizeMultiplier { get; set; } = 1;
 
+        public bool OpenHealthBarForLastAttack { get; set; } = true;
+
         public static uint GumpsVersion { get; private set; }
 
         public void Save(string path, bool saveGumps = true)

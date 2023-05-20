@@ -131,10 +131,27 @@ namespace ClassicUO.Game.Managers
 
     internal static class TargetManager
     {
-        private static uint _targetCursorId;
+        private static uint _targetCursorId, _lastAttack;
         private static readonly byte[] _lastDataBuffer = new byte[19];
 
-        public static uint LastAttack, SelectedTarget;
+        public static uint SelectedTarget;
+
+        public static uint LastAttack
+        {
+            get { return _lastAttack; }
+            set
+            {
+                _lastAttack = value;
+                if (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.OpenHealthBarForLastAttack)
+                {
+                    if (UIManager.GetGump<BaseHealthBarGump>(value) == null)
+                        if (ProfileManager.CurrentProfile.CustomBarsToggled)
+                            UIManager.Add(new HealthBarGumpCustom(value) { X = Mouse.Position.X, Y = Mouse.Position.Y });
+                        else
+                            UIManager.Add(new HealthBarGump(value) { X = Mouse.Position.X, Y = Mouse.Position.Y });
+                }
+            }
+        }
 
         public static readonly LastTargetInfo LastTargetInfo = new LastTargetInfo();
 
@@ -193,7 +210,7 @@ namespace ClassicUO.Game.Managers
             // https://github.com/andreakarasho/ClassicUO/issues/1373
             // when receiving a cancellation target from the server we need
             // to send the last active cursorID, so update cursor data later
-            
+
             _targetCursorId = cursorID;
         }
 
@@ -336,7 +353,7 @@ namespace ClassicUO.Game.Managers
                             _lastDataBuffer[4] = (byte)(_targetCursorId >> 8);
                             _lastDataBuffer[5] = (byte)_targetCursorId;
 
-                            _lastDataBuffer[6] = (byte) TargetingType;
+                            _lastDataBuffer[6] = (byte)TargetingType;
 
                             _lastDataBuffer[7] = (byte)(entity.Serial >> 24);
                             _lastDataBuffer[8] = (byte)(entity.Serial >> 16);
@@ -380,7 +397,7 @@ namespace ClassicUO.Game.Managers
 
                         if (SerialHelper.IsItem(serial))
                         {
-                            GameActions.GrabItem(serial, ((Item) entity).Amount);
+                            GameActions.GrabItem(serial, ((Item)entity).Amount);
                         }
 
                         ClearTargetingWithoutTargetCancelPacket();
@@ -445,9 +462,9 @@ namespace ClassicUO.Game.Managers
                 }
             }
 
-            LastTargetInfo.SetStatic(graphic, x, y, (sbyte) z);
+            LastTargetInfo.SetStatic(graphic, x, y, (sbyte)z);
 
-            TargetPacket(graphic, x, y, (sbyte) z);
+            TargetPacket(graphic, x, y, (sbyte)z);
         }
 
         public static void SendMultiTarget(ushort x, ushort y, sbyte z)
@@ -464,12 +481,12 @@ namespace ClassicUO.Game.Managers
             }
 
             _lastDataBuffer[0] = 0x6C;
-            _lastDataBuffer[1] = (byte) TargetingState;
-            _lastDataBuffer[2] = (byte) (_targetCursorId >> 24);
-            _lastDataBuffer[3] = (byte) (_targetCursorId >> 16);
-            _lastDataBuffer[4] = (byte) (_targetCursorId >> 8);
-            _lastDataBuffer[5] = (byte) _targetCursorId;
-            _lastDataBuffer[6] = (byte) TargetingType;
+            _lastDataBuffer[1] = (byte)TargetingState;
+            _lastDataBuffer[2] = (byte)(_targetCursorId >> 24);
+            _lastDataBuffer[3] = (byte)(_targetCursorId >> 16);
+            _lastDataBuffer[4] = (byte)(_targetCursorId >> 8);
+            _lastDataBuffer[5] = (byte)_targetCursorId;
+            _lastDataBuffer[6] = (byte)TargetingType;
 
             NetClient.Socket.Send(_lastDataBuffer);
             Mouse.CancelDoubleClick = true;
@@ -511,7 +528,7 @@ namespace ClassicUO.Game.Managers
             _lastDataBuffer[17] = (byte)(graphic >> 8);
             _lastDataBuffer[18] = (byte)graphic;
 
-            
+
 
             NetClient.Socket.Send_TargetXYZ(graphic,
                                             x,
