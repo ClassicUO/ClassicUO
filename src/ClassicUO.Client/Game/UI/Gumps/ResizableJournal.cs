@@ -423,7 +423,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 bool maxScroll = _scrollBar.Value == _scrollBar.MaxValue;
 
-                while (journalDatas.Count > Constants.MAX_JOURNAL_HISTORY_COUNT)
+                while (journalDatas.Count > (ProfileManager.CurrentProfile == null ? 200 : ProfileManager.CurrentProfile.MaxJournalEntries))
                     journalDatas.RemoveFromFront().Destroy();
 
                 TextBox timeS = new TextBox($"{time:t}", ProfileManager.CurrentProfile.SelectedTTFJournalFont, ProfileManager.CurrentProfile.SelectedJournalFontSize - 2, null, 1150, strokeEffect: false);

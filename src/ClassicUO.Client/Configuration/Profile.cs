@@ -479,6 +479,8 @@ namespace ClassicUO.Configuration
 
         public bool UseModernShopGump { get; set; } = false;
 
+        public int MaxJournalEntries { get; set; } = 750;
+
         public static uint GumpsVersion { get; private set; }
 
         public void Save(string path, bool saveGumps = true)

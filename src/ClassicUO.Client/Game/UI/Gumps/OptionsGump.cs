@@ -188,7 +188,7 @@ namespace ClassicUO.Game.UI.Gumps
         private Checkbox _leftAlignToolTips, _namePlateHealthOnlyWarmode, _enableHealthIndicator, _spellIconDisplayHotkey, _enableAlphaScrollWheel, _useModernShop, _forceCenterAlignMobileTooltips;
         private InputField _healthIndicatorPercentage, _healthIndicatorWidth;
         private ModernColorPicker.HueDisplay _mainWindowHuePicker, _spellIconHotkeyHue;
-        private HSliderBar _spellIconScale, _journalFontSize, _tooltipFontSize, _gameWindowSideChatFontSize, _overheadFontSize, _overheadTextWidth, _textStrokeSize, _gridHightlightLineSize;
+        private HSliderBar _spellIconScale, _journalFontSize, _tooltipFontSize, _gameWindowSideChatFontSize, _overheadFontSize, _overheadTextWidth, _textStrokeSize, _gridHightlightLineSize, _maxJournalEntries;
         private Combobox _journalFontSelection, _tooltipFontSelect, _gameWindowSideChatFont, _overheadFont;
 
         #region Cooldowns
@@ -3784,6 +3784,9 @@ namespace ClassicUO.Game.UI.Gumps
                     _.MouseUp += MinimizeSectionMouseUp;
                 }
 
+                section.Add(AddLabel(null, "Max journal entries", 0, 0));
+                section.AddRight(_maxJournalEntries = AddHSlider(null, 200, 2000, _currentProfile.MaxJournalEntries, 0, 0, 200));
+
                 {
                     section.Add(AddLabel(null, "Journal Opacity", 0, 0));
 
@@ -4710,6 +4713,8 @@ namespace ClassicUO.Game.UI.Gumps
                     UIManager.Add(new ResizableJournal());
                 }
             }
+
+            _currentProfile.MaxJournalEntries = _maxJournalEntries.Value;
 
             _currentProfile.TextBorderSize = _textStrokeSize.Value;
 
