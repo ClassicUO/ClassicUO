@@ -924,14 +924,14 @@ namespace ClassicUO.Game.UI.Gumps
                                 }
                             }
 
-                            ItemPropertiesData itemPropertiesData = World.OPL.TryGetItemPropertiesData(_item.Serial);
-                            if (itemPropertiesData != null)
-                            {
-                                foreach (ItemPropertiesData.SinglePropertyData data in itemPropertiesData.singlePropertyData)
-                                {
-                                    GameActions.Print(data.ToString());
-                                }
-                            }
+                            //ItemPropertiesData itemPropertiesData = World.OPL.TryGetItemPropertiesData(_item.Serial);
+                            //if (itemPropertiesData != null)
+                            //{
+                            //    foreach (ItemPropertiesData.SinglePropertyData data in itemPropertiesData.singlePropertyData)
+                            //    {
+                            //        GameActions.Print(data.ToString());
+                            //    }
+                            //}
                         }
                     }
                 }
