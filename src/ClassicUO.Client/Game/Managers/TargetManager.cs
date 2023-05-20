@@ -146,9 +146,9 @@ namespace ClassicUO.Game.Managers
                 {
                     if (UIManager.GetGump<BaseHealthBarGump>(value) == null)
                         if (ProfileManager.CurrentProfile.CustomBarsToggled)
-                            UIManager.Add(new HealthBarGumpCustom(value) { X = Mouse.Position.X, Y = Mouse.Position.Y });
+                            UIManager.Add(new HealthBarGumpCustom(value) { Location = ProfileManager.CurrentProfile.LastTargetHealthBarPos, IsLastTarget = true });
                         else
-                            UIManager.Add(new HealthBarGump(value) { X = Mouse.Position.X, Y = Mouse.Position.Y });
+                            UIManager.Add(new HealthBarGump(value) { Location = ProfileManager.CurrentProfile.LastTargetHealthBarPos, IsLastTarget = true });
                 }
             }
         }

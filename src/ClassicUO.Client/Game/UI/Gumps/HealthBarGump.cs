@@ -101,6 +101,8 @@ namespace ClassicUO.Game.UI.Gumps
         protected bool _outOfRange;
         protected StbTextBox _textBox;
 
+        public bool IsLastTarget { get; set; } = false;
+
         private bool _locked = false;
         private bool IsLocked { get { return _locked; } set {
                 _locked = value;
@@ -124,6 +126,9 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 GameActions.SendCloseStatus(LocalSerial);
             }*/
+
+            if (IsLastTarget && ProfileManager.CurrentProfile != null)
+                ProfileManager.CurrentProfile.LastTargetHealthBarPos = Location;
             
             _textBox?.Dispose();
             _textBox = null;

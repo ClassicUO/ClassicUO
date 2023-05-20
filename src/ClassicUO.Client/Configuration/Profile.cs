@@ -484,6 +484,7 @@ namespace ClassicUO.Configuration
         public int HealthLineSizeMultiplier { get; set; } = 1;
 
         public bool OpenHealthBarForLastAttack { get; set; } = true;
+        [JsonConverter(typeof(Point2Converter))] public Point LastTargetHealthBarPos { get; set; } = Point.Zero;
 
         public static uint GumpsVersion { get; private set; }
 
