@@ -331,7 +331,6 @@ namespace ClassicUO.Game
                     );
 
                     UIManager.Add(messageBox);
-
                     return;
                 }
             }
@@ -354,7 +353,8 @@ namespace ClassicUO.Game
             }
             else
             {
-                if (SerialHelper.IsItem(serial)) {
+                if (SerialHelper.IsItem(serial))
+                {
                     Gump g = UIManager.GetGump<GridContainer>(serial);
                     if (g != null)
                     {
@@ -363,7 +363,8 @@ namespace ClassicUO.Game
                     }
                     else
                         Socket.Send_DoubleClick(serial);
-                } else
+                }
+                else
                     Socket.Send_DoubleClick(serial);
             }
 
@@ -417,7 +418,7 @@ namespace ClassicUO.Game
 
         public static void Print(string message, ushort hue = 946, MessageType type = MessageType.Regular, byte font = 3, bool unicode = true)
         {
-            if(type == MessageType.ChatSystem)
+            if (type == MessageType.ChatSystem)
             {
                 MessageManager.HandleMessage
                 (

@@ -519,28 +519,29 @@ namespace ClassicUO.Game.UI.Gumps
                     SelectedObject.CorpseObject = null;
                 }
 
-                uint bankSerial = World.Player.FindItemByLayer(Layer.Bank).Serial;
+                Item bank = World.Player.FindItemByLayer(Layer.Bank);
 
-                if (_c.Serial == bankSerial || _c.Container == bankSerial)
-                {
-                    for (LinkedObject i = _c.Items; i != null; i = i.Next)
+                if (bank != null)
+                    if (_c.Serial == bank.Serial || _c.Container == bank.Serial)
                     {
-                        Item child = (Item)i;
-
-                        if (child.Container == _c)
+                        for (LinkedObject i = _c.Items; i != null; i = i.Next)
                         {
-                            UIManager.GetGump<GridContainer>(child)?.Dispose();
-                            UIManager.GetGump<ContainerGump>(child)?.Dispose();
+                            Item child = (Item)i;
+
+                            if (child.Container == _c)
+                            {
+                                UIManager.GetGump<GridContainer>(child)?.Dispose();
+                                UIManager.GetGump<ContainerGump>(child)?.Dispose();
+                            }
                         }
                     }
-                }
             }
 
             if (gridSlotManager != null && !skipSave)
                 if (gridSlotManager.ItemPositions.Count > 0 && !isCorpse)
                     GridSaveSystem.Instance.SaveContainer(LocalSerial, gridSlotManager.GridSlots, Width, Height, X, Y, UseOldContainerStyle);
 
-            
+
 
             base.Dispose();
         }
@@ -915,7 +916,7 @@ namespace ClassicUO.Game.UI.Gumps
                             }
                             else
                             {
-                                if(World.ClientFeatures.TooltipsEnabled)
+                                if (World.ClientFeatures.TooltipsEnabled)
                                     DelayedObjectClickManager.Set(_item.Serial, gridContainer.X, gridContainer.Y - 80, Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK);
                                 else
                                 {
@@ -924,9 +925,9 @@ namespace ClassicUO.Game.UI.Gumps
                             }
 
                             ItemPropertiesData itemPropertiesData = World.OPL.TryGetItemPropertiesData(_item.Serial);
-                            if(itemPropertiesData != null)
+                            if (itemPropertiesData != null)
                             {
-                                foreach(ItemPropertiesData.SinglePropertyData data in itemPropertiesData.singlePropertyData)
+                                foreach (ItemPropertiesData.SinglePropertyData data in itemPropertiesData.singlePropertyData)
                                 {
                                     GameActions.Print(data.ToString());
                                 }

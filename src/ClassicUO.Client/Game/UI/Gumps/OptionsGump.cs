@@ -185,7 +185,7 @@ namespace ClassicUO.Game.UI.Gumps
         private Checkbox _showStatsMessage, _showSkillsMessage, _displayPartyChatOverhead;
         private HSliderBar _showSkillsMessageDelta;
 
-        private Checkbox _leftAlignToolTips, _namePlateHealthOnlyWarmode, _enableHealthIndicator, _spellIconDisplayHotkey, _enableAlphaScrollWheel, _useModernShop, _forceCenterAlignMobileTooltips;
+        private Checkbox _leftAlignToolTips, _namePlateHealthOnlyWarmode, _enableHealthIndicator, _spellIconDisplayHotkey, _enableAlphaScrollWheel, _useModernShop, _forceCenterAlignMobileTooltips, _openHealthBarForLastAttack;
         private InputField _healthIndicatorPercentage, _healthIndicatorWidth;
         private ModernColorPicker.HueDisplay _mainWindowHuePicker, _spellIconHotkeyHue;
         private HSliderBar _spellIconScale, _journalFontSize, _tooltipFontSize, _gameWindowSideChatFontSize, _overheadFontSize, _overheadTextWidth, _textStrokeSize, _gridHightlightLineSize, _maxJournalEntries;
@@ -3978,6 +3978,9 @@ namespace ClassicUO.Game.UI.Gumps
                 section.Add(AddLabel(null, "Below mobile health line size", 0 ,0));
                 section.AddRight(_healthLineSizeMultiplier = AddHSlider(null, 1, 5, _currentProfile.HealthLineSizeMultiplier, 0, 0, 150));
 
+                section.Add(AddLabel(null, "Open health bar gump for last attack automatically", 0, 0));
+                section.AddRight(_openHealthBarForLastAttack = AddCheckBox(null, "", _currentProfile.OpenHealthBarForLastAttack, 0, 0));
+
                 rightArea.Add(section);
                 startY += section.Height + SPACING;
             } //Mobiles
@@ -4718,6 +4721,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
+            _currentProfile.OpenHealthBarForLastAttack = _openHealthBarForLastAttack.IsChecked;
             _currentProfile.HealthLineSizeMultiplier = _healthLineSizeMultiplier.Value;
 
             _currentProfile.MaxJournalEntries = _maxJournalEntries.Value;
