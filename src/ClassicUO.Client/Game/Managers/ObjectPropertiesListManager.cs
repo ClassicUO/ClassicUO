@@ -205,6 +205,50 @@ namespace ClassicUO.Game.Managers
             }
         }
 
+        public bool GenerateComparisonTooltip(ItemPropertiesData comparedTo, out string compiledToolTip)
+        {
+            if (!HasData)
+            {
+                compiledToolTip = null;
+                return false;
+            }
+
+            string finalTooltip = "";
+
+            foreach (SinglePropertyData thisItem in singlePropertyData)
+            {
+                bool foundMatch = false;
+                foreach(SinglePropertyData secondItem in comparedTo.singlePropertyData)
+                {
+                    if(String.Equals(thisItem.Name, secondItem.Name, StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        foundMatch = true;
+                        finalTooltip += thisItem.Name;
+
+                        if(thisItem.FirstValue > -1 && secondItem.FirstValue > -1)
+                        {
+                            double diff = secondItem.FirstValue - thisItem.FirstValue;
+                            finalTooltip += $" {thisItem.FirstValue}({(diff < 0 ? "-" : "+")}{diff})";
+                        }
+
+                        if (thisItem.SecondValue > -1 && secondItem.SecondValue > -1)
+                        {
+                            double diff = secondItem.SecondValue - thisItem.SecondValue;
+                            finalTooltip += $" {thisItem.SecondValue}({(diff < 0 ? "-" : "+")}{diff})";
+                        }
+
+                        finalTooltip += "\n";
+                        break;
+                    }
+                }
+                if (!foundMatch)
+                    finalTooltip += thisItem.ToString() + "\n";
+            }
+
+            compiledToolTip = finalTooltip;
+            return true;
+        }
+
         public class SinglePropertyData
         {
             public readonly string Name;
@@ -215,9 +259,6 @@ namespace ClassicUO.Game.Managers
             {
                 string pattern = @"(\d+(\.)?\d+)";
                 MatchCollection matches = Regex.Matches(line, pattern, RegexOptions.IgnoreCase);
-
-                foreach (Match fuckyou in matches)
-                    GameActions.Print(fuckyou.Value);
 
                 Match nameMatch = Regex.Match(line, @"(\D+)");
                 if (nameMatch.Success)
@@ -241,10 +282,10 @@ namespace ClassicUO.Game.Managers
                     output += Name;
 
                 if (FirstValue > -1)
-                    output += $" [{FirstValue}]";
+                    output += $" {FirstValue}";
 
                 if (SecondValue > -1)
-                    output += $" [{SecondValue}]";
+                    output += $" {SecondValue}";
 
                 return output;
             }

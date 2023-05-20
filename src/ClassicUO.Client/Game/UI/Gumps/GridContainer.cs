@@ -1025,6 +1025,15 @@ namespace ClassicUO.Game.UI.Gumps
                         //UIManager.Add(toolTipitem1);
                         toolTipList.Add(toolTipitem1);
 
+                        if (CUOEnviroment.Debug)
+                        {
+                            ItemPropertiesData i1 = new ItemPropertiesData(_item);
+                            ItemPropertiesData i2 = new ItemPropertiesData(compItem);
+
+                            if (i1.GenerateComparisonTooltip(i2, out string compileToolTip))
+                                GameActions.Print(compileToolTip);
+                        }
+
                         if ((Layer)_item.ItemData.Layer == Layer.OneHanded)
                         {
                             Item compItem2 = World.Player.FindItemByLayer(Layer.TwoHanded);
