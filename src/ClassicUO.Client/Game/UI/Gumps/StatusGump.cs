@@ -58,7 +58,10 @@ namespace ClassicUO.Game.UI.Gumps
             CanCloseWithRightClick = true;
             CanMove = true;
             if (ProfileManager.CurrentProfile != null)
+            {
                 Location = ProfileManager.CurrentProfile.StatusGumpPosition;
+                IsLocked = ProfileManager.CurrentProfile.StatusGumpLocked;
+            }
 
         }
 

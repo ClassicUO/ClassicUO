@@ -8,20 +8,20 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class SimpleTimedTextGump : Gump
     {
-        private readonly TimeSpan duration;
-        private readonly DateTime creation = DateTime.Now;
+        private readonly DateTime expireAt;
 
-        public SimpleTimedTextGump(string text, int width, Color color, TimeSpan duration) : base(0, 0)
+        public SimpleTimedTextGump(string text, Color color, TimeSpan duration) : base(0, 0)
         {
-            this.duration = duration;
+            expireAt = DateTime.Now.Add(duration);
 
-            Add(new TextBox(text, TrueTypeLoader.EMBEDDED_FONT, 20, width, color));
+            Add(new TextBox(text, TrueTypeLoader.EMBEDDED_FONT, 20, null, color));
+            
             WantUpdateSize = true;
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            if ((creation + duration) > DateTime.Now)
+            if (DateTime.Now >= expireAt)
                 Dispose();
 
             return base.Draw(batcher, x, y);

@@ -49,7 +49,7 @@ namespace ClassicUO.Game.Managers
         const ushort BACKGROUND_GRAPHIC = 0x1068;
         const ushort HP_GRAPHIC = 0x1069;
 
-        
+
         public bool IsEnabled => ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.ShowMobilesHP;
 
 
@@ -107,8 +107,8 @@ namespace ClassicUO.Game.Managers
                 }
 
                 Point p = mobile.RealScreenPosition;
-                p.X += (int) mobile.Offset.X + 22 + 5;
-                p.Y += (int) (mobile.Offset.Y - mobile.Offset.Z) + 22 + 5;
+                p.X += (int)mobile.Offset.X + 22 + 5;
+                p.Y += (int)(mobile.Offset.Y - mobile.Offset.Z) + 22 + 5;
 
 
                 if (mode != 1 && !mobile.IsDead)
@@ -207,8 +207,8 @@ namespace ClassicUO.Game.Managers
             }
 
             Point p = entity.RealScreenPosition;
-            p.X += (int) entity.Offset.X + 22;
-            p.Y += (int) (entity.Offset.Y - entity.Offset.Z) + 22 + 5;
+            p.X += (int)entity.Offset.X + 22;
+            p.Y += (int)(entity.Offset.Y - entity.Offset.Z) + 22 + 5;
 
             p = Client.Game.Scene.Camera.WorldToScreen(p);
             p.X -= BAR_WIDTH_HALF;
@@ -241,7 +241,17 @@ namespace ClassicUO.Game.Managers
                 return;
             }
 
-            int per = BAR_WIDTH * entity.HitsPercentage / 100;
+            int multiplier = 1;
+            if (ProfileManager.CurrentProfile != null)
+                multiplier = ProfileManager.CurrentProfile.HealthLineSizeMultiplier;
+
+            int per = (BAR_WIDTH * multiplier) * entity.HitsPercentage / 100;
+            int offset = 2;
+
+            if (per >> 2 == 0)
+            {
+                offset = per;
+            }
 
             Mobile mobile = entity as Mobile;
 
@@ -257,10 +267,10 @@ namespace ClassicUO.Game.Managers
             }
 
 
-            const int MULTIPLER = 1;
-
             var texture = GumpsLoader.Instance.GetGumpTexture(BACKGROUND_GRAPHIC, out var bounds);
 
+            if (multiplier > 1)
+                x -= (int)(((BAR_WIDTH * multiplier) / 2) - (BAR_WIDTH / 2));
 
             batcher.Draw
             (
@@ -269,8 +279,8 @@ namespace ClassicUO.Game.Managers
                 (
                     x,
                     y,
-                    bounds.Width * MULTIPLER,
-                    bounds.Height * MULTIPLER
+                    bounds.Width * multiplier,
+                    bounds.Height * multiplier
                 ),
                 bounds,
                 hueVec
@@ -279,67 +289,29 @@ namespace ClassicUO.Game.Managers
 
             hueVec.X = 0x21;
 
-
-            if (entity.Hits != entity.HitsMax || entity.HitsMax == 0)
+            if (mobile != null)
             {
-                int offset = 2;
-
-                if (per >> 2 == 0)
+                if (mobile.IsPoisoned)
                 {
-                    offset = per;
+                    hueVec.X = 63;
                 }
-
-                texture = GumpsLoader.Instance.GetGumpTexture(HP_GRAPHIC, out bounds);
-
-                batcher.DrawTiled
-                (
-                    texture,
-                    new Rectangle
-                    (
-                        x + per * MULTIPLER - offset,
-                        y,
-                        (BAR_WIDTH - per) * MULTIPLER - offset / 2,
-                        bounds.Height * MULTIPLER
-                    ),
-                    bounds,
-                    hueVec
-                );
+                else if (mobile.IsYellowHits)
+                {
+                    hueVec.X = 53;
+                }
             }
 
-            hue = 90;
+            float hitPerecentage = (float)entity.Hits / (float)entity.HitsMax;
 
-            if (per > 0)
-            {
-                if (mobile != null)
-                {
-                    if (mobile.IsPoisoned)
-                    {
-                        hue = 63;
-                    }
-                    else if (mobile.IsYellowHits)
-                    {
-                        hue = 53;
-                    }
-                }
+            if (entity.HitsMax == 0)
+                hitPerecentage = 1;
 
-                hueVec.X = hue;
-
-                texture = GumpsLoader.Instance.GetGumpTexture(HP_GRAPHIC, out bounds);
-
-                batcher.DrawTiled
-                (
-                    texture,
-                    new Rectangle
-                    (
-                        x,
-                        y,
-                        per * MULTIPLER,
-                        bounds.Height * MULTIPLER
-                    ),
-                    bounds,
-                    hueVec
+            batcher.Draw(
+                SolidColorTextureCache.GetTexture(Color.White),
+                new Vector2(x + (3 * multiplier), y + (4 * multiplier)),
+                new Rectangle(0, 0, (int)(((BAR_WIDTH * multiplier) - (6 * multiplier)) * hitPerecentage), (bounds.Height * multiplier) - (6 * multiplier)),
+                hueVec
                 );
-            }
         }
     }
 }

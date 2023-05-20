@@ -141,7 +141,10 @@ namespace ClassicUO.Game.UI.Gumps
             CanCloseWithRightClick = false;
 
             if (ProfileManager.CurrentProfile != null)
+            {
                 _last_position = ProfileManager.CurrentProfile.WorldMapPosition;
+                IsLocked = ProfileManager.CurrentProfile.WorldMapLocked;
+            }
 
             X = _last_position.X;
             Y = _last_position.Y;
@@ -2348,6 +2351,25 @@ namespace ClassicUO.Game.UI.Gumps
                     halfHeight,
                     Zoom
                 );
+                if (_gotoMarker.MapId == World.Map.Index)
+                {
+                    Point pdrot = RotatePoint(_gotoMarker.X - _center.X, _gotoMarker.Y - _center.Y, Zoom, 1, _flipMap ? 45f : 0f);
+                    pdrot.X += gX + halfWidth;
+                    pdrot.Y += gY + halfHeight;
+
+                    Point prot = RotatePoint(World.Player.X - _center.X, World.Player.Y - _center.Y, Zoom, 1, _flipMap ? 45f : 0f);
+                    prot.X += gX + halfWidth;
+                    prot.Y += gY + halfHeight;
+
+                    batcher.DrawLine
+                    (
+                       SolidColorTextureCache.GetTexture(Color.YellowGreen),
+                       new Vector2(pdrot.X - 2, pdrot.Y - 2),
+                       new Vector2(prot.X, prot.Y),
+                       ShaderHueTranslator.GetHueVector(0),
+                       1
+                    );
+                }
             }
 
             if (_showMobiles)

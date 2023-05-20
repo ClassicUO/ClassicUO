@@ -79,6 +79,7 @@ namespace ClassicUO.Game.UI.Gumps
             CanCloseWithRightClick = true;
             X = ProfileManager.CurrentProfile.PaperdollPosition.X;
             Y = ProfileManager.CurrentProfile.PaperdollPosition.Y;
+            IsLocked = ProfileManager.CurrentProfile.PaperdollLocked;
         }
 
         public PaperDollGump(uint serial, bool canLift) : this()

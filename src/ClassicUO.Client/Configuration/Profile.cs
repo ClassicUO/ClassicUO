@@ -420,6 +420,7 @@ namespace ClassicUO.Configuration
         public List<List<string>> GridHighlight_PropNames { get; set; } = new List<List<string>>();
         public List<List<int>> GridHighlight_PropMinVal { get; set; } = new List<List<int>>();
         public bool GridHighlight_CorpseOnly { get; set; } = false;
+        public int GridHightlightSize { get; set; } = 1;
         #endregion
 
         #region Modern paperdoll
@@ -452,6 +453,11 @@ namespace ClassicUO.Configuration
         [JsonConverter(typeof(Point2Converter))] public Point StatusGumpPosition { get; set; } = new Point(100, 100);
         [JsonConverter(typeof(Point2Converter))] public Point BackpackGridPosition { get; set; } = new Point(100, 100);
         [JsonConverter(typeof(Point2Converter))] public Point BackpackGridSize { get; set; } = new Point(300, 300);
+        public bool WorldMapLocked { get; set; } = false;
+        public bool PaperdollLocked { get; set; } = false;
+        public bool JournalLocked { get; set; } = false;
+        public bool StatusGumpLocked { get; set; } = false;
+        public bool BackPackLocked { get; set; } = false;
 
         public bool DisplayPartyChatOverhead { get; set; } = true;
 
@@ -472,6 +478,10 @@ namespace ClassicUO.Configuration
         public int TextBorderSize { get; set; } = 2;
 
         public bool UseModernShopGump { get; set; } = false;
+
+        public int MaxJournalEntries { get; set; } = 750;
+
+        public int HealthLineSizeMultiplier { get; set; } = 1;
 
         public static uint GumpsVersion { get; private set; }
 

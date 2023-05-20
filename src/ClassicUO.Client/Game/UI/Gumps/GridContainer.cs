@@ -120,6 +120,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 savedSize = ProfileManager.CurrentProfile.BackpackGridSize;
                 lastPos = ProfileManager.CurrentProfile.BackpackGridPosition;
+                IsLocked = ProfileManager.CurrentProfile.BackPackLocked;
             }
             else
             {
@@ -510,17 +511,36 @@ namespace ClassicUO.Game.UI.Gumps
                 _lastY = Y;
             }
 
-            if (_container != null)
+            Item _c = _container;
+            if (_c != null)
             {
-                if (_container == SelectedObject.CorpseObject)
+                if (_c == SelectedObject.CorpseObject)
                 {
                     SelectedObject.CorpseObject = null;
+                }
+
+                uint bankSerial = World.Player.FindItemByLayer(Layer.Bank).Serial;
+
+                if (_c.Serial == bankSerial || _c.Container == bankSerial)
+                {
+                    for (LinkedObject i = _c.Items; i != null; i = i.Next)
+                    {
+                        Item child = (Item)i;
+
+                        if (child.Container == _c)
+                        {
+                            UIManager.GetGump<GridContainer>(child)?.Dispose();
+                            UIManager.GetGump<ContainerGump>(child)?.Dispose();
+                        }
+                    }
                 }
             }
 
             if (gridSlotManager != null && !skipSave)
                 if (gridSlotManager.ItemPositions.Count > 0 && !isCorpse)
                     GridSaveSystem.Instance.SaveContainer(LocalSerial, gridSlotManager.GridSlots, Width, Height, X, Y, UseOldContainerStyle);
+
+            
 
             base.Dispose();
         }
@@ -894,7 +914,23 @@ namespace ClassicUO.Game.UI.Gumps
                                 Mouse.CancelDoubleClick = true;
                             }
                             else
-                                DelayedObjectClickManager.Set(_item.Serial, gridContainer.X, gridContainer.Y - 80, Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK);
+                            {
+                                if(World.ClientFeatures.TooltipsEnabled)
+                                    DelayedObjectClickManager.Set(_item.Serial, gridContainer.X, gridContainer.Y - 80, Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK);
+                                else
+                                {
+                                    UIManager.Add(new SimpleTimedTextGump(String.IsNullOrEmpty(_item.Name) ? _item.ItemData.Name : _item.Name, Color.LightGray, TimeSpan.FromSeconds(3)) { X = Mouse.LClickPosition.X, Y = Mouse.LClickPosition.Y });
+                                }
+                            }
+
+                            ItemPropertiesData itemPropertiesData = World.OPL.TryGetItemPropertiesData(_item.Serial);
+                            if(itemPropertiesData != null)
+                            {
+                                foreach(ItemPropertiesData.SinglePropertyData data in itemPropertiesData.singlePropertyData)
+                                {
+                                    GameActions.Print(data.ToString());
+                                }
+                            }
                         }
                     }
                 }
@@ -989,6 +1025,15 @@ namespace ClassicUO.Game.UI.Gumps
                         //UIManager.Add(toolTipitem1);
                         toolTipList.Add(toolTipitem1);
 
+                        if (CUOEnviroment.Debug)
+                        {
+                            ItemPropertiesData i1 = new ItemPropertiesData(_item);
+                            ItemPropertiesData i2 = new ItemPropertiesData(compItem);
+
+                            if (i1.GenerateComparisonTooltip(i2, out string compileToolTip))
+                                GameActions.Print(compileToolTip);
+                        }
+
                         if ((Layer)_item.ItemData.Layer == Layer.OneHanded)
                         {
                             Item compItem2 = World.Player.FindItemByLayer(Layer.TwoHanded);
@@ -1043,15 +1088,39 @@ namespace ClassicUO.Game.UI.Gumps
                 );
 
                 if (borderHighlight)
-                    batcher.DrawRectangle
-                    (
-                        SolidColorTextureCache.GetTexture(Color.White),
-                        x + 6,
-                        y + 6,
-                        Width - 12,
-                        Height - 12,
-                        ShaderHueTranslator.GetHueVector(borderHighlightHue, false, 0.8f)
-                    );
+                {
+                    int bx = x + 6;
+                    int by = y + 6;
+                    int bsize = ProfileManager.CurrentProfile.GridHightlightSize;
+
+
+                    Texture2D borderTexture = SolidColorTextureCache.GetTexture(Color.White);
+                    Vector3 borderHueVec = ShaderHueTranslator.GetHueVector(borderHighlightHue, false, 0.8f);
+
+                    batcher.Draw( //Top bar
+                        borderTexture,
+                        new Rectangle(bx, by, Width - 12, bsize),
+                        borderHueVec
+                        );
+
+                    batcher.Draw( //Left Bar
+                        borderTexture,
+                        new Rectangle(bx, by + bsize, bsize, Height - 12 - (bsize * 2)),
+                        borderHueVec
+                        );
+
+                    batcher.Draw( //Right Bar
+                        borderTexture,
+                        new Rectangle(bx + Width - 12 - bsize, by + bsize, bsize, Height - 12 - (bsize * 2)),
+                        borderHueVec
+                        );
+
+                    batcher.Draw( //Bottom bar
+                        borderTexture,
+                        new Rectangle(bx, by + Height - 12 - bsize, Width - 12, bsize),
+                        borderHueVec
+                        );
+                }
 
                 if (hit.MouseIsOver && _item != null)
                 {

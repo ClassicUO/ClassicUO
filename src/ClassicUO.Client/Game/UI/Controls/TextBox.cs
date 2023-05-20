@@ -65,7 +65,7 @@ namespace ClassicUO.Game.UI.Controls
             string text,
             string font,
             float size,
-            int width,
+            int? width,
             int hue = 2996,
             TextHorizontalAlignment align = TextHorizontalAlignment.Left,
             bool strokeEffect = true
@@ -77,9 +77,11 @@ namespace ClassicUO.Game.UI.Controls
             _rtl = new RichTextLayout
             {
                 Font = TrueTypeLoader.Instance.GetFont(font, size),
-                Text = text,
-                Width = width,
+                Text = text
             };
+
+            if (width != null)
+                _rtl.Width = width;
 
             _font = font;
             _size = size;
@@ -93,14 +95,14 @@ namespace ClassicUO.Game.UI.Controls
             _dropShadow = strokeEffect;
 
             AcceptMouseInput = false;
-            Width = width;
+            Width = _rtl.Width == null ? _rtl.Size.X : (int)_rtl.Width;
         }
         public TextBox
             (
                 string text,
                 string font,
                 float size,
-                int width,
+                int? width,
                 Color color,
                 TextHorizontalAlignment align = TextHorizontalAlignment.Left,
                 bool strokeEffect = true
@@ -113,8 +115,9 @@ namespace ClassicUO.Game.UI.Controls
             {
                 Font = TrueTypeLoader.Instance.GetFont(font, size),
                 Text = text,
-                Width = width,
             };
+            if (width != null)
+                _rtl.Width = width;
 
             _font = font;
             _size = size;
@@ -124,7 +127,7 @@ namespace ClassicUO.Game.UI.Controls
             _dropShadow = strokeEffect;
 
             AcceptMouseInput = false;
-            Width = width;
+            Width = _rtl.Width == null ? _rtl.Size.X : (int)_rtl.Width;
         }
 
         public int Height

@@ -188,7 +188,8 @@ namespace ClassicUO.Game.UI.Gumps
         private Checkbox _leftAlignToolTips, _namePlateHealthOnlyWarmode, _enableHealthIndicator, _spellIconDisplayHotkey, _enableAlphaScrollWheel, _useModernShop, _forceCenterAlignMobileTooltips;
         private InputField _healthIndicatorPercentage, _healthIndicatorWidth;
         private ModernColorPicker.HueDisplay _mainWindowHuePicker, _spellIconHotkeyHue;
-        private HSliderBar _spellIconScale, _journalFontSize, _tooltipFontSize, _gameWindowSideChatFontSize, _overheadFontSize, _overheadTextWidth, _textStrokeSize;
+        private HSliderBar _spellIconScale, _journalFontSize, _tooltipFontSize, _gameWindowSideChatFontSize, _overheadFontSize, _overheadTextWidth, _textStrokeSize, _gridHightlightLineSize, _maxJournalEntries;
+        private HSliderBar _healthLineSizeMultiplier;
         private Combobox _journalFontSelection, _tooltipFontSelect, _gameWindowSideChatFont, _overheadFont;
 
         #region Cooldowns
@@ -3764,6 +3765,9 @@ namespace ClassicUO.Game.UI.Gumps
                         UIManager.GetGump<GridHightlightMenu>()?.Dispose();
                         UIManager.Add(new GridHightlightMenu());
                     };
+
+                    gridSection.Add(AddLabel(null, "Grid highlight line size", 0, 0));
+                    gridSection.AddRight(_gridHightlightLineSize = AddHSlider(null, 1, 10, _currentProfile.GridHightlightSize, 0, 0, 150));
                 } //Grid highlight settings
 
                 rightArea.Add(gridSection);
@@ -3780,6 +3784,9 @@ namespace ClassicUO.Game.UI.Gumps
                     _.X = rightArea.Width - 45;
                     _.MouseUp += MinimizeSectionMouseUp;
                 }
+
+                section.Add(AddLabel(null, "Max journal entries", 0, 0));
+                section.AddRight(_maxJournalEntries = AddHSlider(null, 200, 2000, _currentProfile.MaxJournalEntries, 0, 0, 200));
 
                 {
                     section.Add(AddLabel(null, "Journal Opacity", 0, 0));
@@ -3967,6 +3974,9 @@ namespace ClassicUO.Game.UI.Gumps
                 section.Add(AddLabel(null, "Overhead text width", 0, 0));
                 section.AddRight(_overheadTextWidth = AddHSlider(null, 100, 600, _currentProfile.OverheadChatWidth, 0, 0, 200));
                 section.PopIndent();
+
+                section.Add(AddLabel(null, "Below mobile health line size", 0 ,0));
+                section.AddRight(_healthLineSizeMultiplier = AddHSlider(null, 1, 5, _currentProfile.HealthLineSizeMultiplier, 0, 0, 150));
 
                 rightArea.Add(section);
                 startY += section.Height + SPACING;
@@ -4708,6 +4718,10 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
+            _currentProfile.HealthLineSizeMultiplier = _healthLineSizeMultiplier.Value;
+
+            _currentProfile.MaxJournalEntries = _maxJournalEntries.Value;
+
             _currentProfile.TextBorderSize = _textStrokeSize.Value;
 
             _currentProfile.ForceCenterAlignTooltipMobiles = _forceCenterAlignMobileTooltips.IsChecked;
@@ -4823,6 +4837,7 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.Grid_DefaultColumns = int.Parse(_gridDefaultColumns.Text);
             _currentProfile.Grid_DefaultRows = int.Parse(_gridDefaultRows.Text);
             _currentProfile.Grid_UseContainerHue = _gridOverrideWithContainerHue.IsChecked;
+            _currentProfile.GridHightlightSize = _gridHightlightLineSize.Value;
 
             {
                 _currentProfile.CoolDownX = int.Parse(_coolDownX.Text);

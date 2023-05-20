@@ -57,6 +57,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _lastX = ProfileManager.CurrentProfile.JournalPosition.X;
                 _lastY = ProfileManager.CurrentProfile.JournalPosition.Y;
+                IsLocked = ProfileManager.CurrentProfile.JournalLocked;
             }
             X = _lastX;
             Y = _lastY;
@@ -337,12 +338,7 @@ namespace ClassicUO.Game.UI.Gumps
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
                 base.Draw(batcher, x, y);
-
                 int my = y;
-
-                int height = 0;
-                int maxheight = _scrollBar.Value + _scrollBar.Height;
-
 
                 if (batcher.ClipBegin(x, y, Width, Height))
                 {
@@ -354,8 +350,12 @@ namespace ClassicUO.Game.UI.Gumps
                         if (!CanBeDrawn(journalEntry.TextType, journalEntry.MessageType))
                             continue;
 
-                        journalEntry.TimeStamp.Draw(batcher, x, my - _scrollBar.Value);
-                        journalEntry.EntryText.Draw(batcher, x + journalEntry.TimeStamp.Width, my - _scrollBar.Value);
+                        if (my + journalEntry.EntryText.Height - y >= _scrollBar.Value && my - y <= _scrollBar.Value + _scrollBar.Height)
+                        {
+                            
+                            journalEntry.TimeStamp.Draw(batcher, x, my - _scrollBar.Value);
+                            journalEntry.EntryText.Draw(batcher, x + journalEntry.TimeStamp.Width + 5, my - _scrollBar.Value);
+                        }
                         my += journalEntry.EntryText.Height;
                     }
 
@@ -423,13 +423,15 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 bool maxScroll = _scrollBar.Value == _scrollBar.MaxValue;
 
-                while (journalDatas.Count > Constants.MAX_JOURNAL_HISTORY_COUNT)
+                while (journalDatas.Count > (ProfileManager.CurrentProfile == null ? 200 : ProfileManager.CurrentProfile.MaxJournalEntries))
                     journalDatas.RemoveFromFront().Destroy();
+
+                TextBox timeS = new TextBox($"{time:t}", ProfileManager.CurrentProfile.SelectedTTFJournalFont, ProfileManager.CurrentProfile.SelectedJournalFontSize - 2, null, 1150, strokeEffect: false);
 
                 journalDatas.AddToBack(
                     new JournalData(
-                        new TextBox(text, ProfileManager.CurrentProfile.SelectedTTFJournalFont, ProfileManager.CurrentProfile.SelectedJournalFontSize, Width - ((int)(2.6 * ProfileManager.CurrentProfile.SelectedJournalFontSize)), hue, strokeEffect: false),
-                        new TextBox($"{time:t}", ProfileManager.CurrentProfile.SelectedTTFJournalFont, ProfileManager.CurrentProfile.SelectedJournalFontSize - 2, (int)(2.6 * ProfileManager.CurrentProfile.SelectedJournalFontSize), 1150, strokeEffect: false),
+                        new TextBox(text, ProfileManager.CurrentProfile.SelectedTTFJournalFont, ProfileManager.CurrentProfile.SelectedJournalFontSize, Width - timeS.Width, hue, strokeEffect: false),
+                        timeS,
                         text_type,
                         messageType
                     ));

@@ -466,7 +466,6 @@ namespace ClassicUO.Game.UI.Gumps
             if (item == null || item.IsDestroyed)
             {
                 Dispose();
-
                 return;
             }
 
