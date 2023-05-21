@@ -7107,12 +7107,13 @@ namespace ClassicUO.Network
                         Vector3 location = ReverseLookup(xlong, ylat, xmins, ymins, xeast, ysouth);
                         GameActions.Print($"If I am on the correct facet I think these coords should be somewhere near.. {location.X} and {location.Y}..");
 
-                        if (gump.ContextMenu == null)
-                        {
-                            gump.ContextMenu = new ContextMenuControl();
-                            gump.CanCloseWithRightClick = false;
-                        }
-                        gump.ContextMenu.Add(new ContextMenuItemEntry("Locate on world map", () =>
+                        MenuButton menu = new MenuButton(25, Color.Black.PackedValue, 0.75f, "Menu") { X = gump.Width - 46, Y = 6 };
+                        menu.MouseUp += (s, e) => {
+                            menu.ContextMenu?.Show();
+                        };
+
+                        menu.ContextMenu = new ContextMenuControl();
+                        menu.ContextMenu.Add(new ContextMenuItemEntry("Locate on world map", () =>
                         {
                             WorldMapGump gump = UIManager.GetGump<WorldMapGump>();
                             if (gump == null)
@@ -7122,10 +7123,11 @@ namespace ClassicUO.Network
                             }
                             gump.GoToMarker((int)location.X, (int)location.Y, true);
                         }));
-                        gump.ContextMenu.Add(new ContextMenuItemEntry("Close", () =>
+                        menu.ContextMenu.Add(new ContextMenuItemEntry("Close", () =>
                         {
                             gump.Dispose();
                         }));
+                        gump.Add(menu);
                     }
                 }
             }

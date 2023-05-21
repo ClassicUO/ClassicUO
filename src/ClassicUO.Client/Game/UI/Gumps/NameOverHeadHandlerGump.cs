@@ -45,6 +45,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override GumpType GumpType => GumpType.NameOverHeadHandler;
 
+        private StbTextBox searchBox;
 
         public NameOverHeadHandlerGump() : base(0, 0)
         {
@@ -196,8 +197,13 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             );
 
+            Add(new AlphaBlendControl() { Y = mobilesCorpses.Height + mobilesCorpses.Y, Width = 150, Height = 20, Hue = 0x0481 });
+            Add(searchBox = new StbTextBox(0, -1, 150, hue: 0xFFFF) { Y = mobilesCorpses.Height + mobilesCorpses.Y, Width = 150, Height = 20 });
+            searchBox.Text = NameOverHeadManager.Search;
+            searchBox.TextChanged += (s, e) => { NameOverHeadManager.Search = searchBox.Text; };
+
             alpha.Width = Math.Max(mobilesCorpses.Width, Math.Max(items.Width, Math.Max(all.Width, mobiles.Width)));
-            alpha.Height = stayActive.Height + all.Height + mobiles.Height + items.Height + mobilesCorpses.Height;
+            alpha.Height = stayActive.Height + all.Height + mobiles.Height + items.Height + mobilesCorpses.Height + searchBox.Height;
 
             Width = alpha.Width;
             Height = alpha.Height;
@@ -233,6 +239,12 @@ namespace ClassicUO.Game.UI.Gumps
                     NameOverHeadManager.TypeAllowed = NameOverheadTypeAllowed.MobilesCorpses;
                 }
             };
+        }
+
+        public override void Dispose()
+        {
+            NameOverHeadManager.Search = "";
+            base.Dispose();
         }
 
         protected override void OnDragEnd(int x, int y)

@@ -138,11 +138,14 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            Vector3 hue_vec = ShaderHueTranslator.GetHueVector(0, false, alpha);
+            Vector3 hue_vec = ShaderHueTranslator.GetHueVector(1, false, alpha);
+
+            if (ProfileManager.CurrentProfile != null)
+                hue_vec.X = ProfileManager.CurrentProfile.ToolTipBGHue;
 
             batcher.Draw
             (
-                SolidColorTextureCache.GetTexture(Color.Black),
+                SolidColorTextureCache.GetTexture(Color.White),
                 new Rectangle
                 (
                     x - 4,
@@ -153,6 +156,7 @@ namespace ClassicUO.Game.UI.Gumps
                 hue_vec
             );
 
+            hue_vec = ShaderHueTranslator.GetHueVector(0, false, alpha);
 
             batcher.DrawRectangle
             (

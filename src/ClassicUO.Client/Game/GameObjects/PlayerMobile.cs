@@ -1439,8 +1439,15 @@ namespace ClassicUO.Game.GameObjects
 
         public void CloseRangedGumps()
         {
-            foreach (Gump gump in UIManager.Gumps)
+            for (int i = 0; i < UIManager.Gumps.Count; i++)
             {
+                if (UIManager.Gumps.Count > i)
+                    continue;
+
+                Gump gump = UIManager.Gumps.ElementAt(i);
+            //}
+            //foreach (Gump gump in UIManager.Gumps)
+            //{
                 switch (gump)
                 {
                     case ModernPaperdoll _:

@@ -87,13 +87,18 @@ namespace ClassicUO.Game.UI.Gumps
 
 
 
-            _hit = new HitBox(24, 31, width, height, null, 0f);
+            _hit = new HitBox(24, 31, width, height, null, 0f) { CanMove = true };
             Add(_hit);
 
             _hit.MouseUp += TextureControlOnMouseUp;
 
-            _hit.ContextMenu = new ContextMenuControl();
-            _hit.ContextMenu.Add(new ContextMenuItemEntry("Show approximate location on world map", () =>
+            MenuButton menu = new MenuButton(25, Color.Black.PackedValue, 0.75f, "Menu") { X = width + 44 - 43, Y = 6 };
+            
+            menu.MouseUp += (s, e) => {
+                menu.ContextMenu?.Show();
+            };
+            menu.ContextMenu = new ContextMenuControl();
+            menu.ContextMenu.Add(new ContextMenuItemEntry("Show approximate location on world map", () =>
             {
                 if (foundMapLoc)
                 {
@@ -112,7 +117,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 }
             }));
-            _hit.ContextMenu.Add(new ContextMenuItemEntry("Try to pathfind", () => {
+            menu.ContextMenu.Add(new ContextMenuItemEntry("Try to pathfind", () => {
                 if (foundMapLoc)
                 {
                     int distance =  Math.Max(Math.Abs(World.Player.X - mapX), Math.Abs(World.Player.Y - mapY));
@@ -134,10 +139,11 @@ namespace ClassicUO.Game.UI.Gumps
                         Pathfinder.WalkTo(mapX, mapY, 0, 1);
                 }
             }));
-            _hit.ContextMenu.Add(new ContextMenuItemEntry("Close", () => { Dispose(); }));
-            _hit.CanCloseWithRightClick = false;
+            menu.ContextMenu.Add(new ContextMenuItemEntry("Close", () => { Dispose(); }));
+            menu.CanCloseWithRightClick = false;
 
             Add(new GumpPic(width - 20, height - 20, 0x0139D, 0));
+            Add(menu);
         }
 
 
@@ -291,9 +297,6 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void TextureControlOnMouseUp(object sender, MouseEventArgs e)
         {
-            if (e.Button == MouseButtonType.Right)
-                _hit.ContextMenu.Show();
-
             Point offset = Mouse.LDragOffset;
 
             if (Math.Abs(offset.X) < 5 && Math.Abs(offset.Y) < 5)

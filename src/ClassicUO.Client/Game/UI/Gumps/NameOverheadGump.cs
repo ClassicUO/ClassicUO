@@ -532,7 +532,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             bool _isMobile = false;
             double _hpPercent = 1;
-
+            IsVisible = true;
             if (SerialHelper.IsMobile(LocalSerial))
             {
                 Mobile m = World.Mobiles.Get(LocalSerial);
@@ -542,6 +542,27 @@ namespace ClassicUO.Game.UI.Gumps
                     Dispose();
 
                     return false;
+                }
+
+                if (!string.IsNullOrEmpty(NameOverHeadManager.Search))
+                {
+                    string sText = NameOverHeadManager.Search.ToLower();
+                    if (m.Name == null || !m.Name.ToLower().Contains(sText))
+                    {
+                        if (World.OPL.TryGetNameAndData(m.Serial, out string name, out string data))
+                        {
+                            if (/*(data != null && !data.ToLower().Contains(sText)) && */(name != null && !name.ToLower().Contains(sText)))
+                            {
+                                IsVisible = false;
+                                return true;
+                            }
+                        }
+                        else
+                        {
+                            IsVisible = false;
+                            return true;
+                        }
+                    }
                 }
 
                 _isMobile = true;
@@ -564,7 +585,7 @@ namespace ClassicUO.Game.UI.Gumps
                         IsVisible = false;
                         return false;
                     }
-                    
+
                 }
 
                 if (_positionLocked)
@@ -603,8 +624,28 @@ namespace ClassicUO.Game.UI.Gumps
                 if (item == null)
                 {
                     Dispose();
-
                     return false;
+                }
+
+                if (!string.IsNullOrEmpty(NameOverHeadManager.Search))
+                {
+                    string sText = NameOverHeadManager.Search.ToLower();
+                    if (item.Name == null || !item.Name.ToLower().Contains(sText))// && (!item.ItemData.Name?.ToLower().Contains(sText)))
+                    {
+                        if (World.OPL.TryGetNameAndData(item.Serial, out string name, out string data))
+                        {
+                            if ((data != null && !data.ToLower().Contains(sText)) && (name != null && !name.ToLower().Contains(sText)))
+                            {
+                                IsVisible = false;
+                                return true;
+                            }
+                        }
+                        else
+                        {
+                            IsVisible = false;
+                            return true;
+                        }
+                    }
                 }
 
                 var bounds = ArtLoader.Instance.GetRealArtBounds(item.Graphic);
@@ -652,7 +693,7 @@ namespace ClassicUO.Game.UI.Gumps
             base.Draw(batcher, x, y);
 
             if (ProfileManager.CurrentProfile.NamePlateHealthBar && _isMobile)
-            { 
+            {
                 batcher.Draw
                 (
                     SolidColorTextureCache.GetTexture(Color.White),

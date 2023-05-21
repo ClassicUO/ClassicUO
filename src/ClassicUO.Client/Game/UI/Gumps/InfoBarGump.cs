@@ -160,6 +160,7 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private readonly Label _data;
         private readonly Label _label;
+        private readonly ResizableStaticPic _pic;
         private ushort _warningLinesHue;
 
         public InfoBarControl(string label, InfoBarVars var, ushort hue)
@@ -168,10 +169,20 @@ namespace ClassicUO.Game.UI.Gumps
             WantUpdateSize = true;
             CanMove = false;
 
+
             _label = new Label(label, true, 999) { Height = 20, Hue = hue };
+            if (label.StartsWith(@"\"))
+            {
+                if (ushort.TryParse(label.Substring(1), out ushort gphc))
+                {
+                    _label.IsVisible = false;
+                    Add(_pic = new ResizableStaticPic(gphc, 20, 20) { Hue = hue });
+                }
+            }
+
             Var = var;
 
-            _data = new Label("", true, 999) { Height = 20, X = _label.Width, Hue = 0x0481 };
+            _data = new Label("", true, 999) { Height = 20, X = _label.IsVisible ? _label.Width : _pic.Width, Hue = 0x0481 };
             Add(_label);
             Add(_data);
         }
