@@ -547,7 +547,7 @@ namespace ClassicUO.Game.UI.Gumps
                 if (!string.IsNullOrEmpty(NameOverHeadManager.Search))
                 {
                     string sText = NameOverHeadManager.Search.ToLower();
-                    if (m != null && !m.Name.ToLower().Contains(sText))
+                    if (m.Name == null || !m.Name.ToLower().Contains(sText))
                     {
                         if (World.OPL.TryGetNameAndData(m.Serial, out string name, out string data))
                         {
@@ -630,7 +630,7 @@ namespace ClassicUO.Game.UI.Gumps
                 if (!string.IsNullOrEmpty(NameOverHeadManager.Search))
                 {
                     string sText = NameOverHeadManager.Search.ToLower();
-                    if (item != null && !item.Name.ToLower().Contains(sText))// && (!item.ItemData.Name?.ToLower().Contains(sText)))
+                    if (item.Name == null || !item.Name.ToLower().Contains(sText))// && (!item.ItemData.Name?.ToLower().Contains(sText)))
                     {
                         if (World.OPL.TryGetNameAndData(item.Serial, out string name, out string data))
                         {
