@@ -118,6 +118,29 @@ namespace ClassicUO.Game.Managers
                 if(SpellDefinition.TryGetSpellFromName(spell, out var spellDef))
                     GameActions.CastSpell(spellDef.ID);
             });
+
+            List<Skill> sortSkills = new List<Skill>(World.Player.Skills);
+
+            Register("skill", s => {
+                string skill = "";
+                for (int i = 1; i < s.Length; i++)
+                {
+                    skill += s[i] + " ";
+                }
+                skill = skill.Trim().ToLower();
+
+                if(skill.Length > 0)
+                {
+                    for (int i = 0; i < World.Player.Skills.Length; i++)
+                    {
+                        if (World.Player.Skills[i].Name.ToLower().Contains(skill))
+                        {
+                            GameActions.UseSkill(World.Player.Skills[i].Index);
+                            break;
+                        }
+                    }
+                }
+            });
         }
 
 
