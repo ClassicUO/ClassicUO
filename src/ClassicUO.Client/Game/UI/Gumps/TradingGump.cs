@@ -516,8 +516,6 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         if (string.IsNullOrEmpty(entry.Text))
                         {
-                            //entry.SetText("0");
-
                             if ((int) entry.Tag == 0)
                             {
                                 if (my_gold_entry != 0)
@@ -539,6 +537,8 @@ namespace ClassicUO.Game.UI.Gumps
                                 if (value > Gold)
                                 {
                                     value = Gold;
+                                    entry.SetText(value.ToString());
+                                    entry.CaretIndex = entry.Text.Length + 1;
                                     send = true;
                                 }
 
@@ -554,6 +554,8 @@ namespace ClassicUO.Game.UI.Gumps
                                 if (value > Platinum)
                                 {
                                     value = Platinum;
+                                    entry.SetText(value.ToString());
+                                    entry.CaretIndex = entry.Text.Length + 1;
                                     send = true;
                                 }
 
@@ -567,7 +569,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                             //if (send)
                             //{
-                            //    //entry.SetText(value.ToString());
+                            //    entry.SetText(value.ToString());
+                            //    //entry.CaretIndex = entry.Text.Length + 1;
                             //}
                         }
 
