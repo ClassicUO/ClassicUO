@@ -516,7 +516,7 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         if (string.IsNullOrEmpty(entry.Text))
                         {
-                            entry.SetText("0");
+                            //entry.SetText("0");
 
                             if ((int) entry.Tag == 0)
                             {
@@ -565,10 +565,10 @@ namespace ClassicUO.Game.UI.Gumps
                                 my_plat_entry = value;
                             }
 
-                            if (send)
-                            {
-                                entry.SetText(value.ToString());
-                            }
+                            //if (send)
+                            //{
+                            //    //entry.SetText(value.ToString());
+                            //}
                         }
 
                         if (send)
