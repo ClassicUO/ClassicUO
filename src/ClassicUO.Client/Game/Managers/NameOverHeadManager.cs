@@ -63,6 +63,8 @@ namespace ClassicUO.Game.Managers
             set => ProfileManager.CurrentProfile.NameOverheadToggled = value;
         }
 
+        public static string Search { get; set; }
+
         public static bool IsAllowed(Entity serial)
         {
             if (serial == null)

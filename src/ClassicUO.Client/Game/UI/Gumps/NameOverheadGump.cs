@@ -544,6 +544,25 @@ namespace ClassicUO.Game.UI.Gumps
                     return false;
                 }
 
+                if (!String.IsNullOrEmpty(NameOverHeadManager.Search))
+                {
+                    string sText = NameOverHeadManager.Search.ToLower();
+                    if (!m.Name.ToLower().Contains(sText))
+                    {
+                        if (World.OPL.TryGetNameAndData(LocalSerial, out string name, out string data))
+                        {
+                            if (/*(data != null && !data.ToLower().Contains(sText)) && */(name != null && !name.ToLower().Contains(sText)))
+                            {
+                                return true;
+                            }
+                        }
+                        else
+                        {
+                            return true;
+                        }
+                    }
+                }
+
                 _isMobile = true;
                 _hpPercent = (double)m.Hits / (double)m.HitsMax;
 
@@ -564,7 +583,7 @@ namespace ClassicUO.Game.UI.Gumps
                         IsVisible = false;
                         return false;
                     }
-                    
+
                 }
 
                 if (_positionLocked)
@@ -603,8 +622,26 @@ namespace ClassicUO.Game.UI.Gumps
                 if (item == null)
                 {
                     Dispose();
-
                     return false;
+                }
+
+                if (!String.IsNullOrEmpty(NameOverHeadManager.Search))
+                {
+                    string sText = NameOverHeadManager.Search.ToLower();
+                    if (!item.Name.ToLower().Contains(sText) && !item.ItemData.Name.ToLower().Contains(sText))
+                    {
+                        if (World.OPL.TryGetNameAndData(LocalSerial, out string name, out string data))
+                        {
+                            if ((data != null && !data.ToLower().Contains(sText)) && (name != null && !name.ToLower().Contains(sText)))
+                            {
+                                return true;
+                            }
+                        }
+                        else
+                        {
+                            return true;
+                        }
+                    }
                 }
 
                 var bounds = ArtLoader.Instance.GetRealArtBounds(item.Graphic);
@@ -652,7 +689,7 @@ namespace ClassicUO.Game.UI.Gumps
             base.Draw(batcher, x, y);
 
             if (ProfileManager.CurrentProfile.NamePlateHealthBar && _isMobile)
-            { 
+            {
                 batcher.Draw
                 (
                     SolidColorTextureCache.GetTexture(Color.White),

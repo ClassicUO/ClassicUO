@@ -266,10 +266,10 @@ namespace ClassicUO.Game.Managers
 
                 if (matches.Count > 0)
                 {
-                    FirstValue = double.Parse(matches[0].Value);
+                    double.TryParse(matches[0].Value, out FirstValue);
                     if (matches.Count > 1)
                     {
-                        SecondValue = double.Parse(matches[1].Value);
+                        double.TryParse(matches[1].Value, out SecondValue);
                     }
                 }
             }
