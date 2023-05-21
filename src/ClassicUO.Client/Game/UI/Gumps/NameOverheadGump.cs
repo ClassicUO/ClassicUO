@@ -532,7 +532,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             bool _isMobile = false;
             double _hpPercent = 1;
-
+            IsVisible = true;
             if (SerialHelper.IsMobile(LocalSerial))
             {
                 Mobile m = World.Mobiles.Get(LocalSerial);
@@ -553,11 +553,13 @@ namespace ClassicUO.Game.UI.Gumps
                         {
                             if (/*(data != null && !data.ToLower().Contains(sText)) && */(name != null && !name.ToLower().Contains(sText)))
                             {
+                                IsVisible = false;
                                 return true;
                             }
                         }
                         else
                         {
+                            IsVisible = false;
                             return true;
                         }
                     }
@@ -628,17 +630,19 @@ namespace ClassicUO.Game.UI.Gumps
                 if (!String.IsNullOrEmpty(NameOverHeadManager.Search))
                 {
                     string sText = NameOverHeadManager.Search.ToLower();
-                    if (!item.Name.ToLower().Contains(sText) && !item.ItemData.Name.ToLower().Contains(sText))
+                    if (item != null && !item.Name.ToLower().Contains(sText) && !item.ItemData.Name.ToLower().Contains(sText))
                     {
                         if (World.OPL.TryGetNameAndData(LocalSerial, out string name, out string data))
                         {
                             if ((data != null && !data.ToLower().Contains(sText)) && (name != null && !name.ToLower().Contains(sText)))
                             {
+                                IsVisible = false;
                                 return true;
                             }
                         }
                         else
                         {
+                            IsVisible = false;
                             return true;
                         }
                     }
