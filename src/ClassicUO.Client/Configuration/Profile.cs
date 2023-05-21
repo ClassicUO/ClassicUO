@@ -485,6 +485,7 @@ namespace ClassicUO.Configuration
 
         public bool OpenHealthBarForLastAttack { get; set; } = true;
         [JsonConverter(typeof(Point2Converter))] public Point LastTargetHealthBarPos { get; set; } = Point.Zero;
+        public ushort ToolTipBGHue { get; set; } = 0;
 
         public static uint GumpsVersion { get; private set; }
 

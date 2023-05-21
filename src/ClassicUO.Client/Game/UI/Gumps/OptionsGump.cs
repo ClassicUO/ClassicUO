@@ -187,7 +187,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private Checkbox _leftAlignToolTips, _namePlateHealthOnlyWarmode, _enableHealthIndicator, _spellIconDisplayHotkey, _enableAlphaScrollWheel, _useModernShop, _forceCenterAlignMobileTooltips, _openHealthBarForLastAttack;
         private InputField _healthIndicatorPercentage, _healthIndicatorWidth;
-        private ModernColorPicker.HueDisplay _mainWindowHuePicker, _spellIconHotkeyHue;
+        private ModernColorPicker.HueDisplay _mainWindowHuePicker, _spellIconHotkeyHue, _tooltipBGHue;
         private HSliderBar _spellIconScale, _journalFontSize, _tooltipFontSize, _gameWindowSideChatFontSize, _overheadFontSize, _overheadTextWidth, _textStrokeSize, _gridHightlightLineSize, _maxJournalEntries;
         private HSliderBar _healthLineSizeMultiplier;
         private Combobox _journalFontSelection, _tooltipFontSelect, _gameWindowSideChatFont, _overheadFont;
@@ -4144,6 +4144,9 @@ namespace ClassicUO.Game.UI.Gumps
                 section.Add(_forceCenterAlignMobileTooltips = AddCheckBox(null, "Center align mobile name tooltips", _currentProfile.ForceCenterAlignTooltipMobiles, 0, 0));
                 section.PopIndent();
 
+                section.Add(AddLabel(null, "Tooltip background hue", 0, 0));
+                section.AddRight(_tooltipBGHue = new ModernColorPicker.HueDisplay(_currentProfile.ToolTipBGHue, null, true));
+
                 rightArea.Add(section);
                 startY += section.Height + SPACING;
             }// Tooltip sections
@@ -4720,6 +4723,8 @@ namespace ClassicUO.Game.UI.Gumps
                     UIManager.Add(new ResizableJournal());
                 }
             }
+
+            _currentProfile.ToolTipBGHue = _tooltipBGHue.Hue;
 
             _currentProfile.OpenHealthBarForLastAttack = _openHealthBarForLastAttack.IsChecked;
             _currentProfile.HealthLineSizeMultiplier = _healthLineSizeMultiplier.Value;
