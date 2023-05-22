@@ -487,6 +487,8 @@ namespace ClassicUO.Configuration
         [JsonConverter(typeof(Point2Converter))] public Point LastTargetHealthBarPos { get; set; } = Point.Zero;
         public ushort ToolTipBGHue { get; set; } = 0;
 
+        public string LastVersionHistoryShown { get; set; }
+
         public static uint GumpsVersion { get; private set; }
 
         public void Save(string path, bool saveGumps = true)
