@@ -220,7 +220,7 @@ namespace ClassicUO
 #if DEV_BUILD
                 Window.Title = $"ClassicUO [dev] - {CUOEnviroment.Version}";
 #else
-                Window.Title = $"ClassicUO [ TazUO ] - {CUOEnviroment.Version}";
+                Window.Title = $"[TazUO {CUOEnviroment.Version}]";
 #endif
             }
             else
@@ -228,7 +228,7 @@ namespace ClassicUO
 #if DEV_BUILD
                 Window.Title = $"{title} - ClassicUO [dev] - {CUOEnviroment.Version}";
 #else
-                Window.Title = $"{title} - ClassicUO [ TazUO ] - {CUOEnviroment.Version}";
+                Window.Title = $"{title} - [TazUO {CUOEnviroment.Version}]";
 #endif
             }
         }
