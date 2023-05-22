@@ -34,6 +34,7 @@ using System;
 using System.Collections.Generic;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.Resources;
 using ClassicUO.Utility.Logging;
@@ -141,6 +142,8 @@ namespace ClassicUO.Game.Managers
                     }
                 }
             });
+
+            Register("version", s => { UIManager.Add(new VersionHistory()); });
         }
 
 
