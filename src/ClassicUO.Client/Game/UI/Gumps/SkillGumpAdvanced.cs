@@ -41,13 +41,14 @@ using ClassicUO.Assets;
 using ClassicUO.Renderer;
 using ClassicUO.Resources;
 using Microsoft.Xna.Framework;
+using System;
+using ClassicUO.Configuration;
 
 namespace ClassicUO.Game.UI.Gumps
 {
     internal class SkillGumpAdvanced : Gump
     {
-        private const int WIDTH = 500;
-        private const int HEIGHT = 360;
+        private const int WIDTH = 400;
 
         private readonly Dictionary<Buttons, string> _buttonsToSkillsValues = new Dictionary<Buttons, string>
         {
@@ -60,12 +61,20 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly DataBox _databox;
         private readonly List<SkillListEntry> _skillListEntries = new List<SkillListEntry>();
 
+        public static bool Dragging;
 
         private bool _sortAsc;
         private string _sortField;
         private readonly GumpPic _sortOrderIndicator;
         private double _totalReal, _totalValue;
         private bool _updateSkillsNeeded;
+        private HitBox resizeDrag;
+        private int dragStartH;
+        private Label total, real, value;
+        private AlphaBlendControl background;
+        private Line bottomLine;
+
+        private ScrollArea area;
 
         public SkillGumpAdvanced() : base(0, 0)
         {
@@ -76,25 +85,27 @@ namespace ClassicUO.Game.UI.Gumps
             WantUpdateSize = false;
 
             Width = WIDTH;
-            Height = HEIGHT;
+            Height = 310;
+            if (ProfileManager.CurrentProfile != null)
+                Height = ProfileManager.CurrentProfile.AdvancedSkillsGumpHeight;
 
             Add
-            (
-                new AlphaBlendControl(0.95f)
+            (background =
+                new AlphaBlendControl(0.65f)
                 {
                     X = 1,
                     Y = 1,
-                    Width = WIDTH - 2,
-                    Height = HEIGHT - 2
+                    Width = WIDTH - 1,
+                    Height = Height - 1
                 }
             );
 
-            ScrollArea area = new ScrollArea
+            area = new ScrollArea
             (
-                20,
-                60,
-                WIDTH - 40,
-                250,
+                5,
+                40,
+                WIDTH - 10,
+                Height - 60,
                 true
             )
             {
@@ -108,76 +119,69 @@ namespace ClassicUO.Game.UI.Gumps
 
             area.Add(_databox);
 
+            NiceButton _;
             Add
-            (
+            (_ =
                 new NiceButton
                 (
-                    10,
-                    10,
+                    5,
+                    5,
                     180,
                     25,
                     ButtonAction.Activate,
                     ResGumps.Name
                 )
                 {
-                    ButtonParameter = (int) Buttons.SortName,
-                    IsSelected = true,
-                    X = 40,
-                    Y = 25
+                    ButtonParameter = (int)Buttons.SortName,
+                    IsSelected = true
                 }
             );
 
             Add
-            (
+            (_ =
                 new NiceButton
                 (
-                    10,
-                    10,
-                    80,
+                    _.X + _.Width + 10,
+                    _.Y,
+                    50,
                     25,
                     ButtonAction.Activate,
                     ResGumps.Real
                 )
                 {
-                    ButtonParameter = (int) Buttons.SortReal,
-                    X = 220,
-                    Y = 25
+                    ButtonParameter = (int)Buttons.SortReal,
                 }
             );
 
             Add
-            (
+            (_ =
                 new NiceButton
                 (
-                    10,
-                    10,
-                    80,
+                    _.X + _.Width,
+                    _.Y,
+                    50,
                     25,
                     ButtonAction.Activate,
                     ResGumps.Base
                 )
                 {
-                    ButtonParameter = (int) Buttons.SortBase,
-                    X = 300,
-                    Y = 25
+                    ButtonParameter = (int)Buttons.SortBase,
                 }
             );
 
             Add
-            (
+            (_ =
                 new NiceButton
                 (
-                    10,
-                    10,
-                    80,
+                    _.X + _.Width,
+                    _.Y,
+                    50,
                     25,
                     ButtonAction.Activate,
                     ResGumps.Cap
                 )
                 {
-                    ButtonParameter = (int) Buttons.SortCap,
-                    X = 380,
-                    Y = 25
+                    ButtonParameter = (int)Buttons.SortCap,
                 }
             );
 
@@ -185,35 +189,40 @@ namespace ClassicUO.Game.UI.Gumps
             (
                 new Line
                 (
-                    20,
-                    60,
-                    435,
+                    area.X,
+                    area.Y - 1,
+                    area.Width,
                     1,
                     0xFFFFFFFF
                 )
             );
 
             Add
-            (
+            (bottomLine =
                 new Line
                 (
-                    20,
-                    310,
-                    435,
+                    area.X,
+                    area.Height + area.Y - 1,
+                    area.Width,
                     1,
                     0xFFFFFFFF
                 )
             );
 
             Add(_sortOrderIndicator = new GumpPic(0, 0, 0x985, 0));
-            OnButtonClick((int) Buttons.SortName);
+            OnButtonClick((int)Buttons.SortName);
+
+            Add(resizeDrag = new HitBox(1, Height - 10, 20, 10, "Drag to resize", 0.50f));
+            resizeDrag.Add(new AlphaBlendControl(0.5f) { Width = 20, Height = 10, Hue = 997 });
+            resizeDrag.MouseDown += ResizeDrag_MouseDown;
+            resizeDrag.MouseUp += ResizeDrag_MouseUp;
         }
 
         public override GumpType GumpType => GumpType.SkillMenu;
 
         public override void OnButtonClick(int buttonID)
         {
-            if (_buttonsToSkillsValues.TryGetValue((Buttons) buttonID, out string fieldValue))
+            if (_buttonsToSkillsValues.TryGetValue((Buttons)buttonID, out string fieldValue))
             {
                 if (_sortField == fieldValue)
                 {
@@ -227,7 +236,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 NiceButton btn = FindControls<NiceButton>().First(s => s.ButtonParameter == buttonID);
 
-                ushort g = (ushort) (_sortAsc ? 0x985 : 0x983);
+                ushort g = (ushort)(_sortAsc ? 0x985 : 0x983);
 
                 _sortOrderIndicator.Graphic = g;
                 _sortOrderIndicator.X = btn.X + btn.Width - 15;
@@ -290,11 +299,21 @@ namespace ClassicUO.Game.UI.Gumps
             _databox.WantUpdateSize = true;
             _databox.ReArrangeChildren();
 
-            Add(new Label(ResGumps.Total, true, 1153) { X = 40, Y = 320 });
-            Add(new Label(_totalReal.ToString("F1"), true, 1153) { X = 220, Y = 320 });
-            Add(new Label(_totalValue.ToString("F1"), true, 1153) { X = 300, Y = 320 });
+            Add(total = new Label(ResGumps.Total, true, 1153) { X = 40, Y = Height-20 });
+            Add(real = new Label(_totalReal.ToString("F1"), true, 1153) { X = 205, Y = Height - 20 });
+            Add(value = new Label(_totalValue.ToString("F1"), true, 1153) { X = 255, Y = Height - 20 });
         }
 
+        private void ResizeDrag_MouseUp(object sender, Input.MouseEventArgs e)
+        {
+            Dragging = false;
+        }
+
+        private void ResizeDrag_MouseDown(object sender, Input.MouseEventArgs e)
+        {
+            dragStartH = Height;
+            Dragging = true;
+        }
 
         public override void Update()
         {
@@ -310,6 +329,26 @@ namespace ClassicUO.Game.UI.Gumps
                 BuildGump();
 
                 _updateSkillsNeeded = false;
+            }
+
+            int steps = Mouse.LDragOffset.Y;
+
+            if (Dragging && steps != 0)
+            {
+                Height = dragStartH + steps;
+                if (Height < 170)
+                    Height = 170;
+                ProfileManager.CurrentProfile.AdvancedSkillsGumpHeight = Height;
+
+                area.Height = Height - 60;
+                background.Height = Height - 1;
+                _databox.WantUpdateSize = true;
+                resizeDrag.Y = Height - 11;
+                total.Y = Height - 20;
+                real.Y = Height - 20;
+                value.Y = Height - 20;
+                bottomLine.Y = area.Height + area.Y - 1;
+
             }
         }
 
@@ -359,31 +398,34 @@ namespace ClassicUO.Game.UI.Gumps
             Label skillCap = skillcap;
 
             _skill = skill;
-            skillName.X = 20;
+            CanMove = !_skill.IsClickable;
 
             if (skill.IsClickable)
             {
                 Add
                 (
-                    _activeUse = new Button((int) Buttons.ActiveSkillUse, 0x837, 0x838)
+                    _activeUse = new Button((int)Buttons.ActiveSkillUse, 0x837, 0x838)
                     {
-                        X = 0, Y = 4, ButtonAction = ButtonAction.Activate
+                        X = 0,
+                        Y = 4,
+                        ButtonAction = ButtonAction.Activate
                     }
                 );
             }
 
+            skillName.X = 20;
             Add(skillName);
-            skillValueBase.X = 200;
 
+            skillValueBase.X = 205;
             Add(skillValueBase);
-            skillValue.X = 280;
 
+            skillValue.X = 255;
             Add(skillValue);
-            skillCap.X = 360;
 
+            skillCap.X = 305;
             Add(skillCap);
 
-            GumpPic loc = new GumpPic(425, 4, (ushort) (skill.Lock == Lock.Up ? 0x983 : skill.Lock == Lock.Down ? 0x985 : 0x82C), 0);
+            GumpPic loc = new GumpPic(355, 4, (ushort)(skill.Lock == Lock.Up ? 0x983 : skill.Lock == Lock.Down ? 0x985 : 0x82C), 0);
 
             Add(loc);
 
@@ -393,21 +435,21 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     case Lock.Up:
                         _skill.Lock = Lock.Down;
-                        GameActions.ChangeSkillLockStatus((ushort) _skill.Index, (byte) Lock.Down);
+                        GameActions.ChangeSkillLockStatus((ushort)_skill.Index, (byte)Lock.Down);
                         loc.Graphic = 0x985;
 
                         break;
 
                     case Lock.Down:
                         _skill.Lock = Lock.Locked;
-                        GameActions.ChangeSkillLockStatus((ushort) _skill.Index, (byte) Lock.Locked);
+                        GameActions.ChangeSkillLockStatus((ushort)_skill.Index, (byte)Lock.Locked);
                         loc.Graphic = 0x82C;
 
                         break;
 
                     case Lock.Locked:
                         _skill.Lock = Lock.Up;
-                        GameActions.ChangeSkillLockStatus((ushort) _skill.Index, (byte) Lock.Up);
+                        GameActions.ChangeSkillLockStatus((ushort)_skill.Index, (byte)Lock.Up);
                         loc.Graphic = 0x983;
 
                         break;
@@ -417,7 +459,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnDragBegin(int x, int y)
         {
-            if (_skill.IsClickable && Mouse.LButtonPressed)
+            if (_skill.IsClickable && Mouse.LButtonPressed && !SkillGumpAdvanced.Dragging)
             {
                 GetSpellFloatingButton(_skill.Index)?.Dispose();
 
@@ -427,6 +469,26 @@ namespace ClassicUO.Game.UI.Gumps
 
                 UIManager.Add(skillButtonGump);
                 UIManager.AttemptDragControl(skillButtonGump, true);
+            }
+            else
+            {
+                base.OnDragBegin(x, y);
+            }
+        }
+
+        protected override void OnDragEnd(int x, int y)
+        {
+            if (!_skill.IsClickable)
+                base.OnDragEnd(x, y);
+        }
+
+        protected override void OnMouseOver(int x, int y)
+        {
+            base.OnMouseOver(x, y);
+
+            if (Mouse.LButtonPressed && Math.Abs(Mouse.LDragOffset.X) >= Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS || Math.Abs(Mouse.LDragOffset.Y) >= Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS)
+            {
+                InvokeDragBegin(Mouse.Position);
             }
         }
 
@@ -445,7 +507,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void OnButtonClick(int buttonID)
         {
-            switch ((Buttons) buttonID)
+            switch ((Buttons)buttonID)
             {
                 case Buttons.ActiveSkillUse:
                     GameActions.UseSkill(_skill.Index);

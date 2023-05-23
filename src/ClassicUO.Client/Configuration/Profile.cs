@@ -489,6 +489,8 @@ namespace ClassicUO.Configuration
 
         public string LastVersionHistoryShown { get; set; }
 
+        public int AdvancedSkillsGumpHeight { get; set; } = 310;
+
         public static uint GumpsVersion { get; private set; }
 
         public void Save(string path, bool saveGumps = true)

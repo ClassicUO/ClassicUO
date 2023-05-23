@@ -9,7 +9,8 @@ namespace ClassicUO.Game.UI.Gumps
         private static string[] updateTexts = {
             "/c[white][3.4.0]/cd\n" +
                 "- Added this version history gump\n" +
-                "- Added /c[green]-version/cd command to open this gump",
+                "- Added /c[green]-version/cd command to open this gump\n" +
+                "- Made advanced skill gump more compact, height resizable and can grab skill buttons by dragging skills",
 
             "/c[white][3.3.0]/cd\n" +
                 "-Last attack automatic healthbar gump will remember its position\n" +
