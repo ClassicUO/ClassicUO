@@ -184,10 +184,15 @@ namespace ClassicUO.Game.Managers
         public readonly string RawData;
         public readonly uint serial;
         public string[] RawLines;
+        public readonly Item item;
         public List<SinglePropertyData> singlePropertyData = new List<SinglePropertyData>();
 
         public ItemPropertiesData(Item item)
         {
+            if (item == null)
+                return;
+            this.item = item;
+
             serial = item.Serial;
             if (World.OPL.TryGetNameAndData(item.Serial, out Name, out RawData))
             {
@@ -265,12 +270,14 @@ namespace ClassicUO.Game.Managers
 
         public class SinglePropertyData
         {
+            public readonly string OriginalString;
             public readonly string Name;
             public readonly double FirstValue = -1;
             public readonly double SecondValue = -1;
 
             public SinglePropertyData(string line)
             {
+                OriginalString = line;
                 string pattern = @"(\d+(\.)?(\d+)?)";
                 MatchCollection matches = Regex.Matches(line, pattern, RegexOptions.CultureInvariant);
 

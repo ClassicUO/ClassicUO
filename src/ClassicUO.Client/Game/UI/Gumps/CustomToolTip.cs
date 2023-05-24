@@ -76,9 +76,13 @@ namespace ClassicUO.Game.UI.Gumps
                         GameActions.Print(d.CompileTooltip());
                     }
 
+                    string finalString = FormatTooltip(name, data);
+                    if (SerialHelper.IsItem(item.Serial))
+                        finalString = Managers.ToolTipOverrideData.ProcessTooltipText(item.Serial);
+
                     text?.Dispose();
                     text = new TextBox(
-                        TextBox.ConvertHtmlToFontStashSharpCommand(FormatTooltip(name, data)),
+                        TextBox.ConvertHtmlToFontStashSharpCommand(finalString).Trim(),
                         ProfileManager.CurrentProfile.SelectedToolTipFont,
                         ProfileManager.CurrentProfile.SelectedToolTipFontSize,
                         600,

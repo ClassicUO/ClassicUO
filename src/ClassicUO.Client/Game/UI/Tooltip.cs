@@ -101,8 +101,12 @@ namespace ClassicUO.Game.UI
                 if (SerialHelper.IsMobile(Serial) && ProfileManager.CurrentProfile.ForceCenterAlignTooltipMobiles)
                     align = FontStashSharp.RichText.TextHorizontalAlignment.Center;
 
+                string finalString = _textHTML;
+                if (SerialHelper.IsItem(Serial))
+                    finalString = Managers.ToolTipOverrideData.ProcessTooltipText(Serial);
+
                 _textBox = new TextBox(
-                    TextBox.ConvertHtmlToFontStashSharpCommand(_textHTML).Trim(),
+                    TextBox.ConvertHtmlToFontStashSharpCommand(finalString).Trim(),
                     ProfileManager.CurrentProfile.SelectedToolTipFont,
                     ProfileManager.CurrentProfile.SelectedToolTipFontSize,
                     600,

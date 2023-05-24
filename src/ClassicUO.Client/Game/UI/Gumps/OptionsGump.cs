@@ -4147,6 +4147,13 @@ namespace ClassicUO.Game.UI.Gumps
                 section.Add(AddLabel(null, "Tooltip background hue", 0, 0));
                 section.AddRight(_tooltipBGHue = new ModernColorPicker.HueDisplay(_currentProfile.ToolTipBGHue, null, true));
 
+
+                NiceButton ttipO = new NiceButton(0, 0, 250, TEXTBOX_HEIGHT, ButtonAction.Activate, "Open tooltip override settings") { IsSelectable = false, DisplayBorder = true};
+                ttipO.SetTooltip("Warning: This is an advanced feature.");
+                ttipO.MouseUp += (s, e) => { UIManager.GetGump<ToolTipOverideMenu>()?.Dispose(); UIManager.Add(new ToolTipOverideMenu()); };
+
+                section.Add(ttipO);
+
                 rightArea.Add(section);
                 startY += section.Height + SPACING;
             }// Tooltip sections

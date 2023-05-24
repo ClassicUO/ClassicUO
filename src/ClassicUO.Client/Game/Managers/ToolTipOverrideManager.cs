@@ -1,4 +1,6 @@
 ﻿using ClassicUO.Configuration;
+using ClassicUO.Game.Data;
+using ClassicUO.Game.GameObjects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +11,7 @@ namespace ClassicUO.Game.Managers
 {
     internal class ToolTipOverrideData
     {
-        private ToolTipOverrideData(int index, string searchText, string formattedText, int min1, int max1, int min2, int max2)
+        private ToolTipOverrideData(int index, string searchText, string formattedText, int min1, int max1, int min2, int max2, byte layer)
         {
             Index = index;
             SearchText = searchText;
@@ -18,6 +20,7 @@ namespace ClassicUO.Game.Managers
             Max1 = max1;
             Min2 = min2;
             Max2 = max2;
+            ItemLayer = (TooltipLayers)layer;
         }
 
         public int Index { get; }
@@ -27,6 +30,7 @@ namespace ClassicUO.Game.Managers
         public int Max1 { get; set; }
         public int Min2 { get; set; }
         public int Max2 { get; set; }
+        public TooltipLayers ItemLayer { get; set; }
 
         public bool IsNew { get; set; } = false;
 
@@ -37,6 +41,7 @@ namespace ClassicUO.Game.Managers
             {
                 string searchText = "Weapon Damage", formattedText = "DMG /c[orange]{0} /cd- /c[red]";
                 int min1 = -1, max1 = 99, min2 = -1, max2 = 99;
+                byte layer = (byte)TooltipLayers.Any;
 
                 if (ProfileManager.CurrentProfile.ToolTipOverride_SearchText.Count > index)
                     searchText = ProfileManager.CurrentProfile.ToolTipOverride_SearchText[index];
@@ -62,7 +67,11 @@ namespace ClassicUO.Game.Managers
                     max2 = ProfileManager.CurrentProfile.ToolTipOverride_MaxVal2[index];
                 else isNew = true;
 
-                ToolTipOverrideData data = new ToolTipOverrideData(index, searchText, formattedText, min1, max1, min2, max2);
+                if (ProfileManager.CurrentProfile.ToolTipOverride_Layer.Count > index)
+                    layer = ProfileManager.CurrentProfile.ToolTipOverride_Layer[index];
+                else isNew = true;
+
+                ToolTipOverrideData data = new ToolTipOverrideData(index, searchText, formattedText, min1, max1, min2, max2, layer);
 
                 if (isNew)
                 {
@@ -99,6 +108,10 @@ namespace ClassicUO.Game.Managers
             if (ProfileManager.CurrentProfile.ToolTipOverride_MaxVal2.Count > Index)
                 ProfileManager.CurrentProfile.ToolTipOverride_MaxVal2[Index] = Max2;
             else ProfileManager.CurrentProfile.ToolTipOverride_MaxVal2.Add(Max2);
+
+            if (ProfileManager.CurrentProfile.ToolTipOverride_Layer.Count > Index)
+                ProfileManager.CurrentProfile.ToolTipOverride_Layer[Index] = (byte)ItemLayer;
+            else ProfileManager.CurrentProfile.ToolTipOverride_Layer.Add((byte)ItemLayer);
         }
 
         public void Delete()
@@ -109,6 +122,61 @@ namespace ClassicUO.Game.Managers
             ProfileManager.CurrentProfile.ToolTipOverride_MinVal2.RemoveAt(Index);
             ProfileManager.CurrentProfile.ToolTipOverride_MaxVal1.RemoveAt(Index);
             ProfileManager.CurrentProfile.ToolTipOverride_MaxVal2.RemoveAt(Index);
+            ProfileManager.CurrentProfile.ToolTipOverride_Layer.RemoveAt(Index);
+        }
+
+        public static ToolTipOverrideData[] GetAllToolTipOverrides()
+        {
+            if (ProfileManager.CurrentProfile == null)
+                return null;
+
+            ToolTipOverrideData[] result = new ToolTipOverrideData[ProfileManager.CurrentProfile.ToolTipOverride_SearchText.Count];
+
+            for (int i = 0; i < ProfileManager.CurrentProfile.ToolTipOverride_SearchText.Count; i++)
+            {
+                result[i] = Get(i);
+            }
+
+            return result;
+        }
+
+        public static string ProcessTooltipText(uint serial)
+        {
+            string tooltip = "";
+
+            ItemPropertiesData itemPropertiesData = new ItemPropertiesData(World.Items.Get(serial));
+
+            ToolTipOverrideData[] result = GetAllToolTipOverrides();
+
+            if (itemPropertiesData.HasData)
+            {
+                tooltip += $"/c[yellow]{itemPropertiesData.Name}\n";
+
+                //Loop through each property
+                foreach (ItemPropertiesData.SinglePropertyData property in itemPropertiesData.singlePropertyData)
+                {
+                    bool handled = false;
+                    //Loop though each override setting player created
+                    foreach (ToolTipOverrideData overrideData in result)
+                    {
+                        if (overrideData.ItemLayer == TooltipLayers.Any || itemPropertiesData.item.ItemData.Layer == (byte)overrideData.ItemLayer)
+                        {
+                            if (property.OriginalString.ToLower().Contains(overrideData.SearchText.ToLower()))
+                                if (property.FirstValue == -1 || (property.FirstValue >= overrideData.Min1 && property.FirstValue <= overrideData.Max1))
+                                    if (property.SecondValue == -1 || (property.SecondValue >= overrideData.Min2 && property.SecondValue <= overrideData.Max2))
+                                    {
+                                        tooltip += string.Format(overrideData.FormattedText, property.Name, property.FirstValue.ToString(), property.SecondValue.ToString()) + "\n";
+                                        handled = true;
+                                    }
+                        }
+                    }
+                    if (!handled) //Did not find a matching override, need to add the plain tooltip line still
+                        tooltip += $"{property.OriginalString}\n";
+                }
+
+                return tooltip;
+            }
+            return null;
         }
     }
 }

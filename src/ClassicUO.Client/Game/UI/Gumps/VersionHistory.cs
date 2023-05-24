@@ -10,7 +10,8 @@ namespace ClassicUO.Game.UI.Gumps
             "/c[white][3.4.0]/cd\n" +
                 "- Added this version history gump\n" +
                 "- Added /c[green]-version/cd command to open this gump\n" +
-                "- Made advanced skill gump more compact, height resizable and can grab skill buttons by dragging skills",
+                "- Made advanced skill gump more compact, height resizable and can grab skill buttons by dragging skills\n" +
+                "- Added tooltip override feature (See wiki for more details)",
 
             "/c[white][3.3.0]/cd\n" +
                 "-Last attack automatic healthbar gump will remember its position\n" +

@@ -40,6 +40,7 @@ using System.Text.Json.Serialization;
 using System.Xml;
 using ClassicUO.Configuration.Json;
 using ClassicUO.Game;
+using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
@@ -494,12 +495,13 @@ namespace ClassicUO.Configuration
         public bool ShowTooltipParserMockup { get; set; } = false;
 
         #region ToolTip Overrides
-        public List<string> ToolTipOverride_SearchText { get; set; } = new List<string>();
-        public List<string> ToolTipOverride_NewFormat { get; set; } = new List<string>();
-        public List<int> ToolTipOverride_MinVal1 { get; set; } = new List<int>();
-        public List<int> ToolTipOverride_MinVal2 { get; set; } = new List<int>();
-        public List<int> ToolTipOverride_MaxVal1 { get; set; } = new List<int>();
-        public List<int> ToolTipOverride_MaxVal2 { get; set; } = new List<int>();
+        public List<string> ToolTipOverride_SearchText { get; set; } = new List<string>() { "Physical Res", "Fire Res", "Cold Res", "Poison Res", "Energy Res" };
+        public List<string> ToolTipOverride_NewFormat { get; set; } = new List<string>() { "/c[#5f423c]Physical Resist {1}%", "/c[red]Fire Resist {1}%", "/c[blue]Cold Resist {1}%", "/c[green]Poison Resist {1}%", "/c[purple]Energy Resist {1}%" };
+        public List<int> ToolTipOverride_MinVal1 { get; set; } = new List<int>() { -1, -1, -1, -1, -1 };
+        public List<int> ToolTipOverride_MinVal2 { get; set; } = new List<int>() { -1, -1, -1, -1, -1 };
+        public List<int> ToolTipOverride_MaxVal1 { get; set; } = new List<int>() { 100, 100, 100, 100, 100 };
+        public List<int> ToolTipOverride_MaxVal2 { get; set; } = new List<int>() { 100, 100, 100, 100, 100 };
+        public List<byte> ToolTipOverride_Layer { get; set; } = new List<byte>() { (byte)TooltipLayers.Any, (byte)TooltipLayers.Any, (byte)TooltipLayers.Any, (byte)TooltipLayers.Any, (byte)TooltipLayers.Any };
         #endregion
 
         public static uint GumpsVersion { get; private set; }

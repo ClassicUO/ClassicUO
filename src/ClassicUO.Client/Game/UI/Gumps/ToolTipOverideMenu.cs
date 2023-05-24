@@ -1,4 +1,5 @@
 ﻿using ClassicUO.Configuration;
+using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using System;
@@ -85,6 +86,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             NiceButton _del;
 
+            Combobox _itemLater;
             InputField _searchText, _formatText, _min1, _min2, _max1, _max2;
             area.Add(_searchText = new InputField(0x0BB8, 0xFF, 0xFFFF, true, 200, 20) { X = 25, Y = y, AcceptKeyboardInput = true });
             _searchText.SetText(data.SearchText);
@@ -124,7 +126,7 @@ namespace ClassicUO.Game.UI.Gumps
             };
 
             Label label;
-            area.Add(label = new Label("Min/Max first", true, 0xFFFF) { X = 20, Y = y + 20 });
+            area.Add(label = new Label("Min/Max first", true, 0xFFFF) { X = 5, Y = y + 20 });
             area.Add(_min1 = new InputField(0x0BB8, 0xFF, 0xFFFF, true, 30, 20) { X = label.X + label.Width + 5, Y = y + 20, AcceptKeyboardInput = true, NumbersOnly = true });
             _min1.SetText(data.Min1.ToString());
             _min1.TextChanged += (s, e) =>
@@ -167,7 +169,7 @@ namespace ClassicUO.Game.UI.Gumps
 
 
 
-            area.Add(label = new Label("Min/Max second", true, 0xFFFF) { X = _max1.X + _max1.Width + 20, Y = y + 20 });
+            area.Add(label = new Label("Min/Max second", true, 0xFFFF) { X = _max1.X + _max1.Width + 15, Y = y + 20 });
             area.Add(_min2 = new InputField(0x0BB8, 0xFF, 0xFFFF, true, 30, 20) { X = label.X + label.Width + 5, Y = y + 20, AcceptKeyboardInput = true, NumbersOnly = true });
             _min2.SetText(data.Min2.ToString());
             _min2.TextChanged += (s, e) =>
@@ -208,6 +210,12 @@ namespace ClassicUO.Game.UI.Gumps
                 });
             };
 
+            area.Add(_itemLater = new Combobox(_max2.X + _max2.Width + 5, _max2.Y, 80, Enum.GetNames(typeof(TooltipLayers)), Array.IndexOf(Enum.GetValues(typeof(TooltipLayers)), data.ItemLayer)));
+            _itemLater.OnOptionSelected += (s, e) => {
+                data.ItemLayer = (TooltipLayers)(Enum.GetValues(typeof(TooltipLayers))).GetValue(_itemLater.SelectedIndex);
+                data.Save();
+                UIManager.Add(new SimpleTimedTextGump("Saved", Microsoft.Xna.Framework.Color.LightGreen, TimeSpan.FromSeconds(1)) { X = _itemLater.ScreenCoordinateX, Y = _itemLater.ScreenCoordinateY - 20 });
+            };
 
             area.Add(_del = new NiceButton(0, y, 20, 20, ButtonAction.Activate, "X") { IsSelectable = false });
             _del.SetTooltip("Delete this override");
