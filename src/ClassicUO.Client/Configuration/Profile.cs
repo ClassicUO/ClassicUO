@@ -491,6 +491,17 @@ namespace ClassicUO.Configuration
 
         public int AdvancedSkillsGumpHeight { get; set; } = 310;
 
+        public bool ShowTooltipParserMockup { get; set; } = false;
+
+        #region ToolTip Overrides
+        public List<string> ToolTipOverride_SearchText { get; set; } = new List<string>();
+        public List<string> ToolTipOverride_NewFormat { get; set; } = new List<string>();
+        public List<int> ToolTipOverride_MinVal1 { get; set; } = new List<int>();
+        public List<int> ToolTipOverride_MinVal2 { get; set; } = new List<int>();
+        public List<int> ToolTipOverride_MaxVal1 { get; set; } = new List<int>();
+        public List<int> ToolTipOverride_MaxVal2 { get; set; } = new List<int>();
+        #endregion
+
         public static uint GumpsVersion { get; private set; }
 
         public void Save(string path, bool saveGumps = true)

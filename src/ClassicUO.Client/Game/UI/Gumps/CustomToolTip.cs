@@ -70,6 +70,12 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (World.OPL.TryGetNameAndData(item.Serial, out string name, out string data))
                 {
+                    if (ProfileManager.CurrentProfile.ShowTooltipParserMockup)
+                    {
+                        Managers.ItemPropertiesData d = World.OPL.TryGetItemPropertiesData(item.Serial);
+                        GameActions.Print(d.CompileTooltip());
+                    }
+
                     text?.Dispose();
                     text = new TextBox(
                         TextBox.ConvertHtmlToFontStashSharpCommand(FormatTooltip(name, data)),

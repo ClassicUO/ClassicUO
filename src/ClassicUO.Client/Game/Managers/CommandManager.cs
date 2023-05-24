@@ -108,7 +108,8 @@ namespace ClassicUO.Game.Managers
                 }
             );
 
-            Register("cast", s => {
+            Register("cast", s =>
+            {
                 string spell = "";
                 for (int i = 1; i < s.Length; i++)
                 {
@@ -116,13 +117,14 @@ namespace ClassicUO.Game.Managers
                 }
                 spell = spell.Trim();
 
-                if(SpellDefinition.TryGetSpellFromName(spell, out var spellDef))
+                if (SpellDefinition.TryGetSpellFromName(spell, out var spellDef))
                     GameActions.CastSpell(spellDef.ID);
             });
 
             List<Skill> sortSkills = new List<Skill>(World.Player.Skills);
 
-            Register("skill", s => {
+            Register("skill", s =>
+            {
                 string skill = "";
                 for (int i = 1; i < s.Length; i++)
                 {
@@ -130,7 +132,7 @@ namespace ClassicUO.Game.Managers
                 }
                 skill = skill.Trim().ToLower();
 
-                if(skill.Length > 0)
+                if (skill.Length > 0)
                 {
                     for (int i = 0; i < World.Player.Skills.Length; i++)
                     {
@@ -144,6 +146,8 @@ namespace ClassicUO.Game.Managers
             });
 
             Register("version", s => { UIManager.Add(new VersionHistory()); });
+            Register("mockup", s => { Configuration.ProfileManager.CurrentProfile.ShowTooltipParserMockup ^= true; });
+            Register("mockupui", s => { UIManager.Add(new ToolTipOverideMenu()); });
         }
 
 
