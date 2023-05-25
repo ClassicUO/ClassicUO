@@ -22,7 +22,7 @@ namespace ClassicUO.Game.UI.Gumps
             "IDiivil - Happily Organized Now",
             "Avernal",
             "d6punk - UO for life!",
-            "Eora"
+            "Eora - Always looking for interesting adventures"
         };
         private AlphaBlendControl _background;
 
