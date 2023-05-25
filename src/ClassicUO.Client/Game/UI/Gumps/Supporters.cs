@@ -21,7 +21,8 @@ namespace ClassicUO.Game.UI.Gumps
             "Auburok - Don't leave Brit Bank without TazUO",
             "IDiivil - Happily Organized Now",
             "Avernal",
-            "d6punk - UO for life!"
+            "d6punk - UO for life!",
+            "Eora"
         };
         private AlphaBlendControl _background;
 
