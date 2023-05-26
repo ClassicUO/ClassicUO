@@ -165,8 +165,11 @@ namespace ClassicUO.Game.Managers
                                 if (property.FirstValue == -1 || (property.FirstValue >= overrideData.Min1 && property.FirstValue <= overrideData.Max1))
                                     if (property.SecondValue == -1 || (property.SecondValue >= overrideData.Min2 && property.SecondValue <= overrideData.Max2))
                                     {
-                                        tooltip += string.Format(overrideData.FormattedText, property.Name, property.FirstValue.ToString(), property.SecondValue.ToString()) + "\n";
-                                        handled = true;
+                                        try
+                                        {
+                                            tooltip += string.Format(overrideData.FormattedText, property.Name, property.FirstValue.ToString(), property.SecondValue.ToString()) + "\n";
+                                            handled = true;
+                                        } catch(System.FormatException e) {  }
                                     }
                         }
                     }
