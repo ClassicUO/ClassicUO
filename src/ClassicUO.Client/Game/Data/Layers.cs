@@ -89,5 +89,8 @@ namespace ClassicUO.Game.Data
         Robe = 0x16,
         Skirt = 0x17,
         Legs = 0x18,
+        Body_Group = 0xA1,
+        Jewelry_Group = 0xA2,
+        Weapon_Group = 0xA3
     }
 }

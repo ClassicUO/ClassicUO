@@ -159,7 +159,7 @@ namespace ClassicUO.Game.Managers
                     //Loop though each override setting player created
                     foreach (ToolTipOverrideData overrideData in result)
                     {
-                        if (overrideData.ItemLayer == TooltipLayers.Any || itemPropertiesData.item.ItemData.Layer == (byte)overrideData.ItemLayer)
+                        if (overrideData.ItemLayer == TooltipLayers.Any || checkLayers(overrideData.ItemLayer, itemPropertiesData.item.ItemData.Layer))
                         {
                             if (property.OriginalString.ToLower().Contains(overrideData.SearchText.ToLower()))
                                 if (property.FirstValue == -1 || (property.FirstValue >= overrideData.Min1 && property.FirstValue <= overrideData.Max1))
@@ -177,6 +177,27 @@ namespace ClassicUO.Game.Managers
                 return tooltip;
             }
             return null;
+
+            bool checkLayers(TooltipLayers overrideLayer, byte itemLayer)
+            {
+                if ((byte)overrideLayer == itemLayer)
+                    return true;
+
+                if(overrideLayer == TooltipLayers.Body_Group)
+                {
+                    if (itemLayer == (byte)Layer.Shoes || itemLayer == (byte)Layer.Pants || itemLayer == (byte)Layer.Shirt || itemLayer == (byte)Layer.Helmet || itemLayer == (byte)Layer.Necklace || itemLayer == (byte)Layer.Arms || itemLayer == (byte)Layer.Gloves || itemLayer == (byte)Layer.Waist || itemLayer == (byte)Layer.Torso || itemLayer == (byte)Layer.Tunic || itemLayer == (byte)Layer.Legs || itemLayer == (byte)Layer.Skirt || itemLayer == (byte)Layer.Cloak || itemLayer == (byte)Layer.Robe)
+                        return true;
+                } else if (overrideLayer == TooltipLayers.Jewelry_Group)
+                {
+                    if (itemLayer == (byte)Layer.Talisman || itemLayer == (byte)Layer.Bracelet || itemLayer == (byte)Layer.Ring || itemLayer == (byte)Layer.Earrings)
+                        return true;
+                } else if (overrideLayer != TooltipLayers.Weapon_Group) {
+                    if(itemLayer == (byte)Layer.OneHanded || itemLayer == (byte)Layer.TwoHanded)
+                        return true;
+                }
+
+                return false;
+            }
         }
     }
 }
