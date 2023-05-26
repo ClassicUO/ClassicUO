@@ -180,8 +180,52 @@ namespace ClassicUO.Game.Managers
                 return tooltip;
             }
             return null;
+        }
 
-            bool checkLayers(TooltipLayers overrideLayer, byte itemLayer)
+        public static string ProcessTooltipText(string text)
+        {
+            string tooltip = "";
+
+            ItemPropertiesData itemPropertiesData = new ItemPropertiesData(text);
+
+            ToolTipOverrideData[] result = GetAllToolTipOverrides();
+
+            if (itemPropertiesData.HasData)
+            {
+                tooltip += $"/c[yellow]{itemPropertiesData.Name}\n";
+
+                //Loop through each property
+                foreach (ItemPropertiesData.SinglePropertyData property in itemPropertiesData.singlePropertyData)
+                {
+                    bool handled = false;
+                    //Loop though each override setting player created
+                    foreach (ToolTipOverrideData overrideData in result)
+                    {
+                        if (overrideData.ItemLayer == TooltipLayers.Any || checkLayers(overrideData.ItemLayer, itemPropertiesData.item.ItemData.Layer))
+                        {
+                            if (property.OriginalString.ToLower().Contains(overrideData.SearchText.ToLower()))
+                                if (property.FirstValue == -1 || (property.FirstValue >= overrideData.Min1 && property.FirstValue <= overrideData.Max1))
+                                    if (property.SecondValue == -1 || (property.SecondValue >= overrideData.Min2 && property.SecondValue <= overrideData.Max2))
+                                    {
+                                        try
+                                        {
+                                            tooltip += string.Format(overrideData.FormattedText, property.Name, property.FirstValue.ToString(), property.SecondValue.ToString()) + "\n";
+                                            handled = true;
+                                        }
+                                        catch (System.FormatException e) { }
+                                    }
+                        }
+                    }
+                    if (!handled) //Did not find a matching override, need to add the plain tooltip line still
+                        tooltip += $"{property.OriginalString}\n";
+                }
+
+                return tooltip;
+            }
+            return null;
+        }
+        
+        private static bool checkLayers(TooltipLayers overrideLayer, byte itemLayer)
             {
                 if ((byte)overrideLayer == itemLayer)
                     return true;
@@ -201,6 +245,5 @@ namespace ClassicUO.Game.Managers
 
                 return false;
             }
-        }
     }
 }

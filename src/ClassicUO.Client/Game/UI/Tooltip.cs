@@ -105,6 +105,9 @@ namespace ClassicUO.Game.UI
                 if (SerialHelper.IsItem(Serial))
                     finalString = Managers.ToolTipOverrideData.ProcessTooltipText(Serial);
 
+                if (string.IsNullOrEmpty(finalString) && !string.IsNullOrEmpty(_textHTML)) //Fix for vendor search
+                    finalString = Managers.ToolTipOverrideData.ProcessTooltipText(_textHTML);
+
                 _textBox = new TextBox(
                     TextBox.ConvertHtmlToFontStashSharpCommand(finalString).Trim(),
                     ProfileManager.CurrentProfile.SelectedToolTipFont,

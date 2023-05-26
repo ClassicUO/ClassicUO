@@ -201,6 +201,16 @@ namespace ClassicUO.Game.Managers
             }
         }
 
+        public ItemPropertiesData(string tooltip)
+        {
+            if (string.IsNullOrEmpty(tooltip))
+                return;
+            Name = tooltip.Substring(0, tooltip.IndexOf("\n"));
+            RawData = tooltip.Substring(tooltip.IndexOf("\n") + 2);
+            HasData = true;
+            processData();
+        }
+
         private void processData()
         {
             string formattedData = TextBox.ConvertHtmlToFontStashSharpCommand(RawData);
