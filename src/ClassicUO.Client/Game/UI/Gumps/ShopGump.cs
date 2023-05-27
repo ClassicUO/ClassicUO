@@ -758,7 +758,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     ushort graphic = Graphic;
 
-                    if (graphic >= AnimationsLoader.MAX_ANIMATIONS_DATA_INDEX_COUNT)
+                    if (graphic >= AnimationsLoader.Instance.MaxAnimationCount)
                     {
                         graphic = 0;
                     }
