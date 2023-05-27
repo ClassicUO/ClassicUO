@@ -41,6 +41,7 @@ using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Assets;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
+using System.Linq;
 
 namespace ClassicUO.Game.Managers
 {
@@ -203,6 +204,16 @@ namespace ClassicUO.Game.Managers
                 case MessageType.Yell:
                 case MessageType.Regular:
                 case MessageType.Label:
+                    if(textType == TextType.OBJECT)
+                    {
+                        List<GridContainer> unmodifiedList = new List<GridContainer>();
+                        foreach (GridContainer container in UIManager.Gumps.OfType<GridContainer>())
+                            unmodifiedList.Add(container);
+
+                        foreach(GridContainer container in unmodifiedList)
+                            container?.HandleObjectMessage(parent, text, hue);
+                    }
+                    goto case MessageType.Limit3Spell;
                 case MessageType.Limit3Spell:
                     {
                         if (parent == null)
