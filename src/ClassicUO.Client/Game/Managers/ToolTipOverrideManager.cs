@@ -23,8 +23,10 @@ namespace ClassicUO.Game.Managers
             ItemLayer = (TooltipLayers)layer;
         }
 
+        private string searchText;
+
         public int Index { get; }
-        public string SearchText { get; set; }
+        public string SearchText { get { return searchText.Replace(@"\u002B", @"+"); } set { searchText = value; } }
         public string FormattedText { get; set; }
         public int Min1 { get; set; }
         public int Max1 { get; set; }
@@ -238,7 +240,7 @@ namespace ClassicUO.Game.Managers
                 {
                     if (itemLayer == (byte)Layer.Talisman || itemLayer == (byte)Layer.Bracelet || itemLayer == (byte)Layer.Ring || itemLayer == (byte)Layer.Earrings)
                         return true;
-                } else if (overrideLayer != TooltipLayers.Weapon_Group) {
+                } else if (overrideLayer == TooltipLayers.Weapon_Group) {
                     if(itemLayer == (byte)Layer.OneHanded || itemLayer == (byte)Layer.TwoHanded)
                         return true;
                 }
