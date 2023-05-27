@@ -12,7 +12,9 @@ namespace ClassicUO.Game.UI.Gumps
                 "- Added /c[green]-version/cd command to open this gump\n" +
                 "- Made advanced skill gump more compact, height resizable and can grab skill buttons by dragging skills\n" +
                 "- Added tooltip override feature (See wiki for more details)\n" +
-                "- Better rain",
+                "- Better rain\n" +
+                "- Fixed tooltips in vendor search\n" +
+                "- Fixed modern shop gump displaying wrong items at animal trainers",
 
             "/c[white][3.3.0]/cd\n" +
                 "-Last attack automatic healthbar gump will remember its position\n" +
