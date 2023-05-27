@@ -206,6 +206,11 @@ namespace ClassicUO.Game.UI.Gumps
                 BORDER_WIDTH = borderSize;
             }
             Reposition();
+
+            if (ProfileManager.CurrentProfile.HideJournalBorder)
+                BorderControl.IsVisible = false;
+            else
+                BorderControl.IsVisible = true;
         }
 
         private void Reposition()
@@ -339,6 +344,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 base.Draw(batcher, x, y);
                 int my = y;
+                bool hideTimestamp = ProfileManager.CurrentProfile.HideJournalTimestamp;
 
                 if (batcher.ClipBegin(x, y, Width, Height))
                 {
@@ -352,9 +358,9 @@ namespace ClassicUO.Game.UI.Gumps
 
                         if (my + journalEntry.EntryText.Height - y >= _scrollBar.Value && my - y <= _scrollBar.Value + _scrollBar.Height)
                         {
-                            
-                            journalEntry.TimeStamp.Draw(batcher, x, my - _scrollBar.Value);
-                            journalEntry.EntryText.Draw(batcher, x + journalEntry.TimeStamp.Width + 5, my - _scrollBar.Value);
+                            if(!hideTimestamp)
+                                journalEntry.TimeStamp.Draw(batcher, x, my - _scrollBar.Value);
+                            journalEntry.EntryText.Draw(batcher, hideTimestamp ? x : x + (journalEntry.TimeStamp.Width + 5), my - _scrollBar.Value);
                         }
                         my += journalEntry.EntryText.Height;
                     }

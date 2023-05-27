@@ -35,6 +35,7 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.UI.Controls;
 using ClassicUO.Network;
 
 namespace ClassicUO.Game.Managers
@@ -183,10 +184,15 @@ namespace ClassicUO.Game.Managers
         public readonly string RawData;
         public readonly uint serial;
         public string[] RawLines;
+        public readonly Item item;
         public List<SinglePropertyData> singlePropertyData = new List<SinglePropertyData>();
 
         public ItemPropertiesData(Item item)
         {
+            if (item == null)
+                return;
+            this.item = item;
+
             serial = item.Serial;
             if (World.OPL.TryGetNameAndData(item.Serial, out Name, out RawData))
             {
@@ -195,9 +201,21 @@ namespace ClassicUO.Game.Managers
             }
         }
 
+        public ItemPropertiesData(string tooltip)
+        {
+            if (string.IsNullOrEmpty(tooltip))
+                return;
+            Name = tooltip.Substring(0, tooltip.IndexOf("\n"));
+            RawData = tooltip.Substring(tooltip.IndexOf("\n") + 1);
+            HasData = true;
+            processData();
+        }
+
         private void processData()
         {
-            RawLines = RawData.Split(new string[] { "\n", "<br>" }, StringSplitOptions.None);
+            string formattedData = TextBox.ConvertHtmlToFontStashSharpCommand(RawData);
+
+            RawLines = formattedData.Split(new string[] { "\n", "<br>" }, StringSplitOptions.None);
 
             foreach (string line in RawLines)
             {
@@ -249,16 +267,29 @@ namespace ClassicUO.Game.Managers
             return true;
         }
 
+        public string CompileTooltip()
+        {
+            string result = "";
+
+            result += Name + "\n";
+            foreach (SinglePropertyData data in singlePropertyData)
+                result += $"{data.Name} [{data.FirstValue}] [{data.SecondValue}]\n";
+
+            return result;
+        }
+
         public class SinglePropertyData
         {
+            public readonly string OriginalString;
             public readonly string Name;
             public readonly double FirstValue = -1;
             public readonly double SecondValue = -1;
 
             public SinglePropertyData(string line)
             {
-                string pattern = @"(\d+(\.)?\d+)";
-                MatchCollection matches = Regex.Matches(line, pattern, RegexOptions.IgnoreCase);
+                OriginalString = line;
+                string pattern = @"(\d+(\.)?(\d+)?)";
+                MatchCollection matches = Regex.Matches(line, pattern, RegexOptions.CultureInvariant);
 
                 Match nameMatch = Regex.Match(line, @"(\D+)");
                 if (nameMatch.Success)
@@ -281,10 +312,10 @@ namespace ClassicUO.Game.Managers
                 if(Name != null)
                     output += Name;
 
-                if (FirstValue > -1)
+                if (FirstValue != -1)
                     output += $" {FirstValue}";
 
-                if (SecondValue > -1)
+                if (SecondValue != -1)
                     output += $" {SecondValue}";
 
                 return output;

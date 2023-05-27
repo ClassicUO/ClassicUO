@@ -625,6 +625,18 @@ namespace ClassicUO.Game.UI.Gumps
             BorderControl.Alpha = _background.Alpha;
         }
 
+        public void HandleObjectMessage(Entity parent, string text, ushort hue)
+        {
+            if (parent != null)
+            {
+                GridItem item = gridSlotManager.FindItem(parent.Serial);
+                if (item != null)
+                {
+                    UIManager.Add(new SimpleTimedTextGump(text, (uint)hue, TimeSpan.FromSeconds(2)) { X = item.ScreenCoordinateX, Y = item.ScreenCoordinateY });
+                }
+            }
+        }
+
         public void BuildBorder()
         {
             int graphic = 0, borderSize = 0;
@@ -691,6 +703,8 @@ namespace ClassicUO.Game.UI.Gumps
             }
             RePosition();
             OnResize();
+
+            BorderControl.IsVisible = !ProfileManager.CurrentProfile.Grid_HideBorder;
         }
 
         public void RePosition()
@@ -920,18 +934,9 @@ namespace ClassicUO.Game.UI.Gumps
                                     DelayedObjectClickManager.Set(_item.Serial, gridContainer.X, gridContainer.Y - 80, Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK);
                                 else
                                 {
-                                    UIManager.Add(new SimpleTimedTextGump(String.IsNullOrEmpty(_item.Name) ? _item.ItemData.Name : _item.Name, Color.LightGray, TimeSpan.FromSeconds(3)) { X = Mouse.LClickPosition.X, Y = Mouse.LClickPosition.Y });
+                                    GameActions.SingleClick(_item.Serial);
                                 }
                             }
-
-                            //ItemPropertiesData itemPropertiesData = World.OPL.TryGetItemPropertiesData(_item.Serial);
-                            //if (itemPropertiesData != null)
-                            //{
-                            //    foreach (ItemPropertiesData.SinglePropertyData data in itemPropertiesData.singlePropertyData)
-                            //    {
-                            //        GameActions.Print(data.ToString());
-                            //    }
-                            //}
                         }
                     }
                 }
@@ -1263,6 +1268,14 @@ namespace ClassicUO.Game.UI.Gumps
                 if (ItemPositions.ContainsKey(specificSlot)) //Is the slot they wanted this item in already taken? Lets remove that item
                     ItemPositions.Remove(specificSlot);
                 ItemPositions.Add(specificSlot, serial); //Now we add this item at the desired slot
+            }
+
+            public GridItem FindItem(uint serial)
+            {
+                foreach (var slot in gridSlots)
+                    if (slot.Value.LocalSerial == serial)
+                        return slot.Value;
+                return null;
             }
 
             public void RebuildContainer(List<Item> filteredItems, string searchText = "", bool overrideSort = false)

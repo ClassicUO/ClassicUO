@@ -197,6 +197,7 @@ namespace ClassicUO.Game.UI.Controls
             finalString = finalString.Replace("</basefont>", "/cd").Replace("</BASEFONT>", "/cd").Replace("<br>", "\n").Replace("\n", "\n/cd");
             finalString = finalString.Replace("<left>", "").Replace("</left>", "");
             finalString = finalString.Replace("<b>", "").Replace("</b>", "");
+            finalString = finalString.Replace("</font>", "");
             return finalString;
         }
 

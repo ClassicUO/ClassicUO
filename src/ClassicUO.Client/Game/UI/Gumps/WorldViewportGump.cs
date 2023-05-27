@@ -117,6 +117,12 @@ namespace ClassicUO.Game.UI.Gumps
             Add(_button);
             Add(_systemChatControl);
             Resize();
+
+            if (ProfileManager.CurrentProfile.LastVersionHistoryShown != CUOEnviroment.Version.ToString())
+            {
+                UIManager.Add(new VersionHistory());
+                ProfileManager.CurrentProfile.LastVersionHistoryShown = CUOEnviroment.Version.ToString();
+            }
         }
 
 

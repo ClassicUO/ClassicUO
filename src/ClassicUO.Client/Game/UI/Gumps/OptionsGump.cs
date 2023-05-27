@@ -186,6 +186,7 @@ namespace ClassicUO.Game.UI.Gumps
         private HSliderBar _showSkillsMessageDelta;
 
         private Checkbox _leftAlignToolTips, _namePlateHealthOnlyWarmode, _enableHealthIndicator, _spellIconDisplayHotkey, _enableAlphaScrollWheel, _useModernShop, _forceCenterAlignMobileTooltips, _openHealthBarForLastAttack;
+        private Checkbox _hideJournalBorder, _hideJournalTimestamp, _gridHideBorder;
         private InputField _healthIndicatorPercentage, _healthIndicatorWidth;
         private ModernColorPicker.HueDisplay _mainWindowHuePicker, _spellIconHotkeyHue, _tooltipBGHue;
         private HSliderBar _spellIconScale, _journalFontSize, _tooltipFontSize, _gameWindowSideChatFontSize, _overheadFontSize, _overheadTextWidth, _textStrokeSize, _gridHightlightLineSize, _maxJournalEntries;
@@ -3747,6 +3748,9 @@ namespace ClassicUO.Game.UI.Gumps
                         ));
                 } //Grid border style
 
+                gridSection.Add(AddLabel(null, "Hide border around gump", 0, 0));
+                gridSection.AddRight(_gridHideBorder = AddCheckBox(null, "", _currentProfile.Grid_HideBorder, 0, 0));
+
                 {
                     gridSection.Add(AddLabel(null, "Default grid rows x columns", 0, 0));
                     gridSection.AddRight(_gridDefaultRows = AddInputField(null, 0, 0, 25, TEXTBOX_HEIGHT, numbersOnly: true));
@@ -3825,6 +3829,12 @@ namespace ClassicUO.Game.UI.Gumps
                             _currentProfile.JournalStyle, 0, 0, 150
                         ));
                 } //Journal opac and hue
+
+                section.Add(AddLabel(null, "Hide gump border", 0, 0));
+                section.AddRight(_hideJournalBorder = AddCheckBox(null, "", _currentProfile.HideJournalBorder, 0, 0));
+
+                section.Add(AddLabel(null, "Hide timestamp", 0, 0));
+                section.AddRight(_hideJournalTimestamp = AddCheckBox(null, "", _currentProfile.HideJournalTimestamp, 0, 0));
 
                 string[] availableFonts = TrueTypeLoader.Instance.Fonts;
 
@@ -3975,7 +3985,7 @@ namespace ClassicUO.Game.UI.Gumps
                 section.AddRight(_overheadTextWidth = AddHSlider(null, 100, 600, _currentProfile.OverheadChatWidth, 0, 0, 200));
                 section.PopIndent();
 
-                section.Add(AddLabel(null, "Below mobile health line size", 0 ,0));
+                section.Add(AddLabel(null, "Below mobile health line size", 0, 0));
                 section.AddRight(_healthLineSizeMultiplier = AddHSlider(null, 1, 5, _currentProfile.HealthLineSizeMultiplier, 0, 0, 150));
 
                 section.Add(AddLabel(null, "Open health bar gump for last attack automatically", 0, 0));
@@ -4146,6 +4156,13 @@ namespace ClassicUO.Game.UI.Gumps
 
                 section.Add(AddLabel(null, "Tooltip background hue", 0, 0));
                 section.AddRight(_tooltipBGHue = new ModernColorPicker.HueDisplay(_currentProfile.ToolTipBGHue, null, true));
+
+
+                NiceButton ttipO = new NiceButton(0, 0, 250, TEXTBOX_HEIGHT, ButtonAction.Activate, "Open tooltip override settings") { IsSelectable = false, DisplayBorder = true };
+                ttipO.SetTooltip("Warning: This is an advanced feature.");
+                ttipO.MouseUp += (s, e) => { UIManager.GetGump<ToolTipOverideMenu>()?.Dispose(); UIManager.Add(new ToolTipOverideMenu()); };
+
+                section.Add(ttipO);
 
                 rightArea.Add(section);
                 startY += section.Height + SPACING;
@@ -4731,6 +4748,13 @@ namespace ClassicUO.Game.UI.Gumps
 
             _currentProfile.MaxJournalEntries = _maxJournalEntries.Value;
 
+            if (_currentProfile.HideJournalBorder != _hideJournalBorder.IsChecked)
+            {
+                _currentProfile.HideJournalBorder = _hideJournalBorder.IsChecked;
+                UIManager.GetGump<ResizableJournal>()?.BuildBorder();
+            }
+            _currentProfile.HideJournalTimestamp = _hideJournalTimestamp.IsChecked;
+
             _currentProfile.TextBorderSize = _textStrokeSize.Value;
 
             _currentProfile.ForceCenterAlignTooltipMobiles = _forceCenterAlignMobileTooltips.IsChecked;
@@ -4822,14 +4846,16 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            if (_currentProfile.Grid_BorderStyle != _gridBorderStyle.SelectedIndex)
+            if (_currentProfile.Grid_BorderStyle != _gridBorderStyle.SelectedIndex || _currentProfile.Grid_HideBorder != _gridHideBorder.IsChecked)
             {
                 _currentProfile.Grid_BorderStyle = _gridBorderStyle.SelectedIndex;
+                _currentProfile.Grid_HideBorder = _gridHideBorder.IsChecked;
                 foreach (GridContainer gridContainer in UIManager.Gumps.OfType<GridContainer>())
                 {
                     gridContainer.BuildBorder();
                 }
             }
+
 
             _currentProfile.ImprovedBuffBarHue = _improvedBuffBarHue.Hue;
 

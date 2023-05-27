@@ -98,6 +98,13 @@ namespace ClassicUO
                 sb.AppendLine();
                 sb.AppendLine();
 
+                System.Threading.Tasks.Task reportCrash = System.Threading.Tasks.Task.Factory.StartNew(() =>
+                {
+                    string s = "CV: " + Settings.GlobalSettings.ClientVersion + " - TUO: " + CUOEnviroment.Version.ToString() + "\n" + e.ExceptionObject.ToString();
+                    s = s.Substring(0, 1500);
+                    new CrashReportWebhook().SendMessage($"``` {s} ```")?.Dispose();
+                });
+
                 Log.Panic(e.ExceptionObject.ToString());
                 string path = Path.Combine(CUOEnviroment.ExecutablePath, "Logs");
 
@@ -108,6 +115,7 @@ namespace ClassicUO
                 {
                     crashfile.WriteAsync(sb.ToString()).RunSynchronously();
                 }
+                reportCrash.Wait();
             };
 #endif
             ReadSettingsFromArgs(args);
@@ -241,6 +249,7 @@ namespace ClassicUO
 
                         break;
                 }
+
 
                 Client.Run();
             }
