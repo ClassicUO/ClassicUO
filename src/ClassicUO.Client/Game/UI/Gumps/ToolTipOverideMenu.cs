@@ -54,7 +54,25 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         Area _a;
                         highlightSectionScroll.Add(_a = NewAreaSection(ProfileManager.CurrentProfile.ToolTipOverride_SearchText.Count, y));
-                        y += _a.Height + 2;
+                        y += _a.Height + 5;
+                    }
+                };
+
+                section.AddRight(_ = new NiceButton(0, 0, 50, 20, ButtonAction.Activate, "Export") { IsSelectable = false, DisplayBorder = true });
+                _.MouseUp += (s, e) =>
+                {
+                    if (e.Button == Input.MouseButtonType.Left)
+                    {
+                        ToolTipOverrideData.ExportOverrideSettings();
+                    }
+                };
+
+                section.AddRight(_ = new NiceButton(0, 0, 50, 20, ButtonAction.Activate, "Import") { IsSelectable = false, DisplayBorder = true });
+                _.MouseUp += (s, e) =>
+                {
+                    if (e.Button == Input.MouseButtonType.Left)
+                    {
+                        ToolTipOverrideData.ImportOverrideSettings();
                     }
                 };
 

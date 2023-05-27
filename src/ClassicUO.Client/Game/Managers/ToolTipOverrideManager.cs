@@ -1,17 +1,22 @@
 ﻿using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using Microsoft.Xna.Framework;
+using System.IO;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace ClassicUO.Game.Managers
 {
+    [JsonSerializable(typeof(ToolTipOverrideData))]
     internal class ToolTipOverrideData
     {
-        private ToolTipOverrideData(int index, string searchText, string formattedText, int min1, int max1, int min2, int max2, byte layer)
+        public ToolTipOverrideData() { }
+        public ToolTipOverrideData(int index, string searchText, string formattedText, int min1, int max1, int min2, int max2, byte layer)
         {
             Index = index;
             SearchText = searchText;
@@ -142,6 +147,72 @@ namespace ClassicUO.Game.Managers
             return result;
         }
 
+        public static void ExportOverrideSettings()
+        {
+            ToolTipOverrideData[] allData = GetAllToolTipOverrides();
+
+            Thread t = new Thread(() =>
+            {
+                SaveFileDialog saveFileDialog1 = new SaveFileDialog();
+                saveFileDialog1.Filter = "Json|*.json";
+                saveFileDialog1.Title = "Save tooltip override settings";
+                saveFileDialog1.ShowDialog();
+
+                string result = JsonSerializer.Serialize(allData);
+
+                // If the file name is not an empty string open it for saving.
+                if (saveFileDialog1.FileName != "")
+                {
+                    System.IO.FileStream fs =
+                        (System.IO.FileStream)saveFileDialog1.OpenFile();
+                    // NOTE that the FilterIndex property is one-based.
+                    switch (saveFileDialog1.FilterIndex)
+                    {
+                        default:
+                            byte[] data = Encoding.UTF8.GetBytes(result);
+                            fs.Write(data, 0, data.Length);
+                            break;
+                    }
+
+                    fs.Close();
+                }
+            });
+            t.SetApartmentState(ApartmentState.STA);
+            t.Start();
+        }
+
+        public static void ImportOverrideSettings()
+        {
+            Thread t = new Thread(() =>
+            {
+                OpenFileDialog openFileDialog = new OpenFileDialog();
+                openFileDialog.Filter = "Json|*.json";
+                openFileDialog.Title = "Import tooltip override settings";
+                openFileDialog.ShowDialog();
+
+                // If the file name is not an empty string open it for saving.
+                if (openFileDialog.FileName != "")
+                {
+                    // NOTE that the FilterIndex property is one-based.
+                    switch (openFileDialog.FilterIndex)
+                    {
+                        default:
+                            string result = File.ReadAllText(openFileDialog.FileName);
+
+                            ToolTipOverrideData[] imported = JsonSerializer.Deserialize<ToolTipOverrideData[]>(result);
+
+                            foreach (ToolTipOverrideData importedData in imported)
+                                //GameActions.Print(importedData.searchText);
+                                new ToolTipOverrideData(ProfileManager.CurrentProfile.ToolTipOverride_SearchText.Count, importedData.searchText, importedData.FormattedText, importedData.Min1, importedData.Max1, importedData.Min2, importedData.Max2, (byte)importedData.ItemLayer).Save();
+
+                            break;
+                    }
+                }
+            });
+            t.SetApartmentState(ApartmentState.STA);
+            t.Start();
+        }
+
         public static string ProcessTooltipText(uint serial)
         {
             string tooltip = "";
@@ -171,7 +242,8 @@ namespace ClassicUO.Game.Managers
                                         {
                                             tooltip += string.Format(overrideData.FormattedText, property.Name, property.FirstValue.ToString(), property.SecondValue.ToString()) + "\n";
                                             handled = true;
-                                        } catch(System.FormatException e) {  }
+                                        }
+                                        catch (System.FormatException e) { }
                                     }
                         }
                     }
@@ -226,26 +298,29 @@ namespace ClassicUO.Game.Managers
             }
             return null;
         }
-        
+
         private static bool checkLayers(TooltipLayers overrideLayer, byte itemLayer)
+        {
+            if ((byte)overrideLayer == itemLayer)
+                return true;
+
+            if (overrideLayer == TooltipLayers.Body_Group)
             {
-                if ((byte)overrideLayer == itemLayer)
+                if (itemLayer == (byte)Layer.Shoes || itemLayer == (byte)Layer.Pants || itemLayer == (byte)Layer.Shirt || itemLayer == (byte)Layer.Helmet || itemLayer == (byte)Layer.Necklace || itemLayer == (byte)Layer.Arms || itemLayer == (byte)Layer.Gloves || itemLayer == (byte)Layer.Waist || itemLayer == (byte)Layer.Torso || itemLayer == (byte)Layer.Tunic || itemLayer == (byte)Layer.Legs || itemLayer == (byte)Layer.Skirt || itemLayer == (byte)Layer.Cloak || itemLayer == (byte)Layer.Robe)
                     return true;
-
-                if(overrideLayer == TooltipLayers.Body_Group)
-                {
-                    if (itemLayer == (byte)Layer.Shoes || itemLayer == (byte)Layer.Pants || itemLayer == (byte)Layer.Shirt || itemLayer == (byte)Layer.Helmet || itemLayer == (byte)Layer.Necklace || itemLayer == (byte)Layer.Arms || itemLayer == (byte)Layer.Gloves || itemLayer == (byte)Layer.Waist || itemLayer == (byte)Layer.Torso || itemLayer == (byte)Layer.Tunic || itemLayer == (byte)Layer.Legs || itemLayer == (byte)Layer.Skirt || itemLayer == (byte)Layer.Cloak || itemLayer == (byte)Layer.Robe)
-                        return true;
-                } else if (overrideLayer == TooltipLayers.Jewelry_Group)
-                {
-                    if (itemLayer == (byte)Layer.Talisman || itemLayer == (byte)Layer.Bracelet || itemLayer == (byte)Layer.Ring || itemLayer == (byte)Layer.Earrings)
-                        return true;
-                } else if (overrideLayer == TooltipLayers.Weapon_Group) {
-                    if(itemLayer == (byte)Layer.OneHanded || itemLayer == (byte)Layer.TwoHanded)
-                        return true;
-                }
-
-                return false;
             }
+            else if (overrideLayer == TooltipLayers.Jewelry_Group)
+            {
+                if (itemLayer == (byte)Layer.Talisman || itemLayer == (byte)Layer.Bracelet || itemLayer == (byte)Layer.Ring || itemLayer == (byte)Layer.Earrings)
+                    return true;
+            }
+            else if (overrideLayer == TooltipLayers.Weapon_Group)
+            {
+                if (itemLayer == (byte)Layer.OneHanded || itemLayer == (byte)Layer.TwoHanded)
+                    return true;
+            }
+
+            return false;
+        }
     }
 }
