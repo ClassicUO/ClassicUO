@@ -5144,6 +5144,7 @@ namespace ClassicUO.Network
             if (inBuyList && container != null && SerialHelper.IsValid(container.Serial))
             {
                 UIManager.GetGump<ShopGump>(container.RootContainer)?.SetNameTo((Item)entity, name);
+                UIManager.GetGump<ModernShopGump>(container.RootContainer)?.SetNameTo((Item)entity, name);
             }
         }
 

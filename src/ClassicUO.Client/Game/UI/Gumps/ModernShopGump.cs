@@ -1,17 +1,16 @@
 ﻿using ClassicUO.Assets;
 using ClassicUO.Configuration;
-using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
+using ClassicUO.Resources;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -130,6 +129,21 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
+        public void SetNameTo(Item item, string name)
+        {
+            if (!string.IsNullOrEmpty(name))
+            {
+                for (int i = 0; i < shopItems.Count; i++)
+                {
+                    if (shopItems[i].Serial == item.Serial)
+                    {
+                        shopItems[i].SetName(name);
+                        break;
+                    }
+                }
+            }
+        }
+
         public void AddItem
             (
                 uint serial,
@@ -178,7 +192,9 @@ namespace ClassicUO.Game.UI.Gumps
             AlphaBlendControl backgound;
             Area itemInfo, purchaseSell;
             BuySellButton buySellButton;
+            private readonly bool isPurchase;
             private readonly uint gumpSerial;
+            TextBox textBoxName;
 
             public ShopItem(uint serial, ushort graphic, ushort hue, int count, uint price, string name, int width, int height, bool isPurchase, uint gumpSerial)
             {
@@ -188,6 +204,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Count = count;
                 Price = price;
                 Name = name;
+                this.isPurchase = isPurchase;
                 this.gumpSerial = gumpSerial;
                 Width = width;
                 Height = height;
@@ -202,15 +219,15 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Add(backgound = new AlphaBlendControl(0.01f) { Width = Width, Height = Height });
 
-                Add(new ResizableStaticPic(Graphic, Height, Height) { Hue = hue, AcceptMouseInput = false });
+                //Add(new ResizableStaticPic(Graphic, Height, Height) { Hue = hue, AcceptMouseInput = false });
 
                 itemInfo = new Area(false) { Width = Width - Height, Height = Height, X = Height, AcceptMouseInput = false };
                 purchaseSell = new Area(false) { Width = Width - Height, Height = Height, X = Height, AcceptMouseInput = false, IsVisible = false };
 
                 #region ITEM INFO
                 TextBox _;
-                itemInfo.Add(_ = new TextBox(Name, TrueTypeLoader.EMBEDDED_FONT, 25, ITEM_DESCPTION_WIDTH - Height, Color.White, strokeEffect: false));
-                _.Y = (itemInfo.Height - _.MeasuredSize.Y) / 2;
+                itemInfo.Add(textBoxName = new TextBox(Name, TrueTypeLoader.EMBEDDED_FONT, 25, ITEM_DESCPTION_WIDTH - Height, Color.White, strokeEffect: false));
+                textBoxName.Y = (itemInfo.Height - textBoxName.MeasuredSize.Y) / 2;
 
                 TextBox countTB;
                 itemInfo.Add(countTB = new TextBox($"x{count}", TrueTypeLoader.EMBEDDED_FONT, 20, ITEM_DESCPTION_WIDTH - Height, Color.WhiteSmoke, FontStashSharp.RichText.TextHorizontalAlignment.Right, false) { Y = 3 });
@@ -246,7 +263,7 @@ namespace ClassicUO.Game.UI.Gumps
                     theItem.Add(serial, (ushort)quantity.Value);
 
                     Tuple<uint, ushort>[] item = theItem.Select(t => new Tuple<uint, ushort>(t.Key, (ushort)t.Value)).ToArray();
-                  
+
                     if (isPurchase)
                     {
                         NetClient.Socket.Send_BuyRequest(gumpSerial, item);
@@ -279,6 +296,12 @@ namespace ClassicUO.Game.UI.Gumps
                 Add(new SimpleBorder() { Width = Width, Height = Height, Hue = 0, Alpha = 0.2f });
             }
 
+            public void SetName(string s)
+            {
+                Name = s;
+                textBoxName.Text = Name;
+            }
+
             protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
             {
                 base.OnMouseDoubleClick(x, y, button);
@@ -298,7 +321,106 @@ namespace ClassicUO.Game.UI.Gumps
                     backgound.Alpha = 0.6f;
                 else
                     backgound.Alpha = 0.01f;
-                return base.Draw(batcher, x, y);
+
+                base.Draw(batcher, x, y);
+
+                Vector3 hueVector;
+
+                if (isPurchase && SerialHelper.IsMobile(Serial))
+                {
+                    ushort graphic = Graphic;
+
+                    if (graphic >= AnimationsLoader.MAX_ANIMATIONS_DATA_INDEX_COUNT)
+                    {
+                        graphic = 0;
+                    }
+
+                    byte group = GetAnimGroup(graphic);
+                    var frames = AnimationsLoader.Instance.GetAnimationFrames(graphic, group, 1, out var hue2, out _, true);
+
+                    if (frames.Length != 0)
+                    {
+                        hueVector = ShaderHueTranslator.GetHueVector(hue2, TileDataLoader.Instance.StaticData[Graphic].IsPartialHue, 1f);
+
+                        ref var spriteInfo = ref frames[0];
+
+                        if (spriteInfo.Texture != null)
+                        {
+                            batcher.Draw
+                            (
+                                spriteInfo.Texture,
+                                new Rectangle
+                                (
+                                    x,
+                                    y,
+                                    Math.Min(spriteInfo.UV.Width, Height),
+                                    Math.Min(spriteInfo.UV.Height, Height)
+                                ),
+                                spriteInfo.UV,
+                                hueVector
+                            );
+                        }
+                    }
+                }
+                else
+                {
+                    var texture = ArtLoader.Instance.GetStaticTexture(Graphic, out var bounds);
+
+                    hueVector = ShaderHueTranslator.GetHueVector(Hue, TileDataLoader.Instance.StaticData[Graphic].IsPartialHue, 1f);
+
+                    var rect = ArtLoader.Instance.GetRealArtBounds(Graphic);
+
+                    Point originalSize = new Point(Height, Height);
+                    Point point = new Point();
+
+                    if (rect.Width < Height)
+                    {
+                        originalSize.X = rect.Width;
+                        point.X = (Height >> 1) - (originalSize.X >> 1);
+                    }
+
+                    if (rect.Height < Height)
+                    {
+                        originalSize.Y = rect.Height;
+                        point.Y = (Height >> 1) - (originalSize.Y >> 1);
+                    }
+
+                    batcher.Draw
+                    (
+                        texture,
+                        new Rectangle
+                        (
+                            x + point.X,
+                            y + point.Y,
+                            originalSize.X,
+                            originalSize.Y
+                        ),
+                        new Rectangle
+                        (
+                            bounds.X + rect.X,
+                            bounds.Y + rect.Y,
+                            rect.Width,
+                            rect.Height
+                        ),
+                        hueVector
+                    );
+                }
+
+                return true;
+            }
+
+            private static byte GetAnimGroup(ushort graphic)
+            {
+                switch (AnimationsLoader.Instance.GetGroupIndex(graphic))
+                {
+                    case ANIMATION_GROUPS.AG_LOW: return (byte)LOW_ANIMATION_GROUP.LAG_STAND;
+
+                    case ANIMATION_GROUPS.AG_HIGHT: return (byte)HIGHT_ANIMATION_GROUP.HAG_STAND;
+
+                    case ANIMATION_GROUPS.AG_PEOPLE: return (byte)PEOPLE_ANIMATION_GROUP.PAG_STAND;
+                }
+
+                return 0;
             }
 
             public bool MatchSearch(string text)
@@ -369,7 +491,7 @@ namespace ClassicUO.Game.UI.Gumps
             public ushort Hue { get; }
             public int Count { get; }
             public uint Price { get; }
-            public string Name { get; }
+            public string Name { get; set; }
         }
     }
 }
