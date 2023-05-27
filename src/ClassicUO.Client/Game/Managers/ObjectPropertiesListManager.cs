@@ -206,7 +206,7 @@ namespace ClassicUO.Game.Managers
             if (string.IsNullOrEmpty(tooltip))
                 return;
             Name = tooltip.Substring(0, tooltip.IndexOf("\n"));
-            RawData = tooltip.Substring(tooltip.IndexOf("\n") + 2);
+            RawData = tooltip.Substring(tooltip.IndexOf("\n") + 1);
             HasData = true;
             processData();
         }
