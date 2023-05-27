@@ -525,7 +525,7 @@ namespace ClassicUO.Game.GameObjects
                 graphic = mobile.GetGraphicForAnimation();
             }
 
-            if (graphic >= AnimationsLoader.MAX_ANIMATIONS_DATA_INDEX_COUNT)
+            if (graphic >= AnimationsLoader.Instance.MaxAnimationCount)
             {
                 return 0;
             }
@@ -1449,7 +1449,7 @@ namespace ClassicUO.Game.GameObjects
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static byte GetObjectNewAnimation(Mobile mobile, ushort type, ushort action, byte mode)
         {
-            if (mobile.Graphic >= AnimationsLoader.MAX_ANIMATIONS_DATA_INDEX_COUNT)
+            if (mobile.Graphic >= AnimationsLoader.Instance.MaxAnimationCount)
             {
                 return 0;
             }
