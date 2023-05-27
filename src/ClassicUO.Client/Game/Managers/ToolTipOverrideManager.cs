@@ -223,7 +223,7 @@ namespace ClassicUO.Game.Managers
 
             if (itemPropertiesData.HasData)
             {
-                tooltip += $"/c[yellow]{itemPropertiesData.Name}\n";
+                tooltip += ProfileManager.CurrentProfile == null ? $"/c[yellow]{itemPropertiesData.Name}\n" : string.Format(ProfileManager.CurrentProfile.TooltipHeaderFormat + "\n", itemPropertiesData.Name);
 
                 //Loop through each property
                 foreach (ItemPropertiesData.SinglePropertyData property in itemPropertiesData.singlePropertyData)
@@ -264,9 +264,9 @@ namespace ClassicUO.Game.Managers
 
             ToolTipOverrideData[] result = GetAllToolTipOverrides();
 
-            if (itemPropertiesData.HasData)
+            if (itemPropertiesData.HasData && result != null && result.Length > 0)
             {
-                tooltip += $"/c[yellow]{itemPropertiesData.Name}\n";
+                tooltip += ProfileManager.CurrentProfile == null ? $"/c[yellow]{itemPropertiesData.Name}\n" : string.Format(ProfileManager.CurrentProfile.TooltipHeaderFormat + "\n", itemPropertiesData.Name);
 
                 //Loop through each property
                 foreach (ItemPropertiesData.SinglePropertyData property in itemPropertiesData.singlePropertyData)

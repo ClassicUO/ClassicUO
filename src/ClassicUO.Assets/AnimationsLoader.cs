@@ -49,7 +49,7 @@ namespace ClassicUO.Assets
     {
         public const int MAX_ACTIONS = 80; // gargoyle is like 78
         public const int MAX_DIRECTIONS = 5;
-        const int MAX_ANIMATIONS_DATA_INDEX_COUNT = 2048;
+        public const int MAX_ANIMATIONS_DATA_INDEX_COUNT = 2048;
 
         private static AnimationsLoader _instance;
         private static BodyConvFlags _lastFlags = (BodyConvFlags)(-1);

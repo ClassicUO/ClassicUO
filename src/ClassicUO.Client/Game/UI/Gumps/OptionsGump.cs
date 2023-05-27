@@ -187,7 +187,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private Checkbox _leftAlignToolTips, _namePlateHealthOnlyWarmode, _enableHealthIndicator, _spellIconDisplayHotkey, _enableAlphaScrollWheel, _useModernShop, _forceCenterAlignMobileTooltips, _openHealthBarForLastAttack;
         private Checkbox _hideJournalBorder, _hideJournalTimestamp, _gridHideBorder;
-        private InputField _healthIndicatorPercentage, _healthIndicatorWidth;
+        private InputField _healthIndicatorPercentage, _healthIndicatorWidth, _tooltipHeaderFormat;
         private ModernColorPicker.HueDisplay _mainWindowHuePicker, _spellIconHotkeyHue, _tooltipBGHue;
         private HSliderBar _spellIconScale, _journalFontSize, _tooltipFontSize, _gameWindowSideChatFontSize, _overheadFontSize, _overheadTextWidth, _textStrokeSize, _gridHightlightLineSize, _maxJournalEntries;
         private HSliderBar _healthLineSizeMultiplier;
@@ -4157,6 +4157,9 @@ namespace ClassicUO.Game.UI.Gumps
                 section.Add(AddLabel(null, "Tooltip background hue", 0, 0));
                 section.AddRight(_tooltipBGHue = new ModernColorPicker.HueDisplay(_currentProfile.ToolTipBGHue, null, true));
 
+                section.Add(AddLabel(null, "Tooltip header format (Item name)", 0, 0));
+                section.AddRight(_tooltipHeaderFormat = AddInputField(null, 0, 0, 250, TEXTBOX_HEIGHT));
+                _tooltipHeaderFormat.SetText(_currentProfile.TooltipHeaderFormat);
 
                 NiceButton ttipO = new NiceButton(0, 0, 250, TEXTBOX_HEIGHT, ButtonAction.Activate, "Open tooltip override settings") { IsSelectable = false, DisplayBorder = true };
                 ttipO.SetTooltip("Warning: This is an advanced feature.");
@@ -4740,6 +4743,9 @@ namespace ClassicUO.Game.UI.Gumps
                     UIManager.Add(new ResizableJournal());
                 }
             }
+
+            if (_tooltipHeaderFormat.Text.Length > 0)
+                _currentProfile.TooltipHeaderFormat = _tooltipHeaderFormat.Text;
 
             _currentProfile.ToolTipBGHue = _tooltipBGHue.Hue;
 
