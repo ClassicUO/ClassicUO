@@ -703,6 +703,8 @@ namespace ClassicUO.Game.UI.Gumps
             }
             RePosition();
             OnResize();
+
+            BorderControl.IsVisible = !ProfileManager.CurrentProfile.Grid_HideBorder;
         }
 
         public void RePosition()

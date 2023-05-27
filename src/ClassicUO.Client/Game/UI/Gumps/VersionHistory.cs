@@ -14,7 +14,9 @@ namespace ClassicUO.Game.UI.Gumps
                 "- Added tooltip override feature (See wiki for more details)\n" +
                 "- Better rain\n" +
                 "- Fixed tooltips in vendor search\n" +
-                "- Fixed modern shop gump displaying wrong items at animal trainers",
+                "- Fixed modern shop gump displaying wrong items at animal trainers\n" +
+                "- Added hide border and timestamps to journal options\n" +
+                "- Added hide border option for grid containers",
 
             "/c[white][3.3.0]/cd\n" +
                 "-Last attack automatic healthbar gump will remember its position\n" +

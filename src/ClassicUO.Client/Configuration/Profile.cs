@@ -380,6 +380,7 @@ namespace ClassicUO.Configuration
         public int Grid_DefaultColumns { get; set; } = 4;
         public int Grid_DefaultRows { get; set; } = 4;
         public bool Grid_UseContainerHue { get; set; } = false;
+        public bool Grid_HideBorder { get; set; } = false;
         #endregion
 
         #region COOLDOWNS
@@ -481,6 +482,8 @@ namespace ClassicUO.Configuration
         public bool UseModernShopGump { get; set; } = false;
 
         public int MaxJournalEntries { get; set; } = 750;
+        public bool HideJournalBorder { get; set; } = false;
+        public bool HideJournalTimestamp { get; set; } = false;
 
         public int HealthLineSizeMultiplier { get; set; } = 1;
 
