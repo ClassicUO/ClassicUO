@@ -39,7 +39,7 @@ namespace ClassicUO.Game.Managers
             bool isNew = false;
             if (ProfileManager.CurrentProfile != null)
             {
-                string searchText = "Weapon Damage", formattedText = "DMG /c[orange]{0} /cd- /c[red]";
+                string searchText = "Weapon Damage", formattedText = "DMG /c[orange]{1} /cd- /c[red]{2}";
                 int min1 = -1, max1 = 99, min2 = -1, max2 = 99;
                 byte layer = (byte)TooltipLayers.Any;
 
