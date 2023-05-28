@@ -11,7 +11,8 @@ namespace ClassicUO.Game.UI.Gumps
                 "- Bug fix for EA egg event\n" +
                 "- Added tooltip header formatting(change item name color)\n" +
                 "- Damage hues fixed\n" +
-                "- Added fix for <h2> and <Bodytextcolor> tags",
+                "- Added fix for <h2> and <Bodytextcolor> tags\n" +
+                "- Tooltip crash fix",
 
             "/c[white][3.4.0]/cd\n" +
                 "- Added this version history gump\n" +
