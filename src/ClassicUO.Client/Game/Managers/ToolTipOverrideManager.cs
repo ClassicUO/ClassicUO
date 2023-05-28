@@ -198,16 +198,22 @@ namespace ClassicUO.Game.Managers
                     switch (openFileDialog.FilterIndex)
                     {
                         default:
-                            string result = File.ReadAllText(openFileDialog.FileName);
+                            try
+                            {
+                                string result = File.ReadAllText(openFileDialog.FileName);
 
-                            ToolTipOverrideData[] imported = JsonSerializer.Deserialize<ToolTipOverrideData[]>(result);
+                                ToolTipOverrideData[] imported = JsonSerializer.Deserialize<ToolTipOverrideData[]>(result);
 
-                            foreach (ToolTipOverrideData importedData in imported)
-                                //GameActions.Print(importedData.searchText);
-                                new ToolTipOverrideData(ProfileManager.CurrentProfile.ToolTipOverride_SearchText.Count, importedData.searchText, importedData.FormattedText, importedData.Min1, importedData.Max1, importedData.Min2, importedData.Max2, (byte)importedData.ItemLayer).Save();
+                                foreach (ToolTipOverrideData importedData in imported)
+                                    //GameActions.Print(importedData.searchText);
+                                    new ToolTipOverrideData(ProfileManager.CurrentProfile.ToolTipOverride_SearchText.Count, importedData.searchText, importedData.FormattedText, importedData.Min1, importedData.Max1, importedData.Min2, importedData.Max2, (byte)importedData.ItemLayer).Save();
 
-                            ToolTipOverideMenu.Reopen = true;
+                                ToolTipOverideMenu.Reopen = true;
 
+                            } catch(System.Exception e)
+                            {
+                                GameActions.Print("It looks like there was an error trying to import your override settings.", 32);
+                            }
                             break;
                     }
                 }
