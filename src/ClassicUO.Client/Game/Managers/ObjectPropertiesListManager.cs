@@ -290,7 +290,7 @@ namespace ClassicUO.Game.Managers
             {
                 OriginalString = line;
                 
-                string pattern = @"(\d+(\.)?(\d+)?)";
+                string pattern = @"(-?\d+(\.)?(\d+)?)";
                 MatchCollection matches = Regex.Matches(line, pattern, RegexOptions.CultureInvariant);
 
                 Match nameMatch = Regex.Match(line, @"(\D+)");
