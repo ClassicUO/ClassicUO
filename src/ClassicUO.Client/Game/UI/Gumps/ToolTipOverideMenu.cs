@@ -79,6 +79,29 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 };
 
+                section.AddRight(_ = new NiceButton(0, 0, 100, 20, ButtonAction.Activate, "Delete All") { IsSelectable = false, DisplayBorder = true });
+                _.SetTooltip("/c[red]This will remove ALL tooltip override settings.\nThis is not reversible.");
+                _.MouseUp += (s, e) =>
+                {
+                    if (e.Button == Input.MouseButtonType.Left)
+                    {
+                        UIManager.Add(new QuestionGump("Are you sure?", (a) =>
+                        {
+                            if (a)
+                            {
+                                ProfileManager.CurrentProfile.ToolTipOverride_SearchText = new List<string>();
+                                ProfileManager.CurrentProfile.ToolTipOverride_NewFormat = new List<string>();
+                                ProfileManager.CurrentProfile.ToolTipOverride_MinVal1 = new List<int>();
+                                ProfileManager.CurrentProfile.ToolTipOverride_MinVal2 = new List<int>();
+                                ProfileManager.CurrentProfile.ToolTipOverride_MaxVal1 = new List<int>();
+                                ProfileManager.CurrentProfile.ToolTipOverride_MaxVal2 = new List<int>();
+                                ProfileManager.CurrentProfile.ToolTipOverride_Layer = new List<byte>();
+                                Reopen = true;
+                            }
+                        }));
+                    }
+                };
+
                 Add(section);
                 y = section.Y + section.Height;
             }//Top section
@@ -90,7 +113,7 @@ namespace ClassicUO.Game.UI.Gumps
             for (int i = 0; i < ProfileManager.CurrentProfile.ToolTipOverride_SearchText.Count; i++)
             {
                 Area _a;
-                highlightSectionScroll.Add( _a = NewAreaSection(i, y));
+                highlightSectionScroll.Add(_a = NewAreaSection(i, y));
                 y += _a.Height + 5;
             }
 
@@ -234,7 +257,8 @@ namespace ClassicUO.Game.UI.Gumps
             };
 
             area.Add(_itemLater = new Combobox(_max2.X + _max2.Width + 5, _max2.Y, 110, Enum.GetNames(typeof(TooltipLayers)), Array.IndexOf(Enum.GetValues(typeof(TooltipLayers)), data.ItemLayer)));
-            _itemLater.OnOptionSelected += (s, e) => {
+            _itemLater.OnOptionSelected += (s, e) =>
+            {
                 data.ItemLayer = (TooltipLayers)(Enum.GetValues(typeof(TooltipLayers))).GetValue(_itemLater.SelectedIndex);
                 data.Save();
                 UIManager.Add(new SimpleTimedTextGump("Saved", Microsoft.Xna.Framework.Color.LightGreen, TimeSpan.FromSeconds(1)) { X = _itemLater.ScreenCoordinateX, Y = _itemLater.ScreenCoordinateY - 20 });
