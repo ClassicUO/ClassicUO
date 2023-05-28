@@ -13,7 +13,8 @@ namespace ClassicUO.Game.UI.Gumps
                 "- Damage hues fixed\n" +
                 "- Added fix for <h2> and <Bodytextcolor> tags\n" +
                 "- Tooltip crash fix\n" +
-                "- Added tooltip export and import buttons",
+                "- Added tooltip export and import buttons\n" +
+                "- Updated to the main CUO repo",
 
             "/c[white][3.4.0]/cd\n" +
                 "- Added this version history gump\n" +
