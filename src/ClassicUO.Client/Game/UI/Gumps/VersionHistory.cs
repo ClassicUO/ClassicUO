@@ -12,7 +12,8 @@ namespace ClassicUO.Game.UI.Gumps
                 "- Added tooltip header formatting(change item name color)\n" +
                 "- Damage hues fixed\n" +
                 "- Added fix for <h2> and <Bodytextcolor> tags\n" +
-                "- Tooltip crash fix",
+                "- Tooltip crash fix\n" +
+                "- Added tooltip export and import buttons",
 
             "/c[white][3.4.0]/cd\n" +
                 "- Added this version history gump\n" +
