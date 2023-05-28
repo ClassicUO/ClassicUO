@@ -246,6 +246,7 @@ namespace ClassicUO.Game.Managers
                                             {
                                                 tooltip += string.Format(overrideData.FormattedText, property.Name, property.FirstValue.ToString(), property.SecondValue.ToString()) + "\n";
                                                 handled = true;
+                                                break;
                                             }
                                             catch (System.FormatException e) { }
                                         }
@@ -290,6 +291,7 @@ namespace ClassicUO.Game.Managers
                                             {
                                                 tooltip += string.Format(overrideData.FormattedText, property.Name, property.FirstValue.ToString(), property.SecondValue.ToString()) + "\n";
                                                 handled = true;
+                                                break;
                                             }
                                             catch (System.FormatException e) { }
                                         }
@@ -297,6 +299,7 @@ namespace ClassicUO.Game.Managers
                     }
                     if (!handled) //Did not find a matching override, need to add the plain tooltip line still
                         tooltip += $"{property.OriginalString}\n";
+                    
                 }
 
                 return tooltip;

@@ -244,6 +244,7 @@ namespace ClassicUO.Game.UI.Gumps
                 if (e.Button == Input.MouseButtonType.Left)
                 {
                     data.Delete();
+                    UIManager.GetGump<ToolTipOverideMenu>()?.Dispose();
                     UIManager.Add(new ToolTipOverideMenu(X, Y));
                 }
             };
