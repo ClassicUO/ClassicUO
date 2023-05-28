@@ -232,20 +232,21 @@ namespace ClassicUO.Game.Managers
                     //Loop though each override setting player created
                     foreach (ToolTipOverrideData overrideData in result)
                     {
-                        if (overrideData.ItemLayer == TooltipLayers.Any || checkLayers(overrideData.ItemLayer, itemPropertiesData.item.ItemData.Layer))
-                        {
-                            if (property.OriginalString.ToLower().Contains(overrideData.SearchText.ToLower()))
-                                if (property.FirstValue == -1 || (property.FirstValue >= overrideData.Min1 && property.FirstValue <= overrideData.Max1))
-                                    if (property.SecondValue == -1 || (property.SecondValue >= overrideData.Min2 && property.SecondValue <= overrideData.Max2))
-                                    {
-                                        try
+                        if (overrideData != null)
+                            if (overrideData.ItemLayer == TooltipLayers.Any || checkLayers(overrideData.ItemLayer, itemPropertiesData.item.ItemData.Layer))
+                            {
+                                if (property.OriginalString.ToLower().Contains(overrideData.SearchText.ToLower()))
+                                    if (property.FirstValue == -1 || (property.FirstValue >= overrideData.Min1 && property.FirstValue <= overrideData.Max1))
+                                        if (property.SecondValue == -1 || (property.SecondValue >= overrideData.Min2 && property.SecondValue <= overrideData.Max2))
                                         {
-                                            tooltip += string.Format(overrideData.FormattedText, property.Name, property.FirstValue.ToString(), property.SecondValue.ToString()) + "\n";
-                                            handled = true;
+                                            try
+                                            {
+                                                tooltip += string.Format(overrideData.FormattedText, property.Name, property.FirstValue.ToString(), property.SecondValue.ToString()) + "\n";
+                                                handled = true;
+                                            }
+                                            catch (System.FormatException e) { }
                                         }
-                                        catch (System.FormatException e) { }
-                                    }
-                        }
+                            }
                     }
                     if (!handled) //Did not find a matching override, need to add the plain tooltip line still
                         tooltip += $"{property.OriginalString}\n";
@@ -275,20 +276,21 @@ namespace ClassicUO.Game.Managers
                     //Loop though each override setting player created
                     foreach (ToolTipOverrideData overrideData in result)
                     {
-                        if (overrideData.ItemLayer == TooltipLayers.Any || checkLayers(overrideData.ItemLayer, itemPropertiesData.item.ItemData.Layer))
-                        {
-                            if (property.OriginalString.ToLower().Contains(overrideData.SearchText.ToLower()))
-                                if (property.FirstValue == -1 || (property.FirstValue >= overrideData.Min1 && property.FirstValue <= overrideData.Max1))
-                                    if (property.SecondValue == -1 || (property.SecondValue >= overrideData.Min2 && property.SecondValue <= overrideData.Max2))
-                                    {
-                                        try
+                        if (overrideData != null)
+                            if (overrideData.ItemLayer == TooltipLayers.Any || checkLayers(overrideData.ItemLayer, itemPropertiesData.item.ItemData.Layer))
+                            {
+                                if (property.OriginalString.ToLower().Contains(overrideData.SearchText.ToLower()))
+                                    if (property.FirstValue == -1 || (property.FirstValue >= overrideData.Min1 && property.FirstValue <= overrideData.Max1))
+                                        if (property.SecondValue == -1 || (property.SecondValue >= overrideData.Min2 && property.SecondValue <= overrideData.Max2))
                                         {
-                                            tooltip += string.Format(overrideData.FormattedText, property.Name, property.FirstValue.ToString(), property.SecondValue.ToString()) + "\n";
-                                            handled = true;
+                                            try
+                                            {
+                                                tooltip += string.Format(overrideData.FormattedText, property.Name, property.FirstValue.ToString(), property.SecondValue.ToString()) + "\n";
+                                                handled = true;
+                                            }
+                                            catch (System.FormatException e) { }
                                         }
-                                        catch (System.FormatException e) { }
-                                    }
-                        }
+                            }
                     }
                     if (!handled) //Did not find a matching override, need to add the plain tooltip line still
                         tooltip += $"{property.OriginalString}\n";
