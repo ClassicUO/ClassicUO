@@ -1,6 +1,7 @@
 ﻿using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.UI.Gumps;
 using Microsoft.Xna.Framework;
 using System.IO;
 using System.Text;
@@ -205,6 +206,8 @@ namespace ClassicUO.Game.Managers
                                 //GameActions.Print(importedData.searchText);
                                 new ToolTipOverrideData(ProfileManager.CurrentProfile.ToolTipOverride_SearchText.Count, importedData.searchText, importedData.FormattedText, importedData.Min1, importedData.Max1, importedData.Min2, importedData.Max2, (byte)importedData.ItemLayer).Save();
 
+                            UIManager.GetGump<ToolTipOverideMenu>()?.Dispose();
+                            UIManager.Add(new ToolTipOverideMenu());
                             break;
                     }
                 }
@@ -277,7 +280,7 @@ namespace ClassicUO.Game.Managers
                     foreach (ToolTipOverrideData overrideData in result)
                     {
                         if (overrideData != null)
-                            if (overrideData.ItemLayer == TooltipLayers.Any || checkLayers(overrideData.ItemLayer, itemPropertiesData.item.ItemData.Layer))
+                            if (overrideData.ItemLayer == TooltipLayers.Any)
                             {
                                 if (property.OriginalString.ToLower().Contains(overrideData.SearchText.ToLower()))
                                     if (property.FirstValue == -1 || (property.FirstValue >= overrideData.Min1 && property.FirstValue <= overrideData.Max1))
