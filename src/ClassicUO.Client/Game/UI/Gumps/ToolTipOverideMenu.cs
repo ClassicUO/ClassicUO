@@ -2,6 +2,7 @@
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
+using ClassicUO.Renderer;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,6 +18,8 @@ namespace ClassicUO.Game.UI.Gumps
         private AlphaBlendControl background;
         private SettingsSection highlightSection;
         private ScrollArea highlightSectionScroll;
+
+        public static bool Reopen = false;
 
         public ToolTipOverideMenu(int x = 200, int y = 200) : base(0, 0)
         {
@@ -249,6 +252,18 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             };
             return area;
+        }
+
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        {
+            if (Reopen)
+            {
+                Reopen = false;
+                Dispose();
+                UIManager.Add(new ToolTipOverideMenu(X, Y));
+            }
+
+            return base.Draw(batcher, x, y);
         }
     }
 }

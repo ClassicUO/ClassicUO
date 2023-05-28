@@ -206,6 +206,8 @@ namespace ClassicUO.Game.Managers
                                 //GameActions.Print(importedData.searchText);
                                 new ToolTipOverrideData(ProfileManager.CurrentProfile.ToolTipOverride_SearchText.Count, importedData.searchText, importedData.FormattedText, importedData.Min1, importedData.Max1, importedData.Min2, importedData.Max2, (byte)importedData.ItemLayer).Save();
 
+                            ToolTipOverideMenu.Reopen = true;
+
                             break;
                     }
                 }
@@ -297,7 +299,7 @@ namespace ClassicUO.Game.Managers
                     }
                     if (!handled) //Did not find a matching override, need to add the plain tooltip line still
                         tooltip += $"{property.OriginalString}\n";
-                    
+
                 }
 
                 return tooltip;
