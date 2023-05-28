@@ -7,6 +7,15 @@ namespace ClassicUO.Game.UI.Gumps
     internal class VersionHistory : Gump
     {
         private static string[] updateTexts = {
+            "/c[white][3.5.0]/cd\n" +
+                "- Bug fix for EA egg event\n" +
+                "- Added tooltip header formatting(change item name color)\n" +
+                "- Damage hues fixed\n" +
+                "- Added fix for <h2> and <Bodytextcolor> tags\n" +
+                "- Tooltip crash fix\n" +
+                "- Added tooltip export and import buttons\n" +
+                "- Updated to the main CUO repo",
+
             "/c[white][3.4.0]/cd\n" +
                 "- Added this version history gump\n" +
                 "- Added /c[green]-version/cd command to open this gump\n" +

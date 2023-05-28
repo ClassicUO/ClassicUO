@@ -54,7 +54,25 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         Area _a;
                         highlightSectionScroll.Add(_a = NewAreaSection(ProfileManager.CurrentProfile.ToolTipOverride_SearchText.Count, y));
-                        y += _a.Height + 2;
+                        y += _a.Height + 5;
+                    }
+                };
+
+                section.AddRight(_ = new NiceButton(0, 0, 50, 20, ButtonAction.Activate, "Export") { IsSelectable = false, DisplayBorder = true });
+                _.MouseUp += (s, e) =>
+                {
+                    if (e.Button == Input.MouseButtonType.Left)
+                    {
+                        ToolTipOverrideData.ExportOverrideSettings();
+                    }
+                };
+
+                section.AddRight(_ = new NiceButton(0, 0, 50, 20, ButtonAction.Activate, "Import") { IsSelectable = false, DisplayBorder = true });
+                _.MouseUp += (s, e) =>
+                {
+                    if (e.Button == Input.MouseButtonType.Left)
+                    {
+                        ToolTipOverrideData.ImportOverrideSettings();
                     }
                 };
 
@@ -70,7 +88,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Area _a;
                 highlightSectionScroll.Add( _a = NewAreaSection(i, y));
-                y += _a.Height + 2;
+                y += _a.Height + 5;
             }
 
             Add(highlightSection);
@@ -80,8 +98,10 @@ namespace ClassicUO.Game.UI.Gumps
         {
             ToolTipOverrideData data = ToolTipOverrideData.Get(keyLoc);
             Area area = new Area() { Y = y };
-            area.Width = WIDTH - 20;
-            area.Height = 40;
+            area.Width = WIDTH - 35;
+            area.Height = 45;
+            area.WantUpdateSize = false;
+            area.CanMove = true;
             y = 0;
 
             NiceButton _del;
@@ -108,7 +128,7 @@ namespace ClassicUO.Game.UI.Gumps
             };
 
 
-            area.Add(_formatText = new InputField(0x0BB8, 0xFF, 0xFFFF, true, 200, 20) { X = _searchText.X + _searchText.Width + 5, Y = y, AcceptKeyboardInput = true });
+            area.Add(_formatText = new InputField(0x0BB8, 0xFF, 0xFFFF, true, 230, 20) { X = _searchText.X + _searchText.Width + 5, Y = y, AcceptKeyboardInput = true });
             _formatText.SetText(data.FormattedText);
             _formatText.TextChanged += (s, e) =>
             {
@@ -210,7 +230,7 @@ namespace ClassicUO.Game.UI.Gumps
                 });
             };
 
-            area.Add(_itemLater = new Combobox(_max2.X + _max2.Width + 5, _max2.Y, 80, Enum.GetNames(typeof(TooltipLayers)), Array.IndexOf(Enum.GetValues(typeof(TooltipLayers)), data.ItemLayer)));
+            area.Add(_itemLater = new Combobox(_max2.X + _max2.Width + 5, _max2.Y, 110, Enum.GetNames(typeof(TooltipLayers)), Array.IndexOf(Enum.GetValues(typeof(TooltipLayers)), data.ItemLayer)));
             _itemLater.OnOptionSelected += (s, e) => {
                 data.ItemLayer = (TooltipLayers)(Enum.GetValues(typeof(TooltipLayers))).GetValue(_itemLater.SelectedIndex);
                 data.Save();
@@ -224,7 +244,7 @@ namespace ClassicUO.Game.UI.Gumps
                 if (e.Button == Input.MouseButtonType.Left)
                 {
                     data.Delete();
-                    Dispose();
+                    UIManager.GetGump<ToolTipOverideMenu>()?.Dispose();
                     UIManager.Add(new ToolTipOverideMenu(X, Y));
                 }
             };

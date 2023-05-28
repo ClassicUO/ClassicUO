@@ -109,20 +109,20 @@ namespace ClassicUO.Game.GameObjects
         {
             TextObject text_obj = TextObject.Create();
 
-            ushort hue = 0x0021;
+            ushort hue = ProfileManager.CurrentProfile == null ? (ushort)0x0021 : ProfileManager.CurrentProfile.DamageHueOther;
 
             if (ReferenceEquals(Parent, World.Player))
-                hue = 0x0034;
+                hue = ProfileManager.CurrentProfile == null ? (ushort)0x0034 : ProfileManager.CurrentProfile.DamageHueSelf;
             else if (Parent is Mobile)
             {
                 Mobile _parent = (Mobile)Parent;
                 if (_parent.IsRenamable && _parent.NotorietyFlag != NotorietyFlag.Invulnerable && _parent.NotorietyFlag != NotorietyFlag.Enemy)
-                    hue = 0x0033;
+                    hue = ProfileManager.CurrentProfile == null ? (ushort)0x0033 : ProfileManager.CurrentProfile.DamageHuePet;
                 else if (_parent.NotorietyFlag == NotorietyFlag.Ally)
-                    hue = 0x0030;
+                    hue = ProfileManager.CurrentProfile == null ? (ushort)0x0030 : ProfileManager.CurrentProfile.DamageHueAlly;
 
                 if (_parent.Serial == TargetManager.LastAttack)
-                    hue = 0x1F;
+                    hue = ProfileManager.CurrentProfile == null ? (ushort)0x1F : ProfileManager.CurrentProfile.DamageHueLastAttck;
             }
 
             text_obj.TextBox = new UI.Controls.TextBox(damage.ToString(), ProfileManager.CurrentProfile.OverheadChatFont, ProfileManager.CurrentProfile.OverheadChatFontSize, ProfileManager.CurrentProfile.OverheadChatWidth, hue, align: FontStashSharp.RichText.TextHorizontalAlignment.Center);

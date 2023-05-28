@@ -507,6 +507,8 @@ namespace ClassicUO.Configuration
         public List<byte> ToolTipOverride_Layer { get; set; } = new List<byte>() { (byte)TooltipLayers.Any, (byte)TooltipLayers.Any, (byte)TooltipLayers.Any, (byte)TooltipLayers.Any, (byte)TooltipLayers.Any };
         #endregion
 
+        public string TooltipHeaderFormat { get; set; } = "/c[yellow]{0}";
+
         public static uint GumpsVersion { get; private set; }
 
         public void Save(string path, bool saveGumps = true)

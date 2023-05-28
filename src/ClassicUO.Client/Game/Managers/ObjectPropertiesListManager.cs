@@ -180,8 +180,8 @@ namespace ClassicUO.Game.Managers
     internal class ItemPropertiesData
     {
         public readonly bool HasData = false;
-        public readonly string Name;
-        public readonly string RawData;
+        public readonly string Name = "";
+        public readonly string RawData = "";
         public readonly uint serial;
         public string[] RawLines;
         public readonly Item item;
