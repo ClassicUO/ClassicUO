@@ -151,7 +151,7 @@ namespace ClassicUO.Game.UI
             Vector3 hue_vec = ShaderHueTranslator.GetHueVector(1, false, alpha);
 
             if (ProfileManager.CurrentProfile != null)
-                hue_vec.X = ProfileManager.CurrentProfile.ToolTipBGHue;
+                hue_vec.X = ProfileManager.CurrentProfile.ToolTipBGHue - 1;
 
             batcher.Draw
             (

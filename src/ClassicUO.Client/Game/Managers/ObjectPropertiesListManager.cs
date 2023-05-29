@@ -37,6 +37,7 @@ using System.Threading.Tasks;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Network;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace ClassicUO.Game.Managers
 {
@@ -288,12 +289,17 @@ namespace ClassicUO.Game.Managers
             public SinglePropertyData(string line)
             {
                 OriginalString = line;
-                string pattern = @"(\d+(\.)?(\d+)?)";
+                
+                string pattern = @"(-?\d+(\.)?(\d+)?)";
                 MatchCollection matches = Regex.Matches(line, pattern, RegexOptions.CultureInvariant);
 
                 Match nameMatch = Regex.Match(line, @"(\D+)");
                 if (nameMatch.Success)
+                {
                     Name = nameMatch.Value;
+                    //Name = Regex.Replace(Name, "/c[\"?'?(?<color>.*?)\"?'?]", "", RegexOptions.Multiline | RegexOptions.IgnoreCase);
+                    Name = Name.Replace("/cd", "");
+                }
 
                 if (matches.Count > 0)
                 {
