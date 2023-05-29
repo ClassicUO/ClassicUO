@@ -177,20 +177,20 @@ namespace ClassicUO.Game.UI.Gumps
                         borderSize = 16;
                         break;
                     }
-                case BorderStyle.Style9:
-                    {
-                        if (Assets.GumpsLoader.Instance.GetGumpTexture(40313, out var bounds) != null)
-                        {
-                            graphic = 40313;
-                            borderSize = 75;
-                        }
-                        else
-                        {
-                            graphic = 83;
-                            borderSize = 16;
-                        }
-                        break;
-                    }
+                //case BorderStyle.Style9:
+                //    {
+                //        if (Assets.GumpsLoader.Instance.GetGumpTexture(40313, out var bounds) != null)
+                //        {
+                //            graphic = 40313;
+                //            borderSize = 75;
+                //        }
+                //        else
+                //        {
+                //            graphic = 83;
+                //            borderSize = 16;
+                //        }
+                //        break;
+                //    }
 
                 default:
                 case BorderStyle.Default:
