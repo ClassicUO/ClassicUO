@@ -11,7 +11,8 @@ namespace ClassicUO.Game.UI.Gumps
                 "- Tooltip import crash fix\n" +
                 "- Tooltip delete all override button added\n" +
                 "- Tooltip override color fix\n" +
-                "- Added an error message when importing tooltip override fails",
+                "- Added an error message when importing tooltip override fails\n" +
+                "- Fixed tooltip background hue offset",
 
             "/c[white][3.5.0]/cd\n" +
                 "- Bug fix for EA egg event\n" +
