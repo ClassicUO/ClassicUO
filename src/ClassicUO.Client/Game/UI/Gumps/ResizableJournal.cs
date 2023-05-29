@@ -138,7 +138,8 @@ namespace ClassicUO.Game.UI.Gumps
             Style5,
             Style6,
             Style7,
-            Style8
+            Style8,
+            //Style9
         }
 
         public void BuildBorder()
@@ -168,12 +169,28 @@ namespace ClassicUO.Game.UI.Gumps
                     graphic = 9260; borderSize = 17;
                     break;
                 case BorderStyle.Style8:
-                    if (Assets.GumpsLoader.Instance.GetGumpTexture(40303, out var bounds) != null)
-                        graphic = 40303;
-                    else
-                        graphic = 83;
-                    borderSize = 16;
-                    break;
+                    {
+                        if (Assets.GumpsLoader.Instance.GetGumpTexture(40303, out var bounds) != null)
+                            graphic = 40303;
+                        else
+                            graphic = 83;
+                        borderSize = 16;
+                        break;
+                    }
+                case BorderStyle.Style9:
+                    {
+                        if (Assets.GumpsLoader.Instance.GetGumpTexture(40313, out var bounds) != null)
+                        {
+                            graphic = 40313;
+                            borderSize = 75;
+                        }
+                        else
+                        {
+                            graphic = 83;
+                            borderSize = 16;
+                        }
+                        break;
+                    }
 
                 default:
                 case BorderStyle.Default:
@@ -350,7 +367,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     foreach (JournalData journalEntry in journalDatas)
                     {
-                        if (journalEntry == null)
+                        if (journalEntry == null || string.IsNullOrEmpty(journalEntry.EntryText.Text))
                             continue;
 
                         if (!CanBeDrawn(journalEntry.TextType, journalEntry.MessageType))
