@@ -96,10 +96,13 @@ namespace ClassicUO.Game.UI
             if (_textBox == null || _dirty)
             {
                 FontStashSharp.RichText.TextHorizontalAlignment align = FontStashSharp.RichText.TextHorizontalAlignment.Center;
-                if (ProfileManager.CurrentProfile.LeftAlignToolTips)
-                    align = FontStashSharp.RichText.TextHorizontalAlignment.Left;
-                if (SerialHelper.IsMobile(Serial) && ProfileManager.CurrentProfile.ForceCenterAlignTooltipMobiles)
-                    align = FontStashSharp.RichText.TextHorizontalAlignment.Center;
+                if (ProfileManager.CurrentProfile != null)
+                {
+                    if (ProfileManager.CurrentProfile.LeftAlignToolTips)
+                        align = FontStashSharp.RichText.TextHorizontalAlignment.Left;
+                    if (SerialHelper.IsMobile(Serial) && ProfileManager.CurrentProfile.ForceCenterAlignTooltipMobiles)
+                        align = FontStashSharp.RichText.TextHorizontalAlignment.Center;
+                }
 
                 string finalString = _textHTML;
                 if (SerialHelper.IsItem(Serial))

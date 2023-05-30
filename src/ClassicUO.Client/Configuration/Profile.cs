@@ -464,10 +464,10 @@ namespace ClassicUO.Configuration
         public bool DisplayPartyChatOverhead { get; set; } = true;
 
         public string SelectedTTFJournalFont { get; set; } = "avadonian";
-        public int SelectedJournalFontSize { get; set; } = 15;
+        public int SelectedJournalFontSize { get; set; } = 20;
 
         public string SelectedToolTipFont { get; set; } = "Roboto-Regular";
-        public int SelectedToolTipFontSize { get; set; } = 15;
+        public int SelectedToolTipFontSize { get; set; } = 20;
 
         public string GameWindowSideChatFont { get; set; } = "avadonian";
         public int GameWindowSideChatFontSize { get; set; } = 20;
