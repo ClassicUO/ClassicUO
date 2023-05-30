@@ -7,6 +7,9 @@ namespace ClassicUO.Game.UI.Gumps
     internal class VersionHistory : Gump
     {
         private static string[] updateTexts = {
+            "/c[white][3.7.0]/cd\n" +
+                "- Upgraded to .Net 7",
+
             "/c[white][3.6.0]/cd\n" +
                 "- Tooltip import crash fix\n" +
                 "- Tooltip delete all override button added\n" +
