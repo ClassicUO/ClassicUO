@@ -130,9 +130,13 @@ namespace ClassicUO.Game.UI.Controls
             Width = _rtl.Width == null ? _rtl.Size.X : (int)_rtl.Width;
         }
 
-        public int Height
+        public new int Height
         {
-            get { return _rtl.Size.Y; }
+            get {
+                if (_rtl == null)
+                    return 0;
+                
+                return _rtl.Size.Y; }
         }
 
         public Point MeasuredSize
