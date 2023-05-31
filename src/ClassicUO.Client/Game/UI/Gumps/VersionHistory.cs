@@ -8,7 +8,6 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private static string[] updateTexts = {
             "/c[white][3.7.0]/cd\n" +
-                "- Upgraded to .Net 7\n" +
                 "- Updated some default font sizes, slightly larger (New installs only)\n" +
                 "- Added item count to grid containers.",
 
