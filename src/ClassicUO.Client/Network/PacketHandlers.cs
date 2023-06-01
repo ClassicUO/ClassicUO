@@ -5453,6 +5453,8 @@ namespace ClassicUO.Network
             uint y = p.ReadUInt32BE();
             uint clen = p.ReadUInt32BE() - 4;
             int dlen = (int)p.ReadUInt32BE();
+            if (dlen < 1)
+                dlen = 1;
             byte[] decData = System.Buffers.ArrayPool<byte>.Shared.Rent(dlen);
             string layout;
 
