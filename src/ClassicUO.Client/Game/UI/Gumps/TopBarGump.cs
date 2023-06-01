@@ -267,7 +267,6 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }));
             moreMenu.ContextMenu.Add(new ContextMenuItemEntry(cliloc.GetString(3000134, ResGumps.Help), () => { GameActions.RequestHelp(); }));
-            moreMenu.ContextMenu.Add(new ContextMenuItemEntry("Info", () => { }));
 
             startX += largeWidth + 1;
 
