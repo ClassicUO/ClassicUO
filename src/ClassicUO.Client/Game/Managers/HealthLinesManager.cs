@@ -287,7 +287,7 @@ namespace ClassicUO.Game.Managers
             );
 
 
-            hueVec.X = 0x21;
+            hueVec.X = 90;
 
             if (mobile != null)
             {
