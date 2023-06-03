@@ -1,6 +1,7 @@
 using ClassicUO.Game.UI.Controls;
 using static System.Net.Mime.MediaTypeNames;
 using System.Drawing;
+using ClassicUO.Game.Managers;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -35,22 +36,35 @@ namespace ClassicUO.Game.UI.Gumps
             GumpPic _;
 
             Add(_ = new GumpPic(10, 10, 4507, 0)); //West
+            _.MouseUp += (s, e) => { if (CheckDrivingBoat()) BoatMovingManager.MoveRequest(Data.Direction.West, Speed()); };
+
             Add(_ = new GumpPic(75, 10, 4500, 0)); //NW
+            _.MouseUp += (s, e) => { if (CheckDrivingBoat()) BoatMovingManager.MoveRequest(Data.Direction.Up, Speed()); };
+
             Add(_ = new GumpPic(140, 10, 4501, 0)); //North
+            _.MouseUp += (s, e) => { if (CheckDrivingBoat()) BoatMovingManager.MoveRequest(Data.Direction.North, Speed()); };
 
             Add(_ = new GumpPic(10, 70, 4506, 0)); //SW
+            _.MouseUp += (s, e) => { if (CheckDrivingBoat()) BoatMovingManager.MoveRequest(Data.Direction.Left, Speed()); };
 
             Add(_ = new GumpPic((Width / 2) - (29 / 2), 90, 5830, 0)); //Center stop button
+            _.MouseUp += (s, e) => { if (CheckDrivingBoat()) BoatMovingManager.MoveRequest(Data.Direction.Left, 0); };
 
             Add(_ = new GumpPic(140, 70, 4502, 0)); //NE
+            _.MouseUp += (s, e) => { if (CheckDrivingBoat()) BoatMovingManager.MoveRequest(Data.Direction.Right, Speed()); };
 
             Add(_ = new GumpPic(10, 140, 4505, 0)); //South
+            _.MouseUp += (s, e) => { if (CheckDrivingBoat()) BoatMovingManager.MoveRequest(Data.Direction.South, Speed()); };
+
             Add(_ = new GumpPic(75, 140, 4504, 0)); //SE
+            _.MouseUp += (s, e) => { if (CheckDrivingBoat()) BoatMovingManager.MoveRequest(Data.Direction.Down, Speed()); };
+
             Add(_ = new GumpPic(140, 140, 4503, 0)); // East
+            _.MouseUp += (s, e) => { if (CheckDrivingBoat()) BoatMovingManager.MoveRequest(Data.Direction.East, Speed()); };
 
 
-            Add(_ = new GumpPic(10, 190, 22406, 0)); //Rotate Clockwise
-            Add(_ = new GumpPic(Width - 10 - 19, 190, 22400, 0)); //Rotate counter-clockwise
+            //Add(_ = new GumpPic(10, 190, 22406, 0)); //Rotate Clockwise
+            //Add(_ = new GumpPic(Width - 10 - 19, 190, 22400, 0)); //Rotate counter-clockwise
 
             Add(reg = new Checkbox
             (
@@ -92,7 +106,8 @@ namespace ClassicUO.Game.UI.Gumps
             )
             {
                 IsChecked = false,
-                Y = Height - 30
+                Y = Height - 30,
+                IsVisible = false
             });
             one.X = Width - one.Width - 10;
             one.MouseUp += Reg_MouseUp;
@@ -118,6 +133,24 @@ namespace ClassicUO.Game.UI.Gumps
                     slow.IsChecked = false;
                 }
             }
+        }
+
+        private bool CheckDrivingBoat()
+        {
+            if (World.Player.IsDrivingBoat)
+                return true;
+            else
+            {
+                GameActions.Print("You need to be driving a boat to use this.");
+                return false;
+            }
+        }
+        private byte Speed()
+        {
+            if (one.IsChecked) return 1;
+            if (slow.IsChecked) return 1;
+            if (reg.IsChecked) return 2;
+            return 2;
         }
     }
 }

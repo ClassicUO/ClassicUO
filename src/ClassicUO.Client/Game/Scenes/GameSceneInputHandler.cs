@@ -93,7 +93,7 @@ namespace ClassicUO.Game.Scenes
 
                 bool run = mouseRange >= 190;
 
-                if (World.Player.IsDrivingBoat)
+                if (World.Player.IsDrivingBoat && UIManager.GetGump<BoatControl>() == null)
                 {
                     if (!_boatIsMoving || _boatRun != run || _lastBoatDirection != facing - 1)
                     {
