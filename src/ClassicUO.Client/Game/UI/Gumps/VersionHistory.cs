@@ -10,7 +10,8 @@ namespace ClassicUO.Game.UI.Gumps
             "/c[white][3.7.0]/cd\n" +
                 "- Updated some default font sizes, slightly larger (New installs only)\n" +
                 "- Added item count to grid containers\n" +
-                "- Changed health lines back to blue",
+                "- Changed health lines back to blue\n" +
+                "- Added boat control gump",
 
             "/c[white][3.6.0]/cd\n" +
                 "- Tooltip import crash fix\n" +
