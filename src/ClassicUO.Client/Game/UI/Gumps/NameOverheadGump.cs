@@ -68,13 +68,13 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
-            if (SerialHelper.IsMobile(entity))
-            {
-                Mobile mobile = World.Mobiles.Get(LocalSerial);
-                if (mobile != null && mobile.HitsMax < 1) {
-                    MobileStatusRequestQueue.Instance.RequestMobileStatus(LocalSerial);
-                }
-            }
+            //if (SerialHelper.IsMobile(entity))
+            //{
+            //    Mobile mobile = World.Mobiles.Get(LocalSerial);
+            //    if (mobile != null && mobile.HitsMax < 1) {
+            //        MobileStatusRequestQueue.Instance.RequestMobileStatus(LocalSerial);
+            //    }
+            //}
 
             _renderedText = RenderedText.Create
             (

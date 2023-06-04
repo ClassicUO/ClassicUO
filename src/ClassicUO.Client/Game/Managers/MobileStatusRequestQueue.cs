@@ -25,13 +25,14 @@ namespace ClassicUO.Game.Managers
         public void RequestMobileStatus(uint serial)
         {
             requestedSerials.Enqueue(serial);
-            if (queueProccessor == null || queueProccessor.IsCompleted)
+            if (requestedSerials.Count > 0 && (queueProccessor == null || queueProccessor.IsCompleted || !queueProccessor.Status.Equals(TaskStatus.Running)))
             {
                 queueProccessor = Task.Factory.StartNew(() => {
                     while (requestedSerials.TryDequeue(out var serial))
                     {
                         GameActions.RequestMobileStatus(serial);
-                        Task.Delay(750).Wait();
+                        GameActions.Print($"Processing {serial}");
+                        Task.Delay(1000).Wait();
                     }
                 });
             }
