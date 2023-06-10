@@ -248,7 +248,7 @@ namespace ClassicUO.Game.Managers
                                         {
                                             try
                                             {
-                                                tooltip += string.Format(overrideData.FormattedText, property.Name, property.FirstValue.ToString(), property.SecondValue.ToString()) + "\n";
+                                                tooltip += string.Format(overrideData.FormattedText, property.Name, property.FirstValue.ToString(), property.SecondValue.ToString(), property.OriginalString) + "\n";
                                                 handled = true;
                                                 break;
                                             }

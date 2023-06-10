@@ -14,7 +14,8 @@ namespace ClassicUO.Game.UI.Gumps
                 "- Added boat control gump\n" +
                 "- Fixed + symbol issue with tooltip overrides\n" +
                 "- Fixed an issue with having zero tooltip overrides\n" +
-                "- Fixed journal width issue when timestamps are disabled",
+                "- Fixed journal width issue when timestamps are disabled\n" +
+                "- Added {3} to tooltip overrides, inserting the original tooltip property",
 
             "/c[white][3.6.0]/cd\n" +
                 "- Tooltip import crash fix\n" +
