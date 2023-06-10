@@ -27,11 +27,11 @@ namespace ClassicUO.Game.Managers
             ItemLayer = (TooltipLayers)layer;
         }
 
-        private string searchText;
+        private string searchText, formattedText;
 
         public int Index { get; }
         public string SearchText { get { return searchText.Replace(@"\u002B", @"+"); } set { searchText = value; } }
-        public string FormattedText { get; set; }
+        public string FormattedText { get { return formattedText.Replace(@"\u002B", @"+"); } set { formattedText = value; } }
         public int Min1 { get; set; }
         public int Max1 { get; set; }
         public int Min2 { get; set; }
