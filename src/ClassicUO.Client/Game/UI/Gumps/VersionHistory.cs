@@ -13,7 +13,8 @@ namespace ClassicUO.Game.UI.Gumps
                 "- Changed health lines back to blue\n" +
                 "- Added boat control gump\n" +
                 "- Fixed + symbol issue with tooltip overrides\n" +
-                "- Fixed an issue with having zero tooltip overrides",
+                "- Fixed an issue with having zero tooltip overrides\n" +
+                "- Fixed journal width issue when timestamps are disabled",
 
             "/c[white][3.6.0]/cd\n" +
                 "- Tooltip import crash fix\n" +
