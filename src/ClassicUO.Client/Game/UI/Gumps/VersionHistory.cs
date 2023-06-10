@@ -12,7 +12,8 @@ namespace ClassicUO.Game.UI.Gumps
                 "- Added item count to grid containers\n" +
                 "- Changed health lines back to blue\n" +
                 "- Added boat control gump\n" +
-                "- Fixed + symbol issue with tooltip overrides",
+                "- Fixed + symbol issue with tooltip overrides\n" +
+                "- Fixed an issue with having zero tooltip overrides",
 
             "/c[white][3.6.0]/cd\n" +
                 "- Tooltip import crash fix\n" +

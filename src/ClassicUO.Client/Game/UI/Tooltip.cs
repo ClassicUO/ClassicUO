@@ -106,7 +106,11 @@ namespace ClassicUO.Game.UI
 
                 string finalString = _textHTML;
                 if (SerialHelper.IsItem(Serial))
+                {
                     finalString = Managers.ToolTipOverrideData.ProcessTooltipText(Serial);
+                    if (finalString == null)
+                        finalString = _textHTML;
+                }
 
                 if (string.IsNullOrEmpty(finalString) && !string.IsNullOrEmpty(_textHTML)) //Fix for vendor search
                     finalString = Managers.ToolTipOverrideData.ProcessTooltipText(_textHTML);
