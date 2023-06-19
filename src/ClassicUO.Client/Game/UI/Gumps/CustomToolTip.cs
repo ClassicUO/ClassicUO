@@ -78,7 +78,11 @@ namespace ClassicUO.Game.UI.Gumps
 
                     string finalString = FormatTooltip(name, data);
                     if (SerialHelper.IsItem(item.Serial))
+                    {
                         finalString = Managers.ToolTipOverrideData.ProcessTooltipText(item.Serial);
+                        if (finalString == null)
+                            finalString = FormatTooltip(name, data);
+                    }
 
                     text?.Dispose();
                     text = new TextBox(

@@ -402,7 +402,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     foreach (JournalData _ in journalDatas)
                     {
-                        _.EntryText.Width = Width - BORDER_WIDTH - _.TimeStamp.Width;
+                        _.EntryText.Width = Width - BORDER_WIDTH - (ProfileManager.CurrentProfile.HideJournalTimestamp ? 0 : _.TimeStamp.Width);
                         _.EntryText.Update();
                     }
 
@@ -453,7 +453,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 journalDatas.AddToBack(
                     new JournalData(
-                        new TextBox(text, ProfileManager.CurrentProfile.SelectedTTFJournalFont, ProfileManager.CurrentProfile.SelectedJournalFontSize, Width - timeS.Width, hue, strokeEffect: false),
+                        new TextBox(text, ProfileManager.CurrentProfile.SelectedTTFJournalFont, ProfileManager.CurrentProfile.SelectedJournalFontSize, Width - (ProfileManager.CurrentProfile.HideJournalTimestamp ? 0 : timeS.Width), hue, strokeEffect: false),
                         timeS,
                         text_type,
                         messageType

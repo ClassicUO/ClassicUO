@@ -60,7 +60,8 @@ namespace ClassicUO.Game.UI.Gumps
             (
                 new ResizePic(0x13BE)
                 {
-                    Width = 30, Height = 27
+                    Width = 30,
+                    Height = 27
                 },
                 2
             );
@@ -69,7 +70,9 @@ namespace ClassicUO.Game.UI.Gumps
             (
                 new Button(0, 0x15A1, 0x15A1, 0x15A1)
                 {
-                    X = 5, Y = 3, ToPage = 1
+                    X = 5,
+                    Y = 3,
+                    ToPage = 1
                 },
                 2
             );
@@ -96,12 +99,7 @@ namespace ClassicUO.Game.UI.Gumps
                 new[] { 1, (int) Buttons.Inventory },
                 new[] { 1, (int) Buttons.Journal },
                 new[] { 0, (int) Buttons.Chat },
-                new[] { 0, (int) Buttons.Help },
                 new[] { 1, (int) Buttons.WorldMap },
-                new[] { 0, (int) Buttons.Info },
-                new[] { 0, (int) Buttons.Debug },
-                new[] { 1, (int) Buttons.NetStats },
-
                 new[] { 1, (int) Buttons.UOStore },
             };
 
@@ -109,15 +107,11 @@ namespace ClassicUO.Game.UI.Gumps
 
             string[] texts =
             {
-                cliloc.GetString(3000133, ResGumps.Paperdoll), 
-                cliloc.GetString(3000431, ResGumps.Inventory), 
-                cliloc.GetString(3000129, ResGumps.Journal), 
-                cliloc.GetString(3000131, ResGumps.Chat), 
-                cliloc.GetString(3000134, ResGumps.Help),     
-                StringHelper.CapitalizeAllWords(cliloc.GetString(1015233, ResGumps.WorldMap)), 
-                cliloc.GetString(1079449, ResGumps.Info), 
-                cliloc.GetString(1042237, ResGumps.Debug), 
-                cliloc.GetString(3000169, ResGumps.NetStats), 
+                cliloc.GetString(3000133, ResGumps.Paperdoll),
+                cliloc.GetString(3000431, ResGumps.Inventory),
+                cliloc.GetString(3000129, ResGumps.Journal),
+                cliloc.GetString(3000131, ResGumps.Chat),
+                StringHelper.CapitalizeAllWords(cliloc.GetString(1015233, ResGumps.WorldMap)),
                 cliloc.GetString(1158008, ResGumps.UOStore),
             };
 
@@ -138,7 +132,9 @@ namespace ClassicUO.Game.UI.Gumps
             (
                 new Button(0, 0x15A4, 0x15A4, 0x15A4)
                 {
-                    X = 5, Y = 3, ToPage = 2
+                    X = 5,
+                    Y = 3,
+                    ToPage = 2
                 },
                 1
             );
@@ -147,12 +143,12 @@ namespace ClassicUO.Game.UI.Gumps
 
             for (int i = 0; i < textTable.Length; i++)
             {
-                if (!hasUOStore && i >= (int) Buttons.UOStore)
+                if (!hasUOStore && i >= (int)Buttons.UOStore)
                 {
                     break;
                 }
 
-                ushort graphic = (ushort) (textTable[i][0] != 0 ? 0x098D : 0x098B);
+                ushort graphic = (ushort)(textTable[i][0] != 0 ? 0x098D : 0x098B);
 
                 Add
                 (
@@ -183,7 +179,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             RighClickableButton supporters;
             Add
-            (supporters = 
+            (supporters =
                 new RighClickableButton
                 (
                     998877,
@@ -205,6 +201,73 @@ namespace ClassicUO.Game.UI.Gumps
                 1
             );
             supporters.MouseUp += (s, e) => { UIManager.Add(new Supporters()); };
+
+            RighClickableButton moreMenu;
+            Add
+            (moreMenu =
+                new RighClickableButton
+                (
+                    998877,
+                    0x098D,
+                    0x098D,
+                    0x098D,
+                    "More +",
+                    1,
+                    true,
+                    0,
+                    0x0036
+                )
+                {
+                    ButtonAction = ButtonAction.Activate,
+                    X = startX,
+                    Y = 1,
+                    FontCenter = true
+                },
+                1
+            );
+            moreMenu.ContextMenu = new ContextMenuControl();
+            moreMenu.MouseUp += (s, e) => { moreMenu.ContextMenu?.Show(); };
+            moreMenu.ContextMenu.Add(new ContextMenuItemEntry(cliloc.GetString(1079449, ResGumps.Info), () =>
+            {
+                if (TargetManager.IsTargeting)
+                {
+                    TargetManager.CancelTarget();
+                }
+
+                TargetManager.SetTargeting(CursorTarget.SetTargetClientSide, CursorType.Target, TargetType.Neutral);
+            }));
+            moreMenu.ContextMenu.Add(new ContextMenuItemEntry(cliloc.GetString(1042237, ResGumps.Debug), () =>
+            {
+                DebugGump debugGump = UIManager.GetGump<DebugGump>();
+
+                if (debugGump == null)
+                {
+                    debugGump = new DebugGump(100, 100);
+                    UIManager.Add(debugGump);
+                }
+                else
+                {
+                    debugGump.IsVisible = !debugGump.IsVisible;
+                    debugGump.SetInScreen();
+                }
+            }));
+            moreMenu.ContextMenu.Add(new ContextMenuItemEntry(cliloc.GetString(3000169, ResGumps.NetStats), () =>
+            {
+                NetworkStatsGump netstatsgump = UIManager.GetGump<NetworkStatsGump>();
+
+                if (netstatsgump == null)
+                {
+                    netstatsgump = new NetworkStatsGump(100, 100);
+                    UIManager.Add(netstatsgump);
+                }
+                else
+                {
+                    netstatsgump.IsVisible = !netstatsgump.IsVisible;
+                    netstatsgump.SetInScreen();
+                }
+            }));
+            moreMenu.ContextMenu.Add(new ContextMenuItemEntry(cliloc.GetString(3000134, ResGumps.Help), () => { GameActions.RequestHelp(); }));
+            moreMenu.ContextMenu.Add(new ContextMenuItemEntry("Open boat control", () => { UIManager.Add(new BoatControl() { X = 200, Y = 200 }); }));
 
             startX += largeWidth + 1;
 
@@ -272,7 +335,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void OnButtonClick(int buttonID)
         {
-            switch ((Buttons) buttonID)
+            switch ((Buttons)buttonID)
             {
                 case Buttons.Paperdoll:
                     GameActions.OpenPaperdoll(World.Player);
@@ -298,53 +361,6 @@ namespace ClassicUO.Game.UI.Gumps
                     if (Client.Version >= ClientVersion.CV_706400)
                     {
                         NetClient.Socket.Send_OpenUOStore();
-                    }
-
-                    break;
-
-                case Buttons.Help:
-                    GameActions.RequestHelp();
-
-                    break;
-
-                case Buttons.Info:
-                    if (TargetManager.IsTargeting)
-                    {
-                        TargetManager.CancelTarget();
-                    }
-
-                    TargetManager.SetTargeting(CursorTarget.SetTargetClientSide, CursorType.Target, TargetType.Neutral);
-                    break;
-
-                case Buttons.Debug:
-
-                    DebugGump debugGump = UIManager.GetGump<DebugGump>();
-
-                    if (debugGump == null)
-                    {
-                        debugGump = new DebugGump(100, 100);
-                        UIManager.Add(debugGump);
-                    }
-                    else
-                    {
-                        debugGump.IsVisible = !debugGump.IsVisible;
-                        debugGump.SetInScreen();
-                    }
-
-                    break;
-
-                case Buttons.NetStats:
-                    NetworkStatsGump netstatsgump = UIManager.GetGump<NetworkStatsGump>();
-
-                    if (netstatsgump == null)
-                    {
-                        netstatsgump = new NetworkStatsGump(100, 100);
-                        UIManager.Add(netstatsgump);
-                    }
-                    else
-                    {
-                        netstatsgump.IsVisible = !netstatsgump.IsVisible;
-                        netstatsgump.SetInScreen();
                     }
 
                     break;

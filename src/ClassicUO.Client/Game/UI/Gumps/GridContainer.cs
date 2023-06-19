@@ -610,7 +610,15 @@ namespace ClassicUO.Game.UI.Gumps
 
         private string GetContainerName()
         {
-            return _container.Name?.Length > 0 ? _container.Name : "a container";
+            string containerName = _container.Name?.Length > 0 ? _container.Name : "a container";
+
+            if (gridSlotManager != null)
+            {
+                gridSlotManager.UpdateItems();
+                containerName += $" ({gridSlotManager.ContainerContents.Count})";
+            }
+
+            return containerName;
         }
 
         public void OptionsUpdated()
