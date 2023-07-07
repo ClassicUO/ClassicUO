@@ -518,6 +518,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     SelectedObject.CorpseObject = null;
                 }
+                _containerNameLabel?.Dispose();
 
                 Item bank = World.Player.FindItemByLayer(Layer.Bank);
 
@@ -834,6 +835,7 @@ namespace ClassicUO.Game.UI.Gumps
                     LocalSerial = 0;
                     hit.ClearTooltip();
                     Hightlight = false;
+                    count?.Dispose();
                     count = null;
                     ItemGridLocked = false;
                 }
@@ -847,6 +849,7 @@ namespace ClassicUO.Game.UI.Gumps
                     int itemAmt = (_item.ItemData.IsStackable ? _item.Amount : 1);
                     if (itemAmt > 1)
                     {
+                        count?.Dispose();
                         count = new Label(itemAmt.ToString(), true, 0x0481, align: TEXT_ALIGN_TYPE.TS_LEFT, maxwidth: Width - 3);
                         count.X = 1;
                         count.Y = Height - count.Height;
