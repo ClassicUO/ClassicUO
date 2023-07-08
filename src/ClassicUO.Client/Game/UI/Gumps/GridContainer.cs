@@ -640,7 +640,7 @@ namespace ClassicUO.Game.UI.Gumps
                 GridItem item = gridSlotManager.FindItem(parent.Serial);
                 if (item != null)
                 {
-                    UIManager.Add(new SimpleTimedTextGump(text, (uint)hue, TimeSpan.FromSeconds(2)) { X = item.ScreenCoordinateX, Y = item.ScreenCoordinateY });
+                    UIManager.Add(new SimpleTimedTextGump(text, (uint)hue, TimeSpan.FromSeconds(2), 200) { X = item.ScreenCoordinateX, Y = item.ScreenCoordinateY });
                 }
             }
         }

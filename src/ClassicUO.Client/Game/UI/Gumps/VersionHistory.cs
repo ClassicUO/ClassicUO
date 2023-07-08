@@ -7,6 +7,9 @@ namespace ClassicUO.Game.UI.Gumps
     internal class VersionHistory : Gump
     {
         private static string[] updateTexts = {
+            "/c[white][3.7.1]/cd\n" +
+                "- Text width fix for old clients",
+
             "/c[white][3.7.0]/cd\n" +
                 "- Updated some default font sizes, slightly larger (New installs only)\n" +
                 "- Added item count to grid containers\n" +
