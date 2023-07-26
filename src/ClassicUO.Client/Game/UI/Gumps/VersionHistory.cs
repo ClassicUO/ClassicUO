@@ -9,7 +9,8 @@ namespace ClassicUO.Game.UI.Gumps
         private static string[] updateTexts = {
             "/c[white][3.7.1]/cd\n" +
                 "- Text width fix for old clients\n" +
-                "- Fix for a potential small memory leak - Lasheras",
+                "- Fix for a potential small memory leak - Lasheras\n" +
+                "- Fix for a bug when creating a new character",
 
             "/c[white][3.7.0]/cd\n" +
                 "- Updated some default font sizes, slightly larger (New installs only)\n" +
