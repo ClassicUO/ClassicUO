@@ -206,9 +206,7 @@ namespace ClassicUO.Game.Managers
                 case MessageType.Label:
                     if(textType == TextType.OBJECT)
                     {
-                        List<GridContainer> unmodifiedList = new List<GridContainer>();
-                        foreach (GridContainer container in UIManager.Gumps.OfType<GridContainer>())
-                            unmodifiedList.Add(container);
+                        List<GridContainer> unmodifiedList = UIManager.Gumps.OfType<GridContainer>().ToList();
 
                         foreach(GridContainer container in unmodifiedList)
                             container?.HandleObjectMessage(parent, text, hue);
