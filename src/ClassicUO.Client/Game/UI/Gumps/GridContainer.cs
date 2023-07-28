@@ -134,6 +134,16 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 X = _lastCorpseX;
                 Y = _lastCorpseY;
+
+                if (World.Player.ManualOpenedCorpses.Contains(LocalSerial))
+                {
+                    World.Player.ManualOpenedCorpses.Remove(LocalSerial);
+                }
+                else if (World.Player.AutoOpenedCorpses.Contains(LocalSerial) && ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.SkipEmptyCorpse)
+                {
+                    IsVisible = false;
+                    Dispose();
+                }
             }
             else
             {
@@ -542,8 +552,6 @@ namespace ClassicUO.Game.UI.Gumps
                 if (gridSlotManager.ItemPositions.Count > 0 && !isCorpse)
                     GridSaveSystem.Instance.SaveContainer(LocalSerial, gridSlotManager.GridSlots, Width, Height, X, Y, UseOldContainerStyle);
 
-
-
             base.Dispose();
         }
 
@@ -564,7 +572,7 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
-            if (item.IsCorpse)
+            if (item.IsCorpse && item.OnGround)
             {
                 if (item.Distance > 3)
                 {
