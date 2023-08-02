@@ -1570,6 +1570,9 @@ Client version: '{0}'</value>
   <data name="ShowMouseCoordinates" xml:space="preserve">
     <value>Show mouse coordinates</value>
   </data>
+  <data name="AllowPositionalTargeting" xml:space="preserve">
+    <value>Allow Positional Targeting</value>
+  </data>
   <data name="LightLevelType" xml:space="preserve">
     <value>Light Level Setting Type</value>
   </data>
