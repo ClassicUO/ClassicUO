@@ -7094,6 +7094,9 @@ namespace ClassicUO.Network
                             c++;
                         }
 
+                        if (loc[0] == null || loc[1] == null || loc[2] == null || loc[3] == null)
+                            break;
+
                         int xlong = 0, ylat = 0, xmins = 0, ymins = 0;
                         bool xeast = true, ysouth = true;
 

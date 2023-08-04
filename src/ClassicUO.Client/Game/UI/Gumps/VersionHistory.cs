@@ -12,7 +12,8 @@ namespace ClassicUO.Game.UI.Gumps
                 "- Fix for a potential small memory leak - Lasheras\n" +
                 "- Fix for a bug when creating a new character\n" +
                 "- Potential fix for bug when processing messages\n" +
-                "- Fixed an issue on OSI where corpses would not open in grid containers",
+                "- Fixed an issue on OSI where corpses would not open in grid containers\n" +
+                "- Fix for some SOS messages",
 
             "/c[white][3.7.0]/cd\n" +
                 "- Updated some default font sizes, slightly larger (New installs only)\n" +
