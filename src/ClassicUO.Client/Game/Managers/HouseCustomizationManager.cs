@@ -94,7 +94,6 @@ namespace ClassicUO.Game.Managers
         public int Category = -1, MaxPage = 1, CurrentFloor = 1, FloorCount = 4, RoofZ = 1, MinHouseZ = -120, Components, Fixtures, MaxComponets, MaxFixtures;
         public bool Erasing, SeekTile, ShowWindow, CombinedStair;
 
-
         public readonly int[] FloorVisionState = new int[4];
 
 
@@ -136,7 +135,7 @@ namespace ClassicUO.Game.Managers
 
                 int componentsOnFloor = (width - 1) * (height - 1);
 
-                MaxComponets = FloorCount * (componentsOnFloor + 2 * (width + height) - 4) - (int) (FloorCount * componentsOnFloor * -0.25) + 2 * width + 3 * height - 5;
+                MaxComponets = FloorCount * (componentsOnFloor + 2 * (width + height) - 4) - (int)(FloorCount * componentsOnFloor * -0.25) + 2 * width + 3 * height - 5;
 
                 MaxFixtures = MaxComponets / 20;
             }
@@ -192,11 +191,11 @@ namespace ClassicUO.Game.Managers
                     {
                         state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR;
 
-                        if (FloorVisionState[currentFloor] == (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_HIDE_FLOOR)
+                        if (FloorVisionState[currentFloor] == (int)CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_HIDE_FLOOR)
                         {
                             state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER;
                         }
-                        else if (FloorVisionState[currentFloor] == (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_TRANSPARENT_FLOOR || FloorVisionState[currentFloor] == (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_TRANSLUCENT_FLOOR)
+                        else if (FloorVisionState[currentFloor] == (int)CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_TRANSPARENT_FLOOR || FloorVisionState[currentFloor] == (int)CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_TRANSLUCENT_FLOOR)
                         {
                             state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_TRANSPARENT;
                         }
@@ -239,11 +238,11 @@ namespace ClassicUO.Game.Managers
 
                         if (!ignore)
                         {
-                            if (FloorVisionState[currentFloor] == (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_HIDE_CONTENT)
+                            if (FloorVisionState[currentFloor] == (int)CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_HIDE_CONTENT)
                             {
                                 state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER;
                             }
-                            else if (FloorVisionState[currentFloor] == (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_TRANSPARENT_CONTENT)
+                            else if (FloorVisionState[currentFloor] == (int)CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_TRANSPARENT_CONTENT)
                             {
                                 state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_TRANSPARENT;
                             }
@@ -252,7 +251,7 @@ namespace ClassicUO.Game.Managers
 
                     if (!ignore)
                     {
-                        if (FloorVisionState[currentFloor] == (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_HIDE_ALL)
+                        if (FloorVisionState[currentFloor] == (int)CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_HIDE_ALL)
                         {
                             state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER;
                         }
@@ -300,9 +299,9 @@ namespace ClassicUO.Game.Managers
                             (
                                 floorMulti.Graphic,
                                 0,
-                                (ushort) (foundationItem.X + (x - foundationItem.X)),
-                                (ushort) (foundationItem.Y + (y - foundationItem.Y)),
-                                (sbyte) z,
+                                (ushort)(foundationItem.X + (x - foundationItem.X)),
+                                (ushort)(foundationItem.Y + (y - foundationItem.Y)),
+                                (sbyte)z,
                                 true,
                                 false
                             );
@@ -311,11 +310,11 @@ namespace ClassicUO.Game.Managers
 
                             CUSTOM_HOUSE_MULTI_OBJECT_FLAGS state = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR;
 
-                            if (FloorVisionState[0] == (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_HIDE_FLOOR)
+                            if (FloorVisionState[0] == (int)CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_HIDE_FLOOR)
                             {
                                 state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER;
                             }
-                            else if (FloorVisionState[0] == (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_TRANSPARENT_FLOOR || FloorVisionState[0] == (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_TRANSLUCENT_FLOOR)
+                            else if (FloorVisionState[0] == (int)CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_TRANSPARENT_FLOOR || FloorVisionState[0] == (int)CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_TRANSLUCENT_FLOOR)
                             {
                                 state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_TRANSPARENT;
                             }
@@ -589,7 +588,7 @@ namespace ClassicUO.Game.Managers
                                 tempColor,
                                 (ushort)(foundationItem.X + (x - foundationItem.X)),
                                 (ushort)(foundationItem.Y + (y - foundationItem.Y)),
-                                (sbyte) z,
+                                (sbyte)z,
                                 true,
                                 false
                             );
@@ -694,19 +693,19 @@ namespace ClassicUO.Game.Managers
 
                                     if (SelectedGraphic == stair.North)
                                     {
-                                        graphic = (ushort) stair.MultiNorth;
+                                        graphic = (ushort)stair.MultiNorth;
                                     }
                                     else if (SelectedGraphic == stair.East)
                                     {
-                                        graphic = (ushort) stair.MultiEast;
+                                        graphic = (ushort)stair.MultiEast;
                                     }
                                     else if (SelectedGraphic == stair.South)
                                     {
-                                        graphic = (ushort) stair.MultiSouth;
+                                        graphic = (ushort)stair.MultiSouth;
                                     }
                                     else if (SelectedGraphic == stair.West)
                                     {
-                                        graphic = (ushort) stair.MultiWest;
+                                        graphic = (ushort)stair.MultiWest;
                                     }
 
                                     if (graphic != 0)
@@ -735,6 +734,13 @@ namespace ClassicUO.Game.Managers
                                             minZ -= 7;
                                         }
 
+                                        int XX = placeX - foundationItem.X;
+                                        int YY = placeY - foundationItem.Y;
+                                        int ZZ = foundationItem.Z + 7 + (CurrentFloor - 1) * 20;
+
+                                        List<Multi> itemsToRemove = new List<Multi>();
+
+
                                         foreach (Multi multiObject in multi)
                                         {
                                             int testMinZ = minZ;
@@ -754,30 +760,56 @@ namespace ClassicUO.Game.Managers
                                             {
                                                 if ((multiObject.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_STAIR) != 0)
                                                 {
-                                                    multiObject.Destroy();
+                                                    if (!house.Components.Exists(c => c._originalGraphic == item.Graphic && c.X == (ushort)(foundationItem.X + XX + item.X) && c.Y == (ushort)(foundationItem.Y + YY + item.Y) && c.Z == (sbyte)(ZZ + item.Z)))
+                                                    {
+
+                                                        multiObject.Destroy();
+                                                    }
                                                 }
                                             }
                                             else if (type == CUSTOM_HOUSE_BUILD_TYPE.CHBT_ROOF)
                                             {
                                                 if ((multiObject.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_ROOF) != 0)
                                                 {
-                                                    multiObject.Destroy();
+                                                    if (!house.Components.Exists(c => c._originalGraphic == item.Graphic && c.X == (ushort)(foundationItem.X + XX + item.X) && c.Y == (ushort)(foundationItem.Y + YY + item.Y) && c.Z == (sbyte)(ZZ + item.Z)))
+                                                    {
+                                                        multiObject.Destroy();
+                                                    }
                                                 }
                                             }
                                             else if (type == CUSTOM_HOUSE_BUILD_TYPE.CHBT_FLOOR)
                                             {
                                                 if ((multiObject.State & (CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FIXTURE)) != 0)
                                                 {
-                                                    multiObject.Destroy();
+                                                    if (!house.Components.Exists(c => c._originalGraphic == item.Graphic && c.X == (ushort)(foundationItem.X + XX + item.X) && c.Y == (ushort)(foundationItem.Y + YY + item.Y) && c.Z == (sbyte)(ZZ + item.Z)))
+                                                    {
+                                                        if (house.Components.Contains(multiObject)) // if component was found
+                                                        {
+                                                            itemsToRemove.Add(multiObject);
+                                                        }
+
+                                                        multiObject.Destroy();
+
+                                                    }
                                                 }
                                             }
                                             else
                                             {
                                                 if ((multiObject.State & (CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_STAIR | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_ROOF | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_DONT_REMOVE)) == 0)
                                                 {
-                                                    multiObject.Destroy();
+
+                                                    if (!house.Components.Exists(c => c._originalGraphic == item.Graphic && c.X == (ushort)(foundationItem.X + XX + item.X) && c.Y == (ushort)(foundationItem.Y + YY + item.Y) && c.Z == (sbyte)(ZZ + item.Z)))
+                                                    {
+                                                        multiObject.Destroy(); 
+                                                    }
+                                                            
                                                 }
                                             }
+                                        }
+
+                                        foreach (var mult in itemsToRemove)
+                                        {
+                                            house.Components.Remove(mult);
                                         }
 
                                         // todo: remove foundation if no components
@@ -810,16 +842,15 @@ namespace ClassicUO.Game.Managers
                                     break;
                                 }
 
-                                house.Add
-                                (
-                                    item.Graphic,
-                                    0,
-                                    (ushort) (foundationItem.X + xx + item.X),
-                                    (ushort) (foundationItem.Y + yy + item.Y),
-                                    (sbyte) (z + item.Z),
-                                    true,
-                                    false
-                                );
+                                if (!house.Components.Exists
+                                    (
+                                        c => c._originalGraphic == item.Graphic && c.X == (ushort)(foundationItem.X + xx + item.X) && c.Y == (ushort)(foundationItem.Y + yy + item.Y) &&
+                                             c.Z == (sbyte)(z + item.Z)))
+                                {
+                                    house.Add
+                                        (item.Graphic, 0, (ushort)(foundationItem.X + xx + item.X), (ushort)(foundationItem.Y + yy + item.Y), (sbyte)(z + item.Z), true, false);
+                                }
+                                
                             }
                         }
                     }
@@ -915,7 +946,7 @@ namespace ClassicUO.Game.Managers
                 {
                     if (SelectedGraphic == item.North)
                     {
-                        list[0].Graphic = (ushort) item.Block;
+                        list[0].Graphic = (ushort)item.Block;
 
                         list[0].X = 0;
 
@@ -923,7 +954,7 @@ namespace ClassicUO.Game.Managers
 
                         list[0].Z = 0;
 
-                        list[1].Graphic = (ushort) item.Block;
+                        list[1].Graphic = (ushort)item.Block;
 
                         list[1].X = 0;
 
@@ -931,7 +962,7 @@ namespace ClassicUO.Game.Managers
 
                         list[1].Z = 0;
 
-                        list[2].Graphic = (ushort) item.Block;
+                        list[2].Graphic = (ushort)item.Block;
 
                         list[2].X = 0;
 
@@ -939,7 +970,7 @@ namespace ClassicUO.Game.Managers
 
                         list[2].Z = 0;
 
-                        list[3].Graphic = (ushort) item.North;
+                        list[3].Graphic = (ushort)item.North;
 
                         list[3].X = 0;
 
@@ -947,7 +978,7 @@ namespace ClassicUO.Game.Managers
 
                         list[3].Z = 0;
 
-                        list[4].Graphic = (ushort) item.Block;
+                        list[4].Graphic = (ushort)item.Block;
 
                         list[4].X = 0;
 
@@ -955,7 +986,7 @@ namespace ClassicUO.Game.Managers
 
                         list[4].Z = 5;
 
-                        list[5].Graphic = (ushort) item.Block;
+                        list[5].Graphic = (ushort)item.Block;
 
                         list[5].X = 0;
 
@@ -963,7 +994,7 @@ namespace ClassicUO.Game.Managers
 
                         list[5].Z = 5;
 
-                        list[6].Graphic = (ushort) item.North;
+                        list[6].Graphic = (ushort)item.North;
 
                         list[6].X = 0;
 
@@ -971,7 +1002,7 @@ namespace ClassicUO.Game.Managers
 
                         list[6].Z = 5;
 
-                        list[7].Graphic = (ushort) item.Block;
+                        list[7].Graphic = (ushort)item.Block;
 
                         list[7].X = 0;
 
@@ -979,7 +1010,7 @@ namespace ClassicUO.Game.Managers
 
                         list[7].Z = 10;
 
-                        list[8].Graphic = (ushort) item.North;
+                        list[8].Graphic = (ushort)item.North;
 
                         list[8].X = 0;
 
@@ -987,7 +1018,7 @@ namespace ClassicUO.Game.Managers
 
                         list[8].Z = 10;
 
-                        list[9].Graphic = (ushort) item.North;
+                        list[9].Graphic = (ushort)item.North;
 
                         list[9].X = 0;
 
@@ -997,7 +1028,7 @@ namespace ClassicUO.Game.Managers
                     }
                     else if (SelectedGraphic == item.East)
                     {
-                        list[0].Graphic = (ushort) item.East;
+                        list[0].Graphic = (ushort)item.East;
 
                         list[0].X = 0;
 
@@ -1005,7 +1036,7 @@ namespace ClassicUO.Game.Managers
 
                         list[0].Z = 0;
 
-                        list[1].Graphic = (ushort) item.Block;
+                        list[1].Graphic = (ushort)item.Block;
 
                         list[1].X = 1;
 
@@ -1013,7 +1044,7 @@ namespace ClassicUO.Game.Managers
 
                         list[1].Z = 0;
 
-                        list[2].Graphic = (ushort) item.Block;
+                        list[2].Graphic = (ushort)item.Block;
 
                         list[2].X = 2;
 
@@ -1021,7 +1052,7 @@ namespace ClassicUO.Game.Managers
 
                         list[2].Z = 0;
 
-                        list[3].Graphic = (ushort) item.Block;
+                        list[3].Graphic = (ushort)item.Block;
 
                         list[3].X = 3;
 
@@ -1029,7 +1060,7 @@ namespace ClassicUO.Game.Managers
 
                         list[3].Z = 0;
 
-                        list[4].Graphic = (ushort) item.East;
+                        list[4].Graphic = (ushort)item.East;
 
                         list[4].X = 1;
 
@@ -1037,7 +1068,7 @@ namespace ClassicUO.Game.Managers
 
                         list[4].Z = 5;
 
-                        list[5].Graphic = (ushort) item.Block;
+                        list[5].Graphic = (ushort)item.Block;
 
                         list[5].X = 2;
 
@@ -1045,7 +1076,7 @@ namespace ClassicUO.Game.Managers
 
                         list[5].Z = 5;
 
-                        list[6].Graphic = (ushort) item.Block;
+                        list[6].Graphic = (ushort)item.Block;
 
                         list[6].X = 3;
 
@@ -1053,7 +1084,7 @@ namespace ClassicUO.Game.Managers
 
                         list[6].Z = 5;
 
-                        list[7].Graphic = (ushort) item.East;
+                        list[7].Graphic = (ushort)item.East;
 
                         list[7].X = 2;
 
@@ -1061,7 +1092,7 @@ namespace ClassicUO.Game.Managers
 
                         list[7].Z = 10;
 
-                        list[8].Graphic = (ushort) item.Block;
+                        list[8].Graphic = (ushort)item.Block;
 
                         list[8].X = 3;
 
@@ -1069,7 +1100,7 @@ namespace ClassicUO.Game.Managers
 
                         list[8].Z = 10;
 
-                        list[9].Graphic = (ushort) item.East;
+                        list[9].Graphic = (ushort)item.East;
 
                         list[9].X = 3;
 
@@ -1079,7 +1110,7 @@ namespace ClassicUO.Game.Managers
                     }
                     else if (SelectedGraphic == item.South)
                     {
-                        list[0].Graphic = (ushort) item.South;
+                        list[0].Graphic = (ushort)item.South;
 
                         list[0].X = 0;
 
@@ -1087,7 +1118,7 @@ namespace ClassicUO.Game.Managers
 
                         list[0].Z = 0;
 
-                        list[1].Graphic = (ushort) item.Block;
+                        list[1].Graphic = (ushort)item.Block;
 
                         list[1].X = 0;
 
@@ -1095,7 +1126,7 @@ namespace ClassicUO.Game.Managers
 
                         list[1].Z = 0;
 
-                        list[2].Graphic = (ushort) item.Block;
+                        list[2].Graphic = (ushort)item.Block;
 
                         list[2].X = 0;
 
@@ -1103,7 +1134,7 @@ namespace ClassicUO.Game.Managers
 
                         list[2].Z = 0;
 
-                        list[3].Graphic = (ushort) item.Block;
+                        list[3].Graphic = (ushort)item.Block;
 
                         list[3].X = 0;
 
@@ -1111,7 +1142,7 @@ namespace ClassicUO.Game.Managers
 
                         list[3].Z = 0;
 
-                        list[4].Graphic = (ushort) item.South;
+                        list[4].Graphic = (ushort)item.South;
 
                         list[4].X = 0;
 
@@ -1119,7 +1150,7 @@ namespace ClassicUO.Game.Managers
 
                         list[4].Z = 5;
 
-                        list[5].Graphic = (ushort) item.Block;
+                        list[5].Graphic = (ushort)item.Block;
 
                         list[5].X = 0;
 
@@ -1127,7 +1158,7 @@ namespace ClassicUO.Game.Managers
 
                         list[5].Z = 5;
 
-                        list[6].Graphic = (ushort) item.Block;
+                        list[6].Graphic = (ushort)item.Block;
 
                         list[6].X = 0;
 
@@ -1135,7 +1166,7 @@ namespace ClassicUO.Game.Managers
 
                         list[6].Z = 5;
 
-                        list[7].Graphic = (ushort) item.South;
+                        list[7].Graphic = (ushort)item.South;
 
                         list[7].X = 0;
 
@@ -1143,7 +1174,7 @@ namespace ClassicUO.Game.Managers
 
                         list[7].Z = 10;
 
-                        list[8].Graphic = (ushort) item.Block;
+                        list[8].Graphic = (ushort)item.Block;
 
                         list[8].X = 0;
 
@@ -1151,7 +1182,7 @@ namespace ClassicUO.Game.Managers
 
                         list[8].Z = 10;
 
-                        list[9].Graphic = (ushort) item.South;
+                        list[9].Graphic = (ushort)item.South;
 
                         list[9].X = 0;
 
@@ -1161,7 +1192,7 @@ namespace ClassicUO.Game.Managers
                     }
                     else if (SelectedGraphic == item.West)
                     {
-                        list[0].Graphic = (ushort) item.Block;
+                        list[0].Graphic = (ushort)item.Block;
 
                         list[0].X = -3;
 
@@ -1169,7 +1200,7 @@ namespace ClassicUO.Game.Managers
 
                         list[0].Z = 0;
 
-                        list[1].Graphic = (ushort) item.Block;
+                        list[1].Graphic = (ushort)item.Block;
 
                         list[1].X = -2;
 
@@ -1177,7 +1208,7 @@ namespace ClassicUO.Game.Managers
 
                         list[1].Z = 0;
 
-                        list[2].Graphic = (ushort) item.Block;
+                        list[2].Graphic = (ushort)item.Block;
 
                         list[2].X = -1;
 
@@ -1185,7 +1216,7 @@ namespace ClassicUO.Game.Managers
 
                         list[2].Z = 0;
 
-                        list[3].Graphic = (ushort) item.West;
+                        list[3].Graphic = (ushort)item.West;
 
                         list[3].X = 0;
 
@@ -1193,7 +1224,7 @@ namespace ClassicUO.Game.Managers
 
                         list[3].Z = 0;
 
-                        list[4].Graphic = (ushort) item.Block;
+                        list[4].Graphic = (ushort)item.Block;
 
                         list[4].X = -3;
 
@@ -1201,7 +1232,7 @@ namespace ClassicUO.Game.Managers
 
                         list[4].Z = 5;
 
-                        list[5].Graphic = (ushort) item.Block;
+                        list[5].Graphic = (ushort)item.Block;
 
                         list[5].X = -2;
 
@@ -1209,7 +1240,7 @@ namespace ClassicUO.Game.Managers
 
                         list[5].Z = 5;
 
-                        list[6].Graphic = (ushort) item.West;
+                        list[6].Graphic = (ushort)item.West;
 
                         list[6].X = -1;
 
@@ -1217,7 +1248,7 @@ namespace ClassicUO.Game.Managers
 
                         list[6].Z = 5;
 
-                        list[7].Graphic = (ushort) item.Block;
+                        list[7].Graphic = (ushort)item.Block;
 
                         list[7].X = -3;
 
@@ -1225,7 +1256,7 @@ namespace ClassicUO.Game.Managers
 
                         list[7].Z = 10;
 
-                        list[8].Graphic = (ushort) item.West;
+                        list[8].Graphic = (ushort)item.West;
 
                         list[8].X = -2;
 
@@ -1233,7 +1264,7 @@ namespace ClassicUO.Game.Managers
 
                         list[8].Z = 10;
 
-                        list[9].Graphic = (ushort) item.West;
+                        list[9].Graphic = (ushort)item.West;
 
                         list[9].X = -3;
 
@@ -1388,7 +1419,7 @@ namespace ClassicUO.Game.Managers
 
                             if (sy < EndPos.Y || sx == StartPos.X || gobj.Z >= MinHouseZ)
 
-                                //if ( !(sx > StartPos.X && sx < EndPos.X && sy >= EndPos.Y && sy <= EndPos.Y + 1)  || gobj.Z >= MinHouseZ)
+                            //if ( !(sx > StartPos.X && sx < EndPos.X && sy >= EndPos.Y && sy <= EndPos.Y + 1)  || gobj.Z >= MinHouseZ)
                             {
                                 return false;
                             }
@@ -1610,7 +1641,7 @@ namespace ClassicUO.Game.Managers
                     house.GetMultiAt(item.X, item.Y),
                     minZ - 20,
                     maxZ - 20,
-                    (int) CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_DIRECT_SUPPORT
+                    (int)CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_DIRECT_SUPPORT
                 ) || ValidatePlaceStructure
                 (
                     foundationItem,
@@ -1618,7 +1649,7 @@ namespace ClassicUO.Game.Managers
                     house.GetMultiAt(item.X - 1, item.Y - 1),
                     minZ - 20,
                     maxZ - 20,
-                    (int) (CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_DIRECT_SUPPORT | CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_CANGO_W)
+                    (int)(CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_DIRECT_SUPPORT | CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_CANGO_W)
                 ) || ValidatePlaceStructure
                 (
                     foundationItem,
@@ -1626,7 +1657,7 @@ namespace ClassicUO.Game.Managers
                     house.GetMultiAt(item.X, item.Y - 1),
                     minZ - 20,
                     maxZ - 20,
-                    (int) (CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_DIRECT_SUPPORT | CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_CANGO_N)
+                    (int)(CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_DIRECT_SUPPORT | CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_CANGO_N)
                 ))
                 {
                     Point[] table =
@@ -1710,7 +1741,7 @@ namespace ClassicUO.Game.Managers
                             house.GetMultiAt(item.X, item.Y + 1),
                             minZ,
                             maxZ,
-                            (int) (CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_BOTTOM | CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_N)
+                            (int)(CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_BOTTOM | CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_N)
                         );
                     }
 
@@ -1723,7 +1754,7 @@ namespace ClassicUO.Game.Managers
                             house.GetMultiAt(item.X - 1, item.Y),
                             minZ,
                             maxZ,
-                            (int) (CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_BOTTOM | CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_E)
+                            (int)(CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_BOTTOM | CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_E)
                         );
                     }
 
@@ -1736,7 +1767,7 @@ namespace ClassicUO.Game.Managers
                             house.GetMultiAt(item.X, item.Y - 1),
                             minZ,
                             maxZ,
-                            (int) (CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_BOTTOM | CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_S)
+                            (int)(CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_BOTTOM | CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_S)
                         );
                     }
 
@@ -1749,7 +1780,7 @@ namespace ClassicUO.Game.Managers
                             house.GetMultiAt(item.X + 1, item.Y),
                             minZ,
                             maxZ,
-                            (int) (CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_BOTTOM | CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_W)
+                            (int)(CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_BOTTOM | CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_W)
                         );
                     }
 
@@ -1772,7 +1803,7 @@ namespace ClassicUO.Game.Managers
                             house.GetMultiAt(item.X, item.Y + 1),
                             minZ,
                             maxZ,
-                            (int) (CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_TOP | CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_N)
+                            (int)(CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_TOP | CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_N)
                         );
                     }
 
@@ -1785,7 +1816,7 @@ namespace ClassicUO.Game.Managers
                             house.GetMultiAt(item.X - 1, item.Y),
                             minZ,
                             maxZ,
-                            (int) (CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_TOP | CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_E)
+                            (int)(CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_TOP | CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_E)
                         );
                     }
 
@@ -1798,7 +1829,7 @@ namespace ClassicUO.Game.Managers
                             house.GetMultiAt(item.X, item.Y - 1),
                             minZ,
                             maxZ,
-                            (int) (CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_TOP | CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_S)
+                            (int)(CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_TOP | CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_S)
                         );
                     }
 
@@ -1811,7 +1842,7 @@ namespace ClassicUO.Game.Managers
                             house.GetMultiAt(item.X + 1, item.Y),
                             minZ,
                             maxZ,
-                            (int) (CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_TOP | CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_W)
+                            (int)(CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_TOP | CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_W)
                         );
                     }
 
@@ -1853,21 +1884,21 @@ namespace ClassicUO.Game.Managers
                     {
                         CustomHousePlaceInfo info = ObjectsInfo[info1];
 
-                        if ((flags & (int) CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_DIRECT_SUPPORT) != 0)
+                        if ((flags & (int)CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_DIRECT_SUPPORT) != 0)
                         {
                             if ((item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE) != 0 || info.DirectSupports == 0)
                             {
                                 continue;
                             }
 
-                            if ((flags & (int) CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_CANGO_W) != 0)
+                            if ((flags & (int)CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_CANGO_W) != 0)
                             {
                                 if (info.CanGoW != 0)
                                 {
                                     return true;
                                 }
                             }
-                            else if ((flags & (int) CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_CANGO_N) != 0)
+                            else if ((flags & (int)CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_CANGO_N) != 0)
                             {
                                 if (info.CanGoN != 0)
                                 {
@@ -1879,7 +1910,7 @@ namespace ClassicUO.Game.Managers
                                 return true;
                             }
                         }
-                        else if ((flags & (int) CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_BOTTOM) != 0 && info.Bottom != 0 || (flags & (int) CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_TOP) != 0 && info.Top != 0)
+                        else if ((flags & (int)CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_BOTTOM) != 0 && info.Bottom != 0 || (flags & (int)CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_TOP) != 0 && info.Top != 0)
                         {
                             if ((item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE) == 0)
                             {
@@ -1904,46 +1935,46 @@ namespace ClassicUO.Game.Managers
 
                             if ((item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE) == 0)
                             {
-                                if ((flags & (int) CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_BOTTOM) != 0)
+                                if ((flags & (int)CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_BOTTOM) != 0)
                                 {
-                                    if ((flags & (int) CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_N) != 0 && info.AdjUN != 0)
+                                    if ((flags & (int)CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_N) != 0 && info.AdjUN != 0)
                                     {
                                         return true;
                                     }
 
-                                    if ((flags & (int) CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_E) != 0 && info.AdjUE != 0)
+                                    if ((flags & (int)CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_E) != 0 && info.AdjUE != 0)
                                     {
                                         return true;
                                     }
 
-                                    if ((flags & (int) CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_S) != 0 && info.AdjUS != 0)
+                                    if ((flags & (int)CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_S) != 0 && info.AdjUS != 0)
                                     {
                                         return true;
                                     }
 
-                                    if ((flags & (int) CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_W) != 0 && info.AdjUW != 0)
+                                    if ((flags & (int)CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_W) != 0 && info.AdjUW != 0)
                                     {
                                         return true;
                                     }
                                 }
                                 else
                                 {
-                                    if ((flags & (int) CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_N) != 0 && info.AdjLN != 0)
+                                    if ((flags & (int)CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_N) != 0 && info.AdjLN != 0)
                                     {
                                         return true;
                                     }
 
-                                    if ((flags & (int) CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_E) != 0 && info.AdjLE != 0)
+                                    if ((flags & (int)CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_E) != 0 && info.AdjLE != 0)
                                     {
                                         return true;
                                     }
 
-                                    if ((flags & (int) CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_S) != 0 && info.AdjLS != 0)
+                                    if ((flags & (int)CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_S) != 0 && info.AdjLS != 0)
                                     {
                                         return true;
                                     }
 
-                                    if ((flags & (int) CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_W) != 0 && info.AdjLW != 0)
+                                    if ((flags & (int)CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_W) != 0 && info.AdjLW != 0)
                                     {
                                         return true;
                                     }
@@ -1981,7 +2012,7 @@ namespace ClassicUO.Game.Managers
 
                     if (item.Parse(line))
                     {
-                        if (item.FeatureMask == 0 || ((int) World.ClientLockedFeatures.Flags & item.FeatureMask) != 0)
+                        if (item.FeatureMask == 0 || ((int)World.ClientLockedFeatures.Flags & item.FeatureMask) != 0)
                         {
                             list.Add(item);
                         }
@@ -2014,7 +2045,7 @@ namespace ClassicUO.Game.Managers
 
                     if (item.Parse(line))
                     {
-                        if (item.FeatureMask != 0 && ((int) World.ClientLockedFeatures.Flags & item.FeatureMask) == 0)
+                        if (item.FeatureMask != 0 && ((int)World.ClientLockedFeatures.Flags & item.FeatureMask) == 0)
                         {
                             continue;
                         }
@@ -2146,4 +2177,5 @@ namespace ClassicUO.Game.Managers
         CHVCF_CANGO_W = 0x80,
         CHVCF_CANGO_N = 0x100
     }
+
 }

@@ -62,6 +62,7 @@ namespace ClassicUO.Game.Data
 
         public int Style, TID, South1, South2, South3, Corner, East1, East2, East3, Post, WindowS, AltWindowS, WindowE, AltWindowE, SecondAltWindowS, SecondAltWindowE;
         public ushort[] WindowGraphics = new ushort[GRAPHICS_COUNT];
+        public string Comment;
 
         public override int Contains(ushort graphic)
         {
@@ -78,13 +79,14 @@ namespace ClassicUO.Game.Data
 
         public override bool Parse(string text)
         {
-            string[] scanf = text.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] scanf = text.Split('\t');
 
             bool result = false;
 
-            if (scanf.Length >= 17)
+            if (scanf.Length >= 18)
             {
                 result = int.TryParse(scanf[0], out Category) && int.TryParse(scanf[1], out Style) && int.TryParse(scanf[2], out TID) && int.TryParse(scanf[3], out South1) && int.TryParse(scanf[4], out South2) && int.TryParse(scanf[5], out South3) && int.TryParse(scanf[6], out Corner) && int.TryParse(scanf[7], out East1) && int.TryParse(scanf[8], out East2) && int.TryParse(scanf[9], out East3) && int.TryParse(scanf[10], out Post) && int.TryParse(scanf[11], out WindowS) && int.TryParse(scanf[12], out AltWindowS) && int.TryParse(scanf[13], out WindowE) && int.TryParse(scanf[14], out AltWindowE) && int.TryParse(scanf[15], out SecondAltWindowS) && int.TryParse(scanf[16], out SecondAltWindowE) && int.TryParse(scanf[17], out FeatureMask);
+                Comment = scanf[18];
             }
 
             if (result)
@@ -149,16 +151,18 @@ namespace ClassicUO.Game.Data
 
         public int F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, F13, F14, F15, F16;
         public ushort[] Graphics = new ushort[GRAPHICS_COUNT];
+        public string Comment;
 
         public override bool Parse(string text)
         {
-            string[] scanf = text.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] scanf = text.Split('\t');
 
             bool result = false;
 
-            if (scanf.Length >= 17)
+            if (scanf.Length >= 18)
             {
                 result = int.TryParse(scanf[0], out Category) && int.TryParse(scanf[1], out F1) && int.TryParse(scanf[2], out F2) && int.TryParse(scanf[3], out F3) && int.TryParse(scanf[4], out F4) && int.TryParse(scanf[5], out F5) && int.TryParse(scanf[6], out F6) && int.TryParse(scanf[7], out F7) && int.TryParse(scanf[8], out F8) && int.TryParse(scanf[9], out F9) && int.TryParse(scanf[10], out F10) && int.TryParse(scanf[11], out F11) && int.TryParse(scanf[12], out F12) && int.TryParse(scanf[13], out F13) && int.TryParse(scanf[14], out F14) && int.TryParse(scanf[15], out F15) && int.TryParse(scanf[16], out F16) && int.TryParse(scanf[17], out FeatureMask);
+                Comment = scanf[18];
             }
 
             if (result)
@@ -202,18 +206,20 @@ namespace ClassicUO.Game.Data
     {
         public const int GRAPHICS_COUNT = 16;
         public ushort[] Graphics = new ushort[GRAPHICS_COUNT];
+        public string Comment;
 
         public int Style, TID, North, East, South, West, NSCrosspiece, EWCrosspiece, NDent, SDent, WDent, NTPiece, ETPiece, STPiece, WTPiece, XPiece, Extra, Piece;
 
         public override bool Parse(string text)
         {
-            string[] scanf = text.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] scanf = text.Split('\t');
 
             bool result = false;
 
-            if (scanf.Length >= 19)
+            if (scanf.Length >= 20)
             {
                 result = int.TryParse(scanf[0], out Category) && int.TryParse(scanf[1], out Style) && int.TryParse(scanf[2], out TID) && int.TryParse(scanf[3], out North) && int.TryParse(scanf[4], out East) && int.TryParse(scanf[5], out South) && int.TryParse(scanf[6], out West) && int.TryParse(scanf[7], out NSCrosspiece) && int.TryParse(scanf[8], out EWCrosspiece) && int.TryParse(scanf[9], out NDent) && int.TryParse(scanf[10], out SDent) && int.TryParse(scanf[11], out WDent) && int.TryParse(scanf[12], out NTPiece) && int.TryParse(scanf[13], out ETPiece) && int.TryParse(scanf[14], out STPiece) && int.TryParse(scanf[15], out WTPiece) && int.TryParse(scanf[16], out XPiece) && int.TryParse(scanf[17], out Extra) && int.TryParse(scanf[18], out Piece) && int.TryParse(scanf[19], out FeatureMask);
+                Comment = scanf[20];
             }
 
             if (result)
@@ -261,18 +267,20 @@ namespace ClassicUO.Game.Data
     {
         public const int GRAPHICS_COUNT = 8;
         public ushort[] Graphics = new ushort[GRAPHICS_COUNT];
+        public string Comment;
 
         public int Style, TID, Piece1, Piece2, Piece3, Piece4, Piece5, Piece6, Piece7, Piece8;
 
         public override bool Parse(string text)
         {
-            string[] scanf = text.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] scanf = text.Split('\t');
 
             bool result = false;
 
-            if (scanf.Length >= 11)
+            if (scanf.Length >= 12)
             {
                 result = int.TryParse(scanf[0], out Category) && int.TryParse(scanf[1], out Style) && int.TryParse(scanf[2], out TID) && int.TryParse(scanf[3], out Piece1) && int.TryParse(scanf[4], out Piece2) && int.TryParse(scanf[5], out Piece3) && int.TryParse(scanf[6], out Piece4) && int.TryParse(scanf[7], out Piece5) && int.TryParse(scanf[8], out Piece6) && int.TryParse(scanf[9], out Piece7) && int.TryParse(scanf[10], out Piece8) && int.TryParse(scanf[11], out FeatureMask);
+                Comment = scanf[12];
             }
 
             if (result)
@@ -312,18 +320,20 @@ namespace ClassicUO.Game.Data
     {
         public const int GRAPHICS_COUNT = 8;
         public ushort[] Graphics = new ushort[GRAPHICS_COUNT];
+        public string Comment;
 
         public int Piece1, Piece2, Piece3, Piece4, Piece5, Piece6, Piece7, Piece8;
 
         public override bool Parse(string text)
         {
-            string[] scanf = text.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] scanf = text.Split('\t');
 
             bool result = false;
 
-            if (scanf.Length >= 9)
+            if (scanf.Length >= 10)
             {
                 result = int.TryParse(scanf[0], out Category) && int.TryParse(scanf[1], out Piece1) && int.TryParse(scanf[2], out Piece2) && int.TryParse(scanf[3], out Piece3) && int.TryParse(scanf[4], out Piece4) && int.TryParse(scanf[5], out Piece5) && int.TryParse(scanf[6], out Piece6) && int.TryParse(scanf[7], out Piece7) && int.TryParse(scanf[8], out Piece8) && int.TryParse(scanf[9], out FeatureMask);
+                Comment = scanf[10];
             }
 
             if (result)
@@ -361,16 +371,18 @@ namespace ClassicUO.Game.Data
 
         public int F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, F13, F14, F15, F16;
         public ushort[] Graphics = new ushort[GRAPHICS_COUNT];
+        public string Comment;
 
         public override bool Parse(string text)
         {
-            string[] scanf = text.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] scanf = text.Split('\t');
 
             bool result = false;
 
-            if (scanf.Length >= 17)
+            if (scanf.Length >= 18)
             {
                 result = int.TryParse(scanf[0], out Category) && int.TryParse(scanf[1], out F1) && int.TryParse(scanf[2], out F2) && int.TryParse(scanf[3], out F3) && int.TryParse(scanf[4], out F4) && int.TryParse(scanf[5], out F5) && int.TryParse(scanf[6], out F6) && int.TryParse(scanf[7], out F7) && int.TryParse(scanf[8], out F8) && int.TryParse(scanf[9], out F9) && int.TryParse(scanf[10], out F10) && int.TryParse(scanf[11], out F11) && int.TryParse(scanf[12], out F12) && int.TryParse(scanf[13], out F13) && int.TryParse(scanf[14], out F14) && int.TryParse(scanf[15], out F15) && int.TryParse(scanf[16], out F16) && int.TryParse(scanf[17], out FeatureMask);
+                Comment = scanf[18];
             }
 
             if (result)
@@ -416,16 +428,18 @@ namespace ClassicUO.Game.Data
 
         public int Block, North, East, South, West, Squared1, Squared2, Rounded1, Rounded2, MultiNorth, MultiEast, MultiSouth, MultiWest;
         public ushort[] Graphics = new ushort[GRAPHICS_COUNT];
+        public string Comment;
 
         public override bool Parse(string text)
         {
-            string[] scanf = text.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] scanf = text.Split('\t');
 
             bool result = false;
 
-            if (scanf.Length >= 14)
+            if (scanf.Length >= 15)
             {
                 result = int.TryParse(scanf[0], out Category) && int.TryParse(scanf[1], out Block) && int.TryParse(scanf[2], out North) && int.TryParse(scanf[3], out East) && int.TryParse(scanf[4], out South) && int.TryParse(scanf[5], out West) && int.TryParse(scanf[6], out Squared1) && int.TryParse(scanf[7], out Squared2) && int.TryParse(scanf[8], out Rounded1) && int.TryParse(scanf[9], out Rounded2) && int.TryParse(scanf[10], out MultiNorth) && int.TryParse(scanf[11], out MultiEast) && int.TryParse(scanf[12], out MultiSouth) && int.TryParse(scanf[13], out MultiWest) && int.TryParse(scanf[14], out FeatureMask);
+                Comment = scanf[15];
             }
 
             if (result)

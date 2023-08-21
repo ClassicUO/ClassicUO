@@ -40,6 +40,10 @@ using ClassicUO.Assets;
 using ClassicUO.Network;
 using ClassicUO.Resources;
 using Microsoft.Xna.Framework;
+using System.Drawing;
+using System.Text;
+using System.Globalization;
+using System.Text.RegularExpressions;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -697,6 +701,8 @@ namespace ClassicUO.Game.UI.Gumps
                     pic.MouseUp += (sender, e) => { OnButtonClick((int) pic.LocalSerial); };
                     _dataBox.Add(pic);
 
+                    pic.SetTooltip(ClilocLoader.Instance.GetString(vec[0].TID));
+
                     x += 48;
 
                     if (x >= 384)
@@ -1163,6 +1169,8 @@ namespace ClassicUO.Game.UI.Gumps
                     pic.MouseUp += (sender, e) => { OnButtonClick((int) pic.LocalSerial); };
                     _dataBox.Add(pic);
 
+                    pic.SetTooltip(ClilocLoader.Instance.GetString(vec[0].TID));
+
                     x += 48;
 
                     if (x >= 384)
@@ -1239,6 +1247,11 @@ namespace ClassicUO.Game.UI.Gumps
 
                                 pic.MouseUp += (sender, e) => { OnButtonClick((int) pic.LocalSerial); };
                                 _dataBox.Add(pic);
+
+                                ref StaticTiles data = ref TileDataLoader.Instance.StaticData[graphic];
+
+                                pic.SetTooltip(ToTitleCase(ClilocLoader.Instance.GetString(item.Style == 0 ? 1070640 + (index == 15 ? index + 1 : index) : 1070657 + index)));
+
                             }
 
                             x += 48;
@@ -1285,7 +1298,7 @@ namespace ClassicUO.Game.UI.Gumps
                 button.SetTooltip(ResGumps.RaiseRoofPlacementLevel);
                 _dataBoxGUI.Add(button);
 
-                _dataBoxGUI.Add(new GumpPic(583, 4, 0x55F4, 0));
+                _dataBoxGUI.Add(new GumpPic(383, 4, 0x55F4, 0));
 
                 Label text = new Label(_customHouseManager.RoofZ.ToString(), false, 0x04E9, font: 3)
                 {
@@ -1349,6 +1362,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                     pic.MouseUp += (sender, e) => { OnButtonClick((int) pic.LocalSerial); };
                     _dataBox.Add(pic);
+
+                    pic.SetTooltip(ClilocLoader.Instance.GetString(vec[0].TID));
 
                     x += 48;
 
@@ -1962,6 +1977,12 @@ namespace ClassicUO.Game.UI.Gumps
 
                     break;
             }
+        }
+
+        public string ToTitleCase(string str)
+        {
+            TextInfo textInfo = new CultureInfo("en-US", false).TextInfo;
+            return textInfo.ToTitleCase(str.ToLower());
         }
 
 

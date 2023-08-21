@@ -56,7 +56,7 @@ namespace ClassicUO.Game.GameObjects
                 m.Offset = Vector3.Zero;
             }
         );
-        private ushort _originalGraphic;
+        public ushort _originalGraphic;
 
 
         public string Name => ItemData.Name;
