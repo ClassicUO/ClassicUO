@@ -14,7 +14,8 @@ namespace ClassicUO.Game.UI.Gumps
                 "- Potential fix for bug when processing messages\n" +
                 "- Fixed an issue on OSI where corpses would not open in grid containers\n" +
                 "- Fix for some SOS messages\n" +
-                "- Fix for text not being clickable",
+                "- Fix for text not being clickable\n" +
+                "- Added yellow highlighting for overhead text",
 
             "/c[white][3.7.0]/cd\n" +
                 "- Updated some default font sizes, slightly larger (New installs only)\n" +
