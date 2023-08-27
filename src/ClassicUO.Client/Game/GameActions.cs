@@ -330,7 +330,7 @@ namespace ClassicUO.Game
                 Socket.Send_DoubleClick(serial);
             }
 
-            if (SerialHelper.IsItem(serial))
+            if (SerialHelper.IsItem(serial) || (SerialHelper.IsMobile(serial) && World.Mobiles.Get(serial).IsHuman))
             {
                 World.LastObject = serial;
             }
