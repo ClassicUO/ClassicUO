@@ -6380,13 +6380,14 @@ namespace ClassicUO.Network
                     gs.UpdateDrawPosition = true;
                 }
 
-                if (old_graphic != 0 && old_graphic != World.Player.Graphic)
+                // std client keeps the target open! 
+                /*if (old_graphic != 0 && old_graphic != World.Player.Graphic)
                 {
                     if (World.Player.IsDead)
                     {
                         TargetManager.Reset();
                     }
-                }
+                }*/
 
                 if (olddead != World.Player.IsDead)
                 {
