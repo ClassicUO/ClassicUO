@@ -349,7 +349,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             ResizeWindow(new Point(rW, rH));
-            //InvalidateContents = true;
+            GameActions.DoubleClickQueued(LocalSerial);
         }
 
         private void _scrollArea_DragBegin(object sender, MouseEventArgs e)
