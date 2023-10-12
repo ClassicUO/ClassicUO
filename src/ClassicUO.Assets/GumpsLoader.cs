@@ -242,12 +242,9 @@ namespace ClassicUO.Assets
                             val = HuesHelper.Color16To32(gmul[i].Value) | 0xFF_00_00_00;
                         }
 
-                        int count = gmul[i].Run;
-
-                        for (int j = 0; j < count; j++)
-                        {
-                            pixels[pos++] = val;
-                        }
+                        var count = gmul[i].Run;
+                        pixels.Slice(pos, count).Fill(val);
+                        pos += count;
                     }
                 }
 

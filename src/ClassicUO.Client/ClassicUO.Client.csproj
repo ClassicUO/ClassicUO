@@ -7,6 +7,17 @@
     <RootNamespace>ClassicUO</RootNamespace>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <OutputPath>$(ProjectDir)..\..\bin\Release\</OutputPath>
+    <PublishDir>$(ProjectDir)..\..\bin\dist\</PublishDir>
+    <Optimize>true</Optimize>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)'=='Debug'">
+    <OutputPath>$(ProjectDir)..\..\bin\Debug\</OutputPath>
+    <DefineConstants>$(DefineConstants)TRACE</DefineConstants>
+  </PropertyGroup>
+
   <PropertyGroup Condition="'$(IS_DEV_BUILD)' == 'true'">
     <OutputType>WinExe</OutputType>
   </PropertyGroup>

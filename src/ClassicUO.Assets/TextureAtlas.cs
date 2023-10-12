@@ -44,7 +44,7 @@ namespace ClassicUO.Assets
         public int TexturesCount => _textureList.Count;
 
 
-        public unsafe Texture2D AddSprite<T>(Span<T> pixels, int width, int height, out Rectangle pr) where T : unmanaged
+        public unsafe Texture2D AddSprite(ReadOnlySpan<uint> pixels, int width, int height, out Rectangle pr)
         {
             var index = _textureList.Count - 1;
 
@@ -62,14 +62,14 @@ namespace ClassicUO.Assets
 
             Texture2D texture = _textureList[index];
 
-            fixed (T* src = pixels)
+            fixed (uint* src = pixels)
             {
                 texture.SetDataPointerEXT
                 (
                     0,
                     pr,
                     (IntPtr)src,
-                    sizeof(T) * width * height
+                    sizeof(uint) * width * height
                 );
             }
 
