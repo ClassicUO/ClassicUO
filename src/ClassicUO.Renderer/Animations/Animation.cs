@@ -1,16 +1,23 @@
 using System;
 using System.Runtime.CompilerServices;
 using ClassicUO.Assets;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Renderer.Animations
 {
-    public sealed class Animation
+    public sealed class Animations
     {
         const int MAX_ANIMATIONS_DATA_INDEX_COUNT = 2048;
 
         private readonly TextureAtlas _atlas;
         private readonly PixelPicker _picker = new PixelPicker();
         private IndexAnimation[] _dataIndex = new IndexAnimation[MAX_ANIMATIONS_DATA_INDEX_COUNT];
+
+        public Animations(GraphicsDevice device)
+        {
+            _atlas = new TextureAtlas(device, 4096, 4096, SurfaceFormat.Color);
+        }
+
         public int MaxAnimationCount => _dataIndex.Length;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

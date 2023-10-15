@@ -2,7 +2,7 @@
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 // 1. Redistributions of source code must retain the above copyright
@@ -16,7 +16,7 @@
 // 4. Neither the name of the copyright holder nor the
 //    names of its contributors may be used to endorse or promote products
 //    derived from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -53,10 +53,11 @@ namespace ClassicUO.Game.UI.Controls
         private readonly string _caption;
         private bool _entered;
         private readonly RenderedText[] _fontTexture;
-        private ushort _normal, _pressed, _over;
+        private ushort _normal,
+            _pressed,
+            _over;
 
-        public Button
-        (
+        public Button(
             int buttonID,
             ushort normal,
             ushort pressed,
@@ -73,16 +74,17 @@ namespace ClassicUO.Game.UI.Controls
             _pressed = pressed;
             _over = over;
 
-            if (GumpsLoader.Instance.GetGumpTexture(normal, out var bounds) == null)
+            ref readonly var gumpInfo = ref Client.Game.Gumps.GetGump(normal);
+            if (gumpInfo.Texture == null)
             {
                 Dispose();
 
                 return;
             }
-          
-            Width = bounds.Width;
-            Height = bounds.Height;
-            FontHue = normalHue == ushort.MaxValue ? (ushort) 0 : normalHue;
+
+            Width = gumpInfo.UV.Width;
+            Height = gumpInfo.UV.Height;
+            FontHue = normalHue == ushort.MaxValue ? (ushort)0 : normalHue;
             HueHover = hoverHue == ushort.MaxValue ? normalHue : hoverHue;
 
             if (!string.IsNullOrEmpty(caption) && normalHue != ushort.MaxValue)
@@ -105,7 +107,12 @@ namespace ClassicUO.Game.UI.Controls
             CanCloseWithEsc = false;
         }
 
-        public Button(List<string> parts) : this(parts.Count >= 8 ? int.Parse(parts[7]) : 0, UInt16Converter.Parse(parts[3]), UInt16Converter.Parse(parts[4]))
+        public Button(List<string> parts)
+            : this(
+                parts.Count >= 8 ? int.Parse(parts[7]) : 0,
+                UInt16Converter.Parse(parts[3]),
+                UInt16Converter.Parse(parts[4])
+            )
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
@@ -140,10 +147,10 @@ namespace ClassicUO.Game.UI.Controls
             {
                 _normal = value;
 
-                _ = GumpsLoader.Instance.GetGumpTexture(value, out var bounds);
+                ref readonly var gumpInfo = ref Client.Game.Gumps.GetGump(value);
 
-                Width = bounds.Width;
-                Height = bounds.Height;
+                Width = gumpInfo.UV.Width;
+                Height = gumpInfo.UV.Height;
             }
         }
 
@@ -154,10 +161,10 @@ namespace ClassicUO.Game.UI.Controls
             {
                 _pressed = value;
 
-                _ = GumpsLoader.Instance.GetGumpTexture(value, out var bounds);
+                ref readonly var gumpInfo = ref Client.Game.Gumps.GetGump(value);
 
-                Width = bounds.Width;
-                Height = bounds.Height;
+                Width = gumpInfo.UV.Width;
+                Height = gumpInfo.UV.Height;
             }
         }
 
@@ -168,10 +175,10 @@ namespace ClassicUO.Game.UI.Controls
             {
                 _over = value;
 
-                _ = GumpsLoader.Instance.GetGumpTexture(value, out var bounds);
+                ref readonly var gumpInfo = ref Client.Game.Gumps.GetGump(value);
 
-                Width = bounds.Width;
-                Height = bounds.Height;
+                Width = gumpInfo.UV.Width;
+                Height = gumpInfo.UV.Height;
             }
         }
 
@@ -184,7 +191,6 @@ namespace ClassicUO.Game.UI.Controls
 
         public bool ContainsByBounds { get; set; }
 
-       
         protected override void OnMouseEnter(int x, int y)
         {
             _entered = true;
@@ -204,18 +210,24 @@ namespace ClassicUO.Game.UI.Controls
             {
                 if (IsClicked && _pressed > 0)
                 {
-                    texture = GumpsLoader.Instance.GetGumpTexture(_pressed, out bounds);
+                    ref readonly var gumpInfo = ref Client.Game.Gumps.GetGump(_pressed);
+                    texture = gumpInfo.Texture;
+                    bounds = gumpInfo.UV;
                 }
 
                 if (texture == null && _over > 0)
                 {
-                    texture = GumpsLoader.Instance.GetGumpTexture(_over, out bounds);
+                    ref readonly var gumpInfo = ref Client.Game.Gumps.GetGump(_over);
+                    texture = gumpInfo.Texture;
+                    bounds = gumpInfo.UV;
                 }
             }
 
             if (texture == null)
             {
-                texture = GumpsLoader.Instance.GetGumpTexture(_normal, out bounds);
+                ref readonly var gumpInfo = ref Client.Game.Gumps.GetGump(_normal);
+                texture = gumpInfo.Texture;
+                bounds = gumpInfo.UV;
             }
 
             if (texture == null)
@@ -223,21 +235,9 @@ namespace ClassicUO.Game.UI.Controls
                 return false;
             }
 
-            Vector3 hue = ShaderHueTranslator.GetHueVector
-                            (
-                                Hue,
-                                false,
-                                Alpha,
-                                true
-                            );
+            var hue = ShaderHueTranslator.GetHueVector(Hue, false, Alpha, true);
 
-            batcher.Draw
-            (
-                texture,
-                new Rectangle(x, y, Width, Height),
-                bounds,
-                hue
-            );
+            batcher.Draw(texture, new Rectangle(x, y, Width, Height), bounds, hue);
 
             if (!string.IsNullOrEmpty(_caption))
             {
@@ -247,7 +247,11 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     int yoffset = IsClicked ? 1 : 0;
 
-                    textTexture.Draw(batcher, x + ((Width - textTexture.Width) >> 1), y + yoffset + ((Height - textTexture.Height) >> 1));
+                    textTexture.Draw(
+                        batcher,
+                        x + ((Width - textTexture.Width) >> 1),
+                        y + yoffset + ((Height - textTexture.Height) >> 1)
+                    );
                 }
                 else
                 {
@@ -298,7 +302,6 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-   
         public override bool Contains(int x, int y)
         {
             if (IsDisposed)
@@ -306,7 +309,9 @@ namespace ClassicUO.Game.UI.Controls
                 return false;
             }
 
-            return ContainsByBounds ? base.Contains(x, y) : GumpsLoader.Instance.PixelCheck(_normal, x - Offset.X, y - Offset.Y);
+            return ContainsByBounds
+                ? base.Contains(x, y)
+                : Client.Game.Gumps.PixelCheck(_normal, x - Offset.X, y - Offset.Y);
         }
 
         public sealed override void Dispose()

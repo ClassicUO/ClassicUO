@@ -2,7 +2,7 @@
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 // 1. Redistributions of source code must retain the above copyright
@@ -16,7 +16,7 @@
 // 4. Neither the name of the copyright holder nor the
 //    names of its contributors may be used to endorse or promote products
 //    derived from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -56,8 +56,7 @@ namespace ClassicUO.Game.UI.Controls
         private readonly RenderedText _text;
         private int _value = -1;
 
-        public HSliderBar
-        (
+        public HSliderBar(
             int x,
             int y,
             int w,
@@ -87,13 +86,15 @@ namespace ClassicUO.Game.UI.Controls
             _style = style;
             AcceptMouseInput = true;
 
-            var texture = GumpsLoader.Instance.GetGumpTexture((uint)(_style == HSliderBarStyle.MetalWidgetRecessedBar ? 216 : 0x845), out var bounds);
+            ref readonly var gumpInfo = ref Client.Game.Gumps.GetGump(
+                (uint)(_style == HSliderBarStyle.MetalWidgetRecessedBar ? 216 : 0x845)
+            );
 
             Width = BarWidth;
 
-            if (texture != null)
+            if (gumpInfo.Texture != null)
             {
-                Height = bounds.Height;
+                Height = gumpInfo.UV.Height;
             }
 
             CalculateOffset();
@@ -117,7 +118,8 @@ namespace ClassicUO.Game.UI.Controls
                 if (_value != value)
                 {
                     int oldValue = _value;
-                    _value = /*_newValue =*/ value;
+                    _value = /*_newValue =*/
+                    value;
                     //if (IsInitialized)
                     //    RecalculateSliderX();
 
@@ -166,65 +168,52 @@ namespace ClassicUO.Game.UI.Controls
         {
             Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
-
             if (_style == HSliderBarStyle.MetalWidgetRecessedBar)
             {
-                var texture0 = GumpsLoader.Instance.GetGumpTexture(213, out var bounds0);
-                var texture1 = GumpsLoader.Instance.GetGumpTexture(214, out var bounds1);
-                var texture2 = GumpsLoader.Instance.GetGumpTexture(215, out var bounds2);
-                var texture3 = GumpsLoader.Instance.GetGumpTexture(216, out var bounds3);
+                ref readonly var gumpInfo0 = ref Client.Game.Gumps.GetGump(213);
+                ref readonly var gumpInfo1 = ref Client.Game.Gumps.GetGump(214);
+                ref readonly var gumpInfo2 = ref Client.Game.Gumps.GetGump(215);
+                ref readonly var gumpInfo3 = ref Client.Game.Gumps.GetGump(216);
 
-                batcher.Draw
-                (
-                    texture0,
-                    new Vector2(x, y),
-                    bounds0,
-                    hueVector
-                );
+                batcher.Draw(gumpInfo0.Texture, new Vector2(x, y), gumpInfo0.UV, hueVector);
 
-                batcher.DrawTiled
-                (
-                    texture1,
-                    new Rectangle
-                    (
-                        x + bounds0.Width,
+                batcher.DrawTiled(
+                    gumpInfo1.Texture,
+                    new Rectangle(
+                        x + gumpInfo0.UV.Width,
                         y,
-                        BarWidth - bounds2.Width - bounds0.Width,
-                        bounds1.Height
+                        BarWidth - gumpInfo2.UV.Width - gumpInfo0.UV.Width,
+                        gumpInfo1.UV.Height
                     ),
-                    bounds1,
+                    gumpInfo1.UV,
                     hueVector
                 );
 
-                batcher.Draw
-                (
-                    texture2,
-                    new Vector2(x + BarWidth - bounds2.Width, y),
-                    bounds2,
+                batcher.Draw(
+                    gumpInfo2.Texture,
+                    new Vector2(x + BarWidth - gumpInfo2.UV.Width, y),
+                    gumpInfo2.UV,
                     hueVector
                 );
-    
-                batcher.Draw
-                (
-                    texture3,
+
+                batcher.Draw(
+                    gumpInfo3.Texture,
                     new Vector2(x + _sliderX, y),
-                    bounds3,
+                    gumpInfo3.UV,
                     hueVector
                 );
             }
             else
             {
-                var texture = GumpsLoader.Instance.GetGumpTexture(0x845, out var bounds);
-              
-                batcher.Draw
-                (
-                    texture,
+                ref readonly var gumpInfo = ref Client.Game.Gumps.GetGump(idx: 0x845);
+
+                batcher.Draw(
+                    gumpInfo.Texture,
                     new Vector2(x + _sliderX, y),
-                    bounds,
+                    gumpInfo.UV,
                     hueVector
                 );
             }
-
 
             if (_text != null)
             {
@@ -273,7 +262,6 @@ namespace ClassicUO.Game.UI.Controls
             CalculateNew(x);
         }
 
-
         protected override void OnMouseWheel(MouseEventType delta)
         {
             switch (delta)
@@ -297,11 +285,13 @@ namespace ClassicUO.Game.UI.Controls
             int len = BarWidth;
             int maxValue = MaxValue - MinValue;
 
-            _ = GumpsLoader.Instance.GetGumpTexture((uint)(_style == HSliderBarStyle.MetalWidgetRecessedBar ? 216 : 0x845), out var bounds);
+            ref readonly var gumpInfo = ref Client.Game.Gumps.GetGump(
+                (uint)(_style == HSliderBarStyle.MetalWidgetRecessedBar ? 216 : 0x845)
+            );
 
-            len -= bounds.Width;
-            float perc = x / (float) len * 100.0f;
-            Value = (int) (maxValue * perc / 100.0f) + MinValue;
+            len -= gumpInfo.UV.Width;
+            float perc = x / (float)len * 100.0f;
+            Value = (int)(maxValue * perc / 100.0f) + MinValue;
             CalculateOffset();
         }
 
@@ -320,19 +310,21 @@ namespace ClassicUO.Game.UI.Controls
             int maxValue = MaxValue - MinValue;
             int length = BarWidth;
 
-            _ = GumpsLoader.Instance.GetGumpTexture((uint)(_style == HSliderBarStyle.MetalWidgetRecessedBar ? 216 : 0x845), out var bounds);
-            length -= bounds.Width;
+            ref readonly var gumpInfo = ref Client.Game.Gumps.GetGump(
+                (uint)(_style == HSliderBarStyle.MetalWidgetRecessedBar ? 216 : 0x845)
+            );
+            length -= gumpInfo.UV.Width;
 
             if (maxValue > 0)
             {
-                Percents = value / (float) maxValue * 100.0f;
+                Percents = value / (float)maxValue * 100.0f;
             }
             else
             {
                 Percents = 0;
             }
 
-            _sliderX = (int) (length * Percents / 100.0f);
+            _sliderX = (int)(length * Percents / 100.0f);
 
             if (_sliderX < 0)
             {
@@ -365,7 +357,9 @@ namespace ClassicUO.Game.UI.Controls
                     {
                         updateSinceLastCycle = true;
 
-                        _pairedSliders[sliderIndex].InternalSetValue(_pairedSliders[sliderIndex].Value + d);
+                        _pairedSliders[sliderIndex].InternalSetValue(
+                            _pairedSliders[sliderIndex].Value + d
+                        );
 
                         points--;
                     }
@@ -376,7 +370,9 @@ namespace ClassicUO.Game.UI.Controls
                     {
                         updateSinceLastCycle = true;
 
-                        _pairedSliders[sliderIndex].InternalSetValue(_pairedSliders[sliderIndex]._value + d);
+                        _pairedSliders[sliderIndex].InternalSetValue(
+                            _pairedSliders[sliderIndex]._value + d
+                        );
 
                         points--;
                     }

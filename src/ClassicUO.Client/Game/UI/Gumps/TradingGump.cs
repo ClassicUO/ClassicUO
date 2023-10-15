@@ -2,7 +2,7 @@
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 // 1. Redistributions of source code must retain the above copyright
@@ -16,7 +16,7 @@
 // 4. Neither the name of the copyright holder nor the
 //    names of its contributors may be used to endorse or promote products
 //    derived from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -45,13 +45,18 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal sealed class TradingGump : TextContainerGump
     {
-        private uint _gold, _platinum, _hisGold, _hisPlatinum;
+        private uint _gold,
+            _platinum,
+            _hisGold,
+            _hisPlatinum;
         private readonly Label[] _hisCoins = new Label[2];
         private GumpPic _hisPic;
 
-        private bool _imAccepting, _heIsAccepting;
+        private bool _imAccepting,
+            _heIsAccepting;
 
-        private DataBox _myBox, _hisBox;
+        private DataBox _myBox,
+            _hisBox;
         private Checkbox _myCheckbox;
         private readonly Label[] _myCoins = new Label[2];
         private readonly StbTextBox[] _myCoinsEntries = new StbTextBox[2];
@@ -168,7 +173,6 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-
         protected override void UpdateContents()
         {
             Entity container = World.Get(ID1);
@@ -187,16 +191,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             for (LinkedObject i = container.Items; i != null; i = i.Next)
             {
-                Item it = (Item) i;
+                Item it = (Item)i;
 
-                ItemGump g = new ItemGump
-                (
-                    it.Serial,
-                    it.DisplayedGraphic,
-                    it.Hue,
-                    it.X,
-                    it.Y
-                )
+                ItemGump g = new ItemGump(it.Serial, it.DisplayedGraphic, it.Hue, it.X, it.Y)
                 {
                     HighlightOnMouseOver = true
                 };
@@ -204,18 +201,20 @@ namespace ClassicUO.Game.UI.Gumps
                 int x = g.X;
                 int y = g.Y;
 
-                var texture = loader.GetStaticTexture(it.DisplayedGraphic, out var bounds);
+                ref readonly var artInfo = ref Client.Game.Arts.GetArt(
+                    (uint)(it.DisplayedGraphic + 0x4000)
+                );
 
-                if (texture != null)
+                if (artInfo.Texture != null)
                 {
-                    if (x + bounds.Width > _myBox.Width)
+                    if (x + artInfo.UV.Width > _myBox.Width)
                     {
-                        x = _myBox.Width - bounds.Width;
+                        x = _myBox.Width - artInfo.UV.Width;
                     }
 
-                    if (y + bounds.Height > _myBox.Height)
+                    if (y + artInfo.UV.Height > _myBox.Height)
                     {
-                        y = _myBox.Height - bounds.Height;
+                        y = _myBox.Height - artInfo.UV.Height;
                     }
                 }
 
@@ -228,7 +227,6 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     y = 0;
                 }
-
 
                 g.X = x;
                 g.Y = y;
@@ -250,16 +248,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             for (LinkedObject i = container.Items; i != null; i = i.Next)
             {
-                Item it = (Item) i;
+                Item it = (Item)i;
 
-                ItemGump g = new ItemGump
-                (
-                    it.Serial,
-                    it.DisplayedGraphic,
-                    it.Hue,
-                    it.X,
-                    it.Y
-                )
+                ItemGump g = new ItemGump(it.Serial, it.DisplayedGraphic, it.Hue, it.X, it.Y)
                 {
                     HighlightOnMouseOver = true
                 };
@@ -267,18 +258,20 @@ namespace ClassicUO.Game.UI.Gumps
                 int x = g.X;
                 int y = g.Y;
 
-                var texture = loader.GetStaticTexture(it.DisplayedGraphic, out var bounds);
+                ref readonly var artInfo = ref Client.Game.Arts.GetArt(
+                    (uint)(it.DisplayedGraphic + 0x4000)
+                );
 
-                if (texture != null)
+                if (artInfo.Texture != null)
                 {
-                    if (x + bounds.Width > _myBox.Width)
+                    if (x + artInfo.UV.Width > _myBox.Width)
                     {
-                        x = _myBox.Width - bounds.Width;
+                        x = _myBox.Width - artInfo.UV.Width;
                     }
 
-                    if (y + bounds.Height > _myBox.Height)
+                    if (y + artInfo.UV.Height > _myBox.Height)
                     {
-                        y = _myBox.Height - bounds.Height;
+                        y = _myBox.Height - artInfo.UV.Height;
                     }
                 }
 
@@ -292,7 +285,6 @@ namespace ClassicUO.Game.UI.Gumps
                     y = 0;
                 }
 
-
                 g.X = x;
                 g.Y = y;
 
@@ -304,28 +296,32 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (button == MouseButtonType.Left)
             {
-                if (Client.Game.GameCursor.ItemHold.Enabled && !Client.Game.GameCursor.ItemHold.IsFixedPosition)
+                if (
+                    Client.Game.GameCursor.ItemHold.Enabled
+                    && !Client.Game.GameCursor.ItemHold.IsFixedPosition
+                )
                 {
                     if (_myBox != null && _myBox.Bounds.Contains(x, y))
                     {
-                        var texture = ArtLoader.Instance.GetStaticTexture(Client.Game.GameCursor.ItemHold.DisplayedGraphic, out var bounds);
-
+                        ref readonly var artInfo = ref Client.Game.Arts.GetArt(
+                            (uint)(Client.Game.GameCursor.ItemHold.DisplayedGraphic + 0x4000)
+                        );
                         x -= _myBox.X;
                         y -= _myBox.Y;
 
-                        if (texture != null)
+                        if (artInfo.Texture != null)
                         {
-                            x -= bounds.Width >> 1;
-                            y -= bounds.Height >> 1;
+                            x -= artInfo.UV.Width >> 1;
+                            y -= artInfo.UV.Height >> 1;
 
-                            if (x + bounds.Width > _myBox.Width)
+                            if (x + artInfo.UV.Width > _myBox.Width)
                             {
-                                x = _myBox.Width - bounds.Width;
+                                x = _myBox.Width - artInfo.UV.Width;
                             }
 
-                            if (y + bounds.Height > _myBox.Height)
+                            if (y + artInfo.UV.Height > _myBox.Height)
                             {
-                                y = _myBox.Height - bounds.Height;
+                                y = _myBox.Height - artInfo.UV.Height;
                             }
                         }
 
@@ -339,14 +335,7 @@ namespace ClassicUO.Game.UI.Gumps
                             y = 0;
                         }
 
-                        GameActions.DropItem
-                        (
-                            Client.Game.GameCursor.ItemHold.Serial,
-                            x,
-                            y,
-                            0,
-                            ID1
-                        );
+                        GameActions.DropItem(Client.Game.GameCursor.ItemHold.Serial, x, y, 0, ID1);
                     }
                 }
                 else if (SelectedObject.Object is Item it)
@@ -365,7 +354,12 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         Point off = Mouse.LDragOffset;
 
-                        DelayedObjectClickManager.Set(it.Serial, Mouse.Position.X - off.X - ScreenCoordinateX, Mouse.Position.Y - off.Y - ScreenCoordinateY, Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK);
+                        DelayedObjectClickManager.Set(
+                            it.Serial,
+                            Mouse.Position.X - off.X - ScreenCoordinateX,
+                            Mouse.Position.Y - off.Y - ScreenCoordinateY,
+                            Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK
+                        );
                     }
                 }
             }
@@ -382,7 +376,10 @@ namespace ClassicUO.Game.UI.Gumps
             _myCheckbox?.Dispose();
             _hisPic?.Dispose();
 
-            int myX, myY, otherX, otherY;
+            int myX,
+                myY,
+                otherX,
+                otherY;
 
             if (Client.Version >= ClientVersion.CV_704565)
             {
@@ -403,19 +400,11 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (ImAccepting)
             {
-                _myCheckbox = new Checkbox(0x0869, 0x086A)
-                {
-                    X = myX,
-                    Y = myY
-                };
+                _myCheckbox = new Checkbox(0x0869, 0x086A) { X = myX, Y = myY };
             }
             else
             {
-                _myCheckbox = new Checkbox(0x0867, 0x0868)
-                {
-                    X = myX,
-                    Y = myY
-                };
+                _myCheckbox = new Checkbox(0x0867, 0x0868) { X = myX, Y = myY };
             }
 
             _myCheckbox.ValueChanged -= MyCheckboxOnValueChanged;
@@ -423,16 +412,19 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(_myCheckbox);
 
-
-            _hisPic = HeIsAccepting ? new GumpPic(otherX, otherY, 0x0869, 0) : new GumpPic(otherX, otherY, 0x0867, 0);
+            _hisPic = HeIsAccepting
+                ? new GumpPic(otherX, otherY, 0x0869, 0)
+                : new GumpPic(otherX, otherY, 0x0867, 0);
 
             Add(_hisPic);
         }
 
-
         private void BuildGump()
         {
-            int mydbX, mydbY, opdbX, opdbY;
+            int mydbX,
+                mydbY,
+                opdbX,
+                opdbY;
 
             if (Client.Version >= ClientVersion.CV_704565)
             {
@@ -444,36 +436,19 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Add(new Label(_name, false, 0x0481, font: 3) { X = fontWidth, Y = 244 });
 
-
-                _myCoins[0] = new Label("0", false, 0x0481, font: 9)
-                {
-                    X = 43,
-                    Y = 67
-                };
+                _myCoins[0] = new Label("0", false, 0x0481, font: 9) { X = 43, Y = 67 };
 
                 Add(_myCoins[0]);
 
-                _myCoins[1] = new Label("0", false, 0x0481, font: 9)
-                {
-                    X = 180,
-                    Y = 67
-                };
+                _myCoins[1] = new Label("0", false, 0x0481, font: 9) { X = 180, Y = 67 };
 
                 Add(_myCoins[1]);
 
-                _hisCoins[0] = new Label("0", false, 0x0481, font: 9)
-                {
-                    X = 180,
-                    Y = 190
-                };
+                _hisCoins[0] = new Label("0", false, 0x0481, font: 9) { X = 180, Y = 190 };
 
                 Add(_hisCoins[0]);
 
-                _hisCoins[1] = new Label("0", false, 0x0481, font: 9)
-                {
-                    X = 180,
-                    Y = 210
-                };
+                _hisCoins[1] = new Label("0", false, 0x0481, font: 9) { X = 180, Y = 210 };
 
                 Add(_hisCoins[1]);
 
@@ -505,11 +480,12 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Add(_myCoinsEntries[1]);
 
-                uint my_gold_entry = 0, my_plat_entry = 0;
+                uint my_gold_entry = 0,
+                    my_plat_entry = 0;
 
                 void OnTextChanged(object sender, EventArgs e)
                 {
-                    StbTextBox entry = (StbTextBox) sender;
+                    StbTextBox entry = (StbTextBox)sender;
                     bool send = false;
 
                     if (entry != null)
@@ -518,7 +494,7 @@ namespace ClassicUO.Game.UI.Gumps
                         {
                             entry.SetText("0");
 
-                            if ((int) entry.Tag == 0)
+                            if ((int)entry.Tag == 0)
                             {
                                 if (my_gold_entry != 0)
                                 {
@@ -534,7 +510,7 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                         else if (uint.TryParse(entry.Text, out uint value))
                         {
-                            if ((int) entry.Tag == 0) // gold
+                            if ((int)entry.Tag == 0) // gold
                             {
                                 if (value > Gold)
                                 {
@@ -573,7 +549,11 @@ namespace ClassicUO.Game.UI.Gumps
 
                         if (send)
                         {
-                            NetClient.Socket.Send_TradeUpdateGold(ID1, my_gold_entry, my_plat_entry);
+                            NetClient.Socket.Send_TradeUpdateGold(
+                                ID1,
+                                my_gold_entry,
+                                my_plat_entry
+                            );
                         }
                     }
                 }
@@ -581,7 +561,6 @@ namespace ClassicUO.Game.UI.Gumps
                 _myCoinsEntries[0].TextChanged += OnTextChanged;
 
                 _myCoinsEntries[1].TextChanged += OnTextChanged;
-
 
                 mydbX = 30;
                 mydbY = 110;
@@ -604,29 +583,14 @@ namespace ClassicUO.Game.UI.Gumps
                 opdbY = 70;
             }
 
-
             if (Client.Version < ClientVersion.CV_500A)
             {
-                Add
-                (
-                    new ColorBox(110, 60, 0)
-                    {
-                        X = 45, Y = 90
-                    }
-                );
+                Add(new ColorBox(110, 60, 0) { X = 45, Y = 90 });
 
-                Add
-                (
-                    new ColorBox(110, 60, 0)
-                    {
-                        X = 192, Y = 70
-                    }
-                );
+                Add(new ColorBox(110, 60, 0) { X = 192, Y = 70 });
             }
 
-
-            Add
-            (
+            Add(
                 _myBox = new DataBox(mydbX, mydbY, 110, 80)
                 {
                     WantUpdateSize = false,
@@ -636,8 +600,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             );
 
-            Add
-            (
+            Add(
                 _hisBox = new DataBox(opdbX, opdbY, 110, 80)
                 {
                     WantUpdateSize = false,
