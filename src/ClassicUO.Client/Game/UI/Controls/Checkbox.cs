@@ -2,7 +2,7 @@
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 // 1. Redistributions of source code must retain the above copyright
@@ -16,7 +16,7 @@
 // 4. Neither the name of the copyright holder nor the
 //    names of its contributors may be used to endorse or promote products
 //    derived from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -44,10 +44,10 @@ namespace ClassicUO.Game.UI.Controls
     {
         private bool _isChecked;
         private readonly RenderedText _text;
-        private ushort _inactive, _active;
+        private ushort _inactive,
+            _active;
 
-        public Checkbox
-        (
+        public Checkbox(
             ushort inactive,
             ushort active,
             string text = "",
@@ -60,35 +60,29 @@ namespace ClassicUO.Game.UI.Controls
             _inactive = inactive;
             _active = active;
 
-            var textureInactive = GumpsLoader.Instance.GetGumpTexture(inactive, out var boundsInactive);
-            var textureActive = GumpsLoader.Instance.GetGumpTexture(active, out var boundsActive);
+            ref readonly var gumpInfoInactive = ref Client.Game.Gumps.GetGump(inactive);
+            ref readonly var gumpInfoActive = ref Client.Game.Gumps.GetGump(active);
 
-            if (textureInactive == null || textureActive == null)
+            if (gumpInfoInactive.Texture == null || gumpInfoActive.Texture == null)
             {
                 Dispose();
 
                 return;
             }
 
-            Width = boundsInactive.Width;
+            Width = gumpInfoInactive.UV.Width;
 
-            _text = RenderedText.Create
-            (
-                text,
-                color,
-                font,
-                isunicode,
-                maxWidth: maxWidth
-            );
+            _text = RenderedText.Create(text, color, font, isunicode, maxWidth: maxWidth);
 
             Width += _text.Width;
 
-            Height = Math.Max(boundsInactive.Width, _text.Height);
+            Height = Math.Max(gumpInfoInactive.UV.Width, _text.Height);
             CanMove = false;
             AcceptMouseInput = true;
         }
 
-        public Checkbox(List<string> parts, string[] lines) : this(ushort.Parse(parts[3]), ushort.Parse(parts[4]))
+        public Checkbox(List<string> parts, string[] lines)
+            : this(ushort.Parse(parts[3]), ushort.Parse(parts[4]))
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
@@ -116,7 +110,6 @@ namespace ClassicUO.Game.UI.Controls
 
         public event EventHandler ValueChanged;
 
-
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             if (IsDisposed)
@@ -124,19 +117,20 @@ namespace ClassicUO.Game.UI.Controls
                 return false;
             }
 
-            bool ok = base.Draw(batcher, x, y);
+            var ok = base.Draw(batcher, x, y);
 
-            var texture = GumpsLoader.Instance.GetGumpTexture(IsChecked ? _active : _inactive, out var bounds);
+            ref readonly var gumpInfo = ref Client.Game.Gumps.GetGump(
+                IsChecked ? _active : _inactive
+            );
 
-            batcher.Draw
-            (
-                texture,
+            batcher.Draw(
+                gumpInfo.Texture,
                 new Vector2(x, y),
-                bounds,
+                gumpInfo.UV,
                 ShaderHueTranslator.GetHueVector(0)
             );
 
-            _text.Draw(batcher, x + bounds.Width + 2, y);
+            _text.Draw(batcher, x + gumpInfo.UV.Width + 2, y);
 
             return ok;
         }

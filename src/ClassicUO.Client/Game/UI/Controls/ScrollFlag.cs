@@ -2,7 +2,7 @@
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 // 1. Redistributions of source code must retain the above copyright
@@ -16,7 +16,7 @@
 // 4. Neither the name of the copyright holder nor the
 //    names of its contributors may be used to endorse or promote products
 //    derived from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -59,69 +59,66 @@ namespace ClassicUO.Game.UI.Controls
         public ScrollFlag()
         {
             AcceptMouseInput = true;
-          
-            if (GumpsLoader.Instance.GetGumpTexture(BUTTON_FLAG, out var boundsFlag) == null)
+
+            ref readonly var gumpInfoFlag = ref Client.Game.Gumps.GetGump(BUTTON_FLAG);
+
+            if (gumpInfoFlag.Texture == null)
             {
                 Dispose();
 
                 return;
             }
 
-            _ = GumpsLoader.Instance.GetGumpTexture(BUTTON_UP, out var boundsButtonUp);
-            _ = GumpsLoader.Instance.GetGumpTexture(BUTTON_DOWN, out var boundsButtonDown);
+            ref readonly var gumpInfoUp = ref Client.Game.Gumps.GetGump(BUTTON_UP);
+            ref readonly var gumpInfoDown = ref Client.Game.Gumps.GetGump(BUTTON_DOWN);
 
-            Width = boundsFlag.Width;
-            Height = boundsFlag.Height;
+            Width = gumpInfoFlag.UV.Width;
+            Height = gumpInfoFlag.UV.Height;
 
-            _rectUpButton = new Rectangle(0, 0, boundsButtonUp.Width, boundsButtonUp.Height);
-            _rectDownButton = new Rectangle(0, Height, boundsButtonDown.Width, boundsButtonDown.Height);
+            _rectUpButton = new Rectangle(0, 0, gumpInfoUp.UV.Width, gumpInfoUp.UV.Height);
+            _rectDownButton = new Rectangle(
+                0,
+                Height,
+                gumpInfoDown.UV.Width,
+                gumpInfoDown.UV.Height
+            );
 
             WantUpdateSize = false;
         }
 
         public override ClickPriority Priority { get; set; } = ClickPriority.High;
 
-
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
+            var hueVector = ShaderHueTranslator.GetHueVector(0);
 
-            var textureFlag = GumpsLoader.Instance.GetGumpTexture(BUTTON_FLAG, out var boundsFlag);
-            var textureButtonUp = GumpsLoader.Instance.GetGumpTexture(BUTTON_UP, out var boundsButtonUp);
-            var textureButtonDown = GumpsLoader.Instance.GetGumpTexture(BUTTON_DOWN, out var boundsButtonDown);
+            ref readonly var gumpInfoFlag = ref Client.Game.Gumps.GetGump(BUTTON_FLAG);
+            ref readonly var gumpInfoUp = ref Client.Game.Gumps.GetGump(BUTTON_UP);
+            ref readonly var gumpInfoDown = ref Client.Game.Gumps.GetGump(BUTTON_DOWN);
 
-
-            if (MaxValue != MinValue && textureFlag != null)
+            if (MaxValue != MinValue && gumpInfoFlag.Texture != null)
             {
-                batcher.Draw
-                (
-                    textureFlag,
-                    new Vector2(x,  y + _sliderPosition),
-                    boundsFlag,
+                batcher.Draw(
+                    gumpInfoFlag.Texture,
+                    new Vector2(x, y + _sliderPosition),
+                    gumpInfoFlag.UV,
                     hueVector
                 );
             }
 
             if (_showButtons)
             {
-                if (textureButtonUp != null)
+                if (gumpInfoUp.Texture != null)
                 {
-                    batcher.Draw
-                    (
-                        textureButtonUp,
-                        new Vector2(x, y),
-                        boundsButtonUp,
-                        hueVector
-                    );
+                    batcher.Draw(gumpInfoUp.Texture, new Vector2(x, y), gumpInfoUp.UV, hueVector);
                 }
 
-                if (textureButtonDown != null)
+                if (gumpInfoDown.Texture != null)
                 {
-                    batcher.Draw
-                    (
-                        textureButtonDown,
+                    batcher.Draw(
+                        gumpInfoDown.Texture,
                         new Vector2(x, y + Height),
-                        boundsButtonDown,
+                        gumpInfoDown.UV,
                         hueVector
                     );
                 }
@@ -132,21 +129,19 @@ namespace ClassicUO.Game.UI.Controls
 
         protected override int GetScrollableArea()
         {
-            _ = GumpsLoader.Instance.GetGumpTexture(BUTTON_FLAG, out var boundsFlag);
+            ref readonly var gumpInfoFlag = ref Client.Game.Gumps.GetGump(BUTTON_FLAG);
 
-            return Height - boundsFlag.Height;
+            return Height - gumpInfoFlag.UV.Height;
         }
-
 
         protected override void CalculateByPosition(int x, int y)
         {
             if (y != _clickPosition.Y)
             {
-                _ = GumpsLoader.Instance.GetGumpTexture(BUTTON_FLAG, out var boundsFlag);
-                int height = boundsFlag.Height;
+                ref readonly var gumpInfoFlag = ref Client.Game.Gumps.GetGump(BUTTON_FLAG);
+                int height = gumpInfoFlag.UV.Height;
 
                 y -= (height >> 1);
-
 
                 if (y < 0)
                 {
@@ -173,21 +168,23 @@ namespace ClassicUO.Game.UI.Controls
                     _clickPosition.Y = Height - (height >> 1);
                 }
 
-                _value = (int) Math.Round(y / (float) scrollableArea * (MaxValue - MinValue) + MinValue);
+                _value = (int)
+                    Math.Round(y / (float)scrollableArea * (MaxValue - MinValue) + MinValue);
             }
         }
 
-
         public override bool Contains(int x, int y)
         {
-            if (GumpsLoader.Instance.GetGumpTexture(BUTTON_FLAG, out _) == null)
+            ref readonly var gumpInfoFlag = ref Client.Game.Gumps.GetGump(BUTTON_FLAG);
+
+            if (gumpInfoFlag.Texture == null)
             {
                 return false;
             }
 
             y -= _sliderPosition;
 
-            return GumpsLoader.Instance.PixelCheck(BUTTON_FLAG, x, y);
+            return Client.Game.Gumps.PixelCheck(BUTTON_FLAG, x, y);
         }
     }
 }

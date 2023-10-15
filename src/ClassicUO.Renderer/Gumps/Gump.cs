@@ -15,7 +15,7 @@ namespace ClassicUO.Renderer.Gumps
             _spriteInfos = new SpriteInfo[GumpsLoader.Instance.Entries.Length];
         }
 
-        public ref readonly SpriteInfo GetSprite(uint idx)
+        public ref readonly SpriteInfo GetGump(uint idx)
         {
             if (idx >= _spriteInfos.Length)
                 return ref SpriteInfo.Empty;
@@ -40,5 +40,7 @@ namespace ClassicUO.Renderer.Gumps
 
             return ref spriteInfo;
         }
+
+        public bool PixelCheck(uint idx, int x, int y) => _picker.Get(idx, x, y);
     }
 }

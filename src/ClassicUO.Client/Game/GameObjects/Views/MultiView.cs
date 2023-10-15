@@ -2,7 +2,7 @@
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 // 1. Redistributions of source code must retain the above copyright
@@ -16,7 +16,7 @@
 // 4. Neither the name of the copyright holder nor the
 //    names of its contributors may be used to endorse or promote products
 //    derived from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -83,12 +83,11 @@ namespace ClassicUO.Game.GameObjects
                 }
 
                 if ((State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_TRANSPARENT) != 0)
-                { 
+                {
                     AlphaHue = 192;
                 }
             }
 
-            
             ushort graphic = Graphic;
             bool partial = ItemData.IsPartialHue;
 
@@ -117,19 +116,10 @@ namespace ClassicUO.Game.GameObjects
                 hueVec.Z *= 0.5f;
             }
 
-            posX += (int) Offset.X;
-            posY += (int) (Offset.Y + Offset.Z);
+            posX += (int)Offset.X;
+            posY += (int)(Offset.Y + Offset.Z);
 
-            DrawStaticAnimated
-            (
-                batcher,
-                graphic,
-                posX,
-                posY,
-                hueVec,
-                false,
-                depth
-            );
+            DrawStaticAnimated(batcher, graphic, posX, posY, hueVec, false, depth);
 
             if (ItemData.IsLight)
             {
@@ -141,24 +131,38 @@ namespace ClassicUO.Game.GameObjects
 
         public override bool CheckMouseSelection()
         {
-            if (!(SelectedObject.Object == this || IsHousePreview || FoliageIndex != -1 && Client.Game.GetScene<GameScene>().FoliageIndex == FoliageIndex))
+            if (
+                !(
+                    SelectedObject.Object == this
+                    || IsHousePreview
+                    || FoliageIndex != -1
+                        && Client.Game.GetScene<GameScene>().FoliageIndex == FoliageIndex
+                )
+            )
             {
                 if (State != 0)
                 {
-                    if ((State & (CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_PREVIEW)) != 0)
+                    if (
+                        (
+                            State
+                            & (
+                                CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER
+                                | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_PREVIEW
+                            )
+                        ) != 0
+                    )
                     {
                         return false;
                     }
                 }
-  
+
                 ref UOFileIndex index = ref ArtLoader.Instance.GetValidRefEntry(Graphic + 0x4000);
 
                 Point position = RealScreenPosition;
                 position.X -= index.Width;
                 position.Y -= index.Height;
 
-                return ArtLoader.Instance.PixelCheck
-                (
+                return Client.Game.Arts.PixelCheck(
                     Graphic,
                     SelectedObject.TranslatedMousePositionByViewport.X - position.X,
                     SelectedObject.TranslatedMousePositionByViewport.Y - position.Y

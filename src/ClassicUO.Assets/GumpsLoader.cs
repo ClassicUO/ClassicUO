@@ -43,7 +43,6 @@ namespace ClassicUO.Assets
     {
         private static GumpsLoader _instance;
         private UOFile _file;
-        private PixelPicker _picker = new PixelPicker();
 
         public const int MAX_GUMP_DATA_INDEX_COUNT = 0x10000;
 
@@ -209,11 +208,6 @@ namespace ClassicUO.Assets
                 Width = entry.Width,
                 Height = entry.Height
             };
-        }
-
-        public bool PixelCheck(int index, int x, int y)
-        {
-            return _picker.Get((ulong)index, x, y);
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]

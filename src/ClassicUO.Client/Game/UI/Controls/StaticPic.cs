@@ -2,7 +2,7 @@
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 // 1. Redistributions of source code must retain the above copyright
@@ -16,7 +16,7 @@
 // 4. Neither the name of the copyright holder nor the
 //    names of its contributors may be used to endorse or promote products
 //    derived from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -50,13 +50,16 @@ namespace ClassicUO.Game.UI.Controls
             WantUpdateSize = false;
         }
 
-        public StaticPic(List<string> parts) : this(UInt16Converter.Parse(parts[3]), parts.Count > 4 ? UInt16Converter.Parse(parts[4]) : (ushort) 0)
+        public StaticPic(List<string> parts)
+            : this(
+                UInt16Converter.Parse(parts[3]),
+                parts.Count > 4 ? UInt16Converter.Parse(parts[4]) : (ushort)0
+            )
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
             IsFromServer = true;
         }
-
 
         public ushort Hue { get; set; }
         public bool IsPartialHue { get; set; }
@@ -68,36 +71,34 @@ namespace ClassicUO.Game.UI.Controls
             {
                 _graphic = value;
 
-                var texture = ArtLoader.Instance.GetStaticTexture(value, out var bounds);
+                ref readonly var artInfo = ref Client.Game.Arts.GetArt(value);
 
-                if (texture == null)
+                if (artInfo.Texture == null)
                 {
                     Dispose();
 
                     return;
                 }
 
-                Width = bounds.Width;
-                Height = bounds.Height;
+                Width = artInfo.UV.Width;
+                Height = artInfo.UV.Height;
 
                 IsPartialHue = TileDataLoader.Instance.StaticData[value].IsPartialHue;
             }
         }
 
-
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             Vector3 hueVector = ShaderHueTranslator.GetHueVector(Hue, IsPartialHue, 1);
 
-            var texture = ArtLoader.Instance.GetStaticTexture(Graphic, out var bounds);
+            ref readonly var artInfo = ref Client.Game.Arts.GetArt(Graphic);
 
-            if (texture != null)
+            if (artInfo.Texture != null)
             {
-                batcher.Draw
-                (
-                    texture,
+                batcher.Draw(
+                    artInfo.Texture,
                     new Rectangle(x, y, Width, Height),
-                    bounds,
+                    artInfo.UV,
                     hueVector
                 );
             }
@@ -107,7 +108,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Contains(int x, int y)
         {
-            return ArtLoader.Instance.PixelCheck(Graphic, x - Offset.X, y - Offset.Y);
+            return Client.Game.Arts.PixelCheck(Graphic, x - Offset.X, y - Offset.Y);
         }
     }
 }
