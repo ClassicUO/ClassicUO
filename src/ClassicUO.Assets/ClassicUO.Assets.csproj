@@ -7,7 +7,6 @@
   <ItemGroup>
     <ProjectReference Include="..\ClassicUO.IO\ClassicUO.IO.csproj" />
     <ProjectReference Include="..\ClassicUO.Utility\ClassicUO.Utility.csproj" />
-    <ProjectReference Include="..\..\external\FNA\FNA.Core.csproj" />
   </ItemGroup>
 
 </Project>

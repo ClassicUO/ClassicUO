@@ -32,9 +32,6 @@
 
 using ClassicUO.IO;
 using ClassicUO.Utility;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using SDL2;
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -53,15 +50,6 @@ namespace ClassicUO.Assets
 
         public const int MAX_LAND_DATA_INDEX_COUNT = 0x4000;
         public const int MAX_STATIC_DATA_INDEX_COUNT = 0x14000;
-
-        struct SpriteInfo
-        {
-            public Texture2D Texture;
-            public Rectangle UV;
-            public Rectangle ArtBounds;
-        }
-
-        private SpriteInfo[] _spriteInfos;
 
         private ArtLoader(int staticCount, int landCount)
         {
@@ -97,18 +85,17 @@ namespace ClassicUO.Assets
                 }
 
                 _file.FillEntries(ref Entries);
-                _spriteInfos = new SpriteInfo[Entries.Length];
             });
         }
 
-        public Rectangle GetRealArtBounds(int index) =>
-            index + 0x4000 >= _spriteInfos.Length
-                ? Rectangle.Empty
-                : _spriteInfos[index + 0x4000].ArtBounds;
+        // public Rectangle GetRealArtBounds(int index) =>
+        //     index + 0x4000 >= _spriteInfos.Length
+        //         ? Rectangle.Empty
+        //         : _spriteInfos[index + 0x4000].ArtBounds;
 
         private bool LoadData(Span<uint> data, int g, out short width, out short height)
         {
-            ref UOFileIndex entry = ref GetValidRefEntry(g);
+            ref var entry = ref GetValidRefEntry(g);
 
             if (entry.Length == 0)
             {
@@ -162,7 +149,6 @@ namespace ClassicUO.Assets
                         data[pos++] = HuesHelper.Color16To32(_file.ReadUShort()) | 0xFF_00_00_00;
                     }
                 }
-                ;
             }
             else
             {
@@ -201,178 +187,30 @@ namespace ClassicUO.Assets
                     //        data[i * width + width - 1] = 0;
                     //    }
                     //}
-
-                    ref var spriteInfo = ref _spriteInfos[g];
-
-                    FinalizeData(
-                        data,
-                        ref entry,
-                        fixedGraphic,
-                        width,
-                        height,
-                        out spriteInfo.ArtBounds
-                    );
                 }
             }
 
             return true;
         }
 
-        public ReadOnlySpan<uint> GetRawImage(uint g, out short width, out short height)
+        public Span<uint> GetRawImage(uint g, out short width, out short height)
         {
             if (!LoadData(_data, (int)g, out width, out height))
             {
                 if (_data != null && width * height < _data.Length)
                 {
-                    return ReadOnlySpan<uint>.Empty;
+                    return Span<uint>.Empty;
                 }
 
                 _data = new uint[width * height];
 
                 if (!LoadData(_data, (int)g, out width, out height))
                 {
-                    return ReadOnlySpan<uint>.Empty;
+                    return Span<uint>.Empty;
                 }
             }
 
             return _data.AsSpan(0, width * height);
-        }
-
-        private Texture2D GetTexture(uint g, out Rectangle bounds)
-        {
-            if (g >= _spriteInfos.Length)
-            {
-                bounds = Rectangle.Empty;
-                return null;
-            }
-
-            ref var spriteInfo = ref _spriteInfos[g];
-
-            if (spriteInfo.Texture == null)
-            {
-                var pixels = GetRawImage(g, out var width, out var height);
-                if (pixels.IsEmpty)
-                {
-                    bounds = Rectangle.Empty;
-                    return null;
-                }
-
-                if (g >= 0x4000)
-                    _picker.Set(g - 0x4000, width, height, pixels);
-                spriteInfo.Texture = TextureAtlas.Shared.AddSprite(
-                    pixels,
-                    width,
-                    height,
-                    out spriteInfo.UV
-                );
-            }
-
-            bounds = spriteInfo.UV;
-            return spriteInfo.Texture;
-        }
-
-        public Texture2D GetLandTexture(uint g, out Rectangle bounds) =>
-            GetTexture(g & _graphicMask, out bounds);
-
-        public Texture2D GetStaticTexture(uint g, out Rectangle bounds) =>
-            GetTexture(g + 0x4000, out bounds);
-
-        public unsafe IntPtr CreateCursorSurfacePtr(
-            int index,
-            ushort customHue,
-            out int hotX,
-            out int hotY
-        )
-        {
-            hotX = hotY = 0;
-
-            var pixels = GetRawImage((uint)(index + 0x4000), out var w, out var h);
-            if (pixels.IsEmpty)
-            {
-                return IntPtr.Zero;
-            }
-
-            fixed (uint* ptr = pixels)
-            {
-                SDL.SDL_Surface* surface = (SDL.SDL_Surface*)
-                    SDL.SDL_CreateRGBSurfaceWithFormatFrom(
-                        (IntPtr)ptr,
-                        w,
-                        h,
-                        32,
-                        4 * w,
-                        SDL.SDL_PIXELFORMAT_ABGR8888
-                    );
-
-                int stride = surface->pitch >> 2;
-                uint* pixels_ptr = (uint*)surface->pixels;
-                uint* p_line_end = pixels_ptr + w;
-                uint* p_img_end = pixels_ptr + stride * h;
-                int delta = stride - w;
-                short curX = 0;
-                short curY = 0;
-                Color c = default;
-
-                while (pixels_ptr < p_img_end)
-                {
-                    curX = 0;
-
-                    while (pixels_ptr < p_line_end)
-                    {
-                        if (*pixels_ptr != 0 && *pixels_ptr != 0xFF_00_00_00)
-                        {
-                            if (curX >= w - 1 || curY >= h - 1)
-                            {
-                                *pixels_ptr = 0;
-                            }
-                            else if (curX == 0 || curY == 0)
-                            {
-                                if (*pixels_ptr == 0xFF_00_FF_00)
-                                {
-                                    if (curX == 0)
-                                    {
-                                        hotY = curY;
-                                    }
-
-                                    if (curY == 0)
-                                    {
-                                        hotX = curX;
-                                    }
-                                }
-
-                                *pixels_ptr = 0;
-                            }
-                            else if (customHue > 0)
-                            {
-                                c.PackedValue = *pixels_ptr;
-                                *pixels_ptr =
-                                    HuesHelper.Color16To32(
-                                        HuesLoader.Instance.GetColor16(
-                                            HuesHelper.ColorToHue(c),
-                                            customHue
-                                        )
-                                    ) | 0xFF_00_00_00;
-                            }
-                        }
-
-                        ++pixels_ptr;
-
-                        ++curX;
-                    }
-
-                    pixels_ptr += delta;
-                    p_line_end += stride;
-
-                    ++curY;
-                }
-
-                return (IntPtr)surface;
-            }
-        }
-
-        public bool PixelCheck(int index, int x, int y)
-        {
-            return _picker.Get((ulong)index, x, y);
         }
 
         private bool ReadHeader(
@@ -446,50 +284,50 @@ namespace ClassicUO.Assets
             return true;
         }
 
-        private void FinalizeData(
-            Span<uint> pixels,
-            ref UOFileIndex entry,
-            ushort graphic,
-            int width,
-            int height,
-            out Rectangle bounds
-        )
-        {
-            int pos1 = 0;
-            int minX = width,
-                minY = height,
-                maxX = 0,
-                maxY = 0;
+        // private void FinalizeData(
+        //     Span<uint> pixels,
+        //     ref UOFileIndex entry,
+        //     ushort graphic,
+        //     int width,
+        //     int height,
+        //     out Rectangle bounds
+        // )
+        // {
+        //     int pos1 = 0;
+        //     int minX = width,
+        //         minY = height,
+        //         maxX = 0,
+        //         maxY = 0;
 
-            /* Temporarily broken. This isn't the right way to do it anyway since it can't be toggled on/off.
-            if (StaticFilters.IsCave(graphic) && ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.EnableCaveBorder)
-            {
-                AddBlackBorder(pixels, width, height);
-            }
-            */
+        //     /* Temporarily broken. This isn't the right way to do it anyway since it can't be toggled on/off.
+        //     if (StaticFilters.IsCave(graphic) && ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.EnableCaveBorder)
+        //     {
+        //         AddBlackBorder(pixels, width, height);
+        //     }
+        //     */
 
-            for (int y = 0; y < height; ++y)
-            {
-                for (int x = 0; x < width; ++x)
-                {
-                    if (pixels[pos1++] != 0)
-                    {
-                        minX = Math.Min(minX, x);
-                        maxX = Math.Max(maxX, x);
-                        minY = Math.Min(minY, y);
-                        maxY = Math.Max(maxY, y);
-                    }
-                }
-            }
+        //     for (int y = 0; y < height; ++y)
+        //     {
+        //         for (int x = 0; x < width; ++x)
+        //         {
+        //             if (pixels[pos1++] != 0)
+        //             {
+        //                 minX = Math.Min(minX, x);
+        //                 maxX = Math.Max(maxX, x);
+        //                 minY = Math.Min(minY, y);
+        //                 maxY = Math.Max(maxY, y);
+        //             }
+        //         }
+        //     }
 
-            entry.Width = (short)((width >> 1) - 22);
-            entry.Height = (short)(height - 44);
+        //     entry.Width = (short)((width >> 1) - 22);
+        //     entry.Height = (short)(height - 44);
 
-            bounds.X = minX;
-            bounds.Y = minY;
-            bounds.Width = maxX - minX;
-            bounds.Height = maxY - minY;
-        }
+        //     bounds.X = minX;
+        //     bounds.Y = minY;
+        //     bounds.Width = maxX - minX;
+        //     bounds.Height = maxY - minY;
+        // }
 
         private void AddBlackBorder(Span<uint> pixels, int width, int height)
         {
@@ -529,5 +367,24 @@ namespace ClassicUO.Assets
                 }
             }
         }
+
+        public ArtInfo GetArt(uint idx)
+        {
+            var pixels = GetRawImage(idx, out var width, out var height);
+
+            return new ArtInfo()
+            {
+                Pixels = pixels,
+                Width = width,
+                Height = height
+            };
+        }
+    }
+
+    public ref struct ArtInfo
+    {
+        public Span<uint> Pixels;
+        public int Width;
+        public int Height;
     }
 }
