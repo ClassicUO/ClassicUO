@@ -8,6 +8,7 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private static string[] updateTexts = {
             "/c[white][3.7.1]/cd\n" +
+                "- Multi item move can now move items to the trade window\n" +
                 "- Added -marktile command, see wiki for more details\n" +
                 "- Updated TUO with CUO updates\n" +
                 "- Fixed mouse interactions with art replaced using the PNG replacement system\n" +
