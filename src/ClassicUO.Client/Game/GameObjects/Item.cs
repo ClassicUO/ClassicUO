@@ -2,7 +2,7 @@
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 // 1. Redistributions of source code must retain the above copyright
@@ -16,7 +16,7 @@
 // 4. Neither the name of the copyright holder nor the
 //    names of its contributors may be used to endorse or promote products
 //    derived from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -48,8 +48,7 @@ namespace ClassicUO.Game.GameObjects
 {
     internal partial class Item : Entity
     {
-        private static readonly QueuedPool<Item> _pool = new QueuedPool<Item>
-        (
+        private static readonly QueuedPool<Item> _pool = new QueuedPool<Item>(
             Constants.PREDICTABLE_CHUNKS * 3,
             i =>
             {
@@ -103,10 +102,7 @@ namespace ClassicUO.Game.GameObjects
         private ushort? _displayedGraphic;
         private bool _isMulti;
 
-
-        public Item() : base(0)
-        {
-        }
+        public Item() : base(0) { }
 
         public bool IsCoin => Graphic == 0x0EEA || Graphic == 0x0EED || Graphic == 0x0EF0;
 
@@ -123,12 +119,12 @@ namespace ClassicUO.Game.GameObjects
                 {
                     if (Amount > 5)
                     {
-                        return (ushort) (Graphic + 2);
+                        return (ushort)(Graphic + 2);
                     }
 
                     if (Amount > 1)
                     {
-                        return (ushort) (Graphic + 1);
+                        return (ushort)(Graphic + 1);
                     }
                 }
                 else if (IsMulti)
@@ -162,7 +158,8 @@ namespace ClassicUO.Game.GameObjects
 
         public int MultiDistanceBonus { get; private set; }
 
-        public bool IsCorpse => /*MathHelper.InRange(Graphic, 0x0ECA, 0x0ED2) ||*/ Graphic == 0x2006;
+        public bool IsCorpse => /*MathHelper.InRange(Graphic, 0x0ECA, 0x0ED2) ||*/
+            Graphic == 0x2006;
 
         public bool OnGround => !SerialHelper.IsValid(Container);
 
@@ -186,10 +183,14 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public ref StaticTiles ItemData => ref TileDataLoader.Instance.StaticData[IsMulti ? MultiGraphic : Graphic];
+        public ref StaticTiles ItemData =>
+            ref TileDataLoader.Instance.StaticData[IsMulti ? MultiGraphic : Graphic];
 
         public bool IsLootable =>
-            ItemData.Layer != (int) Layer.Hair && ItemData.Layer != (int) Layer.Beard && ItemData.Layer != (int) Layer.Face && Graphic != 0;
+            ItemData.Layer != (int)Layer.Hair
+            && ItemData.Layer != (int)Layer.Beard
+            && ItemData.Layer != (int)Layer.Face
+            && Graphic != 0;
 
         public ushort Amount;
         public uint Container = 0xFFFF_FFFF;
@@ -204,7 +205,6 @@ namespace ClassicUO.Game.GameObjects
         public uint Price;
         public bool UsedLayer;
         public bool WantUpdateMulti = true;
-
 
         public static Item Create(uint serial)
         {
@@ -252,7 +252,6 @@ namespace ClassicUO.Game.GameObjects
             short maxX = 0;
             short maxY = 0;
 
-
             if (!World.HouseManager.TryGetHouse(Serial, out House house))
             {
                 house = new House(Serial, 0, false);
@@ -262,7 +261,6 @@ namespace ClassicUO.Game.GameObjects
             {
                 house.ClearComponents();
             }
-
 
             ref UOFileIndex entry = ref MultiLoader.Instance.GetValidRefEntry(Graphic);
             MultiLoader.Instance.File.SetData(entry.Address, entry.FileSize);
@@ -275,14 +273,20 @@ namespace ClassicUO.Game.GameObjects
                     MultiLoader.Instance.File.Seek(entry.Offset);
 
                     byte[] buffer = null;
-                    Span<byte> span = entry.DecompressedLength <= 1024 ? stackalloc byte[entry.DecompressedLength] : (buffer = System.Buffers.ArrayPool<byte>.Shared.Rent(entry.DecompressedLength));
+                    Span<byte> span =
+                        entry.DecompressedLength <= 1024
+                            ? stackalloc byte[entry.DecompressedLength]
+                            : (
+                                buffer = System.Buffers.ArrayPool<byte>.Shared.Rent(
+                                    entry.DecompressedLength
+                                )
+                            );
 
                     try
                     {
                         fixed (byte* dataPtr = span)
                         {
-                            ZLib.Decompress
-                            (
+                            ZLib.Decompress(
                                 MultiLoader.Instance.File.PositionAddress,
                                 entry.Length,
                                 0,
@@ -290,7 +294,9 @@ namespace ClassicUO.Game.GameObjects
                                 entry.DecompressedLength
                             );
 
-                            StackDataReader reader = new StackDataReader(span.Slice(0, entry.DecompressedLength));
+                            StackDataReader reader = new StackDataReader(
+                                span.Slice(0, entry.DecompressedLength)
+                            );
                             reader.Skip(4);
 
                             int count = reader.ReadInt32LE();
@@ -299,7 +305,9 @@ namespace ClassicUO.Game.GameObjects
 
                             for (int i = 0; i < count; i++)
                             {
-                                MultiBlockNew* block = (MultiBlockNew*)(reader.PositionAddress + i * sizeOf);
+                                MultiBlockNew* block = (MultiBlockNew*)(
+                                    reader.PositionAddress + i * sizeOf
+                                );
 
                                 if (block->Unknown != 0)
                                 {
@@ -338,7 +346,11 @@ namespace ClassicUO.Game.GameObjects
                                     m.State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_DONT_REMOVE;
                                     m.IsMovable = ItemData.IsMultiMovable;
 
-                                    m.SetInWorldTile((ushort)(X + block->X), (ushort)(Y + block->Y), (sbyte)(Z + block->Z));
+                                    m.SetInWorldTile(
+                                        (ushort)(X + block->X),
+                                        (ushort)(Y + block->Y),
+                                        (sbyte)(Z + block->Z)
+                                    );
 
                                     house.Components.Add(m);
 
@@ -376,7 +388,9 @@ namespace ClassicUO.Game.GameObjects
 
                 for (int i = 0; i < count; i++)
                 {
-                    MultiBlock* block = (MultiBlock*) (MultiLoader.Instance.File.PositionAddress + i * MultiLoader.Instance.Offset);
+                    MultiBlock* block = (MultiBlock*)(
+                        MultiLoader.Instance.File.PositionAddress + i * MultiLoader.Instance.Offset
+                    );
 
                     if (block->X < minX)
                     {
@@ -410,7 +424,11 @@ namespace ClassicUO.Game.GameObjects
                         m.State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_DONT_REMOVE;
                         m.IsMovable = ItemData.IsMultiMovable;
 
-                        m.SetInWorldTile((ushort)(X + block->X), (ushort)(Y + block->Y), (sbyte)(Z + block->Z));
+                        m.SetInWorldTile(
+                            (ushort)(X + block->X),
+                            (ushort)(Y + block->Y),
+                            (sbyte)(Z + block->Z)
+                        );
 
                         house.Components.Add(m);
 
@@ -444,7 +462,10 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-            MultiDistanceBonus = Math.Max(Math.Max(Math.Abs(minX), maxX), Math.Max(Math.Abs(minY), maxY));
+            MultiDistanceBonus = Math.Max(
+                Math.Max(Math.Abs(minX), maxX),
+                Math.Max(Math.Abs(minY), maxY)
+            );
 
             house.Bounds = MultiInfo.Value;
 
@@ -473,22 +494,25 @@ namespace ClassicUO.Game.GameObjects
                     if ((Direction & Direction.Running) != 0)
                     {
                         UsedLayer = true;
-                        Direction &= (Direction) 0x7F;
+                        Direction &= (Direction)0x7F;
                     }
                     else
                     {
                         UsedLayer = false;
                     }
-                    
-                    Layer = (Layer) Direction;
+
+                    Layer = (Layer)Direction;
                     AllowedToDraw = true;
                 }
             }
             else if (WantUpdateMulti)
             {
-                UoAssist.SignalAddMulti((ushort) (Graphic | 0x4000), X, Y);
+                UoAssist.SignalAddMulti((ushort)(Graphic | 0x4000), X, Y);
 
-                if (MultiDistanceBonus == 0 || World.HouseManager.IsHouseInRange(Serial, World.ClientViewRange))
+                if (
+                    MultiDistanceBonus == 0
+                    || World.HouseManager.IsHouseInRange(Serial, World.ClientViewRange)
+                )
                 {
                     LoadMulti();
                     AllowedToDraw = MultiGraphic > 2;
@@ -508,7 +532,10 @@ namespace ClassicUO.Game.GameObjects
             ProcessAnimation();
         }
 
-        private static readonly Dictionary<ushort, ushort> _mounts = new Dictionary<ushort, ushort>()
+        private static readonly Dictionary<ushort, ushort> _mounts = new Dictionary<
+            ushort,
+            ushort
+        >()
         {
             { 0x3E90, 0x0114 }, // 16016 Reptalon
             { 0x3E91, 0x0115 }, // 16017
@@ -569,12 +596,12 @@ namespace ClassicUO.Game.GameObjects
             { 0x3ECF, 0x05A0 }, // Eowmu
             { 0x3ED3, 0x05F7 }, // capybara
             { 0x3ED4, 0x060A },
-            { 0x3ED5, 0x060B }, // a wolf      
+            { 0x3ED5, 0x060B }, // a wolf
             { 0x3ED6, 0x060C }, // an orange dog 2?
             { 0x3ED7, 0x060D },
             { 0x3ED8, 0x060F }, // a black dog?
             { 0x3ED9, 0x0610 }, // a dobberman?
-            { 0x3EDA, 0x0590 }  // Frostmites Beetles
+            { 0x3EDA, 0x0590 } // Frostmites Beetles
         };
 
         public override ushort GetGraphicForAnimation()
@@ -620,11 +647,11 @@ namespace ClassicUO.Game.GameObjects
                 return;
             }
 
-            TextObject last = (TextObject) TextContainer.Items;
+            TextObject last = (TextObject)TextContainer.Items;
 
             while (last?.Next != null)
             {
-                last = (TextObject) last.Next;
+                last = (TextObject)last.Next;
             }
 
             if (last == null)
@@ -638,15 +665,15 @@ namespace ClassicUO.Game.GameObjects
             {
                 Point p = RealScreenPosition;
 
-                var bounds = ArtLoader.Instance.GetRealArtBounds(Graphic);
+                var bounds = Client.Game.Arts.GetRealArtBounds(Graphic);
                 p.Y -= bounds.Height >> 1;
 
-                p.X += (int) Offset.X + 22;
-                p.Y += (int) (Offset.Y - Offset.Z) + 22;
+                p.X += (int)Offset.X + 22;
+                p.Y += (int)(Offset.Y - Offset.Z) + 22;
 
                 p = Client.Game.Scene.Camera.WorldToScreen(p);
 
-                for (; last != null; last = (TextObject) last.Previous)
+                for (; last != null; last = (TextObject)last.Previous)
                 {
                     if (last.RenderedText != null && !last.RenderedText.IsDestroyed)
                     {
@@ -667,7 +694,7 @@ namespace ClassicUO.Game.GameObjects
             }
             else
             {
-                for (; last != null; last = (TextObject) last.Previous)
+                for (; last != null; last = (TextObject)last.Previous)
                 {
                     if (last.RenderedText != null && !last.RenderedText.IsDestroyed)
                     {
@@ -690,11 +717,11 @@ namespace ClassicUO.Game.GameObjects
         {
             if (IsCorpse)
             {
-                var dir = (byte) Layer;
+                var dir = (byte)Layer;
 
                 if (LastAnimationChangeTime < Time.Ticks)
                 {
-                    byte frameIndex = (byte) (AnimIndex + (ExecuteAnimation ? 1 : 0));
+                    byte frameIndex = (byte)(AnimIndex + (ExecuteAnimation ? 1 : 0));
                     ushort id = GetGraphicForAnimation();
 
                     bool mirror = false;
@@ -703,7 +730,14 @@ namespace ClassicUO.Game.GameObjects
                     if (id < AnimationsLoader.Instance.MaxAnimationCount && dir < 5)
                     {
                         byte action = AnimationsLoader.Instance.GetDeathAction(id, UsedLayer);
-                        var frames = AnimationsLoader.Instance.GetAnimationFrames(id, action, dir, out _, out _, isCorpse : true);
+                        var frames = Client.Game.Animations.GetAnimationFrames(
+                            id,
+                            action,
+                            dir,
+                            out _,
+                            out _,
+                            isCorpse: true
+                        );
 
                         if (frames.Length > 0)
                         {
@@ -713,7 +747,7 @@ namespace ClassicUO.Game.GameObjects
                                 frameIndex = (byte)(frames.Length - 1);
                             }
 
-                            AnimIndex = (byte) (frameIndex % frames.Length);
+                            AnimIndex = (byte)(frameIndex % frames.Length);
                         }
                     }
 

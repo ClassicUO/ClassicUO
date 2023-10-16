@@ -319,7 +319,7 @@ namespace ClassicUO.Game.GameObjects
                 return;
             }
 
-            var frames = AnimationsLoader.Instance.GetAnimationFrames(
+            var frames = Client.Game.Animations.GetAnimationFrames(
                 graphic,
                 animGroup,
                 dir,
@@ -608,7 +608,7 @@ namespace ClassicUO.Game.GameObjects
                     }
 
                     byte group = AnimationsLoader.Instance.GetDeathAction(graphic, UsedLayer);
-                    var frames = AnimationsLoader.Instance.GetAnimationFrames(
+                    var frames = Client.Game.Animations.GetAnimationFrames(
                         graphic,
                         group,
                         direction,
@@ -645,7 +645,7 @@ namespace ClassicUO.Game.GameObjects
                         int y = position.Y - (spriteInfo.UV.Height + spriteInfo.Center.Y);
 
                         if (
-                            Client.Game.Arts.PixelCheck(
+                            Client.Game.Animations.PixelCheck(
                                 graphic,
                                 group,
                                 direction,

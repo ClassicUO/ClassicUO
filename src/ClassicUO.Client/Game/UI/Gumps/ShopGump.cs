@@ -814,7 +814,8 @@ namespace ClassicUO.Game.UI.Gumps
                     }
 
                     byte group = GetAnimGroup(graphic);
-                    var frames = AnimationsLoader.Instance.GetAnimationFrames(
+
+                    var frames = Client.Game.Animations.GetAnimationFrames(
                         graphic,
                         group,
                         1,
@@ -860,7 +861,7 @@ namespace ClassicUO.Game.UI.Gumps
                         1f
                     );
 
-                    var rect = ArtLoader.Instance.GetRealArtBounds(Graphic);
+                    var rect = Client.Game.Arts.GetRealArtBounds(Graphic);
 
                     const int RECT_SIZE = 50;
 
