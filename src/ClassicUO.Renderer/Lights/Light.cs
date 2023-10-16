@@ -15,7 +15,7 @@ namespace ClassicUO.Renderer.Lights
             _spriteInfos = new SpriteInfo[LightsLoader.Instance.Entries.Length];
         }
 
-        public ref readonly SpriteInfo GetSprite(uint idx)
+        public ref readonly SpriteInfo GetLight(uint idx)
         {
             if (idx >= _spriteInfos.Length)
                 return ref SpriteInfo.Empty;

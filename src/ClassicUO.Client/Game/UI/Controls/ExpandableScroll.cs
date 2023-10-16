@@ -2,7 +2,7 @@
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 // 1. Redistributions of source code must retain the above copyright
@@ -16,7 +16,7 @@
 // 4. Neither the name of the copyright holder nor the
 //    names of its contributors may be used to endorse or promote products
 //    derived from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -67,71 +67,51 @@ namespace ClassicUO.Game.UI.Controls
 
             int width = 0;
 
-            int w0 = 0, w1 = 0, w3 = 0;
+            int w0 = 0,
+                w1 = 0,
+                w3 = 0;
 
             for (int i = 0; i < 4; i++)
             {
-                var texture = GumpsLoader.Instance.GetGumpTexture((ushort) (graphic + i), out var bounds);
+                ref readonly var gumpInfo = ref Client.Game.Gumps.GetGump((ushort)(graphic + i));
 
-                if (texture == null)
+                if (gumpInfo.Texture == null)
                 {
                     Dispose();
 
                     return;
                 }
 
-                if (bounds.Width > width)
+                if (gumpInfo.UV.Width > width)
                 {
-                    width = bounds.Width;
+                    width = gumpInfo.UV.Width;
                 }
 
                 if (i == 0)
                 {
-                    w0 = bounds.Width;
+                    w0 = gumpInfo.UV.Width;
                 }
                 else if (i == 1)
                 {
-                    w1 = bounds.Width;
+                    w1 = gumpInfo.UV.Width;
                 }
                 else if (i == 3)
                 {
-                    w3 = bounds.Width;
+                    w3 = gumpInfo.UV.Width;
                 }
             }
 
-
             Add(_gumpTop = new GumpPic(0, 0, graphic, 0));
 
-            Add
-            (
-                _gumpRight = new GumpPicTiled
-                (
-                    0,
-                    0,
-                    0,
-                    0,
-                    (ushort) (graphic + 1)
-                )
-            );
+            Add(_gumpRight = new GumpPicTiled(0, 0, 0, 0, (ushort)(graphic + 1)));
 
-            Add
-            (
-                _gumpMiddle = new GumpPicTiled
-                (
-                    0,
-                    0,
-                    0,
-                    0,
-                    (ushort) (graphic + 2)
-                )
-            );
+            Add(_gumpMiddle = new GumpPicTiled(0, 0, 0, 0, (ushort)(graphic + 2)));
 
-            Add(_gumpBottom = new GumpPic(0, 0, (ushort) (graphic + 3), 0));
+            Add(_gumpBottom = new GumpPic(0, 0, (ushort)(graphic + 3), 0));
 
             if (_isResizable)
             {
-                Add
-                (
+                Add(
                     _gumpExpander = new Button(c_GumplingExpander_ButtonID, 0x082E, 0x82F)
                     {
                         ButtonAction = ButtonAction.Activate,
@@ -154,7 +134,6 @@ namespace ClassicUO.Game.UI.Controls
 
             Width = _gumpMiddle.Width;
 
-
             WantUpdateSize = true;
         }
 
@@ -163,11 +142,13 @@ namespace ClassicUO.Game.UI.Controls
         private int _gumplingMidHeight =>
             SpecialHeight - _gumpTop.Height - _gumpBottom.Height - (_gumpExpander?.Height ?? 0);
 
-        private int _gumplingBottomY => SpecialHeight - _gumpBottom.Height - (_gumpExpander?.Height ?? 0);
+        private int _gumplingBottomY =>
+            SpecialHeight - _gumpBottom.Height - (_gumpExpander?.Height ?? 0);
 
         private int _gumplingExpanderX => (Width - (_gumpExpander?.Width ?? 0)) >> 1;
 
-        private int _gumplingExpanderY => SpecialHeight - (_gumpExpander?.Height ?? 0) - c_GumplingExpanderY_Offset;
+        private int _gumplingExpanderY =>
+            SpecialHeight - (_gumpExpander?.Height ?? 0) - c_GumplingExpanderY_Offset;
 
         public int TitleGumpID
         {
@@ -205,7 +186,6 @@ namespace ClassicUO.Game.UI.Controls
             y += ScreenCoordinateY;
 
             Control c = null;
-
 
             _gumpTop.HitTest(x, y, ref c);
 
@@ -270,7 +250,7 @@ namespace ClassicUO.Game.UI.Controls
                 _gumplingTitleGumpIDDelta = false;
 
                 _gumplingTitle?.Dispose();
-                Add(_gumplingTitle = new GumpPic(0, 0, (ushort) _gumplingTitleGumpID, 0));
+                Add(_gumplingTitle = new GumpPic(0, 0, (ushort)_gumplingTitleGumpID, 0));
             }
 
             //if (!IsVisible)
@@ -306,7 +286,6 @@ namespace ClassicUO.Game.UI.Controls
 
             base.Update();
         }
-
 
         private void expander_OnMouseDown(object sender, MouseEventArgs args)
         {

@@ -2,7 +2,7 @@
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 // 1. Redistributions of source code must retain the above copyright
@@ -16,7 +16,7 @@
 // 4. Neither the name of the copyright holder nor the
 //    names of its contributors may be used to endorse or promote products
 //    derived from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -74,7 +74,6 @@ namespace ClassicUO.Game.UI.Controls
             IsFromServer = true;
         }
 
-
         public ushort Graphic
         {
             get => _graphic;
@@ -84,49 +83,35 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     _graphic = value;
 
-                    var texture = GumpsLoader.Instance.GetGumpTexture(_graphic, out var bounds);
+                    ref readonly var gumpInfo = ref Client.Game.Gumps.GetGump(_graphic);
 
-                    if (texture == null)
+                    if (gumpInfo.Texture == null)
                     {
                         Dispose();
 
                         return;
                     }
 
-                    Width = bounds.Width;
-                    Height = bounds.Height;
+                    Width = gumpInfo.UV.Width;
+                    Height = gumpInfo.UV.Height;
                 }
             }
         }
 
         public ushort Hue { get; set; }
 
-
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            Vector3 hueVector = ShaderHueTranslator.GetHueVector
-            (
-                Hue,
-                false,
-                Alpha,
-                true
-            );
+            Vector3 hueVector = ShaderHueTranslator.GetHueVector(Hue, false, Alpha, true);
 
-            var texture = GumpsLoader.Instance.GetGumpTexture(Graphic, out var bounds);
+            ref readonly var gumpInfo = ref Client.Game.Gumps.GetGump(Graphic);
 
-            if (texture != null)
+            if (gumpInfo.Texture != null)
             {
-                batcher.DrawTiled
-                (
-                    texture,
-                    new Rectangle
-                    (
-                        x,
-                        y,
-                        Width,
-                        Height
-                    ),
-                    bounds,
+                batcher.DrawTiled(
+                    gumpInfo.Texture,
+                    new Rectangle(x, y, Width, Height),
+                    gumpInfo.UV,
                     hueVector
                 );
             }
@@ -142,43 +127,41 @@ namespace ClassicUO.Game.UI.Controls
             x -= Offset.X;
             y -= Offset.Y;
 
-            var texture = GumpsLoader.Instance.GetGumpTexture(Graphic, out var bounds);
+            ref readonly var gumpInfo = ref Client.Game.Gumps.GetGump(Graphic);
 
-            if (texture == null)
+            if (gumpInfo.Texture == null)
             {
                 return false;
             }
 
             if (width == 0)
             {
-                width = bounds.Width;
+                width = gumpInfo.UV.Width;
             }
 
             if (height == 0)
             {
-                height = bounds.Height;
+                height = gumpInfo.UV.Height;
             }
 
-            while (x > bounds.Width && width > bounds.Width)
+            while (x > gumpInfo.UV.Width && width > gumpInfo.UV.Width)
             {
-                x -= bounds.Width;
-                width -= bounds.Width;
+                x -= gumpInfo.UV.Width;
+                width -= gumpInfo.UV.Width;
             }
 
-            while (y > bounds.Height && height > bounds.Height)
+            while (y > gumpInfo.UV.Height && height > gumpInfo.UV.Height)
             {
-                y -= bounds.Height;
-                height -= bounds.Height;
+                y -= gumpInfo.UV.Height;
+                height -= gumpInfo.UV.Height;
             }
-
 
             if (x > width || y > height)
             {
                 return false;
             }
 
-
-            return GumpsLoader.Instance.PixelCheck(Graphic, x, y);
+            return Client.Game.Gumps.PixelCheck(Graphic, x, y);
         }
     }
 }

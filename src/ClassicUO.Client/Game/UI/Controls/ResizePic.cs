@@ -421,7 +421,12 @@ namespace ClassicUO.Game.UI.Controls
                     ++index;
                 }
 
-                return GumpsLoader.Instance.GetGumpTexture((ushort)(Graphic + index), out bounds);
+                ref readonly var gumpInfo = ref Client.Game.Gumps.GetGump(
+                    (ushort)(Graphic + index)
+                );
+
+                bounds = gumpInfo.UV;
+                return gumpInfo.Texture;
             }
 
             bounds = Rectangle.Empty;
