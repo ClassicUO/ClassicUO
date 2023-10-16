@@ -30,11 +30,16 @@
 
 #endregion
 
+using ClassicUO.Assets;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System;
+using System.Diagnostics;
 using System.IO;
+using System.Net;
 using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -47,24 +52,47 @@ namespace ClassicUO.Game.UI.Controls
             X = x; Y = y;
             ImgUrl = imgUrl;
             Hue = hue;
-            imageTexture = getImageTexture();
+            getImageTexture();
+            AcceptMouseInput = true;
+            CanMove = true;
         }
 
         public string ImgUrl { get; }
         public ushort Hue { get; }
-        public Texture2D imageTexture { get; }
+        public Texture2D imageTexture { get; private set; }
 
-        private Texture2D getImageTexture()
+        private void getImageTexture()
         {
-            try
+            Task.Factory.StartNew(() =>
             {
-                using (HttpClient httpClient = new HttpClient())
-                using (Stream stream = httpClient.GetStreamAsync(ImgUrl).Result)
+                try
                 {
-                    return Texture2D.FromStream(Client.Game.GraphicsDevice, stream);
+                    using (HttpClient httpClient = new HttpClient())
+                    using (Stream stream = httpClient.GetStreamAsync(ImgUrl).Result)
+                    {
+                        using (System.Drawing.Image image = System.Drawing.Image.FromStream(stream))
+                        {
+                            Console.WriteLine($"Image size {image.Width} x {image.Height}");
+
+                            var memStream = new MemoryStream();
+                            image.Save(memStream, System.Drawing.Imaging.ImageFormat.Png);
+
+                            using (memStream)
+                            {
+                                var t = Texture2D.FromStream(Client.Game.GraphicsDevice, memStream);
+                                //Color[] buffer = new Color[t.Width * t.Height];
+                                //t.GetData(buffer);
+                                //for (int i = 0; i < buffer.Length; i++)
+                                //    buffer[i] = Color.FromNonPremultiplied(buffer[i].R, buffer[i].G, buffer[i].B, buffer[i].A);
+                                //t.SetData(buffer);
+                                imageTexture = t;
+                            }
+                        }
+
+                    }
                 }
-            }
-            catch { return null; }
+                catch { }
+            });
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
@@ -72,9 +100,9 @@ namespace ClassicUO.Game.UI.Controls
             Vector3 hueVector = ShaderHueTranslator.GetHueVector(Hue);
 
             if (imageTexture != null)
-                batcher.Draw(imageTexture, new Rectangle(x, y, imageTexture.Width, imageTexture.Height), hueVector);
+                batcher.DrawTiled(imageTexture, new Rectangle(x, y, Width, Height), imageTexture.Bounds, hueVector);
 
-            return true;
+            return base.Draw(batcher, x, y);;
         }
     }
 }

@@ -34,6 +34,7 @@ using System;
 using System.Collections.Generic;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.Resources;
@@ -148,6 +149,28 @@ namespace ClassicUO.Game.Managers
             Register("version", s => { UIManager.Add(new VersionHistory()); });
             Register("mockup", s => { Configuration.ProfileManager.CurrentProfile.ShowTooltipParserMockup ^= true; });
             Register("rain", s => { Client.Game.GetScene<ClassicUO.Game.Scenes.GameScene>()?.Weather.Generate(WeatherType.WT_RAIN, 30, 75); });
+            Register("marktile", s =>
+            {
+                if (s.Length < 4)
+                {
+                    TileMarkerManager.Instance.AddTile(World.Player.X, World.Player.Y, 32);
+                }
+                else
+                {
+                    if (int.TryParse(s[1], out var x))
+                        if (int.TryParse(s[2], out var y))
+                            if (ushort.TryParse(s[3], out var h))
+                                TileMarkerManager.Instance.AddTile(x, y, h);
+                }
+            });
+
+            Register("test", s =>
+            {
+                Gump g = new Gump(0, 0) { CanCloseWithRightClick = true, WantUpdateSize = true, AcceptMouseInput = true, CanMove = true };
+                if (s.Length > 0)
+                    g.Add(new GumpPicExternalUrl(0, 0, s[1], 0, 100, 100));
+                UIManager.Add(g);
+            });
         }
 
 
