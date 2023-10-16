@@ -8,7 +8,8 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private static string[] updateTexts = {
             "/c[white][3.7.1]/cd\n" +
-                "- Advanced Skill Gump light support for groups added by Elderwyn" +
+                "- Fixed mouse interactions with art replaced using the PNG replacement system\n" +
+                "- Advanced Skill Gump light support for groups added by Elderwyn\n" +
                 "- Fix for backpack not loading contents when logging in\n" +
                 "- Text width fix for old clients\n" +
                 "- Fix for a potential small memory leak - Lasheras\n" +

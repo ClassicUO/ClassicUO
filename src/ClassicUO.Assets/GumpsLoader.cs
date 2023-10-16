@@ -164,6 +164,12 @@ namespace ClassicUO.Assets
             if (png != null)
             {
                 bounds = png.Bounds;
+
+                ref var spriteInfoP = ref _spriteInfos[g];
+
+                if (spriteInfoP.Texture == null)
+                    AddPNGSpriteToAtlas(_atlas, g, png);
+
                 return png;
             }
 
@@ -272,7 +278,35 @@ namespace ClassicUO.Assets
             }
         }
 
+        private unsafe void AddPNGSpriteToAtlas(TextureAtlas atlas, uint index, Texture2D texture)
+        {
+            uint[] buffer = null;
 
+            Span<uint> pixels = texture.Width * texture.Height <= 1024 ? stackalloc uint[1024] : (buffer = System.Buffers.ArrayPool<uint>.Shared.Rent(texture.Width * texture.Height));
+
+            Color[] pixelColors = new Color[texture.Width * texture.Height];
+            texture.GetData<Color>(pixelColors);
+
+            for (int i = 0; i < pixelColors.Length; i++)
+            {
+                pixels[i] = pixelColors[i].PackedValue;
+            }
+
+            try
+            {
+                ref var spriteInfo = ref _spriteInfos[index];
+
+                spriteInfo.Texture = atlas.AddSprite(pixels, texture.Width, texture.Height, out spriteInfo.UV);
+                _picker.Set(index, texture.Width, texture.Height, pixels);
+            }
+            finally
+            {
+                if (buffer != null)
+                {
+                    System.Buffers.ArrayPool<uint>.Shared.Return(buffer, true);
+                }
+            }
+        }
 
         public bool PixelCheck(int index, int x, int y)
         {
