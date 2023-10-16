@@ -177,7 +177,7 @@ namespace ClassicUO.Game.UI.Gumps
                 while (MoveItems.TryDequeue(out Item moveItem))
                 {
                     if (GameActions.PickUp(moveItem.Serial, 0, 0, moveItem.Amount))
-                        GameActions.DropItem(moveItem.Serial, RandomHelper.GetValue(0, 20), RandomHelper.GetValue(0, 20), z, tradeID);
+                        GameActions.DropItem(moveItem.Serial, RandomHelper.GetValue(0, 20), RandomHelper.GetValue(0, 20), 0, tradeID);
                     Task.Delay(ObjDelay).Wait();
                 }
             });
