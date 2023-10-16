@@ -8,6 +8,7 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private static string[] updateTexts = {
             "/c[white][3.7.1]/cd\n" +
+                "- Updated TUO with CUO updates\n" +
                 "- Fixed mouse interactions with art replaced using the PNG replacement system\n" +
                 "- Advanced Skill Gump light support for groups added by Elderwyn\n" +
                 "- Fix for backpack not loading contents when logging in\n" +
