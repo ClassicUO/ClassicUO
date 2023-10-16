@@ -240,6 +240,13 @@ namespace ClassicUO.Assets
 
         private Texture2D GetTexture(uint g, out Rectangle bounds)
         {
+            Texture2D png = PNGLoader.Instance.LoadArtTexture(g);
+            if (png != null)
+            {
+                bounds = png.Bounds;
+                return png;
+            }
+
             if (g >= _spriteInfos.Length)
             {
                 bounds = Rectangle.Empty;
@@ -274,19 +281,8 @@ namespace ClassicUO.Assets
         public Texture2D GetLandTexture(uint g, out Rectangle bounds) =>
             GetTexture(g & _graphicMask, out bounds);
 
-<<<<<<< HEAD
-            Texture2D png = PNGLoader.Instance.LoadArtTexture(g);
-            if (png != null)
-            {
-                bounds = png.Bounds;
-                return png;
-            }
-
-            ref var spriteInfo = ref _spriteInfos[g];
-=======
         public Texture2D GetStaticTexture(uint g, out Rectangle bounds) =>
             GetTexture(g + 0x4000, out bounds);
->>>>>>> 48135b725ed8dec7f43df93e0febde3475287540
 
         public unsafe IntPtr CreateCursorSurfacePtr(
             int index,
@@ -347,12 +343,7 @@ namespace ClassicUO.Assets
 
                                     if (curY == 0)
                                     {
-<<<<<<< HEAD
-                                        c.PackedValue = *pixels_ptr;
-                                        *pixels_ptr = HuesLoader.Instance.ApplyHueRgba8888(HuesHelper.Color32To16(*pixels_ptr), customHue);
-=======
                                         hotX = curX;
->>>>>>> 48135b725ed8dec7f43df93e0febde3475287540
                                     }
                                 }
 
@@ -362,12 +353,7 @@ namespace ClassicUO.Assets
                             {
                                 c.PackedValue = *pixels_ptr;
                                 *pixels_ptr =
-                                    HuesHelper.Color16To32(
-                                        HuesLoader.Instance.GetColor16(
-                                            HuesHelper.ColorToHue(c),
-                                            customHue
-                                        )
-                                    ) | 0xFF_00_00_00;
+                                    HuesLoader.Instance.ApplyHueRgba8888(HuesHelper.Color32To16(*pixels_ptr), customHue);
                             }
                         }
 
