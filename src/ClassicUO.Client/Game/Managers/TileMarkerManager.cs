@@ -1,4 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using ClassicUO.Configuration;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace ClassicUO.Game.Managers
 {
@@ -8,23 +12,57 @@ namespace ClassicUO.Game.Managers
 
         private Dictionary<string, ushort> markedTiles = new Dictionary<string, ushort>();
 
-        private TileMarkerManager() { }
+        private TileMarkerManager() { Load(); }
 
-        public void AddTile(int x, int y, ushort hue)
+        private string savePath = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Profiles", "TileMarkers.bin");
+
+        public void AddTile(int x, int y, int map, ushort hue)
         {
-            markedTiles.Add($"{x}.{y}", hue);
+            markedTiles.Add(FormatLocKey(x, y, map), hue);
         }
 
-        public void RemoveTile(int x, int y)
+        public void RemoveTile(int x, int y, int map)
         {
-            if (markedTiles.ContainsKey($"{x}.{y}"))
-                markedTiles.Remove($"{x}.{y}");
+            if (markedTiles.ContainsKey(FormatLocKey(x, y, map)))
+                markedTiles.Remove(FormatLocKey(x, y, map));
         }
 
-        public bool IsTileMarked(int x, int y, out ushort hue)
+        public bool IsTileMarked(int x, int y, int map, out ushort hue)
         {
-            if (markedTiles.TryGetValue($"{x}.{y}", out hue)) return true;
+            if (markedTiles.TryGetValue(FormatLocKey(x, y, map), out hue)) return true;
             return false;
+        }
+
+        private string FormatLocKey(int x, int y, int map)
+        {
+            return $"{x}.{y}.{map}";
+        }
+
+        public void Save()
+        {
+            try
+            {
+                using (FileStream fs = new FileStream(savePath, FileMode.Create, FileAccess.Write))
+                {
+                    BinaryFormatter bf = new BinaryFormatter();
+                    bf.Serialize(fs, markedTiles);
+                }
+            }
+            catch { Console.WriteLine("Failed to save marked tile data."); }
+        }
+
+        private void Load()
+        {
+            if(File.Exists(savePath))
+                try
+                {
+                    using (FileStream fs = File.OpenRead(savePath))
+                    {
+                        BinaryFormatter bf = new BinaryFormatter();
+                        markedTiles = (Dictionary<string, ushort>)bf.Deserialize(fs);
+                    }
+                }
+                catch { }
         }
     }
 }

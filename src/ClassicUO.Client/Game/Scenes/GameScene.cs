@@ -345,6 +345,7 @@ namespace ClassicUO.Game.Scenes
             UIManager.GetGump<WorldMapGump>()?.SaveSettings();
 
             ProfileManager.CurrentProfile?.Save(ProfileManager.ProfilePath);
+            TileMarkerManager.Instance.Save();
 
             Macros.Save();
             InfoBars.Save();
