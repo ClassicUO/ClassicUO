@@ -12,11 +12,13 @@ namespace ClassicUO.Renderer.Arts
         private readonly SpriteInfo[] _spriteInfos;
         private readonly TextureAtlas _atlas;
         private readonly PixelPicker _picker = new PixelPicker();
+        private readonly Rectangle[] _realArtBounds;
 
         public Art(GraphicsDevice device)
         {
             _atlas = new TextureAtlas(device, 4096, 4096, SurfaceFormat.Color);
             _spriteInfos = new SpriteInfo[ArtLoader.Instance.Entries.Length];
+            _realArtBounds = new Rectangle[_spriteInfos.Length];
         }
 
         public ref readonly SpriteInfo GetArt(uint idx)
@@ -39,6 +41,32 @@ namespace ClassicUO.Renderer.Arts
                     );
 
                     _picker.Set(idx, artInfo.Width, artInfo.Height, artInfo.Pixels);
+
+                    if (idx > 0x4000)
+                    {
+                        idx -= 0x4000;
+                        var pos1 = 0;
+                        int minX = artInfo.Width,
+                            minY = artInfo.Height,
+                            maxX = 0,
+                            maxY = 0;
+
+                        for (int y = 0; y < artInfo.Height; ++y)
+                        {
+                            for (int x = 0; x < artInfo.Width; ++x)
+                            {
+                                if (artInfo.Pixels[pos1++] != 0)
+                                {
+                                    minX = Math.Min(minX, x);
+                                    maxX = Math.Max(maxX, x);
+                                    minY = Math.Min(minY, y);
+                                    maxY = Math.Max(maxY, y);
+                                }
+                            }
+                        }
+
+                        _realArtBounds[idx] = new Rectangle(minX, minY, maxX - minX, maxY - minY);
+                    }
                 }
             }
 
@@ -138,6 +166,11 @@ namespace ClassicUO.Renderer.Arts
                 return (IntPtr)surface;
             }
         }
+
+        public Rectangle GetRealArtBounds(uint idx) =>
+            idx < 0x4000 || idx - 0x4000 >= _realArtBounds.Length
+                ? Rectangle.Empty
+                : _realArtBounds[idx - 0x4000];
 
         public bool PixelCheck(uint idx, int x, int y) => _picker.Get(idx, x, y);
     }

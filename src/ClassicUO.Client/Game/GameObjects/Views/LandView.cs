@@ -2,7 +2,7 @@
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 // 1. Redistributions of source code must retain the above copyright
@@ -16,7 +16,7 @@
 // 4. Neither the name of the copyright holder nor the
 //    names of its contributors may be used to endorse or promote products
 //    derived from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -56,7 +56,10 @@ namespace ClassicUO.Game.GameObjects
             {
                 hue = Constants.HIGHLIGHT_CURRENT_OBJECT_HUE;
             }
-            else if (ProfileManager.CurrentProfile.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
+            else if (
+                ProfileManager.CurrentProfile.NoColorObjectsOutOfRange
+                && Distance > World.ClientViewRange
+            )
             {
                 hue = Constants.OUT_RANGE_COLOR;
             }
@@ -69,12 +72,16 @@ namespace ClassicUO.Game.GameObjects
             if (hue != 0)
             {
                 hueVec.X = hue - 1;
-                hueVec.Y = IsStretched ? ShaderHueTranslator.SHADER_LAND_HUED : ShaderHueTranslator.SHADER_HUED;
+                hueVec.Y = IsStretched
+                    ? ShaderHueTranslator.SHADER_LAND_HUED
+                    : ShaderHueTranslator.SHADER_HUED;
             }
             else
             {
                 hueVec.X = 0;
-                hueVec.Y = IsStretched ? ShaderHueTranslator.SHADER_LAND : ShaderHueTranslator.SHADER_NONE;
+                hueVec.Y = IsStretched
+                    ? ShaderHueTranslator.SHADER_LAND
+                    : ShaderHueTranslator.SHADER_NONE;
             }
             hueVec.Z = 1f;
 
@@ -82,15 +89,16 @@ namespace ClassicUO.Game.GameObjects
             {
                 posY += Z << 2;
 
-                var texture = TexmapsLoader.Instance.GetLandTexture(TileDataLoader.Instance.LandData[Graphic].TexID, out var bounds);
+                ref readonly var texmapInfo = ref Client.Game.Texmaps.GetTexmap(
+                    TileDataLoader.Instance.LandData[Graphic].TexID
+                );
 
-                if (texture != null)
+                if (texmapInfo.Texture != null)
                 {
-                    batcher.DrawStretchedLand
-                    (
-                        texture,
+                    batcher.DrawStretchedLand(
+                        texmapInfo.Texture,
                         new Vector2(posX, posY),
-                        bounds,
+                        texmapInfo.UV,
                         ref YOffsets,
                         ref NormalTop,
                         ref NormalRight,
@@ -102,8 +110,7 @@ namespace ClassicUO.Game.GameObjects
                 }
                 else
                 {
-                    DrawStatic
-                    (
+                    DrawStatic(
                         batcher,
                         Graphic,
                         posX,
@@ -116,20 +123,19 @@ namespace ClassicUO.Game.GameObjects
             }
             else
             {
-                var texture = ArtLoader.Instance.GetLandTexture(Graphic, out var bounds);
+                ref readonly var artInfo = ref Client.Game.Arts.GetArt(Graphic);
 
-                if (texture != null)
+                if (artInfo.Texture != null)
                 {
                     var pos = new Vector2(posX, posY);
                     var scale = Vector2.One;
 
                     if (ProfileManager.CurrentProfile.AnimatedWaterEffect && TileData.IsWet)
                     {
-                        batcher.Draw
-                        (
-                            texture,
+                        batcher.Draw(
+                            artInfo.Texture,
                             pos,
-                            bounds,
+                            artInfo.UV,
                             hueVec,
                             0f,
                             Vector2.Zero,
@@ -143,11 +149,10 @@ namespace ClassicUO.Game.GameObjects
                         scale = new Vector2(1.1f + sin * 0.1f, 1.1f + cos * 0.5f * 0.1f);
                     }
 
-                    batcher.Draw
-                    (
-                        texture,
+                    batcher.Draw(
+                        artInfo.Texture,
                         pos,
-                        bounds,
+                        artInfo.UV,
                         hueVec,
                         0f,
                         Vector2.Zero,
@@ -165,7 +170,11 @@ namespace ClassicUO.Game.GameObjects
         {
             if (IsStretched)
             {
-                return SelectedObject.IsPointInStretchedLand(ref YOffsets, RealScreenPosition.X, RealScreenPosition.Y + (Z << 2));
+                return SelectedObject.IsPointInStretchedLand(
+                    ref YOffsets,
+                    RealScreenPosition.X,
+                    RealScreenPosition.Y + (Z << 2)
+                );
             }
 
             return SelectedObject.IsPointInLand(RealScreenPosition.X, RealScreenPosition.Y);

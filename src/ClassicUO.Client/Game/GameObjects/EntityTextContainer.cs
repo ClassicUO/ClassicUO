@@ -2,7 +2,7 @@
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 // 1. Redistributions of source code must retain the above copyright
@@ -16,7 +16,7 @@
 // 4. Neither the name of the copyright holder nor the
 //    names of its contributors may be used to endorse or promote products
 //    derived from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -39,7 +39,8 @@ namespace ClassicUO.Game.GameObjects
 {
     internal class TextContainer : LinkedObject
     {
-        public int Size, MaxSize = 5;
+        public int Size,
+            MaxSize = 5;
 
         public void Add(TextObject obj)
         {
@@ -47,7 +48,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (Size >= MaxSize)
             {
-                ((TextObject) Items)?.Destroy();
+                ((TextObject)Items)?.Destroy();
                 Remove(Items);
             }
             else
@@ -56,15 +57,14 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-
         public new void Clear()
         {
-            TextObject item = (TextObject) Items;
+            TextObject item = (TextObject)Items;
             Items = null;
 
             while (item != null)
             {
-                TextObject next = (TextObject) item.Next;
+                TextObject next = (TextObject)item.Next;
                 item.Next = null;
                 item.Destroy();
                 Remove(item);
@@ -76,7 +76,6 @@ namespace ClassicUO.Game.GameObjects
         }
     }
 
-
     internal class OverheadDamage
     {
         private const int DAMAGE_Y_MOVING_TIME = 25;
@@ -85,13 +84,11 @@ namespace ClassicUO.Game.GameObjects
 
         private Rectangle _rectangle;
 
-
         public OverheadDamage(GameObject parent)
         {
             Parent = parent;
             _messages = new Deque<TextObject>();
         }
-
 
         public GameObject Parent { get; private set; }
         public bool IsDestroyed { get; private set; }
@@ -106,7 +103,12 @@ namespace ClassicUO.Game.GameObjects
         {
             TextObject text_obj = TextObject.Create();
 
-            text_obj.RenderedText = RenderedText.Create(damage.ToString(), (ushort) (ReferenceEquals(Parent, World.Player) ? 0x0034 : 0x0021), 3, false);
+            text_obj.RenderedText = RenderedText.Create(
+                damage.ToString(),
+                (ushort)(ReferenceEquals(Parent, World.Player) ? 0x0034 : 0x0021),
+                3,
+                false
+            );
 
             text_obj.Time = Time.Ticks + 1500;
 
@@ -187,9 +189,7 @@ namespace ClassicUO.Game.GameObjects
                         offY = -22;
                     }
 
-
-                    AnimationsLoader.Instance.GetAnimationDimensions
-                    (
+                    Client.Game.Animations.GetAnimationDimensions(
                         m.AnimIndex,
                         m.GetGraphicForAnimation(),
                         /*(byte) m.GetDirectionForAnimation()*/
@@ -205,17 +205,19 @@ namespace ClassicUO.Game.GameObjects
                         out int height
                     );
 
-                    p.X += (int) m.Offset.X + 22;
-                    p.Y += (int) (m.Offset.Y - m.Offset.Z - (height + centerY + 8));
+                    p.X += (int)m.Offset.X + 22;
+                    p.Y += (int)(m.Offset.Y - m.Offset.Z - (height + centerY + 8));
                 }
                 else
                 {
-                    var texture = ArtLoader.Instance.GetStaticTexture(Parent.Graphic, out var bounds);
+                    ref readonly var artInfo = ref Client.Game.Arts.GetArt(
+                        (uint)(Parent.Graphic + 0x4000)
+                    );
 
-                    if (texture != null)
+                    if (artInfo.Texture != null)
                     {
                         p.X += 22;
-                        int yValue = bounds.Height >> 1;
+                        int yValue = artInfo.UV.Height >> 1;
 
                         if (Parent is Item it)
                         {
@@ -250,7 +252,6 @@ namespace ClassicUO.Game.GameObjects
                 offY += item.RenderedText.Height;
             }
         }
-
 
         public void Destroy()
         {

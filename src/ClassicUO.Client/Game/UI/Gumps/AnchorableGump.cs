@@ -2,7 +2,7 @@
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 // 1. Redistributions of source code must retain the above copyright
@@ -16,7 +16,7 @@
 // 4. Neither the name of the copyright holder nor the
 //    names of its contributors may be used to endorse or promote products
 //    derived from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -50,14 +50,14 @@ namespace ClassicUO.Game.UI.Gumps
     internal abstract class AnchorableGump : Gump
     {
         private AnchorableGump _anchorCandidate;
+
         //private GumpPic _lockGumpPic;
-        private int _prevX, _prevY;
+        private int _prevX,
+            _prevY;
 
         const ushort LOCK_GRAPHIC = 0x082C;
 
-        protected AnchorableGump(uint local, uint server) : base(local, server)
-        {
-        }
+        protected AnchorableGump(uint local, uint server) : base(local, server) { }
 
         public ANCHOR_TYPE AnchorType { get; protected set; }
         public virtual int GroupMatrixWidth { get; protected set; }
@@ -132,9 +132,15 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (button == MouseButtonType.Left && ShowLock)
             {
-                if (GumpsLoader.Instance.GetGumpTexture(LOCK_GRAPHIC, out var bounds) != null)
+                ref readonly var gumpInfo = ref Client.Game.Gumps.GetGump(LOCK_GRAPHIC);
+                if (gumpInfo.Texture != null)
                 {
-                    if (x >= Width - bounds.Width && x < Width && y >= 0 && y <= bounds.Height)
+                    if (
+                        x >= Width - gumpInfo.UV.Width
+                        && x < Width
+                        && y >= 0
+                        && y <= gumpInfo.UV.Height
+                    )
                     {
                         UIManager.AnchorManager.DetachControl(this);
                     }
@@ -143,7 +149,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             base.OnMouseUp(x, y, button);
         }
-
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
@@ -154,22 +159,26 @@ namespace ClassicUO.Game.UI.Gumps
             if (ShowLock)
             {
                 hueVector = ShaderHueTranslator.GetHueVector(0);
+                ref readonly var gumpInfo = ref Client.Game.Gumps.GetGump(LOCK_GRAPHIC);
 
-                var texture = GumpsLoader.Instance.GetGumpTexture(LOCK_GRAPHIC, out var bounds);
-
-                if (texture != null)
+                if (gumpInfo.Texture != null)
                 {
-                    if (UIManager.MouseOverControl != null && (UIManager.MouseOverControl == this || UIManager.MouseOverControl.RootParent == this))
+                    if (
+                        UIManager.MouseOverControl != null
+                        && (
+                            UIManager.MouseOverControl == this
+                            || UIManager.MouseOverControl.RootParent == this
+                        )
+                    )
                     {
                         hueVector.X = 34;
                         hueVector.Y = 1;
                     }
 
-                    batcher.Draw
-                    (
-                        texture, 
-                        new Vector2(x + (Width - bounds.Width), y), 
-                        bounds,
+                    batcher.Draw(
+                        gumpInfo.Texture,
+                        new Vector2(x + (Width - gumpInfo.UV.Width), y),
+                        gumpInfo.UV,
                         hueVector
                     );
                 }
@@ -179,31 +188,26 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_anchorCandidate != null)
             {
-                Point drawLoc = UIManager.AnchorManager.GetCandidateDropLocation(this, _anchorCandidate);
+                Point drawLoc = UIManager.AnchorManager.GetCandidateDropLocation(
+                    this,
+                    _anchorCandidate
+                );
 
                 if (drawLoc != Location)
                 {
                     Texture2D previewColor = SolidColorTextureCache.GetTexture(Color.Silver);
                     hueVector = ShaderHueTranslator.GetHueVector(0, false, 0.5f);
 
-                    batcher.Draw
-                    (
+                    batcher.Draw(
                         previewColor,
-                        new Rectangle
-                        (
-                            drawLoc.X,
-                            drawLoc.Y,
-                            Width,
-                            Height
-                        ),
+                        new Rectangle(drawLoc.X, drawLoc.Y, Width, Height),
                         hueVector
                     );
 
                     hueVector.Z = 1f;
 
                     // double rectangle for thicker "stroke"
-                    batcher.DrawRectangle
-                    (
+                    batcher.DrawRectangle(
                         previewColor,
                         drawLoc.X,
                         drawLoc.Y,
@@ -212,8 +216,7 @@ namespace ClassicUO.Game.UI.Gumps
                         hueVector
                     );
 
-                    batcher.DrawRectangle
-                    (
+                    batcher.DrawRectangle(
                         previewColor,
                         drawLoc.X + 1,
                         drawLoc.Y + 1,
@@ -229,7 +232,11 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void CloseWithRightClick()
         {
-            if (UIManager.AnchorManager[this] == null || Keyboard.Alt || !ProfileManager.CurrentProfile.HoldDownKeyAltToCloseAnchored)
+            if (
+                UIManager.AnchorManager[this] == null
+                || Keyboard.Alt
+                || !ProfileManager.CurrentProfile.HoldDownKeyAltToCloseAnchored
+            )
             {
                 if (ProfileManager.CurrentProfile.CloseAllAnchoredGumpsInGroupWithRightClick)
                 {

@@ -2,7 +2,7 @@
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 // 1. Redistributions of source code must retain the above copyright
@@ -16,7 +16,7 @@
 // 4. Neither the name of the copyright holder nor the
 //    names of its contributors may be used to endorse or promote products
 //    derived from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -52,7 +52,8 @@ namespace ClassicUO.Game.UI.Gumps
         private int _lastMap = -1;
         private long _timeMS;
         private bool _useLargeMap;
-        private ushort _x, _y;
+        private ushort _x,
+            _y;
         private static readonly uint[][] _blankGumpsPixels = new uint[4][];
 
         const ushort SMALL_MAP_GRAPHIC = 5010;
@@ -64,7 +65,6 @@ namespace ClassicUO.Game.UI.Gumps
             AcceptMouseInput = true;
             CanCloseWithRightClick = true;
         }
-
 
         public override GumpType GumpType => GumpType.MiniMap;
 
@@ -83,23 +83,25 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void CreateMap()
         {
-            var texture = GumpsLoader.Instance.GetGumpTexture(_useLargeMap ? BIG_MAP_GRAPHIC : SMALL_MAP_GRAPHIC, out var bounds);
+            ref readonly var gumpInfo = ref Client.Game.Gumps.GetGump(
+                _useLargeMap ? BIG_MAP_GRAPHIC : SMALL_MAP_GRAPHIC
+            );
 
             int index = _useLargeMap ? 1 : 0;
 
             if (_blankGumpsPixels[index] == null)
             {
-                int size = bounds.Width * bounds.Height;
+                int size = gumpInfo.UV.Width * gumpInfo.UV.Height;
                 _blankGumpsPixels[index] = new uint[size];
                 _blankGumpsPixels[index + 2] = new uint[size];
-                texture.GetData(0, bounds, _blankGumpsPixels[index], 0, size);
+                gumpInfo.Texture.GetData(0, gumpInfo.UV, _blankGumpsPixels[index], 0, size);
 
                 Array.Copy(_blankGumpsPixels[index], 0, _blankGumpsPixels[index + 2], 0, size);
             }
 
-            Width = bounds.Width;
-            Height = bounds.Height;
-            CreateMiniMapTexture(texture, bounds, true);
+            Width = gumpInfo.UV.Width;
+            Height = gumpInfo.UV.Height;
+            CreateMiniMapTexture(gumpInfo.Texture, gumpInfo.UV, true);
         }
 
         public override void Update()
@@ -147,26 +149,22 @@ namespace ClassicUO.Game.UI.Gumps
 
             Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
-            var texture = GumpsLoader.Instance.GetGumpTexture(_useLargeMap ? BIG_MAP_GRAPHIC : SMALL_MAP_GRAPHIC, out var bounds);
+            ref readonly var gumpInfo = ref Client.Game.Gumps.GetGump(
+                _useLargeMap ? BIG_MAP_GRAPHIC : SMALL_MAP_GRAPHIC
+            );
 
-            if (texture == null)
+            if (gumpInfo.Texture == null)
             {
                 Dispose();
 
                 return false;
             }
 
-            batcher.Draw
-            (
-                texture,
-                new Vector2(x, y),
-                bounds,
-                hueVector
-            );
+            batcher.Draw(gumpInfo.Texture, new Vector2(x, y), gumpInfo.UV, hueVector);
 
-            CreateMiniMapTexture(texture, bounds);
+            CreateMiniMapTexture(gumpInfo.Texture, gumpInfo.UV);
 
-            batcher.Draw(texture, new Vector2(x, y), bounds, hueVector);
+            batcher.Draw(gumpInfo.Texture, new Vector2(x, y), gumpInfo.UV, hueVector);
 
             if (_draw)
             {
@@ -188,18 +186,13 @@ namespace ClassicUO.Game.UI.Gumps
                     int gx = xx - yy;
                     int gy = xx + yy;
 
-                    hueVector = ShaderHueTranslator.GetHueVector(Notoriety.GetHue(mob.NotorietyFlag));
+                    hueVector = ShaderHueTranslator.GetHueVector(
+                        Notoriety.GetHue(mob.NotorietyFlag)
+                    );
 
-                    batcher.Draw
-                    (
+                    batcher.Draw(
                         mobilesTextureDot,
-                        new Rectangle
-                        (
-                            x + w + gx,
-                            y + h + gy,
-                            2,
-                            2
-                        ),
+                        new Rectangle(x + w + gx, y + h + gy, 2, 2),
                         hueVector
                     );
                 }
@@ -207,16 +200,9 @@ namespace ClassicUO.Game.UI.Gumps
                 //DRAW PLAYER DOT
                 hueVector = ShaderHueTranslator.GetHueVector(0);
 
-                batcher.Draw
-                (
+                batcher.Draw(
                     SolidColorTextureCache.GetTexture(Color.White),
-                    new Rectangle
-                    (
-                        x + w,
-                        y + h,
-                        2,
-                        2
-                    ),
+                    new Rectangle(x + w, y + h, 2, 2),
                     hueVector
                 );
             }
@@ -241,11 +227,14 @@ namespace ClassicUO.Game.UI.Gumps
             CreateMap();
         }
 
-        private unsafe void CreateMiniMapTexture(Texture2D texture, Rectangle bounds, bool force = false)
+        private unsafe void CreateMiniMapTexture(
+            Texture2D texture,
+            Rectangle bounds,
+            bool force = false
+        )
         {
             ushort lastX = World.Player.X;
             ushort lastY = World.Player.Y;
-
 
             if (_x != lastX || _y != lastY)
             {
@@ -256,7 +245,6 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 return;
             }
-
 
             int blockOffsetX = Width >> 2;
             int blockOffsetY = Height >> 2;
@@ -285,7 +273,7 @@ namespace ClassicUO.Game.UI.Gumps
             int index = _useLargeMap ? 1 : 0;
 
             _blankGumpsPixels[index].CopyTo(_blankGumpsPixels[index + 2], 0);
-          
+
             uint[] data = _blankGumpsPixels[index + 2];
 
             Point* table = stackalloc Point[2];
@@ -293,8 +281,6 @@ namespace ClassicUO.Game.UI.Gumps
             table[0].Y = 0;
             table[1].X = 0;
             table[1].Y = 1;
-
-            
 
             for (int i = minBlockX; i <= maxBlockX; i++)
             {
@@ -340,20 +326,26 @@ namespace ClassicUO.Game.UI.Gumps
                             {
                                 ref StaticsBlock stblock = ref sb[c];
 
-                                if (stblock.X == x && stblock.Y == y &&
-                                    stblock.Color > 0 && stblock.Color != 0xFFFF &&
-                                    GameObject.CanBeDrawn(stblock.Color))
+                                if (
+                                    stblock.X == x
+                                    && stblock.Y == y
+                                    && stblock.Color > 0
+                                    && stblock.Color != 0xFFFF
+                                    && GameObject.CanBeDrawn(stblock.Color)
+                                )
                                 {
                                     if (stblock.Z >= z)
                                     {
-                                        color = stblock.Hue > 0 ? (ushort)(stblock.Hue + 0x4000) : stblock.Color;
+                                        color =
+                                            stblock.Hue > 0
+                                                ? (ushort)(stblock.Hue + 0x4000)
+                                                : stblock.Color;
                                         isLand = stblock.Hue > 0;
 
                                         z = stblock.Z;
                                     }
                                 }
                             }
-
 
                             if (block != null)
                             {
@@ -392,7 +384,10 @@ namespace ClassicUO.Game.UI.Gumps
 
                             if (isLand && color > 0x4000)
                             {
-                                color = HuesLoader.Instance.GetColor16(16384, (ushort) (color - 0x4000)); //28672 is an arbitrary position in hues.mul, is the 14 position in the range
+                                color = HuesLoader.Instance.GetColor16(
+                                    16384,
+                                    (ushort)(color - 0x4000)
+                                ); //28672 is an arbitrary position in hues.mul, is the 14 position in the range
                             }
                             else
                             {
@@ -403,8 +398,7 @@ namespace ClassicUO.Game.UI.Gumps
                             int gx = px - py;
                             int gy = px + py;
 
-                            CreatePixels
-                            (
+                            CreatePixels(
                                 data,
                                 0x8000 | color,
                                 gx,
@@ -422,11 +416,10 @@ namespace ClassicUO.Game.UI.Gumps
             fixed (uint* ptr = data)
             {
                 texture.SetDataPointerEXT(0, bounds, (IntPtr)ptr, data.Length * sizeof(uint));
-            }         
+            }
         }
 
-        private unsafe void CreatePixels
-        (
+        private unsafe void CreatePixels(
             uint[] data,
             int color,
             int x,
@@ -463,7 +456,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (data[block] == 0xFF080808)
                 {
-                    data[block] = HuesHelper.Color16To32((ushort) color) | 0xFF_00_00_00;
+                    data[block] = HuesHelper.Color16To32((ushort)color) | 0xFF_00_00_00;
                 }
             }
         }
