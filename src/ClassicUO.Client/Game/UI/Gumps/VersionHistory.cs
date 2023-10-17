@@ -8,6 +8,7 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private static string[] updateTexts = {
             "/c[white][3.7.1]/cd\n" +
+                "- Trees/stumps will be slightly visible with circle of transparency on\n" +
                 "- Multi item move can now move items to the trade window\n" +
                 "- Added -marktile command, see wiki for more details\n" +
                 "- Updated TUO with CUO updates\n" +
