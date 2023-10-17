@@ -45,13 +45,14 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class GumpPicExternalUrl : Control
     {
-        public GumpPicExternalUrl(int x, int y, string imgUrl, ushort hue, int width, int height)
+        public GumpPicExternalUrl(int x, int y, string imgUrl, ushort hue, int width, int height, bool resize = false)
         {
             Width = width;
             Height = height;
             X = x; Y = y;
             ImgUrl = imgUrl;
             Hue = hue;
+            Resize = resize;
             getImageTexture();
             AcceptMouseInput = true;
             CanMove = true;
@@ -59,6 +60,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public string ImgUrl { get; }
         public ushort Hue { get; }
+        public bool Resize { get; }
         public Texture2D imageTexture { get; private set; }
 
         private void getImageTexture()
@@ -100,7 +102,12 @@ namespace ClassicUO.Game.UI.Controls
             Vector3 hueVector = ShaderHueTranslator.GetHueVector(Hue);
 
             if (imageTexture != null)
-                batcher.DrawTiled(imageTexture, new Rectangle(x, y, Width, Height), imageTexture.Bounds, hueVector);
+            {
+                if (!Resize)
+                    batcher.DrawTiled(imageTexture, new Rectangle(x, y, Width, Height), imageTexture.Bounds, hueVector);
+                else
+                    batcher.Draw(imageTexture, new Rectangle(x, y, Width, Height), imageTexture.Bounds, hueVector);
+            }
 
             return base.Draw(batcher, x, y);;
         }
