@@ -55,7 +55,8 @@ namespace ClassicUO.Game.UI.Gumps
             { Buttons.SortName, "Name" },
             { Buttons.SortReal, "Base" },
             { Buttons.SortBase, "Value" },
-            { Buttons.SortCap, "Cap" }
+            { Buttons.SortCap, "Cap" },
+            { Buttons.SortLock, "Lock" }
         };
 
         private readonly DataBox _databox;
@@ -184,6 +185,22 @@ namespace ClassicUO.Game.UI.Gumps
                 )
                 {
                     ButtonParameter = (int)Buttons.SortCap,
+                }
+            );
+
+            Add
+            (_ =
+                new NiceButton
+                (
+                    _.X + _.Width,
+                    _.Y,
+                    50,
+                    25,
+                    ButtonAction.Activate,
+                    "Lock"
+                )
+                {
+                    ButtonParameter = (int)Buttons.SortLock,
                 }
             );
 
@@ -475,7 +492,8 @@ namespace ClassicUO.Game.UI.Gumps
             SortName = 1,
             SortReal = 2,
             SortBase = 3,
-            SortCap = 4
+            SortCap = 4,
+            SortLock = 5,
         }
     }
     
