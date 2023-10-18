@@ -41,6 +41,7 @@ using ClassicUO.Resources;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using SDL2;
+using System.Collections.Generic;
 
 namespace ClassicUO.Game.UI.Gumps.Login
 {
@@ -385,6 +386,18 @@ namespace ClassicUO.Game.UI.Gumps.Login
                     Height = 25
                 }
             );
+
+            string[] accts = SimpleAccountManager.GetAccounts();
+            if (accts.Length > 0)
+            {
+                _textboxAccount.ContextMenu = new ContextMenuControl();
+                foreach (string acct in accts)
+                {
+                    _textboxAccount.ContextMenu.Add(new ContextMenuItemEntry(acct, () => { _textboxAccount.SetText(acct); _passwordFake?.ClearText(); }));
+                }
+                _textboxAccount.SetTooltip("Right click to select another account.");
+                _textboxAccount.MouseUp += (s, e) => { if (e.Button == MouseButtonType.Right) _textboxAccount.ContextMenu.Show(); };
+            }
 
             _passwordFake.RealText = Crypter.Decrypt(Settings.GlobalSettings.Password);
 
