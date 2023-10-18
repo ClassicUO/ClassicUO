@@ -1,11 +1,14 @@
-﻿using ClassicUO.Assets;
-using ClassicUO.Configuration;
+﻿using ClassicUO.Configuration;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Text;
+using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using static ClassicUO.Game.UI.Gumps.OptionsGump;
 
@@ -18,7 +21,7 @@ namespace ClassicUO.Game.UI.Gumps
         private SettingsSection highlightSection;
         private ScrollArea highlightSectionScroll;
 
-        public GridHightlightMenu(int x=100, int y = 100) : base(0, 0)
+        public GridHightlightMenu(int x = 100, int y = 100) : base(0, 0)
         {
             #region SET VARS
             Width = WIDTH;
@@ -54,6 +57,24 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         highlightSectionScroll?.Add(NewAreaSection(ProfileManager.CurrentProfile.GridHighlight_Name.Count, y));
                         y += 21;
+                    }
+                };
+
+                section.AddRight(_ = new NiceButton(0, 0, 60, 20, ButtonAction.Activate, "Export") { IsSelectable = false });
+                _.MouseUp += (s, e) =>
+                {
+                    if (e.Button == Input.MouseButtonType.Left)
+                    {
+                        ExportGridHightlightSettings();
+                    }
+                };
+
+                section.AddRight(_ = new NiceButton(0, 0, 60, 20, ButtonAction.Activate, "Import") { IsSelectable = false });
+                _.MouseUp += (s, e) =>
+                {
+                    if (e.Button == Input.MouseButtonType.Left)
+                    {
+                        ImportGridHighlightSettings();
                     }
                 };
 
@@ -99,6 +120,7 @@ namespace ClassicUO.Game.UI.Gumps
             hueDisplay.HueChanged += (s, e) =>
             {
                 data.Hue = hueDisplay.Hue;
+                data.Save();
                 area.Add(new FadingLabel(10, "Saved", true, 0xff) { X = hueDisplay.X - 40, Y = hueDisplay.Y });
             };
 
@@ -115,6 +137,7 @@ namespace ClassicUO.Game.UI.Gumps
                     if (_name.Text == tVal)
                     {
                         data.Name = _name.Text;
+                        data.Save();
                         area.Add(new FadingLabel(10, "Saved", true, 0xff) { X = _name.X, Y = _name.Y - 20 });
                     }
                 });
@@ -137,6 +160,92 @@ namespace ClassicUO.Game.UI.Gumps
             return area;
         }
 
+        public static GridHighlightData[] GetAllGridHighlightData()
+        {
+            List<GridHighlightData> data = new List<GridHighlightData>();
+            for (int i = 0; i < ProfileManager.CurrentProfile.GridHighlight_Name.Count; i++)
+            {
+                data.Add(GridHighlightData.GetGridHighlightData(i));
+            }
+            return data.ToArray();
+        }
+
+        public static void ExportGridHightlightSettings()
+        {
+            GridHighlightData[] allData = GetAllGridHighlightData();
+
+            Thread t = new Thread(() =>
+            {
+                System.Windows.Forms.SaveFileDialog saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
+                saveFileDialog1.Filter = "Json|*.json";
+                saveFileDialog1.Title = "Save grid highlight settings";
+                saveFileDialog1.ShowDialog();
+
+                string result = JsonSerializer.Serialize(allData);
+
+                // If the file name is not an empty string open it for saving.
+                if (saveFileDialog1.FileName != "")
+                {
+                    System.IO.FileStream fs =
+                        (System.IO.FileStream)saveFileDialog1.OpenFile();
+                    // NOTE that the FilterIndex property is one-based.
+                    switch (saveFileDialog1.FilterIndex)
+                    {
+                        default:
+                            byte[] data = Encoding.UTF8.GetBytes(result);
+                            fs.Write(data, 0, data.Length);
+                            break;
+                    }
+
+                    fs.Close();
+                }
+            });
+            t.SetApartmentState(ApartmentState.STA);
+            t.Start();
+        }
+
+        public static void ImportGridHighlightSettings()
+        {
+            Thread t = new Thread(() =>
+            {
+                System.Windows.Forms.OpenFileDialog openFileDialog = new System.Windows.Forms.OpenFileDialog();
+                openFileDialog.Filter = "Json|*.json";
+                openFileDialog.Title = "Import grid highlight settings";
+                openFileDialog.ShowDialog();
+
+                // If the file name is not an empty string open it for saving.
+                if (openFileDialog.FileName != "")
+                {
+                    // NOTE that the FilterIndex property is one-based.
+                    switch (openFileDialog.FilterIndex)
+                    {
+                        default:
+                            try
+                            {
+                                string result = File.ReadAllText(openFileDialog.FileName);
+
+                                GridHighlightData[] imported = JsonSerializer.Deserialize<GridHighlightData[]>(result);
+
+                                foreach (GridHighlightData importedData in imported)
+                                    importedData.Save();
+
+                                UIManager.GetGump<GridHightlightMenu>()?.Dispose();
+                                UIManager.Add(new GridHightlightMenu());
+
+                            }
+                            catch (System.Exception e)
+                            {
+                                GameActions.Print("It looks like there was an error trying to import your grid highlight settings.", 32);
+                                Console.WriteLine(e.ToString());
+                            }
+                            break;
+                    }
+                }
+            });
+            t.SetApartmentState(ApartmentState.STA);
+            t.Start();
+        }
+
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             base.Draw(batcher, x, y);
@@ -144,7 +253,7 @@ namespace ClassicUO.Game.UI.Gumps
             batcher.DrawRectangle(
                 SolidColorTextureCache.GetTexture(Color.LightGray),
                 x - 1, y - 1,
-                WIDTH + 2, HEIGHT + 2,
+                WIDTH + 1, HEIGHT + 1,
                 new Vector3(0, 0, 1)
                 );
 
@@ -153,60 +262,81 @@ namespace ClassicUO.Game.UI.Gumps
 
         public class GridHighlightData
         {
-            private string name;
-            private ushort hue;
-            private List<string> properties;
-            private List<int> propMinVal;
-            private readonly int keyLoc;
+            private int keyLoc = -1;
 
-            public string Name { get { return name; } set { name = value; SaveName(); } }
-            public ushort Hue { get { return hue; } set { hue = value; SaveHue(); } }
-            public List<string> Properties { get { return properties; } set { properties = value; SaveProps(); } }
-            public List<int> PropMinVal { get { return propMinVal; } set { propMinVal = value; SaveMinVals(); } }
+            public string Name { get; set; } = "Name";
+            public ushort Hue { get; set; } = 1;
+            public List<string> Properties { get; set; } = new List<string>();
+            public List<int> PropMinVal { get; set; } = new List<int>();
 
+            public GridHighlightData()
+            {
+
+            }
 
             private GridHighlightData(int keyLoc)
             {
+                this.keyLoc = keyLoc;
                 if (ProfileManager.CurrentProfile.GridHighlight_Name.Count > keyLoc) //Key exists?
                 {
-                    name = ProfileManager.CurrentProfile.GridHighlight_Name[keyLoc];
-                    hue = ProfileManager.CurrentProfile.GridHighlight_Hue[keyLoc];
-                    properties = ProfileManager.CurrentProfile.GridHighlight_PropNames[keyLoc];
-                    propMinVal = ProfileManager.CurrentProfile.GridHighlight_PropMinVal[keyLoc];
+                    Name = ProfileManager.CurrentProfile.GridHighlight_Name[keyLoc];
+                    Hue = ProfileManager.CurrentProfile.GridHighlight_Hue[keyLoc];
+                    Properties = ProfileManager.CurrentProfile.GridHighlight_PropNames[keyLoc];
+                    PropMinVal = ProfileManager.CurrentProfile.GridHighlight_PropMinVal[keyLoc];
                 }
                 else
                 {
-                    name = "Name";
                     ProfileManager.CurrentProfile.GridHighlight_Name.Add(Name);
-                    hue = 1;
                     ProfileManager.CurrentProfile.GridHighlight_Hue.Add(Hue);
-                    properties = new List<string>();
+                    Properties = new List<string>();
                     ProfileManager.CurrentProfile.GridHighlight_PropNames.Add(Properties);
-                    propMinVal = new List<int>();
+                    PropMinVal = new List<int>();
                     ProfileManager.CurrentProfile.GridHighlight_PropMinVal.Add(PropMinVal);
                 }
 
                 this.keyLoc = keyLoc;
             }
 
+            public void Save()
+            {
+                if (keyLoc == -1)
+                    SaveAsNew();
+                else
+                {
+                    SaveName();
+                    SaveHue();
+                    SaveProps();
+                    SaveMinVals();
+                }
+            }
+
             private void SaveName()
             {
-                ProfileManager.CurrentProfile.GridHighlight_Name[keyLoc] = name;
+                ProfileManager.CurrentProfile.GridHighlight_Name[keyLoc] = Name;
             }
 
             private void SaveHue()
             {
-                ProfileManager.CurrentProfile.GridHighlight_Hue[keyLoc] = hue;
+                ProfileManager.CurrentProfile.GridHighlight_Hue[keyLoc] = Hue;
             }
 
             private void SaveProps()
             {
-                ProfileManager.CurrentProfile.GridHighlight_PropNames[keyLoc] = properties;
+                ProfileManager.CurrentProfile.GridHighlight_PropNames[keyLoc] = Properties;
             }
 
             private void SaveMinVals()
             {
-                ProfileManager.CurrentProfile.GridHighlight_PropMinVal[keyLoc] = propMinVal;
+                ProfileManager.CurrentProfile.GridHighlight_PropMinVal[keyLoc] = PropMinVal;
+            }
+
+            private void SaveAsNew()
+            {
+                ProfileManager.CurrentProfile.GridHighlight_Name.Add(Name);
+                ProfileManager.CurrentProfile.GridHighlight_Hue.Add(Hue);
+                ProfileManager.CurrentProfile.GridHighlight_PropNames.Add(Properties);
+                ProfileManager.CurrentProfile.GridHighlight_PropMinVal.Add(PropMinVal);
+                keyLoc = ProfileManager.CurrentProfile.GridHighlight_Name.Count;
             }
 
             public void Delete()
@@ -272,12 +402,14 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             private void AddProperty(int subKeyLoc)
-            {              
+            {
                 while (data.Properties.Count <= subKeyLoc)
                 {
                     data.Properties.Add("");
                     data.PropMinVal.Add(-1);
+
                 }
+                data.Save();
                 InputField propInput, valInput;
                 scrollArea.Add(propInput = new InputField(0x0BB8, 0xFF, 0xFFFF, true, 150, 20) { Y = lastYitem });
                 propInput.SetText(data.Properties[subKeyLoc]);
@@ -290,6 +422,7 @@ namespace ClassicUO.Game.UI.Gumps
                         if (propInput.Text == tVal)
                         {
                             data.Properties[subKeyLoc] = propInput.Text;
+                            data.Save();
                             propInput.Add(new FadingLabel(10, "Saved", true, 0xff) { X = 0, Y = -20 });
                         }
                     });
@@ -308,6 +441,7 @@ namespace ClassicUO.Game.UI.Gumps
                             if (int.TryParse(valInput.Text, out int val))
                             {
                                 data.PropMinVal[subKeyLoc] = val;
+                                data.Save();
                                 valInput.Add(new FadingLabel(10, "Saved", true, 0xff) { X = 0, Y = -20 });
                             }
                             else
@@ -321,12 +455,14 @@ namespace ClassicUO.Game.UI.Gumps
                 NiceButton _del;
                 scrollArea.Add(_del = new NiceButton(285, lastYitem, 20, 20, ButtonAction.Activate, "X") { IsSelectable = false });
                 _del.SetTooltip("Delete this property");
-                _del.MouseUp += (s, e) => {
-                    if(e.Button == Input.MouseButtonType.Left)
+                _del.MouseUp += (s, e) =>
+                {
+                    if (e.Button == Input.MouseButtonType.Left)
                     {
                         Dispose();
                         data.Properties.RemoveAt(subKeyLoc);
                         data.PropMinVal.RemoveAt(subKeyLoc);
+                        data.Save();
                         UIManager.Add(new GridHightlightProperties(keyLoc, X, Y));
                     }
                 };

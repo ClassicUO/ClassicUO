@@ -8,6 +8,7 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private static string[] updateTexts = {
             "/c[white][3.7.1]/cd\n" +
+                "- Added import and export options for Grid Highlight settings\n" +
                 "- Added a simple account selector on the login screen\n" +
                 "- Added a toggle to auto sort grid containers\n" +
                 "- Trees/stumps will be slightly visible with circle of transparency on\n" +
