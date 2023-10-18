@@ -509,6 +509,8 @@ namespace ClassicUO.Configuration
 
         public string TooltipHeaderFormat { get; set; } = "/c[yellow]{0}";
 
+        public bool AutoSortGridContainers { get; set; } = false;
+
         public static uint GumpsVersion { get; private set; }
 
         public void Save(string path, bool saveGumps = true)

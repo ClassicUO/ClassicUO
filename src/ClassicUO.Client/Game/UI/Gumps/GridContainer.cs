@@ -100,6 +100,15 @@ namespace ClassicUO.Game.UI.Gumps
 
         }
 
+        private string sortButtonTooltip
+        {
+            get
+            {
+                string status = ProfileManager.CurrentProfile.AutoSortGridContainers ? "<basefont color=\"green\">Enabled" : "<basefont color=\"red\">Disabled";
+                return $"Sort this container.<br>Alt + Click to enable auto sort<br>Auto sort currently {status}";
+            }
+        }
+
         public GridContainer(uint local, ushort originalContainerGraphic, bool? useGridStyle = null) : base(GetWidth(), GetHeight(), GetWidth(2), GetHeight(1), local, 0)
         {
             if (_container == null)
@@ -240,10 +249,17 @@ namespace ClassicUO.Game.UI.Gumps
             _quickDropBackpack.SetTooltip(quickLootTooltip);
 
             _sortContents = new GumpPic(_quickDropBackpack.X - 20, BORDER_WIDTH, 1210, 0);
-            _sortContents.MouseUp += (sender, e) => { updateItems(true); };
+            _sortContents.MouseUp += (sender, e) => {
+                if (Keyboard.Alt)
+                {
+                    ProfileManager.CurrentProfile.AutoSortGridContainers ^= true;
+                    _sortContents.SetTooltip(sortButtonTooltip);
+                }
+                updateItems(true);
+            };
             _sortContents.MouseEnter += (sender, e) => { _sortContents.Graphic = 1209; };
             _sortContents.MouseExit += (sender, e) => { _sortContents.Graphic = 1210; };
-            _sortContents.SetTooltip("Sort this container.");
+            _sortContents.SetTooltip(sortButtonTooltip);
             #endregion
 
             #region Scroll Area
@@ -483,6 +499,8 @@ namespace ClassicUO.Game.UI.Gumps
                 Dispose();
                 return;
             }
+
+            if (!overrideSort && ProfileManager.CurrentProfile.AutoSortGridContainers) overrideSort = true;
 
             List<Item> sortedContents = ProfileManager.CurrentProfile.GridContainerSearchMode == 0 ? gridSlotManager.SearchResults(_searchBox.Text) : GridSlotManager.GetItemsInContainer(_container);
             gridSlotManager.RebuildContainer(sortedContents, _searchBox.Text, overrideSort);
