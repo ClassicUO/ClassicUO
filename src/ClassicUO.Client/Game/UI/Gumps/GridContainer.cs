@@ -249,7 +249,8 @@ namespace ClassicUO.Game.UI.Gumps
             _quickDropBackpack.SetTooltip(quickLootTooltip);
 
             _sortContents = new GumpPic(_quickDropBackpack.X - 20, BORDER_WIDTH, 1210, 0);
-            _sortContents.MouseUp += (sender, e) => {
+            _sortContents.MouseUp += (sender, e) =>
+            {
                 if (Keyboard.Alt)
                 {
                     ProfileManager.CurrentProfile.AutoSortGridContainers ^= true;
@@ -1499,58 +1500,35 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         item.Value.SetHighLightBorder(0);
                         if (item.Value.SlotItem != null)
-                            foreach (GridHighlightData configData in highlightConfigs) //For each highlight configuration
-                            {
-                                bool fullMatch = true;
-                                for (int i = 0; i < configData.Properties.Count; i++) //For each property in the highlight config
-                                {
-                                    if (!fullMatch)
-                                        break;
-                                    string propText = configData.Properties[i];
+                        {
+                            ItemPropertiesData itemData = new ItemPropertiesData(item.Value.SlotItem);
 
-                                    if (World.OPL.TryGetNameAndData(item.Value.SlotItem.Serial, out string name, out string data))
-                                    {
-                                        if (data != null)
-                                        {
-                                            string[] lines = data.Split(new string[] { "\n", "<br>" }, StringSplitOptions.None);
-                                            bool hasProp = false;
-                                            foreach (string line in lines) //For each property on the item
-                                            {
-                                                if (line.ToLower().Contains(propText.ToLower()))
-                                                {
-                                                    hasProp = true;
-                                                    Match m = Regex.Match(line, @"\d+");
-                                                    if (m.Success) //There is a number
-                                                    {
-                                                        if (int.TryParse(m.Value, out int val))
-                                                        {
-                                                            if (val >= configData.PropMinVal[i])
-                                                                fullMatch = true;
-                                                            else
-                                                                fullMatch = false;
-                                                        }
-                                                    }
-                                                    else if (configData.PropMinVal[i] == -1)
-                                                    {
-                                                        fullMatch = true;
-                                                    }
-                                                    else
-                                                    {
-                                                        fullMatch = false;
-                                                    }
-                                                }
-                                            }
-                                            if (!hasProp) { fullMatch = false; break; }
-                                        }
-                                        else fullMatch = false; //No OPL data(props)
-                                    }
-                                    else fullMatch = false; //No OPL data(name/props)
-                                }
-                                if (fullMatch)
+                            if (itemData.HasData)
+                                foreach (GridHighlightData configData in highlightConfigs) //For each highlight configuration
                                 {
-                                    item.Value.SetHighLightBorder(configData.Hue);
+                                    bool fullMatch = true;
+                                    for (int i = 0; i < configData.Properties.Count; i++) //For each property in a single grid highlight config
+                                    {
+                                        if (!fullMatch) break;
+                                        bool hasProp = false;
+                                        foreach (var singleProperty in itemData.singlePropertyData) //For each property on the item
+                                        {
+                                            if (singleProperty.Name.ToLower().Contains(configData.Properties[i].ToLower())) //This property has a match for this highlight search text
+                                            {
+                                                hasProp = true;
+                                                if (singleProperty.FirstValue >= configData.PropMinVal[i]) //This property matches the highlight property
+                                                    fullMatch = true;
+                                                else
+                                                    fullMatch = false;
+                                            }
+                                            else if (configData.PropMinVal[i] == -1)
+                                                fullMatch = true;
+                                        }
+                                        if (!hasProp) fullMatch = false;
+                                    }
+                                    if (fullMatch) item.Value.SetHighLightBorder(configData.Hue);
                                 }
-                            }
+                        }
                     }
                 });
             }
