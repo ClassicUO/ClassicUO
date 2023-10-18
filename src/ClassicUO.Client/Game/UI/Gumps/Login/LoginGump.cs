@@ -393,7 +393,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 _textboxAccount.ContextMenu = new ContextMenuControl();
                 foreach (string acct in accts)
                 {
-                    _textboxAccount.ContextMenu.Add(new ContextMenuItemEntry(acct, () => { _textboxAccount.SetText(acct); _passwordFake?.ClearText(); }));
+                    _textboxAccount.ContextMenu.Add(new ContextMenuItemEntry(acct, () => { _textboxAccount.SetText(acct); }));
                 }
                 _textboxAccount.SetTooltip("Right click to select another account.");
                 _textboxAccount.MouseUp += (s, e) => { if (e.Button == MouseButtonType.Right) _textboxAccount.ContextMenu.Show(); };
