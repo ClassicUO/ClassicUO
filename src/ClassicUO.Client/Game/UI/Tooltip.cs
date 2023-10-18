@@ -115,10 +115,19 @@ namespace ClassicUO.Game.UI
                 if (string.IsNullOrEmpty(finalString) && !string.IsNullOrEmpty(_textHTML)) //Fix for vendor search
                     finalString = Managers.ToolTipOverrideData.ProcessTooltipText(_textHTML);
 
-                _textBox = new TextBox(
+                string font = TrueTypeLoader.EMBEDDED_FONT;
+                int fontSize = 15;
+
+                if (ProfileManager.CurrentProfile != null)
+                {
+                    font = ProfileManager.CurrentProfile.SelectedToolTipFont;
+                    fontSize = ProfileManager.CurrentProfile.SelectedToolTipFontSize;
+                }
+
+                    _textBox = new TextBox(
                     TextBox.ConvertHtmlToFontStashSharpCommand(finalString).Trim(),
-                    ProfileManager.CurrentProfile.SelectedToolTipFont,
-                    ProfileManager.CurrentProfile.SelectedToolTipFontSize,
+                    font,
+                    fontSize,
                     600,
                     hue,
                     align,

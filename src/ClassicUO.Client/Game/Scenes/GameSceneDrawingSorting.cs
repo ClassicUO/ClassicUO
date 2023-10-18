@@ -351,28 +351,36 @@ namespace ClassicUO.Game.Scenes
             {
                 if (Vector2.Distance(new Vector2(obj.RealScreenPosition.X, obj.RealScreenPosition.Y), playerPos) < ProfileManager.CurrentProfile.CircleOfTransparencyRadius)
                 {
-                    if(obj.Z >= _maxZ)
+                    if (obj.Z >= _maxZ)
                     {
                         CalculateAlpha(ref obj.AlphaHue, 0);
                     }
-                    else if (itemData.IsWall || itemData.IsWindow)
+                    else
                     {
-                        obj.AlphaHue = 65;
-                        allowSelection = false;
-                        return true;
-                    }
-                    else if (itemData.IsDoor || itemData.IsRoof)
-                    {
-                        obj.AlphaHue = 65;
-                        allowSelection = true;
-                        return true;
-                    }
-                    else if (itemData.IsRoof && _noDrawRoofs)
-                    {
-                        return false;
+                        if (itemData.IsWall || itemData.IsWindow)
+                        {
+                            obj.AlphaHue = 65;
+                            allowSelection = false;
+                            return true;
+                        }
+                        if (itemData.IsDoor || itemData.IsRoof)
+                        {
+                            obj.AlphaHue = 65;
+                            allowSelection = true;
+                            return true;
+                        }
+                        if (itemData.IsRoof && _noDrawRoofs)
+                        {
+                            return false;
+                        }
+                        if (itemData.IsFoliage || obj.Graphic == Constants.TREE_REPLACE_GRAPHIC || StaticFilters.IsTree(obj.Graphic, out var _) || (!itemData.IsMultiMovable && obj is Static stat && stat.IsVegetation) || (!itemData.IsMultiMovable && obj is Multi multi && multi.IsVegetation))
+                        {
+                            obj.AlphaHue = 65;
+                            allowSelection = true;
+                            return true;
+                        }
                     }
                 }
-
             }
             if (obj.Z >= _maxZ)
             {

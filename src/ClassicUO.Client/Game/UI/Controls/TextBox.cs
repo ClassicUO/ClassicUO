@@ -94,8 +94,9 @@ namespace ClassicUO.Game.UI.Controls
             _align = align;
             _dropShadow = strokeEffect;
 
-            AcceptMouseInput = false;
+            AcceptMouseInput = true;
             Width = _rtl.Width == null ? _rtl.Size.X : (int)_rtl.Width;
+            base.Height = _rtl.Size.Y;
         }
         public TextBox
             (
@@ -126,17 +127,40 @@ namespace ClassicUO.Game.UI.Controls
             _align = align;
             _dropShadow = strokeEffect;
 
-            AcceptMouseInput = false;
+            AcceptMouseInput = true;
             Width = _rtl.Width == null ? _rtl.Size.X : (int)_rtl.Width;
+            base.Height = _rtl.Size.Y;
+        }
+
+        public bool PixelCheck(int x, int y)
+        {
+            if (string.IsNullOrWhiteSpace(Text))
+            {
+                return false;
+            }
+
+            if (x < 0 || x >= Width)
+            {
+                return false;
+            }
+
+            if (y < 0 || y >= Height)
+            {
+                return false;
+            }
+
+            return true;
         }
 
         public new int Height
         {
-            get {
+            get
+            {
                 if (_rtl == null)
                     return 0;
-                
-                return _rtl.Size.Y; }
+
+                return _rtl.Size.Y;
+            }
         }
 
         public Point MeasuredSize
@@ -224,6 +248,11 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
+            return Draw(batcher, x, y, _color);
+        }
+
+        public bool Draw(UltimaBatcher2D batcher, int x, int y, Color color)
+        {
             if (IsDisposed)
             {
                 return false;
@@ -238,7 +267,7 @@ namespace ClassicUO.Game.UI.Controls
                 x += Width;
             }
 
-            _rtl.Draw(batcher, new Vector2(x, y), _color, horizontalAlignment: _align);
+            _rtl.Draw(batcher, new Vector2(x, y), color, horizontalAlignment: _align);
 
             return true;
         }

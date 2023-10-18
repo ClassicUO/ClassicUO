@@ -57,13 +57,13 @@ namespace ClassicUO.Game.UI.Gumps
             Add(new AlphaBlendControl(0.65f) { Width = Width, Height = 75, Hue = 997 });
 
             TextBox _;
-            Add(_ = new TextBox(isPurchaseGump ? "Shop Inventory" : "Your Inventory", TrueTypeLoader.EMBEDDED_FONT, 30, Width, Color.LightBlue, FontStashSharp.RichText.TextHorizontalAlignment.Center, false));
+            Add(_ = new TextBox(isPurchaseGump ? "Shop Inventory" : "Your Inventory", TrueTypeLoader.EMBEDDED_FONT, 30, Width, Color.LightBlue, FontStashSharp.RichText.TextHorizontalAlignment.Center, false) { AcceptMouseInput = false });
             _.Y = (50 - _.MeasuredSize.Y) / 2;
 
-            Add(_ = new TextBox("Item", TrueTypeLoader.EMBEDDED_FONT, 20, 75, Color.White, strokeEffect: false) { X = 5 });
+            Add(_ = new TextBox("Item", TrueTypeLoader.EMBEDDED_FONT, 20, 75, Color.White, strokeEffect: false) { X = 5, AcceptMouseInput = false });
             _.Y = 55 - _.Height;
 
-            Add(_ = new TextBox("/c[white]Avail.\n/cdPrice per item", TrueTypeLoader.EMBEDDED_FONT, 20, 150, Color.Gold, FontStashSharp.RichText.TextHorizontalAlignment.Right, false));
+            Add(_ = new TextBox("/c[white]Avail.\n/cdPrice per item", TrueTypeLoader.EMBEDDED_FONT, 20, 150, Color.Gold, FontStashSharp.RichText.TextHorizontalAlignment.Right, false) { AcceptMouseInput = false });
             _.Y = 55 - _.Height;
             _.X = Width - 1 - _.Width - 5;
 
@@ -226,20 +226,20 @@ namespace ClassicUO.Game.UI.Gumps
 
                 #region ITEM INFO
                 TextBox _;
-                itemInfo.Add(textBoxName = new TextBox(Name, TrueTypeLoader.EMBEDDED_FONT, 25, ITEM_DESCPTION_WIDTH - Height, Color.White, strokeEffect: false));
+                itemInfo.Add(textBoxName = new TextBox(Name, TrueTypeLoader.EMBEDDED_FONT, 25, ITEM_DESCPTION_WIDTH - Height, Color.White, strokeEffect: false) { AcceptMouseInput = false });
                 textBoxName.Y = (itemInfo.Height - textBoxName.MeasuredSize.Y) / 2;
 
                 TextBox countTB;
-                itemInfo.Add(countTB = new TextBox($"x{count}", TrueTypeLoader.EMBEDDED_FONT, 20, ITEM_DESCPTION_WIDTH - Height, Color.WhiteSmoke, FontStashSharp.RichText.TextHorizontalAlignment.Right, false) { Y = 3 });
+                itemInfo.Add(countTB = new TextBox($"x{count}", TrueTypeLoader.EMBEDDED_FONT, 20, ITEM_DESCPTION_WIDTH - Height, Color.WhiteSmoke, FontStashSharp.RichText.TextHorizontalAlignment.Right, false) { Y = 3, AcceptMouseInput = false });
                 countTB.X = itemInfo.Width - countTB.Width - 3;
 
-                itemInfo.Add(_ = new TextBox($"{price}gp", TrueTypeLoader.EMBEDDED_FONT, 25, ITEM_DESCPTION_WIDTH - Height, Color.Gold, FontStashSharp.RichText.TextHorizontalAlignment.Right, false));
+                itemInfo.Add(_ = new TextBox($"{price}gp", TrueTypeLoader.EMBEDDED_FONT, 25, ITEM_DESCPTION_WIDTH - Height, Color.Gold, FontStashSharp.RichText.TextHorizontalAlignment.Right, false) { AcceptMouseInput = false });
                 _.Y = itemInfo.Height - _.Height - 3;
                 _.X = itemInfo.Width - _.Width - 3;
                 #endregion
 
                 #region PURCHASE OR SELL
-                purchaseSell.Add(new TextBox($"How many would you like to {(isPurchase ? "buy" : "sell")} at /c[gold]{price}gp /cdeach?", TrueTypeLoader.EMBEDDED_FONT, 18, purchaseSell.Width - 76, Color.White, strokeEffect: false));
+                purchaseSell.Add(new TextBox($"How many would you like to {(isPurchase ? "buy" : "sell")} at /c[gold]{price}gp /cdeach?", TrueTypeLoader.EMBEDDED_FONT, 18, purchaseSell.Width - 76, Color.White, strokeEffect: false) { AcceptMouseInput = false });
 
                 AlphaBlendControl sliderBG;
                 purchaseSell.Add(sliderBG = new AlphaBlendControl(0.5f) { Width = purchaseSell.Width - 78, Height = 5, Hue = 148, BaseColor = Color.White });
@@ -460,7 +460,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (text == null)
                     {
-                        text = new TextBox($"{(isPurchase ? "Buy" : "Sell")}\n{quantity}\n/c[Gold]{price * quantity}", TrueTypeLoader.EMBEDDED_FONT, 17, Width, Color.White, FontStashSharp.RichText.TextHorizontalAlignment.Center, true);
+                        text = new TextBox($"{(isPurchase ? "Buy" : "Sell")}\n{quantity}\n/c[Gold]{price * quantity}", TrueTypeLoader.EMBEDDED_FONT, 17, Width, Color.White, FontStashSharp.RichText.TextHorizontalAlignment.Center, true) { AcceptMouseInput = false };
                         Add(text);
                     }
                     else

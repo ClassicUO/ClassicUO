@@ -36,6 +36,7 @@ using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
+using ClassicUO.Game.Managers;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -64,6 +65,8 @@ namespace ClassicUO.Game.GameObjects
             {
                 hue = Constants.DEAD_RANGE_COLOR;
             }
+
+            TileMarkerManager.Instance.IsTileMarked(X, Y, World.Map.Index, out hue);
 
             Vector3 hueVec;
             if (hue != 0)

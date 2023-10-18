@@ -2,7 +2,7 @@
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 // 1. Redistributions of source code must retain the above copyright
@@ -16,7 +16,7 @@
 // 4. Neither the name of the copyright holder nor the
 //    names of its contributors may be used to endorse or promote products
 //    derived from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -48,46 +48,11 @@ namespace ClassicUO.Assets
         private readonly ushort _graphicMask;
         private readonly PixelPicker _picker = new PixelPicker();
 
+        [ThreadStatic]
+        private static uint[] _data = null;
+
         public const int MAX_LAND_DATA_INDEX_COUNT = 0x4000;
         public const int MAX_STATIC_DATA_INDEX_COUNT = 0x14000;
-
-        private ArtLoader(int staticCount, int landCount)
-        {
-            _graphicMask = UOFileManager.IsUOPInstallation ? (ushort) 0xFFFF : (ushort) 0x3FFF;
-        }
-
-        public static ArtLoader Instance => _instance ?? (_instance = new ArtLoader(MAX_STATIC_DATA_INDEX_COUNT, MAX_LAND_DATA_INDEX_COUNT));
-
-
-        public override Task Load()
-        {
-            return Task.Run
-            (
-                () =>
-                {
-                    string filePath = UOFileManager.GetUOFilePath("artLegacyMUL.uop");
-
-                    if (UOFileManager.IsUOPInstallation && File.Exists(filePath))
-                    {
-                        _file = new UOFileUop(filePath, "build/artlegacymul/{0:D8}.tga");
-                        Entries = new UOFileIndex[Math.Max(((UOFileUop) _file).TotalEntriesCount, MAX_STATIC_DATA_INDEX_COUNT)];
-                    }
-                    else
-                    {
-                        filePath = UOFileManager.GetUOFilePath("art.mul");
-                        string idxPath = UOFileManager.GetUOFilePath("artidx.mul");
-
-                        if (File.Exists(filePath) && File.Exists(idxPath))
-                        {
-                            _file = new UOFileMul(filePath, idxPath, MAX_STATIC_DATA_INDEX_COUNT);
-                        }
-                    }
-
-                    _file.FillEntries(ref Entries);
-                    _spriteInfos = new SpriteInfo[Entries.Length];
-                }
-            );
-        }
 
         struct SpriteInfo
         {
@@ -98,21 +63,68 @@ namespace ClassicUO.Assets
 
         private SpriteInfo[] _spriteInfos;
 
-        public Rectangle GetRealArtBounds(int index) => index + 0x4000 >= _spriteInfos.Length ? Rectangle.Empty : _spriteInfos[index + 0x4000].ArtBounds;
+        private ArtLoader(int staticCount, int landCount)
+        {
+            _graphicMask = UOFileManager.IsUOPInstallation ? (ushort)0xFFFF : (ushort)0x3FFF;
+        }
 
-        private bool LoadData(Span<uint> data, int g, out short width, out short height, bool isTerrain)
+        public static ArtLoader Instance =>
+            _instance
+            ?? (_instance = new ArtLoader(MAX_STATIC_DATA_INDEX_COUNT, MAX_LAND_DATA_INDEX_COUNT));
+
+        public override Task Load()
+        {
+            return Task.Run(() =>
+            {
+                string filePath = UOFileManager.GetUOFilePath("artLegacyMUL.uop");
+
+                if (UOFileManager.IsUOPInstallation && File.Exists(filePath))
+                {
+                    _file = new UOFileUop(filePath, "build/artlegacymul/{0:D8}.tga");
+                    Entries = new UOFileIndex[
+                        Math.Max(((UOFileUop)_file).TotalEntriesCount, MAX_STATIC_DATA_INDEX_COUNT)
+                    ];
+                }
+                else
+                {
+                    filePath = UOFileManager.GetUOFilePath("art.mul");
+                    string idxPath = UOFileManager.GetUOFilePath("artidx.mul");
+
+                    if (File.Exists(filePath) && File.Exists(idxPath))
+                    {
+                        _file = new UOFileMul(filePath, idxPath, MAX_STATIC_DATA_INDEX_COUNT);
+                    }
+                }
+
+                _file.FillEntries(ref Entries);
+                _spriteInfos = new SpriteInfo[Entries.Length];
+            });
+        }
+
+        public Rectangle GetRealArtBounds(int index) =>
+            index + 0x4000 >= _spriteInfos.Length
+                ? Rectangle.Empty
+                : _spriteInfos[index + 0x4000].ArtBounds;
+
+        private bool LoadData(Span<uint> data, int g, out short width, out short height)
         {
             ref UOFileIndex entry = ref GetValidRefEntry(g);
 
-            if (isTerrain)
+            if (entry.Length == 0)
             {
-                if (entry.Length == 0)
-                {
-                    width = 0;
-                    height = 0;
-                    return false;
-                }
+                width = 0;
+                height = 0;
 
+                return false;
+            }
+
+            _file.SetData(entry.Address, entry.FileSize);
+            _file.Seek(entry.Offset);
+            //var flags = _file.ReadUInt();
+
+            //if (flags > 0xFFFF || flags == 0)
+            if (g < 0x4000)
+            {
                 width = 44;
                 height = 44;
 
@@ -121,15 +133,12 @@ namespace ClassicUO.Assets
                     return false;
                 }
 
-                /* 
+                /*
                  * Since the data only contains the diamond shape, we may not actually read
                  * into every pixel in 'data'. We must zero the buffer here since it is
                  * re-used. But we only have to zero out the (44 * 44) worth.
                  */
                 data.Slice(0, (width * height)).Fill(0);
-
-                _file.SetData(entry.Address, entry.FileSize);
-                _file.Seek(entry.Offset);
 
                 for (int i = 0; i < 22; ++i)
                 {
@@ -152,100 +161,85 @@ namespace ClassicUO.Assets
                     {
                         data[pos++] = HuesHelper.Color16To32(_file.ReadUShort()) | 0xFF_00_00_00;
                     }
-                };
+                }
+                ;
             }
             else
             {
-                if (ReadHeader(_file, ref entry, out width, out height))
+                var flags = _file.ReadUInt();
+                width = _file.ReadShort();
+                height = _file.ReadShort();
+
+                if (width <= 0 || height <= 0 || data.Length < (width * height))
                 {
-                    if (data.Length < (width * height))
-                    {
-                        return false;
-                    }
+                    return false;
+                }
 
-                    /* 
-                     * Since the data is run-length-encoded, we may not actually read
-                     * into every pixel in 'data'. We must zero the buffer here since it is
-                     * re-used. But we only have to zero out the (width * height) worth.
-                     */
-                    data.Slice(0, (width * height)).Fill(0);
+                /*
+                    * Since the data is run-length-encoded, we may not actually read
+                    * into every pixel in 'data'. We must zero the buffer here since it is
+                    * re-used. But we only have to zero out the (width * height) worth.
+                    */
+                data.Slice(0, (width * height)).Fill(0);
 
-                    ushort fixedGraphic = (ushort)(g - 0x4000);
+                ushort fixedGraphic = (ushort)(g - 0x4000);
 
-                    if (ReadData(data, width, height, _file))
-                    {
-                        // keep the cursor graphic check to cleanup edges
-                        if ((fixedGraphic >= 0x2053 && fixedGraphic <= 0x2062) || (fixedGraphic >= 0x206A && fixedGraphic <= 0x2079))
-                        {
-                            for (int i = 0; i < width; i++)
-                            {
-                                data[i] = 0;
-                                data[(height - 1) * width + i] = 0;
-                            }
+                if (ReadData(data, width, height, _file))
+                {
+                    // keep the cursor graphic check to cleanup edges
+                    //if ((fixedGraphic >= 0x2053 && fixedGraphic <= 0x2062) || (fixedGraphic >= 0x206A && fixedGraphic <= 0x2079))
+                    //{
+                    //    for (int i = 0; i < width; i++)
+                    //    {
+                    //        data[i] = 0;
+                    //        data[(height - 1) * width + i] = 0;
+                    //    }
 
-                            for (int i = 0; i < height; i++)
-                            {
-                                data[i * width] = 0;
-                                data[i * width + width - 1] = 0;
-                            }
-                        }
+                    //    for (int i = 0; i < height; i++)
+                    //    {
+                    //        data[i * width] = 0;
+                    //        data[i * width + width - 1] = 0;
+                    //    }
+                    //}
 
-                        ref var spriteInfo = ref _spriteInfos[g];
+                    ref var spriteInfo = ref _spriteInfos[g];
 
-                        FinalizeData
-                        (
-                            data,
-                            ref entry,
-                            fixedGraphic,
-                            width,
-                            height,
-                            out spriteInfo.ArtBounds
-                        );
-                    }
+                    FinalizeData(
+                        data,
+                        ref entry,
+                        fixedGraphic,
+                        width,
+                        height,
+                        out spriteInfo.ArtBounds
+                    );
                 }
             }
 
             return true;
         }
 
-        [ThreadStatic] private static uint[] _data = null;
-
-        public Texture2D GetLandTexture(uint g, out Rectangle bounds)
+        public ReadOnlySpan<uint> GetRawImage(uint g, out short width, out short height)
         {
-            g &= _graphicMask;
-
-            ref var spriteInfo = ref _spriteInfos[g];
-
-            if (spriteInfo.Texture == null)
+            if (!LoadData(_data, (int)g, out width, out height))
             {
-                if (!LoadData(_data, (int)g, out var width, out var height, true))
+                if (_data != null && width * height < _data.Length)
                 {
-                    if (_data != null && width * height < _data.Length)
-                    {
-                        bounds = Rectangle.Empty;
-                        return null;
-                    }
-
-                    _data = new uint[width * height];
-
-                    if (!LoadData(_data, (int)g, out width, out height, true))
-                    {
-                        bounds = Rectangle.Empty;
-                        return null;
-                    }
+                    return ReadOnlySpan<uint>.Empty;
                 }
 
-                spriteInfo.Texture = TextureAtlas.Shared.AddSprite(_data.AsSpan(), 44, 44, out spriteInfo.UV);
+                _data = new uint[width * height];
+
+                if (!LoadData(_data, (int)g, out width, out height))
+                {
+                    return ReadOnlySpan<uint>.Empty;
+                }
             }
 
-            bounds = spriteInfo.UV;
-            return spriteInfo.Texture;
+            return _data.AsSpan(0, width * height);
         }
 
-        public Texture2D GetStaticTexture(uint g, out Rectangle bounds)
+        private Texture2D GetTexture(uint g, out Rectangle bounds)
         {
-            g += 0x4000;
-
             Texture2D png = PNGLoader.Instance.LoadArtTexture(g);
             if (png != null)
             {
@@ -253,140 +247,142 @@ namespace ClassicUO.Assets
                 return png;
             }
 
+            if (g >= _spriteInfos.Length)
+            {
+                bounds = Rectangle.Empty;
+                return null;
+            }
+
             ref var spriteInfo = ref _spriteInfos[g];
 
             if (spriteInfo.Texture == null)
             {
-                if (!LoadData(_data, (int)g, out var width, out var height, false))
+                var pixels = GetRawImage(g, out var width, out var height);
+                if (pixels.IsEmpty)
                 {
-                    if (_data != null && width * height < _data.Length)
-                    {
-                        bounds = Rectangle.Empty;
-                        return null;
-                    }
-
-                    _data = new uint[width * height];
-
-                    if (!LoadData(_data, (int)g, out width, out height, false))
-                    {
-                        bounds = Rectangle.Empty;
-                        return null;
-                    }
+                    bounds = Rectangle.Empty;
+                    return null;
                 }
 
-                _picker.Set(g - 0x4000, width, height, _data);
-                spriteInfo.Texture = TextureAtlas.Shared.AddSprite(_data.AsSpan(), width, height, out spriteInfo.UV);
+                if (g >= 0x4000)
+                    _picker.Set(g - 0x4000, width, height, pixels);
+                spriteInfo.Texture = TextureAtlas.Shared.AddSprite(
+                    pixels,
+                    width,
+                    height,
+                    out spriteInfo.UV
+                );
             }
 
             bounds = spriteInfo.UV;
             return spriteInfo.Texture;
         }
 
+        public Texture2D GetLandTexture(uint g, out Rectangle bounds) =>
+            GetTexture(g & _graphicMask, out bounds);
 
-        public unsafe IntPtr CreateCursorSurfacePtr(int index, ushort customHue, out int hotX, out int hotY)
+        public Texture2D GetStaticTexture(uint g, out Rectangle bounds) =>
+            GetTexture(g + 0x4000, out bounds);
+
+        public unsafe IntPtr CreateCursorSurfacePtr(
+            int index,
+            ushort customHue,
+            out int hotX,
+            out int hotY
+        )
         {
             hotX = hotY = 0;
 
-            ref UOFileIndex entry = ref GetValidRefEntry(index + 0x4000);
-
-            if (ReadHeader(_file, ref entry, out short w, out short h))
+            var pixels = GetRawImage((uint)(index + 0x4000), out var w, out var h);
+            if (pixels.IsEmpty)
             {
-                Span<uint> pixels = new uint[w * h];
+                return IntPtr.Zero;
+            }
 
-                if (ReadData(pixels, w, h, _file))
-                {
-                    FinalizeData
-                    (
-                        pixels,
-                        ref entry,
-                        (ushort) index,
+            fixed (uint* ptr = pixels)
+            {
+                SDL.SDL_Surface* surface = (SDL.SDL_Surface*)
+                    SDL.SDL_CreateRGBSurfaceWithFormatFrom(
+                        (IntPtr)ptr,
                         w,
                         h,
-                        out _
+                        32,
+                        4 * w,
+                        SDL.SDL_PIXELFORMAT_ABGR8888
                     );
 
-                    fixed(uint * ptr = pixels)
+                int stride = surface->pitch >> 2;
+                uint* pixels_ptr = (uint*)surface->pixels;
+                uint* p_line_end = pixels_ptr + w;
+                uint* p_img_end = pixels_ptr + stride * h;
+                int delta = stride - w;
+                short curX = 0;
+                short curY = 0;
+                Color c = default;
+
+                while (pixels_ptr < p_img_end)
+                {
+                    curX = 0;
+
+                    while (pixels_ptr < p_line_end)
                     {
-                        SDL.SDL_Surface* surface = (SDL.SDL_Surface*)SDL.SDL_CreateRGBSurfaceWithFormatFrom
-                        (
-                            (IntPtr)ptr,
-                            w,
-                            h,
-                            32,
-                            4 * w,
-                            SDL.SDL_PIXELFORMAT_ABGR8888
-                        );
-
-                        int stride = surface->pitch >> 2;
-                        uint* pixels_ptr = (uint*)surface->pixels;
-                        uint* p_line_end = pixels_ptr + w;
-                        uint* p_img_end = pixels_ptr + stride * h;
-                        int delta = stride - w;
-                        short curX = 0;
-                        short curY = 0;
-                        Color c = default;
-
-                        while (pixels_ptr < p_img_end)
+                        if (*pixels_ptr != 0 && *pixels_ptr != 0xFF_00_00_00)
                         {
-                            curX = 0;
-
-                            while (pixels_ptr < p_line_end)
+                            if (curX >= w - 1 || curY >= h - 1)
                             {
-                                if (*pixels_ptr != 0 && *pixels_ptr != 0xFF_00_00_00)
+                                *pixels_ptr = 0;
+                            }
+                            else if (curX == 0 || curY == 0)
+                            {
+                                if (*pixels_ptr == 0xFF_00_FF_00)
                                 {
-                                    if (curX >= w - 1 || curY >= h - 1)
+                                    if (curX == 0)
                                     {
-                                        *pixels_ptr = 0;
+                                        hotY = curY;
                                     }
-                                    else if (curX == 0 || curY == 0)
-                                    {
-                                        if (*pixels_ptr == 0xFF_00_FF_00)
-                                        {
-                                            if (curX == 0)
-                                            {
-                                                hotY = curY;
-                                            }
 
-                                            if (curY == 0)
-                                            {
-                                                hotX = curX;
-                                            }
-                                        }
-
-                                        *pixels_ptr = 0;
-                                    }
-                                    else if (customHue > 0)
+                                    if (curY == 0)
                                     {
-                                        c.PackedValue = *pixels_ptr;
-                                        *pixels_ptr = HuesLoader.Instance.ApplyHueRgba8888(HuesHelper.Color32To16(*pixels_ptr), customHue);
+                                        hotX = curX;
                                     }
                                 }
 
-                                ++pixels_ptr;
-
-                                ++curX;
+                                *pixels_ptr = 0;
                             }
-
-                            pixels_ptr += delta;
-                            p_line_end += stride;
-
-                            ++curY;
+                            else if (customHue > 0)
+                            {
+                                c.PackedValue = *pixels_ptr;
+                                *pixels_ptr =
+                                    HuesLoader.Instance.ApplyHueRgba8888(HuesHelper.Color32To16(*pixels_ptr), customHue);
+                            }
                         }
 
-                        return (IntPtr)surface;
+                        ++pixels_ptr;
+
+                        ++curX;
                     }
+
+                    pixels_ptr += delta;
+                    p_line_end += stride;
+
+                    ++curY;
                 }
+
+                return (IntPtr)surface;
             }
-            
-            return IntPtr.Zero;
         }
 
         public bool PixelCheck(int index, int x, int y)
         {
-            return _picker.Get((ulong) index, x, y);
+            return _picker.Get((ulong)index, x, y);
         }
 
-        private bool ReadHeader(DataReader file, ref UOFileIndex entry, out short width, out short height)
+        private bool ReadHeader(
+            DataReader file,
+            ref UOFileIndex entry,
+            out short width,
+            out short height
+        )
         {
             if (entry.Length == 0)
             {
@@ -452,10 +448,20 @@ namespace ClassicUO.Assets
             return true;
         }
 
-        private void FinalizeData(Span<uint> pixels, ref UOFileIndex entry, ushort graphic, int width, int height, out Rectangle bounds)
+        private void FinalizeData(
+            Span<uint> pixels,
+            ref UOFileIndex entry,
+            ushort graphic,
+            int width,
+            int height,
+            out Rectangle bounds
+        )
         {
             int pos1 = 0;
-            int minX = width, minY = height, maxX = 0, maxY = 0;
+            int minX = width,
+                minY = height,
+                maxX = 0,
+                maxY = 0;
 
             /* Temporarily broken. This isn't the right way to do it anyway since it can't be toggled on/off.
             if (StaticFilters.IsCave(graphic) && ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.EnableCaveBorder)
@@ -486,7 +492,6 @@ namespace ClassicUO.Assets
             bounds.Width = maxX - minX;
             bounds.Height = maxY - minY;
         }
-
 
         private void AddBlackBorder(Span<uint> pixels, int width, int height)
         {

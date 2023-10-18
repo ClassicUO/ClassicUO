@@ -100,6 +100,15 @@ namespace ClassicUO.Game.UI.Gumps
 
         }
 
+        private string sortButtonTooltip
+        {
+            get
+            {
+                string status = ProfileManager.CurrentProfile.AutoSortGridContainers ? "<basefont color=\"green\">Enabled" : "<basefont color=\"red\">Disabled";
+                return $"Sort this container.<br>Alt + Click to enable auto sort<br>Auto sort currently {status}";
+            }
+        }
+
         public GridContainer(uint local, ushort originalContainerGraphic, bool? useGridStyle = null) : base(GetWidth(), GetHeight(), GetWidth(2), GetHeight(1), local, 0)
         {
             if (_container == null)
@@ -134,6 +143,16 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 X = _lastCorpseX;
                 Y = _lastCorpseY;
+
+                if (World.Player.ManualOpenedCorpses.Contains(LocalSerial))
+                {
+                    World.Player.ManualOpenedCorpses.Remove(LocalSerial);
+                }
+                else if (World.Player.AutoOpenedCorpses.Contains(LocalSerial) && ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.SkipEmptyCorpse)
+                {
+                    IsVisible = false;
+                    Dispose();
+                }
             }
             else
             {
@@ -230,10 +249,18 @@ namespace ClassicUO.Game.UI.Gumps
             _quickDropBackpack.SetTooltip(quickLootTooltip);
 
             _sortContents = new GumpPic(_quickDropBackpack.X - 20, BORDER_WIDTH, 1210, 0);
-            _sortContents.MouseUp += (sender, e) => { updateItems(true); };
+            _sortContents.MouseUp += (sender, e) =>
+            {
+                if (Keyboard.Alt)
+                {
+                    ProfileManager.CurrentProfile.AutoSortGridContainers ^= true;
+                    _sortContents.SetTooltip(sortButtonTooltip);
+                }
+                updateItems(true);
+            };
             _sortContents.MouseEnter += (sender, e) => { _sortContents.Graphic = 1209; };
             _sortContents.MouseExit += (sender, e) => { _sortContents.Graphic = 1210; };
-            _sortContents.SetTooltip("Sort this container.");
+            _sortContents.SetTooltip(sortButtonTooltip);
             #endregion
 
             #region Scroll Area
@@ -339,7 +366,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             ResizeWindow(new Point(rW, rH));
-            //InvalidateContents = true;
+            GameActions.DoubleClickQueued(LocalSerial);
         }
 
         private void _scrollArea_DragBegin(object sender, MouseEventArgs e)
@@ -474,6 +501,8 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
+            if (!overrideSort && ProfileManager.CurrentProfile.AutoSortGridContainers) overrideSort = true;
+
             List<Item> sortedContents = ProfileManager.CurrentProfile.GridContainerSearchMode == 0 ? gridSlotManager.SearchResults(_searchBox.Text) : GridSlotManager.GetItemsInContainer(_container);
             gridSlotManager.RebuildContainer(sortedContents, _searchBox.Text, overrideSort);
             _containerNameLabel.Text = GetContainerName();
@@ -518,6 +547,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     SelectedObject.CorpseObject = null;
                 }
+                _containerNameLabel?.Dispose();
 
                 Item bank = World.Player.FindItemByLayer(Layer.Bank);
 
@@ -541,8 +571,6 @@ namespace ClassicUO.Game.UI.Gumps
                 if (gridSlotManager.ItemPositions.Count > 0 && !isCorpse)
                     GridSaveSystem.Instance.SaveContainer(LocalSerial, gridSlotManager.GridSlots, Width, Height, X, Y, UseOldContainerStyle);
 
-
-
             base.Dispose();
         }
 
@@ -563,7 +591,7 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
-            if (item.IsCorpse)
+            if (item.IsCorpse && item.OnGround)
             {
                 if (item.Distance > 3)
                 {
@@ -640,7 +668,7 @@ namespace ClassicUO.Game.UI.Gumps
                 GridItem item = gridSlotManager.FindItem(parent.Serial);
                 if (item != null)
                 {
-                    UIManager.Add(new SimpleTimedTextGump(text, (uint)hue, TimeSpan.FromSeconds(2)) { X = item.ScreenCoordinateX, Y = item.ScreenCoordinateY });
+                    UIManager.Add(new SimpleTimedTextGump(text, (uint)hue, TimeSpan.FromSeconds(2), 200) { X = item.ScreenCoordinateX, Y = item.ScreenCoordinateY });
                 }
             }
         }
@@ -834,6 +862,7 @@ namespace ClassicUO.Game.UI.Gumps
                     LocalSerial = 0;
                     hit.ClearTooltip();
                     Hightlight = false;
+                    count?.Dispose();
                     count = null;
                     ItemGridLocked = false;
                 }
@@ -847,6 +876,7 @@ namespace ClassicUO.Game.UI.Gumps
                     int itemAmt = (_item.ItemData.IsStackable ? _item.Amount : 1);
                     if (itemAmt > 1)
                     {
+                        count?.Dispose();
                         count = new Label(itemAmt.ToString(), true, 0x0481, align: TEXT_ALIGN_TYPE.TS_LEFT, maxwidth: Width - 3);
                         count.X = 1;
                         count.Y = Height - count.Height;
@@ -1470,58 +1500,35 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         item.Value.SetHighLightBorder(0);
                         if (item.Value.SlotItem != null)
-                            foreach (GridHighlightData configData in highlightConfigs) //For each highlight configuration
-                            {
-                                bool fullMatch = true;
-                                for (int i = 0; i < configData.Properties.Count; i++) //For each property in the highlight config
-                                {
-                                    if (!fullMatch)
-                                        break;
-                                    string propText = configData.Properties[i];
+                        {
+                            ItemPropertiesData itemData = new ItemPropertiesData(item.Value.SlotItem);
 
-                                    if (World.OPL.TryGetNameAndData(item.Value.SlotItem.Serial, out string name, out string data))
-                                    {
-                                        if (data != null)
-                                        {
-                                            string[] lines = data.Split(new string[] { "\n", "<br>" }, StringSplitOptions.None);
-                                            bool hasProp = false;
-                                            foreach (string line in lines) //For each property on the item
-                                            {
-                                                if (line.ToLower().Contains(propText.ToLower()))
-                                                {
-                                                    hasProp = true;
-                                                    Match m = Regex.Match(line, @"\d+");
-                                                    if (m.Success) //There is a number
-                                                    {
-                                                        if (int.TryParse(m.Value, out int val))
-                                                        {
-                                                            if (val >= configData.PropMinVal[i])
-                                                                fullMatch = true;
-                                                            else
-                                                                fullMatch = false;
-                                                        }
-                                                    }
-                                                    else if (configData.PropMinVal[i] == -1)
-                                                    {
-                                                        fullMatch = true;
-                                                    }
-                                                    else
-                                                    {
-                                                        fullMatch = false;
-                                                    }
-                                                }
-                                            }
-                                            if (!hasProp) { fullMatch = false; break; }
-                                        }
-                                        else fullMatch = false; //No OPL data(props)
-                                    }
-                                    else fullMatch = false; //No OPL data(name/props)
-                                }
-                                if (fullMatch)
+                            if (itemData.HasData)
+                                foreach (GridHighlightData configData in highlightConfigs) //For each highlight configuration
                                 {
-                                    item.Value.SetHighLightBorder(configData.Hue);
+                                    bool fullMatch = true;
+                                    for (int i = 0; i < configData.Properties.Count; i++) //For each property in a single grid highlight config
+                                    {
+                                        if (!fullMatch) break;
+                                        bool hasProp = false;
+                                        foreach (var singleProperty in itemData.singlePropertyData) //For each property on the item
+                                        {
+                                            if (singleProperty.Name.ToLower().Contains(configData.Properties[i].ToLower())) //This property has a match for this highlight search text
+                                            {
+                                                hasProp = true;
+                                                if (singleProperty.FirstValue >= configData.PropMinVal[i]) //This property matches the highlight property
+                                                    fullMatch = true;
+                                                else
+                                                    fullMatch = false;
+                                            }
+                                            else if (configData.PropMinVal[i] == -1)
+                                                fullMatch = true;
+                                        }
+                                        if (!hasProp) fullMatch = false;
+                                    }
+                                    if (fullMatch) item.Value.SetHighLightBorder(configData.Hue);
                                 }
-                            }
+                        }
                     }
                 });
             }

@@ -304,6 +304,11 @@ namespace ClassicUO.Game.UI.Gumps
 
             string text = $"{usrSend}: {entry.Text}";
 
+            if (string.IsNullOrEmpty(usrSend))
+            {
+                text = entry.Text;
+            }
+
             _journalEntries.AddEntry
             (
                 text,

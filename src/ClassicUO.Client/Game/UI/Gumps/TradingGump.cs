@@ -368,6 +368,14 @@ namespace ClassicUO.Game.UI.Gumps
                         DelayedObjectClickManager.Set(it.Serial, Mouse.Position.X - off.X - ScreenCoordinateX, Mouse.Position.Y - off.Y - ScreenCoordinateY, Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK);
                     }
                 }
+                else if(TargetManager.IsTargeting)
+                {
+                    if(TargetManager.TargetingType == TargetType.Neutral && TargetManager.TargetingState == CursorTarget.MoveItemContainer)
+                    {
+                        MultiItemMoveGump.OnTradeWindowTarget(ID1);
+                        TargetManager.CancelTarget();
+                    }
+                }
             }
         }
 

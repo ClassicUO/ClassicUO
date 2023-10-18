@@ -33,6 +33,7 @@
 using System.Collections.Generic;
 using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
@@ -90,16 +91,16 @@ namespace ClassicUO.Game.Managers
                 int x = o.RealScreenPosition.X;
                 int y = o.RealScreenPosition.Y;
 
-                if (o.TextBox.MouseIsOver)
+                if (o.TextBox.PixelCheck(mouseX - x - startX, mouseY - y - startY))
                 {
                     SelectedObject.Object = o;
                 }
-
+                bool highlight = false;
                 if (!isGump)
                 {
                     if (o.Owner is Entity && SelectedObject.Object == o)
                     {
-                        hue = 0x0035;
+                        highlight = true;
                     }
                 }
                 else
@@ -108,12 +109,21 @@ namespace ClassicUO.Game.Managers
                     y += startY;
                 }
                 o.TextBox.Alpha = alpha;
-                o.TextBox.Draw
-                (
-                    batcher,
-                    x,
-                    y
-                );
+                if (highlight)
+                    o.TextBox.Draw
+                    (
+                        batcher,
+                        x,
+                        y,
+                        Color.Yellow
+                    );
+                else
+                    o.TextBox.Draw
+                    (
+                        batcher,
+                        x,
+                        y
+                    );
             }
         }
 
@@ -174,7 +184,7 @@ namespace ClassicUO.Game.Managers
         {
             if (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.TextFading)
             {
-                int delta = (int) (msg.Time - ClassicUO.Time.Ticks);
+                int delta = (int)(msg.Time - ClassicUO.Time.Ticks);
 
                 if (delta >= 0 && delta <= 1000)
                 {
@@ -193,7 +203,7 @@ namespace ClassicUO.Game.Managers
 
                     if (!msg.IsTransparent || delta <= 0x7F)
                     {
-                        msg.Alpha = (byte) delta;
+                        msg.Alpha = (byte)delta;
                     }
 
                     msg.IsTransparent = true;

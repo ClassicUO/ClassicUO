@@ -361,14 +361,13 @@ namespace ClassicUO.Game
                         g.SetInScreen();
                         g.BringOnTop();
                     }
-                    else
-                        Socket.Send_DoubleClick(serial);
+                    Socket.Send_DoubleClick(serial);
                 }
                 else
                     Socket.Send_DoubleClick(serial);
             }
 
-            if (SerialHelper.IsItem(serial))
+            if (SerialHelper.IsItem(serial) || (SerialHelper.IsMobile(serial) && World.Mobiles.Get(serial).IsHuman))
             {
                 World.LastObject = serial;
             }

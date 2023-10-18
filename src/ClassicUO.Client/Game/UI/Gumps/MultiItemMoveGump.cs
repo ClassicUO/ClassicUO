@@ -4,6 +4,7 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
+using ClassicUO.Utility;
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
@@ -123,6 +124,11 @@ namespace ClassicUO.Game.UI.Gumps
             processItemMoves(x, y, z);
         }
 
+        public static void OnTradeWindowTarget(uint tradeID)
+        {
+            processItemMoves(tradeID);
+        }
+
         public static void AddMultiItemMoveGumpToUI(int x, int y)
         {
             if (MoveItems.Count > 0)
@@ -163,6 +169,20 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             });
         }
+
+        private static void processItemMoves(uint tradeID)
+        {
+            Task.Factory.StartNew(() =>
+            {
+                while (MoveItems.TryDequeue(out Item moveItem))
+                {
+                    if (GameActions.PickUp(moveItem.Serial, 0, 0, moveItem.Amount))
+                        GameActions.DropItem(moveItem.Serial, RandomHelper.GetValue(0, 20), RandomHelper.GetValue(0, 20), 0, tradeID);
+                    Task.Delay(ObjDelay).Wait();
+                }
+            });
+        }
+
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {

@@ -206,12 +206,13 @@ namespace ClassicUO.Game.Managers
                 case MessageType.Label:
                     if(textType == TextType.OBJECT)
                     {
-                        List<GridContainer> unmodifiedList = new List<GridContainer>();
-                        foreach (GridContainer container in UIManager.Gumps.OfType<GridContainer>())
-                            unmodifiedList.Add(container);
-
-                        foreach(GridContainer container in unmodifiedList)
-                            container?.HandleObjectMessage(parent, text, hue);
+                        for (LinkedListNode<Gump> gump = UIManager.Gumps.Last; gump != null; gump = gump.Previous)
+                        {
+                            if(gump.Value is GridContainer && !gump.Value.IsDisposed)
+                            {
+                                ((GridContainer)gump.Value).HandleObjectMessage(parent, text, hue);
+                            }
+                        }
                     }
                     goto case MessageType.Limit3Spell;
                 case MessageType.Limit3Spell:

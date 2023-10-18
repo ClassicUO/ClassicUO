@@ -6542,13 +6542,14 @@ namespace ClassicUO.Network
                     gs.UpdateDrawPosition = true;
                 }
 
-                if (old_graphic != 0 && old_graphic != World.Player.Graphic)
+                // std client keeps the target open! 
+                /*if (old_graphic != 0 && old_graphic != World.Player.Graphic)
                 {
                     if (World.Player.IsDead)
                     {
                         TargetManager.Reset();
                     }
-                }
+                }*/
 
                 if (olddead != World.Player.IsDead)
                 {
@@ -7093,6 +7094,9 @@ namespace ClassicUO.Network
                             loc[c] = m.Value.Replace("'", "");
                             c++;
                         }
+
+                        if (loc[0] == null || loc[1] == null || loc[2] == null || loc[3] == null)
+                            break;
 
                         int xlong = 0, ylat = 0, xmins = 0, ymins = 0;
                         bool xeast = true, ysouth = true;
