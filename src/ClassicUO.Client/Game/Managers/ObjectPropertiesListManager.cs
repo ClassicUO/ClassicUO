@@ -306,6 +306,9 @@ namespace ClassicUO.Game.Managers
                     //Name = Regex.Replace(Name, "/c[\"?'?(?<color>.*?)\"?'?]", "", RegexOptions.Multiline | RegexOptions.IgnoreCase);
                     Name = Name.Replace("/cd", "");
                 }
+                
+                if(Name.Length < 1)
+                    Name = line;
 
                 if (matches.Count > 0)
                 {
