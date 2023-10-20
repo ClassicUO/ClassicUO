@@ -7,6 +7,9 @@ namespace ClassicUO.Game.UI.Gumps
     internal class VersionHistory : Gump
     {
         private static string[] updateTexts = {
+            "/c[white][3.8.0]/cd\n" +
+                "- Added an optional skill progress bar when a skill changes\n",
+
             "/c[white][3.7.1]/cd\n" +
                 "- Added ability to sort advanced skills gump by lock status\n" +
                 "- Added import and export options for Grid Highlight settings\n" +

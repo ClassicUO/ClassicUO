@@ -57,6 +57,14 @@ namespace ClassicUO.Game.GameObjects
                 SkillEntry skill = SkillsLoader.Instance.Skills[i];
                 Skills[i] = new Skill(skill.Name, skill.Index, skill.HasAction);
             }
+
+            Skill.SkillValueChangedEvent += (s, e) =>
+            {
+                if (ProfileManager.CurrentProfile.DisplaySkillBarOnChange)
+                {
+                    UIManager.Add(new SkillProgressBar(e.Index));
+                }
+            };
         }
 
         public Skill[] Skills { get; }

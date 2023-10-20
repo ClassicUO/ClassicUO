@@ -511,6 +511,9 @@ namespace ClassicUO.Configuration
 
         public bool AutoSortGridContainers { get; set; } = false;
 
+        public bool DisplaySkillBarOnChange { get; set; } = true;
+        public string SkillBarFormat { get; set; } = "{0}: {1} / {2}";
+
         public static uint GumpsVersion { get; private set; }
 
         public void Save(string path, bool saveGumps = true)
