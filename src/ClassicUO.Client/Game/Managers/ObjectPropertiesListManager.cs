@@ -288,7 +288,7 @@ namespace ClassicUO.Game.Managers
         public class SinglePropertyData
         {
             public readonly string OriginalString;
-            public readonly string Name;
+            public readonly string Name = "";
             public readonly double FirstValue = -1;
             public readonly double SecondValue = -1;
 
