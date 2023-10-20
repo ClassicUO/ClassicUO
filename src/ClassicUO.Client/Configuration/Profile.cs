@@ -514,6 +514,10 @@ namespace ClassicUO.Configuration
         public bool DisplaySkillBarOnChange { get; set; } = true;
         public string SkillBarFormat { get; set; } = "{0}: {1} / {2}";
 
+        public bool DisplayRadius { get; set; } = false;
+        public int DisplayRadiusDistance { get; set; } = 10;
+        public ushort DisplayRadiusHue { get; set; } = 22;
+
         public static uint GumpsVersion { get; private set; }
 
         public void Save(string path, bool saveGumps = true)

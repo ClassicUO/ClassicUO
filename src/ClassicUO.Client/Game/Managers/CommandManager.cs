@@ -32,6 +32,7 @@
 
 using System;
 using System.Collections.Generic;
+using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Controls;
@@ -199,6 +200,22 @@ namespace ClassicUO.Game.Managers
                                         TileMarkerManager.Instance.AddTile(x, y, m, h);
                     }
                 }
+            });
+
+            Register("radius", s =>
+            {
+                ///-radius distance hue
+                if (s.Length == 1)
+                    ProfileManager.CurrentProfile.DisplayRadius ^= true;
+                if (s.Length > 1)
+                {
+                    if (int.TryParse(s[1], out var dist))
+                        ProfileManager.CurrentProfile.DisplayRadiusDistance = dist;
+                    ProfileManager.CurrentProfile.DisplayRadius = true;
+                }
+                if (s.Length > 2)
+                    if (ushort.TryParse(s[2], out var h))
+                        ProfileManager.CurrentProfile.DisplayRadiusHue = h;
             });
         }
 

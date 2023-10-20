@@ -68,6 +68,9 @@ namespace ClassicUO.Game.GameObjects
 
             TileMarkerManager.Instance.IsTileMarked(X, Y, World.Map.Index, out hue);
 
+            if (ProfileManager.CurrentProfile.DisplayRadius && Distance == ProfileManager.CurrentProfile.DisplayRadiusDistance)
+                hue = ProfileManager.CurrentProfile.DisplayRadiusHue;
+
             Vector3 hueVec;
             if (hue != 0)
             {
