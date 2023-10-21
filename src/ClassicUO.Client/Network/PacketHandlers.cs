@@ -2030,11 +2030,24 @@ namespace ClassicUO.Network
                                 }
                             }
 
+                            ushort lastBase = skill.BaseFixed;
+                            ushort lastValue = skill.ValueFixed;
+                            ushort lastCap = skill.CapFixed;
 
                             skill.BaseFixed = baseVal;
                             skill.ValueFixed = realVal;
                             skill.CapFixed = cap;
                             skill.Lock = locked;
+
+                            if (isSingleUpdate)
+                            {
+                                if (lastBase != skill.BaseFixed)
+                                    Skill.InvokeSkillBaseChanged(id);
+                                if(lastValue != skill.ValueFixed)
+                                    Skill.InvokeSkillValueChanged(id);
+                                if(lastCap != skill.CapFixed)
+                                    Skill.InvokeSkillCapChanged(id);
+                            }
 
                             standard?.Update(id);
                             advanced?.ForceUpdate();

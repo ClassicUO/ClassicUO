@@ -186,8 +186,8 @@ namespace ClassicUO.Game.UI.Gumps
         private HSliderBar _showSkillsMessageDelta;
 
         private Checkbox _leftAlignToolTips, _namePlateHealthOnlyWarmode, _enableHealthIndicator, _spellIconDisplayHotkey, _enableAlphaScrollWheel, _useModernShop, _forceCenterAlignMobileTooltips, _openHealthBarForLastAttack;
-        private Checkbox _hideJournalBorder, _hideJournalTimestamp, _gridHideBorder;
-        private InputField _healthIndicatorPercentage, _healthIndicatorWidth, _tooltipHeaderFormat;
+        private Checkbox _hideJournalBorder, _hideJournalTimestamp, _gridHideBorder, _skillProgressBarOnChange;
+        private InputField _healthIndicatorPercentage, _healthIndicatorWidth, _tooltipHeaderFormat, _skillProgressBarFormat;
         private ModernColorPicker.HueDisplay _mainWindowHuePicker, _spellIconHotkeyHue, _tooltipBGHue;
         private HSliderBar _spellIconScale, _journalFontSize, _tooltipFontSize, _gameWindowSideChatFontSize, _overheadFontSize, _overheadTextWidth, _textStrokeSize, _gridHightlightLineSize, _maxJournalEntries;
         private HSliderBar _healthLineSizeMultiplier;
@@ -4126,6 +4126,14 @@ namespace ClassicUO.Game.UI.Gumps
                 section.Add(AddLabel(null, "TTF Font text border size", 0, 0));
                 section.AddRight(_textStrokeSize = AddHSlider(null, 0, 5, _currentProfile.TextBorderSize, 0, 0, 150));
 
+                section.Add(AddLabel(null, "Display skill progress bar on skill changes", 0, 0));
+                section.AddRight(_skillProgressBarOnChange = AddCheckBox(null, "", _currentProfile.DisplaySkillBarOnChange, 0, 0));
+
+                Label _label;
+                section.Add(_label = AddLabel(null, "Skill progress bar format", 0, 0));
+                section.AddRight(_skillProgressBarFormat = AddInputField(null, 0, 0, 250, TEXTBOX_HEIGHT));
+                _skillProgressBarFormat.SetText(_currentProfile.SkillBarFormat);
+
                 rightArea.Add(section);
                 startY += section.Height + SPACING + 15;
             } //Misc
@@ -4743,6 +4751,9 @@ namespace ClassicUO.Game.UI.Gumps
                     UIManager.Add(new ResizableJournal());
                 }
             }
+
+            _currentProfile.DisplaySkillBarOnChange = _skillProgressBarOnChange.IsChecked;
+            _currentProfile.SkillBarFormat = _skillProgressBarFormat.Text;
 
             if (_tooltipHeaderFormat.Text.Length > 0)
                 _currentProfile.TooltipHeaderFormat = _tooltipHeaderFormat.Text;

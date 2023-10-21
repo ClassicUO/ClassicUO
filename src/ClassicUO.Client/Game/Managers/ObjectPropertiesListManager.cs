@@ -288,7 +288,7 @@ namespace ClassicUO.Game.Managers
         public class SinglePropertyData
         {
             public readonly string OriginalString;
-            public readonly string Name;
+            public readonly string Name = "";
             public readonly double FirstValue = -1;
             public readonly double SecondValue = -1;
 
@@ -306,6 +306,9 @@ namespace ClassicUO.Game.Managers
                     //Name = Regex.Replace(Name, "/c[\"?'?(?<color>.*?)\"?'?]", "", RegexOptions.Multiline | RegexOptions.IgnoreCase);
                     Name = Name.Replace("/cd", "");
                 }
+                
+                if(Name.Length < 1)
+                    Name = line;
 
                 if (matches.Count > 0)
                 {

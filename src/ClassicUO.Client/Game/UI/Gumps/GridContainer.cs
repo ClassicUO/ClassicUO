@@ -1513,16 +1513,16 @@ namespace ClassicUO.Game.UI.Gumps
                                         bool hasProp = false;
                                         foreach (var singleProperty in itemData.singlePropertyData) //For each property on the item
                                         {
-                                            if (singleProperty.Name.ToLower().Contains(configData.Properties[i].ToLower())) //This property has a match for this highlight search text
+                                            if (singleProperty.Name.ToLower().Contains(configData.Properties[i].ToLower()) || singleProperty.OriginalString.ToLower().Contains(configData.Properties[i].ToLower())) //This property has a match for this highlight search text
                                             {
                                                 hasProp = true;
                                                 if (singleProperty.FirstValue >= configData.PropMinVal[i]) //This property matches the highlight property
                                                     fullMatch = true;
+                                                else if (configData.PropMinVal[i] == -1)
+                                                    fullMatch = true;
                                                 else
                                                     fullMatch = false;
                                             }
-                                            else if (configData.PropMinVal[i] == -1)
-                                                fullMatch = true;
                                         }
                                         if (!hasProp) fullMatch = false;
                                     }

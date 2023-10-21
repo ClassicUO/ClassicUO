@@ -377,6 +377,9 @@ namespace ClassicUO.Assets
         {
             if (index >= 0 && index < MAX_SOUND_DATA_INDEX_COUNT)
             {
+                if (SoundOverrideLoader.Instance.TryGetSoundOverride(index, out var s))
+                    return s;
+
                 ref Sound sound = ref _sounds[index];
 
                 if (sound == null && TryGetSound(index, out byte[] data, out string name))
