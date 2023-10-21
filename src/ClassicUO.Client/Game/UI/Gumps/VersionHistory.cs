@@ -7,6 +7,8 @@ namespace ClassicUO.Game.UI.Gumps
     internal class VersionHistory : Gump
     {
         private static string[] updateTexts = {
+            "/c[white][3.9.0]/cd\n",
+
             "/c[white][3.8.0]/cd\n" +
                 "- Added sound override feature\n" +
                 "- Added -radius command, see wiki for more details\n" +
