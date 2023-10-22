@@ -9,7 +9,9 @@ namespace ClassicUO.Game.UI.Gumps
         private static string[] updateTexts = {
             "/c[white][3.9.0]/cd\n" +
                 "- The /c[green]-marktile/cd command works on static locations also now\n" +
-                "- Bug fix for object highlighting\n",
+                "- The 'Items Only' option for nameplates will no longer include corpses\n" +
+                "- Bug fix for object highlighting\n" +
+                "- Bug fix for <BR> tag in tooltips",
 
             "/c[white][3.8.0]/cd\n" +
                 "- Added sound override feature\n" +
