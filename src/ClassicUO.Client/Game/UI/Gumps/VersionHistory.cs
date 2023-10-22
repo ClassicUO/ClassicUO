@@ -7,7 +7,9 @@ namespace ClassicUO.Game.UI.Gumps
     internal class VersionHistory : Gump
     {
         private static string[] updateTexts = {
-            "/c[white][3.9.0]/cd\n",
+            "/c[white][3.9.0]/cd\n" +
+                "- The /c[green]-marktile/cd command works on static locations also now\n" +
+                "- Bug fix for object highlighting\n",
 
             "/c[white][3.8.0]/cd\n" +
                 "- Added sound override feature\n" +

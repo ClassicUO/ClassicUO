@@ -66,7 +66,8 @@ namespace ClassicUO.Game.GameObjects
                 hue = Constants.DEAD_RANGE_COLOR;
             }
 
-            TileMarkerManager.Instance.IsTileMarked(X, Y, World.Map.Index, out hue);
+            if (TileMarkerManager.Instance.IsTileMarked(X, Y, World.Map.Index, out var nhue))
+                hue = nhue;
 
             if (ProfileManager.CurrentProfile.DisplayRadius && Distance == ProfileManager.CurrentProfile.DisplayRadiusDistance)
                 hue = ProfileManager.CurrentProfile.DisplayRadiusHue;
