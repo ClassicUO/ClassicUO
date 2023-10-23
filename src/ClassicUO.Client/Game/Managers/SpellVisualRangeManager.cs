@@ -32,6 +32,20 @@ namespace ClassicUO.Game.Managers
         private bool isCasting { get; set; } = false;
         private SpellRangeInfo currentSpell { get; set; }
 
+        //Taken from Dust client
+        private static readonly int[] stopAtClilocs = new int[]
+        {
+            500641,     // Your concentration is disturbed, thus ruining thy spell.
+            502625,     // Insufficient mana. You must have at least ~1_MANA_REQUIREMENT~ Mana to use this spell.
+            502630,     // More reagents are needed for this spell.
+            500946,     // You cannot cast this in town!
+            500015,     // You do not have that spell
+            502643,     // You can not cast a spell while frozen.
+            1061091,    // You cannot cast that spell in this form.
+            502644,     // You have not yet recovered from casting a spell.
+            1072060,    // You cannot cast a spell while calmed.
+        };
+
         private SpellVisualRangeManager()
         {
             Load();
@@ -47,6 +61,16 @@ namespace ClassicUO.Game.Managers
                     {
                         SetCasting(spell);
                     }
+                }
+            });
+        }
+
+        public void OnClilocReceived(int cliloc)
+        {
+            Task.Factory.StartNew(() => {
+                if (isCasting && stopAtClilocs.Contains(cliloc))
+                {
+                    ClearCasting();
                 }
             });
         }
