@@ -75,7 +75,6 @@ namespace ClassicUO.Game.GameObjects
             if (ProfileManager.CurrentProfile.HighlightGameObjects && SelectedObject.Object == this)
             {
                 hue = Constants.HIGHLIGHT_CURRENT_OBJECT_HUE;
-                SpellVisualRangeManager.Instance.LastCursorTileLoc = new Vector2(X, Y);
                 partial = false;
             }
             else if (ProfileManager.CurrentProfile.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
@@ -90,7 +89,12 @@ namespace ClassicUO.Game.GameObjects
             }
             else
             {
-                if (SpellVisualRangeManager.Instance.IsCasting())
+                if (SelectedObject.Object == this)
+                {
+                    SpellVisualRangeManager.Instance.LastCursorTileLoc = new Vector2(X, Y);
+                }
+
+                if (SpellVisualRangeManager.Instance.IsTargetingAfterCasting())
                 {
                     hue = SpellVisualRangeManager.Instance.ProcessHueForTile(hue, this);
                 }

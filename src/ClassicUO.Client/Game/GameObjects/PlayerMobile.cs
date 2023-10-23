@@ -41,12 +41,15 @@ using ClassicUO.Assets;
 using ClassicUO.Network;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
+using ClassicUO.Renderer;
 
 namespace ClassicUO.Game.GameObjects
 {
     internal class PlayerMobile : Mobile
     {
         private readonly Dictionary<BuffIconType, BuffIcon> _buffIcons = new Dictionary<BuffIconType, BuffIcon>();
+
+        private static SpellVisualRangeManager.CastTimerProgressBar castTimer;
 
         public PlayerMobile(uint serial) : base(serial)
         {
@@ -65,6 +68,8 @@ namespace ClassicUO.Game.GameObjects
                     UIManager.Add(new SkillProgressBar(e.Index));
                 }
             };
+
+           UIManager.Add(castTimer = new SpellVisualRangeManager.CastTimerProgressBar());
         }
 
         public Skill[] Skills { get; }
