@@ -346,6 +346,7 @@ namespace ClassicUO.Game.Scenes
 
             ProfileManager.CurrentProfile?.Save(ProfileManager.ProfilePath);
             TileMarkerManager.Instance.Save();
+            SpellVisualRangeManager.Instance.Save();
 
             Macros.Save();
             InfoBars.Save();

@@ -66,6 +66,18 @@ namespace ClassicUO.Game.GameObjects
                 hue = Constants.DEAD_RANGE_COLOR;
             }
 
+            if (SpellVisualRangeManager.Instance.IsCasting())
+            {
+                SpellVisualRangeManager.SpellRangeInfo spellRangeInfo = SpellVisualRangeManager.Instance.GetSpellInfo();
+                if (spellRangeInfo != null)
+                {
+                    if(Distance <= spellRangeInfo.CastRange)
+                    {
+                        hue = spellRangeInfo.Hue;
+                    }
+                }
+            }
+
             if (TileMarkerManager.Instance.IsTileMarked(X, Y, World.Map.Index, out var nhue))
                 hue = nhue;
 
