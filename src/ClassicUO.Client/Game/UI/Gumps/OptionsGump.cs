@@ -186,7 +186,7 @@ namespace ClassicUO.Game.UI.Gumps
         private HSliderBar _showSkillsMessageDelta;
 
         private Checkbox _leftAlignToolTips, _namePlateHealthOnlyWarmode, _enableHealthIndicator, _spellIconDisplayHotkey, _enableAlphaScrollWheel, _useModernShop, _forceCenterAlignMobileTooltips, _openHealthBarForLastAttack;
-        private Checkbox _hideJournalBorder, _hideJournalTimestamp, _gridHideBorder, _skillProgressBarOnChange;
+        private Checkbox _hideJournalBorder, _hideJournalTimestamp, _gridHideBorder, _skillProgressBarOnChange, _displaySpellIndicators;
         private InputField _healthIndicatorPercentage, _healthIndicatorWidth, _tooltipHeaderFormat, _skillProgressBarFormat;
         private ModernColorPicker.HueDisplay _mainWindowHuePicker, _spellIconHotkeyHue, _tooltipBGHue;
         private HSliderBar _spellIconScale, _journalFontSize, _tooltipFontSize, _gameWindowSideChatFontSize, _overheadFontSize, _overheadTextWidth, _textStrokeSize, _gridHightlightLineSize, _maxJournalEntries;
@@ -4134,6 +4134,9 @@ namespace ClassicUO.Game.UI.Gumps
                 section.AddRight(_skillProgressBarFormat = AddInputField(null, 0, 0, 250, TEXTBOX_HEIGHT));
                 _skillProgressBarFormat.SetText(_currentProfile.SkillBarFormat);
 
+                section.Add(AddLabel(null, "Display spell indicators", 0, 0));
+                section.AddRight(_displaySpellIndicators = AddCheckBox(null, "", _currentProfile.EnableSpellIndicators, 0 ,0));
+
                 rightArea.Add(section);
                 startY += section.Height + SPACING + 15;
             } //Misc
@@ -4751,6 +4754,7 @@ namespace ClassicUO.Game.UI.Gumps
                     UIManager.Add(new ResizableJournal());
                 }
             }
+            _currentProfile.EnableSpellIndicators = _displaySpellIndicators.IsChecked;
 
             _currentProfile.DisplaySkillBarOnChange = _skillProgressBarOnChange.IsChecked;
             _currentProfile.SkillBarFormat = _skillProgressBarFormat.Text;

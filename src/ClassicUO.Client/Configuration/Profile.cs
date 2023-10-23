@@ -518,6 +518,8 @@ namespace ClassicUO.Configuration
         public int DisplayRadiusDistance { get; set; } = 10;
         public ushort DisplayRadiusHue { get; set; } = 22;
 
+        public bool EnableSpellIndicators { get; set; } = true;
+
         public static uint GumpsVersion { get; private set; }
 
         public void Save(string path, bool saveGumps = true)
