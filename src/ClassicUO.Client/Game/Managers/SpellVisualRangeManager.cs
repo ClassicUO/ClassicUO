@@ -16,7 +16,7 @@ namespace ClassicUO.Game.Managers
         public static SpellVisualRangeManager Instance { get; private set; } = new SpellVisualRangeManager();
         public int LastSpellID
         {
-            get => lastSpellID; 
+            get => lastSpellID;
             set
             {
                 lastSpellID = value;
@@ -91,7 +91,7 @@ namespace ClassicUO.Game.Managers
 
         public bool IsCasting()
         {
-            if(!loaded) { return false; }
+            if (!loaded) { return false; }
 
             if (GameActions.LastSpellIndex == LastSpellID && TargetManager.IsTargeting)
             {
@@ -114,18 +114,64 @@ namespace ClassicUO.Game.Managers
             {
                 if (o.Distance <= spellRangeInfo.CastRange)
                 {
-                    hue =  spellRangeInfo.Hue;
+                    hue = spellRangeInfo.Hue;
                 }
-                
+
                 int cDistance = o.DistanceFrom(LastCursorTileLoc);
 
                 if (spellRangeInfo.CursorSize > 0 && cDistance <= spellRangeInfo.CursorSize)
                 {
-                    hue = spellRangeInfo.CursorHue;
+                    if (spellRangeInfo.IsLinear)
+                    {
+                        if (GetDirection(new Vector2(World.Player.X, World.Player.Y), LastCursorTileLoc) == Spell_Direction.EastWest)
+                        { //X
+                            if (o.Y == LastCursorTileLoc.Y)
+                            {
+                                hue = spellRangeInfo.CursorHue;
+                            }
+                        }
+                        else
+                        { //Y
+                            if (o.X == LastCursorTileLoc.X)
+                            {
+                                hue = spellRangeInfo.CursorHue;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        hue = spellRangeInfo.CursorHue;
+                    }
                 }
             }
 
             return hue;
+        }
+
+
+        private static Spell_Direction GetDirection(Vector2 from, Vector2 to)
+        {
+            int dx = (int)(from.X - to.X);
+            int dy = (int)(from.Y - to.Y);
+            int rx = (dx - dy) * 44;
+            int ry = (dx + dy) * 44;
+
+            if (rx >= 0 && ry >= 0)
+            {
+                return Spell_Direction.SouthNorth;
+            }
+            else if (rx >= 0)
+            {
+                return Spell_Direction.EastWest;
+            }
+            else if (ry >= 0)
+            {
+                return Spell_Direction.EastWest;
+            }
+            else
+            {
+                return Spell_Direction.SouthNorth;
+            }
         }
 
         private void CreateAndLoadDataFile()
@@ -175,14 +221,15 @@ namespace ClassicUO.Game.Managers
             {
                 string fileData = JsonSerializer.Serialize(spellRangeCache.Values.ToArray());
 
-                using (FileStream fs = File.OpenWrite(savePath))
-                {
-                    byte[] data = Encoding.UTF8.GetBytes(fileData);
-                    fs.Write(data, 0, data.Length);
-                    fs.Close();
-                }
+                File.WriteAllText(savePath, fileData);
             }
             catch (Exception e) { Console.WriteLine(e.ToString()); }
+        }
+
+        private enum Spell_Direction
+        {
+            EastWest,
+            SouthNorth
         }
 
         public class SpellRangeInfo
@@ -194,6 +241,7 @@ namespace ClassicUO.Game.Managers
             public ushort Hue { get; set; } = 32;
             public ushort CursorHue { get; set; } = 10;
             public int MaxDuration { get; set; } = 10;
+            public bool IsLinear { get; set; } = false;
 
             public static SpellRangeInfo FromSpellDef(SpellDefinition spell)
             {
