@@ -153,7 +153,7 @@ namespace ClassicUO.Game.Managers
 
             int cDistance = o.DistanceFrom(LastCursorTileLoc);
 
-            if (currentSpell.CursorSize > 0 && cDistance <= currentSpell.CursorSize)
+            if (currentSpell.CursorSize > 0 && cDistance < currentSpell.CursorSize)
             {
                 if (currentSpell.IsLinear)
                 {
@@ -314,7 +314,8 @@ namespace ClassicUO.Game.Managers
         {
             try
             {
-                string fileData = JsonSerializer.Serialize(spellRangeCache.Values.ToArray());
+                var options = new JsonSerializerOptions() { WriteIndented = true };
+                string fileData = JsonSerializer.Serialize(spellRangeCache.Values.ToArray(), options);
 
                 File.WriteAllText(savePath, fileData);
             }
