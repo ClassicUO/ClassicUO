@@ -56,6 +56,7 @@ namespace ClassicUO.Game.GameObjects
             if (ProfileManager.CurrentProfile.HighlightGameObjects && SelectedObject.Object == this)
             {
                 hue = Constants.HIGHLIGHT_CURRENT_OBJECT_HUE;
+                SpellVisualRangeManager.Instance.LastCursorTileLoc = new Vector2(X, Y);
             }
             else if (ProfileManager.CurrentProfile.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
             {
@@ -65,24 +66,19 @@ namespace ClassicUO.Game.GameObjects
             {
                 hue = Constants.DEAD_RANGE_COLOR;
             }
-
-            if (SpellVisualRangeManager.Instance.IsCasting())
+            else
             {
-                SpellVisualRangeManager.SpellRangeInfo spellRangeInfo = SpellVisualRangeManager.Instance.GetSpellInfo();
-                if (spellRangeInfo != null)
+                if (SpellVisualRangeManager.Instance.IsCasting())
                 {
-                    if(Distance <= spellRangeInfo.CastRange)
-                    {
-                        hue = spellRangeInfo.Hue;
-                    }
+                    hue = SpellVisualRangeManager.Instance.ProcessHueForTile(hue, this);
                 }
+
+                if (TileMarkerManager.Instance.IsTileMarked(X, Y, World.Map.Index, out var nhue))
+                    hue = nhue;
+
+                if (ProfileManager.CurrentProfile.DisplayRadius && Distance == ProfileManager.CurrentProfile.DisplayRadiusDistance)
+                    hue = ProfileManager.CurrentProfile.DisplayRadiusHue;
             }
-
-            if (TileMarkerManager.Instance.IsTileMarked(X, Y, World.Map.Index, out var nhue))
-                hue = nhue;
-
-            if (ProfileManager.CurrentProfile.DisplayRadius && Distance == ProfileManager.CurrentProfile.DisplayRadiusDistance)
-                hue = ProfileManager.CurrentProfile.DisplayRadiusHue;
 
             Vector3 hueVec;
             if (hue != 0)

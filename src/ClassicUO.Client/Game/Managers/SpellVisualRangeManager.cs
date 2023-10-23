@@ -1,4 +1,6 @@
 ﻿using ClassicUO.Game.Data;
+using ClassicUO.Game.GameObjects;
+using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -21,6 +23,8 @@ namespace ClassicUO.Game.Managers
                 lastSpellTime = DateTime.Now;
             }
         }
+
+        public Vector2 LastCursorTileLoc { get; set; } = Vector2.Zero;
 
         private string savePath = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Profiles", "SpellVisualRange.json");
 
@@ -87,6 +91,8 @@ namespace ClassicUO.Game.Managers
 
         public bool IsCasting()
         {
+            if(!loaded) { return false; }
+
             if (GameActions.LastSpellIndex == LastSpellID && TargetManager.IsTargeting)
             {
                 var spell = GetSpellInfo();
@@ -97,6 +103,29 @@ namespace ClassicUO.Game.Managers
             }
 
             return false;
+        }
+
+        public ushort ProcessHueForTile(ushort hue, GameObject o)
+        {
+            if (!loaded) { return hue; }
+
+            SpellRangeInfo spellRangeInfo = GetSpellInfo();
+            if (spellRangeInfo != null)
+            {
+                if (o.Distance <= spellRangeInfo.CastRange)
+                {
+                    hue =  spellRangeInfo.Hue;
+                }
+                
+                int cDistance = o.DistanceFrom(LastCursorTileLoc);
+
+                if (spellRangeInfo.CursorSize > 0 && cDistance <= spellRangeInfo.CursorSize)
+                {
+                    hue = spellRangeInfo.CursorHue;
+                }
+            }
+
+            return hue;
         }
 
         private void CreateAndLoadDataFile()
@@ -160,9 +189,10 @@ namespace ClassicUO.Game.Managers
         {
             public int ID { get; set; } = -1;
             public string Name { get; set; } = "";
-            public int CursorSize { get; set; } = 1;
+            public int CursorSize { get; set; } = 0;
             public int CastRange { get; set; } = 1;
             public ushort Hue { get; set; } = 32;
+            public ushort CursorHue { get; set; } = 10;
             public int MaxDuration { get; set; } = 10;
 
             public static SpellRangeInfo FromSpellDef(SpellDefinition spell)
