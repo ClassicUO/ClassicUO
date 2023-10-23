@@ -67,7 +67,8 @@ namespace ClassicUO.Game.Managers
 
         public void OnClilocReceived(int cliloc)
         {
-            Task.Factory.StartNew(() => {
+            Task.Factory.StartNew(() =>
+            {
                 if (isCasting && stopAtClilocs.Contains(cliloc))
                 {
                     ClearCasting();
@@ -113,7 +114,7 @@ namespace ClassicUO.Game.Managers
                 return false;
             }
 
-            if (TargetManager.IsTargeting)
+            if (TargetManager.IsTargeting || (currentSpell.ShowCastRangeDuringCasting && IsCastingWithoutTarget()))
             {
                 if (LastSpellTime + TimeSpan.FromSeconds(currentSpell.MaxDuration) > DateTime.Now)
                 {
@@ -341,6 +342,7 @@ namespace ClassicUO.Game.Managers
             public int MaxDuration { get; set; } = 10;
             public bool IsLinear { get; set; } = false;
             public double CastTime { get; set; } = 0.0;
+            public bool ShowCastRangeDuringCasting { get; set; } = false;
 
             public static SpellRangeInfo FromSpellDef(SpellDefinition spell)
             {
