@@ -112,7 +112,7 @@ namespace ClassicUO.Game.Managers
             SpellRangeInfo spellRangeInfo = GetSpellInfo();
             if (spellRangeInfo != null)
             {
-                if (o.Distance <= spellRangeInfo.CastRange)
+                if (spellRangeInfo.CastRange > 0 && o.Distance <= spellRangeInfo.CastRange)
                 {
                     hue = spellRangeInfo.Hue;
                 }
