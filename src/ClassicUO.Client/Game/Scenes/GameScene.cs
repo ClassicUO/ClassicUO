@@ -190,6 +190,7 @@ namespace ClassicUO.Game.Scenes
             CircleOfTransparency.Create(ProfileManager.CurrentProfile.CircleOfTransparencyRadius);
             Plugin.OnConnected();
             GameController.UpdateBackgroundHueShader();
+            SpellVisualRangeManager.Instance.OnSceneLoad();
         }
 
         private void ChatOnMessageReceived(object sender, MessageEventArgs e)
@@ -346,6 +347,8 @@ namespace ClassicUO.Game.Scenes
 
             ProfileManager.CurrentProfile?.Save(ProfileManager.ProfilePath);
             TileMarkerManager.Instance.Save();
+            SpellVisualRangeManager.Instance.Save();
+            SpellVisualRangeManager.Instance.OnSceneUnload();
 
             Macros.Save();
             InfoBars.Save();

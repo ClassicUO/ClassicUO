@@ -4860,6 +4860,8 @@ namespace ClassicUO.Network
 
             string arguments = null;
 
+            SpellVisualRangeManager.Instance.OnClilocReceived((int)cliloc);
+
             if (cliloc == 1008092 || cliloc == 1005445) // value for "You notify them you don't want to join the party" || "You have been added to the party"
             {
                 for (LinkedListNode<Gump> g = UIManager.Gumps.Last; g != null; g = g.Previous)

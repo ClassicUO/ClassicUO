@@ -704,6 +704,7 @@ namespace ClassicUO.Game
             if (index >= 0)
             {
                 LastSpellIndex = index;
+                SpellVisualRangeManager.Instance.ClearCasting();
                 Socket.Send_CastSpellFromBook(index, bookSerial);
             }
         }
@@ -713,6 +714,7 @@ namespace ClassicUO.Game
             if (index >= 0)
             {
                 LastSpellIndex = index;
+                SpellVisualRangeManager.Instance.ClearCasting();
                 Socket.Send_CastSpell(index);
             }
         }

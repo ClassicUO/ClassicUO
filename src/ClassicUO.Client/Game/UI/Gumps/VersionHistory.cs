@@ -8,6 +8,7 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private static string[] updateTexts = {
             "/c[white][3.9.0]/cd\n" +
+                "- Spell indicator system, see wiki for more details\n" +
                 "- The /c[green]-marktile/cd command works on static locations also now\n" +
                 "- The 'Items Only' option for nameplates will no longer include corpses\n" +
                 "- Bug fix for object highlighting\n" +
