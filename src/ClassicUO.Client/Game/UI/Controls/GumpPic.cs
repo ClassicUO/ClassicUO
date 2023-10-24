@@ -236,15 +236,16 @@ namespace ClassicUO.Game.UI.Controls
 
             Vector3 hueVector = ShaderHueTranslator.GetHueVector(Hue, false, Alpha, true);
 
-            var texture = GumpsLoader.Instance.GetGumpPartialTexture(
-                Graphic,
-                _picInPicBounds,
-                out var bounds
-            );
+            ref readonly var gumpInfo = ref Client.Game.Gumps.GetGump(Graphic);
 
-            if (texture != null)
+            if (gumpInfo.Texture != null)
             {
-                batcher.Draw(texture, new Rectangle(x, y, Width, Height), bounds, hueVector);
+                batcher.Draw(
+                    gumpInfo.Texture,
+                    new Rectangle(x, y, Width, Height),
+                    gumpInfo.UV,
+                    hueVector
+                );
             }
 
             return base.Draw(batcher, x, y);

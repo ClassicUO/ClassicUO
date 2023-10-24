@@ -729,7 +729,14 @@ namespace ClassicUO.Game.GameObjects
 
                     if (id < Client.Game.Animations.MaxAnimationCount && dir < 5)
                     {
-                        byte action = AnimationsLoader.Instance.GetDeathAction(id, UsedLayer);
+                        var animGroup = Client.Game.Animations.GetAnimType(id);
+                        var animFlags = Client.Game.Animations.GetAnimFlags(id);
+                        byte action = AnimationsLoader.Instance.GetDeathAction(
+                            id,
+                            animFlags,
+                            animGroup,
+                            UsedLayer
+                        );
                         var frames = Client.Game.Animations.GetAnimationFrames(
                             id,
                             action,
