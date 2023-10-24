@@ -427,7 +427,7 @@ namespace ClassicUO.Game.UI.Gumps
             paperDollInteractable.RequestUpdate(hair, beard);
         }
 
-        private void ConfirmButton_MouseUp(object sender, Input.MouseEventArgs e)
+        private void ConfirmButton_MouseUp(object sender, MouseEventArgs e)
         {
             if (e.Button == Input.MouseButtonType.Left)
             {
@@ -437,7 +437,11 @@ namespace ClassicUO.Game.UI.Gumps
                     CurrentColorOption[Layer.Hair].Item2,
                     (ushort)CharacterCreationValues.GetFacialHairComboContent(selectedRace).GetGraphic(CurrentOption[Layer.Beard]),
                     CurrentColorOption[Layer.Beard].Item2
-                    );
+                );
+
+                //Cleanup
+                World.RemoveItem(hair, true);
+                World.RemoveItem(beard, true);
                 Dispose();
             }
         }
@@ -465,27 +469,15 @@ namespace ClassicUO.Game.UI.Gumps
 
         private Item CreateItem(int id, ushort hue, Layer layer)
         {
-            Item existsItem = fakeMobile.FindItemByLayer(layer);
-
-            if (existsItem != null)
-            {
-                World.RemoveItem(existsItem, true);
-                fakeMobile.Remove(existsItem);
-            }
-
             if (id == 0)
             {
                 return null;
             }
-            // This is a workaround to avoid to see naked guy
-            // We are simulating server objects into World.Items map.
+
             Item item = World.GetOrCreateItem(0x4000_0000 + (uint)layer); // use layer as unique Serial
-            fakeMobile.Remove(item);
             item.Graphic = (ushort)id;
             item.Hue = hue;
             item.Layer = layer;
-            item.Container = fakeMobile;
-            fakeMobile.PushToBack(item);
             //
 
             return item;
@@ -740,30 +732,30 @@ namespace ClassicUO.Game.UI.Gumps
 
                 // equipment
 
-                if(hair != null)
+                if (hair != null)
                 {
-                        ushort id = GetAnimID(mobile.Graphic, hair.ItemData.AnimID, mobile.IsFemale);
+                    ushort id = GetAnimID(mobile.Graphic, hair.ItemData.AnimID, mobile.IsFemale);
 
-                        Add
+                    Add
+                    (
+                        new GumpPicEquipment
                         (
-                            new GumpPicEquipment
-                            (
-                                hair.Serial,
-                                0,
-                                0,
-                                id,
-                                (ushort)(hair.Hue & 0x3FFF),
-                                Layer.Hair
-                            )
-                            {
-                                AcceptMouseInput = true,
-                                IsPartialHue = hair.ItemData.IsPartialHue,
-                                CanLift = false
-                            }
-                        );
+                            hair.Serial,
+                            0,
+                            0,
+                            id,
+                            (ushort)(hair.Hue & 0x3FFF),
+                            Layer.Hair
+                        )
+                        {
+                            AcceptMouseInput = true,
+                            IsPartialHue = hair.ItemData.IsPartialHue,
+                            CanLift = false
+                        }
+                    );
                 }
 
-                if(beard != null)
+                if (beard != null)
                 {
                     ushort id = GetAnimID(mobile.Graphic, beard.ItemData.AnimID, mobile.IsFemale);
 
