@@ -772,7 +772,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             private static byte GetAnimGroup(ushort graphic)
             {
-                switch (AnimationsLoader.Instance.GetGroupIndex(graphic))
+                var groupType = Client.Game.Animations.GetAnimType(graphic);
+                switch (AnimationsLoader.Instance.GetGroupIndex(graphic, groupType))
                 {
                     case ANIMATION_GROUPS.AG_LOW:
                         return (byte)LOW_ANIMATION_GROUP.LAG_STAND;
@@ -808,7 +809,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     ushort graphic = Graphic;
 
-                    if (graphic >= AnimationsLoader.Instance.MaxAnimationCount)
+                    if (graphic >= Client.Game.Animations.MaxAnimationCount)
                     {
                         graphic = 0;
                     }

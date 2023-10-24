@@ -43,7 +43,6 @@ namespace ClassicUO.Assets
         private static ArtLoader _instance;
         private UOFile _file;
         private readonly ushort _graphicMask;
-        private readonly PixelPicker _picker = new PixelPicker();
 
         [ThreadStatic]
         private static uint[] _data = null;
