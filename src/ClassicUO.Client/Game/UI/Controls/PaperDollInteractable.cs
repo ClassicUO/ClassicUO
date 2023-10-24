@@ -354,7 +354,7 @@ namespace ClassicUO.Game.UI.Controls
             _updateUI = true;
         }
 
-        private static ushort GetAnimID(ushort graphic, ushort animID, bool isfemale)
+        protected static ushort GetAnimID(ushort graphic, ushort animID, bool isfemale)
         {
             int offset = isfemale ? Constants.FEMALE_GUMP_OFFSET : Constants.MALE_GUMP_OFFSET;
 
@@ -395,7 +395,7 @@ namespace ClassicUO.Game.UI.Controls
             return (ushort) (animID + offset);
         }
 
-        private class GumpPicEquipment : GumpPic
+        protected class GumpPicEquipment : GumpPic
         {
             private readonly Layer _layer;
 
