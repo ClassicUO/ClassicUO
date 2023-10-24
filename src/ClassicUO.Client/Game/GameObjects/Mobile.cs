@@ -419,7 +419,7 @@ namespace ClassicUO.Game.GameObjects
                 byte action = 0;
                 ushort hue = 0;
 
-                AnimationsLoader.Instance.ReplaceAnimationValues(
+                Client.Game.Animations.ReplaceAnimationValues(
                     ref graphic,
                     ref action,
                     ref hue,

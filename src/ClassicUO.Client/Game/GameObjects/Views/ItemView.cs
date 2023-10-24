@@ -204,7 +204,15 @@ namespace ClassicUO.Game.GameObjects
 
             byte animIndex = (byte)AnimIndex;
             ushort graphic = GetGraphicForAnimation();
-            byte group = AnimationsLoader.Instance.GetDeathAction(graphic, UsedLayer);
+
+            var animGroup = Client.Game.Animations.GetAnimType(graphic);
+            var animFlags = Client.Game.Animations.GetAnimFlags(graphic);
+            byte group = AnimationsLoader.Instance.GetDeathAction(
+                graphic,
+                animFlags,
+                animGroup,
+                UsedLayer
+            );
 
             bool ishuman =
                 MathHelper.InRange(Amount, 0x0190, 0x0193)
@@ -607,7 +615,14 @@ namespace ClassicUO.Game.GameObjects
                         continue;
                     }
 
-                    byte group = AnimationsLoader.Instance.GetDeathAction(graphic, UsedLayer);
+                    var animGroup = Client.Game.Animations.GetAnimType(graphic);
+                    var animFlags = Client.Game.Animations.GetAnimFlags(graphic);
+                    byte group = AnimationsLoader.Instance.GetDeathAction(
+                        graphic,
+                        animFlags,
+                        animGroup,
+                        UsedLayer
+                    );
                     var frames = Client.Game.Animations.GetAnimationFrames(
                         graphic,
                         group,

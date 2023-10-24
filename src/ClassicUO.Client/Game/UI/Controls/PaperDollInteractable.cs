@@ -423,7 +423,7 @@ namespace ClassicUO.Game.UI.Controls
                 animID = 0x0223;
             }
 
-            AnimationsLoader.Instance.ConvertBodyIfNeeded(ref graphic);
+            Client.Game.Animations.ConvertBodyIfNeeded(ref graphic);
 
             if (
                 AnimationsLoader.Instance.EquipConversions.TryGetValue(

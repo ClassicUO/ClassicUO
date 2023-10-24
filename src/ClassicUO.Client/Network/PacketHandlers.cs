@@ -3766,8 +3766,12 @@ namespace ClassicUO.Network
                 World.CorpseManager.Add(corpseSerial, serial, owner.Direction, running != 0);
             }
 
+            var animGroup = Client.Game.Animations.GetAnimType(owner.Graphic);
+            var animFlags = Client.Game.Animations.GetAnimFlags(owner.Graphic);
             byte group = AnimationsLoader.Instance.GetDeathAction(
                 owner.Graphic,
+                animFlags,
+                animGroup,
                 running != 0,
                 true
             );

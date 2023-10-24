@@ -566,7 +566,7 @@ namespace ClassicUO.Game.GameObjects
             }
 
             ANIMATION_GROUPS_TYPE originalType = Client.Game.Animations.GetAnimType(graphic);
-            AnimationsLoader.Instance.ConvertBodyIfNeeded(ref graphic, isParent);
+            Client.Game.Animations.ConvertBodyIfNeeded(ref graphic, isParent);
             ANIMATION_GROUPS_TYPE type = Client.Game.Animations.GetAnimType(graphic);
             ANIMATION_FLAGS flags = Client.Game.Animations.GetAnimFlags(graphic);
 
