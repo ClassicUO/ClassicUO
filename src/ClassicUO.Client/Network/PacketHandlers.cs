@@ -4639,10 +4639,8 @@ namespace ClassicUO.Network
                     bool isfemale = p.ReadBool();
                     byte race = p.ReadUInt8();
 
-                    // TODO: gump race request
-
-                    GameActions.Print("[DEBUG]: change-race gump is not implemented yet.", 34);
-
+                    UIManager.GetGump<RaceChangeGump>()?.Dispose();
+                    UIManager.Add(new RaceChangeGump(isfemale, race));
                     break;
 
                 case 0x2B:
