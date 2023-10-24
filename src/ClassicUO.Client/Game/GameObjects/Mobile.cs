@@ -411,7 +411,7 @@ namespace ClassicUO.Game.GameObjects
 
                 ushort graphic = GetGraphicForAnimation();
 
-                if (graphic >= AnimationsLoader.Instance.MaxAnimationCount)
+                if (graphic >= Client.Game.Animations.MaxAnimationCount)
                 {
                     return;
                 }
@@ -425,8 +425,9 @@ namespace ClassicUO.Game.GameObjects
                     ref hue,
                     out var useUOP
                 );
-                ANIMATION_GROUPS_TYPE type = AnimationsLoader.Instance.GetAnimType(graphic);
-                ANIMATION_FLAGS flags = AnimationsLoader.Instance.GetAnimFlags(graphic);
+
+                ANIMATION_GROUPS_TYPE type = Client.Game.Animations.GetAnimType(graphic);
+                ANIMATION_FLAGS flags = Client.Game.Animations.GetAnimFlags(graphic);
                 ANIMATION_GROUPS animGroup = ANIMATION_GROUPS.AG_NONE;
 
                 bool isLowExtended = false;
@@ -603,7 +604,7 @@ namespace ClassicUO.Game.GameObjects
                 AnimationsLoader.Instance.GetAnimDirection(ref dir, ref mirror);
                 int currentDelay = Constants.CHARACTER_ANIMATION_DELAY;
 
-                if (id < AnimationsLoader.Instance.MaxAnimationCount && dir < 5)
+                if (id < Client.Game.Animations.MaxAnimationCount && dir < 5)
                 {
                     var frames = Client.Game.Animations.GetAnimationFrames(
                         id,

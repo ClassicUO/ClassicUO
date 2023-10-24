@@ -727,7 +727,7 @@ namespace ClassicUO.Game.GameObjects
                     bool mirror = false;
                     AnimationsLoader.Instance.GetAnimDirection(ref dir, ref mirror);
 
-                    if (id < AnimationsLoader.Instance.MaxAnimationCount && dir < 5)
+                    if (id < Client.Game.Animations.MaxAnimationCount && dir < 5)
                     {
                         byte action = AnimationsLoader.Instance.GetDeathAction(id, UsedLayer);
                         var frames = Client.Game.Animations.GetAnimationFrames(
