@@ -142,7 +142,9 @@ namespace ClassicUO.Game.GameObjects
 
             if (artInfo.Texture != null)
             {
-                ref UOFileIndex index = ref ArtLoader.Instance.GetValidRefEntry(graphic + 0x4000);
+                ref var index = ref ArtLoader.Instance.GetValidRefEntry(graphic + 0x4000);
+                index.Width = (short)((artInfo.UV.Width >> 1) - 22);
+                index.Height = (short)(artInfo.UV.Height - 44);
 
                 x -= index.Width;
                 y -= index.Height;
@@ -223,7 +225,9 @@ namespace ClassicUO.Game.GameObjects
 
             if (artInfo.Texture != null)
             {
-                ref UOFileIndex index = ref ArtLoader.Instance.GetValidRefEntry(graphic + 0x4000);
+                ref var index = ref ArtLoader.Instance.GetValidRefEntry(graphic + 0x4000);
+                index.Width = (short)((artInfo.UV.Width >> 1) - 22);
+                index.Height = (short)(artInfo.UV.Height - 44);
 
                 batcher.Draw(
                     artInfo.Texture,
@@ -263,6 +267,8 @@ namespace ClassicUO.Game.GameObjects
             if (artInfo.Texture != null)
             {
                 index = ref ArtLoader.Instance.GetValidRefEntry(graphic + 0x4000);
+                index.Width = (short)((artInfo.UV.Width >> 1) - 22);
+                index.Height = (short)(artInfo.UV.Height - 44);
 
                 x -= index.Width;
                 y -= index.Height;

@@ -260,34 +260,50 @@ namespace ClassicUO.Assets
             ProcessCorpseDef();
         }
 
-        public void LoadAnimIndex(
-            int fileIndex,
-            ushort graphic,
-            ANIMATION_GROUPS_TYPE animType,
-            ANIMATION_FLAGS animFlags
+        public ReadOnlySpan<AnimIdxBlock> LoadAnimIndex(
+            ref int fileIndex,
+            ref ushort graphic
         )
         {
             if (fileIndex < 0 || fileIndex >= _files.Length)
-                return;
+                return ReadOnlySpan<AnimIdxBlock>.Empty;
 
-            if (animType == ANIMATION_GROUPS_TYPE.UNKNOWN)
-                animType = CalculateTypeByGraphic(graphic);
+            _mobTypes.TryGetValue(graphic, out var mobInfo);
+            var animType = mobInfo.Type != ANIMATION_GROUPS_TYPE.UNKNOWN ? mobInfo.Type : CalculateTypeByGraphic(graphic);
+
+            if (_bodyInfos.TryGetValue(graphic, out var bodyInfo))
+            {
+                if (fileIndex <= 0)
+                    graphic = bodyInfo.Graphic;
+            }
+
+            if (_bodyConvInfos.TryGetValue(graphic, out var bodyConvInfo))
+            {
+                if (fileIndex <= 0)
+                {
+                    fileIndex = (byte)bodyConvInfo.FileIndex;
+                    animType = bodyConvInfo.AnimType;
+                    graphic = bodyConvInfo.Graphic;
+                }
+            }
 
             var fileIdx = _files[fileIndex].IdxFile;
-            var offsetAddress = CalculateOffset(graphic, animType, animFlags, out var actionCount);
+            var offsetAddress = CalculateOffset(graphic, animType, mobInfo.Flags, out var actionCount);
 
             var animIdxSpan = new ReadOnlySpan<AnimIdxBlock>(
                 (byte*)(fileIdx.StartAddress.ToInt64() + offsetAddress),
                 actionCount * MAX_DIRECTIONS
             );
 
-            foreach (ref readonly var aidx in animIdxSpan)
-            {
-                if (aidx.Size != 0 && aidx.Position != 0xFFFFFFFF && aidx.Size != 0xFFFFFFFF)
-                {
-                    // TODO: set Position and Size
-                }
-            }
+            return animIdxSpan;
+
+            //foreach (ref readonly var aidx in animIdxSpan)
+            //{
+            //    if (aidx.Size != 0 && aidx.Position != 0xFFFFFFFF && aidx.Size != 0xFFFFFFFF)
+            //    {
+            //        // TODO: set Position and Size
+            //    }
+            //}
         }
 
         public long CalculateOffset(
@@ -433,7 +449,7 @@ namespace ClassicUO.Assets
             }
         }
 
-        private void ProcessBodyConvDef(BodyConvFlags flags)
+        public void ProcessBodyConvDef(BodyConvFlags flags)
         {
             if (UOFileManager.Version < ClientVersion.CV_300)
             {
@@ -1433,25 +1449,38 @@ namespace ClassicUO.Assets
             return frames;
         }
 
-        public Span<FrameInfo> ReadMULAnimationFrames(int animID, int fileIndex)
+        public Span<FrameInfo> ReadMULAnimationFrames(int fileIndex, AnimIdxBlock index)
         {
             if (fileIndex < 0 || fileIndex >= _filesUop.Length)
             {
                 return Span<FrameInfo>.Empty;
             }
 
-            var file = _files[fileIndex];
-            ref readonly var index = ref GetValidRefEntry(animID);
+           
+            //var animIndices = LoadAnimIndex(ref fileIndex, ref animID);
 
-            if (index.Offset == 0 && index.Length == 0)
+            //var offset = action * MAX_DIRECTIONS + direction;
+            //if (offset >= animIndices.Length)
+            //    return Span<FrameInfo>.Empty;
+
+            //var index = animIndices[action * MAX_DIRECTIONS + direction];
+
+            if (index.Position == 0 && index.Size == 0)
             {
                 return Span<FrameInfo>.Empty;
             }
 
+            if (index.Position == 0xFFFF_FFFF) // TODO: Size != 0xFFFF_FFFF ?
+            {
+                return Span<FrameInfo>.Empty;
+            }
+
+            var file = _files[fileIndex];
+
             var reader = new StackDataReader(
                 new ReadOnlySpan<byte>(
-                    (byte*)file.StartAddress.ToPointer() + index.Offset,
-                    length: index.Length
+                    (byte*)file.StartAddress.ToPointer() + index.Position,
+                    length: (int)index.Size
                 )
             );
             reader.Seek(0);
@@ -1600,11 +1629,11 @@ namespace ClassicUO.Assets
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
-        private struct AnimIdxBlock
+        public struct AnimIdxBlock
         {
-            public readonly uint Position;
-            public readonly uint Size;
-            public readonly uint Unknown;
+            public uint Position;
+            public uint Size;
+            public uint Unknown;
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
