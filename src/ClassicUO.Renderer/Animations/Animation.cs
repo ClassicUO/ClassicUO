@@ -112,6 +112,29 @@ namespace ClassicUO.Renderer.Animations
                 return Span<SpriteInfo>.Empty;
             }
 
+            if (_dataIndex[id] == null)
+            {
+                var idx = _dataIndex[id] = new IndexAnimation();
+                idx.Graphic = id;
+        
+                var indices = AnimationsLoader.Instance.LoadAnimIndex(ref idx.FileIndex, ref idx.Graphic);
+                if (!indices.IsEmpty)
+                {
+                    idx.Groups = new AnimationGroup[indices.Length / 5];
+                    for (int i = 0; i < idx.Groups.Length; i++)
+                    {
+                        idx.Groups[i] = new AnimationGroup();
+
+                        for (int d = 0; d < 5; d++)
+                        {
+                            ref readonly var animIdx = ref indices[i * 5 + d];
+                            idx.Groups[i].Direction[d].Address = animIdx.Position;
+                            idx.Groups[i].Direction[d].Size = animIdx.Size;
+                        }
+                    }
+                }
+            }
+
             ReplaceAnimationValues(
                 ref id,
                 ref action,
@@ -126,12 +149,43 @@ namespace ClassicUO.Renderer.Animations
 
             if (index == null)
             {
-                return Span<SpriteInfo>.Empty;
+                //var idx = index = _dataIndex[id] = new IndexAnimation();
+                //idx.Graphic = id;
+
+                //var indices = AnimationsLoader.Instance.LoadAnimIndex(ref idx.FileIndex, ref idx.Graphic);
+                //if (!indices.IsEmpty)
+                //{
+                //    idx.Groups = new AnimationGroup[indices.Length / 5];
+                //    for (int i = 0; i < idx.Groups.Length; i++)
+                //    {
+                //        idx.Groups[i] = new AnimationGroup();
+
+                //        for (int d = 0; d < 5; d++)
+                //        {
+                //            ref readonly var animIdx = ref indices[i * 5 + d];
+                //            idx.Groups[i].Direction[d].Address = animIdx.Position;
+                //            idx.Groups[i].Direction[d].Size = animIdx.Size;
+                //        }
+                //    }
+                //}
+                //else 
+                    return Span<SpriteInfo>.Empty;
             }
 
             // NOTE:
             // for UOP: we don't call the method index.GetUopGroup(ref x) because the action has been already changed by the method ReplaceAnimationValues
-            AnimationGroup groupObj = useUOP ? index.UopGroups?[action] : index.Groups?[action];
+
+            AnimationGroup groupObj = null;
+            if (useUOP)
+            {
+                if (index.UopGroups == null || action >= index.UopGroups.Length)
+                    return Span<SpriteInfo>.Empty;
+                groupObj = index.UopGroups[action];
+            }
+            else if (index.Groups != null && action < index.Groups.Length)
+            {
+                groupObj = index.Groups[action];
+            }
 
             if (groupObj == null)
             {
@@ -140,7 +194,7 @@ namespace ClassicUO.Renderer.Animations
 
             ref var animDir = ref groupObj.Direction[dir];
 
-            if (animDir.Address == -1)
+            if (animDir.Address == uint.MaxValue)
             {
                 return Span<SpriteInfo>.Empty;
             }
@@ -169,7 +223,13 @@ namespace ClassicUO.Renderer.Animations
                 }
                 else
                 {
-                    frames = AnimationsLoader.Instance.ReadMULAnimationFrames(id, index.FileIndex);
+                    var ff = new AnimationsLoader.AnimIdxBlock()
+                    {
+                        Position = groupObj.Direction[dir].Address,
+                        Size = groupObj.Direction[dir].Size,
+                    };
+
+                    frames = AnimationsLoader.Instance.ReadMULAnimationFrames(index.FileIndex, ff);
                 }
 
                 if (frames.IsEmpty)
@@ -215,19 +275,20 @@ namespace ClassicUO.Renderer.Animations
 
         public void UpdateAnimationTable(BodyConvFlags flags)
         {
-            // if (flags != _lastFlags)
-            // {
-            //     if (_lastFlags != (BodyConvFlags)(-1))
-            //     {
-            //         /* This happens when you log out of an account then into another
-            //          * one with different expansions activated. Just reload the anim
-            //          * files from scratch. */
-            //         Array.Clear(_dataIndex, 0, _dataIndex.Length);
-            //         LoadInternal();
-            //     }
+            AnimationsLoader.Instance.ProcessBodyConvDef(flags);
+            //if (flags != _lastFlags)
+            //{
+            //    if (_lastFlags != (BodyConvFlags)(-1))
+            //    {
+            //        /* This happens when you log out of an account then into another
+            //         * one with different expansions activated. Just reload the anim
+            //         * files from scratch. */
+            //        Array.Clear(_dataIndex, 0, _dataIndex.Length);
+            //        LoadInternal();
+            //    }
 
-            //     ProcessBodyConvDef(flags);
-            // }
+            //    ProcessBodyConvDef(flags);
+            //}
 
             //_lastFlags = flags;
         }
@@ -373,7 +434,7 @@ namespace ClassicUO.Renderer.Animations
             public ushort CorpseGraphic;
             public ushort Color;
             public ushort CorpseColor;
-            public byte FileIndex;
+            public int FileIndex;
             public ANIMATION_FLAGS Flags;
             public AnimationGroup[] Groups;
             public AnimationGroupUop[] UopGroups;

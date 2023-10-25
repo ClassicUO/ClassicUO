@@ -40,7 +40,7 @@ namespace ClassicUO.Renderer.Arts
                         out spriteInfo.UV
                     );
 
-                    _picker.Set(idx, artInfo.Width, artInfo.Height, artInfo.Pixels);
+                    _picker.Set((ulong)(idx & ~0x4000), artInfo.Width, artInfo.Height, artInfo.Pixels);
 
                     if (idx > 0x4000)
                     {
