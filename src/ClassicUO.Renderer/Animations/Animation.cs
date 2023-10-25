@@ -112,65 +112,36 @@ namespace ClassicUO.Renderer.Animations
                 return Span<SpriteInfo>.Empty;
             }
 
-            if (_dataIndex[id] == null)
+            ref var index = ref _dataIndex[id];
+            if (index == null)
             {
-                var idx = _dataIndex[id] = new IndexAnimation();
-                idx.Graphic = id;
-        
-                var indices = AnimationsLoader.Instance.LoadAnimIndex(ref idx.FileIndex, ref idx.Graphic);
+                var original = id;
+                index = new IndexAnimation();
+                var indices = AnimationsLoader.Instance.GetIndices(ref id, ref hue, ref index.Flags, out index.FileIndex, out index.Type);
+                var replaced = AnimationsLoader.Instance.ReplaceBody(ref id, ref hue);
+                index.Graphic = id;
+
                 if (!indices.IsEmpty)
                 {
-                    idx.Groups = new AnimationGroup[indices.Length / 5];
-                    for (int i = 0; i < idx.Groups.Length; i++)
+                    index.Groups = new AnimationGroup[indices.Length / 5];
+                    for (int i = 0; i < index.Groups.Length; i++)
                     {
-                        idx.Groups[i] = new AnimationGroup();
+                        index.Groups[i] = new AnimationGroup();
 
                         for (int d = 0; d < 5; d++)
                         {
                             ref readonly var animIdx = ref indices[i * 5 + d];
-                            idx.Groups[i].Direction[d].Address = animIdx.Position;
-                            idx.Groups[i].Direction[d].Size = animIdx.Size;
+                            index.Groups[i].Direction[d].Address = animIdx.Position;
+                            index.Groups[i].Direction[d].Size = animIdx.Size;
                         }
                     }
                 }
+
+                _dataIndex[original] = index;
+                _dataIndex[id] = index;
             }
 
-            ReplaceAnimationValues(
-                ref id,
-                ref action,
-                ref hue,
-                out useUOP,
-                isEquip,
-                isCorpse,
-                forceUOP
-            );
-
-            IndexAnimation index = _dataIndex[id];
-
-            if (index == null)
-            {
-                //var idx = index = _dataIndex[id] = new IndexAnimation();
-                //idx.Graphic = id;
-
-                //var indices = AnimationsLoader.Instance.LoadAnimIndex(ref idx.FileIndex, ref idx.Graphic);
-                //if (!indices.IsEmpty)
-                //{
-                //    idx.Groups = new AnimationGroup[indices.Length / 5];
-                //    for (int i = 0; i < idx.Groups.Length; i++)
-                //    {
-                //        idx.Groups[i] = new AnimationGroup();
-
-                //        for (int d = 0; d < 5; d++)
-                //        {
-                //            ref readonly var animIdx = ref indices[i * 5 + d];
-                //            idx.Groups[i].Direction[d].Address = animIdx.Position;
-                //            idx.Groups[i].Direction[d].Size = animIdx.Size;
-                //        }
-                //    }
-                //}
-                //else 
-                    return Span<SpriteInfo>.Empty;
-            }
+            useUOP = index.Flags.HasFlag(ANIMATION_FLAGS.AF_USE_UOP_ANIMATION);
 
             // NOTE:
             // for UOP: we don't call the method index.GetUopGroup(ref x) because the action has been already changed by the method ReplaceAnimationValues

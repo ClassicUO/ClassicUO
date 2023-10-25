@@ -260,6 +260,59 @@ namespace ClassicUO.Assets
             ProcessCorpseDef();
         }
 
+        public bool ReplaceBody(ref ushort body, ref ushort hue)
+        {
+            if (_bodyInfos.TryGetValue(body, out var bodyInfo))
+            {
+                body = bodyInfo.Graphic;
+                hue = bodyInfo.Hue;
+
+                return true;
+            }
+
+            return false;
+        }
+
+        public ReadOnlySpan<AnimIdxBlock> GetIndices(ref ushort body, ref ushort hue, ref ANIMATION_FLAGS flags, out int fileIndex, out ANIMATION_GROUPS_TYPE animType)
+        {
+            fileIndex = 0;
+            animType = ANIMATION_GROUPS_TYPE.UNKNOWN;
+
+            if (!_mobTypes.TryGetValue(body, out var mobInfo))
+            {
+                return ReadOnlySpan<AnimIdxBlock>.Empty;
+            }
+
+            flags = mobInfo.Flags;
+
+            if (mobInfo.Flags.HasFlag(ANIMATION_FLAGS.AF_USE_UOP_ANIMATION))
+            {
+                // TODO: calculate UOP stuff
+                return ReadOnlySpan<AnimIdxBlock>.Empty;
+            }
+
+            if (_bodyConvInfos.TryGetValue(body, out var bodyConvInfo))
+            {
+                hue = bodyConvInfo.Hue;
+                body = bodyConvInfo.Graphic;
+                fileIndex = bodyConvInfo.FileIndex;
+                animType = bodyConvInfo.AnimType;
+            }
+
+            if (animType == ANIMATION_GROUPS_TYPE.UNKNOWN)
+                animType = mobInfo.Type != ANIMATION_GROUPS_TYPE.UNKNOWN ? mobInfo.Type : CalculateTypeByGraphic(body);
+
+            var fileIdx = _files[fileIndex].IdxFile;
+            var offsetAddress = CalculateOffset(body, animType, flags, out var actionCount);
+
+            var animIdxSpan = new ReadOnlySpan<AnimIdxBlock>(
+                (byte*)(fileIdx.StartAddress.ToInt64() + offsetAddress),
+                actionCount * MAX_DIRECTIONS
+            );
+
+            return animIdxSpan;
+        }
+
         public ReadOnlySpan<AnimIdxBlock> LoadAnimIndex(
             ref int fileIndex,
             ref ushort graphic
