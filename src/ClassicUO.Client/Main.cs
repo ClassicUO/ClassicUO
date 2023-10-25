@@ -38,13 +38,13 @@ using ClassicUO.Network;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
-using ClassicUO.Utility.Platforms;
 using SDL2;
 using System;
 using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Windows.Forms;
 
 namespace ClassicUO
 {
@@ -197,7 +197,27 @@ namespace ClassicUO
 
             if (!Directory.Exists(Settings.GlobalSettings.UltimaOnlineDirectory) || !File.Exists(Path.Combine(Settings.GlobalSettings.UltimaOnlineDirectory, "tiledata.mul")))
             {
-                flags |= INVALID_UO_DIRECTORY;
+                bool foundFolder = false;
+                using (var fbd = new FolderBrowserDialog())
+                {
+                    fbd.Description = "Please select your Ultima Online directory.";
+                    DialogResult result = fbd.ShowDialog();
+
+                    if (result == DialogResult.OK && !string.IsNullOrWhiteSpace(fbd.SelectedPath))
+                    {
+                        if (Directory.Exists(fbd.SelectedPath) && File.Exists(Path.Combine(fbd.SelectedPath, "tiledata.mul")))
+                        {
+                            Settings.GlobalSettings.UltimaOnlineDirectory = fbd.SelectedPath;
+                            Settings.GlobalSettings.Save();
+                            foundFolder = true;
+                        }
+                    }
+                }
+
+                if (!foundFolder)
+                {
+                    flags |= INVALID_UO_DIRECTORY;
+                }
             }
 
             string clientVersionText = Settings.GlobalSettings.ClientVersion;
