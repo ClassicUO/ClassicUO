@@ -142,7 +142,7 @@ namespace ClassicUO.Game.Scenes
 
             Client.Game.Audio.PlayMusic(Client.Game.Audio.LoginMusicIndex, false, true);
 
-            if (CanAutologin && CurrentLoginStep != LoginSteps.Main || CUOEnviroment.SkipLoginScreen)
+            if (CanAutologin && CurrentLoginStep != LoginSteps.Main || CUOEnviroment.SkipLoginScreen && _currentGump != null)
             {
                 if (!string.IsNullOrEmpty(Settings.GlobalSettings.Username))
                 {
@@ -194,7 +194,7 @@ namespace ClassicUO.Game.Scenes
                 // this trick avoid the flickering
                 Gump g = _currentGump;
                 UIManager.Add(_currentGump = GetGumpForStep());
-                g.Dispose();
+                g?.Dispose();
 
                 _lastLoginStep = CurrentLoginStep;
             }
