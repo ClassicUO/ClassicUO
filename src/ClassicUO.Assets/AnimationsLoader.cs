@@ -35,6 +35,7 @@ using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Runtime.CompilerServices;
@@ -287,8 +288,36 @@ namespace ClassicUO.Assets
 
             if (mobInfo.Flags.HasFlag(ANIMATION_FLAGS.AF_USE_UOP_ANIMATION))
             {
-                // TODO: calculate UOP stuff
-                return ReadOnlySpan<AnimIdxBlock>.Empty;
+                if (animType == ANIMATION_GROUPS_TYPE.UNKNOWN)
+                    animType = mobInfo.Type != ANIMATION_GROUPS_TYPE.UNKNOWN ? mobInfo.Type : CalculateTypeByGraphic(body);
+
+                var animIndices = Array.Empty<AnimIdxBlock>();
+
+                for (int action = 0; action < MAX_ACTIONS; ++action)
+                {
+                    var hashstring = $"build/animationlegacyframe/{body:D6}/{action:D2}.bin";
+                    var hash = UOFileUop.CreateHash(hashstring);
+
+                    for (int index = 0; index < _filesUop.Length; ++index)
+                    {
+                        if (_filesUop[index] != null && _filesUop[index].TryGetUOPData(hash, out var data))
+                        {
+                            if (animIndices.Length == 0)
+                                animIndices = new AnimIdxBlock[MAX_ACTIONS];
+
+                            fileIndex = index;
+
+                            ref var animIndex = ref animIndices[action];
+                            animIndex.Position = (uint)data.Offset;
+                            animIndex.Size = (uint)data.Length;
+                            animIndex.Unknown = (uint)data.DecompressedLength;
+
+                            break;
+                        }
+                    }
+                }
+                
+                return animIndices;
             }
 
             if (_bodyConvInfos.TryGetValue(body, out var bodyConvInfo))
@@ -311,52 +340,6 @@ namespace ClassicUO.Assets
             );
 
             return animIdxSpan;
-        }
-
-        public ReadOnlySpan<AnimIdxBlock> LoadAnimIndex(
-            ref int fileIndex,
-            ref ushort graphic
-        )
-        {
-            if (fileIndex < 0 || fileIndex >= _files.Length)
-                return ReadOnlySpan<AnimIdxBlock>.Empty;
-
-            _mobTypes.TryGetValue(graphic, out var mobInfo);
-            var animType = mobInfo.Type != ANIMATION_GROUPS_TYPE.UNKNOWN ? mobInfo.Type : CalculateTypeByGraphic(graphic);
-
-            if (_bodyInfos.TryGetValue(graphic, out var bodyInfo))
-            {
-                if (fileIndex <= 0)
-                    graphic = bodyInfo.Graphic;
-            }
-
-            if (_bodyConvInfos.TryGetValue(graphic, out var bodyConvInfo))
-            {
-                if (fileIndex <= 0)
-                {
-                    fileIndex = (byte)bodyConvInfo.FileIndex;
-                    animType = bodyConvInfo.AnimType;
-                    graphic = bodyConvInfo.Graphic;
-                }
-            }
-
-            var fileIdx = _files[fileIndex].IdxFile;
-            var offsetAddress = CalculateOffset(graphic, animType, mobInfo.Flags, out var actionCount);
-
-            var animIdxSpan = new ReadOnlySpan<AnimIdxBlock>(
-                (byte*)(fileIdx.StartAddress.ToInt64() + offsetAddress),
-                actionCount * MAX_DIRECTIONS
-            );
-
-            return animIdxSpan;
-
-            //foreach (ref readonly var aidx in animIdxSpan)
-            //{
-            //    if (aidx.Size != 0 && aidx.Position != 0xFFFFFFFF && aidx.Size != 0xFFFFFFFF)
-            //    {
-            //        // TODO: set Position and Size
-            //    }
-            //}
         }
 
         public long CalculateOffset(
@@ -825,10 +808,10 @@ namespace ClassicUO.Assets
             //     }
             // }
 
-            for (int i = 0; i < _filesUop.Length; i++)
-            {
-                _filesUop[i]?.ClearHashes();
-            }
+            //for (int i = 0; i < _filesUop.Length; i++)
+            //{
+            //    _filesUop[i]?.ClearHashes();
+            //}
 
             string animationSequencePath = UOFileManager.GetUOFilePath("AnimationSequence.uop");
 
@@ -984,7 +967,6 @@ namespace ClassicUO.Assets
                             {
                                 replacedAnimSpan[oldGroup] = newGroup;
                             }
-
                             reader.Skip(60);
                         }
 
@@ -1026,19 +1008,19 @@ namespace ClassicUO.Assets
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe uint CalculatePeopleGroupOffset(ushort graphic)
+        private static unsafe uint CalculatePeopleGroupOffset(ushort graphic)
         {
             return (uint)(((graphic - 400) * 175 + 35000) * sizeof(AnimIdxBlock));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe uint CalculateHighGroupOffset(ushort graphic)
+        private static unsafe uint CalculateHighGroupOffset(ushort graphic)
         {
             return (uint)(graphic * 110 * sizeof(AnimIdxBlock));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe uint CalculateLowGroupOffset(ushort graphic)
+        private static unsafe uint CalculateLowGroupOffset(ushort graphic)
         {
             return (uint)(((graphic - 200) * 65 + 22000) * sizeof(AnimIdxBlock));
         }
@@ -1359,7 +1341,8 @@ namespace ClassicUO.Assets
             byte animGroup,
             byte direction,
             ANIMATION_GROUPS_TYPE type,
-            int fileIndex
+            int fileIndex,
+            AnimationsLoader.AnimIdxBlock index
         )
         {
             if (fileIndex < 0 || fileIndex >= _filesUop.Length)
@@ -1368,9 +1351,8 @@ namespace ClassicUO.Assets
             }
 
             var file = _filesUop[fileIndex];
-            ref readonly var index = ref GetValidRefEntry(animID);
 
-            if (index.Offset == 0 || (index.Offset + index.Length) >= index.Address.ToInt64())
+            if (index.Position == 0 && index.Size == 0)
             {
                 return Span<FrameInfo>.Empty;
             }
@@ -1382,9 +1364,9 @@ namespace ClassicUO.Assets
 
             if (
                 fileIndex == 0
-                && index.Length == 0
-                && index.DecompressedLength == 0
-                && index.Offset == 0
+                && index.Size == 0
+                && index.Unknown == 0
+                && index.Position == 0
             )
             {
                 Log.Warn("uop animData is null");
@@ -1392,26 +1374,26 @@ namespace ClassicUO.Assets
                 return Span<FrameInfo>.Empty;
             }
 
-            file.Seek(index.Offset);
+            file.Seek(index.Position);
 
-            if (_decompressedData == null || index.DecompressedLength > _decompressedData.Length)
+            if (_decompressedData == null || index.Unknown > _decompressedData.Length)
             {
-                _decompressedData = new byte[index.DecompressedLength];
+                _decompressedData = new byte[index.Unknown];
             }
 
             fixed (byte* ptr = _decompressedData.AsSpan())
             {
                 ZLib.Decompress(
                     file.PositionAddress,
-                    index.Length,
+                    (int)index.Size,
                     0,
                     (IntPtr)ptr,
-                    index.DecompressedLength
+                    (int)index.Unknown
                 );
             }
 
             var reader = new StackDataReader(
-                _decompressedData.AsSpan().Slice(0, index.DecompressedLength)
+                _decompressedData.AsSpan().Slice(0, (int)index.Unknown)
             );
             reader.Skip(32);
 
@@ -1508,15 +1490,6 @@ namespace ClassicUO.Assets
             {
                 return Span<FrameInfo>.Empty;
             }
-
-           
-            //var animIndices = LoadAnimIndex(ref fileIndex, ref animID);
-
-            //var offset = action * MAX_DIRECTIONS + direction;
-            //if (offset >= animIndices.Length)
-            //    return Span<FrameInfo>.Empty;
-
-            //var index = animIndices[action * MAX_DIRECTIONS + direction];
 
             if (index.Position == 0 && index.Size == 0)
             {
