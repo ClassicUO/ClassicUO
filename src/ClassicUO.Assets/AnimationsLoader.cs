@@ -41,6 +41,7 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using static System.Collections.Specialized.BitVector32;
 
 namespace ClassicUO.Assets
 {
@@ -291,12 +292,14 @@ namespace ClassicUO.Assets
                 if (animType == ANIMATION_GROUPS_TYPE.UNKNOWN)
                     animType = mobInfo.Type != ANIMATION_GROUPS_TYPE.UNKNOWN ? mobInfo.Type : CalculateTypeByGraphic(body);
 
+                var replaceFound = _uopInfos.TryGetValue(body, out var uopInfo);
                 var animIndices = Array.Empty<AnimIdxBlock>();
 
-                for (int action = 0; action < MAX_ACTIONS; ++action)
+                for (int actioIdx = 0; actioIdx < MAX_ACTIONS; ++actioIdx)
                 {
-                    var hashstring = $"build/animationlegacyframe/{body:D6}/{action:D2}.bin";
-                    var hash = UOFileUop.CreateHash(hashstring);
+                    var action = replaceFound ? uopInfo.ReplacedAnimations[actioIdx] : actioIdx;
+                    var hashString = $"build/animationlegacyframe/{body:D6}/{action:D2}.bin";
+                    var hash = UOFileUop.CreateHash(hashString);
 
                     for (int index = 0; index < _filesUop.Length; ++index)
                     {
