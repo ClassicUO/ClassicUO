@@ -345,7 +345,7 @@ namespace ClassicUO.Assets
             }
 
             if (animType == ANIMATION_GROUPS_TYPE.UNKNOWN)
-                animType = mobInfo.Type != ANIMATION_GROUPS_TYPE.UNKNOWN ? mobInfo.Type : CalculateTypeByGraphic(body);
+                animType = mobInfo.Type != ANIMATION_GROUPS_TYPE.UNKNOWN ? mobInfo.Type : CalculateTypeByGraphic(body, fileIndex);
 
             var fileIdx = _files[fileIndex].IdxFile;
             var offsetAddress = CalculateOffset(body, animType, flags, out var actionCount);
