@@ -123,18 +123,34 @@ namespace ClassicUO.Renderer.Animations
 
                 if (!indices.IsEmpty)
                 {
-                    index.Groups = new AnimationGroup[indices.Length / 5];
-                    for (int i = 0; i < index.Groups.Length; i++)
+                    if (index.Flags.HasFlag(ANIMATION_FLAGS.AF_USE_UOP_ANIMATION))
                     {
-                        index.Groups[i] = new AnimationGroup();
-
-                        for (int d = 0; d < 5; d++)
+                        index.UopGroups = new AnimationGroupUop[indices.Length];
+                        for (int i = 0; i < index.UopGroups.Length; i++)
                         {
-                            ref readonly var animIdx = ref indices[i * 5 + d];
-                            index.Groups[i].Direction[d].Address = animIdx.Position;
-                            index.Groups[i].Direction[d].Size = animIdx.Size;
+                            index.UopGroups[i] = new AnimationGroupUop();
+                            index.UopGroups[i].FileIndex = index.FileIndex;
+                            index.UopGroups[i].DecompressedLength = indices[i].Unknown;
+                            index.UopGroups[i].CompressedLength = indices[i].Size;
+                            index.UopGroups[i].Offset = indices[i].Position;
                         }
                     }
+                    else
+                    {
+                        index.Groups = new AnimationGroup[indices.Length / 5];
+                        for (int i = 0; i < index.Groups.Length; i++)
+                        {
+                            index.Groups[i] = new AnimationGroup();
+
+                            for (int d = 0; d < 5; d++)
+                            {
+                                ref readonly var animIdx = ref indices[i * 5 + d];
+                                index.Groups[i].Direction[d].Address = animIdx.Position;
+                                index.Groups[i].Direction[d].Size = animIdx.Size;
+                            }
+                        }
+                    }
+                    
                 }
 
                 _dataIndex[original] = index;
@@ -183,12 +199,21 @@ namespace ClassicUO.Renderer.Animations
                 //(animDir.Address == 0 && animDir.Size == 0)
                 )
                 {
+                    var uopGroupObj = (AnimationGroupUop)groupObj;
+                    var ff = new AnimationsLoader.AnimIdxBlock()
+                    {
+                        Position = uopGroupObj.Offset,
+                        Size = uopGroupObj.CompressedLength,
+                        Unknown = uopGroupObj.DecompressedLength
+                    };
+
                     frames = AnimationsLoader.Instance.ReadUOPAnimationFrames(
                         id,
                         action,
                         dir,
                         index.Type,
-                        index.FileIndex
+                        index.FileIndex,
+                        ff
                     );
                     uopFlag = 1;
                 }
@@ -415,7 +440,7 @@ namespace ClassicUO.Renderer.Animations
 
             public AnimationGroupUop GetUopGroup(ref byte group)
             {
-                if (group < AnimationsLoader.MAX_ACTIONS && UopGroups != null)
+                if (_uopReplaceGroupIndex != null && group < AnimationsLoader.MAX_ACTIONS && UopGroups != null)
                 {
                     group = _uopReplaceGroupIndex[group];
 
