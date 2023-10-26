@@ -416,15 +416,15 @@ namespace ClassicUO.Game.GameObjects
                     return;
                 }
 
-                byte action = 0;
-                ushort hue = 0;
+                //byte action = 0;
+                //ushort hue = 0;
 
-                Client.Game.Animations.ReplaceAnimationValues(
-                    ref graphic,
-                    ref action,
-                    ref hue,
-                    out var useUOP
-                );
+                //Client.Game.Animations.ReplaceAnimationValues(
+                //    ref graphic,
+                //    ref action,
+                //    ref hue,
+                //    out var useUOP
+                //);
 
                 ANIMATION_GROUPS_TYPE type = Client.Game.Animations.GetAnimType(graphic);
                 ANIMATION_FLAGS flags = Client.Game.Animations.GetAnimFlags(graphic);

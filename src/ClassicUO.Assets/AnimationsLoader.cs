@@ -275,6 +275,19 @@ namespace ClassicUO.Assets
             return false;
         }
 
+        public bool ReplaceCorpse(ref ushort body, ref ushort hue)
+        {
+            if (_corpseInfos.TryGetValue(body, out var bodyInfo))
+            {
+                body = bodyInfo.Graphic;
+                hue = bodyInfo.Hue;
+
+                return true;
+            }
+
+            return false;
+        }
+
         public ReadOnlySpan<AnimIdxBlock> GetIndices(ref ushort body, ref ushort hue, ref ANIMATION_FLAGS flags, out int fileIndex, out ANIMATION_GROUPS_TYPE animType)
         {
             fileIndex = 0;
@@ -345,7 +358,7 @@ namespace ClassicUO.Assets
             return animIdxSpan;
         }
 
-        public long CalculateOffset(
+        private long CalculateOffset(
             ushort graphic,
             ANIMATION_GROUPS_TYPE type,
             ANIMATION_FLAGS flags,
@@ -1472,7 +1485,7 @@ namespace ClassicUO.Assets
 
                         reader.Skip((int)animHeaderInfo->DataOffset);
 
-                        ushort* palette = (ushort*)reader.PositionAddress;
+                        var palette = new ReadOnlySpan<ushort>(reader.PositionAddress.ToPointer(), 512 / sizeof(ushort));
                         reader.Skip(512);
 
                         ReadSpriteData(ref reader, palette, ref frame, true);
@@ -1489,7 +1502,7 @@ namespace ClassicUO.Assets
 
         public Span<FrameInfo> ReadMULAnimationFrames(int fileIndex, AnimIdxBlock index)
         {
-            if (fileIndex < 0 || fileIndex >= _filesUop.Length)
+            if (fileIndex < 0 || fileIndex >= _files.Length)
             {
                 return Span<FrameInfo>.Empty;
             }
@@ -1514,7 +1527,7 @@ namespace ClassicUO.Assets
             );
             reader.Seek(0);
 
-            ushort* palette = (ushort*)reader.PositionAddress;
+            var palette = new ReadOnlySpan<ushort>(reader.PositionAddress.ToPointer(), 512 / sizeof(ushort));
             reader.Skip(512);
 
             long dataStart = reader.Position;
@@ -1541,7 +1554,7 @@ namespace ClassicUO.Assets
 
         private void ReadSpriteData(
             ref StackDataReader reader,
-            ushort* palette,
+            ReadOnlySpan<ushort> palette,
             ref FrameInfo frame,
             bool alphaCheck
         )

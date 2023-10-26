@@ -40,10 +40,8 @@ namespace ClassicUO.Renderer.Animations
             int y
         )
         {
-            ushort hue = 0;
-            ReplaceAnimationValues(ref animID, ref group, ref hue, out var isUOP, forceUOP: uop);
 
-            uint packed32 = (uint)((group | (direction << 8) | ((isUOP ? 0x01 : 0x00) << 16)));
+            uint packed32 = (uint)((group | (direction << 8) | ((uop ? 0x01 : 0x00) << 16)));
             uint packed32_2 = (uint)((animID | (frame << 16)));
             ulong packed = (packed32_2 | ((ulong)packed32 << 32));
 
@@ -112,14 +110,19 @@ namespace ClassicUO.Renderer.Animations
                 return Span<SpriteInfo>.Empty;
             }
 
+            var original = id;
+
             ref var index = ref _dataIndex[id];
             if (index == null)
             {
-                var original = id;
                 index = new IndexAnimation();
                 var indices = AnimationsLoader.Instance.GetIndices(ref id, ref hue, ref index.Flags, out index.FileIndex, out index.Type);
-                var replaced = AnimationsLoader.Instance.ReplaceBody(ref id, ref hue);
-                index.Graphic = id;
+                var replaced = isCorpse ? AnimationsLoader.Instance.ReplaceCorpse(ref id, ref hue) : AnimationsLoader.Instance.ReplaceBody(ref id, ref hue);
+
+                if (isCorpse)
+                    index.CorpseGraphic = id;
+                else
+                    index.Graphic = id;
 
                 if (!indices.IsEmpty)
                 {
@@ -149,8 +152,7 @@ namespace ClassicUO.Renderer.Animations
                                 index.Groups[i].Direction[d].Size = animIdx.Size;
                             }
                         }
-                    }
-                    
+                    }  
                 }
 
                 _dataIndex[original] = index;
@@ -161,7 +163,6 @@ namespace ClassicUO.Renderer.Animations
 
             // NOTE:
             // for UOP: we don't call the method index.GetUopGroup(ref x) because the action has been already changed by the method ReplaceAnimationValues
-
             AnimationGroup groupObj = null;
             if (useUOP)
             {
@@ -190,8 +191,6 @@ namespace ClassicUO.Renderer.Animations
 
             if (animDir.FrameCount <= 0 || animDir.SpriteInfos == null)
             {
-                int uopFlag = 0;
-
                 if (useUOP
                 //animDir.IsUOP ||
                 ///* If it's not flagged as UOP, but there is no mul data, try to load
@@ -215,7 +214,6 @@ namespace ClassicUO.Renderer.Animations
                         index.FileIndex,
                         ff
                     );
-                    uopFlag = 1;
                 }
                 else
                 {
@@ -249,8 +247,8 @@ namespace ClassicUO.Renderer.Animations
                         continue;
                     }
 
-                    uint keyUpper = (uint)((action | (dir << 8) | (uopFlag << 16)));
-                    uint keyLower = (uint)((id | (frame.Num << 16)));
+                    uint keyUpper = (uint)((action | (dir << 8) | ((useUOP ? 1 : 0) << 16)));
+                    uint keyLower = (uint)((original | (frame.Num << 16)));
                     ulong key = (keyLower | ((ulong)keyUpper << 32));
 
                     _picker.Set(key, frame.Width, frame.Height, frame.Pixels);
@@ -295,31 +293,31 @@ namespace ClassicUO.Renderer.Animations
             bool forceUOP = false
         )
         {
-            if (graphic >= _dataIndex.Length)
-            {
-                return;
-            }
+            //if (graphic >= _dataIndex.Length)
+            //{
+            //    return;
+            //}
 
-            IndexAnimation dataIndex = _dataIndex[graphic];
+            //IndexAnimation dataIndex = _dataIndex[graphic];
 
-            if (dataIndex == null)
-            {
-                return;
-            }
+            //if (dataIndex == null)
+            //{
+            //    return;
+            //}
 
-            if ((dataIndex.IsUOP && (isParent || !dataIndex.IsValidMUL)) || forceUOP)
-            {
-                // do nothing ?
-            }
-            else
-            {
-                if (
-                    dataIndex.FileIndex == 0 /*|| !dataIndex.IsValidMUL*/
-                )
-                {
-                    graphic = dataIndex.Graphic;
-                }
-            }
+            //if ((dataIndex.IsUOP && (isParent || !dataIndex.IsValidMUL)) || forceUOP)
+            //{
+            //    // do nothing ?
+            //}
+            //else
+            //{
+            //    if (
+            //        dataIndex.FileIndex == 0 /*|| !dataIndex.IsValidMUL*/
+            //    )
+            //    {
+            //        graphic = dataIndex.Graphic;
+            //    }
+            //}
         }
 
         public void ReplaceAnimationValues(
@@ -381,24 +379,6 @@ namespace ClassicUO.Renderer.Animations
                 }
             }
         }
-
-        public void ApplyConversions()
-        {
-            var isCorpse = false;
-
-            if (isCorpse)
-                ApplyCorpse();
-            else
-                ApplyBody();
-
-            ApplyBodyConv();
-        }
-
-        private void ApplyBody() { }
-
-        private void ApplyCorpse() { }
-
-        private void ApplyBodyConv() { }
 
         public bool IsAnimationExists(ushort graphic, byte group, bool isCorpse = false)
         {
