@@ -35,13 +35,11 @@ using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using static System.Collections.Specialized.BitVector32;
 
 namespace ClassicUO.Assets
 {
