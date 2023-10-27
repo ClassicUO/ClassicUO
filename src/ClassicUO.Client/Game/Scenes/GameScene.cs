@@ -192,6 +192,20 @@ namespace ClassicUO.Game.Scenes
             GameController.UpdateBackgroundHueShader();
             SpellVisualRangeManager.Instance.OnSceneLoad();
             AutoLootManager.Instance.OnSceneLoad();
+            if (UpdateManager.HasUpdate)
+            {
+                UpdateManager.SendDelayedUpdateMessage();
+            }
+            else
+            {
+                UpdateManager.UpdateStatusChanged += (s, e) =>
+                {
+                    if (UpdateManager.HasUpdate)
+                    {
+                        UpdateManager.SendDelayedUpdateMessage();
+                    }
+                };
+            }
         }
 
         private void ChatOnMessageReceived(object sender, MessageEventArgs e)

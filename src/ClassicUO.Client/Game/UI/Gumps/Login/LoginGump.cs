@@ -537,6 +537,29 @@ namespace ClassicUO.Game.UI.Gumps.Login
             {
                 _textboxAccount.SetKeyboardFocus();
             }
+
+            _ = new TextBox("A new version of TazUO is available!\n Click to open the download page.", TrueTypeLoader.EMBEDDED_FONT, 20, 300, Color.Yellow, strokeEffect: false) { X = 10, Y = 10, AcceptMouseInput = false };
+            Add(_hit = new HitBox(_.X, _.Y, _.MeasuredSize.X, _.MeasuredSize.Y));
+            _hit.MouseUp += (s, e) =>
+            {
+                Utility.Platforms.PlatformHelper.LaunchBrowser("https://github.com/bittiez/TazUO/releases/latest");
+            };
+            _hit.Add(new AlphaBlendControl() { Width = _hit.Width, Height = _hit.Height });
+            Add(_);
+            if (!UpdateManager.HasUpdate)
+            {
+                _.IsVisible = false;
+                _hit.IsVisible = false;
+            }
+
+            UpdateManager.UpdateStatusChanged += (s, e) => {
+                if (UpdateManager.HasUpdate)
+                {
+                    _.IsVisible = true;
+                    _hit.IsVisible = true;
+                }
+            };
+
         }
 
         public override void OnKeyboardReturn(int textID, string text)
