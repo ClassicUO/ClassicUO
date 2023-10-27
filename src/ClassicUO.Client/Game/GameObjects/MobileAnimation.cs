@@ -167,7 +167,7 @@ namespace ClassicUO.Game.GameObjects
                     {
                         if (
                             (flags & AnimationFlags.IdleAt8Frame) != 0
-                            && Client.Game.Animations.IsAnimationExists(graphic, 8)
+                            && Client.Game.Animations.AnimationExists(graphic, 8)
                         )
                         {
                             result = 8;
@@ -192,7 +192,7 @@ namespace ClassicUO.Game.GameObjects
                 {
                     if (
                         (flags & AnimationFlags.CanFlying) != 0
-                        && Client.Game.Animations.IsAnimationExists(graphic, 19)
+                        && Client.Game.Animations.AnimationExists(graphic, 19)
                     )
                     {
                         result = 19;
@@ -635,10 +635,10 @@ namespace ClassicUO.Game.GameObjects
                                     case 26:
 
                                         if (
-                                            !Client.Game.Animations.IsAnimationExists(graphic, 26)
+                                            !Client.Game.Animations.AnimationExists(graphic, 26)
                                             || (
                                                 mobile.InWarMode
-                                                && Client.Game.Animations.IsAnimationExists(
+                                                && Client.Game.Animations.AnimationExists(
                                                     graphic,
                                                     9
                                                 )
@@ -653,7 +653,7 @@ namespace ClassicUO.Game.GameObjects
                                     case 28:
 
                                         v13 = (ushort)(
-                                            Client.Game.Animations.IsAnimationExists(graphic, 10)
+                                            Client.Game.Animations.AnimationExists(graphic, 10)
                                                 ? 10
                                                 : 5
                                         );
@@ -702,7 +702,7 @@ namespace ClassicUO.Game.GameObjects
                         originalType = AnimationGroupsType.Unknown;
                     }
 
-                    if (!Client.Game.Animations.IsAnimationExists(graphic, (byte)v13))
+                    if (!Client.Game.Animations.AnimationExists(graphic, (byte)v13))
                     {
                         v13 = 1;
                     }
@@ -1089,7 +1089,7 @@ namespace ClassicUO.Game.GameObjects
                                 {
                                     if (
                                         mobile.InWarMode
-                                        && Client.Game.Animations.IsAnimationExists(graphic, 1)
+                                        && Client.Game.Animations.AnimationExists(graphic, 1)
                                     )
                                     {
                                         result = 1;
@@ -1113,7 +1113,7 @@ namespace ClassicUO.Game.GameObjects
                             }
                             else
                             {
-                                result = Client.Game.Animations.IsAnimationExists(graphic, 1)
+                                result = Client.Game.Animations.AnimationExists(graphic, 1)
                                     ? (byte)1
                                     : (byte)2;
                             }
@@ -1122,7 +1122,7 @@ namespace ClassicUO.Game.GameObjects
                             (flags & AnimationFlags.UseUopAnimation) != 0
                             && (
                                 !mobile.InWarMode
-                                || !Client.Game.Animations.IsAnimationExists(graphic, 0)
+                                || !Client.Game.Animations.AnimationExists(graphic, 0)
                             )
                         )
                         {
@@ -1208,7 +1208,7 @@ namespace ClassicUO.Game.GameObjects
                                     if (
                                         uop
                                         && type == AnimationGroupsType.Equipment
-                                        && Client.Game.Animations.IsAnimationExists(graphic, 37)
+                                        && Client.Game.Animations.AnimationExists(graphic, 37)
                                     )
                                     {
                                         result = 37;
@@ -1249,7 +1249,7 @@ namespace ClassicUO.Game.GameObjects
                                             if (
                                                 uop
                                                 && type == AnimationGroupsType.Equipment
-                                                && !Client.Game.Animations.IsAnimationExists(
+                                                && !Client.Game.Animations.AnimationExists(
                                                     graphic,
                                                     7
                                                 )
@@ -1336,7 +1336,7 @@ namespace ClassicUO.Game.GameObjects
                             }
                             else
                             {
-                                if (isRun && Client.Game.Animations.IsAnimationExists(graphic, 24))
+                                if (isRun && Client.Game.Animations.AnimationExists(graphic, 24))
                                 {
                                     result = 24;
                                 }
@@ -1347,7 +1347,7 @@ namespace ClassicUO.Game.GameObjects
                                         if (
                                             uop
                                             && type == AnimationGroupsType.Equipment
-                                            && !Client.Game.Animations.IsAnimationExists(graphic, 2)
+                                            && !Client.Game.Animations.AnimationExists(graphic, 2)
                                         )
                                         {
                                             result = 3;
@@ -1367,7 +1367,7 @@ namespace ClassicUO.Game.GameObjects
                                         if (
                                             uop
                                             && type == AnimationGroupsType.Equipment
-                                            && !Client.Game.Animations.IsAnimationExists(graphic, 0)
+                                            && !Client.Game.Animations.AnimationExists(graphic, 0)
                                         )
                                         {
                                             result = 1;
@@ -1693,12 +1693,12 @@ namespace ClassicUO.Game.GameObjects
                             if (
                                 mobile.IsGargoyle
                                 && mobile.IsFlying
-                                && Client.Game.Animations.IsAnimationExists(mobile.Graphic, 71)
+                                && Client.Game.Animations.AnimationExists(mobile.Graphic, 71)
                             )
                             {
                                 return 71;
                             }
-                            else if (Client.Game.Animations.IsAnimationExists(mobile.Graphic, 31))
+                            else if (Client.Game.Animations.AnimationExists(mobile.Graphic, 31))
                             {
                                 return 31;
                             }
@@ -1718,7 +1718,7 @@ namespace ClassicUO.Game.GameObjects
                             if (
                                 mobile.IsGargoyle
                                 && mobile.IsFlying
-                                && Client.Game.Animations.IsAnimationExists(mobile.Graphic, 72)
+                                && Client.Game.Animations.AnimationExists(mobile.Graphic, 72)
                             )
                             {
                                 return 72;
@@ -1745,7 +1745,7 @@ namespace ClassicUO.Game.GameObjects
                     return 2;
                 }
 
-                if (mode % 2 != 0 && Client.Game.Animations.IsAnimationExists(mobile.Graphic, 6))
+                if (mode % 2 != 0 && Client.Game.Animations.AnimationExists(mobile.Graphic, 6))
                 {
                     return 6;
                 }
@@ -1847,7 +1847,7 @@ namespace ClassicUO.Game.GameObjects
                     if (
                         mobile.IsGargoyle
                         && mobile.IsFlying
-                        && Client.Game.Animations.IsAnimationExists(mobile.Graphic, 77)
+                        && Client.Game.Animations.AnimationExists(mobile.Graphic, 77)
                     )
                     {
                         return 77;

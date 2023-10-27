@@ -507,8 +507,8 @@ namespace ClassicUO.Game.GameObjects
                 if (isLowExtended && _animationGroup == 18)
                 {
                     if (
-                        !Client.Game.Animations.IsAnimationExists(graphic, 18)
-                        && Client.Game.Animations.IsAnimationExists(graphic, 17)
+                        !Client.Game.Animations.AnimationExists(graphic, 18)
+                        && Client.Game.Animations.AnimationExists(graphic, 17)
                     )
                     {
                         _animationGroup = GetReplacedObjectAnimation(graphic, 17);
@@ -519,7 +519,7 @@ namespace ClassicUO.Game.GameObjects
                     }
                 }
 
-                if (!Client.Game.Animations.IsAnimationExists(graphic, _animationGroup))
+                if (!Client.Game.Animations.AnimationExists(graphic, _animationGroup))
                 {
                     if (first_value == 0)
                     {
@@ -532,7 +532,7 @@ namespace ClassicUO.Game.GameObjects
 
                     _animationGroup = _animationIdle[(byte)animGroup - 1, first_value];
 
-                    if (!Client.Game.Animations.IsAnimationExists(graphic, _animationGroup))
+                    if (!Client.Game.Animations.AnimationExists(graphic, _animationGroup))
                     {
                         SetAnimation(original_value);
                     }
