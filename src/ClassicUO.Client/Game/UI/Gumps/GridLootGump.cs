@@ -71,6 +71,8 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
+            AutoLootManager.Instance.HandleCorpse(_corpse);
+
             if (World.Player.ManualOpenedCorpses.Contains(LocalSerial))
             {
                 World.Player.ManualOpenedCorpses.Remove(LocalSerial);

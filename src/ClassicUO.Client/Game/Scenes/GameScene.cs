@@ -191,6 +191,7 @@ namespace ClassicUO.Game.Scenes
             Plugin.OnConnected();
             GameController.UpdateBackgroundHueShader();
             SpellVisualRangeManager.Instance.OnSceneLoad();
+            AutoLootManager.Instance.OnSceneLoad();
         }
 
         private void ChatOnMessageReceived(object sender, MessageEventArgs e)
@@ -349,6 +350,7 @@ namespace ClassicUO.Game.Scenes
             TileMarkerManager.Instance.Save();
             SpellVisualRangeManager.Instance.Save();
             SpellVisualRangeManager.Instance.OnSceneUnload();
+            AutoLootManager.Instance.Save();
 
             Macros.Save();
             InfoBars.Save();

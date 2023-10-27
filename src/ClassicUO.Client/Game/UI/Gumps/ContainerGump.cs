@@ -129,6 +129,8 @@ namespace ClassicUO.Game.UI.Gumps
                     IsVisible = false;
                     _hideIfEmpty = true;
                 }
+
+                AutoLootManager.Instance.HandleCorpse(item);
             }
 
             if (_data.OpenSound != 0 && playsound)

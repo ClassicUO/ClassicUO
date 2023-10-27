@@ -153,6 +153,8 @@ namespace ClassicUO.Game.UI.Gumps
                     IsVisible = false;
                     Dispose();
                 }
+
+                AutoLootManager.Instance.HandleCorpse(_container);
             }
             else
             {
@@ -212,7 +214,12 @@ namespace ClassicUO.Game.UI.Gumps
             };
             _openRegularGump.MouseEnter += (sender, e) => { _openRegularGump.Graphic = regularGumpIcon == null ? (ushort)1210 : (ushort)5840; };
             _openRegularGump.MouseExit += (sender, e) => { _openRegularGump.Graphic = regularGumpIcon == null ? (ushort)1209 : (ushort)5839; };
-            _openRegularGump.SetTooltip("Open the original style container.");
+            _openRegularGump.SetTooltip("Open the original style container.\n\n" +
+                "/c[orange]Grid Container Controls:/cd\n" +
+                "Ctrl + Click to lock an item in place\n" +
+                "Alt + Click to add an item to the quick move queue\n" +
+                "Shift + Click to add an item to your auto loot list\n" +
+                "Sort and single click looting can be enabled with the icons on thr right side");
 
             var quickDropIcon = GumpsLoader.Instance.GetGumpTexture(1625, out var bounds1);
             _quickDropBackpack = new ResizableStaticPic(World.Player.FindItemByLayer(Layer.Backpack).DisplayedGraphic, 20, 20)
@@ -955,6 +962,11 @@ namespace ClassicUO.Game.UI.Gumps
                         MultiItemMoveGump.AddMultiItemMoveGumpToUI(gridContainer.X - 200, gridContainer.Y);
                         SelectHighlight = true;
                         Mouse.CancelDoubleClick = true;
+                    }
+                    else if (Keyboard.Shift && _item != null)
+                    {
+                        AutoLootManager.Instance.AddLootItem(_item.Graphic, _item.Hue, _item.Name);
+                        GameActions.Print($"Added this item to auto loot.");
                     }
                     else if (_item != null)
                     {

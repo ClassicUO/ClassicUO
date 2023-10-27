@@ -520,6 +520,8 @@ namespace ClassicUO.Configuration
 
         public bool EnableSpellIndicators { get; set; } = true;
 
+        public bool EnableAutoLoot { get; set; } = false;
+
         public static uint GumpsVersion { get; private set; }
 
         public void Save(string path, bool saveGumps = true)
