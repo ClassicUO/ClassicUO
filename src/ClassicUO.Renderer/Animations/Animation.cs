@@ -41,10 +41,10 @@ namespace ClassicUO.Renderer.Animations
         public int MaxAnimationCount => _dataIndex.Length;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ANIMATION_GROUPS_TYPE GetAnimType(ushort graphic) => _dataIndex[graphic]?.Type ?? 0;
+        public AnimationGroupsType GetAnimType(ushort graphic) => _dataIndex[graphic]?.Type ?? 0;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ANIMATION_FLAGS GetAnimFlags(ushort graphic) => _dataIndex[graphic]?.Flags ?? 0;
+        public AnimationFlags  GetAnimFlags(ushort graphic) => _dataIndex[graphic]?.Flags ?? 0;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public sbyte GetMountedHeightOffset(ushort graphic) =>
@@ -153,7 +153,7 @@ namespace ClassicUO.Renderer.Animations
 
                     if (!indices.IsEmpty)
                     {
-                        if (index.Flags.HasFlag(ANIMATION_FLAGS.AF_USE_UOP_ANIMATION))
+                        if (index.Flags.HasFlag(AnimationFlags.UseUopAnimation))
                         {
                             index.UopGroups = new AnimationGroupUop[indices.Length];
                             for (int i = 0; i < index.UopGroups.Length; i++)
@@ -200,7 +200,7 @@ namespace ClassicUO.Renderer.Animations
            
             
 
-            useUOP = index.Flags.HasFlag(ANIMATION_FLAGS.AF_USE_UOP_ANIMATION);
+            useUOP = index.Flags.HasFlag(AnimationFlags.UseUopAnimation);
             hue = index.Hue;
 
             // NOTE:
@@ -340,7 +340,7 @@ namespace ClassicUO.Renderer.Animations
 
             ushort hue = 0;
 
-            if (_dataIndex[graphic] != null && _dataIndex[graphic].FileIndex == 0 && !_dataIndex[graphic].Flags.HasFlag(ANIMATION_FLAGS.AF_USE_UOP_ANIMATION))
+            if (_dataIndex[graphic] != null && _dataIndex[graphic].FileIndex == 0 && !_dataIndex[graphic].Flags.HasFlag(AnimationFlags.UseUopAnimation))
                 AnimationsLoader.Instance.ReplaceBody(ref graphic, ref hue);
         }
 
@@ -368,11 +368,11 @@ namespace ClassicUO.Renderer.Animations
         {
             public int FileIndex;
             public ushort Hue;
-            public ANIMATION_FLAGS Flags;
+            public AnimationFlags  Flags;
             public AnimationGroup[] Groups;
             public AnimationGroupUop[] UopGroups;
             public sbyte MountedHeightOffset;
-            public ANIMATION_GROUPS_TYPE Type = ANIMATION_GROUPS_TYPE.UNKNOWN;
+            public AnimationGroupsType Type = AnimationGroupsType.Unknown;
         }
     }
 }

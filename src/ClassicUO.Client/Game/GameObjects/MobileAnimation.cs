@@ -124,20 +124,20 @@ namespace ClassicUO.Game.GameObjects
         private static void CalculateHight(
             ushort graphic,
             Mobile mobile,
-            ANIMATION_FLAGS flags,
+            AnimationFlags  flags,
             bool isrun,
             bool iswalking,
             ref byte result
         )
         {
-            if ((flags & ANIMATION_FLAGS.AF_CALCULATE_OFFSET_BY_PEOPLE_GROUP) != 0)
+            if ((flags & AnimationFlags.CalculateOffsetByPeopleGroup) != 0)
             {
                 if (result == 0xFF)
                 {
                     result = 0;
                 }
             }
-            else if ((flags & ANIMATION_FLAGS.AF_CALCULATE_OFFSET_BY_LOW_GROUP) != 0)
+            else if ((flags & AnimationFlags.CalculateOffsetByLowGroup) != 0)
             {
                 if (!iswalking)
                 {
@@ -166,7 +166,7 @@ namespace ClassicUO.Game.GameObjects
                     if (result == 0xFF)
                     {
                         if (
-                            (flags & ANIMATION_FLAGS.AF_IDLE_AT_8_FRAME) != 0
+                            (flags & AnimationFlags.IdleAt8Frame) != 0
                             && Client.Game.Animations.IsAnimationExists(graphic, 8)
                         )
                         {
@@ -175,7 +175,7 @@ namespace ClassicUO.Game.GameObjects
                         else
                         {
                             if (
-                                (flags & ANIMATION_FLAGS.AF_USE_UOP_ANIMATION) != 0
+                                (flags & AnimationFlags.UseUopAnimation) != 0
                                 && !mobile.InWarMode
                             )
                             {
@@ -191,7 +191,7 @@ namespace ClassicUO.Game.GameObjects
                 else if (isrun)
                 {
                     if (
-                        (flags & ANIMATION_FLAGS.AF_CAN_FLYING) != 0
+                        (flags & AnimationFlags.CanFlying) != 0
                         && Client.Game.Animations.IsAnimationExists(graphic, 19)
                     )
                     {
@@ -199,7 +199,7 @@ namespace ClassicUO.Game.GameObjects
                     }
                     else
                     {
-                        if ((flags & ANIMATION_FLAGS.AF_USE_UOP_ANIMATION) != 0)
+                        if ((flags & AnimationFlags.UseUopAnimation) != 0)
                         {
                             result = 24;
                         }
@@ -211,7 +211,7 @@ namespace ClassicUO.Game.GameObjects
                 }
                 else
                 {
-                    if ((flags & ANIMATION_FLAGS.AF_USE_UOP_ANIMATION) != 0 && !mobile.InWarMode)
+                    if ((flags & AnimationFlags.UseUopAnimation) != 0 && !mobile.InWarMode)
                     {
                         result = 22;
                     }
@@ -223,9 +223,9 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        private static void LABEL_222(ANIMATION_FLAGS flags, ref ushort v13)
+        private static void LABEL_222(AnimationFlags  flags, ref ushort v13)
         {
-            if ((flags & ANIMATION_FLAGS.AF_CALCULATE_OFFSET_LOW_GROUP_EXTENDED) != 0)
+            if ((flags & AnimationFlags.CalculateOffsetLowGroupExtended) != 0)
             {
                 switch (v13)
                 {
@@ -242,7 +242,7 @@ namespace ClassicUO.Game.GameObjects
                     case 5:
                     case 6:
 
-                        if ((flags & ANIMATION_FLAGS.AF_IDLE_AT_8_FRAME) != 0)
+                        if ((flags & AnimationFlags.IdleAt8Frame) != 0)
                         {
                             v13 = 4;
                         }
@@ -266,7 +266,7 @@ namespace ClassicUO.Game.GameObjects
                     case 10:
                         v13 = 18;
 
-                        if ((flags & ANIMATION_FLAGS.AF_IDLE_AT_8_FRAME) != 0)
+                        if ((flags & AnimationFlags.IdleAt8Frame) != 0)
                         {
                             v13--;
                         }
@@ -284,7 +284,7 @@ namespace ClassicUO.Game.GameObjects
             }
             else
             {
-                if ((flags & ANIMATION_FLAGS.AF_CALCULATE_OFFSET_BY_LOW_GROUP) != 0)
+                if ((flags & AnimationFlags.CalculateOffsetByLowGroup) != 0)
                 {
                     switch (v13)
                     {
@@ -365,14 +365,14 @@ namespace ClassicUO.Game.GameObjects
             //    v13 = 0;
         }
 
-        private static void LABEL_190(ANIMATION_FLAGS flags, ref ushort v13)
+        private static void LABEL_190(AnimationFlags  flags, ref ushort v13)
         {
-            if ((flags & ANIMATION_FLAGS.AF_UNKNOWN_80) != 0 && v13 == 4)
+            if ((flags & AnimationFlags.Unknown80) != 0 && v13 == 4)
             {
                 v13 = 5;
             }
 
-            if ((flags & ANIMATION_FLAGS.AF_UNKNOWN_200) != 0)
+            if ((flags & AnimationFlags.Unknown200) != 0)
             {
                 if (v13 - 7 > 9)
                 {
@@ -393,7 +393,7 @@ namespace ClassicUO.Game.GameObjects
             }
             else
             {
-                if ((flags & ANIMATION_FLAGS.AF_UNKNOWN_100) != 0)
+                if ((flags & AnimationFlags.Unknown100) != 0)
                 {
                     switch (v13)
                     {
@@ -417,7 +417,7 @@ namespace ClassicUO.Game.GameObjects
                     return;
                 }
 
-                if ((flags & ANIMATION_FLAGS.AF_UNKNOWN_1) != 0)
+                if ((flags & AnimationFlags.Unknown1) != 0)
                 {
                     if (v13 == 21)
                     {
@@ -429,7 +429,7 @@ namespace ClassicUO.Game.GameObjects
                     return;
                 }
 
-                if ((flags & ANIMATION_FLAGS.AF_CALCULATE_OFFSET_BY_PEOPLE_GROUP) == 0)
+                if ((flags & AnimationFlags.CalculateOffsetByPeopleGroup) == 0)
                 {
                     //LABEL_222:
                     LABEL_222(flags, ref v13);
@@ -565,12 +565,12 @@ namespace ClassicUO.Game.GameObjects
                 return 0;
             }
 
-            ANIMATION_GROUPS_TYPE originalType = Client.Game.Animations.GetAnimType(graphic);
+            AnimationGroupsType originalType = Client.Game.Animations.GetAnimType(graphic);
             Client.Game.Animations.ConvertBodyIfNeeded(ref graphic, isParent);
-            ANIMATION_GROUPS_TYPE type = Client.Game.Animations.GetAnimType(graphic);
-            ANIMATION_FLAGS flags = Client.Game.Animations.GetAnimFlags(graphic);
+            AnimationGroupsType type = Client.Game.Animations.GetAnimType(graphic);
+            AnimationFlags  flags = Client.Game.Animations.GetAnimFlags(graphic);
 
-            bool uop = (flags & ANIMATION_FLAGS.AF_USE_UOP_ANIMATION) != 0;
+            bool uop = (flags & AnimationFlags.UseUopAnimation) != 0;
 
             if (mobile.AnimationFromServer && mobile._animationGroup != 0xFF)
             {
@@ -580,17 +580,17 @@ namespace ClassicUO.Game.GameObjects
                 {
                     if (
                         !(
-                            type == ANIMATION_GROUPS_TYPE.HUMAN
-                            || type == ANIMATION_GROUPS_TYPE.EQUIPMENT
-                            || (flags & ANIMATION_FLAGS.AF_UNKNOWN_1000) != 0
+                            type == AnimationGroupsType.Human
+                            || type == AnimationGroupsType.Equipment
+                            || (flags & AnimationFlags.Unknown1000) != 0
                         )
                     )
                     {
-                        if (type != ANIMATION_GROUPS_TYPE.MONSTER)
+                        if (type != AnimationGroupsType.Monster)
                         {
                             if (
-                                type == ANIMATION_GROUPS_TYPE.HUMAN
-                                || type == ANIMATION_GROUPS_TYPE.EQUIPMENT
+                                type == AnimationGroupsType.Human
+                                || type == AnimationGroupsType.Equipment
                             )
                             {
                                 v13 = 16;
@@ -607,15 +607,15 @@ namespace ClassicUO.Game.GameObjects
                     }
                 }
 
-                if (type != ANIMATION_GROUPS_TYPE.MONSTER)
+                if (type != AnimationGroupsType.Monster)
                 {
-                    if (type != ANIMATION_GROUPS_TYPE.SEA_MONSTER)
+                    if (type != AnimationGroupsType.SeaMonster)
                     {
-                        if (type == ANIMATION_GROUPS_TYPE.ANIMAL)
+                        if (type == AnimationGroupsType.Animal)
                         {
                             if (IsReplacedObjectAnimation(0, v13))
                             {
-                                originalType = ANIMATION_GROUPS_TYPE.UNKNOWN;
+                                originalType = AnimationGroupsType.Unknown;
                             }
 
                             if (v13 > 12)
@@ -686,7 +686,7 @@ namespace ClassicUO.Game.GameObjects
                     {
                         if (IsReplacedObjectAnimation(3, v13))
                         {
-                            originalType = ANIMATION_GROUPS_TYPE.UNKNOWN;
+                            originalType = AnimationGroupsType.Unknown;
                         }
 
                         if (v13 > 8)
@@ -699,7 +699,7 @@ namespace ClassicUO.Game.GameObjects
                 {
                     if (IsReplacedObjectAnimation(2, v13))
                     {
-                        originalType = ANIMATION_GROUPS_TYPE.UNKNOWN;
+                        originalType = AnimationGroupsType.Unknown;
                     }
 
                     if (!Client.Game.Animations.IsAnimationExists(graphic, (byte)v13))
@@ -707,7 +707,7 @@ namespace ClassicUO.Game.GameObjects
                         v13 = 1;
                     }
 
-                    if ((flags & ANIMATION_FLAGS.AF_USE_UOP_ANIMATION) != 0)
+                    if ((flags & AnimationFlags.UseUopAnimation) != 0)
                     {
                         // do nothing?
                     }
@@ -717,7 +717,7 @@ namespace ClassicUO.Game.GameObjects
                     }
                 }
 
-                if (originalType == ANIMATION_GROUPS_TYPE.UNKNOWN)
+                if (originalType == AnimationGroupsType.Unknown)
                 {
                     LABEL_190(flags, ref v13);
 
@@ -727,8 +727,8 @@ namespace ClassicUO.Game.GameObjects
                 if (originalType != 0)
                 {
                     if (
-                        originalType == ANIMATION_GROUPS_TYPE.ANIMAL
-                        && type == ANIMATION_GROUPS_TYPE.MONSTER
+                        originalType == AnimationGroupsType.Animal
+                        && type == AnimationGroupsType.Monster
                     )
                     {
                         switch (v13)
@@ -806,7 +806,7 @@ namespace ClassicUO.Game.GameObjects
 
                 switch (type)
                 {
-                    case ANIMATION_GROUPS_TYPE.HUMAN:
+                    case AnimationGroupsType.Human:
 
                         switch (v13)
                         {
@@ -902,7 +902,7 @@ namespace ClassicUO.Game.GameObjects
 
                         goto LABEL_189;
 
-                    case ANIMATION_GROUPS_TYPE.ANIMAL:
+                    case AnimationGroupsType.Animal:
 
                         switch (v13)
                         {
@@ -978,7 +978,7 @@ namespace ClassicUO.Game.GameObjects
 
                         return (byte)v13;
 
-                    case ANIMATION_GROUPS_TYPE.SEA_MONSTER:
+                    case AnimationGroupsType.SeaMonster:
 
                         switch (v13)
                         {
@@ -1073,9 +1073,9 @@ namespace ClassicUO.Game.GameObjects
 
             switch (type)
             {
-                case ANIMATION_GROUPS_TYPE.ANIMAL:
+                case AnimationGroupsType.Animal:
 
-                    if ((flags & ANIMATION_FLAGS.AF_CALCULATE_OFFSET_LOW_GROUP_EXTENDED) != 0)
+                    if ((flags & AnimationFlags.CalculateOffsetLowGroupExtended) != 0)
                     {
                         CalculateHight(graphic, mobile, flags, isRun, isWalking, ref result);
                     }
@@ -1085,7 +1085,7 @@ namespace ClassicUO.Game.GameObjects
                         {
                             if (result == 0xFF)
                             {
-                                if ((flags & ANIMATION_FLAGS.AF_USE_UOP_ANIMATION) != 0)
+                                if ((flags & AnimationFlags.UseUopAnimation) != 0)
                                 {
                                     if (
                                         mobile.InWarMode
@@ -1107,7 +1107,7 @@ namespace ClassicUO.Game.GameObjects
                         }
                         else if (isRun)
                         {
-                            if ((flags & ANIMATION_FLAGS.AF_USE_UOP_ANIMATION) != 0)
+                            if ((flags & AnimationFlags.UseUopAnimation) != 0)
                             {
                                 result = 24;
                             }
@@ -1119,7 +1119,7 @@ namespace ClassicUO.Game.GameObjects
                             }
                         }
                         else if (
-                            (flags & ANIMATION_FLAGS.AF_USE_UOP_ANIMATION) != 0
+                            (flags & AnimationFlags.UseUopAnimation) != 0
                             && (
                                 !mobile.InWarMode
                                 || !Client.Game.Animations.IsAnimationExists(graphic, 0)
@@ -1136,12 +1136,12 @@ namespace ClassicUO.Game.GameObjects
 
                     break;
 
-                case ANIMATION_GROUPS_TYPE.MONSTER:
+                case AnimationGroupsType.Monster:
                     CalculateHight(graphic, mobile, flags, isRun, isWalking, ref result);
 
                     break;
 
-                case ANIMATION_GROUPS_TYPE.SEA_MONSTER:
+                case AnimationGroupsType.SeaMonster:
 
                     if (!isWalking)
                     {
@@ -1207,7 +1207,7 @@ namespace ClassicUO.Game.GameObjects
                                 {
                                     if (
                                         uop
-                                        && type == ANIMATION_GROUPS_TYPE.EQUIPMENT
+                                        && type == AnimationGroupsType.Equipment
                                         && Client.Game.Animations.IsAnimationExists(graphic, 37)
                                     )
                                     {
@@ -1248,7 +1248,7 @@ namespace ClassicUO.Game.GameObjects
                                         {
                                             if (
                                                 uop
-                                                && type == ANIMATION_GROUPS_TYPE.EQUIPMENT
+                                                && type == AnimationGroupsType.Equipment
                                                 && !Client.Game.Animations.IsAnimationExists(
                                                     graphic,
                                                     7
@@ -1320,7 +1320,7 @@ namespace ClassicUO.Game.GameObjects
                     //}
                     else if (isRun || !mobile.InWarMode || mobile.IsDead)
                     {
-                        if ((flags & ANIMATION_FLAGS.AF_USE_UOP_ANIMATION) != 0)
+                        if ((flags & AnimationFlags.UseUopAnimation) != 0)
                         {
                             // i'm not sure here if it's necessary the isgargoyle
                             if (mobile.IsGargoyle && mobile.IsFlying)
@@ -1346,7 +1346,7 @@ namespace ClassicUO.Game.GameObjects
                                     {
                                         if (
                                             uop
-                                            && type == ANIMATION_GROUPS_TYPE.EQUIPMENT
+                                            && type == AnimationGroupsType.Equipment
                                             && !Client.Game.Animations.IsAnimationExists(graphic, 2)
                                         )
                                         {
@@ -1366,7 +1366,7 @@ namespace ClassicUO.Game.GameObjects
                                     {
                                         if (
                                             uop
-                                            && type == ANIMATION_GROUPS_TYPE.EQUIPMENT
+                                            && type == AnimationGroupsType.Equipment
                                             && !Client.Game.Animations.IsAnimationExists(graphic, 0)
                                         )
                                         {
@@ -1508,34 +1508,34 @@ namespace ClassicUO.Game.GameObjects
                 return idx;
             }
 
-            ANIMATION_GROUPS group = AnimationsLoader.Instance.GetGroupIndex(
+            AnimationGroups group = AnimationsLoader.Instance.GetGroupIndex(
                 graphic,
                 Client.Game.Animations.GetAnimType(graphic)
             );
 
-            if (group == ANIMATION_GROUPS.AG_LOW)
+            if (group == AnimationGroups.Low)
             {
                 return (byte)(
                     getReplacedGroup(
                         AnimationsLoader.Instance.GroupReplaces[0],
                         index,
-                        (ushort)LOW_ANIMATION_GROUP.LAG_WALK
-                    ) % (ushort)LOW_ANIMATION_GROUP.LAG_ANIMATION_COUNT
+                        (ushort)LowAnimationGroup.Walk
+                    ) % (ushort)LowAnimationGroup.AnimationCount
                 );
             }
 
-            if (group == ANIMATION_GROUPS.AG_PEOPLE)
+            if (group == AnimationGroups.People)
             {
                 return (byte)(
                     getReplacedGroup(
                         AnimationsLoader.Instance.GroupReplaces[1],
                         index,
-                        (ushort)PEOPLE_ANIMATION_GROUP.PAG_WALK_UNARMED
-                    ) % (ushort)PEOPLE_ANIMATION_GROUP.PAG_ANIMATION_COUNT
+                        (ushort)PeopleAnimationGroup.WalkUnarmed
+                    ) % (ushort)PeopleAnimationGroup.AnimationCount
                 );
             }
 
-            return (byte)(index % (ushort)HIGHT_ANIMATION_GROUP.HAG_ANIMATION_COUNT);
+            return (byte)(index % (ushort)HighAnimationGroup.AnimationCount);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1594,15 +1594,15 @@ namespace ClassicUO.Game.GameObjects
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool TestStepNoChangeDirection(Mobile mob, byte group)
         {
-            switch ((PEOPLE_ANIMATION_GROUP)group)
+            switch ((PeopleAnimationGroup)group)
             {
-                case PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_RIDE_FAST:
-                case PEOPLE_ANIMATION_GROUP.PAG_RUN_UNARMED:
-                case PEOPLE_ANIMATION_GROUP.PAG_RUN_ARMED:
-                case PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_RIDE_SLOW:
-                case PEOPLE_ANIMATION_GROUP.PAG_WALK_WARMODE:
-                case PEOPLE_ANIMATION_GROUP.PAG_WALK_ARMED:
-                case PEOPLE_ANIMATION_GROUP.PAG_WALK_UNARMED:
+                case PeopleAnimationGroup.OnmountRideFast:
+                case PeopleAnimationGroup.RunUnarmed:
+                case PeopleAnimationGroup.RunArmed:
+                case PeopleAnimationGroup.OnmountRideSlow:
+                case PeopleAnimationGroup.WalkWarmode:
+                case PeopleAnimationGroup.WalkArmed:
+                case PeopleAnimationGroup.WalkUnarmed:
 
                     if (mob.Steps.Count != 0)
                     {
@@ -1625,15 +1625,15 @@ namespace ClassicUO.Game.GameObjects
         {
             if (action <= 10)
             {
-                ANIMATION_FLAGS flags = Client.Game.Animations.GetAnimFlags(mobile.Graphic);
-                ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
+                AnimationFlags  flags = Client.Game.Animations.GetAnimFlags(mobile.Graphic);
+                AnimationGroupsType type = AnimationGroupsType.Monster;
 
-                if ((flags & ANIMATION_FLAGS.AF_FOUND) != 0)
+                if ((flags & AnimationFlags.Found) != 0)
                 {
                     type = Client.Game.Animations.GetAnimType(mobile.Graphic);
                 }
 
-                if (type == ANIMATION_GROUPS_TYPE.MONSTER)
+                if (type == AnimationGroupsType.Monster)
                 {
                     switch (mode % 4)
                     {
@@ -1645,7 +1645,7 @@ namespace ClassicUO.Game.GameObjects
 
                         case 3:
 
-                            if ((flags & ANIMATION_FLAGS.AF_UNKNOWN_1) != 0)
+                            if ((flags & AnimationFlags.Unknown1) != 0)
                             {
                                 return 12;
                             }
@@ -1656,7 +1656,7 @@ namespace ClassicUO.Game.GameObjects
                             return 4;
                     }
                 }
-                else if (type == ANIMATION_GROUPS_TYPE.SEA_MONSTER)
+                else if (type == AnimationGroupsType.SeaMonster)
                 {
                     if (mode % 2 != 0)
                     {
@@ -1665,7 +1665,7 @@ namespace ClassicUO.Game.GameObjects
 
                     return 5;
                 }
-                else if (type != ANIMATION_GROUPS_TYPE.ANIMAL)
+                else if (type != AnimationGroupsType.Animal)
                 {
                     if (mobile.IsMounted)
                     {
@@ -1740,7 +1740,7 @@ namespace ClassicUO.Game.GameObjects
                     }
                 }
 
-                if ((flags & ANIMATION_FLAGS.AF_USE_2_IF_HITTED_WHILE_RUNNING) != 0)
+                if ((flags & AnimationFlags.Use2IfHittedWhileRunning) != 0)
                 {
                     return 2;
                 }
@@ -1759,17 +1759,17 @@ namespace ClassicUO.Game.GameObjects
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static byte GetObjectNewAnimationType_1_2(Mobile mobile, ushort action, byte mode)
         {
-            ANIMATION_FLAGS flags = Client.Game.Animations.GetAnimFlags(mobile.Graphic);
-            ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
+            AnimationFlags  flags = Client.Game.Animations.GetAnimFlags(mobile.Graphic);
+            AnimationGroupsType type = AnimationGroupsType.Monster;
 
-            if ((flags & ANIMATION_FLAGS.AF_FOUND) != 0)
+            if ((flags & AnimationFlags.Found) != 0)
             {
                 type = Client.Game.Animations.GetAnimType(mobile.Graphic);
             }
 
-            if (type != ANIMATION_GROUPS_TYPE.MONSTER)
+            if (type != AnimationGroupsType.Monster)
             {
-                if (type <= ANIMATION_GROUPS_TYPE.ANIMAL || mobile.IsMounted)
+                if (type <= AnimationGroupsType.Animal || mobile.IsMounted)
                 {
                     return 0xFF;
                 }
@@ -1788,22 +1788,22 @@ namespace ClassicUO.Game.GameObjects
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static byte GetObjectNewAnimationType_3(Mobile mobile, ushort action, byte mode)
         {
-            ANIMATION_FLAGS flags = Client.Game.Animations.GetAnimFlags(mobile.Graphic);
-            ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
+            AnimationFlags  flags = Client.Game.Animations.GetAnimFlags(mobile.Graphic);
+            AnimationGroupsType type = AnimationGroupsType.Monster;
 
-            if ((flags & ANIMATION_FLAGS.AF_FOUND) != 0)
+            if ((flags & AnimationFlags.Found) != 0)
             {
                 type = Client.Game.Animations.GetAnimType(mobile.Graphic);
             }
 
-            if (type != ANIMATION_GROUPS_TYPE.MONSTER)
+            if (type != AnimationGroupsType.Monster)
             {
-                if (type == ANIMATION_GROUPS_TYPE.SEA_MONSTER)
+                if (type == AnimationGroupsType.SeaMonster)
                 {
                     return 8;
                 }
 
-                if (type == ANIMATION_GROUPS_TYPE.ANIMAL)
+                if (type == AnimationGroupsType.Animal)
                 {
                     if (mode % 2 != 0)
                     {
@@ -1832,17 +1832,17 @@ namespace ClassicUO.Game.GameObjects
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static byte GetObjectNewAnimationType_4(Mobile mobile, ushort action, byte mode)
         {
-            ANIMATION_FLAGS flags = Client.Game.Animations.GetAnimFlags(mobile.Graphic);
-            ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
+            AnimationFlags  flags = Client.Game.Animations.GetAnimFlags(mobile.Graphic);
+            AnimationGroupsType type = AnimationGroupsType.Monster;
 
-            if ((flags & ANIMATION_FLAGS.AF_FOUND) != 0)
+            if ((flags & AnimationFlags.Found) != 0)
             {
                 type = Client.Game.Animations.GetAnimType(mobile.Graphic);
             }
 
-            if (type != ANIMATION_GROUPS_TYPE.MONSTER)
+            if (type != AnimationGroupsType.Monster)
             {
-                if (type > ANIMATION_GROUPS_TYPE.ANIMAL)
+                if (type > AnimationGroupsType.Animal)
                 {
                     if (
                         mobile.IsGargoyle
@@ -1870,15 +1870,15 @@ namespace ClassicUO.Game.GameObjects
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static byte GetObjectNewAnimationType_5(Mobile mobile, ushort action, byte mode)
         {
-            ANIMATION_FLAGS flags = Client.Game.Animations.GetAnimFlags(mobile.Graphic);
-            ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
+            AnimationFlags  flags = Client.Game.Animations.GetAnimFlags(mobile.Graphic);
+            AnimationGroupsType type = AnimationGroupsType.Monster;
 
-            if ((flags & ANIMATION_FLAGS.AF_FOUND) != 0)
+            if ((flags & AnimationFlags.Found) != 0)
             {
                 type = Client.Game.Animations.GetAnimType(mobile.Graphic);
             }
 
-            if (type <= ANIMATION_GROUPS_TYPE.SEA_MONSTER)
+            if (type <= AnimationGroupsType.SeaMonster)
             {
                 if (mode % 2 != 0)
                 {
@@ -1888,7 +1888,7 @@ namespace ClassicUO.Game.GameObjects
                 return 17;
             }
 
-            if (type != ANIMATION_GROUPS_TYPE.ANIMAL)
+            if (type != AnimationGroupsType.Animal)
             {
                 if (mobile.IsMounted)
                 {
@@ -1918,19 +1918,19 @@ namespace ClassicUO.Game.GameObjects
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static byte GetObjectNewAnimationType_6_14(Mobile mobile, ushort action, byte mode)
         {
-            ANIMATION_FLAGS flags = Client.Game.Animations.GetAnimFlags(mobile.Graphic);
-            ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
+            AnimationFlags  flags = Client.Game.Animations.GetAnimFlags(mobile.Graphic);
+            AnimationGroupsType type = AnimationGroupsType.Monster;
 
-            if ((flags & ANIMATION_FLAGS.AF_FOUND) != 0)
+            if ((flags & AnimationFlags.Found) != 0)
             {
                 type = Client.Game.Animations.GetAnimType(mobile.Graphic);
             }
 
-            if (type != ANIMATION_GROUPS_TYPE.MONSTER)
+            if (type != AnimationGroupsType.Monster)
             {
-                if (type != ANIMATION_GROUPS_TYPE.SEA_MONSTER)
+                if (type != AnimationGroupsType.SeaMonster)
                 {
-                    if (type == ANIMATION_GROUPS_TYPE.ANIMAL)
+                    if (type == AnimationGroupsType.Animal)
                     {
                         return 3;
                     }
@@ -1975,19 +1975,19 @@ namespace ClassicUO.Game.GameObjects
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static byte GetObjectNewAnimationType_8(Mobile mobile, ushort action, byte mode)
         {
-            ANIMATION_FLAGS flags = Client.Game.Animations.GetAnimFlags(mobile.Graphic);
-            ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
+            AnimationFlags  flags = Client.Game.Animations.GetAnimFlags(mobile.Graphic);
+            AnimationGroupsType type = AnimationGroupsType.Monster;
 
-            if ((flags & ANIMATION_FLAGS.AF_FOUND) != 0)
+            if ((flags & AnimationFlags.Found) != 0)
             {
                 type = Client.Game.Animations.GetAnimType(mobile.Graphic);
             }
 
-            if (type != ANIMATION_GROUPS_TYPE.MONSTER)
+            if (type != AnimationGroupsType.Monster)
             {
-                if (type != ANIMATION_GROUPS_TYPE.SEA_MONSTER)
+                if (type != AnimationGroupsType.SeaMonster)
                 {
-                    if (type == ANIMATION_GROUPS_TYPE.ANIMAL)
+                    if (type == AnimationGroupsType.Animal)
                     {
                         return 9;
                     }
@@ -2004,15 +2004,15 @@ namespace ClassicUO.Game.GameObjects
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static byte GetObjectNewAnimationType_9(Mobile mobile, ushort action, byte mode)
         {
-            ANIMATION_FLAGS flags = Client.Game.Animations.GetAnimFlags(mobile.Graphic);
-            ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
+            AnimationFlags  flags = Client.Game.Animations.GetAnimFlags(mobile.Graphic);
+            AnimationGroupsType type = AnimationGroupsType.Monster;
 
-            if ((flags & ANIMATION_FLAGS.AF_FOUND) != 0)
+            if ((flags & AnimationFlags.Found) != 0)
             {
                 type = Client.Game.Animations.GetAnimType(mobile.Graphic);
             }
 
-            if (type != ANIMATION_GROUPS_TYPE.MONSTER)
+            if (type != AnimationGroupsType.Monster)
             {
                 if (mobile.IsGargoyle)
                 {
@@ -2031,15 +2031,15 @@ namespace ClassicUO.Game.GameObjects
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static byte GetObjectNewAnimationType_10(Mobile mobile, ushort action, byte mode)
         {
-            ANIMATION_FLAGS flags = Client.Game.Animations.GetAnimFlags(mobile.Graphic);
-            ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
+            AnimationFlags  flags = Client.Game.Animations.GetAnimFlags(mobile.Graphic);
+            AnimationGroupsType type = AnimationGroupsType.Monster;
 
-            if ((flags & ANIMATION_FLAGS.AF_FOUND) != 0)
+            if ((flags & AnimationFlags.Found) != 0)
             {
                 type = Client.Game.Animations.GetAnimType(mobile.Graphic);
             }
 
-            if (type != ANIMATION_GROUPS_TYPE.MONSTER)
+            if (type != AnimationGroupsType.Monster)
             {
                 if (mobile.IsGargoyle)
                 {
@@ -2058,17 +2058,17 @@ namespace ClassicUO.Game.GameObjects
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static byte GetObjectNewAnimationType_11(Mobile mobile, ushort action, byte mode)
         {
-            ANIMATION_FLAGS flags = Client.Game.Animations.GetAnimFlags(mobile.Graphic);
-            ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
+            AnimationFlags  flags = Client.Game.Animations.GetAnimFlags(mobile.Graphic);
+            AnimationGroupsType type = AnimationGroupsType.Monster;
 
-            if ((flags & ANIMATION_FLAGS.AF_FOUND) != 0)
+            if ((flags & AnimationFlags.Found) != 0)
             {
                 type = Client.Game.Animations.GetAnimType(mobile.Graphic);
             }
 
-            if (type != ANIMATION_GROUPS_TYPE.MONSTER)
+            if (type != AnimationGroupsType.Monster)
             {
-                if (type >= ANIMATION_GROUPS_TYPE.ANIMAL)
+                if (type >= AnimationGroupsType.Animal)
                 {
                     if (mobile.IsMounted)
                     {
