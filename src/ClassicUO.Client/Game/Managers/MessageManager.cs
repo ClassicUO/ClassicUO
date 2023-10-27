@@ -75,6 +75,8 @@ namespace ClassicUO.Game.Managers
 
         public static event EventHandler<MessageEventArgs> MessageReceived;
 
+        public static event EventHandler<MessageEventArgs> RawMessageReceived;
+
         public static event EventHandler<MessageEventArgs> LocalizedMessageReceived;
 
 
@@ -97,6 +99,23 @@ namespace ClassicUO.Game.Managers
             }
 
             Profile currentProfile = ProfileManager.CurrentProfile;
+
+            RawMessageReceived.Raise
+            (
+                new MessageEventArgs
+                (
+                    parent,
+                    text,
+                    name,
+                    hue,
+                    type,
+                    font,
+                    textType,
+                    unicode,
+                    lang
+                ),
+                parent
+            );
 
             if (currentProfile != null && currentProfile.OverrideAllFonts)
             {

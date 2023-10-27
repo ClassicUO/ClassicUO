@@ -89,7 +89,7 @@ namespace ClassicUO.Game.Scenes
         public static string Account { get; internal set; }
         public string Password { get; private set; }
         public bool CanAutologin => _autoLogin || Reconnect;
-        
+
 
         public override void Load()
         {
@@ -100,11 +100,49 @@ namespace ClassicUO.Game.Scenes
             _autoLogin = Settings.GlobalSettings.AutoLogin;
 
             UIManager.Add(new LoginBackground());
-            UIManager.Add(_currentGump = new LoginGump(this));          
+
+            if (string.IsNullOrEmpty(Settings.GlobalSettings.IP))
+            {
+                UIManager.Add(new InputRequest("Please enter a server IP to connect to", "Save", "Cancel", (result, input) =>
+                {
+                    if (result == InputRequest.Result.BUTTON1 && !string.IsNullOrEmpty(input))
+                    {
+                        if (Settings.GlobalSettings.Port <= 0)
+                        {
+                            UIManager.Add(new InputRequest("Please enter the port for this server", "Save", "Cancel", (result, input) =>
+                            {
+                                if (result == InputRequest.Result.BUTTON1 && !string.IsNullOrEmpty(input))
+                                {
+                                    if (ushort.TryParse(input, out ushort p))
+                                    {
+                                        Settings.GlobalSettings.Port = p;
+                                    }
+                                }
+                                UIManager.Add(_currentGump = new LoginGump(this));
+                            })
+                            { X = 130, Y = 150 });
+                        }
+                        else //Port is > 0, possibly valid
+                        {
+                            UIManager.Add(_currentGump = new LoginGump(this));
+                        }
+                        Settings.GlobalSettings.IP = input;
+                    }
+                    else //Cancel ip entry
+                    {
+                        UIManager.Add(_currentGump = new LoginGump(this));
+                    }
+                })
+                { X = 130, Y = 150});
+            }
+            else
+            {
+                UIManager.Add(_currentGump = new LoginGump(this));
+            }
 
             Client.Game.Audio.PlayMusic(Client.Game.Audio.LoginMusicIndex, false, true);
 
-            if (CanAutologin && CurrentLoginStep != LoginSteps.Main || CUOEnviroment.SkipLoginScreen)
+            if (CanAutologin && CurrentLoginStep != LoginSteps.Main || CUOEnviroment.SkipLoginScreen && _currentGump != null)
             {
                 if (!string.IsNullOrEmpty(Settings.GlobalSettings.Username))
                 {
@@ -156,7 +194,7 @@ namespace ClassicUO.Game.Scenes
                 // this trick avoid the flickering
                 Gump g = _currentGump;
                 UIManager.Add(_currentGump = GetGumpForStep());
-                g.Dispose();
+                g?.Dispose();
 
                 _lastLoginStep = CurrentLoginStep;
             }
@@ -264,7 +302,7 @@ namespace ClassicUO.Game.Scenes
                 {
                     case LoginSteps.Connecting:
                         labelText = ClilocLoader.Instance.GetString(3000002, ResGeneral.Connecting); // "Connecting..."
-                        
+
                         showButtons = LoginButtons.Cancel;
 
                         break;
@@ -298,7 +336,7 @@ namespace ClassicUO.Game.Scenes
 
         private void OnLoadingGumpButtonClick(int buttonId)
         {
-            LoginButtons butt = (LoginButtons) buttonId;
+            LoginButtons butt = (LoginButtons)buttonId;
 
             if (butt == LoginButtons.OK || butt == LoginButtons.Cancel)
             {
@@ -395,7 +433,7 @@ namespace ClassicUO.Game.Scenes
                     }
                 }
 
-                Settings.GlobalSettings.LastServerNum = (ushort) (1 + ServerIndex);
+                Settings.GlobalSettings.LastServerNum = (ushort)(1 + ServerIndex);
                 Settings.GlobalSettings.LastServerName = Servers[ServerIndex].Name;
                 Settings.GlobalSettings.Save();
 
@@ -523,12 +561,12 @@ namespace ClassicUO.Game.Scenes
 
             if (Client.Version >= ClientVersion.CV_6040)
             {
-                uint clientVersion = (uint) Client.Version;
+                uint clientVersion = (uint)Client.Version;
 
-                byte major = (byte) (clientVersion >> 24);
-                byte minor = (byte) (clientVersion >> 16);
-                byte build = (byte) (clientVersion >> 8);
-                byte extra = (byte) clientVersion;
+                byte major = (byte)(clientVersion >> 24);
+                byte minor = (byte)(clientVersion >> 16);
+                byte build = (byte)(clientVersion >> 8);
+                byte extra = (byte)clientVersion;
 
 
                 NetClient.Socket.Send_Seed(address, major, minor, build, extra);
@@ -625,7 +663,7 @@ namespace ClassicUO.Game.Scenes
             ParseCharacterList(ref p);
             ParseCities(ref p);
 
-            World.ClientFeatures.SetFlags((CharacterListFlags) p.ReadUInt32BE());
+            World.ClientFeatures.SetFlags((CharacterListFlags)p.ReadUInt32BE());
             CurrentLoginStep = LoginSteps.CharacterSelection;
 
             uint charToSelect = 0;
@@ -674,14 +712,14 @@ namespace ClassicUO.Game.Scenes
         }
 
         public void HandleRelayServerPacket(ref StackDataReader p)
-        {           
+        {
             long ip = p.ReadUInt32LE(); // use LittleEndian here
             ushort port = p.ReadUInt16BE();
             uint seed = p.ReadUInt32BE();
 
             NetClient.Socket.Disconnect();
             NetClient.Socket = new NetClient();
-            EncryptionHelper.Initialize(false, seed, (ENCRYPTION_TYPE) Settings.GlobalSettings.Encryption);
+            EncryptionHelper.Initialize(false, seed, (ENCRYPTION_TYPE)Settings.GlobalSettings.Encryption);
 
             NetClient.Socket.Connect(new IPAddress(ip).ToString(), port);
 
@@ -743,9 +781,9 @@ namespace ClassicUO.Game.Scenes
                     byte cityIndex = p.ReadUInt8();
                     string cityName = p.ReadASCII(32);
                     string cityBuilding = p.ReadASCII(32);
-                    ushort cityX = (ushort) p.ReadUInt32BE();
-                    ushort cityY = (ushort) p.ReadUInt32BE();
-                    sbyte cityZ = (sbyte) p.ReadUInt32BE();
+                    ushort cityX = (ushort)p.ReadUInt32BE();
+                    ushort cityY = (ushort)p.ReadUInt32BE();
+                    sbyte cityZ = (sbyte)p.ReadUInt32BE();
                     uint cityMapIndex = p.ReadUInt32BE();
                     uint cityDescription = p.ReadUInt32BE();
                     p.Skip(4);
@@ -755,7 +793,7 @@ namespace ClassicUO.Game.Scenes
                         cityIndex,
                         cityName,
                         cityBuilding,
-                        ClilocLoader.Instance.GetString((int) cityDescription),
+                        ClilocLoader.Instance.GetString((int)cityDescription),
                         cityX,
                         cityY,
                         cityZ,
@@ -775,8 +813,8 @@ namespace ClassicUO.Game.Scenes
                         cityName,
                         cityBuilding,
                         descriptions != null ? descriptions[i] : string.Empty,
-                        (ushort) oldtowns[i % oldtowns.Length].X,
-                        (ushort) oldtowns[i % oldtowns.Length].Y,
+                        (ushort)oldtowns[i % oldtowns.Length].X,
+                        (ushort)oldtowns[i % oldtowns.Length].Y,
                         0,
                         0,
                         isNew
@@ -825,7 +863,7 @@ namespace ClassicUO.Game.Scenes
 
                         while (stream.Position < stream.Length)
                         {
-                            char b = (char) stream.ReadByte();
+                            char b = (char)stream.ReadByte();
 
                             if (b == '<')
                             {
@@ -843,7 +881,7 @@ namespace ClassicUO.Game.Scenes
                         {
                             char b;
 
-                            while ((b = (char) stream.ReadByte()) != '\0')
+                            while ((b = (char)stream.ReadByte()) != '\0')
                             {
                                 text.Append(b);
                             }
@@ -857,7 +895,7 @@ namespace ClassicUO.Game.Scenes
                             }
 
                             long pos = stream.Position;
-                            byte end = (byte) stream.ReadByte();
+                            byte end = (byte)stream.ReadByte();
                             stream.Position = pos;
 
                             if (end == 0x2E)
@@ -1008,11 +1046,11 @@ namespace ClassicUO.Game.Scenes
 
         private void PingerOnPingCompleted(object sender, PingCompletedEventArgs e)
         {
-            int index = (int) e.UserState;
+            int index = (int)e.UserState;
 
             if (e.Reply != null)
             {
-                Ping = (int) e.Reply.RoundtripTime;
+                Ping = (int)e.Reply.RoundtripTime;
                 PingStatus = e.Reply.Status;
 
                 _last10Results[index] = e.Reply.Status == IPStatus.Success;
@@ -1051,7 +1089,7 @@ namespace ClassicUO.Game.Scenes
                         _pinger.SendAsyncCancel();
                     }
                     catch { }
-                   
+
                 }
 
                 _pinger.Dispose();

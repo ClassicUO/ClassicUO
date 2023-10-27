@@ -4801,10 +4801,8 @@ namespace ClassicUO.Network
                     bool isfemale = p.ReadBool();
                     byte race = p.ReadUInt8();
 
-                    // TODO: gump race request
-
-                    GameActions.Print("[DEBUG]: change-race gump is not implemented yet.", 34);
-
+                    UIManager.GetGump<RaceChangeGump>()?.Dispose();
+                    UIManager.Add(new RaceChangeGump(isfemale, race));
                     break;
 
                 case 0x2B:
@@ -4859,6 +4857,8 @@ namespace ClassicUO.Network
             string affix = p[0] == 0xCC ? p.ReadASCII() : string.Empty;
 
             string arguments = null;
+
+            SpellVisualRangeManager.Instance.OnClilocReceived((int)cliloc);
 
             if (cliloc == 1008092 || cliloc == 1005445) // value for "You notify them you don't want to join the party" || "You have been added to the party"
             {

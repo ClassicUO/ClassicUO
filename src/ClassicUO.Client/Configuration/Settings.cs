@@ -54,9 +54,9 @@ namespace ClassicUO.Configuration
 
         [JsonPropertyName("password")] public string Password { get; set; } = string.Empty;
 
-        [JsonPropertyName("ip")] public string IP { get; set; } = "127.0.0.1";
+        [JsonPropertyName("ip")] public string IP { get; set; } = "";
 
-        [JsonPropertyName("port"), JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)] public ushort Port { get; set; } = 2593;
+        [JsonPropertyName("port"), JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)] public ushort Port { get; set; } = 0;
 
         [JsonPropertyName("ultimaonlinedirectory")]
         public string UltimaOnlineDirectory { get; set; } = "";
