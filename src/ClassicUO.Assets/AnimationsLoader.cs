@@ -288,7 +288,7 @@ namespace ClassicUO.Assets
             return false;
         }
 
-        public ReadOnlySpan<AnimIdxBlock> GetIndices(ref ushort body, ref ushort hue, ref ANIMATION_FLAGS flags, out int fileIndex, out ANIMATION_GROUPS_TYPE animType)
+        public ReadOnlySpan<AnimIdxBlock> GetIndices(ClientVersion clientVersion, ushort body, ref ushort hue, ref ANIMATION_FLAGS flags, out int fileIndex, out ANIMATION_GROUPS_TYPE animType)
         {
             fileIndex = 0;
             animType = ANIMATION_GROUPS_TYPE.UNKNOWN;
@@ -341,7 +341,9 @@ namespace ClassicUO.Assets
                 hue = bodyConvInfo.Hue;
                 body = bodyConvInfo.Graphic;
                 fileIndex = bodyConvInfo.FileIndex;
-                animType = bodyConvInfo.AnimType;
+
+                if (clientVersion < ClientVersion.CV_500A)
+                    animType = bodyConvInfo.AnimType;
             }
 
             if (animType == ANIMATION_GROUPS_TYPE.UNKNOWN)
@@ -351,7 +353,7 @@ namespace ClassicUO.Assets
             var offsetAddress = CalculateOffset(body, animType, flags, out var actionCount);
 
             var animIdxSpan = new ReadOnlySpan<AnimIdxBlock>(
-                (byte*)(fileIdx.StartAddress.ToInt64() + offsetAddress),
+                (void*)(fileIdx.StartAddress.ToInt64() + offsetAddress),
                 actionCount * MAX_DIRECTIONS
             );
 
@@ -595,7 +597,7 @@ namespace ClassicUO.Assets
                             continue;
                         }
 
-                        UOFile currentIdxFile = _files[i].IdxFile;
+                        //UOFile currentIdxFile = _files[i].IdxFile;
 
                         // ANIMATION_GROUPS_TYPE realType =
                         //     UOFileManager.Version < ClientVersion.CV_500A
@@ -1522,7 +1524,7 @@ namespace ClassicUO.Assets
             var reader = new StackDataReader(
                 new ReadOnlySpan<byte>(
                     (byte*)file.StartAddress.ToPointer() + index.Position,
-                    length: (int)index.Size
+                    (int)index.Size
                 )
             );
             reader.Seek(0);
