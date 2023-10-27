@@ -8,6 +8,7 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private static string[] updateTexts = {
             "/c[white][3.9.0]/cd\n" +
+                "- Added missing race change gump\n" +
                 "- If no server is set in settings.json user will get a request to type one in\n" +
                 "- When opening TUO with a uo directory that is not valid a folder selection prompt will open\n" +
                 "- Spell indicator system, see wiki for more details\n" +
