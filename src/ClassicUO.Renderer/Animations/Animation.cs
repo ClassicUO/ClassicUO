@@ -125,6 +125,14 @@ namespace ClassicUO.Renderer.Animations
                 return Span<SpriteInfo>.Empty;
             }
 
+            if (id >= ushort.MaxValue)
+                return Span<SpriteInfo>.Empty;
+
+            if (id >= _dataIndex.Length)
+            {
+                Array.Resize(ref _dataIndex, id);
+            }
+
             ref var index = ref _dataIndex[id];
 
             do
@@ -132,7 +140,16 @@ namespace ClassicUO.Renderer.Animations
                 if (index == null)
                 {
                     index = new IndexAnimation();
-                    var indices = AnimationsLoader.Instance.GetIndices(UOFileManager.Version, id, ref index.Hue, ref index.Flags, out index.FileIndex, out index.Type);
+                    var indices = AnimationsLoader.Instance.GetIndices
+                    (
+                        UOFileManager.Version, 
+                        id, 
+                        ref index.Hue,
+                        ref index.Flags, 
+                        out index.FileIndex,
+                        out index.Type,
+                        out index.MountedHeightOffset
+                    );
 
                     if (!indices.IsEmpty)
                     {
@@ -144,7 +161,7 @@ namespace ClassicUO.Renderer.Animations
                                 index.UopGroups[i] = new AnimationGroupUop();
                                 index.UopGroups[i].FileIndex = index.FileIndex;
                                 index.UopGroups[i].DecompressedLength = indices[i].Unknown;
-                                index.UopGroups[i].CompressedLength = Math.Max(1, indices[i].Size);
+                                index.UopGroups[i].CompressedLength = indices[i].Size;
                                 index.UopGroups[i].Offset = indices[i].Position;
                             }
                         }
@@ -320,32 +337,6 @@ namespace ClassicUO.Renderer.Animations
 
             if (_dataIndex[graphic] != null && _dataIndex[graphic].FileIndex == 0 && !_dataIndex[graphic].Flags.HasFlag(ANIMATION_FLAGS.AF_USE_UOP_ANIMATION))
                 AnimationsLoader.Instance.ReplaceBody(ref graphic, ref hue);
-
-            //if (graphic >= _dataIndex.Length)
-            //{
-            //    return;
-            //}
-
-            //IndexAnimation dataIndex = _dataIndex[graphic];
-
-            //if (dataIndex == null)
-            //{
-            //    return;
-            //}
-
-            //if ((dataIndex.IsUOP && (isParent || !dataIndex.IsValidMUL)) || forceUOP)
-            //{
-            //    // do nothing ?
-            //}
-            //else
-            //{
-            //    if (
-            //        dataIndex.FileIndex == 0 /*|| !dataIndex.IsValidMUL*/
-            //    )
-            //    {
-            //        graphic = dataIndex.Graphic;
-            //    }
-            //}
         }
 
         public bool IsAnimationExists(ushort graphic, byte group, bool isCorpse = false)
