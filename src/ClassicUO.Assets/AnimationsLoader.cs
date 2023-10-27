@@ -288,10 +288,20 @@ namespace ClassicUO.Assets
             return false;
         }
 
-        public ReadOnlySpan<AnimIdxBlock> GetIndices(ClientVersion clientVersion, ushort body, ref ushort hue, ref ANIMATION_FLAGS flags, out int fileIndex, out ANIMATION_GROUPS_TYPE animType)
+        public ReadOnlySpan<AnimIdxBlock> GetIndices
+        (
+            ClientVersion clientVersion,
+            ushort body,
+            ref ushort hue,
+            ref ANIMATION_FLAGS flags,
+            out int fileIndex,
+            out ANIMATION_GROUPS_TYPE animType,
+            out sbyte mountHeight
+        )
         {
             fileIndex = 0;
             animType = ANIMATION_GROUPS_TYPE.UNKNOWN;
+            mountHeight = 0;
 
             if (!_mobTypes.TryGetValue(body, out var mobInfo))
             {
@@ -306,6 +316,7 @@ namespace ClassicUO.Assets
                     animType = mobInfo.Type != ANIMATION_GROUPS_TYPE.UNKNOWN ? mobInfo.Type : CalculateTypeByGraphic(body);
 
                 var replaceFound = _uopInfos.TryGetValue(body, out var uopInfo);
+                mountHeight = uopInfo.HeightOffset;
                 var animIndices = Array.Empty<AnimIdxBlock>();
 
                 for (int actioIdx = 0; actioIdx < MAX_ACTIONS; ++actioIdx)
@@ -341,6 +352,7 @@ namespace ClassicUO.Assets
                 hue = bodyConvInfo.Hue;
                 body = bodyConvInfo.Graphic;
                 fileIndex = bodyConvInfo.FileIndex;
+                mountHeight = bodyConvInfo.MountHeight;
 
                 if (clientVersion < ClientVersion.CV_500A)
                     animType = bodyConvInfo.AnimType;
@@ -609,7 +621,8 @@ namespace ClassicUO.Assets
                             FileIndex = i,
                             Graphic = (ushort)body,
                             // TODO: fix for UOFileManager.Version < ClientVersion.CV_500A
-                            AnimType = CalculateTypeByGraphic((ushort)body, i)
+                            AnimType = CalculateTypeByGraphic((ushort)body, i),
+                            MountHeight = mountedHeightOffset
                         };
 
                         // long addressOffset = _dataIndex[index].CalculateOffset(
@@ -1866,6 +1879,7 @@ namespace ClassicUO.Assets
         public ANIMATION_GROUPS_TYPE AnimType;
         public ushort Graphic;
         public ushort Hue;
+        public sbyte MountHeight;
     }
 
     unsafe struct UopInfo
@@ -1884,7 +1898,7 @@ namespace ClassicUO.Assets
             }
         }
 
-        public int HeightOffset;
+        public sbyte HeightOffset;
     }
 
     [Flags]
