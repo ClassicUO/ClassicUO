@@ -60,7 +60,7 @@ namespace ClassicUO.Assets
         public bool TopLevel { get; set; }
         public int[,] SkillDefVal { get; set; } = _VoidSkills;
         public int[] StatsVal { get; set; } = _VoidStats;
-        public List<string> Childrens { get; set; }
+        public List<string> Children { get; set; }
     }
 
     public class ProfessionLoader : UOFileLoader
@@ -133,13 +133,13 @@ namespace ClassicUO.Assets
 
                     foreach (KeyValuePair<ProfessionInfo, List<ProfessionInfo>> kvp in Professions)
                     {
-                        kvp.Key.Childrens = null;
+                        kvp.Key.Children = null;
 
                         if (kvp.Value != null)
                         {
                             foreach (ProfessionInfo info in kvp.Value)
                             {
-                                info.Childrens = null;
+                                info.Children = null;
                             }
                         }
                     }
@@ -352,7 +352,7 @@ namespace ClassicUO.Assets
             {
                 info = new ProfessionInfo
                 {
-                    Childrens = childrens
+                    Children = childrens
                 };
 
                 list = new List<ProfessionInfo>();
@@ -387,7 +387,7 @@ namespace ClassicUO.Assets
                 {
                     foreach (KeyValuePair<ProfessionInfo, List<ProfessionInfo>> kvp in Professions)
                     {
-                        if (kvp.Key.Childrens != null && kvp.Value != null && kvp.Key.Childrens.Contains(trueName))
+                        if (kvp.Key.Children != null && kvp.Value != null && kvp.Key.Children.Contains(trueName))
                         {
                             Professions[kvp.Key].Add(info);
 
