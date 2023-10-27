@@ -344,7 +344,7 @@ namespace ClassicUO.Renderer.Animations
                 AnimationsLoader.Instance.ReplaceBody(ref graphic, ref hue);
         }
 
-        public bool IsAnimationExists(ushort graphic, byte group, bool isCorpse = false)
+        public bool AnimationExists(ushort graphic, byte group, bool isCorpse = false)
         {
             if (graphic < _dataIndex.Length && group < AnimationsLoader.MAX_ACTIONS)
             {
