@@ -109,19 +109,19 @@ namespace ClassicUO.Game.GameObjects
         private static readonly byte[,] _animationIdle =
         {
             {
-                (byte)LOW_ANIMATION_GROUP.LAG_FIDGET_1,
-                (byte)LOW_ANIMATION_GROUP.LAG_FIDGET_2,
-                (byte)LOW_ANIMATION_GROUP.LAG_FIDGET_1
+                (byte)LowAnimationGroup.Fidget1,
+                (byte)LowAnimationGroup.Fidget2,
+                (byte)LowAnimationGroup.Fidget1
             },
             {
-                (byte)HIGHT_ANIMATION_GROUP.HAG_FIDGET_1,
-                (byte)HIGHT_ANIMATION_GROUP.HAG_FIDGET_2,
-                (byte)HIGHT_ANIMATION_GROUP.HAG_FIDGET_1
+                (byte)HighAnimationGroup.Fidget1,
+                (byte)HighAnimationGroup.Fidget2,
+                (byte)HighAnimationGroup.Fidget1
             },
             {
-                (byte)PEOPLE_ANIMATION_GROUP.PAG_FIDGET_1,
-                (byte)PEOPLE_ANIMATION_GROUP.PAG_FIDGET_2,
-                (byte)PEOPLE_ANIMATION_GROUP.PAG_FIDGET_3
+                (byte)PeopleAnimationGroup.Fidget1,
+                (byte)PeopleAnimationGroup.Fidget2,
+                (byte)PeopleAnimationGroup.Fidget3
             }
         };
 
@@ -426,38 +426,38 @@ namespace ClassicUO.Game.GameObjects
                 //    out var useUOP
                 //);
 
-                ANIMATION_GROUPS_TYPE type = Client.Game.Animations.GetAnimType(graphic);
-                ANIMATION_FLAGS flags = Client.Game.Animations.GetAnimFlags(graphic);
-                ANIMATION_GROUPS animGroup = ANIMATION_GROUPS.AG_NONE;
+                AnimationGroupsType type = Client.Game.Animations.GetAnimType(graphic);
+                AnimationFlags  flags = Client.Game.Animations.GetAnimFlags(graphic);
+                AnimationGroups animGroup = AnimationGroups.None;
 
                 bool isLowExtended = false;
 
-                if ((flags & ANIMATION_FLAGS.AF_CALCULATE_OFFSET_LOW_GROUP_EXTENDED) != 0)
+                if ((flags & AnimationFlags.CalculateOffsetLowGroupExtended) != 0)
                 {
                     isLowExtended = true;
-                    type = ANIMATION_GROUPS_TYPE.MONSTER;
+                    type = AnimationGroupsType.Monster;
                 }
-                else if ((flags & ANIMATION_FLAGS.AF_CALCULATE_OFFSET_BY_LOW_GROUP) != 0)
+                else if ((flags & AnimationFlags.CalculateOffsetByLowGroup) != 0)
                 {
-                    type = ANIMATION_GROUPS_TYPE.ANIMAL;
+                    type = AnimationGroupsType.Animal;
                 }
 
                 switch (type)
                 {
-                    case ANIMATION_GROUPS_TYPE.SEA_MONSTER:
-                    case ANIMATION_GROUPS_TYPE.MONSTER:
-                        animGroup = ANIMATION_GROUPS.AG_HIGHT;
+                    case AnimationGroupsType.SeaMonster:
+                    case AnimationGroupsType.Monster:
+                        animGroup = AnimationGroups.High;
 
                         break;
 
-                    case ANIMATION_GROUPS_TYPE.ANIMAL:
-                        animGroup = ANIMATION_GROUPS.AG_LOW;
+                    case AnimationGroupsType.Animal:
+                        animGroup = AnimationGroups.Low;
 
                         break;
 
-                    case ANIMATION_GROUPS_TYPE.HUMAN:
-                    case ANIMATION_GROUPS_TYPE.EQUIPMENT:
-                        animGroup = ANIMATION_GROUPS.AG_PEOPLE;
+                    case AnimationGroupsType.Human:
+                    case AnimationGroupsType.Equipment:
+                        animGroup = AnimationGroups.People;
 
                         break;
                 }
@@ -467,9 +467,9 @@ namespace ClassicUO.Game.GameObjects
                     return;
                 }
 
-                if ((flags & ANIMATION_FLAGS.AF_USE_UOP_ANIMATION) != 0)
+                if ((flags & AnimationFlags.UseUopAnimation) != 0)
                 {
-                    if (animGroup != ANIMATION_GROUPS.AG_PEOPLE)
+                    if (animGroup != AnimationGroups.People)
                     {
                         if (InWarMode)
                         {

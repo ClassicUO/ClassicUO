@@ -775,14 +775,14 @@ namespace ClassicUO.Game.UI.Gumps
                 var groupType = Client.Game.Animations.GetAnimType(graphic);
                 switch (AnimationsLoader.Instance.GetGroupIndex(graphic, groupType))
                 {
-                    case ANIMATION_GROUPS.AG_LOW:
-                        return (byte)LOW_ANIMATION_GROUP.LAG_STAND;
+                    case AnimationGroups.Low:
+                        return (byte)LowAnimationGroup.Stand;
 
-                    case ANIMATION_GROUPS.AG_HIGHT:
-                        return (byte)HIGHT_ANIMATION_GROUP.HAG_STAND;
+                    case AnimationGroups.High:
+                        return (byte)HighAnimationGroup.Stand;
 
-                    case ANIMATION_GROUPS.AG_PEOPLE:
-                        return (byte)PEOPLE_ANIMATION_GROUP.PAG_STAND;
+                    case AnimationGroups.People:
+                        return (byte)PeopleAnimationGroup.Stand;
                 }
 
                 return 0;

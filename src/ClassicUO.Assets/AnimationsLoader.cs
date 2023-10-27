@@ -82,8 +82,8 @@ namespace ClassicUO.Assets
 
         struct MobTypeInfo
         {
-            public ANIMATION_GROUPS_TYPE Type;
-            public ANIMATION_FLAGS Flags;
+            public AnimationGroupsType Type;
+            public AnimationFlags  Flags;
         }
 
         public List<Tuple<ushort, byte>>[] GroupReplaces { get; } =
@@ -201,8 +201,8 @@ namespace ClassicUO.Assets
                                 {
                                     _mobTypes[id] = new MobTypeInfo()
                                     {
-                                        Type = (ANIMATION_GROUPS_TYPE)i,
-                                        Flags = (ANIMATION_FLAGS)(0x80000000 | number)
+                                        Type = (AnimationGroupsType)i,
+                                        Flags = (AnimationFlags )(0x80000000 | number)
                                     };
 
                                     break;
@@ -293,14 +293,14 @@ namespace ClassicUO.Assets
             ClientVersion clientVersion,
             ushort body,
             ref ushort hue,
-            ref ANIMATION_FLAGS flags,
+            ref AnimationFlags  flags,
             out int fileIndex,
-            out ANIMATION_GROUPS_TYPE animType,
+            out AnimationGroupsType animType,
             out sbyte mountHeight
         )
         {
             fileIndex = 0;
-            animType = ANIMATION_GROUPS_TYPE.UNKNOWN;
+            animType = AnimationGroupsType.Unknown;
             mountHeight = 0;
 
             if (!_mobTypes.TryGetValue(body, out var mobInfo))
@@ -310,10 +310,10 @@ namespace ClassicUO.Assets
 
             flags = mobInfo.Flags;
 
-            if (mobInfo.Flags.HasFlag(ANIMATION_FLAGS.AF_USE_UOP_ANIMATION))
+            if (mobInfo.Flags.HasFlag(AnimationFlags.UseUopAnimation))
             {
-                if (animType == ANIMATION_GROUPS_TYPE.UNKNOWN)
-                    animType = mobInfo.Type != ANIMATION_GROUPS_TYPE.UNKNOWN ? mobInfo.Type : CalculateTypeByGraphic(body);
+                if (animType == AnimationGroupsType.Unknown)
+                    animType = mobInfo.Type != AnimationGroupsType.Unknown ? mobInfo.Type : CalculateTypeByGraphic(body);
 
                 var replaceFound = _uopInfos.TryGetValue(body, out var uopInfo);
                 mountHeight = uopInfo.HeightOffset;
@@ -358,8 +358,8 @@ namespace ClassicUO.Assets
                     animType = bodyConvInfo.AnimType;
             }
 
-            if (animType == ANIMATION_GROUPS_TYPE.UNKNOWN)
-                animType = mobInfo.Type != ANIMATION_GROUPS_TYPE.UNKNOWN ? mobInfo.Type : CalculateTypeByGraphic(body, fileIndex);
+            if (animType == AnimationGroupsType.Unknown)
+                animType = mobInfo.Type != AnimationGroupsType.Unknown ? mobInfo.Type : CalculateTypeByGraphic(body, fileIndex);
 
             var fileIdx = _files[fileIndex].IdxFile;
             var offsetAddress = CalculateOffset(body, animType, flags, out var actionCount);
@@ -374,88 +374,88 @@ namespace ClassicUO.Assets
 
         private long CalculateOffset(
             ushort graphic,
-            ANIMATION_GROUPS_TYPE type,
-            ANIMATION_FLAGS flags,
+            AnimationGroupsType type,
+            AnimationFlags  flags,
             out int groupCount
         )
         {
             long result = 0;
             groupCount = 0;
 
-            var group = ANIMATION_GROUPS.AG_NONE;
+            var group = AnimationGroups.None;
 
             switch (type)
             {
-                case ANIMATION_GROUPS_TYPE.MONSTER:
+                case AnimationGroupsType.Monster:
 
-                    if ((flags & ANIMATION_FLAGS.AF_CALCULATE_OFFSET_BY_PEOPLE_GROUP) != 0)
+                    if ((flags & AnimationFlags.CalculateOffsetByPeopleGroup) != 0)
                     {
-                        group = ANIMATION_GROUPS.AG_PEOPLE;
+                        group = AnimationGroups.People;
                     }
-                    else if ((flags & ANIMATION_FLAGS.AF_CALCULATE_OFFSET_BY_LOW_GROUP) != 0)
+                    else if ((flags & AnimationFlags.CalculateOffsetByLowGroup) != 0)
                     {
-                        group = ANIMATION_GROUPS.AG_LOW;
+                        group = AnimationGroups.Low;
                     }
                     else
                     {
-                        group = ANIMATION_GROUPS.AG_HIGHT;
+                        group = AnimationGroups.High;
                     }
 
                     break;
 
-                case ANIMATION_GROUPS_TYPE.SEA_MONSTER:
+                case AnimationGroupsType.SeaMonster:
                     result = CalculateHighGroupOffset(graphic);
-                    groupCount = (int)LOW_ANIMATION_GROUP.LAG_ANIMATION_COUNT;
+                    groupCount = (int)LowAnimationGroup.AnimationCount;
 
                     break;
 
-                case ANIMATION_GROUPS_TYPE.ANIMAL:
+                case AnimationGroupsType.Animal:
 
-                    if ((flags & ANIMATION_FLAGS.AF_CALCULATE_OFFSET_LOW_GROUP_EXTENDED) != 0)
+                    if ((flags & AnimationFlags.CalculateOffsetLowGroupExtended) != 0)
                     {
-                        if ((flags & ANIMATION_FLAGS.AF_CALCULATE_OFFSET_BY_PEOPLE_GROUP) != 0)
+                        if ((flags & AnimationFlags.CalculateOffsetByPeopleGroup) != 0)
                         {
-                            group = ANIMATION_GROUPS.AG_PEOPLE;
+                            group = AnimationGroups.People;
                         }
-                        else if ((flags & ANIMATION_FLAGS.AF_CALCULATE_OFFSET_BY_LOW_GROUP) != 0)
+                        else if ((flags & AnimationFlags.CalculateOffsetByLowGroup) != 0)
                         {
-                            group = ANIMATION_GROUPS.AG_LOW;
+                            group = AnimationGroups.Low;
                         }
                         else
                         {
-                            group = ANIMATION_GROUPS.AG_HIGHT;
+                            group = AnimationGroups.High;
                         }
                     }
                     else
                     {
-                        group = ANIMATION_GROUPS.AG_LOW;
+                        group = AnimationGroups.Low;
                     }
 
                     break;
 
                 default:
-                    group = ANIMATION_GROUPS.AG_PEOPLE;
+                    group = AnimationGroups.People;
 
                     break;
             }
 
             switch (group)
             {
-                case ANIMATION_GROUPS.AG_LOW:
+                case AnimationGroups.Low:
                     result = CalculateLowGroupOffset(graphic);
-                    groupCount = (int)LOW_ANIMATION_GROUP.LAG_ANIMATION_COUNT;
+                    groupCount = (int)LowAnimationGroup.AnimationCount;
 
                     break;
 
-                case ANIMATION_GROUPS.AG_HIGHT:
+                case AnimationGroups.High:
                     result = CalculateHighGroupOffset(graphic);
-                    groupCount = (int)HIGHT_ANIMATION_GROUP.HAG_ANIMATION_COUNT;
+                    groupCount = (int)HighAnimationGroup.AnimationCount;
 
                     break;
 
-                case ANIMATION_GROUPS.AG_PEOPLE:
+                case AnimationGroups.People:
                     result = CalculatePeopleGroupOffset(graphic);
-                    groupCount = (int)PEOPLE_ANIMATION_GROUP.PAG_ANIMATION_COUNT;
+                    groupCount = (int)PeopleAnimationGroup.AnimationCount;
 
                     break;
             }
@@ -611,7 +611,7 @@ namespace ClassicUO.Assets
 
                         //UOFile currentIdxFile = _files[i].IdxFile;
 
-                        // ANIMATION_GROUPS_TYPE realType =
+                        // AnimationGroupsType realType =
                         //     UOFileManager.Version < ClientVersion.CV_500A
                         //         ? CalculateTypeByGraphic((ushort)body, i)
                         //         : _dataIndex[index].Type;
@@ -801,48 +801,6 @@ namespace ClassicUO.Assets
             {
                 return;
             }
-
-            // for (ushort animID = 0; animID < _dataIndex.Length; animID++)
-            // {
-            //     for (byte grpID = 0; grpID < MAX_ACTIONS; grpID++)
-            //     {
-            //         string hashstring = $"build/animationlegacyframe/{animID:D6}/{grpID:D2}.bin";
-            //         ulong hash = UOFileUop.CreateHash(hashstring);
-
-            //         for (int i = 0; i < _filesUop.Length; i++)
-            //         {
-            //             UOFileUop uopFile = _filesUop[i];
-
-            //             if (uopFile != null && uopFile.TryGetUOPData(hash, out UOFileIndex data))
-            //             {
-            //                 if (_dataIndex[animID] == null)
-            //                 {
-            //                     _dataIndex[animID] = new IndexAnimation
-            //                     {
-            //                         UopGroups = new AnimationGroupUop[MAX_ACTIONS]
-            //                     };
-            //                 }
-
-            //                 _dataIndex[animID].InitializeUOP();
-
-            //                 ref AnimationGroupUop g = ref _dataIndex[animID].UopGroups[grpID];
-
-            //                 g = new AnimationGroupUop
-            //                 {
-            //                     Offset = (uint)data.Offset,
-            //                     CompressedLength = (uint)data.Length,
-            //                     DecompressedLength = (uint)data.DecompressedLength,
-            //                     FileIndex = i,
-            //                 };
-            //             }
-            //         }
-            //     }
-            // }
-
-            //for (int i = 0; i < _filesUop.Length; i++)
-            //{
-            //    _filesUop[i]?.ClearHashes();
-            //}
 
             string animationSequencePath = UOFileManager.GetUOFilePath("AnimationSequence.uop");
 
@@ -1057,27 +1015,27 @@ namespace ClassicUO.Assets
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private ANIMATION_GROUPS_TYPE CalculateTypeByGraphic(ushort graphic, int fileIndex = 0)
+        private AnimationGroupsType CalculateTypeByGraphic(ushort graphic, int fileIndex = 0)
         {
             if (fileIndex == 1) // anim2
             {
-                return graphic < 200 ? ANIMATION_GROUPS_TYPE.MONSTER : ANIMATION_GROUPS_TYPE.ANIMAL;
+                return graphic < 200 ? AnimationGroupsType.Monster : AnimationGroupsType.Animal;
             }
 
             if (fileIndex == 2) // anim3
             {
                 return graphic < 300
-                    ? ANIMATION_GROUPS_TYPE.ANIMAL
+                    ? AnimationGroupsType.Animal
                     : graphic < 400
-                        ? ANIMATION_GROUPS_TYPE.MONSTER
-                        : ANIMATION_GROUPS_TYPE.HUMAN;
+                        ? AnimationGroupsType.Monster
+                        : AnimationGroupsType.Human;
             }
 
             return graphic < 200
-                ? ANIMATION_GROUPS_TYPE.MONSTER
+                ? AnimationGroupsType.Monster
                 : graphic < 400
-                    ? ANIMATION_GROUPS_TYPE.ANIMAL
-                    : ANIMATION_GROUPS_TYPE.HUMAN;
+                    ? AnimationGroupsType.Animal
+                    : AnimationGroupsType.Human;
         }
 
         public override void ClearResources() { }
@@ -1285,82 +1243,82 @@ namespace ClassicUO.Assets
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ANIMATION_GROUPS GetGroupIndex(ushort graphic, ANIMATION_GROUPS_TYPE animType)
+        public AnimationGroups GetGroupIndex(ushort graphic, AnimationGroupsType animType)
         {
             switch (animType)
             {
-                case ANIMATION_GROUPS_TYPE.ANIMAL:
-                    return ANIMATION_GROUPS.AG_LOW;
+                case AnimationGroupsType.Animal:
+                    return AnimationGroups.Low;
 
-                case ANIMATION_GROUPS_TYPE.MONSTER:
-                case ANIMATION_GROUPS_TYPE.SEA_MONSTER:
-                    return ANIMATION_GROUPS.AG_HIGHT;
+                case AnimationGroupsType.Monster:
+                case AnimationGroupsType.SeaMonster:
+                    return AnimationGroups.High;
 
-                case ANIMATION_GROUPS_TYPE.HUMAN:
-                case ANIMATION_GROUPS_TYPE.EQUIPMENT:
-                    return ANIMATION_GROUPS.AG_PEOPLE;
+                case AnimationGroupsType.Human:
+                case AnimationGroupsType.Equipment:
+                    return AnimationGroups.People;
             }
 
-            return ANIMATION_GROUPS.AG_HIGHT;
+            return AnimationGroups.High;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public byte GetDeathAction(
             ushort animID,
-            ANIMATION_FLAGS animFlags,
-            ANIMATION_GROUPS_TYPE animType,
+            AnimationFlags  animFlags,
+            AnimationGroupsType animType,
             bool second,
             bool isRunning = false
         )
-        {
+        {        
             //ConvertBodyIfNeeded(ref animID);
 
             switch (animType)
             {
-                case ANIMATION_GROUPS_TYPE.ANIMAL:
+                case AnimationGroupsType.Animal:
 
                     if (
-                        (animFlags & ANIMATION_FLAGS.AF_USE_2_IF_HITTED_WHILE_RUNNING) != 0
-                        || (animFlags & ANIMATION_FLAGS.AF_CAN_FLYING) != 0
+                        (animFlags & AnimationFlags.Use2IfHittedWhileRunning) != 0
+                        || (animFlags & AnimationFlags.CanFlying) != 0
                     )
                     {
                         return 2;
                     }
 
-                    if ((animFlags & ANIMATION_FLAGS.AF_USE_UOP_ANIMATION) != 0)
+                    if ((animFlags & AnimationFlags.UseUopAnimation) != 0)
                     {
                         return (byte)(second ? 3 : 2);
                     }
 
                     return (byte)(
-                        second ? LOW_ANIMATION_GROUP.LAG_DIE_2 : LOW_ANIMATION_GROUP.LAG_DIE_1
+                        second ? LowAnimationGroup.Die2 : LowAnimationGroup.Die1
                     );
 
-                case ANIMATION_GROUPS_TYPE.SEA_MONSTER:
+                case AnimationGroupsType.SeaMonster:
                 {
                     if (!isRunning)
                     {
                         return 8;
                     }
 
-                    goto case ANIMATION_GROUPS_TYPE.MONSTER;
+                    goto case AnimationGroupsType.Monster;
                 }
 
-                case ANIMATION_GROUPS_TYPE.MONSTER:
+                case AnimationGroupsType.Monster:
 
-                    if ((animFlags & ANIMATION_FLAGS.AF_USE_UOP_ANIMATION) != 0)
+                    if ((animFlags & AnimationFlags.UseUopAnimation) != 0)
                     {
                         return (byte)(second ? 3 : 2);
                     }
 
                     return (byte)(
-                        second ? HIGHT_ANIMATION_GROUP.HAG_DIE_2 : HIGHT_ANIMATION_GROUP.HAG_DIE_1
+                        second ? HighAnimationGroup.Die2 : HighAnimationGroup.Die1
                     );
 
-                case ANIMATION_GROUPS_TYPE.HUMAN:
-                case ANIMATION_GROUPS_TYPE.EQUIPMENT:
+                case AnimationGroupsType.Human:
+                case AnimationGroupsType.Equipment:
                     return (byte)(
-                        second ? PEOPLE_ANIMATION_GROUP.PAG_DIE_2 : PEOPLE_ANIMATION_GROUP.PAG_DIE_1
+                        second ? PeopleAnimationGroup.Die2 : PeopleAnimationGroup.Die1
                     );
             }
 
@@ -1371,7 +1329,7 @@ namespace ClassicUO.Assets
             ushort animID,
             byte animGroup,
             byte direction,
-            ANIMATION_GROUPS_TYPE type,
+            AnimationGroupsType type,
             int fileIndex,
             AnimationsLoader.AnimIdxBlock index
         )
@@ -1435,7 +1393,7 @@ namespace ClassicUO.Assets
             reader.Seek(dataStart);
 
             byte frameCount = (byte)(
-                type < ANIMATION_GROUPS_TYPE.EQUIPMENT ? Math.Round(fc / 5f) : 10
+                type < AnimationGroupsType.Equipment ? Math.Round(fc / 5f) : 10
             );
             if (frameCount > _frames.Length)
             {
@@ -1708,134 +1666,134 @@ namespace ClassicUO.Assets
         }
     }
 
-    public enum ANIMATION_GROUPS
+    public enum AnimationGroups
     {
-        AG_NONE = 0,
-        AG_LOW,
-        AG_HIGHT,
-        AG_PEOPLE
+        None = 0,
+        Low,
+        High,
+        People
     }
 
-    public enum ANIMATION_GROUPS_TYPE
+    public enum AnimationGroupsType
     {
-        MONSTER = 0,
-        SEA_MONSTER,
-        ANIMAL,
-        HUMAN,
-        EQUIPMENT,
-        UNKNOWN
+        Monster = 0,
+        SeaMonster,
+        Animal,
+        Human,
+        Equipment,
+        Unknown
     }
 
-    public enum HIGHT_ANIMATION_GROUP
+    public enum HighAnimationGroup
     {
-        HAG_WALK = 0,
-        HAG_STAND,
-        HAG_DIE_1,
-        HAG_DIE_2,
-        HAG_ATTACK_1,
-        HAG_ATTACK_2,
-        HAG_ATTACK_3,
-        HAG_MISC_1,
-        HAG_MISC_2,
-        HAG_MISC_3,
-        HAG_STUMBLE,
-        HAG_SLAP_GROUND,
-        HAG_CAST,
-        HAG_GET_HIT_1,
-        HAG_MISC_4,
-        HAG_GET_HIT_2,
-        HAG_GET_HIT_3,
-        HAG_FIDGET_1,
-        HAG_FIDGET_2,
-        HAG_FLY,
-        HAG_LAND,
-        HAG_DIE_IN_FLIGHT,
-        HAG_ANIMATION_COUNT
+        Walk = 0,
+        Stand,
+        Die1,
+        Die2,
+        Attack1,
+        Attack2,
+        Attack3,
+        Misc1,
+        Misc2,
+        Misc3,
+        Stumble,
+        SlapGround,
+        Cast,
+        GetHit1,
+        Misc4,
+        GetHit2,
+        GetHit3,
+        Fidget1,
+        Fidget2,
+        Fly,
+        Land,
+        DieInFlight,
+        AnimationCount
     }
 
-    public enum PEOPLE_ANIMATION_GROUP
+    public enum PeopleAnimationGroup
     {
-        PAG_WALK_UNARMED = 0,
-        PAG_WALK_ARMED,
-        PAG_RUN_UNARMED,
-        PAG_RUN_ARMED,
-        PAG_STAND,
-        PAG_FIDGET_1,
-        PAG_FIDGET_2,
-        PAG_STAND_ONEHANDED_ATTACK,
-        PAG_STAND_TWOHANDED_ATTACK,
-        PAG_ATTACK_ONEHANDED,
-        PAG_ATTACK_UNARMED_1,
-        PAG_ATTACK_UNARMED_2,
-        PAG_ATTACK_TWOHANDED_DOWN,
-        PAG_ATTACK_TWOHANDED_WIDE,
-        PAG_ATTACK_TWOHANDED_JAB,
-        PAG_WALK_WARMODE,
-        PAG_CAST_DIRECTED,
-        PAG_CAST_AREA,
-        PAG_ATTACK_BOW,
-        PAG_ATTACK_CROSSBOW,
-        PAG_GET_HIT,
-        PAG_DIE_1,
-        PAG_DIE_2,
-        PAG_ONMOUNT_RIDE_SLOW,
-        PAG_ONMOUNT_RIDE_FAST,
-        PAG_ONMOUNT_STAND,
-        PAG_ONMOUNT_ATTACK,
-        PAG_ONMOUNT_ATTACK_BOW,
-        PAG_ONMOUNT_ATTACK_CROSSBOW,
-        PAG_ONMOUNT_SLAP_HORSE,
-        PAG_TURN,
-        PAG_ATTACK_UNARMED_AND_WALK,
-        PAG_EMOTE_BOW,
-        PAG_EMOTE_SALUTE,
-        PAG_FIDGET_3,
-        PAG_ANIMATION_COUNT
+        WalkUnarmed = 0,
+        WalkArmed,
+        RunUnarmed,
+        RunArmed,
+        Stand,
+        Fidget1,
+        Fidget2,
+        StandOnehandedAttack,
+        StandTwohandedAttack,
+        AttackOnehanded,
+        AttackUnarmed1,
+        AttackUnarmed2,
+        AttackTwohandedDown,
+        AttackTwohandedWide,
+        AttackTwohandedJab,
+        WalkWarmode,
+        CastDirected,
+        CastArea,
+        AttackBow,
+        AttackCrossbow,
+        GetHit,
+        Die1,
+        Die2,
+        OnmountRideSlow,
+        OnmountRideFast,
+        OnmountStand,
+        OnmountAttack,
+        OnmountAttackBow,
+        OnmountAttackCrossbow,
+        OnmountSlapHorse,
+        Turn,
+        AttackUnarmedAndWalk,
+        EmoteBow,
+        EmoteSalute,
+        Fidget3,
+        AnimationCount
     }
 
-    public enum LOW_ANIMATION_GROUP
+    public enum LowAnimationGroup
     {
-        LAG_WALK = 0,
-        LAG_RUN,
-        LAG_STAND,
-        LAG_EAT,
-        LAG_UNKNOWN,
-        LAG_ATTACK_1,
-        LAG_ATTACK_2,
-        LAG_ATTACK_3,
-        LAG_DIE_1,
-        LAG_FIDGET_1,
-        LAG_FIDGET_2,
-        LAG_LIE_DOWN,
-        LAG_DIE_2,
-        LAG_ANIMATION_COUNT
+        Walk = 0,
+        Run,
+        Stand,
+        Eat,
+        Unknown,
+        Attack1,
+        Attack2,
+        Attack3,
+        Die1,
+        Fidget1,
+        Fidget2,
+        LieDown,
+        Die2,
+        AnimationCount
     }
 
     [Flags]
-    public enum ANIMATION_FLAGS : uint
+    public enum AnimationFlags : uint
     {
-        AF_NONE = 0x00000,
-        AF_UNKNOWN_1 = 0x00001,
-        AF_USE_2_IF_HITTED_WHILE_RUNNING = 0x00002,
-        AF_IDLE_AT_8_FRAME = 0x00004,
-        AF_CAN_FLYING = 0x00008,
-        AF_UNKNOWN_10 = 0x00010,
-        AF_CALCULATE_OFFSET_LOW_GROUP_EXTENDED = 0x00020,
-        AF_CALCULATE_OFFSET_BY_LOW_GROUP = 0x00040,
-        AF_UNKNOWN_80 = 0x00080,
-        AF_UNKNOWN_100 = 0x00100,
-        AF_UNKNOWN_200 = 0x00200,
-        AF_CALCULATE_OFFSET_BY_PEOPLE_GROUP = 0x00400,
-        AF_UNKNOWN_800 = 0x00800,
-        AF_UNKNOWN_1000 = 0x01000,
-        AF_UNKNOWN_2000 = 0x02000,
-        AF_UNKNOWN_4000 = 0x04000,
-        AF_UNKNOWN_8000 = 0x08000,
-        AF_USE_UOP_ANIMATION = 0x10000,
-        AF_UNKNOWN_20000 = 0x20000,
-        AF_UNKNOWN_40000 = 0x40000,
-        AF_UNKNOWN_80000 = 0x80000,
-        AF_FOUND = 0x80000000
+        None = 0x00000,
+        Unknown1 = 0x00001,
+        Use2IfHittedWhileRunning = 0x00002,
+        IdleAt8Frame = 0x00004,
+        CanFlying = 0x00008,
+        Unknown10 = 0x00010,
+        CalculateOffsetLowGroupExtended = 0x00020,
+        CalculateOffsetByLowGroup = 0x00040,
+        Unknown80 = 0x00080,
+        Unknown100 = 0x00100,
+        Unknown200 = 0x00200,
+        CalculateOffsetByPeopleGroup = 0x00400,
+        Unknown800 = 0x00800,
+        Unknown1000 = 0x01000,
+        Unknown2000 = 0x02000,
+        Unknown4000 = 0x04000,
+        Unknown8000 = 0x08000,
+        UseUopAnimation = 0x10000,
+        Unknown20000 = 0x20000,
+        Unknown40000 = 0x40000,
+        Unknown80000 = 0x80000,
+        Found = 0x80000000
     }
 
     public struct EquipConvData : IEquatable<EquipConvData>
@@ -1876,7 +1834,7 @@ namespace ClassicUO.Assets
     struct BodyConvInfo
     {
         public int FileIndex;
-        public ANIMATION_GROUPS_TYPE AnimType;
+        public AnimationGroupsType AnimType;
         public ushort Graphic;
         public ushort Hue;
         public sbyte MountHeight;

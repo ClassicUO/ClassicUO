@@ -289,7 +289,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (TryGetSittingInfo(out seatData))
                 {
-                    animGroup = (byte)PEOPLE_ANIMATION_GROUP.PAG_STAND;
+                    animGroup = (byte)PeopleAnimationGroup.Stand;
                     animIndex = 0;
 
                     ProcessSteps(out dir);
