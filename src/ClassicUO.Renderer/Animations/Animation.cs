@@ -313,8 +313,14 @@ namespace ClassicUO.Renderer.Animations
             bool forceUOP = false
         )
         {
+            if (graphic >= _dataIndex.Length)
+                return;
+
             ushort hue = 0;
-            AnimationsLoader.Instance.ReplaceBody(ref graphic, ref hue);
+
+            if (_dataIndex[graphic] != null && _dataIndex[graphic].FileIndex == 0 && !_dataIndex[graphic].Flags.HasFlag(ANIMATION_FLAGS.AF_USE_UOP_ANIMATION))
+                AnimationsLoader.Instance.ReplaceBody(ref graphic, ref hue);
+
             //if (graphic >= _dataIndex.Length)
             //{
             //    return;
