@@ -188,6 +188,11 @@ namespace ClassicUO.Renderer.Animations
                     var replaced = isCorpse ? AnimationsLoader.Instance.ReplaceCorpse(ref id, ref index.Hue) : AnimationsLoader.Instance.ReplaceBody(ref id, ref index.Hue);
                     if (replaced)
                     {
+                        if (id >= _dataIndex.Length)
+                        {
+                            Array.Resize(ref _dataIndex, id);
+                        }
+
                         index = ref _dataIndex[id];
                     }
                 }
