@@ -49,6 +49,8 @@ using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.ComponentModel;
+using System.Threading.Tasks;
+using System.Net.Http;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -4135,7 +4137,48 @@ namespace ClassicUO.Game.UI.Gumps
                 _skillProgressBarFormat.SetText(_currentProfile.SkillBarFormat);
 
                 section.Add(AddLabel(null, "Display spell indicators", 0, 0));
-                section.AddRight(_displaySpellIndicators = AddCheckBox(null, "", _currentProfile.EnableSpellIndicators, 0 ,0));
+                section.AddRight(_displaySpellIndicators = AddCheckBox(null, "", _currentProfile.EnableSpellIndicators, 0, 0));
+                NiceButton _importSpellConfig;
+                section.AddRight(_importSpellConfig = new NiceButton(0, 0, 150, TEXTBOX_HEIGHT, ButtonAction.Activate, "Import from url") { IsSelectable = false, DisplayBorder = true });
+                _importSpellConfig.MouseUp += (s, e) =>
+                {
+                    if (e.Button == MouseButtonType.Left)
+                    {
+                        UIManager.Add(
+                            new InputRequest("Enter the url for the spell config. /c[red]This will override your current config.", "Download", "Cancel", (r, s) =>
+                            {
+                                if (r == InputRequest.Result.BUTTON1 && !string.IsNullOrEmpty(s))
+                                {
+                                    if (Uri.TryCreate(s, UriKind.Absolute, out var uri))
+                                    {
+                                        GameActions.Print("Attempting to download spell config..");
+                                        Task.Factory.StartNew(() =>
+                                        {
+                                            try
+                                            {
+                                                using HttpClient httpClient = new HttpClient();
+                                                string result = httpClient.GetStringAsync(uri).Result;
+
+                                                if (SpellVisualRangeManager.Instance.LoadFromString(result))
+                                                {
+                                                    GameActions.Print("Succesfully downloaded new spell config.");
+                                                }
+                                            } 
+                                            catch(Exception ex)
+                                            {
+                                                GameActions.Print($"Failed to download the spell config. ({ex.Message})");
+                                            }
+                                        });
+                                    }
+                                }
+                            })
+                            {
+                                X = (Client.Game.Window.ClientBounds.Width >> 1 )- 50,
+                                Y = (Client.Game.Window.ClientBounds.Height >> 1 )- 50
+                            }
+                            );
+                    }
+                };
 
                 rightArea.Add(section);
                 startY += section.Height + SPACING + 15;

@@ -7,6 +7,9 @@ namespace ClassicUO.Game.UI.Gumps
     internal class VersionHistory : Gump
     {
         private static string[] updateTexts = {
+            "/c[white][3.10.0]/cd\n" +
+                "- Added the option to download a spell indicator config from an external source\n",
+
             "/c[white][3.9.0]/cd\n" +
                 "- Added missing race change gump\n" +
                 "- If no server is set in settings.json user will get a request to type one in\n" +

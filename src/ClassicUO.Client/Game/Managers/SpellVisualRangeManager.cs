@@ -246,6 +246,30 @@ namespace ClassicUO.Game.Managers
             });
         }
 
+        public bool LoadFromString(string json)
+        {
+            try
+            {
+                SpellRangeInfo[] fileData = JsonSerializer.Deserialize<SpellRangeInfo[]>(json);
+
+                loaded = false;
+                spellRangeCache.Clear();
+
+                foreach (var entry in fileData)
+                {
+                    spellRangeCache.Add(entry.ID, entry);
+                }
+                AfterLoad();
+                loaded = true;
+                return true;
+            } catch(Exception ex)
+            {
+                loaded = true;
+                Console.WriteLine(ex.ToString());
+                return false;
+            }
+        }
+
         private void AfterLoad()
         {
             spellRangePowerWordCache.Clear();

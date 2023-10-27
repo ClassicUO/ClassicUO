@@ -14,7 +14,7 @@ namespace ClassicUO.Game.UI.Gumps
             Height = 0;
 
             AlphaBlendControl bg;
-            Add(bg = new AlphaBlendControl());
+            Add(bg = new AlphaBlendControl(0.75f));
 
             Control _;
             Add(_ = new TextBox(message, TrueTypeLoader.EMBEDDED_FONT, 25, Width, Microsoft.Xna.Framework.Color.White, FontStashSharp.RichText.TextHorizontalAlignment.Center, false));
