@@ -1418,7 +1418,7 @@ namespace ClassicUO.Assets
 
             long dataStart = reader.Position;
             uint frameCount = reader.ReadUInt32LE();
-            uint* frameOffset = (uint*)reader.PositionAddress;
+            var frameOffset = new ReadOnlySpan<uint>((uint*)reader.PositionAddress, (int)frameCount);
 
             if (_frames == null || frameCount > _frames.Length)
             {
