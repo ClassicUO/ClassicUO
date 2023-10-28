@@ -729,8 +729,9 @@ namespace ClassicUO.Game.GameObjects
 
                     if (id < Client.Game.Animations.MaxAnimationCount && dir < 5)
                     {
+                        Client.Game.Animations.ConvertBodyIfNeeded(ref id);
                         var animGroup = Client.Game.Animations.GetAnimType(id);
-                        var animFlags = Client.Game.Animations.GetAnimFlags(id);
+                        var animFlags = Client.Game.Animations.GetAnimFlags(id);                   
                         byte action = AnimationsLoader.Instance.GetDeathAction(
                             id,
                             animFlags,

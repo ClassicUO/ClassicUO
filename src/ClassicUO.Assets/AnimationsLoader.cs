@@ -49,7 +49,6 @@ namespace ClassicUO.Assets
         public const int MAX_DIRECTIONS = 5;
 
         private static AnimationsLoader _instance;
-        private static BodyConvFlags _lastFlags = (BodyConvFlags)(-1);
 
         [ThreadStatic]
         private static FrameInfo[] _frames;
@@ -57,17 +56,14 @@ namespace ClassicUO.Assets
         [ThreadStatic]
         private static byte[] _decompressedData;
 
-        private readonly Dictionary<ushort, Dictionary<ushort, EquipConvData>> _equipConv =
-            new Dictionary<ushort, Dictionary<ushort, EquipConvData>>();
+        private readonly Dictionary<ushort, Dictionary<ushort, EquipConvData>> _equipConv = new Dictionary<ushort, Dictionary<ushort, EquipConvData>>();
         private readonly UOFileMul[] _files = new UOFileMul[5];
         private readonly UOFileUop[] _filesUop = new UOFileUop[4];
 
-        private readonly Dictionary<int, MobTypeInfo> _mobTypes =
-            new Dictionary<int, MobTypeInfo>();
+        private readonly Dictionary<int, MobTypeInfo> _mobTypes = new Dictionary<int, MobTypeInfo>();
         private readonly Dictionary<int, BodyInfo> _bodyInfos = new Dictionary<int, BodyInfo>();
         private readonly Dictionary<int, BodyInfo> _corpseInfos = new Dictionary<int, BodyInfo>();
-        private readonly Dictionary<int, BodyConvInfo> _bodyConvInfos =
-            new Dictionary<int, BodyConvInfo>();
+        private readonly Dictionary<int, BodyConvInfo> _bodyConvInfos = new Dictionary<int, BodyConvInfo>();
         private readonly Dictionary<int, UopInfo> _uopInfos = new Dictionary<int, UopInfo>();
 
         private AnimationsLoader() { }
@@ -75,8 +71,7 @@ namespace ClassicUO.Assets
         public static AnimationsLoader Instance =>
             _instance ?? (_instance = new AnimationsLoader());
 
-        public IReadOnlyDictionary<ushort, Dictionary<ushort, EquipConvData>> EquipConversions =>
-            _equipConv;
+        public IReadOnlyDictionary<ushort, Dictionary<ushort, EquipConvData>> EquipConversions =>  _equipConv;
 
         struct MobTypeInfo
         {
@@ -1185,6 +1180,11 @@ namespace ClassicUO.Assets
         )
         {        
             //ConvertBodyIfNeeded(ref animID);
+
+            if (animFlags.HasFlag(AnimationFlags.CalculateOffsetByLowGroup))
+            {
+                animType = AnimationGroupsType.Animal;
+            }
 
             switch (animType)
             {
