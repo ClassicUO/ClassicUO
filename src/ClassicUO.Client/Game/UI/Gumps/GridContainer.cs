@@ -130,21 +130,13 @@ namespace ClassicUO.Game.UI.Gumps
             isCorpse = container.IsCorpse;
             if (useGridStyle != null)
                 UseOldContainerStyle = !useGridStyle;
-            if (LocalSerial == World.Player.FindItemByLayer(Layer.Backpack).Serial)
-                IsPlayerBackpack = true;
 
-            Point savedSize, lastPos;
-            if (IsPlayerBackpack)
-            {
-                savedSize = ProfileManager.CurrentProfile.BackpackGridSize;
-                lastPos = ProfileManager.CurrentProfile.BackpackGridPosition;
-                IsLocked = ProfileManager.CurrentProfile.BackPackLocked;
-            }
-            else
-            {
-                savedSize = GridSaveSystem.Instance.GetLastSize(LocalSerial);
-                lastPos = GridSaveSystem.Instance.GetLastPosition(LocalSerial);
-            }
+            IsPlayerBackpack = LocalSerial == World.Player.FindItemByLayer(Layer.Backpack).Serial;
+
+            Point lastPos = IsPlayerBackpack ? ProfileManager.CurrentProfile.BackpackGridPosition : GridSaveSystem.Instance.GetLastPosition(LocalSerial);
+            Point savedSize = IsPlayerBackpack ? ProfileManager.CurrentProfile.BackpackGridSize : GridSaveSystem.Instance.GetLastSize(LocalSerial);
+            IsLocked = IsPlayerBackpack && ProfileManager.CurrentProfile.BackPackLocked;
+
             lastWidth = Width = savedSize.X;
             lastHeight = Height = savedSize.Y;
 
@@ -563,7 +555,6 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     SelectedObject.CorpseObject = null;
                 }
-                containerNameLabel?.Dispose();
 
                 Item bank = World.Player.FindItemByLayer(Layer.Bank);
 
