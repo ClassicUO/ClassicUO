@@ -335,7 +335,10 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Save(writer);
 
-            GridSaveSystem.Instance.SaveContainer(LocalSerial, gridSlotManager.GridSlots, Width, Height, X, Y);
+            if (!skipSave)
+            {
+                GridSaveSystem.Instance.SaveContainer(LocalSerial, gridSlotManager.GridSlots, Width, Height, X, Y, UseOldContainerStyle);
+            }
 
             if (IsPlayerBackpack)
             {
@@ -344,8 +347,6 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             writer.WriteAttributeString("ogContainer", originalContainerItemGraphic.ToString());
-            writer.WriteAttributeString("width", Width.ToString());
-            writer.WriteAttributeString("height", Height.ToString());
         }
 
         private void _scrollArea_DragBegin(object sender, MouseEventArgs e)
