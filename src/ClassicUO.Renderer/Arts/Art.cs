@@ -40,11 +40,12 @@ namespace ClassicUO.Renderer.Arts
                         out spriteInfo.UV
                     );
 
-                    _picker.Set((ulong)(idx & ~0x4000), artInfo.Width, artInfo.Height, artInfo.Pixels);
 
                     if (idx > 0x4000)
                     {
                         idx -= 0x4000;
+                        _picker.Set(idx, artInfo.Width, artInfo.Height, artInfo.Pixels);
+
                         var pos1 = 0;
                         int minX = artInfo.Width,
                             minY = artInfo.Height,
