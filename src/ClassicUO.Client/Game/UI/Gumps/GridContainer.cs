@@ -493,7 +493,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseExit(int x, int y)
         {
-            if (isCorpse && container != null && !container.IsDestroyed)
+            if (isCorpse && container != null && container == SelectedObject.CorpseObject)
             {
                 SelectedObject.CorpseObject = null;
             }
@@ -552,13 +552,11 @@ namespace ClassicUO.Game.UI.Gumps
             if (IsDisposed)
                 return;
 
-
-            Item item = World.Items.Get(LocalSerial);
+            Item item = container;
 
             if (item == null || item.IsDestroyed)
             {
                 Dispose();
-
                 return;
             }
 
@@ -748,7 +746,7 @@ namespace ClassicUO.Game.UI.Gumps
             Style8
         }
 
-        public static void Clear()
+        public static void ClearInstance()
         {
             GridSaveSystem.Instance.Clear();
         }

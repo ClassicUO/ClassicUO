@@ -772,7 +772,7 @@ namespace ClassicUO.Game
 
             UIManager.GetGump<BaseHealthBarGump>(Player.Serial)?.Dispose();
 
-            GridContainer.Clear();
+            GridContainer.ClearInstance();
 
             ObjectToRemove = 0;
             LastObject = 0;
