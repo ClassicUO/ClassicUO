@@ -192,7 +192,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Width = 150,
                 Height = 20
             };
-            searchBox.TextChanged += (sender, e) => { updateItems(); };
+            searchBox.TextChanged += (sender, e) => { UpdateItems(); };
 
             var regularGumpIcon = GumpsLoader.Instance.GetGumpTexture(5839, out var bounds);
             openRegularGump = new GumpPic(background.Width - 25 - borderWidth, borderWidth, regularGumpIcon == null ? (ushort)1209 : (ushort)5839, 0);
@@ -251,7 +251,7 @@ namespace ClassicUO.Game.UI.Gumps
                     ProfileManager.CurrentProfile.AutoSortGridContainers ^= true;
                     sortContents.SetTooltip(sortButtonTooltip);
                 }
-                updateItems(true);
+                UpdateItems(true);
             };
             sortContents.MouseEnter += (sender, e) => { sortContents.Graphic = 1209; };
             sortContents.MouseExit += (sender, e) => { sortContents.Graphic = 1210; };
@@ -266,7 +266,7 @@ namespace ClassicUO.Game.UI.Gumps
                 background.Height - (containerNameLabel.Height + 1)
                 );
 
-            scrollArea.MouseUp += _scrollArea_MouseUp;
+            scrollArea.MouseUp += ScrollArea_MouseUp;
             #endregion
 
             #region Set loot bag
@@ -348,7 +348,7 @@ namespace ClassicUO.Game.UI.Gumps
             writer.WriteAttributeString("ogContainer", originalContainerItemGraphic.ToString());
         }
 
-        private void _scrollArea_MouseUp(object sender, MouseEventArgs e)
+        private void ScrollArea_MouseUp(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtonType.Left && scrollArea.MouseIsOver)
             {
@@ -466,7 +466,7 @@ namespace ClassicUO.Game.UI.Gumps
             Dispose();
         }
 
-        private void updateItems(bool overrideSort = false)
+        private void UpdateItems(bool overrideSort = false)
         {
             //Container doesn't exist or has no items
             if (container == null)
@@ -487,7 +487,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (InvalidateContents && !IsDisposed && IsVisible)
             {
-                updateItems();
+                UpdateItems();
             }
         }
 
@@ -706,13 +706,13 @@ namespace ClassicUO.Game.UI.Gumps
                 BorderControl.BorderSize = borderSize;
                 borderWidth = borderSize;
             }
-            RePosition();
+            UpdateUIPositions();
             OnResize();
 
             BorderControl.IsVisible = !ProfileManager.CurrentProfile.Grid_HideBorder;
         }
 
-        public void RePosition()
+        private void UpdateUIPositions()
         {
             background.X = borderWidth;
             background.Y = borderWidth;
@@ -1775,17 +1775,15 @@ namespace ClassicUO.Game.UI.Gumps
 
             public override void Update()
             {
+                if (IsDisposed)
+                {
+                    return;
+                }
+
                 if (_container == null || _container.IsDestroyed || _container.OnGround && _container.Distance > 3)
                 {
                     Dispose();
 
-                    return;
-                }
-
-                base.Update();
-
-                if (IsDisposed)
-                {
                     return;
                 }
 
