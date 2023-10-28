@@ -267,7 +267,6 @@ namespace ClassicUO.Game.UI.Gumps
                 );
 
             scrollArea.MouseUp += _scrollArea_MouseUp;
-            scrollArea.DragBegin += _scrollArea_DragBegin;
             #endregion
 
             #region Set loot bag
@@ -347,11 +346,6 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             writer.WriteAttributeString("ogContainer", originalContainerItemGraphic.ToString());
-        }
-
-        private void _scrollArea_DragBegin(object sender, MouseEventArgs e)
-        {
-            InvokeDragBegin(e.Location);
         }
 
         private void _scrollArea_MouseUp(object sender, MouseEventArgs e)
@@ -493,8 +487,6 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (InvalidateContents && !IsDisposed && IsVisible)
             {
-                if (ProfileManager.CurrentProfile != null)
-                    background.Alpha = (float)ProfileManager.CurrentProfile.ContainerOpacity / 100;
                 updateItems();
             }
         }
