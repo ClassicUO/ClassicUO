@@ -34,10 +34,9 @@ using ClassicUO.IO;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Collections;
 using ClassicUO.Utility.Logging;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
+using System.Drawing.Printing;
 using System.Globalization;
 using System.IO;
 using System.Runtime.CompilerServices;
@@ -66,13 +65,39 @@ namespace ClassicUO.Assets
 
         private static FontsLoader _instance;
 
+        public struct Margin 
+        { 
+            public int X, Y, Width, Height; 
+
+            public Margin()
+            {
+                this = default;
+            }
+
+            public Margin(int x, int y, int width, int height)
+            {
+                X = x; Y = y; Width = width; Height = height;
+            }
+
+
+            public readonly int Right => X + Width;
+            public readonly int Bottom => Y + Height;
+
+            public readonly bool Contains(int x, int y)
+            {
+                return (x >= X && x < Right && y >= Y && y < Bottom);
+            }
+
+            public static readonly Margin Empty = new Margin(); 
+        }
+
         struct HtmlStatus
         {
             public uint BackgroundColor;
             public uint VisitedWebLinkColor;
             public uint WebLinkColor;
             public uint Color;
-            public Rectangle Margins;
+            public Margin Margins;
 
             public bool IsHtmlBackgroundColored;
         }
@@ -1278,7 +1303,7 @@ namespace ClassicUO.Assets
             _htmlStatus.WebLinkColor = 0xFF0000FF;
             _htmlStatus.VisitedWebLinkColor = 0x0000FFFF;
             _htmlStatus.BackgroundColor = 0;
-            _htmlStatus.Margins = Rectangle.Empty;
+            _htmlStatus.Margins = Margin.Empty;
 
             if (font >= 20 || _unicodeFontAddress[font] == IntPtr.Zero)
             {
@@ -1767,7 +1792,7 @@ namespace ClassicUO.Assets
                             WebLinkRect wlr = new WebLinkRect
                             {
                                 LinkID = oldLink,
-                                Bounds = new Rectangle(linkStartX, linkStartY, w - ofsX, linkHeight)
+                                Bounds = new Margin(linkStartX, linkStartY, w - ofsX, linkHeight)
                             };
 
                             links.Add(wlr);
@@ -3775,7 +3800,7 @@ namespace ClassicUO.Assets
     public struct WebLinkRect
     {
         public ushort LinkID;
-        public Rectangle Bounds;
+        public FontsLoader.Margin Bounds;
     }
 
     public class WebLink
