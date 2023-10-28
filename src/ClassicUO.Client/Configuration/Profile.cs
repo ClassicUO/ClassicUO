@@ -162,6 +162,7 @@ namespace ClassicUO.Configuration
         public bool EnableBlackWhiteEffect { get; set; } = true;
         public ushort HiddenBodyHue { get; set; } = 0x038E;
         public byte HiddenBodyAlpha { get; set; } = 40;
+        public int PlayerConstantAlpha { get; set; } = 100;
 
         // tooltip
         public bool UseTooltip { get; set; } = true;

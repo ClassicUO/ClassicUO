@@ -192,7 +192,7 @@ namespace ClassicUO.Game.UI.Gumps
         private InputField _healthIndicatorPercentage, _healthIndicatorWidth, _tooltipHeaderFormat, _skillProgressBarFormat;
         private ModernColorPicker.HueDisplay _mainWindowHuePicker, _spellIconHotkeyHue, _tooltipBGHue;
         private HSliderBar _spellIconScale, _journalFontSize, _tooltipFontSize, _gameWindowSideChatFontSize, _overheadFontSize, _overheadTextWidth, _textStrokeSize, _gridHightlightLineSize, _maxJournalEntries;
-        private HSliderBar _healthLineSizeMultiplier;
+        private HSliderBar _healthLineSizeMultiplier, _regularPlayerAlpha;
         private Combobox _journalFontSelection, _tooltipFontSelect, _gameWindowSideChatFont, _overheadFont;
 
         #region Cooldowns
@@ -4057,6 +4057,9 @@ namespace ClassicUO.Game.UI.Gumps
                     section.PopIndent();
                 } //Hidden body mods
 
+                section.Add(AddLabel(null, "Regular player opacity", 0, 0));
+                section.AddRight(_regularPlayerAlpha = AddHSlider(null, 0, 100, _currentProfile.PlayerConstantAlpha, 0, 0, 200));
+
                 {
                     section.Add(AddLabel(null, "Auto Follow Distance", 0, 0));
                     section.AddRight(
@@ -4806,6 +4809,8 @@ namespace ClassicUO.Game.UI.Gumps
                     UIManager.Add(new ResizableJournal());
                 }
             }
+            _currentProfile.PlayerConstantAlpha = _regularPlayerAlpha.Value;
+
             _currentProfile.EnableSpellIndicators = _displaySpellIndicators.IsChecked;
 
             _currentProfile.DisplaySkillBarOnChange = _skillProgressBarOnChange.IsChecked;

@@ -99,6 +99,11 @@ namespace ClassicUO.Game.GameObjects
 
             Vector3 hueVec = ShaderHueTranslator.GetHueVector(0, false, AlphaHue / 255f);
 
+            if(World.Player == this && ProfileManager.CurrentProfile.PlayerConstantAlpha != 100)
+            {
+                hueVec = ShaderHueTranslator.GetHueVector(0, false, (float)ProfileManager.CurrentProfile.PlayerConstantAlpha / 100f);
+            }
+
             if (ProfileManager.CurrentProfile.HighlightGameObjects && ReferenceEquals(SelectedObject.Object, this))
             {
                 overridedHue = Constants.HIGHLIGHT_CURRENT_OBJECT_HUE;
