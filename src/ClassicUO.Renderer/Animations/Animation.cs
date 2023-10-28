@@ -60,6 +60,8 @@ namespace ClassicUO.Renderer.Animations
             int y
         )
         {
+            ConvertBodyIfNeeded(ref animID);
+
             uint packed32 = (uint)((group | (direction << 8) | ((uop ? 0x01 : 0x00) << 16)));
             uint packed32_2 = (uint)((animID | (frame << 16)));
             ulong packed = (packed32_2 | ((ulong)packed32 << 32));
