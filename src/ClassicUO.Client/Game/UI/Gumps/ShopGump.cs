@@ -772,16 +772,17 @@ namespace ClassicUO.Game.UI.Gumps
 
             private static byte GetAnimGroup(ushort graphic)
             {
-                switch (AnimationsLoader.Instance.GetGroupIndex(graphic))
+                var groupType = Client.Game.Animations.GetAnimType(graphic);
+                switch (AnimationsLoader.Instance.GetGroupIndex(graphic, groupType))
                 {
-                    case ANIMATION_GROUPS.AG_LOW:
-                        return (byte)LOW_ANIMATION_GROUP.LAG_STAND;
+                    case AnimationGroups.Low:
+                        return (byte)LowAnimationGroup.Stand;
 
-                    case ANIMATION_GROUPS.AG_HIGHT:
-                        return (byte)HIGHT_ANIMATION_GROUP.HAG_STAND;
+                    case AnimationGroups.High:
+                        return (byte)HighAnimationGroup.Stand;
 
-                    case ANIMATION_GROUPS.AG_PEOPLE:
-                        return (byte)PEOPLE_ANIMATION_GROUP.PAG_STAND;
+                    case AnimationGroups.People:
+                        return (byte)PeopleAnimationGroup.Stand;
                 }
 
                 return 0;
@@ -808,13 +809,14 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     ushort graphic = Graphic;
 
-                    if (graphic >= AnimationsLoader.Instance.MaxAnimationCount)
+                    if (graphic >= Client.Game.Animations.MaxAnimationCount)
                     {
                         graphic = 0;
                     }
 
                     byte group = GetAnimGroup(graphic);
-                    var frames = AnimationsLoader.Instance.GetAnimationFrames(
+
+                    var frames = Client.Game.Animations.GetAnimationFrames(
                         graphic,
                         group,
                         1,
@@ -860,7 +862,7 @@ namespace ClassicUO.Game.UI.Gumps
                         1f
                     );
 
-                    var rect = ArtLoader.Instance.GetRealArtBounds(Graphic);
+                    var rect = Client.Game.Arts.GetRealArtBounds(Graphic);
 
                     const int RECT_SIZE = 50;
 

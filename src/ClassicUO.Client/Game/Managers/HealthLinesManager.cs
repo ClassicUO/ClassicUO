@@ -130,7 +130,7 @@ namespace ClassicUO.Game.Managers
                     {
                         if (mobile.HitsPercentage != 0)
                         {
-                            AnimationsLoader.Instance.GetAnimationDimensions(
+                            Client.Game.Animations.GetAnimationDimensions(
                                 mobile.AnimIndex,
                                 mobile.GetGraphicForAnimation(),
                                 /*(byte) m.GetDirectionForAnimation()*/

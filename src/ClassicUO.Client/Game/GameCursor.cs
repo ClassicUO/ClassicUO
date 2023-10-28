@@ -188,7 +188,7 @@ namespace ClassicUO.Game
 
             if (graphic != 0xFFFF)
             {
-                ref readonly var artInfo = ref Client.Game.Arts.GetArt(graphic);
+                ref readonly var artInfo = ref Client.Game.Arts.GetArt((uint)(graphic + 0x4000));
 
                 float scale = 1;
 
@@ -252,7 +252,7 @@ namespace ClassicUO.Game
 
                 if (draggingGraphic != 0xFFFF && ItemHold.IsFixedPosition && !UIManager.IsDragging)
                 {
-                    ref readonly var artInfo = ref Client.Game.Arts.GetArt(draggingGraphic);
+                    ref readonly var artInfo = ref Client.Game.Arts.GetArt((uint)(draggingGraphic + 0x4000));
 
                     Point offset = GetDraggingItemOffset();
 
@@ -464,7 +464,7 @@ namespace ClassicUO.Game
 
                 ushort draggingGraphic = GetDraggingItemGraphic();
 
-                ref readonly var artInfo = ref Client.Game.Arts.GetArt(draggingGraphic);
+                ref readonly var artInfo = ref Client.Game.Arts.GetArt((uint)(draggingGraphic + 0x4000));
 
                 if (artInfo.Texture != null)
                 {
@@ -535,7 +535,7 @@ namespace ClassicUO.Game
                     hueVec = ShaderHueTranslator.GetHueVector(0);
                 }
 
-                ref readonly var artInfo = ref Client.Game.Arts.GetArt(Graphic);
+                ref readonly var artInfo = ref Client.Game.Arts.GetArt((uint)(Graphic + 0x4000));
 
                 sb.Draw(
                     artInfo.Texture,

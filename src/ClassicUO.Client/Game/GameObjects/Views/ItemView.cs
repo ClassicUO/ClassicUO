@@ -204,7 +204,15 @@ namespace ClassicUO.Game.GameObjects
 
             byte animIndex = (byte)AnimIndex;
             ushort graphic = GetGraphicForAnimation();
-            byte group = AnimationsLoader.Instance.GetDeathAction(graphic, UsedLayer);
+
+            var animGroup = Client.Game.Animations.GetAnimType(graphic);
+            var animFlags = Client.Game.Animations.GetAnimFlags(graphic);
+            byte group = AnimationsLoader.Instance.GetDeathAction(
+                graphic,
+                animFlags,
+                animGroup,
+                UsedLayer
+            );
 
             bool ishuman =
                 MathHelper.InRange(Amount, 0x0190, 0x0193)
@@ -319,7 +327,7 @@ namespace ClassicUO.Game.GameObjects
                 return;
             }
 
-            var frames = AnimationsLoader.Instance.GetAnimationFrames(
+            var frames = Client.Game.Animations.GetAnimationFrames(
                 graphic,
                 animGroup,
                 dir,
@@ -604,8 +612,15 @@ namespace ClassicUO.Game.GameObjects
                         continue;
                     }
 
-                    byte group = AnimationsLoader.Instance.GetDeathAction(graphic, UsedLayer);
-                    var frames = AnimationsLoader.Instance.GetAnimationFrames(
+                    var animGroup = Client.Game.Animations.GetAnimType(graphic);
+                    var animFlags = Client.Game.Animations.GetAnimFlags(graphic);
+                    byte group = AnimationsLoader.Instance.GetDeathAction(
+                        graphic,
+                        animFlags,
+                        animGroup,
+                        UsedLayer
+                    );
+                    var frames = Client.Game.Animations.GetAnimationFrames(
                         graphic,
                         group,
                         direction,
@@ -642,7 +657,7 @@ namespace ClassicUO.Game.GameObjects
                         int y = position.Y - (spriteInfo.UV.Height + spriteInfo.Center.Y);
 
                         if (
-                            Client.Game.Arts.PixelCheck(
+                            Client.Game.Animations.PixelCheck(
                                 graphic,
                                 group,
                                 direction,

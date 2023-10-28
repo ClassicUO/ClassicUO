@@ -2,7 +2,7 @@
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 // 1. Redistributions of source code must retain the above copyright
@@ -16,7 +16,7 @@
 // 4. Neither the name of the copyright holder nor the
 //    names of its contributors may be used to endorse or promote products
 //    derived from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -57,33 +57,32 @@ namespace ClassicUO.Game.UI.Controls
             {
                 _graphic = value;
 
-                var texture = GumpsLoader.Instance.GetGumpTexture(_graphic, out var bounds);
+                ref readonly var gumpInfo = ref Client.Game.Gumps.GetGump(_graphic);
 
-                if (texture == null)
+                if (gumpInfo.Texture == null)
                 {
                     Dispose();
 
                     return;
                 }
 
-                Width = bounds.Width;
-                Height = bounds.Height;
+                Width = gumpInfo.UV.Width;
+                Height = gumpInfo.UV.Height;
             }
         }
 
         public ushort Hue { get; set; }
 
-
         public override bool Contains(int x, int y)
         {
-            var texture = GumpsLoader.Instance.GetGumpTexture(_graphic, out _);
+            ref readonly var gumpInfo = ref Client.Game.Gumps.GetGump(_graphic);
 
-            if (texture == null)
+            if (gumpInfo.Texture == null)
             {
                 return false;
             }
 
-            if (GumpsLoader.Instance.PixelCheck(Graphic, x - Offset.X, y - Offset.Y))
+            if (Client.Game.Gumps.PixelCheck(Graphic, x - Offset.X, y - Offset.Y))
             {
                 return true;
             }
@@ -114,9 +113,22 @@ namespace ClassicUO.Game.UI.Controls
             IsFromServer = true;
         }
 
-        public GumpPic(List<string> parts) : this(int.Parse(parts[1]), int.Parse(parts[2]), UInt16Converter.Parse(parts[3]), (ushort) (parts.Count > 4 ? TransformHue((ushort) (UInt16Converter.Parse(parts[4].Substring(parts[4].IndexOf('=') + 1)) + 1)) : 0))
-        {
-        }
+        public GumpPic(List<string> parts)
+            : this(
+                int.Parse(parts[1]),
+                int.Parse(parts[2]),
+                UInt16Converter.Parse(parts[3]),
+                (ushort)(
+                    parts.Count > 4
+                        ? TransformHue(
+                            (ushort)(
+                                UInt16Converter.Parse(parts[4].Substring(parts[4].IndexOf('=') + 1))
+                                + 1
+                            )
+                        )
+                        : 0
+                )
+            ) { }
 
         public bool IsPartialHue { get; set; }
         public bool ContainsByBounds { get; set; }
@@ -158,23 +170,16 @@ namespace ClassicUO.Game.UI.Controls
                 return false;
             }
 
-            Vector3 hueVector = ShaderHueTranslator.GetHueVector
-            (
-                Hue,
-                IsPartialHue,
-                Alpha,
-                true
-            );
+            Vector3 hueVector = ShaderHueTranslator.GetHueVector(Hue, IsPartialHue, Alpha, true);
 
-            var texture = GumpsLoader.Instance.GetGumpTexture(Graphic, out var bounds);
+            ref readonly var gumpInfo = ref Client.Game.Gumps.GetGump(Graphic);
 
-            if (texture != null)
+            if (gumpInfo.Texture != null)
             {
-                batcher.Draw
-                (
-                    texture,
+                batcher.Draw(
+                    gumpInfo.Texture,
                     new Rectangle(x, y, Width, Height),
-                    bounds,
+                    gumpInfo.UV,
                     hueVector
                 );
             }
@@ -186,7 +191,16 @@ namespace ClassicUO.Game.UI.Controls
     internal class GumpPicInPic : GumpPicBase
     {
         private readonly Rectangle _picInPicBounds;
-        public GumpPicInPic(int x, int y, ushort graphic, ushort sx, ushort sy, ushort width, ushort height)
+
+        public GumpPicInPic(
+            int x,
+            int y,
+            ushort graphic,
+            ushort sx,
+            ushort sy,
+            ushort width,
+            ushort height
+        )
         {
             X = x;
             Y = y;
@@ -197,9 +211,16 @@ namespace ClassicUO.Game.UI.Controls
             IsFromServer = true;
         }
 
-        public GumpPicInPic(List<string> parts) : this(int.Parse(parts[1]), int.Parse(parts[2]), UInt16Converter.Parse(parts[3]), UInt16Converter.Parse(parts[4]), UInt16Converter.Parse(parts[5]), UInt16Converter.Parse(parts[6]), UInt16Converter.Parse(parts[7]))
-        {
-        }
+        public GumpPicInPic(List<string> parts)
+            : this(
+                int.Parse(parts[1]),
+                int.Parse(parts[2]),
+                UInt16Converter.Parse(parts[3]),
+                UInt16Converter.Parse(parts[4]),
+                UInt16Converter.Parse(parts[5]),
+                UInt16Converter.Parse(parts[6]),
+                UInt16Converter.Parse(parts[7])
+            ) { }
 
         public override bool Contains(int x, int y)
         {
@@ -213,23 +234,16 @@ namespace ClassicUO.Game.UI.Controls
                 return false;
             }
 
-            Vector3 hueVector = ShaderHueTranslator.GetHueVector
-            (
-                Hue,
-                false,
-                Alpha,
-                true
-            );
+            Vector3 hueVector = ShaderHueTranslator.GetHueVector(Hue, false, Alpha, true);
 
-            var texture = GumpsLoader.Instance.GetGumpPartialTexture(Graphic, _picInPicBounds, out var bounds);
+            ref readonly var gumpInfo = ref Client.Game.Gumps.GetGump(Graphic);
 
-            if (texture != null)
+            if (gumpInfo.Texture != null)
             {
-                batcher.Draw
-                (
-                    texture,
+                batcher.Draw(
+                    gumpInfo.Texture,
                     new Rectangle(x, y, Width, Height),
-                    bounds,
+                    gumpInfo.UV,
                     hueVector
                 );
             }

@@ -2,7 +2,7 @@
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 // 1. Redistributions of source code must retain the above copyright
@@ -16,7 +16,7 @@
 // 4. Neither the name of the copyright holder nor the
 //    names of its contributors may be used to endorse or promote products
 //    derived from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -46,33 +46,28 @@ namespace ClassicUO.Game.UI.Gumps
             CanCloseWithRightClick = true;
             Add(new GumpPic(0, 0, 0x0816, 0));
 
-            GumpsLoader.Instance.GetGumpTexture(0x0816, out var bounds);
+            ref readonly var gumpInfo = ref Client.Game.Gumps.GetGump(0x0816);
 
-            Width = bounds.Width;
-            Height = bounds.Height;
+            Width = gumpInfo.UV.Width;
+            Height = gumpInfo.UV.Height;
 
+            Add(new Label(message, false, 0x0386, 165, font: 1) { X = 33, Y = 30 });
 
-            Add
-            (
-                new Label(message, false, 0x0386, 165, font: 1)
+            Add(
+                new Button((int)Buttons.Cancel, 0x817, 0x818, 0x0819)
                 {
-                    X = 33, Y = 30
+                    X = 37,
+                    Y = 75,
+                    ButtonAction = ButtonAction.Activate
                 }
             );
 
-            Add
-            (
-                new Button((int) Buttons.Cancel, 0x817, 0x818, 0x0819)
+            Add(
+                new Button((int)Buttons.Ok, 0x81A, 0x81B, 0x081C)
                 {
-                    X = 37, Y = 75, ButtonAction = ButtonAction.Activate
-                }
-            );
-
-            Add
-            (
-                new Button((int) Buttons.Ok, 0x81A, 0x81B, 0x081C)
-                {
-                    X = 100, Y = 75, ButtonAction = ButtonAction.Activate
+                    X = 100,
+                    Y = 75,
+                    ButtonAction = ButtonAction.Activate
                 }
             );
 
@@ -85,7 +80,6 @@ namespace ClassicUO.Game.UI.Gumps
             WantUpdateSize = false;
             _result = result;
         }
-
 
         public override void OnButtonClick(int buttonID)
         {

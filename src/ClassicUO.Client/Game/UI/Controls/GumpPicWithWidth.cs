@@ -2,7 +2,7 @@
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 // 1. Redistributions of source code must retain the above copyright
@@ -16,7 +16,7 @@
 // 4. Neither the name of the copyright holder nor the
 //    names of its contributors may be used to endorse or promote products
 //    derived from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -38,7 +38,8 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class GumpPicWithWidth : GumpPic
     {
-        public GumpPicWithWidth(int x, int y, ushort graphic, ushort hue, int perc) : base(x, y, graphic, hue)
+        public GumpPicWithWidth(int x, int y, ushort graphic, ushort hue, int perc)
+            : base(x, y, graphic, hue)
         {
             Percent = perc;
             CanMove = true;
@@ -51,21 +52,14 @@ namespace ClassicUO.Game.UI.Controls
         {
             Vector3 hueVector = ShaderHueTranslator.GetHueVector(Hue);
 
-            var texture = GumpsLoader.Instance.GetGumpTexture(Graphic, out var bounds);
+            ref readonly var gumpInfo = ref Client.Game.Gumps.GetGump(Graphic);
 
-            if (texture != null)
+            if (gumpInfo.Texture != null)
             {
-                batcher.DrawTiled
-                (
-                    texture,
-                    new Rectangle
-                    (
-                        x,
-                        y,
-                        Percent,
-                        Height
-                    ),
-                    bounds,
+                batcher.DrawTiled(
+                    gumpInfo.Texture,
+                    new Rectangle(x, y, Percent, Height),
+                    gumpInfo.UV,
                     hueVector
                 );
 

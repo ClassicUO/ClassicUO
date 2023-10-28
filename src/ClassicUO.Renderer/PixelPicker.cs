@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace ClassicUO.Assets
+namespace ClassicUO.Renderer
 {
-    public class PixelPicker
+    public sealed class PixelPicker
     {
         const int InitialDataCount = 0x40000; // 256kb
 

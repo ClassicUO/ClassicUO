@@ -2,10 +2,10 @@ namespace ClassicUO.Renderer.Animations
 {
     public struct AnimationDirection
     {
-        public long Address;
+        public uint Address;
+        public uint Size;
         public byte FrameCount;
         public SpriteInfo[] SpriteInfos;
         public bool IsVerdata;
-        public uint Size;
     }
 }

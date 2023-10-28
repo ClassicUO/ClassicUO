@@ -40,6 +40,7 @@ using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.IO;
+using ClassicUO.Renderer;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
@@ -3250,6 +3251,7 @@ namespace ClassicUO.Network
             ushort height = p.ReadUInt16BE();
 
             MapGump gump = new MapGump(serial, gumpid, width, height);
+            SpriteInfo multiMapInfo;
 
             if (p[0] == 0xF5 || Client.Version >= Utility.ClientVersion.CV_308Z)
             {
@@ -3308,6 +3310,9 @@ namespace ClassicUO.Network
                 );
                 gump.MapInfos(startX, startY, endX, endY);
             }
+
+            if (multiMapInfo.Texture != null)
+                gump.SetMapTexture(multiMapInfo.Texture);
 
             UIManager.Add(gump);
 
@@ -3893,8 +3898,12 @@ namespace ClassicUO.Network
                 World.CorpseManager.Add(corpseSerial, serial, owner.Direction, running != 0);
             }
 
+            var animGroup = Client.Game.Animations.GetAnimType(owner.Graphic);
+            var animFlags = Client.Game.Animations.GetAnimFlags(owner.Graphic);
             byte group = AnimationsLoader.Instance.GetDeathAction(
                 owner.Graphic,
+                animFlags,
+                animGroup,
                 running != 0,
                 true
             );

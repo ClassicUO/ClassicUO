@@ -13,18 +13,38 @@ namespace ClassicUO.Renderer.Animations
         private readonly PixelPicker _picker = new PixelPicker();
         private IndexAnimation[] _dataIndex = new IndexAnimation[MAX_ANIMATIONS_DATA_INDEX_COUNT];
 
+        private AnimationDirection[][][] _cache;
+
         public Animations(GraphicsDevice device)
         {
             _atlas = new TextureAtlas(device, 4096, 4096, SurfaceFormat.Color);
         }
 
+
+        private ref AnimationDirection GetSprite(int body, int action, int dir)
+        {
+            if (_cache == null)
+                _cache = new AnimationDirection[Math.Max(body, MAX_ANIMATIONS_DATA_INDEX_COUNT)][][];
+
+            if (body >= _cache.Length)
+                Array.Resize(ref _cache, body);
+
+            if (_cache[body] == null)
+                _cache[body] = new AnimationDirection[AnimationsLoader.MAX_ACTIONS][];
+
+            if (_cache[body][action] == null)
+                _cache[body][action] = new AnimationDirection[AnimationsLoader.MAX_DIRECTIONS];
+
+            return ref _cache[body][action][dir];
+        }
+
         public int MaxAnimationCount => _dataIndex.Length;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ANIMATION_GROUPS_TYPE GetAnimType(ushort graphic) => _dataIndex[graphic]?.Type ?? 0;
+        public AnimationGroupsType GetAnimType(ushort graphic) => _dataIndex[graphic]?.Type ?? 0;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ANIMATION_FLAGS GetAnimFlags(ushort graphic) => _dataIndex[graphic]?.Flags ?? 0;
+        public AnimationFlags  GetAnimFlags(ushort graphic) => _dataIndex[graphic]?.Flags ?? 0;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public sbyte GetMountedHeightOffset(ushort graphic) =>
@@ -40,10 +60,7 @@ namespace ClassicUO.Renderer.Animations
             int y
         )
         {
-            ushort hue = 0;
-            ReplaceAnimationValues(ref animID, ref group, ref hue, out var isUOP, forceUOP: uop);
-
-            uint packed32 = (uint)((group | (direction << 8) | ((isUOP ? 0x01 : 0x00) << 16)));
+            uint packed32 = (uint)((group | (direction << 8) | ((uop ? 0x01 : 0x00) << 16)));
             uint packed32_2 = (uint)((animID | (frame << 16)));
             ulong packed = (packed32_2 | ((ulong)packed32 << 32));
 
@@ -103,35 +120,102 @@ namespace ClassicUO.Renderer.Animations
             hue = 0;
             useUOP = false;
 
-            if (
-                id >= _dataIndex.Length
-                || action >= AnimationsLoader.MAX_ACTIONS
-                || dir >= AnimationsLoader.MAX_DIRECTIONS
-            )
+            if (action >= AnimationsLoader.MAX_ACTIONS || dir >= AnimationsLoader.MAX_DIRECTIONS)
             {
                 return Span<SpriteInfo>.Empty;
             }
 
-            ReplaceAnimationValues(
-                ref id,
-                ref action,
-                ref hue,
-                out useUOP,
-                isEquip,
-                isCorpse,
-                forceUOP
-            );
-
-            IndexAnimation index = _dataIndex[id];
-
-            if (index == null)
-            {
+            if (id >= ushort.MaxValue)
                 return Span<SpriteInfo>.Empty;
+
+            if (id >= _dataIndex.Length)
+            {
+                Array.Resize(ref _dataIndex, id);
             }
+
+            ref var index = ref _dataIndex[id];
+
+            do
+            {
+                if (index == null)
+                {
+                    index = new IndexAnimation();
+                    var indices = AnimationsLoader.Instance.GetIndices
+                    (
+                        UOFileManager.Version, 
+                        id, 
+                        ref index.Hue,
+                        ref index.Flags, 
+                        out index.FileIndex,
+                        out index.Type,
+                        out index.MountedHeightOffset
+                    );
+
+                    if (!indices.IsEmpty)
+                    {
+                        if (index.Flags.HasFlag(AnimationFlags.UseUopAnimation))
+                        {
+                            index.UopGroups = new AnimationGroupUop[indices.Length];
+                            for (int i = 0; i < index.UopGroups.Length; i++)
+                            {
+                                index.UopGroups[i] = new AnimationGroupUop();
+                                index.UopGroups[i].FileIndex = index.FileIndex;
+                                index.UopGroups[i].DecompressedLength = indices[i].Unknown;
+                                index.UopGroups[i].CompressedLength = indices[i].Size;
+                                index.UopGroups[i].Offset = indices[i].Position;
+                            }
+                        }
+                        else
+                        {
+                            index.Groups = new AnimationGroup[indices.Length / AnimationsLoader.MAX_DIRECTIONS];
+                            for (int i = 0; i < index.Groups.Length; i++)
+                            {
+                                index.Groups[i] = new AnimationGroup();
+
+                                for (int d = 0; d < AnimationsLoader.MAX_DIRECTIONS; d++)
+                                {
+                                    ref readonly var animIdx = ref indices[i * AnimationsLoader.MAX_DIRECTIONS + d];
+                                    index.Groups[i].Direction[d].Address = animIdx.Position;
+                                    index.Groups[i].Direction[d].Size = index.FileIndex > 0 ? Math.Max(1, animIdx.Size) : animIdx.Size;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (index.FileIndex == 0)
+                {
+                    var replaced = isCorpse ? AnimationsLoader.Instance.ReplaceCorpse(ref id, ref index.Hue) : AnimationsLoader.Instance.ReplaceBody(ref id, ref index.Hue);
+                    if (replaced)
+                    {
+                        if (id >= _dataIndex.Length)
+                        {
+                            Array.Resize(ref _dataIndex, id);
+                        }
+
+                        index = ref _dataIndex[id];
+                    }
+                }
+            } while (index == null);
+           
+            
+
+            useUOP = index.Flags.HasFlag(AnimationFlags.UseUopAnimation);
+            hue = index.Hue;
 
             // NOTE:
             // for UOP: we don't call the method index.GetUopGroup(ref x) because the action has been already changed by the method ReplaceAnimationValues
-            AnimationGroup groupObj = useUOP ? index.UopGroups?[action] : index.Groups?[action];
+            AnimationGroup groupObj = null;
+            if (useUOP)
+            {
+                if (index.UopGroups == null || action >= index.UopGroups.Length)
+                    return Span<SpriteInfo>.Empty;
+                groupObj = index.UopGroups[action];
+            }
+            else if (index.Groups != null && action < index.Groups.Length)
+            {
+                groupObj = index.Groups[action];
+            }
 
             if (groupObj == null)
             {
@@ -140,7 +224,7 @@ namespace ClassicUO.Renderer.Animations
 
             ref var animDir = ref groupObj.Direction[dir];
 
-            if (animDir.Address == -1)
+            if (animDir.Address == uint.MaxValue)
             {
                 return Span<SpriteInfo>.Empty;
             }
@@ -149,8 +233,6 @@ namespace ClassicUO.Renderer.Animations
 
             if (animDir.FrameCount <= 0 || animDir.SpriteInfos == null)
             {
-                int uopFlag = 0;
-
                 if (useUOP
                 //animDir.IsUOP ||
                 ///* If it's not flagged as UOP, but there is no mul data, try to load
@@ -158,18 +240,32 @@ namespace ClassicUO.Renderer.Animations
                 //(animDir.Address == 0 && animDir.Size == 0)
                 )
                 {
+                    var uopGroupObj = (AnimationGroupUop)groupObj;
+                    var ff = new AnimationsLoader.AnimIdxBlock()
+                    {
+                        Position = uopGroupObj.Offset,
+                        Size = uopGroupObj.CompressedLength,
+                        Unknown = uopGroupObj.DecompressedLength
+                    };
+
                     frames = AnimationsLoader.Instance.ReadUOPAnimationFrames(
                         id,
                         action,
                         dir,
                         index.Type,
-                        index.FileIndex
+                        index.FileIndex,
+                        ff
                     );
-                    uopFlag = 1;
                 }
                 else
                 {
-                    frames = AnimationsLoader.Instance.ReadMULAnimationFrames(id, index.FileIndex);
+                    var ff = new AnimationsLoader.AnimIdxBlock()
+                    {
+                        Position = groupObj.Direction[dir].Address,
+                        Size = groupObj.Direction[dir].Size,
+                    };
+
+                    frames = AnimationsLoader.Instance.ReadMULAnimationFrames(index.FileIndex, ff);
                 }
 
                 if (frames.IsEmpty)
@@ -193,7 +289,7 @@ namespace ClassicUO.Renderer.Animations
                         continue;
                     }
 
-                    uint keyUpper = (uint)((action | (dir << 8) | (uopFlag << 16)));
+                    uint keyUpper = (uint)((action | (dir << 8) | ((useUOP ? 1 : 0) << 16)));
                     uint keyLower = (uint)((id | (frame.Num << 16)));
                     ulong key = (keyLower | ((ulong)keyUpper << 32));
 
@@ -215,19 +311,20 @@ namespace ClassicUO.Renderer.Animations
 
         public void UpdateAnimationTable(BodyConvFlags flags)
         {
-            // if (flags != _lastFlags)
-            // {
-            //     if (_lastFlags != (BodyConvFlags)(-1))
-            //     {
-            //         /* This happens when you log out of an account then into another
-            //          * one with different expansions activated. Just reload the anim
-            //          * files from scratch. */
-            //         Array.Clear(_dataIndex, 0, _dataIndex.Length);
-            //         LoadInternal();
-            //     }
+            AnimationsLoader.Instance.ProcessBodyConvDef(flags);
+            //if (flags != _lastFlags)
+            //{
+            //    if (_lastFlags != (BodyConvFlags)(-1))
+            //    {
+            //        /* This happens when you log out of an account then into another
+            //         * one with different expansions activated. Just reload the anim
+            //         * files from scratch. */
+            //        Array.Clear(_dataIndex, 0, _dataIndex.Length);
+            //        LoadInternal();
+            //    }
 
-            //     ProcessBodyConvDef(flags);
-            // }
+            //    ProcessBodyConvDef(flags);
+            //}
 
             //_lastFlags = flags;
         }
@@ -239,111 +336,15 @@ namespace ClassicUO.Renderer.Animations
         )
         {
             if (graphic >= _dataIndex.Length)
-            {
                 return;
-            }
 
-            IndexAnimation dataIndex = _dataIndex[graphic];
+            ushort hue = 0;
 
-            if (dataIndex == null)
-            {
-                return;
-            }
-
-            if ((dataIndex.IsUOP && (isParent || !dataIndex.IsValidMUL)) || forceUOP)
-            {
-                // do nothing ?
-            }
-            else
-            {
-                if (
-                    dataIndex.FileIndex == 0 /*|| !dataIndex.IsValidMUL*/
-                )
-                {
-                    graphic = dataIndex.Graphic;
-                }
-            }
+            if (_dataIndex[graphic] != null && _dataIndex[graphic].FileIndex == 0 && !_dataIndex[graphic].Flags.HasFlag(AnimationFlags.UseUopAnimation))
+                AnimationsLoader.Instance.ReplaceBody(ref graphic, ref hue);
         }
 
-        public void ReplaceAnimationValues(
-            ref ushort graphic,
-            ref byte action,
-            ref ushort hue,
-            out bool useUOP,
-            bool isEquip = false,
-            bool isCorpse = false,
-            bool forceUOP = false
-        )
-        {
-            useUOP = false;
-
-            if (graphic < _dataIndex.Length && action < AnimationsLoader.MAX_ACTIONS)
-            {
-                IndexAnimation index = _dataIndex[graphic];
-
-                if (index == null)
-                {
-                    return;
-                }
-
-                if (forceUOP)
-                {
-                    index.GetUopGroup(ref action);
-                    useUOP = true;
-                    return;
-                }
-
-                if (index.IsUOP)
-                {
-                    if (!index.IsValidMUL)
-                    {
-                        /* Regardless of flags, there is only a UOP version so use that. */
-                        index.GetUopGroup(ref action);
-                        useUOP = true;
-                        return;
-                    }
-
-                    /* For equipment, prefer the mul version. */
-                    if (!isEquip)
-                    {
-                        index.GetUopGroup(ref action);
-                        useUOP = true;
-                        return;
-                    }
-                }
-
-                // Body.def replaces animations always at fileindex == 0.
-                // Bodyconv.def instead uses always fileindex >= 1 when replacing animations. So we don't need to replace the animations here. The values have been already replaced.
-                // If the animation has been replaced by Body.def means it doesn't exist
-                if (
-                    index.FileIndex == 0 /*|| !index.IsValidMUL*/
-                )
-                {
-                    hue = isCorpse ? index.CorpseColor : index.Color;
-                    graphic = isCorpse ? index.CorpseGraphic : index.Graphic;
-                }
-            }
-        }
-
-        public void ApplyConversions()
-        {
-            var isCorpse = false;
-
-            if (isCorpse)
-                ApplyCorpse();
-            else
-                ApplyBody();
-
-            ApplyBodyConv();
-        }
-
-        private void ApplyBody() { }
-
-        private void ApplyCorpse() { }
-
-        private void ApplyBodyConv() { }
-
-        public bool IsAnimationExists(ushort graphic, byte group, bool isCorpse = false)
+        public bool AnimationExists(ushort graphic, byte group, bool isCorpse = false)
         {
             if (graphic < _dataIndex.Length && group < AnimationsLoader.MAX_ACTIONS)
             {
@@ -363,56 +364,15 @@ namespace ClassicUO.Renderer.Animations
             return false;
         }
 
-        public class IndexAnimation
+        private sealed class IndexAnimation
         {
-            private byte[] _uopReplaceGroupIndex;
-
-            public bool IsUOP => (Flags & ANIMATION_FLAGS.AF_USE_UOP_ANIMATION) != 0;
-
-            public ushort Graphic;
-            public ushort CorpseGraphic;
-            public ushort Color;
-            public ushort CorpseColor;
-            public byte FileIndex;
-            public ANIMATION_FLAGS Flags;
+            public int FileIndex;
+            public ushort Hue;
+            public AnimationFlags  Flags;
             public AnimationGroup[] Groups;
             public AnimationGroupUop[] UopGroups;
-            public bool IsValidMUL;
             public sbyte MountedHeightOffset;
-            public ANIMATION_GROUPS_TYPE Type = ANIMATION_GROUPS_TYPE.UNKNOWN;
-
-            public AnimationGroupUop GetUopGroup(ref byte group)
-            {
-                if (group < AnimationsLoader.MAX_ACTIONS && UopGroups != null)
-                {
-                    group = _uopReplaceGroupIndex[group];
-
-                    return UopGroups[group];
-                }
-
-                return null;
-            }
-
-            public void InitializeUOP()
-            {
-                if (_uopReplaceGroupIndex == null)
-                {
-                    _uopReplaceGroupIndex = new byte[AnimationsLoader.MAX_ACTIONS];
-
-                    for (byte i = 0; i < AnimationsLoader.MAX_ACTIONS; i++)
-                    {
-                        _uopReplaceGroupIndex[i] = i;
-                    }
-                }
-            }
-
-            public void ReplaceUopGroup(byte old, byte newG)
-            {
-                if (old < AnimationsLoader.MAX_ACTIONS && newG < AnimationsLoader.MAX_ACTIONS)
-                {
-                    _uopReplaceGroupIndex[old] = newG;
-                }
-            }
+            public AnimationGroupsType Type = AnimationGroupsType.Unknown;
         }
     }
 }

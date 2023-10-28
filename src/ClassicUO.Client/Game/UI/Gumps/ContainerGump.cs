@@ -424,7 +424,7 @@ namespace ClassicUO.Game.UI.Gumps
                                     )
                                 )
                                 : ref Client.Game.Arts.GetArt(
-                                    Client.Game.GameCursor.ItemHold.DisplayedGraphic
+                                    (uint)(Client.Game.GameCursor.ItemHold.DisplayedGraphic + 0x4000)
                                 )
                         );
 
@@ -685,7 +685,7 @@ namespace ClassicUO.Game.UI.Gumps
                             - Constants.ITEM_GUMP_TEXTURE_OFFSET
                         )
                     )
-                    : ref Client.Game.Arts.GetArt(Client.Game.GameCursor.ItemHold.DisplayedGraphic)
+                    : ref Client.Game.Arts.GetArt((uint)(Client.Game.GameCursor.ItemHold.DisplayedGraphic + 0x4000))
             );
 
             if (spriteInfo.Texture != null)
