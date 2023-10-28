@@ -2,7 +2,7 @@
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 // 1. Redistributions of source code must retain the above copyright
@@ -16,7 +16,7 @@
 // 4. Neither the name of the copyright holder nor the
 //    names of its contributors may be used to endorse or promote products
 //    derived from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -32,8 +32,6 @@
 
 using ClassicUO.IO;
 using ClassicUO.Utility;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -49,9 +47,7 @@ namespace ClassicUO.Assets
 
         public const int MAX_GUMP_DATA_INDEX_COUNT = 0x10000;
 
-        private GumpsLoader(int count)
-        {
-        }
+        private GumpsLoader(int count) { }
 
         public static GumpsLoader Instance =>
             _instance ?? (_instance = new GumpsLoader(MAX_GUMP_DATA_INDEX_COUNT));
@@ -60,152 +56,102 @@ namespace ClassicUO.Assets
 
         public override Task Load()
         {
-            return Task.Run
-            (
-                () =>
+            return Task.Run(() =>
+            {
+                string path = UOFileManager.GetUOFilePath("gumpartLegacyMUL.uop");
+
+                if (UOFileManager.IsUOPInstallation && File.Exists(path))
                 {
-                    string path = UOFileManager.GetUOFilePath("gumpartLegacyMUL.uop");
+                    _file = new UOFileUop(path, "build/gumpartlegacymul/{0:D8}.tga", true);
+                    Entries = new UOFileIndex[
+                        Math.Max(((UOFileUop)_file).TotalEntriesCount, MAX_GUMP_DATA_INDEX_COUNT)
+                    ];
+                    UseUOPGumps = true;
+                }
+                else
+                {
+                    path = UOFileManager.GetUOFilePath("gumpart.mul");
+                    string pathidx = UOFileManager.GetUOFilePath("gumpidx.mul");
 
-                    if (UOFileManager.IsUOPInstallation && File.Exists(path))
+                    if (!File.Exists(path))
                     {
-                        _file = new UOFileUop(path, "build/gumpartlegacymul/{0:D8}.tga", true);
-                        Entries = new UOFileIndex[Math.Max(((UOFileUop)_file).TotalEntriesCount, MAX_GUMP_DATA_INDEX_COUNT)];
-                        UseUOPGumps = true;
+                        path = UOFileManager.GetUOFilePath("Gumpart.mul");
                     }
-                    else
-                    {
-                        path = UOFileManager.GetUOFilePath("gumpart.mul");
-                        string pathidx = UOFileManager.GetUOFilePath("gumpidx.mul");
 
-                        if (!File.Exists(path))
+                    if (!File.Exists(pathidx))
+                    {
+                        pathidx = UOFileManager.GetUOFilePath("Gumpidx.mul");
+                    }
+
+                    _file = new UOFileMul(path, pathidx, MAX_GUMP_DATA_INDEX_COUNT, 12);
+
+                    UseUOPGumps = false;
+                }
+
+                _file.FillEntries(ref Entries);
+
+                string pathdef = UOFileManager.GetUOFilePath("gump.def");
+
+                if (!File.Exists(pathdef))
+                {
+                    return;
+                }
+
+                using (DefReader defReader = new DefReader(pathdef, 3))
+                {
+                    while (defReader.Next())
+                    {
+                        int ingump = defReader.ReadInt();
+
+                        if (
+                            ingump < 0
+                            || ingump >= MAX_GUMP_DATA_INDEX_COUNT
+                            || ingump >= Entries.Length
+                            || Entries[ingump].Length > 0
+                        )
                         {
-                            path = UOFileManager.GetUOFilePath("Gumpart.mul");
+                            continue;
                         }
 
-                        if (!File.Exists(pathidx))
+                        int[] group = defReader.ReadGroup();
+
+                        if (group == null)
                         {
-                            pathidx = UOFileManager.GetUOFilePath("Gumpidx.mul");
+                            continue;
                         }
 
-                        _file = new UOFileMul(path, pathidx, MAX_GUMP_DATA_INDEX_COUNT, 12);
-
-                        UseUOPGumps = false;
-                    }
-
-                    _file.FillEntries(ref Entries);
-                    _spriteInfos = new SpriteInfo[Entries.Length];
-
-                    string pathdef = UOFileManager.GetUOFilePath("gump.def");
-
-                    if (!File.Exists(pathdef))
-                    {
-                        return;
-                    }
-
-                    using (DefReader defReader = new DefReader(pathdef, 3))
-                    {
-                        while (defReader.Next())
+                        for (int i = 0; i < group.Length; i++)
                         {
-                            int ingump = defReader.ReadInt();
+                            int checkIndex = group[i];
 
-                            if (ingump < 0 || ingump >= MAX_GUMP_DATA_INDEX_COUNT || ingump >= Entries.Length || Entries[ingump].Length > 0)
+                            if (
+                                checkIndex < 0
+                                || checkIndex >= MAX_GUMP_DATA_INDEX_COUNT
+                                || checkIndex >= Entries.Length
+                                || Entries[checkIndex].Length <= 0
+                            )
                             {
                                 continue;
                             }
 
-                            int[] group = defReader.ReadGroup();
+                            Entries[ingump] = Entries[checkIndex];
 
-                            if (group == null)
-                            {
-                                continue;
-                            }
+                            Entries[ingump].Hue = (ushort)defReader.ReadInt();
 
-                            for (int i = 0; i < group.Length; i++)
-                            {
-                                int checkIndex = group[i];
-
-                                if (checkIndex < 0 || checkIndex >= MAX_GUMP_DATA_INDEX_COUNT || checkIndex >= Entries.Length || Entries[checkIndex].Length <= 0)
-                                {
-                                    continue;
-                                }
-
-                                Entries[ingump] = Entries[checkIndex];
-
-                                Entries[ingump].Hue = (ushort)defReader.ReadInt();
-
-                                break;
-                            }
+                            break;
                         }
                     }
                 }
-            );
+            });
         }
 
-
-        const int ATLAS_SIZE = 1024 * 4;
-        private TextureAtlas _atlas;
-
-        public void CreateAtlas(GraphicsDevice device)
-        {
-            _atlas = new TextureAtlas(device, ATLAS_SIZE, ATLAS_SIZE, SurfaceFormat.Color);
-        }
-
-        struct SpriteInfo
-        {
-            public Texture2D Texture;
-            public Rectangle UV;
-        }
-
-        private SpriteInfo[] _spriteInfos;
-
-        public Texture2D GetGumpTexture(uint g, out Rectangle bounds)
-        {
-            Texture2D png = PNGLoader.Instance.LoadGumpTexture(g);
-            if (png != null)
-            {
-                bounds = png.Bounds;
-
-                ref var spriteInfoP = ref _spriteInfos[g];
-
-                if (spriteInfoP.Texture == null)
-                    AddPNGSpriteToAtlas(_atlas, g, png);
-
-                return png;
-            }
-
-            ref var spriteInfo = ref _spriteInfos[g];
-
-            if (spriteInfo.Texture == null)
-            {
-                AddSpriteToAtlas(_atlas, g);
-            }
-
-            bounds = spriteInfo.UV;
-
-            return spriteInfo.Texture;
-        }
-
-        public Texture2D GetGumpPartialTexture(uint g, Rectangle partialBounds, out Rectangle bounds)
-        {
-            ref var spriteInfo = ref _spriteInfos[g];
-
-            if (spriteInfo.Texture == null)
-            {
-                AddSpriteToAtlas(_atlas, g);
-            }
-
-            bounds = new Rectangle(spriteInfo.UV.X + partialBounds.X, spriteInfo.UV.Y + partialBounds.Y, partialBounds.Width, partialBounds.Height);
-
-            return spriteInfo.Texture;
-        }
-
-        private unsafe void AddSpriteToAtlas(TextureAtlas atlas, uint index)
+        public unsafe GumpInfo GetGump(uint index)
         {
             ref UOFileIndex entry = ref GetValidRefEntry((int)index);
 
             if (entry.Width <= 0 && entry.Height <= 0)
             {
-                return;
+                return default;
             }
 
             ushort color = entry.Hue;
@@ -215,95 +161,85 @@ namespace ClassicUO.Assets
 
             IntPtr dataStart = _file.PositionAddress;
 
-            uint[] buffer = null;
+            var pixels = new uint[entry.Width * entry.Height];
 
-            Span<uint> pixels = entry.Width * entry.Height <= 1024 ? stackalloc uint[1024] : (buffer = System.Buffers.ArrayPool<uint>.Shared.Rent(entry.Width * entry.Height));
+            int* lookuplist = (int*)dataStart;
 
-            try
+            int gsize;
+
+            for (int y = 0, half_len = entry.Length >> 2; y < entry.Height; y++)
             {
-                int* lookuplist = (int*)dataStart;
-
-                int gsize;
-
-                for (int y = 0, half_len = entry.Length >> 2; y < entry.Height; y++)
+                if (y < entry.Height - 1)
                 {
-                    if (y < entry.Height - 1)
-                    {
-                        gsize = lookuplist[y + 1] - lookuplist[y];
-                    }
-                    else
-                    {
-                        gsize = half_len - lookuplist[y];
-                    }
+                    gsize = lookuplist[y + 1] - lookuplist[y];
+                }
+                else
+                {
+                    gsize = half_len - lookuplist[y];
+                }
 
-                    GumpBlock* gmul = (GumpBlock*)(dataStart + (lookuplist[y] << 2));
+                GumpBlock* gmul = (GumpBlock*)(dataStart + (lookuplist[y] << 2));
 
-                    int pos = y * entry.Width;
+                int pos = y * entry.Width;
 
-                    for (int i = 0; i < gsize; i++)
-                    {
-                        uint val = gmul[i].Value;
+                for (int i = 0; i < gsize; i++)
+                {
+                    uint val = gmul[i].Value;
 
                         if (color != 0 && val != 0)
                         {
                             val = HuesLoader.Instance.ApplyHueRgba5551(gmul[i].Value, color);
                         }
 
-                        if (val != 0)
-                        {
-                            //val = 0x8000 | val;
-                            val = HuesHelper.Color16To32(gmul[i].Value) | 0xFF_00_00_00;
-                        }
-
-                        var count = gmul[i].Run;
-                        pixels.Slice(pos, count).Fill(val);
-                        pos += count;
+                    if (val != 0)
+                    {
+                        //val = 0x8000 | val;
+                        val = HuesHelper.Color16To32(gmul[i].Value) | 0xFF_00_00_00;
                     }
+
+                    var count = gmul[i].Run;
+                    pixels.AsSpan().Slice(pos, count).Fill(val);
+                    pos += count;
                 }
-
-                ref var spriteInfo = ref _spriteInfos[index];
-
-                spriteInfo.Texture = atlas.AddSprite(pixels, entry.Width, entry.Height, out spriteInfo.UV);
-                _picker.Set(index, entry.Width, entry.Height, pixels);
             }
-            finally
+
+            return new GumpInfo()
             {
-                if (buffer != null)
-                {
-                    System.Buffers.ArrayPool<uint>.Shared.Return(buffer, true);
-                }
-            }
+                Pixels = pixels,
+                Width = entry.Width,
+                Height = entry.Height
+            };
         }
 
-        private unsafe void AddPNGSpriteToAtlas(TextureAtlas atlas, uint index, Texture2D texture)
-        {
-            uint[] buffer = null;
+        //private unsafe void AddPNGSpriteToAtlas(TextureAtlas atlas, uint index, Texture2D texture)
+        //{
+        //    uint[] buffer = null;
 
-            Span<uint> pixels = texture.Width * texture.Height <= 1024 ? stackalloc uint[1024] : (buffer = System.Buffers.ArrayPool<uint>.Shared.Rent(texture.Width * texture.Height));
+        //    Span<uint> pixels = texture.Width * texture.Height <= 1024 ? stackalloc uint[1024] : (buffer = System.Buffers.ArrayPool<uint>.Shared.Rent(texture.Width * texture.Height));
 
-            Color[] pixelColors = new Color[texture.Width * texture.Height];
-            texture.GetData<Color>(pixelColors);
+        //    Color[] pixelColors = new Color[texture.Width * texture.Height];
+        //    texture.GetData<Color>(pixelColors);
 
-            for (int i = 0; i < pixelColors.Length; i++)
-            {
-                pixels[i] = pixelColors[i].PackedValue;
-            }
+        //    for (int i = 0; i < pixelColors.Length; i++)
+        //    {
+        //        pixels[i] = pixelColors[i].PackedValue;
+        //    }
 
-            try
-            {
-                ref var spriteInfo = ref _spriteInfos[index];
+        //    try
+        //    {
+        //        ref var spriteInfo = ref _spriteInfos[index];
 
-                spriteInfo.Texture = atlas.AddSprite(pixels, texture.Width, texture.Height, out spriteInfo.UV);
-                _picker.Set(index, texture.Width, texture.Height, pixels);
-            }
-            finally
-            {
-                if (buffer != null)
-                {
-                    System.Buffers.ArrayPool<uint>.Shared.Return(buffer, true);
-                }
-            }
-        }
+        //        spriteInfo.Texture = atlas.AddSprite(pixels, texture.Width, texture.Height, out spriteInfo.UV);
+        //        _picker.Set(index, texture.Width, texture.Height, pixels);
+        //    }
+        //    finally
+        //    {
+        //        if (buffer != null)
+        //        {
+        //            System.Buffers.ArrayPool<uint>.Shared.Return(buffer, true);
+        //        }
+        //    }
+        //}
 
         public bool PixelCheck(int index, int x, int y)
         {
@@ -316,5 +252,12 @@ namespace ClassicUO.Assets
             public readonly ushort Value;
             public readonly ushort Run;
         }
+    }
+
+    public ref struct GumpInfo
+    {
+        public Span<uint> Pixels;
+        public int Width;
+        public int Height;
     }
 }

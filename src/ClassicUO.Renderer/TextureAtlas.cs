@@ -4,11 +4,12 @@ using StbRectPackSharp;
 using System;
 using System.Collections.Generic;
 
-namespace ClassicUO.Assets
+namespace ClassicUO.Renderer
 {
     public class TextureAtlas : IDisposable
     {
-        private readonly int _width, _height;
+        private readonly int _width,
+            _height;
         private readonly SurfaceFormat _format;
         private readonly GraphicsDevice _device;
         private readonly List<Texture2D> _textureList;
@@ -20,31 +21,27 @@ namespace ClassicUO.Assets
         {
             const int TEXTURE_SIZE = 1024 * 4;
 
-            Shared = new TextureAtlas
-            (
-                device,
-                TEXTURE_SIZE,
-                TEXTURE_SIZE,
-                SurfaceFormat.Color
-            );
+            Shared = new TextureAtlas(device, TEXTURE_SIZE, TEXTURE_SIZE, SurfaceFormat.Color);
         }
-
 
         public TextureAtlas(GraphicsDevice device, int width, int height, SurfaceFormat format)
         {
             _device = device;
             _width = width;
-            _height= height;
+            _height = height;
             _format = format;
 
             _textureList = new List<Texture2D>();
         }
 
-
         public int TexturesCount => _textureList.Count;
 
-
-        public unsafe Texture2D AddSprite(ReadOnlySpan<uint> pixels, int width, int height, out Rectangle pr)
+        public unsafe Texture2D AddSprite(
+            ReadOnlySpan<uint> pixels,
+            int width,
+            int height,
+            out Rectangle pr
+        )
         {
             var index = _textureList.Count - 1;
 
@@ -64,13 +61,7 @@ namespace ClassicUO.Assets
 
             fixed (uint* src = pixels)
             {
-                texture.SetDataPointerEXT
-                (
-                    0,
-                    pr,
-                    (IntPtr)src,
-                    sizeof(uint) * width * height
-                );
+                texture.SetDataPointerEXT(0, pr, (IntPtr)src, sizeof(uint) * width * height);
             }
 
             return texture;
@@ -86,7 +77,6 @@ namespace ClassicUO.Assets
             _packer = new Packer(_width, _height);
         }
 
-      
         public void SaveImages(string name)
         {
             for (int i = 0, count = TexturesCount; i < count; ++i)
