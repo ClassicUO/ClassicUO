@@ -103,6 +103,7 @@ namespace ClassicUO
         public Renderer.Texmaps.Texmap Texmaps { get; private set; }
         public Renderer.Lights.Light Lights { get; private set; }
         public Renderer.MultiMaps.MultiMap MultiMaps { get; private set; }
+        public Renderer.Sounds.Sound Sounds { get; private set; }
 
         public GraphicsDeviceManager GraphicManager { get; }
         public readonly uint[] FrameDelay = new uint[2];
@@ -195,6 +196,7 @@ namespace ClassicUO
             Texmaps = new Renderer.Texmaps.Texmap(GraphicsDevice);
             Lights = new Renderer.Lights.Light(GraphicsDevice);
             MultiMaps = new Renderer.MultiMaps.MultiMap(GraphicsDevice);
+            Sounds = new Renderer.Sounds.Sound();
 
             LightColors.LoadLights();
 

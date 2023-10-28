@@ -39,9 +39,9 @@ namespace ClassicUO.Game.UI.Controls
                 return false;
             }
 
-            Rectangle _rect = Client.Game.Arts.GetRealArtBounds(graphic + 0x4000);
-
             ref readonly var texture = ref Client.Game.Arts.GetArt(graphic + 0x4000); //Guess were using 0x4000 for static item art now.
+
+            Rectangle _rect = Client.Game.Arts.GetRealArtBounds(graphic);
 
             Point _originalSize = new Point(Width, Height);
             Point _point = new Point((Width >> 1) - (_originalSize.X >> 1), (Height >> 1) - (_originalSize.Y >> 1));

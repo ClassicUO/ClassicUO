@@ -1,6 +1,7 @@
 using System;
 using ClassicUO.Assets;
 using ClassicUO.Utility;
+using FontStashSharp;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SDL2;
@@ -30,7 +31,12 @@ namespace ClassicUO.Renderer.Arts
 
             if (spriteInfo.Texture == null)
             {
-                var artInfo = ArtLoader.Instance.GetArt(idx);
+                ArtInfo artInfo = PNGLoader.Instance.LoadArtTexture(idx);
+
+                if (artInfo.Pixels == null || artInfo.Pixels.IsEmpty)
+                {
+                    artInfo = ArtLoader.Instance.GetArt(idx);
+                }
                 if (!artInfo.Pixels.IsEmpty)
                 {
                     spriteInfo.Texture = _atlas.AddSprite(

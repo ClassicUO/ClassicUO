@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.Remoting.Messaging;
 using System.Threading.Tasks;
 
 namespace ClassicUO.Assets
@@ -43,14 +44,14 @@ namespace ClassicUO.Assets
             return texture;
         }
 
-        public Texture2D LoadGumpTexture(uint graphic)
+        public GumpInfo LoadGumpTexture(uint graphic)
         {
             Texture2D texture;
 
             if (gump_availableIDs == null)
-                return null;
+                return new GumpInfo();
             int index = Array.IndexOf(gump_availableIDs, graphic);
-            if (index == -1) return null;
+            if (index == -1) return new GumpInfo();
 
             gump_textureCache.TryGetValue(graphic, out texture);
 
@@ -73,18 +74,23 @@ namespace ClassicUO.Assets
                 }
             }
 
-            return texture;
+            return new GumpInfo()
+            {
+                Pixels = GetPixels(texture),
+                Width = texture.Width,
+                Height = texture.Height
+            };
         }
 
-        public Texture2D LoadArtTexture(uint graphic)
+        public ArtInfo LoadArtTexture(uint graphic)
         {
             Texture2D texture;
 
             if (art_availableIDs == null)
-                return null;
+                return new ArtInfo();
 
             int index = Array.IndexOf(art_availableIDs, graphic);
-            if (index == -1) return null;
+            if (index == -1) return new ArtInfo();
 
             art_textureCache.TryGetValue(graphic, out texture);
 
@@ -107,7 +113,36 @@ namespace ClassicUO.Assets
                 }
             }
 
-            return texture;
+            return new ArtInfo()
+            {
+                Pixels = GetPixels(texture),
+                Width = texture.Width,
+                Height = texture.Height,
+            };
+        }
+
+        private uint[] GetPixels(Texture2D texture)
+        {
+            uint[] buffer = null;
+
+            Span<uint> pixels = texture.Width * texture.Height <= 1024 ? stackalloc uint[1024] : (buffer = System.Buffers.ArrayPool<uint>.Shared.Rent(texture.Width * texture.Height));
+
+            Color[] pixelColors = new Color[texture.Width * texture.Height];
+            texture.GetData<Color>(pixelColors);
+
+            for (int i = 0; i < pixelColors.Length; i++)
+            {
+                pixels[i] = pixelColors[i].PackedValue;
+            }
+
+            System.Buffers.ArrayPool<uint>.Shared.Return(buffer, true);
+
+            return pixels.ToArray();
+        }
+
+        public void InjectIntoArtSprites()
+        {
+
         }
 
         public Task Load()

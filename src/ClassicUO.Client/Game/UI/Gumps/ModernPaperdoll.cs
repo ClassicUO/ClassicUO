@@ -528,7 +528,7 @@ namespace ClassicUO.Game.UI.Gumps
                 );
 
                 ref readonly var texture = ref Client.Game.Arts.GetArt((uint)item.DisplayedGraphic + 0x4000);
-                Rectangle _rect = Client.Game.Arts.GetRealArtBounds((uint)item.DisplayedGraphic + 0x4000);
+                Rectangle _rect = Client.Game.Arts.GetRealArtBounds((uint)item.DisplayedGraphic);
 
 
                 Point _originalSize = new Point(Width, Height);

@@ -214,7 +214,6 @@ namespace ClassicUO.Game.UI.Gumps
                 "Shift + Click to add an item to your auto loot list\n" +
                 "Sort and single click looting can be enabled with the icons on thr right side");
 
-            var quickDropIcon = Client.Game.Gumps.GetGump(1625).Texture;
             quickDropBackpack = new ResizableStaticPic(World.Player.FindItemByLayer(Layer.Backpack).DisplayedGraphic, 20, 20)
             {
                 X = Width - openRegularGump.Width - 20 - borderWidth,
@@ -788,7 +787,7 @@ namespace ClassicUO.Game.UI.Gumps
                     texture = text.Texture;
                     bounds = text.UV;
 
-                    rect = Client.Game.Arts.GetRealArtBounds((uint)_item.DisplayedGraphic + 0x4000);
+                    rect = Client.Game.Arts.GetRealArtBounds((uint)_item.DisplayedGraphic);
                 }
                 #endregion
 
@@ -839,13 +838,13 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else
                 {
+                    _item = item;
                     ref readonly var text = ref Client.Game.Arts.GetArt((uint)_item.DisplayedGraphic + 0x4000);
                     texture = text.Texture;
                     bounds = text.UV;
 
-                    rect = Client.Game.Arts.GetRealArtBounds((uint)_item.DisplayedGraphic + 0x4000);
+                    rect = Client.Game.Arts.GetRealArtBounds(_item.DisplayedGraphic);
 
-                    _item = item;
                     LocalSerial = item.Serial;
                     int itemAmt = (_item.ItemData.IsStackable ? _item.Amount : 1);
                     if (itemAmt > 1)
@@ -1227,8 +1226,7 @@ namespace ClassicUO.Game.UI.Gumps
                         ),
                         hueVector
                     );
-                    if (count != null)
-                        count.Draw(batcher, x + count.X, y + count.Y);
+                    count?.Draw(batcher, x + count.X, y + count.Y);
                 }
                 return true;
             }

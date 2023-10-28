@@ -121,7 +121,7 @@ namespace ClassicUO.Game.UI.Gumps
                 hueVector = ShaderHueTranslator.GetHueVector(hue, true, 1);
                 ref readonly var staticArt = ref Client.Game.Arts.GetArt(0x0FAB + 0x4000);
                 texture = staticArt.Texture;
-                rect = Client.Game.Arts.GetRealArtBounds(0x0FAB + 0x4000);
+                rect = Client.Game.Arts.GetRealArtBounds(0x0FAB);
                 Width = 18;
                 Height = 18;
                 this.bounds = staticArt.UV;

@@ -31,7 +31,6 @@
 #endregion
 
 using ClassicUO.IO;
-using ClassicUO.IO.Audio;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using System;
@@ -53,10 +52,6 @@ namespace ClassicUO.Assets
         public const int MAX_SOUND_DATA_INDEX_COUNT = 0xFFFF;
 
         private UOFile _file;
-        private readonly Sound[] _musics = new Sound[MAX_SOUND_DATA_INDEX_COUNT];
-        private readonly Sound[] _sounds = new Sound[MAX_SOUND_DATA_INDEX_COUNT];
-
-        private bool _useDigitalMusicFolder;
 
         private SoundsLoader()
         {
@@ -234,13 +229,11 @@ namespace ClassicUO.Assets
                         _musicData.Add(65, new Tuple<string, bool>("serpentislecombat_u7", true));
                         _musicData.Add(66, new Tuple<string, bool>("valoriaships", true));
                     }
-
-                    _useDigitalMusicFolder = Directory.Exists(Path.Combine(UOFileManager.BasePath, "Music", "Digital"));
                 }
             );
         }
 
-        private unsafe bool TryGetSound(int sound, out byte[] data, out string name)
+        public unsafe bool TryGetSound(int sound, out byte[] data, out string name)
         {
             data = null;
             name = null;
@@ -355,7 +348,7 @@ namespace ClassicUO.Assets
             return name;
         }
 
-        private bool TryGetMusicData(int index, out string name, out bool doesLoop)
+        public bool TryGetMusicData(int index, out string name, out bool doesLoop)
         {
             name = null;
             doesLoop = false;
@@ -420,21 +413,6 @@ namespace ClassicUO.Assets
 
         public override void ClearResources()
         {
-            for (int i = 0; i < SOUND_DELTA; i++)
-            {
-                if (_sounds[i] != null)
-                {
-                    _sounds[i].Dispose();
-                    _sounds[i] = null;
-                }
-
-                if (_musics[i] != null)
-                {
-                    _musics[i].Dispose();
-                    _musics[i] = null;
-                }
-            }
-
             _musicData.Clear();
         }
     }

@@ -24,7 +24,12 @@ namespace ClassicUO.Renderer.Gumps
 
             if (spriteInfo.Texture == null)
             {
-                var gumpInfo = GumpsLoader.Instance.GetGump(idx);
+                var gumpInfo = PNGLoader.Instance.LoadGumpTexture(idx);
+
+                if (gumpInfo.Pixels == null || gumpInfo.Pixels.IsEmpty)
+                {
+                    gumpInfo = GumpsLoader.Instance.GetGump(idx);
+                }
                 if (!gumpInfo.Pixels.IsEmpty)
                 {
                     spriteInfo.Texture = _atlas.AddSprite(

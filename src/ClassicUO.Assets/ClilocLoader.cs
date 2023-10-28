@@ -33,7 +33,6 @@
 using ClassicUO.IO;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
-using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -252,14 +251,14 @@ namespace ClassicUO.Assets
             }
 
             // store index locations
-            Point* locations = stackalloc Point[++totalArgs];
+            Span<(int, int)> locations = stackalloc (int, int)[++totalArgs];
             i = trueStart;
             for (int j = 0; i < roChars.Length; ++i)
             {
                 if (roChars[i] == '\t')
                 {
-                    locations[j].X = trueStart;
-                    locations[j].Y = i;
+                    locations[j].Item1 = trueStart;
+                    locations[j].Item2 = i;
 
                     trueStart = i + 1;
 
@@ -269,8 +268,8 @@ namespace ClassicUO.Assets
 
             bool has_arguments = totalArgs - 1 > 0;
 
-            locations[totalArgs - 1].X = trueStart;
-            locations[totalArgs - 1].Y = i;
+            locations[totalArgs - 1].Item1 = trueStart;
+            locations[totalArgs - 1].Item2 = i;
 
             ValueStringBuilder sb = new ValueStringBuilder(baseCliloc.AsSpan());
             {
@@ -328,7 +327,7 @@ namespace ClassicUO.Assets
 
                     --index;
 
-                    var a = index < 0 || index >= totalArgs ? string.Empty.AsSpan() : arg.AsSpan().Slice(locations[index].X, locations[index].Y - locations[index].X);
+                    var a = index < 0 || index >= totalArgs ? string.Empty.AsSpan() : arg.AsSpan().Slice(locations[index].Item1, locations[index].Item2 - locations[index].Item1);
 
                     if (a.Length > 1)
                     {

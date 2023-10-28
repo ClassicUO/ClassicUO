@@ -581,7 +581,7 @@ namespace ClassicUO.Game.UI.Gumps
                         ref readonly var artInfo = ref Client.Game.Arts.GetArt(
                             (uint)(_graphic + 0x4000)
                         );
-                        var rect = Client.Game.Arts.GetRealArtBounds((uint)(_graphic + 0x4000));
+                        var rect = Client.Game.Arts.GetRealArtBounds((uint)(_graphic));
 
                         Vector3 hueVector = ShaderHueTranslator.GetHueVector(_hue, _partial, 1f);
 

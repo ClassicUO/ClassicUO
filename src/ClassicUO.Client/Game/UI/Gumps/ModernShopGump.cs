@@ -365,11 +365,11 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else
                 {
-                    ref readonly var texture = ref Client.Game.Arts.GetArt(Graphic);
+                    ref readonly var texture = ref Client.Game.Arts.GetArt((uint)Graphic + 0x4000);
 
                     hueVector = ShaderHueTranslator.GetHueVector(Hue, TileDataLoader.Instance.StaticData[Graphic].IsPartialHue, 1f);
 
-                    var rect = Client.Game.Arts.GetRealArtBounds((uint)Graphic + 0x4000);
+                    var rect = Client.Game.Arts.GetRealArtBounds(Graphic);
 
                     Point originalSize = new Point(Height, Height);
                     Point point = new Point();
