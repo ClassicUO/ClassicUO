@@ -140,16 +140,14 @@ namespace ClassicUO.Game.UI.Gumps
             lastWidth = Width = savedSize.X;
             lastHeight = Height = savedSize.Y;
 
+            X = isCorpse ? lastCorpseX : lastX = lastPos.X;
+            Y = isCorpse ? lastCorpseY : lastY = lastPos.Y;
+
             if (isCorpse)
             {
-                X = lastCorpseX;
-                Y = lastCorpseY;
+                World.Player.ManualOpenedCorpses.Remove(LocalSerial);
 
-                if (World.Player.ManualOpenedCorpses.Contains(LocalSerial))
-                {
-                    World.Player.ManualOpenedCorpses.Remove(LocalSerial);
-                }
-                else if (World.Player.AutoOpenedCorpses.Contains(LocalSerial) && ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.SkipEmptyCorpse)
+                if (World.Player.AutoOpenedCorpses.Contains(LocalSerial) && ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.SkipEmptyCorpse && container.IsEmpty)
                 {
                     IsVisible = false;
                     Dispose();
@@ -157,18 +155,12 @@ namespace ClassicUO.Game.UI.Gumps
 
                 AutoLootManager.Instance.HandleCorpse(container);
             }
-            else
-            {
-                lastX = X = lastPos.X;
-                lastY = Y = lastPos.Y;
-            }
 
             AnchorType = ProfileManager.CurrentProfile.EnableGridContainerAnchor ? ANCHOR_TYPE.NONE : ANCHOR_TYPE.DISABLED;
             originalContainerItemGraphic = originalContainerGraphic;
 
             CanMove = true;
             AcceptMouseInput = true;
-            CanCloseWithRightClick = true;
             #endregion
 
             #region background
@@ -201,7 +193,6 @@ namespace ClassicUO.Game.UI.Gumps
                 Height = 20
             };
             searchBox.TextChanged += (sender, e) => { updateItems(); };
-            searchBox.DragBegin += (sender, e) => { InvokeDragBegin(e.Location); };
 
             var regularGumpIcon = GumpsLoader.Instance.GetGumpTexture(5839, out var bounds);
             openRegularGump = new GumpPic(background.Width - 25 - borderWidth, borderWidth, regularGumpIcon == null ? (ushort)1209 : (ushort)5839, 0);
@@ -247,10 +238,6 @@ namespace ClassicUO.Game.UI.Gumps
                         quickDropBackpack.SetTooltip(quickLootTooltip);
                     }
                 }
-                else if (e.Button == MouseButtonType.Right)
-                {
-                    InvokeMouseCloseGumpWithRClick();
-                }
             };
             quickDropBackpack.MouseEnter += (sender, e) => { quickDropBackpack.Hue = 0x34; };
             quickDropBackpack.MouseExit += (sender, e) => { quickDropBackpack.Hue = 0; };
@@ -259,7 +246,7 @@ namespace ClassicUO.Game.UI.Gumps
             sortContents = new GumpPic(quickDropBackpack.X - 20, borderWidth, 1210, 0);
             sortContents.MouseUp += (sender, e) =>
             {
-                if (Keyboard.Alt)
+                if (e.Button == MouseButtonType.Left && Keyboard.Alt)
                 {
                     ProfileManager.CurrentProfile.AutoSortGridContainers ^= true;
                     sortContents.SetTooltip(sortButtonTooltip);
