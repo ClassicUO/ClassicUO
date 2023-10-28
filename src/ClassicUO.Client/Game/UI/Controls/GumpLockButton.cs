@@ -3,6 +3,7 @@ using ClassicUO.Input;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System.Xml.Linq;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -18,7 +19,10 @@ namespace ClassicUO.Game.UI.Controls
         public GumpLockButton(ref bool isLocked)
         {
             this.isLocked = isLocked;
-            lockIcon = Assets.GumpsLoader.Instance.GetGumpTexture(0x82C, out lockIconBounds);
+
+            ref readonly var ginfo = ref Client.Game.Gumps.GetGump(0x82C);
+            lockIcon = ginfo.Texture;
+            lockIconBounds = ginfo.UV;
         }
 
         protected override void OnMouseUp(int x, int y, MouseButtonType button)

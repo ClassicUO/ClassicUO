@@ -3262,52 +3262,14 @@ namespace ClassicUO.Network
                     facet = p.ReadUInt16BE();
                 }
 
-                if (MultiMapLoader.Instance.HasFacet(facet))
-                {
-                    gump.SetMapTexture(
-                        MultiMapLoader.Instance.LoadFacet(
-                            Client.Game.GraphicsDevice,
-                            facet,
-                            width,
-                            height,
-                            startX,
-                            startY,
-                            endX,
-                            endY
-                        )
-                    );
+                multiMapInfo = Client.Game.MultiMaps.GetMap(facet, width, height, startX, startY, endX, endY);
 
-                    gump.MapInfos(startX, startY, endX, endY, facet);
-                }
-                else
-                {
-                    gump.SetMapTexture(
-                        MultiMapLoader.Instance.LoadMap(
-                            Client.Game.GraphicsDevice,
-                            width,
-                            height,
-                            startX,
-                            startY,
-                            endX,
-                            endY
-                        )
-                    );
-                    gump.MapInfos(startX, startY, endX, endY);
-                }
+                gump.MapInfos(startX, startY, endX, endY, facet);
             }
             else
             {
-                gump.SetMapTexture(
-                    MultiMapLoader.Instance.LoadMap(
-                        Client.Game.GraphicsDevice,
-                        width,
-                        height,
-                        startX,
-                        startY,
-                        endX,
-                        endY
-                    )
-                );
+                multiMapInfo = Client.Game.MultiMaps.GetMap(null, width, height, startX, startY, endX, endY);
+
                 gump.MapInfos(startX, startY, endX, endY);
             }
 

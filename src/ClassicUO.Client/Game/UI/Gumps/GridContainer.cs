@@ -46,6 +46,7 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
+using ClassicUO.Resources;
 using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -194,7 +195,7 @@ namespace ClassicUO.Game.UI.Gumps
             };
             searchBox.TextChanged += (sender, e) => { UpdateItems(); };
 
-            var regularGumpIcon = GumpsLoader.Instance.GetGumpTexture(5839, out var bounds);
+            var regularGumpIcon = Client.Game.Gumps.GetGump(5839).Texture;
             openRegularGump = new GumpPic(background.Width - 25 - borderWidth, borderWidth, regularGumpIcon == null ? (ushort)1209 : (ushort)5839, 0);
             openRegularGump.MouseUp += (sender, e) =>
             {
@@ -213,7 +214,7 @@ namespace ClassicUO.Game.UI.Gumps
                 "Shift + Click to add an item to your auto loot list\n" +
                 "Sort and single click looting can be enabled with the icons on thr right side");
 
-            var quickDropIcon = GumpsLoader.Instance.GetGumpTexture(1625, out var bounds1);
+            var quickDropIcon = Client.Game.Gumps.GetGump(1625).Texture;
             quickDropBackpack = new ResizableStaticPic(World.Player.FindItemByLayer(Layer.Backpack).DisplayedGraphic, 20, 20)
             {
                 X = Width - openRegularGump.Width - 20 - borderWidth,
@@ -376,12 +377,10 @@ namespace ClassicUO.Game.UI.Gumps
             ushort graphic = originalContainerItemGraphic;
             if (Client.Version >= Utility.ClientVersion.CV_706000 && ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.UseLargeContainerGumps)
             {
-                GumpsLoader loader = GumpsLoader.Instance;
-
                 switch (graphic)
                 {
                     case 0x0048:
-                        if (loader.GetGumpTexture(0x06E8, out _) != null)
+                        if (Client.Game.Gumps.GetGump(0x06E8).Texture != null)
                         {
                             graphic = 0x06E8;
                         }
@@ -389,7 +388,7 @@ namespace ClassicUO.Game.UI.Gumps
                         break;
 
                     case 0x0049:
-                        if (loader.GetGumpTexture(0x9CDF, out _) != null)
+                        if (Client.Game.Gumps.GetGump(0x9CDF).Texture != null)
                         {
                             graphic = 0x9CDF;
                         }
@@ -397,7 +396,7 @@ namespace ClassicUO.Game.UI.Gumps
                         break;
 
                     case 0x0051:
-                        if (loader.GetGumpTexture(0x06E7, out _) != null)
+                        if (Client.Game.Gumps.GetGump(0x06E7).Texture != null)
                         {
                             graphic = 0x06E7;
                         }
@@ -405,7 +404,7 @@ namespace ClassicUO.Game.UI.Gumps
                         break;
 
                     case 0x003E:
-                        if (loader.GetGumpTexture(0x06E9, out _) != null)
+                        if (Client.Game.Gumps.GetGump(0x06E9).Texture != null)
                         {
                             graphic = 0x06E9;
                         }
@@ -413,7 +412,7 @@ namespace ClassicUO.Game.UI.Gumps
                         break;
 
                     case 0x004D:
-                        if (loader.GetGumpTexture(0x06EA, out _) != null)
+                        if (Client.Game.Gumps.GetGump(0x06EA).Texture != null)
                         {
                             graphic = 0x06EA;
                         }
@@ -421,7 +420,7 @@ namespace ClassicUO.Game.UI.Gumps
                         break;
 
                     case 0x004E:
-                        if (loader.GetGumpTexture(0x06E6, out _) != null)
+                        if (Client.Game.Gumps.GetGump(0x06E6).Texture != null)
                         {
                             graphic = 0x06E6;
                         }
@@ -429,7 +428,7 @@ namespace ClassicUO.Game.UI.Gumps
                         break;
 
                     case 0x004F:
-                        if (loader.GetGumpTexture(0x06E5, out _) != null)
+                        if (Client.Game.Gumps.GetGump(0x06E5).Texture != null)
                         {
                             graphic = 0x06E5;
                         }
@@ -437,7 +436,7 @@ namespace ClassicUO.Game.UI.Gumps
                         break;
 
                     case 0x004A:
-                        if (loader.GetGumpTexture(0x9CDD, out _) != null)
+                        if (Client.Game.Gumps.GetGump(0x9CDD).Texture != null)
                         {
                             graphic = 0x9CDD;
                         }
@@ -445,7 +444,7 @@ namespace ClassicUO.Game.UI.Gumps
                         break;
 
                     case 0x0044:
-                        if (loader.GetGumpTexture(0x9CE3, out _) != null)
+                        if (Client.Game.Gumps.GetGump(0x9CE3).Texture != null)
                         {
                             graphic = 0x9CE3;
                         }
@@ -669,7 +668,7 @@ namespace ClassicUO.Game.UI.Gumps
                     graphic = 9260; borderSize = 17;
                     break;
                 case BorderStyle.Style8:
-                    if (GumpsLoader.Instance.GetGumpTexture(40303, out var bounds) != null)
+                    if (Client.Game.Gumps.GetGump(40303).Texture != null)
                         graphic = 40303;
                     else
                         graphic = 83;
@@ -785,8 +784,11 @@ namespace ClassicUO.Game.UI.Gumps
                 CanMove = true;
                 if (_item != null)
                 {
-                    texture = ArtLoader.Instance.GetStaticTexture(_item.DisplayedGraphic, out bounds);
-                    rect = ArtLoader.Instance.GetRealArtBounds(_item.DisplayedGraphic);
+                    ref readonly var text = ref Client.Game.Arts.GetArt((uint)_item.DisplayedGraphic + 0x4000);
+                    texture = text.Texture;
+                    bounds = text.UV;
+
+                    rect = Client.Game.Arts.GetRealArtBounds((uint)_item.DisplayedGraphic + 0x4000);
                 }
                 #endregion
 
@@ -837,8 +839,11 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else
                 {
-                    texture = ArtLoader.Instance.GetStaticTexture(item.DisplayedGraphic, out bounds);
-                    rect = ArtLoader.Instance.GetRealArtBounds(item.DisplayedGraphic);
+                    ref readonly var text = ref Client.Game.Arts.GetArt((uint)_item.DisplayedGraphic + 0x4000);
+                    texture = text.Texture;
+                    bounds = text.UV;
+
+                    rect = Client.Game.Arts.GetRealArtBounds((uint)_item.DisplayedGraphic + 0x4000);
 
                     _item = item;
                     LocalSerial = item.Serial;

@@ -240,11 +240,6 @@ namespace ClassicUO.Assets
         //    }
         //}
 
-        public bool PixelCheck(int index, int x, int y)
-        {
-            return _picker.Get((ulong)index, x, y);
-        }
-
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         private ref struct GumpBlock
         {

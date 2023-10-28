@@ -170,7 +170,7 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
                 case BorderStyle.Style8:
                     {
-                        if (Assets.GumpsLoader.Instance.GetGumpTexture(40303, out var bounds) != null)
+                        if (Client.Game.Gumps.GetGump(40303).Texture != null)
                             graphic = 40303;
                         else
                             graphic = 83;

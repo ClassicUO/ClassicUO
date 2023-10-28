@@ -5,6 +5,7 @@ using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
+using ClassicUO.Renderer.Animations;
 using ClassicUO.Resources;
 using Microsoft.Xna.Framework;
 using System;
@@ -330,13 +331,13 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     ushort graphic = Graphic;
 
-                    if (graphic >= AnimationsLoader.MAX_ANIMATIONS_DATA_INDEX_COUNT)
+                    if (graphic >= 2048)
                     {
                         graphic = 0;
                     }
 
                     byte group = GetAnimGroup(graphic);
-                    var frames = AnimationsLoader.Instance.GetAnimationFrames(graphic, group, 1, out var hue2, out _, true);
+                    var frames = Client.Game.Animations.GetAnimationFrames(graphic, group, 1, out var hue2, out _, true);
 
                     if (frames.Length != 0)
                     {
@@ -364,11 +365,11 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else
                 {
-                    var texture = ArtLoader.Instance.GetStaticTexture(Graphic, out var bounds);
+                    ref readonly var texture = ref Client.Game.Arts.GetArt(Graphic);
 
                     hueVector = ShaderHueTranslator.GetHueVector(Hue, TileDataLoader.Instance.StaticData[Graphic].IsPartialHue, 1f);
 
-                    var rect = ArtLoader.Instance.GetRealArtBounds(Graphic);
+                    var rect = Client.Game.Arts.GetRealArtBounds((uint)Graphic + 0x4000);
 
                     Point originalSize = new Point(Height, Height);
                     Point point = new Point();
@@ -387,7 +388,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     batcher.Draw
                     (
-                        texture,
+                        texture.Texture,
                         new Rectangle
                         (
                             x + point.X,
@@ -397,8 +398,8 @@ namespace ClassicUO.Game.UI.Gumps
                         ),
                         new Rectangle
                         (
-                            bounds.X + rect.X,
-                            bounds.Y + rect.Y,
+                            texture.UV.X + rect.X,
+                            texture.UV.Y + rect.Y,
                             rect.Width,
                             rect.Height
                         ),
@@ -411,13 +412,17 @@ namespace ClassicUO.Game.UI.Gumps
 
             private static byte GetAnimGroup(ushort graphic)
             {
-                switch (AnimationsLoader.Instance.GetGroupIndex(graphic))
+                var groupType = Client.Game.Animations.GetAnimType(graphic);
+                switch (AnimationsLoader.Instance.GetGroupIndex(graphic, groupType))
                 {
-                    case ANIMATION_GROUPS.AG_LOW: return (byte)LOW_ANIMATION_GROUP.LAG_STAND;
+                    case AnimationGroups.Low:
+                        return (byte)LowAnimationGroup.Stand;
 
-                    case ANIMATION_GROUPS.AG_HIGHT: return (byte)HIGHT_ANIMATION_GROUP.HAG_STAND;
+                    case AnimationGroups.High:
+                        return (byte)HighAnimationGroup.Stand;
 
-                    case ANIMATION_GROUPS.AG_PEOPLE: return (byte)PEOPLE_ANIMATION_GROUP.PAG_STAND;
+                    case AnimationGroups.People:
+                        return (byte)PeopleAnimationGroup.Stand;
                 }
 
                 return 0;

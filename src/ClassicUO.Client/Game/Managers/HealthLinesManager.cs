@@ -305,13 +305,6 @@ namespace ClassicUO.Game.Managers
 
             if (entity.Hits != entity.HitsMax || entity.HitsMax == 0)
             {
-                int offset = 2;
-
-                if (per >> 2 == 0)
-                {
-                    offset = per;
-                }
-
                 gumpInfo = ref Client.Game.Gumps.GetGump(HP_GRAPHIC);
 
                 batcher.DrawTiled(

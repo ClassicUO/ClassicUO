@@ -39,9 +39,9 @@ namespace ClassicUO.Game.UI.Controls
                 return false;
             }
 
-            var texture = ArtLoader.Instance.GetStaticTexture(graphic, out var bounds);
-            Rectangle _rect = ArtLoader.Instance.GetRealArtBounds((int)graphic);
+            Rectangle _rect = Client.Game.Arts.GetRealArtBounds(graphic + 0x4000);
 
+            ref readonly var texture = ref Client.Game.Arts.GetArt(graphic + 0x4000); //Guess were using 0x4000 for static item art now.
 
             Point _originalSize = new Point(Width, Height);
             Point _point = new Point((Width >> 1) - (_originalSize.X >> 1), (Height >> 1) - (_originalSize.Y >> 1));
@@ -70,11 +70,11 @@ namespace ClassicUO.Game.UI.Controls
                 _point.Y = 0;
             }
 
-            if (texture != null)
+            if (texture.Texture != null)
             {
                 batcher.Draw
                 (
-                    texture,
+                    texture.Texture,
                     new Rectangle
                     (
                         x + _point.X,
@@ -84,8 +84,8 @@ namespace ClassicUO.Game.UI.Controls
                     ),
                     new Rectangle
                     (
-                        bounds.X + _rect.X,
-                        bounds.Y + _rect.Y,
+                        texture.UV.X + _rect.X,
+                        texture.UV.Y + _rect.Y,
                         _rect.Width,
                         _rect.Height
                     ),

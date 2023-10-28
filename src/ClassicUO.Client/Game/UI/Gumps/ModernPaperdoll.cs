@@ -7,6 +7,7 @@ using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
+using ClassicUO.Renderer.Animations;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
@@ -480,7 +481,7 @@ namespace ClassicUO.Game.UI.Gumps
                     animID = 0x0223;
                 }
 
-                AnimationsLoader.Instance.ConvertBodyIfNeeded(ref graphic);
+                Client.Game.Animations.ConvertBodyIfNeeded(ref graphic);                
 
                 if (AnimationsLoader.Instance.EquipConversions.TryGetValue(graphic, out Dictionary<ushort, EquipConvData> dict))
                 {
@@ -497,7 +498,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 }
 
-                if (animID + offset > GumpsLoader.MAX_GUMP_DATA_INDEX_COUNT || GumpsLoader.Instance.GetGumpTexture((ushort)(animID + offset), out _) == null)
+                if (animID + offset > GumpsLoader.MAX_GUMP_DATA_INDEX_COUNT || Client.Game.Gumps.GetGump((ushort)(animID + offset)).Texture == null)
                 {
                     // inverse
                     offset = isfemale ? Constants.MALE_GUMP_OFFSET : Constants.FEMALE_GUMP_OFFSET;
@@ -526,8 +527,8 @@ namespace ClassicUO.Game.UI.Gumps
                     true
                 );
 
-                var texture = ArtLoader.Instance.GetStaticTexture(item.DisplayedGraphic, out var bounds);
-                Rectangle _rect = ArtLoader.Instance.GetRealArtBounds(item.DisplayedGraphic);
+                ref readonly var texture = ref Client.Game.Arts.GetArt((uint)item.DisplayedGraphic + 0x4000);
+                Rectangle _rect = Client.Game.Arts.GetRealArtBounds((uint)item.DisplayedGraphic + 0x4000);
 
 
                 Point _originalSize = new Point(Width, Height);
@@ -557,11 +558,11 @@ namespace ClassicUO.Game.UI.Gumps
                     _point.Y = 0;
                 }
 
-                if (texture != null)
+                if (texture.Texture != null)
                 {
                     batcher.Draw
                     (
-                        texture,
+                        texture.Texture,
                         new Rectangle
                         (
                             x + _point.X,
@@ -571,8 +572,8 @@ namespace ClassicUO.Game.UI.Gumps
                         ),
                         new Rectangle
                         (
-                            bounds.X + _rect.X,
-                            bounds.Y + _rect.Y,
+                            texture.UV.X + _rect.X,
+                            texture.UV.Y + _rect.Y,
                             _rect.Width,
                             _rect.Height
                         ),
@@ -762,7 +763,7 @@ namespace ClassicUO.Game.UI.Gumps
                             }
                             else
                             {
-                                _ = GumpsLoader.Instance.GetGumpTexture(0x0804, out var bounds);
+                                Rectangle bounds = Client.Game.Gumps.GetGump(0x0804).UV;
 
                                 UIManager.Add
                                 (
