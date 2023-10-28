@@ -348,22 +348,6 @@ namespace ClassicUO.Game.UI.Gumps
             writer.WriteAttributeString("height", Height.ToString());
         }
 
-        public override void Restore(XmlElement xml)
-        {
-            base.Restore(xml);
-            int rW = int.Parse(xml.GetAttribute("width"));
-            int rH = int.Parse(xml.GetAttribute("height"));
-
-            if (IsPlayerBackpack)
-            {
-                rW = ProfileManager.CurrentProfile.BackpackGridSize.X;
-                rH = ProfileManager.CurrentProfile.BackpackGridSize.Y;
-            }
-
-            ResizeWindow(new Point(rW, rH));
-            GameActions.DoubleClickQueued(LocalSerial);
-        }
-
         private void _scrollArea_DragBegin(object sender, MouseEventArgs e)
         {
             InvokeDragBegin(e.Location);
