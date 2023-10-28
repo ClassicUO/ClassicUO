@@ -40,6 +40,7 @@ using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.IO;
+using ClassicUO.Renderer;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
@@ -3156,6 +3157,7 @@ namespace ClassicUO.Network
             ushort height = p.ReadUInt16BE();
 
             MapGump gump = new MapGump(serial, gumpid, width, height);
+            SpriteInfo multiMapInfo;
 
             if (p[0] == 0xF5 || Client.Version >= Utility.ClientVersion.CV_308Z)
             {
@@ -3166,50 +3168,14 @@ namespace ClassicUO.Network
                     facet = p.ReadUInt16BE();
                 }
 
-                if (MultiMapLoader.Instance.HasFacet(facet))
-                {
-                    gump.SetMapTexture(
-                        MultiMapLoader.Instance.LoadFacet(
-                            Client.Game.GraphicsDevice,
-                            facet,
-                            width,
-                            height,
-                            startX,
-                            startY,
-                            endX,
-                            endY
-                        )
-                    );
-                }
-                else
-                {
-                    gump.SetMapTexture(
-                        MultiMapLoader.Instance.LoadMap(
-                            Client.Game.GraphicsDevice,
-                            width,
-                            height,
-                            startX,
-                            startY,
-                            endX,
-                            endY
-                        )
-                    );
-                }
-            }
+                multiMapInfo = Client.Game.MultiMaps.GetMap(facet, width, height, startX, startY, endX, endY);            }
             else
             {
-                gump.SetMapTexture(
-                    MultiMapLoader.Instance.LoadMap(
-                        Client.Game.GraphicsDevice,
-                        width,
-                        height,
-                        startX,
-                        startY,
-                        endX,
-                        endY
-                    )
-                );
+                multiMapInfo = Client.Game.MultiMaps.GetMap(null, width, height, startX, startY, endX, endY);
             }
+
+            if (multiMapInfo.Texture != null)
+                gump.SetMapTexture(multiMapInfo.Texture);
 
             UIManager.Add(gump);
 
