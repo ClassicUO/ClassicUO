@@ -2,7 +2,7 @@
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 // 1. Redistributions of source code must retain the above copyright
@@ -16,7 +16,7 @@
 // 4. Neither the name of the copyright holder nor the
 //    names of its contributors may be used to endorse or promote products
 //    derived from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -40,7 +40,8 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class ScrollBar : ScrollBarBase
     {
-        private Rectangle _rectSlider, _emptySpace;
+        private Rectangle _rectSlider,
+            _emptySpace;
 
         const ushort BUTTON_UP_0 = 251;
         const ushort BUTTON_UP_1 = 250;
@@ -57,24 +58,31 @@ namespace ClassicUO.Game.UI.Controls
             Location = new Point(x, y);
             AcceptMouseInput = true;
 
+            ref readonly var gumpInfoUp = ref Client.Game.Gumps.GetGump(BUTTON_UP_0);
+            ref readonly var gumpInfoDown = ref Client.Game.Gumps.GetGump(BUTTON_DOWN_0);
+            ref readonly var gumpInfoBackground = ref Client.Game.Gumps.GetGump(BACKGROUND_0);
+            ref readonly var gumpInfoSlider = ref Client.Game.Gumps.GetGump(SLIDER);
 
-            _ = GumpsLoader.Instance.GetGumpTexture(BUTTON_UP_0, out var boundsUp0);
-            _ = GumpsLoader.Instance.GetGumpTexture(BUTTON_DOWN_0, out var boundsDown0);
-            _ = GumpsLoader.Instance.GetGumpTexture(BACKGROUND_0, out var boundsBackground0);
-            _ = GumpsLoader.Instance.GetGumpTexture(SLIDER, out var boundsSlider);
+            Width = gumpInfoBackground.UV.Width;
 
-
-            Width = boundsBackground0.Width;
-
-            _rectDownButton = new Rectangle(0, Height - boundsDown0.Height, boundsDown0.Width, boundsDown0.Height);
-            _rectUpButton = new Rectangle(0, 0, boundsUp0.Width, boundsUp0.Height);
-            _rectSlider = new Rectangle((boundsBackground0.Width - boundsSlider.Width) >> 1, boundsUp0.Height + _sliderPosition, boundsSlider.Width, boundsSlider.Height);
+            _rectDownButton = new Rectangle(
+                0,
+                Height - gumpInfoDown.UV.Height,
+                gumpInfoDown.UV.Width,
+                gumpInfoDown.UV.Height
+            );
+            _rectUpButton = new Rectangle(0, 0, gumpInfoUp.UV.Width, gumpInfoUp.UV.Height);
+            _rectSlider = new Rectangle(
+                (gumpInfoBackground.UV.Width - gumpInfoSlider.UV.Width) >> 1,
+                gumpInfoUp.UV.Height + _sliderPosition,
+                gumpInfoSlider.UV.Width,
+                gumpInfoSlider.UV.Height
+            );
             _emptySpace.X = 0;
-            _emptySpace.Y = boundsUp0.Height;
-            _emptySpace.Width = boundsSlider.Width;
-            _emptySpace.Height = Height - (boundsDown0.Height + boundsUp0.Height);
+            _emptySpace.Y = gumpInfoUp.UV.Height;
+            _emptySpace.Width = gumpInfoSlider.UV.Width;
+            _emptySpace.Height = Height - (gumpInfoDown.UV.Height + gumpInfoUp.UV.Height);
         }
-
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
@@ -83,67 +91,69 @@ namespace ClassicUO.Game.UI.Controls
                 return false;
             }
 
-            Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
+            var hueVector = ShaderHueTranslator.GetHueVector(0);
 
-            var textureUp0 = GumpsLoader.Instance.GetGumpTexture(BUTTON_UP_0, out var boundsUp0);
-            var textureUp1 = GumpsLoader.Instance.GetGumpTexture(BUTTON_UP_1, out var boundsUp1);
-            var textureDown0 = GumpsLoader.Instance.GetGumpTexture(BUTTON_DOWN_0, out var boundsDown0);
-            var textureDown1 = GumpsLoader.Instance.GetGumpTexture(BUTTON_DOWN_1, out var boundsDown1);
-            var textureBackground0 = GumpsLoader.Instance.GetGumpTexture(BACKGROUND_0, out var boundsBackground0);
-            var textureBackground1 = GumpsLoader.Instance.GetGumpTexture(BACKGROUND_1, out var boundsBackground1);
-            var textureBackground2 = GumpsLoader.Instance.GetGumpTexture(BACKGROUND_2, out var boundsBackground2);
-            var textureSlider = GumpsLoader.Instance.GetGumpTexture(SLIDER, out var boundsSlider);
+            ref readonly var gumpInfoUp0 = ref Client.Game.Gumps.GetGump(BUTTON_UP_0);
+            ref readonly var gumpInfoUp1 = ref Client.Game.Gumps.GetGump(BUTTON_UP_1);
+            ref readonly var gumpInfoDown0 = ref Client.Game.Gumps.GetGump(BUTTON_DOWN_0);
+            ref readonly var gumpInfoDown1 = ref Client.Game.Gumps.GetGump(BUTTON_DOWN_1);
+            ref readonly var gumpInfoBackground0 = ref Client.Game.Gumps.GetGump(BACKGROUND_0);
+            ref readonly var gumpInfoBackground1 = ref Client.Game.Gumps.GetGump(BACKGROUND_1);
+            ref readonly var gumpInfoBackground2 = ref Client.Game.Gumps.GetGump(BACKGROUND_2);
+            ref readonly var gumpInfoSlider = ref Client.Game.Gumps.GetGump(SLIDER);
 
             // draw scrollbar background
-            int middleHeight = Height - boundsUp0.Height - boundsDown0.Height - boundsBackground0.Height - boundsBackground2.Height;
+            int middleHeight =
+                Height
+                - gumpInfoUp0.UV.Height
+                - gumpInfoDown0.UV.Height
+                - gumpInfoBackground0.UV.Height
+                - gumpInfoBackground2.UV.Height;
 
             if (middleHeight > 0)
             {
-                batcher.Draw
-                (
-                    textureBackground0,
-                    new Vector2(x, y + boundsUp0.Height),
-                    boundsBackground0,
+                batcher.Draw(
+                    gumpInfoBackground0.Texture,
+                    new Vector2(x, y + gumpInfoUp0.UV.Height),
+                    gumpInfoBackground0.UV,
                     hueVector
                 );
 
-                batcher.DrawTiled
-                (
-                    textureBackground1,
-                    new Rectangle
-                    (
+                batcher.DrawTiled(
+                    gumpInfoBackground1.Texture,
+                    new Rectangle(
                         x,
-                        y + boundsUp1.Height + boundsBackground0.Height,
-                        boundsBackground0.Width,
+                        y + gumpInfoUp1.UV.Height + gumpInfoBackground0.UV.Height,
+                        gumpInfoBackground0.UV.Width,
                         middleHeight
                     ),
-                    boundsBackground1,
+                    gumpInfoBackground1.UV,
                     hueVector
                 );
 
-                batcher.Draw
-                (
-                    textureBackground2,
-                    new Vector2(x, y + Height - boundsDown0.Height - boundsBackground2.Height),
-                    boundsBackground2,
+                batcher.Draw(
+                    gumpInfoBackground2.Texture,
+                    new Vector2(
+                        x,
+                        y + Height - gumpInfoDown0.UV.Height - gumpInfoBackground2.UV.Height
+                    ),
+                    gumpInfoBackground2.UV,
                     hueVector
                 );
             }
             else
             {
-                middleHeight = Height - boundsUp0.Height - boundsDown0.Height;
+                middleHeight = Height - gumpInfoUp0.UV.Height - gumpInfoDown0.UV.Height;
 
-                batcher.DrawTiled
-                (
-                    textureBackground1,
-                    new Rectangle
-                    (
+                batcher.DrawTiled(
+                    gumpInfoBackground1.Texture,
+                    new Rectangle(
                         x,
-                        y + boundsUp0.Height,
-                        boundsBackground0.Width,
+                        y + gumpInfoUp0.UV.Height,
+                        gumpInfoBackground0.UV.Width,
                         middleHeight
                     ),
-                    boundsBackground1,
+                    gumpInfoBackground1.UV,
                     hueVector
                 );
             }
@@ -151,59 +161,43 @@ namespace ClassicUO.Game.UI.Controls
             // draw up button
             if (_btUpClicked)
             {
-                batcher.Draw
-                (
-                    textureUp1,
-                    new Vector2(x, y),
-                    boundsUp1,
-                    hueVector
-                );
+                batcher.Draw(gumpInfoUp1.Texture, new Vector2(x, y), gumpInfoUp1.UV, hueVector);
             }
             else
             {
-                batcher.Draw
-                (
-                    textureUp0,
-                    new Vector2(x, y),
-                    boundsUp0,
-                    hueVector
-                );
+                batcher.Draw(gumpInfoUp0.Texture, new Vector2(x, y), gumpInfoUp0.UV, hueVector);
             }
 
             // draw down button
             if (_btDownClicked)
             {
-                batcher.Draw
-                (
-                    textureDown1,
-                    new Vector2(x, y + Height - boundsDown0.Height),
-                    boundsDown1,
+                batcher.Draw(
+                    gumpInfoDown1.Texture,
+                    new Vector2(x, y + Height - gumpInfoDown0.UV.Height),
+                    gumpInfoDown1.UV,
                     hueVector
                 );
             }
             else
             {
-                batcher.Draw
-                (
-                    textureDown0,
-                    new Vector2(x, y + Height - boundsDown0.Height),
-                    boundsDown0,
+                batcher.Draw(
+                    gumpInfoDown0.Texture,
+                    new Vector2(x, y + Height - gumpInfoDown0.UV.Height),
+                    gumpInfoDown0.UV,
                     hueVector
                 );
-            }        
+            }
 
             // draw slider
             if (MaxValue > MinValue && middleHeight > 0)
             {
-                batcher.Draw
-                (
-                    textureSlider,
-                    new Vector2
-                    (
-                        x + ((boundsBackground0.Width - boundsSlider.Width) >> 1), 
-                        y + boundsUp0.Height + _sliderPosition
+                batcher.Draw(
+                    gumpInfoSlider.Texture,
+                    new Vector2(
+                        x + ((gumpInfoBackground0.UV.Width - gumpInfoSlider.UV.Width) >> 1),
+                        y + gumpInfoUp0.UV.Height + _sliderPosition
                     ),
-                    boundsSlider,
+                    gumpInfoSlider.UV,
                     hueVector
                 );
             }
@@ -213,11 +207,14 @@ namespace ClassicUO.Game.UI.Controls
 
         protected override int GetScrollableArea()
         {
-            _ = GumpsLoader.Instance.GetGumpTexture(BUTTON_UP_0, out var boundsUp0);
-            _ = GumpsLoader.Instance.GetGumpTexture(BUTTON_DOWN_0, out var boundsDown0);
-            _ = GumpsLoader.Instance.GetGumpTexture(SLIDER, out var boundsSlider);
+            ref readonly var gumpInfoUp = ref Client.Game.Gumps.GetGump(BUTTON_UP_0);
+            ref readonly var gumpInfoDown = ref Client.Game.Gumps.GetGump(BUTTON_DOWN_0);
+            ref readonly var gumpInfoSlider = ref Client.Game.Gumps.GetGump(SLIDER);
 
-            return Height - boundsUp0.Height - boundsDown0.Height - boundsSlider.Height;
+            return Height
+                - gumpInfoUp.UV.Height
+                - gumpInfoDown.UV.Height
+                - gumpInfoSlider.UV.Height;
         }
 
         protected override void OnMouseDown(int x, int y, MouseButtonType button)
@@ -252,20 +249,29 @@ namespace ClassicUO.Game.UI.Controls
                 _clickPosition.X = x;
                 _clickPosition.Y = y;
 
-                _ = GumpsLoader.Instance.GetGumpTexture(BUTTON_UP_0, out var boundsUp0);
-                _ = GumpsLoader.Instance.GetGumpTexture(BUTTON_DOWN_0, out var boundsDown0);
-                _ = GumpsLoader.Instance.GetGumpTexture(SLIDER, out var boundsSlider);
+                ref readonly var gumpInfoUp = ref Client.Game.Gumps.GetGump(BUTTON_UP_0);
+                ref readonly var gumpInfoDown = ref Client.Game.Gumps.GetGump(BUTTON_DOWN_0);
+                ref readonly var gumpInfoSlider = ref Client.Game.Gumps.GetGump(SLIDER);
 
-                if (y == 0 && _clickPosition.Y < boundsUp0.Height + (boundsSlider.Height >> 1))
+                if (
+                    y == 0
+                    && _clickPosition.Y < gumpInfoUp.UV.Height + (gumpInfoSlider.UV.Height >> 1)
+                )
                 {
-                    _clickPosition.Y = boundsUp0.Height + (boundsSlider.Height >> 1);
+                    _clickPosition.Y = gumpInfoUp.UV.Height + (gumpInfoSlider.UV.Height >> 1);
                 }
-                else if (y == scrollableArea && _clickPosition.Y > Height - boundsDown0.Height - (boundsSlider.Height >> 1))
+                else if (
+                    y == scrollableArea
+                    && _clickPosition.Y
+                        > Height - gumpInfoDown.UV.Height - (gumpInfoSlider.UV.Height >> 1)
+                )
                 {
-                    _clickPosition.Y = Height - boundsDown0.Height - (boundsSlider.Height >> 1);
+                    _clickPosition.Y =
+                        Height - gumpInfoDown.UV.Height - (gumpInfoSlider.UV.Height >> 1);
                 }
 
-                _value = (int) Math.Round(y / (float) scrollableArea * (MaxValue - MinValue) + MinValue);
+                _value = (int)
+                    Math.Round(y / (float)scrollableArea * (MaxValue - MinValue) + MinValue);
             }
         }
 

@@ -43,7 +43,6 @@ namespace ClassicUO.Assets
     {
         private static GumpsLoader _instance;
         private UOFile _file;
-        private PixelPicker _picker = new PixelPicker();
 
         public const int MAX_GUMP_DATA_INDEX_COUNT = 0x10000;
 

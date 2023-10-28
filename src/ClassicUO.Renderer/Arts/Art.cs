@@ -138,5 +138,7 @@ namespace ClassicUO.Renderer.Arts
                 return (IntPtr)surface;
             }
         }
+
+        public bool PixelCheck(uint idx, int x, int y) => _picker.Get(idx, x, y);
     }
 }
