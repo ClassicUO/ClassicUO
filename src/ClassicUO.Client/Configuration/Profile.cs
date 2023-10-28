@@ -847,7 +847,7 @@ namespace ClassicUO.Configuration
                                 case GumpType.GridContainer:
                                     ushort ogContainer = ushort.Parse(xml.GetAttribute("ogContainer"));
                                     gump = new GridContainer(serial, ogContainer);
-                                    if (((GridContainer)gump).isPlayerBackpack)
+                                    if (((GridContainer)gump).IsPlayerBackpack)
                                     {
                                         x = ProfileManager.CurrentProfile.BackpackGridPosition.X;
                                         y = ProfileManager.CurrentProfile.BackpackGridPosition.Y;
