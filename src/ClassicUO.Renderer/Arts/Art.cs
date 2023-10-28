@@ -144,12 +144,7 @@ namespace ClassicUO.Renderer.Arts
                             {
                                 c.PackedValue = *pixels_ptr;
                                 *pixels_ptr =
-                                    HuesHelper.Color16To32(
-                                        HuesLoader.Instance.GetHueColorRgba5551(
-                                            HuesHelper.Color32To16(*pixels_ptr),
-                                            customHue
-                                        )
-                                    ) | 0xFF_00_00_00;
+                                    HuesLoader.Instance.ApplyHueRgba8888(HuesHelper.Color32To16(*pixels_ptr), customHue);
                             }
                         }
 
