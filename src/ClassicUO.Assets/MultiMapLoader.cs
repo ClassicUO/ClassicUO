@@ -77,15 +77,6 @@ namespace ClassicUO.Assets
                     {
                         _facets[i] = new UOFileMul(facetFiles[i]);
                     }
-                    //for (int i = 0; i < _facets.Length; i++)
-                    //{
-                    //    path = UOFileManager.GetUOFilePath($"facet0{i}.mul");
-
-                    //    if (File.Exists(path))
-                    //    {
-                    //        _facets[i] = new UOFileMul(path);
-                    //    }
-                    //}
                 }
             );
         }
@@ -249,7 +240,7 @@ namespace ClassicUO.Assets
             int endy
         )
         {
-            if (_file == null || facet < 0 || facet > MapLoader.MAPS_COUNT || _facets[facet] == null)
+            if (_file == null || facet < 0 || facet > MapLoader.MAPS_COUNT || facet >= _facets.Length || _facets[facet] == null)
             {
                 return default;
             }
