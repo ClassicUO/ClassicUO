@@ -81,7 +81,7 @@ namespace ClassicUO.Assets
         struct MobTypeInfo
         {
             public AnimationGroupsType Type;
-            public AnimationFlags  Flags;
+            public AnimationFlags Flags;
         }
 
         public List<Tuple<ushort, byte>>[] GroupReplaces { get; } =
@@ -607,13 +607,6 @@ namespace ClassicUO.Assets
                             continue;
                         }
 
-                        //UOFile currentIdxFile = _files[i].IdxFile;
-
-                        // AnimationGroupsType realType =
-                        //     UOFileManager.Version < ClientVersion.CV_500A
-                        //         ? CalculateTypeByGraphic((ushort)body, i)
-                        //         : _dataIndex[index].Type;
-
                         _bodyConvInfos[index] = new BodyConvInfo()
                         {
                             FileIndex = i,
@@ -622,86 +615,6 @@ namespace ClassicUO.Assets
                             AnimType = CalculateTypeByGraphic((ushort)body, i),
                             MountHeight = mountedHeightOffset
                         };
-
-                        // long addressOffset = _dataIndex[index].CalculateOffset(
-                        //     (ushort)body,
-                        //     realType,
-                        //     out int count
-                        // );
-
-                        // count = Math.Min(count, MAX_ACTIONS);
-
-                        // if (addressOffset < currentIdxFile.Length)
-                        // {
-                        //     _dataIndex[index].Graphic = (ushort)body;
-                        //     _dataIndex[index].Type = realType;
-
-                        //     if (_dataIndex[index].MountedHeightOffset == 0)
-                        //     {
-                        //         _dataIndex[index].MountedHeightOffset = mountedHeightOffset;
-                        //     }
-
-                        //     _dataIndex[index].FileIndex = (byte)i;
-
-                        //     bool isValid = false;
-                        //     addressOffset += currentIdxFile.StartAddress.ToInt64();
-                        //     long maxaddress =
-                        //         currentIdxFile.StartAddress.ToInt64() + currentIdxFile.Length;
-
-                        //     int offset = 0;
-
-                        //     if (_dataIndex[index].Groups == null)
-                        //     {
-                        //         _dataIndex[index].Groups = new AnimationGroup[MAX_ACTIONS];
-                        //     }
-
-                        //     for (int j = 0; j < count; j++)
-                        //     {
-                        //         if (_dataIndex[index].Groups[j] == null)
-                        //         {
-                        //             _dataIndex[index].Groups[j] = new AnimationGroup();
-                        //         }
-
-                        //         for (byte d = 0; d < MAX_DIRECTIONS; d++)
-                        //         {
-                        //             AnimIdxBlock* aidx = (AnimIdxBlock*)(
-                        //                 addressOffset + offset * sizeof(AnimIdxBlock)
-                        //             );
-
-                        //             ++offset;
-
-                        //             if (
-                        //                 (long)aidx < maxaddress
-                        //                 && aidx->Position != 0xFFFFFFFF
-                        //                 && aidx->Size != 0xFFFFFFFF
-                        //             )
-                        //             {
-                        //                 ref var direction = ref _dataIndex[index].Groups[
-                        //                     j
-                        //                 ].Direction[d];
-                        //                 direction.Address = aidx->Position;
-                        //                 direction.Size = Math.Max(1, aidx->Size);
-
-                        //                 isValid = true;
-                        //             }
-                        //             else
-                        //             {
-                        //                 // we need to nullify the bad address or we will read invalid data.
-                        //                 // we dont touch the isValid parameter because sometime the mul exists but some frames don't
-                        //                 // see: https://github.com/ClassicUO/ClassicUO/issues/1532
-                        //                 ref var direction = ref _dataIndex[index].Groups[
-                        //                     j
-                        //                 ].Direction[d];
-                        //                 direction.Address = 0;
-                        //                 direction.Size = 0;
-                        //             }
-                        //         }
-                        //     }
-
-                        //     _dataIndex[index].IsValidMUL = isValid;
-
-                        //     break;
-                        // }
                     }
                 }
             }
@@ -809,7 +722,9 @@ namespace ClassicUO.Assets
                 return;
             }
 
+            // ==========================
             // credit: @tristran
+            // ==========================
             // u32 animid
             // 12 times: [
             //   u32 unk0 //often zero
@@ -1391,7 +1306,7 @@ namespace ClassicUO.Assets
             reader.Seek(dataStart);
 
             byte frameCount = (byte)(
-                type < AnimationGroupsType.Equipment ? Math.Round(fc / 5f) : 10
+                type < AnimationGroupsType.Equipment ? Math.Round(fc / (float) MAX_DIRECTIONS) : MAX_DIRECTIONS * 2
             );
             if (frameCount > _frames.Length)
             {

@@ -33,7 +33,6 @@
 using ClassicUO.IO;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
-using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
