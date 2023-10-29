@@ -138,7 +138,7 @@ namespace ClassicUO.Game.GameObjects
             bool isWet = false
         )
         {
-            ref readonly var artInfo = ref Client.Game.Arts.GetArt((uint)(graphic + 0x4000));
+            ref readonly var artInfo = ref Client.Game.Arts.GetArt(graphic);
 
             if (artInfo.Texture != null)
             {
@@ -193,7 +193,7 @@ namespace ClassicUO.Game.GameObjects
             float depth
         )
         {
-            ref readonly var artInfo = ref Client.Game.Arts.GetArt((uint)(graphic + 0x4000));
+            ref readonly var artInfo = ref Client.Game.Arts.GetArt(graphic);
 
             if (artInfo.Texture != null)
             {
@@ -221,7 +221,7 @@ namespace ClassicUO.Game.GameObjects
             float depth
         )
         {
-            ref readonly var artInfo = ref Client.Game.Arts.GetArt((uint)(graphic + 0x4000));
+            ref readonly var artInfo = ref Client.Game.Arts.GetArt(graphic);
 
             if (artInfo.Texture != null)
             {
@@ -262,7 +262,7 @@ namespace ClassicUO.Game.GameObjects
 
             graphic = (ushort)(graphic + index.AnimOffset);
 
-            ref readonly var artInfo = ref Client.Game.Arts.GetArt((uint)(graphic + 0x4000));
+            ref readonly var artInfo = ref Client.Game.Arts.GetArt(graphic);
 
             if (artInfo.Texture != null)
             {

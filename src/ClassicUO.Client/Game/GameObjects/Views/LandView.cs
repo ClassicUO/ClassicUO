@@ -123,7 +123,7 @@ namespace ClassicUO.Game.GameObjects
             }
             else
             {
-                ref readonly var artInfo = ref Client.Game.Arts.GetArt(Graphic);
+                ref readonly var artInfo = ref Client.Game.Arts.GetLand(Graphic);
 
                 if (artInfo.Texture != null)
                 {

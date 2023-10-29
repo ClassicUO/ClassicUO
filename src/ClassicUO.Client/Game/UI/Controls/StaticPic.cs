@@ -71,7 +71,7 @@ namespace ClassicUO.Game.UI.Controls
             {
                 _graphic = value;
 
-                ref readonly var artInfo = ref Client.Game.Arts.GetArt((uint)(value + 0x4000));
+                ref readonly var artInfo = ref Client.Game.Arts.GetArt(value);
 
                 if (artInfo.Texture == null)
                 {
@@ -91,7 +91,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             Vector3 hueVector = ShaderHueTranslator.GetHueVector(Hue, IsPartialHue, 1);
 
-            ref readonly var artInfo = ref Client.Game.Arts.GetArt((uint)(Graphic + 0x4000));
+            ref readonly var artInfo = ref Client.Game.Arts.GetArt(Graphic);
 
             if (artInfo.Texture != null)
             {
