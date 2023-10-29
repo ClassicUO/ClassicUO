@@ -21,7 +21,13 @@ namespace ClassicUO.Renderer.Arts
             _realArtBounds = new Rectangle[_spriteInfos.Length];
         }
 
+        public ref readonly SpriteInfo GetLand(uint idx)
+            => ref Get((uint)(idx & ~0x4000));
+
         public ref readonly SpriteInfo GetArt(uint idx)
+            => ref Get(idx + 0x4000);
+
+        private ref readonly SpriteInfo Get(uint idx)
         {
             if (idx >= _spriteInfos.Length)
                 return ref SpriteInfo.Empty;
@@ -39,7 +45,6 @@ namespace ClassicUO.Renderer.Arts
                         artInfo.Height,
                         out spriteInfo.UV
                     );
-
 
                     if (idx > 0x4000)
                     {
@@ -169,9 +174,9 @@ namespace ClassicUO.Renderer.Arts
         }
 
         public Rectangle GetRealArtBounds(uint idx) =>
-            idx < 0x4000 || idx - 0x4000 >= _realArtBounds.Length
+            idx < 0 || idx >= _realArtBounds.Length
                 ? Rectangle.Empty
-                : _realArtBounds[idx - 0x4000];
+                : _realArtBounds[idx];
 
         public bool PixelCheck(uint idx, int x, int y) => _picker.Get(idx, x, y);
     }

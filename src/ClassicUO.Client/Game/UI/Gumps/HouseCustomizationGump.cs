@@ -785,9 +785,7 @@ namespace ClassicUO.Game.UI.Gumps
                         continue;
                     }
 
-                    ref readonly var artInfo = ref Client.Game.Arts.GetArt(
-                        (uint)(vec[0].East1 + 0x4000)
-                    );
+                    ref readonly var artInfo = ref Client.Game.Arts.GetArt((uint)vec[0].East1);
 
                     int offsetX = x + 121 + (48 - artInfo.UV.Width) / 2;
                     int offsetY = y + 36;
@@ -847,9 +845,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         if (graphic != 0)
                         {
-                            ref readonly var artInfo = ref Client.Game.Arts.GetArt(
-                                (uint)(graphic + 0x4000)
-                            );
+                            ref readonly var artInfo = ref Client.Game.Arts.GetArt(graphic);
 
                             int offsetX = x + 130 + (48 - artInfo.UV.Width) / 2;
                             int offsetY = y + 36 + (120 - artInfo.UV.Height) / 2;
@@ -951,9 +947,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (graphic != 0)
                     {
-                        ref readonly var artInfo = ref Client.Game.Arts.GetArt(
-                            (uint)(graphic + 0x4000)
-                        );
+                        ref readonly var artInfo = ref Client.Game.Arts.GetArt(graphic);
 
                         int offsetX = x + 138 + (48 - artInfo.UV.Width) / 2;
 
@@ -1098,9 +1092,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         if (graphic != 0)
                         {
-                            ref readonly var artInfo = ref Client.Game.Arts.GetArt(
-                                (uint)(graphic + 0x4000)
-                            );
+                            ref readonly var artInfo = ref Client.Game.Arts.GetArt(graphic);
 
                             int offsetX = x + 123 + (48 - artInfo.UV.Width) / 2;
                             int offsetY = y + 36 + (60 - artInfo.UV.Height) / 2;
@@ -1174,9 +1166,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         if (graphic != 0)
                         {
-                            ref readonly var artInfo = ref Client.Game.Arts.GetArt(
-                                (uint)(graphic + 0x4000)
-                            );
+                            ref readonly var artInfo = ref Client.Game.Arts.GetArt(graphic);
 
                             int offsetX = x + 123 + (48 - artInfo.UV.Width) / 2;
                             int offsetY = y + 36 + (60 - artInfo.UV.Height) / 2;
@@ -1237,9 +1227,7 @@ namespace ClassicUO.Game.UI.Gumps
                         continue;
                     }
 
-                    ref readonly var artInfo = ref Client.Game.Arts.GetArt(
-                        (uint)(vec[0].NSCrosspiece + 0x4000)
-                    );
+                    ref readonly var artInfo = ref Client.Game.Arts.GetArt((uint)vec[0].NSCrosspiece);
 
                     int offsetX = x + 121 + (48 - artInfo.UV.Width) / 2;
                     int offsetY = y + 36;
@@ -1304,9 +1292,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                             if (graphic != 0)
                             {
-                                ref readonly var artInfo = ref Client.Game.Arts.GetArt(
-                                    (uint)(graphic + 0x4000)
-                                );
+                                ref readonly var artInfo = ref Client.Game.Arts.GetArt(graphic);
 
                                 int offsetX = x + 130 + (48 - artInfo.UV.Width) / 2;
                                 int offsetY = y + 44 + (60 - artInfo.UV.Height) / 2;
@@ -1427,9 +1413,7 @@ namespace ClassicUO.Game.UI.Gumps
                         continue;
                     }
 
-                    ref readonly var artInfo = ref Client.Game.Arts.GetArt(
-                        (uint)(vec[0].Piece5 + 0x4000)
-                    );
+                    ref readonly var artInfo = ref Client.Game.Arts.GetArt((uint)vec[0].Piece5);
 
                     int offsetX = x + 121 + (48 - artInfo.UV.Width) / 2;
                     int offsetY = y + 36;
@@ -1489,9 +1473,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         if (graphic != 0)
                         {
-                            ref readonly var artInfo = ref Client.Game.Arts.GetArt(
-                                (uint)(graphic + 0x4000)
-                            );
+                            ref readonly var artInfo = ref Client.Game.Arts.GetArt(graphic);
 
                             int offsetX = x + 130 + (48 - artInfo.UV.Width) / 2;
                             int offsetY = y + 44 + (120 - artInfo.UV.Height) / 2;

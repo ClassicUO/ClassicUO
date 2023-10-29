@@ -396,9 +396,7 @@ namespace ClassicUO.Game.UI.Gumps
                                         - Constants.ITEM_GUMP_TEXTURE_OFFSET
                                     )
                                 )
-                                : ref Client.Game.Arts.GetArt(
-                                    (uint)(Client.Game.GameCursor.ItemHold.DisplayedGraphic + 0x4000)
-                                )
+                                : ref Client.Game.Arts.GetArt(Client.Game.GameCursor.ItemHold.DisplayedGraphic)
                         );
 
                         float scale = GetScale();
@@ -659,7 +657,7 @@ namespace ClassicUO.Game.UI.Gumps
                             - Constants.ITEM_GUMP_TEXTURE_OFFSET
                         )
                     )
-                    : ref Client.Game.Arts.GetArt((uint)(Client.Game.GameCursor.ItemHold.DisplayedGraphic + 0x4000))
+                    : ref Client.Game.Arts.GetArt(Client.Game.GameCursor.ItemHold.DisplayedGraphic)
             );
 
             if (spriteInfo.Texture != null)

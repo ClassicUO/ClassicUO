@@ -201,9 +201,7 @@ namespace ClassicUO.Game.UI.Gumps
                 int x = g.X;
                 int y = g.Y;
 
-                ref readonly var artInfo = ref Client.Game.Arts.GetArt(
-                    (uint)(it.DisplayedGraphic + 0x4000)
-                );
+                ref readonly var artInfo = ref Client.Game.Arts.GetArt(it.DisplayedGraphic);
 
                 if (artInfo.Texture != null)
                 {
@@ -258,9 +256,7 @@ namespace ClassicUO.Game.UI.Gumps
                 int x = g.X;
                 int y = g.Y;
 
-                ref readonly var artInfo = ref Client.Game.Arts.GetArt(
-                    (uint)(it.DisplayedGraphic + 0x4000)
-                );
+                ref readonly var artInfo = ref Client.Game.Arts.GetArt(it.DisplayedGraphic);
 
                 if (artInfo.Texture != null)
                 {
@@ -303,9 +299,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (_myBox != null && _myBox.Bounds.Contains(x, y))
                     {
-                        ref readonly var artInfo = ref Client.Game.Arts.GetArt(
-                            (uint)(Client.Game.GameCursor.ItemHold.DisplayedGraphic + 0x4000)
-                        );
+                        ref readonly var artInfo = ref Client.Game.Arts.GetArt(Client.Game.GameCursor.ItemHold.DisplayedGraphic);
                         x -= _myBox.X;
                         y -= _myBox.Y;
 

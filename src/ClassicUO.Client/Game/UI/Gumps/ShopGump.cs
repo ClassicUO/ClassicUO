@@ -853,9 +853,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else
                 {
-                    ref readonly var artInfo = ref Client.Game.Arts.GetArt(
-                        (uint)(Graphic + 0x4000)
-                    );
+                    ref readonly var artInfo = ref Client.Game.Arts.GetArt(Graphic);
                     hueVector = ShaderHueTranslator.GetHueVector(
                         Hue,
                         TileDataLoader.Instance.StaticData[Graphic].IsPartialHue,
