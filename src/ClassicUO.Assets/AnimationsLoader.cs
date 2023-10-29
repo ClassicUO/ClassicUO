@@ -56,10 +56,10 @@ namespace ClassicUO.Assets
         [ThreadStatic]
         private static byte[] _decompressedData;
 
-        private readonly Dictionary<ushort, Dictionary<ushort, EquipConvData>> _equipConv = new Dictionary<ushort, Dictionary<ushort, EquipConvData>>();
         private readonly UOFileMul[] _files = new UOFileMul[5];
         private readonly UOFileUop[] _filesUop = new UOFileUop[4];
 
+        private readonly Dictionary<ushort, Dictionary<ushort, EquipConvData>> _equipConv = new Dictionary<ushort, Dictionary<ushort, EquipConvData>>();
         private readonly Dictionary<int, MobTypeInfo> _mobTypes = new Dictionary<int, MobTypeInfo>();
         private readonly Dictionary<int, BodyInfo> _bodyInfos = new Dictionary<int, BodyInfo>();
         private readonly Dictionary<int, BodyInfo> _corpseInfos = new Dictionary<int, BodyInfo>();
@@ -73,17 +73,11 @@ namespace ClassicUO.Assets
 
         public IReadOnlyDictionary<ushort, Dictionary<ushort, EquipConvData>> EquipConversions =>  _equipConv;
 
-        struct MobTypeInfo
-        {
-            public AnimationGroupsType Type;
-            public AnimationFlags Flags;
-        }
-
-        public List<Tuple<ushort, byte>>[] GroupReplaces { get; } =
-            new List<Tuple<ushort, byte>>[2]
+        public List<(ushort, byte)>[] GroupReplaces { get; } =
+            new List<(ushort, byte)>[2]
             {
-                new List<Tuple<ushort, byte>>(),
-                new List<Tuple<ushort, byte>>()
+                new List<(ushort, byte)>(),
+                new List<(ushort, byte)>()
             };
 
         private unsafe void LoadInternal()
@@ -223,7 +217,7 @@ namespace ClassicUO.Assets
 
                         int replace = defReader.ReadGroupInt();
 
-                        GroupReplaces[0].Add(new Tuple<ushort, byte>(group, (byte)replace));
+                        GroupReplaces[0].Add((group, (byte)replace));
                     }
                 }
             }
@@ -245,7 +239,7 @@ namespace ClassicUO.Assets
 
                         int replace = defReader.ReadGroupInt();
 
-                        GroupReplaces[1].Add(new Tuple<ushort, byte>(group, (byte)replace));
+                        GroupReplaces[1].Add((group, (byte)replace));
                     }
                 }
             }
@@ -1736,6 +1730,12 @@ namespace ClassicUO.Assets
         {
             return (Graphic, Gump, Color) == (other.Graphic, other.Gump, other.Color);
         }
+    }
+
+    struct MobTypeInfo
+    {
+        public AnimationGroupsType Type;
+        public AnimationFlags Flags;
     }
 
     struct BodyInfo

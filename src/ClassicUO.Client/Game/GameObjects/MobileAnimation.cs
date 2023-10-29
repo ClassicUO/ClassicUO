@@ -1476,7 +1476,7 @@ namespace ClassicUO.Game.GameObjects
         {
             if (anim < AnimationsLoader.Instance.GroupReplaces.Length)
             {
-                foreach (Tuple<ushort, byte> tuple in AnimationsLoader.Instance.GroupReplaces[anim])
+                foreach (var tuple in AnimationsLoader.Instance.GroupReplaces[anim])
                 {
                     if (tuple.Item1 == v13)
                     {
@@ -1490,9 +1490,9 @@ namespace ClassicUO.Game.GameObjects
 
         public static byte GetReplacedObjectAnimation(ushort graphic, ushort index)
         {
-            ushort getReplacedGroup(List<Tuple<ushort, byte>> list, ushort idx, ushort walkIdx)
+            ushort getReplacedGroup(List<(ushort, byte)> list, ushort idx, ushort walkIdx)
             {
-                foreach (Tuple<ushort, byte> item in list)
+                foreach (var item in list)
                 {
                     if (item.Item1 == idx)
                     {
