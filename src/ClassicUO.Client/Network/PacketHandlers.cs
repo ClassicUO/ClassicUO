@@ -2983,7 +2983,7 @@ namespace ClassicUO.Network
                     ushort hue = p.ReadUInt16BE();
                     name = p.ReadASCII(p.ReadUInt8());
 
-                    ref readonly var artInfo = ref Client.Game.Arts.GetArt(graphic);
+                    ref readonly var artInfo = ref Client.Game.Arts.GetArt((uint)(graphic + 0x4000));
 
                     if (artInfo.UV.Width != 0 && artInfo.UV.Height != 0)
                     {
