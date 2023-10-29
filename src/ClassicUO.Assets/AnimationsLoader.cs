@@ -351,8 +351,16 @@ namespace ClassicUO.Assets
             var fileIdx = _files[fileIndex].IdxFile;
             var offsetAddress = CalculateOffset(body, animType, flags, out var actionCount);
 
+            var offset = fileIdx.StartAddress.ToInt64() + offsetAddress;
+            var end = fileIdx.StartAddress.ToInt64() + fileIdx.Length;
+
+            if (offset >= end)
+            {
+                return ReadOnlySpan<AnimIdxBlock>.Empty;
+            }
+
             var animIdxSpan = new ReadOnlySpan<AnimIdxBlock>(
-                (void*)(fileIdx.StartAddress.ToInt64() + offsetAddress),
+                (void*)offset,
                 actionCount * MAX_DIRECTIONS
             );
 

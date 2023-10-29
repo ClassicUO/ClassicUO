@@ -135,7 +135,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public void AddItem(ushort graphic, ushort hue, string name, int x, int y, int index)
         {
-            ItemView view = new ItemView(graphic, (ushort)(hue != 0 ? hue : 0))
+            var view = new ItemView(graphic, hue)
             {
                 X = x,
                 Y = y
