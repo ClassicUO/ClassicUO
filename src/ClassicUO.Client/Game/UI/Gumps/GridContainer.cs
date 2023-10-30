@@ -783,7 +783,7 @@ namespace ClassicUO.Game.UI.Gumps
                 CanMove = true;
                 if (_item != null)
                 {
-                    ref readonly var text = ref Client.Game.Arts.GetArt((uint)_item.DisplayedGraphic + 0x4000);
+                    ref readonly var text = ref Client.Game.Arts.GetArt((uint)(_item.DisplayedGraphic + 0x4000));
                     texture = text.Texture;
                     bounds = text.UV;
 
@@ -839,7 +839,7 @@ namespace ClassicUO.Game.UI.Gumps
                 else
                 {
                     _item = item;
-                    ref readonly var text = ref Client.Game.Arts.GetArt((uint)_item.DisplayedGraphic + 0x4000);
+                    ref readonly var text = ref Client.Game.Arts.GetArt((uint)(_item.DisplayedGraphic + 0x4000));
                     texture = text.Texture;
                     bounds = text.UV;
 

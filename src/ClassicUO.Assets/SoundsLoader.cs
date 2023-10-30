@@ -31,6 +31,7 @@
 #endregion
 
 using ClassicUO.IO;
+using ClassicUO.IO.Audio;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using System;
@@ -363,50 +364,6 @@ namespace ClassicUO.Assets
             }
 
             return false;
-        }
-
-
-        public Sound GetSound(int index)
-        {
-            if (index >= 0 && index < MAX_SOUND_DATA_INDEX_COUNT)
-            {
-                if (SoundOverrideLoader.Instance.TryGetSoundOverride(index, out var s))
-                    return s;
-
-                ref Sound sound = ref _sounds[index];
-
-                if (sound == null && TryGetSound(index, out byte[] data, out string name))
-                {
-                    sound = new UOSound(name, index, data);
-                }
-
-                return sound;
-            }
-
-            return null;
-        }
-
-        public Sound GetMusic(int index)
-        {
-            if (index >= 0 && index < MAX_SOUND_DATA_INDEX_COUNT)
-            {
-                ref Sound music = ref _musics[index];
-
-                if (music == null && TryGetMusicData(index, out string name, out bool loop))
-                {
-                    var path = _useDigitalMusicFolder ? $"Music/Digital/{name}" : $"Music/{name}";
-                    if (!path.EndsWith(".mp3", StringComparison.InvariantCultureIgnoreCase))
-                    {
-                        path += ".mp3";
-                    }
-
-                    music = new UOMusic(index, name, loop, UOFileManager.GetUOFilePath(path));
-                }
-
-                return music;
-            }
-
-            return null;
         }
 
         public const float SOUND_DELTA = 250;
