@@ -405,8 +405,6 @@ namespace ClassicUO.Game.Managers
                     {
                         if (i.CastTime > 0)
                         {
-
-
                             if (background != null && foreground != null)
                             {
                                 Mobile m = World.Player;
@@ -424,8 +422,10 @@ namespace ClassicUO.Game.Managers
                                     out int height
                                 );
 
-                                x = (int)(m.RealScreenPosition.X - (m.Offset.X + 22 + 5));
-                                y = (int)(m.RealScreenPosition.Y - ((m.Offset.Y - m.Offset.Z) - (height + centerY + 15) + (m.IsGargoyle && m.IsFlying ? -22 : !m.IsMounted ? 22 : 0)));
+                                WorldViewportGump vp = UIManager.GetGump<WorldViewportGump>();
+
+                                x = vp.Location.X + (int)(m.RealScreenPosition.X - (m.Offset.X + 22 + 5));
+                                y = vp.Location.Y + (int)(m.RealScreenPosition.Y - ((m.Offset.Y - m.Offset.Z) - (height + centerY + 15) + (m.IsGargoyle && m.IsFlying ? -22 : !m.IsMounted ? 22 : 0)));
 
                                 batcher.Draw(background, new Rectangle(x, y, barBounds.Width, barBounds.Height), barBounds, hue);
 
