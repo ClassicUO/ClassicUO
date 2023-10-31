@@ -292,7 +292,8 @@ namespace ClassicUO.Assets
 
             if (!_mobTypes.TryGetValue(body, out var mobInfo))
             {
-                return ReadOnlySpan<AnimIdxBlock>.Empty;
+                mobInfo.Flags = AnimationFlags.None;
+                mobInfo.Type = AnimationGroupsType.Unknown;
             }
 
             flags = mobInfo.Flags;
