@@ -205,6 +205,11 @@ namespace ClassicUO.Renderer.Animations
             useUOP = index.Flags.HasFlag(AnimationFlags.UseUopAnimation);
             hue = index.Hue;
 
+            if (useUOP)
+            {
+                AnimationsLoader.Instance.ReplaceUopGroup(id, ref action);
+            }
+
             // NOTE:
             // for UOP: we don't call the method index.GetUopGroup(ref x) because the action has been already changed by the method ReplaceAnimationValues
             AnimationGroup groupObj = null;
