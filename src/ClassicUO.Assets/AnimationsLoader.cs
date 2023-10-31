@@ -275,6 +275,18 @@ namespace ClassicUO.Assets
             return false;
         }
 
+        public bool ReplaceUopGroup(ushort body, ref byte group)
+        {
+            if (_uopInfos.TryGetValue(body, out var uopInfo))
+            {
+                group = (byte)uopInfo.ReplacedAnimations[group];
+
+                return true;
+            }
+
+            return false;
+        }
+
         public ReadOnlySpan<AnimIdxBlock> GetIndices
         (
             ClientVersion clientVersion,
@@ -322,7 +334,7 @@ namespace ClassicUO.Assets
 
                             fileIndex = index;
 
-                            ref var animIndex = ref animIndices[action];
+                            ref var animIndex = ref animIndices[actioIdx];
                             animIndex.Position = (uint)data.Offset;
                             animIndex.Size = (uint)data.Length;
                             animIndex.Unknown = (uint)data.DecompressedLength;
@@ -804,14 +816,14 @@ namespace ClassicUO.Assets
                 animationSequencePath,
                 "build/animationsequence/{0:D8}.bin"
             );
-            var animseqEntries = new UOFileIndex[animSeq.TotalEntriesCount];
-            animSeq.FillEntries(ref animseqEntries);
+            //var animseqEntries = new UOFileIndex[animSeq.TotalEntriesCount];
+            //animSeq.FillEntries(ref animseqEntries);
 
             Span<byte> spanAlloc = stackalloc byte[1024];
 
-            for (int i = 0; i < animseqEntries.Length; i++)
+            foreach (var pair in animSeq.Hashes)
             {
-                ref var entry = ref animseqEntries[i];
+                var entry = pair.Value;
 
                 if (entry.Offset == 0)
                 {
@@ -867,6 +879,7 @@ namespace ClassicUO.Assets
                             {
                                 replacedAnimSpan[oldGroup] = newGroup;
                             }
+
                             reader.Skip(60);
                         }
 
@@ -891,7 +904,7 @@ namespace ClassicUO.Assets
                         }
                     }
 
-                    _uopInfos.Add((int)animID, uopInfo);
+                    _uopInfos[(int)animID] = uopInfo;
 
                     reader.Release();
                 }
