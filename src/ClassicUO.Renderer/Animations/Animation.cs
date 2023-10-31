@@ -132,7 +132,7 @@ namespace ClassicUO.Renderer.Animations
 
             if (id >= _dataIndex.Length)
             {
-                Array.Resize(ref _dataIndex, id);
+                Array.Resize(ref _dataIndex, id + 1);
             }
 
             ref var index = ref _dataIndex[id];
