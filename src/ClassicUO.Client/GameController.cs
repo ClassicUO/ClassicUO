@@ -185,8 +185,6 @@ namespace ClassicUO
             Fonts.Initialize(GraphicsDevice);
             SolidColorTextureCache.Initialize(GraphicsDevice);
 
-            TextureAtlas.InitializeSharedTexture(GraphicsDevice);
-
             Animations = new Renderer.Animations.Animations(GraphicsDevice);
             Arts = new Renderer.Arts.Art(GraphicsDevice);
             Gumps = new Renderer.Gumps.Gump(GraphicsDevice);

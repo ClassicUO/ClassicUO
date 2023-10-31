@@ -15,15 +15,6 @@ namespace ClassicUO.Renderer
         private readonly List<Texture2D> _textureList;
         private Packer _packer;
 
-        public static TextureAtlas Shared { get; private set; }
-
-        public static void InitializeSharedTexture(GraphicsDevice device)
-        {
-            const int TEXTURE_SIZE = 1024 * 4;
-
-            Shared = new TextureAtlas(device, TEXTURE_SIZE, TEXTURE_SIZE, SurfaceFormat.Color);
-        }
-
         public TextureAtlas(GraphicsDevice device, int width, int height, SurfaceFormat format)
         {
             _device = device;
