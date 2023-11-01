@@ -2,6 +2,7 @@ using System;
 using System.Runtime.CompilerServices;
 using ClassicUO.Assets;
 using Microsoft.Xna.Framework.Graphics;
+using static System.Collections.Specialized.BitVector32;
 
 namespace ClassicUO.Renderer.Animations
 {
@@ -61,6 +62,11 @@ namespace ClassicUO.Renderer.Animations
         )
         {
             ConvertBodyIfNeeded(ref animID);
+
+            if (uop)
+            {
+                AnimationsLoader.Instance.ReplaceUopGroup(animID, ref group);
+            }
 
             uint packed32 = (uint)((group | (direction << 8) | ((uop ? 0x01 : 0x00) << 16)));
             uint packed32_2 = (uint)((animID | (frame << 16)));
