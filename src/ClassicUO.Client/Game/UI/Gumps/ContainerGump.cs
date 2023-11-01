@@ -653,11 +653,11 @@ namespace ClassicUO.Game.UI.Gumps
                 IsChessboard
                     ? ref Client.Game.Gumps.GetGump(
                         (ushort)(
-                            Client.Game.GameCursor.ItemHold.DisplayedGraphic
+                            item.DisplayedGraphic
                             - Constants.ITEM_GUMP_TEXTURE_OFFSET
                         )
                     )
-                    : ref Client.Game.Arts.GetArt(Client.Game.GameCursor.ItemHold.DisplayedGraphic)
+                    : ref Client.Game.Arts.GetArt(item.DisplayedGraphic)
             );
 
             if (spriteInfo.Texture != null)
