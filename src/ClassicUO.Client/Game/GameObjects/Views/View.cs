@@ -193,14 +193,14 @@ namespace ClassicUO.Game.GameObjects
             float depth
         )
         {
-            ref readonly var artInfo = ref Client.Game.Arts.GetArt(graphic);
+            ref readonly var gumpInfo = ref Client.Game.Gumps.GetGump(graphic);
 
-            if (artInfo.Texture != null)
+            if (gumpInfo.Texture != null)
             {
                 batcher.Draw(
-                    artInfo.Texture,
+                    gumpInfo.Texture,
                     new Vector2(x, y),
-                    artInfo.UV,
+                    gumpInfo.UV,
                     hue,
                     0f,
                     Vector2.Zero,
