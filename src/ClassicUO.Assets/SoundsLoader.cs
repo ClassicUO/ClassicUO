@@ -244,6 +244,11 @@ namespace ClassicUO.Assets
                 return false;
             }
 
+            if (SoundOverrideLoader.Instance.TryGetSoundOverride(sound, out data, out name))
+            {
+                return true;
+            }
+
             ref UOFileIndex entry = ref GetValidRefEntry(sound);
 
             _file.SetData(entry.Address, entry.FileSize);
