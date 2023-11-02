@@ -39,7 +39,7 @@ namespace ClassicUO.Game.UI.Controls
                 return false;
             }
 
-            ref readonly var texture = ref Client.Game.Arts.GetArt(graphic + 0x4000); //Guess were using 0x4000 for static item art now.
+            ref readonly var texture = ref Client.Game.Arts.GetArt(graphic);
 
             Rectangle _rect = Client.Game.Arts.GetRealArtBounds(graphic);
 

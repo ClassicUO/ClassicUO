@@ -365,7 +365,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else
                 {
-                    ref readonly var texture = ref Client.Game.Arts.GetArt((uint)Graphic + 0x4000);
+                    ref readonly var texture = ref Client.Game.Arts.GetArt((uint)Graphic);
 
                     hueVector = ShaderHueTranslator.GetHueVector(Hue, TileDataLoader.Instance.StaticData[Graphic].IsPartialHue, 1f);
 

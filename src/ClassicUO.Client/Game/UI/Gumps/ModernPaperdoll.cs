@@ -527,7 +527,7 @@ namespace ClassicUO.Game.UI.Gumps
                     true
                 );
 
-                ref readonly var texture = ref Client.Game.Arts.GetArt((uint)item.DisplayedGraphic + 0x4000);
+                ref readonly var texture = ref Client.Game.Arts.GetArt((uint)item.DisplayedGraphic);
                 Rectangle _rect = Client.Game.Arts.GetRealArtBounds((uint)item.DisplayedGraphic);
 
 

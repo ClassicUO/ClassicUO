@@ -94,7 +94,7 @@ namespace ClassicUO.Renderer.Arts
         {
             hotX = hotY = 0;
 
-            var artInfo = ArtLoader.Instance.GetArt((uint)(index + 0x4000));
+            var artInfo = ArtLoader.Instance.GetArt((uint)(index));
 
             if (artInfo.Pixels.IsEmpty)
             {
