@@ -34,7 +34,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
@@ -83,6 +82,7 @@ namespace ClassicUO.Game.UI.Gumps
         private int lastWidth = GetWidth(), lastHeight = GetHeight();
         private bool quickLootThisContainer = false;
         private bool? UseOldContainerStyle = null;
+        private bool autoSortContainer = false;
 
         private readonly bool skipSave = false;
         private readonly ushort originalContainerItemGraphic;
@@ -108,7 +108,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             get
             {
-                string status = ProfileManager.CurrentProfile.AutoSortGridContainers ? "<basefont color=\"green\">Enabled" : "<basefont color=\"red\">Disabled";
+                string status = autoSortContainer ? "<basefont color=\"green\">Enabled" : "<basefont color=\"red\">Disabled";
                 return $"Sort this container.<br>Alt + Click to enable auto sort<br>Auto sort currently {status}";
             }
         }
@@ -132,6 +132,8 @@ namespace ClassicUO.Game.UI.Gumps
                 UseOldContainerStyle = !useGridStyle;
 
             IsPlayerBackpack = LocalSerial == World.Player.FindItemByLayer(Layer.Backpack).Serial;
+
+            autoSortContainer = GridSaveSystem.Instance.AutoSortContainer(LocalSerial);
 
             Point lastPos = IsPlayerBackpack ? ProfileManager.CurrentProfile.BackpackGridPosition : GridSaveSystem.Instance.GetLastPosition(LocalSerial);
             Point savedSize = IsPlayerBackpack ? ProfileManager.CurrentProfile.BackpackGridSize : GridSaveSystem.Instance.GetLastSize(LocalSerial);
@@ -248,7 +250,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (e.Button == MouseButtonType.Left && Keyboard.Alt)
                 {
-                    ProfileManager.CurrentProfile.AutoSortGridContainers ^= true;
+                    autoSortContainer ^= true;
                     sortContents.SetTooltip(sortButtonTooltip);
                 }
                 UpdateItems(true);
@@ -336,7 +338,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (!skipSave)
             {
-                GridSaveSystem.Instance.SaveContainer(LocalSerial, gridSlotManager.GridSlots, Width, Height, X, Y, UseOldContainerStyle);
+                GridSaveSystem.Instance.SaveContainer(LocalSerial, gridSlotManager.GridSlots, Width, Height, X, Y, UseOldContainerStyle, autoSortContainer);
             }
 
             if (IsPlayerBackpack)
@@ -475,7 +477,7 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
-            if (!overrideSort && ProfileManager.CurrentProfile.AutoSortGridContainers) overrideSort = true;
+            if (autoSortContainer) overrideSort = true;
 
             List<Item> sortedContents = ProfileManager.CurrentProfile.GridContainerSearchMode == 0 ? gridSlotManager.SearchResults(searchBox.Text) : GridSlotManager.GetItemsInContainer(container);
             gridSlotManager.RebuildContainer(sortedContents, searchBox.Text, overrideSort);
@@ -540,7 +542,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (gridSlotManager != null && !skipSave)
                 if (gridSlotManager.ItemPositions.Count > 0 && !isCorpse)
-                    GridSaveSystem.Instance.SaveContainer(LocalSerial, gridSlotManager.GridSlots, Width, Height, X, Y, UseOldContainerStyle);
+                    GridSaveSystem.Instance.SaveContainer(LocalSerial, gridSlotManager.GridSlots, Width, Height, X, Y, UseOldContainerStyle, autoSortContainer);
 
             base.Dispose();
         }
@@ -1842,7 +1844,7 @@ namespace ClassicUO.Game.UI.Gumps
                 enabled = true;
             }
 
-            public bool SaveContainer(uint serial, Dictionary<int, GridItem> gridSlots, int width, int height, int lastX = 100, int lastY = 100, bool? useOriginalContainer = false)
+            public bool SaveContainer(uint serial, Dictionary<int, GridItem> gridSlots, int width, int height, int lastX = 100, int lastY = 100, bool? useOriginalContainer = false, bool autoSort = false)
             {
                 if (!enabled)
                     return false;
@@ -1865,6 +1867,7 @@ namespace ClassicUO.Game.UI.Gumps
                 thisContainer.SetAttributeValue("lastX", lastX.ToString());
                 thisContainer.SetAttributeValue("lastY", lastY.ToString());
                 thisContainer.SetAttributeValue("useOriginalContainer", useOriginalContainer.ToString());
+                thisContainer.SetAttributeValue("autoSort", autoSort.ToString());
 
                 foreach (var slot in gridSlots)
                 {
@@ -1983,6 +1986,23 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
                 return useOriginalContainer;
+            }
+
+            public bool AutoSortContainer(uint container)
+            {
+                bool autoSort = false;
+
+                XElement thisContainer = rootElement.Element("container_" + container.ToString());
+                if (thisContainer != null)
+                {
+                    XAttribute attribute = thisContainer.Attribute("autoSort");
+                    if (attribute != null)
+                    {
+                        bool.TryParse(attribute.Value, out autoSort);
+                    }
+                }
+
+                return autoSort;
             }
 
             private void RemoveOldContainers()
