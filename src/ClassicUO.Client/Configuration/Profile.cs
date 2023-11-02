@@ -510,8 +510,6 @@ namespace ClassicUO.Configuration
 
         public string TooltipHeaderFormat { get; set; } = "/c[yellow]{0}";
 
-        public bool AutoSortGridContainers { get; set; } = false;
-
         public bool DisplaySkillBarOnChange { get; set; } = true;
         public string SkillBarFormat { get; set; } = "{0}: {1} / {2}";
 
