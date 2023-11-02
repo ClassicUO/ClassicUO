@@ -36,6 +36,7 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Assets;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
+using FontStashSharp;
 
 namespace ClassicUO.Game.Managers
 {
@@ -290,6 +291,7 @@ namespace ClassicUO.Game.Managers
 
 
             ref readonly var gumpInfo = ref Client.Game.Gumps.GetGump(BACKGROUND_GRAPHIC);
+            Rectangle bounds = gumpInfo.UV;
 
             if (multiplier > 1)
                 x -= (int)(((BAR_WIDTH * multiplier) / 2) - (BAR_WIDTH / 2));
@@ -340,20 +342,13 @@ namespace ClassicUO.Game.Managers
 
                 if (entity.HitsMax == 0)
                     hitPerecentage = 1;
-                gumpInfo = ref Client.Game.Gumps.GetGump(HP_GRAPHIC);
-                //batcher.DrawTiled(
-                //    gumpInfo.Texture,
-                //    new Rectangle(x, y, per * multiplier, gumpInfo.UV.Height * multiplier),
-                //    gumpInfo.UV,
-                //    hueVec
-                //);
 
                 batcher.Draw(
-                    gumpInfo.Texture,
+                    SolidColorTextureCache.GetTexture(Color.White),
                     new Vector2(x + (3 * multiplier), y + (4 * multiplier)),
-                    new Rectangle(0, 0, (int)(((BAR_WIDTH * multiplier) - (6 * multiplier)) * hitPerecentage), (gumpInfo.UV.Height * multiplier) - (6 * multiplier)),
+                    new Rectangle(0, 0, (int)(((BAR_WIDTH * multiplier) - (6 * multiplier)) * hitPerecentage), (bounds.Height * multiplier) - (6 * multiplier)),
                     hueVec
-                );
+                    );
             }
         }
     }
