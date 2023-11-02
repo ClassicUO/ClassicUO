@@ -138,7 +138,7 @@ namespace ClassicUO.Game.GameObjects
             bool isWet = false
         )
         {
-            ref readonly var artInfo = ref Client.Game.Arts.GetArt((uint)(graphic + 0x4000));
+            ref readonly var artInfo = ref Client.Game.Arts.GetArt(graphic);
 
             if (artInfo.Texture != null)
             {
@@ -193,14 +193,14 @@ namespace ClassicUO.Game.GameObjects
             float depth
         )
         {
-            ref readonly var artInfo = ref Client.Game.Arts.GetArt((uint)(graphic + 0x4000));
+            ref readonly var gumpInfo = ref Client.Game.Gumps.GetGump(graphic);
 
-            if (artInfo.Texture != null)
+            if (gumpInfo.Texture != null)
             {
                 batcher.Draw(
-                    artInfo.Texture,
+                    gumpInfo.Texture,
                     new Vector2(x, y),
-                    artInfo.UV,
+                    gumpInfo.UV,
                     hue,
                     0f,
                     Vector2.Zero,
@@ -221,7 +221,7 @@ namespace ClassicUO.Game.GameObjects
             float depth
         )
         {
-            ref readonly var artInfo = ref Client.Game.Arts.GetArt((uint)(graphic + 0x4000));
+            ref readonly var artInfo = ref Client.Game.Arts.GetArt(graphic);
 
             if (artInfo.Texture != null)
             {
@@ -262,7 +262,7 @@ namespace ClassicUO.Game.GameObjects
 
             graphic = (ushort)(graphic + index.AnimOffset);
 
-            ref readonly var artInfo = ref Client.Game.Arts.GetArt((uint)(graphic + 0x4000));
+            ref readonly var artInfo = ref Client.Game.Arts.GetArt(graphic);
 
             if (artInfo.Texture != null)
             {

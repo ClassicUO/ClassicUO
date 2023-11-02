@@ -2,6 +2,7 @@ using System;
 using System.Runtime.CompilerServices;
 using ClassicUO.Assets;
 using Microsoft.Xna.Framework.Graphics;
+using static System.Collections.Specialized.BitVector32;
 
 namespace ClassicUO.Renderer.Animations
 {
@@ -61,6 +62,11 @@ namespace ClassicUO.Renderer.Animations
         )
         {
             ConvertBodyIfNeeded(ref animID);
+
+            if (uop)
+            {
+                AnimationsLoader.Instance.ReplaceUopGroup(animID, ref group);
+            }
 
             uint packed32 = (uint)((group | (direction << 8) | ((uop ? 0x01 : 0x00) << 16)));
             uint packed32_2 = (uint)((animID | (frame << 16)));
@@ -132,7 +138,7 @@ namespace ClassicUO.Renderer.Animations
 
             if (id >= _dataIndex.Length)
             {
-                Array.Resize(ref _dataIndex, id);
+                Array.Resize(ref _dataIndex, id + 1);
             }
 
             ref var index = ref _dataIndex[id];
@@ -146,7 +152,7 @@ namespace ClassicUO.Renderer.Animations
                     (
                         UOFileManager.Version, 
                         id, 
-                        ref index.Hue,
+                        ref hue,
                         ref index.Flags, 
                         out index.FileIndex,
                         out index.Type,
@@ -187,12 +193,12 @@ namespace ClassicUO.Renderer.Animations
 
                 if (index.FileIndex == 0)
                 {
-                    var replaced = isCorpse ? AnimationsLoader.Instance.ReplaceCorpse(ref id, ref index.Hue) : AnimationsLoader.Instance.ReplaceBody(ref id, ref index.Hue);
+                    var replaced = isCorpse ? AnimationsLoader.Instance.ReplaceCorpse(ref id, ref hue) : AnimationsLoader.Instance.ReplaceBody(ref id, ref hue);
                     if (replaced)
                     {
                         if (id >= _dataIndex.Length)
                         {
-                            Array.Resize(ref _dataIndex, id);
+                            Array.Resize(ref _dataIndex, id + 1);
                         }
 
                         index = ref _dataIndex[id];
@@ -200,10 +206,13 @@ namespace ClassicUO.Renderer.Animations
                 }
             } while (index == null);
            
-            
-
             useUOP = index.Flags.HasFlag(AnimationFlags.UseUopAnimation);
-            hue = index.Hue;
+            index.Hue = hue;
+
+            if (useUOP)
+            {
+                AnimationsLoader.Instance.ReplaceUopGroup(id, ref action);
+            }
 
             // NOTE:
             // for UOP: we don't call the method index.GetUopGroup(ref x) because the action has been already changed by the method ReplaceAnimationValues

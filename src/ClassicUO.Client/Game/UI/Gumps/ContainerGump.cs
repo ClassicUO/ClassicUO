@@ -423,9 +423,7 @@ namespace ClassicUO.Game.UI.Gumps
                                         - Constants.ITEM_GUMP_TEXTURE_OFFSET
                                     )
                                 )
-                                : ref Client.Game.Arts.GetArt(
-                                    (uint)(Client.Game.GameCursor.ItemHold.DisplayedGraphic + 0x4000)
-                                )
+                                : ref Client.Game.Arts.GetArt(Client.Game.GameCursor.ItemHold.DisplayedGraphic)
                         );
 
                         float scale = GetScale();
@@ -681,11 +679,11 @@ namespace ClassicUO.Game.UI.Gumps
                 IsChessboard
                     ? ref Client.Game.Gumps.GetGump(
                         (ushort)(
-                            Client.Game.GameCursor.ItemHold.DisplayedGraphic
+                            item.DisplayedGraphic
                             - Constants.ITEM_GUMP_TEXTURE_OFFSET
                         )
                     )
-                    : ref Client.Game.Arts.GetArt((uint)(Client.Game.GameCursor.ItemHold.DisplayedGraphic + 0x4000))
+                    : ref Client.Game.Arts.GetArt(item.DisplayedGraphic)
             );
 
             if (spriteInfo.Texture != null)

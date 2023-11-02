@@ -76,7 +76,7 @@ namespace ClassicUO.Game.UI.Controls
 
                 ref readonly var spriteInfo = ref _is_gump
                     ? ref Client.Game.Gumps.GetGump(value)
-                    : ref Client.Game.Arts.GetArt((uint)(value + 0x4000));
+                    : ref Client.Game.Arts.GetArt(value);
 
                 if (spriteInfo.Texture == null)
                 {
@@ -153,7 +153,7 @@ namespace ClassicUO.Game.UI.Controls
 
             ref readonly var spriteInfo = ref _is_gump
                 ? ref Client.Game.Gumps.GetGump(Graphic)
-                : ref Client.Game.Arts.GetArt((uint)(Graphic + 0x4000));
+                : ref Client.Game.Arts.GetArt(Graphic);
 
             if (spriteInfo.Texture != null)
             {
@@ -185,7 +185,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             ref readonly var spriteInfo = ref _is_gump
                 ? ref Client.Game.Gumps.GetGump(Graphic)
-                : ref Client.Game.Arts.GetArt((uint)(Graphic + 0x4000));
+                : ref Client.Game.Arts.GetArt(Graphic);
 
             if (spriteInfo.Texture == null)
             {
@@ -319,7 +319,7 @@ namespace ClassicUO.Game.UI.Controls
             {
                 ref readonly var spriteInfo = ref _is_gump
                     ? ref Client.Game.Gumps.GetGump(Graphic)
-                    : ref Client.Game.Arts.GetArt((uint)(Graphic + 0x4000));
+                    : ref Client.Game.Arts.GetArt(Graphic);
 
                 int centerX = spriteInfo.UV.Width >> 1;
                 int centerY = spriteInfo.UV.Height >> 1;

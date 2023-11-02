@@ -513,9 +513,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (item != null)
                 {
-                    ref readonly var artInfo = ref Client.Game.Arts.GetArt(
-                        (uint)(item.DisplayedGraphic + 0x4000)
-                    );
+                    ref readonly var artInfo = ref Client.Game.Arts.GetArt(item.DisplayedGraphic);
 
                     var rect = Client.Game.Arts.GetRealArtBounds(item.DisplayedGraphic);
 

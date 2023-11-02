@@ -56,10 +56,10 @@ namespace ClassicUO.Assets
         [ThreadStatic]
         private static byte[] _decompressedData;
 
-        private readonly Dictionary<ushort, Dictionary<ushort, EquipConvData>> _equipConv = new Dictionary<ushort, Dictionary<ushort, EquipConvData>>();
         private readonly UOFileMul[] _files = new UOFileMul[5];
         private readonly UOFileUop[] _filesUop = new UOFileUop[4];
 
+        private readonly Dictionary<ushort, Dictionary<ushort, EquipConvData>> _equipConv = new Dictionary<ushort, Dictionary<ushort, EquipConvData>>();
         private readonly Dictionary<int, MobTypeInfo> _mobTypes = new Dictionary<int, MobTypeInfo>();
         private readonly Dictionary<int, BodyInfo> _bodyInfos = new Dictionary<int, BodyInfo>();
         private readonly Dictionary<int, BodyInfo> _corpseInfos = new Dictionary<int, BodyInfo>();
@@ -73,17 +73,11 @@ namespace ClassicUO.Assets
 
         public IReadOnlyDictionary<ushort, Dictionary<ushort, EquipConvData>> EquipConversions =>  _equipConv;
 
-        struct MobTypeInfo
-        {
-            public AnimationGroupsType Type;
-            public AnimationFlags Flags;
-        }
-
-        public List<Tuple<ushort, byte>>[] GroupReplaces { get; } =
-            new List<Tuple<ushort, byte>>[2]
+        public List<(ushort, byte)>[] GroupReplaces { get; } =
+            new List<(ushort, byte)>[2]
             {
-                new List<Tuple<ushort, byte>>(),
-                new List<Tuple<ushort, byte>>()
+                new List<(ushort, byte)>(),
+                new List<(ushort, byte)>()
             };
 
         private unsafe void LoadInternal()
@@ -223,7 +217,7 @@ namespace ClassicUO.Assets
 
                         int replace = defReader.ReadGroupInt();
 
-                        GroupReplaces[0].Add(new Tuple<ushort, byte>(group, (byte)replace));
+                        GroupReplaces[0].Add((group, (byte)replace));
                     }
                 }
             }
@@ -245,7 +239,7 @@ namespace ClassicUO.Assets
 
                         int replace = defReader.ReadGroupInt();
 
-                        GroupReplaces[1].Add(new Tuple<ushort, byte>(group, (byte)replace));
+                        GroupReplaces[1].Add((group, (byte)replace));
                     }
                 }
             }
@@ -281,6 +275,18 @@ namespace ClassicUO.Assets
             return false;
         }
 
+        public bool ReplaceUopGroup(ushort body, ref byte group)
+        {
+            if (_uopInfos.TryGetValue(body, out var uopInfo))
+            {
+                group = (byte)uopInfo.ReplacedAnimations[group];
+
+                return true;
+            }
+
+            return false;
+        }
+
         public ReadOnlySpan<AnimIdxBlock> GetIndices
         (
             ClientVersion clientVersion,
@@ -298,7 +304,8 @@ namespace ClassicUO.Assets
 
             if (!_mobTypes.TryGetValue(body, out var mobInfo))
             {
-                return ReadOnlySpan<AnimIdxBlock>.Empty;
+                mobInfo.Flags = AnimationFlags.None;
+                mobInfo.Type = AnimationGroupsType.Unknown;
             }
 
             flags = mobInfo.Flags;
@@ -327,7 +334,7 @@ namespace ClassicUO.Assets
 
                             fileIndex = index;
 
-                            ref var animIndex = ref animIndices[action];
+                            ref var animIndex = ref animIndices[actioIdx];
                             animIndex.Position = (uint)data.Offset;
                             animIndex.Size = (uint)data.Length;
                             animIndex.Unknown = (uint)data.DecompressedLength;
@@ -357,8 +364,16 @@ namespace ClassicUO.Assets
             var fileIdx = _files[fileIndex].IdxFile;
             var offsetAddress = CalculateOffset(body, animType, flags, out var actionCount);
 
+            var offset = fileIdx.StartAddress.ToInt64() + offsetAddress;
+            var end = fileIdx.StartAddress.ToInt64() + fileIdx.Length;
+
+            if (offset >= end)
+            {
+                return ReadOnlySpan<AnimIdxBlock>.Empty;
+            }
+
             var animIdxSpan = new ReadOnlySpan<AnimIdxBlock>(
-                (void*)(fileIdx.StartAddress.ToInt64() + offsetAddress),
+                (void*)offset,
                 actionCount * MAX_DIRECTIONS
             );
 
@@ -801,14 +816,14 @@ namespace ClassicUO.Assets
                 animationSequencePath,
                 "build/animationsequence/{0:D8}.bin"
             );
-            var animseqEntries = new UOFileIndex[animSeq.TotalEntriesCount];
-            animSeq.FillEntries(ref animseqEntries);
+            //var animseqEntries = new UOFileIndex[animSeq.TotalEntriesCount];
+            //animSeq.FillEntries(ref animseqEntries);
 
             Span<byte> spanAlloc = stackalloc byte[1024];
 
-            for (int i = 0; i < animseqEntries.Length; i++)
+            foreach (var pair in animSeq.Hashes)
             {
-                ref var entry = ref animseqEntries[i];
+                var entry = pair.Value;
 
                 if (entry.Offset == 0)
                 {
@@ -864,6 +879,7 @@ namespace ClassicUO.Assets
                             {
                                 replacedAnimSpan[oldGroup] = newGroup;
                             }
+
                             reader.Skip(60);
                         }
 
@@ -888,7 +904,7 @@ namespace ClassicUO.Assets
                         }
                     }
 
-                    _uopInfos.Add((int)animID, uopInfo);
+                    _uopInfos[(int)animID] = uopInfo;
 
                     reader.Release();
                 }
@@ -1736,6 +1752,12 @@ namespace ClassicUO.Assets
         {
             return (Graphic, Gump, Color) == (other.Graphic, other.Gump, other.Color);
         }
+    }
+
+    struct MobTypeInfo
+    {
+        public AnimationGroupsType Type;
+        public AnimationFlags Flags;
     }
 
     struct BodyInfo

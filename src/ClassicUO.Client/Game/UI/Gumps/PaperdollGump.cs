@@ -875,9 +875,7 @@ namespace ClassicUO.Game.UI.Gumps
                         true
                     );
 
-                    ref readonly var artInfo = ref Client.Game.Arts.GetArt(
-                        (uint)item.DisplayedGraphic + 0x4000
-                    );
+                    ref readonly var artInfo = ref Client.Game.Arts.GetArt(item.DisplayedGraphic);
 
                     if (artInfo.Texture != null)
                     {

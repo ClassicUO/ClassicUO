@@ -135,7 +135,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public void AddItem(ushort graphic, ushort hue, string name, int x, int y, int index)
         {
-            ItemView view = new ItemView(graphic, (ushort)(hue != 0 ? (hue + 1) : 0))
+            var view = new ItemView(graphic, hue)
             {
                 X = x,
                 Y = y
@@ -182,7 +182,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _graphic = graphic;
 
-                ref readonly var artInfo = ref Client.Game.Arts.GetArt((uint)(_graphic + 0x4000));
+                ref readonly var artInfo = ref Client.Game.Arts.GetArt(_graphic);
 
                 Width = artInfo.UV.Width;
                 Height = artInfo.UV.Height;
@@ -194,9 +194,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (_graphic != 0)
                 {
-                    ref readonly var artInfo = ref Client.Game.Arts.GetArt(
-                        (uint)(_graphic + 0x4000)
-                    );
+                    ref readonly var artInfo = ref Client.Game.Arts.GetArt(_graphic);
 
                     Vector3 hueVector = ShaderHueTranslator.GetHueVector(_hue, _isPartial, 1f);
 

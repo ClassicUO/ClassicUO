@@ -186,8 +186,6 @@ namespace ClassicUO
 
             Fonts.Initialize(GraphicsDevice);
             SolidColorTextureCache.Initialize(GraphicsDevice);
-
-            TextureAtlas.InitializeSharedTexture(GraphicsDevice);
             PNGLoader.Instance.GraphicsDevice = GraphicsDevice;
 
             Animations = new Renderer.Animations.Animations(GraphicsDevice);

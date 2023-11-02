@@ -506,7 +506,7 @@ namespace ClassicUO.Game.GameObjects
                     }
                 }
 
-                if (Client.Game.Arts.GetArt((uint)(graphic + 0x4000)).Texture != null)
+                if (Client.Game.Arts.GetArt(graphic).Texture != null)
                 {
                     ref var index = ref ArtLoader.Instance.GetValidRefEntry(graphic + 0x4000);
 

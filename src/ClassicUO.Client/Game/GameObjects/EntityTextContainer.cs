@@ -224,9 +224,7 @@ namespace ClassicUO.Game.GameObjects
                 }
                 else
                 {
-                    ref readonly var artInfo = ref Client.Game.Arts.GetArt(
-                        (uint)(Parent.Graphic + 0x4000)
-                    );
+                    ref readonly var artInfo = ref Client.Game.Arts.GetArt(Parent.Graphic);
 
                     if (artInfo.Texture != null)
                     {

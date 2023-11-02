@@ -51,6 +51,7 @@ namespace ClassicUO.IO
 
         public int TotalEntriesCount { get; private set; }
         public string Pattern => _pattern;
+        public Dictionary<ulong, UOFileIndex> Hashes => _hashes;
 
         
         protected override void Load()

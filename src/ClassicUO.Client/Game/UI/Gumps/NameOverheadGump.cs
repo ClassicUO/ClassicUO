@@ -705,7 +705,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 }
 
-                var bounds = Client.Game.Arts.GetRealArtBounds((uint)(item.Graphic + 0x4000));
+                var bounds = Client.Game.Arts.GetRealArtBounds(item.Graphic);
 
                 x = item.RealScreenPosition.X + (int)item.Offset.X + 22 + 5;
                 y =
