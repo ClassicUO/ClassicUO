@@ -4129,7 +4129,7 @@ namespace ClassicUO.Game.UI.Gumps
                 section.AddRight(_useModernShop = AddCheckBox(null, "", _currentProfile.UseModernShopGump, 0, 0));
 
                 section.Add(AddLabel(null, "TTF Font text border size", 0, 0));
-                section.AddRight(_textStrokeSize = AddHSlider(null, 0, 5, _currentProfile.TextBorderSize, 0, 0, 150));
+                section.AddRight(_textStrokeSize = AddHSlider(null, 0, 2, _currentProfile.TextBorderSize, 0, 0, 150));
 
                 section.Add(AddLabel(null, "Display skill progress bar on skill changes", 0, 0));
                 section.AddRight(_skillProgressBarOnChange = AddCheckBox(null, "", _currentProfile.DisplaySkillBarOnChange, 0, 0));
