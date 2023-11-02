@@ -123,9 +123,7 @@ namespace ClassicUO.Assets
 
         private uint[] GetPixels(Texture2D texture)
         {
-            uint[] buffer = null;
-
-            Span<uint> pixels = texture.Width * texture.Height <= 1024 ? stackalloc uint[1024] : (buffer = System.Buffers.ArrayPool<uint>.Shared.Rent(texture.Width * texture.Height));
+            Span<uint> pixels = texture.Width * texture.Height <= 1024 ? stackalloc uint[1024] : stackalloc uint[texture.Width * texture.Height];
 
             Color[] pixelColors = new Color[texture.Width * texture.Height];
             texture.GetData<Color>(pixelColors);
@@ -134,8 +132,6 @@ namespace ClassicUO.Assets
             {
                 pixels[i] = pixelColors[i].PackedValue;
             }
-
-            System.Buffers.ArrayPool<uint>.Shared.Return(buffer, true);
 
             return pixels.ToArray();
         }
