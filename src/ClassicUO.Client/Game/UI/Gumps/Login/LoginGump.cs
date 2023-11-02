@@ -552,13 +552,17 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 _hit.IsVisible = false;
             }
 
-            UpdateManager.UpdateStatusChanged += (s, e) => {
-                if (UpdateManager.HasUpdate)
+            if (!UpdateManager.SkipUpdateCheck)
+            {
+                UpdateManager.UpdateStatusChanged += (s, e) =>
                 {
-                    _.IsVisible = true;
-                    _hit.IsVisible = true;
-                }
-            };
+                    if (UpdateManager.HasUpdate)
+                    {
+                        _.IsVisible = true;
+                        _hit.IsVisible = true;
+                    }
+                };
+            }
 
         }
 

@@ -6,30 +6,34 @@ namespace ClassicUO.Game.Managers
 {
     internal static class UpdateManager
     {
+        public static bool SkipUpdateCheck { get; set; } = false;
         public static event EventHandler<EventArgs> UpdateStatusChanged;
         public static bool HasUpdate { get; private set; } = false;
 
-        static UpdateManager()
+        public static void CheckForUpdates()
         {
-            Task.Factory.StartNew(() =>
+            if (!SkipUpdateCheck)
             {
-                try
+                Task.Factory.StartNew(() =>
                 {
-                    using (HttpClient httpClient = new HttpClient())
+                    try
                     {
-                        string webVer = httpClient.GetStringAsync("https://raw.githubusercontent.com/bittiez/TazUO/main/tazuoversioninfo.txt").Result;
-                        
-                        Version remoteV = new Version(webVer);
-
-                        if(remoteV > CUOEnviroment.Version)
+                        using (HttpClient httpClient = new HttpClient())
                         {
-                            HasUpdate = true;
-                            UpdateStatusChanged?.Invoke(null, EventArgs.Empty);
+                            string webVer = httpClient.GetStringAsync("https://raw.githubusercontent.com/bittiez/TazUO/main/tazuoversioninfo.txt").Result;
+
+                            Version remoteV = new Version(webVer);
+
+                            if (remoteV > CUOEnviroment.Version)
+                            {
+                                HasUpdate = true;
+                                UpdateStatusChanged?.Invoke(null, EventArgs.Empty);
+                            }
                         }
                     }
-                }
-                catch { }
-            });
+                    catch { }
+                });
+            }
         }
 
         public static void SendDelayedUpdateMessage()

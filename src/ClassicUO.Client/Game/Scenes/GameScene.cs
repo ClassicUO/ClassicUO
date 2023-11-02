@@ -192,11 +192,11 @@ namespace ClassicUO.Game.Scenes
             GameController.UpdateBackgroundHueShader();
             SpellVisualRangeManager.Instance.OnSceneLoad();
             AutoLootManager.Instance.OnSceneLoad();
-            if (UpdateManager.HasUpdate)
+            if (!UpdateManager.SkipUpdateCheck && UpdateManager.HasUpdate)
             {
                 UpdateManager.SendDelayedUpdateMessage();
             }
-            else
+            else if (!UpdateManager.SkipUpdateCheck)
             {
                 UpdateManager.UpdateStatusChanged += (s, e) =>
                 {

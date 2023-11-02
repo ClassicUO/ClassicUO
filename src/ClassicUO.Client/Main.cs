@@ -147,6 +147,8 @@ namespace ClassicUO
 
             ReadSettingsFromArgs(args);
 
+            UpdateManager.CheckForUpdates();
+
             // still invalid, cannot load settings
             if (Settings.GlobalSettings == null)
             {
@@ -550,6 +552,10 @@ namespace ClassicUO
 
                         CUOEnviroment.NoServerPing = true;
 
+                        break;
+
+                    case "skipupdatecheck":
+                        UpdateManager.SkipUpdateCheck = true;
                         break;
                 }
             }
