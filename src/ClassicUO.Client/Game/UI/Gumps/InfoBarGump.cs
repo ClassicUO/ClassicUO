@@ -43,24 +43,26 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    internal class InfoBarGump : Gump
+    internal class InfoBarGump : ResizableGump
     {
         private readonly AlphaBlendControl _background;
 
         private readonly List<InfoBarControl> _infobarControls = new List<InfoBarControl>();
         private long _refreshTime;
 
-        public InfoBarGump() : base(0, 0)
+        public InfoBarGump() : base(300, 20, 50, 20, 0, 0)
         {
             CanMove = true;
             AcceptMouseInput = true;
             AcceptKeyboardInput = false;
             CanCloseWithRightClick = false;
-            Height = 20;
 
-            Add(_background = new AlphaBlendControl(0.7f) { Width = Width, Height = Height });
+            //ShowBorder = false;
+
+            Add(_background = new AlphaBlendControl(0.7f) { Width = Width - 8, Height = Height - 8, X = 4, Y = 4 });
 
             ResetItems();
+
         }
 
         public override GumpType GumpType => GumpType.InfoBar;
@@ -85,43 +87,6 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        public override void Save(XmlTextWriter writer)
-        {
-            base.Save(writer);
-            //writer.WriteStartElement("controls");
-
-            //foreach (InfoBarControl co in _infobarControls)
-            //{
-            //    writer.WriteStartElement("control");
-            //    writer.WriteAttributeString("label", co.Text);
-            //    writer.WriteAttributeString("var", ((int) co.Var).ToString());
-            //    writer.WriteAttributeString("hue", co.Hue.ToString());
-            //    writer.WriteEndElement();
-            //}
-            //writer.WriteEndElement();
-        }
-
-        public override void Restore(XmlElement xml)
-        {
-            base.Restore(xml);
-
-            //XmlElement controlsXml = xml["controls"];
-            //_infobarControls.Clear();
-
-            //if (controlsXml != null)
-            //{
-            //    foreach (XmlElement controlXml in controlsXml.GetElementsByTagName("control"))
-            //    {
-            //        InfoBarControl control = new InfoBarControl(controlXml.GetAttribute("label"),
-            //                                                    (InfoBarVars) int.Parse(controlXml.GetAttribute("var")),
-            //                                                    ushort.Parse(controlXml.GetAttribute("hue")));
-
-            //        Add(control);
-            //        _infobarControls.Add(control);
-            //    }
-            //}
-        }
-
         public override void Update()
         {
             if (IsDisposed)
@@ -133,25 +98,34 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _refreshTime = (long)Time.Ticks + 125;
 
-                int x = 5;
+                int x = 5, y = 0;
 
                 foreach (InfoBarControl c in _infobarControls)
                 {
+                    if (x + c.Width + 5 > Width)
+                    {
+                        y += 20;
+                        x = 5;
+                    }
+
                     c.X = x;
+                    c.Y = y;
+
                     x += c.Width + 5;
                 }
             }
 
             base.Update();
 
-            Control last = Children.LastOrDefault();
+            //Control last = Children.LastOrDefault();
 
-            if (last != null)
-            {
-                Width = last.Bounds.Right;
-            }
+            //if (last != null)
+            //{
+            //    Width = last.Bounds.Right;
+            //}
 
-            _background.Width = Width;
+            _background.Width = Width - 8;
+            _background.Height = Height - 8;
         }
     }
 
@@ -327,7 +301,7 @@ namespace ClassicUO.Game.UI.Gumps
             switch (var)
             {
                 case InfoBarVars.HP:
-                    percent = World.Player.Hits / (float) World.Player.HitsMax;
+                    percent = World.Player.Hits / (float)World.Player.HitsMax;
 
                     if (percent <= 0.25)
                     {
@@ -347,7 +321,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
 
                 case InfoBarVars.Mana:
-                    percent = World.Player.Mana / (float) World.Player.ManaMax;
+                    percent = World.Player.Mana / (float)World.Player.ManaMax;
 
                     if (percent <= 0.25)
                     {
@@ -367,7 +341,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
 
                 case InfoBarVars.Stamina:
-                    percent = World.Player.Stamina / (float) World.Player.StaminaMax;
+                    percent = World.Player.Stamina / (float)World.Player.StaminaMax;
 
                     if (percent <= 0.25)
                     {
@@ -387,7 +361,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
 
                 case InfoBarVars.Weight:
-                    percent = World.Player.Weight / (float) World.Player.WeightMax;
+                    percent = World.Player.Weight / (float)World.Player.WeightMax;
 
                     if (percent >= 1)
                     {
