@@ -847,13 +847,19 @@ namespace ClassicUO.Assets
                 {
                     fixed (byte* destPtr = span)
                     {
-                        ZLib.Decompress(
+                        var result = ZLib.Decompress(
                             animSeq.PositionAddress,
                             entry.Length,
                             0,
                             (IntPtr)destPtr,
                             entry.DecompressedLength
                         );
+
+                        if (result != ZLib.ZLibError.Okay)
+                        {
+                            Log.Error($"error reading animationsequence {result}");
+                            return;
+                        }
                     }
 
                     var reader = new StackDataReader(span.Slice(0, entry.DecompressedLength));
@@ -1301,13 +1307,20 @@ namespace ClassicUO.Assets
 
             fixed (byte* ptr = _decompressedData.AsSpan())
             {
-                ZLib.Decompress(
+                var result = ZLib.Decompress(
                     file.PositionAddress,
                     (int)index.Size,
                     0,
                     (IntPtr)ptr,
                     (int)index.Unknown
                 );
+
+                if (result != ZLib.ZLibError.Okay)
+                {
+                    Log.Error($"error reading uop animation. AnimID: {animID} | Group: {animGroup} | Dir: {direction} | FileIndex: {fileIndex}");
+
+                    return Span<FrameInfo>.Empty;
+                }
             }
 
             var reader = new StackDataReader(
