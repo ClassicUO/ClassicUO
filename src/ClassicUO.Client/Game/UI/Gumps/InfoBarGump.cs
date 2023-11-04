@@ -100,14 +100,14 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _refreshTime = (long)Time.Ticks + 125;
 
-                int x = 4, y = 4;
+                int x = 6, y = 6;
 
                 foreach (InfoBarControl c in _infobarControls)
                 {
                     if (x + c.Width + 8 > Width)
                     {
                         y += c.Height;
-                        x = 4;
+                        x = 6;
                     }
 
                     c.X = x;
