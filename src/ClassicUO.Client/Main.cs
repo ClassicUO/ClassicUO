@@ -32,8 +32,8 @@
 
 using ClassicUO.Configuration;
 using ClassicUO.Game;
-using ClassicUO.Game.Managers;
 using ClassicUO.IO;
+using ClassicUO.Game.Managers;
 using ClassicUO.Network;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
@@ -44,7 +44,6 @@ using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
-using System.Windows.Forms;
 
 namespace ClassicUO
 {
@@ -200,18 +199,21 @@ namespace ClassicUO
             if (!Directory.Exists(Settings.GlobalSettings.UltimaOnlineDirectory) || !File.Exists(Path.Combine(Settings.GlobalSettings.UltimaOnlineDirectory, "tiledata.mul")))
             {
                 bool foundFolder = false;
-                using (var fbd = new FolderBrowserDialog())
+                if (!CUOEnviroment.IsUnix)
                 {
-                    fbd.Description = "Please select your Ultima Online directory.";
-                    DialogResult result = fbd.ShowDialog();
-
-                    if (result == DialogResult.OK && !string.IsNullOrWhiteSpace(fbd.SelectedPath))
+                    using (var fbd = new System.Windows.Forms.FolderBrowserDialog())
                     {
-                        if (Directory.Exists(fbd.SelectedPath) && File.Exists(Path.Combine(fbd.SelectedPath, "tiledata.mul")))
+                        fbd.Description = "Please select your Ultima Online directory.";
+                        System.Windows.Forms.DialogResult result = fbd.ShowDialog();
+
+                        if (result == System.Windows.Forms.DialogResult.OK && !string.IsNullOrWhiteSpace(fbd.SelectedPath))
                         {
-                            Settings.GlobalSettings.UltimaOnlineDirectory = fbd.SelectedPath;
-                            Settings.GlobalSettings.Save();
-                            foundFolder = true;
+                            if (Directory.Exists(fbd.SelectedPath) && File.Exists(Path.Combine(fbd.SelectedPath, "tiledata.mul")))
+                            {
+                                Settings.GlobalSettings.UltimaOnlineDirectory = fbd.SelectedPath;
+                                Settings.GlobalSettings.Save();
+                                foundFolder = true;
+                            }
                         }
                     }
                 }

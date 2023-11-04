@@ -174,76 +174,82 @@ namespace ClassicUO.Game.UI.Gumps
         {
             GridHighlightData[] allData = GetAllGridHighlightData();
 
-            Thread t = new Thread(() =>
+            if (!CUOEnviroment.IsUnix)
             {
-                System.Windows.Forms.SaveFileDialog saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
-                saveFileDialog1.Filter = "Json|*.json";
-                saveFileDialog1.Title = "Save grid highlight settings";
-                saveFileDialog1.ShowDialog();
-
-                string result = JsonSerializer.Serialize(allData);
-
-                // If the file name is not an empty string open it for saving.
-                if (saveFileDialog1.FileName != "")
+                Thread t = new Thread(() =>
                 {
-                    System.IO.FileStream fs =
-                        (System.IO.FileStream)saveFileDialog1.OpenFile();
-                    // NOTE that the FilterIndex property is one-based.
-                    switch (saveFileDialog1.FilterIndex)
-                    {
-                        default:
-                            byte[] data = Encoding.UTF8.GetBytes(result);
-                            fs.Write(data, 0, data.Length);
-                            break;
-                    }
+                    System.Windows.Forms.SaveFileDialog saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
+                    saveFileDialog1.Filter = "Json|*.json";
+                    saveFileDialog1.Title = "Save grid highlight settings";
+                    saveFileDialog1.ShowDialog();
 
-                    fs.Close();
-                }
-            });
-            t.SetApartmentState(ApartmentState.STA);
-            t.Start();
+                    string result = JsonSerializer.Serialize(allData);
+
+                    // If the file name is not an empty string open it for saving.
+                    if (saveFileDialog1.FileName != "")
+                    {
+                        System.IO.FileStream fs =
+                            (System.IO.FileStream)saveFileDialog1.OpenFile();
+                        // NOTE that the FilterIndex property is one-based.
+                        switch (saveFileDialog1.FilterIndex)
+                        {
+                            default:
+                                byte[] data = Encoding.UTF8.GetBytes(result);
+                                fs.Write(data, 0, data.Length);
+                                break;
+                        }
+
+                        fs.Close();
+                    }
+                });
+                t.SetApartmentState(ApartmentState.STA);
+                t.Start();
+            }
         }
 
         public static void ImportGridHighlightSettings()
         {
-            Thread t = new Thread(() =>
+            if (!CUOEnviroment.IsUnix)
             {
-                System.Windows.Forms.OpenFileDialog openFileDialog = new System.Windows.Forms.OpenFileDialog();
-                openFileDialog.Filter = "Json|*.json";
-                openFileDialog.Title = "Import grid highlight settings";
-                openFileDialog.ShowDialog();
-
-                // If the file name is not an empty string open it for saving.
-                if (openFileDialog.FileName != "")
+                Thread t = new Thread(() =>
                 {
-                    // NOTE that the FilterIndex property is one-based.
-                    switch (openFileDialog.FilterIndex)
+                    System.Windows.Forms.OpenFileDialog openFileDialog = new System.Windows.Forms.OpenFileDialog();
+                    openFileDialog.Filter = "Json|*.json";
+                    openFileDialog.Title = "Import grid highlight settings";
+                    openFileDialog.ShowDialog();
+
+                    // If the file name is not an empty string open it for saving.
+                    if (openFileDialog.FileName != "")
                     {
-                        default:
-                            try
-                            {
-                                string result = File.ReadAllText(openFileDialog.FileName);
+                        // NOTE that the FilterIndex property is one-based.
+                        switch (openFileDialog.FilterIndex)
+                        {
+                            default:
+                                try
+                                {
+                                    string result = File.ReadAllText(openFileDialog.FileName);
 
-                                GridHighlightData[] imported = JsonSerializer.Deserialize<GridHighlightData[]>(result);
+                                    GridHighlightData[] imported = JsonSerializer.Deserialize<GridHighlightData[]>(result);
 
-                                foreach (GridHighlightData importedData in imported)
-                                    importedData.Save();
+                                    foreach (GridHighlightData importedData in imported)
+                                        importedData.Save();
 
-                                UIManager.GetGump<GridHightlightMenu>()?.Dispose();
-                                UIManager.Add(new GridHightlightMenu());
+                                    UIManager.GetGump<GridHightlightMenu>()?.Dispose();
+                                    UIManager.Add(new GridHightlightMenu());
 
-                            }
-                            catch (System.Exception e)
-                            {
-                                GameActions.Print("It looks like there was an error trying to import your grid highlight settings.", 32);
-                                Console.WriteLine(e.ToString());
-                            }
-                            break;
+                                }
+                                catch (System.Exception e)
+                                {
+                                    GameActions.Print("It looks like there was an error trying to import your grid highlight settings.", 32);
+                                    Console.WriteLine(e.ToString());
+                                }
+                                break;
+                        }
                     }
-                }
-            });
-            t.SetApartmentState(ApartmentState.STA);
-            t.Start();
+                });
+                t.SetApartmentState(ApartmentState.STA);
+                t.Start();
+            }
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
