@@ -160,8 +160,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             _label = new TextBox(
                 label,
-                TrueTypeLoader.EMBEDDED_FONT,
-                15,
+                ProfileManager.CurrentProfile.InfoBarFont,
+                ProfileManager.CurrentProfile.InfoBarFontSize,
                 null,
                 hue,
                 strokeEffect: false
@@ -179,8 +179,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             _data = new TextBox(
                 "",
-                TrueTypeLoader.EMBEDDED_FONT,
-                15,
+                ProfileManager.CurrentProfile.InfoBarFont,
+                ProfileManager.CurrentProfile.InfoBarFontSize,
                 null,
                 0x0481,
                 strokeEffect: false

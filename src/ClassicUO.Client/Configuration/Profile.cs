@@ -527,6 +527,8 @@ namespace ClassicUO.Configuration
         [JsonConverter(typeof(Point2Converter))] 
         public Point InfoBarSize { get; set; } = new Point(400, 20);
         public bool InfoBarLocked { get; set; } = false;
+        public string InfoBarFont { get; set; } = "Roboto-Regular";
+        public int InfoBarFontSize { get; set; } = 18;
 
 
 
