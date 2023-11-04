@@ -9,7 +9,11 @@ namespace ClassicUO.Game.UI.Gumps
         private static string[] updateTexts = {
             "/c[white][3.10.0]/cd\n" +
                 "- Added the option to download a spell indicator config from an external source\n" +
-                "- Added a simple auto loot system",
+                "- Added a simple auto loot system\n" +
+                "- Updated to ClassicUO's latest version\n" +
+                "- Auto sort is container specific now\n" +
+                "- InfoBar can now be resized and is using the new font rendering system\n" +
+                "- InfoBar font and font size can be customized now (TazUO->Misc)",
 
             "/c[white][3.9.0]/cd\n" +
                 "- Added missing race change gump\n" +

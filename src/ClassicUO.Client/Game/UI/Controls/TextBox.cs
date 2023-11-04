@@ -37,6 +37,7 @@ using Microsoft.Xna.Framework;
 using System;
 using System.Text.RegularExpressions;
 using ClassicUO.Configuration;
+using ClassicUO.Utility;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -47,7 +48,6 @@ namespace ClassicUO.Game.UI.Controls
         private float _size;
         private Color _color;
         private TextHorizontalAlignment _align;
-        private bool _dropShadow;
         private bool _dirty = false;
 
         private int getStrokeSize
@@ -92,7 +92,6 @@ namespace ClassicUO.Game.UI.Controls
 
 
             _align = align;
-            _dropShadow = strokeEffect;
 
             AcceptMouseInput = true;
             Width = _rtl.Width == null ? _rtl.Size.X : (int)_rtl.Width;
@@ -125,7 +124,6 @@ namespace ClassicUO.Game.UI.Controls
             _color = color;
 
             _align = align;
-            _dropShadow = strokeEffect;
 
             AcceptMouseInput = true;
             Width = _rtl.Width == null ? _rtl.Size.X : (int)_rtl.Width;
@@ -188,7 +186,7 @@ namespace ClassicUO.Game.UI.Controls
             get => (int)_color.PackedValue;
             set
             {
-                _color.PackedValue = (uint)value;
+                _color.PackedValue = HuesLoader.Instance.GetHueColorRgba8888(31, (ushort)value);
                 _dirty = true;
             }
         }
@@ -214,6 +212,33 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
+        /// <summary>
+        /// Update the text of the TextBox
+        /// </summary>
+        /// <param name="text">New string</param>
+        /// <param name="width">Set to null to ignore width, taking as much width as needed.</param>
+        public void UpdateText(string text, int? width = null)
+        {
+
+            if (width != null && width > 0)
+            {
+                _rtl = new RichTextLayout
+                {
+                    Font = TrueTypeLoader.Instance.GetFont(_font, _size),
+                    Text = text,
+                    Width = width
+                };
+            }
+            else
+            {
+                _rtl = new RichTextLayout
+                {
+                    Font = TrueTypeLoader.Instance.GetFont(_font, _size),
+                    Text = text,
+                };
+            }
+        }
+
         public static string ConvertHtmlToFontStashSharpCommand(string text)
         {
             string finalString;
@@ -232,16 +257,31 @@ namespace ClassicUO.Game.UI.Controls
 
         public override void Update()
         {
-            if (Width != _rtl.Width || _dirty)
+            if (Width != _rtl.Width || _dirty || WantUpdateSize)
             {
                 var text = _rtl.Text;
-                _rtl = new RichTextLayout
-                {
-                    Font = TrueTypeLoader.Instance.GetFont(_font, _size),
-                    Text = text,
-                    Width = Width,
-                };
 
+                if (WantUpdateSize)
+                {
+                    _rtl = new RichTextLayout
+                    {
+                        Font = TrueTypeLoader.Instance.GetFont(_font, _size),
+                        Text = text,
+                    };
+                }
+                else
+                {
+                    _rtl = new RichTextLayout
+                    {
+                        Font = TrueTypeLoader.Instance.GetFont(_font, _size),
+                        Text = text,
+                        Width = Width,
+                    };
+                }
+
+                Width = _rtl.Size.X;
+
+                WantUpdateSize = false;
                 _dirty = false;
             }
         }

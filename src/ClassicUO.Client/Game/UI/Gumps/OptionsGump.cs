@@ -48,7 +48,6 @@ using ClassicUO.Resources;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Net.Http;
 
@@ -192,8 +191,8 @@ namespace ClassicUO.Game.UI.Gumps
         private InputField _healthIndicatorPercentage, _healthIndicatorWidth, _tooltipHeaderFormat, _skillProgressBarFormat;
         private ModernColorPicker.HueDisplay _mainWindowHuePicker, _spellIconHotkeyHue, _tooltipBGHue;
         private HSliderBar _spellIconScale, _journalFontSize, _tooltipFontSize, _gameWindowSideChatFontSize, _overheadFontSize, _overheadTextWidth, _textStrokeSize, _gridHightlightLineSize, _maxJournalEntries;
-        private HSliderBar _healthLineSizeMultiplier, _regularPlayerAlpha;
-        private Combobox _journalFontSelection, _tooltipFontSelect, _gameWindowSideChatFont, _overheadFont;
+        private HSliderBar _healthLineSizeMultiplier, _regularPlayerAlpha, _infoBarFontSize;
+        private Combobox _journalFontSelection, _tooltipFontSelect, _gameWindowSideChatFont, _overheadFont, _infoBarFont;
 
         #region Cooldowns
         private InputField _coolDownX, _coolDownY;
@@ -4139,6 +4138,7 @@ namespace ClassicUO.Game.UI.Gumps
                 section.AddRight(_skillProgressBarFormat = AddInputField(null, 0, 0, 250, TEXTBOX_HEIGHT));
                 _skillProgressBarFormat.SetText(_currentProfile.SkillBarFormat);
 
+
                 section.Add(AddLabel(null, "Display spell indicators", 0, 0));
                 section.AddRight(_displaySpellIndicators = AddCheckBox(null, "", _currentProfile.EnableSpellIndicators, 0, 0));
                 NiceButton _importSpellConfig;
@@ -4183,6 +4183,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 };
 
+
                 NiceButton autoLoot;
                 section.Add(autoLoot = new NiceButton(0, 0, 150, TEXTBOX_HEIGHT, ButtonAction.Activate, "Open auto loot options") {  IsSelectable = false, DisplayBorder = true });
                 autoLoot.MouseUp += (s, e) => {
@@ -4193,7 +4194,17 @@ namespace ClassicUO.Game.UI.Gumps
                 };
 
                 rightArea.Add(section);
-                startY += section.Height + SPACING + 15;
+
+                section.Add(AddLabel(null, "InfoBar font", 0, 0));
+                section.AddRight(_infoBarFont = GenerateFontSelector(_currentProfile.InfoBarFont));
+
+                section.PushIndent();
+                section.Add(AddLabel(null, "InfoBar font size", 0, 0));
+                section.AddRight(_infoBarFontSize = AddHSlider(null, 5, 40, _currentProfile.InfoBarFontSize, 0, 0, 200));
+                section.PopIndent();
+
+
+                startY += section.Height + SPACING + 35;
             } //Misc
 
             {
@@ -4809,6 +4820,9 @@ namespace ClassicUO.Game.UI.Gumps
                     UIManager.Add(new ResizableJournal());
                 }
             }
+            _currentProfile.InfoBarFont = TrueTypeLoader.Instance.Fonts[_infoBarFont.SelectedIndex];
+            _currentProfile.InfoBarFontSize = _infoBarFontSize.Value;
+
             _currentProfile.PlayerConstantAlpha = _regularPlayerAlpha.Value;
 
             _currentProfile.EnableSpellIndicators = _displaySpellIndicators.IsChecked;
