@@ -31,8 +31,7 @@
 #endregion
 
 using System.Collections.Generic;
-using System.Linq;
-using System.Xml;
+using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
@@ -98,14 +97,14 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _refreshTime = (long)Time.Ticks + 125;
 
-                int x = 5, y = 0;
+                int x = 9, y = 4;
 
                 foreach (InfoBarControl c in _infobarControls)
                 {
                     if (x + c.Width + 5 > Width)
                     {
-                        y += 20;
-                        x = 5;
+                        y += c.Height;
+                        x = 9;
                     }
 
                     c.X = x;
@@ -117,13 +116,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             base.Update();
 
-            //Control last = Children.LastOrDefault();
-
-            //if (last != null)
-            //{
-            //    Width = last.Bounds.Right;
-            //}
-
             _background.Width = Width - 8;
             _background.Height = Height - 8;
         }
@@ -132,8 +124,8 @@ namespace ClassicUO.Game.UI.Gumps
 
     internal class InfoBarControl : Control
     {
-        private readonly Label _data;
-        private readonly Label _label;
+        private readonly TextBox _data;
+        private readonly TextBox _label;
         private readonly ResizableStaticPic _pic;
         private ushort _warningLinesHue;
 
@@ -142,9 +134,16 @@ namespace ClassicUO.Game.UI.Gumps
             AcceptMouseInput = false;
             WantUpdateSize = true;
             CanMove = false;
+            Hue = hue;
 
-
-            _label = new Label(label, true, 999) { Height = 20, Hue = hue };
+            _label = new TextBox(
+                label,
+                TrueTypeLoader.EMBEDDED_FONT,
+                15,
+                null,
+                hue,
+                strokeEffect: false
+                );
             if (label.StartsWith(@"\"))
             {
                 if (ushort.TryParse(label.Substring(1), out ushort gphc))
@@ -156,7 +155,16 @@ namespace ClassicUO.Game.UI.Gumps
 
             Var = var;
 
-            _data = new Label("", true, 999) { Height = 20, X = _label.IsVisible ? _label.Width : _pic.Width, Hue = 0x0481 };
+            _data = new TextBox(
+                "",
+                TrueTypeLoader.EMBEDDED_FONT,
+                15,
+                null,
+                0x0481,
+                strokeEffect: false
+                )
+            { X = _label.IsVisible ? _label.Width + 5 : _pic.Width };
+
             Add(_label);
             Add(_data);
         }
@@ -164,7 +172,7 @@ namespace ClassicUO.Game.UI.Gumps
         public string Text => _label.Text;
         public InfoBarVars Var { get; }
 
-        public ushort Hue => _label.Hue;
+        public ushort Hue { get; }
         protected long _refreshTime;
 
         public override void Update()
@@ -189,6 +197,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _data.Hue = 0x0481;
                     _warningLinesHue = GetVarHue(Var);
                 }
+
 
                 _data.WantUpdateSize = true;
             }
@@ -313,7 +322,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                     else if (percent <= 0.75)
                     {
-                        return 0x0035;
+                        return 53;
                     }
                     else
                     {
