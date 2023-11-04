@@ -1,10 +1,8 @@
-﻿using ClassicUO.Assets;
-using ClassicUO.Configuration;
+﻿using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Renderer;
-using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -392,8 +390,14 @@ namespace ClassicUO.Game.Managers
                 AcceptMouseInput = false;
                 CanCloseWithEsc = false;
                 CanCloseWithRightClick = false;
-                background = GumpsLoader.Instance.GetGumpTexture(0x0805, out barBounds);
-                foreground = GumpsLoader.Instance.GetGumpTexture(0x0806, out barBoundsF);
+
+                ref readonly var gi = ref Client.Game.Gumps.GetGump(0x0805);
+                background = gi.Texture;
+                barBounds = gi.UV;
+
+                gi = ref Client.Game.Gumps.GetGump(0x0806);
+                foreground = gi.Texture;
+                barBoundsF = gi.UV;
             }
 
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
@@ -408,8 +412,7 @@ namespace ClassicUO.Game.Managers
                             if (background != null && foreground != null)
                             {
                                 Mobile m = World.Player;
-                                AnimationsLoader.Instance.GetAnimationDimensions
-                                (
+                                Client.Game.Animations.GetAnimationDimensions(
                                     m.AnimIndex,
                                     m.GetGraphicForAnimation(),
                                     0,

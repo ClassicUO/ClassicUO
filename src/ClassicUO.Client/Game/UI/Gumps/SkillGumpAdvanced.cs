@@ -2,7 +2,7 @@
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 // 1. Redistributions of source code must retain the above copyright
@@ -16,7 +16,7 @@
 // 4. Neither the name of the copyright holder nor the
 //    names of its contributors may be used to endorse or promote products
 //    derived from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -50,7 +50,10 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private const int WIDTH = 400;
 
-        private readonly Dictionary<Buttons, string> _buttonsToSkillsValues = new Dictionary<Buttons, string>
+        private readonly Dictionary<Buttons, string> _buttonsToSkillsValues = new Dictionary<
+            Buttons,
+            string
+        >
         {
             { Buttons.SortName, "Name" },
             { Buttons.SortReal, "Base" },
@@ -68,7 +71,8 @@ namespace ClassicUO.Game.UI.Gumps
         private bool _sortAsc;
         private string _sortField;
         private readonly GumpPic _sortOrderIndicator;
-        private double _totalReal, _totalValue;
+        private double _totalReal,
+            _totalValue;
         private bool _updateSkillsNeeded;
         private Button resizeDrag;
         private Area BottomArea;
@@ -283,7 +287,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (FindControls<NiceButton>().Any(s => s.ButtonParameter == buttonID))
             {
-                NiceButton btn = FindControls<NiceButton>().First(s => s.ButtonParameter == buttonID);
+                NiceButton btn = FindControls<NiceButton>()
+                    .First(s => s.ButtonParameter == buttonID);
 
                 ushort g = (ushort)(_sortAsc ? 0x985 : 0x983);
 
@@ -468,8 +473,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
-            batcher.DrawRectangle
-            (
+            batcher.DrawRectangle(
                 SolidColorTextureCache.GetTexture(Color.Gray),
                 x,
                 y,
@@ -480,7 +484,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             return base.Draw(batcher, x, y);
         }
-
 
         public void ForceUpdate()
         {
@@ -576,9 +579,13 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 GetSpellFloatingButton(_skill.Index)?.Dispose();
 
-                _ = GumpsLoader.Instance.GetGumpTexture(0x24B8, out var bounds);
+                ref readonly var gumpInfo = ref Client.Game.Gumps.GetGump(0x24B8);
 
-                SkillButtonGump skillButtonGump = new SkillButtonGump(_skill, Mouse.LClickPosition.X + (bounds.Width >> 1), Mouse.LClickPosition.Y + (bounds.Height >> 1));
+                SkillButtonGump skillButtonGump = new SkillButtonGump(
+                    _skill,
+                    Mouse.LClickPosition.X + (gumpInfo.UV.Width >> 1),
+                    Mouse.LClickPosition.Y + (gumpInfo.UV.Height >> 1)
+                );
 
                 UIManager.Add(skillButtonGump);
                 UIManager.AttemptDragControl(skillButtonGump, true);

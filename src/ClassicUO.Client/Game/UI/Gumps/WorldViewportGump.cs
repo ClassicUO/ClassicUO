@@ -2,7 +2,7 @@
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 // 1. Redistributions of source code must retain the above copyright
@@ -16,7 +16,7 @@
 // 4. Neither the name of the copyright holder nor the
 //    names of its contributors may be used to endorse or promote products
 //    derived from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -41,6 +41,7 @@ using ClassicUO.Renderer;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -50,7 +51,8 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly BorderControl _borderControl;
         private readonly Button _button;
         private bool _clicked;
-        private Point _lastSize, _savedSize;
+        private Point _lastSize,
+            _savedSize;
         private readonly GameScene _scene;
         private readonly SystemChatControl _systemChatControl;
 
@@ -67,7 +69,10 @@ namespace ClassicUO.Game.UI.Gumps
             LayerOrder = UILayer.Under;
             X = scene.Camera.Bounds.X - BORDER_WIDTH;
             Y = scene.Camera.Bounds.Y - BORDER_WIDTH;
-            _savedSize = _lastSize = new Point(scene.Camera.Bounds.Width, scene.Camera.Bounds.Height);
+            _savedSize = _lastSize = new Point(
+                scene.Camera.Bounds.Width,
+                scene.Camera.Bounds.Height
+            );
 
             _button = new Button(0, 0x837, 0x838, 0x838);
 
@@ -100,18 +105,19 @@ namespace ClassicUO.Game.UI.Gumps
             Width = scene.Camera.Bounds.Width + BORDER_WIDTH * 2;
             Height = scene.Camera.Bounds.Height + BORDER_WIDTH * 2;
 
-            _borderControl = new BorderControl
-            (
-                0,
-                0,
-                Width,
-                Height,
-                4
+            _borderControl = new BorderControl(0, 0, Width, Height, 4);
+
+            _borderControl.DragEnd += (sender, e) =>
+            {
+                UIManager.GetGump<OptionsGump>()?.UpdateVideo();
+            };
+
+            UIManager.SystemChat = _systemChatControl = new SystemChatControl(
+                BORDER_WIDTH,
+                BORDER_WIDTH,
+                scene.Camera.Bounds.Width,
+                scene.Camera.Bounds.Height
             );
-
-            _borderControl.DragEnd += (sender, e) => { UIManager.GetGump<OptionsGump>()?.UpdateVideo(); };
-
-            UIManager.SystemChat = _systemChatControl = new SystemChatControl(BORDER_WIDTH, BORDER_WIDTH, scene.Camera.Bounds.Width, scene.Camera.Bounds.Height);
 
             Add(_borderControl);
             Add(_button);
@@ -124,7 +130,6 @@ namespace ClassicUO.Game.UI.Gumps
                 ProfileManager.CurrentProfile.LastVersionHistoryShown = CUOEnviroment.Version.ToString();
             }
         }
-
 
         public override void Update()
         {
@@ -170,7 +175,10 @@ namespace ClassicUO.Game.UI.Gumps
                     _lastSize.Y = h;
                 }
 
-                if (_scene.Camera.Bounds.Width != _lastSize.X || _scene.Camera.Bounds.Height != _lastSize.Y)
+                if (
+                    _scene.Camera.Bounds.Width != _lastSize.X
+                    || _scene.Camera.Bounds.Height != _lastSize.Y
+                )
                 {
                     Width = _lastSize.X + BORDER_WIDTH * 2;
                     Height = _lastSize.Y + BORDER_WIDTH * 2;
@@ -212,7 +220,6 @@ namespace ClassicUO.Game.UI.Gumps
             _scene.Camera.Bounds.X = position.X + BORDER_WIDTH;
             _scene.Camera.Bounds.Y = position.Y + BORDER_WIDTH;
 
-
             UIManager.GetGump<OptionsGump>()?.UpdateVideo();
             UpdateGameWindowPos();
         }
@@ -234,7 +241,6 @@ namespace ClassicUO.Game.UI.Gumps
                 _scene.UpdateDrawPosition = true;
             }
         }
-
 
         private void Resize()
         {
@@ -275,7 +281,10 @@ namespace ClassicUO.Game.UI.Gumps
             //Resize();
             _lastSize = _savedSize = newSize;
 
-            if (_scene.Camera.Bounds.Width != _lastSize.X || _scene.Camera.Bounds.Height != _lastSize.Y)
+            if (
+                _scene.Camera.Bounds.Width != _lastSize.X
+                || _scene.Camera.Bounds.Height != _lastSize.Y
+            )
             {
                 _scene.Camera.Bounds.Width = _lastSize.X;
                 _scene.Camera.Bounds.Height = _lastSize.Y;
@@ -290,7 +299,20 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override bool Contains(int x, int y)
         {
-            if (x >= BORDER_WIDTH && x < Width - BORDER_WIDTH * 2 && y >= BORDER_WIDTH && y < Height - BORDER_WIDTH * 2 - (_systemChatControl?.TextBoxControl != null && _systemChatControl.IsActive ? _systemChatControl.TextBoxControl.Height : 0))
+            if (
+                x >= BORDER_WIDTH
+                && x < Width - BORDER_WIDTH * 2
+                && y >= BORDER_WIDTH
+                && y
+                    < Height
+                        - BORDER_WIDTH * 2
+                        - (
+                            _systemChatControl?.TextBoxControl != null
+                            && _systemChatControl.IsActive
+                                ? _systemChatControl.TextBoxControl.Height
+                                : 0
+                        )
+            )
             {
                 return false;
             }
@@ -382,6 +404,13 @@ namespace ClassicUO.Game.UI.Gumps
             _borderSize = 4;
         }
 
+        private Texture2D GetGumpTexture(uint g, out Rectangle bounds)
+        {
+            ref readonly var texture = ref Client.Game.Gumps.GetGump(g);
+            bounds = texture.UV;
+            return texture.Texture;
+        }
+
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
@@ -394,7 +423,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
             hueVector.Z = Alpha;
 
-            var texture = GumpsLoader.Instance.GetGumpTexture(h_border, out var bounds);
+            var texture = GetGumpTexture(h_border, out var bounds);
             if (texture != null)
             {
                 pos = new Rectangle
@@ -421,7 +450,7 @@ namespace ClassicUO.Game.UI.Gumps
                 );
             }
 
-            texture = GumpsLoader.Instance.GetGumpTexture(h_bottom_border, out bounds);
+            texture = GetGumpTexture(h_bottom_border, out bounds);
             if (texture != null)
             {
                 pos = new Rectangle
@@ -448,7 +477,7 @@ namespace ClassicUO.Game.UI.Gumps
                 );
             }
 
-            texture = GumpsLoader.Instance.GetGumpTexture(v_border, out bounds);
+            texture = GetGumpTexture(v_border, out bounds);
             if (texture != null)
             {
                 pos = new Rectangle
@@ -475,7 +504,7 @@ namespace ClassicUO.Game.UI.Gumps
                 );
             }
 
-            texture = GumpsLoader.Instance.GetGumpTexture(v_right_border, out bounds);
+            texture = GetGumpTexture(v_right_border, out bounds);
             if (texture != null)
             {
                 pos = new Rectangle
@@ -504,7 +533,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (t_left != 0xffff)
             {
-                texture = GumpsLoader.Instance.GetGumpTexture(t_left, out bounds);
+                texture = GetGumpTexture(t_left, out bounds);
                 if (texture != null)
                     batcher.Draw(
                         texture,
@@ -515,7 +544,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
             if (t_right != 0xffff)
             {
-                texture = GumpsLoader.Instance.GetGumpTexture(t_right, out bounds);
+                texture = GetGumpTexture(t_right, out bounds);
                 if (texture != null)
                     batcher.Draw(
                     texture,
@@ -526,7 +555,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
             if (b_left != 0xffff)
             {
-                texture = GumpsLoader.Instance.GetGumpTexture(b_left, out bounds);
+                texture = GetGumpTexture(b_left, out bounds);
                 if (texture != null)
                     batcher.Draw(
                     texture,
@@ -537,7 +566,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
             if (b_right != 0xffff)
             {
-                texture = GumpsLoader.Instance.GetGumpTexture(b_right, out bounds);
+                texture = GetGumpTexture(b_right, out bounds);
                 if (texture != null)
                     batcher.Draw(
                     texture,

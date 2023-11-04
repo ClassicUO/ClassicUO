@@ -186,9 +186,10 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (button == MouseButtonType.Left && Keyboard.Alt && UIManager.MouseOverControl != null && (UIManager.MouseOverControl == this || UIManager.MouseOverControl.RootParent == this))
             {
-                if (GumpsLoader.Instance.GetGumpTexture(0x82C, out var bounds) != null)
+                ref readonly var texture = ref Client.Game.Gumps.GetGump(0x82C);
+                if (texture.Texture != null)
                 {
-                    if (x >= 0 && x < bounds.Width && y >= 0 && y <= bounds.Height)
+                    if (x >= 0 && x <= texture.UV.Width && y >= 0 && y <= texture.UV.Height)
                     {
                         _isLocked = !_isLocked;
                         if (_isLocked)
@@ -220,9 +221,9 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
-                var texture = GumpsLoader.Instance.GetGumpTexture(0x82C, out var bounds);
+                ref readonly var texture = ref Client.Game.Gumps.GetGump(0x82C);
 
-                if (texture != null)
+                if (texture.Texture != null)
                 {
                     if (_isLocked)
                     {
@@ -231,9 +232,9 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                     batcher.Draw
                     (
-                        texture,
+                        texture.Texture,
                         new Vector2(x, y),
-                        bounds,
+                        texture.UV,
                         hueVector
                     );
                 }

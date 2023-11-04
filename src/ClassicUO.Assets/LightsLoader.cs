@@ -2,7 +2,7 @@
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 // 1. Redistributions of source code must retain the above copyright
@@ -16,7 +16,7 @@
 // 4. Neither the name of the copyright holder nor the
 //    names of its contributors may be used to endorse or promote products
 //    derived from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -32,8 +32,6 @@
 
 using ClassicUO.IO;
 using ClassicUO.Utility;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Threading.Tasks;
 
@@ -43,115 +41,78 @@ namespace ClassicUO.Assets
     {
         private static LightsLoader _instance;
         private UOFileMul _file;
-        private TextureAtlas _atlas;
-        private SpriteInfo[] _spriteInfos;
 
         public const int MAX_LIGHTS_DATA_INDEX_COUNT = 100;
 
-        struct SpriteInfo
-        {
-            public Texture2D Texture;
-            public Rectangle UV;
-        }
-
-        private LightsLoader(int count) 
-        {
-        }
+        private LightsLoader(int count) { }
 
         public static LightsLoader Instance =>
             _instance ?? (_instance = new LightsLoader(MAX_LIGHTS_DATA_INDEX_COUNT));
 
-        public void CreateAtlas(GraphicsDevice device)
-        {
-            _atlas = new TextureAtlas(device, 2048, 2048, SurfaceFormat.Color);
-        }
+        public UOFileMul File => _file;
 
         public override Task Load()
         {
-            return Task.Run
-            (
-                () =>
-                {
-                    string path = UOFileManager.GetUOFilePath("light.mul");
-                    string pathidx = UOFileManager.GetUOFilePath("lightidx.mul");
-
-                    FileSystemHelper.EnsureFileExists(path);
-                    FileSystemHelper.EnsureFileExists(pathidx);
-
-                    _file = new UOFileMul(path, pathidx, MAX_LIGHTS_DATA_INDEX_COUNT);
-                    _file.FillEntries(ref Entries);
-                    _spriteInfos = new SpriteInfo[Entries.Length];
-                }
-            );
-        }
-
-        public Texture2D GetLightTexture(uint id, out Rectangle bounds)
-        {
-            ref var spriteInfo = ref _spriteInfos[id];
-
-            if (spriteInfo.Texture == null)
+            return Task.Run(() =>
             {
-                AddSpriteLightToAtlas(_atlas, id);
-            }
+                string path = UOFileManager.GetUOFilePath("light.mul");
+                string pathidx = UOFileManager.GetUOFilePath("lightidx.mul");
 
-            bounds = spriteInfo.UV;
+                FileSystemHelper.EnsureFileExists(path);
+                FileSystemHelper.EnsureFileExists(pathidx);
 
-            return spriteInfo.Texture;
+                _file = new UOFileMul(path, pathidx, MAX_LIGHTS_DATA_INDEX_COUNT);
+                _file.FillEntries(ref Entries);
+            });
         }
 
-
-        private unsafe bool AddSpriteLightToAtlas(TextureAtlas atlas, uint idx)
+        public LightInfo GetLight(uint idx)
         {
-            ref UOFileIndex entry = ref GetValidRefEntry((int) idx);
+            ref var entry = ref GetValidRefEntry((int)idx);
 
             if (entry.Width == 0 && entry.Height == 0)
             {
-                return false;
+                return default;
             }
 
-            uint[] buffer = null;
-          
-            Span<uint> pixels = entry.Width * entry.Height <= 1024 ? stackalloc uint[1024] : (buffer = System.Buffers.ArrayPool<uint>.Shared.Rent(entry.Width * entry.Height));
+            var buffer = new uint[entry.Width * entry.Height];
+            _file.SetData(entry.Address, entry.FileSize);
+            _file.Seek(entry.Offset);
 
-            try
+            for (int i = 0; i < entry.Height; i++)
             {
-                _file.SetData(entry.Address, entry.FileSize);
-                _file.Seek(entry.Offset);
+                int pos = i * entry.Width;
 
-                for (int i = 0; i < entry.Height; i++)
+                for (int j = 0; j < entry.Width; j++)
                 {
-                    int pos = i * entry.Width;
-
-                    for (int j = 0; j < entry.Width; j++)
+                    ushort val = _file.ReadByte();
+                    // Light can be from -31 to 31. When they are below 0 they are bit inverted
+                    if (val > 0x1F)
                     {
-                        ushort val = _file.ReadByte();
-                        // Light can be from -31 to 31. When they are below 0 they are bit inverted
-                        if (val > 0x1F)
-                        {
-                            val = (ushort)(~val & 0x1F);
-                        }
-                        uint rgb24 = (uint) ((val << 19) | (val << 11) | (val << 3));
+                        val = (ushort)(~val & 0x1F);
+                    }
+                    uint rgb24 = (uint)((val << 19) | (val << 11) | (val << 3));
 
-                        if (val != 0)
-                        {
-                            pixels[pos + j] = rgb24 | 0xFF_00_00_00;
-                        }
+                    if (val != 0)
+                    {
+                        buffer[pos + j] = rgb24 | 0xFF_00_00_00;
                     }
                 }
-
-                ref var spriteInfo = ref _spriteInfos[idx];
-
-                spriteInfo.Texture = atlas.AddSprite(pixels, entry.Width, entry.Height, out spriteInfo.UV);
             }
-            finally
+
+            return new LightInfo()
             {
-                if (buffer != null)
-                {
-                    System.Buffers.ArrayPool<uint>.Shared.Return(buffer, true);
-                }             
-            }
-
-            return true;
+                Pixels = buffer,
+                Width = entry.Width,
+                Height = entry.Height
+            };
         }
+    }
+
+    public ref struct LightInfo
+    {
+        public Span<uint> Pixels;
+        public int Width;
+        public int Height;
     }
 }

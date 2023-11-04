@@ -2,7 +2,7 @@
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 // 1. Redistributions of source code must retain the above copyright
@@ -16,7 +16,7 @@
 // 4. Neither the name of the copyright holder nor the
 //    names of its contributors may be used to endorse or promote products
 //    derived from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -50,10 +50,9 @@ namespace ClassicUO.Game.UI.Controls
             CanCloseWithRightClick = true;
             Graphic = graphic;
 
-
             for (_maxIndex = 0; _maxIndex < 9; ++_maxIndex)
             {
-                if (GumpsLoader.Instance.GetGumpTexture((ushort)(Graphic + _maxIndex), out _) == null)
+                if (Client.Game.Gumps.GetGump((ushort)(Graphic + _maxIndex)).Texture == null)
                 {
                     break;
                 }
@@ -71,12 +70,10 @@ namespace ClassicUO.Game.UI.Controls
 
         public ushort Graphic { get; }
 
-
         public override bool Contains(int x, int y)
         {
             x -= Offset.X;
             y -= Offset.Y;
-
 
             var texture0 = GetTexture(0, out var bounds0);
             var texture1 = GetTexture(1, out var bounds1);
@@ -93,12 +90,10 @@ namespace ClassicUO.Game.UI.Controls
             int offsetLeft = Math.Abs(Math.Max(bounds0.Width, bounds5.Width) - bounds2.Width);
             int offsetRight = Math.Max(bounds2.Width, bounds7.Width) - bounds4.Width;
 
-
             if (PixelsInXY(ref bounds0, Graphic, x, y))
             {
                 return true;
             }
-
 
             int DW = Width - bounds0.Width - bounds2.Width;
 
@@ -107,76 +102,105 @@ namespace ClassicUO.Game.UI.Controls
                 return true;
             }
 
-
-            if (PixelsInXY(ref bounds2, (ushort)(Graphic + 2), x - (Width - bounds2.Width), y - offsetTop))
+            if (
+                PixelsInXY(
+                    ref bounds2,
+                    (ushort)(Graphic + 2),
+                    x - (Width - bounds2.Width),
+                    y - offsetTop
+                )
+            )
             {
                 return true;
             }
-
 
             int DH = Height - bounds0.Height - bounds5.Height;
 
-            if (DH >= 1 && PixelsInXY
-            (
-                ref bounds3, (ushort)(Graphic + 3),
-                x /*- offsetLeft*/,
-                y - bounds0.Height,
-                0,
-                DH
-            ))
+            if (
+                DH >= 1
+                && PixelsInXY(
+                    ref bounds3,
+                    (ushort)(Graphic + 3),
+                    x /*- offsetLeft*/
+                    ,
+                    y - bounds0.Height,
+                    0,
+                    DH
+                )
+            )
             {
                 return true;
             }
-
 
             DH = Height - bounds2.Height - bounds7.Height;
-          
-            if (DH >= 1 && PixelsInXY
-            (
-                ref bounds4, (ushort)(Graphic + 5),
-                x - (Width - bounds4.Width /*- offsetRight*/),
-                y - bounds2.Height,
-                0,
-                DH
-            ))
+
+            if (
+                DH >= 1
+                && PixelsInXY(
+                    ref bounds4,
+                    (ushort)(Graphic + 5),
+                    x
+                        - (
+                            Width - bounds4.Width /*- offsetRight*/
+                        ),
+                    y - bounds2.Height,
+                    0,
+                    DH
+                )
+            )
             {
                 return true;
             }
-
 
             if (PixelsInXY(ref bounds5, (ushort)(Graphic + 6), x, y - (Height - bounds5.Height)))
             {
                 return true;
             }
 
-
             DW = Width - bounds5.Width - bounds2.Width;
 
-            if (DH >= 1 && PixelsInXY(ref bounds6, (ushort)(Graphic + 7), x - bounds5.Width, y - (Height - bounds6.Height - offsetBottom), DW))
+            if (
+                DH >= 1
+                && PixelsInXY(
+                    ref bounds6,
+                    (ushort)(Graphic + 7),
+                    x - bounds5.Width,
+                    y - (Height - bounds6.Height - offsetBottom),
+                    DW
+                )
+            )
             {
                 return true;
             }
 
-           
-            if (PixelsInXY(ref bounds7, (ushort)(Graphic + 8), x - (Width - bounds7.Width), y - (Height - bounds7.Height)))
+            if (
+                PixelsInXY(
+                    ref bounds7,
+                    (ushort)(Graphic + 8),
+                    x - (Width - bounds7.Width),
+                    y - (Height - bounds7.Height)
+                )
+            )
             {
                 return true;
             }
-
 
             DW = Width - bounds0.Width - bounds2.Width;
             DW += offsetLeft + offsetRight;
             DH = Height - bounds2.Height - bounds7.Height;
 
-            if (DW >= 1 && DH >= 1 && PixelsInXY
-            (
-                ref bounds8,
-                (ushort)(Graphic + 4),
-                x - bounds0.Width,
-                y - bounds0.Height,
-                DW,
-                DH
-            ))
+            if (
+                DW >= 1
+                && DH >= 1
+                && PixelsInXY(
+                    ref bounds8,
+                    (ushort)(Graphic + 4),
+                    x - bounds0.Width,
+                    y - bounds0.Height,
+                    DW,
+                    DH
+                )
+            )
             {
                 return true;
             }
@@ -184,8 +208,14 @@ namespace ClassicUO.Game.UI.Controls
             return false;
         }
 
-
-        private static bool PixelsInXY(ref Rectangle bounds, ushort graphic, int x, int y, int width = 0, int height = 0)
+        private static bool PixelsInXY(
+            ref Rectangle bounds,
+            ushort graphic,
+            int x,
+            int y,
+            int width = 0,
+            int height = 0
+        )
         {
             if (x < 0 || y < 0 || width > 0 && x >= width || height > 0 && y >= height)
             {
@@ -210,7 +240,6 @@ namespace ClassicUO.Game.UI.Controls
                 height = textureHeight;
             }
 
-
             while (x >= textureWidth && width >= textureWidth)
             {
                 x -= textureWidth;
@@ -233,27 +262,21 @@ namespace ClassicUO.Game.UI.Controls
                 return false;
             }
 
-            return GumpsLoader.Instance.PixelCheck(graphic, x, y);
+            return Client.Game.Gumps.PixelCheck(graphic, x, y);
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             if (batcher.ClipBegin(x, y, Width, Height))
             {
-                Vector3 hueVector = ShaderHueTranslator.GetHueVector
-                                    (
-                                        0,
-                                        false,
-                                        Alpha,
-                                        true
-                                    );
+                Vector3 hueVector = ShaderHueTranslator.GetHueVector(0, false, Alpha, true);
 
                 DrawInternal(batcher, x, y, hueVector);
                 base.Draw(batcher, x, y);
 
                 batcher.ClipEnd();
             }
-            
+
             return true;
         }
 
@@ -274,26 +297,16 @@ namespace ClassicUO.Game.UI.Controls
             int offsetLeft = Math.Abs(Math.Max(bounds0.Width, bounds5.Width) - bounds2.Width);
             int offsetRight = Math.Max(bounds2.Width, bounds7.Width) - bounds4.Width;
 
-
-
             if (texture0 != null)
             {
-                batcher.Draw
-               (
-                   texture0,
-                   new Vector2(x, y),
-                   bounds0,
-                   color
-               );
+                batcher.Draw(texture0, new Vector2(x, y), bounds0, color);
             }
-           
+
             if (texture1 != null)
             {
-                batcher.DrawTiled
-                (
+                batcher.DrawTiled(
                     texture1,
-                    new Rectangle
-                    (
+                    new Rectangle(
                         x + bounds0.Width,
                         y,
                         Width - bounds0.Width - bounds2.Width,
@@ -302,12 +315,11 @@ namespace ClassicUO.Game.UI.Controls
                     bounds1,
                     color
                 );
-            }         
+            }
 
             if (texture2 != null)
             {
-                batcher.Draw
-                (
+                batcher.Draw(
                     texture2,
                     new Vector2(x + (Width - bounds2.Width), y + offsetTop),
                     bounds2,
@@ -317,11 +329,9 @@ namespace ClassicUO.Game.UI.Controls
 
             if (texture3 != null)
             {
-                batcher.DrawTiled
-                (
+                batcher.DrawTiled(
                     texture3,
-                    new Rectangle
-                    (
+                    new Rectangle(
                         x,
                         y + bounds0.Height,
                         bounds3.Width,
@@ -331,14 +341,12 @@ namespace ClassicUO.Game.UI.Controls
                     color
                 );
             }
-            
+
             if (texture4 != null)
             {
-                batcher.DrawTiled
-                (
+                batcher.DrawTiled(
                     texture4,
-                    new Rectangle
-                    (
+                    new Rectangle(
                         x + (Width - bounds4.Width),
                         y + bounds2.Height,
                         bounds4.Width,
@@ -351,22 +359,19 @@ namespace ClassicUO.Game.UI.Controls
 
             if (texture5 != null)
             {
-                batcher.Draw
-                (
+                batcher.Draw(
                     texture5,
                     new Vector2(x, y + (Height - bounds5.Height)),
                     bounds5,
                     color
                 );
             }
-            
+
             if (texture6 != null)
             {
-                batcher.DrawTiled
-                (
+                batcher.DrawTiled(
                     texture6,
-                    new Rectangle
-                    (
+                    new Rectangle(
                         x + bounds5.Width,
                         y + (Height - bounds6.Height - offsetBottom),
                         Width - bounds5.Width - bounds7.Width,
@@ -376,25 +381,22 @@ namespace ClassicUO.Game.UI.Controls
                     color
                 );
             }
-            
+
             if (texture7 != null)
             {
-                batcher.Draw
-                (
+                batcher.Draw(
                     texture7,
                     new Vector2(x + (Width - bounds7.Width), y + (Height - bounds7.Height)),
                     bounds7,
                     color
                 );
             }
-            
+
             if (texture8 != null)
             {
-                batcher.DrawTiled
-                (
+                batcher.DrawTiled(
                     texture8,
-                    new Rectangle
-                    (
+                    new Rectangle(
                         x + bounds0.Width,
                         y + bounds0.Height,
                         (Width - bounds0.Width - bounds2.Width) + (offsetLeft + offsetRight),
@@ -405,7 +407,7 @@ namespace ClassicUO.Game.UI.Controls
                 );
             }
         }
-       
+
         private Texture2D GetTexture(int index, out Rectangle bounds)
         {
             if (index >= 0 && index <= _maxIndex)
@@ -419,12 +421,16 @@ namespace ClassicUO.Game.UI.Controls
                     ++index;
                 }
 
-                return GumpsLoader.Instance.GetGumpTexture((ushort)(Graphic + index), out bounds);
+                ref readonly var gumpInfo = ref Client.Game.Gumps.GetGump(
+                    (ushort)(Graphic + index)
+                );
+
+                bounds = gumpInfo.UV;
+                return gumpInfo.Texture;
             }
 
             bounds = Rectangle.Empty;
             return null;
         }
-
     }
 }

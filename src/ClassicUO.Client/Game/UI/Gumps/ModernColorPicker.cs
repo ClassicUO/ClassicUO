@@ -119,11 +119,12 @@ namespace ClassicUO.Game.UI.Gumps
             public HueDisplay(ushort hue, Action<ushort> hueChanged, bool isClickable = false, bool sendSysMessage = false)
             {
                 hueVector = ShaderHueTranslator.GetHueVector(hue, true, 1);
-                texture = ArtLoader.Instance.GetStaticTexture(0x0FAB, out var bounds);
-                rect = ArtLoader.Instance.GetRealArtBounds(0x0FAB);
+                ref readonly var staticArt = ref Client.Game.Arts.GetArt(0x0FAB);
+                texture = staticArt.Texture;
+                rect = Client.Game.Arts.GetRealArtBounds(0x0FAB);
                 Width = 18;
                 Height = 18;
-                this.bounds = bounds;
+                this.bounds = staticArt.UV;
                 CanMove = true;
                 CanCloseWithRightClick = true;
                 AcceptMouseInput = true;

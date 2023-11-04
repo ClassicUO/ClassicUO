@@ -53,10 +53,6 @@ namespace ClassicUO.Assets
         public const int MAX_SOUND_DATA_INDEX_COUNT = 0xFFFF;
 
         private UOFile _file;
-        private readonly Sound[] _musics = new Sound[MAX_SOUND_DATA_INDEX_COUNT];
-        private readonly Sound[] _sounds = new Sound[MAX_SOUND_DATA_INDEX_COUNT];
-
-        private bool _useDigitalMusicFolder;
 
         private SoundsLoader()
         {
@@ -234,13 +230,11 @@ namespace ClassicUO.Assets
                         _musicData.Add(65, new Tuple<string, bool>("serpentislecombat_u7", true));
                         _musicData.Add(66, new Tuple<string, bool>("valoriaships", true));
                     }
-
-                    _useDigitalMusicFolder = Directory.Exists(Path.Combine(UOFileManager.BasePath, "Music", "Digital"));
                 }
             );
         }
 
-        private unsafe bool TryGetSound(int sound, out byte[] data, out string name)
+        public unsafe bool TryGetSound(int sound, out byte[] data, out string name)
         {
             data = null;
             name = null;
@@ -248,6 +242,11 @@ namespace ClassicUO.Assets
             if (sound < 0)
             {
                 return false;
+            }
+
+            if (SoundOverrideLoader.Instance.TryGetSoundOverride(sound, out data, out name))
+            {
+                return true;
             }
 
             ref UOFileIndex entry = ref GetValidRefEntry(sound);
@@ -355,7 +354,7 @@ namespace ClassicUO.Assets
             return name;
         }
 
-        private bool TryGetMusicData(int index, out string name, out bool doesLoop)
+        public bool TryGetMusicData(int index, out string name, out bool doesLoop)
         {
             name = null;
             doesLoop = false;
@@ -372,69 +371,10 @@ namespace ClassicUO.Assets
             return false;
         }
 
-
-        public Sound GetSound(int index)
-        {
-            if (index >= 0 && index < MAX_SOUND_DATA_INDEX_COUNT)
-            {
-                if (SoundOverrideLoader.Instance.TryGetSoundOverride(index, out var s))
-                    return s;
-
-                ref Sound sound = ref _sounds[index];
-
-                if (sound == null && TryGetSound(index, out byte[] data, out string name))
-                {
-                    sound = new UOSound(name, index, data);
-                }
-
-                return sound;
-            }
-
-            return null;
-        }
-
-        public Sound GetMusic(int index)
-        {
-            if (index >= 0 && index < MAX_SOUND_DATA_INDEX_COUNT)
-            {
-                ref Sound music = ref _musics[index];
-
-                if (music == null && TryGetMusicData(index, out string name, out bool loop))
-                {
-                    var path = _useDigitalMusicFolder ? $"Music/Digital/{name}" : $"Music/{name}";
-                    if (!path.EndsWith(".mp3", StringComparison.InvariantCultureIgnoreCase))
-                    {
-                        path += ".mp3";
-                    }
-
-                    music = new UOMusic(index, name, loop, UOFileManager.GetUOFilePath(path));
-                }
-
-                return music;
-            }
-
-            return null;
-        }
-
         public const float SOUND_DELTA = 250;
 
         public override void ClearResources()
         {
-            for (int i = 0; i < SOUND_DELTA; i++)
-            {
-                if (_sounds[i] != null)
-                {
-                    _sounds[i].Dispose();
-                    _sounds[i] = null;
-                }
-
-                if (_musics[i] != null)
-                {
-                    _musics[i].Dispose();
-                    _musics[i] = null;
-                }
-            }
-
             _musicData.Clear();
         }
     }

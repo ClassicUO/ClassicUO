@@ -2,7 +2,7 @@
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 // 1. Redistributions of source code must retain the above copyright
@@ -16,7 +16,7 @@
 // 4. Neither the name of the copyright holder nor the
 //    names of its contributors may be used to endorse or promote products
 //    derived from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -43,7 +43,8 @@ namespace ClassicUO.Game.UI.Gumps
     internal class MenuGump : Gump
     {
         private readonly ContainerHorizontal _container;
-        private bool _isDown, _isLeft;
+        private bool _isDown,
+            _isLeft;
         private readonly HSliderBar _slider;
 
         public MenuGump(uint serial, uint serv, string name) : base(serial, serv)
@@ -55,24 +56,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(new GumpPic(0, 0, 0x0910, 0));
 
-            Add
-            (
-                new ColorBox(217, 49, 1)
-                {
-                    X = 40,
-                    Y = 42
-                }
-            );
+            Add(new ColorBox(217, 49, 1) { X = 40, Y = 42 });
 
-            Label label = new Label
-            (
-                name,
-                false,
-                0x0386,
-                200,
-                1,
-                FontStyle.Fixed
-            )
+            Label label = new Label(name, false, 0x0386, 200, 1, FontStyle.Fixed)
             {
                 X = 39,
                 Y = 18
@@ -91,10 +77,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(_container);
 
-            Add
-            (
-                _slider = new HSliderBar
-                (
+            Add(
+                _slider = new HSliderBar(
                     40,
                     _container.Y + _container.Height + 12,
                     217,
@@ -105,12 +89,12 @@ namespace ClassicUO.Game.UI.Gumps
                 )
             );
 
-            _slider.ValueChanged += (sender, e) => { _container.Value = _slider.Value; };
-
-            HitBox left = new HitBox(25, 60, 10, 15)
+            _slider.ValueChanged += (sender, e) =>
             {
-                Alpha = 0f
+                _container.Value = _slider.Value;
             };
+
+            HitBox left = new HitBox(25, 60, 10, 15) { Alpha = 0f };
 
             left.MouseDown += (sender, e) =>
             {
@@ -118,14 +102,13 @@ namespace ClassicUO.Game.UI.Gumps
                 _isLeft = true;
             };
 
-            left.MouseUp += (sender, e) => { _isDown = false; };
+            left.MouseUp += (sender, e) =>
+            {
+                _isDown = false;
+            };
             Add(left);
 
-
-            HitBox right = new HitBox(260, 60, 10, 15)
-            {
-                Alpha = 0f
-            };
+            HitBox right = new HitBox(260, 60, 10, 15) { Alpha = 0f };
 
             right.MouseDown += (sender, e) =>
             {
@@ -133,7 +116,10 @@ namespace ClassicUO.Game.UI.Gumps
                 _isLeft = false;
             };
 
-            right.MouseUp += (sender, e) => { _isDown = false; };
+            right.MouseUp += (sender, e) =>
+            {
+                _isDown = false;
+            };
             Add(right);
         }
 
@@ -147,18 +133,9 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-
-        public void AddItem
-        (
-            ushort graphic,
-            ushort hue,
-            string name,
-            int x,
-            int y,
-            int index
-        )
+        public void AddItem(ushort graphic, ushort hue, string name, int x, int y, int index)
         {
-            ItemView view = new ItemView(graphic, (ushort)(hue != 0 ? (hue + 1) : 0))
+            var view = new ItemView(graphic, hue)
             {
                 X = x,
                 Y = y
@@ -166,17 +143,18 @@ namespace ClassicUO.Game.UI.Gumps
 
             view.MouseDoubleClick += (sender, e) =>
             {
-                NetClient.Socket.Send_MenuResponse(LocalSerial,
-                                                   (ushort)ServerSerial,
-                                                   index,
-                                                   graphic,
-                                                   hue);
+                NetClient.Socket.Send_MenuResponse(
+                    LocalSerial,
+                    (ushort)ServerSerial,
+                    index,
+                    graphic,
+                    hue
+                );
                 Dispose();
                 e.Result = true;
             };
 
             view.SetTooltip(name);
-
 
             _container.Add(view);
 
@@ -188,11 +166,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.CloseWithRightClick();
 
-            NetClient.Socket.Send_MenuResponse(LocalSerial,
-                                               (ushort)ServerSerial,
-                                               0,
-                                               0,
-                                               0);
+            NetClient.Socket.Send_MenuResponse(LocalSerial, (ushort)ServerSerial, 0, 0, 0);
         }
 
         class ItemView : Control
@@ -208,10 +182,10 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _graphic = graphic;
 
-                _ = ArtLoader.Instance.GetStaticTexture(_graphic, out var bounds);
+                ref readonly var artInfo = ref Client.Game.Arts.GetArt(_graphic);
 
-                Width = bounds.Width;
-                Height = bounds.Height;
+                Width = artInfo.UV.Width;
+                Height = artInfo.UV.Height;
                 _hue = hue;
                 _isPartial = TileDataLoader.Instance.StaticData[graphic].IsPartialHue;
             }
@@ -220,17 +194,11 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (_graphic != 0)
                 {
-                    var texture = ArtLoader.Instance.GetStaticTexture(_graphic, out var bounds);
+                    ref readonly var artInfo = ref Client.Game.Arts.GetArt(_graphic);
 
                     Vector3 hueVector = ShaderHueTranslator.GetHueVector(_hue, _isPartial, 1f);
 
-                    batcher.Draw
-                    (
-                        texture,
-                        new Vector2(x, y),
-                        bounds,
-                        hueVector
-                    );
+                    batcher.Draw(artInfo.Texture, new Vector2(x, y), artInfo.UV, hueVector);
                 }
 
                 return base.Draw(batcher, x, y);
@@ -261,7 +229,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             public int MaxValue { get; private set; }
 
-
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
                 if (batcher.ClipBegin(x, y, Width, Height))
@@ -279,9 +246,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         child.X = width - Value;
 
-                        if (width + child.Width <= Value)
-                        {
-                        }
+                        if (width + child.Width <= Value) { }
                         else if (width + child.Width <= maxWidth)
                         {
                             child.Draw(batcher, child.X + x, y);
@@ -327,32 +292,11 @@ namespace ClassicUO.Game.UI.Gumps
             CanCloseWithRightClick = false;
             IsFromServer = true;
 
-            Add
-            (
-                _resizePic = new ResizePic(0x13EC)
-                {
-                    Width = 400,
-                    Height = 111111
-                }
-            );
+            Add(_resizePic = new ResizePic(0x13EC) { Width = 400, Height = 111111 });
 
             Label l;
 
-            Add
-            (
-                l = new Label
-                (
-                    name,
-                    false,
-                    0x0386,
-                    370,
-                    1
-                )
-                {
-                    X = 20,
-                    Y = 16
-                }
-            );
+            Add(l = new Label(name, false, 0x0386, 370, 1) { X = 20, Y = 16 });
 
             Width = _resizePic.Width;
             Height = l.Height;
@@ -365,20 +309,9 @@ namespace ClassicUO.Game.UI.Gumps
             Height = _resizePic.Height;
         }
 
-
         public int AddItem(string name, int y)
         {
-            RadioButton radio = new RadioButton
-            (
-                0,
-                0x138A,
-                0x138B,
-                name,
-                1,
-                0x0386,
-                false,
-                330
-            )
+            RadioButton radio = new RadioButton(0, 0x138A, 0x138B, name, 1, 0x0386, false, 330)
             {
                 X = 50,
                 Y = y
@@ -408,16 +341,18 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         if (radioButton.IsChecked)
                         {
-                            NetClient.Socket.Send_GrayMenuResponse(LocalSerial, (ushort)ServerSerial, index);
-                            
+                            NetClient.Socket.Send_GrayMenuResponse(
+                                LocalSerial,
+                                (ushort)ServerSerial,
+                                index
+                            );
+
                             Dispose();
                             break;
                         }
 
                         index++;
                     }
-
-                   
 
                     break;
             }

@@ -2,7 +2,7 @@
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 // 1. Redistributions of source code must retain the above copyright
@@ -16,7 +16,7 @@
 // 4. Neither the name of the copyright holder nor the
 //    names of its contributors may be used to endorse or promote products
 //    derived from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -56,18 +56,9 @@ namespace ClassicUO.Game.UI.Gumps
             CanCloseWithRightClick = false;
 
             // little
-            Add
-            (
-                new ResizePic(0x13BE)
-                {
-                    Width = 30,
-                    Height = 27
-                },
-                2
-            );
+            Add(new ResizePic(0x13BE) { Width = 30, Height = 27 }, 2);
 
-            Add
-            (
+            Add(
                 new Button(0, 0x15A1, 0x15A1, 0x15A1)
                 {
                     X = 5,
@@ -77,20 +68,20 @@ namespace ClassicUO.Game.UI.Gumps
                 2
             );
 
-
             // big
             int smallWidth = 50;
-
-            if (GumpsLoader.Instance.GetGumpTexture(0x098B, out var bounds) != null)
+            ref readonly var gumpInfo = ref Client.Game.Gumps.GetGump(0x098B);
+            if (gumpInfo.Texture != null)
             {
-                smallWidth = bounds.Width;
+                smallWidth = gumpInfo.UV.Width;
             }
 
             int largeWidth = 100;
 
-            if (GumpsLoader.Instance.GetGumpTexture(0x098D, out bounds) != null)
+            gumpInfo = ref Client.Game.Gumps.GetGump(0x098D);
+            if (gumpInfo.Texture != null)
             {
-                largeWidth = bounds.Width;
+                largeWidth = gumpInfo.UV.Width;
             }
 
             int[][] textTable =
@@ -119,17 +110,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             ResizePic background;
 
-            Add
-            (
-                background = new ResizePic(0x13BE)
-                {
-                    Height = 27
-                },
-                1
-            );
+            Add(background = new ResizePic(0x13BE) { Height = 27 }, 1);
 
-            Add
-            (
+            Add(
                 new Button(0, 0x15A4, 0x15A4, 0x15A4)
                 {
                     X = 5,
@@ -150,10 +133,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                 ushort graphic = (ushort)(textTable[i][0] != 0 ? 0x098D : 0x098B);
 
-                Add
-                (
-                    new RighClickableButton
-                    (
+                Add(
+                    new RighClickableButton(
                         textTable[i][1],
                         graphic,
                         graphic,
@@ -285,13 +266,15 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (gump == null)
             {
-                if (ProfileManager.CurrentProfile.TopbarGumpPosition.X < 0 || ProfileManager.CurrentProfile.TopbarGumpPosition.Y < 0)
+                if (
+                    ProfileManager.CurrentProfile.TopbarGumpPosition.X < 0
+                    || ProfileManager.CurrentProfile.TopbarGumpPosition.Y < 0
+                )
                 {
                     ProfileManager.CurrentProfile.TopbarGumpPosition = Point.Zero;
                 }
 
-                UIManager.Add
-                (
+                UIManager.Add(
                     gump = new TopBarGump
                     {
                         X = ProfileManager.CurrentProfile.TopbarGumpPosition.X,
@@ -388,8 +371,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private class RighClickableButton : Button
         {
-            public RighClickableButton
-            (
+            public RighClickableButton(
                 int buttonID,
                 ushort normal,
                 ushort pressed,
@@ -399,24 +381,10 @@ namespace ClassicUO.Game.UI.Gumps
                 bool isunicode = true,
                 ushort normalHue = ushort.MaxValue,
                 ushort hoverHue = ushort.MaxValue
-            ) : base
-            (
-                buttonID,
-                normal,
-                pressed,
-                over,
-                caption,
-                font,
-                isunicode,
-                normalHue,
-                hoverHue
-            )
-            {
-            }
+            ) : base(buttonID, normal, pressed, over, caption, font, isunicode, normalHue, hoverHue)
+            { }
 
-            public RighClickableButton(List<string> parts) : base(parts)
-            {
-            }
+            public RighClickableButton(List<string> parts) : base(parts) { }
 
             protected override void OnMouseUp(int x, int y, MouseButtonType button)
             {
