@@ -530,6 +530,8 @@ namespace ClassicUO.Configuration
         public string InfoBarFont { get; set; } = "Roboto-Regular";
         public int InfoBarFontSize { get; set; } = 18;
 
+        public int LastJournalTab { get; set; } = 0;
+
 
 
         public void Save(string path, bool saveGumps = true)

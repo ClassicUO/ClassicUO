@@ -13,7 +13,8 @@ namespace ClassicUO.Game.UI.Gumps
                 "- Updated to ClassicUO's latest version\n" +
                 "- Auto sort is container specific now\n" +
                 "- InfoBar can now be resized and is using the new font rendering system\n" +
-                "- InfoBar font and font size can be customized now (TazUO->Misc)",
+                "- InfoBar font and font size can be customized now (TazUO->Misc)\n" +
+                "- Journal will now remember the last tab you were on",
 
             "/c[white][3.9.0]/cd\n" +
                 "- Added missing race change gump\n" +
