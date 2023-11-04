@@ -34,6 +34,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.Remoting.Contexts;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
@@ -45,7 +46,6 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
-using ClassicUO.Resources;
 using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -480,7 +480,16 @@ namespace ClassicUO.Game.UI.Gumps
             List<Item> sortedContents = ProfileManager.CurrentProfile.GridContainerSearchMode == 0 ? gridSlotManager.SearchResults(searchBox.Text) : GridSlotManager.GetItemsInContainer(container);
             gridSlotManager.RebuildContainer(sortedContents, searchBox.Text, overrideSort);
             containerNameLabel.Text = GetContainerName();
+            if(container.Container != 0xFFFF_FFFF && FindContainer(container.Container, out GridContainer gridContainer))
+            {
+                gridContainer.UpdateContainerName();
+            }
             InvalidateContents = false;
+        }
+
+        public static bool FindContainer(uint serial, out GridContainer? gridContainer)
+        {
+            return (gridContainer = UIManager.GetGump<GridContainer>(serial)) == null ? false : true;
         }
 
         protected override void UpdateContents()
@@ -612,10 +621,35 @@ namespace ClassicUO.Game.UI.Gumps
             if (gridSlotManager != null)
             {
                 gridSlotManager.UpdateItems();
-                containerName += $" ({gridSlotManager.ContainerContents.Count})";
+                containerName += $" ({GetRecursiveItemCount(LocalSerial)})";
+            }
+            return containerName;
+        }
+
+        public void UpdateContainerName()
+        {
+            containerNameLabel.Text = GetContainerName();
+        }
+
+        private static int GetRecursiveItemCount(uint serial)
+        {
+            int v = 0;
+
+            Item requestedItem = World.Items.Get(serial);
+            if (requestedItem != null)
+            {
+                for (LinkedObject i = requestedItem.Items; i != null; i = i.Next)
+                {
+                    Item item = (Item)i;
+                    if (item.Items != null)
+                    {
+                        v += GetRecursiveItemCount(item.Serial);
+                    }
+                    v++;
+                }
             }
 
-            return containerName;
+            return v;
         }
 
         public void OptionsUpdated()
