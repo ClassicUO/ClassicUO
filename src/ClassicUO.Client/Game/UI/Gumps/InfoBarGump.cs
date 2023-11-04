@@ -31,6 +31,7 @@
 #endregion
 
 using System.Collections.Generic;
+using System.Xml;
 using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
@@ -49,14 +50,16 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly List<InfoBarControl> _infobarControls = new List<InfoBarControl>();
         private long _refreshTime;
 
-        public InfoBarGump() : base(300, 20, 50, 20, 0, 0)
+        public override bool IsLocked => _isLocked;
+
+        public InfoBarGump() : base(ProfileManager.CurrentProfile.InfoBarSize.X, ProfileManager.CurrentProfile.InfoBarSize.Y, 50, 20, 0, 0)
         {
-            CanMove = true;
+            CanBeLocked = true; //For base gump locking, resizable uses a special locking procedure
+            CanMove = _prevCanMove = true;
             AcceptMouseInput = true;
             AcceptKeyboardInput = false;
-            CanCloseWithRightClick = false;
-
-            //ShowBorder = false;
+            CanCloseWithRightClick = _prevCloseWithRightClick = false;
+            ShowBorder = _prevBorder = true;
 
             Add(_background = new AlphaBlendControl(0.7f) { Width = Width - 8, Height = Height - 8, X = 4, Y = 4 });
 
@@ -97,20 +100,20 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _refreshTime = (long)Time.Ticks + 125;
 
-                int x = 9, y = 4;
+                int x = 4, y = 4;
 
                 foreach (InfoBarControl c in _infobarControls)
                 {
-                    if (x + c.Width + 5 > Width)
+                    if (x + c.Width + 8 > Width)
                     {
                         y += c.Height;
-                        x = 9;
+                        x = 4;
                     }
 
                     c.X = x;
                     c.Y = y;
 
-                    x += c.Width + 5;
+                    x += c.Width + 8;
                 }
             }
 
@@ -118,6 +121,25 @@ namespace ClassicUO.Game.UI.Gumps
 
             _background.Width = Width - 8;
             _background.Height = Height - 8;
+        }
+
+        public override void OnResize()
+        {
+            base.OnResize();
+
+            ProfileManager.CurrentProfile.InfoBarSize = new Point(Width, Height);
+        }
+
+        public override void Restore(XmlElement xml)
+        {
+            base.Restore(xml);
+            SetLockStatus(ProfileManager.CurrentProfile.InfoBarLocked);
+        }
+
+        public override void Save(XmlTextWriter writer)
+        {
+            base.Save(writer);
+            ProfileManager.CurrentProfile.InfoBarLocked = IsLocked;
         }
     }
 
@@ -163,7 +185,7 @@ namespace ClassicUO.Game.UI.Gumps
                 0x0481,
                 strokeEffect: false
                 )
-            { X = _label.IsVisible ? _label.Width + 5 : _pic.Width };
+            { X = _label.IsVisible ? _label.Width + 3 : _pic.Width };
 
             Add(_label);
             Add(_data);
@@ -322,7 +344,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                     else if (percent <= 0.75)
                     {
-                        return 53;
+                        return 0x0035;
                     }
                     else
                     {

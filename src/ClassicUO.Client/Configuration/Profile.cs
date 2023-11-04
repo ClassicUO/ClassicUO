@@ -489,7 +489,8 @@ namespace ClassicUO.Configuration
         public int HealthLineSizeMultiplier { get; set; } = 1;
 
         public bool OpenHealthBarForLastAttack { get; set; } = true;
-        [JsonConverter(typeof(Point2Converter))] public Point LastTargetHealthBarPos { get; set; } = Point.Zero;
+        [JsonConverter(typeof(Point2Converter))] 
+        public Point LastTargetHealthBarPos { get; set; } = Point.Zero;
         public ushort ToolTipBGHue { get; set; } = 0;
 
         public string LastVersionHistoryShown { get; set; }
@@ -522,6 +523,12 @@ namespace ClassicUO.Configuration
         public bool EnableAutoLoot { get; set; } = false;
 
         public static uint GumpsVersion { get; private set; }
+
+        [JsonConverter(typeof(Point2Converter))] 
+        public Point InfoBarSize { get; set; } = new Point(400, 20);
+        public bool InfoBarLocked { get; set; } = false;
+
+
 
         public void Save(string path, bool saveGumps = true)
         {

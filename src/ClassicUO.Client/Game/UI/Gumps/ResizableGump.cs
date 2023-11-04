@@ -47,8 +47,8 @@ namespace ClassicUO.Game.UI.Gumps
         private Point _lastSize, _savedSize;
         private readonly int _minH;
         private readonly int _minW;
-        private bool _isLocked = false;
-        private bool _prevCanMove, _prevCloseWithRightClick, _prevBorder;
+        protected bool _isLocked = false;
+        protected bool _prevCanMove, _prevCloseWithRightClick, _prevBorder;
 
         public BorderControl BorderControl { get { return _borderControl; } }
 
@@ -180,6 +180,27 @@ namespace ClassicUO.Game.UI.Gumps
             GroupMatrixWidth = Width;
         }
 
+        protected void SetLockStatus(bool locked)
+        {
+            _isLocked = locked;
+            if (_isLocked)
+            {
+                _prevCanMove = CanMove;
+                _prevCloseWithRightClick = CanCloseWithRightClick;
+                _prevBorder = ShowBorder;
+
+                CanMove = false;
+                CanCloseWithRightClick = false;
+                ShowBorder = false;
+            }
+            else
+            {
+                CanMove = _prevCanMove;
+                CanCloseWithRightClick = _prevCloseWithRightClick;
+                ShowBorder = _prevBorder;
+            }
+        }
+
         protected override void OnMouseUp(int x, int y, MouseButtonType button)
         {
             base.OnMouseUp(x, y, button);
@@ -190,23 +211,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (x >= 0 && x < bounds.Width && y >= 0 && y <= bounds.Height)
                     {
-                        _isLocked = !_isLocked;
-                        if (_isLocked)
-                        {
-                            _prevCanMove = CanMove;
-                            _prevCloseWithRightClick = CanCloseWithRightClick;
-                            _prevBorder = ShowBorder;
-
-                            CanMove = false;
-                            CanCloseWithRightClick = false;
-                            ShowBorder = false;
-                        }
-                        else
-                        {
-                            CanMove = _prevCanMove;
-                            CanCloseWithRightClick = _prevCloseWithRightClick;
-                            ShowBorder = _prevBorder;
-                        }
+                        SetLockStatus(!_isLocked);
                     }
                 }
             }
