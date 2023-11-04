@@ -4,6 +4,8 @@
 
 
 ------------------------------------------------------------------
+Dev status: [![Build-Test](https://github.com/bittiez/TazUO/actions/workflows/build-test.yml/badge.svg?branch=dev)](https://github.com/bittiez/TazUO/actions/workflows/build-test.yml)  
+Release status: [![Build-Test](https://github.com/bittiez/TazUO/actions/workflows/build-test.yml/badge.svg?branch=main)](https://github.com/bittiez/TazUO/actions/workflows/build-test.yml)
 
 Join TazUO's discord for ideas/support/updates -> https://discord.gg/SqwtB5g95H
 
