@@ -305,8 +305,8 @@ namespace ClassicUO.Game.UI.Controls
             {
                 x += Width;
             }
-            
-            _rtl.Draw(batcher, new Vector2(x, y), color, horizontalAlignment: _align);
+
+            _rtl.Draw(batcher, new Vector2(x, y), color*Alpha, horizontalAlignment: _align);
 
             return true;
         }
