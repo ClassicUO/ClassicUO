@@ -266,11 +266,25 @@ namespace ClassicUO.Game.Managers
                                             {
                                                 if (compareTo != uint.MinValue)
                                                 {
-                                                    tooltip += string.Format(overrideData.FormattedText, property.Name, property.FirstValue.ToString(), property.SecondValue.ToString(), property.OriginalString, "(" + property.FirstDiff.ToString() + ")", "(" + property.SecondDiff.ToString() + ")") + "\n";
+                                                    tooltip += string.Format(
+                                                        overrideData.FormattedText, 
+                                                        property.Name, 
+                                                        property.FirstValue.ToString(), 
+                                                        property.SecondValue.ToString(), 
+                                                        property.OriginalString, 
+                                                        property.FirstDiff != 0 ? "("+property.FirstDiff.ToString()+")" : "",
+                                                        property.SecondDiff != 0 ? "("+property.SecondDiff.ToString()+")" : ""
+                                                        ) + "\n";
                                                 }
                                                 else
                                                 {
-                                                    tooltip += string.Format(overrideData.FormattedText, property.Name, property.FirstValue.ToString(), property.SecondValue.ToString(), property.OriginalString, "", "") + "\n";
+                                                    tooltip += string.Format(
+                                                        overrideData.FormattedText, 
+                                                        property.Name, 
+                                                        property.FirstValue.ToString(), 
+                                                        property.SecondValue.ToString(), 
+                                                        property.OriginalString, "", ""
+                                                        ) + "\n";
                                                 }
                                                 handled = true;
                                                 break;
