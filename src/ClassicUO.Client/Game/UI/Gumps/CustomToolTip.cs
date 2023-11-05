@@ -1,5 +1,4 @@
-﻿using ClassicUO.Assets;
-using ClassicUO.Configuration;
+﻿using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Renderer;
@@ -14,17 +13,19 @@ namespace ClassicUO.Game.UI.Gumps
         private Control hoverReference;
         private readonly string prepend;
         private readonly string append;
+        private readonly Item compareTo;
         private TextBox text;
         private readonly uint hue = 0xFFFF;
 
         public event FinishedLoadingEvent OnOPLLoaded;
 
-        public CustomToolTip(Item item, int x, int y, Control hoverReference, string prepend = "", string append = "") : base(0, 0)
+        public CustomToolTip(Item item, int x, int y, Control hoverReference, string prepend = "", string append = "", Item compareTo = null) : base(0, 0)
         {
             this.item = item;
             this.hoverReference = hoverReference;
             this.prepend = prepend;
             this.append = append;
+            this.compareTo = compareTo;
             X = x;
             Y = y;
             if (ProfileManager.CurrentProfile != null)
@@ -70,16 +71,10 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (World.OPL.TryGetNameAndData(item.Serial, out string name, out string data))
                 {
-                    if (ProfileManager.CurrentProfile.ShowTooltipParserMockup)
-                    {
-                        Managers.ItemPropertiesData d = World.OPL.TryGetItemPropertiesData(item.Serial);
-                        GameActions.Print(d.CompileTooltip());
-                    }
-
                     string finalString = FormatTooltip(name, data);
                     if (SerialHelper.IsItem(item.Serial))
                     {
-                        finalString = Managers.ToolTipOverrideData.ProcessTooltipText(item.Serial);
+                        finalString = Managers.ToolTipOverrideData.ProcessTooltipText(item.Serial, compareTo == null ? uint.MinValue : compareTo.Serial);
                         if (finalString == null)
                             finalString = FormatTooltip(name, data);
                     }

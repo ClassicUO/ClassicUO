@@ -2,6 +2,8 @@
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Gumps;
+using System;
+using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Text.Json;
@@ -226,11 +228,19 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public static string ProcessTooltipText(uint serial)
+        public static string ProcessTooltipText(uint serial, uint compareTo = uint.MinValue)
         {
             string tooltip = "";
+            ItemPropertiesData itemPropertiesData;
 
-            ItemPropertiesData itemPropertiesData = new ItemPropertiesData(World.Items.Get(serial));
+            if (compareTo != uint.MinValue)
+            {
+                itemPropertiesData = new ItemPropertiesData(World.Items.Get(serial), World.Items.Get(compareTo));
+            }
+            else
+            {
+                itemPropertiesData = new ItemPropertiesData(World.Items.Get(serial));
+            }
 
             ToolTipOverrideData[] result = GetAllToolTipOverrides();
 
@@ -254,7 +264,15 @@ namespace ClassicUO.Game.Managers
                                         {
                                             try
                                             {
-                                                tooltip += string.Format(overrideData.FormattedText, property.Name, property.FirstValue.ToString(), property.SecondValue.ToString(), property.OriginalString) + "\n";
+                                                if (compareTo != uint.MinValue)
+                                                {
+                                                    tooltip += string.Format(overrideData.FormattedText, property.Name, property.FirstValue.ToString(), property.SecondValue.ToString(), property.OriginalString, "(" + property.FirstDiff.ToString() + ")", "(" + property.SecondDiff.ToString() + ")") + "\n";
+                                                }
+                                                else
+                                                {
+                                                    tooltip += string.Format(overrideData.FormattedText, property.Name, property.FirstValue.ToString(), property.SecondValue.ToString(), property.OriginalString, "", "") + "\n";
+
+                                                }
                                                 handled = true;
                                                 break;
                                             }

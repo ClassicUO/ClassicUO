@@ -185,14 +185,15 @@ namespace ClassicUO.Game.Managers
         public readonly string RawData = "";
         public readonly uint serial;
         public string[] RawLines;
-        public readonly Item item;
+        public readonly Item item, compareTo;
         public List<SinglePropertyData> singlePropertyData = new List<SinglePropertyData>();
 
-        public ItemPropertiesData(Item item)
+        public ItemPropertiesData(Item item, Item compareTo = null)
         {
             if (item == null)
                 return;
             this.item = item;
+            this.compareTo = compareTo;
 
             serial = item.Serial;
             if (World.OPL.TryGetNameAndData(item.Serial, out Name, out RawData))
@@ -210,7 +211,8 @@ namespace ClassicUO.Game.Managers
             {
                 Name = tooltip.Substring(0, tooltip.IndexOf("\n"));
                 RawData = tooltip.Substring(tooltip.IndexOf("\n") + 1);
-            } else
+            }
+            else
             {
                 Name = tooltip;
             }
@@ -228,6 +230,40 @@ namespace ClassicUO.Game.Managers
             {
                 singlePropertyData.Add(new SinglePropertyData(line));
             }
+
+            if(compareTo != null)
+            {
+                GenComparisonData();
+            }
+        }
+
+        private void GenComparisonData()
+        {
+            if(compareTo == null) return;
+
+            ItemPropertiesData itemPropertiesData = new ItemPropertiesData(compareTo);
+            if (itemPropertiesData.HasData)
+            {
+                foreach (SinglePropertyData thisItem in singlePropertyData)
+                {
+                    foreach (SinglePropertyData secondItem in itemPropertiesData.singlePropertyData)
+                    {
+                        if (String.Equals(thisItem.Name, secondItem.Name, StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            if (thisItem.FirstValue != -1 && secondItem.FirstValue != -1)
+                            {
+                                thisItem.FirstDiff = thisItem.FirstValue - secondItem.FirstValue;
+                            }
+
+                            if (thisItem.SecondValue > -1 && secondItem.SecondValue > -1)
+                            {
+                                thisItem.SecondDiff = thisItem.SecondValue - secondItem.SecondValue;
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
         }
 
         public bool GenerateComparisonTooltip(ItemPropertiesData comparedTo, out string compiledToolTip)
@@ -238,28 +274,36 @@ namespace ClassicUO.Game.Managers
                 return false;
             }
 
-            string finalTooltip = "";
+            string finalTooltip = Name + "\n";
 
             foreach (SinglePropertyData thisItem in singlePropertyData)
             {
                 bool foundMatch = false;
-                foreach(SinglePropertyData secondItem in comparedTo.singlePropertyData)
+                foreach (SinglePropertyData secondItem in comparedTo.singlePropertyData)
                 {
-                    if(String.Equals(thisItem.Name, secondItem.Name, StringComparison.InvariantCultureIgnoreCase))
+                    if (String.Equals(thisItem.Name, secondItem.Name, StringComparison.InvariantCultureIgnoreCase))
                     {
                         foundMatch = true;
                         finalTooltip += thisItem.Name;
 
-                        if(thisItem.FirstValue > -1 && secondItem.FirstValue > -1)
+                        if (thisItem.FirstValue != -1 && secondItem.FirstValue != -1)
                         {
-                            double diff = secondItem.FirstValue - thisItem.FirstValue;
-                            finalTooltip += $" {thisItem.FirstValue}({(diff < 0 ? "-" : "+")}{diff})";
+                            double diff = thisItem.FirstValue - secondItem.FirstValue;
+                            finalTooltip += $" {thisItem.FirstValue}";
+                            if (diff != 0)
+                            {
+                                finalTooltip += $"({(diff >= 0 ? "/c[green]+" : "/c[red]")} {diff}/cd)";
+                            }
                         }
 
                         if (thisItem.SecondValue > -1 && secondItem.SecondValue > -1)
                         {
-                            double diff = secondItem.SecondValue - thisItem.SecondValue;
-                            finalTooltip += $" {thisItem.SecondValue}({(diff < 0 ? "-" : "+")}{diff})";
+                            double diff = thisItem.SecondValue - secondItem.SecondValue;
+                            finalTooltip += $" {thisItem.SecondValue}";
+                            if (diff != 0)
+                            {
+                                finalTooltip += $"({(diff >= 0 ? "/c[green]+" : "/c[red]")}{diff}/cd)";
+                            }
                         }
 
                         finalTooltip += "\n";
@@ -291,11 +335,13 @@ namespace ClassicUO.Game.Managers
             public readonly string Name = "";
             public readonly double FirstValue = -1;
             public readonly double SecondValue = -1;
+            public double FirstDiff = 0;
+            public double SecondDiff = 0;
 
             public SinglePropertyData(string line)
             {
                 OriginalString = line;
-                
+
                 string pattern = @"(-?\d+(\.)?(\d+)?)";
                 MatchCollection matches = Regex.Matches(line, pattern, RegexOptions.CultureInvariant);
 
@@ -306,8 +352,8 @@ namespace ClassicUO.Game.Managers
                     //Name = Regex.Replace(Name, "/c[\"?'?(?<color>.*?)\"?'?]", "", RegexOptions.Multiline | RegexOptions.IgnoreCase);
                     Name = Name.Replace("/cd", "");
                 }
-                
-                if(Name.Length < 1)
+
+                if (Name.Length < 1)
                     Name = line;
 
                 if (matches.Count > 0)
@@ -324,7 +370,7 @@ namespace ClassicUO.Game.Managers
             {
                 string output = "";
 
-                if(Name != null)
+                if (Name != null)
                     output += Name;
 
                 if (FirstValue != -1)
