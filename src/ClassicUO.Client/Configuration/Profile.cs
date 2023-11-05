@@ -497,8 +497,6 @@ namespace ClassicUO.Configuration
 
         public int AdvancedSkillsGumpHeight { get; set; } = 310;
 
-        public bool ShowTooltipParserMockup { get; set; } = false;
-
         #region ToolTip Overrides
         public List<string> ToolTipOverride_SearchText { get; set; } = new List<string>() { "Physical Res", "Fire Res", "Cold Res", "Poison Res", "Energy Res" };
         public List<string> ToolTipOverride_NewFormat { get; set; } = new List<string>() { "/c[#5f423c]Physical Resist {1}%", "/c[red]Fire Resist {1}%", "/c[blue]Cold Resist {1}%", "/c[green]Poison Resist {1}%", "/c[purple]Energy Resist {1}%" };

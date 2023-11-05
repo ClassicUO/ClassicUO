@@ -1076,11 +1076,9 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         hit.ClearTooltip();
                         List<CustomToolTip> toolTipList = new List<CustomToolTip>();
-                        toolTipThis = new CustomToolTip(_item, Mouse.Position.X + 5, Mouse.Position.Y + 5, hit);
+                        toolTipThis = new CustomToolTip(_item, Mouse.Position.X + 5, Mouse.Position.Y + 5, hit, compareTo: compItem);
                         toolTipList.Add(toolTipThis);
-                        //UIManager.Add(toolTipThis);
                         toolTipitem1 = new CustomToolTip(compItem, toolTipThis.X + toolTipThis.Width + 10, toolTipThis.Y, hit, "<basefont color=\"orange\">Equipped Item<br>");
-                        //UIManager.Add(toolTipitem1);
                         toolTipList.Add(toolTipitem1);
 
                         if (CUOEnviroment.Debug)
