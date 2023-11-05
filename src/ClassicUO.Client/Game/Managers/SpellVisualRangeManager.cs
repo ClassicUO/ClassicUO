@@ -16,18 +16,21 @@ namespace ClassicUO.Game.Managers
 {
     internal class SpellVisualRangeManager
     {
-        public static SpellVisualRangeManager Instance { get; private set; } = new SpellVisualRangeManager();
+        public static SpellVisualRangeManager Instance => instance ??= new SpellVisualRangeManager();
 
         public Vector2 LastCursorTileLoc { get; set; } = Vector2.Zero;
-
         public DateTime LastSpellTime { get; private set; } = DateTime.Now;
 
         private string savePath = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Profiles", "SpellVisualRange.json");
+        private string overridePath = Path.Combine(ProfileManager.ProfilePath, "SpellVisualRange.json");
 
         private Dictionary<int, SpellRangeInfo> spellRangeCache = new Dictionary<int, SpellRangeInfo>();
+        private Dictionary<int, SpellRangeInfo> spellRangeOverrideCache = new Dictionary<int, SpellRangeInfo>();
         private Dictionary<string, SpellRangeInfo> spellRangePowerWordCache = new Dictionary<string, SpellRangeInfo>();
 
         private bool loaded = false;
+        private static SpellVisualRangeManager instance;
+
         private bool isCasting { get; set; } = false;
         private SpellRangeInfo currentSpell { get; set; }
 
@@ -103,6 +106,7 @@ namespace ClassicUO.Game.Managers
         public void OnSceneUnload()
         {
             MessageManager.RawMessageReceived -= OnRawMessageReceived;
+            instance = null;
         }
         #endregion
 
@@ -210,7 +214,6 @@ namespace ClassicUO.Game.Managers
         private void Load()
         {
             spellRangeCache.Clear();
-
             Task.Factory.StartNew(() =>
             {
                 if (!File.Exists(savePath))
@@ -244,6 +247,57 @@ namespace ClassicUO.Game.Managers
             });
         }
 
+        private void LoadOverrides()
+        {
+            spellRangeOverrideCache.Clear();
+
+            if (File.Exists(overridePath))
+            {
+                try
+                {
+                    string data = File.ReadAllText(overridePath);
+                    SpellRangeInfo[] fileData = JsonSerializer.Deserialize<SpellRangeInfo[]>(data);
+
+                    foreach (var entry in fileData)
+                    {
+                        spellRangeOverrideCache.Add(entry.ID, entry);
+                    }
+
+                    foreach (var entry in spellRangeOverrideCache.Values)
+                    {
+                        if (string.IsNullOrEmpty(entry.PowerWords))
+                        {
+                            SpellDefinition spellD = SpellDefinition.FullIndexGetSpell(entry.ID);
+                            if (spellD == SpellDefinition.EmptySpell)
+                            {
+                                SpellDefinition.TryGetSpellFromName(entry.Name, out spellD);
+                            }
+
+                            if (spellD != SpellDefinition.EmptySpell)
+                            {
+                                entry.PowerWords = spellD.PowerWords;
+                            }
+                        }
+                        if (!string.IsNullOrEmpty(entry.PowerWords))
+                        {
+                            if (spellRangePowerWordCache.ContainsKey(entry.PowerWords))
+                            {
+                                spellRangePowerWordCache[entry.PowerWords] = entry;
+                            }
+                            else
+                            {
+                                spellRangePowerWordCache.Add(entry.PowerWords, entry);
+                            }
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.ToString());
+                }
+            }
+        }
+
         public bool LoadFromString(string json)
         {
             try
@@ -258,9 +312,11 @@ namespace ClassicUO.Game.Managers
                     spellRangeCache.Add(entry.ID, entry);
                 }
                 AfterLoad();
+                LoadOverrides();
                 loaded = true;
                 return true;
-            } catch(Exception ex)
+            }
+            catch (Exception ex)
             {
                 loaded = true;
                 Console.WriteLine(ex.ToString());
@@ -291,6 +347,7 @@ namespace ClassicUO.Game.Managers
                     spellRangePowerWordCache.Add(entry.PowerWords, entry);
                 }
             }
+            LoadOverrides();
         }
 
         private void CreateAndLoadDataFile()
@@ -340,7 +397,6 @@ namespace ClassicUO.Game.Managers
             {
                 var options = new JsonSerializerOptions() { WriteIndented = true };
                 string fileData = JsonSerializer.Serialize(spellRangeCache.Values.ToArray(), options);
-
                 File.WriteAllText(savePath, fileData);
             }
             catch (Exception e) { Console.WriteLine(e.ToString()); }
