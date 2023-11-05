@@ -2,7 +2,7 @@
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 // 1. Redistributions of source code must retain the above copyright
@@ -16,7 +16,7 @@
 // 4. Neither the name of the copyright holder nor the
 //    names of its contributors may be used to endorse or promote products
 //    derived from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -108,15 +108,15 @@ namespace ClassicUO.Game.GameObjects
                 // Northwest
             }
 
-           return (x + y) + (127 + z) * 0.01f;
+            return (x + y) + (127 + z) * 0.01f;
         }
 
         public Rectangle GetOnScreenRectangle()
         {
             Rectangle prect = Rectangle.Empty;
 
-            prect.X = (int) (RealScreenPosition.X - FrameInfo.X + 22 + Offset.X);
-            prect.Y = (int) (RealScreenPosition.Y - FrameInfo.Y + 22 + (Offset.Y - Offset.Z));
+            prect.X = (int)(RealScreenPosition.X - FrameInfo.X + 22 + Offset.X);
+            prect.Y = (int)(RealScreenPosition.Y - FrameInfo.Y + 22 + (Offset.Y - Offset.Z));
             prect.Width = FrameInfo.Width;
             prect.Height = FrameInfo.Height;
 
@@ -128,13 +128,23 @@ namespace ClassicUO.Game.GameObjects
             return false;
         }
 
-        protected static void DrawStatic(UltimaBatcher2D batcher, ushort graphic, int x, int y, Vector3 hue, float depth, bool isWet = false)
+        protected static void DrawStatic(
+            UltimaBatcher2D batcher,
+            ushort graphic,
+            int x,
+            int y,
+            Vector3 hue,
+            float depth,
+            bool isWet = false
+        )
         {
-            var texture = ArtLoader.Instance.GetStaticTexture(graphic, out var bounds);
+            ref readonly var artInfo = ref Client.Game.Arts.GetArt(graphic);
 
-            if (texture != null)
+            if (artInfo.Texture != null)
             {
-                ref UOFileIndex index = ref ArtLoader.Instance.GetValidRefEntry(graphic + 0x4000);
+                ref var index = ref ArtLoader.Instance.GetValidRefEntry(graphic + 0x4000);
+                index.Width = (short)((artInfo.UV.Width >> 1) - 22);
+                index.Height = (short)(artInfo.UV.Height - 44);
 
                 x -= index.Width;
                 y -= index.Height;
@@ -143,11 +153,10 @@ namespace ClassicUO.Game.GameObjects
                 var scale = Vector2.One;
                 if (isWet)
                 {
-                    batcher.Draw
-                    (
-                        texture,
+                    batcher.Draw(
+                        artInfo.Texture,
                         pos,
-                        bounds,
+                        artInfo.UV,
                         hue,
                         0f,
                         Vector2.Zero,
@@ -161,32 +170,37 @@ namespace ClassicUO.Game.GameObjects
                     scale = new Vector2(1.1f + sin * 0.1f, 1.1f + cos * 0.5f * 0.1f);
                 }
 
-                batcher.Draw
-                (
-                    texture,
+                batcher.Draw(
+                    artInfo.Texture,
                     pos,
-                    bounds,
+                    artInfo.UV,
                     hue,
                     0f,
                     Vector2.Zero,
                     scale,
-                    SpriteEffects.None, 
+                    SpriteEffects.None,
                     depth + 0.5f
                 );
             }
         }
 
-        protected static void DrawGump(UltimaBatcher2D batcher, ushort graphic, int x, int y, Vector3 hue, float depth)
+        protected static void DrawGump(
+            UltimaBatcher2D batcher,
+            ushort graphic,
+            int x,
+            int y,
+            Vector3 hue,
+            float depth
+        )
         {
-            var texture = GumpsLoader.Instance.GetGumpTexture(graphic, out var bounds);
+            ref readonly var gumpInfo = ref Client.Game.Gumps.GetGump(graphic);
 
-            if (texture != null)
+            if (gumpInfo.Texture != null)
             {
-                batcher.Draw
-                (
-                    texture,
+                batcher.Draw(
+                    gumpInfo.Texture,
                     new Vector2(x, y),
-                    bounds,
+                    gumpInfo.UV,
                     hue,
                     0f,
                     Vector2.Zero,
@@ -197,8 +211,7 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        protected static void DrawStaticRotated
-        (
+        protected static void DrawStaticRotated(
             UltimaBatcher2D batcher,
             ushort graphic,
             int x,
@@ -208,23 +221,23 @@ namespace ClassicUO.Game.GameObjects
             float depth
         )
         {
-            var texture = ArtLoader.Instance.GetStaticTexture(graphic, out var bounds);
+            ref readonly var artInfo = ref Client.Game.Arts.GetArt(graphic);
 
-            if (texture != null)
+            if (artInfo.Texture != null)
             {
-                ref UOFileIndex index = ref ArtLoader.Instance.GetValidRefEntry(graphic + 0x4000);
+                ref var index = ref ArtLoader.Instance.GetValidRefEntry(graphic + 0x4000);
+                index.Width = (short)((artInfo.UV.Width >> 1) - 22);
+                index.Height = (short)(artInfo.UV.Height - 44);
 
-                batcher.Draw
-                (
-                    texture,
-                    new Rectangle
-                    (
+                batcher.Draw(
+                    artInfo.Texture,
+                    new Rectangle(
                         x - index.Width,
-                        y - index.Height, 
-                        bounds.Width,
-                        bounds.Height
+                        y - index.Height,
+                        artInfo.UV.Width,
+                        artInfo.UV.Height
                     ),
-                    bounds,
+                    artInfo.UV,
                     hue,
                     angle,
                     Vector2.Zero,
@@ -234,8 +247,7 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        protected static void DrawStaticAnimated
-        (
+        protected static void DrawStaticAnimated(
             UltimaBatcher2D batcher,
             ushort graphic,
             int x,
@@ -248,14 +260,16 @@ namespace ClassicUO.Game.GameObjects
         {
             ref UOFileIndex index = ref ArtLoader.Instance.GetValidRefEntry(graphic + 0x4000);
 
-            graphic = (ushort) (graphic + index.AnimOffset);
+            graphic = (ushort)(graphic + index.AnimOffset);
 
-            var texture = ArtLoader.Instance.GetStaticTexture(graphic, out var bounds);
+            ref readonly var artInfo = ref Client.Game.Arts.GetArt(graphic);
 
-            if (texture != null)
+            if (artInfo.Texture != null)
             {
                 index = ref ArtLoader.Instance.GetValidRefEntry(graphic + 0x4000);
-              
+                index.Width = (short)((artInfo.UV.Width >> 1) - 22);
+                index.Height = (short)(artInfo.UV.Height - 44);
+
                 x -= index.Width;
                 y -= index.Height;
 
@@ -263,17 +277,16 @@ namespace ClassicUO.Game.GameObjects
 
                 if (shadow)
                 {
-                    batcher.DrawShadow(texture, pos, bounds, false, depth + 0.25f);
+                    batcher.DrawShadow(artInfo.Texture, pos, artInfo.UV, false, depth + 0.25f);
                 }
 
                 var scale = Vector2.One;
                 if (isWet)
                 {
-                    batcher.Draw
-                    (
-                        texture,
+                    batcher.Draw(
+                        artInfo.Texture,
                         pos,
-                        bounds,
+                        artInfo.UV,
                         hue,
                         0f,
                         Vector2.Zero,
@@ -287,11 +300,10 @@ namespace ClassicUO.Game.GameObjects
                     scale = new Vector2(1.1f + sin * 0.1f, 1.1f + cos * 0.5f * 0.1f);
                 }
 
-                batcher.Draw
-                (
-                    texture,
+                batcher.Draw(
+                    artInfo.Texture,
                     pos,
-                    bounds,
+                    artInfo.UV,
                     hue,
                     0f,
                     Vector2.Zero,

@@ -7,6 +7,17 @@ namespace ClassicUO.Game.UI.Gumps
     internal class VersionHistory : Gump
     {
         private static string[] updateTexts = {
+            "/c[white][3.10.0]/cd\n" +
+                "- Added the option to download a spell indicator config from an external source\n" +
+                "- Added a simple auto loot system\n" +
+                "- Updated to ClassicUO's latest version\n" +
+                "- Auto sort is container specific now\n" +
+                "- InfoBar can now be resized and is using the new font rendering system\n" +
+                "- InfoBar font and font size can be customized now (TazUO->Misc)\n" +
+                "- Journal will now remember the last tab you were on\n" +
+                "- Upgraded item comparisons, see wiki on tooltip overrides for more info\n" +
+                "- Spell indicators can now be overridden with a per-character config",
+
             "/c[white][3.9.0]/cd\n" +
                 "- Added missing race change gump\n" +
                 "- If no server is set in settings.json user will get a request to type one in\n" +

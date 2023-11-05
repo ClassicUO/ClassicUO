@@ -2,7 +2,7 @@
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 // 1. Redistributions of source code must retain the above copyright
@@ -16,7 +16,7 @@
 // 4. Neither the name of the copyright holder nor the
 //    names of its contributors may be used to endorse or promote products
 //    derived from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -42,7 +42,8 @@ namespace ClassicUO.Game.UI.Controls
     {
         private readonly ushort _hue;
         private readonly bool _isPartial;
-        private readonly int _tileX, _tileY;
+        private readonly int _tileX,
+            _tileY;
         private ushort _graphic;
 
         public ButtonTileArt(List<string> gparams) : base(gparams)
@@ -56,9 +57,9 @@ namespace ClassicUO.Game.UI.Controls
             ContainsByBounds = true;
             IsFromServer = true;
 
-            var texture = ArtLoader.Instance.GetStaticTexture(_graphic, out _);
+            ref readonly var artInfo = ref Client.Game.Arts.GetArt(_graphic);
 
-            if (texture == null)
+            if (artInfo.Texture == null)
             {
                 Dispose();
 
@@ -72,17 +73,16 @@ namespace ClassicUO.Game.UI.Controls
         {
             base.Draw(batcher, x, y);
 
-            Vector3 hueVector = ShaderHueTranslator.GetHueVector(_hue, _isPartial, 1f);
+            var hueVector = ShaderHueTranslator.GetHueVector(_hue, _isPartial, 1f);
 
-            var texture = ArtLoader.Instance.GetStaticTexture(_graphic, out var bounds);
+            ref readonly var artInfo = ref Client.Game.Arts.GetArt(_graphic);
 
-            if (texture != null)
+            if (artInfo.Texture != null)
             {
-                batcher.Draw
-                (
-                    texture, 
+                batcher.Draw(
+                    artInfo.Texture,
                     new Vector2(x + _tileX, y + _tileY),
-                    bounds,
+                    artInfo.UV,
                     hueVector
                 );
 
@@ -90,7 +90,6 @@ namespace ClassicUO.Game.UI.Controls
             }
 
             return false;
-
         }
     }
 }

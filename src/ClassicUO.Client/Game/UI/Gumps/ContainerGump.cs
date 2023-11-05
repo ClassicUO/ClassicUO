@@ -2,7 +2,7 @@
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 // 1. Redistributions of source code must retain the above copyright
@@ -16,7 +16,7 @@
 // 4. Neither the name of the copyright holder nor the
 //    names of its contributors may be used to endorse or promote products
 //    derived from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -61,9 +61,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         internal const int CORPSES_GUMP = 0x0009;
 
-        public ContainerGump() : base(0, 0)
-        {
-        }
+        public ContainerGump() : base(0, 0) { }
 
         public ContainerGump(uint serial, ushort gumpid, bool playsound) : base(serial, 0)
         {
@@ -79,35 +77,39 @@ namespace ClassicUO.Game.UI.Gumps
             Graphic = gumpid;
 
             // New Backpack gumps. Client Version 7.0.53.1
-            if (item == World.Player.FindItemByLayer(Layer.Backpack) && Client.Version >= ClassicUO.Utility.ClientVersion.CV_705301 && ProfileManager.CurrentProfile != null)
+            if (
+                item == World.Player.FindItemByLayer(Layer.Backpack)
+                && Client.Version >= ClassicUO.Utility.ClientVersion.CV_705301
+                && ProfileManager.CurrentProfile != null
+            )
             {
-                GumpsLoader loader = GumpsLoader.Instance;
+                var gumps = Client.Game.Gumps;
 
                 switch (ProfileManager.CurrentProfile.BackpackStyle)
                 {
                     case 1:
-                        if (loader.GetGumpTexture(0x775E, out _) != null)
+                        if (gumps.GetGump(0x775E).Texture != null)
                         {
                             Graphic = 0x775E; // Suede Backpack
                         }
 
                         break;
                     case 2:
-                        if (loader.GetGumpTexture(0x7760, out _) != null)
+                        if (gumps.GetGump(0x7760).Texture != null)
                         {
                             Graphic = 0x7760; // Polar Bear Backpack
                         }
 
                         break;
                     case 3:
-                        if (loader.GetGumpTexture(0x7762, out _) != null)
+                        if (gumps.GetGump(0x7762).Texture != null)
                         {
                             Graphic = 0x7762; // Ghoul Skin Backpack
                         }
 
                         break;
                     default:
-                        if (loader.GetGumpTexture(0x003C, out _) != null)
+                        if (gumps.GetGump(0x003C).Texture != null)
                         {
                             Graphic = 0x003C; // Default Backpack
                         }
@@ -124,11 +126,17 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     World.Player.ManualOpenedCorpses.Remove(LocalSerial);
                 }
-                else if (World.Player.AutoOpenedCorpses.Contains(LocalSerial) && ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.SkipEmptyCorpse)
+                else if (
+                    World.Player.AutoOpenedCorpses.Contains(LocalSerial)
+                    && ProfileManager.CurrentProfile != null
+                    && ProfileManager.CurrentProfile.SkipEmptyCorpse
+                )
                 {
                     IsVisible = false;
                     _hideIfEmpty = true;
                 }
+
+                AutoLootManager.Instance.HandleCorpse(item);
             }
 
             if (_data.OpenSound != 0 && playsound)
@@ -172,8 +180,10 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        public bool IsChessboard => Graphic == 0x091A /*|| Graphic == 0x092E*/;
-
+        public bool IsChessboard =>
+            Graphic
+            == 0x091A /*|| Graphic == 0x092E*/
+        ;
 
         private void BuildGump()
         {
@@ -195,11 +205,15 @@ namespace ClassicUO.Game.UI.Gumps
             _data = ContainerManager.Get(Graphic);
             ushort g = _data.Graphic;
 
-
             _gumpPicContainer?.Dispose();
             _hitBox?.Dispose();
 
-            _hitBox = new HitBox((int)(_data.MinimizerArea.X * scale), (int)(_data.MinimizerArea.Y * scale), (int)(_data.MinimizerArea.Width * scale), (int)(_data.MinimizerArea.Height * scale));
+            _hitBox = new HitBox(
+                (int)(_data.MinimizerArea.X * scale),
+                (int)(_data.MinimizerArea.Y * scale),
+                (int)(_data.MinimizerArea.Width * scale),
+                (int)(_data.MinimizerArea.Height * scale)
+            );
 
             _hitBox.MouseUp += HitBoxOnMouseUp;
             Add(_hitBox);
@@ -244,11 +258,18 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void HitBoxOnMouseUp(object sender, MouseEventArgs e)
         {
-            if (e.Button == MouseButtonType.Left && !IsMinimized && !Client.Game.GameCursor.ItemHold.Enabled)
+            if (
+                e.Button == MouseButtonType.Left
+                && !IsMinimized
+                && !Client.Game.GameCursor.ItemHold.Enabled
+            )
             {
                 Point offset = Mouse.LDragOffset;
 
-                if (Math.Abs(offset.X) < Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS && Math.Abs(offset.Y) < Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS)
+                if (
+                    Math.Abs(offset.X) < Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS
+                    && Math.Abs(offset.Y) < Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS
+                )
                 {
                     IsMinimized = true;
                 }
@@ -275,7 +296,11 @@ namespace ClassicUO.Game.UI.Gumps
             uint serial = it != null ? it.Serial : 0;
             uint dropcontainer = LocalSerial;
 
-            if (TargetManager.IsTargeting && !Client.Game.GameCursor.ItemHold.Enabled && SerialHelper.IsValid(serial))
+            if (
+                TargetManager.IsTargeting
+                && !Client.Game.GameCursor.ItemHold.Enabled
+                && SerialHelper.IsValid(serial)
+            )
             {
                 TargetManager.Target(serial);
                 Mouse.CancelDoubleClick = true;
@@ -307,7 +332,10 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     candrop = false;
 
-                    if (Client.Game.GameCursor.ItemHold.Enabled && !Client.Game.GameCursor.ItemHold.IsFixedPosition)
+                    if (
+                        Client.Game.GameCursor.ItemHold.Enabled
+                        && !Client.Game.GameCursor.ItemHold.IsFixedPosition
+                    )
                     {
                         candrop = true;
 
@@ -321,7 +349,10 @@ namespace ClassicUO.Game.UI.Gumps
                                 x = 0xFFFF;
                                 y = 0xFFFF;
                             }
-                            else if (target.ItemData.IsStackable && target.Graphic == Client.Game.GameCursor.ItemHold.Graphic)
+                            else if (
+                                target.ItemData.IsStackable
+                                && target.Graphic == Client.Game.GameCursor.ItemHold.Graphic
+                            )
                             {
                                 dropcontainer = target.Serial;
                                 x = target.X;
@@ -350,16 +381,32 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 }
 
-                if (!candrop && Client.Game.GameCursor.ItemHold.Enabled && !Client.Game.GameCursor.ItemHold.IsFixedPosition)
+                if (
+                    !candrop
+                    && Client.Game.GameCursor.ItemHold.Enabled
+                    && !Client.Game.GameCursor.ItemHold.IsFixedPosition
+                )
                 {
                     Client.Game.Audio.PlaySound(0x0051);
                 }
 
-                if (candrop && Client.Game.GameCursor.ItemHold.Enabled && !Client.Game.GameCursor.ItemHold.IsFixedPosition)
+                if (
+                    candrop
+                    && Client.Game.GameCursor.ItemHold.Enabled
+                    && !Client.Game.GameCursor.ItemHold.IsFixedPosition
+                )
                 {
                     ContainerGump gump = UIManager.GetGump<ContainerGump>(dropcontainer);
 
-                    if (gump != null && (it == null || it.Serial != dropcontainer && it is Item item && !item.ItemData.IsContainer))
+                    if (
+                        gump != null
+                        && (
+                            it == null
+                            || it.Serial != dropcontainer
+                                && it is Item item
+                                && !item.ItemData.IsContainer
+                        )
+                    )
                     {
                         if (gump.IsChessboard)
                         {
@@ -368,34 +415,49 @@ namespace ClassicUO.Game.UI.Gumps
 
                         Rectangle containerBounds = ContainerManager.Get(gump.Graphic).Bounds;
 
-                        var texture = gump.IsChessboard ?
-                            GumpsLoader.Instance.GetGumpTexture((ushort)(Client.Game.GameCursor.ItemHold.DisplayedGraphic - Constants.ITEM_GUMP_TEXTURE_OFFSET), out var bounds)
-                            :
-                            ArtLoader.Instance.GetStaticTexture(Client.Game.GameCursor.ItemHold.DisplayedGraphic, out bounds);
+                        ref readonly var spriteInfo = ref (
+                            gump.IsChessboard
+                                ? ref Client.Game.Gumps.GetGump(
+                                    (ushort)(
+                                        Client.Game.GameCursor.ItemHold.DisplayedGraphic
+                                        - Constants.ITEM_GUMP_TEXTURE_OFFSET
+                                    )
+                                )
+                                : ref Client.Game.Arts.GetArt(Client.Game.GameCursor.ItemHold.DisplayedGraphic)
+                        );
 
                         float scale = GetScale();
 
                         containerBounds.X = (int)(containerBounds.X * scale);
                         containerBounds.Y = (int)(containerBounds.Y * scale);
                         containerBounds.Width = (int)(containerBounds.Width * scale);
-                        containerBounds.Height = (int)((containerBounds.Height + (gump.IsChessboard ? 20 : 0)) * scale);
+                        containerBounds.Height = (int)(
+                            (containerBounds.Height + (gump.IsChessboard ? 20 : 0)) * scale
+                        );
 
-                        if (texture != null)
+                        if (spriteInfo.Texture != null)
                         {
-                            int textureW, textureH;
+                            int textureW,
+                                textureH;
 
-                            if (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.ScaleItemsInsideContainers)
+                            if (
+                                ProfileManager.CurrentProfile != null
+                                && ProfileManager.CurrentProfile.ScaleItemsInsideContainers
+                            )
                             {
-                                textureW = (int)(bounds.Width * scale);
-                                textureH = (int)(bounds.Height * scale);
+                                textureW = (int)(spriteInfo.UV.Width * scale);
+                                textureH = (int)(spriteInfo.UV.Height * scale);
                             }
                             else
                             {
-                                textureW = bounds.Width;
-                                textureH = bounds.Height;
+                                textureW = spriteInfo.UV.Width;
+                                textureH = spriteInfo.UV.Height;
                             }
 
-                            if (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.RelativeDragAndDropItems)
+                            if (
+                                ProfileManager.CurrentProfile != null
+                                && ProfileManager.CurrentProfile.RelativeDragAndDropItems
+                            )
                             {
                                 x += Client.Game.GameCursor.ItemHold.MouseOffset.X;
                                 y += Client.Game.GameCursor.ItemHold.MouseOffset.Y;
@@ -429,8 +491,7 @@ namespace ClassicUO.Game.UI.Gumps
                         y = (int)(y / scale);
                     }
 
-                    GameActions.DropItem
-                    (
+                    GameActions.DropItem(
                         Client.Game.GameCursor.ItemHold.Serial,
                         x,
                         y,
@@ -446,7 +507,12 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         Point off = Mouse.LDragOffset;
 
-                        DelayedObjectClickManager.Set(serial, Mouse.Position.X - off.X - ScreenCoordinateX, Mouse.Position.Y - off.Y - ScreenCoordinateY, Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK);
+                        DelayedObjectClickManager.Set(
+                            serial,
+                            Mouse.Position.X - off.X - ScreenCoordinateX,
+                            Mouse.Position.Y - off.Y - ScreenCoordinateY,
+                            Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK
+                        );
                     }
                 }
             }
@@ -469,7 +535,12 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
-            if (UIManager.MouseOverControl != null && UIManager.MouseOverControl.RootParent == this && ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.HighlightContainerWhenSelected)
+            if (
+                UIManager.MouseOverControl != null
+                && UIManager.MouseOverControl.RootParent == this
+                && ProfileManager.CurrentProfile != null
+                && ProfileManager.CurrentProfile.HighlightContainerWhenSelected
+            )
             {
                 SelectedObject.SelectedContainer = item;
             }
@@ -484,7 +555,6 @@ namespace ClassicUO.Game.UI.Gumps
                 _eyeGumpPic.Height = (int)(_eyeGumpPic.Height * scale);
             }
         }
-
 
         protected override void UpdateContents()
         {
@@ -511,7 +581,6 @@ namespace ClassicUO.Game.UI.Gumps
             Dispose();
         }
 
-
         private float GetScale()
         {
             return IsChessboard ? 1f : UIManager.ContainerScale;
@@ -527,7 +596,6 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             bool is_corpse = container.Graphic == 0x2006;
-
 
             if (!container.IsEmpty && _hideIfEmpty && !IsVisible)
             {
@@ -558,15 +626,20 @@ namespace ClassicUO.Game.UI.Gumps
                 // some items has layer = [face | beard | hair] and we need to check if it's a wearable item or not.
                 // when the item is wearable we dont add it to the container.
                 // Tested with --> client = 7.0.95.0 | graphic = 0x0A02
-                if (item.ItemData.IsWearable && (layer == Layer.Face || layer == Layer.Beard || layer == Layer.Hair))
+                if (
+                    item.ItemData.IsWearable
+                    && (layer == Layer.Face || layer == Layer.Beard || layer == Layer.Hair)
+                )
                 {
                     continue;
                 }
 
-                ItemGump itemControl = new ItemGump
-                (
+                ItemGump itemControl = new ItemGump(
                     item.Serial,
-                    (ushort)(item.DisplayedGraphic - (IsChessboard ? Constants.ITEM_GUMP_TEXTURE_OFFSET : 0)),
+                    (ushort)(
+                        item.DisplayedGraphic
+                        - (IsChessboard ? Constants.ITEM_GUMP_TEXTURE_OFFSET : 0)
+                    ),
                     item.Hue,
                     item.X,
                     item.Y,
@@ -577,7 +650,10 @@ namespace ClassicUO.Game.UI.Gumps
 
                 float scale = GetScale();
 
-                if (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.ScaleItemsInsideContainers)
+                if (
+                    ProfileManager.CurrentProfile != null
+                    && ProfileManager.CurrentProfile.ScaleItemsInsideContainers
+                )
                 {
                     itemControl.Width = (int)(itemControl.Width * scale);
                     itemControl.Height = (int)(itemControl.Height * scale);
@@ -586,11 +662,9 @@ namespace ClassicUO.Game.UI.Gumps
                 itemControl.X = (int)((short)item.X * scale);
                 itemControl.Y = (int)(((short)item.Y - (IsChessboard ? 20 : 0)) * scale);
 
-
                 Add(itemControl);
             }
         }
-
 
         public void CheckItemControlPosition(Item item)
         {
@@ -601,17 +675,23 @@ namespace ClassicUO.Game.UI.Gumps
             int boundWidth = dataBounds.Width;
             int boundHeight = dataBounds.Height + (IsChessboard ? 20 : 0);
 
-            var texture = IsChessboard ?
-                GumpsLoader.Instance.GetGumpTexture((ushort)(item.DisplayedGraphic - (IsChessboard ? Constants.ITEM_GUMP_TEXTURE_OFFSET : 0)), out var bounds)
-                :
-                ArtLoader.Instance.GetStaticTexture(item.DisplayedGraphic, out bounds);
+            ref readonly var spriteInfo = ref (
+                IsChessboard
+                    ? ref Client.Game.Gumps.GetGump(
+                        (ushort)(
+                            item.DisplayedGraphic
+                            - Constants.ITEM_GUMP_TEXTURE_OFFSET
+                        )
+                    )
+                    : ref Client.Game.Arts.GetArt(item.DisplayedGraphic)
+            );
 
-            if (texture != null)
+            if (spriteInfo.Texture != null)
             {
                 float scale = GetScale();
 
-                boundWidth -= (int)(bounds.Width / scale);
-                boundHeight -= (int)(bounds.Height / scale);
+                boundWidth -= (int)(spriteInfo.UV.Width / scale);
+                boundHeight -= (int)(spriteInfo.UV.Height / scale);
             }
 
             if (item.X < boundX)
@@ -633,7 +713,6 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             base.Draw(batcher, x, y);
@@ -649,8 +728,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
-                batcher.DrawRectangle
-                (
+                batcher.DrawRectangle(
                     SolidColorTextureCache.GetTexture(Color.Red),
                     x + boundX,
                     y + boundY,
@@ -663,14 +741,16 @@ namespace ClassicUO.Game.UI.Gumps
             return true;
         }
 
-
         public override void Dispose()
         {
             Item item = World.Items.Get(LocalSerial);
 
             if (item != null)
             {
-                if (World.Player != null && ProfileManager.CurrentProfile?.OverrideContainerLocationSetting == 3)
+                if (
+                    World.Player != null
+                    && ProfileManager.CurrentProfile?.OverrideContainerLocationSetting == 3
+                )
                 {
                     UIManager.SavePosition(item, Location);
                 }
@@ -701,7 +781,10 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnDragEnd(int x, int y)
         {
-            if (ProfileManager.CurrentProfile.OverrideContainerLocation && ProfileManager.CurrentProfile.OverrideContainerLocationSetting >= 2)
+            if (
+                ProfileManager.CurrentProfile.OverrideContainerLocation
+                && ProfileManager.CurrentProfile.OverrideContainerLocationSetting >= 2
+            )
             {
                 Point gumpCenter = new Point(X + (Width >> 1), Y + (Height >> 1));
                 ProfileManager.CurrentProfile.OverrideContainerLocationPosition = gumpCenter;
@@ -712,13 +795,13 @@ namespace ClassicUO.Game.UI.Gumps
 
         private class GumpPicContainer : GumpPic
         {
-            public GumpPicContainer(int x, int y, ushort graphic, ushort hue) : base(x, y, graphic, hue)
-            {
-            }
+            public GumpPicContainer(int x, int y, ushort graphic, ushort hue)
+                : base(x, y, graphic, hue) { }
 
             public override bool Contains(int x, int y)
             {
-                float scale = Graphic == 0x091A || Graphic == 0x092E ? 1f : UIManager.ContainerScale;
+                float scale =
+                    Graphic == 0x091A || Graphic == 0x092E ? 1f : UIManager.ContainerScale;
 
                 x = (int)(x / scale);
                 y = (int)(y / scale);

@@ -124,6 +124,8 @@ namespace ClassicUO.Game.UI.Gumps
             ResizeWindow(ProfileManager.CurrentProfile.ResizeJournalSize);
             BuildBorder();
             World.Journal.EntryAdded += (sender, e) => { AddJournalEntry(e); };
+
+            OnButtonClick(ProfileManager.CurrentProfile.LastJournalTab);
         }
 
         public override GumpType GumpType => GumpType.Journal;
@@ -170,7 +172,7 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
                 case BorderStyle.Style8:
                     {
-                        if (Assets.GumpsLoader.Instance.GetGumpTexture(40303, out var bounds) != null)
+                        if (Client.Game.Gumps.GetGump(40303).Texture != null)
                             graphic = 40303;
                         else
                             graphic = 83;
@@ -269,13 +271,14 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void OnButtonClick(int buttonID)
         {
-            if (_tab.Count >= buttonID)
+            if (_tab.Count > buttonID)
             {
                 _tab[buttonID].IsSelected = true;
                 _currentFilter = _tabTypes[buttonID];
                 _journalArea.CalculateScrollBarMaxValue();
                 _journalArea.Update();
                 _scrollBarBase.Value = _scrollBarBase.MaxValue;
+                ProfileManager.CurrentProfile.LastJournalTab = buttonID;
             }
         }
 

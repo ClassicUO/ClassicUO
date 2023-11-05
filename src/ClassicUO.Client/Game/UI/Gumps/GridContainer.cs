@@ -34,7 +34,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
+using System.Runtime.Remoting.Contexts;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
@@ -55,38 +55,44 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class GridContainer : ResizableGump
     {
+        #region CONSTANTS
         private const int X_SPACING = 1, Y_SPACING = 1;
         private const int TOP_BAR_HEIGHT = 20;
+        #endregion
 
-        private static int _lastX = 100, _lastY = 100, _lastCorpseX = 100, _lastCorpseY = 100;
-        private static int GRID_ITEM_SIZE { get { return (int)Math.Round(50 * (ProfileManager.CurrentProfile.GridContainersScale / 100f)); } }
-        private static int BORDER_WIDTH = 4;
-        private static int DEFAULT_WIDTH { get { return GetWidth(); } }
-        private static int DEFAULT_HEIGHT { get { return GetHeight(); } }
+        #region private static vars
+        private static int lastX = 100, lastY = 100, lastCorpseX = 100, lastCorpseY = 100;
+        private static int gridItemSize { get { return (int)Math.Round(50 * (ProfileManager.CurrentProfile.GridContainersScale / 100f)); } }
+        private static int borderWidth = 4;
+        #endregion
 
-        public readonly ushort OriginalContainerItemGraphic;
-        private readonly AlphaBlendControl _background;
-        private Item _container { get { return World.Items.Get(LocalSerial); } }
-        private readonly Label _containerNameLabel;
-        private readonly StbTextBox _searchBox;
-        private readonly GumpPic _openRegularGump, _sortContents;
-        private readonly ResizableStaticPic _quickDropBackpack;
-        private readonly GumpPicTiled _backgroundTexture;
-        private readonly NiceButton _setLootBag;
+        #region private readonly vars
+        private readonly AlphaBlendControl background;
+        private readonly Label containerNameLabel;
+        private readonly StbTextBox searchBox;
+        private readonly GumpPic openRegularGump, sortContents;
+        private readonly ResizableStaticPic quickDropBackpack;
+        private readonly GumpPicTiled backgroundTexture;
+        private readonly NiceButton setLootBag;
         private readonly bool isCorpse = false;
+        #endregion
 
-        private float _lastGridItemScale = (ProfileManager.CurrentProfile.GridContainersScale / 100f);
-        private int _lastWidth = DEFAULT_WIDTH, _lastHeight = DEFAULT_HEIGHT;
+        #region private vars
+        private Item container { get { return World.Items.Get(LocalSerial); } }
+        private float lastGridItemScale = (ProfileManager.CurrentProfile.GridContainersScale / 100f);
+        private int lastWidth = GetWidth(), lastHeight = GetHeight();
         private bool quickLootThisContainer = false;
-        private bool skipSave = false;
+        private bool? UseOldContainerStyle = null;
+        private bool autoSortContainer = false;
 
-        private GridScrollArea _scrollArea;
+        private readonly bool skipSave = false;
+        private readonly ushort originalContainerItemGraphic;
+
+        private GridScrollArea scrollArea;
         private GridSlotManager gridSlotManager;
+        #endregion
 
-        public bool? UseOldContainerStyle = null;
-
-        public bool isPlayerBackpack = false;
-
+        #region private tooltip vars
         private string quickLootStatus { get { return ProfileManager.CurrentProfile.CorpseSingleClickLoot ? "<basefont color=\"green\">Enabled" : "<basefont color=\"red\">Disabled"; } }
         private string quickLootTooltip
         {
@@ -99,110 +105,101 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
         }
-
         private string sortButtonTooltip
         {
             get
             {
-                string status = ProfileManager.CurrentProfile.AutoSortGridContainers ? "<basefont color=\"green\">Enabled" : "<basefont color=\"red\">Disabled";
+                string status = autoSortContainer ? "<basefont color=\"green\">Enabled" : "<basefont color=\"red\">Disabled";
                 return $"Sort this container.<br>Alt + Click to enable auto sort<br>Auto sort currently {status}";
             }
         }
+        #endregion
+
+        #region public vars
+        public readonly bool IsPlayerBackpack = false;
+        #endregion
 
         public GridContainer(uint local, ushort originalContainerGraphic, bool? useGridStyle = null) : base(GetWidth(), GetHeight(), GetWidth(2), GetHeight(1), local, 0)
         {
-            if (_container == null)
+            if (container == null)
             {
                 Dispose();
                 return;
             }
 
             #region SET VARS
-            isCorpse = _container.IsCorpse;
+            isCorpse = container.IsCorpse;
             if (useGridStyle != null)
                 UseOldContainerStyle = !useGridStyle;
-            if (LocalSerial == World.Player.FindItemByLayer(Layer.Backpack).Serial)
-                isPlayerBackpack = true;
 
-            Point savedSize, lastPos;
-            if (isPlayerBackpack)
-            {
-                savedSize = ProfileManager.CurrentProfile.BackpackGridSize;
-                lastPos = ProfileManager.CurrentProfile.BackpackGridPosition;
-                IsLocked = ProfileManager.CurrentProfile.BackPackLocked;
-            }
-            else
-            {
-                savedSize = GridSaveSystem.Instance.GetLastSize(LocalSerial);
-                lastPos = GridSaveSystem.Instance.GetLastPosition(LocalSerial);
-            }
-            _lastWidth = Width = savedSize.X;
-            _lastHeight = Height = savedSize.Y;
+            IsPlayerBackpack = LocalSerial == World.Player.FindItemByLayer(Layer.Backpack).Serial;
+
+            autoSortContainer = GridSaveSystem.Instance.AutoSortContainer(LocalSerial);
+
+            Point lastPos = IsPlayerBackpack ? ProfileManager.CurrentProfile.BackpackGridPosition : GridSaveSystem.Instance.GetLastPosition(LocalSerial);
+            Point savedSize = IsPlayerBackpack ? ProfileManager.CurrentProfile.BackpackGridSize : GridSaveSystem.Instance.GetLastSize(LocalSerial);
+            IsLocked = IsPlayerBackpack && ProfileManager.CurrentProfile.BackPackLocked;
+
+            lastWidth = Width = savedSize.X;
+            lastHeight = Height = savedSize.Y;
+
+            X = isCorpse ? lastCorpseX : lastX = lastPos.X;
+            Y = isCorpse ? lastCorpseY : lastY = lastPos.Y;
 
             if (isCorpse)
             {
-                X = _lastCorpseX;
-                Y = _lastCorpseY;
+                World.Player.ManualOpenedCorpses.Remove(LocalSerial);
 
-                if (World.Player.ManualOpenedCorpses.Contains(LocalSerial))
-                {
-                    World.Player.ManualOpenedCorpses.Remove(LocalSerial);
-                }
-                else if (World.Player.AutoOpenedCorpses.Contains(LocalSerial) && ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.SkipEmptyCorpse)
+                if (World.Player.AutoOpenedCorpses.Contains(LocalSerial) && ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.SkipEmptyCorpse && container.IsEmpty)
                 {
                     IsVisible = false;
                     Dispose();
                 }
-            }
-            else
-            {
-                _lastX = X = lastPos.X;
-                _lastY = Y = lastPos.Y;
+
+                AutoLootManager.Instance.HandleCorpse(container);
             }
 
             AnchorType = ProfileManager.CurrentProfile.EnableGridContainerAnchor ? ANCHOR_TYPE.NONE : ANCHOR_TYPE.DISABLED;
-            OriginalContainerItemGraphic = originalContainerGraphic;
+            originalContainerItemGraphic = originalContainerGraphic;
 
             CanMove = true;
             AcceptMouseInput = true;
-            CanCloseWithRightClick = true;
             #endregion
 
             #region background
-            _background = new AlphaBlendControl()
+            background = new AlphaBlendControl()
             {
-                Width = Width - (BORDER_WIDTH * 2),
-                Height = Height - (BORDER_WIDTH * 2),
-                X = BORDER_WIDTH,
-                Y = BORDER_WIDTH,
+                Width = Width - (borderWidth * 2),
+                Height = Height - (borderWidth * 2),
+                X = borderWidth,
+                Y = borderWidth,
                 Alpha = (float)ProfileManager.CurrentProfile.ContainerOpacity / 100,
-                Hue = ProfileManager.CurrentProfile.Grid_UseContainerHue ? _container.Hue : ProfileManager.CurrentProfile.AltGridContainerBackgroundHue
+                Hue = ProfileManager.CurrentProfile.Grid_UseContainerHue ? container.Hue : ProfileManager.CurrentProfile.AltGridContainerBackgroundHue
             };
 
-            _backgroundTexture = new GumpPicTiled(0);
+            backgroundTexture = new GumpPicTiled(0);
             #endregion
 
             #region TOP BAR AREA
-            _containerNameLabel = new Label(GetContainerName(), true, 0x0481)
+            containerNameLabel = new Label(GetContainerName(), true, 0x0481)
             {
-                X = BORDER_WIDTH,
+                X = borderWidth,
                 Y = -20
             };
 
-            _searchBox = new StbTextBox(0xFF, 20, 150, true, FontStyle.None, 0x0481)
+            searchBox = new StbTextBox(0xFF, 20, 150, true, FontStyle.None, 0x0481)
             {
-                X = BORDER_WIDTH,
-                Y = BORDER_WIDTH,
+                X = borderWidth,
+                Y = borderWidth,
                 Multiline = false,
                 Width = 150,
                 Height = 20
             };
-            _searchBox.TextChanged += (sender, e) => { updateItems(); };
-            _searchBox.DragBegin += (sender, e) => { InvokeDragBegin(e.Location); };
+            searchBox.TextChanged += (sender, e) => { UpdateItems(); };
 
-            var regularGumpIcon = GumpsLoader.Instance.GetGumpTexture(5839, out var bounds);
-            _openRegularGump = new GumpPic(_background.Width - 25 - BORDER_WIDTH, BORDER_WIDTH, regularGumpIcon == null ? (ushort)1209 : (ushort)5839, 0);
-            _openRegularGump.MouseUp += (sender, e) =>
+            var regularGumpIcon = Client.Game.Gumps.GetGump(5839).Texture;
+            openRegularGump = new GumpPic(background.Width - 25 - borderWidth, borderWidth, regularGumpIcon == null ? (ushort)1209 : (ushort)5839, 0);
+            openRegularGump.MouseUp += (sender, e) =>
             {
                 if (e.Button == MouseButtonType.Left)
                 {
@@ -210,19 +207,23 @@ namespace ClassicUO.Game.UI.Gumps
                     OpenOldContainer(LocalSerial);
                 }
             };
-            _openRegularGump.MouseEnter += (sender, e) => { _openRegularGump.Graphic = regularGumpIcon == null ? (ushort)1210 : (ushort)5840; };
-            _openRegularGump.MouseExit += (sender, e) => { _openRegularGump.Graphic = regularGumpIcon == null ? (ushort)1209 : (ushort)5839; };
-            _openRegularGump.SetTooltip("Open the original style container.");
+            openRegularGump.MouseEnter += (sender, e) => { openRegularGump.Graphic = regularGumpIcon == null ? (ushort)1210 : (ushort)5840; };
+            openRegularGump.MouseExit += (sender, e) => { openRegularGump.Graphic = regularGumpIcon == null ? (ushort)1209 : (ushort)5839; };
+            openRegularGump.SetTooltip("Open the original style container.\n\n" +
+                "/c[orange]Grid Container Controls:/cd\n" +
+                "Ctrl + Click to lock an item in place\n" +
+                "Alt + Click to add an item to the quick move queue\n" +
+                "Shift + Click to add an item to your auto loot list\n" +
+                "Sort and single click looting can be enabled with the icons on thr right side");
 
-            var quickDropIcon = GumpsLoader.Instance.GetGumpTexture(1625, out var bounds1);
-            _quickDropBackpack = new ResizableStaticPic(World.Player.FindItemByLayer(Layer.Backpack).DisplayedGraphic, 20, 20)
+            quickDropBackpack = new ResizableStaticPic(World.Player.FindItemByLayer(Layer.Backpack).DisplayedGraphic, 20, 20)
             {
-                X = Width - _openRegularGump.Width - 20 - BORDER_WIDTH,
-                Y = BORDER_WIDTH
+                X = Width - openRegularGump.Width - 20 - borderWidth,
+                Y = borderWidth
             };
-            _quickDropBackpack.MouseUp += (sender, e) =>
+            quickDropBackpack.MouseUp += (sender, e) =>
             {
-                if (e.Button == MouseButtonType.Left && _quickDropBackpack.MouseIsOver)
+                if (e.Button == MouseButtonType.Left && quickDropBackpack.MouseIsOver)
                 {
                     if (Client.Game.GameCursor.ItemHold.Enabled)
                     {
@@ -231,55 +232,50 @@ namespace ClassicUO.Game.UI.Gumps
                     else if (isCorpse)
                     {
                         ProfileManager.CurrentProfile.CorpseSingleClickLoot ^= true;
-                        _quickDropBackpack.SetTooltip(quickLootTooltip);
+                        quickDropBackpack.SetTooltip(quickLootTooltip);
                     }
                     else
                     {
                         quickLootThisContainer ^= true;
-                        _quickDropBackpack.SetTooltip(quickLootTooltip);
+                        quickDropBackpack.SetTooltip(quickLootTooltip);
                     }
                 }
-                else if (e.Button == MouseButtonType.Right)
-                {
-                    InvokeMouseCloseGumpWithRClick();
-                }
             };
-            _quickDropBackpack.MouseEnter += (sender, e) => { _quickDropBackpack.Hue = 0x34; };
-            _quickDropBackpack.MouseExit += (sender, e) => { _quickDropBackpack.Hue = 0; };
-            _quickDropBackpack.SetTooltip(quickLootTooltip);
+            quickDropBackpack.MouseEnter += (sender, e) => { quickDropBackpack.Hue = 0x34; };
+            quickDropBackpack.MouseExit += (sender, e) => { quickDropBackpack.Hue = 0; };
+            quickDropBackpack.SetTooltip(quickLootTooltip);
 
-            _sortContents = new GumpPic(_quickDropBackpack.X - 20, BORDER_WIDTH, 1210, 0);
-            _sortContents.MouseUp += (sender, e) =>
+            sortContents = new GumpPic(quickDropBackpack.X - 20, borderWidth, 1210, 0);
+            sortContents.MouseUp += (sender, e) =>
             {
-                if (Keyboard.Alt)
+                if (e.Button == MouseButtonType.Left && Keyboard.Alt)
                 {
-                    ProfileManager.CurrentProfile.AutoSortGridContainers ^= true;
-                    _sortContents.SetTooltip(sortButtonTooltip);
+                    autoSortContainer ^= true;
+                    sortContents.SetTooltip(sortButtonTooltip);
                 }
-                updateItems(true);
+                UpdateItems(true);
             };
-            _sortContents.MouseEnter += (sender, e) => { _sortContents.Graphic = 1209; };
-            _sortContents.MouseExit += (sender, e) => { _sortContents.Graphic = 1210; };
-            _sortContents.SetTooltip(sortButtonTooltip);
+            sortContents.MouseEnter += (sender, e) => { sortContents.Graphic = 1209; };
+            sortContents.MouseExit += (sender, e) => { sortContents.Graphic = 1210; };
+            sortContents.SetTooltip(sortButtonTooltip);
             #endregion
 
             #region Scroll Area
-            _scrollArea = new GridScrollArea(
-                _background.X,
-                TOP_BAR_HEIGHT + _background.Y,
-                _background.Width,
-                _background.Height - (_containerNameLabel.Height + 1)
+            scrollArea = new GridScrollArea(
+                background.X,
+                TOP_BAR_HEIGHT + background.Y,
+                background.Width,
+                background.Height - (containerNameLabel.Height + 1)
                 );
 
-            _scrollArea.MouseUp += _scrollArea_MouseUp;
-            _scrollArea.DragBegin += _scrollArea_DragBegin;
+            scrollArea.MouseUp += ScrollArea_MouseUp;
             #endregion
 
             #region Set loot bag
-            _setLootBag = new NiceButton(0, Height - 20, 100, 20, ButtonAction.Default, "Set loot bag") { IsSelectable = false };
-            _setLootBag.IsVisible = isCorpse;
-            _setLootBag.SetTooltip("For double click looting only");
-            _setLootBag.MouseUp += (s, e) =>
+            setLootBag = new NiceButton(0, Height - 20, 100, 20, ButtonAction.Default, "Set loot bag") { IsSelectable = false };
+            setLootBag.IsVisible = isCorpse;
+            setLootBag.SetTooltip("For double click looting only");
+            setLootBag.MouseUp += (s, e) =>
             {
                 GameActions.Print(Resources.ResGumps.TargetContainerToGrabItemsInto);
                 TargetManager.SetTargeting(CursorTarget.SetGrabBag, 0, TargetType.Neutral);
@@ -287,24 +283,24 @@ namespace ClassicUO.Game.UI.Gumps
             #endregion
 
             #region Add controls
-            Add(_background);
-            Add(_backgroundTexture);
-            Add(_containerNameLabel);
-            _searchBox.Add(new AlphaBlendControl(0.5f)
+            Add(background);
+            Add(backgroundTexture);
+            Add(containerNameLabel);
+            searchBox.Add(new AlphaBlendControl(0.5f)
             {
                 Hue = 0x0481,
-                Width = _searchBox.Width,
-                Height = _searchBox.Height
+                Width = searchBox.Width,
+                Height = searchBox.Height
             });
-            Add(_searchBox);
-            Add(_openRegularGump);
-            Add(_quickDropBackpack);
-            Add(_sortContents);
-            Add(_scrollArea);
-            Add(_setLootBag);
+            Add(searchBox);
+            Add(openRegularGump);
+            Add(quickDropBackpack);
+            Add(sortContents);
+            Add(scrollArea);
+            Add(setLootBag);
             #endregion
 
-            gridSlotManager = new GridSlotManager(LocalSerial, this, _scrollArea); //Must come after scroll area
+            gridSlotManager = new GridSlotManager(LocalSerial, this, scrollArea); //Must come after scroll area
 
             if (GridSaveSystem.Instance.UseOriginalContainerGump(LocalSerial) && (UseOldContainerStyle == null || UseOldContainerStyle == true))
             {
@@ -323,9 +319,9 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (columns < 0)
                 columns = ProfileManager.CurrentProfile.Grid_DefaultColumns;
-            return (BORDER_WIDTH * 2)     //The borders around the container, one on the left and one on the right
+            return (borderWidth * 2)     //The borders around the container, one on the left and one on the right
             + 15                   //The width of the scroll bar
-            + (GRID_ITEM_SIZE * columns) //How many items to fit in left to right
+            + (gridItemSize * columns) //How many items to fit in left to right
             + (X_SPACING * columns);      //Spacing between each grid item(x columns)
         }
 
@@ -333,50 +329,30 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (rows < 0)
                 rows = ProfileManager.CurrentProfile.Grid_DefaultRows;
-            return TOP_BAR_HEIGHT + (BORDER_WIDTH * 2) + ((GRID_ITEM_SIZE + Y_SPACING) * rows);
+            return TOP_BAR_HEIGHT + (borderWidth * 2) + ((gridItemSize + Y_SPACING) * rows);
         }
 
         public override void Save(XmlTextWriter writer)
         {
             base.Save(writer);
 
-            GridSaveSystem.Instance.SaveContainer(LocalSerial, gridSlotManager.GridSlots, Width, Height, X, Y);
+            if (!skipSave)
+            {
+                GridSaveSystem.Instance.SaveContainer(LocalSerial, gridSlotManager.GridSlots, Width, Height, X, Y, UseOldContainerStyle, autoSortContainer);
+            }
 
-            if (isPlayerBackpack)
+            if (IsPlayerBackpack)
             {
                 ProfileManager.CurrentProfile.BackpackGridPosition = Location;
                 ProfileManager.CurrentProfile.BackpackGridSize = new Point(Width, Height);
             }
 
-            writer.WriteAttributeString("ogContainer", OriginalContainerItemGraphic.ToString());
-            writer.WriteAttributeString("width", Width.ToString());
-            writer.WriteAttributeString("height", Height.ToString());
+            writer.WriteAttributeString("ogContainer", originalContainerItemGraphic.ToString());
         }
 
-        public override void Restore(XmlElement xml)
+        private void ScrollArea_MouseUp(object sender, MouseEventArgs e)
         {
-            base.Restore(xml);
-            int rW = int.Parse(xml.GetAttribute("width"));
-            int rH = int.Parse(xml.GetAttribute("height"));
-
-            if (isPlayerBackpack)
-            {
-                rW = ProfileManager.CurrentProfile.BackpackGridSize.X;
-                rH = ProfileManager.CurrentProfile.BackpackGridSize.Y;
-            }
-
-            ResizeWindow(new Point(rW, rH));
-            GameActions.DoubleClickQueued(LocalSerial);
-        }
-
-        private void _scrollArea_DragBegin(object sender, MouseEventArgs e)
-        {
-            InvokeDragBegin(e.Location);
-        }
-
-        private void _scrollArea_MouseUp(object sender, MouseEventArgs e)
-        {
-            if (e.Button == MouseButtonType.Left && _scrollArea.MouseIsOver)
+            if (e.Button == MouseButtonType.Left && scrollArea.MouseIsOver)
             {
                 if (Client.Game.GameCursor.ItemHold.Enabled)
                 {
@@ -399,15 +375,13 @@ namespace ClassicUO.Game.UI.Gumps
 
             UIManager.GetGump<ContainerGump>(serial)?.Dispose();
 
-            ushort graphic = OriginalContainerItemGraphic;
+            ushort graphic = originalContainerItemGraphic;
             if (Client.Version >= Utility.ClientVersion.CV_706000 && ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.UseLargeContainerGumps)
             {
-                GumpsLoader loader = GumpsLoader.Instance;
-
                 switch (graphic)
                 {
                     case 0x0048:
-                        if (loader.GetGumpTexture(0x06E8, out _) != null)
+                        if (Client.Game.Gumps.GetGump(0x06E8).Texture != null)
                         {
                             graphic = 0x06E8;
                         }
@@ -415,7 +389,7 @@ namespace ClassicUO.Game.UI.Gumps
                         break;
 
                     case 0x0049:
-                        if (loader.GetGumpTexture(0x9CDF, out _) != null)
+                        if (Client.Game.Gumps.GetGump(0x9CDF).Texture != null)
                         {
                             graphic = 0x9CDF;
                         }
@@ -423,7 +397,7 @@ namespace ClassicUO.Game.UI.Gumps
                         break;
 
                     case 0x0051:
-                        if (loader.GetGumpTexture(0x06E7, out _) != null)
+                        if (Client.Game.Gumps.GetGump(0x06E7).Texture != null)
                         {
                             graphic = 0x06E7;
                         }
@@ -431,7 +405,7 @@ namespace ClassicUO.Game.UI.Gumps
                         break;
 
                     case 0x003E:
-                        if (loader.GetGumpTexture(0x06E9, out _) != null)
+                        if (Client.Game.Gumps.GetGump(0x06E9).Texture != null)
                         {
                             graphic = 0x06E9;
                         }
@@ -439,7 +413,7 @@ namespace ClassicUO.Game.UI.Gumps
                         break;
 
                     case 0x004D:
-                        if (loader.GetGumpTexture(0x06EA, out _) != null)
+                        if (Client.Game.Gumps.GetGump(0x06EA).Texture != null)
                         {
                             graphic = 0x06EA;
                         }
@@ -447,7 +421,7 @@ namespace ClassicUO.Game.UI.Gumps
                         break;
 
                     case 0x004E:
-                        if (loader.GetGumpTexture(0x06E6, out _) != null)
+                        if (Client.Game.Gumps.GetGump(0x06E6).Texture != null)
                         {
                             graphic = 0x06E6;
                         }
@@ -455,7 +429,7 @@ namespace ClassicUO.Game.UI.Gumps
                         break;
 
                     case 0x004F:
-                        if (loader.GetGumpTexture(0x06E5, out _) != null)
+                        if (Client.Game.Gumps.GetGump(0x06E5).Texture != null)
                         {
                             graphic = 0x06E5;
                         }
@@ -463,7 +437,7 @@ namespace ClassicUO.Game.UI.Gumps
                         break;
 
                     case 0x004A:
-                        if (loader.GetGumpTexture(0x9CDD, out _) != null)
+                        if (Client.Game.Gumps.GetGump(0x9CDD).Texture != null)
                         {
                             graphic = 0x9CDD;
                         }
@@ -471,7 +445,7 @@ namespace ClassicUO.Game.UI.Gumps
                         break;
 
                     case 0x0044:
-                        if (loader.GetGumpTexture(0x9CE3, out _) != null)
+                        if (Client.Game.Gumps.GetGump(0x9CE3).Texture != null)
                         {
                             graphic = 0x9CE3;
                         }
@@ -482,7 +456,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             ContainerManager.CalculateContainerPosition(serial, graphic);
 
-            container = new ContainerGump(_container.Serial, graphic, true, true)
+            container = new ContainerGump(this.container.Serial, graphic, true, true)
             {
                 X = ContainerManager.X,
                 Y = ContainerManager.Y,
@@ -492,36 +466,43 @@ namespace ClassicUO.Game.UI.Gumps
             Dispose();
         }
 
-        private void updateItems(bool overrideSort = false)
+        private void UpdateItems(bool overrideSort = false)
         {
             //Container doesn't exist or has no items
-            if (_container == null)
+            if (container == null)
             {
                 Dispose();
                 return;
             }
 
-            if (!overrideSort && ProfileManager.CurrentProfile.AutoSortGridContainers) overrideSort = true;
+            if (autoSortContainer) overrideSort = true;
 
-            List<Item> sortedContents = ProfileManager.CurrentProfile.GridContainerSearchMode == 0 ? gridSlotManager.SearchResults(_searchBox.Text) : GridSlotManager.GetItemsInContainer(_container);
-            gridSlotManager.RebuildContainer(sortedContents, _searchBox.Text, overrideSort);
-            _containerNameLabel.Text = GetContainerName();
+            List<Item> sortedContents = ProfileManager.CurrentProfile.GridContainerSearchMode == 0 ? gridSlotManager.SearchResults(searchBox.Text) : GridSlotManager.GetItemsInContainer(container);
+            gridSlotManager.RebuildContainer(sortedContents, searchBox.Text, overrideSort);
+            containerNameLabel.Text = GetContainerName();
+            if(container.Container != 0xFFFF_FFFF && FindContainer(container.Container, out GridContainer gridContainer))
+            {
+                gridContainer.UpdateContainerName();
+            }
             InvalidateContents = false;
+        }
+
+        public static bool FindContainer(uint serial, out GridContainer? gridContainer)
+        {
+            return (gridContainer = UIManager.GetGump<GridContainer>(serial)) == null ? false : true;
         }
 
         protected override void UpdateContents()
         {
             if (InvalidateContents && !IsDisposed && IsVisible)
             {
-                if (ProfileManager.CurrentProfile != null)
-                    _background.Alpha = (float)ProfileManager.CurrentProfile.ContainerOpacity / 100;
-                updateItems();
+                UpdateItems();
             }
         }
 
         protected override void OnMouseExit(int x, int y)
         {
-            if (isCorpse && _container != null && !_container.IsDestroyed)
+            if (isCorpse && container != null && container == SelectedObject.CorpseObject)
             {
                 SelectedObject.CorpseObject = null;
             }
@@ -531,23 +512,22 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (isCorpse)
             {
-                _lastCorpseX = X;
-                _lastCorpseY = Y;
+                lastCorpseX = X;
+                lastCorpseY = Y;
             }
             else
             {
-                _lastX = X;
-                _lastY = Y;
+                lastX = X;
+                lastY = Y;
             }
 
-            Item _c = _container;
+            Item _c = container;
             if (_c != null)
             {
                 if (_c == SelectedObject.CorpseObject)
                 {
                     SelectedObject.CorpseObject = null;
                 }
-                _containerNameLabel?.Dispose();
 
                 Item bank = World.Player.FindItemByLayer(Layer.Bank);
 
@@ -569,7 +549,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (gridSlotManager != null && !skipSave)
                 if (gridSlotManager.ItemPositions.Count > 0 && !isCorpse)
-                    GridSaveSystem.Instance.SaveContainer(LocalSerial, gridSlotManager.GridSlots, Width, Height, X, Y, UseOldContainerStyle);
+                    GridSaveSystem.Instance.SaveContainer(LocalSerial, gridSlotManager.GridSlots, Width, Height, X, Y, UseOldContainerStyle, autoSortContainer);
 
             base.Dispose();
         }
@@ -581,13 +561,11 @@ namespace ClassicUO.Game.UI.Gumps
             if (IsDisposed)
                 return;
 
-
-            Item item = World.Items.Get(LocalSerial);
+            Item item = container;
 
             if (item == null || item.IsDestroyed)
             {
                 Dispose();
-
                 return;
             }
 
@@ -600,30 +578,30 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            if ((_lastWidth != Width || _lastHeight != Height) || _lastGridItemScale != GRID_ITEM_SIZE)
+            if ((lastWidth != Width || lastHeight != Height) || lastGridItemScale != gridItemSize)
             {
-                _lastGridItemScale = GRID_ITEM_SIZE;
-                _background.Width = Width - (BORDER_WIDTH * 2);
-                _background.Height = Height - (BORDER_WIDTH * 2);
-                _scrollArea.Width = _background.Width;
-                _scrollArea.Height = _background.Height - TOP_BAR_HEIGHT;
-                _openRegularGump.X = Width - _openRegularGump.Width - BORDER_WIDTH;
-                _quickDropBackpack.X = _openRegularGump.X - _quickDropBackpack.Width;
-                _sortContents.X = _quickDropBackpack.X - _sortContents.Width;
-                _lastHeight = Height;
-                _lastWidth = Width;
-                _searchBox.Width = Math.Min(Width - (BORDER_WIDTH * 2) - _openRegularGump.Width - _quickDropBackpack.Width - _sortContents.Width, 150);
-                _backgroundTexture.Width = _background.Width;
-                _backgroundTexture.Height = _background.Height;
-                _backgroundTexture.Alpha = _background.Alpha;
-                _backgroundTexture.Hue = _background.Hue;
-                _setLootBag.Y = Height - 20;
-                if (isPlayerBackpack)
+                lastGridItemScale = gridItemSize;
+                background.Width = Width - (borderWidth * 2);
+                background.Height = Height - (borderWidth * 2);
+                scrollArea.Width = background.Width;
+                scrollArea.Height = background.Height - TOP_BAR_HEIGHT;
+                openRegularGump.X = Width - openRegularGump.Width - borderWidth;
+                quickDropBackpack.X = openRegularGump.X - quickDropBackpack.Width;
+                sortContents.X = quickDropBackpack.X - sortContents.Width;
+                lastHeight = Height;
+                lastWidth = Width;
+                searchBox.Width = Math.Min(Width - (borderWidth * 2) - openRegularGump.Width - quickDropBackpack.Width - sortContents.Width, 150);
+                backgroundTexture.Width = background.Width;
+                backgroundTexture.Height = background.Height;
+                backgroundTexture.Alpha = background.Alpha;
+                backgroundTexture.Hue = background.Hue;
+                setLootBag.Y = Height - 20;
+                if (IsPlayerBackpack)
                     ProfileManager.CurrentProfile.BackpackGridSize = new Point(Width, Height);
                 RequestUpdateContents();
             }
 
-            if (isPlayerBackpack)
+            if (IsPlayerBackpack)
                 if (Location != ProfileManager.CurrentProfile.BackpackGridPosition)
                     ProfileManager.CurrentProfile.BackpackGridPosition = Location;
 
@@ -638,27 +616,52 @@ namespace ClassicUO.Game.UI.Gumps
 
         private string GetContainerName()
         {
-            string containerName = _container.Name?.Length > 0 ? _container.Name : "a container";
+            string containerName = container.Name?.Length > 0 ? container.Name : "a container";
 
             if (gridSlotManager != null)
             {
                 gridSlotManager.UpdateItems();
-                containerName += $" ({gridSlotManager.ContainerContents.Count})";
+                containerName += $" ({GetRecursiveItemCount(LocalSerial)})";
+            }
+            return containerName;
+        }
+
+        public void UpdateContainerName()
+        {
+            containerNameLabel.Text = GetContainerName();
+        }
+
+        private static int GetRecursiveItemCount(uint serial)
+        {
+            int v = 0;
+
+            Item requestedItem = World.Items.Get(serial);
+            if (requestedItem != null)
+            {
+                for (LinkedObject i = requestedItem.Items; i != null; i = i.Next)
+                {
+                    Item item = (Item)i;
+                    if (item.Items != null)
+                    {
+                        v += GetRecursiveItemCount(item.Serial);
+                    }
+                    v++;
+                }
             }
 
-            return containerName;
+            return v;
         }
 
         public void OptionsUpdated()
         {
             var newAlpha = (float)ProfileManager.CurrentProfile.ContainerOpacity / 100;
-            var newHue = ProfileManager.CurrentProfile.Grid_UseContainerHue ? _container.Hue : ProfileManager.CurrentProfile.AltGridContainerBackgroundHue;
-            _background.Hue = newHue;
-            _background.Alpha = newAlpha;
-            _backgroundTexture.Alpha = _background.Alpha;
-            _backgroundTexture.Hue = _background.Hue;
-            BorderControl.Hue = _background.Hue;
-            BorderControl.Alpha = _background.Alpha;
+            var newHue = ProfileManager.CurrentProfile.Grid_UseContainerHue ? container.Hue : ProfileManager.CurrentProfile.AltGridContainerBackgroundHue;
+            background.Hue = newHue;
+            background.Alpha = newAlpha;
+            backgroundTexture.Alpha = background.Alpha;
+            backgroundTexture.Hue = background.Hue;
+            BorderControl.Hue = background.Hue;
+            BorderControl.Alpha = background.Alpha;
         }
 
         public void HandleObjectMessage(Entity parent, string text, ushort hue)
@@ -700,7 +703,7 @@ namespace ClassicUO.Game.UI.Gumps
                     graphic = 9260; borderSize = 17;
                     break;
                 case BorderStyle.Style8:
-                    if (GumpsLoader.Instance.GetGumpTexture(40303, out var bounds) != null)
+                    if (Client.Game.Gumps.GetGump(40303).Texture != null)
                         graphic = 40303;
                     else
                         graphic = 83;
@@ -710,9 +713,9 @@ namespace ClassicUO.Game.UI.Gumps
                 default:
                 case BorderStyle.Default:
                     BorderControl.DefaultGraphics();
-                    _backgroundTexture.IsVisible = false;
-                    _background.IsVisible = true;
-                    BORDER_WIDTH = 4;
+                    backgroundTexture.IsVisible = false;
+                    background.IsVisible = true;
+                    borderWidth = 4;
                     break;
             }
 
@@ -723,45 +726,45 @@ namespace ClassicUO.Game.UI.Gumps
                 BorderControl.T_Right = (ushort)(graphic + 2);
                 BorderControl.V_Border = (ushort)(graphic + 3);
 
-                _backgroundTexture.Graphic = (ushort)(graphic + 4);
-                _backgroundTexture.IsVisible = true;
-                _backgroundTexture.Hue = _background.Hue;
-                BorderControl.Hue = _background.Hue;
-                BorderControl.Alpha = _background.Alpha;
-                _background.IsVisible = false;
+                backgroundTexture.Graphic = (ushort)(graphic + 4);
+                backgroundTexture.IsVisible = true;
+                backgroundTexture.Hue = background.Hue;
+                BorderControl.Hue = background.Hue;
+                BorderControl.Alpha = background.Alpha;
+                background.IsVisible = false;
 
                 BorderControl.V_Right_Border = (ushort)(graphic + 5);
                 BorderControl.B_Left = (ushort)(graphic + 6);
                 BorderControl.H_Bottom_Border = (ushort)(graphic + 7);
                 BorderControl.B_Right = (ushort)(graphic + 8);
                 BorderControl.BorderSize = borderSize;
-                BORDER_WIDTH = borderSize;
+                borderWidth = borderSize;
             }
-            RePosition();
+            UpdateUIPositions();
             OnResize();
 
             BorderControl.IsVisible = !ProfileManager.CurrentProfile.Grid_HideBorder;
         }
 
-        public void RePosition()
+        private void UpdateUIPositions()
         {
-            _background.X = BORDER_WIDTH;
-            _background.Y = BORDER_WIDTH;
-            _scrollArea.X = _background.X;
-            _scrollArea.Y = TOP_BAR_HEIGHT + _background.Y;
-            _searchBox.Y = BORDER_WIDTH;
-            _quickDropBackpack.Y = BORDER_WIDTH;
-            _sortContents.Y = BORDER_WIDTH;
-            _openRegularGump.Y = BORDER_WIDTH;
-            _searchBox.X = BORDER_WIDTH;
-            _backgroundTexture.X = _background.X;
-            _backgroundTexture.Y = _background.Y;
-            _backgroundTexture.Width = Width - (BORDER_WIDTH * 2);
-            _backgroundTexture.Height = Height - (BORDER_WIDTH * 2);
-            _background.Width = Width - (BORDER_WIDTH * 2);
-            _background.Height = Height - (BORDER_WIDTH * 2);
-            _scrollArea.Width = _background.Width;
-            _scrollArea.Height = _background.Height - TOP_BAR_HEIGHT;
+            background.X = borderWidth;
+            background.Y = borderWidth;
+            scrollArea.X = background.X;
+            scrollArea.Y = TOP_BAR_HEIGHT + background.Y;
+            searchBox.Y = borderWidth;
+            quickDropBackpack.Y = borderWidth;
+            sortContents.Y = borderWidth;
+            openRegularGump.Y = borderWidth;
+            searchBox.X = borderWidth;
+            backgroundTexture.X = background.X;
+            backgroundTexture.Y = background.Y;
+            backgroundTexture.Width = Width - (borderWidth * 2);
+            backgroundTexture.Height = Height - (borderWidth * 2);
+            background.Width = Width - (borderWidth * 2);
+            background.Height = Height - (borderWidth * 2);
+            scrollArea.Width = background.Width;
+            scrollArea.Height = background.Height - TOP_BAR_HEIGHT;
         }
 
         public enum BorderStyle
@@ -777,7 +780,7 @@ namespace ClassicUO.Game.UI.Gumps
             Style8
         }
 
-        public static void Clear()
+        public static void ClearInstance()
         {
             GridSaveSystem.Instance.Clear();
         }
@@ -816,8 +819,11 @@ namespace ClassicUO.Game.UI.Gumps
                 CanMove = true;
                 if (_item != null)
                 {
-                    texture = ArtLoader.Instance.GetStaticTexture(_item.DisplayedGraphic, out bounds);
-                    rect = ArtLoader.Instance.GetRealArtBounds(_item.DisplayedGraphic);
+                    ref readonly var text = ref Client.Game.Arts.GetArt((uint)(_item.DisplayedGraphic));
+                    texture = text.Texture;
+                    bounds = text.UV;
+
+                    rect = Client.Game.Arts.GetRealArtBounds((uint)_item.DisplayedGraphic);
                 }
                 #endregion
 
@@ -846,12 +852,12 @@ namespace ClassicUO.Game.UI.Gumps
 
             public void Resize()
             {
-                Width = GRID_ITEM_SIZE;
-                Height = GRID_ITEM_SIZE;
-                hit.Width = GRID_ITEM_SIZE;
-                hit.Height = GRID_ITEM_SIZE;
-                background.Width = GRID_ITEM_SIZE;
-                background.Height = GRID_ITEM_SIZE;
+                Width = gridItemSize;
+                Height = gridItemSize;
+                hit.Width = gridItemSize;
+                hit.Height = gridItemSize;
+                background.Width = gridItemSize;
+                background.Height = gridItemSize;
             }
 
             public void SetGridItem(Item item)
@@ -868,10 +874,13 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else
                 {
-                    texture = ArtLoader.Instance.GetStaticTexture(item.DisplayedGraphic, out bounds);
-                    rect = ArtLoader.Instance.GetRealArtBounds(item.DisplayedGraphic);
-
                     _item = item;
+                    ref readonly var text = ref Client.Game.Arts.GetArt((uint)(_item.DisplayedGraphic));
+                    texture = text.Texture;
+                    bounds = text.UV;
+
+                    rect = Client.Game.Arts.GetRealArtBounds(_item.DisplayedGraphic);
+
                     LocalSerial = item.Serial;
                     int itemAmt = (_item.ItemData.IsStackable ? _item.Amount : 1);
                     if (itemAmt > 1)
@@ -955,6 +964,11 @@ namespace ClassicUO.Game.UI.Gumps
                         MultiItemMoveGump.AddMultiItemMoveGumpToUI(gridContainer.X - 200, gridContainer.Y);
                         SelectHighlight = true;
                         Mouse.CancelDoubleClick = true;
+                    }
+                    else if (Keyboard.Shift && _item != null)
+                    {
+                        AutoLootManager.Instance.AddLootItem(_item.Graphic, _item.Hue, _item.Name);
+                        GameActions.Print($"Added this item to auto loot.");
                     }
                     else if (_item != null)
                     {
@@ -1062,11 +1076,9 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         hit.ClearTooltip();
                         List<CustomToolTip> toolTipList = new List<CustomToolTip>();
-                        toolTipThis = new CustomToolTip(_item, Mouse.Position.X + 5, Mouse.Position.Y + 5, hit);
+                        toolTipThis = new CustomToolTip(_item, Mouse.Position.X + 5, Mouse.Position.Y + 5, hit, compareTo: compItem);
                         toolTipList.Add(toolTipThis);
-                        //UIManager.Add(toolTipThis);
                         toolTipitem1 = new CustomToolTip(compItem, toolTipThis.X + toolTipThis.Width + 10, toolTipThis.Y, hit, "<basefont color=\"orange\">Equipped Item<br>");
-                        //UIManager.Add(toolTipitem1);
                         toolTipList.Add(toolTipitem1);
 
                         if (CUOEnviroment.Debug)
@@ -1248,8 +1260,7 @@ namespace ClassicUO.Game.UI.Gumps
                         ),
                         hueVector
                     );
-                    if (count != null)
-                        count.Draw(batcher, x + count.X, y + count.Y);
+                    count?.Draw(batcher, x + count.X, y + count.Y);
                 }
                 return true;
             }
@@ -1289,7 +1300,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 for (int i = 0; i < amount; i++)
                 {
-                    GridItem GI = new GridItem(0, GRID_ITEM_SIZE, container, gridContainer, i);
+                    GridItem GI = new GridItem(0, gridItemSize, container, gridContainer, i);
                     gridSlots.Add(i, GI);
                     area.Add(GI);
                 }
@@ -1389,15 +1400,15 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         continue;
                     }
-                    if (x + GRID_ITEM_SIZE >= area.Width - 14) //14 is the scroll bar width
+                    if (x + gridItemSize >= area.Width - 14) //14 is the scroll bar width
                     {
                         x = X_SPACING;
-                        y += GRID_ITEM_SIZE + Y_SPACING;
+                        y += gridItemSize + Y_SPACING;
                     }
                     slot.Value.X = x;
                     slot.Value.Y = y;
                     slot.Value.Resize();
-                    x += GRID_ITEM_SIZE + X_SPACING;
+                    x += gridItemSize + X_SPACING;
                 }
             }
 
@@ -1801,17 +1812,15 @@ namespace ClassicUO.Game.UI.Gumps
 
             public override void Update()
             {
+                if (IsDisposed)
+                {
+                    return;
+                }
+
                 if (_container == null || _container.IsDestroyed || _container.OnGround && _container.Distance > 3)
                 {
                     Dispose();
 
-                    return;
-                }
-
-                base.Update();
-
-                if (IsDisposed)
-                {
                     return;
                 }
 
@@ -1870,7 +1879,7 @@ namespace ClassicUO.Game.UI.Gumps
                 enabled = true;
             }
 
-            public bool SaveContainer(uint serial, Dictionary<int, GridItem> gridSlots, int width, int height, int lastX = 100, int lastY = 100, bool? useOriginalContainer = false)
+            public bool SaveContainer(uint serial, Dictionary<int, GridItem> gridSlots, int width, int height, int lastX = 100, int lastY = 100, bool? useOriginalContainer = false, bool autoSort = false)
             {
                 if (!enabled)
                     return false;
@@ -1893,6 +1902,7 @@ namespace ClassicUO.Game.UI.Gumps
                 thisContainer.SetAttributeValue("lastX", lastX.ToString());
                 thisContainer.SetAttributeValue("lastY", lastY.ToString());
                 thisContainer.SetAttributeValue("useOriginalContainer", useOriginalContainer.ToString());
+                thisContainer.SetAttributeValue("autoSort", autoSort.ToString());
 
                 foreach (var slot in gridSlots)
                 {
@@ -1957,7 +1967,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             public Point GetLastSize(uint container)
             {
-                Point lastSize = new Point(GridContainer.DEFAULT_WIDTH, GridContainer.DEFAULT_HEIGHT);
+                Point lastSize = new Point(GetWidth(), GetHeight());
 
                 XElement thisContainer = rootElement.Element("container_" + container.ToString());
                 if (thisContainer != null)
@@ -1977,7 +1987,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             public Point GetLastPosition(uint container)
             {
-                Point LastPos = new Point(GridContainer._lastX, GridContainer._lastY);
+                Point LastPos = new Point(GridContainer.lastX, GridContainer.lastY);
 
                 XElement thisContainer = rootElement.Element("container_" + container.ToString());
                 if (thisContainer != null)
@@ -2011,6 +2021,23 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
                 return useOriginalContainer;
+            }
+
+            public bool AutoSortContainer(uint container)
+            {
+                bool autoSort = false;
+
+                XElement thisContainer = rootElement.Element("container_" + container.ToString());
+                if (thisContainer != null)
+                {
+                    XAttribute attribute = thisContainer.Attribute("autoSort");
+                    if (attribute != null)
+                    {
+                        bool.TryParse(attribute.Value, out autoSort);
+                    }
+                }
+
+                return autoSort;
             }
 
             private void RemoveOldContainers()

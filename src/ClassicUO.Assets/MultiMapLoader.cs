@@ -33,7 +33,6 @@
 using ClassicUO.IO;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
-using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -44,7 +43,7 @@ namespace ClassicUO.Assets
     public class MultiMapLoader : UOFileLoader
     {
         private static MultiMapLoader _instance;
-        private readonly UOFileMul[] _facets = new UOFileMul[256];
+        private UOFileMul[] _facets;
         private UOFile _file;
 
         private MultiMapLoader()
@@ -70,23 +69,20 @@ namespace ClassicUO.Assets
                     {
                         _file = new UOFile(path, true);
                     }
+                    
+                    var facetFiles = Directory.GetFiles(UOFileManager.BasePath, "facet0*.mul", SearchOption.TopDirectoryOnly);
+                    _facets = new UOFileMul[facetFiles.Length];
 
-                    for (int i = 0; i < _facets.Length; i++)
+                    for (int i = 0; i < facetFiles.Length; i++)
                     {
-                        path = UOFileManager.GetUOFilePath($"facet0{i}.mul");
-
-                        if (File.Exists(path))
-                        {
-                            _facets[i] = new UOFileMul(path);
-                        }
+                        _facets[i] = new UOFileMul(facetFiles[i]);
                     }
                 }
             );
         }
 
-        public unsafe Texture2D LoadMap
+        public unsafe MultiMapInfo LoadMap
         (
-            GraphicsDevice device,
             int width,
             int height,
             int startx,
@@ -99,7 +95,7 @@ namespace ClassicUO.Assets
             {
                 Log.Warn("MultiMap.rle is not loaded!");
 
-                return null;
+                return default;
             }
 
             _file.Seek(0);
@@ -111,7 +107,7 @@ namespace ClassicUO.Assets
             {
                 Log.Warn("Failed to load bounds from MultiMap.rle");
 
-                return null;
+                return default;
             }
 
             int mapSize = width * height;
@@ -186,65 +182,55 @@ namespace ClassicUO.Assets
                 }
             }
 
-            if (maxPixelValue >= 1)
+            if (maxPixelValue <= 0)
             {
-                int s = Marshal.SizeOf<HuesGroup>();
-                IntPtr ptr = Marshal.AllocHGlobal(s * HuesLoader.Instance.HuesRange.Length);
-
-                for (int i = 0; i < HuesLoader.Instance.HuesRange.Length; i++)
-                {
-                    Marshal.StructureToPtr(HuesLoader.Instance.HuesRange[i], ptr + i * s, false);
-                }
-
-                ushort* huesData = (ushort*) (byte*) (ptr + 30800);
-
-                uint[] colorTable = System.Buffers.ArrayPool<uint>.Shared.Rent(maxPixelValue);
-                Texture2D texture = new Texture2D(device, width, height, false, SurfaceFormat.Color);
-
-                try
-                {
-                    int colorOffset = 31 * maxPixelValue;
-
-                    for (int i = 0; i < maxPixelValue; i++)
-                    {
-                        colorOffset -= 31;
-                        colorTable[i] = HuesHelper.Color16To32(huesData[colorOffset / maxPixelValue]) | 0xFF_00_00_00;
-                    }
-
-                    uint[] worldMap = System.Buffers.ArrayPool<uint>.Shared.Rent(mapSize);
-
-                    try
-                    {
-                        for (int i = 0; i < mapSize; i++)
-                        {
-                            byte bytepic = data[i];
-
-                            worldMap[i] = bytepic != 0 ? colorTable[bytepic - 1] : 0;
-                        }
-
-                        texture.SetData(worldMap, 0, width * height);
-                    }
-                    finally
-                    {
-                        System.Buffers.ArrayPool<uint>.Shared.Return(worldMap, true);
-                    }
-                }
-                finally
-                {
-                    Marshal.FreeHGlobal(ptr);
-
-                    System.Buffers.ArrayPool<uint>.Shared.Return(colorTable, true);
-                }
-
-                return texture;
+                return default;
             }
 
-            return null;
+            int s = Marshal.SizeOf<HuesGroup>();
+            IntPtr ptr = Marshal.AllocHGlobal(s * HuesLoader.Instance.HuesRange.Length);
+
+            for (int i = 0; i < HuesLoader.Instance.HuesRange.Length; i++)
+            {
+                Marshal.StructureToPtr(HuesLoader.Instance.HuesRange[i], ptr + i * s, false);
+            }
+
+            ushort* huesData = (ushort*)(byte*)(ptr + 30800);
+
+            Span<uint> colorTable = stackalloc uint[byte.MaxValue];
+            var pixels = new uint[mapSize];
+
+            try
+            {
+                int colorOffset = 31 * maxPixelValue;
+
+                for (int i = 0; i < maxPixelValue; i++)
+                {
+                    colorOffset -= 31;
+                    colorTable[i] = HuesHelper.Color16To32(huesData[colorOffset / maxPixelValue]) | 0xFF_00_00_00;
+                }
+
+                for (int i = 0; i < mapSize; i++)
+                {
+                    pixels[i] = data[i] != 0 ? colorTable[data[i] - 1] : 0;
+                }
+            }
+            finally
+            {
+                if (ptr != IntPtr.Zero)
+                    Marshal.FreeHGlobal(ptr);
+            }
+
+            return new MultiMapInfo()
+            {
+                Pixels = pixels,
+                Width = width,
+                Height = height,
+            };
         }
 
-        public Texture2D LoadFacet
+        public MultiMapInfo LoadFacet
         (
-            GraphicsDevice device,
             int facet,
             int width,
             int height,
@@ -254,9 +240,9 @@ namespace ClassicUO.Assets
             int endy
         )
         {
-            if (_file == null || facet < 0 || facet > MapLoader.MAPS_COUNT || _facets[facet] == null)
+            if (_file == null || facet < 0 || facet > MapLoader.MAPS_COUNT || facet >= _facets.Length || _facets[facet] == null)
             {
-                return null;
+                return default;
             }
 
             _facets[facet].Seek(0);
@@ -267,7 +253,7 @@ namespace ClassicUO.Assets
 
             if (w < 1 || h < 1)
             {
-                return null;
+                return default;
             }
 
             int startX = startx;
@@ -279,44 +265,44 @@ namespace ClassicUO.Assets
             int pwidth = endX - startX;
             int pheight = endY - startY;
 
-            uint[] map = System.Buffers.ArrayPool<uint>.Shared.Rent(pwidth * pheight);
-            Texture2D texture = new Texture2D(device, pwidth, pheight, false, SurfaceFormat.Color);
+            var pixels = new uint[pwidth * pheight];
 
-            try
+            for (int y = 0; y < h; y++)
             {
-                for (int y = 0; y < h; y++)
+                int x = 0;
+
+                int colorCount = _facets[facet].ReadInt() / 3;
+
+                for (int i = 0; i < colorCount; i++)
                 {
-                    int x = 0;
+                    int size = _facets[facet].ReadByte();
 
-                    int colorCount = _facets[facet].ReadInt() / 3;
+                    uint color = HuesHelper.Color16To32(_facets[facet].ReadUShort()) | 0xFF_00_00_00;
 
-                    for (int i = 0; i < colorCount; i++)
+                    for (int j = 0; j < size; j++)
                     {
-                        int size = _facets[facet].ReadByte();
-
-                        uint color = HuesHelper.Color16To32(_facets[facet].ReadUShort()) | 0xFF_00_00_00;
-
-                        for (int j = 0; j < size; j++)
+                        if (x >= startX && x < endX && y >= startY && y < endY)
                         {
-                            if (x >= startX && x < endX && y >= startY && y < endY)
-                            {
-                                map[(y - startY) * pwidth + (x - startX)] = color;
-                            }
-
-                            x++;
+                            pixels[(y - startY) * pwidth + (x - startX)] = color;
                         }
+
+                        x++;
                     }
                 }
-
-                texture.SetData(map, 0, width * height);
             }
-            finally
+
+            return new MultiMapInfo()
             {
-                System.Buffers.ArrayPool<uint>.Shared.Return(map, true);
-            }
-
-
-            return texture;
+                Pixels = pixels,
+                Width = pwidth,
+                Height = pheight,
+            };
         }
+    }
+
+    public ref struct MultiMapInfo
+    {
+        public Span<uint> Pixels;
+        public int Width, Height;
     }
 }

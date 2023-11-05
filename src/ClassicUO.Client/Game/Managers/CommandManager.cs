@@ -148,7 +148,6 @@ namespace ClassicUO.Game.Managers
             });
 
             Register("version", s => { UIManager.Add(new VersionHistory()); });
-            Register("mockup", s => { Configuration.ProfileManager.CurrentProfile.ShowTooltipParserMockup ^= true; });
             Register("rain", s => { Client.Game.GetScene<ClassicUO.Game.Scenes.GameScene>()?.Weather.Generate(WeatherType.WT_RAIN, 30, 75); });
 
             Register("marktile", s =>

@@ -154,7 +154,7 @@ namespace ClassicUO.Renderer
         // For IFontStashRenderer
         public void Draw(Texture2D texture, Vector2 position, Rectangle? sourceRectangle, Color color, float rotation, Vector2 scale, float depth)
         {
-            Vector3 hueVector = new Vector3(0, ShaderHueTranslator.SHADER_TEXT_HUE, 1f);
+            Vector3 hueVector = new Vector3(0, ShaderHueTranslator.SHADER_TEXT_HUE, MathHelper.Clamp(color.A / 255f, 0f, 1f));
 
             float sourceX, sourceY, sourceW, sourceH;
             if (sourceRectangle.HasValue)

@@ -48,7 +48,8 @@ using ClassicUO.Resources;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System.ComponentModel;
+using System.Threading.Tasks;
+using System.Net.Http;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -190,8 +191,8 @@ namespace ClassicUO.Game.UI.Gumps
         private InputField _healthIndicatorPercentage, _healthIndicatorWidth, _tooltipHeaderFormat, _skillProgressBarFormat;
         private ModernColorPicker.HueDisplay _mainWindowHuePicker, _spellIconHotkeyHue, _tooltipBGHue;
         private HSliderBar _spellIconScale, _journalFontSize, _tooltipFontSize, _gameWindowSideChatFontSize, _overheadFontSize, _overheadTextWidth, _textStrokeSize, _gridHightlightLineSize, _maxJournalEntries;
-        private HSliderBar _healthLineSizeMultiplier;
-        private Combobox _journalFontSelection, _tooltipFontSelect, _gameWindowSideChatFont, _overheadFont;
+        private HSliderBar _healthLineSizeMultiplier, _regularPlayerAlpha, _infoBarFontSize;
+        private Combobox _journalFontSelection, _tooltipFontSelect, _gameWindowSideChatFont, _overheadFont, _infoBarFont;
 
         #region Cooldowns
         private InputField _coolDownX, _coolDownY;
@@ -4055,6 +4056,9 @@ namespace ClassicUO.Game.UI.Gumps
                     section.PopIndent();
                 } //Hidden body mods
 
+                section.Add(AddLabel(null, "Regular player opacity", 0, 0));
+                section.AddRight(_regularPlayerAlpha = AddHSlider(null, 0, 100, _currentProfile.PlayerConstantAlpha, 0, 0, 200));
+
                 {
                     section.Add(AddLabel(null, "Auto Follow Distance", 0, 0));
                     section.AddRight(
@@ -4124,7 +4128,7 @@ namespace ClassicUO.Game.UI.Gumps
                 section.AddRight(_useModernShop = AddCheckBox(null, "", _currentProfile.UseModernShopGump, 0, 0));
 
                 section.Add(AddLabel(null, "TTF Font text border size", 0, 0));
-                section.AddRight(_textStrokeSize = AddHSlider(null, 0, 5, _currentProfile.TextBorderSize, 0, 0, 150));
+                section.AddRight(_textStrokeSize = AddHSlider(null, 0, 2, _currentProfile.TextBorderSize, 0, 0, 150));
 
                 section.Add(AddLabel(null, "Display skill progress bar on skill changes", 0, 0));
                 section.AddRight(_skillProgressBarOnChange = AddCheckBox(null, "", _currentProfile.DisplaySkillBarOnChange, 0, 0));
@@ -4134,11 +4138,73 @@ namespace ClassicUO.Game.UI.Gumps
                 section.AddRight(_skillProgressBarFormat = AddInputField(null, 0, 0, 250, TEXTBOX_HEIGHT));
                 _skillProgressBarFormat.SetText(_currentProfile.SkillBarFormat);
 
+
                 section.Add(AddLabel(null, "Display spell indicators", 0, 0));
-                section.AddRight(_displaySpellIndicators = AddCheckBox(null, "", _currentProfile.EnableSpellIndicators, 0 ,0));
+                section.AddRight(_displaySpellIndicators = AddCheckBox(null, "", _currentProfile.EnableSpellIndicators, 0, 0));
+                NiceButton _importSpellConfig;
+                section.AddRight(_importSpellConfig = new NiceButton(0, 0, 150, TEXTBOX_HEIGHT, ButtonAction.Activate, "Import from url") { IsSelectable = false, DisplayBorder = true });
+                _importSpellConfig.MouseUp += (s, e) =>
+                {
+                    if (e.Button == MouseButtonType.Left)
+                    {
+                        UIManager.Add(
+                            new InputRequest("Enter the url for the spell config. /c[red]This will override your current config.", "Download", "Cancel", (r, s) =>
+                            {
+                                if (r == InputRequest.Result.BUTTON1 && !string.IsNullOrEmpty(s))
+                                {
+                                    if (Uri.TryCreate(s, UriKind.Absolute, out var uri))
+                                    {
+                                        GameActions.Print("Attempting to download spell config..");
+                                        Task.Factory.StartNew(() =>
+                                        {
+                                            try
+                                            {
+                                                using HttpClient httpClient = new HttpClient();
+                                                string result = httpClient.GetStringAsync(uri).Result;
+
+                                                if (SpellVisualRangeManager.Instance.LoadFromString(result))
+                                                {
+                                                    GameActions.Print("Succesfully downloaded new spell config.");
+                                                }
+                                            } 
+                                            catch(Exception ex)
+                                            {
+                                                GameActions.Print($"Failed to download the spell config. ({ex.Message})");
+                                            }
+                                        });
+                                    }
+                                }
+                            })
+                            {
+                                X = (Client.Game.Window.ClientBounds.Width >> 1 )- 50,
+                                Y = (Client.Game.Window.ClientBounds.Height >> 1 )- 50
+                            }
+                            );
+                    }
+                };
+
+
+                NiceButton autoLoot;
+                section.Add(autoLoot = new NiceButton(0, 0, 150, TEXTBOX_HEIGHT, ButtonAction.Activate, "Open auto loot options") {  IsSelectable = false, DisplayBorder = true });
+                autoLoot.MouseUp += (s, e) => {
+                    if(e.Button == MouseButtonType.Left)
+                    {
+                        AutoLootOptions.AddToUI();
+                    }
+                };
 
                 rightArea.Add(section);
-                startY += section.Height + SPACING + 15;
+
+                section.Add(AddLabel(null, "InfoBar font", 0, 0));
+                section.AddRight(_infoBarFont = GenerateFontSelector(_currentProfile.InfoBarFont));
+
+                section.PushIndent();
+                section.Add(AddLabel(null, "InfoBar font size", 0, 0));
+                section.AddRight(_infoBarFontSize = AddHSlider(null, 5, 40, _currentProfile.InfoBarFontSize, 0, 0, 200));
+                section.PopIndent();
+
+
+                startY += section.Height + SPACING + 35;
             } //Misc
 
             {
@@ -4754,6 +4820,11 @@ namespace ClassicUO.Game.UI.Gumps
                     UIManager.Add(new ResizableJournal());
                 }
             }
+            _currentProfile.InfoBarFont = TrueTypeLoader.Instance.Fonts[_infoBarFont.SelectedIndex];
+            _currentProfile.InfoBarFontSize = _infoBarFontSize.Value;
+
+            _currentProfile.PlayerConstantAlpha = _regularPlayerAlpha.Value;
+
             _currentProfile.EnableSpellIndicators = _displaySpellIndicators.IsChecked;
 
             _currentProfile.DisplaySkillBarOnChange = _skillProgressBarOnChange.IsChecked;

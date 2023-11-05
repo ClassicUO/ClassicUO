@@ -2,12 +2,13 @@
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Gumps;
+using System;
+using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading;
-using System.Windows.Forms;
 
 namespace ClassicUO.Game.Managers
 {
@@ -150,81 +151,96 @@ namespace ClassicUO.Game.Managers
         {
             ToolTipOverrideData[] allData = GetAllToolTipOverrides();
 
-            Thread t = new Thread(() =>
+            if (!CUOEnviroment.IsUnix)
             {
-                SaveFileDialog saveFileDialog1 = new SaveFileDialog();
-                saveFileDialog1.Filter = "Json|*.json";
-                saveFileDialog1.Title = "Save tooltip override settings";
-                saveFileDialog1.ShowDialog();
-
-                string result = JsonSerializer.Serialize(allData);
-
-                // If the file name is not an empty string open it for saving.
-                if (saveFileDialog1.FileName != "")
+                Thread t = new Thread(() =>
                 {
-                    System.IO.FileStream fs =
-                        (System.IO.FileStream)saveFileDialog1.OpenFile();
-                    // NOTE that the FilterIndex property is one-based.
-                    switch (saveFileDialog1.FilterIndex)
-                    {
-                        default:
-                            byte[] data = Encoding.UTF8.GetBytes(result);
-                            fs.Write(data, 0, data.Length);
-                            break;
-                    }
+                    System.Windows.Forms.SaveFileDialog saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
+                    saveFileDialog1.Filter = "Json|*.json";
+                    saveFileDialog1.Title = "Save tooltip override settings";
+                    saveFileDialog1.ShowDialog();
 
-                    fs.Close();
-                }
-            });
-            t.SetApartmentState(ApartmentState.STA);
-            t.Start();
+                    string result = JsonSerializer.Serialize(allData);
+
+                    // If the file name is not an empty string open it for saving.
+                    if (saveFileDialog1.FileName != "")
+                    {
+                        System.IO.FileStream fs =
+                            (System.IO.FileStream)saveFileDialog1.OpenFile();
+                        // NOTE that the FilterIndex property is one-based.
+                        switch (saveFileDialog1.FilterIndex)
+                        {
+                            default:
+                                byte[] data = Encoding.UTF8.GetBytes(result);
+                                fs.Write(data, 0, data.Length);
+                                break;
+                        }
+
+                        fs.Close();
+                    }
+                });
+                t.SetApartmentState(ApartmentState.STA);
+                t.Start();
+            }
         }
 
         public static void ImportOverrideSettings()
         {
-            Thread t = new Thread(() =>
+            if (!CUOEnviroment.IsUnix)
             {
-                OpenFileDialog openFileDialog = new OpenFileDialog();
-                openFileDialog.Filter = "Json|*.json";
-                openFileDialog.Title = "Import tooltip override settings";
-                openFileDialog.ShowDialog();
-
-                // If the file name is not an empty string open it for saving.
-                if (openFileDialog.FileName != "")
+                Thread t = new Thread(() =>
                 {
-                    // NOTE that the FilterIndex property is one-based.
-                    switch (openFileDialog.FilterIndex)
+                    System.Windows.Forms.OpenFileDialog openFileDialog = new System.Windows.Forms.OpenFileDialog();
+                    openFileDialog.Filter = "Json|*.json";
+                    openFileDialog.Title = "Import tooltip override settings";
+                    openFileDialog.ShowDialog();
+
+                    // If the file name is not an empty string open it for saving.
+                    if (openFileDialog.FileName != "")
                     {
-                        default:
-                            try
-                            {
-                                string result = File.ReadAllText(openFileDialog.FileName);
+                        // NOTE that the FilterIndex property is one-based.
+                        switch (openFileDialog.FilterIndex)
+                        {
+                            default:
+                                try
+                                {
+                                    string result = File.ReadAllText(openFileDialog.FileName);
 
-                                ToolTipOverrideData[] imported = JsonSerializer.Deserialize<ToolTipOverrideData[]>(result);
+                                    ToolTipOverrideData[] imported = JsonSerializer.Deserialize<ToolTipOverrideData[]>(result);
 
-                                foreach (ToolTipOverrideData importedData in imported)
-                                    //GameActions.Print(importedData.searchText);
-                                    new ToolTipOverrideData(ProfileManager.CurrentProfile.ToolTipOverride_SearchText.Count, importedData.searchText, importedData.FormattedText, importedData.Min1, importedData.Max1, importedData.Min2, importedData.Max2, (byte)importedData.ItemLayer).Save();
+                                    foreach (ToolTipOverrideData importedData in imported)
+                                        //GameActions.Print(importedData.searchText);
+                                        new ToolTipOverrideData(ProfileManager.CurrentProfile.ToolTipOverride_SearchText.Count, importedData.searchText, importedData.FormattedText, importedData.Min1, importedData.Max1, importedData.Min2, importedData.Max2, (byte)importedData.ItemLayer).Save();
 
-                                ToolTipOverideMenu.Reopen = true;
+                                    ToolTipOverideMenu.Reopen = true;
 
-                            } catch(System.Exception e)
-                            {
-                                GameActions.Print("It looks like there was an error trying to import your override settings.", 32);
-                            }
-                            break;
+                                }
+                                catch (System.Exception e)
+                                {
+                                    GameActions.Print("It looks like there was an error trying to import your override settings.", 32);
+                                }
+                                break;
+                        }
                     }
-                }
-            });
-            t.SetApartmentState(ApartmentState.STA);
-            t.Start();
+                });
+                t.SetApartmentState(ApartmentState.STA);
+                t.Start();
+            }
         }
 
-        public static string ProcessTooltipText(uint serial)
+        public static string ProcessTooltipText(uint serial, uint compareTo = uint.MinValue)
         {
             string tooltip = "";
+            ItemPropertiesData itemPropertiesData;
 
-            ItemPropertiesData itemPropertiesData = new ItemPropertiesData(World.Items.Get(serial));
+            if (compareTo != uint.MinValue)
+            {
+                itemPropertiesData = new ItemPropertiesData(World.Items.Get(serial), World.Items.Get(compareTo));
+            }
+            else
+            {
+                itemPropertiesData = new ItemPropertiesData(World.Items.Get(serial));
+            }
 
             ToolTipOverrideData[] result = GetAllToolTipOverrides();
 
@@ -248,11 +264,32 @@ namespace ClassicUO.Game.Managers
                                         {
                                             try
                                             {
-                                                tooltip += string.Format(overrideData.FormattedText, property.Name, property.FirstValue.ToString(), property.SecondValue.ToString(), property.OriginalString) + "\n";
+                                                if (compareTo != uint.MinValue)
+                                                {
+                                                    tooltip += string.Format(
+                                                        overrideData.FormattedText, 
+                                                        property.Name, 
+                                                        property.FirstValue.ToString(), 
+                                                        property.SecondValue.ToString(), 
+                                                        property.OriginalString, 
+                                                        property.FirstDiff != 0 ? "("+property.FirstDiff.ToString()+")" : "",
+                                                        property.SecondDiff != 0 ? "("+property.SecondDiff.ToString()+")" : ""
+                                                        ) + "\n";
+                                                }
+                                                else
+                                                {
+                                                    tooltip += string.Format(
+                                                        overrideData.FormattedText, 
+                                                        property.Name, 
+                                                        property.FirstValue.ToString(), 
+                                                        property.SecondValue.ToString(), 
+                                                        property.OriginalString, "", ""
+                                                        ) + "\n";
+                                                }
                                                 handled = true;
                                                 break;
                                             }
-                                            catch (System.FormatException e) { }
+                                            catch (System.FormatException e) { Console.WriteLine(e.ToString()); }
                                         }
                             }
                     }

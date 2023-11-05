@@ -162,6 +162,7 @@ namespace ClassicUO.Configuration
         public bool EnableBlackWhiteEffect { get; set; } = true;
         public ushort HiddenBodyHue { get; set; } = 0x038E;
         public byte HiddenBodyAlpha { get; set; } = 40;
+        public int PlayerConstantAlpha { get; set; } = 100;
 
         // tooltip
         public bool UseTooltip { get; set; } = true;
@@ -488,14 +489,13 @@ namespace ClassicUO.Configuration
         public int HealthLineSizeMultiplier { get; set; } = 1;
 
         public bool OpenHealthBarForLastAttack { get; set; } = true;
-        [JsonConverter(typeof(Point2Converter))] public Point LastTargetHealthBarPos { get; set; } = Point.Zero;
+        [JsonConverter(typeof(Point2Converter))] 
+        public Point LastTargetHealthBarPos { get; set; } = Point.Zero;
         public ushort ToolTipBGHue { get; set; } = 0;
 
         public string LastVersionHistoryShown { get; set; }
 
         public int AdvancedSkillsGumpHeight { get; set; } = 310;
-
-        public bool ShowTooltipParserMockup { get; set; } = false;
 
         #region ToolTip Overrides
         public List<string> ToolTipOverride_SearchText { get; set; } = new List<string>() { "Physical Res", "Fire Res", "Cold Res", "Poison Res", "Energy Res" };
@@ -509,8 +509,6 @@ namespace ClassicUO.Configuration
 
         public string TooltipHeaderFormat { get; set; } = "/c[yellow]{0}";
 
-        public bool AutoSortGridContainers { get; set; } = false;
-
         public bool DisplaySkillBarOnChange { get; set; } = true;
         public string SkillBarFormat { get; set; } = "{0}: {1} / {2}";
 
@@ -520,7 +518,19 @@ namespace ClassicUO.Configuration
 
         public bool EnableSpellIndicators { get; set; } = true;
 
+        public bool EnableAutoLoot { get; set; } = false;
+
         public static uint GumpsVersion { get; private set; }
+
+        [JsonConverter(typeof(Point2Converter))] 
+        public Point InfoBarSize { get; set; } = new Point(400, 20);
+        public bool InfoBarLocked { get; set; } = false;
+        public string InfoBarFont { get; set; } = "Roboto-Regular";
+        public int InfoBarFontSize { get; set; } = 18;
+
+        public int LastJournalTab { get; set; } = 0;
+
+
 
         public void Save(string path, bool saveGumps = true)
         {
@@ -845,7 +855,7 @@ namespace ClassicUO.Configuration
                                 case GumpType.GridContainer:
                                     ushort ogContainer = ushort.Parse(xml.GetAttribute("ogContainer"));
                                     gump = new GridContainer(serial, ogContainer);
-                                    if (((GridContainer)gump).isPlayerBackpack)
+                                    if (((GridContainer)gump).IsPlayerBackpack)
                                     {
                                         x = ProfileManager.CurrentProfile.BackpackGridPosition.X;
                                         y = ProfileManager.CurrentProfile.BackpackGridPosition.Y;

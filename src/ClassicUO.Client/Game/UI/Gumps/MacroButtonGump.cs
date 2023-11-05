@@ -40,6 +40,7 @@ using ClassicUO.Assets;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System.Data.SqlClient;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -138,8 +139,9 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (value.HasValue)
                 {
-                    var texture = GumpsLoader.Instance.GetGumpTexture(value.Value, out _bounds);
-                    IsPartialHue = texture == null ? false : TileDataLoader.Instance.StaticData[value.Value].IsPartialHue;
+                    ref readonly var texture = ref Client.Game.Gumps.GetGump(value.Value);
+                    _bounds = texture.UV;
+                    IsPartialHue = texture.Texture == null ? false : TileDataLoader.Instance.StaticData[value.Value].IsPartialHue;
                 }
 
                 Width = (int)(_bounds.Width * factor);
@@ -242,15 +244,16 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (Graphic.HasValue)
             {
-                var texture = GumpsLoader.Instance.GetGumpTexture(Graphic.Value, out Rectangle bounds);
-                if (texture != null)
+                //var texture = GumpsLoader.Instance.GetGumpTexture(, out Rectangle bounds);
+                ref readonly var texture = ref Client.Game.Gumps.GetGump(Graphic.Value);
+                if (texture.Texture != null)
                 {
                     Rectangle rect = new Rectangle(x, y, Width, Height);
                     batcher.Draw
                     (
-                        texture,
+                        texture.Texture,
                         rect,
-                        bounds,
+                        texture.UV,
                         hueVector
                     );
                 }

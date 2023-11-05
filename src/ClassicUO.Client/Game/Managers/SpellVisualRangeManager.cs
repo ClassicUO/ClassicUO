@@ -1,10 +1,8 @@
-﻿using ClassicUO.Assets;
-using ClassicUO.Configuration;
+﻿using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Renderer;
-using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -18,18 +16,21 @@ namespace ClassicUO.Game.Managers
 {
     internal class SpellVisualRangeManager
     {
-        public static SpellVisualRangeManager Instance { get; private set; } = new SpellVisualRangeManager();
+        public static SpellVisualRangeManager Instance => instance ??= new SpellVisualRangeManager();
 
         public Vector2 LastCursorTileLoc { get; set; } = Vector2.Zero;
-
         public DateTime LastSpellTime { get; private set; } = DateTime.Now;
 
         private string savePath = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Profiles", "SpellVisualRange.json");
+        private string overridePath = Path.Combine(ProfileManager.ProfilePath, "SpellVisualRange.json");
 
         private Dictionary<int, SpellRangeInfo> spellRangeCache = new Dictionary<int, SpellRangeInfo>();
+        private Dictionary<int, SpellRangeInfo> spellRangeOverrideCache = new Dictionary<int, SpellRangeInfo>();
         private Dictionary<string, SpellRangeInfo> spellRangePowerWordCache = new Dictionary<string, SpellRangeInfo>();
 
         private bool loaded = false;
+        private static SpellVisualRangeManager instance;
+
         private bool isCasting { get; set; } = false;
         private SpellRangeInfo currentSpell { get; set; }
 
@@ -105,6 +106,7 @@ namespace ClassicUO.Game.Managers
         public void OnSceneUnload()
         {
             MessageManager.RawMessageReceived -= OnRawMessageReceived;
+            instance = null;
         }
         #endregion
 
@@ -212,7 +214,6 @@ namespace ClassicUO.Game.Managers
         private void Load()
         {
             spellRangeCache.Clear();
-
             Task.Factory.StartNew(() =>
             {
                 if (!File.Exists(savePath))
@@ -246,6 +247,83 @@ namespace ClassicUO.Game.Managers
             });
         }
 
+        private void LoadOverrides()
+        {
+            spellRangeOverrideCache.Clear();
+
+            if (File.Exists(overridePath))
+            {
+                try
+                {
+                    string data = File.ReadAllText(overridePath);
+                    SpellRangeInfo[] fileData = JsonSerializer.Deserialize<SpellRangeInfo[]>(data);
+
+                    foreach (var entry in fileData)
+                    {
+                        spellRangeOverrideCache.Add(entry.ID, entry);
+                    }
+
+                    foreach (var entry in spellRangeOverrideCache.Values)
+                    {
+                        if (string.IsNullOrEmpty(entry.PowerWords))
+                        {
+                            SpellDefinition spellD = SpellDefinition.FullIndexGetSpell(entry.ID);
+                            if (spellD == SpellDefinition.EmptySpell)
+                            {
+                                SpellDefinition.TryGetSpellFromName(entry.Name, out spellD);
+                            }
+
+                            if (spellD != SpellDefinition.EmptySpell)
+                            {
+                                entry.PowerWords = spellD.PowerWords;
+                            }
+                        }
+                        if (!string.IsNullOrEmpty(entry.PowerWords))
+                        {
+                            if (spellRangePowerWordCache.ContainsKey(entry.PowerWords))
+                            {
+                                spellRangePowerWordCache[entry.PowerWords] = entry;
+                            }
+                            else
+                            {
+                                spellRangePowerWordCache.Add(entry.PowerWords, entry);
+                            }
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.ToString());
+                }
+            }
+        }
+
+        public bool LoadFromString(string json)
+        {
+            try
+            {
+                SpellRangeInfo[] fileData = JsonSerializer.Deserialize<SpellRangeInfo[]>(json);
+
+                loaded = false;
+                spellRangeCache.Clear();
+
+                foreach (var entry in fileData)
+                {
+                    spellRangeCache.Add(entry.ID, entry);
+                }
+                AfterLoad();
+                LoadOverrides();
+                loaded = true;
+                return true;
+            }
+            catch (Exception ex)
+            {
+                loaded = true;
+                Console.WriteLine(ex.ToString());
+                return false;
+            }
+        }
+
         private void AfterLoad()
         {
             spellRangePowerWordCache.Clear();
@@ -269,6 +347,7 @@ namespace ClassicUO.Game.Managers
                     spellRangePowerWordCache.Add(entry.PowerWords, entry);
                 }
             }
+            LoadOverrides();
         }
 
         private void CreateAndLoadDataFile()
@@ -318,7 +397,6 @@ namespace ClassicUO.Game.Managers
             {
                 var options = new JsonSerializerOptions() { WriteIndented = true };
                 string fileData = JsonSerializer.Serialize(spellRangeCache.Values.ToArray(), options);
-
                 File.WriteAllText(savePath, fileData);
             }
             catch (Exception e) { Console.WriteLine(e.ToString()); }
@@ -368,8 +446,14 @@ namespace ClassicUO.Game.Managers
                 AcceptMouseInput = false;
                 CanCloseWithEsc = false;
                 CanCloseWithRightClick = false;
-                background = GumpsLoader.Instance.GetGumpTexture(0x0805, out barBounds);
-                foreground = GumpsLoader.Instance.GetGumpTexture(0x0806, out barBoundsF);
+
+                ref readonly var gi = ref Client.Game.Gumps.GetGump(0x0805);
+                background = gi.Texture;
+                barBounds = gi.UV;
+
+                gi = ref Client.Game.Gumps.GetGump(0x0806);
+                foreground = gi.Texture;
+                barBoundsF = gi.UV;
             }
 
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
@@ -381,13 +465,10 @@ namespace ClassicUO.Game.Managers
                     {
                         if (i.CastTime > 0)
                         {
-
-
                             if (background != null && foreground != null)
                             {
                                 Mobile m = World.Player;
-                                AnimationsLoader.Instance.GetAnimationDimensions
-                                (
+                                Client.Game.Animations.GetAnimationDimensions(
                                     m.AnimIndex,
                                     m.GetGraphicForAnimation(),
                                     0,
@@ -400,8 +481,10 @@ namespace ClassicUO.Game.Managers
                                     out int height
                                 );
 
-                                x = (int)(m.RealScreenPosition.X - (m.Offset.X + 22 + 5));
-                                y = (int)(m.RealScreenPosition.Y - ((m.Offset.Y - m.Offset.Z) - (height + centerY + 15) + (m.IsGargoyle && m.IsFlying ? -22 : !m.IsMounted ? 22 : 0)));
+                                WorldViewportGump vp = UIManager.GetGump<WorldViewportGump>();
+
+                                x = vp.Location.X + (int)(m.RealScreenPosition.X - (m.Offset.X + 22 + 5));
+                                y = vp.Location.Y + (int)(m.RealScreenPosition.Y - ((m.Offset.Y - m.Offset.Z) - (height + centerY + 15) + (m.IsGargoyle && m.IsFlying ? -22 : !m.IsMounted ? 22 : 0)));
 
                                 batcher.Draw(background, new Rectangle(x, y, barBounds.Width, barBounds.Height), barBounds, hue);
 

@@ -42,7 +42,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Skill s = World.Player.Skills[skillIndex];
                 Add(new TextBox(string.Format(ProfileManager.CurrentProfile.SkillBarFormat, s.Name, s.Value, s.Cap), ProfileManager.CurrentProfile.GameWindowSideChatFont, ProfileManager.CurrentProfile.GameWindowSideChatFontSize, Width, Color.White, FontStashSharp.RichText.TextHorizontalAlignment.Center));
 
-                GumpsLoader.Instance.GetGumpTexture(0x0805, out var barBounds);
+                Rectangle barBounds = Client.Game.Gumps.GetGump(0x0805).UV;
 
                 int widthPercent = (int)(barBounds.Width * (s.Value / s.Cap));
                 Add(new GumpPic(0, Height - barBounds.Height, 0x0805, 0) { X = (Width / 2) - (barBounds.Width / 2) }); //Background

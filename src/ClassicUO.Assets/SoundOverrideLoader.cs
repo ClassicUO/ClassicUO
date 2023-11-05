@@ -1,5 +1,4 @@
-﻿using ClassicUO.IO.Audio;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
@@ -15,16 +14,18 @@ namespace ClassicUO.Assets
         private Dictionary<int, Tuple<string, byte[]>> soundCache = new Dictionary<int, Tuple<string, byte[]>>();
         private bool loaded = false;
 
-        private SoundOverrideLoader() {
+        private SoundOverrideLoader()
+        {
             string strExeFilePath = System.Reflection.Assembly.GetExecutingAssembly().Location;
             exePath = Path.GetDirectoryName(strExeFilePath);
 
-            Task.Factory.StartNew(() => {
+            Task.Factory.StartNew(() =>
+            {
                 if (Directory.Exists(Path.Combine(exePath, SOUND_OVERRIDE_FOLDER)))
                 {
                     string[] files = Directory.GetFiles(Path.Combine(exePath, SOUND_OVERRIDE_FOLDER), "*.mp3", SearchOption.TopDirectoryOnly);
 
-                    for(int i = 0; i < files.Length; i++)
+                    for (int i = 0; i < files.Length; i++)
                     {
                         var fname = Path.GetFileName(files[i]);
                         if (int.TryParse(fname.Substring(0, fname.Length - 4), out int fID))
@@ -38,15 +39,19 @@ namespace ClassicUO.Assets
             });
         }
 
-        public bool TryGetSoundOverride(int id, out Sound sound) {
-            if(loaded)
-                if(soundCache.ContainsKey(id))
+        public bool TryGetSoundOverride(int id, out byte[] data, out string name)
+        {
+            if (loaded)
+            {
+                if (soundCache.ContainsKey(id))
                 {
-                    sound = new UOSound(soundCache[id].Item1, id, soundCache[id].Item2);
+                    data = soundCache[id].Item2;
+                    name = soundCache[id].Item1;
                     return true;
-                }    
-
-            sound = null;
+                }
+            }
+            name = null;
+            data = null;
             return false;
         }
     }

@@ -26,15 +26,15 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            var texture = GumpsLoader.Instance.GetGumpTexture(5587, out Rectangle bounds);
-            if (texture != null)
+            ref readonly var texture = ref Client.Game.Gumps.GetGump(5587);
+            if (texture.Texture != null)
             {
                 Rectangle rect = new Rectangle(x, y, Width, Height);
                 batcher.Draw
                 (
-                    texture,
+                    texture.Texture,
                     rect,
-                    bounds,
+                    texture.UV,
                     ShaderHueTranslator.GetHueVector(0)
                 );
             }
@@ -130,7 +130,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             _dataBox.Clear();
             _dataBox.WantUpdateSize = true;
-            GumpsLoader.Instance.GetGumpTexture((uint)DurabilityColors.RED, out var barBounds);
+            Rectangle barBounds = Client.Game.Gumps.GetGump((uint)DurabilityColors.RED).UV;
             var startY = 0;
 
             var items = World.DurabilityManager?.Durabilities ?? new List<DurabiltyProp>();
