@@ -90,7 +90,6 @@ namespace ClassicUO.Game.UI.Controls
             if (hue == 0xFFFF || hue == ushort.MaxValue)
                 _color = Color.White;
 
-
             _align = align;
 
             AcceptMouseInput = true;
@@ -306,8 +305,8 @@ namespace ClassicUO.Game.UI.Controls
             {
                 x += Width;
             }
-
-            _rtl.Draw(batcher, new Vector2(x, y), color*Alpha, horizontalAlignment: _align);
+            
+            _rtl.Draw(batcher, new Vector2(x, y), color, horizontalAlignment: _align);
 
             return true;
         }
