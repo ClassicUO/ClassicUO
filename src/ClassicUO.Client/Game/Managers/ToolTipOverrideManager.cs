@@ -271,12 +271,11 @@ namespace ClassicUO.Game.Managers
                                                 else
                                                 {
                                                     tooltip += string.Format(overrideData.FormattedText, property.Name, property.FirstValue.ToString(), property.SecondValue.ToString(), property.OriginalString, "", "") + "\n";
-
                                                 }
                                                 handled = true;
                                                 break;
                                             }
-                                            catch (System.FormatException e) { }
+                                            catch (System.FormatException e) { Console.WriteLine(e.ToString()); }
                                         }
                             }
                     }
