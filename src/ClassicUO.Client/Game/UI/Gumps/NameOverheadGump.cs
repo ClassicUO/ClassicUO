@@ -567,6 +567,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _background.Hue = _renderedText.Hue = entity is Mobile m
                         ? Notoriety.GetHue(m.NotorietyFlag)
                         : (ushort)0x0481;
+                    _background.Alpha = ProfileManager.CurrentProfile.NamePlateOpacity / 100f;
                 }
             }
         }

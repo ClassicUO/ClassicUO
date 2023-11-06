@@ -18,8 +18,11 @@ namespace ClassicUO.Game.UI.Gumps
 
             Height = 40;
             Width = 300;
-            Y = 80;
-            X = (ProfileManager.CurrentProfile.GameWindowSize.X / 2) - (Width / 2);
+
+            WorldViewportGump vp = UIManager.GetGump<WorldViewportGump>();
+
+            Y = vp.Location.Y + 80;
+            X = (vp.Location.X + (vp.Width / 2)) - (Width / 2);
 
             AcceptMouseInput = true;
             CanCloseWithRightClick = true;
@@ -40,7 +43,15 @@ namespace ClassicUO.Game.UI.Gumps
             if (World.Player.Skills.Length > skillIndex)
             {
                 Skill s = World.Player.Skills[skillIndex];
-                Add(new TextBox(string.Format(ProfileManager.CurrentProfile.SkillBarFormat, s.Name, s.Value, s.Cap), ProfileManager.CurrentProfile.GameWindowSideChatFont, ProfileManager.CurrentProfile.GameWindowSideChatFontSize, Width, Color.White, FontStashSharp.RichText.TextHorizontalAlignment.Center));
+                TextBox tb;
+                Add(tb = new TextBox(
+                    string.Format(ProfileManager.CurrentProfile.SkillBarFormat, s.Name, s.Value, s.Cap),
+                    ProfileManager.CurrentProfile.GameWindowSideChatFont,
+                    ProfileManager.CurrentProfile.GameWindowSideChatFontSize,
+                    null,
+                    Color.White));
+
+                tb.X = (Width/2) - (tb.MeasuredSize.X / 2);
 
                 Rectangle barBounds = Client.Game.Gumps.GetGump(0x0805).UV;
 
