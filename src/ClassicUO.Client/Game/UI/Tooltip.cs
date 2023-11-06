@@ -115,50 +115,53 @@ namespace ClassicUO.Game.UI
 
             if (_renderedText.Text != Text)
             {
+                _renderedText.Font = font;
+                _renderedText.Hue = hue;
+                _renderedText.MaxWidth = 0;
+                _renderedText.MaxHeight = 0;
+                _renderedText.Text = _textHTML;
+
                 if (_maxWidth == 0)
                 {
-                    int width = FontsLoader.Instance.GetWidthUnicode(font, Text);
+                    
+                    //int width = FontsLoader.Instance.GetWidthUnicode(font, Text);
 
-                    if (width > 600)
-                    {
-                        width = 600;
-                    }
+                    //if (width > 600)
+                    //{
+                    //    width = 600;
+                    //}
 
-                    width = FontsLoader.Instance.GetWidthExUnicode
-                    (
-                        font,
-                        Text,
-                        width,
-                        TEXT_ALIGN_TYPE.TS_CENTER,
-                        (ushort) FontStyle.BlackBorder
-                    );
+                    //width = FontsLoader.Instance.GetWidthExUnicode
+                    //(
+                    //    font,
+                    //    Text,
+                    //    width,
+                    //    TEXT_ALIGN_TYPE.TS_CENTER,
+                    //    (ushort) FontStyle.BlackBorder
+                    //);
 
-                    if (width > 600)
-                    {
-                        width = 600;
-                    }
+                    //if (width > 600)
+                    //{
+                    //    width = 600;
+                    //}
 
-                    _renderedText.MaxWidth = width;
+                    _renderedText.MaxWidth = Math.Min(600, _renderedText.Width);
                 }
                 else
                 {
                     _renderedText.MaxWidth = _maxWidth;
                 }
-
-                _renderedText.Font = font;
-                _renderedText.Hue = hue;
-                _renderedText.Text = _textHTML;
             }
 
             FontsLoader.Instance.RecalculateWidthByInfo = false;
             FontsLoader.Instance.SetUseHTML(false);
 
-            if (_renderedText.Texture == null || _renderedText.Texture.IsDisposed)
-            {
-                return false;
-            }
+            //if (_renderedText.Texture == null || _renderedText.Texture.IsDisposed)
+            //{
+            //    return false;
+            //}
 
-            int z_width = _renderedText.Width + 8;
+            int z_width = _renderedText.MaxWidth + 8;
             int z_height = _renderedText.Height + 8;
 
             if (x < 0)
@@ -187,7 +190,7 @@ namespace ClassicUO.Game.UI
                 SolidColorTextureCache.GetTexture(Color.Black),
                 new Rectangle
                 (
-                    x - 4,
+                    x - 2,
                     y - 2,
                     (int)(z_width * zoom),
                     (int)(z_height * zoom)
@@ -199,26 +202,28 @@ namespace ClassicUO.Game.UI
             batcher.DrawRectangle
             (
                 SolidColorTextureCache.GetTexture(Color.Gray),
-                x - 4,
+                x - 2,
                 y - 2,
                 (int) (z_width * zoom),
                 (int) (z_height * zoom),
                 hue_vec
             );
 
-            batcher.Draw
-            (
-                _renderedText.Texture,
-                new Rectangle
-                (
-                    x + 3,
-                    y + 3,
-                    (int)(_renderedText.Texture.Width * zoom),
-                    (int)(_renderedText.Texture.Height * zoom)
-                ),
-                null,
-                Vector3.UnitZ
-            );
+
+            _renderedText.Draw(batcher, x + 2, y + 2);
+            //batcher.Draw
+            //(
+            //    _renderedText.Texture,
+            //    new Rectangle
+            //    (
+            //        x + 3,
+            //        y + 3,
+            //        (int)(_renderedText.Width * zoom),
+            //        (int)(_renderedText.Height * zoom)
+            //    ),
+            //    null,
+            //    Vector3.UnitZ
+            //);
 
             return true;
         }

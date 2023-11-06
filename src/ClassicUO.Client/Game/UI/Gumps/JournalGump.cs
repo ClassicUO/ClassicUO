@@ -403,12 +403,10 @@ namespace ClassicUO.Game.UI.Gumps
                     RenderedText hour = _hours[i];
                     TextType type = _text_types[i];
 
-
                     if (!CanBeDrawn(type))
                     {
                         continue;
                     }
-
 
                     if (height + t.Height <= _scrollBar.Value)
                     {
@@ -440,7 +438,7 @@ namespace ClassicUO.Game.UI.Gumps
                                 batcher,
                                 t.Width,
                                 t.Height,
-                                mx + hour.Width,
+                                mx + hour.Width + 4,
                                 y,
                                 t.Width,
                                 t.Height + yy,
@@ -454,7 +452,7 @@ namespace ClassicUO.Game.UI.Gumps
                         {
                             // this entry is completely within the renderable area.
                             hour.Draw(batcher, mx, my);
-                            t.Draw(batcher, mx + hour.Width, my);
+                            t.Draw(batcher, mx + hour.Width + 4, my);
                             my += t.Height;
                         }
 
@@ -462,7 +460,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                     else
                     {
-                        int yyy = maxheight - height;
+                        int yyy = maxheight - height ;
 
                         hour.Draw
                         (
@@ -482,7 +480,7 @@ namespace ClassicUO.Game.UI.Gumps
                             batcher,
                             t.Width,
                             t.Height,
-                            mx + hour.Width,
+                            mx + hour.Width + 4,
                             y + _scrollBar.Height - yyy,
                             t.Width,
                             yyy,
@@ -567,7 +565,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 RenderedText h = RenderedText.Create
                 (
-                    $"{time:t} ",
+                    $"[{time:HH:mm:ss}]",
                     1150,
                     1,
                     true,

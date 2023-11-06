@@ -890,7 +890,7 @@ namespace ClassicUO.Game.UI.Controls
                 _rendererText.Draw(batcher, x, y);
                 DrawCaret(batcher, x, y);
 
-                batcher.ClipEnd();
+               batcher.ClipEnd();
             }
             
             return true;

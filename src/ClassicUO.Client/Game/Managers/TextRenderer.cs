@@ -70,7 +70,7 @@ namespace ClassicUO.Game.Managers
 
             for (TextObject o = DrawPointer; o != null; o = o.DLeft)
             {
-                if (o.IsDestroyed || o.RenderedText == null || o.RenderedText.IsDestroyed || o.RenderedText.Texture == null || o.Time < ClassicUO.Time.Ticks)
+                if (o.IsDestroyed || o.RenderedText == null || o.RenderedText.IsDestroyed || /*o.RenderedText.Texture == null ||*/ o.Time < ClassicUO.Time.Ticks)
                 {
                     continue;
                 }

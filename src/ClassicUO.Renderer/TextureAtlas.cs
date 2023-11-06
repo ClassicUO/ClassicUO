@@ -25,6 +25,8 @@ namespace ClassicUO.Renderer
             _textureList = new List<Texture2D>();
         }
 
+        public int Width => _width;
+        public int Height => _height;
         public int TexturesCount => _textureList.Count;
 
         public unsafe Texture2D AddSprite(

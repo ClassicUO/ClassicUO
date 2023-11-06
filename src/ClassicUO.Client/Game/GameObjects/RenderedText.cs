@@ -30,7 +30,6 @@
 
 #endregion
 
-using ClassicUO.IO;
 using ClassicUO.Assets;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
@@ -39,11 +38,13 @@ using Microsoft.Xna.Framework.Graphics;
 using StbTextEditSharp;
 using System;
 using System.Collections.Generic;
+using FontStashSharp.RichText;
+using System.Text.RegularExpressions;
 
 namespace ClassicUO.Game
 {
     [Flags]
-    internal enum FontStyle : ushort
+    public enum FontStyle : ushort
     {
         None = 0x0000,
         Solid = 0x0001,
@@ -71,6 +72,10 @@ namespace ClassicUO.Game
 
         private static PixelPicker _picker = new PixelPicker();
         private byte _font;
+        private readonly RichTextLayout _textLayout = new RichTextLayout()
+        {
+            CalculateGlyphs = true
+        };
 
         private MultilinesFontInfo _info;
         private string _text;
@@ -126,7 +131,7 @@ namespace ClassicUO.Game
                     {
                         Width = 0;
                         Height = 0;
-
+                        CreateTexture();
                         if (IsHTML)
                         {
                             FontsLoader.Instance.SetUseHTML(false);
@@ -172,7 +177,7 @@ namespace ClassicUO.Game
             }
         }
 
-        public int LinesCount { get; set; }
+        public int LinesCount => _textLayout?.Lines.Count ?? 0;
 
         public bool SaveHitMap { get; private set; }
 
@@ -228,30 +233,38 @@ namespace ClassicUO.Game
 
         public Point GetCaretPosition(int caret_index)
         {
-            Point p;
+            Point p = Point.Zero;
 
-            if (IsUnicode)
+            var line = _textLayout?.GetLineByCursorPosition(caret_index);
+            if (line != null)
             {
-                (p.X, p.Y) = FontsLoader.Instance.GetCaretPosUnicode(
-                    Font,
-                    Text,
-                    caret_index,
-                    MaxWidth,
-                    Align,
-                    (ushort)FontStyle
-                );
+                var maxIndex = _textLayout.GetGlyphInfoByIndex(caret_index);
+                p.X = maxIndex?.Bounds.X /*+ maxIndex?.XAdvance*/ ?? line.Size.X;
+                p.Y = line.LineIndex * _textLayout?.Font?.LineHeight ?? 0;
             }
-            else
-            {
-                (p.X, p.Y) = FontsLoader.Instance.GetCaretPosASCII(
-                    Font,
-                    Text,
-                    caret_index,
-                    MaxWidth,
-                    Align,
-                    (ushort)FontStyle
-                );
-            }
+
+            //if (IsUnicode)
+            //{
+            //    (p.X, p.Y) = FontsLoader.Instance.GetCaretPosUnicode(
+            //        Font,
+            //        Text,
+            //        caret_index,
+            //        MaxWidth,
+            //        Align,
+            //        (ushort)FontStyle
+            //    );
+            //}
+            //else
+            //{
+            //    (p.X, p.Y) = FontsLoader.Instance.GetCaretPosASCII(
+            //        Font,
+            //        Text,
+            //        caret_index,
+            //        MaxWidth,
+            //        Align,
+            //        (ushort)FontStyle
+            //    );
+            //}
 
             return p;
         }
@@ -296,55 +309,75 @@ namespace ClassicUO.Game
                 return r;
             }
 
-            MultilinesFontInfo info = _info;
+            //MultilinesFontInfo info = _info;
 
-            if (info == null)
-            {
-                return r;
-            }
+            //if (info == null)
+            //{
+            //    return r;
+            //}
 
-            switch (Align)
-            {
-                case TEXT_ALIGN_TYPE.TS_LEFT:
-                    r.x0 = 0;
-                    r.x1 = Width;
+            //switch (Align)
+            //{
+            //    case TEXT_ALIGN_TYPE.TS_LEFT:
+            //        r.x0 = 0;
+            //        r.x1 = Width;
 
-                    break;
+            //        break;
 
-                case TEXT_ALIGN_TYPE.TS_CENTER:
-                    r.x0 = (Width - info.Width) >> 1;
+            //    case TEXT_ALIGN_TYPE.TS_CENTER:
+            //        r.x0 = (Width - info.Width) >> 1;
 
-                    if (r.x0 < 0)
-                    {
-                        r.x0 = 0;
-                    }
+            //        if (r.x0 < 0)
+            //        {
+            //            r.x0 = 0;
+            //        }
 
-                    r.x1 = r.x0;
+            //        r.x1 = r.x0;
 
-                    break;
+            //        break;
 
-                case TEXT_ALIGN_TYPE.TS_RIGHT:
-                    r.x0 = Width;
+            //    case TEXT_ALIGN_TYPE.TS_RIGHT:
+            //        r.x0 = Width;
 
-                    // TODO: r.x1 ???  i don't know atm :D
-                    break;
-            }
+            //        // TODO: r.x1 ???  i don't know atm :D
+            //        break;
+            //}
 
             int start = 0;
 
-            while (info != null)
+            //while (info != null)
+            //{
+            //    if (startIndex >= start && startIndex < start + info.CharCount)
+            //    {
+            //        r.num_chars = info.CharCount;
+            //        r.ymax = info.MaxHeight;
+            //        r.baseline_y_delta = info.MaxHeight;
+
+            //        break;
+            //    }
+
+            //    start += info.CharCount;
+            //    info = info.Next;
+            //}
+
+            if (_textLayout == null)
+                return r;
+
+            r.x0 = 0;
+            r.x1 = Width;
+
+            foreach (var line in _textLayout.Lines)
             {
-                if (startIndex >= start && startIndex < start + info.CharCount)
+                if (startIndex >= start && startIndex < start + line.Count)
                 {
-                    r.num_chars = info.CharCount;
-                    r.ymax = info.MaxHeight;
-                    r.baseline_y_delta = info.MaxHeight;
+                    r.num_chars = line.Count;
+                    r.ymax = line.Size.Y;
+                    r.baseline_y_delta = line.Size.Y;
 
                     break;
                 }
 
-                start += info.CharCount;
-                info = info.Next;
+                start += line.Count;
             }
 
             return r;
@@ -357,44 +390,47 @@ namespace ClassicUO.Game
                 return 0;
             }
 
-            MultilinesFontInfo info = _info;
+            //MultilinesFontInfo info = _info;
 
-            int start = 0;
+            //int start = 0;
 
-            while (info != null)
-            {
-                if (index >= start && index < start + info.CharCount)
-                {
-                    int x = index - start;
+            //while (info != null)
+            //{
+            //    if (index >= start && index < start + info.CharCount)
+            //    {
+            //        int x = index - start;
 
-                    if (x >= 0)
-                    {
-                        char c = x >= info.Data.Length ? '\n' : info.Data[x].Item;
+            //        if (x >= 0)
+            //        {
+            //            char c = x >= info.Data.Length ? '\n' : info.Data[x].Item;
 
-                        if (IsUnicode)
-                        {
-                            return FontsLoader.Instance.GetCharWidthUnicode(Font, c);
-                        }
+            //            if (IsUnicode)
+            //            {
+            //                return FontsLoader.Instance.GetCharWidthUnicode(Font, c);
+            //            }
 
-                        return FontsLoader.Instance.GetCharWidthASCII(Font, c);
-                    }
-                }
+            //            return FontsLoader.Instance.GetCharWidthASCII(Font, c);
+            //        }
+            //    }
 
-                start += info.CharCount;
-                info = info.Next;
-            }
+            //    start += info.CharCount;
+            //    info = info.Next;
+            //}
 
-            return 0;
+            return _textLayout?.GetGlyphInfoByIndex(index)?.Bounds.Width ?? 0;
         }
 
         public int GetCharWidth(char c)
         {
-            if (IsUnicode)
-            {
-                return FontsLoader.Instance.GetCharWidthUnicode(Font, c);
-            }
+            var f = _textLayout?.Font?.MeasureString(c.ToString()).X ?? 0;
+            return (int)f;
+            
+            //if (IsUnicode)
+            //{
+            //    return FontsLoader.Instance.GetCharWidthUnicode(Font, c);
+            //}
 
-            return FontsLoader.Instance.GetCharWidthASCII(Font, c);
+            //return FontsLoader.Instance.GetCharWidthASCII(Font, c);
         }
 
         public bool Draw(
@@ -410,10 +446,10 @@ namespace ClassicUO.Game
             ushort hue = 0
         )
         {
-            if (string.IsNullOrEmpty(Text) || Texture == null || IsDestroyed || Texture.IsDisposed)
-            {
-                return false;
-            }
+            //if (string.IsNullOrEmpty(Text) || Texture == null || IsDestroyed || Texture.IsDisposed)
+            //{
+            //    return false;
+            //}
 
             if (offsetX > swidth || offsetX < -swidth || offsetY > sheight || offsetY < -sheight)
             {
@@ -481,12 +517,20 @@ namespace ClassicUO.Game
                 hueVector.Y = 0;
             }
 
-            batcher.Draw(
-                Texture,
-                new Rectangle(dx, dy, dwidth, dheight),
-                new Rectangle(srcX, srcY, srcWidth, srcHeight),
-                hueVector
-            );
+            //_textLayout.Draw(batcher,)
+
+            //batcher.Draw(
+            //    Texture,
+            //    new Rectangle(dx, dy, dwidth, dheight),
+            //    new Rectangle(srcX, srcY, srcWidth, srcHeight),
+            //    hueVector
+            //);
+
+            if (batcher.ClipBegin(dx, dy, dwidth, dheight))
+            {
+                _textLayout.Draw(batcher, new Vector2(dx - offsetX, dy - offsetY), GetColor(1f, hue));
+                batcher.ClipEnd();
+            }         
 
             return true;
         }
@@ -502,15 +546,15 @@ namespace ClassicUO.Game
             int hue = -1
         )
         {
-            if (string.IsNullOrEmpty(Text) || Texture == null || IsDestroyed || Texture.IsDisposed)
-            {
-                return false;
-            }
+            //if (string.IsNullOrEmpty(Text) || Texture == null || IsDestroyed || Texture.IsDisposed)
+            //{
+            //    return false;
+            //}
 
-            if (sx > Texture.Width || sy > Texture.Height)
-            {
-                return false;
-            }
+            //if (sx > Texture.Width || sy > Texture.Height)
+            //{
+            //    return false;
+            //}
 
             if (!IsUnicode && SaveHitMap && hue == -1)
             {
@@ -549,22 +593,30 @@ namespace ClassicUO.Game
                 }
             }
 
-            batcher.Draw(
-                Texture,
-                new Vector2(dx, dy),
-                new Rectangle(sx, sy, swidth, sheight),
-                hueVector
-            );
+            //batcher.Draw(
+            //    Texture,
+            //    new Vector2(dx, dy),
+            //    new Rectangle(sx, sy, swidth, sheight),
+            //    hueVector
+            //);
+
+            if (batcher.ClipBegin(dx, dy, Width, Height))
+            {
+                _textLayout.Draw(batcher, new Vector2(dx - sx, dy - sy), GetColor(1f, (ushort)hue));
+                batcher.ClipEnd();
+            }
+
+            //_textLayout.Draw(batcher, new Vector2(dx, dy), Color.Red);
 
             return true;
         }
 
         public bool Draw(UltimaBatcher2D batcher, int x, int y, float alpha = 1, ushort hue = 0)
         {
-            if (string.IsNullOrEmpty(Text) || Texture == null || IsDestroyed || Texture.IsDisposed)
-            {
-                return false;
-            }
+            //if (string.IsNullOrEmpty(Text) || Texture == null || IsDestroyed || Texture.IsDisposed)
+            //{
+            //    return false;
+            //}
 
             if (!IsUnicode && SaveHitMap && hue == 0)
             {
@@ -598,114 +650,201 @@ namespace ClassicUO.Game
                 hueVector.Y = 0;
             }
 
-            batcher.Draw(Texture, new Rectangle(x, y, Width, Height), hueVector);
+            var pos = new Vector2(x, y);
+            var alignment = TextHorizontalAlignment.Left;
+
+            if (Align == TEXT_ALIGN_TYPE.TS_CENTER)
+            {
+                pos.X += MaxWidth / 2;
+               // pos.Y += MaxHeight > 0 ? MaxHeight / 2 : 0;
+
+                alignment = TextHorizontalAlignment.Center;
+            }
+
+            _textLayout.Draw(batcher, pos, GetColor(alpha, hue), horizontalAlignment: alignment);
 
             return true;
         }
 
+        private string ConvertHtmlToFontStashSharpCommand(string text)
+        {
+            string finalString;
+
+            if (string.IsNullOrEmpty(text))
+                return string.Empty;
+
+            var size = GetFontSize();
+
+            finalString = Regex.Replace(text, "<basefont color=\"?'?(?<color>.*?)\"?'?>", " /c[${color}]", RegexOptions.Multiline | RegexOptions.IgnoreCase);
+            finalString = Regex.Replace(finalString, "<Bodytextcolor\"?'?(?<color>.*?)\"?'?>", " /c[${color}]", RegexOptions.Multiline | RegexOptions.IgnoreCase);
+            finalString = finalString.Replace("</basefont>", "/cd").Replace("</BASEFONT>", "/cd").Replace("<br>", "\n").Replace("<BR>", "\n").Replace("\n", "\n/cd");
+            finalString = finalString.Replace("<left>", "").Replace("</left>", "");
+            finalString = finalString.Replace("<b>", $"/f[bold, {size}]").Replace("</b>", "/fd").Replace("<B>", $"/f[bold, {size}]").Replace("</B>", "/fd");
+            finalString = finalString.Replace("<u>", "/tu").Replace("</u>", "/td").Replace("<U>", "/tu").Replace("</U>", "/td");
+            finalString = finalString.Replace("<i>", $"/f[italic, {size}]").Replace("</i>", "/fd").Replace("<I>", $"/f[italic, {size}]").Replace("</I>", "/fd");
+            finalString = finalString.Replace("</font>", "").Replace("<h2>", "");
+           
+            if (FontStyle.HasFlag(FontStyle.Underline))
+                finalString = "/tu" + finalString;
+
+            return "/es[1]" + finalString.Trim();
+        }
+
+        private int GetFontSize()
+        {
+            switch (Font)
+            {
+                default:
+                    return 16;
+            }
+        }
+
+        private Color GetColor(float alpha = 1.0f, ushort hue = 0)
+        {
+            // this might be simplified somehow
+            var h = HuesHelper.Color16To32(
+                HuesLoader.Instance.GetColor16(
+                     HuesHelper.ColorToHue(Color.White), hue > 0 ? hue : Hue)) | 0xFF_00_00_00;
+
+            var c = new Color() { PackedValue = h };
+            c.A = (byte)Microsoft.Xna.Framework.MathHelper.Clamp(alpha * 255f, byte.MinValue, byte.MaxValue);
+
+            return c;
+        }
+
+        private string GetFontName()
+        {
+            var font = "medium";
+
+            if (FontStyle.HasFlag(FontStyle.Italic))
+            {
+                font += "italic";
+            }
+
+            if (FontStyle.HasFlag(FontStyle.Solid))
+            {
+                font = "bold";
+
+                if (FontStyle.HasFlag(FontStyle.Italic))
+                {
+                    font = "bold-italic";
+                }
+            }
+
+            return font;
+        }
+
         public unsafe void CreateTexture()
         {
-            if (Texture != null && !Texture.IsDisposed)
-            {
-                Texture.Dispose();
-                Texture = null;
-            }
+            _textLayout.Text = ConvertHtmlToFontStashSharpCommand(Text);
+            _textLayout.Width = MaxWidth <= 0 ? null : MaxWidth;
+            _textLayout.Height = MaxHeight <= 0 ? null : MaxHeight;
+            _textLayout.Font = RichTextDefaults.FontResolver.Invoke($"{GetFontName()}, {GetFontSize()}");
 
-            if (IsHTML)
-            {
-                FontsLoader.Instance.SetUseHTML(true, HTMLColor, HasBackgroundColor);
-            }
+            Width = _textLayout.Size.X;
+            Height = _textLayout.Size.Y;
 
-            FontsLoader.Instance.RecalculateWidthByInfo = RecalculateWidthByInfo;
+            //if (Texture != null && !Texture.IsDisposed)
+            //{
+            //    Texture.Dispose();
+            //    Texture = null;
+            //}
 
-            FontsLoader.FontInfo fi;
-            if (IsUnicode)
-            {
-                fi = FontsLoader.Instance.GenerateUnicode(
-                    Font,
-                    Text,
-                    Hue,
-                    Cell,
-                    MaxWidth,
-                    Align,
-                    (ushort)FontStyle,
-                    SaveHitMap,
-                    MaxHeight
-                );
-            }
-            else
-            {
-                fi = FontsLoader.Instance.GenerateASCII(
-                    Font,
-                    Text,
-                    Hue,
-                    MaxWidth,
-                    Align,
-                    (ushort)FontStyle,
-                    SaveHitMap,
-                    MaxHeight
-                );
-            }
+            //if (IsHTML)
+            //{
+            //    FontsLoader.Instance.SetUseHTML(true, HTMLColor, HasBackgroundColor);
+            //}
 
-            if (SaveHitMap)
-            {
-                var b = (ulong)(
-                    Text.GetHashCode()
-                    ^ Hue
-                    ^ ((int)Align)
-                    ^ ((int)FontStyle)
-                    ^ Font
-                    ^ (IsUnicode ? 0x01 : 0x00)
-                );
-                _picker.Set(b, fi.Width, fi.Height, fi.Data);
-            }
+            //FontsLoader.Instance.RecalculateWidthByInfo = RecalculateWidthByInfo;
 
-            var isValid = fi.Data != null && fi.Data.Length > 0;
+            //FontsLoader.FontInfo fi;
+            //if (IsUnicode)
+            //{
+            //    fi = FontsLoader.Instance.GenerateUnicode(
+            //        Font,
+            //        Text,
+            //        Hue,
+            //        Cell,
+            //        MaxWidth,
+            //        Align,
+            //        (ushort)FontStyle,
+            //        SaveHitMap,
+            //        MaxHeight
+            //    );
+            //}
+            //else
+            //{
+            //    fi = FontsLoader.Instance.GenerateASCII(
+            //        Font,
+            //        Text,
+            //        Hue,
+            //        MaxWidth,
+            //        Align,
+            //        (ushort)FontStyle,
+            //        SaveHitMap,
+            //        MaxHeight
+            //    );
+            //}
 
-            if (isValid && (Texture == null || Texture.IsDisposed))
-            {
-                Texture = new Texture2D(
-                    Client.Game.GraphicsDevice,
-                    fi.Width,
-                    fi.Height,
-                    false,
-                    SurfaceFormat.Color
-                );
-            }
+            //if (SaveHitMap)
+            //{
+            //    var b = (ulong)(
+            //        Text.GetHashCode()
+            //        ^ Hue
+            //        ^ ((int)Align)
+            //        ^ ((int)FontStyle)
+            //        ^ Font
+            //        ^ (IsUnicode ? 0x01 : 0x00)
+            //    );
+            //    _picker.Set(b, fi.Width, fi.Height, fi.Data);
+            //}
 
-            Links.Clear();
-            if (fi.Links != null)
-            {
-                for (int i = 0; i < fi.Links.Length; ++i)
-                {
-                    Links.Add(fi.Links[i]);
-                }
-            }
+            //var isValid = fi.Data != null && fi.Data.Length > 0;
 
-            LinesCount = fi.LineCount;
+            //if (isValid && (Texture == null || Texture.IsDisposed))
+            //{
+            //    Texture = new Texture2D(
+            //        Client.Game.GraphicsDevice,
+            //        fi.Width,
+            //        fi.Height,
+            //        false,
+            //        SurfaceFormat.Color
+            //    );
+            //}
 
-            if (Texture != null && isValid)
-            {
-                fixed (uint* dataPtr = fi.Data)
-                {
-                    Texture.SetDataPointerEXT(
-                        0,
-                        null,
-                        (IntPtr)dataPtr,
-                        fi.Width * fi.Height * sizeof(uint)
-                    );
-                }
+            //Links.Clear();
+            //if (fi.Links != null)
+            //{
+            //    for (int i = 0; i < fi.Links.Length; ++i)
+            //    {
+            //        Links.Add(fi.Links[i]);
+            //    }
+            //}
 
-                Width = Texture.Width;
-                Height = Texture.Height;
-            }
+            //LinesCount = fi.LineCount;
 
-            if (IsHTML)
-            {
-                FontsLoader.Instance.SetUseHTML(false);
-            }
+            //if (Texture != null && isValid)
+            //{
+            //    fixed (uint* dataPtr = fi.Data)
+            //    {
+            //        Texture.SetDataPointerEXT(
+            //            0,
+            //            null,
+            //            (IntPtr)dataPtr,
+            //            fi.Width * fi.Height * sizeof(uint)
+            //        );
+            //    }
 
-            FontsLoader.Instance.RecalculateWidthByInfo = false;
+            //    Width = Texture.Width;
+            //    Height = Texture.Height;
+            //}
+
+            //if (IsHTML)
+            //{
+            //    FontsLoader.Instance.SetUseHTML(false);
+            //}
+
+            //FontsLoader.Instance.RecalculateWidthByInfo = false;
         }
 
         public void Destroy()

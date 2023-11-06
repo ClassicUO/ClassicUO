@@ -44,9 +44,13 @@ using ClassicUO.Renderer;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
+using FontStashSharp;
+using FontStashSharp.Interfaces;
+using FontStashSharp.RichText;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -61,12 +65,13 @@ namespace ClassicUO
         private readonly Texture2D[] _hueSamplers = new Texture2D[3];
         private bool _ignoreNextTextInput;
         private readonly float[] _intervalFixedUpdate = new float[2];
-        private double _totalElapsed,
-            _currentFpsTime;
+        private double _totalElapsed, _currentFpsTime;
         private uint _totalFrames;
         private UltimaBatcher2D _uoSpriteBatch;
         private bool _suppressedDraw;
         private Texture2D _background;
+        private readonly Dictionary<string, FontSystem> _fontsCache = new Dictionary<string, FontSystem>();
+
 
         public GameController()
         {
@@ -103,8 +108,10 @@ namespace ClassicUO
         public Renderer.MultiMaps.MultiMap MultiMaps { get; private set; }
         public Renderer.Sounds.Sound Sounds { get; private set; }
 
+
         public GraphicsDeviceManager GraphicManager { get; }
         public readonly uint[] FrameDelay = new uint[2];
+
 
         protected override void Initialize()
         {
@@ -120,6 +127,27 @@ namespace ClassicUO
 
             _filter = HandleSdlEvent;
             SDL_SetEventFilter(_filter, IntPtr.Zero);
+
+            RichTextDefaults.FontResolver = p =>
+            {
+                // Parse font name and size
+                var args = p.Split(',');
+                var fontName = args[0].Trim();
+                var fontSize = int.Parse(args[1].Trim());
+
+                // _fontCache is field of type Dictionary<string, FontSystem>
+                // It is used to cache fonts
+                if (!_fontsCache.TryGetValue(fontName, out var fontSystem))
+                {
+                    // Load and cache the font system
+                    fontSystem = new FontSystem();
+                    fontSystem.AddFont(TTFFontsLoader.GetFont(fontName).ToArray());
+                    _fontsCache[fontName] = fontSystem;
+                }
+
+                // Return the required font
+                return fontSystem.GetFont(fontSize);
+            };
 
             base.Initialize();
         }
