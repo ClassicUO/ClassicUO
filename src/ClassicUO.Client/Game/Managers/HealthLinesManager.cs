@@ -303,53 +303,31 @@ namespace ClassicUO.Game.Managers
                 hueVec
             );
 
-            hueVec.X = 0x21;
+            hueVec.X = 90;
 
-            if (entity.Hits != entity.HitsMax || entity.HitsMax == 0)
+            if (mobile != null)
             {
-                gumpInfo = ref Client.Game.Gumps.GetGump(HP_GRAPHIC);
-
-                batcher.DrawTiled(
-                    gumpInfo.Texture,
-                    new Rectangle(
-                        x + per * multiplier - offset,
-                        y,
-                        (BAR_WIDTH - per) * multiplier - offset / 2,
-                        gumpInfo.UV.Height * multiplier
-                    ),
-                    gumpInfo.UV,
-                    hueVec
-                );
-            }
-
-            hue = 90;
-
-            if (per > 0)
-            {
-                if (mobile != null)
+                if (mobile.IsPoisoned)
                 {
-                    if (mobile.IsPoisoned)
-                    {
-                        hueVec.X = 63;
-                    }
-                    else if (mobile.IsYellowHits)
-                    {
-                        hueVec.X = 53;
-                    }
+                    hueVec.X = 63;
                 }
-
-                float hitPerecentage = (float)entity.Hits / (float)entity.HitsMax;
-
-                if (entity.HitsMax == 0)
-                    hitPerecentage = 1;
-
-                batcher.Draw(
-                    SolidColorTextureCache.GetTexture(Color.White),
-                    new Vector2(x + (3 * multiplier), y + (4 * multiplier)),
-                    new Rectangle(0, 0, (int)(((BAR_WIDTH * multiplier) - (6 * multiplier)) * hitPerecentage), (bounds.Height * multiplier) - (6 * multiplier)),
-                    hueVec
-                    );
+                else if (mobile.IsYellowHits)
+                {
+                    hueVec.X = 53;
+                }
             }
+
+            float hitPerecentage = (float)entity.Hits / (float)entity.HitsMax;
+
+            if (entity.HitsMax == 0)
+                hitPerecentage = 1;
+
+            batcher.Draw(
+                SolidColorTextureCache.GetTexture(Color.White),
+                new Vector2(x + (3 * multiplier), y + (4 * multiplier)),
+                new Rectangle(0, 0, (int)(((BAR_WIDTH * multiplier) - (6 * multiplier)) * hitPerecentage), (bounds.Height * multiplier) - (6 * multiplier)),
+                hueVec
+                );
         }
     }
 }
