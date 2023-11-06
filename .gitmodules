@@ -4,3 +4,6 @@
 [submodule "external/MP3Sharp"]
 	path = external/MP3Sharp
 	url = https://github.com/andreakarasho/MP3Sharp.git
+[submodule "external/FontStashSharp"]
+	path = external/FontStashSharp
+	url = https://github.com/FontStashSharp/FontStashSharp.git
