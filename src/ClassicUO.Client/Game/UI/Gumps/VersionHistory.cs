@@ -9,7 +9,8 @@ namespace ClassicUO.Game.UI.Gumps
         private static string[] updateTexts = {
             "/c[white][3.11.0]/cd\n" +
                 "- Bug fix for floating damage numbers\n" +
-                "- Bug fix for health line color",
+                "- Bug fix for health line color\n" +
+                "- Fix skill progress bar positioning",
 
             "/c[white][3.10.0]/cd\n" +
                 "- Added the option to download a spell indicator config from an external source\n" +
