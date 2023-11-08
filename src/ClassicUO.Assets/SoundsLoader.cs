@@ -31,7 +31,6 @@
 #endregion
 
 using ClassicUO.IO;
-using ClassicUO.IO.Audio;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using System;
@@ -370,8 +369,6 @@ namespace ClassicUO.Assets
 
             return false;
         }
-
-        public const float SOUND_DELTA = 250;
 
         public override void ClearResources()
         {

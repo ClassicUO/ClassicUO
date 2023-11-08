@@ -551,7 +551,9 @@ namespace ClassicUO.Network
 
                     if (mobile == World.Player)
                     {
-                        if (!string.IsNullOrEmpty(World.Player.Name) && oldName != World.Player.Name)
+                        if (
+                            !string.IsNullOrEmpty(World.Player.Name) && oldName != World.Player.Name
+                        )
                         {
                             Client.Game.SetWindowTitle(World.Player.Name);
                         }
