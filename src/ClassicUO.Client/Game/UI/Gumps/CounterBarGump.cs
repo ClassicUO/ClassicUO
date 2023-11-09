@@ -321,6 +321,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             private readonly ImageWithText _image;
             private uint _time;
+            private const uint HIGHLIGHT_DURATION = 1000;
+            private uint _endHighlight;
+            private bool _highlight;
 
             public CounterItem(int x, int y, int w, int h)
             {
@@ -480,6 +483,17 @@ namespace ClassicUO.Game.UI.Gumps
                             }
                         }
 
+                        if (ProfileManager.CurrentProfile.CounterBarHighlightOnUse)
+                        {
+                            if (int.TryParse(_image.GetText(), out int cAmt))
+                            {
+                                if (cAmt > _amount)
+                                {
+                                    _highlight = true;
+                                    _endHighlight = Time.Ticks + HIGHLIGHT_DURATION;
+                                }
+                            }
+                        }
                         _image.SetAmount(_amount.ToString());
                     }
                 }
@@ -520,6 +534,19 @@ namespace ClassicUO.Game.UI.Gumps
                 );
 
                 Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
+
+                if (_highlight && Time.Ticks > _endHighlight)
+                {
+                    _highlight = false;
+                }
+
+                if (_highlight)
+                {
+                    hueVector.Z = ((float)_endHighlight - (float)Time.Ticks ) / (float)HIGHLIGHT_DURATION;
+                    batcher.Draw(SolidColorTextureCache.GetTexture(Color.Yellow), new Rectangle(x, y, Width, Height), hueVector);
+                }
+
+                hueVector.Z = 1;
 
                 batcher.DrawRectangle(color, x, y, Width, Height, hueVector);
 
@@ -617,6 +644,11 @@ namespace ClassicUO.Game.UI.Gumps
                 public void SetAmount(string amount)
                 {
                     _label.Text = amount;
+                }
+
+                public string GetText()
+                {
+                    return _label?.Text ?? "";
                 }
             }
         }
