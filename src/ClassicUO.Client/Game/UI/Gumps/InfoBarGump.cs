@@ -204,27 +204,34 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
-            if (_refreshTime < Time.Ticks)
+            if (_refreshTime < Time.Ticks && _data != null)
             {
-                _refreshTime = (long)Time.Ticks + 125;
+                _refreshTime = (long)Time.Ticks + 250;
 
-                _data.Text = GetVarData(Var);
+                string newData = GetVarData(Var);
+                if (!newData.Equals(_data.Text))
+                {
+                    _data.UpdateText(newData);
+                    _data.WantUpdateSize = true;
+                }
 
                 if (ProfileManager.CurrentProfile.InfoBarHighlightType == 0 || Var == InfoBarVars.NameNotoriety)
                 {
-                    _data.Hue = GetVarHue(Var);
+                    ushort hue = GetVarHue(Var);
+                    if (!hue.Equals((ushort)_data.Hue))
+                    {
+                        _data.Hue = hue;
+                    }
                 }
                 else
                 {
-                    _data.Hue = 0x0481;
+                    if ((ushort)_data.Hue != 0x0481)
+                    {
+                        _data.Hue = 0x0481;
+                    }
                     _warningLinesHue = GetVarHue(Var);
                 }
-
-
-                _data.WantUpdateSize = true;
             }
-
-            WantUpdateSize = true;
 
             base.Update();
         }
