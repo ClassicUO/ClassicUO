@@ -12,7 +12,8 @@ namespace ClassicUO.Game.UI.Gumps
                 "- Pull in latest changes from CUO\n" +
                 "- Update client-side version checking\n" +
                 "- Infobar bug fixes\n" +
-                "- Other small bug fixes",
+                "- Other small bug fixes\n" +
+                "- Modern paperdoll being anchored will be remembered now",
 
             "/c[white][3.10.1]/cd\n" +
                 "- Bug fix for floating damage numbers\n" +
