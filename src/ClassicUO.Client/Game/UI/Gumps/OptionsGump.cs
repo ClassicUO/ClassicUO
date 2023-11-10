@@ -187,7 +187,7 @@ namespace ClassicUO.Game.UI.Gumps
         private HSliderBar _showSkillsMessageDelta;
 
         private Checkbox _leftAlignToolTips, _namePlateHealthOnlyWarmode, _enableHealthIndicator, _spellIconDisplayHotkey, _enableAlphaScrollWheel, _useModernShop, _forceCenterAlignMobileTooltips, _openHealthBarForLastAttack;
-        private Checkbox _hideJournalBorder, _hideJournalTimestamp, _gridHideBorder, _skillProgressBarOnChange, _displaySpellIndicators;
+        private Checkbox _hideJournalBorder, _hideJournalTimestamp, _gridHideBorder, _skillProgressBarOnChange, _displaySpellIndicators, _uselastCooldownPosition;
         private InputField _healthIndicatorPercentage, _healthIndicatorWidth, _tooltipHeaderFormat, _skillProgressBarFormat;
         private ModernColorPicker.HueDisplay _mainWindowHuePicker, _spellIconHotkeyHue, _tooltipBGHue;
         private HSliderBar _spellIconScale, _journalFontSize, _tooltipFontSize, _gameWindowSideChatFontSize, _overheadFontSize, _overheadTextWidth, _textStrokeSize, _gridHightlightLineSize, _maxJournalEntries;
@@ -3547,6 +3547,8 @@ namespace ClassicUO.Game.UI.Gumps
                     ));
                 _coolDownY.SetText(_currentProfile.CoolDownY.ToString());
 
+                _coolDowns.AddRight(_uselastCooldownPosition = AddCheckBox(null, "Use last moved bar position", _currentProfile.UseLastMovedCooldownPosition, 0, 0));
+
             }//Cooldown position
             rightArea.Add(_coolDowns);
 
@@ -4820,6 +4822,8 @@ namespace ClassicUO.Game.UI.Gumps
                     UIManager.Add(new ResizableJournal());
                 }
             }
+            _currentProfile.UseLastMovedCooldownPosition = _uselastCooldownPosition.IsChecked;
+
             _currentProfile.InfoBarFont = TrueTypeLoader.Instance.Fonts[_infoBarFont.SelectedIndex];
             _currentProfile.InfoBarFontSize = _infoBarFontSize.Value;
 

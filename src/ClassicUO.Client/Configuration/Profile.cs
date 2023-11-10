@@ -530,6 +530,8 @@ namespace ClassicUO.Configuration
 
         public int LastJournalTab { get; set; } = 0;
 
+        public bool UseLastMovedCooldownPosition {  get; set; } = false;
+
 
 
         public void Save(string path, bool saveGumps = true)
