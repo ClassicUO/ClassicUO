@@ -35,7 +35,6 @@ using ClassicUO.Input;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
-using FontStashSharp;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
