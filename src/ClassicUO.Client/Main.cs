@@ -100,8 +100,7 @@ namespace ClassicUO
                 System.Threading.Tasks.Task reportCrash = System.Threading.Tasks.Task.Factory.StartNew(() =>
                 {
                     string s = "CV: " + Settings.GlobalSettings.ClientVersion + " - TUO: " + CUOEnviroment.Version.ToString() + "\n" + e.ExceptionObject.ToString();
-                    s = s.Substring(0, 1500);
-                    new CrashReportWebhook().SendMessage($"``` {s} ```")?.Dispose();
+                    new CrashReportWebhook().SendMessage(s);
                 });
 
                 Log.Panic(e.ExceptionObject.ToString());

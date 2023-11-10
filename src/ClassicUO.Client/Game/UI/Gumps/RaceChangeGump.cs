@@ -1,4 +1,4 @@
-﻿using ClassicUO.Assets;
+using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
@@ -156,7 +156,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add(new GumpPic(185, 25, 0x708, 0));
             Add
             (
-                paperDollInteractable = new CustomPaperDollGump(210, 75, fakeMobile, ref hair, ref beard)
+                paperDollInteractable = new CustomPaperDollGump(210, 75, fakeMobile, hair, beard)
                 {
                     AcceptMouseInput = false
                 }
@@ -358,7 +358,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             hair = CreateItem(0x4000_0000 + (int)Layer.Hair, 0, Layer.Hair);
-            if(!isFemale && selectedRace != RaceType.ELF)
+            if (!isFemale && selectedRace != RaceType.ELF)
             {
                 beard = CreateItem(0x4000_0000 + (int)Layer.Beard, 0, Layer.Beard);
             }
@@ -433,50 +433,39 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void ConfirmButton_MouseUp(object sender, MouseEventArgs e)
         {
-            foreach (var co in CurrentColorOption)
+            if (e.Button == Input.MouseButtonType.Left)
             {
-                Console.WriteLine($"{co.Key}: {co.Value}");
-            }
-            try
-            {
-                if (e.Button == Input.MouseButtonType.Left)
+                if (!isFemale && selectedRace != RaceType.ELF) //Has beard
                 {
-                    if (!isFemale && selectedRace != RaceType.ELF) //Has beard
-                    {
-                        NetClient.Socket.Send_ChangeRaceRequest(
-                            CurrentColorOption[Layer.Invalid].Item2,
-                            (ushort)CharacterCreationValues.GetHairComboContent(isFemale, selectedRace).GetGraphic(CurrentOption[Layer.Hair]),
-                            CurrentColorOption[Layer.Hair].Item2,
-                            (ushort)CharacterCreationValues.GetFacialHairComboContent(selectedRace).GetGraphic(CurrentOption[Layer.Beard]),
-                            CurrentColorOption[Layer.Beard].Item2
-                        );
-                    }
-                    else //No beard
-                    {
-                        NetClient.Socket.Send_ChangeRaceRequest(
-                            CurrentColorOption[Layer.Invalid].Item2,
-                            (ushort)CharacterCreationValues.GetHairComboContent(isFemale, selectedRace).GetGraphic(CurrentOption[Layer.Hair]),
-                            CurrentColorOption[Layer.Hair].Item2,
-                            0,
-                            0
-                        );
-                    }
-
-                    //Cleanup
-                    if (hair != null)
-                    {
-                        World.RemoveItem(hair, true);
-                    }
-                    if (beard != null)
-                    {
-                        World.RemoveItem(beard, true);
-                    }
-                    Dispose();
+                    NetClient.Socket.Send_ChangeRaceRequest(
+                        CurrentColorOption[Layer.Invalid].Item2,
+                        (ushort)CharacterCreationValues.GetHairComboContent(isFemale, selectedRace).GetGraphic(CurrentOption[Layer.Hair]),
+                        CurrentColorOption[Layer.Hair].Item2,
+                        (ushort)CharacterCreationValues.GetFacialHairComboContent(selectedRace).GetGraphic(CurrentOption[Layer.Beard]),
+                        CurrentColorOption[Layer.Beard].Item2
+                    );
                 }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
+                else //No beard
+                {
+                    NetClient.Socket.Send_ChangeRaceRequest(
+                        CurrentColorOption[Layer.Invalid].Item2,
+                        (ushort)CharacterCreationValues.GetHairComboContent(isFemale, selectedRace).GetGraphic(CurrentOption[Layer.Hair]),
+                        CurrentColorOption[Layer.Hair].Item2,
+                        0,
+                        0
+                    );
+                }
+
+                //Cleanup
+                if (hair != null)
+                {
+                    World.RemoveItem(hair, true);
+                }
+                if (beard != null)
+                {
+                    World.RemoveItem(beard, true);
+                }
+                Dispose();
             }
         }
 
@@ -676,7 +665,7 @@ namespace ClassicUO.Game.UI.Gumps
             private Item beard;
             private bool requestUpdate = false;
 
-            public CustomPaperDollGump(int x, int y, Mobile playerMobile, ref Item hair, ref Item beard) : base(x, y, playerMobile, null)
+            public CustomPaperDollGump(int x, int y, Mobile playerMobile, Item hair, Item beard) : base(x, y, playerMobile, null)
             {
                 this.playerMobile = playerMobile;
                 this.hair = hair;

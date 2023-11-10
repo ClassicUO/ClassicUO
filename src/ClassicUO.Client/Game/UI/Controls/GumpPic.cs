@@ -32,7 +32,6 @@
 
 using System.Collections.Generic;
 using ClassicUO.Input;
-using ClassicUO.Assets;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
@@ -128,7 +127,8 @@ namespace ClassicUO.Game.UI.Controls
                         )
                         : 0
                 )
-            ) { }
+            )
+        { }
 
         public bool IsPartialHue { get; set; }
         public bool ContainsByBounds { get; set; }
@@ -220,7 +220,8 @@ namespace ClassicUO.Game.UI.Controls
                 UInt16Converter.Parse(parts[5]),
                 UInt16Converter.Parse(parts[6]),
                 UInt16Converter.Parse(parts[7])
-            ) { }
+            )
+        { }
 
         public override bool Contains(int x, int y)
         {
@@ -238,12 +239,14 @@ namespace ClassicUO.Game.UI.Controls
 
             ref readonly var gumpInfo = ref Client.Game.Gumps.GetGump(Graphic);
 
+            var sourceBounds = new Rectangle(gumpInfo.UV.X + _picInPicBounds.X, gumpInfo.UV.Y + _picInPicBounds.Y, _picInPicBounds.Width, _picInPicBounds.Height);
+
             if (gumpInfo.Texture != null)
             {
                 batcher.Draw(
                     gumpInfo.Texture,
                     new Rectangle(x, y, Width, Height),
-                    gumpInfo.UV,
+                    sourceBounds,
                     hueVector
                 );
             }

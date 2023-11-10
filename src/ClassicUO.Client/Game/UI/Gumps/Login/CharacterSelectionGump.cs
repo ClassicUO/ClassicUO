@@ -296,7 +296,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
         {
             LoginScene loginScene = Client.Game.GetScene<LoginScene>();
 
-            if (loginScene.Characters.Length > index && !string.IsNullOrEmpty(loginScene.Characters[index]))
+            if (loginScene.Characters != null && loginScene.Characters.Length > index && !string.IsNullOrEmpty(loginScene.Characters[index]))
             {
                 loginScene.SelectCharacter(index);
             }
