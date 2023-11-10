@@ -13,7 +13,8 @@ namespace ClassicUO.Game.UI.Gumps
                 "- Update client-side version checking\n" +
                 "- Infobar bug fixes\n" +
                 "- Other small bug fixes\n" +
-                "- Modern paperdoll being anchored will be remembered now",
+                "- Modern paperdoll being anchored will be remembered now\n" +
+                "- Added an option for Cooldown bars to use the position of the last moved bar",
 
             "/c[white][3.10.1]/cd\n" +
                 "- Bug fix for floating damage numbers\n" +
