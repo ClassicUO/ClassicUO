@@ -1476,6 +1476,11 @@ namespace ClassicUO.Game.Scenes
                     }
                 }
             }
+
+            if (e.keysym.sym != SDL.SDL_Keycode.SDLK_UNKNOWN)
+            {
+                NameOverHeadManager.RegisterKeyDown(e.keysym);
+            }
         }
 
         internal override void OnKeyUp(SDL.SDL_KeyboardEvent e)
@@ -1625,6 +1630,8 @@ namespace ClassicUO.Game.Scenes
                     GameActions.ToggleWarMode();
                 }
             }
+
+            NameOverHeadManager.RegisterKeyUp(e.keysym);
         }
 
         private bool CanExecuteMacro()

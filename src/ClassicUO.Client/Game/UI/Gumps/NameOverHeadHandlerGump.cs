@@ -31,6 +31,7 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
@@ -45,6 +46,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override GumpType GumpType => GumpType.NameOverHeadHandler;
 
+        private readonly List<RadioButton> _overheadButtons = new List<RadioButton>();
+        private Control _alpha;
+        private readonly Checkbox _keepOpenCheckbox;
         private StbTextBox searchBox;
 
         public NameOverHeadHandlerGump() : base(0, 0)
@@ -69,12 +73,9 @@ namespace ClassicUO.Game.UI.Gumps
             LayerOrder = UILayer.Over;
 
             Checkbox stayActive;
-            RadioButton all, mobiles, items, mobilesCorpses;
-            AlphaBlendControl alpha;
-
             Add
             (
-                alpha = new AlphaBlendControl(0.7f)
+                _alpha = new AlphaBlendControl(0.7f)
                 {
                     Hue = 34
                 }
@@ -90,10 +91,10 @@ namespace ClassicUO.Game.UI.Gumps
                     color: 0xFFFF
                 )
                 {
-                    IsChecked = ProfileManager.CurrentProfile.NameOverheadToggled,
+                    IsChecked = NameOverHeadManager.IsPermaToggled,
                 }
             );
-            stayActive.ValueChanged += (sender, e) => { ProfileManager.CurrentProfile.NameOverheadToggled = stayActive.IsChecked; CanCloseWithRightClick = false; };
+            stayActive.ValueChanged += (sender, e) => { NameOverHeadManager.SetOverheadToggled(stayActive.IsChecked); CanCloseWithRightClick = stayActive.IsChecked; };
 
 
             Checkbox hideFullHp;
@@ -133,112 +134,84 @@ namespace ClassicUO.Game.UI.Gumps
 
 
 
-            Add
-            (
-                all = new RadioButton
-                (
-                    0,
-                    0x00D0,
-                    0x00D1,
-                    ResGumps.All,
-                    color: 0xFFFF
-                )
-                {
-                    Y = stayActive.Height + stayActive.Y,
-                    IsChecked = NameOverHeadManager.TypeAllowed == NameOverheadTypeAllowed.All
-                }
-            );
-
-            Add
-            (
-                mobiles = new RadioButton
-                (
-                    0,
-                    0x00D0,
-                    0x00D1,
-                    ResGumps.MobilesOnly,
-                    color: 0xFFFF
-                )
-                {
-                    Y = all.Y + all.Height,
-                    IsChecked = NameOverHeadManager.TypeAllowed == NameOverheadTypeAllowed.Mobiles
-                }
-            );
-
-            Add
-            (
-                items = new RadioButton
-                (
-                    0,
-                    0x00D0,
-                    0x00D1,
-                    ResGumps.ItemsOnly,
-                    color: 0xFFFF
-                )
-                {
-                    Y = mobiles.Y + mobiles.Height,
-                    IsChecked = NameOverHeadManager.TypeAllowed == NameOverheadTypeAllowed.Items
-                }
-            );
-
-            Add
-            (
-                mobilesCorpses = new RadioButton
-                (
-                    0,
-                    0x00D0,
-                    0x00D1,
-                    ResGumps.MobilesAndCorpsesOnly,
-                    color: 0xFFFF
-                )
-                {
-                    Y = items.Y + items.Height,
-                    IsChecked = NameOverHeadManager.TypeAllowed == NameOverheadTypeAllowed.MobilesCorpses
-                }
-            );
-
-            Add(new AlphaBlendControl() { Y = mobilesCorpses.Height + mobilesCorpses.Y, Width = 150, Height = 20, Hue = 0x0481 });
-            Add(searchBox = new StbTextBox(0, -1, 150, hue: 0xFFFF) { Y = mobilesCorpses.Height + mobilesCorpses.Y, Width = 150, Height = 20 });
+            Add(new AlphaBlendControl() { Y = stayActive.Height + stayActive.Y, Width = 150, Height = 20, Hue = 0x0481 });
+            Add(searchBox = new StbTextBox(0, -1, 150, hue: 0xFFFF) { Y = stayActive.Height + stayActive.Y, Width = 150, Height = 20 });
             searchBox.Text = NameOverHeadManager.Search;
             searchBox.TextChanged += (s, e) => { NameOverHeadManager.Search = searchBox.Text; };
 
-            alpha.Width = Math.Max(mobilesCorpses.Width, Math.Max(items.Width, Math.Max(all.Width, mobiles.Width)));
-            alpha.Height = stayActive.Height + all.Height + mobiles.Height + items.Height + mobilesCorpses.Height + searchBox.Height;
+            DrawChoiceButtons();
+        }
 
-            Width = alpha.Width;
-            Height = alpha.Height;
-
-            all.ValueChanged += (sender, e) =>
+        public void UpdateCheckboxes()
+        {
+            foreach (var button in _overheadButtons)
             {
-                if (all.IsChecked)
+                button.IsChecked = NameOverHeadManager.LastActiveNameOverheadOption == button.Text;
+            }
+            if (_keepOpenCheckbox != null)
+            {
+                _keepOpenCheckbox.IsChecked = NameOverHeadManager.IsPermaToggled;
+            }
+        }
+
+        public void RedrawOverheadOptions()
+        {
+            foreach (var button in _overheadButtons)
+                Remove(button);
+
+            DrawChoiceButtons();
+        }
+
+        private void DrawChoiceButtons()
+        {
+            int biggestWidth = 100;
+            var options = NameOverHeadManager.GetAllOptions();
+
+            for (int i = 0; i < options.Count; i++)
+            {
+                biggestWidth = Math.Max(biggestWidth, AddOverheadOptionButton(options[i], i).Width);
+            }
+
+            _alpha.Width = biggestWidth;
+            _alpha.Height = Math.Max(30, options.Count * 20) + 44;
+
+            Width = _alpha.Width;
+            Height = _alpha.Height;
+        }
+
+        private RadioButton AddOverheadOptionButton(NameOverheadOption option, int index)
+        {
+            RadioButton button;
+
+            Add
+            (
+                button = new RadioButton
+                (
+                    0, 0x00D0, 0x00D1, option.Name,
+                    color: 0xFFFF
+                )
                 {
-                    NameOverHeadManager.TypeAllowed = NameOverheadTypeAllowed.All;
+                    Y = 20 * index + 44,
+                    IsChecked = NameOverHeadManager.LastActiveNameOverheadOption == option.Name,
+                }
+            );
+
+            if (button.IsChecked)
+            {
+                NameOverHeadManager.SetActiveOption(option);
+            }
+
+            button.ValueChanged += (sender, e) =>
+            {
+                if (button.IsChecked)
+                {
+                    NameOverHeadManager.SetActiveOption(option);
                 }
             };
 
-            mobiles.ValueChanged += (sender, e) =>
-            {
-                if (mobiles.IsChecked)
-                {
-                    NameOverHeadManager.TypeAllowed = NameOverheadTypeAllowed.Mobiles;
-                }
-            };
+            _overheadButtons.Add(button);
 
-            items.ValueChanged += (sender, e) =>
-            {
-                if (items.IsChecked)
-                {
-                    NameOverHeadManager.TypeAllowed = NameOverheadTypeAllowed.Items;
-                }
-            };
-
-            mobilesCorpses.ValueChanged += (sender, e) =>
-            {
-                if (mobilesCorpses.IsChecked)
-                {
-                    NameOverHeadManager.TypeAllowed = NameOverheadTypeAllowed.MobilesCorpses;
-                }
-            };
+            return button;
         }
 
         public override void Dispose()
