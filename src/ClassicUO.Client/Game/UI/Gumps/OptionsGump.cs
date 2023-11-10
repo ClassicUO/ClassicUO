@@ -3551,7 +3551,7 @@ namespace ClassicUO.Game.UI.Gumps
             rightArea.Add(_coolDowns);
 
             #region Cooldown conditions
-            SettingsSection conditions = new SettingsSection("Condition", rightArea.Width);
+            SettingsSection conditions = new SettingsSection("Condition", rightArea.Width + 10);
             conditions.Y = _coolDowns.Y + _coolDowns.Height + 5;
 
             {
