@@ -204,12 +204,12 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
-            if (_refreshTime < Time.Ticks && _data != null)
+            if (_refreshTime < Time.Ticks)
             {
                 _refreshTime = (long)Time.Ticks + 250;
 
-                string newData = GetVarData(Var);
-                if (_data.Text != null && !newData.Equals(_data.Text))
+                string newData = GetVarData(Var) ?? string.Empty;
+                if (!newData.Equals(_data.Text))
                 {
                     _data.UpdateText(newData);
                     _data.WantUpdateSize = true;
