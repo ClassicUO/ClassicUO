@@ -1,58 +1,35 @@
-﻿using System;
-using System.Net;
+using System;
 using System.Collections.Specialized;
-using System.Collections.Generic;
-using System.Linq;
+using System.Net.Http;
 
 namespace ClassicUO.Game.Managers
 {
-    public class CrashReportWebhook : IDisposable
+    public class CrashReportWebhook
     {
-        private readonly WebClient dWebClient;
         private static NameValueCollection discordValues = new NameValueCollection();
-        public string WebHook { get; set; }
-        public string UserName { get; set; }
-        public string ProfilePicture { get; set; }
+        public string WebHook { get; set; } = "";
+        public string UserName { get; set; } = "";
+        public string ProfilePicture { get; set; } = "https://static.giantbomb.com/uploads/original/4/42381/1196379-gas_mask_respirator.jpg";
 
         public CrashReportWebhook()
         {
-            dWebClient = new WebClient();
-
-            ProfilePicture = "https://static.giantbomb.com/uploads/original/4/42381/1196379-gas_mask_respirator.jpg";
-            UserName = "Crash Reporter";
-            WebHook = "";
         }
-
 
         public CrashReportWebhook SendMessage(string msgSend)
         {
             if (String.IsNullOrEmpty(WebHook))
                 return null;
-            msgSend = System.Net.WebUtility.HtmlEncode(msgSend);
-            discordValues.Add("username", UserName);
-            discordValues.Add("avatar_url", ProfilePicture);
-            discordValues.Add("content", msgSend);
-            dWebClient.UploadValues(Obf(WebHook, 0), discordValues);
-            return this;
-        }
 
-        public void Dispose()
-        {
-            dWebClient.Dispose();
-        }
-
-        public static List<string> Split(string str, int chunkSize)
-        {
-            List<string> strings = new List<string>();
-
-            int c = 0, amt = str.Length / chunkSize;
-
-            for (int i = 0; i < amt; i++)
+            using (HttpClient httpClient = new HttpClient())
             {
-                strings.Add(str.Substring(i * chunkSize, chunkSize));
+                MultipartFormDataContent form = new MultipartFormDataContent();
+                var file_bytes = System.Text.Encoding.Unicode.GetBytes(msgSend);
+                form.Add(new ByteArrayContent(file_bytes, 0, file_bytes.Length), "Document", "log.txt");
+                httpClient.PostAsync(WebHook, form).Wait();
+                httpClient.Dispose();
             }
 
-            return strings;
+            return this;
         }
 
         public static string Obf(string source, Int16 shift)
@@ -81,5 +58,4 @@ namespace ClassicUO.Game.Managers
             return new string(buffer);
         }
     }
-
 }
