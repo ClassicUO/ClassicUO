@@ -11,7 +11,8 @@ namespace ClassicUO.Game.UI.Gumps
                 "- Modern shop gump fix\n" +
                 "- Pull in latest changes from CUO\n" +
                 "- Update client-side version checking\n" +
-                "- Infobar bug fixes",
+                "- Infobar bug fixes\n" +
+                "- Other small bug fixes",
 
             "/c[white][3.10.1]/cd\n" +
                 "- Bug fix for floating damage numbers\n" +
