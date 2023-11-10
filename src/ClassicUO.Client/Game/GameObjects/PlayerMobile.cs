@@ -69,7 +69,7 @@ namespace ClassicUO.Game.GameObjects
                 }
             };
 
-           UIManager.Add(castTimer = new SpellVisualRangeManager.CastTimerProgressBar());
+            UIManager.Add(castTimer = new SpellVisualRangeManager.CastTimerProgressBar());
         }
 
         public Skill[] Skills { get; }
@@ -1335,8 +1335,10 @@ namespace ClassicUO.Game.GameObjects
 
             int max = 0;
 
-            foreach (Gump control in UIManager.Gumps)
+            for (LinkedListNode<Gump> last = UIManager.Gumps.Last; last != null; last = last.Previous)
             {
+                Control control = last.Value;
+
                 if (control is UseAbilityButtonGump s)
                 {
                     s.RequestUpdateContents();
@@ -1458,9 +1460,9 @@ namespace ClassicUO.Game.GameObjects
                     continue;
 
                 Gump gump = UIManager.Gumps.ElementAt(i);
-            //}
-            //foreach (Gump gump in UIManager.Gumps)
-            //{
+                //}
+                //foreach (Gump gump in UIManager.Gumps)
+                //{
                 switch (gump)
                 {
                     case ModernPaperdoll _:
