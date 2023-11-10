@@ -372,6 +372,11 @@ namespace ClassicUO.Assets
                 return ReadOnlySpan<AnimIdxBlock>.Empty;
             }
 
+            if (offset + (actionCount * MAX_DIRECTIONS * sizeof(AnimIdxBlock)) >= end)
+            {
+                return ReadOnlySpan<AnimIdxBlock>.Empty;
+            }
+
             var animIdxSpan = new ReadOnlySpan<AnimIdxBlock>(
                 (void*)offset,
                 actionCount * MAX_DIRECTIONS
