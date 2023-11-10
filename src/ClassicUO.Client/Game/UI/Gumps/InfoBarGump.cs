@@ -98,7 +98,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_refreshTime < Time.Ticks)
             {
-                _refreshTime = (long)Time.Ticks + 125;
+                _refreshTime = (long)Time.Ticks + 250;
 
                 int x = 6, y = 6;
 
@@ -195,7 +195,7 @@ namespace ClassicUO.Game.UI.Gumps
         public InfoBarVars Var { get; }
 
         public ushort Hue { get; }
-        protected long _refreshTime;
+        protected long _refreshTime = (long)Time.Ticks - 1;
 
         public override void Update()
         {
@@ -209,10 +209,11 @@ namespace ClassicUO.Game.UI.Gumps
                 _refreshTime = (long)Time.Ticks + 250;
 
                 string newData = GetVarData(Var);
-                if (!newData.Equals(_data.Text))
+                if (_data.Text != null && !newData.Equals(_data.Text))
                 {
                     _data.UpdateText(newData);
                     _data.WantUpdateSize = true;
+                    WantUpdateSize = true;
                 }
 
                 if (ProfileManager.CurrentProfile.InfoBarHighlightType == 0 || Var == InfoBarVars.NameNotoriety)

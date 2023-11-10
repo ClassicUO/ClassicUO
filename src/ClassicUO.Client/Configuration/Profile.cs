@@ -957,6 +957,9 @@ namespace ClassicUO.Configuration
                                     case GumpType.WorldMap:
                                         gump = new WorldMapGump();
                                         break;
+                                    case GumpType.InfoBar:
+                                        gump = new InfoBarGump();
+                                        break;
                                 }
 
                                 if (gump != null)
