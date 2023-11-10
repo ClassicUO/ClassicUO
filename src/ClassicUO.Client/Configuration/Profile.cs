@@ -960,6 +960,9 @@ namespace ClassicUO.Configuration
                                     case GumpType.InfoBar:
                                         gump = new InfoBarGump();
                                         break;
+                                    case GumpType.PaperDoll:
+                                        gump = new ModernPaperdoll(World.Player.Serial);
+                                        break;
                                 }
 
                                 if (gump != null)
