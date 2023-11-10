@@ -1,4 +1,4 @@
-﻿using ClassicUO.Assets;
+using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
