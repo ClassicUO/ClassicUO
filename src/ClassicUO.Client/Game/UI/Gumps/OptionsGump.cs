@@ -4068,24 +4068,6 @@ namespace ClassicUO.Game.UI.Gumps
                 section.Add(AddLabel(null, "Hide timestamp", 0, 0));
                 section.AddRight(_hideJournalTimestamp = AddCheckBox(null, "", _currentProfile.HideJournalTimestamp, 0, 0));
 
-                string[] availableFonts = TrueTypeLoader.Instance.Fonts;
-
-                section.Add(AddLabel(null, "Font selection", 0, 0));
-
-                string[] fontArray = TrueTypeLoader.Instance.Fonts;
-                int selectedFont = Array.IndexOf(fontArray, _currentProfile.SelectedTTFJournalFont);
-                section.AddRight(_journalFontSelection = AddCombobox(
-                        null,
-                        availableFonts,
-                        selectedFont < 0 ? 0 : selectedFont,
-                        0, 0, 200
-                    ));
-
-                section.PushIndent();
-                section.Add(AddLabel(null, "Font size", 0, 0));
-                section.Add(_journalFontSize = AddHSlider(null, 5, 40, _currentProfile.SelectedJournalFontSize, 0, 0, 200));
-                section.PopIndent();
-
                 rightArea.Add(section);
                 startY += section.Height + SPACING;
             }//Journal
@@ -4206,16 +4188,8 @@ namespace ClassicUO.Game.UI.Gumps
                 section.Add(_displayPartyChatOverhead = AddCheckBox(null, "", _currentProfile.DisplayPartyChatOverhead, 0, 0));
                 section.AddRight(AddLabel(null, "Display party chat over players heads.", 0, 0));
 
-                section.Add(AddLabel(null, "Overhead text font", 0, 0));
-                section.AddRight(_overheadFont = GenerateFontSelector(_currentProfile.OverheadChatFont));
-
-                section.PushIndent();
-                section.Add(AddLabel(null, "Overhead text font size", 0, 0));
-                section.AddRight(_overheadFontSize = AddHSlider(null, 5, 40, _currentProfile.OverheadChatFontSize, 0, 0, 200));
-
                 section.Add(AddLabel(null, "Overhead text width", 0, 0));
                 section.AddRight(_overheadTextWidth = AddHSlider(null, 100, 600, _currentProfile.OverheadChatWidth, 0, 0, 200));
-                section.PopIndent();
 
                 section.Add(AddLabel(null, "Below mobile health line size", 0, 0));
                 section.AddRight(_healthLineSizeMultiplier = AddHSlider(null, 1, 5, _currentProfile.HealthLineSizeMultiplier, 0, 0, 150));
@@ -4246,14 +4220,6 @@ namespace ClassicUO.Game.UI.Gumps
                             0, 0
                         ));
                     section.AddRight(AddLabel(null, "Disable system chat", 0, 0));
-
-                    section.Add(AddLabel(null, "System chat font", 0, 0));
-                    section.AddRight(_gameWindowSideChatFont = GenerateFontSelector(_currentProfile.GameWindowSideChatFont));
-
-                    section.PushIndent();
-                    section.Add(AddLabel(null, "System chat font size", 0, 0));
-                    section.AddRight(_gameWindowSideChatFontSize = AddHSlider(null, 5, 40, _currentProfile.GameWindowSideChatFontSize, 0, 0, 200));
-                    section.PopIndent();
                 } //System chat
 
                 {
@@ -4358,9 +4324,6 @@ namespace ClassicUO.Game.UI.Gumps
                 section.Add(AddLabel(null, "Use advanced shop gump", 0, 0));
                 section.AddRight(_useModernShop = AddCheckBox(null, "", _currentProfile.UseModernShopGump, 0, 0));
 
-                section.Add(AddLabel(null, "TTF Font text border size", 0, 0));
-                section.AddRight(_textStrokeSize = AddHSlider(null, 0, 2, _currentProfile.TextBorderSize, 0, 0, 150));
-
                 section.Add(AddLabel(null, "Display skill progress bar on skill changes", 0, 0));
                 section.AddRight(_skillProgressBarOnChange = AddCheckBox(null, "", _currentProfile.DisplaySkillBarOnChange, 0, 0));
 
@@ -4425,17 +4388,7 @@ namespace ClassicUO.Game.UI.Gumps
                 };
 
                 rightArea.Add(section);
-
-                section.Add(AddLabel(null, "InfoBar font", 0, 0));
-                section.AddRight(_infoBarFont = GenerateFontSelector(_currentProfile.InfoBarFont));
-
-                section.PushIndent();
-                section.Add(AddLabel(null, "InfoBar font size", 0, 0));
-                section.AddRight(_infoBarFontSize = AddHSlider(null, 5, 40, _currentProfile.InfoBarFontSize, 0, 0, 200));
-                section.PopIndent();
-
-
-                startY += section.Height + SPACING + 35;
+                startY += section.Height + SPACING + 30;
             } //Misc
 
             {
@@ -4448,14 +4401,6 @@ namespace ClassicUO.Game.UI.Gumps
                     _.X = rightArea.Width - 45;
                     _.MouseUp += MinimizeSectionMouseUp;
                 }
-
-                section.Add(AddLabel(null, "Tooltip font", 0, 0));
-                section.AddRight(_tooltipFontSelect = GenerateFontSelector(_currentProfile.SelectedToolTipFont));
-
-                section.PushIndent();
-                section.Add(AddLabel(null, "Tooltip font size", 0, 0));
-                section.AddRight(_tooltipFontSize = AddHSlider(null, 5, 40, _currentProfile.SelectedToolTipFontSize, 0, 0, 200));
-                section.PopIndent();
 
                 section.Add(_leftAlignToolTips = AddCheckBox(null, "Align tooltips to the left side", _currentProfile.LeftAlignToolTips, 0, 0));
                 section.PushIndent();
@@ -4478,6 +4423,78 @@ namespace ClassicUO.Game.UI.Gumps
                 rightArea.Add(section);
                 startY += section.Height + SPACING;
             }// Tooltip sections
+
+            {
+                SettingsSection section = new SettingsSection("Font settings", rightArea.Width) { Y = startY };
+
+                {
+                    NiceButton _;
+                    section.BaseAdd(_ = new NiceButton(0, 0, 20, TEXTBOX_HEIGHT, ButtonAction.Activate, "<>") { IsSelectable = false });
+                    _.SetTooltip("Minimize section");
+                    _.X = rightArea.Width - 45;
+                    _.MouseUp += MinimizeSectionMouseUp;
+                }
+
+                section.Add(AddLabel(null, "TTF Font text border size", 0, 0));
+                section.AddRight(_textStrokeSize = AddHSlider(null, 0, 2, _currentProfile.TextBorderSize, 0, 0, 150));
+
+                section.Add(new Line(0, 0, section.Width, 1, Color.Gray.PackedValue));
+
+                section.Add(AddLabel(null, "InfoBar font", 0, 0));
+                section.AddRight(_infoBarFont = GenerateFontSelector(_currentProfile.InfoBarFont));
+
+                section.PushIndent();
+                section.Add(AddLabel(null, "InfoBar font size", 0, 0));
+                section.AddRight(_infoBarFontSize = AddHSlider(null, 5, 40, _currentProfile.InfoBarFontSize, 0, 0, 200));
+                section.PopIndent();
+
+                section.Add(new Line(0, 0, section.Width, 1, Color.Gray.PackedValue));
+
+
+                section.Add(AddLabel(null, "System chat font", 0, 0));
+                section.AddRight(_gameWindowSideChatFont = GenerateFontSelector(_currentProfile.GameWindowSideChatFont));
+
+                section.PushIndent();
+                section.Add(AddLabel(null, "System chat font size", 0, 0));
+                section.AddRight(_gameWindowSideChatFontSize = AddHSlider(null, 5, 40, _currentProfile.GameWindowSideChatFontSize, 0, 0, 200));
+                section.PopIndent();
+
+                section.Add(new Line(0, 0, section.Width, 1, Color.Gray.PackedValue));
+
+
+                section.Add(AddLabel(null, "Tooltip font", 0, 0));
+                section.AddRight(_tooltipFontSelect = GenerateFontSelector(_currentProfile.SelectedToolTipFont));
+
+                section.PushIndent();
+                section.Add(AddLabel(null, "Tooltip font size", 0, 0));
+                section.AddRight(_tooltipFontSize = AddHSlider(null, 5, 40, _currentProfile.SelectedToolTipFontSize, 0, 0, 200));
+                section.PopIndent();
+
+                section.Add(new Line(0, 0, section.Width, 1, Color.Gray.PackedValue));
+
+
+                section.Add(AddLabel(null, "Overhead text font", 0, 0));
+                section.AddRight(_overheadFont = GenerateFontSelector(_currentProfile.OverheadChatFont));
+
+                section.PushIndent();
+                section.Add(AddLabel(null, "Overhead text font size", 0, 0));
+                section.AddRight(_overheadFontSize = AddHSlider(null, 5, 40, _currentProfile.OverheadChatFontSize, 0, 0, 200));
+                section.PopIndent();
+
+                section.Add(new Line(0, 0, section.Width, 1, Color.Gray.PackedValue));
+
+
+                section.Add(AddLabel(null, "Journal text font", 0, 0));
+                section.AddRight(_journalFontSelection = GenerateFontSelector(_currentProfile.SelectedTTFJournalFont));
+
+                section.PushIndent();
+                section.Add(AddLabel(null, "Journal font size", 0, 0));
+                section.Add(_journalFontSize = AddHSlider(null, 5, 40, _currentProfile.SelectedJournalFontSize, 0, 0, 200));
+                section.PopIndent();
+
+                rightArea.Add(section);
+                startY += section.Height + SPACING + 30;
+            }// Font settings
 
             {
                 SettingsSection section = new SettingsSection("Global Settings", rightArea.Width) { Y = startY };
