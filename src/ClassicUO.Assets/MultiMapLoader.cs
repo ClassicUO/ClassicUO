@@ -35,7 +35,9 @@ using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using System;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace ClassicUO.Assets
@@ -70,7 +72,12 @@ namespace ClassicUO.Assets
                         _file = new UOFile(path, true);
                     }
                     
-                    var facetFiles = Directory.GetFiles(UOFileManager.BasePath, "facet0*.mul", SearchOption.TopDirectoryOnly);
+                    var facetFiles = Directory.GetFiles(UOFileManager.BasePath, "*.mul", SearchOption.TopDirectoryOnly)
+                        .Select(s => Regex.Match(s, "facet0.*\\.mul", RegexOptions.IgnoreCase))
+                        .Where(s => s.Success)
+                        .Select(s => Path.Combine(UOFileManager.BasePath, s.Value))
+                        .ToArray();
+
                     _facets = new UOFileMul[facetFiles.Length];
 
                     for (int i = 0; i < facetFiles.Length; i++)
