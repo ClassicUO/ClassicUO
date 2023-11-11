@@ -16,7 +16,8 @@ namespace ClassicUO.Game.UI.Gumps
                 "- Modern paperdoll being anchored will be remembered now\n" +
                 "- Added an option for Cooldown bars to use the position of the last moved bar\n" +
                 "- Added advanced nameplate options\n" +
-                "- Moved TTF Font settings to their own category",
+                "- Moved TTF Font settings to their own category\n" +
+                "- Journal tabs are now fully customizable",
 
             "/c[white][3.10.1]/cd\n" +
                 "- Bug fix for floating damage numbers\n" +
