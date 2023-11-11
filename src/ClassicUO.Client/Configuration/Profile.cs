@@ -529,6 +529,36 @@ namespace ClassicUO.Configuration
         public int InfoBarFontSize { get; set; } = 18;
 
         public int LastJournalTab { get; set; } = 0;
+        public Dictionary<string, MessageType[]> JournalTabs { get; set; } = new Dictionary<string, MessageType[]>() 
+        {
+            { "All", new MessageType[] {
+                MessageType.Alliance, MessageType.Command, MessageType.Emote,
+                MessageType.Encoded, MessageType.Focus, MessageType.Guild,
+                MessageType.Label, MessageType.Limit3Spell, MessageType.Party,
+                MessageType.Regular, MessageType.Spell, MessageType.System,
+                MessageType.Whisper, MessageType.Yell, MessageType.ChatSystem }
+            },
+            { "Chat", new MessageType[] { 
+                MessageType.Regular, 
+                MessageType.Guild, 
+                MessageType.Alliance, 
+                MessageType.Emote, 
+                MessageType.Party, 
+                MessageType.Whisper, 
+                MessageType.Yell, 
+                MessageType.ChatSystem } 
+            },
+            {
+                "Guild|Party", new MessageType[] { 
+                    MessageType.Guild, 
+                    MessageType.Alliance, 
+                    MessageType.Party }
+            },
+            {
+                "System", new MessageType[] { 
+                    MessageType.System }
+            }
+        };
 
         public bool UseLastMovedCooldownPosition {  get; set; } = false;
 
