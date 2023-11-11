@@ -193,7 +193,7 @@ namespace ClassicUO.Game.UI.Gumps
         private InputField _healthIndicatorPercentage, _healthIndicatorWidth, _tooltipHeaderFormat, _skillProgressBarFormat;
         private ModernColorPicker.HueDisplay _mainWindowHuePicker, _spellIconHotkeyHue, _tooltipBGHue;
         private HSliderBar _spellIconScale, _journalFontSize, _tooltipFontSize, _gameWindowSideChatFontSize, _overheadFontSize, _overheadTextWidth, _textStrokeSize, _gridHightlightLineSize, _maxJournalEntries;
-        private HSliderBar _healthLineSizeMultiplier, _regularPlayerAlpha, _infoBarFontSize;
+        private HSliderBar _healthLineSizeMultiplier, _regularPlayerAlpha, _infoBarFontSize, _nameplateBorderOpacity;
         private Combobox _journalFontSelection, _tooltipFontSelect, _gameWindowSideChatFont, _overheadFont, _infoBarFont;
 
         #region Cooldowns
@@ -4133,13 +4133,24 @@ namespace ClassicUO.Game.UI.Gumps
                             0, 0,
                             200
                         ));
+
                     section.Add(_namePlateShowAtFullHealth = AddCheckBox(null, "", _currentProfile.NamePlateHideAtFullHealth, 0, 0));
                     section.AddRight(new Label("Hide nameplates above 100% hp.", true, HUE_FONT, font: FONT));
                     section.PushIndent();
+
                     section.Add(_namePlateHealthOnlyWarmode = AddCheckBox(null, "", _currentProfile.NamePlateHideAtFullHealthInWarmode, 0, 0));
                     section.AddRight(new Label("Only while in warmode", true, HUE_FONT, font: FONT));
                     section.PopIndent();
                     section.PopIndent();
+
+                    section.Add(AddLabel(null, "Border opacity", 0, 0));
+                    section.AddRight(_nameplateBorderOpacity = AddHSlider(
+                            null,
+                            0, 100,
+                            _currentProfile.NamePlateBorderOpacity,
+                            0, 0,
+                            200
+                        ));
                 } //Name plate health bar
 
                 {
@@ -5207,6 +5218,7 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.GridContainersScale = (byte)_gridContainerScale.Value;
             _currentProfile.NamePlateHealthBar = _namePlateHealthBar.IsChecked;
             _currentProfile.NamePlateOpacity = (byte)_namePlateOpacity.Value;
+            _currentProfile.NamePlateBorderOpacity = (byte)_nameplateBorderOpacity.Value;
             _currentProfile.NamePlateHealthBarOpacity = (byte)_namePlateHealthBarOpacity.Value;
             _currentProfile.GridContainerSearchMode = _gridContainerSearchAlternative.SelectedIndex;
             _currentProfile.GridContainerScaleItems = _gridContainerItemScale.IsChecked;
