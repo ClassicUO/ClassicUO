@@ -175,6 +175,8 @@ namespace ClassicUO.Game.UI.Gumps
         private Combobox _journalStyle;
         private ModernColorPicker.HueDisplay _paperDollHue, _durabilityBarHue;
 
+        private NameOverheadAssignControl _nameOverheadControl;
+
         // video
         private Checkbox _use_old_status_gump, _windowBorderless, _enableDeathScreen, _enableBlackWhiteEffect, _altLights, _enableLight, _enableShadows, _enableShadowsStatics, _auraMouse, _runMouseInSeparateThread, _useColoredLights, _darkNights, _partyAura, _hideChatGradient, _animatedWaterEffect;
         private Combobox _lightLevelType;
@@ -411,6 +413,22 @@ namespace ClassicUO.Game.UI.Gumps
                     140,
                     25,
                     ButtonAction.SwitchPage,
+                    "Nameplate Options"
+                )
+                {
+                    ButtonParameter = 13
+                }
+            );
+
+            Add
+            (
+                new NiceButton
+                (
+                    10,
+                    10 + 30 * i++,
+                    140,
+                    25,
+                    ButtonAction.SwitchPage,
                     "Cooldowns (TUO)"
                 )
                 {
@@ -517,6 +535,7 @@ namespace ClassicUO.Game.UI.Gumps
             BuildInfoBar();
             BuildContainers();
             BuildExperimental();
+            BuildNameOverhead();
             BuildCooldowns();
             BuildTazUO();
 
@@ -3515,6 +3534,216 @@ namespace ClassicUO.Game.UI.Gumps
             Add(rightArea, PAGE);
         }
 
+        private void BuildNameOverhead()
+        {
+            const int PAGE = 13;
+
+            ScrollArea rightArea = new ScrollArea
+            (
+                190,
+                52 + 25 + 4,
+                150,
+                360,
+                true
+            );
+
+            Add
+            (
+                new Line
+                (
+                    190,
+                    52 + 25 + 2,
+                    150,
+                    1,
+                    Color.Gray.PackedValue
+                ),
+                PAGE
+            );
+
+            Add
+            (
+                new Line
+                (
+                    191 + 150,
+                    21,
+                    1,
+                    418,
+                    Color.Gray.PackedValue
+                ),
+                PAGE
+            );
+
+            NiceButton addButton = new NiceButton
+            (
+                190,
+                20,
+                130,
+                20,
+                ButtonAction.Activate,
+                "New entry"
+            )
+            { IsSelectable = false, ButtonParameter = (int)Buttons.NewNameOverheadEntry };
+
+            Add(addButton, PAGE);
+
+            NiceButton delButton = new NiceButton
+            (
+                190,
+                52,
+                130,
+                20,
+                ButtonAction.Activate,
+                "Delete entry"
+            )
+            { IsSelectable = false, ButtonParameter = (int)Buttons.DeleteOverheadEntry };
+
+            Add(delButton, PAGE);
+
+
+            int startX = 5;
+            int startY = 5;
+
+            DataBox databox = new DataBox(startX, startY, 1, 1);
+            databox.WantUpdateSize = true;
+            rightArea.Add(databox);
+
+
+            addButton.MouseUp += (sender, e) =>
+            {
+                EntryDialog dialog = new
+                (
+                    250,
+                    150,
+                    "Name overhead entry name",
+                    name =>
+                    {
+                        if (string.IsNullOrWhiteSpace(name))
+                        {
+                            return;
+                        }
+                        if (NameOverHeadManager.FindOption(name) != null)
+                        {
+                            return;
+                        }
+                        NiceButton nb;
+                        databox.Add
+                        (
+                            nb = new NiceButton
+                            (
+                                0,
+                                0,
+                                130,
+                                25,
+                                ButtonAction.Activate,
+                                name
+                            )
+                            {
+                                ButtonParameter = (int)Buttons.Last + 1 + rightArea.Children.Count
+                            }
+                        );
+                        databox.ReArrangeChildren();
+                        nb.IsSelected = true;
+                        _nameOverheadControl?.Dispose();
+                        var option = new NameOverheadOption(name);
+                        NameOverHeadManager.AddOption(option);
+                        _nameOverheadControl = new NameOverheadAssignControl(option)
+                        {
+                            X = 400,
+                            Y = 20
+                        };
+                        Add(_nameOverheadControl, PAGE);
+                        nb.MouseUp += (sss, eee) =>
+                        {
+                            _nameOverheadControl?.Dispose();
+                            _nameOverheadControl = new NameOverheadAssignControl(option)
+                            {
+                                X = 400,
+                                Y = 20
+                            };
+                            Add(_nameOverheadControl, PAGE);
+                        };
+                    }
+                )
+                {
+                    CanCloseWithRightClick = true
+                };
+                UIManager.Add(dialog);
+            };
+
+            delButton.MouseUp += (ss, ee) =>
+            {
+                NiceButton nb = databox.FindControls<NiceButton>().SingleOrDefault(a => a.IsSelected);
+                if (nb != null)
+                {
+                    QuestionGump dialog = new QuestionGump
+                    (
+                        ResGumps.MacroDeleteConfirmation,
+                        b =>
+                        {
+                            if (!b)
+                            {
+                                return;
+                            }
+                            if (_nameOverheadControl != null)
+                            {
+                                NameOverHeadManager.RemoveOption(_nameOverheadControl.Option);
+                                _nameOverheadControl.Dispose();
+                            }
+                            nb.Dispose();
+                            databox.ReArrangeChildren();
+                        }
+                    );
+                    UIManager.Add(dialog);
+                }
+            };
+
+
+            foreach (var option in NameOverHeadManager.GetAllOptions())
+            {
+                NiceButton nb;
+
+                databox.Add
+                (
+                    nb = new NiceButton
+                    (
+                        0,
+                        0,
+                        130,
+                        25,
+                        ButtonAction.Activate,
+                        option.Name
+                    )
+                    {
+                        ButtonParameter = (int)Buttons.Last + 1 + rightArea.Children.Count,
+                        Tag = option
+                    }
+                );
+
+                nb.IsSelected = true;
+
+                nb.MouseUp += (sss, eee) =>
+                {
+                    NiceButton mupNiceButton = (NiceButton)sss;
+                    var option = mupNiceButton.Tag as NameOverheadOption;
+                    if (option == null)
+                    {
+                        return;
+                    }
+                    _nameOverheadControl?.Dispose();
+                    _nameOverheadControl = new NameOverheadAssignControl(option)
+                    {
+                        X = 400,
+                        Y = 20
+                    };
+                    Add(_nameOverheadControl, PAGE);
+                };
+            }
+
+            databox.ReArrangeChildren();
+
+            Add(rightArea, PAGE);
+        }
+
         private void BuildCooldowns()
         {
             const int PAGE = 8787;
@@ -5810,6 +6039,9 @@ namespace ClassicUO.Game.UI.Gumps
             OpenIgnoreList,
             NewMacro,
             DeleteMacro,
+
+            NewNameOverheadEntry,
+            DeleteOverheadEntry,
 
             Last = DeleteMacro
         }

@@ -148,6 +148,8 @@ namespace ClassicUO.Game.Scenes
             Macros = new MacroManager();
             Macros.Load();
 
+            NameOverHeadManager.Load();
+
             _animatedStaticsManager = new AnimatedStaticsManager();
             _animatedStaticsManager.Initialize();
             InfoBars = new InfoBarManager();
@@ -379,6 +381,8 @@ namespace ClassicUO.Game.Scenes
             SpellVisualRangeManager.Instance.Save();
             SpellVisualRangeManager.Instance.OnSceneUnload();
             AutoLootManager.Instance.Save();
+
+            NameOverHeadManager.Save();
 
             Macros.Save();
             InfoBars.Save();
@@ -661,13 +665,14 @@ namespace ClassicUO.Game.Scenes
 
             GetViewPort();
 
-            var useObjectHandles = NameOverHeadManager.IsToggled || Keyboard.Ctrl && Keyboard.Shift;
+            var useObjectHandles = NameOverHeadManager.IsShowing;
             if (useObjectHandles != _useObjectHandles)
             {
                 _useObjectHandles = useObjectHandles;
                 if (_useObjectHandles)
                 {
                     NameOverHeadManager.Open();
+
                 }
                 else
                 {

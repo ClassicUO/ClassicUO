@@ -215,17 +215,7 @@ namespace ClassicUO.Game.GameObjects
                 UsedLayer
             );
 
-            bool ishuman =
-                MathHelper.InRange(Amount, 0x0190, 0x0193)
-                || MathHelper.InRange(Amount, 0x00B7, 0x00BA)
-                || MathHelper.InRange(Amount, 0x025D, 0x0260)
-                || MathHelper.InRange(Amount, 0x029A, 0x029B)
-                || MathHelper.InRange(Amount, 0x02B6, 0x02B7)
-                || Amount == 0x03DB
-                || Amount == 0x03DF
-                || Amount == 0x03E2
-                || Amount == 0x02E8
-                || Amount == 0x02E9;
+            bool ishuman = IsHumanCorpse;
 
             DrawLayer(
                 batcher,
