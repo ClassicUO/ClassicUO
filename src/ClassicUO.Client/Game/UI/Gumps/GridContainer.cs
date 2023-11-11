@@ -937,9 +937,8 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                         else
                         {
-                            Rectangle containerBounds = ContainerManager.Get(container.Graphic).Bounds;
                             gridContainer.gridSlotManager.AddLockedItemSlot(Client.Game.GameCursor.ItemHold.Serial, slot);
-                            GameActions.DropItem(Client.Game.GameCursor.ItemHold.Serial, containerBounds.X / 2, containerBounds.Y / 2, 0, container.Serial);
+                            GameActions.DropItem(Client.Game.GameCursor.ItemHold.Serial, 0xFFFF, 0xFFFF, 0, container.Serial);
                             Mouse.CancelDoubleClick = true;
                         }
                     }
