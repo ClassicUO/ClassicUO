@@ -485,7 +485,7 @@ namespace ClassicUO.Game.UI.Gumps
             List<Item> sortedContents = ProfileManager.CurrentProfile.GridContainerSearchMode == 0 ? gridSlotManager.SearchResults(searchBox.Text) : GridSlotManager.GetItemsInContainer(container);
             gridSlotManager.RebuildContainer(sortedContents, searchBox.Text, overrideSort);
             containerNameLabel.Text = GetContainerName();
-            if(container.Container != 0xFFFF_FFFF && FindContainer(container.Container, out GridContainer gridContainer))
+            if (container.Container != 0xFFFF_FFFF && FindContainer(container.Container, out GridContainer gridContainer))
             {
                 gridContainer.UpdateContainerName();
             }
@@ -626,35 +626,15 @@ namespace ClassicUO.Game.UI.Gumps
             if (gridSlotManager != null)
             {
                 gridSlotManager.UpdateItems();
-                containerName += $" ({GetRecursiveItemCount(LocalSerial)})";
+                containerName += $" ({gridSlotManager.ItemPositions.Count})";
             }
+
             return containerName;
         }
 
         public void UpdateContainerName()
         {
             containerNameLabel.Text = GetContainerName();
-        }
-
-        private static int GetRecursiveItemCount(uint serial)
-        {
-            int v = 0;
-
-            Item requestedItem = World.Items.Get(serial);
-            if (requestedItem != null)
-            {
-                for (LinkedObject i = requestedItem.Items; i != null; i = i.Next)
-                {
-                    Item item = (Item)i;
-                    if (item.Items != null)
-                    {
-                        v += GetRecursiveItemCount(item.Serial);
-                    }
-                    v++;
-                }
-            }
-
-            return v;
         }
 
         public void OptionsUpdated()

@@ -117,7 +117,8 @@ namespace ClassicUO.Game.UI.Gumps
                             ProfileManager.CurrentProfile.JournalTabs.Add(entry, new MessageType[] { MessageType.Regular });
                             ResizableJournal.ReloadTabs = true;
                         }
-                    }));
+                    })
+                    { X = X, Y = Y });
                 }
             };
 
