@@ -67,18 +67,19 @@ namespace ClassicUO.Game.Managers
         Humanoid = 1 << 8,
         Monster = 1 << 9,
         OwnFollowers = 1 << 10,
+        Self = 1 << 11,
 
         // Mobiles (notoriety)
-        Innocent = 1 << 11,
-        Ally = 1 << 12,
-        Gray = 1 << 13,
-        Criminal = 1 << 14,
-        Enemy = 1 << 15,
-        Murderer = 1 << 16,
-        Invulnerable = 1 << 17,
+        Innocent = 1 << 12,
+        Ally = 1 << 13,
+        Gray = 1 << 14,
+        Criminal = 1 << 15,
+        Enemy = 1 << 16,
+        Murderer = 1 << 17,
+        Invulnerable = 1 << 18,
 
         AllItems = Containers | Gold | Stackable | LockedDown | Other,
-        AllMobiles = Humanoid | Monster | OwnFollowers,
+        AllMobiles = Humanoid | Monster | OwnFollowers | Self,
         MobilesAndCorpses = AllMobiles | MonsterCorpses | HumanoidCorpses,
     }
 
@@ -160,6 +161,9 @@ namespace ClassicUO.Game.Managers
                 return true;
 
             if (ActiveOverheadOptions.HasFlag(NameOverheadOptions.Invulnerable) && mobile.NotorietyFlag == NotorietyFlag.Invulnerable)
+                return true;
+
+            if(ActiveOverheadOptions.HasFlag(NameOverheadOptions.Self) && mobile.Equals(World.Player)) 
                 return true;
 
             return false;

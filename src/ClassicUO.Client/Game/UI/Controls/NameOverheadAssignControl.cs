@@ -113,8 +113,8 @@ namespace ClassicUO.Game.UI.Controls
 
             AddCheckbox("Monster corpses", NameOverheadOptions.MonsterCorpses, 0, y);
             AddCheckbox("Humanoid corpses", NameOverheadOptions.HumanoidCorpses, 150, y);
-            y += 22;
-            AddCheckbox("Own corpses", NameOverheadOptions.OwnCorpses, 0, y);
+            //y += 22;
+            //AddCheckbox("Own corpses", NameOverheadOptions.OwnCorpses, 0, y);
             y += 28;
 
             AddLabel("Mobiles by type", 75, y);
@@ -124,6 +124,7 @@ namespace ClassicUO.Game.UI.Controls
             AddCheckbox("Monster", NameOverheadOptions.Monster, 150, y);
             y += 22;
             AddCheckbox("Your Followers", NameOverheadOptions.OwnFollowers, 0, y);
+            AddCheckbox("Yourself", NameOverheadOptions.Self, 150, y);
             y += 28;
 
             AddLabel("Mobiles by notoriety", 75, y);
