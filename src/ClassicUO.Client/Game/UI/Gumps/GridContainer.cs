@@ -34,7 +34,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.Remoting.Contexts;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
@@ -348,6 +347,12 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             writer.WriteAttributeString("ogContainer", originalContainerItemGraphic.ToString());
+        }
+
+        public override void Restore(XmlElement xml)
+        {
+            base.Restore(xml);
+            GameActions.DoubleClickQueued(LocalSerial);
         }
 
         private void ScrollArea_MouseUp(object sender, MouseEventArgs e)
