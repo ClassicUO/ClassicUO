@@ -52,9 +52,11 @@ namespace ClassicUO.Game.UI.Gumps
         {
             AnchorType = ANCHOR_TYPE.NONE;
             CanMove = true;
+            _prevCanMove = true;
             AcceptMouseInput = true;
             WantUpdateSize = true;
             CanCloseWithRightClick = true;
+            _prevCloseWithRightClick = true;
             if (ProfileManager.CurrentProfile != null)
             {
                 _lastX = ProfileManager.CurrentProfile.JournalPosition.X;
@@ -393,6 +395,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _scrollBar.IsVisible = false;
                 AcceptMouseInput = true;
                 CanMove = true;
+                
                 X = x;
                 Y = y;
                 Width = lastWidth = width;
