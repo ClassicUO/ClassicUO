@@ -1432,7 +1432,7 @@ namespace ClassicUO.Assets
                 return Span<FrameInfo>.Empty;
             }
 
-            if (index.Position == 0xFFFF_FFFF) // TODO: Size != 0xFFFF_FFFF ?
+            if (index.Position == 0xFFFF_FFFF || index.Size == 0xFFFF_FFFF)
             {
                 return Span<FrameInfo>.Empty;
             }
