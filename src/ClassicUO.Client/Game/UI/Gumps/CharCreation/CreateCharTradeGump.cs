@@ -182,7 +182,6 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                                      s.Index != 54 && // Spellweaving
                                      (character.Race == RaceType.GARGOYLE || s.Index != 57) // Throwing for gargoyle only
                                  )
-
                           .Where(s =>
                                     clientFlags.HasFlag(LockedFeatureFlags.ExpansionAOS) ||
                                     (   
@@ -208,6 +207,16 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                                     )
                                 )
                          .ToList();
+
+            // do not include archer if it's a gargoyle
+            if (character.Race == RaceType.GARGOYLE)
+            {
+                var archeryEntry = _skillList.FirstOrDefault(s => s.Index == 31);
+                if (archeryEntry != null)
+                {
+                    _skillList.Remove(archeryEntry);
+                }
+            }
 
             var skillNames = _skillList.Select(s => s.Name).ToArray();
 
