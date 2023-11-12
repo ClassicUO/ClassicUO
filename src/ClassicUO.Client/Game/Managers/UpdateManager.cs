@@ -29,8 +29,6 @@ namespace ClassicUO.Game.Managers
                         restApi.Headers.Add("User-Agent", "Public");
                         string jsonResponse = new HttpClient().SendAsync(restApi).Result.Content.ReadAsStringAsync().Result;
 
-                        Console.WriteLine(jsonResponse);
-
                         MainReleaseData = JsonSerializer.Deserialize<GitHubReleaseData>(jsonResponse);
 
                         if (MainReleaseData != null)
