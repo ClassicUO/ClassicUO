@@ -4854,7 +4854,6 @@ namespace ClassicUO.Game.UI.Gumps
                     _objectsFading.IsChecked = true;
                     _textFading.IsChecked = true;
                     _enableDragSelect.IsChecked = false;
-                    _dragSelectHumanoidsOnly.IsChecked = false;
                     _showTargetRangeIndicator.IsChecked = false;
                     _customBars.IsChecked = false;
                     _customBarsBBG.IsChecked = false;
