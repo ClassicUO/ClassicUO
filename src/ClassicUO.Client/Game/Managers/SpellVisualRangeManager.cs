@@ -21,8 +21,8 @@ namespace ClassicUO.Game.Managers
         public Vector2 LastCursorTileLoc { get; set; } = Vector2.Zero;
         public DateTime LastSpellTime { get; private set; } = DateTime.Now;
 
-        private string savePath = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Profiles", "SpellVisualRange.json");
-        private string overridePath = Path.Combine(ProfileManager.ProfilePath, "SpellVisualRange.json");
+        private string savePath = Path.Combine(CUOEnviroment.ExecutablePath ?? "", "Data", "Profiles", "SpellVisualRange.json");
+        private string overridePath = Path.Combine(ProfileManager.ProfilePath ?? "", "SpellVisualRange.json");
 
         private Dictionary<int, SpellRangeInfo> spellRangeCache = new Dictionary<int, SpellRangeInfo>();
         private Dictionary<int, SpellRangeInfo> spellRangeOverrideCache = new Dictionary<int, SpellRangeInfo>();
