@@ -61,14 +61,14 @@ namespace ClassicUO.Utility
             }
         }
 
-        public static void Decompress(byte[] source, int offset, byte[] dest, int length)
+        public static ZLibError Decompress(byte[] source, int offset, byte[] dest, int length)
         {
-            _compressor.Decompress(dest, ref length, source, source.Length - offset);
+            return _compressor.Decompress(dest, ref length, source, source.Length - offset);
         }
 
-        public static void Decompress(IntPtr source, int sourceLength, int offset, IntPtr dest, int length)
+        public static ZLibError Decompress(IntPtr source, int sourceLength, int offset, IntPtr dest, int length)
         {
-            _compressor.Decompress(dest, ref length, source, sourceLength - offset);
+            return _compressor.Decompress(dest, ref length, source, sourceLength - offset);
         }
 
         private enum ZLibQuality
@@ -81,7 +81,7 @@ namespace ClassicUO.Utility
             Size = 9
         }
 
-        private enum ZLibError
+        public enum ZLibError
         {
             VersionError = -6,
             BufferError = -5,

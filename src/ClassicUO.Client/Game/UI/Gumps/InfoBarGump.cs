@@ -32,7 +32,6 @@
 
 using System.Collections.Generic;
 using System.Xml;
-using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
@@ -55,11 +54,14 @@ namespace ClassicUO.Game.UI.Gumps
         public InfoBarGump() : base(ProfileManager.CurrentProfile.InfoBarSize.X, ProfileManager.CurrentProfile.InfoBarSize.Y, 50, 20, 0, 0)
         {
             CanBeLocked = true; //For base gump locking, resizable uses a special locking procedure
-            CanMove = _prevCanMove = true;
+            CanMove = true;
+            _prevCanMove = true;
             AcceptMouseInput = true;
             AcceptKeyboardInput = false;
-            CanCloseWithRightClick = _prevCloseWithRightClick = false;
-            ShowBorder = _prevBorder = true;
+            CanCloseWithRightClick = false;
+            _prevCloseWithRightClick = false;
+            ShowBorder = true;
+            _prevBorder = true;
 
             Add(_background = new AlphaBlendControl(0.7f) { Width = Width - 8, Height = Height - 8, X = 4, Y = 4 });
 
@@ -98,7 +100,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_refreshTime < Time.Ticks)
             {
-                _refreshTime = (long)Time.Ticks + 125;
+                _refreshTime = (long)Time.Ticks + 250;
 
                 int x = 6, y = 6;
 
@@ -115,6 +117,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     x += c.Width + 8;
                 }
+                ProfileManager.CurrentProfile.InfoBarLocked = IsLocked;
             }
 
             base.Update();
@@ -134,12 +137,6 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Restore(xml);
             SetLockStatus(ProfileManager.CurrentProfile.InfoBarLocked);
-        }
-
-        public override void Save(XmlTextWriter writer)
-        {
-            base.Save(writer);
-            ProfileManager.CurrentProfile.InfoBarLocked = IsLocked;
         }
     }
 
@@ -195,7 +192,7 @@ namespace ClassicUO.Game.UI.Gumps
         public InfoBarVars Var { get; }
 
         public ushort Hue { get; }
-        protected long _refreshTime;
+        protected long _refreshTime = (long)Time.Ticks - 1;
 
         public override void Update()
         {
@@ -206,25 +203,33 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_refreshTime < Time.Ticks)
             {
-                _refreshTime = (long)Time.Ticks + 125;
+                _refreshTime = (long)Time.Ticks + 250;
 
-                _data.Text = GetVarData(Var);
+                string newData = GetVarData(Var) ?? string.Empty;
+                if (!newData.Equals(_data.Text))
+                {
+                    _data.UpdateText(newData);
+                    _data.WantUpdateSize = true;
+                    WantUpdateSize = true;
+                }
 
                 if (ProfileManager.CurrentProfile.InfoBarHighlightType == 0 || Var == InfoBarVars.NameNotoriety)
                 {
-                    _data.Hue = GetVarHue(Var);
+                    ushort hue = GetVarHue(Var);
+                    if (!hue.Equals((ushort)_data.Hue))
+                    {
+                        _data.Hue = hue;
+                    }
                 }
                 else
                 {
-                    _data.Hue = 0x0481;
+                    if ((ushort)_data.Hue != 0x0481)
+                    {
+                        _data.Hue = 0x0481;
+                    }
                     _warningLinesHue = GetVarHue(Var);
                 }
-
-
-                _data.WantUpdateSize = true;
             }
-
-            WantUpdateSize = true;
 
             base.Update();
         }

@@ -558,6 +558,10 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 }
             }
+            else
+            {
+                base.OnMouseUp(x, y, button);
+            }
         }
 
         public override void Save(XmlTextWriter writer)

@@ -216,11 +216,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 SetTooltip(serial);
 
-
-
                 Add(backgound = new AlphaBlendControl(0.01f) { Width = Width, Height = Height });
-
-                //Add(new ResizableStaticPic(Graphic, Height, Height) { Hue = hue, AcceptMouseInput = false });
 
                 itemInfo = new Area(false) { Width = Width - Height, Height = Height, X = Height, AcceptMouseInput = false };
                 purchaseSell = new Area(false) { Width = Width - Height, Height = Height, X = Height, AcceptMouseInput = false, IsVisible = false };
@@ -443,7 +439,7 @@ namespace ClassicUO.Game.UI.Gumps
             private class BuySellButton : Control
             {
                 private readonly bool isPurchase;
-                TextBox text;
+                private TextBox text;
 
                 public BuySellButton(bool isPurchase, int quantity, int price)
                 {

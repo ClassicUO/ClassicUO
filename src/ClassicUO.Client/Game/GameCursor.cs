@@ -536,11 +536,19 @@ namespace ClassicUO.Game
                 }
 
                 ref readonly var artInfo = ref Client.Game.Arts.GetArt(Graphic);
+               
+                var rect = artInfo.UV;
+
+                const int BORDER_SIZE = 1;
+                rect.X += BORDER_SIZE;
+                rect.Y += BORDER_SIZE;
+                rect.Width -= BORDER_SIZE * 2;
+                rect.Height -= BORDER_SIZE * 2;
 
                 sb.Draw(
                     artInfo.Texture,
                     new Vector2(Mouse.Position.X - offX, Mouse.Position.Y - offY),
-                    artInfo.UV,
+                    rect,
                     hueVec
                 );
             }

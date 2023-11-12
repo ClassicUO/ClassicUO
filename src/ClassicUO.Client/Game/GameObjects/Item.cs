@@ -43,6 +43,7 @@ using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using ClassicUO.Utility.Platforms;
 using Microsoft.Xna.Framework;
+using MathHelper = ClassicUO.Utility.MathHelper;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -160,6 +161,18 @@ namespace ClassicUO.Game.GameObjects
 
         public bool IsCorpse => /*MathHelper.InRange(Graphic, 0x0ECA, 0x0ED2) ||*/
             Graphic == 0x2006;
+
+        public bool IsHumanCorpse => IsCorpse && 
+            MathHelper.InRange(Amount, 0x0190, 0x0193) || 
+            MathHelper.InRange(Amount, 0x00B7, 0x00BA) || 
+            MathHelper.InRange(Amount, 0x025D, 0x0260) || 
+            MathHelper.InRange(Amount, 0x029A, 0x029B) || 
+            MathHelper.InRange(Amount, 0x02B6, 0x02B7) || 
+            Amount == 0x03DB || 
+            Amount == 0x03DF || 
+            Amount == 0x03E2 || 
+            Amount == 0x02E8 || 
+            Amount == 0x02E9;
 
         public bool OnGround => !SerialHelper.IsValid(Container);
 

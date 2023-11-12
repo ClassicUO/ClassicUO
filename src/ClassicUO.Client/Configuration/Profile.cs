@@ -244,7 +244,7 @@ namespace ClassicUO.Configuration
         public int DragSelectStartX { get; set; } = 100;
         public int DragSelectStartY { get; set; } = 100;
         public bool DragSelectAsAnchor { get; set; } = false;
-        public NameOverheadTypeAllowed NameOverheadTypeAllowed { get; set; } = NameOverheadTypeAllowed.All;
+        public string LastActiveNameOverheadOption { get; set; } = "All";
         public bool NameOverheadToggled { get; set; } = false;
         public bool ShowTargetRangeIndicator { get; set; }
         public bool PartyInviteGump { get; set; }
@@ -360,6 +360,7 @@ namespace ClassicUO.Configuration
         public byte NamePlateHealthBarOpacity { get; set; } = 50;
         public bool NamePlateHideAtFullHealth { get; set; } = true;
         public bool NamePlateHideAtFullHealthInWarmode { get; set; } = true;
+        public byte NamePlateBorderOpacity { get; set; } = 50;
 
         public bool LeftAlignToolTips { get; set; } = false;
         public bool ForceCenterAlignTooltipMobiles { get; set; } = false;
@@ -529,6 +530,38 @@ namespace ClassicUO.Configuration
         public int InfoBarFontSize { get; set; } = 18;
 
         public int LastJournalTab { get; set; } = 0;
+        public Dictionary<string, MessageType[]> JournalTabs { get; set; } = new Dictionary<string, MessageType[]>() 
+        {
+            { "All", new MessageType[] {
+                MessageType.Alliance, MessageType.Command, MessageType.Emote,
+                MessageType.Encoded, MessageType.Focus, MessageType.Guild,
+                MessageType.Label, MessageType.Limit3Spell, MessageType.Party,
+                MessageType.Regular, MessageType.Spell, MessageType.System,
+                MessageType.Whisper, MessageType.Yell, MessageType.ChatSystem }
+            },
+            { "Chat", new MessageType[] { 
+                MessageType.Regular, 
+                MessageType.Guild, 
+                MessageType.Alliance, 
+                MessageType.Emote, 
+                MessageType.Party, 
+                MessageType.Whisper, 
+                MessageType.Yell, 
+                MessageType.ChatSystem } 
+            },
+            {
+                "Guild|Party", new MessageType[] { 
+                    MessageType.Guild, 
+                    MessageType.Alliance, 
+                    MessageType.Party }
+            },
+            {
+                "System", new MessageType[] { 
+                    MessageType.System }
+            }
+        };
+
+        public bool UseLastMovedCooldownPosition {  get; set; } = false;
 
 
 
@@ -956,6 +989,12 @@ namespace ClassicUO.Configuration
                                         break;
                                     case GumpType.WorldMap:
                                         gump = new WorldMapGump();
+                                        break;
+                                    case GumpType.InfoBar:
+                                        gump = new InfoBarGump();
+                                        break;
+                                    case GumpType.PaperDoll:
+                                        gump = new ModernPaperdoll(World.Player.Serial);
                                         break;
                                 }
 

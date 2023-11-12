@@ -235,6 +235,7 @@ namespace ClassicUO.Game.UI.Controls
                     Font = TrueTypeLoader.Instance.GetFont(_font, _size),
                     Text = text,
                 };
+                Width = _rtl.Size.X;
             }
         }
 
@@ -277,9 +278,7 @@ namespace ClassicUO.Game.UI.Controls
                         Width = Width,
                     };
                 }
-
-                Width = _rtl.Size.X;
-
+                
                 WantUpdateSize = false;
                 _dirty = false;
             }

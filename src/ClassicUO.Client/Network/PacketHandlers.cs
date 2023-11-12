@@ -551,7 +551,9 @@ namespace ClassicUO.Network
 
                     if (mobile == World.Player)
                     {
-                        if (!string.IsNullOrEmpty(World.Player.Name) && oldName != World.Player.Name)
+                        if (
+                            !string.IsNullOrEmpty(World.Player.Name) && oldName != World.Player.Name
+                        )
                         {
                             Client.Game.SetWindowTitle(World.Player.Name);
                         }
@@ -3983,7 +3985,6 @@ namespace ClassicUO.Network
                     p.Skip(4);
                     string username = p.ReadUnicodeBE();
                     ChatManager.ChatIsEnabled = ChatStatus.Enabled;
-                    ResizableJournal.HasReceivedChatSystemMessage = true;
                     NetClient.Socket.Send_ChatJoinCommand("General");
 
                     break;
@@ -4046,8 +4047,6 @@ namespace ClassicUO.Network
                     MessageManager.HandleMessage(null, msgSent, username, ProfileManager.CurrentProfile.ChatMessageHue, MessageType.ChatSystem, 3, TextType.OBJECT, true);
 
                     //GameActions.Print($"{username}: {msgSent}", ProfileManager.CurrentProfile.ChatMessageHue, MessageType.ChatSystem, 1);
-
-                    ResizableJournal.HasReceivedChatSystemMessage = true;
                     break;
 
                 default:
@@ -4087,7 +4086,6 @@ namespace ClassicUO.Network
                         }
 
                         GameActions.Print(msg, ProfileManager.CurrentProfile.ChatMessageHue, MessageType.ChatSystem, 1);
-                        ResizableJournal.HasReceivedChatSystemMessage = true;
                     }
 
                     break;

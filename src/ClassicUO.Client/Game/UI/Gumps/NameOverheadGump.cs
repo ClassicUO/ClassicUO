@@ -738,7 +738,7 @@ namespace ClassicUO.Game.UI.Gumps
             X = x;
             Y = y;
 
-
+            hueVector.Z = ProfileManager.CurrentProfile.NamePlateBorderOpacity / 100f;
 
             batcher.DrawRectangle
             (

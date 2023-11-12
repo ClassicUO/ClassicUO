@@ -34,7 +34,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.Remoting.Contexts;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
@@ -350,6 +349,12 @@ namespace ClassicUO.Game.UI.Gumps
             writer.WriteAttributeString("ogContainer", originalContainerItemGraphic.ToString());
         }
 
+        public override void Restore(XmlElement xml)
+        {
+            base.Restore(xml);
+            GameActions.DoubleClickQueued(LocalSerial);
+        }
+
         private void ScrollArea_MouseUp(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtonType.Left && scrollArea.MouseIsOver)
@@ -480,7 +485,7 @@ namespace ClassicUO.Game.UI.Gumps
             List<Item> sortedContents = ProfileManager.CurrentProfile.GridContainerSearchMode == 0 ? gridSlotManager.SearchResults(searchBox.Text) : GridSlotManager.GetItemsInContainer(container);
             gridSlotManager.RebuildContainer(sortedContents, searchBox.Text, overrideSort);
             containerNameLabel.Text = GetContainerName();
-            if(container.Container != 0xFFFF_FFFF && FindContainer(container.Container, out GridContainer gridContainer))
+            if (container.Container != 0xFFFF_FFFF && FindContainer(container.Container, out GridContainer gridContainer))
             {
                 gridContainer.UpdateContainerName();
             }
@@ -621,35 +626,15 @@ namespace ClassicUO.Game.UI.Gumps
             if (gridSlotManager != null)
             {
                 gridSlotManager.UpdateItems();
-                containerName += $" ({GetRecursiveItemCount(LocalSerial)})";
+                containerName += $" ({gridSlotManager.ItemPositions.Count})";
             }
+
             return containerName;
         }
 
         public void UpdateContainerName()
         {
             containerNameLabel.Text = GetContainerName();
-        }
-
-        private static int GetRecursiveItemCount(uint serial)
-        {
-            int v = 0;
-
-            Item requestedItem = World.Items.Get(serial);
-            if (requestedItem != null)
-            {
-                for (LinkedObject i = requestedItem.Items; i != null; i = i.Next)
-                {
-                    Item item = (Item)i;
-                    if (item.Items != null)
-                    {
-                        v += GetRecursiveItemCount(item.Serial);
-                    }
-                    v++;
-                }
-            }
-
-            return v;
         }
 
         public void OptionsUpdated()
@@ -932,9 +917,8 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                         else
                         {
-                            Rectangle containerBounds = ContainerManager.Get(container.Graphic).Bounds;
                             gridContainer.gridSlotManager.AddLockedItemSlot(Client.Game.GameCursor.ItemHold.Serial, slot);
-                            GameActions.DropItem(Client.Game.GameCursor.ItemHold.Serial, containerBounds.X / 2, containerBounds.Y / 2, 0, container.Serial);
+                            GameActions.DropItem(Client.Game.GameCursor.ItemHold.Serial, 0xFFFF, 0xFFFF, 0, container.Serial);
                             Mouse.CancelDoubleClick = true;
                         }
                     }

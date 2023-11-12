@@ -30,12 +30,12 @@
 
 #endregion
 
-using ClassicUO.Assets;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
+using System.Xml;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -48,7 +48,7 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly int _minH;
         private readonly int _minW;
         protected bool _isLocked = false;
-        protected bool _prevCanMove, _prevCloseWithRightClick, _prevBorder;
+        protected bool? _prevCanMove = null, _prevCloseWithRightClick = null, _prevBorder = null;
 
         public BorderControl BorderControl { get { return _borderControl; } }
 
@@ -180,24 +180,32 @@ namespace ClassicUO.Game.UI.Gumps
             GroupMatrixWidth = Width;
         }
 
-        protected void SetLockStatus(bool locked)
+        public override void Restore(XmlElement xml)
         {
+            base.Restore(xml);
+
+            SetLockStatus(IsLocked);
+        }
+
+        protected virtual void SetLockStatus(bool locked)
+        {
+            _prevCanMove ??= CanMove;
+            _prevCloseWithRightClick ??= CanCloseWithRightClick;
+            _prevBorder ??= ShowBorder;
+
             _isLocked = locked;
+            IsLocked = locked;
             if (_isLocked)
             {
-                _prevCanMove = CanMove;
-                _prevCloseWithRightClick = CanCloseWithRightClick;
-                _prevBorder = ShowBorder;
-
                 CanMove = false;
                 CanCloseWithRightClick = false;
                 ShowBorder = false;
             }
             else
             {
-                CanMove = _prevCanMove;
-                CanCloseWithRightClick = _prevCloseWithRightClick;
-                ShowBorder = _prevBorder;
+                CanMove = _prevCanMove ?? true;
+                CanCloseWithRightClick = _prevCloseWithRightClick ?? true;
+                ShowBorder = _prevBorder ?? true;
             }
         }
 

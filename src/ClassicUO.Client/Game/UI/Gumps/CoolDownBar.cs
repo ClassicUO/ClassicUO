@@ -1,6 +1,5 @@
 ﻿using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
-using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
@@ -18,24 +17,29 @@ namespace ClassicUO.Game.UI.Gumps
         public readonly Label textLabel, cooldownLabel;
         private DateTime expire;
         private TimeSpan duration;
+        private int startX, startY;
+        private readonly bool isBuffBar;
 
         private GumpPic gumpPic;
 
         public BuffIconType buffIconType;
 
-        public CoolDownBar(TimeSpan _duration, string _name, ushort _hue, int x, int y, ushort graphic = ushort.MaxValue, BuffIconType type = BuffIconType.Unknown2) : base(0, 0)
+        public CoolDownBar(TimeSpan _duration, string _name, ushort _hue, int x, int y, ushort graphic = ushort.MaxValue, BuffIconType type = BuffIconType.Unknown2, bool isBuffBar = false) : base(0, 0)
         {
             #region VARS
             Width = COOL_DOWN_WIDTH;
             Height = COOL_DOWN_HEIGHT;
             X = x;
+            startX = x;
             Y = y;
+            startY = y;
             expire = DateTime.Now + _duration;
             duration = _duration;
             CanCloseWithRightClick = true;
             CanMove = true;
             AcceptMouseInput = true;
             buffIconType = type;
+            this.isBuffBar = isBuffBar;
             #endregion
 
             #region BACK/FORE GROUND
@@ -83,6 +87,23 @@ namespace ClassicUO.Game.UI.Gumps
             Add(textLabel);
             Add(cooldownLabel);
             #endregion
+        }
+
+        public override void Update()
+        {
+            base.Update();
+
+            if (
+                !isBuffBar &&
+                (ProfileManager.CurrentProfile?.UseLastMovedCooldownPosition ?? false) &&
+                (X != startX || Y != startY)
+                )
+            {
+                ProfileManager.CurrentProfile.CoolDownX = X;
+                ProfileManager.CurrentProfile.CoolDownY = Y;
+                startX = X;
+                startY = Y;
+            }
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)

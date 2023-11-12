@@ -372,6 +372,11 @@ namespace ClassicUO.Assets
                 return ReadOnlySpan<AnimIdxBlock>.Empty;
             }
 
+            if (offset + (actionCount * MAX_DIRECTIONS * sizeof(AnimIdxBlock)) >= end)
+            {
+                return ReadOnlySpan<AnimIdxBlock>.Empty;
+            }
+
             var animIdxSpan = new ReadOnlySpan<AnimIdxBlock>(
                 (void*)offset,
                 actionCount * MAX_DIRECTIONS
@@ -812,6 +817,20 @@ namespace ClassicUO.Assets
             41300000 anim 1246,1247 , group 0  (jack o lantern)
             */
 
+            /*
+            based on the current "mode" the mobile is in (e.g. IsFlying check) select the right set of definitions from the xtra array
+            then consult the num2 based list for stand/walk/run
+            and the num3 based list for NewCharacterAnimation packets
+            /
+            / flags
+            41100000
+            41400000 usually group 22,24 (walk run?)
+            40C00000 often group 31
+            42860000 anim 692   Animated weapon
+            41F80000 anim 692
+            41300000 anim 1246,1247 , group 0  (jack o lantern)
+            */
+
             var animSeq = new UOFileUop(
                 animationSequencePath,
                 "build/animationsequence/{0:D8}.bin"
@@ -847,13 +866,19 @@ namespace ClassicUO.Assets
                 {
                     fixed (byte* destPtr = span)
                     {
-                        ZLib.Decompress(
+                        var result = ZLib.Decompress(
                             animSeq.PositionAddress,
                             entry.Length,
                             0,
                             (IntPtr)destPtr,
                             entry.DecompressedLength
                         );
+
+                        if (result != ZLib.ZLibError.Okay)
+                        {
+                            Log.Error($"error reading animationsequence {result}");
+                            return;
+                        }
                     }
 
                     var reader = new StackDataReader(span.Slice(0, entry.DecompressedLength));
@@ -1301,13 +1326,20 @@ namespace ClassicUO.Assets
 
             fixed (byte* ptr = _decompressedData.AsSpan())
             {
-                ZLib.Decompress(
+                var result = ZLib.Decompress(
                     file.PositionAddress,
                     (int)index.Size,
                     0,
                     (IntPtr)ptr,
                     (int)index.Unknown
                 );
+
+                if (result != ZLib.ZLibError.Okay)
+                {
+                    Log.Error($"error reading uop animation. AnimID: {animID} | Group: {animGroup} | Dir: {direction} | FileIndex: {fileIndex}");
+
+                    return Span<FrameInfo>.Empty;
+                }
             }
 
             var reader = new StackDataReader(
@@ -1414,7 +1446,7 @@ namespace ClassicUO.Assets
                 return Span<FrameInfo>.Empty;
             }
 
-            if (index.Position == 0xFFFF_FFFF) // TODO: Size != 0xFFFF_FFFF ?
+            if (index.Position == 0xFFFF_FFFF || index.Size == 0xFFFF_FFFF)
             {
                 return Span<FrameInfo>.Empty;
             }

@@ -7,10 +7,22 @@ namespace ClassicUO.Game.UI.Gumps
     internal class VersionHistory : Gump
     {
         private static string[] updateTexts = {
+            "/c[white][3.11.0]/cd\n" +
+                "- Modern shop gump fix\n" +
+                "- Pull in latest changes from CUO\n" +
+                "- Update client-side version checking\n" +
+                "- Infobar bug fixes\n" +
+                "- Other small bug fixes\n" +
+                "- Modern paperdoll being anchored will be remembered now\n" +
+                "- Added an option for Cooldown bars to use the position of the last moved bar\n" +
+                "- Added advanced nameplate options\n" +
+                "- Moved TTF Font settings to their own category\n" +
+                "- Journal tabs are now fully customizable",
+
             "/c[white][3.10.1]/cd\n" +
                 "- Bug fix for floating damage numbers\n" +
                 "- Bug fix for health line color\n" +
-                "- Fix skill progress bar positioning",
+                "- Fix skill progress bar positioning\n",
 
             "/c[white][3.10.0]/cd\n" +
                 "- Added the option to download a spell indicator config from an external source\n" +
