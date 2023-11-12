@@ -7,6 +7,9 @@ namespace ClassicUO.Game.UI.Gumps
     internal class VersionHistory : Gump
     {
         private static string[] updateTexts = {
+            "/c[white][3.12.0]/cd\n" +
+                "- Added Exclude self to advanced nameplate options",
+
             "/c[white][3.11.0]/cd\n" +
                 "- Modern shop gump fix\n" +
                 "- Pull in latest changes from CUO\n" +

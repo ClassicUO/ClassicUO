@@ -44,6 +44,7 @@ namespace ClassicUO.Game.UI.Controls
     {
         private readonly HotkeyBox _hotkeyBox;
         private readonly Dictionary<NameOverheadOptions, Checkbox> checkboxDict = new();
+        private readonly ScrollArea checkBoxScroll;
 
         private enum ButtonType
         {
@@ -87,6 +88,8 @@ namespace ClassicUO.Game.UI.Controls
                 ) { ButtonParameter = (int)ButtonType.CheckAll, IsSelectable = false }
             );
 
+            Add(checkBoxScroll = new ScrollArea(0, 60, 300, 350, true));
+
             SetupOptionCheckboxes();
 
             UpdateCheckboxesByCurrentOptionFlags();
@@ -95,8 +98,8 @@ namespace ClassicUO.Game.UI.Controls
 
         private void SetupOptionCheckboxes()
         {
-            var y = 60;
-            AddLabel("Items", 75, y);
+            var y = 0;
+            AddLabel("Items", 75, y, true);
             y += 28;
 
             AddCheckbox("Containers", NameOverheadOptions.Containers, 0, y);
@@ -108,7 +111,7 @@ namespace ClassicUO.Game.UI.Controls
             AddCheckbox("Other items", NameOverheadOptions.Other, 0, y);
             y += 28;
 
-            AddLabel("Corpses", 75, y);
+            AddLabel("Corpses", 75, y, true);
             y += 28;
 
             AddCheckbox("Monster corpses", NameOverheadOptions.MonsterCorpses, 0, y);
@@ -117,7 +120,7 @@ namespace ClassicUO.Game.UI.Controls
             //AddCheckbox("Own corpses", NameOverheadOptions.OwnCorpses, 0, y);
             y += 28;
 
-            AddLabel("Mobiles by type", 75, y);
+            AddLabel("Mobiles by type", 75, y, true);
             y += 28;
 
             AddCheckbox("Humanoid", NameOverheadOptions.Humanoid, 0, y);
@@ -125,9 +128,11 @@ namespace ClassicUO.Game.UI.Controls
             y += 22;
             AddCheckbox("Your Followers", NameOverheadOptions.OwnFollowers, 0, y);
             AddCheckbox("Yourself", NameOverheadOptions.Self, 150, y);
+            y += 22;
+            AddCheckbox("Exclude yourself", NameOverheadOptions.ExcludeSelf, 0, y);
             y += 28;
 
-            AddLabel("Mobiles by notoriety", 75, y);
+            AddLabel("Mobiles by notoriety", 75, y, true);
             y += 28;
 
             AddCheckbox("Innocent (blue)", NameOverheadOptions.Innocent, 0, y);
@@ -142,15 +147,21 @@ namespace ClassicUO.Game.UI.Controls
             AddCheckbox("Invulnerable (yellow)", NameOverheadOptions.Invulnerable, 0, y);
         }
 
-        private void AddLabel(string name, int x, int y)
+        private void AddLabel(string name, int x, int y, bool scrollArea = false)
         {
             var label = new Label(name, true, 0xFFFF)
             {
                 X = x,
                 Y = y,
             };
-
-            Add(label);
+            if (scrollArea)
+            {
+                checkBoxScroll.Add(label);
+            }
+            else
+            {
+                Add(label);
+            }
         }
 
         private void AddCheckbox(string checkboxName, NameOverheadOptions optionFlag, int x, int y)
@@ -181,7 +192,7 @@ namespace ClassicUO.Game.UI.Controls
 
             checkboxDict.Add(optionFlag, checkbox);
 
-            Add(checkbox);
+            checkBoxScroll.Add(checkbox);
         }
 
         public NameOverheadOption Option { get; }
