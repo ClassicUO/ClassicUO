@@ -18,12 +18,13 @@ namespace ClassicUO.Game.UI.Gumps
         private DateTime expire;
         private TimeSpan duration;
         private int startX, startY;
+        private readonly bool isBuffBar;
 
         private GumpPic gumpPic;
 
         public BuffIconType buffIconType;
 
-        public CoolDownBar(TimeSpan _duration, string _name, ushort _hue, int x, int y, ushort graphic = ushort.MaxValue, BuffIconType type = BuffIconType.Unknown2) : base(0, 0)
+        public CoolDownBar(TimeSpan _duration, string _name, ushort _hue, int x, int y, ushort graphic = ushort.MaxValue, BuffIconType type = BuffIconType.Unknown2, bool isBuffBar = false) : base(0, 0)
         {
             #region VARS
             Width = COOL_DOWN_WIDTH;
@@ -38,6 +39,7 @@ namespace ClassicUO.Game.UI.Gumps
             CanMove = true;
             AcceptMouseInput = true;
             buffIconType = type;
+            this.isBuffBar = isBuffBar;
             #endregion
 
             #region BACK/FORE GROUND
@@ -92,8 +94,10 @@ namespace ClassicUO.Game.UI.Gumps
             base.Update();
 
             if (
+                !isBuffBar &&
                 (ProfileManager.CurrentProfile?.UseLastMovedCooldownPosition ?? false) &&
-                (X != startX || Y != startY))
+                (X != startX || Y != startY)
+                )
             {
                 ProfileManager.CurrentProfile.CoolDownX = X;
                 ProfileManager.CurrentProfile.CoolDownY = Y;
