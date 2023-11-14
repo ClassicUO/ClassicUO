@@ -8,7 +8,8 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private static string[] updateTexts = {
             "/c[white][3.12.0]/cd\n" +
-                "- Added Exclude self to advanced nameplate options",
+                "- Added Exclude self to advanced nameplate options\n" +
+                "- Bug fix for spell indicator loading",
 
             "/c[white][3.11.0]/cd\n" +
                 "- Modern shop gump fix\n" +
