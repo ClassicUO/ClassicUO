@@ -4543,6 +4543,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
                 List<ProfileLocationData> locations = new List<ProfileLocationData>();
+                List<ProfileLocationData> sameServerLocations = new List<ProfileLocationData>();
                 string[] allAccounts = Directory.GetDirectories(rootpath);
 
                 foreach (string account in allAccounts)
@@ -4554,6 +4555,10 @@ namespace ClassicUO.Game.UI.Gumps
                         foreach (string character in allCharacters)
                         {
                             locations.Add(new ProfileLocationData(server, account, character));
+                            if(_currentProfile.ServerName == Path.GetFileName(server))
+                            {
+                                sameServerLocations.Add(new ProfileLocationData(server, account, character));
+                            }
                         }
                     }
                 }
@@ -4562,7 +4567,7 @@ namespace ClassicUO.Game.UI.Gumps
                     $"! Warning !<br>" +
                     $"This will override all other character's profile options!<br>" +
                     $"This is not reversable!<br>" +
-                    $"You have {locations.Count - 1} other profiles that will be overridden with the settings in this profile.<br>" +
+                    $"You have {locations.Count - 1} other profiles that will may overridden with the settings in this profile.<br>" +
                     $"<br>This will not override: Macros, skill groups, info bar, grid container data, or gump saved positions.<br>"
                     , true, 32, section.Width - 32, align: TEXT_ALIGN_TYPE.TS_CENTER, ishtml: true));
 
@@ -4576,6 +4581,18 @@ namespace ClassicUO.Game.UI.Gumps
                         section.BaseAdd(new FadingLabel(7, $"{locations.Count - 1} profiles overriden.", true, 0xff) { X = overrideButton.X, Y = overrideButton.Y });
                     }
                 };
+
+                NiceButton overrideSSButton;
+                section.Add(overrideSSButton = new NiceButton(0, 0, section.Width - 32, 20, ButtonAction.Activate, $"Override {sameServerLocations.Count - 1} other profiles on this same server with this one.") { IsSelectable = false });
+                overrideSSButton.MouseUp += (s, e) =>
+                {
+                    if (e.Button == MouseButtonType.Left)
+                    {
+                        OverrideAllProfiles(sameServerLocations);
+                        section.BaseAdd(new FadingLabel(7, $"{sameServerLocations.Count - 1} profiles overriden.", true, 0xff) { X = overrideButton.X, Y = overrideButton.Y });
+                    }
+                };
+
                 rightArea.Add(section);
                 startY += section.Height + SPACING;
             }// Global settings
