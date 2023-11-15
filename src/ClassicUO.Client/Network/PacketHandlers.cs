@@ -48,8 +48,10 @@ using ClassicUO.Utility.Platforms;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Xml;
 
 namespace ClassicUO.Network
 {
@@ -6640,7 +6642,59 @@ namespace ClassicUO.Network
             Gump gump = null;
             bool mustBeAdded = true;
 
-            if (UIManager.GetGumpCachePosition(gumpID, out Point pos))
+            //Restore server side gump position
+            string gumpsXmlPath = Path.Combine(ProfileManager.ProfilePath, "gumps.xml");
+
+            if (File.Exists(gumpsXmlPath))
+            {
+                XmlDocument doc = new XmlDocument();
+
+                try
+                {
+                    doc.Load(gumpsXmlPath);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex.ToString());
+                }
+
+                XmlElement root = doc["gumps"];
+
+                if (root != null)
+                {
+                    foreach (XmlElement xml in root.ChildNodes)
+                    {
+                        if (xml.Name != "gump")
+                        {
+                            continue;
+                        }
+
+                        try
+                        {
+                            GumpType type = (GumpType)int.Parse(xml.GetAttribute(nameof(type)));
+                            int restoreX = int.Parse(xml.GetAttribute(nameof(x)));
+                            int restoreY = int.Parse(xml.GetAttribute(nameof(y)));
+                            uint serial = uint.Parse(xml.GetAttribute(nameof(serial)));
+                            uint serverSerial = uint.Parse(xml.GetAttribute(nameof(serverSerial)));
+
+                            if (type == GumpType.None && serverSerial == gumpID)
+                            {
+                                x = restoreX;
+                                y = restoreY;
+                            }
+
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Error(ex.ToString());
+                        }
+                    }
+
+                    UIManager.SavePosition(gumpID, new Point(x, y));
+
+                }
+            }
+            else if (UIManager.GetGumpCachePosition(gumpID, out Point pos))
             {
                 x = pos.X;
                 y = pos.Y;
