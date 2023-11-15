@@ -68,15 +68,16 @@ namespace ClassicUO.Game.Managers
         Monster = 1 << 9,
         OwnFollowers = 1 << 10,
         Self = 1 << 11,
+        ExcludeSelf = 1 << 12,
 
         // Mobiles (notoriety)
-        Innocent = 1 << 12,
-        Ally = 1 << 13,
-        Gray = 1 << 14,
-        Criminal = 1 << 15,
-        Enemy = 1 << 16,
-        Murderer = 1 << 17,
-        Invulnerable = 1 << 18,
+        Innocent = 1 << 13,
+        Ally = 1 << 14,
+        Gray = 1 << 15,
+        Criminal = 1 << 16,
+        Enemy = 1 << 17,
+        Murderer = 1 << 18,
+        Invulnerable = 1 << 19,
 
         AllItems = Containers | Gold | Stackable | LockedDown | Other,
         AllMobiles = Humanoid | Monster | OwnFollowers | Self,
@@ -129,6 +130,9 @@ namespace ClassicUO.Game.Managers
             var mobile = serial as Mobile;
 
             if (mobile == null)
+                return false;
+
+            if(mobile.Equals(World.Player) && ActiveOverheadOptions.HasFlag(NameOverheadOptions.ExcludeSelf)) 
                 return false;
 
             // Mobile types

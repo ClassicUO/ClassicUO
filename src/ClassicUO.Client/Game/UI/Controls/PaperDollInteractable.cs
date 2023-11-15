@@ -282,7 +282,6 @@ namespace ClassicUO.Game.UI.Controls
                         equipItem.ItemData.AnimID,
                         mobile.IsFemale
                     );
-
                     Add(
                         new GumpPicEquipment(
                             equipItem.Serial,
@@ -300,7 +299,7 @@ namespace ClassicUO.Game.UI.Controls
                                 && !World.Player.IsDead
                                 && layer != Layer.Beard
                                 && layer != Layer.Hair
-                                && (_paperDollGump.CanLift || LocalSerial == World.Player)
+                                && ((_paperDollGump != null && _paperDollGump.CanLift) || LocalSerial == World.Player)
                         }
                     );
                 }

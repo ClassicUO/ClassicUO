@@ -5086,6 +5086,13 @@ namespace ClassicUO.Network
                     str += "</basefont>";
                 }
 
+                // horrible fix for "strength requirement ~1_val~" when player.str < argument
+                if (cliloc == 1061170 && int.TryParse(argument, out var strength) && World.Player.Strength < strength)
+                {
+                    str = str.Insert(0, "<basefont color=#FF0000>");
+                    str += "</basefont>";
+                }
+
                 for (int i = 0; i < list.Count; i++)
                 {
                     if (
