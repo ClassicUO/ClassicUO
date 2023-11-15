@@ -36,6 +36,7 @@ namespace ClassicUO.Game.Managers
                 int delay = ProfileManager.CurrentProfile == null ? 1000 : ProfileManager.CurrentProfile.MoveMultiObjectDelay;
                 Task.Factory.StartNew(() =>
                 {
+                    Task.Delay(delay).Wait();
                     try
                     {
                         lootTaskRunning = true;
@@ -71,7 +72,7 @@ namespace ClassicUO.Game.Managers
 
             if (IsOnLootList(i))
             {
-                GameActions.Print($"SAL Looting: {i.Name}");
+                GameActions.Print($"SAL Looting: {i.Name} {i.Graphic} x {i.Amount}");
                 lootItems.Enqueue(i);
             }
         }
