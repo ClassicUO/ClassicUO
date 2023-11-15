@@ -232,16 +232,6 @@ namespace ClassicUO.Game.UI.Gumps
                 hueVector
             );
 
-            batcher.DrawRectangle
-            (
-                SolidColorTextureCache.GetTexture(Color.Gray),
-                x,
-                y,
-                Width,
-                Height,
-                hueVector
-            );
-
             if (Graphic.HasValue)
             {
                 //var texture = GumpsLoader.Instance.GetGumpTexture(, out Rectangle bounds);
@@ -257,6 +247,18 @@ namespace ClassicUO.Game.UI.Gumps
                         hueVector
                     );
                 }
+            }
+            else
+            {
+                batcher.DrawRectangle
+                    (
+                        SolidColorTextureCache.GetTexture(Color.Gray),
+                        x,
+                        y,
+                        Width,
+                        Height,
+                        hueVector
+                    );
             }
 
             if (!HideLabel)
