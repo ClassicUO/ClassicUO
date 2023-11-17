@@ -561,7 +561,8 @@ namespace ClassicUO.Configuration
             }
         };
 
-        public bool UseLastMovedCooldownPosition {  get; set; } = false;
+        public bool UseLastMovedCooldownPosition { get; set; } = false;
+        public bool CloseHealthBarIfAnchored { get; set; } = false;
 
 
 
@@ -743,6 +744,11 @@ namespace ClassicUO.Configuration
                             int x = int.Parse(xml.GetAttribute(nameof(x)));
                             int y = int.Parse(xml.GetAttribute(nameof(y)));
                             uint serial = uint.Parse(xml.GetAttribute(nameof(serial)));
+
+                            if(uint.TryParse(xml.GetAttribute("serverSerial"), out uint serverSerial))
+                            {
+                                UIManager.SavePosition(serverSerial, new Point(x, y));
+                            }
 
                             Gump gump = null;
 

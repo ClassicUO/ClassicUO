@@ -127,9 +127,9 @@ namespace ClassicUO.Game.Managers
 
         public static bool IsModalControlOpen()
         {
-            foreach (Gump control in Gumps)
+            for (LinkedListNode<Gump> last = Gumps.Last; last != null; last = last.Previous)
             {
-                if (control.IsModal)
+                if (last.Value.IsModal)
                 {
                     return true;
                 }

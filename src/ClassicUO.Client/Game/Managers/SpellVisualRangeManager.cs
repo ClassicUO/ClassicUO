@@ -83,6 +83,10 @@ namespace ClassicUO.Game.Managers
             LastSpellTime = DateTime.Now;
             currentSpell = spell;
             isCasting = true;
+            if(currentSpell != null && currentSpell.FreezeCharacterWhileCasting)
+            {
+                World.Player.Flags |= Flags.Frozen;
+            }
         }
 
         public void ClearCasting()
@@ -90,6 +94,7 @@ namespace ClassicUO.Game.Managers
             isCasting = false;
             currentSpell = null;
             LastSpellTime = DateTime.MinValue;
+            World.Player.Flags &= ~Flags.Frozen;
         }
 
         public SpellRangeInfo GetCurrentSpell()
@@ -422,6 +427,7 @@ namespace ClassicUO.Game.Managers
             public bool IsLinear { get; set; } = false;
             public double CastTime { get; set; } = 0.0;
             public bool ShowCastRangeDuringCasting { get; set; } = false;
+            public bool FreezeCharacterWhileCasting { get; set; } = false;
 
             public static SpellRangeInfo FromSpellDef(SpellDefinition spell)
             {

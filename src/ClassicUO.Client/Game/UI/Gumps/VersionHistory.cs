@@ -7,6 +7,14 @@ namespace ClassicUO.Game.UI.Gumps
     internal class VersionHistory : Gump
     {
         private static string[] updateTexts = {
+            "/c[white][3.13.0]/cd\n" +
+                "- Fix item unintentional stacking\n" +
+                "- Potential small bug fix\n" +
+                "- Option to close anchored healthbars automatically\n" +
+                "- Added optional freeze on cast to spell indicator system\n" +
+                "- Save server side gump positions\n" +
+                "- Added addition equipment slots to the original paperdoll gump",
+
             "/c[white][3.12.0]/cd\n" +
                 "- Added Exclude self to advanced nameplate options\n" +
                 "- Bug fix for spell indicator loading\n" +
