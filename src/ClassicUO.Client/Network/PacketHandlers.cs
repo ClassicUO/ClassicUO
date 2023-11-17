@@ -2147,9 +2147,9 @@ namespace ClassicUO.Network
                             {
                                 if (lastBase != skill.BaseFixed)
                                     Skill.InvokeSkillBaseChanged(id);
-                                if(lastValue != skill.ValueFixed)
+                                if (lastValue != skill.ValueFixed)
                                     Skill.InvokeSkillValueChanged(id);
-                                if(lastCap != skill.CapFixed)
+                                if (lastCap != skill.CapFixed)
                                     Skill.InvokeSkillCapChanged(id);
                             }
 
@@ -3734,47 +3734,47 @@ namespace ClassicUO.Network
             {
                 Span<byte> buffer =
                     stackalloc byte[] {
-                        0x03,
-                        0x00,
-                        0x28,
-                        0x20,
-                        0x00,
-                        0x34,
-                        0x00,
-                        0x03,
-                        0xdb,
-                        0x13,
-                        0x14,
-                        0x3f,
-                        0x45,
-                        0x2c,
-                        0x58,
-                        0x0f,
-                        0x5d,
-                        0x44,
-                        0x2e,
-                        0x50,
-                        0x11,
-                        0xdf,
-                        0x75,
-                        0x5c,
-                        0xe0,
-                        0x3e,
-                        0x71,
-                        0x4f,
-                        0x31,
-                        0x34,
-                        0x05,
-                        0x4e,
-                        0x18,
-                        0x1e,
-                        0x72,
-                        0x0f,
-                        0x59,
-                        0xad,
-                        0xf5,
-                        0x00
-                    };
+                    0x03,
+                    0x00,
+                    0x28,
+                    0x20,
+                    0x00,
+                    0x34,
+                    0x00,
+                    0x03,
+                    0xdb,
+                    0x13,
+                    0x14,
+                    0x3f,
+                    0x45,
+                    0x2c,
+                    0x58,
+                    0x0f,
+                    0x5d,
+                    0x44,
+                    0x2e,
+                    0x50,
+                    0x11,
+                    0xdf,
+                    0x75,
+                    0x5c,
+                    0xe0,
+                    0x3e,
+                    0x71,
+                    0x4f,
+                    0x31,
+                    0x34,
+                    0x05,
+                    0x4e,
+                    0x18,
+                    0x1e,
+                    0x72,
+                    0x0f,
+                    0x59,
+                    0xad,
+                    0xf5,
+                    0x00
+                };
 
                 NetClient.Socket.Send(buffer);
 
@@ -6645,56 +6645,7 @@ namespace ClassicUO.Network
             //Restore server side gump position
             string gumpsXmlPath = Path.Combine(ProfileManager.ProfilePath, "gumps.xml");
 
-            if (File.Exists(gumpsXmlPath))
-            {
-                XmlDocument doc = new XmlDocument();
-
-                try
-                {
-                    doc.Load(gumpsXmlPath);
-                }
-                catch (Exception ex)
-                {
-                    Log.Error(ex.ToString());
-                }
-
-                XmlElement root = doc["gumps"];
-
-                if (root != null)
-                {
-                    foreach (XmlElement xml in root.ChildNodes)
-                    {
-                        if (xml.Name != "gump")
-                        {
-                            continue;
-                        }
-
-                        try
-                        {
-                            GumpType type = (GumpType)int.Parse(xml.GetAttribute(nameof(type)));
-                            int restoreX = int.Parse(xml.GetAttribute(nameof(x)));
-                            int restoreY = int.Parse(xml.GetAttribute(nameof(y)));
-                            uint serial = uint.Parse(xml.GetAttribute(nameof(serial)));
-                            uint serverSerial = uint.Parse(xml.GetAttribute(nameof(serverSerial)));
-
-                            if (type == GumpType.None && serverSerial == gumpID)
-                            {
-                                x = restoreX;
-                                y = restoreY;
-                            }
-
-                        }
-                        catch (Exception ex)
-                        {
-                            Log.Error(ex.ToString());
-                        }
-                    }
-
-                    UIManager.SavePosition(gumpID, new Point(x, y));
-
-                }
-            }
-            else if (UIManager.GetGumpCachePosition(gumpID, out Point pos))
+            if (UIManager.GetGumpCachePosition(gumpID, out Point pos))
             {
                 x = pos.X;
                 y = pos.Y;
@@ -7289,7 +7240,8 @@ namespace ClassicUO.Network
                         GameActions.Print($"If I am on the correct facet I think these coords should be somewhere near.. {location.X} and {location.Y}..");
 
                         MenuButton menu = new MenuButton(25, Color.Black.PackedValue, 0.75f, "Menu") { X = gump.Width - 46, Y = 6 };
-                        menu.MouseUp += (s, e) => {
+                        menu.MouseUp += (s, e) =>
+                        {
                             menu.ContextMenu?.Show();
                         };
 

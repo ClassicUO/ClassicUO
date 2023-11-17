@@ -745,6 +745,11 @@ namespace ClassicUO.Configuration
                             int y = int.Parse(xml.GetAttribute(nameof(y)));
                             uint serial = uint.Parse(xml.GetAttribute(nameof(serial)));
 
+                            if(uint.TryParse(xml.GetAttribute("serverSerial"), out uint serverSerial))
+                            {
+                                UIManager.SavePosition(serverSerial, new Point(x, y));
+                            }
+
                             Gump gump = null;
 
                             switch (type)
