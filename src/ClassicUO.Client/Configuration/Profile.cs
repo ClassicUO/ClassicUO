@@ -561,7 +561,8 @@ namespace ClassicUO.Configuration
             }
         };
 
-        public bool UseLastMovedCooldownPosition {  get; set; } = false;
+        public bool UseLastMovedCooldownPosition { get; set; } = false;
+        public bool CloseHealthBarIfAnchored { get; set; } = false;
 
 
 

@@ -407,7 +407,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected bool CheckIfAnchoredElseDispose()
         {
-            if (UIManager.AnchorManager[this] == null && LocalSerial != World.Player)
+            if ((UIManager.AnchorManager[this] == null || ProfileManager.CurrentProfile.CloseHealthBarIfAnchored) && LocalSerial != World.Player)
             {
                 Dispose();
 

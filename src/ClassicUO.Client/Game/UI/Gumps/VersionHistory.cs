@@ -8,7 +8,9 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private static string[] updateTexts = {
             "/c[white][3.13.0]/cd\n" +
-                "- Fix item unintentional stacking",
+                "- Fix item unintentional stacking\n" +
+                "- Potential small bug fix\n" +
+                "- Option to close anchored healthbars automatically",
 
             "/c[white][3.12.0]/cd\n" +
                 "- Added Exclude self to advanced nameplate options\n" +
