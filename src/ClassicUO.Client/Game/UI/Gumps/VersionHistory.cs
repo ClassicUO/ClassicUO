@@ -7,7 +7,9 @@ namespace ClassicUO.Game.UI.Gumps
     internal class VersionHistory : Gump
     {
         private static string[] updateTexts = {
-            "/c[white][3.14.0]/cd\n",
+            "/c[white][3.14.0]/cd\n" +
+                "- Small null ref bug fix",
+
             "/c[white][3.13.0]/cd\n" +
                 "- Fix item unintentional stacking\n" +
                 "- Potential small bug fix\n" +
