@@ -189,7 +189,7 @@ namespace ClassicUO.Game.UI.Gumps
         private HSliderBar _showSkillsMessageDelta;
 
         private Checkbox _leftAlignToolTips, _namePlateHealthOnlyWarmode, _enableHealthIndicator, _spellIconDisplayHotkey, _enableAlphaScrollWheel, _useModernShop, _forceCenterAlignMobileTooltips, _openHealthBarForLastAttack;
-        private Checkbox _hideJournalBorder, _hideJournalTimestamp, _gridHideBorder, _skillProgressBarOnChange, _displaySpellIndicators, _uselastCooldownPosition;
+        private Checkbox _hideJournalBorder, _hideJournalTimestamp, _gridHideBorder, _skillProgressBarOnChange, _displaySpellIndicators, _uselastCooldownPosition, _closeHPBarWhenAnchored;
         private InputField _healthIndicatorPercentage, _healthIndicatorWidth, _tooltipHeaderFormat, _skillProgressBarFormat;
         private ModernColorPicker.HueDisplay _mainWindowHuePicker, _spellIconHotkeyHue, _tooltipBGHue;
         private HSliderBar _spellIconScale, _journalFontSize, _tooltipFontSize, _gameWindowSideChatFontSize, _overheadFontSize, _overheadTextWidth, _textStrokeSize, _gridHightlightLineSize, _maxJournalEntries;
@@ -4389,6 +4389,10 @@ namespace ClassicUO.Game.UI.Gumps
                 };
 
 
+                section.Add(AddLabel(null, "Close anchored healthbars when automatically closing healthbars", 0, 0));
+                section.AddRight(_closeHPBarWhenAnchored = AddCheckBox(null, "", _currentProfile.CloseHealthBarIfAnchored, 0, 0));
+
+
                 NiceButton autoLoot;
                 section.Add(autoLoot = new NiceButton(0, 0, 150, TEXTBOX_HEIGHT, ButtonAction.Activate, "Open auto loot options") {  IsSelectable = false, DisplayBorder = true });
                 autoLoot.MouseUp += (s, e) => {
@@ -5095,6 +5099,7 @@ namespace ClassicUO.Game.UI.Gumps
                     UIManager.Add(new ResizableJournal());
                 }
             }
+            _currentProfile.CloseHealthBarIfAnchored = _closeHPBarWhenAnchored.IsChecked;
             _currentProfile.UseLastMovedCooldownPosition = _uselastCooldownPosition.IsChecked;
 
             _currentProfile.InfoBarFont = TrueTypeLoader.Instance.Fonts[_infoBarFont.SelectedIndex];
