@@ -63,6 +63,7 @@ namespace ClassicUO.Game.UI.Gumps
         private GumpPic _picBase;
         private GumpPic _profilePic;
         private readonly EquipmentSlot[] _slots = new EquipmentSlot[6];
+        private readonly EquipmentSlot[] _slots_right = new EquipmentSlot[6];
         private Label _titleLabel;
         private GumpPic _virtueMenuPic;
         private Button _warModeBtn;
@@ -313,6 +314,19 @@ namespace ClassicUO.Game.UI.Gumps
             Add(_slots[4] = new EquipmentSlot(0, 2, 75 + 21 * 4, Layer.Bracelet, this));
 
             Add(_slots[5] = new EquipmentSlot(0, 2, 75 + 21 * 5, Layer.Tunic, this));
+
+            // Right side equip slots
+            Add(_slots_right[0] = new EquipmentSlot(0, 166, 75, Layer.Torso, this));
+
+            Add(_slots_right[1] = new EquipmentSlot(0, 166, 75 + 21, Layer.Arms, this));
+
+            Add(_slots_right[2] = new EquipmentSlot(0, 166, 75 + 21 * 2, Layer.Shirt, this));
+
+            Add(_slots_right[3] = new EquipmentSlot(0, 166, 75 + 21 * 3, Layer.Pants, this));
+
+            Add(_slots_right[4] = new EquipmentSlot(0, 166, 75 + 21 * 4, Layer.Skirt, this));
+
+            Add(_slots_right[5] = new EquipmentSlot(0, 166, 75 + 21 * 5, Layer.Shoes, this));
 
             // Paperdoll control!
             _paperDollInteractable = new PaperDollInteractable(8, 19, LocalSerial, this);
@@ -612,6 +626,13 @@ namespace ClassicUO.Game.UI.Gumps
                     int idx = (int)_slots[i].Layer;
 
                     _slots[i].LocalSerial = mobile.FindItemByLayer((Layer)idx)?.Serial ?? 0;
+                }
+
+                for (int i = 0; i < _slots_right.Length; i++)
+                {
+                    int idx = (int)_slots_right[i].Layer;
+
+                    _slots_right[i].LocalSerial = mobile.FindItemByLayer((Layer)idx)?.Serial ?? 0;
                 }
             }
         }
