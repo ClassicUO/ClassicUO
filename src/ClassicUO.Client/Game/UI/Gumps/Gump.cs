@@ -55,7 +55,7 @@ namespace ClassicUO.Game.UI.Gumps
             AcceptKeyboardInput = false;
         }
 
-        public bool CanBeSaved => GumpType != Gumps.GumpType.None;
+        public bool CanBeSaved => GumpType != Gumps.GumpType.None || ServerSerial != 0;
 
         public virtual GumpType GumpType { get; }
 
@@ -155,6 +155,7 @@ namespace ClassicUO.Game.UI.Gumps
             writer.WriteAttributeString("x", X.ToString());
             writer.WriteAttributeString("y", Y.ToString());
             writer.WriteAttributeString("serial", LocalSerial.ToString());
+            writer.WriteAttributeString("serverSerial", ServerSerial.ToString());
             writer.WriteAttributeString("isLocked", isLocked.ToString());
             writer.WriteAttributeString("alphaOffset", AlphaOffset.ToString());
         }
