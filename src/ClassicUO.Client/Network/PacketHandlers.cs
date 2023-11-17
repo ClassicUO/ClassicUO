@@ -48,10 +48,8 @@ using ClassicUO.Utility.Platforms;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Xml;
 
 namespace ClassicUO.Network
 {
@@ -6641,9 +6639,6 @@ namespace ClassicUO.Network
 
             Gump gump = null;
             bool mustBeAdded = true;
-
-            //Restore server side gump position
-            string gumpsXmlPath = Path.Combine(ProfileManager.ProfilePath, "gumps.xml");
 
             if (UIManager.GetGumpCachePosition(gumpID, out Point pos))
             {
