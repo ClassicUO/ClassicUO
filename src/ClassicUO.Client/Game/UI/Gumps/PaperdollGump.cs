@@ -790,7 +790,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     Item it_at_layer = mobile.FindItemByLayer(Layer);
 
-                    if (item != it_at_layer || _itemGump == null)
+                    if ((it_at_layer != null && _itemGump != null && _itemGump.Graphic != it_at_layer.DisplayedGraphic) || _itemGump == null)
                     {
                         if (_itemGump != null)
                         {
