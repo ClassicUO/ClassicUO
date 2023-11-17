@@ -10,7 +10,8 @@ namespace ClassicUO.Game.UI.Gumps
             "/c[white][3.13.0]/cd\n" +
                 "- Fix item unintentional stacking\n" +
                 "- Potential small bug fix\n" +
-                "- Option to close anchored healthbars automatically",
+                "- Option to close anchored healthbars automatically\n" +
+                "- Added optional freeze on cast to spell indicator system",
 
             "/c[white][3.12.0]/cd\n" +
                 "- Added Exclude self to advanced nameplate options\n" +
