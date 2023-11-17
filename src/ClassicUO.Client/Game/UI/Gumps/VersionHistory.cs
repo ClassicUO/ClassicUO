@@ -7,6 +7,9 @@ namespace ClassicUO.Game.UI.Gumps
     internal class VersionHistory : Gump
     {
         private static string[] updateTexts = {
+            "/c[white][3.13.0]/cd\n" +
+                "- Fix item unintentional stacking",
+
             "/c[white][3.12.0]/cd\n" +
                 "- Added Exclude self to advanced nameplate options\n" +
                 "- Bug fix for spell indicator loading\n" +
