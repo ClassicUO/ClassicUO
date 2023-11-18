@@ -1,7 +1,9 @@
 ﻿using ClassicUO.Assets;
+using ClassicUO.Configuration;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
+using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -13,8 +15,6 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private LeftSideMenuRightSideContent mainContent;
         private List<SettingsOption> options = new List<SettingsOption>();
-
-        private int subCategoryPage = 0;
 
         public ModernOptionsGump() : base(0, 0)
         {
@@ -71,6 +71,9 @@ namespace ClassicUO.Game.UI.Gumps
         {
             LeftSideMenuRightSideContent content = new LeftSideMenuRightSideContent(mainContent.RightWidth, mainContent.Height, (int)(mainContent.RightWidth * 0.3));
             content.AddToLeft(SubCategoryButton("General", ((int)PAGE.General + 1000), content.LeftWidth));
+
+            content.AddToRight(new Checkbox("Highlight objects under cursor", isChecked: ProfileManager.CurrentProfile.HighlightGameObjects), true, (int)PAGE.General + 1000);
+
             content.AddToLeft(SubCategoryButton("Mobiles", ((int)PAGE.General + 1001), content.LeftWidth));
             content.AddToLeft(SubCategoryButton("Gumps & Context", ((int)PAGE.General + 1002), content.LeftWidth));
             content.AddToLeft(SubCategoryButton("Misc", ((int)PAGE.General + 1003), content.LeftWidth));
@@ -86,24 +89,114 @@ namespace ClassicUO.Game.UI.Gumps
 
         private ModernButton CategoryButton(string text, int page, int width, int height = 40)
         {
-            return new ModernButton(0, 0, width, height, ButtonAction.SwitchPage, text, ColorPallet.BUTTON_FONT_COLOR) { ButtonParameter = page };
+            return new ModernButton(0, 0, width, height, ButtonAction.SwitchPage, text, ColorPallet.BUTTON_FONT_COLOR) { ButtonParameter = page, FullPageSwitch = true };
         }
 
         private ModernButton SubCategoryButton(string text, int page, int width, int height = 40)
         {
-            return new ModernButton(0, 0, width, height, ButtonAction.Activate, text, ColorPallet.BUTTON_FONT_COLOR) { ButtonParameter = page };
-        }
-
-        public override void OnButtonClick(int buttonID)
-        {
-            subCategoryPage = buttonID;
+            return new ModernButton(0, 0, width, height, ButtonAction.SwitchPage, text, ColorPallet.BUTTON_FONT_COLOR) { ButtonParameter = page };
         }
 
         public override void OnPageChanged()
         {
             base.OnPageChanged();
 
-            mainContent.Page = ActivePage;
+            mainContent.ActivePage = ActivePage;
+        }
+
+        private class Checkbox : Control
+        {
+            private const int CHECKBOX_SIZE = 30;
+
+            private bool _isChecked;
+            private readonly TextBox _text;
+
+            private Vector3 hueVector = ShaderHueTranslator.GetHueVector(ColorPallet.SEARCH_BACKGROUND, false, 0.9f);
+
+            public Checkbox(
+                string text = "",
+                int fontSize = 18,
+                int maxWidth = 0,
+                bool isChecked = false
+            )
+            {
+                _isChecked = isChecked;
+
+                _text = new TextBox(text, TrueTypeLoader.EMBEDDED_FONT, fontSize, maxWidth == 0 ? null : maxWidth, ColorPallet.TEXT_FOREGROUND, strokeEffect: false) { X = CHECKBOX_SIZE + 5 };
+
+                Width = CHECKBOX_SIZE + 5 + _text.Width;
+                Height = Math.Max(CHECKBOX_SIZE, _text.Height);
+
+                _text.Y = (Height / 2) - (_text.Height / 2);
+
+                Add(_text);
+
+                CanMove = true;
+                AcceptMouseInput = true;
+            }
+
+            public bool IsChecked
+            {
+                get => _isChecked;
+                set
+                {
+                    if (_isChecked != value)
+                    {
+                        _isChecked = value;
+                        OnCheckedChanged();
+                    }
+                }
+            }
+
+            public override ClickPriority Priority => ClickPriority.High;
+
+            public string Text => _text.Text;
+
+            public event EventHandler ValueChanged;
+
+            public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+            {
+                if (IsDisposed)
+                {
+                    return false;
+                }
+
+                batcher.Draw(
+                    SolidColorTextureCache.GetTexture(Color.White),
+                    new Rectangle(x, y, CHECKBOX_SIZE, CHECKBOX_SIZE),
+                    hueVector
+                );
+
+                if (IsChecked)
+                {
+                    batcher.Draw(
+                        SolidColorTextureCache.GetTexture(Color.Black),
+                        new Rectangle(x + (CHECKBOX_SIZE / 2) / 2, y + (CHECKBOX_SIZE / 2) / 2, CHECKBOX_SIZE / 2, CHECKBOX_SIZE / 2),
+                        hueVector
+                    );
+                }
+
+                return base.Draw(batcher, x, y);
+            }
+
+            protected virtual void OnCheckedChanged()
+            {
+                ValueChanged.Raise(this);
+            }
+
+            protected override void OnMouseUp(int x, int y, MouseButtonType button)
+            {
+                if (button == MouseButtonType.Left && MouseIsOver)
+                {
+                    IsChecked = !IsChecked;
+                }
+            }
+
+            public override void Dispose()
+            {
+                base.Dispose();
+                _text?.Dispose();
+            }
         }
 
         private class LeftSideMenuRightSideContent : Control
@@ -112,7 +205,16 @@ namespace ClassicUO.Game.UI.Gumps
 
             private ScrollArea left, right;
             private int leftY, rightY = TOP_PADDING, leftX, rightX;
-            private int height;
+
+            public new int ActivePage
+            {
+                get => base.ActivePage;
+                set
+                {
+                    base.ActivePage = value;
+                    right.ActivePage = value;
+                }
+            }
 
             public LeftSideMenuRightSideContent(int width, int height, int leftWidth, int page = 0)
             {
@@ -210,6 +312,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             public bool DisplayBorder;
 
+            public bool FullPageSwitch;
+
             public ModernButton
             (
                 int x,
@@ -297,7 +401,21 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (_action == ButtonAction.SwitchPage)
                     {
-                        ChangePage(ButtonParameter);
+                        if (!FullPageSwitch)
+                        {
+                            if (Parent != null)
+                            { //Scroll area
+                                Parent.ActivePage = ButtonParameter;
+                                if (Parent.Parent != null && Parent.Parent is LeftSideMenuRightSideContent)
+                                { //LeftSideMenuRightSideContent
+                                    ((LeftSideMenuRightSideContent)Parent.Parent).ActivePage = ButtonParameter;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            ChangePage(ButtonParameter);
+                        }
                     }
                     else
                     {
@@ -360,6 +478,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _scrollBar.MinValue = 0;
                 _scrollBar.MaxValue = scroll_max_height >= 0 ? scroll_max_height : Height;
                 _scrollBar.Parent = this;
+                _scrollBar.IsVisible = true;
 
                 AcceptMouseInput = true;
                 WantUpdateSize = false;
@@ -383,15 +502,6 @@ namespace ClassicUO.Game.UI.Gumps
                 base.Update();
 
                 CalculateScrollBarMaxValue();
-
-                if (ScrollbarBehaviour == ScrollbarBehaviour.ShowAlways)
-                {
-                    _scrollBar.IsVisible = true;
-                }
-                else if (ScrollbarBehaviour == ScrollbarBehaviour.ShowWhenDataExceedFromView)
-                {
-                    _scrollBar.IsVisible = _scrollBar.MaxValue > _scrollBar.MinValue;
-                }
             }
 
             public int ScrollBarWidth()
@@ -424,7 +534,7 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         Control child = Children[i];
 
-                        if (!child.IsVisible)
+                        if (!child.IsVisible || (child.Page != ActivePage && child.Page != 0))
                         {
                             continue;
                         }
