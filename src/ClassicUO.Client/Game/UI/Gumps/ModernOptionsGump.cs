@@ -3,7 +3,6 @@ using ClassicUO.Configuration;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
-using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -15,6 +14,9 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private LeftSideMenuRightSideContent mainContent;
         private List<SettingsOption> options = new List<SettingsOption>();
+
+        public static string SearchText { get; private set; } = String.Empty;
+        public static event EventHandler SearchValueChanged;
 
         public ModernOptionsGump() : base(0, 0)
         {
@@ -34,7 +36,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(mainContent = new LeftSideMenuRightSideContent(Width, Height - 40, (int)(Width * 0.23)) { Y = 40 });
 
-            mainContent.AddToLeft(CategoryButton("General", (int)PAGE.General, mainContent.LeftWidth));
+            ModernButton b;
+            mainContent.AddToLeft(b = CategoryButton("General", (int)PAGE.General, mainContent.LeftWidth));
+            b.IsSelected = true;
             mainContent.AddToLeft(CategoryButton("Sound", (int)PAGE.Sound, mainContent.LeftWidth));
             mainContent.AddToLeft(CategoryButton("Video", (int)PAGE.Video, mainContent.LeftWidth));
             mainContent.AddToLeft(CategoryButton("Macros", (int)PAGE.Macros, mainContent.LeftWidth));
@@ -52,13 +56,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             BuildGeneral();
 
-            options.Add(new SettingsOption(
-                "Testt",
-                new Area() { Width = 400, Height = 70 },
-                mainContent.RightWidth,
-                PAGE.Sound
-            ));
-
             foreach (SettingsOption option in options)
             {
                 mainContent.AddToRight(option.FullControl, false, (int)option.OptionsPage);
@@ -72,7 +69,14 @@ namespace ClassicUO.Game.UI.Gumps
             LeftSideMenuRightSideContent content = new LeftSideMenuRightSideContent(mainContent.RightWidth, mainContent.Height, (int)(mainContent.RightWidth * 0.3));
             content.AddToLeft(SubCategoryButton("General", ((int)PAGE.General + 1000), content.LeftWidth));
 
-            content.AddToRight(new Checkbox("Highlight objects under cursor", isChecked: ProfileManager.CurrentProfile.HighlightGameObjects), true, (int)PAGE.General + 1000);
+            Checkbox cb;
+            content.AddToRight(cb = new Checkbox("Highlight objects under cursor", isChecked: ProfileManager.CurrentProfile.HighlightGameObjects, valueChanged: (b) => { ProfileManager.CurrentProfile.HighlightGameObjects = b; }), true, (int)PAGE.General + 1000);
+
+            content.AddToRight(cb = new Checkbox("Enable pathfinding", isChecked: ProfileManager.CurrentProfile.EnablePathfind, valueChanged: (b) => { ProfileManager.CurrentProfile.EnablePathfind = b; }), true, (int)PAGE.General + 1000);
+            content.Indent();
+            content.AddToRight(cb = new Checkbox("Use shift for pathfinding", isChecked: ProfileManager.CurrentProfile.UseShiftToPathfind, valueChanged: (b) => { ProfileManager.CurrentProfile.UseShiftToPathfind = b; }), true, (int)PAGE.General + 1000);
+            content.AddToRight(cb = new Checkbox("Single click for pathfinding", isChecked: ProfileManager.CurrentProfile.PathfindSingleClick, valueChanged: (b) => { ProfileManager.CurrentProfile.PathfindSingleClick = b; }), true, (int)PAGE.General + 1000);
+            content.RemoveIndent();
 
             content.AddToLeft(SubCategoryButton("Mobiles", ((int)PAGE.General + 1001), content.LeftWidth));
             content.AddToLeft(SubCategoryButton("Gumps & Context", ((int)PAGE.General + 1002), content.LeftWidth));
@@ -117,11 +121,12 @@ namespace ClassicUO.Game.UI.Gumps
                 string text = "",
                 int fontSize = 18,
                 int maxWidth = 0,
-                bool isChecked = false
+                bool isChecked = false,
+                Action<bool> valueChanged = null
             )
             {
                 _isChecked = isChecked;
-
+                ValueChanged = valueChanged;
                 _text = new TextBox(text, TrueTypeLoader.EMBEDDED_FONT, fontSize, maxWidth == 0 ? null : maxWidth, ColorPallet.TEXT_FOREGROUND, strokeEffect: false) { X = CHECKBOX_SIZE + 5 };
 
                 Width = CHECKBOX_SIZE + 5 + _text.Width;
@@ -152,7 +157,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             public string Text => _text.Text;
 
-            public event EventHandler ValueChanged;
+            public Action<bool> ValueChanged { get; }
 
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
@@ -181,7 +186,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             protected virtual void OnCheckedChanged()
             {
-                ValueChanged.Raise(this);
+                ValueChanged.Invoke(IsChecked);
             }
 
             protected override void OnMouseUp(int x, int y, MouseButtonType button)
@@ -202,6 +207,7 @@ namespace ClassicUO.Game.UI.Gumps
         private class LeftSideMenuRightSideContent : Control
         {
             private const int TOP_PADDING = 5;
+            private const int INDENT_SPACE = 30;
 
             private ScrollArea left, right;
             private int leftY, rightY = TOP_PADDING, leftX, rightX;
@@ -258,6 +264,20 @@ namespace ClassicUO.Game.UI.Gumps
 
                 right.Add(c, page);
             }
+
+            public void Indent()
+            {
+                rightX += INDENT_SPACE;
+            }
+
+            public void RemoveIndent()
+            {
+                rightX -= INDENT_SPACE;
+                if (rightX < 0)
+                {
+                    rightX = 0;
+                }
+            }
         }
 
         private class SettingsOption
@@ -304,7 +324,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        private class ModernButton : HitBox
+        private class ModernButton : HitBox, SearchableOption
         {
             private readonly ButtonAction _action;
             private readonly int _groupnumber;
@@ -336,6 +356,26 @@ namespace ClassicUO.Game.UI.Gumps
 
                 TextLabel.Y = (h - TextLabel.Height) >> 1;
                 _groupnumber = groupnumber;
+
+                ModernOptionsGump.SearchValueChanged += ModernOptionsGump_SearchValueChanged;
+            }
+
+            private void ModernOptionsGump_SearchValueChanged(object sender, EventArgs e)
+            {
+                if (!string.IsNullOrEmpty(ModernOptionsGump.SearchText))
+                {
+                    if (Search(SearchText))
+                    {
+                        TextLabel.Alpha = 1f;
+                    }
+                    else
+                    {
+                        TextLabel.Alpha = 0.3f;
+                    }
+                } else
+                {
+                    TextLabel.Alpha = 1f;
+                }
             }
 
             internal TextBox TextLabel { get; }
@@ -450,6 +490,11 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
                 return base.Draw(batcher, x, y);
+            }
+
+            public bool Search(string text)
+            {
+                return TextLabel.Text.ToLower().Contains(text.ToLower());
             }
         }
 
@@ -788,6 +833,11 @@ namespace ClassicUO.Game.UI.Gumps
             NameplateOptions,
             TUOCooldowns,
             TUOOptions
+        }
+
+        private interface SearchableOption
+        {
+            public bool Search(string text);
         }
     }
 }
