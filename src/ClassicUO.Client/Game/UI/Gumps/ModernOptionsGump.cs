@@ -11,6 +11,7 @@ using StbTextEditSharp;
 using System;
 using System.Collections.Generic;
 using SDL2;
+using System.Linq;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -107,6 +108,10 @@ namespace ClassicUO.Game.UI.Gumps
             content.AddToRight(new CheckboxWithLabel("Automatically open corpses", isChecked: ProfileManager.CurrentProfile.AutoOpenCorpses, valueChanged: (b) => { ProfileManager.CurrentProfile.AutoOpenCorpses = b; }), true, (int)PAGE.General + 1000);
             content.Indent();
             content.AddToRight(new SliderWithLabel("Corpse open distance", 0, ColorPallet.SLIDER_WIDTH, 0, 5, ProfileManager.CurrentProfile.AutoOpenCorpseRange, (r) => { ProfileManager.CurrentProfile.AutoOpenCorpseRange = r; }), true, (int)PAGE.General + 1000);
+            content.AddToRight(new CheckboxWithLabel("Skip empty corpses", isChecked: ProfileManager.CurrentProfile.SkipEmptyCorpse, valueChanged: (b) => { ProfileManager.CurrentProfile.SkipEmptyCorpse = b; }), true, (int)PAGE.General + 1000);
+            content.AddToRight(new ComboBoxWithLabel("Corpse open options", 0, ColorPallet.COMBO_BOX_WIDTH, new string[] { "None", "Not targeting", "Not hiding", "Both" }, ProfileManager.CurrentProfile.CorpseOpenOptions, (s, n) => { ProfileManager.CurrentProfile.CorpseOpenOptions = s; }), true, (int)PAGE.General + 1000);
+
+            content.RemoveIndent();
 
             content.AddToLeft(SubCategoryButton("Mobiles", ((int)PAGE.General + 1001), content.LeftWidth));
             content.AddToLeft(SubCategoryButton("Gumps & Context", ((int)PAGE.General + 1002), content.LeftWidth));
@@ -334,212 +339,518 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _label.Alpha = 1f;
             }
-        }
 
-        private class Slider : Control
-        {
-            private bool _clicked;
-            private int _sliderX;
-            private readonly TextBox _text;
-            private int _value = -1;
-
-            public Slider(
-                int barWidth,
-                int min,
-                int max,
-                int value,
-                Action<int> valueChanged = null
-            )
+            private class Slider : Control
             {
-                _text = new TextBox(string.Empty, TrueTypeLoader.EMBEDDED_FONT, ColorPallet.STANDARD_TEXT_SIZE, barWidth, ColorPallet.TEXT_FOREGROUND, strokeEffect: false);
+                private bool _clicked;
+                private int _sliderX;
+                private readonly TextBox _text;
+                private int _value = -1;
 
-                MinValue = min;
-                MaxValue = max;
-                BarWidth = barWidth;
-                AcceptMouseInput = true;
-                Width = barWidth;
-                Height = Math.Max(_text.MeasuredSize.Y, 15);
-
-                CalculateOffset();
-
-                Value = value;
-                ValueChanged = valueChanged;
-            }
-
-            public int MinValue { get; set; }
-
-            public int MaxValue { get; set; }
-
-            public int BarWidth { get; set; }
-
-            public float Percents { get; private set; }
-
-            public int Value
-            {
-                get => _value;
-                set
+                public Slider(
+                    int barWidth,
+                    int min,
+                    int max,
+                    int value,
+                    Action<int> valueChanged = null
+                )
                 {
-                    if (_value != value)
+                    _text = new TextBox(string.Empty, TrueTypeLoader.EMBEDDED_FONT, ColorPallet.STANDARD_TEXT_SIZE, barWidth, ColorPallet.TEXT_FOREGROUND, strokeEffect: false);
+
+                    MinValue = min;
+                    MaxValue = max;
+                    BarWidth = barWidth;
+                    AcceptMouseInput = true;
+                    Width = barWidth;
+                    Height = Math.Max(_text.MeasuredSize.Y, 15);
+
+                    CalculateOffset();
+
+                    Value = value;
+                    ValueChanged = valueChanged;
+                }
+
+                public int MinValue { get; set; }
+
+                public int MaxValue { get; set; }
+
+                public int BarWidth { get; set; }
+
+                public float Percents { get; private set; }
+
+                public int Value
+                {
+                    get => _value;
+                    set
                     {
-                        int oldValue = _value;
-                        _value = /*_newValue =*/
-                        value;
-                        //if (IsInitialized)
-                        //    RecalculateSliderX();
-
-                        if (_value < MinValue)
+                        if (_value != value)
                         {
-                            _value = MinValue;
-                        }
-                        else if (_value > MaxValue)
-                        {
-                            _value = MaxValue;
-                        }
+                            int oldValue = _value;
+                            _value = /*_newValue =*/
+                            value;
+                            //if (IsInitialized)
+                            //    RecalculateSliderX();
 
-                        if (_text != null)
-                        {
-                            _text.Text = Value.ToString();
-                        }
+                            if (_value < MinValue)
+                            {
+                                _value = MinValue;
+                            }
+                            else if (_value > MaxValue)
+                            {
+                                _value = MaxValue;
+                            }
 
-                        if (_value != oldValue)
-                        {
-                            CalculateOffset();
-                        }
+                            if (_text != null)
+                            {
+                                _text.Text = Value.ToString();
+                            }
 
-                        ValueChanged?.Invoke(_value);
+                            if (_value != oldValue)
+                            {
+                                CalculateOffset();
+                            }
+
+                            ValueChanged?.Invoke(_value);
+                        }
                     }
                 }
-            }
 
-            public Action<int> ValueChanged { get; }
+                public Action<int> ValueChanged { get; }
 
-            public override void Update()
-            {
-                base.Update();
-
-                if (_clicked)
+                public override void Update()
                 {
-                    int x = Mouse.Position.X - X - ParentX;
-                    int y = Mouse.Position.Y - Y - ParentY;
+                    base.Update();
 
+                    if (_clicked)
+                    {
+                        int x = Mouse.Position.X - X - ParentX;
+                        int y = Mouse.Position.Y - Y - ParentY;
+
+                        CalculateNew(x);
+                    }
+                }
+
+                public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+                {
+                    Vector3 hueVector = ShaderHueTranslator.GetHueVector(ColorPallet.BACKGROUND);
+
+                    int mx = x;
+
+                    //Draw background line
+                    batcher.Draw(
+                        SolidColorTextureCache.GetTexture(Color.White),
+                        new Rectangle(mx, y + 3, BarWidth, 10),
+                        hueVector
+                        );
+
+                    hueVector = ShaderHueTranslator.GetHueVector(ColorPallet.SEARCH_BACKGROUND);
+
+                    batcher.Draw(
+                        SolidColorTextureCache.GetTexture(Color.White),
+                        new Rectangle(mx + _sliderX, y, 15, 16),
+                        hueVector
+                        );
+
+                    _text?.Draw(batcher, mx + BarWidth + 2, y + (Height >> 1) - (_text.Height >> 1));
+
+                    return base.Draw(batcher, x, y);
+                }
+
+                protected override void OnMouseDown(int x, int y, MouseButtonType button)
+                {
+                    if (button != MouseButtonType.Left)
+                    {
+                        return;
+                    }
+
+                    _clicked = true;
+                }
+
+                protected override void OnMouseUp(int x, int y, MouseButtonType button)
+                {
+                    if (button != MouseButtonType.Left)
+                    {
+                        return;
+                    }
+
+                    _clicked = false;
                     CalculateNew(x);
                 }
+
+                protected override void OnMouseWheel(MouseEventType delta)
+                {
+                    switch (delta)
+                    {
+                        case MouseEventType.WheelScrollUp:
+                            Value++;
+
+                            break;
+
+                        case MouseEventType.WheelScrollDown:
+                            Value--;
+
+                            break;
+                    }
+
+                    CalculateOffset();
+                }
+
+                private void CalculateNew(int x)
+                {
+                    int len = BarWidth;
+                    int maxValue = MaxValue - MinValue;
+
+                    len -= 15;
+                    float perc = x / (float)len * 100.0f;
+                    Value = (int)(maxValue * perc / 100.0f) + MinValue;
+                    CalculateOffset();
+                }
+
+                private void CalculateOffset()
+                {
+                    if (Value < MinValue)
+                    {
+                        Value = MinValue;
+                    }
+                    else if (Value > MaxValue)
+                    {
+                        Value = MaxValue;
+                    }
+
+                    int value = Value - MinValue;
+                    int maxValue = MaxValue - MinValue;
+                    int length = BarWidth;
+
+                    length -= 15;
+
+                    if (maxValue > 0)
+                    {
+                        Percents = value / (float)maxValue * 100.0f;
+                    }
+                    else
+                    {
+                        Percents = 0;
+                    }
+
+                    _sliderX = (int)(length * Percents / 100.0f);
+
+                    if (_sliderX < 0)
+                    {
+                        _sliderX = 0;
+                    }
+                }
+
+                public override void Dispose()
+                {
+                    _text?.Dispose();
+                    base.Dispose();
+                }
+            }
+        }
+
+        private class ComboBoxWithLabel : Control, SearchableOption
+        {
+            private TextBox _label;
+            private Combobox _comboBox;
+
+            public ComboBoxWithLabel(string label, int labelWidth, int comboWidth, string[] options, int selectedIndex, Action<int, string> onOptionSelected = null)
+            {
+                AcceptMouseInput = true;
+                CanMove = true;
+
+                Add(_label = new TextBox(label, TrueTypeLoader.EMBEDDED_FONT, ColorPallet.STANDARD_TEXT_SIZE, labelWidth > 0 ? labelWidth : null, ColorPallet.TEXT_FOREGROUND, strokeEffect: false));
+                Add(_comboBox = new Combobox(comboWidth, options, selectedIndex, onOptionSelected: onOptionSelected) { X = _label.MeasuredSize.X + _label.X + 5 });
+
+                Width = labelWidth + comboWidth + 5;
+                Height = Math.Max(_label.MeasuredSize.Y, _comboBox.Height);
             }
 
-            public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+            public void OnSearchMatch()
             {
-                Vector3 hueVector = ShaderHueTranslator.GetHueVector(ColorPallet.BACKGROUND);
+                throw new NotImplementedException();
+            }
 
-                int mx = x;
+            public bool Search(string text)
+            {
+                throw new NotImplementedException();
+            }
 
-                //Draw background line
-                batcher.Draw(
-                    SolidColorTextureCache.GetTexture(Color.White),
-                    new Rectangle(mx, y + 3, BarWidth, 10),
-                    hueVector
+            private class Combobox : Control
+            {
+                private readonly string[] _items;
+                private readonly int _maxHeight;
+                private TextBox _label;
+                private int _selectedIndex;
+
+                public Combobox
+                (
+                    int width,
+                    string[] items,
+                    int selected = -1,
+                    int maxHeight = 200,
+                    Action<int, string> onOptionSelected = null
+                    )
+                {
+                    Width = width;
+                    Height = 25;
+                    SelectedIndex = selected;
+                    _items = items;
+                    _maxHeight = maxHeight;
+                    OnOptionSelected = onOptionSelected;
+
+                    string initialText = selected > -1 ? items[selected] : string.Empty;
+
+                    Add(new ColorBox(Width, Height, ColorPallet.SEARCH_BACKGROUND));
+
+                    Add
+                    (
+                        _label = new TextBox(initialText, TrueTypeLoader.EMBEDDED_FONT, ColorPallet.STANDARD_TEXT_SIZE, width, ColorPallet.TEXT_FOREGROUND, strokeEffect: false)
+                        {
+                            X = 2,
+                            Y = 5
+                        }
+                    );
+                }
+
+                public int SelectedIndex
+                {
+                    get => _selectedIndex;
+                    set
+                    {
+                        _selectedIndex = value;
+
+                        if (_items != null)
+                        {
+                            _label.Text = _items[value];
+
+                            OnOptionSelected?.Invoke(value, _items[value]);
+                        }
+                    }
+                }
+
+                public Action<int, string> OnOptionSelected { get; }
+
+
+                public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+                {
+                    if (batcher.ClipBegin(x, y, Width, Height))
+                    {
+                        base.Draw(batcher, x, y);
+                        batcher.ClipEnd();
+                    }
+
+                    return true;
+                }
+
+
+                protected override void OnMouseUp(int x, int y, MouseButtonType button)
+                {
+                    if (button != MouseButtonType.Left)
+                    {
+                        return;
+                    }
+
+                    int comboY = ScreenCoordinateY + Offset.Y;
+
+                    if (comboY < 0)
+                    {
+                        comboY = 0;
+                    }
+                    else if (comboY + _maxHeight > Client.Game.Window.ClientBounds.Height)
+                    {
+                        comboY = Client.Game.Window.ClientBounds.Height - _maxHeight;
+                    }
+
+                    UIManager.Add
+                    (
+                        new ComboboxGump
+                        (
+                            ScreenCoordinateX,
+                            comboY,
+                            Width,
+                            _maxHeight,
+                            _items,
+                            this
+                        )
                     );
 
-                hueVector = ShaderHueTranslator.GetHueVector(ColorPallet.SEARCH_BACKGROUND);
-
-                batcher.Draw(
-                    SolidColorTextureCache.GetTexture(Color.White),
-                    new Rectangle(mx + _sliderX, y, 15, 16),
-                    hueVector
-                    );
-
-                _text?.Draw(batcher, mx + BarWidth + 2, y + (Height >> 1) - (_text.Height >> 1));
-
-                return base.Draw(batcher, x, y);
-            }
-
-            protected override void OnMouseDown(int x, int y, MouseButtonType button)
-            {
-                if (button != MouseButtonType.Left)
-                {
-                    return;
+                    base.OnMouseUp(x, y, button);
                 }
 
-                _clicked = true;
-            }
-
-            protected override void OnMouseUp(int x, int y, MouseButtonType button)
-            {
-                if (button != MouseButtonType.Left)
+                private class ComboboxGump : Gump
                 {
-                    return;
+                    private readonly Combobox _combobox;
+
+                    public ComboboxGump
+                    (
+                        int x,
+                        int y,
+                        int width,
+                        int maxHeight,
+                        string[] items,
+                        Combobox combobox
+                    ) : base(0, 0)
+                    {
+                        CanMove = false;
+                        AcceptMouseInput = true;
+                        X = x;
+                        Y = y;
+
+                        IsModal = true;
+                        LayerOrder = UILayer.Over;
+                        ModalClickOutsideAreaClosesThisControl = true;
+
+                        _combobox = combobox;
+
+                        ColorBox cb;
+                        Add(cb = new ColorBox(width, 0, ColorPallet.BACKGROUND));
+
+                        HoveredLabel[] labels = new HoveredLabel[items.Length];
+
+                        for (int i = 0; i < items.Length; i++)
+                        {
+                            string item = items[i];
+
+                            if (item == null)
+                            {
+                                item = string.Empty;
+                            }
+
+                            HoveredLabel label = new HoveredLabel
+                            (
+                                item,
+                                ColorPallet.OPTION_HUE,
+                                ColorPallet.OPTION_OVER_HUE,
+                                ColorPallet.OPTION_SELECTED_HUE
+                            )
+                            {
+                                X = 2,
+                                DrawBackgroundCurrentIndex = true,
+                                IsVisible = item.Length != 0,
+                                Tag = i
+                            };
+
+                            label.Y = i * label.Height + 5;
+
+                            label.MouseUp += LabelOnMouseUp;
+
+                            labels[i] = label;
+                        }
+
+                        int totalHeight = Math.Min(maxHeight, labels.Max(o => o.Y + o.Height));
+                        int maxWidth = Math.Max(width, labels.Max(o => o.X + o.Width));
+
+                        ScrollArea area = new ScrollArea
+                        (
+                            0,
+                            0,
+                            maxWidth + 15,
+                            totalHeight
+                        );
+
+                        foreach (HoveredLabel label in labels)
+                        {
+                            label.Width = maxWidth;
+                            area.Add(label);
+                        }
+
+                        Add(area);
+
+                        cb.Width = maxWidth;
+                        cb.Height = totalHeight;
+                    }
+
+                    private void LabelOnMouseUp(object sender, MouseEventArgs e)
+                    {
+                        if (e.Button == MouseButtonType.Left)
+                        {
+                            _combobox.SelectedIndex = (int)((Label)sender).Tag;
+
+                            Dispose();
+                        }
+                    }
+
+                    private class HoveredLabel : Control
+                    {
+                        private readonly ushort _overHue, _normalHue, _selectedHue;
+
+                        private TextBox _label;
+
+                        public HoveredLabel
+                        (
+                            string text,
+                            ushort hue,
+                            ushort overHue,
+                            ushort selectedHue,
+                            int maxwidth = 0
+                        )
+                        {
+                            _overHue = overHue;
+                            _normalHue = hue;
+                            _selectedHue = selectedHue;
+                            AcceptMouseInput = true;
+
+                            Add(_label = new TextBox(text, TrueTypeLoader.EMBEDDED_FONT, ColorPallet.STANDARD_TEXT_SIZE, maxwidth > 0 ? maxwidth : null, ColorPallet.TEXT_FOREGROUND, strokeEffect: false) { AcceptMouseInput = true });
+                            Height = _label.MeasuredSize.Y;
+                            Width = _label.MeasuredSize.X;
+                        }
+
+                        public bool DrawBackgroundCurrentIndex;
+                        public bool IsSelected, ForceHover;
+
+                        public ushort Hue;
+
+                        public override void Update()
+                        {
+                            if (IsSelected)
+                            {
+                                if (Hue != _selectedHue)
+                                {
+                                    Hue = _selectedHue;
+                                    _label.Hue = Hue;
+                                }
+                            }
+                            else if (MouseIsOver || ForceHover)
+                            {
+                                if (Hue != _overHue)
+                                {
+                                    Hue = _overHue;
+                                    _label.Hue = Hue;
+                                }
+                            }
+                            else if (Hue != _normalHue)
+                            {
+                                Hue = _normalHue;
+                                _label.Hue = Hue;
+                            }
+
+                            base.Update();
+                        }
+
+                        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+                        {
+                            if (DrawBackgroundCurrentIndex && MouseIsOver && !string.IsNullOrWhiteSpace(_label.Text))
+                            {
+                                Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
+
+                                batcher.Draw
+                                (
+                                    SolidColorTextureCache.GetTexture(Color.Gray),
+                                    new Rectangle
+                                    (
+                                        x,
+                                        y + 2,
+                                        Width - 4,
+                                        Height - 4
+                                    ),
+                                    hueVector
+                                );
+                            }
+
+                            return base.Draw(batcher, x, y);
+                        }
+                    }
                 }
-
-                _clicked = false;
-                CalculateNew(x);
-            }
-
-            protected override void OnMouseWheel(MouseEventType delta)
-            {
-                switch (delta)
-                {
-                    case MouseEventType.WheelScrollUp:
-                        Value++;
-
-                        break;
-
-                    case MouseEventType.WheelScrollDown:
-                        Value--;
-
-                        break;
-                }
-
-                CalculateOffset();
-            }
-
-            private void CalculateNew(int x)
-            {
-                int len = BarWidth;
-                int maxValue = MaxValue - MinValue;
-
-                len -= 15;
-                float perc = x / (float)len * 100.0f;
-                Value = (int)(maxValue * perc / 100.0f) + MinValue;
-                CalculateOffset();
-            }
-
-            private void CalculateOffset()
-            {
-                if (Value < MinValue)
-                {
-                    Value = MinValue;
-                }
-                else if (Value > MaxValue)
-                {
-                    Value = MaxValue;
-                }
-
-                int value = Value - MinValue;
-                int maxValue = MaxValue - MinValue;
-                int length = BarWidth;
-
-                length -= 15;
-
-                if (maxValue > 0)
-                {
-                    Percents = value / (float)maxValue * 100.0f;
-                }
-                else
-                {
-                    Percents = 0;
-                }
-
-                _sliderX = (int)(length * Percents / 100.0f);
-
-                if (_sliderX < 0)
-                {
-                    _sliderX = 0;
-                }
-            }
-
-            public override void Dispose()
-            {
-                _text?.Dispose();
-                base.Dispose();
             }
         }
 
@@ -1933,6 +2244,7 @@ namespace ClassicUO.Game.UI.Gumps
         private static class ColorPallet
         {
             public const int SLIDER_WIDTH = 150;
+            public const int COMBO_BOX_WIDTH = 250;
 
             public const int STANDARD_TEXT_SIZE = 20;
 
@@ -1941,6 +2253,10 @@ namespace ClassicUO.Game.UI.Gumps
             public const ushort BACKGROUND = 897;
             public const ushort SEARCH_BACKGROUND = 899;
             public const ushort BLACK = 0;
+
+            public const ushort OPTION_HUE = 0x0453;
+            public const ushort OPTION_OVER_HUE = 0x0454;
+            public const ushort OPTION_SELECTED_HUE = 0x0455;
 
             public static Color BUTTON_FONT_COLOR = Color.White;
             public static Color TEXT_FOREGROUND = Color.White;
