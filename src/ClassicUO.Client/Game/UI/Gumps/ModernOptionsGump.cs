@@ -1,12 +1,16 @@
 ﻿using ClassicUO.Assets;
 using ClassicUO.Configuration;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
+using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using StbTextEditSharp;
 using System;
 using System.Collections.Generic;
+using SDL2;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -32,7 +36,12 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(new TextBox("Options", TrueTypeLoader.EMBEDDED_FONT, 30, null, Color.White, strokeEffect: false) { X = 10, Y = 10 });
 
-            Add(new TextBox("Search", TrueTypeLoader.EMBEDDED_FONT, 30, null, Color.White, strokeEffect: false) { X = (int)(Width * 0.3), Y = 10 });
+            Control c;
+            Add(c = new TextBox("Search", TrueTypeLoader.EMBEDDED_FONT, 30, null, Color.White, strokeEffect: false) { X = (int)(Width * 0.3), Y = 10 });
+
+            InputField search;
+            Add(search = new InputField(400, 30) { X = c.X + c.Width + 5, Y = 5 });
+            search.TextChanged += (s, e) => { SearchText = search.Text; SearchValueChanged.Raise(); };
 
             Add(mainContent = new LeftSideMenuRightSideContent(Width, Height - 40, (int)(Width * 0.23)) { Y = 40 });
 
@@ -69,13 +78,13 @@ namespace ClassicUO.Game.UI.Gumps
             LeftSideMenuRightSideContent content = new LeftSideMenuRightSideContent(mainContent.RightWidth, mainContent.Height, (int)(mainContent.RightWidth * 0.3));
             content.AddToLeft(SubCategoryButton("General", ((int)PAGE.General + 1000), content.LeftWidth));
 
-            Checkbox cb;
-            content.AddToRight(cb = new Checkbox("Highlight objects under cursor", isChecked: ProfileManager.CurrentProfile.HighlightGameObjects, valueChanged: (b) => { ProfileManager.CurrentProfile.HighlightGameObjects = b; }), true, (int)PAGE.General + 1000);
+            CheckboxWithLabel cb;
+            content.AddToRight(cb = new CheckboxWithLabel("Highlight objects under cursor", isChecked: ProfileManager.CurrentProfile.HighlightGameObjects, valueChanged: (b) => { ProfileManager.CurrentProfile.HighlightGameObjects = b; }), true, (int)PAGE.General + 1000);
 
-            content.AddToRight(cb = new Checkbox("Enable pathfinding", isChecked: ProfileManager.CurrentProfile.EnablePathfind, valueChanged: (b) => { ProfileManager.CurrentProfile.EnablePathfind = b; }), true, (int)PAGE.General + 1000);
+            content.AddToRight(cb = new CheckboxWithLabel("Enable pathfinding", isChecked: ProfileManager.CurrentProfile.EnablePathfind, valueChanged: (b) => { ProfileManager.CurrentProfile.EnablePathfind = b; }), true, (int)PAGE.General + 1000);
             content.Indent();
-            content.AddToRight(cb = new Checkbox("Use shift for pathfinding", isChecked: ProfileManager.CurrentProfile.UseShiftToPathfind, valueChanged: (b) => { ProfileManager.CurrentProfile.UseShiftToPathfind = b; }), true, (int)PAGE.General + 1000);
-            content.AddToRight(cb = new Checkbox("Single click for pathfinding", isChecked: ProfileManager.CurrentProfile.PathfindSingleClick, valueChanged: (b) => { ProfileManager.CurrentProfile.PathfindSingleClick = b; }), true, (int)PAGE.General + 1000);
+            content.AddToRight(cb = new CheckboxWithLabel("Use shift for pathfinding", isChecked: ProfileManager.CurrentProfile.UseShiftToPathfind, valueChanged: (b) => { ProfileManager.CurrentProfile.UseShiftToPathfind = b; }), true, (int)PAGE.General + 1000);
+            content.AddToRight(cb = new CheckboxWithLabel("Single click for pathfinding", isChecked: ProfileManager.CurrentProfile.PathfindSingleClick, valueChanged: (b) => { ProfileManager.CurrentProfile.PathfindSingleClick = b; }), true, (int)PAGE.General + 1000);
             content.RemoveIndent();
 
             content.AddToLeft(SubCategoryButton("Mobiles", ((int)PAGE.General + 1001), content.LeftWidth));
@@ -108,7 +117,26 @@ namespace ClassicUO.Game.UI.Gumps
             mainContent.ActivePage = ActivePage;
         }
 
-        private class Checkbox : Control
+        public override void Dispose()
+        {
+            base.Dispose();
+
+            SearchValueChanged = null;
+        }
+
+        public static void SetParentsForMatchingSearch(Control c, int page)
+        {
+            for (Control p = c.Parent; p != null; p = p.Parent)
+            {
+                if (p is LeftSideMenuRightSideContent content)
+                {
+                    content.SetMatchingButton(page);
+                }
+            }
+        }
+
+        #region Custom Controls For Options
+        private class CheckboxWithLabel : Control, SearchableOption
         {
             private const int CHECKBOX_SIZE = 30;
 
@@ -117,7 +145,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             private Vector3 hueVector = ShaderHueTranslator.GetHueVector(ColorPallet.SEARCH_BACKGROUND, false, 0.9f);
 
-            public Checkbox(
+            public CheckboxWithLabel(
                 string text = "",
                 int fontSize = 18,
                 int maxWidth = 0,
@@ -138,6 +166,28 @@ namespace ClassicUO.Game.UI.Gumps
 
                 CanMove = true;
                 AcceptMouseInput = true;
+
+                ModernOptionsGump.SearchValueChanged += ModernOptionsGump_SearchValueChanged;
+            }
+
+            private void ModernOptionsGump_SearchValueChanged(object sender, EventArgs e)
+            {
+                if (!string.IsNullOrEmpty(ModernOptionsGump.SearchText))
+                {
+                    if (Search(ModernOptionsGump.SearchText))
+                    {
+                        OnSearchMatch();
+                        ModernOptionsGump.SetParentsForMatchingSearch(this, Page);
+                    }
+                    else
+                    {
+                        _text.Alpha = ColorPallet.NO_MATCH_SEARCH;
+                    }
+                }
+                else
+                {
+                    _text.Alpha = 1f;
+                }
             }
 
             public bool IsChecked
@@ -202,12 +252,782 @@ namespace ClassicUO.Game.UI.Gumps
                 base.Dispose();
                 _text?.Dispose();
             }
+
+            public bool Search(string text)
+            {
+                return _text.Text.ToLower().Contains(text.ToLower());
+            }
+
+            public void OnSearchMatch()
+            {
+                _text.Alpha = 1f;
+            }
         }
+
+        private class InputField : Control
+        {
+            private readonly StbTextBox _textbox;
+
+            public event EventHandler TextChanged { add { _textbox.TextChanged += value; } remove { _textbox.TextChanged -= value; } }
+
+            public InputField
+            (
+                int width,
+                int height,
+                int maxWidthText = 0,
+                int maxCharsCount = -1
+            )
+            {
+                WantUpdateSize = false;
+
+                Width = width;
+                Height = height;
+
+                _textbox = new StbTextBox
+                (
+                    maxCharsCount,
+                    maxWidthText
+                )
+                {
+                    X = 4,
+                    Y = 4,
+                    Width = width - 8,
+                    Height = height - 8
+                };
+
+                Add(new AlphaBlendControl() { Width = Width, Height = Height });
+                Add(_textbox);
+            }
+
+            public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+            {
+                if (batcher.ClipBegin(x, y, Width, Height))
+                {
+                    base.Draw(batcher, x, y);
+
+                    batcher.ClipEnd();
+                }
+
+                return true;
+            }
+
+
+            public string Text => _textbox.Text;
+
+            public override bool AcceptKeyboardInput
+            {
+                get => _textbox.AcceptKeyboardInput;
+                set => _textbox.AcceptKeyboardInput = value;
+            }
+
+            public bool NumbersOnly
+            {
+                get => _textbox.NumbersOnly;
+                set => _textbox.NumbersOnly = value;
+            }
+
+
+            public void SetText(string text)
+            {
+                _textbox.SetText(text);
+            }
+
+
+            private class StbTextBox : Control, ITextEditHandler
+            {
+                protected static readonly Color SELECTION_COLOR = new Color() { PackedValue = 0x80a06020 };
+                private const int FONT_SIZE = 20;
+                private readonly int _maxCharCount = -1;
+
+
+                public StbTextBox
+                (
+                    int max_char_count = -1,
+                    int maxWidth = 0
+                )
+                {
+                    AcceptKeyboardInput = true;
+                    AcceptMouseInput = true;
+                    CanMove = false;
+                    IsEditable = true;
+
+                    _maxCharCount = max_char_count;
+
+                    Stb = new TextEdit(this);
+                    Stb.SingleLine = true;
+
+                    _rendererText = new TextBox(string.Empty, TrueTypeLoader.EMBEDDED_FONT, FONT_SIZE, maxWidth > 0 ? maxWidth : null, ColorPallet.TEXT_FOREGROUND, strokeEffect: false);
+
+
+                    _rendererCaret = new TextBox("_", TrueTypeLoader.EMBEDDED_FONT, FONT_SIZE, null, ColorPallet.TEXT_FOREGROUND, strokeEffect: false);
+
+                    Height = _rendererCaret.Height;
+                    LoseFocusOnEscapeKey = true;
+                }
+
+                protected TextEdit Stb { get; }
+
+                public override bool AcceptKeyboardInput => base.AcceptKeyboardInput && IsEditable;
+
+                public bool AllowTAB { get; set; }
+                public bool NoSelection { get; set; }
+
+                public bool LoseFocusOnEscapeKey { get; set; }
+
+                public int CaretIndex
+                {
+                    get => Stb.CursorIndex;
+                    set
+                    {
+                        Stb.CursorIndex = value;
+                        UpdateCaretScreenPosition();
+                    }
+                }
+
+                public bool Multiline
+                {
+                    get => !Stb.SingleLine;
+                    set => Stb.SingleLine = !value;
+                }
+
+                public bool NumbersOnly { get; set; }
+
+                public int SelectionStart
+                {
+                    get => Stb.SelectStart;
+                    set
+                    {
+                        if (AllowSelection)
+                        {
+                            Stb.SelectStart = value;
+                        }
+                    }
+                }
+
+                public int SelectionEnd
+                {
+                    get => Stb.SelectEnd;
+                    set
+                    {
+                        if (AllowSelection)
+                        {
+                            Stb.SelectEnd = value;
+                        }
+                    }
+                }
+
+                public bool AllowSelection { get; set; } = true;
+
+                internal int TotalHeight
+                {
+                    get
+                    {
+                        return _rendererText.Height;
+                    }
+                }
+
+                public string Text
+                {
+                    get => _rendererText.Text;
+
+                    set
+                    {
+                        if (_maxCharCount > 0)
+                        {
+                            if (value != null && value.Length > _maxCharCount)
+                            {
+                                value = value.Substring(0, _maxCharCount);
+                            }
+                        }
+
+                        _rendererText.Text = value;
+
+                        if (!_is_writing)
+                        {
+                            OnTextChanged();
+                        }
+                    }
+                }
+
+                public int Length => Text?.Length ?? 0;
+
+                public float GetWidth(int index)
+                {
+                    if (index >= _rendererText.Text.Length - 1)
+                    {
+                        return _rendererText.GetStringWidth(_rendererText.Text.Substring(index, 1));
+                    }
+                    return 0;
+                }
+
+                public TextEditRow LayoutRow(int startIndex)
+                {
+                    TextEditRow r = new TextEditRow() { num_chars = _rendererText.Text.Length };
+
+                    int sx = ScreenCoordinateX;
+                    int sy = ScreenCoordinateY;
+
+                    r.x0 += sx;
+                    r.x1 += sx;
+                    r.ymin += sy;
+                    r.ymax += sy;
+
+                    return r;
+                }
+
+                protected Point _caretScreenPosition;
+                protected bool _is_writing;
+                protected bool _leftWasDown, _fromServer;
+                protected TextBox _rendererText, _rendererCaret;
+
+                public event EventHandler TextChanged;
+
+                public void SelectAll()
+                {
+                    if (AllowSelection)
+                    {
+                        Stb.SelectStart = 0;
+                        Stb.SelectEnd = Length;
+                    }
+                }
+
+                protected void UpdateCaretScreenPosition()
+                {
+                    //Fix this based off of Stb.CaretIndex
+                    _caretScreenPosition = new Point(_rendererText.X, _rendererText.Y);
+                }
+
+                private ControlKeys ApplyShiftIfNecessary(ControlKeys k)
+                {
+                    if (Keyboard.Shift && !NoSelection)
+                    {
+                        k |= ControlKeys.Shift;
+                    }
+
+                    return k;
+                }
+
+                private bool IsMaxCharReached(int count)
+                {
+                    return _maxCharCount >= 0 && Length + count >= _maxCharCount;
+                }
+
+                protected virtual void OnTextChanged()
+                {
+                    TextChanged?.Raise(this);
+
+                    UpdateCaretScreenPosition();
+                }
+
+                internal override void OnFocusEnter()
+                {
+                    base.OnFocusEnter();
+                    CaretIndex = Text?.Length ?? 0;
+                }
+
+                internal override void OnFocusLost()
+                {
+                    if (Stb != null)
+                    {
+                        Stb.SelectStart = Stb.SelectEnd = 0;
+                    }
+
+                    base.OnFocusLost();
+                }
+
+                protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
+                {
+                    ControlKeys? stb_key = null;
+                    bool update_caret = false;
+
+                    switch (key)
+                    {
+                        case SDL.SDL_Keycode.SDLK_TAB:
+                            if (AllowTAB)
+                            {
+                                // UO does not support '\t' char in its fonts
+                                OnTextInput("   ");
+                            }
+                            else
+                            {
+                                Parent?.KeyboardTabToNextFocus(this);
+                            }
+
+                            break;
+
+                        case SDL.SDL_Keycode.SDLK_a when Keyboard.Ctrl && !NoSelection:
+                            SelectAll();
+
+                            break;
+
+                        case SDL.SDL_Keycode.SDLK_ESCAPE:
+                            if (LoseFocusOnEscapeKey && SelectionStart == SelectionEnd)
+                            {
+                                UIManager.KeyboardFocusControl = null;
+                            }
+                            SelectionStart = 0;
+                            SelectionEnd = 0;
+                            break;
+
+                        case SDL.SDL_Keycode.SDLK_INSERT when IsEditable:
+                            stb_key = ControlKeys.InsertMode;
+
+                            break;
+
+                        case SDL.SDL_Keycode.SDLK_c when Keyboard.Ctrl && !NoSelection:
+                            int selectStart = Math.Min(Stb.SelectStart, Stb.SelectEnd);
+                            int selectEnd = Math.Max(Stb.SelectStart, Stb.SelectEnd);
+
+                            if (selectStart < selectEnd && selectStart >= 0 && selectEnd - selectStart <= Text.Length)
+                            {
+                                SDL.SDL_SetClipboardText(Text.Substring(selectStart, selectEnd - selectStart));
+                            }
+
+                            break;
+
+                        case SDL.SDL_Keycode.SDLK_x when Keyboard.Ctrl && !NoSelection:
+                            selectStart = Math.Min(Stb.SelectStart, Stb.SelectEnd);
+                            selectEnd = Math.Max(Stb.SelectStart, Stb.SelectEnd);
+
+                            if (selectStart < selectEnd && selectStart >= 0 && selectEnd - selectStart <= Text.Length)
+                            {
+                                SDL.SDL_SetClipboardText(Text.Substring(selectStart, selectEnd - selectStart));
+
+                                if (IsEditable)
+                                {
+                                    Stb.Cut();
+                                }
+                            }
+
+                            break;
+
+                        case SDL.SDL_Keycode.SDLK_v when Keyboard.Ctrl && IsEditable:
+                            OnTextInput(StringHelper.GetClipboardText(Multiline));
+
+                            break;
+
+                        case SDL.SDL_Keycode.SDLK_z when Keyboard.Ctrl && IsEditable:
+                            stb_key = ControlKeys.Undo;
+
+                            break;
+
+                        case SDL.SDL_Keycode.SDLK_y when Keyboard.Ctrl && IsEditable:
+                            stb_key = ControlKeys.Redo;
+
+                            break;
+
+                        case SDL.SDL_Keycode.SDLK_LEFT:
+                            if (Keyboard.Ctrl && Keyboard.Shift)
+                            {
+                                if (!NoSelection)
+                                {
+                                    stb_key = ControlKeys.Shift | ControlKeys.WordLeft;
+                                }
+                            }
+                            else if (Keyboard.Shift)
+                            {
+                                if (!NoSelection)
+                                {
+                                    stb_key = ControlKeys.Shift | ControlKeys.Left;
+                                }
+                            }
+                            else if (Keyboard.Ctrl)
+                            {
+                                stb_key = ControlKeys.WordLeft;
+                            }
+                            else
+                            {
+                                stb_key = ControlKeys.Left;
+                            }
+
+                            update_caret = true;
+
+                            break;
+
+                        case SDL.SDL_Keycode.SDLK_RIGHT:
+                            if (Keyboard.Ctrl && Keyboard.Shift)
+                            {
+                                if (!NoSelection)
+                                {
+                                    stb_key = ControlKeys.Shift | ControlKeys.WordRight;
+                                }
+                            }
+                            else if (Keyboard.Shift)
+                            {
+                                if (!NoSelection)
+                                {
+                                    stb_key = ControlKeys.Shift | ControlKeys.Right;
+                                }
+                            }
+                            else if (Keyboard.Ctrl)
+                            {
+                                stb_key = ControlKeys.WordRight;
+                            }
+                            else
+                            {
+                                stb_key = ControlKeys.Right;
+                            }
+
+                            update_caret = true;
+
+                            break;
+
+                        case SDL.SDL_Keycode.SDLK_UP:
+                            stb_key = ApplyShiftIfNecessary(ControlKeys.Up);
+                            update_caret = true;
+
+                            break;
+
+                        case SDL.SDL_Keycode.SDLK_DOWN:
+                            stb_key = ApplyShiftIfNecessary(ControlKeys.Down);
+                            update_caret = true;
+
+                            break;
+
+                        case SDL.SDL_Keycode.SDLK_BACKSPACE when IsEditable:
+                            stb_key = ApplyShiftIfNecessary(ControlKeys.BackSpace);
+                            update_caret = true;
+
+                            break;
+
+                        case SDL.SDL_Keycode.SDLK_DELETE when IsEditable:
+                            stb_key = ApplyShiftIfNecessary(ControlKeys.Delete);
+                            update_caret = true;
+
+                            break;
+
+                        case SDL.SDL_Keycode.SDLK_HOME:
+                            if (Keyboard.Ctrl && Keyboard.Shift)
+                            {
+                                if (!NoSelection)
+                                {
+                                    stb_key = ControlKeys.Shift | ControlKeys.TextStart;
+                                }
+                            }
+                            else if (Keyboard.Shift)
+                            {
+                                if (!NoSelection)
+                                {
+                                    stb_key = ControlKeys.Shift | ControlKeys.LineStart;
+                                }
+                            }
+                            else if (Keyboard.Ctrl)
+                            {
+                                stb_key = ControlKeys.TextStart;
+                            }
+                            else
+                            {
+                                stb_key = ControlKeys.LineStart;
+                            }
+
+                            update_caret = true;
+
+                            break;
+
+                        case SDL.SDL_Keycode.SDLK_END:
+                            if (Keyboard.Ctrl && Keyboard.Shift)
+                            {
+                                if (!NoSelection)
+                                {
+                                    stb_key = ControlKeys.Shift | ControlKeys.TextEnd;
+                                }
+                            }
+                            else if (Keyboard.Shift)
+                            {
+                                if (!NoSelection)
+                                {
+                                    stb_key = ControlKeys.Shift | ControlKeys.LineEnd;
+                                }
+                            }
+                            else if (Keyboard.Ctrl)
+                            {
+                                stb_key = ControlKeys.TextEnd;
+                            }
+                            else
+                            {
+                                stb_key = ControlKeys.LineEnd;
+                            }
+
+                            update_caret = true;
+
+                            break;
+
+                        case SDL.SDL_Keycode.SDLK_KP_ENTER:
+                        case SDL.SDL_Keycode.SDLK_RETURN:
+                            if (IsEditable)
+                            {
+                                if (Multiline)
+                                {
+                                    if (!_fromServer && !IsMaxCharReached(0))
+                                    {
+                                        OnTextInput("\n");
+                                    }
+                                }
+                                else
+                                {
+                                    Parent?.OnKeyboardReturn(0, Text);
+
+                                    if (UIManager.SystemChat != null && UIManager.SystemChat.TextBoxControl != null && IsFocused)
+                                    {
+                                        if (!IsFromServer || !UIManager.SystemChat.TextBoxControl.IsVisible)
+                                        {
+                                            OnFocusLost();
+                                            OnFocusEnter();
+                                        }
+                                        else if (UIManager.KeyboardFocusControl == null || UIManager.KeyboardFocusControl != UIManager.SystemChat.TextBoxControl)
+                                        {
+                                            UIManager.SystemChat.TextBoxControl.SetKeyboardFocus();
+                                        }
+                                    }
+                                }
+                            }
+
+                            break;
+                    }
+
+                    if (stb_key != null)
+                    {
+                        Stb.Key(stb_key.Value);
+                    }
+
+                    if (update_caret)
+                    {
+                        UpdateCaretScreenPosition();
+                    }
+
+                    base.OnKeyDown(key, mod);
+                }
+
+                public void SetText(string text)
+                {
+                    if (string.IsNullOrEmpty(text))
+                    {
+                        ClearText();
+                    }
+                    else
+                    {
+                        if (_maxCharCount > 0)
+                        {
+                            if (text.Length > _maxCharCount)
+                            {
+                                text = text.Substring(0, _maxCharCount);
+                            }
+                        }
+
+                        Stb.ClearState(!Multiline);
+                        Text = text;
+
+                        Stb.CursorIndex = Length;
+
+                        if (!_is_writing)
+                        {
+                            OnTextChanged();
+                        }
+                    }
+                }
+
+                public void ClearText()
+                {
+                    if (Length != 0)
+                    {
+                        SelectionStart = 0;
+                        SelectionEnd = 0;
+                        Stb.Delete(0, Length);
+
+                        if (!_is_writing)
+                        {
+                            OnTextChanged();
+                        }
+                    }
+                }
+
+                public void AppendText(string text)
+                {
+                    Stb.Paste(text);
+                }
+
+                protected override void OnTextInput(string c)
+                {
+                    if (c == null || !IsEditable)
+                    {
+                        return;
+                    }
+
+                    _is_writing = true;
+
+                    if (SelectionStart != SelectionEnd)
+                    {
+                        Stb.DeleteSelection();
+                    }
+
+                    int count;
+
+                    if (_maxCharCount > 0)
+                    {
+                        int remains = _maxCharCount - Length;
+
+                        if (remains <= 0)
+                        {
+                            _is_writing = false;
+
+                            return;
+                        }
+
+                        count = Math.Min(remains, c.Length);
+
+                        if (remains < c.Length && count > 0)
+                        {
+                            c = c.Substring(0, count);
+                        }
+                    }
+                    else
+                    {
+                        count = c.Length;
+                    }
+
+                    if (count > 0)
+                    {
+                        if (NumbersOnly)
+                        {
+                            for (int i = 0; i < count; i++)
+                            {
+                                if (!char.IsNumber(c[i]))
+                                {
+                                    _is_writing = false;
+
+                                    return;
+                                }
+                            }
+
+                            if (_maxCharCount > 0 && int.TryParse(Stb.text + c, out int val))
+                            {
+                                if (val > _maxCharCount)
+                                {
+                                    _is_writing = false;
+                                    SetText(_maxCharCount.ToString());
+
+                                    return;
+                                }
+                            }
+                        }
+
+
+                        if (count > 1)
+                        {
+                            Stb.Paste(c);
+                            OnTextChanged();
+                        }
+                        else
+                        {
+                            Stb.InputChar(c[0]);
+                            OnTextChanged();
+                        }
+                    }
+
+                    _is_writing = false;
+                }
+
+                public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+                {
+                    if (batcher.ClipBegin(x, y, Width, Height))
+                    {
+                        base.Draw(batcher, x, y);
+                        //DrawSelection(batcher, x, y);
+                        _rendererText.Draw(batcher, x, y);
+                        //DrawCaret(batcher, x, y);
+
+                        batcher.ClipEnd();
+                    }
+
+                    return true;
+                }
+
+                protected virtual void DrawCaret(UltimaBatcher2D batcher, int x, int y)
+                {
+                    if (HasKeyboardFocus)
+                    {
+                        _rendererCaret.Draw(batcher, x + _caretScreenPosition.X, y + _caretScreenPosition.Y);
+                    }
+                }
+
+                protected override void OnMouseDown(int x, int y, MouseButtonType button)
+                {
+                    if (button == MouseButtonType.Left && IsEditable)
+                    {
+                        if (!NoSelection)
+                        {
+                            _leftWasDown = true;
+                        }
+
+                        Stb.Click(Mouse.Position.X, Mouse.Position.Y);
+                        UpdateCaretScreenPosition();
+                    }
+
+                    base.OnMouseDown(x, y, button);
+                }
+
+                protected override void OnMouseUp(int x, int y, MouseButtonType button)
+                {
+                    if (button == MouseButtonType.Left)
+                    {
+                        _leftWasDown = false;
+                    }
+
+                    base.OnMouseUp(x, y, button);
+                }
+
+                protected override void OnMouseOver(int x, int y)
+                {
+                    base.OnMouseOver(x, y);
+
+                    if (!_leftWasDown)
+                    {
+                        return;
+                    }
+
+                    Stb.Drag(Mouse.Position.X, Mouse.Position.Y);
+                }
+
+                public override void Dispose()
+                {
+                    _rendererText?.Dispose();
+                    _rendererCaret?.Dispose();
+
+                    base.Dispose();
+                }
+
+                protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
+                {
+                    if (!NoSelection && CaretIndex < Text.Length && CaretIndex >= 0 && !char.IsWhiteSpace(Text[CaretIndex]))
+                    {
+                        int idx = CaretIndex;
+
+                        if (idx - 1 >= 0 && char.IsWhiteSpace(Text[idx - 1]))
+                        {
+                            ++idx;
+                        }
+
+                        SelectionStart = Stb.MoveToPreviousWord(idx);
+                        SelectionEnd = Stb.MoveToNextWord(idx);
+
+                        if (SelectionEnd < Text.Length)
+                        {
+                            --SelectionEnd;
+                        }
+
+                        return true;
+                    }
+
+                    return base.OnMouseDoubleClick(x, y, button);
+                }
+            }
+        }
+        #endregion
 
         private class LeftSideMenuRightSideContent : Control
         {
             private const int TOP_PADDING = 5;
-            private const int INDENT_SPACE = 30;
+            private const int INDENT_SPACE = 40;
 
             private ScrollArea left, right;
             private int leftY, rightY = TOP_PADDING, leftX, rightX;
@@ -276,6 +1096,19 @@ namespace ClassicUO.Game.UI.Gumps
                 if (rightX < 0)
                 {
                     rightX = 0;
+                }
+            }
+
+            public void SetMatchingButton(int page)
+            {
+                foreach (Control c in left.Children)
+                {
+                    if(c is ModernButton button && button.ButtonParameter == page)
+                    {
+                        ((SearchableOption)button).OnSearchMatch();
+                        int p = Parent == null ? Page : Parent.Page;
+                        ModernOptionsGump.SetParentsForMatchingSearch(this, p);
+                    }
                 }
             }
         }
@@ -366,13 +1199,15 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (Search(SearchText))
                     {
-                        TextLabel.Alpha = 1f;
+                        OnSearchMatch();
+                        ModernOptionsGump.SetParentsForMatchingSearch(this, Page);
                     }
                     else
                     {
-                        TextLabel.Alpha = 0.3f;
+                        TextLabel.Alpha = ColorPallet.NO_MATCH_SEARCH;
                     }
-                } else
+                }
+                else
                 {
                     TextLabel.Alpha = 1f;
                 }
@@ -495,6 +1330,11 @@ namespace ClassicUO.Game.UI.Gumps
             public bool Search(string text)
             {
                 return TextLabel.Text.ToLower().Contains(text.ToLower());
+            }
+
+            public void OnSearchMatch()
+            {
+                TextLabel.Alpha = 1f;
             }
         }
 
@@ -807,6 +1647,8 @@ namespace ClassicUO.Game.UI.Gumps
 
         private static class ColorPallet
         {
+            public const float NO_MATCH_SEARCH = 0.5f;
+
             public const ushort BACKGROUND = 897;
             public const ushort SEARCH_BACKGROUND = 899;
             public const ushort BLACK = 0;
@@ -838,6 +1680,8 @@ namespace ClassicUO.Game.UI.Gumps
         private interface SearchableOption
         {
             public bool Search(string text);
+
+            public void OnSearchMatch();
         }
     }
 }

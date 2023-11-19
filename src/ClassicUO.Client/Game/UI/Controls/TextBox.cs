@@ -37,7 +37,6 @@ using Microsoft.Xna.Framework;
 using System;
 using System.Text.RegularExpressions;
 using ClassicUO.Configuration;
-using ClassicUO.Utility;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -79,7 +78,7 @@ namespace ClassicUO.Game.UI.Controls
                 Font = TrueTypeLoader.Instance.GetFont(font, size),
                 Text = text
             };
-
+            
             if (width != null)
                 _rtl.Width = width;
 
@@ -147,6 +146,18 @@ namespace ClassicUO.Game.UI.Controls
             }
 
             return true;
+        }
+
+        public int GetStringWidth(string c)
+        {
+            //Horrible way to get character width
+            RichTextLayout temp = new RichTextLayout
+            {
+                Font = TrueTypeLoader.Instance.GetFont(_font, _size),
+                Text = c
+            };
+
+            return temp.Size.X;
         }
 
         public new int Height
