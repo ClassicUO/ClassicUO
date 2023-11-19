@@ -78,31 +78,35 @@ namespace ClassicUO.Game.UI.Gumps
             LeftSideMenuRightSideContent content = new LeftSideMenuRightSideContent(mainContent.RightWidth, mainContent.Height, (int)(mainContent.RightWidth * 0.3));
             content.AddToLeft(SubCategoryButton("General", ((int)PAGE.General + 1000), content.LeftWidth));
 
+            content.AddToRight(new CheckboxWithLabel("Highlight objects under cursor", isChecked: ProfileManager.CurrentProfile.HighlightGameObjects, valueChanged: (b) => { ProfileManager.CurrentProfile.HighlightGameObjects = b; }), true, (int)PAGE.General + 1000);
+
             content.BlankLine();
 
-            CheckboxWithLabel cb;
-            content.AddToRight(cb = new CheckboxWithLabel("Highlight objects under cursor", isChecked: ProfileManager.CurrentProfile.HighlightGameObjects, valueChanged: (b) => { ProfileManager.CurrentProfile.HighlightGameObjects = b; }), true, (int)PAGE.General + 1000);
-
-            content.AddToRight(cb = new CheckboxWithLabel("Enable pathfinding", isChecked: ProfileManager.CurrentProfile.EnablePathfind, valueChanged: (b) => { ProfileManager.CurrentProfile.EnablePathfind = b; }), true, (int)PAGE.General + 1000);
+            content.AddToRight(new CheckboxWithLabel("Enable pathfinding", isChecked: ProfileManager.CurrentProfile.EnablePathfind, valueChanged: (b) => { ProfileManager.CurrentProfile.EnablePathfind = b; }), true, (int)PAGE.General + 1000);
             content.Indent();
-            content.AddToRight(cb = new CheckboxWithLabel("Use shift for pathfinding", isChecked: ProfileManager.CurrentProfile.UseShiftToPathfind, valueChanged: (b) => { ProfileManager.CurrentProfile.UseShiftToPathfind = b; }), true, (int)PAGE.General + 1000);
-            content.AddToRight(cb = new CheckboxWithLabel("Single click for pathfinding", isChecked: ProfileManager.CurrentProfile.PathfindSingleClick, valueChanged: (b) => { ProfileManager.CurrentProfile.PathfindSingleClick = b; }), true, (int)PAGE.General + 1000);
+            content.AddToRight(new CheckboxWithLabel("Use shift for pathfinding", isChecked: ProfileManager.CurrentProfile.UseShiftToPathfind, valueChanged: (b) => { ProfileManager.CurrentProfile.UseShiftToPathfind = b; }), true, (int)PAGE.General + 1000);
+            content.AddToRight(new CheckboxWithLabel("Single click for pathfinding", isChecked: ProfileManager.CurrentProfile.PathfindSingleClick, valueChanged: (b) => { ProfileManager.CurrentProfile.PathfindSingleClick = b; }), true, (int)PAGE.General + 1000);
             content.RemoveIndent();
 
             content.BlankLine();
 
-            content.AddToRight(cb = new CheckboxWithLabel("Always run", isChecked: ProfileManager.CurrentProfile.AlwaysRun, valueChanged: (b) => { ProfileManager.CurrentProfile.AlwaysRun = b; }), true, (int)PAGE.General + 1000);
+            content.AddToRight(new CheckboxWithLabel("Always run", isChecked: ProfileManager.CurrentProfile.AlwaysRun, valueChanged: (b) => { ProfileManager.CurrentProfile.AlwaysRun = b; }), true, (int)PAGE.General + 1000);
             content.Indent();
-            content.AddToRight(cb = new CheckboxWithLabel("Unless hidden", isChecked: ProfileManager.CurrentProfile.AlwaysRunUnlessHidden, valueChanged: (b) => { ProfileManager.CurrentProfile.AlwaysRunUnlessHidden = b; }), true, (int)PAGE.General + 1000);
+            content.AddToRight(new CheckboxWithLabel("Unless hidden", isChecked: ProfileManager.CurrentProfile.AlwaysRunUnlessHidden, valueChanged: (b) => { ProfileManager.CurrentProfile.AlwaysRunUnlessHidden = b; }), true, (int)PAGE.General + 1000);
             content.RemoveIndent();
 
             content.BlankLine();
 
-            content.AddToRight(cb = new CheckboxWithLabel("Automatically open doors", isChecked: ProfileManager.CurrentProfile.AutoOpenDoors, valueChanged: (b) => { ProfileManager.CurrentProfile.AutoOpenDoors = b; }), true, (int)PAGE.General + 1000);
+            content.AddToRight(new CheckboxWithLabel("Automatically open doors", isChecked: ProfileManager.CurrentProfile.AutoOpenDoors, valueChanged: (b) => { ProfileManager.CurrentProfile.AutoOpenDoors = b; }), true, (int)PAGE.General + 1000);
             content.Indent();
-            content.AddToRight(cb = new CheckboxWithLabel("Smooth doors", isChecked: ProfileManager.CurrentProfile.SmoothDoors, valueChanged: (b) => { ProfileManager.CurrentProfile.SmoothDoors = b; }), true, (int)PAGE.General + 1000);
+            content.AddToRight(new CheckboxWithLabel("Open doors while pathfinding", isChecked: ProfileManager.CurrentProfile.SmoothDoors, valueChanged: (b) => { ProfileManager.CurrentProfile.SmoothDoors = b; }), true, (int)PAGE.General + 1000);
             content.RemoveIndent();
 
+            content.BlankLine();
+
+            content.AddToRight(new CheckboxWithLabel("Automatically open corpses", isChecked: ProfileManager.CurrentProfile.AutoOpenCorpses, valueChanged: (b) => { ProfileManager.CurrentProfile.AutoOpenCorpses = b; }), true, (int)PAGE.General + 1000);
+            content.Indent();
+            content.AddToRight(new SliderWithLabel("Corpse open distance", 0, ColorPallet.SLIDER_WIDTH, 0, 5, ProfileManager.CurrentProfile.AutoOpenCorpseRange, (r) => { ProfileManager.CurrentProfile.AutoOpenCorpseRange = r; }), true, (int)PAGE.General + 1000);
 
             content.AddToLeft(SubCategoryButton("Mobiles", ((int)PAGE.General + 1001), content.LeftWidth));
             content.AddToLeft(SubCategoryButton("Gumps & Context", ((int)PAGE.General + 1002), content.LeftWidth));
@@ -164,7 +168,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             public CheckboxWithLabel(
                 string text = "",
-                int fontSize = 18,
                 int maxWidth = 0,
                 bool isChecked = false,
                 Action<bool> valueChanged = null
@@ -172,10 +175,10 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _isChecked = isChecked;
                 ValueChanged = valueChanged;
-                _text = new TextBox(text, TrueTypeLoader.EMBEDDED_FONT, fontSize, maxWidth == 0 ? null : maxWidth, ColorPallet.TEXT_FOREGROUND, strokeEffect: false) { X = CHECKBOX_SIZE + 5 };
+                _text = new TextBox(text, TrueTypeLoader.EMBEDDED_FONT, ColorPallet.STANDARD_TEXT_SIZE, maxWidth == 0 ? null : maxWidth, ColorPallet.TEXT_FOREGROUND, strokeEffect: false) { X = CHECKBOX_SIZE + 5 };
 
                 Width = CHECKBOX_SIZE + 5 + _text.Width;
-                Height = Math.Max(CHECKBOX_SIZE, _text.Height);
+                Height = Math.Max(CHECKBOX_SIZE, _text.MeasuredSize.Y);
 
                 _text.Y = (Height / 2) - (_text.Height / 2);
 
@@ -278,6 +281,265 @@ namespace ClassicUO.Game.UI.Gumps
             public void OnSearchMatch()
             {
                 _text.Alpha = 1f;
+            }
+        }
+
+        private class SliderWithLabel : Control, SearchableOption
+        {
+            private readonly TextBox _label;
+            private readonly Slider _slider;
+
+            public SliderWithLabel(string label, int textWidth, int barWidth, int min, int max, int value, Action<int> valueChanged = null)
+            {
+                AcceptMouseInput = true;
+                CanMove = true;
+
+                Add(_label = new TextBox(label, TrueTypeLoader.EMBEDDED_FONT, ColorPallet.STANDARD_TEXT_SIZE, textWidth > 0 ? textWidth : null, ColorPallet.TEXT_FOREGROUND, strokeEffect: false));
+                Add(_slider = new Slider(barWidth, min, max, value, valueChanged) { X = _label.X + _label.Width + 5 });
+
+                Width = textWidth + barWidth + 5;
+                Height = Math.Max(_label.Height, _slider.Height);
+
+                _slider.Y = (Height / 2) - (_slider.Height / 2);
+
+                ModernOptionsGump.SearchValueChanged += ModernOptionsGump_SearchValueChanged;
+            }
+
+            private void ModernOptionsGump_SearchValueChanged(object sender, EventArgs e)
+            {
+                if (!string.IsNullOrEmpty(ModernOptionsGump.SearchText))
+                {
+                    if (Search(ModernOptionsGump.SearchText))
+                    {
+                        OnSearchMatch();
+                        ModernOptionsGump.SetParentsForMatchingSearch(this, Page);
+                    }
+                    else
+                    {
+                        _label.Alpha = ColorPallet.NO_MATCH_SEARCH;
+                    }
+                }
+                else
+                {
+                    _label.Alpha = 1f;
+                }
+            }
+
+            public bool Search(string text)
+            {
+                return _label.Text.ToLower().Contains(text.ToLower());
+            }
+
+            public void OnSearchMatch()
+            {
+                _label.Alpha = 1f;
+            }
+        }
+
+        private class Slider : Control
+        {
+            private bool _clicked;
+            private int _sliderX;
+            private readonly TextBox _text;
+            private int _value = -1;
+
+            public Slider(
+                int barWidth,
+                int min,
+                int max,
+                int value,
+                Action<int> valueChanged = null
+            )
+            {
+                _text = new TextBox(string.Empty, TrueTypeLoader.EMBEDDED_FONT, ColorPallet.STANDARD_TEXT_SIZE, barWidth, ColorPallet.TEXT_FOREGROUND, strokeEffect: false);
+
+                MinValue = min;
+                MaxValue = max;
+                BarWidth = barWidth;
+                AcceptMouseInput = true;
+                Width = barWidth;
+                Height = Math.Max(_text.MeasuredSize.Y, 15);
+
+                CalculateOffset();
+
+                Value = value;
+                ValueChanged = valueChanged;
+            }
+
+            public int MinValue { get; set; }
+
+            public int MaxValue { get; set; }
+
+            public int BarWidth { get; set; }
+
+            public float Percents { get; private set; }
+
+            public int Value
+            {
+                get => _value;
+                set
+                {
+                    if (_value != value)
+                    {
+                        int oldValue = _value;
+                        _value = /*_newValue =*/
+                        value;
+                        //if (IsInitialized)
+                        //    RecalculateSliderX();
+
+                        if (_value < MinValue)
+                        {
+                            _value = MinValue;
+                        }
+                        else if (_value > MaxValue)
+                        {
+                            _value = MaxValue;
+                        }
+
+                        if (_text != null)
+                        {
+                            _text.Text = Value.ToString();
+                        }
+
+                        if (_value != oldValue)
+                        {
+                            CalculateOffset();
+                        }
+
+                        ValueChanged?.Invoke(_value);
+                    }
+                }
+            }
+
+            public Action<int> ValueChanged { get; }
+
+            public override void Update()
+            {
+                base.Update();
+
+                if (_clicked)
+                {
+                    int x = Mouse.Position.X - X - ParentX;
+                    int y = Mouse.Position.Y - Y - ParentY;
+
+                    CalculateNew(x);
+                }
+            }
+
+            public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+            {
+                Vector3 hueVector = ShaderHueTranslator.GetHueVector(ColorPallet.BACKGROUND);
+
+                int mx = x;
+
+                //Draw background line
+                batcher.Draw(
+                    SolidColorTextureCache.GetTexture(Color.White),
+                    new Rectangle(mx, y + 3, BarWidth, 10),
+                    hueVector
+                    );
+
+                hueVector = ShaderHueTranslator.GetHueVector(ColorPallet.SEARCH_BACKGROUND);
+
+                batcher.Draw(
+                    SolidColorTextureCache.GetTexture(Color.White),
+                    new Rectangle(mx + _sliderX, y, 15, 16),
+                    hueVector
+                    );
+
+                _text?.Draw(batcher, mx + BarWidth + 2, y + (Height >> 1) - (_text.Height >> 1));
+
+                return base.Draw(batcher, x, y);
+            }
+
+            protected override void OnMouseDown(int x, int y, MouseButtonType button)
+            {
+                if (button != MouseButtonType.Left)
+                {
+                    return;
+                }
+
+                _clicked = true;
+            }
+
+            protected override void OnMouseUp(int x, int y, MouseButtonType button)
+            {
+                if (button != MouseButtonType.Left)
+                {
+                    return;
+                }
+
+                _clicked = false;
+                CalculateNew(x);
+            }
+
+            protected override void OnMouseWheel(MouseEventType delta)
+            {
+                switch (delta)
+                {
+                    case MouseEventType.WheelScrollUp:
+                        Value++;
+
+                        break;
+
+                    case MouseEventType.WheelScrollDown:
+                        Value--;
+
+                        break;
+                }
+
+                CalculateOffset();
+            }
+
+            private void CalculateNew(int x)
+            {
+                int len = BarWidth;
+                int maxValue = MaxValue - MinValue;
+
+                len -= 15;
+                float perc = x / (float)len * 100.0f;
+                Value = (int)(maxValue * perc / 100.0f) + MinValue;
+                CalculateOffset();
+            }
+
+            private void CalculateOffset()
+            {
+                if (Value < MinValue)
+                {
+                    Value = MinValue;
+                }
+                else if (Value > MaxValue)
+                {
+                    Value = MaxValue;
+                }
+
+                int value = Value - MinValue;
+                int maxValue = MaxValue - MinValue;
+                int length = BarWidth;
+
+                length -= 15;
+
+                if (maxValue > 0)
+                {
+                    Percents = value / (float)maxValue * 100.0f;
+                }
+                else
+                {
+                    Percents = 0;
+                }
+
+                _sliderX = (int)(length * Percents / 100.0f);
+
+                if (_sliderX < 0)
+                {
+                    _sliderX = 0;
+                }
+            }
+
+            public override void Dispose()
+            {
+                _text?.Dispose();
+                base.Dispose();
             }
         }
 
@@ -1126,7 +1388,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 foreach (Control c in left.Children)
                 {
-                    if(c is ModernButton button && button.ButtonParameter == page)
+                    if (c is ModernButton button && button.ButtonParameter == page)
                     {
                         ((SearchableOption)button).OnSearchMatch();
                         int p = Parent == null ? Page : Parent.Page;
@@ -1670,6 +1932,10 @@ namespace ClassicUO.Game.UI.Gumps
 
         private static class ColorPallet
         {
+            public const int SLIDER_WIDTH = 150;
+
+            public const int STANDARD_TEXT_SIZE = 20;
+
             public const float NO_MATCH_SEARCH = 0.5f;
 
             public const ushort BACKGROUND = 897;
