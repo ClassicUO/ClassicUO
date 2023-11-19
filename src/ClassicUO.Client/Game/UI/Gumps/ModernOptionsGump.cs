@@ -78,6 +78,8 @@ namespace ClassicUO.Game.UI.Gumps
             LeftSideMenuRightSideContent content = new LeftSideMenuRightSideContent(mainContent.RightWidth, mainContent.Height, (int)(mainContent.RightWidth * 0.3));
             content.AddToLeft(SubCategoryButton("General", ((int)PAGE.General + 1000), content.LeftWidth));
 
+            content.BlankLine();
+
             CheckboxWithLabel cb;
             content.AddToRight(cb = new CheckboxWithLabel("Highlight objects under cursor", isChecked: ProfileManager.CurrentProfile.HighlightGameObjects, valueChanged: (b) => { ProfileManager.CurrentProfile.HighlightGameObjects = b; }), true, (int)PAGE.General + 1000);
 
@@ -86,6 +88,21 @@ namespace ClassicUO.Game.UI.Gumps
             content.AddToRight(cb = new CheckboxWithLabel("Use shift for pathfinding", isChecked: ProfileManager.CurrentProfile.UseShiftToPathfind, valueChanged: (b) => { ProfileManager.CurrentProfile.UseShiftToPathfind = b; }), true, (int)PAGE.General + 1000);
             content.AddToRight(cb = new CheckboxWithLabel("Single click for pathfinding", isChecked: ProfileManager.CurrentProfile.PathfindSingleClick, valueChanged: (b) => { ProfileManager.CurrentProfile.PathfindSingleClick = b; }), true, (int)PAGE.General + 1000);
             content.RemoveIndent();
+
+            content.BlankLine();
+
+            content.AddToRight(cb = new CheckboxWithLabel("Always run", isChecked: ProfileManager.CurrentProfile.AlwaysRun, valueChanged: (b) => { ProfileManager.CurrentProfile.AlwaysRun = b; }), true, (int)PAGE.General + 1000);
+            content.Indent();
+            content.AddToRight(cb = new CheckboxWithLabel("Unless hidden", isChecked: ProfileManager.CurrentProfile.AlwaysRunUnlessHidden, valueChanged: (b) => { ProfileManager.CurrentProfile.AlwaysRunUnlessHidden = b; }), true, (int)PAGE.General + 1000);
+            content.RemoveIndent();
+
+            content.BlankLine();
+
+            content.AddToRight(cb = new CheckboxWithLabel("Automatically open doors", isChecked: ProfileManager.CurrentProfile.AutoOpenDoors, valueChanged: (b) => { ProfileManager.CurrentProfile.AutoOpenDoors = b; }), true, (int)PAGE.General + 1000);
+            content.Indent();
+            content.AddToRight(cb = new CheckboxWithLabel("Smooth doors", isChecked: ProfileManager.CurrentProfile.SmoothDoors, valueChanged: (b) => { ProfileManager.CurrentProfile.SmoothDoors = b; }), true, (int)PAGE.General + 1000);
+            content.RemoveIndent();
+
 
             content.AddToLeft(SubCategoryButton("Mobiles", ((int)PAGE.General + 1001), content.LeftWidth));
             content.AddToLeft(SubCategoryButton("Gumps & Context", ((int)PAGE.General + 1002), content.LeftWidth));
@@ -1028,6 +1045,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             private const int TOP_PADDING = 5;
             private const int INDENT_SPACE = 40;
+            private const int BLANK_LINE = 20;
 
             private ScrollArea left, right;
             private int leftY, rightY = TOP_PADDING, leftX, rightX;
@@ -1083,6 +1101,11 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
                 right.Add(c, page);
+            }
+
+            public void BlankLine()
+            {
+                rightY += BLANK_LINE;
             }
 
             public void Indent()
