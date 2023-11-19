@@ -488,24 +488,84 @@ namespace ClassicUO.Game.UI.Gumps
             #region Zoom
             page = ((int)PAGE.Video + 1001);
             content.AddToLeft(SubCategoryButton("Zoom", page, content.LeftWidth));
+            content.ResetRightSide();
 
+            var cameraZoomCount = (int)((Client.Game.Scene.Camera.ZoomMax - Client.Game.Scene.Camera.ZoomMin) / Client.Game.Scene.Camera.ZoomStep);
+            var cameraZoomIndex = cameraZoomCount - (int)((Client.Game.Scene.Camera.ZoomMax - Client.Game.Scene.Camera.Zoom) / Client.Game.Scene.Camera.ZoomStep);
+            content.AddToRight(new SliderWithLabel("Default zoom", 0, Theme.SLIDER_WIDTH, 0, cameraZoomCount, cameraZoomIndex, (r) => { ProfileManager.CurrentProfile.DefaultScale = Client.Game.Scene.Camera.Zoom = (r * Client.Game.Scene.Camera.ZoomStep) + Client.Game.Scene.Camera.ZoomMin; }), true, page);
+
+            content.BlankLine();
+
+            content.AddToRight(new CheckboxWithLabel("Enable zooming with ctrl + mousewheel", isChecked: ProfileManager.CurrentProfile.EnableMousewheelScaleZoom, valueChanged: (b) => { ProfileManager.CurrentProfile.EnableMousewheelScaleZoom = b; }), true, page);
+
+            content.BlankLine();
+
+            content.AddToRight(new CheckboxWithLabel("Return to default zoom after ctrl is released", isChecked: ProfileManager.CurrentProfile.RestoreScaleAfterUnpressCtrl, valueChanged: (b) => { ProfileManager.CurrentProfile.RestoreScaleAfterUnpressCtrl = b; }), true, page);
             #endregion
 
             #region Lighting
             page = ((int)PAGE.Video + 1002);
             content.AddToLeft(SubCategoryButton("Lighting", page, content.LeftWidth));
+            content.ResetRightSide();
+
+            content.AddToRight(new CheckboxWithLabel("Alternative lights", isChecked: ProfileManager.CurrentProfile.UseAlternativeLights, valueChanged: (b) => { ProfileManager.CurrentProfile.UseAlternativeLights = b; }), true, page);
+
+            content.BlankLine();
+
+            content.AddToRight(new CheckboxWithLabel("Custom light level", isChecked: ProfileManager.CurrentProfile.UseCustomLightLevel, valueChanged: (b) => { 
+                ProfileManager.CurrentProfile.UseCustomLightLevel = b;
+                if (b)
+                {
+                    World.Light.Overall = ProfileManager.CurrentProfile.LightLevelType == 1 ? Math.Min(World.Light.RealOverall, ProfileManager.CurrentProfile.LightLevel) : ProfileManager.CurrentProfile.LightLevel;
+                    World.Light.Personal = 0;
+                }
+                else
+                {
+                    World.Light.Overall = World.Light.RealOverall;
+                    World.Light.Personal = World.Light.RealPersonal;
+                }
+            }), true, page);
+            content.Indent();
+            content.AddToRight(new SliderWithLabel("Light level", 0, Theme.SLIDER_WIDTH, 0, 0x1E, 0x1E - ProfileManager.CurrentProfile.LightLevel, (r) => { 
+                ProfileManager.CurrentProfile.LightLevel = (byte)(0x1E - r);
+                if (ProfileManager.CurrentProfile.UseCustomLightLevel)
+                {
+                    World.Light.Overall = ProfileManager.CurrentProfile.LightLevelType == 1 ? Math.Min(World.Light.RealOverall, ProfileManager.CurrentProfile.LightLevel) : ProfileManager.CurrentProfile.LightLevel;
+                    World.Light.Personal = 0;
+                }
+                else
+                {
+                    World.Light.Overall = World.Light.RealOverall;
+                    World.Light.Personal = World.Light.RealPersonal;
+                }
+            }), true, page);
+            content.RemoveIndent();
+
+            content.BlankLine();
+
+            content.AddToRight(new ComboBoxWithLabel("Light level type", 0, Theme.COMBO_BOX_WIDTH, new string[] { "Absolute", "Minimum" }, ProfileManager.CurrentProfile.LightLevelType, (s, n) => { ProfileManager.CurrentProfile.LightLevelType = s; }), true, page);
+
+            content.BlankLine();
+
+            content.AddToRight(new CheckboxWithLabel("Dark nights", isChecked: ProfileManager.CurrentProfile.UseDarkNights, valueChanged: (b) => { ProfileManager.CurrentProfile.UseDarkNights = b; }), true, page);
+
+            content.BlankLine();
+
+            content.AddToRight(new CheckboxWithLabel("Colored lighting", isChecked: ProfileManager.CurrentProfile.UseColoredLights, valueChanged: (b) => { ProfileManager.CurrentProfile.UseColoredLights = b; }), true, page);
 
             #endregion
 
             #region Misc
             page = ((int)PAGE.Video + 1003);
             content.AddToLeft(SubCategoryButton("Misc", page, content.LeftWidth));
+            content.ResetRightSide();
 
             #endregion
 
             #region Shadows
             page = ((int)PAGE.Video + 1004);
             content.AddToLeft(SubCategoryButton("Shadows", page, content.LeftWidth));
+            content.ResetRightSide();
 
             #endregion
 
