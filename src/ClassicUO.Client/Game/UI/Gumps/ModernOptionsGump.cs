@@ -66,6 +66,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             BuildGeneral();
             BuildSound();
+            BuildVideo();
 
             foreach (SettingsOption option in options)
             {
@@ -431,6 +432,89 @@ namespace ClassicUO.Game.UI.Gumps
                     PAGE.Sound
                 ));
             PositionHelper.PositionControl(s.FullControl);
+        }
+
+        private void BuildVideo()
+        {
+            LeftSideMenuRightSideContent content = new LeftSideMenuRightSideContent(mainContent.RightWidth, mainContent.Height, (int)(mainContent.RightWidth * 0.3));
+            Control c;
+
+            #region Game window
+            int page = ((int)PAGE.Video + 1000);
+            content.AddToLeft(SubCategoryButton("Game window", page, content.LeftWidth));
+
+            content.AddToRight(new SliderWithLabel("FPS Cap", 0, Theme.SLIDER_WIDTH, Constants.MIN_FPS, Constants.MAX_FPS, Settings.GlobalSettings.FPS, (r) => { Settings.GlobalSettings.FPS = r; Client.Game.SetRefreshRate(r); }), true, page);
+            content.Indent();
+            content.AddToRight(new CheckboxWithLabel("Reduce FPS when game is not in focus", isChecked: ProfileManager.CurrentProfile.ReduceFPSWhenInactive, valueChanged: (b) => { ProfileManager.CurrentProfile.ReduceFPSWhenInactive = b; }), true, page);
+            content.RemoveIndent();
+
+            content.BlankLine();
+
+            content.AddToRight(new CheckboxWithLabel("Always use fullsize game world viewport", isChecked: ProfileManager.CurrentProfile.GameWindowFullSize, valueChanged: (b) => { 
+                ProfileManager.CurrentProfile.GameWindowFullSize = b; 
+                if (b) 
+                {
+                    UIManager.GetGump<WorldViewportGump>()?.ResizeGameWindow(new Point(Client.Game.Window.ClientBounds.Width, Client.Game.Window.ClientBounds.Height));
+                    UIManager.GetGump<WorldViewportGump>()?.SetGameWindowPosition(new Point(-5, -5));
+                    ProfileManager.CurrentProfile.GameWindowPosition = new Point(-5, -5);
+                } else
+                {
+                    UIManager.GetGump<WorldViewportGump>()?.ResizeGameWindow(new Point(600, 480));
+                    UIManager.GetGump<WorldViewportGump>()?.SetGameWindowPosition(new Point(25, 25));
+                    ProfileManager.CurrentProfile.GameWindowPosition = new Point(25, 25);
+                }
+            }), true, page);
+
+            content.BlankLine();
+
+            content.AddToRight(new CheckboxWithLabel("Fullscreen window", isChecked: ProfileManager.CurrentProfile.WindowBorderless, valueChanged: (b) => { ProfileManager.CurrentProfile.WindowBorderless = b; Client.Game.SetWindowBorderless(b); }), true, page);
+
+            content.BlankLine();
+
+            content.AddToRight(new CheckboxWithLabel("Lock game world viewport position/size", isChecked: ProfileManager.CurrentProfile.GameWindowLock, valueChanged: (b) => { ProfileManager.CurrentProfile.GameWindowLock = b; }), true, page);
+
+            content.BlankLine();
+
+            content.AddToRight(new SliderWithLabel("Viewport position X", 0, Theme.SLIDER_WIDTH, 0, Client.Game.Window.ClientBounds.Width, ProfileManager.CurrentProfile.GameWindowPosition.X, (r) => { ProfileManager.CurrentProfile.GameWindowPosition =  new Point(r, ProfileManager.CurrentProfile.GameWindowPosition.Y); UIManager.GetGump<WorldViewportGump>()?.SetGameWindowPosition(ProfileManager.CurrentProfile.GameWindowPosition); }), true, page);
+            content.AddToRight(new SliderWithLabel("Viewport position Y", 0, Theme.SLIDER_WIDTH, 0, Client.Game.Window.ClientBounds.Height, ProfileManager.CurrentProfile.GameWindowPosition.Y, (r) => { ProfileManager.CurrentProfile.GameWindowPosition =  new Point(ProfileManager.CurrentProfile.GameWindowPosition.X, r); UIManager.GetGump<WorldViewportGump>()?.SetGameWindowPosition(ProfileManager.CurrentProfile.GameWindowPosition); }), true, page);
+
+            content.BlankLine();
+
+            content.AddToRight(new SliderWithLabel("Viewport width", 0, Theme.SLIDER_WIDTH, 0, Client.Game.Window.ClientBounds.Width, ProfileManager.CurrentProfile.GameWindowSize.X, (r) => { ProfileManager.CurrentProfile.GameWindowSize = new Point(r, ProfileManager.CurrentProfile.GameWindowSize.Y); UIManager.GetGump<WorldViewportGump>()?.ResizeGameWindow(ProfileManager.CurrentProfile.GameWindowSize); }), true, page);
+            content.AddToRight(new SliderWithLabel("Viewport height", 0, Theme.SLIDER_WIDTH, 0, Client.Game.Window.ClientBounds.Height, ProfileManager.CurrentProfile.GameWindowSize.Y, (r) => { ProfileManager.CurrentProfile.GameWindowSize = new Point(ProfileManager.CurrentProfile.GameWindowSize.X, r); UIManager.GetGump<WorldViewportGump>()?.ResizeGameWindow(ProfileManager.CurrentProfile.GameWindowSize); }), true, page);
+
+            #endregion
+
+            #region Zoom
+            page = ((int)PAGE.Video + 1001);
+            content.AddToLeft(SubCategoryButton("Zoom", page, content.LeftWidth));
+
+            #endregion
+
+            #region Lighting
+            page = ((int)PAGE.Video + 1002);
+            content.AddToLeft(SubCategoryButton("Lighting", page, content.LeftWidth));
+
+            #endregion
+
+            #region Misc
+            page = ((int)PAGE.Video + 1003);
+            content.AddToLeft(SubCategoryButton("Misc", page, content.LeftWidth));
+
+            #endregion
+
+            #region Shadows
+            page = ((int)PAGE.Video + 1004);
+            content.AddToLeft(SubCategoryButton("Shadows", page, content.LeftWidth));
+
+            #endregion
+
+            options.Add(new SettingsOption(
+                    "",
+                    content,
+                    mainContent.RightWidth,
+                    PAGE.Video
+                ));
         }
 
         private ModernButton CategoryButton(string text, int page, int width, int height = 40)
