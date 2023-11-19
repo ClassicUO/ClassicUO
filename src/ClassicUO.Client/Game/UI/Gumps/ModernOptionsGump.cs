@@ -340,124 +340,97 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void BuildSound()
         {
-            int x = 0, y = Theme.TOP_PADDING;
-            Control c;
+            SettingsOption s;
 
-            options.Add(new SettingsOption(
+            PositionHelper.Reset();
+
+            options.Add(s = new SettingsOption(
                     "",
-                    c = new CheckboxWithLabel("Enable sound", 0, ProfileManager.CurrentProfile.EnableSound, (b) => { ProfileManager.CurrentProfile.EnableSound = b; }),
+                    new CheckboxWithLabel("Enable sound", 0, ProfileManager.CurrentProfile.EnableSound, (b) => { ProfileManager.CurrentProfile.EnableSound = b; }),
                     mainContent.RightWidth,
-                    PAGE.Sound,
-                    x,
-                    y
+                    PAGE.Sound
                 ));
-            y += c.Height + Theme.TOP_PADDING;
-            x += Theme.INDENT_SPACE;
+            PositionHelper.PositionControl(s.FullControl);
+            PositionHelper.Indent();
 
-            options.Add(new SettingsOption(
+            options.Add(s = new SettingsOption(
                     "",
-                    c = new SliderWithLabel("Volume", 0, Theme.SLIDER_WIDTH, 0, 100, ProfileManager.CurrentProfile.SoundVolume, (i) => { ProfileManager.CurrentProfile.SoundVolume = i; }),
+                    new SliderWithLabel("Volume", 0, Theme.SLIDER_WIDTH, 0, 100, ProfileManager.CurrentProfile.SoundVolume, (i) => { ProfileManager.CurrentProfile.SoundVolume = i; }),
                     mainContent.RightWidth,
-                    PAGE.Sound,
-                    x,
-                    y
+                    PAGE.Sound
                 ));
-            y += c.Height + Theme.TOP_PADDING;
-            x -= Theme.INDENT_SPACE;
+            PositionHelper.PositionControl(s.FullControl);
+            PositionHelper.RemoveIndent();
+            PositionHelper.BlankLine();
 
 
-            y += Theme.BLANK_LINE;
-
-
-            options.Add(new SettingsOption(
+            options.Add(s = new SettingsOption(
                     "",
-                    c = new CheckboxWithLabel("Enable music", 0, ProfileManager.CurrentProfile.EnableMusic, (b) => { ProfileManager.CurrentProfile.EnableMusic = b; }),
+                    new CheckboxWithLabel("Enable music", 0, ProfileManager.CurrentProfile.EnableMusic, (b) => { ProfileManager.CurrentProfile.EnableMusic = b; }),
                     mainContent.RightWidth,
-                    PAGE.Sound,
-                    x,
-                    y
+                    PAGE.Sound
                 ));
-            y += c.Height + Theme.TOP_PADDING;
-            x += Theme.INDENT_SPACE;
+            PositionHelper.PositionControl(s.FullControl);
+            PositionHelper.Indent();
 
-            options.Add(new SettingsOption(
+            options.Add(s = new SettingsOption(
                     "",
-                    c = new SliderWithLabel("Volume", 0, Theme.SLIDER_WIDTH, 0, 100, ProfileManager.CurrentProfile.MusicVolume, (i) => { ProfileManager.CurrentProfile.MusicVolume = i; }),
+                    new SliderWithLabel("Volume", 0, Theme.SLIDER_WIDTH, 0, 100, ProfileManager.CurrentProfile.MusicVolume, (i) => { ProfileManager.CurrentProfile.MusicVolume = i; }),
                     mainContent.RightWidth,
-                    PAGE.Sound,
-                    x,
-                    y
+                    PAGE.Sound
                 ));
-            y += c.Height + Theme.TOP_PADDING;
-            x -= Theme.INDENT_SPACE;
+            PositionHelper.PositionControl(s.FullControl);
+            PositionHelper.RemoveIndent();
+            PositionHelper.BlankLine();
 
 
-            y += Theme.BLANK_LINE;
-
-
-            options.Add(new SettingsOption(
+            options.Add(s = new SettingsOption(
                     "",
-                    c = new CheckboxWithLabel("Enable login page music", 0, Settings.GlobalSettings.LoginMusic, (b) => { Settings.GlobalSettings.LoginMusic = b; }),
+                    new CheckboxWithLabel("Enable login page music", 0, Settings.GlobalSettings.LoginMusic, (b) => { Settings.GlobalSettings.LoginMusic = b; }),
                     mainContent.RightWidth,
-                    PAGE.Sound,
-                    x,
-                    y
+                    PAGE.Sound
                 ));
-            y += c.Height + Theme.TOP_PADDING;
-            x += Theme.INDENT_SPACE;
+            PositionHelper.PositionControl(s.FullControl);
+            PositionHelper.Indent();
 
-            options.Add(new SettingsOption(
+            options.Add(s = new SettingsOption(
                     "",
-                    c = new SliderWithLabel("Volume", 0, Theme.SLIDER_WIDTH, 0, 100, Settings.GlobalSettings.LoginMusicVolume, (i) => { Settings.GlobalSettings.LoginMusicVolume = i; }),
+                    new SliderWithLabel("Volume", 0, Theme.SLIDER_WIDTH, 0, 100, Settings.GlobalSettings.LoginMusicVolume, (i) => { Settings.GlobalSettings.LoginMusicVolume = i; }),
                     mainContent.RightWidth,
-                    PAGE.Sound,
-                    x,
-                    y
+                    PAGE.Sound
                 ));
-            y += c.Height + Theme.TOP_PADDING;
-            x -= Theme.INDENT_SPACE;
+            PositionHelper.PositionControl(s.FullControl);
+            PositionHelper.RemoveIndent();
+            PositionHelper.BlankLine();
 
 
-            y += Theme.BLANK_LINE;
-
-
-            options.Add(new SettingsOption(
+            options.Add(s = new SettingsOption(
                     "",
-                    c = new CheckboxWithLabel("Play footsteps", 0, ProfileManager.CurrentProfile.EnableFootstepsSound, (b) => { ProfileManager.CurrentProfile.EnableFootstepsSound = b; }),
+                    new CheckboxWithLabel("Play footsteps", 0, ProfileManager.CurrentProfile.EnableFootstepsSound, (b) => { ProfileManager.CurrentProfile.EnableFootstepsSound = b; }),
                     mainContent.RightWidth,
-                    PAGE.Sound,
-                    x,
-                    y
+                    PAGE.Sound
                 ));
-            y += c.Height + Theme.TOP_PADDING;
+            PositionHelper.PositionControl(s.FullControl);
+            PositionHelper.BlankLine();
 
 
-            y += Theme.BLANK_LINE;
-
-
-            options.Add(new SettingsOption(
+            options.Add(s = new SettingsOption(
                     "",
-                    c = new CheckboxWithLabel("Combat music", 0, ProfileManager.CurrentProfile.EnableCombatMusic, (b) => { ProfileManager.CurrentProfile.EnableCombatMusic = b; }),
+                    new CheckboxWithLabel("Combat music", 0, ProfileManager.CurrentProfile.EnableCombatMusic, (b) => { ProfileManager.CurrentProfile.EnableCombatMusic = b; }),
                     mainContent.RightWidth,
-                    PAGE.Sound,
-                    x,
-                    y
+                    PAGE.Sound
                 ));
-            y += c.Height + Theme.TOP_PADDING;
+            PositionHelper.PositionControl(s.FullControl);
+            PositionHelper.BlankLine();
 
 
-            y += Theme.BLANK_LINE;
-
-
-            options.Add(new SettingsOption(
+            options.Add(s = new SettingsOption(
                     "",
-                    c = new CheckboxWithLabel("Play sound when UO is not in focus", 0, ProfileManager.CurrentProfile.ReproduceSoundsInBackground, (b) => { ProfileManager.CurrentProfile.ReproduceSoundsInBackground = b; }),
+                    new CheckboxWithLabel("Play sound when UO is not in focus", 0, ProfileManager.CurrentProfile.ReproduceSoundsInBackground, (b) => { ProfileManager.CurrentProfile.ReproduceSoundsInBackground = b; }),
                     mainContent.RightWidth,
-                    PAGE.Sound,
-                    x,
-                    y
+                    PAGE.Sound
                 ));
-            y += c.Height + Theme.TOP_PADDING;
+            PositionHelper.PositionControl(s.FullControl);
         }
 
         private ModernButton CategoryButton(string text, int page, int width, int height = 40)
@@ -2140,7 +2113,7 @@ namespace ClassicUO.Game.UI.Gumps
                 if (!string.IsNullOrEmpty(optionLabel))
                 {
                     Control labelTextBox;
-                    FullControl.Add(labelTextBox = new TextBox(optionLabel, Theme.FONT, 20, null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { AcceptMouseInput = false });
+                    FullControl.Add(labelTextBox = new TextBox(optionLabel, Theme.FONT, 20, null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { AcceptMouseInput = false }, (int)optionsPage);
 
                     if (labelTextBox.Width > maxTotalWidth)
                     {
@@ -2161,8 +2134,9 @@ namespace ClassicUO.Game.UI.Gumps
                     FullControl.Height = labelTextBox.Height;
                 }
 
-                FullControl.Add(OptionControl);
+                FullControl.Add(OptionControl, (int)optionsPage);
                 FullControl.Width += OptionControl.Width;
+                FullControl.ActivePage = (int)optionsPage;
 
                 if (OptionControl.Height > FullControl.Height)
                 {
@@ -2642,8 +2616,6 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-
-
         private static class Theme
         {
             public const int SLIDER_WIDTH = 150;
@@ -2669,6 +2641,40 @@ namespace ClassicUO.Game.UI.Gumps
             public static Color TEXT_FONT_COLOR = Color.White;
 
             public static string FONT = TrueTypeLoader.EMBEDDED_FONT;
+        }
+
+        private static class PositionHelper
+        {
+            public static int X, Y = Theme.TOP_PADDING;
+
+            public static void BlankLine()
+            {
+                Y += Theme.BLANK_LINE;
+            }
+
+            public static void Indent()
+            {
+                X += Theme.INDENT_SPACE;
+            }
+
+            public static void RemoveIndent()
+            {
+                X -= Theme.INDENT_SPACE;
+            }
+
+            public static void PositionControl(Control c)
+            {
+                c.X = X;
+                c.Y = Y;
+
+                Y += c.Height + Theme.TOP_PADDING;
+            }
+
+            public static void Reset()
+            {
+                X = 0;
+                Y = Theme.TOP_PADDING;
+            }
         }
 
         private enum PAGE
