@@ -12,6 +12,9 @@ using System;
 using System.Collections.Generic;
 using SDL2;
 using System.Linq;
+using ClassicUO.Game.Scenes;
+using ClassicUO.Resources;
+using System.Data;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -67,6 +70,7 @@ namespace ClassicUO.Game.UI.Gumps
             BuildGeneral();
             BuildSound();
             BuildVideo();
+            BuildMacros();
 
             foreach (SettingsOption option in options)
             {
@@ -437,8 +441,6 @@ namespace ClassicUO.Game.UI.Gumps
         private void BuildVideo()
         {
             LeftSideMenuRightSideContent content = new LeftSideMenuRightSideContent(mainContent.RightWidth, mainContent.Height, (int)(mainContent.RightWidth * 0.3));
-            Control c;
-
             #region Game window
             int page = ((int)PAGE.Video + 1000);
             content.AddToLeft(SubCategoryButton("Game window", page, content.LeftWidth));
@@ -450,14 +452,16 @@ namespace ClassicUO.Game.UI.Gumps
 
             content.BlankLine();
 
-            content.AddToRight(new CheckboxWithLabel("Always use fullsize game world viewport", isChecked: ProfileManager.CurrentProfile.GameWindowFullSize, valueChanged: (b) => { 
-                ProfileManager.CurrentProfile.GameWindowFullSize = b; 
-                if (b) 
+            content.AddToRight(new CheckboxWithLabel("Always use fullsize game world viewport", isChecked: ProfileManager.CurrentProfile.GameWindowFullSize, valueChanged: (b) =>
+            {
+                ProfileManager.CurrentProfile.GameWindowFullSize = b;
+                if (b)
                 {
                     UIManager.GetGump<WorldViewportGump>()?.ResizeGameWindow(new Point(Client.Game.Window.ClientBounds.Width, Client.Game.Window.ClientBounds.Height));
                     UIManager.GetGump<WorldViewportGump>()?.SetGameWindowPosition(new Point(-5, -5));
                     ProfileManager.CurrentProfile.GameWindowPosition = new Point(-5, -5);
-                } else
+                }
+                else
                 {
                     UIManager.GetGump<WorldViewportGump>()?.ResizeGameWindow(new Point(600, 480));
                     UIManager.GetGump<WorldViewportGump>()?.SetGameWindowPosition(new Point(25, 25));
@@ -475,8 +479,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             content.BlankLine();
 
-            content.AddToRight(new SliderWithLabel("Viewport position X", 0, Theme.SLIDER_WIDTH, 0, Client.Game.Window.ClientBounds.Width, ProfileManager.CurrentProfile.GameWindowPosition.X, (r) => { ProfileManager.CurrentProfile.GameWindowPosition =  new Point(r, ProfileManager.CurrentProfile.GameWindowPosition.Y); UIManager.GetGump<WorldViewportGump>()?.SetGameWindowPosition(ProfileManager.CurrentProfile.GameWindowPosition); }), true, page);
-            content.AddToRight(new SliderWithLabel("Viewport position Y", 0, Theme.SLIDER_WIDTH, 0, Client.Game.Window.ClientBounds.Height, ProfileManager.CurrentProfile.GameWindowPosition.Y, (r) => { ProfileManager.CurrentProfile.GameWindowPosition =  new Point(ProfileManager.CurrentProfile.GameWindowPosition.X, r); UIManager.GetGump<WorldViewportGump>()?.SetGameWindowPosition(ProfileManager.CurrentProfile.GameWindowPosition); }), true, page);
+            content.AddToRight(new SliderWithLabel("Viewport position X", 0, Theme.SLIDER_WIDTH, 0, Client.Game.Window.ClientBounds.Width, ProfileManager.CurrentProfile.GameWindowPosition.X, (r) => { ProfileManager.CurrentProfile.GameWindowPosition = new Point(r, ProfileManager.CurrentProfile.GameWindowPosition.Y); UIManager.GetGump<WorldViewportGump>()?.SetGameWindowPosition(ProfileManager.CurrentProfile.GameWindowPosition); }), true, page);
+            content.AddToRight(new SliderWithLabel("Viewport position Y", 0, Theme.SLIDER_WIDTH, 0, Client.Game.Window.ClientBounds.Height, ProfileManager.CurrentProfile.GameWindowPosition.Y, (r) => { ProfileManager.CurrentProfile.GameWindowPosition = new Point(ProfileManager.CurrentProfile.GameWindowPosition.X, r); UIManager.GetGump<WorldViewportGump>()?.SetGameWindowPosition(ProfileManager.CurrentProfile.GameWindowPosition); }), true, page);
 
             content.BlankLine();
 
@@ -512,7 +516,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             content.BlankLine();
 
-            content.AddToRight(new CheckboxWithLabel("Custom light level", isChecked: ProfileManager.CurrentProfile.UseCustomLightLevel, valueChanged: (b) => { 
+            content.AddToRight(new CheckboxWithLabel("Custom light level", isChecked: ProfileManager.CurrentProfile.UseCustomLightLevel, valueChanged: (b) =>
+            {
                 ProfileManager.CurrentProfile.UseCustomLightLevel = b;
                 if (b)
                 {
@@ -526,7 +531,8 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }), true, page);
             content.Indent();
-            content.AddToRight(new SliderWithLabel("Light level", 0, Theme.SLIDER_WIDTH, 0, 0x1E, 0x1E - ProfileManager.CurrentProfile.LightLevel, (r) => { 
+            content.AddToRight(new SliderWithLabel("Light level", 0, Theme.SLIDER_WIDTH, 0, 0x1E, 0x1E - ProfileManager.CurrentProfile.LightLevel, (r) =>
+            {
                 ProfileManager.CurrentProfile.LightLevel = (byte)(0x1E - r);
                 if (ProfileManager.CurrentProfile.UseCustomLightLevel)
                 {
@@ -560,6 +566,22 @@ namespace ClassicUO.Game.UI.Gumps
             content.AddToLeft(SubCategoryButton("Misc", page, content.LeftWidth));
             content.ResetRightSide();
 
+            content.AddToRight(new CheckboxWithLabel("Enable death screen", isChecked: ProfileManager.CurrentProfile.EnableDeathScreen, valueChanged: (b) => { ProfileManager.CurrentProfile.EnableDeathScreen = b; }), true, page);
+            content.Indent();
+            content.AddToRight(new CheckboxWithLabel("Black and white mode while dead", isChecked: ProfileManager.CurrentProfile.EnableBlackWhiteEffect, valueChanged: (b) => { ProfileManager.CurrentProfile.EnableBlackWhiteEffect = b; }), true, page);
+            content.RemoveIndent();
+
+            content.BlankLine();
+
+            content.AddToRight(new CheckboxWithLabel("Run mouse in seperate thread", isChecked: Settings.GlobalSettings.RunMouseInASeparateThread, valueChanged: (b) => { Settings.GlobalSettings.RunMouseInASeparateThread = b; }), true, page);
+
+            content.BlankLine();
+
+            content.AddToRight(new CheckboxWithLabel("Aura on mouse target", isChecked: ProfileManager.CurrentProfile.AuraOnMouse, valueChanged: (b) => { ProfileManager.CurrentProfile.AuraOnMouse = b; }), true, page);
+
+            content.BlankLine();
+
+            content.AddToRight(new CheckboxWithLabel("Animated water effect", isChecked: ProfileManager.CurrentProfile.AnimatedWaterEffect, valueChanged: (b) => { ProfileManager.CurrentProfile.AnimatedWaterEffect = b; }), true, page);
             #endregion
 
             #region Shadows
@@ -567,6 +589,14 @@ namespace ClassicUO.Game.UI.Gumps
             content.AddToLeft(SubCategoryButton("Shadows", page, content.LeftWidth));
             content.ResetRightSide();
 
+            content.AddToRight(new CheckboxWithLabel("Enable shadows", isChecked: ProfileManager.CurrentProfile.ShadowsEnabled, valueChanged: (b) => { ProfileManager.CurrentProfile.ShadowsEnabled = b; }), true, page);
+            content.Indent();
+            content.AddToRight(new CheckboxWithLabel("Rock and tree shadows", isChecked: ProfileManager.CurrentProfile.ShadowsStatics, valueChanged: (b) => { ProfileManager.CurrentProfile.ShadowsStatics = b; }), true, page);
+            content.RemoveIndent();
+
+            content.BlankLine();
+
+            content.AddToRight(new SliderWithLabel("Terrain shadow level", 0, Theme.SLIDER_WIDTH, Constants.MIN_TERRAIN_SHADOWS_LEVEL, Constants.MAX_TERRAIN_SHADOWS_LEVEL, ProfileManager.CurrentProfile.TerrainShadowsLevel, (r) => { ProfileManager.CurrentProfile.TerrainShadowsLevel = r; }), true, page);
             #endregion
 
             options.Add(new SettingsOption(
@@ -574,6 +604,175 @@ namespace ClassicUO.Game.UI.Gumps
                     content,
                     mainContent.RightWidth,
                     PAGE.Video
+                ));
+        }
+
+        private void BuildMacros()
+        {
+            LeftSideMenuRightSideContent content = new LeftSideMenuRightSideContent(mainContent.RightWidth, mainContent.Height, (int)(mainContent.RightWidth * 0.3));
+            int page = ((int)PAGE.Macros + 1000);
+
+            #region New Macro
+            ModernButton b;
+            content.AddToLeft(b = new ModernButton(0, 0, content.LeftWidth, 40, ButtonAction.Activate, "New Macro", Theme.BUTTON_FONT_COLOR) { ButtonParameter = page, IsSelectable = false });
+
+            b.MouseUp += (sender, e) =>
+            {
+                EntryDialog dialog = new EntryDialog
+                (
+                    250,
+                    150,
+                    ResGumps.MacroName,
+                    name =>
+                    {
+                        if (string.IsNullOrWhiteSpace(name))
+                        {
+                            return;
+                        }
+
+                        MacroManager manager = Client.Game.GetScene<GameScene>().Macros;
+
+                        if (manager.FindMacro(name) != null)
+                        {
+                            return;
+                        }
+
+                        ModernButton nb;
+
+                        MacroControl macroControl = new MacroControl(name);
+
+                        content.AddToLeft(nb = new ModernButton(0, 0, content.LeftWidth, 40, ButtonAction.SwitchPage, name, Theme.BUTTON_FONT_COLOR) { ButtonParameter = page + 1 + content.LeftArea.Children.Count, Tag = macroControl.Macro });
+                        content.AddToRight(macroControl, true, nb.ButtonParameter);
+
+                        nb.IsSelected = true;
+                        content.ActivePage = nb.ButtonParameter;
+
+                        manager.PushToBack(macroControl.Macro);
+
+                        nb.DragBegin += (sss, eee) =>
+                        {
+                            ModernButton mupNiceButton = (ModernButton)sss;
+
+                            Macro m = mupNiceButton.Tag as Macro;
+
+                            if (m == null)
+                            {
+                                return;
+                            }
+
+                            if (UIManager.DraggingControl != this || UIManager.MouseOverControl != sss)
+                            {
+                                return;
+                            }
+
+                            UIManager.Gumps.OfType<MacroButtonGump>().FirstOrDefault(s => s.TheMacro == m)?.Dispose();
+
+                            MacroButtonGump macroButtonGump = new MacroButtonGump(m, Mouse.Position.X, Mouse.Position.Y);
+
+                            macroButtonGump.X = Mouse.Position.X - (macroButtonGump.Width >> 1);
+                            macroButtonGump.Y = Mouse.Position.Y - (macroButtonGump.Height >> 1);
+
+                            UIManager.Add(macroButtonGump);
+
+                            UIManager.AttemptDragControl(macroButtonGump, true);
+                        };
+                    }
+                )
+                {
+                    CanCloseWithRightClick = true
+                };
+
+                UIManager.Add(dialog);
+            };
+            #endregion
+
+
+            #region Delete Macro
+            page = ((int)PAGE.Macros + 1001);
+            content.AddToLeft(b = new ModernButton(0, 0, content.LeftWidth, 40, ButtonAction.Activate, "Delete Macro", Theme.BUTTON_FONT_COLOR) { ButtonParameter = page, IsSelectable = false });
+
+            b.MouseUp += (ss, ee) =>
+            {
+                ModernButton nb = content.LeftArea.FindControls<ModernButton>().SingleOrDefault(a => a.IsSelected);
+
+                if (nb != null)
+                {
+                    QuestionGump dialog = new QuestionGump
+                    (
+                        ResGumps.MacroDeleteConfirmation,
+                        b =>
+                        {
+                            if (!b)
+                            {
+                                return;
+                            }
+
+                            if (nb.Tag is Macro macro)
+                            {
+                                UIManager.Gumps.OfType<MacroButtonGump>().FirstOrDefault(s => s.TheMacro == macro)?.Dispose();
+                                Client.Game.GetScene<GameScene>().Macros.Remove(macro);
+                                nb.Dispose();
+                            }
+                        }
+                    );
+
+                    UIManager.Add(dialog);
+                }
+            };
+            #endregion
+
+            content.AddToLeft(new Line(0, 0, content.LeftWidth, 1, Color.Gray.PackedValue));
+
+
+            #region Macros
+            page = ((int)PAGE.Macros + 1002);
+            MacroManager macroManager = Client.Game.GetScene<GameScene>().Macros;
+            for (Macro macro = (Macro)macroManager.Items; macro != null; macro = (Macro)macro.Next)
+            {
+                content.AddToLeft(b = new ModernButton(0, 0, content.LeftWidth, 40, ButtonAction.SwitchPage, macro.Name, Theme.BUTTON_FONT_COLOR) { ButtonParameter = page + 1 + content.LeftArea.Children.Count, Tag = macro });
+
+                b.DragBegin += (sss, eee) =>
+                {
+                    ModernButton mupNiceButton = (ModernButton)sss;
+
+                    Macro m = mupNiceButton.Tag as Macro;
+
+                    if (m == null)
+                    {
+                        return;
+                    }
+
+                    if (UIManager.DraggingControl != this || UIManager.MouseOverControl != sss)
+                    {
+                        return;
+                    }
+
+                    UIManager.Gumps.OfType<MacroButtonGump>().FirstOrDefault(s => s.TheMacro == m)?.Dispose();
+
+                    MacroButtonGump macroButtonGump = new MacroButtonGump(m, Mouse.Position.X, Mouse.Position.Y);
+
+                    macroButtonGump.X = Mouse.Position.X - (macroButtonGump.Width >> 1);
+                    macroButtonGump.Y = Mouse.Position.Y - (macroButtonGump.Height >> 1);
+
+                    UIManager.Add(macroButtonGump);
+
+                    UIManager.AttemptDragControl(macroButtonGump, true);
+                };
+
+                content.ResetRightSide();
+                content.AddToRight(new MacroControl(macro.Name), true, b.ButtonParameter);
+            }
+
+            b.IsSelected = true;
+            content.ActivePage = b.ButtonParameter;
+            #endregion
+
+
+            options.Add(new SettingsOption(
+                    "",
+                    content,
+                    mainContent.RightWidth,
+                    PAGE.Macros
                 ));
         }
 
@@ -2152,6 +2351,9 @@ namespace ClassicUO.Game.UI.Gumps
         {
             private ScrollArea left, right;
             private int leftY, rightY = Theme.TOP_PADDING, leftX, rightX;
+
+            public ScrollArea LeftArea => left;
+            public ScrollArea RightArea => right;
 
             public new int ActivePage
             {
