@@ -741,7 +741,7 @@ namespace ClassicUO.Game.UI.Gumps
                     CalculateNew(x);
                 }
 
-                protected override void OnKeyUp(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
+                protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
                 {
                     base.OnKeyUp(key, mod);
                     switch(key)
@@ -755,23 +755,11 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 }
 
-                //protected override void OnMouseWheel(MouseEventType delta)
-                //{
-                //    switch (delta)
-                //    {
-                //        case MouseEventType.WheelScrollUp:
-                //            Value++;
-
-                //            break;
-
-                //        case MouseEventType.WheelScrollDown:
-                //            Value--;
-
-                //            break;
-                //    }
-
-                //    CalculateOffset();
-                //}
+                protected override void OnMouseEnter(int x, int y)
+                {
+                    base.OnMouseEnter(x, y);
+                    UIManager.KeyboardFocusControl = this;
+                }
 
                 private void CalculateNew(int x)
                 {
