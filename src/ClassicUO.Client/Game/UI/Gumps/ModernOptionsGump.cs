@@ -192,9 +192,142 @@ namespace ClassicUO.Game.UI.Gumps
             content.RemoveIndent();
             #endregion
 
-            content.AddToLeft(SubCategoryButton("Gumps & Context", ((int)PAGE.General + 1002), content.LeftWidth));
-            content.AddToLeft(SubCategoryButton("Misc", ((int)PAGE.General + 1003), content.LeftWidth));
-            content.AddToLeft(SubCategoryButton("Terrain & Statics", ((int)PAGE.General + 1004), content.LeftWidth));
+            #region Gumps & Context
+            page = ((int)PAGE.General + 1002);
+            content.AddToLeft(SubCategoryButton("Gumps & Context", page, content.LeftWidth));
+            content.ResetRightSide();
+
+            content.AddToRight(new CheckboxWithLabel("Disable top menu bar", isChecked: ProfileManager.CurrentProfile.TopbarGumpIsDisabled, valueChanged: (b) => { ProfileManager.CurrentProfile.TopbarGumpIsDisabled = b; }), true, page);
+
+            content.BlankLine();
+
+            content.AddToRight(new CheckboxWithLabel("Require alt to close anchored gumps", isChecked: ProfileManager.CurrentProfile.HoldDownKeyAltToCloseAnchored, valueChanged: (b) => { ProfileManager.CurrentProfile.HoldDownKeyAltToCloseAnchored = b; }), true, page);
+
+            content.BlankLine();
+
+            content.AddToRight(new CheckboxWithLabel("Require alt to move gumps", isChecked: ProfileManager.CurrentProfile.HoldAltToMoveGumps, valueChanged: (b) => { ProfileManager.CurrentProfile.HoldAltToMoveGumps = b; }), true, page);
+
+            content.BlankLine();
+
+            content.AddToRight(new CheckboxWithLabel("Close entire group of anchored gumps with right click", isChecked: ProfileManager.CurrentProfile.CloseAllAnchoredGumpsInGroupWithRightClick, valueChanged: (b) => { ProfileManager.CurrentProfile.CloseAllAnchoredGumpsInGroupWithRightClick = b; }), true, page);
+
+            content.BlankLine();
+
+            content.AddToRight(new CheckboxWithLabel("Use original skills gump", isChecked: ProfileManager.CurrentProfile.StandardSkillsGump, valueChanged: (b) => { ProfileManager.CurrentProfile.StandardSkillsGump = b; }), true, page);
+
+            content.BlankLine();
+
+            content.AddToRight(new CheckboxWithLabel("Use old status gump", isChecked: ProfileManager.CurrentProfile.UseOldStatusGump, valueChanged: (b) => { ProfileManager.CurrentProfile.UseOldStatusGump = b; }), true, page);
+
+            content.BlankLine();
+
+            content.AddToRight(new CheckboxWithLabel("Show party invite gump", isChecked: ProfileManager.CurrentProfile.PartyInviteGump, valueChanged: (b) => { ProfileManager.CurrentProfile.PartyInviteGump = b; }), true, page);
+
+            content.BlankLine();
+
+            content.AddToRight(new CheckboxWithLabel("Use modern health bar gumps", isChecked: ProfileManager.CurrentProfile.CustomBarsToggled, valueChanged: (b) => { ProfileManager.CurrentProfile.CustomBarsToggled = b; }), true, page);
+            content.Indent();
+            content.AddToRight(new CheckboxWithLabel("Use black background", isChecked: ProfileManager.CurrentProfile.CBBlackBGToggled, valueChanged: (b) => { ProfileManager.CurrentProfile.CBBlackBGToggled = b; }), true, page);
+            content.RemoveIndent();
+
+            content.BlankLine();
+
+            content.AddToRight(new CheckboxWithLabel("Save health bars on logout", isChecked: ProfileManager.CurrentProfile.SaveHealthbars, valueChanged: (b) => { ProfileManager.CurrentProfile.SaveHealthbars = b; }), true, page);
+
+            content.BlankLine();
+
+            content.AddToRight(new ComboBoxWithLabel("Close health bars when", 0, Theme.COMBO_BOX_WIDTH, new string[] { "Disabled", "Out of range", "Dead" }, ProfileManager.CurrentProfile.CloseHealthBarType, (s, n) => { ProfileManager.CurrentProfile.CloseHealthBarType = s; }), true, page);
+
+            content.BlankLine();
+
+            content.AddToRight(c = new ComboBoxWithLabel("Grid Loot", 0, Theme.COMBO_BOX_WIDTH, new string[] { "Disabled", "Grid loot only", "Grid loot and normal container" }, ProfileManager.CurrentProfile.GridLootType, (s, n) => { ProfileManager.CurrentProfile.GridLootType = s; }), true, page);
+            c.SetTooltip("This is not the same as Grid Containers, this is a simple grid gump used for looting corpses.");
+
+            content.BlankLine();
+
+            content.AddToRight(new CheckboxWithLabel("Require shift to open context menus", isChecked: ProfileManager.CurrentProfile.HoldShiftForContext, valueChanged: (b) => { ProfileManager.CurrentProfile.HoldShiftForContext = b; }), true, page);
+
+            content.BlankLine();
+
+            content.AddToRight(new CheckboxWithLabel("Require shift to split stacks of items", isChecked: ProfileManager.CurrentProfile.HoldShiftToSplitStack, valueChanged: (b) => { ProfileManager.CurrentProfile.HoldShiftToSplitStack = b; }), true, page);
+            #endregion
+
+            #region Misc
+            page = ((int)PAGE.General + 1003);
+            content.AddToLeft(SubCategoryButton("Misc", page, content.LeftWidth));
+            content.ResetRightSide();
+
+            content.AddToRight(new CheckboxWithLabel("Enable circle of transparency", isChecked: ProfileManager.CurrentProfile.UseCircleOfTransparency, valueChanged: (b) => { ProfileManager.CurrentProfile.UseCircleOfTransparency = b; }), true, page);
+            content.Indent();
+            content.AddToRight(new SliderWithLabel("Distance", 0, Theme.SLIDER_WIDTH, Constants.MIN_CIRCLE_OF_TRANSPARENCY_RADIUS, Constants.MAX_CIRCLE_OF_TRANSPARENCY_RADIUS, ProfileManager.CurrentProfile.CircleOfTransparencyRadius, (r) => { ProfileManager.CurrentProfile.CircleOfTransparencyRadius = r; }), true, page);
+            content.AddToRight(new ComboBoxWithLabel("Type", 0, Theme.COMBO_BOX_WIDTH, new string[] { "Full", "Gradient", "Modern" }, ProfileManager.CurrentProfile.CircleOfTransparencyType, (s, n) => { ProfileManager.CurrentProfile.CircleOfTransparencyType = s; }), true, page);
+            content.RemoveIndent();
+
+            content.BlankLine();
+
+            content.AddToRight(new CheckboxWithLabel("Hide 'screenshot stored in' message", isChecked: ProfileManager.CurrentProfile.HideScreenshotStoredInMessage, valueChanged: (b) => { ProfileManager.CurrentProfile.HideScreenshotStoredInMessage = b; }), true, page);
+
+            content.BlankLine();
+
+            content.AddToRight(new CheckboxWithLabel("Enable object fading", isChecked: ProfileManager.CurrentProfile.UseObjectsFading, valueChanged: (b) => { ProfileManager.CurrentProfile.UseObjectsFading = b; }), true, page);
+
+            content.BlankLine();
+
+            content.AddToRight(new CheckboxWithLabel("Enable text fading", isChecked: ProfileManager.CurrentProfile.TextFading, valueChanged: (b) => { ProfileManager.CurrentProfile.TextFading = b; }), true, page);
+
+            content.BlankLine();
+
+            content.AddToRight(new CheckboxWithLabel("Show target range indicator", isChecked: ProfileManager.CurrentProfile.ShowTargetRangeIndicator, valueChanged: (b) => { ProfileManager.CurrentProfile.ShowTargetRangeIndicator = b; }), true, page);
+
+            content.BlankLine();
+
+            content.AddToRight(new CheckboxWithLabel("Enable drag select for health bars", isChecked: ProfileManager.CurrentProfile.EnableDragSelect, valueChanged: (b) => { ProfileManager.CurrentProfile.EnableDragSelect = b; }), true, page);
+            content.Indent();
+            content.AddToRight(new ComboBoxWithLabel("Key modifier", 0, Theme.COMBO_BOX_WIDTH, new string[] { "None", "Ctrl", "Shift" }, ProfileManager.CurrentProfile.DragSelectModifierKey, (s, n) => { ProfileManager.CurrentProfile.DragSelectModifierKey = s; }), true, page);
+            content.AddToRight(new ComboBoxWithLabel("Players only", 0, Theme.COMBO_BOX_WIDTH, new string[] { "None", "Ctrl", "Shift" }, ProfileManager.CurrentProfile.DragSelect_PlayersModifier, (s, n) => { ProfileManager.CurrentProfile.DragSelect_PlayersModifier = s; }), true, page);
+            content.AddToRight(new ComboBoxWithLabel("Monsters only", 0, Theme.COMBO_BOX_WIDTH, new string[] { "None", "Ctrl", "Shift" }, ProfileManager.CurrentProfile.DragSelect_MonstersModifier, (s, n) => { ProfileManager.CurrentProfile.DragSelect_MonstersModifier = s; }), true, page);
+            content.AddToRight(new ComboBoxWithLabel("Visible nameplates only", 0, Theme.COMBO_BOX_WIDTH, new string[] { "None", "Ctrl", "Shift" }, ProfileManager.CurrentProfile.DragSelect_NameplateModifier, (s, n) => { ProfileManager.CurrentProfile.DragSelect_NameplateModifier = s; }), true, page);
+            content.AddToRight(new SliderWithLabel("X Position of healthbars", 0, Theme.SLIDER_WIDTH, 0, Client.Game.Scene.Camera.Bounds.Width, ProfileManager.CurrentProfile.DragSelectStartX, (r) => { ProfileManager.CurrentProfile.DragSelectStartX = r; }), true, page);
+            content.AddToRight(new SliderWithLabel("Y Position of healthbars", 0, Theme.SLIDER_WIDTH, 0, Client.Game.Scene.Camera.Bounds.Width, ProfileManager.CurrentProfile.DragSelectStartY, (r) => { ProfileManager.CurrentProfile.DragSelectStartY = r; }), true, page);
+            content.AddToRight(new CheckboxWithLabel("Anchor opened health bars together", isChecked: ProfileManager.CurrentProfile.DragSelectAsAnchor, valueChanged: (b) => { ProfileManager.CurrentProfile.DragSelectAsAnchor = b; }), true, page);
+            content.RemoveIndent();
+
+            content.BlankLine();
+
+            content.AddToRight(new CheckboxWithLabel("Show stats changed messages", isChecked: ProfileManager.CurrentProfile.ShowStatsChangedMessage, valueChanged: (b) => { ProfileManager.CurrentProfile.ShowStatsChangedMessage = b; }), true, page);
+
+            content.BlankLine();
+
+            content.AddToRight(new CheckboxWithLabel("Show skills changed messages", isChecked: ProfileManager.CurrentProfile.ShowSkillsChangedMessage, valueChanged: (b) => { ProfileManager.CurrentProfile.ShowStatsChangedMessage = b; }), true, page);
+            content.Indent();
+            content.AddToRight(new SliderWithLabel("Changed by", 0, Theme.SLIDER_WIDTH, 0, 100, ProfileManager.CurrentProfile.ShowSkillsChangedDeltaValue, (r) => { ProfileManager.CurrentProfile.ShowSkillsChangedDeltaValue = r; }), true, page);
+            content.RemoveIndent();
+            #endregion
+
+            #region Terrain and statics
+            page = ((int)PAGE.General + 1004);
+            content.AddToLeft(SubCategoryButton("Terrain & Statics", page, content.LeftWidth));
+            content.ResetRightSide();
+
+            content.AddToRight(new CheckboxWithLabel("Hide roof tiles", isChecked: !ProfileManager.CurrentProfile.DrawRoofs, valueChanged: (b) => { ProfileManager.CurrentProfile.DrawRoofs = !b; }), true, page);
+
+            content.BlankLine();
+
+            content.AddToRight(new CheckboxWithLabel("Change trees to strumps", isChecked: ProfileManager.CurrentProfile.TreeToStumps, valueChanged: (b) => { ProfileManager.CurrentProfile.TreeToStumps = b; }), true, page);
+
+            content.BlankLine();
+
+            content.AddToRight(new CheckboxWithLabel("Hide vegetation", isChecked: ProfileManager.CurrentProfile.HideVegetation, valueChanged: (b) => { ProfileManager.CurrentProfile.HideVegetation = b; }), true, page);
+
+            //content.BlankLine();
+
+            //content.AddToRight(new CheckboxWithLabel("Mark cave tiles", isChecked: ProfileManager.CurrentProfile.EnableCaveBorder, valueChanged: (b) => { ProfileManager.CurrentProfile.EnableCaveBorder = b; }), true, page);
+
+            content.BlankLine();
+
+            content.AddToRight(new ComboBoxWithLabel("Field types", 0, Theme.COMBO_BOX_WIDTH, new string[] { "Normal", "Static", "Tile" }, ProfileManager.CurrentProfile.FieldsType, (s, n) => { ProfileManager.CurrentProfile.FieldsType = s; }), true, page);
+
+            #endregion
 
             options.Add(new SettingsOption(
                     "",
@@ -491,6 +624,7 @@ namespace ClassicUO.Game.UI.Gumps
                     MaxValue = max;
                     BarWidth = barWidth;
                     AcceptMouseInput = true;
+                    AcceptKeyboardInput = true;
                     Width = barWidth;
                     Height = Math.Max(_text.MeasuredSize.Y, 15);
 
@@ -607,6 +741,20 @@ namespace ClassicUO.Game.UI.Gumps
                     CalculateNew(x);
                 }
 
+                protected override void OnKeyUp(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
+                {
+                    base.OnKeyUp(key, mod);
+                    switch(key)
+                    {
+                        case SDL.SDL_Keycode.SDLK_LEFT:
+                            Value--;
+                            break;
+                        case SDL.SDL_Keycode.SDLK_RIGHT:
+                            Value++;
+                            break;
+                    }
+                }
+
                 //protected override void OnMouseWheel(MouseEventType delta)
                 //{
                 //    switch (delta)
@@ -689,7 +837,7 @@ namespace ClassicUO.Game.UI.Gumps
                 AcceptMouseInput = true;
                 CanMove = true;
 
-                Add(_label = new TextBox(label, Theme.FONT, Theme.STANDARD_TEXT_SIZE, labelWidth > 0 ? labelWidth : null, Theme.TEXT_FONT_COLOR, strokeEffect: false));
+                Add(_label = new TextBox(label, Theme.FONT, Theme.STANDARD_TEXT_SIZE, labelWidth > 0 ? labelWidth : null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { AcceptMouseInput = false });
                 Add(_comboBox = new Combobox(comboWidth, options, selectedIndex, onOptionSelected: onOptionSelected) { X = _label.MeasuredSize.X + _label.X + 5 });
 
                 Width = labelWidth + comboWidth + 5;
@@ -2385,7 +2533,7 @@ namespace ClassicUO.Game.UI.Gumps
         private static class Theme
         {
             public const int SLIDER_WIDTH = 150;
-            public const int COMBO_BOX_WIDTH = 250;
+            public const int COMBO_BOX_WIDTH = 225;
             public const int SCROLL_BAR_WIDTH = 15;
 
             public const int STANDARD_TEXT_SIZE = 20;
