@@ -154,23 +154,41 @@ namespace ClassicUO.Game.UI.Gumps
 
             content.BlankLine();
 
-            content.AddToRight(new CheckboxWithLabel("Hightlight poisoned mobiles", isChecked: ProfileManager.CurrentProfile.HighlightMobilesByPoisoned, valueChanged: (b) => { ProfileManager.CurrentProfile.HighlightMobilesByPoisoned = b; }), true, page);
+            content.AddToRight(new CheckboxWithLabel("Highlight poisoned mobiles", isChecked: ProfileManager.CurrentProfile.HighlightMobilesByPoisoned, valueChanged: (b) => { ProfileManager.CurrentProfile.HighlightMobilesByPoisoned = b; }), true, page);
             content.Indent();
             content.AddToRight(new ModernColorPickerWithLabel("Highlight color", ProfileManager.CurrentProfile.PoisonHue, (h) => { ProfileManager.CurrentProfile.PoisonHue = h; }), true, page);
             content.RemoveIndent();
 
             content.BlankLine();
 
-            content.AddToRight(new CheckboxWithLabel("Hightlight paralyzed mobiles", isChecked: ProfileManager.CurrentProfile.HighlightMobilesByParalize, valueChanged: (b) => { ProfileManager.CurrentProfile.HighlightMobilesByParalize = b; }), true, page);
+            content.AddToRight(new CheckboxWithLabel("Highlight paralyzed mobiles", isChecked: ProfileManager.CurrentProfile.HighlightMobilesByParalize, valueChanged: (b) => { ProfileManager.CurrentProfile.HighlightMobilesByParalize = b; }), true, page);
             content.Indent();
             content.AddToRight(new ModernColorPickerWithLabel("Highlight color", ProfileManager.CurrentProfile.ParalyzedHue, (h) => { ProfileManager.CurrentProfile.ParalyzedHue = h; }), true, page);
             content.RemoveIndent();
 
             content.BlankLine();
 
-            content.AddToRight(new CheckboxWithLabel("Hightlight invulnerable mobiles", isChecked: ProfileManager.CurrentProfile.HighlightMobilesByInvul, valueChanged: (b) => { ProfileManager.CurrentProfile.HighlightMobilesByInvul = b; }), true, page);
+            content.AddToRight(new CheckboxWithLabel("Highlight invulnerable mobiles", isChecked: ProfileManager.CurrentProfile.HighlightMobilesByInvul, valueChanged: (b) => { ProfileManager.CurrentProfile.HighlightMobilesByInvul = b; }), true, page);
             content.Indent();
             content.AddToRight(new ModernColorPickerWithLabel("Highlight color", ProfileManager.CurrentProfile.InvulnerableHue, (h) => { ProfileManager.CurrentProfile.InvulnerableHue = h; }), true, page);
+            content.RemoveIndent();
+
+            content.BlankLine();
+
+            content.AddToRight(new CheckboxWithLabel("Show incoming mobile names", isChecked: ProfileManager.CurrentProfile.ShowNewMobileNameIncoming, valueChanged: (b) => { ProfileManager.CurrentProfile.ShowNewMobileNameIncoming = b; }), true, page);
+
+            content.BlankLine(); 
+            
+            content.AddToRight(new CheckboxWithLabel("Show incoming corpse names", isChecked: ProfileManager.CurrentProfile.ShowNewCorpseNameIncoming, valueChanged: (b) => { ProfileManager.CurrentProfile.ShowNewCorpseNameIncoming = b; }), true, page);
+
+            content.BlankLine();
+
+            content.AddToRight(new ComboBoxWithLabel("Show aura under feet", 0, Theme.COMBO_BOX_WIDTH, new string[] { "Disabled", "Warmode", "Ctrl + Shift", "Always" }, ProfileManager.CurrentProfile.AuraUnderFeetType, (s, n) => { ProfileManager.CurrentProfile.AuraUnderFeetType = s; }), true, page);
+            content.Indent();
+            content.AddToRight(new CheckboxWithLabel("Use a custom color for party members", isChecked: ProfileManager.CurrentProfile.PartyAura, valueChanged: (b) => { ProfileManager.CurrentProfile.PartyAura = b; }), true, page);
+            content.Indent();
+            content.AddToRight(new ModernColorPickerWithLabel("Party aura color", ProfileManager.CurrentProfile.PartyAuraHue, (h) => { ProfileManager.CurrentProfile.PartyAuraHue = h; }), true, page);
+            content.RemoveIndent();
             content.RemoveIndent();
             #endregion
 
