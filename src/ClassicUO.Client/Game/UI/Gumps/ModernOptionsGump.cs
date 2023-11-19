@@ -630,19 +630,6 @@ namespace ClassicUO.Game.UI.Gumps
 
                 public Action<int, string> OnOptionSelected { get; }
 
-
-                public override bool Draw(UltimaBatcher2D batcher, int x, int y)
-                {
-                    if (batcher.ClipBegin(x, y, Width, Height))
-                    {
-                        base.Draw(batcher, x, y);
-                        batcher.ClipEnd();
-                    }
-
-                    return true;
-                }
-
-
                 protected override void OnMouseUp(int x, int y, MouseButtonType button)
                 {
                     if (button != MouseButtonType.Left)
@@ -721,13 +708,13 @@ namespace ClassicUO.Game.UI.Gumps
                                 item,
                                 ColorPallet.OPTION_HUE,
                                 ColorPallet.OPTION_OVER_HUE,
-                                ColorPallet.OPTION_SELECTED_HUE
+                                ColorPallet.OPTION_SELECTED_HUE,
+                                width
                             )
                             {
                                 X = 2,
-                                DrawBackgroundCurrentIndex = true,
-                                IsVisible = item.Length != 0,
-                                Tag = i
+                                Tag = i,
+                                IsSelected = combobox.SelectedIndex == i ? true: false
                             };
 
                             label.Y = i * label.Height + 5;
@@ -746,11 +733,11 @@ namespace ClassicUO.Game.UI.Gumps
                             0,
                             maxWidth + 15,
                             totalHeight
-                        );
+                        )
+                        { AcceptMouseInput = true };
 
                         foreach (HoveredLabel label in labels)
                         {
-                            label.Width = maxWidth;
                             area.Add(label);
                         }
 
@@ -758,30 +745,31 @@ namespace ClassicUO.Game.UI.Gumps
 
                         cb.Width = maxWidth;
                         cb.Height = totalHeight;
+                        Width = maxWidth;
+                        Height = totalHeight;
                     }
 
                     private void LabelOnMouseUp(object sender, MouseEventArgs e)
                     {
                         if (e.Button == MouseButtonType.Left)
                         {
-                            _combobox.SelectedIndex = (int)((Label)sender).Tag;
-
+                            _combobox.SelectedIndex = (int)((HoveredLabel)sender).Tag;
                             Dispose();
                         }
                     }
 
                     private class HoveredLabel : Control
                     {
-                        private readonly ushort _overHue, _normalHue, _selectedHue;
+                        private readonly Color _overHue, _normalHue, _selectedHue;
 
-                        private TextBox _label;
+                        private readonly TextBox _label;
 
                         public HoveredLabel
                         (
                             string text,
-                            ushort hue,
-                            ushort overHue,
-                            ushort selectedHue,
+                            Color hue,
+                            Color overHue,
+                            Color selectedHue,
                             int maxwidth = 0
                         )
                         {
@@ -790,15 +778,17 @@ namespace ClassicUO.Game.UI.Gumps
                             _selectedHue = selectedHue;
                             AcceptMouseInput = true;
 
-                            Add(_label = new TextBox(text, TrueTypeLoader.EMBEDDED_FONT, ColorPallet.STANDARD_TEXT_SIZE, maxwidth > 0 ? maxwidth : null, ColorPallet.TEXT_FOREGROUND, strokeEffect: false) { AcceptMouseInput = true });
+                            _label = new TextBox(text, TrueTypeLoader.EMBEDDED_FONT, ColorPallet.STANDARD_TEXT_SIZE, maxwidth > 0 ? maxwidth : null, ColorPallet.TEXT_FOREGROUND, strokeEffect: false) { AcceptMouseInput = true };
                             Height = _label.MeasuredSize.Y;
-                            Width = _label.MeasuredSize.X;
+                            Width = Math.Max(_label.MeasuredSize.X, maxwidth);
+
+                            IsVisible = !string.IsNullOrEmpty(text);
                         }
 
-                        public bool DrawBackgroundCurrentIndex;
+                        public bool DrawBackgroundCurrentIndex = true;
                         public bool IsSelected, ForceHover;
 
-                        public ushort Hue;
+                        public Color Hue;
 
                         public override void Update()
                         {
@@ -807,7 +797,7 @@ namespace ClassicUO.Game.UI.Gumps
                                 if (Hue != _selectedHue)
                                 {
                                     Hue = _selectedHue;
-                                    _label.Hue = Hue;
+                                    _label.Fontcolor = Hue;
                                 }
                             }
                             else if (MouseIsOver || ForceHover)
@@ -815,15 +805,14 @@ namespace ClassicUO.Game.UI.Gumps
                                 if (Hue != _overHue)
                                 {
                                     Hue = _overHue;
-                                    _label.Hue = Hue;
+                                    _label.Fontcolor = Hue;
                                 }
                             }
                             else if (Hue != _normalHue)
                             {
                                 Hue = _normalHue;
-                                _label.Hue = Hue;
+                                _label.Fontcolor = Hue;
                             }
-
                             base.Update();
                         }
 
@@ -846,6 +835,8 @@ namespace ClassicUO.Game.UI.Gumps
                                     hueVector
                                 );
                             }
+
+                            _label.Draw(batcher, x, y);
 
                             return base.Draw(batcher, x, y);
                         }
@@ -2254,9 +2245,9 @@ namespace ClassicUO.Game.UI.Gumps
             public const ushort SEARCH_BACKGROUND = 899;
             public const ushort BLACK = 0;
 
-            public const ushort OPTION_HUE = 0x0453;
-            public const ushort OPTION_OVER_HUE = 0x0454;
-            public const ushort OPTION_SELECTED_HUE = 0x0455;
+            public static Color OPTION_HUE = Color.White;
+            public static Color OPTION_OVER_HUE = Color.AntiqueWhite;
+            public static Color OPTION_SELECTED_HUE = Color.CadetBlue;
 
             public static Color BUTTON_FONT_COLOR = Color.White;
             public static Color TEXT_FOREGROUND = Color.White;

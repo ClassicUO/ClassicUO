@@ -201,6 +201,16 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
+        public Color Fontcolor
+        {
+            get => _color;
+            set
+            {
+                _color = value;
+                _dirty = true;
+            }
+        }
+
         public string Font
         {
             get => _font;
