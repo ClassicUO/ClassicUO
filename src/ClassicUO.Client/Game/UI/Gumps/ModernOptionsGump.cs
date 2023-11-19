@@ -63,11 +63,6 @@ namespace ClassicUO.Game.UI.Gumps
             mainContent.AddToLeft(CategoryButton("Nameplate Options", (int)PAGE.NameplateOptions, mainContent.LeftWidth));
             mainContent.AddToLeft(CategoryButton("Cooldown bars", (int)PAGE.TUOCooldowns, mainContent.LeftWidth));
             mainContent.AddToLeft(CategoryButton("TazUO Specific", (int)PAGE.TUOOptions, mainContent.LeftWidth));
-            mainContent.AddToLeft(CategoryButton("TazUO Specific", (int)PAGE.TUOOptions, mainContent.LeftWidth));
-            mainContent.AddToLeft(CategoryButton("TazUO Specific", (int)PAGE.TUOOptions, mainContent.LeftWidth));
-            mainContent.AddToLeft(CategoryButton("TazUO Specific", (int)PAGE.TUOOptions, mainContent.LeftWidth));
-            mainContent.AddToLeft(CategoryButton("TazUO Specific", (int)PAGE.TUOOptions, mainContent.LeftWidth));
-            mainContent.AddToLeft(CategoryButton("TazUO Specific", (int)PAGE.TUOOptions, mainContent.LeftWidth));
 
             BuildGeneral();
 
@@ -83,72 +78,86 @@ namespace ClassicUO.Game.UI.Gumps
         {
             LeftSideMenuRightSideContent content = new LeftSideMenuRightSideContent(mainContent.RightWidth, mainContent.Height, (int)(mainContent.RightWidth * 0.3));
             Control c;
+            int page;
 
             #region General
-            content.AddToLeft(SubCategoryButton("General", ((int)PAGE.General + 1000), content.LeftWidth));
+            page = ((int)PAGE.General + 1000);
+            content.AddToLeft(SubCategoryButton("General", page, content.LeftWidth));
 
-            content.AddToRight(new CheckboxWithLabel("Highlight objects under cursor", isChecked: ProfileManager.CurrentProfile.HighlightGameObjects, valueChanged: (b) => { ProfileManager.CurrentProfile.HighlightGameObjects = b; }), true, (int)PAGE.General + 1000);
+            content.AddToRight(new CheckboxWithLabel("Highlight objects under cursor", isChecked: ProfileManager.CurrentProfile.HighlightGameObjects, valueChanged: (b) => { ProfileManager.CurrentProfile.HighlightGameObjects = b; }), true, page);
 
             content.BlankLine();
 
-            content.AddToRight(new CheckboxWithLabel("Enable pathfinding", isChecked: ProfileManager.CurrentProfile.EnablePathfind, valueChanged: (b) => { ProfileManager.CurrentProfile.EnablePathfind = b; }), true, (int)PAGE.General + 1000);
+            content.AddToRight(new CheckboxWithLabel("Enable pathfinding", isChecked: ProfileManager.CurrentProfile.EnablePathfind, valueChanged: (b) => { ProfileManager.CurrentProfile.EnablePathfind = b; }), true, page);
             content.Indent();
-            content.AddToRight(new CheckboxWithLabel("Use shift for pathfinding", isChecked: ProfileManager.CurrentProfile.UseShiftToPathfind, valueChanged: (b) => { ProfileManager.CurrentProfile.UseShiftToPathfind = b; }), true, (int)PAGE.General + 1000);
-            content.AddToRight(new CheckboxWithLabel("Single click for pathfinding", isChecked: ProfileManager.CurrentProfile.PathfindSingleClick, valueChanged: (b) => { ProfileManager.CurrentProfile.PathfindSingleClick = b; }), true, (int)PAGE.General + 1000);
+            content.AddToRight(new CheckboxWithLabel("Use shift for pathfinding", isChecked: ProfileManager.CurrentProfile.UseShiftToPathfind, valueChanged: (b) => { ProfileManager.CurrentProfile.UseShiftToPathfind = b; }), true, page);
+            content.AddToRight(new CheckboxWithLabel("Single click for pathfinding", isChecked: ProfileManager.CurrentProfile.PathfindSingleClick, valueChanged: (b) => { ProfileManager.CurrentProfile.PathfindSingleClick = b; }), true, page);
             content.RemoveIndent();
 
             content.BlankLine();
 
-            content.AddToRight(new CheckboxWithLabel("Always run", isChecked: ProfileManager.CurrentProfile.AlwaysRun, valueChanged: (b) => { ProfileManager.CurrentProfile.AlwaysRun = b; }), true, (int)PAGE.General + 1000);
+            content.AddToRight(new CheckboxWithLabel("Always run", isChecked: ProfileManager.CurrentProfile.AlwaysRun, valueChanged: (b) => { ProfileManager.CurrentProfile.AlwaysRun = b; }), true, page);
             content.Indent();
-            content.AddToRight(new CheckboxWithLabel("Unless hidden", isChecked: ProfileManager.CurrentProfile.AlwaysRunUnlessHidden, valueChanged: (b) => { ProfileManager.CurrentProfile.AlwaysRunUnlessHidden = b; }), true, (int)PAGE.General + 1000);
+            content.AddToRight(new CheckboxWithLabel("Unless hidden", isChecked: ProfileManager.CurrentProfile.AlwaysRunUnlessHidden, valueChanged: (b) => { ProfileManager.CurrentProfile.AlwaysRunUnlessHidden = b; }), true, page);
             content.RemoveIndent();
 
             content.BlankLine();
 
-            content.AddToRight(new CheckboxWithLabel("Automatically open doors", isChecked: ProfileManager.CurrentProfile.AutoOpenDoors, valueChanged: (b) => { ProfileManager.CurrentProfile.AutoOpenDoors = b; }), true, (int)PAGE.General + 1000);
+            content.AddToRight(new CheckboxWithLabel("Automatically open doors", isChecked: ProfileManager.CurrentProfile.AutoOpenDoors, valueChanged: (b) => { ProfileManager.CurrentProfile.AutoOpenDoors = b; }), true, page);
             content.Indent();
-            content.AddToRight(new CheckboxWithLabel("Open doors while pathfinding", isChecked: ProfileManager.CurrentProfile.SmoothDoors, valueChanged: (b) => { ProfileManager.CurrentProfile.SmoothDoors = b; }), true, (int)PAGE.General + 1000);
+            content.AddToRight(new CheckboxWithLabel("Open doors while pathfinding", isChecked: ProfileManager.CurrentProfile.SmoothDoors, valueChanged: (b) => { ProfileManager.CurrentProfile.SmoothDoors = b; }), true, page);
             content.RemoveIndent();
 
             content.BlankLine();
 
-            content.AddToRight(new CheckboxWithLabel("Automatically open corpses", isChecked: ProfileManager.CurrentProfile.AutoOpenCorpses, valueChanged: (b) => { ProfileManager.CurrentProfile.AutoOpenCorpses = b; }), true, (int)PAGE.General + 1000);
+            content.AddToRight(new CheckboxWithLabel("Automatically open corpses", isChecked: ProfileManager.CurrentProfile.AutoOpenCorpses, valueChanged: (b) => { ProfileManager.CurrentProfile.AutoOpenCorpses = b; }), true, page);
             content.Indent();
-            content.AddToRight(new SliderWithLabel("Corpse open distance", 0, Theme.SLIDER_WIDTH, 0, 5, ProfileManager.CurrentProfile.AutoOpenCorpseRange, (r) => { ProfileManager.CurrentProfile.AutoOpenCorpseRange = r; }), true, (int)PAGE.General + 1000);
-            content.AddToRight(new CheckboxWithLabel("Skip empty corpses", isChecked: ProfileManager.CurrentProfile.SkipEmptyCorpse, valueChanged: (b) => { ProfileManager.CurrentProfile.SkipEmptyCorpse = b; }), true, (int)PAGE.General + 1000);
-            content.AddToRight(new ComboBoxWithLabel("Corpse open options", 0, Theme.COMBO_BOX_WIDTH, new string[] { "None", "Not targeting", "Not hiding", "Both" }, ProfileManager.CurrentProfile.CorpseOpenOptions, (s, n) => { ProfileManager.CurrentProfile.CorpseOpenOptions = s; }), true, (int)PAGE.General + 1000);
+            content.AddToRight(new SliderWithLabel("Corpse open distance", 0, Theme.SLIDER_WIDTH, 0, 5, ProfileManager.CurrentProfile.AutoOpenCorpseRange, (r) => { ProfileManager.CurrentProfile.AutoOpenCorpseRange = r; }), true, page);
+            content.AddToRight(new CheckboxWithLabel("Skip empty corpses", isChecked: ProfileManager.CurrentProfile.SkipEmptyCorpse, valueChanged: (b) => { ProfileManager.CurrentProfile.SkipEmptyCorpse = b; }), true, page);
+            content.AddToRight(new ComboBoxWithLabel("Corpse open options", 0, Theme.COMBO_BOX_WIDTH, new string[] { "None", "Not targeting", "Not hiding", "Both" }, ProfileManager.CurrentProfile.CorpseOpenOptions, (s, n) => { ProfileManager.CurrentProfile.CorpseOpenOptions = s; }), true, page);
             content.RemoveIndent();
 
             content.BlankLine();
 
-            content.AddToRight(new CheckboxWithLabel("No color for out of range objects", isChecked: ProfileManager.CurrentProfile.NoColorObjectsOutOfRange, valueChanged: (b) => { ProfileManager.CurrentProfile.NoColorObjectsOutOfRange = b; }), true, (int)PAGE.General + 1000);
+            content.AddToRight(new CheckboxWithLabel("No color for out of range objects", isChecked: ProfileManager.CurrentProfile.NoColorObjectsOutOfRange, valueChanged: (b) => { ProfileManager.CurrentProfile.NoColorObjectsOutOfRange = b; }), true, page);
 
             content.BlankLine();
 
-            content.AddToRight(c = new CheckboxWithLabel("Enable sallos easy grab", isChecked: ProfileManager.CurrentProfile.SallosEasyGrab, valueChanged: (b) => { ProfileManager.CurrentProfile.SallosEasyGrab = b; }), true, (int)PAGE.General + 1000);
+            content.AddToRight(c = new CheckboxWithLabel("Enable sallos easy grab", isChecked: ProfileManager.CurrentProfile.SallosEasyGrab, valueChanged: (b) => { ProfileManager.CurrentProfile.SallosEasyGrab = b; }), true, page);
             c.SetTooltip("Sallos easy grab is not recommended with grid containers enabled.");
 
             if (Client.Version > ClientVersion.CV_70796)
             {
                 content.BlankLine();
-                content.AddToRight(new CheckboxWithLabel("Show house content", isChecked: ProfileManager.CurrentProfile.ShowHouseContent, valueChanged: (b) => { ProfileManager.CurrentProfile.ShowHouseContent = b; }), true, (int)PAGE.General + 1000);
+                content.AddToRight(new CheckboxWithLabel("Show house content", isChecked: ProfileManager.CurrentProfile.ShowHouseContent, valueChanged: (b) => { ProfileManager.CurrentProfile.ShowHouseContent = b; }), true, page);
             }
 
             if (Client.Version >= ClientVersion.CV_7090)
             {
                 content.BlankLine();
-                content.AddToRight(new CheckboxWithLabel("Smooth boat movements", isChecked: ProfileManager.CurrentProfile.UseSmoothBoatMovement, valueChanged: (b) => { ProfileManager.CurrentProfile.UseSmoothBoatMovement = b; }), true, (int)PAGE.General + 1000);
-                content.AddToRight(new CheckboxWithLabel("Smooth boat movements", isChecked: ProfileManager.CurrentProfile.UseSmoothBoatMovement, valueChanged: (b) => { ProfileManager.CurrentProfile.UseSmoothBoatMovement = b; }), true, (int)PAGE.General + 1000);
-                content.AddToRight(new CheckboxWithLabel("Smooth boat movements", isChecked: ProfileManager.CurrentProfile.UseSmoothBoatMovement, valueChanged: (b) => { ProfileManager.CurrentProfile.UseSmoothBoatMovement = b; }), true, (int)PAGE.General + 1000);
-                content.AddToRight(new CheckboxWithLabel("Smooth boat movements", isChecked: ProfileManager.CurrentProfile.UseSmoothBoatMovement, valueChanged: (b) => { ProfileManager.CurrentProfile.UseSmoothBoatMovement = b; }), true, (int)PAGE.General + 1000);
-                content.AddToRight(new CheckboxWithLabel("Smooth boat movements", isChecked: ProfileManager.CurrentProfile.UseSmoothBoatMovement, valueChanged: (b) => { ProfileManager.CurrentProfile.UseSmoothBoatMovement = b; }), true, (int)PAGE.General + 1000);
+                content.AddToRight(new CheckboxWithLabel("Smooth boat movements", isChecked: ProfileManager.CurrentProfile.UseSmoothBoatMovement, valueChanged: (b) => { ProfileManager.CurrentProfile.UseSmoothBoatMovement = b; }), true, page);
             }
 
             content.BlankLine();
             #endregion
 
-            content.AddToLeft(SubCategoryButton("Mobiles", ((int)PAGE.General + 1001), content.LeftWidth));
+            #region Mobiles
+            page = ((int)PAGE.General + 1001);
+            content.AddToLeft(SubCategoryButton("Mobiles", page, content.LeftWidth));
+            content.ResetRightSide();
+
+            content.AddToRight(new CheckboxWithLabel("Show mobile's HP", isChecked: ProfileManager.CurrentProfile.ShowMobilesHP, valueChanged: (b) => { ProfileManager.CurrentProfile.ShowMobilesHP = b; }), true, page);
+            content.Indent();
+            content.AddToRight(new ComboBoxWithLabel("Type", 0, Theme.COMBO_BOX_WIDTH, new string[] { "Percentage", "Bar", "Both" }, ProfileManager.CurrentProfile.MobileHPType, (s, n) => { ProfileManager.CurrentProfile.MobileHPType = s; }), true, page);
+            content.AddToRight(new ComboBoxWithLabel("Show when", 0, Theme.COMBO_BOX_WIDTH, new string[] { "Always", "Less than 100%", "Smart" }, ProfileManager.CurrentProfile.MobileHPShowWhen, (s, n) => { ProfileManager.CurrentProfile.MobileHPShowWhen = s; }), true, page);
+            content.RemoveIndent();
+
+            content.BlankLine();
+
+            content.AddToRight(new CheckboxWithLabel("Hightlight poisoned mobiles", isChecked: ProfileManager.CurrentProfile.HighlightMobilesByPoisoned, valueChanged: (b) => { ProfileManager.CurrentProfile.HighlightMobilesByPoisoned = b; }), true, page);
+
+            #endregion
+
             content.AddToLeft(SubCategoryButton("Gumps & Context", ((int)PAGE.General + 1002), content.LeftWidth));
             content.AddToLeft(SubCategoryButton("Misc", ((int)PAGE.General + 1003), content.LeftWidth));
             content.AddToLeft(SubCategoryButton("Terrain & Statics", ((int)PAGE.General + 1004), content.LeftWidth));
@@ -2205,9 +2214,9 @@ namespace ClassicUO.Game.UI.Gumps
                         hueVector
                     );
 
-                    
+
                     // draw slider
-                    //if (MaxValue > MinValue)
+                    if (MaxValue > MinValue)
                     {
                         batcher.Draw(
                             whiteTexture,
