@@ -155,7 +155,23 @@ namespace ClassicUO.Game.UI.Gumps
             content.BlankLine();
 
             content.AddToRight(new CheckboxWithLabel("Hightlight poisoned mobiles", isChecked: ProfileManager.CurrentProfile.HighlightMobilesByPoisoned, valueChanged: (b) => { ProfileManager.CurrentProfile.HighlightMobilesByPoisoned = b; }), true, page);
+            content.Indent();
+            content.AddToRight(new ModernColorPickerWithLabel("Highlight color", ProfileManager.CurrentProfile.PoisonHue, (h) => { ProfileManager.CurrentProfile.PoisonHue = h; }), true, page);
+            content.RemoveIndent();
 
+            content.BlankLine();
+
+            content.AddToRight(new CheckboxWithLabel("Hightlight paralyzed mobiles", isChecked: ProfileManager.CurrentProfile.HighlightMobilesByParalize, valueChanged: (b) => { ProfileManager.CurrentProfile.HighlightMobilesByParalize = b; }), true, page);
+            content.Indent();
+            content.AddToRight(new ModernColorPickerWithLabel("Highlight color", ProfileManager.CurrentProfile.ParalyzedHue, (h) => { ProfileManager.CurrentProfile.ParalyzedHue = h; }), true, page);
+            content.RemoveIndent();
+
+            content.BlankLine();
+
+            content.AddToRight(new CheckboxWithLabel("Hightlight invulnerable mobiles", isChecked: ProfileManager.CurrentProfile.HighlightMobilesByInvul, valueChanged: (b) => { ProfileManager.CurrentProfile.HighlightMobilesByInvul = b; }), true, page);
+            content.Indent();
+            content.AddToRight(new ModernColorPickerWithLabel("Highlight color", ProfileManager.CurrentProfile.InvulnerableHue, (h) => { ProfileManager.CurrentProfile.InvulnerableHue = h; }), true, page);
+            content.RemoveIndent();
             #endregion
 
             content.AddToLeft(SubCategoryButton("Gumps & Context", ((int)PAGE.General + 1002), content.LeftWidth));
@@ -206,6 +222,58 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
         #region Custom Controls For Options
+        private class ModernColorPickerWithLabel : Control, SearchableOption
+        {
+            private TextBox _label;
+            private ModernColorPicker.HueDisplay _colorPicker;
+
+            public ModernColorPickerWithLabel(string text, ushort hue, Action<ushort> hueSelected = null, int maxWidth = 0) 
+            {
+                AcceptMouseInput = true;
+                CanMove = true;
+                WantUpdateSize = false;
+
+                Add(_colorPicker = new ModernColorPicker.HueDisplay(hue, hueSelected, true));
+
+                Add(_label = new TextBox(text, Theme.FONT, Theme.STANDARD_TEXT_SIZE, maxWidth > 0 ? maxWidth : null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { X = _colorPicker.Width + 5 });
+
+                Width = _label.Width + _colorPicker.Width + 5;
+                Height = Math.Max(_colorPicker.Height, _label.MeasuredSize.Y);
+
+                ModernOptionsGump.SearchValueChanged += ModernOptionsGump_SearchValueChanged;
+            }
+
+            private void ModernOptionsGump_SearchValueChanged(object sender, EventArgs e)
+            {
+                if (!string.IsNullOrEmpty(ModernOptionsGump.SearchText))
+                {
+                    if (Search(ModernOptionsGump.SearchText))
+                    {
+                        OnSearchMatch();
+                        ModernOptionsGump.SetParentsForMatchingSearch(this, Page);
+                    }
+                    else
+                    {
+                        _label.Alpha = Theme.NO_MATCH_SEARCH;
+                    }
+                }
+                else
+                {
+                    _label.Alpha = 1f;
+                }
+            }
+
+            public bool Search(string text)
+            {
+                return _label.Text.ToLower().Contains(text.ToLower());
+            }
+
+            public void OnSearchMatch()
+            {
+                _label.Alpha = 1f;
+            }
+        }
+
         private class CheckboxWithLabel : Control, SearchableOption
         {
             private const int CHECKBOX_SIZE = 30;
@@ -224,7 +292,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _isChecked = isChecked;
                 ValueChanged = valueChanged;
-                _text = new TextBox(text, TrueTypeLoader.EMBEDDED_FONT, Theme.STANDARD_TEXT_SIZE, maxWidth == 0 ? null : maxWidth, Theme.TEXT_FONT_COLOR, strokeEffect: false) { X = CHECKBOX_SIZE + 5 };
+                _text = new TextBox(text, Theme.FONT, Theme.STANDARD_TEXT_SIZE, maxWidth == 0 ? null : maxWidth, Theme.TEXT_FONT_COLOR, strokeEffect: false) { X = CHECKBOX_SIZE + 5 };
 
                 Width = CHECKBOX_SIZE + 5 + _text.Width;
                 Height = Math.Max(CHECKBOX_SIZE, _text.MeasuredSize.Y);
@@ -343,7 +411,7 @@ namespace ClassicUO.Game.UI.Gumps
                 AcceptMouseInput = true;
                 CanMove = true;
 
-                Add(_label = new TextBox(label, TrueTypeLoader.EMBEDDED_FONT, Theme.STANDARD_TEXT_SIZE, textWidth > 0 ? textWidth : null, Theme.TEXT_FONT_COLOR, strokeEffect: false));
+                Add(_label = new TextBox(label, Theme.FONT, Theme.STANDARD_TEXT_SIZE, textWidth > 0 ? textWidth : null, Theme.TEXT_FONT_COLOR, strokeEffect: false));
                 Add(_slider = new Slider(barWidth, min, max, value, valueChanged) { X = _label.X + _label.Width + 5 });
 
                 Width = textWidth + barWidth + 5;
@@ -399,7 +467,7 @@ namespace ClassicUO.Game.UI.Gumps
                     Action<int> valueChanged = null
                 )
                 {
-                    _text = new TextBox(string.Empty, TrueTypeLoader.EMBEDDED_FONT, Theme.STANDARD_TEXT_SIZE, barWidth, Theme.TEXT_FONT_COLOR, strokeEffect: false);
+                    _text = new TextBox(string.Empty, Theme.FONT, Theme.STANDARD_TEXT_SIZE, barWidth, Theme.TEXT_FONT_COLOR, strokeEffect: false);
 
                     MinValue = min;
                     MaxValue = max;
@@ -603,7 +671,7 @@ namespace ClassicUO.Game.UI.Gumps
                 AcceptMouseInput = true;
                 CanMove = true;
 
-                Add(_label = new TextBox(label, TrueTypeLoader.EMBEDDED_FONT, Theme.STANDARD_TEXT_SIZE, labelWidth > 0 ? labelWidth : null, Theme.TEXT_FONT_COLOR, strokeEffect: false));
+                Add(_label = new TextBox(label, Theme.FONT, Theme.STANDARD_TEXT_SIZE, labelWidth > 0 ? labelWidth : null, Theme.TEXT_FONT_COLOR, strokeEffect: false));
                 Add(_comboBox = new Combobox(comboWidth, options, selectedIndex, onOptionSelected: onOptionSelected) { X = _label.MeasuredSize.X + _label.X + 5 });
 
                 Width = labelWidth + comboWidth + 5;
@@ -685,7 +753,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     Add
                     (
-                        _label = new TextBox(initialText, TrueTypeLoader.EMBEDDED_FONT, Theme.STANDARD_TEXT_SIZE, width, Theme.TEXT_FONT_COLOR, strokeEffect: false)
+                        _label = new TextBox(initialText, Theme.FONT, Theme.STANDARD_TEXT_SIZE, width, Theme.TEXT_FONT_COLOR, strokeEffect: false)
                         {
                             X = 2,
                             Y = 5
@@ -859,7 +927,7 @@ namespace ClassicUO.Game.UI.Gumps
                             _selectedHue = selectedHue;
                             AcceptMouseInput = true;
 
-                            _label = new TextBox(text, TrueTypeLoader.EMBEDDED_FONT, Theme.STANDARD_TEXT_SIZE, maxwidth > 0 ? maxwidth : null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { AcceptMouseInput = true };
+                            _label = new TextBox(text, Theme.FONT, Theme.STANDARD_TEXT_SIZE, maxwidth > 0 ? maxwidth : null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { AcceptMouseInput = true };
                             Height = _label.MeasuredSize.Y;
                             Width = Math.Max(_label.MeasuredSize.X, maxwidth);
 
@@ -1018,10 +1086,10 @@ namespace ClassicUO.Game.UI.Gumps
                     Stb = new TextEdit(this);
                     Stb.SingleLine = true;
 
-                    _rendererText = new TextBox(string.Empty, TrueTypeLoader.EMBEDDED_FONT, FONT_SIZE, maxWidth > 0 ? maxWidth : null, Theme.TEXT_FONT_COLOR, strokeEffect: false);
+                    _rendererText = new TextBox(string.Empty, Theme.FONT, FONT_SIZE, maxWidth > 0 ? maxWidth : null, Theme.TEXT_FONT_COLOR, strokeEffect: false);
 
 
-                    _rendererCaret = new TextBox("_", TrueTypeLoader.EMBEDDED_FONT, FONT_SIZE, null, Theme.TEXT_FONT_COLOR, strokeEffect: false);
+                    _rendererCaret = new TextBox("_", Theme.FONT, FONT_SIZE, null, Theme.TEXT_FONT_COLOR, strokeEffect: false);
 
                     Height = _rendererCaret.Height;
                     LoseFocusOnEscapeKey = true;
@@ -1799,7 +1867,7 @@ namespace ClassicUO.Game.UI.Gumps
                 if (!string.IsNullOrEmpty(optionLabel))
                 {
                     Control labelTextBox;
-                    FullControl.Add(labelTextBox = new TextBox(optionLabel, TrueTypeLoader.EMBEDDED_FONT, 20, null, Theme.TEXT_FONT_COLOR, strokeEffect: false));
+                    FullControl.Add(labelTextBox = new TextBox(optionLabel, Theme.FONT, 20, null, Theme.TEXT_FONT_COLOR, strokeEffect: false));
 
                     if (labelTextBox.Width > maxTotalWidth)
                     {
@@ -1858,7 +1926,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Add
                 (
-                    TextLabel = new TextBox(text, TrueTypeLoader.EMBEDDED_FONT, 20, w, fontColor, align, false)
+                    TextLabel = new TextBox(text, Theme.FONT, 20, w, fontColor, align, false)
                 );
 
                 TextLabel.Y = (h - TextLabel.Height) >> 1;
@@ -2316,6 +2384,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             public static Color BUTTON_FONT_COLOR = Color.White;
             public static Color TEXT_FONT_COLOR = Color.White;
+
+            public static string FONT = TrueTypeLoader.EMBEDDED_FONT;
         }
 
         private enum PAGE

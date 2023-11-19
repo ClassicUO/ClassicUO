@@ -112,7 +112,7 @@ namespace ClassicUO.Game.UI.Gumps
             private float flashAlpha = 1f;
             private bool rev = false;
 
-            public ushort Hue { get { return hue; } set { hue = value; HueChanged?.Invoke(this, null);  } }
+            public ushort Hue { get { return hue; } set { hue = value; HueChanged?.Invoke(this, null); hueChanged?.Invoke(value);  } }
 
             public event EventHandler HueChanged;
 
