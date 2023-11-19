@@ -31,9 +31,9 @@ namespace ClassicUO.Game.UI.Gumps
             Width = 900;
             Height = 700;
 
-            Add(new ColorBox(Width, Height, ColorPallet.BACKGROUND) { AcceptMouseInput = true, CanMove = true, Alpha = 0.85f });
+            Add(new ColorBox(Width, Height, Theme.BACKGROUND) { AcceptMouseInput = true, CanMove = true, Alpha = 0.85f });
 
-            Add(new ColorBox(Width, 40, ColorPallet.SEARCH_BACKGROUND) { AcceptMouseInput = true, CanMove = true, Alpha = 0.85f });
+            Add(new ColorBox(Width, 40, Theme.SEARCH_BACKGROUND) { AcceptMouseInput = true, CanMove = true, Alpha = 0.85f });
 
             Add(new TextBox("Options", TrueTypeLoader.EMBEDDED_FONT, 30, null, Color.White, strokeEffect: false) { X = 10, Y = 10 });
 
@@ -63,6 +63,11 @@ namespace ClassicUO.Game.UI.Gumps
             mainContent.AddToLeft(CategoryButton("Nameplate Options", (int)PAGE.NameplateOptions, mainContent.LeftWidth));
             mainContent.AddToLeft(CategoryButton("Cooldown bars", (int)PAGE.TUOCooldowns, mainContent.LeftWidth));
             mainContent.AddToLeft(CategoryButton("TazUO Specific", (int)PAGE.TUOOptions, mainContent.LeftWidth));
+            mainContent.AddToLeft(CategoryButton("TazUO Specific", (int)PAGE.TUOOptions, mainContent.LeftWidth));
+            mainContent.AddToLeft(CategoryButton("TazUO Specific", (int)PAGE.TUOOptions, mainContent.LeftWidth));
+            mainContent.AddToLeft(CategoryButton("TazUO Specific", (int)PAGE.TUOOptions, mainContent.LeftWidth));
+            mainContent.AddToLeft(CategoryButton("TazUO Specific", (int)PAGE.TUOOptions, mainContent.LeftWidth));
+            mainContent.AddToLeft(CategoryButton("TazUO Specific", (int)PAGE.TUOOptions, mainContent.LeftWidth));
 
             BuildGeneral();
 
@@ -77,6 +82,9 @@ namespace ClassicUO.Game.UI.Gumps
         private void BuildGeneral()
         {
             LeftSideMenuRightSideContent content = new LeftSideMenuRightSideContent(mainContent.RightWidth, mainContent.Height, (int)(mainContent.RightWidth * 0.3));
+            Control c;
+
+            #region General
             content.AddToLeft(SubCategoryButton("General", ((int)PAGE.General + 1000), content.LeftWidth));
 
             content.AddToRight(new CheckboxWithLabel("Highlight objects under cursor", isChecked: ProfileManager.CurrentProfile.HighlightGameObjects, valueChanged: (b) => { ProfileManager.CurrentProfile.HighlightGameObjects = b; }), true, (int)PAGE.General + 1000);
@@ -107,11 +115,38 @@ namespace ClassicUO.Game.UI.Gumps
 
             content.AddToRight(new CheckboxWithLabel("Automatically open corpses", isChecked: ProfileManager.CurrentProfile.AutoOpenCorpses, valueChanged: (b) => { ProfileManager.CurrentProfile.AutoOpenCorpses = b; }), true, (int)PAGE.General + 1000);
             content.Indent();
-            content.AddToRight(new SliderWithLabel("Corpse open distance", 0, ColorPallet.SLIDER_WIDTH, 0, 5, ProfileManager.CurrentProfile.AutoOpenCorpseRange, (r) => { ProfileManager.CurrentProfile.AutoOpenCorpseRange = r; }), true, (int)PAGE.General + 1000);
+            content.AddToRight(new SliderWithLabel("Corpse open distance", 0, Theme.SLIDER_WIDTH, 0, 5, ProfileManager.CurrentProfile.AutoOpenCorpseRange, (r) => { ProfileManager.CurrentProfile.AutoOpenCorpseRange = r; }), true, (int)PAGE.General + 1000);
             content.AddToRight(new CheckboxWithLabel("Skip empty corpses", isChecked: ProfileManager.CurrentProfile.SkipEmptyCorpse, valueChanged: (b) => { ProfileManager.CurrentProfile.SkipEmptyCorpse = b; }), true, (int)PAGE.General + 1000);
-            content.AddToRight(new ComboBoxWithLabel("Corpse open options", 0, ColorPallet.COMBO_BOX_WIDTH, new string[] { "None", "Not targeting", "Not hiding", "Both" }, ProfileManager.CurrentProfile.CorpseOpenOptions, (s, n) => { ProfileManager.CurrentProfile.CorpseOpenOptions = s; }), true, (int)PAGE.General + 1000);
-
+            content.AddToRight(new ComboBoxWithLabel("Corpse open options", 0, Theme.COMBO_BOX_WIDTH, new string[] { "None", "Not targeting", "Not hiding", "Both" }, ProfileManager.CurrentProfile.CorpseOpenOptions, (s, n) => { ProfileManager.CurrentProfile.CorpseOpenOptions = s; }), true, (int)PAGE.General + 1000);
             content.RemoveIndent();
+
+            content.BlankLine();
+
+            content.AddToRight(new CheckboxWithLabel("No color for out of range objects", isChecked: ProfileManager.CurrentProfile.NoColorObjectsOutOfRange, valueChanged: (b) => { ProfileManager.CurrentProfile.NoColorObjectsOutOfRange = b; }), true, (int)PAGE.General + 1000);
+
+            content.BlankLine();
+
+            content.AddToRight(c = new CheckboxWithLabel("Enable sallos easy grab", isChecked: ProfileManager.CurrentProfile.SallosEasyGrab, valueChanged: (b) => { ProfileManager.CurrentProfile.SallosEasyGrab = b; }), true, (int)PAGE.General + 1000);
+            c.SetTooltip("Sallos easy grab is not recommended with grid containers enabled.");
+
+            if (Client.Version > ClientVersion.CV_70796)
+            {
+                content.BlankLine();
+                content.AddToRight(new CheckboxWithLabel("Show house content", isChecked: ProfileManager.CurrentProfile.ShowHouseContent, valueChanged: (b) => { ProfileManager.CurrentProfile.ShowHouseContent = b; }), true, (int)PAGE.General + 1000);
+            }
+
+            if (Client.Version >= ClientVersion.CV_7090)
+            {
+                content.BlankLine();
+                content.AddToRight(new CheckboxWithLabel("Smooth boat movements", isChecked: ProfileManager.CurrentProfile.UseSmoothBoatMovement, valueChanged: (b) => { ProfileManager.CurrentProfile.UseSmoothBoatMovement = b; }), true, (int)PAGE.General + 1000);
+                content.AddToRight(new CheckboxWithLabel("Smooth boat movements", isChecked: ProfileManager.CurrentProfile.UseSmoothBoatMovement, valueChanged: (b) => { ProfileManager.CurrentProfile.UseSmoothBoatMovement = b; }), true, (int)PAGE.General + 1000);
+                content.AddToRight(new CheckboxWithLabel("Smooth boat movements", isChecked: ProfileManager.CurrentProfile.UseSmoothBoatMovement, valueChanged: (b) => { ProfileManager.CurrentProfile.UseSmoothBoatMovement = b; }), true, (int)PAGE.General + 1000);
+                content.AddToRight(new CheckboxWithLabel("Smooth boat movements", isChecked: ProfileManager.CurrentProfile.UseSmoothBoatMovement, valueChanged: (b) => { ProfileManager.CurrentProfile.UseSmoothBoatMovement = b; }), true, (int)PAGE.General + 1000);
+                content.AddToRight(new CheckboxWithLabel("Smooth boat movements", isChecked: ProfileManager.CurrentProfile.UseSmoothBoatMovement, valueChanged: (b) => { ProfileManager.CurrentProfile.UseSmoothBoatMovement = b; }), true, (int)PAGE.General + 1000);
+            }
+
+            content.BlankLine();
+            #endregion
 
             content.AddToLeft(SubCategoryButton("Mobiles", ((int)PAGE.General + 1001), content.LeftWidth));
             content.AddToLeft(SubCategoryButton("Gumps & Context", ((int)PAGE.General + 1002), content.LeftWidth));
@@ -128,12 +163,12 @@ namespace ClassicUO.Game.UI.Gumps
 
         private ModernButton CategoryButton(string text, int page, int width, int height = 40)
         {
-            return new ModernButton(0, 0, width, height, ButtonAction.SwitchPage, text, ColorPallet.BUTTON_FONT_COLOR) { ButtonParameter = page, FullPageSwitch = true };
+            return new ModernButton(0, 0, width, height, ButtonAction.SwitchPage, text, Theme.BUTTON_FONT_COLOR) { ButtonParameter = page, FullPageSwitch = true };
         }
 
         private ModernButton SubCategoryButton(string text, int page, int width, int height = 40)
         {
-            return new ModernButton(0, 0, width, height, ButtonAction.SwitchPage, text, ColorPallet.BUTTON_FONT_COLOR) { ButtonParameter = page };
+            return new ModernButton(0, 0, width, height, ButtonAction.SwitchPage, text, Theme.BUTTON_FONT_COLOR) { ButtonParameter = page };
         }
 
         public override void OnPageChanged()
@@ -169,7 +204,7 @@ namespace ClassicUO.Game.UI.Gumps
             private bool _isChecked;
             private readonly TextBox _text;
 
-            private Vector3 hueVector = ShaderHueTranslator.GetHueVector(ColorPallet.SEARCH_BACKGROUND, false, 0.9f);
+            private Vector3 hueVector = ShaderHueTranslator.GetHueVector(Theme.SEARCH_BACKGROUND, false, 0.9f);
 
             public CheckboxWithLabel(
                 string text = "",
@@ -180,14 +215,12 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _isChecked = isChecked;
                 ValueChanged = valueChanged;
-                _text = new TextBox(text, TrueTypeLoader.EMBEDDED_FONT, ColorPallet.STANDARD_TEXT_SIZE, maxWidth == 0 ? null : maxWidth, ColorPallet.TEXT_FOREGROUND, strokeEffect: false) { X = CHECKBOX_SIZE + 5 };
+                _text = new TextBox(text, TrueTypeLoader.EMBEDDED_FONT, Theme.STANDARD_TEXT_SIZE, maxWidth == 0 ? null : maxWidth, Theme.TEXT_FONT_COLOR, strokeEffect: false) { X = CHECKBOX_SIZE + 5 };
 
                 Width = CHECKBOX_SIZE + 5 + _text.Width;
                 Height = Math.Max(CHECKBOX_SIZE, _text.MeasuredSize.Y);
 
                 _text.Y = (Height / 2) - (_text.Height / 2);
-
-                Add(_text);
 
                 CanMove = true;
                 AcceptMouseInput = true;
@@ -206,7 +239,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                     else
                     {
-                        _text.Alpha = ColorPallet.NO_MATCH_SEARCH;
+                        _text.Alpha = Theme.NO_MATCH_SEARCH;
                     }
                 }
                 else
@@ -256,6 +289,8 @@ namespace ClassicUO.Game.UI.Gumps
                     );
                 }
 
+                _text.Draw(batcher, x + _text.X, y + _text.Y);
+
                 return base.Draw(batcher, x, y);
             }
 
@@ -299,7 +334,7 @@ namespace ClassicUO.Game.UI.Gumps
                 AcceptMouseInput = true;
                 CanMove = true;
 
-                Add(_label = new TextBox(label, TrueTypeLoader.EMBEDDED_FONT, ColorPallet.STANDARD_TEXT_SIZE, textWidth > 0 ? textWidth : null, ColorPallet.TEXT_FOREGROUND, strokeEffect: false));
+                Add(_label = new TextBox(label, TrueTypeLoader.EMBEDDED_FONT, Theme.STANDARD_TEXT_SIZE, textWidth > 0 ? textWidth : null, Theme.TEXT_FONT_COLOR, strokeEffect: false));
                 Add(_slider = new Slider(barWidth, min, max, value, valueChanged) { X = _label.X + _label.Width + 5 });
 
                 Width = textWidth + barWidth + 5;
@@ -321,7 +356,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                     else
                     {
-                        _label.Alpha = ColorPallet.NO_MATCH_SEARCH;
+                        _label.Alpha = Theme.NO_MATCH_SEARCH;
                     }
                 }
                 else
@@ -355,7 +390,7 @@ namespace ClassicUO.Game.UI.Gumps
                     Action<int> valueChanged = null
                 )
                 {
-                    _text = new TextBox(string.Empty, TrueTypeLoader.EMBEDDED_FONT, ColorPallet.STANDARD_TEXT_SIZE, barWidth, ColorPallet.TEXT_FOREGROUND, strokeEffect: false);
+                    _text = new TextBox(string.Empty, TrueTypeLoader.EMBEDDED_FONT, Theme.STANDARD_TEXT_SIZE, barWidth, Theme.TEXT_FONT_COLOR, strokeEffect: false);
 
                     MinValue = min;
                     MaxValue = max;
@@ -432,7 +467,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 public override bool Draw(UltimaBatcher2D batcher, int x, int y)
                 {
-                    Vector3 hueVector = ShaderHueTranslator.GetHueVector(ColorPallet.BACKGROUND);
+                    Vector3 hueVector = ShaderHueTranslator.GetHueVector(Theme.BACKGROUND);
 
                     int mx = x;
 
@@ -443,7 +478,7 @@ namespace ClassicUO.Game.UI.Gumps
                         hueVector
                         );
 
-                    hueVector = ShaderHueTranslator.GetHueVector(ColorPallet.SEARCH_BACKGROUND);
+                    hueVector = ShaderHueTranslator.GetHueVector(Theme.SEARCH_BACKGROUND);
 
                     batcher.Draw(
                         SolidColorTextureCache.GetTexture(Color.White),
@@ -477,23 +512,23 @@ namespace ClassicUO.Game.UI.Gumps
                     CalculateNew(x);
                 }
 
-                protected override void OnMouseWheel(MouseEventType delta)
-                {
-                    switch (delta)
-                    {
-                        case MouseEventType.WheelScrollUp:
-                            Value++;
+                //protected override void OnMouseWheel(MouseEventType delta)
+                //{
+                //    switch (delta)
+                //    {
+                //        case MouseEventType.WheelScrollUp:
+                //            Value++;
 
-                            break;
+                //            break;
 
-                        case MouseEventType.WheelScrollDown:
-                            Value--;
+                //        case MouseEventType.WheelScrollDown:
+                //            Value--;
 
-                            break;
-                    }
+                //            break;
+                //    }
 
-                    CalculateOffset();
-                }
+                //    CalculateOffset();
+                //}
 
                 private void CalculateNew(int x)
                 {
@@ -552,27 +587,64 @@ namespace ClassicUO.Game.UI.Gumps
         {
             private TextBox _label;
             private Combobox _comboBox;
+            private readonly string[] options;
 
             public ComboBoxWithLabel(string label, int labelWidth, int comboWidth, string[] options, int selectedIndex, Action<int, string> onOptionSelected = null)
             {
                 AcceptMouseInput = true;
                 CanMove = true;
 
-                Add(_label = new TextBox(label, TrueTypeLoader.EMBEDDED_FONT, ColorPallet.STANDARD_TEXT_SIZE, labelWidth > 0 ? labelWidth : null, ColorPallet.TEXT_FOREGROUND, strokeEffect: false));
+                Add(_label = new TextBox(label, TrueTypeLoader.EMBEDDED_FONT, Theme.STANDARD_TEXT_SIZE, labelWidth > 0 ? labelWidth : null, Theme.TEXT_FONT_COLOR, strokeEffect: false));
                 Add(_comboBox = new Combobox(comboWidth, options, selectedIndex, onOptionSelected: onOptionSelected) { X = _label.MeasuredSize.X + _label.X + 5 });
 
                 Width = labelWidth + comboWidth + 5;
                 Height = Math.Max(_label.MeasuredSize.Y, _comboBox.Height);
+
+                ModernOptionsGump.SearchValueChanged += ModernOptionsGump_SearchValueChanged;
+                this.options = options;
             }
 
-            public void OnSearchMatch()
+            private void ModernOptionsGump_SearchValueChanged(object sender, EventArgs e)
             {
-                throw new NotImplementedException();
+                if (!string.IsNullOrEmpty(ModernOptionsGump.SearchText))
+                {
+                    if (Search(ModernOptionsGump.SearchText))
+                    {
+                        OnSearchMatch();
+                        ModernOptionsGump.SetParentsForMatchingSearch(this, Page);
+                    }
+                    else
+                    {
+                        _label.Alpha = Theme.NO_MATCH_SEARCH;
+                    }
+                }
+                else
+                {
+                    _label.Alpha = 1f;
+                }
             }
 
             public bool Search(string text)
             {
-                throw new NotImplementedException();
+                if (_label.Text.ToLower().Contains(text.ToLower()))
+                {
+                    return true;
+                }
+
+                foreach (string o in options)
+                {
+                    if (o.ToLower().Contains(text.ToLower()))
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+
+            public void OnSearchMatch()
+            {
+                _label.Alpha = 1f;
             }
 
             private class Combobox : Control
@@ -600,11 +672,11 @@ namespace ClassicUO.Game.UI.Gumps
 
                     string initialText = selected > -1 ? items[selected] : string.Empty;
 
-                    Add(new ColorBox(Width, Height, ColorPallet.SEARCH_BACKGROUND));
+                    Add(new ColorBox(Width, Height, Theme.SEARCH_BACKGROUND));
 
                     Add
                     (
-                        _label = new TextBox(initialText, TrueTypeLoader.EMBEDDED_FONT, ColorPallet.STANDARD_TEXT_SIZE, width, ColorPallet.TEXT_FOREGROUND, strokeEffect: false)
+                        _label = new TextBox(initialText, TrueTypeLoader.EMBEDDED_FONT, Theme.STANDARD_TEXT_SIZE, width, Theme.TEXT_FONT_COLOR, strokeEffect: false)
                         {
                             X = 2,
                             Y = 5
@@ -690,7 +762,7 @@ namespace ClassicUO.Game.UI.Gumps
                         _combobox = combobox;
 
                         ColorBox cb;
-                        Add(cb = new ColorBox(width, 0, ColorPallet.BACKGROUND));
+                        Add(cb = new ColorBox(width, 0, Theme.BACKGROUND));
 
                         HoveredLabel[] labels = new HoveredLabel[items.Length];
 
@@ -706,15 +778,15 @@ namespace ClassicUO.Game.UI.Gumps
                             HoveredLabel label = new HoveredLabel
                             (
                                 item,
-                                ColorPallet.OPTION_HUE,
-                                ColorPallet.OPTION_OVER_HUE,
-                                ColorPallet.OPTION_SELECTED_HUE,
+                                Theme.DROPDOWN_OPTION_NORMAL_HUE,
+                                Theme.DROPDOWN_OPTION_HOVER_HUE,
+                                Theme.DROPDOWN_OPTION_SELECTED_HUE,
                                 width
                             )
                             {
                                 X = 2,
                                 Tag = i,
-                                IsSelected = combobox.SelectedIndex == i ? true: false
+                                IsSelected = combobox.SelectedIndex == i ? true : false
                             };
 
                             label.Y = i * label.Height + 5;
@@ -778,7 +850,7 @@ namespace ClassicUO.Game.UI.Gumps
                             _selectedHue = selectedHue;
                             AcceptMouseInput = true;
 
-                            _label = new TextBox(text, TrueTypeLoader.EMBEDDED_FONT, ColorPallet.STANDARD_TEXT_SIZE, maxwidth > 0 ? maxwidth : null, ColorPallet.TEXT_FOREGROUND, strokeEffect: false) { AcceptMouseInput = true };
+                            _label = new TextBox(text, TrueTypeLoader.EMBEDDED_FONT, Theme.STANDARD_TEXT_SIZE, maxwidth > 0 ? maxwidth : null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { AcceptMouseInput = true };
                             Height = _label.MeasuredSize.Y;
                             Width = Math.Max(_label.MeasuredSize.X, maxwidth);
 
@@ -937,10 +1009,10 @@ namespace ClassicUO.Game.UI.Gumps
                     Stb = new TextEdit(this);
                     Stb.SingleLine = true;
 
-                    _rendererText = new TextBox(string.Empty, TrueTypeLoader.EMBEDDED_FONT, FONT_SIZE, maxWidth > 0 ? maxWidth : null, ColorPallet.TEXT_FOREGROUND, strokeEffect: false);
+                    _rendererText = new TextBox(string.Empty, TrueTypeLoader.EMBEDDED_FONT, FONT_SIZE, maxWidth > 0 ? maxWidth : null, Theme.TEXT_FONT_COLOR, strokeEffect: false);
 
 
-                    _rendererCaret = new TextBox("_", TrueTypeLoader.EMBEDDED_FONT, FONT_SIZE, null, ColorPallet.TEXT_FOREGROUND, strokeEffect: false);
+                    _rendererCaret = new TextBox("_", TrueTypeLoader.EMBEDDED_FONT, FONT_SIZE, null, Theme.TEXT_FONT_COLOR, strokeEffect: false);
 
                     Height = _rendererCaret.Height;
                     LoseFocusOnEscapeKey = true;
@@ -1636,7 +1708,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Add(left = new ScrollArea(0, 0, leftWidth, height) { CanMove = true, AcceptMouseInput = true }, page);
                 Add(right = new ScrollArea(leftWidth, 0, Width - leftWidth, height) { CanMove = true, AcceptMouseInput = true }, page);
 
-                LeftWidth = leftWidth - ScrollBar.SCROLL_BAR_WIDTH;
+                LeftWidth = leftWidth - Theme.SCROLL_BAR_WIDTH;
                 RightWidth = Width - leftWidth;
             }
 
@@ -1686,6 +1758,12 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
+            public void ResetRightSide()
+            {
+                rightY = TOP_PADDING;
+                rightX = 0;
+            }
+
             public void SetMatchingButton(int page)
             {
                 foreach (Control c in left.Children)
@@ -1712,7 +1790,7 @@ namespace ClassicUO.Game.UI.Gumps
                 if (!string.IsNullOrEmpty(optionLabel))
                 {
                     Control labelTextBox;
-                    FullControl.Add(labelTextBox = new TextBox(optionLabel, TrueTypeLoader.EMBEDDED_FONT, 20, null, ColorPallet.TEXT_FOREGROUND, strokeEffect: false));
+                    FullControl.Add(labelTextBox = new TextBox(optionLabel, TrueTypeLoader.EMBEDDED_FONT, 20, null, Theme.TEXT_FONT_COLOR, strokeEffect: false));
 
                     if (labelTextBox.Width > maxTotalWidth)
                     {
@@ -1791,7 +1869,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                     else
                     {
-                        TextLabel.Alpha = ColorPallet.NO_MATCH_SEARCH;
+                        TextLabel.Alpha = Theme.NO_MATCH_SEARCH;
                     }
                 }
                 else
@@ -1927,7 +2005,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private class ScrollArea : Control
         {
-            private readonly ScrollBarBase _scrollBar;
+            private readonly ScrollBar _scrollBar;
 
             public ScrollArea
             (
@@ -1943,7 +2021,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Width = w;
                 Height = h;
 
-                _scrollBar = new ScrollBar(Width - 15, 0, Height);
+                _scrollBar = new ScrollBar(Width - Theme.SCROLL_BAR_WIDTH, 0, Height);
 
                 ScrollMaxHeight = scroll_max_height;
 
@@ -1955,32 +2033,20 @@ namespace ClassicUO.Game.UI.Gumps
                 AcceptMouseInput = true;
                 WantUpdateSize = false;
                 CanMove = true;
-                ScrollbarBehaviour = ScrollbarBehaviour.ShowAlways;
             }
 
-
             public int ScrollMaxHeight { get; set; } = -1;
-            public ScrollbarBehaviour ScrollbarBehaviour { get; set; }
             public int ScrollValue => _scrollBar.Value;
             public int ScrollMinValue => _scrollBar.MinValue;
             public int ScrollMaxValue => _scrollBar.MaxValue;
 
-
             public Rectangle ScissorRectangle;
-
 
             public override void Update()
             {
                 base.Update();
 
                 CalculateScrollBarMaxValue();
-            }
-
-            public int ScrollBarWidth()
-            {
-                if (_scrollBar == null)
-                    return 0;
-                return _scrollBar.Width;
             }
 
             public void Scroll(bool isup)
@@ -1997,10 +2063,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
-                ScrollBarBase scrollbar = (ScrollBarBase)Children[0];
-                scrollbar.Draw(batcher, x + scrollbar.X, y + scrollbar.Y);
+                _scrollBar.Draw(batcher, x + _scrollBar.X, y + _scrollBar.Y);
 
-                if (batcher.ClipBegin(x + ScissorRectangle.X, y + ScissorRectangle.Y, Width - 14 + ScissorRectangle.Width, Height + ScissorRectangle.Height))
+                if (batcher.ClipBegin(x + ScissorRectangle.X, y + ScissorRectangle.Y, Width - _scrollBar.Width + ScissorRectangle.Width, Height + ScissorRectangle.Height))
                 {
                     for (int i = 1; i < Children.Count; i++)
                     {
@@ -2011,7 +2076,7 @@ namespace ClassicUO.Game.UI.Gumps
                             continue;
                         }
 
-                        int finalY = y + child.Y - scrollbar.Value + ScissorRectangle.Y;
+                        int finalY = y + child.Y - _scrollBar.Value + ScissorRectangle.Y;
 
                         child.Draw(batcher, x + child.X, finalY);
                     }
@@ -2021,7 +2086,6 @@ namespace ClassicUO.Game.UI.Gumps
 
                 return true;
             }
-
 
             protected override void OnMouseWheel(MouseEventType delta)
             {
@@ -2052,27 +2116,17 @@ namespace ClassicUO.Game.UI.Gumps
                 _scrollBar.Height = ScrollMaxHeight >= 0 ? ScrollMaxHeight : Height;
                 bool maxValue = _scrollBar.Value == _scrollBar.MaxValue && _scrollBar.MaxValue != 0;
 
-                int startX = 0, startY = 0, endX = 0, endY = 0;
+                int startY = 0, endY = 0;
 
                 for (int i = 1; i < Children.Count; i++)
                 {
                     Control c = Children[i];
 
-                    if (c.IsVisible && !c.IsDisposed)
+                    if (c.IsVisible && !c.IsDisposed && (c.Page == 0 || c.Page == ActivePage))
                     {
-                        if (c.X < startX)
-                        {
-                            startX = c.X;
-                        }
-
                         if (c.Y < startY)
                         {
                             startY = c.Y;
-                        }
-
-                        if (c.Bounds.Right > endX)
-                        {
-                            endX = c.Bounds.Right;
                         }
 
                         if (c.Bounds.Bottom > endY)
@@ -2082,7 +2136,6 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 }
 
-                int width = Math.Abs(startX) + Math.Abs(endX);
                 int height = Math.Abs(startY) + Math.Abs(endY) - _scrollBar.Height;
                 height = Math.Max(0, height - (-ScissorRectangle.Y + ScissorRectangle.Height));
 
@@ -2107,135 +2160,138 @@ namespace ClassicUO.Game.UI.Gumps
                     Children[i].UpdateOffset(0, -_scrollBar.Value + ScissorRectangle.Y);
                 }
             }
-        }
 
-        private class ScrollBar : ScrollBarBase
-        {
-            public const int SCROLL_BAR_WIDTH = 15;
-            private Rectangle _rectSlider,
-                _emptySpace;
-
-            private Vector3 hueVector = ShaderHueTranslator.GetHueVector(ColorPallet.BACKGROUND, false, 0.75f);
-            private Vector3 hueVectorForeground = ShaderHueTranslator.GetHueVector(ColorPallet.BLACK, false, 0.75f);
-            private Texture2D whiteTexture = SolidColorTextureCache.GetTexture(Color.White);
-
-            public ScrollBar(int x, int y, int height)
+            private class ScrollBar : ScrollBarBase
             {
-                Height = height;
-                Location = new Point(x, y);
-                AcceptMouseInput = true;
+                private Rectangle _rectSlider,
+                    _emptySpace;
 
-                Width = SCROLL_BAR_WIDTH;
+                private Vector3 hueVector = ShaderHueTranslator.GetHueVector(Theme.BACKGROUND, false, 0.75f);
+                private Vector3 hueVectorForeground = ShaderHueTranslator.GetHueVector(Theme.BLACK, false, 0.75f);
+                private Texture2D whiteTexture = SolidColorTextureCache.GetTexture(Color.White);
 
-                _rectSlider = new Rectangle(
-                    0,
-                    _sliderPosition,
-                    Width,
-                    20
-                );
-
-                _emptySpace.X = 0;
-                _emptySpace.Y = 0;
-                _emptySpace.Width = Width;
-                _emptySpace.Height = Height;
-            }
-
-            public override bool Draw(UltimaBatcher2D batcher, int x, int y)
-            {
-                if (Height <= 0 || !IsVisible)
+                public ScrollBar(int x, int y, int height)
                 {
-                    return false;
+                    Height = height;
+                    Location = new Point(x, y);
+                    AcceptMouseInput = true;
+
+                    Width = Theme.SCROLL_BAR_WIDTH;
+
+                    _rectSlider = new Rectangle(
+                        0,
+                        _sliderPosition,
+                        Width,
+                        20
+                    );
+
+                    _emptySpace.X = 0;
+                    _emptySpace.Y = 0;
+                    _emptySpace.Width = Width;
+                    _emptySpace.Height = Height;
                 }
 
-                // draw scrollbar background
-                batcher.Draw(
-                    whiteTexture,
-                    new Rectangle(x, y, Width, Height),
-                    hueVector
-                );
-
-                // draw slider
-                if (MaxValue > MinValue)
+                public override bool Draw(UltimaBatcher2D batcher, int x, int y)
                 {
+                    if (Height <= 0 || !IsVisible)
+                    {
+                        return false;
+                    }
+
+                    // draw scrollbar background
                     batcher.Draw(
                         whiteTexture,
-                        new Rectangle(x, y + _sliderPosition, Width, 20),
-                        hueVectorForeground
+                        new Rectangle(x, y, Width, Height),
+                        hueVector
                     );
+
+                    
+                    // draw slider
+                    //if (MaxValue > MinValue)
+                    {
+                        batcher.Draw(
+                            whiteTexture,
+                            new Rectangle(x, y + _sliderPosition, Width, 20),
+                            hueVectorForeground
+                        );
+                    }
+
+                    return base.Draw(batcher, x, y);
                 }
 
-                return base.Draw(batcher, x, y);
-            }
-
-            protected override int GetScrollableArea()
-            {
-                return Height - _rectSlider.Height;
-            }
-
-            protected override void OnMouseDown(int x, int y, MouseButtonType button)
-            {
-                base.OnMouseDown(x, y, button);
-
-                if (_btnSliderClicked && _emptySpace.Contains(x, y))
+                protected override int GetScrollableArea()
                 {
-                    CalculateByPosition(x, y);
+                    return Height - _rectSlider.Height;
                 }
-            }
 
-            protected override void CalculateByPosition(int x, int y)
-            {
-                if (y != _clickPosition.Y)
+                protected override void OnMouseDown(int x, int y, MouseButtonType button)
                 {
-                    y -= _emptySpace.Y + (_rectSlider.Height >> 1);
+                    base.OnMouseDown(x, y, button);
 
-                    if (y < 0)
+                    if (_btnSliderClicked && _emptySpace.Contains(x, y))
                     {
-                        y = 0;
+                        CalculateByPosition(x, y);
                     }
-
-                    int scrollableArea = GetScrollableArea();
-
-                    if (y > scrollableArea)
-                    {
-                        y = scrollableArea;
-                    }
-
-                    _sliderPosition = y;
-                    _clickPosition.X = x;
-                    _clickPosition.Y = y;
-
-                    if (
-                        y == 0
-                        && _clickPosition.Y < (_rectSlider.Height >> 1)
-                    )
-                    {
-                        _clickPosition.Y = _rectSlider.Height >> 1;
-                    }
-                    else if (
-                        y == scrollableArea
-                        && _clickPosition.Y
-                            > Height - (_rectSlider.Height >> 1)
-                    )
-                    {
-                        _clickPosition.Y =
-                            Height - (_rectSlider.Height >> 1);
-                    }
-
-                    _value = (int)
-                        Math.Round(y / (float)scrollableArea * (MaxValue - MinValue) + MinValue);
                 }
-            }
 
-            public override bool Contains(int x, int y)
-            {
-                return x >= 0 && x <= Width && y >= 0 && y <= Height;
+                protected override void CalculateByPosition(int x, int y)
+                {
+                    if (y != _clickPosition.Y)
+                    {
+                        y -= _emptySpace.Y + (_rectSlider.Height >> 1);
+
+                        if (y < 0)
+                        {
+                            y = 0;
+                        }
+
+                        int scrollableArea = GetScrollableArea();
+
+                        if (y > scrollableArea)
+                        {
+                            y = scrollableArea;
+                        }
+
+                        _sliderPosition = y;
+                        _clickPosition.X = x;
+                        _clickPosition.Y = y;
+
+                        if (
+                            y == 0
+                            && _clickPosition.Y < (_rectSlider.Height >> 1)
+                        )
+                        {
+                            _clickPosition.Y = _rectSlider.Height >> 1;
+                        }
+                        else if (
+                            y == scrollableArea
+                            && _clickPosition.Y
+                                > Height - (_rectSlider.Height >> 1)
+                        )
+                        {
+                            _clickPosition.Y =
+                                Height - (_rectSlider.Height >> 1);
+                        }
+
+                        _value = (int)
+                            Math.Round(y / (float)scrollableArea * (MaxValue - MinValue) + MinValue);
+                    }
+                }
+
+                public override bool Contains(int x, int y)
+                {
+                    return x >= 0 && x <= Width && y >= 0 && y <= Height;
+                }
             }
         }
 
-        private static class ColorPallet
+
+
+        private static class Theme
         {
             public const int SLIDER_WIDTH = 150;
             public const int COMBO_BOX_WIDTH = 250;
+            public const int SCROLL_BAR_WIDTH = 15;
 
             public const int STANDARD_TEXT_SIZE = 20;
 
@@ -2245,12 +2301,12 @@ namespace ClassicUO.Game.UI.Gumps
             public const ushort SEARCH_BACKGROUND = 899;
             public const ushort BLACK = 0;
 
-            public static Color OPTION_HUE = Color.White;
-            public static Color OPTION_OVER_HUE = Color.AntiqueWhite;
-            public static Color OPTION_SELECTED_HUE = Color.CadetBlue;
+            public static Color DROPDOWN_OPTION_NORMAL_HUE = Color.White;
+            public static Color DROPDOWN_OPTION_HOVER_HUE = Color.AntiqueWhite;
+            public static Color DROPDOWN_OPTION_SELECTED_HUE = Color.CadetBlue;
 
             public static Color BUTTON_FONT_COLOR = Color.White;
-            public static Color TEXT_FOREGROUND = Color.White;
+            public static Color TEXT_FONT_COLOR = Color.White;
         }
 
         private enum PAGE
