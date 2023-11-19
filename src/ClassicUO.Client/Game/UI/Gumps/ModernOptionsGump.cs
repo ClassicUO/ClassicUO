@@ -65,6 +65,7 @@ namespace ClassicUO.Game.UI.Gumps
             mainContent.AddToLeft(CategoryButton("TazUO Specific", (int)PAGE.TUOOptions, mainContent.LeftWidth));
 
             BuildGeneral();
+            BuildSound();
 
             foreach (SettingsOption option in options)
             {
@@ -177,8 +178,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             content.AddToRight(new CheckboxWithLabel("Show incoming mobile names", isChecked: ProfileManager.CurrentProfile.ShowNewMobileNameIncoming, valueChanged: (b) => { ProfileManager.CurrentProfile.ShowNewMobileNameIncoming = b; }), true, page);
 
-            content.BlankLine(); 
-            
+            content.BlankLine();
+
             content.AddToRight(new CheckboxWithLabel("Show incoming corpse names", isChecked: ProfileManager.CurrentProfile.ShowNewCorpseNameIncoming, valueChanged: (b) => { ProfileManager.CurrentProfile.ShowNewCorpseNameIncoming = b; }), true, page);
 
             content.BlankLine();
@@ -337,6 +338,128 @@ namespace ClassicUO.Game.UI.Gumps
                 ));
         }
 
+        private void BuildSound()
+        {
+            int x = 0, y = Theme.TOP_PADDING;
+            Control c;
+
+            options.Add(new SettingsOption(
+                    "",
+                    c = new CheckboxWithLabel("Enable sound", 0, ProfileManager.CurrentProfile.EnableSound, (b) => { ProfileManager.CurrentProfile.EnableSound = b; }),
+                    mainContent.RightWidth,
+                    PAGE.Sound,
+                    x,
+                    y
+                ));
+            y += c.Height + Theme.TOP_PADDING;
+            x += Theme.INDENT_SPACE;
+
+            options.Add(new SettingsOption(
+                    "",
+                    c = new SliderWithLabel("Volume", 0, Theme.SLIDER_WIDTH, 0, 100, ProfileManager.CurrentProfile.SoundVolume, (i) => { ProfileManager.CurrentProfile.SoundVolume = i; }),
+                    mainContent.RightWidth,
+                    PAGE.Sound,
+                    x,
+                    y
+                ));
+            y += c.Height + Theme.TOP_PADDING;
+            x -= Theme.INDENT_SPACE;
+
+
+            y += Theme.BLANK_LINE;
+
+
+            options.Add(new SettingsOption(
+                    "",
+                    c = new CheckboxWithLabel("Enable music", 0, ProfileManager.CurrentProfile.EnableMusic, (b) => { ProfileManager.CurrentProfile.EnableMusic = b; }),
+                    mainContent.RightWidth,
+                    PAGE.Sound,
+                    x,
+                    y
+                ));
+            y += c.Height + Theme.TOP_PADDING;
+            x += Theme.INDENT_SPACE;
+
+            options.Add(new SettingsOption(
+                    "",
+                    c = new SliderWithLabel("Volume", 0, Theme.SLIDER_WIDTH, 0, 100, ProfileManager.CurrentProfile.MusicVolume, (i) => { ProfileManager.CurrentProfile.MusicVolume = i; }),
+                    mainContent.RightWidth,
+                    PAGE.Sound,
+                    x,
+                    y
+                ));
+            y += c.Height + Theme.TOP_PADDING;
+            x -= Theme.INDENT_SPACE;
+
+
+            y += Theme.BLANK_LINE;
+
+
+            options.Add(new SettingsOption(
+                    "",
+                    c = new CheckboxWithLabel("Enable login page music", 0, Settings.GlobalSettings.LoginMusic, (b) => { Settings.GlobalSettings.LoginMusic = b; }),
+                    mainContent.RightWidth,
+                    PAGE.Sound,
+                    x,
+                    y
+                ));
+            y += c.Height + Theme.TOP_PADDING;
+            x += Theme.INDENT_SPACE;
+
+            options.Add(new SettingsOption(
+                    "",
+                    c = new SliderWithLabel("Volume", 0, Theme.SLIDER_WIDTH, 0, 100, Settings.GlobalSettings.LoginMusicVolume, (i) => { Settings.GlobalSettings.LoginMusicVolume = i; }),
+                    mainContent.RightWidth,
+                    PAGE.Sound,
+                    x,
+                    y
+                ));
+            y += c.Height + Theme.TOP_PADDING;
+            x -= Theme.INDENT_SPACE;
+
+
+            y += Theme.BLANK_LINE;
+
+
+            options.Add(new SettingsOption(
+                    "",
+                    c = new CheckboxWithLabel("Play footsteps", 0, ProfileManager.CurrentProfile.EnableFootstepsSound, (b) => { ProfileManager.CurrentProfile.EnableFootstepsSound = b; }),
+                    mainContent.RightWidth,
+                    PAGE.Sound,
+                    x,
+                    y
+                ));
+            y += c.Height + Theme.TOP_PADDING;
+
+
+            y += Theme.BLANK_LINE;
+
+
+            options.Add(new SettingsOption(
+                    "",
+                    c = new CheckboxWithLabel("Combat music", 0, ProfileManager.CurrentProfile.EnableCombatMusic, (b) => { ProfileManager.CurrentProfile.EnableCombatMusic = b; }),
+                    mainContent.RightWidth,
+                    PAGE.Sound,
+                    x,
+                    y
+                ));
+            y += c.Height + Theme.TOP_PADDING;
+
+
+            y += Theme.BLANK_LINE;
+
+
+            options.Add(new SettingsOption(
+                    "",
+                    c = new CheckboxWithLabel("Play sound when UO is not in focus", 0, ProfileManager.CurrentProfile.ReproduceSoundsInBackground, (b) => { ProfileManager.CurrentProfile.ReproduceSoundsInBackground = b; }),
+                    mainContent.RightWidth,
+                    PAGE.Sound,
+                    x,
+                    y
+                ));
+            y += c.Height + Theme.TOP_PADDING;
+        }
+
         private ModernButton CategoryButton(string text, int page, int width, int height = 40)
         {
             return new ModernButton(0, 0, width, height, ButtonAction.SwitchPage, text, Theme.BUTTON_FONT_COLOR) { ButtonParameter = page, FullPageSwitch = true };
@@ -378,7 +501,7 @@ namespace ClassicUO.Game.UI.Gumps
             private TextBox _label;
             private ModernColorPicker.HueDisplay _colorPicker;
 
-            public ModernColorPickerWithLabel(string text, ushort hue, Action<ushort> hueSelected = null, int maxWidth = 0) 
+            public ModernColorPickerWithLabel(string text, ushort hue, Action<ushort> hueSelected = null, int maxWidth = 0)
             {
                 AcceptMouseInput = true;
                 CanMove = true;
@@ -744,7 +867,7 @@ namespace ClassicUO.Game.UI.Gumps
                 protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
                 {
                     base.OnKeyUp(key, mod);
-                    switch(key)
+                    switch (key)
                     {
                         case SDL.SDL_Keycode.SDLK_LEFT:
                             Value--;
@@ -1910,12 +2033,8 @@ namespace ClassicUO.Game.UI.Gumps
 
         private class LeftSideMenuRightSideContent : Control
         {
-            private const int TOP_PADDING = 5;
-            private const int INDENT_SPACE = 40;
-            private const int BLANK_LINE = 20;
-
             private ScrollArea left, right;
-            private int leftY, rightY = TOP_PADDING, leftX, rightX;
+            private int leftY, rightY = Theme.TOP_PADDING, leftX, rightX;
 
             public new int ActivePage
             {
@@ -1964,7 +2083,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     c.Y = rightY;
                     c.X = rightX;
-                    rightY += c.Height + TOP_PADDING;
+                    rightY += c.Height + Theme.TOP_PADDING;
                 }
 
                 right.Add(c, page);
@@ -1972,17 +2091,17 @@ namespace ClassicUO.Game.UI.Gumps
 
             public void BlankLine()
             {
-                rightY += BLANK_LINE;
+                rightY += Theme.BLANK_LINE;
             }
 
             public void Indent()
             {
-                rightX += INDENT_SPACE;
+                rightX += Theme.INDENT_SPACE;
             }
 
             public void RemoveIndent()
             {
-                rightX -= INDENT_SPACE;
+                rightX -= Theme.INDENT_SPACE;
                 if (rightX < 0)
                 {
                     rightX = 0;
@@ -1991,7 +2110,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             public void ResetRightSide()
             {
-                rightY = TOP_PADDING;
+                rightY = Theme.TOP_PADDING;
                 rightX = 0;
             }
 
@@ -2011,7 +2130,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private class SettingsOption
         {
-            public SettingsOption(string optionLabel, Control control, int maxTotalWidth, PAGE optionsPage)
+            public SettingsOption(string optionLabel, Control control, int maxTotalWidth, PAGE optionsPage, int x = 0, int y = 0)
             {
                 OptionLabel = optionLabel;
                 OptionControl = control;
@@ -2021,7 +2140,7 @@ namespace ClassicUO.Game.UI.Gumps
                 if (!string.IsNullOrEmpty(optionLabel))
                 {
                     Control labelTextBox;
-                    FullControl.Add(labelTextBox = new TextBox(optionLabel, Theme.FONT, 20, null, Theme.TEXT_FONT_COLOR, strokeEffect: false));
+                    FullControl.Add(labelTextBox = new TextBox(optionLabel, Theme.FONT, 20, null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { AcceptMouseInput = false });
 
                     if (labelTextBox.Width > maxTotalWidth)
                     {
@@ -2037,20 +2156,27 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         control.X = labelTextBox.Width + 5;
                     }
+
+                    FullControl.Width += labelTextBox.Width + 5;
+                    FullControl.Height = labelTextBox.Height;
                 }
 
                 FullControl.Add(OptionControl);
+                FullControl.Width += OptionControl.Width;
+
+                if (OptionControl.Height > FullControl.Height)
+                {
+                    FullControl.Height = OptionControl.Height;
+                }
+
+                FullControl.X = x;
+                FullControl.Y = y;
             }
 
             public string OptionLabel { get; }
             public Control OptionControl { get; }
             public PAGE OptionsPage { get; }
             public Area FullControl { get; }
-
-            public bool CanBeDisplayed()
-            {
-                return true;
-            }
         }
 
         private class ModernButton : HitBox, SearchableOption
@@ -2523,6 +2649,9 @@ namespace ClassicUO.Game.UI.Gumps
             public const int SLIDER_WIDTH = 150;
             public const int COMBO_BOX_WIDTH = 225;
             public const int SCROLL_BAR_WIDTH = 15;
+            public const int TOP_PADDING = 5;
+            public const int INDENT_SPACE = 40;
+            public const int BLANK_LINE = 20;
 
             public const int STANDARD_TEXT_SIZE = 20;
 
