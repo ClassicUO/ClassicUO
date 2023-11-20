@@ -63,7 +63,7 @@ namespace ClassicUO.Game.UI.Gumps
             ShowBorder = true;
             _prevBorder = true;
 
-            Add(_background = new AlphaBlendControl(0.7f) { Width = Width - 8, Height = Height - 8, X = 4, Y = 4 });
+            Insert(0, _background = new AlphaBlendControl(0.7f) { Width = Width - 8, Height = Height - 8, X = 4, Y = 4, Parent = this });
 
             ResetItems();
 
