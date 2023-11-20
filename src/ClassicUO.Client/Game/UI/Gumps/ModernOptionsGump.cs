@@ -71,6 +71,7 @@ namespace ClassicUO.Game.UI.Gumps
             BuildSound();
             BuildVideo();
             BuildMacros();
+            BuildTooltips();
 
             foreach (SettingsOption option in options)
             {
@@ -774,6 +775,45 @@ namespace ClassicUO.Game.UI.Gumps
                     mainContent.RightWidth,
                     PAGE.Macros
                 ));
+        }
+
+        private void BuildTooltips()
+        {
+            SettingsOption s;
+            PositionHelper.Reset();
+
+            options.Add(s = new SettingsOption(
+                    "",
+                    new CheckboxWithLabel("Enable tooltips", 0, ProfileManager.CurrentProfile.UseTooltip, (b) => { ProfileManager.CurrentProfile.UseTooltip = b; }),
+                    mainContent.RightWidth,
+                    PAGE.Tooltip
+                ));
+            PositionHelper.PositionControl(s.FullControl);
+            PositionHelper.Indent();
+
+            options.Add(s = new SettingsOption(
+                    "",
+                    new SliderWithLabel("Tooltip delay", 0, Theme.SLIDER_WIDTH, 0, 1000, ProfileManager.CurrentProfile.TooltipDelayBeforeDisplay, (i) => { ProfileManager.CurrentProfile.TooltipDelayBeforeDisplay = i; }),
+                    mainContent.RightWidth,
+                    PAGE.Tooltip
+                ));
+            PositionHelper.PositionControl(s.FullControl);
+
+            options.Add(s = new SettingsOption(
+                    "",
+                    new SliderWithLabel("Tooltip background opacity", 0, Theme.SLIDER_WIDTH, 0, 100, ProfileManager.CurrentProfile.TooltipBackgroundOpacity, (i) => { ProfileManager.CurrentProfile.TooltipBackgroundOpacity = i; }),
+                    mainContent.RightWidth,
+                    PAGE.Tooltip
+                ));
+            PositionHelper.PositionControl(s.FullControl);
+
+            options.Add(s = new SettingsOption(
+                    "",
+                    new ModernColorPickerWithLabel("Default tooltip font color", ProfileManager.CurrentProfile.TooltipTextHue, (h) => { ProfileManager.CurrentProfile.TooltipTextHue = h; }),
+                    mainContent.RightWidth,
+                    PAGE.Tooltip
+                ));
+            PositionHelper.PositionControl(s.FullControl);
         }
 
         private ModernButton CategoryButton(string text, int page, int width, int height = 40)
