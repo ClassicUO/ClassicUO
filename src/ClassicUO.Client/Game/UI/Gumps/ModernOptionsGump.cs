@@ -34,6 +34,9 @@ namespace ClassicUO.Game.UI.Gumps
             Width = 900;
             Height = 700;
 
+            X = (Client.Game.Window.ClientBounds.Width >> 1) - (Width >> 1);
+            Y = (Client.Game.Window.ClientBounds.Height >> 1) - (Height >> 1);
+
             Add(new ColorBox(Width, Height, Theme.BACKGROUND) { AcceptMouseInput = true, CanMove = true, Alpha = 0.85f });
 
             Add(new ColorBox(Width, 40, Theme.SEARCH_BACKGROUND) { AcceptMouseInput = true, CanMove = true, Alpha = 0.85f });
@@ -72,6 +75,8 @@ namespace ClassicUO.Game.UI.Gumps
             BuildVideo();
             BuildMacros();
             BuildTooltips();
+            BuildSpeech();
+            BuildCombatSpells();
 
             foreach (SettingsOption option in options)
             {
@@ -812,6 +817,194 @@ namespace ClassicUO.Game.UI.Gumps
                     new ModernColorPickerWithLabel("Default tooltip font color", ProfileManager.CurrentProfile.TooltipTextHue, (h) => { ProfileManager.CurrentProfile.TooltipTextHue = h; }),
                     mainContent.RightWidth,
                     PAGE.Tooltip
+                ));
+            PositionHelper.PositionControl(s.FullControl);
+        }
+
+        private void BuildSpeech()
+        {
+            SettingsOption s, ss;
+            PositionHelper.Reset();
+
+            options.Add(s = new SettingsOption(
+                    "",
+                    new CheckboxWithLabel("Scale speech delay", 0, ProfileManager.CurrentProfile.ScaleSpeechDelay, (b) => { ProfileManager.CurrentProfile.ScaleSpeechDelay = b; }),
+                    mainContent.RightWidth,
+                    PAGE.Speech
+                ));
+            PositionHelper.PositionControl(s.FullControl);
+            PositionHelper.Indent();
+
+            options.Add(s = new SettingsOption(
+                    "",
+                    new SliderWithLabel("Delay", 0, Theme.SLIDER_WIDTH, 0, 1000, ProfileManager.CurrentProfile.SpeechDelay, (i) => { ProfileManager.CurrentProfile.SpeechDelay = i; }),
+                    mainContent.RightWidth,
+                    PAGE.Speech
+                ));
+            PositionHelper.PositionControl(s.FullControl);
+            PositionHelper.RemoveIndent();
+
+            
+            PositionHelper.BlankLine();
+
+
+            options.Add(s = new SettingsOption(
+                    "",
+                    new CheckboxWithLabel("Save journal entries to file", 0, ProfileManager.CurrentProfile.SaveJournalToFile, (b) => { ProfileManager.CurrentProfile.SaveJournalToFile = b; }),
+                    mainContent.RightWidth,
+                    PAGE.Speech
+                ));
+            PositionHelper.PositionControl(s.FullControl);
+
+
+            PositionHelper.BlankLine();
+
+
+            options.Add(s = new SettingsOption(
+                    "",
+                    new CheckboxWithLabel("Activate chat by pressing Enter", 0, ProfileManager.CurrentProfile.ActivateChatAfterEnter, (b) => { ProfileManager.CurrentProfile.ActivateChatAfterEnter = b; }),
+                    mainContent.RightWidth,
+                    PAGE.Speech
+                ));
+            PositionHelper.PositionControl(s.FullControl);
+            PositionHelper.Indent();
+
+            options.Add(s = new SettingsOption(
+                    "",
+                    new CheckboxWithLabel("Also activate with common keys( ! ; : / \\ \\ , . [ | ~ )", 0, ProfileManager.CurrentProfile.ActivateChatAdditionalButtons, (b) => { ProfileManager.CurrentProfile.ActivateChatAdditionalButtons = b; }),
+                    mainContent.RightWidth,
+                    PAGE.Speech
+                ));
+            PositionHelper.PositionControl(s.FullControl);
+
+            options.Add(s = new SettingsOption(
+                    "",
+                    new CheckboxWithLabel("Use Shift + Enter to send message without closing chat", 0, ProfileManager.CurrentProfile.ActivateChatShiftEnterSupport, (b) => { ProfileManager.CurrentProfile.ActivateChatShiftEnterSupport = b; }),
+                    mainContent.RightWidth,
+                    PAGE.Speech
+                ));
+            PositionHelper.PositionControl(s.FullControl);
+            PositionHelper.RemoveIndent();
+
+
+            PositionHelper.BlankLine();
+
+
+            options.Add(s = new SettingsOption(
+                    "",
+                    new CheckboxWithLabel("Hide chat gradient", 0, ProfileManager.CurrentProfile.HideChatGradient, (b) => { ProfileManager.CurrentProfile.HideChatGradient = b; }),
+                    mainContent.RightWidth,
+                    PAGE.Speech
+                ));
+            PositionHelper.PositionControl(s.FullControl);
+
+
+            PositionHelper.BlankLine();
+
+
+            options.Add(s = new SettingsOption(
+                    "",
+                    new CheckboxWithLabel("Hide guild chat", 0, ProfileManager.CurrentProfile.IgnoreGuildMessages, (b) => { ProfileManager.CurrentProfile.IgnoreGuildMessages = b; }),
+                    mainContent.RightWidth,
+                    PAGE.Speech
+                ));
+            PositionHelper.PositionControl(s.FullControl);
+
+
+            PositionHelper.BlankLine();
+
+
+            options.Add(s = new SettingsOption(
+                    "",
+                    new CheckboxWithLabel("Hide alliance chat", 0, ProfileManager.CurrentProfile.IgnoreAllianceMessages, (b) => { ProfileManager.CurrentProfile.IgnoreAllianceMessages = b; }),
+                    mainContent.RightWidth,
+                    PAGE.Speech
+                ));
+            PositionHelper.PositionControl(s.FullControl);
+
+            
+            PositionHelper.BlankLine();
+
+
+            options.Add(s = new SettingsOption(
+                "",
+                new ModernColorPickerWithLabel("Speech color", ProfileManager.CurrentProfile.SpeechHue, (h) => { ProfileManager.CurrentProfile.SpeechHue = h; }),
+                mainContent.RightWidth,
+                PAGE.Speech
+            ));
+            PositionHelper.PositionControl(s.FullControl);
+            ss = s;
+
+            options.Add(s = new SettingsOption(
+                "",
+                new ModernColorPickerWithLabel("Yell color", ProfileManager.CurrentProfile.YellHue, (h) => { ProfileManager.CurrentProfile.YellHue = h; }),
+                mainContent.RightWidth,
+                PAGE.Speech
+            ));
+            PositionHelper.PositionExact(s.FullControl, 200, ss.FullControl.Y);
+
+            options.Add(s = new SettingsOption(
+                "",
+                new ModernColorPickerWithLabel("Party color", ProfileManager.CurrentProfile.PartyMessageHue, (h) => { ProfileManager.CurrentProfile.PartyMessageHue = h; }),
+                mainContent.RightWidth,
+                PAGE.Speech
+            ));
+            PositionHelper.PositionControl(s.FullControl);
+            ss = s;
+
+            options.Add(s = new SettingsOption(
+                "",
+                new ModernColorPickerWithLabel("Alliance color", ProfileManager.CurrentProfile.AllyMessageHue, (h) => { ProfileManager.CurrentProfile.AllyMessageHue = h; }),
+                mainContent.RightWidth,
+                PAGE.Speech
+            ));
+            PositionHelper.PositionExact(s.FullControl, 200, ss.FullControl.Y);
+
+            options.Add(s = new SettingsOption(
+                "",
+                new ModernColorPickerWithLabel("Emote color", ProfileManager.CurrentProfile.EmoteHue, (h) => { ProfileManager.CurrentProfile.EmoteHue = h; }),
+                mainContent.RightWidth,
+                PAGE.Speech
+            ));
+            PositionHelper.PositionControl(s.FullControl);
+            ss = s;
+
+            options.Add(s = new SettingsOption(
+                "",
+                new ModernColorPickerWithLabel("Whisper color", ProfileManager.CurrentProfile.WhisperHue, (h) => { ProfileManager.CurrentProfile.WhisperHue = h; }),
+                mainContent.RightWidth,
+                PAGE.Speech
+            ));
+            PositionHelper.PositionExact(s.FullControl, 200, ss.FullControl.Y);
+
+            options.Add(s = new SettingsOption(
+                "",
+                new ModernColorPickerWithLabel("Guild color", ProfileManager.CurrentProfile.GuildMessageHue, (h) => { ProfileManager.CurrentProfile.GuildMessageHue = h; }),
+                mainContent.RightWidth,
+                PAGE.Speech
+            ));
+            PositionHelper.PositionControl(s.FullControl);
+            ss = s;
+
+            options.Add(s = new SettingsOption(
+                "",
+                new ModernColorPickerWithLabel("Chat color", ProfileManager.CurrentProfile.ChatMessageHue, (h) => { ProfileManager.CurrentProfile.ChatMessageHue = h; }),
+                mainContent.RightWidth,
+                PAGE.Speech
+            ));
+            PositionHelper.PositionExact(s.FullControl, 200, ss.FullControl.Y);
+        }
+
+        private void BuildCombatSpells()
+        {
+            SettingsOption s;
+            PositionHelper.Reset();
+
+            options.Add(s = new SettingsOption(
+                    "",
+                    new CheckboxWithLabel("Hold tab for combat", 0, ProfileManager.CurrentProfile.HoldDownKeyTab, (b) => { ProfileManager.CurrentProfile.HoldDownKeyTab = b; }),
+                    mainContent.RightWidth,
+                    PAGE.CombatSpells
                 ));
             PositionHelper.PositionControl(s.FullControl);
         }
@@ -3010,6 +3203,7 @@ namespace ClassicUO.Game.UI.Gumps
             public const int TOP_PADDING = 5;
             public const int INDENT_SPACE = 40;
             public const int BLANK_LINE = 20;
+            public const int HORIZONTAL_SPACING_CONTROLS = 20;
 
             public const int STANDARD_TEXT_SIZE = 20;
 
@@ -3054,6 +3248,12 @@ namespace ClassicUO.Game.UI.Gumps
                 c.Y = Y;
 
                 Y += c.Height + Theme.TOP_PADDING;
+            }
+
+            public static void PositionExact(Control c, int x, int y)
+            {
+                c.X = x;
+                c.Y = y;
             }
 
             public static void Reset()
