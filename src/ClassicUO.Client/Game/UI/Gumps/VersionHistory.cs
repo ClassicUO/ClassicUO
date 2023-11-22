@@ -12,7 +12,8 @@ namespace ClassicUO.Game.UI.Gumps
                 "- No max width on item count text for smaller scaling\n" +
                 "- Auto loot shift-click will no long work if you have shift for context menu or split stacks.\n" +
                 "- Skill progress bars will save their position if you move them\n" +
-                "- Changed skill progress bars to a queue instead of all showing at once",
+                "- Changed skill progress bars to a queue instead of all showing at once\n" +
+                "- Fix art png loading",
 
             "/c[white][3.13.0]/cd\n" +
                 "- Fix item unintentional stacking\n" +
