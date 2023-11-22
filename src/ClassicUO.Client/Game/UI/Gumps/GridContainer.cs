@@ -950,7 +950,7 @@ namespace ClassicUO.Game.UI.Gumps
                         SelectHighlight = true;
                         Mouse.CancelDoubleClick = true;
                     }
-                    else if (Keyboard.Shift && _item != null)
+                    else if (Keyboard.Shift && _item != null && ProfileManager.CurrentProfile.EnableAutoLoot && !ProfileManager.CurrentProfile.HoldShiftForContext && !ProfileManager.CurrentProfile.HoldShiftToSplitStack)
                     {
                         AutoLootManager.Instance.AddLootItem(_item.Graphic, _item.Hue, _item.Name);
                         GameActions.Print($"Added this item to auto loot.");
