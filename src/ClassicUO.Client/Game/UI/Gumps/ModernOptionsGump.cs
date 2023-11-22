@@ -14,7 +14,6 @@ using SDL2;
 using System.Linq;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Resources;
-using static System.Windows.Forms.AxHost;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -1380,7 +1379,6 @@ namespace ClassicUO.Game.UI.Gumps
                 PAGE.InfoBar
             ));
             PositionHelper.PositionControl(s.FullControl);
-
             PositionHelper.RemoveIndent();
 
             PositionHelper.BlankLine();
@@ -1423,10 +1421,11 @@ namespace ClassicUO.Game.UI.Gumps
 
             options.Add(s = new SettingsOption(
                     "",
-                    new Line(ss.FullControl.X - 205, ss.FullControl.Y + ss.FullControl.Height + 2, mainContent.RightWidth, 1, Color.Gray.PackedValue),
+                    new Line(0, 0, mainContent.RightWidth, 1, Color.Gray.PackedValue) { AcceptMouseInput = false},
                     mainContent.RightWidth,
                     PAGE.InfoBar
                 ));
+            PositionHelper.PositionExact(s.FullControl, ss.FullControl.X - 205, ss.FullControl.Y + ss.FullControl.Height + 2);
             PositionHelper.BlankLine();
 
 
@@ -1558,7 +1557,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _isChecked = isChecked;
                 ValueChanged = valueChanged;
-                _text = new TextBox(text, Theme.FONT, Theme.STANDARD_TEXT_SIZE, maxWidth == 0 ? null : maxWidth, Theme.TEXT_FONT_COLOR, strokeEffect: false) { X = CHECKBOX_SIZE + 5 };
+                _text = new TextBox(text, Theme.FONT, Theme.STANDARD_TEXT_SIZE, maxWidth == 0 ? null : maxWidth, Theme.TEXT_FONT_COLOR, strokeEffect: false) { X = CHECKBOX_SIZE + 5, AcceptMouseInput = false };
 
                 Width = CHECKBOX_SIZE + 5 + _text.Width;
                 Height = Math.Max(CHECKBOX_SIZE, _text.MeasuredSize.Y);
@@ -2017,6 +2016,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _items = items;
                     _maxHeight = maxHeight;
                     OnOptionSelected = onOptionSelected;
+                    AcceptMouseInput = true;
 
                     string initialText = selected > -1 ? items[selected] : string.Empty;
 
@@ -2026,10 +2026,10 @@ namespace ClassicUO.Game.UI.Gumps
                     (
                         _label = new TextBox(initialText, Theme.FONT, Theme.STANDARD_TEXT_SIZE, width, Theme.TEXT_FONT_COLOR, strokeEffect: false)
                         {
-                            X = 2,
-                            Y = 5
+                            X = 2
                         }
                     );
+                    _label.Y = (Height >> 1) - (_label.Height >> 1);
                 }
 
                 public int SelectedIndex
@@ -2294,10 +2294,9 @@ namespace ClassicUO.Game.UI.Gumps
                 )
                 {
                     X = 4,
-                    Y = 4,
                     Width = width - 8,
-                    Height = height - 8
                 };
+                _textbox.Y = (height >> 1) - (_textbox.Height >> 1);
                 _textbox.Text = text;
                 _textbox.NumbersOnly = numbersOnly;
 
@@ -2367,7 +2366,6 @@ namespace ClassicUO.Game.UI.Gumps
                     Stb.SingleLine = true;
 
                     _rendererText = new TextBox(string.Empty, Theme.FONT, FONT_SIZE, maxWidth > 0 ? maxWidth : null, Theme.TEXT_FONT_COLOR, strokeEffect: false);
-
 
                     _rendererCaret = new TextBox("_", Theme.FONT, FONT_SIZE, null, Theme.TEXT_FONT_COLOR, strokeEffect: false);
 
@@ -3108,7 +3106,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         c.Update();
 
-                       
+
                     }
 
                 }
