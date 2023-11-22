@@ -80,6 +80,7 @@ namespace ClassicUO.Game.UI.Gumps
             BuildCombatSpells();
             BuildCounters();
             BuildInfoBar();
+            BuildContainers();
 
             foreach (SettingsOption option in options)
             {
@@ -1421,7 +1422,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             options.Add(s = new SettingsOption(
                     "",
-                    new Line(0, 0, mainContent.RightWidth, 1, Color.Gray.PackedValue) { AcceptMouseInput = false},
+                    new Line(0, 0, mainContent.RightWidth, 1, Color.Gray.PackedValue) { AcceptMouseInput = false },
                     mainContent.RightWidth,
                     PAGE.InfoBar
                 ));
@@ -1446,6 +1447,143 @@ namespace ClassicUO.Game.UI.Gumps
                     mainContent.RightWidth,
                     PAGE.InfoBar
                 ));
+            PositionHelper.PositionControl(s.FullControl);
+        }
+
+        private void BuildContainers()
+        {
+            SettingsOption s;
+            PositionHelper.Reset();
+
+            options.Add(s = new SettingsOption(
+                "These settings are for original container gumps, for grid container settings visit the TazUO section",
+                new Area(false),
+                mainContent.RightWidth,
+                PAGE.Containers
+            ));
+            PositionHelper.PositionControl(s.FullControl);
+            PositionHelper.BlankLine();
+            PositionHelper.BlankLine();
+            PositionHelper.BlankLine();
+
+            if (Client.Version >= ClientVersion.CV_705301)
+            {
+                options.Add(s = new SettingsOption(
+                    "",
+                    new ComboBoxWithLabel("Character backpack style", 0, Theme.COMBO_BOX_WIDTH, new string[] { "Default", "Suede", "Polar bear", "Ghoul skin" }, ProfileManager.CurrentProfile.BackpackStyle, (i, s) => { ProfileManager.CurrentProfile.BackpackStyle = i; }),
+                    mainContent.RightWidth,
+                    PAGE.Containers
+                ));
+                PositionHelper.PositionControl(s.FullControl);
+                PositionHelper.BlankLine();
+            }
+
+            options.Add(s = new SettingsOption(
+                "",
+                new SliderWithLabel("Container scale", 0, Theme.SLIDER_WIDTH, Constants.MIN_CONTAINER_SIZE_PERC, Constants.MAX_CONTAINER_SIZE_PERC, ProfileManager.CurrentProfile.ContainersScale, (i) =>
+                {
+                    ProfileManager.CurrentProfile.ContainersScale = (byte)i;
+                    UIManager.ContainerScale = (byte)i / 100f;
+                    foreach (ContainerGump resizableGump in UIManager.Gumps.OfType<ContainerGump>())
+                    {
+                        resizableGump.RequestUpdateContents();
+                    }
+                }),
+                mainContent.RightWidth,
+                PAGE.Containers
+            ));
+            PositionHelper.PositionControl(s.FullControl);
+            PositionHelper.Indent();
+
+            options.Add(s = new SettingsOption(
+                "",
+                new CheckboxWithLabel("Also scale items", 0, ProfileManager.CurrentProfile.ScaleItemsInsideContainers, (b) => { ProfileManager.CurrentProfile.ScaleItemsInsideContainers = b; }),
+                mainContent.RightWidth,
+                PAGE.Containers
+            ));
+            PositionHelper.PositionControl(s.FullControl);
+            PositionHelper.RemoveIndent();
+            PositionHelper.BlankLine();
+
+            if (Client.Version >= ClientVersion.CV_706000)
+            {
+                options.Add(s = new SettingsOption(
+                    "",
+                    new CheckboxWithLabel("Use large container gumps", 0, ProfileManager.CurrentProfile.UseLargeContainerGumps, (b) => { ProfileManager.CurrentProfile.UseLargeContainerGumps = b; }),
+                    mainContent.RightWidth,
+                    PAGE.Containers
+                ));
+                PositionHelper.PositionControl(s.FullControl);
+                PositionHelper.BlankLine();
+            }
+
+            options.Add(s = new SettingsOption(
+                "",
+                new CheckboxWithLabel("Double click to loot items inside containers", 0, ProfileManager.CurrentProfile.DoubleClickToLootInsideContainers, (b) => { ProfileManager.CurrentProfile.DoubleClickToLootInsideContainers = b; }),
+                mainContent.RightWidth,
+                PAGE.Containers
+            ));
+            PositionHelper.PositionControl(s.FullControl);
+            PositionHelper.BlankLine();
+
+            options.Add(s = new SettingsOption(
+                "",
+                new CheckboxWithLabel("Relative drag and drop items in containers", 0, ProfileManager.CurrentProfile.RelativeDragAndDropItems, (b) => { ProfileManager.CurrentProfile.RelativeDragAndDropItems = b; }),
+                mainContent.RightWidth,
+                PAGE.Containers
+            ));
+            PositionHelper.PositionControl(s.FullControl);
+            PositionHelper.BlankLine();
+
+
+            options.Add(s = new SettingsOption(
+                "",
+                new CheckboxWithLabel("Highlight container on ground when mouse is over a container gump", 0, ProfileManager.CurrentProfile.HighlightContainerWhenSelected, (b) => { ProfileManager.CurrentProfile.HighlightContainerWhenSelected = b; }),
+                mainContent.RightWidth,
+                PAGE.Containers
+            ));
+            PositionHelper.PositionControl(s.FullControl);
+            PositionHelper.BlankLine();
+
+
+            options.Add(s = new SettingsOption(
+                "",
+                new CheckboxWithLabel("Recolor container gump by with container hue", 0, ProfileManager.CurrentProfile.HueContainerGumps, (b) => { ProfileManager.CurrentProfile.HueContainerGumps = b; }),
+                mainContent.RightWidth,
+                PAGE.Containers
+            ));
+            PositionHelper.PositionControl(s.FullControl);
+            PositionHelper.BlankLine();
+
+            options.Add(s = new SettingsOption(
+                "",
+                new CheckboxWithLabel("Override container gump locations", 0, ProfileManager.CurrentProfile.OverrideContainerLocation, (b) => { ProfileManager.CurrentProfile.OverrideContainerLocation = b; }),
+                mainContent.RightWidth,
+                PAGE.Containers
+            ));
+            PositionHelper.PositionControl(s.FullControl);
+            PositionHelper.Indent();
+
+            options.Add(s = new SettingsOption(
+                    "",
+                    new ComboBoxWithLabel("Override position", 0, Theme.COMBO_BOX_WIDTH, new string[] { "Near container", "Top right", "Last dragged position", "Remember each container" }, ProfileManager.CurrentProfile.OverrideContainerLocationSetting, (i, s) => { ProfileManager.CurrentProfile.OverrideContainerLocationSetting = i; }),
+                    mainContent.RightWidth,
+                    PAGE.Containers
+                ));
+            PositionHelper.PositionControl(s.FullControl);
+            PositionHelper.BlankLine();
+
+            ModernButton rebuildContainers;
+            options.Add(s = new SettingsOption(
+                "",
+                rebuildContainers = new ModernButton(0, 0, 130, 40, ButtonAction.Activate, "Rebuild containers.txt", Theme.BUTTON_FONT_COLOR, 999) { IsSelected = true, IsSelectable = true },
+                mainContent.RightWidth,
+                PAGE.Containers
+            ));
+            rebuildContainers.MouseUp += (s, e) =>
+            {
+                ContainerManager.BuildContainerFile(true);
+            };
             PositionHelper.PositionControl(s.FullControl);
         }
 
