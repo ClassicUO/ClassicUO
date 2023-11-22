@@ -76,6 +76,7 @@ namespace ClassicUO.Game.UI.Gumps
             BuildTooltips();
             BuildSpeech();
             BuildCombatSpells();
+            BuildCounters();
 
             foreach (SettingsOption option in options)
             {
@@ -843,7 +844,7 @@ namespace ClassicUO.Game.UI.Gumps
             PositionHelper.PositionControl(s.FullControl);
             PositionHelper.RemoveIndent();
 
-            
+
             PositionHelper.BlankLine();
 
 
@@ -921,7 +922,7 @@ namespace ClassicUO.Game.UI.Gumps
                 ));
             PositionHelper.PositionControl(s.FullControl);
 
-            
+
             PositionHelper.BlankLine();
 
 
@@ -1162,6 +1163,8 @@ namespace ClassicUO.Game.UI.Gumps
             ));
             PositionHelper.PositionControl(s.FullControl);
 
+            PositionHelper.BlankLine();
+
             InputField spellFormat;
             options.Add(s = new SettingsOption(
                     "Spell overhead format",
@@ -1170,11 +1173,165 @@ namespace ClassicUO.Game.UI.Gumps
                     PAGE.CombatSpells
                     ));
             spellFormat.SetText(ProfileManager.CurrentProfile.SpellDisplayFormat);
-            spellFormat.TextChanged += (s, e) => {
+            spellFormat.TextChanged += (s, e) =>
+            {
                 ProfileManager.CurrentProfile.SpellDisplayFormat = spellFormat.Text;
             };
             PositionHelper.PositionControl(s.FullControl);
             s.FullControl.SetTooltip("{power} for powerword, {spell} for spell name");
+        }
+
+        private void BuildCounters()
+        {
+            SettingsOption s;
+            PositionHelper.Reset();
+
+            options.Add(s = new SettingsOption(
+                    "",
+                    new CheckboxWithLabel("Enable counters", 0, ProfileManager.CurrentProfile.CounterBarEnabled, (b) =>
+                    {
+                        ProfileManager.CurrentProfile.CounterBarEnabled = b;
+                        CounterBarGump counterGump = UIManager.GetGump<CounterBarGump>();
+
+                        if (b)
+                        {
+                            if (counterGump != null)
+                            {
+                                counterGump.IsEnabled = counterGump.IsVisible = b;
+                            }
+                            else
+                            {
+                                UIManager.Add(counterGump = new CounterBarGump(200, 200));
+                            }
+                        }
+                        else
+                        {
+                            if (counterGump != null)
+                            {
+                                counterGump.IsEnabled = counterGump.IsVisible = b;
+                            }
+                        }
+
+                        counterGump?.SetLayout(ProfileManager.CurrentProfile.CounterBarCellSize, ProfileManager.CurrentProfile.CounterBarRows, ProfileManager.CurrentProfile.CounterBarColumns);
+                    }),
+                    mainContent.RightWidth,
+                    PAGE.Counters
+                ));
+            PositionHelper.PositionControl(s.FullControl);
+            PositionHelper.Indent();
+
+            options.Add(s = new SettingsOption(
+                    "",
+                    new CheckboxWithLabel("Highlight items on use", 0, ProfileManager.CurrentProfile.CounterBarHighlightOnUse, (b) => { ProfileManager.CurrentProfile.CounterBarHighlightOnUse = b; }),
+                    mainContent.RightWidth,
+                    PAGE.Counters
+                ));
+            PositionHelper.PositionControl(s.FullControl);
+
+            options.Add(s = new SettingsOption(
+                    "",
+                    new CheckboxWithLabel("Abbreviated values", 0, ProfileManager.CurrentProfile.CounterBarDisplayAbbreviatedAmount, (b) => { ProfileManager.CurrentProfile.CounterBarDisplayAbbreviatedAmount = b; }),
+                    mainContent.RightWidth,
+                    PAGE.Counters
+                ));
+            PositionHelper.PositionControl(s.FullControl);
+            PositionHelper.Indent();
+
+            options.Add(s = new SettingsOption(
+                    "Abbreviate if amount exceeds",
+                    new InputField(100, 40, text: ProfileManager.CurrentProfile.CounterBarAbbreviatedAmount.ToString(), numbersOnly: true, onTextChanges: (s, e) =>
+                    {
+                        if (int.TryParse(((InputField.StbTextBox)s).Text, out int v))
+                        {
+                            ProfileManager.CurrentProfile.CounterBarAbbreviatedAmount = v;
+                        }
+                    }),
+                    mainContent.RightWidth,
+                    PAGE.Counters
+                    ));
+            PositionHelper.PositionControl(s.FullControl);
+            PositionHelper.RemoveIndent();
+
+            options.Add(s = new SettingsOption(
+                "",
+                new CheckboxWithLabel("Highlight red when amount is low", 0, ProfileManager.CurrentProfile.CounterBarHighlightOnAmount, (b) => { ProfileManager.CurrentProfile.CounterBarHighlightOnAmount = b; }),
+                mainContent.RightWidth,
+                PAGE.Counters
+            ));
+            PositionHelper.PositionControl(s.FullControl);
+            PositionHelper.Indent();
+
+            options.Add(s = new SettingsOption(
+                "Highlight red if amount is below",
+                new InputField(100, 40, text: ProfileManager.CurrentProfile.CounterBarHighlightAmount.ToString(), numbersOnly: true, onTextChanges: (s, e) =>
+                {
+                    if (int.TryParse(((InputField.StbTextBox)s).Text, out int v))
+                    {
+                        ProfileManager.CurrentProfile.CounterBarHighlightAmount = v;
+                    }
+                }),
+                mainContent.RightWidth,
+                PAGE.Counters
+                ));
+            PositionHelper.PositionControl(s.FullControl);
+            PositionHelper.RemoveIndent();
+            PositionHelper.RemoveIndent();
+
+            PositionHelper.BlankLine();
+            PositionHelper.BlankLine();
+
+            options.Add(s = new SettingsOption(
+                "Counter layout",
+                new Area(),
+                mainContent.RightWidth,
+                PAGE.Counters
+                ));
+            PositionHelper.PositionControl(s.FullControl);
+
+            PositionHelper.Indent();
+
+            options.Add(s = new SettingsOption(
+                "",
+                new SliderWithLabel("Grid size", 0, Theme.SLIDER_WIDTH, 30, 100, ProfileManager.CurrentProfile.CounterBarCellSize, (v) =>
+                {
+                    ProfileManager.CurrentProfile.CounterBarCellSize = v;
+                    UIManager.GetGump<CounterBarGump>()?.SetLayout(ProfileManager.CurrentProfile.CounterBarCellSize, ProfileManager.CurrentProfile.CounterBarRows, ProfileManager.CurrentProfile.CounterBarColumns);
+                }),
+                mainContent.RightWidth,
+                PAGE.Counters
+                ));
+            PositionHelper.PositionControl(s.FullControl);
+
+            options.Add(s = new SettingsOption(
+                "Rows",
+                new InputField(100, 40, text: ProfileManager.CurrentProfile.CounterBarRows.ToString(), numbersOnly: true, onTextChanges: (s, e) =>
+                {
+                    if (int.TryParse(((InputField.StbTextBox)s).Text, out int v))
+                    {
+                        ProfileManager.CurrentProfile.CounterBarRows = v;
+                        UIManager.GetGump<CounterBarGump>()?.SetLayout(ProfileManager.CurrentProfile.CounterBarCellSize, ProfileManager.CurrentProfile.CounterBarRows, ProfileManager.CurrentProfile.CounterBarColumns);
+                    }
+                }),
+                mainContent.RightWidth,
+                PAGE.Counters
+                ));
+            PositionHelper.PositionControl(s.FullControl);
+            SettingsOption ss = s;
+
+            options.Add(s = new SettingsOption(
+                "Columns",
+                new InputField(100, 40, text: ProfileManager.CurrentProfile.CounterBarColumns.ToString(), numbersOnly: true, onTextChanges: (s, e) =>
+                {
+                    if (int.TryParse(((InputField.StbTextBox)s).Text, out int v))
+                    {
+                        ProfileManager.CurrentProfile.CounterBarColumns = v;
+                        UIManager.GetGump<CounterBarGump>()?.SetLayout(ProfileManager.CurrentProfile.CounterBarCellSize, ProfileManager.CurrentProfile.CounterBarRows, ProfileManager.CurrentProfile.CounterBarColumns);
+                    }
+                }),
+                mainContent.RightWidth,
+                PAGE.Counters
+                ));
+            PositionHelper.PositionExact(s.FullControl, ss.FullControl.X + ss.FullControl.Width + 30, ss.FullControl.Y);
         }
 
         private ModernButton CategoryButton(string text, int page, int width, int height = 40)
@@ -1999,7 +2156,10 @@ namespace ClassicUO.Game.UI.Gumps
                 int width,
                 int height,
                 int maxWidthText = 0,
-                int maxCharsCount = -1
+                int maxCharsCount = -1,
+                string text = "",
+                bool numbersOnly = false,
+                EventHandler onTextChanges = null
             )
             {
                 WantUpdateSize = false;
@@ -2018,9 +2178,15 @@ namespace ClassicUO.Game.UI.Gumps
                     Width = width - 8,
                     Height = height - 8
                 };
+                _textbox.Text = text;
+                _textbox.NumbersOnly = numbersOnly;
 
                 Add(new AlphaBlendControl() { Width = Width, Height = Height });
                 Add(_textbox);
+                if (onTextChanges != null)
+                {
+                    TextChanged += onTextChanges;
+                }
             }
 
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
@@ -2057,7 +2223,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
 
-            private class StbTextBox : Control, ITextEditHandler
+            internal class StbTextBox : Control, ITextEditHandler
             {
                 protected static readonly Color SELECTION_COLOR = new Color() { PackedValue = 0x80a06020 };
                 private const int FONT_SIZE = 20;
@@ -2857,37 +3023,43 @@ namespace ClassicUO.Game.UI.Gumps
                 OptionsPage = optionsPage;
                 FullControl = new Area(false) { AcceptMouseInput = true, CanMove = true, CanCloseWithRightClick = true };
 
-                if (!string.IsNullOrEmpty(optionLabel))
+                if (!string.IsNullOrEmpty(OptionLabel))
                 {
-                    Control labelTextBox;
-                    FullControl.Add(labelTextBox = new TextBox(optionLabel, Theme.FONT, 20, null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { AcceptMouseInput = false }, (int)optionsPage);
+                    Control labelTextBox = new TextBox(OptionLabel, Theme.FONT, 20, null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { AcceptMouseInput = false };
+                    FullControl.Add(labelTextBox, (int)optionsPage);
 
                     if (labelTextBox.Width > maxTotalWidth)
                     {
                         labelTextBox.Width = maxTotalWidth;
                     }
 
-                    if (labelTextBox.Width + control.Width + 5 > maxTotalWidth)
+                    if (OptionControl != null)
                     {
-                        control.Y = labelTextBox.Height + 5;
-                        control.X = 15;
-                    }
-                    else
-                    {
-                        control.X = labelTextBox.Width + 5;
+                        if (labelTextBox.Width + OptionControl.Width + 5 > maxTotalWidth)
+                        {
+                            OptionControl.Y = labelTextBox.Height + 5;
+                            OptionControl.X = 15;
+                        }
+                        else
+                        {
+                            OptionControl.X = labelTextBox.Width + 5;
+                        }
                     }
 
                     FullControl.Width += labelTextBox.Width + 5;
                     FullControl.Height = labelTextBox.Height;
                 }
 
-                FullControl.Add(OptionControl, (int)optionsPage);
-                FullControl.Width += OptionControl.Width;
-                FullControl.ActivePage = (int)optionsPage;
-
-                if (OptionControl.Height > FullControl.Height)
+                if (OptionControl != null)
                 {
-                    FullControl.Height = OptionControl.Height;
+                    FullControl.Add(OptionControl, (int)optionsPage);
+                    FullControl.Width += OptionControl.Width;
+                    FullControl.ActivePage = (int)optionsPage;
+
+                    if (OptionControl.Height > FullControl.Height)
+                    {
+                        FullControl.Height = OptionControl.Height;
+                    }
                 }
 
                 FullControl.X = x;
