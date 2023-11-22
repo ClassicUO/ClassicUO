@@ -14,7 +14,6 @@ using SDL2;
 using System.Linq;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Resources;
-using System.Data;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -1007,6 +1006,175 @@ namespace ClassicUO.Game.UI.Gumps
                     PAGE.CombatSpells
                 ));
             PositionHelper.PositionControl(s.FullControl);
+
+            PositionHelper.BlankLine();
+
+            options.Add(s = new SettingsOption(
+                    "",
+                    new CheckboxWithLabel("Query before attack", 0, ProfileManager.CurrentProfile.EnabledCriminalActionQuery, (b) => { ProfileManager.CurrentProfile.EnabledCriminalActionQuery = b; }),
+                    mainContent.RightWidth,
+                    PAGE.CombatSpells
+                ));
+            PositionHelper.PositionControl(s.FullControl);
+
+            PositionHelper.BlankLine();
+
+            options.Add(s = new SettingsOption(
+                    "",
+                    new CheckboxWithLabel("Query before beneficial acts on murderers/criminals/gray", 0, ProfileManager.CurrentProfile.EnabledBeneficialCriminalActionQuery, (b) => { ProfileManager.CurrentProfile.EnabledBeneficialCriminalActionQuery = b; }),
+                    mainContent.RightWidth,
+                    PAGE.CombatSpells
+                ));
+            PositionHelper.PositionControl(s.FullControl);
+
+            PositionHelper.BlankLine();
+
+            options.Add(s = new SettingsOption(
+                    "",
+                    new CheckboxWithLabel("Enable overhead spell format", 0, ProfileManager.CurrentProfile.EnabledSpellFormat, (b) => { ProfileManager.CurrentProfile.EnabledSpellFormat = b; }),
+                    mainContent.RightWidth,
+                    PAGE.CombatSpells
+                ));
+            PositionHelper.PositionControl(s.FullControl);
+
+            PositionHelper.BlankLine();
+
+            options.Add(s = new SettingsOption(
+                    "",
+                    new CheckboxWithLabel("Enable overhead spell hue", 0, ProfileManager.CurrentProfile.EnabledSpellHue, (b) => { ProfileManager.CurrentProfile.EnabledSpellHue = b; }),
+                    mainContent.RightWidth,
+                    PAGE.CombatSpells
+                ));
+            PositionHelper.PositionControl(s.FullControl);
+
+            PositionHelper.BlankLine();
+
+            options.Add(s = new SettingsOption(
+                    "",
+                    new CheckboxWithLabel("Single click for spell icons", 0, ProfileManager.CurrentProfile.CastSpellsByOneClick, (b) => { ProfileManager.CurrentProfile.CastSpellsByOneClick = b; }),
+                    mainContent.RightWidth,
+                    PAGE.CombatSpells
+                ));
+            PositionHelper.PositionControl(s.FullControl);
+
+            PositionHelper.BlankLine();
+
+            options.Add(s = new SettingsOption(
+                    "",
+                    new CheckboxWithLabel("Show buff duration on old style buff bar", 0, ProfileManager.CurrentProfile.BuffBarTime, (b) => { ProfileManager.CurrentProfile.BuffBarTime = b; }),
+                    mainContent.RightWidth,
+                    PAGE.CombatSpells
+                ));
+            PositionHelper.PositionControl(s.FullControl);
+
+            PositionHelper.BlankLine();
+
+            Control c;
+            options.Add(s = new SettingsOption(
+                    "",
+                    c = new CheckboxWithLabel("Enable fast spell hotkey assigning", 0, ProfileManager.CurrentProfile.FastSpellsAssign, (b) => { ProfileManager.CurrentProfile.FastSpellsAssign = b; }),
+                    mainContent.RightWidth,
+                    PAGE.CombatSpells
+                ));
+            PositionHelper.PositionControl(s.FullControl);
+            c.SetTooltip("Ctrl + Alt + Click a spell icon the open a gump to set a hotkey");
+
+            PositionHelper.BlankLine();
+
+            SettingsOption ss;
+            options.Add(s = new SettingsOption(
+                "",
+                new ModernColorPickerWithLabel("Innocent color", ProfileManager.CurrentProfile.InnocentHue, (h) => { ProfileManager.CurrentProfile.InnocentHue = h; }),
+                mainContent.RightWidth,
+                PAGE.CombatSpells
+            ));
+            PositionHelper.PositionControl(s.FullControl);
+            ss = s;
+
+            options.Add(s = new SettingsOption(
+                "",
+                new ModernColorPickerWithLabel("Beneficial spell", ProfileManager.CurrentProfile.BeneficHue, (h) => { ProfileManager.CurrentProfile.BeneficHue = h; }),
+                mainContent.RightWidth,
+                PAGE.CombatSpells
+            ));
+            PositionHelper.PositionExact(s.FullControl, 200, ss.FullControl.Y);
+            ss = s;
+
+            options.Add(s = new SettingsOption(
+                "",
+                new ModernColorPickerWithLabel("Friend color", ProfileManager.CurrentProfile.FriendHue, (h) => { ProfileManager.CurrentProfile.FriendHue = h; }),
+                mainContent.RightWidth,
+                PAGE.CombatSpells
+            ));
+            PositionHelper.PositionControl(s.FullControl);
+            ss = s;
+
+            options.Add(s = new SettingsOption(
+                "",
+                new ModernColorPickerWithLabel("Harmful spell", ProfileManager.CurrentProfile.HarmfulHue, (h) => { ProfileManager.CurrentProfile.HarmfulHue = h; }),
+                mainContent.RightWidth,
+                PAGE.CombatSpells
+            ));
+            PositionHelper.PositionExact(s.FullControl, 200, ss.FullControl.Y);
+            ss = s;
+
+            options.Add(s = new SettingsOption(
+                "",
+                new ModernColorPickerWithLabel("Criminal", ProfileManager.CurrentProfile.CriminalHue, (h) => { ProfileManager.CurrentProfile.CriminalHue = h; }),
+                mainContent.RightWidth,
+                PAGE.CombatSpells
+            ));
+            PositionHelper.PositionControl(s.FullControl);
+            ss = s;
+
+            options.Add(s = new SettingsOption(
+                "",
+                new ModernColorPickerWithLabel("Neutral spell", ProfileManager.CurrentProfile.NeutralHue, (h) => { ProfileManager.CurrentProfile.NeutralHue = h; }),
+                mainContent.RightWidth,
+                PAGE.CombatSpells
+            ));
+            PositionHelper.PositionExact(s.FullControl, 200, ss.FullControl.Y);
+            ss = s;
+
+            options.Add(s = new SettingsOption(
+                "",
+                new ModernColorPickerWithLabel("Can be attacked hue", ProfileManager.CurrentProfile.CanAttackHue, (h) => { ProfileManager.CurrentProfile.CanAttackHue = h; }),
+                mainContent.RightWidth,
+                PAGE.CombatSpells
+            ));
+            PositionHelper.PositionControl(s.FullControl);
+            ss = s;
+
+            options.Add(s = new SettingsOption(
+                "",
+                new ModernColorPickerWithLabel("Murderer", ProfileManager.CurrentProfile.MurdererHue, (h) => { ProfileManager.CurrentProfile.MurdererHue = h; }),
+                mainContent.RightWidth,
+                PAGE.CombatSpells
+            ));
+            PositionHelper.PositionExact(s.FullControl, 200, ss.FullControl.Y);
+            ss = s;
+
+            options.Add(s = new SettingsOption(
+                "",
+                new ModernColorPickerWithLabel("Enemy", ProfileManager.CurrentProfile.EnemyHue, (h) => { ProfileManager.CurrentProfile.EnemyHue = h; }),
+                mainContent.RightWidth,
+                PAGE.CombatSpells
+            ));
+            PositionHelper.PositionControl(s.FullControl);
+
+            InputField spellFormat;
+            options.Add(s = new SettingsOption(
+                    "Spell overhead format",
+                    spellFormat = new InputField(200, 40),
+                    mainContent.RightWidth,
+                    PAGE.CombatSpells
+                    ));
+            spellFormat.SetText(ProfileManager.CurrentProfile.SpellDisplayFormat);
+            spellFormat.TextChanged += (s, e) => {
+                ProfileManager.CurrentProfile.SpellDisplayFormat = spellFormat.Text;
+            };
+            PositionHelper.PositionControl(s.FullControl);
+            s.FullControl.SetTooltip("{power} for powerword, {spell} for spell name");
         }
 
         private ModernButton CategoryButton(string text, int page, int width, int height = 40)
