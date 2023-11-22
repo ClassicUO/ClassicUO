@@ -14,6 +14,8 @@ using SDL2;
 using System.Linq;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Resources;
+using ClassicUO.Renderer.Lights;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -66,7 +68,12 @@ namespace ClassicUO.Game.UI.Gumps
             mainContent.AddToLeft(CategoryButton("Infobar", (int)PAGE.InfoBar, mainContent.LeftWidth));
             mainContent.AddToLeft(CategoryButton("Containers", (int)PAGE.Containers, mainContent.LeftWidth));
             mainContent.AddToLeft(CategoryButton("Experimental", (int)PAGE.Experimental, mainContent.LeftWidth));
-            mainContent.AddToLeft(CategoryButton("Ignore List", (int)PAGE.IgnoreList, mainContent.LeftWidth));
+            mainContent.AddToLeft(b = new ModernButton(0, 0, mainContent.LeftWidth, 40, ButtonAction.Activate, "Ignore List", Theme.BUTTON_FONT_COLOR) { ButtonParameter = 999 });
+            b.MouseUp += (s, e) => 
+            {
+                UIManager.GetGump<IgnoreManagerGump>()?.Dispose();
+                UIManager.Add(new IgnoreManagerGump());
+            };
             mainContent.AddToLeft(CategoryButton("Nameplate Options", (int)PAGE.NameplateOptions, mainContent.LeftWidth));
             mainContent.AddToLeft(CategoryButton("Cooldown bars", (int)PAGE.TUOCooldowns, mainContent.LeftWidth));
             mainContent.AddToLeft(CategoryButton("TazUO Specific", (int)PAGE.TUOOptions, mainContent.LeftWidth));
