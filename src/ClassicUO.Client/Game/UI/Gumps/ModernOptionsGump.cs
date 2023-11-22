@@ -14,6 +14,7 @@ using SDL2;
 using System.Linq;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Resources;
+using static System.Windows.Forms.AxHost;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -40,14 +41,16 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(new ColorBox(Width, 40, Theme.SEARCH_BACKGROUND) { AcceptMouseInput = true, CanMove = true, Alpha = 0.85f });
 
-            Add(new TextBox("Options", TrueTypeLoader.EMBEDDED_FONT, 30, null, Color.White, strokeEffect: false) { X = 10, Y = 10 });
+            Add(new TextBox("Options", TrueTypeLoader.EMBEDDED_FONT, 30, null, Color.White, strokeEffect: false) { X = 10, Y = 7 });
 
             Control c;
-            Add(c = new TextBox("Search", TrueTypeLoader.EMBEDDED_FONT, 30, null, Color.White, strokeEffect: false) { X = (int)(Width * 0.3), Y = 10 });
+            Add(c = new TextBox("Search", TrueTypeLoader.EMBEDDED_FONT, 30, null, Color.White, strokeEffect: false) { Y = 7 });
 
             InputField search;
-            Add(search = new InputField(400, 30) { X = c.X + c.Width + 5, Y = 5 });
+            Add(search = new InputField(400, 30) { X = Width - 405, Y = 5 });
             search.TextChanged += (s, e) => { SearchText = search.Text; SearchValueChanged.Raise(); };
+
+            c.X = search.X - c.Width - 5;
 
             Add(mainContent = new LeftSideMenuRightSideContent(Width, Height - 40, (int)(Width * 0.23)) { Y = 40 });
 
@@ -77,6 +80,7 @@ namespace ClassicUO.Game.UI.Gumps
             BuildSpeech();
             BuildCombatSpells();
             BuildCounters();
+            BuildInfoBar();
 
             foreach (SettingsOption option in options)
             {
@@ -1282,7 +1286,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             options.Add(s = new SettingsOption(
                 "Counter layout",
-                new Area(),
+                new Area(false),
                 mainContent.RightWidth,
                 PAGE.Counters
                 ));
@@ -1332,6 +1336,118 @@ namespace ClassicUO.Game.UI.Gumps
                 PAGE.Counters
                 ));
             PositionHelper.PositionExact(s.FullControl, ss.FullControl.X + ss.FullControl.Width + 30, ss.FullControl.Y);
+        }
+
+        private void BuildInfoBar()
+        {
+            SettingsOption s;
+            PositionHelper.Reset();
+
+            options.Add(s = new SettingsOption(
+                    "",
+                    new CheckboxWithLabel("Show info bar", 0, ProfileManager.CurrentProfile.ShowInfoBar, (b) =>
+                    {
+                        ProfileManager.CurrentProfile.ShowInfoBar = b;
+                        InfoBarGump infoBarGump = UIManager.GetGump<InfoBarGump>();
+
+                        if (b)
+                        {
+                            if (infoBarGump == null)
+                            {
+                                UIManager.Add(new InfoBarGump { X = 300, Y = 300 });
+                            }
+                            else
+                            {
+                                infoBarGump.ResetItems();
+                                infoBarGump.SetInScreen();
+                            }
+                        }
+                        else
+                        {
+                            infoBarGump?.Dispose();
+                        }
+                    }),
+                    mainContent.RightWidth,
+                    PAGE.InfoBar
+                ));
+            PositionHelper.PositionControl(s.FullControl);
+            PositionHelper.Indent();
+
+            options.Add(s = new SettingsOption(
+                "",
+                new ComboBoxWithLabel("Highlight type", 0, Theme.COMBO_BOX_WIDTH, new string[] { "Text color", "Colored bars" }, ProfileManager.CurrentProfile.InfoBarHighlightType, (i, s) => { ProfileManager.CurrentProfile.InfoBarHighlightType = i; }),
+                mainContent.RightWidth,
+                PAGE.InfoBar
+            ));
+            PositionHelper.PositionControl(s.FullControl);
+
+            PositionHelper.RemoveIndent();
+
+            PositionHelper.BlankLine();
+
+            DataBox infoBarItems = new DataBox(0, 0, 0, 0) { AcceptMouseInput = true, WantUpdateSize = true };
+
+            ModernButton addItem;
+            options.Add(s = new SettingsOption(
+                "",
+                addItem = new ModernButton(0, 0, 150, 40, ButtonAction.Activate, "+ Add item", Theme.BUTTON_FONT_COLOR) { ButtonParameter = -1, IsSelectable = true, IsSelected = true },
+                mainContent.RightWidth,
+                PAGE.InfoBar
+            ));
+            addItem.MouseUp += (s, e) =>
+            {
+                InfoBarItem ibi;
+                InfoBarBuilderControl ibbc = new InfoBarBuilderControl(ibi = new InfoBarItem("HP", InfoBarVars.HP, 0x3B9));
+                ibbc.X = 5;
+                ibbc.Y = infoBarItems.Children.Count * ibbc.Height;
+                infoBarItems.Add(ibbc);
+                infoBarItems.ReArrangeChildren();
+                Client.Game.GetScene<GameScene>().InfoBars?.AddItem(ibi);
+            };
+            PositionHelper.PositionControl(s.FullControl);
+            SettingsOption ss = s;
+            PositionHelper.BlankLine();
+            PositionHelper.BlankLine();
+
+            options.Add(s = new SettingsOption("Label", new Area(false), mainContent.RightWidth, PAGE.InfoBar));
+            PositionHelper.PositionExact(s.FullControl, ss.FullControl.X, ss.FullControl.Y + ss.FullControl.Height + 40);
+            ss = s;
+
+            options.Add(s = new SettingsOption("Color", new Area(false), mainContent.RightWidth, PAGE.InfoBar));
+            PositionHelper.PositionExact(s.FullControl, ss.FullControl.X + 150, ss.FullControl.Y);
+            ss = s;
+
+            options.Add(s = new SettingsOption("Data", new Area(false), mainContent.RightWidth, PAGE.InfoBar));
+            PositionHelper.PositionExact(s.FullControl, ss.FullControl.X + 55, ss.FullControl.Y);
+            ss = s;
+
+            options.Add(s = new SettingsOption(
+                    "",
+                    new Line(ss.FullControl.X - 205, ss.FullControl.Y + ss.FullControl.Height + 2, mainContent.RightWidth, 1, Color.Gray.PackedValue),
+                    mainContent.RightWidth,
+                    PAGE.InfoBar
+                ));
+            PositionHelper.BlankLine();
+
+
+            InfoBarManager ibmanager = Client.Game.GetScene<GameScene>().InfoBars;
+            List<InfoBarItem> _infoBarItems = ibmanager.GetInfoBars();
+
+            for (int i = 0; i < _infoBarItems.Count; i++)
+            {
+                InfoBarBuilderControl ibbc = new InfoBarBuilderControl(_infoBarItems[i]);
+                ibbc.X = 5;
+                ibbc.Y = i * ibbc.Height;
+                infoBarItems.Add(ibbc);
+            }
+
+            options.Add(s = new SettingsOption(
+                    "",
+                    infoBarItems,
+                    mainContent.RightWidth,
+                    PAGE.InfoBar
+                ));
+            PositionHelper.PositionControl(s.FullControl);
         }
 
         private ModernButton CategoryButton(string text, int page, int width, int height = 40)
@@ -1390,6 +1506,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                 ModernOptionsGump.SearchValueChanged += ModernOptionsGump_SearchValueChanged;
             }
+
+            public ushort Hue => _colorPicker.Hue;
 
             private void ModernOptionsGump_SearchValueChanged(object sender, EventArgs e)
             {
@@ -1874,6 +1992,8 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _label.Alpha = 1f;
             }
+
+            public int SelectedIndex => _comboBox.SelectedIndex;
 
             private class Combobox : Control
             {
@@ -2911,6 +3031,93 @@ namespace ClassicUO.Game.UI.Gumps
                     return base.OnMouseDoubleClick(x, y, button);
                 }
             }
+        }
+
+        private class InfoBarBuilderControl : Control
+        {
+            private readonly InputField infoLabel;
+            private readonly ModernColorPickerWithLabel labelColor;
+            private readonly ComboBoxWithLabel varStat;
+
+            public InfoBarBuilderControl(InfoBarItem item)
+            {
+                infoLabel = new InputField(130, 40, text: item.label, onTextChanges: (s, e) => { item.label = ((InputField.StbTextBox)s).Text; UIManager.GetGump<InfoBarGump>()?.ResetItems(); }) { X = 5 };
+
+                string[] dataVars = InfoBarManager.GetVars();
+
+                varStat = new ComboBoxWithLabel(string.Empty, 0, 170, dataVars, (int)item.var, onOptionSelected: (i, s) => { item.var = (InfoBarVars)i; UIManager.GetGump<InfoBarGump>()?.ResetItems(); }) { X = 200, Y = 8 };
+
+                labelColor = new ModernColorPickerWithLabel(string.Empty, item.hue, (h) => { item.hue = h; UIManager.GetGump<InfoBarGump>()?.ResetItems(); }) { X = 150, Y = 10 };
+
+
+                ModernButton deleteButton = new ModernButton
+                (
+                    390,
+                    8,
+                    60,
+                    25,
+                    ButtonAction.Activate,
+                    "Delete",
+                    Theme.BUTTON_FONT_COLOR
+                )
+                { ButtonParameter = 999 };
+
+                deleteButton.MouseUp += (sender, e) =>
+                {
+                    if (Parent != null && Parent is DataBox db)
+                    {
+                        db.ReArrangeChildren();
+                        db.WantUpdateSize = true;
+                    }
+                    Client.Game.GetScene<GameScene>().InfoBars?.RemoveItem(item);
+                    UIManager.GetGump<InfoBarGump>()?.ResetItems();
+                    Dispose();
+                };
+
+                Add(infoLabel);
+                Add(varStat);
+                Add(labelColor);
+                Add(deleteButton);
+
+                Width = deleteButton.Bounds.Right + 10;
+                Height = infoLabel.Height + 5;
+            }
+
+            public override void Update()
+            {
+                if (IsDisposed)
+                {
+                    return;
+                }
+
+                if (Children.Count != 0)
+                {
+                    int w = 0, h = 0;
+
+                    for (int i = 0; i < Children.Count; i++)
+                    {
+                        Control c = Children[i];
+
+                        if (c.IsDisposed)
+                        {
+                            OnChildRemoved();
+                            Children.RemoveAt(i--);
+
+                            continue;
+                        }
+
+                        c.Update();
+
+                       
+                    }
+
+                }
+
+            }
+
+            public string LabelText => infoLabel.Text;
+            public InfoBarVars Var => (InfoBarVars)varStat.SelectedIndex;
+            public ushort Hue => labelColor.Hue;
         }
         #endregion
 
