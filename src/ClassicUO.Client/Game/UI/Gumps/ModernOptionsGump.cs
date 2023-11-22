@@ -81,6 +81,7 @@ namespace ClassicUO.Game.UI.Gumps
             BuildCounters();
             BuildInfoBar();
             BuildContainers();
+            BuildExperimental();
 
             foreach (SettingsOption option in options)
             {
@@ -1584,6 +1585,56 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 ContainerManager.BuildContainerFile(true);
             };
+            PositionHelper.PositionControl(s.FullControl);
+        }
+
+        private void BuildExperimental()
+        {
+            SettingsOption s;
+            PositionHelper.Reset();
+
+            options.Add(s = new SettingsOption(
+                "",
+                new CheckboxWithLabel("Disable default UO hotkeys", 0, ProfileManager.CurrentProfile.DisableDefaultHotkeys, (b) => { ProfileManager.CurrentProfile.DisableDefaultHotkeys = b; }),
+                mainContent.RightWidth,
+                PAGE.Experimental
+            ));
+            PositionHelper.PositionControl(s.FullControl);
+            PositionHelper.BlankLine();
+
+            options.Add(s = new SettingsOption(
+                "",
+                new CheckboxWithLabel("Disable arrows & numlock arrows(player movement)", 0, ProfileManager.CurrentProfile.DisableArrowBtn, (b) => { ProfileManager.CurrentProfile.DisableArrowBtn = b; }),
+                mainContent.RightWidth,
+                PAGE.Experimental
+            ));
+            PositionHelper.PositionControl(s.FullControl);
+            PositionHelper.BlankLine();
+
+            options.Add(s = new SettingsOption(
+                "",
+                new CheckboxWithLabel("Disable tab (toggle warmode)", 0, ProfileManager.CurrentProfile.DisableTabBtn, (b) => { ProfileManager.CurrentProfile.DisableTabBtn = b; }),
+                mainContent.RightWidth,
+                PAGE.Experimental
+            ));
+            PositionHelper.PositionControl(s.FullControl);
+            PositionHelper.BlankLine();
+
+            options.Add(s = new SettingsOption(
+                "",
+                new CheckboxWithLabel("Disable Ctrl + Q/W (message history)", 0, ProfileManager.CurrentProfile.DisableCtrlQWBtn, (b) => { ProfileManager.CurrentProfile.DisableCtrlQWBtn = b; }),
+                mainContent.RightWidth,
+                PAGE.Experimental
+            ));
+            PositionHelper.PositionControl(s.FullControl);
+            PositionHelper.BlankLine();
+
+            options.Add(s = new SettingsOption(
+                "",
+                new CheckboxWithLabel("Disable right + left click auto move", 0, ProfileManager.CurrentProfile.DisableAutoMove, (b) => { ProfileManager.CurrentProfile.DisableAutoMove = b; }),
+                mainContent.RightWidth,
+                PAGE.Experimental
+            ));
             PositionHelper.PositionControl(s.FullControl);
         }
 
