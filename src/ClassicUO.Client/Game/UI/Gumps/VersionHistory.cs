@@ -8,7 +8,11 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private static string[] updateTexts = {
             "/c[white][3.14.0]/cd\n" +
-                "- Small null ref bug fix",
+                "- Small null ref bug fix\n" +
+                "- No max width on item count text for smaller scaling\n" +
+                "- Auto loot shift-click will no long work if you have shift for context menu or split stacks.\n" +
+                "- Skill progress bars will save their position if you move them\n" +
+                "- Changed skill progress bars to a queue instead of all showing at once",
 
             "/c[white][3.13.0]/cd\n" +
                 "- Fix item unintentional stacking\n" +

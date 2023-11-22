@@ -871,7 +871,7 @@ namespace ClassicUO.Game.UI.Gumps
                     if (itemAmt > 1)
                     {
                         count?.Dispose();
-                        count = new Label(itemAmt.ToString(), true, 0x0481, align: TEXT_ALIGN_TYPE.TS_LEFT, maxwidth: Width - 3);
+                        count = new Label(itemAmt.ToString(), true, 0x0481, align: TEXT_ALIGN_TYPE.TS_LEFT);
                         count.X = 1;
                         count.Y = Height - count.Height;
                     }
@@ -950,7 +950,7 @@ namespace ClassicUO.Game.UI.Gumps
                         SelectHighlight = true;
                         Mouse.CancelDoubleClick = true;
                     }
-                    else if (Keyboard.Shift && _item != null)
+                    else if (Keyboard.Shift && _item != null && ProfileManager.CurrentProfile.EnableAutoLoot && !ProfileManager.CurrentProfile.HoldShiftForContext && !ProfileManager.CurrentProfile.HoldShiftToSplitStack)
                     {
                         AutoLootManager.Instance.AddLootItem(_item.Graphic, _item.Hue, _item.Name);
                         GameActions.Print($"Added this item to auto loot.");

@@ -564,6 +564,9 @@ namespace ClassicUO.Configuration
         public bool UseLastMovedCooldownPosition { get; set; } = false;
         public bool CloseHealthBarIfAnchored { get; set; } = false;
 
+        [JsonConverter(typeof(Point2Converter))]
+        public Point SkillProgressBarPosition { get; set; } = Point.Zero;
+
 
 
         public void Save(string path, bool saveGumps = true)
