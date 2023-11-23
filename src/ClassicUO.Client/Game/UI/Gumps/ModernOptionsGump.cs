@@ -14,8 +14,6 @@ using SDL2;
 using System.Linq;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Resources;
-using ClassicUO.Renderer.Lights;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -69,7 +67,7 @@ namespace ClassicUO.Game.UI.Gumps
             mainContent.AddToLeft(CategoryButton("Containers", (int)PAGE.Containers, mainContent.LeftWidth));
             mainContent.AddToLeft(CategoryButton("Experimental", (int)PAGE.Experimental, mainContent.LeftWidth));
             mainContent.AddToLeft(b = new ModernButton(0, 0, mainContent.LeftWidth, 40, ButtonAction.Activate, "Ignore List", Theme.BUTTON_FONT_COLOR) { ButtonParameter = 999 });
-            b.MouseUp += (s, e) => 
+            b.MouseUp += (s, e) =>
             {
                 UIManager.GetGump<IgnoreManagerGump>()?.Dispose();
                 UIManager.Add(new IgnoreManagerGump());
@@ -89,6 +87,9 @@ namespace ClassicUO.Game.UI.Gumps
             BuildInfoBar();
             BuildContainers();
             BuildExperimental();
+            BuildNameplates();
+            BuildCooldowns();
+            BuildTazUO();
 
             foreach (SettingsOption option in options)
             {
@@ -1645,6 +1646,317 @@ namespace ClassicUO.Game.UI.Gumps
             PositionHelper.PositionControl(s.FullControl);
         }
 
+        private void BuildNameplates()
+        {
+            LeftSideMenuRightSideContent content = new LeftSideMenuRightSideContent(mainContent.RightWidth, mainContent.Height, (int)(mainContent.RightWidth * 0.3));
+            int page = ((int)PAGE.NameplateOptions + 1000);
+
+            #region New entry
+            ModernButton b;
+            content.AddToLeft(b = new ModernButton(0, 0, content.LeftWidth, 40, ButtonAction.Activate, "New entry", Theme.BUTTON_FONT_COLOR) { ButtonParameter = page, IsSelectable = false });
+
+            b.MouseUp += (sender, e) =>
+            {
+                EntryDialog dialog = new
+                (
+                    250,
+                    150,
+                    "Name overhead entry name",
+                    name =>
+                    {
+                        if (string.IsNullOrWhiteSpace(name))
+                        {
+                            return;
+                        }
+                        if (NameOverHeadManager.FindOption(name) != null)
+                        {
+                            return;
+                        }
+
+                        NameOverheadOption option = new NameOverheadOption(name);
+
+                        ModernButton nb;
+                        content.AddToLeft
+                        (
+                            nb = new ModernButton
+                            (
+                                0,
+                                0,
+                                content.LeftWidth,
+                                40,
+                                ButtonAction.SwitchPage,
+                                name,
+                                Theme.BUTTON_FONT_COLOR
+                            )
+                            {
+                                ButtonParameter = page + 1 + content.LeftArea.Children.Count,
+                                Tag = option
+                            }
+                        );
+                        nb.IsSelected = true;
+                        content.ActivePage = nb.ButtonParameter;
+                        NameOverHeadManager.AddOption(option);
+
+                        content.AddToRight(new NameOverheadAssignControl(option), false, nb.ButtonParameter);
+                    }
+                )
+                {
+                    CanCloseWithRightClick = true
+                };
+                UIManager.Add(dialog);
+            };
+            #endregion
+
+
+            #region Delete entry
+            page = ((int)PAGE.Macros + 1001);
+            content.AddToLeft(b = new ModernButton(0, 0, content.LeftWidth, 40, ButtonAction.Activate, "Delete entry", Theme.BUTTON_FONT_COLOR) { ButtonParameter = page, IsSelectable = false });
+
+            b.MouseUp += (ss, ee) =>
+            {
+                ModernButton nb = content.LeftArea.FindControls<ModernButton>().SingleOrDefault(a => a.IsSelected);
+
+                if (nb != null)
+                {
+                    QuestionGump dialog = new QuestionGump
+                    (
+                        ResGumps.MacroDeleteConfirmation,
+                        b =>
+                        {
+                            if (!b)
+                            {
+                                return;
+                            }
+
+                            if (nb.Tag is NameOverheadOption option)
+                            {
+                                NameOverHeadManager.RemoveOption(option);
+                                nb.Dispose();
+                            }
+                        }
+                    );
+
+                    UIManager.Add(dialog);
+                }
+            };
+            #endregion
+
+            content.AddToLeft(new Line(0, 0, content.LeftWidth, 1, Color.Gray.PackedValue));
+
+            var opts = NameOverHeadManager.GetAllOptions();
+            ModernButton nb = null;
+
+            for (int i = 0; i < opts.Count; i++)
+            {
+                var option = opts[i];
+                if (option == null)
+                {
+                    continue;
+                }
+
+                content.AddToLeft
+                (
+                    nb = new ModernButton
+                    (
+                        0,
+                        0,
+                        content.LeftWidth,
+                        40,
+                        ButtonAction.SwitchPage,
+                        option.Name,
+                        Theme.BUTTON_FONT_COLOR
+                    )
+                    {
+                        ButtonParameter = page + 1 + content.LeftArea.Children.Count,
+                        Tag = option
+                    }
+                );
+
+                content.AddToRight(new NameOverheadAssignControl(option), false, nb.ButtonParameter);
+            }
+
+            if (nb != null)
+            {
+                nb.IsSelected = true;
+                content.ActivePage = nb.ButtonParameter;
+            }
+
+            options.Add(new SettingsOption(
+                "",
+                content,
+                mainContent.RightWidth,
+                PAGE.NameplateOptions
+            ));
+        }
+
+        private void BuildCooldowns()
+        {
+            SettingsOption s;
+            PositionHelper.Reset();
+
+            options.Add(s = new SettingsOption(
+                "Custom cooldown bars",
+                new Area(false),
+                mainContent.RightWidth,
+                PAGE.TUOCooldowns
+            ));
+            PositionHelper.PositionControl(s.FullControl);
+            PositionHelper.Indent();
+
+            options.Add(s = new SettingsOption(
+                "Position X",
+                new InputField(100, 40, text: ProfileManager.CurrentProfile.CoolDownX.ToString(), numbersOnly: true, onTextChanges: (s, e) =>
+                {
+                    if (int.TryParse(((InputField.StbTextBox)s).Text, out int v))
+                    {
+                        ProfileManager.CurrentProfile.CoolDownX = v;
+                    }
+                }),
+                mainContent.RightWidth,
+                PAGE.TUOCooldowns
+            ));
+            PositionHelper.PositionControl(s.FullControl);
+
+            options.Add(s = new SettingsOption(
+                "Position Y",
+                new InputField(100, 40, text: ProfileManager.CurrentProfile.CoolDownY.ToString(), numbersOnly: true, onTextChanges: (s, e) =>
+                {
+                    if (int.TryParse(((InputField.StbTextBox)s).Text, out int v))
+                    {
+                        ProfileManager.CurrentProfile.CoolDownY = v;
+                    }
+                }),
+                mainContent.RightWidth,
+                PAGE.TUOCooldowns
+            ));
+            PositionHelper.PositionControl(s.FullControl);
+
+            options.Add(s = new SettingsOption(
+                string.Empty,
+                new CheckboxWithLabel("Use last moved bar position", 0, ProfileManager.CurrentProfile.UseLastMovedCooldownPosition, (b) => { ProfileManager.CurrentProfile.UseLastMovedCooldownPosition = b; }),
+                mainContent.RightWidth,
+                PAGE.TUOCooldowns
+            ));
+            PositionHelper.PositionControl(s.FullControl);
+            PositionHelper.RemoveIndent();
+
+            PositionHelper.BlankLine();
+            PositionHelper.BlankLine();
+
+            options.Add(s = new SettingsOption(
+                "Conditions",
+                new Area(false),
+                mainContent.RightWidth,
+                PAGE.TUOCooldowns
+            ));
+            PositionHelper.PositionControl(s.FullControl);
+
+            DataBox conditionsDataBox = new DataBox(0, 0, 0, 0) { WantUpdateSize = true };
+
+            ModernButton addcond;
+            options.Add(s = new SettingsOption(
+                "",
+                addcond = new ModernButton(0, 0, 175, 40, ButtonAction.Activate, "+ Add condition", Theme.BUTTON_FONT_COLOR),
+                mainContent.RightWidth,
+                PAGE.TUOCooldowns
+            ));
+            addcond.MouseUp += (s, e) =>
+            {
+                CoolDownBar.CoolDownConditionData.GetConditionData(ProfileManager.CurrentProfile.CoolDownConditionCount, true);
+
+                Gump g = UIManager.GetGump<ModernOptionsGump>();
+                if (g != null)
+                {
+                    Point pos = g.Location;
+                    g.Dispose();
+                    g = new ModernOptionsGump() { Location = pos };
+                    g.ChangePage((int)PAGE.TUOCooldowns);
+                    UIManager.Add(g);
+                }
+            };
+            PositionHelper.PositionControl(s.FullControl);
+
+            int count = ProfileManager.CurrentProfile.CoolDownConditionCount;
+            for (int i = 0; i < count; i++)
+            {
+                conditionsDataBox.Add(GenConditionControl(i, mainContent.RightWidth - 19, false));
+            }
+            conditionsDataBox.ReArrangeChildren();
+
+            options.Add(s = new SettingsOption(
+                "",
+                conditionsDataBox,
+                mainContent.RightWidth,
+                PAGE.TUOCooldowns
+            ));
+            PositionHelper.PositionControl(s.FullControl);
+        }
+
+        private void BuildTazUO()
+        {
+            LeftSideMenuRightSideContent content = new LeftSideMenuRightSideContent(mainContent.RightWidth, mainContent.Height, (int)(mainContent.RightWidth * 0.3));
+            Control c;
+            int page;
+
+            #region General
+            page = ((int)PAGE.TUOOptions + 1000);
+            content.AddToLeft(SubCategoryButton("Grid containers", page, content.LeftWidth));
+            #endregion
+
+            #region Journal
+            page = ((int)PAGE.TUOOptions + 1001);
+            content.AddToLeft(SubCategoryButton("Journal", page, content.LeftWidth));
+            #endregion
+
+            #region Modern paperdoll
+            page = ((int)PAGE.TUOOptions + 1002);
+            content.AddToLeft(SubCategoryButton("Modern paperdoll", page, content.LeftWidth));
+            #endregion
+
+            #region Nameplates
+            page = ((int)PAGE.TUOOptions + 1003);
+            content.AddToLeft(SubCategoryButton("Nameplates", page, content.LeftWidth));
+            #endregion
+
+            #region Mobiles
+            page = ((int)PAGE.TUOOptions + 1004);
+            content.AddToLeft(SubCategoryButton("Mobiles", page, content.LeftWidth));
+            #endregion
+
+            #region Misc
+            page = ((int)PAGE.TUOOptions + 1005);
+            content.AddToLeft(SubCategoryButton("Misc", page, content.LeftWidth));
+            #endregion
+
+            #region Tooltips
+            page = ((int)PAGE.TUOOptions + 1006);
+            content.AddToLeft(SubCategoryButton("Tooltips", page, content.LeftWidth));
+            #endregion
+
+            #region Font settings
+            page = ((int)PAGE.TUOOptions + 1007);
+            content.AddToLeft(SubCategoryButton("Font settings", page, content.LeftWidth));
+            #endregion
+
+            #region Settings transfers
+            page = ((int)PAGE.TUOOptions + 1008);
+            content.AddToLeft(SubCategoryButton("Settings transfers", page, content.LeftWidth));
+            #endregion
+        }
+
+        public override void ChangePage(int pageIndex)
+        {
+            base.ChangePage(pageIndex);
+            foreach(Control mb in mainContent.LeftArea.Children)
+            {
+                if(mb is ModernButton button && button.ButtonParameter == pageIndex && button.IsSelectable)
+                {
+                    button.IsSelected = true;
+                    break;
+                }
+            }
+        }
+
         private ModernButton CategoryButton(string text, int page, int width, int height = 40)
         {
             return new ModernButton(0, 0, width, height, ButtonAction.SwitchPage, text, Theme.BUTTON_FONT_COLOR) { ButtonParameter = page, FullPageSwitch = true };
@@ -1653,6 +1965,98 @@ namespace ClassicUO.Game.UI.Gumps
         private ModernButton SubCategoryButton(string text, int page, int width, int height = 40)
         {
             return new ModernButton(0, 0, width, height, ButtonAction.SwitchPage, text, Theme.BUTTON_FONT_COLOR) { ButtonParameter = page };
+        }
+
+        public Control GenConditionControl(int key, int width, bool createIfNotExists)
+        {
+            CoolDownBar.CoolDownConditionData data = CoolDownBar.CoolDownConditionData.GetConditionData(key, createIfNotExists);
+            Area main = new Area
+            {
+                Width = width
+            };
+
+            AlphaBlendControl _background = new AlphaBlendControl();
+            main.Add(_background);
+
+            ModernButton _delete = new ModernButton(1, 1, 30, 40, ButtonAction.Activate, "X", Theme.BUTTON_FONT_COLOR);
+            _delete.SetTooltip("Delete this cooldown bar");
+            _delete.MouseUp += (sender, e) =>
+            {
+                if (e.Button == MouseButtonType.Left)
+                {
+                    CoolDownBar.CoolDownConditionData.RemoveCondition(key);
+
+                    Gump g = UIManager.GetGump<ModernOptionsGump>();
+                    if (g != null)
+                    {
+                        Point pos = g.Location;
+                        g.Dispose();
+                        g = new ModernOptionsGump() {  Location = pos };
+                        g.ChangePage((int)PAGE.TUOCooldowns);
+                        UIManager.Add(g);
+                    }
+                }
+            };
+            main.Add(_delete);
+
+
+            TextBox _hueLabel = new TextBox("Hue:", Theme.FONT, Theme.STANDARD_TEXT_SIZE, null, Theme.BUTTON_FONT_COLOR, strokeEffect: false);
+            _hueLabel.X = _delete.X + _delete.Width + 5;
+            _hueLabel.Y = 10;
+            main.Add(_hueLabel);
+
+            ModernColorPickerWithLabel _hueSelector = new ModernColorPickerWithLabel(string.Empty, data.hue) { X = _hueLabel.X + _hueLabel.Width + 5, Y = 10 };
+            main.Add(_hueSelector);
+
+
+            InputField _name = new InputField(140, 40, text: data.label) { X = _hueSelector.X + _hueSelector.Width + 10, Y = 1 };
+            main.Add(_name);
+
+
+            TextBox _cooldownLabel = new TextBox("Cooldown:", Theme.FONT, Theme.STANDARD_TEXT_SIZE, null, Theme.BUTTON_FONT_COLOR, strokeEffect: false);
+            _cooldownLabel.X = _name.X + _name.Width + 10;
+            _cooldownLabel.Y = 10;
+            main.Add(_cooldownLabel);
+
+            InputField _cooldown = new InputField(45, 40, numbersOnly: true, text: data.cooldown.ToString()) { Y = 1 };
+            _cooldown.X = _cooldownLabel.X + _cooldownLabel.Width + 10;
+            main.Add(_cooldown);
+
+            ComboBoxWithLabel _message_type = new ComboBoxWithLabel(string.Empty, 0, 85, new string[] { "All", "Self", "Other" }, data.message_type) { X = _cooldown.X + _cooldown.Width + 10, Y = 10 };
+            main.Add(_message_type);
+
+            InputField _conditionText = new InputField(main.Width - 50, 40, text: data.trigger) { X = 1, Y = _delete.Height + 5 };
+            main.Add(_conditionText);
+
+            CheckboxWithLabel _replaceIfExists = new CheckboxWithLabel(isChecked: data.replace_if_exists) { X = _conditionText.X + _conditionText.Width + 2, Y = _conditionText.Y + 5 };
+            _replaceIfExists.SetTooltip("Replace any active cooldown of this type with a new one if triggered again.");
+            main.Add(_replaceIfExists);
+
+            ModernButton _save = new ModernButton(0, 1, 40, 40, ButtonAction.Activate, "Save", Theme.BUTTON_FONT_COLOR);
+            _save.X = main.Width - _save.Width;
+            _save.IsSelectable = true;
+            _save.IsSelected = true;
+            _save.MouseUp += (s, e) =>
+            {
+                CoolDownBar.CoolDownConditionData.SaveCondition(key, _hueSelector.Hue, _name.Text, _conditionText.Text, int.Parse(_cooldown.Text), false, _message_type.SelectedIndex, _replaceIfExists.IsChecked);
+            };
+            main.Add(_save);
+
+            ModernButton _preview = new ModernButton(0, 1, 65, 40, ButtonAction.Activate, "Preview", Theme.BUTTON_FONT_COLOR);
+            _preview.X = _save.X - _preview.Width - 15;
+            _preview.IsSelectable = true;
+            _preview.IsSelected = true;
+            _preview.MouseUp += (s, e) =>
+            {
+                CoolDownBarManager.AddCoolDownBar(TimeSpan.FromSeconds(int.Parse(_cooldown.Text)), _name.Text, _hueSelector.Hue, _replaceIfExists.IsChecked);
+            };
+            main.Add(_preview);
+
+            main.Height = _conditionText.Bounds.Bottom;
+
+            _background.Width = width;
+            _background.Height = main.Height;
+            return main;
         }
 
         public override void OnPageChanged()
