@@ -3577,13 +3577,18 @@ namespace ClassicUO.Game.UI.Gumps
 
                 protected void UpdateCaretScreenPosition()
                 {
+                    _caretScreenPosition = GetCoordsForIndex(Stb.CursorIndex);
+                }
+
+                protected Point GetCoordsForIndex(int index)
+                {
                     int x = 0, y = 0;
 
                     if (Text != null)
                     {
-                        if (Stb.CursorIndex < Text.Length)
+                        if (index < Text.Length)
                         {
-                            var glyphRender = _rendererText.RTL.GetGlyphInfoByIndex(Stb.CursorIndex);
+                            var glyphRender = _rendererText.RTL.GetGlyphInfoByIndex(index);
                             if (glyphRender != null)
                             {
                                 x += glyphRender.Value.Bounds.Left;
@@ -3612,7 +3617,42 @@ namespace ClassicUO.Game.UI.Gumps
                             }
                         }
                     }
-                    _caretScreenPosition = new Point(x, y);
+
+                    return new Point(x, y);
+                }
+
+                protected int GetIndexFromCoords(Point coords)
+                {
+                    if (Text != null)
+                    {
+                        var line = _rendererText.RTL.GetLineByY(coords.Y);
+                        if (line != null)
+                        {
+                            int? index = line.GetGlyphIndexByX(coords.X);
+                            if (index != null)
+                            {
+                                return (int)index;
+                            }
+                        }
+                    }
+                    return 0;
+                }
+
+                protected Point GetCoordsForClick(Point clicked)
+                {
+                    if (Text != null)
+                    {
+                        var line = _rendererText.RTL.GetLineByY(clicked.Y);
+                        if (line != null)
+                        {
+                            int? index = line.GetGlyphIndexByX(clicked.X);
+                            if (index != null)
+                            {
+                                return GetCoordsForIndex((int)index);
+                            }
+                        }
+                    }
+                    return Point.Zero;
                 }
 
                 private ControlKeys ApplyShiftIfNecessary(ControlKeys k)
@@ -4045,12 +4085,67 @@ namespace ClassicUO.Game.UI.Gumps
                     _is_writing = false;
                 }
 
+                public void Click(Point pos)
+                {
+                    pos = new Point(pos.X - ScreenCoordinateX, pos.Y - ScreenCoordinateY);
+                    CaretIndex = GetIndexFromCoords(pos);
+                    SelectionStart = 0;
+                    SelectionEnd = 0;
+                    Stb.HasPreferredX = false;
+                }
+
+                public void Drag(Point pos)
+                {
+                    pos = new Point(pos.X - ScreenCoordinateX, pos.Y - ScreenCoordinateY);
+                    int p = 0;
+
+                    if (SelectionStart == SelectionEnd)
+                    {
+                        SelectionStart = CaretIndex;
+                    }
+
+                    CaretIndex = SelectionEnd = GetIndexFromCoords(pos);
+                }
+
+                private protected void DrawSelection(UltimaBatcher2D batcher, int x, int y)
+                {
+                    if (!AllowSelection)
+                    {
+                        return;
+                    }
+
+                    int selectStart = Math.Min(SelectionStart, SelectionEnd);
+                    int selectEnd = Math.Max(SelectionStart, SelectionEnd);
+
+                    if (selectStart < selectEnd)
+                    { //Show selection
+                        Vector3 hueVector = ShaderHueTranslator.GetHueVector(0, false, 0.5f);
+
+                        Point start = GetCoordsForIndex(selectStart);
+                        Point size = GetCoordsForIndex(selectEnd);
+                        size = new Point(size.X - start.X, _rendererText.Height);
+
+                        batcher.Draw
+                        (
+                            SolidColorTextureCache.GetTexture(SELECTION_COLOR),
+                            new Rectangle
+                            (
+                                x + start.X,
+                                y + start.Y,
+                                size.X,
+                                size.Y
+                            ),
+                            hueVector
+                        );
+                    }
+                }
+
                 public override bool Draw(UltimaBatcher2D batcher, int x, int y)
                 {
                     if (batcher.ClipBegin(x, y, Width, Height))
                     {
                         base.Draw(batcher, x, y);
-                        //DrawSelection(batcher, x, y);
+                        DrawSelection(batcher, x, y);
                         _rendererText.Draw(batcher, x, y);
                         DrawCaret(batcher, x, y);
 
@@ -4077,8 +4172,7 @@ namespace ClassicUO.Game.UI.Gumps
                             _leftWasDown = true;
                         }
 
-                        Stb.Click(Mouse.Position.X, Mouse.Position.Y);
-                        UpdateCaretScreenPosition();
+                        Click(Mouse.Position);
                     }
 
                     base.OnMouseDown(x, y, button);
@@ -4103,7 +4197,7 @@ namespace ClassicUO.Game.UI.Gumps
                         return;
                     }
 
-                    Stb.Drag(Mouse.Position.X, Mouse.Position.Y);
+                    Drag(Mouse.Position);
                 }
 
                 public override void Dispose()
