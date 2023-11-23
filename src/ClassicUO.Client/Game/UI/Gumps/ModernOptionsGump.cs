@@ -14,6 +14,8 @@ using SDL2;
 using System.Linq;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Resources;
+using System.Threading.Tasks;
+using System.Net.Http;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -2051,7 +2053,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             content.AddToRight(c = new ModernColorPickerWithLabel("Damage to self", profile.DamageHueSelf, (h) => { profile.DamageHueSelf = h; }), true, page);
             content.AddToRight(c = new ModernColorPickerWithLabel("Damage to others", profile.DamageHueOther, (h) => { profile.DamageHueOther = h; }) { X = 250, Y = c.Y }, false, page);
-            
+
             content.AddToRight(c = new ModernColorPickerWithLabel("Damage to pets", profile.DamageHuePet, (h) => { profile.DamageHuePet = h; }), true, page);
             content.AddToRight(c = new ModernColorPickerWithLabel("Damage to allies", profile.DamageHueAlly, (h) => { profile.DamageHueAlly = h; }) { X = 250, Y = c.Y }, false, page);
 
@@ -2074,12 +2076,121 @@ namespace ClassicUO.Game.UI.Gumps
             content.BlankLine();
 
             content.AddToRight(c = new CheckboxWithLabel("Automatically open health bars for last attack", 0, profile.OpenHealthBarForLastAttack, (b) => { profile.OpenHealthBarForLastAttack = b; }), true, page);
+
+            content.BlankLine();
+
+            content.AddToRight(new SliderWithLabel("Hidden player opacity", 0, Theme.SLIDER_WIDTH, 0, 100, profile.HiddenBodyAlpha, (i) => { profile.HiddenBodyAlpha = (byte)i; }), true, page);
+            content.Indent();
+            content.AddToRight(c = new ModernColorPickerWithLabel("Hidden player hue", profile.HiddenBodyHue, (h) => { profile.HiddenBodyHue = h; }), true, page);
+            content.RemoveIndent();
+
+            content.BlankLine();
+
+            content.AddToRight(new SliderWithLabel("Regular player opacity", 0, Theme.SLIDER_WIDTH, 0, 100, profile.PlayerConstantAlpha, (i) => { profile.PlayerConstantAlpha = i; }), true, page);
+
+            content.BlankLine();
+
+            content.AddToRight(new SliderWithLabel("Auto follow distance", 0, Theme.SLIDER_WIDTH, 0, 10, profile.AutoFollowDistance, (i) => { profile.AutoFollowDistance = i; }), true, page);
             #endregion
 
             #region Misc
             page = ((int)PAGE.TUOOptions + 1005);
             content.AddToLeft(SubCategoryButton("Misc", page, content.LeftWidth));
             content.ResetRightSide();
+
+            content.AddToRight(new CheckboxWithLabel("Disable system chat", 0, profile.DisableSystemChat, (b) => { profile.DisableSystemChat = b; }), true, page);
+
+            content.BlankLine();
+
+            content.AddToRight(new CheckboxWithLabel("Enable improved buff gump", 0, profile.UseImprovedBuffBar, (b) => { profile.UseImprovedBuffBar = b; }), true, page);
+            content.Indent();
+            content.AddToRight(new ModernColorPickerWithLabel("Buff gump hue", profile.ImprovedBuffBarHue, (h) => { profile.ImprovedBuffBarHue = h; }), true, page);
+            content.RemoveIndent();
+
+            content.BlankLine();
+
+            content.AddToRight(new ModernColorPickerWithLabel("Main game window background", profile.MainWindowBackgroundHue, (h) => { profile.MainWindowBackgroundHue = h; GameController.UpdateBackgroundHueShader(); }), true, page);
+
+            content.BlankLine();
+
+            content.AddToRight(new CheckboxWithLabel("Enable health indicator border", 0, profile.EnableHealthIndicator, (b) => { profile.EnableHealthIndicator = b; }), true, page);
+            content.Indent();
+            content.AddToRight(new SliderWithLabel("Only show below hp %", 0, Theme.SLIDER_WIDTH, 1, 100, (int)profile.ShowHealthIndicatorBelow, (i) => { profile.ShowHealthIndicatorBelow = i; }), true, page);
+            content.AddToRight(new SliderWithLabel("Size", 0, Theme.SLIDER_WIDTH, 1, 25, profile.HealthIndicatorWidth, (i) => { profile.HealthIndicatorWidth = i; }), true, page);
+            content.RemoveIndent();
+
+            content.BlankLine();
+
+            content.AddToRight(new SliderWithLabel("Spell icon scale", 0, Theme.SLIDER_WIDTH, 50, 300, profile.SpellIconScale, (i) => { profile.SpellIconScale = i; }), true, page);
+            content.AddToRight(new CheckboxWithLabel("Display matching hotkeys on spell icons", 0, profile.SpellIcon_DisplayHotkey, (b) => { profile.SpellIcon_DisplayHotkey = b; }), true, page);
+            content.Indent();
+            content.AddToRight(new ModernColorPickerWithLabel("Hotkey text hue", profile.SpellIcon_HotkeyHue, (h) => { profile.SpellIcon_HotkeyHue = h; }), true, page);
+            content.RemoveIndent();
+
+            content.BlankLine();
+
+            content.AddToRight(new CheckboxWithLabel("Enable gump opacity adjust via Alt + Scroll", 0, profile.EnableAlphaScrollingOnGumps, (b) => { profile.EnableAlphaScrollingOnGumps = b; }), true, page);
+
+            content.BlankLine();
+
+            content.AddToRight(new CheckboxWithLabel("Enable advanced shop gump", 0, profile.UseModernShopGump, (b) => { profile.UseModernShopGump = b; }), true, page);
+
+            content.BlankLine();
+
+            content.AddToRight(new CheckboxWithLabel("Display skill progress bar on skill changes", 0, profile.DisplaySkillBarOnChange, (b) => { profile.DisplaySkillBarOnChange = b; }), true, page);
+            content.Indent();
+            content.AddToRight(new InputFieldWithLabel("Text format", 200, profile.SkillBarFormat, false, (s, e) => { profile.SkillBarFormat = ((InputField.StbTextBox)s).Text; }), true, page);
+            content.RemoveIndent();
+
+            content.BlankLine();
+
+            content.AddToRight(new CheckboxWithLabel("Enable spell indicator system", 0, profile.EnableSpellIndicators, (b) => { profile.EnableSpellIndicators = b; }), true, page);
+            content.Indent();
+            content.AddToRight(c = new ModernButton(0, 0, 200, 40, ButtonAction.Activate, "Import from url", Theme.BUTTON_FONT_COLOR) { IsSelectable = true, IsSelected = true });
+            c.MouseUp += (s, e) => {
+                if (e.Button == MouseButtonType.Left)
+                {
+                    UIManager.Add(
+                        new InputRequest("Enter the url for the spell config. /c[red]This will override your current config.", "Download", "Cancel", (r, s) =>
+                        {
+                            if (r == InputRequest.Result.BUTTON1 && !string.IsNullOrEmpty(s))
+                            {
+                                if (Uri.TryCreate(s, UriKind.Absolute, out var uri))
+                                {
+                                    GameActions.Print("Attempting to download spell config..");
+                                    Task.Factory.StartNew(() =>
+                                    {
+                                        try
+                                        {
+                                            using HttpClient httpClient = new HttpClient();
+                                            string result = httpClient.GetStringAsync(uri).Result;
+
+                                            if (SpellVisualRangeManager.Instance.LoadFromString(result))
+                                            {
+                                                GameActions.Print("Succesfully downloaded new spell config.");
+                                            }
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            GameActions.Print($"Failed to download the spell config. ({ex.Message})");
+                                        }
+                                    });
+                                }
+                            }
+                        })
+                        {
+                            X = (Client.Game.Window.ClientBounds.Width >> 1) - 50,
+                            Y = (Client.Game.Window.ClientBounds.Height >> 1) - 50
+                        }
+                        );
+                }
+            };
+            content.RemoveIndent();
+
+            content.BlankLine();
+
+            content.AddToRight(new CheckboxWithLabel("Also close anchored healthbars when auto closing healthbars", content.RightWidth - 30, profile.CloseHealthBarIfAnchored, (b) => { profile.CloseHealthBarIfAnchored = b; }), true, page);
+
             #endregion
 
             #region Tooltips
@@ -2099,6 +2210,14 @@ namespace ClassicUO.Game.UI.Gumps
             content.AddToLeft(SubCategoryButton("Settings transfers", page, content.LeftWidth));
             content.ResetRightSide();
             #endregion
+
+            content.AddToLeft(c = new ModernButton(0, 0, content.LeftWidth, 40, ButtonAction.Activate, "Autoloot", Theme.BUTTON_FONT_COLOR));
+            c.MouseUp += (s, e) => {
+                if (e.Button == MouseButtonType.Left)
+                {
+                    AutoLootOptions.AddToUI();
+                }
+            };
 
             options.Add(
                 new SettingsOption(
