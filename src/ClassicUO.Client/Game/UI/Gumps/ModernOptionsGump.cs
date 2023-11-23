@@ -2002,15 +2002,15 @@ namespace ClassicUO.Game.UI.Gumps
             content.ResetRightSide();
 
             content.AddToRight(c = new CheckboxWithLabel("Enable modern paperdoll", 0, profile.UseModernPaperdoll, (b) => { profile.UseModernPaperdoll = b; }), true, page);
-
+            content.Indent();
             content.BlankLine();
 
-            content.AddToRight(new ModernColorPickerWithLabel("Hue", profile.ModernPaperDollHue, (h) => { profile.ModernPaperDollHue = h; ModernPaperdoll.UpdateAllOptions(); }), true, page);
+            content.AddToRight(new ModernColorPickerWithLabel("Paperdoll hue", profile.ModernPaperDollHue, (h) => { profile.ModernPaperDollHue = h; ModernPaperdoll.UpdateAllOptions(); }), true, page);
 
             content.BlankLine();
 
             content.AddToRight(new ModernColorPickerWithLabel("Durability bar hue", profile.ModernPaperDollDurabilityHue, (h) => { profile.ModernPaperDollDurabilityHue = h; }), true, page);
-
+            content.RemoveIndent();
             content.BlankLine();
 
 
