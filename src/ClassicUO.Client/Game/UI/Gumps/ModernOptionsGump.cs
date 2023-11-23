@@ -2027,6 +2027,21 @@ namespace ClassicUO.Game.UI.Gumps
             page = ((int)PAGE.TUOOptions + 1003);
             content.AddToLeft(SubCategoryButton("Nameplates", page, content.LeftWidth));
             content.ResetRightSide();
+
+            content.AddToRight(c = new CheckboxWithLabel("Nameplates also act as health bars", 0, profile.NamePlateHealthBar, (b) => { profile.NamePlateHealthBar = b; }), true, page);
+            content.Indent();
+            content.AddToRight(new SliderWithLabel("HP opacity", 0, Theme.SLIDER_WIDTH, 0, 100, profile.NamePlateHealthBarOpacity, (i) => { profile.NamePlateHealthBarOpacity = (byte)i; }), true, page);
+            content.AddToRight(c = new CheckboxWithLabel("Hide nameplates if full health", 0, profile.NamePlateHideAtFullHealth, (b) => { profile.NamePlateHideAtFullHealth = b; }), true, page);
+            content.Indent();
+            content.AddToRight(c = new CheckboxWithLabel("Only in warmode", 0, profile.NamePlateHideAtFullHealthInWarmode, (b) => { profile.NamePlateHideAtFullHealthInWarmode = b; }), true, page);
+            content.RemoveIndent();
+            content.RemoveIndent();
+
+            content.BlankLine();
+
+            content.AddToRight(new SliderWithLabel("Border opacity", 0, Theme.SLIDER_WIDTH, 0, 100, profile.NamePlateBorderOpacity, (i) => { profile.NamePlateBorderOpacity = (byte)i; }), true, page);
+            content.AddToRight(new SliderWithLabel("Background opacity", 0, Theme.SLIDER_WIDTH, 0, 100, profile.NamePlateOpacity, (i) => { profile.NamePlateOpacity = (byte)i; }), true, page);
+
             #endregion
 
             #region Mobiles
@@ -3002,6 +3017,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Add(_label = new TextBox(label, Theme.FONT, Theme.STANDARD_TEXT_SIZE, null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { AcceptMouseInput = false });
                 Add(_inputField = new InputField(inputWidth, 40, 0, -1, inputText, numbersonly, onTextChange) { X = _label.Width + _label.X + 5 });
+
+                _label.Y = (_inputField.Height >> 1) - (_label.Height >> 1);
 
                 Width = _label.Width + _inputField.Width + 5;
                 Height = Math.Max(_label.Height, _inputField.Height);
