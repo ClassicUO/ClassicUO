@@ -1901,6 +1901,69 @@ namespace ClassicUO.Game.UI.Gumps
             #region General
             page = ((int)PAGE.TUOOptions + 1000);
             content.AddToLeft(SubCategoryButton("Grid containers", page, content.LeftWidth));
+
+            content.AddToRight(new CheckboxWithLabel("Enable grid containers", 0, ProfileManager.CurrentProfile.UseGridLayoutContainerGumps, (b) => { ProfileManager.CurrentProfile.UseGridLayoutContainerGumps = b; }), true, page);
+
+            content.BlankLine();
+
+            content.AddToRight(new SliderWithLabel("Grid container scale", 0, Theme.SLIDER_WIDTH, 50, 200, ProfileManager.CurrentProfile.GridContainersScale, (i) => { ProfileManager.CurrentProfile.GridContainersScale = (byte)i; }), true, page);
+            content.Indent();
+            content.AddToRight(new CheckboxWithLabel("Also scale items", 0, ProfileManager.CurrentProfile.GridContainerScaleItems, (b) => { ProfileManager.CurrentProfile.GridContainerScaleItems = b; }), true, page);
+            content.RemoveIndent();
+
+            content.BlankLine();
+
+            content.AddToRight(new SliderWithLabel("Grid item border opacity", 0, Theme.SLIDER_WIDTH, 0, 100, ProfileManager.CurrentProfile.GridBorderAlpha, (i) => { ProfileManager.CurrentProfile.GridBorderAlpha = (byte)i; }), true, page);
+            content.Indent();
+            content.AddToRight(new ModernColorPickerWithLabel("Border color", ProfileManager.CurrentProfile.GridBorderHue, (h) => { ProfileManager.CurrentProfile.GridBorderHue = h; }), true, page);
+            content.RemoveIndent();
+
+            content.BlankLine();
+
+            content.AddToRight(new SliderWithLabel("Container opacity", 0, Theme.SLIDER_WIDTH, 0, 100, ProfileManager.CurrentProfile.ContainerOpacity, (i) => { ProfileManager.CurrentProfile.ContainerOpacity = (byte)i; GridContainer.UpdateAllGridContainers(); }), true, page);
+            content.Indent();
+            content.AddToRight(new ModernColorPickerWithLabel("Background color", ProfileManager.CurrentProfile.AltGridContainerBackgroundHue, (h) => { ProfileManager.CurrentProfile.AltGridContainerBackgroundHue = h; GridContainer.UpdateAllGridContainers(); }), true, page);
+            content.AddToRight(new CheckboxWithLabel("Use container's hue", 0, ProfileManager.CurrentProfile.Grid_UseContainerHue, (b) => { ProfileManager.CurrentProfile.Grid_UseContainerHue = b; GridContainer.UpdateAllGridContainers(); }), true, page);
+            content.RemoveIndent();
+
+            content.BlankLine();
+
+            content.AddToRight(new ComboBoxWithLabel("Search style", 0, Theme.COMBO_BOX_WIDTH, new string[] { "Only show", "Highlight" }, ProfileManager.CurrentProfile.GridContainerSearchMode, (i, s) => { ProfileManager.CurrentProfile.GridContainerSearchMode = i; }), true, page);
+
+            content.BlankLine();
+
+            content.AddToRight(c = new CheckboxWithLabel("Enable container preview", 0, ProfileManager.CurrentProfile.GridEnableContPreview, (b) => { ProfileManager.CurrentProfile.GridEnableContPreview = b; }), true, page);
+            c.SetTooltip("This only works on containers that you have opened, otherwise the client does not have that information yet.");
+
+            content.BlankLine();
+
+            content.AddToRight(c = new CheckboxWithLabel("Make anchorable", 0, ProfileManager.CurrentProfile.EnableGridContainerAnchor, (b) => { ProfileManager.CurrentProfile.EnableGridContainerAnchor = b; GridContainer.UpdateAllGridContainers(); }), true, page);
+            c.SetTooltip("This will allow grid containers to be anchored to other containers/world map/journal");
+
+            content.BlankLine();
+
+            content.AddToRight(new ComboBoxWithLabel("Container style", 0, Theme.COMBO_BOX_WIDTH, Enum.GetNames(typeof(GridContainer.BorderStyle)), ProfileManager.CurrentProfile.Grid_BorderStyle, (i, s) => { ProfileManager.CurrentProfile.Grid_BorderStyle = i; GridContainer.UpdateAllGridContainers(); }), true, page);
+
+            content.BlankLine();
+
+            content.AddToRight(c = new CheckboxWithLabel("Hide borders", 0, ProfileManager.CurrentProfile.Grid_HideBorder, (b) => { ProfileManager.CurrentProfile.Grid_HideBorder = b; GridContainer.UpdateAllGridContainers(); }), true, page);
+
+            content.BlankLine();
+
+            content.AddToRight(new SliderWithLabel("Default grid rows", 0, Theme.SLIDER_WIDTH, 1, 20, ProfileManager.CurrentProfile.Grid_DefaultRows, (i) => { ProfileManager.CurrentProfile.Grid_DefaultRows = (byte)i; }), true, page);
+            content.AddToRight(new SliderWithLabel("Default grid columns", 0, Theme.SLIDER_WIDTH, 1, 20, ProfileManager.CurrentProfile.Grid_DefaultColumns, (i) => { ProfileManager.CurrentProfile.Grid_DefaultColumns = (byte)i; }), true, page);
+
+            content.BlankLine();
+
+            content.AddToRight(c = new ModernButton(0, 0, 200, 40, ButtonAction.Activate, "Grid highlight settings", Theme.BUTTON_FONT_COLOR), true, page);
+            c.MouseUp += (s, e) =>
+            {
+                UIManager.GetGump<GridHightlightMenu>()?.Dispose();
+                UIManager.Add(new GridHightlightMenu());
+            };
+
+            content.AddToRight(new SliderWithLabel("Grid highlight size", 0, Theme.SLIDER_WIDTH, 1, 20, ProfileManager.CurrentProfile.GridHightlightSize, (i) => { ProfileManager.CurrentProfile.GridHightlightSize = (byte)i; }), true, page);
+
             #endregion
 
             #region Journal
@@ -1942,14 +2005,23 @@ namespace ClassicUO.Game.UI.Gumps
             page = ((int)PAGE.TUOOptions + 1008);
             content.AddToLeft(SubCategoryButton("Settings transfers", page, content.LeftWidth));
             #endregion
+
+            options.Add(
+                new SettingsOption(
+                    "",
+                    content,
+                    mainContent.RightWidth,
+                    PAGE.TUOOptions
+                    )
+                );
         }
 
         public override void ChangePage(int pageIndex)
         {
             base.ChangePage(pageIndex);
-            foreach(Control mb in mainContent.LeftArea.Children)
+            foreach (Control mb in mainContent.LeftArea.Children)
             {
-                if(mb is ModernButton button && button.ButtonParameter == pageIndex && button.IsSelectable)
+                if (mb is ModernButton button && button.ButtonParameter == pageIndex && button.IsSelectable)
                 {
                     button.IsSelected = true;
                     break;
@@ -1991,7 +2063,7 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         Point pos = g.Location;
                         g.Dispose();
-                        g = new ModernOptionsGump() {  Location = pos };
+                        g = new ModernOptionsGump() { Location = pos };
                         g.ChangePage((int)PAGE.TUOCooldowns);
                         UIManager.Add(g);
                     }

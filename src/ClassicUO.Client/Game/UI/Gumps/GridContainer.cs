@@ -647,6 +647,16 @@ namespace ClassicUO.Game.UI.Gumps
             backgroundTexture.Hue = background.Hue;
             BorderControl.Hue = background.Hue;
             BorderControl.Alpha = background.Alpha;
+            AnchorType = ProfileManager.CurrentProfile.EnableGridContainerAnchor ? ANCHOR_TYPE.NONE : ANCHOR_TYPE.DISABLED;
+            BuildBorder();
+        }
+
+        public static void UpdateAllGridContainers()
+        {
+            foreach (GridContainer _ in UIManager.Gumps.OfType<GridContainer>())
+            {
+                _.OptionsUpdated();
+            }
         }
 
         public void HandleObjectMessage(Entity parent, string text, ushort hue)
