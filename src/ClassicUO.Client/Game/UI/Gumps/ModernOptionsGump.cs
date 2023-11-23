@@ -1401,7 +1401,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             PositionHelper.BlankLine();
 
-            DataBox infoBarItems = new DataBox(0, 0, 0, 0) { AcceptMouseInput = true, WantUpdateSize = true };
+            DataBox infoBarItems = new DataBox(0, 0, 0, 0) { AcceptMouseInput = true };
 
             ModernButton addItem;
             options.Add(s = new SettingsOption(
@@ -1414,11 +1414,11 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 InfoBarItem ibi;
                 InfoBarBuilderControl ibbc = new InfoBarBuilderControl(ibi = new InfoBarItem("HP", InfoBarVars.HP, 0x3B9));
-                ibbc.X = 5;
-                ibbc.Y = infoBarItems.Children.Count * ibbc.Height;
                 infoBarItems.Add(ibbc);
                 infoBarItems.ReArrangeChildren();
+                infoBarItems.Height = 9000;
                 Client.Game.GetScene<GameScene>().InfoBars?.AddItem(ibi);
+                UIManager.GetGump<InfoBarGump>()?.ResetItems();
             };
             PositionHelper.PositionControl(s.FullControl);
             SettingsOption ss = s;
@@ -1453,10 +1453,9 @@ namespace ClassicUO.Game.UI.Gumps
             for (int i = 0; i < _infoBarItems.Count; i++)
             {
                 InfoBarBuilderControl ibbc = new InfoBarBuilderControl(_infoBarItems[i]);
-                ibbc.X = 5;
-                ibbc.Y = i * ibbc.Height;
                 infoBarItems.Add(ibbc);
             }
+            infoBarItems.ReArrangeChildren();
 
             options.Add(s = new SettingsOption(
                     "",
@@ -4273,14 +4272,15 @@ namespace ClassicUO.Game.UI.Gumps
 
                 deleteButton.MouseUp += (sender, e) =>
                 {
+                    Dispose();
+                    GameActions.Print(Parent.ToString());
                     if (Parent != null && Parent is DataBox db)
                     {
+                        db.Remove(this);
                         db.ReArrangeChildren();
-                        db.WantUpdateSize = true;
                     }
                     Client.Game.GetScene<GameScene>().InfoBars?.RemoveItem(item);
                     UIManager.GetGump<InfoBarGump>()?.ResetItems();
-                    Dispose();
                 };
 
                 Add(infoLabel);
@@ -4288,8 +4288,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Add(labelColor);
                 Add(deleteButton);
 
-                Width = deleteButton.Bounds.Right + 10;
-                Height = infoLabel.Height + 5;
+                ForceSizeUpdate();
             }
 
             public override void Update()
