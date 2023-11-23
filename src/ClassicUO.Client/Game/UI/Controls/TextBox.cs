@@ -160,18 +160,6 @@ namespace ClassicUO.Game.UI.Controls
             return true;
         }
 
-        public int GetStringWidth(string c)
-        {
-            //Horrible way to get character width
-            RichTextLayout temp = new RichTextLayout
-            {
-                Font = TrueTypeLoader.Instance.GetFont(_font, _size),
-                Text = c
-            };
-
-            return temp.Size.X;
-        }
-
         public new int Height
         {
             get

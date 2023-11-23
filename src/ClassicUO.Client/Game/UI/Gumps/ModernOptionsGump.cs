@@ -3537,9 +3537,16 @@ namespace ClassicUO.Game.UI.Gumps
 
                 public float GetWidth(int index)
                 {
-                    if (index < _rendererText.Text.Length)
+                    if (Text != null)
                     {
-                        return _rendererText.GetStringWidth(_rendererText.Text.Substring(index, 1));
+                        if (index < _rendererText.Text.Length)
+                        {
+                            var glyphRender = _rendererText.RTL.GetGlyphInfoByIndex(index);
+                            if (glyphRender != null)
+                            {
+                                return glyphRender.Value.Bounds.Width;
+                            }
+                        }
                     }
                     return 0;
                 }
