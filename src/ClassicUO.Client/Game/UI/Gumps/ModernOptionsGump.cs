@@ -16,6 +16,8 @@ using ClassicUO.Game.Scenes;
 using ClassicUO.Resources;
 using System.Threading.Tasks;
 using System.Net.Http;
+using System.IO;
+using static System.Collections.Specialized.BitVector32;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -2251,15 +2253,77 @@ namespace ClassicUO.Game.UI.Gumps
             content.AddToRight(new SliderWithLabel("Size", 0, Theme.SLIDER_WIDTH, 5, 40, profile.SelectedJournalFontSize, (i) => { profile.SelectedJournalFontSize = i; }), true, page);
             content.RemoveIndent();
             content.BlankLine();
-
-
-
             #endregion
 
             #region Settings transfers
             page = ((int)PAGE.TUOOptions + 1008);
             content.AddToLeft(SubCategoryButton("Settings transfers", page, content.LeftWidth));
             content.ResetRightSide();
+
+            string rootpath;
+
+            if (string.IsNullOrWhiteSpace(Settings.GlobalSettings.ProfilesPath))
+            {
+                rootpath = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Profiles");
+            }
+            else
+            {
+                rootpath = Settings.GlobalSettings.ProfilesPath;
+            }
+
+            List<ProfileLocationData> locations = new List<ProfileLocationData>();
+            List<ProfileLocationData> sameServerLocations = new List<ProfileLocationData>();
+            string[] allAccounts = Directory.GetDirectories(rootpath);
+
+            foreach (string account in allAccounts)
+            {
+                string[] allServers = Directory.GetDirectories(account);
+                foreach (string server in allServers)
+                {
+                    string[] allCharacters = Directory.GetDirectories(server);
+                    foreach (string character in allCharacters)
+                    {
+                        locations.Add(new ProfileLocationData(server, account, character));
+                        if (profile.ServerName == Path.GetFileName(server))
+                        {
+                            sameServerLocations.Add(new ProfileLocationData(server, account, character));
+                        }
+                    }
+                }
+            }
+
+            content.AddToRight(new TextBox(
+                "/es/c[red]! Warning !/cd\n" +
+                "This will override other character's profile options!\n" +
+                "This is not reversable!\n" +
+                $"You have {locations.Count - 1} other profiles that will may overridden with the settings in this profile.\n\n" +
+                "This will not override: Macros, skill groups, info bar, grid container data, or gump saved positions.",
+                Theme.FONT, 
+                Theme.STANDARD_TEXT_SIZE, 
+                content.RightWidth - 20, 
+                Theme.TEXT_FONT_COLOR,
+                FontStashSharp.RichText.TextHorizontalAlignment.Center,
+                false), true, page);
+
+            content.AddToRight(c = new ModernButton(0, 0, content.RightWidth - 20, 40, ButtonAction.Activate, $"Override {locations.Count - 1} other profiles with this one.", Theme.BUTTON_FONT_COLOR) { IsSelectable = true, IsSelected = true }, true, page);
+            c.MouseUp += (s, e) =>
+            {
+                if (e.Button == MouseButtonType.Left)
+                {
+                    OverrideAllProfiles(locations);
+                    GameActions.Print($"{locations.Count - 1} profiles overriden.", 32, Data.MessageType.System);
+                }
+            };
+
+            content.AddToRight(c = new ModernButton(0, 0, content.RightWidth - 20, 40, ButtonAction.Activate, $"Override {sameServerLocations.Count - 1} other profiles on this same server with this one.", Theme.BUTTON_FONT_COLOR) { IsSelectable = true, IsSelected = true }, true, page);
+            c.MouseUp += (s, e) =>
+            {
+                if (e.Button == MouseButtonType.Left)
+                {
+                    OverrideAllProfiles(sameServerLocations);
+                    GameActions.Print($"{sameServerLocations.Count - 1} profiles overriden.", 32, Data.MessageType.System);
+                }
+            };
             #endregion
 
             content.AddToLeft(c = new ModernButton(0, 0, content.LeftWidth, 40, ButtonAction.Activate, "Autoloot", Theme.BUTTON_FONT_COLOR));
@@ -2290,6 +2354,14 @@ namespace ClassicUO.Game.UI.Gumps
                     button.IsSelected = true;
                     break;
                 }
+            }
+        }
+
+        private void OverrideAllProfiles(List<ProfileLocationData> allProfiles)
+        {
+            foreach (var profile in allProfiles)
+            {
+                ProfileManager.CurrentProfile.Save(profile.ToString(), false);
             }
         }
 
@@ -4124,6 +4196,25 @@ namespace ClassicUO.Game.UI.Gumps
             public ushort Hue => labelColor.Hue;
         }
         #endregion
+
+        private class ProfileLocationData
+        {
+            public readonly DirectoryInfo Server;
+            public readonly DirectoryInfo Username;
+            public readonly DirectoryInfo Character;
+
+            public ProfileLocationData(string server, string username, string character)
+            {
+                this.Server = new DirectoryInfo(server);
+                this.Username = new DirectoryInfo(username);
+                this.Character = new DirectoryInfo(character);
+            }
+
+            public override string ToString()
+            {
+                return Character.ToString();
+            }
+        }
 
         private class LeftSideMenuRightSideContent : Control
         {
