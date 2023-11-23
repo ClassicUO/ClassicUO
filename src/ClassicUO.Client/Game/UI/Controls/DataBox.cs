@@ -30,6 +30,7 @@
 
 #endregion
 
+
 namespace ClassicUO.Game.UI.Controls
 {
     internal class DataBox : Control
@@ -62,7 +63,6 @@ namespace ClassicUO.Game.UI.Controls
                     newheight += c.Height;
                 }
             }
-
             ForceSizeUpdate();
         }
 

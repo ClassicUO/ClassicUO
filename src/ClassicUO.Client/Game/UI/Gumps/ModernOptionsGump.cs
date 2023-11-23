@@ -17,9 +17,6 @@ using ClassicUO.Resources;
 using System.Threading.Tasks;
 using System.Net.Http;
 using System.IO;
-using static System.Collections.Specialized.BitVector32;
-using FontStashSharp.RichText;
-using System.Reflection;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -1416,7 +1413,6 @@ namespace ClassicUO.Game.UI.Gumps
                 InfoBarBuilderControl ibbc = new InfoBarBuilderControl(ibi = new InfoBarItem("HP", InfoBarVars.HP, 0x3B9));
                 infoBarItems.Add(ibbc);
                 infoBarItems.ReArrangeChildren();
-                infoBarItems.Height = 9000;
                 Client.Game.GetScene<GameScene>().InfoBars?.AddItem(ibi);
                 UIManager.GetGump<InfoBarGump>()?.ResetItems();
             };
@@ -4249,6 +4245,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             public InfoBarBuilderControl(InfoBarItem item)
             {
+                AcceptMouseInput = true;
                 infoLabel = new InputField(130, 40, text: item.label, onTextChanges: (s, e) => { item.label = ((InputField.StbTextBox)s).Text; UIManager.GetGump<InfoBarGump>()?.ResetItems(); }) { X = 5 };
 
                 string[] dataVars = InfoBarManager.GetVars();
@@ -4273,7 +4270,6 @@ namespace ClassicUO.Game.UI.Gumps
                 deleteButton.MouseUp += (sender, e) =>
                 {
                     Dispose();
-                    GameActions.Print(Parent.ToString());
                     if (Parent != null && Parent is DataBox db)
                     {
                         db.Remove(this);
@@ -5285,7 +5281,7 @@ namespace ClassicUO.Game.UI.Gumps
                     switch (buttonID)
                     {
                         case (int)buttonsOption.RemoveBtn:
-                            
+
                             _control.Macro.Remove(_obj);
                             Dispose();
                             _control._databox.ReArrangeChildren();
