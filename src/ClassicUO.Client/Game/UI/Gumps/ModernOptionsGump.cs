@@ -2028,12 +2028,12 @@ namespace ClassicUO.Game.UI.Gumps
             content.AddToLeft(SubCategoryButton("Nameplates", page, content.LeftWidth));
             content.ResetRightSide();
 
-            content.AddToRight(c = new CheckboxWithLabel("Nameplates also act as health bars", 0, profile.NamePlateHealthBar, (b) => { profile.NamePlateHealthBar = b; }), true, page);
+            content.AddToRight(new CheckboxWithLabel("Nameplates also act as health bars", 0, profile.NamePlateHealthBar, (b) => { profile.NamePlateHealthBar = b; }), true, page);
             content.Indent();
             content.AddToRight(new SliderWithLabel("HP opacity", 0, Theme.SLIDER_WIDTH, 0, 100, profile.NamePlateHealthBarOpacity, (i) => { profile.NamePlateHealthBarOpacity = (byte)i; }), true, page);
-            content.AddToRight(c = new CheckboxWithLabel("Hide nameplates if full health", 0, profile.NamePlateHideAtFullHealth, (b) => { profile.NamePlateHideAtFullHealth = b; }), true, page);
+            content.AddToRight(new CheckboxWithLabel("Hide nameplates if full health", 0, profile.NamePlateHideAtFullHealth, (b) => { profile.NamePlateHideAtFullHealth = b; }), true, page);
             content.Indent();
-            content.AddToRight(c = new CheckboxWithLabel("Only in warmode", 0, profile.NamePlateHideAtFullHealthInWarmode, (b) => { profile.NamePlateHideAtFullHealthInWarmode = b; }), true, page);
+            content.AddToRight(new CheckboxWithLabel("Only in warmode", 0, profile.NamePlateHideAtFullHealthInWarmode, (b) => { profile.NamePlateHideAtFullHealthInWarmode = b; }), true, page);
             content.RemoveIndent();
             content.RemoveIndent();
 
@@ -2048,6 +2048,32 @@ namespace ClassicUO.Game.UI.Gumps
             page = ((int)PAGE.TUOOptions + 1004);
             content.AddToLeft(SubCategoryButton("Mobiles", page, content.LeftWidth));
             content.ResetRightSide();
+
+            content.AddToRight(c = new ModernColorPickerWithLabel("Damage to self", profile.DamageHueSelf, (h) => { profile.DamageHueSelf = h; }), true, page);
+            content.AddToRight(c = new ModernColorPickerWithLabel("Damage to others", profile.DamageHueOther, (h) => { profile.DamageHueOther = h; }) { X = 250, Y = c.Y }, false, page);
+            
+            content.AddToRight(c = new ModernColorPickerWithLabel("Damage to pets", profile.DamageHuePet, (h) => { profile.DamageHuePet = h; }), true, page);
+            content.AddToRight(c = new ModernColorPickerWithLabel("Damage to allies", profile.DamageHueAlly, (h) => { profile.DamageHueAlly = h; }) { X = 250, Y = c.Y }, false, page);
+
+            content.AddToRight(c = new ModernColorPickerWithLabel("Damage to last attack", profile.DamageHueLastAttck, (h) => { profile.DamageHueLastAttck = h; }), true, page);
+
+            content.BlankLine();
+
+            content.AddToRight(c = new CheckboxWithLabel("Display party chat over player heads", 0, profile.DisplayPartyChatOverhead, (b) => { profile.DisplayPartyChatOverhead = b; }), true, page);
+            c.SetTooltip("If a party member uses party chat their text will also show above their head to you");
+
+            content.BlankLine();
+
+            content.AddToRight(c = new SliderWithLabel("Overhead text width", 0, Theme.SLIDER_WIDTH, 0, 600, profile.OverheadChatWidth, (i) => { profile.OverheadChatWidth = (byte)i; }), true, page);
+            c.SetTooltip("This adjusts the maximum width for text over players, setting to 0 will allow it to use any width needed to stay one line");
+
+            content.BlankLine();
+
+            content.AddToRight(new SliderWithLabel("Below mobile health bar scale", 0, Theme.SLIDER_WIDTH, 1, 5, profile.HealthLineSizeMultiplier, (i) => { profile.HealthLineSizeMultiplier = (byte)i; }), true, page);
+
+            content.BlankLine();
+
+            content.AddToRight(c = new CheckboxWithLabel("Automatically open health bars for last attack", 0, profile.OpenHealthBarForLastAttack, (b) => { profile.OpenHealthBarForLastAttack = b; }), true, page);
             #endregion
 
             #region Misc
