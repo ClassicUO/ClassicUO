@@ -1950,8 +1950,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             content.BlankLine();
 
-            content.AddToRight(new SliderWithLabel("Default grid rows", 0, Theme.SLIDER_WIDTH, 1, 20, ProfileManager.CurrentProfile.Grid_DefaultRows, (i) => { ProfileManager.CurrentProfile.Grid_DefaultRows = (byte)i; }), true, page);
-            content.AddToRight(new SliderWithLabel("Default grid columns", 0, Theme.SLIDER_WIDTH, 1, 20, ProfileManager.CurrentProfile.Grid_DefaultColumns, (i) => { ProfileManager.CurrentProfile.Grid_DefaultColumns = (byte)i; }), true, page);
+            content.AddToRight(new SliderWithLabel("Default grid rows", 0, Theme.SLIDER_WIDTH, 1, 20, ProfileManager.CurrentProfile.Grid_DefaultRows, (i) => { ProfileManager.CurrentProfile.Grid_DefaultRows = i; }), true, page);
+            content.AddToRight(new SliderWithLabel("Default grid columns", 0, Theme.SLIDER_WIDTH, 1, 20, ProfileManager.CurrentProfile.Grid_DefaultColumns, (i) => { ProfileManager.CurrentProfile.Grid_DefaultColumns = i; }), true, page);
 
             content.BlankLine();
 
@@ -1962,48 +1962,79 @@ namespace ClassicUO.Game.UI.Gumps
                 UIManager.Add(new GridHightlightMenu());
             };
 
-            content.AddToRight(new SliderWithLabel("Grid highlight size", 0, Theme.SLIDER_WIDTH, 1, 20, ProfileManager.CurrentProfile.GridHightlightSize, (i) => { ProfileManager.CurrentProfile.GridHightlightSize = (byte)i; }), true, page);
+            content.AddToRight(new SliderWithLabel("Grid highlight size", 0, Theme.SLIDER_WIDTH, 1, 5, ProfileManager.CurrentProfile.GridHightlightSize, (i) => { ProfileManager.CurrentProfile.GridHightlightSize = i; }), true, page);
 
             #endregion
 
             #region Journal
             page = ((int)PAGE.TUOOptions + 1001);
+            content.ResetRightSide();
+
             content.AddToLeft(SubCategoryButton("Journal", page, content.LeftWidth));
+
+            content.AddToRight(new SliderWithLabel("Max journal entries", 0, Theme.SLIDER_WIDTH, 100, 2000, ProfileManager.CurrentProfile.MaxJournalEntries, (i) => { ProfileManager.CurrentProfile.MaxJournalEntries = i; }), true, page);
+
+            content.BlankLine();
+
+            content.AddToRight(new SliderWithLabel("Journal opacity", 0, Theme.SLIDER_WIDTH, 0, 100, ProfileManager.CurrentProfile.JournalOpacity, (i) => { ProfileManager.CurrentProfile.JournalOpacity = (byte)i; ResizableJournal.UpdateJournalOptions(); }), true, page);
+            content.Indent();
+            content.AddToRight(new ModernColorPickerWithLabel("Background color", ProfileManager.CurrentProfile.AltJournalBackgroundHue, (h) => { ProfileManager.CurrentProfile.AltJournalBackgroundHue = h; ResizableJournal.UpdateJournalOptions(); }), true, page);
+            content.RemoveIndent();
+
+            content.BlankLine();
+
+            content.AddToRight(new ComboBoxWithLabel("Journal style", 0, Theme.COMBO_BOX_WIDTH, Enum.GetNames(typeof(ResizableJournal.BorderStyle)), ProfileManager.CurrentProfile.JournalStyle, (i, s) => { ProfileManager.CurrentProfile.JournalStyle = i; ResizableJournal.UpdateJournalOptions(); }), true, page);
+
+            content.BlankLine();
+
+            content.AddToRight(c = new CheckboxWithLabel("Hide borders", 0, ProfileManager.CurrentProfile.HideJournalBorder, (b) => { ProfileManager.CurrentProfile.HideJournalBorder = b; ResizableJournal.UpdateJournalOptions(); }), true, page);
+
+            content.BlankLine();
+
+            content.AddToRight(c = new CheckboxWithLabel("Hide timestamp", 0, ProfileManager.CurrentProfile.HideJournalTimestamp, (b) => { ProfileManager.CurrentProfile.HideJournalTimestamp = b; }), true, page);
+
             #endregion
 
             #region Modern paperdoll
             page = ((int)PAGE.TUOOptions + 1002);
             content.AddToLeft(SubCategoryButton("Modern paperdoll", page, content.LeftWidth));
-            #endregion
+            content.ResetRightSide();
+                        #endregion
 
             #region Nameplates
             page = ((int)PAGE.TUOOptions + 1003);
             content.AddToLeft(SubCategoryButton("Nameplates", page, content.LeftWidth));
+            content.ResetRightSide();
             #endregion
 
             #region Mobiles
             page = ((int)PAGE.TUOOptions + 1004);
             content.AddToLeft(SubCategoryButton("Mobiles", page, content.LeftWidth));
+            content.ResetRightSide();
             #endregion
 
             #region Misc
             page = ((int)PAGE.TUOOptions + 1005);
             content.AddToLeft(SubCategoryButton("Misc", page, content.LeftWidth));
+            content.ResetRightSide();
             #endregion
 
             #region Tooltips
             page = ((int)PAGE.TUOOptions + 1006);
             content.AddToLeft(SubCategoryButton("Tooltips", page, content.LeftWidth));
+            content.ResetRightSide();
             #endregion
 
             #region Font settings
             page = ((int)PAGE.TUOOptions + 1007);
             content.AddToLeft(SubCategoryButton("Font settings", page, content.LeftWidth));
+            content.ResetRightSide();
             #endregion
 
             #region Settings transfers
             page = ((int)PAGE.TUOOptions + 1008);
             content.AddToLeft(SubCategoryButton("Settings transfers", page, content.LeftWidth));
+            content.ResetRightSide();
             #endregion
 
             options.Add(

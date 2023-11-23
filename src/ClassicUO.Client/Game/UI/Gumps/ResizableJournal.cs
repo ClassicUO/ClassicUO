@@ -293,6 +293,22 @@ namespace ClassicUO.Game.UI.Gumps
             ProfileManager.CurrentProfile.ResizeJournalSize = new Point(Width, Height);
         }
 
+        public void UpdateOptions()
+        {
+            _backgroundTexture.Alpha = (float)ProfileManager.CurrentProfile.JournalOpacity / 100;
+            BorderControl.Alpha = (float)ProfileManager.CurrentProfile.JournalOpacity / 100;
+
+            BuildBorder();
+        }
+
+        public static void UpdateJournalOptions()
+        {
+            foreach(ResizableJournal j in UIManager.Gumps.OfType<ResizableJournal>())
+            {
+                j.UpdateOptions();
+            }
+        }
+
         protected override void OnMouseWheel(MouseEventType delta)
         {
             base.OnMouseWheel(delta);
