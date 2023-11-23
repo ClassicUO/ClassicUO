@@ -18,6 +18,8 @@ using System.Threading.Tasks;
 using System.Net.Http;
 using System.IO;
 using static System.Collections.Specialized.BitVector32;
+using FontStashSharp.RichText;
+using System.Reflection;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -2143,7 +2145,8 @@ namespace ClassicUO.Game.UI.Gumps
             content.AddToRight(new CheckboxWithLabel("Enable spell indicator system", 0, profile.EnableSpellIndicators, (b) => { profile.EnableSpellIndicators = b; }), true, page);
             content.Indent();
             content.AddToRight(c = new ModernButton(0, 0, 200, 40, ButtonAction.Activate, "Import from url", Theme.BUTTON_FONT_COLOR) { IsSelectable = true, IsSelected = true }, true, page);
-            c.MouseUp += (s, e) => {
+            c.MouseUp += (s, e) =>
+            {
                 if (e.Button == MouseButtonType.Left)
                 {
                     UIManager.Add(
@@ -2298,9 +2301,9 @@ namespace ClassicUO.Game.UI.Gumps
                 "This is not reversable!\n" +
                 $"You have {locations.Count - 1} other profiles that will may overridden with the settings in this profile.\n\n" +
                 "This will not override: Macros, skill groups, info bar, grid container data, or gump saved positions.",
-                Theme.FONT, 
-                Theme.STANDARD_TEXT_SIZE, 
-                content.RightWidth - 20, 
+                Theme.FONT,
+                Theme.STANDARD_TEXT_SIZE,
+                content.RightWidth - 20,
                 Theme.TEXT_FONT_COLOR,
                 FontStashSharp.RichText.TextHorizontalAlignment.Center,
                 false), true, page);
@@ -2327,7 +2330,8 @@ namespace ClassicUO.Game.UI.Gumps
             #endregion
 
             content.AddToLeft(c = new ModernButton(0, 0, content.LeftWidth, 40, ButtonAction.Activate, "Autoloot", Theme.BUTTON_FONT_COLOR));
-            c.MouseUp += (s, e) => {
+            c.MouseUp += (s, e) =>
+            {
                 if (e.Button == MouseButtonType.Left)
                 {
                     AutoLootOptions.AddToUI();
@@ -3438,7 +3442,7 @@ namespace ClassicUO.Game.UI.Gumps
                     Stb = new TextEdit(this);
                     Stb.SingleLine = true;
 
-                    _rendererText = new TextBox(string.Empty, Theme.FONT, FONT_SIZE, maxWidth > 0 ? maxWidth : null, Theme.TEXT_FONT_COLOR, strokeEffect: false, supportsCommands: false, ignoreColorCommands: true);
+                    _rendererText = new TextBox(string.Empty, Theme.FONT, FONT_SIZE, maxWidth > 0 ? maxWidth : null, Theme.TEXT_FONT_COLOR, strokeEffect: false, supportsCommands: false, ignoreColorCommands: true, calculateGlyphs: true);
                     _rendererCaret = new TextBox("_", Theme.FONT, FONT_SIZE, null, Theme.TEXT_FONT_COLOR, strokeEffect: false, supportsCommands: false, ignoreColorCommands: true);
 
                     Height = _rendererCaret.Height;
@@ -3533,7 +3537,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 public float GetWidth(int index)
                 {
-                    if (index >= _rendererText.Text.Length - 1)
+                    if (index < _rendererText.Text.Length)
                     {
                         return _rendererText.GetStringWidth(_rendererText.Text.Substring(index, 1));
                     }
@@ -3573,14 +3577,42 @@ namespace ClassicUO.Game.UI.Gumps
 
                 protected void UpdateCaretScreenPosition()
                 {
-                    //if (!string.IsNullOrEmpty(_rendererText.Text))
-                    //{
-                    //    var g = _rendererText.RTL.GetGlyphInfoByIndex(Stb.CursorIndex);
-                    //    if (g != null && g.HasValue)
-                    //    {
-                    //        _caretScreenPosition = new Point(g.Value.Bounds.X, g.Value.Bounds.Y);
-                    //    }
-                    //}
+                    int x = 0, y = 0;
+
+                    if (Text != null)
+                    {
+                        if (Stb.CursorIndex < Text.Length)
+                        {
+                            var glyphRender = _rendererText.RTL.GetGlyphInfoByIndex(Stb.CursorIndex);
+                            if (glyphRender != null)
+                            {
+                                x += glyphRender.Value.Bounds.Left;
+                                y += glyphRender.Value.LineTop;
+                            }
+                        }
+                        else if (_rendererText.RTL.Lines != null && _rendererText.RTL.Lines.Count > 0)
+                        {
+                            // After last glyph
+                            var lastLine = _rendererText.RTL.Lines[_rendererText.RTL.Lines.Count - 1];
+                            if (lastLine.Count > 0)
+                            {
+                                var glyphRender = lastLine.GetGlyphInfoByIndex(lastLine.Count - 1);
+
+                                x += glyphRender.Value.Bounds.Right;
+                                y += glyphRender.Value.LineTop;
+                            }
+                            else if (_rendererText.RTL.Lines.Count > 1)
+                            {
+                                var previousLine = _rendererText.RTL.Lines[_rendererText.RTL.Lines.Count - 2];
+                                if (previousLine.Count > 0)
+                                {
+                                    var glyphRender = previousLine.GetGlyphInfoByIndex(0);
+                                    y += glyphRender.Value.LineTop + lastLine.Size.Y + _rendererText.RTL.VerticalSpacing;
+                                }
+                            }
+                        }
+                    }
+                    _caretScreenPosition = new Point(x, y);
                 }
 
                 private ControlKeys ApplyShiftIfNecessary(ControlKeys k)
@@ -4020,7 +4052,7 @@ namespace ClassicUO.Game.UI.Gumps
                         base.Draw(batcher, x, y);
                         //DrawSelection(batcher, x, y);
                         _rendererText.Draw(batcher, x, y);
-                        //DrawCaret(batcher, x, y);
+                        DrawCaret(batcher, x, y);
 
                         batcher.ClipEnd();
                     }

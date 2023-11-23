@@ -69,7 +69,8 @@ namespace ClassicUO.Game.UI.Controls
             TextHorizontalAlignment align = TextHorizontalAlignment.Left,
             bool strokeEffect = true,
             bool supportsCommands = true,
-            bool ignoreColorCommands = false
+            bool ignoreColorCommands = false,
+            bool calculateGlyphs = false
         )
         {
             if (strokeEffect)
@@ -81,6 +82,7 @@ namespace ClassicUO.Game.UI.Controls
                 Text = text,
                 IgnoreColorCommand = ignoreColorCommands,
                 SupportsCommands = supportsCommands,
+                CalculateGlyphs = calculateGlyphs
             };
 
             if (width != null)
@@ -109,7 +111,8 @@ namespace ClassicUO.Game.UI.Controls
                 TextHorizontalAlignment align = TextHorizontalAlignment.Left,
                 bool strokeEffect = true,
                 bool supportsCommands = true,
-                bool ignoreColorCommands = false
+                bool ignoreColorCommands = false,
+                bool calculateGlyphs = false
             )
         {
             if (strokeEffect)
@@ -121,6 +124,7 @@ namespace ClassicUO.Game.UI.Controls
                 Text = text,
                 IgnoreColorCommand = ignoreColorCommands,
                 SupportsCommands = supportsCommands,
+                CalculateGlyphs = calculateGlyphs
             };
             if (width != null)
                 _rtl.Width = width;
