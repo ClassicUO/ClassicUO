@@ -1994,14 +1994,34 @@ namespace ClassicUO.Game.UI.Gumps
             content.BlankLine();
 
             content.AddToRight(c = new CheckboxWithLabel("Hide timestamp", 0, profile.HideJournalTimestamp, (b) => { profile.HideJournalTimestamp = b; }), true, page);
-
             #endregion
 
             #region Modern paperdoll
             page = ((int)PAGE.TUOOptions + 1002);
             content.AddToLeft(SubCategoryButton("Modern paperdoll", page, content.LeftWidth));
             content.ResetRightSide();
-                        #endregion
+
+            content.AddToRight(c = new CheckboxWithLabel("Enable modern paperdoll", 0, profile.UseModernPaperdoll, (b) => { profile.UseModernPaperdoll = b; }), true, page);
+
+            content.BlankLine();
+
+            content.AddToRight(new ModernColorPickerWithLabel("Hue", profile.ModernPaperDollHue, (h) => { profile.ModernPaperDollHue = h; ModernPaperdoll.UpdateAllOptions(); }), true, page);
+
+            content.BlankLine();
+
+            content.AddToRight(new ModernColorPickerWithLabel("Durability bar hue", profile.ModernPaperDollDurabilityHue, (h) => { profile.ModernPaperDollDurabilityHue = h; }), true, page);
+
+            content.BlankLine();
+
+
+            content.AddToRight(new InputFieldWithLabel("Show durability bar below %", 100, profile.ModernPaperDoll_DurabilityPercent.ToString(), true, (s, e) =>
+            {
+                if (int.TryParse(((InputField.StbTextBox)s).Text, out int v))
+                {
+                    profile.ModernPaperDoll_DurabilityPercent = v;
+                }
+            }), true, page);
+            #endregion
 
             #region Nameplates
             page = ((int)PAGE.TUOOptions + 1003);
@@ -2967,6 +2987,61 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                     }
                 }
+            }
+        }
+
+        private class InputFieldWithLabel : Control, SearchableOption
+        {
+            private readonly InputField _inputField;
+            private readonly TextBox _label;
+
+            public InputFieldWithLabel(string label, int inputWidth, string inputText, bool numbersonly = false, EventHandler onTextChange = null)
+            {
+                AcceptMouseInput = true;
+                CanMove = true;
+
+                Add(_label = new TextBox(label, Theme.FONT, Theme.STANDARD_TEXT_SIZE, null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { AcceptMouseInput = false });
+                Add(_inputField = new InputField(inputWidth, 40, 0, -1, inputText, numbersonly, onTextChange) { X = _label.Width + _label.X + 5 });
+
+                Width = _label.Width + _inputField.Width + 5;
+                Height = Math.Max(_label.Height, _inputField.Height);
+
+                ModernOptionsGump.SearchValueChanged += ModernOptionsGump_SearchValueChanged;
+            }
+
+            private void ModernOptionsGump_SearchValueChanged(object sender, EventArgs e)
+            {
+                if (!string.IsNullOrEmpty(ModernOptionsGump.SearchText))
+                {
+                    if (Search(ModernOptionsGump.SearchText))
+                    {
+                        OnSearchMatch();
+                        ModernOptionsGump.SetParentsForMatchingSearch(this, Page);
+                    }
+                    else
+                    {
+                        _label.Alpha = Theme.NO_MATCH_SEARCH;
+                    }
+                }
+                else
+                {
+                    _label.Alpha = 1f;
+                }
+            }
+
+            public bool Search(string text)
+            {
+                if (_label.Text.ToLower().Contains(text.ToLower()))
+                {
+                    return true;
+                }
+
+                return false;
+            }
+
+            public void OnSearchMatch()
+            {
+                _label.Alpha = 1f;
             }
         }
 
