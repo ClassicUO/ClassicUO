@@ -67,7 +67,9 @@ namespace ClassicUO.Game.UI.Controls
             int? width,
             int hue = 2996,
             TextHorizontalAlignment align = TextHorizontalAlignment.Left,
-            bool strokeEffect = true
+            bool strokeEffect = true,
+            bool supportsCommands = true,
+            bool ignoreColorCommands = false
         )
         {
             if (strokeEffect)
@@ -76,9 +78,11 @@ namespace ClassicUO.Game.UI.Controls
             _rtl = new RichTextLayout
             {
                 Font = TrueTypeLoader.Instance.GetFont(font, size),
-                Text = text
+                Text = text,
+                IgnoreColorCommand = ignoreColorCommands,
+                SupportsCommands = supportsCommands,
             };
-            
+
             if (width != null)
                 _rtl.Width = width;
 
@@ -103,7 +107,9 @@ namespace ClassicUO.Game.UI.Controls
                 int? width,
                 Color color,
                 TextHorizontalAlignment align = TextHorizontalAlignment.Left,
-                bool strokeEffect = true
+                bool strokeEffect = true,
+                bool supportsCommands = true,
+                bool ignoreColorCommands = false
             )
         {
             if (strokeEffect)
@@ -113,6 +119,8 @@ namespace ClassicUO.Game.UI.Controls
             {
                 Font = TrueTypeLoader.Instance.GetFont(font, size),
                 Text = text,
+                IgnoreColorCommand = ignoreColorCommands,
+                SupportsCommands = supportsCommands,
             };
             if (width != null)
                 _rtl.Width = width;
@@ -211,6 +219,8 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
+        public RichTextLayout RTL => _rtl;
+
         public string Font
         {
             get => _font;
@@ -299,7 +309,7 @@ namespace ClassicUO.Game.UI.Controls
                         Width = Width,
                     };
                 }
-                
+
                 WantUpdateSize = false;
                 _dirty = false;
             }
@@ -326,7 +336,7 @@ namespace ClassicUO.Game.UI.Controls
                 x += Width;
             }
 
-            _rtl.Draw(batcher, new Vector2(x, y), color*Alpha, horizontalAlignment: _align);
+            _rtl.Draw(batcher, new Vector2(x, y), color * Alpha, horizontalAlignment: _align);
 
             return true;
         }

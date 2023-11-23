@@ -2015,14 +2015,8 @@ namespace ClassicUO.Game.UI.Gumps
             content.RemoveIndent();
             content.BlankLine();
 
+            content.AddToRight(new SliderWithLabel("Show durability bar below %", 0, Theme.SLIDER_WIDTH, 1, 100, profile.ModernPaperDoll_DurabilityPercent, (i) => { profile.ModernPaperDoll_DurabilityPercent = i; }), true, page);
 
-            content.AddToRight(new InputFieldWithLabel("Show durability bar below %", 100, profile.ModernPaperDoll_DurabilityPercent.ToString(), true, (s, e) =>
-            {
-                if (int.TryParse(((InputField.StbTextBox)s).Text, out int v))
-                {
-                    profile.ModernPaperDoll_DurabilityPercent = v;
-                }
-            }), true, page);
             #endregion
 
             #region Nameplates
@@ -2146,7 +2140,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             content.AddToRight(new CheckboxWithLabel("Enable spell indicator system", 0, profile.EnableSpellIndicators, (b) => { profile.EnableSpellIndicators = b; }), true, page);
             content.Indent();
-            content.AddToRight(c = new ModernButton(0, 0, 200, 40, ButtonAction.Activate, "Import from url", Theme.BUTTON_FONT_COLOR) { IsSelectable = true, IsSelected = true });
+            content.AddToRight(c = new ModernButton(0, 0, 200, 40, ButtonAction.Activate, "Import from url", Theme.BUTTON_FONT_COLOR) { IsSelectable = true, IsSelected = true }, true, page);
             c.MouseUp += (s, e) => {
                 if (e.Button == MouseButtonType.Left)
                 {
@@ -2197,12 +2191,69 @@ namespace ClassicUO.Game.UI.Gumps
             page = ((int)PAGE.TUOOptions + 1006);
             content.AddToLeft(SubCategoryButton("Tooltips", page, content.LeftWidth));
             content.ResetRightSide();
+
+            content.AddToRight(new CheckboxWithLabel("Align tooltips to the left side", 0, profile.LeftAlignToolTips, (b) => { profile.LeftAlignToolTips = b; }), true, page);
+            content.Indent();
+            content.AddToRight(new CheckboxWithLabel("Align mobile tooltips to center", 0, profile.ForceCenterAlignTooltipMobiles, (b) => { profile.ForceCenterAlignTooltipMobiles = b; }), true, page);
+            content.RemoveIndent();
+
+            content.BlankLine();
+
+            content.AddToRight(new ModernColorPickerWithLabel("Background hue", profile.ToolTipBGHue, (h) => { profile.ToolTipBGHue = h; }), true, page);
+
+            content.BlankLine();
+
+            content.AddToRight(new InputFieldWithLabel("Header format(Item name)", 200, profile.TooltipHeaderFormat, false, (s, e) => { profile.TooltipHeaderFormat = ((InputField.StbTextBox)s).Text; }), true, page);
+
+            content.BlankLine();
+
+            content.AddToRight(c = new ModernButton(0, 0, 200, 40, ButtonAction.Activate, "Tooltip override settings", Theme.BUTTON_FONT_COLOR) { IsSelectable = true, IsSelected = true }, true, page);
+            c.MouseUp += (s, e) => { UIManager.GetGump<ToolTipOverideMenu>()?.Dispose(); UIManager.Add(new ToolTipOverideMenu()); };
+
             #endregion
 
             #region Font settings
             page = ((int)PAGE.TUOOptions + 1007);
             content.AddToLeft(SubCategoryButton("Font settings", page, content.LeftWidth));
             content.ResetRightSide();
+
+            content.AddToRight(new SliderWithLabel("TTF Font border", 0, Theme.SLIDER_WIDTH, 0, 2, profile.TextBorderSize, (i) => { profile.TextBorderSize = i; }), true, page);
+
+            content.BlankLine();
+            content.BlankLine();
+
+            content.AddToRight(GenerateFontSelector("Infobar font", ProfileManager.CurrentProfile.InfoBarFont, (i, s) => { ProfileManager.CurrentProfile.InfoBarFont = s; }), true, page);
+            content.Indent();
+            content.AddToRight(new SliderWithLabel("Size", 0, Theme.SLIDER_WIDTH, 5, 40, profile.InfoBarFontSize, (i) => { profile.InfoBarFontSize = i; }), true, page);
+            content.RemoveIndent();
+            content.BlankLine();
+
+            content.AddToRight(GenerateFontSelector("System chat font", ProfileManager.CurrentProfile.GameWindowSideChatFont, (i, s) => { ProfileManager.CurrentProfile.GameWindowSideChatFont = s; }), true, page);
+            content.Indent();
+            content.AddToRight(new SliderWithLabel("Size", 0, Theme.SLIDER_WIDTH, 5, 40, profile.GameWindowSideChatFontSize, (i) => { profile.GameWindowSideChatFontSize = i; }), true, page);
+            content.RemoveIndent();
+            content.BlankLine();
+
+            content.AddToRight(GenerateFontSelector("Tooltip font", ProfileManager.CurrentProfile.SelectedToolTipFont, (i, s) => { ProfileManager.CurrentProfile.SelectedToolTipFont = s; }), true, page);
+            content.Indent();
+            content.AddToRight(new SliderWithLabel("Size", 0, Theme.SLIDER_WIDTH, 5, 40, profile.SelectedToolTipFontSize, (i) => { profile.SelectedToolTipFontSize = i; }), true, page);
+            content.RemoveIndent();
+            content.BlankLine();
+
+            content.AddToRight(GenerateFontSelector("Overhead font", ProfileManager.CurrentProfile.OverheadChatFont, (i, s) => { ProfileManager.CurrentProfile.OverheadChatFont = s; }), true, page);
+            content.Indent();
+            content.AddToRight(new SliderWithLabel("Size", 0, Theme.SLIDER_WIDTH, 5, 40, profile.OverheadChatFontSize, (i) => { profile.OverheadChatFontSize = i; }), true, page);
+            content.RemoveIndent();
+            content.BlankLine();
+
+            content.AddToRight(GenerateFontSelector("Journal font", ProfileManager.CurrentProfile.SelectedTTFJournalFont, (i, s) => { ProfileManager.CurrentProfile.SelectedTTFJournalFont = s; }), true, page);
+            content.Indent();
+            content.AddToRight(new SliderWithLabel("Size", 0, Theme.SLIDER_WIDTH, 5, 40, profile.SelectedJournalFontSize, (i) => { profile.SelectedJournalFontSize = i; }), true, page);
+            content.RemoveIndent();
+            content.BlankLine();
+
+
+
             #endregion
 
             #region Settings transfers
@@ -2240,6 +2291,13 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
                 }
             }
+        }
+
+        private ComboBoxWithLabel GenerateFontSelector(string label, string selectedFont = "", Action<int, string> onSelect = null)
+        {
+            string[] fontArray = TrueTypeLoader.Instance.Fonts;
+            int selectedFontInd = Array.IndexOf(fontArray, selectedFont);
+            return new ComboBoxWithLabel(label, 0, Theme.COMBO_BOX_WIDTH, fontArray, selectedFontInd, onSelect);
         }
 
         private ModernButton CategoryButton(string text, int page, int width, int height = 40)
@@ -3161,6 +3219,7 @@ namespace ClassicUO.Game.UI.Gumps
                 CanMove = true;
 
                 Add(_label = new TextBox(label, Theme.FONT, Theme.STANDARD_TEXT_SIZE, null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { AcceptMouseInput = false });
+
                 Add(_inputField = new InputField(inputWidth, 40, 0, -1, inputText, numbersonly, onTextChange) { X = _label.Width + _label.X + 5 });
 
                 _label.Y = (_inputField.Height >> 1) - (_label.Height >> 1);
@@ -3307,9 +3366,8 @@ namespace ClassicUO.Game.UI.Gumps
                     Stb = new TextEdit(this);
                     Stb.SingleLine = true;
 
-                    _rendererText = new TextBox(string.Empty, Theme.FONT, FONT_SIZE, maxWidth > 0 ? maxWidth : null, Theme.TEXT_FONT_COLOR, strokeEffect: false);
-
-                    _rendererCaret = new TextBox("_", Theme.FONT, FONT_SIZE, null, Theme.TEXT_FONT_COLOR, strokeEffect: false);
+                    _rendererText = new TextBox(string.Empty, Theme.FONT, FONT_SIZE, maxWidth > 0 ? maxWidth : null, Theme.TEXT_FONT_COLOR, strokeEffect: false, supportsCommands: false, ignoreColorCommands: true);
+                    _rendererCaret = new TextBox("_", Theme.FONT, FONT_SIZE, null, Theme.TEXT_FONT_COLOR, strokeEffect: false, supportsCommands: false, ignoreColorCommands: true);
 
                     Height = _rendererCaret.Height;
                     LoseFocusOnEscapeKey = true;
@@ -3443,8 +3501,14 @@ namespace ClassicUO.Game.UI.Gumps
 
                 protected void UpdateCaretScreenPosition()
                 {
-                    //Fix this based off of Stb.CaretIndex
-                    _caretScreenPosition = new Point(_rendererText.X, _rendererText.Y);
+                    //if (!string.IsNullOrEmpty(_rendererText.Text))
+                    //{
+                    //    var g = _rendererText.RTL.GetGlyphInfoByIndex(Stb.CursorIndex);
+                    //    if (g != null && g.HasValue)
+                    //    {
+                    //        _caretScreenPosition = new Point(g.Value.Bounds.X, g.Value.Bounds.Y);
+                    //    }
+                    //}
                 }
 
                 private ControlKeys ApplyShiftIfNecessary(ControlKeys k)
