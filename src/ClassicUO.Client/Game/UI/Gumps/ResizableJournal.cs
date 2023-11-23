@@ -297,6 +297,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             _backgroundTexture.Alpha = (float)ProfileManager.CurrentProfile.JournalOpacity / 100;
             BorderControl.Alpha = (float)ProfileManager.CurrentProfile.JournalOpacity / 100;
+            _background.Hue = ProfileManager.CurrentProfile.AltJournalBackgroundHue;
 
             BuildBorder();
         }
