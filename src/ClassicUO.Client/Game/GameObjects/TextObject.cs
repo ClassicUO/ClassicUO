@@ -65,6 +65,8 @@ namespace ClassicUO.Game.GameObjects
             }
         );
 
+        public TextObject(World world) : base(world) { }
+
         public byte Alpha;
         public TextObject DLeft, DRight;
         public ushort Hue;

@@ -35,11 +35,11 @@ using ClassicUO.Resources;
 
 namespace ClassicUO.Game.Managers
 {
-    internal static class ChatManager
+    internal sealed class ChatManager
     {
-        public static readonly Dictionary<string, ChatChannel> Channels = new Dictionary<string, ChatChannel>();
-        public static ChatStatus ChatIsEnabled;
-        public static string CurrentChannelName = string.Empty;
+        public readonly Dictionary<string, ChatChannel> Channels = new Dictionary<string, ChatChannel>();
+        public ChatStatus ChatIsEnabled;
+        public string CurrentChannelName = string.Empty;
 
         private static readonly string[] _messages =
         {
@@ -92,7 +92,7 @@ namespace ClassicUO.Game.Managers
             return index < _messages.Length ? _messages[index] : string.Empty;
         }
 
-        public static void AddChannel(string text, bool hasPassword)
+        public void AddChannel(string text, bool hasPassword)
         {
             if (!Channels.TryGetValue(text, out ChatChannel channel))
             {
@@ -101,7 +101,7 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public static void RemoveChannel(string name)
+        public void RemoveChannel(string name)
         {
             if (Channels.ContainsKey(name))
             {
@@ -109,7 +109,7 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public static void Clear()
+        public void Clear()
         {
             Channels.Clear();
         }

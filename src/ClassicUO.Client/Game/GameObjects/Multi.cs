@@ -71,12 +71,14 @@ namespace ClassicUO.Game.GameObjects
         public CUSTOM_HOUSE_MULTI_OBJECT_FLAGS State = 0;
 
 
-        public static Multi Create(ushort graphic)
+        public Multi(World world) : base(world) { }
+
+        public static Multi Create(World world, ushort graphic)
         {
             Multi m = _pool.GetOne();
             m.Graphic = m._originalGraphic = graphic;
             m.UpdateGraphicBySeason();
-            m.AllowedToDraw = CanBeDrawn(m.Graphic);
+            m.AllowedToDraw = CanBeDrawn(world, m.Graphic);
 
             if (m.ItemData.Height > 5 || m.ItemData.Height == 0)
             {

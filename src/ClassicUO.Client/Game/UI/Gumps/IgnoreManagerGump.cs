@@ -2,6 +2,7 @@
 using System.Linq;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Managers;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Renderer;
 using ClassicUO.Resources;
@@ -29,7 +30,7 @@ namespace ClassicUO.Game.UI.Gumps
             ADD_NEW_IGNORE,
         }
 
-        public IgnoreManagerGump() : base(0, 0)
+        public IgnoreManagerGump(World world) : base(world, 0, 0)
         {
             CanMove = true;
 
@@ -141,8 +142,8 @@ namespace ClassicUO.Game.UI.Gumps
             if (_isListModified)
                 IgnoreManager.SaveIgnoreList();
 
-            if (TargetManager.IsTargeting)
-                TargetManager.CancelTarget();
+            if (Client.Game.GetScene<GameScene>().TargetManager.IsTargeting)
+                Client.Game.GetScene<GameScene>().TargetManager.CancelTarget();
 
             base.Dispose();
         }
@@ -200,7 +201,7 @@ namespace ClassicUO.Game.UI.Gumps
             switch (buttonId)
             {
                 case (int)ButtonsId.ADD_NEW_IGNORE:
-                    TargetManager.SetTargeting(CursorTarget.IgnorePlayerTarget, CursorType.Target, TargetType.Neutral);
+                    Client.Game.GetScene<GameScene>().TargetManager.SetTargeting(CursorTarget.IgnorePlayerTarget, CursorType.Target, TargetType.Neutral);
                     break;
             }
         }

@@ -36,9 +36,15 @@ using ClassicUO.Utility.Collections;
 
 namespace ClassicUO.Game.Managers
 {
-    internal class CorpseManager
+    internal sealed class CorpseManager
     {
         private readonly Deque<CorpseInfo> _corpses = new Deque<CorpseInfo>();
+        private readonly World _world;
+
+        public CorpseManager(World world)
+        {
+            _world = world;
+        }
 
         public void Add(uint corpse, uint obj, Direction dir, bool run)
         {
@@ -65,7 +71,7 @@ namespace ClassicUO.Game.Managers
                 {
                     if (corpse != 0)
                     {
-                        Item item = World.Items.Get(corpse);
+                        Item item = _world.Items.Get(corpse);
 
                         if (item != null)
                         {
@@ -105,7 +111,7 @@ namespace ClassicUO.Game.Managers
 
                 if (c.ObjectSerial == serial)
                 {
-                    return World.Items.Get(c.CorpseSerial);
+                    return _world.Items.Get(c.CorpseSerial);
                 }
             }
 

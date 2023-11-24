@@ -56,7 +56,7 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly RenderedTextList _journalEntries;
         private readonly ScrollFlag _scrollBar;
 
-        public JournalGump() : base(0, 0)
+        public JournalGump(World world) : base(world, 0, 0)
         {
             Height = 300;
             CanMove = true;

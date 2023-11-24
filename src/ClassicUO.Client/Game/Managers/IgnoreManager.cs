@@ -11,18 +11,22 @@ using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.Managers
 {
-    internal static class IgnoreManager
+    internal sealed class IgnoreManager
     {
+        private readonly World _world;
+
+        public IgnoreManager(World world) { _world = world; }
+
         /// <summary>
         /// Set of Char names
         /// </summary>
-        public static HashSet<string> IgnoredCharsList = new HashSet<string>();
+        public HashSet<string> IgnoredCharsList = new HashSet<string>();
 
         /// <summary>
         /// Initialize Ignore Manager
         /// - Load List from XML file
         /// </summary>
-        public static void Initialize()
+        public void Initialize()
         {
             ReadIgnoreList();
         }
@@ -31,9 +35,9 @@ namespace ClassicUO.Game.Managers
         /// Add Char to ignored list
         /// </summary>
         /// <param name="entity">Targeted Entity</param>
-        public static void AddIgnoredTarget(Entity entity)
+        public void AddIgnoredTarget(Entity entity)
         {
-            if (entity is Mobile m && !m.IsYellowHits && m.Serial != World.Player.Serial)
+            if (entity is Mobile m && !m.IsYellowHits && m.Serial != _world.Player.Serial)
             {
                 var charName = m.Name;
 
@@ -58,7 +62,7 @@ namespace ClassicUO.Game.Managers
         /// Remove Char from Ignored List
         /// </summary>
         /// <param name="charName">Char name</param>
-        public static void RemoveIgnoredTarget(string charName)
+        public void RemoveIgnoredTarget(string charName)
         {
             if (IgnoredCharsList.Contains(charName))
                 IgnoredCharsList.Remove(charName);
@@ -67,7 +71,7 @@ namespace ClassicUO.Game.Managers
         /// <summary>
         /// Load Ignored List from XML file
         /// </summary>
-        private static void ReadIgnoreList()
+        private void ReadIgnoreList()
         {
             HashSet<string> list = new HashSet<string>();
 
@@ -111,7 +115,7 @@ namespace ClassicUO.Game.Managers
         /// <summary>
         /// Save List to XML File
         /// </summary>
-        public static void SaveIgnoreList()
+        public void SaveIgnoreList()
         {
             string ignoreXmlPath = Path.Combine(ProfileManager.ProfilePath, "ignore_list.xml");
 

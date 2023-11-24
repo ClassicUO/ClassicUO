@@ -41,6 +41,7 @@ using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Assets;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
+using ClassicUO.Game.Scenes;
 
 namespace ClassicUO.Game.Managers
 {
@@ -68,16 +69,16 @@ namespace ClassicUO.Game.Managers
     }
 
 
-    internal static class MessageManager
+    internal sealed class MessageManager
     {
-        public static PromptData PromptData { get; set; }
+        public PromptData PromptData { get; set; }
 
-        public static event EventHandler<MessageEventArgs> MessageReceived;
+        public event EventHandler<MessageEventArgs> MessageReceived;
 
-        public static event EventHandler<MessageEventArgs> LocalizedMessageReceived;
+        public event EventHandler<MessageEventArgs> LocalizedMessageReceived;
 
 
-        public static void HandleMessage
+        public void HandleMessage
         (
             Entity parent,
             string text,
@@ -188,8 +189,8 @@ namespace ClassicUO.Game.Managers
 
                     if (parent is Item it && !it.OnGround)
                     {
-                        msg.X = DelayedObjectClickManager.X;
-                        msg.Y = DelayedObjectClickManager.Y;
+                        msg.X = Client.Game.GetScene<GameScene>().DelayedObjectClickManager.X;
+                        msg.Y = Client.Game.GetScene<GameScene>().DelayedObjectClickManager.Y;
                         msg.IsTextGump = true;
                         bool found = false;
 
@@ -251,12 +252,12 @@ namespace ClassicUO.Game.Managers
             );
         }
 
-        public static void OnLocalizedMessage(Entity entity, MessageEventArgs args)
+        public void OnLocalizedMessage(Entity entity, MessageEventArgs args)
         {
             LocalizedMessageReceived.Raise(args, entity);
         }
 
-        public static TextObject CreateMessage
+        public TextObject CreateMessage
         (
             string msg,
             ushort hue,

@@ -56,7 +56,7 @@ namespace ClassicUO.Game.UI.Gumps
         public bool ShowEdit =>
             Keyboard.Ctrl && Keyboard.Alt && ProfileManager.CurrentProfile.FastSpellsAssign;
 
-        public UseSpellButtonGump() : base(0, 0)
+        public UseSpellButtonGump(World world) : base(world,0, 0)
         {
             CanMove = true;
             AcceptMouseInput = true;
@@ -65,7 +65,7 @@ namespace ClassicUO.Game.UI.Gumps
             _mm = Client.Game.GetScene<GameScene>().Macros;
         }
 
-        public UseSpellButtonGump(SpellDefinition spell) : this()
+        public UseSpellButtonGump(World world, SpellDefinition spell) : this(world)
         {
             _spell = spell;
             BuildGump();
@@ -218,7 +218,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     _mm.MoveToBack(mCast);
                 }
-                GameActions.OpenMacroGump(_spell.Name);
+                GameActions.OpenMacroGump(World, _spell.Name);
             }
 
             if (

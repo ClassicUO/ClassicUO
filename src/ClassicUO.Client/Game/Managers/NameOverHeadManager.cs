@@ -47,23 +47,26 @@ namespace ClassicUO.Game.Managers
         MobilesCorpses = Mobiles | Corpses
     }
 
-    internal static class NameOverHeadManager
+    internal sealed class NameOverHeadManager
     {
-        private static NameOverHeadHandlerGump _gump;
+        private NameOverHeadHandlerGump _gump;
+        private readonly World _world;
 
-        public static NameOverheadTypeAllowed TypeAllowed
+        public NameOverHeadManager(World world) { _world = world; }
+
+        public NameOverheadTypeAllowed TypeAllowed
         {
             get => ProfileManager.CurrentProfile.NameOverheadTypeAllowed;
             set => ProfileManager.CurrentProfile.NameOverheadTypeAllowed = value;
         }
 
-        public static bool IsToggled
+        public bool IsToggled
         {
             get => ProfileManager.CurrentProfile.NameOverheadToggled;
             set => ProfileManager.CurrentProfile.NameOverheadToggled = value;
         }
 
-        public static bool IsAllowed(Entity serial)
+        public bool IsAllowed(Entity serial)
         {
             if (serial == null)
             {
@@ -85,7 +88,7 @@ namespace ClassicUO.Game.Managers
                 return true;
             }
 
-            if (TypeAllowed.HasFlag(NameOverheadTypeAllowed.Corpses) && SerialHelper.IsItem(serial.Serial) && World.Items.Get(serial)?.IsCorpse == true)
+            if (TypeAllowed.HasFlag(NameOverheadTypeAllowed.Corpses) && SerialHelper.IsItem(serial.Serial) && _world.Items.Get(serial)?.IsCorpse == true)
             {
                 return true;
             }
@@ -93,7 +96,7 @@ namespace ClassicUO.Game.Managers
             return false;
         }
 
-        public static void Open()
+        public void Open()
         {
             if (_gump == null || _gump.IsDisposed)
             {
@@ -105,7 +108,7 @@ namespace ClassicUO.Game.Managers
             _gump.IsVisible = true;
         }
 
-        public static void Close()
+        public void Close()
         {
             if (_gump == null)
                 return;
@@ -114,7 +117,7 @@ namespace ClassicUO.Game.Managers
             _gump.IsVisible = false;
         }
 
-        public static void ToggleOverheads()
+        public void ToggleOverheads()
         {
             IsToggled = !IsToggled;
         }

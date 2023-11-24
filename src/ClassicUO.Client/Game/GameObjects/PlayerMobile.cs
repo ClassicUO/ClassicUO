@@ -41,6 +41,7 @@ using ClassicUO.Assets;
 using ClassicUO.Network;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
+using ClassicUO.Game.Scenes;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -48,7 +49,7 @@ namespace ClassicUO.Game.GameObjects
     {
         private readonly Dictionary<BuffIconType, BuffIcon> _buffIcons = new Dictionary<BuffIconType, BuffIcon>();
 
-        public PlayerMobile(uint serial) : base(serial)
+        public PlayerMobile(World world, uint serial) : base(world, serial)
         {
             Skills = new Skill[SkillsLoader.Instance.SkillsCount];
 
@@ -57,6 +58,8 @@ namespace ClassicUO.Game.GameObjects
                 SkillEntry skill = SkillsLoader.Instance.Skills[i];
                 Skills[i] = new Skill(skill.Name, skill.Index, skill.HasAction);
             }
+
+            Walker = new WalkerManager(this);
         }
 
         public Skill[] Skills { get; }
@@ -67,7 +70,7 @@ namespace ClassicUO.Game.GameObjects
         public ref Ability SecondaryAbility => ref Abilities[1];
         protected override bool IsWalking => LastStepTime > Time.Ticks - Constants.PLAYER_WALKING_DELAY;
 
-        internal WalkerManager Walker { get; } = new WalkerManager();
+        internal WalkerManager Walker { get; }
         public Ability[] Abilities = new Ability[2]
         {
             Ability.Invalid, Ability.Invalid
@@ -1338,7 +1341,7 @@ namespace ClassicUO.Game.GameObjects
         {
             if (ProfileManager.CurrentProfile.AutoOpenCorpses)
             {
-                if ((ProfileManager.CurrentProfile.CorpseOpenOptions == 1 || ProfileManager.CurrentProfile.CorpseOpenOptions == 3) && TargetManager.IsTargeting)
+                if ((ProfileManager.CurrentProfile.CorpseOpenOptions == 1 || ProfileManager.CurrentProfile.CorpseOpenOptions == 3) && Client.Game.GetScene<GameScene>().TargetManager.IsTargeting)
                 {
                     return;
                 }
@@ -1371,7 +1374,7 @@ namespace ClassicUO.Game.GameObjects
             if (!World.Player.IsDead && ProfileManager.CurrentProfile.AutoOpenDoors)
             {
                 int x = X, y = Y, z = Z;
-                Pathfinder.GetNewXY((byte) Direction, ref x, ref y);
+                Client.Game.GetScene<GameScene>().Pathfinder.GetNewXY((byte) Direction, ref x, ref y);
 
                 if (World.Items.Values.Any(s => s.ItemData.IsDoor && s.X == x && s.Y == y && s.Z - 15 <= z && s.Z + 15 >= z))
                 {
@@ -1573,7 +1576,7 @@ namespace ClassicUO.Game.GameObjects
                 int newY = y;
                 sbyte newZ = z;
 
-                if (!Pathfinder.CanWalk(ref newDir, ref newX, ref newY, ref newZ))
+                if (!Client.Game.GetScene<GameScene>().Pathfinder.CanWalk(ref newDir, ref newX, ref newY, ref newZ))
                 {
                     return false;
                 }
@@ -1599,7 +1602,7 @@ namespace ClassicUO.Game.GameObjects
                 int newY = y;
                 sbyte newZ = z;
 
-                if (!Pathfinder.CanWalk(ref newDir, ref newX, ref newY, ref newZ))
+                if (!Client.Game.GetScene<GameScene>().Pathfinder.CanWalk(ref newDir, ref newX, ref newY, ref newZ))
                 {
                     if ((oldDirection & Direction.Mask) == newDir)
                     {

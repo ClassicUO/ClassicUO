@@ -51,7 +51,7 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly DataBox _databox;
         private string _selectedChannelText;
 
-        public ChatGump() : base(0, 0)
+        public ChatGump(World world) : base(world, 0, 0)
         {
             CanMove = true;
             AcceptMouseInput = true;

@@ -168,9 +168,9 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-            bool isAttack = Serial == TargetManager.LastAttack;
+            bool isAttack = Serial == Client.Game.GetScene<GameScene>().TargetManager.LastAttack;
             bool isUnderMouse =
-                TargetManager.IsTargeting && ReferenceEquals(SelectedObject.Object, this);
+                Client.Game.GetScene<GameScene>().TargetManager.IsTargeting && ReferenceEquals(SelectedObject.Object, this);
 
             if (Serial != World.Player.Serial)
             {

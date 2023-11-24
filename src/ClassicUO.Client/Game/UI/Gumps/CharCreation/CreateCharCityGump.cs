@@ -67,7 +67,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             new Point(270, 130)
         };
 
-        public CreateCharSelectionCityGump(byte profession, LoginScene scene) : base(0, 0)
+        public CreateCharSelectionCityGump(World world, byte profession, LoginScene scene) : base(world, 0, 0)
         {
             CanMove = false;
             CanCloseWithRightClick = false;

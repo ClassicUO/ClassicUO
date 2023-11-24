@@ -58,6 +58,7 @@ using SDL2;
 using SpriteFont = ClassicUO.Renderer.SpriteFont;
 using System.Text.Json.Serialization;
 using static ClassicUO.Game.UI.Gumps.WorldMapGump;
+using ClassicUO.Game.Scenes;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -123,8 +124,9 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly float[] _zooms = new float[10] { 0.125f, 0.25f, 0.5f, 0.75f, 1f, 1.5f, 2f, 4f, 6f, 8f };
         private readonly Color _semiTransparentWhiteForGrid = new Color(255, 255, 255, 56);
 
-        public WorldMapGump() : base
+        public WorldMapGump(World world) : base
         (
+            world,
             400,
             400,
             100,
@@ -301,6 +303,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     EntryDialog dialog = new EntryDialog
                     (
+                        World,
                         250,
                         150,
                         ResGumps.EnterLocation,
@@ -399,7 +402,7 @@ namespace ClassicUO.Game.UI.Gumps
             _options["markers_manager"] = new ContextMenuItemEntry(ResGumps.MarkersManager,
                 () =>
                 {
-                    var mm = new MarkersManagerGump();
+                    var mm = new MarkersManagerGump(World);
 
                     UIManager.Add(mm);
                 }
@@ -733,7 +736,7 @@ namespace ClassicUO.Game.UI.Gumps
             int x = position.X - X - ParentX;
             int y = position.Y - Y - ParentY;
             CanvasToWorld(x, y, out int xMap, out int yMap);
-            TargetManager.Target
+            Client.Game.GetScene<GameScene>().TargetManager.Target
             (
                 0,
                 (ushort)xMap,
@@ -1185,7 +1188,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 for (int c = 0; c < count; ++c, ++sb)
                 {
-                    if (sb->Color != 0 && sb->Color != 0xFFFF && GameObject.CanBeDrawn(sb->Color))
+                    if (sb->Color != 0 && sb->Color != 0xFFFF && GameObject.CanBeDrawn(World, sb->Color))
                     {
                         int index = sb->Y * 8 + sb->X;
 
@@ -1514,7 +1517,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                                         for (int c = 0; c < count; ++c, ++sb)
                                         {
-                                            if (sb->Color != 0 && sb->Color != 0xFFFF && GameObject.CanBeDrawn(sb->Color))
+                                            if (sb->Color != 0 && sb->Color != 0xFFFF && GameObject.CanBeDrawn(World, sb->Color))
                                             {
                                                 int block = (mapY + sb->Y + OFFSET_PIX_HALF) * (realWidth + OFFSET_PIX) + mapX + sb->X + OFFSET_PIX_HALF;
 
@@ -2010,7 +2013,7 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
-            var entryDialog = new EntryDialog(250, 150, ResGumps.EnterMarkerName, SaveMakerOnPlayer)
+            var entryDialog = new EntryDialog(World, 250, 150, ResGumps.EnterMarkerName, SaveMakerOnPlayer)
             {
                 CanCloseWithRightClick = true
             };
@@ -3240,7 +3243,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseUp(int x, int y, MouseButtonType button)
         {
-            var allowTarget = _allowPositionalTarget && TargetManager.IsTargeting && TargetManager.TargetingState == CursorTarget.Position;
+            var allowTarget = _allowPositionalTarget && Client.Game.GetScene<GameScene>().TargetManager.IsTargeting && Client.Game.GetScene<GameScene>().TargetManager.TargetingState == CursorTarget.Position;
             if (allowTarget && button == MouseButtonType.Left)
             {
                 HandlePositionTarget();
@@ -3300,7 +3303,7 @@ namespace ClassicUO.Game.UI.Gumps
                     UserMarkersGump existingGump = UIManager.GetGump<UserMarkersGump>();
 
                     existingGump?.Dispose();
-                    UIManager.Add(new UserMarkersGump(_mouseCenter.X, _mouseCenter.Y, userFile.Markers));
+                    UIManager.Add(new UserMarkersGump(World, _mouseCenter.X, _mouseCenter.Y, userFile.Markers));
                 }
             }
 

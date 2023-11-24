@@ -102,6 +102,7 @@ namespace ClassicUO
         public Renderer.Lights.Light Lights { get; private set; }
         public Renderer.MultiMaps.MultiMap MultiMaps { get; private set; }
         public Renderer.Sounds.Sound Sounds { get; private set; }
+        public World World { get; private set; }
 
         public GraphicsDeviceManager GraphicManager { get; }
         public readonly uint[] FrameDelay = new uint[2];
@@ -195,7 +196,8 @@ namespace ClassicUO
 
             LightColors.LoadLights();
 
-            GameCursor = new GameCursor();
+            World = new World(this);
+            GameCursor = new GameCursor(World);
             Audio = new AudioManager();
             Audio.Initialize();
 
@@ -437,7 +439,7 @@ namespace ClassicUO
             Mouse.Update();
 
             var data = NetClient.Socket.CollectAvailableData();
-            var packetsCount = PacketHandlers.Handler.ParsePackets(data);
+            var packetsCount = PacketHandlers.Handler.ParsePackets(World, data);
             NetClient.Socket.Statistics.TotalPacketsReceived += (uint)packetsCount;
             NetClient.Socket.Flush();
 
@@ -950,7 +952,7 @@ namespace ClassicUO
                 }
                 else
                 {
-                    GameActions.Print(message, 0x44, MessageType.System);
+                    GameActions.Print(World, message, 0x44, MessageType.System);
                 }
             }
         }

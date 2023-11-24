@@ -63,7 +63,9 @@ namespace ClassicUO.Game.GameObjects
         public ushort OriginalGraphic;
         public UltimaBatcher2D.YOffsets YOffsets;
 
-        public static Land Create(ushort graphic)
+        public Land(World world) : base(world) { }
+
+        public static Land Create(World world, ushort graphic)
         {
             Land land = _pool.GetOne();
             land.Graphic = graphic;

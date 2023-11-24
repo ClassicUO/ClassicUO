@@ -58,7 +58,7 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly AlphaBlendControl _alphaBlendControl;
         private string _cacheText = string.Empty;
 
-        public DebugGump(int x, int y) : base(0, 0)
+        public DebugGump(World world, int x, int y) : base(world, 0, 0)
         {
             CanMove = true;
             CanCloseWithEsc = false;

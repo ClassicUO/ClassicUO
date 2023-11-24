@@ -55,7 +55,7 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly GameScene _scene;
         private readonly SystemChatControl _systemChatControl;
 
-        public WorldViewportGump(GameScene scene) : base(0, 0)
+        public WorldViewportGump(World world, GameScene scene) : base(world, 0, 0)
         {
             _scene = scene;
             AcceptMouseInput = false;
@@ -109,6 +109,7 @@ namespace ClassicUO.Game.UI.Gumps
             };
 
             UIManager.SystemChat = _systemChatControl = new SystemChatControl(
+                this,
                 BORDER_WIDTH,
                 BORDER_WIDTH,
                 scene.Camera.Bounds.Width,

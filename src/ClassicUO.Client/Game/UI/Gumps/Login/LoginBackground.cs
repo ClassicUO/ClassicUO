@@ -37,7 +37,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 {
     internal class LoginBackground : Gump
     {
-        public LoginBackground() : base(0, 0)
+        public LoginBackground(World world) : base(world, 0, 0)
         {
             if (Client.Version >= ClientVersion.CV_706400)
             {

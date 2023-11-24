@@ -59,7 +59,7 @@ namespace ClassicUO.Game.UI.Gumps
         const ushort SMALL_MAP_GRAPHIC = 5010;
         const ushort BIG_MAP_GRAPHIC = 5011;
 
-        public MiniMapGump() : base(0, 0)
+        public MiniMapGump(World world) : base(world, 0, 0)
         {
             CanMove = true;
             AcceptMouseInput = true;
@@ -331,7 +331,7 @@ namespace ClassicUO.Game.UI.Gumps
                                     && stblock.Y == y
                                     && stblock.Color > 0
                                     && stblock.Color != 0xFFFF
-                                    && GameObject.CanBeDrawn(stblock.Color)
+                                    && GameObject.CanBeDrawn(World, stblock.Color)
                                 )
                                 {
                                     if (stblock.Z >= z)

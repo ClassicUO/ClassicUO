@@ -65,7 +65,7 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly Label _skillsLabelSum;
         private readonly NiceButton _resetGroups;
 
-        public StandardSkillsGump() : base(0, 0)
+        public StandardSkillsGump(World world) : base(world, 0, 0)
         {
             AcceptMouseInput = false;
             CanMove = true;
@@ -247,7 +247,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 SkillsGroupManager.Add(g);
 
-                SkillsGroupControl control = new SkillsGroupControl(g, 3, 3);
+                SkillsGroupControl control = new SkillsGroupControl(this, g, 3, 3);
                 _skillsControl.Add(control);
                 _container.Add(control);
                 control.IsMinimized = !g.IsMaximized;
@@ -258,7 +258,7 @@ namespace ClassicUO.Game.UI.Gumps
             else if (buttonID == 1) // reset
             {
                 UIManager.Add(
-                    new MessageBoxGump(300, 200,
+                    new MessageBoxGump(World, 300, 200,
                                        "Skills will be placed in default groups.\nDo you want reset all groups?",
                                                b =>
                                                {
@@ -285,7 +285,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 foreach (SkillsGroup g in SkillsGroupManager.Groups)
                 {
-                    SkillsGroupControl control = new SkillsGroupControl(g, 3, 3);
+                    SkillsGroupControl control = new SkillsGroupControl(this, g, 3, 3);
                     _skillsControl.Add(control);
                     _container.Add(control);
 
@@ -388,6 +388,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private class SkillsGroupControl : Control
         {
+            private readonly StandardSkillsGump _gump;
             private readonly DataBox _box;
             private readonly Button _button;
             private readonly SkillsGroup _group;
@@ -398,8 +399,9 @@ namespace ClassicUO.Game.UI.Gumps
             private byte _status;
             private readonly StbTextBox _textbox;
 
-            public SkillsGroupControl(SkillsGroup group, int x, int y)
+            public SkillsGroupControl(StandardSkillsGump gump, SkillsGroup group, int x, int y)
             {
+                _gump = gump;
                 CanMove = false;
                 AcceptMouseInput = true;
                 WantUpdateSize = true;
@@ -544,7 +546,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             public void AddSkill(int index, int x, int y)
             {
-                SkillItemControl c = new SkillItemControl(index, x, y);
+                SkillItemControl c = new SkillItemControl(_gump, index, x, y);
                 _skills.Add(c);
                 _box.Add(c);
                 _box.WantUpdateSize = true;
@@ -568,9 +570,9 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 foreach (SkillItemControl c in _skills)
                 {
-                    if (c.Index == index && index >= 0 && index < World.Player.Skills.Length)
+                    if (c.Index == index && index >= 0 && index < _gump.World.Player.Skills.Length)
                     {
-                        Skill skill = World.Player.Skills[index];
+                        Skill skill = _gump.World.Player.Skills[index];
 
                         if (skill == null)
                         {
@@ -778,13 +780,15 @@ namespace ClassicUO.Game.UI.Gumps
 
         private class SkillItemControl : Control
         {
+            private readonly StandardSkillsGump _gump;
             private readonly Button _buttonStatus;
             private Lock _status;
             private readonly Label _value;
 
 
-            public SkillItemControl(int index, int x, int y)
+            public SkillItemControl(StandardSkillsGump gump, int index, int x, int y)
             {
+                _gump = gump;
                 Index = index;
                 X = x;
                 Y = y;
@@ -796,7 +800,7 @@ namespace ClassicUO.Game.UI.Gumps
                     return;
                 }
 
-                Skill skill = World.Player.Skills[Index];
+                Skill skill = gump.World.Player.Skills[Index];
 
                 if (skill != null)
                 {
@@ -858,12 +862,12 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else if (buttonID == 1) // change status
                 {
-                    if (World.Player == null)
+                    if (_gump.World.Player == null)
                     {
                         return;
                     }
 
-                    Skill skill = World.Player.Skills[Index];
+                    Skill skill = _gump.World.Player.Skills[Index];
                     byte newStatus = (byte) skill.Lock;
 
                     if (newStatus < 2)
@@ -894,12 +898,12 @@ namespace ClassicUO.Game.UI.Gumps
 
             public void UpdateValueText(bool showReal, bool showCap)
             {
-                if (World.Player == null || Index < 0 || Index >= World.Player.Skills.Length)
+                if (_gump.World.Player == null || Index < 0 || Index >= _gump.World.Player.Skills.Length)
                 {
                     return;
                 }
 
-                Skill skill = World.Player.Skills[Index];
+                Skill skill = _gump.World.Player.Skills[Index];
 
                 if (skill != null)
                 {
@@ -941,15 +945,15 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Client.Game.GameCursor.IsDraggingCursorForced = false;
 
-                if (UIManager.LastControlMouseDown(MouseButtonType.Left) == this && World.Player.Skills[Index].IsClickable)
+                if (UIManager.LastControlMouseDown(MouseButtonType.Left) == this && _gump.World.Player.Skills[Index].IsClickable)
                 {
                     if (UIManager.MouseOverControl == null || UIManager.MouseOverControl.RootParent != RootParent)
                     {
                         GetSpellFloatingButton(Index)?.Dispose();
 
-                        if (Index >= 0 && Index < World.Player.Skills.Length)
+                        if (Index >= 0 && Index < _gump.World.Player.Skills.Length)
                         {
-                            UIManager.Add(new SkillButtonGump(World.Player.Skills[Index], Mouse.Position.X - 44, Mouse.Position.Y - 22));
+                            UIManager.Add(new SkillButtonGump(_gump.World, _gump.World.Player.Skills[Index], Mouse.Position.X - 44, Mouse.Position.Y - 22));
                         }
                     }
                 }
