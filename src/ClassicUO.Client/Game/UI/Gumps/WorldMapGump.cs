@@ -144,7 +144,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             LoadSettings();
 
-            GameActions.Print(ResGumps.WorldMapLoading, 0x35);
+            GameActions.Print(World, ResGumps.WorldMapLoading, 0x35);
             Load();
             OnResize();
 
@@ -313,7 +313,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                             if (string.IsNullOrWhiteSpace(name))
                             {
-                                GameActions.Print(ResGumps.InvalidLocation, 0x35);
+                                GameActions.Print(World, ResGumps.InvalidLocation, 0x35);
 
                                 return;
                             }
@@ -331,19 +331,19 @@ namespace ClassicUO.Game.UI.Gumps
                                 }
                                 catch
                                 {
-                                    GameActions.Print(ResGumps.InvalidLocation, 0x35);
+                                    GameActions.Print(World, ResGumps.InvalidLocation, 0x35);
                                 }
                             }
                             else
                             {
                                 if (!int.TryParse(coords[0], out x))
                                 {
-                                    GameActions.Print(ResGumps.InvalidLocation, 0x35);
+                                    GameActions.Print(World, ResGumps.InvalidLocation, 0x35);
                                 }
 
                                 if (!int.TryParse(coords[1], out y))
                                 {
-                                    GameActions.Print(ResGumps.InvalidLocation, 0x35);
+                                    GameActions.Print(World, ResGumps.InvalidLocation, 0x35);
                                 }
                             }
 
@@ -1601,7 +1601,7 @@ namespace ClassicUO.Game.UI.Gumps
                             Log.Error($"error loading worldmap: {ex}");
                         }
 
-                        GameActions.Print(ResGumps.WorldMapLoaded, 0x48);
+                        GameActions.Print(World, ResGumps.WorldMapLoaded, 0x48);
                     }
                 }
             );
@@ -1688,13 +1688,13 @@ namespace ClassicUO.Game.UI.Gumps
         {
             public Dictionary<string, ZoneSet> ZoneSetDict { get; } = new Dictionary<string, ZoneSet>();
 
-            public void AddZoneSetByFileName(string filename, bool hidden)
+            public void AddZoneSetByFileName(World world, string filename, bool hidden)
             {
                 try
                 {
                     var zf = System.Text.Json.JsonSerializer.Deserialize(File.ReadAllText(filename), ZonesJsonContext.Default.ZonesFile);
                     ZoneSetDict[filename] = new ZoneSet(zf, filename, hidden);
-                    GameActions.Print(string.Format(ResGumps.MapZoneFileLoaded, ZoneSetDict[filename].NiceFileName), 0x3A /* yellow green */);
+                    GameActions.Print(world, string.Format(ResGumps.MapZoneFileLoaded, ZoneSetDict[filename].NiceFileName), 0x3A /* yellow green */);
                 }
                 catch (Exception ee)
                 {
@@ -1737,7 +1737,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _hiddenZoneFiles.FirstOrDefault(x => x.Contains(filename))
                 );
 
-                _zoneSets.AddZoneSetByFileName(filename, shouldHide);
+                _zoneSets.AddZoneSetByFileName(World, filename, shouldHide);
             }
         }
 
@@ -1754,7 +1754,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     _mapMarkersLoaded = false;
 
-                    GameActions.Print(ResGumps.LoadingWorldMapMarkers, 0x2A);
+                    GameActions.Print(World, ResGumps.LoadingWorldMapMarkers, 0x2A);
 
                     foreach (Texture2D t in _markerIcons.Values)
                     {
@@ -1982,7 +1982,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                             if (markerFile.Markers.Count > 0)
                             {
-                                GameActions.Print($"..{Path.GetFileName(mapFile)} ({markerFile.Markers.Count})", 0x2B);
+                                GameActions.Print(World, $"..{Path.GetFileName(mapFile)} ({markerFile.Markers.Count})", 0x2B);
                             }
                             _markerFiles.Add(markerFile);
                         }
@@ -1999,7 +1999,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     _mapMarkersLoaded = true;
 
-                    GameActions.Print(string.Format(ResGumps.WorldMapMarkersLoaded0, count), 0x2A);
+                    GameActions.Print(World, string.Format(ResGumps.WorldMapMarkersLoaded0, count), 0x2A);
                 }
             }
 
@@ -2030,7 +2030,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (string.IsNullOrWhiteSpace(markerName))
             {
-                GameActions.Print(ResGumps.InvalidMarkerName, 0x2A);
+                GameActions.Print(World, ResGumps.InvalidMarkerName, 0x2A);
             }
 
             var markerColor = "blue";

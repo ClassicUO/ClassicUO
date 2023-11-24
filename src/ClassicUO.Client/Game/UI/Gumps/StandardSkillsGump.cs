@@ -245,7 +245,7 @@ namespace ClassicUO.Game.UI.Gumps
                     Name = ResGumps.NewGroup
                 };
 
-                SkillsGroupManager.Add(g);
+                World.SkillsGroupManager.Add(g);
 
                 SkillsGroupControl control = new SkillsGroupControl(this, g, 3, 3);
                 _skillsControl.Add(control);
@@ -267,8 +267,8 @@ namespace ClassicUO.Game.UI.Gumps
                                                        _skillsControl.Clear();
                                                        _container.Clear();
 
-                                                       SkillsGroupManager.Groups.Clear();
-                                                       SkillsGroupManager.MakeDefault();
+                                                       World.SkillsGroupManager.Groups.Clear();
+                                                       World.SkillsGroupManager.MakeDefault();
 
                                                        LoadSkills();
 
@@ -283,7 +283,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (World.Player != null)
             {
-                foreach (SkillsGroup g in SkillsGroupManager.Groups)
+                foreach (SkillsGroup g in World.SkillsGroupManager.Groups)
                 {
                     SkillsGroupControl control = new SkillsGroupControl(this, g, 3, 3);
                     _skillsControl.Add(control);
@@ -682,7 +682,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (key == SDL.SDL_Keycode.SDLK_DELETE && _status == 1)
                 {
-                    if (SkillsGroupManager.Remove(_group) && RootParent is StandardSkillsGump gump)
+                    if (_gump.World.SkillsGroupManager.Remove(_group) && RootParent is StandardSkillsGump gump)
                     {
                         SkillsGroupControl first = gump._skillsControl[0];
 

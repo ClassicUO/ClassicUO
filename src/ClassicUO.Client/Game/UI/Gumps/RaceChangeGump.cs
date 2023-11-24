@@ -381,6 +381,7 @@ namespace ClassicUO.Game.UI.Gumps
             (
                 colorPicker = new CustomColorPicker
                 (
+                    this,
                     layer,
                     clilocLabel,
                     pallet,
@@ -538,9 +539,11 @@ namespace ClassicUO.Game.UI.Gumps
             private int _lastSelectedIndex;
             private readonly Layer _layer;
             private readonly ushort[] _pallet;
+            private readonly RaceChangeGump _gump;
 
-            public CustomColorPicker(Layer layer, int label, ushort[] pallet, int rows, int columns)
+            public CustomColorPicker(RaceChangeGump gump, Layer layer, int label, ushort[] pallet, int rows, int columns)
             {
+                _gump = gump;
                 Width = 121;
                 Height = 25;
                 _cellW = 125 / columns;
@@ -625,6 +628,7 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         _colorPickerBox = new ColorPickerBox
                         (
+                            _gump.World,
                             485,
                             109,
                             _rows,

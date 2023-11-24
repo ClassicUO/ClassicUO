@@ -132,19 +132,6 @@ namespace ClassicUO.Game.UI.Controls
 
         public bool IsPartialHue { get; set; }
         public bool ContainsByBounds { get; set; }
-        public bool IsVirtue { get; set; }
-
-        protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
-        {
-            if (IsVirtue && button == MouseButtonType.Left)
-            {
-                NetClient.Socket.Send_VirtueGumpResponse(World.Player, Graphic);
-
-                return true;
-            }
-
-            return base.OnMouseDoubleClick(x, y, button);
-        }
 
         public override bool Contains(int x, int y)
         {
@@ -185,6 +172,28 @@ namespace ClassicUO.Game.UI.Controls
             }
 
             return base.Draw(batcher, x, y);
+        }
+    }
+
+    internal class VirtueGumpPic : GumpPic
+    {
+        private readonly World _world;
+
+        public VirtueGumpPic(World world, List<string> parts) : base(parts)
+        {
+            _world = world;
+        }
+
+        protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
+        {
+            if (button == MouseButtonType.Left)
+            {
+                NetClient.Socket.Send_VirtueGumpResponse(_world.Player, Graphic);
+
+                return true;
+            }
+
+            return base.OnMouseDoubleClick(x, y, button);
         }
     }
 

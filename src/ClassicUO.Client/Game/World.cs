@@ -65,7 +65,11 @@ namespace ClassicUO.Game
             HouseManager = new HouseManager(this);
             WorldTextManager = new WorldTextManager(this);
             _effectManager = new EffectManager(this);
-            MessageManager = new MessageManager();
+            MessageManager = new MessageManager(this);
+            ContainerManager = new ContainerManager(this);
+            IgnoreManager = new IgnoreManager(this);
+            SkillsGroupManager = new SkillsGroupManager(this);
+            ChatManager = new ChatManager(this);
         }
 
         public Point RangeSize;
@@ -89,6 +93,14 @@ namespace ClassicUO.Game
         public HouseManager HouseManager { get; }
 
         public MessageManager MessageManager { get; }
+
+        public ContainerManager ContainerManager { get; }
+
+        public IgnoreManager IgnoreManager { get; }
+
+        public SkillsGroupManager SkillsGroupManager { get; }
+
+        public ChatManager ChatManager { get; }
 
         public Dictionary<uint, Item> Items { get; } = new Dictionary<uint, Item>();
 
@@ -434,7 +446,7 @@ namespace ClassicUO.Game
 
             if (item == null /*|| item.IsDestroyed*/)
             {
-                item = Item.Create(serial);
+                item = Item.Create(this, serial);
                 Items.Add(item);
             }
 
@@ -453,7 +465,7 @@ namespace ClassicUO.Game
 
             if (mob == null /*|| mob.IsDestroyed*/)
             {
-                mob = Mobile.Create(serial);
+                mob = Mobile.Create(this, serial);
                 Mobiles.Add(mob);
             }
 

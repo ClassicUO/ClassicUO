@@ -1545,9 +1545,9 @@ namespace ClassicUO.Network
                     }
                     else
                     {
-                        ContainerManager.CalculateContainerPosition(serial, graphic);
-                        x = ContainerManager.X;
-                        y = ContainerManager.Y;
+                        world.ContainerManager.CalculateContainerPosition(serial, graphic);
+                        x = world.ContainerManager.X;
+                        y = world.ContainerManager.Y;
                         playsound = true;
                     }
 
@@ -3831,8 +3831,8 @@ namespace ClassicUO.Network
                     p.Skip(4);
                     string channelName = p.ReadUnicodeBE();
                     bool hasPassword = p.ReadUInt16BE() == 0x31;
-                    ChatManager.CurrentChannelName = channelName;
-                    ChatManager.AddChannel(channelName, hasPassword);
+                    world.ChatManager.CurrentChannelName = channelName;
+                    world.ChatManager.AddChannel(channelName, hasPassword);
 
                     UIManager.GetGump<ChatGump>()?.RequestUpdateContents();
 
@@ -3841,20 +3841,20 @@ namespace ClassicUO.Network
                 case 0x03E9: // destroy conference
                     p.Skip(4);
                     channelName = p.ReadUnicodeBE();
-                    ChatManager.RemoveChannel(channelName);
+                    world.ChatManager.RemoveChannel(channelName);
 
                     UIManager.GetGump<ChatGump>()?.RequestUpdateContents();
 
                     break;
 
                 case 0x03EB: // display enter username window
-                    ChatManager.ChatIsEnabled = ChatStatus.EnabledUserRequest;
+                    world.ChatManager.ChatIsEnabled = ChatStatus.EnabledUserRequest;
 
                     break;
 
                 case 0x03EC: // close chat
-                    ChatManager.Clear();
-                    ChatManager.ChatIsEnabled = ChatStatus.Disabled;
+                    world.ChatManager.Clear();
+                    world.ChatManager.ChatIsEnabled = ChatStatus.Disabled;
 
                     UIManager.GetGump<ChatGump>()?.Dispose();
 
@@ -3863,7 +3863,7 @@ namespace ClassicUO.Network
                 case 0x03ED: // username accepted, display chat
                     p.Skip(4);
                     string username = p.ReadUnicodeBE();
-                    ChatManager.ChatIsEnabled = ChatStatus.Enabled;
+                    world.ChatManager.ChatIsEnabled = ChatStatus.Enabled;
                     NetClient.Socket.Send_ChatJoinCommand("General");
 
                     break;
@@ -3887,7 +3887,7 @@ namespace ClassicUO.Network
                 case 0x03F1: // you have joined a conference
                     p.Skip(4);
                     channelName = p.ReadUnicodeBE();
-                    ChatManager.CurrentChannelName = channelName;
+                    world.ChatManager.CurrentChannelName = channelName;
 
                     UIManager.GetGump<ChatGump>()?.UpdateConference();
 
@@ -4031,7 +4031,7 @@ namespace ClassicUO.Network
 
             world.ClientLockedFeatures.SetFlags(flags);
 
-            ChatManager.ChatIsEnabled = world.ClientLockedFeatures.Flags.HasFlag(
+            world.ChatManager.ChatIsEnabled = world.ClientLockedFeatures.Flags.HasFlag(
                 LockedFeatureFlags.T2A
             )
                 ? ChatStatus.Enabled
@@ -4542,7 +4542,7 @@ namespace ClassicUO.Network
                             {
                                 ushort cc = (ushort)(j * 32 + i + 1);
                                 // FIXME: should i call Item.Create ?
-                                Item spellItem = Item.Create(cc); // new Item()
+                                Item spellItem = Item.Create(world, cc); // new Item()
                                 spellItem.Serial = cc;
                                 spellItem.Graphic = 0x1F2E;
                                 spellItem.Amount = cc;
@@ -6637,18 +6637,17 @@ namespace ClassicUO.Network
                     string.Equals(entry, "gumppic", StringComparison.InvariantCultureIgnoreCase)
                 )
                 {
-                    GumpPic pic = new GumpPic(gparams);
-
-                    if (
-                        gparams.Count >= 6
+                    GumpPic pic;
+                    var isVirtue = gparams.Count >= 6
                         && gparams[5].IndexOf(
                             "virtuegumpitem",
                             StringComparison.InvariantCultureIgnoreCase
-                        ) >= 0
-                    )
+                        ) >= 0;
+
+                    if (isVirtue)
                     {
+                        pic = new VirtueGumpPic(world, gparams);
                         pic.ContainsByBounds = true;
-                        pic.IsVirtue = true;
 
                         string s,
                             lvl;
@@ -6762,6 +6761,10 @@ namespace ClassicUO.Network
                         }
 
                         pic.SetTooltip(lvl + s, 100);
+                    }
+                    else
+                    {
+                        pic = new GumpPic(gparams);
                     }
 
                     gump.Add(pic, page);

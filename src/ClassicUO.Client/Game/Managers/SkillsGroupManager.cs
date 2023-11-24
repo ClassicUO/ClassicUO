@@ -184,23 +184,28 @@ namespace ClassicUO.Game.Managers
         }
     }
 
-    internal static class SkillsGroupManager
+    internal sealed class SkillsGroupManager
     {
-        public static readonly List<SkillsGroup> Groups = new List<SkillsGroup>();
+        private readonly World _world;
+
+        public SkillsGroupManager(World world) => _world = world;
 
 
-        public static void Add(SkillsGroup g)
+        public readonly List<SkillsGroup> Groups = new List<SkillsGroup>();
+
+
+        public void Add(SkillsGroup g)
         {
             Groups.Add(g);
         }
 
-        public static bool Remove(SkillsGroup g)
+        public bool Remove(SkillsGroup g)
         {
             if (Groups[0] == g)
             {
                 var camera = Client.Game.Scene.Camera;
 
-                MessageBoxGump messageBox = new MessageBoxGump(200, 125, ResGeneral.CannotDeleteThisGroup, null)
+                MessageBoxGump messageBox = new MessageBoxGump(_world, 200, 125, ResGeneral.CannotDeleteThisGroup, null)
                 {
                     X = camera.Bounds.X + camera.Bounds.Width / 2 - 100,
                     Y = camera.Bounds.Y + camera.Bounds.Height / 2 - 62
@@ -217,7 +222,7 @@ namespace ClassicUO.Game.Managers
             return true;
         }
 
-        public static void Load()
+        public void Load()
         {
             Groups.Clear();
 
@@ -273,7 +278,7 @@ namespace ClassicUO.Game.Managers
         }
 
 
-        public static void Save()
+        public void Save()
         {
             string path = Path.Combine(ProfileManager.ProfilePath, "skillsgroups.xml");
 
@@ -298,7 +303,7 @@ namespace ClassicUO.Game.Managers
         }
 
 
-        public static void MakeDefault()
+        public void MakeDefault()
         {
             Groups.Clear();
 
@@ -321,7 +326,7 @@ namespace ClassicUO.Game.Managers
             Save();
         }
 
-        private static void MakeDefaultMiscellaneous()
+        private void MakeDefaultMiscellaneous()
         {
             SkillsGroup g = new SkillsGroup();
             g.Name = ResGeneral.Miscellaneous;
@@ -336,7 +341,7 @@ namespace ClassicUO.Game.Managers
             Add(g);
         }
 
-        private static void MakeDefaultCombat()
+        private void MakeDefaultCombat()
         {
             int count = SkillsLoader.Instance.SkillsCount;
 
@@ -381,7 +386,7 @@ namespace ClassicUO.Game.Managers
             Add(g);
         }
 
-        private static void MakeDefaultTradeSkills()
+        private void MakeDefaultTradeSkills()
         {
             SkillsGroup g = new SkillsGroup();
             g.Name = ResGeneral.TradeSkills;
@@ -399,7 +404,7 @@ namespace ClassicUO.Game.Managers
             Add(g);
         }
 
-        private static void MakeDefaultMagic()
+        private void MakeDefaultMagic()
         {
             int count = SkillsLoader.Instance.SkillsCount;
 
@@ -437,7 +442,7 @@ namespace ClassicUO.Game.Managers
             Add(g);
         }
 
-        private static void MakeDefaultWilderness()
+        private void MakeDefaultWilderness()
         {
             SkillsGroup g = new SkillsGroup();
             g.Name = ResGeneral.Wilderness;
@@ -451,7 +456,7 @@ namespace ClassicUO.Game.Managers
             Add(g);
         }
 
-        private static void MakeDefaultThieving()
+        private void MakeDefaultThieving()
         {
             SkillsGroup g = new SkillsGroup();
             g.Name = ResGeneral.Thieving;
@@ -467,7 +472,7 @@ namespace ClassicUO.Game.Managers
             Add(g);
         }
 
-        private static void MakeDefaultBard()
+        private void MakeDefaultBard()
         {
             SkillsGroup g = new SkillsGroup();
             g.Name = ResGeneral.Bard;
@@ -479,7 +484,7 @@ namespace ClassicUO.Game.Managers
             Add(g);
         }
 
-        private static bool LoadMULFile(string path)
+        private bool LoadMULFile(string path)
         {
             FileInfo info = new FileInfo(path);
 

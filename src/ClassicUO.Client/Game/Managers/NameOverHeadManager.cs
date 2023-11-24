@@ -100,7 +100,7 @@ namespace ClassicUO.Game.Managers
         {
             if (_gump == null || _gump.IsDisposed)
             {
-                _gump = new NameOverHeadHandlerGump();
+                _gump = new NameOverHeadHandlerGump(_world);
                 UIManager.Add(_gump);
             }
 

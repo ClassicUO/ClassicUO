@@ -297,6 +297,7 @@ namespace ClassicUO.Game.Managers
                                 {
                                     QuestionGump messageBox = new QuestionGump
                                     (
+                                        _world,
                                         "This may flag\nyou criminal!",
                                         s =>
                                         {
@@ -394,7 +395,7 @@ namespace ClassicUO.Game.Managers
                         if (SerialHelper.IsItem(serial))
                         {
                             ProfileManager.CurrentProfile.GrabBagSerial = serial;
-                            GameActions.Print(string.Format(ResGeneral.GrabBagSet0, serial));
+                            GameActions.Print(_world, string.Format(ResGeneral.GrabBagSet0, serial));
                         }
 
                         ClearTargetingWithoutTargetCancelPacket();
@@ -403,7 +404,7 @@ namespace ClassicUO.Game.Managers
                     case CursorTarget.IgnorePlayerTarget:
                         if (SelectedObject.Object is Entity pmEntity)
                         {
-                            IgnoreManager.AddIgnoredTarget(pmEntity);
+                            _world.IgnoreManager.AddIgnoredTarget(pmEntity);
                         }
                         CancelTarget();
                         return;

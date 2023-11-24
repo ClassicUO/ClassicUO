@@ -372,7 +372,7 @@ namespace ClassicUO.Game.Scenes
             Weather.Reset();
             UIManager.Clear();
             _world.Clear();
-            ChatManager.Clear();
+            _world.ChatManager.Clear();
             DelayedObjectClickManager.Clear();
 
             _useItemQueue?.Clear();
@@ -865,7 +865,7 @@ namespace ClassicUO.Game.Scenes
             {
                 if (_multi == null)
                 {
-                    _multi = Item.Create(0);
+                    _multi = Item.Create(_world, 0);
                     _multi.Graphic = TargetManager.MultiTargetInfo.Model;
                     _multi.Hue = TargetManager.MultiTargetInfo.Hue;
                     _multi.IsMulti = true;
