@@ -92,7 +92,7 @@ namespace ClassicUO.Game.UI.Gumps
         private const int RIGHT_OFFSET = 32;
         private const int RIGHT_BOTTOM_HEIGHT = 93;
 
-        public ShopGump(uint serial, bool isBuyGump, int x, int y) : base(serial, 0) //60 is the base height, original size
+        public ShopGump(World world, uint serial, bool isBuyGump, int x, int y) : base(world, serial, 0) //60 is the base height, original size
         {
             int height = ProfileManager.CurrentProfile.VendorGumpHeight;
 
@@ -374,7 +374,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             int y = count > 0 ? _shopScrollArea.Children[count].Bounds.Bottom : 0;
 
-            ShopItem shopItem = new ShopItem(serial, graphic, hue, amount, price, name)
+            ShopItem shopItem = new ShopItem(this, serial, graphic, hue, amount, price, name)
             {
                 X = 5,
                 Y = y + 2,
@@ -657,10 +657,12 @@ namespace ClassicUO.Game.UI.Gumps
 
         private class ShopItem : Control
         {
+            private readonly ShopGump _gump;
             private readonly Label _amountLabel,
                 _name;
 
             public ShopItem(
+                ShopGump gump,
                 uint serial,
                 ushort graphic,
                 ushort hue,
@@ -669,6 +671,7 @@ namespace ClassicUO.Game.UI.Gumps
                 string name
             )
             {
+                _gump = gump;
                 LocalSerial = serial;
                 Graphic = graphic;
                 Hue = hue;
@@ -734,7 +737,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 WantUpdateSize = false;
 
-                if (World.ClientFeatures.TooltipsEnabled)
+                if (_gump.World.ClientFeatures.TooltipsEnabled)
                 {
                     SetTooltip(LocalSerial);
                 }

@@ -172,7 +172,7 @@ namespace ClassicUO.Game.GameObjects
             if (
                 !SerialHelper.IsValid(Serial)
                 && IsMulti
-                && TargetManager.TargetingState == CursorTarget.MultiPlacement
+                && Client.Game.GetScene<GameScene>().TargetManager.TargetingState == CursorTarget.MultiPlacement
             )
             {
                 hueVec.Z = 0.5f;
@@ -269,7 +269,7 @@ namespace ClassicUO.Game.GameObjects
             return true;
         }
 
-        private static void DrawLayer(
+        private void DrawLayer(
             UltimaBatcher2D batcher,
             int posX,
             int posY,
@@ -476,7 +476,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (
                     ReferenceEquals(SelectedObject.Object, this)
-                    || TargetManager.TargetingState == CursorTarget.MultiPlacement
+                    || Client.Game.GetScene<GameScene>().TargetManager.TargetingState == CursorTarget.MultiPlacement
                 )
                 {
                     return false;

@@ -41,7 +41,7 @@ namespace ClassicUO.Game.UI.Gumps
             CLEAR_SEARCH_BTN
         }
 
-        internal MarkersManagerGump() : base(0, 0)
+        internal MarkersManagerGump(World world) : base(world, 0, 0)
         {
             X = 50;
             Y = 50;
@@ -230,7 +230,7 @@ namespace ClassicUO.Game.UI.Gumps
                     continue;
                 }
 
-                var newElement = new MakerManagerControl(marker.value, i, marker.idx, isEditable);
+                var newElement = new MakerManagerControl(this, marker.value, i, marker.idx, isEditable);
                 newElement.RemoveMarkerEvent += MarkerRemoveEventHandler;
                 newElement.EditMarkerEvent += MarkerEditEventHandler;
 
@@ -331,6 +331,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private sealed class MakerManagerControl : Control
         {
+            private readonly MarkersManagerGump _gump;
             private readonly WMapMarker _marker;
             private readonly int _y;
             private readonly int _idx;
@@ -353,8 +354,9 @@ namespace ClassicUO.Game.UI.Gumps
                 GOTO_MARKER_BTN
             }
 
-            public MakerManagerControl(WMapMarker marker, int y, int idx, bool isEditable)
+            public MakerManagerControl(MarkersManagerGump gump, WMapMarker marker, int y, int idx, bool isEditable)
             {
+                _gump = gump;
                 CanMove = true;
 
                 _idx = idx;
@@ -444,7 +446,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         existingGump?.Dispose();
 
-                        var editUserMarkerGump = new UserMarkersGump(_marker.X, _marker.Y, _markers, _marker.ColorName, _marker.MarkerIconName, true, _idx);
+                        var editUserMarkerGump = new UserMarkersGump(_gump.World, _marker.X, _marker.Y, _markers, _marker.ColorName, _marker.MarkerIconName, true, _idx);
                         editUserMarkerGump.EditEnd += OnEditEnd;
 
                         UIManager.Add(editUserMarkerGump);

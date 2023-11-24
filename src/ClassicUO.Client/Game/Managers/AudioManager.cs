@@ -41,7 +41,7 @@ using Microsoft.Xna.Framework.Audio;
 
 namespace ClassicUO.Game.Managers
 {
-    internal class AudioManager
+    internal sealed class AudioManager
     {
         const float SOUND_DELTA = 250;
 
@@ -135,15 +135,15 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public void PlaySoundWithDistance(int index, int x, int y)
+        public void PlaySoundWithDistance(World world, int index, int x, int y)
         {
-            if (!_canReproduceAudio || !World.InGame)
+            if (!_canReproduceAudio || !world.InGame)
             {
                 return;
             }
 
-            int distX = Math.Abs(x - World.Player.X);
-            int distY = Math.Abs(y - World.Player.Y);
+            int distX = Math.Abs(x - world.Player.X);
+            int distY = Math.Abs(y - world.Player.Y);
             int distance = Math.Max(distX, distY);
 
             Profile currentProfile = ProfileManager.CurrentProfile;
@@ -152,11 +152,11 @@ namespace ClassicUO.Game.Managers
 
             if (distance >= 1)
             {
-                float volumeByDist = volume / (World.ClientViewRange + 1);
+                float volumeByDist = volume / (world.ClientViewRange + 1);
                 distanceFactor = volumeByDist * distance;
             }
 
-            if (distance > World.ClientViewRange)
+            if (distance > world.ClientViewRange)
             {
                 volume = 0;
             }

@@ -51,7 +51,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
         private const ushort NORMAL_COLOR = 0x034F;
         private uint _selectedCharacter;
 
-        public CharacterSelectionGump() : base(0, 0)
+        public CharacterSelectionGump(World world) : base(world, 0, 0)
         {
             CanCloseWithRightClick = false;
 

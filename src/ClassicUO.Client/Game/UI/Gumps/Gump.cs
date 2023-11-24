@@ -45,14 +45,16 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class Gump : Control
     {
-        public Gump(uint local, uint server)
+        public Gump(World world, uint local, uint server)
         {
+            World = world;
             LocalSerial = local;
             ServerSerial = server;
             AcceptMouseInput = false;
             AcceptKeyboardInput = false;
         }
 
+        public World World { get; }
 
         public bool CanBeSaved => GumpType != Gumps.GumpType.None;
 

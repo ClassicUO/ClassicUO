@@ -33,29 +33,36 @@
 using System;
 using System.Collections.Generic;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
 using ClassicUO.Resources;
 using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.Managers
 {
-    internal static class CommandManager
+    internal sealed class CommandManager
     {
-        private static readonly Dictionary<string, Action<string[]>> _commands = new Dictionary<string, Action<string[]>>();
+        private readonly Dictionary<string, Action<string[]>> _commands = new Dictionary<string, Action<string[]>>();
+        private readonly World _world;
 
-        public static void Initialize()
+        public CommandManager(World world)
+        {
+            _world = world;
+        }
+
+        public void Initialize()
         {
             Register
             (
                 "info",
                 s =>
                 {
-                    if (TargetManager.IsTargeting)
+                    if (Client.Game.GetScene<GameScene>().TargetManager.IsTargeting)
                     {
-                        TargetManager.CancelTarget();
+                        Client.Game.GetScene<GameScene>().TargetManager.CancelTarget();
                     }
 
-                    TargetManager.SetTargeting(CursorTarget.SetTargetClientSide, CursorType.Target, TargetType.Neutral);
+                    Client.Game.GetScene<GameScene>().TargetManager.SetTargeting(CursorTarget.SetTargetClientSide, CursorType.Target, TargetType.Neutral);
                 }
             );
 
@@ -64,9 +71,9 @@ namespace ClassicUO.Game.Managers
                 "datetime",
                 s =>
                 {
-                    if (World.Player != null)
+                    if (_world.Player != null)
                     {
-                        GameActions.Print(string.Format(ResGeneral.CurrentDateTimeNowIs0, DateTime.Now));
+                        GameActions.Print(_world, string.Format(ResGeneral.CurrentDateTimeNowIs0, DateTime.Now));
                     }
                 }
             );
@@ -76,12 +83,12 @@ namespace ClassicUO.Game.Managers
                 "hue",
                 s =>
                 {
-                    if (TargetManager.IsTargeting)
+                    if (Client.Game.GetScene<GameScene>().TargetManager.IsTargeting)
                     {
-                        TargetManager.CancelTarget();
+                        Client.Game.GetScene<GameScene>().TargetManager.CancelTarget();
                     }
 
-                    TargetManager.SetTargeting(CursorTarget.HueCommandTarget, CursorType.Target, TargetType.Neutral);
+                    Client.Game.GetScene<GameScene>().TargetManager.SetTargeting(CursorTarget.HueCommandTarget, CursorType.Target, TargetType.Neutral);
                 }
             );
 
@@ -98,7 +105,7 @@ namespace ClassicUO.Game.Managers
         }
 
 
-        public static void Register(string name, Action<string[]> callback)
+        public void Register(string name, Action<string[]> callback)
         {
             name = name.ToLower();
 
@@ -112,7 +119,7 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public static void UnRegister(string name)
+        public void UnRegister(string name)
         {
             name = name.ToLower();
 
@@ -122,12 +129,12 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public static void UnRegisterAll()
+        public void UnRegisterAll()
         {
             _commands.Clear();
         }
 
-        public static void Execute(string name, params string[] args)
+        public void Execute(string name, params string[] args)
         {
             name = name.ToLower();
 
@@ -141,15 +148,15 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public static void OnHueTarget(Entity entity)
+        public void OnHueTarget(Entity entity)
         {
             if (entity != null)
             {
-                TargetManager.Target(entity);
+                Client.Game.GetScene<GameScene>().TargetManager.Target(entity);
             }
 
             Mouse.LastLeftButtonClickTime = 0;
-            GameActions.Print(string.Format(ResGeneral.ItemID0Hue1, entity.Graphic, entity.Hue));
+            GameActions.Print(_world, string.Format(ResGeneral.ItemID0Hue1, entity.Graphic, entity.Hue));
         }
     }
 }

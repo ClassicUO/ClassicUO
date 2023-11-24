@@ -79,13 +79,13 @@ namespace ClassicUO.Game.GameObjects
     internal class OverheadDamage
     {
         private const int DAMAGE_Y_MOVING_TIME = 25;
-
         private readonly Deque<TextObject> _messages;
-
         private Rectangle _rectangle;
+        private readonly World _world;
 
-        public OverheadDamage(GameObject parent)
+        public OverheadDamage(World world, GameObject parent)
         {
+            _world = world;
             Parent = parent;
             _messages = new Deque<TextObject>();
         }
@@ -105,7 +105,7 @@ namespace ClassicUO.Game.GameObjects
 
             text_obj.RenderedText = RenderedText.Create(
                 damage.ToString(),
-                (ushort)(ReferenceEquals(Parent, World.Player) ? 0x0034 : 0x0021),
+                (ushort)(ReferenceEquals(Parent, _world.Player) ? 0x0034 : 0x0021),
                 3,
                 false
             );

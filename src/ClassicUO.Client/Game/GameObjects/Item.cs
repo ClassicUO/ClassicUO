@@ -102,7 +102,7 @@ namespace ClassicUO.Game.GameObjects
         private ushort? _displayedGraphic;
         private bool _isMulti;
 
-        public Item() : base(0) { }
+        public Item(World world) : base(world, 0) { }
 
         public bool IsCoin => Graphic == 0x0EEA || Graphic == 0x0EED || Graphic == 0x0EF0;
 
@@ -254,7 +254,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (!World.HouseManager.TryGetHouse(Serial, out House house))
             {
-                house = new House(Serial, 0, false);
+                house = new House(World, Serial, 0, false);
                 World.HouseManager.Add(Serial, house);
             }
             else
@@ -336,7 +336,7 @@ namespace ClassicUO.Game.GameObjects
 
                                 if (block->Flags == 0 || block->Flags == 0x100)
                                 {
-                                    Multi m = Multi.Create(block->ID);
+                                    Multi m = Multi.Create(World, block->ID);
                                     m.MultiOffsetX = block->X;
                                     m.MultiOffsetY = block->Y;
                                     m.MultiOffsetZ = block->Z;
@@ -414,7 +414,7 @@ namespace ClassicUO.Game.GameObjects
 
                     if (block->Flags != 0)
                     {
-                        Multi m = Multi.Create(block->ID);
+                        Multi m = Multi.Create(World, block->ID);
                         m.MultiOffsetX = block->X;
                         m.MultiOffsetY = block->Y;
                         m.MultiOffsetZ = block->Z;
@@ -476,7 +476,7 @@ namespace ClassicUO.Game.GameObjects
                 Client.Game.GetScene<GameScene>()?.UpdateMaxDrawZ(true);
             }
 
-            BoatMovingManager.ClearSteps(Serial);
+            Client.Game.GetScene<GameScene>()?.BoatMovingManager.ClearSteps(Serial);
         }
 
         public override void CheckGraphicChange(byte animIndex = 0)
@@ -485,7 +485,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (!IsCorpse)
                 {
-                    AllowedToDraw = CanBeDrawn(Graphic);
+                    AllowedToDraw = CanBeDrawn(World, Graphic);
                 }
                 else
                 {

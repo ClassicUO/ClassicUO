@@ -42,6 +42,7 @@ using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using ClassicUO.Game.Scenes;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -55,7 +56,7 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly RenderedText _renderedText;
         private Texture2D _borderColor = SolidColorTextureCache.GetTexture(Color.Black);
 
-        public NameOverheadGump(uint serial) : base(serial, 0)
+        public NameOverheadGump(World world, uint serial) : base(world, serial, 0)
         {
             CanMove = false;
             AcceptMouseInput = true;
@@ -267,7 +268,7 @@ namespace ClassicUO.Game.UI.Gumps
                     );
 
                     UIManager.Add(
-                        gump = new HealthBarGumpCustom(entity)
+                        gump = new HealthBarGumpCustom(World, entity)
                         {
                             X = Mouse.Position.X - (rect.Width >> 1),
                             Y = Mouse.Position.Y - (rect.Height >> 1)
@@ -279,7 +280,7 @@ namespace ClassicUO.Game.UI.Gumps
                     ref readonly var gumpInfo = ref Client.Game.Gumps.GetGump(0x0804);
 
                     UIManager.Add(
-                        gump = new HealthBarGump(entity)
+                        gump = new HealthBarGump(World, entity)
                         {
                             X = Mouse.LClickPosition.X - (gumpInfo.UV.Width >> 1),
                             Y = Mouse.LClickPosition.Y - (gumpInfo.UV.Height >> 1)
@@ -291,7 +292,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
             else if (entity != null)
             {
-                GameActions.PickUp(LocalSerial, 0, 0);
+                GameActions.PickUp(World, LocalSerial, 0, 0);
 
                 //if (entity.Texture != null)
                 //    GameActions.PickUp(LocalSerial, entity.Texture.Width >> 1, entity.Texture.Height >> 1);
@@ -308,18 +309,18 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (World.Player.InWarMode)
                     {
-                        GameActions.Attack(LocalSerial);
+                        GameActions.Attack(World, LocalSerial);
                     }
                     else
                     {
-                        GameActions.DoubleClick(LocalSerial);
+                        GameActions.DoubleClick(World, LocalSerial);
                     }
                 }
                 else
                 {
-                    if (!GameActions.OpenCorpse(LocalSerial))
+                    if (!GameActions.OpenCorpse(World, LocalSerial))
                     {
-                        GameActions.DoubleClick(LocalSerial);
+                        GameActions.DoubleClick(World, LocalSerial);
                     }
                 }
 
@@ -360,23 +361,23 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 }
 
-                if (TargetManager.IsTargeting)
+                if (Client.Game.GetScene<GameScene>().TargetManager.IsTargeting)
                 {
-                    switch (TargetManager.TargetingState)
+                    switch (Client.Game.GetScene<GameScene>().TargetManager.TargetingState)
                     {
                         case CursorTarget.Position:
                         case CursorTarget.Object:
                         case CursorTarget.Grab:
                         case CursorTarget.SetGrabBag:
-                            TargetManager.Target(LocalSerial);
+                            Client.Game.GetScene<GameScene>().TargetManager.Target(LocalSerial);
                             Mouse.LastLeftButtonClickTime = 0;
 
                             break;
 
                         case CursorTarget.SetTargetClientSide:
-                            TargetManager.Target(LocalSerial);
+                            Client.Game.GetScene<GameScene>().TargetManager.Target(LocalSerial);
                             Mouse.LastLeftButtonClickTime = 0;
-                            UIManager.Add(new InspectorGump(World.Get(LocalSerial)));
+                            UIManager.Add(new InspectorGump(World, World.Get(LocalSerial)));
 
                             break;
 
@@ -465,9 +466,9 @@ namespace ClassicUO.Game.UI.Gumps
                             }
                         }
                     }
-                    else if (!DelayedObjectClickManager.IsEnabled)
+                    else if (!Client.Game.GetScene<GameScene>().DelayedObjectClickManager.IsEnabled)
                     {
-                        DelayedObjectClickManager.Set(
+                        Client.Game.GetScene<GameScene>().DelayedObjectClickManager.Set(
                             LocalSerial,
                             Mouse.Position.X,
                             Mouse.Position.Y,
@@ -558,7 +559,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
             else
             {
-                if (entity == TargetManager.LastTargetInfo.Serial)
+                if (entity == Client.Game.GetScene<GameScene>().TargetManager.LastTargetInfo.Serial)
                 {
                     _borderColor = SolidColorTextureCache.GetTexture(Color.Red);
                     _background.Hue = _renderedText.Hue = entity is Mobile m

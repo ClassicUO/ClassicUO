@@ -121,7 +121,7 @@ namespace ClassicUO.Game.UI.Controls
         private List<ContextMenuShowMenu> _subMenus;
 
 
-        public ContextMenuShowMenu(List<ContextMenuItemEntry> list) : base(0, 0)
+        public ContextMenuShowMenu(World world, List<ContextMenuItemEntry> list) : base(world, 0, 0)
         {
             WantUpdateSize = true;
             ModalClickOutsideAreaClosesThisControl = true;

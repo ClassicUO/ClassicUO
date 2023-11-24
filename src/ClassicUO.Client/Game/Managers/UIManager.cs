@@ -33,6 +33,7 @@
 using System;
 using System.Collections.Generic;
 using ClassicUO.Configuration;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
@@ -250,7 +251,7 @@ namespace ClassicUO.Game.Managers
                 {
                     if (button == MouseButtonType.Left)
                     {
-                        DelayedObjectClickManager.Clear();
+                        Client.Game.GetScene<GameScene>().DelayedObjectClickManager.Clear();
                     }
 
                     return true;

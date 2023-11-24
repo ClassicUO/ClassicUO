@@ -40,6 +40,7 @@ using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
+using ClassicUO.Game.Scenes;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -62,7 +63,7 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly StbTextBox[] _myCoinsEntries = new StbTextBox[2];
         private readonly string _name;
 
-        public TradingGump(uint local, string name, uint id1, uint id2) : base(local, 0)
+        public TradingGump(World world, uint local, string name, uint id1, uint id2) : base(world, local, 0)
         {
             CanMove = true;
             CanCloseWithRightClick = true;
@@ -334,21 +335,21 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else if (SelectedObject.Object is Item it)
                 {
-                    if (TargetManager.IsTargeting)
+                    if (Client.Game.GetScene<GameScene>().TargetManager.IsTargeting)
                     {
-                        TargetManager.Target(it.Serial);
+                        Client.Game.GetScene<GameScene>().TargetManager.Target(it.Serial);
                         Mouse.CancelDoubleClick = true;
 
-                        if (TargetManager.TargetingState == CursorTarget.SetTargetClientSide)
+                        if (Client.Game.GetScene<GameScene>().TargetManager.TargetingState == CursorTarget.SetTargetClientSide)
                         {
-                            UIManager.Add(new InspectorGump(it));
+                            UIManager.Add(new InspectorGump(World, it));
                         }
                     }
-                    else if (!DelayedObjectClickManager.IsEnabled)
+                    else if (!Client.Game.GetScene<GameScene>().DelayedObjectClickManager.IsEnabled)
                     {
                         Point off = Mouse.LDragOffset;
 
-                        DelayedObjectClickManager.Set(
+                        Client.Game.GetScene<GameScene>().DelayedObjectClickManager.Set(
                             it.Serial,
                             Mouse.Position.X - off.X - ScreenCoordinateX,
                             Mouse.Position.Y - off.Y - ScreenCoordinateY,

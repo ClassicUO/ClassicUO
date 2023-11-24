@@ -54,7 +54,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
 
 
-        public CreateCharTradeGump(PlayerMobile character, ProfessionInfo profession) : base(0, 0)
+        public CreateCharTradeGump(World world, PlayerMobile character, ProfessionInfo profession) : base(world, 0, 0)
         {
             _character = character;
 

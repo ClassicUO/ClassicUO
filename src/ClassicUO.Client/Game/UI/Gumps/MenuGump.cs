@@ -47,7 +47,7 @@ namespace ClassicUO.Game.UI.Gumps
             _isLeft;
         private readonly HSliderBar _slider;
 
-        public MenuGump(uint serial, uint serv, string name) : base(serial, serv)
+        public MenuGump(World world, uint serial, uint serv, string name) : base(world, serial, serv)
         {
             CanMove = true;
             AcceptMouseInput = true;
@@ -285,7 +285,7 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private readonly ResizePic _resizePic;
 
-        public GrayMenuGump(uint local, uint serv, string name) : base(local, serv)
+        public GrayMenuGump(World world, uint local, uint serv, string name) : base(world, local, serv)
         {
             CanMove = true;
             AcceptMouseInput = true;

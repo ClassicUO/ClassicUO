@@ -35,34 +35,38 @@ using ClassicUO.Input;
 
 namespace ClassicUO.Game.Managers
 {
-    internal static class DelayedObjectClickManager
+    internal sealed class DelayedObjectClickManager
     {
-        public static uint Serial { get; private set; }
-        public static bool IsEnabled { get; private set; }
-        public static uint Timer { get; private set; }
-        public static int X { get; set; }
-        public static int Y { get; set; }
-        public static int LastMouseX { get; set; }
-        public static int LastMouseY { get; set; }
+        private readonly World _world;
+
+        public DelayedObjectClickManager(World world) { _world = world; }
+
+        public uint Serial { get; private set; }
+        public bool IsEnabled { get; private set; }
+        public uint Timer { get; private set; }
+        public int X { get; set; }
+        public int Y { get; set; }
+        public int LastMouseX { get; set; }
+        public int LastMouseY { get; set; }
 
 
-        public static void Update()
+        public void Update()
         {
             if (!IsEnabled || Timer > Time.Ticks)
             {
                 return;
             }
 
-            Entity entity = World.Get(Serial);
+            Entity entity = _world.Get(Serial);
 
             if (entity != null)
             {
-                if (!World.ClientFeatures.TooltipsEnabled || SerialHelper.IsItem(Serial) && ((Item) entity).IsLocked && ((Item) entity).ItemData.Weight == 255 && !((Item) entity).ItemData.IsContainer)
+                if (!_world.ClientFeatures.TooltipsEnabled || SerialHelper.IsItem(Serial) && ((Item) entity).IsLocked && ((Item) entity).ItemData.Weight == 255 && !((Item) entity).ItemData.IsContainer)
                 {
-                    GameActions.SingleClick(Serial);
+                    GameActions.SingleClick(_world, Serial);
                 }
 
-                if (World.ClientFeatures.PopupEnabled)
+                if (_world.ClientFeatures.PopupEnabled)
                 {
                     GameActions.OpenPopupMenu(Serial);
                 }
@@ -71,7 +75,7 @@ namespace ClassicUO.Game.Managers
             Clear();
         }
 
-        public static void Set(uint serial, int x, int y, uint timer)
+        public void Set(uint serial, int x, int y, uint timer)
         {
             Serial = serial;
             LastMouseX = Mouse.Position.X;
@@ -82,14 +86,14 @@ namespace ClassicUO.Game.Managers
             IsEnabled = true;
         }
 
-        public static void Clear()
+        public void Clear()
         {
             IsEnabled = false;
             Serial = 0xFFFF_FFFF;
             Timer = 0;
         }
 
-        public static void Clear(uint serial)
+        public void Clear(uint serial)
         {
             if (Serial == serial)
             {

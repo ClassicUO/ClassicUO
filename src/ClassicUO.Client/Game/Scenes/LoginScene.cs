@@ -77,6 +77,9 @@ namespace ClassicUO.Game.Scenes
         private long _reconnectTime;
         private int _reconnectTryCounter = 1;
         private bool _autoLogin;
+        private readonly World _world;
+
+        public LoginScene(World world) => _world = world;
 
 
         public bool Reconnect { get; set; }
@@ -99,8 +102,8 @@ namespace ClassicUO.Game.Scenes
 
             _autoLogin = Settings.GlobalSettings.AutoLogin;
 
-            UIManager.Add(new LoginBackground());
-            UIManager.Add(_currentGump = new LoginGump(this));          
+            UIManager.Add(new LoginBackground(_world));
+            UIManager.Add(_currentGump = new LoginGump(_world, this));          
 
             Client.Game.Audio.PlayMusic(Client.Game.Audio.LoginMusicIndex, false, true);
 
@@ -201,25 +204,25 @@ namespace ClassicUO.Game.Scenes
 
         private Gump GetGumpForStep()
         {
-            foreach (Item item in World.Items.Values)
+            foreach (Item item in _world.Items.Values)
             {
-                World.RemoveItem(item);
+                _world.RemoveItem(item);
             }
 
-            foreach (Mobile mobile in World.Mobiles.Values)
+            foreach (Mobile mobile in _world.Mobiles.Values)
             {
-                World.RemoveMobile(mobile);
+                _world.RemoveMobile(mobile);
             }
 
-            World.Mobiles.Clear();
-            World.Items.Clear();
+            _world.Mobiles.Clear();
+            _world.Items.Clear();
 
             switch (CurrentLoginStep)
             {
                 case LoginSteps.Main:
                     PopupMessage = null;
 
-                    return new LoginGump(this);
+                    return new LoginGump(_world,this);
 
                 case LoginSteps.Connecting:
                 case LoginSteps.VerifyingAccount:
@@ -231,17 +234,17 @@ namespace ClassicUO.Game.Scenes
 
                     return GetLoadingScreen();
 
-                case LoginSteps.CharacterSelection: return new CharacterSelectionGump();
+                case LoginSteps.CharacterSelection: return new CharacterSelectionGump(_world);
 
                 case LoginSteps.ServerSelection:
                     _pingTime = Time.Ticks + 60000; // reset ping timer
 
-                    return new ServerSelectionGump();
+                    return new ServerSelectionGump(_world);
 
                 case LoginSteps.CharacterCreation:
                     _pingTime = Time.Ticks + 60000; // reset ping timer
 
-                    return new CharCreationGump(this);
+                    return new CharCreationGump(_world,this);
             }
 
             return null;
@@ -293,7 +296,7 @@ namespace ClassicUO.Game.Scenes
                 }
             }
 
-            return new LoadingGump(labelText, showButtons, OnLoadingGumpButtonClick);
+            return new LoadingGump(_world, labelText, showButtons, OnLoadingGumpButtonClick);
         }
 
         private void OnLoadingGumpButtonClick(int buttonId)
@@ -401,7 +404,7 @@ namespace ClassicUO.Game.Scenes
 
                 CurrentLoginStep = LoginSteps.LoginInToServer;
 
-                World.ServerName = Servers[ServerIndex].Name;
+                _world.ServerName = Servers[ServerIndex].Name;
 
                 NetClient.Socket.Send_SelectServer(index);
             }
@@ -411,7 +414,7 @@ namespace ClassicUO.Game.Scenes
         {
             if (CurrentLoginStep == LoginSteps.CharacterSelection)
             {
-                LastCharacterManager.Save(Account, World.ServerName, Characters[index]);
+                LastCharacterManager.Save(Account, _world.ServerName, Characters[index]);
 
                 CurrentLoginStep = LoginSteps.EnteringBritania;
                 NetClient.Socket.Send_SelectCharacter(index, Characters[index], NetClient.Socket.LocalIP);
@@ -438,7 +441,7 @@ namespace ClassicUO.Game.Scenes
                 }
             }
 
-            LastCharacterManager.Save(Account, World.ServerName, character.Name);
+            LastCharacterManager.Save(Account, _world.ServerName, character.Name);
 
             NetClient.Socket.Send_CreateCharacter(character,
                                                   cityIndex,
@@ -610,11 +613,11 @@ namespace ClassicUO.Game.Scenes
 
             _currentGump?.Dispose();
 
-            UIManager.Add(_currentGump = new CharacterSelectionGump());
+            UIManager.Add(_currentGump = new CharacterSelectionGump(_world));
             if (!string.IsNullOrWhiteSpace(PopupMessage))
             {
                 Gump g = null;
-                g = new LoadingGump(PopupMessage, LoginButtons.OK, (but) => g.Dispose()) { IsModal = true };
+                g = new LoadingGump(_world,PopupMessage, LoginButtons.OK, (but) => g.Dispose()) { IsModal = true };
                 UIManager.Add(g);
                 PopupMessage = null;
             }
@@ -625,7 +628,7 @@ namespace ClassicUO.Game.Scenes
             ParseCharacterList(ref p);
             ParseCities(ref p);
 
-            World.ClientFeatures.SetFlags((CharacterListFlags) p.ReadUInt32BE());
+            _world.ClientFeatures.SetFlags((CharacterListFlags) p.ReadUInt32BE());
             CurrentLoginStep = LoginSteps.CharacterSelection;
 
             uint charToSelect = 0;
@@ -638,7 +641,7 @@ namespace ClassicUO.Game.Scenes
                 _autoLogin = false;
             }
 
-            string lastCharName = LastCharacterManager.GetLastCharacter(Account, World.ServerName);
+            string lastCharName = LastCharacterManager.GetLastCharacter(Account, _world.ServerName);
 
             for (byte i = 0; i < Characters.Length; i++)
             {

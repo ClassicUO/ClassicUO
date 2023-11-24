@@ -43,6 +43,7 @@ namespace ClassicUO.Game.Managers
         private readonly List<Tuple<uint, uint>> _subst = new List<Tuple<uint, uint>>();
         private readonly List<uint> _toRemoveDamages = new List<uint>();
 
+        public WorldTextManager(World world) : base(world) { }
 
         public override void Update()
         {
@@ -133,7 +134,7 @@ namespace ClassicUO.Game.Managers
         {
             if (!_damages.TryGetValue(obj, out OverheadDamage dm) || dm == null)
             {
-                dm = new OverheadDamage(World.Get(obj));
+                dm = new OverheadDamage(World, World.Get(obj));
                 _damages[obj] = dm;
             }
 

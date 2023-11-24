@@ -42,6 +42,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public TextEntryDialogGump
         (
+            World world,
             uint serial,
             int x,
             int y,
@@ -51,7 +52,7 @@ namespace ClassicUO.Game.UI.Gumps
             string description,
             byte buttonid,
             byte parentid
-        ) : base(serial, 0)
+        ) : base(world, serial, 0)
         {
             CanMove = false;
             IsFromServer = true;

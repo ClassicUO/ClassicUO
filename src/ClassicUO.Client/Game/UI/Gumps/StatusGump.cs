@@ -40,6 +40,7 @@ using ClassicUO.Assets;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
+using ClassicUO.Game.Scenes;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -50,7 +51,7 @@ namespace ClassicUO.Game.UI.Gumps
         protected const ushort LOCK_LOCKED_GRAPHIC = 0x082C;
 
 
-        protected StatusGumpBase() : base(0, 0)
+        protected StatusGumpBase(World world) : base(world, 0, 0)
         {
             // sanity check
             UIManager.GetGump<HealthBarGump>(World.Player)?.Dispose();
@@ -75,7 +76,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (gump == null)
                     {
-                        UIManager.Add(new BuffGump(100, 100));
+                        UIManager.Add(new BuffGump(World, 100, 100));
                     }
                     else
                     {
@@ -92,9 +93,9 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (button == MouseButtonType.Left)
             {
-                if (TargetManager.IsTargeting)
+                if (Client.Game.GetScene<GameScene>().TargetManager.IsTargeting)
                 {
-                    TargetManager.Target(World.Player);
+                    Client.Game.GetScene<GameScene>().TargetManager.Target(World.Player);
                     Mouse.LastLeftButtonClickTime = 0;
                 }
                 else if (x >= _point.X && x <= Width + 16 && y >= _point.Y && y <= Height + 16)
@@ -107,11 +108,11 @@ namespace ClassicUO.Game.UI.Gumps
 
                         if (ProfileManager.CurrentProfile.CustomBarsToggled)
                         {
-                            UIManager.Add(new HealthBarGumpCustom(World.Player) { X = ScreenCoordinateX, Y = ScreenCoordinateY });
+                            UIManager.Add(new HealthBarGumpCustom(World, World.Player) { X = ScreenCoordinateX, Y = ScreenCoordinateY });
                         }
                         else
                         {
-                            UIManager.Add(new HealthBarGump(World.Player) { X = ScreenCoordinateX, Y = ScreenCoordinateY });
+                            UIManager.Add(new HealthBarGump(World, World.Player) { X = ScreenCoordinateX, Y = ScreenCoordinateY });
                         }
 
                         Dispose();
@@ -123,9 +124,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseDown(int x, int y, MouseButtonType button)
         {
-            if (TargetManager.IsTargeting)
+            if (Client.Game.GetScene<GameScene>().TargetManager.IsTargeting)
             {
-                TargetManager.Target(World.Player);
+                Client.Game.GetScene<GameScene>().TargetManager.Target(World.Player);
                 Mouse.LastLeftButtonClickTime = 0;
             }
         }
@@ -156,7 +157,7 @@ namespace ClassicUO.Game.UI.Gumps
             return gump;
         }
 
-        public static StatusGumpBase AddStatusGump(int x, int y)
+        public static StatusGumpBase AddStatusGump(World world, int x, int y)
         {
             StatusGumpBase gump;
 
@@ -164,16 +165,16 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (Client.Version < ClientVersion.CV_308Z || ProfileManager.CurrentProfile.UseOldStatusGump)
                 {
-                    gump = new StatusGumpOld();
+                    gump = new StatusGumpOld(world);
                 }
                 else
                 {
-                    gump = new StatusGumpModern();
+                    gump = new StatusGumpModern(world);
                 }
             }
             else
             {
-                gump = new StatusGumpOutlands();
+                gump = new StatusGumpOutlands(world);
             }
 
             gump.X = x;
@@ -225,7 +226,7 @@ namespace ClassicUO.Game.UI.Gumps
 
     internal class StatusGumpOld : StatusGumpBase
     {
-        public StatusGumpOld()
+        public StatusGumpOld(World world) : base(world)
         {
             Point p = Point.Zero;
             _labels = new Label[(int) MobileStats.NumStats];            
@@ -584,7 +585,7 @@ namespace ClassicUO.Game.UI.Gumps
 
     internal class StatusGumpModern : StatusGumpBase
     {
-        public StatusGumpModern()
+        public StatusGumpModern(World world) : base(world)
         {
             Point p = Point.Zero;
             int xOffset = 0;
@@ -1537,7 +1538,7 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private readonly GumpPicWithWidth[] _fillBars = new GumpPicWithWidth[3];
 
-        public StatusGumpOutlands()
+        public StatusGumpOutlands(World world) : base(world)
         {
             Point pos = Point.Zero;
             _labels = new Label[(int) MobileStats.Max];
@@ -1951,9 +1952,9 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (button == MouseButtonType.Left)
             {
-                if (TargetManager.IsTargeting)
+                if (Client.Game.GetScene<GameScene>().TargetManager.IsTargeting)
                 {
-                    TargetManager.Target(World.Player);
+                    Client.Game.GetScene<GameScene>().TargetManager.Target(World.Player);
                     Mouse.LastLeftButtonClickTime = 0;
                 }
                 else
@@ -1968,11 +1969,11 @@ namespace ClassicUO.Game.UI.Gumps
                         //TCH whole if else
                         if (ProfileManager.CurrentProfile.CustomBarsToggled)
                         {
-                            UIManager.Add(new HealthBarGumpCustom(World.Player) { X = ScreenCoordinateX, Y = ScreenCoordinateY });
+                            UIManager.Add(new HealthBarGumpCustom(World,World.Player) { X = ScreenCoordinateX, Y = ScreenCoordinateY });
                         }
                         else
                         {
-                            UIManager.Add(new HealthBarGump(World.Player) { X = ScreenCoordinateX, Y = ScreenCoordinateY });
+                            UIManager.Add(new HealthBarGump(World, World.Player) { X = ScreenCoordinateX, Y = ScreenCoordinateY });
                         }
 
                         Dispose();

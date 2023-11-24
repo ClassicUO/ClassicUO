@@ -41,7 +41,7 @@ using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.Managers
 {
-    internal class InfoBarManager
+    internal sealed class InfoBarManager
     {
         private readonly List<InfoBarItem> infoBarItems;
 

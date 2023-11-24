@@ -73,7 +73,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             }
         };
 
-        public CreateCharAppearanceGump() : base(0, 0)
+        public CreateCharAppearanceGump(World world) : base(world, 0, 0)
         {
             Add
             (

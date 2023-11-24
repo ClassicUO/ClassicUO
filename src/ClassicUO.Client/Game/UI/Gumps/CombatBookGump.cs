@@ -51,7 +51,7 @@ namespace ClassicUO.Game.UI.Gumps
         private GumpPic _pageCornerLeft, _pageCornerRight, _primAbility, _secAbility;
         private int _enqueuePage = -1;
 
-        public CombatBookGump(int x, int y) : base(0, 0)
+        public CombatBookGump(World world, int x, int y) : base(world, 0, 0)
         {
             X = x;
             Y = y;
@@ -284,7 +284,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (e.Button == MouseButtonType.Left)
             {
-                GameActions.UsePrimaryAbility();
+                GameActions.UsePrimaryAbility(World);
 
                 e.Result = true;
             }        
@@ -294,7 +294,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (e.Button == MouseButtonType.Left)
             {
-                GameActions.UseSecondaryAbility();
+                GameActions.UseSecondaryAbility(World);
 
                 e.Result = true;
             }
@@ -331,7 +331,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             GetSpellFloatingButton(def.Index)?.Dispose();
 
-            UseAbilityButtonGump gump = new UseAbilityButtonGump(true)
+            UseAbilityButtonGump gump = new UseAbilityButtonGump(World, true)
             {
                 X = Mouse.LClickPosition.X - 22,
                 Y = Mouse.LClickPosition.Y - 22
@@ -352,7 +352,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             GetSpellFloatingButton(def.Index)?.Dispose();
 
-            UseAbilityButtonGump gump = new UseAbilityButtonGump(false)
+            UseAbilityButtonGump gump = new UseAbilityButtonGump(World, false)
             {
                 X = Mouse.LClickPosition.X - 22,
                 Y = Mouse.LClickPosition.Y - 22

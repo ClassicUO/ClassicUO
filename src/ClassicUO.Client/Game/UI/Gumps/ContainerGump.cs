@@ -59,11 +59,11 @@ namespace ClassicUO.Game.UI.Gumps
 
         internal const int CORPSES_GUMP = 0x0009;
 
-        public ContainerGump() : base(0, 0) { }
+        public ContainerGump(World world) : base(world, 0, 0) { }
 
-        public ContainerGump(uint serial, ushort gumpid, bool playsound) : base(serial, 0)
+        public ContainerGump(World world, uint serial, ushort gumpid, bool playsound) : base(world, serial, 0)
         {
-            Item item = World.Items.Get(serial);
+            Item item = world.Items.Get(serial);
 
             if (item == null)
             {
@@ -76,7 +76,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             // New Backpack gumps. Client Version 7.0.53.1
             if (
-                item == World.Player.FindItemByLayer(Layer.Backpack)
+                item == world.Player.FindItemByLayer(Layer.Backpack)
                 && Client.Version >= ClassicUO.Utility.ClientVersion.CV_705301
                 && ProfileManager.CurrentProfile != null
             )
@@ -120,12 +120,12 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (Graphic == CORPSES_GUMP)
             {
-                if (World.Player.ManualOpenedCorpses.Contains(LocalSerial))
+                if (world.Player.ManualOpenedCorpses.Contains(LocalSerial))
                 {
-                    World.Player.ManualOpenedCorpses.Remove(LocalSerial);
+                    world.Player.ManualOpenedCorpses.Remove(LocalSerial);
                 }
                 else if (
-                    World.Player.AutoOpenedCorpses.Contains(LocalSerial)
+                    world.Player.AutoOpenedCorpses.Contains(LocalSerial)
                     && ProfileManager.CurrentProfile != null
                     && ProfileManager.CurrentProfile.SkipEmptyCorpse
                 )
@@ -270,17 +270,17 @@ namespace ClassicUO.Game.UI.Gumps
             uint dropcontainer = LocalSerial;
 
             if (
-                TargetManager.IsTargeting
+                Client.Game.GetScene<GameScene>().TargetManager.IsTargeting
                 && !Client.Game.GameCursor.ItemHold.Enabled
                 && SerialHelper.IsValid(serial)
             )
             {
-                TargetManager.Target(serial);
+                Client.Game.GetScene<GameScene>().TargetManager.Target(serial);
                 Mouse.CancelDoubleClick = true;
 
-                if (TargetManager.TargetingState == CursorTarget.SetTargetClientSide)
+                if (Client.Game.GetScene<GameScene>().TargetManager.TargetingState == CursorTarget.SetTargetClientSide)
                 {
-                    UIManager.Add(new InspectorGump(World.Get(serial)));
+                    UIManager.Add(new InspectorGump(World, World.Get(serial)));
                 }
             }
             else
@@ -476,11 +476,11 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else if (!Client.Game.GameCursor.ItemHold.Enabled && SerialHelper.IsValid(serial))
                 {
-                    if (!DelayedObjectClickManager.IsEnabled)
+                    if (!Client.Game.GetScene<GameScene>().DelayedObjectClickManager.IsEnabled)
                     {
                         Point off = Mouse.LDragOffset;
 
-                        DelayedObjectClickManager.Set(
+                        Client.Game.GetScene<GameScene>().DelayedObjectClickManager.Set(
                             serial,
                             Mouse.Position.X - off.X - ScreenCoordinateX,
                             Mouse.Position.Y - off.Y - ScreenCoordinateY,

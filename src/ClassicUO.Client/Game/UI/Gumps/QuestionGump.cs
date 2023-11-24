@@ -41,7 +41,7 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private readonly Action<bool> _result;
 
-        public QuestionGump(string message, Action<bool> result) : base(0, 0)
+        public QuestionGump(World world, string message, Action<bool> result) : base(world, 0, 0)
         {
             CanCloseWithRightClick = true;
             Add(new GumpPic(0, 0, 0x0816, 0));

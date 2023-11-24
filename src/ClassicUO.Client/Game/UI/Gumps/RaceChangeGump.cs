@@ -71,7 +71,7 @@ namespace ClassicUO.Game.UI.Gumps
         }
         #endregion
 
-        public RaceChangeGump(bool isFemale, byte race) : base(0, 0)
+        public RaceChangeGump(World world, bool isFemale, byte race) : base(world, 0, 0)
         {
             if (race <= 0 || race > (int)RaceType.GARGOYLE)
             {
@@ -320,7 +320,7 @@ namespace ClassicUO.Game.UI.Gumps
             #region Create a fake character to use for the gump
             if (fakeMobile == null || fakeMobile.IsDestroyed)
             {
-                fakeMobile = new PlayerMobile(0);
+                fakeMobile = new PlayerMobile(World, 0);
             }
 
             LinkedObject first = fakeMobile.Items;

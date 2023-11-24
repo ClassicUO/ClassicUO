@@ -44,7 +44,7 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly ScrollArea _scrollArea;
         private readonly StbTextBox _textBox;
 
-        public TipNoticeGump(uint serial, byte type, string text) : base(serial, 0)
+        public TipNoticeGump(World world, uint serial, byte type, string text) : base(world, serial, 0)
         {
             Height = 300;
             CanMove = true;

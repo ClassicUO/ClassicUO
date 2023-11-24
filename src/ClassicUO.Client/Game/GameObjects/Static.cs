@@ -50,6 +50,8 @@ namespace ClassicUO.Game.GameObjects
             }
         );
 
+        public Static(World world) : base(world) { }
+
         public string Name => ItemData.Name;
 
         public ushort OriginalGraphic { get; private set; }
@@ -101,7 +103,7 @@ namespace ClassicUO.Game.GameObjects
         public override void UpdateGraphicBySeason()
         {
             SetGraphic(SeasonManager.GetSeasonGraphic(World.Season, OriginalGraphic));
-            AllowedToDraw = CanBeDrawn(Graphic);
+            AllowedToDraw = CanBeDrawn(World, Graphic);
             IsVegetation = StaticFilters.IsVegetation(Graphic);
         }
 

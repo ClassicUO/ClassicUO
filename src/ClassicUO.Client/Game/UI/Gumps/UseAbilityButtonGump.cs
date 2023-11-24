@@ -43,14 +43,14 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private GumpPic _button;
 
-        public UseAbilityButtonGump() : base(0, 0)
+        public UseAbilityButtonGump(World world) : base(world, 0, 0)
         {
             CanMove = true;
             AcceptMouseInput = true;
             CanCloseWithRightClick = true;
         }
 
-        public UseAbilityButtonGump(bool primary) : this()
+        public UseAbilityButtonGump(World world, bool primary) : this(world)
         {
             IsPrimary = primary;
             BuildGump();
@@ -96,11 +96,11 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (IsPrimary)
                 {
-                    GameActions.UsePrimaryAbility();
+                    GameActions.UsePrimaryAbility(World);
                 }
                 else
                 {
-                    GameActions.UseSecondaryAbility();
+                    GameActions.UseSecondaryAbility(World);
                 }
 
                 return true;

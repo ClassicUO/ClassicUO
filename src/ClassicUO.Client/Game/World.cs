@@ -45,56 +45,72 @@ using ClassicUO.Configuration;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Utility.Logging;
 using ClassicUO.Assets;
+using System.Linq.Expressions;
 
 namespace ClassicUO.Game
 {
-    internal static class World
+    internal sealed class World
     {
-        private static readonly EffectManager _effectManager = new EffectManager();
-        private static readonly List<uint> _toRemove = new List<uint>();
-        private static uint _timeToDelete;
+        private readonly EffectManager _effectManager;
+        private readonly List<uint> _toRemove = new List<uint>();
+        private uint _timeToDelete;
+        private readonly GameController _game;
 
-        public static Point RangeSize;
+        public World(GameController game)
+        {
+            _game = game;
+            WMapManager = new WorldMapEntityManager(this);
+            CorpseManager = new CorpseManager(this);
+            Party = new PartyManager(this);
+            HouseManager = new HouseManager(this);
+            WorldTextManager = new WorldTextManager(this);
+            _effectManager = new EffectManager(this);
+            MessageManager = new MessageManager();
+        }
 
-        public static PlayerMobile Player { get; private set; }
+        public Point RangeSize;
 
-        public static HouseCustomizationManager CustomHouseManager;
+        public PlayerMobile Player { get; private set; }
 
-        public static WorldMapEntityManager WMapManager = new WorldMapEntityManager();
+        public HouseCustomizationManager CustomHouseManager;
 
-        public static ActiveSpellIconsManager ActiveSpellIcons = new ActiveSpellIconsManager();
+        public WorldMapEntityManager WMapManager { get; }
 
-        public static uint LastObject, ObjectToRemove;
+        public ActiveSpellIconsManager ActiveSpellIcons = new ActiveSpellIconsManager();
 
-        public static ObjectPropertiesListManager OPL { get; } = new ObjectPropertiesListManager();
+        public uint LastObject, ObjectToRemove;
 
-        public static CorpseManager CorpseManager { get; } = new CorpseManager();
+        public ObjectPropertiesListManager OPL { get; } = new ObjectPropertiesListManager();
 
-        public static PartyManager Party { get; } = new PartyManager();
+        public CorpseManager CorpseManager { get; }
 
-        public static HouseManager HouseManager { get; } = new HouseManager();
+        public PartyManager Party { get; }
 
-        public static Dictionary<uint, Item> Items { get; } = new Dictionary<uint, Item>();
+        public HouseManager HouseManager { get; }
 
-        public static Dictionary<uint, Mobile> Mobiles { get; } = new Dictionary<uint, Mobile>();
+        public MessageManager MessageManager { get; }
 
-        public static Map.Map Map { get; private set; }
+        public Dictionary<uint, Item> Items { get; } = new Dictionary<uint, Item>();
 
-        public static byte ClientViewRange { get; set; } = Constants.MAX_VIEW_RANGE;
+        public Dictionary<uint, Mobile> Mobiles { get; } = new Dictionary<uint, Mobile>();
 
-        public static bool SkillsRequested { get; set; }
+        public Map.Map Map { get; private set; }
 
-        public static Season Season { get; private set; } = Season.Summer;
-        public static Season OldSeason { get; set; } = Season.Summer;
+        public byte ClientViewRange { get; set; } = Constants.MAX_VIEW_RANGE;
 
-        public static int OldMusicIndex { get; set; }
+        public bool SkillsRequested { get; set; }
 
-        public static WorldTextManager WorldTextManager { get; } = new WorldTextManager();
+        public Season Season { get; private set; } = Season.Summer;
+        public Season OldSeason { get; set; } = Season.Summer;
 
-        public static JournalManager Journal { get; } = new JournalManager();
+        public int OldMusicIndex { get; set; }
+
+        public WorldTextManager WorldTextManager { get; }
+
+        public JournalManager Journal { get; } = new JournalManager();
 
 
-        public static int MapIndex
+        public int MapIndex
         {
             get => Map?.Index ?? -1;
             set
@@ -150,9 +166,9 @@ namespace ClassicUO.Game
             }
         }
 
-        public static bool InGame => Player != null && Map != null;
+        public bool InGame => Player != null && Map != null;
 
-        public static IsometricLight Light { get; } = new IsometricLight
+        public IsometricLight Light { get; } = new IsometricLight
         {
             Overall = 0,
             Personal = 0,
@@ -160,20 +176,20 @@ namespace ClassicUO.Game
             RealPersonal = 0
         };
 
-        public static LockedFeatures ClientLockedFeatures { get; } = new LockedFeatures();
+        public LockedFeatures ClientLockedFeatures { get; } = new LockedFeatures();
 
-        public static ClientFeatures ClientFeatures { get; } = new ClientFeatures();
+        public ClientFeatures ClientFeatures { get; } = new ClientFeatures();
 
-        public static string ServerName { get; set; } = "_";
+        public string ServerName { get; set; } = "_";
 
 
 
-        public static void CreatePlayer(uint serial)
+        public void CreatePlayer(uint serial)
         {
             if (ProfileManager.CurrentProfile == null)
             {
-                string lastChar = LastCharacterManager.GetLastCharacter(LoginScene.Account, World.ServerName);
-                ProfileManager.Load(World.ServerName, LoginScene.Account, lastChar);
+                string lastChar = LastCharacterManager.GetLastCharacter(LoginScene.Account, ServerName);
+                ProfileManager.Load(ServerName, LoginScene.Account, lastChar);
             }
 
             if (Player != null)
@@ -181,13 +197,13 @@ namespace ClassicUO.Game
                 Clear();
             }
 
-            Player = new PlayerMobile(serial);
+            Player = new PlayerMobile(this, serial);
             Mobiles.Add(Player);
 
             Log.Trace($"Player [0x{serial:X8}] created");
         }
 
-        public static void ChangeSeason(Season season, int music)
+        public void ChangeSeason(Season season, int music)
         {
             Season = season;
 
@@ -224,7 +240,7 @@ namespace ClassicUO.Game
         }
         */
 
-        public static void Update()
+        public void Update()
         {
             if (Player != null)
             {
@@ -365,7 +381,7 @@ namespace ClassicUO.Game
             }
         }
 
-        public static bool Contains(uint serial)
+        public bool Contains(uint serial)
         {
             if (SerialHelper.IsItem(serial))
             {
@@ -375,7 +391,7 @@ namespace ClassicUO.Game
             return SerialHelper.IsMobile(serial) && Mobiles.Contains(serial);
         }
 
-        public static Entity Get(uint serial)
+        public Entity Get(uint serial)
         {
             Entity ent;
 
@@ -406,7 +422,7 @@ namespace ClassicUO.Game
             return ent;
         }
 
-        public static Item GetOrCreateItem(uint serial)
+        public Item GetOrCreateItem(uint serial)
         {
             Item item = Items.Get(serial);
 
@@ -425,7 +441,7 @@ namespace ClassicUO.Game
             return item;
         }
 
-        public static Mobile GetOrCreateMobile(uint serial)
+        public Mobile GetOrCreateMobile(uint serial)
         {
             Mobile mob = Mobiles.Get(serial);
 
@@ -444,7 +460,7 @@ namespace ClassicUO.Game
             return mob;
         }
 
-        public static void RemoveItemFromContainer(uint serial)
+        public void RemoveItemFromContainer(uint serial)
         {
             Item it = Items.Get(serial);
 
@@ -454,7 +470,7 @@ namespace ClassicUO.Game
             }
         }
 
-        public static void RemoveItemFromContainer(Item obj)
+        public void RemoveItemFromContainer(Item obj)
         {
             uint containerSerial = obj.Container;
 
@@ -486,7 +502,7 @@ namespace ClassicUO.Game
             obj.RemoveFromTile();
         }
 
-        public static bool RemoveItem(uint serial, bool forceRemove = false)
+        public bool RemoveItem(uint serial, bool forceRemove = false)
         {
             Item item = Items.Get(serial);
 
@@ -518,7 +534,7 @@ namespace ClassicUO.Game
             return true;
         }
 
-        public static bool RemoveMobile(uint serial, bool forceRemove = false)
+        public bool RemoveMobile(uint serial, bool forceRemove = false)
         {
             Mobile mobile = Mobiles.Get(serial);
 
@@ -549,7 +565,7 @@ namespace ClassicUO.Game
             return true;
         }
 
-        public static void SpawnEffect
+        public void SpawnEffect
         (
             GraphicEffectType type,
             uint source,
@@ -592,7 +608,7 @@ namespace ClassicUO.Game
             );
         }
 
-        public static uint FindNearest(ScanTypeObject scanType)
+        public uint FindNearest(ScanTypeObject scanType)
         {
             int distance = int.MaxValue;
             uint serial = 0;
@@ -658,7 +674,7 @@ namespace ClassicUO.Game
             return serial;
         }
 
-        public static uint FindNext(ScanTypeObject scanType, uint lastSerial, bool reverse)
+        public uint FindNext(ScanTypeObject scanType, uint lastSerial, bool reverse)
         {
             bool found = false;
 
@@ -747,7 +763,7 @@ namespace ClassicUO.Game
         }
 
        
-        public static void Clear()
+        public void Clear()
         {
             foreach (Mobile mobile in Mobiles.Values)
             {
@@ -773,7 +789,7 @@ namespace ClassicUO.Game
             Light.Personal = Light.RealPersonal = 0;
             ClientLockedFeatures.SetFlags(0);
             Party?.Clear();
-            TargetManager.LastAttack = 0;
+            _game.GetScene<GameScene>().TargetManager.LastAttack = 0;
             MessageManager.PromptData = default;
             _effectManager.Clear();
             _toRemove.Clear();
@@ -792,7 +808,7 @@ namespace ClassicUO.Game
             SkillsRequested = false;
         }
 
-        private static void InternalMapChangeClear(bool noplayer)
+        private void InternalMapChangeClear(bool noplayer)
         {
             if (!noplayer)
             {

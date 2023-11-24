@@ -56,6 +56,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public ColorPickerBox
         (
+            World world,
             int x,
             int y,
             int rows = 10,
@@ -63,7 +64,7 @@ namespace ClassicUO.Game.UI.Controls
             int cellW = 8,
             int cellH = 8,
             ushort[] customPallete = null
-        ) : base(0, 0)
+        ) : base(world, 0, 0)
         {
             X = x;
             Y = y;

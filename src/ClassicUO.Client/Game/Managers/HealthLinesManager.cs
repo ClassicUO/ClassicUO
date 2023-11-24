@@ -36,10 +36,11 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Assets;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
+using ClassicUO.Game.Scenes;
 
 namespace ClassicUO.Game.Managers
 {
-    internal class HealthLinesManager
+    internal sealed class HealthLinesManager
     {
         private const int BAR_WIDTH = 34; //28;
         private const int BAR_HEIGHT = 8;
@@ -49,6 +50,10 @@ namespace ClassicUO.Game.Managers
         const ushort BACKGROUND_GRAPHIC = 0x1068;
         const ushort HP_GRAPHIC = 0x1069;
 
+        private readonly World _world;
+
+        public HealthLinesManager(World world) { _world = world; }
+
         public bool IsEnabled =>
             ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.ShowMobilesHP;
 
@@ -56,31 +61,31 @@ namespace ClassicUO.Game.Managers
         {
             var camera = Client.Game.Scene.Camera;
 
-            if (SerialHelper.IsMobile(TargetManager.LastTargetInfo.Serial))
+            if (SerialHelper.IsMobile(Client.Game.GetScene<GameScene>().TargetManager.LastTargetInfo.Serial))
             {
                 DrawHealthLineWithMath(
                     batcher,
-                    TargetManager.LastTargetInfo.Serial,
+                    Client.Game.GetScene<GameScene>().TargetManager.LastTargetInfo.Serial,
                     camera.Bounds.Width,
                     camera.Bounds.Height
                 );
             }
 
-            if (SerialHelper.IsMobile(TargetManager.SelectedTarget))
+            if (SerialHelper.IsMobile(Client.Game.GetScene<GameScene>().TargetManager.SelectedTarget))
             {
                 DrawHealthLineWithMath(
                     batcher,
-                    TargetManager.SelectedTarget,
+                    Client.Game.GetScene<GameScene>().TargetManager.SelectedTarget,
                     camera.Bounds.Width,
                     camera.Bounds.Height
                 );
             }
 
-            if (SerialHelper.IsMobile(TargetManager.LastAttack))
+            if (SerialHelper.IsMobile(Client.Game.GetScene<GameScene>().TargetManager.LastAttack))
             {
                 DrawHealthLineWithMath(
                     batcher,
-                    TargetManager.LastAttack,
+                    Client.Game.GetScene<GameScene>().TargetManager.LastAttack,
                     camera.Bounds.Width,
                     camera.Bounds.Height
                 );
@@ -100,7 +105,7 @@ namespace ClassicUO.Game.Managers
 
             int showWhen = ProfileManager.CurrentProfile.MobileHPShowWhen;
 
-            foreach (Mobile mobile in World.Mobiles.Values)
+            foreach (Mobile mobile in _world.Mobiles.Values)
             {
                 if (mobile.IsDestroyed)
                 {
@@ -183,9 +188,9 @@ namespace ClassicUO.Game.Managers
                 }
 
                 if (
-                    mobile.Serial == TargetManager.LastTargetInfo.Serial
-                    || mobile.Serial == TargetManager.SelectedTarget
-                    || mobile.Serial == TargetManager.LastAttack
+                    mobile.Serial == Client.Game.GetScene<GameScene>().TargetManager.LastTargetInfo.Serial
+                    || mobile.Serial == Client.Game.GetScene<GameScene>().TargetManager.SelectedTarget
+                    || mobile.Serial == Client.Game.GetScene<GameScene>().TargetManager.LastAttack
                 )
                 {
                     continue;
@@ -208,7 +213,7 @@ namespace ClassicUO.Game.Managers
 
                 if (mode >= 1)
                 {
-                    DrawHealthLine(batcher, mobile, p.X, p.Y, mobile.Serial != World.Player.Serial);
+                    DrawHealthLine(batcher, mobile, p.X, p.Y, mobile.Serial != _world.Player.Serial);
                 }
             }
         }
@@ -220,7 +225,7 @@ namespace ClassicUO.Game.Managers
             int screenH
         )
         {
-            Entity entity = World.Get(serial);
+            Entity entity = _world.Get(serial);
 
             if (entity == null)
             {

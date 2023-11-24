@@ -94,12 +94,25 @@ namespace ClassicUO.Game.Scenes
 
         private uint _timeToPlaceMultiInHouseCustomization;
         private readonly bool _use_render_target = false;
-        private UseItemQueue _useItemQueue = new UseItemQueue();
+        private readonly UseItemQueue _useItemQueue;
         private bool _useObjectHandles;
-        private RenderTarget2D _world_render_target,
-            _lightRenderTarget;
+        private RenderTarget2D _world_render_target, _lightRenderTarget;
         private AnimatedStaticsManager _animatedStaticsManager;
 
+        private readonly World _world;
+
+        public GameScene(World world)
+        {
+            _world = world;
+            _useItemQueue = new UseItemQueue(world);
+        }
+
+        public BoatMovingManager BoatMovingManager { get; private set; }
+        public Pathfinder Pathfinder { get; private set; }
+        public NameOverHeadManager NameOverHeadManager { get; private set; }
+        public DelayedObjectClickManager DelayedObjectClickManager { get; private set; }
+        public TargetManager TargetManager { get; private set; }
+        public CommandManager CommandManager { get; private set; }
         public bool UpdateDrawPosition { get; set; }
         public HotkeysManager Hotkeys { get; private set; }
         public MacroManager Macros { get; private set; }
@@ -109,8 +122,8 @@ namespace ClassicUO.Game.Scenes
         public bool UseLights =>
             ProfileManager.CurrentProfile != null
             && ProfileManager.CurrentProfile.UseCustomLightLevel
-                ? World.Light.Personal < World.Light.Overall
-                : World.Light.RealPersonal < World.Light.RealOverall;
+                ? _world.Light.Personal < _world.Light.Overall
+                : _world.Light.RealPersonal < _world.Light.RealOverall;
         public bool UseAltLights =>
             ProfileManager.CurrentProfile != null
             && ProfileManager.CurrentProfile.UseAlternativeLights;
@@ -134,27 +147,34 @@ namespace ClassicUO.Game.Scenes
 
             Client.Game.GameCursor.ItemHold.Clear();
             Hotkeys = new HotkeysManager();
-            Macros = new MacroManager();
+            Macros = new MacroManager(_world);
             Macros.Load();
 
             _animatedStaticsManager = new AnimatedStaticsManager();
             _animatedStaticsManager.Initialize();
             InfoBars = new InfoBarManager();
             InfoBars.Load();
-            _healthLinesManager = new HealthLinesManager();
-            Weather = new Weather();
+            _healthLinesManager = new HealthLinesManager(_world);
+            Weather = new Weather(_world);
 
-            WorldViewportGump viewport = new WorldViewportGump(this);
+            WorldViewportGump viewport = new WorldViewportGump(_world, this);
             UIManager.Add(viewport, false);
 
             if (!ProfileManager.CurrentProfile.TopbarGumpIsDisabled)
             {
-                TopBarGump.Create();
+                TopBarGump.Create(_world);
             }
 
+            CommandManager = new CommandManager(_world);
             CommandManager.Initialize();
+            TargetManager = new TargetManager(_world);
+            DelayedObjectClickManager = new DelayedObjectClickManager(_world);
+            NameOverHeadManager = new NameOverHeadManager(_world);
+            Pathfinder = new Pathfinder(_world);
+            BoatMovingManager = new BoatMovingManager(_world);
+
             NetClient.Socket.Disconnected += SocketOnDisconnected;
-            MessageManager.MessageReceived += ChatOnMessageReceived;
+            _world.MessageManager.MessageReceived += ChatOnMessageReceived;
             UIManager.ContainerScale = ProfileManager.CurrentProfile.ContainersScale / 100f;
 
             SDL.SDL_SetWindowMinimumSize(Client.Game.Window.Handle, 640, 480);
@@ -296,7 +316,7 @@ namespace ClassicUO.Game.Scenes
 
             if (!string.IsNullOrEmpty(text))
             {
-                World.Journal.Add(text, hue, name, e.TextType, e.IsUnicode);
+                _world.Journal.Add(text, hue, name, e.TextType, e.IsUnicode);
             }
         }
 
@@ -334,7 +354,7 @@ namespace ClassicUO.Game.Scenes
             // special case for wmap. this allow us to save settings
             UIManager.GetGump<WorldMapGump>()?.SaveSettings();
 
-            ProfileManager.CurrentProfile?.Save(ProfileManager.ProfilePath);
+            ProfileManager.CurrentProfile?.Save(_world, ProfileManager.ProfilePath);
 
             Macros.Save();
             InfoBars.Save();
@@ -351,15 +371,14 @@ namespace ClassicUO.Game.Scenes
             CommandManager.UnRegisterAll();
             Weather.Reset();
             UIManager.Clear();
-            World.Clear();
+            _world.Clear();
             ChatManager.Clear();
             DelayedObjectClickManager.Clear();
 
             _useItemQueue?.Clear();
-            _useItemQueue = null;
             Hotkeys = null;
             Macros = null;
-            MessageManager.MessageReceived -= ChatOnMessageReceived;
+            _world.MessageManager.MessageReceived -= ChatOnMessageReceived;
 
             Settings.GlobalSettings.WindowSize = new Point(
                 Client.Game.Window.ClientBounds.Width,
@@ -382,6 +401,7 @@ namespace ClassicUO.Game.Scenes
             {
                 UIManager.Add(
                     new MessageBoxGump(
+                        _world,
                         200,
                         200,
                         string.Format(
@@ -404,6 +424,7 @@ namespace ClassicUO.Game.Scenes
         {
             UIManager.Add(
                 new QuestionGump(
+                    _world,
                     ResGeneral.QuitPrompt,
                     s =>
                     {
@@ -411,7 +432,7 @@ namespace ClassicUO.Game.Scenes
                         {
                             if (
                                 (
-                                    World.ClientFeatures.Flags
+                                    _world.ClientFeatures.Flags
                                     & CharacterListFlags.CLF_OWERWRITE_CONFIGURATION_BUTTON
                                 ) != 0
                             )
@@ -446,7 +467,7 @@ namespace ClassicUO.Game.Scenes
             int testX = obj.X + 1;
             int testY = obj.Y + 1;
 
-            GameObject tile = World.Map.GetTile(testX, testY);
+            GameObject tile = _world.Map.GetTile(testX, testY);
 
             if (tile != null)
             {
@@ -596,7 +617,7 @@ namespace ClassicUO.Game.Scenes
 
             _foliageCount = 0;
 
-            if (!World.InGame)
+            if (!_world.InGame)
             {
                 return;
             }
@@ -632,28 +653,28 @@ namespace ClassicUO.Game.Scenes
             }
 
             _rectanglePlayer.X = (int)(
-                World.Player.RealScreenPosition.X
-                - World.Player.FrameInfo.X
+                _world.Player.RealScreenPosition.X
+                - _world.Player.FrameInfo.X
                 + 22
-                + World.Player.Offset.X
+                + _world.Player.Offset.X
             );
             _rectanglePlayer.Y = (int)(
-                World.Player.RealScreenPosition.Y
-                - World.Player.FrameInfo.Y
+                _world.Player.RealScreenPosition.Y
+                - _world.Player.FrameInfo.Y
                 + 22
-                + (World.Player.Offset.Y - World.Player.Offset.Z)
+                + (_world.Player.Offset.Y - _world.Player.Offset.Z)
             );
-            _rectanglePlayer.Width = World.Player.FrameInfo.Width;
-            _rectanglePlayer.Height = World.Player.FrameInfo.Height;
+            _rectanglePlayer.Width = _world.Player.FrameInfo.Width;
+            _rectanglePlayer.Height = _world.Player.FrameInfo.Height;
 
             int minX = _minTile.X;
             int minY = _minTile.Y;
             int maxX = _maxTile.X;
             int maxY = _maxTile.Y;
-            Map.Map map = World.Map;
+            Map.Map map = _world.Map;
             bool use_handles = _useObjectHandles;
-            int maxCotZ = World.Player.Z + 5;
-            Vector2 playerPos = World.Player.GetScreenPosition();
+            int maxCotZ = _world.Player.Z + 5;
+            Vector2 playerPos = _world.Player.GetScreenPosition();
 
             for (int i = 0; i < 2; ++i)
             {
@@ -712,8 +733,8 @@ namespace ClassicUO.Game.Scenes
                 }
             }
 
-            UpdateTextServerEntities(World.Mobiles.Values, true);
-            UpdateTextServerEntities(World.Items.Values, false);
+            UpdateTextServerEntities(_world.Mobiles.Values, true);
+            UpdateTextServerEntities(_world.Items.Values, false);
 
             UpdateDrawPosition = false;
         }
@@ -744,11 +765,11 @@ namespace ClassicUO.Game.Scenes
 
             if (_time_cleanup < Time.Ticks)
             {
-                World.Map?.ClearUnusedBlocks();
+                _world.Map?.ClearUnusedBlocks();
                 _time_cleanup = Time.Ticks + 500;
             }
 
-            PacketHandlers.SendMegaClilocRequests();
+            PacketHandlers.SendMegaClilocRequests(_world);
 
             if (_forceStopScene)
             {
@@ -759,7 +780,7 @@ namespace ClassicUO.Game.Scenes
                 return;
             }
 
-            if (!World.InGame)
+            if (!_world.InGame)
             {
                 return;
             }
@@ -770,7 +791,7 @@ namespace ClassicUO.Game.Scenes
                 _timePing = (long)Time.Ticks + 1000;
             }
 
-            World.Update();
+            _world.Update();
             _animatedStaticsManager.Process();
             BoatMovingManager.Update();
             Pathfinder.ProcessAutoWalk();
@@ -785,9 +806,9 @@ namespace ClassicUO.Game.Scenes
                     _flags[3]
                 );
 
-                if (World.InGame && !Pathfinder.AutoWalking && dir != Direction.NONE)
+                if (_world.InGame && !Pathfinder.AutoWalking && dir != Direction.NONE)
                 {
-                    World.Player.Walk(dir, currentProfile.AlwaysRun);
+                    _world.Player.Walk(dir, currentProfile.AlwaysRun);
                 }
             }
 
@@ -795,13 +816,13 @@ namespace ClassicUO.Game.Scenes
                 _followingMode && SerialHelper.IsMobile(_followingTarget) && !Pathfinder.AutoWalking
             )
             {
-                Mobile follow = World.Mobiles.Get(_followingTarget);
+                Mobile follow = _world.Mobiles.Get(_followingTarget);
 
                 if (follow != null)
                 {
                     int distance = follow.Distance;
 
-                    if (distance > World.ClientViewRange)
+                    if (distance > _world.ClientViewRange)
                     {
                         StopFollowing();
                     }
@@ -822,7 +843,7 @@ namespace ClassicUO.Game.Scenes
                 (currentProfile.CorpseOpenOptions == 1 || currentProfile.CorpseOpenOptions == 3)
                     && TargetManager.IsTargeting
                 || (currentProfile.CorpseOpenOptions == 2 || currentProfile.CorpseOpenOptions == 3)
-                    && World.Player.IsHidden
+                    && _world.Player.IsHidden
             )
             {
                 _useItemQueue.ClearCorpses();
@@ -838,7 +859,7 @@ namespace ClassicUO.Game.Scenes
             if (
                 TargetManager.IsTargeting
                 && TargetManager.TargetingState == CursorTarget.MultiPlacement
-                && World.CustomHouseManager == null
+                && _world.CustomHouseManager == null
                 && TargetManager.MultiTargetInfo != null
             )
             {
@@ -859,7 +880,7 @@ namespace ClassicUO.Game.Scenes
                     int cellX = gobj.X % 8;
                     int cellY = gobj.Y % 8;
 
-                    GameObject o = World.Map.GetChunk(gobj.X, gobj.Y)?.Tiles[cellX, cellY];
+                    GameObject o = _world.Map.GetChunk(gobj.X, gobj.Y)?.Tiles[cellX, cellY];
 
                     if (o != null)
                     {
@@ -874,7 +895,7 @@ namespace ClassicUO.Game.Scenes
                         z = gobj.Z;
                     }
 
-                    World.Map.GetMapZ(x, y, out sbyte groundZ, out sbyte _);
+                    _world.Map.GetMapZ(x, y, out sbyte groundZ, out sbyte _);
 
                     if (gobj is Static st && st.ItemData.IsWet)
                     {
@@ -888,7 +909,7 @@ namespace ClassicUO.Game.Scenes
                     _multi.SetInWorldTile(x, y, z);
                     _multi.CheckGraphicChange();
 
-                    World.HouseManager.TryGetHouse(_multi.Serial, out House house);
+                    _world.HouseManager.TryGetHouse(_multi.Serial, out House house);
 
                     foreach (Multi s in house.Components)
                     {
@@ -903,7 +924,7 @@ namespace ClassicUO.Game.Scenes
             }
             else if (_multi != null)
             {
-                World.HouseManager.RemoveMultiTargetHouse();
+                _world.HouseManager.RemoveMultiTargetHouse();
                 _multi.Destroy();
                 _multi = null;
             }
@@ -911,10 +932,10 @@ namespace ClassicUO.Game.Scenes
             if (_isMouseLeftDown && !Client.Game.GameCursor.ItemHold.Enabled)
             {
                 if (
-                    World.CustomHouseManager != null
-                    && World.CustomHouseManager.SelectedGraphic != 0
-                    && !World.CustomHouseManager.SeekTile
-                    && !World.CustomHouseManager.Erasing
+                    _world.CustomHouseManager != null
+                    && _world.CustomHouseManager.SelectedGraphic != 0
+                    && !_world.CustomHouseManager.SeekTile
+                    && !_world.CustomHouseManager.Erasing
                     && Time.Ticks > _timeToPlaceMultiInHouseCustomization
                 )
                 {
@@ -926,7 +947,7 @@ namespace ClassicUO.Game.Scenes
                         )
                     )
                     {
-                        World.CustomHouseManager.OnTargetWorld(obj);
+                        _world.CustomHouseManager.OnTargetWorld(obj);
                         _timeToPlaceMultiInHouseCustomization = Time.Ticks + 50;
                         _lastSelectedMultiPositionInHouseCustomization.X = obj.X;
                         _lastSelectedMultiPositionInHouseCustomization.Y = obj.Y;
@@ -934,7 +955,7 @@ namespace ClassicUO.Game.Scenes
                 }
                 else if (Time.Ticks - _holdMouse2secOverItemTime >= 1000)
                 {
-                    if (SelectedObject.Object is Item it && GameActions.PickUp(it.Serial, 0, 0))
+                    if (SelectedObject.Object is Item it && GameActions.PickUp(_world, it.Serial, 0, 0))
                     {
                         _isMouseLeftDown = false;
                         _holdMouse2secOverItemTime = 0;
@@ -945,7 +966,7 @@ namespace ClassicUO.Game.Scenes
 
         public override bool Draw(UltimaBatcher2D batcher)
         {
-            if (!World.InGame)
+            if (!_world.InGame)
             {
                 return false;
             }
@@ -1196,7 +1217,7 @@ namespace ClassicUO.Game.Scenes
         {
             if (
                 !UseLights && !UseAltLights
-                || World.Player.IsDead && ProfileManager.CurrentProfile.EnableBlackWhiteEffect
+                || _world.Player.IsDead && ProfileManager.CurrentProfile.EnableBlackWhiteEffect
                 || _lightRenderTarget == null
             )
             {
@@ -1208,7 +1229,7 @@ namespace ClassicUO.Game.Scenes
 
             if (!UseAltLights)
             {
-                float lightColor = World.Light.IsometricLevel;
+                float lightColor = _world.Light.IsometricLevel;
 
                 if (ProfileManager.CurrentProfile.UseDarkNights)
                 {
@@ -1278,8 +1299,8 @@ namespace ClassicUO.Game.Scenes
                 SelectedObject.Object = null;
             }
 
-            World.WorldTextManager.ProcessWorldText(true);
-            World.WorldTextManager.Draw(batcher, Camera.Bounds.X, Camera.Bounds.Y);
+            _world.WorldTextManager.ProcessWorldText(true);
+            _world.WorldTextManager.Draw(batcher, Camera.Bounds.X, Camera.Bounds.Y);
         }
 
         public void DrawSelection(UltimaBatcher2D batcher)
@@ -1336,9 +1357,9 @@ namespace ClassicUO.Game.Scenes
                 && ProfileManager.CurrentProfile.EnableDeathScreen
             )
             {
-                if (World.InGame)
+                if (_world.InGame)
                 {
-                    if (World.Player.IsDead && World.Player.DeathScreenTimer > Time.Ticks)
+                    if (_world.Player.IsDead && _world.Player.DeathScreenTimer > Time.Ticks)
                     {
                         batcher.Begin();
                         _youAreDeadText.Draw(
@@ -1364,8 +1385,8 @@ namespace ClassicUO.Game.Scenes
                 _followingTarget = 0;
                 Pathfinder.StopAutoWalk();
 
-                MessageManager.HandleMessage(
-                    World.Player,
+                _world.MessageManager.HandleMessage(
+                    _world.Player,
                     ResGeneral.StoppedFollowing,
                     string.Empty,
                     0,

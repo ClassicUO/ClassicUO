@@ -55,7 +55,7 @@ namespace ClassicUO.Game.GameObjects
         private Direction _direction;
 
 
-        protected Entity(uint serial)
+        protected Entity(World world, uint serial) : base(world)
         {
             Serial = serial;
         }
@@ -169,7 +169,7 @@ namespace ClassicUO.Game.GameObjects
                     Socket.Send_NameRequest(Serial);
                 }
 
-                UIManager.Add(new NameOverheadGump(this));
+                UIManager.Add(new NameOverheadGump(World, this));
             }
 
 
@@ -186,7 +186,7 @@ namespace ClassicUO.Game.GameObjects
         {
             base.Destroy();
 
-            GameActions.SendCloseStatus(Serial, HitsRequest >= HitsRequestStatus.Pending);
+            GameActions.SendCloseStatus(World, Serial, HitsRequest >= HitsRequestStatus.Pending);
 
             AnimIndex = 0;
             LastAnimationChangeTime = 0;

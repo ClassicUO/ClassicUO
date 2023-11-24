@@ -51,7 +51,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
         private readonly Action<int> _buttonClick;
         private readonly Label _label;
 
-        public LoadingGump(string labelText, LoginButtons showButtons, Action<int> buttonClick = null) : base(0, 0)
+        public LoadingGump(World world, string labelText, LoginButtons showButtons, Action<int> buttonClick = null) : base(world, 0, 0)
         {
             _buttonClick = buttonClick;
             CanCloseWithRightClick = false;

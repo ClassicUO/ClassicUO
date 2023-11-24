@@ -51,6 +51,13 @@ namespace ClassicUO.Game.Map
             }
         );
 
+        private readonly World _world;
+
+        public Chunk(World world)
+        {
+            _world = world;
+        }
+
         public GameObject[,] Tiles { get; } = new GameObject[8, 8];
         public bool IsDestroyed;
         public long LastAccessTime;
@@ -75,7 +82,7 @@ namespace ClassicUO.Game.Map
         {
             IsDestroyed = false;
 
-            Map map = World.Map;
+            Map map = _world.Map;
 
             ref IndexMap im = ref GetIndex(index);
 
@@ -97,7 +104,7 @@ namespace ClassicUO.Game.Map
 
                         sbyte z = cells[pos].Z;
 
-                        Land land = Land.Create(tileID);
+                        Land land = Land.Create(_world, tileID);
 
                         ushort tileX = (ushort) (bx + x);
 
@@ -389,7 +396,7 @@ namespace ClassicUO.Game.Map
                     {
                         GameObject next = first.TNext;
 
-                        if (!ReferenceEquals(first, World.Player))
+                        if (!ReferenceEquals(first, _world.Player))
                         {
                             first.Destroy();
                         }
@@ -431,7 +438,7 @@ namespace ClassicUO.Game.Map
                     {
                         GameObject next = first.TNext;
 
-                        if (!ReferenceEquals(first, World.Player))
+                        if (!ReferenceEquals(first, _world.Player))
                         {
                             first.Destroy();
                         }

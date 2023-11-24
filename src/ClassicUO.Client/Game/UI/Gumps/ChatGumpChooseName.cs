@@ -41,7 +41,7 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private readonly StbTextBox _textBox;
 
-        public ChatGumpChooseName() : base(0, 0)
+        public ChatGumpChooseName(World world) : base(world, 0, 0)
         {
             CanMove = false;
             AcceptKeyboardInput = true;

@@ -1846,7 +1846,7 @@ namespace ClassicUO.Network
             writer.Dispose();
         }
 
-        public static void Send_ASCIIPromptResponse(this NetClient socket, string text, bool cancel)
+        public static void Send_ASCIIPromptResponse(this NetClient socket, World world, string text, bool cancel)
         {
             const byte ID = 0x9A;
 
@@ -1861,7 +1861,7 @@ namespace ClassicUO.Network
                 writer.WriteZero(2);
             }
 
-            writer.WriteUInt64BE(MessageManager.PromptData.Data);
+            writer.WriteUInt64BE(world.MessageManager.PromptData.Data);
             writer.WriteUInt32BE((uint) (cancel ? 0 : 1));
             writer.WriteASCII(text);
 
@@ -1879,7 +1879,7 @@ namespace ClassicUO.Network
             writer.Dispose();
         }
 
-        public static void Send_UnicodePromptResponse(this NetClient socket, string text, string lang, bool cancel)
+        public static void Send_UnicodePromptResponse(this NetClient socket, World world, string text, string lang, bool cancel)
         {
             const byte ID = 0xC2;
 
@@ -1894,7 +1894,7 @@ namespace ClassicUO.Network
                 writer.WriteZero(2);
             }
 
-            writer.WriteUInt64BE(MessageManager.PromptData.Data);
+            writer.WriteUInt64BE(world.MessageManager.PromptData.Data);
             writer.WriteUInt32BE((uint) (cancel ? 0 : 1));
             writer.WriteASCII(lang, 3);
             writer.WriteUInt8(0x00);
@@ -2952,7 +2952,7 @@ namespace ClassicUO.Network
             writer.Dispose();
         }
 
-        public static void Send_GuildMenuRequest(this NetClient socket)
+        public static void Send_GuildMenuRequest(this NetClient socket, World world)
         {
             const byte ID = 0xD7;
 
@@ -2967,7 +2967,7 @@ namespace ClassicUO.Network
                 writer.WriteZero(2);
             }
 
-            writer.WriteUInt32BE(World.Player.Serial);
+            writer.WriteUInt32BE(world.Player.Serial);
             writer.WriteUInt16BE(0x28);
             writer.WriteUInt8(0x0A);
 
@@ -2985,7 +2985,7 @@ namespace ClassicUO.Network
             writer.Dispose();
         }
 
-        public static void Send_QuestMenuRequest(this NetClient socket)
+        public static void Send_QuestMenuRequest(this NetClient socket, World world)
         {
             const byte ID = 0xD7;
 
@@ -3000,7 +3000,7 @@ namespace ClassicUO.Network
                 writer.WriteZero(2);
             }
 
-            writer.WriteUInt32BE(World.Player.Serial);
+            writer.WriteUInt32BE(world.Player.Serial);
             writer.WriteUInt16BE(0x32);
             writer.WriteUInt8(0x00);
 
@@ -3018,7 +3018,7 @@ namespace ClassicUO.Network
             writer.Dispose();
         }
 
-        public static void Send_EquipLastWeapon(this NetClient socket)
+        public static void Send_EquipLastWeapon(this NetClient socket, World world)
         {
             const byte ID = 0xD7;
 
@@ -3033,7 +3033,7 @@ namespace ClassicUO.Network
                 writer.WriteZero(2);
             }
 
-            writer.WriteUInt32BE(World.Player.Serial);
+            writer.WriteUInt32BE(world.Player.Serial);
             writer.WriteUInt16BE(0x1E);
             writer.WriteUInt8(0x0A);
 
@@ -3491,7 +3491,7 @@ namespace ClassicUO.Network
             writer.Dispose();
         }
 
-        public static void Send_UseCombatAbility(this NetClient socket, byte idx)
+        public static void Send_UseCombatAbility(this NetClient socket, World world, byte idx)
         {
             const byte ID = 0xD7;
 
@@ -3506,7 +3506,7 @@ namespace ClassicUO.Network
                 writer.WriteZero(2);
             }
 
-            writer.WriteUInt32BE(World.Player.Serial);
+            writer.WriteUInt32BE(world.Player.Serial);
             writer.WriteUInt16BE(0x19);
             writer.WriteUInt32BE(0);
             writer.WriteUInt8(idx);
@@ -3836,7 +3836,7 @@ namespace ClassicUO.Network
             writer.Dispose();
         }
 
-        public static void Send_CustomHouseBackup(this NetClient socket)
+        public static void Send_CustomHouseBackup(this NetClient socket, World world)
         {
             const byte ID = 0xD7;
 
@@ -3851,7 +3851,7 @@ namespace ClassicUO.Network
                 writer.WriteZero(2);
             }
 
-            writer.WriteUInt32BE(World.Player.Serial);
+            writer.WriteUInt32BE(world.Player.Serial);
             writer.WriteUInt16BE(0x02);
             writer.WriteUInt8(0x0A);
 
@@ -3870,7 +3870,7 @@ namespace ClassicUO.Network
             writer.Dispose();
         }
 
-        public static void Send_CustomHouseRestore(this NetClient socket)
+        public static void Send_CustomHouseRestore(this NetClient socket, World world)
         {
             const byte ID = 0xD7;
 
@@ -3885,7 +3885,7 @@ namespace ClassicUO.Network
                 writer.WriteZero(2);
             }
 
-            writer.WriteUInt32BE(World.Player.Serial);
+            writer.WriteUInt32BE(world.Player.Serial);
             writer.WriteUInt16BE(0x03);
             writer.WriteUInt8(0x0A);
 
@@ -3904,7 +3904,7 @@ namespace ClassicUO.Network
             writer.Dispose();
         }
 
-        public static void Send_CustomHouseCommit(this NetClient socket)
+        public static void Send_CustomHouseCommit(this NetClient socket, World world)
         {
             const byte ID = 0xD7;
 
@@ -3919,7 +3919,7 @@ namespace ClassicUO.Network
                 writer.WriteZero(2);
             }
 
-            writer.WriteUInt32BE(World.Player.Serial);
+            writer.WriteUInt32BE(world.Player.Serial);
             writer.WriteUInt16BE(0x04);
             writer.WriteUInt8(0x0A);
 
@@ -3938,7 +3938,7 @@ namespace ClassicUO.Network
             writer.Dispose();
         }
 
-        public static void Send_CustomHouseBuildingExit(this NetClient socket)
+        public static void Send_CustomHouseBuildingExit(this NetClient socket, World world)
         {
             const byte ID = 0xD7;
 
@@ -3953,7 +3953,7 @@ namespace ClassicUO.Network
                 writer.WriteZero(2);
             }
 
-            writer.WriteUInt32BE(World.Player.Serial);
+            writer.WriteUInt32BE(world.Player.Serial);
             writer.WriteUInt16BE(0x0C);
             writer.WriteUInt8(0x0A);
 
@@ -3971,7 +3971,7 @@ namespace ClassicUO.Network
             writer.Dispose();
         }
 
-        public static void Send_CustomHouseGoToFloor(this NetClient socket, byte floor)
+        public static void Send_CustomHouseGoToFloor(this NetClient socket, World world, byte floor)
         {
             const byte ID = 0xD7;
 
@@ -3986,7 +3986,7 @@ namespace ClassicUO.Network
                 writer.WriteZero(2);
             }
 
-            writer.WriteUInt32BE(World.Player.Serial);
+            writer.WriteUInt32BE(world.Player.Serial);
             writer.WriteUInt16BE(0x12);
             writer.WriteUInt32BE(0);
             writer.WriteUInt8(floor);
@@ -4007,7 +4007,7 @@ namespace ClassicUO.Network
             writer.Dispose();
         }
 
-        public static void Send_CustomHouseSync(this NetClient socket)
+        public static void Send_CustomHouseSync(this NetClient socket, World world)
         {
             const byte ID = 0xD7;
 
@@ -4022,7 +4022,7 @@ namespace ClassicUO.Network
                 writer.WriteZero(2);
             }
 
-            writer.WriteUInt32BE(World.Player.Serial);
+            writer.WriteUInt32BE(world.Player.Serial);
             writer.WriteUInt16BE(0x0E);
             writer.WriteUInt8(0x0A);
 
@@ -4041,7 +4041,7 @@ namespace ClassicUO.Network
             writer.Dispose();
         }
 
-        public static void Send_CustomHouseClear(this NetClient socket)
+        public static void Send_CustomHouseClear(this NetClient socket, World world)
         {
             const byte ID = 0xD7;
 
@@ -4056,7 +4056,7 @@ namespace ClassicUO.Network
                 writer.WriteZero(2);
             }
 
-            writer.WriteUInt32BE(World.Player.Serial);
+            writer.WriteUInt32BE(world.Player.Serial);
             writer.WriteUInt16BE(0x10);
             writer.WriteUInt8(0x0A);
 
@@ -4075,7 +4075,7 @@ namespace ClassicUO.Network
             writer.Dispose();
         }
 
-        public static void Send_CustomHouseRevert(this NetClient socket)
+        public static void Send_CustomHouseRevert(this NetClient socket, World world)
         {
             const byte ID = 0xD7;
 
@@ -4090,7 +4090,7 @@ namespace ClassicUO.Network
                 writer.WriteZero(2);
             }
 
-            writer.WriteUInt32BE(World.Player.Serial);
+            writer.WriteUInt32BE(world.Player.Serial);
             writer.WriteUInt16BE(0x1A);
             writer.WriteUInt8(0x0A);
 
@@ -4108,7 +4108,7 @@ namespace ClassicUO.Network
             writer.Dispose();
         }
 
-        public static void Send_CustomHouseResponse(this NetClient socket)
+        public static void Send_CustomHouseResponse(this NetClient socket, World world)
         {
             const byte ID = 0xD7;
 
@@ -4123,7 +4123,7 @@ namespace ClassicUO.Network
                 writer.WriteZero(2);
             }
 
-            writer.WriteUInt32BE(World.Player.Serial);
+            writer.WriteUInt32BE(world.Player.Serial);
             writer.WriteUInt16BE(0x0A);
             writer.WriteUInt8(0x0A);
 
@@ -4141,7 +4141,7 @@ namespace ClassicUO.Network
             writer.Dispose();
         }
 
-        public static void Send_CustomHouseAddItem(this NetClient socket, ushort graphic, int x, int y)
+        public static void Send_CustomHouseAddItem(this NetClient socket, World world, ushort graphic, int x, int y)
         {
             const byte ID = 0xD7;
 
@@ -4156,7 +4156,7 @@ namespace ClassicUO.Network
                 writer.WriteZero(2);
             }
 
-            writer.WriteUInt32BE(World.Player.Serial);
+            writer.WriteUInt32BE(world.Player.Serial);
             writer.WriteUInt16BE(0x06);
             writer.WriteUInt8(0x00);
             writer.WriteUInt32BE(graphic);
@@ -4180,7 +4180,7 @@ namespace ClassicUO.Network
             writer.Dispose();
         }
 
-        public static void Send_CustomHouseDeleteItem(this NetClient socket, ushort graphic, int x, int y, int z)
+        public static void Send_CustomHouseDeleteItem(this NetClient socket, World world, ushort graphic, int x, int y, int z)
         {
             const byte ID = 0xD7;
 
@@ -4195,7 +4195,7 @@ namespace ClassicUO.Network
                 writer.WriteZero(2);
             }
 
-            writer.WriteUInt32BE(World.Player.Serial);
+            writer.WriteUInt32BE(world.Player.Serial);
             writer.WriteUInt16BE(0x05);
             writer.WriteUInt8(0x00);
             writer.WriteUInt32BE(graphic);
@@ -4221,7 +4221,7 @@ namespace ClassicUO.Network
             writer.Dispose();
         }
 
-        public static void Send_CustomHouseAddRoof(this NetClient socket, ushort graphic, int x, int y, int z)
+        public static void Send_CustomHouseAddRoof(this NetClient socket, World world, ushort graphic, int x, int y, int z)
         {
             const byte ID = 0xD7;
 
@@ -4236,7 +4236,7 @@ namespace ClassicUO.Network
                 writer.WriteZero(2);
             }
 
-            writer.WriteUInt32BE(World.Player.Serial);
+            writer.WriteUInt32BE(world.Player.Serial);
             writer.WriteUInt16BE(0x13);
             writer.WriteUInt8(0x00);
             writer.WriteUInt32BE(graphic);
@@ -4262,7 +4262,7 @@ namespace ClassicUO.Network
             writer.Dispose();
         }
 
-        public static void Send_CustomHouseDeleteRoof(this NetClient socket, ushort graphic, int x, int y, int z)
+        public static void Send_CustomHouseDeleteRoof(this NetClient socket, World world, ushort graphic, int x, int y, int z)
         {
             const byte ID = 0xD7;
 
@@ -4277,7 +4277,7 @@ namespace ClassicUO.Network
                 writer.WriteZero(2);
             }
 
-            writer.WriteUInt32BE(World.Player.Serial);
+            writer.WriteUInt32BE(world.Player.Serial);
             writer.WriteUInt16BE(0x14);
             writer.WriteUInt8(0x00);
             writer.WriteUInt32BE(graphic);
@@ -4303,7 +4303,7 @@ namespace ClassicUO.Network
             writer.Dispose();
         }
 
-        public static void Send_CustomHouseAddStair(this NetClient socket, ushort graphic, int x, int y)
+        public static void Send_CustomHouseAddStair(this NetClient socket, World world, ushort graphic, int x, int y)
         {
             const byte ID = 0xD7;
 
@@ -4318,7 +4318,7 @@ namespace ClassicUO.Network
                 writer.WriteZero(2);
             }
 
-            writer.WriteUInt32BE(World.Player.Serial);
+            writer.WriteUInt32BE(world.Player.Serial);
             writer.WriteUInt16BE(0x0D);
             writer.WriteUInt8(0x00);
             writer.WriteUInt32BE(graphic);

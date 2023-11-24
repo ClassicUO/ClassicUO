@@ -39,7 +39,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.Managers
 {
-    class Aura : IDisposable
+    sealed class Aura : IDisposable
     {
         private static readonly Lazy<BlendState> _blend = new Lazy<BlendState>
         (
@@ -103,13 +103,18 @@ namespace ClassicUO.Game.Managers
         }
     }
 
-    internal static class AuraManager
+    internal sealed class AuraManager
     {
-        private static readonly Aura _aura = new Aura(30);
+        private readonly World _world;
+        private readonly Aura _aura = new Aura(30);
+        private int _saveAuraUnderFeetType;
 
-        private static int _saveAuraUnderFeetType;
+        public AuraManager(World world)
+        {
+            _world = world;
+        }
 
-        public static bool IsEnabled
+        public bool IsEnabled
         {
             get
             {
@@ -123,14 +128,14 @@ namespace ClassicUO.Game.Managers
                     default:
                     case 0: return false;
 
-                    case 1 when World.Player != null && World.Player.InWarMode: return true;
+                    case 1 when _world.Player != null && _world.Player.InWarMode: return true;
                     case 2 when Keyboard.Ctrl && Keyboard.Shift: return true;
                     case 3: return true;
                 }
             }
         }
 
-        public static void ToggleVisibility()
+        public void ToggleVisibility()
         {
             Profile currentProfile = ProfileManager.CurrentProfile;
 
@@ -145,7 +150,7 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public static void Draw(UltimaBatcher2D batcher, int x, int y, ushort hue, float depth)
+        public void Draw(UltimaBatcher2D batcher, int x, int y, ushort hue, float depth)
         {
             _aura.Draw(batcher, x, y, hue, depth);
         }

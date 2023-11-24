@@ -58,15 +58,16 @@ namespace ClassicUO.Game.UI.Gumps
 
         //private bool _isVertical;
 
-        public CounterBarGump() : base(0, 0) { }
+        public CounterBarGump(World world) : base(world, 0, 0) { }
 
         public CounterBarGump(
+            World world,
             int x,
             int y,
             int rectSize = 30,
             int rows = 1,
             int columns = 1 /*, bool vertical = false*/
-        ) : base(0, 0)
+        ) : base(world, 0, 0)
         {
             X = x;
             Y = y;
@@ -119,6 +120,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     Add(
                         new CounterItem(
+                            this,
                             col * _rectSize + 2,
                             row * _rectSize + 2,
                             _rectSize - 4,
@@ -231,6 +233,7 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         Add(
                             new CounterItem(
+                                this,
                                 col * _rectSize + 2,
                                 row * _rectSize + 2,
                                 _rectSize - 4,
@@ -318,12 +321,13 @@ namespace ClassicUO.Game.UI.Gumps
         private class CounterItem : Control
         {
             private int _amount;
-
             private readonly ImageWithText _image;
             private uint _time;
+            private readonly CounterBarGump _gump;
 
-            public CounterItem(int x, int y, int w, int h)
+            public CounterItem(CounterBarGump gump, int x, int y, int w, int h)
             {
+                _gump = gump;
                 AcceptMouseInput = true;
                 WantUpdateSize = false;
                 CanMove = true;
@@ -373,7 +377,7 @@ namespace ClassicUO.Game.UI.Gumps
                     return;
                 }
 
-                Item backpack = World.Player.FindItemByLayer(Layer.Backpack);
+                Item backpack = _gump.World.Player.FindItemByLayer(Layer.Backpack);
 
                 if (backpack == null)
                 {
@@ -384,7 +388,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (item != null)
                 {
-                    GameActions.DoubleClick(item);
+                    GameActions.DoubleClick(_gump.World, item);
                 }
             }
 
@@ -452,7 +456,7 @@ namespace ClassicUO.Game.UI.Gumps
                         _amount = 0;
 
                         for (
-                            Item item = (Item)World.Player.Items;
+                            Item item = (Item)_gump.World.Player.Items;
                             item != null;
                             item = (Item)item.Next
                         )

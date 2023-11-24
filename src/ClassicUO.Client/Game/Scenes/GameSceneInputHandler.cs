@@ -68,7 +68,7 @@ namespace ClassicUO.Game.Scenes
 
         private bool MoveCharacterByMouseInput()
         {
-            if ((_rightMousePressed || _continueRunning) && World.InGame) // && !Pathfinder.AutoWalking)
+            if ((_rightMousePressed || _continueRunning) && _world.InGame) // && !Pathfinder.AutoWalking)
             {
                 if (Pathfinder.AutoWalking)
                 {
@@ -95,7 +95,7 @@ namespace ClassicUO.Game.Scenes
 
                 bool run = mouseRange >= 190;
 
-                if (World.Player.IsDrivingBoat)
+                if (_world.Player.IsDrivingBoat)
                 {
                     if (!_boatIsMoving || _boatRun != run || _lastBoatDirection != facing - 1)
                     {
@@ -108,7 +108,7 @@ namespace ClassicUO.Game.Scenes
                 }
                 else
                 {
-                    World.Player.Walk(facing - 1, run);
+                    _world.Player.Walk(facing - 1, run);
                 }
 
                 return true;
@@ -201,7 +201,7 @@ namespace ClassicUO.Game.Scenes
                 rect = Client.Game.Gumps.GetGump(0x0804).UV;
             }
 
-            foreach (Mobile mobile in World.Mobiles.Values)
+            foreach (Mobile mobile in _world.Mobiles.Values)
             {
                 if (ProfileManager.CurrentProfile.DragSelectHumanoidsOnly && !mobile.IsHuman)
                 {
@@ -227,7 +227,7 @@ namespace ClassicUO.Game.Scenes
 
                 if (_rectangleObj.Intersects(_rectanglePlayer))
                 {
-                    if (mobile != World.Player)
+                    if (mobile != _world.Player)
                     {
                         if (UIManager.GetGump<BaseHealthBarGump>(mobile) != null)
                         {
@@ -238,11 +238,11 @@ namespace ClassicUO.Game.Scenes
 
                         if (useCHB)
                         {
-                            hbgc = new HealthBarGumpCustom(mobile);
+                            hbgc = new HealthBarGumpCustom(_world, mobile);
                         }
                         else
                         {
-                            hbgc = new HealthBarGump(mobile);
+                            hbgc = new HealthBarGump(_world, mobile);
                         }
 
                         if (finalY >= Camera.Bounds.Bottom - 20)
@@ -365,7 +365,7 @@ namespace ClassicUO.Game.Scenes
                 return false;
             }
 
-            if (World.CustomHouseManager != null)
+            if (_world.CustomHouseManager != null)
             {
                 _isMouseLeftDown = true;
 
@@ -373,14 +373,14 @@ namespace ClassicUO.Game.Scenes
                     TargetManager.IsTargeting
                     && TargetManager.TargetingState == CursorTarget.MultiPlacement
                     && (
-                        World.CustomHouseManager.SelectedGraphic != 0
-                        || World.CustomHouseManager.Erasing
-                        || World.CustomHouseManager.SeekTile
+                        _world.CustomHouseManager.SelectedGraphic != 0
+                        || _world.CustomHouseManager.Erasing
+                        || _world.CustomHouseManager.SeekTile
                     )
                     && SelectedObject.Object is GameObject obj
                 )
                 {
-                    World.CustomHouseManager.OnTargetWorld(obj);
+                    _world.CustomHouseManager.OnTargetWorld(obj);
                     _lastSelectedMultiPositionInHouseCustomization.X = obj.X;
                     _lastSelectedMultiPositionInHouseCustomization.Y = obj.Y;
                 }
@@ -572,7 +572,7 @@ namespace ClassicUO.Game.Scenes
                     case CursorTarget.SetGrabBag:
                     case CursorTarget.Position:
                     case CursorTarget.Object:
-                    case CursorTarget.MultiPlacement when World.CustomHouseManager == null:
+                    case CursorTarget.MultiPlacement when _world.CustomHouseManager == null:
 
                         {
                             BaseGameObject obj = lastObj;
@@ -629,19 +629,19 @@ namespace ClassicUO.Game.Scenes
                             {
                                 case Entity ent:
                                     TargetManager.Target(ent.Serial);
-                                    UIManager.Add(new InspectorGump(ent));
+                                    UIManager.Add(new InspectorGump(_world, ent));
 
                                     break;
 
                                 case Land land:
                                     TargetManager.Target(0, land.X, land.Y, land.Z);
-                                    UIManager.Add(new InspectorGump(land));
+                                    UIManager.Add(new InspectorGump(_world, land));
 
                                     break;
 
                                 case GameObject o:
                                     TargetManager.Target(o.Graphic, o.X, o.Y, o.Z);
-                                    UIManager.Add(new InspectorGump(o));
+                                    UIManager.Add(new InspectorGump(_world, o));
 
                                     break;
                             }
@@ -688,7 +688,7 @@ namespace ClassicUO.Game.Scenes
                             );
                         }
 
-                        MessageManager.HandleMessage(
+                        _world.MessageManager.HandleMessage(
                             null,
                             name,
                             string.Empty,
@@ -718,7 +718,7 @@ namespace ClassicUO.Game.Scenes
                             );
                         }
 
-                        MessageManager.HandleMessage(
+                        _world.MessageManager.HandleMessage(
                             null,
                             name,
                             string.Empty,
@@ -741,8 +741,8 @@ namespace ClassicUO.Game.Scenes
 
                         if (Keyboard.Alt && ent is Mobile)
                         {
-                            MessageManager.HandleMessage(
-                                World.Player,
+                            _world.MessageManager.HandleMessage(
+                                _world.Player,
                                 ResGeneral.NowFollowing,
                                 string.Empty,
                                 0,
@@ -796,9 +796,9 @@ namespace ClassicUO.Game.Scenes
                 case Item item:
                     result = true;
 
-                    if (!GameActions.OpenCorpse(item))
+                    if (!GameActions.OpenCorpse(_world, item))
                     {
-                        GameActions.DoubleClick(item);
+                        GameActions.DoubleClick(_world, item);
                     }
 
                     break;
@@ -806,25 +806,25 @@ namespace ClassicUO.Game.Scenes
                 case Mobile mob:
                     result = true;
 
-                    if (World.Player.InWarMode && World.Player != mob)
+                    if (_world.Player.InWarMode && _world.Player != mob)
                     {
-                        GameActions.Attack(mob);
+                        GameActions.Attack(_world, mob);
                     }
                     else
                     {
-                        GameActions.DoubleClick(mob);
+                        GameActions.DoubleClick(_world, mob);
                     }
 
                     break;
 
                 case TextObject msg when msg.Owner is Entity entity:
                     result = true;
-                    GameActions.DoubleClick(entity);
+                    GameActions.DoubleClick(_world, entity);
 
                     break;
 
                 default:
-                    World.LastObject = 0;
+                    _world.LastObject = 0;
 
                     break;
             }
@@ -874,7 +874,7 @@ namespace ClassicUO.Game.Scenes
             if (_boatIsMoving)
             {
                 _boatIsMoving = false;
-                BoatMovingManager.MoveRequest(World.Player.Direction, 0);
+                BoatMovingManager.MoveRequest(_world.Player.Direction, 0);
             }
 
             return UIManager.IsMouseOverWorld;
@@ -904,7 +904,7 @@ namespace ClassicUO.Game.Scenes
 
                         if (itemdata.IsSurface && Pathfinder.WalkTo(obj.X, obj.Y, obj.Z, 0))
                         {
-                            World.Player.AddMessage(
+                            _world.Player.AddMessage(
                                 MessageType.Label,
                                 ResGeneral.Pathfinding,
                                 3,
@@ -918,7 +918,7 @@ namespace ClassicUO.Game.Scenes
                     }
                     else if (obj is Land && Pathfinder.WalkTo(obj.X, obj.Y, obj.Z, 0))
                     {
-                        World.Player.AddMessage(
+                        _world.Player.AddMessage(
                             MessageType.Label,
                             ResGeneral.Pathfinding,
                             3,
@@ -1103,7 +1103,7 @@ namespace ClassicUO.Game.Scenes
                             );
                             customgump?.Dispose();
 
-                            if (obj == World.Player)
+                            if (obj == _world.Player)
                             {
                                 StatusGumpBase.GetStatusGump()?.Dispose();
                             }
@@ -1118,7 +1118,7 @@ namespace ClassicUO.Game.Scenes
                                 );
 
                                 UIManager.Add(
-                                    customgump = new HealthBarGumpCustom(obj)
+                                    customgump = new HealthBarGumpCustom(_world, obj)
                                     {
                                         X = Mouse.LClickPosition.X - (rect.Width >> 1),
                                         Y = Mouse.LClickPosition.Y - (rect.Height >> 1)
@@ -1130,7 +1130,7 @@ namespace ClassicUO.Game.Scenes
                                 var bounds = Client.Game.Gumps.GetGump(0x0804).UV;
 
                                 UIManager.Add(
-                                    customgump = new HealthBarGump(obj)
+                                    customgump = new HealthBarGump(_world, obj)
                                     {
                                         X = Mouse.LClickPosition.X - (bounds.Width >> 1),
                                         Y = Mouse.LClickPosition.Y - (bounds.Height >> 1)
@@ -1143,7 +1143,7 @@ namespace ClassicUO.Game.Scenes
                         }
                         else if (obj is Item item)
                         {
-                            GameActions.PickUp(item, Mouse.Position.X, Mouse.Position.Y);
+                            GameActions.PickUp(_world, item, Mouse.Position.X, Mouse.Position.Y);
                         }
                     }
 
@@ -1190,7 +1190,7 @@ namespace ClassicUO.Game.Scenes
                         {
                             _requestedWarMode = true;
 
-                            if (!World.Player.InWarMode)
+                            if (!_world.Player.InWarMode)
                             {
                                 NetClient.Socket.Send_ChangeWarMode(true);
                             }
@@ -1391,7 +1391,7 @@ namespace ClassicUO.Game.Scenes
 
         internal override void OnKeyUp(SDL.SDL_KeyboardEvent e)
         {
-            if (!World.InGame)
+            if (!_world.InGame)
             {
                 return;
             }
@@ -1533,7 +1533,7 @@ namespace ClassicUO.Game.Scenes
                 }
                 else
                 {
-                    GameActions.ToggleWarMode();
+                    GameActions.ToggleWarMode(_world.Player);
                 }
             }
         }

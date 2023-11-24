@@ -60,13 +60,14 @@ namespace ClassicUO.Game.UI.Gumps
 
         public ModernBookGump
         (
+            World world,
             uint serial,
             ushort page_count,
             string title,
             string author,
             bool is_editable,
             bool old_packet
-        ) : base(serial, 0)
+        ) : base(world, serial, 0)
         {
             CanMove = true;
             AcceptMouseInput = true;

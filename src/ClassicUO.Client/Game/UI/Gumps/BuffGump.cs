@@ -53,14 +53,14 @@ namespace ClassicUO.Game.UI.Gumps
         private ushort _graphic;
         private DataBox _box;
 
-        public BuffGump() : base(0, 0)
+        public BuffGump(World world) : base(world, 0, 0)
         {
             CanMove = true;
             CanCloseWithRightClick = true;
             AcceptMouseInput = true;
         }
 
-        public BuffGump(int x, int y) : this()
+        public BuffGump(World world, int x, int y) : this(world)
         {
             X = x;
             Y = y;
