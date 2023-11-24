@@ -204,7 +204,7 @@ namespace ClassicUO.Game
 
         public static void OpenChat(World world)
         {
-            if (ChatManager.ChatIsEnabled == ChatStatus.Enabled)
+            if (world.ChatManager.ChatIsEnabled == ChatStatus.Enabled)
             {
                 ChatGump chatGump = UIManager.GetGump<ChatGump>();
 
@@ -218,7 +218,7 @@ namespace ClassicUO.Game
                     chatGump.BringOnTop();
                 }
             }
-            else if (ChatManager.ChatIsEnabled == ChatStatus.EnabledUserRequest)
+            else if (world.ChatManager.ChatIsEnabled == ChatStatus.EnabledUserRequest)
             {
                 ChatGumpChooseName chatGump = UIManager.GetGump<ChatGumpChooseName>();
 

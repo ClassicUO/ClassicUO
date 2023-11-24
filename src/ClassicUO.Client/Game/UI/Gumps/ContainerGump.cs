@@ -193,7 +193,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             float scale = GetScale();
 
-            _data = ContainerManager.Get(Graphic);
+            _data = World.ContainerManager.Get(Graphic);
             ushort g = _data.Graphic;
 
             _gumpPicContainer?.Dispose();
@@ -386,7 +386,7 @@ namespace ClassicUO.Game.UI.Gumps
                             y += 20;
                         }
 
-                        Rectangle containerBounds = ContainerManager.Get(gump.Graphic).Bounds;
+                        Rectangle containerBounds = World.ContainerManager.Get(gump.Graphic).Bounds;
 
                         ref readonly var spriteInfo = ref (
                             gump.IsChessboard
@@ -609,6 +609,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
                 ItemGump itemControl = new ItemGump(
+                    this,
                     item.Serial,
                     (ushort)(
                         item.DisplayedGraphic

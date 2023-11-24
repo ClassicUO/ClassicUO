@@ -41,15 +41,15 @@ namespace ClassicUO.Game.Map
 {
     internal sealed class Chunk
     {
-        private static readonly QueuedPool<Chunk> _pool = new QueuedPool<Chunk>
-        (
-            Constants.PREDICTABLE_CHUNKS,
-            c =>
-            {
-                c.LastAccessTime = Time.Ticks + Constants.CLEAR_TEXTURES_DELAY;
-                c.IsDestroyed = false;
-            }
-        );
+        //private static readonly QueuedPool<Chunk> _pool = new QueuedPool<Chunk>
+        //(
+        //    Constants.PREDICTABLE_CHUNKS,
+        //    c =>
+        //    {
+        //        c.LastAccessTime = Time.Ticks + Constants.CLEAR_TEXTURES_DELAY;
+        //        c.IsDestroyed = false;
+        //    }
+        //);
 
         private readonly World _world;
 
@@ -68,9 +68,9 @@ namespace ClassicUO.Game.Map
         public int Y;
 
 
-        public static Chunk Create(int x, int y)
+        public static Chunk Create(World world, int x, int y)
         {
-            Chunk c = _pool.GetOne();
+            Chunk c = new Chunk(world); // _pool.GetOne();
             c.X = x;
             c.Y = y;
 
@@ -135,7 +135,7 @@ namespace ClassicUO.Game.Map
                                     continue;
                                 }
 
-                                Static staticObject = Static.Create(sb->Color, sb->Hue, pos);
+                                Static staticObject = Static.Create(_world, sb->Color, sb->Hue, pos);
                                 staticObject.X = (ushort) (bx + sb->X);
                                 staticObject.Y = (ushort) (by + sb->Y);
                                 staticObject.Z = sb->Z;
@@ -416,7 +416,7 @@ namespace ClassicUO.Game.Map
             }
 
             IsDestroyed = true;
-            _pool.ReturnOne(this);
+            //_pool.ReturnOne(this);
         }
 
         public void Clear()

@@ -40,30 +40,30 @@ namespace ClassicUO.Game.GameObjects
 {
     internal class TextObject : BaseGameObject
     {
-        private static readonly QueuedPool<TextObject> _queue = new QueuedPool<TextObject>
-        (
-            1000,
-            o =>
-            {
-                o.IsDestroyed = false;
-                o.Alpha = 0xFF;
-                o.Hue = 0;
-                o.Time = 0;
-                o.IsTransparent = false;
-                o.SecondTime = 0;
-                o.Type = 0;
-                o.X = 0;
-                o.Y = 0;
-                o.RealScreenPosition = Point.Zero;
-                o.OffsetY = 0;
-                o.Owner = null;
-                o.UnlinkD();
-                o.IsTextGump = false;
-                o.RenderedText?.Destroy();
-                o.RenderedText = null;
-                o.Clear();
-            }
-        );
+        //private static readonly QueuedPool<TextObject> _queue = new QueuedPool<TextObject>
+        //(
+        //    1000,
+        //    o =>
+        //    {
+        //        o.IsDestroyed = false;
+        //        o.Alpha = 0xFF;
+        //        o.Hue = 0;
+        //        o.Time = 0;
+        //        o.IsTransparent = false;
+        //        o.SecondTime = 0;
+        //        o.Type = 0;
+        //        o.X = 0;
+        //        o.Y = 0;
+        //        o.RealScreenPosition = Point.Zero;
+        //        o.OffsetY = 0;
+        //        o.Owner = null;
+        //        o.UnlinkD();
+        //        o.IsTextGump = false;
+        //        o.RenderedText?.Destroy();
+        //        o.RenderedText = null;
+        //        o.Clear();
+        //    }
+        //);
 
         public TextObject(World world) : base(world) { }
 
@@ -81,9 +81,9 @@ namespace ClassicUO.Game.GameObjects
         public int X, Y, OffsetY;
 
 
-        public static TextObject Create()
+        public static TextObject Create(World world)
         {
-            return _queue.GetOne();
+            return new TextObject(world); // _queue.GetOne();
         }
 
 
@@ -102,7 +102,7 @@ namespace ClassicUO.Game.GameObjects
             RenderedText = null;
             Owner = null;
 
-            _queue.ReturnOne(this);
+            //_queue.ReturnOne(this);
         }
 
         public void UnlinkD()

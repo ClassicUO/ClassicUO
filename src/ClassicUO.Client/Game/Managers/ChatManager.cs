@@ -37,6 +37,11 @@ namespace ClassicUO.Game.Managers
 {
     internal sealed class ChatManager
     {
+        private readonly World _world;
+
+        public ChatManager(World world) => _world = world;
+
+
         public readonly Dictionary<string, ChatChannel> Channels = new Dictionary<string, ChatChannel>();
         public ChatStatus ChatIsEnabled;
         public string CurrentChannelName = string.Empty;

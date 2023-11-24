@@ -593,7 +593,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                     break;
 
                 case Buttons.Credits:
-                    UIManager.Add(new CreditsGump());
+                    UIManager.Add(new CreditsGump(World));
 
                     break;
             }

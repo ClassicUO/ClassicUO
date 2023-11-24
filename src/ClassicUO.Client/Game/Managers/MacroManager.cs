@@ -644,12 +644,12 @@ namespace ClassicUO.Game.Managers
                                     break;
 
                                 case MacroSubType.Guild:
-                                    GameActions.OpenGuildGump();
+                                    GameActions.OpenGuildGump(_world);
 
                                     break;
 
                                 case MacroSubType.QuestLog:
-                                    GameActions.RequestQuestMenu();
+                                    GameActions.RequestQuestMenu(_world);
 
                                     break;
 

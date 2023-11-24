@@ -266,6 +266,7 @@ namespace ClassicUO.Game.UI.Gumps
                 case Buttons.GlobalChat:
                     Log.Warn(ResGumps.ChatButtonPushedNotImplementedYet);
                     GameActions.Print(
+                        World,
                         ResGumps.GlobalChatNotImplementedYet,
                         0x23,
                         MessageType.System

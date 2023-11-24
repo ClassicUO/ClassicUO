@@ -140,7 +140,7 @@ namespace ClassicUO.Game.UI.Gumps
         public override void Dispose()
         {
             if (_isListModified)
-                IgnoreManager.SaveIgnoreList();
+                World.IgnoreManager.SaveIgnoreList();
 
             if (Client.Game.GetScene<GameScene>().TargetManager.IsTargeting)
                 Client.Game.GetScene<GameScene>().TargetManager.CancelTarget();
@@ -160,7 +160,7 @@ namespace ClassicUO.Game.UI.Gumps
             );
 
             var y = 0;
-            foreach (IgnoreListControl element in IgnoreManager.IgnoredCharsList.Select(m => new IgnoreListControl(m) { Y = y }))
+            foreach (IgnoreListControl element in World.IgnoreManager.IgnoredCharsList.Select(m => new IgnoreListControl(this, m) { Y = y }))
             {
                 element.RemoveMarkerEvent += MarkerRemoveEventHandler;
 
@@ -211,9 +211,11 @@ namespace ClassicUO.Game.UI.Gumps
             private readonly string _chName;
 
             public event EventHandler RemoveMarkerEvent;
+            private readonly IgnoreManagerGump _gump;
 
-            public IgnoreListControl(string chName)
+            public IgnoreListControl(IgnoreManagerGump gump, string chName)
             {
+                _gump = gump;
                 CanMove = true;
                 AcceptMouseInput = false;
                 CanCloseWithRightClick = true;
@@ -226,7 +228,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             public override void OnButtonClick(int buttonId)
             {
-                IgnoreManager.RemoveIgnoredTarget(_chName);
+                _gump.World.IgnoreManager.RemoveIgnoredTarget(_chName);
                 RemoveMarkerEvent.Raise();
             }
         }

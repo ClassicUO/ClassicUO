@@ -71,6 +71,11 @@ namespace ClassicUO.Game.Managers
 
     internal sealed class MessageManager
     {
+        private readonly World _world;
+
+        public MessageManager(World world) => _world = world;
+
+
         public PromptData PromptData { get; set; }
 
         public event EventHandler<MessageEventArgs> MessageReceived;
@@ -172,7 +177,7 @@ namespace ClassicUO.Game.Managers
                     }
 
                     // If person who send that message is in ignores list - but filter out Spell Text
-                    if (IgnoreManager.IgnoredCharsList.Contains(parent.Name) && type != MessageType.Spell)
+                    if (_world.IgnoreManager.IgnoredCharsList.Contains(parent.Name) && type != MessageType.Spell)
                         break;
 
                     TextObject msg = CreateMessage
@@ -318,7 +323,7 @@ namespace ClassicUO.Game.Managers
             }
 
 
-            TextObject textObject = TextObject.Create();
+            TextObject textObject = TextObject.Create(_world);
             textObject.Alpha = 0xFF;
             textObject.Type = type;
             textObject.Hue = fixedColor;

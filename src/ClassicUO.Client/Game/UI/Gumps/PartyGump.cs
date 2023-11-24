@@ -324,6 +324,7 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         GameActions.Print
                         (
+                            World,
                             ResGumps.YouAreNotInAParty,
                             0,
                             MessageType.System,
@@ -349,6 +350,7 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         GameActions.Print
                         (
+                            World,
                             ResGumps.YouAreNotInAParty,
                             0,
                             MessageType.System,
@@ -388,6 +390,7 @@ namespace ClassicUO.Game.UI.Gumps
                         {
                             GameActions.Print
                             (
+                                World,
                                 ResGumps.ThereIsNoOneInThatPartySlot,
                                 0,
                                 MessageType.System,
@@ -410,6 +413,7 @@ namespace ClassicUO.Game.UI.Gumps
                         {
                             GameActions.Print
                             (
+                                World,
                                 ResGumps.ThereIsNoOneInThatPartySlot,
                                 0,
                                 MessageType.System,

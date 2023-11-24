@@ -628,7 +628,7 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
 
                 case Buttons.Quests:
-                    GameActions.RequestQuestMenu();
+                    GameActions.RequestQuestMenu(World);
 
                     break;
 
@@ -638,7 +638,7 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
 
                 case Buttons.Guild:
-                    GameActions.OpenGuildGump();
+                    GameActions.OpenGuildGump(World);
 
                     break;
 
@@ -817,7 +817,7 @@ namespace ClassicUO.Game.UI.Gumps
                 private readonly Rectangle _rect;
 
                 public ItemGumpFixed(PaperDollGump gump, Item item, int w, int h)
-                    : base(item.Serial, item.DisplayedGraphic, item.Hue, item.X, item.Y)
+                    : base(gump, item.Serial, item.DisplayedGraphic, item.Hue, item.X, item.Y)
                 {
                     _gump = gump;
                     Width = w;

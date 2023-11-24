@@ -424,7 +424,7 @@ namespace ClassicUO.Configuration
             }
 
 
-            SkillsGroupManager.Save();
+            world.SkillsGroupManager.Save();
         }
 
         private static void SaveItemsGumpRecursive(Item parent, XmlTextWriter xml, LinkedList<Gump> list)
@@ -478,7 +478,7 @@ namespace ClassicUO.Configuration
             List<Gump> gumps = new List<Gump>();
 
             // load skillsgroup
-            SkillsGroupManager.Load();
+            world.SkillsGroupManager.Load();
 
             // load gumps
             string gumpsXmlPath = Path.Combine(path, "gumps.xml");

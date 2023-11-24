@@ -41,8 +41,11 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class ClickableColorBox : ColorBox
     {
+        private readonly World _world;
+
         public ClickableColorBox
         (
+            World world,
             int x,
             int y,
             int w,
@@ -50,6 +53,7 @@ namespace ClassicUO.Game.UI.Controls
             ushort hue
         ) : base(w, h, hue)
         {
+            _world = world;
             X = x;
             Y = y;
             WantUpdateSize = false;
@@ -94,6 +98,7 @@ namespace ClassicUO.Game.UI.Controls
 
                 ColorPickerGump pickerGump = new ColorPickerGump
                 (
+                    _world,
                     0,
                     0,
                     100,

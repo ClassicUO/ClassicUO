@@ -3398,7 +3398,7 @@ namespace ClassicUO.Game.UI.Gumps
                 IsSelected = true
             };
 
-            button.MouseUp += (sender, e) => { ContainerManager.BuildContainerFile(true); };
+            button.MouseUp += (sender, e) => { World.ContainerManager.BuildContainerFile(true); };
             rightArea.Add(button);
 
             Add(rightArea, PAGE);

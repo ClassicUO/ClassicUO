@@ -382,7 +382,7 @@ namespace ClassicUO.Game.UI.Gumps
                             break;
 
                         case CursorTarget.HueCommandTarget:
-                            CommandManager.OnHueTarget(World.Get(LocalSerial));
+                            Client.Game.GetScene<GameScene>().CommandManager.OnHueTarget(World.Get(LocalSerial));
 
                             break;
                     }

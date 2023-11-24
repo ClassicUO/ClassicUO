@@ -43,6 +43,7 @@ namespace ClassicUO.Game.Map
         private static readonly Chunk[] _terrainChunks;
         private static readonly bool[] _blockAccessList = new bool[0x1000];
         private readonly LinkedList<int> _usedIndices = new LinkedList<int>();
+        private readonly World _world;
 
         static Map()
         {
@@ -65,8 +66,9 @@ namespace ClassicUO.Game.Map
             _terrainChunks = new Chunk[maxX * maxY];
         }
 
-        public Map(int index)
+        public Map(World world, int index)
         {
+            _world = world;
             Index = index;
             BlocksCount = MapLoader.Instance.MapBlocksSize[Index, 0] * MapLoader.Instance.MapBlocksSize[Index, 1];
             ClearBockAccess();
@@ -114,7 +116,7 @@ namespace ClassicUO.Game.Map
                 }
 
                 LinkedListNode<int> node = _usedIndices.AddLast(block);
-                chunk = Chunk.Create(cellX, cellY);
+                chunk = Chunk.Create(_world, cellX, cellY);
                 chunk.Load(Index);
                 chunk.Node = node;
             }

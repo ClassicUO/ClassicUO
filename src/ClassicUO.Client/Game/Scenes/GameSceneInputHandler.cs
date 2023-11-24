@@ -662,7 +662,7 @@ namespace ClassicUO.Game.Scenes
                     case CursorTarget.IgnorePlayerTarget:
                         if (SelectedObject.Object is Entity pmEntity)
                         {
-                            IgnoreManager.AddIgnoredTarget(pmEntity);
+                            _world.IgnoreManager.AddIgnoredTarget(pmEntity);
                         }
                         TargetManager.CancelTarget();
                         break;
