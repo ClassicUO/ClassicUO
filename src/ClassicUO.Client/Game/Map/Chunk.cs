@@ -71,6 +71,7 @@ namespace ClassicUO.Game.Map
         public static Chunk Create(World world, int x, int y)
         {
             Chunk c = new Chunk(world); // _pool.GetOne();
+            c.LastAccessTime = Time.Ticks + Constants.CLEAR_TEXTURES_DELAY;
             c.X = x;
             c.Y = y;
 
