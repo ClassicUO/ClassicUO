@@ -83,8 +83,6 @@ namespace ClassicUO
 
                 Log.Trace("Done!");
 
-                UoAssist.Start();
-
                 Game.Run();
             }
 

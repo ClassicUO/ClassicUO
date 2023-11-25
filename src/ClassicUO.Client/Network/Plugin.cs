@@ -499,16 +499,16 @@ namespace ClassicUO.Network
 
         private static bool RequestMove(int dir, bool run)
         {
-            return World.Player.Walk((Direction)dir, run);
+            return Client.Game.World.Player.Walk((Direction)dir, run);
         }
 
         private static bool GetPlayerPosition(out int x, out int y, out int z)
         {
-            if (World.Player != null)
+            if (Client.Game.World.Player != null)
             {
-                x = World.Player.X;
-                y = World.Player.Y;
-                z = World.Player.Z;
+                x = Client.Game.World.Player.X;
+                y = Client.Game.World.Player.Y;
+                z = Client.Game.World.Player.Z;
 
                 return true;
             }
@@ -661,7 +661,7 @@ namespace ClassicUO.Network
         internal static bool ProcessHotkeys(int key, int mod, bool ispressed)
         {
             if (
-                !World.InGame
+                !Client.Game.World.InGame
                 || UIManager.SystemChat != null
                     && (
                         ProfileManager.CurrentProfile != null
