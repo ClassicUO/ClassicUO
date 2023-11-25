@@ -194,8 +194,8 @@ namespace ClassicUO.Game.Managers
 
                     if (parent is Item it && !it.OnGround)
                     {
-                        msg.X = Client.Game.GetScene<GameScene>().DelayedObjectClickManager.X;
-                        msg.Y = Client.Game.GetScene<GameScene>().DelayedObjectClickManager.Y;
+                        msg.X = _world.DelayedObjectClickManager.X;
+                        msg.Y = _world.DelayedObjectClickManager.Y;
                         msg.IsTextGump = true;
                         bool found = false;
 

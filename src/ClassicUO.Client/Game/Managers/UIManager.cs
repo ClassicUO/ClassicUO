@@ -251,7 +251,7 @@ namespace ClassicUO.Game.Managers
                 {
                     if (button == MouseButtonType.Left)
                     {
-                        Client.Game.GetScene<GameScene>().DelayedObjectClickManager.Clear();
+                        Client.Game.World.DelayedObjectClickManager.Clear();
                     }
 
                     return true;

@@ -754,9 +754,9 @@ namespace ClassicUO.Game.Scenes
                             _followingMode = true;
                             _followingTarget = ent;
                         }
-                        else if (!DelayedObjectClickManager.IsEnabled)
+                        else if (!_world.DelayedObjectClickManager.IsEnabled)
                         {
-                            DelayedObjectClickManager.Set(
+                            _world.DelayedObjectClickManager.Set(
                                 ent.Serial,
                                 Mouse.Position.X,
                                 Mouse.Position.Y,
@@ -777,11 +777,11 @@ namespace ClassicUO.Game.Scenes
 
             if (!UIManager.IsMouseOverWorld)
             {
-                result = DelayedObjectClickManager.IsEnabled;
+                result = _world.DelayedObjectClickManager.IsEnabled;
 
                 if (result)
                 {
-                    DelayedObjectClickManager.Clear();
+                    _world.DelayedObjectClickManager.Clear();
 
                     return false;
                 }
@@ -831,7 +831,7 @@ namespace ClassicUO.Game.Scenes
 
             if (result)
             {
-                DelayedObjectClickManager.Clear();
+                _world.DelayedObjectClickManager.Clear();
             }
 
             return result;

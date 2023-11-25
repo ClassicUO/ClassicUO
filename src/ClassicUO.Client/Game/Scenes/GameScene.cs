@@ -110,7 +110,6 @@ namespace ClassicUO.Game.Scenes
         public BoatMovingManager BoatMovingManager { get; private set; }
         public Pathfinder Pathfinder { get; private set; }
         public NameOverHeadManager NameOverHeadManager { get; private set; }
-        public DelayedObjectClickManager DelayedObjectClickManager { get; private set; }
         public CommandManager CommandManager { get; private set; }
         public bool UpdateDrawPosition { get; set; }
         public HotkeysManager Hotkeys { get; private set; }
@@ -166,7 +165,6 @@ namespace ClassicUO.Game.Scenes
 
             CommandManager = new CommandManager(_world);
             CommandManager.Initialize();
-            DelayedObjectClickManager = new DelayedObjectClickManager(_world);
             NameOverHeadManager = new NameOverHeadManager(_world);
             Pathfinder = new Pathfinder(_world);
             BoatMovingManager = new BoatMovingManager(_world);
@@ -371,7 +369,7 @@ namespace ClassicUO.Game.Scenes
             UIManager.Clear();
             _world.Clear();
             _world.ChatManager.Clear();
-            DelayedObjectClickManager.Clear();
+            _world.DelayedObjectClickManager.Clear();
 
             _useItemQueue?.Clear();
             Hotkeys = null;
@@ -793,7 +791,7 @@ namespace ClassicUO.Game.Scenes
             _animatedStaticsManager.Process();
             BoatMovingManager.Update();
             Pathfinder.ProcessAutoWalk();
-            DelayedObjectClickManager.Update();
+            _world.DelayedObjectClickManager.Update();
 
             if (!MoveCharacterByMouseInput() && !currentProfile.DisableArrowBtn)
             {

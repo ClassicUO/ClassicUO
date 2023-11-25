@@ -466,9 +466,9 @@ namespace ClassicUO.Game.UI.Gumps
                             }
                         }
                     }
-                    else if (!Client.Game.GetScene<GameScene>().DelayedObjectClickManager.IsEnabled)
+                    else if (!World.DelayedObjectClickManager.IsEnabled)
                     {
-                        Client.Game.GetScene<GameScene>().DelayedObjectClickManager.Set(
+                        World.DelayedObjectClickManager.Set(
                             LocalSerial,
                             Mouse.Position.X,
                             Mouse.Position.Y,

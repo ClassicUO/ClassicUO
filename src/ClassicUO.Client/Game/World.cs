@@ -73,6 +73,7 @@ namespace ClassicUO.Game
             AuraManager = new AuraManager(this);
             UoAssist = new UoAssist(this);
             TargetManager = new TargetManager(this);
+            DelayedObjectClickManager = new DelayedObjectClickManager(this);
         }
 
         public Point RangeSize;
@@ -110,6 +111,7 @@ namespace ClassicUO.Game
         public UoAssist UoAssist { get; }
 
         public TargetManager TargetManager { get; }
+        public DelayedObjectClickManager DelayedObjectClickManager { get; }
 
         public Dictionary<uint, Item> Items { get; } = new Dictionary<uint, Item>();
 
