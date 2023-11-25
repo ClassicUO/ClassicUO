@@ -111,6 +111,7 @@ namespace ClassicUO.Game
         public UoAssist UoAssist { get; }
 
         public TargetManager TargetManager { get; }
+
         public DelayedObjectClickManager DelayedObjectClickManager { get; }
 
         public Dictionary<uint, Item> Items { get; } = new Dictionary<uint, Item>();

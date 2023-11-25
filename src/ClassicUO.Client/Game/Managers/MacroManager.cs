@@ -496,7 +496,7 @@ namespace ClassicUO.Game.Managers
                         }
                     }
 
-                    if (!Client.Game.GetScene<GameScene>().Pathfinder.AutoWalking)
+                    if (!_world.Player.Pathfinder.AutoWalking)
                     {
                         _world.Player.Walk((Direction) dt, false);
                     }

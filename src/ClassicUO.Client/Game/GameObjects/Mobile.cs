@@ -780,7 +780,7 @@ namespace ClassicUO.Game.GameObjects
                                 absX = X;
                                 absY = Y;
 
-                                Client.Game.GetScene<GameScene>().Pathfinder.GetNewXY((byte)(step.Direction & 7), ref absX, ref absY);
+                               Pathfinder.GetNewXY((byte)(step.Direction & 7), ref absX, ref absY);
 
                                 badStep = absX != step.X || absY != step.Y;
                             }
