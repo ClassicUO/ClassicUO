@@ -345,11 +345,11 @@ namespace ClassicUO.Game.UI.Gumps
                             UIManager.Add(new InspectorGump(World, it));
                         }
                     }
-                    else if (!Client.Game.GetScene<GameScene>().DelayedObjectClickManager.IsEnabled)
+                    else if (!World.DelayedObjectClickManager.IsEnabled)
                     {
                         Point off = Mouse.LDragOffset;
 
-                        Client.Game.GetScene<GameScene>().DelayedObjectClickManager.Set(
+                        World.DelayedObjectClickManager.Set(
                             it.Serial,
                             Mouse.Position.X - off.X - ScreenCoordinateX,
                             Mouse.Position.Y - off.Y - ScreenCoordinateY,

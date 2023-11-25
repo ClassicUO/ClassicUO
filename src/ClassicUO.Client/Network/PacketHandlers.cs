@@ -4359,8 +4359,8 @@ namespace ClassicUO.Network
                     UIManager.ShowGamePopup(
                         new PopupMenuGump(world, PopupMenuData.Parse(ref p))
                         {
-                            X = Client.Game.GetScene<GameScene>().DelayedObjectClickManager.LastMouseX,
-                            Y = Client.Game.GetScene<GameScene>().DelayedObjectClickManager.LastMouseY
+                            X = world.DelayedObjectClickManager.LastMouseX,
+                            Y = world.DelayedObjectClickManager.LastMouseY
                         }
                     );
 

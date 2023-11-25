@@ -476,11 +476,11 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else if (!Client.Game.GameCursor.ItemHold.Enabled && SerialHelper.IsValid(serial))
                 {
-                    if (!Client.Game.GetScene<GameScene>().DelayedObjectClickManager.IsEnabled)
+                    if (!World.DelayedObjectClickManager.IsEnabled)
                     {
                         Point off = Mouse.LDragOffset;
 
-                        Client.Game.GetScene<GameScene>().DelayedObjectClickManager.Set(
+                        World.DelayedObjectClickManager.Set(
                             serial,
                             Mouse.Position.X - off.X - ScreenCoordinateX,
                             Mouse.Position.Y - off.Y - ScreenCoordinateY,
