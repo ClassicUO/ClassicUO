@@ -60,6 +60,7 @@ namespace ClassicUO.Game.GameObjects
             }
 
             Walker = new WalkerManager(this);
+            Pathfinder = new Pathfinder(world);
         }
 
         public Skill[] Skills { get; }
@@ -71,6 +72,9 @@ namespace ClassicUO.Game.GameObjects
         protected override bool IsWalking => LastStepTime > Time.Ticks - Constants.PLAYER_WALKING_DELAY;
 
         internal WalkerManager Walker { get; }
+        public Pathfinder Pathfinder { get; }
+
+
         public Ability[] Abilities = new Ability[2]
         {
             Ability.Invalid, Ability.Invalid
@@ -1374,7 +1378,7 @@ namespace ClassicUO.Game.GameObjects
             if (!World.Player.IsDead && ProfileManager.CurrentProfile.AutoOpenDoors)
             {
                 int x = X, y = Y, z = Z;
-                Client.Game.GetScene<GameScene>().Pathfinder.GetNewXY((byte) Direction, ref x, ref y);
+                Pathfinder.GetNewXY((byte) Direction, ref x, ref y);
 
                 if (World.Items.Values.Any(s => s.ItemData.IsDoor && s.X == x && s.Y == y && s.Z - 15 <= z && s.Z + 15 >= z))
                 {
@@ -1576,7 +1580,7 @@ namespace ClassicUO.Game.GameObjects
                 int newY = y;
                 sbyte newZ = z;
 
-                if (!Client.Game.GetScene<GameScene>().Pathfinder.CanWalk(ref newDir, ref newX, ref newY, ref newZ))
+                if (!Pathfinder.CanWalk(ref newDir, ref newX, ref newY, ref newZ))
                 {
                     return false;
                 }
@@ -1602,7 +1606,7 @@ namespace ClassicUO.Game.GameObjects
                 int newY = y;
                 sbyte newZ = z;
 
-                if (!Client.Game.GetScene<GameScene>().Pathfinder.CanWalk(ref newDir, ref newX, ref newY, ref newZ))
+                if (!Pathfinder.CanWalk(ref newDir, ref newX, ref newY, ref newZ))
                 {
                     if ((oldDirection & Direction.Mask) == newDir)
                     {

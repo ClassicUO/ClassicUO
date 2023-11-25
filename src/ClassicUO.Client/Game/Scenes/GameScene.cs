@@ -108,7 +108,6 @@ namespace ClassicUO.Game.Scenes
         }
 
         public BoatMovingManager BoatMovingManager { get; private set; }
-        public Pathfinder Pathfinder { get; private set; }
         public NameOverHeadManager NameOverHeadManager { get; private set; }
         public CommandManager CommandManager { get; private set; }
         public bool UpdateDrawPosition { get; set; }
@@ -166,7 +165,6 @@ namespace ClassicUO.Game.Scenes
             CommandManager = new CommandManager(_world);
             CommandManager.Initialize();
             NameOverHeadManager = new NameOverHeadManager(_world);
-            Pathfinder = new Pathfinder(_world);
             BoatMovingManager = new BoatMovingManager(_world);
 
             NetClient.Socket.Disconnected += SocketOnDisconnected;
@@ -790,7 +788,7 @@ namespace ClassicUO.Game.Scenes
             _world.Update();
             _animatedStaticsManager.Process();
             BoatMovingManager.Update();
-            Pathfinder.ProcessAutoWalk();
+            _world.Player.Pathfinder.ProcessAutoWalk();
             _world.DelayedObjectClickManager.Update();
 
             if (!MoveCharacterByMouseInput() && !currentProfile.DisableArrowBtn)
@@ -802,14 +800,14 @@ namespace ClassicUO.Game.Scenes
                     _flags[3]
                 );
 
-                if (_world.InGame && !Pathfinder.AutoWalking && dir != Direction.NONE)
+                if (_world.InGame && !_world.Player.Pathfinder.AutoWalking && dir != Direction.NONE)
                 {
                     _world.Player.Walk(dir, currentProfile.AlwaysRun);
                 }
             }
 
             if (
-                _followingMode && SerialHelper.IsMobile(_followingTarget) && !Pathfinder.AutoWalking
+                _followingMode && SerialHelper.IsMobile(_followingTarget) && !_world.Player.Pathfinder.AutoWalking
             )
             {
                 Mobile follow = _world.Mobiles.Get(_followingTarget);
@@ -824,7 +822,7 @@ namespace ClassicUO.Game.Scenes
                     }
                     else if (distance > 3)
                     {
-                        Pathfinder.WalkTo(follow.X, follow.Y, follow.Z, 1);
+                        _world.Player.Pathfinder.WalkTo(follow.X, follow.Y, follow.Z, 1);
                     }
                 }
                 else
@@ -1379,7 +1377,7 @@ namespace ClassicUO.Game.Scenes
             {
                 _followingMode = false;
                 _followingTarget = 0;
-                Pathfinder.StopAutoWalk();
+                _world.Player.Pathfinder.StopAutoWalk();
 
                 _world.MessageManager.HandleMessage(
                     _world.Player,
