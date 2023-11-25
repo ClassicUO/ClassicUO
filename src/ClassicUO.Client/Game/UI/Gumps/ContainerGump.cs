@@ -270,15 +270,15 @@ namespace ClassicUO.Game.UI.Gumps
             uint dropcontainer = LocalSerial;
 
             if (
-                Client.Game.GetScene<GameScene>().TargetManager.IsTargeting
+                World.TargetManager.IsTargeting
                 && !Client.Game.GameCursor.ItemHold.Enabled
                 && SerialHelper.IsValid(serial)
             )
             {
-                Client.Game.GetScene<GameScene>().TargetManager.Target(serial);
+                World.TargetManager.Target(serial);
                 Mouse.CancelDoubleClick = true;
 
-                if (Client.Game.GetScene<GameScene>().TargetManager.TargetingState == CursorTarget.SetTargetClientSide)
+                if (World.TargetManager.TargetingState == CursorTarget.SetTargetClientSide)
                 {
                     UIManager.Add(new InspectorGump(World, World.Get(serial)));
                 }

@@ -167,9 +167,9 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
-            if (Client.Game.GetScene<GameScene>().TargetManager.IsTargeting)
+            if (World.TargetManager.IsTargeting)
             {
-                Client.Game.GetScene<GameScene>().TargetManager.Target(LocalSerial);
+                World.TargetManager.Target(LocalSerial);
                 Mouse.LastLeftButtonClickTime = 0;
             }
             else if (_canChangeName && !_targetBroke)
@@ -204,7 +204,7 @@ namespace ClassicUO.Game.UI.Gumps
         protected override void OnDragEnd(int x, int y)
         {
             // when dragging an healthbar with target on, we have to reset the dclick timer 
-            if (Client.Game.GetScene<GameScene>().TargetManager.IsTargeting)
+            if (World.TargetManager.IsTargeting)
             {
                 Mouse.LastLeftButtonClickTime = 0;
                 Mouse.CancelDoubleClick = true;
@@ -220,10 +220,10 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
-            if (Client.Game.GetScene<GameScene>().TargetManager.IsTargeting)
+            if (World.TargetManager.IsTargeting)
             {
                 _targetBroke = true;
-                Client.Game.GetScene<GameScene>().TargetManager.Target(LocalSerial);
+                World.TargetManager.Target(LocalSerial);
                 Mouse.LastLeftButtonClickTime = 0;
             }
             else if (_canChangeName)
@@ -439,7 +439,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _outOfRange = true;
                     textColor = 912;
 
-                    if (Client.Game.GetScene<GameScene>().TargetManager.LastAttack != LocalSerial)
+                    if (World.TargetManager.LastAttack != LocalSerial)
                     {
                         GameActions.SendCloseStatus(World,LocalSerial);
                     }
@@ -576,9 +576,9 @@ namespace ClassicUO.Game.UI.Gumps
                     _bars[0].IsVisible = true;
                 }
 
-                if (Client.Game.GetScene<GameScene>().TargetManager.LastTargetInfo.Serial != World.Player && !_outOfRange && mobile != null)
+                if (World.TargetManager.LastTargetInfo.Serial != World.Player && !_outOfRange && mobile != null)
                 {
-                    if (mobile == Client.Game.GetScene<GameScene>().TargetManager.LastTargetInfo.Serial)
+                    if (mobile == World.TargetManager.LastTargetInfo.Serial)
                     {
                         _border[0].LineColor = HPB_COLOR_RED;
 
@@ -587,7 +587,7 @@ namespace ClassicUO.Game.UI.Gumps
                             _border[1].LineColor = _border[2].LineColor = _border[3].LineColor = HPB_COLOR_RED;
                         }
                     }
-                    else if (mobile != Client.Game.GetScene<GameScene>().TargetManager.LastTargetInfo.Serial)
+                    else if (mobile != World.TargetManager.LastTargetInfo.Serial)
                     {
                         _border[0].LineColor = HPB_COLOR_BLACK;
 
@@ -1638,7 +1638,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     _outOfRange = true;
 
-                    if (Client.Game.GetScene<GameScene>().TargetManager.LastAttack != LocalSerial)
+                    if (World.TargetManager.LastAttack != LocalSerial)
                     {
                         GameActions.SendCloseStatus(World, LocalSerial);
                     }

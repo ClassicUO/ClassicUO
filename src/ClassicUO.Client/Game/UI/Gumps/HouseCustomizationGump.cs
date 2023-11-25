@@ -1822,7 +1822,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _customHouseManager.SelectedGraphic = 0;
                     _customHouseManager.CombinedStair = false;
                     UpdateMaxPage();
-                    Client.Game.GetScene<GameScene>().TargetManager.CancelTarget();
+                    World.TargetManager.CancelTarget();
                     Update();
 
                     break;
@@ -1834,7 +1834,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _customHouseManager.SelectedGraphic = 0;
                     _customHouseManager.CombinedStair = false;
                     UpdateMaxPage();
-                    Client.Game.GetScene<GameScene>().TargetManager.CancelTarget();
+                    World.TargetManager.CancelTarget();
                     Update();
 
                     break;
@@ -1846,7 +1846,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _customHouseManager.SelectedGraphic = 0;
                     _customHouseManager.CombinedStair = false;
                     UpdateMaxPage();
-                    Client.Game.GetScene<GameScene>().TargetManager.CancelTarget();
+                    World.TargetManager.CancelTarget();
                     Update();
 
                     break;
@@ -1858,7 +1858,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _customHouseManager.SelectedGraphic = 0;
                     _customHouseManager.CombinedStair = false;
                     UpdateMaxPage();
-                    Client.Game.GetScene<GameScene>().TargetManager.CancelTarget();
+                    World.TargetManager.CancelTarget();
                     Update();
 
                     break;
@@ -1870,7 +1870,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _customHouseManager.SelectedGraphic = 0;
                     _customHouseManager.CombinedStair = false;
                     UpdateMaxPage();
-                    Client.Game.GetScene<GameScene>().TargetManager.CancelTarget();
+                    World.TargetManager.CancelTarget();
                     Update();
 
                     break;
@@ -1882,7 +1882,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _customHouseManager.SelectedGraphic = 0;
                     _customHouseManager.CombinedStair = false;
                     UpdateMaxPage();
-                    Client.Game.GetScene<GameScene>().TargetManager.CancelTarget();
+                    World.TargetManager.CancelTarget();
                     Update();
 
                     break;
@@ -1912,7 +1912,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _customHouseManager.MaxPage = 1;
                     _customHouseManager.SelectedGraphic = 0;
                     _customHouseManager.CombinedStair = false;
-                    Client.Game.GetScene<GameScene>().TargetManager.CancelTarget();
+                    World.TargetManager.CancelTarget();
                     Update();
 
                     break;
@@ -2062,7 +2062,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _customHouseManager.SelectedGraphic = 0;
                     _customHouseManager.CombinedStair = false;
                     UpdateMaxPage();
-                    Client.Game.GetScene<GameScene>().TargetManager.CancelTarget();
+                    World.TargetManager.CancelTarget();
                     Update();
 
                     break;
@@ -2097,7 +2097,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             World.CustomHouseManager = null;
             NetClient.Socket.Send_CustomHouseBuildingExit(World);
-            Client.Game.GetScene<GameScene>().TargetManager.CancelTarget();
+            World.TargetManager.CancelTarget();
 
             base.Dispose();
         }

@@ -1042,7 +1042,7 @@ namespace ClassicUO.Game.Managers
                     //if (WaitForTargetTimer == 0)
                     //    WaitForTargetTimer = Time.Ticks + Constants.WAIT_FOR_TARGET_DELAY;
 
-                    if (Client.Game.GetScene<GameScene>().TargetManager.IsTargeting)
+                    if (_world.TargetManager.IsTargeting)
                     {
                         //if (TargetManager.TargetingState != TargetType.Object)
                         //{
@@ -1050,17 +1050,17 @@ namespace ClassicUO.Game.Managers
                         //}
                         //else 
 
-                        if (Client.Game.GetScene<GameScene>().TargetManager.TargetingState != CursorTarget.Object && !Client.Game.GetScene<GameScene>().TargetManager.LastTargetInfo.IsEntity)
+                        if (_world.TargetManager.TargetingState != CursorTarget.Object && !_world.TargetManager.LastTargetInfo.IsEntity)
                         {
-                            Client.Game.GetScene<GameScene>().TargetManager.TargetLast();
+                            _world.TargetManager.TargetLast();
                         }
-                        else if (Client.Game.GetScene<GameScene>().TargetManager.LastTargetInfo.IsEntity)
+                        else if (_world.TargetManager.LastTargetInfo.IsEntity)
                         {
-                            Client.Game.GetScene<GameScene>().TargetManager.Target(Client.Game.GetScene<GameScene>().TargetManager.LastTargetInfo.Serial);
+                            _world.TargetManager.Target(_world.TargetManager.LastTargetInfo.Serial);
                         }
                         else
                         {
-                            Client.Game.GetScene<GameScene>().TargetManager.Target(Client.Game.GetScene<GameScene>().TargetManager.LastTargetInfo.Graphic, Client.Game.GetScene<GameScene>().TargetManager.LastTargetInfo.X, Client.Game.GetScene<GameScene>().TargetManager.LastTargetInfo.Y, Client.Game.GetScene<GameScene>().TargetManager.LastTargetInfo.Z);
+                            _world.TargetManager.Target(_world.TargetManager.LastTargetInfo.Graphic, _world.TargetManager.LastTargetInfo.X, _world.TargetManager.LastTargetInfo.Y, _world.TargetManager.LastTargetInfo.Z);
                         }
 
                         WaitForTargetTimer = 0;
@@ -1081,9 +1081,9 @@ namespace ClassicUO.Game.Managers
                     //if (WaitForTargetTimer == 0)
                     //    WaitForTargetTimer = Time.Ticks + Constants.WAIT_FOR_TARGET_DELAY;
 
-                    if (Client.Game.GetScene<GameScene>().TargetManager.IsTargeting)
+                    if (_world.TargetManager.IsTargeting)
                     {
-                        Client.Game.GetScene<GameScene>().TargetManager.Target(_world.Player);
+                        _world.TargetManager.Target(_world.Player);
                         WaitForTargetTimer = 0;
                     }
                     else if (WaitForTargetTimer < Time.Ticks)
@@ -1153,7 +1153,7 @@ namespace ClassicUO.Game.Managers
                         WaitForTargetTimer = Time.Ticks + Constants.WAIT_FOR_TARGET_DELAY;
                     }
 
-                    if (Client.Game.GetScene<GameScene>().TargetManager.IsTargeting || WaitForTargetTimer < Time.Ticks)
+                    if (_world.TargetManager.IsTargeting || WaitForTargetTimer < Time.Ticks)
                     {
                         WaitForTargetTimer = 0;
                     }
@@ -1166,20 +1166,20 @@ namespace ClassicUO.Game.Managers
 
                 case MacroType.TargetNext:
 
-                    uint sel_obj = _world.FindNext(ScanTypeObject.Mobiles, Client.Game.GetScene<GameScene>().TargetManager.LastTargetInfo.Serial, false);
+                    uint sel_obj = _world.FindNext(ScanTypeObject.Mobiles, _world.TargetManager.LastTargetInfo.Serial, false);
 
                     if (SerialHelper.IsValid(sel_obj))
                     {
-                        Client.Game.GetScene<GameScene>().TargetManager.LastTargetInfo.SetEntity(sel_obj);
-                        Client.Game.GetScene<GameScene>().TargetManager.LastAttack = sel_obj;
+                        _world.TargetManager.LastTargetInfo.SetEntity(sel_obj);
+                        _world.TargetManager.LastAttack = sel_obj;
                     }
 
                     break;
 
                 case MacroType.AttackLast:
-                    if (Client.Game.GetScene<GameScene>().TargetManager.LastTargetInfo.IsEntity)
+                    if (_world.TargetManager.LastTargetInfo.IsEntity)
                     {
-                        GameActions.Attack(_world, Client.Game.GetScene<GameScene>().TargetManager.LastTargetInfo.Serial);
+                        GameActions.Attack(_world, _world.TargetManager.LastTargetInfo.Serial);
                     }
 
                     break;
@@ -1235,33 +1235,33 @@ namespace ClassicUO.Game.Managers
 
                 case MacroType.AttackSelectedTarget:
 
-                    if (SerialHelper.IsMobile(Client.Game.GetScene<GameScene>().TargetManager.SelectedTarget))
+                    if (SerialHelper.IsMobile(_world.TargetManager.SelectedTarget))
                     {
-                        GameActions.Attack(_world, Client.Game.GetScene<GameScene>().TargetManager.SelectedTarget);
+                        GameActions.Attack(_world, _world.TargetManager.SelectedTarget);
                     }
 
                     break;
 
                 case MacroType.UseSelectedTarget:
-                    if (SerialHelper.IsValid(Client.Game.GetScene<GameScene>().TargetManager.SelectedTarget))
+                    if (SerialHelper.IsValid(_world.TargetManager.SelectedTarget))
                     {
-                        GameActions.DoubleClick(_world, Client.Game.GetScene<GameScene>().TargetManager.SelectedTarget);
+                        GameActions.DoubleClick(_world, _world.TargetManager.SelectedTarget);
                     }
 
                     break;
 
                 case MacroType.CurrentTarget:
 
-                    if (Client.Game.GetScene<GameScene>().TargetManager.SelectedTarget != 0)
+                    if (_world.TargetManager.SelectedTarget != 0)
                     {
                         if (WaitForTargetTimer == 0)
                         {
                             WaitForTargetTimer = Time.Ticks + Constants.WAIT_FOR_TARGET_DELAY;
                         }
 
-                        if (Client.Game.GetScene<GameScene>().TargetManager.IsTargeting)
+                        if (_world.TargetManager.IsTargeting)
                         {
-                            Client.Game.GetScene<GameScene>().TargetManager.Target(Client.Game.GetScene<GameScene>().TargetManager.SelectedTarget);
+                            _world.TargetManager.Target(_world.TargetManager.SelectedTarget);
                             WaitForTargetTimer = 0;
                         }
                         else if (WaitForTargetTimer < Time.Ticks)
@@ -1294,15 +1294,15 @@ namespace ClassicUO.Game.Managers
                                 WaitForTargetTimer = Time.Ticks + Constants.WAIT_FOR_TARGET_DELAY;
                             }
 
-                            if (Client.Game.GetScene<GameScene>().TargetManager.IsTargeting)
+                            if (_world.TargetManager.IsTargeting)
                             {
                                 if (macro.Code == MacroType.BandageSelf)
                                 {
-                                    Client.Game.GetScene<GameScene>().TargetManager.Target(_world.Player);
+                                    _world.TargetManager.Target(_world.Player);
                                 }
-                                else if (Client.Game.GetScene<GameScene>().TargetManager.LastTargetInfo.IsEntity)
+                                else if (_world.TargetManager.LastTargetInfo.IsEntity)
                                 {
-                                    Client.Game.GetScene<GameScene>().TargetManager.Target(Client.Game.GetScene<GameScene>().TargetManager.LastTargetInfo.Serial);
+                                    _world.TargetManager.Target(_world.TargetManager.LastTargetInfo.Serial);
                                 }
 
                                 WaitingBandageTarget = false;
@@ -1340,9 +1340,9 @@ namespace ClassicUO.Game.Managers
                             {
                                 NetClient.Socket.Send_TargetSelectedObject(bandage.Serial, _world.Player.Serial);
                             }
-                            else if (SerialHelper.IsMobile(Client.Game.GetScene<GameScene>().TargetManager.SelectedTarget))
+                            else if (SerialHelper.IsMobile(_world.TargetManager.SelectedTarget))
                             {
-                                NetClient.Socket.Send_TargetSelectedObject(bandage.Serial, Client.Game.GetScene<GameScene>().TargetManager.SelectedTarget);
+                                NetClient.Socket.Send_TargetSelectedObject(bandage.Serial, _world.TargetManager.SelectedTarget);
                             }
                         }
                     }
@@ -1435,7 +1435,7 @@ namespace ClassicUO.Game.Managers
                     }
                     else
                     {
-                        SetLastTarget(_world.FindNext(scantype, Client.Game.GetScene<GameScene>().TargetManager.SelectedTarget, scanRange == ScanModeObject.Previous));
+                        SetLastTarget(_world.FindNext(scantype, _world.TargetManager.SelectedTarget, scanRange == ScanModeObject.Previous));
                     }
 
                     break;
@@ -1527,13 +1527,13 @@ namespace ClassicUO.Game.Managers
 
                 case MacroType.Grab:
                     GameActions.Print(_world, ResGeneral.TargetAnItemToGrabIt);
-                    Client.Game.GetScene<GameScene>().TargetManager.SetTargeting(CursorTarget.Grab, 0, TargetType.Neutral);
+                    _world.TargetManager.SetTargeting(CursorTarget.Grab, 0, TargetType.Neutral);
 
                     break;
 
                 case MacroType.SetGrabBag:
                     GameActions.Print(_world, ResGumps.TargetContainerToGrabItemsInto);
-                    Client.Game.GetScene<GameScene>().TargetManager.SetTargeting(CursorTarget.SetGrabBag, 0, TargetType.Neutral);
+                    _world.TargetManager.SetTargeting(CursorTarget.SetGrabBag, 0, TargetType.Neutral);
 
                     break;
 
@@ -1816,8 +1816,8 @@ namespace ClassicUO.Game.Managers
                     {
                         GameActions.MessageOverhead(_world, string.Format(ResGeneral.Target0, ent.Name), Notoriety.GetHue(((Mobile) ent).NotorietyFlag), _world.Player);
 
-                        Client.Game.GetScene<GameScene>().TargetManager.SelectedTarget = serial;
-                        Client.Game.GetScene<GameScene>().TargetManager.LastTargetInfo.SetEntity(serial);
+                        _world.TargetManager.SelectedTarget = serial;
+                        _world.TargetManager.LastTargetInfo.SetEntity(serial);
 
                         return;
                     }
@@ -1827,8 +1827,8 @@ namespace ClassicUO.Game.Managers
                     if (ent != null)
                     {
                         GameActions.MessageOverhead(_world, string.Format(ResGeneral.Target0, ent.Name), 992, _world.Player);
-                        Client.Game.GetScene<GameScene>().TargetManager.SelectedTarget = serial;
-                        Client.Game.GetScene<GameScene>().TargetManager.LastTargetInfo.SetEntity(serial);
+                        _world.TargetManager.SelectedTarget = serial;
+                        _world.TargetManager.LastTargetInfo.SetEntity(serial);
 
                         return;
                     }

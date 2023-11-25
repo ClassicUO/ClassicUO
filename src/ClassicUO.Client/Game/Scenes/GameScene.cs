@@ -111,7 +111,6 @@ namespace ClassicUO.Game.Scenes
         public Pathfinder Pathfinder { get; private set; }
         public NameOverHeadManager NameOverHeadManager { get; private set; }
         public DelayedObjectClickManager DelayedObjectClickManager { get; private set; }
-        public TargetManager TargetManager { get; private set; }
         public CommandManager CommandManager { get; private set; }
         public bool UpdateDrawPosition { get; set; }
         public HotkeysManager Hotkeys { get; private set; }
@@ -167,7 +166,6 @@ namespace ClassicUO.Game.Scenes
 
             CommandManager = new CommandManager(_world);
             CommandManager.Initialize();
-            TargetManager = new TargetManager(_world);
             DelayedObjectClickManager = new DelayedObjectClickManager(_world);
             NameOverHeadManager = new NameOverHeadManager(_world);
             Pathfinder = new Pathfinder(_world);
@@ -349,7 +347,7 @@ namespace ClassicUO.Game.Scenes
             }
             catch { }
 
-            TargetManager.Reset();
+            _world.TargetManager.Reset();
 
             // special case for wmap. this allow us to save settings
             UIManager.GetGump<WorldMapGump>()?.SaveSettings();
@@ -841,7 +839,7 @@ namespace ClassicUO.Game.Scenes
 
             if (
                 (currentProfile.CorpseOpenOptions == 1 || currentProfile.CorpseOpenOptions == 3)
-                    && TargetManager.IsTargeting
+                    && _world.TargetManager.IsTargeting
                 || (currentProfile.CorpseOpenOptions == 2 || currentProfile.CorpseOpenOptions == 3)
                     && _world.Player.IsHidden
             )
@@ -857,17 +855,17 @@ namespace ClassicUO.Game.Scenes
             }
 
             if (
-                TargetManager.IsTargeting
-                && TargetManager.TargetingState == CursorTarget.MultiPlacement
+                _world.TargetManager.IsTargeting
+                && _world.TargetManager.TargetingState == CursorTarget.MultiPlacement
                 && _world.CustomHouseManager == null
-                && TargetManager.MultiTargetInfo != null
+                && _world.TargetManager.MultiTargetInfo != null
             )
             {
                 if (_multi == null)
                 {
                     _multi = Item.Create(_world, 0);
-                    _multi.Graphic = TargetManager.MultiTargetInfo.Model;
-                    _multi.Hue = TargetManager.MultiTargetInfo.Hue;
+                    _multi.Graphic = _world.TargetManager.MultiTargetInfo.Model;
+                    _multi.Hue = _world.TargetManager.MultiTargetInfo.Hue;
                     _multi.IsMulti = true;
                 }
 
@@ -902,9 +900,9 @@ namespace ClassicUO.Game.Scenes
                         groundZ = gobj.Z;
                     }
 
-                    x = (ushort)(x - TargetManager.MultiTargetInfo.XOff);
-                    y = (ushort)(y - TargetManager.MultiTargetInfo.YOff);
-                    z = (sbyte)(groundZ - TargetManager.MultiTargetInfo.ZOff);
+                    x = (ushort)(x - _world.TargetManager.MultiTargetInfo.XOff);
+                    y = (ushort)(y - _world.TargetManager.MultiTargetInfo.YOff);
+                    z = (sbyte)(groundZ - _world.TargetManager.MultiTargetInfo.ZOff);
 
                     _multi.SetInWorldTile(x, y, z);
                     _multi.CheckGraphicChange();
@@ -1152,8 +1150,8 @@ namespace ClassicUO.Game.Scenes
 
             if (
                 _multi != null
-                && TargetManager.IsTargeting
-                && TargetManager.TargetingState == CursorTarget.MultiPlacement
+                && _world.TargetManager.IsTargeting
+                && _world.TargetManager.TargetingState == CursorTarget.MultiPlacement
             )
             {
                 _multi.Draw(

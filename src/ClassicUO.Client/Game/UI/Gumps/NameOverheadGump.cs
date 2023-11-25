@@ -361,21 +361,21 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 }
 
-                if (Client.Game.GetScene<GameScene>().TargetManager.IsTargeting)
+                if (World.TargetManager.IsTargeting)
                 {
-                    switch (Client.Game.GetScene<GameScene>().TargetManager.TargetingState)
+                    switch (World.TargetManager.TargetingState)
                     {
                         case CursorTarget.Position:
                         case CursorTarget.Object:
                         case CursorTarget.Grab:
                         case CursorTarget.SetGrabBag:
-                            Client.Game.GetScene<GameScene>().TargetManager.Target(LocalSerial);
+                            World.TargetManager.Target(LocalSerial);
                             Mouse.LastLeftButtonClickTime = 0;
 
                             break;
 
                         case CursorTarget.SetTargetClientSide:
-                            Client.Game.GetScene<GameScene>().TargetManager.Target(LocalSerial);
+                            World.TargetManager.Target(LocalSerial);
                             Mouse.LastLeftButtonClickTime = 0;
                             UIManager.Add(new InspectorGump(World, World.Get(LocalSerial)));
 
@@ -559,7 +559,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
             else
             {
-                if (entity == Client.Game.GetScene<GameScene>().TargetManager.LastTargetInfo.Serial)
+                if (entity == World.TargetManager.LastTargetInfo.Serial)
                 {
                     _borderColor = SolidColorTextureCache.GetTexture(Color.Red);
                     _background.Hue = _renderedText.Hue = entity is Mobile m

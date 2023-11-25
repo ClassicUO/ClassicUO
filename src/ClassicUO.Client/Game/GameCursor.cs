@@ -285,9 +285,9 @@ namespace ClassicUO.Game
 
         public void Draw(UltimaBatcher2D sb)
         {
-            if (_world.InGame && Client.Game.GetScene<GameScene>().TargetManager.IsTargeting && ProfileManager.CurrentProfile != null)
+            if (_world.InGame && _world.TargetManager.IsTargeting && ProfileManager.CurrentProfile != null)
             {
-                if (Client.Game.GetScene<GameScene>().TargetManager.TargetingState == CursorTarget.MultiPlacement)
+                if (_world.TargetManager.TargetingState == CursorTarget.MultiPlacement)
                 {
                     if (
                         _world.CustomHouseManager != null
@@ -396,7 +396,7 @@ namespace ClassicUO.Game
 
                     ushort hue = 0;
 
-                    switch (Client.Game.GetScene<GameScene>().TargetManager.TargetingType)
+                    switch (_world.TargetManager.TargetingType)
                     {
                         case TargetType.Neutral:
                             hue = 0x03b2;
@@ -647,7 +647,7 @@ namespace ClassicUO.Game
         {
             int war = _world.InGame && _world.Player.InWarMode ? 1 : 0;
 
-            if (Client.Game.GetScene<GameScene>().TargetManager.IsTargeting)
+            if (_world.TargetManager.IsTargeting)
             {
                 return _cursorData[war, 12];
             }

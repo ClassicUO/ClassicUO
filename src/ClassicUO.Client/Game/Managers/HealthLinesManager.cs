@@ -61,31 +61,31 @@ namespace ClassicUO.Game.Managers
         {
             var camera = Client.Game.Scene.Camera;
 
-            if (SerialHelper.IsMobile(Client.Game.GetScene<GameScene>().TargetManager.LastTargetInfo.Serial))
+            if (SerialHelper.IsMobile(_world.TargetManager.LastTargetInfo.Serial))
             {
                 DrawHealthLineWithMath(
                     batcher,
-                    Client.Game.GetScene<GameScene>().TargetManager.LastTargetInfo.Serial,
+                    _world.TargetManager.LastTargetInfo.Serial,
                     camera.Bounds.Width,
                     camera.Bounds.Height
                 );
             }
 
-            if (SerialHelper.IsMobile(Client.Game.GetScene<GameScene>().TargetManager.SelectedTarget))
+            if (SerialHelper.IsMobile(_world.TargetManager.SelectedTarget))
             {
                 DrawHealthLineWithMath(
                     batcher,
-                    Client.Game.GetScene<GameScene>().TargetManager.SelectedTarget,
+                    _world.TargetManager.SelectedTarget,
                     camera.Bounds.Width,
                     camera.Bounds.Height
                 );
             }
 
-            if (SerialHelper.IsMobile(Client.Game.GetScene<GameScene>().TargetManager.LastAttack))
+            if (SerialHelper.IsMobile(_world.TargetManager.LastAttack))
             {
                 DrawHealthLineWithMath(
                     batcher,
-                    Client.Game.GetScene<GameScene>().TargetManager.LastAttack,
+                    _world.TargetManager.LastAttack,
                     camera.Bounds.Width,
                     camera.Bounds.Height
                 );
@@ -188,9 +188,9 @@ namespace ClassicUO.Game.Managers
                 }
 
                 if (
-                    mobile.Serial == Client.Game.GetScene<GameScene>().TargetManager.LastTargetInfo.Serial
-                    || mobile.Serial == Client.Game.GetScene<GameScene>().TargetManager.SelectedTarget
-                    || mobile.Serial == Client.Game.GetScene<GameScene>().TargetManager.LastAttack
+                    mobile.Serial == _world.TargetManager.LastTargetInfo.Serial
+                    || mobile.Serial == _world.TargetManager.SelectedTarget
+                    || mobile.Serial == _world.TargetManager.LastAttack
                 )
                 {
                     continue;
