@@ -81,9 +81,9 @@ namespace ClassicUO.Game.GameObjects
 
             bool hasShadow = !IsDead && !IsHidden && ProfileManager.CurrentProfile.ShadowsEnabled;
 
-            if (AuraManager.IsEnabled)
+            if (World.AuraManager.IsEnabled)
             {
-                AuraManager.Draw(
+                World.AuraManager.Draw(
                     batcher,
                     drawX,
                     drawY,

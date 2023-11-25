@@ -32,7 +32,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                new MacroControl(name, true)
+                new MacroControl(this, name, true)
                 {
                     X = macroGumpBackground.X + 20,
                     Y = macroGumpBackground.Y + 20,

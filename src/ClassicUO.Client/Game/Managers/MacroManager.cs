@@ -1521,7 +1521,7 @@ namespace ClassicUO.Game.Managers
                     break;
 
                 case MacroType.AuraOnOff:
-                    AuraManager.ToggleVisibility();
+                    _world.AuraManager.ToggleVisibility();
 
                     break;
 

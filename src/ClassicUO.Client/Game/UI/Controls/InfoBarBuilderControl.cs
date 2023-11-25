@@ -31,8 +31,8 @@
 #endregion
 
 using ClassicUO.Game.Managers;
-using ClassicUO.Assets;
 using ClassicUO.Resources;
+using ClassicUO.Game.UI.Gumps;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -41,9 +41,11 @@ namespace ClassicUO.Game.UI.Controls
         private readonly StbTextBox infoLabel;
         private readonly ClickableColorBox labelColor;
         private readonly Combobox varStat;
+        private readonly Gump _gump;
 
-        public InfoBarBuilderControl(InfoBarItem item)
+        public InfoBarBuilderControl(Gump gump, InfoBarItem item)
         {
+            _gump = gump;
             infoLabel = new StbTextBox(0xFF, 10, 80) { X = 5, Y = 0, Width = 130, Height = 26 };
             infoLabel.SetText(item.label);
 
@@ -61,6 +63,7 @@ namespace ClassicUO.Game.UI.Controls
 
             labelColor = new ClickableColorBox
             (
+                _gump.World,
                 150,
                 0,
                 13,

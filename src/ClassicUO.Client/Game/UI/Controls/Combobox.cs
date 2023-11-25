@@ -157,6 +157,8 @@ namespace ClassicUO.Game.UI.Controls
             (
                 new ComboboxGump
                 (
+                    // might crash 
+                    (RootParent as Gump).World,
                     ScreenCoordinateX,
                     comboY,
                     Width,

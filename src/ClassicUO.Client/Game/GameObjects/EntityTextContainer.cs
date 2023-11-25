@@ -101,7 +101,7 @@ namespace ClassicUO.Game.GameObjects
 
         public void Add(int damage)
         {
-            TextObject text_obj = TextObject.Create();
+            TextObject text_obj = TextObject.Create(_world);
 
             text_obj.RenderedText = RenderedText.Create(
                 damage.ToString(),

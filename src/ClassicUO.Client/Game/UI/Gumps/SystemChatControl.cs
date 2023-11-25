@@ -869,7 +869,7 @@ namespace ClassicUO.Game.UI.Gumps
                         break;
 
                     case ChatMode.UOAMChat:
-                        UoAssist.SignalMessage(text);
+                        _gump.World.UoAssist.SignalMessage(text);
 
                         break;
 
