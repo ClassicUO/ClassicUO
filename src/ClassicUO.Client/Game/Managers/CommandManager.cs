@@ -57,12 +57,12 @@ namespace ClassicUO.Game.Managers
                 "info",
                 s =>
                 {
-                    if (Client.Game.GetScene<GameScene>().TargetManager.IsTargeting)
+                    if (_world.TargetManager.IsTargeting)
                     {
-                        Client.Game.GetScene<GameScene>().TargetManager.CancelTarget();
+                        _world.TargetManager.CancelTarget();
                     }
 
-                    Client.Game.GetScene<GameScene>().TargetManager.SetTargeting(CursorTarget.SetTargetClientSide, CursorType.Target, TargetType.Neutral);
+                    _world.TargetManager.SetTargeting(CursorTarget.SetTargetClientSide, CursorType.Target, TargetType.Neutral);
                 }
             );
 
@@ -83,12 +83,12 @@ namespace ClassicUO.Game.Managers
                 "hue",
                 s =>
                 {
-                    if (Client.Game.GetScene<GameScene>().TargetManager.IsTargeting)
+                    if (_world.TargetManager.IsTargeting)
                     {
-                        Client.Game.GetScene<GameScene>().TargetManager.CancelTarget();
+                        _world.TargetManager.CancelTarget();
                     }
 
-                    Client.Game.GetScene<GameScene>().TargetManager.SetTargeting(CursorTarget.HueCommandTarget, CursorType.Target, TargetType.Neutral);
+                    _world.TargetManager.SetTargeting(CursorTarget.HueCommandTarget, CursorType.Target, TargetType.Neutral);
                 }
             );
 
@@ -152,7 +152,7 @@ namespace ClassicUO.Game.Managers
         {
             if (entity != null)
             {
-                Client.Game.GetScene<GameScene>().TargetManager.Target(entity);
+                _world.TargetManager.Target(entity);
             }
 
             Mouse.LastLeftButtonClickTime = 0;

@@ -72,6 +72,7 @@ namespace ClassicUO.Game
             ChatManager = new ChatManager(this);
             AuraManager = new AuraManager(this);
             UoAssist = new UoAssist(this);
+            TargetManager = new TargetManager(this);
         }
 
         public Point RangeSize;
@@ -107,6 +108,8 @@ namespace ClassicUO.Game
         public AuraManager AuraManager { get; }
 
         public UoAssist UoAssist { get; }
+
+        public TargetManager TargetManager { get; }
 
         public Dictionary<uint, Item> Items { get; } = new Dictionary<uint, Item>();
 
@@ -807,7 +810,7 @@ namespace ClassicUO.Game
             Light.Personal = Light.RealPersonal = 0;
             ClientLockedFeatures.SetFlags(0);
             Party?.Clear();
-            _game.GetScene<GameScene>().TargetManager.LastAttack = 0;
+            TargetManager.LastAttack = 0;
             MessageManager.PromptData = default;
             _effectManager.Clear();
             _toRemove.Clear();

@@ -142,8 +142,8 @@ namespace ClassicUO.Game.UI.Gumps
             if (_isListModified)
                 World.IgnoreManager.SaveIgnoreList();
 
-            if (Client.Game.GetScene<GameScene>().TargetManager.IsTargeting)
-                Client.Game.GetScene<GameScene>().TargetManager.CancelTarget();
+            if (World.TargetManager.IsTargeting)
+                World.TargetManager.CancelTarget();
 
             base.Dispose();
         }
@@ -201,7 +201,7 @@ namespace ClassicUO.Game.UI.Gumps
             switch (buttonId)
             {
                 case (int)ButtonsId.ADD_NEW_IGNORE:
-                    Client.Game.GetScene<GameScene>().TargetManager.SetTargeting(CursorTarget.IgnorePlayerTarget, CursorType.Target, TargetType.Neutral);
+                    World.TargetManager.SetTargeting(CursorTarget.IgnorePlayerTarget, CursorType.Target, TargetType.Neutral);
                     break;
             }
         }

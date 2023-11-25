@@ -93,9 +93,9 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (button == MouseButtonType.Left)
             {
-                if (Client.Game.GetScene<GameScene>().TargetManager.IsTargeting)
+                if (World.TargetManager.IsTargeting)
                 {
-                    Client.Game.GetScene<GameScene>().TargetManager.Target(World.Player);
+                    World.TargetManager.Target(World.Player);
                     Mouse.LastLeftButtonClickTime = 0;
                 }
                 else if (x >= _point.X && x <= Width + 16 && y >= _point.Y && y <= Height + 16)
@@ -124,9 +124,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseDown(int x, int y, MouseButtonType button)
         {
-            if (Client.Game.GetScene<GameScene>().TargetManager.IsTargeting)
+            if (World.TargetManager.IsTargeting)
             {
-                Client.Game.GetScene<GameScene>().TargetManager.Target(World.Player);
+                World.TargetManager.Target(World.Player);
                 Mouse.LastLeftButtonClickTime = 0;
             }
         }
@@ -1952,9 +1952,9 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (button == MouseButtonType.Left)
             {
-                if (Client.Game.GetScene<GameScene>().TargetManager.IsTargeting)
+                if (World.TargetManager.IsTargeting)
                 {
-                    Client.Game.GetScene<GameScene>().TargetManager.Target(World.Player);
+                    World.TargetManager.Target(World.Player);
                     Mouse.LastLeftButtonClickTime = 0;
                 }
                 else

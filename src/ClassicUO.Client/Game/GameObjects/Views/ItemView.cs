@@ -172,7 +172,7 @@ namespace ClassicUO.Game.GameObjects
             if (
                 !SerialHelper.IsValid(Serial)
                 && IsMulti
-                && Client.Game.GetScene<GameScene>().TargetManager.TargetingState == CursorTarget.MultiPlacement
+                && World.TargetManager.TargetingState == CursorTarget.MultiPlacement
             )
             {
                 hueVec.Z = 0.5f;
@@ -476,7 +476,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (
                     ReferenceEquals(SelectedObject.Object, this)
-                    || Client.Game.GetScene<GameScene>().TargetManager.TargetingState == CursorTarget.MultiPlacement
+                    || World.TargetManager.TargetingState == CursorTarget.MultiPlacement
                 )
                 {
                     return false;

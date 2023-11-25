@@ -515,13 +515,13 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else if (SelectedObject.Object is Item item)
                 {
-                    if (Client.Game.GetScene<GameScene>().TargetManager.IsTargeting)
+                    if (World.TargetManager.IsTargeting)
                     {
-                        Client.Game.GetScene<GameScene>().TargetManager.Target(item.Serial);
+                        World.TargetManager.Target(item.Serial);
                         Mouse.CancelDoubleClick = true;
                         Mouse.LastLeftButtonClickTime = 0;
 
-                        if (Client.Game.GetScene<GameScene>().TargetManager.TargetingState == CursorTarget.SetTargetClientSide)
+                        if (World.TargetManager.TargetingState == CursorTarget.SetTargetClientSide)
                         {
                             UIManager.Add(new InspectorGump(World,item));
                         }

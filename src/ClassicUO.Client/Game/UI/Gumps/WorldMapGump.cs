@@ -736,7 +736,7 @@ namespace ClassicUO.Game.UI.Gumps
             int x = position.X - X - ParentX;
             int y = position.Y - Y - ParentY;
             CanvasToWorld(x, y, out int xMap, out int yMap);
-            Client.Game.GetScene<GameScene>().TargetManager.Target
+            World.TargetManager.Target
             (
                 0,
                 (ushort)xMap,
@@ -3243,7 +3243,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseUp(int x, int y, MouseButtonType button)
         {
-            var allowTarget = _allowPositionalTarget && Client.Game.GetScene<GameScene>().TargetManager.IsTargeting && Client.Game.GetScene<GameScene>().TargetManager.TargetingState == CursorTarget.Position;
+            var allowTarget = _allowPositionalTarget && World.TargetManager.IsTargeting && World.TargetManager.TargetingState == CursorTarget.Position;
             if (allowTarget && button == MouseButtonType.Left)
             {
                 HandlePositionTarget();

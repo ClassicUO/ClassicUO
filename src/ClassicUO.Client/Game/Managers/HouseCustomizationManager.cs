@@ -864,7 +864,7 @@ namespace ClassicUO.Game.Managers
 
         public void SetTargetMulti()
         {
-            Client.Game.GetScene<GameScene>().TargetManager.SetTargetingMulti
+            _world.TargetManager.SetTargetingMulti
             (
                 0,
                 0,

@@ -385,7 +385,7 @@ namespace ClassicUO.Network
 
         private static void TargetCursor(World world, ref StackDataReader p)
         {
-            Client.Game.GetScene<GameScene>().TargetManager.SetTargeting(
+            world.TargetManager.SetTargeting(
                 (CursorTarget)p.ReadUInt8(),
                 p.ReadUInt32BE(),
                 (TargetType)p.ReadUInt8()
@@ -393,7 +393,7 @@ namespace ClassicUO.Network
 
             if (world.Party.PartyHealTimer < Time.Ticks && world.Party.PartyHealTarget != 0)
             {
-                Client.Game.GetScene<GameScene>().TargetManager.Target(world.Party.PartyHealTarget);
+                world.TargetManager.Target(world.Party.PartyHealTarget);
                 world.Party.PartyHealTimer = 0;
                 world.Party.PartyHealTarget = 0;
             }
@@ -1911,7 +1911,7 @@ namespace ClassicUO.Network
             const int TIME_TURN_TO_LASTTARGET = 2000;
 
             if (
-                Client.Game.GetScene<GameScene>().TargetManager.LastAttack == defenders
+                world.TargetManager.LastAttack == defenders
                 && world.Player.InWarMode
                 && world.Player.Walker.LastStepRequestTime + TIME_TURN_TO_LASTTARGET < Time.Ticks
                 && world.Player.Steps.Count == 0
@@ -3337,7 +3337,7 @@ namespace ClassicUO.Network
             ushort zOff = p.ReadUInt16BE();
             ushort hue = p.ReadUInt16BE();
 
-            Client.Game.GetScene<GameScene>().TargetManager.SetTargetingMulti(targID, multiID, xOff, yOff, zOff, hue);
+            world.TargetManager.SetTargetingMulti(targID, multiID, xOff, yOff, zOff, hue);
         }
 
         private static void ASCIIPrompt(World world, ref StackDataReader p)
@@ -3517,8 +3517,8 @@ namespace ClassicUO.Network
 
             //}
 
-            GameActions.SendCloseStatus(world, Client.Game.GetScene<GameScene>().TargetManager.LastAttack);
-            Client.Game.GetScene<GameScene>().TargetManager.LastAttack = serial;
+            GameActions.SendCloseStatus(world, world.TargetManager.LastAttack);
+            world.TargetManager.LastAttack = serial;
             GameActions.RequestMobileStatus(world, serial);
         }
 

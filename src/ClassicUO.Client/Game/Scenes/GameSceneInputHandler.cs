@@ -370,8 +370,8 @@ namespace ClassicUO.Game.Scenes
                 _isMouseLeftDown = true;
 
                 if (
-                    TargetManager.IsTargeting
-                    && TargetManager.TargetingState == CursorTarget.MultiPlacement
+                    _world.TargetManager.IsTargeting
+                    && _world.TargetManager.TargetingState == CursorTarget.MultiPlacement
                     && (
                         _world.CustomHouseManager.SelectedGraphic != 0
                         || _world.CustomHouseManager.Erasing
@@ -564,9 +564,9 @@ namespace ClassicUO.Game.Scenes
                     }
                 }
             }
-            else if (TargetManager.IsTargeting)
+            else if (_world.TargetManager.IsTargeting)
             {
-                switch (TargetManager.TargetingState)
+                switch (_world.TargetManager.TargetingState)
                 {
                     case CursorTarget.Grab:
                     case CursorTarget.SetGrabBag:
@@ -585,12 +585,12 @@ namespace ClassicUO.Game.Scenes
                             switch (obj)
                             {
                                 case Entity ent:
-                                    TargetManager.Target(ent.Serial);
+                                    _world.TargetManager.Target(ent.Serial);
 
                                     break;
 
                                 case Land land:
-                                    TargetManager.Target(
+                                    _world.TargetManager.Target(
                                         0,
                                         land.X,
                                         land.Y,
@@ -601,7 +601,7 @@ namespace ClassicUO.Game.Scenes
                                     break;
 
                                 case GameObject o:
-                                    TargetManager.Target(o.Graphic, o.X, o.Y, o.Z);
+                                    _world.TargetManager.Target(o.Graphic, o.X, o.Y, o.Z);
 
                                     break;
                             }
@@ -628,19 +628,19 @@ namespace ClassicUO.Game.Scenes
                             switch (obj)
                             {
                                 case Entity ent:
-                                    TargetManager.Target(ent.Serial);
+                                    _world.TargetManager.Target(ent.Serial);
                                     UIManager.Add(new InspectorGump(_world, ent));
 
                                     break;
 
                                 case Land land:
-                                    TargetManager.Target(0, land.X, land.Y, land.Z);
+                                    _world.TargetManager.Target(0, land.X, land.Y, land.Z);
                                     UIManager.Add(new InspectorGump(_world, land));
 
                                     break;
 
                                 case GameObject o:
-                                    TargetManager.Target(o.Graphic, o.X, o.Y, o.Z);
+                                    _world.TargetManager.Target(o.Graphic, o.X, o.Y, o.Z);
                                     UIManager.Add(new InspectorGump(_world, o));
 
                                     break;
@@ -664,7 +664,7 @@ namespace ClassicUO.Game.Scenes
                         {
                             _world.IgnoreManager.AddIgnoredTarget(pmEntity);
                         }
-                        TargetManager.CancelTarget();
+                        _world.TargetManager.CancelTarget();
                         break;
                 }
             }
@@ -1161,9 +1161,9 @@ namespace ClassicUO.Game.Scenes
                 return;
             }
 
-            if (e.keysym.sym == SDL.SDL_Keycode.SDLK_ESCAPE && TargetManager.IsTargeting)
+            if (e.keysym.sym == SDL.SDL_Keycode.SDLK_ESCAPE && _world.TargetManager.IsTargeting)
             {
-                TargetManager.CancelTarget();
+                _world.TargetManager.CancelTarget();
             }
 
             if (UIManager.KeyboardFocusControl != UIManager.SystemChat.TextBoxControl)
