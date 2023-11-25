@@ -68,6 +68,7 @@ namespace ClassicUO.Game.GameObjects
         public static Land Create(World world, ushort graphic)
         {
             Land land = new Land(world); // _pool.GetOne();
+            land.AlphaHue = 0xFF;
             land.Graphic = graphic;
             land.OriginalGraphic = graphic;
             land.IsStretched = land.TileData.TexID == 0 && land.TileData.IsWet;
