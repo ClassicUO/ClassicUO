@@ -412,7 +412,7 @@ namespace ClassicUO.Game.Scenes
                         {
                             if (s)
                             {
-                                Client.Game.SetScene(new LoginScene());
+                                Client.Game.SetScene(new LoginScene(_world));
                             }
                         }
                     )
@@ -443,7 +443,7 @@ namespace ClassicUO.Game.Scenes
                             else
                             {
                                 NetClient.Socket.Disconnect();
-                                Client.Game.SetScene(new LoginScene());
+                                Client.Game.SetScene(new LoginScene(_world));
                             }
                         }
                     }
@@ -773,7 +773,7 @@ namespace ClassicUO.Game.Scenes
 
             if (_forceStopScene)
             {
-                LoginScene loginScene = new LoginScene();
+                LoginScene loginScene = new LoginScene(_world);
                 Client.Game.SetScene(loginScene);
                 loginScene.Reconnect = true;
 

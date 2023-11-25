@@ -2017,7 +2017,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         _macroControl?.Dispose();
 
-                        _macroControl = new MacroControl(name)
+                        _macroControl = new MacroControl(this, name)
                         {
                             X = 400,
                             Y = 20
@@ -2050,7 +2050,7 @@ namespace ClassicUO.Game.UI.Gumps
                         {
                             _macroControl?.Dispose();
 
-                            _macroControl = new MacroControl(name)
+                            _macroControl = new MacroControl(this, name)
                             {
                                 X = 400,
                                 Y = 20
@@ -2170,7 +2170,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     _macroControl?.Dispose();
 
-                    _macroControl = new MacroControl(m.Name)
+                    _macroControl = new MacroControl(this, m.Name)
                     {
                         X = 400,
                         Y = 20
@@ -3154,7 +3154,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             nb.MouseUp += (sender, e) =>
             {
-                InfoBarBuilderControl ibbc = new InfoBarBuilderControl(new InfoBarItem("", InfoBarVars.HP, 0x3B9));
+                InfoBarBuilderControl ibbc = new InfoBarBuilderControl(this, new InfoBarItem("", InfoBarVars.HP, 0x3B9));
                 ibbc.X = 5;
                 ibbc.Y = _databox.Children.Count * ibbc.Height;
                 _infoBarBuilderControls.Add(ibbc);
@@ -3208,7 +3208,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             for (int i = 0; i < _infoBarItems.Count; i++)
             {
-                InfoBarBuilderControl ibbc = new InfoBarBuilderControl(_infoBarItems[i]);
+                InfoBarBuilderControl ibbc = new InfoBarBuilderControl(this, _infoBarItems[i]);
                 ibbc.X = 5;
                 ibbc.Y = i * ibbc.Height;
                 _infoBarBuilderControls.Add(ibbc);
@@ -4412,6 +4412,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             ClickableColorBox box = new ClickableColorBox
             (
+                this.World,
                 x,
                 y,
                 13,

@@ -47,10 +47,13 @@ namespace ClassicUO.Utility.Platforms
 {
     internal sealed class UoAssist
     {
-        private CustomWindow _customWindow;
+        private readonly CustomWindow _customWindow;
+        private readonly World _world;
 
-        public void Start(World world)
+        public UoAssist(World world)
         {
+            _world = world;
+
             if (Environment.OSVersion.Platform != PlatformID.Win32NT)
             {
                 Log.Warn("This OS does not support the UOAssist API");

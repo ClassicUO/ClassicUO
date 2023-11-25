@@ -489,7 +489,7 @@ namespace ClassicUO.Game.UI.Gumps
             BuildOptionDictionary();
 
             ContextMenu?.Dispose();
-            ContextMenu = new ContextMenuControl();
+            ContextMenu = new ContextMenuControl(this);
 
             ContextMenuItemEntry markerFontEntry = new ContextMenuItemEntry(ResGumps.FontStyle);
             markerFontEntry.Add(new ContextMenuItemEntry(string.Format(ResGumps.Style0, 1), () => { SetFont(1); }));

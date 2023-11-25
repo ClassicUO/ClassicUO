@@ -59,17 +59,23 @@ namespace ClassicUO.Game.Managers
 
     internal sealed class HouseCustomizationManager
     {
-        public static readonly List<CustomHouseWallCategory> Walls = new List<CustomHouseWallCategory>();
-        public static readonly List<CustomHouseFloor> Floors = new List<CustomHouseFloor>();
-        public static readonly List<CustomHouseDoor> Doors = new List<CustomHouseDoor>();
-        public static readonly List<CustomHouseMiscCategory> Miscs = new List<CustomHouseMiscCategory>();
-        public static readonly List<CustomHouseStair> Stairs = new List<CustomHouseStair>();
-        public static readonly List<CustomHouseTeleport> Teleports = new List<CustomHouseTeleport>();
-        public static readonly List<CustomHouseRoofCategory> Roofs = new List<CustomHouseRoofCategory>();
-        public static readonly List<CustomHousePlaceInfo> ObjectsInfo = new List<CustomHousePlaceInfo>();
+        public readonly List<CustomHouseWallCategory> Walls = new List<CustomHouseWallCategory>();
+        public readonly List<CustomHouseFloor> Floors = new List<CustomHouseFloor>();
+        public readonly List<CustomHouseDoor> Doors = new List<CustomHouseDoor>();
+        public readonly List<CustomHouseMiscCategory> Miscs = new List<CustomHouseMiscCategory>();
+        public readonly List<CustomHouseStair> Stairs = new List<CustomHouseStair>();
+        public readonly List<CustomHouseTeleport> Teleports = new List<CustomHouseTeleport>();
+        public readonly List<CustomHouseRoofCategory> Roofs = new List<CustomHouseRoofCategory>();
+        public readonly List<CustomHousePlaceInfo> ObjectsInfo = new List<CustomHousePlaceInfo>();
 
-        static HouseCustomizationManager()
+        private readonly World _world;
+
+        public HouseCustomizationManager(World world, uint serial)
         {
+            _world = world;
+            Serial = serial;
+
+            // TODO: don't load the file txt every time the housemanager get initialized
             ParseFileWithCategory<CustomHouseWall, CustomHouseWallCategory>(Walls, UOFileManager.GetUOFilePath("walls.txt"));
 
             ParseFile(Floors, UOFileManager.GetUOFilePath("floors.txt"));
@@ -83,14 +89,8 @@ namespace ClassicUO.Game.Managers
             ParseFileWithCategory<CustomHouseRoof, CustomHouseRoofCategory>(Roofs, UOFileManager.GetUOFilePath("roof.txt"));
 
             ParseFile(ObjectsInfo, UOFileManager.GetUOFilePath("suppinfo.txt"));
-        }
+            // 
 
-        private readonly World _world;
-
-        public HouseCustomizationManager(World world, uint serial)
-        {
-            _world = world;
-            Serial = serial;
 
             InitializeHouse();
         }

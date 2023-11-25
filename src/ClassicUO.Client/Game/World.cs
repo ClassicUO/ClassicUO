@@ -70,6 +70,8 @@ namespace ClassicUO.Game
             IgnoreManager = new IgnoreManager(this);
             SkillsGroupManager = new SkillsGroupManager(this);
             ChatManager = new ChatManager(this);
+            AuraManager = new AuraManager(this);
+            UoAssist = new UoAssist(this);
         }
 
         public Point RangeSize;
@@ -101,6 +103,10 @@ namespace ClassicUO.Game
         public SkillsGroupManager SkillsGroupManager { get; }
 
         public ChatManager ChatManager { get; }
+
+        public AuraManager AuraManager { get; }
+
+        public UoAssist UoAssist { get; }
 
         public Dictionary<uint, Item> Items { get; } = new Dictionary<uint, Item>();
 
@@ -157,14 +163,14 @@ namespace ClassicUO.Game
                             value = 0;
                         }
 
-                        Map = new Map.Map(value);
+                        Map = new Map.Map(this, value);
 
                         Player.SetInWorldTile(x, y, z);
                         Player.ClearSteps();
                     }
                     else
                     {
-                        Map = new Map.Map(value);
+                        Map = new Map.Map(this, value);
                     }
 
                     // force cursor update when switching map

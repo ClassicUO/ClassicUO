@@ -42,6 +42,7 @@ using ClassicUO.Input;
 using ClassicUO.Assets;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
+using ClassicUO.Renderer.Gumps;
 
 namespace ClassicUO.Game.UI.Gumps.CharCreation
 {
@@ -257,7 +258,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         {
             if (_character == null)
             {
-                _character = new PlayerMobile(1);
+                _character = new PlayerMobile(World, 1);
                 World.Mobiles.Add(_character);
             }
 
@@ -621,6 +622,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             (
                 colorPicker = new CustomColorPicker
                 (
+                    this,
                     layer,
                     clilocLabel,
                     pallet,
@@ -1052,9 +1054,11 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             private int _lastSelectedIndex;
             private readonly Layer _layer;
             private readonly ushort[] _pallet;
+            private readonly Gump _gump;
 
-            public CustomColorPicker(Layer layer, int label, ushort[] pallet, int rows, int columns)
+            public CustomColorPicker(Gump gump, Layer layer, int label, ushort[] pallet, int rows, int columns)
             {
+                _gump = gump;
                 Width = 121;
                 Height = 25;
                 _cellW = 125 / columns;
@@ -1139,6 +1143,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                     {
                         _colorPickerBox = new ColorPickerBox
                         (
+                            _gump.World,
                             489,
                             141,
                             _rows,
