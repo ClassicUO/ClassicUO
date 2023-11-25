@@ -210,7 +210,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
             else if (buttonID == 2)
             {
-                GameActions.Print(ResGumps.TargetContainerToGrabItemsInto);
+                GameActions.Print(World, ResGumps.TargetContainerToGrabItemsInto);
                 Client.Game.GetScene<GameScene>().TargetManager.SetTargeting(CursorTarget.SetGrabBag, 0, TargetType.Neutral);
             }
             else
@@ -308,7 +308,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (count == 0)
             {
-                GameActions.Print(ResGumps.CorpseIsEmpty);
+                GameActions.Print(World, ResGumps.CorpseIsEmpty);
                 Dispose();
             }
             else if (_hideIfEmpty && !IsVisible)

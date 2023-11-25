@@ -341,7 +341,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _image = new ImageWithText();
                 Add(_image);
 
-                ContextMenu = new ContextMenuControl();
+                ContextMenu = new ContextMenuControl(_gump);
                 ContextMenu.Add(ResGumps.UseObject, Use);
                 ContextMenu.Add(ResGumps.Remove, RemoveItem);
             }

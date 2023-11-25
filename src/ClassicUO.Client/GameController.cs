@@ -205,7 +205,7 @@ namespace ClassicUO
             using var ms = new MemoryStream(bytes);
             _background = Texture2D.FromStream(GraphicsDevice, ms);
 
-            SetScene(new LoginScene());
+            SetScene(new LoginScene(World));
             SetWindowPositionBySettings();
         }
 
