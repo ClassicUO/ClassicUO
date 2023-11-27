@@ -217,9 +217,9 @@ namespace ClassicUO.Game.Managers
                         ProfileManager.CurrentProfile.DisplayRadiusHue = h;
             });
 
-            Register("test", (s) => 
+            Register("options", (s) => 
             {
-                UIManager.Add(new ModernOptionsGump());
+                UIManager.Add(new OptionsGump());
             });
         }
 

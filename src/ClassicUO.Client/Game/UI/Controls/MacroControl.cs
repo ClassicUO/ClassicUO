@@ -421,7 +421,7 @@ namespace ClassicUO.Game.UI.Controls
             {
                 var posX = (Client.Game.Window.ClientBounds.Width >> 1) - 300;
                 var posY = (Client.Game.Window.ClientBounds.Height >> 1) - 250;
-                OptionsGump opt = UIManager.GetGump<OptionsGump>();
+                Gump opt = UIManager.GetGump<OptionsGump>();
                 if (opt != null)
                 {
                     posX = opt.X + opt.Width + 5;
