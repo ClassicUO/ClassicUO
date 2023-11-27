@@ -647,16 +647,6 @@ namespace ClassicUO.Game.UI.Gumps
             backgroundTexture.Hue = background.Hue;
             BorderControl.Hue = background.Hue;
             BorderControl.Alpha = background.Alpha;
-            AnchorType = ProfileManager.CurrentProfile.EnableGridContainerAnchor ? ANCHOR_TYPE.NONE : ANCHOR_TYPE.DISABLED;
-            BuildBorder();
-        }
-
-        public static void UpdateAllGridContainers()
-        {
-            foreach (GridContainer _ in UIManager.Gumps.OfType<GridContainer>())
-            {
-                _.OptionsUpdated();
-            }
         }
 
         public void HandleObjectMessage(Entity parent, string text, ushort hue)
@@ -881,7 +871,7 @@ namespace ClassicUO.Game.UI.Gumps
                     if (itemAmt > 1)
                     {
                         count?.Dispose();
-                        count = new Label(itemAmt.ToString(), true, 0x0481, align: TEXT_ALIGN_TYPE.TS_LEFT);
+                        count = new Label(itemAmt.ToString(), true, 0x0481, align: TEXT_ALIGN_TYPE.TS_LEFT, maxwidth: Width - 3);
                         count.X = 1;
                         count.Y = Height - count.Height;
                     }
@@ -960,7 +950,7 @@ namespace ClassicUO.Game.UI.Gumps
                         SelectHighlight = true;
                         Mouse.CancelDoubleClick = true;
                     }
-                    else if (Keyboard.Shift && _item != null && ProfileManager.CurrentProfile.EnableAutoLoot && !ProfileManager.CurrentProfile.HoldShiftForContext && !ProfileManager.CurrentProfile.HoldShiftToSplitStack)
+                    else if (Keyboard.Shift && _item != null)
                     {
                         AutoLootManager.Instance.AddLootItem(_item.Graphic, _item.Hue, _item.Name);
                         GameActions.Print($"Added this item to auto loot.");

@@ -1,13 +1,12 @@
-﻿using ClassicUO.Configuration;
+﻿using ClassicUO.Assets;
+using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -20,17 +19,10 @@ namespace ClassicUO.Game.UI.Gumps
             Height = 40;
             Width = 300;
 
-            if (ProfileManager.CurrentProfile.SkillProgressBarPosition == Point.Zero)
-            {
-                WorldViewportGump vp = UIManager.GetGump<WorldViewportGump>();
+            WorldViewportGump vp = UIManager.GetGump<WorldViewportGump>();
 
-                Y = vp.Location.Y + 80;
-                X = (vp.Location.X + (vp.Width / 2)) - (Width / 2);
-            }
-            else
-            {
-                Location = ProfileManager.CurrentProfile.SkillProgressBarPosition;
-            }
+            Y = vp.Location.Y + 80;
+            X = (vp.Location.X + (vp.Width / 2)) - (Width / 2);
 
             AcceptMouseInput = true;
             CanCloseWithRightClick = true;
@@ -39,15 +31,12 @@ namespace ClassicUO.Game.UI.Gumps
             this.skillIndex = skillIndex;
 
             BuildGump();
+            createdAt = DateTime.Now;
         }
 
         private int skillIndex { get; }
-
-        protected override void OnMove(int x, int y)
-        {
-            base.OnMove(x, y);
-            ProfileManager.CurrentProfile.SkillProgressBarPosition = Location;
-        }
+        private DateTime createdAt { get; }
+        private TimeSpan displayDuration = TimeSpan.FromSeconds(10);
 
         private void BuildGump()
         {
@@ -62,7 +51,7 @@ namespace ClassicUO.Game.UI.Gumps
                     null,
                     Color.White));
 
-                tb.X = (Width / 2) - (tb.MeasuredSize.X / 2);
+                tb.X = (Width/2) - (tb.MeasuredSize.X / 2);
 
                 Rectangle barBounds = Client.Game.Gumps.GetGump(0x0805).UV;
 
@@ -74,39 +63,11 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        public static class QueManager
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            private static TimeSpan duration = TimeSpan.FromSeconds(5);
+            if (createdAt + displayDuration < DateTime.Now) { Dispose(); }
 
-            private static ConcurrentQueue<SkillProgressBar> skillProgressBars = new ConcurrentQueue<SkillProgressBar>();
-
-            private static bool threadRunning = false;
-
-            public static void AddSkill(int skillIndex)
-            {
-                skillProgressBars.Enqueue(new SkillProgressBar(skillIndex));
-                StartProcessing();
-            }
-
-            private static void StartProcessing()
-            {
-                if (threadRunning)
-                {
-                    return;
-                }
-                threadRunning = true;
-
-                Task.Factory.StartNew(() =>
-                {
-                    while (skillProgressBars.TryDequeue(out SkillProgressBar bar))
-                    {
-                        UIManager.Add(bar);
-                        Task.Delay(duration).Wait();
-                        bar.Dispose();
-                    }
-                    threadRunning = false;
-                });
-            }
+            return base.Draw(batcher, x, y);
         }
     }
 }

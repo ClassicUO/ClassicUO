@@ -681,7 +681,6 @@ namespace ClassicUO.Game.Managers
                                     if (macro.Code == MacroType.Close)
                                     {
                                         UIManager.GetGump<OptionsGump>()?.Dispose();
-                                        UIManager.GetGump<ModernOptionsGump>()?.Dispose();
                                     }
 
                                     break;
