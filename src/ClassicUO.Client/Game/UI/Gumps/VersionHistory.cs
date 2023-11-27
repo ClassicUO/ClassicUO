@@ -17,7 +17,8 @@ namespace ClassicUO.Game.UI.Gumps
                 "- Fix art png loading\n" +
                 "- Added /c[green]-paperdoll/cd command\n" +
                 "- Added an auto resync option under Options->TazUO->Misc\n" +
-                "- Alt + Click paperdoll preview in modern paperdoll to copy a screenshot of it",
+                "- Alt + Click paperdoll preview in modern paperdoll to copy a screenshot of it\n" +
+                "- Added `both` option to auto close gumps range or dead",
 
             "/c[white][3.13.0]/cd\n" +
                 "- Fix item unintentional stacking\n" +

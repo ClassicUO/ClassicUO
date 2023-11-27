@@ -266,7 +266,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             content.BlankLine();
 
-            content.AddToRight(new ComboBoxWithLabel("Close health bars when", 0, Theme.COMBO_BOX_WIDTH, new string[] { "Disabled", "Out of range", "Dead" }, profile.CloseHealthBarType, (s, n) => { profile.CloseHealthBarType = s; }), true, page);
+            content.AddToRight(new ComboBoxWithLabel("Close health bars when", 0, Theme.COMBO_BOX_WIDTH, new string[] { "Disabled", "Out of range", "Dead", "Both" }, profile.CloseHealthBarType, (s, n) => { profile.CloseHealthBarType = s; }), true, page);
 
             content.BlankLine();
 
