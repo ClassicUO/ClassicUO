@@ -2185,6 +2185,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             content.AddToRight(new CheckboxWithLabel("Also close anchored healthbars when auto closing healthbars", content.RightWidth - 30, profile.CloseHealthBarIfAnchored, (b) => { profile.CloseHealthBarIfAnchored = b; }), true, page);
 
+            content.BlankLine();
+
+            content.AddToRight(new CheckboxWithLabel("Enable auto resync on hang detection", 0, profile.ForceResyncOnHang, (b) => { profile.ForceResyncOnHang = b; }), true, page);
             #endregion
 
             #region Tooltips

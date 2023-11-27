@@ -15,7 +15,8 @@ namespace ClassicUO.Game.UI.Gumps
                 "- Skill progress bars will save their position if you move them\n" +
                 "- Changed skill progress bars to a queue instead of all showing at once\n" +
                 "- Fix art png loading\n" +
-                "- Added /c[green]-paperdoll/cd command",
+                "- Added /c[green]-paperdoll/cd command\n" +
+                "- Added an auto resync option under Options->TazUO->Misc",
 
             "/c[white][3.13.0]/cd\n" +
                 "- Fix item unintentional stacking\n" +
