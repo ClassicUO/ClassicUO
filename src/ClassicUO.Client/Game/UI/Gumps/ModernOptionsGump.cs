@@ -5330,8 +5330,8 @@ namespace ClassicUO.Game.UI.Gumps
             private class HotkeyBox : Control
             {
                 private bool _actived;
-                private readonly Button _buttonOK, _buttonCancel;
-                private readonly HoveredLabel _label;
+                private readonly ModernButton _buttonOK, _buttonCancel;
+                private readonly TextBox _label;
 
                 public HotkeyBox()
                 {
@@ -5339,64 +5339,21 @@ namespace ClassicUO.Game.UI.Gumps
                     AcceptMouseInput = true;
                     AcceptKeyboardInput = true;
 
+                    Width = 300;
+                    Height = 40;
 
-                    Width = 210;
-                    Height = 25;
+                    AlphaBlendControl bg = new AlphaBlendControl() { Width = 150, Height = 40, AcceptMouseInput = true };
+                    Add(bg);
+                    bg.MouseUp += LabelOnMouseUp;
 
-                    ResizePic pic;
-
-                    Add
-                    (
-                        pic = new ResizePic(0x0BB8)
-                        {
-                            Width = 150,
-                            Height = Height,
-                            AcceptKeyboardInput = true
-                        }
-                    );
-
-                    pic.MouseUp += LabelOnMouseUp;
-
-                    Add
-                    (
-                        _label = new HoveredLabel
-                        (
-                            string.Empty,
-                            true,
-                            1,
-                            0x0021,
-                            0x0021,
-                            150,
-                            1,
-                            FontStyle.None,
-                            TEXT_ALIGN_TYPE.TS_CENTER
-                        )
-                        {
-                            Y = 5
-                        }
-                    );
-
+                    Add(_label = new TextBox("None", Theme.FONT, Theme.STANDARD_TEXT_SIZE, 150, Theme.TEXT_FONT_COLOR, align: FontStashSharp.RichText.TextHorizontalAlignment.Center, strokeEffect: false));
+                    _label.Y = (bg.Height >> 1) - (_label.Height >> 1);
 
                     _label.MouseUp += LabelOnMouseUp;
 
-                    Add
-                    (
-                        _buttonOK = new Button((int)ButtonState.Ok, 0x0481, 0x0483, 0x0482)
-                        {
-                            X = 152,
-                            ButtonAction = ButtonAction.Activate
-                        }
-                    );
+                    Add(_buttonOK = new ModernButton(152, 0, 75, 40, ButtonAction.Activate, "Save", Theme.BUTTON_FONT_COLOR) { ButtonParameter = (int)ButtonState.Ok });
 
-
-                    Add
-                    (
-                        _buttonCancel = new Button((int)ButtonState.Cancel, 0x047E, 0x0480, 0x047F)
-                        {
-                            X = 182,
-                            ButtonAction = ButtonAction.Activate
-                        }
-                    );
+                    Add(_buttonCancel = new ModernButton(_buttonOK.Bounds.Right + 5, 0, 75, 40, ButtonAction.Activate, "Cancel", Theme.BUTTON_FONT_COLOR) { ButtonParameter = (int)ButtonState.Cancel });
 
                     WantUpdateSize = false;
                     IsActive = false;
@@ -5429,7 +5386,6 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
                 public event EventHandler HotkeyChanged, HotkeyCancelled;
-
 
                 protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
                 {
@@ -5552,7 +5508,7 @@ namespace ClassicUO.Game.UI.Gumps
                     MouseButton = MouseButtonType.None;
                     WheelScroll = false;
                     Mod = 0;
-                    _label.Text = string.Empty;
+                    _label.Text = "None";
                 }
 
                 private void LabelOnMouseUp(object sender, MouseEventArgs e)
@@ -5560,7 +5516,6 @@ namespace ClassicUO.Game.UI.Gumps
                     IsActive = true;
                     SetKeyboardFocus();
                 }
-
 
                 public override void OnButtonClick(int buttonID)
                 {
@@ -5572,7 +5527,7 @@ namespace ClassicUO.Game.UI.Gumps
                             break;
 
                         case ButtonState.Cancel:
-                            _label.Text = string.Empty;
+                            _label.Text  = "None";
 
                             HotkeyCancelled.Raise(this);
 
