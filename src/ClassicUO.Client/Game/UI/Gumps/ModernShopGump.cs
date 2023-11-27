@@ -256,8 +256,10 @@ namespace ClassicUO.Game.UI.Gumps
 
                 buySellButton.MouseUp += (sender, e) =>
                 {
-                    Dictionary<uint, ushort> theItem = new Dictionary<uint, ushort>();
-                    theItem.Add(serial, (ushort)quantity.Value);
+                    Dictionary<uint, ushort> theItem = new Dictionary<uint, ushort>
+                    {
+                        { serial, (ushort)quantity.Value }
+                    };
 
                     Tuple<uint, ushort>[] item = theItem.Select(t => new Tuple<uint, ushort>(t.Key, (ushort)t.Value)).ToArray();
 
@@ -305,8 +307,30 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (button == MouseButtonType.Left)
                 {
-                    itemInfo.IsVisible ^= true;
-                    purchaseSell.IsVisible ^= true;
+                    if (Keyboard.Shift)
+                    {
+                        Dictionary<uint, ushort> theItem = new Dictionary<uint, ushort>
+                        {
+                            { Serial, (ushort)Count }
+                        };
+
+                        Tuple<uint, ushort>[] item = theItem.Select(t => new Tuple<uint, ushort>(t.Key, (ushort)t.Value)).ToArray();
+
+                        if (isPurchase)
+                        {
+                            NetClient.Socket.Send_BuyRequest(gumpSerial, item);
+                        }
+                        else
+                        {
+                            NetClient.Socket.Send_SellRequest(gumpSerial, item);
+                        }
+                        Dispose();
+                    }
+                    else
+                    {
+                        itemInfo.IsVisible ^= true;
+                        purchaseSell.IsVisible ^= true;
+                    }
                 }
 
                 return true;
@@ -490,7 +514,7 @@ namespace ClassicUO.Game.UI.Gumps
             public uint Serial { get; }
             public ushort Graphic { get; }
             public ushort Hue { get; }
-            public int Count { get; }
+            public int Count { get; set; }
             public uint Price { get; }
             public string Name { get; set; }
         }

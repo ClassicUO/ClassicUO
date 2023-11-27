@@ -18,7 +18,8 @@ namespace ClassicUO.Game.UI.Gumps
                 "- Added /c[green]-paperdoll/cd command\n" +
                 "- Added an auto resync option under Options->TazUO->Misc\n" +
                 "- Alt + Click paperdoll preview in modern paperdoll to copy a screenshot of it\n" +
-                "- Added `both` option to auto close gumps range or dead",
+                "- Added `both` option to auto close gumps range or dead\n" +
+                "- Added shift + double click to advanced shop gump to buy/sell all of that item",
 
             "/c[white][3.13.0]/cd\n" +
                 "- Fix item unintentional stacking\n" +
