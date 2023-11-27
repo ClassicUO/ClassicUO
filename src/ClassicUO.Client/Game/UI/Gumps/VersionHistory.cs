@@ -14,7 +14,8 @@ namespace ClassicUO.Game.UI.Gumps
                 "- Auto loot shift-click will no long work if you have shift for context menu or split stacks.\n" +
                 "- Skill progress bars will save their position if you move them\n" +
                 "- Changed skill progress bars to a queue instead of all showing at once\n" +
-                "- Fix art png loading",
+                "- Fix art png loading\n" +
+                "- Added /c[green]-paperdoll/cd command",
 
             "/c[white][3.13.0]/cd\n" +
                 "- Fix item unintentional stacking\n" +
