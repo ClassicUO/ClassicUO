@@ -6,6 +6,7 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
+using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Renderer.Animations;
 using Microsoft.Xna.Framework;
@@ -179,21 +180,6 @@ namespace ClassicUO.Game.UI.Gumps
             Add(_minHit);
 
             RequestUpdateContents();
-
-            //World.OPL.OPLOnReceive += OPL_OnOPLReceive;
-        }
-
-        private void OPL_OnOPLReceive(ObjectPropertiesListManager.OPLEventArgs e)
-        {
-            Task.Factory.StartNew(() =>
-            {
-                Item i = World.Items.Get(e.Serial);
-                if (i != null && i.RootContainer == World.Player.Serial)
-                    foreach (var itemSlot in itemLayerSlots)
-                    {
-                        itemSlot.Value.OPLChangeEvent(e);
-                    }
-            });
         }
 
         public void UpdateTitle(string text)
@@ -239,6 +225,10 @@ namespace ClassicUO.Game.UI.Gumps
         public void UpdateOptions()
         {
             backgroundImage.Hue = ProfileManager.CurrentProfile.ModernPaperDollHue;
+            foreach (var layerSlot in itemLayerSlots)
+            {
+                layerSlot.Value.UpdateOptions();
+            }
         }
 
         public static void UpdateAllOptions()
@@ -326,18 +316,10 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        private static readonly Layer[] layerOrder =
-        {
-            Layer.Cloak, Layer.Shirt, Layer.Legs, Layer.Shoes, Layer.Skirt, Layer.Arms, Layer.Tunic, Layer.Torso,
-            Layer.Ring, Layer.Bracelet, Layer.Face, Layer.Gloves, Layer.Pants, Layer.Robe, Layer.Waist, Layer.Necklace,
-            Layer.Hair, Layer.Beard, Layer.Earrings, Layer.Helmet, Layer.OneHanded, Layer.TwoHanded, Layer.Talisman
-        };
-
         private class ItemSlot : Control
         {
             public readonly Layer[] layers;
             private Area itemArea;
-            private int tcount = 0;
 
             private AlphaBlendControl durablityBar;
 
@@ -361,82 +343,40 @@ namespace ClassicUO.Game.UI.Gumps
                 this.layers = layers;
             }
 
+            public void UpdateOptions()
+            {
+                durablityBar.Hue = ProfileManager.CurrentProfile.ModernPaperDollDurabilityHue;
+            }
+
             public void AddItem(Item item)
             {
                 itemArea.Add(new ItemGumpFixed(item, Width, Height) { HighlightOnMouseOver = false });
                 UpdateDurability(item);
             }
 
-            private void UpdateDurability(Item item, bool isOPLEvent = false)
+            private void UpdateDurability(Item item)
             {
-                if (!isOPLEvent)
-                    durablityBar.IsVisible = false;
+                if (IsDisposed || durablityBar.IsDisposed || item == null)
+                {
+                    return;
+                }
 
                 durablityBar.Hue = ProfileManager.CurrentProfile.ModernPaperDollDurabilityHue;
 
-                tcount++;
-                Task.Factory.StartNew(() =>
+                if (World.DurabilityManager.TryGetDurability(item.Serial, out DurabiltyProp durabilty))
                 {
-                    int currentTcount = tcount;
-                    //if (!isOPLEvent)
-                    //    System.Threading.Thread.Sleep(1500);
-                    if (durablityBar.IsDisposed || currentTcount != tcount || item == null)
+                    if (durabilty.Percentage > (float)ProfileManager.CurrentProfile.ModernPaperDoll_DurabilityPercent / (float)100)
                     {
+                        durablityBar.IsVisible = false;
                         return;
                     }
-
-                    if (World.DurabilityManager.TryGetDurability(item.Serial, out DurabiltyProp durabilty))
-                    {
-                        if (durabilty.Percentage >= (float)ProfileManager.CurrentProfile.ModernPaperDoll_DurabilityPercent / (float)100)
-                        {
-                            durablityBar.IsVisible = false;
-                            return;
-                        }
-                        durablityBar.Height = (int)(Height * durabilty.Percentage);
-                        durablityBar.Y = Height - durablityBar.Height;
-                        durablityBar.IsVisible = true;
-                    }
-                    else if (World.OPL.TryGetNameAndData(item.Serial, out string name, out string data))
-                    {
-                        MatchCollection matches = Regex.Matches(data, @"(?<=Durability )(\d*) / (\d*)"); //This should match 45 / 255 for example
-                        if (matches.Count > 0)
-                        {
-                            string[] durability = data.Substring(matches[0].Index, matches[0].Length).Split('/');
-                            if (int.TryParse(durability[0].Trim(), out int min))
-                                if (int.TryParse(durability[1].Trim(), out int max))
-                                {
-                                    double perecentRemaining = (double)min / (double)max;
-                                    if (perecentRemaining >= (double)ProfileManager.CurrentProfile.ModernPaperDoll_DurabilityPercent / (double)100)
-                                    {
-                                        durablityBar.IsVisible = false;
-                                        return;
-                                    }
-                                    durablityBar.Height = (int)(Height * perecentRemaining);
-                                    durablityBar.Y = Height - durablityBar.Height;
-                                    durablityBar.IsVisible = true;
-                                }
-                        }
-                    }
-                    else
-                    {
-                        System.Threading.Thread.Sleep(1500);
-                        UpdateDurability(item, isOPLEvent);
-                    }
-                });
-            }
-
-            public void OPLChangeEvent(ObjectPropertiesListManager.OPLEventArgs e)
-            {
-                foreach (Control c in itemArea.Children)
+                    durablityBar.Height = (int)(Height * durabilty.Percentage);
+                    durablityBar.Y = Height - durablityBar.Height;
+                    durablityBar.IsVisible = true;
+                }
+                else
                 {
-                    if (c is ItemGumpFixed itemG)
-                    {
-                        if (itemG.IsVisible && !itemG.IsDisposed && itemG.item.Serial == e.Serial)
-                        {
-                            UpdateDurability(itemG.item, true);
-                            break;
-                        }
-                    }
+                    durablityBar.IsVisible = false;
                 }
             }
 
