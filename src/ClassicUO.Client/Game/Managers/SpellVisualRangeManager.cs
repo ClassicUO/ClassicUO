@@ -503,6 +503,11 @@ namespace ClassicUO.Game.Managers
                                 {
                                     batcher.DrawTiled(foreground, new Rectangle(x, y, widthFromPercent, barBoundsF.Height), barBoundsF, hue);
                                 }
+
+                                if(percent <= 0)
+                                {
+                                    World.Player.Flags &= ~Flags.Frozen;
+                                }
                             }
                         }
                     }
