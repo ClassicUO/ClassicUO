@@ -74,6 +74,7 @@ namespace ClassicUO.Game
             UoAssist = new UoAssist(this);
             TargetManager = new TargetManager(this);
             DelayedObjectClickManager = new DelayedObjectClickManager(this);
+            BoatMovingManager = new BoatMovingManager(this);
         }
 
         public Point RangeSize;
@@ -113,6 +114,8 @@ namespace ClassicUO.Game
         public TargetManager TargetManager { get; }
 
         public DelayedObjectClickManager DelayedObjectClickManager { get; }
+
+        public BoatMovingManager BoatMovingManager { get; }
 
         public Dictionary<uint, Item> Items { get; } = new Dictionary<uint, Item>();
 

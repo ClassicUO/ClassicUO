@@ -103,7 +103,7 @@ namespace ClassicUO.Game.Scenes
                         _lastBoatDirection = facing - 1;
                         _boatIsMoving = true;
 
-                        BoatMovingManager.MoveRequest(facing - 1, (byte)(run ? 2 : 1));
+                        _world.BoatMovingManager.MoveRequest(facing - 1, (byte)(run ? 2 : 1));
                     }
                 }
                 else
@@ -874,7 +874,7 @@ namespace ClassicUO.Game.Scenes
             if (_boatIsMoving)
             {
                 _boatIsMoving = false;
-                BoatMovingManager.MoveRequest(_world.Player.Direction, 0);
+                _world.BoatMovingManager.MoveRequest(_world.Player.Direction, 0);
             }
 
             return UIManager.IsMouseOverWorld;
