@@ -65,7 +65,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (ProfileManager.CurrentProfile.DisplaySkillBarOnChange)
                 {
-                    SkillProgressBar.QueManager.AddSkill(e.Index);
+                    UIManager.Add(new SkillProgressBar(e.Index));
                 }
             };
 

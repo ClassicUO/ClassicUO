@@ -3555,7 +3555,6 @@ namespace ClassicUO.Network
             if (entity == World.Player)
             {
                 UoAssist.SignalHits();
-                SpellVisualRangeManager.Instance.ClearCasting();
             }
         }
 
