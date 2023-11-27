@@ -31,6 +31,7 @@
 #endregion
 
 using System.Collections.Generic;
+using System.Linq;
 using System.Xml;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
@@ -88,6 +89,19 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _infobarControls.Add(info);
                 Add(info);
+            }
+        }
+
+        public void UpdateOptions()
+        {
+            ResetItems();
+        }
+
+        public static void UpdateAllOptions()
+        {
+            foreach(InfoBarGump g in UIManager.Gumps.OfType<InfoBarGump>())
+            {
+                g.UpdateOptions();
             }
         }
 
