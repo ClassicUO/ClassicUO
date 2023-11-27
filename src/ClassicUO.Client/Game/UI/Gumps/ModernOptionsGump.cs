@@ -2222,9 +2222,9 @@ namespace ClassicUO.Game.UI.Gumps
             content.BlankLine();
             content.BlankLine();
 
-            content.AddToRight(GenerateFontSelector("Infobar font", ProfileManager.CurrentProfile.InfoBarFont, (i, s) => { ProfileManager.CurrentProfile.InfoBarFont = s; }), true, page);
+            content.AddToRight(GenerateFontSelector("Infobar font", ProfileManager.CurrentProfile.InfoBarFont, (i, s) => { ProfileManager.CurrentProfile.InfoBarFont = s; InfoBarGump.UpdateAllOptions(); }), true, page);
             content.Indent();
-            content.AddToRight(new SliderWithLabel("Size", 0, Theme.SLIDER_WIDTH, 5, 40, profile.InfoBarFontSize, (i) => { profile.InfoBarFontSize = i; }), true, page);
+            content.AddToRight(new SliderWithLabel("Size", 0, Theme.SLIDER_WIDTH, 5, 40, profile.InfoBarFontSize, (i) => { profile.InfoBarFontSize = i; InfoBarGump.UpdateAllOptions(); }), true, page);
             content.RemoveIndent();
             content.BlankLine();
 
