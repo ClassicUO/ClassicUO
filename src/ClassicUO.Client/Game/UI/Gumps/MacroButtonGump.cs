@@ -261,7 +261,7 @@ namespace ClassicUO.Game.UI.Gumps
                     );
             }
 
-            if (!HideLabel)
+            if (!HideLabel && _gText != null)
             {
                 _gText.Hue = (ushort)(MouseIsOver ? 53 : 0x03b2);
                 _gText.Draw(batcher, x, y + ((Height >> 1) - (_gText.Height >> 1)), Alpha);

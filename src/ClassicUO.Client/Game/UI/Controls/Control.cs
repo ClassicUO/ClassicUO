@@ -261,7 +261,7 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        
+
 
         public virtual bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
@@ -342,6 +342,37 @@ namespace ClassicUO.Game.UI.Controls
                     }
 
                     WantUpdateSize = false;
+                }
+            }
+        }
+
+        public void ForceSizeUpdate()
+        {
+            int h = 0, w = 0;
+            for (int i = 0; i < Children.Count; i++)
+            {
+                Control c = Children[i];
+                if ((c.Page == 0 || c.Page == ActivePage) && c.IsVisible && !c.IsDisposed)
+                {
+                    if (w < c.Bounds.Right)
+                    {
+                        w = c.Bounds.Right;
+                    }
+
+                    if (h < c.Bounds.Bottom)
+                    {
+                        h = c.Bounds.Bottom;
+                    }
+                }
+
+                if (w != Width)
+                {
+                    Width = w;
+                }
+
+                if (h != Height)
+                {
+                    Height = h;
                 }
             }
         }
@@ -830,7 +861,7 @@ namespace ClassicUO.Game.UI.Controls
                 }
 
                 Children.Clear();
-            } 
+            }
 
             IsDisposed = true;
         }

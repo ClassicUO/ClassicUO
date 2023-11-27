@@ -29,6 +29,7 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly Dictionary<Layer[], ItemSlot> itemLayerSlots;
         private Label titleLabel;
         private static int lastX = 100, lastY = 100;
+        private GumpPic backgroundImage;
         #endregion
 
         public override GumpType GumpType => GumpType.PaperDoll;
@@ -58,7 +59,7 @@ namespace ClassicUO.Game.UI.Gumps
             itemLayerSlots = new Dictionary<Layer[], ItemSlot>();
             #endregion
 
-            Add(new GumpPic(0, 0, 40312, ProfileManager.CurrentProfile.ModernPaperDollHue));
+            Add(backgroundImage = new GumpPic(0, 0, 40312, ProfileManager.CurrentProfile.ModernPaperDollHue));
 
             HitBox _menuHit = new HitBox(Width - 26, 1, 25, 16, alpha: 0f);
             Add(_menuHit);
@@ -235,6 +236,19 @@ namespace ClassicUO.Game.UI.Gumps
                 UpdateTitle(m.Title);
         }
 
+        public void UpdateOptions()
+        {
+            backgroundImage.Hue = ProfileManager.CurrentProfile.ModernPaperDollHue;
+        }
+
+        public static void UpdateAllOptions()
+        {
+            foreach(ModernPaperdoll p in UIManager.Gumps.OfType<ModernPaperdoll>())
+            {
+                p.UpdateOptions();
+            }
+        }
+
         public override void Update()
         {
             base.Update();
@@ -379,6 +393,9 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (!isOPLEvent)
                     durablityBar.IsVisible = false;
+
+                durablityBar.Hue = ProfileManager.CurrentProfile.ModernPaperDollDurabilityHue;
+
                 tcount++;
                 Task.Factory.StartNew(() =>
                 {
