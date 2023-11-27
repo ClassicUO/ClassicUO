@@ -90,7 +90,7 @@ namespace ClassicUO.Game.UI.Gumps
                     color: 0xFFFF
                 )
                 {
-                    IsChecked = Client.Game.GetScene<GameScene>().NameOverHeadManager.TypeAllowed == NameOverheadTypeAllowed.All
+                    IsChecked = World.NameOverHeadManager.TypeAllowed == NameOverheadTypeAllowed.All
                 }
             );
 
@@ -106,7 +106,7 @@ namespace ClassicUO.Game.UI.Gumps
                 )
                 {
                     Y = all.Y + all.Height,
-                    IsChecked = Client.Game.GetScene<GameScene>().NameOverHeadManager.TypeAllowed == NameOverheadTypeAllowed.Mobiles
+                    IsChecked = World.NameOverHeadManager.TypeAllowed == NameOverheadTypeAllowed.Mobiles
                 }
             );
 
@@ -122,7 +122,7 @@ namespace ClassicUO.Game.UI.Gumps
                 )
                 {
                     Y = mobiles.Y + mobiles.Height,
-                    IsChecked = Client.Game.GetScene<GameScene>().NameOverHeadManager.TypeAllowed == NameOverheadTypeAllowed.Items
+                    IsChecked = World.NameOverHeadManager.TypeAllowed == NameOverheadTypeAllowed.Items
                 }
             );
 
@@ -138,7 +138,7 @@ namespace ClassicUO.Game.UI.Gumps
                 )
                 {
                     Y = items.Y + items.Height,
-                    IsChecked = Client.Game.GetScene<GameScene>().NameOverHeadManager.TypeAllowed == NameOverheadTypeAllowed.MobilesCorpses
+                    IsChecked = World.NameOverHeadManager.TypeAllowed == NameOverheadTypeAllowed.MobilesCorpses
                 }
             );
 
@@ -152,7 +152,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (all.IsChecked)
                 {
-                    Client.Game.GetScene<GameScene>().NameOverHeadManager.TypeAllowed = NameOverheadTypeAllowed.All;
+                    World.NameOverHeadManager.TypeAllowed = NameOverheadTypeAllowed.All;
                 }
             };
 
@@ -160,7 +160,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (mobiles.IsChecked)
                 {
-                    Client.Game.GetScene<GameScene>().NameOverHeadManager.TypeAllowed = NameOverheadTypeAllowed.Mobiles;
+                    World.NameOverHeadManager.TypeAllowed = NameOverheadTypeAllowed.Mobiles;
                 }
             };
 
@@ -168,7 +168,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (items.IsChecked)
                 {
-                    Client.Game.GetScene<GameScene>().NameOverHeadManager.TypeAllowed = NameOverheadTypeAllowed.Items;
+                    World.NameOverHeadManager.TypeAllowed = NameOverheadTypeAllowed.Items;
                 }
             };
 
@@ -176,7 +176,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (mobilesCorpses.IsChecked)
                 {
-                    Client.Game.GetScene<GameScene>().NameOverHeadManager.TypeAllowed = NameOverheadTypeAllowed.MobilesCorpses;
+                    World.NameOverHeadManager.TypeAllowed = NameOverheadTypeAllowed.MobilesCorpses;
                 }
             };
         }

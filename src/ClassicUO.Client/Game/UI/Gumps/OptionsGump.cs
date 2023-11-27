@@ -1985,7 +1985,7 @@ namespace ClassicUO.Game.UI.Gumps
                             return;
                         }
 
-                        MacroManager manager = Client.Game.GetScene<GameScene>().Macros;
+                        MacroManager manager = World.Macros;
 
                         if (manager.FindMacro(name) != null)
                         {
@@ -2088,7 +2088,7 @@ namespace ClassicUO.Game.UI.Gumps
                             {
                                 UIManager.Gumps.OfType<MacroButtonGump>().FirstOrDefault(s => s._macro == _macroControl.Macro)?.Dispose();
 
-                                Client.Game.GetScene<GameScene>().Macros.Remove(_macroControl.Macro);
+                                World.Macros.Remove(_macroControl.Macro);
 
                                 _macroControl.Dispose();
                             }
@@ -2103,7 +2103,7 @@ namespace ClassicUO.Game.UI.Gumps
             };
 
 
-            MacroManager macroManager = Client.Game.GetScene<GameScene>().Macros;
+            MacroManager macroManager = World.Macros;
 
             for (Macro macro = (Macro) macroManager.Items; macro != null; macro = (Macro) macro.Next)
             {
@@ -4006,7 +4006,7 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.SpellDisplayFormat = _spellFormatBox.Text;
 
             // macros
-            Client.Game.GetScene<GameScene>().Macros.Save();
+            World.Macros.Save();
 
             // counters
 

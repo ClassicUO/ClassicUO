@@ -107,11 +107,8 @@ namespace ClassicUO.Game.Scenes
             _useItemQueue = new UseItemQueue(world);
         }
 
-        public NameOverHeadManager NameOverHeadManager { get; private set; }
         public CommandManager CommandManager { get; private set; }
         public bool UpdateDrawPosition { get; set; }
-        public HotkeysManager Hotkeys { get; private set; }
-        public MacroManager Macros { get; private set; }
         public InfoBarManager InfoBars { get; private set; }
         public Weather Weather { get; private set; }
         public bool DisconnectionRequested { get; set; }
@@ -142,10 +139,9 @@ namespace ClassicUO.Game.Scenes
             Camera.Bounds.Height = Math.Max(0, ProfileManager.CurrentProfile.GameWindowSize.Y);
 
             Client.Game.GameCursor.ItemHold.Clear();
-            Hotkeys = new HotkeysManager();
-            Macros = new MacroManager(_world);
-            Macros.Load();
 
+            _world.Macros.Clear();
+            _world.Macros.Load();
             _animatedStaticsManager = new AnimatedStaticsManager();
             _animatedStaticsManager.Initialize();
             InfoBars = new InfoBarManager();
@@ -163,7 +159,6 @@ namespace ClassicUO.Game.Scenes
 
             CommandManager = new CommandManager(_world);
             CommandManager.Initialize();
-            NameOverHeadManager = new NameOverHeadManager(_world);
 
             NetClient.Socket.Disconnected += SocketOnDisconnected;
             _world.MessageManager.MessageReceived += ChatOnMessageReceived;
@@ -348,7 +343,8 @@ namespace ClassicUO.Game.Scenes
 
             ProfileManager.CurrentProfile?.Save(_world, ProfileManager.ProfilePath);
 
-            Macros.Save();
+            _world.Macros.Save();
+            _world.Macros.Clear();
             InfoBars.Save();
             ProfileManager.UnLoadProfile();
 
@@ -368,8 +364,6 @@ namespace ClassicUO.Game.Scenes
             _world.DelayedObjectClickManager.Clear();
 
             _useItemQueue?.Clear();
-            Hotkeys = null;
-            Macros = null;
             _world.MessageManager.MessageReceived -= ChatOnMessageReceived;
 
             Settings.GlobalSettings.WindowSize = new Point(
@@ -630,17 +624,17 @@ namespace ClassicUO.Game.Scenes
 
             GetViewPort();
 
-            var useObjectHandles = NameOverHeadManager.IsToggled || Keyboard.Ctrl && Keyboard.Shift;
+            var useObjectHandles = _world.NameOverHeadManager.IsToggled || Keyboard.Ctrl && Keyboard.Shift;
             if (useObjectHandles != _useObjectHandles)
             {
                 _useObjectHandles = useObjectHandles;
                 if (_useObjectHandles)
                 {
-                    NameOverHeadManager.Open();
+                    _world.NameOverHeadManager.Open();
                 }
                 else
                 {
-                    NameOverHeadManager.Close();
+                    _world.NameOverHeadManager.Close();
                 }
             }
 
@@ -829,7 +823,7 @@ namespace ClassicUO.Game.Scenes
                 }
             }
 
-            Macros.Update();
+            _world.Macros.Update();
 
             if (
                 (currentProfile.CorpseOpenOptions == 1 || currentProfile.CorpseOpenOptions == 3)

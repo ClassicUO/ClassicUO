@@ -1538,7 +1538,7 @@ namespace ClassicUO.Game.Managers
                     break;
 
                 case MacroType.NamesOnOff:
-                    Client.Game.GetScene<GameScene>().NameOverHeadManager.ToggleOverheads();
+                    _world.NameOverHeadManager.ToggleOverheads();
 
                     break;
 
