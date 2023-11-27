@@ -523,7 +523,7 @@ namespace ClassicUO.Game.UI.Gumps
                         return;
                     }
 
-                    if (scene.Macros.FindMacro(key, false, true, false) != null)
+                    if (_gump.World.Macros.FindMacro(key, false, true, false) != null)
                     {
                         return;
                     }
@@ -553,7 +553,7 @@ namespace ClassicUO.Game.UI.Gumps
                         return;
                     }
 
-                    if (scene.Macros.FindMacro(key, false, true, false) != null)
+                    if (_gump.World.Macros.FindMacro(key, false, true, false) != null)
                     {
                         return;
                     }

@@ -1485,7 +1485,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _spellID = spellID;
                 _spellName = spellName;
 
-                _mm = Client.Game.GetScene<GameScene>().Macros;
+                _mm = gump.World.Macros;
             }
 
             public override void Update()

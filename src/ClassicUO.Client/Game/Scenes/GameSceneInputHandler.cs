@@ -947,7 +947,7 @@ namespace ClassicUO.Game.Scenes
         {
             if (CanExecuteMacro())
             {
-                Macro macro = Macros.FindMacro(button, Keyboard.Alt, Keyboard.Ctrl, Keyboard.Shift);
+                Macro macro = _world.Macros.FindMacro(button, Keyboard.Alt, Keyboard.Ctrl, Keyboard.Shift);
 
                 if (macro != null && button != MouseButtonType.None)
                 {
@@ -979,7 +979,7 @@ namespace ClassicUO.Game.Scenes
         {
             if (Client.Game.Scene.Camera.PeekingToMouse)
             {
-                Macro macro = Macros.FindMacro(button, Keyboard.Alt, Keyboard.Ctrl, Keyboard.Shift);
+                Macro macro = _world.Macros.FindMacro(button, Keyboard.Alt, Keyboard.Ctrl, Keyboard.Shift);
 
                 if (
                     macro != null
@@ -1020,7 +1020,7 @@ namespace ClassicUO.Game.Scenes
 
             if (CanExecuteMacro())
             {
-                Macro macro = Macros.FindMacro(up, Keyboard.Alt, Keyboard.Ctrl, Keyboard.Shift);
+                Macro macro = _world.Macros.FindMacro(up, Keyboard.Alt, Keyboard.Ctrl, Keyboard.Shift);
 
                 if (macro != null)
                 {
@@ -1281,7 +1281,7 @@ namespace ClassicUO.Game.Scenes
 
             if (CanExecuteMacro())
             {
-                Macro macro = Macros.FindMacro(
+                Macro macro = _world.Macros.FindMacro(
                     e.keysym.sym,
                     Keyboard.Alt,
                     Keyboard.Ctrl,
@@ -1407,7 +1407,7 @@ namespace ClassicUO.Game.Scenes
 
             if (_flags[4] || Client.Game.Scene.Camera.PeekingToMouse)
             {
-                Macro macro = Macros.FindMacro(
+                Macro macro = _world.Macros.FindMacro(
                     e.keysym.sym,
                     Keyboard.Alt,
                     Keyboard.Ctrl,
@@ -1477,9 +1477,9 @@ namespace ClassicUO.Game.Scenes
                                     break;
                             }
 
-                            Macros.SetMacroToExecute(mac);
-                            Macros.WaitForTargetTimer = 0;
-                            Macros.Update();
+                            _world.Macros.SetMacroToExecute(mac);
+                            _world.Macros.WaitForTargetTimer = 0;
+                            _world.Macros.Update();
 
                             for (int i = 0; i < 4; i++)
                             {
@@ -1546,10 +1546,10 @@ namespace ClassicUO.Game.Scenes
 
         private void ExecuteMacro(MacroObject macro)
         {
-            Macros.SetMacroToExecute(macro);
-            Macros.WaitingBandageTarget = false;
-            Macros.WaitForTargetTimer = 0;
-            Macros.Update();
+            _world.Macros.SetMacroToExecute(macro);
+            _world.Macros.WaitingBandageTarget = false;
+            _world.Macros.WaitForTargetTimer = 0;
+            _world.Macros.Update();
         }
     }
 }

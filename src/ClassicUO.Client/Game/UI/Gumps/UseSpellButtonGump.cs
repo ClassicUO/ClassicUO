@@ -62,7 +62,7 @@ namespace ClassicUO.Game.UI.Gumps
             AcceptMouseInput = true;
             CanCloseWithRightClick = true;
 
-            _mm = Client.Game.GetScene<GameScene>().Macros;
+            _mm = world.Macros;
         }
 
         public UseSpellButtonGump(World world, SpellDefinition spell) : this(world)
