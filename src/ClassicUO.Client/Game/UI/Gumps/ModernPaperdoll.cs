@@ -243,7 +243,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public static void UpdateAllOptions()
         {
-            foreach(ModernPaperdoll p in UIManager.Gumps.OfType<ModernPaperdoll>())
+            foreach (ModernPaperdoll p in UIManager.Gumps.OfType<ModernPaperdoll>())
             {
                 p.UpdateOptions();
             }
@@ -498,7 +498,7 @@ namespace ClassicUO.Game.UI.Gumps
                     animID = 0x0223;
                 }
 
-                Client.Game.Animations.ConvertBodyIfNeeded(ref graphic);                
+                Client.Game.Animations.ConvertBodyIfNeeded(ref graphic);
 
                 if (AnimationsLoader.Instance.EquipConversions.TryGetValue(graphic, out Dictionary<ushort, EquipConvData> dict))
                 {
@@ -862,7 +862,18 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Add(PaperDollPreview = new PaperDollInteractable(0, 0, LocalSerial, null) { AcceptMouseInput = false });
 
-                Add(new SimpleBorder() { Width = Width, Height = Height, Alpha = 0.85f });
+                Add(new SimpleBorder() { Width = Width - 1, Height = Height - 1, Alpha = 0.85f });
+
+            }
+
+            protected override void OnMouseUp(int x, int y, MouseButtonType button)
+            {
+                base.OnMouseUp(x, y, button);
+
+                if (Keyboard.Alt && button == MouseButtonType.Left)
+                {
+                    Client.Game.ClipboardScreenshot(Bounds);
+                }
             }
         }
 
