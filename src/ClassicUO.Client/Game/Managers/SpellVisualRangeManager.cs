@@ -83,7 +83,7 @@ namespace ClassicUO.Game.Managers
             LastSpellTime = DateTime.Now;
             currentSpell = spell;
             isCasting = true;
-            if(currentSpell != null && currentSpell.FreezeCharacterWhileCasting)
+            if (currentSpell != null && currentSpell.FreezeCharacterWhileCasting)
             {
                 World.Player.Flags |= Flags.Frozen;
             }
@@ -146,6 +146,14 @@ namespace ClassicUO.Game.Managers
                 {
                     return true;
                 }
+                else if (currentSpell.FreezeCharacterWhileCasting)
+                {
+                    World.Player.Flags &= ~Flags.Frozen;
+                }
+            }
+            else if (currentSpell.FreezeCharacterWhileCasting)
+            {
+                World.Player.Flags &= ~Flags.Frozen;
             }
 
             return false;
@@ -502,6 +510,11 @@ namespace ClassicUO.Game.Managers
                                 if (widthFromPercent > 0)
                                 {
                                     batcher.DrawTiled(foreground, new Rectangle(x, y, widthFromPercent, barBoundsF.Height), barBoundsF, hue);
+                                }
+
+                                if (percent <= 0 && i.FreezeCharacterWhileCasting)
+                                {
+                                    World.Player.Flags &= ~Flags.Frozen;
                                 }
                             }
                         }
