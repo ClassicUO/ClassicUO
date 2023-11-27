@@ -1,11 +1,15 @@
+<p align="center"><img src="https://github.com/bittiez/TazUO/assets/3859393/832c4cf3-8525-419b-ad16-3c5f7de1b80c" width="300" height="300"></p>
+
 <p align="center">
-    <img src="https://i.imgur.com/CgpwyIQ.png" width="190" height="200" >
+    <a href="https://discord.gg/VdyCpjQ">
+    <img src="https://img.shields.io/discord/1087124353155608617.svg?logo=discord"
+    alt="chat on Discord"></a>
 </p>
-
-
 ------------------------------------------------------------------
-Dev status: [![Build-Test](https://github.com/bittiez/TazUO/actions/workflows/build-test.yml/badge.svg?branch=dev)](https://github.com/bittiez/TazUO/actions/workflows/build-test.yml)  
-Release status: [![Build-Test](https://github.com/bittiez/TazUO/actions/workflows/build-test.yml/badge.svg?branch=main)](https://github.com/bittiez/TazUO/actions/workflows/build-test.yml)
+
+
+Release: [![Release](https://github.com/bittiez/TazUO/actions/workflows/build-test.yml/badge.svg?branch=main)](https://github.com/bittiez/TazUO/actions/workflows/build-test.yml)  Dev: [![Dev](https://github.com/bittiez/TazUO/actions/workflows/build-test.yml/badge.svg?branch=dev)](https://github.com/bittiez/TazUO/actions/workflows/build-test.yml)   
+
 
 Join TazUO's discord for ideas/support/updates -> https://discord.gg/SqwtB5g95H
 
@@ -46,7 +50,7 @@ And others in our [wiki](../../wiki)
 ![image](https://user-images.githubusercontent.com/3859393/226114417-e68b1653-f719-49b3-b799-0beb07e0a211.png)
 
 
-Original CUO Readme:
+# Original CUO Readme:
 ------------------------------------------------------------------
 
 An open source implementation of the Ultima Online Classic Client.
