@@ -4580,7 +4580,7 @@ namespace ClassicUO.Network
                     else
                     {
                         house.Generate();
-                        Client.Game.GetScene<GameScene>().BoatMovingManager.ClearSteps(serial);
+                        world.BoatMovingManager.ClearSteps(serial);
 
                         UIManager.GetGump<MiniMapGump>()?.RequestUpdateContents();
 
@@ -5347,7 +5347,7 @@ namespace ClassicUO.Network
                 Client.Game.GetScene<GameScene>()?.UpdateMaxDrawZ(true);
             }
 
-            Client.Game.GetScene<GameScene>().BoatMovingManager.ClearSteps(serial);
+            world.BoatMovingManager.ClearSteps(serial);
         }
 
         private static void CharacterTransferLog(World world, ref StackDataReader p) { }
@@ -5805,7 +5805,7 @@ namespace ClassicUO.Network
 
             if (smooth)
             {
-                Client.Game.GetScene<GameScene>().BoatMovingManager.AddStep(
+                world.BoatMovingManager.AddStep(
                     serial,
                     boatSpeed,
                     movingDirection,
@@ -5879,7 +5879,7 @@ namespace ClassicUO.Network
 
                 if (smooth)
                 {
-                    Client.Game.GetScene<GameScene>().BoatMovingManager.PushItemToList(
+                    world.BoatMovingManager.PushItemToList(
                         serial,
                         cSerial,
                         x - cx,

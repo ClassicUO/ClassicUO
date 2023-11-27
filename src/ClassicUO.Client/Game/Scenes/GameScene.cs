@@ -107,7 +107,6 @@ namespace ClassicUO.Game.Scenes
             _useItemQueue = new UseItemQueue(world);
         }
 
-        public BoatMovingManager BoatMovingManager { get; private set; }
         public NameOverHeadManager NameOverHeadManager { get; private set; }
         public CommandManager CommandManager { get; private set; }
         public bool UpdateDrawPosition { get; set; }
@@ -165,7 +164,6 @@ namespace ClassicUO.Game.Scenes
             CommandManager = new CommandManager(_world);
             CommandManager.Initialize();
             NameOverHeadManager = new NameOverHeadManager(_world);
-            BoatMovingManager = new BoatMovingManager(_world);
 
             NetClient.Socket.Disconnected += SocketOnDisconnected;
             _world.MessageManager.MessageReceived += ChatOnMessageReceived;
@@ -787,7 +785,7 @@ namespace ClassicUO.Game.Scenes
 
             _world.Update();
             _animatedStaticsManager.Process();
-            BoatMovingManager.Update();
+            _world.BoatMovingManager.Update();
             _world.Player.Pathfinder.ProcessAutoWalk();
             _world.DelayedObjectClickManager.Update();
 

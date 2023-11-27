@@ -476,7 +476,7 @@ namespace ClassicUO.Game.GameObjects
                 Client.Game.GetScene<GameScene>()?.UpdateMaxDrawZ(true);
             }
 
-            Client.Game.GetScene<GameScene>()?.BoatMovingManager.ClearSteps(Serial);
+            World.BoatMovingManager.ClearSteps(Serial);
         }
 
         public override void CheckGraphicChange(byte animIndex = 0)
