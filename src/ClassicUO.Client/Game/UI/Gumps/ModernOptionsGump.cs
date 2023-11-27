@@ -5326,139 +5326,103 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 }
             }
+        }
 
-            private class HotkeyBox : Control
+        private class HotkeyBox : Control
+        {
+            private bool _actived;
+            private readonly ModernButton _buttonOK, _buttonCancel;
+            private readonly TextBox _label;
+
+            public HotkeyBox()
             {
-                private bool _actived;
-                private readonly ModernButton _buttonOK, _buttonCancel;
-                private readonly TextBox _label;
+                CanMove = false;
+                AcceptMouseInput = true;
+                AcceptKeyboardInput = true;
 
-                public HotkeyBox()
+                Width = 300;
+                Height = 40;
+
+                AlphaBlendControl bg = new AlphaBlendControl() { Width = 150, Height = 40, AcceptMouseInput = true };
+                Add(bg);
+                bg.MouseUp += LabelOnMouseUp;
+
+                Add(_label = new TextBox("None", Theme.FONT, Theme.STANDARD_TEXT_SIZE, 150, Theme.TEXT_FONT_COLOR, align: FontStashSharp.RichText.TextHorizontalAlignment.Center, strokeEffect: false));
+                _label.Y = (bg.Height >> 1) - (_label.Height >> 1);
+
+                _label.MouseUp += LabelOnMouseUp;
+
+                Add(_buttonOK = new ModernButton(152, 0, 75, 40, ButtonAction.Activate, "Save", Theme.BUTTON_FONT_COLOR) { ButtonParameter = (int)ButtonState.Ok });
+
+                Add(_buttonCancel = new ModernButton(_buttonOK.Bounds.Right + 5, 0, 75, 40, ButtonAction.Activate, "Cancel", Theme.BUTTON_FONT_COLOR) { ButtonParameter = (int)ButtonState.Cancel });
+
+                WantUpdateSize = false;
+                IsActive = false;
+            }
+
+            public SDL.SDL_Keycode Key { get; private set; }
+            public MouseButtonType MouseButton { get; private set; }
+            public bool WheelScroll { get; private set; }
+            public bool WheelUp { get; private set; }
+            public SDL.SDL_Keymod Mod { get; private set; }
+
+            public bool IsActive
+            {
+                get => _actived;
+                set
                 {
-                    CanMove = false;
-                    AcceptMouseInput = true;
-                    AcceptKeyboardInput = true;
+                    _actived = value;
 
-                    Width = 300;
-                    Height = 40;
-
-                    AlphaBlendControl bg = new AlphaBlendControl() { Width = 150, Height = 40, AcceptMouseInput = true };
-                    Add(bg);
-                    bg.MouseUp += LabelOnMouseUp;
-
-                    Add(_label = new TextBox("None", Theme.FONT, Theme.STANDARD_TEXT_SIZE, 150, Theme.TEXT_FONT_COLOR, align: FontStashSharp.RichText.TextHorizontalAlignment.Center, strokeEffect: false));
-                    _label.Y = (bg.Height >> 1) - (_label.Height >> 1);
-
-                    _label.MouseUp += LabelOnMouseUp;
-
-                    Add(_buttonOK = new ModernButton(152, 0, 75, 40, ButtonAction.Activate, "Save", Theme.BUTTON_FONT_COLOR) { ButtonParameter = (int)ButtonState.Ok });
-
-                    Add(_buttonCancel = new ModernButton(_buttonOK.Bounds.Right + 5, 0, 75, 40, ButtonAction.Activate, "Cancel", Theme.BUTTON_FONT_COLOR) { ButtonParameter = (int)ButtonState.Cancel });
-
-                    WantUpdateSize = false;
-                    IsActive = false;
-                }
-
-                public SDL.SDL_Keycode Key { get; private set; }
-                public MouseButtonType MouseButton { get; private set; }
-                public bool WheelScroll { get; private set; }
-                public bool WheelUp { get; private set; }
-                public SDL.SDL_Keymod Mod { get; private set; }
-
-                public bool IsActive
-                {
-                    get => _actived;
-                    set
+                    if (value)
                     {
-                        _actived = value;
-
-                        if (value)
-                        {
-                            _buttonOK.IsVisible = _buttonCancel.IsVisible = true;
-                            _buttonOK.IsEnabled = _buttonCancel.IsEnabled = true;
-                        }
-                        else
-                        {
-                            _buttonOK.IsVisible = _buttonCancel.IsVisible = false;
-                            _buttonOK.IsEnabled = _buttonCancel.IsEnabled = false;
-                        }
+                        _buttonOK.IsVisible = _buttonCancel.IsVisible = true;
+                        _buttonOK.IsEnabled = _buttonCancel.IsEnabled = true;
+                    }
+                    else
+                    {
+                        _buttonOK.IsVisible = _buttonCancel.IsVisible = false;
+                        _buttonOK.IsEnabled = _buttonCancel.IsEnabled = false;
                     }
                 }
+            }
 
-                public event EventHandler HotkeyChanged, HotkeyCancelled;
+            public event EventHandler HotkeyChanged, HotkeyCancelled;
 
-                protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
+            protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
+            {
+                if (IsActive)
                 {
-                    if (IsActive)
-                    {
-                        SetKey(key, mod);
-                    }
+                    SetKey(key, mod);
                 }
+            }
 
-                public void SetKey(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
+            public void SetKey(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
+            {
+                if (key == SDL.SDL_Keycode.SDLK_UNKNOWN && mod == SDL.SDL_Keymod.KMOD_NONE)
                 {
-                    if (key == SDL.SDL_Keycode.SDLK_UNKNOWN && mod == SDL.SDL_Keymod.KMOD_NONE)
+                    ResetBinding();
+
+                    Key = key;
+                    Mod = mod;
+                }
+                else
+                {
+                    string newvalue = KeysTranslator.TryGetKey(key, mod);
+
+                    if (!string.IsNullOrEmpty(newvalue) && key != SDL.SDL_Keycode.SDLK_UNKNOWN)
                     {
                         ResetBinding();
 
                         Key = key;
                         Mod = mod;
-                    }
-                    else
-                    {
-                        string newvalue = KeysTranslator.TryGetKey(key, mod);
-
-                        if (!string.IsNullOrEmpty(newvalue) && key != SDL.SDL_Keycode.SDLK_UNKNOWN)
-                        {
-                            ResetBinding();
-
-                            Key = key;
-                            Mod = mod;
-                            _label.Text = newvalue;
-                        }
-                    }
-                }
-
-                protected override void OnMouseDown(int x, int y, MouseButtonType button)
-                {
-                    if (button == MouseButtonType.Middle || button == MouseButtonType.XButton1 || button == MouseButtonType.XButton2)
-                    {
-                        SDL.SDL_Keymod mod = SDL.SDL_Keymod.KMOD_NONE;
-
-                        if (Keyboard.Alt)
-                        {
-                            mod |= SDL.SDL_Keymod.KMOD_ALT;
-                        }
-
-                        if (Keyboard.Shift)
-                        {
-                            mod |= SDL.SDL_Keymod.KMOD_SHIFT;
-                        }
-
-                        if (Keyboard.Ctrl)
-                        {
-                            mod |= SDL.SDL_Keymod.KMOD_CTRL;
-                        }
-
-                        SetMouseButton(button, mod);
-                    }
-                }
-
-                public void SetMouseButton(MouseButtonType button, SDL.SDL_Keymod mod)
-                {
-                    string newvalue = KeysTranslator.GetMouseButton(button, mod);
-
-                    if (!string.IsNullOrEmpty(newvalue) && button != MouseButtonType.None)
-                    {
-                        ResetBinding();
-
-                        MouseButton = button;
-                        Mod = mod;
                         _label.Text = newvalue;
                     }
                 }
+            }
 
-                protected override void OnMouseWheel(MouseEventType delta)
+            protected override void OnMouseDown(int x, int y, MouseButtonType button)
+            {
+                if (button == MouseButtonType.Middle || button == MouseButtonType.XButton1 || button == MouseButtonType.XButton2)
                 {
                     SDL.SDL_Keymod mod = SDL.SDL_Keymod.KMOD_NONE;
 
@@ -5477,74 +5441,110 @@ namespace ClassicUO.Game.UI.Gumps
                         mod |= SDL.SDL_Keymod.KMOD_CTRL;
                     }
 
-                    if (delta == MouseEventType.WheelScrollUp)
-                    {
-                        SetMouseWheel(true, mod);
-                    }
-                    else if (delta == MouseEventType.WheelScrollDown)
-                    {
-                        SetMouseWheel(false, mod);
-                    }
+                    SetMouseButton(button, mod);
                 }
+            }
 
-                public void SetMouseWheel(bool wheelUp, SDL.SDL_Keymod mod)
+            public void SetMouseButton(MouseButtonType button, SDL.SDL_Keymod mod)
+            {
+                string newvalue = KeysTranslator.GetMouseButton(button, mod);
+
+                if (!string.IsNullOrEmpty(newvalue) && button != MouseButtonType.None)
                 {
-                    string newvalue = KeysTranslator.GetMouseWheel(wheelUp, mod);
+                    ResetBinding();
 
-                    if (!string.IsNullOrEmpty(newvalue))
-                    {
-                        ResetBinding();
-
-                        WheelScroll = true;
-                        WheelUp = wheelUp;
-                        Mod = mod;
-                        _label.Text = newvalue;
-                    }
+                    MouseButton = button;
+                    Mod = mod;
+                    _label.Text = newvalue;
                 }
+            }
 
-                private void ResetBinding()
+            protected override void OnMouseWheel(MouseEventType delta)
+            {
+                SDL.SDL_Keymod mod = SDL.SDL_Keymod.KMOD_NONE;
+
+                if (Keyboard.Alt)
                 {
-                    Key = 0;
-                    MouseButton = MouseButtonType.None;
-                    WheelScroll = false;
-                    Mod = 0;
-                    _label.Text = "None";
+                    mod |= SDL.SDL_Keymod.KMOD_ALT;
                 }
 
-                private void LabelOnMouseUp(object sender, MouseEventArgs e)
+                if (Keyboard.Shift)
                 {
-                    IsActive = true;
-                    SetKeyboardFocus();
+                    mod |= SDL.SDL_Keymod.KMOD_SHIFT;
                 }
 
-                public override void OnButtonClick(int buttonID)
+                if (Keyboard.Ctrl)
                 {
-                    switch ((ButtonState)buttonID)
-                    {
-                        case ButtonState.Ok:
-                            HotkeyChanged.Raise(this);
-
-                            break;
-
-                        case ButtonState.Cancel:
-                            _label.Text  = "None";
-
-                            HotkeyCancelled.Raise(this);
-
-                            Key = SDL.SDL_Keycode.SDLK_UNKNOWN;
-                            Mod = SDL.SDL_Keymod.KMOD_NONE;
-
-                            break;
-                    }
-
-                    IsActive = false;
+                    mod |= SDL.SDL_Keymod.KMOD_CTRL;
                 }
 
-                private enum ButtonState
+                if (delta == MouseEventType.WheelScrollUp)
                 {
-                    Ok,
-                    Cancel
+                    SetMouseWheel(true, mod);
                 }
+                else if (delta == MouseEventType.WheelScrollDown)
+                {
+                    SetMouseWheel(false, mod);
+                }
+            }
+
+            public void SetMouseWheel(bool wheelUp, SDL.SDL_Keymod mod)
+            {
+                string newvalue = KeysTranslator.GetMouseWheel(wheelUp, mod);
+
+                if (!string.IsNullOrEmpty(newvalue))
+                {
+                    ResetBinding();
+
+                    WheelScroll = true;
+                    WheelUp = wheelUp;
+                    Mod = mod;
+                    _label.Text = newvalue;
+                }
+            }
+
+            private void ResetBinding()
+            {
+                Key = 0;
+                MouseButton = MouseButtonType.None;
+                WheelScroll = false;
+                Mod = 0;
+                _label.Text = "None";
+            }
+
+            private void LabelOnMouseUp(object sender, MouseEventArgs e)
+            {
+                IsActive = true;
+                SetKeyboardFocus();
+            }
+
+            public override void OnButtonClick(int buttonID)
+            {
+                switch ((ButtonState)buttonID)
+                {
+                    case ButtonState.Ok:
+                        HotkeyChanged.Raise(this);
+
+                        break;
+
+                    case ButtonState.Cancel:
+                        _label.Text = "None";
+
+                        HotkeyCancelled.Raise(this);
+
+                        Key = SDL.SDL_Keycode.SDLK_UNKNOWN;
+                        Mod = SDL.SDL_Keymod.KMOD_NONE;
+
+                        break;
+                }
+
+                IsActive = false;
+            }
+
+            private enum ButtonState
+            {
+                Ok,
+                Cancel
             }
         }
         #endregion
