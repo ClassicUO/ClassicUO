@@ -299,7 +299,7 @@ namespace ClassicUO.Game.UI.Controls
                                 && !World.Player.IsDead
                                 && layer != Layer.Beard
                                 && layer != Layer.Hair
-                                && ((_paperDollGump != null && _paperDollGump.CanLift) || LocalSerial == World.Player)
+                                && ((_paperDollGump != null && _paperDollGump.CanLift) || (_paperDollGump != null && LocalSerial == World.Player))
                         }
                     );
                 }
