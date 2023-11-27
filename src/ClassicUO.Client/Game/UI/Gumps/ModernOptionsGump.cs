@@ -2560,6 +2560,8 @@ namespace ClassicUO.Game.UI.Gumps
             private bool _isChecked;
             private readonly TextBox _text;
 
+            public TextBox TextLabel => _text;
+
             private Vector3 hueVector = ShaderHueTranslator.GetHueVector(Theme.SEARCH_BACKGROUND, false, 0.9f);
 
             public CheckboxWithLabel(
@@ -5547,6 +5549,240 @@ namespace ClassicUO.Game.UI.Gumps
                 Cancel
             }
         }
+
+        private class NameOverheadAssignControl : Control
+        {
+            private readonly HotkeyBox _hotkeyBox;
+            private readonly Dictionary<NameOverheadOptions, CheckboxWithLabel> checkboxDict = new();
+
+            private enum ButtonType
+            {
+                CheckAll,
+                UncheckAll,
+            }
+
+            public NameOverheadAssignControl(NameOverheadOption option)
+            {
+                Option = option;
+
+                CanMove = true;
+
+                Control c;
+                c = AddLabel("Set hotkey:");
+
+                _hotkeyBox = new HotkeyBox
+                {
+                    X = c.Bounds.Right + 5
+                };
+
+                _hotkeyBox.HotkeyChanged += BoxOnHotkeyChanged;
+                _hotkeyBox.HotkeyCancelled += BoxOnHotkeyCancelled;
+
+                Add(_hotkeyBox);
+
+                Add(c = new ModernButton(0, _hotkeyBox.Height + 3, 100, 40, ButtonAction.Activate, "Uncheck all", Theme.BUTTON_FONT_COLOR) { ButtonParameter = (int)ButtonType.UncheckAll, IsSelectable = false });
+
+                Add(new ModernButton(c.Bounds.Right + 5, _hotkeyBox.Height + 3, 100, 40, ButtonAction.Activate, "Check all", Theme.BUTTON_FONT_COLOR) { ButtonParameter = (int)ButtonType.CheckAll, IsSelectable = false });
+
+                SetupOptionCheckboxes();
+
+                UpdateCheckboxesByCurrentOptionFlags();
+                UpdateValueInHotkeyBox();
+            }
+
+            private void SetupOptionCheckboxes()
+            {
+                int rightPosX = 200;
+                Control c;
+                PositionHelper.Reset();
+
+                PositionHelper.Y = 100;
+
+                c = AddLabel("Items");
+                PositionHelper.PositionControl(c);
+
+                c = AddCheckbox("Containers", NameOverheadOptions.Containers);
+                PositionHelper.PositionControl(c);
+
+                c = AddCheckbox("Gold", NameOverheadOptions.Gold);
+                PositionHelper.PositionExact(c, rightPosX, PositionHelper.LAST_Y);
+
+                PositionHelper.PositionControl(AddCheckbox("Stackable", NameOverheadOptions.Stackable));
+                PositionHelper.PositionExact(AddCheckbox("Locked down", NameOverheadOptions.LockedDown), rightPosX, PositionHelper.LAST_Y);
+
+                PositionHelper.PositionControl(AddCheckbox("Other items", NameOverheadOptions.Other));
+
+
+
+                PositionHelper.BlankLine();
+                PositionHelper.PositionControl(AddLabel("Corpses"));
+
+                PositionHelper.PositionControl(AddCheckbox("Monster corpses", NameOverheadOptions.MonsterCorpses));
+                PositionHelper.PositionExact(AddCheckbox("Humanoid corpses", NameOverheadOptions.HumanoidCorpses), rightPosX, PositionHelper.LAST_Y);
+                //AddCheckbox("Own corpses", NameOverheadOptions.OwnCorpses, 0, y);
+
+
+
+                PositionHelper.BlankLine();
+                PositionHelper.PositionControl(AddLabel("Mobiles by type"));
+
+                PositionHelper.PositionControl(AddCheckbox("Humanoid", NameOverheadOptions.Humanoid));
+                PositionHelper.PositionExact(AddCheckbox("Monster", NameOverheadOptions.Monster), rightPosX, PositionHelper.LAST_Y);
+
+                PositionHelper.PositionControl(AddCheckbox("Your Followers", NameOverheadOptions.OwnFollowers));
+                PositionHelper.PositionExact(AddCheckbox("Yourself", NameOverheadOptions.Self), rightPosX, PositionHelper.LAST_Y);
+
+                PositionHelper.PositionControl(AddCheckbox("Exclude yourself", NameOverheadOptions.ExcludeSelf));
+
+
+
+                PositionHelper.BlankLine();
+                PositionHelper.PositionControl(AddLabel("Mobiles by notoriety"));
+
+                CheckboxWithLabel cb;
+                PositionHelper.PositionControl(cb = AddCheckbox("Innocent", NameOverheadOptions.Innocent));
+                cb.TextLabel.Hue = ProfileManager.CurrentProfile.InnocentHue;
+                PositionHelper.PositionExact(cb = AddCheckbox("Allied", NameOverheadOptions.Ally), rightPosX, PositionHelper.LAST_Y);
+                cb.TextLabel.Hue = ProfileManager.CurrentProfile.FriendHue;
+
+                PositionHelper.PositionControl(cb = AddCheckbox("Attackable", NameOverheadOptions.Gray));
+                cb.TextLabel.Hue = ProfileManager.CurrentProfile.CanAttackHue;
+                PositionHelper.PositionExact(cb = AddCheckbox("Criminal", NameOverheadOptions.Criminal), rightPosX, PositionHelper.LAST_Y);
+                cb.TextLabel.Hue = ProfileManager.CurrentProfile.CriminalHue;
+
+                PositionHelper.PositionControl(cb = AddCheckbox("Enemy", NameOverheadOptions.Enemy));
+                cb.TextLabel.Hue = ProfileManager.CurrentProfile.EnemyHue;
+                PositionHelper.PositionExact(cb = AddCheckbox("Murderer", NameOverheadOptions.Murderer), rightPosX, PositionHelper.LAST_Y);
+                cb.TextLabel.Hue = ProfileManager.CurrentProfile.MurdererHue;
+
+                PositionHelper.PositionControl(cb = AddCheckbox("Invulnerable", NameOverheadOptions.Invulnerable));
+                cb.TextLabel.Hue = ProfileManager.CurrentProfile.InvulnerableHue;
+            }
+
+            private TextBox AddLabel(string name)
+            {
+                var label = new TextBox(name, Theme.FONT, Theme.STANDARD_TEXT_SIZE, null, Theme.TEXT_FONT_COLOR, strokeEffect: false);
+
+                Add(label);
+
+                return label;
+            }
+
+            private CheckboxWithLabel AddCheckbox(string checkboxName, NameOverheadOptions optionFlag)
+            {
+                var checkbox = new CheckboxWithLabel(checkboxName, 0, true, (b) =>
+                {
+                    if (b)
+                        Option.NameOverheadOptionFlags |= (int)optionFlag;
+                    else
+                        Option.NameOverheadOptionFlags &= ~(int)optionFlag;
+
+                    if (NameOverHeadManager.LastActiveNameOverheadOption == Option.Name)
+                        NameOverHeadManager.ActiveOverheadOptions = (NameOverheadOptions)Option.NameOverheadOptionFlags;
+                });
+
+                checkboxDict.Add(optionFlag, checkbox);
+
+                Add(checkbox);
+
+                return checkbox;
+            }
+
+            public NameOverheadOption Option { get; }
+
+            private void UpdateValueInHotkeyBox()
+            {
+                if (Option == null || _hotkeyBox == null)
+                {
+                    return;
+                }
+
+                if (Option.Key != SDL.SDL_Keycode.SDLK_UNKNOWN)
+                {
+                    SDL.SDL_Keymod mod = SDL.SDL_Keymod.KMOD_NONE;
+
+                    if (Option.Alt)
+                    {
+                        mod |= SDL.SDL_Keymod.KMOD_ALT;
+                    }
+
+                    if (Option.Shift)
+                    {
+                        mod |= SDL.SDL_Keymod.KMOD_SHIFT;
+                    }
+
+                    if (Option.Ctrl)
+                    {
+                        mod |= SDL.SDL_Keymod.KMOD_CTRL;
+                    }
+
+                    _hotkeyBox.SetKey(Option.Key, mod);
+                }
+            }
+
+            private void BoxOnHotkeyChanged(object sender, EventArgs e)
+            {
+                bool shift = (_hotkeyBox.Mod & SDL.SDL_Keymod.KMOD_SHIFT) != SDL.SDL_Keymod.KMOD_NONE;
+                bool alt = (_hotkeyBox.Mod & SDL.SDL_Keymod.KMOD_ALT) != SDL.SDL_Keymod.KMOD_NONE;
+                bool ctrl = (_hotkeyBox.Mod & SDL.SDL_Keymod.KMOD_CTRL) != SDL.SDL_Keymod.KMOD_NONE;
+
+                if (_hotkeyBox.Key == SDL.SDL_Keycode.SDLK_UNKNOWN)
+                    return;
+
+                NameOverheadOption option = NameOverHeadManager.FindOptionByHotkey(_hotkeyBox.Key, alt, ctrl, shift);
+
+                if (option == null)
+                {
+                    Option.Key = _hotkeyBox.Key;
+                    Option.Shift = shift;
+                    Option.Alt = alt;
+                    Option.Ctrl = ctrl;
+
+                    return;
+                }
+
+                if (Option == option)
+                    return;
+
+                UpdateValueInHotkeyBox();
+                UIManager.Add(new MessageBoxGump(250, 150, string.Format(ResGumps.ThisKeyCombinationAlreadyExists, option.Name), null));
+            }
+
+            private void BoxOnHotkeyCancelled(object sender, EventArgs e)
+            {
+                Option.Alt = Option.Ctrl = Option.Shift = false;
+                Option.Key = SDL.SDL_Keycode.SDLK_UNKNOWN;
+            }
+
+            public override void OnButtonClick(int buttonID)
+            {
+                switch ((ButtonType)buttonID)
+                {
+                    case ButtonType.CheckAll:
+                        Option.NameOverheadOptionFlags = int.MaxValue;
+                        UpdateCheckboxesByCurrentOptionFlags();
+
+                        break;
+
+                    case ButtonType.UncheckAll:
+                        Option.NameOverheadOptionFlags = 0x0;
+                        UpdateCheckboxesByCurrentOptionFlags();
+
+                        break;
+                }
+            }
+
+            private void UpdateCheckboxesByCurrentOptionFlags()
+            {
+                foreach (var kvp in checkboxDict)
+                {
+                    var flag = kvp.Key;
+                    var checkbox = kvp.Value;
+
+                    checkbox.IsChecked = ((NameOverheadOptions)Option.NameOverheadOptionFlags).HasFlag(flag);
+                }
+            }
+        }
         #endregion
 
         private class ProfileLocationData
@@ -5656,10 +5892,11 @@ namespace ClassicUO.Game.UI.Gumps
 
         private static class PositionHelper
         {
-            public static int X, Y = Theme.TOP_PADDING;
+            public static int X, Y = Theme.TOP_PADDING, LAST_Y = Theme.TOP_PADDING;
 
             public static void BlankLine()
             {
+                LAST_Y = Y;
                 Y += Theme.BLANK_LINE;
             }
 
@@ -5678,6 +5915,7 @@ namespace ClassicUO.Game.UI.Gumps
                 c.X = X;
                 c.Y = Y;
 
+                LAST_Y = Y;
                 Y += c.Height + Theme.TOP_PADDING;
             }
 
@@ -5691,6 +5929,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 X = 0;
                 Y = Theme.TOP_PADDING;
+                LAST_Y = Y;
             }
         }
 
