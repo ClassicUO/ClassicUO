@@ -1606,6 +1606,8 @@ namespace ClassicUO.Game.GameObjects
         {
             if (Walker.WalkingFailed || Walker.LastStepRequestTime > Time.Ticks || Walker.StepsCount >= Constants.MAX_STEP_COUNT || Client.Version >= ClientVersion.CV_60142 && IsParalyzed)
             {
+                Direction = direction & Direction.Mask;
+
                 return false;
             }
 
