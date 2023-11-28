@@ -666,6 +666,7 @@ namespace ClassicUO.Game.UI.Gumps
                         MacroControl macroControl = new MacroControl(name);
 
                         content.AddToLeft(nb = new ModernButton(0, 0, content.LeftWidth, 40, ButtonAction.SwitchPage, name, Theme.BUTTON_FONT_COLOR) { ButtonParameter = page + 1 + content.LeftArea.Children.Count, Tag = macroControl.Macro });
+                        content.ResetRightSide();
                         content.AddToRight(macroControl, true, nb.ButtonParameter);
 
                         nb.IsSelected = true;
