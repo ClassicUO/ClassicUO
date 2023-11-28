@@ -118,15 +118,11 @@ namespace ClassicUO.Game
 
         public static void OpenSettings(int page = 0)
         {
-            OptionsGump opt = UIManager.GetGump<OptionsGump>();
+            ModernOptionsGump opt = UIManager.GetGump<ModernOptionsGump>();
 
             if (opt == null)
             {
-                OptionsGump optionsGump = new OptionsGump
-                {
-                    X = (Client.Game.Window.ClientBounds.Width >> 1) - 300,
-                    Y = (Client.Game.Window.ClientBounds.Height >> 1) - 250
-                };
+                ModernOptionsGump optionsGump = new ModernOptionsGump();
 
                 UIManager.Add(optionsGump);
                 optionsGump.ChangePage(page);

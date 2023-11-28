@@ -37,7 +37,6 @@ using Microsoft.Xna.Framework;
 using System;
 using System.Text.RegularExpressions;
 using ClassicUO.Configuration;
-using ClassicUO.Utility;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -68,7 +67,10 @@ namespace ClassicUO.Game.UI.Controls
             int? width,
             int hue = 2996,
             TextHorizontalAlignment align = TextHorizontalAlignment.Left,
-            bool strokeEffect = true
+            bool strokeEffect = true,
+            bool supportsCommands = true,
+            bool ignoreColorCommands = false,
+            bool calculateGlyphs = false
         )
         {
             if (strokeEffect)
@@ -77,7 +79,10 @@ namespace ClassicUO.Game.UI.Controls
             _rtl = new RichTextLayout
             {
                 Font = TrueTypeLoader.Instance.GetFont(font, size),
-                Text = text
+                Text = text,
+                IgnoreColorCommand = ignoreColorCommands,
+                SupportsCommands = supportsCommands,
+                CalculateGlyphs = calculateGlyphs
             };
 
             if (width != null)
@@ -104,7 +109,10 @@ namespace ClassicUO.Game.UI.Controls
                 int? width,
                 Color color,
                 TextHorizontalAlignment align = TextHorizontalAlignment.Left,
-                bool strokeEffect = true
+                bool strokeEffect = true,
+                bool supportsCommands = true,
+                bool ignoreColorCommands = false,
+                bool calculateGlyphs = false
             )
         {
             if (strokeEffect)
@@ -114,6 +122,9 @@ namespace ClassicUO.Game.UI.Controls
             {
                 Font = TrueTypeLoader.Instance.GetFont(font, size),
                 Text = text,
+                IgnoreColorCommand = ignoreColorCommands,
+                SupportsCommands = supportsCommands,
+                CalculateGlyphs = calculateGlyphs
             };
             if (width != null)
                 _rtl.Width = width;
@@ -189,6 +200,18 @@ namespace ClassicUO.Game.UI.Controls
                 _dirty = true;
             }
         }
+
+        public Color Fontcolor
+        {
+            get => _color;
+            set
+            {
+                _color = value;
+                _dirty = true;
+            }
+        }
+
+        public RichTextLayout RTL => _rtl;
 
         public string Font
         {
@@ -278,7 +301,7 @@ namespace ClassicUO.Game.UI.Controls
                         Width = Width,
                     };
                 }
-                
+
                 WantUpdateSize = false;
                 _dirty = false;
             }
@@ -305,7 +328,7 @@ namespace ClassicUO.Game.UI.Controls
                 x += Width;
             }
 
-            _rtl.Draw(batcher, new Vector2(x, y), color*Alpha, horizontalAlignment: _align);
+            _rtl.Draw(batcher, new Vector2(x, y), color * Alpha, horizontalAlignment: _align);
 
             return true;
         }

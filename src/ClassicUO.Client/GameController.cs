@@ -37,6 +37,8 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
+using ClassicUO.Game.UI;
+using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.Network;
@@ -682,7 +684,33 @@ namespace ClassicUO
 
                     if (sdlEvent->key.keysym.sym == SDL_Keycode.SDLK_PRINTSCREEN)
                     {
-                        TakeScreenshot();
+                        if (Keyboard.Ctrl)
+                        {
+                            if (Tooltip.IsEnabled)
+                            {
+                                ClipboardScreenshot(new Rectangle(Tooltip.X, Tooltip.Y, Tooltip.Width, Tooltip.Height), GraphicsDevice);
+                            } 
+                            else if (MultipleToolTipGump.SSIsEnabled)
+                            {
+                                ClipboardScreenshot(new Rectangle(MultipleToolTipGump.SSX, MultipleToolTipGump.SSY, MultipleToolTipGump.SSWidth, MultipleToolTipGump.SSHeight), GraphicsDevice);
+                            }
+                            else if (UIManager.MouseOverControl != null && UIManager.MouseOverControl.IsVisible)
+                            {
+                                Control c = UIManager.MouseOverControl.RootParent;
+                                if (c != null)
+                                {
+                                    ClipboardScreenshot(c.Bounds, GraphicsDevice);
+                                }
+                                else
+                                {
+                                    ClipboardScreenshot(UIManager.MouseOverControl.Bounds, GraphicsDevice);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            TakeScreenshot();
+                        }
                     }
 
                     break;
@@ -751,8 +779,8 @@ namespace ClassicUO
                     {
                         SDL_MouseButtonEvent mouse = sdlEvent->button;
 
-                    // The values in MouseButtonType are chosen to exactly match the SDL values
-                    MouseButtonType buttonType = (MouseButtonType)mouse.button;
+                        // The values in MouseButtonType are chosen to exactly match the SDL values
+                        MouseButtonType buttonType = (MouseButtonType)mouse.button;
 
                         uint lastClickTime = 0;
 
@@ -777,8 +805,8 @@ namespace ClassicUO
                             case MouseButtonType.XButton2:
                                 break;
 
-                        default:
-                            Log.Warn($"No mouse button handled: {mouse.button}");
+                            default:
+                                Log.Warn($"No mouse button handled: {mouse.button}");
 
                                 break;
                         }
@@ -792,31 +820,31 @@ namespace ClassicUO
                         {
                             lastClickTime = 0;
 
-                        bool res =
-                            Scene.OnMouseDoubleClick(buttonType)
-                            || UIManager.OnMouseDoubleClick(buttonType);
+                            bool res =
+                                Scene.OnMouseDoubleClick(buttonType)
+                                || UIManager.OnMouseDoubleClick(buttonType);
 
-                        if (!res)
-                        {
-                            if (!Scene.OnMouseDown(buttonType))
+                            if (!res)
                             {
-                                UIManager.OnMouseButtonDown(buttonType);
+                                if (!Scene.OnMouseDown(buttonType))
+                                {
+                                    UIManager.OnMouseButtonDown(buttonType);
+                                }
+                            }
+                            else
+                            {
+                                lastClickTime = 0xFFFF_FFFF;
                             }
                         }
                         else
                         {
-                            lastClickTime = 0xFFFF_FFFF;
-                        }
-                    }
-                    else
-                    {
-                        if (
-                            buttonType != MouseButtonType.Left
-                            && buttonType != MouseButtonType.Right
-                        )
-                        {
-                            Plugin.ProcessMouse(sdlEvent->button.button, 0);
-                        }
+                            if (
+                                buttonType != MouseButtonType.Left
+                                && buttonType != MouseButtonType.Right
+                            )
+                            {
+                                Plugin.ProcessMouse(sdlEvent->button.button, 0);
+                            }
 
                             if (!Scene.OnMouseDown(buttonType))
                             {
@@ -851,8 +879,8 @@ namespace ClassicUO
                     {
                         SDL_MouseButtonEvent mouse = sdlEvent->button;
 
-                    // The values in MouseButtonType are chosen to exactly match the SDL values
-                    MouseButtonType buttonType = (MouseButtonType)mouse.button;
+                        // The values in MouseButtonType are chosen to exactly match the SDL values
+                        MouseButtonType buttonType = (MouseButtonType)mouse.button;
 
                         uint lastClickTime = 0;
 
@@ -876,19 +904,19 @@ namespace ClassicUO
                             default:
                                 Log.Warn($"No mouse button handled: {mouse.button}");
 
-                            break;
-                    }
-
-                    if (lastClickTime != 0xFFFF_FFFF)
-                    {
-                        if (
-                            !Scene.OnMouseUp(buttonType)
-                            || UIManager.LastControlMouseDown(buttonType) != null
-                        )
-                        {
-                            UIManager.OnMouseButtonUp(buttonType);
+                                break;
                         }
-                    }
+
+                        if (lastClickTime != 0xFFFF_FFFF)
+                        {
+                            if (
+                                !Scene.OnMouseUp(buttonType)
+                                || UIManager.LastControlMouseDown(buttonType) != null
+                            )
+                            {
+                                UIManager.OnMouseButtonUp(buttonType);
+                            }
+                        }
 
                         Mouse.ButtonRelease(buttonType);
                         Mouse.Update();
@@ -952,6 +980,69 @@ namespace ClassicUO
                 else
                 {
                     GameActions.Print(message, 0x44, MessageType.System);
+                }
+            }
+        }
+
+        public void ClipboardScreenshot(Rectangle position, GraphicsDevice graphicDevice)
+        {
+            Color[] colors = new Color[position.Width * position.Height];
+
+            graphicDevice.GetBackBufferData(position, colors, 0, colors.Length);
+
+            using (
+                Texture2D texture = new Texture2D(
+                    GraphicsDevice,
+                    position.Width,
+                    position.Height,
+                    false,
+                    SurfaceFormat.Color
+                )
+            )
+            {
+                texture.SetData(colors);
+
+                if (CUOEnviroment.IsUnix)
+                {
+                    string screenshotsFolder = FileSystemHelper.CreateFolderIfNotExists(
+                        CUOEnviroment.ExecutablePath,
+                        "Data",
+                        "Client",
+                        "Screenshots"
+                    );
+
+                    string path = Path.Combine(
+                        screenshotsFolder,
+                        $"screenshot_{DateTime.Now:yyyy-MM-dd_hh-mm-ss}.png"
+                    );
+
+                    using FileStream fileStream = File.Create(path);
+                    texture.SaveAsPng(fileStream, texture.Width, texture.Height);
+                    string message = string.Format(ResGeneral.ScreenshotStoredIn0, path);
+
+                    if (ProfileManager.CurrentProfile == null || ProfileManager.CurrentProfile.HideScreenshotStoredInMessage)
+                    {
+                        Log.Info(message);
+                    }
+                    else
+                    {
+                        GameActions.Print(message, 0x44, MessageType.System);
+                    }
+                }
+                else
+                {
+                    using (MemoryStream stream = new MemoryStream())
+                    {
+                        texture.SaveAsPng(stream, texture.Width, texture.Height);
+
+                        try
+                        {
+                            System.Windows.Forms.Clipboard.SetImage(System.Drawing.Image.FromStream(stream));
+                            GameActions.Print("Copied screenshot to your clipboard");
+                        }
+                        catch { }
+                    }
+
                 }
             }
         }

@@ -57,6 +57,8 @@ namespace ClassicUO.Game.UI.Controls
         {
             Vector3 hueVector = ShaderHueTranslator.GetHueVector(Hue);
 
+            hueVector.Z = Alpha;
+
             batcher.Draw
             (
                 SolidColorTextureCache.GetTexture(Color.White),

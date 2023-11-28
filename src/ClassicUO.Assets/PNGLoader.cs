@@ -96,7 +96,7 @@ namespace ClassicUO.Assets
 
             if (exePath != null && texture == null && GraphicsDevice != null)
             {
-                string fullImagePath = Path.Combine(exePath, IMAGES_FOLDER, ART_EXTERNAL_FOLDER, ((int)graphic).ToString() + ".png");
+                string fullImagePath = Path.Combine(exePath, IMAGES_FOLDER, ART_EXTERNAL_FOLDER, (graphic -= 0x4000).ToString() + ".png");
 
                 if (File.Exists(fullImagePath))
                 {
@@ -123,6 +123,10 @@ namespace ClassicUO.Assets
 
         private uint[] GetPixels(Texture2D texture)
         {
+            if(texture == null)
+            {
+                return new uint[0];
+            }
             Span<uint> pixels = texture.Width * texture.Height <= 1024 ? stackalloc uint[1024] : stackalloc uint[texture.Width * texture.Height];
 
             Color[] pixelColors = new Color[texture.Width * texture.Height];
@@ -134,11 +138,6 @@ namespace ClassicUO.Assets
             }
 
             return pixels.ToArray();
-        }
-
-        public void InjectIntoArtSprites()
-        {
-
         }
 
         public Task Load()
@@ -171,7 +170,10 @@ namespace ClassicUO.Assets
                     for (int i = 0; i < files.Length; i++)
                     {
                         string fname = Path.GetFileName(files[i]);
-                        uint.TryParse(fname.Substring(0, fname.Length - 4), out art_availableIDs[i]);
+                        if(uint.TryParse(fname.Substring(0, fname.Length - 4), out uint gfx))
+                        {
+                            art_availableIDs[i] = gfx + 0x4000;
+                        }
                     }
                 }
             });

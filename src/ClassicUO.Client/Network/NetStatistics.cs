@@ -68,6 +68,8 @@ namespace ClassicUO.Network
 
         public uint DeltaPacketsSent { get; private set; }
 
+        public uint LastPingReceived { get; private set; } = Time.Ticks;
+
         public uint Ping
         {
             get
@@ -96,6 +98,7 @@ namespace ClassicUO.Network
         public void PingReceived(byte idx)
         {
             _pings[idx % _pings.Length] = Time.Ticks - _startTickValue;
+            LastPingReceived = Time.Ticks;
         }
 
         public void SendPing()

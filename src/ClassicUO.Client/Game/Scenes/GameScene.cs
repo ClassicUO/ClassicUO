@@ -126,6 +126,8 @@ namespace ClassicUO.Game.Scenes
             set { ProfileManager.CurrentProfile.FollowingTarget = value; }
         }
 
+        private uint _lastResync = Time.Ticks;
+
         public void DoubleClickDelayed(uint serial)
         {
             _useItemQueue.Add(serial);
@@ -817,6 +819,14 @@ namespace ClassicUO.Game.Scenes
             {
                 NetClient.Socket.Statistics.SendPing();
                 _timePing = (long)Time.Ticks + 1000;
+            }
+
+            if (currentProfile.ForceResyncOnHang && Time.Ticks - NetClient.Socket.Statistics.LastPingReceived > 5000 && Time.Ticks - _lastResync > 5000)
+            {
+                //Last ping > ~5 seconds
+                NetClient.Socket.Send_Resync();
+                _lastResync = Time.Ticks;
+                GameActions.Print("Possible connection hang, resync attempted", 32, MessageType.System);
             }
 
             World.Update();

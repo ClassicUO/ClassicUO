@@ -31,6 +31,7 @@
 #endregion
 
 using System.Collections.Generic;
+using System.Linq;
 using System.Xml;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
@@ -63,7 +64,7 @@ namespace ClassicUO.Game.UI.Gumps
             ShowBorder = true;
             _prevBorder = true;
 
-            Add(_background = new AlphaBlendControl(0.7f) { Width = Width - 8, Height = Height - 8, X = 4, Y = 4 });
+            Insert(0, _background = new AlphaBlendControl(0.7f) { Width = Width - 8, Height = Height - 8, X = 4, Y = 4, Parent = this });
 
             ResetItems();
 
@@ -88,6 +89,19 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _infobarControls.Add(info);
                 Add(info);
+            }
+        }
+
+        public void UpdateOptions()
+        {
+            ResetItems();
+        }
+
+        public static void UpdateAllOptions()
+        {
+            foreach(InfoBarGump g in UIManager.Gumps.OfType<InfoBarGump>())
+            {
+                g.UpdateOptions();
             }
         }
 

@@ -6,6 +6,7 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
+using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Renderer.Animations;
 using Microsoft.Xna.Framework;
@@ -29,6 +30,7 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly Dictionary<Layer[], ItemSlot> itemLayerSlots;
         private Label titleLabel;
         private static int lastX = 100, lastY = 100;
+        private GumpPic backgroundImage;
         #endregion
 
         public override GumpType GumpType => GumpType.PaperDoll;
@@ -58,7 +60,7 @@ namespace ClassicUO.Game.UI.Gumps
             itemLayerSlots = new Dictionary<Layer[], ItemSlot>();
             #endregion
 
-            Add(new GumpPic(0, 0, 40312, ProfileManager.CurrentProfile.ModernPaperDollHue));
+            Add(backgroundImage = new GumpPic(0, 0, 40312, ProfileManager.CurrentProfile.ModernPaperDollHue));
 
             HitBox _menuHit = new HitBox(Width - 26, 1, 25, 16, alpha: 0f);
             Add(_menuHit);
@@ -178,21 +180,6 @@ namespace ClassicUO.Game.UI.Gumps
             Add(_minHit);
 
             RequestUpdateContents();
-
-            //World.OPL.OPLOnReceive += OPL_OnOPLReceive;
-        }
-
-        private void OPL_OnOPLReceive(ObjectPropertiesListManager.OPLEventArgs e)
-        {
-            Task.Factory.StartNew(() =>
-            {
-                Item i = World.Items.Get(e.Serial);
-                if (i != null && i.RootContainer == World.Player.Serial)
-                    foreach (var itemSlot in itemLayerSlots)
-                    {
-                        itemSlot.Value.OPLChangeEvent(e);
-                    }
-            });
         }
 
         public void UpdateTitle(string text)
@@ -233,6 +220,23 @@ namespace ClassicUO.Game.UI.Gumps
             Mobile m = World.Mobiles.Get(LocalSerial);
             if (m != null)
                 UpdateTitle(m.Title);
+        }
+
+        public void UpdateOptions()
+        {
+            backgroundImage.Hue = ProfileManager.CurrentProfile.ModernPaperDollHue;
+            foreach (var layerSlot in itemLayerSlots)
+            {
+                layerSlot.Value.UpdateOptions();
+            }
+        }
+
+        public static void UpdateAllOptions()
+        {
+            foreach (ModernPaperdoll p in UIManager.Gumps.OfType<ModernPaperdoll>())
+            {
+                p.UpdateOptions();
+            }
         }
 
         public override void Update()
@@ -312,18 +316,10 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        private static readonly Layer[] layerOrder =
-        {
-            Layer.Cloak, Layer.Shirt, Layer.Legs, Layer.Shoes, Layer.Skirt, Layer.Arms, Layer.Tunic, Layer.Torso,
-            Layer.Ring, Layer.Bracelet, Layer.Face, Layer.Gloves, Layer.Pants, Layer.Robe, Layer.Waist, Layer.Necklace,
-            Layer.Hair, Layer.Beard, Layer.Earrings, Layer.Helmet, Layer.OneHanded, Layer.TwoHanded, Layer.Talisman
-        };
-
         private class ItemSlot : Control
         {
             public readonly Layer[] layers;
             private Area itemArea;
-            private int tcount = 0;
 
             private AlphaBlendControl durablityBar;
 
@@ -344,96 +340,43 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Add(durablityBar = new AlphaBlendControl(0.75f) { Width = 7, Height = Height, Hue = ProfileManager.CurrentProfile.ModernPaperDollDurabilityHue, IsVisible = false });
 
-                //Add(new SimpleBorder() { Width = Width, Height = Height, Alpha = 0.8f });
                 this.layers = layers;
+            }
+
+            public void UpdateOptions()
+            {
+                durablityBar.Hue = ProfileManager.CurrentProfile.ModernPaperDollDurabilityHue;
             }
 
             public void AddItem(Item item)
             {
                 itemArea.Add(new ItemGumpFixed(item, Width, Height) { HighlightOnMouseOver = false });
-
-                //ItemGumpFixed highestLayer = null;
-                //foreach (Layer layer in layerOrder)
-                //{
-                //    if (layers.Contains(layer))
-                //        foreach (Control c in itemArea.Children)
-                //        {
-                //            if (c is ItemGumpFixed)
-                //            {
-                //                ItemGumpFixed itemG = (ItemGumpFixed)c;
-                //                itemG.IsVisible = false;
-                //                if ((Layer)itemG.item.ItemData.Layer == layer)
-                //                    highestLayer = itemG;
-                //            }
-                //        }
-                //}
-                //if (highestLayer != null)
-                //{
-                //    highestLayer.IsVisible = true;
-
-                //}
                 UpdateDurability(item);
             }
 
-            private void UpdateDurability(Item item, bool isOPLEvent = false)
+            private void UpdateDurability(Item item)
             {
-                if (!isOPLEvent)
-                    durablityBar.IsVisible = false;
-                tcount++;
-                Task.Factory.StartNew(() =>
+                if (IsDisposed || durablityBar.IsDisposed || item == null)
                 {
-                    int currentTcount = tcount;
-                    //if (!isOPLEvent)
-                    //    System.Threading.Thread.Sleep(1500);
-                    if (durablityBar.IsDisposed || currentTcount != tcount || item == null)
-                        return;
-                    if (World.DurabilityManager.TryGetDurability(item.Serial, out DurabiltyProp durabilty))
-                    {
-                        if (durabilty.Percentage > (float)ProfileManager.CurrentProfile.ModernPaperDoll_DurabilityPercent / (float)100)
-                            return;
-                        durablityBar.Height = (int)(Height * durabilty.Percentage);
-                        durablityBar.Y = Height - durablityBar.Height;
-                        durablityBar.IsVisible = true;
-                    }
-                    else if (World.OPL.TryGetNameAndData(item.Serial, out string name, out string data))
-                    {
-                        MatchCollection matches = Regex.Matches(data, @"(?<=Durability )(\d*) / (\d*)"); //This should match 45 / 255 for example
-                        if (matches.Count > 0)
-                        {
-                            string[] durability = data.Substring(matches[0].Index, matches[0].Length).Split('/');
-                            if (int.TryParse(durability[0].Trim(), out int min))
-                                if (int.TryParse(durability[1].Trim(), out int max))
-                                {
-                                    double perecentRemaining = (double)min / (double)max;
-                                    if (perecentRemaining > (double)ProfileManager.CurrentProfile.ModernPaperDoll_DurabilityPercent / (double)100)
-                                        return;
-                                    durablityBar.Height = (int)(Height * perecentRemaining);
-                                    durablityBar.Y = Height - durablityBar.Height;
-                                    durablityBar.IsVisible = true;
-                                }
-                        }
-                    }
-                    else
-                    {
-                        System.Threading.Thread.Sleep(1500);
-                        UpdateDurability(item, isOPLEvent);
-                    }
-                });
-            }
+                    return;
+                }
 
-            public void OPLChangeEvent(ObjectPropertiesListManager.OPLEventArgs e)
-            {
-                foreach (Control c in itemArea.Children)
+                durablityBar.Hue = ProfileManager.CurrentProfile.ModernPaperDollDurabilityHue;
+
+                if (World.DurabilityManager.TryGetDurability(item.Serial, out DurabiltyProp durabilty))
                 {
-                    if (c is ItemGumpFixed)
+                    if (durabilty.Percentage > (float)ProfileManager.CurrentProfile.ModernPaperDoll_DurabilityPercent / (float)100)
                     {
-                        ItemGumpFixed itemG = (ItemGumpFixed)c;
-                        if (itemG.IsVisible && !itemG.IsDisposed && itemG.item.Serial == e.Serial)
-                        {
-                            UpdateDurability(itemG.item, true);
-                            break;
-                        }
+                        durablityBar.IsVisible = false;
+                        return;
                     }
+                    durablityBar.Height = (int)(Height * durabilty.Percentage);
+                    durablityBar.Y = Height - durablityBar.Height;
+                    durablityBar.IsVisible = true;
+                }
+                else
+                {
+                    durablityBar.IsVisible = false;
                 }
             }
 
@@ -481,7 +424,7 @@ namespace ClassicUO.Game.UI.Gumps
                     animID = 0x0223;
                 }
 
-                Client.Game.Animations.ConvertBodyIfNeeded(ref graphic);                
+                Client.Game.Animations.ConvertBodyIfNeeded(ref graphic);
 
                 if (AnimationsLoader.Instance.EquipConversions.TryGetValue(graphic, out Dictionary<ushort, EquipConvData> dict))
                 {
@@ -845,7 +788,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Add(PaperDollPreview = new PaperDollInteractable(0, 0, LocalSerial, null) { AcceptMouseInput = false });
 
-                Add(new SimpleBorder() { Width = Width, Height = Height, Alpha = 0.85f });
+                Add(new SimpleBorder() { Width = Width - 1, Height = Height - 1, Alpha = 0.85f });
+
             }
         }
 

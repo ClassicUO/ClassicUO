@@ -8,6 +8,11 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly CustomToolTip[] toolTips;
         private readonly Control hoverReference;
 
+        public static bool SSIsEnabled = false;
+
+        public static int SSX, SSY;
+        public static int SSWidth, SSHeight;
+
         public MultipleToolTipGump(int x, int y, CustomToolTip[] toolTips, Controls.Control hoverReference) : base(0, 0)
         {
             this.toolTips = toolTips;
@@ -17,6 +22,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             X = x;
             Y = y;
+
+            SSIsEnabled = true;
         }
 
         private void BuildGump()
@@ -48,8 +55,9 @@ namespace ClassicUO.Game.UI.Gumps
                 if (totalHeight < toolTips[i].Height)
                     totalHeight = toolTips[i].Height;
             }
-            Width = totalWidth;
-            Height = totalHeight;
+            ForceSizeUpdate();
+            SSWidth = Width + 9;
+            SSHeight = Height + 9;
         }
 
         private int updateTickCount = 0;
@@ -66,12 +74,12 @@ namespace ClassicUO.Game.UI.Gumps
                         Height = c.Height;
             }
 
-            updateTickCount++;
-            if(updateTickCount > 5)
-            {
-                RepositionTooltips();
-                updateTickCount = 0;
-            }
+            //updateTickCount++;
+            //if(updateTickCount > 5)
+            //{
+            //    RepositionTooltips();
+            //    updateTickCount = 0;
+            //}
 
             int z_width = Width + 24;
             int z_height = Height + 8;
@@ -94,8 +102,17 @@ namespace ClassicUO.Game.UI.Gumps
                 y = Client.Game.Window.ClientBounds.Height - z_height;
             }
 
+            SSX = x - 4;
+            SSY = y - 2;
+
             return base.Draw(batcher, x, y);
 
+        }
+
+        public override void Dispose()
+        {
+            base.Dispose();
+            SSIsEnabled = false;
         }
     }
 }

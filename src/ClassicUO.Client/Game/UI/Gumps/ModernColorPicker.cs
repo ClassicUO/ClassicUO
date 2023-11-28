@@ -74,11 +74,11 @@ namespace ClassicUO.Game.UI.Gumps
             Add(page);
 
             Add(prev = new NiceButton(borderSize, HEIGHT - borderSize - 20, 20, 20, ButtonAction.Activate, "<") { IsSelectable = false });
-            prev.MouseUp += (sender, e) => { if (e.Button == Input.MouseButtonType.Left) { cPage--;  FillHueDisplays(cPage); page.Text = (cPage+1).ToString(); } };
+            prev.MouseUp += (sender, e) => { if (e.Button == Input.MouseButtonType.Left) { cPage--; FillHueDisplays(cPage); page.Text = (cPage + 1).ToString(); } };
 
             Add(next = new NiceButton(WIDTH - borderSize - 20, HEIGHT - borderSize - 20, 20, 20, ButtonAction.Activate, ">") { IsSelectable = false });
-            next.MouseUp += (sender, e) => { if (e.Button == Input.MouseButtonType.Left) { cPage++;  FillHueDisplays(cPage); page.Text = (cPage+1).ToString(); } };
-            
+            next.MouseUp += (sender, e) => { if (e.Button == Input.MouseButtonType.Left) { cPage++; FillHueDisplays(cPage); page.Text = (cPage + 1).ToString(); } };
+
         }
 
         private void FillHueDisplays(int page = 0)
@@ -112,7 +112,20 @@ namespace ClassicUO.Game.UI.Gumps
             private float flashAlpha = 1f;
             private bool rev = false;
 
-            public ushort Hue { get { return hue; } set { hue = value; HueChanged?.Invoke(this, null);  } }
+            public ushort Hue
+            {
+                get { return hue; }
+                set
+                {
+                    hue = value;
+                    HueChanged?.Invoke(this, null);
+                    hueChanged?.Invoke(value);
+                    if (!isClickable)
+                        SetTooltip(hue.ToString());
+                    else
+                        SetTooltip($"Click to select a hue ({hue})");
+                }
+            }
 
             public event EventHandler HueChanged;
 
@@ -162,10 +175,10 @@ namespace ClassicUO.Game.UI.Gumps
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
                 base.Draw(batcher, x, y);
-                
+
                 if (texture != null)
                 {
-                    if(isClickable)
+                    if (isClickable)
                         hueVector = ShaderHueTranslator.GetHueVector(hue, true, 1);
                     if (flash)
                     {
@@ -181,7 +194,7 @@ namespace ClassicUO.Game.UI.Gumps
                             rev = false;
                             flash = false;
                         }
-                            
+
                     }
                     batcher.Draw
                     (

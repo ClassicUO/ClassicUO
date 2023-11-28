@@ -216,6 +216,48 @@ namespace ClassicUO.Game.Managers
                     if (ushort.TryParse(s[2], out var h))
                         ProfileManager.CurrentProfile.DisplayRadiusHue = h;
             });
+
+            Register("options", (s) =>
+            {
+                UIManager.Add(new OptionsGump());
+            });
+
+            Register("paperdoll", (s) =>
+            {
+                if (ProfileManager.CurrentProfile.UseModernPaperdoll)
+                {
+                    UIManager.Add(new PaperDollGump(World.Player, true));
+                }
+                else
+                {
+                    UIManager.Add(new ModernPaperdoll(World.Player));
+                }
+
+            });
+
+            Register("optlink", (s) =>
+            {
+                ModernOptionsGump g = UIManager.GetGump<ModernOptionsGump>();
+                if (s.Length > 1)
+                {
+                    if (g != null)
+                    {
+                        g.GoToPage(s[1]);
+                    }
+                    else
+                    {
+                        UIManager.Add(g = new ModernOptionsGump());
+                        g.GoToPage(s[1]);
+                    }
+                }
+                else
+                {
+                    if (g != null)
+                    {
+                        GameActions.Print(g.GetPageString());
+                    }
+                }
+            });
         }
 
 

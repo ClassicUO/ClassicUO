@@ -7,6 +7,22 @@ namespace ClassicUO.Game.UI.Gumps
     internal class VersionHistory : Gump
     {
         private static string[] updateTexts = {
+            "/c[white][3.14.0]/cd\n" +
+                "- New options menu\n" +
+                "- Small null ref bug fix\n" +
+                "- No max width on item count text for smaller scaling\n" +
+                "- Auto loot shift-click will no long work if you have shift for context menu or split stacks.\n" +
+                "- Skill progress bars will save their position if you move them\n" +
+                "- Changed skill progress bars to a queue instead of all showing at once\n" +
+                "- Fix art png loading\n" +
+                "- Added /c[green]-paperdoll/cd command\n" +
+                "- Added an auto resync option under Options->TazUO->Misc\n" +
+                "- Alt + Click paperdoll preview in modern paperdoll to copy a screenshot of it\n" +
+                "- Added `both` option to auto close gumps range or dead\n" +
+                "- Added shift + double click to advanced shop gump to buy/sell all of that item\n" +
+                "- Added use one health bar for last attack option\n" +
+                "- Added `-optlink` command",
+
             "/c[white][3.13.0]/cd\n" +
                 "- Fix item unintentional stacking\n" +
                 "- Potential small bug fix\n" +
