@@ -20,7 +20,8 @@ namespace ClassicUO.Game.UI.Gumps
                 "- Alt + Click paperdoll preview in modern paperdoll to copy a screenshot of it\n" +
                 "- Added `both` option to auto close gumps range or dead\n" +
                 "- Added shift + double click to advanced shop gump to buy/sell all of that item\n" +
-                "- Added use one health bar for last attack option",
+                "- Added use one health bar for last attack option\n" +
+                "- Added `-optlink` command",
 
             "/c[white][3.13.0]/cd\n" +
                 "- Fix item unintentional stacking\n" +

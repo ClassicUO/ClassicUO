@@ -2350,6 +2350,71 @@ namespace ClassicUO.Game.UI.Gumps
                 );
         }
 
+        public string GetPageString()
+        {
+            string page = mainContent.ActivePage.ToString();
+
+            foreach (Control c in mainContent.RightArea.Children)
+            {
+                if (c is Area && c.Page == mainContent.ActivePage)
+                {
+                    foreach (Control c2 in c.Children)
+                    {
+                        if (c2 is LeftSideMenuRightSideContent)
+                        {
+                            page += ":" + c2.ActivePage;
+                            return page;
+                        }
+                    }
+                }
+            }
+            return page;
+        }
+
+        public void GoToPage(string pageString)
+        {
+            string[] parts = pageString.Split(':');
+
+            if (parts.Length >= 1)
+            {
+                if (int.TryParse(parts[0], out int p))
+                {
+                    ChangePage(p);
+
+                    if (parts.Length >= 2)
+                    {
+                        if (int.TryParse(parts[1], out int pp))
+                        {
+                            foreach (Control c in mainContent.RightArea.Children)
+                            {
+                                if (c is Area && c.Page == p)
+                                {
+                                    foreach (Control c2 in c.Children)
+                                    {
+                                        if (c2 is LeftSideMenuRightSideContent lsc)
+                                        {
+                                            lsc.ActivePage = pp;
+                                            foreach (Control mb in lsc.LeftArea.Children)
+                                            {
+                                                if (mb is ModernButton button && button.ButtonParameter == pp && button.IsSelectable)
+                                                {
+                                                    button.IsSelected = true;
+                                                    break;
+                                                }
+                                            }
+                                            return;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+
+        }
+
         public override void ChangePage(int pageIndex)
         {
             base.ChangePage(pageIndex);

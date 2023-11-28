@@ -234,6 +234,30 @@ namespace ClassicUO.Game.Managers
                 }
 
             });
+
+            Register("optlink", (s) =>
+            {
+                ModernOptionsGump g = UIManager.GetGump<ModernOptionsGump>();
+                if (s.Length > 1)
+                {
+                    if (g != null)
+                    {
+                        g.GoToPage(s[1]);
+                    }
+                    else
+                    {
+                        UIManager.Add(g = new ModernOptionsGump());
+                        g.GoToPage(s[1]);
+                    }
+                }
+                else
+                {
+                    if (g != null)
+                    {
+                        GameActions.Print(g.GetPageString());
+                    }
+                }
+            });
         }
 
 
