@@ -4698,6 +4698,12 @@ namespace ClassicUO.Game.UI.Gumps
                 return true;
             }
 
+            protected override void OnMouseEnter(int x, int y)
+            {
+                base.OnMouseEnter(x, y);
+                UIManager.KeyboardFocusControl = this; //Dirty fix for mouse wheel macros
+            }
+
             protected override void OnMouseWheel(MouseEventType delta)
             {
                 switch (delta)
