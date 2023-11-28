@@ -37,6 +37,7 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
+using ClassicUO.Game.UI;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
@@ -685,7 +686,15 @@ namespace ClassicUO
                     {
                         if (Keyboard.Ctrl)
                         {
-                            if (UIManager.MouseOverControl != null && UIManager.MouseOverControl.IsVisible)
+                            if (Tooltip.IsEnabled)
+                            {
+                                ClipboardScreenshot(new Rectangle(Tooltip.X, Tooltip.Y, Tooltip.Width, Tooltip.Height), GraphicsDevice);
+                            } 
+                            else if (MultipleToolTipGump.SSIsEnabled)
+                            {
+                                ClipboardScreenshot(new Rectangle(MultipleToolTipGump.SSX, MultipleToolTipGump.SSY, MultipleToolTipGump.SSWidth, MultipleToolTipGump.SSHeight), GraphicsDevice);
+                            }
+                            else if (UIManager.MouseOverControl != null && UIManager.MouseOverControl.IsVisible)
                             {
                                 Control c = UIManager.MouseOverControl.RootParent;
                                 if (c != null)
