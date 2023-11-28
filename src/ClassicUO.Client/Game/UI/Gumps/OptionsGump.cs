@@ -3194,9 +3194,7 @@ namespace ClassicUO.Game.UI.Gumps
             startY += 20;
 
 
-            InfoBarManager ibmanager = Client.Game.GetScene<GameScene>().InfoBars;
-
-            List<InfoBarItem> _infoBarItems = ibmanager.GetInfoBars();
+            List<InfoBarItem> _infoBarItems = World.InfoBars.GetInfoBars();
 
             _infoBarBuilderControls = new List<InfoBarBuilderControl>();
 
@@ -4154,20 +4152,17 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.ShowInfoBar = _showInfoBar.IsChecked;
             _currentProfile.InfoBarHighlightType = _infoBarHighlightType.SelectedIndex;
 
-
-            InfoBarManager ibmanager = Client.Game.GetScene<GameScene>().InfoBars;
-
-            ibmanager.Clear();
+            World.InfoBars.Clear();
 
             for (int i = 0; i < _infoBarBuilderControls.Count; i++)
             {
                 if (!_infoBarBuilderControls[i].IsDisposed)
                 {
-                    ibmanager.AddItem(new InfoBarItem(_infoBarBuilderControls[i].LabelText, _infoBarBuilderControls[i].Var, _infoBarBuilderControls[i].Hue));
+                    World.InfoBars.AddItem(new InfoBarItem(_infoBarBuilderControls[i].LabelText, _infoBarBuilderControls[i].Var, _infoBarBuilderControls[i].Hue));
                 }
             }
 
-            ibmanager.Save();
+            World.InfoBars.Save();
 
             InfoBarGump infoBarGump = UIManager.GetGump<InfoBarGump>();
 
