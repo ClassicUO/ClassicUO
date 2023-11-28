@@ -791,16 +791,6 @@ namespace ClassicUO.Game.UI.Gumps
                 Add(new SimpleBorder() { Width = Width - 1, Height = Height - 1, Alpha = 0.85f });
 
             }
-
-            protected override void OnMouseUp(int x, int y, MouseButtonType button)
-            {
-                base.OnMouseUp(x, y, button);
-
-                if (Keyboard.Alt && button == MouseButtonType.Left)
-                {
-                    Client.Game.ClipboardScreenshot(Bounds);
-                }
-            }
         }
 
         private class MinimizedPaperdoll : Gump
