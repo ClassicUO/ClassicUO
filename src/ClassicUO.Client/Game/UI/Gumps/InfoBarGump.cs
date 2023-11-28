@@ -74,7 +74,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             _infobarControls.Clear();
 
-            List<InfoBarItem> infoBarItems = Client.Game.GetScene<GameScene>().InfoBars.GetInfoBars();
+            List<InfoBarItem> infoBarItems = World.InfoBars.GetInfoBars();
 
             for (int i = 0; i < infoBarItems.Count; i++)
             {

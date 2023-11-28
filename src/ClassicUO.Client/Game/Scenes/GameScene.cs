@@ -108,7 +108,6 @@ namespace ClassicUO.Game.Scenes
         }
 
         public bool UpdateDrawPosition { get; set; }
-        public InfoBarManager InfoBars { get; private set; }
         public bool DisconnectionRequested { get; set; }
         public bool UseLights =>
             ProfileManager.CurrentProfile != null
@@ -142,8 +141,7 @@ namespace ClassicUO.Game.Scenes
             _world.Macros.Load();
             _animatedStaticsManager = new AnimatedStaticsManager();
             _animatedStaticsManager.Initialize();
-            InfoBars = new InfoBarManager();
-            InfoBars.Load();
+            _world.InfoBars.Load();
             _healthLinesManager = new HealthLinesManager(_world);
 
             _world.CommandManager.Initialize();
@@ -341,7 +339,7 @@ namespace ClassicUO.Game.Scenes
 
             _world.Macros.Save();
             _world.Macros.Clear();
-            InfoBars.Save();
+            _world.InfoBars.Save();
             ProfileManager.UnLoadProfile();
 
             StaticFilters.CleanCaveTextures();

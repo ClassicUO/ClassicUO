@@ -79,6 +79,7 @@ namespace ClassicUO.Game
             Macros = new MacroManager(this);
             CommandManager = new CommandManager(this);
             Weather = new Weather(this);
+            InfoBars = new InfoBarManager(this);
         }
 
         public Point RangeSize;
@@ -128,6 +129,8 @@ namespace ClassicUO.Game
         public CommandManager CommandManager { get; }
 
         public Weather Weather { get; }
+
+        public InfoBarManager InfoBars { get; }
 
         public Dictionary<uint, Item> Items { get; } = new Dictionary<uint, Item>();
 
