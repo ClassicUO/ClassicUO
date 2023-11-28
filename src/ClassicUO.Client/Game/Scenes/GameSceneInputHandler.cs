@@ -655,7 +655,7 @@ namespace ClassicUO.Game.Scenes
 
                         if (SelectedObject.Object is Entity selectedEntity)
                         {
-                            CommandManager.OnHueTarget(selectedEntity);
+                            _world.CommandManager.OnHueTarget(selectedEntity);
                         }
 
                         break;

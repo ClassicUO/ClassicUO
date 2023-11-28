@@ -375,12 +375,12 @@ namespace ClassicUO.Utility.Platforms
 
                         if (wParam == 0)
                         {
-                            Client.Game.GetScene<GameScene>().CommandManager.UnRegister(sb.ToString());
+                            _world.CommandManager.UnRegister(sb.ToString());
 
                             return 0;
                         }
 
-                        new WndCmd(_cmdID, (IntPtr) wParam, sb.ToString());
+                        new WndCmd(_world, _cmdID, (IntPtr) wParam, sb.ToString());
 
                         return (int) _cmdID++;
                     }
@@ -582,11 +582,11 @@ namespace ClassicUO.Utility.Platforms
                 private readonly IntPtr hWnd;
                 private readonly uint Msg;
 
-                public WndCmd(uint msg, IntPtr handle, string cmd)
+                public WndCmd(World world, uint msg, IntPtr handle, string cmd)
                 {
                     Msg = msg;
                     hWnd = handle;
-                    Client.Game.GetScene<GameScene>().CommandManager.Register(cmd, MyCallback);
+                    world.CommandManager.Register(cmd, MyCallback);
                 }
 
                 private void MyCallback(string[] args)

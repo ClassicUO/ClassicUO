@@ -107,10 +107,8 @@ namespace ClassicUO.Game.Scenes
             _useItemQueue = new UseItemQueue(world);
         }
 
-        public CommandManager CommandManager { get; private set; }
         public bool UpdateDrawPosition { get; set; }
         public InfoBarManager InfoBars { get; private set; }
-        public Weather Weather { get; private set; }
         public bool DisconnectionRequested { get; set; }
         public bool UseLights =>
             ProfileManager.CurrentProfile != null
@@ -147,7 +145,8 @@ namespace ClassicUO.Game.Scenes
             InfoBars = new InfoBarManager();
             InfoBars.Load();
             _healthLinesManager = new HealthLinesManager(_world);
-            Weather = new Weather(_world);
+
+            _world.CommandManager.Initialize();
 
             WorldViewportGump viewport = new WorldViewportGump(_world, this);
             UIManager.Add(viewport, false);
@@ -156,9 +155,6 @@ namespace ClassicUO.Game.Scenes
             {
                 TopBarGump.Create(_world);
             }
-
-            CommandManager = new CommandManager(_world);
-            CommandManager.Initialize();
 
             NetClient.Socket.Disconnected += SocketOnDisconnected;
             _world.MessageManager.MessageReceived += ChatOnMessageReceived;
@@ -356,8 +352,8 @@ namespace ClassicUO.Game.Scenes
             _lightRenderTarget?.Dispose();
             _world_render_target?.Dispose();
 
-            CommandManager.UnRegisterAll();
-            Weather.Reset();
+            _world.CommandManager.UnRegisterAll();
+            _world.Weather.Reset();
             UIManager.Clear();
             _world.Clear();
             _world.ChatManager.Clear();
@@ -1154,7 +1150,7 @@ namespace ClassicUO.Game.Scenes
             batcher.SetStencil(null);
 
             // draw weather
-            Weather.Draw(batcher, 0, 0); // TODO: fix the depth
+            _world.Weather.Draw(batcher, 0, 0); // TODO: fix the depth
 
             batcher.End();
 

@@ -863,7 +863,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         if (tt.Length != 0)
                         {
-                            Client.Game.GetScene<GameScene>().CommandManager.Execute(tt[0], tt);
+                            _gump.World.CommandManager.Execute(tt[0], tt);
                         }
 
                         break;
