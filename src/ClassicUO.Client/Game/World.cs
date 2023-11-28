@@ -45,7 +45,6 @@ using ClassicUO.Configuration;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Utility.Logging;
 using ClassicUO.Assets;
-using System.Linq.Expressions;
 
 namespace ClassicUO.Game
 {
