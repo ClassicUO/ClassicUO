@@ -690,11 +690,11 @@ namespace ClassicUO
                                 Control c = UIManager.MouseOverControl.RootParent;
                                 if (c != null)
                                 {
-                                    ClipboardScreenshot(c.Bounds);
+                                    ClipboardScreenshot(c.Bounds, GraphicsDevice);
                                 }
                                 else
                                 {
-                                    ClipboardScreenshot(UIManager.MouseOverControl.Bounds);
+                                    ClipboardScreenshot(UIManager.MouseOverControl.Bounds, GraphicsDevice);
                                 }
                             }
                         }
@@ -975,11 +975,11 @@ namespace ClassicUO
             }
         }
 
-        public void ClipboardScreenshot(Rectangle position)
+        public void ClipboardScreenshot(Rectangle position, GraphicsDevice graphicDevice)
         {
             Color[] colors = new Color[position.Width * position.Height];
 
-            GraphicsDevice.GetBackBufferData(position, colors, 0, colors.Length);
+            graphicDevice.GetBackBufferData(position, colors, 0, colors.Length);
 
             using (
                 Texture2D texture = new Texture2D(
