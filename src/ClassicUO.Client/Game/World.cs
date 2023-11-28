@@ -77,6 +77,8 @@ namespace ClassicUO.Game
             BoatMovingManager = new BoatMovingManager(this);
             NameOverHeadManager = new NameOverHeadManager(this);
             Macros = new MacroManager(this);
+            CommandManager = new CommandManager(this);
+            Weather = new Weather(this);
         }
 
         public Point RangeSize;
@@ -122,6 +124,10 @@ namespace ClassicUO.Game
         public NameOverHeadManager NameOverHeadManager { get; }
 
         public MacroManager Macros { get; }
+
+        public CommandManager CommandManager { get; }
+
+        public Weather Weather { get; }
 
         public Dictionary<uint, Item> Items { get; } = new Dictionary<uint, Item>();
 

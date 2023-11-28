@@ -1219,7 +1219,7 @@ namespace ClassicUO.Network
             world.Player.Walker.DenyWalk(seq, x, y, z);
             world.Player.Direction = direction;
 
-            Client.Game.GetScene<GameScene>()?.Weather?.Reset();
+            world.Weather.Reset();
         }
 
         private static void ConfirmWalk(World world, ref StackDataReader p)
@@ -1776,7 +1776,7 @@ namespace ClassicUO.Network
 
             if (action != 1)
             {
-                Client.Game.GetScene<GameScene>()?.Weather?.Reset();
+                world.Weather.Reset();
 
                 Client.Game.Audio.PlayMusic(Client.Game.Audio.DeathMusicIndex, true);
 
@@ -2340,15 +2340,14 @@ namespace ClassicUO.Network
                 return;
             }
 
-            Weather weather = scene.Weather;
             WeatherType type = (WeatherType)p.ReadUInt8();
 
-            if (weather.CurrentWeather != type)
+            if (world.Weather.CurrentWeather != type)
             {
                 byte count = p.ReadUInt8();
                 byte temp = p.ReadUInt8();
 
-                weather.Generate(type, count, temp);
+                world.Weather.Generate(type, count, temp);
             }
         }
 
@@ -6446,7 +6445,7 @@ namespace ClassicUO.Network
 
                 if (gs != null)
                 {
-                    gs.Weather.Reset();
+                    world.Weather.Reset();
                     gs.UpdateDrawPosition = true;
                 }
 
