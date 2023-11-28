@@ -19,7 +19,8 @@ namespace ClassicUO.Game.UI.Gumps
                 "- Added an auto resync option under Options->TazUO->Misc\n" +
                 "- Alt + Click paperdoll preview in modern paperdoll to copy a screenshot of it\n" +
                 "- Added `both` option to auto close gumps range or dead\n" +
-                "- Added shift + double click to advanced shop gump to buy/sell all of that item",
+                "- Added shift + double click to advanced shop gump to buy/sell all of that item\n" +
+                "- Added use one health bar for last attack option",
 
             "/c[white][3.13.0]/cd\n" +
                 "- Fix item unintentional stacking\n" +

@@ -569,6 +569,8 @@ namespace ClassicUO.Configuration
 
         public bool ForceResyncOnHang { get; set; } = false;
 
+        public bool UseOneHPBarForLastAttack { get; set; } = false;
+
 
 
         public void Save(string path, bool saveGumps = true)

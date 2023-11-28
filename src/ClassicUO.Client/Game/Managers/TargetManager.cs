@@ -144,11 +144,33 @@ namespace ClassicUO.Game.Managers
                 _lastAttack = value;
                 if (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.OpenHealthBarForLastAttack)
                 {
-                    if (UIManager.GetGump<BaseHealthBarGump>(value) == null)
-                        if (ProfileManager.CurrentProfile.CustomBarsToggled)
-                            UIManager.Add(new HealthBarGumpCustom(value) { Location = ProfileManager.CurrentProfile.LastTargetHealthBarPos, IsLastTarget = true });
+                    if (ProfileManager.CurrentProfile.UseOneHPBarForLastAttack)
+                    {
+                        if (BaseHealthBarGump.LastAttackBar != null && !BaseHealthBarGump.LastAttackBar.IsDisposed)
+                        {
+                            if (BaseHealthBarGump.LastAttackBar.LocalSerial != value)
+                            {
+                                BaseHealthBarGump.LastAttackBar.SetNewMobile(value);
+                            }
+                        }
                         else
-                            UIManager.Add(new HealthBarGump(value) { Location = ProfileManager.CurrentProfile.LastTargetHealthBarPos, IsLastTarget = true });
+                        {
+                            if (ProfileManager.CurrentProfile.CustomBarsToggled)
+                                UIManager.Add(BaseHealthBarGump.LastAttackBar = new HealthBarGumpCustom(value) { Location = ProfileManager.CurrentProfile.LastTargetHealthBarPos, IsLastTarget = true });
+                            else
+                                UIManager.Add(BaseHealthBarGump.LastAttackBar = new HealthBarGump(value) { Location = ProfileManager.CurrentProfile.LastTargetHealthBarPos, IsLastTarget = true });
+                        }
+                    }
+                    else
+                    {
+                        if (UIManager.GetGump<BaseHealthBarGump>(value) == null)
+                        {
+                            if (ProfileManager.CurrentProfile.CustomBarsToggled)
+                                UIManager.Add(new HealthBarGumpCustom(value) { Location = ProfileManager.CurrentProfile.LastTargetHealthBarPos, IsLastTarget = true });
+                            else
+                                UIManager.Add(new HealthBarGump(value) { Location = ProfileManager.CurrentProfile.LastTargetHealthBarPos, IsLastTarget = true });
+                        }
+                    }
                 }
             }
         }

@@ -53,6 +53,9 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private bool _targetBroke;
 
+        public bool IsLastAttackBar { get; set; } = false;
+        public static BaseHealthBarGump LastAttackBar { get; set; }
+
         protected BaseHealthBarGump(Entity entity) : this(0, 0)
         {
             if (entity == null || entity.IsDestroyed)
@@ -69,6 +72,19 @@ namespace ClassicUO.Game.UI.Gumps
             _isDead = entity is Mobile mm && mm.IsDead;
 
             BuildGump();
+        }
+
+        public virtual void SetNewMobile(uint serial)
+        {
+            if(World.Mobiles.TryGetValue(serial, out Mobile m))
+            {
+                LocalSerial = serial;
+                _name = m.Name;
+                _isDead = m.IsDead;
+
+                Children.Clear();
+                BuildGump();
+            }
         }
 
         protected BaseHealthBarGump(uint serial) : this(World.Get(serial))
@@ -149,6 +165,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 writer.WriteAttributeString("name", _name);
                 writer.WriteAttributeString("locked", IsLocked.ToString());
+                writer.WriteAttributeString("lastAttackSingle", IsLastAttackBar.ToString());
             }
         }
 
@@ -165,7 +182,19 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _name = xml.GetAttribute("name");
                 if (bool.TryParse(xml.GetAttribute("locked"), out bool locked))
+                {
                     IsLocked = locked;
+                }
+
+                if (bool.TryParse(xml.GetAttribute("lastAttackSingle"), out bool lastAttack))
+                {
+                    if (lastAttack)
+                    {
+                        LastAttackBar = this;
+                        IsLastAttackBar = lastAttack;
+                    }
+                }
+
                 _outOfRange = true;
                 BuildGump();
             }
@@ -407,7 +436,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected bool CheckIfAnchoredElseDispose()
         {
-            if (IsLocked)
+            if (IsLocked || IsLastAttackBar)
             {
                 return false;
             }

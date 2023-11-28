@@ -2069,6 +2069,9 @@ namespace ClassicUO.Game.UI.Gumps
             content.BlankLine();
 
             content.AddToRight(c = new CheckboxWithLabel("Automatically open health bars for last attack", 0, profile.OpenHealthBarForLastAttack, (b) => { profile.OpenHealthBarForLastAttack = b; }), true, page);
+            content.Indent();
+            content.AddToRight(c = new CheckboxWithLabel("Update one bar as last attack", 0, profile.UseOneHPBarForLastAttack, (b) => { profile.UseOneHPBarForLastAttack = b; }), true, page);
+            content.RemoveIndent();
 
             content.BlankLine();
 
