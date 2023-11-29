@@ -1,6 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.Xna.Framework;
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace ClassicUO.Configuration
 {
@@ -33,6 +36,7 @@ namespace ClassicUO.Configuration
             if (preload.TryGetValue(name, out var value))
             {
                 jsonData = value;
+                preload.Remove(name);
             }
             else
             {
@@ -92,5 +96,38 @@ namespace ClassicUO.Configuration
                 }
             });
         }
+    }
+
+    public class ColorJsonConverter : JsonConverter<Color>
+    {
+        public override Color Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
+            Color color = new Color();
+            string value = reader.GetString();
+            if (!string.IsNullOrEmpty(value)) {
+                string[] parts = value.Split(':');
+
+                if (int.TryParse(parts[0], out int r))
+                {
+                    color.R = (byte)r;
+                }
+                if (int.TryParse(parts[1], out int g))
+                {
+                    color.G = (byte)g;
+                }
+                if (int.TryParse(parts[2], out int b))
+                {
+                    color.B = (byte)b;
+                }
+                if (int.TryParse(parts[3], out int a))
+                {
+                    color.A = (byte)a;
+                }
+            }
+
+            return color;
+        }
+
+        public override void Write(Utf8JsonWriter writer, Color value, JsonSerializerOptions options) => writer.WriteStringValue($"{value.R}:{value.G}:{value.B}:{value.A}");
     }
 }

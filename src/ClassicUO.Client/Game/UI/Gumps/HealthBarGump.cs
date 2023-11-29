@@ -44,6 +44,7 @@ using ClassicUO.Resources;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SDL2;
+using System.Text.Json.Serialization;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -451,28 +452,50 @@ namespace ClassicUO.Game.UI.Gumps
 
     internal class HealthBarGumpCustom : BaseHealthBarGump
     {
-        internal const int HPB_WIDTH = 120;
-        internal const int HPB_HEIGHT_MULTILINE = 60;
-        internal const int HPB_HEIGHT_SINGLELINE = 36;
-        private const int HPB_BORDERSIZE = 1;
-        private const int HPB_OUTLINESIZE = 1;
+        private static Settings _settings;
+        private static Settings settings
+        {
+            get
+            {
+                if (_settings == null)
+                {
+                    _settings = (Settings)Settings.Load<Settings>(typeof(HealthBarGumpCustom).ToString());
+                    if (_settings == null)
+                    {
+                        _settings = new Settings();
+                        Settings.Save<Settings>(typeof(HealthBarGumpCustom).ToString(), _settings);
+                    }
+                    return _settings;
+                }
+                else
+                {
+                    return _settings;
+                }
+            }
+        }
+
+        internal static int HPB_WIDTH = settings.Width;
+        internal static int HPB_HEIGHT_MULTILINE = settings.Height_Multiline;
+        internal static int HPB_HEIGHT_SINGLELINE = settings.Height_Singleline;
+        private static int HPB_BORDERSIZE = settings.BorderSize;
+        private static int HPB_OUTLINESIZE = settings.OutlineSize;
 
 
-        internal const int HPB_BAR_WIDTH = 100;
-        private const int HPB_BAR_HEIGHT = 8;
-        private const int HPB_BAR_SPACELEFT = (HPB_WIDTH - HPB_BAR_WIDTH) / 2;
+        internal static int HPB_BAR_WIDTH = settings.HP_Bar_Width;
+        private static int HPB_BAR_HEIGHT = settings.HP_Bar_Height;
+        private static int HPB_BAR_SPACELEFT = (HPB_WIDTH - HPB_BAR_WIDTH) / 2;
 
 
-        private static Color HPB_COLOR_DRAW_RED = Color.Red;
-        private static Color HPB_COLOR_DRAW_BLUE = Color.DodgerBlue;
-        private static Color HPB_COLOR_DRAW_BLACK = Color.Black;
+        private static Color HPB_COLOR_DRAW_RED = settings.Hue_HP_Lines_Red;
+        private static Color HPB_COLOR_DRAW_BLUE = settings.Hue_HP_Lines_Blue;
+        private static Color HPB_COLOR_DRAW_BLACK = settings.Hue_HP_Lines_Black;
 
-        private static readonly Texture2D HPB_COLOR_BLUE = SolidColorTextureCache.GetTexture(Color.DodgerBlue);
-        private static readonly Texture2D HPB_COLOR_GRAY = SolidColorTextureCache.GetTexture(Color.Gray);
-        private static readonly Texture2D HPB_COLOR_RED = SolidColorTextureCache.GetTexture(Color.Red);
-        private static readonly Texture2D HPB_COLOR_YELLOW = SolidColorTextureCache.GetTexture(Color.Orange);
-        private static readonly Texture2D HPB_COLOR_POISON = SolidColorTextureCache.GetTexture(Color.LimeGreen);
-        private static readonly Texture2D HPB_COLOR_BLACK = SolidColorTextureCache.GetTexture(Color.Black);
+        private static readonly Texture2D HPB_COLOR_BLUE = SolidColorTextureCache.GetTexture(settings.Hue_HP_Blue);
+        private static readonly Texture2D HPB_COLOR_GRAY = SolidColorTextureCache.GetTexture(settings.Hue_HP_Gray);
+        private static readonly Texture2D HPB_COLOR_RED = SolidColorTextureCache.GetTexture(settings.Hue_HP_Red);
+        private static readonly Texture2D HPB_COLOR_YELLOW = SolidColorTextureCache.GetTexture(settings.Hue_HP_Yellow);
+        private static readonly Texture2D HPB_COLOR_POISON = SolidColorTextureCache.GetTexture(settings.Hue_HP_Poison);
+        private static readonly Texture2D HPB_COLOR_BLACK = SolidColorTextureCache.GetTexture(settings.Hue_HP_Black);
 
         private readonly LineCHB[] _bars = new LineCHB[3];
         private readonly LineCHB[] _border = new LineCHB[4];
@@ -496,7 +519,6 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected AlphaBlendControl _background;
 
-
         protected override void UpdateContents()
         {
             Clear();
@@ -514,7 +536,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             BuildGump();
         }
-
 
         public override void Update()
         {
@@ -1101,9 +1122,9 @@ namespace ClassicUO.Game.UI.Gumps
                         _outline = new LineCHB
                         (
                             HPB_BAR_SPACELEFT - HPB_OUTLINESIZE,
-                            27 - HPB_OUTLINESIZE,
+                            _textBox.Height - HPB_OUTLINESIZE,
                             HPB_BAR_WIDTH + HPB_OUTLINESIZE * 2,
-                            HPB_BAR_HEIGHT * 3 + 2 + HPB_OUTLINESIZE * 2,
+                            HPB_BAR_HEIGHT * 3 + 2 + HPB_OUTLINESIZE * 3,
                             HPB_COLOR_DRAW_BLACK.PackedValue
                         )
                     );
@@ -1113,7 +1134,19 @@ namespace ClassicUO.Game.UI.Gumps
                         _hpLineRed = new LineCHB
                         (
                             HPB_BAR_SPACELEFT,
-                            27,
+                            _outline.Y + HPB_OUTLINESIZE,
+                            HPB_BAR_WIDTH,
+                            HPB_BAR_HEIGHT,
+                            HPB_COLOR_DRAW_RED.PackedValue
+                        )
+                    );
+                    Control m, s;
+                    Add
+                    (m = 
+                        new LineCHB
+                        (
+                            HPB_BAR_SPACELEFT,
+                            _hpLineRed.Height + _hpLineRed.Y + HPB_OUTLINESIZE,
                             HPB_BAR_WIDTH,
                             HPB_BAR_HEIGHT,
                             HPB_COLOR_DRAW_RED.PackedValue
@@ -1121,23 +1154,11 @@ namespace ClassicUO.Game.UI.Gumps
                     );
 
                     Add
-                    (
+                    (s =
                         new LineCHB
                         (
                             HPB_BAR_SPACELEFT,
-                            36,
-                            HPB_BAR_WIDTH,
-                            HPB_BAR_HEIGHT,
-                            HPB_COLOR_DRAW_RED.PackedValue
-                        )
-                    );
-
-                    Add
-                    (
-                        new LineCHB
-                        (
-                            HPB_BAR_SPACELEFT,
-                            45,
+                            m.Height + m.Y + HPB_OUTLINESIZE,
                             HPB_BAR_WIDTH,
                             HPB_BAR_HEIGHT,
                             HPB_COLOR_DRAW_RED.PackedValue
@@ -1149,7 +1170,7 @@ namespace ClassicUO.Game.UI.Gumps
                         _bars[0] = new LineCHB
                         (
                             HPB_BAR_SPACELEFT,
-                            27,
+                            _hpLineRed.Y,
                             HPB_BAR_WIDTH,
                             HPB_BAR_HEIGHT,
                             HPB_COLOR_DRAW_BLUE.PackedValue
@@ -1162,7 +1183,7 @@ namespace ClassicUO.Game.UI.Gumps
                         _bars[1] = new LineCHB
                         (
                             HPB_BAR_SPACELEFT,
-                            36,
+                            m.Y,
                             HPB_BAR_WIDTH,
                             HPB_BAR_HEIGHT,
                             HPB_COLOR_DRAW_BLUE.PackedValue
@@ -1175,7 +1196,7 @@ namespace ClassicUO.Game.UI.Gumps
                         _bars[2] = new LineCHB
                         (
                             HPB_BAR_SPACELEFT,
-                            45,
+                            s.Y,
                             HPB_BAR_WIDTH,
                             HPB_BAR_HEIGHT,
                             HPB_COLOR_DRAW_BLUE.PackedValue
@@ -1449,6 +1470,37 @@ namespace ClassicUO.Game.UI.Gumps
         // Health Bar Gump Custom v.1c by Syrupz(Alan)
 
         #endregion
+
+        private class Settings : UISettings
+        {
+            [JsonConverter(typeof(ColorJsonConverter))]
+            public Color Hue_HP_Blue { get; set; } = Color.DodgerBlue;
+            [JsonConverter(typeof(ColorJsonConverter))]
+            public Color Hue_HP_Gray { get; set; } = Color.Gray;
+            [JsonConverter(typeof(ColorJsonConverter))]
+            public Color Hue_HP_Red { get; set; } = Color.Red;
+            [JsonConverter(typeof(ColorJsonConverter))]
+            public Color Hue_HP_Yellow { get; set; } = Color.Orange;
+            [JsonConverter(typeof(ColorJsonConverter))]
+            public Color Hue_HP_Poison { get; set; } = Color.LimeGreen;
+            [JsonConverter(typeof(ColorJsonConverter))]
+            public Color Hue_HP_Black { get; set; } = Color.Black;
+
+            [JsonConverter(typeof(ColorJsonConverter))]
+            public Color Hue_HP_Lines_Red { get; set; } = Color.Red;
+            [JsonConverter(typeof(ColorJsonConverter))]
+            public Color Hue_HP_Lines_Blue { get; set; } = Color.DodgerBlue;
+            [JsonConverter(typeof(ColorJsonConverter))]
+            public Color Hue_HP_Lines_Black { get; set; } = Color.Black;
+
+            public int Width { get; set; } = 120;
+            public int Height_Multiline { get; set; } = 60;
+            public int Height_Singleline { get; set; } = 36;
+            public int BorderSize { get; set; } = 1;
+            public int OutlineSize { get; set; } = 1;
+            public int HP_Bar_Width { get; set; } = 100;
+            public int HP_Bar_Height { get; set; } = 8;
+        }
     }
 
     internal class HealthBarGump : BaseHealthBarGump
@@ -2034,7 +2086,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
 
-            if(_bars.Length> 0 && _bars[0].Hue != hpForegroundHue) //HP Foreground
+            if (_bars.Length > 0 && _bars[0].Hue != hpForegroundHue) //HP Foreground
             {
                 _bars[0].Hue = hpForegroundHue;
             }
