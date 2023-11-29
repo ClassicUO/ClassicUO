@@ -1537,7 +1537,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Add
                 (
-                    _background = new GumpPic(0, 0, settings.Background_Normal, 0)
+                    _background = new GumpPic(0, 0, settings.Background_Normal, settings.Hue_Background)
                     {
                         ContainsByBounds = true,
                         Alpha = 0
@@ -1611,7 +1611,7 @@ namespace ClassicUO.Game.UI.Gumps
                         18,
                         20,
                         settings.Line_Blue_Party,
-                        0,
+                        settings.Hue_Bar_HP_Foreground_Normal,
                         96
                     )
                 );
@@ -1623,7 +1623,7 @@ namespace ClassicUO.Game.UI.Gumps
                         18,
                         33,
                         settings.Line_Blue_Party,
-                        0,
+                        settings.Hue_Bar_Mana_Foreground_Normal,
                         96
                     )
                 );
@@ -1635,7 +1635,7 @@ namespace ClassicUO.Game.UI.Gumps
                         18,
                         45,
                         settings.Line_Blue_Party,
-                        0,
+                        settings.Hue_Bar_Stam_Foreground_Normal,
                         96
                     )
                 );
@@ -1664,7 +1664,7 @@ namespace ClassicUO.Game.UI.Gumps
                             34,
                             12,
                             settings.Line_Blue,
-                            0,
+                            settings.Hue_Bar_HP_Foreground_Normal,
                             0
                         )
                     );
@@ -1676,7 +1676,7 @@ namespace ClassicUO.Game.UI.Gumps
                             34,
                             25,
                             settings.Line_Blue,
-                            0,
+                            settings.Hue_Bar_Mana_Foreground_Normal,
                             0
                         )
                     );
@@ -1688,7 +1688,7 @@ namespace ClassicUO.Game.UI.Gumps
                             34,
                             38,
                             settings.Line_Blue,
-                            0,
+                            settings.Hue_Bar_Stam_Foreground_Normal,
                             0
                         )
                     );
@@ -1778,7 +1778,9 @@ namespace ClassicUO.Game.UI.Gumps
 
 
             ushort textColor = settings.Hue_Text;
-            ushort hitsColor = settings.Hue_HitsBar;
+            ushort hitsColor = settings.Hue_HitsBar_Background;
+            ushort backgroundHue = settings.Background_Normal;
+            ushort hpForegroundHue = settings.Hue_Bar_HP_Foreground_Normal;
 
             Entity entity = World.Get(LocalSerial);
 
@@ -1805,10 +1807,6 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (!_outOfRange)
                 {
-                    //_poisoned = false;
-                    //_yellowHits = false;
-                    //_normalHits = true;
-
                     _outOfRange = true;
 
                     if (TargetManager.LastAttack != LocalSerial)
@@ -1845,21 +1843,6 @@ namespace ClassicUO.Game.UI.Gumps
                             }
 
                             _textBox.IsEditable = false;
-                        }
-                    }
-
-                    if (_background.Hue != settings.Hue_Background)
-                    {
-                        _background.Hue = settings.Hue_Background;
-                    }
-
-                    if (_hpLineRed.Hue != hitsColor)
-                    {
-                        _hpLineRed.Hue = hitsColor;
-
-                        if (_manaLineRed != null && _stamLineRed != null)
-                        {
-                            _manaLineRed.Hue = _stamLineRed.Hue = hitsColor;
                         }
                     }
 
@@ -1936,17 +1919,6 @@ namespace ClassicUO.Game.UI.Gumps
                             _bars[2].IsVisible = true;
                         }
                     }
-
-                    if (_hpLineRed.Hue != hitsColor)
-                    {
-                        _hpLineRed.Hue = hitsColor;
-
-                        if (_manaLineRed != null && _stamLineRed != null)
-                        {
-                            _manaLineRed.Hue = _stamLineRed.Hue = hitsColor;
-                        }
-                    }
-
                     _bars[0].IsVisible = true;
                 }
 
@@ -1962,27 +1934,17 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 }
 
-
-                if (_textBox != null && _textBox.Hue != textColor)
-                {
-                    _textBox.Hue = textColor;
-                }
-
-                ushort barColor = entity == World.Player || mobile == null || mobile.NotorietyFlag == NotorietyFlag.Criminal || mobile.NotorietyFlag == NotorietyFlag.Gray ? (ushort)0 : Notoriety.GetHue(mobile.NotorietyFlag);
-
-                if (_background.Hue != barColor)
-                {
-                    _background.Hue = barColor;
-                }
+                backgroundHue = entity == World.Player || mobile == null || mobile.NotorietyFlag == NotorietyFlag.Criminal || mobile.NotorietyFlag == NotorietyFlag.Gray ? (ushort)settings.Hue_Background : Notoriety.GetHue(mobile.NotorietyFlag);
 
                 if (mobile != null && mobile.IsPoisoned && !_poisoned)
                 {
                     if (inparty)
                     {
-                        _bars[0].Hue = settings.Hue_Bar_Poisoned_InParty;
+                        hpForegroundHue = settings.Hue_Bar_Poisoned_InParty;
                     }
                     else
                     {
+                        hpForegroundHue = settings.Hue_Bar_Poisoned;
                         _bars[0].Graphic = settings.Line_Poisoned;
                     }
 
@@ -1993,10 +1955,11 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (inparty)
                     {
-                        _bars[0].Hue = settings.Hue_Bar_Yellow_InParty;
+                        hpForegroundHue = settings.Hue_Bar_Yellow_InParty;
                     }
                     else
                     {
+                        hpForegroundHue = settings.Hue_Bar_Yellow;
                         _bars[0].Graphic = settings.Line_Yellowhits;
                     }
 
@@ -2007,10 +1970,11 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (inparty)
                     {
-                        _bars[0].Hue = 0;
+                        hpForegroundHue = settings.Hue_HitsBarInParty;
                     }
                     else
                     {
+                        hpForegroundHue = settings.Hue_Bar_HP_Foreground_Normal;
                         _bars[0].Graphic = settings.Line_Blue;
                     }
 
@@ -2068,6 +2032,29 @@ namespace ClassicUO.Game.UI.Gumps
                     _background.Graphic = World.Player.InWarMode ? settings.Background_War : settings.Background_Normal;
                 }
             }
+
+
+            if(_bars.Length> 0 && _bars[0].Hue != hpForegroundHue) //HP Foreground
+            {
+                _bars[0].Hue = hpForegroundHue;
+            }
+            if (_textBox != null && _textBox.Hue != textColor)
+            {
+                _textBox.Hue = textColor;
+            }
+            if (_background.Hue != backgroundHue)
+            {
+                _background.Hue = backgroundHue;
+            }
+            if (_hpLineRed.Hue != hitsColor)
+            {
+                _hpLineRed.Hue = hitsColor;
+
+                if (_manaLineRed != null && _stamLineRed != null)
+                {
+                    _manaLineRed.Hue = _stamLineRed.Hue = hitsColor;
+                }
+            }
         }
 
         public override void OnButtonClick(int buttonID)
@@ -2112,13 +2099,18 @@ namespace ClassicUO.Game.UI.Gumps
 
             public ushort Hue_Text { get; set; } = 0x0386;
             public ushort Hue_Text_Renamable { get; set; } = 0x000E;
-            public ushort Hue_HitsBar { get; set; } = 0x0386;
+            public ushort Hue_HitsBar_Background { get; set; } = 0;
             public ushort Hue_TextInParty { get; set; } = 912;
             public ushort Hue_HitsBarInParty { get; set; } = 912;
             public ushort Hue_HitsBar_OutOfRange { get; set; } = 0;
             public ushort Hue_Background { get; set; } = 0;
             public ushort Hue_Bar_Poisoned_InParty { get; set; } = 63;
+            public ushort Hue_Bar_Poisoned { get; set; } = 63;
             public ushort Hue_Bar_Yellow_InParty { get; set; } = 353;
+            public ushort Hue_Bar_Yellow { get; set; } = 353;
+            public ushort Hue_Bar_HP_Foreground_Normal { get; set; } = 0;
+            public ushort Hue_Bar_Mana_Foreground_Normal { get; set; } = 0;
+            public ushort Hue_Bar_Stam_Foreground_Normal { get; set; } = 0;
         }
 
     }
