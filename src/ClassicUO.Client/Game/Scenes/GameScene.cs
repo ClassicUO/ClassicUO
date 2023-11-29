@@ -137,6 +137,8 @@ namespace ClassicUO.Game.Scenes
         {
             base.Load();
 
+            UISettings.Preload();
+
             Client.Game.Window.AllowUserResizing = true;
 
             Camera.Zoom = ProfileManager.CurrentProfile.DefaultScale;

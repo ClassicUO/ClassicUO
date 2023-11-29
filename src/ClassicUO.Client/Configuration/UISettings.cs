@@ -1,20 +1,17 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Text.Json;
 
 namespace ClassicUO.Configuration
 {
     internal abstract class UISettings
     {
-        private static string savePath;
+        private static string savePath { get { return Path.Combine(CUOEnviroment.ExecutablePath, "Data", "UI"); } }
         private static readonly JsonSerializerOptions serializerOptions = new JsonSerializerOptions() { WriteIndented = true };
+        private static Dictionary<string, string> preload = new Dictionary<string, string>();
 
         public static string ReadJsonFile(string name)
         {
-            if (string.IsNullOrEmpty(savePath))
-            {
-                savePath = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "UI");
-            }
-
             string fp = Path.Combine(savePath, name + ".json");
 
             if (File.Exists(fp))
@@ -31,7 +28,16 @@ namespace ClassicUO.Configuration
 
         public static UISettings Load<T>(string name)
         {
-            string jsonData = ReadJsonFile(name);
+            string jsonData;
+
+            if (preload.TryGetValue(name, out var value))
+            {
+                jsonData = value;
+            }
+            else
+            {
+                jsonData = ReadJsonFile(name);
+            }
 
             if (string.IsNullOrEmpty(jsonData))
             {
@@ -50,11 +56,6 @@ namespace ClassicUO.Configuration
 
         public static void Save<T>(string name, object settings)
         {
-            if (string.IsNullOrEmpty(savePath))
-            {
-                savePath = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "UI");
-            }
-
             string fileSaveData = JsonSerializer.Serialize((T)settings, serializerOptions);
 
             try
@@ -67,6 +68,29 @@ namespace ClassicUO.Configuration
                 File.WriteAllText(Path.Combine(savePath, name + ".json"), fileSaveData);
             }
             catch { }
+        }
+
+        public static void Preload()
+        {
+            System.Threading.Tasks.Task.Factory.StartNew(() =>
+            {
+                if (Directory.Exists(savePath))
+                {
+                    string[] allFiles = Directory.GetFiles(savePath, "*.json");
+                    foreach (string file in allFiles)
+                    {
+                        try
+                        {
+                            preload.Add(Path.GetFileNameWithoutExtension(file), File.ReadAllText(file));
+                        }
+                        catch { }
+                    }
+                }
+                else
+                {
+                    Directory.CreateDirectory(savePath);
+                }
+            });
         }
     }
 }
