@@ -17,6 +17,7 @@ using ClassicUO.Resources;
 using System.Threading.Tasks;
 using System.Net.Http;
 using System.IO;
+using ClassicUO.Game.Data;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -2345,14 +2346,47 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             };
 
+            #region Hidden layers
+            page = ((int)PAGE.TUOOptions + 1009);
+            content.AddToLeft(SubCategoryButton("Visible Layers", page, content.LeftWidth));
+            content.ResetRightSide();
+
+            content.AddToRight(new TextBox("These settings are to hide layers on in-game mobiles. Check the box to hide that layer.", Theme.FONT, Theme.STANDARD_TEXT_SIZE, content.RightWidth - 20, Theme.TEXT_FONT_COLOR, FontStashSharp.RichText.TextHorizontalAlignment.Center, false) { AcceptMouseInput = false }, true, page);
+
+            content.BlankLine();
+
+            content.AddToRight(new CheckboxWithLabel("Only for yourself", 0, profile.HideLayersForSelf, (b) => { profile.HideLayersForSelf = b; }), true, page);
+
+            content.BlankLine();
+
+            bool rightSide = false;
+            foreach (Layer layer in (Layer[])Enum.GetValues(typeof(Layer)))
+            {
+                if(layer == Layer.Invalid || layer == Layer.Hair || layer == Layer.Beard || layer == Layer.Backpack || layer == Layer.ShopBuyRestock || layer == Layer.ShopBuy || layer == Layer.ShopSell || layer == Layer.Bank || layer == Layer.Face || layer == Layer.Talisman || layer == Layer.Mount)
+                {
+                    continue;
+                }
+                if (!rightSide)
+                {
+                    content.AddToRight(c = new CheckboxWithLabel(layer.ToString() + $"-{(int)layer}", 0, profile.HiddenLayers.Contains((int)layer), (b) => { if (b) { profile.HiddenLayers.Add((int)layer); } else { profile.HiddenLayers.Remove((int)layer); } }), true, page);
+                    rightSide = true;
+                }
+                else
+                {
+                    content.AddToRight(new CheckboxWithLabel(layer.ToString() + $"-{(int)layer}", 0, profile.HiddenLayers.Contains((int)layer), (b) => { if (b) { profile.HiddenLayers.Add((int)layer); } else { profile.HiddenLayers.Remove((int)layer); } }) { X = 200, Y = c.Y }, false, page);
+                    rightSide = false;
+                }
+            }
+            #endregion
+
             options.Add(
-                new SettingsOption(
-                    "",
-                    content,
-                    mainContent.RightWidth,
-                    PAGE.TUOOptions
-                    )
-                );
+            new SettingsOption(
+                "",
+                content,
+                mainContent.RightWidth,
+                PAGE.TUOOptions
+                )
+            );
         }
 
         public string GetPageString()
