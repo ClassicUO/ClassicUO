@@ -2088,6 +2088,11 @@ namespace ClassicUO.Game.UI.Gumps
             content.BlankLine();
 
             content.AddToRight(new SliderWithLabel("Auto follow distance", 0, Theme.SLIDER_WIDTH, 0, 10, profile.AutoFollowDistance, (i) => { profile.AutoFollowDistance = i; }), true, page);
+
+            content.BlankLine();
+
+            content.AddToRight(c = new CheckboxWithLabel("Disable mouse interactions for overhead text", 0, profile.DisableMouseInteractionOverheadText, (b) => { profile.DisableMouseInteractionOverheadText = b; }), true, page);
+
             #endregion
 
             #region Misc

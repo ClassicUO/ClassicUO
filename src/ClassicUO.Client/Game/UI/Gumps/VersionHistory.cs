@@ -7,6 +7,9 @@ namespace ClassicUO.Game.UI.Gumps
     internal class VersionHistory : Gump
     {
         private static string[] updateTexts = {
+            "/c[white][3.15.0]/cd\n" +
+                "- Mouse interaction for overhead text can be disabled",
+
             "/c[white][3.14.0]/cd\n" +
                 "- New options menu\n" +
                 "- Small null ref bug fix\n" +

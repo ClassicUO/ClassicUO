@@ -376,7 +376,8 @@ namespace ClassicUO.Game.Managers
                     hue,
                     FontStashSharp.RichText.TextHorizontalAlignment.Center,
                     true
-                );
+                )
+            { AcceptMouseInput = !ProfileManager.CurrentProfile.DisableMouseInteractionOverheadText };
 
             textObject.Time = CalculateTimeToLive(textObject.TextBox);
 
