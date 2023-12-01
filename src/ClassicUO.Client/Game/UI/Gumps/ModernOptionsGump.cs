@@ -2368,12 +2368,12 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 if (!rightSide)
                 {
-                    content.AddToRight(c = new CheckboxWithLabel(layer.ToString() + $"-{(int)layer}", 0, profile.HiddenLayers.Contains((int)layer), (b) => { if (b) { profile.HiddenLayers.Add((int)layer); } else { profile.HiddenLayers.Remove((int)layer); } }), true, page);
+                    content.AddToRight(c = new CheckboxWithLabel(layer.ToString(), 0, profile.HiddenLayers.Contains((int)layer), (b) => { if (b) { profile.HiddenLayers.Add((int)layer); } else { profile.HiddenLayers.Remove((int)layer); } }), true, page);
                     rightSide = true;
                 }
                 else
                 {
-                    content.AddToRight(new CheckboxWithLabel(layer.ToString() + $"-{(int)layer}", 0, profile.HiddenLayers.Contains((int)layer), (b) => { if (b) { profile.HiddenLayers.Add((int)layer); } else { profile.HiddenLayers.Remove((int)layer); } }) { X = 200, Y = c.Y }, false, page);
+                    content.AddToRight(new CheckboxWithLabel(layer.ToString(), 0, profile.HiddenLayers.Contains((int)layer), (b) => { if (b) { profile.HiddenLayers.Add((int)layer); } else { profile.HiddenLayers.Remove((int)layer); } }) { X = 200, Y = c.Y }, false, page);
                     rightSide = false;
                 }
             }
