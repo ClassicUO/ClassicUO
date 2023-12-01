@@ -398,6 +398,11 @@ namespace ClassicUO.Game.GameObjects
 
                     if (isHuman)
                     {
+                        if (ProfileManager.CurrentProfile.HiddenLayers.Contains((int)layer) && ((ProfileManager.CurrentProfile.HideLayersForSelf && Serial == World.Player.Serial) || !ProfileManager.CurrentProfile.HideLayersForSelf))
+                        {
+                            continue;
+                        }
+
                         if (IsCovered(this, layer))
                         {
                             continue;
