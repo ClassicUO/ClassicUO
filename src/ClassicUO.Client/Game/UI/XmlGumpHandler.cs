@@ -132,6 +132,7 @@ namespace ClassicUO.Game.UI
         {
             string font = TrueTypeLoader.EMBEDDED_FONT;
             int x = 0, y = 0, fontSize = 16, width = 0, hue = 997;
+            bool needsUpdates = false;
 
             foreach (XmlAttribute attr in textNode.Attributes)
             {
@@ -155,9 +156,20 @@ namespace ClassicUO.Game.UI
                     case "hue":
                         int.TryParse(attr.Value, out hue);
                         break;
+                    case "updates":
+                        bool.TryParse(attr.Value, out needsUpdates);
+                        break;
                 }
             }
-            gump.Add(new TextBox(textNode.InnerText, font, fontSize, width > 0 ? width : null, hue, strokeEffect: false) { X = x, Y = y, AcceptMouseInput = false });
+            TextBox t;
+
+
+            gump.Add(t = new TextBox(FormatText(textNode.InnerText), font, fontSize, width > 0 ? width : null, hue, strokeEffect: false) { X = x, Y = y, AcceptMouseInput = false });
+
+            if(needsUpdates)
+            {
+                gump.TextBoxUpdates.Add(new Tuple<TextBox, string>(t, textNode.InnerText));
+            }
         }
 
         private static Control ApplyBasicAttributes(Control c, XmlNode node)
@@ -195,10 +207,58 @@ namespace ClassicUO.Game.UI
 
             return c;
         }
+
+        public static string FormatText(string text)
+        {
+            text = text.Replace("{charname}", World.Player.Name);
+            text = text.Replace("{hp}", World.Player.Hits.ToString());
+            text = text.Replace("{maxhp}", World.Player.HitsMax.ToString());
+            text = text.Replace("{mana}", World.Player.Mana.ToString());
+            text = text.Replace("{maxmana}", World.Player.ManaMax.ToString());
+            text = text.Replace("{stam}", World.Player.Stamina.ToString());
+            text = text.Replace("{maxstam}", World.Player.StaminaMax.ToString());
+            text = text.Replace("{weight}", World.Player.Weight.ToString());
+            text = text.Replace("{maxweight}", World.Player.WeightMax.ToString());
+            text = text.Replace("{str}", World.Player.Strength.ToString());
+            text = text.Replace("{dex}", World.Player.Dexterity.ToString());
+            text = text.Replace("{int}", World.Player.Intelligence.ToString());
+            text = text.Replace("{damagemin}", World.Player.DamageMin.ToString());
+            text = text.Replace("{damagemax}", World.Player.DamageMax.ToString());
+            text = text.Replace("{hci}", World.Player.HitChanceIncrease.ToString());
+            text = text.Replace("{di}", World.Player.DamageIncrease.ToString());
+            text = text.Replace("{ssi}", World.Player.SwingSpeedIncrease.ToString());
+            text = text.Replace("{defchance}", World.Player.DefenseChanceIncrease.ToString());
+            text = text.Replace("{sdi}", World.Player.SpellDamageIncrease.ToString());
+            text = text.Replace("{fc}", World.Player.FasterCasting.ToString());
+            text = text.Replace("{fcr}", World.Player.FasterCastRecovery.ToString());
+            text = text.Replace("{lmc}", World.Player.LowerManaCost.ToString());
+            text = text.Replace("{lrc}", World.Player.LowerReagentCost.ToString());
+            text = text.Replace("{phyres}", World.Player.PhysicalResistance.ToString());
+            text = text.Replace("{phyresmax}", World.Player.MaxPhysicResistence.ToString());
+            text = text.Replace("{fireres}", World.Player.FireResistance.ToString());
+            text = text.Replace("{fireresmax}", World.Player.MaxFireResistence.ToString());
+            text = text.Replace("{coldres}", World.Player.ColdResistance.ToString());
+            text = text.Replace("{coldresmax}", World.Player.MaxColdResistence.ToString());
+            text = text.Replace("{poisonres}", World.Player.PoisonResistance.ToString());
+            text = text.Replace("{poisonresmax}", World.Player.MaxPoisonResistence.ToString());
+            text = text.Replace("{energyres}", World.Player.EnergyResistance.ToString());
+            text = text.Replace("{energyresmax}", World.Player.MaxEnergyResistence.ToString());
+            text = text.Replace("{maxstats}", World.Player.StatsCap.ToString());
+            text = text.Replace("{luck}", World.Player.Luck.ToString());
+            text = text.Replace("{gold}", World.Player.Gold.ToString());
+            text = text.Replace("{pets}", World.Player.Followers.ToString());
+            text = text.Replace("{petsmax}", World.Player.FollowersMax.ToString());
+
+            return text;
+        }
     }
 
     internal class XmlGump : Gump
     {
+        public List<Tuple<TextBox, string>> TextBoxUpdates { get; set; } = new List<Tuple<TextBox, string>>();
+
+        private uint nextUpdate = 0;
+
         public XmlGump() : base(0, 0)
         {
         }
@@ -206,6 +266,23 @@ namespace ClassicUO.Game.UI
         public override void Update()
         {
             base.Update();
+
+            if(Time.Ticks >= nextUpdate)
+            {
+                foreach(var t in TextBoxUpdates)
+                {
+                    if (t.Item1 != null && !t.Item1.IsDisposed)
+                    {
+                        string newString = XmlGumpHandler.FormatText(t.Item2);
+                        if(t.Item1.Text != newString)
+                        {
+                            t.Item1.Text = newString;
+                        }
+                    }
+                }
+
+                nextUpdate = Time.Ticks + 500;
+            }
         }
     }
 }
