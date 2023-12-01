@@ -142,7 +142,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public bool PixelCheck(int x, int y)
         {
-            if (string.IsNullOrWhiteSpace(Text))
+            if (!AcceptMouseInput || string.IsNullOrWhiteSpace(Text))
             {
                 return false;
             }

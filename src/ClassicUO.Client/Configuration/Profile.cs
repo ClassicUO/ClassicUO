@@ -571,6 +571,8 @@ namespace ClassicUO.Configuration
 
         public bool UseOneHPBarForLastAttack { get; set; } = false;
 
+        public bool DisableMouseInteractionOverheadText { get; set; } = false;
+
 
 
         public void Save(string path, bool saveGumps = true)
