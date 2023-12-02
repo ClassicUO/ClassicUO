@@ -280,7 +280,7 @@ namespace ClassicUO.Game.UI
 
             if (needsUpdates)
             {
-                gump.TextBoxUpdates.Add(new Tuple<TextBox, string>(t, textNode.InnerText));
+                gump.TextBoxUpdates.Add(new Tuple<TextBox, Tuple<string, int>>(t, new Tuple<string, int>(textNode.InnerText, width)));
             }
         }
 
@@ -345,6 +345,7 @@ namespace ClassicUO.Game.UI
             text = text.Replace("{di}", World.Player.DamageIncrease.ToString());
             text = text.Replace("{ssi}", World.Player.SwingSpeedIncrease.ToString());
             text = text.Replace("{defchance}", World.Player.DefenseChanceIncrease.ToString());
+            text = text.Replace("{defchancemax}", World.Player.MaxDefenseChanceIncrease.ToString());
             text = text.Replace("{sdi}", World.Player.SpellDamageIncrease.ToString());
             text = text.Replace("{fc}", World.Player.FasterCasting.ToString());
             text = text.Replace("{fcr}", World.Player.FasterCastRecovery.ToString());
@@ -372,7 +373,8 @@ namespace ClassicUO.Game.UI
 
     internal class XmlGump : Gump
     {
-        public List<Tuple<TextBox, string>> TextBoxUpdates { get; set; } = new List<Tuple<TextBox, string>>();
+        public List<Tuple<TextBox, Tuple<string, int>>> TextBoxUpdates { get; set; } = new List<Tuple<TextBox, Tuple<string, int>>>();
+
         /// <summary>
         /// <Control, Max width>
         /// <Val string, max val string>
@@ -395,9 +397,13 @@ namespace ClassicUO.Game.UI
                 {
                     if (t.Item1 != null && !t.Item1.IsDisposed)
                     {
-                        string newString = XmlGumpHandler.FormatText(t.Item2);
+                        string newString = XmlGumpHandler.FormatText(t.Item2.Item1);
                         if (t.Item1.Text != newString)
                         {
+                            if(t.Item2.Item2 < 1)
+                            {
+                                t.Item1.WantUpdateSize = true;
+                            }
                             t.Item1.Text = newString;
                         }
                     }
