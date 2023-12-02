@@ -186,8 +186,11 @@ namespace ClassicUO.Game.UI.Controls
             get => _rtl.Text;
             set
             {
-                _rtl.Text = value;
-                _dirty = true;
+                if (_rtl.Text != value)
+                {
+                    _rtl.Text = value;
+                    _dirty = true;
+                }
             }
         }
 

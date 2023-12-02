@@ -46,39 +46,7 @@ namespace ClassicUO.Game.UI
                         }
                     }
 
-                    foreach (XmlNode node in root.ChildNodes)
-                    {
-                        switch (node.NodeType)
-                        {
-                            case XmlNodeType.Element:
-                                if (node.Name.ToLower().Equals("text"))
-                                {
-                                    HandleTextTag(gump, node);
-                                    break;
-                                }
-                                if (node.Name.ToLower().Equals("colorbox"))
-                                {
-                                    HandleColorBox(gump, node);
-                                    break;
-                                }
-                                if (node.Name.ToLower().Equals("image"))
-                                {
-                                    HandleImage(gump, node);
-                                    break;
-                                }
-                                if (node.Name.ToLower().Equals("image_progress_bar"))
-                                {
-                                    HandleImageProgressBar(gump, node);
-                                    break;
-                                }
-                                if (node.Name.ToLower().Equals("color_progress_bar"))
-                                {
-                                    HandleColorProgressBar(gump, node);
-                                    break;
-                                }
-                                break;
-                        }
-                    }
+                    ProcessChildNodes(gump, root);
                 }
                 gump.ForceSizeUpdate();
             }
@@ -108,6 +76,92 @@ namespace ClassicUO.Game.UI
             catch { }
 
             return fileList.ToArray();
+        }
+
+        private static void ProcessChildNodes(XmlGump gump, XmlNode node)
+        {
+            foreach (XmlNode child in node.ChildNodes)
+            {
+                switch (child.NodeType)
+                {
+                    case XmlNodeType.Element:
+                        if (child.Name.ToLower().Equals("text"))
+                        {
+                            HandleTextTag(gump, child);
+                            break;
+                        }
+                        if (child.Name.ToLower().Equals("colorbox"))
+                        {
+                            HandleColorBox(gump, child);
+                            break;
+                        }
+                        if (child.Name.ToLower().Equals("image"))
+                        {
+                            HandleImage(gump, child);
+                            break;
+                        }
+                        if (child.Name.ToLower().Equals("image_progress_bar"))
+                        {
+                            HandleImageProgressBar(gump, child);
+                            break;
+                        }
+                        if (child.Name.ToLower().Equals("color_progress_bar"))
+                        {
+                            HandleColorProgressBar(gump, child);
+                            break;
+                        }
+                        if (child.Name.ToLower().Equals("control"))
+                        {
+                            HandleControl(gump, child);
+                            break;
+                        }
+                        if (child.Name.ToLower().Equals("simple_border"))
+                        {
+                            HandleBorder(gump, child);
+                            break;
+                        }
+                        break;
+                }
+            }
+        }
+
+        private static void HandleBorder(Gump gump, XmlNode node)
+        {
+            ushort hue = 0;
+            int width = 0, height = 0;
+
+            foreach (XmlAttribute attr in node.Attributes)
+            {
+                switch (attr.Name.ToLower())
+                {
+                    case "hue":
+                        ushort.TryParse(attr.Value, out hue);
+                        break;
+                    case "width":
+                        int.TryParse(attr.Value, out width); //Special handling of width and height required for this tag
+                        break;
+                    case "height":
+                        int.TryParse(attr.Value, out height);
+                        break;
+                }
+            }
+
+            gump.Add(ApplyBasicAttributes(new SimpleBorder() { Hue = hue, Width = width, Height = height }, node));
+        }
+
+        private static void HandleControl(XmlGump gump, XmlNode node)
+        {
+            XmlGump newControl = new XmlGump();
+            ApplyBasicAttributes(newControl, node);
+
+            ProcessChildNodes(newControl, node);
+
+            if (newControl.Width < 1)
+            {
+                newControl.ForceSizeUpdate();
+            }
+
+            gump.Add(newControl);
         }
 
         private static void HandleColorProgressBar(XmlGump gump, XmlNode node)
@@ -457,7 +511,7 @@ namespace ClassicUO.Game.UI
                     }
                 }
 
-                nextUpdate = Time.Ticks + 500;
+                nextUpdate = Time.Ticks + 250;
             }
         }
     }
