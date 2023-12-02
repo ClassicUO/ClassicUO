@@ -32,6 +32,19 @@ namespace ClassicUO.Game.UI
                 {
                     XmlElement root = xmlDoc.DocumentElement;
 
+                    foreach (XmlAttribute attr in root.Attributes)
+                    {
+                        switch(attr.Name.ToLower())
+                        {
+                            case "x":
+                                int.TryParse(attr.Value, out gump.X);
+                                break;
+                            case "y":
+                                int.TryParse(attr.Value, out gump.Y);
+                                break;
+                        }
+                    }
+
                     foreach (XmlNode node in root.ChildNodes)
                     {
                         switch (node.NodeType)
