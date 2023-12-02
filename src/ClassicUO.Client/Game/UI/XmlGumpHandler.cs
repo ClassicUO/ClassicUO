@@ -5,6 +5,7 @@ using System;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Assets;
 using System.Collections.Generic;
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI
 {
@@ -34,7 +35,7 @@ namespace ClassicUO.Game.UI
 
                     foreach (XmlAttribute attr in root.Attributes)
                     {
-                        switch(attr.Name.ToLower())
+                        switch (attr.Name.ToLower())
                         {
                             case "x":
                                 int.TryParse(attr.Value, out gump.X);
@@ -214,6 +215,8 @@ namespace ClassicUO.Game.UI
         private static void HandleImage(XmlGump gump, XmlNode node)
         {
             ushort graphic = 0, hue = 0;
+            Rectangle picinpic = Rectangle.Empty;
+            bool isPicInPic = false;
 
             foreach (XmlAttribute attr in node.Attributes)
             {
@@ -225,10 +228,28 @@ namespace ClassicUO.Game.UI
                     case "hue":
                         ushort.TryParse(attr.Value, out hue);
                         break;
+                    case "rect":
+                        string[] parts = attr.Value.Split(';');
+                        if (parts.Length == 4)
+                        {
+                            if (int.TryParse(parts[0], out int x) && int.TryParse(parts[1], out int y) && int.TryParse(parts[2], out int w) && int.TryParse(parts[3], out int h))
+                            {
+                                picinpic = new Rectangle(x, y, w, h);
+                                isPicInPic = true;
+                            }
+                        }
+                        break;
                 }
             }
 
-            gump.Add(ApplyBasicAttributes(new GumpPic(0, 0, graphic, hue), node));
+            if (isPicInPic)
+            {
+                gump.Add(ApplyBasicAttributes(new GumpPicInPic(0, 0, graphic, (ushort)picinpic.X, (ushort)picinpic.Y, (ushort)picinpic.Width, (ushort)picinpic.Height), node));
+            }
+            else
+            {
+                gump.Add(ApplyBasicAttributes(new GumpPic(0, 0, graphic, hue), node));
+            }
         }
 
         private static void HandleColorBox(XmlGump gump, XmlNode colorNode)
@@ -413,7 +434,7 @@ namespace ClassicUO.Game.UI
                         string newString = XmlGumpHandler.FormatText(t.Item2.Item1);
                         if (t.Item1.Text != newString)
                         {
-                            if(t.Item2.Item2 < 1)
+                            if (t.Item2.Item2 < 1)
                             {
                                 t.Item1.WantUpdateSize = true;
                             }
