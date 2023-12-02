@@ -52,6 +52,16 @@ namespace ClassicUO.Game.UI
                                     HandleImage(gump, node);
                                     break;
                                 }
+                                if (node.Name.ToLower().Equals("image_progress_bar"))
+                                {
+                                    HandleImageProgressBar(gump, node);
+                                    break;
+                                }
+                                if (node.Name.ToLower().Equals("color_progress_bar"))
+                                {
+                                    HandleColorProgressBar(gump, node);
+                                    break;
+                                }
                                 break;
                         }
                     }
@@ -86,7 +96,109 @@ namespace ClassicUO.Game.UI
             return fileList.ToArray();
         }
 
-        private static void HandleImage(XmlGump gump,  XmlNode node)
+        private static void HandleColorProgressBar(XmlGump gump, XmlNode node)
+        {
+            ushort bg_hue = 0, fg_hue = 0;
+            int value = 0, maxval = 0;
+            bool needsUpdates = false;
+            string originalValue = string.Empty, originalMaxVal = string.Empty;
+
+            foreach (XmlAttribute attr in node.Attributes)
+            {
+                switch (attr.Name.ToLower())
+                {
+                    case "background_hue":
+                        ushort.TryParse(attr.Value, out bg_hue);
+                        break;
+                    case "foreground_hue":
+                        ushort.TryParse(attr.Value, out fg_hue);
+                        break;
+                    case "value":
+                        originalValue = attr.Value;
+                        if (!int.TryParse(attr.Value, out value))
+                        {
+                            int.TryParse(FormatText(attr.Value), out value);
+                        }
+                        break;
+                    case "max_value":
+                        originalMaxVal = attr.Value;
+                        if (!int.TryParse(attr.Value, out maxval))
+                        {
+                            int.TryParse(FormatText(attr.Value), out maxval);
+                        }
+                        break;
+                    case "updates":
+                        bool.TryParse(attr.Value, out needsUpdates);
+                        break;
+                }
+            }
+            Control c;
+            gump.Add(c = ApplyBasicAttributes(new ColorBox(0, 0, bg_hue), node));
+            int maxWidth = c.Width;
+            gump.Add(c = ApplyBasicAttributes(new ColorBox(0, 0, fg_hue), node));
+            c.Width = (int)(GetPercentage(value, maxval) * c.Width);
+
+            if (needsUpdates)
+            {
+                gump.ProgressBarUpdates.Add(new Tuple<Tuple<Control, int>, Tuple<string, string>>(new Tuple<Control, int>(c, maxWidth), new Tuple<string, string>(originalValue, originalMaxVal)));
+            }
+        }
+
+        private static void HandleImageProgressBar(XmlGump gump, XmlNode node)
+        {
+            ushort bg_graphic = 0, fg_graphic = 0, bg_hue = 0, fg_hue = 0;
+            int value = 0, maxval = 0;
+            bool needsUpdates = false;
+            string originalValue = string.Empty, originalMaxVal = string.Empty;
+
+            foreach (XmlAttribute attr in node.Attributes)
+            {
+                switch (attr.Name.ToLower())
+                {
+                    case "background_image":
+                        ushort.TryParse(attr.Value, out bg_graphic);
+                        break;
+                    case "foreground_image":
+                        ushort.TryParse(attr.Value, out fg_graphic);
+                        break;
+                    case "background_hue":
+                        ushort.TryParse(attr.Value, out bg_hue);
+                        break;
+                    case "foreground_hue":
+                        ushort.TryParse(attr.Value, out fg_hue);
+                        break;
+                    case "value":
+                        originalValue = attr.Value;
+                        if (!int.TryParse(attr.Value, out value))
+                        {
+                            int.TryParse(FormatText(attr.Value), out value);
+                        }
+                        break;
+                    case "max_value":
+                        originalMaxVal = attr.Value;
+                        if (!int.TryParse(attr.Value, out maxval))
+                        {
+                            int.TryParse(FormatText(attr.Value), out maxval);
+                        }
+                        break;
+                    case "updates":
+                        bool.TryParse(attr.Value, out needsUpdates);
+                        break;
+                }
+            }
+            Control c;
+            gump.Add(c = ApplyBasicAttributes(new GumpPic(0, 0, bg_graphic, bg_hue), node));
+            int maxWidth = c.Width;
+            gump.Add(c = ApplyBasicAttributes(new GumpPicTiled(fg_graphic) { Hue = fg_hue }, node));
+            c.Width = (int)(GetPercentage(value, maxval) * c.Width);
+
+            if (needsUpdates)
+            {
+                gump.ProgressBarUpdates.Add(new Tuple<Tuple<Control, int>, Tuple<string, string>>(new Tuple<Control, int>(c, maxWidth), new Tuple<string, string>(originalValue, originalMaxVal)));
+            }
+        }
+
+        private static void HandleImage(XmlGump gump, XmlNode node)
         {
             ushort graphic = 0, hue = 0;
 
@@ -166,7 +278,7 @@ namespace ClassicUO.Game.UI
 
             gump.Add(t = new TextBox(FormatText(textNode.InnerText), font, fontSize, width > 0 ? width : null, hue, strokeEffect: false) { X = x, Y = y, AcceptMouseInput = false });
 
-            if(needsUpdates)
+            if (needsUpdates)
             {
                 gump.TextBoxUpdates.Add(new Tuple<TextBox, string>(t, textNode.InnerText));
             }
@@ -206,6 +318,11 @@ namespace ClassicUO.Game.UI
             }
 
             return c;
+        }
+
+        public static float GetPercentage(double value, double max)
+        {
+            return (float)(value / max);
         }
 
         public static string FormatText(string text)
@@ -256,6 +373,11 @@ namespace ClassicUO.Game.UI
     internal class XmlGump : Gump
     {
         public List<Tuple<TextBox, string>> TextBoxUpdates { get; set; } = new List<Tuple<TextBox, string>>();
+        /// <summary>
+        /// <Control, Max width>
+        /// <Val string, max val string>
+        /// </summary>
+        public List<Tuple<Tuple<Control, int>, Tuple<string, string>>> ProgressBarUpdates { get; set; } = new List<Tuple<Tuple<Control, int>, Tuple<string, string>>>();
 
         private uint nextUpdate = 0;
 
@@ -267,16 +389,30 @@ namespace ClassicUO.Game.UI
         {
             base.Update();
 
-            if(Time.Ticks >= nextUpdate)
+            if (Time.Ticks >= nextUpdate)
             {
-                foreach(var t in TextBoxUpdates)
+                foreach (var t in TextBoxUpdates)
                 {
                     if (t.Item1 != null && !t.Item1.IsDisposed)
                     {
                         string newString = XmlGumpHandler.FormatText(t.Item2);
-                        if(t.Item1.Text != newString)
+                        if (t.Item1.Text != newString)
                         {
                             t.Item1.Text = newString;
+                        }
+                    }
+                }
+
+                foreach (var p in ProgressBarUpdates)
+                {
+                    if (p.Item1 != null && !p.Item1.Item1.IsDisposed)
+                    {
+                        if (int.TryParse(XmlGumpHandler.FormatText(p.Item2.Item1), out int val))
+                        {
+                            if (int.TryParse(XmlGumpHandler.FormatText(p.Item2.Item2), out int max))
+                            {
+                                p.Item1.Item1.Width = (int)(XmlGumpHandler.GetPercentage(val, max) * p.Item1.Item2);
+                            }
                         }
                     }
                 }
