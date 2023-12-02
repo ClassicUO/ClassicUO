@@ -333,6 +333,7 @@ namespace ClassicUO.Game.UI
             string font = TrueTypeLoader.EMBEDDED_FONT;
             int x = 0, y = 0, fontSize = 16, width = 0, hue = 997;
             bool needsUpdates = false;
+            FontStashSharp.RichText.TextHorizontalAlignment align = FontStashSharp.RichText.TextHorizontalAlignment.Left;
 
             foreach (XmlAttribute attr in textNode.Attributes)
             {
@@ -359,12 +360,26 @@ namespace ClassicUO.Game.UI
                     case "updates":
                         bool.TryParse(attr.Value, out needsUpdates);
                         break;
+                    case "align":
+                        switch (attr.Value.ToLower())
+                        {
+                            case "left":
+                                align = FontStashSharp.RichText.TextHorizontalAlignment.Left;
+                                break;
+                            case "center":
+                                align = FontStashSharp.RichText.TextHorizontalAlignment.Center;
+                                break;
+                            case "right":
+                                align = FontStashSharp.RichText.TextHorizontalAlignment.Right;
+                                break;
+                        }
+                        break;
                 }
             }
             TextBox t;
 
 
-            gump.Add(t = new TextBox(FormatText(textNode.InnerText), font, fontSize, width > 0 ? width : null, hue, strokeEffect: false) { X = x, Y = y, AcceptMouseInput = false });
+            gump.Add(t = new TextBox(FormatText(textNode.InnerText), font, fontSize, width > 0 ? width : null, hue, align, false) { X = x, Y = y, AcceptMouseInput = false });
 
             if (needsUpdates)
             {
