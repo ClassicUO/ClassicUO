@@ -375,6 +375,7 @@ namespace ClassicUO.Game.UI.Controls
                     Height = h;
                 }
             }
+            WantUpdateSize = false;
         }
 
         public virtual void OnPageChanged()
