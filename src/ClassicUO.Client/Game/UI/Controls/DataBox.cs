@@ -61,6 +61,8 @@ namespace ClassicUO.Game.UI.Controls
                     height += c.Height;
                 }
             }
+
+            WantUpdateSize = true;
         }
 
         public override bool Contains(int x, int y)
