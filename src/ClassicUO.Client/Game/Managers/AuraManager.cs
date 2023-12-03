@@ -50,39 +50,27 @@ namespace ClassicUO.Game.Managers
             }
         );
 
-        private readonly Texture2D _texture;
+        private Texture2D _texture;
+        private readonly int _radius;
 
         public Aura(int radius)
         {
-            short w = 0;
-            short h = 0;
-            uint[] data = CircleOfTransparency.CreateCircleTexture(radius, ref w, ref h);
-
-            for (int i = 0; i < data.Length; i++)
-            {
-                ref uint pixel = ref data[i];
-
-                if (pixel != 0)
-                {
-                    ushort value = (ushort)(pixel << 3);
-
-                    if (value > 0xFF)
-                    {
-                        value = 0xFF;
-                    }
-
-                    pixel = (uint)((value << 24) | (value << 16) | (value << 8) | value);
-                }
-            }
-
-            _texture = new Texture2D(Client.Game.GraphicsDevice, w, h);
-            _texture.SetData(data);
+            _radius = radius;
         }
-
-
 
         public void Draw(UltimaBatcher2D batcher, int x, int y, ushort hue, float depth)
         {
+            if (_texture == null || _texture.IsDisposed)
+            {
+                var w = _radius * 2;
+                var h = _radius * 2;
+                var data = GenerateBlendedCircleColors(_radius);
+
+                _texture?.Dispose();
+                _texture = new Texture2D(batcher.GraphicsDevice, w, h, false, SurfaceFormat.Color);
+                _texture.SetData(data);
+            }
+
             x -= (_texture.Width >> 1);
             y -= (_texture.Height >> 1);
 
@@ -93,6 +81,33 @@ namespace ClassicUO.Game.Managers
             batcher.SetBlendState(null);
         }
 
+        private Color[] GenerateBlendedCircleColors(int radius)
+        {
+            var width = radius * 2;
+            var height = radius * 2;
+
+            var blendedColors = new Color[width * height];
+
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    var distance = (int)Math.Sqrt(Math.Pow(x - radius, 2) + Math.Pow(y - radius, 2));
+
+                    if (distance > radius)
+                    {
+                        blendedColors[x + y * width] = Color.Transparent;
+                        continue;
+                    }
+
+                    var opacityFactor = 1f - distance / (float)radius;
+
+                    blendedColors[x + y * width] = new Color(opacityFactor, opacityFactor, opacityFactor, opacityFactor);
+                }
+            }
+
+            return blendedColors;
+        }
 
         public void Dispose()
         {
@@ -106,12 +121,13 @@ namespace ClassicUO.Game.Managers
     internal sealed class AuraManager
     {
         private readonly World _world;
-        private readonly Aura _aura = new Aura(30);
+        private readonly Aura _aura;
         private int _saveAuraUnderFeetType;
 
         public AuraManager(World world)
         {
             _world = world;
+            _aura = new Aura(30);
         }
 
         public bool IsEnabled

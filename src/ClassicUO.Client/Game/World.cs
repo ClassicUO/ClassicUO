@@ -45,6 +45,7 @@ using ClassicUO.Configuration;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Utility.Logging;
 using ClassicUO.Assets;
+using ClassicUO.Network;
 
 namespace ClassicUO.Game
 {
@@ -53,11 +54,9 @@ namespace ClassicUO.Game
         private readonly EffectManager _effectManager;
         private readonly List<uint> _toRemove = new List<uint>();
         private uint _timeToDelete;
-        private readonly GameController _game;
 
-        public World(GameController game)
+        public World()
         {
-            _game = game;
             WMapManager = new WorldMapEntityManager(this);
             CorpseManager = new CorpseManager(this);
             Party = new PartyManager(this);
@@ -79,6 +78,7 @@ namespace ClassicUO.Game
             CommandManager = new CommandManager(this);
             Weather = new Weather(this);
             InfoBars = new InfoBarManager(this);
+            NetworkManager = new NetworkManager(this);
         }
 
         public Point RangeSize;
@@ -130,6 +130,8 @@ namespace ClassicUO.Game
         public Weather Weather { get; }
 
         public InfoBarManager InfoBars { get; }
+
+        public NetworkManager NetworkManager { get; }
 
         public Dictionary<uint, Item> Items { get; } = new Dictionary<uint, Item>();
 

@@ -3746,13 +3746,7 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.HideVegetation = _hideVegetation.IsChecked;
             _currentProfile.NoColorObjectsOutOfRange = _noColorOutOfRangeObjects.IsChecked;
             _currentProfile.UseCircleOfTransparency = _useCircleOfTransparency.IsChecked;
-
-            if (_currentProfile.CircleOfTransparencyRadius != _circleOfTranspRadius.Value)
-            {
-                _currentProfile.CircleOfTransparencyRadius = _circleOfTranspRadius.Value;
-                CircleOfTransparency.Create(_currentProfile.CircleOfTransparencyRadius);
-            }
-
+            _currentProfile.CircleOfTransparencyRadius = _circleOfTranspRadius.Value;
             _currentProfile.CircleOfTransparencyType = _cotType.SelectedIndex;
             _currentProfile.StandardSkillsGump = _useStandardSkillsGump.IsChecked;
 
