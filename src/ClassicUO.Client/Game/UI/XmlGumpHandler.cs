@@ -6,6 +6,8 @@ using ClassicUO.Game.UI.Controls;
 using ClassicUO.Assets;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using ClassicUO.Game.Managers;
+using ClassicUO.Game.Scenes;
 
 namespace ClassicUO.Game.UI
 {
@@ -120,12 +122,64 @@ namespace ClassicUO.Game.UI
                             HandleBorder(gump, child);
                             break;
                         }
+                        if (child.Name.ToLower().Equals("macro_button_color"))
+                        {
+                            HandleMacroButton(gump, child);
+                            break;
+                        }
                         break;
                 }
             }
         }
 
-        private static void HandleBorder(Gump gump, XmlNode node)
+        private static void HandleMacroButton(XmlGump gump, XmlNode node)
+        {
+            HitBox hb = new HitBox(0, 0, 0, 0, null, 0);
+            ApplyBasicAttributes(hb, node);
+
+            AlphaBlendControl bg = new AlphaBlendControl() { Width = hb.Width, Height = hb.Height };
+            hb.Add(bg);
+
+            ushort hue = 0;
+
+            foreach (XmlAttribute attr in node.Attributes)
+            {
+                switch (attr.Name.ToLower())
+                {
+
+                    case "alpha":
+                        if (float.TryParse(attr.Value, out float a))
+                        {
+                            bg.Alpha = a;
+                        }
+                        break;
+                    case "hue":
+                        if(ushort.TryParse(attr.Value, out ushort h))
+                        {
+                            bg.Hue = hue = h;
+                        }
+                        break;
+                    case "hue_hover":
+                        if (ushort.TryParse(attr.Value, out ushort hh))
+                        {
+                            hb.MouseEnter += (s, e) => { bg.Hue = hh; };
+                            hb.MouseExit += (s, e) => { bg.Hue = hue; };
+                        }
+                        break;
+                    case "macro":
+                        MacroManager manager = Client.Game.GetScene<GameScene>().Macros;
+                        Macro m = manager.FindMacro(attr.Value);
+                        if(m != null){
+                            hb.MouseUp += (s, e) => { if (e.Button == Input.MouseButtonType.Left) { manager.SetMacroToExecute(m.Items as MacroObject); } };
+                        }
+                        break;
+                }
+            }
+
+            gump.Add(hb);
+        }
+
+        private static void HandleBorder(XmlGump gump, XmlNode node)
         {
             ushort hue = 0;
             int width = 0, height = 0;
@@ -505,9 +559,12 @@ namespace ClassicUO.Game.UI
                         {
                             if (t.Item2.Item2 < 1)
                             {
-                                t.Item1.WantUpdateSize = true;
+                                t.Item1.UpdateText(newString);
                             }
-                            t.Item1.Text = newString;
+                            else
+                            {
+                                t.Item1.Text = newString;
+                            }
                         }
                     }
                 }

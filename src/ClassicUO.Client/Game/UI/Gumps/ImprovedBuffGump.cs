@@ -10,7 +10,7 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class ImprovedBuffGump : Gump
     {
-        private const int FUCKINGHEIGHT = CoolDownBar.COOL_DOWN_HEIGHT * (BuffBarManager.MAX_COOLDOWN_BARS + 2);
+        public const int HEIGHT = CoolDownBar.COOL_DOWN_HEIGHT * (BuffBarManager.MAX_COOLDOWN_BARS + 2);
         private GumpPic _background;
         private Button _button;
         private bool _direction = false;
@@ -22,7 +22,7 @@ namespace ClassicUO.Game.UI.Gumps
             X = 100;
             Y = 100;
             Width = CoolDownBar.COOL_DOWN_WIDTH;
-            Height = FUCKINGHEIGHT;
+            Height = HEIGHT;
             CanMove = true;
             CanCloseWithRightClick = true;
             AcceptMouseInput = false;
@@ -46,17 +46,17 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void SwitchDirections()
         {
-            _box.Height = FUCKINGHEIGHT;
+            _box.Height = HEIGHT;
             _box.Y = 0;
             if (!_direction)
             {
-                _background.Y = FUCKINGHEIGHT - 11;
-                Y -= FUCKINGHEIGHT - 11;
+                _background.Y = HEIGHT - 11;
+                Y -= HEIGHT - 11;
             }
             else
             {
                 _background.Y = 0;
-                Y += FUCKINGHEIGHT - 11;
+                Y += HEIGHT - 11;
             }
             _button.Y = _background.Y - 5;
             BuffBarManager.UpdatePositions(_direction, _box);
@@ -65,11 +65,11 @@ namespace ClassicUO.Game.UI.Gumps
         protected override void UpdateContents()
         {
             base.UpdateContents();
-            _box.Height = FUCKINGHEIGHT;
+            _box.Height = HEIGHT;
             _box.Y = 0;
             if (!_direction)
             {
-                _background.Y = FUCKINGHEIGHT - 11;
+                _background.Y = HEIGHT - 11;
             }
             else
             {
@@ -103,7 +103,7 @@ namespace ClassicUO.Game.UI.Gumps
                 ButtonAction = ButtonAction.Activate
             };
 
-            _box = new DataBox(0, 0, Width, FUCKINGHEIGHT);
+            _box = new DataBox(0, 0, Width, HEIGHT);
 
             
 
