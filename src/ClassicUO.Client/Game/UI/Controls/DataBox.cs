@@ -50,7 +50,6 @@ namespace ClassicUO.Game.UI.Controls
 
         public void ReArrangeChildren()
         {
-            int newheight = 0;
             for (int i = 0, height = 0; i < Children.Count; ++i)
             {
                 Control c = Children[i];
@@ -60,10 +59,8 @@ namespace ClassicUO.Game.UI.Controls
                     c.Y = height;
 
                     height += c.Height;
-                    newheight += c.Height;
                 }
             }
-            ForceSizeUpdate();
         }
 
         public override bool Contains(int x, int y)

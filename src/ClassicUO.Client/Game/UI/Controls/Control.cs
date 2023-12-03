@@ -348,7 +348,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public void ForceSizeUpdate()
         {
-            int h = 0, w = 0;
+            int h = Height, w = Width;
             for (int i = 0; i < Children.Count; i++)
             {
                 Control c = Children[i];
@@ -364,17 +364,18 @@ namespace ClassicUO.Game.UI.Controls
                         h = c.Bounds.Bottom;
                     }
                 }
-
-                if (w != Width)
-                {
-                    Width = w;
-                }
-
-                if (h != Height)
-                {
-                    Height = h;
-                }
             }
+
+            if (w != Width)
+            {
+                Width = w;
+            }
+
+            if (h != Height)
+            {
+                Height = h;
+            }
+
             WantUpdateSize = false;
         }
 

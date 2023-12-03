@@ -1415,6 +1415,7 @@ namespace ClassicUO.Game.UI.Gumps
                 InfoBarBuilderControl ibbc = new InfoBarBuilderControl(ibi = new InfoBarItem("HP", InfoBarVars.HP, 0x3B9));
                 infoBarItems.Add(ibbc);
                 infoBarItems.ReArrangeChildren();
+                infoBarItems.ForceSizeUpdate();
                 Client.Game.GetScene<GameScene>().InfoBars?.AddItem(ibi);
                 UIManager.GetGump<InfoBarGump>()?.ResetItems();
             };
@@ -1454,6 +1455,7 @@ namespace ClassicUO.Game.UI.Gumps
                 infoBarItems.Add(ibbc);
             }
             infoBarItems.ReArrangeChildren();
+            infoBarItems.ForceSizeUpdate();
 
             options.Add(s = new SettingsOption(
                     "",
@@ -1887,6 +1889,7 @@ namespace ClassicUO.Game.UI.Gumps
                 conditionsDataBox.Add(GenConditionControl(i, mainContent.RightWidth - 19, false));
             }
             conditionsDataBox.ReArrangeChildren();
+            conditionsDataBox.ForceSizeUpdate();
 
             options.Add(s = new SettingsOption(
                 "",
@@ -4387,6 +4390,7 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         db.Remove(this);
                         db.ReArrangeChildren();
+                        db.ForceSizeUpdate();
                     }
                     Client.Game.GetScene<GameScene>().InfoBars?.RemoveItem(item);
                     UIManager.GetGump<InfoBarGump>()?.ResetItems();
@@ -5082,6 +5086,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Control c;
                 _databox.Add(c = new MacroEntry(this, obj, _allHotkeysNames));
                 _databox.ReArrangeChildren();
+                _databox.ForceSizeUpdate();
                 ForceSizeUpdate();
             }
 
@@ -5132,6 +5137,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
                 _databox.ReArrangeChildren();
+                _databox.ForceSizeUpdate();
             }
 
             private void SetupKeyByDefault()
@@ -5392,6 +5398,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                     ForceSizeUpdate();
                     _control._databox.ReArrangeChildren();
+                    _control._databox.ForceSizeUpdate();
                     _control.ForceSizeUpdate();
                 }
 
@@ -5404,6 +5411,7 @@ namespace ClassicUO.Game.UI.Gumps
                             _control.Macro.Remove(_obj);
                             Dispose();
                             _control._databox.ReArrangeChildren();
+                            _control._databox.ForceSizeUpdate();
                             _control.ForceSizeUpdate();
                             //_control.SetupMacroUI();
                             OnDelete?.Invoke(this, _obj);
