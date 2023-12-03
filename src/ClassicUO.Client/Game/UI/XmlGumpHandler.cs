@@ -127,9 +127,80 @@ namespace ClassicUO.Game.UI
                             HandleMacroButton(gump, child);
                             break;
                         }
+                        if (child.Name.ToLower().Equals("macro_button_graphic"))
+                        {
+                            HandleMacroButtonGraphic(gump, child);
+                            break;
+                        }
                         break;
                 }
             }
+        }
+
+        private static void HandleMacroButtonGraphic(XmlGump gump, XmlNode node)
+        {
+            HitBox hb = new HitBox(0, 0, 0, 0, null, 0);
+            ApplyBasicAttributes(hb, node);
+
+
+            GumpPic bg = new GumpPic(0, 0, 0, 0);
+
+            hb.Add(bg);
+
+            ushort hue = 0, graphic = 0;
+
+            foreach (XmlAttribute attr in node.Attributes)
+            {
+                switch (attr.Name.ToLower())
+                {
+                    case "id":
+                        if(ushort.TryParse(attr.Value, out ushort gra))
+                        {
+                            bg.Graphic = graphic = gra;
+                            if(hb.Width < 1)
+                            {
+                                hb.ForceSizeUpdate();
+                            }
+                        }
+                        break;
+                    case "id_hover":
+                        if (ushort.TryParse(attr.Value, out ushort gra_hover))
+                        {
+                            hb.MouseEnter += (s, e) => { bg.Graphic = gra_hover; };
+                            hb.MouseExit += (s, e) => { bg.Graphic = graphic; };
+                        }
+                        break;
+                    case "alpha":
+                        if (float.TryParse(attr.Value, out float a))
+                        {
+                            bg.Alpha = a;
+                        }
+                        break;
+                    case "hue":
+                        if (ushort.TryParse(attr.Value, out ushort h))
+                        {
+                            bg.Hue = hue = h;
+                        }
+                        break;
+                    case "hue_hover":
+                        if (ushort.TryParse(attr.Value, out ushort hh))
+                        {
+                            hb.MouseEnter += (s, e) => { bg.Hue = hh; };
+                            hb.MouseExit += (s, e) => { bg.Hue = hue; };
+                        }
+                        break;
+                    case "macro":
+                        MacroManager manager = Client.Game.GetScene<GameScene>().Macros;
+                        Macro m = manager.FindMacro(attr.Value);
+                        if (m != null)
+                        {
+                            hb.MouseUp += (s, e) => { if (e.Button == Input.MouseButtonType.Left) { manager.SetMacroToExecute(m.Items as MacroObject); } };
+                        }
+                        break;
+                }
+            }
+
+            gump.Add(hb);
         }
 
         private static void HandleMacroButton(XmlGump gump, XmlNode node)
