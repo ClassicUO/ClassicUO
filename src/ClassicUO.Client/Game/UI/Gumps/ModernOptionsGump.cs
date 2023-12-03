@@ -1416,6 +1416,7 @@ namespace ClassicUO.Game.UI.Gumps
                 infoBarItems.Add(ibbc);
                 infoBarItems.ReArrangeChildren();
                 infoBarItems.ForceSizeUpdate();
+                infoBarItems.Parent?.ForceSizeUpdate();
                 Client.Game.GetScene<GameScene>().InfoBars?.AddItem(ibi);
                 UIManager.GetGump<InfoBarGump>()?.ResetItems();
             };
