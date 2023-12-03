@@ -196,7 +196,7 @@ namespace ClassicUO
 
             LightColors.LoadLights();
 
-            World = new World(this);
+            World = new World();
             GameCursor = new GameCursor(World);
             Audio = new AudioManager();
             Audio.Initialize();

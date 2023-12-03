@@ -108,7 +108,7 @@ namespace ClassicUO.Game
             }
         };
 
-        private readonly Aura _aura = new Aura(30);
+        private readonly Aura _aura;
         private readonly CustomBuildObject[] _componentsList = new CustomBuildObject[10];
         private readonly int[,] _cursorOffset = new int[2, 16];
         private readonly IntPtr[,] _cursors_ptr = new IntPtr[3, 16];
@@ -122,6 +122,7 @@ namespace ClassicUO.Game
         {
             _world = world;
             _tooltip = new Tooltip(world);
+            _aura = new Aura(30);
 
             for (int i = 0; i < 3; i++)
             {
