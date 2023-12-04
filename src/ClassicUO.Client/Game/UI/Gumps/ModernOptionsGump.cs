@@ -2769,7 +2769,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             protected virtual void OnCheckedChanged()
             {
-                ValueChanged.Invoke(IsChecked);
+                ValueChanged?.Invoke(IsChecked);
             }
 
             protected override void OnMouseUp(int x, int y, MouseButtonType button)
