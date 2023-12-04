@@ -326,9 +326,9 @@ namespace ClassicUO.Game.UI
                 }
             }
             Control c;
-            gump.Add(c = ApplyBasicAttributes(new ColorBox(0, 0, bg_hue), node));
+            gump.Add(c = ApplyBasicAttributes(new ColorBox(0, 0, bg_hue) { AcceptMouseInput = false }, node));
             int maxWidth = c.Width;
-            gump.Add(c = ApplyBasicAttributes(new ColorBox(0, 0, fg_hue), node));
+            gump.Add(c = ApplyBasicAttributes(new ColorBox(0, 0, fg_hue) { AcceptMouseInput = false }, node));
             c.Width = (int)(GetPercentage(value, maxval) * c.Width);
 
             if (needsUpdates)
