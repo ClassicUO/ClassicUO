@@ -78,7 +78,6 @@ namespace ClassicUO.Game
             CommandManager = new CommandManager(this);
             Weather = new Weather(this);
             InfoBars = new InfoBarManager(this);
-            NetworkManager = new NetworkManager(this);
         }
 
         public Point RangeSize;
@@ -130,8 +129,6 @@ namespace ClassicUO.Game
         public Weather Weather { get; }
 
         public InfoBarManager InfoBars { get; }
-
-        public NetworkManager NetworkManager { get; }
 
         public Dictionary<uint, Item> Items { get; } = new Dictionary<uint, Item>();
 
