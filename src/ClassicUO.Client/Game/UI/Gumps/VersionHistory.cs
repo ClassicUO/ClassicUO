@@ -9,7 +9,8 @@ namespace ClassicUO.Game.UI.Gumps
         private static string[] updateTexts = {
             "/c[white][3.15.0]/cd\n" +
                 "- Mouse interaction for overhead text can be disabled\n" +
-                "- Visable layers option added in Options->TazUO",
+                "- Visable layers option added in Options->TazUO\n" +
+                "- Added custom XML Gumps -> see wiki",
 
             "/c[white][3.14.0]/cd\n" +
                 "- New options menu\n" +
