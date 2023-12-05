@@ -190,7 +190,9 @@ namespace ClassicUO.Game.UI.Controls
 
     internal class GumpPicInPic : GumpPicBase
     {
-        private readonly Rectangle _picInPicBounds;
+        private Rectangle _picInPicBounds;
+
+        public Rectangle PicInPicBounds { get => _picInPicBounds; set => _picInPicBounds = value; }
 
         public GumpPicInPic(
             int x,

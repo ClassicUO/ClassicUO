@@ -8,6 +8,8 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
+using ClassicUO.Renderer;
+using ClassicUO.Game.GameObjects;
 
 namespace ClassicUO.Game.UI
 {
@@ -45,6 +47,12 @@ namespace ClassicUO.Game.UI
                             case "y":
                                 int.TryParse(attr.Value, out gump.Y);
                                 break;
+                            case "locked":
+                                if(bool.TryParse(attr.Value, out bool locked))
+                                {
+                                    gump.IsLocked = locked;
+                                }
+                                break;
                         }
                     }
 
@@ -54,6 +62,15 @@ namespace ClassicUO.Game.UI
             }
 
             return gump;
+        }
+
+        public static void TryAutoOpenByName(string name)
+        {
+            string fullFile = Path.Combine(XmlGumpPath, name + ".xml");
+            if(File.Exists(fullFile))
+            {
+                UIManager.Add(CreateGumpFromFile(fullFile));
+            }
         }
 
         public static string[] GetAllXmlGumps()
@@ -132,9 +149,120 @@ namespace ClassicUO.Game.UI
                             HandleMacroButtonGraphic(gump, child);
                             break;
                         }
+                        if (child.Name.ToLower().Equals("hp_bar_color"))
+                        {
+                            HandleColorHPBar(gump, child);
+                            break;
+                        }
+                        if (child.Name.ToLower().Equals("hp_bar_image"))
+                        {
+                            HandleImageHPBar(gump, child);
+                            break;
+                        }
                         break;
                 }
             }
+        }
+
+        private static void HandleImageHPBar(XmlGump gump, XmlNode node)
+        {
+            XmlHealthBar hpBar = new XmlHealthBar(World.Player);
+            ApplyBasicAttributes(hpBar, node);
+            hpBar.SetImageType();
+
+            foreach (XmlAttribute attr in node.Attributes)
+            {
+                switch (attr.Name.ToLower())
+                {
+                    case "hue_normal":
+                        if (ushort.TryParse(attr.Value, out ushort h))
+                        {
+                            hpBar.NormalHue = h;
+                        }
+                        break;
+                    case "hue_background":
+                        if (ushort.TryParse(attr.Value, out ushort hh))
+                        {
+                            hpBar.BackgroundHue = hh;
+                        }
+                        break;
+                    case "hue_poisoned":
+                        if (ushort.TryParse(attr.Value, out ushort hp))
+                        {
+                            hpBar.PoisonedHue = hp;
+                        }
+                        break;
+                    case "direction":
+                        if (attr.Value == "right")
+                        {
+                            hpBar.BarDirection = XmlHealthBar.Direction.LeftToRight;
+                        }
+                        else if (attr.Value == "up")
+                        {
+                            hpBar.BarDirection = XmlHealthBar.Direction.BottomToTop;
+                        }
+                        break;
+                    case "image_background":
+                        if (ushort.TryParse(attr.Value, out ushort bg))
+                        {
+                            hpBar.BackgroundImage = bg;
+                        }
+                        break;
+                    case "image_foreground":
+                        if (ushort.TryParse(attr.Value, out ushort fg))
+                        {
+                            hpBar.ForegroundImage = fg;
+                        }
+                        break;
+
+                }
+            }
+
+            gump.Add(hpBar);
+        }
+
+        private static void HandleColorHPBar(XmlGump gump, XmlNode node)
+        {
+            XmlHealthBar hpBar = new XmlHealthBar(World.Player);
+            ApplyBasicAttributes(hpBar, node);
+            hpBar.SetColoredType();
+
+            foreach (XmlAttribute attr in node.Attributes)
+            {
+                switch (attr.Name.ToLower())
+                {
+                    case "hue_normal":
+                        if (ushort.TryParse(attr.Value, out ushort h))
+                        {
+                            hpBar.NormalHue = h;
+                        }
+                        break;
+                    case "hue_background":
+                        if (ushort.TryParse(attr.Value, out ushort hh))
+                        {
+                            hpBar.BackgroundHue = hh;
+                        }
+                        break;
+                    case "hue_poisoned":
+                        if (ushort.TryParse(attr.Value, out ushort hp))
+                        {
+                            hpBar.PoisonedHue = hp;
+                        }
+                        break;
+                    case "direction":
+                        if (attr.Value == "right")
+                        {
+                            hpBar.BarDirection = XmlHealthBar.Direction.LeftToRight;
+                        }
+                        else if (attr.Value == "up")
+                        {
+                            hpBar.BarDirection = XmlHealthBar.Direction.BottomToTop;
+                        }
+                        break;
+                }
+            }
+
+            gump.Add(hpBar);
         }
 
         private static void HandleMacroButtonGraphic(XmlGump gump, XmlNode node)
@@ -154,10 +282,10 @@ namespace ClassicUO.Game.UI
                 switch (attr.Name.ToLower())
                 {
                     case "id":
-                        if(ushort.TryParse(attr.Value, out ushort gra))
+                        if (ushort.TryParse(attr.Value, out ushort gra))
                         {
                             bg.Graphic = graphic = gra;
-                            if(hb.Width < 1)
+                            if (hb.Width < 1)
                             {
                                 hb.ForceSizeUpdate();
                             }
@@ -225,7 +353,7 @@ namespace ClassicUO.Game.UI
                         }
                         break;
                     case "hue":
-                        if(ushort.TryParse(attr.Value, out ushort h))
+                        if (ushort.TryParse(attr.Value, out ushort h))
                         {
                             bg.Hue = hue = h;
                         }
@@ -240,7 +368,8 @@ namespace ClassicUO.Game.UI
                     case "macro":
                         MacroManager manager = Client.Game.GetScene<GameScene>().Macros;
                         Macro m = manager.FindMacro(attr.Value);
-                        if(m != null){
+                        if (m != null)
+                        {
                             hb.MouseUp += (s, e) => { if (e.Button == Input.MouseButtonType.Left) { manager.SetMacroToExecute(m.Items as MacroObject); } };
                         }
                         break;
@@ -656,6 +785,182 @@ namespace ClassicUO.Game.UI
 
                 nextUpdate = Time.Ticks + 250;
             }
+        }
+    }
+
+    internal class XmlHealthBar : Control
+    {
+        private ColorBox color_background, color_foreground;
+        private GumpPic image_background;
+        private GumpPicInPic image_foreground;
+        private Mobile mobile;
+
+        private ushort backgroundHue, backgroundImage, foregroundImage;
+
+        public ushort NormalHue = 97;
+        public ushort PoisonedHue = 62;
+        public ushort BackgroundHue
+        {
+            get => backgroundHue; set
+            {
+                backgroundHue = value;
+                if (color_background != null)
+                {
+                    color_background.Hue = value;
+                }
+                if (image_background != null)
+                {
+                    image_background.Hue = value;
+                }
+            }
+        }
+        public Direction BarDirection { get; set; } = Direction.LeftToRight;
+
+        public ushort BackgroundImage
+        {
+            get => backgroundImage;
+            set
+            {
+                backgroundImage = value;
+                if (image_background != null)
+                {
+                    image_background.Graphic = value;
+                    Width = image_background.Width;
+                    Height = image_background.Height;
+                }
+            }
+        }
+
+        public ushort ForegroundImage
+        {
+            get => foregroundImage;
+            set
+            {
+                foregroundImage = value;
+                if (image_background != null)
+                {
+                    image_foreground.Graphic = value;
+                }
+            }
+        }
+
+        public XmlHealthBar(uint serial)
+        {
+            LocalSerial = serial;
+            if (SerialHelper.IsMobile(serial))
+            {
+                mobile = World.Get(serial) as Mobile;
+            }
+            AcceptMouseInput = false;
+        }
+
+        public void SetImageType()
+        {
+            color_background = null;
+            color_foreground = null;
+
+            image_background = new GumpPic(0, 0, 0, BackgroundHue);
+            image_foreground = new GumpPicInPic(0, 0, 0, 0, 0, 0, 0);
+        }
+
+        public void SetColoredType()
+        {
+            image_background = null;
+            image_foreground = null;
+
+            color_background = new ColorBox(Width, Height, BackgroundHue);
+            color_foreground = new ColorBox(Width, Height, NormalHue);
+        }
+
+        public override void Update()
+        {
+            base.Update();
+
+            if (mobile != null)
+            {
+                if (mobile.IsPoisoned)
+                {
+                    if (color_foreground != null)
+                    {
+                        color_foreground.Hue = PoisonedHue;
+                    }
+                    if (image_foreground != null)
+                    {
+                        image_foreground.Hue = PoisonedHue;
+                    }
+                }
+                else
+                {
+                    if (color_foreground != null)
+                    {
+                        color_foreground.Hue = NormalHue;
+                    }
+                    if (image_foreground != null)
+                    {
+                        image_foreground.Hue = NormalHue;
+                    }
+                }
+
+                UpdateForegroundSizeForPercent();
+            }
+        }
+
+        private void UpdateForegroundSizeForPercent()
+        {
+            switch (BarDirection)
+            {
+                case Direction.LeftToRight:
+                    if (color_foreground != null)
+                    {
+                        color_foreground.Width = (int)(Width * healthPercent());
+                    }
+
+                    if (image_foreground != null)
+                    {
+                        image_foreground.Width = (int)(Width * healthPercent());
+                    }
+                    break;
+                case Direction.BottomToTop:
+                    if (color_foreground != null)
+                    {
+                        color_foreground.Height = (int)(Height * healthPercent());
+                        color_foreground.Y = Height - color_foreground.Height;
+                    }
+
+                    if (image_foreground != null)
+                    {
+                        int heightPerc = (int)(Height * healthPercent());
+                        image_foreground.PicInPicBounds = new Rectangle(0, Height - heightPerc, Width, Height);
+                        image_foreground.Y = Height - heightPerc;
+                    }
+                    break;
+            }
+        }
+
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        {
+            color_background?.Draw(batcher, x, y);
+            color_foreground?.Draw(batcher, x, y + color_foreground.Y);
+            image_background?.Draw(batcher, x, y);
+            image_foreground?.Draw(batcher, x, y + image_foreground.Y);
+
+            return true;
+        }
+
+        private float healthPercent()
+        {
+            if (mobile == null)
+            {
+                return 0f;
+            }
+
+            return (float)((double)mobile.Hits / (double)mobile.HitsMax);
+        }
+
+        public enum Direction
+        {
+            LeftToRight,
+            BottomToTop
         }
     }
 }

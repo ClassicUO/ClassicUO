@@ -282,16 +282,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 XmlGumps.MouseUp += (s, e) => { XmlGumps.ContextMenu?.Show(); };
 
-                XmlGumps.ContextMenu = new ContextMenuControl();
-
-                foreach (var xml in xmls)
-                {
-                    XmlGumps.ContextMenu.Add(new ContextMenuItemEntry(xml, () => { UIManager.Add(XmlGumpHandler.CreateGumpFromFile(System.IO.Path.Combine(XmlGumpHandler.XmlGumpPath, xml + ".xml"))); }));
-                }
-
-                ContextMenuItemEntry reload = new ContextMenuItemEntry("Reload", RefreshXmlGumps);
-
-                XmlGumps.ContextMenu.Add(reload);
+                RefreshXmlGumps();
 
                 startX += largeWidth + 1;
             }
@@ -306,12 +297,36 @@ namespace ClassicUO.Game.UI.Gumps
 
         public void RefreshXmlGumps()
         {
-            XmlGumps.ContextMenu.Dispose();
+            XmlGumps.ContextMenu?.Dispose();
+            if (XmlGumps.ContextMenu == null)
+            {
+                XmlGumps.ContextMenu = new ContextMenuControl();
+            }
 
             string[] xmls = XmlGumpHandler.GetAllXmlGumps();
+
+            ContextMenuItemEntry ci = null;
             foreach (var xml in xmls)
             {
-                XmlGumps.ContextMenu.Add(new ContextMenuItemEntry(xml, () => { UIManager.Add(XmlGumpHandler.CreateGumpFromFile(System.IO.Path.Combine(XmlGumpHandler.XmlGumpPath, xml + ".xml"))); }));
+                XmlGumps.ContextMenu.Add(ci = new ContextMenuItemEntry(xml, () =>
+                {
+                    if (Keyboard.Ctrl)
+                    {
+                        if (ProfileManager.CurrentProfile.AutoOpenXmlGumps.Contains(xml))
+                        {
+                            ProfileManager.CurrentProfile.AutoOpenXmlGumps.Remove(xml);
+                        }
+                        else
+                        {
+                            ProfileManager.CurrentProfile.AutoOpenXmlGumps.Add(xml);
+                        }
+                    }
+                    else
+                    {
+                        UIManager.Add(XmlGumpHandler.CreateGumpFromFile(System.IO.Path.Combine(XmlGumpHandler.XmlGumpPath, xml + ".xml")));
+                    }
+                    RefreshXmlGumps();
+                }, false, ProfileManager.CurrentProfile.AutoOpenXmlGumps.Contains(xml)));
             }
 
             ContextMenuItemEntry reload = new ContextMenuItemEntry("Reload", RefreshXmlGumps);

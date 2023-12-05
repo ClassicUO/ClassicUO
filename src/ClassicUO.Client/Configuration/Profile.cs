@@ -576,6 +576,8 @@ namespace ClassicUO.Configuration
         public List<int> HiddenLayers { get; set; } = new List<int>();
         public bool HideLayersForSelf { get; set; } = true;
 
+        public List<string> AutoOpenXmlGumps { get; set; } = new List<string>();
+
 
 
         public void Save(string path, bool saveGumps = true)
