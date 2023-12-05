@@ -115,6 +115,62 @@ namespace ClassicUO.Game.Scenes
             return false;
         }
 
+        private bool MoveCharByController()
+        {
+            const float THRESHOLD = 0.3f;
+
+            Microsoft.Xna.Framework.Input.GamePadState gamePadState = Microsoft.Xna.Framework.Input.GamePad.GetState(PlayerIndex.One);
+
+            if (gamePadState.IsConnected && gamePadState.ThumbSticks.Left != Vector2.Zero && World.InGame)
+            {
+                var dir = gamePadState.ThumbSticks.Left;
+                bool run = dir.X > 0.5 || dir.Y > 0.5 || dir.X < -0.5 || dir.Y < -0.5;
+
+                if (dir.X > THRESHOLD && dir.Y > THRESHOLD) // North
+                {
+                    World.Player.Walk(Direction.North, run);
+                    return true;
+                }
+                if (dir.X < -THRESHOLD && dir.Y < -THRESHOLD) // South
+                {
+                    World.Player.Walk(Direction.South, run);
+                    return true;
+                }
+                if (dir.X < -THRESHOLD && dir.Y > THRESHOLD) // Left
+                {
+                    World.Player.Walk(Direction.West, run);
+                    return true;
+                }
+                if (dir.X > THRESHOLD && dir.Y < -THRESHOLD) // Left
+                {
+                    World.Player.Walk(Direction.East, run);
+                    return true;
+                }
+
+                if (dir.X < THRESHOLD && dir.Y > THRESHOLD) //Up
+                {
+                    World.Player.Walk(Direction.Up, run);
+                    return true;
+                }
+                if (dir.X < THRESHOLD && dir.Y < -THRESHOLD) //Down
+                {
+                    World.Player.Walk(Direction.Down, run);
+                    return true;
+                }
+                if (dir.X > THRESHOLD && dir.Y < THRESHOLD) // Right
+                {
+                    World.Player.Walk(Direction.Right, run);
+                    return true;
+                }
+                if (dir.X < -THRESHOLD && dir.Y < THRESHOLD) // Left
+                {
+                    World.Player.Walk(Direction.Left, run);
+                    return true;
+                }
+            }
+            return false;
+        }
+
         private bool CanDragSelectOnObject(GameObject obj)
         {
             return obj is null

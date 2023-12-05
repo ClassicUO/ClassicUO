@@ -30,6 +30,7 @@
 
 #endregion
 
+using ClassicUO.Game;
 using Microsoft.Xna.Framework;
 using SDL2;
 
@@ -153,12 +154,21 @@ namespace ClassicUO.Input
             else
             {
                 SDL.SDL_GetMouseState(out Position.X, out Position.Y);
+                Microsoft.Xna.Framework.Input.GamePadState gamePadState = Microsoft.Xna.Framework.Input.GamePad.GetState(PlayerIndex.One);
+
+                if (gamePadState.IsConnected && gamePadState.ThumbSticks.Right != Vector2.Zero)
+                {
+                    const int MOVEMENT = 10;
+                    Position.X += (int)(MOVEMENT * gamePadState.ThumbSticks.Right.X);
+                    Position.Y -= (int)(MOVEMENT * gamePadState.ThumbSticks.Right.Y);
+                    SDL.SDL_WarpMouseInWindow(Client.Game.Window.Handle, Position.X, Position.Y);
+                }
             }
 
             // Scale the mouse coordinates for the faux-backbuffer
-            Position.X = (int) ((double) Position.X * Client.Game.GraphicManager.PreferredBackBufferWidth / Client.Game.Window.ClientBounds.Width);
+            Position.X = (int)((double)Position.X * Client.Game.GraphicManager.PreferredBackBufferWidth / Client.Game.Window.ClientBounds.Width);
 
-            Position.Y = (int) ((double) Position.Y * Client.Game.GraphicManager.PreferredBackBufferHeight / Client.Game.Window.ClientBounds.Height);
+            Position.Y = (int)((double)Position.Y * Client.Game.GraphicManager.PreferredBackBufferHeight / Client.Game.Window.ClientBounds.Height);
 
             IsDragging = LButtonPressed || RButtonPressed || MButtonPressed;
         }
