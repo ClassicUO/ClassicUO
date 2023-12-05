@@ -941,6 +941,8 @@ namespace ClassicUO.Game.UI
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
+            base.Draw(batcher, x, y);
+
             color_background?.Draw(batcher, x, y);
             color_foreground?.Draw(batcher, x, y + color_foreground.Y);
             image_background?.Draw(batcher, x, y);
