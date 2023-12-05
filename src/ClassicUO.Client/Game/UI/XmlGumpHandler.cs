@@ -917,7 +917,9 @@ namespace ClassicUO.Game.UI
 
                     if (image_foreground != null)
                     {
-                        image_foreground.Width = (int)(Width * healthPercent());
+                        int widthPerc = (int)(Width * healthPercent());
+                        image_foreground.PicInPicBounds = new Rectangle(0, 0, widthPerc, Height);
+                        image_foreground.Width = widthPerc;
                     }
                     break;
                 case Direction.BottomToTop:
