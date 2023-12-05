@@ -260,13 +260,6 @@ namespace ClassicUO.Game.Managers
                     }
                 }
             });
-
-            Register("xmldoc", (s) =>
-            {
-                s[0] = string.Empty;
-                UIManager.Add(XmlGumpHandler.CreateGumpFromFile(String.Join(" ", s.Where(s => !String.IsNullOrEmpty(s)))));
-            });
-
         }
 
 
