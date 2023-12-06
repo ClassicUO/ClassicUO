@@ -923,6 +923,33 @@ namespace ClassicUO
 
                         break;
                     }
+
+                case SDL_EventType.SDL_CONTROLLERBUTTONDOWN:
+                    Controller.OnButtonDown(sdlEvent->cbutton);
+                    Scene.OnControllerButtonDown(sdlEvent->cbutton);
+                    break;
+
+                case SDL_EventType.SDL_CONTROLLERBUTTONUP:
+                    Controller.OnButtonUp(sdlEvent->cbutton);
+                    Scene.OnControllerButtonUp(sdlEvent->cbutton);
+                    break;
+
+                case SDL_EventType.SDL_CONTROLLERAXISMOTION: //Work around because sdl doesn't see trigger buttons as buttons, they are axis probably for pressure support
+                    //GameActions.Print(typeof(SDL_GameControllerButton).GetEnumName((SDL_GameControllerButton)sdlEvent->cbutton.button));
+                    if (sdlEvent->cbutton.button == (byte)SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_BACK || sdlEvent->cbutton.button == (byte)SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_GUIDE) //Left trigger BACK Right trigger GUIDE
+                    {
+                        if (sdlEvent->caxis.axisValue > 32000)
+                        {
+                            Controller.OnButtonDown(sdlEvent->cbutton);
+                            Scene.OnControllerButtonDown(sdlEvent->cbutton);
+                        }
+                        else if (sdlEvent->caxis.axisValue < 5000)
+                        {
+                            Controller.OnButtonUp(sdlEvent->cbutton);
+                            Scene.OnControllerButtonDown(sdlEvent->cbutton);
+                        }
+                    }
+                    break;
             }
 
             return 1;
