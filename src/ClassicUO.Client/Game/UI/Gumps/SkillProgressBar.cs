@@ -102,7 +102,7 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         UIManager.Add(bar);
                         Task.Delay(duration).Wait();
-                        bar.Dispose();
+                        bar?.Dispose();
                     }
                     threadRunning = false;
                 });

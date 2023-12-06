@@ -270,8 +270,14 @@ namespace ClassicUO.Game.UI.Controls
                 return false;
             }
 
-            foreach (Control c in Children)
+            for (int i = 0; i < Children.Count; i++)
             {
+                if (Children.Count <= i)
+                {
+                    break;
+                }
+                Control c = Children[i];
+
                 if (c.Page == 0 || c.Page == ActivePage)
                 {
                     if (c.IsVisible)
