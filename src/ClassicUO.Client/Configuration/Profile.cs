@@ -479,7 +479,7 @@ namespace ClassicUO.Configuration
         public int OverheadChatWidth { get; set; } = 200;
 
         public string DefaultTTFFont { get; set; } = "Roboto-Regular";
-        public int TextBorderSize { get; set; } = 2;
+        public int TextBorderSize { get; set; } = 1;
 
         public bool UseModernShopGump { get; set; } = false;
 

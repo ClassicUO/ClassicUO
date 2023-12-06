@@ -293,16 +293,16 @@ namespace ClassicUO.Input
                         break;
 
                     case SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_DPAD_LEFT:
-                        keys += "DLeft, ";
+                        keys += "Left, ";
                         break;
                     case SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
-                        keys += "DRight, ";
+                        keys += "Right, ";
                         break;
                     case SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_DPAD_UP:
-                        keys += "DUp, ";
+                        keys += "Up, ";
                         break;
                     case SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_DPAD_DOWN:
-                        keys += "A,DDown ";
+                        keys += "Down, ";
                         break;
 
 
