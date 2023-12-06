@@ -192,7 +192,15 @@ namespace ClassicUO.Game.UI.Controls
     {
         private Rectangle _picInPicBounds;
 
-        public Rectangle PicInPicBounds { get => _picInPicBounds; set => _picInPicBounds = value; }
+        public Rectangle PicInPicBounds
+        {
+            get => _picInPicBounds; set
+            {
+                _picInPicBounds = value;
+                Width = _picInPicBounds.Width;
+                Height = _picInPicBounds.Height;
+            }
+        }
 
         public GumpPicInPic(
             int x,

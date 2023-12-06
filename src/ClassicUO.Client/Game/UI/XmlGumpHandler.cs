@@ -932,7 +932,7 @@ namespace ClassicUO.Game.UI
                     if (image_foreground != null)
                     {
                         int heightPerc = (int)(Height * healthPercent());
-                        image_foreground.PicInPicBounds = new Rectangle(0, Height - heightPerc, Width, Height);
+                        image_foreground.PicInPicBounds = new Rectangle(0, Height - heightPerc, Width, Height - (Height - heightPerc));
                         image_foreground.Y = Height - heightPerc;
                     }
                     break;
