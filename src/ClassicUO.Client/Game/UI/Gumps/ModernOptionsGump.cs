@@ -5148,6 +5148,11 @@ namespace ClassicUO.Game.UI.Gumps
                     return;
                 }
 
+                if (Macro.ControllerButtons != null && Macro.ControllerButtons.Length > 0)
+                {
+                    _hotkeyBox.SetButtons(Macro.ControllerButtons);
+                }
+
                 SDL.SDL_Keymod mod = SDL.SDL_Keymod.KMOD_NONE;
 
                 if (Macro.Alt)
@@ -5235,6 +5240,9 @@ namespace ClassicUO.Game.UI.Gumps
 
                         return;
                     }
+                } else if (_hotkeyBox.Buttons != null && _hotkeyBox.Buttons.Length > 0)
+                {
+
                 }
                 else
                 {
@@ -5242,6 +5250,10 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
                 Macro m = Macro;
+                if(_hotkeyBox.Buttons != null && _hotkeyBox.Buttons.Length > 0)
+                {
+                    m.ControllerButtons = _hotkeyBox.Buttons;
+                }
                 m.Key = _hotkeyBox.Key;
                 m.MouseButton = _hotkeyBox.MouseButton;
                 m.WheelScroll = _hotkeyBox.WheelScroll;
@@ -5489,6 +5501,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             public SDL.SDL_Keycode Key { get; private set; }
+            public SDL.SDL_GameControllerButton[] Buttons { get; private set; }
             public MouseButtonType MouseButton { get; private set; }
             public bool WheelScroll { get; private set; }
             public bool WheelUp { get; private set; }
@@ -5516,12 +5529,27 @@ namespace ClassicUO.Game.UI.Gumps
 
             public event EventHandler HotkeyChanged, HotkeyCancelled;
 
+            protected override void OnControllerButtonDown(SDL.SDL_GameControllerButton button)
+            {
+                if (IsActive)
+                {
+                    SetButtons(Controller.PressedButtons());
+                }
+            }
+
             protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
             {
                 if (IsActive)
                 {
                     SetKey(key, mod);
                 }
+            }
+
+            public void SetButtons(SDL.SDL_GameControllerButton[] buttons)
+            {
+                ResetBinding();
+                Buttons = buttons;
+                _label.Text = Controller.GetButtonNames(buttons);
             }
 
             public void SetKey(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
@@ -5638,6 +5666,7 @@ namespace ClassicUO.Game.UI.Gumps
                 WheelScroll = false;
                 Mod = 0;
                 _label.Text = "None";
+                Buttons = null;
             }
 
             private void LabelOnMouseUp(object sender, MouseEventArgs e)

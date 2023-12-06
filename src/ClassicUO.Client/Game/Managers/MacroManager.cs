@@ -2005,6 +2005,18 @@ namespace ClassicUO.Game.Managers
 
             writer.WriteEndElement();
 
+            if (ControllerButtons != null)
+            {
+                writer.WriteStartElement("controllerbuttons");
+                foreach (var b in ControllerButtons)
+                {
+                    writer.WriteElementString("button", ((int)b).ToString());
+                }
+                writer.WriteEndElement();
+            }
+
+
+
             writer.WriteEndElement();
         }
 
@@ -2102,6 +2114,24 @@ namespace ClassicUO.Game.Managers
 
                     PushToBack(m);
                 }
+            }
+
+            XmlElement buttons = xml["controllerbuttons"];
+
+            if(buttons != null)
+            {
+                List<SDL.SDL_GameControllerButton> savedButtons = new List<SDL_GameControllerButton> ();
+                foreach (XmlElement buttonNum in buttons.GetElementsByTagName("button"))
+                {
+                    if(int.TryParse(buttonNum.InnerText, out int b))
+                    {
+                        if (Enum.IsDefined(typeof(SDL_GameControllerButton), b))
+                        {
+                            savedButtons.Add((SDL_GameControllerButton)b);
+                        }
+                    }
+                }
+                ControllerButtons = savedButtons.ToArray();
             }
         }
 

@@ -1694,7 +1694,7 @@ namespace ClassicUO.Game.Scenes
         {
             base.OnControllerButtonDown(e);
 
-            if (CanExecuteMacro())
+            if (World.InGame && (UIManager.KeyboardFocusControl == UIManager.SystemChat.TextBoxControl || UIManager.KeyboardFocusControl == null))
             {
                 Macro macro = Macros.FindMacro((SDL.SDL_GameControllerButton)e.button);
                 if(macro != null && macro.Items is MacroObject mac)

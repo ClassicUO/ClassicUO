@@ -10,7 +10,8 @@ namespace ClassicUO.Game.UI.Gumps
             "/c[white][3.15.0]/cd\n" +
                 "- Mouse interaction for overhead text can be disabled\n" +
                 "- Visable layers option added in Options->TazUO\n" +
-                "- Added custom XML Gumps -> see wiki",
+                "- Added custom XML Gumps -> see wiki\n" +
+                "- Added some controller support for movement and macros",
 
             "/c[white][3.14.0]/cd\n" +
                 "- New options menu\n" +
