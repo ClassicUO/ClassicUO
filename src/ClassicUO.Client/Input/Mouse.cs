@@ -158,9 +158,9 @@ namespace ClassicUO.Input
 
                 if (gamePadState.IsConnected && gamePadState.ThumbSticks.Right != Vector2.Zero)
                 {
-                    const int MOVEMENT = 10;
-                    Position.X += (int)(MOVEMENT * gamePadState.ThumbSticks.Right.X);
-                    Position.Y -= (int)(MOVEMENT * gamePadState.ThumbSticks.Right.Y);
+                    float movement = (10 * System.Math.Max(System.Math.Abs(gamePadState.ThumbSticks.Right.X), System.Math.Abs(gamePadState.ThumbSticks.Right.Y)));
+                    Position.X += (int)(movement * gamePadState.ThumbSticks.Right.X);
+                    Position.Y -= (int)(movement * gamePadState.ThumbSticks.Right.Y);
                     SDL.SDL_WarpMouseInWindow(Client.Game.Window.Handle, Position.X, Position.Y);
                 }
             }
