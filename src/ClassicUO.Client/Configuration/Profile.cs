@@ -578,6 +578,8 @@ namespace ClassicUO.Configuration
 
         public List<string> AutoOpenXmlGumps { get; set; } = new List<string>();
 
+        public int ControllerMouseSensativity { get => Input.Mouse.ControllerSensativity; set => Input.Mouse.ControllerSensativity = value; }
+
 
 
         public void Save(string path, bool saveGumps = true)

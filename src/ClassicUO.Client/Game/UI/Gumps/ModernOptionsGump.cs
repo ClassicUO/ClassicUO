@@ -2270,8 +2270,17 @@ namespace ClassicUO.Game.UI.Gumps
             content.BlankLine();
             #endregion
 
-            #region Settings transfers
+            #region Controller settings
             page = ((int)PAGE.TUOOptions + 1008);
+            content.AddToLeft(SubCategoryButton("Controller", page, content.LeftWidth));
+            content.ResetRightSide();
+
+            content.AddToRight(new SliderWithLabel("Mouse Sensitivity", 0, Theme.SLIDER_WIDTH, 1, 20, profile.ControllerMouseSensativity, (i) => { profile.ControllerMouseSensativity = i; }), true, page);
+
+            #endregion
+
+            #region Settings transfers
+            page = ((int)PAGE.TUOOptions + 1009);
             content.AddToLeft(SubCategoryButton("Settings transfers", page, content.LeftWidth));
             content.ResetRightSide();
 
@@ -2351,7 +2360,7 @@ namespace ClassicUO.Game.UI.Gumps
             };
 
             #region Hidden layers
-            page = ((int)PAGE.TUOOptions + 1009);
+            page = ((int)PAGE.TUOOptions + 1010);
             content.AddToLeft(SubCategoryButton("Visible Layers", page, content.LeftWidth));
             content.ResetRightSide();
 

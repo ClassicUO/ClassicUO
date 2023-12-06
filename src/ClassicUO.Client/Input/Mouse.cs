@@ -142,6 +142,8 @@ namespace ClassicUO.Input
 
         public static bool MouseInWindow { get; set; }
 
+        public static int ControllerSensativity { get; set; } = 10;
+
         public static void Update()
         {
             if (!MouseInWindow)
@@ -158,9 +160,8 @@ namespace ClassicUO.Input
 
                 if (gamePadState.IsConnected && gamePadState.ThumbSticks.Right != Vector2.Zero)
                 {
-                    float movement = (10 * System.Math.Max(System.Math.Abs(gamePadState.ThumbSticks.Right.X), System.Math.Abs(gamePadState.ThumbSticks.Right.Y)));
-                    Position.X += (int)(movement * gamePadState.ThumbSticks.Right.X);
-                    Position.Y -= (int)(movement * gamePadState.ThumbSticks.Right.Y);
+                    Position.X += (int)(ControllerSensativity * gamePadState.ThumbSticks.Right.X);
+                    Position.Y -= (int)(ControllerSensativity * gamePadState.ThumbSticks.Right.Y);
                     SDL.SDL_WarpMouseInWindow(Client.Game.Window.Handle, Position.X, Position.Y);
                 }
             }
