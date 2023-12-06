@@ -451,6 +451,8 @@ namespace ClassicUO.Game.UI.Controls
 
         internal event EventHandler<KeyboardEventArgs> KeyDown, KeyUp;
 
+        internal event EventHandler<SDL.SDL_GameControllerButton> ControllerButtonUp, ControllerButtonDown;
+
 
         public void HitTest(int x, int y, ref Control res)
         {
@@ -653,9 +655,9 @@ namespace ClassicUO.Game.UI.Controls
             KeyUp?.Raise(arg);
         }
 
-        public void InvokeControllerButtonUp(SDL.SDL_GameControllerButton button) { OnControllerButtonUp(button); }
+        public void InvokeControllerButtonUp(SDL.SDL_GameControllerButton button) { OnControllerButtonUp(button); ControllerButtonUp?.Raise(button); }
 
-        public void InvokeControllerButtonDown(SDL.SDL_GameControllerButton button) { OnControllerButtonDown(button); }
+        public void InvokeControllerButtonDown(SDL.SDL_GameControllerButton button) { OnControllerButtonDown(button); ControllerButtonDown?.Raise(button); }
 
         public void InvokeMouseWheel(MouseEventType delta)
         {
