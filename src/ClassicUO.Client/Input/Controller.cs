@@ -139,5 +139,65 @@ namespace ClassicUO.Input
                     break;
             }
         }
+
+        public static bool IsButtonPressed(SDL.SDL_GameControllerButton button)
+        {
+            switch (button)
+            {
+                case SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_A:
+                    return Button_A;
+                case SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_B:
+                    return Button_B;
+                case SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_X:
+                    return Button_X;
+                case SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_Y:
+                    return Button_Y;
+
+                case SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_DPAD_LEFT:
+                    return Button_Left;
+                case SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
+                    return Button_Right;
+                case SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_DPAD_UP:
+                    return Button_Up;
+                case SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_DPAD_DOWN:
+                    return Button_Down;
+
+
+                case SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_LEFTSHOULDER:
+                    return Button_LeftBumper;
+                case SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_RIGHTSHOULDER:
+                    return Button_RightBumper;
+
+
+                case SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_BACK:
+                    return Button_LeftTrigger;
+
+                case SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_GUIDE:
+                    return Button_RightTrigger;
+
+                case SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_LEFTSTICK:
+                    return Button_LeftStick;
+                case SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_RIGHTSTICK:
+                    return Button_RightStick;
+            }
+
+            return false;
+        }
+
+        public static bool AreButtonsPressed(SDL.SDL_GameControllerButton[] buttons)
+        {
+            bool finalstatus = false;
+
+            foreach (var button in buttons)
+            {
+                if(!IsButtonPressed(button))
+                {
+                    finalstatus = false; 
+                    break;
+                }
+            }
+
+            return finalstatus;
+        }
     }
 }

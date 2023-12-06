@@ -47,6 +47,7 @@ using ClassicUO.Resources;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using SDL2;
+using static SDL2.SDL;
 
 namespace ClassicUO.Game.Managers
 {
@@ -310,6 +311,32 @@ namespace ClassicUO.Game.Managers
             return macros;
         }
 
+        public Macro FindMacro(SDL_GameControllerButton button)
+        {
+            Macro obj = (Macro)Items;
+
+            while (obj != null)
+            {
+                if (obj.ControllerButtons != null && obj.ControllerButtons.Contains(button))
+                {
+                    if (obj.ControllerButtons.Length > 1)
+                    {
+                        if (Controller.AreButtonsPressed(obj.ControllerButtons))
+                        {
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+
+                obj = (Macro)obj.Next;
+            }
+
+            return obj;
+        }
 
         public Macro FindMacro(SDL.SDL_Keycode key, bool alt, bool ctrl, bool shift)
         {
@@ -1887,6 +1914,7 @@ namespace ClassicUO.Game.Managers
 
         public string Name { get; }
 
+        public SDL.SDL_GameControllerButton[] ControllerButtons { get; set; }
         public SDL.SDL_Keycode Key { get; set; }
         public MouseButtonType MouseButton { get; set; }
         public bool WheelScroll { get; set; }
