@@ -1690,6 +1690,20 @@ namespace ClassicUO.Game.Scenes
             NameOverHeadManager.RegisterKeyUp(e.keysym);
         }
 
+        internal override void OnControllerButtonDown(SDL.SDL_ControllerButtonEvent e)
+        {
+            base.OnControllerButtonDown(e);
+
+            if (CanExecuteMacro())
+            {
+                Macro macro = Macros.FindMacro((SDL.SDL_GameControllerButton)e.button);
+                if(macro != null && macro.Items is MacroObject mac)
+                {
+                    ExecuteMacro(mac);
+                }
+            }
+        }
+
         private bool CanExecuteMacro()
         {
             return UIManager.KeyboardFocusControl == UIManager.SystemChat.TextBoxControl
