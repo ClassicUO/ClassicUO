@@ -926,11 +926,13 @@ namespace ClassicUO
 
                 case SDL_EventType.SDL_CONTROLLERBUTTONDOWN:
                     Controller.OnButtonDown(sdlEvent->cbutton);
+                    UIManager.KeyboardFocusControl?.InvokeControllerButtonDown((SDL_GameControllerButton)sdlEvent->cbutton.button);
                     Scene.OnControllerButtonDown(sdlEvent->cbutton);
                     break;
 
                 case SDL_EventType.SDL_CONTROLLERBUTTONUP:
                     Controller.OnButtonUp(sdlEvent->cbutton);
+                    UIManager.KeyboardFocusControl?.InvokeControllerButtonUp((SDL_GameControllerButton)sdlEvent->cbutton.button);
                     Scene.OnControllerButtonUp(sdlEvent->cbutton);
                     break;
 
@@ -940,13 +942,21 @@ namespace ClassicUO
                     {
                         if (sdlEvent->caxis.axisValue > 32000)
                         {
-                            Controller.OnButtonDown(sdlEvent->cbutton);
-                            Scene.OnControllerButtonDown(sdlEvent->cbutton);
+                            if (
+                                ((SDL_GameControllerButton)sdlEvent->cbutton.button == SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_BACK && !Controller.Button_LeftTrigger)
+                                || ((SDL_GameControllerButton)sdlEvent->cbutton.button == SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_GUIDE && !Controller.Button_RightTrigger)
+                                )
+                            {
+                                Controller.OnButtonDown(sdlEvent->cbutton);
+                                UIManager.KeyboardFocusControl?.InvokeControllerButtonDown((SDL_GameControllerButton)sdlEvent->cbutton.button);
+                                Scene.OnControllerButtonDown(sdlEvent->cbutton);
+                            }
                         }
                         else if (sdlEvent->caxis.axisValue < 5000)
                         {
                             Controller.OnButtonUp(sdlEvent->cbutton);
-                            Scene.OnControllerButtonDown(sdlEvent->cbutton);
+                            UIManager.KeyboardFocusControl?.InvokeControllerButtonUp((SDL_GameControllerButton)sdlEvent->cbutton.button);
+                            Scene.OnControllerButtonUp(sdlEvent->cbutton);
                         }
                     }
                     break;

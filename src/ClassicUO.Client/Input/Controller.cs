@@ -1,4 +1,5 @@
 ﻿using ClassicUO.Game;
+using Microsoft.Xna.Framework.Input;
 using SDL2;
 
 namespace ClassicUO.Input
@@ -186,7 +187,7 @@ namespace ClassicUO.Input
 
         public static bool AreButtonsPressed(SDL.SDL_GameControllerButton[] buttons)
         {
-            bool finalstatus = false;
+            bool finalstatus = true;
 
             foreach (var button in buttons)
             {
@@ -198,6 +199,143 @@ namespace ClassicUO.Input
             }
 
             return finalstatus;
+        }
+
+        public static SDL.SDL_GameControllerButton[] PressedButtons()
+        {
+            System.Collections.Generic.List<SDL.SDL_GameControllerButton> buttons = new System.Collections.Generic.List<SDL.SDL_GameControllerButton>();
+
+            if (Button_A)
+            {
+                buttons.Add(SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_A);
+            }
+            if (Button_B)
+            {
+                buttons.Add(SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_B);
+            }
+            if (Button_X)
+            {
+                buttons.Add(SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_X);
+            }
+            if (Button_Y)
+            {
+                buttons.Add(SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_Y);
+            }
+
+
+            if (Button_Left)
+            {
+                buttons.Add(SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_DPAD_LEFT);
+            }
+            if (Button_Right)
+            {
+                buttons.Add(SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_DPAD_RIGHT);
+            }
+            if (Button_Up)
+            {
+                buttons.Add(SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_DPAD_UP);
+            }
+            if (Button_Down)
+            {
+                buttons.Add(SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_DPAD_DOWN);
+            }
+
+
+            if (Button_LeftTrigger)
+            {
+                buttons.Add(SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_BACK);
+            }
+            if (Button_LeftBumper)
+            {
+                buttons.Add(SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_LEFTSHOULDER);
+            }
+
+            if (Button_RightTrigger)
+            {
+                buttons.Add(SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_GUIDE);
+            }
+            if (Button_RightBumper)
+            {
+                buttons.Add(SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_RIGHTSHOULDER);
+            }
+
+            if (Button_LeftStick)
+            {
+                buttons.Add(SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_LEFTSTICK);
+            }
+            if (Button_RightStick)
+            {
+                buttons.Add(SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_RIGHTSTICK);
+            }
+
+            return buttons.ToArray();
+        }
+
+        public static string GetButtonNames(SDL.SDL_GameControllerButton[] buttons)
+        {
+            string keys = string.Empty;
+
+            foreach (var button in buttons)
+            {
+                switch(button)
+                {
+                    case SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_A:
+                        keys += "A, ";
+                        break;
+                    case SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_B:
+                        keys += "B, ";
+                        break;
+                    case SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_X:
+                        keys += "X, ";
+                        break;
+                    case SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_Y:
+                        keys += "Y, ";
+                        break;
+
+                    case SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_DPAD_LEFT:
+                        keys += "DLeft, ";
+                        break;
+                    case SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
+                        keys += "DRight, ";
+                        break;
+                    case SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_DPAD_UP:
+                        keys += "DUp, ";
+                        break;
+                    case SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_DPAD_DOWN:
+                        keys += "A,DDown ";
+                        break;
+
+
+                    case SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_LEFTSHOULDER:
+                        keys += "LB, ";
+                        break;
+                    case SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_RIGHTSHOULDER:
+                        keys += "RB, ";
+                        break;
+
+
+                    case SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_BACK:
+                        keys += "LT, ";
+                        break;
+                    case SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_GUIDE:
+                        keys += "RT, ";
+                        break;
+
+                    case SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_LEFTSTICK:
+                        keys += "LS, ";
+                        break;
+                    case SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_RIGHTSTICK:
+                        keys += "RS, ";
+                        break;
+                }
+            }
+
+            if(keys.EndsWith(", "))
+            {
+                keys = keys.Substring(0, keys.Length - 2);
+            }
+
+            return keys;
         }
     }
 }

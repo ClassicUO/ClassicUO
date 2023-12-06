@@ -653,6 +653,10 @@ namespace ClassicUO.Game.UI.Controls
             KeyUp?.Raise(arg);
         }
 
+        public void InvokeControllerButtonUp(SDL.SDL_GameControllerButton button) { OnControllerButtonUp(button); }
+
+        public void InvokeControllerButtonDown(SDL.SDL_GameControllerButton button) { OnControllerButtonDown(button); }
+
         public void InvokeMouseWheel(MouseEventType delta)
         {
             OnMouseWheel(delta);
@@ -741,6 +745,10 @@ namespace ClassicUO.Game.UI.Controls
         {
             Parent?.OnKeyUp(key, mod);
         }
+
+        protected virtual void OnControllerButtonUp(SDL.SDL_GameControllerButton button) { }
+
+        protected virtual void OnControllerButtonDown(SDL.SDL_GameControllerButton button) { }
 
         public virtual bool Contains(int x, int y)
         {

@@ -317,7 +317,7 @@ namespace ClassicUO.Game.Managers
 
             while (obj != null)
             {
-                if (obj.ControllerButtons != null && obj.ControllerButtons.Contains(button))
+                if (obj.ControllerButtons != null)
                 {
                     if (obj.ControllerButtons.Length > 1)
                     {
@@ -326,7 +326,7 @@ namespace ClassicUO.Game.Managers
                             break;
                         }
                     }
-                    else
+                    else if (obj.ControllerButtons.Contains(button))
                     {
                         break;
                     }
