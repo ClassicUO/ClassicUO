@@ -936,13 +936,23 @@ namespace ClassicUO
                         e.button.button = (byte)MouseButtonType.Left;
                         SDL2.SDL.SDL_PushEvent(ref e);
                     }
-
                     else if (sdlEvent->cbutton.button == (byte)SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_LEFTSTICK)
                     {
                         SDL_Event e = new SDL_Event();
                         e.type = SDL_EventType.SDL_MOUSEBUTTONDOWN;
                         e.button.button = (byte)MouseButtonType.Right;
                         SDL2.SDL.SDL_PushEvent(ref e);
+                    }
+                    else if (sdlEvent->cbutton.button == (byte)SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_START && World.InGame)
+                    {
+                        Gump g = UIManager.GetGump<ModernOptionsGump>();
+                        if(g == null)
+                        {
+                            UIManager.Add(new ModernOptionsGump());
+                        } else
+                        {
+                            g.Dispose();
+                        }
                     }
                     break;
 
@@ -958,7 +968,6 @@ namespace ClassicUO
                         e.button.button = (byte)MouseButtonType.Left;
                         SDL2.SDL.SDL_PushEvent(ref e);
                     }
-
                     else if (sdlEvent->cbutton.button == (byte)SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_LEFTSTICK)
                     {
                         SDL_Event e = new SDL_Event();
