@@ -192,6 +192,8 @@ namespace ClassicUO.Game.UI.Controls
     {
         private Rectangle _picInPicBounds;
 
+        public Vector2 DrawOffset { get; set; } = Vector2.Zero;
+
         public Rectangle PicInPicBounds
         {
             get => _picInPicBounds; set
@@ -255,7 +257,7 @@ namespace ClassicUO.Game.UI.Controls
             {
                 batcher.Draw(
                     gumpInfo.Texture,
-                    new Rectangle(x, y, Width, Height),
+                    new Rectangle((int)(x + DrawOffset.X), (int)(y + DrawOffset.Y), Width, Height),
                     sourceBounds,
                     hueVector
                 );

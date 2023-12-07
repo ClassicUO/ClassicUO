@@ -10,6 +10,7 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Renderer;
 using ClassicUO.Game.GameObjects;
+using static ClassicUO.Game.UI.XmlGumpHandler;
 
 namespace ClassicUO.Game.UI
 {
@@ -476,11 +477,11 @@ namespace ClassicUO.Game.UI
             {
                 if (vertical)
                 {
-                    gump.VerticalProgressBarUpdates.Add(new Tuple<Tuple<Control, int>, Tuple<string, string>>(new Tuple<Control, int>(c, maxHeight), new Tuple<string, string>(originalValue, originalMaxVal)));
+                    gump.VerticalProgressBarUpdates.Add(new XmlProgressBarInfo(c, maxHeight, originalValue, originalMaxVal));
                 }
                 else
                 {
-                    gump.ProgressBarUpdates.Add(new Tuple<Tuple<Control, int>, Tuple<string, string>>(new Tuple<Control, int>(c, maxWidth), new Tuple<string, string>(originalValue, originalMaxVal)));
+                    gump.ProgressBarUpdates.Add(new XmlProgressBarInfo(c, maxWidth, originalValue, originalMaxVal));
                 }
             }
         }
@@ -491,15 +492,16 @@ namespace ClassicUO.Game.UI
             int value = 0, maxval = 0;
             bool needsUpdates = false;
             string originalValue = string.Empty, originalMaxVal = string.Empty;
+            bool vertical = false;
 
             foreach (XmlAttribute attr in node.Attributes)
             {
                 switch (attr.Name.ToLower())
                 {
-                    case "background_image":
+                    case "image_background":
                         ushort.TryParse(attr.Value, out bg_graphic);
                         break;
-                    case "foreground_image":
+                    case "image_foreground":
                         ushort.TryParse(attr.Value, out fg_graphic);
                         break;
                     case "background_hue":
@@ -525,17 +527,42 @@ namespace ClassicUO.Game.UI
                     case "updates":
                         bool.TryParse(attr.Value, out needsUpdates);
                         break;
+                    case "direction":
+                        if (attr.Value == "up")
+                        {
+                            vertical = true;
+                        }
+                        else if (attr.Value == "right")
+                        {
+                            vertical = false;
+                        }
+                        break;
                 }
             }
             Control c;
             gump.Add(c = ApplyBasicAttributes(new GumpPic(0, 0, bg_graphic, bg_hue), node));
             int maxWidth = c.Width;
-            gump.Add(c = ApplyBasicAttributes(new GumpPicTiled(fg_graphic) { Hue = fg_hue }, node));
-            c.Width = (int)(GetPercentage(value, maxval) * c.Width);
+            int maxHeight = c.Height;
+            if (vertical)
+            {
+                gump.Add(c = ApplyBasicAttributes(new GumpPicInPic(0, 0, fg_graphic, 0, 0, (ushort)maxWidth, (ushort)maxHeight) { Hue = fg_hue }, node));
+            }
+            else
+            {
+                gump.Add(c = ApplyBasicAttributes(new GumpPicTiled(fg_graphic) { Hue = fg_hue }, node));
+                c.Width = (int)(GetPercentage(value, maxval) * c.Width);
+            }
 
             if (needsUpdates)
             {
-                gump.ProgressBarUpdates.Add(new Tuple<Tuple<Control, int>, Tuple<string, string>>(new Tuple<Control, int>(c, maxWidth), new Tuple<string, string>(originalValue, originalMaxVal)));
+                if (vertical)
+                {
+                    gump.VerticalProgressBarUpdates.Add(new XmlProgressBarInfo(c, maxHeight, originalValue, originalMaxVal));
+                }
+                else
+                {
+                    gump.ProgressBarUpdates.Add(new XmlProgressBarInfo(c, maxWidth, originalValue, originalMaxVal));
+                }
             }
         }
 
@@ -745,23 +772,31 @@ namespace ClassicUO.Game.UI
 
             return text;
         }
+
+        internal class XmlProgressBarInfo
+        {
+            public XmlProgressBarInfo(Control control, int maxSize, string value, string maxValue)
+            {
+                Control = control;
+                MaxSize = maxSize;
+                Value = value;
+                MaxValue = maxValue;
+            }
+
+            public Control Control { get; }
+            public int MaxSize { get; }
+            public string Value { get; }
+            public string MaxValue { get; }
+        }
     }
 
     internal class XmlGump : Gump
     {
         public List<Tuple<TextBox, Tuple<string, int>>> TextBoxUpdates { get; set; } = new List<Tuple<TextBox, Tuple<string, int>>>();
 
-        /// <summary>
-        /// <Control, Max width>
-        /// <Val string, max val string>
-        /// </summary>
-        public List<Tuple<Tuple<Control, int>, Tuple<string, string>>> ProgressBarUpdates { get; set; } = new List<Tuple<Tuple<Control, int>, Tuple<string, string>>>();
+        public List<XmlProgressBarInfo> ProgressBarUpdates { get; set; } = new List<XmlProgressBarInfo>();
 
-        /// <summary>
-        /// <Control, Max height>
-        /// <Val string, max val string>
-        /// </summary>
-        public List<Tuple<Tuple<Control, int>, Tuple<string, string>>> VerticalProgressBarUpdates { get; set; } = new List<Tuple<Tuple<Control, int>, Tuple<string, string>>>();
+        public List<XmlProgressBarInfo> VerticalProgressBarUpdates { get; set; } = new List<XmlProgressBarInfo>();
 
         private uint nextUpdate = 0;
 
@@ -796,13 +831,13 @@ namespace ClassicUO.Game.UI
 
                 foreach (var p in ProgressBarUpdates)
                 {
-                    if (p.Item1 != null && !p.Item1.Item1.IsDisposed)
+                    if (p.Control != null && !p.Control.IsDisposed)
                     {
-                        if (int.TryParse(XmlGumpHandler.FormatText(p.Item2.Item1), out int val))
+                        if (int.TryParse(XmlGumpHandler.FormatText(p.Value), out int val))
                         {
-                            if (int.TryParse(XmlGumpHandler.FormatText(p.Item2.Item2), out int max))
+                            if (int.TryParse(XmlGumpHandler.FormatText(p.MaxValue), out int max))
                             {
-                                p.Item1.Item1.Width = (int)(XmlGumpHandler.GetPercentage(val, max) * p.Item1.Item2);
+                                p.Control.Width = (int)(XmlGumpHandler.GetPercentage(val, max) * p.MaxSize);
                             }
                         }
                     }
@@ -810,15 +845,23 @@ namespace ClassicUO.Game.UI
 
                 foreach (var p in VerticalProgressBarUpdates)
                 {
-                    if (p.Item1 != null && !p.Item1.Item1.IsDisposed)
+                    if (p.Control != null && !p.Control.IsDisposed)
                     {
-                        if (int.TryParse(XmlGumpHandler.FormatText(p.Item2.Item1), out int val))
+                        if (int.TryParse(XmlGumpHandler.FormatText(p.Value), out int val))
                         {
-                            if (int.TryParse(XmlGumpHandler.FormatText(p.Item2.Item2), out int max))
+                            if (int.TryParse(XmlGumpHandler.FormatText(p.MaxValue), out int max))
                             {
-                                int newHeight = (int)(XmlGumpHandler.GetPercentage(val, max) * p.Item1.Item2);
-                                p.Item1.Item1.Height = newHeight;
-                                p.Item1.Item1.Y = p.Item1.Item2 - newHeight;
+                                int newHeight = (int)(XmlGumpHandler.GetPercentage(val, max) * p.MaxSize);
+                                if (p.Control is GumpPicInPic picnpic)
+                                {
+                                    picnpic.PicInPicBounds = new Rectangle(0, p.MaxSize - newHeight, picnpic.Width, p.MaxSize - (p.MaxSize - newHeight));
+                                    picnpic.DrawOffset = new Vector2(0, p.MaxSize - newHeight);
+                                }
+                                else
+                                {
+                                    p.Control.Height = newHeight;
+                                    p.Control.Y = p.MaxSize - newHeight;
+                                }
                             }
                         }
                     }
