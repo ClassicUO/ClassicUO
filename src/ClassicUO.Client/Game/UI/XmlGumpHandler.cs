@@ -48,7 +48,7 @@ namespace ClassicUO.Game.UI
                                 int.TryParse(attr.Value, out gump.Y);
                                 break;
                             case "locked":
-                                if(bool.TryParse(attr.Value, out bool locked))
+                                if (bool.TryParse(attr.Value, out bool locked))
                                 {
                                     gump.IsLocked = locked;
                                 }
@@ -67,7 +67,7 @@ namespace ClassicUO.Game.UI
         public static void TryAutoOpenByName(string name)
         {
             string fullFile = Path.Combine(XmlGumpPath, name + ".xml");
-            if(File.Exists(fullFile))
+            if (File.Exists(fullFile))
             {
                 UIManager.Add(CreateGumpFromFile(fullFile));
             }
@@ -424,6 +424,7 @@ namespace ClassicUO.Game.UI
             int value = 0, maxval = 0;
             bool needsUpdates = false;
             string originalValue = string.Empty, originalMaxVal = string.Empty;
+            bool vertical = false;
 
             foreach (XmlAttribute attr in node.Attributes)
             {
@@ -452,17 +453,35 @@ namespace ClassicUO.Game.UI
                     case "updates":
                         bool.TryParse(attr.Value, out needsUpdates);
                         break;
+                    case "direction":
+                        if (attr.Value == "up")
+                        {
+                            vertical = true;
+                        }
+                        else if (attr.Value == "right")
+                        {
+                            vertical = false;
+                        }
+                        break;
                 }
             }
             Control c;
             gump.Add(c = ApplyBasicAttributes(new ColorBox(0, 0, bg_hue) { AcceptMouseInput = false }, node));
             int maxWidth = c.Width;
+            int maxHeight = c.Height;
             gump.Add(c = ApplyBasicAttributes(new ColorBox(0, 0, fg_hue) { AcceptMouseInput = false }, node));
             c.Width = (int)(GetPercentage(value, maxval) * c.Width);
 
             if (needsUpdates)
             {
-                gump.ProgressBarUpdates.Add(new Tuple<Tuple<Control, int>, Tuple<string, string>>(new Tuple<Control, int>(c, maxWidth), new Tuple<string, string>(originalValue, originalMaxVal)));
+                if (vertical)
+                {
+                    gump.VerticalProgressBarUpdates.Add(new Tuple<Tuple<Control, int>, Tuple<string, string>>(new Tuple<Control, int>(c, maxHeight), new Tuple<string, string>(originalValue, originalMaxVal)));
+                }
+                else
+                {
+                    gump.ProgressBarUpdates.Add(new Tuple<Tuple<Control, int>, Tuple<string, string>>(new Tuple<Control, int>(c, maxWidth), new Tuple<string, string>(originalValue, originalMaxVal)));
+                }
             }
         }
 
@@ -738,6 +757,12 @@ namespace ClassicUO.Game.UI
         /// </summary>
         public List<Tuple<Tuple<Control, int>, Tuple<string, string>>> ProgressBarUpdates { get; set; } = new List<Tuple<Tuple<Control, int>, Tuple<string, string>>>();
 
+        /// <summary>
+        /// <Control, Max height>
+        /// <Val string, max val string>
+        /// </summary>
+        public List<Tuple<Tuple<Control, int>, Tuple<string, string>>> VerticalProgressBarUpdates { get; set; } = new List<Tuple<Tuple<Control, int>, Tuple<string, string>>>();
+
         private uint nextUpdate = 0;
 
         public XmlGump() : base(0, 0)
@@ -778,6 +803,22 @@ namespace ClassicUO.Game.UI
                             if (int.TryParse(XmlGumpHandler.FormatText(p.Item2.Item2), out int max))
                             {
                                 p.Item1.Item1.Width = (int)(XmlGumpHandler.GetPercentage(val, max) * p.Item1.Item2);
+                            }
+                        }
+                    }
+                }
+
+                foreach (var p in VerticalProgressBarUpdates)
+                {
+                    if (p.Item1 != null && !p.Item1.Item1.IsDisposed)
+                    {
+                        if (int.TryParse(XmlGumpHandler.FormatText(p.Item2.Item1), out int val))
+                        {
+                            if (int.TryParse(XmlGumpHandler.FormatText(p.Item2.Item2), out int max))
+                            {
+                                int newHeight = (int)(XmlGumpHandler.GetPercentage(val, max) * p.Item1.Item2);
+                                p.Item1.Item1.Height = newHeight;
+                                p.Item1.Item1.Y = p.Item1.Item2 - newHeight;
                             }
                         }
                     }
