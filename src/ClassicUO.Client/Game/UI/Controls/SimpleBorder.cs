@@ -19,11 +19,13 @@ namespace ClassicUO.Game.UI.Controls
                 return false;
             base.Draw(batcher, x, y);
 
+            var huevec = ShaderHueTranslator.GetHueVector(Hue, false, Alpha);
+
             batcher.DrawRectangle(
                 SolidColorTextureCache.GetTexture(Color.White),
                 x, y,
                 _width, _height,
-                new Vector3(Hue, 0, Alpha)
+                huevec
                 );
 
             return true;

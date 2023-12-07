@@ -47,6 +47,7 @@ using ClassicUO.Resources;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using SDL2;
+using static SDL2.SDL;
 
 namespace ClassicUO.Game.Managers
 {
@@ -310,6 +311,32 @@ namespace ClassicUO.Game.Managers
             return macros;
         }
 
+        public Macro FindMacro(SDL_GameControllerButton button)
+        {
+            Macro obj = (Macro)Items;
+
+            while (obj != null)
+            {
+                if (obj.ControllerButtons != null)
+                {
+                    if (obj.ControllerButtons.Length > 1)
+                    {
+                        if (Controller.AreButtonsPressed(obj.ControllerButtons))
+                        {
+                            break;
+                        }
+                    }
+                    else if (obj.ControllerButtons.Contains(button))
+                    {
+                        break;
+                    }
+                }
+
+                obj = (Macro)obj.Next;
+            }
+
+            return obj;
+        }
 
         public Macro FindMacro(SDL.SDL_Keycode key, bool alt, bool ctrl, bool shift)
         {
@@ -1887,6 +1914,7 @@ namespace ClassicUO.Game.Managers
 
         public string Name { get; }
 
+        public SDL.SDL_GameControllerButton[] ControllerButtons { get; set; }
         public SDL.SDL_Keycode Key { get; set; }
         public MouseButtonType MouseButton { get; set; }
         public bool WheelScroll { get; set; }
@@ -1976,6 +2004,18 @@ namespace ClassicUO.Game.Managers
             }
 
             writer.WriteEndElement();
+
+            if (ControllerButtons != null)
+            {
+                writer.WriteStartElement("controllerbuttons");
+                foreach (var b in ControllerButtons)
+                {
+                    writer.WriteElementString("button", ((int)b).ToString());
+                }
+                writer.WriteEndElement();
+            }
+
+
 
             writer.WriteEndElement();
         }
@@ -2074,6 +2114,24 @@ namespace ClassicUO.Game.Managers
 
                     PushToBack(m);
                 }
+            }
+
+            XmlElement buttons = xml["controllerbuttons"];
+
+            if(buttons != null)
+            {
+                List<SDL.SDL_GameControllerButton> savedButtons = new List<SDL_GameControllerButton> ();
+                foreach (XmlElement buttonNum in buttons.GetElementsByTagName("button"))
+                {
+                    if(int.TryParse(buttonNum.InnerText, out int b))
+                    {
+                        if (Enum.IsDefined(typeof(SDL_GameControllerButton), b))
+                        {
+                            savedButtons.Add((SDL_GameControllerButton)b);
+                        }
+                    }
+                }
+                ControllerButtons = savedButtons.ToArray();
             }
         }
 

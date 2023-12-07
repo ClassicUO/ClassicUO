@@ -190,7 +190,19 @@ namespace ClassicUO.Game.UI.Controls
 
     internal class GumpPicInPic : GumpPicBase
     {
-        private readonly Rectangle _picInPicBounds;
+        private Rectangle _picInPicBounds;
+
+        public Vector2 DrawOffset { get; set; } = Vector2.Zero;
+
+        public Rectangle PicInPicBounds
+        {
+            get => _picInPicBounds; set
+            {
+                _picInPicBounds = value;
+                Width = _picInPicBounds.Width;
+                Height = _picInPicBounds.Height;
+            }
+        }
 
         public GumpPicInPic(
             int x,
@@ -245,7 +257,7 @@ namespace ClassicUO.Game.UI.Controls
             {
                 batcher.Draw(
                     gumpInfo.Texture,
-                    new Rectangle(x, y, Width, Height),
+                    new Rectangle((int)(x + DrawOffset.X), (int)(y + DrawOffset.Y), Width, Height),
                     sourceBounds,
                     hueVector
                 );

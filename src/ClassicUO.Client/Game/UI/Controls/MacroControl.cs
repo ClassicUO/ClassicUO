@@ -273,6 +273,11 @@ namespace ClassicUO.Game.UI.Controls
                 return;
             }
 
+            if(Macro.ControllerButtons != null && Macro.ControllerButtons.Length > 0)
+            {
+                _hotkeyBox.SetButtons(Macro.ControllerButtons);
+            }
+
             SDL.SDL_Keymod mod = SDL.SDL_Keymod.KMOD_NONE;
 
             if (Macro.Alt)
@@ -361,12 +366,22 @@ namespace ClassicUO.Game.UI.Controls
                     return;
                 }
             }
+            else if(_hotkeyBox.Buttons != null && _hotkeyBox.Buttons.Length > 0)
+            {
+
+            }
             else
             {
                 return;
             }
 
             Macro m = Macro;
+
+            if(_hotkeyBox.Buttons != null && _hotkeyBox.Buttons.Length > 0)
+            {
+                m.ControllerButtons = _hotkeyBox.Buttons;
+            }
+
             m.Key = _hotkeyBox.Key;
             m.MouseButton = _hotkeyBox.MouseButton;
             m.WheelScroll = _hotkeyBox.WheelScroll;

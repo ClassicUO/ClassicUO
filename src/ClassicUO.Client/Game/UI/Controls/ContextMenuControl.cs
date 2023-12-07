@@ -254,16 +254,13 @@ namespace ClassicUO.Game.UI.Controls
                 Add(_label);
 
 
-                if (entry.CanBeSelected)
+                _selectedPic = new GumpPic(3, 0, 0x838, 0)
                 {
-                    _selectedPic = new GumpPic(3, 0, 0x838, 0)
-                    {
-                        IsVisible = entry.IsSelected,
-                        IsEnabled = false
-                    };
+                    IsVisible = entry.IsSelected,
+                    IsEnabled = false
+                };
 
-                    Add(_selectedPic);
-                }
+                Add(_selectedPic);
 
                 Height = 25;
 
@@ -308,6 +305,11 @@ namespace ClassicUO.Game.UI.Controls
                 if (Width > _label.Width)
                 {
                     _label.Width = Width;
+                }
+
+                if(_selectedPic != null)
+                {
+                    _selectedPic.IsVisible = _entry.IsSelected;
                 }
 
                 if (_subMenu != null)

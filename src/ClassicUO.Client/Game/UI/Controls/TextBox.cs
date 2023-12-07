@@ -142,7 +142,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public bool PixelCheck(int x, int y)
         {
-            if (string.IsNullOrWhiteSpace(Text))
+            if (!AcceptMouseInput || string.IsNullOrWhiteSpace(Text))
             {
                 return false;
             }
@@ -186,8 +186,11 @@ namespace ClassicUO.Game.UI.Controls
             get => _rtl.Text;
             set
             {
-                _rtl.Text = value;
-                _dirty = true;
+                if (_rtl.Text != value)
+                {
+                    _rtl.Text = value;
+                    _dirty = true;
+                }
             }
         }
 
@@ -275,6 +278,8 @@ namespace ClassicUO.Game.UI.Controls
             finalString = finalString.Replace("<left>", "").Replace("</left>", "");
             finalString = finalString.Replace("<b>", "").Replace("</b>", "");
             finalString = finalString.Replace("</font>", "").Replace("<h2>", "");
+            finalString = finalString.Replace("<BODY>", "").Replace("<body>", "");
+            finalString = finalString.Replace("</BODY>", "").Replace("</body>", "");
             return finalString;
         }
 
@@ -309,6 +314,8 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
+            base.Draw(batcher, x, y);
+
             return Draw(batcher, x, y, _color);
         }
 

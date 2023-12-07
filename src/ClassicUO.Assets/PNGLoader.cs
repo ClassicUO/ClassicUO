@@ -74,6 +74,11 @@ namespace ClassicUO.Assets
                 }
             }
 
+            if(texture == null)
+            {
+                return new GumpInfo();
+            }
+
             return new GumpInfo()
             {
                 Pixels = GetPixels(texture),

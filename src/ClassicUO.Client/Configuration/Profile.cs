@@ -479,7 +479,7 @@ namespace ClassicUO.Configuration
         public int OverheadChatWidth { get; set; } = 200;
 
         public string DefaultTTFFont { get; set; } = "Roboto-Regular";
-        public int TextBorderSize { get; set; } = 2;
+        public int TextBorderSize { get; set; } = 1;
 
         public bool UseModernShopGump { get; set; } = false;
 
@@ -570,6 +570,15 @@ namespace ClassicUO.Configuration
         public bool ForceResyncOnHang { get; set; } = false;
 
         public bool UseOneHPBarForLastAttack { get; set; } = false;
+
+        public bool DisableMouseInteractionOverheadText { get; set; } = false;
+
+        public List<int> HiddenLayers { get; set; } = new List<int>();
+        public bool HideLayersForSelf { get; set; } = true;
+
+        public List<string> AutoOpenXmlGumps { get; set; } = new List<string>();
+
+        public int ControllerMouseSensativity { get => Input.Mouse.ControllerSensativity; set => Input.Mouse.ControllerSensativity = value; }
 
 
 

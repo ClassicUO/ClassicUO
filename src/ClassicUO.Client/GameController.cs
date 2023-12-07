@@ -689,7 +689,7 @@ namespace ClassicUO
                             if (Tooltip.IsEnabled)
                             {
                                 ClipboardScreenshot(new Rectangle(Tooltip.X, Tooltip.Y, Tooltip.Width, Tooltip.Height), GraphicsDevice);
-                            } 
+                            }
                             else if (MultipleToolTipGump.SSIsEnabled)
                             {
                                 ClipboardScreenshot(new Rectangle(MultipleToolTipGump.SSX, MultipleToolTipGump.SSY, MultipleToolTipGump.SSWidth, MultipleToolTipGump.SSHeight), GraphicsDevice);
@@ -923,6 +923,84 @@ namespace ClassicUO
 
                         break;
                     }
+
+                case SDL_EventType.SDL_CONTROLLERBUTTONDOWN:
+                    Controller.OnButtonDown(sdlEvent->cbutton);
+                    UIManager.KeyboardFocusControl?.InvokeControllerButtonDown((SDL_GameControllerButton)sdlEvent->cbutton.button);
+                    Scene.OnControllerButtonDown(sdlEvent->cbutton);
+
+                    if (sdlEvent->cbutton.button == (byte)SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_RIGHTSTICK)
+                    {
+                        SDL_Event e = new SDL_Event();
+                        e.type = SDL_EventType.SDL_MOUSEBUTTONDOWN;
+                        e.button.button = (byte)MouseButtonType.Left;
+                        SDL2.SDL.SDL_PushEvent(ref e);
+                    }
+                    else if (sdlEvent->cbutton.button == (byte)SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_LEFTSTICK)
+                    {
+                        SDL_Event e = new SDL_Event();
+                        e.type = SDL_EventType.SDL_MOUSEBUTTONDOWN;
+                        e.button.button = (byte)MouseButtonType.Right;
+                        SDL2.SDL.SDL_PushEvent(ref e);
+                    }
+                    else if (sdlEvent->cbutton.button == (byte)SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_START && World.InGame)
+                    {
+                        Gump g = UIManager.GetGump<ModernOptionsGump>();
+                        if(g == null)
+                        {
+                            UIManager.Add(new ModernOptionsGump());
+                        } else
+                        {
+                            g.Dispose();
+                        }
+                    }
+                    break;
+
+                case SDL_EventType.SDL_CONTROLLERBUTTONUP:
+                    Controller.OnButtonUp(sdlEvent->cbutton);
+                    UIManager.KeyboardFocusControl?.InvokeControllerButtonUp((SDL_GameControllerButton)sdlEvent->cbutton.button);
+                    Scene.OnControllerButtonUp(sdlEvent->cbutton);
+
+                    if (sdlEvent->cbutton.button == (byte)SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_RIGHTSTICK)
+                    {
+                        SDL_Event e = new SDL_Event();
+                        e.type = SDL_EventType.SDL_MOUSEBUTTONUP;
+                        e.button.button = (byte)MouseButtonType.Left;
+                        SDL2.SDL.SDL_PushEvent(ref e);
+                    }
+                    else if (sdlEvent->cbutton.button == (byte)SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_LEFTSTICK)
+                    {
+                        SDL_Event e = new SDL_Event();
+                        e.type = SDL_EventType.SDL_MOUSEBUTTONUP;
+                        e.button.button = (byte)MouseButtonType.Right;
+                        SDL2.SDL.SDL_PushEvent(ref e);
+                    }
+                    break;
+
+                case SDL_EventType.SDL_CONTROLLERAXISMOTION: //Work around because sdl doesn't see trigger buttons as buttons, they are axis probably for pressure support
+                    //GameActions.Print(typeof(SDL_GameControllerButton).GetEnumName((SDL_GameControllerButton)sdlEvent->cbutton.button));
+                    if (sdlEvent->cbutton.button == (byte)SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_BACK || sdlEvent->cbutton.button == (byte)SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_GUIDE) //Left trigger BACK Right trigger GUIDE
+                    {
+                        if (sdlEvent->caxis.axisValue > 32000)
+                        {
+                            if (
+                                ((SDL_GameControllerButton)sdlEvent->cbutton.button == SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_BACK && !Controller.Button_LeftTrigger)
+                                || ((SDL_GameControllerButton)sdlEvent->cbutton.button == SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_GUIDE && !Controller.Button_RightTrigger)
+                                )
+                            {
+                                Controller.OnButtonDown(sdlEvent->cbutton);
+                                UIManager.KeyboardFocusControl?.InvokeControllerButtonDown((SDL_GameControllerButton)sdlEvent->cbutton.button);
+                                Scene.OnControllerButtonDown(sdlEvent->cbutton);
+                            }
+                        }
+                        else if (sdlEvent->caxis.axisValue < 5000)
+                        {
+                            Controller.OnButtonUp(sdlEvent->cbutton);
+                            UIManager.KeyboardFocusControl?.InvokeControllerButtonUp((SDL_GameControllerButton)sdlEvent->cbutton.button);
+                            Scene.OnControllerButtonUp(sdlEvent->cbutton);
+                        }
+                    }
+                    break;
             }
 
             return 1;
