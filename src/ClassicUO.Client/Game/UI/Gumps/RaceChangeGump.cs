@@ -29,7 +29,7 @@ namespace ClassicUO.Game.UI.Gumps
         };
         private Item hair, beard;
 
-        #region 
+        #region
         private ushort raceTextGraphic
         {
             get
@@ -670,7 +670,7 @@ namespace ClassicUO.Game.UI.Gumps
             private Item beard;
             private bool requestUpdate = false;
 
-            public CustomPaperDollGump(Gump gump, int x, int y, Mobile playerMobile, Item hair, Item beard) : base(x, y, playerMobile, null)
+            public CustomPaperDollGump(Gump gump, int x, int y, Mobile playerMobile, Item hair, Item beard) : base(x, y, playerMobile, new PaperdollGump(gump.World))
             {
                 _gump = gump;
                 this.playerMobile = playerMobile;
