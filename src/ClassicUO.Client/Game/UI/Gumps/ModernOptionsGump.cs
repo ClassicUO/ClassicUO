@@ -2375,7 +2375,7 @@ namespace ClassicUO.Game.UI.Gumps
             bool rightSide = false;
             foreach (Layer layer in (Layer[])Enum.GetValues(typeof(Layer)))
             {
-                if(layer == Layer.Invalid || layer == Layer.Hair || layer == Layer.Beard || layer == Layer.Backpack || layer == Layer.ShopBuyRestock || layer == Layer.ShopBuy || layer == Layer.ShopSell || layer == Layer.Bank || layer == Layer.Face || layer == Layer.Talisman || layer == Layer.Mount)
+                if (layer == Layer.Invalid || layer == Layer.Hair || layer == Layer.Beard || layer == Layer.Backpack || layer == Layer.ShopBuyRestock || layer == Layer.ShopBuy || layer == Layer.ShopSell || layer == Layer.Bank || layer == Layer.Face || layer == Layer.Talisman || layer == Layer.Mount)
                 {
                     continue;
                 }
@@ -4213,9 +4213,19 @@ namespace ClassicUO.Game.UI.Gumps
                     _is_writing = false;
                 }
 
+                private int GetXOffset()
+                {
+                    if (_caretScreenPosition.X > Width)
+                    {
+                        return _caretScreenPosition.X - Width + 5;
+                    }
+
+                    return 0;
+                }
+
                 public void Click(Point pos)
                 {
-                    pos = new Point(pos.X - ScreenCoordinateX, pos.Y - ScreenCoordinateY);
+                    pos = new Point((pos.X - ScreenCoordinateX), pos.Y - ScreenCoordinateY);
                     CaretIndex = GetIndexFromCoords(pos);
                     SelectionStart = 0;
                     SelectionEnd = 0;
@@ -4224,7 +4234,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 public void Drag(Point pos)
                 {
-                    pos = new Point(pos.X - ScreenCoordinateX, pos.Y - ScreenCoordinateY);
+                    pos = new Point((pos.X - ScreenCoordinateX), pos.Y - ScreenCoordinateY);
                     int p = 0;
 
                     if (SelectionStart == SelectionEnd)
@@ -4270,13 +4280,14 @@ namespace ClassicUO.Game.UI.Gumps
 
                 public override bool Draw(UltimaBatcher2D batcher, int x, int y)
                 {
+                    int slideX = x - GetXOffset();
+
                     if (batcher.ClipBegin(x, y, Width, Height))
                     {
                         base.Draw(batcher, x, y);
-                        DrawSelection(batcher, x, y);
-                        _rendererText.Draw(batcher, x, y);
-                        DrawCaret(batcher, x, y);
-
+                        DrawSelection(batcher, slideX, y);
+                        _rendererText.Draw(batcher, slideX, y);
+                        DrawCaret(batcher, slideX, y);
                         batcher.ClipEnd();
                     }
 
@@ -4300,7 +4311,7 @@ namespace ClassicUO.Game.UI.Gumps
                             _leftWasDown = true;
                         }
 
-                        Click(Mouse.Position);
+                        Click(new Point(x + ScreenCoordinateX + GetXOffset(), y + ScreenCoordinateY));
                     }
 
                     base.OnMouseDown(x, y, button);
@@ -4325,7 +4336,7 @@ namespace ClassicUO.Game.UI.Gumps
                         return;
                     }
 
-                    Drag(Mouse.Position);
+                    Drag(new Point(x + ScreenCoordinateX + GetXOffset(), y + ScreenCoordinateY));
                 }
 
                 public override void Dispose()
@@ -4819,7 +4830,10 @@ namespace ClassicUO.Game.UI.Gumps
             protected override void OnMouseEnter(int x, int y)
             {
                 base.OnMouseEnter(x, y);
-                UIManager.KeyboardFocusControl = this; //Dirty fix for mouse wheel macros
+                if (UIManager.KeyboardFocusControl == UIManager.SystemChat.TextBoxControl || UIManager.KeyboardFocusControl == null)
+                {
+                    UIManager.KeyboardFocusControl = this; //Dirty fix for mouse wheel macros
+                }
             }
 
             protected override void OnMouseWheel(MouseEventType delta)
@@ -5249,7 +5263,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                         return;
                     }
-                } else if (_hotkeyBox.Buttons != null && _hotkeyBox.Buttons.Length > 0)
+                }
+                else if (_hotkeyBox.Buttons != null && _hotkeyBox.Buttons.Length > 0)
                 {
 
                 }
@@ -5259,7 +5274,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
                 Macro m = Macro;
-                if(_hotkeyBox.Buttons != null && _hotkeyBox.Buttons.Length > 0)
+                if (_hotkeyBox.Buttons != null && _hotkeyBox.Buttons.Length > 0)
                 {
                     m.ControllerButtons = _hotkeyBox.Buttons;
                 }
@@ -5356,12 +5371,13 @@ namespace ClassicUO.Game.UI.Gumps
                     Control c;
                     Add(c = new ModernButton(mainBox.Width + 10, 0, 75, 40, ButtonAction.Activate, ResGumps.Remove, Theme.BUTTON_FONT_COLOR) { ButtonParameter = (int)buttonsOption.RemoveBtn, IsSelectable = false });
 
-                    Width = mainBox.Width + c.Width;
-                    Height = c.Height;
-
                     mainBox.Y = (c.Height >> 1) - (mainBox.Height >> 1);
 
+                    Height = c.Height;
+
                     AddSubMacro(obj);
+
+                    ForceSizeUpdate();
                 }
 
 
@@ -5400,7 +5416,7 @@ namespace ClassicUO.Game.UI.Gumps
                             break;
 
                         case 2:
-                            InputField textbox = new InputField(240, 40, 0, 80, obj.HasString() ? ((MacroObjectString)obj).Text : string.Empty, false, (s, e) =>
+                            InputField textbox = new InputField(400, 40, 0, 80, obj.HasString() ? ((MacroObjectString)obj).Text : string.Empty, false, (s, e) =>
                             {
                                 if (obj.HasString())
                                 {

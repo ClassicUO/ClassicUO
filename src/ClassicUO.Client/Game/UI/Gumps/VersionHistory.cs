@@ -7,6 +7,9 @@ namespace ClassicUO.Game.UI.Gumps
     internal class VersionHistory : Gump
     {
         private static string[] updateTexts = {
+             "/c[white][3.16.0]/cd\n" +
+                "- Some small improvements for input boxes and the new option menu",
+
             "/c[white][3.15.0]/cd\n" +
                 "- Mouse interaction for overhead text can be disabled\n" +
                 "- Visable layers option added in Options->TazUO\n" +
