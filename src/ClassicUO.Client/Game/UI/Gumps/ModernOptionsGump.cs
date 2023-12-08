@@ -2202,6 +2202,12 @@ namespace ClassicUO.Game.UI.Gumps
             content.BlankLine();
 
             content.AddToRight(new CheckboxWithLabel("Enable auto resync on hang detection", 0, profile.ForceResyncOnHang, (b) => { profile.ForceResyncOnHang = b; }), true, page);
+
+            content.BlankLine();
+
+            content.AddToRight(new SliderWithLabel("Player Offset X", 0, Theme.SLIDER_WIDTH, -20, 20, profile.PlayerOffset.X, (i) => { profile.PlayerOffset = new Point(i, profile.PlayerOffset.Y); }), true, page);
+            content.AddToRight(new SliderWithLabel("Player Offset Y", 0, Theme.SLIDER_WIDTH, -20, 20, profile.PlayerOffset.Y, (i) => { profile.PlayerOffset = new Point(profile.PlayerOffset.X, i); }), true, page);
+
             #endregion
 
             #region Tooltips

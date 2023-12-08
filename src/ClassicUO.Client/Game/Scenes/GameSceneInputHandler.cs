@@ -73,8 +73,8 @@ namespace ClassicUO.Game.Scenes
                     Pathfinder.StopAutoWalk();
                 }
 
-                int x = Camera.Bounds.X + (Camera.Bounds.Width >> 1);
-                int y = Camera.Bounds.Y + (Camera.Bounds.Height >> 1);
+                int x = Camera.Bounds.X + (Camera.Bounds.Width >> 1) + ((ProfileManager.CurrentProfile.PlayerOffset.X - ProfileManager.CurrentProfile.PlayerOffset.Y) * 22);
+                int y = Camera.Bounds.Y + (Camera.Bounds.Height >> 1) + ((ProfileManager.CurrentProfile.PlayerOffset.X + ProfileManager.CurrentProfile.PlayerOffset.Y) * 22);
 
                 Direction direction = (Direction)
                     GameCursor.GetMouseDirection(x, y, Mouse.Position.X, Mouse.Position.Y, 1);
