@@ -670,7 +670,7 @@ namespace ClassicUO.Game.UI.Gumps
             private Item beard;
             private bool requestUpdate = false;
 
-            public CustomPaperDollGump(Gump gump, int x, int y, Mobile playerMobile, Item hair, Item beard) : base(x, y, playerMobile, new PaperdollGump(gump.World))
+            public CustomPaperDollGump(Gump gump, int x, int y, Mobile playerMobile, Item hair, Item beard) : base(x, y, playerMobile, new PaperDollGump(gump.World))
             {
                 _gump = gump;
                 this.playerMobile = playerMobile;
