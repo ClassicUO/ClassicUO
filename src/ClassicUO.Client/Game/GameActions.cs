@@ -809,10 +809,10 @@ namespace ClassicUO.Game
 
         // ===================================================
         [Obsolete("temporary workaround to not break assistants")]
-        public static void UsePrimaryAbility() => UsePrimaryAbility(ClassicUO.Client.Game.World);
+        public static void UsePrimaryAbility() => UsePrimaryAbility(ClassicUO.Client.Game.UO.World);
 
         [Obsolete("temporary workaround to not break assistants")]
-        public static void UseSecondaryAbility() => UseSecondaryAbility(ClassicUO.Client.Game.World);
+        public static void UseSecondaryAbility() => UseSecondaryAbility(ClassicUO.Client.Game.UO.World);
         // ===================================================
 
         public static void QuestArrow(bool rightClick)
