@@ -665,7 +665,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 Point p = RealScreenPosition;
 
-                var bounds = Client.Game.Arts.GetRealArtBounds(Graphic);
+                var bounds = Client.Game.UO.Arts.GetRealArtBounds(Graphic);
                 p.Y -= bounds.Height >> 1;
 
                 p.X += (int)Offset.X + 22;
@@ -727,18 +727,18 @@ namespace ClassicUO.Game.GameObjects
                     bool mirror = false;
                     AnimationsLoader.Instance.GetAnimDirection(ref dir, ref mirror);
 
-                    if (id < Client.Game.Animations.MaxAnimationCount && dir < 5)
+                    if (id < Client.Game.UO.Animations.MaxAnimationCount && dir < 5)
                     {
-                        Client.Game.Animations.ConvertBodyIfNeeded(ref id);
-                        var animGroup = Client.Game.Animations.GetAnimType(id);
-                        var animFlags = Client.Game.Animations.GetAnimFlags(id);                   
+                        Client.Game.UO.Animations.ConvertBodyIfNeeded(ref id);
+                        var animGroup = Client.Game.UO.Animations.GetAnimType(id);
+                        var animFlags = Client.Game.UO.Animations.GetAnimFlags(id);
                         byte action = AnimationsLoader.Instance.GetDeathAction(
                             id,
                             animFlags,
                             animGroup,
                             UsedLayer
                         );
-                        var frames = Client.Game.Animations.GetAnimationFrames(
+                        var frames = Client.Game.UO.Animations.GetAnimationFrames(
                             id,
                             action,
                             dir,

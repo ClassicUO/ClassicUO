@@ -277,7 +277,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else
                 {
-                    ref readonly var gumpInfo = ref Client.Game.Gumps.GetGump(0x0804);
+                    ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(0x0804);
 
                     UIManager.Add(
                         gump = new HealthBarGump(World, entity)
@@ -347,7 +347,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _leftMouseIsDown = false;
 
-                if (!Client.Game.GameCursor.ItemHold.Enabled)
+                if (!Client.Game.UO.GameCursor.ItemHold.Enabled)
                 {
                     if (
                         UIManager.IsDragging
@@ -390,8 +390,8 @@ namespace ClassicUO.Game.UI.Gumps
                 else
                 {
                     if (
-                        Client.Game.GameCursor.ItemHold.Enabled
-                        && !Client.Game.GameCursor.ItemHold.IsFixedPosition
+                        Client.Game.UO.GameCursor.ItemHold.Enabled
+                        && !Client.Game.UO.GameCursor.ItemHold.IsFixedPosition
                     )
                     {
                         uint drop_container = 0xFFFF_FFFF;
@@ -421,7 +421,7 @@ namespace ClassicUO.Game.UI.Gumps
                                         it2.ItemData.IsSurface
                                         || it2.ItemData.IsStackable
                                             && it2.DisplayedGraphic
-                                                == Client.Game.GameCursor.ItemHold.DisplayedGraphic
+                                                == Client.Game.UO.GameCursor.ItemHold.DisplayedGraphic
                                     )
                                 )
                                 {
@@ -456,7 +456,7 @@ namespace ClassicUO.Game.UI.Gumps
                                 if (can_drop)
                                 {
                                     GameActions.DropItem(
-                                        Client.Game.GameCursor.ItemHold.Serial,
+                                        Client.Game.UO.GameCursor.ItemHold.Serial,
                                         dropX,
                                         dropY,
                                         dropZ,
@@ -501,7 +501,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _positionLocked = true;
 
-                Client.Game.Animations.GetAnimationDimensions(
+                Client.Game.UO.Animations.GetAnimationDimensions(
                     m.AnimIndex,
                     m.GetGraphicForAnimation(),
                     /*(byte) m.GetDirectionForAnimation()*/
@@ -601,7 +601,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else
                 {
-                    Client.Game.Animations.GetAnimationDimensions(
+                    Client.Game.UO.Animations.GetAnimationDimensions(
                         m.AnimIndex,
                         m.GetGraphicForAnimation(),
                         /*(byte) m.GetDirectionForAnimation()*/
@@ -643,7 +643,7 @@ namespace ClassicUO.Game.UI.Gumps
                     return false;
                 }
 
-                var bounds = Client.Game.Arts.GetRealArtBounds(item.Graphic);
+                var bounds = Client.Game.UO.Arts.GetRealArtBounds(item.Graphic);
 
                 x = item.RealScreenPosition.X + (int)item.Offset.X + 22 + 5;
                 y =

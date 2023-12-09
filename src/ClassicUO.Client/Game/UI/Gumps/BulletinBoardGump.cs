@@ -2,7 +2,7 @@
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 // 1. Redistributions of source code must retain the above copyright
@@ -16,7 +16,7 @@
 // 4. Neither the name of the copyright holder nor the
 //    names of its contributors may be used to endorse or promote products
 //    derived from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -221,7 +221,7 @@ namespace ClassicUO.Game.UI.Gumps
             _databox = new DataBox(0, 0, 1, 1);
             area.Add(_databox);
 
-            bool useUnicode = Client.Version >= ClientVersion.CV_305D;
+            bool useUnicode = Client.Game.UO.Version >= ClientVersion.CV_305D;
             byte unicodeFontIndex = 1;
             int unicodeFontHeightOffset = 0;
 
@@ -523,7 +523,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(new GumpPic(0, 0, 0x1523, 0));
 
-            if (Client.Version >= ClientVersion.CV_305D)
+            if (Client.Game.UO.Version >= ClientVersion.CV_305D)
             {
                 Add
                 (

@@ -89,7 +89,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     _gold = value;
 
-                    if (Client.Version >= ClientVersion.CV_704565)
+                    if (Client.Game.UO.Version >= ClientVersion.CV_704565)
                     {
                         _myCoins[0].Text = _gold.ToString();
                     }
@@ -106,7 +106,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     _platinum = value;
 
-                    if (Client.Version >= ClientVersion.CV_704565)
+                    if (Client.Game.UO.Version >= ClientVersion.CV_704565)
                     {
                         _myCoins[1].Text = _platinum.ToString();
                     }
@@ -123,7 +123,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     _hisGold = value;
 
-                    if (Client.Version >= ClientVersion.CV_704565)
+                    if (Client.Game.UO.Version >= ClientVersion.CV_704565)
                     {
                         _hisCoins[0].Text = _hisGold.ToString();
                     }
@@ -140,7 +140,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     _hisPlatinum = value;
 
-                    if (Client.Version >= ClientVersion.CV_704565)
+                    if (Client.Game.UO.Version >= ClientVersion.CV_704565)
                     {
                         _hisCoins[1].Text = _hisPlatinum.ToString();
                     }
@@ -202,7 +202,7 @@ namespace ClassicUO.Game.UI.Gumps
                 int x = g.X;
                 int y = g.Y;
 
-                ref readonly var artInfo = ref Client.Game.Arts.GetArt(it.DisplayedGraphic);
+                ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(it.DisplayedGraphic);
 
                 if (artInfo.Texture != null)
                 {
@@ -257,7 +257,7 @@ namespace ClassicUO.Game.UI.Gumps
                 int x = g.X;
                 int y = g.Y;
 
-                ref readonly var artInfo = ref Client.Game.Arts.GetArt(it.DisplayedGraphic);
+                ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(it.DisplayedGraphic);
 
                 if (artInfo.Texture != null)
                 {
@@ -294,13 +294,13 @@ namespace ClassicUO.Game.UI.Gumps
             if (button == MouseButtonType.Left)
             {
                 if (
-                    Client.Game.GameCursor.ItemHold.Enabled
-                    && !Client.Game.GameCursor.ItemHold.IsFixedPosition
+                    Client.Game.UO.GameCursor.ItemHold.Enabled
+                    && !Client.Game.UO.GameCursor.ItemHold.IsFixedPosition
                 )
                 {
                     if (_myBox != null && _myBox.Bounds.Contains(x, y))
                     {
-                        ref readonly var artInfo = ref Client.Game.Arts.GetArt(Client.Game.GameCursor.ItemHold.DisplayedGraphic);
+                        ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(Client.Game.UO.GameCursor.ItemHold.DisplayedGraphic);
                         x -= _myBox.X;
                         y -= _myBox.Y;
 
@@ -330,7 +330,7 @@ namespace ClassicUO.Game.UI.Gumps
                             y = 0;
                         }
 
-                        GameActions.DropItem(Client.Game.GameCursor.ItemHold.Serial, x, y, 0, ID1);
+                        GameActions.DropItem(Client.Game.UO.GameCursor.ItemHold.Serial, x, y, 0, ID1);
                     }
                 }
                 else if (SelectedObject.Object is Item it)
@@ -376,7 +376,7 @@ namespace ClassicUO.Game.UI.Gumps
                 otherX,
                 otherY;
 
-            if (Client.Version >= ClientVersion.CV_704565)
+            if (Client.Game.UO.Version >= ClientVersion.CV_704565)
             {
                 myX = 37;
                 myY = 29;
@@ -421,7 +421,7 @@ namespace ClassicUO.Game.UI.Gumps
                 opdbX,
                 opdbY;
 
-            if (Client.Version >= ClientVersion.CV_704565)
+            if (Client.Game.UO.Version >= ClientVersion.CV_704565)
             {
                 Add(new GumpPic(0, 0, 0x088A, 0));
 
@@ -578,7 +578,7 @@ namespace ClassicUO.Game.UI.Gumps
                 opdbY = 70;
             }
 
-            if (Client.Version < ClientVersion.CV_500A)
+            if (Client.Game.UO.Version < ClientVersion.CV_500A)
             {
                 Add(new ColorBox(110, 60, 0) { X = 45, Y = 90 });
 

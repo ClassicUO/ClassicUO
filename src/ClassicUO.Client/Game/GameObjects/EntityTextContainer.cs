@@ -189,7 +189,7 @@ namespace ClassicUO.Game.GameObjects
                         offY = -22;
                     }
 
-                    Client.Game.Animations.GetAnimationDimensions(
+                    Client.Game.UO.Animations.GetAnimationDimensions(
                         m.AnimIndex,
                         m.GetGraphicForAnimation(),
                         /*(byte) m.GetDirectionForAnimation()*/
@@ -210,7 +210,7 @@ namespace ClassicUO.Game.GameObjects
                 }
                 else
                 {
-                    ref readonly var artInfo = ref Client.Game.Arts.GetArt(Parent.Graphic);
+                    ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(Parent.Graphic);
 
                     if (artInfo.Texture != null)
                     {

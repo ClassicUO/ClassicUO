@@ -2,7 +2,7 @@
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 // 1. Redistributions of source code must retain the above copyright
@@ -16,7 +16,7 @@
 // 4. Neither the name of the copyright holder nor the
 //    names of its contributors may be used to endorse or promote products
 //    derived from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -163,7 +163,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (!CUOEnviroment.IsOutlands)
             {
-                if (Client.Version < ClientVersion.CV_308Z || ProfileManager.CurrentProfile.UseOldStatusGump)
+                if (Client.Game.UO.Version < ClientVersion.CV_308Z || ProfileManager.CurrentProfile.UseOldStatusGump)
                 {
                     gump = new StatusGumpOld(world);
                 }
@@ -229,7 +229,7 @@ namespace ClassicUO.Game.UI.Gumps
         public StatusGumpOld(World world) : base(world)
         {
             Point p = Point.Zero;
-            _labels = new Label[(int) MobileStats.NumStats];            
+            _labels = new Label[(int) MobileStats.NumStats];
 
             Add(new GumpPic(0, 0, 0x0802, 0));
             p.X = 244;
@@ -246,7 +246,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             int xOffset = 0;
 
-            if (Client.Version >= ClientVersion.CV_5020)
+            if (Client.Game.UO.Version >= ClientVersion.CV_5020)
             {
                 Add
                 (
@@ -257,8 +257,8 @@ namespace ClassicUO.Game.UI.Gumps
                         ButtonAction = ButtonAction.Activate
                     }
                 );
-            }           
-            
+            }
+
             Lock status = World.Player.StrLock;
             xOffset = GumpsLoader.Instance.UseUOPGumps ? 28 : 40;
             ushort gumpID = GetStatLockGraphic(status);
@@ -593,7 +593,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(new GumpPic(0, 0, 0x2A6C, 0));
 
-            if (Client.Version >= ClientVersion.CV_308Z)
+            if (Client.Game.UO.Version >= ClientVersion.CV_308Z)
             {
                 p.X = 389;
                 p.Y = 152;
@@ -611,7 +611,7 @@ namespace ClassicUO.Game.UI.Gumps
                 );
 
 
-                if (Client.Version >= ClientVersion.CV_5020)
+                if (Client.Game.UO.Version >= ClientVersion.CV_5020)
                 {
                     Add
                     (
@@ -1287,7 +1287,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
             else
             {
-                if (Client.Version == ClientVersion.CV_308D)
+                if (Client.Game.UO.Version == ClientVersion.CV_308D)
                 {
                     AddStatTextLabel(World.Player.StatsCap.ToString(), MobileStats.StatCap, 171, 124);
 
@@ -1304,7 +1304,7 @@ namespace ClassicUO.Game.UI.Gumps
                         ) { CanMove = true }
                     );
                 }
-                else if (Client.Version == ClientVersion.CV_308J)
+                else if (Client.Game.UO.Version == ClientVersion.CV_308J)
                 {
                     AddStatTextLabel(World.Player.StatsCap.ToString(), MobileStats.StatCap, 180, 131);
 
@@ -1548,7 +1548,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add(new GumpPic(34, 25, 0x0805, 0)); // Mana bar
             Add(new GumpPic(34, 38, 0x0805, 0)); // Stamina bar
 
-            if (Client.Version >= ClientVersion.CV_5020)
+            if (Client.Game.UO.Version >= ClientVersion.CV_5020)
             {
                 Add
                 (

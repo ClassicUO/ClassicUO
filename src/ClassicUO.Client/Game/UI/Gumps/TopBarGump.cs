@@ -70,7 +70,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             // big
             int smallWidth = 50;
-            ref readonly var gumpInfo = ref Client.Game.Gumps.GetGump(0x098B);
+            ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(0x098B);
             if (gumpInfo.Texture != null)
             {
                 smallWidth = gumpInfo.UV.Width;
@@ -78,7 +78,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             int largeWidth = 100;
 
-            gumpInfo = ref Client.Game.Gumps.GetGump(0x098D);
+            gumpInfo = ref Client.Game.UO.Gumps.GetGump(0x098D);
             if (gumpInfo.Texture != null)
             {
                 largeWidth = gumpInfo.UV.Width;
@@ -118,7 +118,7 @@ namespace ClassicUO.Game.UI.Gumps
                 cliloc.GetString(1158390, ResGumps.GlobalChat)
             };
 
-            bool hasUOStore = Client.Version >= ClientVersion.CV_706400;
+            bool hasUOStore = Client.Game.UO.Version >= ClientVersion.CV_706400;
 
             ResizePic background;
 
@@ -275,7 +275,7 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
 
                 case Buttons.UOStore:
-                    if (Client.Version >= ClientVersion.CV_706400)
+                    if (Client.Game.UO.Version >= ClientVersion.CV_706400)
                     {
                         NetClient.Socket.Send_OpenUOStore();
                     }

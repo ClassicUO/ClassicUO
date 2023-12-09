@@ -2,7 +2,7 @@
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 // 1. Redistributions of source code must retain the above copyright
@@ -16,7 +16,7 @@
 // 4. Neither the name of the copyright holder nor the
 //    names of its contributors may be used to endorse or promote products
 //    derived from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -59,9 +59,9 @@ namespace ClassicUO.Game.UI.Gumps
             CanMove = true;
             CanCloseWithRightClick = true;
 
-            if (Client.Version < ClientVersion.CV_7000)
+            if (Client.Game.UO.Version < ClientVersion.CV_7000)
             {
-                if (Client.Version < ClientVersion.CV_500A)
+                if (Client.Game.UO.Version < ClientVersion.CV_500A)
                 {
                     _abilityCount = 29;
                 }
@@ -162,7 +162,7 @@ namespace ClassicUO.Game.UI.Gumps
                             _primAbility.DragBegin += OnGumpicDragBeginPrimary;
                             _primAbility.MouseDoubleClick += PrimaryAbilityMouseDoubleClick;
                         }
-                        
+
                         text = new Label
                         (
                             ResGumps.PrimaryAbilityIcon,
@@ -171,7 +171,7 @@ namespace ClassicUO.Game.UI.Gumps
                             80,
                             6
                         ) { X = 265, Y = 105 };
-      
+
                         Add(text, page);
                         Add(_primAbility, page);
 
@@ -184,7 +184,7 @@ namespace ClassicUO.Game.UI.Gumps
                             _secAbility.DragBegin += OnGumpicDragBeginSecondary;
                             _secAbility.MouseDoubleClick += SecondaryAbilityMouseDoubleClick;
                         }
-                        
+
                         text = new Label
                         (
                             ResGumps.SecondaryAbilityIcon,
@@ -194,8 +194,8 @@ namespace ClassicUO.Game.UI.Gumps
                             6
                         ) { X = 265, Y = 150 };
 
-                        
-                        Add(text, page);              
+
+                        Add(text, page);
                         Add(_secAbility, page);
                     }
                 }
@@ -287,7 +287,7 @@ namespace ClassicUO.Game.UI.Gumps
                 GameActions.UsePrimaryAbility(World);
 
                 e.Result = true;
-            }        
+            }
         }
 
         private void SecondaryAbilityMouseDoubleClick(object sender, MouseDoubleClickEventArgs e)

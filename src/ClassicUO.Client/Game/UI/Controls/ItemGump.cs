@@ -78,8 +78,8 @@ namespace ClassicUO.Game.UI.Controls
                 _graphic = value;
 
                 ref readonly var spriteInfo = ref _is_gump
-                    ? ref Client.Game.Gumps.GetGump(value)
-                    : ref Client.Game.Arts.GetArt(value);
+                    ? ref Client.Game.UO.Gumps.GetGump(value)
+                    : ref Client.Game.UO.Arts.GetArt(value);
 
                 if (spriteInfo.Texture == null)
                 {
@@ -113,7 +113,7 @@ namespace ClassicUO.Game.UI.Controls
             {
                 if (
                     CanPickUp
-                    && !Client.Game.GameCursor.ItemHold.Enabled
+                    && !Client.Game.UO.GameCursor.ItemHold.Enabled
                     && Mouse.LButtonPressed
                     && UIManager.LastControlMouseDown(MouseButtonType.Left) == this
                     && (
@@ -155,8 +155,8 @@ namespace ClassicUO.Game.UI.Controls
             Vector3 hueVector = ShaderHueTranslator.GetHueVector(hue, partialHue, 1);
 
             ref readonly var spriteInfo = ref _is_gump
-                ? ref Client.Game.Gumps.GetGump(Graphic)
-                : ref Client.Game.Arts.GetArt(Graphic);
+                ? ref Client.Game.UO.Gumps.GetGump(Graphic)
+                : ref Client.Game.UO.Arts.GetArt(Graphic);
 
             if (spriteInfo.Texture != null)
             {
@@ -187,8 +187,8 @@ namespace ClassicUO.Game.UI.Controls
         public override bool Contains(int x, int y)
         {
             ref readonly var spriteInfo = ref _is_gump
-                ? ref Client.Game.Gumps.GetGump(Graphic)
-                : ref Client.Game.Arts.GetArt(Graphic);
+                ? ref Client.Game.UO.Gumps.GetGump(Graphic)
+                : ref Client.Game.UO.Arts.GetArt(Graphic);
 
             if (spriteInfo.Texture == null)
             {
@@ -211,7 +211,7 @@ namespace ClassicUO.Game.UI.Controls
 
             if (_is_gump)
             {
-                if (Client.Game.Gumps.PixelCheck(Graphic, x, y))
+                if (Client.Game.UO.Gumps.PixelCheck(Graphic, x, y))
                 {
                     return true;
                 }
@@ -220,7 +220,7 @@ namespace ClassicUO.Game.UI.Controls
 
                 if (item != null && !item.IsCoin && item.Amount > 1 && item.ItemData.IsStackable)
                 {
-                    if (Client.Game.Gumps.PixelCheck(Graphic, x - 5, y - 5))
+                    if (Client.Game.UO.Gumps.PixelCheck(Graphic, x - 5, y - 5))
                     {
                         return true;
                     }
@@ -228,7 +228,7 @@ namespace ClassicUO.Game.UI.Controls
             }
             else
             {
-                if (Client.Game.Arts.PixelCheck(Graphic, x, y))
+                if (Client.Game.UO.Arts.PixelCheck(Graphic, x, y))
                 {
                     return true;
                 }
@@ -237,7 +237,7 @@ namespace ClassicUO.Game.UI.Controls
 
                 if (item != null && !item.IsCoin && item.Amount > 1 && item.ItemData.IsStackable)
                 {
-                    if (Client.Game.Arts.PixelCheck(Graphic, x - 5, y - 5))
+                    if (Client.Game.UO.Arts.PixelCheck(Graphic, x - 5, y - 5))
                     {
                         return true;
                     }
@@ -321,8 +321,8 @@ namespace ClassicUO.Game.UI.Controls
             if (CanPickUp)
             {
                 ref readonly var spriteInfo = ref _is_gump
-                    ? ref Client.Game.Gumps.GetGump(Graphic)
-                    : ref Client.Game.Arts.GetArt(Graphic);
+                    ? ref Client.Game.UO.Gumps.GetGump(Graphic)
+                    : ref Client.Game.UO.Arts.GetArt(Graphic);
 
                 int centerX = spriteInfo.UV.Width >> 1;
                 int centerY = spriteInfo.UV.Height >> 1;

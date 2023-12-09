@@ -2,7 +2,7 @@
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 // 1. Redistributions of source code must retain the above copyright
@@ -16,7 +16,7 @@
 // 4. Neither the name of the copyright holder nor the
 //    names of its contributors may be used to endorse or promote products
 //    derived from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -362,9 +362,9 @@ namespace ClassicUO.Game
             }
 
             // TODO: identify what means 'older client' that uses ASCIISpeechRquest [0x03]
-            // 
+            //
             // Fix -> #1267
-            if (Client.Version >= ClientVersion.CV_200)
+            if (Client.Game.UO.Version >= ClientVersion.CV_200)
             {
                 Socket.Send_UnicodeSpeechRequest(message,
                                                  type,
@@ -466,7 +466,7 @@ namespace ClassicUO.Game
             bool is_gump = false
         )
         {
-            if (world.Player.IsDead || Client.Game.GameCursor.ItemHold.Enabled)
+            if (world.Player.IsDead || Client.Game.UO.GameCursor.ItemHold.Enabled)
             {
                 return false;
             }
@@ -507,9 +507,9 @@ namespace ClassicUO.Game
                 amount = item.Amount;
             }
 
-            Client.Game.GameCursor.ItemHold.Clear();
-            Client.Game.GameCursor.ItemHold.Set(item, (ushort) amount, offset);
-            Client.Game.GameCursor.ItemHold.IsGumpTexture = is_gump;
+            Client.Game.UO.GameCursor.ItemHold.Clear();
+            Client.Game.UO.GameCursor.ItemHold.Set(item, (ushort) amount, offset);
+            Client.Game.UO.GameCursor.ItemHold.IsGumpTexture = is_gump;
             Socket.Send_PickUpRequest(item, (ushort) amount);
 
             if (item.OnGround)
@@ -526,9 +526,9 @@ namespace ClassicUO.Game
 
         public static void DropItem(uint serial, int x, int y, int z, uint container)
         {
-            if (Client.Game.GameCursor.ItemHold.Enabled && !Client.Game.GameCursor.ItemHold.IsFixedPosition && (Client.Game.GameCursor.ItemHold.Serial != container || Client.Game.GameCursor.ItemHold.ItemData.IsStackable))
+            if (Client.Game.UO.GameCursor.ItemHold.Enabled && !Client.Game.UO.GameCursor.ItemHold.IsFixedPosition && (Client.Game.UO.GameCursor.ItemHold.Serial != container || Client.Game.UO.GameCursor.ItemHold.ItemData.IsStackable))
             {
-                if (Client.Version >= ClientVersion.CV_6017)
+                if (Client.Game.UO.Version >= ClientVersion.CV_6017)
                 {
                     Socket.Send_DropRequest(serial,
                                             (ushort)x,
@@ -546,24 +546,24 @@ namespace ClassicUO.Game
                                                 container);
                 }
 
-                Client.Game.GameCursor.ItemHold.Enabled = false;
-                Client.Game.GameCursor.ItemHold.Dropped = true;
+                Client.Game.UO.GameCursor.ItemHold.Enabled = false;
+                Client.Game.UO.GameCursor.ItemHold.Dropped = true;
             }
         }
 
         public static void Equip(World world, uint container = 0)
         {
-            if (Client.Game.GameCursor.ItemHold.Enabled && !Client.Game.GameCursor.ItemHold.IsFixedPosition && Client.Game.GameCursor.ItemHold.ItemData.IsWearable)
+            if (Client.Game.UO.GameCursor.ItemHold.Enabled && !Client.Game.UO.GameCursor.ItemHold.IsFixedPosition && Client.Game.UO.GameCursor.ItemHold.ItemData.IsWearable)
             {
                 if (!SerialHelper.IsValid(container))
                 {
                     container = world.Player.Serial;
                 }
 
-                Socket.Send_EquipRequest(Client.Game.GameCursor.ItemHold.Serial, (Layer)Client.Game.GameCursor.ItemHold.ItemData.Layer, container);
+                Socket.Send_EquipRequest(Client.Game.UO.GameCursor.ItemHold.Serial, (Layer)Client.Game.UO.GameCursor.ItemHold.ItemData.Layer, container);
 
-                Client.Game.GameCursor.ItemHold.Enabled = false;
-                Client.Game.GameCursor.ItemHold.Dropped = true;
+                Client.Game.UO.GameCursor.ItemHold.Enabled = false;
+                Client.Game.UO.GameCursor.ItemHold.Dropped = true;
             }
         }
 
@@ -630,7 +630,7 @@ namespace ClassicUO.Game
 
         public static void SendCloseStatus(World world, uint serial, bool force = false)
         {
-            if (Client.Version >= ClientVersion.CV_200 && world.InGame)
+            if (Client.Game.UO.Version >= ClientVersion.CV_200 && world.InGame)
             {
                 Entity ent = world.Get(serial);
 

@@ -60,8 +60,8 @@ namespace ClassicUO.Game.UI.Controls
             _inactive = inactive;
             _active = active;
 
-            ref readonly var gumpInfoInactive = ref Client.Game.Gumps.GetGump(inactive);
-            ref readonly var gumpInfoActive = ref Client.Game.Gumps.GetGump(active);
+            ref readonly var gumpInfoInactive = ref Client.Game.UO.Gumps.GetGump(inactive);
+            ref readonly var gumpInfoActive = ref Client.Game.UO.Gumps.GetGump(active);
 
             if (gumpInfoInactive.Texture == null || gumpInfoActive.Texture == null)
             {
@@ -119,7 +119,7 @@ namespace ClassicUO.Game.UI.Controls
 
             var ok = base.Draw(batcher, x, y);
 
-            ref readonly var gumpInfo = ref Client.Game.Gumps.GetGump(
+            ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(
                 IsChecked ? _active : _inactive
             );
 

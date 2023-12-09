@@ -2,7 +2,7 @@
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 // 1. Redistributions of source code must retain the above copyright
@@ -16,7 +16,7 @@
 // 4. Neither the name of the copyright holder nor the
 //    names of its contributors may be used to endorse or promote products
 //    derived from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -166,7 +166,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     _isTopMost = value;
 
-                    SaveSettings();            
+                    SaveSettings();
                 }
 
                 ShowBorder = !_isTopMost;
@@ -211,7 +211,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             ResizeWindow(new Point(Width, Height));
 
-            _flipMap = ProfileManager.CurrentProfile.WorldMapFlipMap;    
+            _flipMap = ProfileManager.CurrentProfile.WorldMapFlipMap;
             _showPartyMembers = ProfileManager.CurrentProfile.WorldMapShowParty;
 
             World.WMapManager.SetEnable(_showPartyMembers);
@@ -750,7 +750,7 @@ namespace ClassicUO.Game.UI.Gumps
             SaveSettings();
             World.WMapManager.SetEnable(false);
 
-            Client.Game.GameCursor.IsDraggingCursorForced = false;
+            Client.Game.UO.GameCursor.IsDraggingCursorForced = false;
 
             base.Dispose();
         }
@@ -1145,7 +1145,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         #region Loading
 
-       
+
         private unsafe void LoadMapChunk(Span<uint> buffer, Span<sbyte> allZ, int chunkX, int chunkY)
         {
             if (World.Map == null)
@@ -1290,7 +1290,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
 
                     cc = (uint)(r | (g << 8) | (b << 16) | (a << 24));
-                } 
+                }
             }
         }
 
@@ -1622,7 +1622,7 @@ namespace ClassicUO.Game.UI.Gumps
             public List<ZonesFileZoneData> Zones { get; set; }
         }
 
-        private class Zone 
+        private class Zone
         {
             public string Label;
             public Color Color;
@@ -2771,7 +2771,7 @@ namespace ClassicUO.Game.UI.Gumps
             else
             {
                 batcher.Draw(marker.MarkerIcon, new Vector2(rot.X - (marker.MarkerIcon.Width >> 1), rot.Y - (marker.MarkerIcon.Height >> 1)), hueVector);
-               
+
                 if (!showMarkerName)
                 {
                     if (Mouse.Position.X >= rot.X - (marker.MarkerIcon.Width >> 1) &&
@@ -2899,7 +2899,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _flipMap ? 45f : 0f
             );
 
-          
+
             rot.X += x + width;
             rot.Y += y + height;
 
@@ -3248,7 +3248,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 HandlePositionTarget();
             }
-            
+
             if (button == MouseButtonType.Left && !Keyboard.Alt)
             {
                 _isScrolling = false;
@@ -3261,14 +3261,14 @@ namespace ClassicUO.Game.UI.Gumps
                 _lastScroll.Y = _center.Y;
             }
 
-            Client.Game.GameCursor.IsDraggingCursorForced = false;
+            Client.Game.UO.GameCursor.IsDraggingCursorForced = false;
 
             base.OnMouseUp(x, y, button);
         }
 
         protected override void OnMouseDown(int x, int y, MouseButtonType button)
         {
-            if (!Client.Game.GameCursor.ItemHold.Enabled)
+            if (!Client.Game.UO.GameCursor.ItemHold.Enabled)
             {
                 if (button == MouseButtonType.Left && (Keyboard.Alt || _freeView) || button == MouseButtonType.Middle)
                 {
@@ -3284,7 +3284,7 @@ namespace ClassicUO.Game.UI.Gumps
                         _isScrolling = true;
                         CanMove = false;
 
-                        Client.Game.GameCursor.IsDraggingCursorForced = true;
+                        Client.Game.UO.GameCursor.IsDraggingCursorForced = true;
                     }
                 }
 

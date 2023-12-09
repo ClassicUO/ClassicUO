@@ -2,7 +2,7 @@
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 // 1. Redistributions of source code must retain the above copyright
@@ -16,7 +16,7 @@
 // 4. Neither the name of the copyright holder nor the
 //    names of its contributors may be used to endorse or promote products
 //    derived from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -114,7 +114,7 @@ namespace ClassicUO.Game.GameObjects
         public short LowerReagentCost;
         public ushort Luck;
         public short ManaIncrease;
-        public short ManaRegeneration;      
+        public short ManaRegeneration;
         public short MaxColdResistence;
         public short MaxDefenseChanceIncrease;
         public short MaxEnergyResistence;
@@ -1514,8 +1514,8 @@ namespace ClassicUO.Game.GameObjects
 
         //    //const int TIME_TURN_TO_LASTTARGET = 2000;
 
-        //    //if (TargetManager.LastAttack != 0 && 
-        //    //    InWarMode && 
+        //    //if (TargetManager.LastAttack != 0 &&
+        //    //    InWarMode &&
         //    //    Walker.LastStepRequestTime + TIME_TURN_TO_LASTTARGET < Time.Ticks)
         //    //{
         //    //    Mobile enemy = World.Mobiles.Get(TargetManager.LastAttack);
@@ -1523,7 +1523,7 @@ namespace ClassicUO.Game.GameObjects
         //    //    if (enemy != null && enemy.Distance <= 1)
         //    //    {
         //    //        Direction pdir = DirectionHelper.GetDirectionAB(World.Player.X,
-        //    //                                                        World.Player.Y, 
+        //    //                                                        World.Player.Y,
         //    //                                                        enemy.X,
         //    //                                                        enemy.Y);
 
@@ -1542,7 +1542,7 @@ namespace ClassicUO.Game.GameObjects
 
         public bool Walk(Direction direction, bool run)
         {
-            if (Walker.WalkingFailed || Walker.LastStepRequestTime > Time.Ticks || Walker.StepsCount >= Constants.MAX_STEP_COUNT || Client.Version >= ClientVersion.CV_60142 && IsParalyzed)
+            if (Walker.WalkingFailed || Walker.LastStepRequestTime > Time.Ticks || Walker.StepsCount >= Constants.MAX_STEP_COUNT || Client.Game.UO.Version >= ClientVersion.CV_60142 && IsParalyzed)
             {
                 return false;
             }

@@ -148,7 +148,7 @@ namespace ClassicUO.Game.GameObjects
         public bool IsParalyzed => (Flags & Flags.Frozen) != 0;
         public bool IsYellowHits => (Flags & Flags.YellowBar) != 0;
         public bool IsPoisoned =>
-            Client.Version >= ClientVersion.CV_7000
+            Client.Game.UO.Version >= ClientVersion.CV_7000
                 ? _isSA_Poisoned
                 : (Flags & Flags.Poisoned) != 0;
         public bool IgnoreCharacters => (Flags & Flags.IgnoreMobiles) != 0;
@@ -166,7 +166,7 @@ namespace ClassicUO.Game.GameObjects
         }
 
         public bool IsFlying =>
-            Client.Version >= ClientVersion.CV_7000 && (Flags & Flags.Poisoned) != 0;
+            Client.Game.UO.Version >= ClientVersion.CV_7000 && (Flags & Flags.Poisoned) != 0;
 
         public virtual bool InWarMode
         {
@@ -190,7 +190,7 @@ namespace ClassicUO.Game.GameObjects
             || Graphic == 0x04E5;
 
         public bool IsGargoyle =>
-            Client.Version >= ClientVersion.CV_7000 && Graphic == 0x029A || Graphic == 0x029B;
+            Client.Game.UO.Version >= ClientVersion.CV_7000 && Graphic == 0x029A || Graphic == 0x029B;
 
         public bool IsMounted
         {
@@ -412,7 +412,7 @@ namespace ClassicUO.Game.GameObjects
 
                 ushort graphic = GetGraphicForAnimation();
 
-                if (graphic >= Client.Game.Animations.MaxAnimationCount)
+                if (graphic >= Client.Game.UO.Animations.MaxAnimationCount)
                 {
                     return;
                 }
@@ -420,15 +420,15 @@ namespace ClassicUO.Game.GameObjects
                 //byte action = 0;
                 //ushort hue = 0;
 
-                //Client.Game.Animations.ReplaceAnimationValues(
+                //Client.Game.UO.Animations.ReplaceAnimationValues(
                 //    ref graphic,
                 //    ref action,
                 //    ref hue,
                 //    out var useUOP
                 //);
 
-                AnimationGroupsType type = Client.Game.Animations.GetAnimType(graphic);
-                AnimationFlags  flags = Client.Game.Animations.GetAnimFlags(graphic);
+                AnimationGroupsType type = Client.Game.UO.Animations.GetAnimType(graphic);
+                AnimationFlags  flags = Client.Game.UO.Animations.GetAnimFlags(graphic);
                 AnimationGroups animGroup = AnimationGroups.None;
 
                 bool isLowExtended = false;
@@ -508,8 +508,8 @@ namespace ClassicUO.Game.GameObjects
                 if (isLowExtended && _animationGroup == 18)
                 {
                     if (
-                        !Client.Game.Animations.AnimationExists(graphic, 18)
-                        && Client.Game.Animations.AnimationExists(graphic, 17)
+                        !Client.Game.UO.Animations.AnimationExists(graphic, 18)
+                        && Client.Game.UO.Animations.AnimationExists(graphic, 17)
                     )
                     {
                         _animationGroup = GetReplacedObjectAnimation(graphic, 17);
@@ -520,7 +520,7 @@ namespace ClassicUO.Game.GameObjects
                     }
                 }
 
-                if (!Client.Game.Animations.AnimationExists(graphic, _animationGroup))
+                if (!Client.Game.UO.Animations.AnimationExists(graphic, _animationGroup))
                 {
                     if (first_value == 0)
                     {
@@ -533,7 +533,7 @@ namespace ClassicUO.Game.GameObjects
 
                     _animationGroup = _animationIdle[(byte)animGroup - 1, first_value];
 
-                    if (!Client.Game.Animations.AnimationExists(graphic, _animationGroup))
+                    if (!Client.Game.UO.Animations.AnimationExists(graphic, _animationGroup))
                     {
                         SetAnimation(original_value);
                     }
@@ -605,9 +605,9 @@ namespace ClassicUO.Game.GameObjects
                 AnimationsLoader.Instance.GetAnimDirection(ref dir, ref mirror);
                 int currentDelay = Constants.CHARACTER_ANIMATION_DELAY;
 
-                if (id < Client.Game.Animations.MaxAnimationCount && dir < 5)
+                if (id < Client.Game.UO.Animations.MaxAnimationCount && dir < 5)
                 {
-                    var frames = Client.Game.Animations.GetAnimationFrames(
+                    var frames = Client.Game.UO.Animations.GetAnimationFrames(
                         id,
                         action,
                         dir,
@@ -965,7 +965,7 @@ namespace ClassicUO.Game.GameObjects
                 p.Y += 22;
             }
 
-            Client.Game.Animations.GetAnimationDimensions(
+            Client.Game.UO.Animations.GetAnimationDimensions(
                 AnimIndex,
                 GetGraphicForAnimation(),
                 /*(byte) m.GetDirectionForAnimation()*/

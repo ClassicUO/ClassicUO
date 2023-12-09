@@ -212,7 +212,7 @@ namespace ClassicUO.Network
 
             PluginHeader header = new PluginHeader
             {
-                ClientVersion = (int)Client.Version,
+                ClientVersion = (int)Client.Game.UO.Version,
                 Recv = Marshal.GetFunctionPointerForDelegate(_recv),
                 Send = Marshal.GetFunctionPointerForDelegate(_send),
                 GetPacketLength = Marshal.GetFunctionPointerForDelegate(_getPacketLength),
@@ -499,16 +499,16 @@ namespace ClassicUO.Network
 
         private static bool RequestMove(int dir, bool run)
         {
-            return Client.Game.World.Player.Walk((Direction)dir, run);
+            return Client.Game.UO.World.Player.Walk((Direction)dir, run);
         }
 
         private static bool GetPlayerPosition(out int x, out int y, out int z)
         {
-            if (Client.Game.World.Player != null)
+            if (Client.Game.UO.World.Player != null)
             {
-                x = Client.Game.World.Player.X;
-                y = Client.Game.World.Player.Y;
-                z = Client.Game.World.Player.Z;
+                x = Client.Game.UO.World.Player.X;
+                y = Client.Game.UO.World.Player.Y;
+                z = Client.Game.UO.World.Player.Z;
 
                 return true;
             }
@@ -660,10 +660,7 @@ namespace ClassicUO.Network
 
         internal static bool ProcessHotkeys(int key, int mod, bool ispressed)
         {
-            if (
-                !Client.Game.World.InGame
-                || UIManager.SystemChat != null
-                    && (
+            if ((!Client.Game.UO.World?.InGame ?? false) || UIManager.SystemChat != null && (
                         ProfileManager.CurrentProfile != null
                             && ProfileManager.CurrentProfile.ActivateChatAfterEnter
                             && UIManager.SystemChat.IsActive

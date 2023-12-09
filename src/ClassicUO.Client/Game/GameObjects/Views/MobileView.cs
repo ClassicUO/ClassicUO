@@ -97,7 +97,7 @@ namespace ClassicUO.Game.GameObjects
             bool isHuman = IsHuman;
 
             bool isGargoyle =
-                Client.Version >= ClientVersion.CV_7000
+                Client.Game.UO.Version >= ClientVersion.CV_7000
                 && (Graphic == 666 || Graphic == 667 || Graphic == 0x02B7 || Graphic == 0x02B6);
 
             Vector3 hueVec = ShaderHueTranslator.GetHueVector(0, false, AlphaHue / 255f);
@@ -199,10 +199,10 @@ namespace ClassicUO.Game.GameObjects
 
                 if (
                     mountGraphic != 0xFFFF
-                    && mountGraphic < Client.Game.Animations.MaxAnimationCount
+                    && mountGraphic < Client.Game.UO.Animations.MaxAnimationCount
                 )
                 {
-                    mountOffsetY = Client.Game.Animations.GetMountedHeightOffset(mountGraphic);
+                    mountOffsetY = Client.Game.UO.Animations.GetMountedHeightOffset(mountGraphic);
 
                     if (hasShadow)
                     {
@@ -633,7 +633,7 @@ namespace ClassicUO.Game.GameObjects
         {
             spriteInfo = default;
 
-            var frames = Client.Game.Animations.GetAnimationFrames(
+            var frames = Client.Game.UO.Animations.GetAnimationFrames(
                 graphic,
                 animGroup,
                 direction,
@@ -686,12 +686,12 @@ namespace ClassicUO.Game.GameObjects
             bool charIsSitting
         )
         {
-            if (id >= Client.Game.Animations.MaxAnimationCount || owner == null)
+            if (id >= Client.Game.UO.Animations.MaxAnimationCount || owner == null)
             {
                 return;
             }
 
-            var frames = Client.Game.Animations.GetAnimationFrames(
+            var frames = Client.Game.UO.Animations.GetAnimationFrames(
                 id,
                 animGroup,
                 dir,
@@ -1014,7 +1014,7 @@ namespace ClassicUO.Game.GameObjects
 
             bool isHuman = IsHuman;
             bool isGargoyle =
-                Client.Version >= ClientVersion.CV_7000
+                Client.Game.UO.Version >= ClientVersion.CV_7000
                 && (Graphic == 666 || Graphic == 667 || Graphic == 0x02B7 || Graphic == 0x02B6);
 
             ProcessSteps(out byte dir);
@@ -1063,7 +1063,7 @@ namespace ClassicUO.Game.GameObjects
                             int y = position.Y - (spriteInfo.UV.Height + spriteInfo.Center.Y);
 
                             if (
-                                Client.Game.Animations.PixelCheck(
+                                Client.Game.UO.Animations.PixelCheck(
                                     mountGraphic,
                                     animGroupMount,
                                     dir,
@@ -1081,7 +1081,7 @@ namespace ClassicUO.Game.GameObjects
                                 return true;
                             }
 
-                            position.Y += Client.Game.Animations.GetMountedHeightOffset(
+                            position.Y += Client.Game.UO.Animations.GetMountedHeightOffset(
                                 mountGraphic
                             );
                         }
@@ -1097,7 +1097,7 @@ namespace ClassicUO.Game.GameObjects
                 int y = position.Y - (spriteInfo.UV.Height + spriteInfo.Center.Y);
 
                 if (
-                    Client.Game.Animations.PixelCheck(
+                    Client.Game.UO.Animations.PixelCheck(
                         graphic,
                         animGroup,
                         dir,
@@ -1159,7 +1159,7 @@ namespace ClassicUO.Game.GameObjects
                             int y = position.Y - (spriteInfo.UV.Height + spriteInfo.Center.Y);
 
                             if (
-                                Client.Game.Animations.PixelCheck(
+                                Client.Game.UO.Animations.PixelCheck(
                                     graphic,
                                     animGroup,
                                     dir,

@@ -216,7 +216,7 @@ namespace ClassicUO.Game.GameObjects
 
             Point p = RealScreenPosition;
 
-            var bounds = Client.Game.Arts.GetRealArtBounds(Graphic);
+            var bounds = Client.Game.UO.Arts.GetRealArtBounds(Graphic);
 
             p.Y -= bounds.Height >> 1;
 
@@ -419,7 +419,7 @@ namespace ClassicUO.Game.GameObjects
                 // In older clients the tiledata flag for this
                 // item contains NoDiagonal for some reason.
                 // So the next check will make the item invisible.
-                if (g == 0x0F65 && Client.Version < ClientVersion.CV_60144)
+                if (g == 0x0F65 && Client.Game.UO.Version < ClientVersion.CV_60144)
                 {
                     return true;
                 }

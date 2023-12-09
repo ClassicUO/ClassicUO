@@ -2,7 +2,7 @@
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 // 1. Redistributions of source code must retain the above copyright
@@ -16,7 +16,7 @@
 // 4. Neither the name of the copyright holder nor the
 //    names of its contributors may be used to endorse or promote products
 //    derived from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -62,7 +62,7 @@ namespace ClassicUO.Assets
                 {
                     var files = Directory.GetFiles(dir);
                     var matches = 0;
-                    
+
                     foreach (var f in files)
                     {
                         if (string.Equals(f, uoFilePath, StringComparison.OrdinalIgnoreCase))
@@ -76,14 +76,14 @@ namespace ClassicUO.Assets
                     {
                         Log.Warn($"Multiple files with ambiguous case found for {file}, using {Path.GetFileName(uoFilePath)}. Check your data directory for duplicate files.");
                     }
-                }             
+                }
             }
 
             return uoFilePath;
         }
 
         public static ClientVersion Version;
-        public static string BasePath;
+        public static string BasePath = "";
         public static bool IsUOPInstallation;
 
         public static void Load(ClientVersion version, string basePath, bool useVerdata, string lang)
@@ -325,7 +325,7 @@ namespace ClassicUO.Assets
             {
                 TileDataLoader tiledataLoader =  TileDataLoader.Instance;
                 ArtLoader artLoader = ArtLoader.Instance;
-                
+
                 using (DefReader reader = new DefReader(pathdef, 1))
                 {
                     while (reader.Next())
@@ -365,8 +365,8 @@ namespace ClassicUO.Assets
                             }
 
                             if (index < ArtLoader.MAX_LAND_DATA_INDEX_COUNT &&
-                                checkIndex < ArtLoader.MAX_LAND_DATA_INDEX_COUNT && 
-                                checkIndex < tiledataLoader.LandData.Length && 
+                                checkIndex < ArtLoader.MAX_LAND_DATA_INDEX_COUNT &&
+                                checkIndex < tiledataLoader.LandData.Length &&
                                 index < tiledataLoader.LandData.Length &&
                                 !tiledataLoader.LandData[checkIndex].Equals(default) &&
                                 tiledataLoader.LandData[index].Equals(default))

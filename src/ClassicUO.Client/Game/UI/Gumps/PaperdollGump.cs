@@ -145,7 +145,7 @@ namespace ClassicUO.Game.UI.Gumps
             var showPaperdollBooks =
                 LocalSerial == World.Player && World.ClientFeatures.PaperdollBooks;
             var showRacialAbilitiesBook =
-                showPaperdollBooks && Client.Version >= ClientVersion.CV_7000;
+                showPaperdollBooks && Client.Game.UO.Version >= ClientVersion.CV_7000;
 
             if (LocalSerial == World.Player)
             {
@@ -182,7 +182,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 );
 
-                if (Client.Version < ClientVersion.CV_500A)
+                if (Client.Game.UO.Version < ClientVersion.CV_500A)
                 {
                     // JOURNAL BUTTON
                     Add(
@@ -435,7 +435,7 @@ namespace ClassicUO.Game.UI.Gumps
                     && (item.Layer == Layer.Backpack || item.ItemData.IsContainer);
 
                 if (
-                    _paperDollInteractable.HasFakeItem && !Client.Game.GameCursor.ItemHold.Enabled
+                    _paperDollInteractable.HasFakeItem && !Client.Game.UO.GameCursor.ItemHold.Enabled
                     || force_false
                 )
                 {
@@ -443,17 +443,17 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else if (
                     !_paperDollInteractable.HasFakeItem
-                    && Client.Game.GameCursor.ItemHold.Enabled
-                    && !Client.Game.GameCursor.ItemHold.IsFixedPosition
+                    && Client.Game.UO.GameCursor.ItemHold.Enabled
+                    && !Client.Game.UO.GameCursor.ItemHold.IsFixedPosition
                     && UIManager.MouseOverControl?.RootParent == this
                 )
                 {
-                    if (Client.Game.GameCursor.ItemHold.ItemData.AnimID != 0)
+                    if (Client.Game.UO.GameCursor.ItemHold.ItemData.AnimID != 0)
                     {
                         if (
                             mobile != null
                             && mobile.FindItemByLayer(
-                                (Layer)Client.Game.GameCursor.ItemHold.ItemData.Layer
+                                (Layer)Client.Game.UO.GameCursor.ItemHold.ItemData.Layer
                             ) == null
                         )
                         {
@@ -475,7 +475,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Mobile container = World.Mobiles.Get(LocalSerial);
 
-                if (Client.Game.GameCursor.ItemHold.Enabled)
+                if (Client.Game.UO.GameCursor.ItemHold.Enabled)
                 {
                     if (CanLift || LocalSerial == World.Player.Serial)
                     {
@@ -485,7 +485,7 @@ namespace ClassicUO.Game.UI.Gumps
                         )
                         {
                             GameActions.DropItem(
-                                Client.Game.GameCursor.ItemHold.Serial,
+                                Client.Game.UO.GameCursor.ItemHold.Serial,
                                 0xFFFF,
                                 0xFFFF,
                                 0,
@@ -496,10 +496,10 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                         else
                         {
-                            if (Client.Game.GameCursor.ItemHold.ItemData.IsWearable)
+                            if (Client.Game.UO.GameCursor.ItemHold.ItemData.IsWearable)
                             {
                                 Item equipment = container.FindItemByLayer(
-                                    (Layer)Client.Game.GameCursor.ItemHold.ItemData.Layer
+                                    (Layer)Client.Game.UO.GameCursor.ItemHold.ItemData.Layer
                                 );
 
                                 if (equipment == null)
@@ -596,8 +596,8 @@ namespace ClassicUO.Game.UI.Gumps
         public override void OnButtonClick(int buttonID)
         {
             if (
-                Client.Game.GameCursor.ItemHold.Enabled
-                && !Client.Game.GameCursor.ItemHold.IsFixedPosition
+                Client.Game.UO.GameCursor.ItemHold.Enabled
+                && !Client.Game.UO.GameCursor.ItemHold.IsFixedPosition
             )
             {
                 OnMouseUp(0, 0, MouseButtonType.Left);
@@ -695,7 +695,7 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                         else
                         {
-                            ref readonly var gumpInfo = ref Client.Game.Gumps.GetGump(0x0804);
+                            ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(0x0804);
 
                             UIManager.Add(
                                 new HealthBarGump(World,LocalSerial)
@@ -824,7 +824,7 @@ namespace ClassicUO.Game.UI.Gumps
                     Height = h;
                     WantUpdateSize = false;
 
-                    _rect = Client.Game.Arts.GetRealArtBounds(item.DisplayedGraphic);
+                    _rect = Client.Game.UO.Arts.GetRealArtBounds(item.DisplayedGraphic);
 
                     _originalSize.X = Width;
                     _originalSize.Y = Height;
@@ -863,7 +863,7 @@ namespace ClassicUO.Game.UI.Gumps
                         true
                     );
 
-                    ref readonly var artInfo = ref Client.Game.Arts.GetArt(item.DisplayedGraphic);
+                    ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(item.DisplayedGraphic);
 
                     if (artInfo.Texture != null)
                     {
