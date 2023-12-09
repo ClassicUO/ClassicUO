@@ -135,7 +135,7 @@ namespace ClassicUO.Game.Managers
                     {
                         if (mobile.HitsPercentage != 0)
                         {
-                            Client.Game.Animations.GetAnimationDimensions(
+                            Client.Game.UO.Animations.GetAnimationDimensions(
                                 mobile.AnimIndex,
                                 mobile.GetGraphicForAnimation(),
                                 /*(byte) m.GetDirectionForAnimation()*/
@@ -285,7 +285,7 @@ namespace ClassicUO.Game.Managers
 
             const int MULTIPLER = 1;
 
-            ref readonly var gumpInfo = ref Client.Game.Gumps.GetGump(BACKGROUND_GRAPHIC);
+            ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(BACKGROUND_GRAPHIC);
 
             batcher.Draw(
                 gumpInfo.Texture,
@@ -305,7 +305,7 @@ namespace ClassicUO.Game.Managers
                     offset = per;
                 }
 
-                gumpInfo = ref Client.Game.Gumps.GetGump(HP_GRAPHIC);
+                gumpInfo = ref Client.Game.UO.Gumps.GetGump(HP_GRAPHIC);
 
                 batcher.DrawTiled(
                     gumpInfo.Texture,
@@ -338,7 +338,7 @@ namespace ClassicUO.Game.Managers
 
                 hueVec.X = hue;
 
-                gumpInfo = ref Client.Game.Gumps.GetGump(HP_GRAPHIC);
+                gumpInfo = ref Client.Game.UO.Gumps.GetGump(HP_GRAPHIC);
                 batcher.DrawTiled(
                     gumpInfo.Texture,
                     new Rectangle(x, y, per * MULTIPLER, gumpInfo.UV.Height * MULTIPLER),

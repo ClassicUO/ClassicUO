@@ -396,19 +396,19 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (button == MouseButtonType.Left)
                 {
-                    if (Client.Game.GameCursor.ItemHold.Enabled)
+                    if (Client.Game.UO.GameCursor.ItemHold.Enabled)
                     {
                         SetGraphic(
-                            Client.Game.GameCursor.ItemHold.Graphic,
-                            Client.Game.GameCursor.ItemHold.Hue
+                            Client.Game.UO.GameCursor.ItemHold.Graphic,
+                            Client.Game.UO.GameCursor.ItemHold.Hue
                         );
 
                         GameActions.DropItem(
-                            Client.Game.GameCursor.ItemHold.Serial,
-                            Client.Game.GameCursor.ItemHold.X,
-                            Client.Game.GameCursor.ItemHold.Y,
+                            Client.Game.UO.GameCursor.ItemHold.Serial,
+                            Client.Game.UO.GameCursor.ItemHold.X,
+                            Client.Game.UO.GameCursor.ItemHold.Y,
                             0,
-                            Client.Game.GameCursor.ItemHold.Container
+                            Client.Game.UO.GameCursor.ItemHold.Container
                         );
                     }
                     else if (ProfileManager.CurrentProfile.CastSpellsByOneClick)
@@ -582,8 +582,8 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (_graphic != 0)
                     {
-                        ref readonly var artInfo = ref Client.Game.Arts.GetArt(_graphic);
-                        var rect = Client.Game.Arts.GetRealArtBounds(_graphic);
+                        ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(_graphic);
+                        var rect = Client.Game.UO.Arts.GetRealArtBounds(_graphic);
 
                         Vector3 hueVector = ShaderHueTranslator.GetHueVector(_hue, _partial, 1f);
 

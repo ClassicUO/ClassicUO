@@ -373,7 +373,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 GetSpellFloatingButton(_skill.Index)?.Dispose();
 
-                ref readonly var gumpInfo = ref Client.Game.Gumps.GetGump(0x24B8);
+                ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(0x24B8);
 
                 SkillButtonGump skillButtonGump = new SkillButtonGump(
                     _gump.World,

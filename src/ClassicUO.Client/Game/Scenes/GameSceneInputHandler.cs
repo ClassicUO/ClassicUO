@@ -198,7 +198,7 @@ namespace ClassicUO.Game.Scenes
             }
             else
             {
-                rect = Client.Game.Gumps.GetGump(0x0804).UV;
+                rect = Client.Game.UO.Gumps.GetGump(0x0804).UV;
             }
 
             foreach (Mobile mobile in _world.Mobiles.Values)
@@ -461,8 +461,8 @@ namespace ClassicUO.Game.Scenes
             }
 
             if (
-                Client.Game.GameCursor.ItemHold.Enabled
-                && !Client.Game.GameCursor.ItemHold.IsFixedPosition
+                Client.Game.UO.GameCursor.ItemHold.Enabled
+                && !Client.Game.UO.GameCursor.ItemHold.IsFixedPosition
             )
             {
                 uint drop_container = 0xFFFF_FFFF;
@@ -491,7 +491,7 @@ namespace ClassicUO.Game.Scenes
                             && (
                                 it2.ItemData.IsSurface
                                 || it2.ItemData.IsStackable
-                                    && it2.Graphic == Client.Game.GameCursor.ItemHold.Graphic
+                                    && it2.Graphic == Client.Game.UO.GameCursor.ItemHold.Graphic
                             )
                         )
                         {
@@ -555,7 +555,7 @@ namespace ClassicUO.Game.Scenes
                     if (can_drop)
                     {
                         GameActions.DropItem(
-                            Client.Game.GameCursor.ItemHold.Serial,
+                            Client.Game.UO.GameCursor.ItemHold.Serial,
                             dropX,
                             dropY,
                             dropZ,
@@ -1002,17 +1002,17 @@ namespace ClassicUO.Game.Scenes
 
         internal override bool OnMouseWheel(bool up)
         {
-            if (Keyboard.Ctrl && Client.Game.GameCursor.ItemHold.Enabled)
+            if (Keyboard.Ctrl && Client.Game.UO.GameCursor.ItemHold.Enabled)
             {
-                if (!up && !Client.Game.GameCursor.ItemHold.IsFixedPosition)
+                if (!up && !Client.Game.UO.GameCursor.ItemHold.IsFixedPosition)
                 {
-                    Client.Game.GameCursor.ItemHold.IsFixedPosition = true;
-                    Client.Game.GameCursor.ItemHold.IgnoreFixedPosition = true;
-                    Client.Game.GameCursor.ItemHold.FixedX = Mouse.Position.X;
-                    Client.Game.GameCursor.ItemHold.FixedY = Mouse.Position.Y;
+                    Client.Game.UO.GameCursor.ItemHold.IsFixedPosition = true;
+                    Client.Game.UO.GameCursor.ItemHold.IgnoreFixedPosition = true;
+                    Client.Game.UO.GameCursor.ItemHold.FixedX = Mouse.Position.X;
+                    Client.Game.UO.GameCursor.ItemHold.FixedY = Mouse.Position.Y;
                 }
 
-                if (Client.Game.GameCursor.ItemHold.IgnoreFixedPosition)
+                if (Client.Game.UO.GameCursor.ItemHold.IgnoreFixedPosition)
                 {
                     return true;
                 }
@@ -1064,12 +1064,12 @@ namespace ClassicUO.Game.Scenes
 
             bool ok = true;
 
-            if (Mouse.LButtonPressed && !Client.Game.GameCursor.ItemHold.Enabled)
+            if (Mouse.LButtonPressed && !Client.Game.UO.GameCursor.ItemHold.Enabled)
             {
                 Point offset = Mouse.LDragOffset;
 
                 if (
-                    !Client.Game.GameCursor.IsDraggingCursorForced
+                    !Client.Game.UO.GameCursor.IsDraggingCursorForced
                     && // don't trigger "sallos ez grab" when dragging wmap or skill
                     !_isSelectionActive
                     && // and ofc when selection is enabled
@@ -1127,7 +1127,7 @@ namespace ClassicUO.Game.Scenes
                             }
                             else
                             {
-                                var bounds = Client.Game.Gumps.GetGump(0x0804).UV;
+                                var bounds = Client.Game.UO.Gumps.GetGump(0x0804).UV;
 
                                 UIManager.Add(
                                     customgump = new HealthBarGump(_world, obj)

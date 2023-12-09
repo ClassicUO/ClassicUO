@@ -357,7 +357,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Vector3 hueVector = ShaderHueTranslator.GetHueVector(0, false, _alpha / 255f, true);
 
-                ref readonly var gumpInfo = ref Client.Game.Gumps.GetGump(Graphic);
+                ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(Graphic);
 
                 if (gumpInfo.Texture != null)
                 {

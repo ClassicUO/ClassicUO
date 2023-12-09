@@ -341,7 +341,7 @@ namespace ClassicUO.Network
         {
             if (world.ClientFeatures.TooltipsEnabled && Handler._clilocRequests.Count != 0)
             {
-                if (Client.Version >= Utility.ClientVersion.CV_5090)
+                if (Client.Game.UO.Version >= Utility.ClientVersion.CV_5090)
                 {
                     if (Handler._clilocRequests.Count != 0)
                     {
@@ -652,7 +652,7 @@ namespace ClassicUO.Network
                         }
                         else
                         {
-                            if (Client.Version >= Utility.ClientVersion.CV_500A)
+                            if (Client.Game.UO.Version >= Utility.ClientVersion.CV_500A)
                             {
                                 world.Player.WeightMax = (ushort)(
                                     7 * (world.Player.Strength >> 1) + 40
@@ -741,7 +741,7 @@ namespace ClassicUO.Network
                 return;
             }
 
-            if (p[0] == 0x16 && Client.Version < Utility.ClientVersion.CV_500A)
+            if (p[0] == 0x16 && Client.Game.UO.Version < Utility.ClientVersion.CV_500A)
             {
                 return;
             }
@@ -764,7 +764,7 @@ namespace ClassicUO.Network
                 {
                     if (enabled)
                     {
-                        if (Client.Version >= Utility.ClientVersion.CV_7000)
+                        if (Client.Game.UO.Version >= Utility.ClientVersion.CV_7000)
                         {
                             mobile.SetSAPoison(true);
                         }
@@ -775,7 +775,7 @@ namespace ClassicUO.Network
                     }
                     else
                     {
-                        if (Client.Version >= Utility.ClientVersion.CV_7000)
+                        if (Client.Game.UO.Version >= Utility.ClientVersion.CV_7000)
                         {
                             mobile.SetSAPoison(false);
                         }
@@ -943,7 +943,7 @@ namespace ClassicUO.Network
 
             Client.Game.Audio.UpdateCurrentMusicVolume();
 
-            if (Client.Version >= Utility.ClientVersion.CV_200)
+            if (Client.Game.UO.Version >= Utility.ClientVersion.CV_200)
             {
                 if (ProfileManager.CurrentProfile != null)
                 {
@@ -967,7 +967,7 @@ namespace ClassicUO.Network
             }
 
             if (
-                Client.Version >= Utility.ClientVersion.CV_70796
+                Client.Game.UO.Version >= Utility.ClientVersion.CV_70796
                 && ProfileManager.CurrentProfile != null
             )
             {
@@ -1087,7 +1087,7 @@ namespace ClassicUO.Network
 
                     if (cont == world.Player && it.Layer == Layer.Invalid)
                     {
-                        Client.Game.GameCursor.ItemHold.Enabled = false;
+                        Client.Game.UO.GameCursor.ItemHold.Enabled = false;
                     }
 
                     if (it.Layer != Layer.Invalid)
@@ -1454,12 +1454,12 @@ namespace ClassicUO.Network
 
                     // TODO: check client version ?
                     if (
-                        Client.Version >= Utility.ClientVersion.CV_706000
+                        Client.Game.UO.Version >= Utility.ClientVersion.CV_706000
                         && ProfileManager.CurrentProfile != null
                         && ProfileManager.CurrentProfile.UseLargeContainerGumps
                     )
                     {
-                        var gumps = Client.Game.Gumps;
+                        var gumps = Client.Game.UO.Gumps;
 
                         switch (graphic)
                         {
@@ -1597,7 +1597,7 @@ namespace ClassicUO.Network
             ushort x = p.ReadUInt16BE();
             ushort y = p.ReadUInt16BE();
 
-            if (Client.Version >= Utility.ClientVersion.CV_6017)
+            if (Client.Game.UO.Version >= Utility.ClientVersion.CV_6017)
             {
                 p.Skip(1);
             }
@@ -1615,29 +1615,29 @@ namespace ClassicUO.Network
                 return;
             }
 
-            Item firstItem = world.Items.Get(Client.Game.GameCursor.ItemHold.Serial);
+            Item firstItem = world.Items.Get(Client.Game.UO.GameCursor.ItemHold.Serial);
 
             if (
-                Client.Game.GameCursor.ItemHold.Enabled
-                || Client.Game.GameCursor.ItemHold.Dropped
+                Client.Game.UO.GameCursor.ItemHold.Enabled
+                || Client.Game.UO.GameCursor.ItemHold.Dropped
                     && (firstItem == null || !firstItem.AllowedToDraw)
             )
             {
-                if (world.ObjectToRemove == Client.Game.GameCursor.ItemHold.Serial)
+                if (world.ObjectToRemove == Client.Game.UO.GameCursor.ItemHold.Serial)
                 {
                     world.ObjectToRemove = 0;
                 }
 
                 if (
-                    SerialHelper.IsValid(Client.Game.GameCursor.ItemHold.Serial)
-                    && Client.Game.GameCursor.ItemHold.Graphic != 0xFFFF
+                    SerialHelper.IsValid(Client.Game.UO.GameCursor.ItemHold.Serial)
+                    && Client.Game.UO.GameCursor.ItemHold.Graphic != 0xFFFF
                 )
                 {
-                    if (!Client.Game.GameCursor.ItemHold.UpdatedInWorld)
+                    if (!Client.Game.UO.GameCursor.ItemHold.UpdatedInWorld)
                     {
                         if (
-                            Client.Game.GameCursor.ItemHold.Layer == Layer.Invalid
-                            && SerialHelper.IsValid(Client.Game.GameCursor.ItemHold.Container)
+                            Client.Game.UO.GameCursor.ItemHold.Layer == Layer.Invalid
+                            && SerialHelper.IsValid(Client.Game.UO.GameCursor.ItemHold.Container)
                         )
                         {
                             // Server should send an UpdateContainedItem after this packet.
@@ -1645,36 +1645,36 @@ namespace ClassicUO.Network
 
                             AddItemToContainer(
                                 world,
-                                Client.Game.GameCursor.ItemHold.Serial,
-                                Client.Game.GameCursor.ItemHold.Graphic,
-                                Client.Game.GameCursor.ItemHold.TotalAmount,
-                                Client.Game.GameCursor.ItemHold.X,
-                                Client.Game.GameCursor.ItemHold.Y,
-                                Client.Game.GameCursor.ItemHold.Hue,
-                                Client.Game.GameCursor.ItemHold.Container
+                                Client.Game.UO.GameCursor.ItemHold.Serial,
+                                Client.Game.UO.GameCursor.ItemHold.Graphic,
+                                Client.Game.UO.GameCursor.ItemHold.TotalAmount,
+                                Client.Game.UO.GameCursor.ItemHold.X,
+                                Client.Game.UO.GameCursor.ItemHold.Y,
+                                Client.Game.UO.GameCursor.ItemHold.Hue,
+                                Client.Game.UO.GameCursor.ItemHold.Container
                             );
 
                             UIManager
-                                .GetGump<ContainerGump>(Client.Game.GameCursor.ItemHold.Container)
+                                .GetGump<ContainerGump>(Client.Game.UO.GameCursor.ItemHold.Container)
                                 ?.RequestUpdateContents();
                         }
                         else
                         {
                             Item item = world.GetOrCreateItem(
-                                Client.Game.GameCursor.ItemHold.Serial
+                                Client.Game.UO.GameCursor.ItemHold.Serial
                             );
 
-                            item.Graphic = Client.Game.GameCursor.ItemHold.Graphic;
-                            item.Hue = Client.Game.GameCursor.ItemHold.Hue;
-                            item.Amount = Client.Game.GameCursor.ItemHold.TotalAmount;
-                            item.Flags = Client.Game.GameCursor.ItemHold.Flags;
-                            item.Layer = Client.Game.GameCursor.ItemHold.Layer;
-                            item.X = Client.Game.GameCursor.ItemHold.X;
-                            item.Y = Client.Game.GameCursor.ItemHold.Y;
-                            item.Z = Client.Game.GameCursor.ItemHold.Z;
+                            item.Graphic = Client.Game.UO.GameCursor.ItemHold.Graphic;
+                            item.Hue = Client.Game.UO.GameCursor.ItemHold.Hue;
+                            item.Amount = Client.Game.UO.GameCursor.ItemHold.TotalAmount;
+                            item.Flags = Client.Game.UO.GameCursor.ItemHold.Flags;
+                            item.Layer = Client.Game.UO.GameCursor.ItemHold.Layer;
+                            item.X = Client.Game.UO.GameCursor.ItemHold.X;
+                            item.Y = Client.Game.UO.GameCursor.ItemHold.Y;
+                            item.Z = Client.Game.UO.GameCursor.ItemHold.Z;
                             item.CheckGraphicChange();
 
-                            Entity container = world.Get(Client.Game.GameCursor.ItemHold.Container);
+                            Entity container = world.Get(Client.Game.UO.GameCursor.ItemHold.Container);
 
                             if (container != null)
                             {
@@ -1711,13 +1711,13 @@ namespace ClassicUO.Network
                 else
                 {
                     Log.Error(
-                        $"Wrong data: serial = {Client.Game.GameCursor.ItemHold.Serial:X8}  -  graphic = {Client.Game.GameCursor.ItemHold.Graphic:X4}"
+                        $"Wrong data: serial = {Client.Game.UO.GameCursor.ItemHold.Serial:X8}  -  graphic = {Client.Game.UO.GameCursor.ItemHold.Graphic:X4}"
                     );
                 }
 
-                UIManager.GetGump<SplitMenuGump>(Client.Game.GameCursor.ItemHold.Serial)?.Dispose();
+                UIManager.GetGump<SplitMenuGump>(Client.Game.UO.GameCursor.ItemHold.Serial)?.Dispose();
 
-                Client.Game.GameCursor.ItemHold.Clear();
+                Client.Game.UO.GameCursor.ItemHold.Clear();
             }
             else
             {
@@ -1752,8 +1752,8 @@ namespace ClassicUO.Network
                 return;
             }
 
-            Client.Game.GameCursor.ItemHold.Enabled = false;
-            Client.Game.GameCursor.ItemHold.Dropped = false;
+            Client.Game.UO.GameCursor.ItemHold.Enabled = false;
+            Client.Game.UO.GameCursor.ItemHold.Dropped = false;
         }
 
         private static void DropItemAccepted(World world, ref StackDataReader p)
@@ -1763,8 +1763,8 @@ namespace ClassicUO.Network
                 return;
             }
 
-            Client.Game.GameCursor.ItemHold.Enabled = false;
-            Client.Game.GameCursor.ItemHold.Dropped = false;
+            Client.Game.UO.GameCursor.ItemHold.Enabled = false;
+            Client.Game.UO.GameCursor.ItemHold.Dropped = false;
 
             Console.WriteLine("PACKET - ITEM DROP OK!");
         }
@@ -2130,7 +2130,7 @@ namespace ClassicUO.Network
                 ushort x = p.ReadUInt16BE();
                 ushort y = p.ReadUInt16BE();
 
-                if (Client.Version >= Utility.ClientVersion.CV_6017)
+                if (Client.Game.UO.Version >= Utility.ClientVersion.CV_6017)
                 {
                     p.Skip(1);
                 }
@@ -2256,12 +2256,12 @@ namespace ClassicUO.Network
                 NetClient.Socket.Send_SkillsRequest(world.Player);
                 scene.DoubleClickDelayed(world.Player);
 
-                if (Client.Version >= Utility.ClientVersion.CV_306E)
+                if (Client.Game.UO.Version >= Utility.ClientVersion.CV_306E)
                 {
                     NetClient.Socket.Send_ClientType();
                 }
 
-                if (Client.Version >= Utility.ClientVersion.CV_305D)
+                if (Client.Game.UO.Version >= Utility.ClientVersion.CV_305D)
                 {
                     NetClient.Socket.Send_ClientViewRange(world.ClientViewRange);
                 }
@@ -2914,7 +2914,7 @@ namespace ClassicUO.Network
                 byte layer = p.ReadUInt8();
                 ushort item_hue = 0;
 
-                if (Client.Version >= Utility.ClientVersion.CV_70331)
+                if (Client.Game.UO.Version >= Utility.ClientVersion.CV_70331)
                 {
                     item_hue = p.ReadUInt16BE();
                 }
@@ -2990,7 +2990,7 @@ namespace ClassicUO.Network
                     ushort hue = p.ReadUInt16BE();
                     name = p.ReadASCII(p.ReadUInt8());
 
-                    ref readonly var artInfo = ref Client.Game.Arts.GetArt(graphic);
+                    ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(graphic);
 
                     if (artInfo.UV.Width != 0 && artInfo.UV.Height != 0)
                     {
@@ -3166,7 +3166,7 @@ namespace ClassicUO.Network
             MapGump gump = new MapGump(world, serial, gumpid, width, height);
             SpriteInfo multiMapInfo;
 
-            if (p[0] == 0xF5 || Client.Version >= Utility.ClientVersion.CV_308Z)
+            if (p[0] == 0xF5 || Client.Game.UO.Version >= Utility.ClientVersion.CV_308Z)
             {
                 ushort facet = 0;
 
@@ -3175,10 +3175,10 @@ namespace ClassicUO.Network
                     facet = p.ReadUInt16BE();
                 }
 
-                multiMapInfo = Client.Game.MultiMaps.GetMap(facet, width, height, startX, startY, endX, endY);            }
+                multiMapInfo = Client.Game.UO.MultiMaps.GetMap(facet, width, height, startX, startY, endX, endY);            }
             else
             {
-                multiMapInfo = Client.Game.MultiMaps.GetMap(null, width, height, startX, startY, endX, endY);
+                multiMapInfo = Client.Game.UO.MultiMaps.GetMap(null, width, height, startX, startY, endX, endY);
             }
 
             if (multiMapInfo.Texture != null)
@@ -3255,7 +3255,7 @@ namespace ClassicUO.Network
             p.Skip(2);
             ushort graphic = p.ReadUInt16BE();
 
-            ref readonly var gumpInfo = ref Client.Game.Gumps.GetGump(0x0906);
+            ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(0x0906);
 
             int x = (Client.Game.Window.ClientBounds.Width >> 1) - (gumpInfo.UV.Width >> 1);
             int y = (Client.Game.Window.ClientBounds.Height >> 1) - (gumpInfo.UV.Height >> 1);
@@ -3741,9 +3741,9 @@ namespace ClassicUO.Network
             }
 
             var gfx = owner.Graphic;
-            Client.Game.Animations.ConvertBodyIfNeeded(ref gfx);
-            var animGroup = Client.Game.Animations.GetAnimType(gfx);
-            var animFlags = Client.Game.Animations.GetAnimFlags(gfx);
+            Client.Game.UO.Animations.ConvertBodyIfNeeded(ref gfx);
+            var animGroup = Client.Game.UO.Animations.GetAnimType(gfx);
+            var animFlags = Client.Game.UO.Animations.GetAnimFlags(gfx);
             byte group = AnimationsLoader.Instance.GetDeathAction(
                 gfx,
                 animFlags,
@@ -4019,7 +4019,7 @@ namespace ClassicUO.Network
         {
             LockedFeatureFlags flags = 0;
 
-            if (Client.Version >= Utility.ClientVersion.CV_60142)
+            if (Client.Game.UO.Version >= Utility.ClientVersion.CV_60142)
             {
                 flags = (LockedFeatureFlags)p.ReadUInt32BE();
             }
@@ -4048,7 +4048,7 @@ namespace ClassicUO.Network
             if (flags.HasFlag(LockedFeatureFlags.ML))
                 bcFlags |= BodyConvFlags.Anim4;
 
-            Client.Game.Animations.UpdateAnimationTable(bcFlags);
+            Client.Game.UO.Animations.UpdateAnimationTable(bcFlags);
         }
 
         private static void DisplayQuestArrow(World world, ref StackDataReader p)
@@ -4059,7 +4059,7 @@ namespace ClassicUO.Network
 
             uint serial = 0;
 
-            if (Client.Version >= Utility.ClientVersion.CV_7090)
+            if (Client.Game.UO.Version >= Utility.ClientVersion.CV_7090)
             {
                 serial = p.ReadUInt32BE();
             }
@@ -4978,7 +4978,7 @@ namespace ClassicUO.Network
                 }
 
                 // horrible fix for (Imbued) hue
-                if (Client.Version >= Utility.ClientVersion.CV_60143 && cliloc == 1080418)
+                if (Client.Game.UO.Version >= Utility.ClientVersion.CV_60143 && cliloc == 1080418)
                 {
                     str = str.Insert(0, "<basefont color=#42a5ff>");
                     str += "</basefont>";
@@ -6039,12 +6039,12 @@ namespace ClassicUO.Network
             uint containerSerial
         )
         {
-            if (Client.Game.GameCursor.ItemHold.Serial == serial)
+            if (Client.Game.UO.GameCursor.ItemHold.Serial == serial)
             {
-                if (Client.Game.GameCursor.ItemHold.Dropped)
+                if (Client.Game.UO.GameCursor.ItemHold.Dropped)
                 {
                     Console.WriteLine("ADD ITEM TO CONTAINER -- CLEAR HOLD");
-                    Client.Game.GameCursor.ItemHold.Clear();
+                    Client.Game.UO.GameCursor.ItemHold.Clear();
                 }
 
                 //else if (ItemHold.Graphic == graphic && ItemHold.Amount == amount &&
@@ -6187,27 +6187,27 @@ namespace ClassicUO.Network
             Entity obj = world.Get(serial);
 
             if (
-                Client.Game.GameCursor.ItemHold.Enabled
-                && Client.Game.GameCursor.ItemHold.Serial == serial
+                Client.Game.UO.GameCursor.ItemHold.Enabled
+                && Client.Game.UO.GameCursor.ItemHold.Serial == serial
             )
             {
-                if (SerialHelper.IsValid(Client.Game.GameCursor.ItemHold.Container))
+                if (SerialHelper.IsValid(Client.Game.UO.GameCursor.ItemHold.Container))
                 {
-                    if (Client.Game.GameCursor.ItemHold.Layer == 0)
+                    if (Client.Game.UO.GameCursor.ItemHold.Layer == 0)
                     {
                         UIManager
-                            .GetGump<ContainerGump>(Client.Game.GameCursor.ItemHold.Container)
+                            .GetGump<ContainerGump>(Client.Game.UO.GameCursor.ItemHold.Container)
                             ?.RequestUpdateContents();
                     }
                     else
                     {
                         UIManager
-                            .GetGump<PaperDollGump>(Client.Game.GameCursor.ItemHold.Container)
+                            .GetGump<PaperDollGump>(Client.Game.UO.GameCursor.ItemHold.Container)
                             ?.RequestUpdateContents();
                     }
                 }
 
-                Client.Game.GameCursor.ItemHold.UpdatedInWorld = true;
+                Client.Game.UO.GameCursor.ItemHold.UpdatedInWorld = true;
             }
 
             bool created = false;
@@ -6389,14 +6389,14 @@ namespace ClassicUO.Network
             else
             {
                 if (
-                    Client.Game.GameCursor.ItemHold.Serial == serial
-                    && Client.Game.GameCursor.ItemHold.Dropped
+                    Client.Game.UO.GameCursor.ItemHold.Serial == serial
+                    && Client.Game.UO.GameCursor.ItemHold.Dropped
                 )
                 {
                     // we want maintain the item data due to the denymoveitem packet
                     //ItemHold.Clear();
-                    Client.Game.GameCursor.ItemHold.Enabled = false;
-                    Client.Game.GameCursor.ItemHold.Dropped = false;
+                    Client.Game.UO.GameCursor.ItemHold.Enabled = false;
+                    Client.Game.UO.GameCursor.ItemHold.Dropped = false;
                 }
 
                 if (item.OnGround)

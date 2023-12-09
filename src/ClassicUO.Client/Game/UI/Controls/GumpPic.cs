@@ -56,7 +56,7 @@ namespace ClassicUO.Game.UI.Controls
             {
                 _graphic = value;
 
-                ref readonly var gumpInfo = ref Client.Game.Gumps.GetGump(_graphic);
+                ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(_graphic);
 
                 if (gumpInfo.Texture == null)
                 {
@@ -74,14 +74,14 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Contains(int x, int y)
         {
-            ref readonly var gumpInfo = ref Client.Game.Gumps.GetGump(_graphic);
+            ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(_graphic);
 
             if (gumpInfo.Texture == null)
             {
                 return false;
             }
 
-            if (Client.Game.Gumps.PixelCheck(Graphic, x - Offset.X, y - Offset.Y))
+            if (Client.Game.UO.Gumps.PixelCheck(Graphic, x - Offset.X, y - Offset.Y))
             {
                 return true;
             }
@@ -159,7 +159,7 @@ namespace ClassicUO.Game.UI.Controls
 
             Vector3 hueVector = ShaderHueTranslator.GetHueVector(Hue, IsPartialHue, Alpha, true);
 
-            ref readonly var gumpInfo = ref Client.Game.Gumps.GetGump(Graphic);
+            ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(Graphic);
 
             if (gumpInfo.Texture != null)
             {
@@ -246,7 +246,7 @@ namespace ClassicUO.Game.UI.Controls
 
             Vector3 hueVector = ShaderHueTranslator.GetHueVector(Hue, false, Alpha, true);
 
-            ref readonly var gumpInfo = ref Client.Game.Gumps.GetGump(Graphic);
+            ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(Graphic);
 
             var sourceBounds = new Rectangle(gumpInfo.UV.X + _picInPicBounds.X, gumpInfo.UV.Y + _picInPicBounds.Y, _picInPicBounds.Width, _picInPicBounds.Height);
 

@@ -2,7 +2,7 @@
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 // 1. Redistributions of source code must retain the above copyright
@@ -16,7 +16,7 @@
 // 4. Neither the name of the copyright holder nor the
 //    names of its contributors may be used to endorse or promote products
 //    derived from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -196,7 +196,7 @@ namespace ClassicUO.Game.Managers
             // https://github.com/andreakarasho/ClassicUO/issues/1373
             // when receiving a cancellation target from the server we need
             // to send the last active cursorID, so update cursor data later
-            
+
             _targetCursorId = cursorID;
         }
 
@@ -435,7 +435,7 @@ namespace ClassicUO.Game.Managers
 
                 ref StaticTiles itemData = ref TileDataLoader.Instance.StaticData[graphic];
 
-                if (Client.Version >= ClientVersion.CV_7090 && itemData.IsSurface)
+                if (Client.Game.UO.Version >= ClientVersion.CV_7090 && itemData.IsSurface)
                 {
                     z += itemData.Height;
                 }
@@ -507,7 +507,7 @@ namespace ClassicUO.Game.Managers
             _lastDataBuffer[17] = (byte)(graphic >> 8);
             _lastDataBuffer[18] = (byte)graphic;
 
-            
+
 
             NetClient.Socket.Send_TargetXYZ(graphic,
                                             x,

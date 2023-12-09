@@ -46,7 +46,7 @@ namespace ClassicUO.Game.UI.Gumps
             CanCloseWithRightClick = true;
             Add(new GumpPic(0, 0, 0x0816, 0));
 
-            ref readonly var gumpInfo = ref Client.Game.Gumps.GetGump(0x0816);
+            ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(0x0816);
 
             Width = gumpInfo.UV.Width;
             Height = gumpInfo.UV.Height;

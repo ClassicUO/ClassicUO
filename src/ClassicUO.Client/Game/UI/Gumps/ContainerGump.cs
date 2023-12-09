@@ -77,11 +77,11 @@ namespace ClassicUO.Game.UI.Gumps
             // New Backpack gumps. Client Version 7.0.53.1
             if (
                 item == world.Player.FindItemByLayer(Layer.Backpack)
-                && Client.Version >= ClassicUO.Utility.ClientVersion.CV_705301
+                && Client.Game.UO.Version >= ClassicUO.Utility.ClientVersion.CV_705301
                 && ProfileManager.CurrentProfile != null
             )
             {
-                var gumps = Client.Game.Gumps;
+                var gumps = Client.Game.UO.Gumps;
 
                 switch (ProfileManager.CurrentProfile.BackpackStyle)
                 {
@@ -234,7 +234,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (
                 e.Button == MouseButtonType.Left
                 && !IsMinimized
-                && !Client.Game.GameCursor.ItemHold.Enabled
+                && !Client.Game.UO.GameCursor.ItemHold.Enabled
             )
             {
                 Point offset = Mouse.LDragOffset;
@@ -271,7 +271,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (
                 World.TargetManager.IsTargeting
-                && !Client.Game.GameCursor.ItemHold.Enabled
+                && !Client.Game.UO.GameCursor.ItemHold.Enabled
                 && SerialHelper.IsValid(serial)
             )
             {
@@ -306,8 +306,8 @@ namespace ClassicUO.Game.UI.Gumps
                     candrop = false;
 
                     if (
-                        Client.Game.GameCursor.ItemHold.Enabled
-                        && !Client.Game.GameCursor.ItemHold.IsFixedPosition
+                        Client.Game.UO.GameCursor.ItemHold.Enabled
+                        && !Client.Game.UO.GameCursor.ItemHold.IsFixedPosition
                     )
                     {
                         candrop = true;
@@ -324,7 +324,7 @@ namespace ClassicUO.Game.UI.Gumps
                             }
                             else if (
                                 target.ItemData.IsStackable
-                                && target.Graphic == Client.Game.GameCursor.ItemHold.Graphic
+                                && target.Graphic == Client.Game.UO.GameCursor.ItemHold.Graphic
                             )
                             {
                                 dropcontainer = target.Serial;
@@ -356,8 +356,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (
                     !candrop
-                    && Client.Game.GameCursor.ItemHold.Enabled
-                    && !Client.Game.GameCursor.ItemHold.IsFixedPosition
+                    && Client.Game.UO.GameCursor.ItemHold.Enabled
+                    && !Client.Game.UO.GameCursor.ItemHold.IsFixedPosition
                 )
                 {
                     Client.Game.Audio.PlaySound(0x0051);
@@ -365,8 +365,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (
                     candrop
-                    && Client.Game.GameCursor.ItemHold.Enabled
-                    && !Client.Game.GameCursor.ItemHold.IsFixedPosition
+                    && Client.Game.UO.GameCursor.ItemHold.Enabled
+                    && !Client.Game.UO.GameCursor.ItemHold.IsFixedPosition
                 )
                 {
                     ContainerGump gump = UIManager.GetGump<ContainerGump>(dropcontainer);
@@ -390,13 +390,13 @@ namespace ClassicUO.Game.UI.Gumps
 
                         ref readonly var spriteInfo = ref (
                             gump.IsChessboard
-                                ? ref Client.Game.Gumps.GetGump(
+                                ? ref Client.Game.UO.Gumps.GetGump(
                                     (ushort)(
-                                        Client.Game.GameCursor.ItemHold.DisplayedGraphic
+                                        Client.Game.UO.GameCursor.ItemHold.DisplayedGraphic
                                         - Constants.ITEM_GUMP_TEXTURE_OFFSET
                                     )
                                 )
-                                : ref Client.Game.Arts.GetArt(Client.Game.GameCursor.ItemHold.DisplayedGraphic)
+                                : ref Client.Game.UO.Arts.GetArt(Client.Game.UO.GameCursor.ItemHold.DisplayedGraphic)
                         );
 
                         float scale = GetScale();
@@ -432,8 +432,8 @@ namespace ClassicUO.Game.UI.Gumps
                                 && ProfileManager.CurrentProfile.RelativeDragAndDropItems
                             )
                             {
-                                x += Client.Game.GameCursor.ItemHold.MouseOffset.X;
-                                y += Client.Game.GameCursor.ItemHold.MouseOffset.Y;
+                                x += Client.Game.UO.GameCursor.ItemHold.MouseOffset.X;
+                                y += Client.Game.UO.GameCursor.ItemHold.MouseOffset.Y;
                             }
 
                             x -= textureW >> 1;
@@ -465,7 +465,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
 
                     GameActions.DropItem(
-                        Client.Game.GameCursor.ItemHold.Serial,
+                        Client.Game.UO.GameCursor.ItemHold.Serial,
                         x,
                         y,
                         0,
@@ -474,7 +474,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     Mouse.CancelDoubleClick = true;
                 }
-                else if (!Client.Game.GameCursor.ItemHold.Enabled && SerialHelper.IsValid(serial))
+                else if (!Client.Game.UO.GameCursor.ItemHold.Enabled && SerialHelper.IsValid(serial))
                 {
                     if (!World.DelayedObjectClickManager.IsEnabled)
                     {
@@ -652,13 +652,13 @@ namespace ClassicUO.Game.UI.Gumps
 
             ref readonly var spriteInfo = ref (
                 IsChessboard
-                    ? ref Client.Game.Gumps.GetGump(
+                    ? ref Client.Game.UO.Gumps.GetGump(
                         (ushort)(
                             item.DisplayedGraphic
                             - Constants.ITEM_GUMP_TEXTURE_OFFSET
                         )
                     )
-                    : ref Client.Game.Arts.GetArt(item.DisplayedGraphic)
+                    : ref Client.Game.UO.Arts.GetArt(item.DisplayedGraphic)
             );
 
             if (spriteInfo.Texture != null)

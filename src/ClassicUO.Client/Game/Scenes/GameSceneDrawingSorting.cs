@@ -348,7 +348,7 @@ namespace ClassicUO.Game.Scenes
 
                     if (check)
                     {
-                        var rect = Client.Game.Arts.GetRealArtBounds(obj.Graphic);
+                        var rect = Client.Game.UO.Arts.GetRealArtBounds(obj.Graphic);
 
                         rect.X = obj.RealScreenPosition.X - (rect.Width >> 1) + rect.X;
                         rect.Y = obj.RealScreenPosition.Y - rect.Height + rect.Y;

@@ -2,7 +2,7 @@
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 // 1. Redistributions of source code must retain the above copyright
@@ -16,7 +16,7 @@
 // 4. Neither the name of the copyright holder nor the
 //    names of its contributors may be used to endorse or promote products
 //    derived from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -66,13 +66,13 @@ namespace ClassicUO.Game.UI.Gumps.Login
             byte font;
             ushort hue;
 
-            if (Client.Version < ClientVersion.CV_706400)
+            if (Client.Game.UO.Version < ClientVersion.CV_706400)
             {
                 _buttonNormal = 0x15A4;
                 _buttonOver = 0x15A5;
                 const ushort HUE = 0x0386;
 
-                if (Client.Version >= ClientVersion.CV_500A)
+                if (Client.Game.UO.Version >= ClientVersion.CV_500A)
                 {
                     Add(new GumpPic(0, 0, 0x2329, 0));
                 }
@@ -103,7 +103,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                     }
                 );
 
-                if (Client.Version < ClientVersion.CV_500A)
+                if (Client.Game.UO.Version < ClientVersion.CV_500A)
                 {
                     Add(new GumpPic(286, 45, 0x058A, 0));
                 }
@@ -415,7 +415,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 )
             );
 
-          
+
             Add
             (
                 new HtmlControl

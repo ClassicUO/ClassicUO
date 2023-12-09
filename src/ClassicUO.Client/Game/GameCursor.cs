@@ -130,7 +130,7 @@ namespace ClassicUO.Game
                 {
                     ushort id = _cursorData[i, j];
 
-                    var surface = Client.Game.Arts.CreateCursorSurfacePtr(
+                    var surface = Client.Game.UO.Arts.CreateCursorSurfacePtr(
                         id,
                         (ushort)(i == 2 ? 0x0033 : 0),
                         out int hotX,
@@ -191,7 +191,7 @@ namespace ClassicUO.Game
 
             if (graphic != 0xFFFF)
             {
-                ref readonly var artInfo = ref Client.Game.Arts.GetArt(graphic);
+                ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(graphic);
 
                 float scale = 1;
 
@@ -255,7 +255,7 @@ namespace ClassicUO.Game
 
                 if (draggingGraphic != 0xFFFF && ItemHold.IsFixedPosition && !UIManager.IsDragging)
                 {
-                    ref readonly var artInfo = ref Client.Game.Arts.GetArt(draggingGraphic);
+                    ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(draggingGraphic);
 
                     Point offset = GetDraggingItemOffset();
 
@@ -467,7 +467,7 @@ namespace ClassicUO.Game
 
                 ushort draggingGraphic = GetDraggingItemGraphic();
 
-                ref readonly var artInfo = ref Client.Game.Arts.GetArt(draggingGraphic);
+                ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(draggingGraphic);
 
                 if (artInfo.Texture != null)
                 {
@@ -538,8 +538,8 @@ namespace ClassicUO.Game
                     hueVec = ShaderHueTranslator.GetHueVector(0);
                 }
 
-                ref readonly var artInfo = ref Client.Game.Arts.GetArt(Graphic);
-               
+                ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(Graphic);
+
                 var rect = artInfo.UV;
 
                 const int BORDER_SIZE = 1;

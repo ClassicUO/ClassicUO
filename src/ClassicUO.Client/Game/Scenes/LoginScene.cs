@@ -2,7 +2,7 @@
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 // 1. Redistributions of source code must retain the above copyright
@@ -16,7 +16,7 @@
 // 4. Neither the name of the copyright holder nor the
 //    names of its contributors may be used to endorse or promote products
 //    derived from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -92,7 +92,7 @@ namespace ClassicUO.Game.Scenes
         public static string Account { get; internal set; }
         public string Password { get; private set; }
         public bool CanAutologin => _autoLogin || Reconnect;
-        
+
 
         public override void Load()
         {
@@ -103,7 +103,7 @@ namespace ClassicUO.Game.Scenes
             _autoLogin = Settings.GlobalSettings.AutoLogin;
 
             UIManager.Add(new LoginBackground(_world));
-            UIManager.Add(_currentGump = new LoginGump(_world, this));          
+            UIManager.Add(_currentGump = new LoginGump(_world, this));
 
             Client.Game.Audio.PlayMusic(Client.Game.Audio.LoginMusicIndex, false, true);
 
@@ -140,11 +140,11 @@ namespace ClassicUO.Game.Scenes
 
             _currentGump?.Dispose();
 
-            // UnRegistering Packet Events           
+            // UnRegistering Packet Events
             NetClient.Socket.Connected -= OnNetClientConnected;
             NetClient.Socket.Disconnected -= OnNetClientDisconnected;
 
-            Client.Game.GameCursor.IsLoading = false;
+            Client.Game.UO.GameCursor.IsLoading = false;
             base.Unload();
         }
 
@@ -154,7 +154,7 @@ namespace ClassicUO.Game.Scenes
 
             if (_lastLoginStep != CurrentLoginStep)
             {
-                Client.Game.GameCursor.IsLoading = false;
+                Client.Game.UO.GameCursor.IsLoading = false;
 
                 // this trick avoid the flickering
                 Gump g = _currentGump;
@@ -230,7 +230,7 @@ namespace ClassicUO.Game.Scenes
                 case LoginSteps.EnteringBritania:
                 case LoginSteps.PopUpMessage:
                 case LoginSteps.CharacterCreationDone:
-                    Client.Game.GameCursor.IsLoading = CurrentLoginStep != LoginSteps.PopUpMessage;
+                    Client.Game.UO.GameCursor.IsLoading = CurrentLoginStep != LoginSteps.PopUpMessage;
 
                     return GetLoadingScreen();
 
@@ -267,7 +267,7 @@ namespace ClassicUO.Game.Scenes
                 {
                     case LoginSteps.Connecting:
                         labelText = ClilocLoader.Instance.GetString(3000002, ResGeneral.Connecting); // "Connecting..."
-                        
+
                         showButtons = LoginButtons.Cancel;
 
                         break;
@@ -524,9 +524,9 @@ namespace ClassicUO.Game.Scenes
 
             EncryptionHelper.Initialize(true, address, (ENCRYPTION_TYPE)Settings.GlobalSettings.Encryption);
 
-            if (Client.Version >= ClientVersion.CV_6040)
+            if (Client.Game.UO.Version >= ClientVersion.CV_6040)
             {
-                uint clientVersion = (uint) Client.Version;
+                uint clientVersion = (uint) Client.Game.UO.Version;
 
                 byte major = (byte) (clientVersion >> 24);
                 byte minor = (byte) (clientVersion >> 16);
@@ -677,13 +677,14 @@ namespace ClassicUO.Game.Scenes
         }
 
         public void HandleRelayServerPacket(ref StackDataReader p)
-        {           
+        {
             long ip = p.ReadUInt32LE(); // use LittleEndian here
             ushort port = p.ReadUInt16BE();
             uint seed = p.ReadUInt32BE();
 
             NetClient.Socket.Disconnect();
-            NetClient.Socket = new NetClient();
+            // NOTE: i don't think i need to create a new socket wrapper anymore
+            //NetClient.Socket = new NetClient();
             EncryptionHelper.Initialize(false, seed, (ENCRYPTION_TYPE) Settings.GlobalSettings.Encryption);
 
             NetClient.Socket.Connect(new IPAddress(ip).ToString(), port);
@@ -720,7 +721,7 @@ namespace ClassicUO.Game.Scenes
             byte count = p.ReadUInt8();
             Cities = new CityInfo[count];
 
-            bool isNew = Client.Version >= ClientVersion.CV_70130;
+            bool isNew = Client.Game.UO.Version >= ClientVersion.CV_70130;
             string[] descriptions = null;
 
             if (!isNew)
@@ -801,7 +802,7 @@ namespace ClassicUO.Game.Scenes
 
             string[] descr = new string[count];
 
-            // TODO: stackalloc ? 
+            // TODO: stackalloc ?
             byte[] data = new byte[4];
 
             StringBuilder name = new StringBuilder();
@@ -1068,7 +1069,7 @@ namespace ClassicUO.Game.Scenes
                         _pinger.SendAsyncCancel();
                     }
                     catch { }
-                   
+
                 }
 
                 _pinger.Dispose();

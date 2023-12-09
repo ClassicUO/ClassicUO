@@ -2,7 +2,7 @@
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 // 1. Redistributions of source code must retain the above copyright
@@ -16,7 +16,7 @@
 // 4. Neither the name of the copyright holder nor the
 //    names of its contributors may be used to endorse or promote products
 //    derived from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -673,7 +673,7 @@ namespace ClassicUO.Game.UI.Gumps
                 )
             );
 
-            _showHouseContent.IsVisible = Client.Version >= ClientVersion.CV_70796;
+            _showHouseContent.IsVisible = Client.Game.UO.Version >= ClientVersion.CV_70796;
 
             section.Add
             (
@@ -687,7 +687,7 @@ namespace ClassicUO.Game.UI.Gumps
                 )
             );
 
-            _use_smooth_boat_movement.IsVisible = Client.Version >= ClientVersion.CV_7090;
+            _use_smooth_boat_movement.IsVisible = Client.Game.UO.Version >= ClientVersion.CV_7090;
 
 
             SettingsSection section2 = AddSettingsSection(box, "Mobiles");
@@ -1846,7 +1846,7 @@ namespace ClassicUO.Game.UI.Gumps
                     startY
                 )
             );
-            
+
             section4.Add
             (
                 _animatedWaterEffect = AddCheckBox
@@ -3235,7 +3235,7 @@ namespace ClassicUO.Game.UI.Gumps
             int startY = 5;
             Label text;
 
-            bool hasBackpacks = Client.Version >= ClientVersion.CV_705301;
+            bool hasBackpacks = Client.Game.UO.Version >= ClientVersion.CV_705301;
 
             if(hasBackpacks)
             {
@@ -3302,7 +3302,7 @@ namespace ClassicUO.Game.UI.Gumps
                 startY
             );
 
-            _useLargeContianersGumps.IsVisible = Client.Version >= ClientVersion.CV_706000;
+            _useLargeContianersGumps.IsVisible = Client.Game.UO.Version >= ClientVersion.CV_706000;
 
             if (_useLargeContianersGumps.IsVisible)
             {

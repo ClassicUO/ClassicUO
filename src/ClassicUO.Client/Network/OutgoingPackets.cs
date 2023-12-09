@@ -2,7 +2,7 @@
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 // 1. Redistributions of source code must retain the above copyright
@@ -16,7 +16,7 @@
 // 4. Neither the name of the copyright holder nor the
 //    names of its contributors may be used to endorse or promote products
 //    derived from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -348,7 +348,7 @@ namespace ClassicUO.Network
             byte id = ID;
             int skillcount = 3;
 
-            if (Client.Version >= ClientVersion.CV_70160)
+            if (Client.Game.UO.Version >= ClientVersion.CV_70160)
             {
                 id = ID_NEW;
                 ++skillcount;
@@ -370,7 +370,7 @@ namespace ClassicUO.Network
             writer.WriteASCII(character.Name, 30);
             writer.WriteZero(2);
 
-            writer.WriteUInt32BE((uint) Client.Protocol);
+            writer.WriteUInt32BE((uint) Client.Game.UO.Protocol);
             writer.WriteUInt32BE(0x01);
             writer.WriteUInt32BE(0x00);
             writer.WriteUInt8(profession);
@@ -378,7 +378,7 @@ namespace ClassicUO.Network
 
             byte val;
 
-            if (Client.Version < ClientVersion.CV_4011D)
+            if (Client.Game.UO.Version < ClientVersion.CV_4011D)
             {
                 val = (byte) (character.Flags.HasFlag(Flags.Female) ? 0x01 : 0x00);
             }
@@ -386,7 +386,7 @@ namespace ClassicUO.Network
             {
                 val = (byte) character.Race;
 
-                if (Client.Version < ClientVersion.CV_7000)
+                if (Client.Game.UO.Version < ClientVersion.CV_7000)
                 {
                     val--;
                 }
@@ -525,7 +525,7 @@ namespace ClassicUO.Network
             writer.WriteUInt32BE(0xEDEDEDED);
             writer.WriteASCII(name, 30);
             writer.WriteZero(2);
-            writer.WriteUInt32BE((uint) Client.Protocol);
+            writer.WriteUInt32BE((uint) Client.Game.UO.Protocol);
             writer.WriteZero(24);
             writer.WriteUInt32BE(index);
             writer.WriteUInt32BE(ipclient);
@@ -1089,7 +1089,7 @@ namespace ClassicUO.Network
 
             byte id = ID;
 
-            if (Client.Version < ClientVersion.CV_60142)
+            if (Client.Game.UO.Version < ClientVersion.CV_60142)
             {
                 id = ID_OLD;
             }
@@ -1105,7 +1105,7 @@ namespace ClassicUO.Network
                 writer.WriteZero(2);
             }
 
-            if (Client.Version >= ClientVersion.CV_60142)
+            if (Client.Game.UO.Version >= ClientVersion.CV_60142)
             {
                 writer.WriteUInt16BE(0x1C);
                 writer.WriteUInt16BE(0x02);
@@ -2635,7 +2635,7 @@ namespace ClassicUO.Network
 
             uint clientFlag = 0;
 
-            for (int i = 0; i < (uint) Client.Protocol; ++i)
+            for (int i = 0; i < (uint) Client.Game.UO.Protocol; ++i)
             {
                 clientFlag |= (uint) (1 << i);
             }

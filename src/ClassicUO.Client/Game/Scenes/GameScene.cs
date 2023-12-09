@@ -135,7 +135,7 @@ namespace ClassicUO.Game.Scenes
             Camera.Bounds.Width = Math.Max(0, ProfileManager.CurrentProfile.GameWindowSize.X);
             Camera.Bounds.Height = Math.Max(0, ProfileManager.CurrentProfile.GameWindowSize.Y);
 
-            Client.Game.GameCursor.ItemHold.Clear();
+            Client.Game.UO.GameCursor.ItemHold.Clear();
 
             _world.Macros.Clear();
             _world.Macros.Load();
@@ -321,7 +321,7 @@ namespace ClassicUO.Game.Scenes
             Client.Game.Audio?.StopSounds();
 
             Client.Game.SetWindowTitle(string.Empty);
-            Client.Game.GameCursor.ItemHold.Clear();
+            Client.Game.UO.GameCursor.ItemHold.Clear();
 
             try
             {
@@ -908,7 +908,7 @@ namespace ClassicUO.Game.Scenes
                 _multi = null;
             }
 
-            if (_isMouseLeftDown && !Client.Game.GameCursor.ItemHold.Enabled)
+            if (_isMouseLeftDown && !Client.Game.UO.GameCursor.ItemHold.Enabled)
             {
                 if (
                     _world.CustomHouseManager != null
@@ -1233,7 +1233,7 @@ namespace ClassicUO.Game.Scenes
             for (int i = 0; i < _lightCount; i++)
             {
                 ref LightData l = ref _lights[i];
-                ref readonly var lightInfo = ref Client.Game.Lights.GetLight(l.ID);
+                ref readonly var lightInfo = ref Client.Game.UO.Lights.GetLight(l.ID);
 
                 if (lightInfo.Texture == null)
                 {

@@ -82,7 +82,7 @@ namespace ClassicUO.Game.Managers
             }
             else
             {
-                ref readonly var gumpInfo = ref Client.Game.Gumps.GetGump(g);
+                ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(g);
 
                 if (gumpInfo.Texture != null)
                 {
