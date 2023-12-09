@@ -807,6 +807,14 @@ namespace ClassicUO.Game
             ability ^= (Ability) 0x80;
         }
 
+        // ===================================================
+        [Obsolete("temporary workaround to not break assistants")]
+        public static void UsePrimaryAbility() => UsePrimaryAbility(ClassicUO.Client.Game.World);
+
+        [Obsolete("temporary workaround to not break assistants")]
+        public static void UseSecondaryAbility() => UseSecondaryAbility(ClassicUO.Client.Game.World);
+        // ===================================================
+
         public static void QuestArrow(bool rightClick)
         {
             Socket.Send_ClickQuestArrow(rightClick);
