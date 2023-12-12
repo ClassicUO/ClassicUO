@@ -2122,7 +2122,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             content.AddToRight(new CheckboxWithLabel("Enable health indicator border", 0, profile.EnableHealthIndicator, (b) => { profile.EnableHealthIndicator = b; }), true, page);
             content.Indent();
-            content.AddToRight(new SliderWithLabel("Only show below hp %", 0, Theme.SLIDER_WIDTH, 1, 100, (int)profile.ShowHealthIndicatorBelow, (i) => { profile.ShowHealthIndicatorBelow = i; }), true, page);
+            content.AddToRight(new SliderWithLabel("Only show below hp %", 0, Theme.SLIDER_WIDTH, 1, 100, (int)profile.ShowHealthIndicatorBelow * 100, (i) => { profile.ShowHealthIndicatorBelow = i / 100f; }), true, page);
             content.AddToRight(new SliderWithLabel("Size", 0, Theme.SLIDER_WIDTH, 1, 25, profile.HealthIndicatorWidth, (i) => { profile.HealthIndicatorWidth = i; }), true, page);
             content.RemoveIndent();
 

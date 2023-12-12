@@ -9,7 +9,8 @@ namespace ClassicUO.Game.UI.Gumps
         private static string[] updateTexts = {
              "/c[white][3.16.0]/cd\n" +
                 "- Some small improvements for input boxes and the new option menu\n" +
-                "- Added player position offset option in TazUO->Misc",
+                "- Added player position offset option in TazUO->Misc\n" +
+                "- Fix for health indicator percentage",
 
             "/c[white][3.15.0]/cd\n" +
                 "- Mouse interaction for overhead text can be disabled\n" +
