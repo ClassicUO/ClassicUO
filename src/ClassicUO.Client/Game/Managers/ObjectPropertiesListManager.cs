@@ -198,6 +198,7 @@ namespace ClassicUO.Game.Managers
             serial = item.Serial;
             if (World.OPL.TryGetNameAndData(item.Serial, out Name, out RawData))
             {
+                Name = Name.Trim();
                 HasData = true;
                 processData();
             }

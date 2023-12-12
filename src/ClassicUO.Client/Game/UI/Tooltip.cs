@@ -113,8 +113,7 @@ namespace ClassicUO.Game.UI
                 if (SerialHelper.IsItem(Serial))
                 {
                     finalString = Managers.ToolTipOverrideData.ProcessTooltipText(Serial);
-                    if (finalString == null)
-                        finalString = _textHTML;
+                    finalString ??= _textHTML;
                 }
 
                 if (string.IsNullOrEmpty(finalString) && !string.IsNullOrEmpty(_textHTML)) //Fix for vendor search
@@ -206,7 +205,7 @@ namespace ClassicUO.Game.UI
                 hue_vec
             );
 
-            _textBox.Draw(batcher, x + 3, y + 3);
+            _textBox.Draw(batcher, x, y);
 
             return true;
         }

@@ -10,7 +10,8 @@ namespace ClassicUO.Game.UI.Gumps
              "/c[white][3.16.0]/cd\n" +
                 "- Some small improvements for input boxes and the new option menu\n" +
                 "- Added player position offset option in TazUO->Misc\n" +
-                "- Fix for health indicator percentage",
+                "- Fix for health indicator percentage\n" +
+                "- Fix tooltip centered text",
 
             "/c[white][3.15.0]/cd\n" +
                 "- Mouse interaction for overhead text can be disabled\n" +
