@@ -7197,7 +7197,12 @@ namespace ClassicUO.Network
             gump.Update();
             gump.SetInScreen();
 
-            if (gumpID == 1426736667) //SOS message gump
+            if (CUOEnviroment.Debug)
+            {
+                GameActions.Print($"GumpID: {gumpID}");
+            }
+
+            if (gumpID == 1426736667 || (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.ServerName == "UOAlive" && gumpID == 4258191894)) //SOS message gump
             {
                 for (int i = 0; i < gump.Children.Count; i++)
                 {

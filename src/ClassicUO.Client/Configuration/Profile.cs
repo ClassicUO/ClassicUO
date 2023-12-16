@@ -583,6 +583,8 @@ namespace ClassicUO.Configuration
         [JsonConverter(typeof(Point2Converter))]
         public Point PlayerOffset { get; set; } = new Point(-50, -50);
 
+        public bool UseLandTextures { get; set; } = false;
+
 
 
         public void Save(string path, bool saveGumps = true)

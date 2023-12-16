@@ -2208,6 +2208,10 @@ namespace ClassicUO.Game.UI.Gumps
             content.AddToRight(new SliderWithLabel("Player Offset X", 0, Theme.SLIDER_WIDTH, -20, 20, profile.PlayerOffset.X, (i) => { profile.PlayerOffset = new Point(i, profile.PlayerOffset.Y); }), true, page);
             content.AddToRight(new SliderWithLabel("Player Offset Y", 0, Theme.SLIDER_WIDTH, -20, 20, profile.PlayerOffset.Y, (i) => { profile.PlayerOffset = new Point(profile.PlayerOffset.X, i); }), true, page);
 
+            content.BlankLine();
+
+            content.AddToRight(new CheckboxWithLabel("Use land textures where available(Experimental)", 0, profile.UseLandTextures, (b) => { profile.UseLandTextures = b; }), true, page);
+
             #endregion
 
             #region Tooltips
