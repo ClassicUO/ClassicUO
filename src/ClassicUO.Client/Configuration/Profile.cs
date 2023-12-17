@@ -581,7 +581,7 @@ namespace ClassicUO.Configuration
         public int ControllerMouseSensativity { get => Input.Mouse.ControllerSensativity; set => Input.Mouse.ControllerSensativity = value; }
 
         [JsonConverter(typeof(Point2Converter))]
-        public Point PlayerOffset { get; set; } = new Point(-50, -50);
+        public Point PlayerOffset { get; set; } = new Point(0, 0);
 
         public bool UseLandTextures { get; set; } = false;
 
