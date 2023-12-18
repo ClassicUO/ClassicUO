@@ -5096,7 +5096,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 MacroObject ob = (MacroObject)Macro.Items;
 
-                if (ob.Code == MacroType.None)
+                if (ob == null || ob.Code == MacroType.None)
                 {
                     return;
                 }
@@ -5117,8 +5117,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Macro.PushToBack(obj);
 
-                Control c;
-                _databox.Add(c = new MacroEntry(this, obj, _allHotkeysNames));
+                _databox.Add(new MacroEntry(this, obj, _allHotkeysNames));
                 _databox.ReArrangeChildren();
                 _databox.ForceSizeUpdate();
                 ForceSizeUpdate();
