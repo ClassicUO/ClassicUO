@@ -36,6 +36,7 @@ using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
+using ClassicUO.Game.Map;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
@@ -5747,11 +5748,45 @@ namespace ClassicUO.Network
             bool ignoreobject = p.ReadUInt16BE() != 0;
             uint cliloc = p.ReadUInt32BE();
             string name = p.ReadUnicodeLE();
+
+            switch (type)
+            {
+                case WaypointsType.Corpse:
+                    World.WMapManager.AddOrUpdate(serial, x, y, 0, map, true, "Corpse");
+                    break;
+                case WaypointsType.PartyMember:
+                    break;
+                case WaypointsType.RallyPoint:
+                    break;
+                case WaypointsType.QuestGiver:
+                    break;
+                case WaypointsType.QuestDestination:
+                    break;
+                case WaypointsType.Resurrection:
+                    World.WMapManager.AddOrUpdate(serial, x, y, 0, map, true, "Resurrection");
+                    break;
+                case WaypointsType.PointOfInterest:
+                    break;
+                case WaypointsType.Landmark:
+                    break;
+                case WaypointsType.Town:
+                    break;
+                case WaypointsType.Dungeon:
+                    break;
+                case WaypointsType.Moongate:
+                    break;
+                case WaypointsType.Shop:
+                    break;
+                case WaypointsType.Player:
+                    break;
+            }
         }
 
         private static void RemoveWaypoint(ref StackDataReader p)
         {
             uint serial = p.ReadUInt32BE();
+
+            World.WMapManager.Remove(serial);
         }
 
         private static void KrriosClientSpecial(ref StackDataReader p)
