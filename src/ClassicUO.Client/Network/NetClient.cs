@@ -228,7 +228,7 @@ namespace ClassicUO.Network
             _sendStream.Clear();
         }
 
-        public Span<byte> CollectAvailableData()
+        public ArraySegment<byte> CollectAvailableData()
         {
             try
             {
@@ -236,16 +236,17 @@ namespace ClassicUO.Network
 
                 if (size <= 0)
                 {
-                    return Span<byte>.Empty;
+                    return ArraySegment<byte>.Empty;
                 }
 
                 Statistics.TotalBytesReceived += (uint)size;
 
+                var segment = new ArraySegment<byte>(_compressedBuffer, 0, size);
                 var span = _compressedBuffer.AsSpan(0, size);
 
                 ProcessEncryption(span);
 
-                return DecompressBuffer(span);
+                return DecompressBuffer(segment);
             }
             catch (SocketException ex)
             {
@@ -275,7 +276,7 @@ namespace ClassicUO.Network
                 }
             }
 
-            return Span<byte>.Empty;
+            return ArraySegment<byte>.Empty;
         }
 
         public void Flush()
@@ -371,7 +372,7 @@ namespace ClassicUO.Network
             }
         }
 
-        private Span<byte> DecompressBuffer(Span<byte> buffer)
+        private ArraySegment<byte> DecompressBuffer(ArraySegment<byte> buffer)
         {
             if (!_isCompressionEnabled)
                 return buffer;
@@ -382,10 +383,10 @@ namespace ClassicUO.Network
                 Disconnect();
                 Disconnected?.Invoke(this, SocketError.SocketError);
 
-                return Span<byte>.Empty;
+                return ArraySegment<byte>.Empty;
             }
 
-            return _uncompressedBuffer.AsSpan(0, size);
+            return new ArraySegment<byte>(_uncompressedBuffer, 0, size);
         }
     }
 }
