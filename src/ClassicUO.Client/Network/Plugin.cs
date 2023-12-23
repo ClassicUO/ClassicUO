@@ -530,7 +530,11 @@ namespace ClassicUO.Network
 
         internal static void Tick()
         {
+<<<<<<< HEAD
             Client.Game.PluginHost?.Tick();
+=======
+            Client.Game.AssistantHost?.PluginTick();
+>>>>>>> rpc support
 
             foreach (Plugin t in Plugins)
             {
@@ -543,7 +547,13 @@ namespace ClassicUO.Network
 
         internal static bool ProcessRecvPacket(byte[] data, ref int length)
         {
+<<<<<<< HEAD
             bool result = Client.Game.PluginHost?.PacketIn(new ArraySegment<byte>(data, 0, length)) ?? true;
+=======
+            Client.Game.AssistantHost?.PluginPacketIn(new ArraySegment<byte>(data, 0, length));
+
+            bool result = true;
+>>>>>>> rpc support
 
             foreach (Plugin plugin in Plugins)
             {
@@ -615,7 +625,11 @@ namespace ClassicUO.Network
 
         internal static void OnClosing()
         {
+<<<<<<< HEAD
             Client.Game.PluginHost?.Closing();
+=======
+            Client.Game.AssistantHost?.PluginClosing();
+>>>>>>> rpc support
 
             for (int i = 0; i < Plugins.Count; i++)
             {
@@ -630,7 +644,11 @@ namespace ClassicUO.Network
 
         internal static void OnFocusGained()
         {
+<<<<<<< HEAD
             Client.Game.PluginHost?.FocusGained();
+=======
+            Client.Game.AssistantHost?.PluginFocusGained();
+>>>>>>> rpc support
 
             foreach (Plugin t in Plugins)
             {
@@ -643,7 +661,11 @@ namespace ClassicUO.Network
 
         internal static void OnFocusLost()
         {
+<<<<<<< HEAD
             Client.Game.PluginHost?.FocusLost();
+=======
+            Client.Game.AssistantHost?.PluginFocusLost();
+>>>>>>> rpc support
 
             foreach (Plugin t in Plugins)
             {
@@ -656,7 +678,11 @@ namespace ClassicUO.Network
 
         internal static void OnConnected()
         {
+<<<<<<< HEAD
             Client.Game.PluginHost?.Connected();
+=======
+            Client.Game.AssistantHost?.PluginConnected();
+>>>>>>> rpc support
 
             foreach (Plugin t in Plugins)
             {
@@ -669,7 +695,11 @@ namespace ClassicUO.Network
 
         internal static void OnDisconnected()
         {
+<<<<<<< HEAD
             Client.Game.PluginHost?.Disconnected();
+=======
+            Client.Game.AssistantHost?.PluginDisconnected();
+>>>>>>> rpc support
 
             foreach (Plugin t in Plugins)
             {
@@ -693,9 +723,15 @@ namespace ClassicUO.Network
                 return true;
             }
 
+<<<<<<< HEAD
             var ok = Client.Game.PluginHost?.Hotkey(key, mod, ispressed);
 
             bool result = ok ?? true;
+=======
+            var ok = Client.Game.AssistantHost?.PluginHotkeys(key, mod, ispressed);
+
+            bool result = true;
+>>>>>>> rpc support
 
             foreach (Plugin plugin in Plugins)
             {
@@ -712,7 +748,11 @@ namespace ClassicUO.Network
 
         internal static void ProcessMouse(int button, int wheel)
         {
+<<<<<<< HEAD
             Client.Game.PluginHost?.Mouse(button, wheel);
+=======
+            Client.Game.AssistantHost?.PluginMouse(button, wheel);
+>>>>>>> rpc support
 
             foreach (Plugin plugin in Plugins)
             {
@@ -722,6 +762,7 @@ namespace ClassicUO.Network
 
         internal static void ProcessDrawCmdList(GraphicsDevice device)
         {
+<<<<<<< HEAD
             IntPtr cmdList = IntPtr.Zero;
             var len = 0;
             Client.Game.PluginHost?.GetCommandList(out cmdList, out len);
@@ -729,6 +770,9 @@ namespace ClassicUO.Network
             {
                 HandleCmdList(device, cmdList, len, Client.Game.PluginHost.GfxResources);
             }
+=======
+            Client.Game.AssistantHost?.PluginDrawCmdList();
+>>>>>>> rpc support
 
             foreach (Plugin plugin in Plugins)
             {
@@ -747,7 +791,13 @@ namespace ClassicUO.Network
 
         internal static int ProcessWndProc(SDL.SDL_Event* e)
         {
+<<<<<<< HEAD
             var result = Client.Game.PluginHost?.SdlEvent(e) ?? 0;
+=======
+            Client.Game.AssistantHost?.PluginSdlEvent(e);
+
+            int result = 0;
+>>>>>>> rpc support
 
             foreach (Plugin plugin in Plugins)
             {
@@ -762,7 +812,11 @@ namespace ClassicUO.Network
 
         internal static void UpdatePlayerPosition(int x, int y, int z)
         {
+<<<<<<< HEAD
             Client.Game.PluginHost?.UpdatePlayerPosition(x, y, z);
+=======
+            Client.Game.AssistantHost?.PluginUpdatePlayerPosition(x, y, z);
+>>>>>>> rpc support
 
             foreach (Plugin plugin in Plugins)
             {

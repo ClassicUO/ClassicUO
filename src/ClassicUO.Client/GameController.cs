@@ -65,6 +65,7 @@ namespace ClassicUO
         private UltimaBatcher2D _uoSpriteBatch;
         private bool _suppressedDraw;
         private Texture2D _background;
+        private readonly AssistantHost _assistantHost = new AssistantHost();
 
         public GameController(IPluginHost pluginHost)
         {
@@ -93,7 +94,11 @@ namespace ClassicUO
         public AudioManager Audio { get; private set; }
         public UltimaOnline UO { get; } = new UltimaOnline();
 
+<<<<<<< HEAD
         public IPluginHost PluginHost { get; private set; }
+=======
+        public AssistantHost AssistantHost => _assistantHost;
+>>>>>>> rpc support
 
         public GraphicsDeviceManager GraphicManager { get; }
         public readonly uint[] FrameDelay = new uint[2];
@@ -152,6 +157,8 @@ namespace ClassicUO
             SetScene(new LoginScene(UO.World));  
 #endif
             SetWindowPositionBySettings();
+
+            _assistantHost.Connect("127.0.0.1", 7777);
         }
 
         protected override void UnloadContent()
@@ -368,6 +375,11 @@ namespace ClassicUO
             var data = NetClient.Socket.CollectAvailableData();
             var packetsCount = PacketHandlers.Handler.ParsePackets(UO.World, data);
 
+<<<<<<< HEAD
+=======
+            _assistantHost?.Tick();
+
+>>>>>>> rpc support
             NetClient.Socket.Statistics.TotalPacketsReceived += (uint)packetsCount;
             NetClient.Socket.Flush();
 
