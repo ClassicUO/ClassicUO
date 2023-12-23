@@ -520,6 +520,8 @@ namespace ClassicUO.Network
 
         internal static void Tick()
         {
+            Client.Game.AssistantHost?.PluginTick();
+
             foreach (Plugin t in Plugins)
             {
                 if (t._tick != null)
@@ -531,6 +533,8 @@ namespace ClassicUO.Network
 
         internal static bool ProcessRecvPacket(byte[] data, ref int length)
         {
+            Client.Game.AssistantHost?.PluginPacketIn(new ArraySegment<byte>(data, 0, length));
+
             bool result = true;
 
             foreach (Plugin plugin in Plugins)
@@ -603,6 +607,8 @@ namespace ClassicUO.Network
 
         internal static void OnClosing()
         {
+            Client.Game.AssistantHost?.PluginClosing();
+
             for (int i = 0; i < Plugins.Count; i++)
             {
                 if (Plugins[i]._onClientClose != null)
@@ -616,6 +622,8 @@ namespace ClassicUO.Network
 
         internal static void OnFocusGained()
         {
+            Client.Game.AssistantHost?.PluginFocusGained();
+
             foreach (Plugin t in Plugins)
             {
                 if (t._onFocusGained != null)
@@ -627,6 +635,8 @@ namespace ClassicUO.Network
 
         internal static void OnFocusLost()
         {
+            Client.Game.AssistantHost?.PluginFocusLost();
+
             foreach (Plugin t in Plugins)
             {
                 if (t._onFocusLost != null)
@@ -638,6 +648,8 @@ namespace ClassicUO.Network
 
         internal static void OnConnected()
         {
+            Client.Game.AssistantHost?.PluginConnected();
+
             foreach (Plugin t in Plugins)
             {
                 if (t._onConnected != null)
@@ -649,6 +661,8 @@ namespace ClassicUO.Network
 
         internal static void OnDisconnected()
         {
+            Client.Game.AssistantHost?.PluginDisconnected();
+
             foreach (Plugin t in Plugins)
             {
                 if (t._onDisconnected != null)
@@ -671,6 +685,8 @@ namespace ClassicUO.Network
                 return true;
             }
 
+            var ok = Client.Game.AssistantHost?.PluginHotkeys(key, mod, ispressed);
+
             bool result = true;
 
             foreach (Plugin plugin in Plugins)
@@ -688,6 +704,8 @@ namespace ClassicUO.Network
 
         internal static void ProcessMouse(int button, int wheel)
         {
+            Client.Game.AssistantHost?.PluginMouse(button, wheel);
+
             foreach (Plugin plugin in Plugins)
             {
                 plugin._onMouse?.Invoke(button, wheel);
@@ -696,6 +714,8 @@ namespace ClassicUO.Network
 
         internal static void ProcessDrawCmdList(GraphicsDevice device)
         {
+            Client.Game.AssistantHost?.PluginDrawCmdList();
+
             foreach (Plugin plugin in Plugins)
             {
                 if (plugin._draw_cmd_list != null)
@@ -713,6 +733,8 @@ namespace ClassicUO.Network
 
         internal static int ProcessWndProc(SDL.SDL_Event* e)
         {
+            Client.Game.AssistantHost?.PluginSdlEvent(e);
+
             int result = 0;
 
             foreach (Plugin plugin in Plugins)
@@ -728,6 +750,8 @@ namespace ClassicUO.Network
 
         internal static void UpdatePlayerPosition(int x, int y, int z)
         {
+            Client.Game.AssistantHost?.PluginUpdatePlayerPosition(x, y, z);
+
             foreach (Plugin plugin in Plugins)
             {
                 try
