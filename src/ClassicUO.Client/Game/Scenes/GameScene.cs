@@ -172,7 +172,7 @@ namespace ClassicUO.Game.Scenes
 
             CommandManager.Initialize();
             NetClient.Socket.Disconnected += SocketOnDisconnected;
-            MessageManager.MessageReceived += ChatOnMessageReceived;
+            EventSink.MessageReceived += ChatOnMessageReceived;
             UIManager.ContainerScale = ProfileManager.CurrentProfile.ContainersScale / 100f;
 
             SDL.SDL_SetWindowMinimumSize(Client.Game.Window.Handle, 640, 480);
@@ -418,7 +418,7 @@ namespace ClassicUO.Game.Scenes
             _useItemQueue = null;
             Hotkeys = null;
             Macros = null;
-            MessageManager.MessageReceived -= ChatOnMessageReceived;
+            EventSink.MessageReceived -= ChatOnMessageReceived;
 
             Settings.GlobalSettings.WindowSize = new Point(
                 Client.Game.Window.ClientBounds.Width,

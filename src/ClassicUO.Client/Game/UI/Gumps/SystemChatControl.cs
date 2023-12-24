@@ -136,7 +136,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             WantUpdateSize = false;
 
-            MessageManager.MessageReceived += ChatOnMessageReceived;
+            EventSink.MessageReceived += ChatOnMessageReceived;
             Mode = ChatMode.Default;
 
             IsActive = !ProfileManager.CurrentProfile.ActivateChatAfterEnter;
@@ -310,7 +310,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Dispose()
         {
-            MessageManager.MessageReceived -= ChatOnMessageReceived;
+            EventSink.MessageReceived -= ChatOnMessageReceived;
             base.Dispose();
         }
 

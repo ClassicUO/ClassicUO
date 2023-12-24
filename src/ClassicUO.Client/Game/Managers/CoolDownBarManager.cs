@@ -12,7 +12,7 @@ namespace ClassicUO.Game.Managers
 
         public CoolDownBarManager()
         {
-            MessageManager.MessageReceived += MessageManager_MessageReceived;
+            EventSink.MessageReceived += MessageManager_MessageReceived;
         }
 
         private void MessageManager_MessageReceived(object sender, MessageEventArgs e)
