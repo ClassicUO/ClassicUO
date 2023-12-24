@@ -42,14 +42,14 @@ using static ClassicUO.Network.NetClient;
 
 namespace ClassicUO.Game.GameObjects
 {
-    enum HitsRequestStatus
+    public enum HitsRequestStatus
     {
         None,
         Pending,
         Received
     }
 
-    internal abstract class Entity : GameObject, IEquatable<Entity>
+    public abstract class Entity : GameObject, IEquatable<Entity>
     {
         private static readonly RenderedText[] _hitsPercText = new RenderedText[101];
         private Direction _direction;

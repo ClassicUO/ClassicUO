@@ -40,7 +40,7 @@ using ClassicUO.Configuration;
 
 namespace ClassicUO.Game.UI.Controls
 {
-    internal class TextBox : Control
+    public class TextBox : Control
     {
         private RichTextLayout _rtl;
         private string _font;

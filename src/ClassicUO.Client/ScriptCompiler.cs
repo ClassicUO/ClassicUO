@@ -2,14 +2,11 @@
 using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
-using ClassicUO.Configuration;
-using Microsoft.CSharp;
 #endregion
 
 namespace ClassicUO

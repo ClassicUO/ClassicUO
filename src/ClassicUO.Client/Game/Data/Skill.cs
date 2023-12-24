@@ -35,7 +35,7 @@ using System;
 
 namespace ClassicUO.Game.Data
 {
-    internal enum Lock : byte
+    public enum Lock : byte
     {
         Up = 0,
         Down = 1,

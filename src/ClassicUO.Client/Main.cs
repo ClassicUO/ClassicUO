@@ -44,6 +44,8 @@ using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Diagnostics;
+using ClassicUO.Utility.Collections;
 
 namespace ClassicUO
 {
@@ -272,8 +274,11 @@ namespace ClassicUO
 
                         break;
                 }
-
-
+#if DEBUG
+                ScriptCompiler.Compile(true, true);
+#else
+                ScriptCompiler.Compile(false, true);
+#endif
                 Client.Run();
             }
 

@@ -32,7 +32,7 @@
 
 namespace ClassicUO.Game.Data
 {
-    internal enum Layer : byte
+    public enum Layer : byte
     {
         Invalid = 0x00,
         OneHanded = 0x01,
@@ -66,7 +66,7 @@ namespace ClassicUO.Game.Data
         Bank = 0x1D
     }
 
-    internal enum TooltipLayers : byte
+    public enum TooltipLayers : byte
     {
         Any = 0x00,
         OneHanded = 0x01,

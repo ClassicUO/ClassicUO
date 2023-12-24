@@ -41,7 +41,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.GameObjects
 {
-    enum ObjectHandlesStatus
+    public enum ObjectHandlesStatus
     {
         NONE,
         OPEN,
@@ -49,7 +49,7 @@ namespace ClassicUO.Game.GameObjects
         DISPLAYING
     }
 
-    internal abstract partial class GameObject
+    public abstract partial class GameObject
     {
         public byte AlphaHue;
         public bool AllowedToDraw = true;

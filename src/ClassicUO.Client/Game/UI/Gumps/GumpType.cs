@@ -32,7 +32,7 @@
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    internal enum GumpType
+    public enum GumpType
     {
         None,
 

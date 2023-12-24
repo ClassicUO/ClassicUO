@@ -1,39 +1,17 @@
-﻿using ClassicUO.Assets;
-using ClassicUO.Renderer;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using System.IO;
+﻿using ClassicUO.Game.Managers;
 
-namespace ClassicUO.Game.UI.Gumps
+namespace ClassicUO.Game
 {
-    internal class TestGump : Gump
+    internal class Test
     {
-        private Texture2D image = PNGLoader.Instance.GetImageTexture(Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "tazuo.png"));
-
-        public TestGump() : base(0, 0)
+        public static void Initialize()
         {
-            Width = 512;
-            Height = 512;
-            X = 200;
-            Y = 200;
-            CanCloseWithRightClick = true;
-            CanMove = true;
-            AcceptMouseInput = true;
-            //Add(new HitBox(0, 0, Width, Height, null, 0f) { AcceptMouseInput = true, CanMove = true });
+            EventSink.OnConnected += GameScene_OnConnected;
         }
 
-        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        private static void GameScene_OnConnected(object sender, System.EventArgs e)
         {
-            if (image != null)
-            {
-                batcher.Draw(
-                    image,
-                    new Rectangle(x, y, image.Bounds.Width, image.Bounds.Height),
-                    new Vector3(0, 0, 1)
-                    );
-            }
-            base.Draw(batcher, x, y);
-            return true;
+            GameActions.Print("This script sees we connected :O");
         }
     }
 }

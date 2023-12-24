@@ -47,7 +47,7 @@ using MathHelper = ClassicUO.Utility.MathHelper;
 
 namespace ClassicUO.Game.GameObjects
 {
-    internal partial class Item : Entity
+    public partial class Item : Entity
     {
         private static readonly QueuedPool<Item> _pool = new QueuedPool<Item>(
             Constants.PREDICTABLE_CHUNKS * 3,

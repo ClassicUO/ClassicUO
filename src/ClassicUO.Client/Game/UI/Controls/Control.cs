@@ -45,7 +45,7 @@ using Mouse = ClassicUO.Input.Mouse;
 
 namespace ClassicUO.Game.UI.Controls
 {
-    internal abstract class Control
+    public abstract class Control
     {
         internal static int _StepsDone = 1;
         internal static int _StepChanger = 1;
