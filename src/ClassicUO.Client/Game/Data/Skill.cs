@@ -42,7 +42,7 @@ namespace ClassicUO.Game.Data
         Locked = 2
     }
 
-    internal sealed class Skill
+    public sealed class Skill
     {
         public static event EventHandler<SkillChangeArgs> SkillValueChangedEvent;
         public static event EventHandler<SkillChangeArgs> SkillBaseChangedEvent;

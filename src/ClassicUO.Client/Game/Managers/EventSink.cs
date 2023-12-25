@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ClassicUO.Game.Data;
+using System;
 
 namespace ClassicUO.Game.Managers
 {
@@ -39,6 +40,18 @@ namespace ClassicUO.Game.Managers
         /// </summary>
         public static event EventHandler<OPLEventArgs> OPLOnReceive;
         public static void InvokeOPLOnReceive(object sender, OPLEventArgs e) => OPLOnReceive?.Invoke(sender, e);
+
+        /// <summary>
+        /// Invoked when a buff is "added" to a player
+        /// </summary>
+        public static event EventHandler<BuffEventArgs> OnBuffAdded;
+        public static void InvokeOnBuffAdded(object sender, BuffEventArgs e) => OnBuffAdded(sender, e);
+
+        /// <summary>
+        /// Invoked when a buff is "removed" to a player. (Called before removal)
+        /// </summary>
+        public static event EventHandler<BuffEventArgs> OnBuffRemoved;
+        public static void InvokeOnBuffRemoved(object sender, BuffEventArgs e) => OnBuffRemoved(sender, e);
     }
 
     public class OPLEventArgs : EventArgs
@@ -53,5 +66,15 @@ namespace ClassicUO.Game.Managers
             Name = name;
             Data = data;
         }
+    }
+
+    public class BuffEventArgs : EventArgs
+    {
+        public BuffEventArgs(BuffIcon buff)
+        {
+            Buff = buff;
+        }
+
+        public BuffIcon Buff { get; }
     }
 }
