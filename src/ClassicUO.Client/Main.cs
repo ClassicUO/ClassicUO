@@ -32,8 +32,8 @@
 
 using ClassicUO.Configuration;
 using ClassicUO.Game;
-using ClassicUO.IO;
 using ClassicUO.Game.Managers;
+using ClassicUO.IO;
 using ClassicUO.Network;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
@@ -44,8 +44,6 @@ using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
-using System.Diagnostics;
-using ClassicUO.Utility.Collections;
 
 namespace ClassicUO
 {
