@@ -957,6 +957,8 @@ namespace ClassicUO.Game
                 return false;
             }
 
+            EventSink.InvokeOnPathFinding(null, new Vector4(x, y, z, distance));
+
             for (int i = 0; i < PATHFINDER_MAX_NODES; i++)
             {
                 if (_openList[i] == null)

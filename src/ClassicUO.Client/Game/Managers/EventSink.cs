@@ -71,6 +71,22 @@ namespace ClassicUO.Game.Managers
         /// </summary>
         public static event EventHandler<uint> OnOpenContainer;
         public static void InvokeOnOpenContainer(object sender, uint serial) => OnOpenContainer?.Invoke(sender, serial);
+
+        /// <summary>
+        /// Invoked when the player receives a death packet from the server
+        /// </summary>
+        public static event EventHandler<uint> OnPlayerDeath;
+        public static void InvokeOnPlayerDeath(object sender, uint serial) => OnPlayerDeath?.Invoke(sender, serial);
+
+        /// <summary>
+        /// Invoked when the player or server tells the client to path find
+        /// Vector is X, Y, Z and Distance
+        /// </summary>
+        public static event EventHandler<Vector4> OnPathFinding;
+        public static void InvokeOnPathFinding(object sender, Vector4 e) => OnPathFinding?.Invoke(sender, e);
+
+        public static event EventHandler<WeatherEventArgs> OnSetWeather;
+        public static void InvokeOnSetWeather(object sender, WeatherEventArgs e) => OnSetWeather?.Invoke(sender, e);
     }
 
     public class OPLEventArgs : EventArgs
@@ -105,5 +121,19 @@ namespace ClassicUO.Game.Managers
         }
 
         public Vector3 Newlocation { get; }
+    }
+
+    public class WeatherEventArgs : EventArgs
+    {
+        public WeatherEventArgs(WeatherType type, byte count, byte temp)
+        {
+            Type = type;
+            Count = count;
+            Temp = temp;
+        }
+
+        public WeatherType Type { get; }
+        public byte Count { get; }
+        public byte Temp { get; }
     }
 }

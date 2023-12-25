@@ -1839,6 +1839,8 @@ namespace ClassicUO.Network
                     IsGuild = false,
                     Name = $"Your Corpse"
                 };
+
+                EventSink.InvokeOnPlayerDeath(World.Player, World.Player.Serial);
             }
         }
 
@@ -2416,6 +2418,7 @@ namespace ClassicUO.Network
                 byte temp = p.ReadUInt8();
 
                 weather.Generate(type, count, temp);
+                EventSink.InvokeOnSetWeather(null, new WeatherEventArgs(type, count, temp));
             }
         }
 
