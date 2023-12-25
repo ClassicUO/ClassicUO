@@ -46,19 +46,31 @@ namespace ClassicUO.Game.Managers
         /// Invoked when a buff is "added" to a player
         /// </summary>
         public static event EventHandler<BuffEventArgs> OnBuffAdded;
-        public static void InvokeOnBuffAdded(object sender, BuffEventArgs e) => OnBuffAdded(sender, e);
+        public static void InvokeOnBuffAdded(object sender, BuffEventArgs e) => OnBuffAdded?.Invoke(sender, e);
 
         /// <summary>
         /// Invoked when a buff is "removed" to a player (Called before removal)
         /// </summary>
         public static event EventHandler<BuffEventArgs> OnBuffRemoved;
-        public static void InvokeOnBuffRemoved(object sender, BuffEventArgs e) => OnBuffRemoved(sender, e);
+        public static void InvokeOnBuffRemoved(object sender, BuffEventArgs e) => OnBuffRemoved?.Invoke(sender, e);
 
         /// <summary>
         /// Invoked when the players position is changed
         /// </summary>
         public static event EventHandler<PositionChangedArgs> OnPositionChanged;
-        public static void InvokeOnPositionChanged(object sender, PositionChangedArgs e) => OnPositionChanged(sender, e);
+        public static void InvokeOnPositionChanged(object sender, PositionChangedArgs e) => OnPositionChanged?.Invoke(sender, e);
+
+        /// <summary>
+        /// Invoked when any entity in game receives damage, not neccesarily the player.
+        /// </summary>
+        public static event EventHandler<int> OnEntityDamage;
+        public static void InvokeOnEntityDamage(object sender, int e) => OnEntityDamage?.Invoke(sender, e);
+
+        /// <summary>
+        /// Invoked when a container is opened. Sender is the Item, serial is the item serial.
+        /// </summary>
+        public static event EventHandler<uint> OnOpenContainer;
+        public static void InvokeOnOpenContainer(object sender, uint serial) => OnOpenContainer?.Invoke(sender, serial);
     }
 
     public class OPLEventArgs : EventArgs

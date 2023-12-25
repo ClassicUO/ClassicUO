@@ -38,13 +38,12 @@ using ClassicUO.Assets;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Gumps;
-using ClassicUO.IO;
 using ClassicUO.Network;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Managers
 {
-    internal struct CustomBuildObject
+    public struct CustomBuildObject
     {
         public CustomBuildObject(ushort graphic)
         {

@@ -198,7 +198,7 @@ namespace ClassicUO.Game.Data
         }
     }
 
-    internal class CustomHouseRoof : CustomHouseObject
+    public class CustomHouseRoof : CustomHouseObject
     {
         public const int GRAPHICS_COUNT = 16;
         public ushort[] Graphics = new ushort[GRAPHICS_COUNT];

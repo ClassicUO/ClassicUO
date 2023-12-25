@@ -36,7 +36,6 @@ using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
-using ClassicUO.Game.Map;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
@@ -505,6 +504,7 @@ namespace ClassicUO.Network
                 if (damage > 0)
                 {
                     World.WorldTextManager.AddDamage(entity, damage);
+                    EventSink.InvokeOnEntityDamage(entity, damage);
                 }
             }
         }
@@ -1602,6 +1602,8 @@ namespace ClassicUO.Network
                             }
                         );
                     }
+
+                    EventSink.InvokeOnOpenContainer(item, serial);
 
                     UIManager.RemovePosition(serial);
                 }
