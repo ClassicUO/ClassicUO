@@ -227,7 +227,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             InitializeJournalEntries();
-            World.Journal.EntryAdded += AddJournalEntry;
+            EventSink.JournalEntryAdded += AddJournalEntry;
         }
 
         public override GumpType GumpType => GumpType.Journal;
@@ -277,7 +277,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Dispose()
         {
-            World.Journal.EntryAdded -= AddJournalEntry;
+            EventSink.JournalEntryAdded -= AddJournalEntry;
             base.Dispose();
         }
 

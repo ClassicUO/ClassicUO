@@ -42,7 +42,7 @@ using ClassicUO.Utility;
 
 namespace ClassicUO.Game.Managers
 {
-    internal enum CursorTarget
+    public enum CursorTarget
     {
         Invalid = -1,
         Object = 0,
@@ -56,12 +56,12 @@ namespace ClassicUO.Game.Managers
         MoveItemContainer,
     }
 
-    internal class CursorType
+    public class CursorType
     {
         public static readonly uint Target = 6983686;
     }
 
-    internal enum TargetType
+    public enum TargetType
     {
         Neutral,
         Harmful,
@@ -69,7 +69,7 @@ namespace ClassicUO.Game.Managers
         Cancel
     }
 
-    internal class MultiTargetInfo
+    public class MultiTargetInfo
     {
         public MultiTargetInfo(ushort model, ushort x, ushort y, ushort z, ushort hue)
         {
@@ -83,7 +83,7 @@ namespace ClassicUO.Game.Managers
         public readonly ushort XOff, YOff, ZOff, Model, Hue;
     }
 
-    internal class LastTargetInfo
+    public class LastTargetInfo
     {
         public bool IsEntity => SerialHelper.IsValid(Serial);
         public bool IsStatic => !IsEntity && Graphic != 0 && Graphic != 0xFFFF;
@@ -129,7 +129,7 @@ namespace ClassicUO.Game.Managers
         }
     }
 
-    internal static class TargetManager
+    public static class TargetManager
     {
         private static uint _targetCursorId, _lastAttack;
         private static readonly byte[] _lastDataBuffer = new byte[19];

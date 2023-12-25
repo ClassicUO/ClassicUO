@@ -33,20 +33,15 @@
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Network;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace ClassicUO.Game.Managers
 {
     internal sealed class ObjectPropertiesListManager
     {
         private readonly Dictionary<uint, ItemProperty> _itemsProperties = new Dictionary<uint, ItemProperty>();
-
-        public delegate void OPLOnReceiveEvent(OPLEventArgs args);
-        public event OPLOnReceiveEvent OPLOnReceive;
 
         public void Add(uint serial, uint revision, string name, string data, int namecliloc)
         {
@@ -62,21 +57,7 @@ namespace ClassicUO.Game.Managers
             prop.Data = data;
             prop.NameCliloc = namecliloc;
 
-            OPLOnReceive?.Invoke(new OPLEventArgs(serial, name, data));
-        }
-
-        public class OPLEventArgs : System.EventArgs
-        {
-            public readonly uint Serial;
-            public readonly string Name;
-            public readonly string Data;
-
-            public OPLEventArgs(uint serial, string name, string data)
-            {
-                Serial = serial;
-                Name = name;
-                Data = data;
-            }
+            EventSink.InvokeOPLOnReceive(null, new OPLEventArgs(serial, name, data));
         }
 
         public bool Contains(uint serial)

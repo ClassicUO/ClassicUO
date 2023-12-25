@@ -11,7 +11,7 @@ using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.Managers
 {
-    internal static class IgnoreManager
+    public static class IgnoreManager
     {
         /// <summary>
         /// Set of Char names

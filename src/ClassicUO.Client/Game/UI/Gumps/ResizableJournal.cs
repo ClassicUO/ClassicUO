@@ -129,7 +129,12 @@ namespace ClassicUO.Game.UI.Gumps
             InitJournalEntries();
             ResizeWindow(ProfileManager.CurrentProfile.ResizeJournalSize);
             BuildBorder();
-            World.Journal.EntryAdded += (sender, e) => { AddJournalEntry(e); };
+            EventSink.JournalEntryAdded += EventSink_EntryAdded; ;
+        }
+
+        private void EventSink_EntryAdded(object sender, JournalEntry e)
+        {
+            AddJournalEntry(e);
         }
 
         public override GumpType GumpType => GumpType.Journal;
@@ -394,6 +399,12 @@ namespace ClassicUO.Game.UI.Gumps
 
                 BuildTabs();
             }
+        }
+
+        public override void Dispose()
+        {
+            EventSink.JournalEntryAdded -= EventSink_EntryAdded;
+            base.Dispose();
         }
 
         private class JournalEntriesContainer : Control
