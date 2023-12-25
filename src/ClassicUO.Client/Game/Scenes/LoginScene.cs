@@ -133,7 +133,7 @@ namespace ClassicUO.Game.Scenes
                         UIManager.Add(_currentGump = new LoginGump(this));
                     }
                 })
-                { X = 130, Y = 150});
+                { X = 130, Y = 150 });
             }
             else
             {
@@ -359,7 +359,14 @@ namespace ClassicUO.Game.Scenes
             {
                 Settings.GlobalSettings.Username = Account;
                 Settings.GlobalSettings.Password = Crypter.Encrypt(Password);
-                Settings.GlobalSettings.Save();
+                try
+                {
+                    Settings.GlobalSettings.Save();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                }
             }
 
             Log.Trace($"Start login to: {Settings.GlobalSettings.IP},{Settings.GlobalSettings.Port}");
