@@ -39,7 +39,7 @@ using ClassicUO.Network;
 
 namespace ClassicUO.Game.Managers
 {
-    internal sealed class ObjectPropertiesListManager
+    public sealed class ObjectPropertiesListManager
     {
         private readonly Dictionary<uint, ItemProperty> _itemsProperties = new Dictionary<uint, ItemProperty>();
 
@@ -159,7 +159,7 @@ namespace ClassicUO.Game.Managers
         }
     }
 
-    internal class ItemPropertiesData
+    public class ItemPropertiesData
     {
         public readonly bool HasData = false;
         public readonly string Name = "";

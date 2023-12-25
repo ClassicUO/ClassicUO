@@ -273,7 +273,6 @@ namespace ClassicUO.Game.GameObjects
             EventSink.InvokeOnBuffAdded(null, new BuffEventArgs(_buffIcons[type]));
         }
 
-
         public bool IsBuffIconExists(BuffIconType graphic)
         {
             return _buffIcons.ContainsKey(graphic);
@@ -1364,6 +1363,8 @@ namespace ClassicUO.Game.GameObjects
 
             TryOpenDoors();
             TryOpenCorpses();
+
+            EventSink.InvokeOnPositionChanged(this, new PositionChangedArgs(new Microsoft.Xna.Framework.Vector3(X, Y, Z)));
         }
 
         public void TryOpenCorpses()
@@ -1390,7 +1391,6 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
         }
-
 
         protected override void OnDirectionChanged()
         {

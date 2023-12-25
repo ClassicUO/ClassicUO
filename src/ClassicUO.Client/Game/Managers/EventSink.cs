@@ -1,4 +1,5 @@
 ﻿using ClassicUO.Game.Data;
+using Microsoft.Xna.Framework;
 using System;
 
 namespace ClassicUO.Game.Managers
@@ -48,10 +49,16 @@ namespace ClassicUO.Game.Managers
         public static void InvokeOnBuffAdded(object sender, BuffEventArgs e) => OnBuffAdded(sender, e);
 
         /// <summary>
-        /// Invoked when a buff is "removed" to a player. (Called before removal)
+        /// Invoked when a buff is "removed" to a player (Called before removal)
         /// </summary>
         public static event EventHandler<BuffEventArgs> OnBuffRemoved;
         public static void InvokeOnBuffRemoved(object sender, BuffEventArgs e) => OnBuffRemoved(sender, e);
+
+        /// <summary>
+        /// Invoked when the players position is changed
+        /// </summary>
+        public static event EventHandler<PositionChangedArgs> OnPositionChanged;
+        public static void InvokeOnPositionChanged(object sender, PositionChangedArgs e) => OnPositionChanged(sender, e);
     }
 
     public class OPLEventArgs : EventArgs
@@ -76,5 +83,15 @@ namespace ClassicUO.Game.Managers
         }
 
         public BuffIcon Buff { get; }
+    }
+
+    public class PositionChangedArgs : EventArgs 
+    { 
+        public PositionChangedArgs(Vector3 newlocation)
+        {
+            Newlocation = newlocation;
+        }
+
+        public Vector3 Newlocation { get; }
     }
 }

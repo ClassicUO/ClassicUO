@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace ClassicUO.Game.Managers
 {
-    internal class CoolDownBarManager
+    public class CoolDownBarManager
     {
         private const int MAX_COOLDOWN_BARS = 15;
         private static CoolDownBar[] coolDownBars = new CoolDownBar[MAX_COOLDOWN_BARS];

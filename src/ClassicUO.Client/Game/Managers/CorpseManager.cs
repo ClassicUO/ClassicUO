@@ -36,7 +36,7 @@ using ClassicUO.Utility.Collections;
 
 namespace ClassicUO.Game.Managers
 {
-    internal class CorpseManager
+    public class CorpseManager
     {
         private readonly Deque<CorpseInfo> _corpses = new Deque<CorpseInfo>();
 
@@ -118,7 +118,7 @@ namespace ClassicUO.Game.Managers
         }
     }
 
-    internal struct CorpseInfo
+    public struct CorpseInfo
     {
         public CorpseInfo(uint corpseSerial, uint objectSerial, Direction direction, bool isRunning)
         {
