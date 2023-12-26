@@ -39,7 +39,7 @@ using System.Xml;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    internal abstract class ResizableGump : AnchorableGump
+    public abstract class ResizableGump : AnchorableGump
     {
         private readonly BorderControl _borderControl;
         private readonly Button _button;

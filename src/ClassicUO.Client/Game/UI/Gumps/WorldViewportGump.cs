@@ -361,7 +361,7 @@ namespace ClassicUO.Game.UI.Gumps
         }
     }
 
-    internal class BorderControl : Control
+    public class BorderControl : Control
     {
         private int _borderSize;
 

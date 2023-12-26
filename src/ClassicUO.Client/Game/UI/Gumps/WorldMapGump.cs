@@ -68,7 +68,7 @@ namespace ClassicUO.Game.UI.Gumps
     [JsonSerializable(typeof(List<int>), GenerationMode = JsonSourceGenerationMode.Metadata)]
     sealed partial class ZonesJsonContext : JsonSerializerContext { }
 
-    internal class WorldMapGump : ResizableGump
+    public class WorldMapGump : ResizableGump
     {
         private static Point _last_position = new Point(100, 100);
         private Point _center, _lastScroll, _mouseCenter, _scroll;
@@ -94,6 +94,8 @@ namespace ClassicUO.Game.UI.Gumps
         private static Texture2D _mapTexture;
         private static uint[] _pixelBuffer;
         private static sbyte[] _zBuffer;
+
+        public Texture2D MapTexture { get { return _mapTexture; } }
 
         public static readonly List<WMapMarkerFile> _markerFiles = new List<WMapMarkerFile>();
 
@@ -856,7 +858,7 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-        internal class WMapMarker
+        public class WMapMarker
         {
             public string Name { get; set; }
             public int X { get; set; }
@@ -869,7 +871,7 @@ namespace ClassicUO.Game.UI.Gumps
             public string ColorName { get; set; }
         }
 
-        internal class WMapMarkerFile
+        public class WMapMarkerFile
         {
             public string Name { get; set; }
             public string FullPath { get; set; }
