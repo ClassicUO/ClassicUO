@@ -35,7 +35,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
-    internal sealed class AlphaBlendControl : Control
+    public sealed class AlphaBlendControl : Control
     {
         public AlphaBlendControl(float alpha = 0.5f)
         {

@@ -38,7 +38,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.UI.Controls
 {
-    internal class ColorBox : Control
+    public class ColorBox : Control
     {
         public ColorBox(int width, int height, ushort hue)
         {

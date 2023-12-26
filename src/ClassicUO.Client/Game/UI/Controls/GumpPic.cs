@@ -39,7 +39,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
-    internal abstract class GumpPicBase : Control
+    public abstract class GumpPicBase : Control
     {
         private ushort _graphic;
 

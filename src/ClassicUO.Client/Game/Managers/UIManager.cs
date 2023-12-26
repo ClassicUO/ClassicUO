@@ -30,7 +30,6 @@
 
 #endregion
 
-using System;
 using System.Collections.Generic;
 using ClassicUO.Configuration;
 using ClassicUO.Game.UI.Controls;
@@ -41,7 +40,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Managers
 {
-    internal static class UIManager
+    public static class UIManager
     {
         private static readonly Dictionary<uint, Point> _gumpPositionCache = new Dictionary<uint, Point>();
         private static readonly Control[] _mouseDownControls = new Control[0xFF];

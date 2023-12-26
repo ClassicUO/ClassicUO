@@ -30,20 +30,17 @@
 
 #endregion
 
-using ClassicUO.Assets;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
-using System.Diagnostics;
 using System.IO;
-using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace ClassicUO.Game.UI.Controls
 {
-    internal class GumpPicExternalUrl : Control
+    public class GumpPicExternalUrl : Control
     {
         public GumpPicExternalUrl(int x, int y, string imgUrl, ushort hue, int width, int height, bool resize = false)
         {

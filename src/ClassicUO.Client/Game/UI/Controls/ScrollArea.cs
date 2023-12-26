@@ -37,13 +37,13 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
-    internal enum ScrollbarBehaviour
+    public enum ScrollbarBehaviour
     {
         ShowWhenDataExceedFromView,
         ShowAlways
     }
 
-    internal class ScrollArea : Control
+    public class ScrollArea : Control
     {
         private bool _isNormalScroll;
         private readonly ScrollBarBase _scrollBar;

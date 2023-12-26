@@ -1,11 +1,9 @@
-﻿using ClassicUO.Assets;
-using ClassicUO.Renderer;
+﻿using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.UI.Controls
 {
-    internal class ResizableStaticPic : Control
+    public class ResizableStaticPic : Control
     {
         private uint graphic;
         private ushort hue = 0;
