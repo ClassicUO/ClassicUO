@@ -85,6 +85,9 @@ namespace ClassicUO.Game.Managers
         public static event EventHandler<Vector4> OnPathFinding;
         public static void InvokeOnPathFinding(object sender, Vector4 e) => OnPathFinding?.Invoke(sender, e);
 
+        /// <summary>
+        /// Invoked when the server asks the client to generate some weather
+        /// </summary>
         public static event EventHandler<WeatherEventArgs> OnSetWeather;
         public static void InvokeOnSetWeather(object sender, WeatherEventArgs e) => OnSetWeather?.Invoke(sender, e);
     }
