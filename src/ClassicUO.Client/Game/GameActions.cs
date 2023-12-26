@@ -204,6 +204,15 @@ namespace ClassicUO.Game
             }
         }
 
+        public static void BandageSelf()
+        {
+            Item bandage = World.Player.FindBandage();
+            if(bandage != null)
+            {
+                NetClient.Socket.Send_TargetSelectedObject(bandage.Serial, World.Player.Serial);
+            }
+        }
+
         public static void OpenWorldMap()
         {
             WorldMapGump worldMap = UIManager.GetGump<WorldMapGump>();
