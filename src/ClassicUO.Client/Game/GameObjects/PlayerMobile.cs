@@ -144,6 +144,15 @@ namespace ClassicUO.Game.GameObjects
         public ushort Weight;
         public ushort WeightMax;
 
+        public new ushort Hits { get { return base.Hits; } set 
+            {
+                var arg = new PlayerStatChangedArgs(PlayerStatChangedArgs.PlayerStat.Hits, base.Hits, value);
+
+                base.Hits = value;
+
+                EventSink.InvokeOnPlayerStatChange(this, arg);
+            } }
+
         public Item FindBandage()
         {
             Item backpack = FindItemByLayer(Layer.Backpack);

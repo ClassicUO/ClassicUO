@@ -90,6 +90,12 @@ namespace ClassicUO.Game.Managers
         /// </summary>
         public static event EventHandler<WeatherEventArgs> OnSetWeather;
         public static void InvokeOnSetWeather(object sender, WeatherEventArgs e) => OnSetWeather?.Invoke(sender, e);
+
+        /// <summary>
+        /// Invoked when a stat of the player is changed(min or max). Currently only Hits is set up.
+        /// </summary>
+        public static event EventHandler<PlayerStatChangedArgs> OnPlayerStatChange;
+        public static void InvokeOnPlayerStatChange(object sender, PlayerStatChangedArgs e) => OnPlayerStatChange?.Invoke(sender, e);
     }
 
     public class OPLEventArgs : EventArgs
@@ -138,5 +144,29 @@ namespace ClassicUO.Game.Managers
         public WeatherType Type { get; }
         public byte Count { get; }
         public byte Temp { get; }
+    }
+
+    public class PlayerStatChangedArgs : EventArgs
+    {
+        public PlayerStatChangedArgs(PlayerStat stat, int oldValue, int newValue)
+        {
+            Stat = stat;
+            OldValue = oldValue;
+            NewValue = newValue;
+        }
+
+        public PlayerStat Stat { get; }
+        public int OldValue { get; }
+        public int NewValue { get; }
+
+        public enum PlayerStat
+        {
+            Hits,
+            HitsMax,
+            Mana,
+            ManaMax,
+            Stamina,
+            StaminaMax
+        }
     }
 }
