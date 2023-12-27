@@ -21,11 +21,11 @@ namespace ClassicUO
         {
             var list = new List<string>
             {
-                "ClassicUO.Assets.dll",
-                "ClassicUO.IO.dll",
-                "ClassicUO.Renderer.dll",
-                "ClassicUO.Utility.dll",
-                "FNA.dll",
+                CUOEnviroment.ExecutablePath + "/ClassicUO.Assets.dll",
+                CUOEnviroment.ExecutablePath + "/ClassicUO.IO.dll",
+                CUOEnviroment.ExecutablePath + "/ClassicUO.Renderer.dll",
+                CUOEnviroment.ExecutablePath + "/ClassicUO.Utility.dll",
+                CUOEnviroment.ExecutablePath + "/FNA.dll",
 
                 CUOEnviroment.ExecutablePath + "/ClassicUO.exe"
             };
@@ -194,74 +194,70 @@ namespace ClassicUO
             DeleteFiles("Scripts.CS*.dll");
 
 #if !MONO
-            using (CodeDomProvider provider = new Microsoft.CodeDom.Providers.DotNetCompilerPlatform.CSharpCodeProvider())
+            using CodeDomProvider provider = new Microsoft.CodeDom.Providers.DotNetCompilerPlatform.CSharpCodeProvider();
 #else
             using (CSharpCodeProvider provider = new CSharpCodeProvider())
 #endif
+            var path = GetUnusedPath("Scripts.CS");
+
+            var parms = new CompilerParameters(GetReferenceAssemblies(), path, debug);
+
+            var options = GetCompilerOptions(debug);
+
+            if (options != null)
             {
-                var path = GetUnusedPath("Scripts.CS");
-
-                var parms = new CompilerParameters(GetReferenceAssemblies(), path, debug);
-
-                var options = GetCompilerOptions(debug);
-
-                if (options != null)
-                {
-                    parms.CompilerOptions = options;
-                }
-
-                if (CUOEnviroment.IsUnix)
-                {
-                    parms.CompilerOptions = String.Format("{0} /nowarn:169,219,414 /recurse:Scripts/*.cs", parms.CompilerOptions);
-                    files = new string[0];
-                }
-
-                var results = provider.CompileAssemblyFromFile(parms, files);
-
-                m_AdditionalReferences.Add(path);
-
-                Display(results);
-
-                if (results.Errors.Count > 0 && !CUOEnviroment.IsUnix)
-                {
-                    assembly = null;
-                    return false;
-                }
-
-                if (results.Errors.Count > 0 && CUOEnviroment.IsUnix)
-                {
-                    foreach (CompilerError err in results.Errors)
-                    {
-                        if (!err.IsWarning)
-                        {
-                            assembly = null;
-                            return false;
-                        }
-                    }
-                }
-
-                if (cache && Path.GetFileName(path) == "Scripts.CS.dll")
-                {
-                    try
-                    {
-                        var hashCode = GetHashCode(path, files, debug);
-
-                        using (
-                            var fs = new FileStream("Scripts/Output/Scripts.CS.hash", FileMode.Create, FileAccess.Write, FileShare.None))
-                        {
-                            using (var bin = new BinaryWriter(fs))
-                            {
-                                bin.Write(hashCode, 0, hashCode.Length);
-                            }
-                        }
-                    }
-                    catch
-                    { }
-                }
-
-                assembly = results.CompiledAssembly;
-                return true;
+                parms.CompilerOptions = options;
             }
+
+            if (CUOEnviroment.IsUnix)
+            {
+                parms.CompilerOptions = String.Format("{0} /nowarn:169,219,414 /recurse:Scripts/*.cs", parms.CompilerOptions);
+                files = new string[0];
+            }
+
+            var results = provider.CompileAssemblyFromFile(parms, files);
+            provider.Dispose();
+
+            m_AdditionalReferences.Add(path);
+
+            Display(results);
+
+            if (results.Errors.Count > 0 && !CUOEnviroment.IsUnix)
+            {
+                assembly = null;
+                return false;
+            }
+
+            if (results.Errors.Count > 0 && CUOEnviroment.IsUnix)
+            {
+                foreach (CompilerError err in results.Errors)
+                {
+                    if (!err.IsWarning)
+                    {
+                        assembly = null;
+                        return false;
+                    }
+                }
+            }
+
+            if (cache && Path.GetFileName(path) == "Scripts.CS.dll")
+            {
+                try
+                {
+                    var hashCode = GetHashCode(path, files, debug);
+
+                    using var fs = new FileStream("Scripts/Output/Scripts.CS.hash", FileMode.Create, FileAccess.Write, FileShare.None);
+                    using (var bin = new BinaryWriter(fs))
+                    {
+                        bin.Write(hashCode, 0, hashCode.Length);
+                    }
+                }
+                catch
+                { }
+            }
+
+            assembly = results.CompiledAssembly;
+            return true;
         }
 
         public static void Display(CompilerResults results)
