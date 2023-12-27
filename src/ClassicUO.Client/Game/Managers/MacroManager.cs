@@ -51,7 +51,7 @@ using static SDL2.SDL;
 
 namespace ClassicUO.Game.Managers
 {
-    internal class MacroManager : LinkedObject
+    public class MacroManager : LinkedObject
     {
         public static readonly string[] MacroNames = Enum.GetNames(typeof(MacroType));
         private readonly uint[] _itemsInHand = new uint[2];
@@ -82,6 +82,10 @@ namespace ClassicUO.Game.Managers
 
         public bool WaitingBandageTarget { get; set; }
 
+        public static MacroManager TryGetMacroManager()
+        {
+            return Client.Game.GetScene<GameScene>().Macros;
+        }
 
         public void Load()
         {
@@ -1889,7 +1893,7 @@ namespace ClassicUO.Game.Managers
     }
 
 
-    internal class Macro : LinkedObject, IEquatable<Macro>
+    public class Macro : LinkedObject, IEquatable<Macro>
     {
         public Macro(string name, SDL.SDL_Keycode key, bool alt, bool ctrl, bool shift) : this(name)
         {
@@ -2288,7 +2292,7 @@ namespace ClassicUO.Game.Managers
     }
 
 
-    internal class MacroObject : LinkedObject
+    public class MacroObject : LinkedObject
     {
         public MacroObject(MacroType code, MacroSubType sub)
         {
@@ -2356,7 +2360,7 @@ namespace ClassicUO.Game.Managers
         }
     }
 
-    internal class MacroObjectString : MacroObject
+    public class MacroObjectString : MacroObject
     {
         public MacroObjectString(MacroType code, MacroSubType sub, string str = "") : base(code, sub)
         {
@@ -2371,7 +2375,7 @@ namespace ClassicUO.Game.Managers
         }
     }
 
-    internal enum MacroType
+    public enum MacroType
     {
         None = 0,
         Say,
@@ -2455,7 +2459,7 @@ namespace ClassicUO.Game.Managers
         UseCounterBar
     }
 
-    internal enum MacroSubType
+    public enum MacroSubType
     {
         MSC_NONE = 0,
         NW, //Walk group
