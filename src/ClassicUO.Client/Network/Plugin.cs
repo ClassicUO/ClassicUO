@@ -570,6 +570,8 @@ namespace ClassicUO.Network
 
         internal static bool ProcessSendPacket(ref Span<byte> message)
         {
+            Client.Game.AssistantHost?.PluginPacketOut(message);
+
             bool result = true;
 
             foreach (Plugin plugin in Plugins)
