@@ -358,8 +358,6 @@ namespace ClassicUO
             var data = NetClient.Socket.CollectAvailableData();
             var packetsCount = PacketHandlers.Handler.ParsePackets(UO.World, data);
 
-            _assistantHost?.Tick();
-
             NetClient.Socket.Statistics.TotalPacketsReceived += (uint)packetsCount;
             NetClient.Socket.Flush();
 
