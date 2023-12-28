@@ -376,10 +376,13 @@ namespace ClassicUO
             var packetsCount = PacketHandlers.Handler.ParsePackets(UO.World, data);
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
             _assistantHost?.Tick();
 
 >>>>>>> rpc support
+=======
+>>>>>>> more rpc
             NetClient.Socket.Statistics.TotalPacketsReceived += (uint)packetsCount;
             NetClient.Socket.Flush();
 

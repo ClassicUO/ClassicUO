@@ -588,7 +588,13 @@ namespace ClassicUO.Network
 
         internal static bool ProcessSendPacket(ref Span<byte> message)
         {
+<<<<<<< HEAD
             bool result = Client.Game.PluginHost?.PacketOut(message) ?? true;
+=======
+            Client.Game.AssistantHost?.PluginPacketOut(message);
+
+            bool result = true;
+>>>>>>> more rpc
 
             foreach (Plugin plugin in Plugins)
             {
