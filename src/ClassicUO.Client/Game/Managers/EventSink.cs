@@ -96,6 +96,18 @@ namespace ClassicUO.Game.Managers
         /// </summary>
         public static event EventHandler<PlayerStatChangedArgs> OnPlayerStatChange;
         public static void InvokeOnPlayerStatChange(object sender, PlayerStatChangedArgs e) => OnPlayerStatChange?.Invoke(sender, e);
+
+        /// <summary>
+        /// This  occurs *before* any TazUO tooltip processing occurs allowing you to modify it before processing happens
+        /// </summary>
+        public static PreProcessTooltipDelegate PreProcessTooltip;
+        public delegate void PreProcessTooltipDelegate(ref ItemPropertiesData e);
+
+        /// <summary>
+        /// This event occurs *after* TazUO tooltip processing, this is the final string before being rendered into a tooltip window
+        /// </summary>
+        public static PostProcessTooltipDelegate PostProcessTooltip;
+        public delegate void PostProcessTooltipDelegate(ref string e);
     }
 
     public class OPLEventArgs : EventArgs

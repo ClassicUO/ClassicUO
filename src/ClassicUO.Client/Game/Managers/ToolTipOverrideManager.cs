@@ -245,6 +245,8 @@ namespace ClassicUO.Game.Managers
 
             if (itemPropertiesData.HasData)
             {
+                EventSink.PreProcessTooltip(ref itemPropertiesData);
+
                 tooltip += ProfileManager.CurrentProfile == null ? $"/c[yellow]{itemPropertiesData.Name}\n" : string.Format(ProfileManager.CurrentProfile.TooltipHeaderFormat + "\n", itemPropertiesData.Name);
 
                 //Loop through each property
@@ -295,6 +297,8 @@ namespace ClassicUO.Game.Managers
                     if (!handled) //Did not find a matching override, need to add the plain tooltip line still
                         tooltip += $"{property.OriginalString}\n";
                 }
+
+                EventSink.PostProcessTooltip(ref tooltip);
 
                 return tooltip;
             }

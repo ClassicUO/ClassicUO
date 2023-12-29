@@ -272,12 +272,21 @@ namespace ClassicUO
 
                         break;
                 }
+                try
+                {
 #if DEBUG
                 ScriptCompiler.Compile(true, true);
 #else
-                ScriptCompiler.Compile(false, true);
+                    ScriptCompiler.Compile(false, true);
 #endif
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                }
+
                 Client.Run();
+
             }
 
             Log.Trace("Closing...");
