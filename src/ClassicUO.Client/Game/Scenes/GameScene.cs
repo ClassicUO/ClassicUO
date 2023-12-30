@@ -873,7 +873,10 @@ namespace ClassicUO.Game.Scenes
                     }
                     else if (distance > currentProfile.AutoFollowDistance)
                     {
-                        Pathfinder.WalkTo(follow.X, follow.Y, follow.Z, currentProfile.AutoFollowDistance);
+                        if(!Pathfinder.WalkTo(follow.X, follow.Y, follow.Z, currentProfile.AutoFollowDistance))
+                        {
+                            StopFollowing(); //Can't get there
+                        }
                     }
                 }
                 else
