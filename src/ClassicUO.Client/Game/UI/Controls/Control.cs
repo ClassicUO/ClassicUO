@@ -310,11 +310,10 @@ namespace ClassicUO.Game.UI.Controls
 
                     if (c.IsDisposed)
                     {
-                        if (i - 1 >= 0 && i - 1 < Children.Count)
+                        if (i >= 0 && i < Children.Count)
                         {
                             OnChildRemoved();
                             Children.RemoveAt(i--);
-
                             continue;
                         }
                     }

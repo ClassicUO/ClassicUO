@@ -245,7 +245,10 @@ namespace ClassicUO.Game.Managers
 
             if (itemPropertiesData.HasData)
             {
-                EventSink.PreProcessTooltip(ref itemPropertiesData);
+                if (EventSink.PreProcessTooltip != null)
+                {
+                    EventSink.PreProcessTooltip(ref itemPropertiesData);
+                }
 
                 tooltip += ProfileManager.CurrentProfile == null ? $"/c[yellow]{itemPropertiesData.Name}\n" : string.Format(ProfileManager.CurrentProfile.TooltipHeaderFormat + "\n", itemPropertiesData.Name);
 
@@ -298,7 +301,10 @@ namespace ClassicUO.Game.Managers
                         tooltip += $"{property.OriginalString}\n";
                 }
 
-                EventSink.PostProcessTooltip(ref tooltip);
+                if (EventSink.PostProcessTooltip != null)
+                {
+                    EventSink.PostProcessTooltip(ref tooltip);
+                }
 
                 return tooltip;
             }
