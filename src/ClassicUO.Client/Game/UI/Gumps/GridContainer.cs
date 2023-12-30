@@ -478,16 +478,13 @@ namespace ClassicUO.Game.UI.Gumps
                 Dispose();
                 return;
             }
+            UpdateContainerName();
 
             if (autoSortContainer) overrideSort = true;
 
             List<Item> sortedContents = ProfileManager.CurrentProfile.GridContainerSearchMode == 0 ? gridSlotManager.SearchResults(searchBox.Text) : GridSlotManager.GetItemsInContainer(container);
             gridSlotManager.RebuildContainer(sortedContents, searchBox.Text, overrideSort);
-            containerNameLabel.Text = GetContainerName();
-            if (container.Container != 0xFFFF_FFFF && FindContainer(container.Container, out GridContainer gridContainer))
-            {
-                gridContainer.UpdateContainerName();
-            }
+
             InvalidateContents = false;
         }
 
@@ -633,7 +630,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (gridSlotManager != null)
             {
                 gridSlotManager.UpdateItems();
-                containerName += $" ({gridSlotManager.ItemPositions.Count})";
+                containerName += $" ({gridSlotManager.ContainerContents.Count})";
             }
 
             return containerName;
