@@ -16,12 +16,16 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 <<<<<<< HEAD
+<<<<<<< HEAD
 using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
 
 =======
+=======
+using System.Runtime.ExceptionServices;
+>>>>>>> rpc
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
@@ -383,6 +387,9 @@ sealed class TcpSession : IDisposable
         if (_disposed)
             return;
 
+        if (_thread.IsAlive)
+            _thread.Abort();
+
         _disposed = true;
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -569,7 +576,7 @@ sealed class TcpSession : IDisposable
 
         if (!_channelSending.Writer.TryWrite(buffer))
         {
-
+            Console.WriteLine("cannot write {0} request to sending channel", reqId);
         }
 >>>>>>> more rpc
 
@@ -587,7 +594,7 @@ sealed class TcpSession : IDisposable
 
         if (!_channelSending.Writer.TryWrite(buf))
         {
-
+            Console.WriteLine("cannot write {0} response to sending channel", request.ID);
         }
     }
 
@@ -692,11 +699,15 @@ sealed class TcpSession : IDisposable
                     {
                         if (!task.TrySetResult(msg))
                         {
+<<<<<<< HEAD
 
 <<<<<<< HEAD
             stream.BeginRead(buf, 0, buf.Length, _onRecv, buf);
 >>>>>>> rpc support
 =======
+=======
+                            Console.WriteLine("cannot set result of msg {0}", msg.ID);
+>>>>>>> rpc
                         }
                     }
                 }
@@ -780,12 +791,8 @@ sealed class TcpSession : IDisposable
                 {
                     if (!task.TrySetResult(msg))
                     {
-
+                        Console.WriteLine("cannot set result of msg {0}", msg.ID);
                     }
-                }
-                else
-                {
-
                 }
                 break;
         }
@@ -802,7 +809,7 @@ sealed class TcpSession : IDisposable
             while (reader.TryRead(out var item))
             {
                 var xs = new ArraySegment<byte>(item);
-                await socket.SendAsync(xs, SocketFlags.None).ConfigureAwait(false);
+                _ = await socket.SendAsync(xs, SocketFlags.None).ConfigureAwait(false);
             }
 >>>>>>> rpc support
         }
@@ -942,6 +949,7 @@ enum RpcCommand
     Response
 }
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 <<<<<<< HEAD
 // Async helper got from RestSharp project!
@@ -949,10 +957,17 @@ static class AsyncHelpers
 {
     private readonly static ConcurrentStack<CustomSynchronizationContext> _cache = new ConcurrentStack<CustomSynchronizationContext>();
 
+=======
+
+// Async helper got from RestSharp project!
+static class AsyncHelpers
+{
+>>>>>>> rpc
     /// <summary>
     /// Executes a task synchronously on the calling thread by installing a temporary synchronization context that queues continuations
     /// </summary>
     /// <param name="task">Callback for asynchronous task to run</param>
+<<<<<<< HEAD
     public static void RunSync(Func<ValueTask> task)
     {
         var currentContext = SynchronizationContext.Current;
@@ -961,16 +976,29 @@ static class AsyncHelpers
         {
             customContext = new CustomSynchronizationContext();
         }
+=======
+    public static void RunSync(Func<Task> task)
+    {
+        var currentContext = SynchronizationContext.Current;
+        var customContext = new CustomSynchronizationContext(task);
+>>>>>>> rpc
 
         try
         {
             SynchronizationContext.SetSynchronizationContext(customContext);
+<<<<<<< HEAD
             customContext.Run(task);
+=======
+            customContext.Run();
+>>>>>>> rpc
         }
         finally
         {
             SynchronizationContext.SetSynchronizationContext(currentContext);
+<<<<<<< HEAD
             _cache.Push(customContext);
+=======
+>>>>>>> rpc
         }
     }
 
@@ -980,7 +1008,11 @@ static class AsyncHelpers
     /// <param name="task">Callback for asynchronous task to run</param>
     /// <typeparam name="T">Return type for the task</typeparam>
     /// <returns>Return value from the task</returns>
+<<<<<<< HEAD
     public static T RunSync<T>(Func<ValueTask<T>> task)
+=======
+    public static T RunSync<T>(Func<Task<T>> task)
+>>>>>>> rpc
     {
         T result = default!;
         RunSync(async () => { result = await task(); });
@@ -990,6 +1022,7 @@ static class AsyncHelpers
     /// <summary>
     /// Synchronization context that can be "pumped" in order to have it execute continuations posted back to it
     /// </summary>
+<<<<<<< HEAD
     sealed class CustomSynchronizationContext : SynchronizationContext
     {
         readonly BlockingCollection<(SendOrPostCallback, object?)> _coll = new BlockingCollection<(SendOrPostCallback, object?)>(new ConcurrentQueue<(SendOrPostCallback, object?)>());
@@ -1000,6 +1033,22 @@ static class AsyncHelpers
         readonly SendOrPostCallback _callback1 = PostCallback;
         readonly SendOrPostCallback _callback2 = Done;
 
+=======
+    class CustomSynchronizationContext : SynchronizationContext
+    {
+        readonly ConcurrentQueue<Tuple<SendOrPostCallback, object?>> _items = new();
+        readonly AutoResetEvent _workItemsWaiting = new(false);
+        readonly Func<Task> _task;
+        ExceptionDispatchInfo? _caughtException;
+        bool _done;
+
+        /// <summary>
+        /// Constructor for the custom context
+        /// </summary>
+        /// <param name="task">Task to execute</param>
+        public CustomSynchronizationContext(Func<Task> task) =>
+            _task = task ?? throw new ArgumentNullException(nameof(task), "Please remember to pass a Task to be executed");
+>>>>>>> rpc
 
         /// <summary>
         /// When overridden in a derived class, dispatches an asynchronous message to a synchronization context.
@@ -1008,6 +1057,7 @@ static class AsyncHelpers
         /// <param name="state">Callback state</param>
         public override void Post(SendOrPostCallback function, object? state)
         {
+<<<<<<< HEAD
             _coll.Add((function, state));
         }
 
@@ -1031,11 +1081,16 @@ static class AsyncHelpers
         static void Done(object? o)
         {
             ((CustomSynchronizationContext)o)._done = true;
+=======
+            _items.Enqueue(Tuple.Create(function, state));
+            _workItemsWaiting.Set();
+>>>>>>> rpc
         }
 
         /// <summary>
         /// Enqueues the function to be executed and executes all resulting continuations until it is completely done
         /// </summary>
+<<<<<<< HEAD
         public void Run(Func<ValueTask> task)
         {
             _done = false;
@@ -1054,6 +1109,44 @@ static class AsyncHelpers
                 }
 
                 _caughtException.Throw();
+=======
+        public void Run()
+        {
+            async void PostCallback(object? _)
+            {
+                try
+                {
+                    await _task().ConfigureAwait(false);
+                }
+                catch (Exception exception)
+                {
+                    _caughtException = ExceptionDispatchInfo.Capture(exception);
+                    throw;
+                }
+                finally
+                {
+                    Post(_ => _done = true, null);
+                }
+            }
+
+            Post(PostCallback, null);
+
+            while (!_done)
+            {
+                if (_items.TryDequeue(out var task))
+                {
+                    task.Item1(task.Item2);
+                    if (_caughtException == null)
+                    {
+                        continue;
+                    }
+                    _caughtException.Throw();
+                }
+                else
+                {
+                    _workItemsWaiting.WaitOne();
+                }
+>>>>>>> rpc
             }
         }
 
@@ -1069,6 +1162,7 @@ static class AsyncHelpers
         /// </summary>
         /// <returns>Copy of the context</returns>
         public override SynchronizationContext CreateCopy() => this;
+<<<<<<< HEAD
 =======
 sealed class ByteQueue
 {
@@ -1214,3 +1308,7 @@ sealed class ByteQueue
 }
 =======
 >>>>>>> more rpc
+=======
+    }
+}
+>>>>>>> rpc
