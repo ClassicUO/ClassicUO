@@ -196,7 +196,7 @@ namespace ClassicUO.Game.Scenes
 
             CircleOfTransparency.Create(ProfileManager.CurrentProfile.CircleOfTransparencyRadius);
             Plugin.OnConnected();
-            EventSink.InvokeOnConnected(this);
+            EventSink.InvokeOnConnected(null);
             GameController.UpdateBackgroundHueShader();
             SpellVisualRangeManager.Instance.OnSceneLoad();
             AutoLootManager.Instance.OnSceneLoad();
@@ -379,6 +379,8 @@ namespace ClassicUO.Game.Scenes
                 Plugin.OnDisconnected();
             }
             catch { }
+
+            EventSink.InvokeOnDisconnected(null);
 
             TargetManager.Reset();
 

@@ -13,6 +13,12 @@ namespace ClassicUO.Game.Managers
         public static void InvokeOnConnected(object sender) => OnConnected?.Invoke(sender, EventArgs.Empty);
 
         /// <summary>
+        /// Invoked when the player is connected to a server
+        /// </summary>
+        public static event EventHandler<EventArgs> OnDisconnected;
+        public static void InvokeOnDisconnected(object sender) => OnDisconnected?.Invoke(sender, EventArgs.Empty);
+
+        /// <summary>
         /// Invoked when any message is received from the server after client processing
         /// </summary>
         public static event EventHandler<MessageEventArgs> MessageReceived;
