@@ -58,6 +58,7 @@ namespace ClassicUO.Game.UI.Gumps
         private HitBox _hitBox;
         private bool _isMinimized;
         private NiceButton returnToGridView;
+        private bool firstItemsLoaded = false;
 
         internal const int CORPSES_GUMP = 0x0009;
 
@@ -135,8 +136,6 @@ namespace ClassicUO.Game.UI.Gumps
                     IsVisible = false;
                     _hideIfEmpty = true;
                 }
-
-                AutoLootManager.Instance.HandleCorpse(item);
             }
 
             if (_data.OpenSound != 0 && playsound)
@@ -663,6 +662,12 @@ namespace ClassicUO.Game.UI.Gumps
                 itemControl.Y = (int)(((short)item.Y - (IsChessboard ? 20 : 0)) * scale);
 
                 Add(itemControl);
+            }
+
+            if (!firstItemsLoaded)
+            {
+                firstItemsLoaded = true;
+                AutoLootManager.Instance.HandleCorpse(World.Items.Get(LocalSerial));
             }
         }
 

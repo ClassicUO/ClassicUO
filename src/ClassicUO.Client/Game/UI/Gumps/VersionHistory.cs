@@ -13,7 +13,8 @@ namespace ClassicUO.Game.UI.Gumps
                 "- Fix for health indicator percentage\n" +
                 "- Fix tooltip centered text\n" +
                 "- Added a modding system almost identical to ServUO's script system\n" +
-                "- Added macros to use items from your counter bar",
+                "- Added macros to use items from your counter bar\n" +
+                "- Simple auto loot improvements",
 
             "/c[white][3.15.0]/cd\n" +
                 "- Mouse interaction for overhead text can be disabled\n" +

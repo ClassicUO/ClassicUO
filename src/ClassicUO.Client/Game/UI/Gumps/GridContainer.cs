@@ -30,13 +30,6 @@
 
 #endregion
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Xml;
-using System.Xml.Linq;
 using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
@@ -48,6 +41,13 @@ using ClassicUO.Renderer;
 using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Xml;
+using System.Xml.Linq;
 using static ClassicUO.Game.UI.Gumps.GridHightlightMenu;
 
 namespace ClassicUO.Game.UI.Gumps
@@ -83,6 +83,7 @@ namespace ClassicUO.Game.UI.Gumps
         private bool quickLootThisContainer = false;
         private bool? UseOldContainerStyle = null;
         private bool autoSortContainer = false;
+        private bool firstItemsLoaded = false;
 
         private readonly bool skipSave = false;
         private readonly ushort originalContainerItemGraphic;
@@ -127,7 +128,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             #region SET VARS
-            isCorpse = container.IsCorpse;
+            isCorpse = container.IsCorpse || container.Graphic == 0x0009;
             if (useGridStyle != null)
                 UseOldContainerStyle = !useGridStyle;
 
@@ -154,8 +155,6 @@ namespace ClassicUO.Game.UI.Gumps
                     IsVisible = false;
                     Dispose();
                 }
-
-                AutoLootManager.Instance.HandleCorpse(container);
             }
 
             AnchorType = ProfileManager.CurrentProfile.EnableGridContainerAnchor ? ANCHOR_TYPE.NONE : ANCHOR_TYPE.DISABLED;
@@ -502,6 +501,14 @@ namespace ClassicUO.Game.UI.Gumps
             if (InvalidateContents && !IsDisposed && IsVisible)
             {
                 UpdateItems();
+            }
+            if (!firstItemsLoaded)
+            {
+                firstItemsLoaded = true;
+                if (isCorpse)
+                {
+                    AutoLootManager.Instance.HandleCorpse(container);
+                }
             }
         }
 
