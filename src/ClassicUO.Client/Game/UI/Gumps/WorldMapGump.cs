@@ -2560,6 +2560,24 @@ namespace ClassicUO.Game.UI.Gumps
 
             }
 
+            if(Pathfinder.AutoWalking && Pathfinder.PathSize > 0)
+            {
+                Point end = RotatePoint(Pathfinder.EndPoint.X - _center.X, Pathfinder.EndPoint.Y - _center.Y, Zoom, 1, _flipMap ? 45f : 0f);
+                end.X += gX + halfWidth;
+                end.Y += gY + halfHeight;
+                Point start = RotatePoint(World.Player.X - _center.X, World.Player.Y- _center.Y, Zoom, 1, _flipMap ? 45f : 0f);
+                start.X += gX + halfWidth;
+                start.Y += gY + halfHeight;
+
+                batcher.DrawLine(
+                    SolidColorTextureCache.GetTexture(Color.Green),
+                    new Vector2(end.X - 2, end.Y - 2),
+                    new Vector2(start.X, start.Y),
+                    ShaderHueTranslator.GetHueVector(0),
+                    1
+                    );
+            }
+
             DrawMobile
             (
                 batcher,

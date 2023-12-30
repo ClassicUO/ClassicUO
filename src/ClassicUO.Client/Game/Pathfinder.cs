@@ -67,8 +67,12 @@ namespace ClassicUO.Game
         };
         private static Point _startPoint, _endPoint;
 
-        public static bool AutoWalking { get; set; }
+        public static Point StartPoint => _startPoint;
+        public static Point EndPoint => _endPoint;
+        public static int PathSize => _pathSize;
 
+        public static bool AutoWalking { get; set; }
+        
         public static bool PathindingCanBeCancelled { get; set; }
 
         public static bool BlockMoving { get; set; }
@@ -659,6 +663,7 @@ namespace ClassicUO.Game
 
         private static int GetGoalDistCost(Point point, int cost)
         {
+            //return (Math.Abs(_endPoint.X - point.X) + Math.Abs(_endPoint.Y - point.Y)) * cost;
             return Math.Max(Math.Abs(_endPoint.X - point.X), Math.Abs(_endPoint.Y - point.Y));
         }
 
@@ -924,7 +929,7 @@ namespace ClassicUO.Game
                     _pathSize = totalNodes;
                     goalNode = _openList[_goalNode];
 
-                    while (totalNodes != 0)
+                    while (totalNodes > 0)
                     {
                         totalNodes--;
                         _path[totalNodes] = goalNode;

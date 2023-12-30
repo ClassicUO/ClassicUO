@@ -114,6 +114,12 @@ namespace ClassicUO.Game.Managers
         /// </summary>
         public static PostProcessTooltipDelegate PostProcessTooltip;
         public delegate void PostProcessTooltipDelegate(ref string e);
+
+        /// <summary>
+        /// This event occurs every game update, essentially the game tick. Be careful with this, it happens many many times per second.
+        /// </summary>
+        public static GameUpdateDelegate GameUpdate;
+        public delegate void GameUpdateDelegate();
     }
 
     public class OPLEventArgs : EventArgs

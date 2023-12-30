@@ -276,9 +276,9 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     break;
                 }
-                Control c = Children[i];
+                Control c = Children.ElementAt(i);
 
-                if (c.Page == 0 || c.Page == ActivePage)
+                if (c != null && (c.Page == 0 || c.Page == ActivePage))
                 {
                     if (c.IsVisible)
                     {
@@ -310,10 +310,11 @@ namespace ClassicUO.Game.UI.Controls
 
                     if (c.IsDisposed)
                     {
-                        if (i >= 0 && i < Children.Count)
+                        if (Children.ElementAt(i) != null)
                         {
                             OnChildRemoved();
-                            Children.RemoveAt(i--);
+                            Children.RemoveAt(i);
+                            i--;
                             continue;
                         }
                     }
