@@ -553,6 +553,18 @@ namespace ClassicUO.Game.Scenes
                 ushort dropY = 0;
                 sbyte dropZ = 0;
 
+                if (Keyboard.Ctrl)
+                {
+                    GameActions.DropItem(
+                            Client.Game.GameCursor.ItemHold.Serial,
+                            World.Player.X + 1,
+                            World.Player.Y,
+                            World.Player.Z + 1,
+                            0
+                        );
+                    return true;
+                }
+
                 GameObject gobj = SelectedObject.Object as GameObject;
 
                 if (gobj is Entity obj)
@@ -1697,7 +1709,7 @@ namespace ClassicUO.Game.Scenes
             if (World.InGame && (UIManager.KeyboardFocusControl == UIManager.SystemChat.TextBoxControl || UIManager.KeyboardFocusControl == null))
             {
                 Macro macro = Macros.FindMacro((SDL.SDL_GameControllerButton)e.button);
-                if(macro != null && macro.Items is MacroObject mac)
+                if (macro != null && macro.Items is MacroObject mac)
                 {
                     ExecuteMacro(mac);
                 }
