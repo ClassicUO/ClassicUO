@@ -343,7 +343,7 @@ namespace ClassicUO.Assets
                         }
                     }
                 }
-                
+
                 return animIndices;
             }
 
@@ -372,7 +372,7 @@ namespace ClassicUO.Assets
                 return ReadOnlySpan<AnimIdxBlock>.Empty;
             }
 
-            if (offset + (actionCount * MAX_DIRECTIONS * sizeof(AnimIdxBlock)) >= end)
+            if (offset + (actionCount * MAX_DIRECTIONS * sizeof(AnimIdxBlock)) > end)
             {
                 return ReadOnlySpan<AnimIdxBlock>.Empty;
             }
@@ -1219,7 +1219,7 @@ namespace ClassicUO.Assets
             bool second,
             bool isRunning = false
         )
-        {        
+        {
             //ConvertBodyIfNeeded(ref animID);
 
             if (animFlags.HasFlag(AnimationFlags.CalculateOffsetByLowGroup))
