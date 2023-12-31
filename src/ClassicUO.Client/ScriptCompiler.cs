@@ -434,28 +434,31 @@ namespace ClassicUO
 
         public static void Invoke(string method)
         {
-            var invoke = new List<MethodInfo>();
-
-            foreach (var a in Assemblies)
+            if (Assemblies != null)
             {
-                var types = a.GetTypes();
+                var invoke = new List<MethodInfo>();
 
-                foreach (var t in types)
+                foreach (var a in Assemblies)
                 {
-                    var m = t.GetMethod(method, BindingFlags.Static | BindingFlags.Public);
+                    var types = a.GetTypes();
 
-                    if (m != null)
+                    foreach (var t in types)
                     {
-                        invoke.Add(m);
+                        var m = t.GetMethod(method, BindingFlags.Static | BindingFlags.Public);
+
+                        if (m != null)
+                        {
+                            invoke.Add(m);
+                        }
                     }
                 }
-            }
 
-            invoke.Sort(new CallPriorityComparer());
+                invoke.Sort(new CallPriorityComparer());
 
-            foreach (var m in invoke)
-            {
-                m.Invoke(null, null);
+                foreach (var m in invoke)
+                {
+                    m.Invoke(null, null);
+                }
             }
         }
 
