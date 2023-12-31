@@ -38,7 +38,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
-    internal class ButtonTileArt : Button
+    public class ButtonTileArt : Button
     {
         private readonly ushort _hue;
         private readonly bool _isPartial;

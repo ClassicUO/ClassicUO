@@ -39,7 +39,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.GameObjects
 {
-    internal sealed class House : IEquatable<uint>
+    public sealed class House : IEquatable<uint>
     {
         public House(uint serial, uint revision, bool isCustom)
         {

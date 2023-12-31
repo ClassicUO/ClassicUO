@@ -45,7 +45,7 @@ using Mouse = ClassicUO.Input.Mouse;
 
 namespace ClassicUO.Game.UI.Controls
 {
-    internal abstract class Control
+    public abstract class Control
     {
         internal static int _StepsDone = 1;
         internal static int _StepChanger = 1;
@@ -276,9 +276,9 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     break;
                 }
-                Control c = Children[i];
+                Control c = Children.ElementAt(i);
 
-                if (c.Page == 0 || c.Page == ActivePage)
+                if (c != null && (c.Page == 0 || c.Page == ActivePage))
                 {
                     if (c.IsVisible)
                     {
@@ -310,10 +310,13 @@ namespace ClassicUO.Game.UI.Controls
 
                     if (c.IsDisposed)
                     {
-                        OnChildRemoved();
-                        Children.RemoveAt(i--);
-
-                        continue;
+                        if (Children.ElementAt(i) != null)
+                        {
+                            OnChildRemoved();
+                            Children.RemoveAt(i);
+                            i--;
+                            continue;
+                        }
                     }
 
                     c.Update();

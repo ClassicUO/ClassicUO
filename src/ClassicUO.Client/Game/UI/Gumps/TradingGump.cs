@@ -43,7 +43,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    internal sealed class TradingGump : TextContainerGump
+    public sealed class TradingGump : TextContainerGump
     {
         private uint _gold,
             _platinum,

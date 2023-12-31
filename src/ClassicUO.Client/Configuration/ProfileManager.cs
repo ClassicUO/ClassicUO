@@ -36,7 +36,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Configuration
 {
-    internal static class ProfileManager
+    public static class ProfileManager
     {
         public static Profile CurrentProfile { get; private set; }
         public static string ProfilePath { get; private set; }

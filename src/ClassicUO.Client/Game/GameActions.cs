@@ -46,7 +46,7 @@ using static ClassicUO.Network.NetClient;
 
 namespace ClassicUO.Game
 {
-    internal static class GameActions
+    public static class GameActions
     {
         public static int LastSpellIndex { get; set; } = 1;
         public static int LastSkillIndex { get; set; } = 1;
@@ -201,6 +201,15 @@ namespace ClassicUO.Game
                 miniMapGump.ToggleSize();
                 miniMapGump.SetInScreen();
                 miniMapGump.BringOnTop();
+            }
+        }
+
+        public static void BandageSelf()
+        {
+            Item bandage = World.Player.FindBandage();
+            if(bandage != null)
+            {
+                NetClient.Socket.Send_TargetSelectedObject(bandage.Serial, World.Player.Serial);
             }
         }
 

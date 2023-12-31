@@ -32,13 +32,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Sockets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
-using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.Assets;
@@ -172,7 +170,7 @@ namespace ClassicUO.Game.Scenes
 
             CommandManager.Initialize();
             NetClient.Socket.Disconnected += SocketOnDisconnected;
-            MessageManager.MessageReceived += ChatOnMessageReceived;
+            EventSink.MessageReceived += ChatOnMessageReceived;
             UIManager.ContainerScale = ProfileManager.CurrentProfile.ContainersScale / 100f;
 
             SDL.SDL_SetWindowMinimumSize(Client.Game.Window.Handle, 640, 480);
@@ -198,6 +196,7 @@ namespace ClassicUO.Game.Scenes
 
             CircleOfTransparency.Create(ProfileManager.CurrentProfile.CircleOfTransparencyRadius);
             Plugin.OnConnected();
+            EventSink.InvokeOnConnected(null);
             GameController.UpdateBackgroundHueShader();
             SpellVisualRangeManager.Instance.OnSceneLoad();
             AutoLootManager.Instance.OnSceneLoad();
@@ -381,6 +380,8 @@ namespace ClassicUO.Game.Scenes
             }
             catch { }
 
+            EventSink.InvokeOnDisconnected(null);
+
             TargetManager.Reset();
 
             // special case for wmap. this allow us to save settings
@@ -417,7 +418,7 @@ namespace ClassicUO.Game.Scenes
             _useItemQueue = null;
             Hotkeys = null;
             Macros = null;
-            MessageManager.MessageReceived -= ChatOnMessageReceived;
+            EventSink.MessageReceived -= ChatOnMessageReceived;
 
             Settings.GlobalSettings.WindowSize = new Point(
                 Client.Game.Window.ClientBounds.Width,
@@ -872,7 +873,10 @@ namespace ClassicUO.Game.Scenes
                     }
                     else if (distance > currentProfile.AutoFollowDistance)
                     {
-                        Pathfinder.WalkTo(follow.X, follow.Y, follow.Z, currentProfile.AutoFollowDistance);
+                        if(!Pathfinder.WalkTo(follow.X, follow.Y, follow.Z, currentProfile.AutoFollowDistance))
+                        {
+                            StopFollowing(); //Can't get there
+                        }
                     }
                 }
                 else

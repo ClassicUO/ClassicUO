@@ -77,7 +77,7 @@ namespace ClassicUO.Configuration
 
 
 
-    internal sealed class Profile
+    public sealed class Profile
     {
         [JsonIgnore] public string Username { get; set; }
         [JsonIgnore] public string ServerName { get; set; }
@@ -579,6 +579,11 @@ namespace ClassicUO.Configuration
         public List<string> AutoOpenXmlGumps { get; set; } = new List<string>();
 
         public int ControllerMouseSensativity { get => Input.Mouse.ControllerSensativity; set => Input.Mouse.ControllerSensativity = value; }
+
+        [JsonConverter(typeof(Point2Converter))]
+        public Point PlayerOffset { get; set; } = new Point(0, 0);
+
+        public bool UseLandTextures { get; set; } = false;
 
 
 

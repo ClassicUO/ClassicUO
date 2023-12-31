@@ -61,6 +61,7 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly Label _corpseNameLabel;
         private readonly bool _hideIfEmpty;
         private int _pagesCount;
+        private bool firstItemsLoaded = false;
 
         public GridLootGump(uint local) : base(local, 0)
         {
@@ -72,8 +73,6 @@ namespace ClassicUO.Game.UI.Gumps
 
                 return;
             }
-
-            AutoLootManager.Instance.HandleCorpse(_corpse);
 
             if (World.Player.ManualOpenedCorpses.Contains(LocalSerial))
             {
@@ -315,6 +314,12 @@ namespace ClassicUO.Game.UI.Gumps
             else if (_hideIfEmpty && !IsVisible)
             {
                 IsVisible = true;
+            }
+
+            if(!firstItemsLoaded)
+            {
+                firstItemsLoaded = true;
+                AutoLootManager.Instance.HandleCorpse(_corpse);
             }
         }
 

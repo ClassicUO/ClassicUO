@@ -32,7 +32,7 @@
 
 namespace ClassicUO.Game.Data
 {
-    internal enum RaceType : byte
+    public enum RaceType : byte
     {
         HUMAN = 1,
         ELF,

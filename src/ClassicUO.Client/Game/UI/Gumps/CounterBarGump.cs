@@ -52,13 +52,18 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private AlphaBlendControl _background;
 
+        public static CounterBarGump CurrentCounterBarGump { get; private set; }
+
         private int _rows,
             _columns,
             _rectSize;
 
         //private bool _isVertical;
 
-        public CounterBarGump() : base(0, 0) { }
+        public CounterBarGump() : base(0, 0) 
+        {
+            CurrentCounterBarGump = this;
+        }
 
         public CounterBarGump(
             int x,
@@ -96,6 +101,8 @@ namespace ClassicUO.Game.UI.Gumps
             //_isVertical = vertical;
 
             BuildGump();
+
+            CurrentCounterBarGump = this;
         }
 
         public override GumpType GumpType => GumpType.CounterBar;
@@ -247,13 +254,30 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (index >= 0 && index < items.Length)
                 {
-                    items[i].Parent = null;
+                     items[i].Parent = null;
 
                     items[i].Dispose();
                 }
             }
 
             SetInScreen();
+        }
+
+        public CounterItem GetCounterItem(int index)
+        {
+            CounterItem[] items = GetControls<CounterItem>();
+
+            if(items == null)
+            {
+                return null;
+            }
+
+            if(items.Length > index)
+            {
+                return items[index];
+            }
+
+            return null;
         }
 
         public override void Save(XmlTextWriter writer)
@@ -315,7 +339,16 @@ namespace ClassicUO.Game.UI.Gumps
             IsEnabled = IsVisible = ProfileManager.CurrentProfile.CounterBarEnabled;
         }
 
-        private class CounterItem : Control
+        public override void Dispose()
+        {
+            if (CurrentCounterBarGump == this)
+            {
+                CurrentCounterBarGump = null;
+            }
+            base.Dispose();
+        }
+
+        public class CounterItem : Control
         {
             private int _amount;
 
@@ -542,7 +575,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (_highlight)
                 {
-                    hueVector.Z = ((float)_endHighlight - (float)Time.Ticks ) / (float)HIGHLIGHT_DURATION;
+                    hueVector.Z = ((float)_endHighlight - (float)Time.Ticks) / (float)HIGHLIGHT_DURATION;
                     batcher.Draw(SolidColorTextureCache.GetTexture(Color.Yellow), new Rectangle(x, y, Width, Height), hueVector);
                 }
 

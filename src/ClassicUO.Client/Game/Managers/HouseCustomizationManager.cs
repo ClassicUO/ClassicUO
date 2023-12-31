@@ -38,13 +38,12 @@ using ClassicUO.Assets;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Gumps;
-using ClassicUO.IO;
 using ClassicUO.Network;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Managers
 {
-    internal struct CustomBuildObject
+    public struct CustomBuildObject
     {
         public CustomBuildObject(ushort graphic)
         {
@@ -56,7 +55,7 @@ namespace ClassicUO.Game.Managers
         public int X, Y, Z;
     }
 
-    internal class HouseCustomizationManager
+    public class HouseCustomizationManager
     {
         public static readonly List<CustomHouseWallCategory> Walls = new List<CustomHouseWallCategory>();
         public static readonly List<CustomHouseFloor> Floors = new List<CustomHouseFloor>();
@@ -2085,7 +2084,7 @@ namespace ClassicUO.Game.Managers
         }
     }
 
-    internal enum CUSTOM_HOUSE_GUMP_STATE
+    public enum CUSTOM_HOUSE_GUMP_STATE
     {
         CHGS_WALL = 0,
         CHGS_DOOR,
@@ -2097,7 +2096,7 @@ namespace ClassicUO.Game.Managers
         CHGS_FIXTURE
     }
 
-    internal enum CUSTOM_HOUSE_FLOOR_VISION_STATE
+    public enum CUSTOM_HOUSE_FLOOR_VISION_STATE
     {
         CHGVS_NORMAL = 0,
         CHGVS_TRANSPARENT_CONTENT,
@@ -2108,7 +2107,7 @@ namespace ClassicUO.Game.Managers
         CHGVS_HIDE_ALL
     }
 
-    internal enum CUSTOM_HOUSE_BUILD_TYPE
+    public enum CUSTOM_HOUSE_BUILD_TYPE
     {
         CHBT_NORMAL = 0,
         CHBT_ROOF,
@@ -2117,7 +2116,7 @@ namespace ClassicUO.Game.Managers
     }
 
     [Flags]
-    internal enum CUSTOM_HOUSE_MULTI_OBJECT_FLAGS
+    public enum CUSTOM_HOUSE_MULTI_OBJECT_FLAGS
     {
         CHMOF_GENERIC_INTERNAL = 0x01,
         CHMOF_FLOOR = 0x02,
@@ -2134,7 +2133,7 @@ namespace ClassicUO.Game.Managers
     }
 
     [Flags]
-    internal enum CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS
+    public enum CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS
     {
         CHVCF_TOP = 0x01,
         CHVCF_BOTTOM = 0x02,

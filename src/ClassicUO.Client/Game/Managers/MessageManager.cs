@@ -42,6 +42,7 @@ using ClassicUO.Assets;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace ClassicUO.Game.Managers
 {
@@ -60,7 +61,7 @@ namespace ClassicUO.Game.Managers
     //    SmallLight = 9
     //}
 
-    internal enum AffixType : byte
+    public enum AffixType : byte
     {
         Append = 0x00,
         Prepend = 0x01,
@@ -72,13 +73,6 @@ namespace ClassicUO.Game.Managers
     internal static class MessageManager
     {
         public static PromptData PromptData { get; set; }
-
-        public static event EventHandler<MessageEventArgs> MessageReceived;
-
-        public static event EventHandler<MessageEventArgs> RawMessageReceived;
-
-        public static event EventHandler<MessageEventArgs> LocalizedMessageReceived;
-
 
         public static void HandleMessage
         (
@@ -100,9 +94,7 @@ namespace ClassicUO.Game.Managers
 
             Profile currentProfile = ProfileManager.CurrentProfile;
 
-            RawMessageReceived.Raise
-            (
-                new MessageEventArgs
+            EventSink.InvokeRawMessageReceived(parent, new MessageEventArgs
                 (
                     parent,
                     text,
@@ -113,9 +105,7 @@ namespace ClassicUO.Game.Managers
                     textType,
                     unicode,
                     lang
-                ),
-                parent
-            );
+                ));
 
             if (currentProfile != null && currentProfile.OverrideAllFonts)
             {
@@ -305,9 +295,7 @@ namespace ClassicUO.Game.Managers
                     }
             }
 
-            MessageReceived.Raise
-            (
-                new MessageEventArgs
+            EventSink.InvokeMessageReceived(parent, new MessageEventArgs
                 (
                     parent,
                     text,
@@ -318,14 +306,12 @@ namespace ClassicUO.Game.Managers
                     textType,
                     unicode,
                     lang
-                ),
-                parent
-            );
+                ));
         }
 
         public static void OnLocalizedMessage(Entity entity, MessageEventArgs args)
         {
-            LocalizedMessageReceived.Raise(args, entity);
+            EventSink.InvokeLocalizedMessageReceived(entity, args);
         }
 
         public static TextObject CreateMessage

@@ -37,7 +37,7 @@ using ClassicUO.Utility;
 
 namespace ClassicUO.Game.UI.Controls
 {
-    internal class Label : Control
+    public class Label : Control
     {
         private readonly RenderedText _gText;
 

@@ -32,8 +32,8 @@
 
 using ClassicUO.Configuration;
 using ClassicUO.Game;
-using ClassicUO.IO;
 using ClassicUO.Game.Managers;
+using ClassicUO.IO;
 using ClassicUO.Network;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
@@ -272,9 +272,21 @@ namespace ClassicUO
 
                         break;
                 }
-
+                try
+                {
+#if DEBUG
+                ScriptCompiler.Compile(true, true);
+#else
+                    ScriptCompiler.Compile(false, true);
+#endif
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                }
 
                 Client.Run();
+
             }
 
             Log.Trace("Closing...");

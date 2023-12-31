@@ -38,7 +38,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
-    internal class GumpPicTiled : Control
+    public class GumpPicTiled : Control
     {
         private ushort _graphic;
 

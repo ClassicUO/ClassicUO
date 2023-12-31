@@ -39,7 +39,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    internal class PopupMenuGump : Gump
+    public class PopupMenuGump : Gump
     {
         private ushort _selectedItem;
         private readonly PopupMenuData _data;

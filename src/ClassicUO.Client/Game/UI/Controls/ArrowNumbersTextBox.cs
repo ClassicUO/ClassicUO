@@ -35,7 +35,7 @@ using ClassicUO.Renderer;
 
 namespace ClassicUO.Game.UI.Controls
 {
-    internal class ArrowNumbersTextBox : Control
+    public class ArrowNumbersTextBox : Control
     {
         private const int TIME_BETWEEN_CLICKS = 250;
         private readonly int _Min, _Max;

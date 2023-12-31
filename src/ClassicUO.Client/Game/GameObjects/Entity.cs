@@ -42,14 +42,14 @@ using static ClassicUO.Network.NetClient;
 
 namespace ClassicUO.Game.GameObjects
 {
-    enum HitsRequestStatus
+    public enum HitsRequestStatus
     {
         None,
         Pending,
         Received
     }
 
-    internal abstract class Entity : GameObject, IEquatable<Entity>
+    public abstract class Entity : GameObject, IEquatable<Entity>
     {
         private static readonly RenderedText[] _hitsPercText = new RenderedText[101];
         private Direction _direction;
@@ -64,7 +64,20 @@ namespace ClassicUO.Game.GameObjects
         public bool ExecuteAnimation = true;
         internal long LastAnimationChangeTime;
         public Flags Flags;
-        public ushort Hits;
+        public ushort Hits { get => hits; set 
+            {
+                if(this is PlayerMobile)
+                {
+                    var arg = new PlayerStatChangedArgs(PlayerStatChangedArgs.PlayerStat.Hits, hits, value);
+                    hits = value;
+                    EventSink.InvokeOnPlayerStatChange(this, arg);
+                }
+                else
+                {
+                    hits = value;
+                }
+            } 
+        }
         public ushort HitsMax;
         public byte HitsPercentage;
         public bool IsClicked;
@@ -72,7 +85,7 @@ namespace ClassicUO.Game.GameObjects
         public string Name;
         public uint Serial;
         public HitsRequestStatus HitsRequest;
-
+        private ushort hits;
 
         public bool IsHidden => (Flags & Flags.Hidden) != 0;
 

@@ -344,7 +344,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             content.BlankLine();
 
-            content.AddToRight(new CheckboxWithLabel("Change trees to strumps", isChecked: profile.TreeToStumps, valueChanged: (b) => { profile.TreeToStumps = b; }), true, page);
+            content.AddToRight(new CheckboxWithLabel("Change trees to stumps", isChecked: profile.TreeToStumps, valueChanged: (b) => { profile.TreeToStumps = b; }), true, page);
 
             content.BlankLine();
 
@@ -2065,7 +2065,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             content.BlankLine();
 
-            content.AddToRight(c = new SliderWithLabel("Overhead text width", 0, Theme.SLIDER_WIDTH, 0, 600, profile.OverheadChatWidth, (i) => { profile.OverheadChatWidth = (byte)i; }), true, page);
+            content.AddToRight(c = new SliderWithLabel("Overhead text width", 0, Theme.SLIDER_WIDTH, 0, 600, profile.OverheadChatWidth, (i) => { profile.OverheadChatWidth = i; }), true, page);
             c.SetTooltip("This adjusts the maximum width for text over players, setting to 0 will allow it to use any width needed to stay one line");
 
             content.BlankLine();
@@ -2122,7 +2122,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             content.AddToRight(new CheckboxWithLabel("Enable health indicator border", 0, profile.EnableHealthIndicator, (b) => { profile.EnableHealthIndicator = b; }), true, page);
             content.Indent();
-            content.AddToRight(new SliderWithLabel("Only show below hp %", 0, Theme.SLIDER_WIDTH, 1, 100, (int)profile.ShowHealthIndicatorBelow, (i) => { profile.ShowHealthIndicatorBelow = i; }), true, page);
+            content.AddToRight(new SliderWithLabel("Only show below hp %", 0, Theme.SLIDER_WIDTH, 1, 100, (int)profile.ShowHealthIndicatorBelow * 100, (i) => { profile.ShowHealthIndicatorBelow = i / 100f; }), true, page);
             content.AddToRight(new SliderWithLabel("Size", 0, Theme.SLIDER_WIDTH, 1, 25, profile.HealthIndicatorWidth, (i) => { profile.HealthIndicatorWidth = i; }), true, page);
             content.RemoveIndent();
 
@@ -2202,6 +2202,16 @@ namespace ClassicUO.Game.UI.Gumps
             content.BlankLine();
 
             content.AddToRight(new CheckboxWithLabel("Enable auto resync on hang detection", 0, profile.ForceResyncOnHang, (b) => { profile.ForceResyncOnHang = b; }), true, page);
+
+            content.BlankLine();
+
+            content.AddToRight(new SliderWithLabel("Player Offset X", 0, Theme.SLIDER_WIDTH, -20, 20, profile.PlayerOffset.X, (i) => { profile.PlayerOffset = new Point(i, profile.PlayerOffset.Y); }), true, page);
+            content.AddToRight(new SliderWithLabel("Player Offset Y", 0, Theme.SLIDER_WIDTH, -20, 20, profile.PlayerOffset.Y, (i) => { profile.PlayerOffset = new Point(profile.PlayerOffset.X, i); }), true, page);
+
+            content.BlankLine();
+
+            content.AddToRight(new CheckboxWithLabel("Use land textures where available(Experimental)", 0, profile.UseLandTextures, (b) => { profile.UseLandTextures = b; }), true, page);
+
             #endregion
 
             #region Tooltips
@@ -2308,7 +2318,7 @@ namespace ClassicUO.Game.UI.Gumps
                     foreach (string character in allCharacters)
                     {
                         locations.Add(new ProfileLocationData(server, account, character));
-                        if (profile.ServerName == Path.GetFileName(server))
+                        if (FileSystemHelper.RemoveInvalidChars(profile.ServerName) == FileSystemHelper.RemoveInvalidChars(Path.GetFileName(server)))
                         {
                             sameServerLocations.Add(new ProfileLocationData(server, account, character));
                         }
@@ -2375,7 +2385,7 @@ namespace ClassicUO.Game.UI.Gumps
             bool rightSide = false;
             foreach (Layer layer in (Layer[])Enum.GetValues(typeof(Layer)))
             {
-                if(layer == Layer.Invalid || layer == Layer.Hair || layer == Layer.Beard || layer == Layer.Backpack || layer == Layer.ShopBuyRestock || layer == Layer.ShopBuy || layer == Layer.ShopSell || layer == Layer.Bank || layer == Layer.Face || layer == Layer.Talisman || layer == Layer.Mount)
+                if (layer == Layer.Invalid || layer == Layer.Hair || layer == Layer.Beard || layer == Layer.Backpack || layer == Layer.ShopBuyRestock || layer == Layer.ShopBuy || layer == Layer.ShopSell || layer == Layer.Bank || layer == Layer.Face || layer == Layer.Talisman || layer == Layer.Mount)
                 {
                     continue;
                 }
@@ -4213,9 +4223,19 @@ namespace ClassicUO.Game.UI.Gumps
                     _is_writing = false;
                 }
 
+                private int GetXOffset()
+                {
+                    if (_caretScreenPosition.X > Width)
+                    {
+                        return _caretScreenPosition.X - Width + 5;
+                    }
+
+                    return 0;
+                }
+
                 public void Click(Point pos)
                 {
-                    pos = new Point(pos.X - ScreenCoordinateX, pos.Y - ScreenCoordinateY);
+                    pos = new Point((pos.X - ScreenCoordinateX), pos.Y - ScreenCoordinateY);
                     CaretIndex = GetIndexFromCoords(pos);
                     SelectionStart = 0;
                     SelectionEnd = 0;
@@ -4224,7 +4244,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 public void Drag(Point pos)
                 {
-                    pos = new Point(pos.X - ScreenCoordinateX, pos.Y - ScreenCoordinateY);
+                    pos = new Point((pos.X - ScreenCoordinateX), pos.Y - ScreenCoordinateY);
                     int p = 0;
 
                     if (SelectionStart == SelectionEnd)
@@ -4270,13 +4290,14 @@ namespace ClassicUO.Game.UI.Gumps
 
                 public override bool Draw(UltimaBatcher2D batcher, int x, int y)
                 {
+                    int slideX = x - GetXOffset();
+
                     if (batcher.ClipBegin(x, y, Width, Height))
                     {
                         base.Draw(batcher, x, y);
-                        DrawSelection(batcher, x, y);
-                        _rendererText.Draw(batcher, x, y);
-                        DrawCaret(batcher, x, y);
-
+                        DrawSelection(batcher, slideX, y);
+                        _rendererText.Draw(batcher, slideX, y);
+                        DrawCaret(batcher, slideX, y);
                         batcher.ClipEnd();
                     }
 
@@ -4300,7 +4321,7 @@ namespace ClassicUO.Game.UI.Gumps
                             _leftWasDown = true;
                         }
 
-                        Click(Mouse.Position);
+                        Click(new Point(x + ScreenCoordinateX + GetXOffset(), y + ScreenCoordinateY));
                     }
 
                     base.OnMouseDown(x, y, button);
@@ -4325,7 +4346,7 @@ namespace ClassicUO.Game.UI.Gumps
                         return;
                     }
 
-                    Drag(Mouse.Position);
+                    Drag(new Point(x + ScreenCoordinateX + GetXOffset(), y + ScreenCoordinateY));
                 }
 
                 public override void Dispose()
@@ -4819,7 +4840,10 @@ namespace ClassicUO.Game.UI.Gumps
             protected override void OnMouseEnter(int x, int y)
             {
                 base.OnMouseEnter(x, y);
-                UIManager.KeyboardFocusControl = this; //Dirty fix for mouse wheel macros
+                if (UIManager.KeyboardFocusControl == UIManager.SystemChat.TextBoxControl || UIManager.KeyboardFocusControl == null)
+                {
+                    UIManager.KeyboardFocusControl = this; //Dirty fix for mouse wheel macros
+                }
             }
 
             protected override void OnMouseWheel(MouseEventType delta)
@@ -5072,7 +5096,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 MacroObject ob = (MacroObject)Macro.Items;
 
-                if (ob.Code == MacroType.None)
+                if (ob == null || ob.Code == MacroType.None)
                 {
                     return;
                 }
@@ -5093,8 +5117,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Macro.PushToBack(obj);
 
-                Control c;
-                _databox.Add(c = new MacroEntry(this, obj, _allHotkeysNames));
+                _databox.Add(new MacroEntry(this, obj, _allHotkeysNames));
                 _databox.ReArrangeChildren();
                 _databox.ForceSizeUpdate();
                 ForceSizeUpdate();
@@ -5249,7 +5272,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                         return;
                     }
-                } else if (_hotkeyBox.Buttons != null && _hotkeyBox.Buttons.Length > 0)
+                }
+                else if (_hotkeyBox.Buttons != null && _hotkeyBox.Buttons.Length > 0)
                 {
 
                 }
@@ -5259,7 +5283,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
                 Macro m = Macro;
-                if(_hotkeyBox.Buttons != null && _hotkeyBox.Buttons.Length > 0)
+                if (_hotkeyBox.Buttons != null && _hotkeyBox.Buttons.Length > 0)
                 {
                     m.ControllerButtons = _hotkeyBox.Buttons;
                 }
@@ -5356,12 +5380,13 @@ namespace ClassicUO.Game.UI.Gumps
                     Control c;
                     Add(c = new ModernButton(mainBox.Width + 10, 0, 75, 40, ButtonAction.Activate, ResGumps.Remove, Theme.BUTTON_FONT_COLOR) { ButtonParameter = (int)buttonsOption.RemoveBtn, IsSelectable = false });
 
-                    Width = mainBox.Width + c.Width;
-                    Height = c.Height;
-
                     mainBox.Y = (c.Height >> 1) - (mainBox.Height >> 1);
 
+                    Height = c.Height;
+
                     AddSubMacro(obj);
+
+                    ForceSizeUpdate();
                 }
 
 
@@ -5400,7 +5425,7 @@ namespace ClassicUO.Game.UI.Gumps
                             break;
 
                         case 2:
-                            InputField textbox = new InputField(240, 40, 0, 80, obj.HasString() ? ((MacroObjectString)obj).Text : string.Empty, false, (s, e) =>
+                            InputField textbox = new InputField(400, 40, 0, 80, obj.HasString() ? ((MacroObjectString)obj).Text : string.Empty, false, (s, e) =>
                             {
                                 if (obj.HasString())
                                 {

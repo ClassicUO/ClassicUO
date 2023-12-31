@@ -504,6 +504,7 @@ namespace ClassicUO.Network
                 if (damage > 0)
                 {
                     World.WorldTextManager.AddDamage(entity, damage);
+                    EventSink.InvokeOnEntityDamage(entity, damage);
                 }
             }
         }
@@ -1602,6 +1603,8 @@ namespace ClassicUO.Network
                         );
                     }
 
+                    EventSink.InvokeOnOpenContainer(item, serial);
+
                     UIManager.RemovePosition(serial);
                 }
                 else
@@ -1836,6 +1839,8 @@ namespace ClassicUO.Network
                     IsGuild = false,
                     Name = $"Your Corpse"
                 };
+
+                EventSink.InvokeOnPlayerDeath(World.Player, World.Player.Serial);
             }
         }
 
@@ -2413,6 +2418,7 @@ namespace ClassicUO.Network
                 byte temp = p.ReadUInt8();
 
                 weather.Generate(type, count, temp);
+                EventSink.InvokeOnSetWeather(null, new WeatherEventArgs(type, count, temp));
             }
         }
 
@@ -5747,11 +5753,45 @@ namespace ClassicUO.Network
             bool ignoreobject = p.ReadUInt16BE() != 0;
             uint cliloc = p.ReadUInt32BE();
             string name = p.ReadUnicodeLE();
+
+            switch (type)
+            {
+                case WaypointsType.Corpse:
+                    World.WMapManager.AddOrUpdate(serial, x, y, 0, map, true, "Corpse");
+                    break;
+                case WaypointsType.PartyMember:
+                    break;
+                case WaypointsType.RallyPoint:
+                    break;
+                case WaypointsType.QuestGiver:
+                    break;
+                case WaypointsType.QuestDestination:
+                    break;
+                case WaypointsType.Resurrection:
+                    World.WMapManager.AddOrUpdate(serial, x, y, 0, map, true, "Resurrection");
+                    break;
+                case WaypointsType.PointOfInterest:
+                    break;
+                case WaypointsType.Landmark:
+                    break;
+                case WaypointsType.Town:
+                    break;
+                case WaypointsType.Dungeon:
+                    break;
+                case WaypointsType.Moongate:
+                    break;
+                case WaypointsType.Shop:
+                    break;
+                case WaypointsType.Player:
+                    break;
+            }
         }
 
         private static void RemoveWaypoint(ref StackDataReader p)
         {
             uint serial = p.ReadUInt32BE();
+
+            World.WMapManager.Remove(serial);
         }
 
         private static void KrriosClientSpecial(ref StackDataReader p)
@@ -7197,7 +7237,12 @@ namespace ClassicUO.Network
             gump.Update();
             gump.SetInScreen();
 
-            if (gumpID == 1426736667) //SOS message gump
+            if (CUOEnviroment.Debug)
+            {
+                GameActions.Print($"GumpID: {gumpID}");
+            }
+
+            if (gumpID == 1426736667 || (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.ServerName == "UOAlive" && gumpID == 4258191894)) //SOS message gump
             {
                 for (int i = 0; i < gump.Children.Count; i++)
                 {

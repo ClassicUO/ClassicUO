@@ -7,6 +7,16 @@ namespace ClassicUO.Game.UI.Gumps
     internal class VersionHistory : Gump
     {
         private static string[] updateTexts = {
+             "/c[white][3.16.0]/cd\n" +
+                "- Some small improvements for input boxes and the new option menu\n" +
+                "- Added player position offset option in TazUO->Misc\n" +
+                "- Fix for health indicator percentage\n" +
+                "- Fix tooltip centered text\n" +
+                "- Added a modding system almost identical to ServUO's script system\n" +
+                "- Added macros to use items from your counter bar\n" +
+                "- Simple auto loot improvements\n" +
+                "- Hold ctrl and drop an item anywhere on the game window to drop it",
+
             "/c[white][3.15.0]/cd\n" +
                 "- Mouse interaction for overhead text can be disabled\n" +
                 "- Visable layers option added in Options->TazUO\n" +

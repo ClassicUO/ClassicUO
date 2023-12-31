@@ -32,7 +32,7 @@
 
 namespace ClassicUO.Game.Data
 {
-    internal enum GraphicEffectBlendMode
+    public enum GraphicEffectBlendMode
     {
         Normal = 0x00,                // normal, black is transparent
         Multiply = 0x01,              // darken

@@ -34,7 +34,7 @@ using System;
 
 namespace ClassicUO.Game.Data
 {
-    internal class BuffIcon : IEquatable<BuffIcon>
+    public class BuffIcon : IEquatable<BuffIcon>
     {
         public BuffIcon(BuffIconType type, ushort graphic, long timer, string text, string title = "")
         {

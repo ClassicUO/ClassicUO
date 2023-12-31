@@ -43,12 +43,12 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.GameObjects
 {
-    internal abstract class BaseGameObject : LinkedObject
+    public abstract class BaseGameObject : LinkedObject
     {
         public Point RealScreenPosition;
     }
 
-    internal abstract partial class GameObject : BaseGameObject
+    public abstract partial class GameObject : BaseGameObject
     {
         public bool IsDestroyed { get; protected set; }
         public bool IsPositionChanged { get; protected set; }

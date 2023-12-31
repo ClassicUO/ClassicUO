@@ -40,7 +40,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.GameObjects
 {
-    internal class TextContainer : LinkedObject
+    public class TextContainer : LinkedObject
     {
         public int Size,
             MaxSize = 5;

@@ -73,8 +73,8 @@ namespace ClassicUO.Game.Scenes
                     Pathfinder.StopAutoWalk();
                 }
 
-                int x = Camera.Bounds.X + (Camera.Bounds.Width >> 1);
-                int y = Camera.Bounds.Y + (Camera.Bounds.Height >> 1);
+                int x = Camera.Bounds.X + (Camera.Bounds.Width >> 1) + ((ProfileManager.CurrentProfile.PlayerOffset.X - ProfileManager.CurrentProfile.PlayerOffset.Y) * 22);
+                int y = Camera.Bounds.Y + (Camera.Bounds.Height >> 1) + ((ProfileManager.CurrentProfile.PlayerOffset.X + ProfileManager.CurrentProfile.PlayerOffset.Y) * 22);
 
                 Direction direction = (Direction)
                     GameCursor.GetMouseDirection(x, y, Mouse.Position.X, Mouse.Position.Y, 1);
@@ -552,6 +552,18 @@ namespace ClassicUO.Game.Scenes
                 ushort dropX = 0;
                 ushort dropY = 0;
                 sbyte dropZ = 0;
+
+                if (Keyboard.Ctrl)
+                {
+                    GameActions.DropItem(
+                            Client.Game.GameCursor.ItemHold.Serial,
+                            World.Player.X + 1,
+                            World.Player.Y,
+                            World.Player.Z + 1,
+                            0
+                        );
+                    return true;
+                }
 
                 GameObject gobj = SelectedObject.Object as GameObject;
 
@@ -1697,7 +1709,7 @@ namespace ClassicUO.Game.Scenes
             if (World.InGame && (UIManager.KeyboardFocusControl == UIManager.SystemChat.TextBoxControl || UIManager.KeyboardFocusControl == null))
             {
                 Macro macro = Macros.FindMacro((SDL.SDL_GameControllerButton)e.button);
-                if(macro != null && macro.Items is MacroObject mac)
+                if (macro != null && macro.Items is MacroObject mac)
                 {
                     ExecuteMacro(mac);
                 }

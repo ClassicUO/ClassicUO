@@ -39,7 +39,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.GameObjects
 {
-    internal class TextObject : BaseGameObject
+    public class TextObject : BaseGameObject
     {
         private static readonly QueuedPool<TextObject> _queue = new QueuedPool<TextObject>
         (

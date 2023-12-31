@@ -47,7 +47,7 @@ using SDL2;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    internal enum ChatMode
+    public enum ChatMode
     {
         Default,
         Whisper,
@@ -63,7 +63,7 @@ namespace ClassicUO.Game.UI.Gumps
         UOChat
     }
 
-    internal class SystemChatControl : Control
+    public class SystemChatControl : Control
     {
         private const int MAX_MESSAGE_LENGHT = 100;
         private const int CHAT_X_OFFSET = 3;
@@ -136,7 +136,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             WantUpdateSize = false;
 
-            MessageManager.MessageReceived += ChatOnMessageReceived;
+            EventSink.MessageReceived += ChatOnMessageReceived;
             Mode = ChatMode.Default;
 
             IsActive = !ProfileManager.CurrentProfile.ActivateChatAfterEnter;
@@ -310,7 +310,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Dispose()
         {
-            MessageManager.MessageReceived -= ChatOnMessageReceived;
+            EventSink.MessageReceived -= ChatOnMessageReceived;
             base.Dispose();
         }
 

@@ -41,14 +41,14 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.UI.Controls
 {
-    internal enum ButtonAction
+    public enum ButtonAction
     {
         Default = 0,
         SwitchPage = 0,
         Activate = 1
     }
 
-    internal class Button : Control
+    public class Button : Control
     {
         private readonly string _caption;
         private bool _entered;

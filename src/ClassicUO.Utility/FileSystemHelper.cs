@@ -75,6 +75,18 @@ namespace ClassicUO.Utility
             return path;
         }
 
+        public static string RemoveInvalidChars(string text)
+        {
+            char[] invalid = Path.GetInvalidFileNameChars();
+
+            for (int j = 0; j < invalid.Length; j++)
+            {
+                text = text.Replace(invalid[j].ToString(), "");
+            }
+
+            return text;
+        }
+
         public static void EnsureFileExists(string path)
         {
             if (!File.Exists(path))

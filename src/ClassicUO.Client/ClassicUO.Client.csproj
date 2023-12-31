@@ -5,8 +5,8 @@
     <ApplicationIcon>cuoicon.ico</ApplicationIcon>
     <AssemblyName>ClassicUO</AssemblyName>
     <RootNamespace>ClassicUO</RootNamespace>
-    <AssemblyVersion>3.15.0</AssemblyVersion>
-    <FileVersion>3.15.0</FileVersion>
+    <AssemblyVersion>3.16.0</AssemblyVersion>
+    <FileVersion>3.16.0</FileVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)'=='Release'">
@@ -83,6 +83,10 @@
     <DataFiles_lib64 Include="$(ProjectDir)..\..\external\lib64\*.*" />
     <DataFiles_osx Include="$(ProjectDir)..\..\external\osx\*.*" />
     <DataFiles_vulkan Include="$(ProjectDir)..\..\external\vulkan\icd.d\*.*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform" Version="4.1.0" />
   </ItemGroup>
 
   <ItemGroup>

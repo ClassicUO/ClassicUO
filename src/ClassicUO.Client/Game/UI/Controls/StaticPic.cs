@@ -38,7 +38,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
-    internal class StaticPic : Control
+    public class StaticPic : Control
     {
         private ushort _graphic;
 
