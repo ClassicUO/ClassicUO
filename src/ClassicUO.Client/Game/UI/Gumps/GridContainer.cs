@@ -1484,7 +1484,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     contents.Add(item);
                 }
-                return contents.OrderBy((x) => x.Graphic).ToList();
+                return contents.OrderBy((x) => x.Graphic).ThenBy((x) => x.Hue).ToList();
             }
 
             public int hcount = 0;
