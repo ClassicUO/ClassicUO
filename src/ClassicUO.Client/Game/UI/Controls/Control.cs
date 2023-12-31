@@ -313,7 +313,8 @@ namespace ClassicUO.Game.UI.Controls
                         if (Children.ElementAt(i) != null)
                         {
                             OnChildRemoved();
-                            Children.RemoveAt(i);
+                            //Children.RemoveAt(i);
+                            Children.Remove(c);
                             i--;
                             continue;
                         }
