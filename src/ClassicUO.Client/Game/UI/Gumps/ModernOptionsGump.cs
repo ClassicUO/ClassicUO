@@ -2318,7 +2318,7 @@ namespace ClassicUO.Game.UI.Gumps
                     foreach (string character in allCharacters)
                     {
                         locations.Add(new ProfileLocationData(server, account, character));
-                        if (profile.ServerName == Path.GetFileName(server))
+                        if (FileSystemHelper.RemoveInvalidChars(profile.ServerName) == FileSystemHelper.RemoveInvalidChars(Path.GetFileName(server)))
                         {
                             sameServerLocations.Add(new ProfileLocationData(server, account, character));
                         }
