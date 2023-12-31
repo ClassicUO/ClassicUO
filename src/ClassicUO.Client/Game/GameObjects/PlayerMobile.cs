@@ -280,10 +280,12 @@ namespace ClassicUO.Game.GameObjects
 
         public void RemoveBuff(BuffIconType graphic)
         {
-            var ev = _buffIcons[graphic];
-            EventSink.InvokeOnBuffRemoved(null, new BuffEventArgs(ev));
+            if (_buffIcons.TryGetValue(graphic, out BuffIcon ev))
+            {
+                EventSink.InvokeOnBuffRemoved(null, new BuffEventArgs(ev));
+                _buffIcons.Remove(graphic);
+            }
 
-            _buffIcons.Remove(graphic);
             if (ProfileManager.CurrentProfile.UseImprovedBuffBar)
             {
                 ImprovedBuffGump gump = UIManager.GetGump<ImprovedBuffGump>();
