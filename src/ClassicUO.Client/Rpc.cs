@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers;
 using System.Buffers.Binary;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -41,15 +42,21 @@ abstract class TcpServerRpc
         _server.Stop();
     }
 
-    public async Task<RpcMessage> Request(Guid clientId, ArraySegment<byte> payload)
+    public async Task<RpcMessage> RequestAsync(Guid clientId, ArraySegment<byte> payload)
     {
         if (_clients.TryGetValue(clientId, out var client))
         {
-            return await client.Request(payload);
+            return await client.RequestAsync(payload);
         }
 
         return RpcMessage.Invalid;
     }
+
+    public RpcMessage Request(Guid clientId, ArraySegment<byte> payload)
+        => AsyncHelpers.RunSync(() => RequestAsync(clientId, payload));
+
+    public event EventHandler<RpcMessage> OnRequest, OnResponse;
+    public event EventHandler<Guid> OnSocketConnected, OnSocketDisconnected;
 
     protected abstract void OnMessage(Guid id, RpcMessage msg);
     protected virtual void OnClientConnected(Guid id) { }
@@ -91,13 +98,26 @@ abstract class TcpServerRpc
         session.OnDisconnected += () =>
         {
             _clients.TryRemove(session.Guid, out var _);
+            OnSocketDisconnected?.Invoke(this, session.Guid);
             OnClientDisconnected(session.Guid);
         };
-        session.OnMessage += msg => OnMessage(session.Guid, msg);
+        session.OnMessage += msg => {
+            switch (msg.Command)
+            {
+                case RpcCommand.Request:
+                    OnRequest?.Invoke(this, msg);
+                    break;
+                case RpcCommand.Response:
+                    OnResponse?.Invoke(this, msg);
+                    break;
+            }
+            OnMessage(session.Guid, msg);
+        };
         session.Start();
 
         _clients.TryAdd(session.Guid, session);
 
+        OnSocketConnected?.Invoke(this, session.Guid);
         OnClientConnected(session.Guid);
     }
 }
@@ -109,7 +129,7 @@ sealed class TcpSession : IDisposable
     private readonly Channel<byte[]> _channelSending;
     private readonly BlockingCollection<RpcMessage> _collection = new BlockingCollection<RpcMessage>(new ConcurrentQueue<RpcMessage>());
     private readonly Thread _thread;
-
+    private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
     public TcpSession(Guid guid, TcpClient client)
     {
@@ -121,8 +141,9 @@ sealed class TcpSession : IDisposable
             SingleWriter = false,
             AllowSynchronousContinuations = true
         });
+
         _thread = new Thread(ParseMessages) { IsBackground = true };
-        _thread.SetApartmentState(ApartmentState.STA);
+        _thread.TrySetApartmentState(ApartmentState.STA);
     }
 
     public event Action<RpcMessage> OnMessage;
@@ -136,10 +157,11 @@ sealed class TcpSession : IDisposable
         if (_disposed)
             return;
 
-        if (_thread.IsAlive)
-            _thread.Abort();
-
         _disposed = true;
+        _cancellationTokenSource.Cancel();
+        if (_thread.IsAlive)
+            _thread.Join();
+        _cancellationTokenSource.Dispose();
         _collection.Dispose();
         Client.Close();
         Client.Dispose();
@@ -153,7 +175,7 @@ sealed class TcpSession : IDisposable
         SendLoopAsync();
     }
 
-    public async Task<RpcMessage> Request(ArraySegment<byte> payload)
+    public async Task<RpcMessage> RequestAsync(ArraySegment<byte> payload)
     {
         var buffer = SendMessage(payload, out var reqId);
 
@@ -203,7 +225,7 @@ sealed class TcpSession : IDisposable
         return buf;
     }
 
-    async void RunReceiveLoop()
+    async void RunReceiveLoop(CancellationToken token)
     {
         var buf = new byte[ushort.MaxValue + 1];
         var readBuffer = Array.Empty<byte>().AsMemory();
@@ -218,7 +240,11 @@ sealed class TcpSession : IDisposable
                 if (readBuffer.Length == 0)
                 {
                     var xs = new ArraySegment<byte>(buf, 0, buf.Length);
-                    var read = await socket.ReceiveAsync(xs, SocketFlags.None).ConfigureAwait(false);
+                    var read = await socket.ReceiveAsync(xs, SocketFlags.None
+#if NET
+                        , token
+#endif
+                        ).ConfigureAwait(false);
                     if (read <= 0)
                         break;
 
@@ -227,7 +253,11 @@ sealed class TcpSession : IDisposable
                 else if (readBuffer.Length < 19)
                 {
                     var xs = new ArraySegment<byte>(buf, 0, buf.Length);
-                    var readLen = await socket.ReceiveAsync(xs, SocketFlags.None).ConfigureAwait(false);
+                    var readLen = await socket.ReceiveAsync(xs, SocketFlags.None
+#if NET
+                        , token
+#endif
+                        ).ConfigureAwait(false);
                     if (readLen == 0) break;
                     var newBuffer = new byte[readBuffer.Length + readLen];
                     readBuffer.CopyTo(newBuffer);
@@ -239,6 +269,7 @@ sealed class TcpSession : IDisposable
                 {
                     continue;
                 }
+
 
                 var cmd = (RpcCommand)readBuffer.Span[0];
                 var id = new Guid
@@ -290,7 +321,7 @@ sealed class TcpSession : IDisposable
                 }
                 else
                 {
-                    while (!_collection.TryAdd(msg))
+                    while (!_collection.TryAdd(msg, -1, token))
                         Thread.Sleep(1);
                 }
             }
@@ -305,11 +336,20 @@ sealed class TcpSession : IDisposable
 
     void ParseMessages()
     {
-        while (Client.Connected)
-        {
-            var msg = _collection.Take();
+        var token = _cancellationTokenSource.Token;
 
-            ParseMessage(msg);
+        try
+        {
+            while (Client.Connected)
+            {
+                var msg = _collection.Take(token);
+
+                ParseMessage(msg);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+
         }
     }
 
@@ -339,15 +379,28 @@ sealed class TcpSession : IDisposable
     {
         var reader = _channelSending.Reader;
         var socket = Client.Client;
-        RunReceiveLoop();
+        var token = _cancellationTokenSource.Token;
 
-        while (await reader.WaitToReadAsync().ConfigureAwait(false))
+        RunReceiveLoop(token);
+
+        try
         {
-            while (reader.TryRead(out var item))
+            while (await reader.WaitToReadAsync(token).ConfigureAwait(false))
             {
-                var xs = new ArraySegment<byte>(item);
-                _ = await socket.SendAsync(xs, SocketFlags.None).ConfigureAwait(false);
+                while (reader.TryRead(out var item))
+                {
+                    var xs = new ArraySegment<byte>(item);
+                    _ = await socket.SendAsync(xs, SocketFlags.None
+#if NET
+                        , token
+#endif
+                        ).ConfigureAwait(false);
+                }
             }
+        }
+        catch (OperationCanceledException)
+        {
+
         }
     }
 }
@@ -381,10 +434,27 @@ abstract class TcpClientRpc
         tcp.EndConnect(ar);
 
         _session = new TcpSession(Guid.Empty, tcp);
-        _session.OnDisconnected += OnDisconnected;
-        _session.OnMessage += msg => OnMessage(msg);
+        _session.OnDisconnected += () => {
+            OnSocketDisconnected?.Invoke(this, EventArgs.Empty);
+            OnDisconnected();
+        };
+        _session.OnMessage += msg =>
+        {
+            switch (msg.Command)
+            {
+                case RpcCommand.Request:
+                    OnRequest?.Invoke(this, msg);
+                    break;
+                case RpcCommand.Response:
+                    OnResponse?.Invoke(this, msg);
+                    break;
+            }
+
+            OnMessage(msg);
+        };
         _session.Start();
 
+        OnSocketConnected?.Invoke(this, EventArgs.Empty);
         OnConnected();
     }
 
@@ -393,13 +463,19 @@ abstract class TcpClientRpc
         _session?.Client?.Client?.Disconnect(false);
     }
 
-    public async Task<RpcMessage> Request(ArraySegment<byte> payload)
+    public async Task<RpcMessage> RequestAsync(ArraySegment<byte> payload)
     {
         if (_session == null)
             return RpcMessage.Invalid;
 
-        return await _session.Request(payload);
+        return await _session.RequestAsync(payload);
     }
+
+    public RpcMessage Request(ArraySegment<byte> payload)
+        => AsyncHelpers.RunSync(() => RequestAsync(payload));
+
+    public event EventHandler<RpcMessage> OnRequest, OnResponse;
+    public event EventHandler OnSocketConnected, OnSocketDisconnected;
 
     protected abstract void OnMessage(RpcMessage msg);
     protected virtual void OnConnected() { }
