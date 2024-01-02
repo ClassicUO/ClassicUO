@@ -274,12 +274,20 @@ namespace ClassicUO.Network
             {
                 try
                 {
+<<<<<<< HEAD
                     Client.Game.PluginHost?.LoadPlugin(PluginPath);
 
                     //Client.Game.AssistantHost.OnSocketConnected += (o, e) => { 
                     //    Client.Game.AssistantHost.PluginInitialize(PluginPath); 
                     //};
                     //Client.Game.AssistantHost.Connect("127.0.0.1", 7777);
+=======
+                    
+                    Client.Game.AssistantHost.OnSocketConnected += (o, e) => { 
+                        Client.Game.AssistantHost.PluginInitialize(PluginPath); 
+                    };
+                    Client.Game.AssistantHost.Connect("127.0.0.1", 7777);
+>>>>>>> + move managed plugin to rpc
 
                     //Assembly asm = Assembly.LoadFile(PluginPath);
                     //Type type = asm.GetType("Assistant.Engine");

@@ -157,8 +157,6 @@ namespace ClassicUO
             SetScene(new LoginScene(UO.World));  
 #endif
             SetWindowPositionBySettings();
-
-            _assistantHost.Connect("127.0.0.1", 7777);
         }
 
         protected override void UnloadContent()
@@ -173,6 +171,7 @@ namespace ClassicUO
             Audio?.StopMusic();
             Settings.GlobalSettings.Save();
             Plugin.OnClosing();
+            _assistantHost?.Disconnect();
 
             UO.Unload();
 
