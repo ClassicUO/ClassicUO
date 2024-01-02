@@ -271,33 +271,39 @@ namespace ClassicUO.Network
             {
                 try
                 {
-                    Assembly asm = Assembly.LoadFile(PluginPath);
-                    Type type = asm.GetType("Assistant.Engine");
+                    
+                    Client.Game.AssistantHost.OnSocketConnected += (o, e) => { 
+                        Client.Game.AssistantHost.PluginInitialize(PluginPath); 
+                    };
+                    Client.Game.AssistantHost.Connect("127.0.0.1", 7777);
 
-                    if (type == null)
-                    {
-                        Log.Error(
-                            "Unable to find Plugin Type, API requires the public class Engine in namespace Assistant."
-                        );
+                    //Assembly asm = Assembly.LoadFile(PluginPath);
+                    //Type type = asm.GetType("Assistant.Engine");
 
-                        return;
-                    }
+                    //if (type == null)
+                    //{
+                    //    Log.Error(
+                    //        "Unable to find Plugin Type, API requires the public class Engine in namespace Assistant."
+                    //    );
 
-                    MethodInfo meth = type.GetMethod(
-                        "Install",
-                        BindingFlags.Public | BindingFlags.Static
-                    );
+                    //    return;
+                    //}
 
-                    if (meth == null)
-                    {
-                        Log.Error(
-                            "Engine class missing public static Install method Needs 'public static unsafe void Install(PluginHeader *plugin)' "
-                        );
+                    //MethodInfo meth = type.GetMethod(
+                    //    "Install",
+                    //    BindingFlags.Public | BindingFlags.Static
+                    //);
 
-                        return;
-                    }
+                    //if (meth == null)
+                    //{
+                    //    Log.Error(
+                    //        "Engine class missing public static Install method Needs 'public static unsafe void Install(PluginHeader *plugin)' "
+                    //    );
 
-                    meth.Invoke(null, new object[] { (IntPtr)func });
+                    //    return;
+                    //}
+
+                    //meth.Invoke(null, new object[] { (IntPtr)func });
                 }
                 catch (Exception err)
                 {
