@@ -55,10 +55,9 @@ abstract class TcpServerRpc
     public RpcMessage Request(Guid clientId, ArraySegment<byte> payload)
         => AsyncHelpers.RunSync(() => RequestAsync(clientId, payload));
 
-    public event EventHandler<RpcMessage> OnRequest, OnResponse;
     public event EventHandler<Guid> OnSocketConnected, OnSocketDisconnected;
 
-    protected abstract void OnMessage(Guid id, RpcMessage msg);
+    protected abstract ArraySegment<byte> OnRequest(Guid id, RpcMessage msg);
     protected virtual void OnClientConnected(Guid id) { }
     protected virtual void OnClientDisconnected(Guid id) { }
 
@@ -101,18 +100,7 @@ abstract class TcpServerRpc
             OnSocketDisconnected?.Invoke(this, session.Guid);
             OnClientDisconnected(session.Guid);
         };
-        session.OnMessage += msg => {
-            switch (msg.Command)
-            {
-                case RpcCommand.Request:
-                    OnRequest?.Invoke(this, msg);
-                    break;
-                case RpcCommand.Response:
-                    OnResponse?.Invoke(this, msg);
-                    break;
-            }
-            OnMessage(session.Guid, msg);
-        };
+        session.OnRequest += msg => OnRequest(session.Guid, msg);
         session.Start();
 
         _clients.TryAdd(session.Guid, session);
@@ -146,8 +134,8 @@ sealed class TcpSession : IDisposable
         _thread.TrySetApartmentState(ApartmentState.STA);
     }
 
-    public event Action<RpcMessage> OnMessage;
     public event Action OnDisconnected;
+    public event Func<RpcMessage, ArraySegment<byte>> OnRequest;
 
     public Guid Guid { get; }
     public TcpClient Client { get; }
@@ -195,9 +183,9 @@ sealed class TcpSession : IDisposable
         return response;
     }
 
-    private void ResponseTo(RpcMessage request)
+    private void ResponseTo(RpcMessage request, ArraySegment<byte> payload)
     {
-        var buf = CreateMessage(RpcCommand.Response, request.ID, request.Payload);
+        var buf = CreateMessage(RpcCommand.Response, request.ID, payload);
 
         if (!_channelSending.Writer.TryWrite(buf))
         {
@@ -355,12 +343,11 @@ sealed class TcpSession : IDisposable
 
     private void ParseMessage(RpcMessage msg)
     {
-        OnMessage(msg);
-
         switch (msg.Command)
         {
             case RpcCommand.Request:
-                ResponseTo(msg);
+                var respPayload = OnRequest(msg);
+                ResponseTo(msg, respPayload);
                 break;
 
             case RpcCommand.Response:
@@ -438,20 +425,7 @@ abstract class TcpClientRpc
             OnSocketDisconnected?.Invoke(this, EventArgs.Empty);
             OnDisconnected();
         };
-        _session.OnMessage += msg =>
-        {
-            switch (msg.Command)
-            {
-                case RpcCommand.Request:
-                    OnRequest?.Invoke(this, msg);
-                    break;
-                case RpcCommand.Response:
-                    OnResponse?.Invoke(this, msg);
-                    break;
-            }
-
-            OnMessage(msg);
-        };
+        _session.OnRequest += OnRequest;
         _session.Start();
 
         OnSocketConnected?.Invoke(this, EventArgs.Empty);
@@ -474,10 +448,10 @@ abstract class TcpClientRpc
     public RpcMessage Request(ArraySegment<byte> payload)
         => AsyncHelpers.RunSync(() => RequestAsync(payload));
 
-    public event EventHandler<RpcMessage> OnRequest, OnResponse;
     public event EventHandler OnSocketConnected, OnSocketDisconnected;
 
-    protected abstract void OnMessage(RpcMessage msg);
+
+    protected abstract ArraySegment<byte> OnRequest(RpcMessage msg);
     protected virtual void OnConnected() { }
     protected virtual void OnDisconnected() { }
 }

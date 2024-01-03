@@ -539,9 +539,7 @@ namespace ClassicUO.Network
 
         internal static bool ProcessRecvPacket(byte[] data, ref int length)
         {
-            Client.Game.AssistantHost?.PluginPacketIn(new ArraySegment<byte>(data, 0, length));
-
-            bool result = true;
+            bool result = Client.Game.AssistantHost?.PluginPacketIn(new ArraySegment<byte>(data, 0, length)) ?? true;
 
             foreach (Plugin plugin in Plugins)
             {
@@ -576,9 +574,7 @@ namespace ClassicUO.Network
 
         internal static bool ProcessSendPacket(ref Span<byte> message)
         {
-            Client.Game.AssistantHost?.PluginPacketOut(message);
-
-            bool result = true;
+            bool result = Client.Game.AssistantHost?.PluginPacketOut(message) ?? true;
 
             foreach (Plugin plugin in Plugins)
             {
@@ -695,7 +691,7 @@ namespace ClassicUO.Network
 
             var ok = Client.Game.AssistantHost?.PluginHotkeys(key, mod, ispressed);
 
-            bool result = true;
+            bool result = ok ?? true;
 
             foreach (Plugin plugin in Plugins)
             {
