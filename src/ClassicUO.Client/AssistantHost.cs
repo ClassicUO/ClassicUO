@@ -1,20 +1,17 @@
 ﻿using ClassicUO.Configuration;
 using ClassicUO.Network;
+using StructPacker;
 using System;
-using System.Buffers.Binary;
-using System.Text;
+using System.Linq;
 
 namespace ClassicUO
 {
     sealed class AssistantHost : TcpClientRpc
     {
-        protected override void OnMessage(RpcMessage msg)
+        protected override ArraySegment<byte> OnRequest(RpcMessage msg)
         {
-            if (msg.Command == RpcCommand.Response)
-                return;
-
             if (msg.Payload.Count <= 0)
-                return;
+                return ArraySegment<byte>.Empty;
 
             var cmd = (PluginCuoProtocol)msg.Payload.Array[0];
 
@@ -35,6 +32,8 @@ namespace ClassicUO
                     }
                     break;
             }
+
+            return ArraySegment<byte>.Empty;
         }
 
         enum PluginCuoProtocol : byte
@@ -58,100 +57,150 @@ namespace ClassicUO
             OnPluginSend,
         }
 
-        private static readonly ArraySegment<byte> TickMessage = new ArraySegment<byte>(
-            new byte[1] { (byte)PluginCuoProtocol.OnTick });
+        [Pack]
+        internal struct PluginInitializeRequest
+        {
+            public byte Cmd;
+            public uint ClientVersion;
+            public string PluginPath;
+            public string AssetsPath;
+        }
 
-        private static readonly ArraySegment<byte> ClosingMessage = new ArraySegment<byte>(
-            new byte[1] { (byte)PluginCuoProtocol.OnClosing });
+        [Pack]
+        internal struct PluginHotkeyRequest
+        {
+            public byte Cmd;
+            public int Key;
+            public int Mod;
+            public bool IsPressed;
+        }
 
-        private static readonly ArraySegment<byte> FocusGainedMessage = new ArraySegment<byte>(
-            new byte[1] { (byte)PluginCuoProtocol.OnFocusGained });
+        [Pack]
+        internal struct PluginHotkeyResponse
+        {
+            public byte Cmd;
+            public bool Allowed;
+        }
 
-        private static readonly ArraySegment<byte> FocusLostMessage = new ArraySegment<byte>(
-            new byte[1] { (byte)PluginCuoProtocol.OnFocusLost });
+        [Pack]
+        internal struct PluginMouseRequest
+        {
+            public byte Cmd;
+            public int Button;
+            public int Wheel;
+        }
 
-        private static readonly ArraySegment<byte> ConnectedMessage = new ArraySegment<byte>(
-            new byte[1] { (byte)PluginCuoProtocol.OnConnected });
+        [Pack]
+        internal struct PluginSimpleRequest
+        {
+            public byte Cmd;
+        }
 
-        private static readonly ArraySegment<byte> DisconnectedMessage = new ArraySegment<byte>(
-            new byte[1] { (byte)PluginCuoProtocol.OnDisconnected });
+        [Pack]
+        internal struct PluginPacketRequest
+        {
+            public byte Cmd;
+            public byte[] Packet;
+        }
 
+
+        private RpcMessage MakeSimpleRequest(PluginCuoProtocol protocol)
+        {
+            var req = new PluginSimpleRequest()
+            {
+                Cmd = (byte)protocol
+            };
+
+            using var buf = req.PackToBuffer();
+            var resp = Request(new ArraySegment<byte>(buf.Data, 0, buf.Size));
+
+            return resp;
+        }
 
         public void PluginInitialize(string pluginPath)
         {
             if (string.IsNullOrEmpty(pluginPath))
                 return;
 
-            var pluginPathLen = Encoding.UTF8.GetByteCount(pluginPath);
-            var assetsPathLen = Encoding.UTF8.GetByteCount(Settings.GlobalSettings.UltimaOnlineDirectory);
+            var req = new PluginInitializeRequest()
+            {
+                Cmd = (byte) PluginCuoProtocol.OnInitialize,
+                ClientVersion = (uint)Client.Game.UO.Version,
+                PluginPath = pluginPath,
+                AssetsPath = Settings.GlobalSettings.UltimaOnlineDirectory
+            };
 
-            var buf = new byte[1 + sizeof(uint) + sizeof(ushort) * 2 + pluginPathLen + assetsPathLen];
-            buf[0] = (byte)PluginCuoProtocol.OnInitialize;
-            BinaryPrimitives.WriteUInt32LittleEndian(buf.AsSpan(1, sizeof(uint)), (uint)Client.Game.UO.Version);
-            BinaryPrimitives.WriteUInt16LittleEndian(buf.AsSpan(1 + sizeof(uint), sizeof(ushort)), (ushort)pluginPathLen);
-            Encoding.UTF8.GetBytes(pluginPath, 0, pluginPathLen, buf, 1 + sizeof(uint) + sizeof(ushort));
-            BinaryPrimitives.WriteUInt16LittleEndian(buf.AsSpan(1 + sizeof(uint) + sizeof(ushort) + pluginPathLen, sizeof(ushort)), (ushort)assetsPathLen);
-            Encoding.UTF8.GetBytes(Settings.GlobalSettings.UltimaOnlineDirectory, 0, assetsPathLen, buf, 1 + sizeof(uint) + sizeof(ushort) * 2 + pluginPathLen);
-            var resp = Request(buf);
+            using var buf = req.PackToBuffer();
+            var resp = Request(new ArraySegment<byte>(buf.Data, 0, buf.Size));
         }
 
         public void PluginTick()
         {
-            var resp = Request(TickMessage);
+            var resp = MakeSimpleRequest(PluginCuoProtocol.OnTick);
         }
 
         public void PluginClosing()
         {
-            var resp = Request(ClosingMessage);
+            var resp = MakeSimpleRequest(PluginCuoProtocol.OnClosing);
         }
 
         public void PluginFocusGained()
         {
-            var resp = Request(FocusGainedMessage);
+            var resp = MakeSimpleRequest(PluginCuoProtocol.OnFocusGained);
         }
 
         public void PluginFocusLost()
         {
-            var resp = Request(FocusLostMessage);
+            var resp = MakeSimpleRequest(PluginCuoProtocol.OnFocusLost);
         }
 
         public void PluginConnected()
         {
-            var resp = Request(ConnectedMessage);
+            var resp = MakeSimpleRequest(PluginCuoProtocol.OnConnected);
         }
 
         public void PluginDisconnected() 
         {
-            var resp = Request(DisconnectedMessage);
+            var resp = MakeSimpleRequest(PluginCuoProtocol.OnDisconnected);
         }
 
         public bool PluginHotkeys(int key, int mod, bool ispressed)
         {
-            var buf = new byte[1 + sizeof(int) * 2 + sizeof(bool)];
-            buf[0] = (byte)PluginCuoProtocol.OnHotkey;
-            BinaryPrimitives.WriteInt32LittleEndian(buf.AsSpan(1, sizeof(int)), key);
-            BinaryPrimitives.WriteInt32LittleEndian(buf.AsSpan(1 + sizeof(int), sizeof(int)), mod);
-            buf[1 + sizeof(int) * 2] = (byte) (ispressed ? 0x01 : 0x00);
-           
-            var resp = Request(buf);
-            return true;
+            var req = new PluginHotkeyRequest()
+            {
+                Cmd = (byte)PluginCuoProtocol.OnHotkey,
+                Key = key,
+                Mod = mod,
+                IsPressed = ispressed
+            };
+
+            using var buf = req.PackToBuffer();
+            var respMsg = Request(new ArraySegment<byte>(buf.Data, 0, buf.Size));
+
+            var resp = new PluginHotkeyResponse();
+            resp.Unpack(respMsg.Payload.Array, respMsg.Payload.Offset);
+
+            return resp.Allowed;
         }
 
         public void PluginMouse(int button, int wheel)
         {
-            var buf = new byte[1 + sizeof(int) * 2];
-            buf[0] = (byte)PluginCuoProtocol.OnMouse;
-            BinaryPrimitives.WriteInt32LittleEndian(buf.AsSpan(1, sizeof(int)), button);
-            BinaryPrimitives.WriteInt32LittleEndian(buf.AsSpan(1 + sizeof(int), sizeof(int)), wheel);
+            var req = new PluginMouseRequest()
+            {
+                Cmd = (byte)PluginCuoProtocol.OnHotkey,
+                Button = button,
+                Wheel = wheel
+            };
 
-            var resp = Request(buf);
+            using var buf = req.PackToBuffer();
+            var resp = Request(new ArraySegment<byte>(buf.Data, 0, buf.Size));
         }
 
         public void PluginDrawCmdList()
         {
-            var buf = new byte[1];
-            buf[0] = (byte)PluginCuoProtocol.OnCmdList;
-            var resp = Request(buf);
+            //var buf = new byte[1];
+            //buf[0] = (byte)PluginCuoProtocol.OnCmdList;
+            //var resp = Request(buf);
         }
 
         public unsafe void PluginSdlEvent(SDL2.SDL.SDL_Event* ev)
@@ -168,34 +217,58 @@ namespace ClassicUO
             var resp = Request(buf);
         }
 
-        public void PluginPacketIn(ArraySegment<byte> buffer)
+        public bool PluginPacketIn(ArraySegment<byte> buffer)
         {
-            if (buffer.Array != null && buffer.Count> 0)
+            if (buffer.Array != null && buffer.Count > 0)
             {
-                var buf = new byte[sizeof(byte) + buffer.Count];
-                buf[0] = (byte)PluginCuoProtocol.OnPacketIn;
+                var bufRef = buffer.ToArray(); // TODO: remove the allocation
+                var req = new PluginPacketRequest()
+                {
+                    Cmd = (byte)PluginCuoProtocol.OnPacketIn,
+                    Packet = bufRef, 
+                };
 
-                Array.Copy(buffer.Array, buffer.Offset, buf, 1, buffer.Count);
+                using var buf = req.PackToBuffer();
+                var respMsg = Request(new ArraySegment<byte>(buf.Data, 0, buf.Size));
 
-                var resp = Request(buf);
+                var resp = new PluginPacketRequest();
+                resp.Unpack(respMsg.Payload.Array, respMsg.Payload.Offset);
 
-                Array.Copy(resp.Payload.Array, resp.Payload.Offset + 1, buffer.Array, buffer.Offset, resp.Payload.Count - 1);
+                if (resp.Packet.Length != 0)
+                {
+                    resp.Packet.CopyTo(buffer.Array, buffer.Offset);
+
+                    return true;
+                }
             }
+
+            return false;
         }
 
-        public void PluginPacketOut(Span<byte> buffer)
+        public bool PluginPacketOut(Span<byte> buffer)
         {
-            if (buffer.Length > 0)
+            if (buffer.IsEmpty) return true;
+
+            var req = new PluginPacketRequest()
             {
-                var buf = new byte[sizeof(byte) + buffer.Length];
-                buf[0] = (byte)PluginCuoProtocol.OnPacketOut;
+                Cmd = (byte)PluginCuoProtocol.OnPacketOut,
+                Packet = buffer.ToArray(), // TODO: remove the allocation!
+            };
 
-                buffer.CopyTo(buf.AsSpan(1));
+            using var buf = req.PackToBuffer();
+            var respMsg = Request(new ArraySegment<byte>(buf.Data, 0, buf.Size));
 
-                var resp = Request(buf);
-                if (resp.Payload.Count > 0)
-                    resp.Payload.AsSpan(resp.Payload.Offset + 1, resp.Payload.Count - 1).CopyTo(buffer);
+            var resp = new PluginPacketRequest();
+            resp.Unpack(respMsg.Payload.Array, respMsg.Payload.Offset);
+
+            if (resp.Packet.Length != 0)
+            {
+                resp.Packet.CopyTo(buffer);
+
+                return true;
             }
+
+            return false;
         }
     }
 }

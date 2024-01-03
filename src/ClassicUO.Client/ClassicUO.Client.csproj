@@ -44,6 +44,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="StructPacker" Version="1.0.8" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Update="Resources\ResErrorMessages.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
