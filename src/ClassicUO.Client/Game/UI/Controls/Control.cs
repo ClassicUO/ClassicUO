@@ -315,18 +315,20 @@ namespace ClassicUO.Game.UI.Controls
 
                 for (int i = 0; i < Children.Count; i++)
                 {
-                    Control c = Children[i];
+                    Control c = Children.ElementAt(i);
+
+                    if (c == null)
+                    {
+                        continue;
+                    }
 
                     if (c.IsDisposed)
                     {
-                        if (Children.ElementAt(i) != null)
-                        {
-                            OnChildRemoved();
-                            //Children.RemoveAt(i);
-                            Children.Remove(c);
-                            i--;
-                            continue;
-                        }
+                        OnChildRemoved();
+                        //Children.RemoveAt(i);
+                        Children.Remove(c);
+                        i--;
+                        continue;
                     }
 
                     c.Update();
