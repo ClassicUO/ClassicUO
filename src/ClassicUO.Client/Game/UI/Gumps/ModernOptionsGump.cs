@@ -1,23 +1,23 @@
 ﻿using ClassicUO.Assets;
 using ClassicUO.Configuration;
+using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
+using ClassicUO.Resources;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using SDL2;
 using StbTextEditSharp;
 using System;
 using System.Collections.Generic;
-using SDL2;
-using System.Linq;
-using ClassicUO.Game.Scenes;
-using ClassicUO.Resources;
-using System.Threading.Tasks;
-using System.Net.Http;
 using System.IO;
-using ClassicUO.Game.Data;
+using System.Linq;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -2360,6 +2360,23 @@ namespace ClassicUO.Game.UI.Gumps
             };
             #endregion
 
+            #region Gump scaling
+            page = ((int)PAGE.TUOOptions + 1010);
+            content.AddToLeft(SubCategoryButton("Gump scaling", page, content.LeftWidth));
+            content.ResetRightSide();
+
+            content.AddToRight(new TextBox("Some of these settings may only take effect after closing and reopening. Visual bugs may occur until the gump is closed and reopened.", Theme.FONT, Theme.STANDARD_TEXT_SIZE, content.RightWidth - 20, Theme.TEXT_FONT_COLOR, FontStashSharp.RichText.TextHorizontalAlignment.Center, false), true, page);
+
+            content.BlankLine();
+
+            content.AddToRight(new SliderWithLabel("Paperdoll Gump", 0, Theme.SLIDER_WIDTH, 50, 300, (int)(profile.PaperdollScale * 100), (i) => 
+            { 
+                //Must be cast even though VS thinks it's redundant.
+                double v = (double)i / (double)100;
+                profile.PaperdollScale = v > 0 ? v : 1f; 
+            }), true, page);
+            #endregion
+
             content.AddToLeft(c = new ModernButton(0, 0, content.LeftWidth, 40, ButtonAction.Activate, "Autoloot", Theme.BUTTON_FONT_COLOR));
             c.MouseUp += (s, e) =>
             {
@@ -2370,7 +2387,7 @@ namespace ClassicUO.Game.UI.Gumps
             };
 
             #region Hidden layers
-            page = ((int)PAGE.TUOOptions + 1010);
+            page = ((int)PAGE.TUOOptions + 1011);
             content.AddToLeft(SubCategoryButton("Visible Layers", page, content.LeftWidth));
             content.ResetRightSide();
 

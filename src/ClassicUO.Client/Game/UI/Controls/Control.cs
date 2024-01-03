@@ -30,9 +30,6 @@
 
 #endregion
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using ClassicUO.Game.Managers;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
@@ -40,8 +37,10 @@ using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using SDL2;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using Keyboard = ClassicUO.Input.Keyboard;
-using Mouse = ClassicUO.Input.Mouse;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -76,6 +75,16 @@ namespace ClassicUO.Game.UI.Controls
         public uint LocalSerial { get; set; }
 
         public bool IsFromServer { get; set; }
+
+        /// <summary>
+        /// This is not implemented in all controls, this is for use in custom control's that want to have a scale setting
+        /// </summary>
+        public double Scale { get; set; } = 1.0f;
+
+        /// <summary>
+        /// This is intended for scaling mouse positions and other non-visual uses
+        /// </summary>
+        public double InternalScale { get; set; } = 1.0f;
 
         public int Page { get; set; }
 
@@ -354,6 +363,47 @@ namespace ClassicUO.Game.UI.Controls
                     WantUpdateSize = false;
                 }
             }
+        }
+
+        /// <summary>
+        /// Scale the width and height of this control. Width/Height * Scale
+        /// </summary>
+        /// <param name="scale"></param>
+        /// <returns>This control</returns>
+        public virtual Control ScaleWidthAndHeight(double scale)
+        {
+            if (scale != 1f)
+            {
+                Width = (int)(Width * scale);
+                Height = (int)(Height * scale);
+            }
+            return this;
+        }
+
+        /// <summary>
+        /// Scale the x/y position of this control. x/y * Scale
+        /// </summary>
+        /// <param name="scale"></param>
+        /// <returns>This control</returns>
+        public virtual Control ScaleXAndY(double scale)
+        {
+            if (scale != 1f)
+            {
+                X = (int)(X * scale);
+                Y = (int)(Y * scale);
+            }
+            return this;
+        }
+
+        /// <summary>
+        /// Set the internal scale used for mouse interactions or other non visual scaling
+        /// </summary>
+        /// <param name="scale"></param>
+        /// <returns>This control</returns>
+        public virtual Control SetInternalScale(double scale)
+        {
+            InternalScale = scale;
+            return this;
         }
 
         public void ForceSizeUpdate()
