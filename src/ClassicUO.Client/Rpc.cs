@@ -248,11 +248,14 @@ abstract class TcpServerRpc
     public RpcMessage Request(Guid clientId, ArraySegment<byte> payload)
         => AsyncHelpers.RunSync(() => RequestAsync(clientId, payload));
 
-    public event EventHandler<RpcMessage> OnRequest, OnResponse;
     public event EventHandler<Guid> OnSocketConnected, OnSocketDisconnected;
 
+<<<<<<< HEAD
     protected abstract void OnMessage(Guid id, RpcMessage msg);
 >>>>>>> rpc support
+=======
+    protected abstract ArraySegment<byte> OnRequest(Guid id, RpcMessage msg);
+>>>>>>> message serialization
     protected virtual void OnClientConnected(Guid id) { }
     protected virtual void OnClientDisconnected(Guid id) { }
 
@@ -322,6 +325,7 @@ abstract class TcpServerRpc
             OnClientDisconnected(session.Guid);
         };
 <<<<<<< HEAD
+<<<<<<< HEAD
         session.OnMessage += msg => OnMessage(session.Guid, msg);
 >>>>>>> rpc support
 =======
@@ -338,6 +342,9 @@ abstract class TcpServerRpc
             OnMessage(session.Guid, msg);
         };
 >>>>>>> + move managed plugin to rpc
+=======
+        session.OnRequest += msg => OnRequest(session.Guid, msg);
+>>>>>>> message serialization
         session.Start();
 
         _clients.TryAdd(session.Guid, session);
@@ -403,9 +410,13 @@ sealed class TcpSession : IDisposable
         _thread.TrySetApartmentState(ApartmentState.STA);
     }
 
+<<<<<<< HEAD
     public event Action<RpcMessage> OnMessage;
 >>>>>>> rpc support
+=======
+>>>>>>> message serialization
     public event Action OnDisconnected;
+    public event Func<RpcMessage, ArraySegment<byte>> OnRequest;
 
     public Guid Guid { get; }
     public TcpClient Client { get; }
@@ -626,9 +637,9 @@ sealed class TcpSession : IDisposable
         return response;
     }
 
-    private void ResponseTo(RpcMessage request)
+    private void ResponseTo(RpcMessage request, ArraySegment<byte> payload)
     {
-        var buf = CreateMessage(RpcCommand.Response, request.ID, request.Payload);
+        var buf = CreateMessage(RpcCommand.Response, request.ID, payload);
 
         if (!_channelSending.Writer.TryWrite(buf))
         {
@@ -834,12 +845,11 @@ sealed class TcpSession : IDisposable
 
     private void ParseMessage(RpcMessage msg)
     {
-        OnMessage(msg);
-
         switch (msg.Command)
         {
             case RpcCommand.Request:
-                ResponseTo(msg);
+                var respPayload = OnRequest(msg);
+                ResponseTo(msg, respPayload);
                 break;
 
             case RpcCommand.Response:
@@ -953,6 +963,7 @@ abstract class TcpClientRpc
             OnSocketDisconnected?.Invoke(this, EventArgs.Empty);
             OnDisconnected();
         };
+<<<<<<< HEAD
         _session.OnMessage += msg =>
         {
             switch (msg.Command)
@@ -968,6 +979,9 @@ abstract class TcpClientRpc
             OnMessage(msg);
         };
 >>>>>>> + move managed plugin to rpc
+=======
+        _session.OnRequest += OnRequest;
+>>>>>>> message serialization
         _session.Start();
 
         OnSocketConnected?.Invoke(this, EventArgs.Empty);
@@ -1019,11 +1033,15 @@ abstract class TcpClientRpc
     public RpcMessage Request(ArraySegment<byte> payload)
         => AsyncHelpers.RunSync(() => RequestAsync(payload));
 
-    public event EventHandler<RpcMessage> OnRequest, OnResponse;
     public event EventHandler OnSocketConnected, OnSocketDisconnected;
 
+<<<<<<< HEAD
     protected abstract void OnMessage(RpcMessage msg);
 >>>>>>> rpc support
+=======
+
+    protected abstract ArraySegment<byte> OnRequest(RpcMessage msg);
+>>>>>>> message serialization
     protected virtual void OnConnected() { }
     protected virtual void OnDisconnected() { }
 }

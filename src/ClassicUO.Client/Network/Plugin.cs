@@ -556,12 +556,16 @@ namespace ClassicUO.Network
         internal static bool ProcessRecvPacket(byte[] data, ref int length)
         {
 <<<<<<< HEAD
+<<<<<<< HEAD
             bool result = Client.Game.PluginHost?.PacketIn(new ArraySegment<byte>(data, 0, length)) ?? true;
 =======
             Client.Game.AssistantHost?.PluginPacketIn(new ArraySegment<byte>(data, 0, length));
 
             bool result = true;
 >>>>>>> rpc support
+=======
+            bool result = Client.Game.AssistantHost?.PluginPacketIn(new ArraySegment<byte>(data, 0, length)) ?? true;
+>>>>>>> message serialization
 
             foreach (Plugin plugin in Plugins)
             {
@@ -597,12 +601,16 @@ namespace ClassicUO.Network
         internal static bool ProcessSendPacket(ref Span<byte> message)
         {
 <<<<<<< HEAD
+<<<<<<< HEAD
             bool result = Client.Game.PluginHost?.PacketOut(message) ?? true;
 =======
             Client.Game.AssistantHost?.PluginPacketOut(message);
 
             bool result = true;
 >>>>>>> more rpc
+=======
+            bool result = Client.Game.AssistantHost?.PluginPacketOut(message) ?? true;
+>>>>>>> message serialization
 
             foreach (Plugin plugin in Plugins)
             {
@@ -744,8 +752,12 @@ namespace ClassicUO.Network
 =======
             var ok = Client.Game.AssistantHost?.PluginHotkeys(key, mod, ispressed);
 
+<<<<<<< HEAD
             bool result = true;
 >>>>>>> rpc support
+=======
+            bool result = ok ?? true;
+>>>>>>> message serialization
 
             foreach (Plugin plugin in Plugins)
             {
