@@ -1,12 +1,14 @@
 name: TUO-Deploy
 
 on:
+  push:
+    branches: [ main ]
  # workflow_dispatch:
-  workflow_run:
-    branches: [main]
-    workflows: [Build-Test]
-    types:
-      - completed
+ # workflow_run:
+ #   branches: [main]
+ #   workflows: [Build-Test]
+ #   types:
+ #     - completed
 
 
 env:
@@ -21,7 +23,7 @@ env:
 
 jobs:
   build:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    # if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
