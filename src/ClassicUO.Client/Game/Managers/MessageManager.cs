@@ -30,19 +30,14 @@
 
 #endregion
 
-using System;
-using System.Collections.Generic;
-using System.Text;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
-using ClassicUO.Assets;
-using ClassicUO.Renderer;
 using ClassicUO.Utility;
-using System.Linq;
-using System.Runtime.CompilerServices;
+using System;
+using System.Collections.Generic;
 
 namespace ClassicUO.Game.Managers
 {
@@ -213,11 +208,11 @@ namespace ClassicUO.Game.Managers
                 case MessageType.Yell:
                 case MessageType.Regular:
                 case MessageType.Label:
-                    if(textType == TextType.OBJECT)
+                    if (textType == TextType.OBJECT)
                     {
                         for (LinkedListNode<Gump> gump = UIManager.Gumps.Last; gump != null; gump = gump.Previous)
                         {
-                            if(gump.Value is GridContainer && !gump.Value.IsDisposed)
+                            if (gump.Value is GridContainer && !gump.Value.IsDisposed)
                             {
                                 ((GridContainer)gump.Value).HandleObjectMessage(parent, text, hue);
                             }
@@ -307,11 +302,6 @@ namespace ClassicUO.Game.Managers
                     unicode,
                     lang
                 ));
-        }
-
-        public static void OnLocalizedMessage(Entity entity, MessageEventArgs args)
-        {
-            EventSink.InvokeLocalizedMessageReceived(entity, args);
         }
 
         public static TextObject CreateMessage

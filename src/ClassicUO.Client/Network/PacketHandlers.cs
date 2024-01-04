@@ -4951,6 +4951,8 @@ namespace ClassicUO.Network
                 }
             }
 
+            EventSink.InvokeClilocMessageReceived(entity, new MessageEventArgs(entity, text, name, hue, type, (byte)font, text_type, true) { Cliloc = cliloc });
+
             MessageManager.HandleMessage(
                 entity,
                 text,
