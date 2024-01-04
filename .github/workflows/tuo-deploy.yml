@@ -62,10 +62,9 @@ jobs:
       run: mv "${{ env.CUO_OUTPUT_PATH }}/${{ runner.os }}${{ env.CUO_ZIP_NAME }}" upload
               
     - name: Upload Release
-      uses: sinshutu/upload-to-discord@master
-      env:
-        DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+      uses: actions/upload-artifact@v4
       with:
-        args: "upload/${{ runner.os }}${{ env.CUO_ZIP_NAME }}"
+        name: "${{ runner.os }}${{ env.CUO_ZIP_NAME }}"
+        path: "upload/${{ runner.os }}${{ env.CUO_ZIP_NAME }}"
         
         
