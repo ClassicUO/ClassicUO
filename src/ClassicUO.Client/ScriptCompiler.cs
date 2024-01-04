@@ -1,4 +1,5 @@
 ﻿#region References
+using ClassicUO.Utility.Logging;
 using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
@@ -7,12 +8,17 @@ using System.Linq;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
 #endregion
 
 namespace ClassicUO
 {
     public static class ScriptCompiler
     {
+        public static bool Compiled { get { return CompileTaskStatus == TaskStatus.RanToCompletion || CompileTaskStatus == TaskStatus.Faulted; } }
+        public static TaskStatus CompileTaskStatus { get; set; } = TaskStatus.WaitingToRun;
+        public static Task CompileTask { get; private set; }
+
         public static Assembly[] Assemblies { get; set; }
 
         private static readonly List<string> m_AdditionalReferences = new List<string>();
@@ -386,50 +392,71 @@ namespace ClassicUO
 
         private delegate CompilerResults Compiler(bool debug);
 
-        public static bool Compile()
+        public static void Compile()
         {
-            return Compile(false);
+            Compile(false);
         }
 
-        public static bool Compile(bool debug)
+        public static void Compile(bool debug)
         {
-            return Compile(debug, true);
+            Compile(debug, true);
         }
 
-        public static bool Compile(bool debug, bool cache)
+        public static void Compile(bool debug, bool cache)
         {
-            EnsureDirectory("Scripts/");
-            EnsureDirectory("Scripts/Output/");
-
-            if (m_AdditionalReferences.Count > 0)
+            CompileTask = Task.Factory.StartNew(() =>
             {
-                m_AdditionalReferences.Clear();
-            }
-
-            var assemblies = new List<Assembly>();
-
-            Assembly assembly;
-
-            if (CompileCSScripts(debug, cache, out assembly))
-            {
-                if (assembly != null)
+                try
                 {
-                    assemblies.Add(assembly);
+                    EnsureDirectory("Scripts/");
+                    EnsureDirectory("Scripts/Output/");
+
+                    if (m_AdditionalReferences.Count > 0)
+                    {
+                        m_AdditionalReferences.Clear();
+                    }
+
+                    var assemblies = new List<Assembly>();
+
+                    Assembly assembly;
+
+                    if (CompileCSScripts(debug, cache, out assembly))
+                    {
+                        if (assembly != null)
+                        {
+                            assemblies.Add(assembly);
+                        }
+                    }
+                    else
+                    {
+                        CompileTaskStatus = TaskStatus.Faulted;
+                        return;
+                    }
+
+                    CompileTaskStatus = TaskStatus.RanToCompletion;
+
+                    if (assemblies.Count == 0)
+                    {
+                        return;
+                    }
+
+                    Assemblies = assemblies.ToArray();
                 }
-            }
-            else
-            {
-                return false;
-            }
+                catch (Exception ex)
+                {
+                    CompileTaskStatus = TaskStatus.Faulted;
+                    Log.Panic(ex.ToString());
+                    string path = Path.Combine(CUOEnviroment.ExecutablePath, "Logs");
 
-            if (assemblies.Count == 0)
-            {
-                return false;
-            }
+                    if (!Directory.Exists(path))
+                        Directory.CreateDirectory(path);
 
-            Assemblies = assemblies.ToArray();
-
-            return true;
+                    using (LogFile crashfile = new LogFile(path, "crash.txt"))
+                    {
+                        crashfile.WriteAsync(ex.ToString()).RunSynchronously();
+                    }
+                }
+            });
         }
 
         public static void Invoke(string method)

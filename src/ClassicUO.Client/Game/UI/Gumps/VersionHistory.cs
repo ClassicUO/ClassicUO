@@ -8,7 +8,8 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private static string[] updateTexts = {
              "/c[white][3.16.0]/cd\n" +
-                "- Added original paperdoll to customizable gump system",
+                "- Added original paperdoll to customizable gump system\n" +
+                "- Imroved script loading time",
 
              "/c[white][3.16.0]/cd\n" +
                 "- Some small improvements for input boxes and the new option menu\n" +
