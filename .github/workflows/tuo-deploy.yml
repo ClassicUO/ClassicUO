@@ -1,14 +1,12 @@
 name: TUO-Deploy
 
 on:
-  push:
-    branches: [ main ]
- # workflow_dispatch:
- # workflow_run:
- #   branches: [main]
- #   workflows: [Build-Test]
- #   types:
- #     - completed
+  workflow_dispatch:
+  workflow_run:
+    branches: [main]
+    workflows: [Build-Test]
+    types:
+      - completed
 
 
 env:
@@ -64,10 +62,10 @@ jobs:
       run: mv "${{ env.CUO_OUTPUT_PATH }}/${{ runner.os }}${{ env.CUO_ZIP_NAME }}" upload
               
     - name: Upload Release
-      uses: ncipollo/release-action@v1
+      uses: sinshutu/upload-to-discord@master
+      env:
+        DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
       with:
-        artifacts: "upload/${{ runner.os }}${{ env.CUO_ZIP_NAME }}"
-        allowUpdates: true
-        token: ${{ secrets.GITHUB_TOKEN }}
+        args: "upload/${{ runner.os }}${{ env.CUO_ZIP_NAME }}"
         
         
