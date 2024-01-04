@@ -2,11 +2,11 @@ name: TUO-Deploy
 
 on:
   workflow_dispatch:
- # workflow_run:
- #   branches: [main]
- #   workflows: [Build-Test]
- #   types:
- #     - completed
+  workflow_run:
+    branches: [main]
+    workflows: [Build-Test]
+    types:
+      - completed
 
 
 env:
@@ -21,7 +21,7 @@ env:
 
 jobs:
   build:
-    #if: ${{ github.event.workflow_run.conclusion == 'success' }} && "${{ env.GITHUB_REPOSITORY }}" == 'ClassicUO/ClassicUO'
+    # if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -62,10 +62,9 @@ jobs:
       run: mv "${{ env.CUO_OUTPUT_PATH }}/${{ runner.os }}${{ env.CUO_ZIP_NAME }}" upload
               
     - name: Upload Release
-      uses: ncipollo/release-action@v1
+      uses: actions/upload-artifact@v4
       with:
-        artifacts: "upload/${{ runner.os }}${{ env.CUO_ZIP_NAME }}"
-        allowUpdates: true
-        token: ${{ secrets.GITHUB_TOKEN }}
+        name: "${{ runner.os }}${{ env.CUO_ZIP_NAME }}"
+        path: "upload/${{ runner.os }}${{ env.CUO_ZIP_NAME }}"
         
         
