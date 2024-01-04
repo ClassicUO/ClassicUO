@@ -311,7 +311,7 @@ namespace ClassicUO.Game.UI.Controls
 
             return ContainsByBounds
                 ? base.Contains(x, y)
-                : Client.Game.Gumps.PixelCheck(_normal, x - Offset.X, y - Offset.Y);
+                : Client.Game.Gumps.PixelCheck(_normal, x - Offset.X, y - Offset.Y, InternalScale);
         }
 
         public sealed override void Dispose()

@@ -14,6 +14,8 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class DurabilityGumpMinimized : Gump
     {
+        public uint Graphic { get; set; } = 5587;
+
         public DurabilityGumpMinimized() : base(0, 0)
         {
             SetTooltip("Open Equipment Durability Tracker");
@@ -26,7 +28,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            ref readonly var texture = ref Client.Game.Gumps.GetGump(5587);
+            ref readonly var texture = ref Client.Game.Gumps.GetGump(Graphic);
             if (texture.Texture != null)
             {
                 Rectangle rect = new Rectangle(x, y, Width, Height);

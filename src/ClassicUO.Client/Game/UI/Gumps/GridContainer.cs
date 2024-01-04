@@ -212,7 +212,7 @@ namespace ClassicUO.Game.UI.Gumps
                 "Ctrl + Click to lock an item in place\n" +
                 "Alt + Click to add an item to the quick move queue\n" +
                 "Shift + Click to add an item to your auto loot list\n" +
-                "Sort and single click looting can be enabled with the icons on thr right side");
+                "Sort and single click looting can be enabled with the icons on the right side");
 
             quickDropBackpack = new ResizableStaticPic(World.Player.FindItemByLayer(Layer.Backpack).DisplayedGraphic, 20, 20)
             {

@@ -30,14 +30,6 @@
 
 #endregion
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Text.Json;
-using System.Text.Json.Serialization;
-using System.Xml;
 using ClassicUO.Configuration.Json;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
@@ -46,6 +38,14 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Xml;
 
 namespace ClassicUO.Configuration
 {
@@ -585,6 +585,7 @@ namespace ClassicUO.Configuration
 
         public bool UseLandTextures { get; set; } = false;
 
+        public double PaperdollScale { get; set; } = 1f;
 
 
         public void Save(string path, bool saveGumps = true)
@@ -752,6 +753,8 @@ namespace ClassicUO.Configuration
 
                 if (root != null)
                 {
+                    int pdolc = 0;
+
                     foreach (XmlElement xml in root.ChildNodes /*.GetElementsByTagName("gump")*/)
                     {
                         if (xml.Name != "gump")
@@ -832,6 +835,11 @@ namespace ClassicUO.Configuration
                                     break;
 
                                 case GumpType.PaperDoll:
+                                    if(pdolc > 0)
+                                    {
+                                        break;
+                                    }
+
                                     if (ProfileManager.CurrentProfile.UseModernPaperdoll && serial == World.Player.Serial)
                                     {
                                         gump = new ModernPaperdoll(serial);
@@ -840,10 +848,11 @@ namespace ClassicUO.Configuration
                                     }
                                     else
                                     {
-                                        gump = new PaperDollGump();
+                                        gump = new PaperDollGump(serial, serial == World.Player.Serial);
                                         x = ProfileManager.CurrentProfile.PaperdollPosition.X;
                                         y = ProfileManager.CurrentProfile.PaperdollPosition.Y;
                                     }
+                                    pdolc++;
 
                                     break;
 

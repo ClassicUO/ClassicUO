@@ -30,17 +30,17 @@
 
 #endregion
 
-using System.Collections.Generic;
+using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
-using ClassicUO.Assets;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
+using System.Collections.Generic;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -104,7 +104,7 @@ namespace ClassicUO.Game.UI.Controls
 
         private bool _updateUI;
 
-        public PaperDollInteractable(int x, int y, uint serial, PaperDollGump paperDollGump)
+        public PaperDollInteractable(int x, int y, uint serial, PaperDollGump paperDollGump, double scale = 1f)
         {
             X = x;
             Y = y;
@@ -112,6 +112,7 @@ namespace ClassicUO.Game.UI.Controls
             AcceptMouseInput = false;
             LocalSerial = serial;
             _updateUI = true;
+            Scale = InternalScale = scale;
         }
 
         public bool HasFakeItem { get; private set; }
@@ -195,7 +196,7 @@ namespace ClassicUO.Game.UI.Controls
             }
 
             // body
-            Add(new GumpPic(0, 0, body, hue) { IsPartialHue = true });
+            Add(new GumpPic(0, 0, body, hue) { IsPartialHue = true }.ScaleWidthAndHeight(Scale).SetInternalScale(Scale));
 
             if (mobile.Graphic == 0x03DB)
             {
@@ -204,7 +205,7 @@ namespace ClassicUO.Game.UI.Controls
                     {
                         AcceptMouseInput = true,
                         IsPartialHue = true
-                    }
+                    }.ScaleWidthAndHeight(Scale).SetInternalScale(Scale)
                 );
             }
 
@@ -299,8 +300,8 @@ namespace ClassicUO.Game.UI.Controls
                                 && !World.Player.IsDead
                                 && layer != Layer.Beard
                                 && layer != Layer.Hair
-                                && ((_paperDollGump != null && _paperDollGump.CanLift) || (_paperDollGump != null && LocalSerial == World.Player))
-                        }
+                                && ((_paperDollGump != null && _paperDollGump.CanLift) || (_paperDollGump != null && LocalSerial == World.Player)),
+                        }.ScaleWidthAndHeight(Scale).SetInternalScale(InternalScale)
                     );
                 }
                 else if (
@@ -330,7 +331,7 @@ namespace ClassicUO.Game.UI.Controls
                             AcceptMouseInput = true,
                             IsPartialHue = Client.Game.GameCursor.ItemHold.IsPartialHue,
                             Alpha = 0.5f
-                        }
+                        }.ScaleWidthAndHeight(Scale).SetInternalScale(InternalScale)
                     );
                 }
             }
@@ -399,7 +400,7 @@ namespace ClassicUO.Game.UI.Controls
                     )
                     {
                         AcceptMouseInput = true
-                    }
+                    }.ScaleWidthAndHeight(Scale).SetInternalScale(Scale)
                 );
             }
         }
