@@ -21,7 +21,7 @@ env:
 
 jobs:
   build:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }} && "${{ env.GITHUB_REPOSITORY }}" == 'Bittiez/TazUO'
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
