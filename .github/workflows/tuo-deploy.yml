@@ -62,9 +62,14 @@ jobs:
       run: mv "${{ env.CUO_OUTPUT_PATH }}/${{ runner.os }}${{ env.CUO_ZIP_NAME }}" upload
               
     - name: Upload Release
-      uses: actions/upload-artifact@v4
+      uses: ncipollo/release-action@v1
       with:
-        name: "${{ runner.os }}${{ env.CUO_ZIP_NAME }}"
-        path: "upload/${{ runner.os }}${{ env.CUO_ZIP_NAME }}"
+        artifacts: "upload/${{ runner.os }}${{ env.CUO_ZIP_NAME }}"
+        name: 'Latest Unix Build'
+        body: 'These are built automatically on the Main branch.'
+        makeLatest: false
+        prerelease: true
+        tag: UnixBuild
+        token: ${{ secrets.GITHUB_TOKEN }}
         
         
