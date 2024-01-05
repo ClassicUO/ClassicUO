@@ -737,9 +737,7 @@ namespace ClassicUO.Network
 
         internal static int ProcessWndProc(SDL.SDL_Event* e)
         {
-            Client.Game.AssistantHost?.PluginSdlEvent(e);
-
-            int result = 0;
+            var result = Client.Game.AssistantHost?.PluginSdlEvent(e) ?? 0;
 
             foreach (Plugin plugin in Plugins)
             {
