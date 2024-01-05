@@ -18,19 +18,45 @@ namespace ClassicUO
             switch (cmd)
             {
                 case PluginCuoProtocol.OnPluginRecv:
-                    lock (PacketHandlers.Handler)
                     {
-                        PacketHandlers.Handler.Append(msg.Payload.Array.AsSpan(1, msg.Payload.Count - 1), true);
-                    }
+                        var req = new PluginPacketRequestResponse();
+                        req.Unpack(msg.Payload.Array, msg.Payload.Offset);
 
+                        lock (PacketHandlers.Handler)
+                        {
+                            PacketHandlers.Handler.Append(req.Packet, true);
+                        }
+                    }
                     break;
 
                 case PluginCuoProtocol.OnPluginSend:
-                    if (NetClient.Socket.IsConnected)
                     {
-                        NetClient.Socket.Send(msg.Payload.Array.AsSpan(1, msg.Payload.Count - 1), true);
+                        var req = new PluginPacketRequestResponse();
+                        req.Unpack(msg.Payload.Array, msg.Payload.Offset);
+                       
+                        if (NetClient.Socket.IsConnected)
+                        {
+                            NetClient.Socket.Send(req.Packet, true);
+                        }
                     }
+                    
                     break;
+
+                case PluginCuoProtocol.OnPacketLength:
+                    {
+                        var req = new PluginPacketLengthRequest();
+                        req.Unpack(msg.Payload.Array, msg.Payload.Offset);
+
+                        var resp = new PluginPacketLengthResponse()
+                        {
+                            Cmd = (byte)PluginCuoProtocol.OnPacketLength,
+                            PacketLength = PacketsTable.GetPacketLength(req.ID)
+                        };
+
+                        using var buf = resp.PackToBuffer();
+
+                        return new ArraySegment<byte>(buf.Data, 0, buf.Size);
+                    }
             }
 
             return ArraySegment<byte>.Empty;
@@ -55,6 +81,7 @@ namespace ClassicUO
 
             OnPluginRecv,
             OnPluginSend,
+            OnPacketLength,
         }
 
         [Pack]
@@ -97,10 +124,31 @@ namespace ClassicUO
         }
 
         [Pack]
-        internal struct PluginPacketRequest
+        internal struct PluginPacketRequestResponse
         {
             public byte Cmd;
             public byte[] Packet;
+        }
+
+        //[Pack]
+        //internal struct PluginSdlEvent
+        //{
+        //    public byte Cmd;
+        //    public SDL2.SDL.SDL_Event
+        //}
+
+        [Pack]
+        internal struct PluginPacketLengthRequest
+        {
+            public byte Cmd;
+            public byte ID;
+        }
+
+        [Pack]
+        internal struct PluginPacketLengthResponse
+        {
+            public byte Cmd;
+            public short PacketLength;
         }
 
 
@@ -203,11 +251,13 @@ namespace ClassicUO
             //var resp = Request(buf);
         }
 
-        public unsafe void PluginSdlEvent(SDL2.SDL.SDL_Event* ev)
+        public unsafe int PluginSdlEvent(SDL2.SDL.SDL_Event* ev)
         {
             //var buf = new byte[1];
             //buf[0] = (byte)PluginCuoProtocol.OnSdlEvent;
             //var response = RequestAsync(new ArraySegment<byte>(buf)).GetAwaiter().GetResult();
+
+            return 0;
         }
 
         public void PluginUpdatePlayerPosition(int x, int y, int z)
@@ -222,7 +272,7 @@ namespace ClassicUO
             if (buffer.Array != null && buffer.Count > 0)
             {
                 var bufRef = buffer.ToArray(); // TODO: remove the allocation
-                var req = new PluginPacketRequest()
+                var req = new PluginPacketRequestResponse()
                 {
                     Cmd = (byte)PluginCuoProtocol.OnPacketIn,
                     Packet = bufRef, 
@@ -231,7 +281,7 @@ namespace ClassicUO
                 using var buf = req.PackToBuffer();
                 var respMsg = Request(new ArraySegment<byte>(buf.Data, 0, buf.Size));
 
-                var resp = new PluginPacketRequest();
+                var resp = new PluginPacketRequestResponse();
                 resp.Unpack(respMsg.Payload.Array, respMsg.Payload.Offset);
 
                 if (resp.Packet.Length != 0)
@@ -249,7 +299,7 @@ namespace ClassicUO
         {
             if (buffer.IsEmpty) return true;
 
-            var req = new PluginPacketRequest()
+            var req = new PluginPacketRequestResponse()
             {
                 Cmd = (byte)PluginCuoProtocol.OnPacketOut,
                 Packet = buffer.ToArray(), // TODO: remove the allocation!
@@ -258,7 +308,7 @@ namespace ClassicUO
             using var buf = req.PackToBuffer();
             var respMsg = Request(new ArraySegment<byte>(buf.Data, 0, buf.Size));
 
-            var resp = new PluginPacketRequest();
+            var resp = new PluginPacketRequestResponse();
             resp.Unpack(respMsg.Payload.Array, respMsg.Payload.Offset);
 
             if (resp.Packet.Length != 0)
