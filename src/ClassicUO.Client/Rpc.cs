@@ -21,6 +21,7 @@ using System.Net;
 using System.Net.Sockets;
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 using System.Threading;
@@ -28,10 +29,12 @@ using System.Threading.Tasks;
 
 =======
 =======
+=======
+using System.Runtime.CompilerServices;
+>>>>>>> performance improvement
 using System.Runtime.ExceptionServices;
 >>>>>>> rpc
 using System.Threading;
-using System.Threading.Channels;
 using System.Threading.Tasks;
 
 <<<<<<< HEAD
@@ -166,9 +169,13 @@ static class RpcConst
 {
     public const int READ_WRITE_TIMEOUT = 0;
 <<<<<<< HEAD
+<<<<<<< HEAD
     public const int RPC_MESSAGE_SIZE = 1 + 8 + 2;
 =======
 >>>>>>> rpc support
+=======
+    public const int RPC_MESSAGE_SIZE = 1 + 8 + 2;
+>>>>>>> performance improvement
 }
 
 abstract class TcpServerRpc
@@ -195,6 +202,8 @@ abstract class TcpServerRpc
     public IReadOnlyDictionary<Guid, TcpSession> Clients => _clients;
 >>>>>>> more rpc
 
+    public event EventHandler<Guid> OnSocketConnected, OnSocketDisconnected;
+
     public void Start(string address, int port)
     {
         _server = new TcpListener(IPAddress.Parse(address), port);
@@ -211,6 +220,7 @@ abstract class TcpServerRpc
         _server.Stop();
     }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -236,6 +246,9 @@ abstract class TcpServerRpc
 =======
     public async Task<RpcMessage> RequestAsync(Guid clientId, ArraySegment<byte> payload)
 >>>>>>> + move managed plugin to rpc
+=======
+    public async ValueTask<RpcMessage> RequestAsync(Guid clientId, ArraySegment<byte> payload)
+>>>>>>> performance improvement
     {
         if (_clients.TryGetValue(clientId, out var client))
         {
@@ -248,12 +261,15 @@ abstract class TcpServerRpc
     public RpcMessage Request(Guid clientId, ArraySegment<byte> payload)
         => AsyncHelpers.RunSync(() => RequestAsync(clientId, payload));
 
+<<<<<<< HEAD
     public event EventHandler<Guid> OnSocketConnected, OnSocketDisconnected;
 
 <<<<<<< HEAD
     protected abstract void OnMessage(Guid id, RpcMessage msg);
 >>>>>>> rpc support
 =======
+=======
+>>>>>>> performance improvement
     protected abstract ArraySegment<byte> OnRequest(Guid id, RpcMessage msg);
 >>>>>>> message serialization
     protected virtual void OnClientConnected(Guid id) { }
@@ -318,11 +334,12 @@ abstract class TcpServerRpc
         var session = new TcpSession(Guid.NewGuid(), client);
 >>>>>>> more rpc
 
-        session.OnDisconnected += () =>
+        void onDisconnected()
         {
             _clients.TryRemove(session.Guid, out var _);
             OnSocketDisconnected?.Invoke(this, session.Guid);
             OnClientDisconnected(session.Guid);
+<<<<<<< HEAD
         };
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -343,6 +360,13 @@ abstract class TcpServerRpc
         };
 >>>>>>> + move managed plugin to rpc
 =======
+=======
+
+            session.OnDisconnected -= onDisconnected;
+        }
+
+        session.OnDisconnected += onDisconnected;
+>>>>>>> performance improvement
         session.OnRequest += msg => OnRequest(session.Guid, msg);
 >>>>>>> message serialization
         session.Start();
@@ -389,24 +413,20 @@ sealed class TcpSession : IDisposable
 sealed class TcpSession : IDisposable
 {
     private bool _disposed;
-    private readonly ConcurrentDictionary<Guid, TaskCompletionSource<RpcMessage>> _messages = new ConcurrentDictionary<Guid, TaskCompletionSource<RpcMessage>>();
-    private readonly Channel<byte[]> _channelSending;
+    private readonly ConcurrentDictionary<ulong, TaskCompletionSource<RpcMessage>> _messages = new ConcurrentDictionary<ulong, TaskCompletionSource<RpcMessage>>();
     private readonly BlockingCollection<RpcMessage> _collection = new BlockingCollection<RpcMessage>(new ConcurrentQueue<RpcMessage>());
     private readonly Thread _thread;
     private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
+    private readonly BinaryWriter _writer;
+
+    private ulong _nextReqId = 1;
 
     public TcpSession(Guid guid, TcpClient client)
     {
         Guid = guid;
         Client = client;
-        _channelSending = Channel.CreateUnbounded<byte[]>(new UnboundedChannelOptions()
-        {
-            SingleReader = true,
-            SingleWriter = false,
-            AllowSynchronousContinuations = true
-        });
-
-        _thread = new Thread(ParseMessages) { IsBackground = true };
+        _writer = new BinaryWriter(client.GetStream());
+        _thread = new Thread(ParseRequests) { IsBackground = true };
         _thread.TrySetApartmentState(ApartmentState.STA);
     }
 
@@ -613,58 +633,56 @@ sealed class TcpSession : IDisposable
         _queue.Clear();
 =======
         _thread.Start();
-        SendLoopAsync();
+        RunReceiveLoop(_cancellationTokenSource.Token);
     }
 
-    public async Task<RpcMessage> RequestAsync(ArraySegment<byte> payload)
+    public async ValueTask<RpcMessage> RequestAsync(ArraySegment<byte> payload)
     {
-        var buffer = SendMessage(payload, out var reqId);
+        var reqId = (ulong)Interlocked.Increment(ref Unsafe.As<ulong, long>(ref _nextReqId));
 
         var taskSrc = new TaskCompletionSource<RpcMessage>();
         _messages[reqId] = taskSrc;
 
+<<<<<<< HEAD
         if (!_channelSending.Writer.TryWrite(buffer))
         {
             Console.WriteLine("cannot write {0} request to sending channel", reqId);
         }
 >>>>>>> more rpc
+=======
+        WriteMessage(RpcCommand.Request, reqId, payload);
+>>>>>>> performance improvement
 
         var response = await taskSrc.Task.ConfigureAwait(false);
 
-        Trace.Assert(reqId.Equals(response.ID));
-        Trace.Assert(response.Command == RpcCommand.Response);
+        Debug.Assert(reqId.Equals(response.ID));
+        Debug.Assert(response.Command == RpcCommand.Response);
 
         return response;
     }
 
     private void ResponseTo(RpcMessage request, ArraySegment<byte> payload)
     {
-        var buf = CreateMessage(RpcCommand.Response, request.ID, payload);
+        WriteMessage(RpcCommand.Response, request.ID, payload);
+    }
 
-        if (!_channelSending.Writer.TryWrite(buf))
+    private void WriteMessage(RpcCommand cmd, ulong id, ArraySegment<byte> payload)
+    {
+        var buf = ArrayPool<byte>.Shared.Rent(RpcConst.RPC_MESSAGE_SIZE + payload.Count);
+        try
         {
-            Console.WriteLine("cannot write {0} response to sending channel", request.ID);
+            buf[0] = (byte)cmd;
+            BinaryPrimitives.WriteUInt64LittleEndian(buf.AsSpan(sizeof(byte), sizeof(ulong)), id);
+            BinaryPrimitives.WriteUInt16LittleEndian(buf.AsSpan(sizeof(byte) + sizeof(ulong), sizeof(ushort)), (ushort)payload.Count);
+            Array.Copy(payload.Array, payload.Offset, buf, RpcConst.RPC_MESSAGE_SIZE, payload.Count);
+
+            _writer.Write(buf, 0, RpcConst.RPC_MESSAGE_SIZE + payload.Count);
+            _writer.Flush();
         }
-    }
-
-    private byte[] SendMessage(ArraySegment<byte> payload, out Guid id)
-    {
-        id = Guid.NewGuid();
-
-        return CreateMessage(RpcCommand.Request, id, payload);
-    }
-
-    private byte[] CreateMessage(RpcCommand cmd, Guid id, ArraySegment<byte> payload)
-    {
-        var buf = new byte[19 + payload.Count];
-        using var ms = new MemoryStream(buf);
-        using var writer = new BinaryWriter(ms);
-        writer.Write((byte)cmd);
-        writer.Write(id.ToByteArray());
-        writer.Write((ushort)payload.Count);
-        writer.Write(payload.Array, payload.Offset, payload.Count);
-        writer.Flush();
-        return buf;
+        finally
+        {
+            ArrayPool<byte>.Shared.Return(buf);
+        }
     }
 
     async void RunReceiveLoop(CancellationToken token)
@@ -692,7 +710,7 @@ sealed class TcpSession : IDisposable
 
                     readBuffer = buf.AsMemory(0, read);
                 }
-                else if (readBuffer.Length < 19)
+                else if (readBuffer.Length < RpcConst.RPC_MESSAGE_SIZE)
                 {
                     var xs = new ArraySegment<byte>(buf, 0, buf.Length);
                     var readLen = await socket.ReceiveAsync(xs, SocketFlags.None
@@ -707,40 +725,26 @@ sealed class TcpSession : IDisposable
                     readBuffer = newBuffer;
                 }
 
-                if (readBuffer.Span.Length < 19)
+                if (readBuffer.Span.Length < RpcConst.RPC_MESSAGE_SIZE)
                 {
                     continue;
                 }
 
 
                 var cmd = (RpcCommand)readBuffer.Span[0];
-                var id = new Guid
-                (
-                    BinaryPrimitives.ReadUInt32LittleEndian(readBuffer.Span.Slice(1, 4)),
-                    BinaryPrimitives.ReadUInt16LittleEndian(readBuffer.Span.Slice(1 + 4, 2)),
-                    BinaryPrimitives.ReadUInt16LittleEndian(readBuffer.Span.Slice(1 + 4 + 2, 2)),
-                    readBuffer.Span[1 + 4 + 2 + 2],
-                    readBuffer.Span[1 + 4 + 2 + 2 + 1],
-                    readBuffer.Span[1 + 4 + 2 + 2 + 1 + 1],
-                    readBuffer.Span[1 + 4 + 2 + 2 + 1 + 1 + 1],
-                    readBuffer.Span[1 + 4 + 2 + 2 + 1 + 1 + 1 + 1],
-                    readBuffer.Span[1 + 4 + 2 + 2 + 1 + 1 + 1 + 1 + 1],
-                    readBuffer.Span[1 + 4 + 2 + 2 + 1 + 1 + 1 + 1 + 1 + 1],
-                    readBuffer.Span[1 + 4 + 2 + 2 + 1 + 1 + 1 + 1 + 1 + 1 + 1]
-                );
+                var id = BinaryPrimitives.ReadUInt64LittleEndian(readBuffer.Span.Slice(sizeof(byte), sizeof(ulong)));
+                var payloadLen = BinaryPrimitives.ReadUInt16LittleEndian(readBuffer.Span.Slice(sizeof(byte) + sizeof(ulong), sizeof(ushort)));
 
-                var payloadLen = BinaryPrimitives.ReadUInt16LittleEndian(readBuffer.Span.Slice(1 + 16, 2));
-
-                if (readBuffer.Length == (payloadLen + 19)) // just size
+                if (readBuffer.Length == (payloadLen + RpcConst.RPC_MESSAGE_SIZE)) // just size
                 {
-                    value = readBuffer.Slice(19, payloadLen); // skip length header
+                    value = readBuffer.Slice(RpcConst.RPC_MESSAGE_SIZE, payloadLen); // skip length header
                     readBuffer = Array.Empty<byte>();
                     goto PARSE_MESSAGE;
                 }
-                else if (readBuffer.Length > (payloadLen + 19)) // over size
+                else if (readBuffer.Length > (payloadLen + RpcConst.RPC_MESSAGE_SIZE)) // over size
                 {
-                    value = readBuffer.Slice(19, payloadLen);
-                    readBuffer = readBuffer.Slice(payloadLen + 19);
+                    value = readBuffer.Slice(RpcConst.RPC_MESSAGE_SIZE, payloadLen);
+                    readBuffer = readBuffer.Slice(payloadLen + RpcConst.RPC_MESSAGE_SIZE);
                     goto PARSE_MESSAGE;
                 }
                 else
@@ -751,12 +755,12 @@ sealed class TcpSession : IDisposable
             PARSE_MESSAGE:
                 var msg = new RpcMessage(cmd, id, new ArraySegment<byte>(value.ToArray()));
 
-                if (cmd == RpcCommand.Response)
+                switch (cmd)
                 {
-                    if (_messages.TryRemove(msg.ID, out var task))
-                    {
-                        if (!task.TrySetResult(msg))
+                    case RpcCommand.Request:
+                        while (!_collection.TryAdd(msg, -1, token))
                         {
+<<<<<<< HEAD
 <<<<<<< HEAD
 
 <<<<<<< HEAD
@@ -766,13 +770,22 @@ sealed class TcpSession : IDisposable
 =======
                             Console.WriteLine("cannot set result of msg {0}", msg.ID);
 >>>>>>> rpc
+=======
+                            Console.WriteLine("sleep!");
+                            Thread.Sleep(1);
+>>>>>>> performance improvement
                         }
-                    }
-                }
-                else
-                {
-                    while (!_collection.TryAdd(msg, -1, token))
-                        Thread.Sleep(1);
+                        break;
+
+                    case RpcCommand.Response:
+                        if (_messages.TryRemove(msg.ID, out var task))
+                        {
+                            if (!task.TrySetResult(msg))
+                            {
+                                Console.WriteLine("cannot set result of msg {0}", msg.ID);
+                            }
+                        }
+                        break;
                 }
             }
 >>>>>>> more rpc
@@ -824,7 +837,7 @@ sealed class TcpSession : IDisposable
         Dispose();
     }
 
-    void ParseMessages()
+    void ParseRequests()
     {
         var token = _cancellationTokenSource.Token;
 
@@ -845,6 +858,7 @@ sealed class TcpSession : IDisposable
 
     private void ParseMessage(RpcMessage msg)
     {
+<<<<<<< HEAD
         switch (msg.Command)
         {
             case RpcCommand.Request:
@@ -890,8 +904,12 @@ sealed class TcpSession : IDisposable
         }
         catch (OperationCanceledException)
         {
+=======
+        Debug.Assert(msg.Command == RpcCommand.Request, "Message must be a request!");
+>>>>>>> performance improvement
 
-        }
+        var respPayload = OnRequest(msg);
+        ResponseTo(msg, respPayload);
     }
 }
 
@@ -914,7 +932,13 @@ abstract class TcpClientRpc
 
     public bool IsConnected => _session?.Client?.Connected ?? false;
 
+<<<<<<< HEAD
 >>>>>>> rpc support
+=======
+    public event EventHandler OnSocketConnected, OnSocketDisconnected;
+
+
+>>>>>>> performance improvement
     public void Connect(string address, int port)
     {
         if (IsConnected)
@@ -1002,6 +1026,7 @@ abstract class TcpClientRpc
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     public async ValueTask<ArraySegment<byte>> RequestAsync(ArraySegment<byte> payload)
     {
         if (_session == null)
@@ -1023,6 +1048,9 @@ abstract class TcpClientRpc
 =======
     public async Task<RpcMessage> RequestAsync(ArraySegment<byte> payload)
 >>>>>>> + move managed plugin to rpc
+=======
+    public async ValueTask<RpcMessage> RequestAsync(ArraySegment<byte> payload)
+>>>>>>> performance improvement
     {
         if (_session == null)
             return RpcMessage.Invalid;
@@ -1033,12 +1061,15 @@ abstract class TcpClientRpc
     public RpcMessage Request(ArraySegment<byte> payload)
         => AsyncHelpers.RunSync(() => RequestAsync(payload));
 
+<<<<<<< HEAD
     public event EventHandler OnSocketConnected, OnSocketDisconnected;
 
 <<<<<<< HEAD
     protected abstract void OnMessage(RpcMessage msg);
 >>>>>>> rpc support
 =======
+=======
+>>>>>>> performance improvement
 
     protected abstract ArraySegment<byte> OnRequest(RpcMessage msg);
 >>>>>>> message serialization
@@ -1051,13 +1082,13 @@ abstract class TcpClientRpc
 readonly struct RpcMessage
 {
     public readonly RpcCommand Command;
-    public readonly Guid ID;
+    public readonly ulong ID;
     public readonly ArraySegment<byte> Payload;
 
-    public RpcMessage(RpcCommand cmd, Guid id, ArraySegment<byte> payload)
+    public RpcMessage(RpcCommand cmd, ulong id, ArraySegment<byte> payload)
         => (Command, ID, Payload) = (cmd, id, payload);
 
-    public static readonly RpcMessage Invalid = new RpcMessage(RpcCommand.Invalid, Guid.Empty, new ArraySegment<byte>(Array.Empty<byte>()));
+    public static readonly RpcMessage Invalid = new RpcMessage(RpcCommand.Invalid, 0, new ArraySegment<byte>(Array.Empty<byte>()));
 }
 
 >>>>>>> rpc support
@@ -1087,6 +1118,7 @@ static class AsyncHelpers
     /// </summary>
     /// <param name="task">Callback for asynchronous task to run</param>
 <<<<<<< HEAD
+<<<<<<< HEAD
     public static void RunSync(Func<ValueTask> task)
     {
         var currentContext = SynchronizationContext.Current;
@@ -1097,6 +1129,9 @@ static class AsyncHelpers
         }
 =======
     public static void RunSync(Func<Task> task)
+=======
+    public static void RunSync(Func<ValueTask> task)
+>>>>>>> performance improvement
     {
         var currentContext = SynchronizationContext.Current;
         var customContext = new CustomSynchronizationContext(task);
@@ -1128,10 +1163,14 @@ static class AsyncHelpers
     /// <typeparam name="T">Return type for the task</typeparam>
     /// <returns>Return value from the task</returns>
 <<<<<<< HEAD
+<<<<<<< HEAD
     public static T RunSync<T>(Func<ValueTask<T>> task)
 =======
     public static T RunSync<T>(Func<Task<T>> task)
 >>>>>>> rpc
+=======
+    public static T RunSync<T>(Func<ValueTask<T>> task)
+>>>>>>> performance improvement
     {
         T result = default!;
         RunSync(async () => { result = await task(); });
@@ -1157,7 +1196,7 @@ static class AsyncHelpers
     {
         readonly ConcurrentQueue<Tuple<SendOrPostCallback, object?>> _items = new();
         readonly AutoResetEvent _workItemsWaiting = new(false);
-        readonly Func<Task> _task;
+        readonly Func<ValueTask> _task;
         ExceptionDispatchInfo? _caughtException;
         bool _done;
 
@@ -1165,7 +1204,7 @@ static class AsyncHelpers
         /// Constructor for the custom context
         /// </summary>
         /// <param name="task">Task to execute</param>
-        public CustomSynchronizationContext(Func<Task> task) =>
+        public CustomSynchronizationContext(Func<ValueTask> task) =>
             _task = task ?? throw new ArgumentNullException(nameof(task), "Please remember to pass a Task to be executed");
 >>>>>>> rpc
 

@@ -818,12 +818,16 @@ namespace ClassicUO.Network
         internal static int ProcessWndProc(SDL.SDL_Event* e)
         {
 <<<<<<< HEAD
+<<<<<<< HEAD
             var result = Client.Game.PluginHost?.SdlEvent(e) ?? 0;
 =======
             Client.Game.AssistantHost?.PluginSdlEvent(e);
 
             int result = 0;
 >>>>>>> rpc support
+=======
+            var result = Client.Game.AssistantHost?.PluginSdlEvent(e) ?? 0;
+>>>>>>> performance improvement
 
             foreach (Plugin plugin in Plugins)
             {
