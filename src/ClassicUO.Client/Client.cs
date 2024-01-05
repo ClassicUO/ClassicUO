@@ -63,7 +63,23 @@ namespace ClassicUO
             {
                 ScriptCompiler.CompileTask.Wait();
                 ScriptCompiler.CompileTask.Dispose();
-                ScriptCompiler.Invoke("Configure");
+                try
+                {
+                    ScriptCompiler.Invoke("Configure");
+                }
+                catch (Exception ex)
+                {
+                    Log.Panic(ex.ToString());
+                    string path = Path.Combine(CUOEnviroment.ExecutablePath, "Logs");
+
+                    if (!Directory.Exists(path))
+                        Directory.CreateDirectory(path);
+
+                    using (LogFile crashfile = new LogFile(path, "crash.txt"))
+                    {
+                        crashfile.WriteAsync(ex.ToString()).RunSynchronously();
+                    }
+                }
             }
 
             Load();
@@ -91,7 +107,23 @@ namespace ClassicUO
 
                 UoAssist.Start();
 
-                ScriptCompiler.Invoke("Initialize");
+                try
+                {
+                    ScriptCompiler.Invoke("Initialize");
+                }
+                catch (Exception ex)
+                {
+                    Log.Panic(ex.ToString());
+                    string path = Path.Combine(CUOEnviroment.ExecutablePath, "Logs");
+
+                    if (!Directory.Exists(path))
+                        Directory.CreateDirectory(path);
+
+                    using (LogFile crashfile = new LogFile(path, "crash.txt"))
+                    {
+                        crashfile.WriteAsync(ex.ToString()).RunSynchronously();
+                    }
+                }
 
                 Game.Run();
             }
