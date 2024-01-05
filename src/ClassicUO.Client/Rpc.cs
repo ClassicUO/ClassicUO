@@ -7,15 +7,16 @@ using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 using System.Threading;
-using System.Threading.Channels;
 using System.Threading.Tasks;
 
 
 static class RpcConst
 {
     public const int READ_WRITE_TIMEOUT = 0;
+    public const int RPC_MESSAGE_SIZE = 1 + 8 + 2;
 }
 
 abstract class TcpServerRpc
@@ -25,6 +26,8 @@ abstract class TcpServerRpc
 
 
     public IReadOnlyDictionary<Guid, TcpSession> Clients => _clients;
+
+    public event EventHandler<Guid> OnSocketConnected, OnSocketDisconnected;
 
     public void Start(string address, int port)
     {
@@ -42,7 +45,7 @@ abstract class TcpServerRpc
         _server.Stop();
     }
 
-    public async Task<RpcMessage> RequestAsync(Guid clientId, ArraySegment<byte> payload)
+    public async ValueTask<RpcMessage> RequestAsync(Guid clientId, ArraySegment<byte> payload)
     {
         if (_clients.TryGetValue(clientId, out var client))
         {
@@ -54,8 +57,6 @@ abstract class TcpServerRpc
 
     public RpcMessage Request(Guid clientId, ArraySegment<byte> payload)
         => AsyncHelpers.RunSync(() => RequestAsync(clientId, payload));
-
-    public event EventHandler<Guid> OnSocketConnected, OnSocketDisconnected;
 
     protected abstract ArraySegment<byte> OnRequest(Guid id, RpcMessage msg);
     protected virtual void OnClientConnected(Guid id) { }
@@ -94,12 +95,16 @@ abstract class TcpServerRpc
     {
         var session = new TcpSession(Guid.NewGuid(), client);
 
-        session.OnDisconnected += () =>
+        void onDisconnected()
         {
             _clients.TryRemove(session.Guid, out var _);
             OnSocketDisconnected?.Invoke(this, session.Guid);
             OnClientDisconnected(session.Guid);
-        };
+
+            session.OnDisconnected -= onDisconnected;
+        }
+
+        session.OnDisconnected += onDisconnected;
         session.OnRequest += msg => OnRequest(session.Guid, msg);
         session.Start();
 
@@ -113,24 +118,20 @@ abstract class TcpServerRpc
 sealed class TcpSession : IDisposable
 {
     private bool _disposed;
-    private readonly ConcurrentDictionary<Guid, TaskCompletionSource<RpcMessage>> _messages = new ConcurrentDictionary<Guid, TaskCompletionSource<RpcMessage>>();
-    private readonly Channel<byte[]> _channelSending;
+    private readonly ConcurrentDictionary<ulong, TaskCompletionSource<RpcMessage>> _messages = new ConcurrentDictionary<ulong, TaskCompletionSource<RpcMessage>>();
     private readonly BlockingCollection<RpcMessage> _collection = new BlockingCollection<RpcMessage>(new ConcurrentQueue<RpcMessage>());
     private readonly Thread _thread;
     private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
+    private readonly BinaryWriter _writer;
+
+    private ulong _nextReqId = 1;
 
     public TcpSession(Guid guid, TcpClient client)
     {
         Guid = guid;
         Client = client;
-        _channelSending = Channel.CreateUnbounded<byte[]>(new UnboundedChannelOptions()
-        {
-            SingleReader = true,
-            SingleWriter = false,
-            AllowSynchronousContinuations = true
-        });
-
-        _thread = new Thread(ParseMessages) { IsBackground = true };
+        _writer = new BinaryWriter(client.GetStream());
+        _thread = new Thread(ParseRequests) { IsBackground = true };
         _thread.TrySetApartmentState(ApartmentState.STA);
     }
 
@@ -160,57 +161,48 @@ sealed class TcpSession : IDisposable
     public void Start()
     {
         _thread.Start();
-        SendLoopAsync();
+        RunReceiveLoop(_cancellationTokenSource.Token);
     }
 
-    public async Task<RpcMessage> RequestAsync(ArraySegment<byte> payload)
+    public async ValueTask<RpcMessage> RequestAsync(ArraySegment<byte> payload)
     {
-        var buffer = SendMessage(payload, out var reqId);
+        var reqId = (ulong)Interlocked.Increment(ref Unsafe.As<ulong, long>(ref _nextReqId));
 
         var taskSrc = new TaskCompletionSource<RpcMessage>();
         _messages[reqId] = taskSrc;
 
-        if (!_channelSending.Writer.TryWrite(buffer))
-        {
-            Console.WriteLine("cannot write {0} request to sending channel", reqId);
-        }
+        WriteMessage(RpcCommand.Request, reqId, payload);
 
         var response = await taskSrc.Task.ConfigureAwait(false);
 
-        Trace.Assert(reqId.Equals(response.ID));
-        Trace.Assert(response.Command == RpcCommand.Response);
+        Debug.Assert(reqId.Equals(response.ID));
+        Debug.Assert(response.Command == RpcCommand.Response);
 
         return response;
     }
 
     private void ResponseTo(RpcMessage request, ArraySegment<byte> payload)
     {
-        var buf = CreateMessage(RpcCommand.Response, request.ID, payload);
+        WriteMessage(RpcCommand.Response, request.ID, payload);
+    }
 
-        if (!_channelSending.Writer.TryWrite(buf))
+    private void WriteMessage(RpcCommand cmd, ulong id, ArraySegment<byte> payload)
+    {
+        var buf = ArrayPool<byte>.Shared.Rent(RpcConst.RPC_MESSAGE_SIZE + payload.Count);
+        try
         {
-            Console.WriteLine("cannot write {0} response to sending channel", request.ID);
+            buf[0] = (byte)cmd;
+            BinaryPrimitives.WriteUInt64LittleEndian(buf.AsSpan(sizeof(byte), sizeof(ulong)), id);
+            BinaryPrimitives.WriteUInt16LittleEndian(buf.AsSpan(sizeof(byte) + sizeof(ulong), sizeof(ushort)), (ushort)payload.Count);
+            Array.Copy(payload.Array, payload.Offset, buf, RpcConst.RPC_MESSAGE_SIZE, payload.Count);
+
+            _writer.Write(buf, 0, RpcConst.RPC_MESSAGE_SIZE + payload.Count);
+            _writer.Flush();
         }
-    }
-
-    private byte[] SendMessage(ArraySegment<byte> payload, out Guid id)
-    {
-        id = Guid.NewGuid();
-
-        return CreateMessage(RpcCommand.Request, id, payload);
-    }
-
-    private byte[] CreateMessage(RpcCommand cmd, Guid id, ArraySegment<byte> payload)
-    {
-        var buf = new byte[19 + payload.Count];
-        using var ms = new MemoryStream(buf);
-        using var writer = new BinaryWriter(ms);
-        writer.Write((byte)cmd);
-        writer.Write(id.ToByteArray());
-        writer.Write((ushort)payload.Count);
-        writer.Write(payload.Array, payload.Offset, payload.Count);
-        writer.Flush();
-        return buf;
+        finally
+        {
+            ArrayPool<byte>.Shared.Return(buf);
+        }
     }
 
     async void RunReceiveLoop(CancellationToken token)
@@ -238,7 +230,7 @@ sealed class TcpSession : IDisposable
 
                     readBuffer = buf.AsMemory(0, read);
                 }
-                else if (readBuffer.Length < 19)
+                else if (readBuffer.Length < RpcConst.RPC_MESSAGE_SIZE)
                 {
                     var xs = new ArraySegment<byte>(buf, 0, buf.Length);
                     var readLen = await socket.ReceiveAsync(xs, SocketFlags.None
@@ -253,40 +245,26 @@ sealed class TcpSession : IDisposable
                     readBuffer = newBuffer;
                 }
 
-                if (readBuffer.Span.Length < 19)
+                if (readBuffer.Span.Length < RpcConst.RPC_MESSAGE_SIZE)
                 {
                     continue;
                 }
 
 
                 var cmd = (RpcCommand)readBuffer.Span[0];
-                var id = new Guid
-                (
-                    BinaryPrimitives.ReadUInt32LittleEndian(readBuffer.Span.Slice(1, 4)),
-                    BinaryPrimitives.ReadUInt16LittleEndian(readBuffer.Span.Slice(1 + 4, 2)),
-                    BinaryPrimitives.ReadUInt16LittleEndian(readBuffer.Span.Slice(1 + 4 + 2, 2)),
-                    readBuffer.Span[1 + 4 + 2 + 2],
-                    readBuffer.Span[1 + 4 + 2 + 2 + 1],
-                    readBuffer.Span[1 + 4 + 2 + 2 + 1 + 1],
-                    readBuffer.Span[1 + 4 + 2 + 2 + 1 + 1 + 1],
-                    readBuffer.Span[1 + 4 + 2 + 2 + 1 + 1 + 1 + 1],
-                    readBuffer.Span[1 + 4 + 2 + 2 + 1 + 1 + 1 + 1 + 1],
-                    readBuffer.Span[1 + 4 + 2 + 2 + 1 + 1 + 1 + 1 + 1 + 1],
-                    readBuffer.Span[1 + 4 + 2 + 2 + 1 + 1 + 1 + 1 + 1 + 1 + 1]
-                );
+                var id = BinaryPrimitives.ReadUInt64LittleEndian(readBuffer.Span.Slice(sizeof(byte), sizeof(ulong)));
+                var payloadLen = BinaryPrimitives.ReadUInt16LittleEndian(readBuffer.Span.Slice(sizeof(byte) + sizeof(ulong), sizeof(ushort)));
 
-                var payloadLen = BinaryPrimitives.ReadUInt16LittleEndian(readBuffer.Span.Slice(1 + 16, 2));
-
-                if (readBuffer.Length == (payloadLen + 19)) // just size
+                if (readBuffer.Length == (payloadLen + RpcConst.RPC_MESSAGE_SIZE)) // just size
                 {
-                    value = readBuffer.Slice(19, payloadLen); // skip length header
+                    value = readBuffer.Slice(RpcConst.RPC_MESSAGE_SIZE, payloadLen); // skip length header
                     readBuffer = Array.Empty<byte>();
                     goto PARSE_MESSAGE;
                 }
-                else if (readBuffer.Length > (payloadLen + 19)) // over size
+                else if (readBuffer.Length > (payloadLen + RpcConst.RPC_MESSAGE_SIZE)) // over size
                 {
-                    value = readBuffer.Slice(19, payloadLen);
-                    readBuffer = readBuffer.Slice(payloadLen + 19);
+                    value = readBuffer.Slice(RpcConst.RPC_MESSAGE_SIZE, payloadLen);
+                    readBuffer = readBuffer.Slice(payloadLen + RpcConst.RPC_MESSAGE_SIZE);
                     goto PARSE_MESSAGE;
                 }
                 else
@@ -297,20 +275,25 @@ sealed class TcpSession : IDisposable
             PARSE_MESSAGE:
                 var msg = new RpcMessage(cmd, id, new ArraySegment<byte>(value.ToArray()));
 
-                if (cmd == RpcCommand.Response)
+                switch (cmd)
                 {
-                    if (_messages.TryRemove(msg.ID, out var task))
-                    {
-                        if (!task.TrySetResult(msg))
+                    case RpcCommand.Request:
+                        while (!_collection.TryAdd(msg, -1, token))
                         {
-                            Console.WriteLine("cannot set result of msg {0}", msg.ID);
+                            Console.WriteLine("sleep!");
+                            Thread.Sleep(1);
                         }
-                    }
-                }
-                else
-                {
-                    while (!_collection.TryAdd(msg, -1, token))
-                        Thread.Sleep(1);
+                        break;
+
+                    case RpcCommand.Response:
+                        if (_messages.TryRemove(msg.ID, out var task))
+                        {
+                            if (!task.TrySetResult(msg))
+                            {
+                                Console.WriteLine("cannot set result of msg {0}", msg.ID);
+                            }
+                        }
+                        break;
                 }
             }
         }
@@ -322,7 +305,7 @@ sealed class TcpSession : IDisposable
         Dispose();
     }
 
-    void ParseMessages()
+    void ParseRequests()
     {
         var token = _cancellationTokenSource.Token;
 
@@ -343,52 +326,10 @@ sealed class TcpSession : IDisposable
 
     private void ParseMessage(RpcMessage msg)
     {
-        switch (msg.Command)
-        {
-            case RpcCommand.Request:
-                var respPayload = OnRequest(msg);
-                ResponseTo(msg, respPayload);
-                break;
+        Debug.Assert(msg.Command == RpcCommand.Request, "Message must be a request!");
 
-            case RpcCommand.Response:
-                if (_messages.TryRemove(msg.ID, out var task))
-                {
-                    if (!task.TrySetResult(msg))
-                    {
-                        Console.WriteLine("cannot set result of msg {0}", msg.ID);
-                    }
-                }
-                break;
-        }
-    }
-
-    async void SendLoopAsync()
-    {
-        var reader = _channelSending.Reader;
-        var socket = Client.Client;
-        var token = _cancellationTokenSource.Token;
-
-        RunReceiveLoop(token);
-
-        try
-        {
-            while (await reader.WaitToReadAsync(token).ConfigureAwait(false))
-            {
-                while (reader.TryRead(out var item))
-                {
-                    var xs = new ArraySegment<byte>(item);
-                    _ = await socket.SendAsync(xs, SocketFlags.None
-#if NET
-                        , token
-#endif
-                        ).ConfigureAwait(false);
-                }
-            }
-        }
-        catch (OperationCanceledException)
-        {
-
-        }
+        var respPayload = OnRequest(msg);
+        ResponseTo(msg, respPayload);
     }
 }
 
@@ -397,6 +338,9 @@ abstract class TcpClientRpc
     private TcpSession _session;
 
     public bool IsConnected => _session?.Client?.Connected ?? false;
+
+    public event EventHandler OnSocketConnected, OnSocketDisconnected;
+
 
     public void Connect(string address, int port)
     {
@@ -437,7 +381,7 @@ abstract class TcpClientRpc
         _session?.Client?.Client?.Disconnect(false);
     }
 
-    public async Task<RpcMessage> RequestAsync(ArraySegment<byte> payload)
+    public async ValueTask<RpcMessage> RequestAsync(ArraySegment<byte> payload)
     {
         if (_session == null)
             return RpcMessage.Invalid;
@@ -448,8 +392,6 @@ abstract class TcpClientRpc
     public RpcMessage Request(ArraySegment<byte> payload)
         => AsyncHelpers.RunSync(() => RequestAsync(payload));
 
-    public event EventHandler OnSocketConnected, OnSocketDisconnected;
-
 
     protected abstract ArraySegment<byte> OnRequest(RpcMessage msg);
     protected virtual void OnConnected() { }
@@ -459,13 +401,13 @@ abstract class TcpClientRpc
 readonly struct RpcMessage
 {
     public readonly RpcCommand Command;
-    public readonly Guid ID;
+    public readonly ulong ID;
     public readonly ArraySegment<byte> Payload;
 
-    public RpcMessage(RpcCommand cmd, Guid id, ArraySegment<byte> payload)
+    public RpcMessage(RpcCommand cmd, ulong id, ArraySegment<byte> payload)
         => (Command, ID, Payload) = (cmd, id, payload);
 
-    public static readonly RpcMessage Invalid = new RpcMessage(RpcCommand.Invalid, Guid.Empty, new ArraySegment<byte>(Array.Empty<byte>()));
+    public static readonly RpcMessage Invalid = new RpcMessage(RpcCommand.Invalid, 0, new ArraySegment<byte>(Array.Empty<byte>()));
 }
 
 enum RpcCommand
@@ -482,7 +424,7 @@ static class AsyncHelpers
     /// Executes a task synchronously on the calling thread by installing a temporary synchronization context that queues continuations
     /// </summary>
     /// <param name="task">Callback for asynchronous task to run</param>
-    public static void RunSync(Func<Task> task)
+    public static void RunSync(Func<ValueTask> task)
     {
         var currentContext = SynchronizationContext.Current;
         var customContext = new CustomSynchronizationContext(task);
@@ -504,7 +446,7 @@ static class AsyncHelpers
     /// <param name="task">Callback for asynchronous task to run</param>
     /// <typeparam name="T">Return type for the task</typeparam>
     /// <returns>Return value from the task</returns>
-    public static T RunSync<T>(Func<Task<T>> task)
+    public static T RunSync<T>(Func<ValueTask<T>> task)
     {
         T result = default!;
         RunSync(async () => { result = await task(); });
@@ -518,7 +460,7 @@ static class AsyncHelpers
     {
         readonly ConcurrentQueue<Tuple<SendOrPostCallback, object?>> _items = new();
         readonly AutoResetEvent _workItemsWaiting = new(false);
-        readonly Func<Task> _task;
+        readonly Func<ValueTask> _task;
         ExceptionDispatchInfo? _caughtException;
         bool _done;
 
@@ -526,7 +468,7 @@ static class AsyncHelpers
         /// Constructor for the custom context
         /// </summary>
         /// <param name="task">Task to execute</param>
-        public CustomSynchronizationContext(Func<Task> task) =>
+        public CustomSynchronizationContext(Func<ValueTask> task) =>
             _task = task ?? throw new ArgumentNullException(nameof(task), "Please remember to pass a Task to be executed");
 
         /// <summary>
