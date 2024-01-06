@@ -315,6 +315,7 @@ abstract class TcpServerRpc
     {
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         var id = Guid.NewGuid();
         var session = new TcpSession(id, client, (msg) => OnRequest(id, msg));
 
@@ -333,6 +334,10 @@ abstract class TcpServerRpc
 =======
         var session = new TcpSession(Guid.NewGuid(), client);
 >>>>>>> more rpc
+=======
+        var id = Guid.NewGuid();
+        var session = new TcpSession(id, client, (msg) => OnRequest(id, msg));
+>>>>>>> minor improvements
 
         void onDisconnected()
         {
@@ -366,9 +371,12 @@ abstract class TcpServerRpc
         }
 
         session.OnDisconnected += onDisconnected;
+<<<<<<< HEAD
 >>>>>>> performance improvement
         session.OnRequest += msg => OnRequest(session.Guid, msg);
 >>>>>>> message serialization
+=======
+>>>>>>> minor improvements
         session.Start();
 
         _clients.TryAdd(session.Guid, session);
@@ -418,16 +426,18 @@ sealed class TcpSession : IDisposable
     private readonly Thread _thread;
     private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
     private readonly BinaryWriter _writer;
+    private readonly Func<RpcMessage, ArraySegment<byte>> _onRequest;
 
     private ulong _nextReqId = 1;
 
-    public TcpSession(Guid guid, TcpClient client)
+    public TcpSession(Guid guid, TcpClient client, Func<RpcMessage, ArraySegment<byte>> onRequest)
     {
         Guid = guid;
         Client = client;
         _writer = new BinaryWriter(client.GetStream());
         _thread = new Thread(ParseRequests) { IsBackground = true };
         _thread.TrySetApartmentState(ApartmentState.STA);
+        _onRequest = onRequest;
     }
 
 <<<<<<< HEAD
@@ -436,7 +446,6 @@ sealed class TcpSession : IDisposable
 =======
 >>>>>>> message serialization
     public event Action OnDisconnected;
-    public event Func<RpcMessage, ArraySegment<byte>> OnRequest;
 
     public Guid Guid { get; }
     public TcpClient Client { get; }
@@ -847,7 +856,7 @@ sealed class TcpSession : IDisposable
             {
                 var msg = _collection.Take(token);
 
-                ParseMessage(msg);
+                ParseRequest(msg);
             }
         }
         catch (OperationCanceledException)
@@ -856,7 +865,7 @@ sealed class TcpSession : IDisposable
         }
     }
 
-    private void ParseMessage(RpcMessage msg)
+    private void ParseRequest(RpcMessage msg)
     {
 <<<<<<< HEAD
         switch (msg.Command)
@@ -908,7 +917,7 @@ sealed class TcpSession : IDisposable
         Debug.Assert(msg.Command == RpcCommand.Request, "Message must be a request!");
 >>>>>>> performance improvement
 
-        var respPayload = OnRequest(msg);
+        var respPayload = _onRequest(msg);
         ResponseTo(msg, respPayload);
     }
 }
@@ -963,6 +972,7 @@ abstract class TcpClientRpc
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         _session = new TcpSession(Guid.Empty, tcp, OnRequest);
         _session.OnDisconnected += () => {
             OnSocketDisconnected?.Invoke(this, EventArgs.Empty);
@@ -983,10 +993,14 @@ abstract class TcpClientRpc
         _session.OnDisconnected += OnDisconnected;
         _session.OnMessage += msg => OnMessage(msg);
 =======
+=======
+        _session = new TcpSession(Guid.Empty, tcp, OnRequest);
+>>>>>>> minor improvements
         _session.OnDisconnected += () => {
             OnSocketDisconnected?.Invoke(this, EventArgs.Empty);
             OnDisconnected();
         };
+<<<<<<< HEAD
 <<<<<<< HEAD
         _session.OnMessage += msg =>
         {
@@ -1006,6 +1020,8 @@ abstract class TcpClientRpc
 =======
         _session.OnRequest += OnRequest;
 >>>>>>> message serialization
+=======
+>>>>>>> minor improvements
         _session.Start();
 
         OnSocketConnected?.Invoke(this, EventArgs.Empty);
@@ -1194,7 +1210,7 @@ static class AsyncHelpers
 =======
     class CustomSynchronizationContext : SynchronizationContext
     {
-        readonly ConcurrentQueue<Tuple<SendOrPostCallback, object?>> _items = new();
+        readonly ConcurrentQueue<(SendOrPostCallback, object?)> _items = new();
         readonly AutoResetEvent _workItemsWaiting = new(false);
         readonly Func<ValueTask> _task;
         ExceptionDispatchInfo? _caughtException;
@@ -1215,6 +1231,7 @@ static class AsyncHelpers
         /// <param name="state">Callback state</param>
         public override void Post(SendOrPostCallback function, object? state)
         {
+<<<<<<< HEAD
 <<<<<<< HEAD
             _coll.Add((function, state));
         }
@@ -1241,6 +1258,9 @@ static class AsyncHelpers
             ((CustomSynchronizationContext)o)._done = true;
 =======
             _items.Enqueue(Tuple.Create(function, state));
+=======
+            _items.Enqueue((function, state));
+>>>>>>> minor improvements
             _workItemsWaiting.Set();
 >>>>>>> rpc
         }
