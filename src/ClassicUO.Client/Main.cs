@@ -67,6 +67,12 @@ namespace ClassicUO
             CUOEnviroment.GameThread = Thread.CurrentThread;
             CUOEnviroment.GameThread.Name = "CUO_MAIN_THREAD";
 
+#if DEBUG
+            ScriptCompiler.Compile(true, true);
+#else
+            ScriptCompiler.Compile(false, true);
+#endif
+
 #if !DEBUG
             AppDomain.CurrentDomain.UnhandledException += (s, e) =>
             {
@@ -271,18 +277,6 @@ namespace ClassicUO
                         Environment.SetEnvironmentVariable("FNA3D_FORCE_DRIVER", "Vulkan");
 
                         break;
-                }
-                try
-                {
-#if DEBUG
-                ScriptCompiler.Compile(true, true);
-#else
-                    ScriptCompiler.Compile(false, true);
-#endif
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex.ToString());
                 }
 
                 Client.Run();
