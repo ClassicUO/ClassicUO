@@ -2,6 +2,7 @@
 using ClassicUO.Network;
 using StructPacker;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace ClassicUO
@@ -152,17 +153,22 @@ namespace ClassicUO
         }
 
 
-        private RpcMessage MakeSimpleRequest(PluginCuoProtocol protocol)
+        private readonly Dictionary<PluginCuoProtocol, byte[]> _simpleRequests = new Dictionary<PluginCuoProtocol, byte[]>();
+
+        private void MakeSimpleRequest(PluginCuoProtocol protocol)
         {
-            var req = new PluginSimpleRequest()
+            if (!_simpleRequests.TryGetValue(protocol, out var buf))
             {
-                Cmd = (byte)protocol
-            };
+                var req = new PluginSimpleRequest()
+                {
+                    Cmd = (byte)protocol
+                };
 
-            using var buf = req.PackToBuffer();
-            var resp = Request(new ArraySegment<byte>(buf.Data, 0, buf.Size));
+                buf = req.Pack();
+                _simpleRequests.Add(protocol, buf);
+            }
 
-            return resp;
+            var resp = Request(new ArraySegment<byte>(buf));            
         }
 
         public void PluginInitialize(string pluginPath)
@@ -184,32 +190,32 @@ namespace ClassicUO
 
         public void PluginTick()
         {
-            var resp = MakeSimpleRequest(PluginCuoProtocol.OnTick);
+            MakeSimpleRequest(PluginCuoProtocol.OnTick);
         }
 
         public void PluginClosing()
         {
-            var resp = MakeSimpleRequest(PluginCuoProtocol.OnClosing);
+            MakeSimpleRequest(PluginCuoProtocol.OnClosing);
         }
 
         public void PluginFocusGained()
         {
-            var resp = MakeSimpleRequest(PluginCuoProtocol.OnFocusGained);
+            MakeSimpleRequest(PluginCuoProtocol.OnFocusGained);
         }
 
         public void PluginFocusLost()
         {
-            var resp = MakeSimpleRequest(PluginCuoProtocol.OnFocusLost);
+            MakeSimpleRequest(PluginCuoProtocol.OnFocusLost);
         }
 
         public void PluginConnected()
         {
-            var resp = MakeSimpleRequest(PluginCuoProtocol.OnConnected);
+            MakeSimpleRequest(PluginCuoProtocol.OnConnected);
         }
 
         public void PluginDisconnected() 
         {
-            var resp = MakeSimpleRequest(PluginCuoProtocol.OnDisconnected);
+            MakeSimpleRequest(PluginCuoProtocol.OnDisconnected);
         }
 
         public bool PluginHotkeys(int key, int mod, bool ispressed)
@@ -235,7 +241,7 @@ namespace ClassicUO
         {
             var req = new PluginMouseRequest()
             {
-                Cmd = (byte)PluginCuoProtocol.OnHotkey,
+                Cmd = (byte)PluginCuoProtocol.OnMouse,
                 Button = button,
                 Wheel = wheel
             };
@@ -262,9 +268,9 @@ namespace ClassicUO
 
         public void PluginUpdatePlayerPosition(int x, int y, int z)
         {
-            var buf = new byte[1];
-            buf[0] = (byte)PluginCuoProtocol.OnUpdatePlayerPos;
-            var resp = Request(buf);
+            //var buf = new byte[1];
+            //buf[0] = (byte)PluginCuoProtocol.OnUpdatePlayerPos;
+            //var resp = Request(buf);
         }
 
         public bool PluginPacketIn(ArraySegment<byte> buffer)
@@ -284,7 +290,7 @@ namespace ClassicUO
                 var resp = new PluginPacketRequestResponse();
                 resp.Unpack(respMsg.Payload.Array, respMsg.Payload.Offset);
 
-                if (resp.Packet.Length != 0)
+                if (resp.Packet != null && resp.Packet.Length != 0)
                 {
                     resp.Packet.CopyTo(buffer.Array, buffer.Offset);
 
@@ -311,7 +317,7 @@ namespace ClassicUO
             var resp = new PluginPacketRequestResponse();
             resp.Unpack(respMsg.Payload.Array, respMsg.Payload.Offset);
 
-            if (resp.Packet.Length != 0)
+            if (resp.Packet != null && resp.Packet.Length != 0)
             {
                 resp.Packet.CopyTo(buffer);
 
