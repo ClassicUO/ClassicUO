@@ -93,7 +93,8 @@ abstract class TcpServerRpc
 
     void ProcessClient(TcpClient client)
     {
-        var session = new TcpSession(Guid.NewGuid(), client);
+        var id = Guid.NewGuid();
+        var session = new TcpSession(id, client, (msg) => OnRequest(id, msg));
 
         void onDisconnected()
         {
@@ -105,7 +106,6 @@ abstract class TcpServerRpc
         }
 
         session.OnDisconnected += onDisconnected;
-        session.OnRequest += msg => OnRequest(session.Guid, msg);
         session.Start();
 
         _clients.TryAdd(session.Guid, session);
@@ -123,20 +123,21 @@ sealed class TcpSession : IDisposable
     private readonly Thread _thread;
     private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
     private readonly BinaryWriter _writer;
+    private readonly Func<RpcMessage, ArraySegment<byte>> _onRequest;
 
     private ulong _nextReqId = 1;
 
-    public TcpSession(Guid guid, TcpClient client)
+    public TcpSession(Guid guid, TcpClient client, Func<RpcMessage, ArraySegment<byte>> onRequest)
     {
         Guid = guid;
         Client = client;
         _writer = new BinaryWriter(client.GetStream());
         _thread = new Thread(ParseRequests) { IsBackground = true };
         _thread.TrySetApartmentState(ApartmentState.STA);
+        _onRequest = onRequest;
     }
 
     public event Action OnDisconnected;
-    public event Func<RpcMessage, ArraySegment<byte>> OnRequest;
 
     public Guid Guid { get; }
     public TcpClient Client { get; }
@@ -315,7 +316,7 @@ sealed class TcpSession : IDisposable
             {
                 var msg = _collection.Take(token);
 
-                ParseMessage(msg);
+                ParseRequest(msg);
             }
         }
         catch (OperationCanceledException)
@@ -324,11 +325,11 @@ sealed class TcpSession : IDisposable
         }
     }
 
-    private void ParseMessage(RpcMessage msg)
+    private void ParseRequest(RpcMessage msg)
     {
         Debug.Assert(msg.Command == RpcCommand.Request, "Message must be a request!");
 
-        var respPayload = OnRequest(msg);
+        var respPayload = _onRequest(msg);
         ResponseTo(msg, respPayload);
     }
 }
@@ -364,12 +365,11 @@ abstract class TcpClientRpc
         var tcp = (TcpClient)ar.AsyncState;
         tcp.EndConnect(ar);
 
-        _session = new TcpSession(Guid.Empty, tcp);
+        _session = new TcpSession(Guid.Empty, tcp, OnRequest);
         _session.OnDisconnected += () => {
             OnSocketDisconnected?.Invoke(this, EventArgs.Empty);
             OnDisconnected();
         };
-        _session.OnRequest += OnRequest;
         _session.Start();
 
         OnSocketConnected?.Invoke(this, EventArgs.Empty);
@@ -458,7 +458,7 @@ static class AsyncHelpers
     /// </summary>
     class CustomSynchronizationContext : SynchronizationContext
     {
-        readonly ConcurrentQueue<Tuple<SendOrPostCallback, object?>> _items = new();
+        readonly ConcurrentQueue<(SendOrPostCallback, object?)> _items = new();
         readonly AutoResetEvent _workItemsWaiting = new(false);
         readonly Func<ValueTask> _task;
         ExceptionDispatchInfo? _caughtException;
@@ -478,7 +478,7 @@ static class AsyncHelpers
         /// <param name="state">Callback state</param>
         public override void Post(SendOrPostCallback function, object? state)
         {
-            _items.Enqueue(Tuple.Create(function, state));
+            _items.Enqueue((function, state));
             _workItemsWaiting.Set();
         }
 
