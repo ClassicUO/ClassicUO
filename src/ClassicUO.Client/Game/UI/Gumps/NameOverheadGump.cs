@@ -30,18 +30,18 @@
 
 #endregion
 
-using System;
+using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
-using ClassicUO.Assets;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -360,6 +360,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     switch (TargetManager.TargetingState)
                     {
+                        case CursorTarget.Internal:
                         case CursorTarget.Position:
                         case CursorTarget.Object:
                         case CursorTarget.Grab:
