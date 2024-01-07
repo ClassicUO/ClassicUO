@@ -2,6 +2,8 @@
 using ClassicUO.Network;
 using StructPacker;
 using System;
+using System.Buffers;
+using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -20,24 +22,22 @@ namespace ClassicUO
             {
                 case PluginCuoProtocol.OnPluginRecv:
                     {
-                        var req = new PluginPacketRequestResponse();
-                        req.Unpack(msg.Payload.Array, msg.Payload.Offset);
-
+                        var packetLen = BinaryPrimitives.ReadUInt16LittleEndian(msg.Payload.AsSpan(sizeof(byte), sizeof(ushort)));
+                        
                         lock (PacketHandlers.Handler)
                         {
-                            PacketHandlers.Handler.Append(req.Packet, true);
+                            PacketHandlers.Handler.Append(msg.Payload.AsSpan(sizeof(byte) + sizeof(ushort), packetLen), true);
                         }
                     }
                     break;
 
                 case PluginCuoProtocol.OnPluginSend:
                     {
-                        var req = new PluginPacketRequestResponse();
-                        req.Unpack(msg.Payload.Array, msg.Payload.Offset);
-                       
+                        var packetLen = BinaryPrimitives.ReadUInt16LittleEndian(msg.Payload.AsSpan(sizeof(byte), sizeof(ushort)));
+
                         if (NetClient.Socket.IsConnected)
                         {
-                            NetClient.Socket.Send(req.Packet, true);
+                            NetClient.Socket.Send(msg.Payload.AsSpan(sizeof(byte) + sizeof(ushort), packetLen), true);
                         }
                     }
                     
@@ -124,12 +124,12 @@ namespace ClassicUO
             public byte Cmd;
         }
 
-        [Pack]
-        internal struct PluginPacketRequestResponse
-        {
-            public byte Cmd;
-            public byte[] Packet;
-        }
+        //[Pack]
+        //internal struct PluginPacketRequestResponse
+        //{
+        //    public byte Cmd;
+        //    public byte[] Packet;
+        //}
 
         //[Pack]
         //internal struct PluginSdlEvent
@@ -277,24 +277,28 @@ namespace ClassicUO
         {
             if (buffer.Array != null && buffer.Count > 0)
             {
-                var bufRef = buffer.ToArray(); // TODO: remove the allocation
-                var req = new PluginPacketRequestResponse()
+                var rentBuf = ArrayPool<byte>.Shared.Rent(sizeof(byte) + sizeof(ushort) + buffer.Count);
+
+                try
                 {
-                    Cmd = (byte)PluginCuoProtocol.OnPacketIn,
-                    Packet = bufRef, 
-                };
+                    rentBuf[0] = (byte)PluginCuoProtocol.OnPacketIn;
+                    BinaryPrimitives.WriteUInt16LittleEndian(rentBuf.AsSpan(sizeof(byte), sizeof(ushort)), (ushort) buffer.Count);
 
-                using var buf = req.PackToBuffer();
-                var respMsg = Request(new ArraySegment<byte>(buf.Data, 0, buf.Size));
+                    buffer.CopyTo(new ArraySegment<byte>(rentBuf, sizeof(byte) + sizeof(ushort), buffer.Count));
 
-                var resp = new PluginPacketRequestResponse();
-                resp.Unpack(respMsg.Payload.Array, respMsg.Payload.Offset);
+                    var respMsg = Request(new ArraySegment<byte>(rentBuf, 0, sizeof(byte) + sizeof(ushort) + buffer.Count));
 
-                if (resp.Packet != null && resp.Packet.Length != 0)
+                    var packetLen = BinaryPrimitives.ReadUInt16LittleEndian(respMsg.Payload.Array.AsSpan(sizeof(byte), sizeof(ushort)));
+
+                    if (packetLen > 0)
+                    {
+                        respMsg.Payload.Array.AsSpan(sizeof(byte) + sizeof(ushort), packetLen).CopyTo(buffer.Array);
+                        return true;
+                    }
+                }
+                finally
                 {
-                    resp.Packet.CopyTo(buffer.Array, buffer.Offset);
-
-                    return true;
+                    ArrayPool<byte>.Shared.Return(rentBuf);
                 }
             }
 
@@ -305,23 +309,28 @@ namespace ClassicUO
         {
             if (buffer.IsEmpty) return true;
 
-            var req = new PluginPacketRequestResponse()
+            var rentBuf = ArrayPool<byte>.Shared.Rent(sizeof(byte) + sizeof(ushort) + buffer.Length);
+
+            try
             {
-                Cmd = (byte)PluginCuoProtocol.OnPacketOut,
-                Packet = buffer.ToArray(), // TODO: remove the allocation!
-            };
+                rentBuf[0] = (byte)PluginCuoProtocol.OnPacketOut;
+                BinaryPrimitives.WriteUInt16LittleEndian(rentBuf.AsSpan(sizeof(byte), sizeof(ushort)), (ushort)buffer.Length);
 
-            using var buf = req.PackToBuffer();
-            var respMsg = Request(new ArraySegment<byte>(buf.Data, 0, buf.Size));
+                buffer.CopyTo(new ArraySegment<byte>(rentBuf, sizeof(byte) + sizeof(ushort), buffer.Length));
 
-            var resp = new PluginPacketRequestResponse();
-            resp.Unpack(respMsg.Payload.Array, respMsg.Payload.Offset);
+                var respMsg = Request(new ArraySegment<byte>(rentBuf, 0, sizeof(byte) + sizeof(ushort) + buffer.Length));
 
-            if (resp.Packet != null && resp.Packet.Length != 0)
+                var packetLen = BinaryPrimitives.ReadUInt16LittleEndian(respMsg.Payload.Array.AsSpan(sizeof(byte), sizeof(ushort)));
+
+                if (packetLen > 0)
+                {
+                    respMsg.Payload.Array.AsSpan(sizeof(byte) + sizeof(ushort), packetLen).CopyTo(buffer);
+                    return true;
+                }
+            }
+            finally
             {
-                resp.Packet.CopyTo(buffer);
-
-                return true;
+                ArrayPool<byte>.Shared.Return(rentBuf);
             }
 
             return false;
