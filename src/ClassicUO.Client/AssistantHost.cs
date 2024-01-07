@@ -168,7 +168,7 @@ namespace ClassicUO
                 _simpleRequests.Add(protocol, buf);
             }
 
-            var resp = Request(new ArraySegment<byte>(buf));            
+            using var resp = Request(new ArraySegment<byte>(buf));            
         }
 
         public void PluginInitialize(string pluginPath)
@@ -185,7 +185,7 @@ namespace ClassicUO
             };
 
             using var buf = req.PackToBuffer();
-            var resp = Request(new ArraySegment<byte>(buf.Data, 0, buf.Size));
+            using var resp = Request(new ArraySegment<byte>(buf.Data, 0, buf.Size));
         }
 
         public void PluginTick()
@@ -229,7 +229,7 @@ namespace ClassicUO
             };
 
             using var buf = req.PackToBuffer();
-            var respMsg = Request(new ArraySegment<byte>(buf.Data, 0, buf.Size));
+            using var respMsg = Request(new ArraySegment<byte>(buf.Data, 0, buf.Size));
 
             var resp = new PluginHotkeyResponse();
             resp.Unpack(respMsg.Payload.Array, respMsg.Payload.Offset);
@@ -247,7 +247,7 @@ namespace ClassicUO
             };
 
             using var buf = req.PackToBuffer();
-            var resp = Request(new ArraySegment<byte>(buf.Data, 0, buf.Size));
+            using var resp = Request(new ArraySegment<byte>(buf.Data, 0, buf.Size));
         }
 
         public void PluginDrawCmdList()
@@ -286,7 +286,7 @@ namespace ClassicUO
 
                     buffer.CopyTo(new ArraySegment<byte>(rentBuf, sizeof(byte) + sizeof(ushort), buffer.Count));
 
-                    var respMsg = Request(new ArraySegment<byte>(rentBuf, 0, sizeof(byte) + sizeof(ushort) + buffer.Count));
+                    using var respMsg = Request(new ArraySegment<byte>(rentBuf, 0, sizeof(byte) + sizeof(ushort) + buffer.Count));
 
                     var packetLen = BinaryPrimitives.ReadUInt16LittleEndian(respMsg.Payload.Array.AsSpan(sizeof(byte), sizeof(ushort)));
 
@@ -318,7 +318,7 @@ namespace ClassicUO
 
                 buffer.CopyTo(new ArraySegment<byte>(rentBuf, sizeof(byte) + sizeof(ushort), buffer.Length));
 
-                var respMsg = Request(new ArraySegment<byte>(rentBuf, 0, sizeof(byte) + sizeof(ushort) + buffer.Length));
+                using var respMsg = Request(new ArraySegment<byte>(rentBuf, 0, sizeof(byte) + sizeof(ushort) + buffer.Length));
 
                 var packetLen = BinaryPrimitives.ReadUInt16LittleEndian(respMsg.Payload.Array.AsSpan(sizeof(byte), sizeof(ushort)));
 
