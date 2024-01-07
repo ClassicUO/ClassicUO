@@ -274,11 +274,16 @@ sealed class TcpSession : IDisposable
                 }
 
             PARSE_MESSAGE:
-                var msg = new RpcMessage(cmd, id, new ArraySegment<byte>(value.ToArray()));
+
+                var rentBuf = value.IsEmpty ? Array.Empty<byte>() : ArrayPool<byte>.Shared.Rent(value.Length);
+                value.Span.CopyTo(rentBuf);
+
+                var msg = new RpcMessage(cmd, id, new ArraySegment<byte>(rentBuf, 0, value.Length));
 
                 switch (cmd)
                 {
                     case RpcCommand.Request:
+                        //ParseRequest(msg);
                         while (!_collection.TryAdd(msg, -1, token))
                         {
                             Console.WriteLine("sleep!");
@@ -331,6 +336,7 @@ sealed class TcpSession : IDisposable
 
         var respPayload = _onRequest(msg);
         ResponseTo(msg, respPayload);
+        msg.Dispose();
     }
 }
 
@@ -398,7 +404,7 @@ abstract class TcpClientRpc
     protected virtual void OnDisconnected() { }
 }
 
-readonly struct RpcMessage
+readonly struct RpcMessage : IDisposable
 {
     public readonly RpcCommand Command;
     public readonly ulong ID;
@@ -406,6 +412,14 @@ readonly struct RpcMessage
 
     public RpcMessage(RpcCommand cmd, ulong id, ArraySegment<byte> payload)
         => (Command, ID, Payload) = (cmd, id, payload);
+
+    public readonly void Dispose()
+    {
+        if (Payload.Array != null && Payload.Array.Length > 0)
+        {
+            ArrayPool<byte>.Shared.Return(Payload.Array);
+        }
+    }
 
     public static readonly RpcMessage Invalid = new RpcMessage(RpcCommand.Invalid, 0, new ArraySegment<byte>(Array.Empty<byte>()));
 }
