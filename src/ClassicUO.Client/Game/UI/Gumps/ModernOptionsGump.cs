@@ -29,9 +29,12 @@ namespace ClassicUO.Game.UI.Gumps
         public static string SearchText { get; private set; } = string.Empty;
         public static event EventHandler SearchValueChanged;
         private Profile profile;
+        private ModernOptionsGumpLanguage lang;
+
 
         public ModernOptionsGump() : base(0, 0)
         {
+            lang = Language.Instance.GetModernOptionsGumpLanguage;
             profile = ProfileManager.CurrentProfile;
             CanMove = true;
             CanCloseWithRightClick = true;
@@ -46,10 +49,10 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(new ColorBox(Width, 40, Theme.SEARCH_BACKGROUND) { AcceptMouseInput = true, CanMove = true, Alpha = 0.85f });
 
-            Add(new TextBox("Options", TrueTypeLoader.EMBEDDED_FONT, 30, null, Color.White, strokeEffect: false) { X = 10, Y = 7 });
+            Add(new TextBox(lang.OptionsTitle, Theme.FONT, 30, null, Color.White, strokeEffect: false) { X = 10, Y = 7 });
 
             Control c;
-            Add(c = new TextBox("Search", TrueTypeLoader.EMBEDDED_FONT, 30, null, Color.White, strokeEffect: false) { Y = 7 });
+            Add(c = new TextBox(lang.Search, Theme.FONT, 30, null, Color.White, strokeEffect: false) { Y = 7 });
 
             InputField search;
             Add(search = new InputField(400, 30) { X = Width - 405, Y = 5 });
@@ -60,27 +63,27 @@ namespace ClassicUO.Game.UI.Gumps
             Add(mainContent = new LeftSideMenuRightSideContent(Width, Height - 40, (int)(Width * 0.23)) { Y = 40 });
 
             ModernButton b;
-            mainContent.AddToLeft(b = CategoryButton("General", (int)PAGE.General, mainContent.LeftWidth));
+            mainContent.AddToLeft(b = CategoryButton(lang.ButtonGeneral, (int)PAGE.General, mainContent.LeftWidth));
             b.IsSelected = true;
-            mainContent.AddToLeft(CategoryButton("Sound", (int)PAGE.Sound, mainContent.LeftWidth));
-            mainContent.AddToLeft(CategoryButton("Video", (int)PAGE.Video, mainContent.LeftWidth));
-            mainContent.AddToLeft(CategoryButton("Macros", (int)PAGE.Macros, mainContent.LeftWidth));
-            mainContent.AddToLeft(CategoryButton("Tooltips", (int)PAGE.Tooltip, mainContent.LeftWidth));
-            mainContent.AddToLeft(CategoryButton("Speech", (int)PAGE.Speech, mainContent.LeftWidth));
-            mainContent.AddToLeft(CategoryButton("Combat & Spells", (int)PAGE.CombatSpells, mainContent.LeftWidth));
-            mainContent.AddToLeft(CategoryButton("Counters", (int)PAGE.Counters, mainContent.LeftWidth));
-            mainContent.AddToLeft(CategoryButton("Infobar", (int)PAGE.InfoBar, mainContent.LeftWidth));
-            mainContent.AddToLeft(CategoryButton("Containers", (int)PAGE.Containers, mainContent.LeftWidth));
-            mainContent.AddToLeft(CategoryButton("Experimental", (int)PAGE.Experimental, mainContent.LeftWidth));
-            mainContent.AddToLeft(b = new ModernButton(0, 0, mainContent.LeftWidth, 40, ButtonAction.Activate, "Ignore List", Theme.BUTTON_FONT_COLOR) { ButtonParameter = 999 });
+            mainContent.AddToLeft(CategoryButton(lang.ButtonSound, (int)PAGE.Sound, mainContent.LeftWidth));
+            mainContent.AddToLeft(CategoryButton(lang.ButtonVideo, (int)PAGE.Video, mainContent.LeftWidth));
+            mainContent.AddToLeft(CategoryButton(lang.ButtonMacros, (int)PAGE.Macros, mainContent.LeftWidth));
+            mainContent.AddToLeft(CategoryButton(lang.ButtonTooltips, (int)PAGE.Tooltip, mainContent.LeftWidth));
+            mainContent.AddToLeft(CategoryButton(lang.ButtonSpeech, (int)PAGE.Speech, mainContent.LeftWidth));
+            mainContent.AddToLeft(CategoryButton(lang.ButtonCombatSpells, (int)PAGE.CombatSpells, mainContent.LeftWidth));
+            mainContent.AddToLeft(CategoryButton(lang.ButtonCounters, (int)PAGE.Counters, mainContent.LeftWidth));
+            mainContent.AddToLeft(CategoryButton(lang.ButtonInfobar, (int)PAGE.InfoBar, mainContent.LeftWidth));
+            mainContent.AddToLeft(CategoryButton(lang.ButtonContainers, (int)PAGE.Containers, mainContent.LeftWidth));
+            mainContent.AddToLeft(CategoryButton(lang.ButtonExperimental, (int)PAGE.Experimental, mainContent.LeftWidth));
+            mainContent.AddToLeft(b = new ModernButton(0, 0, mainContent.LeftWidth, 40, ButtonAction.Activate, lang.ButtonIgnoreList, Theme.BUTTON_FONT_COLOR) { ButtonParameter = 999 });
             b.MouseUp += (s, e) =>
             {
                 UIManager.GetGump<IgnoreManagerGump>()?.Dispose();
                 UIManager.Add(new IgnoreManagerGump());
             };
-            mainContent.AddToLeft(CategoryButton("Nameplate Options", (int)PAGE.NameplateOptions, mainContent.LeftWidth));
-            mainContent.AddToLeft(CategoryButton("Cooldown bars", (int)PAGE.TUOCooldowns, mainContent.LeftWidth));
-            mainContent.AddToLeft(CategoryButton("TazUO Specific", (int)PAGE.TUOOptions, mainContent.LeftWidth));
+            mainContent.AddToLeft(CategoryButton(lang.ButtonNameplates, (int)PAGE.NameplateOptions, mainContent.LeftWidth));
+            mainContent.AddToLeft(CategoryButton(lang.ButtonCooldowns, (int)PAGE.TUOCooldowns, mainContent.LeftWidth));
+            mainContent.AddToLeft(CategoryButton(lang.ButtonTazUO, (int)PAGE.TUOOptions, mainContent.LeftWidth));
 
             BuildGeneral();
             BuildSound();
@@ -113,60 +116,60 @@ namespace ClassicUO.Game.UI.Gumps
 
             #region General
             page = ((int)PAGE.General + 1000);
-            content.AddToLeft(SubCategoryButton("General", page, content.LeftWidth));
+            content.AddToLeft(SubCategoryButton(lang.ButtonGeneral, page, content.LeftWidth));
 
-            content.AddToRight(new CheckboxWithLabel("Highlight objects under cursor", isChecked: profile.HighlightGameObjects, valueChanged: (b) => { profile.HighlightGameObjects = b; }), true, page);
+            content.AddToRight(new CheckboxWithLabel(lang.GetGeneral.HighlightObjects, isChecked: profile.HighlightGameObjects, valueChanged: (b) => { profile.HighlightGameObjects = b; }), true, page);
 
             content.BlankLine();
 
-            content.AddToRight(new CheckboxWithLabel("Enable pathfinding", isChecked: profile.EnablePathfind, valueChanged: (b) => { profile.EnablePathfind = b; }), true, page);
+            content.AddToRight(new CheckboxWithLabel(lang.GetGeneral.Pathfinding, isChecked: profile.EnablePathfind, valueChanged: (b) => { profile.EnablePathfind = b; }), true, page);
             content.Indent();
-            content.AddToRight(new CheckboxWithLabel("Use shift for pathfinding", isChecked: profile.UseShiftToPathfind, valueChanged: (b) => { profile.UseShiftToPathfind = b; }), true, page);
-            content.AddToRight(new CheckboxWithLabel("Single click for pathfinding", isChecked: profile.PathfindSingleClick, valueChanged: (b) => { profile.PathfindSingleClick = b; }), true, page);
+            content.AddToRight(new CheckboxWithLabel(lang.GetGeneral.ShiftPathfinding, isChecked: profile.UseShiftToPathfind, valueChanged: (b) => { profile.UseShiftToPathfind = b; }), true, page);
+            content.AddToRight(new CheckboxWithLabel(lang.GetGeneral.SingleClickPathfind, isChecked: profile.PathfindSingleClick, valueChanged: (b) => { profile.PathfindSingleClick = b; }), true, page);
             content.RemoveIndent();
 
             content.BlankLine();
 
-            content.AddToRight(new CheckboxWithLabel("Always run", isChecked: profile.AlwaysRun, valueChanged: (b) => { profile.AlwaysRun = b; }), true, page);
+            content.AddToRight(new CheckboxWithLabel(lang.GetGeneral.AlwaysRun, isChecked: profile.AlwaysRun, valueChanged: (b) => { profile.AlwaysRun = b; }), true, page);
             content.Indent();
-            content.AddToRight(new CheckboxWithLabel("Unless hidden", isChecked: profile.AlwaysRunUnlessHidden, valueChanged: (b) => { profile.AlwaysRunUnlessHidden = b; }), true, page);
+            content.AddToRight(new CheckboxWithLabel(lang.GetGeneral.RunUnlessHidden, isChecked: profile.AlwaysRunUnlessHidden, valueChanged: (b) => { profile.AlwaysRunUnlessHidden = b; }), true, page);
             content.RemoveIndent();
 
             content.BlankLine();
 
-            content.AddToRight(new CheckboxWithLabel("Automatically open doors", isChecked: profile.AutoOpenDoors, valueChanged: (b) => { profile.AutoOpenDoors = b; }), true, page);
+            content.AddToRight(new CheckboxWithLabel(lang.GetGeneral.AutoOpenDoors, isChecked: profile.AutoOpenDoors, valueChanged: (b) => { profile.AutoOpenDoors = b; }), true, page);
             content.Indent();
-            content.AddToRight(new CheckboxWithLabel("Open doors while pathfinding", isChecked: profile.SmoothDoors, valueChanged: (b) => { profile.SmoothDoors = b; }), true, page);
+            content.AddToRight(new CheckboxWithLabel(lang.GetGeneral.AutoOpenPathfinding, isChecked: profile.SmoothDoors, valueChanged: (b) => { profile.SmoothDoors = b; }), true, page);
             content.RemoveIndent();
 
             content.BlankLine();
 
-            content.AddToRight(new CheckboxWithLabel("Automatically open corpses", isChecked: profile.AutoOpenCorpses, valueChanged: (b) => { profile.AutoOpenCorpses = b; }), true, page);
+            content.AddToRight(new CheckboxWithLabel(lang.GetGeneral.AutoOpenCorpse, isChecked: profile.AutoOpenCorpses, valueChanged: (b) => { profile.AutoOpenCorpses = b; }), true, page);
             content.Indent();
-            content.AddToRight(new SliderWithLabel("Corpse open distance", 0, Theme.SLIDER_WIDTH, 0, 5, profile.AutoOpenCorpseRange, (r) => { profile.AutoOpenCorpseRange = r; }), true, page);
-            content.AddToRight(new CheckboxWithLabel("Skip empty corpses", isChecked: profile.SkipEmptyCorpse, valueChanged: (b) => { profile.SkipEmptyCorpse = b; }), true, page);
-            content.AddToRight(new ComboBoxWithLabel("Corpse open options", 0, Theme.COMBO_BOX_WIDTH, new string[] { "None", "Not targeting", "Not hiding", "Both" }, profile.CorpseOpenOptions, (s, n) => { profile.CorpseOpenOptions = s; }), true, page);
+            content.AddToRight(new SliderWithLabel(lang.GetGeneral.CorpseOpenDistance, 0, Theme.SLIDER_WIDTH, 0, 5, profile.AutoOpenCorpseRange, (r) => { profile.AutoOpenCorpseRange = r; }), true, page);
+            content.AddToRight(new CheckboxWithLabel(lang.GetGeneral.CorpseSkipEmpty, isChecked: profile.SkipEmptyCorpse, valueChanged: (b) => { profile.SkipEmptyCorpse = b; }), true, page);
+            content.AddToRight(new ComboBoxWithLabel(lang.GetGeneral.CorpseOpenOptions, 0, Theme.COMBO_BOX_WIDTH, new string[] { lang.GetGeneral.CorpseOptNone, lang.GetGeneral.CorpseOptNotTarg, lang.GetGeneral.CorpseOptNotHiding, lang.GetGeneral.CorpseOptBoth }, profile.CorpseOpenOptions, (s, n) => { profile.CorpseOpenOptions = s; }), true, page);
             content.RemoveIndent();
 
             content.BlankLine();
 
-            content.AddToRight(new CheckboxWithLabel("No color for out of range objects", isChecked: profile.NoColorObjectsOutOfRange, valueChanged: (b) => { profile.NoColorObjectsOutOfRange = b; }), true, page);
+            content.AddToRight(new CheckboxWithLabel(lang.GetGeneral.OutRangeColor, isChecked: profile.NoColorObjectsOutOfRange, valueChanged: (b) => { profile.NoColorObjectsOutOfRange = b; }), true, page);
 
             content.BlankLine();
 
-            content.AddToRight(c = new CheckboxWithLabel("Enable sallos easy grab", isChecked: profile.SallosEasyGrab, valueChanged: (b) => { profile.SallosEasyGrab = b; }), true, page);
-            c.SetTooltip("Sallos easy grab is not recommended with grid containers enabled.");
+            content.AddToRight(c = new CheckboxWithLabel(lang.GetGeneral.SallosEasyGrab, isChecked: profile.SallosEasyGrab, valueChanged: (b) => { profile.SallosEasyGrab = b; }), true, page);
+            c.SetTooltip(lang.GetGeneral.SallosTooltip);
 
             if (Client.Version > ClientVersion.CV_70796)
             {
                 content.BlankLine();
-                content.AddToRight(new CheckboxWithLabel("Show house content", isChecked: profile.ShowHouseContent, valueChanged: (b) => { profile.ShowHouseContent = b; }), true, page);
+                content.AddToRight(new CheckboxWithLabel(lang.GetGeneral.ShowHouseContent, isChecked: profile.ShowHouseContent, valueChanged: (b) => { profile.ShowHouseContent = b; }), true, page);
             }
 
             if (Client.Version >= ClientVersion.CV_7090)
             {
                 content.BlankLine();
-                content.AddToRight(new CheckboxWithLabel("Smooth boat movements", isChecked: profile.UseSmoothBoatMovement, valueChanged: (b) => { profile.UseSmoothBoatMovement = b; }), true, page);
+                content.AddToRight(new CheckboxWithLabel(lang.GetGeneral.SmoothBoat, isChecked: profile.UseSmoothBoatMovement, valueChanged: (b) => { profile.UseSmoothBoatMovement = b; }), true, page);
             }
 
             content.BlankLine();
@@ -174,164 +177,164 @@ namespace ClassicUO.Game.UI.Gumps
 
             #region Mobiles
             page = ((int)PAGE.General + 1001);
-            content.AddToLeft(SubCategoryButton("Mobiles", page, content.LeftWidth));
+            content.AddToLeft(SubCategoryButton(lang.ButtonMobiles, page, content.LeftWidth));
             content.ResetRightSide();
 
-            content.AddToRight(new CheckboxWithLabel("Show mobile's HP", isChecked: profile.ShowMobilesHP, valueChanged: (b) => { profile.ShowMobilesHP = b; }), true, page);
+            content.AddToRight(new CheckboxWithLabel(lang.GetGeneral.ShowMobileHP, isChecked: profile.ShowMobilesHP, valueChanged: (b) => { profile.ShowMobilesHP = b; }), true, page);
             content.Indent();
-            content.AddToRight(new ComboBoxWithLabel("Type", 0, Theme.COMBO_BOX_WIDTH, new string[] { "Percentage", "Bar", "Both" }, profile.MobileHPType, (s, n) => { profile.MobileHPType = s; }), true, page);
-            content.AddToRight(new ComboBoxWithLabel("Show when", 0, Theme.COMBO_BOX_WIDTH, new string[] { "Always", "Less than 100%", "Smart" }, profile.MobileHPShowWhen, (s, n) => { profile.MobileHPShowWhen = s; }), true, page);
+            content.AddToRight(new ComboBoxWithLabel(lang.GetGeneral.MobileHPType, 0, Theme.COMBO_BOX_WIDTH, new string[] { lang.GetGeneral.HPTypePerc, lang.GetGeneral.HPTypeBar, lang.GetGeneral.HPTypeNBoth }, profile.MobileHPType, (s, n) => { profile.MobileHPType = s; }), true, page);
+            content.AddToRight(new ComboBoxWithLabel(lang.GetGeneral.HPShowWhen, 0, Theme.COMBO_BOX_WIDTH, new string[] { lang.GetGeneral.HPShowWhen_Always, lang.GetGeneral.HPShowWhen_Less100, lang.GetGeneral.HPShowWhen_Smart }, profile.MobileHPShowWhen, (s, n) => { profile.MobileHPShowWhen = s; }), true, page);
             content.RemoveIndent();
 
             content.BlankLine();
 
-            content.AddToRight(new CheckboxWithLabel("Highlight poisoned mobiles", isChecked: profile.HighlightMobilesByPoisoned, valueChanged: (b) => { profile.HighlightMobilesByPoisoned = b; }), true, page);
+            content.AddToRight(new CheckboxWithLabel(lang.GetGeneral.HighlightPoisoned, isChecked: profile.HighlightMobilesByPoisoned, valueChanged: (b) => { profile.HighlightMobilesByPoisoned = b; }), true, page);
             content.Indent();
-            content.AddToRight(new ModernColorPickerWithLabel("Highlight color", profile.PoisonHue, (h) => { profile.PoisonHue = h; }), true, page);
+            content.AddToRight(new ModernColorPickerWithLabel(lang.GetGeneral.PoisonHighlightColor, profile.PoisonHue, (h) => { profile.PoisonHue = h; }), true, page);
             content.RemoveIndent();
 
             content.BlankLine();
 
-            content.AddToRight(new CheckboxWithLabel("Highlight paralyzed mobiles", isChecked: profile.HighlightMobilesByParalize, valueChanged: (b) => { profile.HighlightMobilesByParalize = b; }), true, page);
+            content.AddToRight(new CheckboxWithLabel(lang.GetGeneral.HighlightPara, isChecked: profile.HighlightMobilesByParalize, valueChanged: (b) => { profile.HighlightMobilesByParalize = b; }), true, page);
             content.Indent();
-            content.AddToRight(new ModernColorPickerWithLabel("Highlight color", profile.ParalyzedHue, (h) => { profile.ParalyzedHue = h; }), true, page);
+            content.AddToRight(new ModernColorPickerWithLabel(lang.GetGeneral.ParaHighlightColor, profile.ParalyzedHue, (h) => { profile.ParalyzedHue = h; }), true, page);
             content.RemoveIndent();
 
             content.BlankLine();
 
-            content.AddToRight(new CheckboxWithLabel("Highlight invulnerable mobiles", isChecked: profile.HighlightMobilesByInvul, valueChanged: (b) => { profile.HighlightMobilesByInvul = b; }), true, page);
+            content.AddToRight(new CheckboxWithLabel(lang.GetGeneral.HighlightInvul, isChecked: profile.HighlightMobilesByInvul, valueChanged: (b) => { profile.HighlightMobilesByInvul = b; }), true, page);
             content.Indent();
-            content.AddToRight(new ModernColorPickerWithLabel("Highlight color", profile.InvulnerableHue, (h) => { profile.InvulnerableHue = h; }), true, page);
+            content.AddToRight(new ModernColorPickerWithLabel(lang.GetGeneral.InvulHighlightColor, profile.InvulnerableHue, (h) => { profile.InvulnerableHue = h; }), true, page);
             content.RemoveIndent();
 
             content.BlankLine();
 
-            content.AddToRight(new CheckboxWithLabel("Show incoming mobile names", isChecked: profile.ShowNewMobileNameIncoming, valueChanged: (b) => { profile.ShowNewMobileNameIncoming = b; }), true, page);
+            content.AddToRight(new CheckboxWithLabel(lang.GetGeneral.IncomingMobiles, isChecked: profile.ShowNewMobileNameIncoming, valueChanged: (b) => { profile.ShowNewMobileNameIncoming = b; }), true, page);
 
             content.BlankLine();
 
-            content.AddToRight(new CheckboxWithLabel("Show incoming corpse names", isChecked: profile.ShowNewCorpseNameIncoming, valueChanged: (b) => { profile.ShowNewCorpseNameIncoming = b; }), true, page);
+            content.AddToRight(new CheckboxWithLabel(lang.GetGeneral.IncomingCorpses, isChecked: profile.ShowNewCorpseNameIncoming, valueChanged: (b) => { profile.ShowNewCorpseNameIncoming = b; }), true, page);
 
             content.BlankLine();
 
-            content.AddToRight(new ComboBoxWithLabel("Show aura under feet", 0, Theme.COMBO_BOX_WIDTH, new string[] { "Disabled", "Warmode", "Ctrl + Shift", "Always" }, profile.AuraUnderFeetType, (s, n) => { profile.AuraUnderFeetType = s; }), true, page);
+            content.AddToRight(new ComboBoxWithLabel(lang.GetGeneral.AuraUnderFeet, 0, Theme.COMBO_BOX_WIDTH, new string[] { lang.GetGeneral.AuraOptDisabled, lang.GetGeneral.AuroOptWarmode, lang.GetGeneral.AuraOptCtrlShift, lang.GetGeneral.AuraOptAlways }, profile.AuraUnderFeetType, (s, n) => { profile.AuraUnderFeetType = s; }), true, page);
             content.Indent();
-            content.AddToRight(new CheckboxWithLabel("Use a custom color for party members", isChecked: profile.PartyAura, valueChanged: (b) => { profile.PartyAura = b; }), true, page);
+            content.AddToRight(new CheckboxWithLabel(lang.GetGeneral.AuraForParty, isChecked: profile.PartyAura, valueChanged: (b) => { profile.PartyAura = b; }), true, page);
             content.Indent();
-            content.AddToRight(new ModernColorPickerWithLabel("Party aura color", profile.PartyAuraHue, (h) => { profile.PartyAuraHue = h; }), true, page);
+            content.AddToRight(new ModernColorPickerWithLabel(lang.GetGeneral.AuraPartyColor, profile.PartyAuraHue, (h) => { profile.PartyAuraHue = h; }), true, page);
             content.RemoveIndent();
             content.RemoveIndent();
             #endregion
 
             #region Gumps & Context
             page = ((int)PAGE.General + 1002);
-            content.AddToLeft(SubCategoryButton("Gumps & Context", page, content.LeftWidth));
+            content.AddToLeft(SubCategoryButton(lang.ButtonGumpContext, page, content.LeftWidth));
             content.ResetRightSide();
 
-            content.AddToRight(new CheckboxWithLabel("Disable top menu bar", isChecked: profile.TopbarGumpIsDisabled, valueChanged: (b) => { profile.TopbarGumpIsDisabled = b; }), true, page);
+            content.AddToRight(new CheckboxWithLabel(lang.GetGeneral.DisableTopMenu, isChecked: profile.TopbarGumpIsDisabled, valueChanged: (b) => { profile.TopbarGumpIsDisabled = b; }), true, page);
 
             content.BlankLine();
 
-            content.AddToRight(new CheckboxWithLabel("Require alt to close anchored gumps", isChecked: profile.HoldDownKeyAltToCloseAnchored, valueChanged: (b) => { profile.HoldDownKeyAltToCloseAnchored = b; }), true, page);
+            content.AddToRight(new CheckboxWithLabel(lang.GetGeneral.AltForAnchorsGumps, isChecked: profile.HoldDownKeyAltToCloseAnchored, valueChanged: (b) => { profile.HoldDownKeyAltToCloseAnchored = b; }), true, page);
 
             content.BlankLine();
 
-            content.AddToRight(new CheckboxWithLabel("Require alt to move gumps", isChecked: profile.HoldAltToMoveGumps, valueChanged: (b) => { profile.HoldAltToMoveGumps = b; }), true, page);
+            content.AddToRight(new CheckboxWithLabel(lang.GetGeneral.AltToMoveGumps, isChecked: profile.HoldAltToMoveGumps, valueChanged: (b) => { profile.HoldAltToMoveGumps = b; }), true, page);
 
             content.BlankLine();
 
-            content.AddToRight(new CheckboxWithLabel("Close entire group of anchored gumps with right click", isChecked: profile.CloseAllAnchoredGumpsInGroupWithRightClick, valueChanged: (b) => { profile.CloseAllAnchoredGumpsInGroupWithRightClick = b; }), true, page);
+            content.AddToRight(new CheckboxWithLabel(lang.GetGeneral.CloseEntireAnchorWithRClick, isChecked: profile.CloseAllAnchoredGumpsInGroupWithRightClick, valueChanged: (b) => { profile.CloseAllAnchoredGumpsInGroupWithRightClick = b; }), true, page);
 
             content.BlankLine();
 
-            content.AddToRight(new CheckboxWithLabel("Use original skills gump", isChecked: profile.StandardSkillsGump, valueChanged: (b) => { profile.StandardSkillsGump = b; }), true, page);
+            content.AddToRight(new CheckboxWithLabel(lang.GetGeneral.OriginalSkillsGump, isChecked: profile.StandardSkillsGump, valueChanged: (b) => { profile.StandardSkillsGump = b; }), true, page);
 
             content.BlankLine();
 
-            content.AddToRight(new CheckboxWithLabel("Use old status gump", isChecked: profile.UseOldStatusGump, valueChanged: (b) => { profile.UseOldStatusGump = b; }), true, page);
+            content.AddToRight(new CheckboxWithLabel(lang.GetGeneral.OldStatusGump, isChecked: profile.UseOldStatusGump, valueChanged: (b) => { profile.UseOldStatusGump = b; }), true, page);
 
             content.BlankLine();
 
-            content.AddToRight(new CheckboxWithLabel("Show party invite gump", isChecked: profile.PartyInviteGump, valueChanged: (b) => { profile.PartyInviteGump = b; }), true, page);
+            content.AddToRight(new CheckboxWithLabel(lang.GetGeneral.PartyInviteGump, isChecked: profile.PartyInviteGump, valueChanged: (b) => { profile.PartyInviteGump = b; }), true, page);
 
             content.BlankLine();
 
-            content.AddToRight(new CheckboxWithLabel("Use modern health bar gumps", isChecked: profile.CustomBarsToggled, valueChanged: (b) => { profile.CustomBarsToggled = b; }), true, page);
+            content.AddToRight(new CheckboxWithLabel(lang.GetGeneral.ModernHealthBars, isChecked: profile.CustomBarsToggled, valueChanged: (b) => { profile.CustomBarsToggled = b; }), true, page);
             content.Indent();
-            content.AddToRight(new CheckboxWithLabel("Use black background", isChecked: profile.CBBlackBGToggled, valueChanged: (b) => { profile.CBBlackBGToggled = b; }), true, page);
+            content.AddToRight(new CheckboxWithLabel(lang.GetGeneral.ModernHPBlackBG, isChecked: profile.CBBlackBGToggled, valueChanged: (b) => { profile.CBBlackBGToggled = b; }), true, page);
             content.RemoveIndent();
 
             content.BlankLine();
 
-            content.AddToRight(new CheckboxWithLabel("Save health bars on logout", isChecked: profile.SaveHealthbars, valueChanged: (b) => { profile.SaveHealthbars = b; }), true, page);
+            content.AddToRight(new CheckboxWithLabel(lang.GetGeneral.SaveHPBars, isChecked: profile.SaveHealthbars, valueChanged: (b) => { profile.SaveHealthbars = b; }), true, page);
 
             content.BlankLine();
 
-            content.AddToRight(new ComboBoxWithLabel("Close health bars when", 0, Theme.COMBO_BOX_WIDTH, new string[] { "Disabled", "Out of range", "Dead", "Both" }, profile.CloseHealthBarType, (s, n) => { profile.CloseHealthBarType = s; }), true, page);
+            content.AddToRight(new ComboBoxWithLabel(lang.GetGeneral.CloseHPGumpsWhen, 0, Theme.COMBO_BOX_WIDTH, new string[] { lang.GetGeneral.CloseHPOptDisable, lang.GetGeneral.CloseHPOptOOR, lang.GetGeneral.CloseHPOptDead, lang.GetGeneral.CloseHPOptBoth }, profile.CloseHealthBarType, (s, n) => { profile.CloseHealthBarType = s; }), true, page);
 
             content.BlankLine();
 
-            content.AddToRight(c = new ComboBoxWithLabel("Grid Loot", 0, Theme.COMBO_BOX_WIDTH, new string[] { "Disabled", "Grid loot only", "Grid loot and normal container" }, profile.GridLootType, (s, n) => { profile.GridLootType = s; }), true, page);
-            c.SetTooltip("This is not the same as Grid Containers, this is a simple grid gump used for looting corpses.");
+            content.AddToRight(c = new ComboBoxWithLabel(lang.GetGeneral.GridLoot, 0, Theme.COMBO_BOX_WIDTH, new string[] { lang.GetGeneral.GridLootOptDisable, lang.GetGeneral.GridLootOptOnly, lang.GetGeneral.GridLootOptBoth }, profile.GridLootType, (s, n) => { profile.GridLootType = s; }), true, page);
+            c.SetTooltip(lang.GetGeneral.GridLootTooltip);
 
             content.BlankLine();
 
-            content.AddToRight(new CheckboxWithLabel("Require shift to open context menus", isChecked: profile.HoldShiftForContext, valueChanged: (b) => { profile.HoldShiftForContext = b; }), true, page);
+            content.AddToRight(new CheckboxWithLabel(lang.GetGeneral.ShiftContext, isChecked: profile.HoldShiftForContext, valueChanged: (b) => { profile.HoldShiftForContext = b; }), true, page);
 
             content.BlankLine();
 
-            content.AddToRight(new CheckboxWithLabel("Require shift to split stacks of items", isChecked: profile.HoldShiftToSplitStack, valueChanged: (b) => { profile.HoldShiftToSplitStack = b; }), true, page);
+            content.AddToRight(new CheckboxWithLabel(lang.GetGeneral.ShiftSplit, isChecked: profile.HoldShiftToSplitStack, valueChanged: (b) => { profile.HoldShiftToSplitStack = b; }), true, page);
             #endregion
 
             #region Misc
             page = ((int)PAGE.General + 1003);
-            content.AddToLeft(SubCategoryButton("Misc", page, content.LeftWidth));
+            content.AddToLeft(SubCategoryButton(lang.ButtonMisc, page, content.LeftWidth));
             content.ResetRightSide();
 
-            content.AddToRight(new CheckboxWithLabel("Enable circle of transparency", isChecked: profile.UseCircleOfTransparency, valueChanged: (b) => { profile.UseCircleOfTransparency = b; }), true, page);
+            content.AddToRight(new CheckboxWithLabel(lang.GetGeneral.EnableCOT, isChecked: profile.UseCircleOfTransparency, valueChanged: (b) => { profile.UseCircleOfTransparency = b; }), true, page);
             content.Indent();
-            content.AddToRight(new SliderWithLabel("Distance", 0, Theme.SLIDER_WIDTH, Constants.MIN_CIRCLE_OF_TRANSPARENCY_RADIUS, Constants.MAX_CIRCLE_OF_TRANSPARENCY_RADIUS, profile.CircleOfTransparencyRadius, (r) => { profile.CircleOfTransparencyRadius = r; }), true, page);
-            content.AddToRight(new ComboBoxWithLabel("Type", 0, Theme.COMBO_BOX_WIDTH, new string[] { "Full", "Gradient", "Modern" }, profile.CircleOfTransparencyType, (s, n) => { profile.CircleOfTransparencyType = s; }), true, page);
+            content.AddToRight(new SliderWithLabel(lang.GetGeneral.COTDistance, 0, Theme.SLIDER_WIDTH, Constants.MIN_CIRCLE_OF_TRANSPARENCY_RADIUS, Constants.MAX_CIRCLE_OF_TRANSPARENCY_RADIUS, profile.CircleOfTransparencyRadius, (r) => { profile.CircleOfTransparencyRadius = r; }), true, page);
+            content.AddToRight(new ComboBoxWithLabel(lang.GetGeneral.COTType, 0, Theme.COMBO_BOX_WIDTH, new string[] { lang.GetGeneral.COTTypeOptFull, lang.GetGeneral.COTTypeOptGrad, lang.GetGeneral.COTTypeOptModern }, profile.CircleOfTransparencyType, (s, n) => { profile.CircleOfTransparencyType = s; }), true, page);
             content.RemoveIndent();
 
             content.BlankLine();
 
-            content.AddToRight(new CheckboxWithLabel("Hide 'screenshot stored in' message", isChecked: profile.HideScreenshotStoredInMessage, valueChanged: (b) => { profile.HideScreenshotStoredInMessage = b; }), true, page);
+            content.AddToRight(new CheckboxWithLabel(lang.GetGeneral.HideScreenshotMessage, isChecked: profile.HideScreenshotStoredInMessage, valueChanged: (b) => { profile.HideScreenshotStoredInMessage = b; }), true, page);
 
             content.BlankLine();
 
-            content.AddToRight(new CheckboxWithLabel("Enable object fading", isChecked: profile.UseObjectsFading, valueChanged: (b) => { profile.UseObjectsFading = b; }), true, page);
+            content.AddToRight(new CheckboxWithLabel(lang.GetGeneral.ObjFade, isChecked: profile.UseObjectsFading, valueChanged: (b) => { profile.UseObjectsFading = b; }), true, page);
 
             content.BlankLine();
 
-            content.AddToRight(new CheckboxWithLabel("Enable text fading", isChecked: profile.TextFading, valueChanged: (b) => { profile.TextFading = b; }), true, page);
+            content.AddToRight(new CheckboxWithLabel(lang.GetGeneral.TextFade, isChecked: profile.TextFading, valueChanged: (b) => { profile.TextFading = b; }), true, page);
 
             content.BlankLine();
 
-            content.AddToRight(new CheckboxWithLabel("Show target range indicator", isChecked: profile.ShowTargetRangeIndicator, valueChanged: (b) => { profile.ShowTargetRangeIndicator = b; }), true, page);
+            content.AddToRight(new CheckboxWithLabel(lang.GetGeneral.CursorRange, isChecked: profile.ShowTargetRangeIndicator, valueChanged: (b) => { profile.ShowTargetRangeIndicator = b; }), true, page);
 
             content.BlankLine();
 
-            content.AddToRight(new CheckboxWithLabel("Enable drag select for health bars", isChecked: profile.EnableDragSelect, valueChanged: (b) => { profile.EnableDragSelect = b; }), true, page);
+            content.AddToRight(new CheckboxWithLabel(lang.GetGeneral.DragSelectHP, isChecked: profile.EnableDragSelect, valueChanged: (b) => { profile.EnableDragSelect = b; }), true, page);
             content.Indent();
-            content.AddToRight(new ComboBoxWithLabel("Key modifier", 0, Theme.COMBO_BOX_WIDTH, new string[] { "None", "Ctrl", "Shift" }, profile.DragSelectModifierKey, (s, n) => { profile.DragSelectModifierKey = s; }), true, page);
-            content.AddToRight(new ComboBoxWithLabel("Players only", 0, Theme.COMBO_BOX_WIDTH, new string[] { "None", "Ctrl", "Shift" }, profile.DragSelect_PlayersModifier, (s, n) => { profile.DragSelect_PlayersModifier = s; }), true, page);
-            content.AddToRight(new ComboBoxWithLabel("Monsters only", 0, Theme.COMBO_BOX_WIDTH, new string[] { "None", "Ctrl", "Shift" }, profile.DragSelect_MonstersModifier, (s, n) => { profile.DragSelect_MonstersModifier = s; }), true, page);
-            content.AddToRight(new ComboBoxWithLabel("Visible nameplates only", 0, Theme.COMBO_BOX_WIDTH, new string[] { "None", "Ctrl", "Shift" }, profile.DragSelect_NameplateModifier, (s, n) => { profile.DragSelect_NameplateModifier = s; }), true, page);
-            content.AddToRight(new SliderWithLabel("X Position of healthbars", 0, Theme.SLIDER_WIDTH, 0, Client.Game.Scene.Camera.Bounds.Width, profile.DragSelectStartX, (r) => { profile.DragSelectStartX = r; }), true, page);
-            content.AddToRight(new SliderWithLabel("Y Position of healthbars", 0, Theme.SLIDER_WIDTH, 0, Client.Game.Scene.Camera.Bounds.Width, profile.DragSelectStartY, (r) => { profile.DragSelectStartY = r; }), true, page);
-            content.AddToRight(new CheckboxWithLabel("Anchor opened health bars together", isChecked: profile.DragSelectAsAnchor, valueChanged: (b) => { profile.DragSelectAsAnchor = b; }), true, page);
+            content.AddToRight(new ComboBoxWithLabel(lang.GetGeneral.DragKeyMod, 0, Theme.COMBO_BOX_WIDTH, new string[] { lang.GetGeneral.SharedNone, lang.GetGeneral.SharedCtrl, lang.GetGeneral.SharedShift }, profile.DragSelectModifierKey, (s, n) => { profile.DragSelectModifierKey = s; }), true, page);
+            content.AddToRight(new ComboBoxWithLabel(lang.GetGeneral.DragPlayersOnly, 0, Theme.COMBO_BOX_WIDTH, new string[] { lang.GetGeneral.SharedNone, lang.GetGeneral.SharedCtrl, lang.GetGeneral.SharedShift }, profile.DragSelect_PlayersModifier, (s, n) => { profile.DragSelect_PlayersModifier = s; }), true, page);
+            content.AddToRight(new ComboBoxWithLabel(lang.GetGeneral.DragMobsOnly, 0, Theme.COMBO_BOX_WIDTH, new string[] { lang.GetGeneral.SharedNone, lang.GetGeneral.SharedCtrl, lang.GetGeneral.SharedShift }, profile.DragSelect_MonstersModifier, (s, n) => { profile.DragSelect_MonstersModifier = s; }), true, page);
+            content.AddToRight(new ComboBoxWithLabel(lang.GetGeneral.DragNameplatesOnly, 0, Theme.COMBO_BOX_WIDTH, new string[] { lang.GetGeneral.SharedNone, lang.GetGeneral.SharedCtrl, lang.GetGeneral.SharedShift }, profile.DragSelect_NameplateModifier, (s, n) => { profile.DragSelect_NameplateModifier = s; }), true, page);
+            content.AddToRight(new SliderWithLabel(lang.GetGeneral.DragX, 0, Theme.SLIDER_WIDTH, 0, Client.Game.Scene.Camera.Bounds.Width, profile.DragSelectStartX, (r) => { profile.DragSelectStartX = r; }), true, page);
+            content.AddToRight(new SliderWithLabel(lang.GetGeneral.DragY, 0, Theme.SLIDER_WIDTH, 0, Client.Game.Scene.Camera.Bounds.Width, profile.DragSelectStartY, (r) => { profile.DragSelectStartY = r; }), true, page);
+            content.AddToRight(new CheckboxWithLabel(lang.GetGeneral.DragAnchored, isChecked: profile.DragSelectAsAnchor, valueChanged: (b) => { profile.DragSelectAsAnchor = b; }), true, page);
             content.RemoveIndent();
 
             content.BlankLine();
 
-            content.AddToRight(new CheckboxWithLabel("Show stats changed messages", isChecked: profile.ShowStatsChangedMessage, valueChanged: (b) => { profile.ShowStatsChangedMessage = b; }), true, page);
+            content.AddToRight(new CheckboxWithLabel(lang.GetGeneral.ShowStatsChangedMsg, isChecked: profile.ShowStatsChangedMessage, valueChanged: (b) => { profile.ShowStatsChangedMessage = b; }), true, page);
 
             content.BlankLine();
 
-            content.AddToRight(new CheckboxWithLabel("Show skills changed messages", isChecked: profile.ShowSkillsChangedMessage, valueChanged: (b) => { profile.ShowStatsChangedMessage = b; }), true, page);
+            content.AddToRight(new CheckboxWithLabel(lang.GetGeneral.ShowSkillsChangedMsg, isChecked: profile.ShowSkillsChangedMessage, valueChanged: (b) => { profile.ShowStatsChangedMessage = b; }), true, page);
             content.Indent();
-            content.AddToRight(new SliderWithLabel("Changed by", 0, Theme.SLIDER_WIDTH, 0, 100, profile.ShowSkillsChangedDeltaValue, (r) => { profile.ShowSkillsChangedDeltaValue = r; }), true, page);
+            content.AddToRight(new SliderWithLabel(lang.GetGeneral.ChangeVolume, 0, Theme.SLIDER_WIDTH, 0, 100, profile.ShowSkillsChangedDeltaValue, (r) => { profile.ShowSkillsChangedDeltaValue = r; }), true, page);
             content.RemoveIndent();
             #endregion
 
@@ -2369,11 +2372,11 @@ namespace ClassicUO.Game.UI.Gumps
 
             content.BlankLine();
 
-            content.AddToRight(new SliderWithLabel("Paperdoll Gump", 0, Theme.SLIDER_WIDTH, 50, 300, (int)(profile.PaperdollScale * 100), (i) => 
-            { 
+            content.AddToRight(new SliderWithLabel("Paperdoll Gump", 0, Theme.SLIDER_WIDTH, 50, 300, (int)(profile.PaperdollScale * 100), (i) =>
+            {
                 //Must be cast even though VS thinks it's redundant.
                 double v = (double)i / (double)100;
-                profile.PaperdollScale = v > 0 ? v : 1f; 
+                profile.PaperdollScale = v > 0 ? v : 1f;
             }), true, page);
             #endregion
 

@@ -57,7 +57,7 @@ namespace ClassicUO
         public static void Main(string[] args)
         {
             CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
-
+            Language.Load();
 #if !NETFRAMEWORK
             DllMap.Initialise();
 #endif
