@@ -45,20 +45,20 @@ abstract class TcpServerRpc
         _server.Stop();
     }
 
-    public async ValueTask<RpcMessage> RequestAsync(Guid clientId, ArraySegment<byte> payload)
+    public async ValueTask<ArraySegment<byte>> RequestAsync(Guid clientId, ArraySegment<byte> payload)
     {
         if (_clients.TryGetValue(clientId, out var client))
         {
             return await client.RequestAsync(payload);
         }
 
-        return RpcMessage.Invalid;
+        return new ArraySegment<byte>(Array.Empty<byte>());
     }
 
-    public RpcMessage Request(Guid clientId, ArraySegment<byte> payload)
+    public ArraySegment<byte> Request(Guid clientId, ArraySegment<byte> payload)
         => AsyncHelpers.RunSync(() => RequestAsync(clientId, payload));
 
-    protected abstract ArraySegment<byte> OnRequest(Guid id, RpcMessage msg);
+    protected abstract ArraySegment<byte> OnRequest(Guid id, ArraySegment<byte> msg);
     protected virtual void OnClientConnected(Guid id) { }
     protected virtual void OnClientDisconnected(Guid id) { }
 
@@ -118,16 +118,16 @@ abstract class TcpServerRpc
 sealed class TcpSession : IDisposable
 {
     private bool _disposed;
-    private readonly ConcurrentDictionary<ulong, TaskCompletionSource<RpcMessage>> _messages = new ConcurrentDictionary<ulong, TaskCompletionSource<RpcMessage>>();
-    private readonly BlockingCollection<RpcMessage> _collection = new BlockingCollection<RpcMessage>(new ConcurrentQueue<RpcMessage>());
+    private readonly ConcurrentDictionary<ulong, TaskCompletionSource<ArraySegment<byte>>> _messages = new ConcurrentDictionary<ulong, TaskCompletionSource<ArraySegment<byte>>>();
+    private readonly BlockingCollection<(ulong, ArraySegment<byte>)> _collection = new BlockingCollection<(ulong, ArraySegment<byte>)>(new ConcurrentQueue<(ulong, ArraySegment<byte>)>());
     private readonly Thread _thread;
     private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
     private readonly BinaryWriter _writer;
-    private readonly Func<RpcMessage, ArraySegment<byte>> _onRequest;
+    private readonly Func<ArraySegment<byte>, ArraySegment<byte>> _onRequest;
 
     private ulong _nextReqId = 1;
 
-    public TcpSession(Guid guid, TcpClient client, Func<RpcMessage, ArraySegment<byte>> onRequest)
+    public TcpSession(Guid guid, TcpClient client, Func<ArraySegment<byte>, ArraySegment<byte>> onRequest)
     {
         Guid = guid;
         Client = client;
@@ -165,26 +165,29 @@ sealed class TcpSession : IDisposable
         RunReceiveLoop(_cancellationTokenSource.Token);
     }
 
-    public async ValueTask<RpcMessage> RequestAsync(ArraySegment<byte> payload)
+    public async ValueTask<ArraySegment<byte>> RequestAsync(ArraySegment<byte> payload)
     {
         var reqId = (ulong)Interlocked.Increment(ref Unsafe.As<ulong, long>(ref _nextReqId));
 
-        var taskSrc = new TaskCompletionSource<RpcMessage>();
-        _messages[reqId] = taskSrc;
+        var taskSrc = new TaskCompletionSource<ArraySegment<byte>>();
+        if (!_messages.TryAdd(reqId, taskSrc))
+        {
+            Console.WriteLine("req {0} already added", reqId);
+        }
 
         WriteMessage(RpcCommand.Request, reqId, payload);
 
         var response = await taskSrc.Task.ConfigureAwait(false);
 
-        Debug.Assert(reqId.Equals(response.ID));
-        Debug.Assert(response.Command == RpcCommand.Response);
+        //Debug.Assert(reqId.Equals(response.ID));
+        //Debug.Assert(response.Command == RpcCommand.Response);
 
         return response;
     }
 
-    private void ResponseTo(RpcMessage request, ArraySegment<byte> payload)
+    private void ResponseTo(ulong msgId, ArraySegment<byte> payload)
     {
-        WriteMessage(RpcCommand.Response, request.ID, payload);
+        WriteMessage(RpcCommand.Response, msgId, payload);
     }
 
     private void WriteMessage(RpcCommand cmd, ulong id, ArraySegment<byte> payload)
@@ -195,7 +198,7 @@ sealed class TcpSession : IDisposable
             buf[0] = (byte)cmd;
             BinaryPrimitives.WriteUInt64LittleEndian(buf.AsSpan(sizeof(byte), sizeof(ulong)), id);
             BinaryPrimitives.WriteUInt16LittleEndian(buf.AsSpan(sizeof(byte) + sizeof(ulong), sizeof(ushort)), (ushort)payload.Count);
-            Array.Copy(payload.Array, payload.Offset, buf, RpcConst.RPC_MESSAGE_SIZE, payload.Count);
+            Buffer.BlockCopy(payload.Array, payload.Offset, buf, RpcConst.RPC_MESSAGE_SIZE, payload.Count);
 
             _writer.Write(buf, 0, RpcConst.RPC_MESSAGE_SIZE + payload.Count);
             _writer.Flush();
@@ -277,14 +280,13 @@ sealed class TcpSession : IDisposable
 
                 var rentBuf = value.IsEmpty ? Array.Empty<byte>() : ArrayPool<byte>.Shared.Rent(value.Length);
                 value.Span.CopyTo(rentBuf);
-
-                var msg = new RpcMessage(cmd, id, new ArraySegment<byte>(rentBuf, 0, value.Length));
+                var payload = new ArraySegment<byte>(rentBuf, 0, value.Length);
 
                 switch (cmd)
                 {
                     case RpcCommand.Request:
                         //ParseRequest(msg);
-                        while (!_collection.TryAdd(msg, -1, token))
+                        while (!_collection.TryAdd((id, payload), -1, token))
                         {
                             Console.WriteLine("sleep!");
                             Thread.Sleep(1);
@@ -292,11 +294,11 @@ sealed class TcpSession : IDisposable
                         break;
 
                     case RpcCommand.Response:
-                        if (_messages.TryRemove(msg.ID, out var task))
+                        if (_messages.TryRemove(id, out var task))
                         {
-                            if (!task.TrySetResult(msg))
+                            if (!task.TrySetResult(payload))
                             {
-                                Console.WriteLine("cannot set result of msg {0}", msg.ID);
+                                Console.WriteLine("cannot set result of msg {0}", id);
                             }
                         }
                         break;
@@ -319,9 +321,9 @@ sealed class TcpSession : IDisposable
         {
             while (Client.Connected)
             {
-                var msg = _collection.Take(token);
+                (var id, var payload) = _collection.Take(token);
 
-                ParseRequest(msg);
+                ParseRequest(id, payload);
             }
         }
         catch (OperationCanceledException)
@@ -330,13 +332,15 @@ sealed class TcpSession : IDisposable
         }
     }
 
-    private void ParseRequest(RpcMessage msg)
+    private void ParseRequest(ulong msgId, ArraySegment<byte> payload)
     {
-        Debug.Assert(msg.Command == RpcCommand.Request, "Message must be a request!");
+        var respPayload = _onRequest(payload);
+        ResponseTo(msgId, respPayload);
 
-        var respPayload = _onRequest(msg);
-        ResponseTo(msg, respPayload);
-        msg.Dispose();
+        if (payload.Array != null && payload.Array.Length > 0)
+        {
+            ArrayPool<byte>.Shared.Return(payload.Array);
+        }
     }
 }
 
@@ -387,42 +391,42 @@ abstract class TcpClientRpc
         _session?.Client?.Client?.Disconnect(false);
     }
 
-    public async ValueTask<RpcMessage> RequestAsync(ArraySegment<byte> payload)
+    public async ValueTask<ArraySegment<byte>> RequestAsync(ArraySegment<byte> payload)
     {
         if (_session == null)
-            return RpcMessage.Invalid;
+            return new ArraySegment<byte>(Array.Empty<byte>());
 
         return await _session.RequestAsync(payload);
     }
 
-    public RpcMessage Request(ArraySegment<byte> payload)
+    public ArraySegment<byte> Request(ArraySegment<byte> payload)
         => AsyncHelpers.RunSync(() => RequestAsync(payload));
 
 
-    protected abstract ArraySegment<byte> OnRequest(RpcMessage msg);
+    protected abstract ArraySegment<byte> OnRequest(ArraySegment<byte> msg);
     protected virtual void OnConnected() { }
     protected virtual void OnDisconnected() { }
 }
 
-readonly struct RpcMessage : IDisposable
-{
-    public readonly RpcCommand Command;
-    public readonly ulong ID;
-    public readonly ArraySegment<byte> Payload;
+//sealed class RpcMessage : IDisposable
+//{
+//    public readonly RpcCommand Command;
+//    public readonly ulong ID;
+//    public readonly ArraySegment<byte> Payload;
 
-    public RpcMessage(RpcCommand cmd, ulong id, ArraySegment<byte> payload)
-        => (Command, ID, Payload) = (cmd, id, payload);
+//    public RpcMessage(RpcCommand cmd, ulong id, ArraySegment<byte> payload)
+//        => (Command, ID, Payload) = (cmd, id, payload);
 
-    public readonly void Dispose()
-    {
-        if (Payload.Array != null && Payload.Array.Length > 0)
-        {
-            ArrayPool<byte>.Shared.Return(Payload.Array);
-        }
-    }
+//    public void Dispose()
+//    {
+//        if (Payload.Array != null && Payload.Array.Length > 0)
+//        {
+//            ArrayPool<byte>.Shared.Return(Payload.Array);
+//        }
+//    }
 
-    public static readonly RpcMessage Invalid = new RpcMessage(RpcCommand.Invalid, 0, new ArraySegment<byte>(Array.Empty<byte>()));
-}
+//    public static readonly RpcMessage Invalid = new RpcMessage(RpcCommand.Invalid, 0, new ArraySegment<byte>(Array.Empty<byte>()));
+//}
 
 enum RpcCommand
 {
@@ -434,6 +438,8 @@ enum RpcCommand
 // Async helper got from RestSharp project!
 static class AsyncHelpers
 {
+    private readonly static ConcurrentStack<CustomSynchronizationContext> _cache = new ConcurrentStack<CustomSynchronizationContext>();
+
     /// <summary>
     /// Executes a task synchronously on the calling thread by installing a temporary synchronization context that queues continuations
     /// </summary>
@@ -441,16 +447,21 @@ static class AsyncHelpers
     public static void RunSync(Func<ValueTask> task)
     {
         var currentContext = SynchronizationContext.Current;
-        var customContext = new CustomSynchronizationContext(task);
+
+        if (!_cache.TryPop(out var customContext))
+        {
+            customContext = new CustomSynchronizationContext();
+        }
 
         try
         {
             SynchronizationContext.SetSynchronizationContext(customContext);
-            customContext.Run();
+            customContext.Run(task);
         }
         finally
         {
             SynchronizationContext.SetSynchronizationContext(currentContext);
+            _cache.Push(customContext);
         }
     }
 
@@ -470,20 +481,16 @@ static class AsyncHelpers
     /// <summary>
     /// Synchronization context that can be "pumped" in order to have it execute continuations posted back to it
     /// </summary>
-    class CustomSynchronizationContext : SynchronizationContext
+    sealed class CustomSynchronizationContext : SynchronizationContext
     {
-        readonly ConcurrentQueue<(SendOrPostCallback, object?)> _items = new();
-        readonly AutoResetEvent _workItemsWaiting = new(false);
-        readonly Func<ValueTask> _task;
+        readonly BlockingCollection<(SendOrPostCallback, object?)> _coll = new BlockingCollection<(SendOrPostCallback, object?)>(new ConcurrentQueue<(SendOrPostCallback, object?)>());
+        Func<ValueTask> _task;
         ExceptionDispatchInfo? _caughtException;
         bool _done;
 
-        /// <summary>
-        /// Constructor for the custom context
-        /// </summary>
-        /// <param name="task">Task to execute</param>
-        public CustomSynchronizationContext(Func<ValueTask> task) =>
-            _task = task ?? throw new ArgumentNullException(nameof(task), "Please remember to pass a Task to be executed");
+        readonly SendOrPostCallback _callback1 = PostCallback;
+        readonly SendOrPostCallback _callback2 = Done;
+
 
         /// <summary>
         /// When overridden in a derived class, dispatches an asynchronous message to a synchronization context.
@@ -492,50 +499,54 @@ static class AsyncHelpers
         /// <param name="state">Callback state</param>
         public override void Post(SendOrPostCallback function, object? state)
         {
-            _items.Enqueue((function, state));
-            _workItemsWaiting.Set();
+            _coll.Add((function, state));
+        }
+
+        static async void PostCallback(object? o)
+        {
+            try
+            {
+                await ((CustomSynchronizationContext)o)._task().ConfigureAwait(false);
+            }
+            catch (Exception exception)
+            {
+                ((CustomSynchronizationContext)o)._caughtException = ExceptionDispatchInfo.Capture(exception);
+                throw;
+            }
+            finally
+            {
+                ((CustomSynchronizationContext)o).Post(((CustomSynchronizationContext)o)._callback2, o);
+            }
+        }
+
+        static void Done(object? o)
+        {
+            ((CustomSynchronizationContext)o)._done = true;
         }
 
         /// <summary>
         /// Enqueues the function to be executed and executes all resulting continuations until it is completely done
         /// </summary>
-        public void Run()
+        public void Run(Func<ValueTask> task)
         {
-            async void PostCallback(object? _)
-            {
-                try
-                {
-                    await _task().ConfigureAwait(false);
-                }
-                catch (Exception exception)
-                {
-                    _caughtException = ExceptionDispatchInfo.Capture(exception);
-                    throw;
-                }
-                finally
-                {
-                    Post(_ => _done = true, null);
-                }
-            }
+            _task = task;
 
-            Post(PostCallback, null);
+            Post(_callback1, this);
 
             while (!_done)
             {
-                if (_items.TryDequeue(out var task))
+                (var callback, var obj) = _coll.Take();
+
+                callback(obj);
+                if (_caughtException == null)
                 {
-                    task.Item1(task.Item2);
-                    if (_caughtException == null)
-                    {
-                        continue;
-                    }
-                    _caughtException.Throw();
+                    continue;
                 }
-                else
-                {
-                    _workItemsWaiting.WaitOne();
-                }
+
+                _caughtException.Throw();
             }
+
+            _done = false;
         }
 
         /// <summary>

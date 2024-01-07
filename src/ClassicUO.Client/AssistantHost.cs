@@ -11,33 +11,33 @@ namespace ClassicUO
 {
     sealed class AssistantHost : TcpClientRpc
     {
-        protected override ArraySegment<byte> OnRequest(RpcMessage msg)
+        protected override ArraySegment<byte> OnRequest(ArraySegment<byte> msg)
         {
-            if (msg.Payload.Count <= 0)
+            if (msg.Count <= 0)
                 return ArraySegment<byte>.Empty;
 
-            var cmd = (PluginCuoProtocol)msg.Payload.Array[0];
+            var cmd = (PluginCuoProtocol)msg.Array[0];
 
             switch (cmd)
             {
                 case PluginCuoProtocol.OnPluginRecv:
                     {
-                        var packetLen = BinaryPrimitives.ReadUInt16LittleEndian(msg.Payload.AsSpan(sizeof(byte), sizeof(ushort)));
+                        var packetLen = BinaryPrimitives.ReadUInt16LittleEndian(msg.AsSpan(sizeof(byte), sizeof(ushort)));
                         
                         lock (PacketHandlers.Handler)
                         {
-                            PacketHandlers.Handler.Append(msg.Payload.AsSpan(sizeof(byte) + sizeof(ushort), packetLen), true);
+                            PacketHandlers.Handler.Append(msg.AsSpan(sizeof(byte) + sizeof(ushort), packetLen), true);
                         }
                     }
                     break;
 
                 case PluginCuoProtocol.OnPluginSend:
                     {
-                        var packetLen = BinaryPrimitives.ReadUInt16LittleEndian(msg.Payload.AsSpan(sizeof(byte), sizeof(ushort)));
+                        var packetLen = BinaryPrimitives.ReadUInt16LittleEndian(msg.AsSpan(sizeof(byte), sizeof(ushort)));
 
                         if (NetClient.Socket.IsConnected)
                         {
-                            NetClient.Socket.Send(msg.Payload.AsSpan(sizeof(byte) + sizeof(ushort), packetLen), true);
+                            NetClient.Socket.Send(msg.AsSpan(sizeof(byte) + sizeof(ushort), packetLen), true);
                         }
                     }
                     
@@ -46,7 +46,7 @@ namespace ClassicUO
                 case PluginCuoProtocol.OnPacketLength:
                     {
                         var req = new PluginPacketLengthRequest();
-                        req.Unpack(msg.Payload.Array, msg.Payload.Offset);
+                        req.Unpack(msg.Array, msg.Offset);
 
                         var resp = new PluginPacketLengthResponse()
                         {
@@ -155,6 +155,14 @@ namespace ClassicUO
 
         private readonly Dictionary<PluginCuoProtocol, byte[]> _simpleRequests = new Dictionary<PluginCuoProtocol, byte[]>();
 
+        private void ReturnArray(ArraySegment<byte> segment)
+        {
+            if (segment.Array != null && segment.Array.Length > 0)
+            {
+                ArrayPool<byte>.Shared.Return(segment.Array);
+            }
+        }
+
         private void MakeSimpleRequest(PluginCuoProtocol protocol)
         {
             if (!_simpleRequests.TryGetValue(protocol, out var buf))
@@ -168,7 +176,9 @@ namespace ClassicUO
                 _simpleRequests.Add(protocol, buf);
             }
 
-            using var resp = Request(new ArraySegment<byte>(buf));            
+            var resp = Request(new ArraySegment<byte>(buf));
+
+            ReturnArray(resp);
         }
 
         public void PluginInitialize(string pluginPath)
@@ -185,7 +195,8 @@ namespace ClassicUO
             };
 
             using var buf = req.PackToBuffer();
-            using var resp = Request(new ArraySegment<byte>(buf.Data, 0, buf.Size));
+            var resp = Request(new ArraySegment<byte>(buf.Data, 0, buf.Size));
+            ReturnArray(resp);
         }
 
         public void PluginTick()
@@ -229,10 +240,12 @@ namespace ClassicUO
             };
 
             using var buf = req.PackToBuffer();
-            using var respMsg = Request(new ArraySegment<byte>(buf.Data, 0, buf.Size));
+            var respMsg = Request(new ArraySegment<byte>(buf.Data, 0, buf.Size));
 
             var resp = new PluginHotkeyResponse();
-            resp.Unpack(respMsg.Payload.Array, respMsg.Payload.Offset);
+            resp.Unpack(respMsg.Array, respMsg.Offset);
+
+            ReturnArray(respMsg);
 
             return resp.Allowed;
         }
@@ -247,7 +260,8 @@ namespace ClassicUO
             };
 
             using var buf = req.PackToBuffer();
-            using var resp = Request(new ArraySegment<byte>(buf.Data, 0, buf.Size));
+            var resp = Request(new ArraySegment<byte>(buf.Data, 0, buf.Size));
+            ReturnArray(resp);
         }
 
         public void PluginDrawCmdList()
@@ -286,15 +300,18 @@ namespace ClassicUO
 
                     buffer.CopyTo(new ArraySegment<byte>(rentBuf, sizeof(byte) + sizeof(ushort), buffer.Count));
 
-                    using var respMsg = Request(new ArraySegment<byte>(rentBuf, 0, sizeof(byte) + sizeof(ushort) + buffer.Count));
+                    var respMsg = Request(new ArraySegment<byte>(rentBuf, 0, sizeof(byte) + sizeof(ushort) + buffer.Count));
 
-                    var packetLen = BinaryPrimitives.ReadUInt16LittleEndian(respMsg.Payload.Array.AsSpan(sizeof(byte), sizeof(ushort)));
+                    var packetLen = BinaryPrimitives.ReadUInt16LittleEndian(respMsg.Array.AsSpan(sizeof(byte), sizeof(ushort)));
 
                     if (packetLen > 0)
                     {
-                        respMsg.Payload.Array.AsSpan(sizeof(byte) + sizeof(ushort), packetLen).CopyTo(buffer.Array);
+                        respMsg.Array.AsSpan(sizeof(byte) + sizeof(ushort), packetLen).CopyTo(buffer.Array);
+                        ReturnArray(respMsg);
                         return true;
                     }
+
+                    ReturnArray(respMsg);
                 }
                 finally
                 {
@@ -318,15 +335,18 @@ namespace ClassicUO
 
                 buffer.CopyTo(new ArraySegment<byte>(rentBuf, sizeof(byte) + sizeof(ushort), buffer.Length));
 
-                using var respMsg = Request(new ArraySegment<byte>(rentBuf, 0, sizeof(byte) + sizeof(ushort) + buffer.Length));
+                var respMsg = Request(new ArraySegment<byte>(rentBuf, 0, sizeof(byte) + sizeof(ushort) + buffer.Length));
 
-                var packetLen = BinaryPrimitives.ReadUInt16LittleEndian(respMsg.Payload.Array.AsSpan(sizeof(byte), sizeof(ushort)));
+                var packetLen = BinaryPrimitives.ReadUInt16LittleEndian(respMsg.Array.AsSpan(sizeof(byte), sizeof(ushort)));
 
                 if (packetLen > 0)
                 {
-                    respMsg.Payload.Array.AsSpan(sizeof(byte) + sizeof(ushort), packetLen).CopyTo(buffer);
+                    respMsg.Array.AsSpan(sizeof(byte) + sizeof(ushort), packetLen).CopyTo(buffer);
+                    ReturnArray(respMsg);
                     return true;
                 }
+
+                ReturnArray(respMsg);
             }
             finally
             {
