@@ -65,7 +65,7 @@ jobs:
       uses: dev-drprasad/delete-tag-and-release@v0.2.1
       with:
         delete_release: true
-        tag_name: UnixBuild
+        tag_name: AutoBuild
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               
@@ -73,11 +73,12 @@ jobs:
       uses: ncipollo/release-action@v1
       with:
         artifacts: "upload/${{ runner.os }}${{ env.CUO_ZIP_NAME }}"
-        name: 'Latest Unix Build'
-        body: 'These are built automatically on the Main branch.'
+        name: 'Latest Build'
+        body: 'These are built automatically on the Main branch. \n # It is recomended to use the [latest](https://github.com/bittiez/TazUO/releases/latest) if you are not sure what this is.'
         makeLatest: false
+        allowUpdates: true
         prerelease: true
-        tag: UnixBuild
+        tag: AutoBuild
         token: ${{ secrets.GITHUB_TOKEN }}
         
         
