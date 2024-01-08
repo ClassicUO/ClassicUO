@@ -7,7 +7,8 @@ namespace ClassicUO.Game.UI.Gumps
     internal class VersionHistory : Gump
     {
         private static string[] updateTexts = {
-             "/c[white][3.18.0]/cd\n",
+             "/c[white][3.18.0]/cd\n" +
+                "- Added a language file that will contain UI text for easy language translations",
 
              "/c[white][3.17.0]/cd\n" +
                 "- Added original paperdoll to customizable gump system\n" +
