@@ -1802,7 +1802,7 @@ namespace ClassicUO.Game.UI.Gumps
             PositionHelper.Reset();
 
             options.Add(s = new SettingsOption(
-                "Custom cooldown bars",
+                lang.GetCooldowns.CustomCooldownBars,
                 new Area(false),
                 mainContent.RightWidth,
                 PAGE.TUOCooldowns
@@ -1811,7 +1811,7 @@ namespace ClassicUO.Game.UI.Gumps
             PositionHelper.Indent();
 
             options.Add(s = new SettingsOption(
-                "Position X",
+                lang.GetCooldowns.PositionX,
                 new InputField(100, 40, text: profile.CoolDownX.ToString(), numbersOnly: true, onTextChanges: (s, e) =>
                 {
                     if (int.TryParse(((InputField.StbTextBox)s).Text, out int v))
@@ -1825,7 +1825,7 @@ namespace ClassicUO.Game.UI.Gumps
             PositionHelper.PositionControl(s.FullControl);
 
             options.Add(s = new SettingsOption(
-                "Position Y",
+                lang.GetCooldowns.PositionY,
                 new InputField(100, 40, text: profile.CoolDownY.ToString(), numbersOnly: true, onTextChanges: (s, e) =>
                 {
                     if (int.TryParse(((InputField.StbTextBox)s).Text, out int v))
@@ -1840,7 +1840,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             options.Add(s = new SettingsOption(
                 string.Empty,
-                new CheckboxWithLabel("Use last moved bar position", 0, profile.UseLastMovedCooldownPosition, (b) => { profile.UseLastMovedCooldownPosition = b; }),
+                new CheckboxWithLabel(lang.GetCooldowns.UseLastMovedBarPosition, 0, profile.UseLastMovedCooldownPosition, (b) => { profile.UseLastMovedCooldownPosition = b; }),
                 mainContent.RightWidth,
                 PAGE.TUOCooldowns
             ));
@@ -1851,7 +1851,7 @@ namespace ClassicUO.Game.UI.Gumps
             PositionHelper.BlankLine();
 
             options.Add(s = new SettingsOption(
-                "Conditions",
+                lang.GetCooldowns.Conditions,
                 new Area(false),
                 mainContent.RightWidth,
                 PAGE.TUOCooldowns
@@ -1863,7 +1863,7 @@ namespace ClassicUO.Game.UI.Gumps
             ModernButton addcond;
             options.Add(s = new SettingsOption(
                 "",
-                addcond = new ModernButton(0, 0, 175, 40, ButtonAction.Activate, "+ Add condition", Theme.BUTTON_FONT_COLOR),
+                addcond = new ModernButton(0, 0, 175, 40, ButtonAction.Activate, lang.GetCooldowns.AddCondition, Theme.BUTTON_FONT_COLOR),
                 mainContent.RightWidth,
                 PAGE.TUOCooldowns
             ));

@@ -81,6 +81,7 @@ namespace ClassicUO.Configuration
         public Containers GetContainers { get; set; } = new Containers();
         public Experimental GetExperimental { get; set; } = new Experimental();
         public NamePlates GetNamePlates { get; set; } = new NamePlates();
+        public Cooldowns GetCooldowns { get; set; } = new Cooldowns();
 
         public class General
         {
@@ -382,6 +383,16 @@ namespace ClassicUO.Configuration
             public string NewEntry { get; set; } = "New entry";
             public string NameOverheadEntryName { get; set; } = "Name overhead entry name";
             public string DeleteEntry { get; set; } = "Delete entry";
+        }
+
+        public class Cooldowns
+        {
+            public string CustomCooldownBars { get; set; } = "Custom cooldown bars";
+            public string PositionX { get; set; } = "Position X";
+            public string PositionY { get; set; } = "Position Y";
+            public string UseLastMovedBarPosition { get; set; } = "Use last moved bar position";
+            public string Conditions { get; set; } = "Conditions";
+            public string AddCondition { get; set; } = "+ Add condition";
         }
     }
 }
