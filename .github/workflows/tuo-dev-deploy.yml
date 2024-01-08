@@ -1,4 +1,4 @@
-name: TUO-Deploy
+name: TUO-Dev-Deploy
 
 on:
   workflow_dispatch:
@@ -76,6 +76,7 @@ jobs:
         name: 'TazUO Bleeding Edge'
         body: 'These are built automatically on the dev branch. These may include features that are still being worked on/not complete.'
         makeLatest: false
+        allowUpdates: true
         prerelease: true
         tag: TazUO-BleedingEdge
         token: ${{ secrets.GITHUB_TOKEN }}
