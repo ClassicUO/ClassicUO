@@ -30,20 +30,20 @@
 
 #endregion
 
-using System;
-using System.Linq;
+using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
-using ClassicUO.Assets;
 using ClassicUO.Network;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using SDL2;
+using System;
+using System.Linq;
 using MathHelper = ClassicUO.Utility.MathHelper;
 
 namespace ClassicUO.Game.Scenes
@@ -662,12 +662,12 @@ namespace ClassicUO.Game.Scenes
             {
                 switch (TargetManager.TargetingState)
                 {
+                    case CursorTarget.Internal:
                     case CursorTarget.Grab:
                     case CursorTarget.SetGrabBag:
                     case CursorTarget.Position:
                     case CursorTarget.Object:
                     case CursorTarget.MultiPlacement when World.CustomHouseManager == null:
-
                         {
                             BaseGameObject obj = lastObj;
 

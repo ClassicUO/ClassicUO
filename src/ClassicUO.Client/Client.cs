@@ -59,12 +59,7 @@ namespace ClassicUO
         {
             Debug.Assert(Game == null);
 
-            if (ScriptCompiler.CompileTask != null)
-            {
-                ScriptCompiler.CompileTask.Wait();
-                ScriptCompiler.CompileTask.Dispose();
-                ScriptCompiler.Invoke("Configure");
-            }
+            ScriptCompiler.InvokeAfterCompiling("Configure");
 
             Load();
 
@@ -91,7 +86,7 @@ namespace ClassicUO
 
                 UoAssist.Start();
 
-                ScriptCompiler.Invoke("Initialize");
+                ScriptCompiler.InvokeAfterCompiling("Initialize");
 
                 Game.Run();
             }

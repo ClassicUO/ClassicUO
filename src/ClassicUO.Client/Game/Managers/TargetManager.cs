@@ -30,12 +30,12 @@
 
 #endregion
 
+using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
-using ClassicUO.Assets;
 using ClassicUO.Network;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
@@ -54,6 +54,7 @@ namespace ClassicUO.Game.Managers
         HueCommandTarget,
         IgnorePlayerTarget,
         MoveItemContainer,
+        Internal
     }
 
     public class CursorType
@@ -302,13 +303,14 @@ namespace ClassicUO.Game.Managers
                 {
                     case CursorTarget.Invalid: return;
 
+                    case CursorTarget.Internal:
                     case CursorTarget.MultiPlacement:
                     case CursorTarget.Position:
                     case CursorTarget.Object:
                     case CursorTarget.HueCommandTarget:
                     case CursorTarget.SetTargetClientSide:
 
-                        if (entity != World.Player)
+                        if (TargetingState != CursorTarget.Internal && entity != World.Player)
                         {
                             LastTargetInfo.SetEntity(serial);
                         }
@@ -364,7 +366,7 @@ namespace ClassicUO.Game.Managers
                             }
                         }
 
-                        if (TargetingState != CursorTarget.SetTargetClientSide)
+                        if (TargetingState != CursorTarget.SetTargetClientSide && TargetingState != CursorTarget.Internal)
                         {
                             _lastDataBuffer[0] = 0x6C;
 

@@ -4951,6 +4951,8 @@ namespace ClassicUO.Network
                 }
             }
 
+            EventSink.InvokeClilocMessageReceived(entity, new MessageEventArgs(entity, text, name, hue, type, (byte)font, text_type, true) { Cliloc = cliloc });
+
             MessageManager.HandleMessage(
                 entity,
                 text,
@@ -7242,7 +7244,7 @@ namespace ClassicUO.Network
                 GameActions.Print($"GumpID: {gumpID}");
             }
 
-            if (gumpID == 1426736667 || (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.ServerName == "UOAlive" && gumpID == 4258191894)) //SOS message gump
+            if (gumpID == 1426736667 || (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.ServerName == "UOAlive" && (gumpID == 4258191894 || gumpID == 1915258020))) //SOS message gump
             {
                 for (int i = 0; i < gump.Children.Count; i++)
                 {

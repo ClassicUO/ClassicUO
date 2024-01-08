@@ -459,32 +459,67 @@ namespace ClassicUO
             });
         }
 
+        public static void InvokeAfterCompiling(string method)
+        {
+            if (CompileTask != null)
+            {
+                if (CompileTask.Status == TaskStatus.Running || CompileTask.Status == TaskStatus.WaitingToRun)
+                {
+                    Task.Factory.StartNew(() =>
+                    {
+                        CompileTask.Wait();
+                        Invoke(method);
+                    });
+                }
+                else
+                {
+                    Invoke(method);
+                }
+            }
+        }
+
         public static void Invoke(string method)
         {
-            if (Assemblies != null)
+            try
             {
-                var invoke = new List<MethodInfo>();
-
-                foreach (var a in Assemblies)
+                if (Assemblies != null)
                 {
-                    var types = a.GetTypes();
+                    var invoke = new List<MethodInfo>();
 
-                    foreach (var t in types)
+                    foreach (var a in Assemblies)
                     {
-                        var m = t.GetMethod(method, BindingFlags.Static | BindingFlags.Public);
+                        var types = a.GetTypes();
 
-                        if (m != null)
+                        foreach (var t in types)
                         {
-                            invoke.Add(m);
+                            var m = t.GetMethod(method, BindingFlags.Static | BindingFlags.Public);
+
+                            if (m != null)
+                            {
+                                invoke.Add(m);
+                            }
                         }
                     }
+
+                    invoke.Sort(new CallPriorityComparer());
+
+                    foreach (var m in invoke)
+                    {
+                        m.Invoke(null, null);
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                Log.Panic(ex.ToString());
+                string path = Path.Combine(CUOEnviroment.ExecutablePath, "Logs");
 
-                invoke.Sort(new CallPriorityComparer());
+                if (!Directory.Exists(path))
+                    Directory.CreateDirectory(path);
 
-                foreach (var m in invoke)
+                using (LogFile crashfile = new LogFile(path, "crash.txt"))
                 {
-                    m.Invoke(null, null);
+                    crashfile.WriteAsync(ex.ToString()).RunSynchronously();
                 }
             }
         }

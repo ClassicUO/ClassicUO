@@ -33,8 +33,8 @@ namespace ClassicUO.Game.Managers
         /// <summary>
         /// Not currently used. May be removed later or put into use, not sure right now
         /// </summary>
-        public static event EventHandler<MessageEventArgs> LocalizedMessageReceived;
-        public static void InvokeLocalizedMessageReceived(object sender, MessageEventArgs e) => LocalizedMessageReceived?.Invoke(sender, e);
+        public static event EventHandler<MessageEventArgs> ClilocMessageReceived;
+        public static void InvokeClilocMessageReceived(object sender, MessageEventArgs e) => ClilocMessageReceived?.Invoke(sender, e);
 
         /// <summary>
         /// Invoked anytime a message is added to the journal
@@ -146,8 +146,8 @@ namespace ClassicUO.Game.Managers
         public BuffIcon Buff { get; }
     }
 
-    public class PositionChangedArgs : EventArgs 
-    { 
+    public class PositionChangedArgs : EventArgs
+    {
         public PositionChangedArgs(Vector3 newlocation)
         {
             Newlocation = newlocation;
