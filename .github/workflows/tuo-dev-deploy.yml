@@ -7,7 +7,10 @@ on:
     workflows: [Build-Test]
     types:
       - completed
-
+      
+concurrency:
+  group: maindeploy
+  cancel-in-progress: true
 
 env:
   CUO_OUTPUT_PATH: '../../bin/dist'
@@ -20,10 +23,25 @@ env:
   NUGET_XMLDOC_MODE: skip
 
 jobs:
+  removeoldrelease:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v1
+    
+    - name: Remove old Release
+      uses: dev-drprasad/delete-tag-and-release@v0.2.1
+      with:
+        delete_release: true
+        tag_name: TazUO-BleedingEdge
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  
   build:
     # if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ${{ matrix.os }}
     strategy:
+      max-parallel: 1
       matrix:
        os: [ macos-latest, ubuntu-latest, windows-latest ]
 
@@ -60,14 +78,6 @@ jobs:
             
     - name: Move output
       run: mv "${{ env.CUO_OUTPUT_PATH }}/${{ runner.os }}${{ env.CUO_ZIP_NAME }}" upload
-
-    - name: Remove old Release
-      uses: dev-drprasad/delete-tag-and-release@v0.2.1
-      with:
-        delete_release: true
-        tag_name: TazUO-BleedingEdge
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               
     - name: Upload Release
       uses: ncipollo/release-action@v1
