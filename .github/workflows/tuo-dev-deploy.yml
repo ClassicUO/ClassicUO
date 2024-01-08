@@ -1,0 +1,83 @@
+name: TUO-Deploy
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    branches: [dev]
+    workflows: [Build-Test]
+    types:
+      - completed
+
+
+env:
+  CUO_OUTPUT_PATH: '../../bin/dist'
+  CUO_PROJECT_PATH: "src/ClassicUO.Client/ClassicUO.Client.csproj"
+  CUO_ZIP_NAME: "TazUO.zip"
+
+  DOTNET_NOLOGO: false
+  DOTNET_CLI_TELEMETRY_OPTOUT: 1
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+  NUGET_XMLDOC_MODE: skip
+
+jobs:
+  build:
+    # if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+       os: [ macos-latest, ubuntu-latest, windows-latest ]
+
+    steps:
+    - uses: actions/checkout@v1
+      
+    - name: Get submodules
+      run: |
+        git config --global url."https://".insteadOf git://
+        git submodule update --init --recursive
+        
+    - name: Setup .NET 7
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 7.0.x
+        include-prerelease: true
+            
+    - name: Build
+      run: dotnet publish ${{ env.CUO_PROJECT_PATH }} -c Release -o ${{ env.CUO_OUTPUT_PATH }} -p:IS_DEV_BUILD=true
+      
+    - name: Create manifest
+      run: |
+        dotnet run --project tools/ManifestCreator/ManifestCreator.csproj "${{ env.CUO_OUTPUT_PATH }}" "unix-auto" "${{ runner.os }}${{ env.CUO_ZIP_NAME }}"
+        mkdir upload
+        mv manifest.xml upload
+      
+    - name: Create package
+      uses: thedoctor0/zip-release@master
+      with:
+        type: 'zip'
+        directory: ${{ env.CUO_OUTPUT_PATH }}
+        filename: ${{ runner.os }}${{ env.CUO_ZIP_NAME }}
+        exclusions: '*.zip manifest.xml'
+            
+    - name: Move output
+      run: mv "${{ env.CUO_OUTPUT_PATH }}/${{ runner.os }}${{ env.CUO_ZIP_NAME }}" upload
+
+    - name: Remove old Release
+      uses: dev-drprasad/delete-tag-and-release@v0.2.1
+      with:
+        delete_release: true
+        tag_name: TazUO-BleedingEdge
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              
+    - name: Upload Release
+      uses: ncipollo/release-action@v1
+      with:
+        artifacts: "upload/${{ runner.os }}${{ env.CUO_ZIP_NAME }}"
+        name: 'TazUO Bleeding Edge'
+        body: 'These are built automatically on the dev branch. These may include features that are still being worked on/not complete.'
+        makeLatest: false
+        prerelease: true
+        tag: TazUO-BleedingEdge
+        token: ${{ secrets.GITHUB_TOKEN }}
+        
+        
