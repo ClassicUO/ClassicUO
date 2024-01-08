@@ -25,7 +25,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-       os: [ macos-latest, ubuntu-latest ]
+       os: [ macos-latest, ubuntu-latest, windows-latest ]
 
     steps:
     - uses: actions/checkout@v1
@@ -60,6 +60,14 @@ jobs:
             
     - name: Move output
       run: mv "${{ env.CUO_OUTPUT_PATH }}/${{ runner.os }}${{ env.CUO_ZIP_NAME }}" upload
+
+    - name: Remove old Release
+      uses: dev-drprasad/delete-tag-and-release@v0.2.1
+      with:
+        delete_release: true
+        tag_name: UnixBuild
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               
     - name: Upload Release
       uses: ncipollo/release-action@v1
@@ -67,7 +75,6 @@ jobs:
         artifacts: "upload/${{ runner.os }}${{ env.CUO_ZIP_NAME }}"
         name: 'Latest Unix Build'
         body: 'These are built automatically on the Main branch.'
-        allowUpdates: true
         makeLatest: false
         prerelease: true
         tag: UnixBuild
