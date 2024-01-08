@@ -63,8 +63,24 @@ namespace ClassicUO.Configuration
         public string ButtonMobiles { get; set; } = "Mobiles";
         public string ButtonGumpContext { get; set; } = "Gumps & Context";
         public string ButtonMisc { get; set; } = "Misc";
+        public string ButtonTerrainStatics { get; set; } = "Terrain & Statics";
+        public string ButtonGameWindow { get; set; } = "Game window";
+        public string ButtonZoom { get; set; } = "Zoom";
+        public string ButtonLighting { get; set; } = "Lighting";
+        public string ButtonShadows { get; set; } = "Shadows";
 
         public General GetGeneral { get; set; } = new General();
+        public Video GetVideo { get; set; } = new Video();
+        public Sound GetSound { get; set; } = new Sound();
+        public Macros GetMacros { get; set; } = new Macros();
+        public ToolTips GetToolTips { get; set; } = new ToolTips();
+        public Speech GetSpeech { get; set; } = new Speech();
+        public CombatSpells GetCombatSpells { get; set; } = new CombatSpells();
+        public Counters GetCounters { get; set; } = new Counters();
+        public InfoBars GetInfoBars { get; set; } = new InfoBars();
+        public Containers GetContainers { get; set; } = new Containers();
+        public Experimental GetExperimental { get; set; } = new Experimental();
+        public NamePlates GetNamePlates { get; set; } = new NamePlates();
 
         public class General
         {
@@ -174,7 +190,198 @@ namespace ClassicUO.Configuration
             #endregion
 
             #region General->TerrainStatics
+            public string HideRoof { get; set; } = "Hide roof tiles";
+            public string TreesToStump { get; set; } = "Change trees to stumps";
+            public string HideVegetation { get; set; } = "Hide vegetation";
+            public string MagicFieldType { get; set; } = "Field types";
+            public string MagicFieldOpt_Normal { get; set; } = "Normal";
+            public string MagicFieldOpt_Static { get; set; } = "Static";
+            public string MagicFieldOpt_Tile { get; set; } = "Tile";
             #endregion
+        }
+
+        public class Sound
+        {
+            public string SharedVolume { get; set; } = "Volume";
+
+            public string EnableSound { get; set; } = "Enable sound";
+            public string EnableMusic { get; set; } = "Enable music";
+            public string LoginMusic { get; set; } = "Enable login page music";
+            public string PlayFootsteps { get; set; } = "Play footsteps";
+            public string CombatMusic { get; set; } = "Combat music";
+            public string BackgroundMusic { get; set; } = "Play sound when UO is not in focus";
+        }
+
+        public class Video
+        {
+            #region GameWindow
+            public string FPSCap { get; set; } = "FPS Cap";
+            public string BackgroundFPS { get; set; } = "Reduce FPS when game is not in focus";
+            public string FullsizeViewport { get; set; } = "Always use fullsize game world viewport";
+            public string FullScreen { get; set; } = "Fullscreen window";
+            public string LockViewport { get; set; } = "Lock game world viewport position/size";
+            public string ViewportX { get; set; } = "Viewport position X";
+            public string ViewportY { get; set; } = "Viewport position Y";
+            public string ViewportW { get; set; } = "Viewport width";
+            public string ViewportH { get; set; } = "Viewport height";
+            #endregion
+
+            #region Zoom
+            public string DefaultZoom { get; set; } = "Default zoom";
+            public string ZoomWheel { get; set; } = "Enable zooming with ctrl + mousewheel";
+            public string ReturnDefaultZoom { get; set; } = "Return to default zoom after ctrl is released";
+            #endregion
+
+            #region Lighting
+            public string AltLights { get; set; } = "Alternative lights";
+            public string CustomLLevel { get; set; } = "Custom light level";
+            public string Level { get; set; } = "Light level";
+            public string LightType { get; set; } = "Light level type";
+            public string LightType_Absolute { get; set; } = "Absolute";
+            public string LightType_Minimum { get; set; } = "Minimum";
+            public string DarkNight { get; set; } = "Dark nights";
+            public string ColoredLight { get; set; } = "Colored lighting";
+            #endregion
+
+            #region Misc
+            public string EnableDeathScreen { get; set; } = "Enable death screen";
+            public string BWDead { get; set; } = "Black and white mode while dead";
+            public string MouseThread { get; set; } = "Run mouse in seperate thread";
+            public string TargetAura { get; set; } = "Aura on mouse target";
+            public string AnimWater { get; set; } = "Animated water effect";
+            #endregion
+
+            #region Shadows
+            public string EnableShadows { get; set; } = "Enable shadows";
+            public string RockTreeShadows { get; set; } = "Rock and tree shadows";
+            public string TerrainShadowLevel { get; set; } = "Terrain shadow level";
+            #endregion
+        }
+
+        public class Macros
+        {
+            public string NewMacro { get; set; } = "New Macro";
+            public string DelMacro { get; set; } = "Delete Macro";
+        }
+
+        public class ToolTips
+        {
+            public string EnableToolTips { get; set; } = "Enable tooltips";
+            public string ToolTipDelay { get; set; } = "Tooltip delay";
+            public string ToolTipBG { get; set; } = "Tooltip background opacity";
+            public string ToolTipFont { get; set; } = "Default tooltip font color";
+        }
+
+        public class Speech
+        {
+            public string ScaleSpeechDelay { get; set; } = "Scale speech delay";
+            public string SpeechDelay { get; set; } = "Delay";
+            public string SaveJournalE { get; set; } = "Save journal entries to file";
+            public string ChatEnterActivation { get; set; } = "Activate chat by pressing Enter";
+            public string ChatEnterSpecial { get; set; } = "Also activate with common keys( ! ; : / \\ \\ , . [ | ~ )";
+            public string ShiftEnterChat { get; set; } = "Use Shift + Enter to send message without closing chat";
+            public string ChatGradient { get; set; } = "Hide chat gradient";
+            public string HideGuildChat { get; set; } = "Hide guild chat";
+            public string HideAllianceChat { get; set; } = "Hide alliance chat";
+            public string SpeechColor { get; set; } = "Speech color";
+            public string YellColor { get; set; } = "Yell color";
+            public string PartyColor { get; set; } = "Party color";
+            public string AllianceColor { get; set; } = "Alliance color";
+            public string EmoteColor { get; set; } = "Emote color";
+            public string WhisperColor { get; set; } = "Whisper color";
+            public string GuildColor { get; set; } = "Guild color";
+            public string CharColor { get; set; } = "Chat color";
+        }
+
+        public class CombatSpells
+        {
+            public string HoldTabForCombat { get; set; } = "Hold tab for combat";
+            public string QueryBeforeAttack { get; set; } = "Query before attack";
+            public string QueryBeforeBeneficial { get; set; } = "Query before beneficial acts on murderers/criminals/gray";
+            public string EnableOverheadSpellFormat { get; set; } = "Enable overhead spell format";
+            public string EnableOverheadSpellHue { get; set; } = "Enable overhead spell hue";
+            public string SingleClickForSpellIcons { get; set; } = "Single click for spell icons";
+            public string ShowBuffDurationOnOldStyleBuffBar { get; set; } = "Show buff duration on old style buff bar";
+            public string EnableFastSpellHotkeyAssigning { get; set; } = "Enable fast spell hotkey assigning";
+            public string TooltipFastSpellAssign { get; set; } = "Ctrl + Alt + Click a spell icon the open a gump to set a hotkey";
+            public string InnocentColor { get; set; } = "Innocent color";
+            public string BeneficialSpell { get; set; } = "Beneficial spell";
+            public string FriendColor { get; set; } = "Friend color";
+            public string HarmfulSpell { get; set; } = "Harmful spell";
+            public string Criminal { get; set; } = "Criminal";
+            public string NeutralSpell { get; set; } = "Neutral spell";
+            public string CanBeAttackedHue { get; set; } = "Can be attacked hue";
+            public string Murderer { get; set; } = "Murderer";
+            public string Enemy { get; set; } = "Enemy";
+            public string SpellOverheadFormat { get; set; } = "Spell overhead format";
+            public string TooltipSpellFormat { get; set; } = "{power} for powerword, {spell} for spell name";
+        }
+
+        public class Counters
+        {
+            public string EnableCounters { get; set; } = "Enable counters";
+            public string HighlightItemsOnUse { get; set; } = "Highlight items on use";
+            public string AbbreviatedValues { get; set; } = "Abbreviated values";
+            public string AbbreviateIfAmountExceeds { get; set; } = "Abbreviate if amount exceeds";
+            public string HighlightRedWhenAmountIsLow { get; set; } = "Highlight red when amount is low";
+            public string HighlightRedIfAmountIsBelow { get; set; } = "Highlight red if amount is below";
+            public string CounterLayout { get; set; } = "Counter layout";
+            public string GridSize { get; set; } = "Grid size";
+            public string Rows { get; set; } = "Rows";
+            public string Columns { get; set; } = "Columns";
+        }
+
+        public class InfoBars
+        {
+            public string ShowInfoBar { get; set; } = "Show info bar";
+            public string HighlightType { get; set; } = "Highlight type";
+            public string HighLightOpt_TextColor { get; set; } = "Text color";
+            public string HighLightOpt_ColoredBars { get; set; } = "Colored bars";
+            public string AddItem { get; set; } = "+ Add item";
+            public string Hp { get; set; } = "HP";
+            public string Label { get; set; } = "Label";
+            public string Color { get; set; } = "Color";
+            public string Data { get; set; } = "Data";
+        }
+
+        public class Containers
+        {
+            public string Description { get; set; } = "These settings are for original container gumps, for grid container settings visit the TazUO section";
+            public string CharacterBackpackStyle { get; set; } = "Character backpack style";
+            public string BackpackOpt_Default { get; set; } = "Default";
+            public string BackpackOpt_Suede { get; set; } = "Suede";
+            public string BackpackOpt_PolarBear { get; set; } = "Polar bear";
+            public string BackpackOpt_GhoulSkin { get; set; } = "Ghoul skin";
+            public string ContainerScale { get; set; } = "Container scale";
+            public string AlsoScaleItems { get; set; } = "Also scale items";
+            public string UseLargeContainerGumps { get; set; } = "Use large container gumps";
+            public string DoubleClickToLootItemsInsideContainers { get; set; } = "Double click to loot items inside containers";
+            public string RelativeDragAndDropItemsInContainers { get; set; } = "Relative drag and drop items in containers";
+            public string HighlightContainerOnGroundWhenMouseIsOverAContainerGump { get; set; } = "Highlight container on ground when mouse is over a container gump";
+            public string RecolorContainerGumpByWithContainerHue { get; set; } = "Recolor container gump by with container hue";
+            public string OverrideContainerGumpLocations { get; set; } = "Override container gump locations";
+            public string OverridePosition { get; set; } = "Override position";
+            public string PositionOpt_NearContainer { get; set; } = "Near container";
+            public string PositionOpt_TopRight { get; set; } = "Top right";
+            public string PositionOpt_LastDraggedPosition { get; set; } = "Last dragged position";
+            public string RememberEachContainer { get; set; } = "Remember each container";
+            public string RebuildContainersTxt { get; set; } = "Rebuild containers.txt";
+        }
+
+        public class Experimental
+        {
+            public string DisableDefaultUoHotkeys { get; set; } = "Disable default UO hotkeys";
+            public string DisableArrowsNumlockArrowsPlayerMovement { get; set; } = "Disable arrows & numlock arrows(player movement)";
+            public string DisableTabToggleWarmode { get; set; } = "Disable tab (toggle warmode)";
+            public string DisableCtrlQWMessageHistory { get; set; } = "Disable Ctrl + Q/W (message history)";
+            public string DisableRightLeftClickAutoMove { get; set; } = "Disable right + left click auto move";
+        }
+
+        public class NamePlates
+        {
+            public string NewEntry { get; set; } = "New entry";
+            public string NameOverheadEntryName { get; set; } = "Name overhead entry name";
+            public string DeleteEntry { get; set; } = "Delete entry";
         }
     }
 }

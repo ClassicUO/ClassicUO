@@ -340,18 +340,18 @@ namespace ClassicUO.Game.UI.Gumps
 
             #region Terrain and statics
             page = ((int)PAGE.General + 1004);
-            content.AddToLeft(SubCategoryButton("Terrain & Statics", page, content.LeftWidth));
+            content.AddToLeft(SubCategoryButton(lang.ButtonTerrainStatics, page, content.LeftWidth));
             content.ResetRightSide();
 
-            content.AddToRight(new CheckboxWithLabel("Hide roof tiles", isChecked: !profile.DrawRoofs, valueChanged: (b) => { profile.DrawRoofs = !b; }), true, page);
+            content.AddToRight(new CheckboxWithLabel(lang.GetGeneral.HideRoof, isChecked: !profile.DrawRoofs, valueChanged: (b) => { profile.DrawRoofs = !b; }), true, page);
 
             content.BlankLine();
 
-            content.AddToRight(new CheckboxWithLabel("Change trees to stumps", isChecked: profile.TreeToStumps, valueChanged: (b) => { profile.TreeToStumps = b; }), true, page);
+            content.AddToRight(new CheckboxWithLabel(lang.GetGeneral.TreesToStump, isChecked: profile.TreeToStumps, valueChanged: (b) => { profile.TreeToStumps = b; }), true, page);
 
             content.BlankLine();
 
-            content.AddToRight(new CheckboxWithLabel("Hide vegetation", isChecked: profile.HideVegetation, valueChanged: (b) => { profile.HideVegetation = b; }), true, page);
+            content.AddToRight(new CheckboxWithLabel(lang.GetGeneral.HideVegetation, isChecked: profile.HideVegetation, valueChanged: (b) => { profile.HideVegetation = b; }), true, page);
 
             //content.BlankLine();
 
@@ -359,7 +359,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             content.BlankLine();
 
-            content.AddToRight(new ComboBoxWithLabel("Field types", 0, Theme.COMBO_BOX_WIDTH, new string[] { "Normal", "Static", "Tile" }, profile.FieldsType, (s, n) => { profile.FieldsType = s; }), true, page);
+            content.AddToRight(new ComboBoxWithLabel(lang.GetGeneral.MagicFieldType, 0, Theme.COMBO_BOX_WIDTH, new string[] { lang.GetGeneral.MagicFieldOpt_Normal, lang.GetGeneral.MagicFieldOpt_Static, lang.GetGeneral.MagicFieldOpt_Tile }, profile.FieldsType, (s, n) => { profile.FieldsType = s; }), true, page);
 
             #endregion
 
@@ -379,7 +379,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             options.Add(s = new SettingsOption(
                     "",
-                    new CheckboxWithLabel("Enable sound", 0, profile.EnableSound, (b) => { profile.EnableSound = b; }),
+                    new CheckboxWithLabel(lang.GetSound.EnableSound, 0, profile.EnableSound, (b) => { profile.EnableSound = b; }),
                     mainContent.RightWidth,
                     PAGE.Sound
                 ));
@@ -388,7 +388,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             options.Add(s = new SettingsOption(
                     "",
-                    new SliderWithLabel("Volume", 0, Theme.SLIDER_WIDTH, 0, 100, profile.SoundVolume, (i) => { profile.SoundVolume = i; }),
+                    new SliderWithLabel(lang.GetSound.SharedVolume, 0, Theme.SLIDER_WIDTH, 0, 100, profile.SoundVolume, (i) => { profile.SoundVolume = i; }),
                     mainContent.RightWidth,
                     PAGE.Sound
                 ));
@@ -399,7 +399,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             options.Add(s = new SettingsOption(
                     "",
-                    new CheckboxWithLabel("Enable music", 0, profile.EnableMusic, (b) => { profile.EnableMusic = b; }),
+                    new CheckboxWithLabel(lang.GetSound.EnableMusic, 0, profile.EnableMusic, (b) => { profile.EnableMusic = b; }),
                     mainContent.RightWidth,
                     PAGE.Sound
                 ));
@@ -408,7 +408,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             options.Add(s = new SettingsOption(
                     "",
-                    new SliderWithLabel("Volume", 0, Theme.SLIDER_WIDTH, 0, 100, profile.MusicVolume, (i) => { profile.MusicVolume = i; }),
+                    new SliderWithLabel(lang.GetSound.SharedVolume, 0, Theme.SLIDER_WIDTH, 0, 100, profile.MusicVolume, (i) => { profile.MusicVolume = i; }),
                     mainContent.RightWidth,
                     PAGE.Sound
                 ));
@@ -419,7 +419,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             options.Add(s = new SettingsOption(
                     "",
-                    new CheckboxWithLabel("Enable login page music", 0, Settings.GlobalSettings.LoginMusic, (b) => { Settings.GlobalSettings.LoginMusic = b; }),
+                    new CheckboxWithLabel(lang.GetSound.LoginMusic, 0, Settings.GlobalSettings.LoginMusic, (b) => { Settings.GlobalSettings.LoginMusic = b; }),
                     mainContent.RightWidth,
                     PAGE.Sound
                 ));
@@ -428,7 +428,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             options.Add(s = new SettingsOption(
                     "",
-                    new SliderWithLabel("Volume", 0, Theme.SLIDER_WIDTH, 0, 100, Settings.GlobalSettings.LoginMusicVolume, (i) => { Settings.GlobalSettings.LoginMusicVolume = i; }),
+                    new SliderWithLabel(lang.GetSound.SharedVolume, 0, Theme.SLIDER_WIDTH, 0, 100, Settings.GlobalSettings.LoginMusicVolume, (i) => { Settings.GlobalSettings.LoginMusicVolume = i; }),
                     mainContent.RightWidth,
                     PAGE.Sound
                 ));
@@ -439,7 +439,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             options.Add(s = new SettingsOption(
                     "",
-                    new CheckboxWithLabel("Play footsteps", 0, profile.EnableFootstepsSound, (b) => { profile.EnableFootstepsSound = b; }),
+                    new CheckboxWithLabel(lang.GetSound.PlayFootsteps, 0, profile.EnableFootstepsSound, (b) => { profile.EnableFootstepsSound = b; }),
                     mainContent.RightWidth,
                     PAGE.Sound
                 ));
@@ -449,7 +449,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             options.Add(s = new SettingsOption(
                     "",
-                    new CheckboxWithLabel("Combat music", 0, profile.EnableCombatMusic, (b) => { profile.EnableCombatMusic = b; }),
+                    new CheckboxWithLabel(lang.GetSound.CombatMusic, 0, profile.EnableCombatMusic, (b) => { profile.EnableCombatMusic = b; }),
                     mainContent.RightWidth,
                     PAGE.Sound
                 ));
@@ -459,7 +459,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             options.Add(s = new SettingsOption(
                     "",
-                    new CheckboxWithLabel("Play sound when UO is not in focus", 0, profile.ReproduceSoundsInBackground, (b) => { profile.ReproduceSoundsInBackground = b; }),
+                    new CheckboxWithLabel(lang.GetSound.BackgroundMusic, 0, profile.ReproduceSoundsInBackground, (b) => { profile.ReproduceSoundsInBackground = b; }),
                     mainContent.RightWidth,
                     PAGE.Sound
                 ));
@@ -471,16 +471,16 @@ namespace ClassicUO.Game.UI.Gumps
             LeftSideMenuRightSideContent content = new LeftSideMenuRightSideContent(mainContent.RightWidth, mainContent.Height, (int)(mainContent.RightWidth * 0.3));
             #region Game window
             int page = ((int)PAGE.Video + 1000);
-            content.AddToLeft(SubCategoryButton("Game window", page, content.LeftWidth));
+            content.AddToLeft(SubCategoryButton(lang.ButtonGameWindow, page, content.LeftWidth));
 
-            content.AddToRight(new SliderWithLabel("FPS Cap", 0, Theme.SLIDER_WIDTH, Constants.MIN_FPS, Constants.MAX_FPS, Settings.GlobalSettings.FPS, (r) => { Settings.GlobalSettings.FPS = r; Client.Game.SetRefreshRate(r); }), true, page);
+            content.AddToRight(new SliderWithLabel(lang.GetVideo.FPSCap, 0, Theme.SLIDER_WIDTH, Constants.MIN_FPS, Constants.MAX_FPS, Settings.GlobalSettings.FPS, (r) => { Settings.GlobalSettings.FPS = r; Client.Game.SetRefreshRate(r); }), true, page);
             content.Indent();
-            content.AddToRight(new CheckboxWithLabel("Reduce FPS when game is not in focus", isChecked: profile.ReduceFPSWhenInactive, valueChanged: (b) => { profile.ReduceFPSWhenInactive = b; }), true, page);
+            content.AddToRight(new CheckboxWithLabel(lang.GetVideo.BackgroundFPS, isChecked: profile.ReduceFPSWhenInactive, valueChanged: (b) => { profile.ReduceFPSWhenInactive = b; }), true, page);
             content.RemoveIndent();
 
             content.BlankLine();
 
-            content.AddToRight(new CheckboxWithLabel("Always use fullsize game world viewport", isChecked: profile.GameWindowFullSize, valueChanged: (b) =>
+            content.AddToRight(new CheckboxWithLabel(lang.GetVideo.FullsizeViewport, isChecked: profile.GameWindowFullSize, valueChanged: (b) =>
             {
                 profile.GameWindowFullSize = b;
                 if (b)
@@ -499,52 +499,52 @@ namespace ClassicUO.Game.UI.Gumps
 
             content.BlankLine();
 
-            content.AddToRight(new CheckboxWithLabel("Fullscreen window", isChecked: profile.WindowBorderless, valueChanged: (b) => { profile.WindowBorderless = b; Client.Game.SetWindowBorderless(b); }), true, page);
+            content.AddToRight(new CheckboxWithLabel(lang.GetVideo.FullScreen, isChecked: profile.WindowBorderless, valueChanged: (b) => { profile.WindowBorderless = b; Client.Game.SetWindowBorderless(b); }), true, page);
 
             content.BlankLine();
 
-            content.AddToRight(new CheckboxWithLabel("Lock game world viewport position/size", isChecked: profile.GameWindowLock, valueChanged: (b) => { profile.GameWindowLock = b; }), true, page);
+            content.AddToRight(new CheckboxWithLabel(lang.GetVideo.LockViewport, isChecked: profile.GameWindowLock, valueChanged: (b) => { profile.GameWindowLock = b; }), true, page);
 
             content.BlankLine();
 
-            content.AddToRight(new SliderWithLabel("Viewport position X", 0, Theme.SLIDER_WIDTH, 0, Client.Game.Window.ClientBounds.Width, profile.GameWindowPosition.X, (r) => { profile.GameWindowPosition = new Point(r, profile.GameWindowPosition.Y); UIManager.GetGump<WorldViewportGump>()?.SetGameWindowPosition(profile.GameWindowPosition); }), true, page);
-            content.AddToRight(new SliderWithLabel("Viewport position Y", 0, Theme.SLIDER_WIDTH, 0, Client.Game.Window.ClientBounds.Height, profile.GameWindowPosition.Y, (r) => { profile.GameWindowPosition = new Point(profile.GameWindowPosition.X, r); UIManager.GetGump<WorldViewportGump>()?.SetGameWindowPosition(profile.GameWindowPosition); }), true, page);
+            content.AddToRight(new SliderWithLabel(lang.GetVideo.ViewportX, 0, Theme.SLIDER_WIDTH, 0, Client.Game.Window.ClientBounds.Width, profile.GameWindowPosition.X, (r) => { profile.GameWindowPosition = new Point(r, profile.GameWindowPosition.Y); UIManager.GetGump<WorldViewportGump>()?.SetGameWindowPosition(profile.GameWindowPosition); }), true, page);
+            content.AddToRight(new SliderWithLabel(lang.GetVideo.ViewportY, 0, Theme.SLIDER_WIDTH, 0, Client.Game.Window.ClientBounds.Height, profile.GameWindowPosition.Y, (r) => { profile.GameWindowPosition = new Point(profile.GameWindowPosition.X, r); UIManager.GetGump<WorldViewportGump>()?.SetGameWindowPosition(profile.GameWindowPosition); }), true, page);
 
             content.BlankLine();
 
-            content.AddToRight(new SliderWithLabel("Viewport width", 0, Theme.SLIDER_WIDTH, 0, Client.Game.Window.ClientBounds.Width, profile.GameWindowSize.X, (r) => { profile.GameWindowSize = new Point(r, profile.GameWindowSize.Y); UIManager.GetGump<WorldViewportGump>()?.ResizeGameWindow(profile.GameWindowSize); }), true, page);
-            content.AddToRight(new SliderWithLabel("Viewport height", 0, Theme.SLIDER_WIDTH, 0, Client.Game.Window.ClientBounds.Height, profile.GameWindowSize.Y, (r) => { profile.GameWindowSize = new Point(profile.GameWindowSize.X, r); UIManager.GetGump<WorldViewportGump>()?.ResizeGameWindow(profile.GameWindowSize); }), true, page);
+            content.AddToRight(new SliderWithLabel(lang.GetVideo.ViewportW, 0, Theme.SLIDER_WIDTH, 0, Client.Game.Window.ClientBounds.Width, profile.GameWindowSize.X, (r) => { profile.GameWindowSize = new Point(r, profile.GameWindowSize.Y); UIManager.GetGump<WorldViewportGump>()?.ResizeGameWindow(profile.GameWindowSize); }), true, page);
+            content.AddToRight(new SliderWithLabel(lang.GetVideo.ViewportH, 0, Theme.SLIDER_WIDTH, 0, Client.Game.Window.ClientBounds.Height, profile.GameWindowSize.Y, (r) => { profile.GameWindowSize = new Point(profile.GameWindowSize.X, r); UIManager.GetGump<WorldViewportGump>()?.ResizeGameWindow(profile.GameWindowSize); }), true, page);
 
             #endregion
 
             #region Zoom
             page = ((int)PAGE.Video + 1001);
-            content.AddToLeft(SubCategoryButton("Zoom", page, content.LeftWidth));
+            content.AddToLeft(SubCategoryButton(lang.ButtonZoom, page, content.LeftWidth));
             content.ResetRightSide();
 
             var cameraZoomCount = (int)((Client.Game.Scene.Camera.ZoomMax - Client.Game.Scene.Camera.ZoomMin) / Client.Game.Scene.Camera.ZoomStep);
             var cameraZoomIndex = cameraZoomCount - (int)((Client.Game.Scene.Camera.ZoomMax - Client.Game.Scene.Camera.Zoom) / Client.Game.Scene.Camera.ZoomStep);
-            content.AddToRight(new SliderWithLabel("Default zoom", 0, Theme.SLIDER_WIDTH, 0, cameraZoomCount, cameraZoomIndex, (r) => { profile.DefaultScale = Client.Game.Scene.Camera.Zoom = (r * Client.Game.Scene.Camera.ZoomStep) + Client.Game.Scene.Camera.ZoomMin; }), true, page);
+            content.AddToRight(new SliderWithLabel(lang.GetVideo.DefaultZoom, 0, Theme.SLIDER_WIDTH, 0, cameraZoomCount, cameraZoomIndex, (r) => { profile.DefaultScale = Client.Game.Scene.Camera.Zoom = (r * Client.Game.Scene.Camera.ZoomStep) + Client.Game.Scene.Camera.ZoomMin; }), true, page);
 
             content.BlankLine();
 
-            content.AddToRight(new CheckboxWithLabel("Enable zooming with ctrl + mousewheel", isChecked: profile.EnableMousewheelScaleZoom, valueChanged: (b) => { profile.EnableMousewheelScaleZoom = b; }), true, page);
+            content.AddToRight(new CheckboxWithLabel(lang.GetVideo.ZoomWheel, isChecked: profile.EnableMousewheelScaleZoom, valueChanged: (b) => { profile.EnableMousewheelScaleZoom = b; }), true, page);
 
             content.BlankLine();
 
-            content.AddToRight(new CheckboxWithLabel("Return to default zoom after ctrl is released", isChecked: profile.RestoreScaleAfterUnpressCtrl, valueChanged: (b) => { profile.RestoreScaleAfterUnpressCtrl = b; }), true, page);
+            content.AddToRight(new CheckboxWithLabel(lang.GetVideo.ReturnDefaultZoom, isChecked: profile.RestoreScaleAfterUnpressCtrl, valueChanged: (b) => { profile.RestoreScaleAfterUnpressCtrl = b; }), true, page);
             #endregion
 
             #region Lighting
             page = ((int)PAGE.Video + 1002);
-            content.AddToLeft(SubCategoryButton("Lighting", page, content.LeftWidth));
+            content.AddToLeft(SubCategoryButton(lang.ButtonLighting, page, content.LeftWidth));
             content.ResetRightSide();
 
-            content.AddToRight(new CheckboxWithLabel("Alternative lights", isChecked: profile.UseAlternativeLights, valueChanged: (b) => { profile.UseAlternativeLights = b; }), true, page);
+            content.AddToRight(new CheckboxWithLabel(lang.GetVideo.AltLights, isChecked: profile.UseAlternativeLights, valueChanged: (b) => { profile.UseAlternativeLights = b; }), true, page);
 
             content.BlankLine();
 
-            content.AddToRight(new CheckboxWithLabel("Custom light level", isChecked: profile.UseCustomLightLevel, valueChanged: (b) =>
+            content.AddToRight(new CheckboxWithLabel(lang.GetVideo.CustomLLevel, isChecked: profile.UseCustomLightLevel, valueChanged: (b) =>
             {
                 profile.UseCustomLightLevel = b;
                 if (b)
@@ -559,7 +559,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }), true, page);
             content.Indent();
-            content.AddToRight(new SliderWithLabel("Light level", 0, Theme.SLIDER_WIDTH, 0, 0x1E, 0x1E - profile.LightLevel, (r) =>
+            content.AddToRight(new SliderWithLabel(lang.GetVideo.Level, 0, Theme.SLIDER_WIDTH, 0, 0x1E, 0x1E - profile.LightLevel, (r) =>
             {
                 profile.LightLevel = (byte)(0x1E - r);
                 if (profile.UseCustomLightLevel)
@@ -577,54 +577,54 @@ namespace ClassicUO.Game.UI.Gumps
 
             content.BlankLine();
 
-            content.AddToRight(new ComboBoxWithLabel("Light level type", 0, Theme.COMBO_BOX_WIDTH, new string[] { "Absolute", "Minimum" }, profile.LightLevelType, (s, n) => { profile.LightLevelType = s; }), true, page);
+            content.AddToRight(new ComboBoxWithLabel(lang.GetVideo.LightType, 0, Theme.COMBO_BOX_WIDTH, new string[] { lang.GetVideo.LightType_Absolute, lang.GetVideo.LightType_Minimum }, profile.LightLevelType, (s, n) => { profile.LightLevelType = s; }), true, page);
 
             content.BlankLine();
 
-            content.AddToRight(new CheckboxWithLabel("Dark nights", isChecked: profile.UseDarkNights, valueChanged: (b) => { profile.UseDarkNights = b; }), true, page);
+            content.AddToRight(new CheckboxWithLabel(lang.GetVideo.DarkNight, isChecked: profile.UseDarkNights, valueChanged: (b) => { profile.UseDarkNights = b; }), true, page);
 
             content.BlankLine();
 
-            content.AddToRight(new CheckboxWithLabel("Colored lighting", isChecked: profile.UseColoredLights, valueChanged: (b) => { profile.UseColoredLights = b; }), true, page);
+            content.AddToRight(new CheckboxWithLabel(lang.GetVideo.ColoredLight, isChecked: profile.UseColoredLights, valueChanged: (b) => { profile.UseColoredLights = b; }), true, page);
 
             #endregion
 
             #region Misc
             page = ((int)PAGE.Video + 1003);
-            content.AddToLeft(SubCategoryButton("Misc", page, content.LeftWidth));
+            content.AddToLeft(SubCategoryButton(lang.ButtonMisc, page, content.LeftWidth));
             content.ResetRightSide();
 
-            content.AddToRight(new CheckboxWithLabel("Enable death screen", isChecked: profile.EnableDeathScreen, valueChanged: (b) => { profile.EnableDeathScreen = b; }), true, page);
+            content.AddToRight(new CheckboxWithLabel(lang.GetVideo.EnableDeathScreen, isChecked: profile.EnableDeathScreen, valueChanged: (b) => { profile.EnableDeathScreen = b; }), true, page);
             content.Indent();
-            content.AddToRight(new CheckboxWithLabel("Black and white mode while dead", isChecked: profile.EnableBlackWhiteEffect, valueChanged: (b) => { profile.EnableBlackWhiteEffect = b; }), true, page);
+            content.AddToRight(new CheckboxWithLabel(lang.GetVideo.BWDead, isChecked: profile.EnableBlackWhiteEffect, valueChanged: (b) => { profile.EnableBlackWhiteEffect = b; }), true, page);
             content.RemoveIndent();
 
             content.BlankLine();
 
-            content.AddToRight(new CheckboxWithLabel("Run mouse in seperate thread", isChecked: Settings.GlobalSettings.RunMouseInASeparateThread, valueChanged: (b) => { Settings.GlobalSettings.RunMouseInASeparateThread = b; }), true, page);
+            content.AddToRight(new CheckboxWithLabel(lang.GetVideo.MouseThread, isChecked: Settings.GlobalSettings.RunMouseInASeparateThread, valueChanged: (b) => { Settings.GlobalSettings.RunMouseInASeparateThread = b; }), true, page);
 
             content.BlankLine();
 
-            content.AddToRight(new CheckboxWithLabel("Aura on mouse target", isChecked: profile.AuraOnMouse, valueChanged: (b) => { profile.AuraOnMouse = b; }), true, page);
+            content.AddToRight(new CheckboxWithLabel(lang.GetVideo.TargetAura, isChecked: profile.AuraOnMouse, valueChanged: (b) => { profile.AuraOnMouse = b; }), true, page);
 
             content.BlankLine();
 
-            content.AddToRight(new CheckboxWithLabel("Animated water effect", isChecked: profile.AnimatedWaterEffect, valueChanged: (b) => { profile.AnimatedWaterEffect = b; }), true, page);
+            content.AddToRight(new CheckboxWithLabel(lang.GetVideo.AnimWater, isChecked: profile.AnimatedWaterEffect, valueChanged: (b) => { profile.AnimatedWaterEffect = b; }), true, page);
             #endregion
 
             #region Shadows
             page = ((int)PAGE.Video + 1004);
-            content.AddToLeft(SubCategoryButton("Shadows", page, content.LeftWidth));
+            content.AddToLeft(SubCategoryButton(lang.ButtonShadows, page, content.LeftWidth));
             content.ResetRightSide();
 
-            content.AddToRight(new CheckboxWithLabel("Enable shadows", isChecked: profile.ShadowsEnabled, valueChanged: (b) => { profile.ShadowsEnabled = b; }), true, page);
+            content.AddToRight(new CheckboxWithLabel(lang.GetVideo.EnableShadows, isChecked: profile.ShadowsEnabled, valueChanged: (b) => { profile.ShadowsEnabled = b; }), true, page);
             content.Indent();
-            content.AddToRight(new CheckboxWithLabel("Rock and tree shadows", isChecked: profile.ShadowsStatics, valueChanged: (b) => { profile.ShadowsStatics = b; }), true, page);
+            content.AddToRight(new CheckboxWithLabel(lang.GetVideo.RockTreeShadows, isChecked: profile.ShadowsStatics, valueChanged: (b) => { profile.ShadowsStatics = b; }), true, page);
             content.RemoveIndent();
 
             content.BlankLine();
 
-            content.AddToRight(new SliderWithLabel("Terrain shadow level", 0, Theme.SLIDER_WIDTH, Constants.MIN_TERRAIN_SHADOWS_LEVEL, Constants.MAX_TERRAIN_SHADOWS_LEVEL, profile.TerrainShadowsLevel, (r) => { profile.TerrainShadowsLevel = r; }), true, page);
+            content.AddToRight(new SliderWithLabel(lang.GetVideo.TerrainShadowLevel, 0, Theme.SLIDER_WIDTH, Constants.MIN_TERRAIN_SHADOWS_LEVEL, Constants.MAX_TERRAIN_SHADOWS_LEVEL, profile.TerrainShadowsLevel, (r) => { profile.TerrainShadowsLevel = r; }), true, page);
             #endregion
 
             options.Add(new SettingsOption(
@@ -642,7 +642,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             #region New Macro
             ModernButton b;
-            content.AddToLeft(b = new ModernButton(0, 0, content.LeftWidth, 40, ButtonAction.Activate, "New Macro", Theme.BUTTON_FONT_COLOR) { ButtonParameter = page, IsSelectable = false });
+            content.AddToLeft(b = new ModernButton(0, 0, content.LeftWidth, 40, ButtonAction.Activate, lang.GetMacros.NewMacro, Theme.BUTTON_FONT_COLOR) { ButtonParameter = page, IsSelectable = false });
 
             b.MouseUp += (sender, e) =>
             {
@@ -715,10 +715,9 @@ namespace ClassicUO.Game.UI.Gumps
             };
             #endregion
 
-
             #region Delete Macro
             page = ((int)PAGE.Macros + 1001);
-            content.AddToLeft(b = new ModernButton(0, 0, content.LeftWidth, 40, ButtonAction.Activate, "Delete Macro", Theme.BUTTON_FONT_COLOR) { ButtonParameter = page, IsSelectable = false });
+            content.AddToLeft(b = new ModernButton(0, 0, content.LeftWidth, 40, ButtonAction.Activate, lang.GetMacros.DelMacro, Theme.BUTTON_FONT_COLOR) { ButtonParameter = page, IsSelectable = false });
 
             b.MouseUp += (ss, ee) =>
             {
@@ -751,7 +750,6 @@ namespace ClassicUO.Game.UI.Gumps
             #endregion
 
             content.AddToLeft(new Line(0, 0, content.LeftWidth, 1, Color.Gray.PackedValue));
-
 
             #region Macros
             page = ((int)PAGE.Macros + 1002);
@@ -796,7 +794,6 @@ namespace ClassicUO.Game.UI.Gumps
             content.ActivePage = b.ButtonParameter;
             #endregion
 
-
             options.Add(new SettingsOption(
                     "",
                     content,
@@ -812,7 +809,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             options.Add(s = new SettingsOption(
                     "",
-                    new CheckboxWithLabel("Enable tooltips", 0, profile.UseTooltip, (b) => { profile.UseTooltip = b; }),
+                    new CheckboxWithLabel(lang.GetToolTips.EnableToolTips, 0, profile.UseTooltip, (b) => { profile.UseTooltip = b; }),
                     mainContent.RightWidth,
                     PAGE.Tooltip
                 ));
@@ -821,7 +818,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             options.Add(s = new SettingsOption(
                     "",
-                    new SliderWithLabel("Tooltip delay", 0, Theme.SLIDER_WIDTH, 0, 1000, profile.TooltipDelayBeforeDisplay, (i) => { profile.TooltipDelayBeforeDisplay = i; }),
+                    new SliderWithLabel(lang.GetToolTips.ToolTipDelay, 0, Theme.SLIDER_WIDTH, 0, 1000, profile.TooltipDelayBeforeDisplay, (i) => { profile.TooltipDelayBeforeDisplay = i; }),
                     mainContent.RightWidth,
                     PAGE.Tooltip
                 ));
@@ -829,7 +826,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             options.Add(s = new SettingsOption(
                     "",
-                    new SliderWithLabel("Tooltip background opacity", 0, Theme.SLIDER_WIDTH, 0, 100, profile.TooltipBackgroundOpacity, (i) => { profile.TooltipBackgroundOpacity = i; }),
+                    new SliderWithLabel(lang.GetToolTips.ToolTipBG, 0, Theme.SLIDER_WIDTH, 0, 100, profile.TooltipBackgroundOpacity, (i) => { profile.TooltipBackgroundOpacity = i; }),
                     mainContent.RightWidth,
                     PAGE.Tooltip
                 ));
@@ -837,7 +834,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             options.Add(s = new SettingsOption(
                     "",
-                    new ModernColorPickerWithLabel("Default tooltip font color", profile.TooltipTextHue, (h) => { profile.TooltipTextHue = h; }),
+                    new ModernColorPickerWithLabel(lang.GetToolTips.ToolTipFont, profile.TooltipTextHue, (h) => { profile.TooltipTextHue = h; }),
                     mainContent.RightWidth,
                     PAGE.Tooltip
                 ));
@@ -851,7 +848,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             options.Add(s = new SettingsOption(
                     "",
-                    new CheckboxWithLabel("Scale speech delay", 0, profile.ScaleSpeechDelay, (b) => { profile.ScaleSpeechDelay = b; }),
+                    new CheckboxWithLabel(lang.GetSpeech.ScaleSpeechDelay, 0, profile.ScaleSpeechDelay, (b) => { profile.ScaleSpeechDelay = b; }),
                     mainContent.RightWidth,
                     PAGE.Speech
                 ));
@@ -860,7 +857,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             options.Add(s = new SettingsOption(
                     "",
-                    new SliderWithLabel("Delay", 0, Theme.SLIDER_WIDTH, 0, 1000, profile.SpeechDelay, (i) => { profile.SpeechDelay = i; }),
+                    new SliderWithLabel(lang.GetSpeech.SpeechDelay, 0, Theme.SLIDER_WIDTH, 0, 1000, profile.SpeechDelay, (i) => { profile.SpeechDelay = i; }),
                     mainContent.RightWidth,
                     PAGE.Speech
                 ));
@@ -873,7 +870,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             options.Add(s = new SettingsOption(
                     "",
-                    new CheckboxWithLabel("Save journal entries to file", 0, profile.SaveJournalToFile, (b) => { profile.SaveJournalToFile = b; }),
+                    new CheckboxWithLabel(lang.GetSpeech.SaveJournalE, 0, profile.SaveJournalToFile, (b) => { profile.SaveJournalToFile = b; }),
                     mainContent.RightWidth,
                     PAGE.Speech
                 ));
@@ -885,7 +882,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             options.Add(s = new SettingsOption(
                     "",
-                    new CheckboxWithLabel("Activate chat by pressing Enter", 0, profile.ActivateChatAfterEnter, (b) => { profile.ActivateChatAfterEnter = b; }),
+                    new CheckboxWithLabel(lang.GetSpeech.ChatEnterActivation, 0, profile.ActivateChatAfterEnter, (b) => { profile.ActivateChatAfterEnter = b; }),
                     mainContent.RightWidth,
                     PAGE.Speech
                 ));
@@ -894,7 +891,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             options.Add(s = new SettingsOption(
                     "",
-                    new CheckboxWithLabel("Also activate with common keys( ! ; : / \\ \\ , . [ | ~ )", 0, profile.ActivateChatAdditionalButtons, (b) => { profile.ActivateChatAdditionalButtons = b; }),
+                    new CheckboxWithLabel(lang.GetSpeech.ChatEnterSpecial, 0, profile.ActivateChatAdditionalButtons, (b) => { profile.ActivateChatAdditionalButtons = b; }),
                     mainContent.RightWidth,
                     PAGE.Speech
                 ));
@@ -902,7 +899,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             options.Add(s = new SettingsOption(
                     "",
-                    new CheckboxWithLabel("Use Shift + Enter to send message without closing chat", 0, profile.ActivateChatShiftEnterSupport, (b) => { profile.ActivateChatShiftEnterSupport = b; }),
+                    new CheckboxWithLabel(lang.GetSpeech.ShiftEnterChat, 0, profile.ActivateChatShiftEnterSupport, (b) => { profile.ActivateChatShiftEnterSupport = b; }),
                     mainContent.RightWidth,
                     PAGE.Speech
                 ));
@@ -915,7 +912,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             options.Add(s = new SettingsOption(
                     "",
-                    new CheckboxWithLabel("Hide chat gradient", 0, profile.HideChatGradient, (b) => { profile.HideChatGradient = b; }),
+                    new CheckboxWithLabel(lang.GetSpeech.ChatGradient, 0, profile.HideChatGradient, (b) => { profile.HideChatGradient = b; }),
                     mainContent.RightWidth,
                     PAGE.Speech
                 ));
@@ -927,7 +924,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             options.Add(s = new SettingsOption(
                     "",
-                    new CheckboxWithLabel("Hide guild chat", 0, profile.IgnoreGuildMessages, (b) => { profile.IgnoreGuildMessages = b; }),
+                    new CheckboxWithLabel(lang.GetSpeech.HideGuildChat, 0, profile.IgnoreGuildMessages, (b) => { profile.IgnoreGuildMessages = b; }),
                     mainContent.RightWidth,
                     PAGE.Speech
                 ));
@@ -939,7 +936,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             options.Add(s = new SettingsOption(
                     "",
-                    new CheckboxWithLabel("Hide alliance chat", 0, profile.IgnoreAllianceMessages, (b) => { profile.IgnoreAllianceMessages = b; }),
+                    new CheckboxWithLabel(lang.GetSpeech.HideAllianceChat, 0, profile.IgnoreAllianceMessages, (b) => { profile.IgnoreAllianceMessages = b; }),
                     mainContent.RightWidth,
                     PAGE.Speech
                 ));
@@ -951,7 +948,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             options.Add(s = new SettingsOption(
                 "",
-                new ModernColorPickerWithLabel("Speech color", profile.SpeechHue, (h) => { profile.SpeechHue = h; }),
+                new ModernColorPickerWithLabel(lang.GetSpeech.SpeechColor, profile.SpeechHue, (h) => { profile.SpeechHue = h; }),
                 mainContent.RightWidth,
                 PAGE.Speech
             ));
@@ -960,7 +957,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             options.Add(s = new SettingsOption(
                 "",
-                new ModernColorPickerWithLabel("Yell color", profile.YellHue, (h) => { profile.YellHue = h; }),
+                new ModernColorPickerWithLabel(lang.GetSpeech.YellColor, profile.YellHue, (h) => { profile.YellHue = h; }),
                 mainContent.RightWidth,
                 PAGE.Speech
             ));
@@ -968,7 +965,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             options.Add(s = new SettingsOption(
                 "",
-                new ModernColorPickerWithLabel("Party color", profile.PartyMessageHue, (h) => { profile.PartyMessageHue = h; }),
+                new ModernColorPickerWithLabel(lang.GetSpeech.PartyColor, profile.PartyMessageHue, (h) => { profile.PartyMessageHue = h; }),
                 mainContent.RightWidth,
                 PAGE.Speech
             ));
@@ -977,7 +974,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             options.Add(s = new SettingsOption(
                 "",
-                new ModernColorPickerWithLabel("Alliance color", profile.AllyMessageHue, (h) => { profile.AllyMessageHue = h; }),
+                new ModernColorPickerWithLabel(lang.GetSpeech.AllianceColor, profile.AllyMessageHue, (h) => { profile.AllyMessageHue = h; }),
                 mainContent.RightWidth,
                 PAGE.Speech
             ));
@@ -985,7 +982,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             options.Add(s = new SettingsOption(
                 "",
-                new ModernColorPickerWithLabel("Emote color", profile.EmoteHue, (h) => { profile.EmoteHue = h; }),
+                new ModernColorPickerWithLabel(lang.GetSpeech.EmoteColor, profile.EmoteHue, (h) => { profile.EmoteHue = h; }),
                 mainContent.RightWidth,
                 PAGE.Speech
             ));
@@ -994,7 +991,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             options.Add(s = new SettingsOption(
                 "",
-                new ModernColorPickerWithLabel("Whisper color", profile.WhisperHue, (h) => { profile.WhisperHue = h; }),
+                new ModernColorPickerWithLabel(lang.GetSpeech.WhisperColor, profile.WhisperHue, (h) => { profile.WhisperHue = h; }),
                 mainContent.RightWidth,
                 PAGE.Speech
             ));
@@ -1002,7 +999,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             options.Add(s = new SettingsOption(
                 "",
-                new ModernColorPickerWithLabel("Guild color", profile.GuildMessageHue, (h) => { profile.GuildMessageHue = h; }),
+                new ModernColorPickerWithLabel(lang.GetSpeech.GuildColor, profile.GuildMessageHue, (h) => { profile.GuildMessageHue = h; }),
                 mainContent.RightWidth,
                 PAGE.Speech
             ));
@@ -1011,7 +1008,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             options.Add(s = new SettingsOption(
                 "",
-                new ModernColorPickerWithLabel("Chat color", profile.ChatMessageHue, (h) => { profile.ChatMessageHue = h; }),
+                new ModernColorPickerWithLabel(lang.GetSpeech.CharColor, profile.ChatMessageHue, (h) => { profile.ChatMessageHue = h; }),
                 mainContent.RightWidth,
                 PAGE.Speech
             ));
@@ -1025,7 +1022,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             options.Add(s = new SettingsOption(
                     "",
-                    new CheckboxWithLabel("Hold tab for combat", 0, profile.HoldDownKeyTab, (b) => { profile.HoldDownKeyTab = b; }),
+                    new CheckboxWithLabel(lang.GetCombatSpells.HoldTabForCombat, 0, profile.HoldDownKeyTab, (b) => { profile.HoldDownKeyTab = b; }),
                     mainContent.RightWidth,
                     PAGE.CombatSpells
                 ));
@@ -1035,7 +1032,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             options.Add(s = new SettingsOption(
                     "",
-                    new CheckboxWithLabel("Query before attack", 0, profile.EnabledCriminalActionQuery, (b) => { profile.EnabledCriminalActionQuery = b; }),
+                    new CheckboxWithLabel(lang.GetCombatSpells.QueryBeforeAttack, 0, profile.EnabledCriminalActionQuery, (b) => { profile.EnabledCriminalActionQuery = b; }),
                     mainContent.RightWidth,
                     PAGE.CombatSpells
                 ));
@@ -1045,7 +1042,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             options.Add(s = new SettingsOption(
                     "",
-                    new CheckboxWithLabel("Query before beneficial acts on murderers/criminals/gray", 0, profile.EnabledBeneficialCriminalActionQuery, (b) => { profile.EnabledBeneficialCriminalActionQuery = b; }),
+                    new CheckboxWithLabel(lang.GetCombatSpells.QueryBeforeBeneficial, 0, profile.EnabledBeneficialCriminalActionQuery, (b) => { profile.EnabledBeneficialCriminalActionQuery = b; }),
                     mainContent.RightWidth,
                     PAGE.CombatSpells
                 ));
@@ -1055,7 +1052,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             options.Add(s = new SettingsOption(
                     "",
-                    new CheckboxWithLabel("Enable overhead spell format", 0, profile.EnabledSpellFormat, (b) => { profile.EnabledSpellFormat = b; }),
+                    new CheckboxWithLabel(lang.GetCombatSpells.EnableOverheadSpellFormat, 0, profile.EnabledSpellFormat, (b) => { profile.EnabledSpellFormat = b; }),
                     mainContent.RightWidth,
                     PAGE.CombatSpells
                 ));
@@ -1065,7 +1062,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             options.Add(s = new SettingsOption(
                     "",
-                    new CheckboxWithLabel("Enable overhead spell hue", 0, profile.EnabledSpellHue, (b) => { profile.EnabledSpellHue = b; }),
+                    new CheckboxWithLabel(lang.GetCombatSpells.EnableOverheadSpellHue, 0, profile.EnabledSpellHue, (b) => { profile.EnabledSpellHue = b; }),
                     mainContent.RightWidth,
                     PAGE.CombatSpells
                 ));
@@ -1075,7 +1072,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             options.Add(s = new SettingsOption(
                     "",
-                    new CheckboxWithLabel("Single click for spell icons", 0, profile.CastSpellsByOneClick, (b) => { profile.CastSpellsByOneClick = b; }),
+                    new CheckboxWithLabel(lang.GetCombatSpells.SingleClickForSpellIcons, 0, profile.CastSpellsByOneClick, (b) => { profile.CastSpellsByOneClick = b; }),
                     mainContent.RightWidth,
                     PAGE.CombatSpells
                 ));
@@ -1085,7 +1082,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             options.Add(s = new SettingsOption(
                     "",
-                    new CheckboxWithLabel("Show buff duration on old style buff bar", 0, profile.BuffBarTime, (b) => { profile.BuffBarTime = b; }),
+                    new CheckboxWithLabel(lang.GetCombatSpells.ShowBuffDurationOnOldStyleBuffBar, 0, profile.BuffBarTime, (b) => { profile.BuffBarTime = b; }),
                     mainContent.RightWidth,
                     PAGE.CombatSpells
                 ));
@@ -1096,19 +1093,19 @@ namespace ClassicUO.Game.UI.Gumps
             Control c;
             options.Add(s = new SettingsOption(
                     "",
-                    c = new CheckboxWithLabel("Enable fast spell hotkey assigning", 0, profile.FastSpellsAssign, (b) => { profile.FastSpellsAssign = b; }),
+                    c = new CheckboxWithLabel(lang.GetCombatSpells.EnableFastSpellHotkeyAssigning, 0, profile.FastSpellsAssign, (b) => { profile.FastSpellsAssign = b; }),
                     mainContent.RightWidth,
                     PAGE.CombatSpells
                 ));
             PositionHelper.PositionControl(s.FullControl);
-            c.SetTooltip("Ctrl + Alt + Click a spell icon the open a gump to set a hotkey");
+            c.SetTooltip(lang.GetCombatSpells.TooltipFastSpellAssign);
 
             PositionHelper.BlankLine();
 
             SettingsOption ss;
             options.Add(s = new SettingsOption(
                 "",
-                new ModernColorPickerWithLabel("Innocent color", profile.InnocentHue, (h) => { profile.InnocentHue = h; }),
+                new ModernColorPickerWithLabel(lang.GetCombatSpells.InnocentColor, profile.InnocentHue, (h) => { profile.InnocentHue = h; }),
                 mainContent.RightWidth,
                 PAGE.CombatSpells
             ));
@@ -1117,7 +1114,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             options.Add(s = new SettingsOption(
                 "",
-                new ModernColorPickerWithLabel("Beneficial spell", profile.BeneficHue, (h) => { profile.BeneficHue = h; }),
+                new ModernColorPickerWithLabel(lang.GetCombatSpells.BeneficialSpell, profile.BeneficHue, (h) => { profile.BeneficHue = h; }),
                 mainContent.RightWidth,
                 PAGE.CombatSpells
             ));
@@ -1126,7 +1123,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             options.Add(s = new SettingsOption(
                 "",
-                new ModernColorPickerWithLabel("Friend color", profile.FriendHue, (h) => { profile.FriendHue = h; }),
+                new ModernColorPickerWithLabel(lang.GetCombatSpells.FriendColor, profile.FriendHue, (h) => { profile.FriendHue = h; }),
                 mainContent.RightWidth,
                 PAGE.CombatSpells
             ));
@@ -1135,7 +1132,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             options.Add(s = new SettingsOption(
                 "",
-                new ModernColorPickerWithLabel("Harmful spell", profile.HarmfulHue, (h) => { profile.HarmfulHue = h; }),
+                new ModernColorPickerWithLabel(lang.GetCombatSpells.HarmfulSpell, profile.HarmfulHue, (h) => { profile.HarmfulHue = h; }),
                 mainContent.RightWidth,
                 PAGE.CombatSpells
             ));
@@ -1144,7 +1141,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             options.Add(s = new SettingsOption(
                 "",
-                new ModernColorPickerWithLabel("Criminal", profile.CriminalHue, (h) => { profile.CriminalHue = h; }),
+                new ModernColorPickerWithLabel(lang.GetCombatSpells.Criminal, profile.CriminalHue, (h) => { profile.CriminalHue = h; }),
                 mainContent.RightWidth,
                 PAGE.CombatSpells
             ));
@@ -1153,7 +1150,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             options.Add(s = new SettingsOption(
                 "",
-                new ModernColorPickerWithLabel("Neutral spell", profile.NeutralHue, (h) => { profile.NeutralHue = h; }),
+                new ModernColorPickerWithLabel(lang.GetCombatSpells.NeutralSpell, profile.NeutralHue, (h) => { profile.NeutralHue = h; }),
                 mainContent.RightWidth,
                 PAGE.CombatSpells
             ));
@@ -1162,7 +1159,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             options.Add(s = new SettingsOption(
                 "",
-                new ModernColorPickerWithLabel("Can be attacked hue", profile.CanAttackHue, (h) => { profile.CanAttackHue = h; }),
+                new ModernColorPickerWithLabel(lang.GetCombatSpells.CanBeAttackedHue, profile.CanAttackHue, (h) => { profile.CanAttackHue = h; }),
                 mainContent.RightWidth,
                 PAGE.CombatSpells
             ));
@@ -1171,7 +1168,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             options.Add(s = new SettingsOption(
                 "",
-                new ModernColorPickerWithLabel("Murderer", profile.MurdererHue, (h) => { profile.MurdererHue = h; }),
+                new ModernColorPickerWithLabel(lang.GetCombatSpells.Murderer, profile.MurdererHue, (h) => { profile.MurdererHue = h; }),
                 mainContent.RightWidth,
                 PAGE.CombatSpells
             ));
@@ -1180,7 +1177,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             options.Add(s = new SettingsOption(
                 "",
-                new ModernColorPickerWithLabel("Enemy", profile.EnemyHue, (h) => { profile.EnemyHue = h; }),
+                new ModernColorPickerWithLabel(lang.GetCombatSpells.Enemy, profile.EnemyHue, (h) => { profile.EnemyHue = h; }),
                 mainContent.RightWidth,
                 PAGE.CombatSpells
             ));
@@ -1190,7 +1187,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             InputField spellFormat;
             options.Add(s = new SettingsOption(
-                    "Spell overhead format",
+                    lang.GetCombatSpells.SpellOverheadFormat,
                     spellFormat = new InputField(200, 40),
                     mainContent.RightWidth,
                     PAGE.CombatSpells
@@ -1201,7 +1198,7 @@ namespace ClassicUO.Game.UI.Gumps
                 profile.SpellDisplayFormat = spellFormat.Text;
             };
             PositionHelper.PositionControl(s.FullControl);
-            s.FullControl.SetTooltip("{power} for powerword, {spell} for spell name");
+            s.FullControl.SetTooltip(lang.GetCombatSpells.TooltipSpellFormat);
         }
 
         private void BuildCounters()
@@ -1211,7 +1208,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             options.Add(s = new SettingsOption(
                     "",
-                    new CheckboxWithLabel("Enable counters", 0, profile.CounterBarEnabled, (b) =>
+                    new CheckboxWithLabel(lang.GetCounters.EnableCounters, 0, profile.CounterBarEnabled, (b) =>
                     {
                         profile.CounterBarEnabled = b;
                         CounterBarGump counterGump = UIManager.GetGump<CounterBarGump>();
@@ -1245,7 +1242,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             options.Add(s = new SettingsOption(
                     "",
-                    new CheckboxWithLabel("Highlight items on use", 0, profile.CounterBarHighlightOnUse, (b) => { profile.CounterBarHighlightOnUse = b; }),
+                    new CheckboxWithLabel(lang.GetCounters.HighlightItemsOnUse, 0, profile.CounterBarHighlightOnUse, (b) => { profile.CounterBarHighlightOnUse = b; }),
                     mainContent.RightWidth,
                     PAGE.Counters
                 ));
@@ -1253,7 +1250,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             options.Add(s = new SettingsOption(
                     "",
-                    new CheckboxWithLabel("Abbreviated values", 0, profile.CounterBarDisplayAbbreviatedAmount, (b) => { profile.CounterBarDisplayAbbreviatedAmount = b; }),
+                    new CheckboxWithLabel(lang.GetCounters.AbbreviatedValues, 0, profile.CounterBarDisplayAbbreviatedAmount, (b) => { profile.CounterBarDisplayAbbreviatedAmount = b; }),
                     mainContent.RightWidth,
                     PAGE.Counters
                 ));
@@ -1261,7 +1258,7 @@ namespace ClassicUO.Game.UI.Gumps
             PositionHelper.Indent();
 
             options.Add(s = new SettingsOption(
-                    "Abbreviate if amount exceeds",
+                    lang.GetCounters.AbbreviateIfAmountExceeds,
                     new InputField(100, 40, text: profile.CounterBarAbbreviatedAmount.ToString(), numbersOnly: true, onTextChanges: (s, e) =>
                     {
                         if (int.TryParse(((InputField.StbTextBox)s).Text, out int v))
@@ -1277,7 +1274,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             options.Add(s = new SettingsOption(
                 "",
-                new CheckboxWithLabel("Highlight red when amount is low", 0, profile.CounterBarHighlightOnAmount, (b) => { profile.CounterBarHighlightOnAmount = b; }),
+                new CheckboxWithLabel(lang.GetCounters.HighlightRedWhenAmountIsLow, 0, profile.CounterBarHighlightOnAmount, (b) => { profile.CounterBarHighlightOnAmount = b; }),
                 mainContent.RightWidth,
                 PAGE.Counters
             ));
@@ -1285,7 +1282,7 @@ namespace ClassicUO.Game.UI.Gumps
             PositionHelper.Indent();
 
             options.Add(s = new SettingsOption(
-                "Highlight red if amount is below",
+                lang.GetCounters.HighlightRedIfAmountIsBelow,
                 new InputField(100, 40, text: profile.CounterBarHighlightAmount.ToString(), numbersOnly: true, onTextChanges: (s, e) =>
                 {
                     if (int.TryParse(((InputField.StbTextBox)s).Text, out int v))
@@ -1304,7 +1301,7 @@ namespace ClassicUO.Game.UI.Gumps
             PositionHelper.BlankLine();
 
             options.Add(s = new SettingsOption(
-                "Counter layout",
+                lang.GetCounters.CounterLayout,
                 new Area(false),
                 mainContent.RightWidth,
                 PAGE.Counters
@@ -1315,7 +1312,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             options.Add(s = new SettingsOption(
                 "",
-                new SliderWithLabel("Grid size", 0, Theme.SLIDER_WIDTH, 30, 100, profile.CounterBarCellSize, (v) =>
+                new SliderWithLabel(lang.GetCounters.GridSize, 0, Theme.SLIDER_WIDTH, 30, 100, profile.CounterBarCellSize, (v) =>
                 {
                     profile.CounterBarCellSize = v;
                     UIManager.GetGump<CounterBarGump>()?.SetLayout(profile.CounterBarCellSize, profile.CounterBarRows, profile.CounterBarColumns);
@@ -1326,7 +1323,7 @@ namespace ClassicUO.Game.UI.Gumps
             PositionHelper.PositionControl(s.FullControl);
 
             options.Add(s = new SettingsOption(
-                "Rows",
+                lang.GetCounters.Rows,
                 new InputField(100, 40, text: profile.CounterBarRows.ToString(), numbersOnly: true, onTextChanges: (s, e) =>
                 {
                     if (int.TryParse(((InputField.StbTextBox)s).Text, out int v))
@@ -1342,7 +1339,7 @@ namespace ClassicUO.Game.UI.Gumps
             SettingsOption ss = s;
 
             options.Add(s = new SettingsOption(
-                "Columns",
+                lang.GetCounters.Columns,
                 new InputField(100, 40, text: profile.CounterBarColumns.ToString(), numbersOnly: true, onTextChanges: (s, e) =>
                 {
                     if (int.TryParse(((InputField.StbTextBox)s).Text, out int v))
@@ -1364,7 +1361,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             options.Add(s = new SettingsOption(
                     "",
-                    new CheckboxWithLabel("Show info bar", 0, profile.ShowInfoBar, (b) =>
+                    new CheckboxWithLabel(lang.GetInfoBars.ShowInfoBar, 0, profile.ShowInfoBar, (b) =>
                     {
                         profile.ShowInfoBar = b;
                         InfoBarGump infoBarGump = UIManager.GetGump<InfoBarGump>();
@@ -1394,7 +1391,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             options.Add(s = new SettingsOption(
                 "",
-                new ComboBoxWithLabel("Highlight type", 0, Theme.COMBO_BOX_WIDTH, new string[] { "Text color", "Colored bars" }, profile.InfoBarHighlightType, (i, s) => { profile.InfoBarHighlightType = i; }),
+                new ComboBoxWithLabel(lang.GetInfoBars.HighlightType, 0, Theme.COMBO_BOX_WIDTH, new string[] { lang.GetInfoBars.HighLightOpt_TextColor, lang.GetInfoBars.HighLightOpt_ColoredBars }, profile.InfoBarHighlightType, (i, s) => { profile.InfoBarHighlightType = i; }),
                 mainContent.RightWidth,
                 PAGE.InfoBar
             ));
@@ -1408,7 +1405,7 @@ namespace ClassicUO.Game.UI.Gumps
             ModernButton addItem;
             options.Add(s = new SettingsOption(
                 "",
-                addItem = new ModernButton(0, 0, 150, 40, ButtonAction.Activate, "+ Add item", Theme.BUTTON_FONT_COLOR) { ButtonParameter = -1, IsSelectable = true, IsSelected = true },
+                addItem = new ModernButton(0, 0, 150, 40, ButtonAction.Activate, lang.GetInfoBars.AddItem, Theme.BUTTON_FONT_COLOR) { ButtonParameter = -1, IsSelectable = true, IsSelected = true },
                 mainContent.RightWidth,
                 PAGE.InfoBar
             ));
@@ -1428,15 +1425,15 @@ namespace ClassicUO.Game.UI.Gumps
             PositionHelper.BlankLine();
             PositionHelper.BlankLine();
 
-            options.Add(s = new SettingsOption("Label", new Area(false), mainContent.RightWidth, PAGE.InfoBar));
+            options.Add(s = new SettingsOption(lang.GetInfoBars.Label, new Area(false), mainContent.RightWidth, PAGE.InfoBar));
             PositionHelper.PositionExact(s.FullControl, ss.FullControl.X, ss.FullControl.Y + ss.FullControl.Height + 40);
             ss = s;
 
-            options.Add(s = new SettingsOption("Color", new Area(false), mainContent.RightWidth, PAGE.InfoBar));
+            options.Add(s = new SettingsOption(lang.GetInfoBars.Color, new Area(false), mainContent.RightWidth, PAGE.InfoBar));
             PositionHelper.PositionExact(s.FullControl, ss.FullControl.X + 150, ss.FullControl.Y);
             ss = s;
 
-            options.Add(s = new SettingsOption("Data", new Area(false), mainContent.RightWidth, PAGE.InfoBar));
+            options.Add(s = new SettingsOption(lang.GetInfoBars.Data, new Area(false), mainContent.RightWidth, PAGE.InfoBar));
             PositionHelper.PositionExact(s.FullControl, ss.FullControl.X + 55, ss.FullControl.Y);
             ss = s;
 
@@ -1476,7 +1473,7 @@ namespace ClassicUO.Game.UI.Gumps
             PositionHelper.Reset();
 
             options.Add(s = new SettingsOption(
-                "These settings are for original container gumps, for grid container settings visit the TazUO section",
+                lang.GetContainers.Description,
                 new Area(false),
                 mainContent.RightWidth,
                 PAGE.Containers
@@ -1490,7 +1487,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 options.Add(s = new SettingsOption(
                     "",
-                    new ComboBoxWithLabel("Character backpack style", 0, Theme.COMBO_BOX_WIDTH, new string[] { "Default", "Suede", "Polar bear", "Ghoul skin" }, profile.BackpackStyle, (i, s) => { profile.BackpackStyle = i; }),
+                    new ComboBoxWithLabel(lang.GetContainers.CharacterBackpackStyle, 0, Theme.COMBO_BOX_WIDTH, new string[] { lang.GetContainers.BackpackOpt_Default, lang.GetContainers.BackpackOpt_Suede, lang.GetContainers.BackpackOpt_PolarBear, lang.GetContainers.BackpackOpt_GhoulSkin }, profile.BackpackStyle, (i, s) => { profile.BackpackStyle = i; }),
                     mainContent.RightWidth,
                     PAGE.Containers
                 ));
@@ -1500,7 +1497,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             options.Add(s = new SettingsOption(
                 "",
-                new SliderWithLabel("Container scale", 0, Theme.SLIDER_WIDTH, Constants.MIN_CONTAINER_SIZE_PERC, Constants.MAX_CONTAINER_SIZE_PERC, profile.ContainersScale, (i) =>
+                new SliderWithLabel(lang.GetContainers.ContainerScale, 0, Theme.SLIDER_WIDTH, Constants.MIN_CONTAINER_SIZE_PERC, Constants.MAX_CONTAINER_SIZE_PERC, profile.ContainersScale, (i) =>
                 {
                     profile.ContainersScale = (byte)i;
                     UIManager.ContainerScale = (byte)i / 100f;
@@ -1517,7 +1514,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             options.Add(s = new SettingsOption(
                 "",
-                new CheckboxWithLabel("Also scale items", 0, profile.ScaleItemsInsideContainers, (b) => { profile.ScaleItemsInsideContainers = b; }),
+                new CheckboxWithLabel(lang.GetContainers.AlsoScaleItems, 0, profile.ScaleItemsInsideContainers, (b) => { profile.ScaleItemsInsideContainers = b; }),
                 mainContent.RightWidth,
                 PAGE.Containers
             ));
@@ -1529,7 +1526,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 options.Add(s = new SettingsOption(
                     "",
-                    new CheckboxWithLabel("Use large container gumps", 0, profile.UseLargeContainerGumps, (b) => { profile.UseLargeContainerGumps = b; }),
+                    new CheckboxWithLabel(lang.GetContainers.UseLargeContainerGumps, 0, profile.UseLargeContainerGumps, (b) => { profile.UseLargeContainerGumps = b; }),
                     mainContent.RightWidth,
                     PAGE.Containers
                 ));
@@ -1539,7 +1536,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             options.Add(s = new SettingsOption(
                 "",
-                new CheckboxWithLabel("Double click to loot items inside containers", 0, profile.DoubleClickToLootInsideContainers, (b) => { profile.DoubleClickToLootInsideContainers = b; }),
+                new CheckboxWithLabel(lang.GetContainers.DoubleClickToLootItemsInsideContainers, 0, profile.DoubleClickToLootInsideContainers, (b) => { profile.DoubleClickToLootInsideContainers = b; }),
                 mainContent.RightWidth,
                 PAGE.Containers
             ));
@@ -1548,17 +1545,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             options.Add(s = new SettingsOption(
                 "",
-                new CheckboxWithLabel("Relative drag and drop items in containers", 0, profile.RelativeDragAndDropItems, (b) => { profile.RelativeDragAndDropItems = b; }),
-                mainContent.RightWidth,
-                PAGE.Containers
-            ));
-            PositionHelper.PositionControl(s.FullControl);
-            PositionHelper.BlankLine();
-
-
-            options.Add(s = new SettingsOption(
-                "",
-                new CheckboxWithLabel("Highlight container on ground when mouse is over a container gump", 0, profile.HighlightContainerWhenSelected, (b) => { profile.HighlightContainerWhenSelected = b; }),
+                new CheckboxWithLabel(lang.GetContainers.RelativeDragAndDropItemsInContainers, 0, profile.RelativeDragAndDropItems, (b) => { profile.RelativeDragAndDropItems = b; }),
                 mainContent.RightWidth,
                 PAGE.Containers
             ));
@@ -1568,7 +1555,17 @@ namespace ClassicUO.Game.UI.Gumps
 
             options.Add(s = new SettingsOption(
                 "",
-                new CheckboxWithLabel("Recolor container gump by with container hue", 0, profile.HueContainerGumps, (b) => { profile.HueContainerGumps = b; }),
+                new CheckboxWithLabel(lang.GetContainers.HighlightContainerOnGroundWhenMouseIsOverAContainerGump, 0, profile.HighlightContainerWhenSelected, (b) => { profile.HighlightContainerWhenSelected = b; }),
+                mainContent.RightWidth,
+                PAGE.Containers
+            ));
+            PositionHelper.PositionControl(s.FullControl);
+            PositionHelper.BlankLine();
+
+
+            options.Add(s = new SettingsOption(
+                "",
+                new CheckboxWithLabel(lang.GetContainers.RecolorContainerGumpByWithContainerHue, 0, profile.HueContainerGumps, (b) => { profile.HueContainerGumps = b; }),
                 mainContent.RightWidth,
                 PAGE.Containers
             ));
@@ -1577,7 +1574,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             options.Add(s = new SettingsOption(
                 "",
-                new CheckboxWithLabel("Override container gump locations", 0, profile.OverrideContainerLocation, (b) => { profile.OverrideContainerLocation = b; }),
+                new CheckboxWithLabel(lang.GetContainers.OverrideContainerGumpLocations, 0, profile.OverrideContainerLocation, (b) => { profile.OverrideContainerLocation = b; }),
                 mainContent.RightWidth,
                 PAGE.Containers
             ));
@@ -1586,7 +1583,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             options.Add(s = new SettingsOption(
                     "",
-                    new ComboBoxWithLabel("Override position", 0, Theme.COMBO_BOX_WIDTH, new string[] { "Near container", "Top right", "Last dragged position", "Remember each container" }, profile.OverrideContainerLocationSetting, (i, s) => { profile.OverrideContainerLocationSetting = i; }),
+                    new ComboBoxWithLabel(lang.GetContainers.OverridePosition, 0, Theme.COMBO_BOX_WIDTH, new string[] { lang.GetContainers.PositionOpt_NearContainer, lang.GetContainers.PositionOpt_TopRight, lang.GetContainers.PositionOpt_LastDraggedPosition, lang.GetContainers.RememberEachContainer }, profile.OverrideContainerLocationSetting, (i, s) => { profile.OverrideContainerLocationSetting = i; }),
                     mainContent.RightWidth,
                     PAGE.Containers
                 ));
@@ -1596,7 +1593,7 @@ namespace ClassicUO.Game.UI.Gumps
             ModernButton rebuildContainers;
             options.Add(s = new SettingsOption(
                 "",
-                rebuildContainers = new ModernButton(0, 0, 130, 40, ButtonAction.Activate, "Rebuild containers.txt", Theme.BUTTON_FONT_COLOR, 999) { IsSelected = true, IsSelectable = true },
+                rebuildContainers = new ModernButton(0, 0, 130, 40, ButtonAction.Activate, lang.GetContainers.RebuildContainersTxt, Theme.BUTTON_FONT_COLOR, 999) { IsSelected = true, IsSelectable = true },
                 mainContent.RightWidth,
                 PAGE.Containers
             ));
@@ -1614,7 +1611,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             options.Add(s = new SettingsOption(
                 "",
-                new CheckboxWithLabel("Disable default UO hotkeys", 0, profile.DisableDefaultHotkeys, (b) => { profile.DisableDefaultHotkeys = b; }),
+                new CheckboxWithLabel(lang.GetExperimental.DisableDefaultUoHotkeys, 0, profile.DisableDefaultHotkeys, (b) => { profile.DisableDefaultHotkeys = b; }),
                 mainContent.RightWidth,
                 PAGE.Experimental
             ));
@@ -1623,7 +1620,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             options.Add(s = new SettingsOption(
                 "",
-                new CheckboxWithLabel("Disable arrows & numlock arrows(player movement)", 0, profile.DisableArrowBtn, (b) => { profile.DisableArrowBtn = b; }),
+                new CheckboxWithLabel(lang.GetExperimental.DisableArrowsNumlockArrowsPlayerMovement, 0, profile.DisableArrowBtn, (b) => { profile.DisableArrowBtn = b; }),
                 mainContent.RightWidth,
                 PAGE.Experimental
             ));
@@ -1632,7 +1629,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             options.Add(s = new SettingsOption(
                 "",
-                new CheckboxWithLabel("Disable tab (toggle warmode)", 0, profile.DisableTabBtn, (b) => { profile.DisableTabBtn = b; }),
+                new CheckboxWithLabel(lang.GetExperimental.DisableTabToggleWarmode, 0, profile.DisableTabBtn, (b) => { profile.DisableTabBtn = b; }),
                 mainContent.RightWidth,
                 PAGE.Experimental
             ));
@@ -1641,7 +1638,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             options.Add(s = new SettingsOption(
                 "",
-                new CheckboxWithLabel("Disable Ctrl + Q/W (message history)", 0, profile.DisableCtrlQWBtn, (b) => { profile.DisableCtrlQWBtn = b; }),
+                new CheckboxWithLabel(lang.GetExperimental.DisableCtrlQWMessageHistory, 0, profile.DisableCtrlQWBtn, (b) => { profile.DisableCtrlQWBtn = b; }),
                 mainContent.RightWidth,
                 PAGE.Experimental
             ));
@@ -1650,7 +1647,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             options.Add(s = new SettingsOption(
                 "",
-                new CheckboxWithLabel("Disable right + left click auto move", 0, profile.DisableAutoMove, (b) => { profile.DisableAutoMove = b; }),
+                new CheckboxWithLabel(lang.GetExperimental.DisableRightLeftClickAutoMove, 0, profile.DisableAutoMove, (b) => { profile.DisableAutoMove = b; }),
                 mainContent.RightWidth,
                 PAGE.Experimental
             ));
@@ -1664,7 +1661,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             #region New entry
             ModernButton b;
-            content.AddToLeft(b = new ModernButton(0, 0, content.LeftWidth, 40, ButtonAction.Activate, "New entry", Theme.BUTTON_FONT_COLOR) { ButtonParameter = page, IsSelectable = false });
+            content.AddToLeft(b = new ModernButton(0, 0, content.LeftWidth, 40, ButtonAction.Activate, lang.GetNamePlates.NewEntry, Theme.BUTTON_FONT_COLOR) { ButtonParameter = page, IsSelectable = false });
 
             b.MouseUp += (sender, e) =>
             {
@@ -1672,7 +1669,7 @@ namespace ClassicUO.Game.UI.Gumps
                 (
                     250,
                     150,
-                    "Name overhead entry name",
+                    lang.GetNamePlates.NameOverheadEntryName,
                     name =>
                     {
                         if (string.IsNullOrWhiteSpace(name))
@@ -1718,10 +1715,9 @@ namespace ClassicUO.Game.UI.Gumps
             };
             #endregion
 
-
             #region Delete entry
             page = ((int)PAGE.Macros + 1001);
-            content.AddToLeft(b = new ModernButton(0, 0, content.LeftWidth, 40, ButtonAction.Activate, "Delete entry", Theme.BUTTON_FONT_COLOR) { ButtonParameter = page, IsSelectable = false });
+            content.AddToLeft(b = new ModernButton(0, 0, content.LeftWidth, 40, ButtonAction.Activate, lang.GetNamePlates.DeleteEntry, Theme.BUTTON_FONT_COLOR) { ButtonParameter = page, IsSelectable = false });
 
             b.MouseUp += (ss, ee) =>
             {
