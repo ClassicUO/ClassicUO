@@ -5,7 +5,7 @@
     <ApplicationIcon>cuoicon.ico</ApplicationIcon>
     <AssemblyName>ClassicUO</AssemblyName>
     <RootNamespace>ClassicUO</RootNamespace>
-    <AssemblyVersion>3.17.0</AssemblyVersion>
+    <AssemblyVersion>3.18.0</AssemblyVersion>
     <FileVersion>3.17.0</FileVersion>
   </PropertyGroup>
 
