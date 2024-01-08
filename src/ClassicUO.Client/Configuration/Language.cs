@@ -82,6 +82,7 @@ namespace ClassicUO.Configuration
         public Experimental GetExperimental { get; set; } = new Experimental();
         public NamePlates GetNamePlates { get; set; } = new NamePlates();
         public Cooldowns GetCooldowns { get; set; } = new Cooldowns();
+        public TazUO GetTazUO { get; set; } = new TazUO();
 
         public class General
         {
@@ -393,6 +394,34 @@ namespace ClassicUO.Configuration
             public string UseLastMovedBarPosition { get; set; } = "Use last moved bar position";
             public string Conditions { get; set; } = "Conditions";
             public string AddCondition { get; set; } = "+ Add condition";
+        }
+
+        public class TazUO
+        {
+            #region General
+            public string GridContainers { get; set; } = "Grid containers";
+            public string EnableGridContainers { get; set; } = "Enable grid containers";
+            public string GridContainerScale { get; set; } = "Grid container scale";
+            public string AlsoScaleItems { get; set; } = "Also scale items";
+            public string GridItemBorderOpacity { get; set; } = "Grid item border opacity";
+            public string BorderColor { get; set; } = "Border color";
+            public string ContainerOpacity { get; set; } = "Container opacity";
+            public string BackgroundColor { get; set; } = "Background color";
+            public string UseContainersHue { get; set; } = "Use container's hue";
+            public string SearchStyle { get; set; } = "Search style";
+            public string OnlyShow { get; set; } = "Only show";
+            public string Highlight { get; set; } = "Highlight";
+            public string EnableContainerPreview { get; set; } = "Enable container preview";
+            public string ThisOnlyWorksOnContainersThatYouHaveOpenedOtherwiseTheClientDoesNotHaveThatInformationYet { get; set; } = "This only works on containers that you have opened, otherwise the client does not have that information yet.";
+            public string MakeAnchorable { get; set; } = "Make anchorable";
+            public string ThisWillAllowGridContainersToBeAnchoredToOtherContainersWorldMapJournal { get; set; } = "This will allow grid containers to be anchored to other containers/world map/journal";
+            public string ContainerStyle { get; set; } = "Container style";
+            public string HideBorders { get; set; } = "Hide borders";
+            public string DefaultGridRows { get; set; } = "Default grid rows";
+            public string DefaultGridColumns { get; set; } = "Default grid columns";
+            public string GridHighlightSettings { get; set; } = "Grid highlight settings";
+            public string GridHighlightSize { get; set; } = "Grid highlight size";
+            #endregion
         }
     }
 }

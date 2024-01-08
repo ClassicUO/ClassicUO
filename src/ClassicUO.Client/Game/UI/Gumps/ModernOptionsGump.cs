@@ -1908,70 +1908,119 @@ namespace ClassicUO.Game.UI.Gumps
 
             #region General
             page = ((int)PAGE.TUOOptions + 1000);
-            content.AddToLeft(SubCategoryButton("Grid containers", page, content.LeftWidth));
-
-            content.AddToRight(new CheckboxWithLabel("Enable grid containers", 0, profile.UseGridLayoutContainerGumps, (b) => { profile.UseGridLayoutContainerGumps = b; }), true, page);
+            content.AddToLeft(SubCategoryButton(lang.GetTazUO.GridContainers, page, content.LeftWidth));
+            content.AddToRight(new CheckboxWithLabel(lang.GetTazUO.EnableGridContainers, 0, profile.UseGridLayoutContainerGumps, (b) =>
+            {
+                profile.UseGridLayoutContainerGumps = b;
+            }), true, page);
 
             content.BlankLine();
 
-            content.AddToRight(new SliderWithLabel("Grid container scale", 0, Theme.SLIDER_WIDTH, 50, 200, profile.GridContainersScale, (i) => { profile.GridContainersScale = (byte)i; }), true, page);
+            content.AddToRight(new SliderWithLabel(lang.GetTazUO.GridContainerScale, 0, Theme.SLIDER_WIDTH, 50, 200, profile.GridContainersScale, (i) =>
+            {
+                profile.GridContainersScale = (byte)i;
+            }), true, page);
             content.Indent();
-            content.AddToRight(new CheckboxWithLabel("Also scale items", 0, profile.GridContainerScaleItems, (b) => { profile.GridContainerScaleItems = b; }), true, page);
+            content.AddToRight(new CheckboxWithLabel(lang.GetTazUO.AlsoScaleItems, 0, profile.GridContainerScaleItems, (b) =>
+            {
+                profile.GridContainerScaleItems = b;
+            }), true, page);
             content.RemoveIndent();
 
             content.BlankLine();
 
-            content.AddToRight(new SliderWithLabel("Grid item border opacity", 0, Theme.SLIDER_WIDTH, 0, 100, profile.GridBorderAlpha, (i) => { profile.GridBorderAlpha = (byte)i; }), true, page);
+            content.AddToRight(new SliderWithLabel(lang.GetTazUO.GridItemBorderOpacity, 0, Theme.SLIDER_WIDTH, 0, 100, profile.GridBorderAlpha, (i) =>
+            {
+                profile.GridBorderAlpha = (byte)i;
+            }), true, page);
             content.Indent();
-            content.AddToRight(new ModernColorPickerWithLabel("Border color", profile.GridBorderHue, (h) => { profile.GridBorderHue = h; }), true, page);
+            content.AddToRight(new ModernColorPickerWithLabel(lang.GetTazUO.BorderColor, profile.GridBorderHue, (h) =>
+            {
+                profile.GridBorderHue = h;
+            }), true, page);
             content.RemoveIndent();
 
             content.BlankLine();
 
-            content.AddToRight(new SliderWithLabel("Container opacity", 0, Theme.SLIDER_WIDTH, 0, 100, profile.ContainerOpacity, (i) => { profile.ContainerOpacity = (byte)i; GridContainer.UpdateAllGridContainers(); }), true, page);
+            content.AddToRight(new SliderWithLabel(lang.GetTazUO.ContainerOpacity, 0, Theme.SLIDER_WIDTH, 0, 100, profile.ContainerOpacity, (i) =>
+            {
+                profile.ContainerOpacity = (byte)i;
+                GridContainer.UpdateAllGridContainers();
+            }), true, page);
             content.Indent();
-            content.AddToRight(new ModernColorPickerWithLabel("Background color", profile.AltGridContainerBackgroundHue, (h) => { profile.AltGridContainerBackgroundHue = h; GridContainer.UpdateAllGridContainers(); }), true, page);
-            content.AddToRight(new CheckboxWithLabel("Use container's hue", 0, profile.Grid_UseContainerHue, (b) => { profile.Grid_UseContainerHue = b; GridContainer.UpdateAllGridContainers(); }), true, page);
+            content.AddToRight(new ModernColorPickerWithLabel(lang.GetTazUO.BackgroundColor, profile.AltGridContainerBackgroundHue, (h) =>
+            {
+                profile.AltGridContainerBackgroundHue = h;
+                GridContainer.UpdateAllGridContainers();
+            }), true, page);
+            content.AddToRight(new CheckboxWithLabel(lang.GetTazUO.UseContainersHue, 0, profile.Grid_UseContainerHue, (b) =>
+            {
+                profile.Grid_UseContainerHue = b;
+                GridContainer.UpdateAllGridContainers();
+            }), true, page);
             content.RemoveIndent();
 
             content.BlankLine();
 
-            content.AddToRight(new ComboBoxWithLabel("Search style", 0, Theme.COMBO_BOX_WIDTH, new string[] { "Only show", "Highlight" }, profile.GridContainerSearchMode, (i, s) => { profile.GridContainerSearchMode = i; }), true, page);
+            content.AddToRight(new ComboBoxWithLabel(lang.GetTazUO.SearchStyle, 0, Theme.COMBO_BOX_WIDTH, new string[] { lang.GetTazUO.OnlyShow, lang.GetTazUO.Highlight }, profile.GridContainerSearchMode, (i, s) =>
+            {
+                profile.GridContainerSearchMode = i;
+            }), true, page);
+            content.BlankLine();
+            content.AddToRight(c = new CheckboxWithLabel(lang.GetTazUO.EnableContainerPreview, 0, profile.GridEnableContPreview, (b) =>
+            {
+                profile.GridEnableContPreview = b;
+            }), true, page);
+            c.SetTooltip(lang.GetTazUO.ThisOnlyWorksOnContainersThatYouHaveOpenedOtherwiseTheClientDoesNotHaveThatInformationYet);
 
             content.BlankLine();
 
-            content.AddToRight(c = new CheckboxWithLabel("Enable container preview", 0, profile.GridEnableContPreview, (b) => { profile.GridEnableContPreview = b; }), true, page);
-            c.SetTooltip("This only works on containers that you have opened, otherwise the client does not have that information yet.");
+            content.AddToRight(c = new CheckboxWithLabel(lang.GetTazUO.MakeAnchorable, 0, profile.EnableGridContainerAnchor, (b) =>
+            {
+                profile.EnableGridContainerAnchor = b;
+                GridContainer.UpdateAllGridContainers();
+            }), true, page);
+            c.SetTooltip(lang.GetTazUO.ThisWillAllowGridContainersToBeAnchoredToOtherContainersWorldMapJournal);
 
             content.BlankLine();
 
-            content.AddToRight(c = new CheckboxWithLabel("Make anchorable", 0, profile.EnableGridContainerAnchor, (b) => { profile.EnableGridContainerAnchor = b; GridContainer.UpdateAllGridContainers(); }), true, page);
-            c.SetTooltip("This will allow grid containers to be anchored to other containers/world map/journal");
+            content.AddToRight(new ComboBoxWithLabel(lang.GetTazUO.ContainerStyle, 0, Theme.COMBO_BOX_WIDTH, Enum.GetNames(typeof(GridContainer.BorderStyle)), profile.Grid_BorderStyle, (i, s) =>
+            {
+                profile.Grid_BorderStyle = i;
+                GridContainer.UpdateAllGridContainers();
+            }), true, page);
 
             content.BlankLine();
 
-            content.AddToRight(new ComboBoxWithLabel("Container style", 0, Theme.COMBO_BOX_WIDTH, Enum.GetNames(typeof(GridContainer.BorderStyle)), profile.Grid_BorderStyle, (i, s) => { profile.Grid_BorderStyle = i; GridContainer.UpdateAllGridContainers(); }), true, page);
+            content.AddToRight(c = new CheckboxWithLabel(lang.GetTazUO.HideBorders, 0, profile.Grid_HideBorder, (b) =>
+            {
+                profile.Grid_HideBorder = b;
+                GridContainer.UpdateAllGridContainers();
+            }), true, page);
 
             content.BlankLine();
 
-            content.AddToRight(c = new CheckboxWithLabel("Hide borders", 0, profile.Grid_HideBorder, (b) => { profile.Grid_HideBorder = b; GridContainer.UpdateAllGridContainers(); }), true, page);
+            content.AddToRight(new SliderWithLabel(lang.GetTazUO.DefaultGridRows, 0, Theme.SLIDER_WIDTH, 1, 20, profile.Grid_DefaultRows, (i) =>
+            {
+                profile.Grid_DefaultRows = i;
+            }), true, page);
+            content.AddToRight(new SliderWithLabel(lang.GetTazUO.DefaultGridColumns, 0, Theme.SLIDER_WIDTH, 1, 20, profile.Grid_DefaultColumns, (i) =>
+            {
+                profile.Grid_DefaultColumns = i;
+            }), true, page);
 
             content.BlankLine();
 
-            content.AddToRight(new SliderWithLabel("Default grid rows", 0, Theme.SLIDER_WIDTH, 1, 20, profile.Grid_DefaultRows, (i) => { profile.Grid_DefaultRows = i; }), true, page);
-            content.AddToRight(new SliderWithLabel("Default grid columns", 0, Theme.SLIDER_WIDTH, 1, 20, profile.Grid_DefaultColumns, (i) => { profile.Grid_DefaultColumns = i; }), true, page);
-
-            content.BlankLine();
-
-            content.AddToRight(c = new ModernButton(0, 0, 200, 40, ButtonAction.Activate, "Grid highlight settings", Theme.BUTTON_FONT_COLOR), true, page);
+            content.AddToRight(c = new ModernButton(0, 0, 200, 40, ButtonAction.Activate, lang.GetTazUO.GridHighlightSettings, Theme.BUTTON_FONT_COLOR), true, page);
             c.MouseUp += (s, e) =>
             {
                 UIManager.GetGump<GridHightlightMenu>()?.Dispose();
                 UIManager.Add(new GridHightlightMenu());
             };
-
-            content.AddToRight(new SliderWithLabel("Grid highlight size", 0, Theme.SLIDER_WIDTH, 1, 5, profile.GridHightlightSize, (i) => { profile.GridHightlightSize = i; }), true, page);
-
+            content.AddToRight(new SliderWithLabel(lang.GetTazUO.GridHighlightSize, 0, Theme.SLIDER_WIDTH, 1, 5, profile.GridHightlightSize, (i) =>
+            {
+                profile.GridHightlightSize = i;
+            }), true, page);
             #endregion
 
             #region Journal
