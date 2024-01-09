@@ -7,6 +7,7 @@ namespace ClassicUO.Configuration
     public class Language
     {
         public ModernOptionsGumpLanguage GetModernOptionsGumpLanguage { get; set; } = new ModernOptionsGumpLanguage();
+        public ErrorsLanguage ErrorsLanguage { get; set; } = new ErrorsLanguage();
 
         [JsonIgnore]
         public static Language Instance { get; private set; } = new Language();
@@ -555,5 +556,10 @@ namespace ClassicUO.Configuration
             public string OnlyForYourself { get; set; } = "Only for yourself";
             #endregion
         }
+    }
+
+    public class ErrorsLanguage
+    {
+        public string CommandNotFound { get; set; } = "Command was not found: {0}";
     }
 }

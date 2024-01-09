@@ -30,8 +30,6 @@
 
 #endregion
 
-using System;
-using System.Collections.Generic;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
@@ -39,6 +37,8 @@ using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.Resources;
 using ClassicUO.Utility.Logging;
+using System;
+using System.Collections.Generic;
 
 namespace ClassicUO.Game.Managers
 {
@@ -299,6 +299,7 @@ namespace ClassicUO.Game.Managers
             }
             else
             {
+                GameActions.Print(string.Format(Language.Instance.ErrorsLanguage.CommandNotFound, name));
                 Log.Warn($"Command: '{name}' not exists");
             }
         }
