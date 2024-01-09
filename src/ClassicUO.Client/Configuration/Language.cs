@@ -8,6 +8,7 @@ namespace ClassicUO.Configuration
     {
         public ModernOptionsGumpLanguage GetModernOptionsGumpLanguage { get; set; } = new ModernOptionsGumpLanguage();
         public ErrorsLanguage ErrorsLanguage { get; set; } = new ErrorsLanguage();
+        public MapLanguage MapLanguage { get; set; } = new MapLanguage();
 
         [JsonIgnore]
         public static Language Instance { get; private set; } = new Language();
@@ -561,5 +562,11 @@ namespace ClassicUO.Configuration
     public class ErrorsLanguage
     {
         public string CommandNotFound { get; set; } = "Command was not found: {0}";
+    }
+
+    public class MapLanguage
+    {
+        public string Follow { get; set; } = "Follow";
+        public string Yourself { get; set; } = "Yourself";
     }
 }

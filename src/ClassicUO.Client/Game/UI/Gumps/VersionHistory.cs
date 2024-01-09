@@ -8,8 +8,10 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private static string[] updateTexts = {
             "/c[white][3.19.0]/cd\n" +
+                "- SOS Gump ID configurable in settings\n" +
                 "- Added macro option to execute a client-side command\n" +
-                "- Added a command doesn't exist message",
+                "- Added a command doesn't exist message\n" +
+                "- Follow party members on world map option",
 
              "/c[white][3.18.0]/cd\n" +
                 "- Added a language file that will contain UI text for easy language translations\n",
