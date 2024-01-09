@@ -1,13 +1,13 @@
-name: TUO-Deploy
+name: TUO-Dev-Deploy
 
 on:
   workflow_dispatch:
   workflow_run:
-    branches: [main]
+    branches: [dev]
     workflows: [Build-Test]
     types:
       - completed
-
+      
 concurrency:
   group: maindeploy
   cancel-in-progress: true
@@ -33,10 +33,10 @@ jobs:
       uses: dev-drprasad/delete-tag-and-release@v0.2.1
       with:
         delete_release: true
-        tag_name: AutoBuild
+        tag_name: TazUO-BleedingEdge
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        
+  
   build:
     # if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ${{ matrix.os }}
@@ -44,10 +44,11 @@ jobs:
       max-parallel: 1
       matrix:
        os: [ macos-latest, ubuntu-latest, windows-latest ]
-       
 
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v4
+      with:
+        ref: 'dev'
       
     - name: Get submodules
       run: |
@@ -84,12 +85,12 @@ jobs:
       uses: ncipollo/release-action@v1
       with:
         artifacts: "upload/${{ runner.os }}${{ env.CUO_ZIP_NAME }}"
-        name: 'Latest Build'
-        body: 'These are built automatically on the Main branch. It is recomended to use the [latest release](https://github.com/bittiez/TazUO/releases/latest) if you are not sure what this is.'
+        name: 'TazUO Bleeding Edge'
+        body: 'These are built automatically on the dev branch. These may include features that are still being worked on/not complete.'
         makeLatest: false
         allowUpdates: true
         prerelease: true
-        tag: AutoBuild
+        tag: TazUO-BleedingEdge
         token: ${{ secrets.GITHUB_TOKEN }}
         
         
