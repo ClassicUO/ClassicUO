@@ -490,7 +490,7 @@ namespace ClassicUO.Configuration
         public int HealthLineSizeMultiplier { get; set; } = 1;
 
         public bool OpenHealthBarForLastAttack { get; set; } = true;
-        [JsonConverter(typeof(Point2Converter))] 
+        [JsonConverter(typeof(Point2Converter))]
         public Point LastTargetHealthBarPos { get; set; } = Point.Zero;
         public ushort ToolTipBGHue { get; set; } = 0;
 
@@ -523,14 +523,14 @@ namespace ClassicUO.Configuration
 
         public static uint GumpsVersion { get; private set; }
 
-        [JsonConverter(typeof(Point2Converter))] 
+        [JsonConverter(typeof(Point2Converter))]
         public Point InfoBarSize { get; set; } = new Point(400, 20);
         public bool InfoBarLocked { get; set; } = false;
         public string InfoBarFont { get; set; } = "Roboto-Regular";
         public int InfoBarFontSize { get; set; } = 18;
 
         public int LastJournalTab { get; set; } = 0;
-        public Dictionary<string, MessageType[]> JournalTabs { get; set; } = new Dictionary<string, MessageType[]>() 
+        public Dictionary<string, MessageType[]> JournalTabs { get; set; } = new Dictionary<string, MessageType[]>()
         {
             { "All", new MessageType[] {
                 MessageType.Alliance, MessageType.Command, MessageType.Emote,
@@ -539,24 +539,24 @@ namespace ClassicUO.Configuration
                 MessageType.Regular, MessageType.Spell, MessageType.System,
                 MessageType.Whisper, MessageType.Yell, MessageType.ChatSystem }
             },
-            { "Chat", new MessageType[] { 
-                MessageType.Regular, 
-                MessageType.Guild, 
-                MessageType.Alliance, 
-                MessageType.Emote, 
-                MessageType.Party, 
-                MessageType.Whisper, 
-                MessageType.Yell, 
-                MessageType.ChatSystem } 
+            { "Chat", new MessageType[] {
+                MessageType.Regular,
+                MessageType.Guild,
+                MessageType.Alliance,
+                MessageType.Emote,
+                MessageType.Party,
+                MessageType.Whisper,
+                MessageType.Yell,
+                MessageType.ChatSystem }
             },
             {
-                "Guild|Party", new MessageType[] { 
-                    MessageType.Guild, 
-                    MessageType.Alliance, 
+                "Guild|Party", new MessageType[] {
+                    MessageType.Guild,
+                    MessageType.Alliance,
                     MessageType.Party }
             },
             {
-                "System", new MessageType[] { 
+                "System", new MessageType[] {
                     MessageType.System }
             }
         };
@@ -586,6 +586,8 @@ namespace ClassicUO.Configuration
         public bool UseLandTextures { get; set; } = false;
 
         public double PaperdollScale { get; set; } = 1f;
+
+        public uint SOSGumpID { get; set; } = 1915258020;
 
 
         public void Save(string path, bool saveGumps = true)
@@ -769,7 +771,7 @@ namespace ClassicUO.Configuration
                             int y = int.Parse(xml.GetAttribute(nameof(y)));
                             uint serial = uint.Parse(xml.GetAttribute(nameof(serial)));
 
-                            if(uint.TryParse(xml.GetAttribute("serverSerial"), out uint serverSerial))
+                            if (uint.TryParse(xml.GetAttribute("serverSerial"), out uint serverSerial))
                             {
                                 UIManager.SavePosition(serverSerial, new Point(x, y));
                             }
@@ -835,7 +837,7 @@ namespace ClassicUO.Configuration
                                     break;
 
                                 case GumpType.PaperDoll:
-                                    if(pdolc > 0)
+                                    if (pdolc > 0)
                                     {
                                         break;
                                     }

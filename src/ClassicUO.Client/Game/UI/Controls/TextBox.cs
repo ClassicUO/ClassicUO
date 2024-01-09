@@ -30,13 +30,13 @@
 
 #endregion
 
-using ClassicUO.Renderer;
 using ClassicUO.Assets;
+using ClassicUO.Configuration;
+using ClassicUO.Renderer;
 using FontStashSharp.RichText;
 using Microsoft.Xna.Framework;
 using System;
 using System.Text.RegularExpressions;
-using ClassicUO.Configuration;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -124,7 +124,7 @@ namespace ClassicUO.Game.UI.Controls
                 Text = text,
                 IgnoreColorCommand = ignoreColorCommands,
                 SupportsCommands = supportsCommands,
-                CalculateGlyphs = calculateGlyphs
+                CalculateGlyphs = calculateGlyphs,
             };
             if (width != null)
                 _rtl.Width = width;

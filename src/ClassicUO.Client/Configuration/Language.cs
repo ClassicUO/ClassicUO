@@ -501,6 +501,7 @@ namespace ClassicUO.Configuration
             public string PlayerOffsetX { get; set; } = "Player Offset X";
             public string PlayerOffsetY { get; set; } = "Player Offset Y";
             public string UseLandTexturesWhereAvailable { get; set; } = "Use land textures where available(Experimental)";
+            public string SOSGumpID { get; set; } = "SOS Gump ID";
             #endregion
 
             #region Tooltips

@@ -34,7 +34,6 @@ using FontStashSharp;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
 
 namespace ClassicUO.Assets

@@ -2280,7 +2280,7 @@ namespace ClassicUO.Game.UI.Gumps
                 profile.DisplaySkillBarOnChange = b;
             }), true, page);
             content.Indent();
-            content.AddToRight(new InputFieldWithLabel(lang.GetTazUO.TextFormat, 200, profile.SkillBarFormat, false, (s, e) =>
+            content.AddToRight(new InputFieldWithLabel(lang.GetTazUO.TextFormat, Theme.INPUT_WIDTH, profile.SkillBarFormat, false, (s, e) =>
             {
                 profile.SkillBarFormat = ((InputField.StbTextBox)s).Text;
             }), true, page);
@@ -2350,6 +2350,8 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 profile.UseLandTextures = b;
             }), true, page);
+            content.BlankLine();
+            content.AddToRight(new InputFieldWithLabel(lang.GetTazUO.SOSGumpID, Theme.INPUT_WIDTH, profile.SOSGumpID.ToString(), true, (s, e) => { if (uint.TryParse(((InputField.StbTextBox)s).Text, out uint id)) { profile.SOSGumpID = id; } }));
             #endregion
 
             #region Tooltips
@@ -2372,7 +2374,7 @@ namespace ClassicUO.Game.UI.Gumps
                 profile.ToolTipBGHue = h;
             }), true, page);
             content.BlankLine();
-            content.AddToRight(new InputFieldWithLabel(lang.GetTazUO.HeaderFormatItemName, 200, profile.TooltipHeaderFormat, false, (s, e) =>
+            content.AddToRight(new InputFieldWithLabel(lang.GetTazUO.HeaderFormatItemName, Theme.INPUT_WIDTH, profile.TooltipHeaderFormat, false, (s, e) =>
             {
                 profile.TooltipHeaderFormat = ((InputField.StbTextBox)s).Text;
             }), true, page);
@@ -6239,6 +6241,7 @@ namespace ClassicUO.Game.UI.Gumps
             public const int SLIDER_WIDTH = 150;
             public const int COMBO_BOX_WIDTH = 225;
             public const int SCROLL_BAR_WIDTH = 15;
+            public const int INPUT_WIDTH = 200;
             public const int TOP_PADDING = 5;
             public const int INDENT_SPACE = 40;
             public const int BLANK_LINE = 20;
