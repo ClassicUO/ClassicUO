@@ -1,11 +1,14 @@
-﻿using ClassicUO.Configuration;
+﻿using ClassicUO.Assets;
+using ClassicUO.Configuration;
+using ClassicUO.Game;
+using ClassicUO.Game.Data;
 using ClassicUO.Network;
 using StructPacker;
 using System;
 using System.Buffers;
 using System.Buffers.Binary;
 using System.Collections.Generic;
-using System.Linq;
+
 
 namespace ClassicUO
 {
@@ -58,6 +61,74 @@ namespace ClassicUO
 
                         return new ArraySegment<byte>(buf.Data, 0, buf.Size);
                     }
+
+                case PluginCuoProtocol.OnCastSpell:
+                    {
+                        var req = new PluginCastSpell();
+                        req.Unpack(msg.Array, msg.Offset);
+
+                        GameActions.CastSpell(req.SpellIndex);
+                    }
+                    break;
+                case PluginCuoProtocol.OnSetWindowTitle:
+                    {
+                        var req = new PluginSetWindowTitle();
+                        req.Unpack(msg.Array, msg.Offset);
+
+                        Client.Game.SetWindowTitle(req.Title);
+                    }
+                    break;
+                case PluginCuoProtocol.OnGetCliloc:
+                    {
+                        var req = new PluginGetCliloc();
+                        req.Unpack(msg.Array, msg.Offset);
+
+                        var result = ClilocLoader.Instance.Translate(req.Cliloc, req.Args, req.Capitalize);
+
+                        var resp = new PluginGetClilocResponse()
+                        {
+                            Cmd = req.Cmd,
+                            Text = result
+                        };
+
+                        using var buf = resp.PackToBuffer();
+
+                        return new ArraySegment<byte>(buf.Data, 0, buf.Size);
+                    }
+                case PluginCuoProtocol.OnRequestMove:
+                    {
+                        var req = new PluginRequestMove();
+                        req.Unpack(msg.Array, msg.Offset);
+
+                        var ok = Client.Game.UO.World.Player.Walk((Direction)req.Direction, req.Run);
+
+                        var resp = new PluginRequestMoveResponse()
+                        {
+                            Cmd = req.Cmd,
+                            CanMove = ok
+                        };
+
+                        using var buf = resp.PackToBuffer();
+
+                        return new ArraySegment<byte>(buf.Data, 0, buf.Size);
+                    }
+                case PluginCuoProtocol.OnGetPlayerPosition:
+                    {
+                        var req = new PluginGetPlayerPosition();
+                        req.Unpack(msg.Array, msg.Offset);
+
+                        var resp = new PluginGetPlayerPositionResponse()
+                        {
+                            Cmd = req.Cmd,
+                            X = Client.Game.UO.World.Player.X,
+                            Y = Client.Game.UO.World.Player.Y,
+                            Z = Client.Game.UO.World.Player.Z,
+                        };
+
+                        using var buf = resp.PackToBuffer();
+
+                        return new ArraySegment<byte>(buf.Data, 0, buf.Size);
+                    }
             }
 
             return ArraySegment<byte>.Empty;
@@ -83,6 +154,12 @@ namespace ClassicUO
             OnPluginRecv,
             OnPluginSend,
             OnPacketLength,
+            OnCastSpell,
+            OnSetWindowTitle,
+            OnGetCliloc,
+            OnRequestMove,
+            OnGetPlayerPosition,
+            OnUpdatePlayerPosition,
         }
 
         [Pack]
@@ -150,6 +227,71 @@ namespace ClassicUO
         {
             public byte Cmd;
             public short PacketLength;
+        }
+
+        [Pack]
+        internal struct PluginCastSpell
+        {
+            public byte Cmd;
+            public int SpellIndex;
+        }
+
+        [Pack]
+        internal struct PluginSetWindowTitle
+        {
+            public byte Cmd;
+            public string Title;
+        }
+
+        [Pack]
+        internal struct PluginGetCliloc
+        {
+            public byte Cmd;
+            public int Cliloc;
+            public string Args;
+            public bool Capitalize;
+        }
+
+        [Pack]
+        internal struct PluginGetClilocResponse
+        {
+            public byte Cmd;
+            public string Text;
+        }
+
+        [Pack]
+        internal struct PluginRequestMove
+        {
+            public byte Cmd;
+            public int Direction;
+            public bool Run;
+        }
+
+        [Pack]
+        internal struct PluginRequestMoveResponse
+        {
+            public byte Cmd;
+            public bool CanMove;
+        }
+
+        [Pack]
+        internal struct PluginGetPlayerPosition
+        {
+            public byte Cmd;
+        }
+
+        [Pack]
+        internal struct PluginGetPlayerPositionResponse
+        {
+            public byte Cmd;
+            public int X, Y, Z;
+        }
+
+        [Pack]
+        internal struct PluginUpdatePlayerPositionRequest
+        {
+            public byte Cmd;
+            public int X, Y, Z;
         }
 
 
@@ -266,25 +408,27 @@ namespace ClassicUO
 
         public void PluginDrawCmdList()
         {
-            //var buf = new byte[1];
-            //buf[0] = (byte)PluginCuoProtocol.OnCmdList;
-            //var resp = Request(buf);
+
         }
 
         public unsafe int PluginSdlEvent(SDL2.SDL.SDL_Event* ev)
         {
-            //var buf = new byte[1];
-            //buf[0] = (byte)PluginCuoProtocol.OnSdlEvent;
-            //var response = RequestAsync(new ArraySegment<byte>(buf)).GetAwaiter().GetResult();
-
             return 0;
         }
 
         public void PluginUpdatePlayerPosition(int x, int y, int z)
         {
-            //var buf = new byte[1];
-            //buf[0] = (byte)PluginCuoProtocol.OnUpdatePlayerPos;
-            //var resp = Request(buf);
+            var req = new PluginUpdatePlayerPositionRequest()
+            {
+                Cmd = (byte)PluginCuoProtocol.OnUpdatePlayerPosition,
+                X = x,
+                Y = y,
+                Z = z
+            };
+
+            using var buf = req.PackToBuffer();
+
+            var reqMsg = Request(new ArraySegment<byte>(buf.Data, 0, buf.Size));
         }
 
         public bool PluginPacketIn(ArraySegment<byte> buffer)
