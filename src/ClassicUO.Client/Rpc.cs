@@ -408,26 +408,6 @@ abstract class TcpClientRpc
     protected virtual void OnDisconnected() { }
 }
 
-//sealed class RpcMessage : IDisposable
-//{
-//    public readonly RpcCommand Command;
-//    public readonly ulong ID;
-//    public readonly ArraySegment<byte> Payload;
-
-//    public RpcMessage(RpcCommand cmd, ulong id, ArraySegment<byte> payload)
-//        => (Command, ID, Payload) = (cmd, id, payload);
-
-//    public void Dispose()
-//    {
-//        if (Payload.Array != null && Payload.Array.Length > 0)
-//        {
-//            ArrayPool<byte>.Shared.Return(Payload.Array);
-//        }
-//    }
-
-//    public static readonly RpcMessage Invalid = new RpcMessage(RpcCommand.Invalid, 0, new ArraySegment<byte>(Array.Empty<byte>()));
-//}
-
 enum RpcCommand
 {
     Invalid = -1,
@@ -529,6 +509,7 @@ static class AsyncHelpers
         /// </summary>
         public void Run(Func<ValueTask> task)
         {
+            _done = false;
             _task = task;
 
             Post(_callback1, this);
@@ -545,8 +526,6 @@ static class AsyncHelpers
 
                 _caughtException.Throw();
             }
-
-            _done = false;
         }
 
         /// <summary>
