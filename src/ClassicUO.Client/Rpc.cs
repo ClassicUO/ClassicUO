@@ -1129,6 +1129,7 @@ abstract class TcpClientRpc
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 readonly struct RpcMessage
 =======
@@ -1161,6 +1162,8 @@ readonly struct RpcMessage : IDisposable
 //}
 
 >>>>>>> rpc support
+=======
+>>>>>>> more commands
 enum RpcCommand
 {
     Invalid = -1,
@@ -1396,8 +1399,6 @@ static class AsyncHelpers
                 _caughtException.Throw();
 >>>>>>> + removed rpc message
             }
-
-            _done = false;
         }
 
         /// <summary>
