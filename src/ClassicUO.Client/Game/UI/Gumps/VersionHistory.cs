@@ -11,7 +11,8 @@ namespace ClassicUO.Game.UI.Gumps
                 "- SOS Gump ID configurable in settings\n" +
                 "- Added macro option to execute a client-side command\n" +
                 "- Added a command doesn't exist message\n" +
-                "- Follow party members on world map option",
+                "- Follow party members on world map option\n" +
+                "- Bug fix",
 
              "/c[white][3.18.0]/cd\n" +
                 "- Added a language file that will contain UI text for easy language translations\n",

@@ -29,6 +29,8 @@ namespace ClassicUO.Configuration
 
         private static void CreateNewLanguageFile()
         {
+            Directory.CreateDirectory(Path.Combine(CUOEnviroment.ExecutablePath, "Data"));
+
             string defaultLanguage = JsonSerializer.Serialize<Language>(Instance, new JsonSerializerOptions() { WriteIndented = true });
             File.WriteAllText(languageFilePath, defaultLanguage);
         }
