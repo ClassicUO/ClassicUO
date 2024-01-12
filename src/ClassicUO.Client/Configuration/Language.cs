@@ -7,6 +7,8 @@ namespace ClassicUO.Configuration
     public class Language
     {
         public ModernOptionsGumpLanguage GetModernOptionsGumpLanguage { get; set; } = new ModernOptionsGumpLanguage();
+        public ErrorsLanguage ErrorsLanguage { get; set; } = new ErrorsLanguage();
+        public MapLanguage MapLanguage { get; set; } = new MapLanguage();
 
         [JsonIgnore]
         public static Language Instance { get; private set; } = new Language();
@@ -27,6 +29,8 @@ namespace ClassicUO.Configuration
 
         private static void CreateNewLanguageFile()
         {
+            Directory.CreateDirectory(Path.Combine(CUOEnviroment.ExecutablePath, "Data"));
+
             string defaultLanguage = JsonSerializer.Serialize<Language>(Instance, new JsonSerializerOptions() { WriteIndented = true });
             File.WriteAllText(languageFilePath, defaultLanguage);
         }
@@ -470,6 +474,7 @@ namespace ClassicUO.Configuration
             public string RegularPlayerOpacity { get; set; } = "Regular player opacity";
             public string AutoFollowDistance { get; set; } = "Auto follow distance";
             public string DisableMouseInteractionsForOverheadText { get; set; } = "Disable mouse interactions for overhead text";
+            public string OverridePartyMemberHues { get; set; } = "Override party member body hues with friendly hue";
             #endregion
 
             #region Misc
@@ -501,6 +506,7 @@ namespace ClassicUO.Configuration
             public string PlayerOffsetX { get; set; } = "Player Offset X";
             public string PlayerOffsetY { get; set; } = "Player Offset Y";
             public string UseLandTexturesWhereAvailable { get; set; } = "Use land textures where available(Experimental)";
+            public string SOSGumpID { get; set; } = "SOS Gump ID";
             #endregion
 
             #region Tooltips
@@ -554,5 +560,16 @@ namespace ClassicUO.Configuration
             public string OnlyForYourself { get; set; } = "Only for yourself";
             #endregion
         }
+    }
+
+    public class ErrorsLanguage
+    {
+        public string CommandNotFound { get; set; } = "Command was not found: {0}";
+    }
+
+    public class MapLanguage
+    {
+        public string Follow { get; set; } = "Follow";
+        public string Yourself { get; set; } = "Yourself";
     }
 }

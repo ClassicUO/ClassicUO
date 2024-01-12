@@ -30,16 +30,7 @@
 
 #endregion
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Json;
-using System.Threading.Tasks;
-using System.Xml;
+using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
@@ -47,7 +38,6 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO;
-using ClassicUO.Assets;
 using ClassicUO.Renderer;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
@@ -55,9 +45,15 @@ using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SDL2;
-using SpriteFont = ClassicUO.Renderer.SpriteFont;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Text.Json.Serialization;
+using System.Threading.Tasks;
+using System.Xml;
 using static ClassicUO.Game.UI.Gumps.WorldMapGump;
+using SpriteFont = ClassicUO.Renderer.SpriteFont;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -90,6 +86,8 @@ namespace ClassicUO.Game.UI.Gumps
 
         private List<string> _hiddenZoneFiles;
         private ZoneSets _zoneSets = new ZoneSets();
+
+        private static Mobile following;
 
         private static Texture2D _mapTexture;
         private static uint[] _pixelBuffer;
@@ -321,7 +319,8 @@ namespace ClassicUO.Game.UI.Gumps
             _options["show_all_markers"] = new ContextMenuItemEntry(ResGumps.ShowAllMarkers, () => { _showMarkers = !_showMarkers; SaveSettings(); }, true, _showMarkers);
             _options["show_marker_names"] = new ContextMenuItemEntry(ResGumps.ShowMarkerNames, () => { _showMarkerNames = !_showMarkerNames; SaveSettings(); }, true, _showMarkerNames);
             _options["show_marker_icons"] = new ContextMenuItemEntry(ResGumps.ShowMarkerIcons, () => { _showMarkerIcons = !_showMarkerIcons; SaveSettings(); }, true, _showMarkerIcons);
-            _options["flip_map"] = new ContextMenuItemEntry(ResGumps.FlipMap, () => { 
+            _options["flip_map"] = new ContextMenuItemEntry(ResGumps.FlipMap, () =>
+            {
                 _flipMap = !_flipMap; SaveSettings();
                 if (_northIcon != null)
                 {
@@ -521,9 +520,17 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void CloseWithRightClick()
         {
-            if(!Keyboard.Ctrl)
+            if (!Keyboard.Ctrl)
+            {
+                BuildContextMenu();
                 ContextMenu?.Show();
+            }
             return;
+        }
+
+        public static void FollowMobile(Mobile m)
+        {
+            following = m;
         }
 
         private void BuildContextMenu()
@@ -532,6 +539,24 @@ namespace ClassicUO.Game.UI.Gumps
 
             ContextMenu?.Dispose();
             ContextMenu = new ContextMenuControl();
+
+            ContextMenuItemEntry follow = new ContextMenuItemEntry(Language.Instance.MapLanguage.Follow);
+            follow.Add(new ContextMenuItemEntry(Language.Instance.MapLanguage.Yourself, () => { following = World.Player; }, true));
+            if (World.Party != null && World.Party.Leader != 0)
+            {
+                foreach (PartyMember e in World.Party.Members)
+                {
+                    if (e != null && SerialHelper.IsValid(e.Serial))
+                    {
+                        var mob = World.Mobiles.Get(e.Serial);
+                        if (mob != null && mob.Serial != World.Player.Serial)
+                        {
+                            follow.Add(new ContextMenuItemEntry(e.Name, () => { following = mob; }, true));
+                        }
+                    }
+                }
+            }
+            ContextMenu.Add(follow);
 
             ContextMenuItemEntry markerFontEntry = new ContextMenuItemEntry(ResGumps.FontStyle);
             markerFontEntry.Add(new ContextMenuItemEntry(string.Format(ResGumps.Style0, 1), () => { SetFont(1); }));
@@ -1184,7 +1209,6 @@ namespace ClassicUO.Game.UI.Gumps
                 return result;
             }
         }
-
 
         #region Loading
 
@@ -2171,8 +2195,16 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (!_isScrolling && !_freeView)
             {
-                _center.X = World.Player.X;
-                _center.Y = World.Player.Y;
+                if (following != null)
+                {
+                    _center.X = following.X;
+                    _center.Y = following.Y;
+                }
+                else
+                {
+                    _center.X = World.Player.X;
+                    _center.Y = World.Player.Y;
+                }
             }
 
 
@@ -2560,12 +2592,12 @@ namespace ClassicUO.Game.UI.Gumps
 
             }
 
-            if(Pathfinder.AutoWalking && Pathfinder.PathSize > 0)
+            if (Pathfinder.AutoWalking && Pathfinder.PathSize > 0)
             {
                 Point end = RotatePoint(Pathfinder.EndPoint.X - _center.X, Pathfinder.EndPoint.Y - _center.Y, Zoom, 1, _flipMap ? 45f : 0f);
                 end.X += gX + halfWidth;
                 end.Y += gY + halfHeight;
-                Point start = RotatePoint(World.Player.X - _center.X, World.Player.Y- _center.Y, Zoom, 1, _flipMap ? 45f : 0f);
+                Point start = RotatePoint(World.Player.X - _center.X, World.Player.Y - _center.Y, Zoom, 1, _flipMap ? 45f : 0f);
                 start.X += gX + halfWidth;
                 start.Y += gY + halfHeight;
 
@@ -3364,7 +3396,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 HandlePositionTarget();
             }
-            
+
             if (button == MouseButtonType.Left && !Keyboard.Alt)
             {
                 _isScrolling = false;

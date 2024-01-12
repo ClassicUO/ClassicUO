@@ -30,12 +30,6 @@
 
 #endregion
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Xml;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
@@ -47,6 +41,12 @@ using ClassicUO.Resources;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using SDL2;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Xml;
 using static SDL2.SDL;
 
 namespace ClassicUO.Game.Managers
@@ -1850,6 +1850,15 @@ namespace ClassicUO.Game.Managers
                         CounterBarGump.CurrentCounterBarGump?.GetCounterItem(cIndex)?.Use();
                     }
                     break;
+                case MacroType.ClientCommand:
+                    string command = ((MacroObjectString)macro).Text;
+
+                    if (!string.IsNullOrEmpty(command))
+                    {
+                        string[] parts = command.Split(' ');
+                        CommandManager.Execute(parts[0], parts);
+                    }
+                    break;
             }
 
 
@@ -2131,12 +2140,12 @@ namespace ClassicUO.Game.Managers
 
             XmlElement buttons = xml["controllerbuttons"];
 
-            if(buttons != null)
+            if (buttons != null)
             {
-                List<SDL.SDL_GameControllerButton> savedButtons = new List<SDL_GameControllerButton> ();
+                List<SDL.SDL_GameControllerButton> savedButtons = new List<SDL_GameControllerButton>();
                 foreach (XmlElement buttonNum in buttons.GetElementsByTagName("button"))
                 {
-                    if(int.TryParse(buttonNum.InnerText, out int b))
+                    if (int.TryParse(buttonNum.InnerText, out int b))
                     {
                         if (Enum.IsDefined(typeof(SDL_GameControllerButton), b))
                         {
@@ -2164,6 +2173,7 @@ namespace ClassicUO.Game.Managers
                 case MacroType.ModifyUpdateRange:
                 case MacroType.RazorMacro:
                 case MacroType.UseCounterBar:
+                case MacroType.ClientCommand:
                     obj = new MacroObjectString(code, MacroSubType.MSC_NONE);
 
                     break;
@@ -2339,6 +2349,7 @@ namespace ClassicUO.Game.Managers
                 case MacroType.ModifyUpdateRange:
                 case MacroType.RazorMacro:
                 case MacroType.UseCounterBar:
+                case MacroType.ClientCommand:
                     SubMenuType = 2;
 
                     break;
@@ -2456,7 +2467,8 @@ namespace ClassicUO.Game.Managers
         CloseCorpses,
         UseObject,
         LookAtMouse,
-        UseCounterBar
+        UseCounterBar,
+        ClientCommand
     }
 
     public enum MacroSubType

@@ -7244,66 +7244,69 @@ namespace ClassicUO.Network
                 GameActions.Print($"GumpID: {gumpID}");
             }
 
-            if (gumpID == 1426736667 || (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.ServerName == "UOAlive" && (gumpID == 4258191894 || gumpID == 1915258020))) //SOS message gump
+            if (ProfileManager.CurrentProfile != null)
             {
-                for (int i = 0; i < gump.Children.Count; i++)
+                if (gumpID == 1426736667 || gumpID == ProfileManager.CurrentProfile.SOSGumpID) //SOS message gump
                 {
-                    if (gump.Children[i] is HtmlControl)
+                    for (int i = 0; i < gump.Children.Count; i++)
                     {
-                        string pattern = @"(\d+('N)?('S)?('E)?('W)?)";
-
-                        string[] loc = new string[4];
-
-                        int c = 0;
-                        foreach (Match m in Regex.Matches(((HtmlControl)gump.Children[i]).Text, pattern, RegexOptions.Multiline))
+                        if (gump.Children[i] is HtmlControl)
                         {
-                            if (c > 3)
-                                break;
-                            loc[c] = m.Value.Replace("'", "");
-                            c++;
-                        }
+                            string pattern = @"(\d+('N)?('S)?('E)?('W)?)";
 
-                        if (loc[0] == null || loc[1] == null || loc[2] == null || loc[3] == null)
-                            break;
+                            string[] loc = new string[4];
 
-                        int xlong = 0, ylat = 0, xmins = 0, ymins = 0;
-                        bool xeast = true, ysouth = true;
-
-                        if (loc[1].Contains("N"))
-                            ysouth = false;
-
-                        if (loc[3].Contains("W"))
-                            xeast = false;
-
-                        xlong = int.Parse(loc[2]);
-                        ylat = int.Parse(loc[0]);
-                        xmins = int.Parse(loc[3].Substring(0, loc[3].Length - 1)); ;
-                        ymins = int.Parse(loc[1].Substring(0, loc[1].Length - 1));
-                        Vector3 location = ReverseLookup(xlong, ylat, xmins, ymins, xeast, ysouth);
-                        GameActions.Print($"If I am on the correct facet I think these coords should be somewhere near.. {location.X} and {location.Y}..");
-
-                        MenuButton menu = new MenuButton(25, Color.Black.PackedValue, 0.75f, "Menu") { X = gump.Width - 46, Y = 6 };
-                        menu.MouseUp += (s, e) =>
-                        {
-                            menu.ContextMenu?.Show();
-                        };
-
-                        menu.ContextMenu = new ContextMenuControl();
-                        menu.ContextMenu.Add(new ContextMenuItemEntry("Locate on world map", () =>
-                        {
-                            WorldMapGump gump = UIManager.GetGump<WorldMapGump>();
-                            if (gump == null)
+                            int c = 0;
+                            foreach (Match m in Regex.Matches(((HtmlControl)gump.Children[i]).Text, pattern, RegexOptions.Multiline))
                             {
-                                gump = new WorldMapGump();
-                                UIManager.Add(gump);
+                                if (c > 3)
+                                    break;
+                                loc[c] = m.Value.Replace("'", "");
+                                c++;
                             }
-                            gump.GoToMarker((int)location.X, (int)location.Y, true);
-                        }));
-                        menu.ContextMenu.Add(new ContextMenuItemEntry("Close", () =>
-                        {
-                            gump.Dispose();
-                        }));
-                        gump.Add(menu);
+
+                            if (loc[0] == null || loc[1] == null || loc[2] == null || loc[3] == null)
+                                break;
+
+                            int xlong = 0, ylat = 0, xmins = 0, ymins = 0;
+                            bool xeast = true, ysouth = true;
+
+                            if (loc[1].Contains("N"))
+                                ysouth = false;
+
+                            if (loc[3].Contains("W"))
+                                xeast = false;
+
+                            xlong = int.Parse(loc[2]);
+                            ylat = int.Parse(loc[0]);
+                            xmins = int.Parse(loc[3].Substring(0, loc[3].Length - 1)); ;
+                            ymins = int.Parse(loc[1].Substring(0, loc[1].Length - 1));
+                            Vector3 location = ReverseLookup(xlong, ylat, xmins, ymins, xeast, ysouth);
+                            GameActions.Print($"If I am on the correct facet I think these coords should be somewhere near.. {location.X} and {location.Y}..");
+
+                            MenuButton menu = new MenuButton(25, Color.Black.PackedValue, 0.75f, "Menu") { X = gump.Width - 46, Y = 6 };
+                            menu.MouseUp += (s, e) =>
+                            {
+                                menu.ContextMenu?.Show();
+                            };
+
+                            menu.ContextMenu = new ContextMenuControl();
+                            menu.ContextMenu.Add(new ContextMenuItemEntry("Locate on world map", () =>
+                            {
+                                WorldMapGump gump = UIManager.GetGump<WorldMapGump>();
+                                if (gump == null)
+                                {
+                                    gump = new WorldMapGump();
+                                    UIManager.Add(gump);
+                                }
+                                gump.GoToMarker((int)location.X, (int)location.Y, true);
+                            }));
+                            menu.ContextMenu.Add(new ContextMenuItemEntry("Close", () =>
+                            {
+                                gump.Dispose();
+                            }));
+                            gump.Add(menu);
+                        }
                     }
                 }
             }

@@ -30,13 +30,13 @@
 
 #endregion
 
-using System;
-using System.Collections.Generic;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
+using System;
+using System.Collections.Generic;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -92,7 +92,7 @@ namespace ClassicUO.Game.UI.Controls
         }
     }
 
-    public sealed class ContextMenuItemEntry
+    public class ContextMenuItemEntry
     {
         public ContextMenuItemEntry(string text, Action action = null, bool canBeSelected = false, bool defaultValue = false)
         {
@@ -307,7 +307,7 @@ namespace ClassicUO.Game.UI.Controls
                     _label.Width = Width;
                 }
 
-                if(_selectedPic != null)
+                if (_selectedPic != null)
                 {
                     _selectedPic.IsVisible = _entry.IsSelected;
                 }

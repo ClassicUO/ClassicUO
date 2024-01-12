@@ -30,18 +30,17 @@
 
 #endregion
 
-using System;
-using System.Collections.Generic;
+using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
-using ClassicUO.Input;
-using ClassicUO.Assets;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System;
+using System.Collections.Generic;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -80,6 +79,7 @@ namespace ClassicUO.Game.GameObjects
             drawY += 22;
 
             bool hasShadow = !IsDead && !IsHidden && ProfileManager.CurrentProfile.ShadowsEnabled;
+            bool inParty = World.Party.Contains(this);
 
             if (AuraManager.IsEnabled)
             {
@@ -87,7 +87,7 @@ namespace ClassicUO.Game.GameObjects
                     batcher,
                     drawX,
                     drawY,
-                    ProfileManager.CurrentProfile.PartyAura && World.Party.Contains(this)
+                    ProfileManager.CurrentProfile.PartyAura && inParty
                         ? ProfileManager.CurrentProfile.PartyAuraHue
                         : Notoriety.GetHue(NotorietyFlag),
                     depth + 1f
@@ -102,7 +102,7 @@ namespace ClassicUO.Game.GameObjects
 
             Vector3 hueVec = ShaderHueTranslator.GetHueVector(0, false, AlphaHue / 255f);
 
-            if(World.Player == this && ProfileManager.CurrentProfile.PlayerConstantAlpha != 100)
+            if (World.Player == this && ProfileManager.CurrentProfile.PlayerConstantAlpha != 100)
             {
                 hueVec = ShaderHueTranslator.GetHueVector(0, false, (float)ProfileManager.CurrentProfile.PlayerConstantAlpha / 100f);
             }
@@ -132,7 +132,7 @@ namespace ClassicUO.Game.GameObjects
             else if (IsHidden)
             {
                 overridedHue = ProfileManager.CurrentProfile.HiddenBodyHue;
-                hueVec = ShaderHueTranslator.GetHueVector(0, false, ((float)ProfileManager.CurrentProfile.HiddenBodyAlpha/100));
+                hueVec = ShaderHueTranslator.GetHueVector(0, false, ((float)ProfileManager.CurrentProfile.HiddenBodyAlpha / 100));
             }
             else
             {
@@ -180,6 +180,10 @@ namespace ClassicUO.Game.GameObjects
                 if (isAttack || isUnderMouse)
                 {
                     overridedHue = Notoriety.GetHue(NotorietyFlag);
+                }
+                else if (inParty && ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.OverridePartyAndGuildHue)
+                {
+                    overridedHue = ProfileManager.CurrentProfile.FriendHue;
                 }
             }
 
@@ -1365,10 +1369,10 @@ namespace ClassicUO.Game.GameObjects
 
                     break;
 
-                /*case Layer.Skirt:
-                    skirt = mobile.FindItemByLayer( Layer.Skirt];
+                    /*case Layer.Skirt:
+                        skirt = mobile.FindItemByLayer( Layer.Skirt];
 
-                    break;*/
+                        break;*/
             }
 
             return false;
