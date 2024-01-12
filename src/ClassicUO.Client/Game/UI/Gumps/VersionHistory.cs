@@ -7,6 +7,9 @@ namespace ClassicUO.Game.UI.Gumps
     internal class VersionHistory : Gump
     {
         private static string[] updateTexts = {
+            "/c[white][3.20.0]/cd\n" +
+                "- Being frozen wont cancel auto follow",
+
             "/c[white][3.19.0]/cd\n" +
                 "- SOS Gump ID configurable in settings\n" +
                 "- Added macro option to execute a client-side command\n" +
