@@ -2207,6 +2207,11 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 profile.DisableMouseInteractionOverheadText = b;
             }), true, page);
+            content.BlankLine();
+            content.AddToRight(c = new CheckboxWithLabel(lang.GetTazUO.OverridePartyMemberHues, 0, profile.OverridePartyAndGuildHue, (b) =>
+            {
+                profile.OverridePartyAndGuildHue = b;
+            }), true, page);
             #endregion
 
             #region Misc

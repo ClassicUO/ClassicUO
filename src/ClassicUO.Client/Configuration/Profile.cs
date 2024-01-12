@@ -128,6 +128,7 @@ namespace ClassicUO.Configuration
         public ushort InvulnerableHue { get; set; } = 0x0030;
         public ushort AltJournalBackgroundHue { get; set; } = 0x0000;
         public ushort AltGridContainerBackgroundHue { get; set; } = 0x0000;
+        public bool OverridePartyAndGuildHue { get; set; } = false;
 
         // visual
         public bool EnabledCriminalActionQuery { get; set; } = true;

@@ -12,6 +12,7 @@ namespace ClassicUO.Game.UI.Gumps
                 "- Added macro option to execute a client-side command\n" +
                 "- Added a command doesn't exist message\n" +
                 "- Follow party members on world map option\n" +
+                "- Added option to override party member body hues\n" +
                 "- Bug fix",
 
              "/c[white][3.18.0]/cd\n" +
