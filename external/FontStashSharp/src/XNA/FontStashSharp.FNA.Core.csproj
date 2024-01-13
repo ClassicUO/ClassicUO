@@ -1,6 +1,6 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>net472</TargetFramework>
     <PackageId>FontStashSharp.FNA</PackageId>
     <AssemblyName>FontStashSharp.FNA</AssemblyName>
     <Description>FontStashSharp for FNA.Core</Description>

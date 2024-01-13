@@ -5,20 +5,6 @@ VisualStudioVersion = 17.1.32328.378
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FontStashSharp", "..\src\FontStashSharp\FontStashSharp.csproj", "{9EAEB3FB-6808-478F-B643-57B9280E4896}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{B239F30F-0011-45CD-8862-62A0BC2ED694}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FontStashSharp.Samples.MonoGameBackend", "..\samples\FontStashSharp.Samples.MonoGameBackend\FontStashSharp.Samples.MonoGameBackend.csproj", "{CC6EF4B2-EE55-4EE5-AB0A-8E38DD3DC7F4}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FontStashSharp.Samples.MonoGameBackendRotating", "..\samples\FontStashSharp.Samples.MonoGameBackendRotating\FontStashSharp.Samples.MonoGameBackendRotating.csproj", "{4047DB36-7104-4314-9027-507374CD1532}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FontStashSharp.Samples.Silk.NET", "..\samples\FontStashSharp.Samples.Silk.NET\FontStashSharp.Samples.Silk.NET.csproj", "{D3410CBD-93DE-4620-9880-68B43C4087B1}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FontStashSharp.Samples.OpenTK", "..\samples\FontStashSharp.Samples.OpenTK\FontStashSharp.Samples.OpenTK.csproj", "{316A0585-C084-4E8D-912B-51EA974F9A90}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FontStashSharp.Samples.Silk.NET.TrippyGL", "..\samples\FontStashSharp.Samples.Silk.NET.TrippyGL\FontStashSharp.Samples.Silk.NET.TrippyGL.csproj", "{F5F8DD50-22A8-4366-855D-C7866CD89C62}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FontStashSharp.Samples.Silk.NET.RichText", "..\samples\FontStashSharp.Samples.Silk.NET.RichText\FontStashSharp.Samples.Silk.NET.RichText.csproj", "{F915F824-D222-4CE4-AE3B-C131B28BB16A}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
