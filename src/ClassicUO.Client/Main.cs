@@ -67,8 +67,6 @@ namespace ClassicUO
                 args[i] = Marshal.PtrToStringAnsi(argv[i]);
             }
 
-            PatchEnvVars();
-
             Host = new UnmanagedAssistantHost(hostSetup);
             Main(args);
         }
@@ -327,8 +325,8 @@ namespace ClassicUO
             CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
 
 #if !NETFRAMEWORK
-            FNADllMap.Init();
-            //DllMap.Initialise();
+            DllMap.Initialise();
+            PatchEnvVars();
 #endif
 
             Log.Start(LogTypes.All);
