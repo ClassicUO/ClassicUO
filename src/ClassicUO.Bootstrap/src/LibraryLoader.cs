@@ -53,10 +53,14 @@ namespace ClassicUO
         private class WinNativeLoader : NativeLoader
         {
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> delegate * --> delegate [lol]
             private const uint LOAD_WITH_ALTERED_SEARCH_PATH = 0x00000008;
             [DllImport("kernel32.dll", SetLastError = true)]
             [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
             private static extern IntPtr LoadLibraryExW([MarshalAs(UnmanagedType.LPWStr)] string lpLibFileName, IntPtr hFile, uint dwFlags);
+<<<<<<< HEAD
 
             [DllImport("kernel32", EntryPoint = "GetProcAddress", CharSet = CharSet.Ansi)]
             private static extern IntPtr GetProcAddress_WIN(IntPtr module, [MarshalAs(UnmanagedType.LPStr)] string procName);
@@ -67,6 +71,11 @@ namespace ClassicUO
             [DllImport("kernel32", EntryPoint = "GetProcAddress")]
             private static extern IntPtr GetProcAddress_WIN(IntPtr module, string procName);
 >>>>>>> + classicuo.bootstrap app
+=======
+
+            [DllImport("kernel32", EntryPoint = "GetProcAddress", CharSet = CharSet.Ansi)]
+            private static extern IntPtr GetProcAddress_WIN(IntPtr module, [MarshalAs(UnmanagedType.LPStr)] string procName);
+>>>>>>> delegate * --> delegate [lol]
 
             [DllImport("kernel32", EntryPoint = "FreeLibrary")]
             private static extern int FreeLibrary_WIN(IntPtr module);
@@ -75,10 +84,14 @@ namespace ClassicUO
             public override IntPtr LoadLibrary(string name)
             {
 <<<<<<< HEAD
+<<<<<<< HEAD
                 return LoadLibraryExW(name, IntPtr.Zero, LOAD_WITH_ALTERED_SEARCH_PATH);
 =======
                 return LoadLibrary_WIN(name);
 >>>>>>> + classicuo.bootstrap app
+=======
+                return LoadLibraryExW(name, IntPtr.Zero, LOAD_WITH_ALTERED_SEARCH_PATH);
+>>>>>>> delegate * --> delegate [lol]
             }
 
             public override IntPtr GetProcessAddress(IntPtr module, string name)

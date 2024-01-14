@@ -103,6 +103,9 @@ sealed class ClassicUOHost
     private readonly List<Plugin> _plugins = new List<Plugin>();
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    unsafe delegate void dOnInitializeCuo(IntPtr* argv, int argc, IntPtr hostSetupPtr);
+
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     delegate void dOnPluginInitialize(IntPtr exportedFuncs, uint clientVersion, IntPtr pluginPathPtr, IntPtr assetsPathPtr);
 >>>>>>> + classicuo.bootstrap app
 
@@ -245,11 +248,16 @@ sealed class ClassicUOHost
         unsafe
         {
 <<<<<<< HEAD
+<<<<<<< HEAD
             var initializePtr = Native.GetProcessAddress(libPtr, "Initialize");
             var initializeMethod = Marshal.GetDelegateForFunctionPointer<dOnInitializeCuo>(initializePtr);
 =======
             var initializeMethod = (delegate*<IntPtr*, int, HostSetup*, void>)Native.GetProcessAddress(libPtr, "Initialize");
 >>>>>>> + classicuo.bootstrap app
+=======
+            var initializePtr = Native.GetProcessAddress(libPtr, "Initialize");
+            var initializeMethod = Marshal.GetDelegateForFunctionPointer<dOnInitializeCuo>(initializePtr);
+>>>>>>> delegate * --> delegate [lol]
 
             var argv = stackalloc IntPtr[args.Length];
             for (int i = 0; i < args.Length; i++)
@@ -316,10 +324,10 @@ sealed class ClassicUOHost
         var plugin = new Plugin(this, Guid.Empty);
 =======
 
-            initializeMethod(argv, args.Length, (HostSetup*)mem);
+            initializeMethod(argv, args.Length, mem);
 
-            //if (mem != null)
-            //    Marshal.FreeHGlobal(mem);
+            if (mem != null)
+                Marshal.FreeHGlobal(mem);
         }
     }
 
@@ -572,7 +580,6 @@ unsafe struct CuoHostSetup
     public IntPtr /*delegate*<int, IntPtr, IntPtr, bool, bool>*/ GetClilocFn;
     public IntPtr /*delegate*<int, bool, bool>*/ RequestMoveFn;
     public IntPtr /*delegate*<ref int, ref int, ref int, bool>*/ GetPlayerPositionFn;
-    public IntPtr /*delegate*<int, int, int, void>*/ UpdatePlayerPositionFn;
 }
 
 sealed unsafe class ClassicUOHandler : IPluginHandler
@@ -793,7 +800,6 @@ unsafe struct ClientBindings
         return _sendToServer?.Invoke(data, ref length) ?? true;
     }
 
-    // NOTE: for some obscure reason this function might cause 'access memory violation'
     public void SetWindowTitle(Guid id, string title)
     {
         if (string.IsNullOrEmpty(title) || _setWindowTitle == null)
@@ -801,11 +807,10 @@ unsafe struct ClientBindings
 
         var count = Encoding.UTF8.GetByteCount(title);
 
-        // NOTE: using stackalloc causes some weird issue on cuo side.
-        var buf = new byte[count + 1]; // stackalloc byte[count + 1];
+        var ptr = stackalloc byte[count + 1];
 
         fixed (char* titlePtr = title)
-        fixed (byte* ptr = &buf[0])
+        //fixed (byte* ptr = &buf[0])
         {
             Encoding.UTF8.GetBytes(titlePtr, title.Length, ptr, count);
 
