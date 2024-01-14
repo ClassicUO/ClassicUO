@@ -308,6 +308,9 @@ sealed class ClassicUOHost
 =======
 
             initializeMethod(argv, args.Length, (HostSetup*)mem);
+
+            if (mem != null)
+                Marshal.FreeHGlobal(mem);
         }
     }
 
@@ -418,8 +421,15 @@ sealed class ClassicUOHost
 
                 ok |= plugin.ProcessRecvPacket(ref rentBuf, ref length);
 
-                fixed (byte* ptr = rentBuf)
-                    Buffer.MemoryCopy(ptr, data.ToPointer(), sizeof(byte) * length, sizeof(byte) * length);
+                if (!ok)
+                {
+                    length = 0;
+                }
+                else
+                {
+                    fixed (byte* ptr = rentBuf)
+                        Buffer.MemoryCopy(ptr, data.ToPointer(), sizeof(byte) * length, sizeof(byte) * length);
+                }
             }
             finally
             {
@@ -445,8 +455,15 @@ sealed class ClassicUOHost
 
                 ok |= plugin.ProcessSendPacket(ref rentBuf, ref length);
 
-                fixed (byte* ptr = rentBuf)
-                    Buffer.MemoryCopy(ptr, data.ToPointer(), sizeof(byte) * length, sizeof(byte) * length);
+                if (!ok)
+                {
+                    length = 0;
+                }
+                else
+                {
+                    fixed (byte* ptr = rentBuf)
+                        Buffer.MemoryCopy(ptr, data.ToPointer(), sizeof(byte) * length, sizeof(byte) * length);
+                }
             }
             finally
             {
@@ -509,7 +526,7 @@ sealed class ClassicUOHost
     }
 }
 
-unsafe struct HostSetup
+struct HostSetup
 {
     public IntPtr InitializeFn;
     public IntPtr TickFn;
