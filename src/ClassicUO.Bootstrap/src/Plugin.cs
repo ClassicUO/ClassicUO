@@ -385,8 +385,7 @@ sealed class Plugin
             var tmp = data;
             result = _onRecv(ref data, ref length);
 
-            //if (!ReferenceEquals(tmp, data))
-            if (!tmp.Equals(data))
+            if (!ReferenceEquals(tmp, data))
             {
                 Array.Copy(data, tmp, length);
                 data = tmp;
@@ -410,7 +409,7 @@ sealed class Plugin
             var tmp = data;
             result = _onSend(ref data, ref length);
 
-            if (!tmp.Equals(data))
+            if (!ReferenceEquals(tmp, data))
             {
                 Array.Copy(data, tmp, length);
                 data = tmp;
