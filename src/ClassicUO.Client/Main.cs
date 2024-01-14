@@ -73,6 +73,7 @@ namespace ClassicUO
 
         public unsafe static UnmanagedAssistantHost Host;
 
+        [StructLayout(LayoutKind.Sequential)]
         public unsafe struct HostSetup
         {
             public delegate*<IntPtr, uint, IntPtr, IntPtr, void> InitializeFn;
@@ -91,6 +92,7 @@ namespace ClassicUO
             public delegate*<IntPtr, ref int, bool> PacketOutFn;
         }
 
+        [StructLayout(LayoutKind.Sequential)]
         unsafe struct CuoHostSetup
         {
             public IntPtr SdlWindow;
@@ -98,7 +100,7 @@ namespace ClassicUO
             public delegate*<IntPtr, ref int, bool> PluginSendFn;
             public delegate*<int, short> PacketLengthFn;
             public delegate*<int, void> CastSpellFn;
-            public delegate*<IntPtr, void> SetWindowTitleFn;
+            public delegate* unmanaged<IntPtr, void> SetWindowTitleFn;
             public delegate*<int, IntPtr, IntPtr, bool, bool> GetClilocFn;
             public delegate*<int, bool, bool> RequestMoveFn;
             public delegate*<out int, out int, out int, bool> GetPlayerPositionFn;
@@ -170,7 +172,7 @@ namespace ClassicUO
                 cuoHost.PluginSendFn = &Plugin.OnPluginSend_new;
                 cuoHost.RequestMoveFn = &Plugin.RequestMove;
                 cuoHost.GetPlayerPositionFn = &Plugin.GetPlayerPosition;
-               
+
                 _hostSetup->InitializeFn
                 (
                     (IntPtr)mem,
@@ -178,10 +180,13 @@ namespace ClassicUO
                     Marshal.StringToHGlobalAnsi(pluginPath),
                     Marshal.StringToHGlobalAnsi(Settings.GlobalSettings.UltimaOnlineDirectory)
                 );
+            }
 
-
-                static void setWindowTitle(IntPtr ptr)
-                    => Client.Game.SetWindowTitle(new string((char*)ptr));
+            [UnmanagedCallersOnly]
+            static void setWindowTitle(IntPtr ptr)
+            {
+                var title = SDL2.SDL.UTF8_ToManaged(ptr);
+                Client.Game.SetWindowTitle(title);
             }
 
             public void Mouse(int button, int wheel)
@@ -192,7 +197,7 @@ namespace ClassicUO
 
             public bool PacketIn(ArraySegment<byte> buffer)
             {
-                if (_hostSetup->PacketInFn == null)
+                if (_hostSetup->PacketInFn == null || buffer.Array == null || buffer.Count <= 0)
                     return true;
 
                 var len = buffer.Count;
@@ -202,7 +207,7 @@ namespace ClassicUO
 
             public bool PacketOut(Span<byte> buffer)
             {
-                if (_hostSetup->PacketOutFn == null)
+                if (_hostSetup->PacketOutFn == null || buffer.IsEmpty)
                     return true;
 
                 var len = buffer.Length;
