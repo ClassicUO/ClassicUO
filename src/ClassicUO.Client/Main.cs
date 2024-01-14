@@ -79,6 +79,7 @@ namespace ClassicUO
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
             var host = new UnmanagedAssistantHost(hostSetup);
             Boot(host, args);
         }
@@ -129,6 +130,8 @@ namespace ClassicUO
             PatchEnvVars();
 
 >>>>>>> PatchEnvVars
+=======
+>>>>>>> fixed order
             Host = new UnmanagedAssistantHost(hostSetup);
             Main(args);
         }
@@ -724,6 +727,7 @@ namespace ClassicUO
             CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
 
 #if !NETFRAMEWORK
+<<<<<<< HEAD
             FNADllMap.Init();
             //DllMap.Initialise();
 <<<<<<< HEAD
@@ -732,6 +736,10 @@ namespace ClassicUO
             PatchEnvVars();
 =======
 >>>>>>> minor
+=======
+            DllMap.Initialise();
+            PatchEnvVars();
+>>>>>>> fixed order
 #endif
 
             Log.Start(LogTypes.All);
