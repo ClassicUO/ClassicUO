@@ -3,9 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 <<<<<<< HEAD
+<<<<<<< HEAD
 using System.Runtime.InteropServices.ComTypes;
 =======
 >>>>>>> + classicuo.bootstrap app
+=======
+using System.Runtime.InteropServices.ComTypes;
+>>>>>>> linux support dlopen
 using System.Text;
 using System.Threading.Tasks;
 
@@ -108,6 +112,7 @@ namespace ClassicUO
         private class UnixNativeLoader : NativeLoader
         {
 <<<<<<< HEAD
+<<<<<<< HEAD
 
             public const int RTLD_NOW = 0x002;
 
@@ -165,61 +170,102 @@ namespace ClassicUO
                 return m_useLibdl1? Libdl1.dlopen(name, RTLD_NOW) : Libdl2.dlopen(name, RTLD_NOW);
 =======
             private const string LibName = "libdl";
+=======
+>>>>>>> linux support dlopen
 
             public const int RTLD_NOW = 0x002;
 
-            [DllImport("libdl.so", EntryPoint = "dlopen")]
-            private static extern IntPtr LoadUnixLibrary1(string path, int flags);
 
-            [DllImport("libdl.so.2", EntryPoint = "dlopen")]
-            private static extern IntPtr LoadUnixLibrary2(string path, int flags);
-
-
-            [DllImport(LibName)]
-            private static extern IntPtr dlsym(IntPtr handle, string name);
-
-            [DllImport(LibName)]
-            private static extern int dlclose(IntPtr handle);
-
-            [DllImport(LibName)]
-            private static extern string dlerror();
-
-            public override IntPtr LoadLibrary(string name)
+            private static class Libdl1
             {
+                private const string LibName = "libdl";
+
+                [DllImport(LibName)]
+                public static extern IntPtr dlopen(string fileName, int flags);
+
+                [DllImport(LibName)]
+                public static extern IntPtr dlsym(IntPtr handle, string name);
+
+                [DllImport(LibName)]
+                public static extern int dlclose(IntPtr handle);
+
+                [DllImport(LibName)]
+                public static extern int dlerror();
+            }
+
+            private static class Libdl2
+            {
+                private const string LibName = "libdl.so.2";
+
+                [DllImport(LibName)]
+                public static extern IntPtr dlopen(string fileName, int flags);
+
+                [DllImport(LibName)]
+                public static extern IntPtr dlsym(IntPtr handle, string name);
+
+                [DllImport(LibName)]
+                public static extern int dlclose(IntPtr handle);
+
+                [DllImport(LibName)]
+                public static extern int dlerror();
+            }
+
+            static UnixNativeLoader()
+            {
+<<<<<<< HEAD
 <<<<<<< HEAD
                 return dlopen(name, RTLD_NOW);
 >>>>>>> + classicuo.bootstrap app
 =======
                 IntPtr ptr = IntPtr.Zero;
+=======
+>>>>>>> linux support dlopen
                 try
                 {
-                    ptr = LoadUnixLibrary1(name, RTLD_NOW);
+                    Libdl1.dlerror();
+                    m_useLibdl1 = true;
                 }
-                catch (DllNotFoundException)
+                catch
                 {
-                    ptr = LoadUnixLibrary2(name, RTLD_NOW);
                 }
+            }
 
+<<<<<<< HEAD
                 return ptr;
 >>>>>>> fix for linux
+=======
+            private static bool m_useLibdl1;
+
+            public override IntPtr LoadLibrary(string name)
+            {
+                return m_useLibdl1? Libdl1.dlopen(name, RTLD_NOW) : Libdl2.dlopen(name, RTLD_NOW);
+>>>>>>> linux support dlopen
             }
 
             public override IntPtr GetProcessAddress(IntPtr module, string name)
             {
 <<<<<<< HEAD
+<<<<<<< HEAD
                 return m_useLibdl1 ? Libdl1.dlsym(module, name) : Libdl2.dlsym(module, name);
 =======
                 return dlsym(module, name);
 >>>>>>> + classicuo.bootstrap app
+=======
+                return m_useLibdl1 ? Libdl1.dlsym(module, name) : Libdl2.dlsym(module, name);
+>>>>>>> linux support dlopen
             }
 
             public override int FreeLibrary(IntPtr module)
             {
 <<<<<<< HEAD
+<<<<<<< HEAD
                 return m_useLibdl1 ? Libdl1.dlerror() : Libdl2.dlerror();
 =======
                 return dlclose(module);
 >>>>>>> + classicuo.bootstrap app
+=======
+                return m_useLibdl1 ? Libdl1.dlerror() : Libdl2.dlerror();
+>>>>>>> linux support dlopen
             }
         }
     }
