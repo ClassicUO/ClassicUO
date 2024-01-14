@@ -710,6 +710,7 @@ namespace ClassicUO
             CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
 
 #if !NETFRAMEWORK
+            FNADllMap.Init();
             //DllMap.Initialise();
 <<<<<<< HEAD
             DllMap.Init(Assembly.GetExecutingAssembly());
