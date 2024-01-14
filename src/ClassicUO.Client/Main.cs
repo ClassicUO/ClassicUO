@@ -711,9 +711,12 @@ namespace ClassicUO
 
 #if !NETFRAMEWORK
             //DllMap.Initialise();
+<<<<<<< HEAD
             DllMap.Init(Assembly.GetExecutingAssembly());
             DllMap.Init(typeof(Microsoft.Xna.Framework.Point).Assembly);
             PatchEnvVars();
+=======
+>>>>>>> minor
 #endif
 
             Log.Start(LogTypes.All);
