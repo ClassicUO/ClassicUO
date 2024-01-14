@@ -20,13 +20,22 @@ using System.Runtime.CompilerServices;
 using System.Xml;
 #endregion
 
-namespace ClassicUO
+namespace Microsoft.Xna.Framework
 {
+<<<<<<< HEAD
     internal static class DllMap
     {
         #region Private Static Variables
 
         private static readonly Dictionary<string, string> _mapDict = new Dictionary<string, string>();
+=======
+    internal static class FNADllMap
+    {
+        #region Private Static Variables
+
+        private static Dictionary<string, string> mapDictionary
+            = new Dictionary<string, string>();
+>>>>>>> update dllmap
 
         #endregion
 
@@ -68,7 +77,11 @@ namespace ClassicUO
         )
         {
             string mappedName;
+<<<<<<< HEAD
             if (!_mapDict.TryGetValue(libraryName, out mappedName))
+=======
+            if (!mapDictionary.TryGetValue(libraryName, out mappedName))
+>>>>>>> update dllmap
             {
                 mappedName = libraryName;
             }
@@ -84,10 +97,20 @@ namespace ClassicUO
         {
             return NativeLibrary.GetMainProgramHandle();
         }
+<<<<<<< HEAD
 
         #endregion
 
         public static void Init(Assembly assembly)
+=======
+
+        #endregion
+
+        #region Module Initializer
+
+        [ModuleInitializer]
+        public static void Init()
+>>>>>>> update dllmap
         {
             if (!RuntimeFeature.IsDynamicCodeCompiled)
             {
@@ -100,23 +123,38 @@ namespace ClassicUO
                 if (OperatingSystem.IsIOS() || OperatingSystem.IsTvOS())
                 {
                     NativeLibrary.SetDllImportResolver(Assembly.GetExecutingAssembly(), LoadStaticLibrary);
+<<<<<<< HEAD
                     return;
                 }
 
                 //return;
+=======
+                }
+
+                return;
+>>>>>>> update dllmap
             }
 
             // Get the platform and architecture
             string os = GetPlatformName();
             string cpu = RuntimeInformation.ProcessArchitecture.ToString().ToLowerInvariant();
             string wordsize = (IntPtr.Size * 8).ToString();
+<<<<<<< HEAD
+=======
+
+            // Get the executing assembly
+            Assembly assembly = Assembly.GetExecutingAssembly();
+>>>>>>> update dllmap
 
             // Locate the config file
             string xmlPath = Path.Combine(
                 AppContext.BaseDirectory,
                 assembly.GetName().Name + ".dll.config"
             );
+<<<<<<< HEAD
 
+=======
+>>>>>>> update dllmap
             if (!File.Exists(xmlPath))
             {
                 // Let's hope for the best...
@@ -139,12 +177,21 @@ namespace ClassicUO
                     Debug.WriteLine(msg);
                 }
             }
+<<<<<<< HEAD
 
             // Parse the XML into a mapping dictionary
             foreach (XmlNode node in xmlDoc.GetElementsByTagName("dllmap"))
             {
                 XmlAttribute attribute;
 
+=======
+
+            // Parse the XML into a mapping dictionary
+            foreach (XmlNode node in xmlDoc.GetElementsByTagName("dllmap"))
+            {
+                XmlAttribute attribute;
+
+>>>>>>> update dllmap
                 // Check the OS
                 attribute = node.Attributes["os"];
                 if (attribute != null)
@@ -198,17 +245,30 @@ namespace ClassicUO
                 }
 
                 // Don't allow duplicates
+<<<<<<< HEAD
                 if (_mapDict.ContainsKey(oldLib))
+=======
+                if (mapDictionary.ContainsKey(oldLib))
+>>>>>>> update dllmap
                 {
                     continue;
                 }
 
+<<<<<<< HEAD
                 _mapDict.Add(oldLib, newLib);
+=======
+                mapDictionary.Add(oldLib, newLib);
+>>>>>>> update dllmap
             }
 
             // Set the resolver callback
             NativeLibrary.SetDllImportResolver(assembly, MapAndLoad);
         }
+<<<<<<< HEAD
+=======
+
+        #endregion
+>>>>>>> update dllmap
     }
 }
 
