@@ -67,8 +67,19 @@ namespace ClassicUO
                 args[i] = Marshal.PtrToStringAnsi(argv[i]);
             }
 
+            PatchEnvVars();
+
             Host = new UnmanagedAssistantHost(hostSetup);
             Main(args);
+        }
+
+        private static void PatchEnvVars()
+        {
+            // Patch necessary for .NET 5
+            foreach (System.Collections.DictionaryEntry envs in Environment.GetEnvironmentVariables())
+            {
+                SDL2.SDL.SDL_SetHint(envs.Key.ToString(), envs.Value.ToString());
+            }
         }
 
         public unsafe static UnmanagedAssistantHost Host;
