@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -78,49 +79,71 @@ namespace ClassicUO
 
         private class UnixNativeLoader : NativeLoader
         {
-            private const string LibName = "libdl";
 
             public const int RTLD_NOW = 0x002;
 
-            [DllImport("libdl.so", EntryPoint = "dlopen")]
-            private static extern IntPtr LoadUnixLibrary1(string path, int flags);
 
-            [DllImport("libdl.so.2", EntryPoint = "dlopen")]
-            private static extern IntPtr LoadUnixLibrary2(string path, int flags);
+            private static class Libdl1
+            {
+                private const string LibName = "libdl";
 
+                [DllImport(LibName)]
+                public static extern IntPtr dlopen(string fileName, int flags);
 
-            [DllImport(LibName)]
-            private static extern IntPtr dlsym(IntPtr handle, string name);
+                [DllImport(LibName)]
+                public static extern IntPtr dlsym(IntPtr handle, string name);
 
-            [DllImport(LibName)]
-            private static extern int dlclose(IntPtr handle);
+                [DllImport(LibName)]
+                public static extern int dlclose(IntPtr handle);
 
-            [DllImport(LibName)]
-            private static extern string dlerror();
+                [DllImport(LibName)]
+                public static extern int dlerror();
+            }
+
+            private static class Libdl2
+            {
+                private const string LibName = "libdl.so.2";
+
+                [DllImport(LibName)]
+                public static extern IntPtr dlopen(string fileName, int flags);
+
+                [DllImport(LibName)]
+                public static extern IntPtr dlsym(IntPtr handle, string name);
+
+                [DllImport(LibName)]
+                public static extern int dlclose(IntPtr handle);
+
+                [DllImport(LibName)]
+                public static extern int dlerror();
+            }
+
+            static UnixNativeLoader()
+            {
+                try
+                {
+                    Libdl1.dlerror();
+                    m_useLibdl1 = true;
+                }
+                catch
+                {
+                }
+            }
+
+            private static bool m_useLibdl1;
 
             public override IntPtr LoadLibrary(string name)
             {
-                IntPtr ptr = IntPtr.Zero;
-                try
-                {
-                    ptr = LoadUnixLibrary1(name, RTLD_NOW);
-                }
-                catch (DllNotFoundException)
-                {
-                    ptr = LoadUnixLibrary2(name, RTLD_NOW);
-                }
-
-                return ptr;
+                return m_useLibdl1? Libdl1.dlopen(name, RTLD_NOW) : Libdl2.dlopen(name, RTLD_NOW);
             }
 
             public override IntPtr GetProcessAddress(IntPtr module, string name)
             {
-                return dlsym(module, name);
+                return m_useLibdl1 ? Libdl1.dlsym(module, name) : Libdl2.dlsym(module, name);
             }
 
             public override int FreeLibrary(IntPtr module)
             {
-                return dlclose(module);
+                return m_useLibdl1 ? Libdl1.dlerror() : Libdl2.dlerror();
             }
         }
     }
