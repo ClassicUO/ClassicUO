@@ -3,12 +3,40 @@ using CUO_API;
 using System;
 using System.Buffers;
 using System.Collections.Generic;
+<<<<<<< HEAD
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 
 
 Global.Host.Run(args);
+=======
+using System.Net;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+var address = "127.0.0.1";
+var port = 7777;
+
+if (args.Length >= 1)
+{
+    Console.WriteLine(args[0]);
+    address = IPAddress.Parse(args[0]).ToString();
+}
+
+if (args.Length >= 2)
+{
+    Console.WriteLine(args[1]);
+    port = int.Parse(args[1]);
+}
+
+
+//var cuoServer = new ClassicUORpcServer();
+//cuoServer.Start(address, port);
+
+Global.Host.Run(args);
+
+>>>>>>> + classicuo.bootstrap app
 Console.WriteLine("finished");
 
 
@@ -19,6 +47,7 @@ static class Global
 
 }
 
+<<<<<<< HEAD
 sealed class ClassicUOHost : IPluginHandler
 {
     private readonly List<Plugin> _plugins = new List<Plugin>();
@@ -67,6 +96,14 @@ sealed class ClassicUOHost : IPluginHandler
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     delegate void dOnPluginLoad(IntPtr pluginPathPtr, uint clientVersion, IntPtr assetsPathPtr, IntPtr sdlWindow);
+=======
+sealed class ClassicUOHost
+{
+    private readonly List<Plugin> _plugins = new List<Plugin>();
+
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    delegate void dOnPluginInitialize(IntPtr exportedFuncs, uint clientVersion, IntPtr pluginPathPtr, IntPtr assetsPathPtr);
+>>>>>>> + classicuo.bootstrap app
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     delegate void dOnPluginTick();
@@ -75,18 +112,24 @@ sealed class ClassicUOHost : IPluginHandler
     delegate void dOnPluginClose();
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+<<<<<<< HEAD
     delegate void dOnPluginConnection();
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+=======
+>>>>>>> + classicuo.bootstrap app
     delegate bool dOnPluginPacketInOut(IntPtr data, ref int length);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     delegate bool dOnHotkey(int key, int mod, bool pressed);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+<<<<<<< HEAD
     delegate void dOnMouse(int button, int wheel);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+=======
+>>>>>>> + classicuo.bootstrap app
     delegate bool dOnUpdatePlayerPosition(int x, int y, int z);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -95,6 +138,7 @@ sealed class ClassicUOHost : IPluginHandler
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     delegate int dOnPluginSdlEvent(IntPtr ev);
 
+<<<<<<< HEAD
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     delegate void dOnPluginCommandList(out IntPtr list, out int len);
 
@@ -111,10 +155,24 @@ sealed class ClassicUOHost : IPluginHandler
     private readonly FuncPointer<dOnPluginFocusWindow> _focusGainedDel, _focusLostDel;
     private readonly FuncPointer<dOnPluginSdlEvent> _sdlEventDel;
     private readonly FuncPointer<dOnPluginCommandList> _cmdListDel;
+=======
+
+    private readonly FuncPointer<dOnPluginInitialize> _initPluginDel;
+    private readonly FuncPointer<dOnPluginTick> _tickPluginDel;
+    private readonly FuncPointer<dOnPluginClose> _closingPluginDel;
+    private readonly FuncPointer<dOnPluginPacketInOut> _packetInPluginDel;
+    private readonly FuncPointer<dOnPluginPacketInOut> _packetOutPluginDel;
+    private readonly FuncPointer<dOnHotkey> _hotkeyPluginDel;
+    private readonly FuncPointer<OnUpdatePlayerPosition> _updatePlayerPosDel;
+    private readonly FuncPointer<dOnPluginFocusWindow> _focusGainedDel, _focusLostDel;
+    private readonly FuncPointer<dOnPluginSdlEvent> _sdlEventDel;
+
+>>>>>>> + classicuo.bootstrap app
     
 
     public ClassicUOHost()
     {
+<<<<<<< HEAD
         _initCuoFunctionsDel = new FuncPointer<dOnPluginBindCuoFunctions>(Initialize);
         _loadPluginDel = new FuncPointer<dOnPluginLoad>(LoadPlugin);
         _tickPluginDel = new FuncPointer<dOnPluginTick>(TickPlugin);
@@ -125,15 +183,27 @@ sealed class ClassicUOHost : IPluginHandler
         _packetOutPluginDel = new FuncPointer<dOnPluginPacketInOut>(PacketOutPlugin);
         _hotkeyPluginDel = new FuncPointer<dOnHotkey>(HotkeyPlugin);
         _mousePluginDel = new FuncPointer<dOnMouse>(MousePlugin);
+=======
+        _initPluginDel = new FuncPointer<dOnPluginInitialize>(InitializePlugin);
+        _tickPluginDel = new FuncPointer<dOnPluginTick>(TickPlugin);
+        _closingPluginDel = new FuncPointer<dOnPluginClose>(ClosingPlugin);
+        _packetInPluginDel = new FuncPointer<dOnPluginPacketInOut>(PacketInPlugin);
+        _packetOutPluginDel = new FuncPointer<dOnPluginPacketInOut>(PacketOutPlugin);
+        _hotkeyPluginDel = new FuncPointer<dOnHotkey>(HotkeyPlugin);
+>>>>>>> + classicuo.bootstrap app
         _updatePlayerPosDel = new FuncPointer<OnUpdatePlayerPosition>(UpdatePlayerPosition);
         _focusGainedDel = new FuncPointer<dOnPluginFocusWindow>(FocusGained);
         _focusLostDel = new FuncPointer<dOnPluginFocusWindow>(FocusLost);
         _sdlEventDel = new FuncPointer<dOnPluginSdlEvent>(SdlEvent);
+<<<<<<< HEAD
         _cmdListDel = new FuncPointer<dOnPluginCommandList>(GetCommandList);
+=======
+>>>>>>> + classicuo.bootstrap app
     }
 
     public void Run(string[] args)
     {
+<<<<<<< HEAD
         var libName = "./cuo";
         switch (Environment.OSVersion.Platform)
         {
@@ -145,6 +215,19 @@ sealed class ClassicUOHost : IPluginHandler
                 break;
             default:
                 libName += ".dll";
+=======
+        var libName = "";
+        switch (Environment.OSVersion.Platform)
+        {
+            case PlatformID.MacOSX:
+                libName = "./ClassicUO.dylib";
+                break;
+            case PlatformID.Unix:
+                libName = "./ClassicUO.so";
+                break;
+            default:
+                libName = "./ClassicUO.dll";
+>>>>>>> + classicuo.bootstrap app
                 break;
         }
 
@@ -152,13 +235,18 @@ sealed class ClassicUOHost : IPluginHandler
 
         unsafe
         {
+<<<<<<< HEAD
             var initializePtr = Native.GetProcessAddress(libPtr, "Initialize");
             var initializeMethod = Marshal.GetDelegateForFunctionPointer<dOnInitializeCuo>(initializePtr);
+=======
+            var initializeMethod = (delegate*<IntPtr*, int, HostSetup*, void>)Native.GetProcessAddress(libPtr, "Initialize");
+>>>>>>> + classicuo.bootstrap app
 
             var argv = stackalloc IntPtr[args.Length];
             for (int i = 0; i < args.Length; i++)
                 argv[i] = Marshal.StringToHGlobalAnsi(args[i]);
 
+<<<<<<< HEAD
             var mem = Marshal.AllocHGlobal(sizeof(HostBindings));
             for (var i = 0; i < sizeof(HostBindings); i++)
                 ((byte*)mem)[i] = 0;
@@ -166,16 +254,28 @@ sealed class ClassicUOHost : IPluginHandler
             ref var hostSetup = ref Unsafe.AsRef<HostBindings>(mem.ToPointer());
             hostSetup.InitializeFn = _initCuoFunctionsDel.Pointer;
             hostSetup.LoadPluginFn = _loadPluginDel.Pointer;
+=======
+            var mem = Marshal.AllocHGlobal(sizeof(HostSetup));
+            for (var i = 0; i < sizeof(HostSetup); i++)
+                ((byte*)mem)[i] = 0;
+
+            ref var hostSetup = ref Unsafe.AsRef<HostSetup>(mem.ToPointer());
+            hostSetup.InitializeFn = _initPluginDel.Pointer;
+>>>>>>> + classicuo.bootstrap app
             hostSetup.TickFn = _tickPluginDel.Pointer;
             hostSetup.ClosingFn = _closingPluginDel.Pointer;
             hostSetup.PacketInFn = _packetInPluginDel.Pointer;
             hostSetup.PacketOutFn = _packetOutPluginDel.Pointer;
             hostSetup.HotkeyFn = _hotkeyPluginDel.Pointer;
+<<<<<<< HEAD
             hostSetup.MouseFn = _mousePluginDel.Pointer;
+=======
+>>>>>>> + classicuo.bootstrap app
             hostSetup.UpdatePlayerPosFn = _updatePlayerPosDel.Pointer;
             hostSetup.FocusGainedFn = _focusGainedDel.Pointer;
             hostSetup.FocusLostFn = _focusLostDel.Pointer;
             hostSetup.SdlEventFn = _sdlEventDel.Pointer;
+<<<<<<< HEAD
             hostSetup.ConnectedFn = _connectedDel.Pointer;
             hostSetup.DisconnectedFn = _disconnectedDel.Pointer;
             hostSetup.CmdListFn = _cmdListDel.Pointer;
@@ -205,11 +305,28 @@ sealed class ClassicUOHost : IPluginHandler
     unsafe void LoadPlugin(IntPtr pluginPathPtr, uint clientVersion, IntPtr assetsPathPtr, IntPtr sdlWindow)
     {
         var plugin = new Plugin(this, Guid.Empty);
+=======
+
+            initializeMethod(argv, args.Length, (HostSetup*)mem);
+        }
+    }
+
+    unsafe void InitializePlugin(IntPtr exportedFuncs, uint clientVersion, IntPtr pluginPathPtr, IntPtr assetsPathPtr)
+    {
+        ref var cuoHost = ref Unsafe.AsRef<CuoHostSetup>(exportedFuncs.ToPointer());
+        var cuoHandler = new ClassicUOHandler((CuoHostSetup*)exportedFuncs);
+
+        var plugin = new Plugin(cuoHandler, Guid.Empty);
+>>>>>>> + classicuo.bootstrap app
         _plugins.Add(plugin);
 
         var pluginPath = Marshal.PtrToStringAnsi(pluginPathPtr);
         var assetsPath = Marshal.PtrToStringAnsi(assetsPathPtr);
+<<<<<<< HEAD
         plugin.Load(sdlWindow, pluginPath, clientVersion, assetsPath);
+=======
+        plugin.Load(cuoHost.SdlWindow, pluginPath, clientVersion, assetsPath);
+>>>>>>> + classicuo.bootstrap app
     }
 
     void TickPlugin()
@@ -224,6 +341,7 @@ sealed class ClassicUOHost : IPluginHandler
             plugin.Close();
     }
 
+<<<<<<< HEAD
     void Connected()
     {
         foreach (var plugin in _plugins)
@@ -236,6 +354,8 @@ sealed class ClassicUOHost : IPluginHandler
             plugin.Disconnected();
     }
 
+=======
+>>>>>>> + classicuo.bootstrap app
     bool HotkeyPlugin(int key, int mod, bool pressed)
     {
         var ok = true;
@@ -246,12 +366,15 @@ sealed class ClassicUOHost : IPluginHandler
         return ok;
     }
 
+<<<<<<< HEAD
     void MousePlugin(int button, int wheel)
     {
         foreach (var plugin in _plugins)
             plugin.ProcessMouse(button, wheel);
     }
 
+=======
+>>>>>>> + classicuo.bootstrap app
     void UpdatePlayerPosition(int x, int y, int z)
     {
         foreach (var plugin in _plugins)
@@ -334,6 +457,7 @@ sealed class ClassicUOHost : IPluginHandler
         return ok;
     }
 
+<<<<<<< HEAD
     void GetCommandList(out IntPtr data, out int len)
     {
         data = IntPtr.Zero;
@@ -368,10 +492,104 @@ sealed class ClassicUOHost : IPluginHandler
     IntPtr SendReflectionCmd(IntPtr ptr)
     {
         return _reflectionCmd?.Delegate?.Invoke(ptr) ?? IntPtr.Zero;
+=======
+    sealed class FuncPointer<T> where T : Delegate
+    {
+        [MarshalAs(UnmanagedType.FunctionPtr)]
+        private readonly T _delegate;
+        private readonly IntPtr _ptr;
+
+        public FuncPointer(T @delegate)
+        {
+            _delegate = @delegate;
+            _ptr = Marshal.GetFunctionPointerForDelegate(_delegate);
+        }
+
+        public IntPtr Pointer => _ptr;
+    }
+}
+
+unsafe struct HostSetup
+{
+    public IntPtr InitializeFn;
+    public IntPtr TickFn;
+    public IntPtr ClosingFn;
+    public IntPtr FocusGainedFn;
+    public IntPtr FocusLostFn;
+    public IntPtr ConnectedFn;
+    public IntPtr DisconnectedFn;
+    public IntPtr /*delegate*<int, int, bool, bool>*/ HotkeyFn;
+    public IntPtr /*delegate*<int, int, bool>*/ MouseFn;
+    public IntPtr /*delegate*<IntPtr, ref int, void>*/ CmdListFn;
+    public IntPtr /*delegate*<IntPtr, int>*/ SdlEventFn;
+    public IntPtr /*delegate*<int, int, int, void>*/ UpdatePlayerPosFn;
+    public IntPtr PacketInFn;
+    public IntPtr PacketOutFn;
+}
+
+struct CuoHostSetup
+{
+    public IntPtr SdlWindow;
+    public IntPtr /*delegate*<IntPtr, ref int, bool>*/ PluginRecvFn;
+    public IntPtr /*delegate*<IntPtr, ref int, bool>*/ PluginSendFn;
+    public IntPtr /*delegate*<int, short>*/ PacketLengthFn;
+    public IntPtr /*delegate*<int, void>*/ CastSpellFn;
+    public IntPtr /*delegate*<IntPtr>*/ SetWindowTitleFn;
+    public IntPtr /*delegate*<int, IntPtr, IntPtr, bool, bool>*/ GetClilocFn;
+    public IntPtr /*delegate*<int, bool, bool>*/ RequestMoveFn;
+    public IntPtr /*delegate*<ref int, ref int, ref int, bool>*/ GetPlayerPositionFn;
+    public IntPtr /*delegate*<int, int, int, void>*/ UpdatePlayerPositionFn;
+}
+
+sealed unsafe class ClassicUOHandler : IPluginHandler
+{
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    delegate void dCastSpell(int index);
+    private readonly dCastSpell _castSpell;
+
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    delegate IntPtr dGetCliloc(int cliloc, IntPtr args, bool capitalize);
+    private readonly dGetCliloc _getCliloc;
+
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    delegate short dGetPacketLength(int id);
+    private readonly dGetPacketLength _packetLength;
+
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    delegate bool dGetPlayerPosition(out int x, out int y, out int z);
+    private readonly dGetPlayerPosition _getPlayerPosition;
+
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    delegate bool dRequestMove(int dir, bool run);
+    private readonly dRequestMove _requestMove;
+
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    delegate bool dPacketRecvSend(IntPtr data, ref int length);
+    private readonly dPacketRecvSend _sendToClient, _sendToServer;
+
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    delegate void dSetWindowTitle(IntPtr textPtr);
+    private readonly dSetWindowTitle _setWindowTitle;
+
+
+    public ClassicUOHandler(CuoHostSetup* setup)
+    {
+        _castSpell = SetFunction<dCastSpell>(setup->CastSpellFn);
+        _getCliloc = SetFunction<dGetCliloc>(setup->GetClilocFn);
+        _packetLength = SetFunction<dGetPacketLength>(setup->PacketLengthFn);
+        _getPlayerPosition = SetFunction<dGetPlayerPosition>(setup->GetPlayerPositionFn);
+        _requestMove = SetFunction<dRequestMove>(setup->RequestMoveFn);
+        _sendToClient = SetFunction<dPacketRecvSend>(setup->PluginRecvFn);
+        _sendToServer = SetFunction<dPacketRecvSend>(setup->PluginSendFn);
+        _setWindowTitle = SetFunction<dSetWindowTitle>(setup->SetWindowTitleFn);
+
+        static T SetFunction<T>(IntPtr ptr) where T : Delegate => ptr == IntPtr.Zero ? null : Marshal.GetDelegateForFunctionPointer<T>(ptr);
+>>>>>>> + classicuo.bootstrap app
     }
 
     public void CastSpell(Guid id, int index)
     {
+<<<<<<< HEAD
         _castSpell?.Delegate?.Invoke(index);
     }
 
@@ -380,27 +598,52 @@ sealed class ClassicUOHost : IPluginHandler
         var output = string.Empty;
         fixed (char* ptr = args)
             output = Marshal.PtrToStringAnsi(_getCliloc?.Delegate?.Invoke(cliloc, (IntPtr)ptr, capitalize) ?? IntPtr.Zero);
+=======
+        _castSpell?.Invoke(index);
+    }
+
+    public string GetCliloc(Guid id, int cliloc, string args, bool capitalize)
+    {
+        var output = string.Empty;
+        fixed (char* ptr = args)
+            output = Marshal.PtrToStringAnsi(_getCliloc?.Invoke(cliloc, (IntPtr)ptr, capitalize) ?? IntPtr.Zero);
+>>>>>>> + classicuo.bootstrap app
 
         return output;
     }
 
     public short GetPacketLen(Guid id, byte packetId)
     {
+<<<<<<< HEAD
         return _packetLength?.Delegate?.Invoke(packetId) ?? -1;
+=======
+        return _packetLength?.Invoke(packetId) ?? -1;
+>>>>>>> + classicuo.bootstrap app
     }
 
     public bool GetPlayerPosition(Guid id, out int x, out int y, out int z)
     {
         x = y = z = 0;
+<<<<<<< HEAD
         return _getPlayerPosition?.Delegate?.Invoke(out x, out y, out z) ?? true;
+=======
+        return _getPlayerPosition?.Invoke(out x, out y, out z) ?? true;
+>>>>>>> + classicuo.bootstrap app
     }
 
     public bool RequestMove(Guid id, int dir, bool run)
     {
+<<<<<<< HEAD
         return _requestMove?.Delegate?.Invoke(dir, run) ?? true;
     }
 
     public unsafe bool SendToClient(Guid id, ref byte[] data, ref int length)
+=======
+        return _requestMove?.Invoke(dir, run) ?? true;
+    }
+
+    public bool SendToClient(Guid id, ref byte[] data, ref int length)
+>>>>>>> + classicuo.bootstrap app
     {
         fixed (byte* ptr = data)
             return SendToClient(id, (IntPtr)ptr, ref length);
@@ -408,10 +651,17 @@ sealed class ClassicUOHost : IPluginHandler
 
     public bool SendToClient(Guid id, IntPtr data, ref int length)
     {
+<<<<<<< HEAD
         return _sendToClient?.Delegate?.Invoke(data, ref length) ?? true;
     }
 
     public unsafe bool SendToServer(Guid id, ref byte[] data, ref int length)
+=======
+        return _sendToClient?.Invoke(data, ref length) ?? true;
+    }
+
+    public bool SendToServer(Guid id, ref byte[] data, ref int length)
+>>>>>>> + classicuo.bootstrap app
     {
         fixed (byte* ptr = data)
             return SendToServer(id, (IntPtr)ptr, ref length);
@@ -419,6 +669,7 @@ sealed class ClassicUOHost : IPluginHandler
 
     public bool SendToServer(Guid id, IntPtr data, ref int length)
     {
+<<<<<<< HEAD
         return _sendToServer?.Delegate?.Invoke(data, ref length) ?? true;
     }
 
@@ -497,3 +748,14 @@ unsafe struct ClientBindings
     public IntPtr /*delegate*<ref int, ref int, ref int, bool>*/ GetPlayerPositionFn;
     public IntPtr ReflectionCmdFn;
 }
+=======
+        return _sendToServer?.Invoke(data, ref length) ?? true;
+    }
+
+    public void SetWindowTitle(Guid id, string title)
+    {
+        fixed (char* ptr = title)
+            _setWindowTitle?.Invoke((IntPtr)ptr);
+    }
+}
+>>>>>>> + classicuo.bootstrap app

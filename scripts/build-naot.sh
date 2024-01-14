@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 #!/bin/bash
 
 set -e
@@ -32,3 +33,7 @@ case $platform in
     exit 1
     ;;
 esac
+=======
+dotnet publish ../src/ClassicUO.Bootstrap/src/ClassicUO.Bootstrap.csproj -c Release -f net472 -o ../bin/dist
+dotnet publish ../src/ClassicUO.Client -c Release -f net8.0 -p:PublishAot=true -p:TargetFrameworks=net8.0 -p:NativeLib=Shared -p:OutputType=Library -r win-x64 -o ../bin/dist
+>>>>>>> + classicuo.bootstrap app

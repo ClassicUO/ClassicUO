@@ -275,12 +275,17 @@ namespace ClassicUO.Network
                 try
                 {
 <<<<<<< HEAD
+<<<<<<< HEAD
                     Client.Game.PluginHost?.LoadPlugin(PluginPath);
+=======
+                    Client.Game.PluginHost?.Initialize(PluginPath);
+>>>>>>> + classicuo.bootstrap app
 
                     //Client.Game.AssistantHost.OnSocketConnected += (o, e) => { 
                     //    Client.Game.AssistantHost.PluginInitialize(PluginPath); 
                     //};
                     //Client.Game.AssistantHost.Connect("127.0.0.1", 7777);
+<<<<<<< HEAD
 =======
                     
                     Client.Game.AssistantHost.OnSocketConnected += (o, e) => { 
@@ -288,6 +293,8 @@ namespace ClassicUO.Network
                     };
                     Client.Game.AssistantHost.Connect("127.0.0.1", 7777);
 >>>>>>> + move managed plugin to rpc
+=======
+>>>>>>> + classicuo.bootstrap app
 
                     //Assembly asm = Assembly.LoadFile(PluginPath);
                     //Type type = asm.GetType("Assistant.Engine");
@@ -539,10 +546,14 @@ namespace ClassicUO.Network
         internal static void Tick()
         {
 <<<<<<< HEAD
+<<<<<<< HEAD
             Client.Game.PluginHost?.Tick();
 =======
             Client.Game.AssistantHost?.PluginTick();
 >>>>>>> rpc support
+=======
+            Client.Game.PluginHost?.Tick();
+>>>>>>> + classicuo.bootstrap app
 
             foreach (Plugin t in Plugins)
             {
@@ -557,6 +568,7 @@ namespace ClassicUO.Network
         {
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
             bool result = Client.Game.PluginHost?.PacketIn(new ArraySegment<byte>(data, 0, length)) ?? true;
 =======
             Client.Game.AssistantHost?.PluginPacketIn(new ArraySegment<byte>(data, 0, length));
@@ -566,6 +578,9 @@ namespace ClassicUO.Network
 =======
             bool result = Client.Game.AssistantHost?.PluginPacketIn(new ArraySegment<byte>(data, 0, length)) ?? true;
 >>>>>>> message serialization
+=======
+            bool result = Client.Game.PluginHost?.PacketIn(new ArraySegment<byte>(data, 0, length)) ?? true;
+>>>>>>> + classicuo.bootstrap app
 
             foreach (Plugin plugin in Plugins)
             {
@@ -602,6 +617,7 @@ namespace ClassicUO.Network
         {
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
             bool result = Client.Game.PluginHost?.PacketOut(message) ?? true;
 =======
             Client.Game.AssistantHost?.PluginPacketOut(message);
@@ -611,6 +627,9 @@ namespace ClassicUO.Network
 =======
             bool result = Client.Game.AssistantHost?.PluginPacketOut(message) ?? true;
 >>>>>>> message serialization
+=======
+            bool result = Client.Game.PluginHost?.PacketOut(message) ?? true;
+>>>>>>> + classicuo.bootstrap app
 
             foreach (Plugin plugin in Plugins)
             {
@@ -648,10 +667,14 @@ namespace ClassicUO.Network
         internal static void OnClosing()
         {
 <<<<<<< HEAD
+<<<<<<< HEAD
             Client.Game.PluginHost?.Closing();
 =======
             Client.Game.AssistantHost?.PluginClosing();
 >>>>>>> rpc support
+=======
+            Client.Game.PluginHost?.Closing();
+>>>>>>> + classicuo.bootstrap app
 
             for (int i = 0; i < Plugins.Count; i++)
             {
@@ -667,10 +690,14 @@ namespace ClassicUO.Network
         internal static void OnFocusGained()
         {
 <<<<<<< HEAD
+<<<<<<< HEAD
             Client.Game.PluginHost?.FocusGained();
 =======
             Client.Game.AssistantHost?.PluginFocusGained();
 >>>>>>> rpc support
+=======
+            Client.Game.PluginHost?.FocusGained();
+>>>>>>> + classicuo.bootstrap app
 
             foreach (Plugin t in Plugins)
             {
@@ -684,10 +711,14 @@ namespace ClassicUO.Network
         internal static void OnFocusLost()
         {
 <<<<<<< HEAD
+<<<<<<< HEAD
             Client.Game.PluginHost?.FocusLost();
 =======
             Client.Game.AssistantHost?.PluginFocusLost();
 >>>>>>> rpc support
+=======
+            Client.Game.PluginHost?.FocusLost();
+>>>>>>> + classicuo.bootstrap app
 
             foreach (Plugin t in Plugins)
             {
@@ -701,10 +732,14 @@ namespace ClassicUO.Network
         internal static void OnConnected()
         {
 <<<<<<< HEAD
+<<<<<<< HEAD
             Client.Game.PluginHost?.Connected();
 =======
             Client.Game.AssistantHost?.PluginConnected();
 >>>>>>> rpc support
+=======
+            Client.Game.PluginHost?.Connected();
+>>>>>>> + classicuo.bootstrap app
 
             foreach (Plugin t in Plugins)
             {
@@ -718,10 +753,14 @@ namespace ClassicUO.Network
         internal static void OnDisconnected()
         {
 <<<<<<< HEAD
+<<<<<<< HEAD
             Client.Game.PluginHost?.Disconnected();
 =======
             Client.Game.AssistantHost?.PluginDisconnected();
 >>>>>>> rpc support
+=======
+            Client.Game.PluginHost?.Disconnected();
+>>>>>>> + classicuo.bootstrap app
 
             foreach (Plugin t in Plugins)
             {
@@ -746,11 +785,15 @@ namespace ClassicUO.Network
             }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
             var ok = Client.Game.PluginHost?.Hotkey(key, mod, ispressed);
 
             bool result = ok ?? true;
 =======
             var ok = Client.Game.AssistantHost?.PluginHotkeys(key, mod, ispressed);
+=======
+            var ok = Client.Game.PluginHost?.Hotkey(key, mod, ispressed);
+>>>>>>> + classicuo.bootstrap app
 
 <<<<<<< HEAD
             bool result = true;
@@ -775,10 +818,14 @@ namespace ClassicUO.Network
         internal static void ProcessMouse(int button, int wheel)
         {
 <<<<<<< HEAD
+<<<<<<< HEAD
             Client.Game.PluginHost?.Mouse(button, wheel);
 =======
             Client.Game.AssistantHost?.PluginMouse(button, wheel);
 >>>>>>> rpc support
+=======
+            Client.Game.PluginHost?.Mouse(button, wheel);
+>>>>>>> + classicuo.bootstrap app
 
             foreach (Plugin plugin in Plugins)
             {
@@ -788,6 +835,7 @@ namespace ClassicUO.Network
 
         internal static void ProcessDrawCmdList(GraphicsDevice device)
         {
+<<<<<<< HEAD
 <<<<<<< HEAD
             IntPtr cmdList = IntPtr.Zero;
             var len = 0;
@@ -799,6 +847,9 @@ namespace ClassicUO.Network
 =======
             Client.Game.AssistantHost?.PluginDrawCmdList();
 >>>>>>> rpc support
+=======
+            Client.Game.PluginHost?.CommandList(IntPtr.Zero, out var len);
+>>>>>>> + classicuo.bootstrap app
 
             foreach (Plugin plugin in Plugins)
             {
@@ -819,6 +870,7 @@ namespace ClassicUO.Network
         {
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
             var result = Client.Game.PluginHost?.SdlEvent(e) ?? 0;
 =======
             Client.Game.AssistantHost?.PluginSdlEvent(e);
@@ -828,6 +880,9 @@ namespace ClassicUO.Network
 =======
             var result = Client.Game.AssistantHost?.PluginSdlEvent(e) ?? 0;
 >>>>>>> performance improvement
+=======
+            var result = Client.Game.PluginHost?.SdlEvent(e) ?? 0;
+>>>>>>> + classicuo.bootstrap app
 
             foreach (Plugin plugin in Plugins)
             {
@@ -843,10 +898,14 @@ namespace ClassicUO.Network
         internal static void UpdatePlayerPosition(int x, int y, int z)
         {
 <<<<<<< HEAD
+<<<<<<< HEAD
             Client.Game.PluginHost?.UpdatePlayerPosition(x, y, z);
 =======
             Client.Game.AssistantHost?.PluginUpdatePlayerPosition(x, y, z);
 >>>>>>> rpc support
+=======
+            Client.Game.PluginHost?.UpdatePlayerPosition(x, y, z);
+>>>>>>> + classicuo.bootstrap app
 
             foreach (Plugin plugin in Plugins)
             {

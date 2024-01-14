@@ -254,6 +254,14 @@ sealed class Plugin
     public void Close()
     {
         OnClosing();
+<<<<<<< HEAD
+=======
+
+        //var forms = AppDomain.CurrentDomain.GetAssemblies().SingleOrDefault(assembly => assembly.GetName().Name.Contains("System.Windows.Forms"));
+        //var application = forms.GetType("System.Windows.Forms.Application");
+        //var appExitMethod = application.GetMethod("Exit", new Type[0]);
+        //appExitMethod.Invoke(null, null);
+>>>>>>> + classicuo.bootstrap app
     }
 
 
@@ -358,7 +366,18 @@ sealed class Plugin
 
     public void Tick()
     {
+<<<<<<< HEAD
         _tick?.Invoke();
+=======
+        try
+        {
+            _tick?.Invoke();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+        }
+>>>>>>> + classicuo.bootstrap app
     }
 
     public bool ProcessRecvPacket(ref byte[] data, ref int length)
@@ -373,7 +392,12 @@ sealed class Plugin
             var tmp = data;
             result = _onRecv(ref data, ref length);
 
+<<<<<<< HEAD
             if (!ReferenceEquals(tmp, data))
+=======
+            //if (!ReferenceEquals(tmp, data))
+            if (!tmp.Equals(data))
+>>>>>>> + classicuo.bootstrap app
             {
                 Array.Copy(data, tmp, length);
                 data = tmp;
@@ -397,7 +421,11 @@ sealed class Plugin
             var tmp = data;
             result = _onSend(ref data, ref length);
 
+<<<<<<< HEAD
             if (!ReferenceEquals(tmp, data))
+=======
+            if (!tmp.Equals(data))
+>>>>>>> + classicuo.bootstrap app
             {
                 Array.Copy(data, tmp, length);
                 data = tmp;
@@ -465,12 +493,15 @@ sealed class Plugin
         }
     }
 
+<<<<<<< HEAD
     public void GetCommandList(out IntPtr listPtr, out int listLen)
     {
         listPtr = IntPtr.Zero;
         listLen = 0;
         _draw_cmd_list?.Invoke(out listPtr, ref listLen);
     }
+=======
+>>>>>>> + classicuo.bootstrap app
 
 
     [MarshalAs(UnmanagedType.FunctionPtr)]
@@ -607,6 +638,24 @@ sealed class Plugin
         bool capitalize,
         [Out][MarshalAs(UnmanagedType.LPStr)] out string buffer
     );
+<<<<<<< HEAD
+=======
+
+
+    static class WinApi
+    {
+        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = false)]
+        static extern IntPtr SendMessage(IntPtr hWnd, UInt32 Msg, IntPtr wParam, IntPtr lParam);
+
+        //I'd double check this constant, just in case
+        static uint WM_CLOSE = 0x10;
+
+        public static void CloseWindow(IntPtr hWindow)
+        {
+            SendMessage(hWindow, WM_CLOSE, IntPtr.Zero, IntPtr.Zero);
+        }
+    }
+>>>>>>> + classicuo.bootstrap app
 }
 
 struct PluginHeader

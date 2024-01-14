@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ﻿using ClassicUO.Game.Scenes;
 using System;
 
@@ -20,6 +21,9 @@ namespace ClassicUO
         }
     }
 }
+=======
+﻿using System;
+>>>>>>> + classicuo.bootstrap app
 
 namespace ClassicUO.Game
 {
@@ -43,12 +47,16 @@ namespace ClassicUO.Game
     {
         public static void UsePrimaryAbility()
         {
+<<<<<<< HEAD
             Global.Host.ReflectionUsePrimaryAbility();
+=======
+>>>>>>> + classicuo.bootstrap app
             Console.WriteLine("Invoked by reflection {0}", nameof(UsePrimaryAbility));
         }
 
         public static void UseSecondaryAbility()
         {
+<<<<<<< HEAD
             Global.Host.ReflectionUseSecondaryAbility();
             Console.WriteLine("Invoked by reflection {0}", nameof(UseSecondaryAbility));
         }
@@ -127,16 +135,25 @@ namespace ClassicUO.Game.Managers
             Console.WriteLine("Invoked by reflection {0}", nameof(SavePosition));
         }
     }
+=======
+            Console.WriteLine("Invoked by reflection {0}", nameof(UseSecondaryAbility));
+        }
+    }
+>>>>>>> + classicuo.bootstrap app
 }
 
 namespace ClassicUO.Game.Scenes
 {
+<<<<<<< HEAD
     public sealed class GameScene : Scene
     {
         public MacroManager Macros { get; set; } = new MacroManager();
     }
 
     public sealed class LoginScene : Scene
+=======
+    public sealed class LoginScene
+>>>>>>> + classicuo.bootstrap app
     {
         public void Connect()
         {
@@ -153,9 +170,12 @@ namespace ClassicUO.Game.Scenes
             Console.WriteLine("Invoked by reflection {0}", nameof(SelectCharacter));
         }
     }
+<<<<<<< HEAD
 
     public abstract class Scene
     {
 
     }
+=======
+>>>>>>> + classicuo.bootstrap app
 }
