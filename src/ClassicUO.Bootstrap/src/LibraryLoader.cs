@@ -1,39 +1,11 @@
-﻿#region license
-
-// Copyright (c) 2021, andreakarasho
-// All rights reserved.
-// 
-// Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions are met:
-// 1. Redistributions of source code must retain the above copyright
-//    notice, this list of conditions and the following disclaimer.
-// 2. Redistributions in binary form must reproduce the above copyright
-//    notice, this list of conditions and the following disclaimer in the
-//    documentation and/or other materials provided with the distribution.
-// 3. All advertising materials mentioning features or use of this software
-//    must display the following acknowledgement:
-//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
-// 4. Neither the name of the copyright holder nor the
-//    names of its contributors may be used to endorse or promote products
-//    derived from this software without specific prior written permission.
-// 
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
-// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
-// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-#endregion
-
-using System;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace ClassicUO.Utility.Platforms
+namespace ClassicUO
 {
     public static class Native
     {
@@ -41,7 +13,7 @@ namespace ClassicUO.Utility.Platforms
 
         static Native()
         {
-            if (PlatformHelper.IsWindows)
+            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
             {
                 _loader = new WinNativeLoader();
             }
@@ -76,13 +48,11 @@ namespace ClassicUO.Utility.Platforms
 
         private class WinNativeLoader : NativeLoader
         {
-            private const uint LOAD_WITH_ALTERED_SEARCH_PATH = 0x00000008;
-            [DllImport("kernel32.dll", SetLastError = true)]
-            [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-            private static extern IntPtr LoadLibraryExW([MarshalAs(UnmanagedType.LPWStr)] string lpLibFileName, IntPtr hFile, uint dwFlags);
+            [DllImport("kernel32", EntryPoint = "LoadLibrary")]
+            private static extern IntPtr LoadLibrary_WIN(string fileName);
 
-            [DllImport("kernel32", EntryPoint = "GetProcAddress", CharSet = CharSet.Ansi)]
-            private static extern IntPtr GetProcAddress_WIN(IntPtr module, [MarshalAs(UnmanagedType.LPStr)] string procName);
+            [DllImport("kernel32", EntryPoint = "GetProcAddress")]
+            private static extern IntPtr GetProcAddress_WIN(IntPtr module, string procName);
 
             [DllImport("kernel32", EntryPoint = "FreeLibrary")]
             private static extern int FreeLibrary_WIN(IntPtr module);
@@ -90,7 +60,7 @@ namespace ClassicUO.Utility.Platforms
 
             public override IntPtr LoadLibrary(string name)
             {
-                return LoadLibraryExW(name, IntPtr.Zero, LOAD_WITH_ALTERED_SEARCH_PATH);
+                return LoadLibrary_WIN(name);
             }
 
             public override IntPtr GetProcessAddress(IntPtr module, string name)

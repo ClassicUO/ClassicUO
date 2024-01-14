@@ -43,6 +43,7 @@ using SDL2;
 using System;
 using System.Globalization;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
 
@@ -53,6 +54,180 @@ namespace ClassicUO
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool SetDllDirectory(string lpPathName);
+
+
+        [UnmanagedCallersOnly(EntryPoint = "Initialize", CallConvs = new Type[] { typeof(CallConvCdecl) })]
+        static unsafe void Initialize(IntPtr* argv, int argc, HostSetup* hostSetup)
+        {
+            Console.WriteLine("run!");
+
+            var args = new string[argc];
+            for (int i = 0; i < argc; i++)
+            {
+                args[i] = Marshal.PtrToStringAnsi(argv[i]);
+            }
+
+            Host = new UnmanagedAssistantHost(hostSetup);
+            Main(args);
+        }
+
+        public unsafe static UnmanagedAssistantHost Host;
+
+        public unsafe struct HostSetup
+        {
+            public delegate*<IntPtr, uint, IntPtr, IntPtr, void> InitializeFn;
+            public delegate*<void> TickFn;
+            public delegate*<void> ClosingFn;
+            public delegate*<void> FocusGainedFn;
+            public delegate*<void> FocusLostFn;
+            public delegate*<void> ConnectedFn;
+            public delegate*<void> DisconnectedFn;
+            public delegate*<int, int, bool, bool> HotkeyFn;
+            public delegate*<int, int, bool> MouseFn;
+            public delegate*<IntPtr, ref int, void> CmdListFn;
+            public delegate*<IntPtr, int> SdlEventFn;
+            public delegate*<int, int, int, void> UpdatePlayerPosFn;
+            public delegate*<IntPtr, ref int, bool> PacketInFn;
+            public delegate*<IntPtr, ref int, bool> PacketOutFn;
+        }
+
+        unsafe struct CuoHostSetup
+        {
+            public IntPtr SdlWindow;
+            public delegate*<IntPtr, ref int, bool> PluginRecvFn;
+            public delegate*<IntPtr, ref int, bool> PluginSendFn;
+            public delegate*<int, short> PacketLengthFn;
+            public delegate*<int, void> CastSpellFn;
+            public delegate*<IntPtr, void> SetWindowTitleFn;
+            public delegate*<int, IntPtr, IntPtr, bool, bool> GetClilocFn;
+            public delegate*<int, bool, bool> RequestMoveFn;
+            public delegate*<out int, out int, out int, bool> GetPlayerPositionFn;
+            public delegate*<int, int, int, void> UpdatePlayerPositionFn;
+        }
+
+        internal unsafe sealed class UnmanagedAssistantHost : IPluginHost
+        {
+            private readonly HostSetup* _hostSetup;
+
+            public UnmanagedAssistantHost(HostSetup* setup) 
+            {
+                _hostSetup = setup;
+            }
+
+            public void Closing()
+            {
+                if (_hostSetup->ClosingFn != null)
+                    _hostSetup->ClosingFn();
+            }
+
+            public void CommandList(nint listPtr, out int listCount)
+            {
+                listCount = 0;
+            }
+
+            public void Connected()
+            {
+                if (_hostSetup->ConnectedFn != null)
+                    _hostSetup->ConnectedFn();
+            }
+
+            public void Disconnected()
+            {
+                if (_hostSetup->DisconnectedFn != null)
+                    _hostSetup->DisconnectedFn();
+            }
+
+            public void FocusGained()
+            {
+                if (_hostSetup->FocusGainedFn != null)
+                    _hostSetup->FocusGainedFn();
+            }
+
+            public void FocusLost()
+            {
+                if (_hostSetup->FocusLostFn != null)
+                    _hostSetup->FocusLostFn();
+            }
+
+            public bool Hotkey(int key, int mod, bool pressed)
+            {
+                return _hostSetup->HotkeyFn != null ? _hostSetup->HotkeyFn(key, mod, pressed) : true;
+            }
+
+            public void Initialize(string pluginPath)
+            {
+                if (_hostSetup->InitializeFn == null)
+                    return;
+
+                var mem = NativeMemory.AllocZeroed((nuint)sizeof(CuoHostSetup));
+                ref var cuoHost = ref Unsafe.AsRef<CuoHostSetup>(mem);
+                cuoHost.SdlWindow = Client.Game.Window.Handle;
+                cuoHost.UpdatePlayerPositionFn = &Plugin.UpdatePlayerPosition;
+                cuoHost.PacketLengthFn = &PacketsTable.GetPacketLength;
+                cuoHost.CastSpellFn = &GameActions.CastSpell;
+                cuoHost.SetWindowTitleFn = &setWindowTitle;
+                cuoHost.PluginRecvFn = &Plugin.OnPluginRecv_new;
+                cuoHost.PluginSendFn = &Plugin.OnPluginSend_new;
+                cuoHost.RequestMoveFn = &Plugin.RequestMove;
+                cuoHost.GetPlayerPositionFn = &Plugin.GetPlayerPosition;
+               
+                _hostSetup->InitializeFn
+                (
+                    (IntPtr)mem,
+                    (uint)Client.Game.UO.Version,
+                    Marshal.StringToHGlobalAnsi(pluginPath),
+                    Marshal.StringToHGlobalAnsi(Settings.GlobalSettings.UltimaOnlineDirectory)
+                );
+
+
+                static void setWindowTitle(IntPtr ptr)
+                    => Client.Game.SetWindowTitle(new string((char*)ptr));
+            }
+
+            public void Mouse(int button, int wheel)
+            {
+                if (_hostSetup->MouseFn != null)
+                    _hostSetup->MouseFn(button, wheel);
+            }
+
+            public bool PacketIn(ArraySegment<byte> buffer)
+            {
+                if (_hostSetup->PacketInFn == null)
+                    return true;
+
+                var len = buffer.Count;
+                fixed (byte* ptr = buffer.Array)
+                    return _hostSetup->PacketInFn((IntPtr)ptr, ref len);
+            }
+
+            public bool PacketOut(Span<byte> buffer)
+            {
+                if (_hostSetup->PacketOutFn == null)
+                    return true;
+
+                var len = buffer.Length;
+                fixed (byte* ptr = buffer)
+                    return _hostSetup->PacketOutFn((IntPtr)ptr, ref len);
+            }
+
+            public unsafe int SdlEvent(SDL.SDL_Event* ev)
+            {
+                return _hostSetup->SdlEventFn != null ? _hostSetup->SdlEventFn((IntPtr)ev) : 0;
+            }
+
+            public void Tick()
+            {
+                if (_hostSetup->TickFn != null)
+                    _hostSetup->TickFn();
+            }
+
+            public void UpdatePlayerPosition(int x, int y, int z)
+            {
+                if (_hostSetup->UpdatePlayerPosFn != null)
+                    _hostSetup->UpdatePlayerPosFn(x, y, z);
+            }
+        }
+
 
         [STAThread]
         public static void Main(string[] args)
