@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <ApplicationIcon>cuoicon.ico</ApplicationIcon>
-    <AssemblyName>ClassicUO</AssemblyName>
+    <AssemblyName>cuo</AssemblyName>
     <RootNamespace>ClassicUO</RootNamespace>
   </PropertyGroup>
 
