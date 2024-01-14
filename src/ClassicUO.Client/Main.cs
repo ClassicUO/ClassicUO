@@ -316,7 +316,7 @@ namespace ClassicUO
             CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
 
 #if !NETFRAMEWORK
-            DllMap.Initialise();
+            //DllMap.Initialise();
 #endif
 
             Log.Start(LogTypes.All);
