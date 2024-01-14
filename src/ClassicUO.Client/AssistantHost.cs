@@ -12,7 +12,26 @@ using System.Collections.Generic;
 
 namespace ClassicUO
 {
-    sealed class AssistantHost : TcpClientRpc
+    interface IPluginHost
+    {
+        public void Initialize(string pluginPath);
+        public void Tick();
+        public void Closing();
+        public void FocusGained();
+        public void FocusLost();
+        public void Connected();
+        public void Disconnected();
+        public bool Hotkey(int key, int mod, bool pressed);
+        public void Mouse(int button, int wheel);
+        public void CommandList(IntPtr listPtr, out int listCount);
+        public unsafe int SdlEvent(SDL2.SDL.SDL_Event* ev);
+        public void UpdatePlayerPosition(int x, int y, int z);
+        public bool PacketIn(ArraySegment<byte> buffer);
+        public bool PacketOut(Span<byte> buffer);
+    }
+
+
+    sealed class AssistantHost : TcpClientRpc, IPluginHost
     {
         protected override ArraySegment<byte> OnRequest(ArraySegment<byte> msg)
         {
@@ -297,6 +316,7 @@ namespace ClassicUO
 
         private readonly Dictionary<PluginCuoProtocol, byte[]> _simpleRequests = new Dictionary<PluginCuoProtocol, byte[]>();
 
+        // TODO: find a better way to return array. Maybe a struct container idk
         private void ReturnArray(ArraySegment<byte> segment)
         {
             if (segment.Array != null && segment.Array.Length > 0)
@@ -323,7 +343,7 @@ namespace ClassicUO
             ReturnArray(resp);
         }
 
-        public void PluginInitialize(string pluginPath)
+        public void Initialize(string pluginPath)
         {
             if (string.IsNullOrEmpty(pluginPath))
                 return;
@@ -341,37 +361,37 @@ namespace ClassicUO
             ReturnArray(resp);
         }
 
-        public void PluginTick()
+        public void Tick()
         {
             MakeSimpleRequest(PluginCuoProtocol.OnTick);
         }
 
-        public void PluginClosing()
+        public void Closing()
         {
             MakeSimpleRequest(PluginCuoProtocol.OnClosing);
         }
 
-        public void PluginFocusGained()
+        public void FocusGained()
         {
             MakeSimpleRequest(PluginCuoProtocol.OnFocusGained);
         }
 
-        public void PluginFocusLost()
+        public void FocusLost()
         {
             MakeSimpleRequest(PluginCuoProtocol.OnFocusLost);
         }
 
-        public void PluginConnected()
+        public void Connected()
         {
             MakeSimpleRequest(PluginCuoProtocol.OnConnected);
         }
 
-        public void PluginDisconnected() 
+        public void Disconnected() 
         {
             MakeSimpleRequest(PluginCuoProtocol.OnDisconnected);
         }
 
-        public bool PluginHotkeys(int key, int mod, bool ispressed)
+        public bool Hotkey(int key, int mod, bool ispressed)
         {
             var req = new PluginHotkeyRequest()
             {
@@ -392,7 +412,7 @@ namespace ClassicUO
             return resp.Allowed;
         }
 
-        public void PluginMouse(int button, int wheel)
+        public void Mouse(int button, int wheel)
         {
             var req = new PluginMouseRequest()
             {
@@ -406,17 +426,17 @@ namespace ClassicUO
             ReturnArray(resp);
         }
 
-        public void PluginDrawCmdList()
+        public void CommandList(IntPtr ptr, out int listCount)
         {
-
+            listCount = 0;
         }
 
-        public unsafe int PluginSdlEvent(SDL2.SDL.SDL_Event* ev)
+        public unsafe int SdlEvent(SDL2.SDL.SDL_Event* ev)
         {
             return 0;
         }
 
-        public void PluginUpdatePlayerPosition(int x, int y, int z)
+        public void UpdatePlayerPosition(int x, int y, int z)
         {
             var req = new PluginUpdatePlayerPositionRequest()
             {
@@ -431,7 +451,7 @@ namespace ClassicUO
             var reqMsg = Request(new ArraySegment<byte>(buf.Data, 0, buf.Size));
         }
 
-        public bool PluginPacketIn(ArraySegment<byte> buffer)
+        public bool PacketIn(ArraySegment<byte> buffer)
         {
             if (buffer.Array != null && buffer.Count > 0)
             {
@@ -466,7 +486,7 @@ namespace ClassicUO
             return false;
         }
 
-        public bool PluginPacketOut(Span<byte> buffer)
+        public bool PacketOut(Span<byte> buffer)
         {
             if (buffer.IsEmpty) return true;
 

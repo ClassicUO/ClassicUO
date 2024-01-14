@@ -65,7 +65,6 @@ namespace ClassicUO
         private UltimaBatcher2D _uoSpriteBatch;
         private bool _suppressedDraw;
         private Texture2D _background;
-        private readonly AssistantHost _assistantHost = new AssistantHost();
 
         public GameController()
         {
@@ -93,7 +92,7 @@ namespace ClassicUO
         public AudioManager Audio { get; private set; }
         public UltimaOnline UO { get; } = new UltimaOnline();
 
-        public AssistantHost AssistantHost => _assistantHost;
+        public IPluginHost PluginHost { get; private set; }
 
         public GraphicsDeviceManager GraphicManager { get; }
         public readonly uint[] FrameDelay = new uint[2];
@@ -137,6 +136,17 @@ namespace ClassicUO
             SetScene(new MainScene(this));
 #else
             UO.Load(this);
+            PluginHost = Bootstrap.Host; // FIXME
+
+            Log.Trace("Loading plugins...");
+
+            foreach (string p in Settings.GlobalSettings.Plugins)
+            {
+                Plugin.Create(p);
+            }
+
+            Log.Trace("Done!");
+
             SetScene(new LoginScene(UO.World));  
 #endif
             SetWindowPositionBySettings();
@@ -154,7 +164,6 @@ namespace ClassicUO
             Audio?.StopMusic();
             Settings.GlobalSettings.Save();
             Plugin.OnClosing();
-            _assistantHost?.Disconnect();
 
             UO.Unload();
 
