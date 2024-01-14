@@ -168,8 +168,12 @@ namespace ClassicUO
 
             public const int RTLD_NOW = 0x002;
 
-            [DllImport(LibName)]
-            private static extern IntPtr dlopen(string fileName, int flags);
+            [DllImport("libdl.so", EntryPoint = "dlopen")]
+            private static extern IntPtr LoadUnixLibrary1(string path, int flags);
+
+            [DllImport("libdl.so.2", EntryPoint = "dlopen")]
+            private static extern IntPtr LoadUnixLibrary2(string path, int flags);
+
 
             [DllImport(LibName)]
             private static extern IntPtr dlsym(IntPtr handle, string name);
@@ -182,8 +186,22 @@ namespace ClassicUO
 
             public override IntPtr LoadLibrary(string name)
             {
+<<<<<<< HEAD
                 return dlopen(name, RTLD_NOW);
 >>>>>>> + classicuo.bootstrap app
+=======
+                IntPtr ptr = IntPtr.Zero;
+                try
+                {
+                    ptr = LoadUnixLibrary1(name, RTLD_NOW);
+                }
+                catch (DllNotFoundException)
+                {
+                    ptr = LoadUnixLibrary2(name, RTLD_NOW);
+                }
+
+                return ptr;
+>>>>>>> fix for linux
             }
 
             public override IntPtr GetProcessAddress(IntPtr module, string name)
