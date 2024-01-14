@@ -14,6 +14,7 @@ Global.Host.Run(args);
 using System.Net;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Text;
 
 var address = "127.0.0.1";
 var port = 7777;
@@ -204,6 +205,7 @@ sealed class ClassicUOHost
     public void Run(string[] args)
     {
 <<<<<<< HEAD
+<<<<<<< HEAD
         var libName = "./cuo";
         switch (Environment.OSVersion.Platform)
         {
@@ -217,17 +219,24 @@ sealed class ClassicUOHost
                 libName += ".dll";
 =======
         var libName = "";
+=======
+        var libName = "./cuo";
+>>>>>>> fixed a weird bug tht causes access mem violation
         switch (Environment.OSVersion.Platform)
         {
             case PlatformID.MacOSX:
-                libName = "./ClassicUO.dylib";
+                libName += ".dylib";
                 break;
             case PlatformID.Unix:
-                libName = "./ClassicUO.so";
+                libName += ".so";
                 break;
             default:
+<<<<<<< HEAD
                 libName = "./ClassicUO.dll";
 >>>>>>> + classicuo.bootstrap app
+=======
+                libName += ".dll";
+>>>>>>> fixed a weird bug tht causes access mem violation
                 break;
         }
 
@@ -309,8 +318,8 @@ sealed class ClassicUOHost
 
             initializeMethod(argv, args.Length, (HostSetup*)mem);
 
-            if (mem != null)
-                Marshal.FreeHGlobal(mem);
+            //if (mem != null)
+            //    Marshal.FreeHGlobal(mem);
         }
     }
 
@@ -421,15 +430,18 @@ sealed class ClassicUOHost
 
                 ok |= plugin.ProcessRecvPacket(ref rentBuf, ref length);
 
-                if (!ok)
-                {
-                    length = 0;
-                }
-                else
-                {
-                    fixed (byte* ptr = rentBuf)
-                        Buffer.MemoryCopy(ptr, data.ToPointer(), sizeof(byte) * length, sizeof(byte) * length);
-                }
+                fixed (byte* ptr = rentBuf)
+                    Buffer.MemoryCopy(ptr, data.ToPointer(), sizeof(byte) * length, sizeof(byte) * length);
+
+                //if (!ok)
+                //{
+                //    length = 0;
+                //}
+                //else
+                //{
+                //    fixed (byte* ptr = rentBuf)
+                //        Buffer.MemoryCopy(ptr, data.ToPointer(), sizeof(byte) * length, sizeof(byte) * length);
+                //}
             }
             finally
             {
@@ -455,15 +467,18 @@ sealed class ClassicUOHost
 
                 ok |= plugin.ProcessSendPacket(ref rentBuf, ref length);
 
-                if (!ok)
-                {
-                    length = 0;
-                }
-                else
-                {
-                    fixed (byte* ptr = rentBuf)
-                        Buffer.MemoryCopy(ptr, data.ToPointer(), sizeof(byte) * length, sizeof(byte) * length);
-                }
+                fixed (byte* ptr = rentBuf)
+                    Buffer.MemoryCopy(ptr, data.ToPointer(), sizeof(byte) * length, sizeof(byte) * length);
+
+                //if (!ok)
+                //{
+                //    length = 0;
+                //}
+                //else
+                //{
+                //    fixed (byte* ptr = rentBuf)
+                //        Buffer.MemoryCopy(ptr, data.ToPointer(), sizeof(byte) * length, sizeof(byte) * length);
+                //}
             }
             finally
             {
@@ -526,7 +541,8 @@ sealed class ClassicUOHost
     }
 }
 
-struct HostSetup
+[StructLayout(LayoutKind.Sequential)]
+unsafe struct HostSetup
 {
     public IntPtr InitializeFn;
     public IntPtr TickFn;
@@ -544,7 +560,8 @@ struct HostSetup
     public IntPtr PacketOutFn;
 }
 
-struct CuoHostSetup
+[StructLayout(LayoutKind.Sequential)]
+unsafe struct CuoHostSetup
 {
     public IntPtr SdlWindow;
     public IntPtr /*delegate*<IntPtr, ref int, bool>*/ PluginRecvFn;
@@ -562,30 +579,37 @@ sealed unsafe class ClassicUOHandler : IPluginHandler
 {
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     delegate void dCastSpell(int index);
+    [MarshalAs(UnmanagedType.FunctionPtr)]
     private readonly dCastSpell _castSpell;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     delegate IntPtr dGetCliloc(int cliloc, IntPtr args, bool capitalize);
+    [MarshalAs(UnmanagedType.FunctionPtr)]
     private readonly dGetCliloc _getCliloc;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     delegate short dGetPacketLength(int id);
+    [MarshalAs(UnmanagedType.FunctionPtr)]
     private readonly dGetPacketLength _packetLength;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     delegate bool dGetPlayerPosition(out int x, out int y, out int z);
+    [MarshalAs(UnmanagedType.FunctionPtr)]
     private readonly dGetPlayerPosition _getPlayerPosition;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     delegate bool dRequestMove(int dir, bool run);
+    [MarshalAs(UnmanagedType.FunctionPtr)]
     private readonly dRequestMove _requestMove;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     delegate bool dPacketRecvSend(IntPtr data, ref int length);
+    [MarshalAs(UnmanagedType.FunctionPtr)]
     private readonly dPacketRecvSend _sendToClient, _sendToServer;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     delegate void dSetWindowTitle(IntPtr textPtr);
+    [MarshalAs(UnmanagedType.FunctionPtr)]
     private readonly dSetWindowTitle _setWindowTitle;
 
 
@@ -769,10 +793,25 @@ unsafe struct ClientBindings
         return _sendToServer?.Invoke(data, ref length) ?? true;
     }
 
+    // NOTE: for some obscure reason this function might cause 'access memory violation'
     public void SetWindowTitle(Guid id, string title)
     {
-        fixed (char* ptr = title)
-            _setWindowTitle?.Invoke((IntPtr)ptr);
+        if (string.IsNullOrEmpty(title) || _setWindowTitle == null)
+            return;
+
+        var count = Encoding.UTF8.GetByteCount(title);
+
+        // NOTE: using stackalloc causes some weird issue on cuo side.
+        var buf = new byte[count + 1]; // stackalloc byte[count + 1];
+
+        fixed (char* titlePtr = title)
+        fixed (byte* ptr = &buf[0])
+        {
+            Encoding.UTF8.GetBytes(titlePtr, title.Length, ptr, count);
+
+            ptr[count] = 0;
+            _setWindowTitle((IntPtr)ptr);
+        }
     }
 }
 >>>>>>> + classicuo.bootstrap app

@@ -393,11 +393,15 @@ sealed class Plugin
             result = _onRecv(ref data, ref length);
 
 <<<<<<< HEAD
+<<<<<<< HEAD
             if (!ReferenceEquals(tmp, data))
 =======
             //if (!ReferenceEquals(tmp, data))
             if (!tmp.Equals(data))
 >>>>>>> + classicuo.bootstrap app
+=======
+            if (!ReferenceEquals(tmp, data))
+>>>>>>> fixed a weird bug tht causes access mem violation
             {
                 Array.Copy(data, tmp, length);
                 data = tmp;
@@ -422,10 +426,14 @@ sealed class Plugin
             result = _onSend(ref data, ref length);
 
 <<<<<<< HEAD
+<<<<<<< HEAD
             if (!ReferenceEquals(tmp, data))
 =======
             if (!tmp.Equals(data))
 >>>>>>> + classicuo.bootstrap app
+=======
+            if (!ReferenceEquals(tmp, data))
+>>>>>>> fixed a weird bug tht causes access mem violation
             {
                 Array.Copy(data, tmp, length);
                 data = tmp;
