@@ -21,6 +21,7 @@ case $platform in
     dotnet publish "$bootstrap_project" -c Release -o "$output_directory"
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     dotnet publish "$client_project" -c Release -f net8.0 -p:PublishAot=true -p:TargetFrameworks=net8.0 -p:NativeLib=Shared -p:OutputType=Library -r linux-x64 -o "$output_directory" 
 =======
     dotnet publish "$client_project" -c Release -f net8.0 -p:PublishAot=true -p:TargetFrameworks=net8.0 -p:NativeLib=Shared -p:OutputType=Library -o "$output_directory"
@@ -28,10 +29,14 @@ case $platform in
 =======
     dotnet publish "$client_project" -c Release -f net8.0 -p:PublishAot=true -p:TargetFrameworks=net8.0 -p:NativeLib=Shared -p:OutputType=Library -o "$output_directory" 
 >>>>>>> fixed a weird bug tht causes access mem violation
+=======
+    dotnet publish "$client_project" -c Release -f net8.0 -p:PublishAot=true -p:TargetFrameworks=net8.0 -p:NativeLib=Shared -p:OutputType=Library -r linux-x64 -o "$output_directory" 
+>>>>>>> script
     ;;
   Darwin)
     # Add macOS-specific build commands here
     dotnet publish "$bootstrap_project" -c Release -o "$output_directory"
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
     dotnet publish "$client_project" -c Release -f net8.0 -p:PublishAot=true -p:TargetFrameworks=net8.0 -p:NativeLib=Shared -p:OutputType=Library -r osx-x64 -o "$output_directory" 
@@ -41,6 +46,9 @@ case $platform in
 =======
     dotnet publish "$client_project" -c Release -f net8.0 -p:PublishAot=true -p:TargetFrameworks=net8.0 -p:NativeLib=Shared -p:OutputType=Library -o "$output_directory" 
 >>>>>>> fixed a weird bug tht causes access mem violation
+=======
+    dotnet publish "$client_project" -c Release -f net8.0 -p:PublishAot=true -p:TargetFrameworks=net8.0 -p:NativeLib=Shared -p:OutputType=Library -r osx-x64 -o "$output_directory" 
+>>>>>>> script
     ;;
   MINGW* | CYGWIN*)
     # Add Windows-specific build commands here
