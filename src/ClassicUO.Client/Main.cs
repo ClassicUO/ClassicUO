@@ -43,6 +43,7 @@ using SDL2;
 using System;
 using System.Globalization;
 using System.IO;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -93,7 +94,7 @@ namespace ClassicUO
             public IntPtr ConnectedFn;
             public IntPtr DisconnectedFn;
             public IntPtr /*delegate*<int, int, bool, bool>*/ HotkeyFn;
-            public IntPtr /*delegate*<int, int, bool>*/ MouseFn;
+            public IntPtr /*delegate*<int, int, void>*/ MouseFn;
             public IntPtr /*delegate*<IntPtr, ref int, void>*/ CmdListFn;
             public IntPtr /*delegate*<IntPtr, int>*/ SdlEventFn;
             public IntPtr /*delegate*<int, int, int, void>*/ UpdatePlayerPosFn;
@@ -143,6 +144,11 @@ namespace ClassicUO
             private readonly dOnHotkey _hotkey;
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+            delegate void dOnMouse(int button, int wheel);
+            [MarshalAs(UnmanagedType.FunctionPtr)]
+            private readonly dOnMouse _mouse;
+
+            [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             delegate bool dOnUpdatePlayerPosition(int x, int y, int z);
             [MarshalAs(UnmanagedType.FunctionPtr)]
             private readonly dOnUpdatePlayerPosition _updatePlayerPos;
@@ -166,6 +172,7 @@ namespace ClassicUO
                 _packetIn = Marshal.GetDelegateForFunctionPointer<dOnPluginPacketInOut>(setup->PacketInFn);
                 _packetOut = Marshal.GetDelegateForFunctionPointer<dOnPluginPacketInOut>(setup->PacketOutFn);
                 _hotkey = Marshal.GetDelegateForFunctionPointer<dOnHotkey>(setup->HotkeyFn);
+                _mouse = Marshal.GetDelegateForFunctionPointer<dOnMouse>(setup->MouseFn);
                 _updatePlayerPos = Marshal.GetDelegateForFunctionPointer<dOnUpdatePlayerPosition>(setup->UpdatePlayerPosFn);
                 _focusGained = Marshal.GetDelegateForFunctionPointer<dOnPluginFocusWindow>(setup->FocusGainedFn);
                 _focusLost = Marshal.GetDelegateForFunctionPointer<dOnPluginFocusWindow>(setup->FocusLostFn);
@@ -204,7 +211,12 @@ namespace ClassicUO
 
             public bool Hotkey(int key, int mod, bool pressed)
             {
-                return _hotkey != null ? _hotkey(key, mod, pressed) : true;
+                return _hotkey == null || _hotkey(key, mod, pressed);
+            }
+
+            public void Mouse(int button, int wheel)
+            {
+                _mouse?.Invoke(button, wheel);
             }
 
 
@@ -277,11 +289,6 @@ namespace ClassicUO
                 Client.Game.SetWindowTitle(title);
             }
 
-            public void Mouse(int button, int wheel)
-            {
-                 //(button, wheel);
-            }
-
             public bool PacketIn(ArraySegment<byte> buffer)
             {
                 if (_packetIn == null || buffer.Array == null || buffer.Count <= 0)
@@ -325,7 +332,9 @@ namespace ClassicUO
             CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
 
 #if !NETFRAMEWORK
-            DllMap.Initialise();
+            //DllMap.Initialise();
+            DllMap.Init(Assembly.GetExecutingAssembly());
+            DllMap.Init(typeof(Microsoft.Xna.Framework.Point).Assembly);
             PatchEnvVars();
 #endif
 
