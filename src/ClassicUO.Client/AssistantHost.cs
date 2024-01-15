@@ -22,11 +22,16 @@ namespace ClassicUO
     interface IPluginHost
     {
 <<<<<<< HEAD
+<<<<<<< HEAD
         public Dictionary<IntPtr, GraphicsResource> GfxResources { get; }
 
         public void Initialize();
         public void LoadPlugin(string pluginPath);
 =======
+=======
+        public Dictionary<IntPtr, GraphicsResource> GfxResources { get; }
+
+>>>>>>> missing fn calls
         public void Initialize(string pluginPath);
 >>>>>>> + classicuo.bootstrap app
         public void Tick();
@@ -38,10 +43,14 @@ namespace ClassicUO
         public bool Hotkey(int key, int mod, bool pressed);
         public void Mouse(int button, int wheel);
 <<<<<<< HEAD
+<<<<<<< HEAD
         public void GetCommandList(out IntPtr listPtr, out int listCount);
 =======
         public void CommandList(IntPtr listPtr, out int listCount);
 >>>>>>> + classicuo.bootstrap app
+=======
+        public void GetCommandList(out IntPtr listPtr, out int listCount);
+>>>>>>> missing fn calls
         public unsafe int SdlEvent(SDL2.SDL.SDL_Event* ev);
         public void UpdatePlayerPosition(int x, int y, int z);
         public bool PacketIn(ArraySegment<byte> buffer);
@@ -855,6 +864,7 @@ namespace ClassicUO
 
 
         private readonly Dictionary<PluginCuoProtocol, byte[]> _simpleRequests = new Dictionary<PluginCuoProtocol, byte[]>();
+        public Dictionary<IntPtr, GraphicsResource> GfxResources { get; } = new Dictionary<nint, GraphicsResource>();
 
         // TODO: find a better way to return array. Maybe a struct container idk
         private void ReturnArray(ArraySegment<byte> segment)
@@ -966,8 +976,9 @@ namespace ClassicUO
             ReturnArray(resp);
         }
 
-        public void CommandList(IntPtr ptr, out int listCount)
+        public void GetCommandList(out IntPtr ptr, out int listCount)
         {
+            ptr = IntPtr.Zero;
             listCount = 0;
         }
 

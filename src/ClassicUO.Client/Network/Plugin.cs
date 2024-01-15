@@ -837,6 +837,9 @@ namespace ClassicUO.Network
         {
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> missing fn calls
             IntPtr cmdList = IntPtr.Zero;
             var len = 0;
             Client.Game.PluginHost?.GetCommandList(out cmdList, out len);
@@ -844,12 +847,15 @@ namespace ClassicUO.Network
             {
                 HandleCmdList(device, cmdList, len, Client.Game.PluginHost.GfxResources);
             }
+<<<<<<< HEAD
 =======
             Client.Game.AssistantHost?.PluginDrawCmdList();
 >>>>>>> rpc support
 =======
             Client.Game.PluginHost?.CommandList(IntPtr.Zero, out var len);
 >>>>>>> + classicuo.bootstrap app
+=======
+>>>>>>> missing fn calls
 
             foreach (Plugin plugin in Plugins)
             {

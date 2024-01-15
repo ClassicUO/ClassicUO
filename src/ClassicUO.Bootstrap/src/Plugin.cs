@@ -502,14 +502,20 @@ sealed class Plugin
     }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> missing fn calls
     public void GetCommandList(out IntPtr listPtr, out int listLen)
     {
         listPtr = IntPtr.Zero;
         listLen = 0;
         _draw_cmd_list?.Invoke(out listPtr, ref listLen);
     }
+<<<<<<< HEAD
 =======
 >>>>>>> + classicuo.bootstrap app
+=======
+>>>>>>> missing fn calls
 
 
     [MarshalAs(UnmanagedType.FunctionPtr)]

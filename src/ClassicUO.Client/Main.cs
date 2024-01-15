@@ -84,6 +84,7 @@ namespace ClassicUO
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
             var host = new UnmanagedAssistantHost(hostSetup);
             Boot(host, args);
         }
@@ -138,6 +139,10 @@ namespace ClassicUO
 >>>>>>> fixed order
             Host = new UnmanagedAssistantHost(hostSetup);
             Main(args);
+=======
+            var host = new UnmanagedAssistantHost(hostSetup);
+            Boot(host, args);
+>>>>>>> missing fn calls
         }
 
         private static void PatchEnvVars()
@@ -148,8 +153,6 @@ namespace ClassicUO
                 SDL2.SDL.SDL_SetHint(envs.Key.ToString(), envs.Value.ToString());
             }
         }
-
-        public unsafe static UnmanagedAssistantHost Host;
 
         [StructLayout(LayoutKind.Sequential)]
         public unsafe struct HostSetup
@@ -229,13 +232,19 @@ namespace ClassicUO
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> missing fn calls
             delegate void dOnPluginConnection();
             [MarshalAs(UnmanagedType.FunctionPtr)]
             private readonly dOnPluginConnection _connected, _disconnected;
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+<<<<<<< HEAD
 =======
 >>>>>>> delegate * --> delegate [lol]
+=======
+>>>>>>> missing fn calls
             delegate bool dOnPluginPacketInOut(IntPtr data, ref int length);
             [MarshalAs(UnmanagedType.FunctionPtr)]
             private readonly dOnPluginPacketInOut _packetIn, _packetOut;
@@ -275,11 +284,15 @@ namespace ClassicUO
             private readonly dOnPluginSdlEvent _sdlEvent;
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> missing fn calls
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             delegate void dOnPluginCommandList(out IntPtr list, out int len);
             [MarshalAs(UnmanagedType.FunctionPtr)]
             private readonly dOnPluginCommandList _cmdList;
 
+<<<<<<< HEAD
 
             public UnmanagedAssistantHost(HostBindings* setup) 
             {
@@ -316,6 +329,8 @@ namespace ClassicUO
             private readonly HostSetup* _hostSetup;
 =======
 >>>>>>> delegate * --> delegate [lol]
+=======
+>>>>>>> missing fn calls
 
             public UnmanagedAssistantHost(HostSetup* setup) 
             {
@@ -330,21 +345,32 @@ namespace ClassicUO
                 _focusGained = Marshal.GetDelegateForFunctionPointer<dOnPluginFocusWindow>(setup->FocusGainedFn);
                 _focusLost = Marshal.GetDelegateForFunctionPointer<dOnPluginFocusWindow>(setup->FocusLostFn);
                 _sdlEvent = Marshal.GetDelegateForFunctionPointer<dOnPluginSdlEvent>(setup->SdlEventFn);
+                _connected = Marshal.GetDelegateForFunctionPointer<dOnPluginConnection>(setup->ConnectedFn);
+                _disconnected = Marshal.GetDelegateForFunctionPointer<dOnPluginConnection>(setup->DisconnectedFn);
+                _cmdList = Marshal.GetDelegateForFunctionPointer<dOnPluginCommandList>(setup->CmdListFn);
             }
+
+            public Dictionary<IntPtr, GraphicsResource> GfxResources { get; } = new Dictionary<nint, GraphicsResource>();
 
             public void Closing()
             {
                 _close?.Invoke();
             }
 
-            public void CommandList(nint listPtr, out int listCount)
+            public void GetCommandList(out IntPtr listPtr, out int listCount)
             {
+                listPtr = IntPtr.Zero;
                 listCount = 0;
+<<<<<<< HEAD
 >>>>>>> + classicuo.bootstrap app
+=======
+                _cmdList?.Invoke(out listPtr, out  listCount);
+>>>>>>> missing fn calls
             }
 
             public void Connected()
             {
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
                 _connected?.Invoke();
@@ -355,10 +381,14 @@ namespace ClassicUO
 =======
                 
 >>>>>>> delegate * --> delegate [lol]
+=======
+                _connected?.Invoke();
+>>>>>>> missing fn calls
             }
 
             public void Disconnected()
             {
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
                 _disconnected?.Invoke();
@@ -369,6 +399,9 @@ namespace ClassicUO
 =======
 
 >>>>>>> delegate * --> delegate [lol]
+=======
+                _disconnected?.Invoke();
+>>>>>>> missing fn calls
             }
 
             public void FocusGained()
@@ -736,8 +769,11 @@ namespace ClassicUO
             }
         }
 
+<<<<<<< HEAD
 
 >>>>>>> + classicuo.bootstrap app
+=======
+>>>>>>> missing fn calls
         [STAThread]
         public static void Main(string[] args) => Boot(null, args);
 

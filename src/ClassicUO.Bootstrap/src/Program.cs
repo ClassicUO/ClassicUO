@@ -105,11 +105,17 @@ sealed class ClassicUOHost
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 <<<<<<< HEAD
+<<<<<<< HEAD
     delegate void dOnPluginConnection();
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 =======
 >>>>>>> + classicuo.bootstrap app
+=======
+    delegate void dOnPluginConnection();
+
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+>>>>>>> missing fn calls
     delegate bool dOnPluginPacketInOut(IntPtr data, ref int length);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -137,6 +143,7 @@ sealed class ClassicUOHost
     delegate int dOnPluginSdlEvent(IntPtr ev);
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     delegate void dOnPluginCommandList(out IntPtr list, out int len);
 
@@ -154,17 +161,23 @@ sealed class ClassicUOHost
     private readonly FuncPointer<dOnPluginSdlEvent> _sdlEventDel;
     private readonly FuncPointer<dOnPluginCommandList> _cmdListDel;
 =======
+=======
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    delegate void dOnPluginCommandList(out IntPtr list, out int len);
+
+>>>>>>> missing fn calls
 
     private readonly FuncPointer<dOnPluginInitialize> _initPluginDel;
     private readonly FuncPointer<dOnPluginTick> _tickPluginDel;
     private readonly FuncPointer<dOnPluginClose> _closingPluginDel;
-    private readonly FuncPointer<dOnPluginPacketInOut> _packetInPluginDel;
-    private readonly FuncPointer<dOnPluginPacketInOut> _packetOutPluginDel;
+    private readonly FuncPointer<dOnPluginConnection> _connectedDel, _disconnectedDel;
+    private readonly FuncPointer<dOnPluginPacketInOut> _packetInPluginDel, _packetOutPluginDel;
     private readonly FuncPointer<dOnHotkey> _hotkeyPluginDel;
     private readonly FuncPointer<dOnMouse> _mousePluginDel;
     private readonly FuncPointer<OnUpdatePlayerPosition> _updatePlayerPosDel;
     private readonly FuncPointer<dOnPluginFocusWindow> _focusGainedDel, _focusLostDel;
     private readonly FuncPointer<dOnPluginSdlEvent> _sdlEventDel;
+    private readonly FuncPointer<dOnPluginCommandList> _cmdListDel;
 
 >>>>>>> + classicuo.bootstrap app
     
@@ -186,6 +199,8 @@ sealed class ClassicUOHost
         _initPluginDel = new FuncPointer<dOnPluginInitialize>(InitializePlugin);
         _tickPluginDel = new FuncPointer<dOnPluginTick>(TickPlugin);
         _closingPluginDel = new FuncPointer<dOnPluginClose>(ClosingPlugin);
+        _connectedDel = new FuncPointer<dOnPluginConnection>(Connected);
+        _disconnectedDel = new FuncPointer<dOnPluginConnection>(Disconnected);
         _packetInPluginDel = new FuncPointer<dOnPluginPacketInOut>(PacketInPlugin);
         _packetOutPluginDel = new FuncPointer<dOnPluginPacketInOut>(PacketOutPlugin);
         _hotkeyPluginDel = new FuncPointer<dOnHotkey>(HotkeyPlugin);
@@ -199,9 +214,13 @@ sealed class ClassicUOHost
         _focusLostDel = new FuncPointer<dOnPluginFocusWindow>(FocusLost);
         _sdlEventDel = new FuncPointer<dOnPluginSdlEvent>(SdlEvent);
 <<<<<<< HEAD
+<<<<<<< HEAD
         _cmdListDel = new FuncPointer<dOnPluginCommandList>(GetCommandList);
 =======
 >>>>>>> + classicuo.bootstrap app
+=======
+        _cmdListDel = new FuncPointer<dOnPluginCommandList>(GetCommandList);
+>>>>>>> missing fn calls
     }
 
     public void Run(string[] args)
@@ -296,6 +315,7 @@ sealed class ClassicUOHost
             hostSetup.FocusLostFn = _focusLostDel.Pointer;
             hostSetup.SdlEventFn = _sdlEventDel.Pointer;
 <<<<<<< HEAD
+<<<<<<< HEAD
             hostSetup.ConnectedFn = _connectedDel.Pointer;
             hostSetup.DisconnectedFn = _disconnectedDel.Pointer;
             hostSetup.CmdListFn = _cmdListDel.Pointer;
@@ -326,6 +346,11 @@ sealed class ClassicUOHost
     {
         var plugin = new Plugin(this, Guid.Empty);
 =======
+=======
+            hostSetup.ConnectedFn = _connectedDel.Pointer;
+            hostSetup.DisconnectedFn = _disconnectedDel.Pointer;
+            hostSetup.CmdListFn = _cmdListDel.Pointer;
+>>>>>>> missing fn calls
 
             initializeMethod(argv, args.Length, mem);
 
@@ -365,6 +390,9 @@ sealed class ClassicUOHost
     }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> missing fn calls
     void Connected()
     {
         foreach (var plugin in _plugins)
@@ -377,8 +405,11 @@ sealed class ClassicUOHost
             plugin.Disconnected();
     }
 
+<<<<<<< HEAD
 =======
 >>>>>>> + classicuo.bootstrap app
+=======
+>>>>>>> missing fn calls
     bool HotkeyPlugin(int key, int mod, bool pressed)
     {
         var ok = true;
@@ -507,6 +538,9 @@ sealed class ClassicUOHost
     }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> missing fn calls
     void GetCommandList(out IntPtr data, out int len)
     {
         data = IntPtr.Zero;
@@ -516,6 +550,7 @@ sealed class ClassicUOHost
             plugin.GetCommandList(out data, out len);
     }
 
+<<<<<<< HEAD
 
     public unsafe void ReflectionUsePrimaryAbility()
     {
@@ -542,6 +577,8 @@ sealed class ClassicUOHost
     {
         return _reflectionCmd?.Delegate?.Invoke(ptr) ?? IntPtr.Zero;
 =======
+=======
+>>>>>>> missing fn calls
     sealed class FuncPointer<T> where T : Delegate
     {
         [MarshalAs(UnmanagedType.FunctionPtr)]

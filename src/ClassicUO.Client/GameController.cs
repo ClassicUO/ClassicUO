@@ -146,6 +146,7 @@ namespace ClassicUO
 #else
             UO.Load(this);
 <<<<<<< HEAD
+<<<<<<< HEAD
 
             Log.Trace("Loading plugins...");
 
@@ -153,6 +154,8 @@ namespace ClassicUO
 
 =======
             PluginHost = Bootstrap.Host; // FIXME
+=======
+>>>>>>> missing fn calls
 
             Log.Trace("Loading plugins...");
 
