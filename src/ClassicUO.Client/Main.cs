@@ -39,8 +39,10 @@ using ClassicUO.Resources;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using ClassicUO.Utility.Platforms;
+using Microsoft.Xna.Framework.Graphics;
 using SDL2;
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
@@ -68,8 +70,8 @@ namespace ClassicUO
                 args[i] = Marshal.PtrToStringAnsi(argv[i]);
             }
 
-            Host = new UnmanagedAssistantHost(hostSetup);
-            Main(args);
+            var host = new UnmanagedAssistantHost(hostSetup);
+            Boot(host, args);
         }
 
         private static void PatchEnvVars()
@@ -80,8 +82,6 @@ namespace ClassicUO
                 SDL2.SDL.SDL_SetHint(envs.Key.ToString(), envs.Value.ToString());
             }
         }
-
-        public unsafe static UnmanagedAssistantHost Host;
 
         [StructLayout(LayoutKind.Sequential)]
         public unsafe struct HostSetup
@@ -134,6 +134,11 @@ namespace ClassicUO
             private readonly dOnPluginClose _close;
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+            delegate void dOnPluginConnection();
+            [MarshalAs(UnmanagedType.FunctionPtr)]
+            private readonly dOnPluginConnection _connected, _disconnected;
+
+            [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             delegate bool dOnPluginPacketInOut(IntPtr data, ref int length);
             [MarshalAs(UnmanagedType.FunctionPtr)]
             private readonly dOnPluginPacketInOut _packetIn, _packetOut;
@@ -163,6 +168,11 @@ namespace ClassicUO
             [MarshalAs(UnmanagedType.FunctionPtr)]
             private readonly dOnPluginSdlEvent _sdlEvent;
 
+            [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+            delegate void dOnPluginCommandList(out IntPtr list, out int len);
+            [MarshalAs(UnmanagedType.FunctionPtr)]
+            private readonly dOnPluginCommandList _cmdList;
+
 
             public UnmanagedAssistantHost(HostSetup* setup) 
             {
@@ -177,26 +187,33 @@ namespace ClassicUO
                 _focusGained = Marshal.GetDelegateForFunctionPointer<dOnPluginFocusWindow>(setup->FocusGainedFn);
                 _focusLost = Marshal.GetDelegateForFunctionPointer<dOnPluginFocusWindow>(setup->FocusLostFn);
                 _sdlEvent = Marshal.GetDelegateForFunctionPointer<dOnPluginSdlEvent>(setup->SdlEventFn);
+                _connected = Marshal.GetDelegateForFunctionPointer<dOnPluginConnection>(setup->ConnectedFn);
+                _disconnected = Marshal.GetDelegateForFunctionPointer<dOnPluginConnection>(setup->DisconnectedFn);
+                _cmdList = Marshal.GetDelegateForFunctionPointer<dOnPluginCommandList>(setup->CmdListFn);
             }
+
+            public Dictionary<IntPtr, GraphicsResource> GfxResources { get; } = new Dictionary<nint, GraphicsResource>();
 
             public void Closing()
             {
                 _close?.Invoke();
             }
 
-            public void CommandList(nint listPtr, out int listCount)
+            public void GetCommandList(out IntPtr listPtr, out int listCount)
             {
+                listPtr = IntPtr.Zero;
                 listCount = 0;
+                _cmdList?.Invoke(out listPtr, out  listCount);
             }
 
             public void Connected()
             {
-                
+                _connected?.Invoke();
             }
 
             public void Disconnected()
             {
-
+                _disconnected?.Invoke();
             }
 
             public void FocusGained()
@@ -325,9 +342,11 @@ namespace ClassicUO
             }
         }
 
-
         [STAThread]
-        public static void Main(string[] args)
+        public static void Main(string[] args) => Boot(null, args);
+
+
+        public static void Boot(UnmanagedAssistantHost pluginHost, string[] args)
         {
             CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
 
@@ -517,7 +536,7 @@ namespace ClassicUO
                         break;
                 }
 
-                Client.Run();
+                Client.Run(pluginHost);
             }
 
             Log.Trace("Closing...");
