@@ -5655,8 +5655,8 @@ namespace ClassicUO.Network
                         uint wtfCliloc = p.ReadUInt32BE();
 
                         ushort arg_length = p.ReadUInt16BE();
-                        p.Skip(4);
-                        string args = p.ReadUnicodeLE();
+                        var str = p.ReadUnicodeLE(2);
+                        var args = str + p.ReadUnicodeLE();
                         string title = ClilocLoader.Instance.Translate(
                             (int)titleCliloc,
                             args,
