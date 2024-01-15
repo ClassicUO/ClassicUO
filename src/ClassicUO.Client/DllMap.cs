@@ -1,14 +1,28 @@
+#region License
+/* FNA - XNA4 Reimplementation for Desktop Platforms
+ * Copyright 2009-2024 Ethan Lee and the MonoGame Team
+ *
+ * Released under the Microsoft Public License.
+ * See LICENSE for details.
+ */
+#endregion
+
+#if NET7_0_OR_GREATER
+
+#region Using Statements
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Xml.Linq;
+using System.Runtime.CompilerServices;
+using System.Xml;
+#endregion
 
 namespace ClassicUO
 {
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
     internal static class DllMap
@@ -23,11 +37,13 @@ namespace ClassicUO
     // only works in .NET Core. disable in .NET framework
     public static class DllMap
 >>>>>>> fixed order
+=======
+    internal static class DllMap
+>>>>>>> appconfig
     {
-        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool SetDefaultDllDirectories(int directoryFlags);
+        #region Private Static Variables
 
+<<<<<<< HEAD
 <<<<<<< HEAD
         private static Dictionary<string, string> mapDictionary
             = new Dictionary<string, string>();
@@ -36,20 +52,17 @@ namespace ClassicUO
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         private static extern void AddDllDirectory(string lpPathName);
 >>>>>>> fixed order
+=======
+        private static readonly Dictionary<string, string> _mapDict = new Dictionary<string, string>();
+>>>>>>> appconfig
 
-        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool SetDllDirectory(string lpPathName);
+        #endregion
 
-        private const int LOAD_LIBRARY_SEARCH_DEFAULT_DIRS = 0x00001000;
+        #region Private Static Methods
 
-        public static Dictionary<string, string> MapDictionary;
-        public static string OS;
-        public static string CPU;
-        public static bool Optimise;
-
-        public static void Initialise(bool optimise = true)
+        private static string GetPlatformName()
         {
+<<<<<<< HEAD
 <<<<<<< HEAD
             string mappedName;
 <<<<<<< HEAD
@@ -66,38 +79,57 @@ namespace ClassicUO
             // For OSX we need to set an environment variable (DYLD_LIBRARY_PATH) outside of the process by a script
             if (Environment.OSVersion.Platform == PlatformID.Win32NT)
 >>>>>>> fixed order
+=======
+            if (OperatingSystem.IsWindows())
             {
-                try
-                {
-                    SetDefaultDllDirectories(LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);
-                    AddDllDirectory(
-                        Path.Combine(
-                            AppDomain.CurrentDomain.BaseDirectory,
-                            Environment.Is64BitProcess ? "x64" : "x86"
-                        )
-                    );
-                }
-                catch
-                {
-                    // Pre-Windows 7, KB2533623
-                    SetDllDirectory(
-                        Path.Combine(
-                            AppDomain.CurrentDomain.BaseDirectory,
-                            Environment.Is64BitProcess ? "x64" : "x86"
-                        )
-                    );
-                }
+                return "windows";
             }
-
-            // .NET Core also doesn't use DllImport but we can replicate this using NativeLibrary as per below
-            // Uses FNA.dll.config to dictate what the name of the native library is per platform and architecture
-            var fnaAssembly = Assembly.GetAssembly(typeof(Microsoft.Xna.Framework.Graphics.ColorWriteChannels));
-            Register(fnaAssembly);
+            else if (OperatingSystem.IsMacOS())
+            {
+                return "osx";
+            }
+            else if (OperatingSystem.IsLinux())
+            {
+                return "linux";
+            }
+            else if (OperatingSystem.IsFreeBSD())
+            {
+                return "freebsd";
+            }
+            else
+            {
+                // What is this platform??
+                return "unknown";
+            }
         }
 
-        // Register a call-back for native library resolution.
-        private static void Register(Assembly assembly)
+        #endregion
+
+        #region DllImportResolver Callback Methods
+
+        private static IntPtr MapAndLoad(
+            string libraryName,
+            Assembly assembly,
+            DllImportSearchPath? dllImportSearchPath
+        )
         {
+            string mappedName;
+            if (!_mapDict.TryGetValue(libraryName, out mappedName))
+>>>>>>> appconfig
+            {
+                mappedName = libraryName;
+            }
+
+            return NativeLibrary.Load(mappedName, assembly, dllImportSearchPath);
+        }
+
+        private static IntPtr LoadStaticLibrary(
+            string libraryName,
+            Assembly assembly,
+            DllImportSearchPath? dllImportSearchPath
+        )
+        {
+<<<<<<< HEAD
 <<<<<<< HEAD
             return NativeLibrary.GetMainProgramHandle();
         }
@@ -112,11 +144,14 @@ namespace ClassicUO
 >>>>>>> fixed order
 
             // Do setup so that MapLibraryName is faster than reading the XML each time
+=======
+            return NativeLibrary.GetMainProgramHandle();
+        }
+>>>>>>> appconfig
 
-            // 1) Get platform & cpu
-            OS = GetCurrentPlatform().ToString().ToLowerInvariant();
-            CPU = GetCurrentRuntimeArchitecture().ToString().ToLowerInvariant();
+        #endregion
 
+<<<<<<< HEAD
 <<<<<<< HEAD
         [ModuleInitializer]
         public static void Init()
@@ -152,25 +187,36 @@ namespace ClassicUO
 >>>>>>> fixed order
             }
             else
+=======
+        public static void Init(Assembly assembly)
+        {
+            if (!RuntimeFeature.IsDynamicCodeCompiled)
+>>>>>>> appconfig
             {
-                // For every other platform use XML file
-                // Read in config XML and only store details we're interested in within MapDictionary
-                var xmlPath = Path.Combine(
-                    Path.GetDirectoryName(assembly.Location),
-                    Path.GetFileNameWithoutExtension(assembly.Location) + ".dll.config"
-                );
-
-                if (!File.Exists(xmlPath))
+                /* NativeAOT platforms don't perform dynamic loading,
+				 * so setting a DllImportResolver is unnecessary.
+				 *
+				 * However, iOS and tvOS with Mono AOT statically link
+				 * their dependencies, so we need special handling for them.
+				 */
+                if (OperatingSystem.IsIOS() || OperatingSystem.IsTvOS())
                 {
-                    Console.WriteLine($"=== Cannot find XML: {xmlPath}");
+                    NativeLibrary.SetDllImportResolver(Assembly.GetExecutingAssembly(), LoadStaticLibrary);
                     return;
                 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+                //return;
+            }
+
+>>>>>>> appconfig
             // Get the platform and architecture
             string os = GetPlatformName();
             string cpu = RuntimeInformation.ProcessArchitecture.ToString().ToLowerInvariant();
             string wordsize = (IntPtr.Size * 8).ToString();
+<<<<<<< HEAD
 <<<<<<< HEAD
 =======
 
@@ -198,18 +244,37 @@ namespace ClassicUO
                 ParseXml(root, true);  // Direct match on OS & CPU first
                 ParseXml(root, false); // Loose match on CPU second (won't allow duplicates)
 >>>>>>> fixed order
-            }
-        }
+=======
 
-        private static void ParseXml(XContainer root, bool matchCPU)
-        {
-            foreach (var el in root.Elements("dllmap"))
+            // Locate the config file
+            string xmlPath = Path.Combine(
+                AppContext.BaseDirectory,
+                assembly.GetName().Name + ".dll.config"
+            );
+
+            if (!File.Exists(xmlPath))
             {
-                // Ignore entries for other OSs
-                if (el.Attribute("os")!.ToString().IndexOf(OS) < 0)
+                // Let's hope for the best...
+                return;
+>>>>>>> appconfig
+            }
+
+            // Load the XML
+            XmlDocument xmlDoc = new XmlDocument();
+            xmlDoc.Load(xmlPath);
+
+            // The NativeLibrary API cannot remap function names. :(
+            if (xmlDoc.GetElementsByTagName("dllentry").Count > 0)
+            {
+                string msg = "Function remapping is not supported by .NET Core. Ignoring dllentry elements...";
+                Console.WriteLine(msg);
+
+                // Log it in the debugger for non-console apps.
+                if (Debugger.IsAttached)
                 {
-                    continue;
+                    Debug.WriteLine(msg);
                 }
+<<<<<<< HEAD
 <<<<<<< HEAD
             }
 <<<<<<< HEAD
@@ -235,38 +300,68 @@ namespace ClassicUO
                 // Ignore entries for other CPUs
                 if (matchCPU)
 >>>>>>> fixed order
-                {
-                    if (el.Attribute("cpu") == null)
-                    {
-                        continue;
-                    }
+=======
+            }
 
-                    if (el.Attribute("cpu")!.ToString().IndexOf(CPU) < 0)
+            // Parse the XML into a mapping dictionary
+            foreach (XmlNode node in xmlDoc.GetElementsByTagName("dllmap"))
+            {
+                XmlAttribute attribute;
+
+                // Check the OS
+                attribute = node.Attributes["os"];
+                if (attribute != null)
+>>>>>>> appconfig
+                {
+                    bool containsOS = attribute.Value.Contains(os);
+                    bool invert = attribute.Value.StartsWith("!");
+                    if ((!containsOS && !invert) || (containsOS && invert))
                     {
                         continue;
                     }
                 }
-                else
+
+                // Check the CPU
+                attribute = node.Attributes["cpu"];
+                if (attribute != null)
                 {
-                    if (el.Attribute("cpu") != null && el.Attribute("cpu")!.ToString().IndexOf(CPU) < 0)
+                    bool containsCPU = attribute.Value.Contains(cpu);
+                    bool invert = attribute.Value.StartsWith("!");
+                    if ((!containsCPU && !invert) || (containsCPU && invert))
                     {
                         continue;
                     }
                 }
 
-                var oldLib = el.Attribute("dll")!.Value;
-                var newLib = el.Attribute("target")!.Value;
+                // Check the word size
+                attribute = node.Attributes["wordsize"];
+                if (attribute != null)
+                {
+                    bool containsWordsize = attribute.Value.Contains(wordsize);
+                    bool invert = attribute.Value.StartsWith("!");
+                    if ((!containsWordsize && !invert) || (containsWordsize && invert))
+                    {
+                        continue;
+                    }
+                }
+
+                // Check for the existence of 'dll' and 'target' attributes
+                XmlAttribute dllAttribute = node.Attributes["dll"];
+                XmlAttribute targetAttribute = node.Attributes["target"];
+                if (dllAttribute == null || targetAttribute == null)
+                {
+                    continue;
+                }
+
+                // Get the actual library names
+                string oldLib = dllAttribute.Value;
+                string newLib = targetAttribute.Value;
                 if (string.IsNullOrWhiteSpace(oldLib) || string.IsNullOrWhiteSpace(newLib))
                 {
                     continue;
                 }
 
-                // Don't allow duplicates
-                if (MapDictionary.ContainsKey(oldLib))
-                {
-                    continue;
-                }
-
+<<<<<<< HEAD
 <<<<<<< HEAD
                 // Don't allow duplicates
 <<<<<<< HEAD
@@ -317,14 +412,15 @@ namespace ClassicUO
             {
                 if (operatingDesc.Contains(system.ToString().ToUpperInvariant()))
 >>>>>>> fixed order
+=======
+                // Don't allow duplicates
+                if (_mapDict.ContainsKey(oldLib))
+>>>>>>> appconfig
                 {
-                    return system;
+                    continue;
                 }
-            }
 
-            throw new PlatformNotSupportedException($"Couldn't detect platform: {RuntimeInformation.OSDescription}");
-        }
-
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
                 _mapDict.Add(oldLib, newLib);
@@ -402,9 +498,16 @@ namespace ClassicUO
             Alpha = 1 << 9,
             HPPA = 1 << 10,
             IA64 = 1 << 11
+=======
+                _mapDict.Add(oldLib, newLib);
+            }
+
+            // Set the resolver callback
+            NativeLibrary.SetDllImportResolver(assembly, MapAndLoad);
+>>>>>>> appconfig
         }
 >>>>>>> fixed order
     }
-
-#endif
 }
+
+#endif // NET7_0_OR_GREATER

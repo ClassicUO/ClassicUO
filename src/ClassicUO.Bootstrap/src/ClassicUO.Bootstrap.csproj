@@ -7,9 +7,13 @@
     <LangVersion>Preview</LangVersion>
     <PlatformTarget>x64</PlatformTarget>
 <<<<<<< HEAD
+<<<<<<< HEAD
     <Platforms>x64</Platforms>
 =======
 >>>>>>> + classicuo.bootstrap app
+=======
+    <Platforms>x64</Platforms>
+>>>>>>> appconfig
     <AssemblyName>ClassicUO</AssemblyName>
     <RootNamespace>ClassicUO</RootNamespace>
     <ApplicationIcon>cuoicon.ico</ApplicationIcon>

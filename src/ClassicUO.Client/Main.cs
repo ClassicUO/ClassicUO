@@ -46,9 +46,13 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 <<<<<<< HEAD
+<<<<<<< HEAD
 using System.Reflection;
 =======
 >>>>>>> + classicuo.bootstrap app
+=======
+using System.Reflection;
+>>>>>>> appconfig
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -158,7 +162,7 @@ namespace ClassicUO
             public IntPtr ConnectedFn;
             public IntPtr DisconnectedFn;
             public IntPtr /*delegate*<int, int, bool, bool>*/ HotkeyFn;
-            public IntPtr /*delegate*<int, int, bool>*/ MouseFn;
+            public IntPtr /*delegate*<int, int, void>*/ MouseFn;
             public IntPtr /*delegate*<IntPtr, ref int, void>*/ CmdListFn;
             public IntPtr /*delegate*<IntPtr, int>*/ SdlEventFn;
             public IntPtr /*delegate*<int, int, int, void>*/ UpdatePlayerPosFn;
@@ -243,13 +247,19 @@ namespace ClassicUO
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> appconfig
             delegate void dOnMouse(int button, int wheel);
             [MarshalAs(UnmanagedType.FunctionPtr)]
             private readonly dOnMouse _mouse;
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+<<<<<<< HEAD
 =======
 >>>>>>> delegate * --> delegate [lol]
+=======
+>>>>>>> appconfig
             delegate bool dOnUpdatePlayerPosition(int x, int y, int z);
             [MarshalAs(UnmanagedType.FunctionPtr)]
             private readonly dOnUpdatePlayerPosition _updatePlayerPos;
@@ -315,6 +325,7 @@ namespace ClassicUO
                 _packetIn = Marshal.GetDelegateForFunctionPointer<dOnPluginPacketInOut>(setup->PacketInFn);
                 _packetOut = Marshal.GetDelegateForFunctionPointer<dOnPluginPacketInOut>(setup->PacketOutFn);
                 _hotkey = Marshal.GetDelegateForFunctionPointer<dOnHotkey>(setup->HotkeyFn);
+                _mouse = Marshal.GetDelegateForFunctionPointer<dOnMouse>(setup->MouseFn);
                 _updatePlayerPos = Marshal.GetDelegateForFunctionPointer<dOnUpdatePlayerPosition>(setup->UpdatePlayerPosFn);
                 _focusGained = Marshal.GetDelegateForFunctionPointer<dOnPluginFocusWindow>(setup->FocusGainedFn);
                 _focusLost = Marshal.GetDelegateForFunctionPointer<dOnPluginFocusWindow>(setup->FocusLostFn);
@@ -392,12 +403,16 @@ namespace ClassicUO
             {
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> appconfig
                 return _hotkey == null || _hotkey(key, mod, pressed);
             }
 
             public void Mouse(int button, int wheel)
             {
                 _mouse?.Invoke(button, wheel);
+<<<<<<< HEAD
             }
 
 
@@ -529,6 +544,8 @@ namespace ClassicUO
 =======
                 return _hotkey != null ? _hotkey(key, mod, pressed) : true;
 >>>>>>> delegate * --> delegate [lol]
+=======
+>>>>>>> appconfig
             }
 
 
@@ -601,6 +618,7 @@ namespace ClassicUO
                 Client.Game.SetWindowTitle(title);
             }
 
+<<<<<<< HEAD
             public void Mouse(int button, int wheel)
             {
 <<<<<<< HEAD
@@ -612,6 +630,8 @@ namespace ClassicUO
 >>>>>>> delegate * --> delegate [lol]
             }
 
+=======
+>>>>>>> appconfig
             public bool PacketIn(ArraySegment<byte> buffer)
             {
 <<<<<<< HEAD
@@ -728,6 +748,7 @@ namespace ClassicUO
 
 #if !NETFRAMEWORK
 <<<<<<< HEAD
+<<<<<<< HEAD
             FNADllMap.Init();
             //DllMap.Initialise();
 <<<<<<< HEAD
@@ -738,6 +759,11 @@ namespace ClassicUO
 >>>>>>> minor
 =======
             DllMap.Initialise();
+=======
+            //DllMap.Initialise();
+            DllMap.Init(Assembly.GetExecutingAssembly());
+            DllMap.Init(typeof(Microsoft.Xna.Framework.Point).Assembly);
+>>>>>>> appconfig
             PatchEnvVars();
 >>>>>>> fixed order
 #endif
