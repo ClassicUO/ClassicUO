@@ -3,32 +3,12 @@ using CUO_API;
 using System;
 using System.Buffers;
 using System.Collections.Generic;
-using System.Net;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 
-var address = "127.0.0.1";
-var port = 7777;
-
-if (args.Length >= 1)
-{
-    Console.WriteLine(args[0]);
-    address = IPAddress.Parse(args[0]).ToString();
-}
-
-if (args.Length >= 2)
-{
-    Console.WriteLine(args[1]);
-    port = int.Parse(args[1]);
-}
-
-
-//var cuoServer = new ClassicUORpcServer();
-//cuoServer.Start(address, port);
 
 Global.Host.Run(args);
-
 Console.WriteLine("finished");
 
 
@@ -62,6 +42,9 @@ sealed class ClassicUOHost
     delegate bool dOnHotkey(int key, int mod, bool pressed);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    delegate void dOnMouse(int button, int wheel);
+
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     delegate bool dOnUpdatePlayerPosition(int x, int y, int z);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -77,6 +60,7 @@ sealed class ClassicUOHost
     private readonly FuncPointer<dOnPluginPacketInOut> _packetInPluginDel;
     private readonly FuncPointer<dOnPluginPacketInOut> _packetOutPluginDel;
     private readonly FuncPointer<dOnHotkey> _hotkeyPluginDel;
+    private readonly FuncPointer<dOnMouse> _mousePluginDel;
     private readonly FuncPointer<OnUpdatePlayerPosition> _updatePlayerPosDel;
     private readonly FuncPointer<dOnPluginFocusWindow> _focusGainedDel, _focusLostDel;
     private readonly FuncPointer<dOnPluginSdlEvent> _sdlEventDel;
@@ -91,6 +75,7 @@ sealed class ClassicUOHost
         _packetInPluginDel = new FuncPointer<dOnPluginPacketInOut>(PacketInPlugin);
         _packetOutPluginDel = new FuncPointer<dOnPluginPacketInOut>(PacketOutPlugin);
         _hotkeyPluginDel = new FuncPointer<dOnHotkey>(HotkeyPlugin);
+        _mousePluginDel = new FuncPointer<dOnMouse>(MousePlugin);
         _updatePlayerPosDel = new FuncPointer<OnUpdatePlayerPosition>(UpdatePlayerPosition);
         _focusGainedDel = new FuncPointer<dOnPluginFocusWindow>(FocusGained);
         _focusLostDel = new FuncPointer<dOnPluginFocusWindow>(FocusLost);
@@ -135,6 +120,7 @@ sealed class ClassicUOHost
             hostSetup.PacketInFn = _packetInPluginDel.Pointer;
             hostSetup.PacketOutFn = _packetOutPluginDel.Pointer;
             hostSetup.HotkeyFn = _hotkeyPluginDel.Pointer;
+            hostSetup.MouseFn = _mousePluginDel.Pointer;
             hostSetup.UpdatePlayerPosFn = _updatePlayerPosDel.Pointer;
             hostSetup.FocusGainedFn = _focusGainedDel.Pointer;
             hostSetup.FocusLostFn = _focusLostDel.Pointer;
@@ -180,6 +166,12 @@ sealed class ClassicUOHost
             ok |= plugin.ProcessHotkeys(key, mod, pressed);
 
         return ok;
+    }
+
+    void MousePlugin(int button, int wheel)
+    {
+        foreach (var plugin in _plugins)
+            plugin.ProcessMouse(button, wheel);
     }
 
     void UpdatePlayerPosition(int x, int y, int z)
