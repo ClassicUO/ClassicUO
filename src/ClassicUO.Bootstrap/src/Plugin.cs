@@ -477,6 +477,12 @@ sealed class Plugin
         }
     }
 
+    public void GetCommandList(out IntPtr listPtr, out int listLen)
+    {
+        listPtr = IntPtr.Zero;
+        listLen = 0;
+        _draw_cmd_list?.Invoke(out listPtr, ref listLen);
+    }
 
 
     [MarshalAs(UnmanagedType.FunctionPtr)]
