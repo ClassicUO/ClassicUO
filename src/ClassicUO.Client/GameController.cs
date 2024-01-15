@@ -66,7 +66,7 @@ namespace ClassicUO
         private bool _suppressedDraw;
         private Texture2D _background;
 
-        public GameController()
+        public GameController(IPluginHost pluginHost)
         {
             GraphicManager = new GraphicsDeviceManager(this);
 
@@ -86,6 +86,7 @@ namespace ClassicUO
 
             IsFixedTimeStep = false; // Settings.GlobalSettings.FixedTimeStep;
             TargetElapsedTime = TimeSpan.FromMilliseconds(1000.0 / 250.0);
+            PluginHost = pluginHost;
         }
 
         public Scene Scene { get; private set; }
@@ -136,7 +137,6 @@ namespace ClassicUO
             SetScene(new MainScene(this));
 #else
             UO.Load(this);
-            PluginHost = Bootstrap.Host; // FIXME
 
             Log.Trace("Loading plugins...");
 

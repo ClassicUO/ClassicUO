@@ -3,6 +3,7 @@ using ClassicUO.Configuration;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Network;
+using Microsoft.Xna.Framework.Graphics;
 using StructPacker;
 using System;
 using System.Buffers;
@@ -14,6 +15,8 @@ namespace ClassicUO
 {
     interface IPluginHost
     {
+        public Dictionary<IntPtr, GraphicsResource> GfxResources { get; }
+
         public void Initialize(string pluginPath);
         public void Tick();
         public void Closing();
@@ -23,7 +26,7 @@ namespace ClassicUO
         public void Disconnected();
         public bool Hotkey(int key, int mod, bool pressed);
         public void Mouse(int button, int wheel);
-        public void CommandList(IntPtr listPtr, out int listCount);
+        public void GetCommandList(out IntPtr listPtr, out int listCount);
         public unsafe int SdlEvent(SDL2.SDL.SDL_Event* ev);
         public void UpdatePlayerPosition(int x, int y, int z);
         public bool PacketIn(ArraySegment<byte> buffer);
@@ -315,6 +318,7 @@ namespace ClassicUO
 
 
         private readonly Dictionary<PluginCuoProtocol, byte[]> _simpleRequests = new Dictionary<PluginCuoProtocol, byte[]>();
+        public Dictionary<IntPtr, GraphicsResource> GfxResources { get; } = new Dictionary<nint, GraphicsResource>();
 
         // TODO: find a better way to return array. Maybe a struct container idk
         private void ReturnArray(ArraySegment<byte> segment)
@@ -426,8 +430,9 @@ namespace ClassicUO
             ReturnArray(resp);
         }
 
-        public void CommandList(IntPtr ptr, out int listCount)
+        public void GetCommandList(out IntPtr ptr, out int listCount)
         {
+            ptr = IntPtr.Zero;
             listCount = 0;
         }
 

@@ -36,6 +36,9 @@ sealed class ClassicUOHost
     delegate void dOnPluginClose();
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    delegate void dOnPluginConnection();
+
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     delegate bool dOnPluginPacketInOut(IntPtr data, ref int length);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -53,17 +56,21 @@ sealed class ClassicUOHost
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     delegate int dOnPluginSdlEvent(IntPtr ev);
 
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    delegate void dOnPluginCommandList(out IntPtr list, out int len);
+
 
     private readonly FuncPointer<dOnPluginInitialize> _initPluginDel;
     private readonly FuncPointer<dOnPluginTick> _tickPluginDel;
     private readonly FuncPointer<dOnPluginClose> _closingPluginDel;
-    private readonly FuncPointer<dOnPluginPacketInOut> _packetInPluginDel;
-    private readonly FuncPointer<dOnPluginPacketInOut> _packetOutPluginDel;
+    private readonly FuncPointer<dOnPluginConnection> _connectedDel, _disconnectedDel;
+    private readonly FuncPointer<dOnPluginPacketInOut> _packetInPluginDel, _packetOutPluginDel;
     private readonly FuncPointer<dOnHotkey> _hotkeyPluginDel;
     private readonly FuncPointer<dOnMouse> _mousePluginDel;
     private readonly FuncPointer<OnUpdatePlayerPosition> _updatePlayerPosDel;
     private readonly FuncPointer<dOnPluginFocusWindow> _focusGainedDel, _focusLostDel;
     private readonly FuncPointer<dOnPluginSdlEvent> _sdlEventDel;
+    private readonly FuncPointer<dOnPluginCommandList> _cmdListDel;
 
     
 
@@ -72,6 +79,8 @@ sealed class ClassicUOHost
         _initPluginDel = new FuncPointer<dOnPluginInitialize>(InitializePlugin);
         _tickPluginDel = new FuncPointer<dOnPluginTick>(TickPlugin);
         _closingPluginDel = new FuncPointer<dOnPluginClose>(ClosingPlugin);
+        _connectedDel = new FuncPointer<dOnPluginConnection>(Connected);
+        _disconnectedDel = new FuncPointer<dOnPluginConnection>(Disconnected);
         _packetInPluginDel = new FuncPointer<dOnPluginPacketInOut>(PacketInPlugin);
         _packetOutPluginDel = new FuncPointer<dOnPluginPacketInOut>(PacketOutPlugin);
         _hotkeyPluginDel = new FuncPointer<dOnHotkey>(HotkeyPlugin);
@@ -80,6 +89,7 @@ sealed class ClassicUOHost
         _focusGainedDel = new FuncPointer<dOnPluginFocusWindow>(FocusGained);
         _focusLostDel = new FuncPointer<dOnPluginFocusWindow>(FocusLost);
         _sdlEventDel = new FuncPointer<dOnPluginSdlEvent>(SdlEvent);
+        _cmdListDel = new FuncPointer<dOnPluginCommandList>(GetCommandList);
     }
 
     public void Run(string[] args)
@@ -125,6 +135,9 @@ sealed class ClassicUOHost
             hostSetup.FocusGainedFn = _focusGainedDel.Pointer;
             hostSetup.FocusLostFn = _focusLostDel.Pointer;
             hostSetup.SdlEventFn = _sdlEventDel.Pointer;
+            hostSetup.ConnectedFn = _connectedDel.Pointer;
+            hostSetup.DisconnectedFn = _disconnectedDel.Pointer;
+            hostSetup.CmdListFn = _cmdListDel.Pointer;
 
             initializeMethod(argv, args.Length, mem);
 
@@ -156,6 +169,18 @@ sealed class ClassicUOHost
     {
         foreach (var plugin in _plugins)
             plugin.Close();
+    }
+
+    void Connected()
+    {
+        foreach (var plugin in _plugins)
+            plugin.Connected();
+    }
+
+    void Disconnected()
+    {
+        foreach (var plugin in _plugins)
+            plugin.Disconnected();
     }
 
     bool HotkeyPlugin(int key, int mod, bool pressed)
@@ -274,6 +299,15 @@ sealed class ClassicUOHost
         }
 
         return ok;
+    }
+
+    void GetCommandList(out IntPtr data, out int len)
+    {
+        data = IntPtr.Zero;
+        len = 0;
+
+        foreach (var plugin in _plugins)
+            plugin.GetCommandList(out data, out len);
     }
 
     sealed class FuncPointer<T> where T : Delegate
