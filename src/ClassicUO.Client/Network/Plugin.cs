@@ -722,18 +722,24 @@ namespace ClassicUO.Network
 
         internal static void ProcessDrawCmdList(GraphicsDevice device)
         {
-            Client.Game.PluginHost?.CommandList(IntPtr.Zero, out var len);
+            IntPtr cmdList = IntPtr.Zero;
+            var len = 0;
+            Client.Game.PluginHost?.GetCommandList(out cmdList, out len);
+            if (Client.Game.PluginHost != null && len != 0 && cmdList != IntPtr.Zero)
+            {
+                HandleCmdList(device, cmdList, len, Client.Game.PluginHost.GfxResources);
+            }
 
             foreach (Plugin plugin in Plugins)
             {
                 if (plugin._draw_cmd_list != null)
                 {
-                    int cmd_count = 0;
-                    plugin._draw_cmd_list.Invoke(out IntPtr cmdlist, ref cmd_count);
+                    len = 0;
+                    plugin._draw_cmd_list.Invoke(out cmdList, ref len);
 
-                    if (cmd_count != 0 && cmdlist != IntPtr.Zero)
+                    if (len != 0 && cmdList != IntPtr.Zero)
                     {
-                        plugin.HandleCmdList(device, cmdlist, cmd_count, plugin._resources);
+                        HandleCmdList(device, cmdList, len, plugin._resources);
                     }
                 }
             }
@@ -845,7 +851,7 @@ namespace ClassicUO.Network
             return DeleteFile(fileName + ":Zone.Identifier");
         }
 
-        private void HandleCmdList(
+        private static void HandleCmdList(
             GraphicsDevice device,
             IntPtr ptr,
             int length,
