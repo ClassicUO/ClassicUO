@@ -27,22 +27,22 @@ namespace ClassicUO.IO
 
         public int Position { get; private set; }
         public long Length { get; }
-        public int Remaining => (int)(Length - Position);
+        public readonly int Remaining => (int)(Length - Position);
 
-        public IntPtr StartAddress => (IntPtr)Unsafe.AsPointer(ref GetPinnableReference());
-        public IntPtr PositionAddress
+        public readonly IntPtr StartAddress => (IntPtr)Unsafe.AsPointer(ref GetPinnableReference());
+        public readonly IntPtr PositionAddress
         {
             [MethodImpl(IMPL_OPTION)]
             get => (IntPtr)((byte*)Unsafe.AsPointer(ref GetPinnableReference()) + Position);
         }
 
-        public byte this[int index] => _data[0];
+        public readonly byte this[int index] => _data[index];
 
         public ReadOnlySpan<byte> Buffer => _data;
 
 
         [MethodImpl(IMPL_OPTION)]
-        public ref byte GetPinnableReference() => ref MemoryMarshal.GetReference(_data);
+        public readonly ref byte GetPinnableReference() => ref MemoryMarshal.GetReference(_data);
 
 
         [MethodImpl(IMPL_OPTION)]
@@ -391,11 +391,6 @@ namespace ClassicUO.IO
         public string ReadUTF8(int length, bool safe = false)
         {
             return ReadString(Encoding.UTF8, length, 1, safe);
-        }
-
-        public void Read(Span<byte> data, int offset, int count)
-        {
-            _data.Slice(Position + offset, count).CopyTo(data);
         }
 
         // from modernuo <3
