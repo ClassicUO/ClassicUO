@@ -237,10 +237,9 @@ namespace ClassicUO.Game
                         return;
                     }
 
-                    // TODO(andrea): using a struct range instead of allocate the array to the heap?
+                        // TODO(andrea): using a struct range instead of allocate the array to the heap?
                     byte[] staticsData = new byte[totalLength];
-
-                    p.Read(staticsData, 0, totalLength);
+                    p.Buffer.Slice(p.Position, totalLength).CopyTo(staticsData);
 
 
                     if (block >= 0 && block < MapLoader.Instance.MapBlocksSize[mapId, 0] * MapLoader.Instance.MapBlocksSize[mapId, 1])
