@@ -17,7 +17,8 @@ namespace ClassicUO
     {
         public Dictionary<IntPtr, GraphicsResource> GfxResources { get; }
 
-        public void Initialize(string pluginPath);
+        public void Initialize();
+        public void LoadPlugin(string pluginPath);
         public void Tick();
         public void Closing();
         public void FocusGained();
@@ -347,7 +348,12 @@ namespace ClassicUO
             ReturnArray(resp);
         }
 
-        public void Initialize(string pluginPath)
+        public void Initialize()
+        {
+
+        }
+
+        public void LoadPlugin(string pluginPath)
         {
             if (string.IsNullOrEmpty(pluginPath))
                 return;
