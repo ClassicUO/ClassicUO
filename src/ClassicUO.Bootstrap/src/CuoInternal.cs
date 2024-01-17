@@ -22,11 +22,13 @@ namespace ClassicUO.Game
     {
         public static void UsePrimaryAbility()
         {
+            Global.Host.ReflectionUsePrimaryAbility();
             Console.WriteLine("Invoked by reflection {0}", nameof(UsePrimaryAbility));
         }
 
         public static void UseSecondaryAbility()
         {
+            Global.Host.ReflectionUseSecondaryAbility();
             Console.WriteLine("Invoked by reflection {0}", nameof(UseSecondaryAbility));
         }
     }

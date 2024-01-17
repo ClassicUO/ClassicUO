@@ -140,6 +140,8 @@ namespace ClassicUO
 
             Log.Trace("Loading plugins...");
 
+            PluginHost.Initialize();
+
             foreach (string p in Settings.GlobalSettings.Plugins)
             {
                 Plugin.Create(p);
