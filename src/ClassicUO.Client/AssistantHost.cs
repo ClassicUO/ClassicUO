@@ -27,6 +27,7 @@ namespace ClassicUO
 
         public void Initialize();
         public void LoadPlugin(string pluginPath);
+<<<<<<< HEAD
 =======
 =======
         public Dictionary<IntPtr, GraphicsResource> GfxResources { get; }
@@ -34,6 +35,8 @@ namespace ClassicUO
 >>>>>>> missing fn calls
         public void Initialize(string pluginPath);
 >>>>>>> + classicuo.bootstrap app
+=======
+>>>>>>> calling reflection methods
         public void Tick();
         public void Closing();
         public void FocusGained();
@@ -893,7 +896,12 @@ namespace ClassicUO
             ReturnArray(resp);
         }
 
-        public void Initialize(string pluginPath)
+        public void Initialize()
+        {
+
+        }
+
+        public void LoadPlugin(string pluginPath)
         {
             if (string.IsNullOrEmpty(pluginPath))
                 return;

@@ -276,10 +276,14 @@ namespace ClassicUO.Network
                 {
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
                     Client.Game.PluginHost?.LoadPlugin(PluginPath);
 =======
                     Client.Game.PluginHost?.Initialize(PluginPath);
 >>>>>>> + classicuo.bootstrap app
+=======
+                    Client.Game.PluginHost?.LoadPlugin(PluginPath);
+>>>>>>> calling reflection methods
 
                     //Client.Game.AssistantHost.OnSocketConnected += (o, e) => { 
                     //    Client.Game.AssistantHost.PluginInitialize(PluginPath); 

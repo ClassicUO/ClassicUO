@@ -158,6 +158,7 @@ namespace ClassicUO
         public unsafe struct HostSetup
         {
             public IntPtr InitializeFn;
+            public IntPtr LoadPluginFn;
             public IntPtr TickFn;
             public IntPtr ClosingFn;
             public IntPtr FocusGainedFn;
@@ -176,6 +177,7 @@ namespace ClassicUO
         [StructLayout(LayoutKind.Sequential)]
         unsafe struct CuoHostSetup
         {
+<<<<<<< HEAD
             public IntPtr SdlWindow;
 <<<<<<< HEAD
             public delegate*<IntPtr, ref int, bool> PluginRecvFn;
@@ -189,6 +191,8 @@ namespace ClassicUO
             public delegate*<int, int, int, void> UpdatePlayerPositionFn;
 >>>>>>> + classicuo.bootstrap app
 =======
+=======
+>>>>>>> calling reflection methods
             public IntPtr /*delegate*<IntPtr, ref int, bool>*/ PluginRecvFn;
             public IntPtr /*delegate*<IntPtr, ref int, bool>*/ PluginSendFn;
             public IntPtr /*delegate*<int, short>*/ PacketLengthFn;
@@ -197,7 +201,11 @@ namespace ClassicUO
             public IntPtr /*delegate*<int, IntPtr, IntPtr, bool, bool>*/ GetClilocFn;
             public IntPtr /*delegate*<int, bool, bool>*/ RequestMoveFn;
             public IntPtr /*delegate*<ref int, ref int, ref int, bool>*/ GetPlayerPositionFn;
+<<<<<<< HEAD
 >>>>>>> delegate * --> delegate [lol]
+=======
+            public IntPtr ReflectionCmdFn;
+>>>>>>> calling reflection methods
         }
 
         internal unsafe sealed class UnmanagedAssistantHost : IPluginHost
@@ -215,10 +223,19 @@ namespace ClassicUO
             private readonly dOnPluginLoad _loadPlugin;
 =======
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-            delegate void dOnPluginInitialize(IntPtr exportedFuncs, uint clientVersion, IntPtr pluginPathPtr, IntPtr assetsPathPtr);
+            delegate void dOnPluginBindCuoFunctions(IntPtr exportedFuncs);
             [MarshalAs(UnmanagedType.FunctionPtr)]
+<<<<<<< HEAD
             private readonly dOnPluginInitialize _initialize;
 >>>>>>> delegate * --> delegate [lol]
+=======
+            private readonly dOnPluginBindCuoFunctions _initialize;
+
+            [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+            delegate void dOnPluginLoad(IntPtr pluginPathPtr, uint clientVersion, IntPtr assetsPathPtr, IntPtr sdlWindow);
+            [MarshalAs(UnmanagedType.FunctionPtr)]
+            private readonly dOnPluginLoad _loadPlugin;
+>>>>>>> calling reflection methods
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             delegate void dOnPluginTick();
@@ -334,7 +351,8 @@ namespace ClassicUO
 
             public UnmanagedAssistantHost(HostSetup* setup) 
             {
-                _initialize = Marshal.GetDelegateForFunctionPointer<dOnPluginInitialize>(setup->InitializeFn);
+                _initialize = Marshal.GetDelegateForFunctionPointer<dOnPluginBindCuoFunctions>(setup->InitializeFn);
+                _loadPlugin = Marshal.GetDelegateForFunctionPointer<dOnPluginLoad>(setup->LoadPluginFn);
                 _tick = Marshal.GetDelegateForFunctionPointer<dOnPluginTick>(setup->TickFn);
                 _close = Marshal.GetDelegateForFunctionPointer<dOnPluginClose>(setup->ClosingFn);
                 _packetIn = Marshal.GetDelegateForFunctionPointer<dOnPluginPacketInOut>(setup->PacketInFn);
@@ -619,15 +637,30 @@ namespace ClassicUO
             [MarshalAs(UnmanagedType.FunctionPtr)]
             private readonly dSetWindowTitle _setWindowTitle = setWindowTitle;
 
+            [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+            delegate void dOnPluginReflectionCommand(IntPtr cmdPtr);
+            [MarshalAs(UnmanagedType.FunctionPtr)]
+            private readonly dOnPluginReflectionCommand _reflectionCmd = reflectionCmd;
 
-            public void Initialize(string pluginPath)
+
+            static void setWindowTitle(IntPtr ptr)
+            {
+                var title = SDL2.SDL.UTF8_ToManaged(ptr);
+                Client.Game.SetWindowTitle(title);
+            }
+
+            static void reflectionCmd(IntPtr cmd)
+            {
+                Console.WriteLine("called reflection cmd {0}", cmd);
+            }
+
+            public void Initialize()
             {
                 if (_initialize == null)
                     return;
 
                 var mem = NativeMemory.AllocZeroed((nuint)sizeof(CuoHostSetup));
                 ref var cuoHost = ref Unsafe.AsRef<CuoHostSetup>(mem);
-                cuoHost.SdlWindow = Client.Game.Window.Handle;
                 cuoHost.PacketLengthFn = Marshal.GetFunctionPointerForDelegate(_packetLength);
                 cuoHost.CastSpellFn = Marshal.GetFunctionPointerForDelegate(_castSpell);
                 cuoHost.SetWindowTitleFn = Marshal.GetFunctionPointerForDelegate(_setWindowTitle);
@@ -635,20 +668,32 @@ namespace ClassicUO
                 cuoHost.PluginSendFn = Marshal.GetFunctionPointerForDelegate(_sendToServer);
                 cuoHost.RequestMoveFn = Marshal.GetFunctionPointerForDelegate(_requestMove);
                 cuoHost.GetPlayerPositionFn = Marshal.GetFunctionPointerForDelegate(_getPlayerPosition);
+                cuoHost.ReflectionCmdFn = Marshal.GetFunctionPointerForDelegate(_reflectionCmd);
 
-                _initialize
-                (
-                    (IntPtr)mem,
-                    (uint)Client.Game.UO.Version,
-                    Marshal.StringToHGlobalAnsi(pluginPath),
-                    Marshal.StringToHGlobalAnsi(Settings.GlobalSettings.UltimaOnlineDirectory)
-                );
+                _initialize((IntPtr)mem);
             }
 
-            static void setWindowTitle(IntPtr ptr)
+            public void LoadPlugin(string pluginPath)
             {
-                var title = SDL2.SDL.UTF8_ToManaged(ptr);
-                Client.Game.SetWindowTitle(title);
+                if (_loadPlugin == null)
+                    return;
+
+                var pluginPathPtr = Marshal.StringToHGlobalAnsi(pluginPath);
+                var uoAssetsPtr = Marshal.StringToHGlobalAnsi(Settings.GlobalSettings.UltimaOnlineDirectory);
+
+                _loadPlugin
+                (
+                    pluginPathPtr,
+                    (uint)Client.Game.UO.Version,
+                    uoAssetsPtr,
+                    Client.Game.Window.Handle
+                );
+
+                if (pluginPathPtr != IntPtr.Zero)
+                    Marshal.FreeHGlobal(pluginPathPtr);
+
+                if (uoAssetsPtr != IntPtr.Zero)
+                    Marshal.FreeHGlobal(uoAssetsPtr);
             }
 
 <<<<<<< HEAD

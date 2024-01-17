@@ -48,14 +48,19 @@ namespace ClassicUO.Game
         public static void UsePrimaryAbility()
         {
 <<<<<<< HEAD
+<<<<<<< HEAD
             Global.Host.ReflectionUsePrimaryAbility();
 =======
 >>>>>>> + classicuo.bootstrap app
+=======
+            Global.Host.ReflectionUsePrimaryAbility();
+>>>>>>> calling reflection methods
             Console.WriteLine("Invoked by reflection {0}", nameof(UsePrimaryAbility));
         }
 
         public static void UseSecondaryAbility()
         {
+<<<<<<< HEAD
 <<<<<<< HEAD
             Global.Host.ReflectionUseSecondaryAbility();
             Console.WriteLine("Invoked by reflection {0}", nameof(UseSecondaryAbility));
@@ -136,6 +141,9 @@ namespace ClassicUO.Game.Managers
         }
     }
 =======
+=======
+            Global.Host.ReflectionUseSecondaryAbility();
+>>>>>>> calling reflection methods
             Console.WriteLine("Invoked by reflection {0}", nameof(UseSecondaryAbility));
         }
     }

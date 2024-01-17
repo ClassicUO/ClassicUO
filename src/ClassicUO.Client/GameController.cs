@@ -159,7 +159,12 @@ namespace ClassicUO
 
             Log.Trace("Loading plugins...");
 
+<<<<<<< HEAD
 >>>>>>> + classicuo.bootstrap app
+=======
+            PluginHost.Initialize();
+
+>>>>>>> calling reflection methods
             foreach (string p in Settings.GlobalSettings.Plugins)
             {
                 Plugin.Create(p);
