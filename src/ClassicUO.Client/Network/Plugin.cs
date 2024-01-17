@@ -274,7 +274,7 @@ namespace ClassicUO.Network
             {
                 try
                 {
-                    Client.Game.PluginHost?.Initialize(PluginPath);
+                    Client.Game.PluginHost?.LoadPlugin(PluginPath);
 
                     //Client.Game.AssistantHost.OnSocketConnected += (o, e) => { 
                     //    Client.Game.AssistantHost.PluginInitialize(PluginPath); 
