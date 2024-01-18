@@ -147,7 +147,19 @@ namespace ClassicUO.Game.Managers
             Console.WriteLine("Invoked by reflection {0}", nameof(UseSecondaryAbility));
         }
     }
+<<<<<<< HEAD
 >>>>>>> + classicuo.bootstrap app
+=======
+
+    static class Pathfinder
+    {
+        public static bool AutoWalking
+        {
+            get => Global.Host.ReflectionAutowalking(-1);
+            set => Global.Host.ReflectionAutowalking((sbyte)(value ? 1 : 0));
+        }
+    }
+>>>>>>> reflection pathfinding support
 }
 
 namespace ClassicUO.Game.Scenes

@@ -117,7 +117,7 @@ sealed class ClassicUOHost : IPluginHandler
     delegate void dSetWindowTitle(IntPtr textPtr);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    delegate void dOnPluginReflectionCommand(IntPtr cmdPtr);
+    delegate IntPtr dOnPluginReflectionCommand(IntPtr cmdPtr);
 
     private FuncPointer<dCastSpell> _castSpell;
     private FuncPointer<dGetCliloc> _getCliloc;
@@ -696,6 +696,7 @@ sealed class ClassicUOHost : IPluginHandler
     }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
         static T SetFunction<T>(IntPtr ptr) where T : Delegate => ptr == IntPtr.Zero ? null : Marshal.GetDelegateForFunctionPointer<T>(ptr);
 >>>>>>> + classicuo.bootstrap app
 =======
@@ -707,6 +708,17 @@ sealed class ClassicUOHost : IPluginHandler
 =======
         _reflectionCmd?.Delegate?.Invoke(ptr);
 >>>>>>> cleanup
+=======
+    public unsafe bool ReflectionAutowalking(sbyte walking)
+    {
+        var f = (3, walking);
+        return Unsafe.AsRef<bool>(SendReflectionCmd((IntPtr)(&f)).ToPointer());
+    }
+
+    IntPtr SendReflectionCmd(IntPtr ptr)
+    {
+        return _reflectionCmd?.Delegate?.Invoke(ptr) ?? IntPtr.Zero;
+>>>>>>> reflection pathfinding support
     }
 
     public void CastSpell(Guid id, int index)
