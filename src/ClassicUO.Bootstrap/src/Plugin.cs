@@ -254,11 +254,6 @@ sealed class Plugin
     public void Close()
     {
         OnClosing();
-
-        //var forms = AppDomain.CurrentDomain.GetAssemblies().SingleOrDefault(assembly => assembly.GetName().Name.Contains("System.Windows.Forms"));
-        //var application = forms.GetType("System.Windows.Forms.Application");
-        //var appExitMethod = application.GetMethod("Exit", new Type[0]);
-        //appExitMethod.Invoke(null, null);
     }
 
 
@@ -363,14 +358,7 @@ sealed class Plugin
 
     public void Tick()
     {
-        try
-        {
-            _tick?.Invoke();
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-        }
+        _tick?.Invoke();
     }
 
     public bool ProcessRecvPacket(ref byte[] data, ref int length)
@@ -619,21 +607,6 @@ sealed class Plugin
         bool capitalize,
         [Out][MarshalAs(UnmanagedType.LPStr)] out string buffer
     );
-
-
-    static class WinApi
-    {
-        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = false)]
-        static extern IntPtr SendMessage(IntPtr hWnd, UInt32 Msg, IntPtr wParam, IntPtr lParam);
-
-        //I'd double check this constant, just in case
-        static uint WM_CLOSE = 0x10;
-
-        public static void CloseWindow(IntPtr hWindow)
-        {
-            SendMessage(hWindow, WM_CLOSE, IntPtr.Zero, IntPtr.Zero);
-        }
-    }
 }
 
 struct PluginHeader
