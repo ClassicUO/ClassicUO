@@ -60,7 +60,7 @@ namespace ClassicUO
 
 
         [UnmanagedCallersOnly(EntryPoint = "Initialize", CallConvs = new Type[] { typeof(CallConvCdecl) })]
-        static unsafe void Initialize(IntPtr* argv, int argc, HostSetup* hostSetup)
+        static unsafe void Initialize(IntPtr* argv, int argc, HostBindings* hostSetup)
         {
             Console.WriteLine("run!");
 
@@ -84,7 +84,7 @@ namespace ClassicUO
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        public unsafe struct HostSetup
+        public unsafe struct HostBindings
         {
             public IntPtr InitializeFn;
             public IntPtr LoadPluginFn;
@@ -104,7 +104,7 @@ namespace ClassicUO
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        unsafe struct CuoHostSetup
+        unsafe struct ClientBindings
         {
             public IntPtr /*delegate*<IntPtr, ref int, bool>*/ PluginRecvFn;
             public IntPtr /*delegate*<IntPtr, ref int, bool>*/ PluginSendFn;
@@ -180,7 +180,7 @@ namespace ClassicUO
             private readonly dOnPluginCommandList _cmdList;
 
 
-            public UnmanagedAssistantHost(HostSetup* setup) 
+            public UnmanagedAssistantHost(HostBindings* setup) 
             {
                 _initialize = Marshal.GetDelegateForFunctionPointer<dOnPluginBindCuoFunctions>(setup->InitializeFn);
                 _loadPlugin = Marshal.GetDelegateForFunctionPointer<dOnPluginLoad>(setup->LoadPluginFn);
@@ -303,8 +303,8 @@ namespace ClassicUO
                 if (_initialize == null)
                     return;
 
-                var mem = NativeMemory.AllocZeroed((nuint)sizeof(CuoHostSetup));
-                ref var cuoHost = ref Unsafe.AsRef<CuoHostSetup>(mem);
+                var mem = NativeMemory.AllocZeroed((nuint)sizeof(ClientBindings));
+                ref var cuoHost = ref Unsafe.AsRef<ClientBindings>(mem);
                 cuoHost.PacketLengthFn = Marshal.GetFunctionPointerForDelegate(_packetLength);
                 cuoHost.CastSpellFn = Marshal.GetFunctionPointerForDelegate(_castSpell);
                 cuoHost.SetWindowTitleFn = Marshal.GetFunctionPointerForDelegate(_setWindowTitle);
