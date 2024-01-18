@@ -282,7 +282,7 @@ namespace ClassicUO
             private readonly dSetWindowTitle _setWindowTitle = setWindowTitle;
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-            delegate void dOnPluginReflectionCommand(IntPtr cmdPtr);
+            delegate IntPtr dOnPluginReflectionCommand(IntPtr cmdPtr);
             [MarshalAs(UnmanagedType.FunctionPtr)]
             private readonly dOnPluginReflectionCommand _reflectionCmd = reflectionCmd;
 
@@ -293,9 +293,38 @@ namespace ClassicUO
                 Client.Game.SetWindowTitle(title);
             }
 
-            static void reflectionCmd(IntPtr cmd)
+            static IntPtr reflectionCmd(IntPtr cmd)
             {
                 Console.WriteLine("called reflection cmd {0}", cmd);
+
+                switch (Unsafe.AsRef<int>(cmd.ToPointer()))
+                {
+                    case 1:
+                        GameActions.UsePrimaryAbility();
+                        break;
+                    case 2:
+                        GameActions.UseSecondaryAbility();
+                        break;
+                    case 3:
+                        var subCmd = Unsafe.AsRef<int>((byte*)cmd + sizeof(int));
+                        var res = Client.Game.UO?.World?.Player?.Pathfinder?.AutoWalking ?? false;
+
+                        switch (subCmd)
+                        {
+                            case -1:
+                                break;
+                            case 0:
+                                Client.Game.UO.World.Player.Pathfinder.AutoWalking = false;
+                                break;
+                            default:
+                                Client.Game.UO.World.Player.Pathfinder.AutoWalking = true;
+                                break;
+                        }
+                     
+                        return (IntPtr) Unsafe.AsPointer(ref res);
+                }
+
+                return IntPtr.Zero;
             }
 
             public void Initialize()
