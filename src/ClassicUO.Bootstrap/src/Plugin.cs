@@ -255,6 +255,7 @@ sealed class Plugin
     {
         OnClosing();
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 
         //var forms = AppDomain.CurrentDomain.GetAssemblies().SingleOrDefault(assembly => assembly.GetName().Name.Contains("System.Windows.Forms"));
@@ -262,6 +263,8 @@ sealed class Plugin
         //var appExitMethod = application.GetMethod("Exit", new Type[0]);
         //appExitMethod.Invoke(null, null);
 >>>>>>> + classicuo.bootstrap app
+=======
+>>>>>>> cleanup
     }
 
 
@@ -367,6 +370,7 @@ sealed class Plugin
     public void Tick()
     {
 <<<<<<< HEAD
+<<<<<<< HEAD
         _tick?.Invoke();
 =======
         try
@@ -378,6 +382,9 @@ sealed class Plugin
             Console.WriteLine(ex.ToString());
         }
 >>>>>>> + classicuo.bootstrap app
+=======
+        _tick?.Invoke();
+>>>>>>> cleanup
     }
 
     public bool ProcessRecvPacket(ref byte[] data, ref int length)
@@ -653,6 +660,7 @@ sealed class Plugin
         [Out][MarshalAs(UnmanagedType.LPStr)] out string buffer
     );
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 
 
@@ -670,6 +678,8 @@ sealed class Plugin
         }
     }
 >>>>>>> + classicuo.bootstrap app
+=======
+>>>>>>> cleanup
 }
 
 struct PluginHeader
