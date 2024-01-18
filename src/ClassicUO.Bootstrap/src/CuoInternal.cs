@@ -32,6 +32,15 @@ namespace ClassicUO.Game
             Console.WriteLine("Invoked by reflection {0}", nameof(UseSecondaryAbility));
         }
     }
+
+    static class Pathfinder
+    {
+        public static bool AutoWalking
+        {
+            get => Global.Host.ReflectionAutowalking(-1);
+            set => Global.Host.ReflectionAutowalking((sbyte)(value ? 1 : 0));
+        }
+    }
 }
 
 namespace ClassicUO.Game.Scenes

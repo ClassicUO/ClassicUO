@@ -46,7 +46,7 @@ sealed class ClassicUOHost : IPluginHandler
     delegate void dSetWindowTitle(IntPtr textPtr);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    delegate void dOnPluginReflectionCommand(IntPtr cmdPtr);
+    delegate IntPtr dOnPluginReflectionCommand(IntPtr cmdPtr);
 
     private FuncPointer<dCastSpell> _castSpell;
     private FuncPointer<dGetCliloc> _getCliloc;
@@ -354,9 +354,15 @@ sealed class ClassicUOHost : IPluginHandler
         SendReflectionCmd((IntPtr)2);
     }
 
-    void SendReflectionCmd(IntPtr ptr)
+    public unsafe bool ReflectionAutowalking(sbyte walking)
     {
-        _reflectionCmd?.Delegate?.Invoke(ptr);
+        var f = (3, walking);
+        return Unsafe.AsRef<bool>(SendReflectionCmd((IntPtr)(&f)).ToPointer());
+    }
+
+    IntPtr SendReflectionCmd(IntPtr ptr)
+    {
+        return _reflectionCmd?.Delegate?.Invoke(ptr) ?? IntPtr.Zero;
     }
 
     public void CastSpell(Guid id, int index)
