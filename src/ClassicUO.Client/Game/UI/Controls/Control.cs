@@ -315,6 +315,11 @@ namespace ClassicUO.Game.UI.Controls
 
                 for (int i = 0; i < Children.Count; i++)
                 {
+                    if (i < 0)
+                    {
+                        continue;
+                    }
+
                     Control c = Children.ElementAt(i);
 
                     if (c == null)
