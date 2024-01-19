@@ -666,13 +666,12 @@ namespace ClassicUO
                         GameActions.UseSecondaryAbility();
                         break;
                     case 3:
-                        var subCmd = Unsafe.AsRef<int>((byte*)cmd + sizeof(int));
+                        var subCmd = Unsafe.AsRef<(int, sbyte)>(cmd.ToPointer());
                         var res = Client.Game.UO?.World?.Player?.Pathfinder?.AutoWalking ?? false;
-
-                        switch (subCmd)
+                        
+                        switch (subCmd.Item2)
                         {
-                            case -1:
-                                break;
+                            case -1: return (IntPtr)Unsafe.AsPointer(ref res);
                             case 0:
                                 Client.Game.UO.World.Player.Pathfinder.AutoWalking = false;
                                 break;
@@ -680,8 +679,9 @@ namespace ClassicUO
                                 Client.Game.UO.World.Player.Pathfinder.AutoWalking = true;
                                 break;
                         }
-                     
-                        return (IntPtr) Unsafe.AsPointer(ref res);
+
+                        break;
+                        
                 }
 
                 return IntPtr.Zero;

@@ -685,14 +685,16 @@ sealed class ClassicUOHost : IPluginHandler
 =======
 >>>>>>> calling reflection methods
 
-    public void ReflectionUsePrimaryAbility()
+    public unsafe void ReflectionUsePrimaryAbility()
     {
-        SendReflectionCmd((IntPtr)1);
+        var f = 1;
+        SendReflectionCmd((IntPtr)(&f));
     }
 
-    public void ReflectionUseSecondaryAbility()
+    public unsafe void ReflectionUseSecondaryAbility()
     {
-        SendReflectionCmd((IntPtr)2);
+        var f = 2;
+        SendReflectionCmd((IntPtr)(&f));
     }
 
 <<<<<<< HEAD
@@ -712,7 +714,10 @@ sealed class ClassicUOHost : IPluginHandler
     public unsafe bool ReflectionAutowalking(sbyte walking)
     {
         var f = (3, walking);
-        return Unsafe.AsRef<bool>(SendReflectionCmd((IntPtr)(&f)).ToPointer());
+        var result = SendReflectionCmd((IntPtr)(&f));
+        var toBool = Unsafe.AsRef<bool>(result.ToPointer());
+        Console.WriteLine("bool: {0} [{1}]", toBool, result);
+        return toBool;
     }
 
     IntPtr SendReflectionCmd(IntPtr ptr)

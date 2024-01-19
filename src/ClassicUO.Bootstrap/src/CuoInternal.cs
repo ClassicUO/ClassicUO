@@ -1,4 +1,7 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> more reflection stuff
 ﻿using ClassicUO.Game.Scenes;
 using System;
 
@@ -21,9 +24,12 @@ namespace ClassicUO
         }
     }
 }
+<<<<<<< HEAD
 =======
 ﻿using System;
 >>>>>>> + classicuo.bootstrap app
+=======
+>>>>>>> more reflection stuff
 
 namespace ClassicUO.Game
 {
@@ -159,21 +165,95 @@ namespace ClassicUO.Game.Managers
             set => Global.Host.ReflectionAutowalking((sbyte)(value ? 1 : 0));
         }
     }
+<<<<<<< HEAD
 >>>>>>> reflection pathfinding support
+=======
+
+    public sealed class MacroManager : LinkedObject
+    {
+        public bool WaitingBandageTarget { get; set; }
+        public long WaitForTargetTimer { get; set; }
+
+
+        public void SetMacroToExecute(MacroObject macro)
+        {
+            Console.WriteLine("Invoked by reflection {0}", nameof(SetMacroToExecute));
+        }
+
+        public void Update()
+        {
+            Console.WriteLine("Invoked by reflection {0}", nameof(Update));
+        }
+    }
+
+    class Macro : LinkedObject
+    {
+        public string Name { get; set; }
+    }
+
+    enum MacroType
+    {
+        RazorMacro = 70
+    }
+
+    enum MacroSubType
+    {
+        MSC_NONE = 0
+    }
+
+    public class MacroObject : LinkedObject
+    {
+        public object Code { get; set; }
+        public object SubCode { get; set; }
+    }
+
+    public class MacroObjectString : MacroObject
+    {
+        public string Text { get; set; }
+    }
+
+    public abstract class LinkedObject
+    {
+        public bool IsEmpty => Items == null;
+        public LinkedObject Previous, Next, Items;
+    }
+}
+
+namespace ClassicUO.Game.Managers
+{
+    static class UIManager
+    {
+        public static void Add(object obj)
+        {
+            Console.WriteLine("Invoked by reflection {0}", nameof(Add));
+        }
+
+        public static void SavePosition(uint gumpId, object point)
+        {
+            Console.WriteLine("Invoked by reflection {0}", nameof(SavePosition));
+        }
+    }
+>>>>>>> more reflection stuff
 }
 
 namespace ClassicUO.Game.Scenes
 {
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> more reflection stuff
     public sealed class GameScene : Scene
     {
         public MacroManager Macros { get; set; } = new MacroManager();
     }
 
     public sealed class LoginScene : Scene
+<<<<<<< HEAD
 =======
     public sealed class LoginScene
 >>>>>>> + classicuo.bootstrap app
+=======
+>>>>>>> more reflection stuff
     {
         public void Connect()
         {
@@ -191,11 +271,17 @@ namespace ClassicUO.Game.Scenes
         }
     }
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> more reflection stuff
 
     public abstract class Scene
     {
 
     }
+<<<<<<< HEAD
 =======
 >>>>>>> + classicuo.bootstrap app
+=======
+>>>>>>> more reflection stuff
 }
