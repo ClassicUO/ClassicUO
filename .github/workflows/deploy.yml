@@ -164,5 +164,24 @@ jobs:
         protocol: ftps
         server-dir: /www.classicuo.eu/dev/deploy/
         local-dir: upload/
+<<<<<<< HEAD
         
 >>>>>>> bfb981545 (Update deploy.yml)
+=======
+
+    - name: Repo Preaparation
+      run: |
+       git clone --recursive https://github.com/ClassicUO/deploy.git
+       
+       cp ${{ env.CUO_OUTPUT_PATH }}/* ./deploy/client/win-x64/
+       cp ${{ env.CUO_OUTPUT_PATH }}/* ./deploy/client/linux-x64/
+       cp ${{ env.CUO_OUTPUT_PATH }}/* ./deploy/client/osx-x64/
+       
+       cp ./upload/manifest.xml ./deploy/client/win-x64_manifest.xml
+       cp ./upload/manifest.xml ./deploy/client/linux-x64_manifest.xml
+       cp ./upload/manifest.xml ./deploy/client/osx-x64_manifest.xml
+
+       git add .
+       git commit -m 'release ${{ env.CUO_ASSEMBLY_VERSION }}'
+       git push
+>>>>>>> 9dfa03711 (Update deploy.yml)
