@@ -78,7 +78,7 @@ jobs:
         body: 'This build may not be safe: use it at your own risk.'
         draft: false
         prerelease: true
-        tag: ClassicUO-dev-release
+        tag: 'ClassicUO-dev-release'
         token: ${{ secrets.GITHUB_TOKEN }}
         
     - name: FTP Deploy
