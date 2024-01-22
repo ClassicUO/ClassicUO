@@ -76,6 +76,7 @@ jobs:
         artifacts: "upload/${{ env.CUO_ZIP_NAME }}"
         name: 'ClassicUO dev preview'
         body: 'This build may not be safe: use it at your own risk.'
+        draft: false
         prerelease: true
         tag: ClassicUO-dev-release
         token: ${{ secrets.GITHUB_TOKEN }}
