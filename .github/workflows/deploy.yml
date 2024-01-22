@@ -84,10 +84,14 @@ jobs:
         server-dir: /www.classicuo.eu/dev/deploy/
         local-dir: upload/
 
-    - name: Repo Preaparation
-      run: |
-       git clone --recursive https://github.com/ClassicUO/deploy.git
+    - name: Repo Preparation - clone
+      uses: actions/checkout@master
+      with:
+       repository: ClassicUO/deploy
+       ssh-key: ${{ secrets.SSH_DEPLOY_KEY }}
        
+    - name: Repo Preparation - prepare
+      run: |       
        cp -rdf ${{ env.CUO_OUTPUT_PATH }}/* ./deploy/client/win-x64/
        cp -rdf ${{ env.CUO_OUTPUT_PATH }}/* ./deploy/client/linux-x64/
        cp -rdf ${{ env.CUO_OUTPUT_PATH }}/* ./deploy/client/osx-x64/
@@ -95,7 +99,14 @@ jobs:
        cp ./upload/manifest.xml ./deploy/client/win-x64_manifest.xml
        cp ./upload/manifest.xml ./deploy/client/linux-x64_manifest.xml
        cp ./upload/manifest.xml ./deploy/client/osx-x64_manifest.xml
-
-       git add .
-       git commit -m 'release ${{ env.CUO_ASSEMBLY_VERSION }}'
-       git push
+       
+    - name: Pushes to another repository
+      uses: cpina/github-action-push-to-another-repository@main
+      env:
+        SSH_DEPLOY_KEY: ${{ secrets.SSH_DEPLOY_KEY }}
+      with:
+        source-directory: deploy/
+        destination-github-username: 'ClassicUO'
+        destination-repository-name: 'deploy'
+        commit-message: 'release ${{ env.CUO_ASSEMBLY_VERSION }}'
+        target-branch: main
