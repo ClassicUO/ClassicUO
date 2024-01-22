@@ -39,6 +39,7 @@ using ClassicUO.Resources;
 using ClassicUO.Utility.Logging;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace ClassicUO.Game.Managers
 {
@@ -256,6 +257,11 @@ namespace ClassicUO.Game.Managers
                         GameActions.Print(g.GetPageString());
                     }
                 }
+            });
+
+            Register("genspelldef", (s) =>
+            {
+                Task.Run(SpellDefinition.SaveAllSpellsToJson);
             });
         }
 

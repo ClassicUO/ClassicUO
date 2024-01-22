@@ -198,6 +198,7 @@ namespace ClassicUO.Game.Scenes
             Plugin.OnConnected();
             EventSink.InvokeOnConnected(null);
             GameController.UpdateBackgroundHueShader();
+            SpellDefinition.LoadCustomSpells();
             SpellVisualRangeManager.Instance.OnSceneLoad();
             AutoLootManager.Instance.OnSceneLoad();
             if (!UpdateManager.SkipUpdateCheck && UpdateManager.HasUpdate)

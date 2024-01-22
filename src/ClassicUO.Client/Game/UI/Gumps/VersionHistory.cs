@@ -8,7 +8,9 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private static string[] updateTexts = {
             "/c[white][3.20.0]/cd\n" +
-                "- Being frozen wont cancel auto follow",
+                "- Being frozen wont cancel auto follow\n" +
+                "- Fix from CUO for buffs\n" +
+                "- Add ability to load custom spell definitions from an external file",
 
             "/c[white][3.19.0]/cd\n" +
                 "- SOS Gump ID configurable in settings\n" +

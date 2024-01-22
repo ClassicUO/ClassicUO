@@ -1,0 +1,84 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32328.378
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{99076AAC-3723-4B2E-A74B-4772FAE8DD6A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FontStashSharp.Samples.DynamicSpriteFont.MonoGame", "..\samples\FontStashSharp.Samples.DynamicSpriteFont\FontStashSharp.Samples.DynamicSpriteFont.MonoGame.csproj", "{F7C897B4-5C80-4846-A5CB-8997E7A93C1B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FontStashSharp.Samples.TextureAtlasFull.MonoGame", "..\samples\FontStashSharp.Samples.TextureAtlasFull\FontStashSharp.Samples.TextureAtlasFull.MonoGame.csproj", "{5131B837-13F8-4EA7-938B-FFF663B0E332}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FontStashSharp.MonoGame", "..\src\XNA\FontStashSharp.MonoGame.csproj", "{3F408D1A-4A24-4DAC-90A5-972FC4F20E87}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FontStashSharp.Samples.StaticSpriteFont.MonoGame", "..\samples\FontStashSharp.Samples.StaticSpriteFont\FontStashSharp.Samples.StaticSpriteFont.MonoGame.csproj", "{4BE1E17E-2098-4AC5-84C2-9B2EEF500948}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FontStashSharp.Samples.RotatingText.MonoGame", "..\samples\FontStashSharp.Samples.RotatingText\FontStashSharp.Samples.RotatingText.MonoGame.csproj", "{128B548A-8D25-410A-AA0A-B59E586CED75}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FontStashSharp.Tests.MonoGame", "..\src\FontStashSharp.Tests\FontStashSharp.Tests.MonoGame.csproj", "{6438CE5C-AD2F-4C16-A158-5FA42AD6C8CC}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FontStashSharp.Samples.CustomRasterizers.MonoGame", "..\samples\FontStashSharp.Samples.CustomRasterizers\FontStashSharp.Samples.CustomRasterizers.MonoGame.csproj", "{8A654C3C-6EC2-444A-B492-76CF2DE57CE0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FontStashSharp.Samples.MeasureString.MonoGame", "..\samples\FontStashSharp.Samples.MeasureString\FontStashSharp.Samples.MeasureString.MonoGame.csproj", "{42F0AA0C-44F4-44E8-BDFD-097E95F90E66}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FontStashSharp.Samples.RichText.MonoGame", "..\samples\FontStashSharp.Samples.RichText\FontStashSharp.Samples.RichText.MonoGame.csproj", "{DF94ABCC-D7A4-478F-AA1A-CDCA906A7250}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F7C897B4-5C80-4846-A5CB-8997E7A93C1B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F7C897B4-5C80-4846-A5CB-8997E7A93C1B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F7C897B4-5C80-4846-A5CB-8997E7A93C1B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F7C897B4-5C80-4846-A5CB-8997E7A93C1B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5131B837-13F8-4EA7-938B-FFF663B0E332}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5131B837-13F8-4EA7-938B-FFF663B0E332}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5131B837-13F8-4EA7-938B-FFF663B0E332}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5131B837-13F8-4EA7-938B-FFF663B0E332}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3F408D1A-4A24-4DAC-90A5-972FC4F20E87}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3F408D1A-4A24-4DAC-90A5-972FC4F20E87}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3F408D1A-4A24-4DAC-90A5-972FC4F20E87}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3F408D1A-4A24-4DAC-90A5-972FC4F20E87}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4BE1E17E-2098-4AC5-84C2-9B2EEF500948}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4BE1E17E-2098-4AC5-84C2-9B2EEF500948}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4BE1E17E-2098-4AC5-84C2-9B2EEF500948}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4BE1E17E-2098-4AC5-84C2-9B2EEF500948}.Release|Any CPU.Build.0 = Release|Any CPU
+		{128B548A-8D25-410A-AA0A-B59E586CED75}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{128B548A-8D25-410A-AA0A-B59E586CED75}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{128B548A-8D25-410A-AA0A-B59E586CED75}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{128B548A-8D25-410A-AA0A-B59E586CED75}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6438CE5C-AD2F-4C16-A158-5FA42AD6C8CC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6438CE5C-AD2F-4C16-A158-5FA42AD6C8CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6438CE5C-AD2F-4C16-A158-5FA42AD6C8CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6438CE5C-AD2F-4C16-A158-5FA42AD6C8CC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8A654C3C-6EC2-444A-B492-76CF2DE57CE0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8A654C3C-6EC2-444A-B492-76CF2DE57CE0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8A654C3C-6EC2-444A-B492-76CF2DE57CE0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8A654C3C-6EC2-444A-B492-76CF2DE57CE0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{42F0AA0C-44F4-44E8-BDFD-097E95F90E66}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{42F0AA0C-44F4-44E8-BDFD-097E95F90E66}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{42F0AA0C-44F4-44E8-BDFD-097E95F90E66}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{42F0AA0C-44F4-44E8-BDFD-097E95F90E66}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DF94ABCC-D7A4-478F-AA1A-CDCA906A7250}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DF94ABCC-D7A4-478F-AA1A-CDCA906A7250}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DF94ABCC-D7A4-478F-AA1A-CDCA906A7250}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DF94ABCC-D7A4-478F-AA1A-CDCA906A7250}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{F7C897B4-5C80-4846-A5CB-8997E7A93C1B} = {99076AAC-3723-4B2E-A74B-4772FAE8DD6A}
+		{5131B837-13F8-4EA7-938B-FFF663B0E332} = {99076AAC-3723-4B2E-A74B-4772FAE8DD6A}
+		{4BE1E17E-2098-4AC5-84C2-9B2EEF500948} = {99076AAC-3723-4B2E-A74B-4772FAE8DD6A}
+		{128B548A-8D25-410A-AA0A-B59E586CED75} = {99076AAC-3723-4B2E-A74B-4772FAE8DD6A}
+		{8A654C3C-6EC2-444A-B492-76CF2DE57CE0} = {99076AAC-3723-4B2E-A74B-4772FAE8DD6A}
+		{42F0AA0C-44F4-44E8-BDFD-097E95F90E66} = {99076AAC-3723-4B2E-A74B-4772FAE8DD6A}
+		{DF94ABCC-D7A4-478F-AA1A-CDCA906A7250} = {99076AAC-3723-4B2E-A74B-4772FAE8DD6A}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {35ACDF4E-2CE2-46B1-A19F-35DC131069A1}
+	EndGlobalSection
+EndGlobal
