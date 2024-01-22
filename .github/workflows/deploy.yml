@@ -35,6 +35,7 @@ jobs:
             target: osx-x64
 
     steps:
+<<<<<<< HEAD
     env:
       CUO_ZIP_NAME: "ClassicUO-${{ matrix.target }}-release.zip"
 
@@ -108,3 +109,67 @@ jobs:
           destination-repository-name: "deploy"
           commit-message: "release ${{ env.CUO_ASSEMBLY_VERSION }} on ${{ matrix.target }}"
           target-branch: main
+=======
+    - uses: actions/checkout@v2
+      
+    - name: Get submodules
+      run: |
+        git config --global url."https://".insteadOf git://
+        git submodule update --init --recursive
+        
+    - name: Setup .NET 7
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 7.0.x
+        include-prerelease: true
+            
+    - name: Build
+      run: dotnet publish ${{ env.CUO_PROJECT_PATH }} -c Release -o ${{ env.CUO_OUTPUT_PATH }} -p:IS_DEV_BUILD=true -p:AssemblyVersion=${{ env.CUO_ASSEMBLY_VERSION }} -p:FileVersion=${{ env.CUO_ASSEMBLY_VERSION }}
+      
+    - name: Create manifest
+      run: |
+        dotnet run --project tools/ManifestCreator/ManifestCreator.csproj "${{ env.CUO_OUTPUT_PATH }}" "dev-preview" "${{ env.CUO_ZIP_NAME }}"
+        mkdir upload
+        mv manifest.xml upload
+      
+    - name: Create package
+      uses: thedoctor0/zip-release@master
+      with:
+        type: 'zip'
+        directory: ${{ env.CUO_OUTPUT_PATH }}
+        filename: ${{ env.CUO_ZIP_NAME }}
+        exclusions: '*.zip manifest.xml'
+            
+    - name: Move output
+      run: mv "${{ env.CUO_OUTPUT_PATH }}/${{ env.CUO_ZIP_NAME }}" upload
+              
+    - name: Remove old Release
+      uses: dev-drprasad/delete-tag-and-release@v0.2.1
+      with:
+        delete_release: true
+        tag_name: ClassicUO-dev-release
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Upload Release
+      uses: ncipollo/release-action@v1
+      with:
+        artifacts: "upload/${{ env.CUO_ZIP_NAME }}"
+        name: 'ClassicUO dev preview'
+        body: 'This build may not be safe: use it at your own risk.'
+        draft: false
+        prerelease: false
+        tag: 'ClassicUO-dev-release'
+        token: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: FTP Deploy
+      uses: SamKirkland/FTP-Deploy-Action@4.3.2
+      with:
+        server: ftp.classicuo.eu
+        username: ${{ secrets.FTP_USER }}
+        password: ${{ secrets.FTP_PSW }}
+        protocol: ftps
+        server-dir: /www.classicuo.eu/dev/deploy/
+        local-dir: upload/
+        
+>>>>>>> bfb981545 (Update deploy.yml)
