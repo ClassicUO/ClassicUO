@@ -29,5 +29,26 @@ namespace ClassicUO.Utility
             obj = default(T);
             return false;
         }
+
+        /// <summary>
+        /// Save an object to a json file at the specified path.
+        /// </summary>
+        /// <typeparam name="T">Type of the object</typeparam>
+        /// <param name="obj">The object to be serialized into json</param>
+        /// <param name="path">The path to the save file including file name and extension</param>
+        /// <param name="prettified">Should the output file be indented for readability</param>
+        /// <returns></returns>
+        public static bool SaveJsonFile<T>(T obj, string path, bool prettified = true)
+        {
+            try
+            {
+                string output = JsonSerializer.Serialize(obj, new JsonSerializerOptions() { WriteIndented = prettified });
+                File.WriteAllText(path, output);
+                return true;
+            }
+            catch (Exception e) { Console.WriteLine(e.ToString()); }
+
+            return false;
+        }
     }
 }

@@ -30,12 +30,14 @@
 
 #endregion
 
-using System;
-using System.Collections.Generic;
-using System.Text;
+using ClassicUO.Configuration;
 using ClassicUO.Game.Managers;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text.Json.Serialization;
 
 namespace ClassicUO.Game.Data
 {
@@ -146,6 +148,70 @@ namespace ClassicUO.Game.Data
         public readonly Reagents[] Regs;
         public readonly TargetType TargetType;
         public readonly int TithingCost;
+
+        public static void LoadCustomSpells()
+        {
+            string path = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "spelldef.json");
+            if (File.Exists(path))
+            {
+                LoadSpellsFromFile(path);
+            }
+
+            path = Path.Combine(Settings.GlobalSettings.UltimaOnlineDirectory, "spelldef.json");
+            if (File.Exists(path))
+            {
+                LoadSpellsFromFile(path);
+            }
+        }
+
+        private static void LoadSpellsFromFile(string path)
+        {
+            try
+            {
+                if (Utility.JsonHelper.LoadJsonFile(path, out List<SpellJson> spells))
+                {
+                    foreach (SpellJson spell in spells)
+                    {
+                        SpellDefinition spellDef = new SpellDefinition(spell.SpellName, spell.SpellIndex, spell.GumpIcon, spell.SmallGumpIcon, spell.PowerWords, spell.ManaCost, spell.MinSkill, spell.TithingCost, spell.TargetType, spell.AllReagents);
+
+                        switch (spell.School)
+                        {
+                            case "Magery":
+                                SpellsMagery.SetSpell(spell.SpellID, spellDef);
+                                break;
+                            case "Necromancy":
+                                SpellsNecromancy.SetSpell(spell.SpellID, spellDef);
+                                break;
+                            case "Bushido":
+                                SpellsBushido.SetSpell(spell.SpellID, spellDef);
+                                break;
+                            case "Chivalry":
+                                SpellsChivalry.SetSpell(spell.SpellID, spellDef);
+                                break;
+                            case "Mastery":
+                                SpellsMastery.SetSpell(spell.SpellID, spellDef);
+                                break;
+                            case "Mysticism":
+                                SpellsMysticism.SetSpell(spell.SpellID, spellDef);
+                                break;
+                            case "Ninjitsu":
+                                SpellsNinjitsu.SetSpell(spell.SpellID, spellDef);
+                                break;
+                            case "Spellweaving":
+                                SpellsSpellweaving.SetSpell(spell.SpellID, spellDef);
+                                break;
+                            default:
+                                GameActions.Print($"Failed to load a spell, matching school not found for: [{spell.School}]. Spell was {spell.SpellName}({spell.SpellID})");
+                                continue;
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+            }
+        }
 
         private void AddToWatchedSpell()
         {
@@ -443,6 +509,108 @@ namespace ClassicUO.Game.Data
             return SpellsMastery.GetSpell(fullidx % 100);
         }
 
+        public static SpellDefinition[] GetAllSpells()
+        {
+            return
+            [
+                .. SpellsMagery.GetAllSpells.Values,
+                .. SpellsNecromancy.GetAllSpells.Values,
+                .. SpellsChivalry.GetAllSpells.Values,
+                .. SpellsBushido.GetAllSpells.Values,
+                .. SpellsNinjitsu.GetAllSpells.Values,
+                .. SpellsSpellweaving.GetAllSpells.Values,
+                .. SpellsMysticism.GetAllSpells.Values,
+                .. SpellsMastery.GetAllSpells.Values,
+            ];
+        }
+
+        public static void SaveAllSpellsToJson()
+        {
+            List<SpellJson> list = new List<SpellJson>();
+
+            foreach (SpellDefinition spell in GetAllSpells())
+            {
+                if (spell.ID < 1 || spell.ID > 799)
+                {
+                    continue;
+                }
+
+                SpellJson spellJson = new SpellJson()
+                {
+                    SpellName = spell.Name,
+                    PowerWords = spell.PowerWords,
+                    GumpIcon = spell.GumpIconID,
+                    SmallGumpIcon = spell.GumpIconSmallID,
+                    ManaCost = spell.ManaCost,
+                    MinSkill = spell.MinSkill,
+                    TithingCost = spell.TithingCost,
+                    TargetType = spell.TargetType,
+                    AllReagents = spell.Regs
+
+                };
+
+                if (spell.ID < 100)
+                {
+                    spellJson.School = "Magery";
+                    spellJson.SpellID = spell.ID;
+                }
+                else if (spell.ID < 200)
+                {
+                    spellJson.School = "Necromancy";
+                    spellJson.SpellID = spell.ID - 100;
+                    spellJson.SpellOffset = 100;
+
+                }
+                else if (spell.ID < 300)
+                {
+                    spellJson.School = "Chivalry";
+                    spellJson.SpellID = spell.ID - 200;
+                    spellJson.SpellOffset = 200;
+                }
+                else if (spell.ID < 500)
+                {
+                    spellJson.School = "Bushido";
+                    spellJson.SpellID = spell.ID - 400;
+                    spellJson.SpellOffset = 400;
+                }
+                else if (spell.ID < 600)
+                {
+                    spellJson.School = "Ninjitsu";
+                    spellJson.SpellID = spell.ID - 500;
+                    spellJson.SpellOffset = 500;
+                }
+                else if (spell.ID < 678)
+                {
+                    spellJson.School = "Spellweaving";
+                    spellJson.SpellID = spell.ID - 600;
+                    spellJson.SpellOffset = 600;
+                }
+                else if (spell.ID < 700)
+                {
+                    spellJson.School = "Mysticism";
+                    spellJson.SpellID = spell.ID - 600;
+                    spellJson.SpellOffset = 600;
+                }
+                else if (spell.ID < 800)
+                {
+                    spellJson.School = "Mastery";
+                    spellJson.SpellID = spell.ID - 700;
+                    spellJson.SpellOffset = 700;
+                }
+
+                list.Add(spellJson);
+            }
+
+            if (!JsonHelper.SaveJsonFile(list, Path.Combine(CUOEnviroment.ExecutablePath, "Data", "spelldef.json")))
+            {
+                GameActions.Print("Failed to save all spells as a json file!", 32);
+            }
+            else
+            {
+                GameActions.Print($"Saved all spells as a json file at {Path.Combine(CUOEnviroment.ExecutablePath, "Data", "spelldef.json")}");
+            }
+        }
+
         public static void FullIndexSetModifySpell
         (
             int fullidx,
@@ -550,5 +718,25 @@ namespace ClassicUO.Game.Data
                 SpellsMastery.SetSpell(id, in sd);
             }
         }
+    }
+
+    public class SpellJson
+    {
+        public string School { get; set; } = "Magery";
+
+        public int SpellID { get; set; } = 0;
+        public int SpellOffset { get; set; } = 0;
+        public string SpellName { get; set; } = "";
+        public string PowerWords { get; set; } = "";
+        public int GumpIcon { get; set; } = 0x5000;
+        public int SmallGumpIcon { get; set; } = 0x5000;
+        public int ManaCost { get; set; } = 0;
+        public int MinSkill { get; set; } = 0;
+        public int TithingCost { get; set; } = 0;
+        public TargetType TargetType { get; set; } = TargetType.Neutral;
+        public Reagents[] AllReagents { get; set; } = { };
+
+        [JsonIgnore]
+        public int SpellIndex => SpellID + SpellOffset;
     }
 }
