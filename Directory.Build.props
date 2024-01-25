@@ -17,8 +17,8 @@
   <PropertyGroup>
     <Company>ClassicUO</Company>
     <Authors>KaRaShO'</Authors>
-    <AssemblyVersion>0.1.11.0</AssemblyVersion>
-    <FileVersion>0.1.11.0</FileVersion>
+    <AssemblyVersion>1.2.0.0</AssemblyVersion>
+    <FileVersion>1.2.0.0</FileVersion>
     <Copyright>ClassicUO</Copyright>
     <PackageProjectUrl>https://www.classicuo.eu/</PackageProjectUrl>
     <Description>An open source implementation of the Ultima Online Classic Client.</Description>
