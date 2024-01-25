@@ -343,7 +343,7 @@ namespace ClassicUO.Assets
                         }
                     }
                 }
-                
+
                 return animIndices;
             }
 
@@ -1205,7 +1205,7 @@ namespace ClassicUO.Assets
             bool second,
             bool isRunning = false
         )
-        {        
+        {
             //ConvertBodyIfNeeded(ref animID);
 
             if (animFlags.HasFlag(AnimationFlags.CalculateOffsetByLowGroup))
