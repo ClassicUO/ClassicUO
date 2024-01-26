@@ -389,7 +389,8 @@ namespace ClassicUO.Game.Scenes
                 {
                     if (obj.Z >= _maxZ)
                     {
-                        CalculateAlpha(ref obj.AlphaHue, 0);
+                        obj.AlphaHue = 0;
+                        //CalculateAlpha(ref obj.AlphaHue, 0);
                     }
                     else
                     {
