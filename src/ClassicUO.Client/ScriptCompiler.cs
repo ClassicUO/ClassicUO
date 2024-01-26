@@ -36,6 +36,24 @@ namespace ClassicUO
                 CUOEnviroment.ExecutablePath + "/ClassicUO.exe"
             };
 
+            var path = Path.Combine(CUOEnviroment.ExecutablePath, "Data/Assemblies.cfg");
+
+            if (File.Exists(path))
+            {
+                using (var ip = new StreamReader(path))
+                {
+                    string line;
+
+                    while ((line = ip.ReadLine()) != null)
+                    {
+                        if (line.Length > 0 && !line.StartsWith("#"))
+                        {
+                            list.Add(line);
+                        }
+                    }
+                }
+            }
+
             list.AddRange(m_AdditionalReferences);
 
             return list.ToArray();
