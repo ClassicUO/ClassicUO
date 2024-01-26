@@ -30,21 +30,21 @@
 
 #endregion
 
-using System;
-using System.Xml;
+using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
-using ClassicUO.Assets;
 using ClassicUO.Renderer;
 using ClassicUO.Resources;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SDL2;
+using System;
 using System.Text.Json.Serialization;
+using System.Xml;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -148,12 +148,17 @@ namespace ClassicUO.Game.UI.Gumps
                 GameActions.SendCloseStatus(LocalSerial);
             }*/
 
-            if (IsLastTarget && ProfileManager.CurrentProfile != null)
-                ProfileManager.CurrentProfile.LastTargetHealthBarPos = Location;
-
             _textBox?.Dispose();
             _textBox = null;
             base.Dispose();
+        }
+
+        protected override void OnMove(int x, int y)
+        {
+            base.OnMove(x, y);
+
+            if (IsLastTarget && ProfileManager.CurrentProfile != null)
+                ProfileManager.CurrentProfile.LastTargetHealthBarPos = Location;
         }
 
         public override void Save(XmlTextWriter writer)
@@ -1142,7 +1147,7 @@ namespace ClassicUO.Game.UI.Gumps
                     );
                     Control m, s;
                     Add
-                    (m = 
+                    (m =
                         new LineCHB
                         (
                             HPB_BAR_SPACELEFT,
