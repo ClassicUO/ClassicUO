@@ -923,6 +923,7 @@ namespace ClassicUO.Game.Scenes
     internal class ServerListEntry
     {
         private IPAddress _ipAddress;
+        private IPAddress _ipAddressLittleEndian;
         private Ping _pinger = new Ping();
         private bool _sending;
         private readonly bool[] _last10Results = new bool[10];
@@ -956,6 +957,19 @@ namespace ClassicUO.Game.Scenes
                         (byte) (entry.Address & 0xFF)
                     }
                 );
+
+                // IP address in little-endian format, required for server ping
+                entry._ipAddressLittleEndian = new IPAddress
+                (
+                    new byte[]
+                    {
+                        (byte) (entry.Address & 0xFF),
+                        (byte) ((entry.Address >> 8) & 0xFF),
+                        (byte) ((entry.Address >> 16) & 0xFF),
+                        (byte) ((entry.Address >> 24) & 0xFF)
+                    }
+                );
+                
             }
             catch (Exception e)
             {
@@ -993,7 +1007,7 @@ namespace ClassicUO.Game.Scenes
                 {
                     _pinger.SendAsync
                     (
-                        _ipAddress,
+                        _ipAddressLittleEndian,
                         1000,
                         _buffData,
                         _pingOptions,

@@ -24,6 +24,10 @@ jobs:
   build:
     #if: ${{ github.event.workflow_run.conclusion == 'success' }} && "${{ env.GITHUB_REPOSITORY }}" == 'ClassicUO/ClassicUO'
     runs-on: ${{ matrix.os }}
+
+    env:
+      CUO_ZIP_NAME: "ClassicUO-${{ matrix.target }}-release.zip"
+
     strategy:
       matrix:
         include:
@@ -55,7 +59,7 @@ jobs:
         run: dotnet publish ${{ env.BOOT_PROJECT_PATH }} -c Release -o ${{ env.CUO_OUTPUT_PATH }} -p:AssemblyVersion=${{ env.CUO_ASSEMBLY_VERSION }} -p:FileVersion=${{ env.CUO_ASSEMBLY_VERSION }}
 
       - name: Build ClassicUO
-        run: dotnet publish ${{ env.CUO_PROJECT_PATH }} -c Release -r ${{ matrix.target }} -o ${{ env.CUO_OUTPUT_PATH }} -p:IS_DEV_BUILD=true -p:AssemblyVersion=${{ env.CUO_ASSEMBLY_VERSION }} -p:FileVersion=${{ env.CUO_ASSEMBLY_VERSION }} -p:PublishAot=true -p:TargetFrameworks=net8.0 -p:NativeLib=Shared -p:OutputType=Library
+        run: dotnet publish ${{ env.CUO_PROJECT_PATH }} -c Release -r ${{ matrix.target }} -o ${{ env.CUO_OUTPUT_PATH }} -p:IS_DEV_BUILD=true -p:AssemblyVersion=${{ env.CUO_ASSEMBLY_VERSION }} -p:FileVersion=${{ env.CUO_ASSEMBLY_VERSION }} -p:PublishAot=true -p:TargetFrameworks=${{ env.TARGET_FRAMEWORK }}.0 -p:NativeLib=Shared -p:OutputType=Library
 
       - name: Create manifest
         run: |
@@ -86,25 +90,25 @@ jobs:
           tag: "ClassicUO-dev-release"
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Repo Preparation - clone
-        uses: actions/checkout@master
-        with:
-          repository: ClassicUO/deploy
-          path: deploy
-          ssh-key: ${{ secrets.SSH_DEPLOY_KEY }}
+      # - name: Repo Preparation - clone
+      #   uses: actions/checkout@master
+      #   with:
+      #     repository: ClassicUO/deploy
+      #     path: deploy
+      #     ssh-key: ${{ secrets.SSH_DEPLOY_KEY }}
 
-      - name: Repo Preparation - prepare
-        run: |
-          cp -rdf ${{ env.CUO_OUTPUT_PATH }}/* deploy/client/${{ matrix.target }}/
-          cp upload/manifest.xml deploy/client/${{ matrix.target }}_manifest.xml
+      # - name: Repo Preparation - prepare
+      #   run: |
+      #     cp -rdf ${{ env.CUO_OUTPUT_PATH }}/* deploy/client/${{ matrix.target }}/
+      #     cp upload/manifest.xml deploy/client/${{ matrix.target }}_manifest.xml
 
-      - name: Pushes to another repository
-        uses: cpina/github-action-push-to-another-repository@main
-        env:
-          SSH_DEPLOY_KEY: ${{ secrets.SSH_DEPLOY_KEY }}
-        with:
-          source-directory: deploy/
-          destination-github-username: "ClassicUO"
-          destination-repository-name: "deploy"
-          commit-message: "release ${{ env.CUO_ASSEMBLY_VERSION }} on ${{ matrix.target }}"
-          target-branch: main
+      # - name: Pushes to another repository
+      #   uses: cpina/github-action-push-to-another-repository@main
+      #   env:
+      #     SSH_DEPLOY_KEY: ${{ secrets.SSH_DEPLOY_KEY }}
+      #   with:
+      #     source-directory: deploy/
+      #     destination-github-username: "ClassicUO"
+      #     destination-repository-name: "deploy"
+      #     commit-message: "release ${{ env.CUO_ASSEMBLY_VERSION }} on ${{ matrix.target }}"
+      #     target-branch: main
