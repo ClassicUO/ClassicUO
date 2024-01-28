@@ -24,6 +24,10 @@ jobs:
   build:
     #if: ${{ github.event.workflow_run.conclusion == 'success' }} && "${{ env.GITHUB_REPOSITORY }}" == 'ClassicUO/ClassicUO'
     runs-on: ${{ matrix.os }}
+
+    env:
+      CUO_ZIP_NAME: "ClassicUO-${{ matrix.target }}-release.zip"
+
     strategy:
       matrix:
         include:
@@ -36,9 +40,12 @@ jobs:
 
     steps:
 <<<<<<< HEAD
+<<<<<<< HEAD
     env:
       CUO_ZIP_NAME: "ClassicUO-${{ matrix.target }}-release.zip"
 
+=======
+>>>>>>> 898a91d31 (fixed deploy yml)
       - uses: actions/checkout@v2
 
       - name: Get submodules
@@ -56,7 +63,7 @@ jobs:
         run: dotnet publish ${{ env.BOOT_PROJECT_PATH }} -c Release -o ${{ env.CUO_OUTPUT_PATH }} -p:AssemblyVersion=${{ env.CUO_ASSEMBLY_VERSION }} -p:FileVersion=${{ env.CUO_ASSEMBLY_VERSION }}
 
       - name: Build ClassicUO
-        run: dotnet publish ${{ env.CUO_PROJECT_PATH }} -c Release -r ${{ matrix.target }} -o ${{ env.CUO_OUTPUT_PATH }} -p:IS_DEV_BUILD=true -p:AssemblyVersion=${{ env.CUO_ASSEMBLY_VERSION }} -p:FileVersion=${{ env.CUO_ASSEMBLY_VERSION }} -p:PublishAot=true -p:TargetFrameworks=net8.0 -p:NativeLib=Shared -p:OutputType=Library
+        run: dotnet publish ${{ env.CUO_PROJECT_PATH }} -c Release -r ${{ matrix.target }} -o ${{ env.CUO_OUTPUT_PATH }} -p:IS_DEV_BUILD=true -p:AssemblyVersion=${{ env.CUO_ASSEMBLY_VERSION }} -p:FileVersion=${{ env.CUO_ASSEMBLY_VERSION }} -p:PublishAot=true -p:TargetFrameworks=${{ env.TARGET_FRAMEWORK }}.0 -p:NativeLib=Shared -p:OutputType=Library
 
       - name: Create manifest
         run: |
@@ -109,6 +116,7 @@ jobs:
           destination-repository-name: "deploy"
           commit-message: "release ${{ env.CUO_ASSEMBLY_VERSION }} on ${{ matrix.target }}"
           target-branch: main
+<<<<<<< HEAD
 =======
     - uses: actions/checkout@v2
       
@@ -204,3 +212,5 @@ jobs:
         commit-message: 'release ${{ env.CUO_ASSEMBLY_VERSION }}'
         target-branch: main
 >>>>>>> ff22de734 (Update deploy.yml)
+=======
+>>>>>>> 898a91d31 (fixed deploy yml)
