@@ -595,7 +595,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             Add
             (
-                _paperDoll = new PaperDollInteractable(262, 135, _character, new PaperDollGump(World))
+                _paperDoll = new PaperDollInteractable(262, 135, _character, new PaperdollGump(World))
                 {
                     AcceptMouseInput = false
                 },
