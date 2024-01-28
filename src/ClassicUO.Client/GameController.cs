@@ -129,7 +129,9 @@ namespace ClassicUO
             Audio = new AudioManager();
             Audio.Initialize();
 
-            Log.Trace("Done!");
+            var bytes = Loader.GetBackgroundImage().ToArray();
+            using var ms = new MemoryStream(bytes);
+            _background = Texture2D.FromStream(GraphicsDevice, ms);
 
 #if false
             SetScene(new MainScene(this));
@@ -138,7 +140,7 @@ namespace ClassicUO
 
             Log.Trace("Loading plugins...");
 
-            PluginHost.Initialize();
+            PluginHost?.Initialize();
 
             foreach (string p in Settings.GlobalSettings.Plugins)
             {
