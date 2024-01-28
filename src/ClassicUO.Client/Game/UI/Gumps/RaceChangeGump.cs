@@ -29,7 +29,7 @@ namespace ClassicUO.Game.UI.Gumps
         };
         private Item hair, beard;
 
-        #region 
+        #region
         private ushort raceTextGraphic
         {
             get
