@@ -129,9 +129,7 @@ namespace ClassicUO
             Audio = new AudioManager();
             Audio.Initialize();
 
-            var bytes = Loader.GetBackgroundImage().ToArray();
-            using var ms = new MemoryStream(bytes);
-            _background = Texture2D.FromStream(GraphicsDevice, ms);
+            Log.Trace("Done!");
 
 #if false
             SetScene(new MainScene(this));
