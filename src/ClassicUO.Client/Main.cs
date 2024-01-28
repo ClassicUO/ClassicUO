@@ -418,13 +418,6 @@ namespace ClassicUO
             DllMap.Init(Assembly.GetExecutingAssembly());
             DllMap.Init(typeof(Microsoft.Xna.Framework.Point).Assembly);
             PatchEnvVars();
-=======
-            //DllMap.Initialise();
-            DllMap.Init(Assembly.GetExecutingAssembly());
-            DllMap.Init(typeof(Microsoft.Xna.Framework.Point).Assembly);
->>>>>>> appconfig
-            PatchEnvVars();
->>>>>>> fixed order
 #endif
 
             Log.Start(LogTypes.All);
