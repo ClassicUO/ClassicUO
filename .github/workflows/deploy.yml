@@ -10,7 +10,7 @@ on:
 
 
 env:
-  CUO_ASSEMBLY_VERSION: '0.1.11.${{ github.run_number }}'
+  CUO_ASSEMBLY_VERSION: '1.0.0.0' #'0.1.11.${{ github.run_number }}'
   CUO_OUTPUT_PATH: '../../bin/dist'
   CUO_PROJECT_PATH: "src/ClassicUO.Client/ClassicUO.Client.csproj"
   CUO_ZIP_NAME: "ClassicUO-dev-preview-release.zip"
@@ -74,40 +74,3 @@ jobs:
         tag: 'ClassicUO-dev-release'
         token: ${{ secrets.GITHUB_TOKEN }}
         
-    - name: FTP Deploy
-      uses: SamKirkland/FTP-Deploy-Action@4.3.2
-      with:
-        server: ftp.classicuo.eu
-        username: ${{ secrets.FTP_USER }}
-        password: ${{ secrets.FTP_PSW }}
-        protocol: ftps
-        server-dir: /www.classicuo.eu/dev/deploy/
-        local-dir: upload/
-
-    - name: Repo Preparation - clone
-      uses: actions/checkout@master
-      with:
-       repository: ClassicUO/deploy
-       path: deploy
-       ssh-key: ${{ secrets.SSH_DEPLOY_KEY }}
-       
-    - name: Repo Preparation - prepare
-      run: |       
-       cp -rdf ${{ env.CUO_OUTPUT_PATH }}/* deploy/client/win-x64/
-       cp -rdf ${{ env.CUO_OUTPUT_PATH }}/* deploy/client/linux-x64/
-       cp -rdf ${{ env.CUO_OUTPUT_PATH }}/* deploy/client/osx-x64/
-       
-       cp upload/manifest.xml deploy/client/win-x64_manifest.xml
-       cp upload/manifest.xml deploy/client/linux-x64_manifest.xml
-       cp upload/manifest.xml deploy/client/osx-x64_manifest.xml
-       
-    - name: Pushes to another repository
-      uses: cpina/github-action-push-to-another-repository@main
-      env:
-        SSH_DEPLOY_KEY: ${{ secrets.SSH_DEPLOY_KEY }}
-      with:
-        source-directory: deploy/
-        destination-github-username: 'ClassicUO'
-        destination-repository-name: 'deploy'
-        commit-message: 'release ${{ env.CUO_ASSEMBLY_VERSION }}'
-        target-branch: main
