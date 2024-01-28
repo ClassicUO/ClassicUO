@@ -87,25 +87,25 @@ jobs:
           tag: "ClassicUO-dev-release"
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Repo Preparation - clone
-        uses: actions/checkout@master
-        with:
-          repository: ClassicUO/deploy
-          path: deploy
-          ssh-key: ${{ secrets.SSH_DEPLOY_KEY }}
+      # - name: Repo Preparation - clone
+      #   uses: actions/checkout@master
+      #   with:
+      #     repository: ClassicUO/deploy
+      #     path: deploy
+      #     ssh-key: ${{ secrets.SSH_DEPLOY_KEY }}
 
-      - name: Repo Preparation - prepare
-        run: |
-          cp -rdf ${{ env.CUO_OUTPUT_PATH }}/* deploy/client/${{ matrix.target }}/
-          cp upload/manifest.xml deploy/client/${{ matrix.target }}_manifest.xml
+      # - name: Repo Preparation - prepare
+      #   run: |
+      #     cp -rdf ${{ env.CUO_OUTPUT_PATH }}/* deploy/client/${{ matrix.target }}/
+      #     cp upload/manifest.xml deploy/client/${{ matrix.target }}_manifest.xml
 
-      - name: Pushes to another repository
-        uses: cpina/github-action-push-to-another-repository@main
-        env:
-          SSH_DEPLOY_KEY: ${{ secrets.SSH_DEPLOY_KEY }}
-        with:
-          source-directory: deploy/
-          destination-github-username: "ClassicUO"
-          destination-repository-name: "deploy"
-          commit-message: "release ${{ env.CUO_ASSEMBLY_VERSION }} on ${{ matrix.target }}"
-          target-branch: main
+      # - name: Pushes to another repository
+      #   uses: cpina/github-action-push-to-another-repository@main
+      #   env:
+      #     SSH_DEPLOY_KEY: ${{ secrets.SSH_DEPLOY_KEY }}
+      #   with:
+      #     source-directory: deploy/
+      #     destination-github-username: "ClassicUO"
+      #     destination-repository-name: "deploy"
+      #     commit-message: "release ${{ env.CUO_ASSEMBLY_VERSION }} on ${{ matrix.target }}"
+      #     target-branch: main
