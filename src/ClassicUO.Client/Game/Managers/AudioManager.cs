@@ -2,7 +2,7 @@
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 // 1. Redistributions of source code must retain the above copyright
@@ -16,7 +16,7 @@
 // 4. Neither the name of the copyright holder nor the
 //    names of its contributors may be used to endorse or promote products
 //    derived from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -41,7 +41,7 @@ using Microsoft.Xna.Framework.Audio;
 
 namespace ClassicUO.Game.Managers
 {
-    internal class AudioManager
+    internal sealed class AudioManager
     {
         const float SOUND_DELTA = 250;
 
@@ -64,7 +64,7 @@ namespace ClassicUO.Game.Managers
                 _canReproduceAudio = false;
             }
 
-            LoginMusicIndex = Client.Version >= ClientVersion.CV_7000 ? 78 : Client.Version > ClientVersion.CV_308Z ? 0 : 8;
+            LoginMusicIndex = Client.Game.UO.Version >= ClientVersion.CV_7000 ? 78 : Client.Game.UO.Version > ClientVersion.CV_308Z ? 0 : 8;
 
             Client.Game.Activated += OnWindowActivated;
             Client.Game.Deactivated += OnWindowDeactivated;
@@ -123,7 +123,7 @@ namespace ClassicUO.Game.Managers
                 volume = 0;
             }
 
-            UOSound sound = (UOSound) Client.Game.Sounds.GetSound(index);
+            UOSound sound = (UOSound) Client.Game.UO.Sounds.GetSound(index);
 
             if (sound != null && sound.Play(Time.Ticks, volume))
             {
@@ -135,15 +135,15 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public void PlaySoundWithDistance(int index, int x, int y)
+        public void PlaySoundWithDistance(World world, int index, int x, int y)
         {
-            if (!_canReproduceAudio || !World.InGame)
+            if (!_canReproduceAudio || !world.InGame)
             {
                 return;
             }
 
-            int distX = Math.Abs(x - World.Player.X);
-            int distY = Math.Abs(y - World.Player.Y);
+            int distX = Math.Abs(x - world.Player.X);
+            int distY = Math.Abs(y - world.Player.Y);
             int distance = Math.Max(distX, distY);
 
             Profile currentProfile = ProfileManager.CurrentProfile;
@@ -152,11 +152,11 @@ namespace ClassicUO.Game.Managers
 
             if (distance >= 1)
             {
-                float volumeByDist = volume / (World.ClientViewRange + 1);
+                float volumeByDist = volume / (world.ClientViewRange + 1);
                 distanceFactor = volumeByDist * distance;
             }
 
-            if (distance > World.ClientViewRange)
+            if (distance > world.ClientViewRange)
             {
                 volume = 0;
             }
@@ -171,7 +171,7 @@ namespace ClassicUO.Game.Managers
                 volume = 0;
             }
 
-            UOSound sound = (UOSound)Client.Game.Sounds.GetSound(index);
+            UOSound sound = (UOSound)Client.Game.UO.Sounds.GetSound(index);
 
             if (sound != null && sound.Play(Time.Ticks, volume, distanceFactor))
             {
@@ -226,7 +226,7 @@ namespace ClassicUO.Game.Managers
                 return;
             }
 
-            Sound m = Client.Game.Sounds.GetMusic(music);
+            Sound m = Client.Game.UO.Sounds.GetMusic(music);
 
             if (m == null && _currentMusic[0] != null)
             {

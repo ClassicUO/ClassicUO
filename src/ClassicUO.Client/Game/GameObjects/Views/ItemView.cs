@@ -172,7 +172,7 @@ namespace ClassicUO.Game.GameObjects
             if (
                 !SerialHelper.IsValid(Serial)
                 && IsMulti
-                && TargetManager.TargetingState == CursorTarget.MultiPlacement
+                && World.TargetManager.TargetingState == CursorTarget.MultiPlacement
             )
             {
                 hueVec.Z = 0.5f;
@@ -205,9 +205,9 @@ namespace ClassicUO.Game.GameObjects
             byte animIndex = (byte)AnimIndex;
             ushort graphic = GetGraphicForAnimation();
 
-            Client.Game.Animations.ConvertBodyIfNeeded(ref graphic);
-            var animGroup = Client.Game.Animations.GetAnimType(graphic);
-            var animFlags = Client.Game.Animations.GetAnimFlags(graphic);
+            Client.Game.UO.Animations.ConvertBodyIfNeeded(ref graphic);
+            var animGroup = Client.Game.UO.Animations.GetAnimType(graphic);
+            var animFlags = Client.Game.UO.Animations.GetAnimFlags(graphic);
             byte group = AnimationsLoader.Instance.GetDeathAction(
                 graphic,
                 animFlags,
@@ -269,7 +269,7 @@ namespace ClassicUO.Game.GameObjects
             return true;
         }
 
-        private static void DrawLayer(
+        private void DrawLayer(
             UltimaBatcher2D batcher,
             int posX,
             int posY,
@@ -328,7 +328,7 @@ namespace ClassicUO.Game.GameObjects
                 return;
             }
 
-            var frames = Client.Game.Animations.GetAnimationFrames(
+            var frames = Client.Game.UO.Animations.GetAnimationFrames(
                 graphic,
                 animGroup,
                 dir,
@@ -476,7 +476,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (
                     ReferenceEquals(SelectedObject.Object, this)
-                    || TargetManager.TargetingState == CursorTarget.MultiPlacement
+                    || World.TargetManager.TargetingState == CursorTarget.MultiPlacement
                 )
                 {
                     return false;
@@ -509,7 +509,7 @@ namespace ClassicUO.Game.GameObjects
                     }
                 }
 
-                if (Client.Game.Arts.GetArt(graphic).Texture != null)
+                if (Client.Game.UO.Arts.GetArt(graphic).Texture != null)
                 {
                     ref var index = ref ArtLoader.Instance.GetValidRefEntry(graphic + 0x4000);
 
@@ -520,7 +520,7 @@ namespace ClassicUO.Game.GameObjects
                     position.Y -= index.Height;
 
                     if (
-                        Client.Game.Arts.PixelCheck(
+                        Client.Game.UO.Arts.PixelCheck(
                             graphic,
                             SelectedObject.TranslatedMousePositionByViewport.X - position.X,
                             SelectedObject.TranslatedMousePositionByViewport.Y - position.Y
@@ -532,7 +532,7 @@ namespace ClassicUO.Game.GameObjects
                     else if (!IsMulti && !IsCoin && Amount > 1 && ItemData.IsStackable)
                     {
                         if (
-                            Client.Game.Arts.PixelCheck(
+                            Client.Game.UO.Arts.PixelCheck(
                                 graphic,
                                 SelectedObject.TranslatedMousePositionByViewport.X - position.X + 5,
                                 SelectedObject.TranslatedMousePositionByViewport.Y - position.Y + 5
@@ -616,16 +616,16 @@ namespace ClassicUO.Game.GameObjects
                         continue;
                     }
 
-                    Client.Game.Animations.ConvertBodyIfNeeded(ref graphic);
-                    var animGroup = Client.Game.Animations.GetAnimType(graphic);
-                    var animFlags = Client.Game.Animations.GetAnimFlags(graphic);
+                    Client.Game.UO.Animations.ConvertBodyIfNeeded(ref graphic);
+                    var animGroup = Client.Game.UO.Animations.GetAnimType(graphic);
+                    var animFlags = Client.Game.UO.Animations.GetAnimFlags(graphic);
                     byte group = AnimationsLoader.Instance.GetDeathAction(
                         graphic,
                         animFlags,
                         animGroup,
                         UsedLayer
                     );
-                    var frames = Client.Game.Animations.GetAnimationFrames(
+                    var frames = Client.Game.UO.Animations.GetAnimationFrames(
                         graphic,
                         group,
                         direction,
@@ -662,7 +662,7 @@ namespace ClassicUO.Game.GameObjects
                         int y = position.Y - (spriteInfo.UV.Height + spriteInfo.Center.Y);
 
                         if (
-                            Client.Game.Animations.PixelCheck(
+                            Client.Game.UO.Animations.PixelCheck(
                                 graphic,
                                 group,
                                 direction,

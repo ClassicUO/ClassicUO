@@ -29,7 +29,7 @@ namespace ClassicUO.Game.UI.Gumps
         };
         private Item hair, beard;
 
-        #region 
+        #region
         private ushort raceTextGraphic
         {
             get
@@ -71,7 +71,7 @@ namespace ClassicUO.Game.UI.Gumps
         }
         #endregion
 
-        public RaceChangeGump(bool isFemale, byte race) : base(0, 0)
+        public RaceChangeGump(World world, bool isFemale, byte race) : base(world, 0, 0)
         {
             if (race <= 0 || race > (int)RaceType.GARGOYLE)
             {
@@ -156,7 +156,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add(new GumpPic(185, 25, 0x708, 0));
             Add
             (
-                paperDollInteractable = new CustomPaperDollGump(210, 75, fakeMobile, hair, beard)
+                paperDollInteractable = new CustomPaperDollGump(this, 210, 75, fakeMobile, hair, beard)
                 {
                     AcceptMouseInput = false
                 }
@@ -320,7 +320,7 @@ namespace ClassicUO.Game.UI.Gumps
             #region Create a fake character to use for the gump
             if (fakeMobile == null || fakeMobile.IsDestroyed)
             {
-                fakeMobile = new PlayerMobile(0);
+                fakeMobile = new PlayerMobile(World, 0);
             }
 
             LinkedObject first = fakeMobile.Items;
@@ -381,6 +381,7 @@ namespace ClassicUO.Game.UI.Gumps
             (
                 colorPicker = new CustomColorPicker
                 (
+                    this,
                     layer,
                     clilocLabel,
                     pallet,
@@ -538,9 +539,11 @@ namespace ClassicUO.Game.UI.Gumps
             private int _lastSelectedIndex;
             private readonly Layer _layer;
             private readonly ushort[] _pallet;
+            private readonly RaceChangeGump _gump;
 
-            public CustomColorPicker(Layer layer, int label, ushort[] pallet, int rows, int columns)
+            public CustomColorPicker(RaceChangeGump gump, Layer layer, int label, ushort[] pallet, int rows, int columns)
             {
+                _gump = gump;
                 Width = 121;
                 Height = 25;
                 _cellW = 125 / columns;
@@ -625,6 +628,7 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         _colorPickerBox = new ColorPickerBox
                         (
+                            _gump.World,
                             485,
                             109,
                             _rows,
@@ -660,13 +664,15 @@ namespace ClassicUO.Game.UI.Gumps
         /// </summary>
         private class CustomPaperDollGump : PaperDollInteractable
         {
+            private readonly Gump _gump;
             private readonly Mobile playerMobile;
             private Item hair;
             private Item beard;
             private bool requestUpdate = false;
 
-            public CustomPaperDollGump(int x, int y, Mobile playerMobile, Item hair, Item beard) : base(x, y, playerMobile, null)
+            public CustomPaperDollGump(Gump gump, int x, int y, Mobile playerMobile, Item hair, Item beard) : base(x, y, playerMobile, new PaperDollGump(gump.World))
             {
+                _gump = gump;
                 this.playerMobile = playerMobile;
                 this.hair = hair;
                 this.beard = beard;
@@ -765,6 +771,7 @@ namespace ClassicUO.Game.UI.Gumps
                     (
                         new GumpPicEquipment
                         (
+                            _gump,
                             hair.Serial,
                             0,
                             0,
@@ -788,6 +795,7 @@ namespace ClassicUO.Game.UI.Gumps
                     (
                         new GumpPicEquipment
                         (
+                            _gump,
                             beard.Serial,
                             0,
                             0,

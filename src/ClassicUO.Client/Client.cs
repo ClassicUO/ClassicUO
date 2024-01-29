@@ -2,7 +2,7 @@
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 // 1. Redistributions of source code must retain the above copyright
@@ -16,7 +16,7 @@
 // 4. Neither the name of the copyright holder nor the
 //    names of its contributors may be used to endorse or promote products
 //    derived from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -41,6 +41,7 @@ using ClassicUO.Resources;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using ClassicUO.Utility.Platforms;
+using Microsoft.Xna.Framework.Graphics;
 using SDL2;
 using System;
 using System.Diagnostics;
@@ -48,56 +49,116 @@ using System.IO;
 
 namespace ClassicUO
 {
-    internal static class Client
+    sealed class UltimaOnline
     {
-        public static ClientVersion Version { get; private set; }
-        public static ClientFlags Protocol { get; set; }
-        public static string ClientPath { get; private set; }
-        public static GameController Game { get; private set; }
+        public Renderer.Animations.Animations Animations { get; private set; }
+        public Renderer.Arts.Art Arts { get; private set; }
+        public Renderer.Gumps.Gump Gumps { get; private set; }
+        public Renderer.Texmaps.Texmap Texmaps { get; private set; }
+        public Renderer.Lights.Light Lights { get; private set; }
+        public Renderer.MultiMaps.MultiMap MultiMaps { get; private set; }
+        public Renderer.Sounds.Sound Sounds { get; private set; }
+        public World World { get; private set; }
+        public GameCursor GameCursor { get; private set; }
+
+        public ClientVersion Version { get; private set; }
+        public ClientFlags Protocol { get; set; }
+        public string ClientPath { get; private set; }
 
 
-        public static void Run()
+        public UltimaOnline()
         {
-            Debug.Assert(Game == null);
 
-            Load();
+        }
 
-            Log.Trace("Running game...");
+        public unsafe void Load(GameController game)
+        {
+            LoadUOFiles();
 
-            using (Game = new GameController())
+            const int TEXTURE_WIDTH = 32;
+            const int TEXTURE_HEIGHT = 2048;
+            const int LIGHTS_TEXTURE_WIDTH = 32;
+            const int LIGHTS_TEXTURE_HEIGHT = 63;
+
+            var hueSamplers = new Texture2D[3];
+            hueSamplers[0] = new Texture2D(game.GraphicsDevice, TEXTURE_WIDTH, TEXTURE_HEIGHT);
+            hueSamplers[1] = new Texture2D(game.GraphicsDevice, TEXTURE_WIDTH, TEXTURE_HEIGHT);
+            hueSamplers[2] = new Texture2D(game.GraphicsDevice,LIGHTS_TEXTURE_WIDTH, LIGHTS_TEXTURE_HEIGHT);
+
+            var buffer = new uint[Math.Max(
+                LIGHTS_TEXTURE_WIDTH * LIGHTS_TEXTURE_HEIGHT,
+                TEXTURE_WIDTH * TEXTURE_HEIGHT * 2
+            )];
+
+            fixed (uint* ptr = buffer)
             {
-                // https://github.com/FNA-XNA/FNA/wiki/7:-FNA-Environment-Variables#fna_graphics_enable_highdpi
-                CUOEnviroment.IsHighDPI = Environment.GetEnvironmentVariable("FNA_GRAPHICS_ENABLE_HIGHDPI") == "1";
+                HuesLoader.Instance.CreateShaderColors(buffer);
 
-                if (CUOEnviroment.IsHighDPI)
-                {
-                    Log.Trace("HIGH DPI - ENABLED");
-                }
+                hueSamplers[0].SetDataPointerEXT(
+                    0,
+                    null,
+                    (IntPtr)ptr,
+                    TEXTURE_WIDTH * TEXTURE_HEIGHT * sizeof(uint)
+                );
+                hueSamplers[1].SetDataPointerEXT(
+                    0,
+                    null,
+                    (IntPtr)ptr + TEXTURE_WIDTH * TEXTURE_HEIGHT * sizeof(uint),
+                    TEXTURE_WIDTH * TEXTURE_HEIGHT * sizeof(uint)
+                );
 
-                Log.Trace("Loading plugins...");
-
-                foreach (string p in Settings.GlobalSettings.Plugins)
-                {
-                    Plugin.Create(p);
-                }
-
-                Log.Trace("Done!");
-
-                UoAssist.Start();
-
-                Game.Run();
+                LightColors.CreateLightTextures(buffer, LIGHTS_TEXTURE_HEIGHT);
+                hueSamplers[2].SetDataPointerEXT(
+                    0,
+                    null,
+                    (IntPtr)ptr,
+                    LIGHTS_TEXTURE_WIDTH * LIGHTS_TEXTURE_HEIGHT * sizeof(uint)
+                );
             }
 
-            Log.Trace("Exiting game...");
+            game.GraphicsDevice.Textures[1] = hueSamplers[0];
+            game.GraphicsDevice.Textures[2] = hueSamplers[1];
+            game.GraphicsDevice.Textures[3] = hueSamplers[2];
+
+            Animations = new Renderer.Animations.Animations(game.GraphicsDevice);
+            Arts = new Renderer.Arts.Art(game.GraphicsDevice);
+            Gumps = new Renderer.Gumps.Gump(game.GraphicsDevice);
+            Texmaps = new Renderer.Texmaps.Texmap(game.GraphicsDevice);
+            Lights = new Renderer.Lights.Light(game.GraphicsDevice);
+            MultiMaps = new Renderer.MultiMaps.MultiMap(game.GraphicsDevice);
+            Sounds = new Renderer.Sounds.Sound();
+
+            LightColors.LoadLights();
+
+            World = new World();
+            GameCursor = new GameCursor(World);
         }
 
-        public static void ShowErrorMessage(string msg)
+        public void Unload()
         {
-            SDL.SDL_ShowSimpleMessageBox(SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_ERROR, "ERROR", msg, IntPtr.Zero);
+            ArtLoader.Instance?.Dispose();
+            GumpsLoader.Instance?.Dispose();
+            TexmapsLoader.Instance?.Dispose();
+            AnimationsLoader.Instance?.Dispose();
+            LightsLoader.Instance?.Dispose();
+            TileDataLoader.Instance?.Dispose();
+            AnimDataLoader.Instance?.Dispose();
+            ClilocLoader.Instance?.Dispose();
+            FontsLoader.Instance?.Dispose();
+            HuesLoader.Instance?.Dispose();
+            MapLoader.Instance?.Dispose();
+            MultiLoader.Instance?.Dispose();
+            MultiMapLoader.Instance?.Dispose();
+            ProfessionLoader.Instance?.Dispose();
+            SkillsLoader.Instance?.Dispose();
+            SoundsLoader.Instance?.Dispose();
+            SpeechesLoader.Instance?.Dispose();
+            Verdata.File?.Dispose();
+            World?.Map?.Destroy();
         }
 
 
-        private static void Load()
+        private void LoadUOFiles()
         {
             string clientPath = Settings.GlobalSettings.UltimaOnlineDirectory;
             Log.Trace($"Ultima Online installation folder: {clientPath}");
@@ -116,7 +177,7 @@ namespace ClassicUO
             if (!Directory.Exists(clientPath))
             {
                 Log.Error("Invalid client directory: " + clientPath);
-                ShowErrorMessage(string.Format(ResErrorMessages.ClientPathIsNotAValidUODirectory, clientPath));
+                Client.ShowErrorMessage(string.Format(ResErrorMessages.ClientPathIsNotAValidUODirectory, clientPath));
 
                 throw new InvalidClientDirectory($"'{clientPath}' is not a valid directory");
             }
@@ -130,7 +191,7 @@ namespace ClassicUO
                 if (!ClientVersionHelper.TryParseFromFile(Path.Combine(clientPath, "client.exe"), out clientVersionText) || !ClientVersionHelper.IsClientVersionValid(clientVersionText, out clientVersion))
                 {
                     Log.Error("Invalid client version: " + clientVersionText);
-                    ShowErrorMessage(string.Format(ResGumps.ImpossibleToDefineTheClientVersion0, clientVersionText));
+                    Client.ShowErrorMessage(string.Format(ResGumps.ImpossibleToDefineTheClientVersion0, clientVersionText));
 
                     throw new InvalidClientVersion($"Invalid client version: '{clientVersionText}'");
                 }
@@ -204,6 +265,40 @@ namespace ClassicUO
                     Settings.GlobalSettings.Encryption = (byte) EncryptionHelper.Type;
                 }
             }
+        }
+    }
+
+
+    internal static class Client
+    {
+        public static GameController Game { get; private set; }
+
+
+        public static void Run(IPluginHost pluginHost)
+        {
+            Debug.Assert(Game == null);
+
+            Log.Trace("Running game...");
+
+            using (Game = new GameController(pluginHost))
+            {
+                // https://github.com/FNA-XNA/FNA/wiki/7:-FNA-Environment-Variables#fna_graphics_enable_highdpi
+                CUOEnviroment.IsHighDPI = Environment.GetEnvironmentVariable("FNA_GRAPHICS_ENABLE_HIGHDPI") == "1";
+
+                if (CUOEnviroment.IsHighDPI)
+                {
+                    Log.Trace("HIGH DPI - ENABLED");
+                }
+
+                Game.Run();
+            }
+
+            Log.Trace("Exiting game...");
+        }
+
+        public static void ShowErrorMessage(string msg)
+        {
+            SDL.SDL_ShowSimpleMessageBox(SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_ERROR, "ERROR", msg, IntPtr.Zero);
         }
     }
 }

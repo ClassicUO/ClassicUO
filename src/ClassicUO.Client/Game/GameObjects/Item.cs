@@ -48,61 +48,61 @@ namespace ClassicUO.Game.GameObjects
 {
     internal partial class Item : Entity
     {
-        private static readonly QueuedPool<Item> _pool = new QueuedPool<Item>(
-            Constants.PREDICTABLE_CHUNKS * 3,
-            i =>
-            {
-                i.IsDestroyed = false;
-                i.Graphic = 0;
-                i.Amount = 0;
-                i.Container = 0xFFFF_FFFF;
-                i._isMulti = false;
-                i.Layer = 0;
-                i.Price = 0;
-                i.UsedLayer = false;
-                i._displayedGraphic = null;
-                i.X = 0;
-                i.Y = 0;
-                i.Z = 0;
+        //private static readonly QueuedPool<Item> _pool = new QueuedPool<Item>(
+        //    Constants.PREDICTABLE_CHUNKS * 3,
+        //    i =>
+        //    {
+        //        i.IsDestroyed = false;
+        //        i.Graphic = 0;
+        //        i.Amount = 0;
+        //        i.Container = 0xFFFF_FFFF;
+        //        i._isMulti = false;
+        //        i.Layer = 0;
+        //        i.Price = 0;
+        //        i.UsedLayer = false;
+        //        i._displayedGraphic = null;
+        //        i.X = 0;
+        //        i.Y = 0;
+        //        i.Z = 0;
 
-                i.LightID = 0;
-                i.MultiDistanceBonus = 0;
-                i.Flags = 0;
-                i.WantUpdateMulti = true;
-                i.MultiInfo = null;
-                i.MultiGraphic = 0;
+        //        i.LightID = 0;
+        //        i.MultiDistanceBonus = 0;
+        //        i.Flags = 0;
+        //        i.WantUpdateMulti = true;
+        //        i.MultiInfo = null;
+        //        i.MultiGraphic = 0;
 
-                i.AlphaHue = 0;
-                i.Name = null;
-                i.Direction = 0;
-                i.AnimIndex = 0;
-                i.Hits = 0;
-                i.HitsMax = 0;
-                i.LastStepTime = 0;
-                i.LastAnimationChangeTime = 0;
+        //        i.AlphaHue = 0;
+        //        i.Name = null;
+        //        i.Direction = 0;
+        //        i.AnimIndex = 0;
+        //        i.Hits = 0;
+        //        i.HitsMax = 0;
+        //        i.LastStepTime = 0;
+        //        i.LastAnimationChangeTime = 0;
 
-                i.Clear();
+        //        i.Clear();
 
-                i.IsClicked = false;
-                i.IsDamageable = false;
-                i.Offset = Vector3.Zero;
-                i.HitsPercentage = 0;
-                i.Opened = false;
-                i.TextContainer?.Clear();
-                i.IsFlipped = false;
-                i.FrameInfo = Rectangle.Empty;
-                i.ObjectHandlesStatus = ObjectHandlesStatus.NONE;
-                i.AlphaHue = 0;
-                i.AllowedToDraw = true;
-                i.ExecuteAnimation = true;
-                i.HitsRequest = HitsRequestStatus.None;
-            }
-        );
+        //        i.IsClicked = false;
+        //        i.IsDamageable = false;
+        //        i.Offset = Vector3.Zero;
+        //        i.HitsPercentage = 0;
+        //        i.Opened = false;
+        //        i.TextContainer?.Clear();
+        //        i.IsFlipped = false;
+        //        i.FrameInfo = Rectangle.Empty;
+        //        i.ObjectHandlesStatus = ObjectHandlesStatus.NONE;
+        //        i.AlphaHue = 0;
+        //        i.AllowedToDraw = true;
+        //        i.ExecuteAnimation = true;
+        //        i.HitsRequest = HitsRequestStatus.None;
+        //    }
+        //);
 
         private ushort? _displayedGraphic;
         private bool _isMulti;
 
-        public Item() : base(0) { }
+        public Item(World world) : base(world, 0) { }
 
         public bool IsCoin => Graphic == 0x0EEA || Graphic == 0x0EED || Graphic == 0x0EF0;
 
@@ -206,9 +206,9 @@ namespace ClassicUO.Game.GameObjects
         public bool UsedLayer;
         public bool WantUpdateMulti = true;
 
-        public static Item Create(uint serial)
+        public static Item Create(World world, uint serial)
         {
-            Item i = _pool.GetOne();
+            Item i = new Item(world); // _pool.GetOne();
             i.Serial = serial;
 
             return i;
@@ -240,7 +240,7 @@ namespace ClassicUO.Game.GameObjects
 
             base.Destroy();
 
-            _pool.ReturnOne(this);
+            //_pool.ReturnOne(this);
         }
 
         private unsafe void LoadMulti()
@@ -254,7 +254,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (!World.HouseManager.TryGetHouse(Serial, out House house))
             {
-                house = new House(Serial, 0, false);
+                house = new House(World, Serial, 0, false);
                 World.HouseManager.Add(Serial, house);
             }
             else
@@ -336,7 +336,7 @@ namespace ClassicUO.Game.GameObjects
 
                                 if (block->Flags == 0 || block->Flags == 0x100)
                                 {
-                                    Multi m = Multi.Create(block->ID);
+                                    Multi m = Multi.Create(World, block->ID);
                                     m.MultiOffsetX = block->X;
                                     m.MultiOffsetY = block->Y;
                                     m.MultiOffsetZ = block->Z;
@@ -414,7 +414,7 @@ namespace ClassicUO.Game.GameObjects
 
                     if (block->Flags != 0)
                     {
-                        Multi m = Multi.Create(block->ID);
+                        Multi m = Multi.Create(World, block->ID);
                         m.MultiOffsetX = block->X;
                         m.MultiOffsetY = block->Y;
                         m.MultiOffsetZ = block->Z;
@@ -476,7 +476,7 @@ namespace ClassicUO.Game.GameObjects
                 Client.Game.GetScene<GameScene>()?.UpdateMaxDrawZ(true);
             }
 
-            BoatMovingManager.ClearSteps(Serial);
+            World.BoatMovingManager.ClearSteps(Serial);
         }
 
         public override void CheckGraphicChange(byte animIndex = 0)
@@ -485,7 +485,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (!IsCorpse)
                 {
-                    AllowedToDraw = CanBeDrawn(Graphic);
+                    AllowedToDraw = CanBeDrawn(World, Graphic);
                 }
                 else
                 {
@@ -507,7 +507,7 @@ namespace ClassicUO.Game.GameObjects
             }
             else if (WantUpdateMulti)
             {
-                UoAssist.SignalAddMulti((ushort)(Graphic | 0x4000), X, Y);
+                World.UoAssist.SignalAddMulti((ushort)(Graphic | 0x4000), X, Y);
 
                 if (
                     MultiDistanceBonus == 0
@@ -665,7 +665,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 Point p = RealScreenPosition;
 
-                var bounds = Client.Game.Arts.GetRealArtBounds(Graphic);
+                var bounds = Client.Game.UO.Arts.GetRealArtBounds(Graphic);
                 p.Y -= bounds.Height >> 1;
 
                 p.X += (int)Offset.X + 22;
@@ -727,18 +727,18 @@ namespace ClassicUO.Game.GameObjects
                     bool mirror = false;
                     AnimationsLoader.Instance.GetAnimDirection(ref dir, ref mirror);
 
-                    if (id < Client.Game.Animations.MaxAnimationCount && dir < 5)
+                    if (id < Client.Game.UO.Animations.MaxAnimationCount && dir < 5)
                     {
-                        Client.Game.Animations.ConvertBodyIfNeeded(ref id);
-                        var animGroup = Client.Game.Animations.GetAnimType(id);
-                        var animFlags = Client.Game.Animations.GetAnimFlags(id);                   
+                        Client.Game.UO.Animations.ConvertBodyIfNeeded(ref id);
+                        var animGroup = Client.Game.UO.Animations.GetAnimType(id);
+                        var animFlags = Client.Game.UO.Animations.GetAnimFlags(id);
                         byte action = AnimationsLoader.Instance.GetDeathAction(
                             id,
                             animFlags,
                             animGroup,
                             UsedLayer
                         );
-                        var frames = Client.Game.Animations.GetAnimationFrames(
+                        var frames = Client.Game.UO.Animations.GetAnimationFrames(
                             id,
                             action,
                             dir,

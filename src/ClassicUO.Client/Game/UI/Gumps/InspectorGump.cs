@@ -50,7 +50,7 @@ namespace ClassicUO.Game.UI.Gumps
         private const int HEIGHT = 400;
         private readonly GameObject _obj;
 
-        public InspectorGump(GameObject obj) : base(0, 0)
+        public InspectorGump(World world, GameObject obj) : base(world, 0, 0)
         {
             X = 200;
             Y = 100;

@@ -37,14 +37,15 @@ namespace ClassicUO.Game.GameObjects
 {
     internal sealed class FixedEffect : GameEffect
     {
-        public FixedEffect(EffectManager manager, ushort graphic, ushort hue, int duration, byte speed) 
-            : base(manager, graphic, hue, duration, speed)
+        public FixedEffect(World world, EffectManager manager, ushort graphic, ushort hue, int duration, byte speed) 
+            : base(world, manager, graphic, hue, duration, speed)
         {
             
         }
 
         public FixedEffect
         (
+            World world,
             EffectManager manager,
             ushort sourceX,
             ushort sourceY,
@@ -53,13 +54,14 @@ namespace ClassicUO.Game.GameObjects
             ushort hue,
             int duration,
             byte speed
-        ) : this(manager, graphic, hue, duration, speed)
+        ) : this(world, manager, graphic, hue, duration, speed)
         {
             SetSource(sourceX, sourceY, sourceZ);
         }
 
         public FixedEffect
         (
+            World world,
             EffectManager manager,
             uint sourceSerial,
             ushort sourceX,
@@ -69,7 +71,7 @@ namespace ClassicUO.Game.GameObjects
             ushort hue,
             int duration,
             byte speed
-        ) : this(manager, graphic, hue, duration, speed)
+        ) : this(world, manager, graphic, hue, duration, speed)
         {
             Entity source = World.Get(sourceSerial);
 

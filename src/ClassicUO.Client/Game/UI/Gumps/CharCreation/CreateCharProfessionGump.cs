@@ -44,7 +44,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
     {
         private readonly ProfessionInfo _Parent;
 
-        public CreateCharProfessionGump(ProfessionInfo parent = null) : base(0, 0)
+        public CreateCharProfessionGump(World world, ProfessionInfo parent = null) : base(world, 0, 0)
         {
             _Parent = parent;
 
@@ -120,7 +120,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         {
             if (info.Type == ProfessionLoader.PROF_TYPE.CATEGORY && ProfessionLoader.Instance.Professions.TryGetValue(info, out List<ProfessionInfo> list) && list != null)
             {
-                Parent.Add(new CreateCharProfessionGump(info));
+                Parent.Add(new CreateCharProfessionGump(World, info));
                 Parent.Remove(this);
             }
             else
@@ -140,7 +140,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 {
                     if (_Parent != null && _Parent.TopLevel)
                     {
-                        Parent.Add(new CreateCharProfessionGump());
+                        Parent.Add(new CreateCharProfessionGump(World));
                         Parent.Remove(this);
                     }
                     else

@@ -50,7 +50,7 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly List<InfoBarControl> _infobarControls = new List<InfoBarControl>();
         private long _refreshTime;
 
-        public InfoBarGump() : base(0, 0)
+        public InfoBarGump(World world) : base(world, 0, 0)
         {
             CanMove = true;
             AcceptMouseInput = true;
@@ -74,11 +74,11 @@ namespace ClassicUO.Game.UI.Gumps
 
             _infobarControls.Clear();
 
-            List<InfoBarItem> infoBarItems = Client.Game.GetScene<GameScene>().InfoBars.GetInfoBars();
+            List<InfoBarItem> infoBarItems = World.InfoBars.GetInfoBars();
 
             for (int i = 0; i < infoBarItems.Count; i++)
             {
-                InfoBarControl info = new InfoBarControl(infoBarItems[i].label, infoBarItems[i].var, infoBarItems[i].hue);
+                InfoBarControl info = new InfoBarControl(this, infoBarItems[i].label, infoBarItems[i].var, infoBarItems[i].hue);
 
                 _infobarControls.Add(info);
                 Add(info);
@@ -158,12 +158,14 @@ namespace ClassicUO.Game.UI.Gumps
 
     internal class InfoBarControl : Control
     {
+        private readonly InfoBarGump _gump;
         private readonly Label _data;
         private readonly Label _label;
         private ushort _warningLinesHue;
 
-        public InfoBarControl(string label, InfoBarVars var, ushort hue)
+        public InfoBarControl(InfoBarGump gump, string label, InfoBarVars var, ushort hue)
         {
+            _gump = gump;
             AcceptMouseInput = false;
             WantUpdateSize = true;
             CanMove = false;
@@ -255,55 +257,55 @@ namespace ClassicUO.Game.UI.Gumps
         {
             switch (var)
             {
-                case InfoBarVars.HP: return $"{World.Player.Hits}/{World.Player.HitsMax}";
+                case InfoBarVars.HP: return $"{_gump.World.Player.Hits}/{_gump.World.Player.HitsMax}";
 
-                case InfoBarVars.Mana: return $"{World.Player.Mana}/{World.Player.ManaMax}";
+                case InfoBarVars.Mana: return $"{_gump.World.Player.Mana}/{_gump.World.Player.ManaMax}";
 
-                case InfoBarVars.Stamina: return $"{World.Player.Stamina}/{World.Player.StaminaMax}";
+                case InfoBarVars.Stamina: return $"{_gump.World.Player.Stamina}/{_gump.World.Player.StaminaMax}";
 
-                case InfoBarVars.Weight: return $"{World.Player.Weight}/{World.Player.WeightMax}";
+                case InfoBarVars.Weight: return $"{_gump.World.Player.Weight}/{_gump.World.Player.WeightMax}";
 
-                case InfoBarVars.Followers: return $"{World.Player.Followers}/{World.Player.FollowersMax}";
+                case InfoBarVars.Followers: return $"{_gump.World.Player.Followers}/{_gump.World.Player.FollowersMax}";
 
-                case InfoBarVars.Gold: return World.Player.Gold.ToString();
+                case InfoBarVars.Gold: return _gump.World.Player.Gold.ToString();
 
-                case InfoBarVars.Damage: return $"{World.Player.DamageMin}-{World.Player.DamageMax}";
+                case InfoBarVars.Damage: return $"{_gump.World.Player.DamageMin}-{_gump.World.Player.DamageMax}";
 
-                case InfoBarVars.Armor: return World.Player.PhysicalResistance.ToString();
+                case InfoBarVars.Armor: return _gump.World.Player.PhysicalResistance.ToString();
 
-                case InfoBarVars.Luck: return World.Player.Luck.ToString();
+                case InfoBarVars.Luck: return _gump.World.Player.Luck.ToString();
 
-                case InfoBarVars.FireResist: return World.Player.FireResistance.ToString();
+                case InfoBarVars.FireResist: return _gump.World.Player.FireResistance.ToString();
 
-                case InfoBarVars.ColdResist: return World.Player.ColdResistance.ToString();
+                case InfoBarVars.ColdResist: return _gump.World.Player.ColdResistance.ToString();
 
-                case InfoBarVars.PoisonResist: return World.Player.PoisonResistance.ToString();
+                case InfoBarVars.PoisonResist: return _gump.World.Player.PoisonResistance.ToString();
 
-                case InfoBarVars.EnergyResist: return World.Player.EnergyResistance.ToString();
+                case InfoBarVars.EnergyResist: return _gump.World.Player.EnergyResistance.ToString();
 
-                case InfoBarVars.LowerReagentCost: return World.Player.LowerReagentCost.ToString();
+                case InfoBarVars.LowerReagentCost: return _gump.World.Player.LowerReagentCost.ToString();
 
-                case InfoBarVars.SpellDamageInc: return World.Player.SpellDamageIncrease.ToString();
+                case InfoBarVars.SpellDamageInc: return _gump.World.Player.SpellDamageIncrease.ToString();
 
-                case InfoBarVars.FasterCasting: return World.Player.FasterCasting.ToString();
+                case InfoBarVars.FasterCasting: return _gump.World.Player.FasterCasting.ToString();
 
-                case InfoBarVars.FasterCastRecovery: return World.Player.FasterCastRecovery.ToString();
+                case InfoBarVars.FasterCastRecovery: return _gump.World.Player.FasterCastRecovery.ToString();
 
-                case InfoBarVars.HitChanceInc: return World.Player.HitChanceIncrease.ToString();
+                case InfoBarVars.HitChanceInc: return _gump.World.Player.HitChanceIncrease.ToString();
 
-                case InfoBarVars.DefenseChanceInc: return World.Player.DefenseChanceIncrease.ToString();
+                case InfoBarVars.DefenseChanceInc: return _gump.World.Player.DefenseChanceIncrease.ToString();
 
-                case InfoBarVars.LowerManaCost: return World.Player.LowerManaCost.ToString();
+                case InfoBarVars.LowerManaCost: return _gump.World.Player.LowerManaCost.ToString();
 
-                case InfoBarVars.DamageChanceInc: return World.Player.DamageIncrease.ToString();
+                case InfoBarVars.DamageChanceInc: return _gump.World.Player.DamageIncrease.ToString();
 
-                case InfoBarVars.SwingSpeedInc: return World.Player.SwingSpeedIncrease.ToString();
+                case InfoBarVars.SwingSpeedInc: return _gump.World.Player.SwingSpeedIncrease.ToString();
 
-                case InfoBarVars.StatsCap: return World.Player.StatsCap.ToString();
+                case InfoBarVars.StatsCap: return _gump.World.Player.StatsCap.ToString();
 
-                case InfoBarVars.NameNotoriety: return World.Player.Name;
+                case InfoBarVars.NameNotoriety: return _gump.World.Player.Name;
 
-                case InfoBarVars.TithingPoints: return World.Player.TithingPoints.ToString();
+                case InfoBarVars.TithingPoints: return _gump.World.Player.TithingPoints.ToString();
 
                 default: return "";
             }
@@ -316,7 +318,7 @@ namespace ClassicUO.Game.UI.Gumps
             switch (var)
             {
                 case InfoBarVars.HP:
-                    percent = World.Player.Hits / (float) World.Player.HitsMax;
+                    percent = _gump.World.Player.Hits / (float) _gump.World.Player.HitsMax;
 
                     if (percent <= 0.25)
                     {
@@ -336,7 +338,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
 
                 case InfoBarVars.Mana:
-                    percent = World.Player.Mana / (float) World.Player.ManaMax;
+                    percent = _gump.World.Player.Mana / (float) _gump.World.Player.ManaMax;
 
                     if (percent <= 0.25)
                     {
@@ -356,7 +358,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
 
                 case InfoBarVars.Stamina:
-                    percent = World.Player.Stamina / (float) World.Player.StaminaMax;
+                    percent = _gump.World.Player.Stamina / (float)_gump.World.Player.StaminaMax;
 
                     if (percent <= 0.25)
                     {
@@ -376,7 +378,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
 
                 case InfoBarVars.Weight:
-                    percent = World.Player.Weight / (float) World.Player.WeightMax;
+                    percent = _gump.World.Player.Weight / (float)_gump.World.Player.WeightMax;
 
                     if (percent >= 1)
                     {
@@ -395,7 +397,7 @@ namespace ClassicUO.Game.UI.Gumps
                         return 0x0481;
                     }
 
-                case InfoBarVars.NameNotoriety: return Notoriety.GetHue(World.Player.NotorietyFlag);
+                case InfoBarVars.NameNotoriety: return Notoriety.GetHue(_gump.World.Player.NotorietyFlag);
 
                 default: return 0x0481;
             }

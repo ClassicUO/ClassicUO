@@ -43,13 +43,13 @@ namespace ClassicUO.Game.GameObjects
     {
         private readonly EffectManager _manager;
 
-        protected GameEffect(EffectManager manager, ushort graphic, ushort hue, int duration, byte speed)
+        protected GameEffect(World world, EffectManager manager, ushort graphic, ushort hue, int duration, byte speed) : base(world)
         {
             _manager = manager;
 
             Graphic = graphic;
             Hue = hue;
-            AllowedToDraw = CanBeDrawn(graphic);
+            AllowedToDraw = CanBeDrawn(world, graphic);
             AlphaHue = 0xFF;
             AnimDataFrame = AnimDataLoader.Instance?.CalculateCurrentGraphic(graphic) ?? default;
             IsEnabled = true;
@@ -167,7 +167,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 (var targetX, var targetY, var targetZ) = GetTarget();
 
-                FixedEffect effect = new FixedEffect(_manager, 0x36CB, Hue, 400, 0);
+                FixedEffect effect = new FixedEffect(World, _manager, 0x36CB, Hue, 400, 0);
                 effect.Blend = Blend;
                 effect.SetSource(targetX, targetY, targetZ);
 

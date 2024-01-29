@@ -145,7 +145,7 @@ namespace ClassicUO.Game.GameObjects
                 position.X -= index.Width;
                 position.Y -= index.Height;
 
-                return Client.Game.Arts.PixelCheck(
+                return Client.Game.UO.Arts.PixelCheck(
                     graphic,
                     SelectedObject.TranslatedMousePositionByViewport.X - position.X,
                     SelectedObject.TranslatedMousePositionByViewport.Y - position.Y

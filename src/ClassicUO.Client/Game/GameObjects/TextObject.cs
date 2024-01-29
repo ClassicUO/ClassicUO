@@ -2,7 +2,7 @@
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 // 1. Redistributions of source code must retain the above copyright
@@ -16,7 +16,7 @@
 // 4. Neither the name of the copyright holder nor the
 //    names of its contributors may be used to endorse or promote products
 //    derived from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -40,30 +40,32 @@ namespace ClassicUO.Game.GameObjects
 {
     internal class TextObject : BaseGameObject
     {
-        private static readonly QueuedPool<TextObject> _queue = new QueuedPool<TextObject>
-        (
-            1000,
-            o =>
-            {
-                o.IsDestroyed = false;
-                o.Alpha = 0xFF;
-                o.Hue = 0;
-                o.Time = 0;
-                o.IsTransparent = false;
-                o.SecondTime = 0;
-                o.Type = 0;
-                o.X = 0;
-                o.Y = 0;
-                o.RealScreenPosition = Point.Zero;
-                o.OffsetY = 0;
-                o.Owner = null;
-                o.UnlinkD();
-                o.IsTextGump = false;
-                o.RenderedText?.Destroy();
-                o.RenderedText = null;
-                o.Clear();
-            }
-        );
+        //private static readonly QueuedPool<TextObject> _queue = new QueuedPool<TextObject>
+        //(
+        //    1000,
+        //    o =>
+        //    {
+        //        o.IsDestroyed = false;
+        //        o.Alpha = 0xFF;
+        //        o.Hue = 0;
+        //        o.Time = 0;
+        //        o.IsTransparent = false;
+        //        o.SecondTime = 0;
+        //        o.Type = 0;
+        //        o.X = 0;
+        //        o.Y = 0;
+        //        o.RealScreenPosition = Point.Zero;
+        //        o.OffsetY = 0;
+        //        o.Owner = null;
+        //        o.UnlinkD();
+        //        o.IsTextGump = false;
+        //        o.RenderedText?.Destroy();
+        //        o.RenderedText = null;
+        //        o.Clear();
+        //    }
+        //);
+
+        public TextObject(World world) : base(world) { }
 
         public byte Alpha;
         public TextObject DLeft, DRight;
@@ -79,9 +81,9 @@ namespace ClassicUO.Game.GameObjects
         public int X, Y, OffsetY;
 
 
-        public static TextObject Create()
+        public static TextObject Create(World world)
         {
-            return _queue.GetOne();
+            return new TextObject(world) { Alpha = 0xFF }; // _queue.GetOne();
         }
 
 
@@ -100,7 +102,7 @@ namespace ClassicUO.Game.GameObjects
             RenderedText = null;
             Owner = null;
 
-            _queue.ReturnOne(this);
+            //_queue.ReturnOne(this);
         }
 
         public void UnlinkD()

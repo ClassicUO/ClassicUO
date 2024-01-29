@@ -41,7 +41,7 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class PartyGump : Gump
     {
-        public PartyGump(int x, int y, bool canloot) : base(0, 0)
+        public PartyGump(World world, int x, int y, bool canloot) : base(world, 0, 0)
         {
             X = x;
             Y = y;
@@ -324,6 +324,7 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         GameActions.Print
                         (
+                            World,
                             ResGumps.YouAreNotInAParty,
                             0,
                             MessageType.System,
@@ -349,6 +350,7 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         GameActions.Print
                         (
+                            World,
                             ResGumps.YouAreNotInAParty,
                             0,
                             MessageType.System,
@@ -359,7 +361,7 @@ namespace ClassicUO.Game.UI.Gumps
                     else
                     {
                         // NetClient.Socket.Send(new PPartyRemoveRequest(World.Player));
-                        GameActions.RequestPartyQuit();
+                        GameActions.RequestPartyQuit(World.Player);
                         //for (int i = 0; i < 10; i++)
                         //{
                         //    if (World.Party.Members[i] != null && World.Party.Members[i].Serial != 0)
@@ -388,6 +390,7 @@ namespace ClassicUO.Game.UI.Gumps
                         {
                             GameActions.Print
                             (
+                                World,
                                 ResGumps.ThereIsNoOneInThatPartySlot,
                                 0,
                                 MessageType.System,
@@ -410,6 +413,7 @@ namespace ClassicUO.Game.UI.Gumps
                         {
                             GameActions.Print
                             (
+                                World,
                                 ResGumps.ThereIsNoOneInThatPartySlot,
                                 0,
                                 MessageType.System,

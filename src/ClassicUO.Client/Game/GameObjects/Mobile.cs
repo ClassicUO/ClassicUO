@@ -40,71 +40,72 @@ using ClassicUO.Resources;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Collections;
 using Microsoft.Xna.Framework;
+using ClassicUO.Game.Scenes;
 
 namespace ClassicUO.Game.GameObjects
 {
     internal partial class Mobile : Entity
     {
-        private static readonly QueuedPool<Mobile> _pool = new QueuedPool<Mobile>(
-            Constants.PREDICTABLE_CHUNKS,
-            mobile =>
-            {
-                mobile.IsDestroyed = false;
-                mobile.Graphic = 0;
-                mobile.Steps.Clear();
-                mobile.Offset = Vector3.Zero;
-                mobile.SpeedMode = CharacterSpeedType.Normal;
-                mobile.Race = 0;
-                mobile.Hits = 0;
-                mobile.HitsMax = 0;
-                mobile.Mana = 0;
-                mobile.ManaMax = 0;
-                mobile.Stamina = 0;
-                mobile.StaminaMax = 0;
-                mobile.NotorietyFlag = 0;
-                mobile.IsRenamable = false;
-                mobile.Flags = 0;
-                mobile.IsFemale = false;
-                mobile.InWarMode = false;
-                mobile.IsRunning = false;
-                mobile._animationInterval = 0;
-                mobile.AnimationFrameCount = 0;
-                mobile._animationRepeateMode = 1;
-                mobile._animationRepeatModeCount = 1;
-                mobile._animationRepeat = false;
-                mobile.AnimationFromServer = false;
-                mobile._isAnimationForwardDirection = false;
-                mobile.LastStepSoundTime = 0;
-                mobile.StepSoundOffset = 0;
-                mobile.Title = string.Empty;
-                mobile._animationGroup = 0xFF;
-                mobile._isDead = false;
-                mobile._isSA_Poisoned = false;
-                mobile._lastAnimationIdleDelay = 0;
-                mobile.X = 0;
-                mobile.Y = 0;
-                mobile.Z = 0;
-                mobile.Direction = 0;
-                mobile.LastAnimationChangeTime = Time.Ticks;
-                mobile.TextContainer?.Clear();
-                mobile.HitsPercentage = 0;
-                mobile.IsFlipped = false;
-                mobile.FrameInfo = Rectangle.Empty;
-                mobile.ObjectHandlesStatus = ObjectHandlesStatus.NONE;
-                mobile.AlphaHue = 0;
-                mobile.AllowedToDraw = true;
-                mobile.IsClicked = false;
-                mobile.RemoveFromTile();
-                mobile.Clear();
-                mobile.Next = null;
-                mobile.Previous = null;
-                mobile.Name = null;
-                mobile.ExecuteAnimation = true;
-                mobile.HitsRequest = HitsRequestStatus.None;
+        //private static readonly QueuedPool<Mobile> _pool = new QueuedPool<Mobile>(
+        //    Constants.PREDICTABLE_CHUNKS,
+        //    mobile =>
+        //    {
+        //        mobile.IsDestroyed = false;
+        //        mobile.Graphic = 0;
+        //        mobile.Steps.Clear();
+        //        mobile.Offset = Vector3.Zero;
+        //        mobile.SpeedMode = CharacterSpeedType.Normal;
+        //        mobile.Race = 0;
+        //        mobile.Hits = 0;
+        //        mobile.HitsMax = 0;
+        //        mobile.Mana = 0;
+        //        mobile.ManaMax = 0;
+        //        mobile.Stamina = 0;
+        //        mobile.StaminaMax = 0;
+        //        mobile.NotorietyFlag = 0;
+        //        mobile.IsRenamable = false;
+        //        mobile.Flags = 0;
+        //        mobile.IsFemale = false;
+        //        mobile.InWarMode = false;
+        //        mobile.IsRunning = false;
+        //        mobile._animationInterval = 0;
+        //        mobile.AnimationFrameCount = 0;
+        //        mobile._animationRepeateMode = 1;
+        //        mobile._animationRepeatModeCount = 1;
+        //        mobile._animationRepeat = false;
+        //        mobile.AnimationFromServer = false;
+        //        mobile._isAnimationForwardDirection = false;
+        //        mobile.LastStepSoundTime = 0;
+        //        mobile.StepSoundOffset = 0;
+        //        mobile.Title = string.Empty;
+        //        mobile._animationGroup = 0xFF;
+        //        mobile._isDead = false;
+        //        mobile._isSA_Poisoned = false;
+        //        mobile._lastAnimationIdleDelay = 0;
+        //        mobile.X = 0;
+        //        mobile.Y = 0;
+        //        mobile.Z = 0;
+        //        mobile.Direction = 0;
+        //        mobile.LastAnimationChangeTime = Time.Ticks;
+        //        mobile.TextContainer?.Clear();
+        //        mobile.HitsPercentage = 0;
+        //        mobile.IsFlipped = false;
+        //        mobile.FrameInfo = Rectangle.Empty;
+        //        mobile.ObjectHandlesStatus = ObjectHandlesStatus.NONE;
+        //        mobile.AlphaHue = 0;
+        //        mobile.AllowedToDraw = true;
+        //        mobile.IsClicked = false;
+        //        mobile.RemoveFromTile();
+        //        mobile.Clear();
+        //        mobile.Next = null;
+        //        mobile.Previous = null;
+        //        mobile.Name = null;
+        //        mobile.ExecuteAnimation = true;
+        //        mobile.HitsRequest = HitsRequestStatus.None;
 
-                mobile.CalculateRandomIdleTime();
-            }
-        );
+        //        mobile.CalculateRandomIdleTime();
+        //    }
+        //);
 
         private static readonly byte[,] _animationIdle =
         {
@@ -135,19 +136,19 @@ namespace ClassicUO.Game.GameObjects
         private ushort _animationRepeateMode = 1;
         private ushort _animationRepeatModeCount = 1;
 
-        public Mobile(uint serial) : base(serial)
+        public Mobile(World world, uint serial) : base(world, serial)
         {
             LastAnimationChangeTime = Time.Ticks;
             CalculateRandomIdleTime();
         }
 
-        public Mobile() : base(0) { }
+        public Mobile(World world) : base(world, 0) { }
 
         public Deque<Step> Steps { get; } = new Deque<Step>(Constants.MAX_STEP_COUNT);
         public bool IsParalyzed => (Flags & Flags.Frozen) != 0;
         public bool IsYellowHits => (Flags & Flags.YellowBar) != 0;
         public bool IsPoisoned =>
-            Client.Version >= ClientVersion.CV_7000
+            Client.Game.UO.Version >= ClientVersion.CV_7000
                 ? _isSA_Poisoned
                 : (Flags & Flags.Poisoned) != 0;
         public bool IgnoreCharacters => (Flags & Flags.IgnoreMobiles) != 0;
@@ -165,7 +166,7 @@ namespace ClassicUO.Game.GameObjects
         }
 
         public bool IsFlying =>
-            Client.Version >= ClientVersion.CV_7000 && (Flags & Flags.Poisoned) != 0;
+            Client.Game.UO.Version >= ClientVersion.CV_7000 && (Flags & Flags.Poisoned) != 0;
 
         public virtual bool InWarMode
         {
@@ -189,7 +190,7 @@ namespace ClassicUO.Game.GameObjects
             || Graphic == 0x04E5;
 
         public bool IsGargoyle =>
-            Client.Version >= ClientVersion.CV_7000 && Graphic == 0x029A || Graphic == 0x029B;
+            Client.Game.UO.Version >= ClientVersion.CV_7000 && Graphic == 0x029A || Graphic == 0x029B;
 
         public bool IsMounted
         {
@@ -234,9 +235,9 @@ namespace ClassicUO.Game.GameObjects
         public int StepSoundOffset;
         public string Title = string.Empty;
 
-        public static Mobile Create(uint serial)
+        public static Mobile Create(World world, uint serial)
         {
-            Mobile mobile = _pool.GetOne();
+            Mobile mobile = new Mobile(world); // _pool.GetOne();
             mobile.Serial = serial;
 
             return mobile;
@@ -411,7 +412,7 @@ namespace ClassicUO.Game.GameObjects
 
                 ushort graphic = GetGraphicForAnimation();
 
-                if (graphic >= Client.Game.Animations.MaxAnimationCount)
+                if (graphic >= Client.Game.UO.Animations.MaxAnimationCount)
                 {
                     return;
                 }
@@ -419,15 +420,15 @@ namespace ClassicUO.Game.GameObjects
                 //byte action = 0;
                 //ushort hue = 0;
 
-                //Client.Game.Animations.ReplaceAnimationValues(
+                //Client.Game.UO.Animations.ReplaceAnimationValues(
                 //    ref graphic,
                 //    ref action,
                 //    ref hue,
                 //    out var useUOP
                 //);
 
-                AnimationGroupsType type = Client.Game.Animations.GetAnimType(graphic);
-                AnimationFlags  flags = Client.Game.Animations.GetAnimFlags(graphic);
+                AnimationGroupsType type = Client.Game.UO.Animations.GetAnimType(graphic);
+                AnimationFlags  flags = Client.Game.UO.Animations.GetAnimFlags(graphic);
                 AnimationGroups animGroup = AnimationGroups.None;
 
                 bool isLowExtended = false;
@@ -507,8 +508,8 @@ namespace ClassicUO.Game.GameObjects
                 if (isLowExtended && _animationGroup == 18)
                 {
                     if (
-                        !Client.Game.Animations.AnimationExists(graphic, 18)
-                        && Client.Game.Animations.AnimationExists(graphic, 17)
+                        !Client.Game.UO.Animations.AnimationExists(graphic, 18)
+                        && Client.Game.UO.Animations.AnimationExists(graphic, 17)
                     )
                     {
                         _animationGroup = GetReplacedObjectAnimation(graphic, 17);
@@ -519,7 +520,7 @@ namespace ClassicUO.Game.GameObjects
                     }
                 }
 
-                if (!Client.Game.Animations.AnimationExists(graphic, _animationGroup))
+                if (!Client.Game.UO.Animations.AnimationExists(graphic, _animationGroup))
                 {
                     if (first_value == 0)
                     {
@@ -532,7 +533,7 @@ namespace ClassicUO.Game.GameObjects
 
                     _animationGroup = _animationIdle[(byte)animGroup - 1, first_value];
 
-                    if (!Client.Game.Animations.AnimationExists(graphic, _animationGroup))
+                    if (!Client.Game.UO.Animations.AnimationExists(graphic, _animationGroup))
                     {
                         SetAnimation(original_value);
                     }
@@ -584,7 +585,7 @@ namespace ClassicUO.Game.GameObjects
 
                     StepSoundOffset = (incID + 1) % 2;
 
-                    Client.Game.Audio.PlaySoundWithDistance(soundID, step.X, step.Y);
+                    Client.Game.Audio.PlaySoundWithDistance(World, soundID, step.X, step.Y);
                     LastStepSoundTime = Time.Ticks + delaySound;
                 }
             }
@@ -604,9 +605,9 @@ namespace ClassicUO.Game.GameObjects
                 AnimationsLoader.Instance.GetAnimDirection(ref dir, ref mirror);
                 int currentDelay = Constants.CHARACTER_ANIMATION_DELAY;
 
-                if (id < Client.Game.Animations.MaxAnimationCount && dir < 5)
+                if (id < Client.Game.UO.Animations.MaxAnimationCount && dir < 5)
                 {
-                    var frames = Client.Game.Animations.GetAnimationFrames(
+                    var frames = Client.Game.UO.Animations.GetAnimationFrames(
                         id,
                         action,
                         dir,
@@ -779,7 +780,7 @@ namespace ClassicUO.Game.GameObjects
                                 absX = X;
                                 absY = Y;
 
-                                Pathfinder.GetNewXY((byte)(step.Direction & 7), ref absX, ref absY);
+                               Pathfinder.GetNewXY((byte)(step.Direction & 7), ref absX, ref absY);
 
                                 badStep = absX != step.X || absY != step.Y;
                             }
@@ -964,7 +965,7 @@ namespace ClassicUO.Game.GameObjects
                 p.Y += 22;
             }
 
-            Client.Game.Animations.GetAnimationDimensions(
+            Client.Game.UO.Animations.GetAnimationDimensions(
                 AnimIndex,
                 GetGraphicForAnimation(),
                 /*(byte) m.GetDirectionForAnimation()*/
@@ -1087,7 +1088,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 UIManager.GetGump<PaperDollGump>(serial)?.Dispose();
 
-                _pool.ReturnOne(this);
+                //_pool.ReturnOne(this);
             }
         }
 

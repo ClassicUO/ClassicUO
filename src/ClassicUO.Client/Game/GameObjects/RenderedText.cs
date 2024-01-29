@@ -84,7 +84,7 @@ namespace ClassicUO.Game
             {
                 if (value == 0xFF)
                 {
-                    value = (byte)(Client.Version >= ClientVersion.CV_305D ? 1 : 0);
+                    value = (byte)(Client.Game.UO.Version >= ClientVersion.CV_305D ? 1 : 0);
                 }
 
                 _font = value;

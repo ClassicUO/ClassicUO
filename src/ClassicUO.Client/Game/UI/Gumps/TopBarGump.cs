@@ -49,7 +49,7 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class TopBarGump : Gump
     {
-        private TopBarGump() : base(0, 0)
+        private TopBarGump(World world) : base(world, 0, 0)
         {
             CanMove = true;
             AcceptMouseInput = true;
@@ -70,7 +70,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             // big
             int smallWidth = 50;
-            ref readonly var gumpInfo = ref Client.Game.Gumps.GetGump(0x098B);
+            ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(0x098B);
             if (gumpInfo.Texture != null)
             {
                 smallWidth = gumpInfo.UV.Width;
@@ -78,7 +78,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             int largeWidth = 100;
 
-            gumpInfo = ref Client.Game.Gumps.GetGump(0x098D);
+            gumpInfo = ref Client.Game.UO.Gumps.GetGump(0x098D);
             if (gumpInfo.Texture != null)
             {
                 largeWidth = gumpInfo.UV.Width;
@@ -118,7 +118,7 @@ namespace ClassicUO.Game.UI.Gumps
                 cliloc.GetString(1158390, ResGumps.GlobalChat)
             };
 
-            bool hasUOStore = Client.Version >= ClientVersion.CV_706400;
+            bool hasUOStore = Client.Game.UO.Version >= ClientVersion.CV_706400;
 
             ResizePic background;
 
@@ -178,7 +178,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public bool IsMinimized { get; private set; }
 
-        public static void Create()
+        public static void Create(World world)
         {
             TopBarGump gump = UIManager.GetGump<TopBarGump>();
 
@@ -193,7 +193,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
                 UIManager.Add(
-                    gump = new TopBarGump
+                    gump = new TopBarGump(world)
                     {
                         X = ProfileManager.CurrentProfile.TopbarGumpPosition.X,
                         Y = ProfileManager.CurrentProfile.TopbarGumpPosition.Y
@@ -239,33 +239,34 @@ namespace ClassicUO.Game.UI.Gumps
             switch ((Buttons)buttonID)
             {
                 case Buttons.Map:
-                    GameActions.OpenMiniMap();
+                    GameActions.OpenMiniMap(World);
 
                     break;
 
                 case Buttons.Paperdoll:
-                    GameActions.OpenPaperdoll(World.Player);
+                    GameActions.OpenPaperdoll(World, World.Player);
 
                     break;
 
                 case Buttons.Inventory:
-                    GameActions.OpenBackpack();
+                    GameActions.OpenBackpack(World);
 
                     break;
 
                 case Buttons.Journal:
-                    GameActions.OpenJournal();
+                    GameActions.OpenJournal(World);
 
                     break;
 
                 case Buttons.Chat:
-                    GameActions.OpenChat();
+                    GameActions.OpenChat(World);
 
                     break;
 
                 case Buttons.GlobalChat:
                     Log.Warn(ResGumps.ChatButtonPushedNotImplementedYet);
                     GameActions.Print(
+                        World,
                         ResGumps.GlobalChatNotImplementedYet,
                         0x23,
                         MessageType.System
@@ -274,7 +275,7 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
 
                 case Buttons.UOStore:
-                    if (Client.Version >= ClientVersion.CV_706400)
+                    if (Client.Game.UO.Version >= ClientVersion.CV_706400)
                     {
                         NetClient.Socket.Send_OpenUOStore();
                     }
@@ -292,7 +293,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (debugGump == null)
                     {
-                        debugGump = new DebugGump(100, 100);
+                        debugGump = new DebugGump(World, 100, 100);
                         UIManager.Add(debugGump);
                     }
                     else
@@ -308,7 +309,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (netstatsgump == null)
                     {
-                        netstatsgump = new NetworkStatsGump(100, 100);
+                        netstatsgump = new NetworkStatsGump(World, 100, 100);
                         UIManager.Add(netstatsgump);
                     }
                     else
@@ -320,7 +321,7 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
 
                 case Buttons.WorldMap:
-                    GameActions.OpenWorldMap();
+                    GameActions.OpenWorldMap(World);
 
                     break;
             }

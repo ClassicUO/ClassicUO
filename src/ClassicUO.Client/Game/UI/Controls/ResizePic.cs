@@ -52,7 +52,7 @@ namespace ClassicUO.Game.UI.Controls
 
             for (_maxIndex = 0; _maxIndex < 9; ++_maxIndex)
             {
-                if (Client.Game.Gumps.GetGump((ushort)(Graphic + _maxIndex)).Texture == null)
+                if (Client.Game.UO.Gumps.GetGump((ushort)(Graphic + _maxIndex)).Texture == null)
                 {
                     break;
                 }
@@ -262,7 +262,7 @@ namespace ClassicUO.Game.UI.Controls
                 return false;
             }
 
-            return Client.Game.Gumps.PixelCheck(graphic, x, y);
+            return Client.Game.UO.Gumps.PixelCheck(graphic, x, y);
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
@@ -421,7 +421,7 @@ namespace ClassicUO.Game.UI.Controls
                     ++index;
                 }
 
-                ref readonly var gumpInfo = ref Client.Game.Gumps.GetGump(
+                ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(
                     (ushort)(Graphic + index)
                 );
 
