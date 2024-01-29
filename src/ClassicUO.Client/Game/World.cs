@@ -815,7 +815,7 @@ namespace ClassicUO.Game
                 RemoveItem(item);
             }
 
-            UIManager.GetGump<BaseHealthBarGump>(Player.Serial)?.Dispose();
+            UIManager.GetGump<BaseHealthBarGump>(Player?.Serial)?.Dispose();
 
             ObjectToRemove = 0;
             LastObject = 0;
