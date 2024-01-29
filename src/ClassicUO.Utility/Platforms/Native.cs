@@ -32,7 +32,6 @@
 
 using System;
 using System.Runtime.InteropServices;
-using SDL2;
 
 namespace ClassicUO.Utility.Platforms
 {
@@ -77,11 +76,13 @@ namespace ClassicUO.Utility.Platforms
 
         private class WinNativeLoader : NativeLoader
         {
-            [DllImport("kernel32", EntryPoint = "LoadLibrary")]
-            private static extern IntPtr LoadLibrary_WIN(string fileName);
+            private const uint LOAD_WITH_ALTERED_SEARCH_PATH = 0x00000008;
+            [DllImport("kernel32.dll", SetLastError = true)]
+            [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+            private static extern IntPtr LoadLibraryExW([MarshalAs(UnmanagedType.LPWStr)] string lpLibFileName, IntPtr hFile, uint dwFlags);
 
-            [DllImport("kernel32", EntryPoint = "GetProcAddress")]
-            private static extern IntPtr GetProcAddress_WIN(IntPtr module, string procName);
+            [DllImport("kernel32", EntryPoint = "GetProcAddress", CharSet = CharSet.Ansi)]
+            private static extern IntPtr GetProcAddress_WIN(IntPtr module, [MarshalAs(UnmanagedType.LPStr)] string procName);
 
             [DllImport("kernel32", EntryPoint = "FreeLibrary")]
             private static extern int FreeLibrary_WIN(IntPtr module);
@@ -89,7 +90,7 @@ namespace ClassicUO.Utility.Platforms
 
             public override IntPtr LoadLibrary(string name)
             {
-                return LoadLibrary_WIN(name);
+                return LoadLibraryExW(name, IntPtr.Zero, LOAD_WITH_ALTERED_SEARCH_PATH);
             }
 
             public override IntPtr GetProcessAddress(IntPtr module, string name)

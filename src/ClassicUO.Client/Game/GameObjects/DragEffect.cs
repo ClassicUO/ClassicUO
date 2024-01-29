@@ -45,6 +45,7 @@ namespace ClassicUO.Game.GameObjects
 
         public DragEffect
         (
+            World world,
             EffectManager manager,
             uint src,
             uint trg,
@@ -59,7 +60,7 @@ namespace ClassicUO.Game.GameObjects
             int duration,
             byte speed
         ) 
-            : base(manager, graphic, hue, duration, speed)
+            : base(world, manager, graphic, hue, duration, speed)
         {
             Entity source = World.Get(src);
 

@@ -2,18 +2,18 @@ name: Deploy
 
 on:
   workflow_dispatch:
- # workflow_run:
- #   branches: [main]
- #   workflows: [Build-Test]
- #   types:
- #     - completed
-
+  # workflow_run:
+  #   branches: [main]
+  #   workflows: [Build-Test]
+  #   types:
+  #     - completed
 
 env:
-  CUO_ASSEMBLY_VERSION: '1.0.0.0' #'0.1.11.${{ github.run_number }}'
-  CUO_OUTPUT_PATH: '../../bin/dist'
+  CUO_ASSEMBLY_VERSION: "1.0.0.${{ github.run_number }}"
+  CUO_OUTPUT_PATH: "../../bin/dist"
   CUO_PROJECT_PATH: "src/ClassicUO.Client/ClassicUO.Client.csproj"
-  CUO_ZIP_NAME: "ClassicUO-dev-preview-release.zip"
+  BOOT_PROJECT_PATH: "src/ClassicUO.Bootstrap/src/ClassicUO.Bootstrap.csproj"
+  TARGET_FRAMEWORK: net8.0
 
   DOTNET_NOLOGO: false
   DOTNET_CLI_TELEMETRY_OPTOUT: 1
@@ -26,51 +26,85 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-       os: [ ubuntu-latest ]
+        include:
+          - os: windows-latest
+            target: win-x64
+          - os: ubuntu-latest
+            target: linux-x64
+          - os: macos-latest
+            target: osx-x64
 
     steps:
-    - uses: actions/checkout@v2
-      
-    - name: Get submodules
-      run: |
-        git config --global url."https://".insteadOf git://
-        git submodule update --init --recursive
-        
-    - name: Setup .NET 8
-      uses: actions/setup-dotnet@v3
-      with:
-        dotnet-version: 8.0.x
-        include-prerelease: true
-            
-    - name: Build
-      run: dotnet publish ${{ env.CUO_PROJECT_PATH }} -c Release -o ${{ env.CUO_OUTPUT_PATH }} -p:IS_DEV_BUILD=true -p:AssemblyVersion=${{ env.CUO_ASSEMBLY_VERSION }} -p:FileVersion=${{ env.CUO_ASSEMBLY_VERSION }}
-      
-    - name: Create manifest
-      run: |
-        dotnet run --project tools/ManifestCreator/ManifestCreator.csproj "${{ env.CUO_OUTPUT_PATH }}" "dev-preview" "${{ env.CUO_ZIP_NAME }}"
-        mkdir upload
-        mv manifest.xml upload
-      
-    - name: Create package
-      uses: thedoctor0/zip-release@master
-      with:
-        type: 'zip'
-        directory: ${{ env.CUO_OUTPUT_PATH }}
-        filename: ${{ env.CUO_ZIP_NAME }}
-        exclusions: '*.zip manifest.xml'
-            
-    - name: Move output
-      run: mv "${{ env.CUO_OUTPUT_PATH }}/${{ env.CUO_ZIP_NAME }}" upload
-                      
-    - name: Upload Release
-      uses: ncipollo/release-action@v1
-      with:
-        artifacts: "upload/${{ env.CUO_ZIP_NAME }}"
-        name: 'ClassicUO dev preview'
-        body: 'This build may not be safe: use it at your own risk.'
-        draft: false
-        prerelease: true
-        allowUpdates: true
-        tag: 'ClassicUO-dev-release'
-        token: ${{ secrets.GITHUB_TOKEN }}
-        
+    env:
+      CUO_ZIP_NAME: "ClassicUO-${{ matrix.target }}-release.zip"
+
+      - uses: actions/checkout@v2
+
+      - name: Get submodules
+        run: |
+          git config --global url."https://".insteadOf git://
+          git submodule update --init --recursive
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 8.0.x
+          include-prerelease: true
+
+      - name: Build Bootstrap app
+        run: dotnet publish ${{ env.BOOT_PROJECT_PATH }} -c Release -o ${{ env.CUO_OUTPUT_PATH }} -p:AssemblyVersion=${{ env.CUO_ASSEMBLY_VERSION }} -p:FileVersion=${{ env.CUO_ASSEMBLY_VERSION }}
+
+      - name: Build ClassicUO
+        run: dotnet publish ${{ env.CUO_PROJECT_PATH }} -c Release -r ${{ matrix.target }} -o ${{ env.CUO_OUTPUT_PATH }} -p:IS_DEV_BUILD=true -p:AssemblyVersion=${{ env.CUO_ASSEMBLY_VERSION }} -p:FileVersion=${{ env.CUO_ASSEMBLY_VERSION }} -p:PublishAot=true -p:TargetFrameworks=net8.0 -p:NativeLib=Shared -p:OutputType=Library
+
+      - name: Create manifest
+        run: |
+          dotnet run --project tools/ManifestCreator/ManifestCreator.csproj "${{ env.CUO_OUTPUT_PATH }}" "dev-preview" "${{ env.CUO_ZIP_NAME }}"
+          mkdir upload
+          mv manifest.xml upload
+
+      - name: Create package
+        uses: thedoctor0/zip-release@master
+        with:
+          type: "zip"
+          directory: ${{ env.CUO_OUTPUT_PATH }}
+          filename: ${{ env.CUO_ZIP_NAME }}
+          exclusions: "*.zip manifest.xml"
+
+      - name: Move output
+        run: mv "${{ env.CUO_OUTPUT_PATH }}/${{ env.CUO_ZIP_NAME }}" upload
+
+      - name: Upload Release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "upload/${{ env.CUO_ZIP_NAME }}"
+          name: "ClassicUO dev preview"
+          body: "This build may not be safe: use it at your own risk."
+          draft: false
+          prerelease: true
+          allowUpdates: true
+          tag: "ClassicUO-dev-release"
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Repo Preparation - clone
+        uses: actions/checkout@master
+        with:
+          repository: ClassicUO/deploy
+          path: deploy
+          ssh-key: ${{ secrets.SSH_DEPLOY_KEY }}
+
+      - name: Repo Preparation - prepare
+        run: |
+          cp -rdf ${{ env.CUO_OUTPUT_PATH }}/* deploy/client/${{ matrix.target }}/
+          cp upload/manifest.xml deploy/client/${{ matrix.target }}_manifest.xml
+
+      - name: Pushes to another repository
+        uses: cpina/github-action-push-to-another-repository@main
+        env:
+          SSH_DEPLOY_KEY: ${{ secrets.SSH_DEPLOY_KEY }}
+        with:
+          source-directory: deploy/
+          destination-github-username: "ClassicUO"
+          destination-repository-name: "deploy"
+          commit-message: "release ${{ env.CUO_ASSEMBLY_VERSION }} on ${{ matrix.target }}"
+          target-branch: main

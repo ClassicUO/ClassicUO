@@ -47,7 +47,7 @@ namespace ClassicUO.Game.UI.Gumps
             _isLeft;
         private readonly HSliderBar _slider;
 
-        public MenuGump(uint serial, uint serv, string name) : base(serial, serv)
+        public MenuGump(World world, uint serial, uint serv, string name) : base(world, serial, serv)
         {
             CanMove = true;
             AcceptMouseInput = true;
@@ -182,7 +182,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _graphic = graphic;
 
-                ref readonly var artInfo = ref Client.Game.Arts.GetArt(_graphic);
+                ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(_graphic);
 
                 Width = artInfo.UV.Width;
                 Height = artInfo.UV.Height;
@@ -194,7 +194,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (_graphic != 0)
                 {
-                    ref readonly var artInfo = ref Client.Game.Arts.GetArt(_graphic);
+                    ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(_graphic);
 
                     Vector3 hueVector = ShaderHueTranslator.GetHueVector(_hue, _isPartial, 1f);
 
@@ -285,7 +285,7 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private readonly ResizePic _resizePic;
 
-        public GrayMenuGump(uint local, uint serv, string name) : base(local, serv)
+        public GrayMenuGump(World world, uint local, uint serv, string name) : base(world, local, serv)
         {
             CanMove = true;
             AcceptMouseInput = true;

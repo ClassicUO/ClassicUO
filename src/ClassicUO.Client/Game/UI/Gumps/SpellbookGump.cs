@@ -61,14 +61,14 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly bool[] _spells = new bool[64];
         private int _enqueuePage = -1;
 
-        public SpellbookGump(uint item) : this()
+        public SpellbookGump(World world, uint item) : this(world)
         {
             LocalSerial = item;
 
             BuildGump();
         }
 
-        public SpellbookGump() : base(0, 0)
+        public SpellbookGump(World world) : base(world, 0, 0)
         {
             CanMove = true;
             AcceptMouseInput = false;
@@ -765,6 +765,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 var spellDef = GetSpellDefinition(iconSerial);
                 HueGumpPic icon = new HueGumpPic(
+                    this,
                     iconX,
                     40,
                     iconGraphic,
@@ -871,7 +872,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             GetSpellFloatingButton(def.ID)?.Dispose();
 
-            UseSpellButtonGump gump = new UseSpellButtonGump(def)
+            UseSpellButtonGump gump = new UseSpellButtonGump(World, def)
             {
                 X = Mouse.LClickPosition.X - 22,
                 Y = Mouse.LClickPosition.Y - 22
@@ -1459,6 +1460,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private class HueGumpPic : GumpPic
         {
+            private readonly SpellbookGump _gump;
             private readonly MacroManager _mm;
             private readonly ushort _spellID;
             private readonly string _spellName;
@@ -1470,6 +1472,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Keyboard.Ctrl && Keyboard.Alt && ProfileManager.CurrentProfile.FastSpellsAssign;
 
             public HueGumpPic(
+                SpellbookGump gump,
                 int x,
                 int y,
                 ushort graphic,
@@ -1478,17 +1481,18 @@ namespace ClassicUO.Game.UI.Gumps
                 string spellName
             ) : base(x, y, graphic, hue)
             {
+                _gump = gump;
                 _spellID = spellID;
                 _spellName = spellName;
 
-                _mm = Client.Game.GetScene<GameScene>().Macros;
+                _mm = gump.World.Macros;
             }
 
             public override void Update()
             {
                 base.Update();
 
-                if (World.ActiveSpellIcons.IsActive(_spellID))
+                if (_gump.World.ActiveSpellIcons.IsActive(_spellID))
                 {
                     Hue = 38;
                 }
@@ -1513,7 +1517,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
-                    ref readonly var gumpInfo = ref Client.Game.Gumps.GetGump(0x09CF);
+                    ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(0x09CF);
 
                     if (gumpInfo.Texture != null)
                     {
@@ -1565,7 +1569,7 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         _mm.MoveToBack(mCast);
                     }
-                    GameActions.OpenMacroGump(_spellName);
+                    GameActions.OpenMacroGump(_gump.World, _spellName);
                 }
             }
 

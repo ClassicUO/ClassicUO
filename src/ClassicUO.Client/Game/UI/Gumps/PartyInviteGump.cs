@@ -40,7 +40,7 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class PartyInviteGump : Gump
     {
-        public PartyInviteGump(uint inviter) : base(0, 0)
+        public PartyInviteGump(World world, uint inviter) : base(world, 0, 0)
         {
             CanCloseWithRightClick = true;
 

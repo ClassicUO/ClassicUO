@@ -37,8 +37,15 @@ using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.Managers
 {
-    internal class EffectManager : LinkedObject
+    internal sealed class EffectManager : LinkedObject
     {
+        private readonly World _world;
+
+        public EffectManager(World world)
+        {
+            _world = world;
+        }
+
         public void Update()
         {
             for (GameEffect f = (GameEffect) Items; f != null;)
@@ -47,7 +54,7 @@ namespace ClassicUO.Game.Managers
 
                 f.Update();
 
-                if (!f.IsDestroyed && f.Distance > World.ClientViewRange)
+                if (!f.IsDestroyed && f.Distance > _world.ClientViewRange)
                 {
                     f.Destroy();
                 }
@@ -108,6 +115,7 @@ namespace ClassicUO.Game.Managers
 
                     effect = new MovingEffect
                     (
+                        _world,
                         this,
                         source,
                         target,
@@ -144,6 +152,7 @@ namespace ClassicUO.Game.Managers
 
                     effect = new DragEffect
                     (
+                        _world,
                         this,
                         source,
                         target,
@@ -168,6 +177,7 @@ namespace ClassicUO.Game.Managers
                 case GraphicEffectType.Lightning:
                     effect = new LightningEffect
                     (
+                        _world,
                         this,
                         source,
                         srcX,
@@ -187,6 +197,7 @@ namespace ClassicUO.Game.Managers
 
                     effect = new FixedEffect
                     (
+                        _world,
                         this,
                         srcX,
                         srcY,
@@ -211,6 +222,7 @@ namespace ClassicUO.Game.Managers
 
                     effect = new FixedEffect
                     (
+                        _world,   
                         this,
                         source,
                         srcX,

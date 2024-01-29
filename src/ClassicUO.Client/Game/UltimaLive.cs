@@ -83,7 +83,7 @@ namespace ClassicUO.Game
         }
 
         //The UltimaLive packets could be also used for other things than maps and statics
-        private static void OnUltimaLivePacket(ref StackDataReader p)
+        private static void OnUltimaLivePacket(World world, ref StackDataReader p)
         {
             p.Seek(13);
             byte command = p.ReadUInt8();
@@ -114,7 +114,7 @@ namespace ClassicUO.Game
                         return;
                     }
 
-                    if (World.Map == null || mapId != World.Map.Index)
+                    if (world.Map == null || mapId != world.Map.Index)
                     {
                         return;
                     }
@@ -180,7 +180,7 @@ namespace ClassicUO.Game
                                     }
                                     else
                                     {
-                                        crc = GetBlockCrc(blockNumber);
+                                        crc = GetBlockCrc(world, blockNumber);
                                     }
 
                                     _UL.MapCRCs[mapId][blockNumber] = crc;
@@ -232,15 +232,14 @@ namespace ClassicUO.Game
                         return;
                     }
 
-                    if (World.Map == null || mapId != World.Map.Index)
+                    if (world.Map == null || mapId != world.Map.Index)
                     {
                         return;
                     }
 
-                    // TODO(andrea): using a struct range instead of allocate the array to the heap?
+                        // TODO(andrea): using a struct range instead of allocate the array to the heap?
                     byte[] staticsData = new byte[totalLength];
-
-                    p.Read(staticsData, 0, totalLength);
+                    p.Buffer.Slice(p.Position, totalLength).CopyTo(staticsData);
 
 
                     if (block >= 0 && block < MapLoader.Instance.MapBlocksSize[mapId, 0] * MapLoader.Instance.MapBlocksSize[mapId, 1])
@@ -293,7 +292,7 @@ namespace ClassicUO.Game
                             //update lookup AND index length on disk
                             _UL._filesIdxStatics[mapId].WriteArray(block * 12, idxData);
 
-                            Chunk mapChunk = World.Map.GetChunk(block);
+                            Chunk mapChunk = world.Map.GetChunk(block);
 
                             if (mapChunk == null)
                             {
@@ -479,7 +478,7 @@ namespace ClassicUO.Game
             }
         }
 
-        private static void OnUpdateTerrainPacket(ref StackDataReader p)
+        private static void OnUpdateTerrainPacket(World world, ref StackDataReader p)
         {
             int block = (int) p.ReadUInt32BE();
             // TODO: stackalloc
@@ -493,7 +492,7 @@ namespace ClassicUO.Game
             p.Seek(200);
             byte mapId = p.ReadUInt8();
 
-            if (World.Map == null || mapId != World.Map.Index)
+            if (world.Map == null || mapId != world.Map.Index)
             {
                 return;
             }
@@ -516,7 +515,7 @@ namespace ClassicUO.Game
                 {
                     for (int by = blockY; by >= miny; --by)
                     {
-                        Chunk mapChunk = World.Map.GetChunk(blockX * mapHeightInBlocks + by);
+                        Chunk mapChunk = world.Map.GetChunk(blockX * mapHeightInBlocks + by);
 
                         if (mapChunk == null)
                         {
@@ -563,9 +562,9 @@ namespace ClassicUO.Game
             }
         }
 
-        private static ushort GetBlockCrc(uint block)
+        private static ushort GetBlockCrc(World world, uint block)
         {
-            int mapId = World.Map.Index;
+            int mapId = world.Map.Index;
 
             _UL._filesIdxStatics[mapId].Seek(block * 12);
 

@@ -53,10 +53,10 @@ namespace ClassicUO
 
         public static readonly bool IsUnix = Environment.OSVersion.Platform != PlatformID.Win32NT && Environment.OSVersion.Platform != PlatformID.Win32Windows && Environment.OSVersion.Platform != PlatformID.Win32S && Environment.OSVersion.Platform != PlatformID.WinCE;
 
-        public static readonly Version Version = Assembly.GetExecutingAssembly().GetName().Version;
-        public static readonly string ExecutablePath = 
+        public static readonly string Version = Assembly.GetExecutingAssembly()?.GetName()?.Version?.ToString() ?? "0.0.0.0";
+        public static readonly string ExecutablePath =
 #if NETFRAMEWORK
-           Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location);
+           AppContext.BaseDirectory; // Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location);
 #else
             Environment.CurrentDirectory;
 #endif

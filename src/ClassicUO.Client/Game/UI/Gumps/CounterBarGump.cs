@@ -58,15 +58,16 @@ namespace ClassicUO.Game.UI.Gumps
 
         //private bool _isVertical;
 
-        public CounterBarGump() : base(0, 0) { }
+        public CounterBarGump(World world) : base(world, 0, 0) { }
 
         public CounterBarGump(
+            World world,
             int x,
             int y,
             int rectSize = 30,
             int rows = 1,
             int columns = 1 /*, bool vertical = false*/
-        ) : base(0, 0)
+        ) : base(world, 0, 0)
         {
             X = x;
             Y = y;
@@ -119,6 +120,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     Add(
                         new CounterItem(
+                            this,
                             col * _rectSize + 2,
                             row * _rectSize + 2,
                             _rectSize - 4,
@@ -231,6 +233,7 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         Add(
                             new CounterItem(
+                                this,
                                 col * _rectSize + 2,
                                 row * _rectSize + 2,
                                 _rectSize - 4,
@@ -318,12 +321,13 @@ namespace ClassicUO.Game.UI.Gumps
         private class CounterItem : Control
         {
             private int _amount;
-
             private readonly ImageWithText _image;
             private uint _time;
+            private readonly CounterBarGump _gump;
 
-            public CounterItem(int x, int y, int w, int h)
+            public CounterItem(CounterBarGump gump, int x, int y, int w, int h)
             {
+                _gump = gump;
                 AcceptMouseInput = true;
                 WantUpdateSize = false;
                 CanMove = true;
@@ -337,7 +341,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _image = new ImageWithText();
                 Add(_image);
 
-                ContextMenu = new ContextMenuControl();
+                ContextMenu = new ContextMenuControl(_gump);
                 ContextMenu.Add(ResGumps.UseObject, Use);
                 ContextMenu.Add(ResGumps.Remove, RemoveItem);
             }
@@ -373,7 +377,7 @@ namespace ClassicUO.Game.UI.Gumps
                     return;
                 }
 
-                Item backpack = World.Player.FindItemByLayer(Layer.Backpack);
+                Item backpack = _gump.World.Player.FindItemByLayer(Layer.Backpack);
 
                 if (backpack == null)
                 {
@@ -384,7 +388,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (item != null)
                 {
-                    GameActions.DoubleClick(item);
+                    GameActions.DoubleClick(_gump.World, item);
                 }
             }
 
@@ -392,19 +396,19 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (button == MouseButtonType.Left)
                 {
-                    if (Client.Game.GameCursor.ItemHold.Enabled)
+                    if (Client.Game.UO.GameCursor.ItemHold.Enabled)
                     {
                         SetGraphic(
-                            Client.Game.GameCursor.ItemHold.Graphic,
-                            Client.Game.GameCursor.ItemHold.Hue
+                            Client.Game.UO.GameCursor.ItemHold.Graphic,
+                            Client.Game.UO.GameCursor.ItemHold.Hue
                         );
 
                         GameActions.DropItem(
-                            Client.Game.GameCursor.ItemHold.Serial,
-                            Client.Game.GameCursor.ItemHold.X,
-                            Client.Game.GameCursor.ItemHold.Y,
+                            Client.Game.UO.GameCursor.ItemHold.Serial,
+                            Client.Game.UO.GameCursor.ItemHold.X,
+                            Client.Game.UO.GameCursor.ItemHold.Y,
                             0,
-                            Client.Game.GameCursor.ItemHold.Container
+                            Client.Game.UO.GameCursor.ItemHold.Container
                         );
                     }
                     else if (ProfileManager.CurrentProfile.CastSpellsByOneClick)
@@ -452,7 +456,7 @@ namespace ClassicUO.Game.UI.Gumps
                         _amount = 0;
 
                         for (
-                            Item item = (Item)World.Player.Items;
+                            Item item = (Item)_gump.World.Player.Items;
                             item != null;
                             item = (Item)item.Next
                         )
@@ -578,8 +582,8 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (_graphic != 0)
                     {
-                        ref readonly var artInfo = ref Client.Game.Arts.GetArt(_graphic);
-                        var rect = Client.Game.Arts.GetRealArtBounds(_graphic);
+                        ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(_graphic);
+                        var rect = Client.Game.UO.Arts.GetRealArtBounds(_graphic);
 
                         Vector3 hueVector = ShaderHueTranslator.GetHueVector(_hue, _partial, 1f);
 

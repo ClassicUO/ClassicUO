@@ -41,6 +41,7 @@ using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Assets;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
+using ClassicUO.Game.Scenes;
 
 namespace ClassicUO.Game.Managers
 {
@@ -68,16 +69,21 @@ namespace ClassicUO.Game.Managers
     }
 
 
-    internal static class MessageManager
+    internal sealed class MessageManager
     {
-        public static PromptData PromptData { get; set; }
+        private readonly World _world;
 
-        public static event EventHandler<MessageEventArgs> MessageReceived;
-
-        public static event EventHandler<MessageEventArgs> LocalizedMessageReceived;
+        public MessageManager(World world) => _world = world;
 
 
-        public static void HandleMessage
+        public PromptData PromptData { get; set; }
+
+        public event EventHandler<MessageEventArgs> MessageReceived;
+
+        public event EventHandler<MessageEventArgs> LocalizedMessageReceived;
+
+
+        public void HandleMessage
         (
             Entity parent,
             string text,
@@ -171,7 +177,7 @@ namespace ClassicUO.Game.Managers
                     }
 
                     // If person who send that message is in ignores list - but filter out Spell Text
-                    if (IgnoreManager.IgnoredCharsList.Contains(parent.Name) && type != MessageType.Spell)
+                    if (_world.IgnoreManager.IgnoredCharsList.Contains(parent.Name) && type != MessageType.Spell)
                         break;
 
                     TextObject msg = CreateMessage
@@ -188,8 +194,8 @@ namespace ClassicUO.Game.Managers
 
                     if (parent is Item it && !it.OnGround)
                     {
-                        msg.X = DelayedObjectClickManager.X;
-                        msg.Y = DelayedObjectClickManager.Y;
+                        msg.X = _world.DelayedObjectClickManager.X;
+                        msg.Y = _world.DelayedObjectClickManager.Y;
                         msg.IsTextGump = true;
                         bool found = false;
 
@@ -251,12 +257,12 @@ namespace ClassicUO.Game.Managers
             );
         }
 
-        public static void OnLocalizedMessage(Entity entity, MessageEventArgs args)
+        public void OnLocalizedMessage(Entity entity, MessageEventArgs args)
         {
             LocalizedMessageReceived.Raise(args, entity);
         }
 
-        public static TextObject CreateMessage
+        public TextObject CreateMessage
         (
             string msg,
             ushort hue,
@@ -317,7 +323,7 @@ namespace ClassicUO.Game.Managers
             }
 
 
-            TextObject textObject = TextObject.Create();
+            TextObject textObject = TextObject.Create(_world);
             textObject.Alpha = 0xFF;
             textObject.Type = type;
             textObject.Hue = fixedColor;

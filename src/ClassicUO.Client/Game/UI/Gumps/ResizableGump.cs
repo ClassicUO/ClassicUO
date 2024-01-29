@@ -48,14 +48,14 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected ResizableGump
         (
-            int width,
+            World world,int width,
             int height,
             int minW,
             int minH,
             uint local,
             uint server,
             ushort borderHue = 0
-        ) : base(local, server)
+        ) : base(world, local, server)
         {
             _borderControl = new BorderControl
             (

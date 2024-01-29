@@ -212,7 +212,7 @@ namespace ClassicUO.Network
 
             PluginHeader header = new PluginHeader
             {
-                ClientVersion = (int)Client.Version,
+                ClientVersion = (int)Client.Game.UO.Version,
                 Recv = Marshal.GetFunctionPointerForDelegate(_recv),
                 Send = Marshal.GetFunctionPointerForDelegate(_send),
                 GetPacketLength = Marshal.GetFunctionPointerForDelegate(_getPacketLength),
@@ -243,23 +243,26 @@ namespace ClassicUO.Network
 
             try
             {
-                IntPtr assptr = Native.LoadLibrary(PluginPath);
+                var assptr = Native.LoadLibrary(PluginPath);
 
                 Log.Trace($"assembly: {assptr}");
 
                 if (assptr == IntPtr.Zero)
                 {
+                    var err = Marshal.GetLastWin32Error().ToString();
                     throw new Exception("Invalid Assembly, Attempting managed load.");
                 }
 
                 Log.Trace($"Searching for 'Install' entry point  -  {assptr}");
 
-                IntPtr installPtr = Native.GetProcessAddress(assptr, "Install");
+                var installPtr = Native.GetProcessAddress(assptr, "Install");
 
                 Log.Trace($"Entry point: {installPtr}");
 
                 if (installPtr == IntPtr.Zero)
                 {
+                    Native.FreeLibrary(assptr);
+                    Console.WriteLine("free lib done");
                     throw new Exception("Invalid Entry Point, Attempting managed load.");
                 }
 
@@ -271,33 +274,40 @@ namespace ClassicUO.Network
             {
                 try
                 {
-                    Assembly asm = Assembly.LoadFile(PluginPath);
-                    Type type = asm.GetType("Assistant.Engine");
+                    Client.Game.PluginHost?.LoadPlugin(PluginPath);
 
-                    if (type == null)
-                    {
-                        Log.Error(
-                            "Unable to find Plugin Type, API requires the public class Engine in namespace Assistant."
-                        );
+                    //Client.Game.AssistantHost.OnSocketConnected += (o, e) => { 
+                    //    Client.Game.AssistantHost.PluginInitialize(PluginPath); 
+                    //};
+                    //Client.Game.AssistantHost.Connect("127.0.0.1", 7777);
 
-                        return;
-                    }
+                    //Assembly asm = Assembly.LoadFile(PluginPath);
+                    //Type type = asm.GetType("Assistant.Engine");
 
-                    MethodInfo meth = type.GetMethod(
-                        "Install",
-                        BindingFlags.Public | BindingFlags.Static
-                    );
+                    //if (type == null)
+                    //{
+                    //    Log.Error(
+                    //        "Unable to find Plugin Type, API requires the public class Engine in namespace Assistant."
+                    //    );
 
-                    if (meth == null)
-                    {
-                        Log.Error(
-                            "Engine class missing public static Install method Needs 'public static unsafe void Install(PluginHeader *plugin)' "
-                        );
+                    //    return;
+                    //}
 
-                        return;
-                    }
+                    //MethodInfo meth = type.GetMethod(
+                    //    "Install",
+                    //    BindingFlags.Public | BindingFlags.Static
+                    //);
 
-                    meth.Invoke(null, new object[] { (IntPtr)func });
+                    //if (meth == null)
+                    //{
+                    //    Log.Error(
+                    //        "Engine class missing public static Install method Needs 'public static unsafe void Install(PluginHeader *plugin)' "
+                    //    );
+
+                    //    return;
+                    //}
+
+                    //meth.Invoke(null, new object[] { (IntPtr)func });
                 }
                 catch (Exception err)
                 {
@@ -497,18 +507,18 @@ namespace ClassicUO.Network
             //info.CompressedSize = compressedsize;
         }
 
-        private static bool RequestMove(int dir, bool run)
+        internal static bool RequestMove(int dir, bool run)
         {
-            return World.Player.Walk((Direction)dir, run);
+            return Client.Game.UO.World.Player.Walk((Direction)dir, run);
         }
 
-        private static bool GetPlayerPosition(out int x, out int y, out int z)
+        internal static bool GetPlayerPosition(out int x, out int y, out int z)
         {
-            if (World.Player != null)
+            if (Client.Game.UO.World.Player != null)
             {
-                x = World.Player.X;
-                y = World.Player.Y;
-                z = World.Player.Z;
+                x = Client.Game.UO.World.Player.X;
+                y = Client.Game.UO.World.Player.Y;
+                z = Client.Game.UO.World.Player.Z;
 
                 return true;
             }
@@ -520,6 +530,8 @@ namespace ClassicUO.Network
 
         internal static void Tick()
         {
+            Client.Game.PluginHost?.Tick();
+
             foreach (Plugin t in Plugins)
             {
                 if (t._tick != null)
@@ -531,7 +543,7 @@ namespace ClassicUO.Network
 
         internal static bool ProcessRecvPacket(byte[] data, ref int length)
         {
-            bool result = true;
+            bool result = Client.Game.PluginHost?.PacketIn(new ArraySegment<byte>(data, 0, length)) ?? true;
 
             foreach (Plugin plugin in Plugins)
             {
@@ -566,7 +578,7 @@ namespace ClassicUO.Network
 
         internal static bool ProcessSendPacket(ref Span<byte> message)
         {
-            bool result = true;
+            bool result = Client.Game.PluginHost?.PacketOut(message) ?? true;
 
             foreach (Plugin plugin in Plugins)
             {
@@ -603,6 +615,8 @@ namespace ClassicUO.Network
 
         internal static void OnClosing()
         {
+            Client.Game.PluginHost?.Closing();
+
             for (int i = 0; i < Plugins.Count; i++)
             {
                 if (Plugins[i]._onClientClose != null)
@@ -616,6 +630,8 @@ namespace ClassicUO.Network
 
         internal static void OnFocusGained()
         {
+            Client.Game.PluginHost?.FocusGained();
+
             foreach (Plugin t in Plugins)
             {
                 if (t._onFocusGained != null)
@@ -627,6 +643,8 @@ namespace ClassicUO.Network
 
         internal static void OnFocusLost()
         {
+            Client.Game.PluginHost?.FocusLost();
+
             foreach (Plugin t in Plugins)
             {
                 if (t._onFocusLost != null)
@@ -638,6 +656,8 @@ namespace ClassicUO.Network
 
         internal static void OnConnected()
         {
+            Client.Game.PluginHost?.Connected();
+
             foreach (Plugin t in Plugins)
             {
                 if (t._onConnected != null)
@@ -649,6 +669,8 @@ namespace ClassicUO.Network
 
         internal static void OnDisconnected()
         {
+            Client.Game.PluginHost?.Disconnected();
+
             foreach (Plugin t in Plugins)
             {
                 if (t._onDisconnected != null)
@@ -660,10 +682,7 @@ namespace ClassicUO.Network
 
         internal static bool ProcessHotkeys(int key, int mod, bool ispressed)
         {
-            if (
-                !World.InGame
-                || UIManager.SystemChat != null
-                    && (
+            if ((!Client.Game.UO.World?.InGame ?? false) || UIManager.SystemChat != null && (
                         ProfileManager.CurrentProfile != null
                             && ProfileManager.CurrentProfile.ActivateChatAfterEnter
                             && UIManager.SystemChat.IsActive
@@ -674,7 +693,9 @@ namespace ClassicUO.Network
                 return true;
             }
 
-            bool result = true;
+            var ok = Client.Game.PluginHost?.Hotkey(key, mod, ispressed);
+
+            bool result = ok ?? true;
 
             foreach (Plugin plugin in Plugins)
             {
@@ -691,6 +712,8 @@ namespace ClassicUO.Network
 
         internal static void ProcessMouse(int button, int wheel)
         {
+            Client.Game.PluginHost?.Mouse(button, wheel);
+
             foreach (Plugin plugin in Plugins)
             {
                 plugin._onMouse?.Invoke(button, wheel);
@@ -699,16 +722,24 @@ namespace ClassicUO.Network
 
         internal static void ProcessDrawCmdList(GraphicsDevice device)
         {
+            IntPtr cmdList = IntPtr.Zero;
+            var len = 0;
+            Client.Game.PluginHost?.GetCommandList(out cmdList, out len);
+            if (Client.Game.PluginHost != null && len != 0 && cmdList != IntPtr.Zero)
+            {
+                HandleCmdList(device, cmdList, len, Client.Game.PluginHost.GfxResources);
+            }
+
             foreach (Plugin plugin in Plugins)
             {
                 if (plugin._draw_cmd_list != null)
                 {
-                    int cmd_count = 0;
-                    plugin._draw_cmd_list.Invoke(out IntPtr cmdlist, ref cmd_count);
+                    len = 0;
+                    plugin._draw_cmd_list.Invoke(out cmdList, ref len);
 
-                    if (cmd_count != 0 && cmdlist != IntPtr.Zero)
+                    if (len != 0 && cmdList != IntPtr.Zero)
                     {
-                        plugin.HandleCmdList(device, cmdlist, cmd_count, plugin._resources);
+                        HandleCmdList(device, cmdList, len, plugin._resources);
                     }
                 }
             }
@@ -716,7 +747,7 @@ namespace ClassicUO.Network
 
         internal static int ProcessWndProc(SDL.SDL_Event* e)
         {
-            int result = 0;
+            var result = Client.Game.PluginHost?.SdlEvent(e) ?? 0;
 
             foreach (Plugin plugin in Plugins)
             {
@@ -731,6 +762,8 @@ namespace ClassicUO.Network
 
         internal static void UpdatePlayerPosition(int x, int y, int z)
         {
+            Client.Game.PluginHost?.UpdatePlayerPosition(x, y, z);
+
             foreach (Plugin plugin in Plugins)
             {
                 try
@@ -750,7 +783,7 @@ namespace ClassicUO.Network
             }
         }
 
-        private static bool OnPluginRecv(ref byte[] data, ref int length)
+        internal static bool OnPluginRecv(ref byte[] data, ref int length)
         {
             lock (PacketHandlers.Handler)
             {
@@ -760,7 +793,7 @@ namespace ClassicUO.Network
             return true;
         }
 
-        private static bool OnPluginSend(ref byte[] data, ref int length)
+        internal static bool OnPluginSend(ref byte[] data, ref int length)
         {
             if (NetClient.Socket.IsConnected)
             {
@@ -770,7 +803,7 @@ namespace ClassicUO.Network
             return true;
         }
 
-        private static bool OnPluginRecv_new(IntPtr buffer, ref int length)
+        internal static bool OnPluginRecv_new(IntPtr buffer, ref int length)
         {
             if (buffer != IntPtr.Zero && length > 0)
             {
@@ -783,7 +816,7 @@ namespace ClassicUO.Network
             return true;
         }
 
-        private static bool OnPluginSend_new(IntPtr buffer, ref int length)
+        internal static bool OnPluginSend_new(IntPtr buffer, ref int length)
         {
             if (buffer != IntPtr.Zero && length > 0)
             {
@@ -818,7 +851,7 @@ namespace ClassicUO.Network
             return DeleteFile(fileName + ":Zone.Identifier");
         }
 
-        private void HandleCmdList(
+        private static void HandleCmdList(
             GraphicsDevice device,
             IntPtr ptr,
             int length,

@@ -57,7 +57,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         const ushort LOCK_GRAPHIC = 0x082C;
 
-        protected AnchorableGump(uint local, uint server) : base(local, server) { }
+        protected AnchorableGump(World world, uint local, uint server) : base(world, local, server) { }
 
         public ANCHOR_TYPE AnchorType { get; protected set; }
         public virtual int GroupMatrixWidth { get; protected set; }
@@ -132,7 +132,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (button == MouseButtonType.Left && ShowLock)
             {
-                ref readonly var gumpInfo = ref Client.Game.Gumps.GetGump(LOCK_GRAPHIC);
+                ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(LOCK_GRAPHIC);
                 if (gumpInfo.Texture != null)
                 {
                     if (
@@ -159,7 +159,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (ShowLock)
             {
                 hueVector = ShaderHueTranslator.GetHueVector(0);
-                ref readonly var gumpInfo = ref Client.Game.Gumps.GetGump(LOCK_GRAPHIC);
+                ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(LOCK_GRAPHIC);
 
                 if (gumpInfo.Texture != null)
                 {

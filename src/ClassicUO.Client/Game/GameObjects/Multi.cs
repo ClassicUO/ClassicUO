@@ -40,22 +40,22 @@ namespace ClassicUO.Game.GameObjects
 {
     internal sealed partial class Multi : GameObject
     {
-        private static readonly QueuedPool<Multi> _pool = new QueuedPool<Multi>
-        (
-            Constants.PREDICTABLE_MULTIS,
-            m =>
-            {
-                m.IsDestroyed = false;
-                m.AlphaHue = 0;
-                m.FoliageIndex = 0;
-                m.IsHousePreview = false;
-                m.MultiOffsetX = m.MultiOffsetY = m.MultiOffsetZ = 0;
-                m.IsCustom = false;
-                m.State = 0;
-                m.IsMovable = false;
-                m.Offset = Vector3.Zero;
-            }
-        );
+        //private static readonly QueuedPool<Multi> _pool = new QueuedPool<Multi>
+        //(
+        //    Constants.PREDICTABLE_MULTIS,
+        //    m =>
+        //    {
+        //        m.IsDestroyed = false;
+        //        m.AlphaHue = 0;
+        //        m.FoliageIndex = 0;
+        //        m.IsHousePreview = false;
+        //        m.MultiOffsetX = m.MultiOffsetY = m.MultiOffsetZ = 0;
+        //        m.IsCustom = false;
+        //        m.State = 0;
+        //        m.IsMovable = false;
+        //        m.Offset = Vector3.Zero;
+        //    }
+        //);
         private ushort _originalGraphic;
 
 
@@ -71,12 +71,14 @@ namespace ClassicUO.Game.GameObjects
         public CUSTOM_HOUSE_MULTI_OBJECT_FLAGS State = 0;
 
 
-        public static Multi Create(ushort graphic)
+        public Multi(World world) : base(world) { }
+
+        public static Multi Create(World world, ushort graphic)
         {
-            Multi m = _pool.GetOne();
+            Multi m = new Multi(world); // _pool.GetOne();
             m.Graphic = m._originalGraphic = graphic;
             m.UpdateGraphicBySeason();
-            m.AllowedToDraw = CanBeDrawn(m.Graphic);
+            m.AllowedToDraw = CanBeDrawn(world, m.Graphic);
 
             if (m.ItemData.Height > 5 || m.ItemData.Height == 0)
             {
@@ -112,7 +114,7 @@ namespace ClassicUO.Game.GameObjects
             }
 
             base.Destroy();
-            _pool.ReturnOne(this);
+            //_pool.ReturnOne(this);
         }
     }
 }

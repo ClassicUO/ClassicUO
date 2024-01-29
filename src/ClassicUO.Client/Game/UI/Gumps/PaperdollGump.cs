@@ -67,13 +67,13 @@ namespace ClassicUO.Game.UI.Gumps
         private GumpPic _virtueMenuPic;
         private Button _warModeBtn;
 
-        public PaperDollGump() : base(0, 0)
+        public PaperDollGump(World world) : base(world, 0, 0)
         {
             CanMove = true;
             CanCloseWithRightClick = true;
         }
 
-        public PaperDollGump(uint serial, bool canLift) : this()
+        public PaperDollGump(World world, uint serial, bool canLift) : this(world)
         {
             LocalSerial = serial;
             CanLift = canLift;
@@ -145,7 +145,7 @@ namespace ClassicUO.Game.UI.Gumps
             var showPaperdollBooks =
                 LocalSerial == World.Player && World.ClientFeatures.PaperdollBooks;
             var showRacialAbilitiesBook =
-                showPaperdollBooks && Client.Version >= ClientVersion.CV_7000;
+                showPaperdollBooks && Client.Game.UO.Version >= ClientVersion.CV_7000;
 
             if (LocalSerial == World.Player)
             {
@@ -182,7 +182,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 );
 
-                if (Client.Version < ClientVersion.CV_500A)
+                if (Client.Game.UO.Version < ClientVersion.CV_500A)
                 {
                     // JOURNAL BUTTON
                     Add(
@@ -311,7 +311,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Add(_combatBook = new GumpPic(156, 200, 0x2B34, 0));
                 _combatBook.MouseDoubleClick += (sender, e) =>
                 {
-                    GameActions.OpenAbilitiesBook();
+                    GameActions.OpenAbilitiesBook(World);
                 };
 
                 if (showRacialAbilitiesBook)
@@ -322,7 +322,7 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         if (UIManager.GetGump<RacialAbilitiesBookGump>() == null)
                         {
-                            UIManager.Add(new RacialAbilitiesBookGump(100, 100));
+                            UIManager.Add(new RacialAbilitiesBookGump(World, 100, 100));
                         }
                     };
                 }
@@ -390,7 +390,7 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         int x = Client.Game.Window.ClientBounds.Width / 2 - 272;
                         int y = Client.Game.Window.ClientBounds.Height / 2 - 240;
-                        UIManager.Add(new PartyGump(x, y, World.Party.CanLoot));
+                        UIManager.Add(new PartyGump(World, x, y, World.Party.CanLoot));
                     }
                     else
                     {
@@ -435,7 +435,7 @@ namespace ClassicUO.Game.UI.Gumps
                     && (item.Layer == Layer.Backpack || item.ItemData.IsContainer);
 
                 if (
-                    _paperDollInteractable.HasFakeItem && !Client.Game.GameCursor.ItemHold.Enabled
+                    _paperDollInteractable.HasFakeItem && !Client.Game.UO.GameCursor.ItemHold.Enabled
                     || force_false
                 )
                 {
@@ -443,17 +443,17 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else if (
                     !_paperDollInteractable.HasFakeItem
-                    && Client.Game.GameCursor.ItemHold.Enabled
-                    && !Client.Game.GameCursor.ItemHold.IsFixedPosition
+                    && Client.Game.UO.GameCursor.ItemHold.Enabled
+                    && !Client.Game.UO.GameCursor.ItemHold.IsFixedPosition
                     && UIManager.MouseOverControl?.RootParent == this
                 )
                 {
-                    if (Client.Game.GameCursor.ItemHold.ItemData.AnimID != 0)
+                    if (Client.Game.UO.GameCursor.ItemHold.ItemData.AnimID != 0)
                     {
                         if (
                             mobile != null
                             && mobile.FindItemByLayer(
-                                (Layer)Client.Game.GameCursor.ItemHold.ItemData.Layer
+                                (Layer)Client.Game.UO.GameCursor.ItemHold.ItemData.Layer
                             ) == null
                         )
                         {
@@ -475,7 +475,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Mobile container = World.Mobiles.Get(LocalSerial);
 
-                if (Client.Game.GameCursor.ItemHold.Enabled)
+                if (Client.Game.UO.GameCursor.ItemHold.Enabled)
                 {
                     if (CanLift || LocalSerial == World.Player.Serial)
                     {
@@ -485,7 +485,7 @@ namespace ClassicUO.Game.UI.Gumps
                         )
                         {
                             GameActions.DropItem(
-                                Client.Game.GameCursor.ItemHold.Serial,
+                                Client.Game.UO.GameCursor.ItemHold.Serial,
                                 0xFFFF,
                                 0xFFFF,
                                 0,
@@ -496,15 +496,15 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                         else
                         {
-                            if (Client.Game.GameCursor.ItemHold.ItemData.IsWearable)
+                            if (Client.Game.UO.GameCursor.ItemHold.ItemData.IsWearable)
                             {
                                 Item equipment = container.FindItemByLayer(
-                                    (Layer)Client.Game.GameCursor.ItemHold.ItemData.Layer
+                                    (Layer)Client.Game.UO.GameCursor.ItemHold.ItemData.Layer
                                 );
 
                                 if (equipment == null)
                                 {
-                                    GameActions.Equip(
+                                    GameActions.Equip(World,
                                         LocalSerial != World.Player ? container : World.Player
                                     );
                                     Mouse.CancelDoubleClick = true;
@@ -515,22 +515,22 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else if (SelectedObject.Object is Item item)
                 {
-                    if (TargetManager.IsTargeting)
+                    if (World.TargetManager.IsTargeting)
                     {
-                        TargetManager.Target(item.Serial);
+                        World.TargetManager.Target(item.Serial);
                         Mouse.CancelDoubleClick = true;
                         Mouse.LastLeftButtonClickTime = 0;
 
-                        if (TargetManager.TargetingState == CursorTarget.SetTargetClientSide)
+                        if (World.TargetManager.TargetingState == CursorTarget.SetTargetClientSide)
                         {
-                            UIManager.Add(new InspectorGump(item));
+                            UIManager.Add(new InspectorGump(World,item));
                         }
                     }
-                    else if (!DelayedObjectClickManager.IsEnabled)
+                    else if (!World.DelayedObjectClickManager.IsEnabled)
                     {
                         Point off = Mouse.LDragOffset;
 
-                        DelayedObjectClickManager.Set(
+                        World.DelayedObjectClickManager.Set(
                             item.Serial,
                             Mouse.Position.X - off.X - ScreenCoordinateX,
                             Mouse.Position.Y - off.Y - ScreenCoordinateY,
@@ -596,8 +596,8 @@ namespace ClassicUO.Game.UI.Gumps
         public override void OnButtonClick(int buttonID)
         {
             if (
-                Client.Game.GameCursor.ItemHold.Enabled
-                && !Client.Game.GameCursor.ItemHold.IsFixedPosition
+                Client.Game.UO.GameCursor.ItemHold.Enabled
+                && !Client.Game.UO.GameCursor.ItemHold.IsFixedPosition
             )
             {
                 OnMouseUp(0, 0, MouseButtonType.Left);
@@ -613,7 +613,7 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
 
                 case Buttons.Options:
-                    GameActions.OpenSettings();
+                    GameActions.OpenSettings(World);
 
                     break;
 
@@ -623,27 +623,27 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
 
                 case Buttons.Journal:
-                    GameActions.OpenJournal();
+                    GameActions.OpenJournal(World);
 
                     break;
 
                 case Buttons.Quests:
-                    GameActions.RequestQuestMenu();
+                    GameActions.RequestQuestMenu(World);
 
                     break;
 
                 case Buttons.Skills:
-                    GameActions.OpenSkills();
+                    GameActions.OpenSkills(World);
 
                     break;
 
                 case Buttons.Guild:
-                    GameActions.OpenGuildGump();
+                    GameActions.OpenGuildGump(World);
 
                     break;
 
                 case Buttons.PeaceWarToggle:
-                    GameActions.ToggleWarMode();
+                    GameActions.ToggleWarMode(World.Player);
 
                     break;
 
@@ -658,7 +658,7 @@ namespace ClassicUO.Game.UI.Gumps
                         if (status == null)
                         {
                             UIManager.Add(
-                                StatusGumpBase.AddStatusGump(
+                                StatusGumpBase.AddStatusGump(World,
                                     Mouse.Position.X - 100,
                                     Mouse.Position.Y - 25
                                 )
@@ -686,7 +686,7 @@ namespace ClassicUO.Game.UI.Gumps
                             );
 
                             UIManager.Add(
-                                new HealthBarGumpCustom(LocalSerial)
+                                new HealthBarGumpCustom(World, LocalSerial)
                                 {
                                     X = Mouse.Position.X - (bounds.Width >> 1),
                                     Y = Mouse.Position.Y - 5
@@ -695,10 +695,10 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                         else
                         {
-                            ref readonly var gumpInfo = ref Client.Game.Gumps.GetGump(0x0804);
+                            ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(0x0804);
 
                             UIManager.Add(
-                                new HealthBarGump(LocalSerial)
+                                new HealthBarGump(World,LocalSerial)
                                 {
                                     X = Mouse.Position.X - (gumpInfo.UV.Width >> 1),
                                     Y = Mouse.Position.Y - 5
@@ -758,7 +758,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             public override void Update()
             {
-                Item item = World.Items.Get(LocalSerial);
+                Item item = _paperDollGump.World.Items.Get(LocalSerial);
 
                 if (item == null || item.IsDestroyed)
                 {
@@ -766,7 +766,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _itemGump = null;
                 }
 
-                Mobile mobile = World.Mobiles.Get(_paperDollGump.LocalSerial);
+                Mobile mobile = _paperDollGump.World.Mobiles.Get(_paperDollGump.LocalSerial);
 
                 if (mobile != null)
                 {
@@ -787,7 +787,7 @@ namespace ClassicUO.Game.UI.Gumps
                             LocalSerial = it_at_layer.Serial;
 
                             Add(
-                                _itemGump = new ItemGumpFixed(item, 18, 18)
+                                _itemGump = new ItemGumpFixed(_paperDollGump, item, 18, 18)
                                 {
                                     X = 0,
                                     Y = 0,
@@ -795,9 +795,9 @@ namespace ClassicUO.Game.UI.Gumps
                                     Height = 18,
                                     HighlightOnMouseOver = false,
                                     CanPickUp =
-                                        World.InGame
+                                        _paperDollGump.World.InGame
                                         && (
-                                            World.Player.Serial == _paperDollGump.LocalSerial
+                                            _paperDollGump.World.Player.Serial == _paperDollGump.LocalSerial
                                             || _paperDollGump.CanLift
                                         )
                                 }
@@ -811,18 +811,20 @@ namespace ClassicUO.Game.UI.Gumps
 
             private class ItemGumpFixed : ItemGump
             {
+                private readonly PaperDollGump _gump;
                 private readonly Point _originalSize;
                 private readonly Point _point;
                 private readonly Rectangle _rect;
 
-                public ItemGumpFixed(Item item, int w, int h)
-                    : base(item.Serial, item.DisplayedGraphic, item.Hue, item.X, item.Y)
+                public ItemGumpFixed(PaperDollGump gump, Item item, int w, int h)
+                    : base(gump, item.Serial, item.DisplayedGraphic, item.Hue, item.X, item.Y)
                 {
+                    _gump = gump;
                     Width = w;
                     Height = h;
                     WantUpdateSize = false;
 
-                    _rect = Client.Game.Arts.GetRealArtBounds(item.DisplayedGraphic);
+                    _rect = Client.Game.UO.Arts.GetRealArtBounds(item.DisplayedGraphic);
 
                     _originalSize.X = Width;
                     _originalSize.Y = Height;
@@ -842,7 +844,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 public override bool Draw(UltimaBatcher2D batcher, int x, int y)
                 {
-                    Item item = World.Items.Get(LocalSerial);
+                    Item item = _gump.World.Items.Get(LocalSerial);
 
                     if (item == null)
                     {
@@ -861,7 +863,7 @@ namespace ClassicUO.Game.UI.Gumps
                         true
                     );
 
-                    ref readonly var artInfo = ref Client.Game.Arts.GetArt(item.DisplayedGraphic);
+                    ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(item.DisplayedGraphic);
 
                     if (artInfo.Texture != null)
                     {

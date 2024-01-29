@@ -45,11 +45,17 @@ namespace ClassicUO.Game.GameObjects
 {
     internal abstract class BaseGameObject : LinkedObject
     {
+        protected BaseGameObject(World world) => World = world;
+
         public Point RealScreenPosition;
+
+        public World World { get; }
     }
 
     internal abstract partial class GameObject : BaseGameObject
     {
+        protected GameObject(World world) : base(world) { }
+
         public bool IsDestroyed { get; protected set; }
         public bool IsPositionChanged { get; protected set; }
         public TextContainer TextContainer { get; private set; }
@@ -210,7 +216,7 @@ namespace ClassicUO.Game.GameObjects
 
             Point p = RealScreenPosition;
 
-            var bounds = Client.Game.Arts.GetRealArtBounds(Graphic);
+            var bounds = Client.Game.UO.Arts.GetRealArtBounds(Graphic);
 
             p.Y -= bounds.Height >> 1;
 
@@ -316,7 +322,7 @@ namespace ClassicUO.Game.GameObjects
                 return;
             }
 
-            TextObject msg = MessageManager.CreateMessage(
+            TextObject msg = World.MessageManager.CreateMessage(
                 text,
                 hue,
                 font,
@@ -380,7 +386,7 @@ namespace ClassicUO.Game.GameObjects
             FrameInfo = Rectangle.Empty;
         }
 
-        public static bool CanBeDrawn(ushort g)
+        public static bool CanBeDrawn(World world, ushort g)
         {
             switch (g)
             {
@@ -413,7 +419,7 @@ namespace ClassicUO.Game.GameObjects
                 // In older clients the tiledata flag for this
                 // item contains NoDiagonal for some reason.
                 // So the next check will make the item invisible.
-                if (g == 0x0F65 && Client.Version < ClientVersion.CV_60144)
+                if (g == 0x0F65 && Client.Game.UO.Version < ClientVersion.CV_60144)
                 {
                     return true;
                 }
@@ -425,8 +431,8 @@ namespace ClassicUO.Game.GameObjects
                     if (
                         !data.IsNoDiagonal
                         || data.IsAnimated
-                            && World.Player != null
-                            && World.Player.Race == RaceType.GARGOYLE
+                            && world.Player != null
+                            && world.Player.Race == RaceType.GARGOYLE
                     )
                     {
                         return true;

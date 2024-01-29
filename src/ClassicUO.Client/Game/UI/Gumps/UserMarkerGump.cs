@@ -34,8 +34,8 @@ namespace ClassicUO.Game.UI.Gumps
         private const int MAX_NAME_LEN = 25;
 
         private const int MAP_MIN_CORD = 0;
-        private readonly int _mapMaxX = MapLoader.Instance.MapsDefaultSize[World.MapIndex, 0];
-        private readonly int _mapMaxY = MapLoader.Instance.MapsDefaultSize[World.MapIndex, 1];
+        private readonly int _mapMaxX;
+        private readonly int _mapMaxY;
 
         private readonly string _userMarkersFilePath = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Client", $"{USER_MARKERS_FILE}.usr");
 
@@ -48,9 +48,12 @@ namespace ClassicUO.Game.UI.Gumps
             CANCEL_BTN,
         }
 
-        internal UserMarkersGump(int x, int y, List<WMapMarker> markers, string color = "none", string icon = "exit", bool isEdit = false, int markerIdx = -1) : base(0, 0)
+        internal UserMarkersGump(World world, int x, int y, List<WMapMarker> markers, string color = "none", string icon = "exit", bool isEdit = false, int markerIdx = -1) : base(world, 0, 0)
         {
             CanMove = true;
+
+            _mapMaxX= MapLoader.Instance.MapsDefaultSize[world.MapIndex, 0];
+            _mapMaxY = MapLoader.Instance.MapsDefaultSize[world.MapIndex, 1];
 
             _markers = markers;
             _markerIdx = markerIdx;

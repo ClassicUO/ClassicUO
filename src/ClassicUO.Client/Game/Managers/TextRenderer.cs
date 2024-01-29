@@ -43,7 +43,7 @@ namespace ClassicUO.Game.Managers
     {
         private readonly List<Rectangle> _bounds = new List<Rectangle>();
 
-        public TextRenderer()
+        public TextRenderer(World world) : base (world)
         {
             FirstNode = this;
         }

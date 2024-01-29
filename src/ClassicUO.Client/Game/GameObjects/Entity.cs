@@ -2,7 +2,7 @@
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 // 1. Redistributions of source code must retain the above copyright
@@ -16,7 +16,7 @@
 // 4. Neither the name of the copyright holder nor the
 //    names of its contributors may be used to endorse or promote products
 //    derived from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -55,7 +55,7 @@ namespace ClassicUO.Game.GameObjects
         private Direction _direction;
 
 
-        protected Entity(uint serial)
+        protected Entity(World world, uint serial) : base(world)
         {
             Serial = serial;
         }
@@ -164,12 +164,12 @@ namespace ClassicUO.Game.GameObjects
 
                 // TODO: Some servers may not want to receive this (causing original client to not send it),
                 //but all servers tested (latest POL, old POL, ServUO, Outlands) do.
-                if ( /*Client.Version > ClientVersion.CV_200 &&*/ SerialHelper.IsMobile(Serial))
+                if ( /*Client.Game.UO.Version > ClientVersion.CV_200 &&*/ SerialHelper.IsMobile(Serial))
                 {
                     Socket.Send_NameRequest(Serial);
                 }
 
-                UIManager.Add(new NameOverheadGump(this));
+                UIManager.Add(new NameOverheadGump(World, this));
             }
 
 
@@ -186,7 +186,7 @@ namespace ClassicUO.Game.GameObjects
         {
             base.Destroy();
 
-            GameActions.SendCloseStatus(Serial, HitsRequest >= HitsRequestStatus.Pending);
+            GameActions.SendCloseStatus(World, Serial, HitsRequest >= HitsRequestStatus.Pending);
 
             AnimIndex = 0;
             LastAnimationChangeTime = 0;

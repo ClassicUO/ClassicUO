@@ -41,8 +41,11 @@ namespace ClassicUO.Game.GameObjects
 {
     internal sealed class House : IEquatable<uint>
     {
-        public House(uint serial, uint revision, bool isCustom)
+        private readonly World _world;
+
+        public House(World world, uint serial, uint revision, bool isCustom)
         {
+            _world = world;
             Serial = serial;
             Revision = revision;
             IsCustom = isCustom;
@@ -77,7 +80,7 @@ namespace ClassicUO.Game.GameObjects
             bool ismovable
         )
         {
-            Multi m = Multi.Create(graphic);
+            Multi m = Multi.Create(_world, graphic);
             m.Hue = hue;
             m.IsCustom = iscustom;
             m.IsMovable = ismovable;
@@ -91,7 +94,7 @@ namespace ClassicUO.Game.GameObjects
 
         public void ClearCustomHouseComponents(CUSTOM_HOUSE_MULTI_OBJECT_FLAGS state)
         {
-            Item item = World.Items.Get(Serial);
+            Item item = _world.Items.Get(Serial);
 
             if (item != null)
             {
@@ -134,7 +137,7 @@ namespace ClassicUO.Game.GameObjects
 
         public void Generate(bool recalculate = false, bool pushtotile = true, bool removePreview = false)
         {
-            Item item = World.Items.Get(Serial);
+            Item item = _world.Items.Get(Serial);
             //ClearCustomHouseComponents(0);
 
             foreach (Multi s in Components)
@@ -164,12 +167,12 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-            World.CustomHouseManager?.GenerateFloorPlace();
+            _world.CustomHouseManager?.GenerateFloorPlace();
         }
 
         public void ClearComponents(bool removeCustomOnly = false)
         {
-            Item item = World.Items.Get(Serial);
+            Item item = _world.Items.Get(Serial);
 
             if (item != null && !item.IsDestroyed)
             {

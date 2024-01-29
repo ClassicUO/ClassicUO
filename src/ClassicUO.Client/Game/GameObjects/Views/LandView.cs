@@ -89,7 +89,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 posY += Z << 2;
 
-                ref readonly var texmapInfo = ref Client.Game.Texmaps.GetTexmap(
+                ref readonly var texmapInfo = ref Client.Game.UO.Texmaps.GetTexmap(
                     TileDataLoader.Instance.LandData[Graphic].TexID
                 );
 
@@ -123,7 +123,7 @@ namespace ClassicUO.Game.GameObjects
             }
             else
             {
-                ref readonly var artInfo = ref Client.Game.Arts.GetLand(Graphic);
+                ref readonly var artInfo = ref Client.Game.UO.Arts.GetLand(Graphic);
 
                 if (artInfo.Texture != null)
                 {
