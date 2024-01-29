@@ -45,7 +45,6 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -414,9 +413,8 @@ namespace ClassicUO
             CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
 
 #if !NETFRAMEWORK
-            //DllMap.Initialise();
-            DllMap.Init(Assembly.GetExecutingAssembly());
-            DllMap.Init(typeof(Microsoft.Xna.Framework.Point).Assembly);
+            //DllMap.Init(Assembly.GetExecutingAssembly());
+           // DllMap.Init(typeof(Microsoft.Xna.Framework.Point).Assembly);
             PatchEnvVars();
 #endif
 
@@ -473,6 +471,11 @@ namespace ClassicUO
             {
                 Environment.SetEnvironmentVariable("FNA_GRAPHICS_ENABLE_HIGHDPI", "1");
             }
+
+            //Environment.SetEnvironmentVariable("FNA3D_FORCE_DRIVER", "OpenGL");
+
+            // NOTE: this is a workaroud to fix d3d11 on windows 11 + scale windows
+            Environment.SetEnvironmentVariable("FNA3D_D3D11_FORCE_BITBLT", "1");
 
             Environment.SetEnvironmentVariable("FNA3D_BACKBUFFER_SCALE_NEAREST", "1");
             Environment.SetEnvironmentVariable("FNA3D_OPENGL_FORCE_COMPATIBILITY_PROFILE", "1");

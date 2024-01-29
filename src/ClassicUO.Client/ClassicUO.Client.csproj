@@ -100,10 +100,10 @@
   </PropertyGroup>
 
   <Target Name="CopyExternalDeps_build" AfterTargets="Build">
-    <Copy SourceFiles="@(DataFiles_x64)" DestinationFolder="$(PublishDir)\x64\" SkipUnchangedFiles="true" Condition="'$(_IsWindows)' == 'true'" />
-    <Copy SourceFiles="@(DataFiles_lib64)" DestinationFolder="$(PublishDir)\lib64\" SkipUnchangedFiles="true" Condition="'$(_IsLinux)' == 'true'" />
-    <Copy SourceFiles="@(DataFiles_osx)" DestinationFolder="$(PublishDir)\osx\" SkipUnchangedFiles="true" Condition="'$(_IsMacOS)' == 'true'" />
-    <Copy SourceFiles="@(DataFiles_vulkan)" DestinationFolder="$(TargetDir)\vulkan\icd.d\" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(DataFiles_x64)" DestinationFolder="$(OutputPath)" SkipUnchangedFiles="true" Condition="'$(_IsWindows)' == 'true'" />
+    <Copy SourceFiles="@(DataFiles_lib64)" DestinationFolder="$(OutputPath)" SkipUnchangedFiles="true" Condition="'$(_IsLinux)' == 'true'" />
+    <Copy SourceFiles="@(DataFiles_osx)" DestinationFolder="$(OutputPath)" SkipUnchangedFiles="true" Condition="'$(_IsMacOS)' == 'true'" />
+    <Copy SourceFiles="@(DataFiles_vulkan)" DestinationFolder="$(OutputPath)\vulkan\icd.d\" SkipUnchangedFiles="true" Condition="'$(_IsMacOS)' == 'true'" />
   </Target>
 
   <Target Name="CopyExternalDeps_publish" AfterTargets="Publish">
@@ -111,10 +111,10 @@
       <MonockickstartPath Include="$(ProjectDir)..\..\tools\monokickstart\*.*" />
     </ItemGroup>
 
-    <Copy SourceFiles="@(DataFiles_x64)" DestinationFolder="$(PublishDir)\x64\" SkipUnchangedFiles="true" Condition="'$(_IsWindows)' == 'true'" />
-    <Copy SourceFiles="@(DataFiles_lib64)" DestinationFolder="$(PublishDir)\lib64\" SkipUnchangedFiles="true" Condition="'$(_IsLinux)' == 'true'" />
-    <Copy SourceFiles="@(DataFiles_osx)" DestinationFolder="$(PublishDir)\osx\" SkipUnchangedFiles="true" Condition="'$(_IsMacOS)' == 'true'" />
-    <Copy SourceFiles="@(DataFiles_vulkan)" DestinationFolder="$(PublishDir)\vulkan\icd.d\" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(DataFiles_x64)" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="true" Condition="'$(_IsWindows)' == 'true'" />
+    <Copy SourceFiles="@(DataFiles_lib64)" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="true" Condition="'$(_IsLinux)' == 'true'" />
+    <Copy SourceFiles="@(DataFiles_osx)" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="true" Condition="'$(_IsMacOS)' == 'true'" />
+    <Copy SourceFiles="@(DataFiles_vulkan)" DestinationFolder="$(PublishDir)\vulkan\icd.d\" SkipUnchangedFiles="true" Condition="'$(_IsMacOS)' == 'true'" />
 
     <Copy SourceFiles="@(MonockickstartPath)" DestinationFolder="$(PublishDir)\" SkipUnchangedFiles="true" Condition="'$(_IsLinux)' == 'true' Or '$(_IsMacOS)' == 'true'" />
 

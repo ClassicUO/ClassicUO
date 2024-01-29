@@ -480,12 +480,12 @@ namespace ClassicUO
             UO.GameCursor?.Draw(_uoSpriteBatch);
             _uoSpriteBatch.End();
 
-            base.Draw(gameTime);
-
             Profiler.ExitContext("RenderFrame");
             Profiler.EnterContext("OutOfContext");
 
             Plugin.ProcessDrawCmdList(GraphicsDevice);
+
+            base.Draw(gameTime);
         }
 
         protected override bool BeginDraw()
