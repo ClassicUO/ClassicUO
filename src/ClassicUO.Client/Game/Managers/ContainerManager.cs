@@ -262,6 +262,8 @@ namespace ClassicUO.Game.Managers
 
                 using (StreamWriter writer = new StreamWriter(File.OpenWrite(path)))
                 {
+                    writer.BaseStream.Seek(0, SeekOrigin.Begin);
+
                     writer.WriteLine("# FORMAT");
 
                     writer.WriteLine(
