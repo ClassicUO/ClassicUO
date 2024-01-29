@@ -42,18 +42,18 @@ namespace ClassicUO.Game.GameObjects
 {
     internal sealed partial class Land : GameObject
     {
-        private static readonly QueuedPool<Land> _pool = new QueuedPool<Land>
-        (
-            Constants.PREDICTABLE_TILE_COUNT,
-            l =>
-            {
-                l.IsDestroyed = false;
-                l.AlphaHue = 255;
-                l.NormalTop = l.NormalRight = l.NormalLeft = l.NormalBottom = Vector3.Zero;
-                l.YOffsets.Top = l.YOffsets.Right = l.YOffsets.Left = l.YOffsets.Bottom = 0;
-                l.MinZ = l.AverageZ = 0;
-            }
-        );
+        //private static readonly QueuedPool<Land> _pool = new QueuedPool<Land>
+        //(
+        //    Constants.PREDICTABLE_TILE_COUNT,
+        //    l =>
+        //    {
+        //        l.IsDestroyed = false;
+        //        l.AlphaHue = 255;
+        //        l.NormalTop = l.NormalRight = l.NormalLeft = l.NormalBottom = Vector3.Zero;
+        //        l.YOffsets.Top = l.YOffsets.Right = l.YOffsets.Left = l.YOffsets.Bottom = 0;
+        //        l.MinZ = l.AverageZ = 0;
+        //    }
+        //);
 
         public ref LandTiles TileData => ref TileDataLoader.Instance.LandData[Graphic];
         public sbyte AverageZ;
@@ -63,9 +63,12 @@ namespace ClassicUO.Game.GameObjects
         public ushort OriginalGraphic;
         public UltimaBatcher2D.YOffsets YOffsets;
 
-        public static Land Create(ushort graphic)
+        private Land(World world) : base(world) { }
+
+        public static Land Create(World world, ushort graphic)
         {
-            Land land = _pool.GetOne();
+            Land land = new Land(world); // _pool.GetOne();
+            land.AlphaHue = 0xFF;
             land.Graphic = graphic;
             land.OriginalGraphic = graphic;
             land.IsStretched = land.TileData.TexID == 0 && land.TileData.IsWet;
@@ -83,7 +86,7 @@ namespace ClassicUO.Game.GameObjects
             }
 
             base.Destroy();
-            _pool.ReturnOne(this);
+            //_pool.ReturnOne(this);
         }
 
         public override void UpdateGraphicBySeason()

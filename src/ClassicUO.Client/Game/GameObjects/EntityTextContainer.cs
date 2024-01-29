@@ -79,13 +79,13 @@ namespace ClassicUO.Game.GameObjects
     internal class OverheadDamage
     {
         private const int DAMAGE_Y_MOVING_TIME = 25;
-
         private readonly Deque<TextObject> _messages;
-
         private Rectangle _rectangle;
+        private readonly World _world;
 
-        public OverheadDamage(GameObject parent)
+        public OverheadDamage(World world, GameObject parent)
         {
+            _world = world;
             Parent = parent;
             _messages = new Deque<TextObject>();
         }
@@ -101,11 +101,11 @@ namespace ClassicUO.Game.GameObjects
 
         public void Add(int damage)
         {
-            TextObject text_obj = TextObject.Create();
+            TextObject text_obj = TextObject.Create(_world);
 
             text_obj.RenderedText = RenderedText.Create(
                 damage.ToString(),
-                (ushort)(ReferenceEquals(Parent, World.Player) ? 0x0034 : 0x0021),
+                (ushort)(ReferenceEquals(Parent, _world.Player) ? 0x0034 : 0x0021),
                 3,
                 false
             );
@@ -189,7 +189,7 @@ namespace ClassicUO.Game.GameObjects
                         offY = -22;
                     }
 
-                    Client.Game.Animations.GetAnimationDimensions(
+                    Client.Game.UO.Animations.GetAnimationDimensions(
                         m.AnimIndex,
                         m.GetGraphicForAnimation(),
                         /*(byte) m.GetDirectionForAnimation()*/
@@ -210,7 +210,7 @@ namespace ClassicUO.Game.GameObjects
                 }
                 else
                 {
-                    ref readonly var artInfo = ref Client.Game.Arts.GetArt(Parent.Graphic);
+                    ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(Parent.Graphic);
 
                     if (artInfo.Texture != null)
                     {

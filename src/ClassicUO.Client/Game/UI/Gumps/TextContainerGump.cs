@@ -38,12 +38,12 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal abstract class TextContainerGump : Gump
     {
-        protected TextContainerGump(uint local, uint server) : base(local, server)
+        protected TextContainerGump(World world, uint local, uint server) : base(world, local, server)
         {
+            TextRenderer = new TextRenderer(World);
         }
 
-        public TextRenderer TextRenderer { get; } = new TextRenderer();
-
+        public TextRenderer TextRenderer { get; }
 
         public void AddText(TextObject msg)
         {

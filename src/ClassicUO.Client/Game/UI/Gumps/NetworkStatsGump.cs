@@ -52,7 +52,7 @@ namespace ClassicUO.Game.UI.Gumps
         private string _cacheText = string.Empty;
 
 
-        public NetworkStatsGump(int x, int y) : base(0, 0)
+        public NetworkStatsGump(World world, int x, int y) : base(world, 0, 0)
         {
             CanMove = true;
             CanCloseWithEsc = false;

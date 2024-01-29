@@ -51,7 +51,7 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly DataBox _databox;
         private string _selectedChannelText;
 
-        public ChatGump() : base(0, 0)
+        public ChatGump(World world) : base(world, 0, 0)
         {
             CanMove = true;
             AcceptMouseInput = true;
@@ -121,7 +121,7 @@ namespace ClassicUO.Game.UI.Gumps
             _databox.WantUpdateSize = true;
             area.Add(_databox);
 
-            foreach (KeyValuePair<string, ChatChannel> k in ChatManager.Channels)
+            foreach (KeyValuePair<string, ChatChannel> k in World.ChatManager.Channels)
             {
                 ChannelListItemControl chan = new ChannelListItemControl(k.Key, 195);
                 _databox.Add(chan);
@@ -152,7 +152,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             _currentChannelLabel = new Label
             (
-                ChatManager.CurrentChannelName,
+                World.ChatManager.CurrentChannelName,
                 false,
                 0x0386,
                 345,
@@ -272,9 +272,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         public void UpdateConference()
         {
-            if (_currentChannelLabel.Text != ChatManager.CurrentChannelName)
+            if (_currentChannelLabel.Text != World.ChatManager.CurrentChannelName)
             {
-                _currentChannelLabel.Text = ChatManager.CurrentChannelName;
+                _currentChannelLabel.Text = World.ChatManager.CurrentChannelName;
             }
         }
 
@@ -287,7 +287,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             _channelList.Clear();
 
-            foreach (KeyValuePair<string, ChatChannel> k in ChatManager.Channels)
+            foreach (KeyValuePair<string, ChatChannel> k in World.ChatManager.Channels)
             {
                 ChannelListItemControl c = new ChannelListItemControl(k.Key, 195);
                 _databox.Add(c);

@@ -2,7 +2,7 @@
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 // 1. Redistributions of source code must retain the above copyright
@@ -16,7 +16,7 @@
 // 4. Neither the name of the copyright holder nor the
 //    names of its contributors may be used to endorse or promote products
 //    derived from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -80,7 +80,7 @@ namespace ClassicUO.Network
             {
                 Log.Error($"error while connecting {ex}");
                 OnError?.Invoke(this, SocketError.SocketError);
-            }  
+            }
         }
 
         public void Send(byte[] buffer, int offset, int count)
@@ -103,7 +103,7 @@ namespace ClassicUO.Network
             {
                 var toRead = Math.Min(buffer.Length, available - done);
                 var read = stream.Read(buffer, done, toRead);
-                
+
                 if (read <= 0)
                 {
                     OnDisconnected?.Invoke(this, EventArgs.Empty);
@@ -150,7 +150,7 @@ namespace ClassicUO.Network
             _sendStream = new CircularBuffer();
 
             _socket = new SocketWrapper();
-            _socket.OnConnected += (o, e) => 
+            _socket.OnConnected += (o, e) =>
             {
                 Statistics.Reset();
                 Connected?.Invoke(this, EventArgs.Empty);
@@ -160,11 +160,11 @@ namespace ClassicUO.Network
         }
 
 
-        public static NetClient Socket { get; set; } = new NetClient();
-       
+        public static NetClient Socket { get; private set; } = new NetClient();
+
 
         public bool IsConnected => _socket != null && _socket.IsConnected;
-            
+
         public NetStatistics Statistics { get; }
 
         public uint LocalIP
@@ -228,7 +228,7 @@ namespace ClassicUO.Network
             _sendStream.Clear();
         }
 
-        public Span<byte> CollectAvailableData()
+        public ArraySegment<byte> CollectAvailableData()
         {
             try
             {
@@ -236,16 +236,17 @@ namespace ClassicUO.Network
 
                 if (size <= 0)
                 {
-                    return Span<byte>.Empty;
+                    return ArraySegment<byte>.Empty;
                 }
 
                 Statistics.TotalBytesReceived += (uint)size;
 
+                var segment = new ArraySegment<byte>(_compressedBuffer, 0, size);
                 var span = _compressedBuffer.AsSpan(0, size);
 
                 ProcessEncryption(span);
 
-                return DecompressBuffer(span);
+                return DecompressBuffer(segment);
             }
             catch (SocketException ex)
             {
@@ -275,7 +276,7 @@ namespace ClassicUO.Network
                 }
             }
 
-            return Span<byte>.Empty;
+            return ArraySegment<byte>.Empty;
         }
 
         public void Flush()
@@ -355,7 +356,7 @@ namespace ClassicUO.Network
                 {
                     Log.Error("main exception:\n" + ex);
                     Log.Error("socket error when sending:\n" + socketEx);
-                   
+
                     Disconnect();
                     Disconnected?.Invoke(this, socketEx.SocketErrorCode);
                 }
@@ -371,7 +372,7 @@ namespace ClassicUO.Network
             }
         }
 
-        private Span<byte> DecompressBuffer(Span<byte> buffer)
+        private ArraySegment<byte> DecompressBuffer(ArraySegment<byte> buffer)
         {
             if (!_isCompressionEnabled)
                 return buffer;
@@ -382,10 +383,10 @@ namespace ClassicUO.Network
                 Disconnect();
                 Disconnected?.Invoke(this, SocketError.SocketError);
 
-                return Span<byte>.Empty;
+                return ArraySegment<byte>.Empty;
             }
 
-            return _uncompressedBuffer.AsSpan(0, size);
+            return new ArraySegment<byte>(_uncompressedBuffer, 0, size);
         }
     }
 }

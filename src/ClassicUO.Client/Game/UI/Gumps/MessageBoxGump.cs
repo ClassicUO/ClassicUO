@@ -49,7 +49,7 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private readonly Action<bool> _action;
 
-        public MessageBoxGump(int w, int h, string message, Action<bool> action, bool hasBackground = false, MessageButtonType menuType = MessageButtonType.OK) : base(0, 0)
+        public MessageBoxGump(World world, int w, int h, string message, Action<bool> action, bool hasBackground = false, MessageButtonType menuType = MessageButtonType.OK) : base(world, 0, 0)
         {
             CanMove = true;
             CanCloseWithRightClick = false;
@@ -180,7 +180,7 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly Action<string> _action;
         private readonly StbTextBox _textBox;
 
-        public EntryDialog(int w, int h, string message, Action<string> action) : base(0, 0)
+        public EntryDialog(World world, int w, int h, string message, Action<string> action) : base(world, 0, 0)
         {
             CanMove = false;
             CanCloseWithRightClick = false;

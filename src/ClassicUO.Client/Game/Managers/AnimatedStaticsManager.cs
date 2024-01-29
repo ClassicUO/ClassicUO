@@ -38,7 +38,7 @@ using ClassicUO.Utility.Collections;
 
 namespace ClassicUO.Game.Managers
 {
-    class AnimatedStaticsManager
+    sealed class AnimatedStaticsManager
     {
         private readonly FastList<StaticAnimationInfo> _staticInfos = new FastList<StaticAnimationInfo>();
         private uint _processTime;

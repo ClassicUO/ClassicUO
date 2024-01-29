@@ -39,21 +39,27 @@ using ClassicUO.Utility.Collections;
 
 namespace ClassicUO.Game.Managers
 {
-    internal static class BoatMovingManager
+    internal sealed class BoatMovingManager
     {
         private const int SLOW_INTERVAL = 1000;
         private const int NORMAL_INTERVAL = 500;
         private const int FAST_INTERVAL = 250;
 
 
-        private static readonly Dictionary<uint, Deque<BoatStep>> _steps = new Dictionary<uint, Deque<BoatStep>>();
-        private static readonly List<uint> _toRemove = new List<uint>();
-        private static readonly Dictionary<uint, FastList<ItemInside>> _items = new Dictionary<uint, FastList<ItemInside>>();
+        private readonly Dictionary<uint, Deque<BoatStep>> _steps = new Dictionary<uint, Deque<BoatStep>>();
+        private readonly List<uint> _toRemove = new List<uint>();
+        private readonly Dictionary<uint, FastList<ItemInside>> _items = new Dictionary<uint, FastList<ItemInside>>();
 
-        private static uint _timePacket;
+        private uint _timePacket;
+        private readonly World _world;
+
+        public BoatMovingManager(World world)
+        {
+            _world = world;
+        }
 
 
-        private static int GetVelocity(byte speed)
+        private int GetVelocity(byte speed)
         {
             switch (speed)
             {
@@ -68,14 +74,14 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public static void MoveRequest(Direction direciton, byte speed)
+        public void MoveRequest(Direction direciton, byte speed)
         {
-            NetClient.Socket.Send_MultiBoatMoveRequest(World.Player, direciton, speed);
+            NetClient.Socket.Send_MultiBoatMoveRequest(_world.Player, direciton, speed);
             _timePacket = Time.Ticks;
         }
 
 
-        public static void AddStep
+        public void AddStep
         (
             uint serial,
             byte speed,
@@ -86,7 +92,7 @@ namespace ClassicUO.Game.Managers
             sbyte z
         )
         {
-            Item item = World.Items.Get(serial);
+            Item item = _world.Items.Get(serial);
 
             if (item == null || item.IsDestroyed)
             {
@@ -145,11 +151,11 @@ namespace ClassicUO.Game.Managers
             Console.WriteLine("CURRENT PACKET TIME: {0}", _timePacket);
         }
 
-        public static void ClearSteps(uint serial)
+        public void ClearSteps(uint serial)
         {
             if (_steps.TryGetValue(serial, out Deque<BoatStep> deque) && deque.Count != 0)
             {
-                Item multiItem = World.Items.Get(serial);
+                Item multiItem = _world.Items.Get(serial);
 
                 if (multiItem != null)
                 {
@@ -164,7 +170,7 @@ namespace ClassicUO.Game.Managers
                     {
                         ref var it = ref list.Buffer[i];
 
-                        Entity ent = World.Get(it.Serial);
+                        Entity ent = _world.Get(it.Serial);
 
                         if (ent == null)
                         {
@@ -183,7 +189,7 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public static void ClearEntities(uint serial)
+        public void ClearEntities(uint serial)
         {
             _items.Remove(serial);
 
@@ -194,7 +200,7 @@ namespace ClassicUO.Game.Managers
         }
 
 
-        public static void PushItemToList(uint serial, uint objSerial, int x, int y, int z)
+        public void PushItemToList(uint serial, uint objSerial, int x, int y, int z)
         {
             if (!_items.TryGetValue(serial, out var list))
             {
@@ -234,7 +240,7 @@ namespace ClassicUO.Game.Managers
             );
         }
 
-        public static void Update()
+        public void Update()
         {
             foreach (Deque<BoatStep> deques in _steps.Values)
             {
@@ -242,7 +248,7 @@ namespace ClassicUO.Game.Managers
                 {
                     ref BoatStep step = ref deques.Front();
 
-                    Item item = World.Items.Get(step.Serial);
+                    Item item = _world.Items.Get(step.Serial);
 
                     if (item == null || item.IsDestroyed)
                     {
@@ -281,7 +287,7 @@ namespace ClassicUO.Game.Managers
 
                     //item.BoatDirection = step.MovingDir;
 
-                    World.HouseManager.TryGetHouse(item, out House house);
+                    _world.HouseManager.TryGetHouse(item, out House house);
 
                     if (removeStep)
                     {
@@ -357,7 +363,7 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        private static void UpdateEntitiesInside
+        private void UpdateEntitiesInside
         (
             uint serial,
             bool removeStep,
@@ -369,7 +375,7 @@ namespace ClassicUO.Game.Managers
         {
             if (_items.TryGetValue(serial, out var list))
             {
-                Item item = World.Items.Get(serial);
+                Item item = _world.Items.Get(serial);
 
                 for (int i = 0; i < list.Length; i++)
                 {
@@ -378,7 +384,7 @@ namespace ClassicUO.Game.Managers
                     //if (!SerialHelper.IsValid(it.Serial))
                     //    break;
 
-                    Entity entity = World.Get(it.Serial);
+                    Entity entity = _world.Get(it.Serial);
 
                     if (entity == null || entity.IsDestroyed)
                     {
@@ -414,7 +420,7 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        private static void GetEndPosition
+        private void GetEndPosition
         (
             Item item,
             Deque<BoatStep> deque,

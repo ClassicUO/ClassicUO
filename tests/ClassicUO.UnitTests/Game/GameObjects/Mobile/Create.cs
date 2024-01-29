@@ -1,4 +1,5 @@
-﻿using Xunit;
+﻿using ClassicUO.Game;
+using Xunit;
 
 namespace ClassicUO.UnitTests.Game.GameObjects.Mobile
 {
@@ -7,7 +8,9 @@ namespace ClassicUO.UnitTests.Game.GameObjects.Mobile
         [Fact]
         public void Create_Returns_Mobile_Instance()
         {
-            Assert.IsType<ClassicUO.Game.GameObjects.Mobile>( ClassicUO.Game.GameObjects.Mobile.Create(0));
+            var world = new World();
+            Assert.IsType<ClassicUO.Game.GameObjects.Mobile>( ClassicUO.Game.GameObjects.Mobile.Create(world, 0));
+            world.Clear();
         }
     }
 }

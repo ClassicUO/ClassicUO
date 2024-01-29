@@ -46,7 +46,7 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly ushort _graphic;
         private readonly Action<ushort> _okClicked;
 
-        public ColorPickerGump(uint serial, ushort graphic, int x, int y, Action<ushort> okClicked) : base(serial, 0)
+        public ColorPickerGump(World world, uint serial, ushort graphic, int x, int y, Action<ushort> okClicked) : base(world, serial, 0)
         {
             CanCloseWithRightClick = serial == 0;
             _graphic = graphic;
@@ -81,7 +81,7 @@ namespace ClassicUO.Game.UI.Gumps
             );
 
             slider.ValueChanged += (sender, e) => { _box.Graduation = slider.Value; };
-            Add(_box = new ColorPickerBox(34, 34));
+            Add(_box = new ColorPickerBox(World, 34, 34));
             _box.ColorSelectedIndex += (sender, e) => { _dyeTybeImage.Hue = _box.SelectedHue; };
 
             Add

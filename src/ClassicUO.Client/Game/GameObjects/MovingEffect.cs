@@ -40,6 +40,7 @@ namespace ClassicUO.Game.GameObjects
     {        
         public MovingEffect
         (
+            World world,
             EffectManager manager,
             uint src,
             uint trg,
@@ -54,7 +55,7 @@ namespace ClassicUO.Game.GameObjects
             bool fixedDir,
             int duration,
             byte speed
-        ) : base(manager, graphic, hue, 0, speed)
+        ) : base(world, manager, graphic, hue, 0, speed)
         {
             FixedDir = fixedDir;
 

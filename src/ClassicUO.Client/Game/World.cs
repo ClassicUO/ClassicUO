@@ -2,7 +2,7 @@
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 // 1. Redistributions of source code must retain the above copyright
@@ -16,7 +16,7 @@
 // 4. Neither the name of the copyright holder nor the
 //    names of its contributors may be used to endorse or promote products
 //    derived from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -45,56 +45,112 @@ using ClassicUO.Configuration;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Utility.Logging;
 using ClassicUO.Assets;
+using ClassicUO.Network;
 
 namespace ClassicUO.Game
 {
-    internal static class World
+    internal sealed class World
     {
-        private static readonly EffectManager _effectManager = new EffectManager();
-        private static readonly List<uint> _toRemove = new List<uint>();
-        private static uint _timeToDelete;
+        private readonly EffectManager _effectManager;
+        private readonly List<uint> _toRemove = new List<uint>();
+        private uint _timeToDelete;
 
-        public static Point RangeSize;
+        public World()
+        {
+            WMapManager = new WorldMapEntityManager(this);
+            CorpseManager = new CorpseManager(this);
+            Party = new PartyManager(this);
+            HouseManager = new HouseManager(this);
+            WorldTextManager = new WorldTextManager(this);
+            _effectManager = new EffectManager(this);
+            MessageManager = new MessageManager(this);
+            ContainerManager = new ContainerManager(this);
+            IgnoreManager = new IgnoreManager(this);
+            SkillsGroupManager = new SkillsGroupManager(this);
+            ChatManager = new ChatManager(this);
+            AuraManager = new AuraManager(this);
+            UoAssist = new UoAssist(this);
+            TargetManager = new TargetManager(this);
+            DelayedObjectClickManager = new DelayedObjectClickManager(this);
+            BoatMovingManager = new BoatMovingManager(this);
+            NameOverHeadManager = new NameOverHeadManager(this);
+            Macros = new MacroManager(this);
+            CommandManager = new CommandManager(this);
+            Weather = new Weather(this);
+            InfoBars = new InfoBarManager(this);
+        }
 
-        public static PlayerMobile Player { get; private set; }
+        public Point RangeSize;
 
-        public static HouseCustomizationManager CustomHouseManager;
+        public PlayerMobile Player { get; private set; }
 
-        public static WorldMapEntityManager WMapManager = new WorldMapEntityManager();
+        public HouseCustomizationManager CustomHouseManager;
 
-        public static ActiveSpellIconsManager ActiveSpellIcons = new ActiveSpellIconsManager();
+        public WorldMapEntityManager WMapManager { get; }
 
-        public static uint LastObject, ObjectToRemove;
+        public ActiveSpellIconsManager ActiveSpellIcons = new ActiveSpellIconsManager();
 
-        public static ObjectPropertiesListManager OPL { get; } = new ObjectPropertiesListManager();
+        public uint LastObject, ObjectToRemove;
 
-        public static CorpseManager CorpseManager { get; } = new CorpseManager();
+        public ObjectPropertiesListManager OPL { get; } = new ObjectPropertiesListManager();
 
-        public static PartyManager Party { get; } = new PartyManager();
+        public CorpseManager CorpseManager { get; }
 
-        public static HouseManager HouseManager { get; } = new HouseManager();
+        public PartyManager Party { get; }
 
-        public static Dictionary<uint, Item> Items { get; } = new Dictionary<uint, Item>();
+        public HouseManager HouseManager { get; }
 
-        public static Dictionary<uint, Mobile> Mobiles { get; } = new Dictionary<uint, Mobile>();
+        public MessageManager MessageManager { get; }
 
-        public static Map.Map Map { get; private set; }
+        public ContainerManager ContainerManager { get; }
 
-        public static byte ClientViewRange { get; set; } = Constants.MAX_VIEW_RANGE;
+        public IgnoreManager IgnoreManager { get; }
 
-        public static bool SkillsRequested { get; set; }
+        public SkillsGroupManager SkillsGroupManager { get; }
 
-        public static Season Season { get; private set; } = Season.Summer;
-        public static Season OldSeason { get; set; } = Season.Summer;
+        public ChatManager ChatManager { get; }
 
-        public static int OldMusicIndex { get; set; }
+        public AuraManager AuraManager { get; }
 
-        public static WorldTextManager WorldTextManager { get; } = new WorldTextManager();
+        public UoAssist UoAssist { get; }
 
-        public static JournalManager Journal { get; } = new JournalManager();
+        public TargetManager TargetManager { get; }
+
+        public DelayedObjectClickManager DelayedObjectClickManager { get; }
+
+        public BoatMovingManager BoatMovingManager { get; }
+
+        public NameOverHeadManager NameOverHeadManager { get; }
+
+        public MacroManager Macros { get; }
+
+        public CommandManager CommandManager { get; }
+
+        public Weather Weather { get; }
+
+        public InfoBarManager InfoBars { get; }
+
+        public Dictionary<uint, Item> Items { get; } = new Dictionary<uint, Item>();
+
+        public Dictionary<uint, Mobile> Mobiles { get; } = new Dictionary<uint, Mobile>();
+
+        public Map.Map Map { get; private set; }
+
+        public byte ClientViewRange { get; set; } = Constants.MAX_VIEW_RANGE;
+
+        public bool SkillsRequested { get; set; }
+
+        public Season Season { get; private set; } = Season.Summer;
+        public Season OldSeason { get; set; } = Season.Summer;
+
+        public int OldMusicIndex { get; set; }
+
+        public WorldTextManager WorldTextManager { get; }
+
+        public JournalManager Journal { get; } = new JournalManager();
 
 
-        public static int MapIndex
+        public int MapIndex
         {
             get => Map?.Index ?? -1;
             set
@@ -129,30 +185,30 @@ namespace ClassicUO.Game
                             value = 0;
                         }
 
-                        Map = new Map.Map(value);
+                        Map = new Map.Map(this, value);
 
                         Player.SetInWorldTile(x, y, z);
                         Player.ClearSteps();
                     }
                     else
                     {
-                        Map = new Map.Map(value);
+                        Map = new Map.Map(this, value);
                     }
 
                     // force cursor update when switching map
-                    if (Client.Game.GameCursor != null)
+                    if (Client.Game.UO.GameCursor != null)
                     {
-                        Client.Game.GameCursor.Graphic = 0xFFFF;
+                        Client.Game.UO.GameCursor.Graphic = 0xFFFF;
                     }
-                    
+
                     UoAssist.SignalMapChanged(value);
                 }
             }
         }
 
-        public static bool InGame => Player != null && Map != null;
+        public bool InGame => Player != null && Map != null;
 
-        public static IsometricLight Light { get; } = new IsometricLight
+        public IsometricLight Light { get; } = new IsometricLight
         {
             Overall = 0,
             Personal = 0,
@@ -160,20 +216,20 @@ namespace ClassicUO.Game
             RealPersonal = 0
         };
 
-        public static LockedFeatures ClientLockedFeatures { get; } = new LockedFeatures();
+        public LockedFeatures ClientLockedFeatures { get; } = new LockedFeatures();
 
-        public static ClientFeatures ClientFeatures { get; } = new ClientFeatures();
+        public ClientFeatures ClientFeatures { get; } = new ClientFeatures();
 
-        public static string ServerName { get; set; } = "_";
+        public string ServerName { get; set; } = "_";
 
 
 
-        public static void CreatePlayer(uint serial)
+        public void CreatePlayer(uint serial)
         {
             if (ProfileManager.CurrentProfile == null)
             {
-                string lastChar = LastCharacterManager.GetLastCharacter(LoginScene.Account, World.ServerName);
-                ProfileManager.Load(World.ServerName, LoginScene.Account, lastChar);
+                string lastChar = LastCharacterManager.GetLastCharacter(LoginScene.Account, ServerName);
+                ProfileManager.Load(ServerName, LoginScene.Account, lastChar);
             }
 
             if (Player != null)
@@ -181,13 +237,13 @@ namespace ClassicUO.Game
                 Clear();
             }
 
-            Player = new PlayerMobile(serial);
+            Player = new PlayerMobile(this, serial);
             Mobiles.Add(Player);
 
             Log.Trace($"Player [0x{serial:X8}] created");
         }
 
-        public static void ChangeSeason(Season season, int music)
+        public void ChangeSeason(Season season, int music)
         {
             Season = season;
 
@@ -224,7 +280,7 @@ namespace ClassicUO.Game
         }
         */
 
-        public static void Update()
+        public void Update()
         {
             if (Player != null)
             {
@@ -365,7 +421,7 @@ namespace ClassicUO.Game
             }
         }
 
-        public static bool Contains(uint serial)
+        public bool Contains(uint serial)
         {
             if (SerialHelper.IsItem(serial))
             {
@@ -375,7 +431,7 @@ namespace ClassicUO.Game
             return SerialHelper.IsMobile(serial) && Mobiles.Contains(serial);
         }
 
-        public static Entity Get(uint serial)
+        public Entity Get(uint serial)
         {
             Entity ent;
 
@@ -406,7 +462,7 @@ namespace ClassicUO.Game
             return ent;
         }
 
-        public static Item GetOrCreateItem(uint serial)
+        public Item GetOrCreateItem(uint serial)
         {
             Item item = Items.Get(serial);
 
@@ -418,14 +474,14 @@ namespace ClassicUO.Game
 
             if (item == null /*|| item.IsDestroyed*/)
             {
-                item = Item.Create(serial);
+                item = Item.Create(this, serial);
                 Items.Add(item);
             }
 
             return item;
         }
 
-        public static Mobile GetOrCreateMobile(uint serial)
+        public Mobile GetOrCreateMobile(uint serial)
         {
             Mobile mob = Mobiles.Get(serial);
 
@@ -437,14 +493,14 @@ namespace ClassicUO.Game
 
             if (mob == null /*|| mob.IsDestroyed*/)
             {
-                mob = Mobile.Create(serial);
+                mob = Mobile.Create(this, serial);
                 Mobiles.Add(mob);
             }
 
             return mob;
         }
 
-        public static void RemoveItemFromContainer(uint serial)
+        public void RemoveItemFromContainer(uint serial)
         {
             Item it = Items.Get(serial);
 
@@ -454,7 +510,7 @@ namespace ClassicUO.Game
             }
         }
 
-        public static void RemoveItemFromContainer(Item obj)
+        public void RemoveItemFromContainer(Item obj)
         {
             uint containerSerial = obj.Container;
 
@@ -486,7 +542,7 @@ namespace ClassicUO.Game
             obj.RemoveFromTile();
         }
 
-        public static bool RemoveItem(uint serial, bool forceRemove = false)
+        public bool RemoveItem(uint serial, bool forceRemove = false)
         {
             Item item = Items.Get(serial);
 
@@ -494,7 +550,7 @@ namespace ClassicUO.Game
             {
                 return false;
             }
-            
+
             LinkedObject first = item.Items;
             RemoveItemFromContainer(item);
 
@@ -518,7 +574,7 @@ namespace ClassicUO.Game
             return true;
         }
 
-        public static bool RemoveMobile(uint serial, bool forceRemove = false)
+        public bool RemoveMobile(uint serial, bool forceRemove = false)
         {
             Mobile mobile = Mobiles.Get(serial);
 
@@ -526,7 +582,7 @@ namespace ClassicUO.Game
             {
                 return false;
             }
-     
+
             LinkedObject first = mobile.Items;
 
             while (first != null)
@@ -549,7 +605,7 @@ namespace ClassicUO.Game
             return true;
         }
 
-        public static void SpawnEffect
+        public void SpawnEffect
         (
             GraphicEffectType type,
             uint source,
@@ -592,7 +648,7 @@ namespace ClassicUO.Game
             );
         }
 
-        public static uint FindNearest(ScanTypeObject scanType)
+        public uint FindNearest(ScanTypeObject scanType)
         {
             int distance = int.MaxValue;
             uint serial = 0;
@@ -658,7 +714,7 @@ namespace ClassicUO.Game
             return serial;
         }
 
-        public static uint FindNext(ScanTypeObject scanType, uint lastSerial, bool reverse)
+        public uint FindNext(ScanTypeObject scanType, uint lastSerial, bool reverse)
         {
             bool found = false;
 
@@ -746,8 +802,8 @@ namespace ClassicUO.Game
             return 0;
         }
 
-       
-        public static void Clear()
+
+        public void Clear()
         {
             foreach (Mobile mobile in Mobiles.Values)
             {
@@ -792,7 +848,7 @@ namespace ClassicUO.Game
             SkillsRequested = false;
         }
 
-        private static void InternalMapChangeClear(bool noplayer)
+        private void InternalMapChangeClear(bool noplayer)
         {
             if (!noplayer)
             {

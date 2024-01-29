@@ -49,7 +49,7 @@ namespace ClassicUO.Game.UI.Gumps
         private Texture2D backgroundTexture;
         private Label label;
 
-        public MacroButtonGump(Macro macro, int x, int y) : this()
+        public MacroButtonGump(World world, Macro macro, int x, int y) : this(world)
         {
             X = x;
             Y = y;
@@ -57,7 +57,7 @@ namespace ClassicUO.Game.UI.Gumps
             BuildGump();
         }
 
-        public MacroButtonGump() : base(0, 0)
+        public MacroButtonGump(World world) : base(world,0, 0)
         {
             CanMove = true;
             AcceptMouseInput = true;
@@ -142,10 +142,9 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (_macro != null)
             {
-                GameScene gs = Client.Game.GetScene<GameScene>();
-                gs.Macros.SetMacroToExecute(_macro.Items as MacroObject);
-                gs.Macros.WaitForTargetTimer = 0;
-                gs.Macros.Update();
+                World.Macros.SetMacroToExecute(_macro.Items as MacroObject);
+                World.Macros.WaitForTargetTimer = 0;
+                World.Macros.Update();
             }
         }
 
@@ -186,7 +185,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (_macro != null)
             {
                 // hack to give macro buttons a unique id for use in anchor groups
-                int macroid = Client.Game.GetScene<GameScene>().Macros.GetAllMacros().IndexOf(_macro);
+                int macroid = World.Macros.GetAllMacros().IndexOf(_macro);
 
                 LocalSerial = (uint) macroid + 1000;
 
@@ -200,7 +199,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Restore(xml);
 
-            Macro macro = Client.Game.GetScene<GameScene>().Macros.FindMacro(xml.GetAttribute("name"));
+            Macro macro = World.Macros.FindMacro(xml.GetAttribute("name"));
 
             if (macro != null)
             {

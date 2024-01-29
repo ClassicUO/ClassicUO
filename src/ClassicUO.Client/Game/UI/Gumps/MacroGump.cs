@@ -6,7 +6,7 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal sealed class MacroGump : Gump
     {
-        public MacroGump(string name) : base(0, 0)
+        public MacroGump(World world, string name) : base(world, 0, 0)
         {
             CanMove = true;
             CanCloseWithRightClick = true;
@@ -32,7 +32,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                new MacroControl(name, true)
+                new MacroControl(this, name, true)
                 {
                     X = macroGumpBackground.X + 20,
                     Y = macroGumpBackground.Y + 20,

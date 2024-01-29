@@ -56,7 +56,7 @@ namespace ClassicUO.Game.UI.Controls
             {
                 _graphic = value;
 
-                ref readonly var gumpInfo = ref Client.Game.Gumps.GetGump(_graphic);
+                ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(_graphic);
 
                 if (gumpInfo.Texture == null)
                 {
@@ -74,14 +74,14 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Contains(int x, int y)
         {
-            ref readonly var gumpInfo = ref Client.Game.Gumps.GetGump(_graphic);
+            ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(_graphic);
 
             if (gumpInfo.Texture == null)
             {
                 return false;
             }
 
-            if (Client.Game.Gumps.PixelCheck(Graphic, x - Offset.X, y - Offset.Y))
+            if (Client.Game.UO.Gumps.PixelCheck(Graphic, x - Offset.X, y - Offset.Y))
             {
                 return true;
             }
@@ -132,19 +132,6 @@ namespace ClassicUO.Game.UI.Controls
 
         public bool IsPartialHue { get; set; }
         public bool ContainsByBounds { get; set; }
-        public bool IsVirtue { get; set; }
-
-        protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
-        {
-            if (IsVirtue && button == MouseButtonType.Left)
-            {
-                NetClient.Socket.Send_VirtueGumpResponse(World.Player, Graphic);
-
-                return true;
-            }
-
-            return base.OnMouseDoubleClick(x, y, button);
-        }
 
         public override bool Contains(int x, int y)
         {
@@ -172,7 +159,7 @@ namespace ClassicUO.Game.UI.Controls
 
             Vector3 hueVector = ShaderHueTranslator.GetHueVector(Hue, IsPartialHue, Alpha, true);
 
-            ref readonly var gumpInfo = ref Client.Game.Gumps.GetGump(Graphic);
+            ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(Graphic);
 
             if (gumpInfo.Texture != null)
             {
@@ -185,6 +172,28 @@ namespace ClassicUO.Game.UI.Controls
             }
 
             return base.Draw(batcher, x, y);
+        }
+    }
+
+    internal class VirtueGumpPic : GumpPic
+    {
+        private readonly World _world;
+
+        public VirtueGumpPic(World world, List<string> parts) : base(parts)
+        {
+            _world = world;
+        }
+
+        protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
+        {
+            if (button == MouseButtonType.Left)
+            {
+                NetClient.Socket.Send_VirtueGumpResponse(_world.Player, Graphic);
+
+                return true;
+            }
+
+            return base.OnMouseDoubleClick(x, y, button);
         }
     }
 
@@ -237,7 +246,7 @@ namespace ClassicUO.Game.UI.Controls
 
             Vector3 hueVector = ShaderHueTranslator.GetHueVector(Hue, false, Alpha, true);
 
-            ref readonly var gumpInfo = ref Client.Game.Gumps.GetGump(Graphic);
+            ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(Graphic);
 
             var sourceBounds = new Rectangle(gumpInfo.UV.X + _picInPicBounds.X, gumpInfo.UV.Y + _picInPicBounds.Y, _picInPicBounds.Width, _picInPicBounds.Height);
 

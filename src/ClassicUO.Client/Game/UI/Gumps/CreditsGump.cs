@@ -39,7 +39,7 @@ Ultima Online(R) 2021 Electronic Arts Inc. All Rights Reserved.
                 Karasho' - https://github.com/andreakarasho
 ";
 
-        public CreditsGump() : base(0, 0)
+        public CreditsGump(World world) : base(world, 0, 0)
         {
             Client.Game.Audio.PlayMusic(8, false, true);
 

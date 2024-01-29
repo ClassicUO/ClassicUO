@@ -72,17 +72,20 @@ namespace ClassicUO.Game.Managers
         //}
     }
 
-    internal class WorldMapEntityManager
+    internal sealed class WorldMapEntityManager
     {
         private bool _ackReceived;
         private uint _lastUpdate, _lastPacketSend, _lastPacketRecv;
         private readonly List<WMapEntity> _toRemove = new List<WMapEntity>();
+        private readonly World _world;
+
+        public WorldMapEntityManager(World world) { _world = world; }
 
         public bool Enabled
         {
             get
             {
-                return ((World.ClientFeatures.Flags & CharacterListFlags.CLF_NEW_MOVEMENT_SYSTEM) == 0 || _ackReceived) &&
+                return ((_world.ClientFeatures.Flags & CharacterListFlags.CLF_NEW_MOVEMENT_SYSTEM) == 0 || _ackReceived) &&
                         EncryptionHelper.Type == 0 &&
                         ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.WorldMapShowParty && 
                         UIManager.GetGump<WorldMapGump>() != null; // horrible, but works
@@ -98,7 +101,7 @@ namespace ClassicUO.Game.Managers
 
         public void SetEnable(bool v)
         {
-            if ((World.ClientFeatures.Flags & CharacterListFlags.CLF_NEW_MOVEMENT_SYSTEM) != 0 && !_ackReceived)
+            if ((_world.ClientFeatures.Flags & CharacterListFlags.CLF_NEW_MOVEMENT_SYSTEM) != 0 && !_ackReceived)
             {
                 Log.Warn("Server support new movement system. Can't use the 0xF0 packet to query guild/party position");
                 v = false;
@@ -143,7 +146,7 @@ namespace ClassicUO.Game.Managers
 
             if (string.IsNullOrEmpty(name))
             {
-                Entity ent = World.Get(serial);
+                Entity ent = _world.Get(serial);
 
                 if (ent != null && !string.IsNullOrEmpty(ent.Name))
                 {
@@ -231,7 +234,7 @@ namespace ClassicUO.Game.Managers
                 return;
             }
 
-            if (World.InGame && _lastPacketSend < Time.Ticks)
+            if (_world.InGame && _lastPacketSend < Time.Ticks)
             {
                 //GameActions.Print($"SENDING PACKET! {Time.Ticks}");
 
@@ -244,15 +247,15 @@ namespace ClassicUO.Game.Managers
 
                 NetClient.Socket.Send_QueryGuildPosition();
 
-                if (World.Party != null && World.Party.Leader != 0)
+                if (_world.Party != null && _world.Party.Leader != 0)
                 {
-                    foreach (PartyMember e in World.Party.Members)
+                    foreach (PartyMember e in _world.Party.Members)
                     {
                         if (e != null && SerialHelper.IsValid(e.Serial))
                         {
-                            Mobile mob = World.Mobiles.Get(e.Serial);
+                            Mobile mob = _world.Mobiles.Get(e.Serial);
 
-                            if (mob == null || mob.Distance > World.ClientViewRange)
+                            if (mob == null || mob.Distance > _world.ClientViewRange)
                             {
                                 NetClient.Socket.Send_QueryPartyPosition();
 

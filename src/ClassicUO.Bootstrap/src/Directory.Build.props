@@ -1,0 +1,11 @@
+<Project>
+  <PropertyGroup>
+    <Company>ClassicUO</Company>
+    <Authors>KaRaShO'</Authors>
+    <AssemblyVersion>1.1.0.0</AssemblyVersion>
+    <FileVersion>1.1.0.0</FileVersion>
+    <Copyright>ClassicUO</Copyright>
+    <PackageProjectUrl>https://www.classicuo.eu/</PackageProjectUrl>
+    <Description>An open source implementation of the Ultima Online Classic Client.</Description>
+  </PropertyGroup>
+</Project>

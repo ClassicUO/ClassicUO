@@ -41,13 +41,15 @@ using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.Managers
 {
-    internal class InfoBarManager
+    internal sealed class InfoBarManager
     {
+        private readonly World _world;
         private readonly List<InfoBarItem> infoBarItems;
 
-        public InfoBarManager()
+        public InfoBarManager(World world)
         {
             infoBarItems = new List<InfoBarItem>();
+            _world = world; 
         }
 
         public List<InfoBarItem> GetInfoBars()

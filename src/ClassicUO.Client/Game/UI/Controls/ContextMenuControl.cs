@@ -43,10 +43,12 @@ namespace ClassicUO.Game.UI.Controls
     internal class ContextMenuControl
     {
         private readonly List<ContextMenuItemEntry> _items;
+        private readonly Gump _gump;
 
-        public ContextMenuControl()
+        public ContextMenuControl(Gump gump)
         {
             _items = new List<ContextMenuItemEntry>();
+            _gump = gump;
         }
 
         public void Add(string text, Action action, bool canBeSelected = false, bool defaultValue = false)
@@ -81,7 +83,7 @@ namespace ClassicUO.Game.UI.Controls
 
             UIManager.ShowContextMenu
             (
-                new ContextMenuShowMenu(_items)
+                new ContextMenuShowMenu(_gump.World, _items)
             );
         }
 
@@ -121,7 +123,7 @@ namespace ClassicUO.Game.UI.Controls
         private List<ContextMenuShowMenu> _subMenus;
 
 
-        public ContextMenuShowMenu(List<ContextMenuItemEntry> list) : base(0, 0)
+        public ContextMenuShowMenu(World world, List<ContextMenuItemEntry> list) : base(world, 0, 0)
         {
             WantUpdateSize = true;
             ModalClickOutsideAreaClosesThisControl = true;
@@ -232,10 +234,12 @@ namespace ClassicUO.Game.UI.Controls
             private readonly Label _label;
             private readonly GumpPic _selectedPic;
             private readonly ContextMenuShowMenu _subMenu;
+            private readonly ContextMenuShowMenu _gump;
 
 
             public ContextMenuItem(ContextMenuShowMenu parent, ContextMenuItemEntry entry)
             {
+                _gump = parent;
                 CanCloseWithRightClick = false;
                 _entry = entry;
 
@@ -286,7 +290,7 @@ namespace ClassicUO.Game.UI.Controls
                 // it is a bit tricky, but works :D 
                 if (_entry.Items != null && _entry.Items.Count != 0)
                 {
-                    _subMenu = new ContextMenuShowMenu(_entry.Items);
+                    _subMenu = new ContextMenuShowMenu(_gump.World, _entry.Items);
                     parent.Add(_subMenu);
 
                     if (parent._subMenus == null)
