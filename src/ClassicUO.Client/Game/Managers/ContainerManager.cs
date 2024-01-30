@@ -256,34 +256,32 @@ namespace ClassicUO.Game.Managers
 
             path = Path.Combine(path, "containers.txt");
 
-            using var stream = new FileStream(path, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite);
+            using var stream = new FileStream(path, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite);
 
             if (!File.Exists(path) || force)
             {
                 MakeDefault();
 
-                using (var writer = new StreamWriter(stream))
+                using var writer = new StreamWriter(stream);
+                writer.BaseStream.Seek(0, SeekOrigin.Begin);
+
+                writer.WriteLine("# FORMAT");
+
+                writer.WriteLine(
+                    "# GRAPHIC OPEN_SOUND_ID CLOSE_SOUND_ID LEFT TOP RIGHT BOTTOM ICONIZED_GRAPHIC [0 if not exists] MINIMIZER_AREA_X [0 if not exists] MINIMIZER_AREA_Y [0 if not exists]"
+                );
+
+                writer.WriteLine(
+                    "# LEFT = X,  TOP = Y,  RIGHT = X + WIDTH,  BOTTOM = Y + HEIGHT"
+                );
+                writer.WriteLine();
+                writer.WriteLine();
+
+                foreach (KeyValuePair<ushort, ContainerData> e in _data)
                 {
-                    writer.BaseStream.Seek(0, SeekOrigin.Begin);
-
-                    writer.WriteLine("# FORMAT");
-
                     writer.WriteLine(
-                        "# GRAPHIC OPEN_SOUND_ID CLOSE_SOUND_ID LEFT TOP RIGHT BOTTOM ICONIZED_GRAPHIC [0 if not exists] MINIMIZER_AREA_X [0 if not exists] MINIMIZER_AREA_Y [0 if not exists]"
+                        $"{e.Value.Graphic} {e.Value.OpenSound} {e.Value.ClosedSound} {e.Value.Bounds.X} {e.Value.Bounds.Y} {e.Value.Bounds.Width} {e.Value.Bounds.Height} {e.Value.IconizedGraphic} {e.Value.MinimizerArea.X} {e.Value.MinimizerArea.Y}"
                     );
-
-                    writer.WriteLine(
-                        "# LEFT = X,  TOP = Y,  RIGHT = X + WIDTH,  BOTTOM = Y + HEIGHT"
-                    );
-                    writer.WriteLine();
-                    writer.WriteLine();
-
-                    foreach (KeyValuePair<ushort, ContainerData> e in _data)
-                    {
-                        writer.WriteLine(
-                            $"{e.Value.Graphic} {e.Value.OpenSound} {e.Value.ClosedSound} {e.Value.Bounds.X} {e.Value.Bounds.Y} {e.Value.Bounds.Width} {e.Value.Bounds.Height} {e.Value.IconizedGraphic} {e.Value.MinimizerArea.X} {e.Value.MinimizerArea.Y}"
-                        );
-                    }
                 }
             }
 
