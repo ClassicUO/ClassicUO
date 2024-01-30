@@ -343,7 +343,7 @@ namespace ClassicUO.Configuration
             Log.Trace($"Saving path:\t\t{path}");
 
             // Save profile settings
-            ConfigurationResolver.Save(this, Path.Combine(path, "profile.json"), ProfileJsonContext.DefaultToUse);
+            ConfigurationResolver.Save(this, Path.Combine(path, "profile.json"), ProfileJsonContext.DefaultToUse.Profile);
 
             // Save opened gumps
             SaveGumps(world, path);

@@ -63,10 +63,10 @@ namespace ClassicUO.Game.Managers
 
             if (!File.Exists(_lastCharacterFile))
             {
-                ConfigurationResolver.Save(LastCharacters, _lastCharacterFile, LastCharacterJsonContext.Default);
+                ConfigurationResolver.Save(LastCharacters, _lastCharacterFile, LastCharacterJsonContext.Default.ListLastCharacterInfo);
             }
 
-            LastCharacters = ConfigurationResolver.Load<List<LastCharacterInfo>>(_lastCharacterFile, LastCharacterJsonContext.Default);
+            LastCharacters = ConfigurationResolver.Load<List<LastCharacterInfo>>(_lastCharacterFile, LastCharacterJsonContext.Default.ListLastCharacterInfo);
 
             // safety check
             if (LastCharacters == null)
@@ -99,7 +99,7 @@ namespace ClassicUO.Game.Managers
                 });
             }
 
-            ConfigurationResolver.Save(LastCharacters, _lastCharacterFile, LastCharacterJsonContext.Default);
+            ConfigurationResolver.Save(LastCharacters, _lastCharacterFile, LastCharacterJsonContext.Default.ListLastCharacterInfo);
         }
 
         public static string GetLastCharacter(string account, string server)

@@ -33,6 +33,7 @@
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.Json.Serialization.Metadata;
 using System.Text.RegularExpressions;
 using ClassicUO.Utility.Logging;
 
@@ -40,7 +41,7 @@ namespace ClassicUO.Configuration
 {
     internal static class ConfigurationResolver
     {
-        public static T Load<T>(string file, JsonSerializerContext ctx) where T : class
+        public static T Load<T>(string file, JsonTypeInfo<T> ctx) where T : class
         {
             if (!File.Exists(file))
             {
@@ -61,10 +62,10 @@ namespace ClassicUO.Configuration
                 RegexOptions.IgnorePatternWhitespace
             );
 
-            return JsonSerializer.Deserialize(text, typeof(T), ctx) as T;
+            return JsonSerializer.Deserialize(text, ctx);
         }
 
-        public static void Save<T>(T obj, string file, JsonSerializerContext ctx) where T : class
+        public static void Save<T>(T obj, string file, JsonTypeInfo<T> ctx) where T : class
         {
             // this try catch is necessary when multiples cuo instances points to this file.
             try
@@ -76,7 +77,7 @@ namespace ClassicUO.Configuration
                     fileInfo.Directory.Create();
                 }
                 
-                var json = JsonSerializer.Serialize(obj, typeof(T), ctx);
+                var json = JsonSerializer.Serialize(obj, ctx);
                 File.WriteAllText(file, json);
             }
             catch (IOException e)
