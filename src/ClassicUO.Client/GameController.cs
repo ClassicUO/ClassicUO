@@ -98,7 +98,6 @@ namespace ClassicUO
         public GraphicsDeviceManager GraphicManager { get; }
         public readonly uint[] FrameDelay = new uint[2];
 
-        private readonly Plugin2 _plugin2 = new Plugin2();
 
         protected override void Initialize()
         {
