@@ -241,7 +241,7 @@ sealed class ClassicUOHost : IPluginHandler
         var ok = true;
 
         foreach (var plugin in _plugins)
-            ok |= plugin.ProcessHotkeys(key, mod, pressed);
+            ok &= plugin.ProcessHotkeys(key, mod, pressed);
 
         return ok;
     }
@@ -293,7 +293,7 @@ sealed class ClassicUOHost : IPluginHandler
                 fixed (byte* ptr = rentBuf)
                     Buffer.MemoryCopy(data.ToPointer(), ptr, sizeof(byte) * length, sizeof(byte) * length);
 
-                ok |= plugin.ProcessRecvPacket(ref rentBuf, ref length);
+                ok &= plugin.ProcessRecvPacket(ref rentBuf, ref length);
 
                 fixed (byte* ptr = rentBuf)
                     Buffer.MemoryCopy(ptr, data.ToPointer(), sizeof(byte) * length, sizeof(byte) * length);
@@ -320,7 +320,7 @@ sealed class ClassicUOHost : IPluginHandler
                 fixed (byte* ptr = rentBuf)
                     Buffer.MemoryCopy(data.ToPointer(), ptr, sizeof(byte) * length, sizeof(byte) * length);
 
-                ok |= plugin.ProcessSendPacket(ref rentBuf, ref length);
+                ok &= plugin.ProcessSendPacket(ref rentBuf, ref length);
 
                 fixed (byte* ptr = rentBuf)
                     Buffer.MemoryCopy(ptr, data.ToPointer(), sizeof(byte) * length, sizeof(byte) * length);
