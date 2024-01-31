@@ -73,14 +73,6 @@ namespace ClassicUO
             Boot(host, args);
         }
 
-        private static void PatchEnvVars()
-        {
-            // Patch necessary for .NET 5
-            foreach (System.Collections.DictionaryEntry envs in Environment.GetEnvironmentVariables())
-            {
-                SDL2.SDL.SDL_SetHint(envs.Key.ToString(), envs.Value.ToString());
-            }
-        }
 
         [StructLayout(LayoutKind.Sequential)]
         public unsafe struct HostBindings
@@ -411,12 +403,6 @@ namespace ClassicUO
         public static void Boot(UnmanagedAssistantHost pluginHost, string[] args)
         {
             CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
-
-#if !NETFRAMEWORK
-            //DllMap.Init(Assembly.GetExecutingAssembly());
-           // DllMap.Init(typeof(Microsoft.Xna.Framework.Point).Assembly);
-            PatchEnvVars();
-#endif
 
             Log.Start(LogTypes.All);
 
