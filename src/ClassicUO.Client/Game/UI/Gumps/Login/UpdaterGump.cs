@@ -80,7 +80,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
         public static UpdateStates _update_state = UpdateStates.None;
 
 
-        public UpdaterGump(LoginScene scene) : base(0, 0)
+        public UpdaterGump(World world, LoginScene scene) : base(world, 0, 0)
         {
             CanCloseWithRightClick = false;
             AcceptKeyboardInput = false;
@@ -89,7 +89,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             const ushort HUE = 0x0386;
 
 
-            if (Client.Version >= ClientVersion.CV_500A)
+            if (Client.Game.UO.Version >= ClientVersion.CV_500A)
             {
                 Add(new GumpPic(0, 0, 0x2329, 0));
             }

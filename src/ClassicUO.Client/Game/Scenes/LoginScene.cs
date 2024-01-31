@@ -66,7 +66,8 @@ namespace ClassicUO.Game.Scenes
         EnteringBritania,
         CharacterCreation,
         CharacterCreationDone,
-        PopUpMessage
+        PopUpMessage,
+        Updater
     }
 
     internal sealed class LoginScene : Scene
