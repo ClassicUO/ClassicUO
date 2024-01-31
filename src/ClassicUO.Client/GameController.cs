@@ -142,10 +142,12 @@ namespace ClassicUO
 
             PluginHost?.Initialize();
 
+            /*
             foreach (string p in Settings.GlobalSettings.Plugins)
             {
                 Plugin.Create(p);
             }
+            */
 
             Log.Trace("Done!");
 

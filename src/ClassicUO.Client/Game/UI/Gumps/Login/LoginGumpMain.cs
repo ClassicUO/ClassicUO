@@ -44,7 +44,7 @@ using SDL2;
 
 namespace ClassicUO.Game.UI.Gumps.Login
 {
-    internal class LoginGump : Gump
+    internal class LoginGumpMain : Gump
     {
         private readonly ushort _buttonNormal;
         private readonly ushort _buttonOver;
@@ -56,7 +56,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
         private float _time;
 
-        public LoginGump(World world, LoginScene scene) : base(world, 0, 0)
+        public LoginGumpMain(World world, LoginScene scene) : base(world, 0, 0)
         {
             CanCloseWithRightClick = false;
 

@@ -552,9 +552,11 @@ namespace ClassicUO
                 flags |= INVALID_UO_DIRECTORY;
             }
 
-            string clientVersionText = Settings.GlobalSettings.ClientVersion;
+            //string clientVersionText = Settings.GlobalSettings.ClientVersion;
+            string clientVersionText = Constants.CLIENTVERSION;
 
-            if (!ClientVersionHelper.IsClientVersionValid(Settings.GlobalSettings.ClientVersion, out ClientVersion clientVersion))
+            //if (!ClientVersionHelper.IsClientVersionValid(Settings.GlobalSettings.ClientVersion, out ClientVersion clientVersion))
+            if (!ClientVersionHelper.IsClientVersionValid(Constants.CLIENTVERSION, out ClientVersion clientVersion))
             {
                 Log.Warn($"Client version [{clientVersionText}] is invalid, let's try to read the client.exe");
 
@@ -570,7 +572,7 @@ namespace ClassicUO
                     Log.Trace($"Found a valid client.exe [{clientVersionText} - {clientVersion}]");
 
                     // update the wrong/missing client version in settings.json
-                    Settings.GlobalSettings.ClientVersion = clientVersionText;
+                    //Settings.GlobalSettings.ClientVersion = clientVersionText;
                 }
             }
 
@@ -585,7 +587,7 @@ namespace ClassicUO
                     Client.ShowErrorMessage(ResGeneral.YourUOClientVersionIsInvalid);
                 }
 
-                PlatformHelper.LaunchBrowser(ResGeneral.ClassicUOLink);
+                //PlatformHelper.LaunchBrowser(ResGeneral.ClassicUOLink);
             }
             else
             {
@@ -664,6 +666,7 @@ namespace ClassicUO
 
                         break;
 
+                        /*
                     case "ip":
                         Settings.GlobalSettings.IP = value;
 
@@ -673,6 +676,7 @@ namespace ClassicUO
                         Settings.GlobalSettings.Port = ushort.Parse(value);
 
                         break;
+                        */
 
                     case "filesoverride":
                     case "uofilesoverride":
@@ -691,10 +695,12 @@ namespace ClassicUO
 
                         break;
 
+                        /*
                     case "clientversion":
                         Settings.GlobalSettings.ClientVersion = value;
 
                         break;
+                        */
 
                     case "lastcharactername":
                     case "lastcharname":
@@ -798,11 +804,12 @@ namespace ClassicUO
                         CUOEnviroment.SkipLoginScreen = true;
 
                         break;
-
+                        /*
                     case "plugins":
                         Settings.GlobalSettings.Plugins = string.IsNullOrEmpty(value) ? new string[0] : value.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
 
                         break;
+                        */
 
                     case "use_verdata":
                         Settings.GlobalSettings.UseVerdata = bool.Parse(value);

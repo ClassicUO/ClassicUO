@@ -165,6 +165,7 @@ namespace ClassicUO
 
             Log.Trace("Loading files...");
 
+            /*
             if (!string.IsNullOrWhiteSpace(Settings.GlobalSettings.ClientVersion))
             {
                 // sanitize client version
@@ -172,6 +173,9 @@ namespace ClassicUO
             }
 
             string clientVersionText = Settings.GlobalSettings.ClientVersion;
+        */
+
+            string clientVersionText = Constants.CLIENTVERSION;
 
             // check if directory is good
             if (!Directory.Exists(clientPath))
@@ -199,7 +203,7 @@ namespace ClassicUO
                 Log.Trace($"Found a valid client.exe [{clientVersionText} - {clientVersion}]");
 
                 // update the wrong/missing client version in settings.json
-                Settings.GlobalSettings.ClientVersion = clientVersionText;
+                //Settings.GlobalSettings.ClientVersion = clientVersionText;
             }
 
             Version = clientVersion;

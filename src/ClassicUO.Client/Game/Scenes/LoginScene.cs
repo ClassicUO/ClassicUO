@@ -103,7 +103,8 @@ namespace ClassicUO.Game.Scenes
             _autoLogin = Settings.GlobalSettings.AutoLogin;
 
             UIManager.Add(new LoginBackground(_world));
-            UIManager.Add(_currentGump = new LoginGump(_world, this));
+            //UIManager.Add(_currentGump = new LoginGump(_world, this));
+            UIManager.Add(_currentGump = new LoginGumpMain(_world, this));
 
             Client.Game.Audio.PlayMusic(Client.Game.Audio.LoginMusicIndex, false, true);
 
@@ -222,7 +223,8 @@ namespace ClassicUO.Game.Scenes
                 case LoginSteps.Main:
                     PopupMessage = null;
 
-                    return new LoginGump(_world,this);
+                    //return new LoginGump(_world,this);
+                    return new LoginGumpMain(_world,this);
 
                 case LoginSteps.Connecting:
                 case LoginSteps.VerifyingAccount:
@@ -327,7 +329,8 @@ namespace ClassicUO.Game.Scenes
                 Settings.GlobalSettings.Save();
             }
 
-            Log.Trace($"Start login to: {Settings.GlobalSettings.IP},{Settings.GlobalSettings.Port}");
+            //Log.Trace($"Start login to: {Settings.GlobalSettings.IP},{Settings.GlobalSettings.Port}");
+            Log.Trace($"Start login to: {Constants.SPHERE_IP},{Constants.SPHERE_PORT}");
 
 
             if (!Reconnect)
@@ -345,7 +348,8 @@ namespace ClassicUO.Game.Scenes
             NetClient.Socket.Disconnected -= OnNetClientDisconnected;
             NetClient.Socket.Connected += OnNetClientConnected;
             NetClient.Socket.Disconnected += OnNetClientDisconnected;
-            NetClient.Socket.Connect(Settings.GlobalSettings.IP, Settings.GlobalSettings.Port);
+            //NetClient.Socket.Connect(Settings.GlobalSettings.IP, Settings.GlobalSettings.Port);
+            NetClient.Socket.Connect(Constants.SPHERE_IP, Constants.SPHERE_PORT);
         }
 
 

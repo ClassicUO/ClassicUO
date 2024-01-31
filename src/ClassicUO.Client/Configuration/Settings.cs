@@ -54,16 +54,16 @@ namespace ClassicUO.Configuration
 
         [JsonPropertyName("password")] public string Password { get; set; } = string.Empty;
 
-        [JsonPropertyName("ip")] public string IP { get; set; } = "127.0.0.1";
+       // [JsonPropertyName("ip")] public string IP { get; set; } = "127.0.0.1";
 
-        [JsonPropertyName("port"), JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)] public ushort Port { get; set; } = 2593;
+       // [JsonPropertyName("port"), JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)] public ushort Port { get; set; } = 2593;
 
         [JsonPropertyName("ultimaonlinedirectory")]
         public string UltimaOnlineDirectory { get; set; } = "";
 
         [JsonPropertyName("profilespath")] public string ProfilesPath { get; set; } = string.Empty;
 
-        [JsonPropertyName("clientversion")] public string ClientVersion { get; set; } = string.Empty;
+        //[JsonPropertyName("clientversion")] public string ClientVersion { get; set; } = string.Empty;
         
         [JsonPropertyName("lang")] public string Language { get; set; } = "";
 
@@ -105,7 +105,7 @@ namespace ClassicUO.Configuration
 
         [JsonPropertyName("encryption")] public byte Encryption { get; set; }
 
-        [JsonPropertyName("plugins")] public string[] Plugins { get; set; } = { @"./Assistant/Razor.dll" };
+       // [JsonPropertyName("plugins")] public string[] Plugins { get; set; } = { @"./Assistant/Razor.dll" };
 
         public static string GetSettingsFilepath()
         {
