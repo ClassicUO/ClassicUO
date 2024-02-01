@@ -39,13 +39,6 @@ jobs:
             target: osx-x64
 
     steps:
-<<<<<<< HEAD
-<<<<<<< HEAD
-    env:
-      CUO_ZIP_NAME: "ClassicUO-${{ matrix.target }}-release.zip"
-
-=======
->>>>>>> 898a91d31 (fixed deploy yml)
       - uses: actions/checkout@v2
 
       - name: Get submodules
@@ -94,123 +87,26 @@ jobs:
           tag: "ClassicUO-dev-release"
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Repo Preparation - clone
-        uses: actions/checkout@master
-        with:
-          repository: ClassicUO/deploy
-          path: deploy
-          ssh-key: ${{ secrets.SSH_DEPLOY_KEY }}
-
-      - name: Repo Preparation - prepare
-        run: |
-          cp -rdf ${{ env.CUO_OUTPUT_PATH }}/* deploy/client/${{ matrix.target }}/
-          cp upload/manifest.xml deploy/client/${{ matrix.target }}_manifest.xml
-
-      - name: Pushes to another repository
-        uses: cpina/github-action-push-to-another-repository@main
-        env:
-          SSH_DEPLOY_KEY: ${{ secrets.SSH_DEPLOY_KEY }}
-        with:
-          source-directory: deploy/
-          destination-github-username: "ClassicUO"
-          destination-repository-name: "deploy"
-          commit-message: "release ${{ env.CUO_ASSEMBLY_VERSION }} on ${{ matrix.target }}"
-          target-branch: main
-<<<<<<< HEAD
-=======
-    - uses: actions/checkout@v2
-      
-    - name: Get submodules
-      run: |
-        git config --global url."https://".insteadOf git://
-        git submodule update --init --recursive
-        
-    - name: Setup .NET 8
-      uses: actions/setup-dotnet@v3
-      with:
-        dotnet-version: 8.0.x
-        include-prerelease: true
-            
-    - name: Build
-      run: dotnet publish ${{ env.CUO_PROJECT_PATH }} -c Release -o ${{ env.CUO_OUTPUT_PATH }} -p:IS_DEV_BUILD=true -p:AssemblyVersion=${{ env.CUO_ASSEMBLY_VERSION }} -p:FileVersion=${{ env.CUO_ASSEMBLY_VERSION }}
-      
-    - name: Create manifest
-      run: |
-        dotnet run --project tools/ManifestCreator/ManifestCreator.csproj "${{ env.CUO_OUTPUT_PATH }}" "dev-preview" "${{ env.CUO_ZIP_NAME }}"
-        mkdir upload
-        mv manifest.xml upload
-      
-    - name: Create package
-      uses: thedoctor0/zip-release@master
-      with:
-        type: 'zip'
-        directory: ${{ env.CUO_OUTPUT_PATH }}
-        filename: ${{ env.CUO_ZIP_NAME }}
-        exclusions: '*.zip manifest.xml'
-            
-    - name: Move output
-      run: mv "${{ env.CUO_OUTPUT_PATH }}/${{ env.CUO_ZIP_NAME }}" upload
-                      
-    - name: Upload Release
-      uses: ncipollo/release-action@v1
-      with:
-        artifacts: "upload/${{ env.CUO_ZIP_NAME }}"
-        name: 'ClassicUO dev preview'
-        body: 'This build may not be safe: use it at your own risk.'
-        draft: false
-        prerelease: true
-        allowUpdates: true
-        tag: 'ClassicUO-dev-release'
-        token: ${{ secrets.GITHUB_TOKEN }}
-        
-    - name: FTP Deploy
-      uses: SamKirkland/FTP-Deploy-Action@4.3.2
-      with:
-        server: ftp.classicuo.eu
-        username: ${{ secrets.FTP_USER }}
-        password: ${{ secrets.FTP_PSW }}
-        protocol: ftps
-        server-dir: /www.classicuo.eu/dev/deploy/
-        local-dir: upload/
-<<<<<<< HEAD
-        
->>>>>>> bfb981545 (Update deploy.yml)
-=======
-
-    - name: Repo Preparation - clone
-      uses: actions/checkout@master
-      with:
-       repository: ClassicUO/deploy
-       path: deploy
-       ssh-key: ${{ secrets.SSH_DEPLOY_KEY }}
-       
-    - name: Repo Preparation - prepare
-      run: |       
-       cp -rdf ${{ env.CUO_OUTPUT_PATH }}/* deploy/client/win-x64/
-       cp -rdf ${{ env.CUO_OUTPUT_PATH }}/* deploy/client/linux-x64/
-       cp -rdf ${{ env.CUO_OUTPUT_PATH }}/* deploy/client/osx-x64/
-       
-       cp ./upload/manifest.xml ./deploy/client/win-x64_manifest.xml
-       cp ./upload/manifest.xml ./deploy/client/linux-x64_manifest.xml
-       cp ./upload/manifest.xml ./deploy/client/osx-x64_manifest.xml
-<<<<<<< HEAD
-
-       git add .
-       git commit -m 'release ${{ env.CUO_ASSEMBLY_VERSION }}'
-       git push
->>>>>>> 9dfa03711 (Update deploy.yml)
-=======
-       
-    - name: Pushes to another repository
-      uses: cpina/github-action-push-to-another-repository@main
-      env:
-        SSH_DEPLOY_KEY: ${{ secrets.SSH_DEPLOY_KEY }}
-      with:
-        source-directory: deploy/
-        destination-github-username: 'ClassicUO'
-        destination-repository-name: 'deploy'
-        commit-message: 'release ${{ env.CUO_ASSEMBLY_VERSION }}'
-        target-branch: main
->>>>>>> ff22de734 (Update deploy.yml)
-=======
->>>>>>> 898a91d31 (fixed deploy yml)
+  #   - name: Repo Preparation - clone
+  #     uses: actions/checkout@master
+  #     with:
+  #       repository: ClassicUO/deploy
+  #       path: deploy
+  #       ssh-key: ${{ secrets.SSH_DEPLOY_KEY }}
+  #
+  #   - name: Repo Preparation - prepare
+  #     run: |
+  #       cp -rdf ${{ env.CUO_OUTPUT_PATH }}/* deploy/client/${{ matrix.target }}/
+  #       cp upload/manifest.xml deploy/client/${{ matrix.target }}_manifest.xml
+  #
+  #   - name: Pushes to another repository
+  #     uses: cpina/github-action-push-to-another-repository@main
+  #     env:
+  #       SSH_DEPLOY_KEY: ${{ secrets.SSH_DEPLOY_KEY }}
+  #     with:
+  #       source-directory: deploy/
+  #       destination-github-username: "ClassicUO"
+  #       destination-repository-name: "deploy"
+  #       commit-message: "release ${{ env.CUO_ASSEMBLY_VERSION }} on ${{ matrix.target }}"
+  #       target-branch: main
+  
