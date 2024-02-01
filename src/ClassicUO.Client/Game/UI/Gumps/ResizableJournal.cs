@@ -355,6 +355,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             ResizeWindow(savedSize);
+            BuildBorder();
         }
 
         protected override void OnMouseWheel(MouseEventType delta)
