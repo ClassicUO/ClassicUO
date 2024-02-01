@@ -2084,6 +2084,12 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 profile.HideJournalTimestamp = b;
             }), true, page);
+            content.BlankLine();
+            content.AddToRight(c = new CheckboxWithLabel(lang.GetTazUO.MakeAnchorable, 0, profile.JournalAnchorEnabled, (b) =>
+            {
+                profile.JournalAnchorEnabled = b;
+                ResizableJournal.UpdateJournalOptions();
+            }), true, page);
             #endregion
 
             #region Modern paperdoll
@@ -2105,12 +2111,19 @@ namespace ClassicUO.Game.UI.Gumps
             content.AddToRight(new ModernColorPickerWithLabel(lang.GetTazUO.DurabilityBarHue, profile.ModernPaperDollDurabilityHue, (h) =>
             {
                 profile.ModernPaperDollDurabilityHue = h;
+                ModernPaperdoll.UpdateAllOptions();
             }), true, page);
             content.RemoveIndent();
             content.BlankLine();
             content.AddToRight(new SliderWithLabel(lang.GetTazUO.ShowDurabilityBarBelow, 0, Theme.SLIDER_WIDTH, 1, 100, profile.ModernPaperDoll_DurabilityPercent, (i) =>
             {
                 profile.ModernPaperDoll_DurabilityPercent = i;
+            }), true, page);
+            content.BlankLine();
+            content.AddToRight(c = new CheckboxWithLabel(lang.GetTazUO.PaperdollAnchor, 0, profile.ModernPaperdollAnchorEnabled, (b) =>
+            {
+                profile.ModernPaperdollAnchorEnabled = b;
+                ModernPaperdoll.UpdateAllOptions();
             }), true, page);
             #endregion
 

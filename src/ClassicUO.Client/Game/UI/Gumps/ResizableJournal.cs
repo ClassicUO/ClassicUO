@@ -1,14 +1,14 @@
 ﻿using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
+using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
 using ClassicUO.Utility.Collections;
+using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
-using Microsoft.Xna.Framework;
-using ClassicUO.Game.GameObjects;
 using System.Linq;
 
 namespace ClassicUO.Game.UI.Gumps
@@ -50,7 +50,7 @@ namespace ClassicUO.Game.UI.Gumps
         #endregion
         public ResizableJournal() : base(_lastWidth, _lastHeight, MIN_WIDTH, MIN_HEIGHT, 0, 0)
         {
-            AnchorType = ANCHOR_TYPE.NONE;
+            AnchorType = ProfileManager.CurrentProfile.JournalAnchorEnabled ? ANCHOR_TYPE.NONE : ANCHOR_TYPE.DISABLED;
             CanMove = true;
             _prevCanMove = true;
             AcceptMouseInput = true;
@@ -303,13 +303,14 @@ namespace ClassicUO.Game.UI.Gumps
             _backgroundTexture.Alpha = (float)ProfileManager.CurrentProfile.JournalOpacity / 100;
             BorderControl.Alpha = (float)ProfileManager.CurrentProfile.JournalOpacity / 100;
             _background.Hue = ProfileManager.CurrentProfile.AltJournalBackgroundHue;
+            AnchorType = ProfileManager.CurrentProfile.JournalAnchorEnabled ? ANCHOR_TYPE.NONE : ANCHOR_TYPE.DISABLED;
 
             BuildBorder();
         }
 
         public static void UpdateJournalOptions()
         {
-            foreach(ResizableJournal j in UIManager.Gumps.OfType<ResizableJournal>())
+            foreach (ResizableJournal j in UIManager.Gumps.OfType<ResizableJournal>())
             {
                 j.UpdateOptions();
             }
@@ -423,7 +424,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _scrollBar.IsVisible = false;
                 AcceptMouseInput = true;
                 CanMove = true;
-                
+
                 X = x;
                 Y = y;
                 Width = lastWidth = width;

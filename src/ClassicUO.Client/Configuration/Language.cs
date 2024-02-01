@@ -435,6 +435,7 @@ namespace ClassicUO.Configuration
             public string JournalStyle { get; set; } = "Journal style";
             public string JournalHideBorders { get; set; } = "Hide borders";
             public string HideTimestamp { get; set; } = "Hide timestamp";
+            public string JournalAnchor { get; set; } = "Make anchorable";
             #endregion
 
             #region ModernPaperdoll
@@ -443,6 +444,7 @@ namespace ClassicUO.Configuration
             public string PaperdollHue { get; set; } = "Paperdoll hue";
             public string DurabilityBarHue { get; set; } = "Durability bar hue";
             public string ShowDurabilityBarBelow { get; set; } = "Show durability bar below %";
+            public string PaperdollAnchor { get; set; } = "Make anchorable";
             #endregion
 
             #region Nameplates

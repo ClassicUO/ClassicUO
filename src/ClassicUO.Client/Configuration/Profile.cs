@@ -590,6 +590,9 @@ namespace ClassicUO.Configuration
 
         public uint SOSGumpID { get; set; } = 1915258020;
 
+        public bool ModernPaperdollAnchorEnabled { get; set; } = false;
+        public bool JournalAnchorEnabled { get; set; } = false;
+
 
         public void Save(string path, bool saveGumps = true)
         {
