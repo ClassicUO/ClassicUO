@@ -10,7 +10,10 @@ namespace ClassicUO.Game.UI.Gumps
             "/c[white][3.20.0]/cd\n" +
                 "- Being frozen wont cancel auto follow\n" +
                 "- Fix from CUO for buffs\n" +
-                "- Add ability to load custom spell definitions from an external file",
+                "- Add ability to load custom spell definitions from an external file\n" +
+                "- Customize the options gump via ui file\n" +
+                "- Added saveposition tag for xml gumps\n" +
+                "- Can now open multiple journals\n",
 
             "/c[white][3.19.0]/cd\n" +
                 "- SOS Gump ID configurable in settings\n" +
