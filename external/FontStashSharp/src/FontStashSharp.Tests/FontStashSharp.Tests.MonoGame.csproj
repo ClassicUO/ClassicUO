@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <DefineConstants>$(DefineConstants);MONOGAME</DefineConstants>
+    <TargetFrameworks>net6.0-windows</TargetFrameworks>
+    <OutputPath>bin\MonoGame\$(Configuration)</OutputPath>
+    <OutputType>Library</OutputType>
+    <RootNamespace>FontStashSharp.Tests</RootNamespace>
+    <AssemblyName>FontStashSharp.Tests</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\**\*.*" />
+  </ItemGroup>  
+
+  <ItemGroup>
+    <PackageReference Include="MonoGame.Framework.WindowsDX" Version="$(MonoGameVersion)" />
+    <PackageReference Include="NUnit" Version="3.13.3" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.2.1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.2.0" />
+  </ItemGroup>  
+
+  <ItemGroup>
+    <ProjectReference Include="..\XNA\FontStashSharp.MonoGame.csproj" />
+  </ItemGroup>  
+</Project>

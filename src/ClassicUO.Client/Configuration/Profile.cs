@@ -500,7 +500,7 @@ namespace ClassicUO.Configuration
         public int AdvancedSkillsGumpHeight { get; set; } = 310;
 
         #region ToolTip Overrides
-        public List<string> ToolTipOverride_SearchText { get; set; } = new List<string>() { "Physical Res", "Fire Res", "Cold Res", "Poison Res", "Energy Res" };
+        public List<string> ToolTipOverride_SearchText { get; set; } = new List<string>() { "Physical Res", "Fire Resist", "Cold Resist", "Poison Resist", "Energy Resist" };
         public List<string> ToolTipOverride_NewFormat { get; set; } = new List<string>() { "/c[#5f423c]Physical Resist {1}%", "/c[red]Fire Resist {1}%", "/c[blue]Cold Resist {1}%", "/c[green]Poison Resist {1}%", "/c[purple]Energy Resist {1}%" };
         public List<int> ToolTipOverride_MinVal1 { get; set; } = new List<int>() { -1, -1, -1, -1, -1 };
         public List<int> ToolTipOverride_MinVal2 { get; set; } = new List<int>() { -1, -1, -1, -1, -1 };
@@ -589,6 +589,9 @@ namespace ClassicUO.Configuration
         public double PaperdollScale { get; set; } = 1f;
 
         public uint SOSGumpID { get; set; } = 1915258020;
+
+        public bool ModernPaperdollAnchorEnabled { get; set; } = false;
+        public bool JournalAnchorEnabled { get; set; } = false;
 
 
         public void Save(string path, bool saveGumps = true)
@@ -817,10 +820,9 @@ namespace ClassicUO.Configuration
                                     break;
 
                                 case GumpType.Journal:
-                                    //gump = new JournalGump();
                                     gump = new ResizableJournal();
-                                    x = ProfileManager.CurrentProfile.JournalPosition.X;
-                                    y = ProfileManager.CurrentProfile.JournalPosition.Y;
+                                    //x = ProfileManager.CurrentProfile.JournalPosition.X;
+                                    //y = ProfileManager.CurrentProfile.JournalPosition.Y;
                                     break;
 
                                 case GumpType.MacroButton:

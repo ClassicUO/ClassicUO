@@ -30,16 +30,14 @@
 
 #endregion
 
-using System;
-using System.Collections.Generic;
-using System.Net.Sockets;
+using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
+using ClassicUO.Game.UI;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
-using ClassicUO.Assets;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Resources;
@@ -48,7 +46,9 @@ using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SDL2;
-using ClassicUO.Game.UI;
+using System;
+using System.Collections.Generic;
+using System.Net.Sockets;
 
 namespace ClassicUO.Game.Scenes
 {
@@ -198,6 +198,7 @@ namespace ClassicUO.Game.Scenes
             Plugin.OnConnected();
             EventSink.InvokeOnConnected(null);
             GameController.UpdateBackgroundHueShader();
+            SpellDefinition.LoadCustomSpells();
             SpellVisualRangeManager.Instance.OnSceneLoad();
             AutoLootManager.Instance.OnSceneLoad();
             if (!UpdateManager.SkipUpdateCheck && UpdateManager.HasUpdate)
@@ -215,7 +216,7 @@ namespace ClassicUO.Game.Scenes
                 };
             }
 
-            foreach(var xml in ProfileManager.CurrentProfile.AutoOpenXmlGumps)
+            foreach (var xml in ProfileManager.CurrentProfile.AutoOpenXmlGumps)
             {
                 XmlGumpHandler.TryAutoOpenByName(xml);
             }
@@ -873,7 +874,7 @@ namespace ClassicUO.Game.Scenes
                     }
                     else if (distance > currentProfile.AutoFollowDistance)
                     {
-                        if(!Pathfinder.WalkTo(follow.X, follow.Y, follow.Z, currentProfile.AutoFollowDistance))
+                        if (!Pathfinder.WalkTo(follow.X, follow.Y, follow.Z, currentProfile.AutoFollowDistance) && !World.Player.IsParalyzed)
                         {
                             StopFollowing(); //Can't get there
                         }

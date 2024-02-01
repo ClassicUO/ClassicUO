@@ -60,26 +60,17 @@ namespace ClassicUO.Game.UI.Gumps
             SSHeight = Height + 9;
         }
 
-        private int updateTickCount = 0;
-
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             if (!hoverReference.MouseIsOver)
                 Dispose();
 
-            if(Height == 0)
+            if (Height == 0)
             {
-                foreach(Control c in Children)
+                foreach (Control c in Children)
                     if (Height < c.Height)
                         Height = c.Height;
             }
-
-            //updateTickCount++;
-            //if(updateTickCount > 5)
-            //{
-            //    RepositionTooltips();
-            //    updateTickCount = 0;
-            //}
 
             int z_width = Width + 24;
             int z_height = Height + 8;

@@ -189,6 +189,7 @@ namespace ClassicUO
             Fonts.Initialize(GraphicsDevice);
             SolidColorTextureCache.Initialize(GraphicsDevice);
             PNGLoader.Instance.GraphicsDevice = GraphicsDevice;
+            System.Threading.Tasks.Task loadResourceAssets = PNGLoader.Instance.LoadResourceAssets();
 
             Animations = new Renderer.Animations.Animations(GraphicsDevice);
             Arts = new Renderer.Arts.Art(GraphicsDevice);
@@ -207,6 +208,8 @@ namespace ClassicUO
             var bytes = Loader.GetBackgroundImage().ToArray();
             using var ms = new MemoryStream(bytes);
             _background = Texture2D.FromStream(GraphicsDevice, ms);
+
+            loadResourceAssets.Wait(10000);
 
             SetScene(new LoginScene());
             SetWindowPositionBySettings();
@@ -450,7 +453,7 @@ namespace ClassicUO
 
             if (Scene != null && Scene.IsLoaded && !Scene.IsDestroyed)
             {
-                if(EventSink.GameUpdate != null)
+                if (EventSink.GameUpdate != null)
                 {
                     EventSink.GameUpdate();
                 }
@@ -950,10 +953,11 @@ namespace ClassicUO
                     else if (sdlEvent->cbutton.button == (byte)SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_START && World.InGame)
                     {
                         Gump g = UIManager.GetGump<ModernOptionsGump>();
-                        if(g == null)
+                        if (g == null)
                         {
                             UIManager.Add(new ModernOptionsGump());
-                        } else
+                        }
+                        else
                         {
                             g.Dispose();
                         }

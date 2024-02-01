@@ -488,10 +488,7 @@ namespace ClassicUO.Game.UI.Gumps
             InvalidateContents = false;
         }
 
-        public static bool FindContainer(uint serial, out GridContainer? gridContainer)
-        {
-            return (gridContainer = UIManager.GetGump<GridContainer>(serial)) == null ? false : true;
-        }
+        public static bool FindContainer(uint serial, out GridContainer? gridContainer) => (gridContainer = UIManager.GetGump<GridContainer>(serial)) != null;
 
         protected override void UpdateContents()
         {

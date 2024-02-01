@@ -5,10 +5,30 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="gumpartassets\40303.png" />
+    <None Remove="gumpartassets\40304.png" />
+    <None Remove="gumpartassets\40305.png" />
+    <None Remove="gumpartassets\40306.png" />
+    <None Remove="gumpartassets\40307.png" />
+    <None Remove="gumpartassets\40308.png" />
+    <None Remove="gumpartassets\40309.png" />
+    <None Remove="gumpartassets\40310.png" />
+    <None Remove="gumpartassets\40311.png" />
+    <None Remove="gumpartassets\40312.png" />
     <None Remove="Roboto-Regular.ttf" />
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="gumpartassets\40303.png" />
+    <EmbeddedResource Include="gumpartassets\40304.png" />
+    <EmbeddedResource Include="gumpartassets\40305.png" />
+    <EmbeddedResource Include="gumpartassets\40306.png" />
+    <EmbeddedResource Include="gumpartassets\40307.png" />
+    <EmbeddedResource Include="gumpartassets\40308.png" />
+    <EmbeddedResource Include="gumpartassets\40309.png" />
+    <EmbeddedResource Include="gumpartassets\40310.png" />
+    <EmbeddedResource Include="gumpartassets\40311.png" />
+    <EmbeddedResource Include="gumpartassets\40312.png" />
     <EmbeddedResource Include="Roboto-Regular.ttf" />
   </ItemGroup>
 

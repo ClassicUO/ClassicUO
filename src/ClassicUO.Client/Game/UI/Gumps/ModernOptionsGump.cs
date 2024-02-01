@@ -17,6 +17,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace ClassicUO.Game.UI.Gumps
@@ -31,6 +32,27 @@ namespace ClassicUO.Game.UI.Gumps
         private Profile profile;
         private ModernOptionsGumpLanguage lang;
 
+        private static ThemeSettings _settings;
+        private static ThemeSettings Theme
+        {
+            get
+            {
+                if (_settings == null)
+                {
+                    _settings = (ThemeSettings)UISettings.Load<ThemeSettings>(typeof(ModernOptionsGump).ToString());
+                    if (_settings == null)
+                    {
+                        _settings = new ThemeSettings();
+                        ThemeSettings.Save<ThemeSettings>(typeof(ModernOptionsGump).ToString(), _settings);
+                    }
+                    return _settings;
+                }
+                else
+                {
+                    return _settings;
+                }
+            }
+        }
 
         public ModernOptionsGump() : base(0, 0)
         {
@@ -2062,6 +2084,12 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 profile.HideJournalTimestamp = b;
             }), true, page);
+            content.BlankLine();
+            content.AddToRight(c = new CheckboxWithLabel(lang.GetTazUO.MakeAnchorable, 0, profile.JournalAnchorEnabled, (b) =>
+            {
+                profile.JournalAnchorEnabled = b;
+                ResizableJournal.UpdateJournalOptions();
+            }), true, page);
             #endregion
 
             #region Modern paperdoll
@@ -2083,12 +2111,19 @@ namespace ClassicUO.Game.UI.Gumps
             content.AddToRight(new ModernColorPickerWithLabel(lang.GetTazUO.DurabilityBarHue, profile.ModernPaperDollDurabilityHue, (h) =>
             {
                 profile.ModernPaperDollDurabilityHue = h;
+                ModernPaperdoll.UpdateAllOptions();
             }), true, page);
             content.RemoveIndent();
             content.BlankLine();
             content.AddToRight(new SliderWithLabel(lang.GetTazUO.ShowDurabilityBarBelow, 0, Theme.SLIDER_WIDTH, 1, 100, profile.ModernPaperDoll_DurabilityPercent, (i) =>
             {
                 profile.ModernPaperDoll_DurabilityPercent = i;
+            }), true, page);
+            content.BlankLine();
+            content.AddToRight(c = new CheckboxWithLabel(lang.GetTazUO.PaperdollAnchor, 0, profile.ModernPaperdollAnchorEnabled, (b) =>
+            {
+                profile.ModernPaperdollAnchorEnabled = b;
+                ModernPaperdoll.UpdateAllOptions();
             }), true, page);
             #endregion
 
@@ -4435,7 +4470,6 @@ namespace ClassicUO.Game.UI.Gumps
                 public void Drag(Point pos)
                 {
                     pos = new Point((pos.X - ScreenCoordinateX), pos.Y - ScreenCoordinateY);
-                    int p = 0;
 
                     if (SelectionStart == SelectionEnd)
                     {
@@ -4634,8 +4668,6 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (Children.Count != 0)
                 {
-                    int w = 0, h = 0;
-
                     for (int i = 0; i < Children.Count; i++)
                     {
                         Control c = Children[i];
@@ -4649,10 +4681,7 @@ namespace ClassicUO.Game.UI.Gumps
                         }
 
                         c.Update();
-
-
                     }
-
                 }
 
             }
@@ -6241,33 +6270,39 @@ namespace ClassicUO.Game.UI.Gumps
             public Area FullControl { get; }
         }
 
-        private static class Theme
+        private class ThemeSettings : UISettings
         {
-            public const int SLIDER_WIDTH = 150;
-            public const int COMBO_BOX_WIDTH = 225;
-            public const int SCROLL_BAR_WIDTH = 15;
-            public const int INPUT_WIDTH = 200;
-            public const int TOP_PADDING = 5;
-            public const int INDENT_SPACE = 40;
-            public const int BLANK_LINE = 20;
-            public const int HORIZONTAL_SPACING_CONTROLS = 20;
+            public int SLIDER_WIDTH { get; set; } = 150;
+            public int COMBO_BOX_WIDTH { get; set; } = 225;
+            public int SCROLL_BAR_WIDTH { get; set; } = 15;
+            public int INPUT_WIDTH { get; set; } = 200;
+            public int TOP_PADDING { get; set; } = 5;
+            public int INDENT_SPACE { get; set; } = 40;
+            public int BLANK_LINE { get; set; } = 20;
+            public int HORIZONTAL_SPACING_CONTROLS { get; set; } = 20;
 
-            public const int STANDARD_TEXT_SIZE = 20;
+            public int STANDARD_TEXT_SIZE { get; set; } = 20;
 
-            public const float NO_MATCH_SEARCH = 0.5f;
+            public float NO_MATCH_SEARCH { get; set; } = 0.5f;
 
-            public const ushort BACKGROUND = 897;
-            public const ushort SEARCH_BACKGROUND = 899;
-            public const ushort BLACK = 0;
+            public ushort BACKGROUND { get; set; } = 897;
+            public ushort SEARCH_BACKGROUND { get; set; } = 899;
+            public ushort BLACK { get; set; } = 0;
 
-            public static Color DROPDOWN_OPTION_NORMAL_HUE = Color.White;
-            public static Color DROPDOWN_OPTION_HOVER_HUE = Color.AntiqueWhite;
-            public static Color DROPDOWN_OPTION_SELECTED_HUE = Color.CadetBlue;
+            [JsonConverter(typeof(ColorJsonConverter))]
+            public Color DROPDOWN_OPTION_NORMAL_HUE { get; set; } = Color.White;
+            [JsonConverter(typeof(ColorJsonConverter))]
 
-            public static Color BUTTON_FONT_COLOR = Color.White;
-            public static Color TEXT_FONT_COLOR = Color.White;
+            public Color DROPDOWN_OPTION_HOVER_HUE { get; set; } = Color.AntiqueWhite;
+            [JsonConverter(typeof(ColorJsonConverter))]
+            public Color DROPDOWN_OPTION_SELECTED_HUE { get; set; } = Color.CadetBlue;
 
-            public static string FONT = TrueTypeLoader.EMBEDDED_FONT;
+            [JsonConverter(typeof(ColorJsonConverter))]
+            public Color BUTTON_FONT_COLOR { get; set; } = Color.White;
+            [JsonConverter(typeof(ColorJsonConverter))]
+            public Color TEXT_FONT_COLOR { get; set; } = Color.White;
+
+            public string FONT { get; set; } = TrueTypeLoader.EMBEDDED_FONT;
         }
 
         private static class PositionHelper
