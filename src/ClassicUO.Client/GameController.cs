@@ -189,7 +189,7 @@ namespace ClassicUO
             Fonts.Initialize(GraphicsDevice);
             SolidColorTextureCache.Initialize(GraphicsDevice);
             PNGLoader.Instance.GraphicsDevice = GraphicsDevice;
-            PNGLoader.Instance.LoadResourceAssets();
+            System.Threading.Tasks.Task loadResourceAssets = PNGLoader.Instance.LoadResourceAssets();
 
             Animations = new Renderer.Animations.Animations(GraphicsDevice);
             Arts = new Renderer.Arts.Art(GraphicsDevice);
@@ -208,6 +208,8 @@ namespace ClassicUO
             var bytes = Loader.GetBackgroundImage().ToArray();
             using var ms = new MemoryStream(bytes);
             _background = Texture2D.FromStream(GraphicsDevice, ms);
+
+            loadResourceAssets.Wait(10000);
 
             SetScene(new LoginScene());
             SetWindowPositionBySettings();

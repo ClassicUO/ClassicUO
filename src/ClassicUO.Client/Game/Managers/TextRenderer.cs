@@ -30,13 +30,12 @@
 
 #endregion
 
-using System.Collections.Generic;
 using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
+using System.Collections.Generic;
 
 namespace ClassicUO.Game.Managers
 {
@@ -76,7 +75,7 @@ namespace ClassicUO.Game.Managers
                     continue;
                 }
 
-                ushort hue = 0;
+                //ushort hue = 0;
 
                 float alpha = o.Alpha / 255f;
 

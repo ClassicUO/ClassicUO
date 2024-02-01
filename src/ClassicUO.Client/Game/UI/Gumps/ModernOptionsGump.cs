@@ -4470,7 +4470,6 @@ namespace ClassicUO.Game.UI.Gumps
                 public void Drag(Point pos)
                 {
                     pos = new Point((pos.X - ScreenCoordinateX), pos.Y - ScreenCoordinateY);
-                    int p = 0;
 
                     if (SelectionStart == SelectionEnd)
                     {
@@ -4669,8 +4668,6 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (Children.Count != 0)
                 {
-                    int w = 0, h = 0;
-
                     for (int i = 0; i < Children.Count; i++)
                     {
                         Control c = Children[i];
@@ -4684,10 +4681,7 @@ namespace ClassicUO.Game.UI.Gumps
                         }
 
                         c.Update();
-
-
                     }
-
                 }
 
             }

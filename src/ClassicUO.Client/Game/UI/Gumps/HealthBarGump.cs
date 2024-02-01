@@ -119,7 +119,7 @@ namespace ClassicUO.Game.UI.Gumps
         public bool IsLastTarget { get; set; } = false;
 
         private bool _locked = false;
-        private bool IsLocked
+        private new bool IsLocked
         {
             get { return _locked; }
             set

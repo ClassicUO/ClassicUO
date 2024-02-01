@@ -45,12 +45,12 @@ namespace ClassicUO.Assets
 
         public GumpInfo LoadGumpTexture(uint graphic)
         {
-            Texture2D texture;
-
             if (gump_availableIDs == null)
                 return new GumpInfo();
             int index = Array.IndexOf(gump_availableIDs, graphic);
             if (index == -1) return new GumpInfo();
+
+            Texture2D texture;
 
             gump_textureCache.TryGetValue(graphic, out texture);
 
@@ -160,6 +160,10 @@ namespace ClassicUO.Assets
                             uint.TryParse(fname.Substring(0, fname.Length - 4), out gump_availableIDs[i]);
                         }
                     }
+                    else
+                    {
+                        Directory.CreateDirectory(gumpPath);
+                    }
 
                     string artPath = Path.Combine(exePath, IMAGES_FOLDER, ART_EXTERNAL_FOLDER);
                     if (Directory.Exists(artPath))
@@ -176,6 +180,10 @@ namespace ClassicUO.Assets
                             }
                         }
                     }
+                    else
+                    {
+                        Directory.CreateDirectory(artPath);
+                    }
                 });
         }
 
@@ -184,7 +192,7 @@ namespace ClassicUO.Assets
             return Task.Run(
                 () =>
                 {
-                    var assembly = this.GetType().Assembly;
+                    var assembly = GetType().Assembly;
 
                     //Load the custom gump art included with TUO
                     for (uint i = 40303; i <= 40312; i++)
@@ -200,6 +208,10 @@ namespace ClassicUO.Assets
                                 continue;
                             }
                         }
+                        else
+                        {
+                            continue;
+                        }
 
                         var resourceName = assembly.GetName().Name + $".gumpartassets.{i}.png";
                         Console.WriteLine(resourceName);
@@ -214,10 +226,17 @@ namespace ClassicUO.Assets
 
 
                                 //Increase available gump id's
-                                uint[] availableIDs = new uint[gump_availableIDs.Length + 1];
-                                gump_availableIDs.CopyTo(availableIDs, 0);
-                                availableIDs[availableIDs.Length - 1] = i;
-                                gump_availableIDs = availableIDs;
+                                if (gump_availableIDs != null)
+                                {
+                                    uint[] availableIDs = new uint[gump_availableIDs.Length + 1];
+                                    gump_availableIDs.CopyTo(availableIDs, 0);
+                                    availableIDs[availableIDs.Length - 1] = i;
+                                    gump_availableIDs = availableIDs;
+                                }
+                                else
+                                {
+                                    gump_availableIDs = [i];
+                                }
 
                                 stream.Dispose();
                             }

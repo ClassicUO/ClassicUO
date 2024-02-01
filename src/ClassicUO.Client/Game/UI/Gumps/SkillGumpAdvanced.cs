@@ -30,19 +30,19 @@
 
 #endregion
 
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
+using ClassicUO.Assets;
+using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
-using ClassicUO.Assets;
 using ClassicUO.Renderer;
 using ClassicUO.Resources;
 using Microsoft.Xna.Framework;
 using System;
-using ClassicUO.Configuration;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -77,9 +77,8 @@ namespace ClassicUO.Game.UI.Gumps
         private Button resizeDrag;
         private Area BottomArea;
         private int dragStartH;
-        private Label total, real, value;
+        private Label real, value;
         private AlphaBlendControl background;
-        private Line bottomLine;
 
         private ScrollArea area;
 
@@ -259,11 +258,11 @@ namespace ClassicUO.Game.UI.Gumps
 
 
 
-                Add(BottomArea);
+            Add(BottomArea);
 
             Add(_sortOrderIndicator = new GumpPic(0, 0, 0x985, 0));
             OnButtonClick((int)Buttons.SortName);
-             
+
             Add(resizeDrag = new Button(0, 0x837, 0x838, 0x838));
             resizeDrag.MouseDown += ResizeDrag_MouseDown;
             resizeDrag.MouseUp += ResizeDrag_MouseUp;
@@ -311,7 +310,7 @@ namespace ClassicUO.Game.UI.Gumps
                 entry.Clear();
                 entry.Dispose();
             }
-  
+
             _skillListEntries.Clear();
             PropertyInfo pi = typeof(Skill).GetProperty(_sortField);
 
@@ -413,7 +412,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-           
+
 
             _databox.WantUpdateSize = true;
             _databox.ReArrangeChildren();
@@ -499,7 +498,7 @@ namespace ClassicUO.Game.UI.Gumps
             SortLock = 5,
         }
     }
-    
+
 
     internal class SkillListEntry : Control
     {

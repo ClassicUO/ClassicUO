@@ -216,6 +216,7 @@ namespace ClassicUO.Game.Managers
                                 }
                                 catch (System.Exception e)
                                 {
+                                    GameActions.Print(e.Message);
                                     GameActions.Print("It looks like there was an error trying to import your override settings.", 32);
                                 }
                                 break;
@@ -224,6 +225,10 @@ namespace ClassicUO.Game.Managers
                 });
                 t.SetApartmentState(ApartmentState.STA);
                 t.Start();
+            }
+            else
+            {
+                GameActions.Print("This feature is not currently supported on Unix.", 32);
             }
         }
 
@@ -271,22 +276,22 @@ namespace ClassicUO.Game.Managers
                                                 if (compareTo != uint.MinValue)
                                                 {
                                                     tooltip += string.Format(
-                                                        overrideData.FormattedText, 
-                                                        property.Name, 
-                                                        property.FirstValue.ToString(), 
-                                                        property.SecondValue.ToString(), 
-                                                        property.OriginalString, 
-                                                        property.FirstDiff != 0 ? "("+property.FirstDiff.ToString()+")" : "",
-                                                        property.SecondDiff != 0 ? "("+property.SecondDiff.ToString()+")" : ""
+                                                        overrideData.FormattedText,
+                                                        property.Name,
+                                                        property.FirstValue.ToString(),
+                                                        property.SecondValue.ToString(),
+                                                        property.OriginalString,
+                                                        property.FirstDiff != 0 ? "(" + property.FirstDiff.ToString() + ")" : "",
+                                                        property.SecondDiff != 0 ? "(" + property.SecondDiff.ToString() + ")" : ""
                                                         ) + "\n";
                                                 }
                                                 else
                                                 {
                                                     tooltip += string.Format(
-                                                        overrideData.FormattedText, 
-                                                        property.Name, 
-                                                        property.FirstValue.ToString(), 
-                                                        property.SecondValue.ToString(), 
+                                                        overrideData.FormattedText,
+                                                        property.Name,
+                                                        property.FirstValue.ToString(),
+                                                        property.SecondValue.ToString(),
                                                         property.OriginalString, "", ""
                                                         ) + "\n";
                                                 }
@@ -343,7 +348,7 @@ namespace ClassicUO.Game.Managers
                                                 handled = true;
                                                 break;
                                             }
-                                            catch (System.FormatException e) { }
+                                            catch { }
                                         }
                             }
                     }

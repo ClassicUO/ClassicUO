@@ -7333,7 +7333,7 @@ namespace ClassicUO.Network
             if (!ySouth)
                 absLat = 360.0 - absLat;
 
-            int x, y, z;
+            int x, y;
 
             x = xCenter + (int)((absLong * xWidth) / 360);
             y = yCenter + (int)((absLat * yHeight) / 360);

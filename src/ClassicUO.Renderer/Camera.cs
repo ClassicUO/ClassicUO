@@ -109,7 +109,7 @@ namespace ClassicUO.Renderer
                 _updateMatrixes = true;
             }
 
-            _timeDelta= timeDelta;
+            _timeDelta = timeDelta;
             _mousePos = mousePos;
 
             UpdateMatrices();
@@ -138,8 +138,8 @@ namespace ClassicUO.Renderer
         {
             float x = position.X * matrix.M11 + position.Y * matrix.M21 + matrix.M41;
             float y = position.X * matrix.M12 + position.Y * matrix.M22 + matrix.M42;
-            result.X = (int) x;
-            result.Y = (int) y;
+            result.X = (int)x;
+            result.Y = (int)y;
         }
 
         public Point MouseToWorldPosition()
@@ -185,8 +185,8 @@ namespace ClassicUO.Renderer
         {
             float zoom = 1f / Zoom;
 
-            const float FADE_TIME = 12.0f;
-            const float SMOOTHING_FACTOR = (1.0f / FADE_TIME) * 60.0f;
+            //const float FADE_TIME = 12.0f;
+            //const float SMOOTHING_FACTOR = (1.0f / FADE_TIME) * 60.0f;
 
             _lerpZoom = zoom; // MathHelper.Lerp(_lerpZoom, zoom, SMOOTHING_FACTOR * Time.Delta);
         }

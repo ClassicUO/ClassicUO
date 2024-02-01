@@ -773,7 +773,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private int GetOffset(int x, int y, int centerX, int centerY)
         {
-            const int offset = 0;
+            const int OFFSET = 0;
 
             if (y > centerY)
             {
@@ -787,15 +787,15 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (x > centerX)
             {
-                return offset + 4;
+                return OFFSET + 4;
             }
 
             if (x >= -centerX)
             {
-                return offset;
+                return OFFSET;
             }
 
-            return offset + 8;
+            return OFFSET + 8;
         }
 
         internal void HandlePositionTarget()

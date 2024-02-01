@@ -224,7 +224,7 @@ namespace FontStashSharp.RichText
             {
                 _size = _layoutBuilder.Layout(Text, Font, Width);
             }
-            catch (System.Exception ex)
+            catch
             {
             }
 
@@ -249,7 +249,7 @@ namespace FontStashSharp.RichText
                 result = _layoutBuilder.Layout(Text, Font, width, true);
                 _measures[key] = result;
             }
-            catch (System.Exception ex)
+            catch
             {
             }
 
