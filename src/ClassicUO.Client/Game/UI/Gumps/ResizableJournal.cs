@@ -6,10 +6,11 @@ using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
 using ClassicUO.Utility.Collections;
-using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml;
+using Point = Microsoft.Xna.Framework.Point;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -19,7 +20,7 @@ namespace ClassicUO.Game.UI.Gumps
         public static bool ReloadTabs { get; set; } = false;
 
         private static int BORDER_WIDTH = 4;
-        private static int MIN_WIDTH = (BORDER_WIDTH * 2) + (TAB_WIDTH * 4);
+        private static int MIN_WIDTH = (BORDER_WIDTH * 2) + (TAB_WIDTH * 4) + 20;
         private const int MIN_HEIGHT = 100;
         private const int SCROLL_BAR_WIDTH = 14;
         #region TABS
@@ -316,6 +317,46 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
+        public override void Save(XmlTextWriter writer)
+        {
+            base.Save(writer);
+            writer.WriteAttributeString("rw", Width.ToString());
+            writer.WriteAttributeString("rh", Height.ToString());
+
+            int c = 0;
+            foreach (var tab in _tab)
+            {
+                if (tab.IsSelected)
+                {
+                    writer.WriteAttributeString("tab", c.ToString());
+                    break;
+                }
+                c++;
+            }
+        }
+
+        public override void Restore(XmlElement xml)
+        {
+            base.Restore(xml);
+
+            Point savedSize = new Microsoft.Xna.Framework.Point(Width, Height);
+
+            if (int.TryParse(xml.GetAttribute("rw"), out int width) && width > 0)
+            {
+                savedSize.X = width;
+            }
+            if (int.TryParse(xml.GetAttribute("rh"), out int height) && height > 0)
+            {
+                savedSize.Y = height;
+            }
+            if (int.TryParse(xml.GetAttribute("tab"), out int tab))
+            {
+                OnButtonClick(tab); //Simulate selecting a tab
+            }
+
+            ResizeWindow(savedSize);
+        }
+
         protected override void OnMouseWheel(MouseEventType delta)
         {
             base.OnMouseWheel(delta);
@@ -384,6 +425,8 @@ namespace ClassicUO.Game.UI.Gumps
         public override void Update()
         {
             base.Update();
+
+            if (IsDisposed) { return; }
 
             if (X != _lastX || Y != _lastY)
             {

@@ -820,10 +820,9 @@ namespace ClassicUO.Configuration
                                     break;
 
                                 case GumpType.Journal:
-                                    //gump = new JournalGump();
                                     gump = new ResizableJournal();
-                                    x = ProfileManager.CurrentProfile.JournalPosition.X;
-                                    y = ProfileManager.CurrentProfile.JournalPosition.Y;
+                                    //x = ProfileManager.CurrentProfile.JournalPosition.X;
+                                    //y = ProfileManager.CurrentProfile.JournalPosition.Y;
                                     break;
 
                                 case GumpType.MacroButton:
