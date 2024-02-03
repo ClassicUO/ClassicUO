@@ -41,18 +41,14 @@ ClassicUO is natively cross platform and supports:
 
 Or visit the [ClassicUO Website](https://www.classicuo.eu/)
 
-# How to build the project
-
-Clone repository with:
+# How to generate a release build
 ```
-git config --global url."https://".insteadOf git://
 git clone --recursive https://github.com/ClassicUO/ClassicUO.git
+cd ClassicUO
+bash scripts/build-naot.sh
 ```
-
-Build the project:
-```
-dotnet build -c Release
-```
+> [!WARNING] 
+> To execute .sh scripts on Windows, use Git Bash which can be installed with Git itself: https://git-scm.com/download/win
 
 # Contribute
 Everyone is welcome to contribute! The GitHub issues and project tracker are kept up to date with tasks that need work.
