@@ -47,6 +47,7 @@ git clone --recursive https://github.com/ClassicUO/ClassicUO.git
 cd ClassicUO
 bash scripts/build-naot.sh
 ```
+Binaries available in `bin/dist` folder
 > [!WARNING] 
 > To execute .sh scripts on Windows, use Git Bash which can be installed with Git itself: https://git-scm.com/download/win
 
