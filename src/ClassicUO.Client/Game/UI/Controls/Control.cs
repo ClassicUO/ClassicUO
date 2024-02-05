@@ -308,14 +308,15 @@ namespace ClassicUO.Game.UI.Controls
                 return;
             }
 
+
             if (Children.Count != 0)
             {
-                //InitializeControls();
+                List<Control> removalList = new List<Control>(); ;
                 int w = 0, h = 0;
 
                 for (int i = 0; i < Children.Count; i++)
                 {
-                    if (i < 0)
+                    if (i < 0 || i >= Children.Count)
                     {
                         continue;
                     }
@@ -329,10 +330,7 @@ namespace ClassicUO.Game.UI.Controls
 
                     if (c.IsDisposed)
                     {
-                        OnChildRemoved();
-                        //Children.RemoveAt(i);
-                        Children.Remove(c);
-                        i--;
+                        removalList.Add(c);
                         continue;
                     }
 
@@ -352,6 +350,15 @@ namespace ClassicUO.Game.UI.Controls
                                 h = c.Bounds.Bottom;
                             }
                         }
+                    }
+                }
+
+                if (removalList.Count > 0)
+                {
+                    foreach (Control c in removalList)
+                    {
+                        OnChildRemoved();
+                        Children.Remove(c);
                     }
                 }
 
