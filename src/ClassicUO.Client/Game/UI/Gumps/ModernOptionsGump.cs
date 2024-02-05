@@ -2821,7 +2821,10 @@ namespace ClassicUO.Game.UI.Gumps
             _preview.IsSelected = true;
             _preview.MouseUp += (s, e) =>
             {
-                CoolDownBarManager.AddCoolDownBar(TimeSpan.FromSeconds(int.Parse(_cooldown.Text)), _name.Text, _hueSelector.Hue, _replaceIfExists.IsChecked);
+                if (int.TryParse(_cooldown.Text, out int value))
+                {
+                    CoolDownBarManager.AddCoolDownBar(TimeSpan.FromSeconds(value), _name.Text, _hueSelector.Hue, _replaceIfExists.IsChecked);
+                }
             };
             main.Add(_preview);
 
