@@ -71,10 +71,10 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(new ColorBox(Width, 40, Theme.SEARCH_BACKGROUND) { AcceptMouseInput = true, CanMove = true, Alpha = 0.85f });
 
-            Add(new TextBox(lang.OptionsTitle, Theme.FONT, 30, null, Color.White, strokeEffect: false) { X = 10, Y = 7 });
+            Add(new TextBox(lang.OptionsTitle, Theme.FONT, 30, null, Color.White, strokeEffect: false) { X = 10, Y = 7, AcceptMouseInput = false });
 
             Control c;
-            Add(c = new TextBox(lang.Search, Theme.FONT, 30, null, Color.White, strokeEffect: false) { Y = 7 });
+            Add(c = new TextBox(lang.Search, Theme.FONT, 30, null, Color.White, strokeEffect: false) { Y = 7, AcceptMouseInput = false });
 
             InputField search;
             Add(search = new InputField(400, 30) { X = Width - 405, Y = 5 });
@@ -83,6 +83,9 @@ namespace ClassicUO.Game.UI.Gumps
             c.X = search.X - c.Width - 5;
 
             Add(mainContent = new LeftSideMenuRightSideContent(Width, Height - 40, (int)(Width * 0.23)) { Y = 40 });
+            mainContent.RightArea.ToggleScrollBarVisibility(false);
+            mainContent.RightArea.GetScrollBar.Dispose();
+            mainContent.RightArea.GetScrollBar = null;
 
             ModernButton b;
             mainContent.AddToLeft(b = CategoryButton(lang.ButtonGeneral, (int)PAGE.General, mainContent.LeftWidth));
@@ -2391,7 +2394,7 @@ namespace ClassicUO.Game.UI.Gumps
                 profile.UseLandTextures = b;
             }), true, page);
             content.BlankLine();
-            content.AddToRight(new InputFieldWithLabel(lang.GetTazUO.SOSGumpID, Theme.INPUT_WIDTH, profile.SOSGumpID.ToString(), true, (s, e) => { if (uint.TryParse(((InputField.StbTextBox)s).Text, out uint id)) { profile.SOSGumpID = id; } }));
+            content.AddToRight(new InputFieldWithLabel(lang.GetTazUO.SOSGumpID, Theme.INPUT_WIDTH, profile.SOSGumpID.ToString(), true, (s, e) => { if (uint.TryParse(((InputField.StbTextBox)s).Text, out uint id)) { profile.SOSGumpID = id; } }), true, page);
             #endregion
 
             #region Tooltips
@@ -4988,7 +4991,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         private class ScrollArea : Control
         {
-            private readonly ScrollBar _scrollBar;
+            private ScrollBar _scrollBar;
+
+            public ScrollBar GetScrollBar { get { return _scrollBar; } set { _scrollBar = value; } }
 
             public ScrollArea
             (
@@ -5023,7 +5028,13 @@ namespace ClassicUO.Game.UI.Gumps
             public int ScrollMinValue => _scrollBar.MinValue;
             public int ScrollMaxValue => _scrollBar.MaxValue;
 
-            public Rectangle ScissorRectangle;
+            public void ToggleScrollBarVisibility(bool visible = true)
+            {
+                if (_scrollBar != null)
+                {
+                    _scrollBar.IsVisible = visible;
+                }
+            }
 
             public override void Update()
             {
@@ -5046,11 +5057,13 @@ namespace ClassicUO.Game.UI.Gumps
 
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
-                _scrollBar.Draw(batcher, x + _scrollBar.X, y + _scrollBar.Y);
+                _scrollBar?.Draw(batcher, x + _scrollBar.X, y + _scrollBar.Y);
 
-                if (batcher.ClipBegin(x + ScissorRectangle.X, y + ScissorRectangle.Y, Width - _scrollBar.Width + ScissorRectangle.Width, Height + ScissorRectangle.Height))
+                int sbar = _scrollBar == null ? 0 : _scrollBar.Width;
+
+                if (batcher.ClipBegin(x, y, Width - sbar, Height))
                 {
-                    for (int i = 1; i < Children.Count; i++)
+                    for (int i = 0; i < Children.Count; i++)
                     {
                         Control child = Children[i];
 
@@ -5059,7 +5072,7 @@ namespace ClassicUO.Game.UI.Gumps
                             continue;
                         }
 
-                        int finalY = y + child.Y - _scrollBar.Value + ScissorRectangle.Y;
+                        int finalY = y + child.Y - (_scrollBar == null ? 0 : _scrollBar.Value);
 
                         child.Draw(batcher, x + child.X, finalY);
                     }
@@ -5105,6 +5118,11 @@ namespace ClassicUO.Game.UI.Gumps
 
             private void CalculateScrollBarMaxValue()
             {
+                if (_scrollBar == null)
+                {
+                    return;
+                }
+
                 _scrollBar.Height = ScrollMaxHeight >= 0 ? ScrollMaxHeight : Height;
                 bool maxValue = _scrollBar.Value == _scrollBar.MaxValue && _scrollBar.MaxValue != 0;
 
@@ -5129,7 +5147,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
                 int height = Math.Abs(startY) + Math.Abs(endY) - _scrollBar.Height;
-                height = Math.Max(0, height - (-ScissorRectangle.Y + ScissorRectangle.Height));
+                height = Math.Max(0, height);
 
                 if (height > 0)
                 {
@@ -5149,11 +5167,11 @@ namespace ClassicUO.Game.UI.Gumps
 
                 for (int i = 1; i < Children.Count; i++)
                 {
-                    Children[i].UpdateOffset(0, -_scrollBar.Value + ScissorRectangle.Y);
+                    Children[i].UpdateOffset(0, -_scrollBar.Value);
                 }
             }
 
-            private class ScrollBar : ScrollBarBase
+            public class ScrollBar : ScrollBarBase
             {
                 private Rectangle _rectSlider,
                     _emptySpace;
@@ -5185,7 +5203,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 public override bool Draw(UltimaBatcher2D batcher, int x, int y)
                 {
-                    if (Height <= 0 || !IsVisible)
+                    if (Height <= 0 || !IsVisible || IsDisposed)
                     {
                         return false;
                     }
@@ -5208,7 +5226,7 @@ namespace ClassicUO.Game.UI.Gumps
                         );
                     }
 
-                    return base.Draw(batcher, x, y);
+                    return true;// base.Draw(batcher, x, y);
                 }
 
                 protected override int GetScrollableArea()
