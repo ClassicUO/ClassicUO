@@ -9,11 +9,13 @@ namespace ClassicUO.Configuration
         public ModernOptionsGumpLanguage GetModernOptionsGumpLanguage { get; set; } = new ModernOptionsGumpLanguage();
         public ErrorsLanguage ErrorsLanguage { get; set; } = new ErrorsLanguage();
         public MapLanguage MapLanguage { get; set; } = new MapLanguage();
+        public TopBarGumpLanguage TopBarGump { get; set; } = new TopBarGumpLanguage();
 
         public string TazuoVersionHistory { get; set; } = "TazUO Version History";
         public string CurrentVersion { get; set; } = "Current Version: ";
         public string TazUOWiki { get; set; } = "TazUO Wiki";
         public string TazUODiscord { get; set; } = "TazUO Discord";
+        public string CommandGump { get; set; } = "Available Client Commands";
 
         [JsonIgnore]
         public static Language Instance { get; private set; } = new Language();
@@ -579,5 +581,10 @@ namespace ClassicUO.Configuration
     {
         public string Follow { get; set; } = "Follow";
         public string Yourself { get; set; } = "Yourself";
+    }
+
+    public class TopBarGumpLanguage
+    {
+        public string CommandsEntry { get; set; } = "Client Commands";
     }
 }

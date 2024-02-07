@@ -30,20 +30,17 @@
 
 #endregion
 
-using System.Collections.Generic;
+using ClassicUO.Assets;
 using ClassicUO.Configuration;
-using ClassicUO.Game.Data;
-using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
-using ClassicUO.Assets;
 using ClassicUO.Network;
-using ClassicUO.Renderer;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
+using System.Collections.Generic;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -210,6 +207,10 @@ namespace ClassicUO.Game.UI.Gumps
             );
             moreMenu.ContextMenu = new ContextMenuControl();
             moreMenu.MouseUp += (s, e) => { moreMenu.ContextMenu?.Show(); };
+            moreMenu.ContextMenu.Add(new ContextMenuItemEntry(Language.Instance.TopBarGump.CommandsEntry, () =>
+            {
+                UIManager.Add(new CommandsGump());
+            }));
             moreMenu.ContextMenu.Add(new ContextMenuItemEntry(cliloc.GetString(1079449, ResGumps.Info), () =>
             {
                 if (TargetManager.IsTargeting)
