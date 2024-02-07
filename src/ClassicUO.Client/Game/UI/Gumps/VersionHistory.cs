@@ -7,6 +7,10 @@ namespace ClassicUO.Game.UI.Gumps
     internal class VersionHistory : Gump
     {
         private static string[] updateTexts = {
+            "/c[white][3.21.0]/cd\n" +
+                "- A few bug fixes\n" +
+                "- A few fixes from CUO",
+
             "/c[white][3.20.0]/cd\n" +
                 "- Being frozen wont cancel auto follow\n" +
                 "- Fix from CUO for buffs\n" +
