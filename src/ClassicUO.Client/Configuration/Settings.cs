@@ -30,17 +30,26 @@
 
 #endregion
 
+using ClassicUO.Configuration.Json;
+using Microsoft.Xna.Framework;
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using ClassicUO.Configuration.Json;
-using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Configuration
 {
     [JsonSourceGenerationOptions(WriteIndented = true, GenerationMode = JsonSourceGenerationMode.Metadata)]
     [JsonSerializable(typeof(Settings), GenerationMode = JsonSourceGenerationMode.Metadata)]
-    sealed partial class SettingsJsonContext : JsonSerializerContext { }
+    sealed partial class SettingsJsonContext : JsonSerializerContext
+    {
+        // horrible fix: https://github.com/ClassicUO/ClassicUO/issues/1663
+        public static SettingsJsonContext RealDefault { get; } = new SettingsJsonContext(
+            new JsonSerializerOptions()
+            {
+                WriteIndented = true,
+                Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+            });
+    }
 
 
     internal sealed class Settings
@@ -64,7 +73,7 @@ namespace ClassicUO.Configuration
         [JsonPropertyName("profilespath")] public string ProfilesPath { get; set; } = string.Empty;
 
         [JsonPropertyName("clientversion")] public string ClientVersion { get; set; } = string.Empty;
-        
+
         [JsonPropertyName("lang")] public string Language { get; set; } = "";
 
         [JsonPropertyName("lastservernum")] public ushort LastServerNum { get; set; } = 1;
@@ -73,8 +82,8 @@ namespace ClassicUO.Configuration
 
         [JsonPropertyName("fps")] public int FPS { get; set; } = 60;
 
-        [JsonConverter(typeof(NullablePoint2Converter))] [JsonPropertyName("window_position")] public Point? WindowPosition { get; set; }
-        [JsonConverter(typeof(NullablePoint2Converter))] [JsonPropertyName("window_size")] public Point? WindowSize { get; set; }
+        [JsonConverter(typeof(NullablePoint2Converter))][JsonPropertyName("window_position")] public Point? WindowPosition { get; set; }
+        [JsonConverter(typeof(NullablePoint2Converter))][JsonPropertyName("window_size")] public Point? WindowSize { get; set; }
 
         [JsonPropertyName("is_win_maximized")] public bool IsWindowMaximized { get; set; } = true;
 
@@ -127,7 +136,7 @@ namespace ClassicUO.Configuration
         {
             // Make a copy of the settings object that we will use in the saving process
             var json = JsonSerializer.Serialize(this, typeof(Settings), SettingsJsonContext.Default);
-            var settingsToSave = JsonSerializer.Deserialize(json, typeof(Settings), SettingsJsonContext.Default) as Settings;
+            var settingsToSave = JsonSerializer.Deserialize(json, typeof(Settings), SettingsJsonContext.RealDefault) as Settings;
 
             // Make sure we don't save username and password if `saveaccount` flag is not set
             // NOTE: Even if we pass username and password via command-line arguments they won't be saved
@@ -141,7 +150,7 @@ namespace ClassicUO.Configuration
 
             // NOTE: We can do any other settings clean-ups here before we save them
 
-            ConfigurationResolver.Save(settingsToSave, GetSettingsFilepath(), SettingsJsonContext.Default);
+            ConfigurationResolver.Save(settingsToSave, GetSettingsFilepath(), SettingsJsonContext.RealDefault);
         }
     }
 }
