@@ -10,6 +10,11 @@ namespace ClassicUO.Configuration
         public ErrorsLanguage ErrorsLanguage { get; set; } = new ErrorsLanguage();
         public MapLanguage MapLanguage { get; set; } = new MapLanguage();
 
+        public string TazuoVersionHistory { get; set; } = "TazUO Version History";
+        public string CurrentVersion { get; set; } = "Current Version: ";
+        public string TazUOWiki { get; set; } = "TazUO Wiki";
+        public string TazUODiscord { get; set; } = "TazUO Discord";
+
         [JsonIgnore]
         public static Language Instance { get; private set; } = new Language();
 
