@@ -12,7 +12,8 @@ namespace ClassicUO.Game.UI.Gumps
                 "- A few bug fixes\n" +
                 "- A few fixes from CUO\n" +
                 "- Converted nameplates to use TTF fonts\n" +
-                "- Added an available client commands gump",
+                "- Added an available client commands gump\n" +
+                "- World map alt lock now works, and middle mouse click will toggle freeview",
 
             "/c[white][3.20.0]/cd\n" +
                 "- Being frozen wont cancel auto follow\n" +

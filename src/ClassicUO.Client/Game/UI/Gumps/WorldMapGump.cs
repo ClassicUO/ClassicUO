@@ -195,7 +195,10 @@ namespace ClassicUO.Game.UI.Gumps
                     if (!_freeView)
                     {
                         _isScrolling = false;
-                        CanMove = true;
+                        if (!IsLocked)
+                        {
+                            CanMove = true;
+                        }
                     }
                 }
             }
@@ -3400,7 +3403,10 @@ namespace ClassicUO.Game.UI.Gumps
             if (button == MouseButtonType.Left && !Keyboard.Alt)
             {
                 _isScrolling = false;
-                CanMove = true;
+                if (!IsLocked)
+                {
+                    CanMove = true;
+                }
             }
 
             if (button == MouseButtonType.Left || button == MouseButtonType.Middle)
@@ -3430,15 +3436,18 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         if (button == MouseButtonType.Middle)
                         {
-                            FreeView = true;
+                            FreeView = !FreeView;
                         }
 
-                        _lastScroll.X = _center.X;
-                        _lastScroll.Y = _center.Y;
-                        _isScrolling = true;
-                        CanMove = false;
+                        if (FreeView)
+                        {
+                            _lastScroll.X = _center.X;
+                            _lastScroll.Y = _center.Y;
+                            _isScrolling = true;
+                            CanMove = false;
 
-                        Client.Game.GameCursor.IsDraggingCursorForced = true;
+                            Client.Game.GameCursor.IsDraggingCursorForced = true;
+                        }
                     }
                 }
 
