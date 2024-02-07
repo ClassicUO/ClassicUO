@@ -199,8 +199,12 @@ namespace ClassicUO.Game.UI.Controls
             get => (int)_color.PackedValue;
             set
             {
-                _color.PackedValue = HuesLoader.Instance.GetHueColorRgba8888(31, (ushort)value);
-                _dirty = true;
+                var newVal = HuesLoader.Instance.GetHueColorRgba8888(31, (ushort)value);
+                if (_color.PackedValue != newVal)
+                {
+                    _color.PackedValue = newVal;
+                    _dirty = true;
+                }
             }
         }
 
@@ -244,7 +248,6 @@ namespace ClassicUO.Game.UI.Controls
         /// <param name="width">Set to null to ignore width, taking as much width as needed.</param>
         public void UpdateText(string text, int? width = null)
         {
-
             if (width != null && width > 0)
             {
                 _rtl = new RichTextLayout
