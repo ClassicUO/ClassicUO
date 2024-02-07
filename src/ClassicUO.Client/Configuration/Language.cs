@@ -497,7 +497,7 @@ namespace ClassicUO.Configuration
             public string TextFormat { get; set; } = "Text format";
             public string EnableSpellIndicatorSystem { get; set; } = "Enable spell indicator system";
             public string ImportFromUrl { get; set; } = "Import from url";
-            public string InputRequestUrl { get; set; } = "Enter the url for the spell config. /c[red]This will override your current config.";
+            public string InputRequestUrl { get; set; } = "Enter the url for the spell config. \n/c[red]This will override your current config.";
             public string Download { get; set; } = "Download";
             public string Cancel { get; set; } = "Cancel";
             public string AttemptingToDownloadSpellConfig { get; set; } = "Attempting to download spell config..";
