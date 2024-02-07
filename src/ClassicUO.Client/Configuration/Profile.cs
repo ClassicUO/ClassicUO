@@ -479,6 +479,9 @@ namespace ClassicUO.Configuration
         public int OverheadChatFontSize { get; set; } = 20;
         public int OverheadChatWidth { get; set; } = 200;
 
+        public string NamePlateFont { get; set; } = "avadonian";
+        public int NamePlateFontSize { get; set; } = 20;
+
         public string DefaultTTFFont { get; set; } = "Roboto-Regular";
         public int TextBorderSize { get; set; } = 1;
 

@@ -51,9 +51,12 @@ namespace ClassicUO.Game.UI.Gumps
         private Point _lockedPosition,
             _lastLeftMousePositionDown;
         private bool _positionLocked,
-            _leftMouseIsDown;
-        private readonly RenderedText _renderedText;
+            _leftMouseIsDown,
+            _isLastTarget,
+            _needsNameUpdate;
+        private TextBox _text;
         private Texture2D _borderColor = SolidColorTextureCache.GetTexture(Color.Black);
+        private Vector2 _textDrawOffset = Vector2.Zero;
 
         public NameOverheadGump(uint serial) : base(serial, 0)
         {
@@ -70,21 +73,12 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
-            _renderedText = RenderedText.Create(
-                string.Empty,
-                entity is Mobile m ? Notoriety.GetHue(m.NotorietyFlag) : (ushort)0x0481,
-                0xFF,
-                true,
-                FontStyle.BlackBorder,
-                TEXT_ALIGN_TYPE.TS_CENTER,
-                100,
-                30,
-                true
-            );
+            _text = new TextBox(string.Empty, ProfileManager.CurrentProfile.NamePlateFont, ProfileManager.CurrentProfile.NamePlateFontSize, 100, entity is Mobile m ? Notoriety.GetHue(m.NotorietyFlag) : (ushort)0x0481, FontStashSharp.RichText.TextHorizontalAlignment.Center);
 
             SetTooltip(entity);
 
             BuildGump();
+            SetName();
         }
 
         public bool SetName()
@@ -100,6 +94,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (!World.OPL.TryGetNameAndData(item, out string t, out _))
                 {
+                    _needsNameUpdate = true;
                     if (!item.IsCorpse && item.Amount > 1)
                     {
                         t = item.Amount.ToString() + ' ';
@@ -119,40 +114,22 @@ namespace ClassicUO.Game.UI.Gumps
                         );
                     }
                 }
+                else
+                {
+                    _needsNameUpdate = false;
+                }
 
                 if (string.IsNullOrEmpty(t))
                 {
                     return false;
                 }
 
-                FontsLoader.Instance.SetUseHTML(true);
-                FontsLoader.Instance.RecalculateWidthByInfo = true;
+                _text.UpdateText(t);
 
-                int width = FontsLoader.Instance.GetWidthUnicode(_renderedText.Font, t);
-
-                if (width > Constants.OBJECT_HANDLES_GUMP_WIDTH)
-                {
-                    t = FontsLoader.Instance.GetTextByWidthUnicode(
-                        _renderedText.Font,
-                        t.AsSpan(),
-                        Constants.OBJECT_HANDLES_GUMP_WIDTH,
-                        true,
-                        TEXT_ALIGN_TYPE.TS_CENTER,
-                        (ushort)FontStyle.BlackBorder
-                    );
-
-                    width = Constants.OBJECT_HANDLES_GUMP_WIDTH;
-                }
-
-                _renderedText.MaxWidth = width;
-                _renderedText.Text = t;
-
-                FontsLoader.Instance.RecalculateWidthByInfo = false;
-                FontsLoader.Instance.SetUseHTML(false);
-
-                Width = _background.Width = Math.Max(60, _renderedText.Width) + 4;
-                Height = _background.Height = Constants.OBJECT_HANDLES_GUMP_HEIGHT + 4;
-
+                Width = _background.Width = Math.Max(60, _text.Width) + 4;
+                Height = _background.Height = Math.Max(Constants.OBJECT_HANDLES_GUMP_HEIGHT, _text.Height) + 4;
+                _textDrawOffset.X = (Width - _text.Width - 4) >> 1;
+                _textDrawOffset.Y = (Height - _text.Height) >> 1;
                 WantUpdateSize = false;
 
                 return true;
@@ -162,29 +139,12 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 string t = entity.Name;
 
-                int width = FontsLoader.Instance.GetWidthUnicode(_renderedText.Font, t);
+                _text.UpdateText(t);
 
-                if (width > Constants.OBJECT_HANDLES_GUMP_WIDTH)
-                {
-                    t = FontsLoader.Instance.GetTextByWidthUnicode(
-                        _renderedText.Font,
-                        t.AsSpan(),
-                        Constants.OBJECT_HANDLES_GUMP_WIDTH,
-                        true,
-                        TEXT_ALIGN_TYPE.TS_CENTER,
-                        (ushort)FontStyle.BlackBorder
-                    );
-
-                    width = Constants.OBJECT_HANDLES_GUMP_WIDTH;
-                }
-
-                _renderedText.MaxWidth = width;
-
-                _renderedText.Text = t;
-
-                Width = _background.Width = Math.Max(60, _renderedText.Width) + 4;
-                Height = _background.Height = Constants.OBJECT_HANDLES_GUMP_HEIGHT + 4;
-
+                Width = _background.Width = Math.Max(60, _text.Width) + 4;
+                Height = _background.Height = Math.Max(Constants.OBJECT_HANDLES_GUMP_HEIGHT, _text.Height) + 4;
+                _textDrawOffset.X = (Width - _text.Width - 4) >> 1;
+                _textDrawOffset.Y = (Height - _text.Height) >> 1;
                 WantUpdateSize = false;
 
                 return true;
@@ -557,25 +517,37 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (entity == TargetManager.LastTargetInfo.Serial)
                 {
-                    _borderColor = SolidColorTextureCache.GetTexture(Color.Red);
-                    _background.Hue = _renderedText.Hue = entity is Mobile m
-                        ? Notoriety.GetHue(m.NotorietyFlag)
-                        : (ushort)0x0481;
+                    if (!_isLastTarget) //Only set this if it was not already last target
+                    {
+                        _borderColor = SolidColorTextureCache.GetTexture(Color.Red);
+                        _background.Hue = (ushort)(_text.Hue = entity is Mobile m
+                            ? Notoriety.GetHue(m.NotorietyFlag)
+                            : (ushort)0x0481);
+                        _isLastTarget = true;
+                    }
                 }
                 else
                 {
-                    _borderColor = SolidColorTextureCache.GetTexture(Color.Black);
-                    _background.Hue = _renderedText.Hue = entity is Mobile m
-                        ? Notoriety.GetHue(m.NotorietyFlag)
-                        : (ushort)0x0481;
-                    _background.Alpha = ProfileManager.CurrentProfile.NamePlateOpacity / 100f;
+                    if (_isLastTarget)//If we make it here, it is no longer the last target so we update colors and set this to false.
+                    {
+                        _borderColor = SolidColorTextureCache.GetTexture(Color.Black);
+                        _background.Hue = (ushort)(_text.Hue = entity is Mobile m
+                            ? Notoriety.GetHue(m.NotorietyFlag)
+                            : (ushort)0x0481);
+                        _isLastTarget = false;
+                    }
+                }
+
+                if (_needsNameUpdate)
+                {
+                    SetName();
                 }
             }
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            if (IsDisposed || !SetName())
+            if (IsDisposed)
             {
                 return false;
             }
@@ -720,7 +692,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Point p = Client.Game.Scene.Camera.WorldToScreen(new Point(x, y));
             x = p.X - (Width >> 1);
-            y = p.Y - (Height >> 1);
+            y = p.Y - (Height);// >> 1);
 
             var camera = Client.Game.Scene.Camera;
             x += camera.Bounds.X;
@@ -764,24 +736,12 @@ namespace ClassicUO.Game.UI.Gumps
                 );
             }
 
-            int renderedTextOffset = Math.Max(0, Width - _renderedText.Width - 4) >> 1;
-
-            return _renderedText.Draw(
-                batcher,
-                Width,
-                Height,
-                x + 2 + renderedTextOffset,
-                y + 2,
-                Width,
-                Height,
-                0,
-                0
-            );
+            return _text.Draw(batcher, (int)(x + 2 + _textDrawOffset.X), (int)(y + 2 + _textDrawOffset.Y));
         }
 
         public override void Dispose()
         {
-            _renderedText?.Destroy();
+            _text.Dispose();
             base.Dispose();
         }
     }

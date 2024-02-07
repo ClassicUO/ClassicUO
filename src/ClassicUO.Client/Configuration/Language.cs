@@ -534,6 +534,7 @@ namespace ClassicUO.Configuration
             public string TooltipFont { get; set; } = "Tooltip font";
             public string OverheadFont { get; set; } = "Overhead font";
             public string JournalFont { get; set; } = "Journal font";
+            public string NameplateFont { get; set; } = "Nameplate font";
             #endregion
 
             #region Controller

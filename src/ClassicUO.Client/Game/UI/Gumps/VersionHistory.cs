@@ -10,7 +10,8 @@ namespace ClassicUO.Game.UI.Gumps
         private static string[] updateTexts = {
             "/c[white][3.21.0]/cd\n" +
                 "- A few bug fixes\n" +
-                "- A few fixes from CUO",
+                "- A few fixes from CUO\n" +
+                "- Converted nameplates to use TTF fonts",
 
             "/c[white][3.20.0]/cd\n" +
                 "- Being frozen wont cancel auto follow\n" +

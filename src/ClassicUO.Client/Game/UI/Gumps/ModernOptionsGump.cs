@@ -2491,6 +2491,17 @@ namespace ClassicUO.Game.UI.Gumps
             }), true, page);
             content.RemoveIndent();
             content.BlankLine();
+            content.AddToRight(GenerateFontSelector(lang.GetTazUO.NameplateFont, ProfileManager.CurrentProfile.NamePlateFont, (i, s) =>
+            {
+                ProfileManager.CurrentProfile.NamePlateFont = s;
+            }), true, page);
+            content.Indent();
+            content.AddToRight(new SliderWithLabel(lang.GetTazUO.SharedSize, 0, Theme.SLIDER_WIDTH, 5, 40, profile.NamePlateFontSize, (i) =>
+            {
+                profile.NamePlateFontSize = i;
+            }), true, page);
+            content.RemoveIndent();
+            content.BlankLine();
             #endregion
 
             #region Controller settings
