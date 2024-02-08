@@ -1769,6 +1769,10 @@ namespace ClassicUO.Game.UI.Gumps
                 catch (Exception ee)
                 {
                     Log.Error($"{ee}");
+                    if (CUOEnviroment.Debug)
+                    {
+                        GameActions.Print(ee.ToString());
+                    }
                 }
             }
 
@@ -1800,7 +1804,10 @@ namespace ClassicUO.Game.UI.Gumps
 
             _zoneSets.Clear();
 
-            foreach (String filename in Directory.GetFiles(_mapFilesPath, "*.zones.json"))
+            List<string> zonefiles = [.. Directory.GetFiles(_mapFilesPath, "*.zones.json")];
+            zonefiles.AddRange(Directory.GetFiles(Settings.GlobalSettings.UltimaOnlineDirectory, "*.zones.json"));
+
+            foreach (string filename in zonefiles)
             {
                 bool shouldHide = !string.IsNullOrEmpty
                 (
@@ -3121,12 +3128,34 @@ namespace ClassicUO.Game.UI.Gumps
             Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
             Texture2D texture = SolidColorTextureCache.GetTexture(zone.Color);
 
+            //Vector2 topleft = new Vector2(10000, 10000), botright = Vector2.Zero;
+
             for (int i = 0, j = 1; i < zone.Vertices.Count; i++, j++)
             {
                 if (j >= zone.Vertices.Count) j = 0;
 
                 Vector2 start = WorldPointToGumpPoint(zone.Vertices[i].X, zone.Vertices[i].Y, x, y, width, height, zoom);
                 Vector2 end = WorldPointToGumpPoint(zone.Vertices[j].X, zone.Vertices[j].Y, x, y, width, height, zoom);
+
+                //if(start.X < topleft.X)
+                //{
+                //    topleft.X = start.X;
+                //}
+
+                //if(start.Y < topleft.Y)
+                //{
+                //    topleft.Y = start.Y;
+                //}
+
+                //if(end.X > botright.X)
+                //{
+                //    botright.X = end.X;
+                //}
+                //if (end.Y > botright.Y)
+                //{
+                //    botright.Y = end.Y;
+                //}
+                ////Handle drawing a label here
 
                 batcher.DrawLine(texture, start, end, hueVector, 1);
             }
