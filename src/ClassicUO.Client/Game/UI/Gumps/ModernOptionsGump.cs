@@ -45,6 +45,10 @@ namespace ClassicUO.Game.UI.Gumps
                         _settings = new ThemeSettings();
                         ThemeSettings.Save<ThemeSettings>(typeof(ModernOptionsGump).ToString(), _settings);
                     }
+                    else
+                    { //Save changes if things have changed
+                        ThemeSettings.Save<ThemeSettings>(typeof(ModernOptionsGump).ToString(), _settings);
+                    }
                     return _settings;
                 }
                 else
@@ -2931,14 +2935,12 @@ namespace ClassicUO.Game.UI.Gumps
 
         private class CheckboxWithLabel : Control, SearchableOption
         {
-            private const int CHECKBOX_SIZE = 30;
-
             private bool _isChecked;
             private readonly TextBox _text;
 
             public TextBox TextLabel => _text;
 
-            private Vector3 hueVector = ShaderHueTranslator.GetHueVector(Theme.SEARCH_BACKGROUND, false, 0.9f);
+            private Vector3 hueVector = ShaderHueTranslator.GetHueVector(Theme.CHECKBOX, false, 0.9f);
 
             public CheckboxWithLabel(
                 string text = "",
@@ -2949,10 +2951,10 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _isChecked = isChecked;
                 ValueChanged = valueChanged;
-                _text = new TextBox(text, Theme.FONT, Theme.STANDARD_TEXT_SIZE, maxWidth == 0 ? null : maxWidth, Theme.TEXT_FONT_COLOR, strokeEffect: false) { X = CHECKBOX_SIZE + 5, AcceptMouseInput = false };
+                _text = new TextBox(text, Theme.FONT, Theme.STANDARD_TEXT_SIZE, maxWidth == 0 ? null : maxWidth, Theme.TEXT_FONT_COLOR, strokeEffect: false) { X = Theme.CHECKBOX_SIZE + 5, AcceptMouseInput = false };
 
-                Width = CHECKBOX_SIZE + 5 + _text.Width;
-                Height = Math.Max(CHECKBOX_SIZE, _text.MeasuredSize.Y);
+                Width = Theme.CHECKBOX_SIZE + 5 + _text.Width;
+                Height = Math.Max(Theme.CHECKBOX_SIZE, _text.MeasuredSize.Y);
 
                 _text.Y = (Height / 2) - (_text.Height / 2);
 
@@ -3010,7 +3012,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 batcher.Draw(
                     SolidColorTextureCache.GetTexture(Color.White),
-                    new Rectangle(x, y, CHECKBOX_SIZE, CHECKBOX_SIZE),
+                    new Rectangle(x, y, Theme.CHECKBOX_SIZE, Theme.CHECKBOX_SIZE),
                     hueVector
                 );
 
@@ -3018,7 +3020,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     batcher.Draw(
                         SolidColorTextureCache.GetTexture(Color.Black),
-                        new Rectangle(x + (CHECKBOX_SIZE / 2) / 2, y + (CHECKBOX_SIZE / 2) / 2, CHECKBOX_SIZE / 2, CHECKBOX_SIZE / 2),
+                        new Rectangle(x + (Theme.CHECKBOX_SIZE / 2) / 2, y + (Theme.CHECKBOX_SIZE / 2) / 2, Theme.CHECKBOX_SIZE / 2, Theme.CHECKBOX_SIZE / 2),
                         hueVector
                     );
                 }
@@ -6324,6 +6326,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             public ushort BACKGROUND { get; set; } = 897;
             public ushort SEARCH_BACKGROUND { get; set; } = 899;
+            public ushort CHECKBOX { get; set; } = 899;
+            public int CHECKBOX_SIZE { get; set; } = 30;
             public ushort BLACK { get; set; } = 0;
 
             [JsonConverter(typeof(ColorJsonConverter))]
