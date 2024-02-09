@@ -30,11 +30,9 @@
 
 #endregion
 
-using System;
-using ClassicUO.Input;
-using ClassicUO.Assets;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
+using System;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -45,6 +43,8 @@ namespace ClassicUO.Game.UI.Controls
         const ushort BUTTON_UP = 0x0824;
         const ushort BUTTON_DOWN = 0x0825;
         const ushort BUTTON_FLAG = 0x0828;
+
+        private Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
         public ScrollFlag(int x, int y, int height, bool showbuttons) : this()
         {
@@ -90,8 +90,6 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            var hueVector = ShaderHueTranslator.GetHueVector(0);
-
             ref readonly var gumpInfoFlag = ref Client.Game.Gumps.GetGump(BUTTON_FLAG);
             ref readonly var gumpInfoUp = ref Client.Game.Gumps.GetGump(BUTTON_UP);
             ref readonly var gumpInfoDown = ref Client.Game.Gumps.GetGump(BUTTON_DOWN);
