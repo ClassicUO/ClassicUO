@@ -30,6 +30,7 @@
 
 #endregion
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.Managers;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
@@ -55,6 +56,8 @@ namespace ClassicUO.Game.UI.Controls
         private bool _handlesKeyboardFocus;
         private Point _offset;
         private Control _parent;
+        private uint timetoclose = uint.MaxValue;
+        private bool delayedDispose = false;
 
         protected Control(Control parent = null)
         {
@@ -279,6 +282,34 @@ namespace ClassicUO.Game.UI.Controls
                 return false;
             }
 
+            if (delayedDispose)
+            {
+
+                if (timetoclose == uint.MaxValue)
+                {
+                    timetoclose = Time.Ticks + 150;
+                }
+
+                if (Time.Ticks >= timetoclose)
+                {
+                    Dispose();
+                    return false;
+                }
+
+                float prog = (float)(Time.Ticks - timetoclose + 151) / 150;
+                prog = Math.Max(0, Math.Min(1, prog)); // Ensure prog is within [0, 1]
+
+                int offset = (int)(((float)Math.Min(Width, Height) * prog) / 2f);
+
+                if (offset >= Width - (offset * 2) || offset >= Height - (offset * 2))
+                {
+                    Dispose();
+                    return false;
+                }
+
+                batcher.ClipBegin(x + offset, y + offset, Width - (offset * 2), Height - (offset * 2));
+            }
+
             for (int i = 0; i < Children.Count; i++)
             {
                 if (Children.Count <= i)
@@ -297,6 +328,11 @@ namespace ClassicUO.Game.UI.Controls
             }
 
             DrawDebug(batcher, x, y);
+
+            if (delayedDispose)
+            {
+                batcher.ClipEnd();
+            }
 
             return true;
         }
@@ -991,6 +1027,15 @@ namespace ClassicUO.Game.UI.Controls
             if (IsDisposed)
             {
                 return;
+            }
+
+            if (this is Gumps.Gump)
+            {
+                if (!delayedDispose && World.InGame && Parent == null && ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.EnableGumpCloseAnimation)
+                {
+                    delayedDispose = true;
+                    return;
+                }
             }
 
             if (Children != null)
