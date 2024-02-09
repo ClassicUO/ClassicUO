@@ -42,6 +42,8 @@ namespace ClassicUO.Game.UI.Controls
 {
     public class GumpPicExternalUrl : Control
     {
+        private Vector3 hueVector;
+
         public GumpPicExternalUrl(int x, int y, string imgUrl, ushort hue, int width, int height, bool resize = false)
         {
             Width = width;
@@ -53,6 +55,7 @@ namespace ClassicUO.Game.UI.Controls
             getImageTexture();
             AcceptMouseInput = true;
             CanMove = true;
+            hueVector = ShaderHueTranslator.GetHueVector(Hue);
         }
 
         public string ImgUrl { get; }
@@ -96,8 +99,6 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            Vector3 hueVector = ShaderHueTranslator.GetHueVector(Hue);
-
             if (imageTexture != null)
             {
                 if (!Resize)
@@ -106,7 +107,7 @@ namespace ClassicUO.Game.UI.Controls
                     batcher.Draw(imageTexture, new Rectangle(x, y, Width, Height), imageTexture.Bounds, hueVector);
             }
 
-            return base.Draw(batcher, x, y);;
+            return base.Draw(batcher, x, y); ;
         }
     }
 }
