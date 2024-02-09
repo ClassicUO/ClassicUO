@@ -44,8 +44,8 @@ Or visit the [ClassicUO Website](https://www.classicuo.eu/)
 # How to generate a release build
 ```
 git clone --recursive https://github.com/ClassicUO/ClassicUO.git
-cd ClassicUO
-bash scripts/build-naot.sh
+cd ClassicUO/scripts
+bash build-naot.sh
 ```
 Binaries available in `bin/dist` folder
 > [!WARNING] 
