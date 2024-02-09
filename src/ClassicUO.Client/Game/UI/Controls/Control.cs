@@ -675,7 +675,7 @@ namespace ClassicUO.Game.UI.Controls
         /// </summary>
         /// <param name="oldValue"></param>
         /// <param name="newValue"></param>
-        public virtual void AlphaChanged(float oldValue, float newValue) { };
+        public virtual void AlphaChanged(float oldValue, float newValue) { }
 
         public Control GetFirstControlAcceptKeyboardInput()
         {
