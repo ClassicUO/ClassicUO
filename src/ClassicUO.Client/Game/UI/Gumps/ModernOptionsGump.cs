@@ -5057,13 +5057,18 @@ namespace ClassicUO.Game.UI.Gumps
 
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
-                _scrollBar?.Draw(batcher, x + _scrollBar.X, y + _scrollBar.Y);
+                int sbar = 0, start = 0;
 
-                int sbar = _scrollBar == null ? 0 : _scrollBar.Width;
+                if (_scrollBar != null)
+                {
+                    _scrollBar.Draw(batcher, x + _scrollBar.X, y + _scrollBar.Y);
+                    sbar = _scrollBar.Width;
+                    start = 1;
+                }
 
                 if (batcher.ClipBegin(x, y, Width - sbar, Height))
                 {
-                    for (int i = 0; i < Children.Count; i++)
+                    for (int i = start; i < Children.Count; i++)
                     {
                         Control child = Children[i];
 
