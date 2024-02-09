@@ -63,8 +63,7 @@ namespace ClassicUO
         private readonly Texture2D[] _hueSamplers = new Texture2D[3];
         private bool _ignoreNextTextInput;
         private readonly float[] _intervalFixedUpdate = new float[2];
-        private double _totalElapsed,
-            _currentFpsTime;
+        private double _totalElapsed, _currentFpsTime, _nextSlowUpdate;
         private uint _totalFrames;
         private UltimaBatcher2D _uoSpriteBatch;
         private bool _suppressedDraw;
@@ -463,6 +462,12 @@ namespace ClassicUO
             }
 
             UIManager.Update();
+
+            if (Time.Ticks >= _nextSlowUpdate)
+            {
+                _nextSlowUpdate = Time.Ticks + 500;
+                UIManager.SlowUpdate();
+            }
 
             _totalElapsed += gameTime.ElapsedGameTime.TotalMilliseconds;
             _currentFpsTime += gameTime.ElapsedGameTime.TotalMilliseconds;

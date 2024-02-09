@@ -301,6 +301,9 @@ namespace ClassicUO.Game.UI.Controls
             return true;
         }
 
+        /// <summary>
+        /// Update is called as often as possible.
+        /// </summary>
         public virtual void Update()
         {
             if (IsDisposed)
@@ -376,6 +379,57 @@ namespace ClassicUO.Game.UI.Controls
 
                     WantUpdateSize = false;
                 }
+            }
+        }
+
+        /// <summary>
+        /// Intended for updates that don't need to occur as frequently as Update() does.
+        /// SlowUpdate is called twice per second.
+        /// </summary>
+        public virtual void SlowUpdate()
+        {
+            if (IsDisposed)
+            {
+                return;
+            }
+
+            if (Children.Count != 0)
+            {
+                List<Control> removalList = new List<Control>(); ;
+
+                for (int i = 0; i < Children.Count; i++)
+                {
+                    if (i < 0 || i >= Children.Count)
+                    {
+                        continue;
+                    }
+
+                    Control c = Children.ElementAt(i);
+
+                    if (c == null)
+                    {
+                        continue;
+                    }
+
+                    if (c.IsDisposed)
+                    {
+                        removalList.Add(c);
+                        continue;
+                    }
+
+                    c.SlowUpdate();
+
+                }
+
+                if (removalList.Count > 0)
+                {
+                    foreach (Control c in removalList)
+                    {
+                        OnChildRemoved();
+                        Children.Remove(c);
+                    }
+                }
+
             }
         }
 
