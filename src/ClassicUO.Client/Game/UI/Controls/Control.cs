@@ -58,6 +58,7 @@ namespace ClassicUO.Game.UI.Controls
         private Control _parent;
         private uint timetoclose = uint.MaxValue;
         private bool delayedDispose = false;
+        private float alpha = 1.0f;
 
         protected Control(Control parent = null)
         {
@@ -126,7 +127,15 @@ namespace ClassicUO.Game.UI.Controls
 
         public bool IsFocused { get; set; }
 
-        public float Alpha { get; set; } = 1.0f;
+        public float Alpha
+        {
+            get => alpha; set
+            {
+                float old = alpha;
+                alpha = value;
+                AlphaChanged(old, value);
+            }
+        }
 
         public List<Control> Children { get; }
 
@@ -272,8 +281,6 @@ namespace ClassicUO.Game.UI.Controls
                 }
             }
         }
-
-
 
         public virtual bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
@@ -662,6 +669,13 @@ namespace ClassicUO.Game.UI.Controls
         public virtual void OnHitTestSuccess(int x, int y, ref Control res)
         {
         }
+
+        /// <summary>
+        /// Invoked when alpha is changed on a control
+        /// </summary>
+        /// <param name="oldValue"></param>
+        /// <param name="newValue"></param>
+        public virtual void AlphaChanged(float oldValue, float newValue) { };
 
         public Control GetFirstControlAcceptKeyboardInput()
         {
