@@ -114,6 +114,10 @@ namespace ClassicUO.Game.UI.Controls
 
         public static Color ConvertHueToColor(int hue)
         {
+            if (hue == 0xFFFF || hue == ushort.MaxValue)
+            {
+                return Color.White;
+            }
             return new Color() { PackedValue = HuesLoader.Instance.GetHueColorRgba8888(31, (ushort)hue) };
         }
 
