@@ -34,7 +34,6 @@ namespace ClassicUO.Game.UI.Controls
 
             if (hueVector == default)
             {
-                GameActions.Print($"{Hue}, {Alpha}");
                 hueVector = ShaderHueTranslator.GetHueVector(Hue, false, Alpha);
             }
 
