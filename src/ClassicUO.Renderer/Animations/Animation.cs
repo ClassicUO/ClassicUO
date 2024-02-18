@@ -184,7 +184,7 @@ namespace ClassicUO.Renderer.Animations
                                 {
                                     ref readonly var animIdx = ref indices[i * AnimationsLoader.MAX_DIRECTIONS + d];
                                     index.Groups[i].Direction[d].Address = animIdx.Position;
-                                    index.Groups[i].Direction[d].Size = index.FileIndex > 0 ? Math.Max(1, animIdx.Size) : animIdx.Size;
+                                    index.Groups[i].Direction[d].Size = /*index.FileIndex > 0 ? Math.Max(1, animIdx.Size) :*/ animIdx.Size;
                                 }
                             }
                         }

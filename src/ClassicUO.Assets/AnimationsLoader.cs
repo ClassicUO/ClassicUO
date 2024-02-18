@@ -1432,19 +1432,25 @@ namespace ClassicUO.Assets
                 return Span<FrameInfo>.Empty;
             }
 
-            if (index.Position == 0xFFFF_FFFF || index.Size == 0xFFFF_FFFF)
+            if (index.Position == 0xFFFF_FFFF || index.Size == 0xFFFF_FFFF || index.Size <= 0)
             {
                 return Span<FrameInfo>.Empty;
             }
-
+            
             var file = _files[fileIndex];
 
+            if (index.Position + index.Size > file.Length)
+            {
+                return Span<FrameInfo>.Empty;
+            }
+            
             var reader = new StackDataReader(
                 new ReadOnlySpan<byte>(
                     (byte*)file.StartAddress.ToPointer() + index.Position,
                     (int)index.Size
                 )
             );
+            
             reader.Seek(0);
 
             var palette = new ReadOnlySpan<ushort>(reader.PositionAddress.ToPointer(), 512 / sizeof(ushort));
