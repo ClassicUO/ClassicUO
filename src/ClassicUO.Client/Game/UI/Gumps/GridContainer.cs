@@ -52,7 +52,7 @@ using static ClassicUO.Game.UI.Gumps.GridHightlightMenu;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    internal class GridContainer : ResizableGump
+    public class GridContainer : ResizableGump
     {
         #region CONSTANTS
         private const int X_SPACING = 1, Y_SPACING = 1;
@@ -85,7 +85,7 @@ namespace ClassicUO.Game.UI.Gumps
         private bool autoSortContainer = false;
         private bool firstItemsLoaded = false;
 
-        private readonly bool skipSave = false;
+        private bool skipSave = false;
         private readonly ushort originalContainerItemGraphic;
 
         private GridScrollArea scrollArea;
@@ -121,6 +121,11 @@ namespace ClassicUO.Game.UI.Gumps
         public GridSlotManager GetGridSlotManager { get { return gridSlotManager; } }
 
         public List<Item> GetContents { get { return gridSlotManager.ContainerContents; } }
+
+        /// <summary>
+        /// Set to true to avoid saving the current grid slots.
+        /// </summary>
+        public bool SkipSave { get { return skipSave; } set { skipSave = value; } }
         #endregion
 
         public GridContainer(uint local, ushort originalContainerGraphic, bool? useGridStyle = null) : base(GetWidth(), GetHeight(), GetWidth(2), GetHeight(1), local, 0)
@@ -860,6 +865,10 @@ namespace ClassicUO.Game.UI.Gumps
                 background.Height = gridItemSize;
             }
 
+            /// <summary>
+            /// Set this grid slot's item. Set to null for empty slot.
+            /// </summary>
+            /// <param name="item"></param>
             public void SetGridItem(Item item)
             {
                 if (item == null)
@@ -1391,7 +1400,10 @@ namespace ClassicUO.Game.UI.Gumps
                     itemLocks.Add(gridSlots[slot].SlotItem);
             }
 
-            private void SetGridPositions()
+            /// <summary>
+            /// Set the visual grid items to the current GridSlots dict
+            /// </summary>
+            public void SetGridPositions()
             {
                 int x = X_SPACING, y = 0;
                 foreach (var slot in gridSlots)
