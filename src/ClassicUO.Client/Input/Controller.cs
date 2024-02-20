@@ -1,6 +1,4 @@
-﻿using ClassicUO.Game;
-using Microsoft.Xna.Framework.Input;
-using SDL2;
+﻿using SDL2;
 
 namespace ClassicUO.Input
 {
@@ -185,17 +183,30 @@ namespace ClassicUO.Input
             return false;
         }
 
-        public static bool AreButtonsPressed(SDL.SDL_GameControllerButton[] buttons)
+        /// <summary>
+        /// Check is the supplied list of buttons are currently pressed.
+        /// </summary>
+        /// <param name="buttons"></param>
+        /// <param name="exact">If true, any other buttons pressed will make this return false</param>
+        /// <returns></returns>
+        public static bool AreButtonsPressed(SDL.SDL_GameControllerButton[] buttons, bool exact = true)
         {
             bool finalstatus = true;
 
             foreach (var button in buttons)
             {
-                if(!IsButtonPressed(button))
+                if (!IsButtonPressed(button))
                 {
-                    finalstatus = false; 
+                    finalstatus = false;
                     break;
                 }
+            }
+
+            var allPressed = PressedButtons();
+
+            if (exact && allPressed.Length > buttons.Length)
+            {
+                finalstatus = false;
             }
 
             return finalstatus;
@@ -277,7 +288,7 @@ namespace ClassicUO.Input
 
             foreach (var button in buttons)
             {
-                switch(button)
+                switch (button)
                 {
                     case SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_A:
                         keys += "A, ";
@@ -330,7 +341,7 @@ namespace ClassicUO.Input
                 }
             }
 
-            if(keys.EndsWith(", "))
+            if (keys.EndsWith(", "))
             {
                 keys = keys.Substring(0, keys.Length - 2);
             }
