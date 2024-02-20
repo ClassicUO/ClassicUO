@@ -65,6 +65,10 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             #region LABELS
+            if (_name.Length > 17)
+            {
+                _name = _name.Substring(0, 16) + "..";
+            }
             textLabel = new Label(_name, true, _hue, background.Width, style: FontStyle.BlackBorder, align: Assets.TEXT_ALIGN_TYPE.TS_CENTER)
             {
                 X = background.X
