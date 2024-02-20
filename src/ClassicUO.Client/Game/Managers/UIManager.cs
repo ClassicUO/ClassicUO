@@ -52,7 +52,6 @@ namespace ClassicUO.Game.Managers
         private static Control _keyboardFocusControl, _lastFocus;
         private static bool _needSort;
 
-
         public static float ContainerScale { get; set; } = 1f;
 
         public static AnchorManager AnchorManager { get; } = new AnchorManager();
@@ -383,6 +382,29 @@ namespace ClassicUO.Game.Managers
 
             HandleKeyboardInput();
             HandleMouseInput();
+        }
+
+        public static void SlowUpdate()
+        {
+            SortControlsByInfo();
+
+            LinkedListNode<Gump> first = Gumps.First;
+
+            while (first != null)
+            {
+                LinkedListNode<Gump> next = first.Next;
+
+                Control g = first.Value;
+
+                g.SlowUpdate();
+
+                if (g.IsDisposed)
+                {
+                    Gumps.Remove(first);
+                }
+
+                first = next;
+            }
         }
 
         public static void Draw(UltimaBatcher2D batcher)

@@ -1,5 +1,4 @@
 ﻿using ClassicUO.Assets;
-using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using System;
 using static ClassicUO.Game.UI.Gumps.OptionsGump;
@@ -8,7 +7,7 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class InputRequest : Gump
     {
-        public InputRequest(string message, string buttonText, string button2Text, Action<Result, string> result) : base(0, 0)
+        public InputRequest(string message, string buttonText, string button2Text, Action<Result, string> result, string defaultInputValue = "") : base(0, 0)
         {
             Width = 400;
             Height = 0;
@@ -31,6 +30,7 @@ namespace ClassicUO.Game.UI.Gumps
             )
             { X = 0, Y = _.Y + _.Height + 15 };
             Height += input.Height;
+            input.SetText(defaultInputValue);
             Add(input);
 
             NiceButton button1, button2;

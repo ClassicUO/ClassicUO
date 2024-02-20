@@ -479,6 +479,9 @@ namespace ClassicUO.Configuration
         public int OverheadChatFontSize { get; set; } = 20;
         public int OverheadChatWidth { get; set; } = 200;
 
+        public string NamePlateFont { get; set; } = "avadonian";
+        public int NamePlateFontSize { get; set; } = 20;
+
         public string DefaultTTFFont { get; set; } = "Roboto-Regular";
         public int TextBorderSize { get; set; } = 1;
 
@@ -592,6 +595,7 @@ namespace ClassicUO.Configuration
 
         public bool ModernPaperdollAnchorEnabled { get; set; } = false;
         public bool JournalAnchorEnabled { get; set; } = false;
+        public bool EnableGumpCloseAnimation { get; set; } = true;
 
 
         public void Save(string path, bool saveGumps = true)

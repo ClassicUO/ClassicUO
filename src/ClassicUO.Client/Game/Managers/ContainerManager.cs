@@ -30,16 +30,14 @@
 
 #endregion
 
-using System.Collections.Generic;
-using System.IO;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Gumps;
-using ClassicUO.Assets;
-using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
+using System.Collections.Generic;
+using System.IO;
 
 namespace ClassicUO.Game.Managers
 {
@@ -257,7 +255,8 @@ namespace ClassicUO.Game.Managers
             {
                 MakeDefault();
 
-                using (StreamWriter writer = new StreamWriter(File.Create(path)))
+                using (var stream = new FileStream(path, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite))
+                using (var writer = new StreamWriter(stream))
                 {
                     writer.WriteLine("# FORMAT");
 

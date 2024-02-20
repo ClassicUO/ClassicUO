@@ -39,6 +39,7 @@ namespace ClassicUO.Game.UI.Controls
     internal class HoveredLabel : Label
     {
         private readonly ushort _overHue, _normalHue, _selectedHue;
+        private Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
         public HoveredLabel
         (
@@ -100,8 +101,6 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (DrawBackgroundCurrentIndex && MouseIsOver && !string.IsNullOrWhiteSpace(Text))
             {
-                Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
-
                 batcher.Draw
                 (
                     SolidColorTextureCache.GetTexture(Color.Gray),

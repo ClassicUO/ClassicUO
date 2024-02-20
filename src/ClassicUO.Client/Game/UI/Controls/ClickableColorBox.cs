@@ -33,7 +33,6 @@
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
-using ClassicUO.Assets;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 
@@ -71,8 +70,6 @@ namespace ClassicUO.Game.UI.Controls
             {
                 Children[0].Draw(batcher, x, y);
             }
-
-            Vector3 hueVector = ShaderHueTranslator.GetHueVector(Hue);
 
             batcher.Draw
             (

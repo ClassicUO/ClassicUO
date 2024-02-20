@@ -30,11 +30,11 @@
 
 #endregion
 
-using System.Collections.Generic;
 using ClassicUO.Assets;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
+using System.Collections.Generic;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -42,9 +42,9 @@ namespace ClassicUO.Game.UI.Controls
     {
         private readonly ushort _hue;
         private readonly bool _isPartial;
-        private readonly int _tileX,
-            _tileY;
+        private readonly int _tileX, _tileY;
         private ushort _graphic;
+        private Vector3 hueVector;
 
         public ButtonTileArt(List<string> gparams) : base(gparams)
         {
@@ -67,13 +67,13 @@ namespace ClassicUO.Game.UI.Controls
             }
 
             _isPartial = TileDataLoader.Instance.StaticData[_graphic].IsPartialHue;
+
+            hueVector = ShaderHueTranslator.GetHueVector(_hue, _isPartial, 1f);
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             base.Draw(batcher, x, y);
-
-            var hueVector = ShaderHueTranslator.GetHueVector(_hue, _isPartial, 1f);
 
             ref readonly var artInfo = ref Client.Game.Arts.GetArt(_graphic);
 

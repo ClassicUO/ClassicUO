@@ -63,8 +63,7 @@ namespace ClassicUO
         private readonly Texture2D[] _hueSamplers = new Texture2D[3];
         private bool _ignoreNextTextInput;
         private readonly float[] _intervalFixedUpdate = new float[2];
-        private double _totalElapsed,
-            _currentFpsTime;
+        private double _totalElapsed, _currentFpsTime, _nextSlowUpdate;
         private uint _totalFrames;
         private UltimaBatcher2D _uoSpriteBatch;
         private bool _suppressedDraw;
@@ -463,6 +462,12 @@ namespace ClassicUO
             }
 
             UIManager.Update();
+
+            if (Time.Ticks >= _nextSlowUpdate)
+            {
+                _nextSlowUpdate = Time.Ticks + 500;
+                UIManager.SlowUpdate();
+            }
 
             _totalElapsed += gameTime.ElapsedGameTime.TotalMilliseconds;
             _currentFpsTime += gameTime.ElapsedGameTime.TotalMilliseconds;
@@ -932,6 +937,10 @@ namespace ClassicUO
                     }
 
                 case SDL_EventType.SDL_CONTROLLERBUTTONDOWN:
+                    if (!IsActive)
+                    {
+                        break;
+                    }
                     Controller.OnButtonDown(sdlEvent->cbutton);
                     UIManager.KeyboardFocusControl?.InvokeControllerButtonDown((SDL_GameControllerButton)sdlEvent->cbutton.button);
                     Scene.OnControllerButtonDown(sdlEvent->cbutton);
@@ -965,6 +974,10 @@ namespace ClassicUO
                     break;
 
                 case SDL_EventType.SDL_CONTROLLERBUTTONUP:
+                    if (!IsActive)
+                    {
+                        break;
+                    }
                     Controller.OnButtonUp(sdlEvent->cbutton);
                     UIManager.KeyboardFocusControl?.InvokeControllerButtonUp((SDL_GameControllerButton)sdlEvent->cbutton.button);
                     Scene.OnControllerButtonUp(sdlEvent->cbutton);
@@ -986,7 +999,11 @@ namespace ClassicUO
                     break;
 
                 case SDL_EventType.SDL_CONTROLLERAXISMOTION: //Work around because sdl doesn't see trigger buttons as buttons, they are axis probably for pressure support
-                    //GameActions.Print(typeof(SDL_GameControllerButton).GetEnumName((SDL_GameControllerButton)sdlEvent->cbutton.button));
+                                                             //GameActions.Print(typeof(SDL_GameControllerButton).GetEnumName((SDL_GameControllerButton)sdlEvent->cbutton.button));
+                    if (!IsActive)
+                    {
+                        break;
+                    }
                     if (sdlEvent->cbutton.button == (byte)SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_BACK || sdlEvent->cbutton.button == (byte)SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_GUIDE) //Left trigger BACK Right trigger GUIDE
                     {
                         if (sdlEvent->caxis.axisValue > 32000)

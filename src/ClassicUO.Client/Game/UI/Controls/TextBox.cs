@@ -71,36 +71,8 @@ namespace ClassicUO.Game.UI.Controls
             bool supportsCommands = true,
             bool ignoreColorCommands = false,
             bool calculateGlyphs = false
-        )
-        {
-            if (strokeEffect)
-                text = $"/es[{getStrokeSize}]" + text;
+        ) : this(text, font, size, width, ConvertHueToColor(hue), align, strokeEffect, supportsCommands, ignoreColorCommands, calculateGlyphs) { }
 
-            _rtl = new RichTextLayout
-            {
-                Font = TrueTypeLoader.Instance.GetFont(font, size),
-                Text = text,
-                IgnoreColorCommand = ignoreColorCommands,
-                SupportsCommands = supportsCommands,
-                CalculateGlyphs = calculateGlyphs
-            };
-
-            if (width != null)
-                _rtl.Width = width;
-
-            _font = font;
-            _size = size;
-            _color.PackedValue = HuesLoader.Instance.GetHueColorRgba8888(31, (ushort)hue);
-
-            if (hue == 0xFFFF || hue == ushort.MaxValue)
-                _color = Color.White;
-
-            _align = align;
-
-            AcceptMouseInput = true;
-            Width = _rtl.Width == null ? _rtl.Size.X : (int)_rtl.Width;
-            base.Height = _rtl.Size.Y;
-        }
         public TextBox
             (
                 string text,
@@ -138,6 +110,15 @@ namespace ClassicUO.Game.UI.Controls
             AcceptMouseInput = true;
             Width = _rtl.Width == null ? _rtl.Size.X : (int)_rtl.Width;
             base.Height = _rtl.Size.Y;
+        }
+
+        public static Color ConvertHueToColor(int hue)
+        {
+            if (hue == 0xFFFF || hue == ushort.MaxValue)
+            {
+                return Color.White;
+            }
+            return new Color() { PackedValue = HuesLoader.Instance.GetHueColorRgba8888(31, (ushort)hue) };
         }
 
         public bool PixelCheck(int x, int y)
@@ -199,8 +180,12 @@ namespace ClassicUO.Game.UI.Controls
             get => (int)_color.PackedValue;
             set
             {
-                _color.PackedValue = HuesLoader.Instance.GetHueColorRgba8888(31, (ushort)value);
-                _dirty = true;
+                var newVal = HuesLoader.Instance.GetHueColorRgba8888(31, (ushort)value);
+                if (_color.PackedValue != newVal)
+                {
+                    _color.PackedValue = newVal;
+                    _dirty = true;
+                }
             }
         }
 
@@ -244,7 +229,6 @@ namespace ClassicUO.Game.UI.Controls
         /// <param name="width">Set to null to ignore width, taking as much width as needed.</param>
         public void UpdateText(string text, int? width = null)
         {
-
             if (width != null && width > 0)
             {
                 _rtl = new RichTextLayout
@@ -280,6 +264,7 @@ namespace ClassicUO.Game.UI.Controls
             finalString = finalString.Replace("</font>", "").Replace("<h2>", "");
             finalString = finalString.Replace("<BODY>", "").Replace("<body>", "");
             finalString = finalString.Replace("</BODY>", "").Replace("</body>", "");
+            finalString = finalString.Replace("</p>", "").Replace("<p>", "");
             return finalString;
         }
 

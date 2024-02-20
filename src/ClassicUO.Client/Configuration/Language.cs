@@ -9,6 +9,13 @@ namespace ClassicUO.Configuration
         public ModernOptionsGumpLanguage GetModernOptionsGumpLanguage { get; set; } = new ModernOptionsGumpLanguage();
         public ErrorsLanguage ErrorsLanguage { get; set; } = new ErrorsLanguage();
         public MapLanguage MapLanguage { get; set; } = new MapLanguage();
+        public TopBarGumpLanguage TopBarGump { get; set; } = new TopBarGumpLanguage();
+
+        public string TazuoVersionHistory { get; set; } = "TazUO Version History";
+        public string CurrentVersion { get; set; } = "Current Version: ";
+        public string TazUOWiki { get; set; } = "TazUO Wiki";
+        public string TazUODiscord { get; set; } = "TazUO Discord";
+        public string CommandGump { get; set; } = "Available Client Commands";
 
         [JsonIgnore]
         public static Language Instance { get; private set; } = new Language();
@@ -497,7 +504,7 @@ namespace ClassicUO.Configuration
             public string TextFormat { get; set; } = "Text format";
             public string EnableSpellIndicatorSystem { get; set; } = "Enable spell indicator system";
             public string ImportFromUrl { get; set; } = "Import from url";
-            public string InputRequestUrl { get; set; } = "Enter the url for the spell config. /c[red]This will override your current config.";
+            public string InputRequestUrl { get; set; } = "Enter the url for the spell config. \n/c[red]This will override your current config.";
             public string Download { get; set; } = "Download";
             public string Cancel { get; set; } = "Cancel";
             public string AttemptingToDownloadSpellConfig { get; set; } = "Attempting to download spell config..";
@@ -509,6 +516,7 @@ namespace ClassicUO.Configuration
             public string PlayerOffsetY { get; set; } = "Player Offset Y";
             public string UseLandTexturesWhereAvailable { get; set; } = "Use land textures where available(Experimental)";
             public string SOSGumpID { get; set; } = "SOS Gump ID";
+            public string UseGumpClosingAnims { get; set; } = "Enable gump closing animation";
             #endregion
 
             #region Tooltips
@@ -529,6 +537,7 @@ namespace ClassicUO.Configuration
             public string TooltipFont { get; set; } = "Tooltip font";
             public string OverheadFont { get; set; } = "Overhead font";
             public string JournalFont { get; set; } = "Journal font";
+            public string NameplateFont { get; set; } = "Nameplate font";
             #endregion
 
             #region Controller
@@ -573,5 +582,10 @@ namespace ClassicUO.Configuration
     {
         public string Follow { get; set; } = "Follow";
         public string Yourself { get; set; } = "Yourself";
+    }
+
+    public class TopBarGumpLanguage
+    {
+        public string CommandsEntry { get; set; } = "Client Commands";
     }
 }

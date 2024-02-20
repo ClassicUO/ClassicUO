@@ -171,6 +171,11 @@ namespace ClassicUO.Game.UI.Controls
                 Y = Client.Game.Window.ClientBounds.Height - _background.Height;
             }
 
+            if (Y < Client.Game.Window.ClientBounds.Y)
+            {
+                Y = 0;
+            }
+
             foreach (ContextMenuItem mitem in FindControls<ContextMenuItem>())
             {
                 if (mitem.Width < _background.Width)

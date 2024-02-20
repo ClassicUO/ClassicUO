@@ -39,6 +39,9 @@ using ClassicUO.Input;
 using ClassicUO.Network;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace ClassicUO.Game.Managers
 {
@@ -304,13 +307,17 @@ namespace ClassicUO.Game.Managers
                     case CursorTarget.Invalid: return;
 
                     case CursorTarget.Internal:
+                        LastTargetInfo.SetEntity(serial);
+                        ClearTargetingWithoutTargetCancelPacket();
+                        Mouse.CancelDoubleClick = true;
+                        break;
                     case CursorTarget.MultiPlacement:
                     case CursorTarget.Position:
                     case CursorTarget.Object:
                     case CursorTarget.HueCommandTarget:
                     case CursorTarget.SetTargetClientSide:
 
-                        if (TargetingState != CursorTarget.Internal && entity != World.Player)
+                        if (entity != World.Player)
                         {
                             LastTargetInfo.SetEntity(serial);
                         }
@@ -564,6 +571,88 @@ namespace ClassicUO.Game.Managers
 
             Mouse.CancelDoubleClick = true;
             ClearTargetingWithoutTargetCancelPacket();
+        }
+    }
+
+    public static class TargetHelper
+    {
+        private static CancellationTokenSource _executingSource = new CancellationTokenSource();
+
+        /// <summary>
+        /// Request the player to target a gump
+        /// </summary>
+        /// <param name="onTarget"></param>
+        public static async void TargetGump(Action<Gump> onTarget)
+        {
+            var serial = await TargetAsync();
+            if (serial == 0) return;
+
+            var g = UIManager.GetGump(serial);
+            if (g == null)
+            {
+                GameActions.Print($"Failed to find the targeted gump (0x{serial:X}).");
+                return;
+            }
+
+            onTarget(g);
+        }
+
+        /// <summary>
+        /// Request the player target an item or mobile
+        /// </summary>
+        /// <param name="onTargeted"></param>
+        /// <returns></returns>
+        public static async Task TargetObject(Action<Entity> onTargeted)
+        {
+            var serial = await TargetAsync();
+            if (serial == 0) return;
+
+            var untyped = World.Get(serial);
+            if (untyped == null)
+            {
+                GameActions.Print($"Failed to find the targeted entity (0x{serial:X}).");
+                return;
+            }
+
+            onTargeted(untyped);
+        }
+
+        public static async Task<uint> TargetAsync()
+        {
+            if (TargetManager.IsTargeting) TargetManager.CancelTarget();
+
+            if (CUOEnviroment.Debug)
+            {
+                GameActions.Print($"Waiting for Target.");
+            }
+
+            // Abort any previous running task
+            var newSource = new CancellationTokenSource();
+            Interlocked.Exchange(ref _executingSource, newSource).Cancel();
+
+            // Set target
+            TargetManager.SetTargeting(CursorTarget.Internal, CursorType.Target, TargetType.Neutral);
+
+            // Wait for target
+            while (!newSource.IsCancellationRequested && TargetManager.IsTargeting)
+            {
+                try
+                {
+                    await Task.Delay(250, newSource.Token);
+                }
+                catch
+                {
+                    // ignored
+                }
+            }
+
+            if (newSource.IsCancellationRequested)
+            {
+                GameActions.Print($"Target request was cancelled.");
+                return 0;
+            }
+
+            return TargetManager.LastTargetInfo.Serial;
         }
     }
 }

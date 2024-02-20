@@ -47,6 +47,8 @@ namespace ClassicUO.Game.Managers
     {
         private static readonly Dictionary<string, Action<string[]>> _commands = new Dictionary<string, Action<string[]>>();
 
+        public static Dictionary<string, Action<string[]>> Commands { get { return _commands; } }
+
         public static void Initialize()
         {
             Register
