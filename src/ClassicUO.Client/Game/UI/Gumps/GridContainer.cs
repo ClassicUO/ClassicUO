@@ -117,6 +117,10 @@ namespace ClassicUO.Game.UI.Gumps
 
         #region public vars
         public readonly bool IsPlayerBackpack = false;
+
+        public GridSlotManager GetGridSlotManager { get { return gridSlotManager; } }
+
+        public List<Item> GetContents { get { return gridSlotManager.ContainerContents; } }
         #endregion
 
         public GridContainer(uint local, ushort originalContainerGraphic, bool? useGridStyle = null) : base(GetWidth(), GetHeight(), GetWidth(2), GetHeight(1), local, 0)
@@ -781,7 +785,7 @@ namespace ClassicUO.Game.UI.Gumps
             GridSaveSystem.Instance.Clear();
         }
 
-        private class GridItem : Control
+        public class GridItem : Control
         {
             private readonly HitBox hit;
             private bool mousePressedWhenEntered = false;
@@ -1262,7 +1266,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        private class GridSlotManager
+        public class GridSlotManager
         {
             private Dictionary<int, GridItem> gridSlots = new Dictionary<int, GridItem>();
             private Item container;
