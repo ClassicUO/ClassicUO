@@ -8,6 +8,9 @@ namespace ClassicUO.Game.UI.Gumps
     internal class VersionHistory : Gump
     {
         private static string[] updateTexts = {
+            "/c[white][3.21.2]/cd\n" +
+                "-A bugfix release for 3.21 causing crashes",
+
             "/c[white][3.21.0]/cd\n" +
                 "- A few bug fixes\n" +
                 "- A few fixes from CUO\n" +
