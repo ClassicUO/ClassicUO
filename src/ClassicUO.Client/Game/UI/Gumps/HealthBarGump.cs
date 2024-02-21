@@ -140,17 +140,12 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected abstract void BuildGump();
 
-
-        public override void Dispose()
+        public override void AfterDispose()
         {
-            /*if (TargetManager.LastAttack != LocalSerial)
-            {
-                GameActions.SendCloseStatus(LocalSerial);
-            }*/
+            base.AfterDispose();
 
             _textBox?.Dispose();
             _textBox = null;
-            base.Dispose();
         }
 
         protected override void OnMove(int x, int y)
@@ -410,6 +405,11 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
+            if (IsDisposed)
+            {
+                return false;
+            }
+
             base.Draw(batcher, x, y);
 
             if (Keyboard.Alt && UIManager.MouseOverControl != null && (UIManager.MouseOverControl == this || UIManager.MouseOverControl.RootParent == this))
@@ -1829,7 +1829,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Update();
 
-            if (IsDisposed /* || (_textBox != null && _textBox.IsDisposed)*/)
+            if (IsDisposed)
             {
                 return;
             }
@@ -2095,7 +2095,6 @@ namespace ClassicUO.Game.UI.Gumps
                     _background.Graphic = World.Player.InWarMode ? settings.Background_War : settings.Background_Normal;
                 }
             }
-
 
             if (_bars.Length > 0 && _bars[0].Hue != hpForegroundHue) //HP Foreground
             {
