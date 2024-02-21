@@ -636,7 +636,10 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                     }
 
-                    _bars[0].IsVisible = false;
+                    if (_bars[0] != null)
+                    {
+                        _bars[0].IsVisible = false;
+                    }
                 }
             }
 
