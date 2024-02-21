@@ -624,7 +624,7 @@ namespace ClassicUO.Game.UI.Gumps
                         _background.Hue = 912;
                     }
 
-                    if (_hpLineRed.LineColor != HPB_COLOR_GRAY)
+                    if (_hpLineRed != null && _hpLineRed.LineColor != HPB_COLOR_GRAY)
                     {
                         _hpLineRed.LineColor = HPB_COLOR_GRAY;
 
