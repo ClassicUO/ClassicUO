@@ -619,7 +619,7 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                     }
 
-                    if (_background.Hue != 912)
+                    if (_background != null && _background.Hue != 912)
                     {
                         _background.Hue = 912;
                     }
@@ -1903,7 +1903,10 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                     }
 
-                    _bars[0].IsVisible = false;
+                    if (_bars[0] != null)
+                    {
+                        _bars[0].IsVisible = false;
+                    }
                 }
             }
 
