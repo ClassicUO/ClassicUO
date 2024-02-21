@@ -1063,6 +1063,12 @@ namespace ClassicUO.Game.UI.Controls
             }
 
             IsDisposed = true;
+            AfterDispose();
         }
+
+        /// <summary>
+        /// Called after the control has been disposed.
+        /// </summary>
+        public virtual void AfterDispose() { }
     }
 }

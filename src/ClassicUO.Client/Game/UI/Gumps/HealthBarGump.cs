@@ -54,6 +54,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public bool IsLastAttackBar { get; set; } = false;
         public static BaseHealthBarGump LastAttackBar { get; set; }
+        protected bool HasBeenBuilt { get; set; } = false;
 
         protected BaseHealthBarGump(Entity entity) : this(0, 0)
         {
@@ -71,6 +72,7 @@ namespace ClassicUO.Game.UI.Gumps
             _isDead = entity is Mobile mm && mm.IsDead;
 
             BuildGump();
+            HasBeenBuilt = true;
         }
 
         public virtual void SetNewMobile(uint serial)
@@ -83,6 +85,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Children.Clear();
                 BuildGump();
+                HasBeenBuilt = true;
             }
         }
 
@@ -140,18 +143,13 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected abstract void BuildGump();
 
+        //public override void AfterDispose()
+        //{
+        //    base.AfterDispose();
 
-        public override void Dispose()
-        {
-            /*if (TargetManager.LastAttack != LocalSerial)
-            {
-                GameActions.SendCloseStatus(LocalSerial);
-            }*/
-
-            _textBox?.Dispose();
-            _textBox = null;
-            base.Dispose();
-        }
+        //    _textBox?.Dispose();
+        //    _textBox = null;
+        //}
 
         protected override void OnMove(int x, int y)
         {
@@ -181,6 +179,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _name = World.Player.Name;
                 BuildGump();
+                HasBeenBuilt = true;
             }
             else if (ProfileManager.CurrentProfile.SaveHealthbars)
             {
@@ -201,6 +200,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _outOfRange = true;
                 BuildGump();
+                HasBeenBuilt = true;
             }
             else
             {
@@ -410,6 +410,11 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
+            if (IsDisposed)
+            {
+                return false;
+            }
+
             base.Draw(batcher, x, y);
 
             if (Keyboard.Alt && UIManager.MouseOverControl != null && (UIManager.MouseOverControl == this || UIManager.MouseOverControl.RootParent == this))
@@ -535,6 +540,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (_textBox != null)
             {
                 _textBox.MouseUp -= TextBoxOnMouseUp;
+                _textBox.Dispose();
             }
 
             _textBox = null;
@@ -546,7 +552,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Update();
 
-            if (IsDisposed)
+            if (IsDisposed || !HasBeenBuilt)
             {
                 return;
             }
@@ -619,12 +625,12 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                     }
 
-                    if (_background.Hue != 912)
+                    if (_background != null && _background.Hue != 912)
                     {
                         _background.Hue = 912;
                     }
 
-                    if (_hpLineRed.LineColor != HPB_COLOR_GRAY)
+                    if (_hpLineRed != null && _hpLineRed.LineColor != HPB_COLOR_GRAY)
                     {
                         _hpLineRed.LineColor = HPB_COLOR_GRAY;
 
@@ -636,7 +642,10 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                     }
 
-                    _bars[0].IsVisible = false;
+                    if (_bars[0] != null)
+                    {
+                        _bars[0].IsVisible = false;
+                    }
                 }
             }
 
@@ -1577,6 +1586,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (_textBox != null)
             {
                 _textBox.MouseUp -= TextBoxOnMouseUp;
+                _textBox.Dispose();
             }
 
             _textBox = null;
@@ -1826,7 +1836,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Update();
 
-            if (IsDisposed /* || (_textBox != null && _textBox.IsDisposed)*/)
+            if (IsDisposed || !HasBeenBuilt)
             {
                 return;
             }
@@ -1903,7 +1913,10 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                     }
 
-                    _bars[0].IsVisible = false;
+                    if (_bars[0] != null)
+                    {
+                        _bars[0].IsVisible = false;
+                    }
                 }
             }
 
@@ -2089,7 +2102,6 @@ namespace ClassicUO.Game.UI.Gumps
                     _background.Graphic = World.Player.InWarMode ? settings.Background_War : settings.Background_Normal;
                 }
             }
-
 
             if (_bars.Length > 0 && _bars[0].Hue != hpForegroundHue) //HP Foreground
             {

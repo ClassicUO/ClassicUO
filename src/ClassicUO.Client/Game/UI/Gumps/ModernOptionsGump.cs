@@ -5104,16 +5104,19 @@ namespace ClassicUO.Game.UI.Gumps
 
             protected override void OnMouseWheel(MouseEventType delta)
             {
+                if (IsDisposed || _scrollBar == null)
+                {
+                    return;
+                }
+
                 switch (delta)
                 {
                     case MouseEventType.WheelScrollUp:
                         _scrollBar.Value -= _scrollBar.ScrollStep;
-
                         break;
 
                     case MouseEventType.WheelScrollDown:
                         _scrollBar.Value += _scrollBar.ScrollStep;
-
                         break;
                 }
             }
