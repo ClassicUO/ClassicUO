@@ -8,8 +8,11 @@ namespace ClassicUO.Game.UI.Gumps
     internal class VersionHistory : Gump
     {
         private static string[] updateTexts = {
+            "/c[white][3.22.0]/cd\n" +
+            "- Changes to improve gump closing animations",
+
             "/c[white][3.21.2]/cd\n" +
-                "-A bugfix release for 3.21 causing crashes",
+                "- A bugfix release for 3.21 causing crashes",
 
             "/c[white][3.21.0]/cd\n" +
                 "- A few bug fixes\n" +

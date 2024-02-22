@@ -315,6 +315,28 @@ namespace ClassicUO.Game.UI.Controls
                 }
 
                 batcher.ClipBegin(x + offset, y + offset, Width - (offset * 2), Height - (offset * 2));
+
+                for (int i = 0; i < Children.Count; i++)
+                {
+                    if (Children.Count <= i)
+                    {
+                        break;
+                    }
+                    Control c = Children.ElementAt(i);
+
+                    if (c != null && (c.Page == 0 || c.Page == ActivePage))
+                    {
+                        if (c.IsVisible)
+                        {
+                            c.Draw(batcher, c.X + x, c.Y + y);
+                        }
+                    }
+                }
+
+                DrawDebug(batcher, x, y);
+
+                batcher.ClipEnd();
+                return true;
             }
 
             for (int i = 0; i < Children.Count; i++)
@@ -335,11 +357,6 @@ namespace ClassicUO.Game.UI.Controls
             }
 
             DrawDebug(batcher, x, y);
-
-            if (delayedDispose)
-            {
-                batcher.ClipEnd();
-            }
 
             return true;
         }
