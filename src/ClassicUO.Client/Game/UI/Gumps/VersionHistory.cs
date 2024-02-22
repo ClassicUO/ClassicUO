@@ -8,7 +8,7 @@ namespace ClassicUO.Game.UI.Gumps
     internal class VersionHistory : Gump
     {
         private static string[] updateTexts = {
-            "/c[white][3.22.0]/cd\n" +
+            "/c[white][3.21.3]/cd\n" +
             "- Changes to improve gump closing animations",
 
             "/c[white][3.21.2]/cd\n" +

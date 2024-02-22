@@ -1062,7 +1062,7 @@ namespace ClassicUO.Game.UI.Controls
 
             if (this is Gumps.Gump)
             {
-                if (!delayedDispose && World.InGame && Parent == null && ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.EnableGumpCloseAnimation)
+                if (!delayedDispose && !IsFromServer && World.InGame && Parent == null && ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.EnableGumpCloseAnimation)
                 {
                     delayedDispose = true;
                     return;
