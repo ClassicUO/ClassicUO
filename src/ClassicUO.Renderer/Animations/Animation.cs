@@ -343,7 +343,8 @@ namespace ClassicUO.Renderer.Animations
         public void ConvertBodyIfNeeded(
             ref ushort graphic,
             bool isParent = false,
-            bool forceUOP = false
+            bool forceUOP = false,
+            bool isCorpse = false
         )
         {
             if (graphic >= _dataIndex.Length)
@@ -352,7 +353,7 @@ namespace ClassicUO.Renderer.Animations
             ushort hue = 0;
 
             if (_dataIndex[graphic] != null && _dataIndex[graphic].FileIndex == 0 && !_dataIndex[graphic].Flags.HasFlag(AnimationFlags.UseUopAnimation))
-                AnimationsLoader.Instance.ReplaceBody(ref graphic, ref hue);
+                _ = isCorpse ? AnimationsLoader.Instance.ReplaceCorpse(ref graphic, ref hue) : AnimationsLoader.Instance.ReplaceBody(ref graphic, ref hue);
         }
 
         public bool AnimationExists(ushort graphic, byte group, bool isCorpse = false)
