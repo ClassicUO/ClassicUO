@@ -76,6 +76,7 @@ namespace ClassicUO.Assets
                         .Select(s => Regex.Match(s, "facet0.*\\.mul", RegexOptions.IgnoreCase))
                         .Where(s => s.Success)
                         .Select(s => Path.Combine(UOFileManager.BasePath, s.Value))
+                        .OrderBy(s => s)
                         .ToArray();
 
                     _facets = new UOFileMul[facetFiles.Length];
