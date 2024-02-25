@@ -72,6 +72,8 @@ namespace ClassicUO.Game.UI.Controls
             IsEnabled = true;
         }
 
+        public bool IsDelayedDisposed { get { return delayedDispose; } }
+
         public virtual ClickPriority Priority { get; set; } = ClickPriority.Default;
 
         public uint ServerSerial { get; set; }
