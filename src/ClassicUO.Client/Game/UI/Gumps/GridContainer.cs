@@ -595,27 +595,25 @@ namespace ClassicUO.Game.UI.Gumps
 
             if ((lastWidth != Width || lastHeight != Height) || lastGridItemScale != gridItemSize)
             {
-                if (!IsDelayedDisposed)
-                {
-                    lastGridItemScale = gridItemSize;
-                    background.Width = Width - (borderWidth * 2);
-                    background.Height = Height - (borderWidth * 2);
-                    scrollArea.Width = background.Width;
-                    scrollArea.Height = background.Height - TOP_BAR_HEIGHT;
-                    openRegularGump.X = Width - openRegularGump.Width - borderWidth;
-                    quickDropBackpack.X = openRegularGump.X - quickDropBackpack.Width;
-                    sortContents.X = quickDropBackpack.X - sortContents.Width;
-                    lastHeight = Height;
-                    lastWidth = Width;
-                    searchBox.Width = Math.Min(Width - (borderWidth * 2) - openRegularGump.Width - quickDropBackpack.Width - sortContents.Width, 150);
-                    backgroundTexture.Width = background.Width;
-                    backgroundTexture.Height = background.Height;
-                    backgroundTexture.Alpha = background.Alpha;
-                    backgroundTexture.Hue = background.Hue;
-                    setLootBag.Y = Height - 20;
-                    if (IsPlayerBackpack)
-                        ProfileManager.CurrentProfile.BackpackGridSize = new Point(Width, Height);
-                }
+                lastGridItemScale = gridItemSize;
+                background.Width = Width - (borderWidth * 2);
+                background.Height = Height - (borderWidth * 2);
+                scrollArea.Width = background.Width;
+                scrollArea.Height = background.Height - TOP_BAR_HEIGHT;
+                openRegularGump.X = Width - openRegularGump.Width - borderWidth;
+                quickDropBackpack.X = openRegularGump.X - quickDropBackpack.Width;
+                sortContents.X = quickDropBackpack.X - sortContents.Width;
+                lastHeight = Height;
+                lastWidth = Width;
+                searchBox.Width = Math.Min(Width - (borderWidth * 2) - openRegularGump.Width - quickDropBackpack.Width - sortContents.Width, 150);
+                backgroundTexture.Width = background.Width;
+                backgroundTexture.Height = background.Height;
+                backgroundTexture.Alpha = background.Alpha;
+                backgroundTexture.Hue = background.Hue;
+                setLootBag.Y = Height - 20;
+                if (IsPlayerBackpack)
+                    ProfileManager.CurrentProfile.BackpackGridSize = new Point(Width, Height);
+
                 RequestUpdateContents();
             }
 
