@@ -35,7 +35,6 @@ using ClassicUO.Configuration;
 using ClassicUO.Renderer;
 using FontStashSharp.RichText;
 using Microsoft.Xna.Framework;
-using System;
 using System.Text.RegularExpressions;
 
 namespace ClassicUO.Game.UI.Controls
@@ -55,7 +54,7 @@ namespace ClassicUO.Game.UI.Controls
             {
                 if (ProfileManager.CurrentProfile != null)
                     return ProfileManager.CurrentProfile.TextBorderSize;
-                return 2;
+                return 1;
             }
         }
 
@@ -70,8 +69,9 @@ namespace ClassicUO.Game.UI.Controls
             bool strokeEffect = true,
             bool supportsCommands = true,
             bool ignoreColorCommands = false,
-            bool calculateGlyphs = false
-        ) : this(text, font, size, width, ConvertHueToColor(hue), align, strokeEffect, supportsCommands, ignoreColorCommands, calculateGlyphs) { }
+            bool calculateGlyphs = false,
+            bool converthtmlcolors = true
+        ) : this(text, font, size, width, ConvertHueToColor(hue), align, strokeEffect, supportsCommands, ignoreColorCommands, calculateGlyphs, converthtmlcolors) { }
 
         public TextBox
             (
@@ -84,11 +84,19 @@ namespace ClassicUO.Game.UI.Controls
                 bool strokeEffect = true,
                 bool supportsCommands = true,
                 bool ignoreColorCommands = false,
-                bool calculateGlyphs = false
+                bool calculateGlyphs = false,
+                bool converthtmlcolors = true
             )
         {
             if (strokeEffect)
+            {
                 text = $"/es[{getStrokeSize}]" + text;
+            }
+
+            if (converthtmlcolors)
+            {
+                text = ConvertHTMLColorsToFSS(text);
+            }
 
             _rtl = new RichTextLayout
             {
@@ -106,7 +114,7 @@ namespace ClassicUO.Game.UI.Controls
             _color = color;
 
             _align = align;
-
+            ConvertHtmlColors = converthtmlcolors;
             AcceptMouseInput = true;
             Width = _rtl.Width == null ? _rtl.Size.X : (int)_rtl.Width;
             base.Height = _rtl.Size.Y;
@@ -169,7 +177,15 @@ namespace ClassicUO.Game.UI.Controls
             {
                 if (_rtl.Text != value)
                 {
-                    _rtl.Text = value;
+                    if (ConvertHtmlColors)
+                    {
+                        _rtl.Text = ConvertHTMLColorsToFSS(value);
+                    }
+                    else
+                    {
+                        _rtl.Text = value;
+                    }
+
                     _dirty = true;
                 }
             }
@@ -222,13 +238,20 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
+        public bool ConvertHtmlColors { get; set; }
+
         /// <summary>
         /// Update the text of the TextBox
         /// </summary>
         /// <param name="text">New string</param>
         /// <param name="width">Set to null to ignore width, taking as much width as needed.</param>
-        public void UpdateText(string text, int? width = null)
+        public void UpdateText(string text, int? width = null, bool converthtmlcolors = true)
         {
+            if (converthtmlcolors)
+            {
+                text = ConvertHTMLColorsToFSS(text);
+            }
+
             if (width != null && width > 0)
             {
                 _rtl = new RichTextLayout
@@ -249,16 +272,30 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        public static string ConvertHtmlToFontStashSharpCommand(string text)
+        public static string ConvertHTMLColorsToFSS(string text)
         {
             string finalString;
 
-            if (String.IsNullOrEmpty(text))
+            if (string.IsNullOrEmpty(text))
                 return "";
 
             finalString = Regex.Replace(text, "<basefont color=\"?'?(?<color>.*?)\"?'?>", " /c[${color}]", RegexOptions.Multiline | RegexOptions.IgnoreCase);
             finalString = Regex.Replace(finalString, "<Bodytextcolor\"?'?(?<color>.*?)\"?'?>", " /c[${color}]", RegexOptions.Multiline | RegexOptions.IgnoreCase);
-            finalString = finalString.Replace("</basefont>", "/cd").Replace("</BASEFONT>", "/cd").Replace("<br>", "\n").Replace("<BR>", "\n").Replace("\n", "\n/cd");
+            finalString = finalString.Replace("</basefont>", "/cd").Replace("</BASEFONT>", "/cd").Replace("\n", "\n/cd");
+
+            return finalString;
+        }
+
+        public static string ConvertHtmlToFontStashSharpCommand(string text)
+        {
+            string finalString;
+
+            if (string.IsNullOrEmpty(text))
+                return "";
+
+            finalString = ConvertHTMLColorsToFSS(text);
+
+            finalString = finalString.Replace("<br>", "\n").Replace("<BR>", "\n");
             finalString = finalString.Replace("<left>", "").Replace("</left>", "");
             finalString = finalString.Replace("<b>", "").Replace("</b>", "");
             finalString = finalString.Replace("</font>", "").Replace("<h2>", "");

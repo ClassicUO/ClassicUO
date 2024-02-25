@@ -8,6 +8,10 @@ namespace ClassicUO.Game.UI.Gumps
     internal class VersionHistory : Gump
     {
         private static string[] updateTexts = {
+            "/c[white][3.21.4]/cd\n" +
+                "- Various bug fixes\n" +
+                "- Removed gump closing animation. Too many unforeseen issues with it.",
+
             "/c[white][3.21.3]/cd\n" +
             "- Changes to improve gump closing animations",
 

@@ -400,15 +400,15 @@ namespace ClassicUO.Game.Scenes
                             allowSelection = false;
                             return true;
                         }
+                        if (itemData.IsRoof && _noDrawRoofs)
+                        {
+                            return false;
+                        }
                         if (itemData.IsDoor || itemData.IsRoof)
                         {
                             obj.AlphaHue = 65;
                             allowSelection = itemData.IsDoor;
                             return true;
-                        }
-                        if (itemData.IsRoof && _noDrawRoofs)
-                        {
-                            return false;
                         }
                         if (itemData.IsFoliage || obj.Graphic == Constants.TREE_REPLACE_GRAPHIC || StaticFilters.IsTree(obj.Graphic, out var _) || (!itemData.IsMultiMovable && obj is Static stat && stat.IsVegetation) || (!itemData.IsMultiMovable && obj is Multi multi && multi.IsVegetation))
                         {

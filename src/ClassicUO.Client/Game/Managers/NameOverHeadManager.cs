@@ -30,12 +30,6 @@
 
 #endregion
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Xml;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
@@ -43,11 +37,17 @@ using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.Utility.Logging;
 using SDL2;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Xml;
 
 namespace ClassicUO.Game.Managers
 {
     [Flags]
-    internal enum NameOverheadOptions
+    public enum NameOverheadOptions
     {
         None = 0,
 
@@ -84,7 +84,7 @@ namespace ClassicUO.Game.Managers
         MobilesAndCorpses = AllMobiles | MonsterCorpses | HumanoidCorpses,
     }
 
-    internal static class NameOverHeadManager
+    public static class NameOverHeadManager
     {
         private static NameOverHeadHandlerGump _gump;
         private static SDL.SDL_Keycode _lastKeySym = SDL.SDL_Keycode.SDLK_UNKNOWN;
@@ -132,7 +132,7 @@ namespace ClassicUO.Game.Managers
             if (mobile == null)
                 return false;
 
-            if(mobile.Equals(World.Player) && ActiveOverheadOptions.HasFlag(NameOverheadOptions.ExcludeSelf)) 
+            if (mobile.Equals(World.Player) && ActiveOverheadOptions.HasFlag(NameOverheadOptions.ExcludeSelf))
                 return false;
 
             // Mobile types
@@ -167,7 +167,7 @@ namespace ClassicUO.Game.Managers
             if (ActiveOverheadOptions.HasFlag(NameOverheadOptions.Invulnerable) && mobile.NotorietyFlag == NotorietyFlag.Invulnerable)
                 return true;
 
-            if(ActiveOverheadOptions.HasFlag(NameOverheadOptions.Self) && mobile.Equals(World.Player)) 
+            if (ActiveOverheadOptions.HasFlag(NameOverheadOptions.Self) && mobile.Equals(World.Player))
                 return true;
 
             return false;
@@ -407,7 +407,7 @@ namespace ClassicUO.Game.Managers
         }
     }
 
-    internal class NameOverheadOption
+    public class NameOverheadOption
     {
         public NameOverheadOption(string name, SDL.SDL_Keycode key, bool alt, bool ctrl, bool shift, int optionflagscode) : this(name)
         {

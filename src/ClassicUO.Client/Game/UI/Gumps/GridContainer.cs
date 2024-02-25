@@ -491,7 +491,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (autoSortContainer) overrideSort = true;
 
-            List<Item> sortedContents = ProfileManager.CurrentProfile.GridContainerSearchMode == 0 ? gridSlotManager.SearchResults(searchBox.Text) : GridSlotManager.GetItemsInContainer(container);
+            List<Item> sortedContents = (ProfileManager.CurrentProfile is null || ProfileManager.CurrentProfile.GridContainerSearchMode == 0) ? gridSlotManager.SearchResults(searchBox.Text) : GridSlotManager.GetItemsInContainer(container);
             gridSlotManager.RebuildContainer(sortedContents, searchBox.Text, overrideSort);
 
             InvalidateContents = false;
@@ -578,7 +578,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Item item = container;
 
-            if (item == null || item.IsDestroyed)
+            if (item is null || item.IsDestroyed)
             {
                 Dispose();
                 return;
@@ -613,6 +613,7 @@ namespace ClassicUO.Game.UI.Gumps
                 setLootBag.Y = Height - 20;
                 if (IsPlayerBackpack)
                     ProfileManager.CurrentProfile.BackpackGridSize = new Point(Width, Height);
+
                 RequestUpdateContents();
             }
 
