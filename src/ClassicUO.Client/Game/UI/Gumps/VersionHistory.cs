@@ -8,8 +8,10 @@ namespace ClassicUO.Game.UI.Gumps
     internal class VersionHistory : Gump
     {
         private static string[] updateTexts = {
-            "/c[white][3.21.5]/cd\n" +
-                "- Spell book icon fix",
+            "/c[white][3.22.0]/cd\n" +
+                "- Spell book icon fix\n" +
+                "- Add option to add treasure maps as map markers instead of goto only\n" +
+                "- Added the same option for SOS messages",
 
             "/c[white][3.21.4]/cd\n" +
                 "- Various bug fixes\n" +

@@ -118,6 +118,22 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 }
             }));
+            menu.ContextMenu.Add(new ContextMenuItemEntry("Add as marker on world map", () =>
+            {
+                if (foundMapLoc)
+                {
+                    WorldMapGump map = UIManager.GetGump<WorldMapGump>();
+                    if (map != null)
+                    {
+                        if (mapFacet != -1)
+                        {
+                            map.AddUserMarker("TMap", mapX, mapY, mapFacet);
+                        }
+                        else
+                            map.AddUserMarker("TMap", mapX, mapY, World.Map.Index);
+                    }
+                }
+            }));
             menu.ContextMenu.Add(new ContextMenuItemEntry("Try to pathfind", () =>
             {
                 if (foundMapLoc)
