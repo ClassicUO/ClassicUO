@@ -231,7 +231,7 @@ namespace ClassicUO.Configuration
         public bool DisableCtrlQWBtn { get; set; }
         public bool DisableAutoMove { get; set; }
         public bool EnableDragSelect { get; set; }
-        public int DragSelectModifierKey { get; set; } // 0 = none, 1 = control, 2 = shift
+        public int DragSelectModifierKey { get; set; } // 0 = none, 1 = control, 2 = shift, 3 = alt
         public int DragSelect_PlayersModifier { get; set; } = 0;
         public int DragSelect_MonstersModifier { get; set; } = 0;
         public int DragSelect_NameplateModifier { get; set; } = 0;

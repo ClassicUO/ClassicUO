@@ -100,6 +100,7 @@ namespace ClassicUO.Configuration
             public string SharedNone { get; set; } = "None";
             public string SharedShift { get; set; } = "Shift";
             public string SharedCtrl { get; set; } = "Ctrl";
+            public string SharedAlt { get; set; } = "Alt";
 
             #region General->General
             public string HighlightObjects { get; set; } = "Highlight objects under cursor";
