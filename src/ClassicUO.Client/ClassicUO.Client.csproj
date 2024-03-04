@@ -5,8 +5,8 @@
     <ApplicationIcon>cuoicon.ico</ApplicationIcon>
     <AssemblyName>ClassicUO</AssemblyName>
     <RootNamespace>ClassicUO</RootNamespace>
-    <AssemblyVersion>3.21.4</AssemblyVersion>
-    <FileVersion>3.21.4</FileVersion>
+    <AssemblyVersion>3.22.0</AssemblyVersion>
+    <FileVersion>3.22.0</FileVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)'=='Release'">
