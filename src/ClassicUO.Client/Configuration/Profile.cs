@@ -231,7 +231,7 @@ namespace ClassicUO.Configuration
         public bool DisableCtrlQWBtn { get; set; }
         public bool DisableAutoMove { get; set; }
         public bool EnableDragSelect { get; set; }
-        public int DragSelectModifierKey { get; set; } // 0 = none, 1 = control, 2 = shift
+        public int DragSelectModifierKey { get; set; } // 0 = none, 1 = control, 2 = shift, 3 = alt
         public int DragSelect_PlayersModifier { get; set; } = 0;
         public int DragSelect_MonstersModifier { get; set; } = 0;
         public int DragSelect_NameplateModifier { get; set; } = 0;
@@ -353,6 +353,7 @@ namespace ClassicUO.Configuration
         public bool WorldMapAllowPositionalTarget { get; set; } = true;
 
         public int AutoFollowDistance { get; set; } = 2;
+        public bool DisableAutoFollowAlt { get; set; } = false;
         [JsonConverter(typeof(Point2Converter))] public Point ResizeJournalSize { get; set; } = new Point(410, 350);
         public bool FollowingMode { get; set; } = false;
         public uint FollowingTarget { get; set; }

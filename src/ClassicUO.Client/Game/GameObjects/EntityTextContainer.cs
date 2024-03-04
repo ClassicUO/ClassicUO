@@ -30,10 +30,10 @@
 
 #endregion
 
-using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
+using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Renderer;
 using ClassicUO.Utility.Collections;
 using Microsoft.Xna.Framework;
@@ -180,7 +180,7 @@ namespace ClassicUO.Game.GameObjects
                 return;
             }
 
-            int offY = 0;
+            int offY = -NameOverheadGump.CurrentHeight;
 
             Point p = new Point();
 

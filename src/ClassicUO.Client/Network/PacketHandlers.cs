@@ -7246,7 +7246,7 @@ namespace ClassicUO.Network
 
             if (ProfileManager.CurrentProfile != null)
             {
-                if (gumpID == 1426736667 || gumpID == ProfileManager.CurrentProfile.SOSGumpID) //SOS message gump
+                if (gumpID == ProfileManager.CurrentProfile.SOSGumpID) //SOS message gump
                 {
                     for (int i = 0; i < gump.Children.Count; i++)
                     {
@@ -7301,6 +7301,18 @@ namespace ClassicUO.Network
                                 }
                                 gump.GoToMarker((int)location.X, (int)location.Y, true);
                             }));
+
+                            menu.ContextMenu.Add(new ContextMenuItemEntry("Add marker on world map", () =>
+                            {
+                                WorldMapGump gump = UIManager.GetGump<WorldMapGump>();
+                                if (gump == null)
+                                {
+                                    gump = new WorldMapGump();
+                                    UIManager.Add(gump);
+                                }
+                                gump.AddUserMarker("SOS", (int)location.X, (int)location.Y, World.Map.Index);
+                            }));
+
                             menu.ContextMenu.Add(new ContextMenuItemEntry("Close", () =>
                             {
                                 gump.Dispose();

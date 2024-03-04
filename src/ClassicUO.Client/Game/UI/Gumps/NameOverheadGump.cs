@@ -57,6 +57,24 @@ namespace ClassicUO.Game.UI.Gumps
         private TextBox _text;
         private Texture2D _borderColor = SolidColorTextureCache.GetTexture(Color.Black);
         private Vector2 _textDrawOffset = Vector2.Zero;
+        private static int currentHeight = 22;
+
+        public static int CurrentHeight
+        {
+            get
+            {
+                if (NameOverHeadManager.IsShowing)
+                {
+                    return currentHeight;
+                }
+
+                return 0;
+            }
+            private set
+            {
+                currentHeight = value;
+            }
+        }
 
         public NameOverheadGump(uint serial) : base(serial, 0)
         {
@@ -127,7 +145,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _text.UpdateText(t);
 
                 Width = _background.Width = Math.Max(60, _text.Width) + 4;
-                Height = _background.Height = Math.Max(Constants.OBJECT_HANDLES_GUMP_HEIGHT, _text.Height) + 4;
+                Height = _background.Height = CurrentHeight = Math.Max(Constants.OBJECT_HANDLES_GUMP_HEIGHT, _text.Height) + 4;
                 _textDrawOffset.X = (Width - _text.Width - 4) >> 1;
                 _textDrawOffset.Y = (Height - _text.Height) >> 1;
                 WantUpdateSize = false;

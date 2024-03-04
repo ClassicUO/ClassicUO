@@ -759,14 +759,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else
                 {
-                    if (_spellBookType == SpellBookType.Ninjitsu && i > 0 && i < 9)
-                    {
-                        iconGraphic = (ushort)(iconStartGraphic + i);
-                    }
-                    else
-                    {
-                        iconGraphic = (ushort)spellDef.GumpIconID; //(ushort)(iconStartGraphic + i);
-                    }
+                    iconGraphic = (ushort)spellDef.GumpIconSmallID;
                     GetSpellToolTip(out toolTipCliloc);
                 }
 

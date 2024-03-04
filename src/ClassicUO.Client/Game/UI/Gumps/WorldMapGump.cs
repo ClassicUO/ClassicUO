@@ -2145,6 +2145,49 @@ namespace ClassicUO.Game.UI.Gumps
             mapMarkerFile?.Markers.Add(mapMarker);
         }
 
+        public void AddUserMarker(string markerName, int x, int y, int map, string color = "yellow")
+        {
+            if (!World.InGame)
+            {
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(markerName))
+            {
+                GameActions.Print(ResGumps.InvalidMarkerName, 0x2A);
+                return;
+            }
+
+            var markerCsv = $"{x},{y},{map},{markerName}, ,{color},{3}";
+            using (var fileStream = File.Open(UserMarkersFilePath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Write))
+            using (var streamWriter = new StreamWriter(fileStream))
+            {
+                streamWriter.BaseStream.Seek(0, SeekOrigin.End);
+                streamWriter.WriteLine(markerCsv);
+            }
+
+            var mapMarker = new WMapMarker
+            {
+                X = x,
+                Y = y,
+                Color = GetColor(color),
+                ColorName = color,
+                MapId = map,
+                MarkerIconName = "",
+                Name = markerName,
+                ZoomIndex = 3
+            };
+
+            if (!string.IsNullOrWhiteSpace(mapMarker.MarkerIconName) && _markerIcons.TryGetValue(mapMarker.MarkerIconName, out Texture2D markerIconTexture))
+            {
+                mapMarker.MarkerIcon = markerIconTexture;
+            }
+
+            var mapMarkerFile = _markerFiles.FirstOrDefault(x => x.FullPath == UserMarkersFilePath);
+
+            mapMarkerFile?.Markers.Add(mapMarker);
+        }
+
         /// <summary>
         /// Reload User Markers File after Changes
         /// </summary>

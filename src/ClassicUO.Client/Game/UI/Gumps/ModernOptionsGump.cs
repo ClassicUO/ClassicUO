@@ -346,10 +346,10 @@ namespace ClassicUO.Game.UI.Gumps
 
             content.AddToRight(new CheckboxWithLabel(lang.GetGeneral.DragSelectHP, isChecked: profile.EnableDragSelect, valueChanged: (b) => { profile.EnableDragSelect = b; }), true, page);
             content.Indent();
-            content.AddToRight(new ComboBoxWithLabel(lang.GetGeneral.DragKeyMod, 0, Theme.COMBO_BOX_WIDTH, new string[] { lang.GetGeneral.SharedNone, lang.GetGeneral.SharedCtrl, lang.GetGeneral.SharedShift }, profile.DragSelectModifierKey, (s, n) => { profile.DragSelectModifierKey = s; }), true, page);
-            content.AddToRight(new ComboBoxWithLabel(lang.GetGeneral.DragPlayersOnly, 0, Theme.COMBO_BOX_WIDTH, new string[] { lang.GetGeneral.SharedNone, lang.GetGeneral.SharedCtrl, lang.GetGeneral.SharedShift }, profile.DragSelect_PlayersModifier, (s, n) => { profile.DragSelect_PlayersModifier = s; }), true, page);
-            content.AddToRight(new ComboBoxWithLabel(lang.GetGeneral.DragMobsOnly, 0, Theme.COMBO_BOX_WIDTH, new string[] { lang.GetGeneral.SharedNone, lang.GetGeneral.SharedCtrl, lang.GetGeneral.SharedShift }, profile.DragSelect_MonstersModifier, (s, n) => { profile.DragSelect_MonstersModifier = s; }), true, page);
-            content.AddToRight(new ComboBoxWithLabel(lang.GetGeneral.DragNameplatesOnly, 0, Theme.COMBO_BOX_WIDTH, new string[] { lang.GetGeneral.SharedNone, lang.GetGeneral.SharedCtrl, lang.GetGeneral.SharedShift }, profile.DragSelect_NameplateModifier, (s, n) => { profile.DragSelect_NameplateModifier = s; }), true, page);
+            content.AddToRight(new ComboBoxWithLabel(lang.GetGeneral.DragKeyMod, 0, Theme.COMBO_BOX_WIDTH, new string[] { lang.GetGeneral.SharedNone, lang.GetGeneral.SharedCtrl, lang.GetGeneral.SharedShift, lang.GetGeneral.SharedAlt }, profile.DragSelectModifierKey, (s, n) => { profile.DragSelectModifierKey = s; }), true, page);
+            content.AddToRight(new ComboBoxWithLabel(lang.GetGeneral.DragPlayersOnly, 0, Theme.COMBO_BOX_WIDTH, new string[] { lang.GetGeneral.SharedNone, lang.GetGeneral.SharedCtrl, lang.GetGeneral.SharedShift, lang.GetGeneral.SharedAlt }, profile.DragSelect_PlayersModifier, (s, n) => { profile.DragSelect_PlayersModifier = s; }), true, page);
+            content.AddToRight(new ComboBoxWithLabel(lang.GetGeneral.DragMobsOnly, 0, Theme.COMBO_BOX_WIDTH, new string[] { lang.GetGeneral.SharedNone, lang.GetGeneral.SharedCtrl, lang.GetGeneral.SharedShift, lang.GetGeneral.SharedAlt }, profile.DragSelect_MonstersModifier, (s, n) => { profile.DragSelect_MonstersModifier = s; }), true, page);
+            content.AddToRight(new ComboBoxWithLabel(lang.GetGeneral.DragNameplatesOnly, 0, Theme.COMBO_BOX_WIDTH, new string[] { lang.GetGeneral.SharedNone, lang.GetGeneral.SharedCtrl, lang.GetGeneral.SharedShift, lang.GetGeneral.SharedAlt }, profile.DragSelect_NameplateModifier, (s, n) => { profile.DragSelect_NameplateModifier = s; }), true, page);
             content.AddToRight(new SliderWithLabel(lang.GetGeneral.DragX, 0, Theme.SLIDER_WIDTH, 0, Client.Game.Scene.Camera.Bounds.Width, profile.DragSelectStartX, (r) => { profile.DragSelectStartX = r; }), true, page);
             content.AddToRight(new SliderWithLabel(lang.GetGeneral.DragY, 0, Theme.SLIDER_WIDTH, 0, Client.Game.Scene.Camera.Bounds.Width, profile.DragSelectStartY, (r) => { profile.DragSelectStartY = r; }), true, page);
             content.AddToRight(new CheckboxWithLabel(lang.GetGeneral.DragAnchored, isChecked: profile.DragSelectAsAnchor, valueChanged: (b) => { profile.DragSelectAsAnchor = b; }), true, page);
@@ -2243,6 +2243,11 @@ namespace ClassicUO.Game.UI.Gumps
             content.AddToRight(new SliderWithLabel(lang.GetTazUO.AutoFollowDistance, 0, Theme.SLIDER_WIDTH, 0, 10, profile.AutoFollowDistance, (i) =>
             {
                 profile.AutoFollowDistance = i;
+            }), true, page);
+            content.Indent();
+            content.AddToRight(new CheckboxWithLabel(lang.GetTazUO.DisableAutoFollow, 0, profile.DisableAutoFollowAlt, (i) =>
+            {
+                profile.DisableAutoFollowAlt = i;
             }), true, page);
             content.BlankLine();
             content.AddToRight(c = new CheckboxWithLabel(lang.GetTazUO.DisableMouseInteractionsForOverheadText, 0, profile.DisableMouseInteractionOverheadText, (b) =>
