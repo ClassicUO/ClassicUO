@@ -255,10 +255,11 @@ namespace ClassicUO.Game.Managers
             }
 
             path = Path.Combine(path, "containers.txt");
+            var exists = File.Exists(path);
 
             using var stream = new FileStream(path, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite);
 
-            if (!File.Exists(path) || force)
+            if (!exists || force)
             {
                 MakeDefault();
 
