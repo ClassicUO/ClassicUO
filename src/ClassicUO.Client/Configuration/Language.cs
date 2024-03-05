@@ -483,6 +483,7 @@ namespace ClassicUO.Configuration
             public string HiddenPlayerHue { get; set; } = "Hidden player hue";
             public string RegularPlayerOpacity { get; set; } = "Regular player opacity";
             public string AutoFollowDistance { get; set; } = "Auto follow distance";
+            public string DisableAutoFollow { get; set; } = "Disable alt click to auto follow";
             public string DisableMouseInteractionsForOverheadText { get; set; } = "Disable mouse interactions for overhead text";
             public string OverridePartyMemberHues { get; set; } = "Override party member body hues with friendly hue";
             #endregion

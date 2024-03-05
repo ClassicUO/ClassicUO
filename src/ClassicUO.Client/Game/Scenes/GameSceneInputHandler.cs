@@ -865,7 +865,7 @@ namespace ClassicUO.Game.Scenes
 
                     case Entity ent:
 
-                        if (Keyboard.Alt && ent is Mobile)
+                        if (Keyboard.Alt && !ProfileManager.CurrentProfile.DisableAutoFollowAlt && ent is Mobile)
                         {
                             MessageManager.HandleMessage(
                                 World.Player,

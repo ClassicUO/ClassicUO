@@ -12,7 +12,8 @@ namespace ClassicUO.Game.UI.Gumps
                 "- Spell book icon fix\n" +
                 "- Add option to add treasure maps as map markers instead of goto only\n" +
                 "- Added the same option for SOS messages\n" +
-                "- Fix text height for nameplates",
+                "- Fix text height for nameplates\n" +
+                "- Added option to disable auto follow",
 
             "/c[white][3.21.4]/cd\n" +
                 "- Various bug fixes\n" +

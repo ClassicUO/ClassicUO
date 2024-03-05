@@ -292,18 +292,21 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 }
 
-                MessageManager.HandleMessage
-                (
-                    World.Player,
-                    ResGeneral.NowFollowing,
-                    string.Empty,
-                    0,
-                    MessageType.Regular,
-                    3,
-                    TextType.CLIENT
-                );
-                ProfileManager.CurrentProfile.FollowingMode = true;
-                ProfileManager.CurrentProfile.FollowingTarget = LocalSerial;
+                if (!ProfileManager.CurrentProfile.DisableAutoFollowAlt)
+                {
+                    MessageManager.HandleMessage
+                    (
+                        World.Player,
+                        ResGeneral.NowFollowing,
+                        string.Empty,
+                        0,
+                        MessageType.Regular,
+                        3,
+                        TextType.CLIENT
+                    );
+                    ProfileManager.CurrentProfile.FollowingMode = true;
+                    ProfileManager.CurrentProfile.FollowingTarget = LocalSerial;
+                }
             }
         }
 

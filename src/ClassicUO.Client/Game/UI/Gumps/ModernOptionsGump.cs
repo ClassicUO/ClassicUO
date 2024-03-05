@@ -2244,6 +2244,11 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 profile.AutoFollowDistance = i;
             }), true, page);
+            content.Indent();
+            content.AddToRight(new CheckboxWithLabel(lang.GetTazUO.DisableAutoFollow, 0, profile.DisableAutoFollowAlt, (i) =>
+            {
+                profile.DisableAutoFollowAlt = i;
+            }), true, page);
             content.BlankLine();
             content.AddToRight(c = new CheckboxWithLabel(lang.GetTazUO.DisableMouseInteractionsForOverheadText, 0, profile.DisableMouseInteractionOverheadText, (b) =>
             {

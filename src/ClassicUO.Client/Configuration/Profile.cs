@@ -353,6 +353,7 @@ namespace ClassicUO.Configuration
         public bool WorldMapAllowPositionalTarget { get; set; } = true;
 
         public int AutoFollowDistance { get; set; } = 2;
+        public bool DisableAutoFollowAlt { get; set; } = false;
         [JsonConverter(typeof(Point2Converter))] public Point ResizeJournalSize { get; set; } = new Point(410, 350);
         public bool FollowingMode { get; set; } = false;
         public uint FollowingTarget { get; set; }
