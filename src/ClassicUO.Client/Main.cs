@@ -2,7 +2,7 @@
 
 // Copyright (c) 2024, andreakarasho
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 // 1. Redistributions of source code must retain the above copyright
@@ -16,7 +16,7 @@
 // 4. Neither the name of the copyright holder nor the
 //    names of its contributors may be used to endorse or promote products
 //    derived from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -72,7 +72,7 @@ namespace ClassicUO
 
         [STAThread]
         public static void Main(string[] args) => Boot(null, args);
-       
+
 
         public static void Boot(UnmanagedAssistantHost pluginHost, string[] args)
         {
@@ -148,7 +148,7 @@ namespace ClassicUO
             {
                 // settings specified in path does not exists, make new one
                 {
-                    // TODO: 
+                    // TODO:
                     Settings.GlobalSettings.Save();
                 }
             }
@@ -294,7 +294,7 @@ namespace ClassicUO
 
                 switch (cmd)
                 {
-                    // Here we have it! Using `-settings` option we can now set the filepath that will be used 
+                    // Here we have it! Using `-settings` option we can now set the filepath that will be used
                     // to load and save ClassicUO main settings instead of default `./settings.json`
                     // NOTE: All individual settings like `username`, `password`, etc passed in command-line options
                     // will override and overwrite those in the settings file because they have higher priority

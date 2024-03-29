@@ -148,7 +148,7 @@ namespace ClassicUO
 
             Log.Trace("Done!");
 
-            SetScene(new LoginScene(UO.World));  
+            SetScene(new LoginScene(UO.World));
 #endif
             SetWindowPositionBySettings();
         }
