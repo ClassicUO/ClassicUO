@@ -65,6 +65,7 @@ namespace ClassicUO.Game.Managers
                     camera.Bounds.Width,
                     camera.Bounds.Height
                 );
+                DrawTargetIndicator(batcher, TargetManager.LastTargetInfo.Serial);
             }
 
             if (SerialHelper.IsMobile(TargetManager.SelectedTarget))
@@ -75,6 +76,7 @@ namespace ClassicUO.Game.Managers
                     camera.Bounds.Width,
                     camera.Bounds.Height
                 );
+                DrawTargetIndicator(batcher, TargetManager.SelectedTarget);
             }
 
             if (SerialHelper.IsMobile(TargetManager.LastAttack))
@@ -85,6 +87,7 @@ namespace ClassicUO.Game.Managers
                     camera.Bounds.Width,
                     camera.Bounds.Height
                 );
+                DrawTargetIndicator(batcher, TargetManager.LastAttack);
             }
 
             if (!IsEnabled)
@@ -214,6 +217,34 @@ namespace ClassicUO.Game.Managers
             }
         }
 
+        private void DrawTargetIndicator(UltimaBatcher2D batcher, uint serial)
+        {
+            Entity entity = World.Get(serial);
+
+            if (entity == null)
+            {
+                return;
+            }
+            if (ProfileManager.CurrentProfile == null || !ProfileManager.CurrentProfile.ShowTargetIndicator)
+            {
+                return;
+            }
+            ref readonly var indicatorInfo = ref Client.Game.Gumps.GetGump(0x756F);
+            Point p = entity.RealScreenPosition;
+            p.Y += (int)(entity.Offset.Y - entity.Offset.Z) + 22 + 5;
+
+            p = Client.Game.Scene.Camera.WorldToScreen(p);
+            p.Y -= entity.FrameInfo.Height + 25;
+            if (indicatorInfo.Texture != null)
+            {
+                batcher.Draw(
+                indicatorInfo.Texture,
+                new Rectangle(p.X - 24, p.Y, indicatorInfo.UV.Width, indicatorInfo.UV.Height),
+                indicatorInfo.UV,
+                ShaderHueTranslator.GetHueVector(0, false, 1.0f)
+                );
+            }
+        }
         private void DrawHealthLineWithMath(
             UltimaBatcher2D batcher,
             uint serial,
@@ -246,7 +277,7 @@ namespace ClassicUO.Game.Managers
                 return;
             }
 
-            DrawHealthLine(batcher, entity, p.X, p.Y, false);
+            DrawHealthLine(batcher, entity, p.X, p.Y, false);           
         }
 
         private void DrawHealthLine(
@@ -301,7 +332,7 @@ namespace ClassicUO.Game.Managers
                 new Rectangle(x, y, gumpInfo.UV.Width * multiplier, gumpInfo.UV.Height * multiplier),
                 gumpInfo.UV,
                 hueVec
-            );
+            ); 
 
             hueVec.X = 90;
 

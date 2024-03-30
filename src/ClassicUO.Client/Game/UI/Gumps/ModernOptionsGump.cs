@@ -217,6 +217,10 @@ namespace ClassicUO.Game.UI.Gumps
 
             content.BlankLine();
 
+            content.AddToRight(new CheckboxWithLabel(lang.GetGeneral.ShowTargetIndicator, isChecked: profile.ShowTargetIndicator, valueChanged: (b) => { profile.ShowTargetIndicator = b; }), true, page);
+           
+            content.BlankLine();
+
             content.AddToRight(new CheckboxWithLabel(lang.GetGeneral.HighlightPoisoned, isChecked: profile.HighlightMobilesByPoisoned, valueChanged: (b) => { profile.HighlightMobilesByPoisoned = b; }), true, page);
             content.Indent();
             content.AddToRight(new ModernColorPickerWithLabel(lang.GetGeneral.PoisonHighlightColor, profile.PoisonHue, (h) => { profile.PoisonHue = h; }), true, page);
