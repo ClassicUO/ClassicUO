@@ -230,13 +230,14 @@ namespace ClassicUO.Game.Managers
                 return;
             }
             ref readonly var indicatorInfo = ref Client.Game.Gumps.GetGump(0x756F);
-            Point p = entity.RealScreenPosition;
-            p.Y += (int)(entity.Offset.Y - entity.Offset.Z) + 22 + 5;
-
-            p = Client.Game.Scene.Camera.WorldToScreen(p);
-            p.Y -= entity.FrameInfo.Height + 25;
             if (indicatorInfo.Texture != null)
             {
+                Point p = entity.RealScreenPosition;
+                p.Y += (int)(entity.Offset.Y - entity.Offset.Z) + 22 + 5;
+
+                p = Client.Game.Scene.Camera.WorldToScreen(p);
+                p.Y -= entity.FrameInfo.Height + 25;
+
                 batcher.Draw(
                 indicatorInfo.Texture,
                 new Rectangle(p.X - 24, p.Y, indicatorInfo.UV.Width, indicatorInfo.UV.Height),
