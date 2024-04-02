@@ -75,19 +75,18 @@ namespace ClassicUO
         {
             LoadUOFiles();
 
-            const int TEXTURE_WIDTH = 32;
-            const int TEXTURE_HEIGHT = 2048;
+            const int TEXTURE_WIDTH = 512;
+            const int TEXTURE_HEIGHT = 1024;
             const int LIGHTS_TEXTURE_WIDTH = 32;
             const int LIGHTS_TEXTURE_HEIGHT = 63;
 
-            var hueSamplers = new Texture2D[3];
+            var hueSamplers = new Texture2D[2];
             hueSamplers[0] = new Texture2D(game.GraphicsDevice, TEXTURE_WIDTH, TEXTURE_HEIGHT);
-            hueSamplers[1] = new Texture2D(game.GraphicsDevice, TEXTURE_WIDTH, TEXTURE_HEIGHT);
-            hueSamplers[2] = new Texture2D(game.GraphicsDevice,LIGHTS_TEXTURE_WIDTH, LIGHTS_TEXTURE_HEIGHT);
+            hueSamplers[1] = new Texture2D(game.GraphicsDevice, LIGHTS_TEXTURE_WIDTH, LIGHTS_TEXTURE_HEIGHT);
 
             var buffer = new uint[Math.Max(
                 LIGHTS_TEXTURE_WIDTH * LIGHTS_TEXTURE_HEIGHT,
-                TEXTURE_WIDTH * TEXTURE_HEIGHT * 2
+                TEXTURE_WIDTH * TEXTURE_HEIGHT
             )];
 
             fixed (uint* ptr = buffer)
@@ -100,15 +99,9 @@ namespace ClassicUO
                     (IntPtr)ptr,
                     TEXTURE_WIDTH * TEXTURE_HEIGHT * sizeof(uint)
                 );
-                hueSamplers[1].SetDataPointerEXT(
-                    0,
-                    null,
-                    (IntPtr)ptr + TEXTURE_WIDTH * TEXTURE_HEIGHT * sizeof(uint),
-                    TEXTURE_WIDTH * TEXTURE_HEIGHT * sizeof(uint)
-                );
 
                 LightColors.CreateLightTextures(buffer, LIGHTS_TEXTURE_HEIGHT);
-                hueSamplers[2].SetDataPointerEXT(
+                hueSamplers[1].SetDataPointerEXT(
                     0,
                     null,
                     (IntPtr)ptr,
@@ -118,7 +111,6 @@ namespace ClassicUO
 
             game.GraphicsDevice.Textures[1] = hueSamplers[0];
             game.GraphicsDevice.Textures[2] = hueSamplers[1];
-            game.GraphicsDevice.Textures[3] = hueSamplers[2];
 
             Animations = new Renderer.Animations.Animations(game.GraphicsDevice);
             Arts = new Renderer.Arts.Art(game.GraphicsDevice);
