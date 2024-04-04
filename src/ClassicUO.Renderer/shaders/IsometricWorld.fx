@@ -13,7 +13,10 @@
 
 const static float3 LIGHT_DIRECTION = float3(0.0f, 1.0f, 1.0f);
 
-
+const static float HUE_ROWS = 1024;
+const static float HUE_COLUMNS = 16;
+const static float HUE_WIDTH = 32;
+const static float HUES_PER_TEXTURE = HUE_ROWS * HUE_COLUMNS;
 
 float4x4 MatrixTransform;
 float4x4 WorldMatrix;
@@ -42,8 +45,14 @@ struct PS_INPUT
 
 float3 get_rgb(float gray, float hue)
 {
-    float2 texcoord = float2(frac(hue / 16) + gray / 16, (hue + 1) / 16 / 1024);
-    return tex2D(HueSampler0, texcoord).rgb;
+    float halfPixelX = (1.0f / (HUE_COLUMNS * HUE_WIDTH)) * 0.5f;
+    float hueColumnWidth = 1.0f / HUE_COLUMNS;
+    float hueStart = frac(hue / HUE_COLUMNS);
+    
+    float xPos = hueStart + gray / HUE_COLUMNS;
+    xPos = clamp(xPos, hueStart + halfPixelX, hueStart + hueColumnWidth - halfPixelX);
+    float yPos = (hue % HUES_PER_TEXTURE) / (HUES_PER_TEXTURE - 1);
+    return tex2D(HueSampler0, float2(xPos, yPos)).rgb;
 }
 
 float get_light(float3 norm)
