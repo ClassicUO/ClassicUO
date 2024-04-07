@@ -187,7 +187,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _background = new AlphaBlendControl(ProfileManager.CurrentProfile.NamePlateOpacity / 100f)
                 {
                     WantUpdateSize = false,
-                    Hue = entity is Mobile m ? Notoriety.GetHue(m.NotorietyFlag) : (ushort)0x0481
+                    Hue = entity is Mobile m ? Notoriety.GetHue(m.NotorietyFlag) : Notoriety.GetHue(NotorietyFlag.Gray)
                 }
             );
         }
@@ -745,16 +745,86 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (ProfileManager.CurrentProfile.NamePlateHealthBar && _isMobile)
             {
-                batcher.Draw
-                (
-                    SolidColorTextureCache.GetTexture(Color.White),
-                    new Vector2(x, y),
-                    new Rectangle(x, y, Math.Min((int)(Width * _hpPercent), Width), Height),
-                    ShaderHueTranslator.GetHueVector(_background.Hue, false, ProfileManager.CurrentProfile.NamePlateHealthBarOpacity / 100f)
-                );
+                Mobile m = World.Mobiles.Get(LocalSerial);
+                var isPlayer = m is PlayerMobile;
+
+                var _alpha = ProfileManager.CurrentProfile.NamePlateHealthBarOpacity / 100f;
+                DrawResourceBar(batcher, m, x, y, Height / (isPlayer ? 3 : 1), m =>
+                {
+                    var hpPercent = (double)m.Hits / (double)m.HitsMax;
+                    var _baseHue = hpPercent switch
+                    {
+                        1 => m is PlayerMobile ? 0x0058 : Notoriety.GetHue(m.NotorietyFlag),
+                        > .8 => 0x0058,
+                        > .4 => 0x0030,
+                        _ => 0x0021
+                    };
+                    Vector3 hueVec = ShaderHueTranslator.GetHueVector(_baseHue, false, _alpha);
+
+                    if (m.IsPoisoned)
+                    {
+                        hueVec = ShaderHueTranslator.GetHueVector(Notoriety.GetHue(NotorietyFlag.Ally), false, _alpha);
+                    }
+                    else if (m.IsYellowHits || m.IsParalyzed)
+                    {
+                        hueVec = ShaderHueTranslator.GetHueVector(Notoriety.GetHue(NotorietyFlag.Invulnerable), false, _alpha);
+                    }
+                    return (hueVec, hpPercent);
+                }, out var nY);
+                if (m is PlayerMobile)
+                {                    
+                    DrawResourceBar(batcher, m, x, nY, Height / 3, m =>
+                    {
+                        var mpPercent = (double)m.Mana / (double)m.ManaMax;
+                        var _baseHue = mpPercent switch
+                        {
+                            > .6 => 0x0058,
+                            > .2 => 0x0030,
+                            _ => 0x0021
+                        };
+                        Vector3 hueVec = ShaderHueTranslator.GetHueVector(_baseHue, false, _alpha);
+                        return (hueVec, mpPercent);
+                    }, out nY);
+
+                    DrawResourceBar(batcher, m, x, nY, Height / 3, m =>
+                    {
+                        var spPercent = (double)m.Stamina / (double)m.StaminaMax;
+                        var _baseHue = spPercent switch
+                        {
+                            > .8 => 0x0058,
+                            > .5 => 0x0030,
+                            _ => 0x0021
+                        };
+                        Vector3 hueVec = ShaderHueTranslator.GetHueVector(_baseHue, false, _alpha);
+                        return (hueVec, spPercent);
+                    }, out nY);
+                    y += 20;
+                }
             }
 
-            return _text.Draw(batcher, (int)(x + 2 + _textDrawOffset.X), (int)(y + 2 + _textDrawOffset.Y));
+            return _text.Draw(batcher, (int)(x + 2 +_textDrawOffset.X), (int)(y + 2 + _textDrawOffset.Y));
+        }
+
+        private void DrawResourceBar(UltimaBatcher2D batcher, Mobile m, int x, int y, int height, Func<Mobile, (Vector3, double)> getHueVector, out int nY)
+        {
+            var data = getHueVector == null ? (ShaderHueTranslator.GetHueVector(0x0058),0) : getHueVector(m);            
+            batcher.DrawRectangle
+            (
+                _borderColor,
+                x,
+                y,
+                Width,
+                height,
+                ShaderHueTranslator.GetHueVector(0)
+            );
+            batcher.Draw
+            (
+                SolidColorTextureCache.GetTexture(Color.White),
+                new Vector2(x + 1, y + 1),
+                new Rectangle(x, y, Math.Min((int)(Width * data.Item2), Width), height - 2),
+                data.Item1
+            );
+            nY = y + height;
         }
 
         public override void Dispose()
