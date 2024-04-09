@@ -747,14 +747,15 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Mobile m = World.Mobiles.Get(LocalSerial);
                 var isPlayer = m is PlayerMobile;
+                var isInParty = World.Party.Contains(m.Serial);
 
                 var _alpha = ProfileManager.CurrentProfile.NamePlateHealthBarOpacity / 100f;
-                DrawResourceBar(batcher, m, x, y, Height / (isPlayer ? 3 : 1), m =>
+                DrawResourceBar(batcher, m, x, y, Height / (isPlayer || isInParty ? 3 : 1), m =>
                 {
                     var hpPercent = (double)m.Hits / (double)m.HitsMax;
                     var _baseHue = hpPercent switch
                     {
-                        1 => m is PlayerMobile ? 0x0058 : Notoriety.GetHue(m.NotorietyFlag),
+                        1 => (m is PlayerMobile || World.Party.Contains(m.Serial)) ? 0x0058 : Notoriety.GetHue(m.NotorietyFlag),
                         > .8 => 0x0058,
                         > .4 => 0x0030,
                         _ => 0x0021
@@ -771,7 +772,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                     return (hueVec, hpPercent);
                 }, out var nY);
-                if (m is PlayerMobile)
+                if (m is PlayerMobile || isInParty)
                 {                    
                     DrawResourceBar(batcher, m, x, nY, Height / 3, m =>
                     {
