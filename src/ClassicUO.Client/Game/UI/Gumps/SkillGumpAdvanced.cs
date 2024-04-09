@@ -44,6 +44,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using static ClassicUO.Renderer.UltimaBatcher2D;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -389,6 +390,16 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         skillEntries.Add(new SkillListEntry(s));
                     }
+                    a.Add
+                    (
+                            new ResizePic(0x0BB8)
+                            {
+                            X = 1,
+                            Y = 3,
+                            Width = 180,
+                            Height = 22
+                        }
+                    );
                     StbTextBox _textbox;
                     a.Add
                     (
@@ -401,7 +412,7 @@ namespace ClassicUO.Game.UI.Gumps
                             FontStyle.Fixed
                         )
                         {
-                            X = 3,
+                            X = 5,
                             Y = 3,
                             Width = 180,
                             Height = 17,
@@ -417,11 +428,6 @@ namespace ClassicUO.Game.UI.Gumps
                         if (!g.IsMaximized)
                         {
                             a.InvokeMouseUp(e.Location, e.Button);
-                            return;
-                        }
-                        if (_textbox.IsEditable)
-                        {
-                            return;
                         }
                         UIManager.KeyboardFocusControl = _textbox;
                         _textbox.SetKeyboardFocus();
