@@ -33,10 +33,8 @@
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Assets;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
-using FontStashSharp;
 
 namespace ClassicUO.Game.Managers
 {
@@ -245,6 +243,10 @@ namespace ClassicUO.Game.Managers
                 ShaderHueTranslator.GetHueVector(0, false, 1.0f)
                 );
             }
+            else
+            {
+                ProfileManager.CurrentProfile.ShowTargetIndicator = false; //This sprite doesn't exist for this client, lets avoid checking for it every frame.
+            }
         }
         private void DrawHealthLineWithMath(
             UltimaBatcher2D batcher,
@@ -278,7 +280,7 @@ namespace ClassicUO.Game.Managers
                 return;
             }
 
-            DrawHealthLine(batcher, entity, p.X, p.Y, false);           
+            DrawHealthLine(batcher, entity, p.X, p.Y, false);
         }
 
         private void DrawHealthLine(
@@ -333,7 +335,7 @@ namespace ClassicUO.Game.Managers
                 new Rectangle(x, y, gumpInfo.UV.Width * multiplier, gumpInfo.UV.Height * multiplier),
                 gumpInfo.UV,
                 hueVec
-            ); 
+            );
 
             hueVec.X = 90;
 

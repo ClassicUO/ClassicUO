@@ -217,10 +217,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             content.BlankLine();
 
-            content.AddToRight(new CheckboxWithLabel(lang.GetGeneral.ShowTargetIndicator, isChecked: profile.ShowTargetIndicator, valueChanged: (b) => { profile.ShowTargetIndicator = b; }), true, page);
-           
-            content.BlankLine();
-
             content.AddToRight(new CheckboxWithLabel(lang.GetGeneral.HighlightPoisoned, isChecked: profile.HighlightMobilesByPoisoned, valueChanged: (b) => { profile.HighlightMobilesByPoisoned = b; }), true, page);
             content.Indent();
             content.AddToRight(new ModernColorPickerWithLabel(lang.GetGeneral.PoisonHighlightColor, profile.PoisonHue, (h) => { profile.PoisonHue = h; }), true, page);
@@ -2253,6 +2249,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 profile.DisableAutoFollowAlt = i;
             }), true, page);
+            content.RemoveIndent();
             content.BlankLine();
             content.AddToRight(c = new CheckboxWithLabel(lang.GetTazUO.DisableMouseInteractionsForOverheadText, 0, profile.DisableMouseInteractionOverheadText, (b) =>
             {
@@ -2263,6 +2260,8 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 profile.OverridePartyAndGuildHue = b;
             }), true, page);
+            content.BlankLine();
+            content.AddToRight(new CheckboxWithLabel(lang.GetGeneral.ShowTargetIndicator, isChecked: profile.ShowTargetIndicator, valueChanged: (b) => { profile.ShowTargetIndicator = b; }), true, page);
             #endregion
 
             #region Misc
