@@ -128,6 +128,7 @@ namespace ClassicUO.Configuration
 
             #region General->Mobiles
             public string ShowMobileHP { get; set; } = "Show mobile's HP";
+            public string ShowTargetIndicator { get; set; } = "Show Target Indicator";
             public string MobileHPType { get; set; } = "Type";
             public string HPTypePerc { get; set; } = "Percentage";
             public string HPTypeBar { get; set; } = "Bar";
