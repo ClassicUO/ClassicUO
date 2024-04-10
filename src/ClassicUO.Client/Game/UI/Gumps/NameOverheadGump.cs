@@ -734,10 +734,10 @@ namespace ClassicUO.Game.UI.Gumps
             batcher.DrawRectangle
             (
                 _borderColor,
-                x - 1,
-                y - 1,
-                Width + 1,
-                Height + 1,
+                x,
+                y,
+                Width,
+                Height,
                 hueVector
             );
 
@@ -764,16 +764,17 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (m.IsPoisoned)
                     {
-                        hueVec = ShaderHueTranslator.GetHueVector(Notoriety.GetHue(NotorietyFlag.Ally), false, _alpha);
+                        hueVec = ShaderHueTranslator.GetHueVector(63, false, _alpha);
                     }
                     else if (m.IsYellowHits || m.IsParalyzed)
                     {
-                        hueVec = ShaderHueTranslator.GetHueVector(Notoriety.GetHue(NotorietyFlag.Invulnerable), false, _alpha);
+                        hueVec = ShaderHueTranslator.GetHueVector(353, false, _alpha);
                     }
                     return (hueVec, hpPercent);
                 }, out var nY);
+
                 if (m is PlayerMobile || isInParty)
-                {                    
+                {
                     DrawResourceBar(batcher, m, x, nY, Height / 3, m =>
                     {
                         var mpPercent = (double)m.Mana / (double)m.ManaMax;
@@ -803,12 +804,12 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            return _text.Draw(batcher, (int)(x + 2 +_textDrawOffset.X), (int)(y + 2 + _textDrawOffset.Y));
+            return _text.Draw(batcher, (int)(x + 2 + _textDrawOffset.X), (int)(y + 2 + _textDrawOffset.Y));
         }
 
         private void DrawResourceBar(UltimaBatcher2D batcher, Mobile m, int x, int y, int height, Func<Mobile, (Vector3, double)> getHueVector, out int nY)
         {
-            var data = getHueVector == null ? (ShaderHueTranslator.GetHueVector(0x0058),0) : getHueVector(m);            
+            var data = getHueVector == null ? (ShaderHueTranslator.GetHueVector(0x0058), 0) : getHueVector(m);
             batcher.DrawRectangle
             (
                 _borderColor,
@@ -822,7 +823,7 @@ namespace ClassicUO.Game.UI.Gumps
             (
                 SolidColorTextureCache.GetTexture(Color.White),
                 new Vector2(x + 1, y + 1),
-                new Rectangle(x, y, Math.Min((int)(Width * data.Item2), Width), height - 2),
+                new Rectangle(x, y, Math.Min((int)((Width - 1) * data.Item2), Width - 1), height - 1),
                 data.Item1
             );
             nY = y + height;
