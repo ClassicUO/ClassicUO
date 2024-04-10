@@ -43,6 +43,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -67,7 +68,6 @@ namespace ClassicUO.Game.UI.Gumps
 
         public static bool Dragging;
 
-        private bool _showGroups;
         private bool _sortAsc;
         private string _sortField;
         private readonly GumpPic _sortOrderIndicator;
@@ -248,11 +248,12 @@ namespace ClassicUO.Game.UI.Gumps
                 0xFF,
                 1153
             ));
-
+            showGrp.IsChecked = SkillsGroupManager.IsActive;
             showGrp.ValueChanged += (sender, e) =>
             {
-                _showGroups = showGrp.IsChecked;
+                SkillsGroupManager.IsActive = showGrp.IsChecked;
                 ForceUpdate();
+                SkillsGroupManager.Save();
             };
 
 
@@ -314,19 +315,30 @@ namespace ClassicUO.Game.UI.Gumps
             _skillListEntries.Clear();
             PropertyInfo pi = typeof(Skill).GetProperty(_sortField);
 
-            if (_showGroups)
+            if (SkillsGroupManager.IsActive)
             {
-                var reversedGroupNames = new List<string>() {
-                    ResGeneral.Miscellaneous,
-                    ResGeneral.Combat,
-                    ResGeneral.TradeSkills,
-                    ResGeneral.Magic,
-                    ResGeneral.Wilderness,
-                    ResGeneral.Thieving,
-                    ResGeneral.Bard,
-                };
+                SkillsGroupManager.Groups.Sort((s1, s2) =>
+                {
+                    var m1 = Regex.Match(s1.Name, "^\\d+");
+                    var m2 = Regex.Match(s2.Name, "^\\d+");
+                    if (!m1.Success || !m2.Success)
+                    {
+                        return s1.Name.CompareTo(s2.Name);
+                    }
 
-                foreach (SkillsGroup g in SkillsGroupManager.Groups.OrderBy(g => reversedGroupNames.Contains(g.Name)).ThenBy(g => g.Name))
+                    if (!int.TryParse(m1.Value, out var v1) || !int.TryParse(m2.Value, out var v2))
+                    {
+                        return s1.Name.CompareTo(s2.Name);
+                    }
+                    return v1.CompareTo(v2);
+
+                });
+                if (_sortAsc)
+                {
+                    SkillsGroupManager.Groups.Reverse();
+                }
+
+                foreach (SkillsGroup g in SkillsGroupManager.Groups)
                 {
                     var skillEntries = new List<SkillListEntry>();
                     var a = new Area();
@@ -335,9 +347,10 @@ namespace ClassicUO.Game.UI.Gumps
                     a.CanMove = true;
                     a.Height = 26;
                     a.Width = Width - 26;
-                    a.Tag = true;
+                    a.Tag = g.IsMaximized;
                     a.MouseUp += (sender, e) =>
                     {
+                        g.IsMaximized = !g.IsMaximized;
                         var _a = (Area)sender;
                         var newState = !(bool)_a.Tag;
                         _a.Tag = newState;
@@ -376,18 +389,69 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         skillEntries.Add(new SkillListEntry(s));
                     }
+                    a.Add
+                    (
+                            new ResizePic(0x0BB8)
+                            {
+                                X = 1,
+                                Y = 3,
+                                Width = 180,
+                                Height = 22
+                            }
+                    );
+                    StbTextBox _textbox;
+                    a.Add
+                    (
+                        _textbox = new StbTextBox
+                        (
+                            3,
+                            -1,
+                            200,
+                            false,
+                            FontStyle.Fixed
+                        )
+                        {
+                            X = 5,
+                            Y = 3,
+                            Width = 180,
+                            Height = 17,
+                            IsEditable = false
+                        }
+                    );
 
-                    a.Add(new Label(g.Name, true, 1153, font: 3)
+                    _textbox.SetText(g.Name);
+                    _textbox.IsEditable = false;
+
+                    _textbox.MouseDown += (s, e) =>
                     {
-                        X = 3,
-                        Y = 3
-                    });
+                        if (!g.IsMaximized)
+                        {
+                            a.InvokeMouseUp(e.Location, e.Button);
+                        }
+                        UIManager.KeyboardFocusControl = _textbox;
+                        _textbox.SetKeyboardFocus();
+                        _textbox.IsEditable = true;
+                        _textbox.AllowSelection = true;
+                    };
+
+                    _textbox.FocusLost += (s, e) =>
+                    {
+                        _textbox.IsEditable = false;
+                        _textbox.AllowSelection = false;
+                        UIManager.KeyboardFocusControl = null;
+                        UIManager.SystemChat.SetFocus();
+                    };
+                    _textbox.TextChanged += (s, e) =>
+                    {
+                        g.Name = _textbox.Text;
+                    };
                     a.Add(new Label(grpReal.ToString("F1"), true, 1153) { X = 205, Y = 3 });
                     a.Add(new Label(grpVal.ToString("F1"), true, 1153) { X = 255, Y = 3 });
 
                     _databox.Add(a);
                     foreach (var entry in skillEntries)
                     {
+                        entry.IsVisible = g.IsMaximized;
                         _skillListEntries.Add(entry);
                         _databox.Add(entry);
                     }
