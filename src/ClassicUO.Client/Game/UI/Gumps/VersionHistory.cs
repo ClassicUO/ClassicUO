@@ -9,7 +9,9 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private static string[] updateTexts = {
             "/c[white][3.23.0]/cd\n" +
-                "- Nameplate healthbar poison and invul/paralyzed colors from Elderwyn",
+                "- Nameplate healthbar poison and invul/paralyzed colors from Elderwyn\n" +
+                "- Target indiciator option from original client from Elderwyn\n" +
+                "- Advanced skill gump improvements from Elderwyn",
 
             "/c[white][3.22.0]/cd\n" +
                 "- Spell book icon fix\n" +
