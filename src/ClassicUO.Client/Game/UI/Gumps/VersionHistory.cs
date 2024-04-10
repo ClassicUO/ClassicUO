@@ -8,6 +8,9 @@ namespace ClassicUO.Game.UI.Gumps
     internal class VersionHistory : Gump
     {
         private static string[] updateTexts = {
+            "/c[white][3.23.0]/cd\n" +
+                "- Nameplate healthbar poison and invul/paralyzed colors from Elderwyn",
+
             "/c[white][3.22.0]/cd\n" +
                 "- Spell book icon fix\n" +
                 "- Add option to add treasure maps as map markers instead of goto only\n" +
