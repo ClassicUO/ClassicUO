@@ -30,17 +30,16 @@
 
 #endregion
 
+using ClassicUO.Assets;
+using ClassicUO.Configuration;
+using ClassicUO.Game.UI.Gumps;
+using ClassicUO.Resources;
+using ClassicUO.Utility.Logging;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Xml;
-using ClassicUO.Configuration;
-using ClassicUO.Game.UI.Gumps;
-using ClassicUO.IO;
-using ClassicUO.Assets;
-using ClassicUO.Resources;
-using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.Managers
 {
@@ -189,7 +188,10 @@ namespace ClassicUO.Game.Managers
     {
         private static bool _isActive;
         public static readonly List<SkillsGroup> Groups = new List<SkillsGroup>();
-        public static bool IsActive { get { return _isActive; } set
+        public static bool IsActive
+        {
+            get { return _isActive; }
+            set
             {
                 _isActive = value;
             }
@@ -232,7 +234,7 @@ namespace ClassicUO.Game.Managers
             if (!File.Exists(path))
             {
                 Log.Trace("No skillsgroups.xml file. Creating a default file.");
-             
+
                 MakeDefault();
 
                 return;
@@ -247,13 +249,13 @@ namespace ClassicUO.Game.Managers
             catch (Exception ex)
             {
                 MakeDefault();
-                
+
                 Log.Error(ex.ToString());
 
                 return;
             }
 
-            
+
 
             XmlElement root = doc["skillsgroups"];
             if (root != null)
@@ -296,7 +298,7 @@ namespace ClassicUO.Game.Managers
             {
                 xml.WriteStartDocument(true);
                 xml.WriteStartElement("skillsgroups");
-                xml.WriteAttributeString("isActive",IsActive.ToString());
+                xml.WriteAttributeString("isActive", IsActive.ToString());
 
                 foreach (SkillsGroup k in Groups)
                 {
@@ -536,14 +538,14 @@ namespace ClassicUO.Game.Managers
                         {
                             while ((strbuild = bin.ReadInt16()) != 0)
                             {
-                                sb.Append((char) strbuild);
+                                sb.Append((char)strbuild);
                             }
                         }
                         else
                         {
                             while ((strbuild = bin.ReadByte()) != 0)
                             {
-                                sb.Append((char) strbuild);
+                                sb.Append((char)strbuild);
                             }
                         }
 

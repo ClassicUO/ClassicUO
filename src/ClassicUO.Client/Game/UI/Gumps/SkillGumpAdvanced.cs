@@ -44,7 +44,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
-using static ClassicUO.Renderer.UltimaBatcher2D;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -326,8 +325,8 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         return s1.Name.CompareTo(s2.Name);
                     }
-                    
-                    if (!int.TryParse(m1.Value,out var v1) || !int.TryParse(m2.Value,out var v2))
+
+                    if (!int.TryParse(m1.Value, out var v1) || !int.TryParse(m2.Value, out var v2))
                     {
                         return s1.Name.CompareTo(s2.Name);
                     }
@@ -394,11 +393,11 @@ namespace ClassicUO.Game.UI.Gumps
                     (
                             new ResizePic(0x0BB8)
                             {
-                            X = 1,
-                            Y = 3,
-                            Width = 180,
-                            Height = 22
-                        }
+                                X = 1,
+                                Y = 3,
+                                Width = 180,
+                                Height = 22
+                            }
                     );
                     StbTextBox _textbox;
                     a.Add
