@@ -1213,6 +1213,11 @@ namespace ClassicUO.Assets
                 animType = AnimationGroupsType.Animal;
             }
 
+            if (animFlags.HasFlag(AnimationFlags.CalculateOffsetLowGroupExtended))
+            {
+                animType = AnimationGroupsType.Monster;
+            }
+
             switch (animType)
             {
                 case AnimationGroupsType.Animal:
