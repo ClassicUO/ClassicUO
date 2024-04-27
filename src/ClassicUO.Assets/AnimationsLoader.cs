@@ -1213,6 +1213,11 @@ namespace ClassicUO.Assets
                 animType = AnimationGroupsType.Animal;
             }
 
+            if (animFlags.HasFlag(AnimationFlags.CalculateOffsetLowGroupExtended))
+            {
+                animType = AnimationGroupsType.Monster;
+            }
+
             switch (animType)
             {
                 case AnimationGroupsType.Animal:
@@ -1436,21 +1441,21 @@ namespace ClassicUO.Assets
             {
                 return Span<FrameInfo>.Empty;
             }
-            
+
             var file = _files[fileIndex];
 
             if (index.Position + index.Size > file.Length)
             {
                 return Span<FrameInfo>.Empty;
             }
-            
+
             var reader = new StackDataReader(
                 new ReadOnlySpan<byte>(
                     (byte*)file.StartAddress.ToPointer() + index.Position,
                     (int)index.Size
                 )
             );
-            
+
             reader.Seek(0);
 
             var palette = new ReadOnlySpan<ushort>(reader.PositionAddress.ToPointer(), 512 / sizeof(ushort));

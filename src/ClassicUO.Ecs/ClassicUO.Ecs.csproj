@@ -6,6 +6,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\external\TinyEcs\src\TinyEcs.csproj" />
     </ItemGroup>
 
 </Project>

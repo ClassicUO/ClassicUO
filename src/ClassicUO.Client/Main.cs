@@ -39,6 +39,9 @@ using ClassicUO.Resources;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using ClassicUO.Utility.Platforms;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using SDL2;
 using System;
 using System.Globalization;
@@ -46,6 +49,7 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
+using TinyEcs;
 
 namespace ClassicUO
 {
@@ -261,7 +265,14 @@ namespace ClassicUO
                         break;
                 }
 
-                Client.Run(pluginHost);
+                var ecs = new TinyEcs.World();
+                var scheduler = new Scheduler(ecs);
+
+                scheduler.AddPlugin<MainPlugin>();
+                while (true)
+                    scheduler.Run();
+
+                //Client.Run(pluginHost);
             }
 
             Log.Trace("Closing...");
@@ -542,6 +553,247 @@ namespace ClassicUO
 
                         break;
                 }
+            }
+        }
+    }
+
+    struct Renderable
+    {
+        public Texture2D Texture;
+        public Vector2 Position;
+        public Vector3 Color;
+        public Rectangle UV;
+    }
+
+    readonly struct MainPlugin : IPlugin
+    {
+        public void Build(Scheduler scheduler)
+        {
+            scheduler.AddPlugin(new FnaPlugin() {
+                WindowResizable = true,
+                MouseVisible = true,
+                VSync = true, // don't kill the gpu
+            });
+
+            scheduler.AddPlugin<CuoPlugin>();
+        }
+    }
+
+
+    // TODO: just for test
+    readonly struct CuoPlugin : IPlugin
+    {
+        public void Build(Scheduler scheduler)
+        {
+            scheduler.AddSystem((Res<GraphicsDevice> device, SchedulerState schedState) => {
+                ClientVersionHelper.IsClientVersionValid(Settings.GlobalSettings.ClientVersion, out ClientVersion clientVersion);
+                Assets.UOFileManager.Load(clientVersion, Settings.GlobalSettings.UltimaOnlineDirectory, false, "ENU");
+
+                schedState.AddResource(new Renderer.Arts.Art(device));
+                schedState.AddResource(new Renderer.UltimaBatcher2D(device));
+
+            }, Stages.Startup);
+
+            scheduler.AddSystem((TinyEcs.World world, Res<Renderer.Arts.Art> arts) => {
+                var maxX = 500;
+                var maxY = 0;
+                var x = 0;
+                var y = 0;
+
+                for (uint i = 0; i < 100; ++i)
+                {
+                    ref readonly var artInfo = ref arts.Value.GetArt(i + 1000);
+
+                    if (x > maxX)
+                    {
+                        x = 0;
+                        y += maxY;
+                    }
+
+                    world.Entity()
+                        .Set(new Renderable() {
+                            Texture = artInfo.Texture,
+                            Position = { X = x, Y = y },
+                            Color = Vector3.UnitZ,
+                            UV = artInfo.UV
+                        });
+
+                    x += artInfo.UV.Width;
+                    maxY = Math.Max(maxY, artInfo.UV.Height);
+                }
+
+            }, Stages.Startup);
+        }
+    }
+
+    struct FnaPlugin : IPlugin
+    {
+        public bool WindowResizable { get; set; }
+        public bool MouseVisible { get; set; }
+        public bool VSync { get; set; }
+
+
+
+        public void Build(Scheduler scheduler)
+        {
+            var game = new UoGame(MouseVisible, WindowResizable, VSync);
+            scheduler.AddResource(game);
+            scheduler.AddResource(Keyboard.GetState());
+            scheduler.AddResource(Mouse.GetState());
+            scheduler.AddEvent<KeyEvent>();
+            scheduler.AddEvent<MouseEvent>();
+            scheduler.AddEvent<WheelEvent>();
+
+            scheduler.AddSystem((Res<UoGame> game, SchedulerState schedState) => {
+                game.Value.BeforeLoop();
+                game.Value.RunOneFrame();
+                schedState.AddResource(game.Value.GraphicsDevice);
+                game.Value.RunApplication = true;
+            }, Stages.Startup);
+
+            scheduler.AddSystem((Res<UoGame> game) => {
+                game.Value.SuppressDraw();
+                game.Value.Tick();
+
+                FrameworkDispatcher.Update();
+            }).RunIf((SchedulerState state) => state.ResourceExists<UoGame>());
+
+            scheduler.AddSystem((Res<UoGame> game) => {
+                Environment.Exit(0);
+            }, Stages.AfterUpdate).RunIf((Res<UoGame> game) => !game.Value.RunApplication);
+
+            scheduler.AddSystem((Res<GraphicsDevice> device, Res<Renderer.UltimaBatcher2D> batch, Query<Renderable> query) => {
+                device.Value.Clear(Color.AliceBlue);
+
+                var sb = batch.Value;
+                sb.Begin();
+                query.Each((ref Renderable renderable) =>
+                    sb.Draw
+                    (
+                        renderable.Texture,
+                        renderable.Position,
+                        renderable.UV,
+                        Vector3.UnitZ
+                    )
+                );
+                sb.End();
+                device.Value.Present();
+            }, Stages.AfterUpdate).RunIf((SchedulerState state) => state.ResourceExists<GraphicsDevice>());
+
+            scheduler.AddSystem((EventWriter<KeyEvent> writer, Res<KeyboardState> oldState) => {
+                var newState = Keyboard.GetState();
+
+                foreach (var key in oldState.Value.GetPressedKeys())
+                    if (newState.IsKeyUp(key)) // [pressed] -> [released]
+                        writer.Enqueue(new KeyEvent() { Action = 0, Key = key });
+
+                foreach (var key in newState.GetPressedKeys())
+                    if (oldState.Value.IsKeyUp(key)) // [released] -> [pressed]
+                        writer.Enqueue(new KeyEvent() { Action = 1, Key = key });
+                    else if (oldState.Value.IsKeyDown(key))
+                        writer.Enqueue(new KeyEvent() { Action = 2, Key = key });
+
+                oldState.Value = newState;
+            });
+
+            scheduler.AddSystem((EventWriter<MouseEvent> writer, EventWriter<WheelEvent> wheelWriter, Res<MouseState> oldState) => {
+                var newState = Mouse.GetState();
+
+                if (newState.LeftButton != oldState.Value.LeftButton)
+                    writer.Enqueue(new MouseEvent() { Action = newState.LeftButton, Button = Input.MouseButtonType.Left, X = newState.X, Y = newState.Y });
+                if (newState.RightButton != oldState.Value.RightButton)
+                    writer.Enqueue(new MouseEvent() { Action = newState.RightButton, Button = Input.MouseButtonType.Right, X = newState.X, Y = newState.Y });
+                if (newState.MiddleButton != oldState.Value.MiddleButton)
+                    writer.Enqueue(new MouseEvent() { Action = newState.MiddleButton, Button = Input.MouseButtonType.Middle, X = newState.X, Y = newState.Y });
+                if (newState.XButton1 != oldState.Value.XButton1)
+                    writer.Enqueue(new MouseEvent() { Action = newState.XButton1, Button = Input.MouseButtonType.XButton1, X = newState.X, Y = newState.Y });
+                if (newState.XButton2 != oldState.Value.XButton2)
+                    writer.Enqueue(new MouseEvent() { Action = newState.XButton2, Button = Input.MouseButtonType.XButton2, X = newState.X, Y = newState.Y });
+
+                if (newState.ScrollWheelValue != oldState.Value.ScrollWheelValue)
+                    // FNA multiplies for 120 for some reason
+                    wheelWriter.Enqueue(new WheelEvent() { Value = (oldState.Value.ScrollWheelValue - newState.ScrollWheelValue) / 120 });
+
+                oldState.Value = newState;
+            });
+
+            scheduler.AddSystem((EventReader<KeyEvent> reader) => {
+                foreach (var ev in reader.Read())
+                    Console.WriteLine("key {0} is {1}", ev.Key, ev.Action switch {
+                        0 => "up",
+                        1 => "down",
+                        2 => "pressed",
+                        _ => "unkown"
+                    });
+            });
+
+            scheduler.AddSystem((EventReader<MouseEvent> reader) => {
+                foreach (var ev in reader.Read())
+                    Console.WriteLine("mouse button {0} is {1} at {2},{3}", ev.Button, ev.Action switch {
+                        ButtonState.Pressed => "pressed",
+                        ButtonState.Released => "released",
+                        _ => "unknown"
+                    }, ev.X, ev.Y);
+            }).RunIf((Res<UoGame> game) => game.Value.IsActive);
+
+            scheduler.AddSystem((EventReader<WheelEvent> reader) => {
+                foreach (var ev in reader.Read())
+                    Console.WriteLine("wheel value {0}", ev.Value);
+            }).RunIf((Res<UoGame> game) => game.Value.IsActive);
+        }
+
+        struct KeyEvent
+        {
+            public byte Action;
+            public Keys Key;
+        }
+
+        struct MouseEvent
+        {
+            public ButtonState Action;
+            public Input.MouseButtonType Button;
+            public int X, Y;
+        }
+
+        struct WheelEvent
+        {
+            public int Value;
+        }
+
+        sealed class UoGame : Microsoft.Xna.Framework.Game
+        {
+            public UoGame(bool mouseVisible, bool allowWindowResizing, bool vSync)
+            {
+                GraphicManager = new GraphicsDeviceManager(this)
+                {
+                    SynchronizeWithVerticalRetrace = vSync
+                };
+                IsFixedTimeStep = false;
+                IsMouseVisible = mouseVisible;
+                Window.AllowUserResizing = allowWindowResizing;
+            }
+
+            public GraphicsDeviceManager GraphicManager { get; }
+
+
+            protected override void Initialize()
+            {
+                base.Initialize();
+            }
+
+            protected override void LoadContent()
+            {
+                base.LoadContent();
+            }
+
+            protected override void Update(GameTime gameTime)
+            {
+                // I don't want to update things here, but on ecs systems instead
+            }
+
+            protected override void Draw(GameTime gameTime)
+            {
+                // I don't want to render things here, but on ecs systems instead
             }
         }
     }

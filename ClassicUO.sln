@@ -75,6 +75,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClassicUO.Bootstrap", "src\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClassicUO.Ecs", "src\ClassicUO.Ecs\ClassicUO.Ecs.csproj", "{8C090117-05B9-49E3-9121-499A12FD56C1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TinyEcs", "external\TinyEcs\src\TinyEcs.csproj", "{3712A71D-7451-497B-824C-5B33785F06BE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -171,6 +173,14 @@ Global
 		{8C090117-05B9-49E3-9121-499A12FD56C1}.Release|Any CPU.Build.0 = Release|Any CPU
 		{8C090117-05B9-49E3-9121-499A12FD56C1}.Release|x64.ActiveCfg = Release|Any CPU
 		{8C090117-05B9-49E3-9121-499A12FD56C1}.Release|x64.Build.0 = Release|Any CPU
+		{3712A71D-7451-497B-824C-5B33785F06BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3712A71D-7451-497B-824C-5B33785F06BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3712A71D-7451-497B-824C-5B33785F06BE}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{3712A71D-7451-497B-824C-5B33785F06BE}.Debug|x64.Build.0 = Debug|Any CPU
+		{3712A71D-7451-497B-824C-5B33785F06BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3712A71D-7451-497B-824C-5B33785F06BE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3712A71D-7451-497B-824C-5B33785F06BE}.Release|x64.ActiveCfg = Release|Any CPU
+		{3712A71D-7451-497B-824C-5B33785F06BE}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -188,6 +198,7 @@ Global
 		{A6DCFCE5-192B-4AE1-B228-206D37A0021C} = {FA5D7AB8-3570-4E55-95B0-35BA6842FEE3}
 		{8974A04C-8360-4225-ABDD-0C56555F676D} = {8EAF9583-DC5B-46DC-A01E-47B00A1C862E}
 		{8C090117-05B9-49E3-9121-499A12FD56C1} = {8EAF9583-DC5B-46DC-A01E-47B00A1C862E}
+		{3712A71D-7451-497B-824C-5B33785F06BE} = {FA5D7AB8-3570-4E55-95B0-35BA6842FEE3}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0A99E91A-ADAB-45C3-8170-2656140F6EFA}
