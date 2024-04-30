@@ -583,43 +583,136 @@ namespace ClassicUO
     // TODO: just for test
     readonly struct CuoPlugin : IPlugin
     {
-        public void Build(Scheduler scheduler)
+        public unsafe void Build(Scheduler scheduler)
         {
-            scheduler.AddSystem((Res<GraphicsDevice> device, SchedulerState schedState) => {
+            scheduler.AddSystem(static (Res<GraphicsDevice> device, SchedulerState schedState) => {
                 ClientVersionHelper.IsClientVersionValid(Settings.GlobalSettings.ClientVersion, out ClientVersion clientVersion);
                 Assets.UOFileManager.Load(clientVersion, Settings.GlobalSettings.UltimaOnlineDirectory, false, "ENU");
 
                 schedState.AddResource(new Renderer.Arts.Art(device));
+                schedState.AddResource(Assets.MapLoader.Instance);
                 schedState.AddResource(new Renderer.UltimaBatcher2D(device));
 
             }, Stages.Startup);
 
-            scheduler.AddSystem((TinyEcs.World world, Res<Renderer.Arts.Art> arts) => {
-                var maxX = 500;
-                var maxY = 0;
-                var x = 0;
-                var y = 0;
+            // scheduler.AddSystem(static (TinyEcs.World world, Res<Renderer.Arts.Art> arts) => {
+            //     var maxX = 500;
+            //     var maxY = 0;
+            //     var x = 0;
+            //     var y = 0;
 
-                for (uint i = 0; i < 100; ++i)
+            //     for (uint i = 0; i < 100; ++i)
+            //     {
+            //         ref readonly var artInfo = ref arts.Value.GetArt(i + 1000);
+
+            //         if (x > maxX)
+            //         {
+            //             x = 0;
+            //             y += maxY;
+            //         }
+
+            //         world.Entity()
+            //             .Set(new Renderable() {
+            //                 Texture = artInfo.Texture,
+            //                 Position = { X = x, Y = y },
+            //                 Color = Vector3.UnitZ,
+            //                 UV = artInfo.UV
+            //             });
+
+            //         x += artInfo.UV.Width;
+            //         maxY = Math.Max(maxY, artInfo.UV.Height);
+            //     }
+
+            // }, Stages.Startup);
+
+            scheduler.AddSystem(static (TinyEcs.World world, Res<Assets.MapLoader> mapLoader, Res<Renderer.Arts.Art> arts, Res<GraphicsDevice> device) => {
+
+                static Vector2 IsoToScreen(ushort isoX, ushort isoY, sbyte isoZ, Vector2 centerOffset)
                 {
-                    ref readonly var artInfo = ref arts.Value.GetArt(i + 1000);
+                    return new Vector2(
+                        ((isoX - isoY) * 22) - centerOffset.X - 22,
+                        ((isoX + isoY) * 22 - (isoZ << 2)) - centerOffset.Y - 22
+                    );
+                }
 
-                    if (x > maxX)
+                var centerChunkX = 1421 / 8;
+                var centerChunkY = 1699 / 8;
+                var offset = 4;
+                var center = IsoToScreen((ushort)(centerChunkX * 8), (ushort) (centerChunkY * 8), 0, Vector2.Zero);
+                center.X -= device.Value.PresentationParameters.BackBufferWidth / 2 - 22;
+                center.Y -= device.Value.PresentationParameters.BackBufferHeight / 2 - 22;
+
+                for (var chunkX = centerChunkX - offset; chunkX < centerChunkX + offset; ++chunkX)
+                {
+                    for (var chunkY = centerChunkY - offset; chunkY < centerChunkY + offset; ++chunkY)
                     {
-                        x = 0;
-                        y += maxY;
+                        ref var im = ref mapLoader.Value.GetIndex(0, chunkX, chunkY);
+
+                        if (im.MapAddress == 0)
+                            return;
+
+                        var block = (Assets.MapBlock*) im.MapAddress;
+                        var cells = (Assets.MapCells*) &block->Cells;
+                        var bx = chunkX << 3;
+                        var by = chunkY << 3;
+
+                        for (int y = 0; y < 8; ++y)
+                        {
+                            var pos = y << 3;
+                            var tileY = (ushort) (by + y);
+
+                            for (int x = 0; x < 8; ++x, ++pos)
+                            {
+                                var tileID = (ushort) (cells[pos].TileID & 0x3FFF);
+                                var z = cells[pos].Z;
+                                var tileX = (ushort) (bx + x);
+
+                                ref readonly var artInfo = ref arts.Value.GetLand(tileID);
+
+                                world.Entity()
+                                    .Set(new Renderable() {
+                                        Texture = artInfo.Texture,
+                                        UV = artInfo.UV,
+                                        Color = Vector3.UnitZ,
+                                        Position = IsoToScreen(tileX, tileY, z, center)
+                                    });
+                            }
+                        }
+
+                        if (im.StaticAddress != 0)
+                        {
+                            var sb = (Assets.StaticsBlock*) im.StaticAddress;
+
+                            if (sb != null)
+                            {
+                                for (int i = 0, count = (int) im.StaticCount; i < count; ++i, ++sb)
+                                {
+                                    if (sb->Color != 0 && sb->Color != 0xFFFF)
+                                    {
+                                        int pos = (sb->Y << 3) + sb->X;
+
+                                        if (pos >= 64)
+                                        {
+                                            continue;
+                                        }
+
+                                        var staX = (ushort)(bx + sb->X);
+                                        var staY = (ushort)(by + sb->Y);
+
+                                        ref readonly var artInfo = ref arts.Value.GetArt(sb->Color);
+
+                                        world.Entity()
+                                            .Set(new Renderable() {
+                                                Texture = artInfo.Texture,
+                                                UV = artInfo.UV,
+                                                Color = Renderer.ShaderHueTranslator.GetHueVector(sb->Hue),
+                                                Position = IsoToScreen(staX, staY, sb->Z, center)
+                                            });
+                                    }
+                                }
+                            }
+                        }
                     }
-
-                    world.Entity()
-                        .Set(new Renderable() {
-                            Texture = artInfo.Texture,
-                            Position = { X = x, Y = y },
-                            Color = Vector3.UnitZ,
-                            UV = artInfo.UV
-                        });
-
-                    x += artInfo.UV.Width;
-                    maxY = Math.Max(maxY, artInfo.UV.Height);
                 }
 
             }, Stages.Startup);
@@ -673,7 +766,7 @@ namespace ClassicUO
                         renderable.Texture,
                         renderable.Position,
                         renderable.UV,
-                        Vector3.UnitZ
+                        renderable.Color
                     )
                 );
                 sb.End();
