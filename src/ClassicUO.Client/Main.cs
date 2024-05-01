@@ -566,6 +566,13 @@ namespace ClassicUO
         public float Z;
     }
 
+    struct TileStretched
+    {
+        public sbyte AvgZ, MinZ;
+        public Renderer.UltimaBatcher2D.YOffsets Offset;
+        public Vector3 NormalTop, NormalRight, NormalLeft, NormalBottom;
+    }
+
     readonly struct MainPlugin : IPlugin
     {
         public void Build(Scheduler scheduler)
@@ -606,17 +613,24 @@ namespace ClassicUO
                 ClientVersionHelper.IsClientVersionValid(Settings.GlobalSettings.ClientVersion, out ClientVersion clientVersion);
                 Assets.UOFileManager.Load(clientVersion, Settings.GlobalSettings.UltimaOnlineDirectory, false, "ENU");
 
-                schedState.AddResource(new Renderer.Arts.Art(device));
+                schedState.AddResource(Assets.TileDataLoader.Instance);
                 schedState.AddResource(Assets.MapLoader.Instance);
+                schedState.AddResource(new Renderer.Arts.Art(device));
+                schedState.AddResource(new Renderer.Texmaps.Texmap(device));
                 schedState.AddResource(new Renderer.UltimaBatcher2D(device));
             }, Stages.Startup);
 
             scheduler.AddSystem(static (
                 TinyEcs.World world,
                 Res<Assets.MapLoader> mapLoader,
+                Res<Assets.TileDataLoader> tiledataLoader,
                 Res<Renderer.Arts.Art> arts,
+                Res<Renderer.Texmaps.Texmap> textmaps,
                 Res<(ushort, ushort)> centerWorldPos
             ) => {
+
+                world.Entity<Renderable>();
+                world.Entity<TileStretched>();
 
                 static float getDepthZ(ushort x, ushort y, sbyte priorityZ)
                     => (x + y) + (127 + priorityZ) * 0.01f;
@@ -624,12 +638,13 @@ namespace ClassicUO
                 var centerChunkX = centerWorldPos.Value.Item1 / 8;
                 var centerChunkY = centerWorldPos.Value.Item2 / 8;
                 var offset = 4;
+                var mapIndex = 0;
 
                 for (var chunkX = Math.Max(0, centerChunkX - offset); chunkX < centerChunkX + offset; ++chunkX)
                 {
                     for (var chunkY = Math.Max(0, centerChunkY - offset); chunkY < centerChunkY + offset; ++chunkY)
                     {
-                        ref var im = ref mapLoader.Value.GetIndex(0, chunkX, chunkY);
+                        ref var im = ref mapLoader.Value.GetIndex(mapIndex, chunkX, chunkY);
 
                         if (im.MapAddress == 0)
                             continue;
@@ -650,16 +665,59 @@ namespace ClassicUO
                                 var z = cells[pos].Z;
                                 var tileX = (ushort) (bx + x);
 
-                                ref readonly var artInfo = ref arts.Value.GetLand(tileID);
+                                var isStretched = tiledataLoader.Value.LandData[tileID].TexID == 0 &&
+                                    tiledataLoader.Value.LandData[tileID].IsWet;
 
-                                world.Entity()
-                                    .Set(new Renderable() {
-                                        Texture = artInfo.Texture,
-                                        UV = artInfo.UV,
-                                        Color = Vector3.UnitZ,
-                                        Position = IsoHelper.IsoToScreen(tileX, tileY, z),
-                                        Z = getDepthZ(tileX, tileY, (sbyte)(z - 2))
-                                    });
+                                isStretched = ApplyStretch(
+                                    mapIndex, tiledataLoader.Value.LandData[tileID].TexID,
+                                    tileX, tileY, z,
+                                    isStretched,
+                                    out var avgZ, out var minZ,
+                                    out var offsets,
+                                    out var normalTop,
+                                    out var normalRight,
+                                    out var normalBottom,
+                                    out var normalLeft
+                                );
+
+                                if (isStretched)
+                                {
+                                    ref readonly var textmapInfo = ref textmaps.Value.GetTexmap(tiledataLoader.Value.LandData[tileID].TexID);
+
+                                    var position = IsoHelper.IsoToScreen(tileX, tileY, z);
+                                    position.Y += z << 2;
+
+                                    world.Entity()
+                                        .Set(new Renderable() {
+                                            Texture = textmapInfo.Texture,
+                                            UV = textmapInfo.UV,
+                                            Color = Vector3.UnitZ,
+                                            Position = position,
+                                            Z = getDepthZ(tileX, tileY, z)
+                                        })
+                                        .Set(new TileStretched() {
+                                            NormalTop = normalTop,
+                                            NormalRight = normalRight,
+                                            NormalBottom = normalBottom,
+                                            NormalLeft = normalLeft,
+                                            AvgZ = avgZ,
+                                            MinZ = minZ,
+                                            Offset = offsets
+                                        });
+                                }
+                                else
+                                {
+                                    ref readonly var artInfo = ref arts.Value.GetLand(tileID);
+
+                                    world.Entity()
+                                        .Set(new Renderable() {
+                                            Texture = artInfo.Texture,
+                                            UV = artInfo.UV,
+                                            Color = Vector3.UnitZ,
+                                            Position = IsoHelper.IsoToScreen(tileX, tileY, z),
+                                            Z = getDepthZ(tileX, tileY, z)
+                                        });
+                                }
                             }
                         }
 
@@ -701,6 +759,202 @@ namespace ClassicUO
                 }
 
             }, Stages.Startup);
+        }
+
+
+        static bool ApplyStretch(
+            int mapIndex,
+            ushort texId, int x, int y, sbyte z,
+            bool isStretched, out sbyte avgZ, out sbyte minZ,
+            out Renderer.UltimaBatcher2D.YOffsets offsets,
+            out Vector3 normalTop,
+            out Vector3 normalRight,
+            out Vector3 normalBottom,
+            out Vector3 normalLeft)
+        {
+            if (isStretched || Assets.TexmapsLoader.Instance.GetValidRefEntry(texId).Length <= 0)
+            {
+                isStretched = false;
+                avgZ = z;
+                minZ = z;
+                offsets = new Renderer.UltimaBatcher2D.YOffsets();
+                normalTop = normalRight = normalBottom = normalLeft = Vector3.Zero;
+
+                return false;
+            }
+
+            /*  _____ _____
+             * | top | rig |
+             * |_____|_____|
+             * | lef | bot |
+             * |_____|_____|
+             */
+            sbyte zTop = z;
+            sbyte zRight = GetTileZ(mapIndex, x + 1, y);
+            sbyte zLeft = GetTileZ(mapIndex, x, y + 1);
+            sbyte zBottom = GetTileZ(mapIndex, x + 1, y + 1);
+
+            offsets.Top = zTop * 4;
+            offsets.Right = zRight * 4;
+            offsets.Left = zLeft * 4;
+            offsets.Bottom = zBottom * 4;
+
+            if (Math.Abs(zTop - zBottom) <= Math.Abs(zLeft - zRight))
+            {
+                avgZ = (sbyte) ((zTop + zBottom) >> 1);
+            }
+            else
+            {
+                avgZ = (sbyte) ((zLeft + zRight) >> 1);
+            }
+
+            minZ = Math.Min(zTop, Math.Min(zRight, Math.Min(zLeft, zBottom)));
+
+
+            /*  _____ _____ _____ _____
+             * |     | t10 | t20 |     |
+             * |_____|_____|_____|_____|
+             * | t01 |  z  | t21 | t31 |
+             * |_____|_____|_____|_____|
+             * | t02 | t12 | t22 | t32 |
+             * |_____|_____|_____|_____|
+             * |     | t13 | t23 |     |
+             * |_____|_____|_____|_____|
+             */
+            sbyte t10 = GetTileZ(mapIndex, x, y - 1);
+            sbyte t20 = GetTileZ(mapIndex, x + 1, y - 1);
+            sbyte t01 = GetTileZ(mapIndex, x - 1, y);
+            sbyte t21 = zRight;
+            sbyte t31 = GetTileZ(mapIndex, x + 2, y);
+            sbyte t02 = GetTileZ(mapIndex, x - 1, y + 1);
+            sbyte t12 = zLeft;
+            sbyte t22 = zBottom;
+            sbyte t32 = GetTileZ(mapIndex, x + 2, y + 1);
+            sbyte t13 = GetTileZ(mapIndex, x, y + 2);
+            sbyte t23 = GetTileZ(mapIndex, x + 1, y + 2);
+
+
+            isStretched |= CalculateNormal(z, t10, t21, t12, t01, out normalTop);
+            isStretched |= CalculateNormal(t21, t20, t31, t22, z, out normalRight);
+            isStretched |= CalculateNormal(t22, t21, t32, t23, t12, out normalBottom);
+            isStretched |= CalculateNormal(t12, z, t22, t13, t02, out normalLeft);
+
+            return isStretched;
+        }
+
+        private unsafe static sbyte GetTileZ(int mapIndex, int x, int y)
+        {
+            static ref Assets.IndexMap GetIndex(int mapIndex, int x, int y)
+            {
+                var block = GetBlock(mapIndex, x, y);
+                Assets.MapLoader.Instance.SanitizeMapIndex(ref mapIndex);
+                var list = Assets.MapLoader.Instance.BlockData[mapIndex];
+
+                return ref block >= list.Length ? ref Assets.IndexMap.Invalid : ref list[block];
+
+                static int GetBlock(int mapIndex, int blockX, int blockY)
+                    => blockX * Assets.MapLoader.Instance.MapBlocksSize[mapIndex, 1] + blockY;
+            }
+
+
+            if (x < 0 || y < 0)
+            {
+                return -125;
+            }
+
+            ref var blockIndex = ref GetIndex(mapIndex, x >> 3, y >> 3);
+
+            if (blockIndex.MapAddress == 0)
+            {
+                return -125;
+            }
+
+            int mx = x % 8;
+            int my = y % 8;
+
+            unsafe
+            {
+                var mp = (Assets.MapBlock*) blockIndex.MapAddress;
+                var cells = (Assets.MapCells*) &mp->Cells;
+
+                return cells[(my << 3) + mx].Z;
+            }
+        }
+
+        private static bool CalculateNormal(sbyte tile, sbyte top, sbyte right, sbyte bottom, sbyte left, out Vector3 normal)
+        {
+            if (tile == top && tile == right && tile == bottom && tile == left)
+            {
+                normal.X = 0;
+                normal.Y = 0;
+                normal.Z = 1f;
+
+                return false;
+            }
+
+            Vector3 u = new Vector3();
+            Vector3 v = new Vector3();
+            Vector3 ret = new Vector3();
+
+
+            // ==========================
+            u.X = -22;
+            u.Y = -22;
+            u.Z = (left - tile) * 4;
+
+            v.X = -22;
+            v.Y = 22;
+            v.Z = (bottom - tile) * 4;
+
+            Vector3.Cross(ref v, ref u, out ret);
+            // ==========================
+
+
+            // ==========================
+            u.X = -22;
+            u.Y = 22;
+            u.Z = (bottom - tile) * 4;
+
+            v.X = 22;
+            v.Y = 22;
+            v.Z = (right - tile) * 4;
+
+            Vector3.Cross(ref v, ref u, out normal);
+            Vector3.Add(ref ret, ref normal, out ret);
+            // ==========================
+
+
+            // ==========================
+            u.X = 22;
+            u.Y = 22;
+            u.Z = (right - tile) * 4;
+
+            v.X = 22;
+            v.Y = -22;
+            v.Z = (top - tile) * 4;
+
+            Vector3.Cross(ref v, ref u, out normal);
+            Vector3.Add(ref ret, ref normal, out ret);
+            // ==========================
+
+
+            // ==========================
+            u.X = 22;
+            u.Y = -22;
+            u.Z = (top - tile) * 4;
+
+            v.X = -22;
+            v.Y = -22;
+            v.Z = (left - tile) * 4;
+
+            Vector3.Cross(ref v, ref u, out normal);
+            Vector3.Add(ref ret, ref normal, out ret);
+            // ==========================
+
+
+            Vector3.Normalize(ref ret, out normal);
+
+            return true;
         }
     }
 
@@ -744,7 +998,8 @@ namespace ClassicUO
                 Res<GraphicsDevice> device,
                 Res<Renderer.UltimaBatcher2D> batch,
                 Res<(ushort, ushort)> centerWorldPos,
-                Query<Renderable> query
+                Query<Renderable, Not<TileStretched>> query,
+                Query<(Renderable, TileStretched)> queryTiles
                 ) => {
                 device.Value.Clear(Color.AliceBlue);
 
@@ -768,6 +1023,22 @@ namespace ClassicUO
                         renderable.Z
                     )
                 );
+
+                queryTiles.Each((ref Renderable renderable, ref TileStretched stretched) =>
+                    sb.DrawStretchedLand(
+                        renderable.Texture,
+                        renderable.Position - center,
+                        renderable.UV,
+                        ref stretched.Offset,
+                        ref stretched.NormalTop,
+                        ref stretched.NormalRight,
+                        ref stretched.NormalLeft,
+                        ref stretched.NormalBottom,
+                        renderable.Color,
+                        renderable.Z
+                    )
+                );
+
                 sb.End();
                 device.Value.Present();
             }, Stages.AfterUpdate).RunIf((SchedulerState state) => state.ResourceExists<GraphicsDevice>());
