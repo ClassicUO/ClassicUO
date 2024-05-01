@@ -633,7 +633,7 @@ namespace ClassicUO
                 world.Entity<TileStretched>();
 
                 static float getDepthZ(ushort x, ushort y, sbyte priorityZ)
-                    => (x + y) + (127 + priorityZ) * 0.01f;
+                    => 0; // x + y + (127 + priorityZ) * 0.01f;
 
                 var centerChunkX = centerWorldPos.Value.Item1 / 8;
                 var centerChunkY = centerWorldPos.Value.Item2 / 8;
@@ -691,9 +691,9 @@ namespace ClassicUO
                                         .Set(new Renderable() {
                                             Texture = textmapInfo.Texture,
                                             UV = textmapInfo.UV,
-                                            Color = Vector3.UnitZ,
+                                            Color = new Vector3(0, Renderer.ShaderHueTranslator.SHADER_LAND, 1f),
                                             Position = position,
-                                            Z = getDepthZ(tileX, tileY, z)
+                                            Z = getDepthZ(tileX, tileY, (sbyte)(avgZ - 2))
                                         })
                                         .Set(new TileStretched() {
                                             NormalTop = normalTop,
@@ -715,7 +715,7 @@ namespace ClassicUO
                                             UV = artInfo.UV,
                                             Color = Vector3.UnitZ,
                                             Position = IsoHelper.IsoToScreen(tileX, tileY, z),
-                                            Z = getDepthZ(tileX, tileY, z)
+                                            Z = getDepthZ(tileX, tileY, (sbyte)(z - 2))
                                         });
                                 }
                             }
@@ -743,13 +743,30 @@ namespace ClassicUO
 
                                         ref readonly var artInfo = ref arts.Value.GetArt(sb->Color);
 
+                                        var priorityZ = sb->Z;
+
+                                        if (tiledataLoader.Value.StaticData[sb->Color].IsBackground)
+                                        {
+                                            priorityZ -= 1;
+                                        }
+
+                                        if (tiledataLoader.Value.StaticData[sb->Color].Height != 0)
+                                        {
+                                            priorityZ += 1;
+                                        }
+
+                                        if (tiledataLoader.Value.StaticData[sb->Color].IsMultiMovable)
+                                        {
+                                            priorityZ += 1;
+                                        }
+
                                         world.Entity()
                                             .Set(new Renderable() {
                                                 Texture = artInfo.Texture,
                                                 UV = artInfo.UV,
                                                 Color = Renderer.ShaderHueTranslator.GetHueVector(sb->Hue),
                                                 Position = IsoHelper.IsoToScreen(staX, staY, sb->Z),
-                                                Z = getDepthZ(staX, staY, sb->Z)
+                                                Z = getDepthZ(staX, staY, priorityZ)
                                             });
                                     }
                                 }
@@ -1009,21 +1026,7 @@ namespace ClassicUO
 
                 var sb = batch.Value;
                 sb.Begin();
-                query.Each((ref Renderable renderable) =>
-                    sb.Draw
-                    (
-                        renderable.Texture,
-                        renderable.Position - center,
-                        renderable.UV,
-                        renderable.Color,
-                        0f,
-                        Vector2.Zero,
-                        1f,
-                        SpriteEffects.None,
-                        renderable.Z
-                    )
-                );
-
+                sb.SetStencil(DepthStencilState.Default);
                 queryTiles.Each((ref Renderable renderable, ref TileStretched stretched) =>
                     sb.DrawStretchedLand(
                         renderable.Texture,
@@ -1038,7 +1041,21 @@ namespace ClassicUO
                         renderable.Z
                     )
                 );
-
+                query.Each((ref Renderable renderable) =>
+                    sb.Draw
+                    (
+                        renderable.Texture,
+                        renderable.Position - center,
+                        renderable.UV,
+                        renderable.Color,
+                        0f,
+                        Vector2.Zero,
+                        1f,
+                        SpriteEffects.None,
+                        renderable.Z
+                    )
+                );
+                sb.SetStencil(null);
                 sb.End();
                 device.Value.Present();
             }, Stages.AfterUpdate).RunIf((SchedulerState state) => state.ResourceExists<GraphicsDevice>());
