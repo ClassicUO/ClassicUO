@@ -563,12 +563,16 @@ namespace ClassicUO
         public Vector2 Position;
         public Vector3 Color;
         public Rectangle UV;
+        public float Z;
     }
 
     readonly struct MainPlugin : IPlugin
     {
         public void Build(Scheduler scheduler)
         {
+            // center world position x,y
+            scheduler.AddResource(((ushort)1631, (ushort)1233));
+
             scheduler.AddPlugin(new FnaPlugin() {
                 WindowResizable = true,
                 MouseVisible = true,
@@ -577,6 +581,19 @@ namespace ClassicUO
 
             scheduler.AddPlugin<CuoPlugin>();
         }
+    }
+
+    static class IsoHelper
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector2 IsoToScreen(ushort isoX, ushort isoY, sbyte isoZ)
+        {
+            return new Vector2(
+                (isoX - isoY) * 22,
+                (isoX + isoY) * 22 - (isoZ << 2)
+            );
+        }
+
     }
 
 
@@ -592,64 +609,30 @@ namespace ClassicUO
                 schedState.AddResource(new Renderer.Arts.Art(device));
                 schedState.AddResource(Assets.MapLoader.Instance);
                 schedState.AddResource(new Renderer.UltimaBatcher2D(device));
-
             }, Stages.Startup);
 
-            // scheduler.AddSystem(static (TinyEcs.World world, Res<Renderer.Arts.Art> arts) => {
-            //     var maxX = 500;
-            //     var maxY = 0;
-            //     var x = 0;
-            //     var y = 0;
+            scheduler.AddSystem(static (
+                TinyEcs.World world,
+                Res<Assets.MapLoader> mapLoader,
+                Res<Renderer.Arts.Art> arts,
+                Res<(ushort, ushort)> centerWorldPos
+            ) => {
 
-            //     for (uint i = 0; i < 100; ++i)
-            //     {
-            //         ref readonly var artInfo = ref arts.Value.GetArt(i + 1000);
+                static float getDepthZ(ushort x, ushort y, sbyte priorityZ)
+                    => (x + y) + (127 + priorityZ) * 0.01f;
 
-            //         if (x > maxX)
-            //         {
-            //             x = 0;
-            //             y += maxY;
-            //         }
-
-            //         world.Entity()
-            //             .Set(new Renderable() {
-            //                 Texture = artInfo.Texture,
-            //                 Position = { X = x, Y = y },
-            //                 Color = Vector3.UnitZ,
-            //                 UV = artInfo.UV
-            //             });
-
-            //         x += artInfo.UV.Width;
-            //         maxY = Math.Max(maxY, artInfo.UV.Height);
-            //     }
-
-            // }, Stages.Startup);
-
-            scheduler.AddSystem(static (TinyEcs.World world, Res<Assets.MapLoader> mapLoader, Res<Renderer.Arts.Art> arts, Res<GraphicsDevice> device) => {
-
-                static Vector2 IsoToScreen(ushort isoX, ushort isoY, sbyte isoZ, Vector2 centerOffset)
-                {
-                    return new Vector2(
-                        ((isoX - isoY) * 22) - centerOffset.X - 22,
-                        ((isoX + isoY) * 22 - (isoZ << 2)) - centerOffset.Y - 22
-                    );
-                }
-
-                var centerChunkX = 1421 / 8;
-                var centerChunkY = 1699 / 8;
+                var centerChunkX = centerWorldPos.Value.Item1 / 8;
+                var centerChunkY = centerWorldPos.Value.Item2 / 8;
                 var offset = 4;
-                var center = IsoToScreen((ushort)(centerChunkX * 8), (ushort) (centerChunkY * 8), 0, Vector2.Zero);
-                center.X -= device.Value.PresentationParameters.BackBufferWidth / 2 - 22;
-                center.Y -= device.Value.PresentationParameters.BackBufferHeight / 2 - 22;
 
-                for (var chunkX = centerChunkX - offset; chunkX < centerChunkX + offset; ++chunkX)
+                for (var chunkX = Math.Max(0, centerChunkX - offset); chunkX < centerChunkX + offset; ++chunkX)
                 {
-                    for (var chunkY = centerChunkY - offset; chunkY < centerChunkY + offset; ++chunkY)
+                    for (var chunkY = Math.Max(0, centerChunkY - offset); chunkY < centerChunkY + offset; ++chunkY)
                     {
                         ref var im = ref mapLoader.Value.GetIndex(0, chunkX, chunkY);
 
                         if (im.MapAddress == 0)
-                            return;
+                            continue;
 
                         var block = (Assets.MapBlock*) im.MapAddress;
                         var cells = (Assets.MapCells*) &block->Cells;
@@ -674,7 +657,8 @@ namespace ClassicUO
                                         Texture = artInfo.Texture,
                                         UV = artInfo.UV,
                                         Color = Vector3.UnitZ,
-                                        Position = IsoToScreen(tileX, tileY, z, center)
+                                        Position = IsoHelper.IsoToScreen(tileX, tileY, z),
+                                        Z = getDepthZ(tileX, tileY, (sbyte)(z - 2))
                                     });
                             }
                         }
@@ -706,7 +690,8 @@ namespace ClassicUO
                                                 Texture = artInfo.Texture,
                                                 UV = artInfo.UV,
                                                 Color = Renderer.ShaderHueTranslator.GetHueVector(sb->Hue),
-                                                Position = IsoToScreen(staX, staY, sb->Z, center)
+                                                Position = IsoHelper.IsoToScreen(staX, staY, sb->Z),
+                                                Z = getDepthZ(staX, staY, sb->Z)
                                             });
                                     }
                                 }
@@ -755,8 +740,17 @@ namespace ClassicUO
                 Environment.Exit(0);
             }, Stages.AfterUpdate).RunIf((Res<UoGame> game) => !game.Value.RunApplication);
 
-            scheduler.AddSystem((Res<GraphicsDevice> device, Res<Renderer.UltimaBatcher2D> batch, Query<Renderable> query) => {
+            scheduler.AddSystem((
+                Res<GraphicsDevice> device,
+                Res<Renderer.UltimaBatcher2D> batch,
+                Res<(ushort, ushort)> centerWorldPos,
+                Query<Renderable> query
+                ) => {
                 device.Value.Clear(Color.AliceBlue);
+
+                var center = IsoHelper.IsoToScreen(centerWorldPos.Value.Item1, centerWorldPos.Value.Item2, 0);
+                center.X -= device.Value.PresentationParameters.BackBufferWidth / 2;
+                center.Y -= device.Value.PresentationParameters.BackBufferHeight / 2;
 
                 var sb = batch.Value;
                 sb.Begin();
@@ -764,9 +758,14 @@ namespace ClassicUO
                     sb.Draw
                     (
                         renderable.Texture,
-                        renderable.Position,
+                        renderable.Position - center,
                         renderable.UV,
-                        renderable.Color
+                        renderable.Color,
+                        0f,
+                        Vector2.Zero,
+                        1f,
+                        SpriteEffects.None,
+                        renderable.Z
                     )
                 );
                 sb.End();
