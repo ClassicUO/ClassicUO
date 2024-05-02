@@ -578,7 +578,8 @@ namespace ClassicUO
         public void Build(Scheduler scheduler)
         {
             // center world position x,y
-            scheduler.AddResource(((ushort)1631, (ushort)1233));
+            //scheduler.AddResource(((ushort)1631, (ushort)1233));
+            scheduler.AddResource(((ushort)1431, (ushort)1690));
 
             scheduler.AddPlugin(new FnaPlugin() {
                 WindowResizable = true,
@@ -632,12 +633,12 @@ namespace ClassicUO
                 world.Entity<Renderable>();
                 world.Entity<TileStretched>();
 
-                static float getDepthZ(ushort x, ushort y, sbyte priorityZ)
-                    => 0; // x + y + (127 + priorityZ) * 0.01f;
+                static float getDepthZ(int x, int y, int priorityZ)
+                    => x + y + (127 + priorityZ) * 0.01f;
 
                 var centerChunkX = centerWorldPos.Value.Item1 / 8;
                 var centerChunkY = centerWorldPos.Value.Item2 / 8;
-                var offset = 4;
+                var offset = 8;
                 var mapIndex = 0;
 
                 for (var chunkX = Math.Max(0, centerChunkX - offset); chunkX < centerChunkX + offset; ++chunkX)
@@ -693,7 +694,7 @@ namespace ClassicUO
                                             UV = textmapInfo.UV,
                                             Color = new Vector3(0, Renderer.ShaderHueTranslator.SHADER_LAND, 1f),
                                             Position = position,
-                                            Z = getDepthZ(tileX, tileY, (sbyte)(avgZ - 2))
+                                            Z = getDepthZ(tileX, tileY, avgZ - 2)
                                         })
                                         .Set(new TileStretched() {
                                             NormalTop = normalTop,
@@ -715,7 +716,7 @@ namespace ClassicUO
                                             UV = artInfo.UV,
                                             Color = Vector3.UnitZ,
                                             Position = IsoHelper.IsoToScreen(tileX, tileY, z),
-                                            Z = getDepthZ(tileX, tileY, (sbyte)(z - 2))
+                                            Z = getDepthZ(tileX, tileY, z - 2)
                                         });
                                 }
                             }
@@ -760,12 +761,15 @@ namespace ClassicUO
                                             priorityZ += 1;
                                         }
 
+                                        var posVec = IsoHelper.IsoToScreen(staX, staY, sb->Z);
+                                        posVec.X -= (short)((artInfo.UV.Width >> 1) - 22);
+                                        posVec.Y -= (short)(artInfo.UV.Height - 44);
                                         world.Entity()
                                             .Set(new Renderable() {
                                                 Texture = artInfo.Texture,
                                                 UV = artInfo.UV,
                                                 Color = Renderer.ShaderHueTranslator.GetHueVector(sb->Hue),
-                                                Position = IsoHelper.IsoToScreen(staX, staY, sb->Z),
+                                                Position = posVec,
                                                 Z = getDepthZ(staX, staY, priorityZ)
                                             });
                                     }
@@ -1026,6 +1030,7 @@ namespace ClassicUO
 
                 var sb = batch.Value;
                 sb.Begin();
+                sb.SetBrightlight(1.7f);
                 sb.SetStencil(DepthStencilState.Default);
                 queryTiles.Each((ref Renderable renderable, ref TileStretched stretched) =>
                     sb.DrawStretchedLand(
