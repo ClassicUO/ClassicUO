@@ -579,7 +579,7 @@ namespace ClassicUO
         {
             // center world position x,y
             //scheduler.AddResource(((ushort)1631, (ushort)1233));
-            scheduler.AddResource(((ushort)1431, (ushort)1690));
+            scheduler.AddResource(((ushort)1431, (ushort)1690, Vector2.Zero));
 
             scheduler.AddPlugin(new FnaPlugin() {
                 WindowResizable = true,
@@ -588,10 +588,17 @@ namespace ClassicUO
             });
 
             scheduler.AddPlugin<CuoPlugin>();
+
+            scheduler.AddSystem((EventWriter<OnNewChunkRequest> chunkWriter) => {
+                var offset = 8;
+                for (var x = -offset; x < offset; x += 1)
+                for (var y = -offset; y < offset; y += 1)
+                    chunkWriter.Enqueue(new () { X = (1431 / 8) + x, Y = (1690 / 8) + y, Map = 0});
+            }, Stages.Startup);
         }
     }
 
-    static class IsoHelper
+    static class Isometric
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector2 IsoToScreen(ushort isoX, ushort isoY, sbyte isoZ)
@@ -604,13 +611,18 @@ namespace ClassicUO
 
     }
 
+    struct OnNewChunkRequest { public int Map; public int X; public int Y; }
 
     // TODO: just for test
     readonly struct CuoPlugin : IPlugin
     {
         public unsafe void Build(Scheduler scheduler)
         {
-            scheduler.AddSystem(static (Res<GraphicsDevice> device, SchedulerState schedState) => {
+            scheduler.AddEvent<OnNewChunkRequest>();
+
+            scheduler.AddSystem(static (Res<GraphicsDevice> device, SchedulerState schedState, TinyEcs.World world) => {
+                world.Entity<Renderable>();
+                world.Entity<TileStretched>();
                 ClientVersionHelper.IsClientVersionValid(Settings.GlobalSettings.ClientVersion, out ClientVersion clientVersion);
                 Assets.UOFileManager.Load(clientVersion, Settings.GlobalSettings.UltimaOnlineDirectory, false, "ENU");
 
@@ -627,159 +639,148 @@ namespace ClassicUO
                 Res<Assets.TileDataLoader> tiledataLoader,
                 Res<Renderer.Arts.Art> arts,
                 Res<Renderer.Texmaps.Texmap> textmaps,
-                Res<(ushort, ushort)> centerWorldPos
+                Res<(ushort, ushort, Vector2)> centerWorldPos,
+                EventReader<OnNewChunkRequest> chunkRequests
             ) => {
-
-                world.Entity<Renderable>();
-                world.Entity<TileStretched>();
-
                 static float getDepthZ(int x, int y, int priorityZ)
                     => x + y + (127 + priorityZ) * 0.01f;
 
-                var centerChunkX = centerWorldPos.Value.Item1 / 8;
-                var centerChunkY = centerWorldPos.Value.Item2 / 8;
-                var offset = 8;
-                var mapIndex = 0;
-
-                for (var chunkX = Math.Max(0, centerChunkX - offset); chunkX < centerChunkX + offset; ++chunkX)
+                foreach (var chunkEv in chunkRequests.Read())
                 {
-                    for (var chunkY = Math.Max(0, centerChunkY - offset); chunkY < centerChunkY + offset; ++chunkY)
+                    ref var im = ref mapLoader.Value.GetIndex(chunkEv.Map, chunkEv.X, chunkEv.Y);
+
+                    if (im.MapAddress == 0)
+                        continue;
+
+                    var block = (Assets.MapBlock*) im.MapAddress;
+                    var cells = (Assets.MapCells*) &block->Cells;
+                    var bx = chunkEv.X << 3;
+                    var by = chunkEv.Y << 3;
+
+                    for (int y = 0; y < 8; ++y)
                     {
-                        ref var im = ref mapLoader.Value.GetIndex(mapIndex, chunkX, chunkY);
+                        var pos = y << 3;
+                        var tileY = (ushort) (by + y);
 
-                        if (im.MapAddress == 0)
-                            continue;
-
-                        var block = (Assets.MapBlock*) im.MapAddress;
-                        var cells = (Assets.MapCells*) &block->Cells;
-                        var bx = chunkX << 3;
-                        var by = chunkY << 3;
-
-                        for (int y = 0; y < 8; ++y)
+                        for (int x = 0; x < 8; ++x, ++pos)
                         {
-                            var pos = y << 3;
-                            var tileY = (ushort) (by + y);
+                            var tileID = (ushort) (cells[pos].TileID & 0x3FFF);
+                            var z = cells[pos].Z;
+                            var tileX = (ushort) (bx + x);
 
-                            for (int x = 0; x < 8; ++x, ++pos)
+                            var isStretched = tiledataLoader.Value.LandData[tileID].TexID == 0 &&
+                                tiledataLoader.Value.LandData[tileID].IsWet;
+
+                            isStretched = ApplyStretch(
+                                chunkEv.Map, tiledataLoader.Value.LandData[tileID].TexID,
+                                tileX, tileY, z,
+                                isStretched,
+                                out var avgZ, out var minZ,
+                                out var offsets,
+                                out var normalTop,
+                                out var normalRight,
+                                out var normalBottom,
+                                out var normalLeft
+                            );
+
+                            if (isStretched)
                             {
-                                var tileID = (ushort) (cells[pos].TileID & 0x3FFF);
-                                var z = cells[pos].Z;
-                                var tileX = (ushort) (bx + x);
+                                ref readonly var textmapInfo = ref textmaps.Value.GetTexmap(tiledataLoader.Value.LandData[tileID].TexID);
 
-                                var isStretched = tiledataLoader.Value.LandData[tileID].TexID == 0 &&
-                                    tiledataLoader.Value.LandData[tileID].IsWet;
+                                var position = Isometric.IsoToScreen(tileX, tileY, z);
+                                position.Y += z << 2;
 
-                                isStretched = ApplyStretch(
-                                    mapIndex, tiledataLoader.Value.LandData[tileID].TexID,
-                                    tileX, tileY, z,
-                                    isStretched,
-                                    out var avgZ, out var minZ,
-                                    out var offsets,
-                                    out var normalTop,
-                                    out var normalRight,
-                                    out var normalBottom,
-                                    out var normalLeft
-                                );
+                                world.Entity()
+                                    .Set(new Renderable() {
+                                        Texture = textmapInfo.Texture,
+                                        UV = textmapInfo.UV,
+                                        Color = new Vector3(0, Renderer.ShaderHueTranslator.SHADER_LAND, 1f),
+                                        Position = position,
+                                        Z = getDepthZ(tileX, tileY, avgZ - 2)
+                                    })
+                                    .Set(new TileStretched() {
+                                        NormalTop = normalTop,
+                                        NormalRight = normalRight,
+                                        NormalBottom = normalBottom,
+                                        NormalLeft = normalLeft,
+                                        AvgZ = avgZ,
+                                        MinZ = minZ,
+                                        Offset = offsets
+                                    });
+                            }
+                            else
+                            {
+                                ref readonly var artInfo = ref arts.Value.GetLand(tileID);
 
-                                if (isStretched)
+                                world.Entity()
+                                    .Set(new Renderable() {
+                                        Texture = artInfo.Texture,
+                                        UV = artInfo.UV,
+                                        Color = Vector3.UnitZ,
+                                        Position = Isometric.IsoToScreen(tileX, tileY, z),
+                                        Z = getDepthZ(tileX, tileY, z - 2)
+                                    });
+                            }
+                        }
+                    }
+
+                    if (im.StaticAddress != 0)
+                    {
+                        var sb = (Assets.StaticsBlock*) im.StaticAddress;
+
+                        if (sb != null)
+                        {
+                            for (int i = 0, count = (int) im.StaticCount; i < count; ++i, ++sb)
+                            {
+                                if (sb->Color != 0 && sb->Color != 0xFFFF)
                                 {
-                                    ref readonly var textmapInfo = ref textmaps.Value.GetTexmap(tiledataLoader.Value.LandData[tileID].TexID);
+                                    int pos = (sb->Y << 3) + sb->X;
 
-                                    var position = IsoHelper.IsoToScreen(tileX, tileY, z);
-                                    position.Y += z << 2;
+                                    if (pos >= 64)
+                                    {
+                                        continue;
+                                    }
 
-                                    world.Entity()
-                                        .Set(new Renderable() {
-                                            Texture = textmapInfo.Texture,
-                                            UV = textmapInfo.UV,
-                                            Color = new Vector3(0, Renderer.ShaderHueTranslator.SHADER_LAND, 1f),
-                                            Position = position,
-                                            Z = getDepthZ(tileX, tileY, avgZ - 2)
-                                        })
-                                        .Set(new TileStretched() {
-                                            NormalTop = normalTop,
-                                            NormalRight = normalRight,
-                                            NormalBottom = normalBottom,
-                                            NormalLeft = normalLeft,
-                                            AvgZ = avgZ,
-                                            MinZ = minZ,
-                                            Offset = offsets
-                                        });
-                                }
-                                else
-                                {
-                                    ref readonly var artInfo = ref arts.Value.GetLand(tileID);
+                                    var staX = (ushort)(bx + sb->X);
+                                    var staY = (ushort)(by + sb->Y);
 
+                                    ref readonly var artInfo = ref arts.Value.GetArt(sb->Color);
+
+                                    var priorityZ = sb->Z;
+
+                                    if (tiledataLoader.Value.StaticData[sb->Color].IsBackground)
+                                    {
+                                        priorityZ -= 1;
+                                    }
+
+                                    if (tiledataLoader.Value.StaticData[sb->Color].Height != 0)
+                                    {
+                                        priorityZ += 1;
+                                    }
+
+                                    if (tiledataLoader.Value.StaticData[sb->Color].IsMultiMovable)
+                                    {
+                                        priorityZ += 1;
+                                    }
+
+                                    var posVec = Isometric.IsoToScreen(staX, staY, sb->Z);
+                                    posVec.X -= (short)((artInfo.UV.Width >> 1) - 22);
+                                    posVec.Y -= (short)(artInfo.UV.Height - 44);
                                     world.Entity()
                                         .Set(new Renderable() {
                                             Texture = artInfo.Texture,
                                             UV = artInfo.UV,
-                                            Color = Vector3.UnitZ,
-                                            Position = IsoHelper.IsoToScreen(tileX, tileY, z),
-                                            Z = getDepthZ(tileX, tileY, z - 2)
+                                            Color = Renderer.ShaderHueTranslator.GetHueVector(sb->Hue),
+                                            Position = posVec,
+                                            Z = getDepthZ(staX, staY, priorityZ)
                                         });
-                                }
-                            }
-                        }
-
-                        if (im.StaticAddress != 0)
-                        {
-                            var sb = (Assets.StaticsBlock*) im.StaticAddress;
-
-                            if (sb != null)
-                            {
-                                for (int i = 0, count = (int) im.StaticCount; i < count; ++i, ++sb)
-                                {
-                                    if (sb->Color != 0 && sb->Color != 0xFFFF)
-                                    {
-                                        int pos = (sb->Y << 3) + sb->X;
-
-                                        if (pos >= 64)
-                                        {
-                                            continue;
-                                        }
-
-                                        var staX = (ushort)(bx + sb->X);
-                                        var staY = (ushort)(by + sb->Y);
-
-                                        ref readonly var artInfo = ref arts.Value.GetArt(sb->Color);
-
-                                        var priorityZ = sb->Z;
-
-                                        if (tiledataLoader.Value.StaticData[sb->Color].IsBackground)
-                                        {
-                                            priorityZ -= 1;
-                                        }
-
-                                        if (tiledataLoader.Value.StaticData[sb->Color].Height != 0)
-                                        {
-                                            priorityZ += 1;
-                                        }
-
-                                        if (tiledataLoader.Value.StaticData[sb->Color].IsMultiMovable)
-                                        {
-                                            priorityZ += 1;
-                                        }
-
-                                        var posVec = IsoHelper.IsoToScreen(staX, staY, sb->Z);
-                                        posVec.X -= (short)((artInfo.UV.Width >> 1) - 22);
-                                        posVec.Y -= (short)(artInfo.UV.Height - 44);
-                                        world.Entity()
-                                            .Set(new Renderable() {
-                                                Texture = artInfo.Texture,
-                                                UV = artInfo.UV,
-                                                Color = Renderer.ShaderHueTranslator.GetHueVector(sb->Hue),
-                                                Position = posVec,
-                                                Z = getDepthZ(staX, staY, priorityZ)
-                                            });
-                                    }
                                 }
                             }
                         }
                     }
                 }
-
-            }, Stages.Startup);
+            }, Stages.BeforeUpdate)
+            .RunIf((EventReader<OnNewChunkRequest> reader) => !reader.IsEmpty);
         }
 
 
@@ -810,9 +811,9 @@ namespace ClassicUO
              * | lef | bot |
              * |_____|_____|
              */
-            sbyte zTop = z;
-            sbyte zRight = GetTileZ(mapIndex, x + 1, y);
-            sbyte zLeft = GetTileZ(mapIndex, x, y + 1);
+            var zTop = z;
+            var zRight = GetTileZ(mapIndex, x + 1, y);
+            var zLeft = GetTileZ(mapIndex, x, y + 1);
             sbyte zBottom = GetTileZ(mapIndex, x + 1, y + 1);
 
             offsets.Top = zTop * 4;
@@ -842,17 +843,17 @@ namespace ClassicUO
              * |     | t13 | t23 |     |
              * |_____|_____|_____|_____|
              */
-            sbyte t10 = GetTileZ(mapIndex, x, y - 1);
-            sbyte t20 = GetTileZ(mapIndex, x + 1, y - 1);
-            sbyte t01 = GetTileZ(mapIndex, x - 1, y);
-            sbyte t21 = zRight;
-            sbyte t31 = GetTileZ(mapIndex, x + 2, y);
-            sbyte t02 = GetTileZ(mapIndex, x - 1, y + 1);
-            sbyte t12 = zLeft;
-            sbyte t22 = zBottom;
-            sbyte t32 = GetTileZ(mapIndex, x + 2, y + 1);
-            sbyte t13 = GetTileZ(mapIndex, x, y + 2);
-            sbyte t23 = GetTileZ(mapIndex, x + 1, y + 2);
+            var t10 = GetTileZ(mapIndex, x, y - 1);
+            var t20 = GetTileZ(mapIndex, x + 1, y - 1);
+            var t01 = GetTileZ(mapIndex, x - 1, y);
+            var t21 = zRight;
+            var t31 = GetTileZ(mapIndex, x + 2, y);
+            var t02 = GetTileZ(mapIndex, x - 1, y + 1);
+            var t12 = zLeft;
+            var t22 = zBottom;
+            var t32 = GetTileZ(mapIndex, x + 2, y + 1);
+            var t13 = GetTileZ(mapIndex, x, y + 2);
+            var t23 = GetTileZ(mapIndex, x + 1, y + 2);
 
 
             isStretched |= CalculateNormal(z, t10, t21, t12, t01, out normalTop);
@@ -1018,15 +1019,25 @@ namespace ClassicUO
             scheduler.AddSystem((
                 Res<GraphicsDevice> device,
                 Res<Renderer.UltimaBatcher2D> batch,
-                Res<(ushort, ushort)> centerWorldPos,
+                Res<(ushort, ushort, Vector2)> centerWorldPos,
+                Res<MouseState> oldMouseState,
                 Query<Renderable, Not<TileStretched>> query,
                 Query<(Renderable, TileStretched)> queryTiles
-                ) => {
+            ) => {
                 device.Value.Clear(Color.AliceBlue);
 
-                var center = IsoHelper.IsoToScreen(centerWorldPos.Value.Item1, centerWorldPos.Value.Item2, 0);
+                var center = Isometric.IsoToScreen(centerWorldPos.Value.Item1, centerWorldPos.Value.Item2, 0);
                 center.X -= device.Value.PresentationParameters.BackBufferWidth / 2;
                 center.Y -= device.Value.PresentationParameters.BackBufferHeight / 2;
+
+                var newMouseState = Mouse.GetState();
+                if (newMouseState.LeftButton == ButtonState.Pressed)
+                {
+                    centerWorldPos.Value.Item3.X += newMouseState.X - oldMouseState.Value.X;
+                    centerWorldPos.Value.Item3.Y += newMouseState.Y - oldMouseState.Value.Y;
+                }
+
+                center -= centerWorldPos.Value.Item3;
 
                 var sb = batch.Value;
                 sb.Begin();
@@ -1079,7 +1090,7 @@ namespace ClassicUO
                         writer.Enqueue(new KeyEvent() { Action = 2, Key = key });
 
                 oldState.Value = newState;
-            });
+            }, Stages.AfterUpdate);
 
             scheduler.AddSystem((EventWriter<MouseEvent> writer, EventWriter<WheelEvent> wheelWriter, Res<MouseState> oldState) => {
                 var newState = Mouse.GetState();
@@ -1100,7 +1111,7 @@ namespace ClassicUO
                     wheelWriter.Enqueue(new WheelEvent() { Value = (oldState.Value.ScrollWheelValue - newState.ScrollWheelValue) / 120 });
 
                 oldState.Value = newState;
-            });
+            }, Stages.AfterUpdate);
 
             scheduler.AddSystem((EventReader<KeyEvent> reader) => {
                 foreach (var ev in reader.Read())
