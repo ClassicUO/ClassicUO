@@ -101,6 +101,8 @@ namespace ClassicUO
 
         protected override void Initialize()
         {
+            base.Initialize();
+
             if (GraphicManager.GraphicsDevice.Adapter.IsProfileSupported(GraphicsProfile.HiDef))
             {
                 GraphicManager.GraphicsProfile = GraphicsProfile.HiDef;
@@ -113,8 +115,6 @@ namespace ClassicUO
 
             _filter = HandleSdlEvent;
             SDL_SetEventFilter(_filter, IntPtr.Zero);
-
-            base.Initialize();
         }
 
         protected override void LoadContent()
@@ -125,6 +125,7 @@ namespace ClassicUO
 
             Fonts.Initialize(GraphicsDevice);
             SolidColorTextureCache.Initialize(GraphicsDevice);
+
             Audio = new AudioManager();
             Audio.Initialize();
 
