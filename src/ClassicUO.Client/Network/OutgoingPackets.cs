@@ -508,7 +508,7 @@ namespace ClassicUO.Network
             writer.Dispose();
         }
 
-        public static void Send_SelectCharacter(this NetClient socket, uint index, string name, uint ipclient)
+        public static void Send_SelectCharacter(this NetClient socket, uint index, string name, uint ipclient, ClientFlags protocol)
         {
             const byte ID = 0x5D;
 
@@ -525,7 +525,7 @@ namespace ClassicUO.Network
             writer.WriteUInt32BE(0xEDEDEDED);
             writer.WriteASCII(name, 30);
             writer.WriteZero(2);
-            writer.WriteUInt32BE((uint) Client.Game.UO.Protocol);
+            writer.WriteUInt32BE((uint) protocol);
             writer.WriteZero(24);
             writer.WriteUInt32BE(index);
             writer.WriteUInt32BE(ipclient);

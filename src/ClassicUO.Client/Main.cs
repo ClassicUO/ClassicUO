@@ -32,6 +32,7 @@
 
 using ClassicUO.Configuration;
 using ClassicUO.Game;
+using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.IO;
 using ClassicUO.Network;
@@ -44,8 +45,12 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using SDL2;
 using System;
+using System.Buffers;
+using System.Buffers.Binary;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Net;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -612,6 +617,7 @@ namespace ClassicUO
     }
 
     struct OnNewChunkRequest { public int Map; public int X; public int Y; }
+    struct OnPacketRecv { public byte[] RentedBuffer; public int Length; }
 
     // TODO: just for test
     readonly struct CuoPlugin : IPlugin
@@ -619,6 +625,8 @@ namespace ClassicUO
         public unsafe void Build(Scheduler scheduler)
         {
             scheduler.AddEvent<OnNewChunkRequest>();
+            scheduler.AddEvent<OnPacketRecv>();
+            scheduler.AddResource(new NetClient());
 
             scheduler.AddSystem(static (Res<GraphicsDevice> device, SchedulerState schedState, TinyEcs.World world) => {
                 world.Entity<Renderable>();
@@ -631,6 +639,20 @@ namespace ClassicUO
                 schedState.AddResource(new Renderer.Arts.Art(device));
                 schedState.AddResource(new Renderer.Texmaps.Texmap(device));
                 schedState.AddResource(new Renderer.UltimaBatcher2D(device));
+                schedState.AddResource(clientVersion);
+            }, Stages.Startup);
+
+            scheduler.AddSystem((Res<NetClient> network, Res<ClientVersion> clientVersion) => {
+                PacketsTable.AdjustPacketSizeByVersion(clientVersion.Value);
+                network.Value.Connect("localhost", 2593);
+
+                var major = (byte) ((uint)clientVersion.Value >> 24);
+                var minor = (byte) ((uint)clientVersion.Value >> 16);
+                var build = (byte) ((uint)clientVersion.Value >> 8);
+                var extra = (byte) clientVersion.Value;
+
+                network.Value.Send_Seed(network.Value.LocalIP, major, minor, build, extra);
+                network.Value.Send_FirstLogin(Settings.GlobalSettings.Username, Crypter.Decrypt(Settings.GlobalSettings.Password));
             }, Stages.Startup);
 
             scheduler.AddSystem(static (
@@ -781,6 +803,136 @@ namespace ClassicUO
                 }
             }, Stages.BeforeUpdate)
             .RunIf((EventReader<OnNewChunkRequest> reader) => !reader.IsEmpty);
+
+            scheduler.AddSystem((Res<NetClient> network, EventWriter<OnPacketRecv> packetWriter) => {
+                var availableData = network.Value.CollectAvailableData();
+                if (availableData.Count != 0)
+                {
+                    var sharedBuffer = ArrayPool<byte>.Shared.Rent(availableData.Count);
+                    availableData.CopyTo(sharedBuffer);
+
+                    packetWriter.Enqueue(new () { RentedBuffer = sharedBuffer, Length = availableData.Count });
+                }
+
+                network.Value.Flush();
+            });
+
+            scheduler.AddSystem((EventReader<OnPacketRecv> packetReader, Res<NetClient> network) => {
+                foreach (var packet in packetReader.Read())
+                {
+                    var realBuffer = packet.RentedBuffer.AsSpan(0, packet.Length);
+                    try
+                    {
+                        while (!realBuffer.IsEmpty)
+                        {
+                            var packetId = realBuffer[0];
+                            var packetLen = PacketsTable.GetPacketLength(packetId);
+                            var packetBuffer = realBuffer[1..];
+
+                            if (packetLen == -1)
+                            {
+                                if (realBuffer.Length < 3)
+                                    return;
+
+                                packetLen = BinaryPrimitives.ReadInt16BigEndian(packetBuffer);
+                                packetBuffer = packetBuffer[2.. (packetLen - 2)];
+                            }
+
+                            var reader = new StackDataReader(packetBuffer);
+
+                            switch (packetId)
+                            {
+                                // server list
+                                case 0xA8:
+                                    {
+                                        var flags = reader.ReadUInt8();
+                                        var count = reader.ReadUInt16BE();
+
+                                        for (var i = 0; i < count; ++i)
+                                        {
+                                            var index = reader.ReadUInt16BE();
+                                            var name = reader.ReadASCII(32, true);
+                                            var percFull = reader.ReadUInt8();
+                                            var timeZone = reader.ReadUInt8();
+                                            var address = reader.ReadUInt32BE();
+
+                                            Console.WriteLine("server entry -> {0}", name);
+
+                                            network.Value.Send_SelectServer((byte) index);
+                                            break;
+                                        }
+                                    }
+                                    break;
+
+                                // characters list
+                                case 0xA9:
+                                    {
+                                        var charactersCount = reader.ReadUInt8();
+                                        var characterNames = new List<string>();
+                                        for (var i = 0; i < charactersCount; ++i)
+                                        {
+                                            characterNames.Add(reader.ReadASCII(30).TrimEnd('\0'));
+                                            reader.Skip(30);
+                                        }
+
+                                        var cityCount = reader.ReadUInt8();
+                                        // bla bla
+
+                                        var protocol = ClientFlags.CF_T2A |
+                                            ClientFlags.CF_RE |
+                                            ClientFlags.CF_TD |
+                                            ClientFlags.CF_LBR |
+                                            ClientFlags.CF_AOS |
+                                            ClientFlags.CF_SE |
+                                            ClientFlags.CF_SA |
+                                            ClientFlags.CF_UO3D |
+                                            ClientFlags.CF_RESERVED |
+                                            ClientFlags.CF_3D;
+
+                                        network.Value.Send_SelectCharacter(0, characterNames[0], network.Value.LocalIP, protocol);
+                                    }
+                                    break;
+
+                                // server relay
+                                case 0x8C:
+                                    {
+                                        var ip = reader.ReadUInt32LE();
+                                        var port = reader.ReadUInt16BE();
+                                        var seed = reader.ReadUInt32BE();
+
+                                        network.Value.Disconnect();
+                                        network.Value.Connect(new IPAddress(ip).ToString(), port);
+
+                                        if (network.Value.IsConnected)
+                                        {
+                                            network.Value.EnableCompression();
+                                            unsafe {
+                                                Span<byte> b = [(byte)(seed >> 24), (byte)(seed >> 16), (byte)(seed >> 8), (byte)seed];
+                                                network.Value.Send(b, true, true);
+                                            }
+
+                                            network.Value.Send_SecondLogin(Settings.GlobalSettings.Username, Crypter.Decrypt(Settings.GlobalSettings.Password), seed);
+                                        }
+                                    }
+                                    break;
+
+                                // locked features
+                                case 0xB9:
+                                // light level
+                                case 0x4F:
+                                default:
+                                    break;
+                            }
+
+                            realBuffer = realBuffer[packetLen ..];
+                        }
+                    }
+                    finally
+                    {
+                        ArrayPool<byte>.Shared.Return(packet.RentedBuffer);
+                    }
+                }
+            });
         }
 
 
@@ -1019,25 +1171,25 @@ namespace ClassicUO
             scheduler.AddSystem((
                 Res<GraphicsDevice> device,
                 Res<Renderer.UltimaBatcher2D> batch,
-                Res<(ushort, ushort, Vector2)> centerWorldPos,
+                Res<(ushort CenterX, ushort CenterY, Vector2 Offset)> centerWorldPos,
                 Res<MouseState> oldMouseState,
                 Query<Renderable, Not<TileStretched>> query,
                 Query<(Renderable, TileStretched)> queryTiles
             ) => {
                 device.Value.Clear(Color.AliceBlue);
 
-                var center = Isometric.IsoToScreen(centerWorldPos.Value.Item1, centerWorldPos.Value.Item2, 0);
+                var center = Isometric.IsoToScreen(centerWorldPos.Value.CenterX, centerWorldPos.Value.CenterY, 0);
                 center.X -= device.Value.PresentationParameters.BackBufferWidth / 2;
                 center.Y -= device.Value.PresentationParameters.BackBufferHeight / 2;
 
                 var newMouseState = Mouse.GetState();
                 if (newMouseState.LeftButton == ButtonState.Pressed)
                 {
-                    centerWorldPos.Value.Item3.X += newMouseState.X - oldMouseState.Value.X;
-                    centerWorldPos.Value.Item3.Y += newMouseState.Y - oldMouseState.Value.Y;
+                    centerWorldPos.Value.Offset.X += newMouseState.X - oldMouseState.Value.X;
+                    centerWorldPos.Value.Offset.Y += newMouseState.Y - oldMouseState.Value.Y;
                 }
 
-                center -= centerWorldPos.Value.Item3;
+                center -= centerWorldPos.Value.Offset;
 
                 var sb = batch.Value;
                 sb.Begin();

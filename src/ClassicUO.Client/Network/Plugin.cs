@@ -276,8 +276,8 @@ namespace ClassicUO.Network
                 {
                     Client.Game.PluginHost?.LoadPlugin(PluginPath);
 
-                    //Client.Game.AssistantHost.OnSocketConnected += (o, e) => { 
-                    //    Client.Game.AssistantHost.PluginInitialize(PluginPath); 
+                    //Client.Game.AssistantHost.OnSocketConnected += (o, e) => {
+                    //    Client.Game.AssistantHost.PluginInitialize(PluginPath);
                     //};
                     //Client.Game.AssistantHost.Connect("127.0.0.1", 7777);
 
@@ -578,7 +578,7 @@ namespace ClassicUO.Network
 
         internal static bool ProcessSendPacket(ref Span<byte> message)
         {
-            bool result = Client.Game.PluginHost?.PacketOut(message) ?? true;
+            bool result = Client.Game?.PluginHost?.PacketOut(message) ?? true;
 
             foreach (Plugin plugin in Plugins)
             {
