@@ -2615,7 +2615,7 @@ namespace ClassicUO.Network
             writer.Dispose();
         }
 
-        public static void Send_ClientType(this NetClient socket)
+        public static void Send_ClientType(this NetClient socket, ClientFlags protocol)
         {
             const byte ID = 0xBF;
 
@@ -2635,7 +2635,7 @@ namespace ClassicUO.Network
 
             uint clientFlag = 0;
 
-            for (int i = 0; i < (uint) Client.Game.UO.Protocol; ++i)
+            for (int i = 0; i < (uint) protocol; ++i)
             {
                 clientFlag |= (uint) (1 << i);
             }

@@ -2258,7 +2258,7 @@ namespace ClassicUO.Network
 
                 if (Client.Game.UO.Version >= Utility.ClientVersion.CV_306E)
                 {
-                    NetClient.Socket.Send_ClientType();
+                    NetClient.Socket.Send_ClientType(Client.Game.UO.Protocol);
                 }
 
                 if (Client.Game.UO.Version >= Utility.ClientVersion.CV_305D)

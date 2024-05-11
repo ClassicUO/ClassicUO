@@ -277,7 +277,7 @@ namespace ClassicUO
                 while (true)
                     scheduler.Run();
 
-                //Client.Run(pluginHost);
+                // Client.Run(pluginHost);
             }
 
             Log.Trace("Closing...");
@@ -582,9 +582,7 @@ namespace ClassicUO
     {
         public void Build(Scheduler scheduler)
         {
-            // center world position x,y
-            //scheduler.AddResource(((ushort)1631, (ushort)1233));
-            scheduler.AddResource(((ushort)1431, (ushort)1690, Vector2.Zero));
+            scheduler.AddResource(new GameState() { Map = -1 });
 
             scheduler.AddPlugin(new FnaPlugin() {
                 WindowResizable = true,
@@ -593,13 +591,6 @@ namespace ClassicUO
             });
 
             scheduler.AddPlugin<CuoPlugin>();
-
-            scheduler.AddSystem((EventWriter<OnNewChunkRequest> chunkWriter) => {
-                var offset = 8;
-                for (var x = -offset; x < offset; x += 1)
-                for (var y = -offset; y < offset; y += 1)
-                    chunkWriter.Enqueue(new () { X = (1431 / 8) + x, Y = (1690 / 8) + y, Map = 0});
-            }, Stages.Startup);
         }
     }
 
@@ -616,10 +607,19 @@ namespace ClassicUO
 
     }
 
-    struct OnNewChunkRequest { public int Map; public int X; public int Y; }
+    struct OnNewChunkRequest { public int Map; public int RangeStartX, RangeStartY, RangeEndX, RangeEndY; }
     struct OnPacketRecv { public byte[] RentedBuffer; public int Length; }
+    struct GameState
+    {
+        public int Map;
+        public ushort CenterX, CenterY;
+        public sbyte CenterZ;
+        public Vector2 CenterOffset;
+        public uint PlayerSerial;
+        public ClientFlags Protocol;
+        public int MaxMapWidth, MaxMapHeight;
+    }
 
-    // TODO: just for test
     readonly struct CuoPlugin : IPlugin
     {
         public unsafe void Build(Scheduler scheduler)
@@ -627,8 +627,9 @@ namespace ClassicUO
             scheduler.AddEvent<OnNewChunkRequest>();
             scheduler.AddEvent<OnPacketRecv>();
             scheduler.AddResource(new NetClient());
+            scheduler.AddResource(new HashSet<(int chunkX, int chunkY, int mapIndex)>());
 
-            scheduler.AddSystem(static (Res<GraphicsDevice> device, SchedulerState schedState, TinyEcs.World world) => {
+            scheduler.AddSystem(static (Res<GraphicsDevice> device, Res<GameState> gameState, SchedulerState schedState, TinyEcs.World world) => {
                 world.Entity<Renderable>();
                 world.Entity<TileStretched>();
                 ClientVersionHelper.IsClientVersionValid(Settings.GlobalSettings.ClientVersion, out ClientVersion clientVersion);
@@ -640,6 +641,27 @@ namespace ClassicUO
                 schedState.AddResource(new Renderer.Texmaps.Texmap(device));
                 schedState.AddResource(new Renderer.UltimaBatcher2D(device));
                 schedState.AddResource(clientVersion);
+
+                gameState.Value.Protocol = ClientFlags.CF_T2A;
+
+                if (clientVersion  >= ClientVersion.CV_200)
+                    gameState.Value.Protocol |= ClientFlags.CF_RE;
+
+                if (clientVersion >= ClientVersion.CV_300)
+                    gameState.Value.Protocol |= ClientFlags.CF_TD;
+
+                if (clientVersion >= ClientVersion.CV_308)
+                    gameState.Value.Protocol |= ClientFlags.CF_LBR;
+
+                if (clientVersion >= ClientVersion.CV_308Z)
+                    gameState.Value.Protocol |= ClientFlags.CF_AOS;
+
+                if (clientVersion >= ClientVersion.CV_405A)
+                    gameState.Value.Protocol |= ClientFlags.CF_SE;
+
+                if (clientVersion >= ClientVersion.CV_60144)
+                    gameState.Value.Protocol |= ClientFlags.CF_SA;
+
             }, Stages.Startup);
 
             scheduler.AddSystem((Res<NetClient> network, Res<ClientVersion> clientVersion) => {
@@ -662,7 +684,7 @@ namespace ClassicUO
                 Res<Assets.TileDataLoader> tiledataLoader,
                 Res<Renderer.Arts.Art> arts,
                 Res<Renderer.Texmaps.Texmap> textmaps,
-                Res<(ushort, ushort, Vector2)> centerWorldPos,
+                Res<HashSet<(int ChunkX, int ChunkY, int MapIndex)>> chunksLoaded,
                 EventReader<OnNewChunkRequest> chunkRequests
             ) => {
                 static float getDepthZ(int x, int y, int priorityZ)
@@ -670,137 +692,147 @@ namespace ClassicUO
 
                 foreach (var chunkEv in chunkRequests.Read())
                 {
-                    ref var im = ref mapLoader.Value.GetIndex(chunkEv.Map, chunkEv.X, chunkEv.Y);
-
-                    if (im.MapAddress == 0)
-                        continue;
-
-                    var block = (Assets.MapBlock*) im.MapAddress;
-                    var cells = (Assets.MapCells*) &block->Cells;
-                    var bx = chunkEv.X << 3;
-                    var by = chunkEv.Y << 3;
-
-                    for (int y = 0; y < 8; ++y)
+                    for (int chunkX = chunkEv.RangeStartX; chunkX <= chunkEv.RangeEndX; chunkX += 1)
+                    for (int chunkY = chunkEv.RangeStartY; chunkY <= chunkEv.RangeEndY; chunkY += 1)
                     {
-                        var pos = y << 3;
-                        var tileY = (ushort) (by + y);
+                        ref var im = ref mapLoader.Value.GetIndex(chunkEv.Map, chunkX, chunkY);
 
-                        for (int x = 0; x < 8; ++x, ++pos)
+                        if (im.MapAddress == 0)
+                            continue;
+
+                        if (chunksLoaded.Value.Contains((chunkX, chunkY, chunkEv.Map)))
+                            continue;
+
+                        chunksLoaded.Value.Add((chunkX, chunkY, chunkEv.Map));
+
+                        var block = (Assets.MapBlock*) im.MapAddress;
+                        var cells = (Assets.MapCells*) &block->Cells;
+                        var bx = chunkX << 3;
+                        var by = chunkY << 3;
+
+                        for (int y = 0; y < 8; ++y)
                         {
-                            var tileID = (ushort) (cells[pos].TileID & 0x3FFF);
-                            var z = cells[pos].Z;
-                            var tileX = (ushort) (bx + x);
+                            var pos = y << 3;
+                            var tileY = (ushort) (by + y);
 
-                            var isStretched = tiledataLoader.Value.LandData[tileID].TexID == 0 &&
-                                tiledataLoader.Value.LandData[tileID].IsWet;
-
-                            isStretched = ApplyStretch(
-                                chunkEv.Map, tiledataLoader.Value.LandData[tileID].TexID,
-                                tileX, tileY, z,
-                                isStretched,
-                                out var avgZ, out var minZ,
-                                out var offsets,
-                                out var normalTop,
-                                out var normalRight,
-                                out var normalBottom,
-                                out var normalLeft
-                            );
-
-                            if (isStretched)
+                            for (int x = 0; x < 8; ++x, ++pos)
                             {
-                                ref readonly var textmapInfo = ref textmaps.Value.GetTexmap(tiledataLoader.Value.LandData[tileID].TexID);
+                                var tileID = (ushort) (cells[pos].TileID & 0x3FFF);
+                                var z = cells[pos].Z;
+                                var tileX = (ushort) (bx + x);
 
-                                var position = Isometric.IsoToScreen(tileX, tileY, z);
-                                position.Y += z << 2;
+                                var isStretched = tiledataLoader.Value.LandData[tileID].TexID == 0 &&
+                                    tiledataLoader.Value.LandData[tileID].IsWet;
 
-                                world.Entity()
-                                    .Set(new Renderable() {
-                                        Texture = textmapInfo.Texture,
-                                        UV = textmapInfo.UV,
-                                        Color = new Vector3(0, Renderer.ShaderHueTranslator.SHADER_LAND, 1f),
-                                        Position = position,
-                                        Z = getDepthZ(tileX, tileY, avgZ - 2)
-                                    })
-                                    .Set(new TileStretched() {
-                                        NormalTop = normalTop,
-                                        NormalRight = normalRight,
-                                        NormalBottom = normalBottom,
-                                        NormalLeft = normalLeft,
-                                        AvgZ = avgZ,
-                                        MinZ = minZ,
-                                        Offset = offsets
-                                    });
-                            }
-                            else
-                            {
-                                ref readonly var artInfo = ref arts.Value.GetLand(tileID);
+                                isStretched = ApplyStretch(
+                                    chunkEv.Map, tiledataLoader.Value.LandData[tileID].TexID,
+                                    tileX, tileY, z,
+                                    isStretched,
+                                    out var avgZ, out var minZ,
+                                    out var offsets,
+                                    out var normalTop,
+                                    out var normalRight,
+                                    out var normalBottom,
+                                    out var normalLeft
+                                );
 
-                                world.Entity()
-                                    .Set(new Renderable() {
-                                        Texture = artInfo.Texture,
-                                        UV = artInfo.UV,
-                                        Color = Vector3.UnitZ,
-                                        Position = Isometric.IsoToScreen(tileX, tileY, z),
-                                        Z = getDepthZ(tileX, tileY, z - 2)
-                                    });
-                            }
-                        }
-                    }
-
-                    if (im.StaticAddress != 0)
-                    {
-                        var sb = (Assets.StaticsBlock*) im.StaticAddress;
-
-                        if (sb != null)
-                        {
-                            for (int i = 0, count = (int) im.StaticCount; i < count; ++i, ++sb)
-                            {
-                                if (sb->Color != 0 && sb->Color != 0xFFFF)
+                                if (isStretched)
                                 {
-                                    int pos = (sb->Y << 3) + sb->X;
+                                    ref readonly var textmapInfo = ref textmaps.Value.GetTexmap(tiledataLoader.Value.LandData[tileID].TexID);
 
-                                    if (pos >= 64)
-                                    {
-                                        continue;
-                                    }
+                                    var position = Isometric.IsoToScreen(tileX, tileY, z);
+                                    position.Y += z << 2;
 
-                                    var staX = (ushort)(bx + sb->X);
-                                    var staY = (ushort)(by + sb->Y);
+                                    world.Entity()
+                                        .Set(new Renderable() {
+                                            Texture = textmapInfo.Texture,
+                                            UV = textmapInfo.UV,
+                                            Color = new Vector3(0, Renderer.ShaderHueTranslator.SHADER_LAND, 1f),
+                                            Position = position,
+                                            Z = getDepthZ(tileX, tileY, avgZ - 2)
+                                        })
+                                        .Set(new TileStretched() {
+                                            NormalTop = normalTop,
+                                            NormalRight = normalRight,
+                                            NormalBottom = normalBottom,
+                                            NormalLeft = normalLeft,
+                                            AvgZ = avgZ,
+                                            MinZ = minZ,
+                                            Offset = offsets
+                                        });
+                                }
+                                else
+                                {
+                                    ref readonly var artInfo = ref arts.Value.GetLand(tileID);
 
-                                    ref readonly var artInfo = ref arts.Value.GetArt(sb->Color);
-
-                                    var priorityZ = sb->Z;
-
-                                    if (tiledataLoader.Value.StaticData[sb->Color].IsBackground)
-                                    {
-                                        priorityZ -= 1;
-                                    }
-
-                                    if (tiledataLoader.Value.StaticData[sb->Color].Height != 0)
-                                    {
-                                        priorityZ += 1;
-                                    }
-
-                                    if (tiledataLoader.Value.StaticData[sb->Color].IsMultiMovable)
-                                    {
-                                        priorityZ += 1;
-                                    }
-
-                                    var posVec = Isometric.IsoToScreen(staX, staY, sb->Z);
-                                    posVec.X -= (short)((artInfo.UV.Width >> 1) - 22);
-                                    posVec.Y -= (short)(artInfo.UV.Height - 44);
                                     world.Entity()
                                         .Set(new Renderable() {
                                             Texture = artInfo.Texture,
                                             UV = artInfo.UV,
-                                            Color = Renderer.ShaderHueTranslator.GetHueVector(sb->Hue),
-                                            Position = posVec,
-                                            Z = getDepthZ(staX, staY, priorityZ)
+                                            Color = Vector3.UnitZ,
+                                            Position = Isometric.IsoToScreen(tileX, tileY, z),
+                                            Z = getDepthZ(tileX, tileY, z - 2)
                                         });
                                 }
                             }
                         }
+
+                        if (im.StaticAddress != 0)
+                        {
+                            var sb = (Assets.StaticsBlock*) im.StaticAddress;
+
+                            if (sb != null)
+                            {
+                                for (int i = 0, count = (int) im.StaticCount; i < count; ++i, ++sb)
+                                {
+                                    if (sb->Color != 0 && sb->Color != 0xFFFF)
+                                    {
+                                        int pos = (sb->Y << 3) + sb->X;
+
+                                        if (pos >= 64)
+                                        {
+                                            continue;
+                                        }
+
+                                        var staX = (ushort)(bx + sb->X);
+                                        var staY = (ushort)(by + sb->Y);
+
+                                        ref readonly var artInfo = ref arts.Value.GetArt(sb->Color);
+
+                                        var priorityZ = sb->Z;
+
+                                        if (tiledataLoader.Value.StaticData[sb->Color].IsBackground)
+                                        {
+                                            priorityZ -= 1;
+                                        }
+
+                                        if (tiledataLoader.Value.StaticData[sb->Color].Height != 0)
+                                        {
+                                            priorityZ += 1;
+                                        }
+
+                                        if (tiledataLoader.Value.StaticData[sb->Color].IsMultiMovable)
+                                        {
+                                            priorityZ += 1;
+                                        }
+
+                                        var posVec = Isometric.IsoToScreen(staX, staY, sb->Z);
+                                        posVec.X -= (short)((artInfo.UV.Width >> 1) - 22);
+                                        posVec.Y -= (short)(artInfo.UV.Height - 44);
+                                        world.Entity()
+                                            .Set(new Renderable() {
+                                                Texture = artInfo.Texture,
+                                                UV = artInfo.UV,
+                                                Color = Renderer.ShaderHueTranslator.GetHueVector(sb->Hue),
+                                                Position = posVec,
+                                                Z = getDepthZ(staX, staY, priorityZ)
+                                            });
+                                    }
+                                }
+                            }
+                        }
                     }
+
                 }
             }, Stages.BeforeUpdate)
             .RunIf((EventReader<OnNewChunkRequest> reader) => !reader.IsEmpty);
@@ -818,7 +850,15 @@ namespace ClassicUO
                 network.Value.Flush();
             });
 
-            scheduler.AddSystem((EventReader<OnPacketRecv> packetReader, Res<NetClient> network, TinyEcs.World world) => {
+            scheduler.AddSystem((
+                EventReader<OnPacketRecv> packetReader,
+                Res<NetClient> network,
+                TinyEcs.World world,
+                EventWriter<OnNewChunkRequest> chunkRequests,
+                Res<HashSet<(int ChunkX, int ChunkY, int MapIndex)>> chunksLoaded,
+                Res<GameState> gameState,
+                Res<ClientVersion> clientVersion
+            ) => {
                 foreach (var packet in packetReader.Read())
                 {
                     var realBuffer = packet.RentedBuffer.AsSpan(0, packet.Length);
@@ -828,24 +868,26 @@ namespace ClassicUO
                         {
                             var packetId = realBuffer[0];
                             var packetLen = PacketsTable.GetPacketLength(packetId);
-                            var packetBuffer = realBuffer[1..];
+                            var packetBuffer = realBuffer;
+                            var packetHeaderOffset = sizeof(byte);
 
                             if (packetLen == -1)
                             {
                                 if (realBuffer.Length < 3)
                                     return;
 
-                                packetLen = BinaryPrimitives.ReadInt16BigEndian(packetBuffer);
-                                packetBuffer = packetBuffer[2.. (packetLen - 2)];
+                                packetLen = BinaryPrimitives.ReadInt16BigEndian(packetBuffer[packetHeaderOffset..]);
+                                packetHeaderOffset += sizeof(ushort);
                             }
 
-                            var reader = new StackDataReader(packetBuffer);
+                            packetBuffer = packetBuffer[.. packetLen];
+
+                            var reader = new StackDataReader(packetBuffer[packetHeaderOffset..]);
                             Console.WriteLine(">> packet-in: ID 0x{0:X2} | Len: {1}", packetId, packetLen);
 
                             switch (packetId)
                             {
-                                // server list
-                                case 0xA8:
+                                case 0xA8: // server list
                                     {
                                         var flags = reader.ReadUInt8();
                                         var count = reader.ReadUInt16BE();
@@ -867,8 +909,7 @@ namespace ClassicUO
                                     }
                                     break;
 
-                                // characters list
-                                case 0xA9:
+                                case 0xA9:  // characters list
                                     {
                                         var charactersCount = reader.ReadUInt8();
                                         var characterNames = new List<string>();
@@ -881,23 +922,11 @@ namespace ClassicUO
                                         var cityCount = reader.ReadUInt8();
                                         // bla bla
 
-                                        var protocol = ClientFlags.CF_T2A |
-                                            ClientFlags.CF_RE |
-                                            ClientFlags.CF_TD |
-                                            ClientFlags.CF_LBR |
-                                            ClientFlags.CF_AOS |
-                                            ClientFlags.CF_SE |
-                                            ClientFlags.CF_SA |
-                                            ClientFlags.CF_UO3D |
-                                            ClientFlags.CF_RESERVED |
-                                            ClientFlags.CF_3D;
-
-                                        network.Value.Send_SelectCharacter(0, characterNames[0], network.Value.LocalIP, protocol);
+                                        network.Value.Send_SelectCharacter(0, characterNames[0], network.Value.LocalIP, gameState.Value.Protocol);
                                     }
                                     break;
 
-                                // server relay
-                                case 0x8C:
+                                case 0x8C: // server relay
                                     {
                                         var ip = reader.ReadUInt32LE();
                                         var port = reader.ReadUInt16BE();
@@ -928,11 +957,165 @@ namespace ClassicUO
                                         var y = reader.ReadUInt16BE();
                                         var z = (sbyte) reader.ReadUInt16BE();
                                         var dir = (Direction) reader.ReadUInt8();
+                                        reader.Skip(9);
+                                        var mapWidth = reader.ReadUInt16BE();
+                                        var mapHeight = reader.ReadUInt16BE();
 
-                                        // var networkEnt = world.Entity("NetworkEntity");
-                                        // var id = IDOp.Pair(networkEnt, serial);
-                                        // var ent = world.Entity(id);
+                                        if (clientVersion.Value >= ClientVersion.CV_200)
+                                        {
+                                            network.Value.Send_GameWindowSize(800, 400);
+                                            network.Value.Send_Language(Settings.GlobalSettings.Language);
+                                        }
 
+                                        network.Value.Send_ClientVersion(Settings.GlobalSettings.ClientVersion);
+                                        network.Value.Send_ClickRequest(serial);
+                                        network.Value.Send_SkillsRequest(serial);
+
+                                        if (clientVersion.Value >= ClientVersion.CV_70796)
+                                            network.Value.Send_ShowPublicHouseContent(true);
+
+                                        gameState.Value.CenterX = x;
+                                        gameState.Value.CenterY = y;
+                                        gameState.Value.CenterZ = z;
+                                        gameState.Value.PlayerSerial = serial;
+                                        gameState.Value.MaxMapWidth = mapWidth;
+                                        gameState.Value.MaxMapHeight = mapHeight;
+
+                                        var offset = 8;
+                                        chunkRequests.Enqueue(new() {
+                                            Map = gameState.Value.Map,
+                                            RangeStartX = Math.Max(0, x / 8 - offset),
+                                            RangeStartY = Math.Max(0, y / 8 - offset),
+                                            RangeEndX = Math.Min(mapWidth / 8, x / 8 + offset),
+                                            RangeEndY = Math.Min(mapHeight / 8, y / 8 + offset),
+                                        });
+
+                                        break;
+                                    }
+
+                                case 0x55: // login complete
+                                    {
+                                        if (gameState.Value.PlayerSerial != 0)
+                                        {
+                                            network.Value.Send_StatusRequest(gameState.Value.PlayerSerial);
+                                            network.Value.Send_OpenChat("");
+
+                                            network.Value.Send_SkillsRequest(gameState.Value.PlayerSerial);
+                                            network.Value.Send_DoubleClick(gameState.Value.PlayerSerial);
+
+                                            if (clientVersion.Value >= ClientVersion.CV_306E)
+                                                network.Value.Send_ClientType(gameState.Value.Protocol);
+
+                                            if (clientVersion.Value >= ClientVersion.CV_305D)
+                                                network.Value.Send_ClientViewRange(24);
+                                        }
+
+                                        break;
+                                    }
+
+                                case 0xBF: // extended cmds
+                                    {
+                                        var cmd = reader.ReadUInt16BE();
+
+                                        if (cmd == 8)
+                                        {
+                                            var mapIndex = reader.ReadUInt8();
+                                            if (gameState.Value.Map != mapIndex)
+                                            {
+                                                gameState.Value.Map = mapIndex;
+                                            }
+                                        }
+                                        // else if (cmd == 0x18)
+                                        // {
+                                        //     if (Assets.MapLoader.Instance.ApplyPatches(ref reader))
+                                        //     {
+                                        //         chunksLoaded.Value.Clear();
+
+                                        //         var offset = 8;
+                                        //         chunkRequests.Enqueue(new() {
+                                        //             Map = gameState.Value.Map,
+                                        //             RangeStartX = Math.Max(0, gameState.Value.CenterX / 8 - offset),
+                                        //             RangeStartY = Math.Max(0, gameState.Value.CenterY / 8 - offset),
+                                        //             RangeEndX = gameState.Value.CenterX / 8 + offset,
+                                        //             RangeEndY = gameState.Value.CenterY / 8 + offset,
+                                        //         });
+                                        //     }
+                                        // }
+
+                                        break;
+                                    }
+
+                                case 0xBD: // client version request
+                                    {
+                                        network.Value.Send_ClientVersion(Settings.GlobalSettings.ClientVersion);
+                                        break;
+                                    }
+
+                                case 0xAE: // unicode talk
+                                    {
+                                        var serial = reader.ReadUInt32BE();
+                                        var graphic = reader.ReadUInt16BE();
+                                        var msgType = (MessageType) reader.ReadUInt8();
+                                        var hue = reader.ReadUInt16BE();
+                                        var font = reader.ReadUInt16BE();
+                                        var lang = reader.ReadASCII(4);
+                                        var name = reader.ReadASCII(30);
+
+                                        if (serial == 0 && graphic == 0 && msgType == MessageType.Regular &&
+                                            font == 0xFFFF && hue == 0xFFFF && name.Equals("system", StringComparison.InvariantCultureIgnoreCase))
+                                        {
+                                            network.Value.Send([0x03,
+                                                0x00,
+                                                0x28,
+                                                0x20,
+                                                0x00,
+                                                0x34,
+                                                0x00,
+                                                0x03,
+                                                0xdb,
+                                                0x13,
+                                                0x14,
+                                                0x3f,
+                                                0x45,
+                                                0x2c,
+                                                0x58,
+                                                0x0f,
+                                                0x5d,
+                                                0x44,
+                                                0x2e,
+                                                0x50,
+                                                0x11,
+                                                0xdf,
+                                                0x75,
+                                                0x5c,
+                                                0xe0,
+                                                0x3e,
+                                                0x71,
+                                                0x4f,
+                                                0x31,
+                                                0x34,
+                                                0x05,
+                                                0x4e,
+                                                0x18,
+                                                0x1e,
+                                                0x72,
+                                                0x0f,
+                                                0x59,
+                                                0xad,
+                                                0xf5,
+                                                0x00]);
+                                        }
+                                        else
+                                        {
+                                            var text = reader.ReadUnicodeBE();
+                                        }
+
+                                        break;
+                                    }
+
+                                case 0xC8: // client view range
+                                    {
+                                        var range = reader.ReadUInt8();
                                         break;
                                     }
 
@@ -940,7 +1123,6 @@ namespace ClassicUO
                                 case 0x4F: // global light level
                                 case 0x4E: // personal light level
                                 case 0x6E: // play music
-                                case 0xBF: // extended cmds
                                 case 0xBC: // season
                                 case 0x20: // update player
                                 case 0x76: // TODO: ????
@@ -951,11 +1133,9 @@ namespace ClassicUO
                                 case 0x2D: // mobile attributes
                                 case 0xE5: // waypoints
                                 case 0xC1: // display cliloc string
-                                case 0x55: // TODO: ????
                                 case 0x11: // character status
                                 case 0x72: // warmode
                                 case 0x5B: // set time
-                                case 0xAE: // unicode talk
                                 case 0x2E: // equip item
                                 case 0x25: // update contained item
 
@@ -1210,25 +1390,25 @@ namespace ClassicUO
             scheduler.AddSystem((
                 Res<GraphicsDevice> device,
                 Res<Renderer.UltimaBatcher2D> batch,
-                Res<(ushort CenterX, ushort CenterY, Vector2 Offset)> centerWorldPos,
+                Res<GameState> gameState,
                 Res<MouseState> oldMouseState,
                 Query<Renderable, Not<TileStretched>> query,
                 Query<(Renderable, TileStretched)> queryTiles
             ) => {
                 device.Value.Clear(Color.AliceBlue);
 
-                var center = Isometric.IsoToScreen(centerWorldPos.Value.CenterX, centerWorldPos.Value.CenterY, 0);
+                var center = Isometric.IsoToScreen(gameState.Value.CenterX, gameState.Value.CenterY, gameState.Value.CenterZ);
                 center.X -= device.Value.PresentationParameters.BackBufferWidth / 2;
                 center.Y -= device.Value.PresentationParameters.BackBufferHeight / 2;
 
                 var newMouseState = Mouse.GetState();
                 if (newMouseState.LeftButton == ButtonState.Pressed)
                 {
-                    centerWorldPos.Value.Offset.X += newMouseState.X - oldMouseState.Value.X;
-                    centerWorldPos.Value.Offset.Y += newMouseState.Y - oldMouseState.Value.Y;
+                    gameState.Value.CenterOffset.X += newMouseState.X - oldMouseState.Value.X;
+                    gameState.Value.CenterOffset.Y += newMouseState.Y - oldMouseState.Value.Y;
                 }
 
-                center -= centerWorldPos.Value.Offset;
+                center -= gameState.Value.CenterOffset;
 
                 var sb = batch.Value;
                 sb.Begin();
