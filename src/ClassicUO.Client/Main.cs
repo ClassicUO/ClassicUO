@@ -662,6 +662,44 @@ namespace ClassicUO
                 if (clientVersion >= ClientVersion.CV_60144)
                     gameState.Value.Protocol |= ClientFlags.CF_SA;
 
+
+                const int TEXTURE_WIDTH = 512;
+                const int TEXTURE_HEIGHT = 1024;
+                const int LIGHTS_TEXTURE_WIDTH = 32;
+                const int LIGHTS_TEXTURE_HEIGHT = 63;
+
+                var hueSamplers = new Texture2D[2];
+                hueSamplers[0] = new Texture2D(device, TEXTURE_WIDTH, TEXTURE_HEIGHT);
+                hueSamplers[1] = new Texture2D(device, LIGHTS_TEXTURE_WIDTH, LIGHTS_TEXTURE_HEIGHT);
+
+                var buffer = new uint[Math.Max(
+                    LIGHTS_TEXTURE_WIDTH * LIGHTS_TEXTURE_HEIGHT,
+                    TEXTURE_WIDTH * TEXTURE_HEIGHT
+                )];
+
+                fixed (uint* ptr = buffer)
+                {
+                    Assets.HuesLoader.Instance.CreateShaderColors(buffer);
+
+                    hueSamplers[0].SetDataPointerEXT(
+                        0,
+                        null,
+                        (IntPtr)ptr,
+                        TEXTURE_WIDTH * TEXTURE_HEIGHT * sizeof(uint)
+                    );
+
+                    LightColors.CreateLightTextures(buffer, LIGHTS_TEXTURE_HEIGHT);
+                    hueSamplers[1].SetDataPointerEXT(
+                        0,
+                        null,
+                        (IntPtr)ptr,
+                        LIGHTS_TEXTURE_WIDTH * LIGHTS_TEXTURE_HEIGHT * sizeof(uint)
+                    );
+                }
+
+                device.Value.Textures[1] = hueSamplers[0];
+                device.Value.Textures[2] = hueSamplers[1];
+
             }, Stages.Startup);
 
             scheduler.AddSystem((Res<NetClient> network, Res<ClientVersion> clientVersion) => {
@@ -823,7 +861,7 @@ namespace ClassicUO
                                             .Set(new Renderable() {
                                                 Texture = artInfo.Texture,
                                                 UV = artInfo.UV,
-                                                Color = Renderer.ShaderHueTranslator.GetHueVector(sb->Hue),
+                                                Color = Renderer.ShaderHueTranslator.GetHueVector(sb->Hue, tiledataLoader.Value.StaticData[sb->Color].IsPartialHue, 1f),
                                                 Position = posVec,
                                                 Z = getDepthZ(staX, staY, priorityZ)
                                             });
@@ -978,7 +1016,7 @@ namespace ClassicUO
                                         gameState.Value.MaxMapWidth = mapWidth;
                                         gameState.Value.MaxMapHeight = mapHeight;
 
-                                        var offset = 8;
+                                        var offset = 15;
                                         chunkRequests.Enqueue(new() {
                                             Map = gameState.Value.Map,
                                             RangeStartX = Math.Max(0, x / 8 - offset),
