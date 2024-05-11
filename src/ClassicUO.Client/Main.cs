@@ -868,7 +868,6 @@ namespace ClassicUO
                         {
                             var packetId = realBuffer[0];
                             var packetLen = PacketsTable.GetPacketLength(packetId);
-                            var packetBuffer = realBuffer;
                             var packetHeaderOffset = sizeof(byte);
 
                             if (packetLen == -1)
@@ -876,13 +875,11 @@ namespace ClassicUO
                                 if (realBuffer.Length < 3)
                                     return;
 
-                                packetLen = BinaryPrimitives.ReadInt16BigEndian(packetBuffer[packetHeaderOffset..]);
+                                packetLen = BinaryPrimitives.ReadInt16BigEndian(realBuffer[packetHeaderOffset..]);
                                 packetHeaderOffset += sizeof(ushort);
                             }
 
-                            packetBuffer = packetBuffer[.. packetLen];
-
-                            var reader = new StackDataReader(packetBuffer[packetHeaderOffset..]);
+                            var reader = new StackDataReader(realBuffer[packetHeaderOffset.. packetLen]);
                             Console.WriteLine(">> packet-in: ID 0x{0:X2} | Len: {1}", packetId, packetLen);
 
                             switch (packetId)
