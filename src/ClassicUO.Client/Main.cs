@@ -644,8 +644,9 @@ namespace ClassicUO
 
             scheduler.AddSystem((Res<NetClient> network, Res<ClientVersion> clientVersion) => {
                 PacketsTable.AdjustPacketSizeByVersion(clientVersion.Value);
-                network.Value.Connect("localhost", 2593);
+                network.Value.Connect(Settings.GlobalSettings.IP, Settings.GlobalSettings.Port);
 
+                // NOTE: im forcing the use of latest client just for convenience rn
                 var major = (byte) ((uint)clientVersion.Value >> 24);
                 var minor = (byte) ((uint)clientVersion.Value >> 16);
                 var build = (byte) ((uint)clientVersion.Value >> 8);
@@ -817,7 +818,7 @@ namespace ClassicUO
                 network.Value.Flush();
             });
 
-            scheduler.AddSystem((EventReader<OnPacketRecv> packetReader, Res<NetClient> network) => {
+            scheduler.AddSystem((EventReader<OnPacketRecv> packetReader, Res<NetClient> network, TinyEcs.World world) => {
                 foreach (var packet in packetReader.Read())
                 {
                     var realBuffer = packet.RentedBuffer.AsSpan(0, packet.Length);
@@ -839,6 +840,7 @@ namespace ClassicUO
                             }
 
                             var reader = new StackDataReader(packetBuffer);
+                            Console.WriteLine(">> packet-in: ID 0x{0:X2} | Len: {1}", packetId, packetLen);
 
                             switch (packetId)
                             {
@@ -847,6 +849,7 @@ namespace ClassicUO
                                     {
                                         var flags = reader.ReadUInt8();
                                         var count = reader.ReadUInt16BE();
+                                        var serverList = new List<(ushort index, string name)>();
 
                                         for (var i = 0; i < count; ++i)
                                         {
@@ -856,11 +859,11 @@ namespace ClassicUO
                                             var timeZone = reader.ReadUInt8();
                                             var address = reader.ReadUInt32BE();
 
+                                            serverList.Add((index, name));
                                             Console.WriteLine("server entry -> {0}", name);
-
-                                            network.Value.Send_SelectServer((byte) index);
-                                            break;
                                         }
+
+                                        network.Value.Send_SelectServer((byte) serverList[0].index);
                                     }
                                     break;
 
@@ -916,10 +919,46 @@ namespace ClassicUO
                                     }
                                     break;
 
-                                // locked features
-                                case 0xB9:
-                                // light level
-                                case 0x4F:
+                                case 0x1B: // enter world
+                                    {
+                                        var serial = reader.ReadUInt32BE();
+                                        reader.Skip(4);
+                                        var graphic = reader.ReadUInt16BE();
+                                        var x = reader.ReadUInt16BE();
+                                        var y = reader.ReadUInt16BE();
+                                        var z = (sbyte) reader.ReadUInt16BE();
+                                        var dir = (Direction) reader.ReadUInt8();
+
+                                        // var networkEnt = world.Entity("NetworkEntity");
+                                        // var id = IDOp.Pair(networkEnt, serial);
+                                        // var ent = world.Entity(id);
+
+                                        break;
+                                    }
+
+                                case 0xB9: // locked features
+                                case 0x4F: // global light level
+                                case 0x4E: // personal light level
+                                case 0x6E: // play music
+                                case 0xBF: // extended cmds
+                                case 0xBC: // season
+                                case 0x20: // update player
+                                case 0x76: // TODO: ????
+                                case 0x78: // update object
+                                case 0x16: // new healthbar update
+                                case 0x17:
+                                case 0xDC: // opl info
+                                case 0x2D: // mobile attributes
+                                case 0xE5: // waypoints
+                                case 0xC1: // display cliloc string
+                                case 0x55: // TODO: ????
+                                case 0x11: // character status
+                                case 0x72: // warmode
+                                case 0x5B: // set time
+                                case 0xAE: // unicode talk
+                                case 0x2E: // equip item
+                                case 0x25: // update contained item
+
                                 default:
                                     break;
                             }
