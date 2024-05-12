@@ -604,7 +604,9 @@ namespace ClassicUO
                 (isoX + isoY) * 22 - (isoZ << 2)
             );
         }
-
+        
+        public static float GetDepthZ(int x, int y, int priorityZ)
+            => x + y + (127 + priorityZ) * 0.01f;
     }
 
     struct OnNewChunkRequest { public int Map; public int RangeStartX, RangeStartY, RangeEndX, RangeEndY; }
@@ -620,6 +622,14 @@ namespace ClassicUO
         public int MaxMapWidth, MaxMapHeight;
     }
 
+    struct AssetsServer
+    {
+        public Renderer.Arts.Art Arts;
+        public Renderer.Animations.Animations Animations;
+        public Renderer.Texmaps.Texmap Texmaps;
+        public Renderer.Gumps.Gump Gumps;
+    }
+
     readonly struct CuoPlugin : IPlugin
     {
         public unsafe void Build(Scheduler scheduler)
@@ -633,12 +643,17 @@ namespace ClassicUO
                 world.Entity<Renderable>();
                 world.Entity<TileStretched>();
                 ClientVersionHelper.IsClientVersionValid(Settings.GlobalSettings.ClientVersion, out ClientVersion clientVersion);
-                Assets.UOFileManager.Load(clientVersion, Settings.GlobalSettings.UltimaOnlineDirectory, false, "ENU");
+                Assets.UOFileManager.Load(clientVersion, Settings.GlobalSettings.UltimaOnlineDirectory, false, Settings.GlobalSettings.Language);
 
                 schedState.AddResource(Assets.TileDataLoader.Instance);
                 schedState.AddResource(Assets.MapLoader.Instance);
-                schedState.AddResource(new Renderer.Arts.Art(device));
-                schedState.AddResource(new Renderer.Texmaps.Texmap(device));
+                schedState.AddResource(new AssetsServer()
+                {
+                    Arts = new Renderer.Arts.Art(device),
+                    Texmaps = new Renderer.Texmaps.Texmap(device),
+                    Animations = new Renderer.Animations.Animations(device),
+                    Gumps = new Renderer.Gumps.Gump(device)
+                });
                 schedState.AddResource(new Renderer.UltimaBatcher2D(device));
                 schedState.AddResource(clientVersion);
 
@@ -677,10 +692,9 @@ namespace ClassicUO
                     TEXTURE_WIDTH * TEXTURE_HEIGHT
                 )];
 
+                Assets.HuesLoader.Instance.CreateShaderColors(buffer);
                 fixed (uint* ptr = buffer)
                 {
-                    Assets.HuesLoader.Instance.CreateShaderColors(buffer);
-
                     hueSamplers[0].SetDataPointerEXT(
                         0,
                         null,
@@ -705,6 +719,8 @@ namespace ClassicUO
             scheduler.AddSystem((Res<NetClient> network, Res<ClientVersion> clientVersion) => {
                 PacketsTable.AdjustPacketSizeByVersion(clientVersion.Value);
                 network.Value.Connect(Settings.GlobalSettings.IP, Settings.GlobalSettings.Port);
+                
+                Console.WriteLine("Socket is connected ? {0}", network.Value.IsConnected);
 
                 // NOTE: im forcing the use of latest client just for convenience rn
                 var major = (byte) ((uint)clientVersion.Value >> 24);
@@ -720,13 +736,11 @@ namespace ClassicUO
                 TinyEcs.World world,
                 Res<Assets.MapLoader> mapLoader,
                 Res<Assets.TileDataLoader> tiledataLoader,
-                Res<Renderer.Arts.Art> arts,
-                Res<Renderer.Texmaps.Texmap> textmaps,
+                Res<AssetsServer> assetsServer,
                 Res<HashSet<(int ChunkX, int ChunkY, int MapIndex)>> chunksLoaded,
                 EventReader<OnNewChunkRequest> chunkRequests
             ) => {
-                static float getDepthZ(int x, int y, int priorityZ)
-                    => x + y + (127 + priorityZ) * 0.01f;
+
 
                 foreach (var chunkEv in chunkRequests.Read())
                 {
@@ -738,11 +752,9 @@ namespace ClassicUO
                         if (im.MapAddress == 0)
                             continue;
 
-                        if (chunksLoaded.Value.Contains((chunkX, chunkY, chunkEv.Map)))
+                        if (!chunksLoaded.Value.Add((chunkX, chunkY, chunkEv.Map)))
                             continue;
-
-                        chunksLoaded.Value.Add((chunkX, chunkY, chunkEv.Map));
-
+                        
                         var block = (Assets.MapBlock*) im.MapAddress;
                         var cells = (Assets.MapCells*) &block->Cells;
                         var bx = chunkX << 3;
@@ -776,7 +788,7 @@ namespace ClassicUO
 
                                 if (isStretched)
                                 {
-                                    ref readonly var textmapInfo = ref textmaps.Value.GetTexmap(tiledataLoader.Value.LandData[tileID].TexID);
+                                    ref readonly var textmapInfo = ref assetsServer.Value.Texmaps.GetTexmap(tiledataLoader.Value.LandData[tileID].TexID);
 
                                     var position = Isometric.IsoToScreen(tileX, tileY, z);
                                     position.Y += z << 2;
@@ -787,7 +799,7 @@ namespace ClassicUO
                                             UV = textmapInfo.UV,
                                             Color = new Vector3(0, Renderer.ShaderHueTranslator.SHADER_LAND, 1f),
                                             Position = position,
-                                            Z = getDepthZ(tileX, tileY, avgZ - 2)
+                                            Z = Isometric.GetDepthZ(tileX, tileY, avgZ - 2)
                                         })
                                         .Set(new TileStretched() {
                                             NormalTop = normalTop,
@@ -801,7 +813,7 @@ namespace ClassicUO
                                 }
                                 else
                                 {
-                                    ref readonly var artInfo = ref arts.Value.GetLand(tileID);
+                                    ref readonly var artInfo = ref assetsServer.Value.Arts.GetLand(tileID);
 
                                     world.Entity()
                                         .Set(new Renderable() {
@@ -809,7 +821,7 @@ namespace ClassicUO
                                             UV = artInfo.UV,
                                             Color = Vector3.UnitZ,
                                             Position = Isometric.IsoToScreen(tileX, tileY, z),
-                                            Z = getDepthZ(tileX, tileY, z - 2)
+                                            Z = Isometric.GetDepthZ(tileX, tileY, z - 2)
                                         });
                                 }
                             }
@@ -835,7 +847,7 @@ namespace ClassicUO
                                         var staX = (ushort)(bx + sb->X);
                                         var staY = (ushort)(by + sb->Y);
 
-                                        ref readonly var artInfo = ref arts.Value.GetArt(sb->Color);
+                                        ref readonly var artInfo = ref assetsServer.Value.Arts.GetArt(sb->Color);
 
                                         var priorityZ = sb->Z;
 
@@ -863,7 +875,7 @@ namespace ClassicUO
                                                 UV = artInfo.UV,
                                                 Color = Renderer.ShaderHueTranslator.GetHueVector(sb->Hue, tiledataLoader.Value.StaticData[sb->Color].IsPartialHue, 1f),
                                                 Position = posVec,
-                                                Z = getDepthZ(staX, staY, priorityZ)
+                                                Z = Isometric.GetDepthZ(staX, staY, priorityZ)
                                             });
                                     }
                                 }
@@ -886,16 +898,16 @@ namespace ClassicUO
                 }
 
                 network.Value.Flush();
-            });
+            }).RunIf((Res<NetClient> network) => network.Value!.IsConnected);
 
             scheduler.AddSystem((
-                EventReader<OnPacketRecv> packetReader,
-                Res<NetClient> network,
                 TinyEcs.World world,
+                EventReader<OnPacketRecv> packetReader,
                 EventWriter<OnNewChunkRequest> chunkRequests,
-                Res<HashSet<(int ChunkX, int ChunkY, int MapIndex)>> chunksLoaded,
+                Res<NetClient> network,
                 Res<GameState> gameState,
-                Res<ClientVersion> clientVersion
+                Res<ClientVersion> clientVersion,
+                Res<AssetsServer> assetsServer
             ) => {
                 foreach (var packet in packetReader.Read())
                 {
@@ -923,236 +935,283 @@ namespace ClassicUO
                             switch (packetId)
                             {
                                 case 0xA8: // server list
+                                {
+                                    var flags = reader.ReadUInt8();
+                                    var count = reader.ReadUInt16BE();
+                                    var serverList = new List<(ushort index, string name)>();
+
+                                    for (var i = 0; i < count; ++i)
                                     {
-                                        var flags = reader.ReadUInt8();
-                                        var count = reader.ReadUInt16BE();
-                                        var serverList = new List<(ushort index, string name)>();
+                                        var index = reader.ReadUInt16BE();
+                                        var name = reader.ReadASCII(32, true);
+                                        var percFull = reader.ReadUInt8();
+                                        var timeZone = reader.ReadUInt8();
+                                        var address = reader.ReadUInt32BE();
 
-                                        for (var i = 0; i < count; ++i)
-                                        {
-                                            var index = reader.ReadUInt16BE();
-                                            var name = reader.ReadASCII(32, true);
-                                            var percFull = reader.ReadUInt8();
-                                            var timeZone = reader.ReadUInt8();
-                                            var address = reader.ReadUInt32BE();
-
-                                            serverList.Add((index, name));
-                                            Console.WriteLine("server entry -> {0}", name);
-                                        }
-
-                                        network.Value.Send_SelectServer((byte) serverList[0].index);
+                                        serverList.Add((index, name));
+                                        Console.WriteLine("server entry -> {0}", name);
                                     }
-                                    break;
+
+                                    network.Value.Send_SelectServer((byte) serverList[0].index);
+                                }
+                                break;
 
                                 case 0xA9:  // characters list
+                                {
+                                    var charactersCount = reader.ReadUInt8();
+                                    var characterNames = new List<string>();
+                                    for (var i = 0; i < charactersCount; ++i)
                                     {
-                                        var charactersCount = reader.ReadUInt8();
-                                        var characterNames = new List<string>();
-                                        for (var i = 0; i < charactersCount; ++i)
-                                        {
-                                            characterNames.Add(reader.ReadASCII(30).TrimEnd('\0'));
-                                            reader.Skip(30);
-                                        }
-
-                                        var cityCount = reader.ReadUInt8();
-                                        // bla bla
-
-                                        network.Value.Send_SelectCharacter(0, characterNames[0], network.Value.LocalIP, gameState.Value.Protocol);
+                                        characterNames.Add(reader.ReadASCII(30).TrimEnd('\0'));
+                                        reader.Skip(30);
                                     }
-                                    break;
+
+                                    var cityCount = reader.ReadUInt8();
+                                    // bla bla
+
+                                    network.Value.Send_SelectCharacter(0, characterNames[0], network.Value.LocalIP, gameState.Value.Protocol);
+                                }
+                                break;
 
                                 case 0x8C: // server relay
+                                {
+                                    var ip = reader.ReadUInt32LE();
+                                    var port = reader.ReadUInt16BE();
+                                    var seed = reader.ReadUInt32BE();
+
+                                    network.Value.Disconnect();
+                                    network.Value.Connect(new IPAddress(ip).ToString(), port);
+
+                                    if (network.Value.IsConnected)
                                     {
-                                        var ip = reader.ReadUInt32LE();
-                                        var port = reader.ReadUInt16BE();
-                                        var seed = reader.ReadUInt32BE();
-
-                                        network.Value.Disconnect();
-                                        network.Value.Connect(new IPAddress(ip).ToString(), port);
-
-                                        if (network.Value.IsConnected)
-                                        {
-                                            network.Value.EnableCompression();
-                                            unsafe {
-                                                Span<byte> b = [(byte)(seed >> 24), (byte)(seed >> 16), (byte)(seed >> 8), (byte)seed];
-                                                network.Value.Send(b, true, true);
-                                            }
-
-                                            network.Value.Send_SecondLogin(Settings.GlobalSettings.Username, Crypter.Decrypt(Settings.GlobalSettings.Password), seed);
-                                        }
+                                        network.Value.EnableCompression();
+                                        Span<byte> b = [(byte)(seed >> 24), (byte)(seed >> 16), (byte)(seed >> 8), (byte)seed];
+                                        network.Value.Send(b, true, true);
+                                        network.Value.Send_SecondLogin(Settings.GlobalSettings.Username, Crypter.Decrypt(Settings.GlobalSettings.Password), seed);
                                     }
-                                    break;
+                                }
+                                break;
 
                                 case 0x1B: // enter world
+                                {
+                                    var serial = reader.ReadUInt32BE();
+                                    reader.Skip(4);
+                                    var graphic = reader.ReadUInt16BE();
+                                    var x = reader.ReadUInt16BE();
+                                    var y = reader.ReadUInt16BE();
+                                    var z = (sbyte) reader.ReadUInt16BE();
+                                    var dir = (Direction) reader.ReadUInt8();
+                                    reader.Skip(9);
+                                    var mapWidth = reader.ReadUInt16BE();
+                                    var mapHeight = reader.ReadUInt16BE();
+
+                                    if (clientVersion.Value >= ClientVersion.CV_200)
                                     {
-                                        var serial = reader.ReadUInt32BE();
-                                        reader.Skip(4);
-                                        var graphic = reader.ReadUInt16BE();
-                                        var x = reader.ReadUInt16BE();
-                                        var y = reader.ReadUInt16BE();
-                                        var z = (sbyte) reader.ReadUInt16BE();
-                                        var dir = (Direction) reader.ReadUInt8();
-                                        reader.Skip(9);
-                                        var mapWidth = reader.ReadUInt16BE();
-                                        var mapHeight = reader.ReadUInt16BE();
-
-                                        if (clientVersion.Value >= ClientVersion.CV_200)
-                                        {
-                                            network.Value.Send_GameWindowSize(800, 400);
-                                            network.Value.Send_Language(Settings.GlobalSettings.Language);
-                                        }
-
-                                        network.Value.Send_ClientVersion(Settings.GlobalSettings.ClientVersion);
-                                        network.Value.Send_ClickRequest(serial);
-                                        network.Value.Send_SkillsRequest(serial);
-
-                                        if (clientVersion.Value >= ClientVersion.CV_70796)
-                                            network.Value.Send_ShowPublicHouseContent(true);
-
-                                        gameState.Value.CenterX = x;
-                                        gameState.Value.CenterY = y;
-                                        gameState.Value.CenterZ = z;
-                                        gameState.Value.PlayerSerial = serial;
-                                        gameState.Value.MaxMapWidth = mapWidth;
-                                        gameState.Value.MaxMapHeight = mapHeight;
-
-                                        var offset = 15;
-                                        chunkRequests.Enqueue(new() {
-                                            Map = gameState.Value.Map,
-                                            RangeStartX = Math.Max(0, x / 8 - offset),
-                                            RangeStartY = Math.Max(0, y / 8 - offset),
-                                            RangeEndX = Math.Min(mapWidth / 8, x / 8 + offset),
-                                            RangeEndY = Math.Min(mapHeight / 8, y / 8 + offset),
-                                        });
-
-                                        break;
+                                        network.Value.Send_GameWindowSize(800, 400);
+                                        network.Value.Send_Language(Settings.GlobalSettings.Language);
                                     }
+
+                                    network.Value.Send_ClientVersion(Settings.GlobalSettings.ClientVersion);
+                                    network.Value.Send_ClickRequest(serial);
+                                    network.Value.Send_SkillsRequest(serial);
+
+                                    if (clientVersion.Value >= ClientVersion.CV_70796)
+                                        network.Value.Send_ShowPublicHouseContent(true);
+
+                                    gameState.Value.CenterX = x;
+                                    gameState.Value.CenterY = y;
+                                    gameState.Value.CenterZ = z;
+                                    gameState.Value.PlayerSerial = serial;
+                                    gameState.Value.MaxMapWidth = mapWidth;
+                                    gameState.Value.MaxMapHeight = mapHeight;
+
+                                    var offset = 8;
+                                    chunkRequests.Enqueue(new() {
+                                        Map = gameState.Value.Map,
+                                        RangeStartX = Math.Max(0, x / 8 - offset),
+                                        RangeStartY = Math.Max(0, y / 8 - offset),
+                                        RangeEndX = Math.Min(mapWidth / 8, x / 8 + offset),
+                                        RangeEndY = Math.Min(mapHeight / 8, y / 8 + offset),
+                                    });
+
+                                    var frames = assetsServer.Value.Animations.GetAnimationFrames(graphic, 0, (byte)(dir & Direction.Up), 
+                                                                                                  out var hue, out var _);
+                                    var ent = world.Entity()
+                                         .Set(new Ecs.NetworkSerial() { Value = serial })
+                                         .Set(new Ecs.WorldPosition() { X = x, Y = y, Z = z })
+                                         .Set(new Ecs.Graphic() { Value = graphic })
+                                         .Set(new Renderable()
+                                         {
+                                             Color = Vector3.UnitZ,
+                                             Position = Isometric.IsoToScreen(x, y, z) + new Vector2(frames[0].Center.X, frames[0].Center.Y),
+                                             Texture = frames[0].Texture,
+                                             UV = frames[0].UV,
+                                             Z = Isometric.GetDepthZ(x, y, z + 1)
+                                         });
+                                }
+                                break;
 
                                 case 0x55: // login complete
+                                {
+                                    if (gameState.Value.PlayerSerial != 0)
                                     {
-                                        if (gameState.Value.PlayerSerial != 0)
-                                        {
-                                            network.Value.Send_StatusRequest(gameState.Value.PlayerSerial);
-                                            network.Value.Send_OpenChat("");
+                                        network.Value.Send_StatusRequest(gameState.Value.PlayerSerial);
+                                        network.Value.Send_OpenChat("");
 
-                                            network.Value.Send_SkillsRequest(gameState.Value.PlayerSerial);
-                                            network.Value.Send_DoubleClick(gameState.Value.PlayerSerial);
+                                        network.Value.Send_SkillsRequest(gameState.Value.PlayerSerial);
+                                        network.Value.Send_DoubleClick(gameState.Value.PlayerSerial);
 
-                                            if (clientVersion.Value >= ClientVersion.CV_306E)
-                                                network.Value.Send_ClientType(gameState.Value.Protocol);
+                                        if (clientVersion.Value >= ClientVersion.CV_306E)
+                                            network.Value.Send_ClientType(gameState.Value.Protocol);
 
-                                            if (clientVersion.Value >= ClientVersion.CV_305D)
-                                                network.Value.Send_ClientViewRange(24);
-                                        }
-
-                                        break;
+                                        if (clientVersion.Value >= ClientVersion.CV_305D)
+                                            network.Value.Send_ClientViewRange(24);
                                     }
+
+                                    break;
+                                }
 
                                 case 0xBF: // extended cmds
+                                {
+                                    var cmd = reader.ReadUInt16BE();
+
+                                    if (cmd == 8)
                                     {
-                                        var cmd = reader.ReadUInt16BE();
-
-                                        if (cmd == 8)
+                                        var mapIndex = reader.ReadUInt8();
+                                        if (gameState.Value.Map != mapIndex)
                                         {
-                                            var mapIndex = reader.ReadUInt8();
-                                            if (gameState.Value.Map != mapIndex)
-                                            {
-                                                gameState.Value.Map = mapIndex;
-                                            }
+                                            gameState.Value.Map = mapIndex;
                                         }
-                                        // else if (cmd == 0x18)
-                                        // {
-                                        //     if (Assets.MapLoader.Instance.ApplyPatches(ref reader))
-                                        //     {
-                                        //         chunksLoaded.Value.Clear();
-
-                                        //         var offset = 8;
-                                        //         chunkRequests.Enqueue(new() {
-                                        //             Map = gameState.Value.Map,
-                                        //             RangeStartX = Math.Max(0, gameState.Value.CenterX / 8 - offset),
-                                        //             RangeStartY = Math.Max(0, gameState.Value.CenterY / 8 - offset),
-                                        //             RangeEndX = gameState.Value.CenterX / 8 + offset,
-                                        //             RangeEndY = gameState.Value.CenterY / 8 + offset,
-                                        //         });
-                                        //     }
-                                        // }
-
-                                        break;
                                     }
+                                    // else if (cmd == 0x18)
+                                    // {
+                                    //     if (Assets.MapLoader.Instance.ApplyPatches(ref reader))
+                                    //     {
+                                    //         chunksLoaded.Value.Clear();
+
+                                    //         var offset = 8;
+                                    //         chunkRequests.Enqueue(new() {
+                                    //             Map = gameState.Value.Map,
+                                    //             RangeStartX = Math.Max(0, gameState.Value.CenterX / 8 - offset),
+                                    //             RangeStartY = Math.Max(0, gameState.Value.CenterY / 8 - offset),
+                                    //             RangeEndX = gameState.Value.CenterX / 8 + offset,
+                                    //             RangeEndY = gameState.Value.CenterY / 8 + offset,
+                                    //         });
+                                    //     }
+                                    // }
+                                }
+                                break;
 
                                 case 0xBD: // client version request
-                                    {
-                                        network.Value.Send_ClientVersion(Settings.GlobalSettings.ClientVersion);
-                                        break;
-                                    }
+                                {
+                                    network.Value.Send_ClientVersion(Settings.GlobalSettings.ClientVersion);
+                                }
+                                break;
 
                                 case 0xAE: // unicode talk
+                                {
+                                    var serial = reader.ReadUInt32BE();
+                                    var graphic = reader.ReadUInt16BE();
+                                    var msgType = (MessageType) reader.ReadUInt8();
+                                    var hue = reader.ReadUInt16BE();
+                                    var font = reader.ReadUInt16BE();
+                                    var lang = reader.ReadASCII(4);
+                                    var name = reader.ReadASCII(30);
+
+                                    if (serial == 0 && graphic == 0 && msgType == MessageType.Regular &&
+                                        font == 0xFFFF && hue == 0xFFFF && name.Equals("system", StringComparison.InvariantCultureIgnoreCase))
                                     {
-                                        var serial = reader.ReadUInt32BE();
-                                        var graphic = reader.ReadUInt16BE();
-                                        var msgType = (MessageType) reader.ReadUInt8();
-                                        var hue = reader.ReadUInt16BE();
-                                        var font = reader.ReadUInt16BE();
-                                        var lang = reader.ReadASCII(4);
-                                        var name = reader.ReadASCII(30);
-
-                                        if (serial == 0 && graphic == 0 && msgType == MessageType.Regular &&
-                                            font == 0xFFFF && hue == 0xFFFF && name.Equals("system", StringComparison.InvariantCultureIgnoreCase))
-                                        {
-                                            network.Value.Send([0x03,
-                                                0x00,
-                                                0x28,
-                                                0x20,
-                                                0x00,
-                                                0x34,
-                                                0x00,
-                                                0x03,
-                                                0xdb,
-                                                0x13,
-                                                0x14,
-                                                0x3f,
-                                                0x45,
-                                                0x2c,
-                                                0x58,
-                                                0x0f,
-                                                0x5d,
-                                                0x44,
-                                                0x2e,
-                                                0x50,
-                                                0x11,
-                                                0xdf,
-                                                0x75,
-                                                0x5c,
-                                                0xe0,
-                                                0x3e,
-                                                0x71,
-                                                0x4f,
-                                                0x31,
-                                                0x34,
-                                                0x05,
-                                                0x4e,
-                                                0x18,
-                                                0x1e,
-                                                0x72,
-                                                0x0f,
-                                                0x59,
-                                                0xad,
-                                                0xf5,
-                                                0x00]);
-                                        }
-                                        else
-                                        {
-                                            var text = reader.ReadUnicodeBE();
-                                        }
-
-                                        break;
+                                        network.Value.Send(
+                                        [
+                                            0x03,
+                                            0x00,
+                                            0x28,
+                                            0x20,
+                                            0x00,
+                                            0x34,
+                                            0x00,
+                                            0x03,
+                                            0xdb,
+                                            0x13,
+                                            0x14,
+                                            0x3f,
+                                            0x45,
+                                            0x2c,
+                                            0x58,
+                                            0x0f,
+                                            0x5d,
+                                            0x44,
+                                            0x2e,
+                                            0x50,
+                                            0x11,
+                                            0xdf,
+                                            0x75,
+                                            0x5c,
+                                            0xe0,
+                                            0x3e,
+                                            0x71,
+                                            0x4f,
+                                            0x31,
+                                            0x34,
+                                            0x05,
+                                            0x4e,
+                                            0x18,
+                                            0x1e,
+                                            0x72,
+                                            0x0f,
+                                            0x59,
+                                            0xad,
+                                            0xf5,
+                                            0x00
+                                        ]);
                                     }
+                                    else
+                                    {
+                                        var text = reader.ReadUnicodeBE();
+                                        Console.WriteLine("0xAE: {0}", text);
+                                    }
+                                }
+                                break;
 
                                 case 0xC8: // client view range
+                                {
+                                    var range = reader.ReadUInt8();
+                                }
+                                break;
+
+                                case 0x78: // update object
+                                case 0xD3:
+                                {
+                                    var serial = reader.ReadUInt32BE();
+                                    var graphic = reader.ReadUInt16BE();
+                                    var x = reader.ReadUInt16BE();
+                                    var y = reader.ReadUInt16BE();
+                                    var z = reader.ReadInt8();
+                                    var dir = (Direction)reader.ReadUInt8();
+                                    var hue = reader.ReadUInt16BE();
+                                    var flags = (Flags)reader.ReadUInt8();
+                                    var notoriety = (NotorietyFlag)reader.ReadUInt8();
+                                    
+                                    if (packetId != 0x78)
+                                        reader.Skip(6);
+
+                                    uint itemSerial;
+                                    while ((itemSerial = reader.ReadUInt32BE()) != 0)
                                     {
-                                        var range = reader.ReadUInt8();
-                                        break;
+                                        var itemGraphic = reader.ReadUInt16BE();
+                                        var layer = (Layer)reader.ReadUInt8();
+                                        ushort itemHue = 0;
+
+                                        if (clientVersion.Value >= ClientVersion.CV_70331)
+                                            itemHue = reader.ReadUInt16BE();
+                                        else if ((itemGraphic & 0x8000) != 0)
+                                        {
+                                            itemGraphic &= 0x7FFF;
+                                            itemHue = reader.ReadUInt16BE();
+                                        }
                                     }
+                                }
+                                break;
 
                                 case 0xB9: // locked features
                                 case 0x4F: // global light level
@@ -1161,7 +1220,6 @@ namespace ClassicUO
                                 case 0xBC: // season
                                 case 0x20: // update player
                                 case 0x76: // TODO: ????
-                                case 0x78: // update object
                                 case 0x16: // new healthbar update
                                 case 0x17:
                                 case 0xDC: // opl info
@@ -1186,7 +1244,7 @@ namespace ClassicUO
                         ArrayPool<byte>.Shared.Return(packet.RentedBuffer);
                     }
                 }
-            });
+            }).RunIf((Res<NetClient> network, EventReader<OnPacketRecv> packetReader) => !packetReader.IsEmpty && network.Value!.IsConnected);
         }
 
 
