@@ -582,7 +582,7 @@ namespace ClassicUO
     {
         public void Build(Scheduler scheduler)
         {
-            scheduler.AddResource(new GameState() { Map = -1 });
+            scheduler.AddResource(new GameContext() { Map = -1 });
 
             scheduler.AddPlugin(new FnaPlugin() {
                 WindowResizable = true,
@@ -611,7 +611,7 @@ namespace ClassicUO
 
     struct OnNewChunkRequest { public int Map; public int RangeStartX, RangeStartY, RangeEndX, RangeEndY; }
     struct OnPacketRecv { public byte[] RentedBuffer; public int Length; }
-    struct GameState
+    struct GameContext
     {
         public int Map;
         public ushort CenterX, CenterY;
@@ -620,6 +620,11 @@ namespace ClassicUO
         public uint PlayerSerial;
         public ClientFlags Protocol;
         public int MaxMapWidth, MaxMapHeight;
+    }
+
+    struct MouseContext
+    {
+        public MouseState OldState, NewState;
     }
 
     struct AssetsServer
@@ -639,7 +644,7 @@ namespace ClassicUO
             scheduler.AddResource(new NetClient());
             scheduler.AddResource(new HashSet<(int chunkX, int chunkY, int mapIndex)>());
 
-            scheduler.AddSystem(static (Res<GraphicsDevice> device, Res<GameState> gameState, SchedulerState schedState, TinyEcs.World world) => {
+            scheduler.AddSystem(static (Res<GraphicsDevice> device, Res<GameContext> gameCtx, SchedulerState schedState, TinyEcs.World world) => {
                 world.Entity<Renderable>();
                 world.Entity<TileStretched>();
                 ClientVersionHelper.IsClientVersionValid(Settings.GlobalSettings.ClientVersion, out ClientVersion clientVersion);
@@ -657,25 +662,25 @@ namespace ClassicUO
                 schedState.AddResource(new Renderer.UltimaBatcher2D(device));
                 schedState.AddResource(clientVersion);
 
-                gameState.Value.Protocol = ClientFlags.CF_T2A;
+                gameCtx.Value.Protocol = ClientFlags.CF_T2A;
 
                 if (clientVersion  >= ClientVersion.CV_200)
-                    gameState.Value.Protocol |= ClientFlags.CF_RE;
+                    gameCtx.Value.Protocol |= ClientFlags.CF_RE;
 
                 if (clientVersion >= ClientVersion.CV_300)
-                    gameState.Value.Protocol |= ClientFlags.CF_TD;
+                    gameCtx.Value.Protocol |= ClientFlags.CF_TD;
 
                 if (clientVersion >= ClientVersion.CV_308)
-                    gameState.Value.Protocol |= ClientFlags.CF_LBR;
+                    gameCtx.Value.Protocol |= ClientFlags.CF_LBR;
 
                 if (clientVersion >= ClientVersion.CV_308Z)
-                    gameState.Value.Protocol |= ClientFlags.CF_AOS;
+                    gameCtx.Value.Protocol |= ClientFlags.CF_AOS;
 
                 if (clientVersion >= ClientVersion.CV_405A)
-                    gameState.Value.Protocol |= ClientFlags.CF_SE;
+                    gameCtx.Value.Protocol |= ClientFlags.CF_SE;
 
                 if (clientVersion >= ClientVersion.CV_60144)
-                    gameState.Value.Protocol |= ClientFlags.CF_SA;
+                    gameCtx.Value.Protocol |= ClientFlags.CF_SA;
 
 
                 const int TEXTURE_WIDTH = 512;
@@ -740,8 +745,6 @@ namespace ClassicUO
                 Res<HashSet<(int ChunkX, int ChunkY, int MapIndex)>> chunksLoaded,
                 EventReader<OnNewChunkRequest> chunkRequests
             ) => {
-
-
                 foreach (var chunkEv in chunkRequests.Read())
                 {
                     for (int chunkX = chunkEv.RangeStartX; chunkX <= chunkEv.RangeEndX; chunkX += 1)
@@ -905,7 +908,7 @@ namespace ClassicUO
                 EventReader<OnPacketRecv> packetReader,
                 EventWriter<OnNewChunkRequest> chunkRequests,
                 Res<NetClient> network,
-                Res<GameState> gameState,
+                Res<GameContext> gameCtx,
                 Res<ClientVersion> clientVersion,
                 Res<AssetsServer> assetsServer
             ) => {
@@ -969,7 +972,7 @@ namespace ClassicUO
                                     var cityCount = reader.ReadUInt8();
                                     // bla bla
 
-                                    network.Value.Send_SelectCharacter(0, characterNames[0], network.Value.LocalIP, gameState.Value.Protocol);
+                                    network.Value.Send_SelectCharacter(0, characterNames[0], network.Value.LocalIP, gameCtx.Value.Protocol);
                                 }
                                 break;
 
@@ -1018,16 +1021,16 @@ namespace ClassicUO
                                     if (clientVersion.Value >= ClientVersion.CV_70796)
                                         network.Value.Send_ShowPublicHouseContent(true);
 
-                                    gameState.Value.CenterX = x;
-                                    gameState.Value.CenterY = y;
-                                    gameState.Value.CenterZ = z;
-                                    gameState.Value.PlayerSerial = serial;
-                                    gameState.Value.MaxMapWidth = mapWidth;
-                                    gameState.Value.MaxMapHeight = mapHeight;
+                                    gameCtx.Value.CenterX = x;
+                                    gameCtx.Value.CenterY = y;
+                                    gameCtx.Value.CenterZ = z;
+                                    gameCtx.Value.PlayerSerial = serial;
+                                    gameCtx.Value.MaxMapWidth = mapWidth;
+                                    gameCtx.Value.MaxMapHeight = mapHeight;
 
                                     var offset = 8;
                                     chunkRequests.Enqueue(new() {
-                                        Map = gameState.Value.Map,
+                                        Map = gameCtx.Value.Map,
                                         RangeStartX = Math.Max(0, x / 8 - offset),
                                         RangeStartY = Math.Max(0, y / 8 - offset),
                                         RangeEndX = Math.Min(mapWidth / 8, x / 8 + offset),
@@ -1053,16 +1056,16 @@ namespace ClassicUO
 
                                 case 0x55: // login complete
                                 {
-                                    if (gameState.Value.PlayerSerial != 0)
+                                    if (gameCtx.Value.PlayerSerial != 0)
                                     {
-                                        network.Value.Send_StatusRequest(gameState.Value.PlayerSerial);
+                                        network.Value.Send_StatusRequest(gameCtx.Value.PlayerSerial);
                                         network.Value.Send_OpenChat("");
 
-                                        network.Value.Send_SkillsRequest(gameState.Value.PlayerSerial);
-                                        network.Value.Send_DoubleClick(gameState.Value.PlayerSerial);
+                                        network.Value.Send_SkillsRequest(gameCtx.Value.PlayerSerial);
+                                        network.Value.Send_DoubleClick(gameCtx.Value.PlayerSerial);
 
                                         if (clientVersion.Value >= ClientVersion.CV_306E)
-                                            network.Value.Send_ClientType(gameState.Value.Protocol);
+                                            network.Value.Send_ClientType(gameCtx.Value.Protocol);
 
                                         if (clientVersion.Value >= ClientVersion.CV_305D)
                                             network.Value.Send_ClientViewRange(24);
@@ -1078,9 +1081,9 @@ namespace ClassicUO
                                     if (cmd == 8)
                                     {
                                         var mapIndex = reader.ReadUInt8();
-                                        if (gameState.Value.Map != mapIndex)
+                                        if (gameCtx.Value.Map != mapIndex)
                                         {
-                                            gameState.Value.Map = mapIndex;
+                                            gameCtx.Value.Map = mapIndex;
                                         }
                                     }
                                     // else if (cmd == 0x18)
@@ -1091,11 +1094,11 @@ namespace ClassicUO
 
                                     //         var offset = 8;
                                     //         chunkRequests.Enqueue(new() {
-                                    //             Map = gameState.Value.Map,
-                                    //             RangeStartX = Math.Max(0, gameState.Value.CenterX / 8 - offset),
-                                    //             RangeStartY = Math.Max(0, gameState.Value.CenterY / 8 - offset),
-                                    //             RangeEndX = gameState.Value.CenterX / 8 + offset,
-                                    //             RangeEndY = gameState.Value.CenterY / 8 + offset,
+                                    //             Map = gameCtx.Value.Map,
+                                    //             RangeStartX = Math.Max(0, gameCtx.Value.CenterX / 8 - offset),
+                                    //             RangeStartY = Math.Max(0, gameCtx.Value.CenterY / 8 - offset),
+                                    //             RangeEndX = gameCtx.Value.CenterX / 8 + offset,
+                                    //             RangeEndY = gameCtx.Value.CenterY / 8 + offset,
                                     //         });
                                     //     }
                                     // }
@@ -1444,25 +1447,25 @@ namespace ClassicUO
         }
     }
 
-    struct FnaPlugin : IPlugin
+    readonly struct FnaPlugin : IPlugin
     {
-        public bool WindowResizable { get; set; }
-        public bool MouseVisible { get; set; }
-        public bool VSync { get; set; }
-
-
-
+        public bool WindowResizable { get; init; }
+        public bool MouseVisible { get; init; }
+        public bool VSync { get; init; }
+        
+        
         public void Build(Scheduler scheduler)
         {
             var game = new UoGame(MouseVisible, WindowResizable, VSync);
             scheduler.AddResource(game);
             scheduler.AddResource(Keyboard.GetState());
-            scheduler.AddResource(Mouse.GetState());
+            // scheduler.AddResource(Mouse.GetState());
+            scheduler.AddResource(new MouseContext());
             scheduler.AddEvent<KeyEvent>();
             scheduler.AddEvent<MouseEvent>();
             scheduler.AddEvent<WheelEvent>();
 
-            scheduler.AddSystem((Res<UoGame> game, SchedulerState schedState) => {
+            scheduler.AddSystem(static (Res<UoGame> game, SchedulerState schedState) => {
                 game.Value.BeforeLoop();
                 game.Value.RunOneFrame();
                 schedState.AddResource(game.Value.GraphicsDevice);
@@ -1476,32 +1479,31 @@ namespace ClassicUO
                 FrameworkDispatcher.Update();
             }).RunIf((SchedulerState state) => state.ResourceExists<UoGame>());
 
-            scheduler.AddSystem((Res<UoGame> game) => {
-                Environment.Exit(0);
-            }, Stages.AfterUpdate).RunIf((Res<UoGame> game) => !game.Value.RunApplication);
+            scheduler.AddSystem(() => Environment.Exit(0), Stages.AfterUpdate)
+                     .RunIf(static (Res<UoGame> game) => !game.Value.RunApplication);
 
-            scheduler.AddSystem((
+            scheduler.AddSystem(static (
                 Res<GraphicsDevice> device,
                 Res<Renderer.UltimaBatcher2D> batch,
-                Res<GameState> gameState,
-                Res<MouseState> oldMouseState,
+                Res<GameContext> gameCtx,
+                Res<MouseContext> mouseCtx,
                 Query<Renderable, Not<TileStretched>> query,
                 Query<(Renderable, TileStretched)> queryTiles
             ) => {
                 device.Value.Clear(Color.AliceBlue);
 
-                var center = Isometric.IsoToScreen(gameState.Value.CenterX, gameState.Value.CenterY, gameState.Value.CenterZ);
-                center.X -= device.Value.PresentationParameters.BackBufferWidth / 2;
-                center.Y -= device.Value.PresentationParameters.BackBufferHeight / 2;
+                var center = Isometric.IsoToScreen(gameCtx.Value.CenterX, gameCtx.Value.CenterY, gameCtx.Value.CenterZ);
+                center.X -= device.Value.PresentationParameters.BackBufferWidth / 2f;
+                center.Y -= device.Value.PresentationParameters.BackBufferHeight / 2f;
 
-                var newMouseState = Mouse.GetState();
-                if (newMouseState.LeftButton == ButtonState.Pressed)
+                if (mouseCtx.Value.NewState.LeftButton == ButtonState.Pressed)
                 {
-                    gameState.Value.CenterOffset.X += newMouseState.X - oldMouseState.Value.X;
-                    gameState.Value.CenterOffset.Y += newMouseState.Y - oldMouseState.Value.Y;
+                    gameCtx.Value.CenterOffset.X += mouseCtx.Value.NewState.X - mouseCtx.Value.OldState.X;
+                    gameCtx.Value.CenterOffset.Y += mouseCtx.Value.NewState.Y - mouseCtx.Value.OldState.Y;
+                    Console.WriteLine("offset!! {0}", gameCtx.Value.CenterOffset);
                 }
 
-                center -= gameState.Value.CenterOffset;
+                center -= gameCtx.Value.CenterOffset;
 
                 var sb = batch.Value;
                 sb.Begin();
@@ -1556,25 +1558,25 @@ namespace ClassicUO
                 oldState.Value = newState;
             }, Stages.AfterUpdate);
 
-            scheduler.AddSystem((EventWriter<MouseEvent> writer, EventWriter<WheelEvent> wheelWriter, Res<MouseState> oldState) => {
-                var newState = Mouse.GetState();
+            scheduler.AddSystem((Res<MouseContext> mouseCtx) => mouseCtx.Value.NewState = Mouse.GetState(), Stages.BeforeUpdate);
 
-                if (newState.LeftButton != oldState.Value.LeftButton)
-                    writer.Enqueue(new MouseEvent() { Action = newState.LeftButton, Button = Input.MouseButtonType.Left, X = newState.X, Y = newState.Y });
-                if (newState.RightButton != oldState.Value.RightButton)
-                    writer.Enqueue(new MouseEvent() { Action = newState.RightButton, Button = Input.MouseButtonType.Right, X = newState.X, Y = newState.Y });
-                if (newState.MiddleButton != oldState.Value.MiddleButton)
-                    writer.Enqueue(new MouseEvent() { Action = newState.MiddleButton, Button = Input.MouseButtonType.Middle, X = newState.X, Y = newState.Y });
-                if (newState.XButton1 != oldState.Value.XButton1)
-                    writer.Enqueue(new MouseEvent() { Action = newState.XButton1, Button = Input.MouseButtonType.XButton1, X = newState.X, Y = newState.Y });
-                if (newState.XButton2 != oldState.Value.XButton2)
-                    writer.Enqueue(new MouseEvent() { Action = newState.XButton2, Button = Input.MouseButtonType.XButton2, X = newState.X, Y = newState.Y });
+            scheduler.AddSystem((EventWriter<MouseEvent> writer, EventWriter<WheelEvent> wheelWriter, Res<MouseContext> mouseCtx) => {
+                if (mouseCtx.Value.NewState.LeftButton != mouseCtx.Value.OldState.LeftButton)
+                    writer.Enqueue(new MouseEvent() { Action = mouseCtx.Value.NewState.LeftButton, Button = Input.MouseButtonType.Left, X = mouseCtx.Value.NewState.X, Y = mouseCtx.Value.NewState.Y });
+                if (mouseCtx.Value.NewState.RightButton != mouseCtx.Value.OldState.RightButton)
+                    writer.Enqueue(new MouseEvent() { Action = mouseCtx.Value.NewState.RightButton, Button = Input.MouseButtonType.Right, X = mouseCtx.Value.NewState.X, Y = mouseCtx.Value.NewState.Y });
+                if (mouseCtx.Value.NewState.MiddleButton != mouseCtx.Value.OldState.MiddleButton)
+                    writer.Enqueue(new MouseEvent() { Action = mouseCtx.Value.NewState.MiddleButton, Button = Input.MouseButtonType.Middle, X = mouseCtx.Value.NewState.X, Y = mouseCtx.Value.NewState.Y });
+                if (mouseCtx.Value.NewState.XButton1 != mouseCtx.Value.OldState.XButton1)
+                    writer.Enqueue(new MouseEvent() { Action = mouseCtx.Value.NewState.XButton1, Button = Input.MouseButtonType.XButton1, X = mouseCtx.Value.NewState.X, Y = mouseCtx.Value.NewState.Y });
+                if (mouseCtx.Value.NewState.XButton2 != mouseCtx.Value.OldState.XButton2)
+                    writer.Enqueue(new MouseEvent() { Action = mouseCtx.Value.NewState.XButton2, Button = Input.MouseButtonType.XButton2, X = mouseCtx.Value.NewState.X, Y = mouseCtx.Value.NewState.Y });
 
-                if (newState.ScrollWheelValue != oldState.Value.ScrollWheelValue)
+                if (mouseCtx.Value.NewState.ScrollWheelValue != mouseCtx.Value.OldState.ScrollWheelValue)
                     // FNA multiplies for 120 for some reason
-                    wheelWriter.Enqueue(new WheelEvent() { Value = (oldState.Value.ScrollWheelValue - newState.ScrollWheelValue) / 120 });
+                    wheelWriter.Enqueue(new WheelEvent() { Value = (mouseCtx.Value.OldState.ScrollWheelValue - mouseCtx.Value.NewState.ScrollWheelValue) / 120 });
 
-                oldState.Value = newState;
+                mouseCtx.Value.OldState = mouseCtx.Value.NewState;
             }, Stages.AfterUpdate);
 
             scheduler.AddSystem((EventReader<KeyEvent> reader) => {
@@ -1586,7 +1588,7 @@ namespace ClassicUO
                         _ => "unkown"
                     });
             });
-
+            
             scheduler.AddSystem((EventReader<MouseEvent> reader) => {
                 foreach (var ev in reader.Read())
                     Console.WriteLine("mouse button {0} is {1} at {2},{3}", ev.Button, ev.Action switch {
