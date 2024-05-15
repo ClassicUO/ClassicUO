@@ -17,7 +17,6 @@ struct AssetsServer
     public Renderer.Gumps.Gump Gumps;
 }
 struct OnNewChunkRequest { public int Map; public int RangeStartX, RangeStartY, RangeEndX, RangeEndY; }
-struct OnPacketRecv { public byte[] RentedBuffer; public int Length; }
 struct GameContext
 {
     public int Map;
@@ -51,7 +50,6 @@ readonly struct CuoPlugin : IPlugin
     public unsafe void Build(Scheduler scheduler)
     {
         scheduler.AddEvent<OnNewChunkRequest>();
-        scheduler.AddEvent<OnPacketRecv>();
         scheduler.AddResource(new HashSet<(int chunkX, int chunkY, int mapIndex)>());
 
         scheduler.AddSystem(static (Res<GraphicsDevice> device, Res<GameContext> gameCtx, SchedulerState schedState, TinyEcs.World world) => {
