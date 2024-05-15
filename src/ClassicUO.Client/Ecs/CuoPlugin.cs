@@ -29,6 +29,12 @@ readonly struct CuoPlugin : IPlugin
         scheduler.AddResource(new GameContext() { Map = -1 });
         scheduler.AddResource(Settings.GlobalSettings);
 
+        scheduler.AddSystem((TinyEcs.World world) => {
+            // force the component initialization. Queries must know before the components to search
+            world.Entity<Renderable>();
+            world.Entity<TileStretched>();
+        }, Stages.Startup);
+
         scheduler.AddSystem((Res<GameContext> gameCtx, Res<Settings> settings) => {
             ClientVersionHelper.IsClientVersionValid(
                 settings.Value.ClientVersion,
