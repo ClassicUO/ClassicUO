@@ -50,5 +50,6 @@ readonly struct CuoPlugin : IPlugin
         scheduler.AddPlugin<AssetsPlugin>();
         scheduler.AddPlugin<TerrainPlugin>();
         scheduler.AddPlugin<NetworkPlugin>();
+        scheduler.AddPlugin<RenderingPlugin>();
     }
 }
