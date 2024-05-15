@@ -20,11 +20,17 @@ readonly struct AssetsPlugin : IPlugin
 {
     public unsafe void Build(Scheduler scheduler)
     {
-        scheduler.AddSystem((TinyEcs.World world, Res<GraphicsDevice> device, Res<GameContext> gameCtx, SchedulerState schedState) => {
+        scheduler.AddSystem((
+            TinyEcs.World world,
+            Res<GraphicsDevice> device,
+            Res<GameContext> gameCtx,
+            Res<Settings> settings,
+            SchedulerState schedState
+        ) => {
             world.Entity<Renderable>();
             world.Entity<TileStretched>();
 
-            Assets.UOFileManager.Load(gameCtx.Value.ClientVersion, Settings.GlobalSettings.UltimaOnlineDirectory, false, Settings.GlobalSettings.Language);
+            Assets.UOFileManager.Load(gameCtx.Value.ClientVersion, settings.Value.UltimaOnlineDirectory, false, settings.Value.Language);
 
             schedState.AddResource(Assets.TileDataLoader.Instance);
             schedState.AddResource(Assets.MapLoader.Instance);

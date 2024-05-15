@@ -24,6 +24,7 @@ readonly struct NetworkPlugin : IPlugin
         scheduler.AddResource(new PacketsMap());
 
         scheduler.AddSystem((
+            Res<Settings> settings,
             Res<PacketsMap> packetsMap,
             Res<NetClient> network,
             Res<GameContext> gameCtx,
@@ -82,7 +83,7 @@ readonly struct NetworkPlugin : IPlugin
                     network.Value.EnableCompression();
                     Span<byte> b = [(byte)(seed >> 24), (byte)(seed >> 16), (byte)(seed >> 8), (byte)seed];
                     network.Value.Send(b, true, true);
-                    network.Value.Send_SecondLogin(Settings.GlobalSettings.Username, Crypter.Decrypt(Settings.GlobalSettings.Password), seed);
+                    network.Value.Send_SecondLogin(settings.Value.Username, Crypter.Decrypt(settings.Value.Password), seed);
                 }
             };
 
@@ -102,10 +103,10 @@ readonly struct NetworkPlugin : IPlugin
                 if (gameCtx.Value.ClientVersion >= ClientVersion.CV_200)
                 {
                     network.Value.Send_GameWindowSize(800, 400);
-                    network.Value.Send_Language(Settings.GlobalSettings.Language);
+                    network.Value.Send_Language(settings.Value.Language);
                 }
 
-                network.Value.Send_ClientVersion(Settings.GlobalSettings.ClientVersion);
+                network.Value.Send_ClientVersion(settings.Value.ClientVersion);
                 network.Value.Send_ClickRequest(serial);
                 network.Value.Send_SkillsRequest(serial);
 
@@ -175,7 +176,7 @@ readonly struct NetworkPlugin : IPlugin
                 }
             };
 
-            packetsMap.Value[0xBD] = buffer => network.Value.Send_ClientVersion(Settings.GlobalSettings.ClientVersion);
+            packetsMap.Value[0xBD] = buffer => network.Value.Send_ClientVersion(settings.Value.ClientVersion);
 
             packetsMap.Value[0xAE] = buffer => {
                 var reader = new StackDataReader(buffer);
@@ -282,9 +283,9 @@ readonly struct NetworkPlugin : IPlugin
 
         }, Stages.Startup);
 
-        scheduler.AddSystem((Res<NetClient> network, Res<GameContext> gameCtx) => {
+        scheduler.AddSystem((Res<NetClient> network, Res<GameContext> gameCtx, Res<Settings> settings) => {
             PacketsTable.AdjustPacketSizeByVersion(gameCtx.Value.ClientVersion);
-            network.Value.Connect(Settings.GlobalSettings.IP, Settings.GlobalSettings.Port);
+            network.Value.Connect(settings.Value.IP, settings.Value.Port);
 
             Console.WriteLine("Socket is connected ? {0}", network.Value.IsConnected);
 
@@ -303,7 +304,7 @@ readonly struct NetworkPlugin : IPlugin
                 network.Value.Send_Seed_Old(network.Value.LocalIP);
             }
 
-            network.Value.Send_FirstLogin(Settings.GlobalSettings.Username, Crypter.Decrypt(Settings.GlobalSettings.Password));
+            network.Value.Send_FirstLogin(settings.Value.Username, Crypter.Decrypt(settings.Value.Password));
         }, Stages.Startup);
 
         scheduler.AddSystem((Res<NetClient> network, Res<PacketsMap> packetsMap) => {

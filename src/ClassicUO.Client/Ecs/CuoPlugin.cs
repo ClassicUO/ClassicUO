@@ -27,10 +27,11 @@ readonly struct CuoPlugin : IPlugin
     public unsafe void Build(Scheduler scheduler)
     {
         scheduler.AddResource(new GameContext() { Map = -1 });
+        scheduler.AddResource(Settings.GlobalSettings);
 
-        scheduler.AddSystem((Res<GameContext> gameCtx) => {
+        scheduler.AddSystem((Res<GameContext> gameCtx, Res<Settings> settings) => {
             ClientVersionHelper.IsClientVersionValid(
-                Settings.GlobalSettings.ClientVersion,
+                settings.Value.ClientVersion,
                 out gameCtx.Value.ClientVersion
             );
         }, Stages.Startup);
