@@ -11,6 +11,15 @@ struct MouseContext
     public MouseState OldState, NewState;
 }
 
+struct Renderable
+{
+    public Texture2D Texture;
+    public Vector2 Position;
+    public Vector3 Color;
+    public Rectangle UV;
+    public float Z;
+}
+
 readonly struct FnaPlugin : IPlugin
 {
     public bool WindowResizable { get; init; }

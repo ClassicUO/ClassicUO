@@ -282,7 +282,6 @@ readonly struct NetworkPlugin : IPlugin
 
         }, Stages.Startup);
 
-
         scheduler.AddSystem((Res<NetClient> network, Res<GameContext> gameCtx) => {
             PacketsTable.AdjustPacketSizeByVersion(gameCtx.Value.ClientVersion);
             network.Value.Connect(Settings.GlobalSettings.IP, Settings.GlobalSettings.Port);
