@@ -288,13 +288,21 @@ readonly struct NetworkPlugin : IPlugin
 
             Console.WriteLine("Socket is connected ? {0}", network.Value.IsConnected);
 
-            // NOTE: im forcing the use of latest client just for convenience rn
-            var major = (byte) ((uint)gameCtx.Value.ClientVersion >> 24);
-            var minor = (byte) ((uint)gameCtx.Value.ClientVersion >> 16);
-            var build = (byte) ((uint)gameCtx.Value.ClientVersion >> 8);
-            var extra = (byte) gameCtx.Value.ClientVersion;
+            if (gameCtx.Value.ClientVersion >= ClientVersion.CV_6040)
+            {
+                // NOTE: im forcing the use of latest client just for convenience rn
+                var major = (byte) ((uint)gameCtx.Value.ClientVersion >> 24);
+                var minor = (byte) ((uint)gameCtx.Value.ClientVersion >> 16);
+                var build = (byte) ((uint)gameCtx.Value.ClientVersion >> 8);
+                var extra = (byte) gameCtx.Value.ClientVersion;
 
-            network.Value.Send_Seed(network.Value.LocalIP, major, minor, build, extra);
+                network.Value.Send_Seed(network.Value.LocalIP, major, minor, build, extra);
+            }
+            else
+            {
+                network.Value.Send_Seed_Old(network.Value.LocalIP);
+            }
+
             network.Value.Send_FirstLogin(Settings.GlobalSettings.Username, Crypter.Decrypt(Settings.GlobalSettings.Password));
         }, Stages.Startup);
 
