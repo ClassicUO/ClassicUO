@@ -129,7 +129,10 @@ readonly struct NetworkPlugin : IPlugin
                     RangeEndY = Math.Min(mapHeight / 8, y / 8 + offset),
                 });
 
-                var frames = assetsServer.Value.Animations.GetAnimationFrames(graphic, 0, (byte)(dir & Direction.Up),
+                var isFlipped = false;
+                var direction = (byte)(dir & Direction.Up);
+                Assets.AnimationsLoader.Instance.GetAnimDirection(ref direction, ref isFlipped);
+                var frames = assetsServer.Value.Animations.GetAnimationFrames(graphic, 0, direction,
                                                                                 out var hue, out var _);
                 var ent = world.Entity()
                     .Set(new Ecs.NetworkSerial() { Value = serial })
@@ -309,33 +312,31 @@ readonly struct NetworkPlugin : IPlugin
 
         scheduler.AddSystem((Res<NetClient> network, Res<PacketsMap> packetsMap) => {
             var availableData = network.Value.CollectAvailableData();
-            if (availableData.Count != 0)
+
+            var realBuffer = availableData.AsSpan();
+            while (!realBuffer.IsEmpty)
             {
-                var realBuffer = availableData.AsSpan();
-                while (!realBuffer.IsEmpty)
+                var packetId = realBuffer[0];
+                var packetLen = PacketsTable.GetPacketLength(packetId);
+                var packetHeaderOffset = sizeof(byte);
+
+                if (packetLen == -1)
                 {
-                    var packetId = realBuffer[0];
-                    var packetLen = PacketsTable.GetPacketLength(packetId);
-                    var packetHeaderOffset = sizeof(byte);
+                    if (realBuffer.Length < 3)
+                        return;
 
-                    if (packetLen == -1)
-                    {
-                        if (realBuffer.Length < 3)
-                            return;
-
-                        packetLen = BinaryPrimitives.ReadInt16BigEndian(realBuffer[packetHeaderOffset..]);
-                        packetHeaderOffset += sizeof(ushort);
-                    }
-
-                    Console.WriteLine(">> packet-in: ID 0x{0:X2} | Len: {1}", packetId, packetLen);
-
-                    if (packetsMap.Value.TryGetValue(packetId, out var handler))
-                    {
-                        handler(realBuffer[packetHeaderOffset .. packetLen]);
-                    }
-
-                    realBuffer = realBuffer[packetLen ..];
+                    packetLen = BinaryPrimitives.ReadInt16BigEndian(realBuffer[packetHeaderOffset..]);
+                    packetHeaderOffset += sizeof(ushort);
                 }
+
+                Console.WriteLine(">> packet-in: ID 0x{0:X2} | Len: {1}", packetId, packetLen);
+
+                if (packetsMap.Value.TryGetValue(packetId, out var handler))
+                {
+                    handler(realBuffer[packetHeaderOffset .. packetLen]);
+                }
+
+                realBuffer = realBuffer[packetLen ..];
             }
 
             network.Value.Flush();

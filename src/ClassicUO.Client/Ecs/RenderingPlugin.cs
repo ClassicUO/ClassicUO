@@ -14,7 +14,7 @@ readonly struct RenderingPlugin : IPlugin
             Res<Renderer.UltimaBatcher2D> batch,
             Res<GameContext> gameCtx,
             Res<MouseContext> mouseCtx,
-            Query<Renderable, Not<TileStretched>> query,
+            Query<Renderable, Without<TileStretched>> query,
             Query<(Renderable, TileStretched)> queryTiles
         ) => {
             device.Value.Clear(Color.AliceBlue);
