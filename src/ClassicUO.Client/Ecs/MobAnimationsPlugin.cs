@@ -61,7 +61,8 @@ readonly struct MobAnimationsPlugin : IPlugin
     public void Build(Scheduler scheduler)
     {
         var mocTime = 0;
-        scheduler.AddSystem((Query<(
+        scheduler.AddSystem((
+            Query<(
                 Renderable,
                 MobAnimation,
                 Optional<MobileFlags>,

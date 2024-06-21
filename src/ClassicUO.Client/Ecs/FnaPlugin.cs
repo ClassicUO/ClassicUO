@@ -91,7 +91,7 @@ readonly struct FnaPlugin : IPlugin
         }, Stages.FrameEnd);
 
         scheduler.AddSystem((EventReader<KeyEvent> reader) => {
-            foreach (var ev in reader.Read())
+            foreach (var ev in reader)
                 Console.WriteLine("key {0} is {1}", ev.Key, ev.Action switch {
                     0 => "up",
                     1 => "down",
@@ -101,7 +101,7 @@ readonly struct FnaPlugin : IPlugin
         });
 
         scheduler.AddSystem((EventReader<MouseEvent> reader) => {
-            foreach (var ev in reader.Read())
+            foreach (var ev in reader)
                 Console.WriteLine("mouse button {0} is {1} at {2},{3}", ev.Button, ev.Action switch {
                     ButtonState.Pressed => "pressed",
                     ButtonState.Released => "released",
@@ -110,7 +110,7 @@ readonly struct FnaPlugin : IPlugin
         }).RunIf((Res<UoGame> game) => game.Value.IsActive);
 
         scheduler.AddSystem((EventReader<WheelEvent> reader) => {
-            foreach (var ev in reader.Read())
+            foreach (var ev in reader)
                 Console.WriteLine("wheel value {0}", ev.Value);
         }).RunIf((Res<UoGame> game) => game.Value.IsActive);
     }

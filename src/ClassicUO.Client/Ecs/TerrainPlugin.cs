@@ -30,7 +30,7 @@ readonly struct TerrainPlugin : IPlugin
             Res<HashSet<(int ChunkX, int ChunkY, int MapIndex)>> chunksLoaded,
             EventReader<OnNewChunkRequest> chunkRequests
         ) => {
-            foreach (var chunkEv in chunkRequests.Read())
+            foreach (var chunkEv in chunkRequests)
             {
                 for (int chunkX = chunkEv.RangeStartX; chunkX <= chunkEv.RangeEndX; chunkX += 1)
                 for (int chunkY = chunkEv.RangeStartY; chunkY <= chunkEv.RangeEndY; chunkY += 1)

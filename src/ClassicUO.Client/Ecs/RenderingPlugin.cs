@@ -66,7 +66,7 @@ readonly struct RenderingPlugin : IPlugin
             sb.SetStencil(null);
             sb.End();
             device.Value.Present();
-        }, Stages.AfterUpdate)
+        }, Stages.AfterUpdate, ThreadingMode.Single)
         .RunIf((SchedulerState state) => state.ResourceExists<GraphicsDevice>());
     }
 }
