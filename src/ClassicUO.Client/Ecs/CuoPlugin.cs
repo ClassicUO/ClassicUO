@@ -56,8 +56,8 @@ readonly struct CuoPlugin : IPlugin
         // TODO: remove this once the UI is done
         scheduler.AddSystem((EventWriter<OnLoginRequest> writer, Res<Settings> settings) =>
             writer.Enqueue(new OnLoginRequest() {
-            Address = settings.Value.IP,
-            Port = settings.Value.Port,
+                Address = settings.Value.IP,
+                Port = settings.Value.Port,
         }), Stages.Startup);
     }
 }

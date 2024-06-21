@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
+using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.IO;
@@ -28,6 +30,7 @@ readonly struct InGamePacketsPlugin : IPlugin
             Res<AssetsServer> assetsServer,
             TinyEcs.World world
         ) => {
+            // enter world
             packetsMap.Value[0x1B] = buffer => {
                 var reader = new StackDataReader(buffer);
                 var serial = reader.ReadUInt32BE();
@@ -89,6 +92,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                     });
             };
 
+            // login complete
             packetsMap.Value[0x55] = buffer => {
                 if (gameCtx.Value.PlayerSerial == 0)
                     return;
@@ -106,6 +110,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                     network.Value.Send_ClientViewRange(24);
             };
 
+            // extended commands
             packetsMap.Value[0xBF] = buffer => {
                 var reader = new StackDataReader(buffer);
                 var cmd = reader.ReadUInt16BE();
@@ -120,8 +125,10 @@ readonly struct InGamePacketsPlugin : IPlugin
                 }
             };
 
+            // client version
             packetsMap.Value[0xBD] = buffer => network.Value.Send_ClientVersion(settings.Value.ClientVersion);
 
+            // unicode speech
             packetsMap.Value[0xAE] = buffer => {
                 var reader = new StackDataReader(buffer);
                 var serial = reader.ReadUInt32BE();
@@ -217,14 +224,17 @@ readonly struct InGamePacketsPlugin : IPlugin
                 }
             };
 
+            // update object
             packetsMap.Value[0xD3] = buffer => d3_78(0xD3, buffer);
             packetsMap.Value[0x78] = buffer => d3_78(0x78, buffer);
 
+            // view range
             packetsMap.Value[0xC8] = buffer => {
                 var reader = new StackDataReader(buffer);
                 var range = reader.ReadUInt8();
             };
 
+            // update item
             packetsMap.Value[0x1A] = buffer => {
                 var reader = new StackDataReader(buffer);
 
@@ -308,6 +318,289 @@ readonly struct InGamePacketsPlugin : IPlugin
                 }
             };
 
+            // damage
+            packetsMap.Value[0x0B] = buffer => {
+                var reader = new StackDataReader(buffer);
+                var serial = reader.ReadUInt32BE();
+                var damage = reader.ReadUInt16BE();
+            };
+
+            // character status
+            packetsMap.Value[0x11] = buffer => {
+                var reader = new StackDataReader(buffer);
+                var serial = reader.ReadUInt32BE();
+                var name = reader.ReadASCII(30);
+                (var hits, var hitsMax) = (reader.ReadUInt16BE(), reader.ReadUInt16BE());
+                var canBeRenamed = reader.ReadBool();
+                var type = reader.ReadUInt8();
+
+                if (type > 0)
+                {
+                    var isFemale = reader.ReadBool();
+                    (var str, var dex, var intell) = (reader.ReadUInt16BE(), reader.ReadUInt16BE(), reader.ReadUInt16BE());
+                    (var stam, var stamMax) = (reader.ReadUInt16BE(), reader.ReadUInt16BE());
+                    (var mana, var manaMax) = (reader.ReadUInt16BE(), reader.ReadUInt16BE());
+                    var gold = reader.ReadUInt32BE();
+                    var physicalRes = reader.ReadInt16BE();
+                    var weigth = reader.ReadUInt16BE();
+
+                    if (type >= 5)
+                    {
+                        var weightMax = reader.ReadUInt16BE();
+                        var race = reader.ReadUInt8();
+                    }
+
+                    if (type >= 3)
+                    {
+                        var statsCap = reader.ReadInt16BE();
+                        (var followers, var maxFollowers) = (reader.ReadUInt8(), reader.ReadUInt8());
+                    }
+
+                    if (type >= 4)
+                    {
+                        var fireRes = reader.ReadInt16BE();
+                        var coldRes = reader.ReadInt16BE();
+                        var poisonRes = reader.ReadInt16BE();
+                        var energyRes = reader.ReadInt16BE();
+                        var luck = reader.ReadUInt16BE();
+                        (var damageMin, var dagameMax) = (reader.ReadInt16BE(), reader.ReadInt16BE());
+                        var thithingPoints = reader.ReadUInt32BE();
+                    }
+
+                    if (type >= 6)
+                    {
+                        var maxPhysicalRes = reader.ReadInt16BE();
+                        var maxFireRes = reader.ReadInt16BE();
+                        var maxColdRes = reader.ReadInt16BE();
+                        var maxPoisonRes = reader.ReadInt16BE();
+                        var maxEnergyRes = reader.ReadInt16BE();
+                        (var dci, var maxDci) = (reader.ReadInt16BE(), reader.ReadInt16BE());
+                        var hci = reader.ReadInt16BE();
+                        var ssi = reader.ReadInt16BE();
+                        var di = reader.ReadInt16BE();
+                        var lrc = reader.ReadInt16BE();
+                        var sdi = reader.ReadInt16BE();
+                        var fcr = reader.ReadInt16BE();
+                        var fc = reader.ReadInt16BE();
+                        var lmc = reader.ReadInt16BE();
+                    }
+                }
+            };
+
+
+            var p_0x16_0x17 = (byte id, Span<byte> buffer) => {
+                var reader = new StackDataReader(buffer);
+
+                var serial = reader.ReadUInt32BE();
+                var count = reader.ReadUInt16BE();
+
+                for (var i = 0; i < count; ++i)
+                {
+                    var type = reader.ReadUInt16BE();
+                    var enabled = reader.ReadBool();
+                }
+            };
+
+            // healthbar update
+            packetsMap.Value[0x16] = buffer => p_0x16_0x17(0x16, buffer);
+            packetsMap.Value[0x17] = buffer => p_0x16_0x17(0x17, buffer);
+
+            // delete object
+            packetsMap.Value[0x1D] = buffer => {
+                var reader = new StackDataReader(buffer);
+
+                var serial = reader.ReadUInt32BE();
+            };
+
+            // update player
+            packetsMap.Value[0x20] = buffer => {
+                var reader = new StackDataReader(buffer);
+
+                var serial = reader.ReadUInt32BE();
+                var graphic = reader.ReadUInt16BE();
+                var graphicInc = reader.ReadUInt8();
+                var hue = reader.ReadUInt16BE();
+                var flags = (Flags)reader.ReadUInt8();
+                (var x, var y) = (reader.ReadUInt16BE(), reader.ReadUInt16BE());
+                var serverId = reader.ReadUInt16BE();
+                var direction = (Direction)reader.ReadUInt8();
+                var z = reader.ReadInt8();
+            };
+
+            // deny walk
+            packetsMap.Value[0x21] = buffer => {
+                var reader = new StackDataReader(buffer);
+
+                byte sequence = reader.ReadUInt8();
+                (var x, var y) = (reader.ReadUInt16BE(), reader.ReadUInt16BE());
+                var direction = (Direction) reader.ReadUInt8();
+                var z = reader.ReadInt8();
+            };
+
+            // confirm walk
+            packetsMap.Value[0x22] = buffer => {
+                var reader = new StackDataReader(buffer);
+
+                var sequence =  reader.ReadUInt8();
+                var notoriety = reader.ReadUInt8();
+            };
+
+            // drag animation
+            packetsMap.Value[0x23] = buffer => {
+                var reader = new StackDataReader(buffer);
+
+                var graphic = reader.ReadUInt16BE();
+                var graphicInc = reader.ReadUInt8();
+                var hue = reader.ReadUInt16BE();
+                var count = reader.ReadUInt16BE();
+                var src = reader.ReadUInt32BE();
+                (var srcX, var srcY, var srcZ) = (reader.ReadUInt16BE(), reader.ReadUInt16BE(), reader.ReadInt8());
+                var dst = reader.ReadUInt32BE();
+                (var dstX, var dstY, var dstZ) = (reader.ReadUInt16BE(), reader.ReadUInt16BE(), reader.ReadInt8());
+            };
+
+            // open container
+            packetsMap.Value[0x24] = buffer => {
+                var reader = new StackDataReader(buffer);
+
+                var serial = reader.ReadUInt32BE();
+                var graphic = reader.ReadUInt16BE();
+            };
+
+            // update container
+            packetsMap.Value[0x25] = buffer => {
+                var reader = new StackDataReader(buffer);
+
+                var serial = reader.ReadUInt32BE();
+                var graphic = reader.ReadUInt16BE();
+                var graphicInc = reader.ReadInt8();
+                var amount = Math.Max((ushort) 1, reader.ReadUInt16BE());
+                (var x, var y) = (reader.ReadUInt16BE(), reader.ReadUInt16BE());
+
+                if (gameCtx.Value.ClientVersion >= ClientVersion.CV_6017)
+                    reader.Skip(1);
+
+                var containerSerial = reader.ReadUInt32BE();
+                var hue = reader.ReadInt16BE();
+            };
+
+            // deny move item
+            packetsMap.Value[0x27] = buffer => {
+                var reader = new StackDataReader(buffer);
+
+                var code = reader.ReadUInt8();
+            };
+
+            // end draggin item
+            packetsMap.Value[0x28] = buffer => {
+            };
+
+            // drpp item ok
+            packetsMap.Value[0x29] = buffer => {
+            };
+
+            // show death screen
+            packetsMap.Value[0x2C] = buffer => {
+                var reader = new StackDataReader(buffer);
+                var action = reader.ReadUInt8();
+            };
+
+            // mobile attributes
+            packetsMap.Value[0x2D] = buffer => {
+                var reader = new StackDataReader(buffer);
+
+                var serial = reader.ReadUInt32BE();
+                (var hitsMax, var hits) = (reader.ReadUInt16BE(), reader.ReadUInt16BE());
+                (var manaMax, var mana) = (reader.ReadUInt16BE(), reader.ReadUInt16BE());
+                (var stamMax, var stam) = (reader.ReadUInt16BE(), reader.ReadUInt16BE());
+            };
+
+            // equip item
+            packetsMap.Value[0x2E] = buffer => {
+                var reader = new StackDataReader(buffer);
+
+                var serial = reader.ReadUInt32LE();
+                var graphic = reader.ReadUInt16BE();
+                var graphicInc = reader.ReadUInt8();
+                var container = reader.ReadUInt32BE();
+                var hue = reader.ReadUInt16BE();
+            };
+
+            // swing
+            packetsMap.Value[0x2F] = buffer => {
+                var reader = new StackDataReader(buffer);
+
+                reader.Skip(1);
+                var opponent = reader.ReadUInt32BE();
+                var defender = reader.ReadUInt32BE();
+            };
+
+            // update skills
+            packetsMap.Value[0x3A] = buffer => {
+                var reader = new StackDataReader(buffer);
+
+                var type = reader.ReadUInt8();
+                if (type == 0xFE)
+                {
+                    var count = reader.ReadUInt16BE();
+                    for (var i = 0; i < count; ++i)
+                    {
+                        var haveButton = reader.ReadBool();
+                        var nameLen = reader.ReadInt8();
+                        var skillName = reader.ReadASCII(nameLen);
+                    }
+                }
+                else
+                {
+                    var haveCap = type != 0u && type <= 0x03 || type == 0xDF;
+                    var singleUpdate = type == 0xFF || type == 0xDF;
+
+                    while (reader.Remaining > 0)
+                    {
+                        var id = reader.ReadInt16BE();
+                        (var real, var @base) = (reader.ReadInt16BE(), reader.ReadInt16BE());
+                        var status = (Lock)reader.ReadUInt8();
+
+                        if (haveCap)
+                        {
+                            var cap = reader.ReadInt16BE();
+                        }
+
+                        if (singleUpdate)
+                            break;
+                    }
+                }
+            };
+
+            // pathfinding
+            packetsMap.Value[0x38] = buffer => {
+                var reader = new StackDataReader(buffer);
+                var x = reader.ReadUInt16BE();
+                var y = reader.ReadUInt16BE();
+                var z = reader.ReadUInt16BE();
+            };
+
+            // update contained items
+            packetsMap.Value[0x3C] = buffer => {
+                var reader = new StackDataReader(buffer);
+
+                var count = reader.ReadUInt16BE();
+
+                for (var i = 0; i < count; ++i)
+                {
+                    var serial = reader.ReadUInt32BE();
+                    var graphic = reader.ReadUInt16BE();
+                    var graphicInc = reader.ReadUInt8();
+                    var amount = Math.Max((ushort) 1, reader.ReadUInt16BE());
+                    (var x, var y) = (reader.ReadUInt16BE(), reader.ReadUInt16BE());
+
+                    if (gameCtx.Value.ClientVersion >= ClientVersion.CV_6017)
+                        reader.Skip(1);
+
+                    var containerSerial = reader.ReadUInt32BE();
+                    var hue = reader.ReadUInt16BE();
+                }
+            };
         }, Stages.Startup);
     }
 }
