@@ -15,7 +15,7 @@ namespace ClassicUO.Ecs;
 using PacketsMap = Dictionary<byte, OnPacket>;
 using NetworkEntitiesMap = Dictionary<uint, EcsID>;
 
-delegate void OnPacket(Span<byte> buffer);
+delegate void OnPacket(ReadOnlySpan<byte> buffer);
 
 struct OnLoginRequest
 {
