@@ -13,14 +13,19 @@ using TinyEcs;
 namespace ClassicUO.Ecs.NetworkPlugins;
 
 using PacketsMap = Dictionary<byte, OnPacket>;
-using NetworkEntitiesMap = Dictionary<uint, EcsID>;
 
+sealed class NetworkEntitiesMap : SystemParam
+{
+}
 
 readonly struct InGamePacketsPlugin : IPlugin
 {
     public void Build(Scheduler scheduler)
     {
+        scheduler.AddSystemParam(new NetworkEntitiesMap());
+
         scheduler.AddSystem((
+            NetworkEntitiesMap mapCtx,
             Res<Settings> settings,
             Res<PacketsMap> packetsMap,
             Res<NetworkEntitiesMap> networkEntitiesMap,
@@ -36,9 +41,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                 var serial = reader.ReadUInt32BE();
                 reader.Skip(4);
                 var graphic = reader.ReadUInt16BE();
-                var x = reader.ReadUInt16BE();
-                var y = reader.ReadUInt16BE();
-                var z = (sbyte) reader.ReadUInt16BE();
+                (var x, var y, var z) = (reader.ReadUInt16BE(), reader.ReadUInt16BE(), (sbyte) reader.ReadUInt16BE());
                 var dir = (Direction) reader.ReadUInt8();
                 reader.Skip(9);
                 var mapWidth = reader.ReadUInt16BE();
@@ -156,14 +159,12 @@ readonly struct InGamePacketsPlugin : IPlugin
                 }
             };
 
-
+            // update object
             var d3_78 = (byte id, ReadOnlySpan<byte> buffer) => {
                 var reader = new StackDataReader(buffer);
                 var serial = reader.ReadUInt32BE();
                 var graphic = reader.ReadUInt16BE();
-                var x = reader.ReadUInt16BE();
-                var y = reader.ReadUInt16BE();
-                var z = reader.ReadInt8();
+                (var x, var y, var z) = (reader.ReadUInt16BE(), reader.ReadUInt16BE(), reader.ReadUInt8());
                 var dir = (Direction)reader.ReadUInt8();
                 var hue = reader.ReadUInt16BE();
                 var flags = (Flags)reader.ReadUInt8();
@@ -223,8 +224,6 @@ readonly struct InGamePacketsPlugin : IPlugin
                     // ent.AddChild(child);
                 }
             };
-
-            // update object
             packetsMap.Value[0xD3] = buffer => d3_78(0xD3, buffer);
             packetsMap.Value[0x78] = buffer => d3_78(0x78, buffer);
 
@@ -575,9 +574,7 @@ readonly struct InGamePacketsPlugin : IPlugin
             // pathfinding
             packetsMap.Value[0x38] = buffer => {
                 var reader = new StackDataReader(buffer);
-                var x = reader.ReadUInt16BE();
-                var y = reader.ReadUInt16BE();
-                var z = reader.ReadUInt16BE();
+                (var x, var y, var z) = (reader.ReadUInt16BE(), reader.ReadUInt16BE(), reader.ReadUInt16BE());
             };
 
             // update contained items
@@ -745,7 +742,6 @@ readonly struct InGamePacketsPlugin : IPlugin
                             text += " " + reader.ReadASCII(len, true);
                             len = reader.ReadUInt8();
                             text += " " + reader.ReadASCII(len, true);
-
                         }
                         break;
                     case 2:

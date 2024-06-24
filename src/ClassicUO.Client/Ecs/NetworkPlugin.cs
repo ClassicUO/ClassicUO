@@ -13,7 +13,6 @@ using TinyEcs;
 namespace ClassicUO.Ecs;
 
 using PacketsMap = Dictionary<byte, OnPacket>;
-using NetworkEntitiesMap = Dictionary<uint, EcsID>;
 
 delegate void OnPacket(ReadOnlySpan<byte> buffer);
 
@@ -29,7 +28,6 @@ readonly struct NetworkPlugin : IPlugin
     {
         scheduler.AddResource(new NetClient());
         scheduler.AddResource(new PacketsMap());
-        scheduler.AddResource(new NetworkEntitiesMap());
 
         scheduler.AddEvent<OnLoginRequest>();
 

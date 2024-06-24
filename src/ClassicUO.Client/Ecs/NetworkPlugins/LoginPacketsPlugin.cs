@@ -10,8 +10,6 @@ using TinyEcs;
 namespace ClassicUO.Ecs.NetworkPlugins;
 
 using PacketsMap = Dictionary<byte, OnPacket>;
-using NetworkEntitiesMap = Dictionary<uint, EcsID>;
-
 
 readonly struct LoginPacketsPlugin : IPlugin
 {

@@ -9,11 +9,7 @@ namespace ClassicUO.IO
 {
     public unsafe ref struct StackDataReader
     {
-        private const MethodImplOptions IMPL_OPTION = MethodImplOptions.AggressiveInlining
-#if !NETFRAMEWORK && !NETSTANDARD2_0
-                                                      | MethodImplOptions.AggressiveOptimization
-#endif
-                                                      ;
+        private const MethodImplOptions IMPL_OPTION = MethodImplOptions.AggressiveInlining;
 
         private readonly ReadOnlySpan<byte> _data;
 
@@ -38,7 +34,7 @@ namespace ClassicUO.IO
 
         public readonly byte this[int index] => _data[index];
 
-        public ReadOnlySpan<byte> Buffer => _data;
+        public readonly ReadOnlySpan<byte> Buffer => _data;
 
 
         [MethodImpl(IMPL_OPTION)]
@@ -176,10 +172,6 @@ namespace ClassicUO.IO
 
             return v;
         }
-
-
-
-
 
         [MethodImpl(IMPL_OPTION)]
         public ushort ReadUInt16BE()
@@ -353,14 +345,11 @@ namespace ClassicUO.IO
         public string ReadASCII(bool safe = false)
         {
             return ReadRawString(-1, 1, safe);
-            //return ReadString(StringHelper.Cp1252Encoding, -1, 1, safe);
         }
 
         public string ReadASCII(int length, bool safe = false)
         {
             return ReadRawString(length, 1, safe);
-
-            //return ReadString(StringHelper.Cp1252Encoding, length, 1, safe);
         }
 
         public string ReadUnicodeBE(bool safe = false)

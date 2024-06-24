@@ -58,13 +58,13 @@ readonly struct FnaPlugin : IPlugin
 
             foreach (var key in oldState.Value.GetPressedKeys())
                 if (newState.IsKeyUp(key)) // [pressed] -> [released]
-                    writer.Enqueue(new KeyEvent() { Action = 0, Key = key });
+                    writer.Enqueue(new () { Action = 0, Key = key });
 
             foreach (var key in newState.GetPressedKeys())
                 if (oldState.Value.IsKeyUp(key)) // [released] -> [pressed]
-                    writer.Enqueue(new KeyEvent() { Action = 1, Key = key });
+                    writer.Enqueue(new () { Action = 1, Key = key });
                 else if (oldState.Value.IsKeyDown(key))
-                    writer.Enqueue(new KeyEvent() { Action = 2, Key = key });
+                    writer.Enqueue(new () { Action = 2, Key = key });
 
             oldState.Value = newState;
         }, Stages.FrameEnd);
@@ -73,19 +73,19 @@ readonly struct FnaPlugin : IPlugin
 
         scheduler.AddSystem((EventWriter<MouseEvent> writer, EventWriter<WheelEvent> wheelWriter, Res<MouseContext> mouseCtx) => {
             if (mouseCtx.Value.NewState.LeftButton != mouseCtx.Value.OldState.LeftButton)
-                writer.Enqueue(new MouseEvent() { Action = mouseCtx.Value.NewState.LeftButton, Button = Input.MouseButtonType.Left, X = mouseCtx.Value.NewState.X, Y = mouseCtx.Value.NewState.Y });
+                writer.Enqueue(new () { Action = mouseCtx.Value.NewState.LeftButton, Button = Input.MouseButtonType.Left, X = mouseCtx.Value.NewState.X, Y = mouseCtx.Value.NewState.Y });
             if (mouseCtx.Value.NewState.RightButton != mouseCtx.Value.OldState.RightButton)
-                writer.Enqueue(new MouseEvent() { Action = mouseCtx.Value.NewState.RightButton, Button = Input.MouseButtonType.Right, X = mouseCtx.Value.NewState.X, Y = mouseCtx.Value.NewState.Y });
+                writer.Enqueue(new () { Action = mouseCtx.Value.NewState.RightButton, Button = Input.MouseButtonType.Right, X = mouseCtx.Value.NewState.X, Y = mouseCtx.Value.NewState.Y });
             if (mouseCtx.Value.NewState.MiddleButton != mouseCtx.Value.OldState.MiddleButton)
-                writer.Enqueue(new MouseEvent() { Action = mouseCtx.Value.NewState.MiddleButton, Button = Input.MouseButtonType.Middle, X = mouseCtx.Value.NewState.X, Y = mouseCtx.Value.NewState.Y });
+                writer.Enqueue(new () { Action = mouseCtx.Value.NewState.MiddleButton, Button = Input.MouseButtonType.Middle, X = mouseCtx.Value.NewState.X, Y = mouseCtx.Value.NewState.Y });
             if (mouseCtx.Value.NewState.XButton1 != mouseCtx.Value.OldState.XButton1)
-                writer.Enqueue(new MouseEvent() { Action = mouseCtx.Value.NewState.XButton1, Button = Input.MouseButtonType.XButton1, X = mouseCtx.Value.NewState.X, Y = mouseCtx.Value.NewState.Y });
+                writer.Enqueue(new () { Action = mouseCtx.Value.NewState.XButton1, Button = Input.MouseButtonType.XButton1, X = mouseCtx.Value.NewState.X, Y = mouseCtx.Value.NewState.Y });
             if (mouseCtx.Value.NewState.XButton2 != mouseCtx.Value.OldState.XButton2)
-                writer.Enqueue(new MouseEvent() { Action = mouseCtx.Value.NewState.XButton2, Button = Input.MouseButtonType.XButton2, X = mouseCtx.Value.NewState.X, Y = mouseCtx.Value.NewState.Y });
+                writer.Enqueue(new () { Action = mouseCtx.Value.NewState.XButton2, Button = Input.MouseButtonType.XButton2, X = mouseCtx.Value.NewState.X, Y = mouseCtx.Value.NewState.Y });
 
             if (mouseCtx.Value.NewState.ScrollWheelValue != mouseCtx.Value.OldState.ScrollWheelValue)
                 // FNA multiplies for 120 for some reason
-                wheelWriter.Enqueue(new WheelEvent() { Value = (mouseCtx.Value.OldState.ScrollWheelValue - mouseCtx.Value.NewState.ScrollWheelValue) / 120 });
+                wheelWriter.Enqueue(new () { Value = (mouseCtx.Value.OldState.ScrollWheelValue - mouseCtx.Value.NewState.ScrollWheelValue) / 120 });
 
             mouseCtx.Value.OldState = mouseCtx.Value.NewState;
         }, Stages.FrameEnd);
