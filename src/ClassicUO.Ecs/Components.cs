@@ -15,3 +15,10 @@ public struct NetworkSerial
 {
     public uint Value;
 }
+
+public struct ContainedInto;
+
+public struct EquippedItem
+{
+    public byte Layer;
+}

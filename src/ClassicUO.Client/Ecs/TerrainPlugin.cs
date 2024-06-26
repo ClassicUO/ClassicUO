@@ -198,12 +198,12 @@ readonly struct TerrainPlugin : IPlugin
             return false;
         }
 
-        /*  _____ _____
-            * | top | rig |
-            * |_____|_____|
-            * | lef | bot |
-            * |_____|_____|
-            */
+        /* _____ _____
+        * | top | rig |
+        * |_____|_____|
+        * | lef | bot |
+        * |_____|_____|
+        */
         var zTop = z;
         var zRight = GetTileZ(mapIndex, x + 1, y);
         var zLeft = GetTileZ(mapIndex, x, y + 1);
@@ -226,16 +226,16 @@ readonly struct TerrainPlugin : IPlugin
         minZ = Math.Min(zTop, Math.Min(zRight, Math.Min(zLeft, zBottom)));
 
 
-        /*  _____ _____ _____ _____
-            * |     | t10 | t20 |     |
-            * |_____|_____|_____|_____|
-            * | t01 |  z  | t21 | t31 |
-            * |_____|_____|_____|_____|
-            * | t02 | t12 | t22 | t32 |
-            * |_____|_____|_____|_____|
-            * |     | t13 | t23 |     |
-            * |_____|_____|_____|_____|
-            */
+        /* _____ _____ _____ _____
+        * |     | t10 | t20 |     |
+        * |_____|_____|_____|_____|
+        * | t01 |  z  | t21 | t31 |
+        * |_____|_____|_____|_____|
+        * | t02 | t12 | t22 | t32 |
+        * |_____|_____|_____|_____|
+        * |     | t13 | t23 |     |
+        * |_____|_____|_____|_____|
+        */
         var t10 = GetTileZ(mapIndex, x, y - 1);
         var t20 = GetTileZ(mapIndex, x + 1, y - 1);
         var t01 = GetTileZ(mapIndex, x - 1, y);

@@ -14,18 +14,44 @@ namespace ClassicUO.Ecs.NetworkPlugins;
 
 using PacketsMap = Dictionary<byte, OnPacket>;
 
-sealed class NetworkEntitiesMap : SystemParam
+sealed class NetworkEntitiesMap
 {
+    private readonly Dictionary<uint, EcsID> _entities = new();
+
+    public EntityView GetOrCreate(TinyEcs.World world, uint serial)
+    {
+        if (_entities.TryGetValue(serial, out var id))
+        {
+            return world.Entity(id);
+        }
+
+        var ent = world.Entity()
+            .Set(new NetworkSerial() { Value = serial });
+        _entities.Add(serial, ent);
+
+        return ent;
+    }
+
+    public bool Remove(TinyEcs.World world, uint serial)
+    {
+        if (_entities.Remove(serial, out var id))
+        {
+            world.Delete(id);
+            return true;
+        }
+
+        return false;
+    }
 }
 
 readonly struct InGamePacketsPlugin : IPlugin
 {
     public void Build(Scheduler scheduler)
     {
-        scheduler.AddSystemParam(new NetworkEntitiesMap());
+        scheduler.AddResource(new NetworkEntitiesMap());
 
         scheduler.AddSystem((
-            NetworkEntitiesMap mapCtx,
+            Res<NetworkEntitiesMap> entitiesMap,
             Res<Settings> settings,
             Res<PacketsMap> packetsMap,
             Res<NetworkEntitiesMap> networkEntitiesMap,
@@ -81,8 +107,9 @@ readonly struct InGamePacketsPlugin : IPlugin
                 Assets.AnimationsLoader.Instance.GetAnimDirection(ref direction, ref isFlipped);
                 var frames = assetsServer.Value.Animations.GetAnimationFrames(graphic, 0, direction,
                                                                                 out var hue, out var _);
-                var ent = world.Entity()
-                    .Set(new Ecs.NetworkSerial() { Value = serial })
+
+                var ent = entitiesMap.Value.GetOrCreate(world, serial);
+                ent
                     .Set(new Ecs.WorldPosition() { X = x, Y = y, Z = z })
                     .Set(new Ecs.Graphic() { Value = graphic })
                     .Set(new Renderable()
@@ -155,7 +182,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                 else
                 {
                     var text = reader.ReadUnicodeBE();
-                    Console.WriteLine("0xAE: {0}", text);
+                    Console.WriteLine("{0} says: '{1}'", name, text);
                 }
             };
 
@@ -164,7 +191,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                 var reader = new StackDataReader(buffer);
                 var serial = reader.ReadUInt32BE();
                 var graphic = reader.ReadUInt16BE();
-                (var x, var y, var z) = (reader.ReadUInt16BE(), reader.ReadUInt16BE(), reader.ReadUInt8());
+                (var x, var y, var z) = (reader.ReadUInt16BE(), reader.ReadUInt16BE(), reader.ReadInt8());
                 var dir = (Direction)reader.ReadUInt8();
                 var hue = reader.ReadUInt16BE();
                 var flags = (Flags)reader.ReadUInt8();
@@ -172,6 +199,11 @@ readonly struct InGamePacketsPlugin : IPlugin
 
                 if (id == 0xD3)
                     reader.Skip(sizeof(ushort) * 3);
+
+                var parentEnt = entitiesMap.Value.GetOrCreate(world, serial);
+                parentEnt
+                    .Set(new Graphic() { Value = graphic })
+                    .Set(new WorldPosition() { X = x, Y = y, Z = z });
 
                 // Texture2D texture;
                 // Rectangle uv;
@@ -217,11 +249,9 @@ readonly struct InGamePacketsPlugin : IPlugin
                         itemHue = reader.ReadUInt16BE();
                     }
 
-                    // var child = world.Entity()
-                    //     .Set(new Ecs.NetworkSerial() { Value = itemSerial })
-                    //     .Set(new Ecs.Graphic() { Value  = itemGraphic });
-
-                    // ent.AddChild(child);
+                    var child = entitiesMap.Value.GetOrCreate(world, itemSerial);
+                    child.Set(new Graphic() { Value = itemGraphic })
+                        .Set<ContainedInto>(parentEnt);
                 }
             };
             packetsMap.Value[0xD3] = buffer => d3_78(0xD3, buffer);
@@ -315,6 +345,10 @@ readonly struct InGamePacketsPlugin : IPlugin
                     //graphic -= 0x4000;
                     type = 2;
                 }
+
+                var ent = entitiesMap.Value.GetOrCreate(world, serial);
+                ent.Set(new Graphic() { Value = (ushort)(graphic + graphicInc) })
+                    .Set(new WorldPosition() { X = x, Y = y, Z = z });
             };
 
             // damage
@@ -386,7 +420,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                 }
             };
 
-
+            // healthbar update
             var p_0x16_0x17 = (byte id, ReadOnlySpan<byte> buffer) => {
                 var reader = new StackDataReader(buffer);
 
@@ -399,8 +433,6 @@ readonly struct InGamePacketsPlugin : IPlugin
                     var enabled = reader.ReadBool();
                 }
             };
-
-            // healthbar update
             packetsMap.Value[0x16] = buffer => p_0x16_0x17(0x16, buffer);
             packetsMap.Value[0x17] = buffer => p_0x16_0x17(0x17, buffer);
 
@@ -409,6 +441,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                 var reader = new StackDataReader(buffer);
 
                 var serial = reader.ReadUInt32BE();
+                entitiesMap.Value.Remove(world, serial);
             };
 
             // update player
@@ -424,6 +457,10 @@ readonly struct InGamePacketsPlugin : IPlugin
                 var serverId = reader.ReadUInt16BE();
                 var direction = (Direction)reader.ReadUInt8();
                 var z = reader.ReadInt8();
+
+                var ent = entitiesMap.Value.GetOrCreate(world, serial);
+                ent.Set(new Graphic() { Value = (ushort)(graphic + graphicInc) })
+                    .Set(new WorldPosition() { X = x, Y = y, Z = z });
             };
 
             // deny walk
@@ -521,8 +558,15 @@ readonly struct InGamePacketsPlugin : IPlugin
                 var serial = reader.ReadUInt32LE();
                 var graphic = reader.ReadUInt16BE();
                 var graphicInc = reader.ReadUInt8();
+                var layer = (Layer)reader.ReadUInt8();
                 var container = reader.ReadUInt32BE();
                 var hue = reader.ReadUInt16BE();
+
+                var parentEnt = entitiesMap.Value.GetOrCreate(world, container);
+                var childEnt = entitiesMap.Value.GetOrCreate(world, serial);
+                childEnt.Set(new Graphic() { Value = (ushort)(graphic + graphicInc) })
+                    .SetAction(parentEnt, new EquippedItem() { Layer = (byte)layer });
+                    //.Set<ContainedInto>(parentEnt);
             };
 
             // swing
@@ -594,6 +638,12 @@ readonly struct InGamePacketsPlugin : IPlugin
                          0 : reader.ReadUInt8();
                     var containerSerial = reader.ReadUInt32BE();
                     var hue = reader.ReadUInt16BE();
+
+                    var parentEnt = entitiesMap.Value.GetOrCreate(world, containerSerial);
+                    var childEnt = entitiesMap.Value.GetOrCreate(world, serial);
+                    childEnt.Set(new Graphic() { Value = (ushort)(graphic + graphicInc) })
+                        .Set(new WorldPosition() { X = x, Y = y, Z = (sbyte)gridIdx })
+                        .Set<ContainedInto>(parentEnt);
                 }
             };
 
@@ -807,6 +857,10 @@ readonly struct InGamePacketsPlugin : IPlugin
                 var hue = reader.ReadUInt16BE();
                 var flags = (Flags) reader.ReadUInt8();
                 var notoriety = (NotorietyFlag) reader.ReadUInt8();
+
+                var ent = entitiesMap.Value.GetOrCreate(world, serial);
+                ent.Set(new Graphic() { Value = graphic })
+                    .Set(new WorldPosition() { X = x, Y = y, Z = z });
             };
             packetsMap.Value[0x77] = buffer => d2_77(0x77, buffer);
             packetsMap.Value[0xD2] = buffer => d2_77(0xD2, buffer);
@@ -846,12 +900,15 @@ readonly struct InGamePacketsPlugin : IPlugin
 
                 var serial = reader.ReadUInt32BE();
 
+                var parentEnt = entitiesMap.Value.GetOrCreate(world, serial);
+
                 var layer = Layer.Invalid;
                 uint itemSerial = 0;
                 while ((layer = (Layer) reader.ReadUInt8()) != Layer.Invalid &&
                      (itemSerial = reader.ReadUInt32BE()) != 0)
                 {
-
+                    var childEnt = entitiesMap.Value.GetOrCreate(world, itemSerial);
+                    childEnt.SetAction(parentEnt, new EquippedItem() { Layer = (byte)layer });
                 }
             };
 
@@ -1332,6 +1389,10 @@ readonly struct InGamePacketsPlugin : IPlugin
                 var hue = reader.ReadUInt16BE();
                 var flags = (Flags) reader.ReadUInt8();
                 var unk2 = reader.ReadUInt16BE();
+
+                var ent = entitiesMap.Value.GetOrCreate(world, serial);
+                ent.Set(new Graphic() { Value = (ushort)(graphic + graphicInc) })
+                    .Set(new WorldPosition() { X = x, Y = y, Z = z });
             };
 
             // boat moving
@@ -1349,6 +1410,9 @@ readonly struct InGamePacketsPlugin : IPlugin
                 {
                     var entitySerial = reader.ReadUInt32BE();
                     (var entX, var entY, var entZ) = (reader.ReadUInt16BE(), reader.ReadUInt16BE(), reader.ReadUInt16BE());
+
+                    var ent = entitiesMap.Value.GetOrCreate(world, serial);
+                    ent.Set(new WorldPosition() { X = entX, Y = entY, Z = (sbyte) entZ });
                 }
             };
 

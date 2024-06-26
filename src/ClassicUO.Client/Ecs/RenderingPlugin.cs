@@ -10,6 +10,78 @@ readonly struct RenderingPlugin : IPlugin
     public void Build(Scheduler scheduler)
     {
         scheduler.AddSystem(static (
+            Query<(WorldPosition, Graphic), (With<NetworkSerial>, Without<Renderable>, Without<ContainedInto>)> query,
+            Res<AssetsServer> assetsServer,
+            Res<Assets.TileDataLoader> tiledataLoader,
+            TinyEcs.World world
+        ) => {
+            query.Each((EntityView ent, ref WorldPosition pos, ref Graphic graphic) =>
+            {
+                ref readonly var artInfo = ref assetsServer.Value.Arts.GetArt(graphic.Value);
+
+                var priorityZ = pos.Z;
+
+                if (tiledataLoader.Value.StaticData[graphic.Value].IsBackground)
+                {
+                    priorityZ -= 1;
+                }
+
+                if (tiledataLoader.Value.StaticData[graphic.Value].Height != 0)
+                {
+                    priorityZ += 1;
+                }
+
+                if (tiledataLoader.Value.StaticData[graphic.Value].IsMultiMovable)
+                {
+                    priorityZ += 1;
+                }
+
+                ent.Set(new Renderable()
+                {
+                    Texture = artInfo.Texture,
+                    Position = Isometric.IsoToScreen(pos.X, pos.Y, pos.Z),
+                    Color = Vector3.UnitZ,
+                    UV = artInfo.UV,
+                    Z = Isometric.GetDepthZ(pos.X, pos.Y, priorityZ)
+                });
+            });
+        });
+
+        scheduler.AddSystem(static (
+            Query<(WorldPosition, Graphic, Renderable), (With<NetworkSerial>, Without<ContainedInto>)> query,
+            Res<AssetsServer> assetsServer,
+            Res<Assets.TileDataLoader> tiledataLoader,
+            TinyEcs.World world
+        ) => {
+            query.Each((ref WorldPosition pos, ref Graphic graphic, ref Renderable renderable) =>
+            {
+                ref readonly var artInfo = ref assetsServer.Value.Arts.GetArt(graphic.Value);
+
+                var priorityZ = pos.Z;
+
+                if (tiledataLoader.Value.StaticData[graphic.Value].IsBackground)
+                {
+                    priorityZ -= 1;
+                }
+
+                if (tiledataLoader.Value.StaticData[graphic.Value].Height != 0)
+                {
+                    priorityZ += 1;
+                }
+
+                if (tiledataLoader.Value.StaticData[graphic.Value].IsMultiMovable)
+                {
+                    priorityZ += 1;
+                }
+
+                renderable.Position = Isometric.IsoToScreen(pos.X, pos.Y, pos.Z);
+                renderable.Position.X -= (short)((artInfo.UV.Width >> 1) - 22);
+                renderable.Position.Y -= (short)(artInfo.UV.Height - 44);
+                renderable.Z = Isometric.GetDepthZ(pos.X, pos.Y, priorityZ);
+            });
+        });
+
+        scheduler.AddSystem(static (
             Res<GraphicsDevice> device,
             Res<Renderer.UltimaBatcher2D> batch,
             Res<GameContext> gameCtx,
@@ -36,7 +108,8 @@ readonly struct RenderingPlugin : IPlugin
             sb.SetBrightlight(1.7f);
             sb.SetStencil(DepthStencilState.Default);
             queryTiles.Each((ref Renderable renderable, ref TileStretched stretched) =>
-                sb.DrawStretchedLand(
+                sb.DrawStretchedLand
+                (
                     renderable.Texture,
                     renderable.Position - center,
                     renderable.UV,

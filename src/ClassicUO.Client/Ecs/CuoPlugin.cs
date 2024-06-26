@@ -33,6 +33,10 @@ readonly struct CuoPlugin : IPlugin
             // force the component initialization. Queries must know before the components to search
             world.Entity<Renderable>();
             world.Entity<TileStretched>();
+            world.Entity<WorldPosition>();
+            world.Entity<Graphic>();
+            world.Entity<NetworkSerial>();
+            world.Entity<ContainedInto>();
         }, Stages.Startup);
 
         scheduler.AddSystem((Res<GameContext> gameCtx, Res<Settings> settings) => {
