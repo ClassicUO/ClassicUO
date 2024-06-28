@@ -37,6 +37,12 @@ sealed class NetworkEntitiesMap
     {
         if (_entities.Remove(serial, out id))
         {
+            // Some entities might have a network entity associated [child].
+            // It's needed to remove from the dict these children entities.
+            // Filter search:
+            // - (*, id) && (NetworkSerial)
+            // - (id, *) && (NetworkSerial)
+            // Suddenly the world.Delete(id) call will delete the children ecs side.
             var term0 = new QueryTerm(IDOp.Pair(Wildcard.ID, id), TermOp.With);
 			var term1 = new QueryTerm(IDOp.Pair(id, Wildcard.ID), TermOp.With);
             var term2 = new QueryTerm(world.Entity<NetworkSerial>(), TermOp.DataAccess);
