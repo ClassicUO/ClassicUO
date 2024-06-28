@@ -12,6 +12,7 @@ using TinyEcs;
 
 namespace ClassicUO.Ecs.NetworkPlugins;
 
+using static TinyEcs.Defaults;
 using PacketsMap = Dictionary<byte, OnPacket>;
 
 sealed class NetworkEntitiesMap
@@ -27,15 +28,25 @@ sealed class NetworkEntitiesMap
 
         var ent = world.Entity()
             .Set(new NetworkSerial() { Value = serial });
-        _entities.Add(serial, ent);
+        _entities.Add(serial, ent.ID);
 
         return ent;
     }
 
-    public bool Remove(TinyEcs.World world, uint serial)
+    public bool Remove(TinyEcs.World world, uint serial, out EcsID id)
     {
-        if (_entities.Remove(serial, out var id))
+        if (_entities.Remove(serial, out id))
         {
+            var term0 = new QueryTerm(IDOp.Pair(Wildcard.ID, id), TermOp.With);
+			var term1 = new QueryTerm(IDOp.Pair(id, Wildcard.ID), TermOp.With);
+            var term2 = new QueryTerm(world.Entity<NetworkSerial>(), TermOp.DataAccess);
+			world.QueryRaw(term0, term2).Each((EntityView child, ref NetworkSerial ser) => {
+                _entities.Remove(ser.Value);
+            });
+			world.QueryRaw(term1, term2).Each((EntityView child, ref NetworkSerial ser) => {
+                _entities.Remove(ser.Value);
+            });
+
             world.Delete(id);
             return true;
         }
@@ -205,35 +216,6 @@ readonly struct InGamePacketsPlugin : IPlugin
                     .Set(new Graphic() { Value = graphic })
                     .Set(new WorldPosition() { X = x, Y = y, Z = z });
 
-                // Texture2D texture;
-                // Rectangle uv;
-
-                // if (SerialHelper.IsItem(serial))
-                // {
-                //     ref readonly var artInfo = ref assetsServer.Value.Arts.GetArt(graphic);
-                //     texture = artInfo.Texture;
-                //     uv = artInfo.UV;
-                // }
-                // else
-                // {
-                //     var frames = assetsServer.Value.Animations.GetAnimationFrames(graphic, 0, (byte)(dir & Direction.Up), out var _, out var _);
-                //     texture = frames[0].Texture;
-                //     uv = frames[0].UV;
-                // }
-
-                // var ent = world.Entity()
-                //     .Set(new Ecs.NetworkSerial() { Value = serial })
-                //     .Set(new Ecs.Graphic() { Value = graphic })
-                //     .Set(new Ecs.WorldPosition() { X = x, Y = y, Z = z })
-                //     .Set(new Renderable()
-                //     {
-                //         Texture = texture,
-                //         UV = uv,
-                //         Color = Vector3.UnitZ,
-                //         Position = Isometric.IsoToScreen(x, y, z),
-                //         Z = Isometric.GetDepthZ(x, y, z + 1)
-                //     });
-
                 uint itemSerial;
                 while ((itemSerial = reader.ReadUInt32BE()) != 0)
                 {
@@ -251,7 +233,7 @@ readonly struct InGamePacketsPlugin : IPlugin
 
                     var child = entitiesMap.Value.GetOrCreate(world, itemSerial);
                     child.Set(new Graphic() { Value = itemGraphic })
-                        .Set<ContainedInto>(parentEnt);
+                        .Add<ContainedInto>(parentEnt);
                 }
             };
             packetsMap.Value[0xD3] = buffer => d3_78(0xD3, buffer);
@@ -441,7 +423,9 @@ readonly struct InGamePacketsPlugin : IPlugin
                 var reader = new StackDataReader(buffer);
 
                 var serial = reader.ReadUInt32BE();
-                entitiesMap.Value.Remove(world, serial);
+                var deleted = entitiesMap.Value.Remove(world, serial, out var ecsId);
+
+                Console.WriteLine("deleted: serial: 0x{0:X8} | ecsId: {1} | result: {2}", serial, ecsId, deleted);
             };
 
             // update player
@@ -565,7 +549,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                 var parentEnt = entitiesMap.Value.GetOrCreate(world, container);
                 var childEnt = entitiesMap.Value.GetOrCreate(world, serial);
                 childEnt.Set(new Graphic() { Value = (ushort)(graphic + graphicInc) })
-                    .SetAction(parentEnt, new EquippedItem() { Layer = (byte)layer });
+                    .Set(new EquippedItem() { Layer = (byte)layer }, parentEnt);
                     //.Set<ContainedInto>(parentEnt);
             };
 
@@ -643,7 +627,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                     var childEnt = entitiesMap.Value.GetOrCreate(world, serial);
                     childEnt.Set(new Graphic() { Value = (ushort)(graphic + graphicInc) })
                         .Set(new WorldPosition() { X = x, Y = y, Z = (sbyte)gridIdx })
-                        .Set<ContainedInto>(parentEnt);
+                        .Add<ContainedInto>(parentEnt);
                 }
             };
 
@@ -908,7 +892,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                      (itemSerial = reader.ReadUInt32BE()) != 0)
                 {
                     var childEnt = entitiesMap.Value.GetOrCreate(world, itemSerial);
-                    childEnt.SetAction(parentEnt, new EquippedItem() { Layer = (byte)layer });
+                    childEnt.Set(new EquippedItem() { Layer = (byte)layer }, parentEnt);
                 }
             };
 
@@ -1433,6 +1417,6 @@ readonly struct InGamePacketsPlugin : IPlugin
                     }
                 }
             };
-        }, Stages.Startup);
+        }, Stages.Startup, ThreadingMode.Single);
     }
 }

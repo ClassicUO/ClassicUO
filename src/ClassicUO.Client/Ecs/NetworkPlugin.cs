@@ -35,6 +35,16 @@ readonly struct NetworkPlugin : IPlugin
         scheduler.AddPlugin<InGamePacketsPlugin>();
 
 
+        scheduler.AddSystem((Res<NetClient> network, Local<DateTime> pingTime) => {
+            if ((DateTime.UtcNow - pingTime.Value).TotalSeconds > 1)
+            {
+                pingTime.Value = DateTime.UtcNow.AddSeconds(1);
+                network.Value.Send_Ping(0xFF);
+            }
+
+        }, threadingType: ThreadingMode.Single)
+            .RunIf((Res<GameContext> gameCtx, Res<NetClient> network) => network.Value!.IsConnected && gameCtx.Value.PlayerSerial != 0);
+
         scheduler.AddSystem(
         (
             EventReader<OnLoginRequest> requets,
@@ -71,38 +81,55 @@ readonly struct NetworkPlugin : IPlugin
 
                 break;
             }
-        }).RunIf((EventReader<OnLoginRequest> requets) => !requets.IsEmpty);
+        }, threadingType: ThreadingMode.Single).RunIf((EventReader<OnLoginRequest> requets) => !requets.IsEmpty);
 
-        scheduler.AddSystem((Res<NetClient> network, Res<PacketsMap> packetsMap) => {
+        scheduler.AddSystem((Res<NetClient> network, Res<PacketsMap> packetsMap, Local<CircularBuffer> buffer, Local<byte[]> packetBuffer) => {
+            buffer.Value ??= new();
+            packetBuffer.Value ??= new byte[4096];
+
             var availableData = network.Value.CollectAvailableData();
+            var span = availableData.AsSpan();
+            if (!span.IsEmpty)
+                buffer.Value.Enqueue(span);
 
-            var realBuffer = availableData.AsSpan();
-            while (!realBuffer.IsEmpty)
+            while (buffer.Value.Length > 0)
             {
-                var packetId = realBuffer[0];
-                var packetLen = PacketsTable.GetPacketLength(packetId);
+                var packetId = buffer.Value[0];
+                var packetLen = (int)PacketsTable.GetPacketLength(packetId);
                 var packetHeaderOffset = sizeof(byte);
 
                 if (packetLen == -1)
                 {
-                    if (realBuffer.Length < 3)
-                        return;
+                    if (buffer.Value.Length < 3)
+                        break;
 
-                    packetLen = BinaryPrimitives.ReadInt16BigEndian(realBuffer[packetHeaderOffset..]);
+                    var b0 = buffer.Value[1];
+                    var b1 = buffer.Value[2];
+
+                    packetLen = (b0 << 8) | b1;
                     packetHeaderOffset += sizeof(ushort);
                 }
+
+                if (buffer.Value.Length < packetLen)
+                {
+                    Console.WriteLine("needs more data for packet 0x{0:X2}", packetId);
+                    break;
+                }
+
+                while (packetLen > packetBuffer.Value.Length)
+                    Array.Resize(ref packetBuffer.Value, packetBuffer.Value.Length * 2);
+
+                _ = buffer.Value.Dequeue(packetBuffer.Value, 0, packetLen);
 
                 Console.WriteLine(">> packet-in: ID 0x{0:X2} | Len: {1}", packetId, packetLen);
 
                 if (packetsMap.Value.TryGetValue(packetId, out var handler))
                 {
-                    handler(realBuffer[packetHeaderOffset .. packetLen]);
+                    handler(packetBuffer.Value.AsSpan(packetHeaderOffset, packetLen - packetHeaderOffset));
                 }
-
-                realBuffer = realBuffer[packetLen ..];
             }
 
             network.Value.Flush();
-        }).RunIf((Res<NetClient> network) => network.Value!.IsConnected);
+        },threadingType: ThreadingMode.Single).RunIf((Res<NetClient> network) => network.Value!.IsConnected);
     }
 }

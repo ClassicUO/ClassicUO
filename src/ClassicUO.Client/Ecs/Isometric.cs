@@ -16,5 +16,5 @@ static class Isometric
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float GetDepthZ(int x, int y, int priorityZ)
-        => x + y + (127 + priorityZ) * 0.01f;
+        => x + y + (sbyte.MaxValue + priorityZ) * 0.01f;
 }

@@ -79,6 +79,6 @@ readonly struct LoginPacketsPlugin : IPlugin
                     network.Value.Send_SecondLogin(settings.Value.Username, Crypter.Decrypt(settings.Value.Password), seed);
                 }
             };
-        }, Stages.Startup);
+        }, Stages.Startup, ThreadingMode.Single);
     }
 }

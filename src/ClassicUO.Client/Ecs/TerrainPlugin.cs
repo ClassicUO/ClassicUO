@@ -171,7 +171,7 @@ readonly struct TerrainPlugin : IPlugin
                     }
                 }
             }
-        }, Stages.BeforeUpdate)
+        }, Stages.BeforeUpdate, ThreadingMode.Single)
         .RunIf((EventReader<OnNewChunkRequest> reader) => !reader.IsEmpty);
     }
 
