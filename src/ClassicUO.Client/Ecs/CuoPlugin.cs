@@ -37,6 +37,7 @@ readonly struct CuoPlugin : IPlugin
             world.Entity<Graphic>();
             world.Entity<NetworkSerial>();
             world.Entity<ContainedInto>();
+            world.Entity<EquippedItem>();
         }, Stages.Startup);
 
         scheduler.AddSystem((Res<GameContext> gameCtx, Res<Settings> settings) => {

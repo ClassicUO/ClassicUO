@@ -10,7 +10,7 @@ readonly struct RenderingPlugin : IPlugin
     public void Build(Scheduler scheduler)
     {
         scheduler.AddSystem(static (
-            Query<(WorldPosition, Graphic), (With<NetworkSerial>, Without<Renderable>, Without<ContainedInto>)> query,
+            Query<(WorldPosition, Graphic), (With<NetworkSerial>, Without<Renderable>, Without<ContainedInto>, Without<EquippedItem>)> query,
             Res<AssetsServer> assetsServer,
             Res<Assets.TileDataLoader> tiledataLoader,
             TinyEcs.World world
@@ -48,7 +48,7 @@ readonly struct RenderingPlugin : IPlugin
         });
 
         scheduler.AddSystem(static (
-            Query<(WorldPosition, Graphic, Renderable), (With<NetworkSerial>, Without<ContainedInto>)> query,
+            Query<(WorldPosition, Graphic, Renderable), (With<NetworkSerial>, Without<ContainedInto>, Without<EquippedItem>)> query,
             Res<AssetsServer> assetsServer,
             Res<Assets.TileDataLoader> tiledataLoader,
             TinyEcs.World world

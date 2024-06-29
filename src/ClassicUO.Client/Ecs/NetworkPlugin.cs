@@ -1,13 +1,9 @@
 using System;
-using System.Buffers.Binary;
 using System.Collections.Generic;
 using ClassicUO.Configuration;
-using ClassicUO.Game.Data;
-using ClassicUO.IO;
 using ClassicUO.Network;
 using ClassicUO.Utility;
 using ClassicUO.Ecs.NetworkPlugins;
-using Microsoft.Xna.Framework;
 using TinyEcs;
 
 namespace ClassicUO.Ecs;
@@ -41,9 +37,9 @@ readonly struct NetworkPlugin : IPlugin
                 pingTime.Value = DateTime.UtcNow.AddSeconds(1);
                 network.Value.Send_Ping(0xFF);
             }
-
         }, threadingType: ThreadingMode.Single)
-            .RunIf((Res<GameContext> gameCtx, Res<NetClient> network) => network.Value!.IsConnected && gameCtx.Value.PlayerSerial != 0);
+            .RunIf((Res<GameContext> gameCtx, Res<NetClient> network) =>
+                network.Value!.IsConnected && gameCtx.Value.PlayerSerial != 0);
 
         scheduler.AddSystem(
         (
@@ -81,6 +77,7 @@ readonly struct NetworkPlugin : IPlugin
 
                 break;
             }
+            requets.Clear();
         }, threadingType: ThreadingMode.Single).RunIf((EventReader<OnLoginRequest> requets) => !requets.IsEmpty);
 
         scheduler.AddSystem((Res<NetClient> network, Res<PacketsMap> packetsMap, Local<CircularBuffer> buffer, Local<byte[]> packetBuffer) => {
@@ -130,6 +127,7 @@ readonly struct NetworkPlugin : IPlugin
             }
 
             network.Value.Flush();
-        },threadingType: ThreadingMode.Single).RunIf((Res<NetClient> network) => network.Value!.IsConnected);
+        },threadingType: ThreadingMode.Single)
+            .RunIf((Res<NetClient> network) => network.Value!.IsConnected);
     }
 }

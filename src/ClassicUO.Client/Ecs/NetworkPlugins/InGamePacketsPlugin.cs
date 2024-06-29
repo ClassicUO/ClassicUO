@@ -220,7 +220,8 @@ readonly struct InGamePacketsPlugin : IPlugin
                 var parentEnt = entitiesMap.Value.GetOrCreate(world, serial);
                 parentEnt
                     .Set(new Graphic() { Value = graphic })
-                    .Set(new WorldPosition() { X = x, Y = y, Z = z });
+                    .Set(new WorldPosition() { X = x, Y = y, Z = z })
+                    .Set(new Hue() { Value = hue });
 
                 uint itemSerial;
                 while ((itemSerial = reader.ReadUInt32BE()) != 0)
@@ -239,7 +240,8 @@ readonly struct InGamePacketsPlugin : IPlugin
 
                     var child = entitiesMap.Value.GetOrCreate(world, itemSerial);
                     child.Set(new Graphic() { Value = itemGraphic })
-                        .Add<ContainedInto>(parentEnt);
+                        .Set(new Hue() { Value = itemHue })
+                        .Set(new EquippedItem() { Layer = (byte) layer }, parentEnt);
                 }
             };
             packetsMap.Value[0xD3] = buffer => d3_78(0xD3, buffer);
@@ -336,6 +338,7 @@ readonly struct InGamePacketsPlugin : IPlugin
 
                 var ent = entitiesMap.Value.GetOrCreate(world, serial);
                 ent.Set(new Graphic() { Value = (ushort)(graphic + graphicInc) })
+                    .Set(new Hue() { Value = hue })
                     .Set(new WorldPosition() { X = x, Y = y, Z = z });
             };
 
@@ -450,6 +453,7 @@ readonly struct InGamePacketsPlugin : IPlugin
 
                 var ent = entitiesMap.Value.GetOrCreate(world, serial);
                 ent.Set(new Graphic() { Value = (ushort)(graphic + graphicInc) })
+                    .Set(new Hue() { Value = hue })
                     .Set(new WorldPosition() { X = x, Y = y, Z = z });
             };
 
@@ -539,6 +543,11 @@ readonly struct InGamePacketsPlugin : IPlugin
                 (var hitsMax, var hits) = (reader.ReadUInt16BE(), reader.ReadUInt16BE());
                 (var manaMax, var mana) = (reader.ReadUInt16BE(), reader.ReadUInt16BE());
                 (var stamMax, var stam) = (reader.ReadUInt16BE(), reader.ReadUInt16BE());
+
+                entitiesMap.Value.GetOrCreate(world, serial)
+                    .Set(new Hitpoints() { Value = hits, MaxValue = hitsMax })
+                    .Set(new Mana() { Value = mana, MaxValue = manaMax })
+                    .Set(new Stamina() { Value = stam, MaxValue = stamMax });
             };
 
             // equip item
@@ -555,6 +564,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                 var parentEnt = entitiesMap.Value.GetOrCreate(world, container);
                 var childEnt = entitiesMap.Value.GetOrCreate(world, serial);
                 childEnt.Set(new Graphic() { Value = (ushort)(graphic + graphicInc) })
+                    .Set(new Hue() { Value = hue })
                     .Set(new EquippedItem() { Layer = (byte)layer }, parentEnt);
                     //.Set<ContainedInto>(parentEnt);
             };
@@ -632,6 +642,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                     var parentEnt = entitiesMap.Value.GetOrCreate(world, containerSerial);
                     var childEnt = entitiesMap.Value.GetOrCreate(world, serial);
                     childEnt.Set(new Graphic() { Value = (ushort)(graphic + graphicInc) })
+                        .Set(new Hue() { Value = hue })
                         .Set(new WorldPosition() { X = x, Y = y, Z = (sbyte)gridIdx })
                         .Add<ContainedInto>(parentEnt);
                 }
@@ -850,6 +861,7 @@ readonly struct InGamePacketsPlugin : IPlugin
 
                 var ent = entitiesMap.Value.GetOrCreate(world, serial);
                 ent.Set(new Graphic() { Value = graphic })
+                    .Set(new Hue() { Value = hue })
                     .Set(new WorldPosition() { X = x, Y = y, Z = z });
             };
             packetsMap.Value[0x77] = buffer => d2_77(0x77, buffer);
@@ -1368,7 +1380,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                 var reader = new StackDataReader(buffer);
 
                 reader.Skip(2);
-                var type  = reader.ReadUInt8();
+                var type = reader.ReadUInt8();
                 var serial = reader.ReadUInt32BE();
                 var graphic = reader.ReadUInt16BE();
                 var graphicInc = reader.ReadUInt8();
@@ -1382,6 +1394,7 @@ readonly struct InGamePacketsPlugin : IPlugin
 
                 var ent = entitiesMap.Value.GetOrCreate(world, serial);
                 ent.Set(new Graphic() { Value = (ushort)(graphic + graphicInc) })
+                    .Set(new Hue() { Value = hue })
                     .Set(new WorldPosition() { X = x, Y = y, Z = z });
             };
 

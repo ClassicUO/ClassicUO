@@ -62,9 +62,11 @@ readonly struct MobAnimationsPlugin : IPlugin
     {
         var mocTime = 0;
         scheduler.AddSystem((
+            Res<AssetsServer> assetsServer,
             Query<(
                 Renderable,
                 MobAnimation,
+                Graphic,
                 Optional<MobileFlags>,
                 Optional<MobileSteps>,
                 Optional<MobileEquipment>
@@ -73,6 +75,7 @@ readonly struct MobAnimationsPlugin : IPlugin
             (
                 ref Renderable renderable,
                 ref MobAnimation animation,
+                ref Graphic graphic,
                 ref MobileFlags mobFlags,
                 ref MobileSteps mobSteps,
                 ref MobileEquipment mobEquip
@@ -119,7 +122,64 @@ readonly struct MobAnimationsPlugin : IPlugin
                 animation.Direction = realDirection;
 
                 var dir = (byte)(realDirection & Direction.Mask);
+                ClassicUO.Assets.AnimationsLoader.Instance.GetAnimDirection(ref dir, ref mirror);
 
+                var frames = assetsServer.Value.Animations.GetAnimationFrames
+                (
+                    graphic.Value,
+                    animation.Action,
+                    dir,
+                    out _,
+                    out _
+                );
+
+                var currDelay = Constants.CHARACTER_ANIMATION_DELAY;
+                var fc = frames.Length;
+                var d = iterate ? 1 : 0;
+                var frameIndex = animation.Index + (animation.IsFromServer && !animation.ForwardDirection ? -d : d);
+
+                if (animation.IsFromServer)
+                {
+                    currDelay += currDelay * (animation.Interval + 1);
+
+                    if (animation.FramesCount == 0)
+                        animation.FramesCount = fc;
+                    else
+                        fc = animation.FramesCount;
+
+                    if (animation.ForwardDirection && frameIndex >= fc)
+                        frameIndex = 0;
+                    else if (!animation.ForwardDirection && frameIndex < 0)
+                        frameIndex = fc == 0 ? 0 : frames.Length - 1;
+                    else
+                        goto SKIP;
+
+                    animation.RepeatMode = Math.Max(0, animation.RepeatMode - 1);
+                    if (animation.RepeatMode >= 0)
+                        goto SKIP;
+
+                    if (animation.Repeat)
+                    {
+                        animation.RepeatModeCount = animation.RepeatMode;
+                        animation.Repeat = false;
+                    }
+                    else
+                    {
+                        animation.Run = true;
+                    }
+                    SKIP:;
+                }
+                else
+                {
+                    if (frameIndex >= 0)
+                    {
+                        frameIndex = 0;
+                        animation.Run = false;
+                    }
+                }
+
+                animation.Index = frames.IsEmpty ? 0 : frameIndex % frames.Length;
+                animation.Time = 0; // TODO
             });
         });
     }
