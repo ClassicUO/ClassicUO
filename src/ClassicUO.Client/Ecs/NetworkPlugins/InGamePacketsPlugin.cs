@@ -511,7 +511,15 @@ readonly struct InGamePacketsPlugin : IPlugin
                     reader.Skip(1);
 
                 var containerSerial = reader.ReadUInt32BE();
-                var hue = reader.ReadInt16BE();
+                var hue = reader.ReadUInt16BE();
+
+                var ent = entitiesMap.Value.GetOrCreate(world, serial);
+                var parentEnt = entitiesMap.Value.GetOrCreate(world, containerSerial);
+
+                ent.Set(new Graphic() { Value = (ushort)(graphic + graphicInc) })
+                    .Set(new WorldPosition() { X = x, Y = y, Z = 0 })
+                    .Set(new Hue() { Value = hue })
+                    .Add<ContainedInto>(parentEnt);
             };
 
             // deny move item

@@ -31,13 +31,16 @@ readonly struct CuoPlugin : IPlugin
 
         scheduler.AddSystem((TinyEcs.World world) => {
             // force the component initialization. Queries must know before the components to search
-            world.Entity<Renderable>();
-            world.Entity<TileStretched>();
-            world.Entity<WorldPosition>();
-            world.Entity<Graphic>();
-            world.Entity<NetworkSerial>();
-            world.Entity<ContainedInto>();
-            world.Entity<EquippedItem>();
+            // world.Entity<Renderable>();
+            // world.Entity<TileStretched>();
+            // world.Entity<WorldPosition>();
+            // world.Entity<Graphic>();
+            // world.Entity<NetworkSerial>();
+            // world.Entity<ContainedInto>();
+            // world.Entity<EquippedItem>();
+
+            // TODO: fix this bs
+            //world.Entity<Relation<ContainedInto, TinyEcs.Defaults.Wildcard>>();
         }, Stages.Startup);
 
         scheduler.AddSystem((Res<GameContext> gameCtx, Res<Settings> settings) => {

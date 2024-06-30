@@ -2,6 +2,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using TinyEcs;
+using static TinyEcs.Defaults;
 
 namespace ClassicUO.Ecs;
 
@@ -10,7 +11,7 @@ readonly struct RenderingPlugin : IPlugin
     public void Build(Scheduler scheduler)
     {
         scheduler.AddSystem(static (
-            Query<(WorldPosition, Graphic), (With<NetworkSerial>, Without<Renderable>, Without<ContainedInto>, Without<EquippedItem>)> query,
+            Query<(WorldPosition, Graphic), (With<NetworkSerial>, Without<Renderable>, Without<Relation<ContainedInto, Wildcard>>, Without<EquippedItem>)> query,
             Res<AssetsServer> assetsServer,
             Res<Assets.TileDataLoader> tiledataLoader,
             TinyEcs.World world
@@ -48,7 +49,7 @@ readonly struct RenderingPlugin : IPlugin
         });
 
         scheduler.AddSystem(static (
-            Query<(WorldPosition, Graphic, Renderable), (With<NetworkSerial>, Without<ContainedInto>, Without<EquippedItem>)> query,
+            Query<(WorldPosition, Graphic, Renderable), (With<NetworkSerial>, Without<Relation<ContainedInto, Wildcard>>, Without<EquippedItem>)> query,
             Res<AssetsServer> assetsServer,
             Res<Assets.TileDataLoader> tiledataLoader,
             TinyEcs.World world
@@ -86,8 +87,8 @@ readonly struct RenderingPlugin : IPlugin
             Res<Renderer.UltimaBatcher2D> batch,
             Res<GameContext> gameCtx,
             Res<MouseContext> mouseCtx,
-            Query<Renderable, Without<TileStretched>> query,
-            Query<(Renderable, TileStretched)> queryTiles
+            Query<Renderable, (Without<TileStretched>, Without<Relation<ContainedInto, Wildcard>>, Without<EquippedItem>)> query,
+            Query<(Renderable, TileStretched), (Without<Relation<ContainedInto, Wildcard>>, Without<EquippedItem>)> queryTiles
         ) => {
             device.Value.Clear(Color.AliceBlue);
 
