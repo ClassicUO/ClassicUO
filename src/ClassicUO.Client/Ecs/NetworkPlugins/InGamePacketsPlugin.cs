@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
@@ -1036,21 +1037,33 @@ readonly struct InGamePacketsPlugin : IPlugin
             packetsMap.Value[0xA1] = buffer => {
                 var reader = new StackDataReader(buffer);
 
+                var serial = reader.ReadUInt32BE();
                 (var hitsMax, var hits) = (reader.ReadUInt16BE(), reader.ReadUInt16BE());
+
+                entitiesMap.Value.GetOrCreate(world, serial)
+                    .Set(new Hitpoints() { Value = hits, MaxValue = hitsMax });
             };
 
             // update mana
             packetsMap.Value[0xA2] = buffer => {
                 var reader = new StackDataReader(buffer);
 
+                var serial = reader.ReadUInt32BE();
                 (var manaMax, var mana) = (reader.ReadUInt16BE(), reader.ReadUInt16BE());
+
+                entitiesMap.Value.GetOrCreate(world, serial)
+                    .Set(new Mana() { Value = mana, MaxValue = manaMax });
             };
 
             // update stam
             packetsMap.Value[0xA3] = buffer => {
                 var reader = new StackDataReader(buffer);
 
+                var serial = reader.ReadUInt32BE();
                 (var stamMax, var stam) = (reader.ReadUInt16BE(), reader.ReadUInt16BE());
+
+                entitiesMap.Value.GetOrCreate(world, serial)
+                    .Set(new Stamina() { Value = stam, MaxValue = stamMax });
             };
 
             // open url
@@ -1145,6 +1158,20 @@ readonly struct InGamePacketsPlugin : IPlugin
                 var flags = gameCtx.Value.ClientVersion >= ClientVersion.CV_60142 ?
                     (LockedFeatureFlags) reader.ReadUInt32BE() :
                     (LockedFeatureFlags) reader.ReadUInt16BE();
+
+                BodyConvFlags bcFlags = 0;
+                if (flags.HasFlag(LockedFeatureFlags.UOR))
+                    bcFlags |= BodyConvFlags.Anim1 | BodyConvFlags.Anim2;
+                if (flags.HasFlag(LockedFeatureFlags.LBR))
+                    bcFlags |= BodyConvFlags.Anim1;
+                if (flags.HasFlag(LockedFeatureFlags.AOS))
+                    bcFlags |= BodyConvFlags.Anim2;
+                if (flags.HasFlag(LockedFeatureFlags.SE))
+                    bcFlags |= BodyConvFlags.Anim3;
+                if (flags.HasFlag(LockedFeatureFlags.ML))
+                    bcFlags |= BodyConvFlags.Anim4;
+
+                AnimationsLoader.Instance.ProcessBodyConvDef(bcFlags);
             };
 
             // show quest pointer

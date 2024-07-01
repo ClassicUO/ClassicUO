@@ -2,7 +2,6 @@ using System;
 using System.Runtime.CompilerServices;
 using ClassicUO.Assets;
 using Microsoft.Xna.Framework.Graphics;
-using static System.Collections.Specialized.BitVector32;
 
 namespace ClassicUO.Renderer.Animations
 {
@@ -150,10 +149,10 @@ namespace ClassicUO.Renderer.Animations
                     index = new IndexAnimation();
                     var indices = AnimationsLoader.Instance.GetIndices
                     (
-                        UOFileManager.Version, 
-                        id, 
+                        UOFileManager.Version,
+                        id,
                         ref hue,
-                        ref index.Flags, 
+                        ref index.Flags,
                         out index.FileIndex,
                         out index.Type,
                         out index.MountedHeightOffset
@@ -205,7 +204,7 @@ namespace ClassicUO.Renderer.Animations
                     }
                 }
             } while (index == null);
-           
+
             useUOP = index.Flags.HasFlag(AnimationFlags.UseUopAnimation);
             index.Hue = hue;
 

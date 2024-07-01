@@ -11,74 +11,118 @@ readonly struct RenderingPlugin : IPlugin
     public void Build(Scheduler scheduler)
     {
         scheduler.AddSystem(static (
-            Query<(WorldPosition, Graphic), (With<NetworkSerial>, Without<Renderable>, Without<Relation<ContainedInto, Wildcard>>, Without<EquippedItem>)> query,
+            Query<(WorldPosition, Graphic, NetworkSerial), (Without<Renderable>, Without<Relation<ContainedInto, Wildcard>>, Without<EquippedItem>)> query,
             Res<AssetsServer> assetsServer,
             Res<Assets.TileDataLoader> tiledataLoader,
             TinyEcs.World world
         ) => {
-            query.Each((EntityView ent, ref WorldPosition pos, ref Graphic graphic) =>
+            query.Each((EntityView ent, ref WorldPosition pos, ref Graphic graphic, ref NetworkSerial serial) =>
             {
-                ref readonly var artInfo = ref assetsServer.Value.Arts.GetArt(graphic.Value);
-
                 var priorityZ = pos.Z;
 
-                if (tiledataLoader.Value.StaticData[graphic.Value].IsBackground)
+                if (ClassicUO.Game.SerialHelper.IsMobile(serial.Value))
                 {
-                    priorityZ -= 1;
-                }
+                    var frames = assetsServer.Value.Animations.GetAnimationFrames
+                    (
+                        graphic.Value,
+                        0,
+                        0,
+                        out var _,
+                        out var _
+                    );
 
-                if (tiledataLoader.Value.StaticData[graphic.Value].Height != 0)
-                {
-                    priorityZ += 1;
+                    ent.Set(new Renderable()
+                    {
+                        Texture = frames[0].Texture,
+                        Position = Isometric.IsoToScreen(pos.X, pos.Y, pos.Z),
+                        Color = Vector3.UnitZ,
+                        UV = frames[0].UV,
+                        Z = Isometric.GetDepthZ(pos.X, pos.Y, priorityZ + 2)
+                    });
                 }
-
-                if (tiledataLoader.Value.StaticData[graphic.Value].IsMultiMovable)
+                else
                 {
-                    priorityZ += 1;
+                    ref readonly var artInfo = ref assetsServer.Value.Arts.GetArt(graphic.Value);
+
+                    if (tiledataLoader.Value.StaticData[graphic.Value].IsBackground)
+                    {
+                        priorityZ -= 1;
+                    }
+
+                    if (tiledataLoader.Value.StaticData[graphic.Value].Height != 0)
+                    {
+                        priorityZ += 1;
+                    }
+
+                    if (tiledataLoader.Value.StaticData[graphic.Value].IsMultiMovable)
+                    {
+                        priorityZ += 1;
+                    }
+
+                    ent.Set(new Renderable()
+                    {
+                        Texture = artInfo.Texture,
+                        Position = Isometric.IsoToScreen(pos.X, pos.Y, pos.Z),
+                        Color = Vector3.UnitZ,
+                        UV = artInfo.UV,
+                        Z = Isometric.GetDepthZ(pos.X, pos.Y, priorityZ)
+                    });
                 }
-
-                ent.Set(new Renderable()
-                {
-                    Texture = artInfo.Texture,
-                    Position = Isometric.IsoToScreen(pos.X, pos.Y, pos.Z),
-                    Color = Vector3.UnitZ,
-                    UV = artInfo.UV,
-                    Z = Isometric.GetDepthZ(pos.X, pos.Y, priorityZ)
-                });
             });
         });
 
         scheduler.AddSystem(static (
-            Query<(WorldPosition, Graphic, Renderable), (With<NetworkSerial>, Without<Relation<ContainedInto, Wildcard>>, Without<EquippedItem>)> query,
+            Query<(WorldPosition, Graphic, Renderable, NetworkSerial), (Without<Relation<ContainedInto, Wildcard>>, Without<EquippedItem>)> query,
             Res<AssetsServer> assetsServer,
             Res<Assets.TileDataLoader> tiledataLoader,
             TinyEcs.World world
         ) => {
-            query.Each((ref WorldPosition pos, ref Graphic graphic, ref Renderable renderable) =>
+            query.Each((ref WorldPosition pos, ref Graphic graphic, ref Renderable renderable, ref NetworkSerial serial) =>
             {
-                ref readonly var artInfo = ref assetsServer.Value.Arts.GetArt(graphic.Value);
-
                 var priorityZ = pos.Z;
 
-                if (tiledataLoader.Value.StaticData[graphic.Value].IsBackground)
+                if (ClassicUO.Game.SerialHelper.IsMobile(serial.Value))
                 {
-                    priorityZ -= 1;
-                }
+                    var frames = assetsServer.Value.Animations.GetAnimationFrames
+                    (
+                        graphic.Value,
+                        0,
+                        0,
+                        out var _,
+                        out var _
+                    );
 
-                if (tiledataLoader.Value.StaticData[graphic.Value].Height != 0)
+                    renderable.Position = Isometric.IsoToScreen(pos.X, pos.Y, pos.Z);
+                    renderable.Position.X -= 22;
+                    renderable.Position.Y -= 22;
+                    // renderable.Position.X -= (short)((artInfo.UV.Width >> 1) - 22);
+                    // renderable.Position.Y -= (short)(artInfo.UV.Height - 44);
+                    renderable.Z = Isometric.GetDepthZ(pos.X, pos.Y, priorityZ + 2);
+                }
+                else
                 {
-                    priorityZ += 1;
-                }
+                    ref readonly var artInfo = ref assetsServer.Value.Arts.GetArt(graphic.Value);
 
-                if (tiledataLoader.Value.StaticData[graphic.Value].IsMultiMovable)
-                {
-                    priorityZ += 1;
-                }
+                    if (tiledataLoader.Value.StaticData[graphic.Value].IsBackground)
+                    {
+                        priorityZ -= 1;
+                    }
 
-                renderable.Position = Isometric.IsoToScreen(pos.X, pos.Y, pos.Z);
-                renderable.Position.X -= (short)((artInfo.UV.Width >> 1) - 22);
-                renderable.Position.Y -= (short)(artInfo.UV.Height - 44);
-                renderable.Z = Isometric.GetDepthZ(pos.X, pos.Y, priorityZ);
+                    if (tiledataLoader.Value.StaticData[graphic.Value].Height != 0)
+                    {
+                        priorityZ += 1;
+                    }
+
+                    if (tiledataLoader.Value.StaticData[graphic.Value].IsMultiMovable)
+                    {
+                        priorityZ += 1;
+                    }
+
+                    renderable.Position = Isometric.IsoToScreen(pos.X, pos.Y, pos.Z);
+                    renderable.Position.X -= (short)((artInfo.UV.Width >> 1) - 22);
+                    renderable.Position.Y -= (short)(artInfo.UV.Height - 44);
+                    renderable.Z = Isometric.GetDepthZ(pos.X, pos.Y, priorityZ);
+                }
             });
         });
 
