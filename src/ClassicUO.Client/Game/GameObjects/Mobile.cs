@@ -1094,8 +1094,7 @@ namespace ClassicUO.Game.GameObjects
 
         internal struct Step
         {
-            public int X,
-                Y;
+            public int X, Y;
             public sbyte Z;
             public byte Direction;
             public bool Run;

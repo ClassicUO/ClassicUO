@@ -11,13 +11,27 @@ struct MouseContext
     public MouseState OldState, NewState;
 }
 
+sealed class Time : SystemParam
+{
+    public float Total;
+    public float Frame;
+}
+
 struct Renderable
 {
-    public Texture2D Texture;
-    public Vector2 Position;
-    public Vector3 Color;
-    public Rectangle UV;
-    public float Z;
+    public Texture2D Texture = null;
+    public Vector2 Position = default;
+    public float Rotation = 0;
+    public Vector3 Color = default;
+    public Rectangle UV = default;
+    public float Z = 0;
+    public SpriteEffects Flip = SpriteEffects.None;
+    public Vector2 Origin = default;
+    public float Scale = 1f;
+
+    public Renderable()
+    {
+    }
 }
 
 readonly struct FnaPlugin : IPlugin
@@ -32,6 +46,7 @@ readonly struct FnaPlugin : IPlugin
         scheduler.AddResource(new UoGame(MouseVisible, WindowResizable, VSync));
         scheduler.AddResource(Keyboard.GetState());
         scheduler.AddResource(new MouseContext());
+        scheduler.AddSystemParam(new Time());
         scheduler.AddEvent<KeyEvent>();
         scheduler.AddEvent<MouseEvent>();
         scheduler.AddEvent<WheelEvent>();
@@ -43,9 +58,12 @@ readonly struct FnaPlugin : IPlugin
             game.Value.RunApplication = true;
         }, Stages.Startup);
 
-        scheduler.AddSystem((Res<UoGame> game) => {
+        scheduler.AddSystem((Res<UoGame> game, Time time) => {
             game.Value.SuppressDraw();
             game.Value.Tick();
+
+            time.Frame = (float) game.Value.GameTime.ElapsedGameTime.TotalSeconds;
+            time.Total += time.Frame;
 
             FrameworkDispatcher.Update();
         }).RunIf((SchedulerState state) => state.ResourceExists<UoGame>());
@@ -67,9 +85,11 @@ readonly struct FnaPlugin : IPlugin
                     writer.Enqueue(new () { Action = 2, Key = key });
 
             oldState.Value = newState;
-        }, Stages.FrameEnd);
+        }, Stages.FrameEnd)
+            .RunIf((Res<UoGame> game) => game.Value.IsActive);
 
-        scheduler.AddSystem((Res<MouseContext> mouseCtx) => mouseCtx.Value.NewState = Mouse.GetState(), Stages.BeforeUpdate);
+        scheduler.AddSystem((Res<MouseContext> mouseCtx) => mouseCtx.Value.NewState = Mouse.GetState(), Stages.BeforeUpdate)
+            .RunIf((Res<UoGame> game) => game.Value.IsActive);
 
         scheduler.AddSystem((EventWriter<MouseEvent> writer, EventWriter<WheelEvent> wheelWriter, Res<MouseContext> mouseCtx) => {
             if (mouseCtx.Value.NewState.LeftButton != mouseCtx.Value.OldState.LeftButton)
@@ -88,7 +108,8 @@ readonly struct FnaPlugin : IPlugin
                 wheelWriter.Enqueue(new () { Value = (mouseCtx.Value.OldState.ScrollWheelValue - mouseCtx.Value.NewState.ScrollWheelValue) / 120 });
 
             mouseCtx.Value.OldState = mouseCtx.Value.NewState;
-        }, Stages.FrameEnd);
+        }, Stages.FrameEnd)
+            .RunIf((Res<UoGame> game) => game.Value.IsActive);
 
         scheduler.AddSystem((EventReader<KeyEvent> reader) => {
             foreach (var ev in reader)
@@ -147,6 +168,7 @@ readonly struct FnaPlugin : IPlugin
         }
 
         public GraphicsDeviceManager GraphicManager { get; }
+        public GameTime GameTime { get; private set; }
 
 
         protected override void Initialize()
@@ -161,6 +183,7 @@ readonly struct FnaPlugin : IPlugin
 
         protected override void Update(GameTime gameTime)
         {
+            GameTime = gameTime;
             // I don't want to update things here, but on ecs systems instead
         }
 

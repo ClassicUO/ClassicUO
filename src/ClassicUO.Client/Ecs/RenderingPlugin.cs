@@ -1,3 +1,5 @@
+using System.Runtime.CompilerServices;
+using ClassicUO.Game.Data;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -11,15 +13,30 @@ readonly struct RenderingPlugin : IPlugin
     public void Build(Scheduler scheduler)
     {
         scheduler.AddSystem(static (
-            Query<(WorldPosition, Graphic, NetworkSerial), (Without<Renderable>, Without<Relation<ContainedInto, Wildcard>>, Without<EquippedItem>)> query,
+            Query<Graphic,
+                (With<NetworkSerial>, Without<Relation<ContainedInto, Wildcard>>, With<Relation<EquippedItem, Wildcard>>)> queryEquip,
+            Query<(WorldPosition, Graphic, NetworkSerial, Optional<Relation<EquippedItem, Wildcard>>),
+                (Without<Renderable>, Without<Relation<ContainedInto, Wildcard>>)> query,
             Res<AssetsServer> assetsServer,
             Res<Assets.TileDataLoader> tiledataLoader,
             TinyEcs.World world
         ) => {
-            query.Each((EntityView ent, ref WorldPosition pos, ref Graphic graphic, ref NetworkSerial serial) =>
+
+            queryEquip.Each((EntityView ent, ref Graphic graphic) =>
+            {
+                // sync equipment position with the parent
+                var parent = world.Entity(ent.Target<EquippedItem>());
+                if (parent.Has<WorldPosition>())
+                    ent.Set(parent.Get<WorldPosition>());
+            });
+
+            query.Each((EntityView ent, ref WorldPosition pos, ref Graphic graphic, ref NetworkSerial serial, ref Relation<EquippedItem, Wildcard> equip) =>
             {
                 var priorityZ = pos.Z;
+                if (!Unsafe.IsNullRef(ref equip))
+                {
 
+                }
                 if (ClassicUO.Game.SerialHelper.IsMobile(serial.Value))
                 {
                     var frames = assetsServer.Value.Animations.GetAnimationFrames
@@ -33,12 +50,13 @@ readonly struct RenderingPlugin : IPlugin
 
                     ent.Set(new Renderable()
                     {
-                        Texture = frames[0].Texture,
+                        //Texture = frames[0].Texture,
                         Position = Isometric.IsoToScreen(pos.X, pos.Y, pos.Z),
                         Color = Vector3.UnitZ,
-                        UV = frames[0].UV,
+                        //UV = frames[0].UV,
                         Z = Isometric.GetDepthZ(pos.X, pos.Y, priorityZ + 2)
                     });
+                    ent.Set(new MobAnimation() { });
                 }
                 else
                 {
@@ -72,32 +90,47 @@ readonly struct RenderingPlugin : IPlugin
         });
 
         scheduler.AddSystem(static (
-            Query<(WorldPosition, Graphic, Renderable, NetworkSerial), (Without<Relation<ContainedInto, Wildcard>>, Without<EquippedItem>)> query,
+            Query<(WorldPosition, Graphic, Renderable, NetworkSerial, Optional<Facing>, Optional<MobAnimation>),
+                Without<Relation<ContainedInto, Wildcard>>> query,
             Res<AssetsServer> assetsServer,
             Res<Assets.TileDataLoader> tiledataLoader,
             TinyEcs.World world
         ) => {
-            query.Each((ref WorldPosition pos, ref Graphic graphic, ref Renderable renderable, ref NetworkSerial serial) =>
+            query.Each((ref WorldPosition pos, ref Graphic graphic,
+                ref Renderable renderable, ref NetworkSerial serial,
+                ref Facing direction, ref MobAnimation animation) =>
             {
                 var priorityZ = pos.Z;
 
                 if (ClassicUO.Game.SerialHelper.IsMobile(serial.Value))
                 {
+                    var dir = Unsafe.IsNullRef(ref direction) ? Direction.North : direction.Value;
+                    (dir, var mirror) = FixDirection(dir);
+
+                    byte animAction = 0;
+                    var animIndex = 0;
+                    if (!Unsafe.IsNullRef(ref animation))
+                    {
+                        animAction = animation.Action;
+                        animIndex = animation.Index;
+                    }
+
                     var frames = assetsServer.Value.Animations.GetAnimationFrames
                     (
                         graphic.Value,
-                        0,
-                        0,
+                        animAction,
+                        (byte) dir,
                         out var _,
                         out var _
                     );
 
+                    renderable.Texture = frames.IsEmpty ? null : frames[animIndex].Texture;
+                    renderable.UV = frames.IsEmpty ? Rectangle.Empty : frames[animIndex].UV;
                     renderable.Position = Isometric.IsoToScreen(pos.X, pos.Y, pos.Z);
                     renderable.Position.X -= 22;
                     renderable.Position.Y -= 22;
-                    // renderable.Position.X -= (short)((artInfo.UV.Width >> 1) - 22);
-                    // renderable.Position.Y -= (short)(artInfo.UV.Height - 44);
                     renderable.Z = Isometric.GetDepthZ(pos.X, pos.Y, priorityZ + 2);
+                    renderable.Flip = mirror ? SpriteEffects.FlipHorizontally : SpriteEffects.None;
                 }
                 else
                 {
@@ -153,38 +186,87 @@ readonly struct RenderingPlugin : IPlugin
             sb.SetBrightlight(1.7f);
             sb.SetStencil(DepthStencilState.Default);
             queryTiles.Each((ref Renderable renderable, ref TileStretched stretched) =>
-                sb.DrawStretchedLand
-                (
-                    renderable.Texture,
-                    renderable.Position - center,
-                    renderable.UV,
-                    ref stretched.Offset,
-                    ref stretched.NormalTop,
-                    ref stretched.NormalRight,
-                    ref stretched.NormalLeft,
-                    ref stretched.NormalBottom,
-                    renderable.Color,
-                    renderable.Z
-                )
-            );
+            {
+                if (renderable.Texture != null)
+                    sb.DrawStretchedLand
+                    (
+                        renderable.Texture,
+                        renderable.Position - center,
+                        renderable.UV,
+                        ref stretched.Offset,
+                        ref stretched.NormalTop,
+                        ref stretched.NormalRight,
+                        ref stretched.NormalLeft,
+                        ref stretched.NormalBottom,
+                        renderable.Color,
+                        renderable.Z
+                    );
+            });
             query.Each((ref Renderable renderable) =>
-                sb.Draw
-                (
-                    renderable.Texture,
-                    renderable.Position - center,
-                    renderable.UV,
-                    renderable.Color,
-                    0f,
-                    Vector2.Zero,
-                    1f,
-                    SpriteEffects.None,
-                    renderable.Z
-                )
-            );
+            {
+                if (renderable.Texture != null)
+                    sb.Draw
+                    (
+                        renderable.Texture,
+                        renderable.Position - center,
+                        renderable.UV,
+                        renderable.Color,
+                        renderable.Rotation,
+                        renderable.Origin,
+                        renderable.Scale,
+                        renderable.Flip,
+                        renderable.Z
+                    );
+            });
             sb.SetStencil(null);
             sb.End();
             device.Value.Present();
         }, Stages.AfterUpdate, ThreadingMode.Single)
         .RunIf((SchedulerState state) => state.ResourceExists<GraphicsDevice>());
+    }
+
+
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    static (Direction, bool) FixDirection(Direction dir)
+    {
+        dir &= ~(Direction.Running);
+        var mirror = false;
+
+        switch (dir)
+        {
+            case Direction.East:
+            case Direction.South:
+                mirror = dir == Direction.East;
+                dir = Direction.Right;
+
+                break;
+
+            case Direction.Right:
+            case Direction.Left:
+                mirror = dir == Direction.Right;
+                dir = Direction.East;
+
+                break;
+
+            case 0:
+            case Direction.West:
+                mirror = dir == 0;
+                dir = Direction.Down;
+
+                break;
+
+            case Direction.Down:
+                dir = 0;
+
+                break;
+
+            case Direction.Up:
+                dir = Direction.South;
+
+                break;
+        }
+
+        return (dir, mirror);
     }
 }

@@ -6,6 +6,7 @@ using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using TinyEcs;
+using static TinyEcs.Defaults;
 
 namespace ClassicUO.Ecs;
 
@@ -37,10 +38,12 @@ readonly struct CuoPlugin : IPlugin
             // world.Entity<Graphic>();
             // world.Entity<NetworkSerial>();
             // world.Entity<ContainedInto>();
-            // world.Entity<EquippedItem>();
 
             // TODO: fix this bs
             //world.Entity<Relation<ContainedInto, TinyEcs.Defaults.Wildcard>>();
+
+             //world.Entity<EquippedItem>();
+            //world.Entity<Relation<EquippedItem, Wildcard>>();
         }, Stages.Startup);
 
         scheduler.AddSystem((Res<GameContext> gameCtx, Res<Settings> settings) => {
@@ -58,6 +61,7 @@ readonly struct CuoPlugin : IPlugin
         scheduler.AddPlugin<AssetsPlugin>();
         scheduler.AddPlugin<TerrainPlugin>();
         scheduler.AddPlugin<NetworkPlugin>();
+        scheduler.AddPlugin<MobAnimationsPlugin>();
         scheduler.AddPlugin<RenderingPlugin>();
 
 

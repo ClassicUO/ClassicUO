@@ -1,51 +1,49 @@
 namespace ClassicUO.Ecs;
 
-public struct WorldPosition
+struct WorldPosition
 {
     public ushort X, Y;
     public sbyte Z;
 }
 
-public struct Graphic
+struct Graphic
 {
     public ushort Value;
 }
 
-public struct Hue
+struct Hue
 {
     public ushort Value;
 }
 
-public struct NetworkSerial
+struct Facing
+{
+    public ClassicUO.Game.Data.Direction Value;
+}
+
+struct NetworkSerial
 {
     public uint Value;
 }
 
-public struct ContainedInto;
+struct ContainedInto;
 
-public struct EquippedItem
+struct EquippedItem
 {
     public byte Layer;
 }
 
-public struct Hitpoints
+struct Hitpoints
 {
     public ushort Value, MaxValue;
 }
 
-public struct Mana
+struct Mana
 {
     public ushort Value, MaxValue;
 }
 
-public struct Stamina
+struct Stamina
 {
     public ushort Value, MaxValue;
-}
-
-public enum EntityType
-{
-    Static,
-    Land,
-    Network,
 }

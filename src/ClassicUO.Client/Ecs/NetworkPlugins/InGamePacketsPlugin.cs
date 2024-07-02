@@ -120,24 +120,10 @@ readonly struct InGamePacketsPlugin : IPlugin
                     RangeEndY = Math.Min(mapHeight / 8, y / 8 + offset),
                 });
 
-                var isFlipped = false;
-                var direction = (byte)(dir & Direction.Up);
-                Assets.AnimationsLoader.Instance.GetAnimDirection(ref direction, ref isFlipped);
-                var frames = assetsServer.Value.Animations.GetAnimationFrames(graphic, 0, direction,
-                                                                                out var hue, out var _);
-
                 var ent = entitiesMap.Value.GetOrCreate(world, serial);
-                ent
-                    .Set(new Ecs.WorldPosition() { X = x, Y = y, Z = z })
+                ent.Set(new Ecs.WorldPosition() { X = x, Y = y, Z = z })
                     .Set(new Ecs.Graphic() { Value = graphic })
-                    .Set(new Renderable()
-                    {
-                        Color = Vector3.UnitZ,
-                        Position = Isometric.IsoToScreen(x, y, z) + new Vector2(frames[0].Center.X, frames[0].Center.Y),
-                        Texture = frames[0].Texture,
-                        UV = frames[0].UV,
-                        Z = Isometric.GetDepthZ(x, y, z + 1)
-                    });
+                    .Set(new Facing() { Value = dir });
             };
 
             // login complete
@@ -222,7 +208,8 @@ readonly struct InGamePacketsPlugin : IPlugin
                 parentEnt
                     .Set(new Graphic() { Value = graphic })
                     .Set(new WorldPosition() { X = x, Y = y, Z = z })
-                    .Set(new Hue() { Value = hue });
+                    .Set(new Hue() { Value = hue })
+                    .Set(new Facing() { Value = dir });
 
                 uint itemSerial;
                 while ((itemSerial = reader.ReadUInt32BE()) != 0)
@@ -340,7 +327,8 @@ readonly struct InGamePacketsPlugin : IPlugin
                 var ent = entitiesMap.Value.GetOrCreate(world, serial);
                 ent.Set(new Graphic() { Value = (ushort)(graphic + graphicInc) })
                     .Set(new Hue() { Value = hue })
-                    .Set(new WorldPosition() { X = x, Y = y, Z = z });
+                    .Set(new WorldPosition() { X = x, Y = y, Z = z })
+                    .Set(new Facing() { Value = (Direction) direction });
             };
 
             // damage
@@ -455,7 +443,8 @@ readonly struct InGamePacketsPlugin : IPlugin
                 var ent = entitiesMap.Value.GetOrCreate(world, serial);
                 ent.Set(new Graphic() { Value = (ushort)(graphic + graphicInc) })
                     .Set(new Hue() { Value = hue })
-                    .Set(new WorldPosition() { X = x, Y = y, Z = z });
+                    .Set(new WorldPosition() { X = x, Y = y, Z = z })
+                    .Set(new Facing() { Value = direction });
             };
 
             // deny walk
@@ -871,7 +860,8 @@ readonly struct InGamePacketsPlugin : IPlugin
                 var ent = entitiesMap.Value.GetOrCreate(world, serial);
                 ent.Set(new Graphic() { Value = graphic })
                     .Set(new Hue() { Value = hue })
-                    .Set(new WorldPosition() { X = x, Y = y, Z = z });
+                    .Set(new WorldPosition() { X = x, Y = y, Z = z })
+                    .Set(new Facing() { Value = direction });
             };
             packetsMap.Value[0x77] = buffer => d2_77(0x77, buffer);
             packetsMap.Value[0xD2] = buffer => d2_77(0xD2, buffer);
@@ -1430,7 +1420,8 @@ readonly struct InGamePacketsPlugin : IPlugin
                 var ent = entitiesMap.Value.GetOrCreate(world, serial);
                 ent.Set(new Graphic() { Value = (ushort)(graphic + graphicInc) })
                     .Set(new Hue() { Value = hue })
-                    .Set(new WorldPosition() { X = x, Y = y, Z = z });
+                    .Set(new WorldPosition() { X = x, Y = y, Z = z })
+                    .Set(new Facing() { Value = dir });
             };
 
             // boat moving
