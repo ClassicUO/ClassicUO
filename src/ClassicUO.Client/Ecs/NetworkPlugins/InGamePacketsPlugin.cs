@@ -44,7 +44,6 @@ sealed class NetworkEntitiesMap
 
     public bool Remove(TinyEcs.World world, uint serial)
     {
-        return false;
         var result = false;
         if (_entities.Remove(serial, out var id))
         {

@@ -170,14 +170,14 @@ readonly struct RenderingPlugin : IPlugin
                 ref var equip = ref ent.Get<EquippedItem>(act);
                 if (equip.Layer == Layer.Mount)
                 {
-                    if (world.Exists(act))
-                    {
-                        ref var parentSer = ref world.Get<NetworkSerial>(act);
-                        if (parentSer.Value == gameCtx.Value.PlayerSerial)
-                        {
+                    // if (world.Exists(act))
+                    // {
+                    //     ref var parentSer = ref world.Get<NetworkSerial>(act);
+                    //     if (parentSer.Value == gameCtx.Value.PlayerSerial)
+                    //     {
 
-                        }
-                    }
+                    //     }
+                    // }
 
                     animId = Mounts.FixMountGraphic(tiledataLoader, animId);
                     animAction = animation.MountAction;
