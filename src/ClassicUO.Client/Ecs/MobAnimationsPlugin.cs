@@ -21,11 +21,16 @@ struct MobAnimation
     public bool IsFromServer;
     public bool ForwardDirection;
 
-    public byte Action;
-    public byte MountAction;
+    public byte Action = byte.MaxValue;
+    public byte MountAction = byte.MaxValue;
     public Direction Direction;
     public float Time;
     public bool Run;
+
+    public MobAnimation()
+    {
+
+    }
 }
 
 struct MobileFlags
@@ -59,27 +64,29 @@ readonly struct MobAnimationsPlugin : IPlugin
     public void Build(Scheduler scheduler)
     {
         scheduler.AddSystem((
+            TinyEcs.World world,
             Time time,
             Res<GameContext> gameCtx,
             Res<AssetsServer> assetsServer,
+            Res<Assets.TileDataLoader> tiledataLoader,
             Query<(
                 Renderable,
                 MobAnimation,
                 Graphic,
                 Facing,
                 Optional<MobileFlags>,
-                Optional<MobileSteps>,
-                Optional<Relation<EquippedItem, Wildcard>>
-                )> query) => {
+                Optional<MobileSteps>),
+                (Without<Relation<ContainedInto, Wildcard>>,
+                Without<Relation<EquippedItem, Wildcard>>)> query) => {
             query.Each(
             (
+                EntityView ent,
                 ref Renderable renderable,
                 ref MobAnimation animation,
                 ref Graphic graphic,
                 ref Facing direction,
                 ref MobileFlags mobFlags,
-                ref MobileSteps mobSteps,
-                ref Relation<EquippedItem, Wildcard> equip
+                ref MobileSteps mobSteps
             ) => {
                 if (animation.Time >= time.Total) return;
 
@@ -88,6 +95,7 @@ readonly struct MobAnimationsPlugin : IPlugin
                 var iterate = true;
                 var realDirection = direction.Value;
                 var mirror = false;
+                var animId = graphic.Value;
 
                 if (!Unsafe.IsNullRef(ref mobSteps))
                 {
@@ -112,25 +120,62 @@ readonly struct MobAnimationsPlugin : IPlugin
                     }
                 }
 
+
                 var hasMount = false;
-                if (!Unsafe.IsNullRef(ref equip))
-                {
-                    // TODO
-                }
+                var term0 = new QueryTerm(IDOp.Pair(world.Entity<EquippedItem>(), ent.ID), TermOp.With);
+                var term1 = new QueryTerm(world.Entity<NetworkSerial>(), TermOp.DataAccess);
+
+                world.QueryRaw(term0, term1).Each((EntityView child, ref NetworkSerial ser) => {
+                    ref var equip = ref child.Get<EquippedItem>(ent.ID);
+                    if (equip.Layer == Layer.Mount)
+                    {
+                        // animId = Mounts.FixMountGraphic(animId);
+                        hasMount = true;
+                    }
+                });
+
+                animId = Mounts.FixMountGraphic(tiledataLoader, animId);
+
+                // if (ent.Has<EquippedItem, Wildcard>())
+                // {
+                //     var target = ent.Target<EquippedItem>();
+                //     ref var equipment = ref ent.Get<EquippedItem>(target);
+                //     if (equipment.Layer == Layer.Mount)
+                //     {
+                //         hasMount = true;
+                //         animId = Mounts.FixMountGraphic(animId);
+                //     }
+                // }
+
+                // if (tiledataLoader.Value.StaticData[graphic.Value].AnimID != 0)
+                //     animId = tiledataLoader.Value.StaticData[graphic.Value].AnimID;
+
+                realDirection &= ~Direction.Running;
+                realDirection &= Direction.Mask;
 
                 animation.Action = GetAnimationGroup(
                     gameCtx.Value.ClientVersion, assetsServer.Value.Animations,
-                    graphic.Value, realDirection, isWalking, hasMount, false, flags,
+                    animId, realDirection, isWalking, hasMount, false, flags,
                     animation.IsFromServer, animation.Action
                 );
+
+                if (hasMount)
+                {
+                    animation.MountAction = GetAnimationGroup(
+                        gameCtx.Value.ClientVersion, assetsServer.Value.Animations,
+                        animId, realDirection, isWalking, hasMount, false, flags,
+                        animation.IsFromServer, animation.MountAction
+                    );
+                }
+
                 animation.Direction = realDirection;
 
-                var dir = (byte)(realDirection & Direction.Mask);
+                var dir = (byte)(realDirection);
                 ClassicUO.Assets.AnimationsLoader.Instance.GetAnimDirection(ref dir, ref mirror);
 
                 var frames = assetsServer.Value.Animations.GetAnimationFrames
                 (
-                    graphic.Value,
+                    animId,
                     animation.Action,
                     dir,
                     out _,

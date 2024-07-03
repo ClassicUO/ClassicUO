@@ -30,7 +30,7 @@ struct ContainedInto;
 
 struct EquippedItem
 {
-    public byte Layer;
+    public ClassicUO.Game.Data.Layer Layer;
 }
 
 struct Hitpoints

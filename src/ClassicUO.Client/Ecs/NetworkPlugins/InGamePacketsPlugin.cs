@@ -28,15 +28,25 @@ sealed class NetworkEntitiesMap
         }
 
         var ent = world.Entity()
-            .Set(new NetworkSerial() { Value = serial });
+            .Set(new NetworkSerial() { Value = serial })
+            .Set(new Renderable());
+
+        if (SerialHelper.IsMobile(serial))
+        {
+            ent.Set(new MobAnimation());
+        }
         _entities.Add(serial, ent.ID);
+
+        Console.WriteLine("created: serial: 0x{0:X8} | ecsId: {1}", serial, ent.ID);
 
         return ent;
     }
 
-    public bool Remove(TinyEcs.World world, uint serial, out EcsID id)
+    public bool Remove(TinyEcs.World world, uint serial)
     {
-        if (_entities.Remove(serial, out id))
+        return false;
+        var result = false;
+        if (_entities.Remove(serial, out var id))
         {
             // Some entities might have a network entity associated [child].
             // It's needed to remove from the dict these children entities.
@@ -47,18 +57,33 @@ sealed class NetworkEntitiesMap
             var term0 = new QueryTerm(IDOp.Pair(Wildcard.ID, id), TermOp.With);
 			var term1 = new QueryTerm(IDOp.Pair(id, Wildcard.ID), TermOp.With);
             var term2 = new QueryTerm(world.Entity<NetworkSerial>(), TermOp.DataAccess);
-			world.QueryRaw(term0, term2).Each((EntityView child, ref NetworkSerial ser) => {
-                _entities.Remove(ser.Value);
+            var term3 = new QueryTerm(IDOp.Pair(world.Entity<EquippedItem>(), id), TermOp.Without);
+			world.QueryRaw(term0, term2, term3).Each((EntityView child, ref NetworkSerial ser) => {
+                Console.WriteLine("  removing serial: 0x{0:X8} associated to 0x{1:X8}", ser.Value, serial);
+                Remove(world, ser.Value);
             });
-			world.QueryRaw(term1, term2).Each((EntityView child, ref NetworkSerial ser) => {
-                _entities.Remove(ser.Value);
+			world.QueryRaw(term1, term2, term3).Each((EntityView child, ref NetworkSerial ser) => {
+                Console.WriteLine("  removing serial: 0x{0:X8} associated to 0x{1:X8}", ser.Value, serial);
+                Remove(world, ser.Value);
+            });
+
+            // we want to keep the equipments for some reason lol
+            var term4 = new QueryTerm(IDOp.Pair(world.Entity<EquippedItem>(), id), TermOp.With);
+            var id2 = id;
+            world.QueryRaw(term2, term4).Each((EntityView ent, ref NetworkSerial ser) =>
+            {
+                Console.WriteLine("  unsetting equipment serial: 0x{0:X8} associated to 0x{1:X8}", ser.Value, serial);
+                ent.Unset<EquippedItem>(id2);
+                // Remove(world, ser.Value);
             });
 
             world.Delete(id);
-            return true;
+            result = true;
         }
 
-        return false;
+        Console.WriteLine("deleted: serial: 0x{0:X8} | ecsId: {1} | result: {2}", serial, id, result);
+
+        return result;
     }
 }
 
@@ -135,7 +160,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                 network.Value.Send_OpenChat("");
 
                 network.Value.Send_SkillsRequest(gameCtx.Value.PlayerSerial);
-                network.Value.Send_DoubleClick(gameCtx.Value.PlayerSerial);
+                //network.Value.Send_DoubleClick(gameCtx.Value.PlayerSerial);
 
                 if (gameCtx.Value.ClientVersion >= ClientVersion.CV_306E)
                     network.Value.Send_ClientType(gameCtx.Value.Protocol);
@@ -229,7 +254,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                     var child = entitiesMap.Value.GetOrCreate(world, itemSerial);
                     child.Set(new Graphic() { Value = itemGraphic })
                         .Set(new Hue() { Value = itemHue })
-                        .Set(new EquippedItem() { Layer = (byte) layer }, parentEnt);
+                        .Set(new EquippedItem() { Layer = layer }, parentEnt);
                 }
             };
             packetsMap.Value[0xD3] = buffer => d3_78(0xD3, buffer);
@@ -418,12 +443,10 @@ readonly struct InGamePacketsPlugin : IPlugin
 
             // delete object
             packetsMap.Value[0x1D] = buffer => {
+                if (gameCtx.Value.PlayerSerial == 0) return;
                 var reader = new StackDataReader(buffer);
-
                 var serial = reader.ReadUInt32BE();
-                var deleted = entitiesMap.Value.Remove(world, serial, out var ecsId);
-
-                Console.WriteLine("deleted: serial: 0x{0:X8} | ecsId: {1} | result: {2}", serial, ecsId, deleted);
+                var deleted = entitiesMap.Value.Remove(world, serial);
             };
 
             // update player
@@ -563,7 +586,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                 var childEnt = entitiesMap.Value.GetOrCreate(world, serial);
                 childEnt.Set(new Graphic() { Value = (ushort)(graphic + graphicInc) })
                     .Set(new Hue() { Value = hue })
-                    .Set(new EquippedItem() { Layer = (byte)layer }, parentEnt);
+                    .Set(new EquippedItem() { Layer = layer }, parentEnt);
                     //.Set<ContainedInto>(parentEnt);
             };
 
@@ -909,7 +932,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                      (itemSerial = reader.ReadUInt32BE()) != 0)
                 {
                     var childEnt = entitiesMap.Value.GetOrCreate(world, itemSerial);
-                    childEnt.Set(new EquippedItem() { Layer = (byte)layer }, parentEnt);
+                    childEnt.Set(new EquippedItem() { Layer = layer }, parentEnt);
                 }
             };
 
