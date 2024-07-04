@@ -574,7 +574,7 @@ readonly struct InGamePacketsPlugin : IPlugin
             packetsMap.Value[0x2E] = buffer => {
                 var reader = new StackDataReader(buffer);
 
-                var serial = reader.ReadUInt32LE();
+                var serial = reader.ReadUInt32BE();
                 var graphic = reader.ReadUInt16BE();
                 var graphicInc = reader.ReadUInt8();
                 var layer = (Layer)reader.ReadUInt8();
