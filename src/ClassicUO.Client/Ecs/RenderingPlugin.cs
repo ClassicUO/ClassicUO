@@ -19,6 +19,7 @@ readonly struct RenderingPlugin : IPlugin
             Res<NetworkEntitiesMap> entitiesMap,
             Query<Graphic,
                 (With<NetworkSerial>, Without<Relation<ContainedInto, Wildcard>>, With<Relation<EquippedItem, Wildcard>>)> queryEquip,
+            Query<NetworkSerial, (Without<Renderable>, Without<Relation<ContainedInto, Wildcard>>)> queryAddRender,
             TinyEcs.World world
         ) => {
             queryEquip.Each((EntityView ent, ref Graphic graphic) =>
@@ -42,6 +43,11 @@ readonly struct RenderingPlugin : IPlugin
                 {
 
                 }
+            });
+
+            queryAddRender.Each((EntityView ent, ref NetworkSerial serial) =>
+            {
+                ent.Set(new Renderable());
             });
         });
 
@@ -146,7 +152,7 @@ readonly struct RenderingPlugin : IPlugin
                 }
 
                 renderable.Z = Isometric.GetDepthZ(pos.X, pos.Y, priorityZ);
-                renderable.Color = ShaderHueTranslator.GetHueVector(uoHue);
+                renderable.Color = ShaderHueTranslator.GetHueVector(FixHue(uoHue));
             });
 
 
@@ -154,7 +160,7 @@ readonly struct RenderingPlugin : IPlugin
                 ref Renderable renderable, ref NetworkSerial serial, ref MobAnimation animation) =>
             {
                 var uoHue = hue.Value;
-                var priorityZ = pos.Z;
+                var priorityZ = pos.Z + 2;
                 renderable.Position = Isometric.IsoToScreen(pos.X, pos.Y, pos.Z);
 
                 var animId = graphic.Value;
@@ -185,7 +191,6 @@ readonly struct RenderingPlugin : IPlugin
                 else if (tiledataLoader.Value.StaticData[graphic.Value].AnimID != 0)
                     animId = tiledataLoader.Value.StaticData[graphic.Value].AnimID;
 
-                priorityZ += 2;
                 (var dir, var mirror) = FixDirection(animation.Direction);
 
                 var frames = assetsServer.Value.Animations.GetAnimationFrames
@@ -218,7 +223,7 @@ readonly struct RenderingPlugin : IPlugin
 
                 // TODO: priority Z based on layer ordering
                 renderable.Z = Isometric.GetDepthZ(pos.X, pos.Y, priorityZ);
-                renderable.Color = ShaderHueTranslator.GetHueVector(uoHue);
+                renderable.Color = ShaderHueTranslator.GetHueVector(FixHue(uoHue));
             });
         });
 
@@ -230,7 +235,7 @@ readonly struct RenderingPlugin : IPlugin
             Query<Renderable, (Without<TileStretched>, Without<Relation<ContainedInto, Wildcard>>)> query,
             Query<(Renderable, TileStretched), Without<Relation<ContainedInto, Wildcard>>> queryTiles
         ) => {
-            device.Value.Clear(Color.AliceBlue);
+            device.Value.Clear(Color.Black);
 
             var center = Isometric.IsoToScreen(gameCtx.Value.CenterX, gameCtx.Value.CenterY, gameCtx.Value.CenterZ);
             center.X -= device.Value.PresentationParameters.BackBufferWidth / 2f;
@@ -247,6 +252,7 @@ readonly struct RenderingPlugin : IPlugin
             var sb = batch.Value;
             sb.Begin();
             sb.SetBrightlight(1.7f);
+            sb.SetSampler(SamplerState.PointClamp);
             sb.SetStencil(DepthStencilState.Default);
             queryTiles.Each((ref Renderable renderable, ref TileStretched stretched) =>
             {
@@ -281,6 +287,7 @@ readonly struct RenderingPlugin : IPlugin
                         renderable.Z
                     );
             });
+            sb.SetSampler(null);
             sb.SetStencil(null);
             sb.End();
             device.Value.Present();
@@ -289,6 +296,26 @@ readonly struct RenderingPlugin : IPlugin
     }
 
 
+    static ushort FixHue(ushort hue)
+    {
+        var fixedColor = (ushort) (hue & 0x3FFF);
+
+        if (fixedColor != 0)
+        {
+            if (fixedColor >= 0x0BB8)
+            {
+                fixedColor = 1;
+            }
+
+            fixedColor |= (ushort) (hue & 0xC000);
+        }
+        else
+        {
+            fixedColor = (ushort) (hue & 0x8000);
+        }
+
+        return fixedColor;
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     static (Direction, bool) FixDirection(Direction dir)

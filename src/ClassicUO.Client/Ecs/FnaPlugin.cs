@@ -160,8 +160,10 @@ readonly struct FnaPlugin : IPlugin
         {
             GraphicManager = new GraphicsDeviceManager(this)
             {
-                SynchronizeWithVerticalRetrace = vSync
+                SynchronizeWithVerticalRetrace = vSync,
+                PreferredDepthStencilFormat = DepthFormat.Depth24Stencil8
             };
+
             IsFixedTimeStep = false;
             IsMouseVisible = mouseVisible;
             Window.AllowUserResizing = allowWindowResizing;

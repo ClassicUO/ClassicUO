@@ -24,12 +24,16 @@ sealed class NetworkEntitiesMap
     {
         if (_entities.TryGetValue(serial, out var id))
         {
-            return world.Entity(id);
+            if (world.Exists(id))
+            {
+                return world.Entity(id);
+            }
+
+            _entities.Remove(serial);
         }
 
         var ent = world.Entity()
-            .Set(new NetworkSerial() { Value = serial })
-            .Set(new Renderable());
+            .Set(new NetworkSerial() { Value = serial });
 
         if (SerialHelper.IsMobile(serial))
         {
@@ -56,25 +60,36 @@ sealed class NetworkEntitiesMap
             var term0 = new QueryTerm(IDOp.Pair(Wildcard.ID, id), TermOp.With);
 			var term1 = new QueryTerm(IDOp.Pair(id, Wildcard.ID), TermOp.With);
             var term2 = new QueryTerm(world.Entity<NetworkSerial>(), TermOp.DataAccess);
-            var term3 = new QueryTerm(IDOp.Pair(world.Entity<EquippedItem>(), id), TermOp.Without);
-			world.QueryRaw(term0, term2, term3).Each((EntityView child, ref NetworkSerial ser) => {
+            // var term3 = new QueryTerm(IDOp.Pair(world.Entity<EquippedItem>(), id), TermOp.Without);
+
+            var q0 = world.QueryRaw(term0, term2);
+			q0.Each((EntityView child, ref NetworkSerial ser) => {
                 Console.WriteLine("  removing serial: 0x{0:X8} associated to 0x{1:X8}", ser.Value, serial);
-                Remove(world, ser.Value);
-            });
-			world.QueryRaw(term1, term2, term3).Each((EntityView child, ref NetworkSerial ser) => {
-                Console.WriteLine("  removing serial: 0x{0:X8} associated to 0x{1:X8}", ser.Value, serial);
-                Remove(world, ser.Value);
+                if (!Remove(world, ser.Value))
+                {
+
+                }
             });
 
-            // we want to keep the equipments for some reason lol
-            var term4 = new QueryTerm(IDOp.Pair(world.Entity<EquippedItem>(), id), TermOp.With);
-            var id2 = id;
-            world.QueryRaw(term2, term4).Each((EntityView ent, ref NetworkSerial ser) =>
-            {
-                Console.WriteLine("  unsetting equipment serial: 0x{0:X8} associated to 0x{1:X8}", ser.Value, serial);
-                ent.Unset<EquippedItem>(id2);
-                // Remove(world, ser.Value);
+            var q1 = world.QueryRaw(term1, term2);
+			q1.Each((EntityView child, ref NetworkSerial ser) => {
+                Console.WriteLine("  removing serial: 0x{0:X8} associated to 0x{1:X8}", ser.Value, serial);
+                if (!Remove(world, ser.Value))
+                {
+
+                }
             });
+
+            // // we want to keep the equipments for some reason lol
+            // var term4 = new QueryTerm(IDOp.Pair(world.Entity<EquippedItem>(), id), TermOp.With);
+            // var id2 = id;
+            // var q2 = world.QueryRaw(term2, term4);
+            // q2.Each((EntityView ent, ref NetworkSerial ser) =>
+            // {
+            //     Console.WriteLine("  unsetting equipment serial: 0x{0:X8} associated to 0x{1:X8}", ser.Value, serial);
+            //     //ent.Unset<EquippedItem>(id2);
+            //     Remove(world, ser.Value);
+            // });
 
             world.Delete(id);
             result = true;
@@ -254,6 +269,8 @@ readonly struct InGamePacketsPlugin : IPlugin
                     child.Set(new Graphic() { Value = itemGraphic })
                         .Set(new Hue() { Value = itemHue })
                         .Set(new EquippedItem() { Layer = layer }, parentEnt);
+
+                    Console.WriteLine("equip serial 0x{0:X8} | parentId: {1}", itemSerial, parentEnt.ID);
                 }
             };
             packetsMap.Value[0xD3] = buffer => d3_78(0xD3, buffer);
@@ -586,6 +603,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                 childEnt.Set(new Graphic() { Value = (ushort)(graphic + graphicInc) })
                     .Set(new Hue() { Value = hue })
                     .Set(new EquippedItem() { Layer = layer }, parentEnt);
+                Console.WriteLine("equip serial 0x{0:X8} | parentId: {1}", serial, parentEnt.ID);
                     //.Set<ContainedInto>(parentEnt);
             };
 

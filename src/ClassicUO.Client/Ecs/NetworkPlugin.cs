@@ -118,7 +118,7 @@ readonly struct NetworkPlugin : IPlugin
 
                 _ = buffer.Value.Dequeue(packetBuffer.Value, 0, packetLen);
 
-                Console.WriteLine(">> packet-in: ID 0x{0:X2} | Len: {1}", packetId, packetLen);
+                // Console.WriteLine(">> packet-in: ID 0x{0:X2} | Len: {1}", packetId, packetLen);
 
                 if (packetsMap.Value.TryGetValue(packetId, out var handler))
                 {
