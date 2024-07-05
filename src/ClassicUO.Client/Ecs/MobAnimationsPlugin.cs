@@ -120,10 +120,6 @@ readonly struct MobAnimationsPlugin : IPlugin
                     }
                 }
 
-                realDirection &= ~Direction.Running;
-                realDirection &= Direction.Mask;
-
-
                 var hasMount = false;
                 var term0 = new QueryTerm(IDOp.Pair(world.Entity<EquippedItem>(), ent.ID), TermOp.With);
                 var term1 = new QueryTerm(world.Entity<NetworkSerial>(), TermOp.DataAccess);
@@ -181,6 +177,8 @@ readonly struct MobAnimationsPlugin : IPlugin
                 //     );
                 // }
 
+                realDirection &= ~Direction.Running;
+                realDirection &= Direction.Mask;
                 animation.Direction = realDirection;
 
                 var dir = (byte)(realDirection);

@@ -548,6 +548,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                 ent.Set(new Graphic() { Value = (ushort)(graphic + graphicInc) })
                     .Set(new WorldPosition() { X = x, Y = y, Z = 0 })
                     .Set(new Hue() { Value = hue })
+                    .Set(new Amount() { Value = amount })
                     .Add<ContainedInto>(parentEnt);
             };
 
@@ -682,6 +683,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                     childEnt.Set(new Graphic() { Value = (ushort)(graphic + graphicInc) })
                         .Set(new Hue() { Value = hue })
                         .Set(new WorldPosition() { X = x, Y = y, Z = (sbyte)gridIdx })
+                        .Set(new Amount() { Value = amount })
                         .Add<ContainedInto>(parentEnt);
                 }
             };
@@ -760,12 +762,28 @@ readonly struct InGamePacketsPlugin : IPlugin
             packetsMap.Value[0x6E] = buffer => {
                 var reader = new StackDataReader(buffer);
 
+                var serial = reader.ReadUInt32BE();
                 var action = reader.ReadUInt16BE();
                 var frameCount = reader.ReadUInt16BE();
                 var repeatForNTimes = reader.ReadUInt16BE();
                 var backward = reader.ReadBool();
                 var loop = reader.ReadBool();
                 var delay = reader.ReadUInt8();
+
+                var ent = entitiesMap.Value.GetOrCreate(world, serial);
+                var index = ClassicUO.Game.GameObjects.Mobile.GetReplacedObjectAnimation(ent.Get<Graphic>().Value, action);
+
+                ent.Set(new MobAnimation()
+                    {
+                        Index = index,
+                        FramesCount = frameCount,
+                        Interval = delay,
+                        RepeatMode = repeatForNTimes,
+                        RepeatModeCount = repeatForNTimes,
+                        IsFromServer = true,
+                        ForwardDirection = !backward,
+                        Run = true
+                    });
             };
 
             // graphical effects
@@ -1385,6 +1403,15 @@ readonly struct InGamePacketsPlugin : IPlugin
                 var type = reader.ReadUInt16BE();
                 var action = reader.ReadUInt16BE();
                 var mode = reader.ReadUInt8();
+                // TODO
+                // var group = ClassicUO.Game.GameObjects.Mobile.GetObjectNewAnimation()
+
+                // entitiesMap.Value.GetOrCreate(world, serial)
+                //     .Set(new MobAnimation()
+                //     {
+                //         Index = 1,
+
+                //     });
             };
 
             // add waypoint
@@ -1461,7 +1488,8 @@ readonly struct InGamePacketsPlugin : IPlugin
                 ent.Set(new Graphic() { Value = (ushort)(graphic + graphicInc) })
                     .Set(new Hue() { Value = hue })
                     .Set(new WorldPosition() { X = x, Y = y, Z = z })
-                    .Set(new Facing() { Value = dir });
+                    .Set(new Facing() { Value = dir })
+                    .Set(new Amount() { Value = amount });
             };
 
             // boat moving

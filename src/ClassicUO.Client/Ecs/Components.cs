@@ -26,6 +26,11 @@ struct NetworkSerial
     public uint Value;
 }
 
+struct Amount
+{
+    public int Value;
+}
+
 struct ContainedInto;
 
 struct EquippedItem
