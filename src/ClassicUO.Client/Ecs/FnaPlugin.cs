@@ -56,7 +56,7 @@ readonly struct FnaPlugin : IPlugin
             game.Value.RunOneFrame();
             schedState.AddResource(game.Value.GraphicsDevice);
             game.Value.RunApplication = true;
-        }, Stages.Startup);
+        }, Stages.Startup, ThreadingMode.Single);
 
         scheduler.AddSystem((Res<UoGame> game, Time time) => {
             game.Value.SuppressDraw();
@@ -66,7 +66,7 @@ readonly struct FnaPlugin : IPlugin
             time.Total += time.Frame;
 
             FrameworkDispatcher.Update();
-        }).RunIf((SchedulerState state) => state.ResourceExists<UoGame>());
+        }, threadingType: ThreadingMode.Single).RunIf((SchedulerState state) => state.ResourceExists<UoGame>());
 
         scheduler.AddSystem(() => Environment.Exit(0), Stages.AfterUpdate)
             .RunIf(static (Res<UoGame> game) => !game.Value.RunApplication);
@@ -163,6 +163,12 @@ sealed class UoGame : Microsoft.Xna.Framework.Game
         {
             SynchronizeWithVerticalRetrace = vSync,
             PreferredDepthStencilFormat = DepthFormat.Depth24Stencil8
+        };
+
+        GraphicManager.PreparingDeviceSettings += (sender, e) =>
+        {
+            e.GraphicsDeviceInformation.PresentationParameters.RenderTargetUsage =
+                RenderTargetUsage.DiscardContents;
         };
 
         IsFixedTimeStep = false;

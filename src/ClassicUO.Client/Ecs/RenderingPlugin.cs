@@ -257,8 +257,9 @@ readonly struct RenderingPlugin : IPlugin
             Res<Renderer.UltimaBatcher2D> batch,
             Res<GameContext> gameCtx,
             Res<MouseContext> mouseCtx,
-            Query<Renderable, (Without<TileStretched>, Without<Relation<ContainedInto, Wildcard>>)> query,
-            Query<(Renderable, TileStretched), Without<Relation<ContainedInto, Wildcard>>> queryTiles
+            Query<(Renderable, TileStretched), Without<Relation<ContainedInto, Wildcard>>> queryTiles,
+            Query<Renderable, (Without<TileStretched>, Without<MobAnimation>, Without<Relation<ContainedInto, Wildcard>>)> queryStatic,
+            Query<Renderable, (With<MobAnimation>, Without<TileStretched>, Without<Relation<ContainedInto, Wildcard>>)> queryAnimations
         ) => {
             device.Value.Clear(Color.Black);
 
@@ -275,6 +276,7 @@ readonly struct RenderingPlugin : IPlugin
             sb.SetBrightlight(1.7f);
             sb.SetSampler(SamplerState.PointClamp);
             sb.SetStencil(DepthStencilState.Default);
+
             queryTiles.Each((ref Renderable renderable, ref TileStretched stretched) =>
             {
                 if (renderable.Texture != null)
@@ -292,7 +294,27 @@ readonly struct RenderingPlugin : IPlugin
                         renderable.Z
                     );
             });
-            query.Each((ref Renderable renderable) =>
+
+            queryStatic.Each((ref Renderable renderable) =>
+            {
+                if (renderable.Texture != null)
+                    sb.Draw
+                    (
+                        renderable.Texture,
+                        renderable.Position - center,
+                        renderable.UV,
+                        renderable.Color,
+                        renderable.Rotation,
+                        renderable.Origin,
+                        renderable.Scale,
+                        renderable.Flip,
+                        renderable.Z
+                    );
+            });
+
+            // NOTE: i cant mix statics with animation like ethereals because
+            //       the transparent pixels get overraided somehow
+            queryAnimations.Each((ref Renderable renderable) =>
             {
                 if (renderable.Texture != null)
                     sb.Draw
