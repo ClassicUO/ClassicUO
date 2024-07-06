@@ -62,7 +62,8 @@ readonly struct RenderingPlugin : IPlugin
             Res<AssetsServer> assetsServer,
             Res<Assets.TileDataLoader> tiledataLoader,
             TinyEcs.World world,
-            Res<GameContext> gameCtx
+            Res<GameContext> gameCtx,
+            Local<Dictionary<Layer, EntityView>> dict
         ) => {
             query.Each((EntityView ent, ref WorldPosition pos, ref Graphic graphic, ref Hue hue,
                 ref Renderable renderable, ref NetworkSerial serial,
@@ -180,19 +181,11 @@ readonly struct RenderingPlugin : IPlugin
                 var orderKey = 0;
                 if (equip.Layer == Layer.Mount)
                 {
-                    // if (world.Exists(act))
-                    // {
-                    //     ref var parentSer = ref world.Get<NetworkSerial>(act);
-                    //     if (parentSer.Value == gameCtx.Value.PlayerSerial)
-                    //     {
-
-                    //     }
-                    // }
-
                     animId = Mounts.FixMountGraphic(tiledataLoader, animId);
                     animAction = animation.MountAction;
                 }
-                else if (_layerOrders[(int)animation.Direction & 7].TryGetValue(equip.Layer, out orderKey))
+                else if (_layerOrders[(int)animation.Direction & 7].TryGetValue(equip.Layer, out orderKey) &&
+                    !IsItemCovered(dict.Value, world, act, equip.Layer))
                 {
                     if (tiledataLoader.Value.StaticData[graphic.Value].AnimID != 0)
                         animId = tiledataLoader.Value.StaticData[graphic.Value].AnimID;
@@ -233,7 +226,7 @@ readonly struct RenderingPlugin : IPlugin
                 renderable.Position.Y -= frame.UV.Height + frame.Center.Y;
 
                 // TODO: priority Z based on layer ordering
-                renderable.Z = Isometric.GetDepthZ(pos.X, pos.Y, priorityZ + orderKey);
+                renderable.Z = Isometric.GetDepthZ(pos.X, pos.Y, priorityZ) + (orderKey * 0.01f);
                 renderable.Color = ShaderHueTranslator.GetHueVector(FixHue(uoHue));
             });
         });
@@ -416,7 +409,7 @@ readonly struct RenderingPlugin : IPlugin
             for (var k = 0; k < usedLayers.GetLength(1); ++k)
             {
                 var layer = usedLayers[i, k];
-                dict.Add(layer, usedLayers.GetLength(1) - k);
+                dict.Add(layer, k);
             }
             _layerOrders[i] = dict;
         }
@@ -424,34 +417,133 @@ readonly struct RenderingPlugin : IPlugin
 
     private static readonly Dictionary<Layer, int>[] _layerOrders;
 
-    static bool IsItemCovered(TinyEcs.World world, EntityView parent, Layer layer)
+    static bool IsItemCovered(Dictionary<Layer, EntityView> dict, TinyEcs.World world, EcsID parent, Layer layer)
     {
-        var list = new List<(EntityView, Layer)>();
+        dict ??= new Dictionary<Layer, EntityView>();
+        dict.Clear();
         var term0 = new QueryTerm(IDOp.Pair(world.Entity<EquippedItem>(), parent), TermOp.With);
         var term1 = new QueryTerm(world.Entity<NetworkSerial>(), TermOp.DataAccess);
 
         var query = world.QueryRaw(term0, term1);
-
-
+        query.Each((EntityView ent, ref NetworkSerial serial) =>
+        {
+            ref var equip = ref ent.Get<EquippedItem>(parent);
+            dict[equip.Layer] = ent;
+        });
 
         switch (layer)
         {
             case Layer.Shoes:
+                if (dict.TryGetValue(Layer.Legs, out var legs) ||
+                    (dict.TryGetValue(Layer.Pants, out var pants) && pants.Get<Graphic>().Value == 0x1411))
+                {
+                    return true;
+                }
+                else if (pants.ID.IsValid && (pants.Get<Graphic>().Value is 0x0513 or 0x0514) ||
+                    (dict.TryGetValue(Layer.Robe, out var robe) && robe.Get<Graphic>().Value is 0x0504))
+                {
+                    return true;
+                }
+                break;
 
-                break;
             case Layer.Pants:
+                dict.TryGetValue(Layer.Pants, out pants);
+                if (dict.TryGetValue(Layer.Legs, out legs) ||
+                    (dict.TryGetValue(Layer.Robe, out var robe1) &&
+                        robe1.Get<Graphic>().Value == 0x0504))
+                {
+                    return true;
+                }
+
+                if (pants.ID.IsValid && pants.Get<Graphic>().Value is 0x01EB or 0x03E5 or 0x03EB)
+                {
+                    if (dict.TryGetValue(Layer.Skirt, out var skirt) && skirt.Get<Graphic>().Value is not 0x01C7 and not 0x01E4)
+                    {
+                        return true;
+                    }
+
+                    if (robe1.ID.IsValid && robe1.Get<Graphic>().Value is not 0x0229 and not (>= 0x04E8 and <= 0x04EB))
+                    {
+                        return true;
+                    }
+                }
                 break;
+
             case Layer.Tunic:
+                if (dict.TryGetValue(Layer.Robe, out var robe2))
+                {
+                    if (robe2.Get<Graphic>().Value is not 0 and not 0x9985 and not 0x9986 and not 0xA412)
+                    {
+                        return true;
+                    }
+                }
+                else if (dict.TryGetValue(Layer.Tunic, out var tunic) && tunic.Get<Graphic>().Value == 0x0238)
+                {
+                    if (robe2.ID.IsValid && robe2.Get<Graphic>().Value is not 0x9985 and not 0x9986 and not 0xA412)
+                    {
+                        return true;
+                    }
+                }
                 break;
+
             case Layer.Torso:
+                if (dict.TryGetValue(Layer.Robe, out var robe3)
+                    && robe3.Get<Graphic>().Value is not 0 and not 0x9985 and not 0x9986 and not 0xA412 and not 0xA2CA)
+                {
+                    return true;
+                }
+                else if (dict.TryGetValue(Layer.Tunic, out var tunic) && tunic.Get<Graphic>().Value is not 0x1541 and not 0x1542)
+                {
+                    if (dict.TryGetValue(Layer.Torso, out var torso) && torso.Get<Graphic>().Value is 0x782A or 0x782B)
+                    {
+                        return true;
+                    }
+                }
                 break;
+
             case Layer.Arms:
+                if (dict.TryGetValue(Layer.Robe, out var robe4) &&
+                    robe4.Get<Graphic>().Value is not 0 and not 0x9985 and not 0x9986 and not 0xA412)
+                {
+                    return true;
+                }
                 break;
+
             case Layer.Helmet:
             case Layer.Hair:
-                break;
+                if (dict.TryGetValue(Layer.Robe, out var robe5))
+                {
+                    ref var gfx = ref robe5.Get<Graphic>();
 
+                    if (gfx.Value > 0x3173)
+                    {
+                        if (gfx.Value is 0x4B9D or 0x7816)
+                        {
+                            return true;
+                        }
+                    }
+                    else if (gfx.Value <= 0x2687)
+                    {
+                        if (gfx.Value < 0x2683)
+                        {
+                            if (gfx.Value is >= 0x204E and <= 0x204F)
+                            {
+                                return true;
+                            }
+                        }
+                        else
+                        {
+                            return true;
+                        }
+                    }
+                    else if (gfx.Value is 0x2FB9 or 0x3173)
+                    {
+                        return true;
+                    }
+                }
+                break;
         }
+
         return false;
     }
 }
