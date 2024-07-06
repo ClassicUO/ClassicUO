@@ -120,7 +120,7 @@ readonly struct MobAnimationsPlugin : IPlugin
                     }
                 }
 
-                var hasMount = false;
+                animation.MountAction = 0xFF;
                 var term0 = new QueryTerm(IDOp.Pair(world.Entity<EquippedItem>(), ent.ID), TermOp.With);
                 var term1 = new QueryTerm(world.Entity<NetworkSerial>(), TermOp.DataAccess);
                 foreach ((var entities, var serials) in world.QueryRaw(term0, term1).Iter<NetworkSerial>())
@@ -130,52 +130,23 @@ readonly struct MobAnimationsPlugin : IPlugin
                         ref var equip = ref entities[i].Get<EquippedItem>(ent.ID);
                         if (equip.Layer == Layer.Mount)
                         {
-                            hasMount = true;
                             var mountGraphic = entities[i].Get<Graphic>().Value;
                             mountGraphic = Mounts.FixMountGraphic(tiledataLoader, mountGraphic);
 
                             animation.MountAction = GetAnimationGroup(
                                 gameCtx.Value.ClientVersion, assetsServer.Value.Animations,
-                                mountGraphic, realDirection, isWalking, hasMount, false, flags,
+                                mountGraphic, realDirection, isWalking, true, false, flags,
                                 animation.IsFromServer, animation.MountAction
                             );
                         }
                     }
                 }
 
-                // world.QueryRaw(term0, term1).Each((EntityView child, ref NetworkSerial ser) => {
-
-
-                // });
-
-
-                // if (ent.Has<EquippedItem, Wildcard>())
-                // {
-                //     var target = ent.Target<EquippedItem>();
-                //     ref var equipment = ref ent.Get<EquippedItem>(target);
-                //     if (equipment.Layer == Layer.Mount)
-                //     {
-                //         hasMount = true;
-                //         animId = Mounts.FixMountGraphic(animId);
-                //     }
-                // }
-
-                // if (tiledataLoader.Value.StaticData[graphic.Value].AnimID != 0)
-                //     animId = tiledataLoader.Value.StaticData[graphic.Value].AnimID;
-
-                 animation.Action = GetAnimationGroup(
+                animation.Action = GetAnimationGroup(
                     gameCtx.Value.ClientVersion, assetsServer.Value.Animations,
-                    animId, realDirection, isWalking, hasMount, false, flags,
+                    animId, realDirection, isWalking, animation.MountAction != 0xFF, false, flags,
                     animation.IsFromServer, animation.Action);
 
-                // if (hasMount)
-                // {
-                //     animation.MountAction = GetAnimationGroup(
-                //         gameCtx.Value.ClientVersion, assetsServer.Value.Animations,
-                //         mountGraphic, realDirection, isWalking, hasMount, false, flags,
-                //         animation.IsFromServer, animation.MountAction
-                //     );
-                // }
 
                 realDirection &= ~Direction.Running;
                 realDirection &= Direction.Mask;

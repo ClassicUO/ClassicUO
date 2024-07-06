@@ -69,7 +69,7 @@ readonly struct FnaPlugin : IPlugin
         }).RunIf((SchedulerState state) => state.ResourceExists<UoGame>());
 
         scheduler.AddSystem(() => Environment.Exit(0), Stages.AfterUpdate)
-                    .RunIf(static (Res<UoGame> game) => !game.Value.RunApplication);
+            .RunIf(static (Res<UoGame> game) => !game.Value.RunApplication);
 
         scheduler.AddSystem((EventWriter<KeyEvent> writer, Res<KeyboardState> oldState) => {
             var newState = Keyboard.GetState();
@@ -88,9 +88,6 @@ readonly struct FnaPlugin : IPlugin
         }, Stages.FrameEnd)
             .RunIf((Res<UoGame> game) => game.Value.IsActive);
 
-        scheduler.AddSystem((Res<MouseContext> mouseCtx) => mouseCtx.Value.NewState = Mouse.GetState(), Stages.BeforeUpdate)
-            .RunIf((Res<UoGame> game) => game.Value.IsActive);
-
         scheduler.AddSystem((EventWriter<MouseEvent> writer, EventWriter<WheelEvent> wheelWriter, Res<MouseContext> mouseCtx) => {
             if (mouseCtx.Value.NewState.LeftButton != mouseCtx.Value.OldState.LeftButton)
                 writer.Enqueue(new () { Action = mouseCtx.Value.NewState.LeftButton, Button = Input.MouseButtonType.Left, X = mouseCtx.Value.NewState.X, Y = mouseCtx.Value.NewState.Y });
@@ -106,10 +103,13 @@ readonly struct FnaPlugin : IPlugin
             if (mouseCtx.Value.NewState.ScrollWheelValue != mouseCtx.Value.OldState.ScrollWheelValue)
                 // FNA multiplies for 120 for some reason
                 wheelWriter.Enqueue(new () { Value = (mouseCtx.Value.OldState.ScrollWheelValue - mouseCtx.Value.NewState.ScrollWheelValue) / 120 });
+        }, Stages.FrameEnd).RunIf((Res<UoGame> game) => game.Value.IsActive);
 
+        scheduler.AddSystem((Res<MouseContext> mouseCtx) =>
+        {
             mouseCtx.Value.OldState = mouseCtx.Value.NewState;
-        }, Stages.FrameEnd)
-            .RunIf((Res<UoGame> game) => game.Value.IsActive);
+            mouseCtx.Value.NewState = Mouse.GetState();
+        }, Stages.FrameEnd);
 
         scheduler.AddSystem((EventReader<KeyEvent> reader) => {
             foreach (var ev in reader)
@@ -153,45 +153,45 @@ readonly struct FnaPlugin : IPlugin
     {
         public int Value;
     }
+}
 
-    sealed class UoGame : Microsoft.Xna.Framework.Game
+sealed class UoGame : Microsoft.Xna.Framework.Game
+{
+    public UoGame(bool mouseVisible, bool allowWindowResizing, bool vSync)
     {
-        public UoGame(bool mouseVisible, bool allowWindowResizing, bool vSync)
+        GraphicManager = new GraphicsDeviceManager(this)
         {
-            GraphicManager = new GraphicsDeviceManager(this)
-            {
-                SynchronizeWithVerticalRetrace = vSync,
-                PreferredDepthStencilFormat = DepthFormat.Depth24Stencil8
-            };
+            SynchronizeWithVerticalRetrace = vSync,
+            PreferredDepthStencilFormat = DepthFormat.Depth24Stencil8
+        };
 
-            IsFixedTimeStep = false;
-            IsMouseVisible = mouseVisible;
-            Window.AllowUserResizing = allowWindowResizing;
-        }
+        IsFixedTimeStep = false;
+        IsMouseVisible = mouseVisible;
+        Window.AllowUserResizing = allowWindowResizing;
+    }
 
-        public GraphicsDeviceManager GraphicManager { get; }
-        public GameTime GameTime { get; private set; }
+    public GraphicsDeviceManager GraphicManager { get; }
+    public GameTime GameTime { get; private set; }
 
 
-        protected override void Initialize()
-        {
-            base.Initialize();
-        }
+    protected override void Initialize()
+    {
+        base.Initialize();
+    }
 
-        protected override void LoadContent()
-        {
-            base.LoadContent();
-        }
+    protected override void LoadContent()
+    {
+        base.LoadContent();
+    }
 
-        protected override void Update(GameTime gameTime)
-        {
-            GameTime = gameTime;
-            // I don't want to update things here, but on ecs systems instead
-        }
+    protected override void Update(GameTime gameTime)
+    {
+        GameTime = gameTime;
+        // I don't want to update things here, but on ecs systems instead
+    }
 
-        protected override void Draw(GameTime gameTime)
-        {
-            // I don't want to render things here, but on ecs systems instead
-        }
+    protected override void Draw(GameTime gameTime)
+    {
+        // I don't want to render things here, but on ecs systems instead
     }
 }

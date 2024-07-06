@@ -1,4 +1,7 @@
+using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using ClassicUO.Configuration;
 using ClassicUO.Ecs.NetworkPlugins;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
@@ -174,6 +177,7 @@ readonly struct RenderingPlugin : IPlugin
 
                 var act = ent.Target<EquippedItem>();
                 ref var equip = ref ent.Get<EquippedItem>(act);
+                var orderKey = 0;
                 if (equip.Layer == Layer.Mount)
                 {
                     // if (world.Exists(act))
@@ -188,8 +192,15 @@ readonly struct RenderingPlugin : IPlugin
                     animId = Mounts.FixMountGraphic(tiledataLoader, animId);
                     animAction = animation.MountAction;
                 }
-                else if (tiledataLoader.Value.StaticData[graphic.Value].AnimID != 0)
-                    animId = tiledataLoader.Value.StaticData[graphic.Value].AnimID;
+                else if (_layerOrders[(int)animation.Direction & 7].TryGetValue(equip.Layer, out orderKey))
+                {
+                    if (tiledataLoader.Value.StaticData[graphic.Value].AnimID != 0)
+                        animId = tiledataLoader.Value.StaticData[graphic.Value].AnimID;
+                }
+                else
+                {
+                    return;
+                }
 
                 (var dir, var mirror) = FixDirection(animation.Direction);
 
@@ -222,10 +233,25 @@ readonly struct RenderingPlugin : IPlugin
                 renderable.Position.Y -= frame.UV.Height + frame.Center.Y;
 
                 // TODO: priority Z based on layer ordering
-                renderable.Z = Isometric.GetDepthZ(pos.X, pos.Y, priorityZ);
+                renderable.Z = Isometric.GetDepthZ(pos.X, pos.Y, priorityZ + orderKey);
                 renderable.Color = ShaderHueTranslator.GetHueVector(FixHue(uoHue));
             });
         });
+
+        scheduler.AddSystem((Res<MouseContext> mouseCtx, Res<KeyboardState> keyboard, Res<GameContext> gameCtx) =>
+        {
+            if (mouseCtx.Value.OldState.LeftButton == ButtonState.Pressed && mouseCtx.Value.NewState.LeftButton == ButtonState.Pressed)
+            {
+                gameCtx.Value.CenterOffset.X += mouseCtx.Value.NewState.X - mouseCtx.Value.OldState.X;
+                gameCtx.Value.CenterOffset.Y += mouseCtx.Value.NewState.Y - mouseCtx.Value.OldState.Y;
+                Console.WriteLine("OFFSET! {0},{1}", mouseCtx.Value.NewState.X - mouseCtx.Value.OldState.X, mouseCtx.Value.NewState.Y - mouseCtx.Value.OldState.Y);
+            }
+
+            if (keyboard.Value.IsKeyDown(Keys.Space))
+            {
+                gameCtx.Value.CenterOffset = Vector2.Zero;
+            }
+        }, Stages.FrameStart).RunIf((Res<UoGame> game) => game.Value.IsActive);
 
         scheduler.AddSystem(static (
             Res<GraphicsDevice> device,
@@ -240,17 +266,13 @@ readonly struct RenderingPlugin : IPlugin
             var center = Isometric.IsoToScreen(gameCtx.Value.CenterX, gameCtx.Value.CenterY, gameCtx.Value.CenterZ);
             center.X -= device.Value.PresentationParameters.BackBufferWidth / 2f;
             center.Y -= device.Value.PresentationParameters.BackBufferHeight / 2f;
-
-            if (mouseCtx.Value.NewState.LeftButton == ButtonState.Pressed)
-            {
-                gameCtx.Value.CenterOffset.X += mouseCtx.Value.NewState.X - mouseCtx.Value.OldState.X;
-                gameCtx.Value.CenterOffset.Y += mouseCtx.Value.NewState.Y - mouseCtx.Value.OldState.Y;
-            }
-
             center -= gameCtx.Value.CenterOffset;
 
             var sb = batch.Value;
-            sb.Begin();
+            var matrix = Matrix.Identity;
+            //matrix = Matrix.CreateScale(0.45f);
+
+            sb.Begin(null, matrix);
             sb.SetBrightlight(1.7f);
             sb.SetSampler(SamplerState.PointClamp);
             sb.SetStencil(DepthStencilState.Default);
@@ -359,5 +381,56 @@ readonly struct RenderingPlugin : IPlugin
         }
 
         return (dir, mirror);
+    }
+
+    static RenderingPlugin()
+    {
+        var usedLayers = ClassicUO.Game.Data.LayerOrder.UsedLayers;
+
+        _layerOrders = new Dictionary<Layer, int>[usedLayers.GetLength(0)];
+
+        for (var i = 0; i < usedLayers.GetLength(0); ++i)
+        {
+            var dict = new Dictionary<Layer, int>();
+            for (var k = 0; k < usedLayers.GetLength(1); ++k)
+            {
+                var layer = usedLayers[i, k];
+                dict.Add(layer, usedLayers.GetLength(1) - k);
+            }
+            _layerOrders[i] = dict;
+        }
+    }
+
+    private static readonly Dictionary<Layer, int>[] _layerOrders;
+
+    static bool IsItemCovered(TinyEcs.World world, EntityView parent, Layer layer)
+    {
+        var list = new List<(EntityView, Layer)>();
+        var term0 = new QueryTerm(IDOp.Pair(world.Entity<EquippedItem>(), parent), TermOp.With);
+        var term1 = new QueryTerm(world.Entity<NetworkSerial>(), TermOp.DataAccess);
+
+        var query = world.QueryRaw(term0, term1);
+
+
+
+        switch (layer)
+        {
+            case Layer.Shoes:
+
+                break;
+            case Layer.Pants:
+                break;
+            case Layer.Tunic:
+                break;
+            case Layer.Torso:
+                break;
+            case Layer.Arms:
+                break;
+            case Layer.Helmet:
+            case Layer.Hair:
+                break;
+
+        }
+        return false;
     }
 }
