@@ -138,6 +138,8 @@ readonly struct MobAnimationsPlugin : IPlugin
                                 mountGraphic, realDirection, isWalking, true, false, flags,
                                 animation.IsFromServer, animation.MountAction
                             );
+
+                            break;
                         }
                     }
                 }
