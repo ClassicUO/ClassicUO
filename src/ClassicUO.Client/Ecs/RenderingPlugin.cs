@@ -244,7 +244,6 @@ readonly struct RenderingPlugin : IPlugin
             {
                 gameCtx.Value.CenterOffset.X += mouseCtx.Value.NewState.X - mouseCtx.Value.OldState.X;
                 gameCtx.Value.CenterOffset.Y += mouseCtx.Value.NewState.Y - mouseCtx.Value.OldState.Y;
-                Console.WriteLine("OFFSET! {0},{1}", mouseCtx.Value.NewState.X - mouseCtx.Value.OldState.X, mouseCtx.Value.NewState.Y - mouseCtx.Value.OldState.Y);
             }
 
             if (keyboard.Value.IsKeyDown(Keys.Space))
