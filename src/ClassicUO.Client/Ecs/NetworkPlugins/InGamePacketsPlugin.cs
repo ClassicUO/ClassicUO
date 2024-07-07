@@ -188,13 +188,169 @@ readonly struct InGamePacketsPlugin : IPlugin
                 var reader = new StackDataReader(buffer);
                 var cmd = reader.ReadUInt16BE();
 
-                if (cmd == 8)
+                switch (cmd)
                 {
-                    var mapIndex = reader.ReadUInt8();
-                    if (gameCtx.Value.Map != mapIndex)
-                    {
-                        gameCtx.Value.Map = mapIndex;
-                    }
+                    default:
+                        break;
+
+                    // fast walk
+                    case 1:
+                        var key0 = reader.ReadUInt32BE();
+                        var key1 = reader.ReadUInt32BE();
+                        var key2 = reader.ReadUInt32BE();
+                        var key3 = reader.ReadUInt32BE();
+                        var key4 = reader.ReadUInt32BE();
+                        var key5 = reader.ReadUInt32BE();
+                        break;
+
+                    // fast walk
+                    case 2:
+                        var newKey = reader.ReadUInt32BE();
+                        break;
+
+                    // close generic gump
+                    case 4:
+                        var gumpSerial = reader.ReadUInt32BE();
+                        var button = reader.ReadInt32BE();
+                        break;
+
+                    // party
+                    case 6:
+                        break;
+
+                    // map change
+                    case 8:
+                        var mapIndex = reader.ReadUInt8();
+                        if (gameCtx.Value.Map != mapIndex)
+                            gameCtx.Value.Map = mapIndex;
+                        break;
+
+                    // close statusbar
+                    case 0x0C:
+                        var healthBarSerial = reader.ReadUInt32BE();
+                        break;
+
+                    // display equip info
+                    case 0x10:
+                        var itemSerial = reader.ReadUInt32BE();
+                        var cliloc = reader.ReadUInt32BE();
+                        var sentinel = reader.ReadUInt32BE();
+                        if (sentinel == 0xFFFFFFFD)
+                        {
+
+                        }
+
+                        var ownerNameLen = reader.ReadUInt16BE();
+                        var ownerName = reader.ReadASCII(ownerNameLen);
+                        sentinel = reader.ReadUInt32BE();
+                        if (sentinel == 0xFFFFFFFC)
+                        {
+
+                        }
+
+                        while (reader.Remaining > 0)
+                        {
+                            var num = reader.ReadUInt32BE();
+                            if (num == 0xFFFF_FFFF)
+                                break;
+                            var charges = reader.ReadInt16BE();
+                        }
+                        break;
+
+                    // show ctx menu
+                    case 0x14:
+                        break;
+
+                    // close local gump:
+                    case 0x16:
+                        var type = reader.ReadUInt32BE();
+                        gumpSerial = reader.ReadUInt32BE();
+                        break;
+
+                    // map patches
+                    case 0x18:
+                        break;
+
+                    // stats
+                    case 0x19:
+                        var version = reader.ReadUInt8();
+                        var serial = reader.ReadUInt32BE();
+                        break;
+
+                    // spellbook content
+                    case 0x1B:
+                        reader.Skip(sizeof(ushort));
+                        var spellBookSerial = reader.ReadUInt32BE();
+                        var spellBookGraphic = reader.ReadUInt16BE();
+                        type = reader.ReadUInt16BE();
+
+                        for (var i = 0; i < 2; ++i)
+                        {
+                            var spells = 0u;
+                            for (var j = 0; j < 4; j++)
+                                spells |= (uint)(reader.ReadUInt8() << (i * 8));
+
+                            for (var j = 0; j < 32; j++)
+                            {
+                                if ((spellBookGraphic & (1 << j)) != 0)
+                                {
+
+                                }
+                            }
+                        }
+                        break;
+
+                    // house revision
+                    case 0x1D:
+                        serial = reader.ReadUInt32BE();
+                        var revision = reader.ReadUInt32BE();
+                        break;
+
+                    // house customization menu
+                    case 0x20:
+                        serial = reader.ReadUInt32BE();
+                        type = reader.ReadUInt8();
+                        var graphic = reader.ReadUInt16BE();
+                        (var x, var y, var z) = (reader.ReadUInt16BE(), reader.ReadUInt16BE(), reader.ReadInt8());
+                        break;
+
+                    // reset abilities
+                    case 0x21:
+                        break;
+
+                    // damage
+                    case 0x22:
+                        reader.Skip(sizeof(byte));
+                        serial = reader.ReadUInt32BE();
+                        var damage = reader.ReadUInt8();
+                        break;
+
+                    // spellbook icon on/off
+                    case 0x25:
+                        var spell = reader.ReadUInt16BE();
+                        var isActive = reader.ReadBool();
+                        break;
+
+                    // player speed mode
+                    case 0x26:
+                        var speedMode = (CharacterSpeedType)reader.ReadUInt8();
+                        if (speedMode > CharacterSpeedType.FastUnmountAndCantRun)
+                            speedMode = 0;
+
+                        break;
+
+                    // change race
+                    case 0x2A:
+                        var isFemale = reader.ReadBool();
+                        var race = (RaceType)reader.ReadUInt8();
+                        break;
+
+                    // statue animation
+                    case 0x2B:
+                        serial = reader.ReadUInt16BE();
+                        var animId = reader.ReadUInt8();
+                        var frameCount = reader.ReadUInt8();
+                        break;
                 }
             };
 
