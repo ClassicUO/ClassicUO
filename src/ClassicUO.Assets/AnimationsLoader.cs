@@ -1800,8 +1800,13 @@ namespace ClassicUO.Assets
         public int FileIndex;
         public AnimationGroupsType AnimType;
         public ushort Graphic;
-        public ushort Hue;
+        public ushort Hue = INVALID_HUE;
         public sbyte MountHeight;
+        public const ushort INVALID_HUE = 0xFF;
+
+        public BodyConvInfo()
+        {
+        }
     }
 
     unsafe struct UopInfo
