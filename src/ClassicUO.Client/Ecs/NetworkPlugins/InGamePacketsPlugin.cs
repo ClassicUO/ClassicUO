@@ -544,6 +544,9 @@ readonly struct InGamePacketsPlugin : IPlugin
                 var canBeRenamed = reader.ReadBool();
                 var type = reader.ReadUInt8();
 
+                var ent = entitiesMap.Value.GetOrCreate(world, serial);
+                ent.Set(new Hitpoints() { Value = hits, MaxValue = hitsMax });
+
                 if (type > 0)
                 {
                     var isFemale = reader.ReadBool();
@@ -553,6 +556,10 @@ readonly struct InGamePacketsPlugin : IPlugin
                     var gold = reader.ReadUInt32BE();
                     var physicalRes = reader.ReadInt16BE();
                     var weigth = reader.ReadUInt16BE();
+
+                    ent.Set(new Stamina() { Value = stam, MaxValue = stamMax });
+                    ent.Set(new Mana() { Value = mana, MaxValue = manaMax });
+
 
                     if (type >= 5)
                     {
@@ -926,20 +933,20 @@ readonly struct InGamePacketsPlugin : IPlugin
                 var loop = reader.ReadBool();
                 var delay = reader.ReadUInt8();
 
-                var ent = entitiesMap.Value.GetOrCreate(world, serial);
-                var index = ClassicUO.Game.GameObjects.Mobile.GetReplacedObjectAnimation(ent.Get<Graphic>().Value, action);
+                // var ent = entitiesMap.Value.GetOrCreate(world, serial);
+                // var index = ClassicUO.Game.GameObjects.Mobile.GetReplacedObjectAnimation(ent.Get<Graphic>().Value, action);
 
-                ent.Set(new MobAnimation()
-                    {
-                        Index = index,
-                        FramesCount = frameCount,
-                        Interval = delay,
-                        RepeatMode = repeatForNTimes,
-                        RepeatModeCount = repeatForNTimes,
-                        IsFromServer = true,
-                        ForwardDirection = !backward,
-                        Run = true
-                    });
+                // ent.Set(new MobAnimation()
+                //     {
+                //         Index = index,
+                //         FramesCount = frameCount,
+                //         Interval = delay,
+                //         RepeatMode = repeatForNTimes,
+                //         RepeatModeCount = repeatForNTimes,
+                //         IsFromServer = true,
+                //         ForwardDirection = !backward,
+                //         Run = true
+                //     });
             };
 
             // graphical effects

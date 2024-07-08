@@ -231,22 +231,6 @@ readonly struct MobAnimationsPlugin : IPlugin
         0x0240, 0x0241, 0x0242, 0x0243, 0x0244, 0x0245, 0x0246, 0x03E0, 0x03E1, 0
     };
 
-    public static class Races
-    {
-        public static bool IsGargoyle(ClientVersion clientVersion, ushort graphic)
-               => clientVersion >= ClientVersion.CV_7000 && (graphic == 0x029A || graphic == 0x029B);
-
-        public static bool IsHuman(ushort graphic)
-            => graphic >= 0x0190 && graphic <= 0x0193 ||
-               graphic >= 0x00B7 && graphic <= 0x00BA ||
-               graphic >= 0x025D && graphic <= 0x0260 ||
-               graphic == 0x029A || graphic == 0x029B ||
-               graphic == 0x02B6 || graphic == 0x02B7 ||
-               graphic == 0x03DB || graphic == 0x03DF ||
-               graphic == 0x03E2 || graphic == 0x02E8 ||
-               graphic == 0x02E9 || graphic == 0x04E5;
-    }
-
     private static byte GetAnimationGroup
     (
         ClientVersion clientVersion,
@@ -1684,6 +1668,20 @@ readonly struct MobAnimationsPlugin : IPlugin
             }
         }
     }
+}
 
+public static class Races
+{
+    public static bool IsGargoyle(ClientVersion clientVersion, ushort graphic)
+            => clientVersion >= ClientVersion.CV_7000 && (graphic == 0x029A || graphic == 0x029B);
 
+    public static bool IsHuman(ushort graphic)
+        => (graphic >= 0x0190 && graphic <= 0x0193) ||
+            (graphic >= 0x00B7 && graphic <= 0x00BA) ||
+            (graphic >= 0x025D && graphic <= 0x0260) ||
+            graphic == 0x029A || graphic == 0x029B ||
+            graphic == 0x02B6 || graphic == 0x02B7 ||
+            graphic == 0x03DB || graphic == 0x03DF ||
+            graphic == 0x03E2 || graphic == 0x02E8 ||
+            graphic == 0x02E9 || graphic == 0x04E5;
 }
