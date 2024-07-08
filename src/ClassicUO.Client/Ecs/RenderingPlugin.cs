@@ -29,23 +29,16 @@ readonly struct RenderingPlugin : IPlugin
             {
                 // sync equipment position with the parent
                 var id = ent.Target<EquippedItem>();
-                if (world.Exists(id))
-                {
-                    var parent = world.Entity(id);
+                var parent = world.Entity(id);
 
-                    if (parent.Has<WorldPosition>())
-                        ent.Set(parent.Get<WorldPosition>());
+                if (parent.Has<WorldPosition>())
+                    ent.Set(parent.Get<WorldPosition>());
 
-                    // if (parent.Has<Facing>())
-                    //     ent.Set(parent.Get<Facing>());
+                // if (parent.Has<Facing>())
+                //     ent.Set(parent.Get<Facing>());
 
-                    if (parent.Has<MobAnimation>())
-                        ent.Set(parent.Get<MobAnimation>());
-                }
-                else if (id.IsValid)
-                {
-
-                }
+                if (parent.Has<MobAnimation>())
+                    ent.Set(parent.Get<MobAnimation>());
             });
 
             queryAddRender.Each((EntityView ent, ref NetworkSerial serial) =>
@@ -62,7 +55,6 @@ readonly struct RenderingPlugin : IPlugin
             Res<AssetsServer> assetsServer,
             Res<Assets.TileDataLoader> tiledataLoader,
             TinyEcs.World world,
-            Res<GameContext> gameCtx,
             Local<Dictionary<Layer, EntityView>> dict
         ) => {
             query.Each((EntityView ent, ref WorldPosition pos, ref Graphic graphic, ref Hue hue,
@@ -72,17 +64,6 @@ readonly struct RenderingPlugin : IPlugin
                 var uoHue = hue.Value;
                 var priorityZ = pos.Z;
                 renderable.Position = Isometric.IsoToScreen(pos.X, pos.Y, pos.Z);
-
-                // TODO: mount?
-                // if (ent.Has<EquippedItem, Wildcard>())
-                // {
-                //     var target = ent.Target<EquippedItem>();
-                //     var action = ent.Get<EquippedItem>(target);
-                //     if (action.Layer == Layer.Mount)
-                //     {
-
-                //     }
-                // }
 
                 if (ClassicUO.Game.SerialHelper.IsMobile(serial.Value))
                 {
@@ -97,10 +78,6 @@ readonly struct RenderingPlugin : IPlugin
                         animAction = animation.Action;
                         animIndex = animation.Index;
                     }
-
-                    //var animId = Mounts.FixMountGraphic(tiledataLoader, graphic.Value);
-                    // if (tiledataLoader.Value.StaticData[graphic.Value].AnimID != 0)
-                    //     animId = tiledataLoader.Value.StaticData[graphic.Value].AnimID;
 
                     var frames = assetsServer.Value.Animations.GetAnimationFrames
                     (
@@ -163,7 +140,6 @@ readonly struct RenderingPlugin : IPlugin
             queryEquip.Each((EntityView ent, ref WorldPosition pos, ref Graphic graphic, ref Hue hue,
                 ref Renderable renderable, ref NetworkSerial serial, ref MobAnimation animation) =>
             {
-                var uoHue = hue.Value;
                 var priorityZ = pos.Z + 2;
                 renderable.Position = Isometric.IsoToScreen(pos.X, pos.Y, pos.Z);
 
@@ -177,6 +153,12 @@ readonly struct RenderingPlugin : IPlugin
                 }
 
                 var act = ent.Target<EquippedItem>();
+                if (!Races.IsHuman(world.Get<Graphic>(act).Value))
+                {
+                    renderable.Texture = null;
+                    return;
+                }
+
                 ref var equip = ref ent.Get<EquippedItem>(act);
                 var orderKey = 0;
                 if (equip.Layer == Layer.Mount)
@@ -192,6 +174,7 @@ readonly struct RenderingPlugin : IPlugin
                 }
                 else
                 {
+                    renderable.Texture = null;
                     return;
                 }
 
@@ -205,9 +188,6 @@ readonly struct RenderingPlugin : IPlugin
                     out var baseHue,
                     out var _
                 );
-
-                if (uoHue == 0)
-                    uoHue = baseHue;
 
                 ref readonly var frame = ref frames.IsEmpty ?
                     ref SpriteInfo.Empty
@@ -227,7 +207,7 @@ readonly struct RenderingPlugin : IPlugin
 
                 // TODO: priority Z based on layer ordering
                 renderable.Z = Isometric.GetDepthZ(pos.X, pos.Y, priorityZ) + (orderKey * 0.01f);
-                renderable.Color = ShaderHueTranslator.GetHueVector(FixHue(uoHue));
+                renderable.Color = ShaderHueTranslator.GetHueVector(FixHue(hue.Value != 0 ? hue.Value : baseHue));
             });
         });
 
