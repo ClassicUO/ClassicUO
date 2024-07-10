@@ -36,6 +36,10 @@
     </PackageReference>
   </ItemGroup>
 
+  <PropertyGroup>
+    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+  </PropertyGroup>
+
 <!-- Put all intermediate and binary files under same appropriate folder, not mixed in with source. -->
   <PropertyGroup>
     <OutputPath >$(SolutionDir)bin\$(Configuration)</OutputPath>
