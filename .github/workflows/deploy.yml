@@ -35,11 +35,11 @@ jobs:
             target: win-x64
           - os: ubuntu-latest
             target: linux-x64
-          - os: macos-latest
+          - os: macos-12
             target: osx-x64
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Get submodules
         run: |
@@ -47,10 +47,10 @@ jobs:
           git submodule update --init --recursive
 
       - name: Setup .NET 8
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
-          include-prerelease: true
+          include-prerelease: false
 
       - name: Build Bootstrap app
         run: dotnet publish ${{ env.BOOT_PROJECT_PATH }} -c Release -o ${{ env.CUO_OUTPUT_PATH }} -p:AssemblyVersion=${{ env.CUO_ASSEMBLY_VERSION }} -p:FileVersion=${{ env.CUO_ASSEMBLY_VERSION }}
