@@ -150,19 +150,11 @@ readonly struct InGamePacketsPlugin : IPlugin
                 gameCtx.Value.MaxMapWidth = mapWidth;
                 gameCtx.Value.MaxMapHeight = mapHeight;
 
-                var offset = 8;
-                chunkRequests.Enqueue(new() {
-                    Map = gameCtx.Value.Map,
-                    RangeStartX = Math.Max(0, x / 8 - offset),
-                    RangeStartY = Math.Max(0, y / 8 - offset),
-                    RangeEndX = Math.Min(mapWidth / 8, x / 8 + offset),
-                    RangeEndY = Math.Min(mapHeight / 8, y / 8 + offset),
-                });
-
                 var ent = entitiesMap.Value.GetOrCreate(world, serial);
                 ent.Set(new Ecs.WorldPosition() { X = x, Y = y, Z = z })
                     .Set(new Ecs.Graphic() { Value = graphic })
-                    .Set(new Facing() { Value = dir });
+                    .Set(new Facing() { Value = dir })
+                    .Add<Player>();
             };
 
             // login complete

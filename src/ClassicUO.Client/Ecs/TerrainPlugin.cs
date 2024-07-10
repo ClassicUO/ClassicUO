@@ -22,6 +22,34 @@ readonly struct TerrainPlugin : IPlugin
         scheduler.AddEvent<OnNewChunkRequest>();
         scheduler.AddResource(new HashSet<(int chunkX, int chunkY, int mapIndex)>());
 
+        scheduler.AddSystem((
+            Res<GameContext> gameCtx,
+            Query<WorldPosition, With<Player>> playerQuery,
+            EventWriter<OnNewChunkRequest> chunkRequests,
+            Local<(ushort LastX, ushort LastY)> lastPos
+        ) =>
+        {
+            ref var pos = ref playerQuery.Single<WorldPosition>();
+
+            if (lastPos.Value.LastX == pos.X && lastPos.Value.LastY == pos.Y)
+                return;
+
+            if (gameCtx.Value.Map == -1)
+                return;
+
+            lastPos.Value.LastX = pos.X;
+            lastPos.Value.LastY = pos.Y;
+
+            var offset = 8;
+            chunkRequests.Enqueue(new() {
+                Map = gameCtx.Value.Map,
+                RangeStartX = Math.Max(0, pos.X / 8 - offset),
+                RangeStartY = Math.Max(0, pos.Y / 8 - offset),
+                RangeEndX = Math.Min(gameCtx.Value.MaxMapWidth / 8, pos.X / 8 + offset),
+                RangeEndY = Math.Min(gameCtx.Value.MaxMapHeight / 8, pos.Y / 8 + offset),
+            });
+        }).RunIf((Query<WorldPosition, With<Player>> playerQuery) => playerQuery.Count() > 0);
+
         scheduler.AddSystem(static (
             TinyEcs.World world,
             Res<Assets.MapLoader> mapLoader,
@@ -259,15 +287,15 @@ readonly struct TerrainPlugin : IPlugin
 
     private unsafe static sbyte GetTileZ(int mapIndex, int x, int y)
     {
-        static ref Assets.IndexMap GetIndex(int mapIndex, int x, int y)
+        static ref Assets.IndexMap getIndex(int mapIndex, int x, int y)
         {
-            var block = GetBlock(mapIndex, x, y);
+            var block = getBlock(mapIndex, x, y);
             Assets.MapLoader.Instance.SanitizeMapIndex(ref mapIndex);
             var list = Assets.MapLoader.Instance.BlockData[mapIndex];
 
             return ref block >= list.Length ? ref Assets.IndexMap.Invalid : ref list[block];
 
-            static int GetBlock(int mapIndex, int blockX, int blockY)
+            static int getBlock(int mapIndex, int blockX, int blockY)
                 => blockX * Assets.MapLoader.Instance.MapBlocksSize[mapIndex, 1] + blockY;
         }
 
@@ -277,7 +305,7 @@ readonly struct TerrainPlugin : IPlugin
             return -125;
         }
 
-        ref var blockIndex = ref GetIndex(mapIndex, x >> 3, y >> 3);
+        ref var blockIndex = ref getIndex(mapIndex, x >> 3, y >> 3);
 
         if (blockIndex.MapAddress == 0)
         {
