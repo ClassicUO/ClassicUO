@@ -111,10 +111,10 @@ readonly struct InGamePacketsPlugin : IPlugin
             Res<NetworkEntitiesMap> entitiesMap,
             Res<Settings> settings,
             Res<PacketsMap> packetsMap,
-            Res<NetworkEntitiesMap> networkEntitiesMap,
             Res<NetClient> network,
             Res<GameContext> gameCtx,
             EventWriter<OnNewChunkRequest> chunkRequests,
+            EventWriter<PlayerMovementResponse> playerMovements,
             Res<AssetsServer> assetsServer,
             TinyEcs.World world
         ) => {
@@ -649,6 +649,12 @@ readonly struct InGamePacketsPlugin : IPlugin
                 (var x, var y) = (reader.ReadUInt16BE(), reader.ReadUInt16BE());
                 var direction = (Direction) reader.ReadUInt8();
                 var z = reader.ReadInt8();
+
+                playerMovements.Enqueue(new()
+                {
+                    Accepted = false,
+                    Sequence = sequence
+                });
             };
 
             // confirm walk
@@ -657,6 +663,12 @@ readonly struct InGamePacketsPlugin : IPlugin
 
                 var sequence =  reader.ReadUInt8();
                 var notoriety = reader.ReadUInt8();
+
+                playerMovements.Enqueue(new()
+                {
+                    Accepted = true,
+                    Sequence = sequence
+                });
             };
 
             // drag animation

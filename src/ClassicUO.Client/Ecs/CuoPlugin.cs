@@ -62,7 +62,9 @@ readonly struct CuoPlugin : IPlugin
         scheduler.AddPlugin<TerrainPlugin>();
         scheduler.AddPlugin<NetworkPlugin>();
         scheduler.AddPlugin<MobAnimationsPlugin>();
+        scheduler.AddPlugin<PlayerMovementPlugin>();
         scheduler.AddPlugin<RenderingPlugin>();
+
 
 
         // TODO: remove this once the UI is done
