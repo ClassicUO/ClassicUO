@@ -49,5 +49,5 @@ jobs:
       run: dotnet build -c Release
       
     - name: Test
-      run: dotnet test --verbosity normal
+      run: dotnet test --verbosity normal src/tests
    
