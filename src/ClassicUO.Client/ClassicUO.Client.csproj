@@ -90,14 +90,6 @@
     <_IsLinux Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))' == 'true'">true</_IsLinux>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
-  </PropertyGroup>
-
   <Target Name="CopyExternalDeps_build" AfterTargets="Build">
     <Copy SourceFiles="@(DataFiles_x64)" DestinationFolder="$(OutputPath)" SkipUnchangedFiles="true" Condition="'$(_IsWindows)' == 'true'" />
     <Copy SourceFiles="@(DataFiles_lib64)" DestinationFolder="$(OutputPath)" SkipUnchangedFiles="true" Condition="'$(_IsLinux)' == 'true'" />
