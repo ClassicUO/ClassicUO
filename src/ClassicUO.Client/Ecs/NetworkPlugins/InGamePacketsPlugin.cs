@@ -18,7 +18,7 @@ using PacketsMap = Dictionary<byte, OnPacket>;
 
 sealed class NetworkEntitiesMap
 {
-    private readonly Dictionary<uint, EcsID> _entities = new();
+    private readonly Dictionary<uint, ulong> _entities = new ();
 
     public EntityView GetOrCreate(TinyEcs.World world, uint serial)
     {
@@ -58,12 +58,13 @@ sealed class NetworkEntitiesMap
             // - (id, *) && (NetworkSerial)
             // Suddenly the world.Delete(id) call will delete the children ecs side.
             var term0 = new QueryTerm(IDOp.Pair(Wildcard.ID, id), TermOp.With);
-			var term1 = new QueryTerm(IDOp.Pair(id, Wildcard.ID), TermOp.With);
+            var term1 = new QueryTerm(IDOp.Pair(id, Wildcard.ID), TermOp.With);
             var term2 = new QueryTerm(world.Entity<NetworkSerial>(), TermOp.DataAccess);
             // var term3 = new QueryTerm(IDOp.Pair(world.Entity<EquippedItem>(), id), TermOp.Without);
 
             var q0 = world.QueryRaw(term0, term2);
-			q0.Each((EntityView child, ref NetworkSerial ser) => {
+            q0.Each((EntityView child, ref NetworkSerial ser) =>
+            {
                 Console.WriteLine("  removing serial: 0x{0:X8} associated to 0x{1:X8}", ser.Value, serial);
                 if (!Remove(world, ser.Value))
                 {
@@ -72,7 +73,8 @@ sealed class NetworkEntitiesMap
             });
 
             var q1 = world.QueryRaw(term1, term2);
-			q1.Each((EntityView child, ref NetworkSerial ser) => {
+            q1.Each((EntityView child, ref NetworkSerial ser) =>
+            {
                 Console.WriteLine("  removing serial: 0x{0:X8} associated to 0x{1:X8}", ser.Value, serial);
                 if (!Remove(world, ser.Value))
                 {
@@ -117,15 +119,17 @@ readonly struct InGamePacketsPlugin : IPlugin
             EventWriter<PlayerMovementResponse> playerMovements,
             Res<AssetsServer> assetsServer,
             TinyEcs.World world
-        ) => {
+        ) =>
+        {
             // enter world
-            packetsMap.Value[0x1B] = buffer => {
+            packetsMap.Value[0x1B] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
                 var serial = reader.ReadUInt32BE();
                 reader.Skip(4);
                 var graphic = reader.ReadUInt16BE();
-                (var x, var y, var z) = (reader.ReadUInt16BE(), reader.ReadUInt16BE(), (sbyte) reader.ReadUInt16BE());
-                var dir = (Direction) reader.ReadUInt8();
+                (var x, var y, var z) = (reader.ReadUInt16BE(), reader.ReadUInt16BE(), (sbyte)reader.ReadUInt16BE());
+                var dir = (Direction)reader.ReadUInt8();
                 reader.Skip(9);
                 var mapWidth = reader.ReadUInt16BE();
                 var mapHeight = reader.ReadUInt16BE();
@@ -158,7 +162,8 @@ readonly struct InGamePacketsPlugin : IPlugin
             };
 
             // login complete
-            packetsMap.Value[0x55] = buffer => {
+            packetsMap.Value[0x55] = buffer =>
+            {
                 if (gameCtx.Value.PlayerSerial == 0)
                     return;
 
@@ -176,7 +181,8 @@ readonly struct InGamePacketsPlugin : IPlugin
             };
 
             // extended commands
-            packetsMap.Value[0xBF] = buffer => {
+            packetsMap.Value[0xBF] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
                 var cmd = reader.ReadUInt16BE();
 
@@ -350,11 +356,12 @@ readonly struct InGamePacketsPlugin : IPlugin
             packetsMap.Value[0xBD] = buffer => network.Value.Send_ClientVersion(settings.Value.ClientVersion);
 
             // unicode speech
-            packetsMap.Value[0xAE] = buffer => {
+            packetsMap.Value[0xAE] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
                 var serial = reader.ReadUInt32BE();
                 var graphic = reader.ReadUInt16BE();
-                var msgType = (MessageType) reader.ReadUInt8();
+                var msgType = (MessageType)reader.ReadUInt8();
                 var hue = reader.ReadUInt16BE();
                 var font = reader.ReadUInt16BE();
                 var lang = reader.ReadASCII(4);
@@ -378,7 +385,8 @@ readonly struct InGamePacketsPlugin : IPlugin
             };
 
             // update object
-            var d3_78 = (byte id, ReadOnlySpan<byte> buffer) => {
+            var d3_78 = (byte id, ReadOnlySpan<byte> buffer) =>
+            {
                 var reader = new StackDataReader(buffer);
                 var serial = reader.ReadUInt32BE();
                 var graphic = reader.ReadUInt16BE();
@@ -405,7 +413,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                     var layer = (Layer)reader.ReadUInt8();
                     ushort itemHue = 0;
 
-                    if (gameCtx.Value.ClientVersion>= ClientVersion.CV_70331)
+                    if (gameCtx.Value.ClientVersion >= ClientVersion.CV_70331)
                         itemHue = reader.ReadUInt16BE();
                     else if ((itemGraphic & 0x8000) != 0)
                     {
@@ -425,13 +433,15 @@ readonly struct InGamePacketsPlugin : IPlugin
             packetsMap.Value[0x78] = buffer => d3_78(0x78, buffer);
 
             // view range
-            packetsMap.Value[0xC8] = buffer => {
+            packetsMap.Value[0xC8] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
                 var range = reader.ReadUInt8();
             };
 
             // update item
-            packetsMap.Value[0x1A] = buffer => {
+            packetsMap.Value[0x1A] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
 
                 var serial = reader.ReadUInt32BE();
@@ -517,18 +527,20 @@ readonly struct InGamePacketsPlugin : IPlugin
                 ent.Set(new Graphic() { Value = (ushort)(graphic + graphicInc) })
                     .Set(new Hue() { Value = hue })
                     .Set(new WorldPosition() { X = x, Y = y, Z = z })
-                    .Set(new Facing() { Value = (Direction) direction });
+                    .Set(new Facing() { Value = (Direction)direction });
             };
 
             // damage
-            packetsMap.Value[0x0B] = buffer => {
+            packetsMap.Value[0x0B] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
                 var serial = reader.ReadUInt32BE();
                 var damage = reader.ReadUInt16BE();
             };
 
             // character status
-            packetsMap.Value[0x11] = buffer => {
+            packetsMap.Value[0x11] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
                 var serial = reader.ReadUInt32BE();
                 var name = reader.ReadASCII(30);
@@ -597,7 +609,8 @@ readonly struct InGamePacketsPlugin : IPlugin
             };
 
             // healthbar update
-            var p_0x16_0x17 = (byte id, ReadOnlySpan<byte> buffer) => {
+            var p_0x16_0x17 = (byte id, ReadOnlySpan<byte> buffer) =>
+            {
                 var reader = new StackDataReader(buffer);
 
                 var serial = reader.ReadUInt32BE();
@@ -613,7 +626,8 @@ readonly struct InGamePacketsPlugin : IPlugin
             packetsMap.Value[0x17] = buffer => p_0x16_0x17(0x17, buffer);
 
             // delete object
-            packetsMap.Value[0x1D] = buffer => {
+            packetsMap.Value[0x1D] = buffer =>
+            {
                 if (gameCtx.Value.PlayerSerial == 0) return;
                 var reader = new StackDataReader(buffer);
                 var serial = reader.ReadUInt32BE();
@@ -621,7 +635,8 @@ readonly struct InGamePacketsPlugin : IPlugin
             };
 
             // update player
-            packetsMap.Value[0x20] = buffer => {
+            packetsMap.Value[0x20] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
 
                 var serial = reader.ReadUInt32BE();
@@ -642,12 +657,13 @@ readonly struct InGamePacketsPlugin : IPlugin
             };
 
             // deny walk
-            packetsMap.Value[0x21] = buffer => {
+            packetsMap.Value[0x21] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
 
                 byte sequence = reader.ReadUInt8();
                 (var x, var y) = (reader.ReadUInt16BE(), reader.ReadUInt16BE());
-                var direction = (Direction) reader.ReadUInt8();
+                var direction = (Direction)reader.ReadUInt8();
                 var z = reader.ReadInt8();
 
                 playerMovements.Enqueue(new()
@@ -658,10 +674,11 @@ readonly struct InGamePacketsPlugin : IPlugin
             };
 
             // confirm walk
-            packetsMap.Value[0x22] = buffer => {
+            packetsMap.Value[0x22] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
 
-                var sequence =  reader.ReadUInt8();
+                var sequence = reader.ReadUInt8();
                 var notoriety = reader.ReadUInt8();
 
                 playerMovements.Enqueue(new()
@@ -672,7 +689,8 @@ readonly struct InGamePacketsPlugin : IPlugin
             };
 
             // drag animation
-            packetsMap.Value[0x23] = buffer => {
+            packetsMap.Value[0x23] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
 
                 var graphic = reader.ReadUInt16BE();
@@ -686,7 +704,8 @@ readonly struct InGamePacketsPlugin : IPlugin
             };
 
             // open container
-            packetsMap.Value[0x24] = buffer => {
+            packetsMap.Value[0x24] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
 
                 var serial = reader.ReadUInt32BE();
@@ -694,13 +713,14 @@ readonly struct InGamePacketsPlugin : IPlugin
             };
 
             // update container
-            packetsMap.Value[0x25] = buffer => {
+            packetsMap.Value[0x25] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
 
                 var serial = reader.ReadUInt32BE();
                 var graphic = reader.ReadUInt16BE();
                 var graphicInc = reader.ReadInt8();
-                var amount = Math.Max((ushort) 1, reader.ReadUInt16BE());
+                var amount = Math.Max((ushort)1, reader.ReadUInt16BE());
                 (var x, var y) = (reader.ReadUInt16BE(), reader.ReadUInt16BE());
 
                 if (gameCtx.Value.ClientVersion >= ClientVersion.CV_6017)
@@ -720,28 +740,33 @@ readonly struct InGamePacketsPlugin : IPlugin
             };
 
             // deny move item
-            packetsMap.Value[0x27] = buffer => {
+            packetsMap.Value[0x27] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
 
                 var code = reader.ReadUInt8();
             };
 
             // end draggin item
-            packetsMap.Value[0x28] = buffer => {
+            packetsMap.Value[0x28] = buffer =>
+            {
             };
 
             // drpp item ok
-            packetsMap.Value[0x29] = buffer => {
+            packetsMap.Value[0x29] = buffer =>
+            {
             };
 
             // show death screen
-            packetsMap.Value[0x2C] = buffer => {
+            packetsMap.Value[0x2C] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
                 var action = reader.ReadUInt8();
             };
 
             // mobile attributes
-            packetsMap.Value[0x2D] = buffer => {
+            packetsMap.Value[0x2D] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
 
                 var serial = reader.ReadUInt32BE();
@@ -756,7 +781,8 @@ readonly struct InGamePacketsPlugin : IPlugin
             };
 
             // equip item
-            packetsMap.Value[0x2E] = buffer => {
+            packetsMap.Value[0x2E] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
 
                 var serial = reader.ReadUInt32BE();
@@ -772,11 +798,12 @@ readonly struct InGamePacketsPlugin : IPlugin
                     .Set(new Hue() { Value = hue })
                     .Set(new EquippedItem() { Layer = layer }, parentEnt);
                 Console.WriteLine("equip serial 0x{0:X8} | parentId: {1}", serial, parentEnt.ID);
-                    //.Set<ContainedInto>(parentEnt);
+                //.Set<ContainedInto>(parentEnt);
             };
 
             // swing
-            packetsMap.Value[0x2F] = buffer => {
+            packetsMap.Value[0x2F] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
 
                 reader.Skip(1);
@@ -785,7 +812,8 @@ readonly struct InGamePacketsPlugin : IPlugin
             };
 
             // update skills
-            packetsMap.Value[0x3A] = buffer => {
+            packetsMap.Value[0x3A] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
 
                 var type = reader.ReadUInt8();
@@ -822,13 +850,15 @@ readonly struct InGamePacketsPlugin : IPlugin
             };
 
             // pathfinding
-            packetsMap.Value[0x38] = buffer => {
+            packetsMap.Value[0x38] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
                 (var x, var y, var z) = (reader.ReadUInt16BE(), reader.ReadUInt16BE(), reader.ReadUInt16BE());
             };
 
             // update contained items
-            packetsMap.Value[0x3C] = buffer => {
+            packetsMap.Value[0x3C] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
 
                 var count = reader.ReadUInt16BE();
@@ -838,7 +868,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                     var serial = reader.ReadUInt32BE();
                     var graphic = reader.ReadUInt16BE();
                     var graphicInc = reader.ReadUInt8();
-                    var amount = Math.Max((ushort) 1, reader.ReadUInt16BE());
+                    var amount = Math.Max((ushort)1, reader.ReadUInt16BE());
                     (var x, var y) = (reader.ReadUInt16BE(), reader.ReadUInt16BE());
                     var gridIdx = gameCtx.Value.ClientVersion < ClientVersion.CV_6017 ?
                          0 : reader.ReadUInt8();
@@ -856,7 +886,8 @@ readonly struct InGamePacketsPlugin : IPlugin
             };
 
             // player light level
-            packetsMap.Value[0x4E] = buffer => {
+            packetsMap.Value[0x4E] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
 
                 var serial = reader.ReadUInt32BE();
@@ -864,14 +895,16 @@ readonly struct InGamePacketsPlugin : IPlugin
             };
 
             // server light level
-            packetsMap.Value[0x4F] = buffer => {
+            packetsMap.Value[0x4F] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
 
                 var level = reader.ReadUInt8();
             };
 
             // sound effect
-            packetsMap.Value[0x54] = buffer => {
+            packetsMap.Value[0x54] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
 
                 reader.Skip(1);
@@ -881,32 +914,36 @@ readonly struct InGamePacketsPlugin : IPlugin
             };
 
             // music
-            packetsMap.Value[0x6D] = buffer => {
+            packetsMap.Value[0x6D] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
 
                 var index = reader.ReadUInt16BE();
             };
 
             // map data
-            packetsMap.Value[0x56] = buffer => {
+            packetsMap.Value[0x56] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
 
                 var serial = reader.ReadUInt32BE();
-                var mapMsgType = (MapMessageType) reader.ReadUInt8();
+                var mapMsgType = (MapMessageType)reader.ReadUInt8();
                 var plotEnabled = reader.ReadBool();
                 (var x, var y) = (reader.ReadUInt16BE(), reader.ReadUInt16BE());
             };
 
             // weather
-            packetsMap.Value[0x65] = buffer => {
+            packetsMap.Value[0x65] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
-                var weatherType = (WeatherType) reader.ReadUInt8();
+                var weatherType = (WeatherType)reader.ReadUInt8();
                 var count = reader.ReadUInt8();
                 var temp = reader.ReadUInt8();
             };
 
             // books
-            packetsMap.Value[0x66] = buffer => {
+            packetsMap.Value[0x66] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
 
                 var serial = reader.ReadUInt32BE();
@@ -926,7 +963,8 @@ readonly struct InGamePacketsPlugin : IPlugin
             };
 
             // character animation
-            packetsMap.Value[0x6E] = buffer => {
+            packetsMap.Value[0x6E] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
 
                 var serial = reader.ReadUInt32BE();
@@ -954,10 +992,11 @@ readonly struct InGamePacketsPlugin : IPlugin
             };
 
             // graphical effects
-            var c0_c7_70 = (byte id, ReadOnlySpan<byte> buffer) => {
+            var c0_c7_70 = (byte id, ReadOnlySpan<byte> buffer) =>
+            {
                 var reader = new StackDataReader(buffer);
 
-                var effectType = (GraphicEffectType) reader.ReadUInt8();
+                var effectType = (GraphicEffectType)reader.ReadUInt8();
 
                 if (id == 0x70)
                 {
@@ -978,7 +1017,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                 if (id != 0x70)
                 {
                     var hue = reader.ReadUInt32BE();
-                    var blendMode = (GraphicEffectBlendMode) reader.ReadUInt32BE();
+                    var blendMode = (GraphicEffectBlendMode)reader.ReadUInt32BE();
 
                     if (id == 0xC7)
                     {
@@ -996,7 +1035,8 @@ readonly struct InGamePacketsPlugin : IPlugin
             packetsMap.Value[0xC7] = buffer => c0_c7_70(0xC7, buffer);
 
             // bulleting board
-            packetsMap.Value[0x71] = buffer => {
+            packetsMap.Value[0x71] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
 
                 var type = reader.ReadUInt8();
@@ -1043,20 +1083,23 @@ readonly struct InGamePacketsPlugin : IPlugin
             };
 
             // warmode
-            packetsMap.Value[0x72] = buffer => {
+            packetsMap.Value[0x72] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
 
                 var warmodeEnabled = reader.ReadBool();
             };
 
             // ping
-            packetsMap.Value[0x73] = buffer => {
+            packetsMap.Value[0x73] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
                 var sequence = reader.ReadUInt8();
             };
 
             // buy list
-            packetsMap.Value[0x74] = buffer => {
+            packetsMap.Value[0x74] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
 
                 var container = reader.ReadUInt32BE();
@@ -1071,16 +1114,17 @@ readonly struct InGamePacketsPlugin : IPlugin
             };
 
             // update character
-            var d2_77 = (byte id, ReadOnlySpan<byte> buffer) => {
+            var d2_77 = (byte id, ReadOnlySpan<byte> buffer) =>
+            {
                 var reader = new StackDataReader(buffer);
 
                 var serial = reader.ReadUInt32BE();
                 var graphic = reader.ReadUInt16BE();
                 (var x, var y, var z) = (reader.ReadUInt16BE(), reader.ReadUInt16BE(), reader.ReadInt8());
-                var direction = (Direction) reader.ReadUInt8();
+                var direction = (Direction)reader.ReadUInt8();
                 var hue = reader.ReadUInt16BE();
-                var flags = (Flags) reader.ReadUInt8();
-                var notoriety = (NotorietyFlag) reader.ReadUInt8();
+                var flags = (Flags)reader.ReadUInt8();
+                var notoriety = (NotorietyFlag)reader.ReadUInt8();
 
                 var ent = entitiesMap.Value.GetOrCreate(world, serial);
                 ent.Set(new Graphic() { Value = graphic })
@@ -1092,7 +1136,8 @@ readonly struct InGamePacketsPlugin : IPlugin
             packetsMap.Value[0xD2] = buffer => d2_77(0xD2, buffer);
 
             // open menu
-            packetsMap.Value[0x7C] = buffer => {
+            packetsMap.Value[0x7C] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
 
                 var serial = reader.ReadUInt32BE();
@@ -1112,7 +1157,8 @@ readonly struct InGamePacketsPlugin : IPlugin
             };
 
             // open paperdoll
-            packetsMap.Value[0x88] = buffer => {
+            packetsMap.Value[0x88] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
 
                 var serial = reader.ReadUInt32BE();
@@ -1121,7 +1167,8 @@ readonly struct InGamePacketsPlugin : IPlugin
             };
 
             // corpse equipment
-            packetsMap.Value[0x89] = buffer => {
+            packetsMap.Value[0x89] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
 
                 var serial = reader.ReadUInt32BE();
@@ -1130,7 +1177,7 @@ readonly struct InGamePacketsPlugin : IPlugin
 
                 var layer = Layer.Invalid;
                 uint itemSerial = 0;
-                while ((layer = (Layer) reader.ReadUInt8()) != Layer.Invalid &&
+                while ((layer = (Layer)reader.ReadUInt8()) != Layer.Invalid &&
                      (itemSerial = reader.ReadUInt32BE()) != 0)
                 {
                     var childEnt = entitiesMap.Value.GetOrCreate(world, itemSerial);
@@ -1139,7 +1186,8 @@ readonly struct InGamePacketsPlugin : IPlugin
             };
 
             // show map
-            var f5_90 = (byte id, ReadOnlySpan<byte> buffer) => {
+            var f5_90 = (byte id, ReadOnlySpan<byte> buffer) =>
+            {
                 var reader = new StackDataReader(buffer);
 
                 var serial = reader.ReadUInt32BE();
@@ -1157,7 +1205,8 @@ readonly struct InGamePacketsPlugin : IPlugin
             packetsMap.Value[0xF5] = buffer => f5_90(0xF5, buffer);
 
             // open book
-            var d4_93 = (byte id, ReadOnlySpan<byte> buffer) => {
+            var d4_93 = (byte id, ReadOnlySpan<byte> buffer) =>
+            {
                 var reader = new StackDataReader(buffer);
 
                 var serial = reader.ReadUInt32BE();
@@ -1183,7 +1232,8 @@ readonly struct InGamePacketsPlugin : IPlugin
             packetsMap.Value[0xD4] = buffer => d4_93(0xD4, buffer);
 
             // color picker
-            packetsMap.Value[0x95] = buffer => {
+            packetsMap.Value[0x95] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
 
                 var serial = reader.ReadUInt32BE();
@@ -1192,14 +1242,16 @@ readonly struct InGamePacketsPlugin : IPlugin
             };
 
             // move player
-            packetsMap.Value[0x97] = buffer => {
+            packetsMap.Value[0x97] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
 
-                var direction = (Direction) reader.ReadUInt8();
+                var direction = (Direction)reader.ReadUInt8();
             };
 
             // update name
-            packetsMap.Value[0x98] = buffer => {
+            packetsMap.Value[0x98] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
 
                 var serial = reader.ReadUInt32BE();
@@ -1207,7 +1259,8 @@ readonly struct InGamePacketsPlugin : IPlugin
             };
 
             // place multi
-            packetsMap.Value[0x99] = buffer => {
+            packetsMap.Value[0x99] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
 
                 var onGround = reader.ReadBool();
@@ -1220,7 +1273,8 @@ readonly struct InGamePacketsPlugin : IPlugin
             };
 
             // ascii prompt
-            packetsMap.Value[0x9A] = buffer => {
+            packetsMap.Value[0x9A] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
 
                 var serial = reader.ReadUInt32BE();
@@ -1230,7 +1284,8 @@ readonly struct InGamePacketsPlugin : IPlugin
             };
 
             // sell list
-            packetsMap.Value[0x9E] = buffer => {
+            packetsMap.Value[0x9E] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
 
                 var serial = reader.ReadUInt32BE();
@@ -1249,7 +1304,8 @@ readonly struct InGamePacketsPlugin : IPlugin
             };
 
             // update hits
-            packetsMap.Value[0xA1] = buffer => {
+            packetsMap.Value[0xA1] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
 
                 var serial = reader.ReadUInt32BE();
@@ -1260,7 +1316,8 @@ readonly struct InGamePacketsPlugin : IPlugin
             };
 
             // update mana
-            packetsMap.Value[0xA2] = buffer => {
+            packetsMap.Value[0xA2] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
 
                 var serial = reader.ReadUInt32BE();
@@ -1271,7 +1328,8 @@ readonly struct InGamePacketsPlugin : IPlugin
             };
 
             // update stam
-            packetsMap.Value[0xA3] = buffer => {
+            packetsMap.Value[0xA3] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
 
                 var serial = reader.ReadUInt32BE();
@@ -1282,14 +1340,16 @@ readonly struct InGamePacketsPlugin : IPlugin
             };
 
             // open url
-            packetsMap.Value[0xA5] = buffer => {
+            packetsMap.Value[0xA5] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
 
                 var url = reader.ReadASCII();
             };
 
             // window tip
-            packetsMap.Value[0xA6] = buffer => {
+            packetsMap.Value[0xA6] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
 
                 var flags = reader.ReadUInt8();
@@ -1299,14 +1359,16 @@ readonly struct InGamePacketsPlugin : IPlugin
             };
 
             // attack entity
-            packetsMap.Value[0xAA] = buffer => {
+            packetsMap.Value[0xAA] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
 
                 var serial = reader.ReadUInt32BE();
             };
 
             // text entry dialog
-            packetsMap.Value[0xAB] = buffer => {
+            packetsMap.Value[0xAB] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
 
                 var serial = reader.ReadUInt32BE();
@@ -1322,7 +1384,8 @@ readonly struct InGamePacketsPlugin : IPlugin
             };
 
             // show death action
-            packetsMap.Value[0xAF] = buffer => {
+            packetsMap.Value[0xAF] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
 
                 var serial = reader.ReadUInt32BE();
@@ -1331,7 +1394,8 @@ readonly struct InGamePacketsPlugin : IPlugin
             };
 
             // open gump
-            packetsMap.Value[0xB0] = buffer => {
+            packetsMap.Value[0xB0] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
 
                 var sender = reader.ReadUInt32BE();
@@ -1349,7 +1413,8 @@ readonly struct InGamePacketsPlugin : IPlugin
             };
 
             // chat message
-            packetsMap.Value[0xB2] = buffer => {
+            packetsMap.Value[0xB2] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
 
                 var cmd = reader.ReadUInt16BE();
@@ -1357,7 +1422,8 @@ readonly struct InGamePacketsPlugin : IPlugin
             };
 
             // open character profile
-            packetsMap.Value[0xB8] = buffer => {
+            packetsMap.Value[0xB8] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
 
                 var serial = reader.ReadUInt32BE();
@@ -1367,12 +1433,13 @@ readonly struct InGamePacketsPlugin : IPlugin
             };
 
             // lock features
-            packetsMap.Value[0xB9] = buffer => {
+            packetsMap.Value[0xB9] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
 
                 var flags = gameCtx.Value.ClientVersion >= ClientVersion.CV_60142 ?
-                    (LockedFeatureFlags) reader.ReadUInt32BE() :
-                    (LockedFeatureFlags) reader.ReadUInt16BE();
+                    (LockedFeatureFlags)reader.ReadUInt32BE() :
+                    (LockedFeatureFlags)reader.ReadUInt16BE();
 
                 BodyConvFlags bcFlags = 0;
                 if (flags.HasFlag(LockedFeatureFlags.UOR))
@@ -1390,7 +1457,8 @@ readonly struct InGamePacketsPlugin : IPlugin
             };
 
             // show quest pointer
-            packetsMap.Value[0xBA] = buffer => {
+            packetsMap.Value[0xBA] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
 
                 var display = reader.ReadBool();
@@ -1403,7 +1471,8 @@ readonly struct InGamePacketsPlugin : IPlugin
             };
 
             // seasons
-            packetsMap.Value[0xBC] = buffer => {
+            packetsMap.Value[0xBC] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
 
                 var season = reader.ReadUInt8();
@@ -1411,16 +1480,17 @@ readonly struct InGamePacketsPlugin : IPlugin
             };
 
             // cliloc
-            var c1_cc = (byte id, ReadOnlySpan<byte> buffer) => {
+            var c1_cc = (byte id, ReadOnlySpan<byte> buffer) =>
+            {
                 var reader = new StackDataReader(buffer);
 
                 var serial = reader.ReadUInt32BE();
                 var graphic = reader.ReadUInt16BE();
-                var msgType = (MessageType) reader.ReadUInt8();
+                var msgType = (MessageType)reader.ReadUInt8();
                 var hue = reader.ReadUInt16BE();
                 var font = reader.ReadUInt16BE();
                 var cliloc = reader.ReadUInt32BE();
-                var affixType = id == 0xCC ? (AffixType) reader.ReadUInt8() : 0;
+                var affixType = id == 0xCC ? (AffixType)reader.ReadUInt8() : 0;
                 var name = reader.ReadASCII(30);
                 var affix = id == 0xCC ? reader.ReadASCII() : string.Empty;
                 var arguments = id == 0xCC ? reader.ReadUnicodeBE() : reader.ReadUnicodeLE(reader.Remaining / 2);
@@ -1429,7 +1499,8 @@ readonly struct InGamePacketsPlugin : IPlugin
             packetsMap.Value[0xCC] = buffer => c1_cc(0xCC, buffer);
 
             // unicode prompt
-            packetsMap.Value[0xC2] = buffer => {
+            packetsMap.Value[0xC2] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
 
                 var serial = reader.ReadUInt32BE();
@@ -1438,14 +1509,16 @@ readonly struct InGamePacketsPlugin : IPlugin
             };
 
             // logout request
-            packetsMap.Value[0xD1] = buffer => {
+            packetsMap.Value[0xD1] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
 
                 var disconnect = reader.ReadBool();
             };
 
             // megacliloc
-            packetsMap.Value[0xD6] = buffer => {
+            packetsMap.Value[0xD6] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
 
                 var unk = reader.ReadUInt16BE();
@@ -1462,7 +1535,8 @@ readonly struct InGamePacketsPlugin : IPlugin
             };
 
             // custom house
-            packetsMap.Value[0xD8] = buffer => {
+            packetsMap.Value[0xD8] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
 
                 var compressed = reader.ReadUInt8() == 0x03;
@@ -1481,7 +1555,8 @@ readonly struct InGamePacketsPlugin : IPlugin
             };
 
             // opl info
-            packetsMap.Value[0xDC] = buffer => {
+            packetsMap.Value[0xDC] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
 
                 var serial = reader.ReadUInt32BE();
@@ -1489,7 +1564,8 @@ readonly struct InGamePacketsPlugin : IPlugin
             };
 
             // open compressed gump
-            packetsMap.Value[0xDD] = buffer => {
+            packetsMap.Value[0xDD] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
 
                 var sender = reader.ReadUInt32BE();
@@ -1511,7 +1587,8 @@ readonly struct InGamePacketsPlugin : IPlugin
             };
 
             // update mobile status
-            packetsMap.Value[0xDE] = buffer => {
+            packetsMap.Value[0xDE] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
 
                 var serial = reader.ReadUInt32BE();
@@ -1523,11 +1600,12 @@ readonly struct InGamePacketsPlugin : IPlugin
             };
 
             // buff debuff
-            packetsMap.Value[0xDF] = buffer => {
+            packetsMap.Value[0xDF] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
 
                 var serial = reader.ReadUInt32BE();
-                var iconType = (BuffIconType) reader.ReadUInt16BE();
+                var iconType = (BuffIconType)reader.ReadUInt16BE();
                 var count = reader.ReadUInt16BE();
                 if (count == 0)
                 {
@@ -1563,7 +1641,8 @@ readonly struct InGamePacketsPlugin : IPlugin
             };
 
             // new character anim
-            packetsMap.Value[0xE2] = buffer => {
+            packetsMap.Value[0xE2] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
 
                 var serial = reader.ReadUInt32BE();
@@ -1582,27 +1661,30 @@ readonly struct InGamePacketsPlugin : IPlugin
             };
 
             // add waypoint
-            packetsMap.Value[0xE5] = buffer => {
+            packetsMap.Value[0xE5] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
 
                 var serial = reader.ReadUInt32BE();
                 (var x, var y, var z) = (reader.ReadUInt16BE(), reader.ReadUInt16BE(), reader.ReadInt8());
                 var map = reader.ReadUInt8();
-                var waypointType = (WaypointsType) reader.ReadUInt16BE();
+                var waypointType = (WaypointsType)reader.ReadUInt16BE();
                 var ignoreObject = reader.ReadUInt16BE() != 0;
                 var cliloc = reader.ReadUInt32BE();
                 var name = reader.ReadUnicodeLE();
             };
 
             // remove waypoint
-            packetsMap.Value[0xE6] = buffer => {
+            packetsMap.Value[0xE6] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
 
                 var serial = reader.ReadUInt32BE();
             };
 
             // krrios client
-            packetsMap.Value[0xF0] = buffer => {
+            packetsMap.Value[0xF0] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
 
                 var type = reader.ReadUInt8();
@@ -1635,7 +1717,8 @@ readonly struct InGamePacketsPlugin : IPlugin
             };
 
             // update item SA
-            packetsMap.Value[0xF3] = buffer => {
+            packetsMap.Value[0xF3] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
 
                 reader.Skip(2);
@@ -1646,9 +1729,9 @@ readonly struct InGamePacketsPlugin : IPlugin
                 var amount = reader.ReadUInt16BE();
                 var unk = reader.ReadUInt16BE();
                 (var x, var y, var z) = (reader.ReadUInt16BE(), reader.ReadUInt16BE(), reader.ReadInt8());
-                var dir = (Direction) reader.ReadUInt8();
+                var dir = (Direction)reader.ReadUInt8();
                 var hue = reader.ReadUInt16BE();
-                var flags = (Flags) reader.ReadUInt8();
+                var flags = (Flags)reader.ReadUInt8();
                 var unk2 = reader.ReadUInt16BE();
 
                 var ent = entitiesMap.Value.GetOrCreate(world, serial);
@@ -1660,13 +1743,14 @@ readonly struct InGamePacketsPlugin : IPlugin
             };
 
             // boat moving
-            packetsMap.Value[0xF6] = buffer => {
+            packetsMap.Value[0xF6] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
 
                 var serial = reader.ReadUInt32BE();
                 var speed = reader.ReadUInt8();
-                var movingDir = (Direction) reader.ReadUInt8();
-                var facingDir = (Direction) reader.ReadUInt8();
+                var movingDir = (Direction)reader.ReadUInt8();
+                var facingDir = (Direction)reader.ReadUInt8();
                 (var x, var y, var z) = (reader.ReadUInt16BE(), reader.ReadUInt16BE(), reader.ReadUInt16BE());
 
                 var count = reader.ReadUInt16BE();
@@ -1676,12 +1760,13 @@ readonly struct InGamePacketsPlugin : IPlugin
                     (var entX, var entY, var entZ) = (reader.ReadUInt16BE(), reader.ReadUInt16BE(), reader.ReadUInt16BE());
 
                     var ent = entitiesMap.Value.GetOrCreate(world, serial);
-                    ent.Set(new WorldPosition() { X = entX, Y = entY, Z = (sbyte) entZ });
+                    ent.Set(new WorldPosition() { X = entX, Y = entY, Z = (sbyte)entZ });
                 }
             };
 
             // packet list
-            packetsMap.Value[0xF7] = buffer => {
+            packetsMap.Value[0xF7] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
 
                 var count = reader.ReadUInt16BE();

@@ -167,7 +167,7 @@ readonly struct RenderingPlugin : IPlugin
                     animAction = animation.MountAction;
                 }
                 else if (_layerOrders[(int)animation.Direction & 7].TryGetValue(equip.Layer, out orderKey) &&
-                    !IsItemCovered(dict.Value, world, act, equip.Layer))
+                    !IsItemCovered(dict.Value ??= new Dictionary<Layer, EntityView>(), world, act, equip.Layer))
                 {
                     if (tiledataLoader.Value.StaticData[graphic.Value].AnimID != 0)
                         animId = tiledataLoader.Value.StaticData[graphic.Value].AnimID;
@@ -397,9 +397,8 @@ readonly struct RenderingPlugin : IPlugin
 
     private static readonly Dictionary<Layer, int>[] _layerOrders;
 
-    static bool IsItemCovered(Dictionary<Layer, EntityView> dict, TinyEcs.World world, EcsID parent, Layer layer)
+    static bool IsItemCovered(Dictionary<Layer, EntityView> dict, TinyEcs.World world, ulong parent, Layer layer)
     {
-        dict ??= new Dictionary<Layer, EntityView>();
         dict.Clear();
         var term0 = new QueryTerm(IDOp.Pair(world.Entity<EquippedItem>(), parent), TermOp.With);
         var term1 = new QueryTerm(world.Entity<NetworkSerial>(), TermOp.DataAccess);
@@ -419,7 +418,7 @@ readonly struct RenderingPlugin : IPlugin
                 {
                     return true;
                 }
-                else if (pants.ID.IsValid && (pants.Get<Graphic>().Value is 0x0513 or 0x0514) ||
+                else if (pants.ID.IsValid() && (pants.Get<Graphic>().Value is 0x0513 or 0x0514) ||
                     (dict.TryGetValue(Layer.Robe, out var robe) && robe.Get<Graphic>().Value is 0x0504))
                 {
                     return true;
@@ -435,14 +434,14 @@ readonly struct RenderingPlugin : IPlugin
                     return true;
                 }
 
-                if (pants.ID.IsValid && pants.Get<Graphic>().Value is 0x01EB or 0x03E5 or 0x03EB)
+                if (pants.ID.IsValid() && pants.Get<Graphic>().Value is 0x01EB or 0x03E5 or 0x03EB)
                 {
                     if (dict.TryGetValue(Layer.Skirt, out var skirt) && skirt.Get<Graphic>().Value is not 0x01C7 and not 0x01E4)
                     {
                         return true;
                     }
 
-                    if (robe1.ID.IsValid && robe1.Get<Graphic>().Value is not 0x0229 and not (>= 0x04E8 and <= 0x04EB))
+                    if (robe1.ID.IsValid() && robe1.Get<Graphic>().Value is not 0x0229 and not (>= 0x04E8 and <= 0x04EB))
                     {
                         return true;
                     }
@@ -459,7 +458,7 @@ readonly struct RenderingPlugin : IPlugin
                 }
                 else if (dict.TryGetValue(Layer.Tunic, out var tunic) && tunic.Get<Graphic>().Value == 0x0238)
                 {
-                    if (robe2.ID.IsValid && robe2.Get<Graphic>().Value is not 0x9985 and not 0x9986 and not 0xA412)
+                    if (robe2.ID.IsValid() && robe2.Get<Graphic>().Value is not 0x9985 and not 0x9986 and not 0xA412)
                     {
                         return true;
                     }
