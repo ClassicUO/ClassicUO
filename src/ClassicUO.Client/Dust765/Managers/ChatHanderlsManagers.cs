@@ -35,7 +35,7 @@ namespace ClassicUO.Dust765.Managers
     {
         public static void Initialize()
         {
-            Chat.MessageReceived += Chat_MessageReceived;
+            EventSink.MessageReceived += Chat_MessageReceived;
         }
 
         private static void Chat_MessageReceived(object sender, MessageEventArgs e)

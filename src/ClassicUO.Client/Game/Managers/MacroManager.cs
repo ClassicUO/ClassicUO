@@ -2722,6 +2722,7 @@ namespace ClassicUO.Game.Managers
         CureGH, // ## BEGIN - END ## // MACROS
         // ## BEGIN - END ## // AUTOMATIONS
         AutoMeditate,
+        AIBot,
         // ## BEGIN - END ## // AUTOMATIONS
         // ## BEGIN - END ## // ADVMACROS
         CustomInterrupt,

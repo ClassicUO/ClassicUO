@@ -155,7 +155,7 @@ namespace ClassicUO.Game.Cheats.AIBot
 
     internal static class Automation
     {
-        private static long _timer = 0L;
+        public static DateTime _timer = DateTime.Now;
 
         public static bool Active { get; private set; } = false;
         public static AIBot Bot { get; private set; } = new AIBot();
@@ -172,12 +172,12 @@ namespace ClassicUO.Game.Cheats.AIBot
             GameActions.Print( World.Player, String.Format( "5x:{0}abled", ( Automation.IsEnabled = !Automation.IsEnabled ) == true ? "En" : "Dis" ), (ushort)RandomHelper.GetValue( 0, 256 ) );
         }
 
-        public static void Update( double totalMS )
+        public static void Update()
         {
             if ( !IsEnabled )
                 return;
 
-            if ( _timer <= totalMS )
+            if (_timer <= DateTime.Now)
             {
                 Automation.Active = Automation.Bot.Invoke();
             }
