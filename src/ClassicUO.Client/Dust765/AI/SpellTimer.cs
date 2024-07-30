@@ -3,7 +3,7 @@ using System;
 
 namespace ClassicUO.Game.Cheats.AIBot
 {
-    internal class SpellTimer
+    public class SpellTimer
     {
         public static TimeSpan CursorDuration { get; } = TimeSpan.FromSeconds( 30 );
 

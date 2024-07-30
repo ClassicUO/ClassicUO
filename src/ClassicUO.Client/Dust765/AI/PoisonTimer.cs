@@ -2,9 +2,9 @@
 
 namespace ClassicUO.Game.Cheats.AIBot
 {
-    internal delegate void PoisonTick();
+    public delegate void PoisonTick();
 
-    internal class PoisonTimer
+    public class PoisonTimer
     {
         public const int MAX_TICK_COUNT = 6;
 

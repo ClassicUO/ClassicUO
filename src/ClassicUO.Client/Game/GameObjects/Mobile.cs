@@ -41,6 +41,7 @@ using ClassicUO.Utility.Collections;
 using Microsoft.Xna.Framework;
 using ClassicUO.Utility.Logging;
 using System;
+using ClassicUO.Game.Cheats.AIBot;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -104,6 +105,7 @@ namespace ClassicUO.Game.GameObjects
                 mobile.HitsRequest = HitsRequestStatus.None;
                 mobile.CalculateRandomIdleTime();
                 mobile.IsParalyzed = false;
+
             }
         );
 
@@ -147,6 +149,9 @@ namespace ClassicUO.Game.GameObjects
         public uint FlashTimeTick { get; set; } = 0;
         public ushort OldHits { get; set; } = 0;
         // ## BEGIN - END ## // HEALTHBAR
+
+        public SpellTimer Spell { get; set; } = new SpellTimer();
+        public PoisonTimer Poison { get; set; } = new PoisonTimer();
 
         public Mobile() : base(0) { }
 
