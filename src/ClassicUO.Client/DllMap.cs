@@ -16,8 +16,7 @@ namespace ClassicUO
     {
         static readonly Dictionary<string, string> mapDictionary = new Dictionary<string, string>();
 
-        [ModuleInitializer]
-        internal static void AotInit()
+        internal static void Init()
         {
             if (!CUOEnviroment.IsUnix)
                 return;
@@ -163,8 +162,6 @@ namespace ClassicUO
                     return "unknown";
                 }
             }
-
         }
-
     }
 }
