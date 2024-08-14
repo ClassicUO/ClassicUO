@@ -21,8 +21,8 @@ readonly struct RenderingPlugin : IPlugin
         scheduler.AddSystem(static (
             Res<NetworkEntitiesMap> entitiesMap,
             Query<Graphic,
-                (With<NetworkSerial>, Without<Relation<ContainedInto, Wildcard>>, With<Relation<EquippedItem, Wildcard>>)> queryEquip,
-            Query<NetworkSerial, (Without<Renderable>, Without<Relation<ContainedInto, Wildcard>>)> queryAddRender,
+                (With<NetworkSerial>, Without<Pair<ContainedInto, Wildcard>>, With<Pair<EquippedItem, Wildcard>>)> queryEquip,
+            Query<NetworkSerial, (Without<Renderable>, Without<Pair<ContainedInto, Wildcard>>)> queryAddRender,
             TinyEcs.World world
         ) => {
             queryEquip.Each((EntityView ent, ref Graphic graphic) =>
@@ -49,9 +49,9 @@ readonly struct RenderingPlugin : IPlugin
 
         scheduler.AddSystem(static (
             Query<(WorldPosition, Graphic, Hue, Renderable, NetworkSerial, Optional<Facing>, Optional<MobAnimation>),
-                (Without<Relation<ContainedInto, Wildcard>>, Without<Relation<EquippedItem, Wildcard>>)> query,
+                (Without<Pair<ContainedInto, Wildcard>>, Without<Pair<EquippedItem, Wildcard>>)> query,
             Query<(WorldPosition, Graphic, Hue, Renderable, NetworkSerial, Optional<MobAnimation>),
-                (Without<Relation<ContainedInto, Wildcard>>, With<Relation<EquippedItem, Wildcard>>)> queryEquip,
+                (Without<Pair<ContainedInto, Wildcard>>, With<Pair<EquippedItem, Wildcard>>)> queryEquip,
             Res<AssetsServer> assetsServer,
             Res<Assets.TileDataLoader> tiledataLoader,
             TinyEcs.World world,
@@ -230,9 +230,9 @@ readonly struct RenderingPlugin : IPlugin
             Res<Renderer.UltimaBatcher2D> batch,
             Res<GameContext> gameCtx,
             Res<MouseContext> mouseCtx,
-            Query<(Renderable, TileStretched), Without<Relation<ContainedInto, Wildcard>>> queryTiles,
-            Query<Renderable, (Without<TileStretched>, Without<MobAnimation>, Without<Relation<ContainedInto, Wildcard>>)> queryStatic,
-            Query<Renderable, (With<MobAnimation>, Without<TileStretched>, Without<Relation<ContainedInto, Wildcard>>)> queryAnimations
+            Query<(Renderable, TileStretched), Without<Pair<ContainedInto, Wildcard>>> queryTiles,
+            Query<Renderable, (Without<TileStretched>, Without<MobAnimation>, Without<Pair<ContainedInto, Wildcard>>)> queryStatic,
+            Query<Renderable, (With<MobAnimation>, Without<TileStretched>, Without<Pair<ContainedInto, Wildcard>>)> queryAnimations
         ) => {
             device.Value.Clear(Color.Black);
 

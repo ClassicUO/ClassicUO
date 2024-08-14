@@ -76,8 +76,8 @@ readonly struct MobAnimationsPlugin : IPlugin
                 Facing,
                 Optional<MobileFlags>,
                 Optional<MobileSteps>),
-                (Without<Relation<ContainedInto, Wildcard>>,
-                Without<Relation<EquippedItem, Wildcard>>)> query) => {
+                (Without<Pair<ContainedInto, Wildcard>>,
+                Without<Pair<EquippedItem, Wildcard>>)> query) => {
             query.Each(
             (
                 EntityView ent,
