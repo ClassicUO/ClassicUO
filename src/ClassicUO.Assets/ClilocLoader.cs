@@ -114,7 +114,7 @@ namespace ClassicUO.Assets
             while ((bytesRead = fileStream.Read(buf, totalRead, Math.Min(4096, buf.Length - totalRead))) > 0)
                 totalRead += bytesRead;
 
-            var output = newFileFormat ? ClassicUO.Utility.BwtDecompress.Uncompress(buf) : buf;
+            var output = newFileFormat ? ClassicUO.Utility.BwtDecompress.Decompress(buf) : buf;
 
             using (var reader = new BinaryReader(new MemoryStream(output)))
             {

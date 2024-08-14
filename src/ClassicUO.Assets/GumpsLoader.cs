@@ -171,7 +171,7 @@ namespace ClassicUO.Assets
                     return default;
                 }
 
-                output = BwtDecompress.Uncompress(dbuf);
+                output = BwtDecompress.Decompress(dbuf);
             }
             else
             {
