@@ -158,17 +158,39 @@ namespace ClassicUO.Assets
             _file.SetData(entry.Address, entry.FileSize);
             _file.Seek(entry.Offset);
 
-            IntPtr dataStart = _file.PositionAddress;
 
-            var pixels = new uint[entry.Width * entry.Height];
-
-            int* lookuplist = (int*)dataStart;
-
-            int gsize;
-
-            for (int y = 0, half_len = entry.Length >> 2; y < entry.Height; y++)
+            ReadOnlySpan<byte> output;
+            var newFileFormat = UOFileManager.Version >= ClientVersion.CV_7010400;
+            if (newFileFormat)
             {
-                if (y < entry.Height - 1)
+                var cbuf = _file.ReadArray(entry.Length);
+                var dbuf = new byte[entry.DecompressedLength];
+                var result = ZLib.Decompress(cbuf, 0, dbuf, dbuf.Length);
+                if (result != ZLib.ZLibError.Okay)
+                {
+                    return default;
+                }
+
+                output = BwtDecompress.Decompress(dbuf);
+            }
+            else
+            {
+                output = new ReadOnlySpan<byte>(_file.PositionAddress.ToPointer(), entry.Length);
+            }
+
+            var reader = new StackDataReader(output);
+            var w = newFileFormat ? reader.ReadUInt32LE() : (uint)entry.Width;
+            var h = newFileFormat ? reader.ReadUInt32LE() : (uint)entry.Height;
+
+            IntPtr dataStart = reader.PositionAddress;
+            var pixels = new uint[w * h];
+            int* lookuplist = (int*)dataStart;
+            int gsize;
+            var len = reader.Remaining;
+
+            for (int y = 0, half_len = len >> 2; y < h; y++)
+            {
+                if (y < h - 1)
                 {
                     gsize = lookuplist[y + 1] - lookuplist[y];
                 }
@@ -179,7 +201,7 @@ namespace ClassicUO.Assets
 
                 GumpBlock* gmul = (GumpBlock*)(dataStart + (lookuplist[y] << 2));
 
-                int pos = y * entry.Width;
+                var pos = y * w;
 
                 for (int i = 0; i < gsize; i++)
                 {
@@ -197,7 +219,7 @@ namespace ClassicUO.Assets
                     }
 
                     var count = gmul[i].Run;
-                    pixels.AsSpan().Slice(pos, count).Fill(val);
+                    pixels.AsSpan().Slice((int)pos, count).Fill(val);
                     pos += count;
                 }
             }
@@ -205,8 +227,8 @@ namespace ClassicUO.Assets
             return new GumpInfo()
             {
                 Pixels = pixels,
-                Width = entry.Width,
-                Height = entry.Height
+                Width = (int)w,
+                Height = (int)h
             };
         }
 

@@ -682,7 +682,9 @@ namespace ClassicUO.Game
                     {
                         try
                         {
+#pragma warning disable CA1416 // This call site is reachable on all platforms. 'MemoryMappedFile.OpenExisting(string)' is only supported on: 'windows'.
                             mmf = MemoryMappedFile.OpenExisting(_UL.RealShardName + fileInfo.Name);
+#pragma warning restore CA1416
                         }
                         catch
                         {
@@ -701,7 +703,10 @@ namespace ClassicUO.Game
                     {
                         try
                         {
+#pragma warning disable CA1416 // This call site is reachable on all platforms. 'MemoryMappedFile.OpenExisting(string)' is only supported on: 'windows'.
                             mmf = MemoryMappedFile.OpenExisting(_UL.RealShardName + fileInfo.Name);
+#pragma warning restore CA1416
+
                         }
                         catch
                         {

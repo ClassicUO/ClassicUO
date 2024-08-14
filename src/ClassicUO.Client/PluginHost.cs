@@ -180,7 +180,9 @@ namespace ClassicUO
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         delegate IntPtr dGetCliloc(int cliloc, IntPtr args, bool capitalize);
         [MarshalAs(UnmanagedType.FunctionPtr)]
+#pragma warning disable CS0169
         private readonly dGetCliloc _getCliloc;
+#pragma warning restore CS0169
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         delegate short dGetPacketLength(int id);
@@ -227,11 +229,13 @@ namespace ClassicUO
 
             switch (Unsafe.AsRef<int>(cmd.ToPointer()))
             {
+#pragma warning disable CS0618
                 case 1:
                     GameActions.UsePrimaryAbility();
                     break;
                 case 2:
                     GameActions.UseSecondaryAbility();
+#pragma warning restore CS0618
                     break;
                 case 3:
                     var subCmd = Unsafe.AsRef<(int, sbyte)>(cmd.ToPointer());

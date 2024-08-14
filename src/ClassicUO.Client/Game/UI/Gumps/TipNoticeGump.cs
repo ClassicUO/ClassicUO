@@ -40,7 +40,6 @@ namespace ClassicUO.Game.UI.Gumps
     internal class TipNoticeGump : Gump
     {
         private readonly ExpandableScroll _background;
-        private readonly Button _prev, _next;
         private readonly ScrollArea _scrollArea;
         private readonly StbTextBox _textBox;
 

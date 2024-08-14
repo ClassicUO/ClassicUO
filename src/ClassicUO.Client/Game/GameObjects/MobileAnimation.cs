@@ -1050,13 +1050,6 @@ namespace ClassicUO.Game.GameObjects
 
                         return (byte)v13;
                 }
-
-                // LABEL_188
-                v13 = 2;
-
-                LABEL_190(flags, ref v13);
-
-                return (byte)v13;
             }
 
             byte result = mobile._animationGroup;
