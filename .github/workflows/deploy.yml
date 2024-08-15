@@ -53,7 +53,7 @@ jobs:
           include-prerelease: false
 
       - name: Build Bootstrap app
-        run: dotnet publish ${{ env.BOOT_PROJECT_PATH }} -c Release -o ${{ env.CUO_OUTPUT_PATH }} -p:AssemblyVersion=${{ env.CUO_ASSEMBLY_VERSION }} -p:FileVersion=${{ env.CUO_ASSEMBLY_VERSION }}
+        run: dotnet publish ${{ env.BOOT_PROJECT_PATH }} -c Release -o ${{ env.CUO_OUTPUT_PATH }} -p:AssemblyVersion=${{ env.CUO_ASSEMBLY_VERSION }} -p:FileVersion=${{ env.CUO_ASSEMBLY_VERSION }} -p:OutputType=WinExe
 
       - name: Build ClassicUO
         run: dotnet publish ${{ env.CUO_PROJECT_PATH }} -c Release -r ${{ matrix.target }} -o ${{ env.CUO_OUTPUT_PATH }} -p:IS_DEV_BUILD=true -p:AssemblyVersion=${{ env.CUO_ASSEMBLY_VERSION }} -p:FileVersion=${{ env.CUO_ASSEMBLY_VERSION }} -p:TargetFrameworks=${{ env.TARGET_FRAMEWORK }} -p:NativeLib=Shared -p:OutputType=Library
