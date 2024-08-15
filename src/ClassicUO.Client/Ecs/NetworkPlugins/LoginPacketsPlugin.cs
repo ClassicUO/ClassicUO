@@ -4,6 +4,7 @@ using System.Net;
 using ClassicUO.Configuration;
 using ClassicUO.IO;
 using ClassicUO.Network;
+using ClassicUO.Network.Encryption;
 using ClassicUO.Utility;
 using TinyEcs;
 
@@ -69,7 +70,7 @@ readonly struct LoginPacketsPlugin : IPlugin
                 var seed = reader.ReadUInt32BE();
 
                 network.Value.Disconnect();
-                network.Value.Connect(new IPAddress(ip).ToString(), port);
+                settings.Value.Encryption = (byte) network.Value.Connect(new IPAddress(ip).ToString(), port, gameCtx.Value.ClientVersion, (EncryptionType)settings.Value.Encryption);
 
                 if (network.Value.IsConnected)
                 {

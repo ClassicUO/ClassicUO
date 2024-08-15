@@ -5,6 +5,7 @@ using ClassicUO.Network;
 using ClassicUO.Utility;
 using ClassicUO.Ecs.NetworkPlugins;
 using TinyEcs;
+using ClassicUO.Network.Encryption;
 
 namespace ClassicUO.Ecs;
 
@@ -50,8 +51,7 @@ readonly struct NetworkPlugin : IPlugin
         ) => {
             foreach (var request in requets)
             {
-                PacketsTable.AdjustPacketSizeByVersion(gameCtx.Value.ClientVersion);
-                network.Value.Connect(request.Address, request.Port);
+                settings.Value.Encryption = (byte) network.Value.Connect(request.Address, request.Port, gameCtx.Value.ClientVersion, (EncryptionType)settings.Value.Encryption);
 
                 Console.WriteLine("Socket is connected ? {0}", network.Value.IsConnected);
 
@@ -92,7 +92,7 @@ readonly struct NetworkPlugin : IPlugin
             while (buffer.Value.Length > 0)
             {
                 var packetId = buffer.Value[0];
-                var packetLen = (int)PacketsTable.GetPacketLength(packetId);
+                var packetLen = (int)network.Value.PacketsTable.GetPacketLength(packetId);
                 var packetHeaderOffset = sizeof(byte);
 
                 if (packetLen == -1)
