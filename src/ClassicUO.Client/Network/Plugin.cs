@@ -188,7 +188,7 @@ namespace ClassicUO.Network
             _send = OnPluginSend;
             _recv_new = OnPluginRecv_new;
             _send_new = OnPluginSend_new;
-            _getPacketLength = PacketsTable.GetPacketLength;
+            _getPacketLength = OnGetPacketLength;
             _getPlayerPosition = GetPlayerPosition;
             _castSpell = GameActions.CastSpell;
             _getStaticImage = GetStaticImage;
@@ -781,6 +781,11 @@ namespace ClassicUO.Network
                     Log.Error("Plugin initialization failed, please re login");
                 }
             }
+        }
+
+        internal static short OnGetPacketLength(int id)
+        {
+            return NetClient.Socket.PacketsTable.GetPacketLength(id);
         }
 
         internal static bool OnPluginRecv(ref byte[] data, ref int length)

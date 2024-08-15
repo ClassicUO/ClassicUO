@@ -31,12 +31,13 @@
 #endregion
 
 using ClassicUO.Utility;
+using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Network
 {
-    internal static class PacketsTable
+    internal sealed class PacketsTable
     {
-        private static readonly short[] _packetsTable = new short[255]
+        private readonly short[] _packetsTable =
         {
             0x0068, // 0x00
             0x0005, // 0x01
@@ -295,13 +296,10 @@ namespace ClassicUO.Network
             -1      // ff
         };
 
-        public static short GetPacketLength(int id)
+        public PacketsTable(ClientVersion version)
         {
-            return (short) (id >= 0xFF ? -1 : _packetsTable[id]);
-        }
+            Log.Trace("Network calibration...");
 
-        public static void AdjustPacketSizeByVersion(ClientVersion version)
-        {
             if (version >= ClientVersion.CV_500A)
             {
                 _packetsTable[0x0B] = 0x07;
@@ -425,6 +423,11 @@ namespace ClassicUO.Network
             {
                 _packetsTable[0xD5] = 0x09;
             }
+        }
+
+        public short GetPacketLength(int id)
+        {
+            return (short) (id >= 0xFF ? -1 : _packetsTable[id]);
         }
     }
 }

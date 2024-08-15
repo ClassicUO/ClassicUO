@@ -166,6 +166,7 @@ namespace ClassicUO.Network
         public bool IsConnected => _socket != null && _socket.IsConnected;
         public NetStatistics Statistics { get; }
         public EncryptionHelper? Encryption { get; private set; }
+        public PacketsTable PacketsTable { get; private set; }
 
         public uint LocalIP
         {
@@ -206,9 +207,11 @@ namespace ClassicUO.Network
 
         public EncryptionType Connect(string ip, ushort port, ClientVersion clientVersion, EncryptionType encryption)
         {
+            PacketsTable ??= new PacketsTable(clientVersion);
+
             if (encryption != 0)
             {
-                Encryption = new EncryptionHelper(clientVersion);
+                Encryption ??= new EncryptionHelper(clientVersion);
                 Log.Trace("Calculating encryption by client version...");
                 Log.Trace($"encryption: {Encryption.EncryptionType}");
 

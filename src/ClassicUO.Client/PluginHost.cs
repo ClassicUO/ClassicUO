@@ -187,7 +187,7 @@ namespace ClassicUO
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         delegate short dGetPacketLength(int id);
         [MarshalAs(UnmanagedType.FunctionPtr)]
-        private readonly dGetPacketLength _packetLength = PacketsTable.GetPacketLength;
+        private readonly dGetPacketLength _packetLength = getPacketLength;
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         delegate bool dGetPlayerPosition(out int x, out int y, out int z);
@@ -216,6 +216,11 @@ namespace ClassicUO
         [MarshalAs(UnmanagedType.FunctionPtr)]
         private readonly dOnPluginReflectionCommand _reflectionCmd = reflectionCmd;
 
+
+        static short getPacketLength(int id)
+        {
+            return NetClient.Socket.PacketsTable.GetPacketLength(id);
+        }
 
         static void setWindowTitle(IntPtr ptr)
         {
