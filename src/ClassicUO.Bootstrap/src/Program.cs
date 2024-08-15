@@ -169,17 +169,22 @@ sealed class ClassicUOHost : IPluginHandler
     public void Run(string[] args)
     {
         var libName = "./cuo";
-        switch (Environment.OSVersion.Platform)
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
         {
-            case PlatformID.MacOSX:
-                libName += ".dylib";
-                break;
-            case PlatformID.Unix:
-                libName += ".so";
-                break;
-            default:
-                libName += ".dll";
-                break;
+            libName += ".dylib";
+        }
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            libName += ".so";
+        }
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            libName += ".dll";
+        }
+        else
+        {
+            throw new NotSupportedException("OS not suported");
         }
 
         var libPtr = Native.LoadLibrary(libName);
