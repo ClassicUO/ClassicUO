@@ -3,10 +3,45 @@ using CUO_API;
 using System;
 using System.Buffers;
 using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 
+
+#if !DEBUG
+AppDomain.CurrentDomain.UnhandledException += (s, e) =>
+{
+    var dt = DateTime.Now;
+    var version = Assembly.GetExecutingAssembly()?.GetName()?.Version?.ToString() ?? "0.0.0.0";
+    var sb = new System.Text.StringBuilder();
+    sb.AppendLine("######################## [START LOG] ########################");
+
+#if DEV_BUILD
+    sb.AppendLine($"ClassicUO [DEV_BUILD] - {version} - {dt}");
+#else
+    sb.AppendLine($"ClassicUO [STANDARD_BUILD] - {version} - {dt}");
+#endif
+
+    sb.AppendLine($"OS: {Environment.OSVersion.Platform} {(Environment.Is64BitOperatingSystem ? "x64" : "x86")}");
+    sb.AppendLine($"Thread: {Thread.CurrentThread.Name}");
+    sb.AppendLine();
+    sb.AppendFormat("Exception:\n{0}\n", e.ExceptionObject);
+    sb.AppendLine("######################## [END LOG] ########################");
+    sb.AppendLine();
+    sb.AppendLine();
+
+    Console.WriteLine(e.ExceptionObject.ToString());
+    var path = Path.Combine(AppContext.BaseDirectory, "Logs");
+
+    if (!Directory.Exists(path))
+        Directory.CreateDirectory(path);
+
+    File.WriteAllText(Path.Combine(path, $"{dt:yyyy-MM-dd_hh-mm-ss}_crash.txt"), s.ToString());
+};
+#endif
 
 Global.Host.Run(args);
 Console.WriteLine("finished");
@@ -16,7 +51,6 @@ static class Global
 {
     // NOTE: this must be static otherwise GC does some weird stuff on delegates ¯\_(ツ)_/¯
     public static readonly ClassicUOHost Host = new ClassicUOHost();
-
 }
 
 sealed class ClassicUOHost : IPluginHandler
