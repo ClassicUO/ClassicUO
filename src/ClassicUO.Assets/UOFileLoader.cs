@@ -30,65 +30,59 @@
 
 #endregion
 
+using ClassicUO.Assets;
 using ClassicUO.IO;
-using ClassicUO.Utility.Logging;
 using System;
-using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 
 namespace ClassicUO.Assets
 {
-    public static class Verdata
+    public abstract class UOFileLoader : IDisposable
     {
-        unsafe static Verdata()
+        protected UOFileLoader(UOFileManager fileManager) 
         {
-            string path = UOFileManager.GetUOFilePath("verdata.mul");
-
-            if (!System.IO.File.Exists(path))
-            {
-                File = null;
-            }
-            else
-            {
-                File = new UOFileMul(path);
-
-                // the scope of this try/catch is to avoid unexpected crashes if servers redestribuite wrong verdata
-                try
-                {
-                    var reader = File.GetReader();
-                    int len = reader.ReadInt32LE();
-
-                    Patches = MemoryMarshal.Cast<byte, UOFileIndex5D>(reader.ReadArray(len * sizeof(UOFileIndex5D))).ToArray();
-                }
-                catch (Exception ex)
-                {
-                    Log.Error($"error while reading verdata.mul\n{ex}");
-                }
-            }
+            FileManager = fileManager;
         }
 
-        // FileIDs
-        //0 - map0.mul
-        //1 - staidx0.mul
-        //2 - statics0.mul
-        //3 - artidx.mul
-        //4 - art.mul
-        //5 - anim.idx
-        //6 - anim.mul
-        //7 - soundidx.mul
-        //8 - sound.mul
-        //9 - texidx.mul
-        //10 - texmaps.mul
-        //11 - gumpidx.mul
-        //12 - gumps.mul
-        //13 - multi.idx
-        //14 - multi.mul
-        //15 - skills.idx
-        //16 - skills.mul
-        //30 - tiledata.mul
-        //31 - animdata.mul 
+        public UOFileManager FileManager { get; }
 
-        public static UOFileIndex5D[] Patches { get; } = Array.Empty<UOFileIndex5D>();
+        public bool IsDisposed { get; private set; }
 
-        public static UOFileMul File { get; }
+        public virtual void Dispose()
+        {
+            if (IsDisposed)
+            {
+                return;
+            }
+
+            IsDisposed = true;
+
+            ClearResources();
+        }
+
+        public UOFileIndex[] Entries;
+
+        public abstract Task Load();
+
+        public virtual void ClearResources()
+        {
+        }
+
+        public ref UOFileIndex GetValidRefEntry(int index)
+        {
+            if (index < 0 || Entries == null || index >= Entries.Length)
+            {
+                return ref UOFileIndex.Invalid;
+            }
+
+            ref UOFileIndex entry = ref Entries[index];
+
+            if (entry.Offset < 0 || entry.Length <= 0 || entry.Offset == 0x0000_0000_FFFF_FFFF)
+            {
+                return ref UOFileIndex.Invalid;
+            }
+
+            return ref entry;
+        }
     }
 }

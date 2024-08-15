@@ -187,7 +187,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Width = artInfo.UV.Width;
                 Height = artInfo.UV.Height;
                 _hue = hue;
-                _isPartial = TileDataLoader.Instance.StaticData[graphic].IsPartialHue;
+                _isPartial = Client.Game.UO.FileManager.TileData.StaticData[graphic].IsPartialHue;
             }
 
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)

@@ -67,8 +67,8 @@ readonly struct MobAnimationsPlugin : IPlugin
             TinyEcs.World world,
             Time time,
             Res<GameContext> gameCtx,
+            Res<UOFileManager> fileManager,
             Res<AssetsServer> assetsServer,
-            Res<Assets.TileDataLoader> tiledataLoader,
             Query<(
                 Renderable,
                 MobAnimation,
@@ -131,10 +131,10 @@ readonly struct MobAnimationsPlugin : IPlugin
                         if (equip.Layer == Layer.Mount)
                         {
                             var mountGraphic = entities[i].Get<Graphic>().Value;
-                            mountGraphic = Mounts.FixMountGraphic(tiledataLoader, mountGraphic);
+                            mountGraphic = Mounts.FixMountGraphic(fileManager.Value.TileData, mountGraphic);
 
                             animation.MountAction = GetAnimationGroup(
-                                gameCtx.Value.ClientVersion, assetsServer.Value.Animations,
+                                gameCtx.Value.ClientVersion, fileManager.Value.Animations, assetsServer.Value.Animations,
                                 mountGraphic, realDirection, isWalking, true, false, flags,
                                 animation.IsFromServer, animation.MountAction
                             );
@@ -145,7 +145,7 @@ readonly struct MobAnimationsPlugin : IPlugin
                 }
 
                 animation.Action = GetAnimationGroup(
-                    gameCtx.Value.ClientVersion, assetsServer.Value.Animations,
+                    gameCtx.Value.ClientVersion, fileManager.Value.Animations, assetsServer.Value.Animations,
                     animId, realDirection, isWalking, animation.MountAction != 0xFF, false, flags,
                     animation.IsFromServer, animation.Action);
 
@@ -155,7 +155,7 @@ readonly struct MobAnimationsPlugin : IPlugin
                 animation.Direction = realDirection;
 
                 var dir = (byte)(realDirection);
-                ClassicUO.Assets.AnimationsLoader.Instance.GetAnimDirection(ref dir, ref mirror);
+                fileManager.Value.Animations.GetAnimDirection(ref dir, ref mirror);
 
                 var frames = assetsServer.Value.Animations.GetAnimationFrames
                 (
@@ -234,6 +234,7 @@ readonly struct MobAnimationsPlugin : IPlugin
     private static byte GetAnimationGroup
     (
         ClientVersion clientVersion,
+        ClassicUO.Assets.AnimationsLoader animationLoader,
         ClassicUO.Renderer.Animations.Animations animations,
         ushort graphic,
         Direction direction,
@@ -294,7 +295,7 @@ readonly struct MobAnimationsPlugin : IPlugin
                 {
                     if (type == AnimationGroupsType.Animal)
                     {
-                        if (IsReplacedObjectAnimation(0, v13))
+                        if (IsReplacedObjectAnimation(animationLoader, 0, v13))
                         {
                             originalType = AnimationGroupsType.Unknown;
                         }
@@ -339,7 +340,7 @@ readonly struct MobAnimationsPlugin : IPlugin
                     }
                     else
                     {
-                        if (IsReplacedObjectAnimation(1, v13))
+                        if (IsReplacedObjectAnimation(animationLoader, 1, v13))
                         {
                             // LABEL_190:
 
@@ -351,7 +352,7 @@ readonly struct MobAnimationsPlugin : IPlugin
                 }
                 else
                 {
-                    if (IsReplacedObjectAnimation(3, v13))
+                    if (IsReplacedObjectAnimation(animationLoader, 3, v13))
                     {
                         originalType = AnimationGroupsType.Unknown;
                     }
@@ -364,7 +365,7 @@ readonly struct MobAnimationsPlugin : IPlugin
             }
             else
             {
-                if (IsReplacedObjectAnimation(2, v13))
+                if (IsReplacedObjectAnimation(animationLoader, 2, v13))
                 {
                     originalType = AnimationGroupsType.Unknown;
                 }
@@ -1557,11 +1558,11 @@ readonly struct MobAnimationsPlugin : IPlugin
 
         return result;
 
-        static bool IsReplacedObjectAnimation(byte anim, ushort v13)
+        static bool IsReplacedObjectAnimation(AnimationsLoader animationLoader, byte anim, ushort v13)
         {
-            if (anim < AnimationsLoader.Instance.GroupReplaces.Length)
+            if (anim < animationLoader.GroupReplaces.Length)
             {
-                foreach (var tuple in AnimationsLoader.Instance.GroupReplaces[anim])
+                foreach (var tuple in animationLoader.GroupReplaces[anim])
                 {
                     if (tuple.Item1 == v13)
                     {

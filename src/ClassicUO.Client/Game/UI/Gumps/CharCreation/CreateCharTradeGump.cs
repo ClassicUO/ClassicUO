@@ -92,7 +92,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             //TextLabelAscii(AControl parent, int x, int y, int font, int hue, string text, int width = 400)
             Add
             (
-                new Label(ClilocLoader.Instance.GetString(3000326), unicode, hue, font: font)
+                new Label(Client.Game.UO.FileManager.Clilocs.GetString(3000326), unicode, hue, font: font)
                 {
                     X = 148, Y = 132
                 }
@@ -101,7 +101,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             // strength, dexterity, intelligence
             Add
             (
-                new Label(ClilocLoader.Instance.GetString(3000111), unicode, 1, font: 1)
+                new Label(Client.Game.UO.FileManager.Clilocs.GetString(3000111), unicode, 1, font: 1)
                 {
                     X = 158, Y = 170
                 }
@@ -109,7 +109,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             Add
             (
-                new Label(ClilocLoader.Instance.GetString(3000112), unicode, 1, font: 1)
+                new Label(Client.Game.UO.FileManager.Clilocs.GetString(3000112), unicode, 1, font: 1)
                 {
                     X = 158, Y = 250
                 }
@@ -117,7 +117,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             Add
             (
-                new Label(ClilocLoader.Instance.GetString(3000113), unicode, 1, font: 1)
+                new Label(Client.Game.UO.FileManager.Clilocs.GetString(3000113), unicode, 1, font: 1)
                 {
                     X = 158, Y = 330
                 }
@@ -125,6 +125,8 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             // sliders for attributes
             _attributeSliders = new HSliderBar[3];
+
+            (var defSkillsValues, var defStatsValues) = ProfessionInfo.GetDefaults(Client.Game.UO.Version);
 
             Add
             (
@@ -135,7 +137,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                     93,
                     10,
                     60,
-                    ProfessionInfo._VoidStats[0],
+                    defStatsValues[0],
                     HSliderBarStyle.MetalWidgetRecessedBar,
                     true
                 )
@@ -150,7 +152,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                     93,
                     10,
                     60,
-                    ProfessionInfo._VoidStats[1],
+                    defStatsValues[1],
                     HSliderBarStyle.MetalWidgetRecessedBar,
                     true
                 )
@@ -165,7 +167,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                     93,
                     10,
                     60,
-                    ProfessionInfo._VoidStats[2],
+                    defStatsValues[2],
                     HSliderBarStyle.MetalWidgetRecessedBar,
                     true
                 )
@@ -173,7 +175,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             var clientFlags = World.ClientLockedFeatures.Flags;
 
-            _skillList = SkillsLoader.Instance.SortedSkills
+            _skillList = Client.Game.UO.FileManager.Skills.SortedSkills
                          .Where(s =>
                                      // All standard client versions ignore these skills by defualt
                                      //s.Index != 26 && // MagicResist
@@ -250,7 +252,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                         93,
                         0,
                         50,
-                        ProfessionInfo._VoidSkills[i, 1],
+                        defSkillsValues[i, 1],
                         HSliderBarStyle.MetalWidgetRecessedBar,
                         true
                     )
@@ -346,14 +348,14 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
                 if (duplicated > 0)
                 {
-                    UIManager.GetGump<CharCreationGump>()?.ShowMessage(ClilocLoader.Instance.GetString(1080032));
+                    UIManager.GetGump<CharCreationGump>()?.ShowMessage(Client.Game.UO.FileManager.Clilocs.GetString(1080032));
 
                     return false;
                 }
             }
             else
             {
-                UIManager.GetGump<CharCreationGump>()?.ShowMessage(Client.Game.UO.Version <= ClientVersion.CV_5090 ? ResGumps.YouMustHaveThreeUniqueSkillsChosen : ClilocLoader.Instance.GetString(1080032));
+                UIManager.GetGump<CharCreationGump>()?.ShowMessage(Client.Game.UO.Version <= ClientVersion.CV_5090 ? ResGumps.YouMustHaveThreeUniqueSkillsChosen : Client.Game.UO.FileManager.Clilocs.GetString(1080032));
 
                 return false;
             }

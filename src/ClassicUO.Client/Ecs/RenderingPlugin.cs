@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Ecs.NetworkPlugins;
 using ClassicUO.Game;
@@ -53,7 +54,7 @@ readonly struct RenderingPlugin : IPlugin
             Query<(WorldPosition, Graphic, Hue, Renderable, NetworkSerial, Optional<MobAnimation>),
                 (Without<Pair<ContainedInto, Wildcard>>, With<Pair<EquippedItem, Wildcard>>)> queryEquip,
             Res<AssetsServer> assetsServer,
-            Res<Assets.TileDataLoader> tiledataLoader,
+            Res<UOFileManager> fileManager,
             TinyEcs.World world,
             Local<Dictionary<Layer, EntityView>> dict
         ) => {
@@ -111,17 +112,17 @@ readonly struct RenderingPlugin : IPlugin
                 {
                     ref readonly var artInfo = ref assetsServer.Value.Arts.GetArt(graphic.Value);
 
-                    if (tiledataLoader.Value.StaticData[graphic.Value].IsBackground)
+                    if (fileManager.Value.TileData.StaticData[graphic.Value].IsBackground)
                     {
                         priorityZ -= 1;
                     }
 
-                    if (tiledataLoader.Value.StaticData[graphic.Value].Height != 0)
+                    if (fileManager.Value.TileData.StaticData[graphic.Value].Height != 0)
                     {
                         priorityZ += 1;
                     }
 
-                    if (tiledataLoader.Value.StaticData[graphic.Value].IsMultiMovable)
+                    if (fileManager.Value.TileData.StaticData[graphic.Value].IsMultiMovable)
                     {
                         priorityZ += 1;
                     }
@@ -163,14 +164,14 @@ readonly struct RenderingPlugin : IPlugin
                 var orderKey = 0;
                 if (equip.Layer == Layer.Mount)
                 {
-                    animId = Mounts.FixMountGraphic(tiledataLoader, animId);
+                    animId = Mounts.FixMountGraphic(fileManager.Value.TileData, animId);
                     animAction = animation.MountAction;
                 }
                 else if (_layerOrders[(int)animation.Direction & 7].TryGetValue(equip.Layer, out orderKey) &&
                     !IsItemCovered(dict.Value ??= new Dictionary<Layer, EntityView>(), world, act, equip.Layer))
                 {
-                    if (tiledataLoader.Value.StaticData[graphic.Value].AnimID != 0)
-                        animId = tiledataLoader.Value.StaticData[graphic.Value].AnimID;
+                    if (fileManager.Value.TileData.StaticData[graphic.Value].AnimID != 0)
+                        animId = fileManager.Value.TileData.StaticData[graphic.Value].AnimID;
                 }
                 else
                 {

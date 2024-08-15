@@ -12,9 +12,9 @@ namespace ClassicUO.Game.Managers
     {
         private readonly static char[] _split = new char[] { ' ', '\t' };
 
-        public void Read()
+        public void Read(UOFileManager fileManager)
         {
-            var filePath = UOFileManager.GetUOFilePath("stitchin.def");
+            var filePath = fileManager.GetUOFilePath("stitchin.def");
 
             if (!File.Exists(filePath))
             {

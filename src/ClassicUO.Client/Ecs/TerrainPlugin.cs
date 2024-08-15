@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using ClassicUO.Assets;
 using Microsoft.Xna.Framework;
 using TinyEcs;
 
@@ -52,8 +53,7 @@ readonly struct TerrainPlugin : IPlugin
 
         scheduler.AddSystem(static (
             TinyEcs.World world,
-            Res<Assets.MapLoader> mapLoader,
-            Res<Assets.TileDataLoader> tiledataLoader,
+            Res<UOFileManager> fileManager,
             Res<AssetsServer> assetsServer,
             Res<HashSet<(int ChunkX, int ChunkY, int MapIndex)>> chunksLoaded,
             EventReader<OnNewChunkRequest> chunkRequests
@@ -63,7 +63,7 @@ readonly struct TerrainPlugin : IPlugin
                 for (int chunkX = chunkEv.RangeStartX; chunkX <= chunkEv.RangeEndX; chunkX += 1)
                 for (int chunkY = chunkEv.RangeStartY; chunkY <= chunkEv.RangeEndY; chunkY += 1)
                 {
-                    ref var im = ref mapLoader.Value.GetIndex(chunkEv.Map, chunkX, chunkY);
+                    ref var im = ref fileManager.Value.Maps.GetIndex(chunkEv.Map, chunkX, chunkY);
 
                     if (im.MapAddress == 0)
                         continue;
@@ -87,11 +87,12 @@ readonly struct TerrainPlugin : IPlugin
                             var z = cells[pos].Z;
                             var tileX = (ushort) (bx + x);
 
-                            var isStretched = tiledataLoader.Value.LandData[tileID].TexID == 0 &&
-                                tiledataLoader.Value.LandData[tileID].IsWet;
+                            var isStretched = fileManager.Value.TileData.LandData[tileID].TexID == 0 &&
+                                fileManager.Value.TileData.LandData[tileID].IsWet;
 
                             isStretched = ApplyStretch(
-                                chunkEv.Map, tiledataLoader.Value.LandData[tileID].TexID,
+                                fileManager.Value.Maps, fileManager.Value.Texmaps,
+                                chunkEv.Map, fileManager.Value.TileData.LandData[tileID].TexID,
                                 tileX, tileY, z,
                                 isStretched,
                                 out var avgZ, out var minZ,
@@ -104,7 +105,7 @@ readonly struct TerrainPlugin : IPlugin
 
                             if (isStretched)
                             {
-                                ref readonly var textmapInfo = ref assetsServer.Value.Texmaps.GetTexmap(tiledataLoader.Value.LandData[tileID].TexID);
+                                ref readonly var textmapInfo = ref assetsServer.Value.Texmaps.GetTexmap(fileManager.Value.TileData.LandData[tileID].TexID);
 
                                 var position = Isometric.IsoToScreen(tileX, tileY, z);
                                 position.Y += z << 2;
@@ -167,17 +168,17 @@ readonly struct TerrainPlugin : IPlugin
 
                                     var priorityZ = sb->Z;
 
-                                    if (tiledataLoader.Value.StaticData[sb->Color].IsBackground)
+                                    if (fileManager.Value.TileData.StaticData[sb->Color].IsBackground)
                                     {
                                         priorityZ -= 1;
                                     }
 
-                                    if (tiledataLoader.Value.StaticData[sb->Color].Height != 0)
+                                    if (fileManager.Value.TileData.StaticData[sb->Color].Height != 0)
                                     {
                                         priorityZ += 1;
                                     }
 
-                                    if (tiledataLoader.Value.StaticData[sb->Color].IsMultiMovable)
+                                    if (fileManager.Value.TileData.StaticData[sb->Color].IsMultiMovable)
                                     {
                                         priorityZ += 1;
                                     }
@@ -189,7 +190,7 @@ readonly struct TerrainPlugin : IPlugin
                                         .Set(new Renderable() {
                                             Texture = artInfo.Texture,
                                             UV = artInfo.UV,
-                                            Color = Renderer.ShaderHueTranslator.GetHueVector(sb->Hue, tiledataLoader.Value.StaticData[sb->Color].IsPartialHue, 1f),
+                                            Color = Renderer.ShaderHueTranslator.GetHueVector(sb->Hue, fileManager.Value.TileData.StaticData[sb->Color].IsPartialHue, 1f),
                                             Position = posVec,
                                             Z = Isometric.GetDepthZ(staX, staY, priorityZ)
                                         });
@@ -206,6 +207,8 @@ readonly struct TerrainPlugin : IPlugin
 
 
     static bool ApplyStretch(
+        MapLoader mapLoader,
+        TexmapsLoader texmapsLoader,
         int mapIndex,
         ushort texId, int x, int y, sbyte z,
         bool isStretched, out sbyte avgZ, out sbyte minZ,
@@ -215,7 +218,7 @@ readonly struct TerrainPlugin : IPlugin
         out Vector3 normalBottom,
         out Vector3 normalLeft)
     {
-        if (isStretched || Assets.TexmapsLoader.Instance.GetValidRefEntry(texId).Length <= 0)
+        if (isStretched || texmapsLoader.GetValidRefEntry(texId).Length <= 0)
         {
             isStretched = false;
             avgZ = z;
@@ -233,9 +236,9 @@ readonly struct TerrainPlugin : IPlugin
         * |_____|_____|
         */
         var zTop = z;
-        var zRight = GetTileZ(mapIndex, x + 1, y);
-        var zLeft = GetTileZ(mapIndex, x, y + 1);
-        sbyte zBottom = GetTileZ(mapIndex, x + 1, y + 1);
+        var zRight = GetTileZ(mapLoader, mapIndex, x + 1, y);
+        var zLeft = GetTileZ(mapLoader, mapIndex, x, y + 1);
+        sbyte zBottom = GetTileZ(mapLoader, mapIndex, x + 1, y + 1);
 
         offsets.Top = zTop * 4;
         offsets.Right = zRight * 4;
@@ -264,17 +267,17 @@ readonly struct TerrainPlugin : IPlugin
         * |     | t13 | t23 |     |
         * |_____|_____|_____|_____|
         */
-        var t10 = GetTileZ(mapIndex, x, y - 1);
-        var t20 = GetTileZ(mapIndex, x + 1, y - 1);
-        var t01 = GetTileZ(mapIndex, x - 1, y);
+        var t10 = GetTileZ(mapLoader, mapIndex, x, y - 1);
+        var t20 = GetTileZ(mapLoader, mapIndex, x + 1, y - 1);
+        var t01 = GetTileZ(mapLoader, mapIndex, x - 1, y);
         var t21 = zRight;
-        var t31 = GetTileZ(mapIndex, x + 2, y);
-        var t02 = GetTileZ(mapIndex, x - 1, y + 1);
+        var t31 = GetTileZ(mapLoader, mapIndex, x + 2, y);
+        var t02 = GetTileZ(mapLoader, mapIndex, x - 1, y + 1);
         var t12 = zLeft;
         var t22 = zBottom;
-        var t32 = GetTileZ(mapIndex, x + 2, y + 1);
-        var t13 = GetTileZ(mapIndex, x, y + 2);
-        var t23 = GetTileZ(mapIndex, x + 1, y + 2);
+        var t32 = GetTileZ(mapLoader, mapIndex, x + 2, y + 1);
+        var t13 = GetTileZ(mapLoader, mapIndex, x, y + 2);
+        var t23 = GetTileZ(mapLoader, mapIndex, x + 1, y + 2);
 
 
         isStretched |= CalculateNormal(z, t10, t21, t12, t01, out normalTop);
@@ -285,18 +288,18 @@ readonly struct TerrainPlugin : IPlugin
         return isStretched;
     }
 
-    private unsafe static sbyte GetTileZ(int mapIndex, int x, int y)
+    private unsafe static sbyte GetTileZ(MapLoader mapLoader, int mapIndex, int x, int y)
     {
-        static ref Assets.IndexMap getIndex(int mapIndex, int x, int y)
+        static ref Assets.IndexMap getIndex(MapLoader mapLoader, int mapIndex, int x, int y)
         {
-            var block = getBlock(mapIndex, x, y);
-            Assets.MapLoader.Instance.SanitizeMapIndex(ref mapIndex);
-            var list = Assets.MapLoader.Instance.BlockData[mapIndex];
+            var block = getBlock(mapLoader, mapIndex, x, y);
+            mapLoader.SanitizeMapIndex(ref mapIndex);
+            var list = mapLoader.BlockData[mapIndex];
 
             return ref block >= list.Length ? ref Assets.IndexMap.Invalid : ref list[block];
 
-            static int getBlock(int mapIndex, int blockX, int blockY)
-                => blockX * Assets.MapLoader.Instance.MapBlocksSize[mapIndex, 1] + blockY;
+            static int getBlock(MapLoader mapLoader, int mapIndex, int blockX, int blockY)
+                => blockX * mapLoader.MapBlocksSize[mapIndex, 1] + blockY;
         }
 
 
@@ -305,7 +308,7 @@ readonly struct TerrainPlugin : IPlugin
             return -125;
         }
 
-        ref var blockIndex = ref getIndex(mapIndex, x >> 3, y >> 3);
+        ref var blockIndex = ref getIndex(mapLoader, mapIndex, x >> 3, y >> 3);
 
         if (blockIndex.MapAddress == 0)
         {

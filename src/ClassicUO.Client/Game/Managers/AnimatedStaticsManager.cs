@@ -46,7 +46,7 @@ namespace ClassicUO.Game.Managers
 
         public unsafe void Initialize()
         {
-            UOFile file = AnimDataLoader.Instance.AnimDataFile;
+            UOFile file = Client.Game.UO.FileManager.AnimData.AnimDataFile;
 
             if (file == null)
             {
@@ -57,9 +57,9 @@ namespace ClassicUO.Game.Managers
             long startAddr = reader.StartAddress.ToInt64();
             uint lastaddr = (uint) (startAddr + file.Length - sizeof(AnimDataFrame));
 
-            for (int i = 0; i < TileDataLoader.Instance.StaticData.Length; i++)
+            for (int i = 0; i < Client.Game.UO.FileManager.TileData.StaticData.Length; i++)
             {
-                if (TileDataLoader.Instance.StaticData[i].IsAnimated)
+                if (Client.Game.UO.FileManager.TileData.StaticData[i].IsAnimated)
                 {
                     uint addr = (uint) (i * 68 + 4 * (i / 8 + 1));
                     uint offset = (uint) (startAddr + addr);
@@ -86,7 +86,7 @@ namespace ClassicUO.Game.Managers
                 return;
             }
 
-            var file = AnimDataLoader.Instance.AnimDataFile;
+            var file = Client.Game.UO.FileManager.AnimData.AnimDataFile;
 
             if (file == null)
             {
@@ -100,7 +100,7 @@ namespace ClassicUO.Game.Managers
             uint next_time = Time.Ticks + 250;
             bool no_animated_field = ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.FieldsType != 0;
             long startAddr = reader.StartAddress.ToInt64();
-            UOFileIndex[] static_data = ArtLoader.Instance.Entries;
+            UOFileIndex[] static_data = Client.Game.UO.FileManager.Arts.Entries;
 
             for (int i = 0; i < _staticInfos.Length; i++)
             {

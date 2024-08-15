@@ -53,21 +53,11 @@ namespace ClassicUO.Assets
         // cannot be a const, due to UOLive implementation
         public static int MAPS_COUNT = 6;
 
-        protected MapLoader()
+        public MapLoader(UOFileManager fileManager) : base(fileManager)
         {
         }
 
-        public static MapLoader Instance
-        {
-            get => _instance ?? (_instance = new MapLoader());
-            set
-            {
-                _instance?.Dispose();
-                _instance = value;
-            }
-        }
-
-        public static string MapsLayouts { get; set; }
+        public string MapsLayouts { get; set; }
 
         public IndexMap[][] BlockData { get; private set; }
 
@@ -105,9 +95,9 @@ namespace ClassicUO.Assets
         protected UOFile[] _filesMap;
         protected UOFileMul[] _filesStatics;
 
-        protected static UOFile GetMapFile(int map)
+        protected UOFile GetMapFile(int map)
         {
-            return map < Instance._filesMap.Length ? Instance._filesMap[map] : null;
+            return map < _filesMap.Length ? _filesMap[map] : null;
         }
 
         protected void Initialize()
@@ -176,16 +166,16 @@ namespace ClassicUO.Assets
 
                     for (var i = 0; i < MAPS_COUNT; ++i)
                     {
-                        string path = UOFileManager.GetUOFilePath($"map{i}LegacyMUL.uop");
+                        string path = FileManager.GetUOFilePath($"map{i}LegacyMUL.uop");
 
-                        if (UOFileManager.IsUOPInstallation && File.Exists(path))
+                        if (FileManager.IsUOPInstallation && File.Exists(path))
                         {
                             _filesMap[i] = new UOFileUop(path, $"build/map{i}legacymul/{{0:D8}}.dat");
                             foundOneMap = true;
                         }
                         else
                         {
-                            path = UOFileManager.GetUOFilePath($"map{i}.mul");
+                            path = FileManager.GetUOFilePath($"map{i}.mul");
 
                             if (File.Exists(path))
                             {
@@ -194,26 +184,26 @@ namespace ClassicUO.Assets
                                 foundOneMap = true;
                             }
 
-                            path = UOFileManager.GetUOFilePath($"mapdifl{i}.mul");
+                            path = FileManager.GetUOFilePath($"mapdifl{i}.mul");
 
                             if (File.Exists(path))
                             {
                                 _mapDifl[i] = new UOFileMul(path);
-                                _mapDif[i] = new UOFileMul(UOFileManager.GetUOFilePath($"mapdif{i}.mul"));
-                                _staDifl[i] = new UOFileMul(UOFileManager.GetUOFilePath($"stadifl{i}.mul"));
-                                _staDifi[i] = new UOFileMul(UOFileManager.GetUOFilePath($"stadifi{i}.mul"));
-                                _staDif[i] = new UOFileMul(UOFileManager.GetUOFilePath($"stadif{i}.mul"));
+                                _mapDif[i] = new UOFileMul(FileManager.GetUOFilePath($"mapdif{i}.mul"));
+                                _staDifl[i] = new UOFileMul(FileManager.GetUOFilePath($"stadifl{i}.mul"));
+                                _staDifi[i] = new UOFileMul(FileManager.GetUOFilePath($"stadifi{i}.mul"));
+                                _staDif[i] = new UOFileMul(FileManager.GetUOFilePath($"stadif{i}.mul"));
                             }
                         }
 
-                        path = UOFileManager.GetUOFilePath($"statics{i}.mul");
+                        path = FileManager.GetUOFilePath($"statics{i}.mul");
 
                         if (File.Exists(path))
                         {
                             _filesStatics[i] = new UOFileMul(path);
                         }
 
-                        path = UOFileManager.GetUOFilePath($"staidx{i}.mul");
+                        path = FileManager.GetUOFilePath($"staidx{i}.mul");
 
                         if (File.Exists(path))
                         {
@@ -229,7 +219,7 @@ namespace ClassicUO.Assets
 
                     int mapblocksize = sizeof(MapBlock);
 
-                    if (_filesMap[0].Length / mapblocksize == 393216 || UOFileManager.Version < ClientVersion.CV_4011D)
+                    if (_filesMap[0].Length / mapblocksize == 393216 || FileManager.Version < ClientVersion.CV_4011D)
                     {
                         MapsDefaultSize[0, 0] = MapsDefaultSize[1, 0] = 6144;
                     }

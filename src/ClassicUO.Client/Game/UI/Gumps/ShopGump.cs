@@ -350,7 +350,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         //        if (fromcliloc)
         //        {
-        //            shopItem.SetName(ClilocLoader.Instance.Translate(it.Name, $"\t{it.Amount}\t{it.ItemData.Name}", true));
+        //            shopItem.SetName(Client.Game.UO.FileManager.Clilocs.Translate(it.Name, $"\t{it.Amount}\t{it.ItemData.Name}", true));
         //        }
         //    }
         //}
@@ -713,7 +713,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (SerialHelper.IsItem(serial))
                 {
-                    height = Math.Max(TileDataLoader.Instance.StaticData[graphic].Height, height);
+                    height = Math.Max(Client.Game.UO.FileManager.TileData.StaticData[graphic].Height, height);
                 }
 
                 Add(
@@ -776,7 +776,7 @@ namespace ClassicUO.Game.UI.Gumps
             private static byte GetAnimGroup(ushort graphic)
             {
                 var groupType = Client.Game.UO.Animations.GetAnimType(graphic);
-                switch (AnimationsLoader.Instance.GetGroupIndex(graphic, groupType))
+                switch (Client.Game.UO.FileManager.Animations.GetGroupIndex(graphic, groupType))
                 {
                     case AnimationGroups.Low:
                         return (byte)LowAnimationGroup.Stand;
@@ -832,7 +832,7 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         hueVector = ShaderHueTranslator.GetHueVector(
                             hue2,
-                            TileDataLoader.Instance.StaticData[Graphic].IsPartialHue,
+                            Client.Game.UO.FileManager.TileData.StaticData[Graphic].IsPartialHue,
                             1f
                         );
 
@@ -859,7 +859,7 @@ namespace ClassicUO.Game.UI.Gumps
                     ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(Graphic);
                     hueVector = ShaderHueTranslator.GetHueVector(
                         Hue,
-                        TileDataLoader.Instance.StaticData[Graphic].IsPartialHue,
+                        Client.Game.UO.FileManager.TileData.StaticData[Graphic].IsPartialHue,
                         1f
                     );
 

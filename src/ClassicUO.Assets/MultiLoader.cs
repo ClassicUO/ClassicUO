@@ -37,17 +37,13 @@ using System.Threading.Tasks;
 
 namespace ClassicUO.Assets
 {
-    public class MultiLoader : UOFileLoader
+    public sealed class MultiLoader : UOFileLoader
     {
-        private static MultiLoader _instance;
-
         public const int MAX_MULTI_DATA_INDEX_COUNT = 0x2200;
 
-        private MultiLoader()
+        public MultiLoader(UOFileManager fileManager) : base(fileManager)
         {
         }
-
-        public static MultiLoader Instance => _instance ?? (_instance = new MultiLoader());
 
         public int Count { get; private set; }
         public UOFile File { get; private set; }
@@ -62,9 +58,9 @@ namespace ClassicUO.Assets
             (
                 () =>
                 {
-                    string uopPath = UOFileManager.GetUOFilePath("MultiCollection.uop");
+                    string uopPath = FileManager.GetUOFilePath("MultiCollection.uop");
 
-                    if (UOFileManager.IsUOPInstallation && System.IO.File.Exists(uopPath))
+                    if (FileManager.IsUOPInstallation && System.IO.File.Exists(uopPath))
                     {
                         Count = MAX_MULTI_DATA_INDEX_COUNT;
                         File = new UOFileUop(uopPath, "build/multicollection/{0:D6}.bin");
@@ -73,14 +69,14 @@ namespace ClassicUO.Assets
                     }
                     else
                     {
-                        string path = UOFileManager.GetUOFilePath("multi.mul");
-                        string pathidx = UOFileManager.GetUOFilePath("multi.idx");
+                        string path = FileManager.GetUOFilePath("multi.mul");
+                        string pathidx = FileManager.GetUOFilePath("multi.idx");
 
                         if (System.IO.File.Exists(path) && System.IO.File.Exists(pathidx))
                         {
                             File = new UOFileMul(path, pathidx, MAX_MULTI_DATA_INDEX_COUNT, 14);
 
-                            Count = Offset = UOFileManager.Version >= ClientVersion.CV_7090 ? sizeof(MultiBlockNew) + 2 : sizeof(MultiBlock);
+                            Count = Offset = FileManager.Version >= ClientVersion.CV_7090 ? sizeof(MultiBlockNew) + 2 : sizeof(MultiBlock);
                         }
                     }
 

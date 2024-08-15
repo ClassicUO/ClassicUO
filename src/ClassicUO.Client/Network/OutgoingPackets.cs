@@ -958,7 +958,7 @@ namespace ClassicUO.Network
                 writer.WriteZero(2);
             }
 
-            List<SpeechEntry> entries = SpeechesLoader.Instance.GetKeywords(text);
+            List<SpeechEntry> entries = Client.Game.UO.FileManager.Speeches.GetKeywords(text);
             bool encoded = entries != null && entries.Count != 0;
 
             if (encoded)
@@ -1008,7 +1008,7 @@ namespace ClassicUO.Network
                 writer.WriteZero(2);
             }
 
-            List<SpeechEntry> entries = SpeechesLoader.Instance.GetKeywords(text);
+            List<SpeechEntry> entries = Client.Game.UO.FileManager.Speeches.GetKeywords(text);
             bool encoded = entries != null && entries.Count != 0;
 
             if (encoded)
@@ -4609,9 +4609,9 @@ namespace ClassicUO.Network
             writer.WriteUInt16BE(0xBEEF);
             writer.WriteUInt8(0x01);
 
-            writer.WriteUInt16BE((ushort)SkillsLoader.Instance.SortedSkills.Count);
+            writer.WriteUInt16BE((ushort)Client.Game.UO.FileManager.Skills.SortedSkills.Count);
 
-            foreach (SkillEntry s in SkillsLoader.Instance.SortedSkills)
+            foreach (SkillEntry s in Client.Game.UO.FileManager.Skills.SortedSkills)
             {
                 writer.WriteUInt16BE((ushort) s.Index);
                 writer.WriteBool(s.HasAction);

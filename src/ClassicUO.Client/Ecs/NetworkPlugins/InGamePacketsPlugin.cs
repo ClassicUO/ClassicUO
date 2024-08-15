@@ -114,6 +114,7 @@ readonly struct InGamePacketsPlugin : IPlugin
             Res<Settings> settings,
             Res<PacketsMap> packetsMap,
             Res<NetClient> network,
+            Res<UOFileManager> fileManager,
             Res<GameContext> gameCtx,
             EventWriter<OnNewChunkRequest> chunkRequests,
             EventWriter<PlayerMovementResponse> playerMovements,
@@ -1453,7 +1454,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                 if (flags.HasFlag(LockedFeatureFlags.ML))
                     bcFlags |= BodyConvFlags.Anim4;
 
-                AnimationsLoader.Instance.ProcessBodyConvDef(bcFlags);
+                fileManager.Value.Animations.ProcessBodyConvDef(bcFlags);
             };
 
             // show quest pointer

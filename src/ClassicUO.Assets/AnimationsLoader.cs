@@ -43,12 +43,11 @@ using System.Threading.Tasks;
 
 namespace ClassicUO.Assets
 {
-    public unsafe class AnimationsLoader : UOFileLoader
+    public unsafe sealed class AnimationsLoader : UOFileLoader
     {
         public const int MAX_ACTIONS = 80; // gargoyle is like 78
         public const int MAX_DIRECTIONS = 5;
 
-        private static AnimationsLoader _instance;
 
         [ThreadStatic]
         private static FrameInfo[] _frames;
@@ -66,10 +65,11 @@ namespace ClassicUO.Assets
         private readonly Dictionary<int, BodyConvInfo> _bodyConvInfos = new Dictionary<int, BodyConvInfo>();
         private readonly Dictionary<int, UopInfo> _uopInfos = new Dictionary<int, UopInfo>();
 
-        private AnimationsLoader() { }
+        
+        public AnimationsLoader(UOFileManager fileManager) : base(fileManager)
+        {
 
-        public static AnimationsLoader Instance =>
-            _instance ?? (_instance = new AnimationsLoader());
+        }
 
         public IReadOnlyDictionary<ushort, Dictionary<ushort, EquipConvData>> EquipConversions =>  _equipConv;
 
@@ -87,11 +87,11 @@ namespace ClassicUO.Assets
 
             for (int i = 0; i < 5; i++)
             {
-                string pathmul = UOFileManager.GetUOFilePath(
+                string pathmul = FileManager.GetUOFilePath(
                     "anim" + (i == 0 ? string.Empty : (i + 1).ToString()) + ".mul"
                 );
 
-                string pathidx = UOFileManager.GetUOFilePath(
+                string pathidx = FileManager.GetUOFilePath(
                     "anim" + (i == 0 ? string.Empty : (i + 1).ToString()) + ".idx"
                 );
 
@@ -100,9 +100,9 @@ namespace ClassicUO.Assets
                     _files[i] = new UOFileMul(pathmul, pathidx, un[i], i == 0 ? 6 : -1);
                 }
 
-                if (i > 0 && UOFileManager.IsUOPInstallation)
+                if (i > 0 && FileManager.IsUOPInstallation)
                 {
-                    string pathuop = UOFileManager.GetUOFilePath($"AnimationFrame{i}.uop");
+                    string pathuop = FileManager.GetUOFilePath($"AnimationFrame{i}.uop");
 
                     if (File.Exists(pathuop))
                     {
@@ -124,9 +124,9 @@ namespace ClassicUO.Assets
                 LoadUop();
             }
 
-            if (UOFileManager.Version >= ClientVersion.CV_500A)
+            if (FileManager.Version >= ClientVersion.CV_500A)
             {
-                string path = UOFileManager.GetUOFilePath("mobtypes.txt");
+                string path = FileManager.GetUOFilePath("mobtypes.txt");
 
                 if (File.Exists(path))
                 {
@@ -200,7 +200,7 @@ namespace ClassicUO.Assets
                 }
             }
 
-            string file = UOFileManager.GetUOFilePath("Anim1.def");
+            string file = FileManager.GetUOFilePath("Anim1.def");
 
             if (File.Exists(file))
             {
@@ -222,7 +222,7 @@ namespace ClassicUO.Assets
                 }
             }
 
-            file = UOFileManager.GetUOFilePath("Anim2.def");
+            file = FileManager.GetUOFilePath("Anim2.def");
 
             if (File.Exists(file))
             {
@@ -484,12 +484,12 @@ namespace ClassicUO.Assets
 
         private void ProcessEquipConvDef()
         {
-            if (UOFileManager.Version < ClientVersion.CV_300)
+            if (FileManager.Version < ClientVersion.CV_300)
             {
                 return;
             }
 
-            var file = UOFileManager.GetUOFilePath("Equipconv.def");
+            var file = FileManager.GetUOFilePath("Equipconv.def");
 
             if (File.Exists(file))
             {
@@ -531,12 +531,12 @@ namespace ClassicUO.Assets
 
         public void ProcessBodyConvDef(BodyConvFlags flags)
         {
-            if (UOFileManager.Version < ClientVersion.CV_300)
+            if (FileManager.Version < ClientVersion.CV_300)
             {
                 return;
             }
 
-            var file = UOFileManager.GetUOFilePath("Bodyconv.def");
+            var file = FileManager.GetUOFilePath("Bodyconv.def");
 
             if (!File.Exists(file))
                 return;
@@ -638,12 +638,12 @@ namespace ClassicUO.Assets
 
         private void ProcessBodyDef()
         {
-            if (UOFileManager.Version < ClientVersion.CV_300)
+            if (FileManager.Version < ClientVersion.CV_300)
             {
                 return;
             }
 
-            var file = UOFileManager.GetUOFilePath("Body.def");
+            var file = FileManager.GetUOFilePath("Body.def");
 
             if (!File.Exists(file))
                 return;
@@ -682,12 +682,12 @@ namespace ClassicUO.Assets
 
         private void ProcessCorpseDef()
         {
-            if (UOFileManager.Version < ClientVersion.CV_300)
+            if (FileManager.Version < ClientVersion.CV_300)
             {
                 return;
             }
 
-            var file = UOFileManager.GetUOFilePath("Corpse.def");
+            var file = FileManager.GetUOFilePath("Corpse.def");
 
             if (!File.Exists(file))
                 return;
@@ -724,12 +724,12 @@ namespace ClassicUO.Assets
 
         private void LoadUop()
         {
-            if (UOFileManager.Version <= ClientVersion.CV_60144)
+            if (FileManager.Version <= ClientVersion.CV_60144)
             {
                 return;
             }
 
-            string animationSequencePath = UOFileManager.GetUOFilePath("AnimationSequence.uop");
+            string animationSequencePath = FileManager.GetUOFilePath("AnimationSequence.uop");
 
             if (!File.Exists(animationSequencePath))
             {

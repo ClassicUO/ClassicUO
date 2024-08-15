@@ -1,4 +1,5 @@
 using System;
+using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Utility;
@@ -26,16 +27,16 @@ readonly struct AssetsPlugin : IPlugin
             Res<Settings> settings,
             SchedulerState schedState
         ) => {
-            Assets.UOFileManager.Load(gameCtx.Value.ClientVersion, settings.Value.UltimaOnlineDirectory, false, settings.Value.Language);
+            var fileManager = new UOFileManager(gameCtx.Value.ClientVersion, settings.Value.UltimaOnlineDirectory);
+            fileManager.Load(false, settings.Value.Language);
 
-            schedState.AddResource(Assets.TileDataLoader.Instance);
-            schedState.AddResource(Assets.MapLoader.Instance);
+            schedState.AddResource(fileManager);
             schedState.AddResource(new AssetsServer()
             {
-                Arts = new Renderer.Arts.Art(device),
-                Texmaps = new Renderer.Texmaps.Texmap(device),
-                Animations = new Renderer.Animations.Animations(device),
-                Gumps = new Renderer.Gumps.Gump(device)
+                Arts = new Renderer.Arts.Art(fileManager.Arts, fileManager.Hues, device),
+                Texmaps = new Renderer.Texmaps.Texmap(fileManager.Texmaps, device),
+                Animations = new Renderer.Animations.Animations(fileManager.Animations, device),
+                Gumps = new Renderer.Gumps.Gump(fileManager.Gumps, device)
             });
             schedState.AddResource(new Renderer.UltimaBatcher2D(device));
 
@@ -74,7 +75,7 @@ readonly struct AssetsPlugin : IPlugin
                 TEXTURE_WIDTH * TEXTURE_HEIGHT
             )];
 
-            Assets.HuesLoader.Instance.CreateShaderColors(buffer);
+            fileManager.Hues.CreateShaderColors(buffer);
             fixed (uint* ptr = buffer)
             {
                 hueSamplers[0].SetDataPointerEXT(

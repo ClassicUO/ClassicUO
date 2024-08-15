@@ -191,8 +191,8 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                         cityFacet = 5;
                     }
 
-                    x = 62 + MathHelper.PercetangeOf(MapLoader.Instance.MapsDefaultSize[cityFacet, 0] - 2048, c.X, 383);
-                    y = 54 + MathHelper.PercetangeOf(MapLoader.Instance.MapsDefaultSize[cityFacet, 1], c.Y, 384);
+                    x = 62 + MathHelper.PercetangeOf(Client.Game.UO.FileManager.Maps.MapsDefaultSize[cityFacet, 0] - 2048, c.X, 383);
+                    y = 54 + MathHelper.PercetangeOf(Client.Game.UO.FileManager.Maps.MapsDefaultSize[cityFacet, 1], c.Y, 384);
                 }
                 else if (i < _townButtonsText.Length)
                 {

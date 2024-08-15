@@ -200,7 +200,7 @@ namespace ClassicUO.Game.GameObjects
             posY += 22;
 
             byte direction = (byte)((byte)Layer & 0x7F & 7);
-            AnimationsLoader.Instance.GetAnimDirection(ref direction, ref IsFlipped);
+            Client.Game.UO.FileManager.Animations.GetAnimDirection(ref direction, ref IsFlipped);
 
             byte animIndex = (byte)AnimIndex;
             ushort graphic = GetGraphicForAnimation();
@@ -208,7 +208,7 @@ namespace ClassicUO.Game.GameObjects
             Client.Game.UO.Animations.ConvertBodyIfNeeded(ref graphic, isCorpse: IsCorpse);
             var animGroup = Client.Game.UO.Animations.GetAnimType(graphic);
             var animFlags = Client.Game.UO.Animations.GetAnimFlags(graphic);
-            byte group = AnimationsLoader.Instance.GetDeathAction(
+            byte group = Client.Game.UO.FileManager.Animations.GetDeathAction(
                 graphic,
                 animFlags,
                 animGroup,
@@ -308,7 +308,7 @@ namespace ClassicUO.Game.GameObjects
                 ispartialhue = itemEquip.ItemData.IsPartialHue;
 
                 if (
-                    AnimationsLoader.Instance.EquipConversions.TryGetValue(
+                    Client.Game.UO.FileManager.Animations.EquipConversions.TryGetValue(
                         graphic,
                         out Dictionary<ushort, EquipConvData> map
                     )
@@ -501,7 +501,7 @@ namespace ClassicUO.Game.GameObjects
                     }
                     else
                     {
-                        ref UOFileIndex index = ref ArtLoader.Instance.GetValidRefEntry(
+                        ref UOFileIndex index = ref Client.Game.UO.FileManager.Arts.GetValidRefEntry(
                             graphic + 0x4000
                         );
 
@@ -511,7 +511,7 @@ namespace ClassicUO.Game.GameObjects
 
                 if (Client.Game.UO.Arts.GetArt(graphic).Texture != null)
                 {
-                    ref var index = ref ArtLoader.Instance.GetValidRefEntry(graphic + 0x4000);
+                    ref var index = ref Client.Game.UO.FileManager.Arts.GetValidRefEntry(graphic + 0x4000);
 
                     Point position = RealScreenPosition;
                     position.X += (int)Offset.X;
@@ -561,7 +561,7 @@ namespace ClassicUO.Game.GameObjects
                 position.Y += 22;
 
                 byte direction = (byte)((byte)Layer & 0x7F & 7);
-                AnimationsLoader.Instance.GetAnimDirection(ref direction, ref IsFlipped);
+                Client.Game.UO.FileManager.Animations.GetAnimDirection(ref direction, ref IsFlipped);
                 byte animIndex = AnimIndex;
                 bool ishuman =
                     MathHelper.InRange(Amount, 0x0190, 0x0193)
@@ -598,7 +598,7 @@ namespace ClassicUO.Game.GameObjects
                         graphic = itemEquip.ItemData.AnimID;
 
                         if (
-                            AnimationsLoader.Instance.EquipConversions.TryGetValue(
+                            Client.Game.UO.FileManager.Animations.EquipConversions.TryGetValue(
                                 graphic,
                                 out Dictionary<ushort, EquipConvData> map
                             )
@@ -619,7 +619,7 @@ namespace ClassicUO.Game.GameObjects
                     Client.Game.UO.Animations.ConvertBodyIfNeeded(ref graphic, isCorpse: IsCorpse);
                     var animGroup = Client.Game.UO.Animations.GetAnimType(graphic);
                     var animFlags = Client.Game.UO.Animations.GetAnimFlags(graphic);
-                    byte group = AnimationsLoader.Instance.GetDeathAction(
+                    byte group = Client.Game.UO.FileManager.Animations.GetDeathAction(
                         graphic,
                         animFlags,
                         animGroup,

@@ -38,9 +38,8 @@ using System.Threading.Tasks;
 
 namespace ClassicUO.Assets
 {
-    public class ArtLoader : UOFileLoader
+    public sealed class ArtLoader : UOFileLoader
     {
-        private static ArtLoader _instance;
         private UOFile _file;
         private readonly ushort _graphicMask;
 
@@ -50,22 +49,19 @@ namespace ClassicUO.Assets
         public const int MAX_LAND_DATA_INDEX_COUNT = 0x4000;
         public const int MAX_STATIC_DATA_INDEX_COUNT = 0x14000;
 
-        private ArtLoader(int staticCount, int landCount)
+        public ArtLoader(UOFileManager fileManager) : base(fileManager)
         {
-            _graphicMask = UOFileManager.IsUOPInstallation ? (ushort)0xFFFF : (ushort)0x3FFF;
+            _graphicMask = FileManager.IsUOPInstallation ? (ushort)0xFFFF : (ushort)0x3FFF;
         }
 
-        public static ArtLoader Instance =>
-            _instance
-            ?? (_instance = new ArtLoader(MAX_STATIC_DATA_INDEX_COUNT, MAX_LAND_DATA_INDEX_COUNT));
 
         public override Task Load()
         {
             return Task.Run(() =>
             {
-                string filePath = UOFileManager.GetUOFilePath("artLegacyMUL.uop");
+                string filePath = FileManager.GetUOFilePath("artLegacyMUL.uop");
 
-                if (UOFileManager.IsUOPInstallation && File.Exists(filePath))
+                if (FileManager.IsUOPInstallation && File.Exists(filePath))
                 {
                     _file = new UOFileUop(filePath, "build/artlegacymul/{0:D8}.tga");
                     Entries = new UOFileIndex[
@@ -74,8 +70,8 @@ namespace ClassicUO.Assets
                 }
                 else
                 {
-                    filePath = UOFileManager.GetUOFilePath("art.mul");
-                    string idxPath = UOFileManager.GetUOFilePath("artidx.mul");
+                    filePath = FileManager.GetUOFilePath("art.mul");
+                    string idxPath = FileManager.GetUOFilePath("artidx.mul");
 
                     if (File.Exists(filePath) && File.Exists(idxPath))
                     {

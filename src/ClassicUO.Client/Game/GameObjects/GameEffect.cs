@@ -51,7 +51,7 @@ namespace ClassicUO.Game.GameObjects
             Hue = hue;
             AllowedToDraw = CanBeDrawn(world, graphic);
             AlphaHue = 0xFF;
-            AnimDataFrame = AnimDataLoader.Instance?.CalculateCurrentGraphic(graphic) ?? default;
+            AnimDataFrame = Client.Game.UO.FileManager.AnimData.CalculateCurrentGraphic(graphic);
             IsEnabled = true;
             AnimIndex = 0;
             

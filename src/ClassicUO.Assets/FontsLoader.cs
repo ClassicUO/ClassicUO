@@ -44,7 +44,7 @@ using System.Threading.Tasks;
 
 namespace ClassicUO.Assets
 {
-    public class FontsLoader : UOFileLoader
+    public sealed class FontsLoader : UOFileLoader
     {
         private const int UOFONT_SOLID = 0x0001;
         private const int UOFONT_ITALIC = 0x0002;
@@ -61,8 +61,6 @@ namespace ClassicUO.Assets
         private const int MAX_HTML_TEXT_HEIGHT = 18;
         private const byte NOPRINT_CHARS = 32;
         private const float ITALIC_FONT_KOEFFICIENT = 3.3f;
-
-        private static FontsLoader _instance;
 
         public struct Margin 
         { 
@@ -110,9 +108,7 @@ namespace ClassicUO.Assets
         private readonly int[] _offsetCharTable = { 2, 0, 2, 2, 0, 0, 2, 2, 0, 0 };
         private readonly int[] _offsetSymbolTable = { 1, 0, 1, 1, -1, 0, 1, 1, 0, 0 };
 
-        private FontsLoader() { }
-
-        public static FontsLoader Instance => _instance ?? (_instance = new FontsLoader());
+        public FontsLoader(UOFileManager fileManager) : base(fileManager) { }
 
         public int FontCount { get; private set; }
 
@@ -126,12 +122,12 @@ namespace ClassicUO.Assets
         {
             return Task.Run(() =>
             {
-                UOFileMul fonts = new UOFileMul(UOFileManager.GetUOFilePath("fonts.mul"));
+                UOFileMul fonts = new UOFileMul(FileManager.GetUOFilePath("fonts.mul"));
                 UOFileMul[] uniFonts = new UOFileMul[20];
 
                 for (int i = 0; i < 20; i++)
                 {
-                    string path = UOFileManager.GetUOFilePath(
+                    string path = FileManager.GetUOFilePath(
                         "unifont" + (i == 0 ? "" : i.ToString()) + ".mul"
                     );
 
@@ -679,14 +675,14 @@ namespace ClassicUO.Assets
 
                                     if (isPartial)
                                     {
-                                        pcl = HuesLoader.Instance.GetPartialHueColor(
+                                        pcl = FileManager.Hues.GetPartialHueColor(
                                             pic,
                                             charColor
                                         );
                                     }
                                     else
                                     {
-                                        pcl = HuesLoader.Instance.GetColor(pic, charColor);
+                                        pcl = FileManager.Hues.GetColor(pic, charColor);
                                     }
 
                                     int block = testY * width + x + w;
@@ -1693,7 +1689,7 @@ namespace ClassicUO.Assets
                 else
                 {
                     datacolor = HuesHelper.RgbaToArgb(
-                        (HuesLoader.Instance.GetPolygoneColor(cell, color) << 8) | 0xFF
+                        (FileManager.Hues.GetPolygoneColor(cell, color) << 8) | 0xFF
                     );
                 }
 

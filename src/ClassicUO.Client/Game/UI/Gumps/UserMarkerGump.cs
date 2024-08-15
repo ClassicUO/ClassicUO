@@ -52,8 +52,8 @@ namespace ClassicUO.Game.UI.Gumps
         {
             CanMove = true;
 
-            _mapMaxX= MapLoader.Instance.MapsDefaultSize[world.MapIndex, 0];
-            _mapMaxY = MapLoader.Instance.MapsDefaultSize[world.MapIndex, 1];
+            _mapMaxX= Client.Game.UO.FileManager.Maps.MapsDefaultSize[world.MapIndex, 0];
+            _mapMaxY = Client.Game.UO.FileManager.Maps.MapsDefaultSize[world.MapIndex, 1];
 
             _markers = markers;
             _markerIdx = markerIdx;

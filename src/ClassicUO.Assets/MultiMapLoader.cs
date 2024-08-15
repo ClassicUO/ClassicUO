@@ -42,17 +42,14 @@ using System.Threading.Tasks;
 
 namespace ClassicUO.Assets
 {
-    public class MultiMapLoader : UOFileLoader
+    public sealed class MultiMapLoader : UOFileLoader
     {
-        private static MultiMapLoader _instance;
         private UOFileMul[] _facets;
         private UOFile _file;
 
-        private MultiMapLoader()
+        public MultiMapLoader(UOFileManager fileManager) : base(fileManager)
         {
         }
-
-        public static MultiMapLoader Instance => _instance ?? (_instance = new MultiMapLoader());
 
         public bool HasFacet(int map)
         {
@@ -65,17 +62,17 @@ namespace ClassicUO.Assets
             (
                 () =>
                 {
-                    string path = UOFileManager.GetUOFilePath("Multimap.rle");
+                    string path = FileManager.GetUOFilePath("Multimap.rle");
 
                     if (File.Exists(path))
                     {
                         _file = new UOFile(path, true);
                     }
                     
-                    var facetFiles = Directory.GetFiles(UOFileManager.BasePath, "*.mul", SearchOption.TopDirectoryOnly)
+                    var facetFiles = Directory.GetFiles(FileManager.BasePath, "*.mul", SearchOption.TopDirectoryOnly)
                         .Select(s => Regex.Match(s, "facet0.*\\.mul", RegexOptions.IgnoreCase))
                         .Where(s => s.Success)
-                        .Select(s => Path.Combine(UOFileManager.BasePath, s.Value))
+                        .Select(s => Path.Combine(FileManager.BasePath, s.Value))
                         .OrderBy(s => s)
                         .ToArray();
 
@@ -197,11 +194,11 @@ namespace ClassicUO.Assets
             }
 
             int s = Marshal.SizeOf<HuesGroup>();
-            IntPtr ptr = Marshal.AllocHGlobal(s * HuesLoader.Instance.HuesRange.Length);
+            IntPtr ptr = Marshal.AllocHGlobal(s * FileManager.Hues.HuesRange.Length);
 
-            for (int i = 0; i < HuesLoader.Instance.HuesRange.Length; i++)
+            for (int i = 0; i < FileManager.Hues.HuesRange.Length; i++)
             {
-                Marshal.StructureToPtr(HuesLoader.Instance.HuesRange[i], ptr + i * s, false);
+                Marshal.StructureToPtr(FileManager.Hues.HuesRange[i], ptr + i * s, false);
             }
 
             ushort* huesData = (ushort*)(byte*)(ptr + 30800);

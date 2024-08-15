@@ -537,7 +537,7 @@ namespace ClassicUO.Game.Scenes
                     }
                     else
                     {
-                        ref StaticTiles data = ref TileDataLoader.Instance.StaticData[obj.Graphic];
+                        ref StaticTiles data = ref Client.Game.UO.FileManager.TileData.StaticData[obj.Graphic];
                         light.ID = data.Layer;
                     }
                 }

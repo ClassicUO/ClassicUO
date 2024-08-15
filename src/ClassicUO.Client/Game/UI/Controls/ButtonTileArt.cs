@@ -66,7 +66,7 @@ namespace ClassicUO.Game.UI.Controls
                 return;
             }
 
-            _isPartial = TileDataLoader.Instance.StaticData[_graphic].IsPartialHue;
+            _isPartial = Client.Game.UO.FileManager.TileData.StaticData[_graphic].IsPartialHue;
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)

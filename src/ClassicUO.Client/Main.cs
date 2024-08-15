@@ -60,11 +60,6 @@ namespace ClassicUO
 {
     internal static class Bootstrap
     {
-        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool SetDllDirectory(string lpPathName);
-
-
         [UnmanagedCallersOnly(EntryPoint = "Initialize", CallConvs = new Type[] { typeof(CallConvCdecl) })]
         static unsafe void Initialize(IntPtr* argv, int argc, HostBindings* hostSetup)
         {
@@ -142,15 +137,11 @@ namespace ClassicUO
                 Environment.SetEnvironmentVariable("FNA_GRAPHICS_ENABLE_HIGHDPI", "1");
             }
 
-            //Environment.SetEnvironmentVariable("FNA3D_FORCE_DRIVER", "OpenGL");
-
             // NOTE: this is a workaroud to fix d3d11 on windows 11 + scale windows
             Environment.SetEnvironmentVariable("FNA3D_D3D11_FORCE_BITBLT", "1");
-
             Environment.SetEnvironmentVariable("FNA3D_BACKBUFFER_SCALE_NEAREST", "1");
             Environment.SetEnvironmentVariable("FNA3D_OPENGL_FORCE_COMPATIBILITY_PROFILE", "1");
             Environment.SetEnvironmentVariable(SDL.SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH, "1");
-
             Environment.SetEnvironmentVariable("PATH", Environment.GetEnvironmentVariable("PATH") + ";" + Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Plugins"));
 
             string globalSettingsPath = Settings.GetSettingsFilepath();
@@ -173,13 +164,6 @@ namespace ClassicUO
             {
                 Settings.GlobalSettings = new Settings();
                 Settings.GlobalSettings.Save();
-            }
-
-            if (!CUOEnviroment.IsUnix)
-            {
-                string libsPath = Path.Combine(CUOEnviroment.ExecutablePath, Environment.Is64BitProcess ? "x64" : "x86");
-
-                SetDllDirectory(libsPath);
             }
 
             if (string.IsNullOrWhiteSpace(Settings.GlobalSettings.Language))

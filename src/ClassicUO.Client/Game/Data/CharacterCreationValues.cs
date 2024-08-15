@@ -250,8 +250,8 @@ namespace ClassicUO.Game.Data
             public ComboContent(int[] labels, int[] ids)
             {
                 _ids = ids;
-
-                Labels = labels.Select(o => ClilocLoader.Instance.GetString(o)).ToArray();
+                
+                Labels = labels.Select(o => Client.Game.UO.FileManager.Clilocs.GetString(o)).ToArray();
             }
 
             public string[] Labels { get; }

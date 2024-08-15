@@ -4591,7 +4591,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 for (byte i = 0; i < max_font; i++)
                 {
-                    if (FontsLoader.Instance.UnicodeFontExists(i))
+                    if (Client.Game.UO.FileManager.Fonts.UnicodeFontExists(i))
                     {
                         Add
                         (

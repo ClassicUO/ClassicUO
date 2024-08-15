@@ -39,15 +39,11 @@ using System.Threading.Tasks;
 
 namespace ClassicUO.Assets
 {
-    public class HuesLoader : UOFileLoader
+    public sealed class HuesLoader : UOFileLoader
     {
-        private static HuesLoader _instance;
-
-        private HuesLoader()
+        public HuesLoader(UOFileManager fileManager) : base(fileManager)
         {
         }
-
-        public static HuesLoader Instance => _instance ?? (_instance = new HuesLoader());
 
         public HuesGroup[] HuesRange { get; private set; }
 
@@ -63,7 +59,7 @@ namespace ClassicUO.Assets
             (
                 () =>
                 {
-                    string path = UOFileManager.GetUOFilePath("hues.mul");
+                    string path = FileManager.GetUOFilePath("hues.mul");
 
                     FileSystemHelper.EnsureFileExists(path);
 
@@ -80,7 +76,7 @@ namespace ClassicUO.Assets
                         HuesRange[i] = Marshal.PtrToStructure<HuesGroup>((IntPtr) (addr + (ulong) (i * groupSize)));
                     }
 
-                    path = UOFileManager.GetUOFilePath("radarcol.mul");
+                    path = FileManager.GetUOFilePath("radarcol.mul");
 
                     FileSystemHelper.EnsureFileExists(path);
 

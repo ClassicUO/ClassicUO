@@ -428,12 +428,12 @@ namespace ClassicUO.Game.Managers
             }
             else
             {
-                if (graphic >= TileDataLoader.Instance.StaticData.Length)
+                if (graphic >= Client.Game.UO.FileManager.TileData.StaticData.Length)
                 {
                     return;
                 }
 
-                ref StaticTiles itemData = ref TileDataLoader.Instance.StaticData[graphic];
+                ref StaticTiles itemData = ref Client.Game.UO.FileManager.TileData.StaticData[graphic];
 
                 if (Client.Game.UO.Version >= ClientVersion.CV_7090 && itemData.IsSurface)
                 {

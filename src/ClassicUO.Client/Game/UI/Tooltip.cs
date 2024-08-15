@@ -97,8 +97,8 @@ namespace ClassicUO.Game.UI
                 zoom = ProfileManager.CurrentProfile.TooltipDisplayZoom / 100f;
             }
 
-            FontsLoader.Instance.SetUseHTML(true);
-            FontsLoader.Instance.RecalculateWidthByInfo = true;
+            Client.Game.UO.FileManager.Fonts.SetUseHTML(true);
+            Client.Game.UO.FileManager.Fonts.RecalculateWidthByInfo = true;
 
             if (_renderedText == null)
             {
@@ -120,14 +120,14 @@ namespace ClassicUO.Game.UI
             {
                 if (_maxWidth == 0)
                 {
-                    int width = FontsLoader.Instance.GetWidthUnicode(font, Text);
+                    int width = Client.Game.UO.FileManager.Fonts.GetWidthUnicode(font, Text);
 
                     if (width > 600)
                     {
                         width = 600;
                     }
 
-                    width = FontsLoader.Instance.GetWidthExUnicode
+                    width = Client.Game.UO.FileManager.Fonts.GetWidthExUnicode
                     (
                         font,
                         Text,
@@ -153,8 +153,8 @@ namespace ClassicUO.Game.UI
                 _renderedText.Text = _textHTML;
             }
 
-            FontsLoader.Instance.RecalculateWidthByInfo = false;
-            FontsLoader.Instance.SetUseHTML(false);
+            Client.Game.UO.FileManager.Fonts.RecalculateWidthByInfo = false;
+            Client.Game.UO.FileManager.Fonts.SetUseHTML(false);
 
             if (_renderedText.Texture == null || _renderedText.Texture.IsDisposed)
             {

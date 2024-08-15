@@ -269,7 +269,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             int maxBlockIndex = World.Map.BlocksCount;
-            int mapBlockHeight = MapLoader.Instance.MapBlocksSize[World.MapIndex, 1];
+            int mapBlockHeight = Client.Game.UO.FileManager.Maps.MapBlocksSize[World.MapIndex, 1];
             int index = _useLargeMap ? 1 : 0;
 
             _blankGumpsPixels[index].CopyTo(_blankGumpsPixels[index + 2], 0);
@@ -384,14 +384,14 @@ namespace ClassicUO.Game.UI.Gumps
 
                             if (isLand && color > 0x4000)
                             {
-                                color = HuesLoader.Instance.GetColor16(
+                                color = Client.Game.UO.FileManager.Hues.GetColor16(
                                     16384,
                                     (ushort)(color - 0x4000)
                                 ); //28672 is an arbitrary position in hues.mul, is the 14 position in the range
                             }
                             else
                             {
-                                color = HuesLoader.Instance.GetRadarColorData(color);
+                                color = Client.Game.UO.FileManager.Hues.GetRadarColorData(color);
                             }
 
                             int py = realBlockY + y - lastY;

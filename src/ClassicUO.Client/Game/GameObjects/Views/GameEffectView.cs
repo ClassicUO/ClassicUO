@@ -99,7 +99,7 @@ namespace ClassicUO.Game.GameObjects
                 return false;
             }
 
-            ref StaticTiles data = ref TileDataLoader.Instance.StaticData[Graphic];
+            ref StaticTiles data = ref Client.Game.UO.FileManager.TileData.StaticData[Graphic];
 
             posX += (int)Offset.X;
             posY += (int)(Offset.Z + Offset.Y);

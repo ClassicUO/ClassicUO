@@ -105,7 +105,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                         World,
                         400,
                         300,
-                        ClilocLoader.Instance.GetString(1063016),
+                        Client.Game.UO.FileManager.Clilocs.GetString(1063016),
                         null,
                         true
                     )

@@ -55,7 +55,7 @@ namespace ClassicUO.Game.GameObjects
         //    }
         //);
 
-        public ref LandTiles TileData => ref TileDataLoader.Instance.LandData[Graphic];
+        public ref LandTiles TileData => ref Client.Game.UO.FileManager.TileData.LandData[Graphic];
         public sbyte AverageZ;
         public bool IsStretched;
         public sbyte MinZ;
@@ -121,7 +121,7 @@ namespace ClassicUO.Game.GameObjects
 
         public void ApplyStretch(Map.Map map, int x, int y, sbyte z)
         {
-            if (IsStretched || TexmapsLoader.Instance.GetValidRefEntry(TileData.TexID).Length <= 0)
+            if (IsStretched || Client.Game.UO.FileManager.Texmaps.GetValidRefEntry(TileData.TexID).Length <= 0)
             {
                 IsStretched = false;
                 AverageZ = z;

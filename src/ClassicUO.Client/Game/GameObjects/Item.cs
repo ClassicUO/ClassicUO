@@ -184,7 +184,7 @@ namespace ClassicUO.Game.GameObjects
         }
 
         public ref StaticTiles ItemData =>
-            ref TileDataLoader.Instance.StaticData[IsMulti ? MultiGraphic : Graphic];
+            ref Client.Game.UO.FileManager.TileData.StaticData[IsMulti ? MultiGraphic : Graphic];
 
         public bool IsLootable =>
             ItemData.Layer != (int)Layer.Hair
@@ -262,11 +262,11 @@ namespace ClassicUO.Game.GameObjects
                 house.ClearComponents();
             }
 
-            ref UOFileIndex entry = ref MultiLoader.Instance.GetValidRefEntry(Graphic);
+            ref var entry = ref Client.Game.UO.FileManager.Multis.GetValidRefEntry(Graphic);
             var reader = new StackDataReader(entry.Address, (int)entry.FileSize);
             bool movable = false;
 
-            if (MultiLoader.Instance.IsUOP)
+            if (Client.Game.UO.FileManager.Multis.IsUOP)
             {
                 if (entry.Length > 0 && entry.DecompressedLength > 0)
                 {
@@ -383,13 +383,13 @@ namespace ClassicUO.Game.GameObjects
             }
             else
             {
-                int count = entry.Length / MultiLoader.Instance.Offset;
+                int count = entry.Length / Client.Game.UO.FileManager.Multis.Offset;
                 reader.Seek(entry.Offset);
 
                 for (int i = 0; i < count; i++)
                 {
                     MultiBlock* block = (MultiBlock*)(
-                        reader.PositionAddress + i * MultiLoader.Instance.Offset
+                        reader.PositionAddress + i * Client.Game.UO.FileManager.Multis.Offset
                     );
 
                     if (block->X < minX)
@@ -725,14 +725,14 @@ namespace ClassicUO.Game.GameObjects
                     ushort id = GetGraphicForAnimation();
 
                     bool mirror = false;
-                    AnimationsLoader.Instance.GetAnimDirection(ref dir, ref mirror);
+                    Client.Game.UO.FileManager.Animations.GetAnimDirection(ref dir, ref mirror);
 
                     if (id < Client.Game.UO.Animations.MaxAnimationCount && dir < 5)
                     {
                         Client.Game.UO.Animations.ConvertBodyIfNeeded(ref id);
                         var animGroup = Client.Game.UO.Animations.GetAnimType(id);
                         var animFlags = Client.Game.UO.Animations.GetAnimFlags(id);
-                        byte action = AnimationsLoader.Instance.GetDeathAction(
+                        byte action = Client.Game.UO.FileManager.Animations.GetDeathAction(
                             id,
                             animFlags,
                             animGroup,

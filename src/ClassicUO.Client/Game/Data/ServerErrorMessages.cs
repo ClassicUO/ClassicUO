@@ -86,7 +86,7 @@ namespace ClassicUO.Game.Data
 
         public static string GetError(byte packetID, byte code)
         {
-            ClilocLoader cliloc = ClilocLoader.Instance;
+            var cliloc = Client.Game.UO.FileManager.Clilocs;
 
             switch (packetID)
             {
