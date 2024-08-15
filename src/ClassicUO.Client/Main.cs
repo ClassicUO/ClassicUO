@@ -164,8 +164,7 @@ namespace ClassicUO
                 }
             }
 
-            Settings.GlobalSettings = ConfigurationResolver.Load<Settings>(globalSettingsPath, SettingsJsonContext.RealDefault.Settings);
-            CUOEnviroment.IsOutlands = Settings.GlobalSettings.ShardType == 2;
+            Settings.GlobalSettings = ConfigurationResolver.Load(globalSettingsPath, SettingsJsonContext.RealDefault.Settings);
 
             ReadSettingsFromArgs(args);
 
@@ -449,20 +448,6 @@ namespace ClassicUO
                     case "login_music_volume":
                     case "music_volume":
                         Settings.GlobalSettings.LoginMusicVolume = int.Parse(value);
-
-                        break;
-
-                    // ======= [SHARD_TYPE_FIX] =======
-                    // TODO old. maintain it for retrocompatibility
-                    case "shard_type":
-                    case "shard":
-                        Settings.GlobalSettings.ShardType = int.Parse(value);
-
-                        break;
-                    // ================================
-
-                    case "outlands":
-                        CUOEnviroment.IsOutlands = true;
 
                         break;
 

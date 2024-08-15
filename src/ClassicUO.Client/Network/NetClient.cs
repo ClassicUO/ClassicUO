@@ -164,8 +164,9 @@ namespace ClassicUO.Network
 
 
         public bool IsConnected => _socket != null && _socket.IsConnected;
-
         public NetStatistics Statistics { get; }
+        public EncryptionHelper? Encryption { get; private set; }
+        public PacketsTable PacketsTable { get; private set; }
 
         public uint LocalIP
         {
@@ -204,14 +205,30 @@ namespace ClassicUO.Network
         public event EventHandler<SocketError> Disconnected;
 
 
-
-        public void Connect(string ip, ushort port)
+        public EncryptionType Connect(string ip, ushort port, ClientVersion clientVersion, EncryptionType encryption)
         {
+            PacketsTable ??= new PacketsTable(clientVersion);
+
+            if (encryption != 0)
+            {
+                Encryption ??= new EncryptionHelper(clientVersion);
+                Log.Trace("Calculating encryption by client version...");
+                Log.Trace($"encryption: {Encryption.EncryptionType}");
+
+                if (Encryption.EncryptionType != encryption)
+                {
+                    Log.Warn($"Encryption found: {Encryption.EncryptionType}");
+                    encryption = Encryption.EncryptionType;
+                }
+            }
+
             _sendStream.Clear();
             _huffman.Reset();
             Statistics.Reset();
 
             _socket.Connect(ip, port);
+
+            return encryption;
         }
 
         public void Disconnect()
@@ -303,7 +320,7 @@ namespace ClassicUO.Network
 
             if (!skipEncryption)
             {
-                EncryptionHelper.Encrypt(!_isCompressionEnabled, message, message, message.Length);
+                Encryption?.Encrypt(!_isCompressionEnabled, message, message, message.Length);
             }
 
             lock (_sendStream)
@@ -320,7 +337,7 @@ namespace ClassicUO.Network
         {
             if (!_isCompressionEnabled) return;
 
-            EncryptionHelper.Decrypt(buffer, buffer, buffer.Length);
+            Encryption?.Decrypt(buffer, buffer, buffer.Length);
         }
 
         private void ProcessSend()

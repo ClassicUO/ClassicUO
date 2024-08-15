@@ -84,14 +84,14 @@ namespace ClassicUO.Network
         private readonly CircularBuffer _buffer = new CircularBuffer();
         private readonly CircularBuffer _pluginsBuffer = new CircularBuffer();
 
-        public int ParsePackets(World world, Span<byte> data)
+        public int ParsePackets(NetClient socket, World world, Span<byte> data)
         {
             Append(data, false);
 
-            return ParsePackets(world, _buffer, true) + ParsePackets(world, _pluginsBuffer, false);
+            return ParsePackets(socket, world, _buffer, true) + ParsePackets(socket, world, _pluginsBuffer, false);
         }
 
-        private int ParsePackets(World world, CircularBuffer stream, bool allowPlugins)
+        private int ParsePackets(NetClient socket, World world, CircularBuffer stream, bool allowPlugins)
         {
             var packetsCount = 0;
 
@@ -103,6 +103,7 @@ namespace ClassicUO.Network
                 {
                     if (
                         !GetPacketInfo(
+                            socket,
                             stream,
                             stream.Length,
                             out var packetID,
@@ -177,6 +178,7 @@ namespace ClassicUO.Network
         }
 
         private static bool GetPacketInfo(
+            NetClient socket,
             CircularBuffer buffer,
             int bufferLen,
             out byte packetID,
@@ -193,7 +195,7 @@ namespace ClassicUO.Network
                 return false;
             }
 
-            packetLen = PacketsTable.GetPacketLength(packetID = buffer[0]);
+            packetLen = socket.PacketsTable.GetPacketLength(packetID = buffer[0]);
             packetOffset = 1;
 
             if (packetLen == -1)

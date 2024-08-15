@@ -987,7 +987,7 @@ namespace ClassicUO.Game.UI.Gumps
                 )
             );
 
-            _use_old_status_gump.IsVisible = !CUOEnviroment.IsOutlands;
+            _use_old_status_gump.IsVisible = true;
 
             section3.Add
             (
@@ -3845,7 +3845,7 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.EnableMousewheelScaleZoom = _zoomCheckbox.IsChecked;
             _currentProfile.RestoreScaleAfterUnpressCtrl = _restorezoomCheckbox.IsChecked;
 
-            if (!CUOEnviroment.IsOutlands && _use_old_status_gump.IsChecked != _currentProfile.UseOldStatusGump)
+            if (_use_old_status_gump.IsChecked != _currentProfile.UseOldStatusGump)
             {
                 StatusGumpBase status = StatusGumpBase.GetStatusGump();
 

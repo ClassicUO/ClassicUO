@@ -59,12 +59,7 @@ namespace ClassicUO.Game.Managers
 
         public static string[] GetVars()
         {
-            if (!CUOEnviroment.IsOutlands)
-            {
-                return Enum.GetNames(typeof(InfoBarVars));
-            }
-
-            return Enum.GetNames(typeof(InfoBarVarsOutlands));
+            return Enum.GetNames(typeof(InfoBarVars));
         }
 
         public void AddItem(InfoBarItem ibi)
@@ -182,35 +177,6 @@ namespace ClassicUO.Game.Managers
         DamageChanceInc,
         SwingSpeedInc,
         StatsCap,
-        NameNotoriety,
-        TithingPoints
-    }
-
-    internal enum InfoBarVarsOutlands
-    {
-        HP = 0,
-        Mana,
-        Stamina,
-        Weight,
-        Followers,
-        Gold,
-        Damage,
-        Armor,
-        FoodSatisfaction,
-        MurderTimer,
-        CriminalTimer,
-        PvpCooldown,
-        BandageTimer,
-        LowerReagentCost,
-        SpellDamageInc,
-        FasterCasting,
-        FasterCastRecovery,
-        HitChanceInc,
-        DefenseChanceInc,
-        LowerManaCost,
-        DamageChanceInc,
-        SwingSpeedInc,
-        MurderCount,
         NameNotoriety,
         TithingPoints
     }

@@ -36,10 +36,4 @@
     </PackageReference>
   </ItemGroup>
 
-    <!-- Put all intermediate and binary files under same appropriate folder, not mixed in with source. -->
-  <PropertyGroup>
-    <OutputPath >$(SolutionDir)bin\$(Configuration)</OutputPath>
-    <BaseIntermediateOutputPath>$(SolutionDir)intermediate\$(Platform)\$(Configuration)\$(MSBuildProjectName)</BaseIntermediateOutputPath>
-  </PropertyGroup>
-
 </Project>
