@@ -4,6 +4,9 @@
     <LangVersion>Preview</LangVersion>
     <TargetFramework>net8.0</TargetFramework>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <UseSystemResourceKeys>true</UseSystemResourceKeys>
   </PropertyGroup>
 
   <PropertyGroup>

@@ -58,39 +58,40 @@ namespace ClassicUO.IO
         {
             base.Load();
 
-            Seek(0);
+            var reader = GetReader();
+            reader.Seek(0);
 
-            if (ReadUInt() != UOP_MAGIC_NUMBER)
+            if (reader.ReadUInt32LE() != UOP_MAGIC_NUMBER)
             {
                 throw new ArgumentException("Bad uop file");
             }
 
-            uint version = ReadUInt();
-            uint format_timestamp = ReadUInt();
-            long nextBlock = ReadLong();
-            uint block_size = ReadUInt();
-            int count = ReadInt();
+            var version = reader.ReadUInt32LE();
+            var format_timestamp = reader.ReadUInt32LE();
+            var nextBlock = reader.ReadInt64LE();
+            var block_size = reader.ReadUInt32LE();
+            var count = reader.ReadInt32LE();
 
 
-            Seek(nextBlock);
+            reader.Seek(nextBlock);
             int total = 0;
             int real_total = 0;
 
             do
             {
-                int filesCount = ReadInt();
-                nextBlock = ReadLong();
+                var filesCount = reader.ReadInt32LE();
+                nextBlock = reader.ReadInt64LE();
                 total += filesCount;
 
                 for (int i = 0; i < filesCount; i++)
                 {
-                    long offset = ReadLong();
-                    int headerLength = ReadInt();
-                    int compressedLength = ReadInt();
-                    int decompressedLength = ReadInt();
-                    ulong hash = ReadULong();
-                    uint data_hash = ReadUInt();
-                    short flag = ReadShort();
+                    long offset = reader.ReadInt64LE();
+                    int headerLength = reader.ReadInt32LE();
+                    int compressedLength = reader.ReadInt32LE();
+                    int decompressedLength = reader.ReadInt32LE();
+                    var hash = reader.ReadUInt64LE();
+                    uint data_hash = reader.ReadUInt32LE();
+                    short flag = reader.ReadInt16LE();
                     int length = flag == 1 ? compressedLength : decompressedLength;
 
                     if (offset == 0)
@@ -104,18 +105,18 @@ namespace ClassicUO.IO
 
                     if (_hasExtra && flag != 3)
                     {
-                        long curpos = Position;
-                        Seek(offset);
+                        long curpos = reader.Position;
+                        reader.Seek(offset);
 
-                        var extra1 = ReadInt();
-                        var extra2 = ReadInt();
+                        var extra1 = reader.ReadInt32LE();
+                        var extra2 = reader.ReadInt32LE();
 
                         _hashes.Add
                         (
                             hash,
                             new UOFileIndex
                             (
-                                StartAddress,
+                                reader.StartAddress,
                                 (uint)Length,
                                 offset + 8,
                                 compressedLength - 8,
@@ -125,7 +126,7 @@ namespace ClassicUO.IO
                             )
                         );
 
-                        Seek(curpos);
+                        reader.Seek(curpos);
                     }
                     else
                     {
@@ -134,7 +135,7 @@ namespace ClassicUO.IO
                             hash,
                             new UOFileIndex
                             (
-                                StartAddress,
+                                reader.StartAddress,
                                 (uint)Length,
                                 offset,
                                 compressedLength,
@@ -146,7 +147,7 @@ namespace ClassicUO.IO
                     }
                 }
 
-                Seek(nextBlock);
+                reader.Seek(nextBlock);
             } while (nextBlock != 0);
 
             TotalEntriesCount = real_total;

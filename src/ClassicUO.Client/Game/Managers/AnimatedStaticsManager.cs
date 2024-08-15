@@ -53,7 +53,8 @@ namespace ClassicUO.Game.Managers
                 return;
             }
 
-            long startAddr = file.StartAddress.ToInt64();
+            var reader = file.GetReader();
+            long startAddr = reader.StartAddress.ToInt64();
             uint lastaddr = (uint) (startAddr + file.Length - sizeof(AnimDataFrame));
 
             for (int i = 0; i < TileDataLoader.Instance.StaticData.Length; i++)
@@ -85,18 +86,20 @@ namespace ClassicUO.Game.Managers
                 return;
             }
 
-            UOFile file = AnimDataLoader.Instance.AnimDataFile;
+            var file = AnimDataLoader.Instance.AnimDataFile;
 
             if (file == null)
             {
                 return;
             }
 
+            var reader = file.GetReader();
+
             // fix static animations time to reflect the standard client
             uint delay = Constants.ITEM_EFFECT_ANIMATION_DELAY * 2;
             uint next_time = Time.Ticks + 250;
             bool no_animated_field = ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.FieldsType != 0;
-            long startAddr = file.StartAddress.ToInt64();
+            long startAddr = reader.StartAddress.ToInt64();
             UOFileIndex[] static_data = ArtLoader.Instance.Entries;
 
             for (int i = 0; i < _staticInfos.Length; i++)

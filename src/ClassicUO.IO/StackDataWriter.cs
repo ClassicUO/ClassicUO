@@ -10,12 +10,7 @@ namespace ClassicUO.IO
 {
     public ref struct StackDataWriter
     {
-        private const MethodImplOptions IMPL_OPTION = MethodImplOptions.AggressiveInlining
-#if !NETFRAMEWORK && !NETSTANDARD2_0
-                                                      | MethodImplOptions.AggressiveOptimization
-#endif
-            ;
-
+        private const MethodImplOptions IMPL_OPTION = MethodImplOptions.AggressiveInlining;
 
         private byte[] _allocatedBuffer;
         private Span<byte> _buffer;

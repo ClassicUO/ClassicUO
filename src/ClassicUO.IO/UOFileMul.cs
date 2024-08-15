@@ -59,16 +59,18 @@ namespace ClassicUO.IO
             int count = (int) file.Length / 12;
             entries = new UOFileIndex[count];
 
+            var reader = file.GetReader();
+            var startAddress = GetReader().StartAddress;
             for (int i = 0; i < count; i++)
             {
                 ref UOFileIndex e = ref entries[i];
-                e.Address = StartAddress;   // .mul mmf address
+                e.Address = startAddress;   // .mul mmf address
                 e.FileSize = (uint) Length; // .mul mmf length
-                e.Offset = file.ReadUInt(); // .idx offset
-                e.Length = file.ReadInt();  // .idx length
+                e.Offset = reader.ReadUInt32LE(); // .idx offset
+                e.Length = reader.ReadInt32LE();  // .idx length
                 e.DecompressedLength = 0;   // UNUSED HERE --> .UOP
 
-                int size = file.ReadInt();
+                int size = reader.ReadInt32LE();
 
                 if (size > 0)
                 {

@@ -31,7 +31,9 @@
 #endregion
 
 using ClassicUO.IO;
-using System.Runtime.CompilerServices;
+using ClassicUO.Utility.Logging;
+using System;
+using System.Runtime.InteropServices;
 
 namespace ClassicUO.Assets
 {
@@ -43,7 +45,6 @@ namespace ClassicUO.Assets
 
             if (!System.IO.File.Exists(path))
             {
-                Patches = new UOFileIndex5D[0];
                 File = null;
             }
             else
@@ -53,17 +54,14 @@ namespace ClassicUO.Assets
                 // the scope of this try/catch is to avoid unexpected crashes if servers redestribuite wrong verdata
                 try
                 {
-                    int len = File.ReadInt();
-                    Patches = new UOFileIndex5D[len];
+                    var reader = File.GetReader();
+                    int len = reader.ReadInt32LE();
 
-                    fixed (UOFileIndex5D* ptr = Patches)
-                    {
-                        Unsafe.CopyBlockUnaligned((void*)ptr, (void*) File.PositionAddress, (uint) (len * Unsafe.SizeOf<UOFileIndex5D>()));
-                    }
+                    Patches = MemoryMarshal.Cast<byte, UOFileIndex5D>(reader.ReadArray(len * sizeof(UOFileIndex5D))).ToArray();
                 }
-                catch
+                catch (Exception ex)
                 {
-                    Patches = new UOFileIndex5D[0];
+                    Log.Error($"error while reading verdata.mul\n{ex}");
                 }
             }
         }
@@ -89,7 +87,7 @@ namespace ClassicUO.Assets
         //30 - tiledata.mul
         //31 - animdata.mul 
 
-        public static UOFileIndex5D[] Patches { get; }
+        public static UOFileIndex5D[] Patches { get; } = Array.Empty<UOFileIndex5D>();
 
         public static UOFileMul File { get; }
     }

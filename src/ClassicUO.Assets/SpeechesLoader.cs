@@ -66,19 +66,18 @@ namespace ClassicUO.Assets
                         return;
                     }
 
-                    UOFileMul file = new UOFileMul(path);
-                    List<SpeechEntry> entries = new List<SpeechEntry>();
+                    var file = new UOFileMul(path);
+                    var reader = file.GetReader();
+                    var entries = new List<SpeechEntry>();
 
-                    while (file.Position < file.Length)
+                    while (reader.Remaining > 0)
                     {
-                        int id = file.ReadUShortReversed();
-                        int length = file.ReadUShortReversed();
+                        int id = reader.ReadUInt16BE();
+                        int length = reader.ReadUInt16BE();
 
                         if (length > 0)
                         {
-                            entries.Add(new SpeechEntry(id, string.Intern(Encoding.UTF8.GetString((byte*) file.PositionAddress, length))));
-
-                            file.Skip(length);
+                            entries.Add(new SpeechEntry(id, string.Intern(reader.ReadUTF8(length))));
                         }
                     }
 
@@ -125,8 +124,6 @@ namespace ClassicUO.Assets
                     {
                         return true;
                     }
-
-                    
 
                     idx = input.IndexOf(split[i], idx + 1, StringComparison.InvariantCultureIgnoreCase);
                 }
