@@ -86,7 +86,7 @@ namespace ClassicUO.Game.Managers
             get
             {
                 return ((_world.ClientFeatures.Flags & CharacterListFlags.CLF_NEW_MOVEMENT_SYSTEM) == 0 || _ackReceived) &&
-                        EncryptionHelper.Type == 0 &&
+                        NetClient.Socket?.Encryption?.EncryptionType == 0 &&
                         ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.WorldMapShowParty && 
                         UIManager.GetGump<WorldMapGump>() != null; // horrible, but works
             }
@@ -106,7 +106,7 @@ namespace ClassicUO.Game.Managers
                 Log.Warn("Server support new movement system. Can't use the 0xF0 packet to query guild/party position");
                 v = false;
             }
-            else if (EncryptionHelper.Type != 0 && !_ackReceived)
+            else if (NetClient.Socket.Encryption?.EncryptionType != 0 && !_ackReceived)
             {
                 Log.Warn("Server has encryption. Can't use the 0xF0 packet to query guild/party position");
                 v = false;

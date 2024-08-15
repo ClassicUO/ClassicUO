@@ -244,19 +244,6 @@ namespace ClassicUO
             //ATTENTION: you will need to enable ALSO ultimalive server-side, or this code will have absolutely no effect!
             UltimaLive.Enable();
             PacketsTable.AdjustPacketSizeByVersion(Version);
-
-            if (Settings.GlobalSettings.Encryption != 0)
-            {
-                Log.Trace("Calculating encryption by client version...");
-                EncryptionHelper.CalculateEncryption(Version);
-                Log.Trace($"encryption: {EncryptionHelper.Type}");
-
-                if (EncryptionHelper.Type != (ENCRYPTION_TYPE) Settings.GlobalSettings.Encryption)
-                {
-                    Log.Warn($"Encryption found: {EncryptionHelper.Type}");
-                    Settings.GlobalSettings.Encryption = (byte) EncryptionHelper.Type;
-                }
-            }
         }
     }
 
