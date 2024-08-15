@@ -460,7 +460,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             Add
             (
-                _hairLabel = new Label(ClilocLoader.Instance.GetString(race == RaceType.GARGOYLE ? 1112309 : 3000121), unicode, hue, font: font)
+                _hairLabel = new Label(Client.Game.UO.FileManager.Clilocs.GetString(race == RaceType.GARGOYLE ? 1112309 : 3000121), unicode, hue, font: font)
                 {
                     X = 98, Y = 140
                 },
@@ -489,7 +489,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
                 Add
                 (
-                    _facialLabel = new Label(ClilocLoader.Instance.GetString(race == RaceType.GARGOYLE ? 1112511 : 3000122), unicode, hue, font: font)
+                    _facialLabel = new Label(Client.Game.UO.FileManager.Clilocs.GetString(race == RaceType.GARGOYLE ? 1112511 : 3000122), unicode, hue, font: font)
                     {
                         X = 98, Y = 184
                     },
@@ -801,7 +801,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             int invalid = Validate(character.Name);
             if (invalid > 0)
             {
-                UIManager.GetGump<CharCreationGump>()?.ShowMessage(ClilocLoader.Instance.GetString(invalid));
+                UIManager.GetGump<CharCreationGump>()?.ShowMessage(Client.Game.UO.FileManager.Clilocs.GetString(invalid));
 
                 return false;
             }
@@ -1078,7 +1078,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
                 Add
                 (
-                    new Label(ClilocLoader.Instance.GetString(label), unicode, hue, font: font)
+                    new Label(Client.Game.UO.FileManager.Clilocs.GetString(label), unicode, hue, font: font)
                     {
                         X = 0,
                         Y = 0

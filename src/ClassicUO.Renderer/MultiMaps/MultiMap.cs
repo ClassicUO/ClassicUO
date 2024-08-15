@@ -11,17 +11,19 @@ namespace ClassicUO.Renderer.MultiMaps
     public sealed class MultiMap
     {
         private readonly GraphicsDevice _device;
+        private readonly MultiMapLoader _multiMapLoader;
 
-        public MultiMap(GraphicsDevice device)
+        public MultiMap(MultiMapLoader multiMapLodaer, GraphicsDevice device)
         {
+            _multiMapLoader = multiMapLodaer;
             _device = device;
         }
 
         public SpriteInfo GetMap(int? facet, int width, int height, int startX, int startY, int endX, int endY)
         {
-            var multiMapInfo = facet.HasValue && MultiMapLoader.Instance.HasFacet(facet.Value) ?
-                MultiMapLoader.Instance.LoadFacet(facet.Value, width, height, startX, startY, endX, endY) :
-                MultiMapLoader.Instance.LoadMap(width, height, startX, startY, endX, endY);
+            var multiMapInfo = facet.HasValue && _multiMapLoader.HasFacet(facet.Value) ?
+                _multiMapLoader.LoadFacet(facet.Value, width, height, startX, startY, endX, endY) :
+                _multiMapLoader.LoadMap(width, height, startX, startY, endX, endY);
 
             if (multiMapInfo.Pixels.IsEmpty)
                 return default;

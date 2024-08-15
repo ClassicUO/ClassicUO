@@ -41,17 +41,14 @@ using System.Threading.Tasks;
 
 namespace ClassicUO.Assets
 {
-    public class ClilocLoader : UOFileLoader
+    public sealed class ClilocLoader : UOFileLoader
     {
-        private static ClilocLoader _instance;
         private string _cliloc;
         private readonly Dictionary<int, string> _entries = new Dictionary<int, string>();
 
-        private ClilocLoader()
+        public ClilocLoader(UOFileManager fileManager) : base(fileManager)
         {
         }
-
-        public static ClilocLoader Instance => _instance ?? (_instance = new ClilocLoader());
 
         public Task Load(string lang)
         {
@@ -63,7 +60,7 @@ namespace ClassicUO.Assets
             _cliloc = $"Cliloc.{lang}";
             Log.Trace($"searching for: '{_cliloc}'");
 
-            if (!File.Exists(UOFileManager.GetUOFilePath(_cliloc)))
+            if (!File.Exists(FileManager.GetUOFilePath(_cliloc)))
             {
                 Log.Warn($"'{_cliloc}' not found. Rolled back to Cliloc.enu");
 
@@ -84,7 +81,7 @@ namespace ClassicUO.Assets
                         _cliloc = "Cliloc.enu";
                     }
 
-                    string path = UOFileManager.GetUOFilePath(_cliloc);
+                    string path = FileManager.GetUOFilePath(_cliloc);
 
                     if (!File.Exists(path))
                     {
@@ -94,7 +91,7 @@ namespace ClassicUO.Assets
 
                     if (string.Compare(_cliloc, "cliloc.enu", StringComparison.InvariantCultureIgnoreCase) != 0)
                     {
-                        string enupath = UOFileManager.GetUOFilePath("Cliloc.enu");
+                        string enupath = FileManager.GetUOFilePath("Cliloc.enu");
                         ReadCliloc(enupath);
                     }
 
@@ -105,7 +102,7 @@ namespace ClassicUO.Assets
 
         void ReadCliloc(string path)
         {
-            var newFileFormat = UOFileManager.Version >= ClientVersion.CV_7010400;
+            var newFileFormat = FileManager.Version >= ClientVersion.CV_7010400;
             using var fileStream = new FileStream(path, FileMode.Open, FileAccess.Read);
 
             int bytesRead;

@@ -39,16 +39,13 @@ using System.Threading.Tasks;
 
 namespace ClassicUO.Assets
 {
-    public class SkillsLoader : UOFileLoader
+    public sealed class SkillsLoader : UOFileLoader
     {
-        private static SkillsLoader _instance;
         private UOFileMul _file;
 
-        private SkillsLoader()
+        public SkillsLoader(UOFileManager fileManager) : base(fileManager)
         {
         }
-
-        public static SkillsLoader Instance => _instance ?? (_instance = new SkillsLoader());
 
         public int SkillsCount => Skills.Count;
         public readonly List<SkillEntry> Skills = new List<SkillEntry>();
@@ -65,8 +62,8 @@ namespace ClassicUO.Assets
                         return;
                     }
 
-                    string path = UOFileManager.GetUOFilePath("skills.mul");
-                    string pathidx = UOFileManager.GetUOFilePath("Skills.idx");
+                    string path = FileManager.GetUOFilePath("skills.mul");
+                    string pathidx = FileManager.GetUOFilePath("Skills.idx");
 
                     FileSystemHelper.EnsureFileExists(path);
                     FileSystemHelper.EnsureFileExists(pathidx);

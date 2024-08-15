@@ -12,12 +12,14 @@ namespace ClassicUO.Renderer.Animations
 
         private readonly TextureAtlas _atlas;
         private readonly PixelPicker _picker = new PixelPicker();
+        private readonly AnimationsLoader _animationLoader;
         private IndexAnimation[] _dataIndex = new IndexAnimation[MAX_ANIMATIONS_DATA_INDEX_COUNT];
 
         private AnimationDirection[][][] _cache;
 
-        public Animations(GraphicsDevice device)
+        public Animations(AnimationsLoader animationLoader, GraphicsDevice device)
         {
+            _animationLoader = animationLoader;
             _atlas = new TextureAtlas(device, 4096, 4096, SurfaceFormat.Color);
         }
 
@@ -65,7 +67,7 @@ namespace ClassicUO.Renderer.Animations
 
             if (uop)
             {
-                AnimationsLoader.Instance.ReplaceUopGroup(animID, ref group);
+                _animationLoader.ReplaceUopGroup(animID, ref group);
             }
 
             uint packed32 = (uint)((group | (direction << 8) | ((uop ? 0x01 : 0x00) << 16)));
@@ -90,7 +92,7 @@ namespace ClassicUO.Renderer.Animations
         {
             dir &= 0x7F;
             bool mirror = false;
-            AnimationsLoader.Instance.GetAnimDirection(ref dir, ref mirror);
+            _animationLoader.GetAnimDirection(ref dir, ref mirror);
 
             if (frameIndex == 0xFF)
             {
@@ -148,9 +150,9 @@ namespace ClassicUO.Renderer.Animations
                 if (index == null)
                 {
                     index = new IndexAnimation();
-                    var indices = AnimationsLoader.Instance.GetIndices
+                    var indices = _animationLoader.GetIndices
                     (
-                        UOFileManager.Version, 
+                        _animationLoader.FileManager.Version, 
                         id, 
                         ref hue,
                         ref index.Flags, 
@@ -193,7 +195,7 @@ namespace ClassicUO.Renderer.Animations
 
                 if (index.FileIndex == 0)
                 {
-                    var replaced = isCorpse ? AnimationsLoader.Instance.ReplaceCorpse(ref id, ref hue) : AnimationsLoader.Instance.ReplaceBody(ref id, ref hue);
+                    var replaced = isCorpse ? _animationLoader.ReplaceCorpse(ref id, ref hue) : _animationLoader.ReplaceBody(ref id, ref hue);
                     if (replaced)
                     {
                         if (id >= _dataIndex.Length)
@@ -211,7 +213,7 @@ namespace ClassicUO.Renderer.Animations
 
             if (useUOP)
             {
-                AnimationsLoader.Instance.ReplaceUopGroup(id, ref action);
+                _animationLoader.ReplaceUopGroup(id, ref action);
             }
 
             // NOTE:
@@ -259,7 +261,7 @@ namespace ClassicUO.Renderer.Animations
                         Unknown = uopGroupObj.DecompressedLength
                     };
 
-                    frames = AnimationsLoader.Instance.ReadUOPAnimationFrames(
+                    frames = _animationLoader.ReadUOPAnimationFrames(
                         id,
                         action,
                         dir,
@@ -276,7 +278,7 @@ namespace ClassicUO.Renderer.Animations
                         Size = groupObj.Direction[dir].Size,
                     };
 
-                    frames = AnimationsLoader.Instance.ReadMULAnimationFrames(index.FileIndex, ff);
+                    frames = _animationLoader.ReadMULAnimationFrames(index.FileIndex, ff);
                 }
 
                 if (frames.IsEmpty)
@@ -322,7 +324,7 @@ namespace ClassicUO.Renderer.Animations
 
         public void UpdateAnimationTable(BodyConvFlags flags)
         {
-            AnimationsLoader.Instance.ProcessBodyConvDef(flags);
+            _animationLoader.ProcessBodyConvDef(flags);
             //if (flags != _lastFlags)
             //{
             //    if (_lastFlags != (BodyConvFlags)(-1))
@@ -353,7 +355,7 @@ namespace ClassicUO.Renderer.Animations
             ushort hue = 0;
 
             if (_dataIndex[graphic] != null && _dataIndex[graphic].FileIndex == 0 && !_dataIndex[graphic].Flags.HasFlag(AnimationFlags.UseUopAnimation))
-                _ = isCorpse ? AnimationsLoader.Instance.ReplaceCorpse(ref graphic, ref hue) : AnimationsLoader.Instance.ReplaceBody(ref graphic, ref hue);
+                _ = isCorpse ? _animationLoader.ReplaceCorpse(ref graphic, ref hue) : _animationLoader.ReplaceBody(ref graphic, ref hue);
         }
 
         public bool AnimationExists(ushort graphic, byte group, bool isCorpse = false)

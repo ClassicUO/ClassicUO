@@ -48,9 +48,9 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         {
             _Parent = parent;
 
-            if (parent == null || !ProfessionLoader.Instance.Professions.TryGetValue(parent, out List<ProfessionInfo> professions) || professions == null)
+            if (parent == null || !Client.Game.UO.FileManager.Professions.Professions.TryGetValue(parent, out List<ProfessionInfo> professions) || professions == null)
             {
-                professions = new List<ProfessionInfo>(ProfessionLoader.Instance.Professions.Keys);
+                professions = new List<ProfessionInfo>(Client.Game.UO.FileManager.Professions.Professions.Keys);
             }
 
             /* Build the gump */
@@ -69,7 +69,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             Add(new GumpPic(214, 58, 0x058B, 0));
             Add(new GumpPic(300, 51, 0x15A9, 0));
 
-            ClilocLoader localization = ClilocLoader.Instance;
+            ClilocLoader localization = Client.Game.UO.FileManager.Clilocs;
 
             bool isAsianLang = string.Compare(Settings.GlobalSettings.Language, "CHT", StringComparison.InvariantCultureIgnoreCase) == 0 || 
                 string.Compare(Settings.GlobalSettings.Language, "KOR", StringComparison.InvariantCultureIgnoreCase) == 0 ||
@@ -118,7 +118,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
         public void SelectProfession(ProfessionInfo info)
         {
-            if (info.Type == ProfessionLoader.PROF_TYPE.CATEGORY && ProfessionLoader.Instance.Professions.TryGetValue(info, out List<ProfessionInfo> list) && list != null)
+            if (info.Type == ProfessionLoader.PROF_TYPE.CATEGORY && Client.Game.UO.FileManager.Professions.Professions.TryGetValue(info, out List<ProfessionInfo> list) && list != null)
             {
                 Parent.Add(new CreateCharProfessionGump(World, info));
                 Parent.Remove(this);
@@ -171,7 +171,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         {
             _info = info;
 
-            ClilocLoader localization = ClilocLoader.Instance;
+            ClilocLoader localization = Client.Game.UO.FileManager.Clilocs;
 
             ResizePic background = new ResizePic(3000)
             {

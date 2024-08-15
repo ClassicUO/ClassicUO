@@ -129,7 +129,7 @@ namespace ClassicUO.Game
 
                         if (IsHTML)
                         {
-                            FontsLoader.Instance.SetUseHTML(false);
+                            Client.Game.UO.FileManager.Fonts.SetUseHTML(false);
                         }
 
                         Links.Clear();
@@ -143,7 +143,7 @@ namespace ClassicUO.Game
 
                         if (IsUnicode)
                         {
-                            _info = FontsLoader.Instance.GetInfoUnicode(
+                            _info = Client.Game.UO.FileManager.Fonts.GetInfoUnicode(
                                 Font,
                                 Text,
                                 Text.Length,
@@ -156,7 +156,7 @@ namespace ClassicUO.Game
                         }
                         else
                         {
-                            _info = FontsLoader.Instance.GetInfoASCII(
+                            _info = Client.Game.UO.FileManager.Fonts.GetInfoASCII(
                                 Font,
                                 Text,
                                 Text.Length,
@@ -232,7 +232,7 @@ namespace ClassicUO.Game
 
             if (IsUnicode)
             {
-                (p.X, p.Y) = FontsLoader.Instance.GetCaretPosUnicode(
+                (p.X, p.Y) = Client.Game.UO.FileManager.Fonts.GetCaretPosUnicode(
                     Font,
                     Text,
                     caret_index,
@@ -243,7 +243,7 @@ namespace ClassicUO.Game
             }
             else
             {
-                (p.X, p.Y) = FontsLoader.Instance.GetCaretPosASCII(
+                (p.X, p.Y) = Client.Game.UO.FileManager.Fonts.GetCaretPosASCII(
                     Font,
                     Text,
                     caret_index,
@@ -373,10 +373,10 @@ namespace ClassicUO.Game
 
                         if (IsUnicode)
                         {
-                            return FontsLoader.Instance.GetCharWidthUnicode(Font, c);
+                            return Client.Game.UO.FileManager.Fonts.GetCharWidthUnicode(Font, c);
                         }
 
-                        return FontsLoader.Instance.GetCharWidthASCII(Font, c);
+                        return Client.Game.UO.FileManager.Fonts.GetCharWidthASCII(Font, c);
                     }
                 }
 
@@ -391,10 +391,10 @@ namespace ClassicUO.Game
         {
             if (IsUnicode)
             {
-                return FontsLoader.Instance.GetCharWidthUnicode(Font, c);
+                return Client.Game.UO.FileManager.Fonts.GetCharWidthUnicode(Font, c);
             }
 
-            return FontsLoader.Instance.GetCharWidthASCII(Font, c);
+            return Client.Game.UO.FileManager.Fonts.GetCharWidthASCII(Font, c);
         }
 
         public bool Draw(
@@ -613,15 +613,15 @@ namespace ClassicUO.Game
 
             if (IsHTML)
             {
-                FontsLoader.Instance.SetUseHTML(true, HTMLColor, HasBackgroundColor);
+                Client.Game.UO.FileManager.Fonts.SetUseHTML(true, HTMLColor, HasBackgroundColor);
             }
 
-            FontsLoader.Instance.RecalculateWidthByInfo = RecalculateWidthByInfo;
+            Client.Game.UO.FileManager.Fonts.RecalculateWidthByInfo = RecalculateWidthByInfo;
 
             FontsLoader.FontInfo fi;
             if (IsUnicode)
             {
-                fi = FontsLoader.Instance.GenerateUnicode(
+                fi = Client.Game.UO.FileManager.Fonts.GenerateUnicode(
                     Font,
                     Text,
                     Hue,
@@ -635,7 +635,7 @@ namespace ClassicUO.Game
             }
             else
             {
-                fi = FontsLoader.Instance.GenerateASCII(
+                fi = Client.Game.UO.FileManager.Fonts.GenerateASCII(
                     Font,
                     Text,
                     Hue,
@@ -702,10 +702,10 @@ namespace ClassicUO.Game
 
             if (IsHTML)
             {
-                FontsLoader.Instance.SetUseHTML(false);
+                Client.Game.UO.FileManager.Fonts.SetUseHTML(false);
             }
 
-            FontsLoader.Instance.RecalculateWidthByInfo = false;
+            Client.Game.UO.FileManager.Fonts.RecalculateWidthByInfo = false;
         }
 
         public void Destroy()

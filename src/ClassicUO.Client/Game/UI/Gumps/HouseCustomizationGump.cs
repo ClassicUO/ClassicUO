@@ -660,7 +660,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             _textFixtures.Text = _customHouseManager.Fixtures.ToString();
 
-            string tooltip = ClilocLoader.Instance.Translate(
+            string tooltip = Client.Game.UO.FileManager.Clilocs.Translate(
                 1061039,
                 $"{_customHouseManager.MaxComponets}\t{_customHouseManager.MaxFixtures}",
                 true
@@ -1144,7 +1144,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _dataBox.Add(new ScissorControl(true, 121, 36 + y, 384, 60));
 
                     Label text = new Label(
-                        ClilocLoader.Instance.GetString(1062113 + j),
+                        Client.Game.UO.FileManager.Clilocs.GetString(1062113 + j),
                         true,
                         0xFFFF,
                         90,

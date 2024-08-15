@@ -454,7 +454,7 @@ namespace ClassicUO.Network
         {
             if (index >= 0 && index < ArtLoader.MAX_STATIC_DATA_INDEX_COUNT)
             {
-                ref StaticTiles st = ref TileDataLoader.Instance.StaticData[index];
+                ref StaticTiles st = ref Client.Game.UO.FileManager.TileData.StaticData[index];
 
                 flags = (ulong)st.Flags;
                 weight = st.Weight;
@@ -480,7 +480,7 @@ namespace ClassicUO.Network
         {
             if (index >= 0 && index < ArtLoader.MAX_STATIC_DATA_INDEX_COUNT)
             {
-                ref LandTiles st = ref TileDataLoader.Instance.LandData[index];
+                ref LandTiles st = ref Client.Game.UO.FileManager.TileData.LandData[index];
 
                 flags = (ulong)st.Flags;
                 textid = st.TexID;
@@ -494,14 +494,14 @@ namespace ClassicUO.Network
 
         private static bool GetCliloc(int cliloc, string args, bool capitalize, out string buffer)
         {
-            buffer = ClilocLoader.Instance.Translate(cliloc, args, capitalize);
+            buffer = Client.Game.UO.FileManager.Clilocs.Translate(cliloc, args, capitalize);
 
             return buffer != null;
         }
 
         private static void GetStaticImage(ushort g, ref CUO_API.ArtInfo info)
         {
-            //ArtLoader.Instance.TryGetEntryInfo(g, out long address, out long size, out long compressedsize);
+            //Client.Game.UO.FileManager.Arts.TryGetEntryInfo(g, out long address, out long size, out long compressedsize);
             //info.Address = address;
             //info.Size = size;
             //info.CompressedSize = compressedsize;

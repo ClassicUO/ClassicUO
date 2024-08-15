@@ -16,11 +16,12 @@ namespace ClassicUO.Renderer.Sounds
         private readonly IO.Audio.Sound[] _musics = new IO.Audio.Sound[MAX_SOUND_DATA_INDEX_COUNT];
         private readonly IO.Audio.Sound[] _sounds = new IO.Audio.Sound[MAX_SOUND_DATA_INDEX_COUNT];
         private readonly bool _useDigitalMusicFolder;
+        private readonly SoundsLoader _soundsLoader;
 
-
-        public Sound()
+        public Sound(SoundsLoader soundsLoader)
         {
-            _useDigitalMusicFolder = Directory.Exists(Path.Combine(UOFileManager.BasePath, "Music", "Digital"));
+            _soundsLoader = soundsLoader;
+            _useDigitalMusicFolder = Directory.Exists(Path.Combine(soundsLoader.FileManager.BasePath, "Music", "Digital"));
         }
 
         public IO.Audio.Sound GetSound(int index)
@@ -29,7 +30,7 @@ namespace ClassicUO.Renderer.Sounds
             {
                 ref IO.Audio.Sound sound = ref _sounds[index];
 
-                if (sound == null && SoundsLoader.Instance.TryGetSound(index, out byte[] data, out string name))
+                if (sound == null && _soundsLoader.TryGetSound(index, out byte[] data, out string name))
                 {
                     sound = new UOSound(name, index, data);
                 }
@@ -46,7 +47,7 @@ namespace ClassicUO.Renderer.Sounds
             {
                 ref IO.Audio.Sound music = ref _musics[index];
 
-                if (music == null && SoundsLoader.Instance.TryGetMusicData(index, out string name, out bool loop))
+                if (music == null && _soundsLoader.TryGetMusicData(index, out string name, out bool loop))
                 {
                     var path = _useDigitalMusicFolder ? $"Music/Digital/{name}" : $"Music/{name}";
                     if (!path.EndsWith(".mp3", StringComparison.InvariantCultureIgnoreCase))
@@ -54,7 +55,7 @@ namespace ClassicUO.Renderer.Sounds
                         path += ".mp3";
                     }
 
-                    music = new UOMusic(index, name, loop, UOFileManager.GetUOFilePath(path));
+                    music = new UOMusic(index, name, loop, _soundsLoader.FileManager.GetUOFilePath(path));
                 }
 
                 return music;

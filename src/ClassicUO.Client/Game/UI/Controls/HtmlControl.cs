@@ -303,7 +303,7 @@ namespace ClassicUO.Game.UI.Controls
 
                         bool inbounds = link.Bounds.Contains(x, (_scrollBar == null ? 0 : _scrollBar.Value) + y);
                         
-                        if (inbounds && FontsLoader.Instance.GetWebLink(link.LinkID, out WebLink result))
+                        if (inbounds && Client.Game.UO.FileManager.Fonts.GetWebLink(link.LinkID, out WebLink result))
                         {
                             Log.Info("LINK CLICKED: " + result.Link);
 

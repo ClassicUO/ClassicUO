@@ -108,7 +108,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (string.IsNullOrEmpty(item.ItemData.Name))
                     {
-                        t += ClilocLoader.Instance.GetString(1020000 + item.Graphic, true, t);
+                        t += Client.Game.UO.FileManager.Clilocs.GetString(1020000 + item.Graphic, true, t);
                     }
                     else
                     {
@@ -126,14 +126,14 @@ namespace ClassicUO.Game.UI.Gumps
                     return false;
                 }
 
-                FontsLoader.Instance.SetUseHTML(true);
-                FontsLoader.Instance.RecalculateWidthByInfo = true;
+                Client.Game.UO.FileManager.Fonts.SetUseHTML(true);
+                Client.Game.UO.FileManager.Fonts.RecalculateWidthByInfo = true;
 
-                int width = FontsLoader.Instance.GetWidthUnicode(_renderedText.Font, t);
+                int width = Client.Game.UO.FileManager.Fonts.GetWidthUnicode(_renderedText.Font, t);
 
                 if (width > Constants.OBJECT_HANDLES_GUMP_WIDTH)
                 {
-                    t = FontsLoader.Instance.GetTextByWidthUnicode(
+                    t = Client.Game.UO.FileManager.Fonts.GetTextByWidthUnicode(
                         _renderedText.Font,
                         t.AsSpan(),
                         Constants.OBJECT_HANDLES_GUMP_WIDTH,
@@ -148,8 +148,8 @@ namespace ClassicUO.Game.UI.Gumps
                 _renderedText.MaxWidth = width;
                 _renderedText.Text = t;
 
-                FontsLoader.Instance.RecalculateWidthByInfo = false;
-                FontsLoader.Instance.SetUseHTML(false);
+                Client.Game.UO.FileManager.Fonts.RecalculateWidthByInfo = false;
+                Client.Game.UO.FileManager.Fonts.SetUseHTML(false);
 
                 Width = _background.Width = Math.Max(60, _renderedText.Width) + 4;
                 Height = _background.Height = Constants.OBJECT_HANDLES_GUMP_HEIGHT + 4;
@@ -163,11 +163,11 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 string t = entity.Name;
 
-                int width = FontsLoader.Instance.GetWidthUnicode(_renderedText.Font, t);
+                int width = Client.Game.UO.FileManager.Fonts.GetWidthUnicode(_renderedText.Font, t);
 
                 if (width > Constants.OBJECT_HANDLES_GUMP_WIDTH)
                 {
-                    t = FontsLoader.Instance.GetTextByWidthUnicode(
+                    t = Client.Game.UO.FileManager.Fonts.GetTextByWidthUnicode(
                         _renderedText.Font,
                         t.AsSpan(),
                         Constants.OBJECT_HANDLES_GUMP_WIDTH,

@@ -602,7 +602,7 @@ namespace ClassicUO.Game.GameObjects
                 byte action = GetGroupForAnimation(this, id, true);
 
                 bool mirror = false;
-                AnimationsLoader.Instance.GetAnimDirection(ref dir, ref mirror);
+                Client.Game.UO.FileManager.Animations.GetAnimDirection(ref dir, ref mirror);
                 int currentDelay = Constants.CHARACTER_ANIMATION_DELAY;
 
                 if (id < Client.Game.UO.Animations.MaxAnimationCount && dir < 5)

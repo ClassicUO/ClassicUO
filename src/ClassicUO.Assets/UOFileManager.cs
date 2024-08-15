@@ -43,9 +43,81 @@ using System.Threading.Tasks;
 
 namespace ClassicUO.Assets
 {
-    public static class UOFileManager
+    public sealed class UOFileManager : IDisposable
     {
-        public static string GetUOFilePath(string file)
+        public UOFileManager(ClientVersion clientVersion, string uoPath)
+        {
+            Version = clientVersion;
+            BasePath = uoPath;
+
+            Animations = new AnimationsLoader(this);
+            AnimData = new AnimDataLoader(this);
+            Arts = new ArtLoader(this);
+            Maps = new MapLoader(this);
+            Clilocs = new ClilocLoader(this);
+            Gumps = new GumpsLoader(this);
+            Fonts = new FontsLoader(this);
+            Hues = new HuesLoader(this);
+            TileData = new TileDataLoader(this);
+            Multis = new MultiLoader(this);
+            Skills = new SkillsLoader(this);
+            Texmaps = new TexmapsLoader(this);
+            Speeches = new SpeechesLoader(this);
+            Lights = new LightsLoader(this);
+            Sounds = new SoundsLoader(this);
+            MultiMaps = new MultiMapLoader(this);
+            Verdata = new VerdataLoader(this);
+            Professions = new ProfessionLoader(this);
+        }
+
+        public ClientVersion Version { get; }
+        public string BasePath { get; }
+        public bool IsUOPInstallation { get; private set; }
+
+        public AnimationsLoader Animations { get; }
+        public AnimDataLoader AnimData { get; }
+        public ArtLoader Arts { get; }
+        public MapLoader Maps { get; set; }
+        public ClilocLoader Clilocs { get; }
+        public GumpsLoader Gumps { get; }
+        public FontsLoader Fonts { get; }
+        public HuesLoader Hues { get; }
+        public TileDataLoader TileData { get; }
+        public MultiLoader Multis { get; }
+        public SkillsLoader Skills { get; }
+        public TexmapsLoader Texmaps { get; }
+        public SpeechesLoader Speeches { get; }
+        public LightsLoader Lights { get; }
+        public SoundsLoader Sounds { get; }
+        public MultiMapLoader MultiMaps { get; }
+        public VerdataLoader Verdata { get; }
+        public ProfessionLoader Professions { get; }
+
+
+
+        public void Dispose()
+        {
+            Animations.Dispose();
+            AnimData.Dispose();
+            Arts.Dispose();
+            Maps.Dispose();
+            Clilocs.Dispose();
+            Gumps.Dispose();
+            Fonts.Dispose();
+            Hues.Dispose();
+            TileData.Dispose();
+            Multis.Dispose();
+            Skills.Dispose();
+            Texmaps.Dispose();
+            Speeches.Dispose();
+            Lights.Dispose();
+            Sounds.Dispose();
+            MultiMaps.Dispose();
+            Verdata.Dispose();
+            Professions.Dispose();
+        }
+
+        public string GetUOFilePath(string file)
         {
             if (!UOFilesOverrideMap.Instance.TryGetValue(file.ToLowerInvariant(), out string uoFilePath))
             {
@@ -82,39 +154,34 @@ namespace ClassicUO.Assets
             return uoFilePath;
         }
 
-        public static ClientVersion Version;
-        public static string BasePath = "";
-        public static bool IsUOPInstallation;
-
-        public static void Load(ClientVersion version, string basePath, bool useVerdata, string lang)
+        public void Load(bool useVerdata, string lang, string mapsLayouts = "")
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
-
-            Version = version;
-            BasePath = basePath;
 
             UOFilesOverrideMap.Instance.Load(); // need to load this first so that it manages can perform the file overrides if needed
 
             IsUOPInstallation = Version >= ClientVersion.CV_7000 && File.Exists(GetUOFilePath("MainMisc.uop"));
 
+            Maps.MapsLayouts = mapsLayouts;
+
             List<Task> tasks = new List<Task>
             {
-                AnimationsLoader.Instance.Load(),
-                AnimDataLoader.Instance.Load(),
-                ArtLoader.Instance.Load(),
-                MapLoader.Instance.Load(),
-                ClilocLoader.Instance.Load(lang),
-                GumpsLoader.Instance.Load(),
-                FontsLoader.Instance.Load(),
-                HuesLoader.Instance.Load(),
-                TileDataLoader.Instance.Load(),
-                MultiLoader.Instance.Load(),
-                SkillsLoader.Instance.Load().ContinueWith(t => ProfessionLoader.Instance.Load()),
-                TexmapsLoader.Instance.Load(),
-                SpeechesLoader.Instance.Load(),
-                LightsLoader.Instance.Load(),
-                SoundsLoader.Instance.Load(),
-                MultiMapLoader.Instance.Load()
+                Animations.Load(),
+                AnimData.Load(),
+                Arts.Load(),
+                Maps.Load(),
+                Clilocs.Load(lang),
+                Gumps.Load(),
+                Fonts.Load(),
+                Hues.Load(),
+                TileData.Load(),
+                Multis.Load(),
+                Skills.Load().ContinueWith(t => Professions.Load()),
+                Texmaps.Load(),
+                Speeches.Load(),
+                Lights.Load(),
+                Sounds.Load(),
+                MultiMaps.Load()
             };
 
             if (!Task.WhenAll(tasks).Wait(TimeSpan.FromSeconds(10)))
@@ -122,10 +189,9 @@ namespace ClassicUO.Assets
                 Log.Panic("Loading files timeout.");
             }
 
-            Read_Art_def();
+            ReadArtDefFile();
 
-            UOFileMul verdata = Verdata.File;
-
+            var verdata = Verdata.File;
             bool forceVerdata = Version < ClientVersion.CV_500A || verdata != null && verdata.Length != 0 && Verdata.Patches.Length != 0;
 
             if (!useVerdata && forceVerdata)
@@ -149,17 +215,17 @@ namespace ClassicUO.Assets
 
                         if (vh.FileID == 0)
                         {
-                            MapLoader.Instance.PatchMapBlock(vh.BlockID, vh.Position);
+                            Maps.PatchMapBlock(vh.BlockID, vh.Position);
                         }
                         else if (vh.FileID == 2)
                         {
-                            MapLoader.Instance.PatchStaticBlock(vh.BlockID, ((ulong)reader.StartAddress.ToInt64() + vh.Position), vh.Length);
+                            Maps.PatchStaticBlock(vh.BlockID, ((ulong)reader.StartAddress.ToInt64() + vh.Position), vh.Length);
                         }
                         else if (vh.FileID == 4)
                         {
-                            if (vh.BlockID < ArtLoader.Instance.Entries.Length)
+                            if (vh.BlockID < Arts.Entries.Length)
                             {
-                                ArtLoader.Instance.Entries[vh.BlockID] = new UOFileIndex
+                                Arts.Entries[vh.BlockID] = new UOFileIndex
                                 (
                                     reader.StartAddress,
                                     (uint) verdata.Length,
@@ -171,7 +237,7 @@ namespace ClassicUO.Assets
                         }
                         else if (vh.FileID == 12)
                         {
-                            GumpsLoader.Instance.Entries[vh.BlockID] = new UOFileIndex
+                            Gumps.Entries[vh.BlockID] = new UOFileIndex
                             (
                                 reader.StartAddress,
                                 (uint) verdata.Length,
@@ -182,9 +248,9 @@ namespace ClassicUO.Assets
                                 (short) (vh.GumpData & 0xFFFF)
                             );
                         }
-                        else if (vh.FileID == 14 && vh.BlockID < MultiLoader.Instance.Count)
+                        else if (vh.FileID == 14 && vh.BlockID < Multis.Count)
                         {
-                            MultiLoader.Instance.Entries[vh.BlockID] = new UOFileIndex
+                            Multis.Entries[vh.BlockID] = new UOFileIndex
                             (
                                 reader.StartAddress,
                                 (uint) verdata.Length,
@@ -193,9 +259,9 @@ namespace ClassicUO.Assets
                                 0
                             );
                         }
-                        else if (vh.FileID == 16 && vh.BlockID < SkillsLoader.Instance.SkillsCount)
+                        else if (vh.FileID == 16 && vh.BlockID < Skills.SkillsCount)
                         {
-                            SkillEntry skill = SkillsLoader.Instance.Skills[(int) vh.BlockID];
+                            var skill = Skills.Skills[(int) vh.BlockID];
 
                             if (skill != null)
                             {
@@ -217,7 +283,7 @@ namespace ClassicUO.Assets
                             {
                                 int offset = (int) (vh.BlockID * 32);
 
-                                if (offset + 32 > TileDataLoader.Instance.LandData.Length)
+                                if (offset + 32 > TileData.LandData.Length)
                                 {
                                     continue;
                                 }
@@ -237,14 +303,14 @@ namespace ClassicUO.Assets
                                         flags = reader.ReadUInt64LE();
                                     }
 
-                                    TileDataLoader.Instance.LandData[offset + j] = new LandTiles(flags, reader.ReadUInt16LE(), reader.ReadASCII(20));
+                                    TileData.LandData[offset + j] = new LandTiles(flags, reader.ReadUInt16LE(), reader.ReadASCII(20));
                                 }
                             }
                             else if (vh.Length == 1188)
                             {
                                 int offset = (int) ((vh.BlockID - 0x0200) * 32);
 
-                                if (offset + 32 > TileDataLoader.Instance.StaticData.Length)
+                                if (offset + 32 > TileData.StaticData.Length)
                                 {
                                     continue;
                                 }
@@ -264,7 +330,7 @@ namespace ClassicUO.Assets
                                         flags = reader.ReadUInt64LE();
                                     }
 
-                                    TileDataLoader.Instance.StaticData[offset + j] = new StaticTiles
+                                    TileData.StaticData[offset + j] = new StaticTiles
                                     (
                                         flags,
                                         reader.ReadUInt8(),
@@ -281,11 +347,11 @@ namespace ClassicUO.Assets
                         }
                         else if (vh.FileID == 32)
                         {
-                            if (vh.BlockID < HuesLoader.Instance.HuesCount)
+                            if (vh.BlockID < Hues.HuesCount)
                             {
                                 VerdataHuesGroup group = Marshal.PtrToStructure<VerdataHuesGroup>(reader.StartAddress + (int) vh.Position);
 
-                                HuesGroup[] hues = HuesLoader.Instance.HuesRange;
+                                HuesGroup[] hues = Hues.HuesRange;
 
                                 hues[vh.BlockID].Header = group.Header;
 
@@ -310,13 +376,7 @@ namespace ClassicUO.Assets
             stopwatch.Stop();
         }
 
-        public static void MapLoaderReLoad(MapLoader newloader)
-        {
-            MapLoader.Instance?.Dispose();
-            MapLoader.Instance = newloader;
-        }
-
-        private static void Read_Art_def()
+        private void ReadArtDefFile()
         {
             string pathdef = GetUOFilePath("art.def");
 
@@ -325,16 +385,13 @@ namespace ClassicUO.Assets
                 return;
             }
 
-            var tiledataLoader = TileDataLoader.Instance;
-            var artLoader = ArtLoader.Instance;
-
             using (var reader = new DefReader(pathdef, 1))
             {
                 while (reader.Next())
                 {
                     int index = reader.ReadInt();
 
-                    if (index < 0 || index >= ArtLoader.MAX_LAND_DATA_INDEX_COUNT + tiledataLoader.StaticData.Length)
+                    if (index < 0 || index >= ArtLoader.MAX_LAND_DATA_INDEX_COUNT + TileData.StaticData.Length)
                     {
                         continue;
                     }
@@ -350,39 +407,39 @@ namespace ClassicUO.Assets
                     {
                         int checkIndex = group[i];
 
-                        if (checkIndex < 0 || checkIndex >= ArtLoader.MAX_LAND_DATA_INDEX_COUNT + tiledataLoader.StaticData.Length)
+                        if (checkIndex < 0 || checkIndex >= ArtLoader.MAX_LAND_DATA_INDEX_COUNT + TileData.StaticData.Length)
                         {
                             continue;
                         }
 
-                        if (index < artLoader.Entries.Length && checkIndex < artLoader.Entries.Length)
+                        if (index < Arts.Entries.Length && checkIndex < Arts.Entries.Length)
                         {
-                            ref UOFileIndex currentEntry = ref artLoader.GetValidRefEntry(index);
-                            ref UOFileIndex checkEntry = ref artLoader.GetValidRefEntry(checkIndex);
+                            ref UOFileIndex currentEntry = ref Arts.GetValidRefEntry(index);
+                            ref UOFileIndex checkEntry = ref Arts.GetValidRefEntry(checkIndex);
 
                             if (currentEntry.Equals(UOFileIndex.Invalid) && !checkEntry.Equals(UOFileIndex.Invalid))
                             {
-                                artLoader.Entries[index] = artLoader.Entries[checkIndex];
+                                Arts.Entries[index] = Arts.Entries[checkIndex];
                             }
                         }
 
                         if (index < ArtLoader.MAX_LAND_DATA_INDEX_COUNT &&
                             checkIndex < ArtLoader.MAX_LAND_DATA_INDEX_COUNT &&
-                            checkIndex < tiledataLoader.LandData.Length &&
-                            index < tiledataLoader.LandData.Length &&
-                            !tiledataLoader.LandData[checkIndex].Equals(default) &&
-                            tiledataLoader.LandData[index].Equals(default))
+                            checkIndex < TileData.LandData.Length &&
+                            index < TileData.LandData.Length &&
+                            !TileData.LandData[checkIndex].Equals(default) &&
+                            TileData.LandData[index].Equals(default))
                         {
-                            tiledataLoader.LandData[index] = tiledataLoader.LandData[checkIndex];
+                            TileData.LandData[index] = TileData.LandData[checkIndex];
 
                             break;
                         }
 
                         if (index >= ArtLoader.MAX_LAND_DATA_INDEX_COUNT && checkIndex >= ArtLoader.MAX_LAND_DATA_INDEX_COUNT &&
-                            index < tiledataLoader.StaticData.Length && checkIndex < tiledataLoader.StaticData.Length &&
-                            tiledataLoader.StaticData[index].Equals(default) && !tiledataLoader.StaticData[checkIndex].Equals(default))
+                            index < TileData.StaticData.Length && checkIndex < TileData.StaticData.Length &&
+                            TileData.StaticData[index].Equals(default) && !TileData.StaticData[checkIndex].Equals(default))
                         {
-                            tiledataLoader.StaticData[index] = tiledataLoader.StaticData[checkIndex];
+                            TileData.StaticData[index] = TileData.StaticData[checkIndex];
 
                             break;
                         }

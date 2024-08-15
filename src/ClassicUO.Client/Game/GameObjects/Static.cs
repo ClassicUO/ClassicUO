@@ -56,7 +56,7 @@ namespace ClassicUO.Game.GameObjects
 
         public ushort OriginalGraphic { get; private set; }
 
-        public ref StaticTiles ItemData => ref TileDataLoader.Instance.StaticData[Graphic];
+        public ref StaticTiles ItemData => ref Client.Game.UO.FileManager.TileData.StaticData[Graphic];
 
         public bool IsVegetation;
         public int Index;

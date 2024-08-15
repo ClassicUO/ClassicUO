@@ -130,13 +130,13 @@ namespace ClassicUO.Game.Managers
             byte* table = stackalloc byte[60];
             int index = 0;
 
-            int count = SkillsLoader.Instance.SkillsCount;
+            int count = Client.Game.UO.FileManager.Skills.SkillsCount;
 
             for (int i = 0; i < count; i++)
             {
                 for (int j = 0; j < Count; j++)
                 {
-                    if (SkillsLoader.Instance.GetSortedIndex(i) == _list[j])
+                    if (Client.Game.UO.FileManager.Skills.GetSortedIndex(i) == _list[j])
                     {
                         table[index++] = _list[j];
 
@@ -307,7 +307,7 @@ namespace ClassicUO.Game.Managers
         {
             Groups.Clear();
 
-            if (!LoadMULFile(UOFileManager.GetUOFilePath("skillgrp.mul")))
+            if (!LoadMULFile(Client.Game.UO.FileManager.GetUOFilePath("skillgrp.mul")))
             {
                 MakeDefaultMiscellaneous();
                 MakeDefaultCombat();
@@ -343,7 +343,7 @@ namespace ClassicUO.Game.Managers
 
         private void MakeDefaultCombat()
         {
-            int count = SkillsLoader.Instance.SkillsCount;
+            int count = Client.Game.UO.FileManager.Skills.SkillsCount;
 
             SkillsGroup g = new SkillsGroup();
             g.Name = ResGeneral.Combat;
@@ -406,7 +406,7 @@ namespace ClassicUO.Game.Managers
 
         private void MakeDefaultMagic()
         {
-            int count = SkillsLoader.Instance.SkillsCount;
+            int count = Client.Game.UO.FileManager.Skills.SkillsCount;
 
             SkillsGroup g = new SkillsGroup();
             g.Name = ResGeneral.Magic;
@@ -555,7 +555,7 @@ namespace ClassicUO.Game.Managers
                     {
                         int grp = bin.ReadInt32();
 
-                        if (grp < groups.Length && skillidx < SkillsLoader.Instance.SkillsCount)
+                        if (grp < groups.Length && skillidx < Client.Game.UO.FileManager.Skills.SkillsCount)
                         {
                             groups[grp].Add(skillidx++);
                         }

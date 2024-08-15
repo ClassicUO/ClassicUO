@@ -266,26 +266,26 @@ namespace ClassicUO.Game.Scenes
                 switch (CurrentLoginStep)
                 {
                     case LoginSteps.Connecting:
-                        labelText = ClilocLoader.Instance.GetString(3000002, ResGeneral.Connecting); // "Connecting..."
+                        labelText = Client.Game.UO.FileManager.Clilocs.GetString(3000002, ResGeneral.Connecting); // "Connecting..."
 
                         showButtons = LoginButtons.Cancel;
 
                         break;
 
                     case LoginSteps.VerifyingAccount:
-                        labelText = ClilocLoader.Instance.GetString(3000003, ResGeneral.VerifyingAccount); // "Verifying Account..."
+                        labelText = Client.Game.UO.FileManager.Clilocs.GetString(3000003, ResGeneral.VerifyingAccount); // "Verifying Account..."
 
                         showButtons = LoginButtons.Cancel;
 
                         break;
 
                     case LoginSteps.LoginInToServer:
-                        labelText = ClilocLoader.Instance.GetString(3000053, ResGeneral.LoggingIntoShard); // logging into shard
+                        labelText = Client.Game.UO.FileManager.Clilocs.GetString(3000053, ResGeneral.LoggingIntoShard); // logging into shard
 
                         break;
 
                     case LoginSteps.EnteringBritania:
-                        labelText = ClilocLoader.Instance.GetString(3000001, ResGeneral.EnteringBritannia); // Entering Britania...
+                        labelText = Client.Game.UO.FileManager.Clilocs.GetString(3000001, ResGeneral.EnteringBritannia); // Entering Britania...
 
                         break;
 
@@ -769,7 +769,7 @@ namespace ClassicUO.Game.Scenes
                         cityIndex,
                         cityName,
                         cityBuilding,
-                        ClilocLoader.Instance.GetString((int) cityDescription),
+                        Client.Game.UO.FileManager.Clilocs.GetString((int) cityDescription),
                         cityX,
                         cityY,
                         cityZ,
@@ -803,7 +803,7 @@ namespace ClassicUO.Game.Scenes
 
         private string[] ReadCityTextFile(int count)
         {
-            string path = UOFileManager.GetUOFilePath("citytext.enu");
+            string path = Client.Game.UO.FileManager.GetUOFilePath("citytext.enu");
 
             if (!File.Exists(path))
             {

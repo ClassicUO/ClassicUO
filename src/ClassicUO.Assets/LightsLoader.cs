@@ -37,17 +37,13 @@ using System.Threading.Tasks;
 
 namespace ClassicUO.Assets
 {
-    public class LightsLoader : UOFileLoader
+    public sealed class LightsLoader : UOFileLoader
     {
-        private static LightsLoader _instance;
         private UOFileMul _file;
 
         public const int MAX_LIGHTS_DATA_INDEX_COUNT = 100;
 
-        private LightsLoader(int count) { }
-
-        public static LightsLoader Instance =>
-            _instance ?? (_instance = new LightsLoader(MAX_LIGHTS_DATA_INDEX_COUNT));
+        public LightsLoader(UOFileManager fileManager) : base(fileManager) { }
 
         public UOFileMul File => _file;
 
@@ -55,8 +51,8 @@ namespace ClassicUO.Assets
         {
             return Task.Run(() =>
             {
-                string path = UOFileManager.GetUOFilePath("light.mul");
-                string pathidx = UOFileManager.GetUOFilePath("lightidx.mul");
+                string path = FileManager.GetUOFilePath("light.mul");
+                string pathidx = FileManager.GetUOFilePath("lightidx.mul");
 
                 FileSystemHelper.EnsureFileExists(path);
                 FileSystemHelper.EnsureFileExists(pathidx);

@@ -188,7 +188,7 @@ namespace ClassicUO.Game.UI.Gumps
                 v.Dispose();
             }
 
-            ArtLoader loader = ArtLoader.Instance;
+            ArtLoader loader = Client.Game.UO.FileManager.Arts;
 
             for (LinkedObject i = container.Items; i != null; i = i.Next)
             {
@@ -427,7 +427,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Add(new Label(World.Player.Name, false, 0x0481, font: 3) { X = 73, Y = 32 });
 
-                int fontWidth = 250 - FontsLoader.Instance.GetWidthASCII(3, _name);
+                int fontWidth = 250 - Client.Game.UO.FileManager.Fonts.GetWidthASCII(3, _name);
 
                 Add(new Label(_name, false, 0x0481, font: 3) { X = fontWidth, Y = 244 });
 
@@ -568,7 +568,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Add(new Label(World.Player.Name, false, 0x0386, font: 1) { X = 84, Y = 40 });
 
-                int fontWidth = 260 - FontsLoader.Instance.GetWidthASCII(1, _name);
+                int fontWidth = 260 - Client.Game.UO.FileManager.Fonts.GetWidthASCII(1, _name);
 
                 Add(new Label(_name, false, 0x0386, font: 1) { X = fontWidth, Y = 170 });
 

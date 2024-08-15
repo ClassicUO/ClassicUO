@@ -403,7 +403,7 @@ namespace ClassicUO.Game.GameObjects
                 case 0x9E64:
                 case 0x9E65:
                 case 0x9E7D:
-                    ref StaticTiles data = ref TileDataLoader.Instance.StaticData[g];
+                    ref var data = ref Client.Game.UO.FileManager.TileData.StaticData[g];
 
                     return !data.IsBackground && !data.IsSurface;
             }
@@ -424,9 +424,9 @@ namespace ClassicUO.Game.GameObjects
                     return true;
                 }
 
-                if (g < TileDataLoader.Instance?.StaticData?.Length)
+                if (g < Client.Game.UO.FileManager.TileData.StaticData.Length)
                 {
-                    ref StaticTiles data = ref TileDataLoader.Instance.StaticData[g];
+                    ref var data = ref Client.Game.UO.FileManager.TileData.StaticData[g];
 
                     if (
                         !data.IsNoDiagonal

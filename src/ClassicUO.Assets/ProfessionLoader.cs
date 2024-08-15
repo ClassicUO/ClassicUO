@@ -38,45 +38,54 @@ using System.Threading.Tasks;
 
 namespace ClassicUO.Assets
 {
-    public class ProfessionInfo
+    public sealed class ProfessionInfo
     {
-        public static readonly int[,] _VoidSkills = new int[4, 2]
+        public ProfessionInfo(ClientVersion clientVersion)
         {
-            { 0, InitialSkillValue }, { 0, InitialSkillValue },
-            { 0, UOFileManager.Version < ClientVersion.CV_70160 ? 0 : InitialSkillValue }, { 0, InitialSkillValue }
-        };
-        public static readonly int[] _VoidStats = new int[3] { 60, RemainStatValue, RemainStatValue };
-        public static int InitialSkillValue => UOFileManager.Version >= ClientVersion.CV_70160 ? 30 : 50;
-        public static int RemainStatValue => UOFileManager.Version >= ClientVersion.CV_70160 ? 15 : 10;
+            (SkillDefVal, StatsVal) = GetDefaults(clientVersion);
+        }
+
+        public static (int[,] defaultSkillsValues, int[] defaultStatsValues) GetDefaults(ClientVersion clientVersion)
+        {
+            int initialSkillValue = clientVersion >= ClientVersion.CV_70160 ? 30 : 50;
+            int remainStatValue = clientVersion >= ClientVersion.CV_70160 ? 15 : 10;
+
+            return 
+            (
+                new int[4, 2]
+                {
+                    { 0, initialSkillValue }, { 0, initialSkillValue },
+                    { 0, clientVersion < ClientVersion.CV_70160 ? 0 : initialSkillValue }, { 0, initialSkillValue }
+                },
+                new int[3] { 60, remainStatValue, remainStatValue }
+            );
+        }
+
+       
         public string Name { get; set; }
         public string TrueName { get; set; }
         public int Localization { get; set; }
         public int Description { get; set; }
         public int DescriptionIndex { get; set; }
         public ProfessionLoader.PROF_TYPE Type { get; set; }
-
         public ushort Graphic { get; set; }
-
         public bool TopLevel { get; set; }
-        public int[,] SkillDefVal { get; set; } = _VoidSkills;
-        public int[] StatsVal { get; set; } = _VoidStats;
+        public int[,] SkillDefVal { get; set; }
+        public int[] StatsVal { get; set; }
         public List<string> Children { get; set; }
     }
 
-    public class ProfessionLoader : UOFileLoader
+    public sealed class ProfessionLoader : UOFileLoader
     {
-        private static ProfessionLoader _instance;
         private readonly string[] _Keys =
         {
             "begin", "name", "truename", "desc", "toplevel", "gump", "type", "children", "skill",
             "stat", "str", "int", "dex", "end", "true", "category", "nameid", "descid"
         };
 
-        private ProfessionLoader()
+        public ProfessionLoader(UOFileManager fileManager) : base(fileManager)
         {
         }
-
-        public static ProfessionLoader Instance => _instance ?? (_instance = new ProfessionLoader());
 
         public Dictionary<ProfessionInfo, List<ProfessionInfo>> Professions { get; } = new Dictionary<ProfessionInfo, List<ProfessionInfo>>();
 
@@ -88,7 +97,7 @@ namespace ClassicUO.Assets
                 {
                     bool result = false;
 
-                    FileInfo file = new FileInfo(UOFileManager.GetUOFilePath("Prof.txt"));
+                    FileInfo file = new FileInfo(FileManager.GetUOFilePath("Prof.txt"));
 
                     if (file.Exists)
                     {
@@ -119,7 +128,7 @@ namespace ClassicUO.Assets
                         }
                     }
 
-                    Professions[new ProfessionInfo
+                    Professions[new ProfessionInfo(FileManager.Version)
                     {
                         Name = "Advanced",
                         Localization = 1061176,
@@ -284,9 +293,9 @@ namespace ClassicUO.Assets
                                 }
                             }
 
-                            for (int j = 0; j < SkillsLoader.Instance.SkillsCount; j++)
+                            for (int j = 0; j < FileManager.Skills.SkillsCount; j++)
                             {
-                                SkillEntry skill = SkillsLoader.Instance.Skills[j];
+                                var skill = FileManager.Skills.Skills[j];
 
                                 if (strings[1] == skill.Name || ((SkillEntry.HardCodedName) skill.Index).ToString().ToLower() == strings[1].ToLower())
                                 {
@@ -330,7 +339,7 @@ namespace ClassicUO.Assets
 
                     {
                         int.TryParse(strings[1], out nameClilocID);
-                        name = ClilocLoader.Instance.GetString(nameClilocID, true, name);
+                        name = FileManager.Clilocs.GetString(nameClilocID, true, name);
 
                         break;
                     }
@@ -350,7 +359,7 @@ namespace ClassicUO.Assets
 
             if (type == PROF_TYPE.CATEGORY)
             {
-                info = new ProfessionInfo
+                info = new ProfessionInfo(FileManager.Version)
                 {
                     Children = childrens
                 };
@@ -359,7 +368,7 @@ namespace ClassicUO.Assets
             }
             else if (type == PROF_TYPE.PROFESSION)
             {
-                info = new ProfessionInfo
+                info = new ProfessionInfo(FileManager.Version)
                 {
                     StatsVal = stats,
                     SkillDefVal = skillIndex

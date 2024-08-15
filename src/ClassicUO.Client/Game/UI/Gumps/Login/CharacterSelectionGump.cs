@@ -103,7 +103,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             Add
             (
-                new Label(ClilocLoader.Instance.GetString(3000050, "Character Selection"), unicode, hue, font: font)
+                new Label(Client.Game.UO.FileManager.Clilocs.GetString(3000050, "Character Selection"), unicode, hue, font: font)
                 {
                     X = 267, Y = listTitleY
                 },

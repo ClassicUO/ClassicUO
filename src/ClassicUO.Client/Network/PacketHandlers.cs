@@ -1962,22 +1962,22 @@ namespace ClassicUO.Network
             {
                 int count = p.ReadUInt16BE();
 
-                SkillsLoader.Instance.Skills.Clear();
-                SkillsLoader.Instance.SortedSkills.Clear();
+                Client.Game.UO.FileManager.Skills.Skills.Clear();
+                Client.Game.UO.FileManager.Skills.SortedSkills.Clear();
 
                 for (int i = 0; i < count; i++)
                 {
                     bool haveButton = p.ReadBool();
                     int nameLength = p.ReadUInt8();
 
-                    SkillsLoader.Instance.Skills.Add(
+                    Client.Game.UO.FileManager.Skills.Skills.Add(
                         new SkillEntry(i, p.ReadASCII(nameLength), haveButton)
                     );
                 }
 
-                SkillsLoader.Instance.SortedSkills.AddRange(SkillsLoader.Instance.Skills);
+                Client.Game.UO.FileManager.Skills.SortedSkills.AddRange(Client.Game.UO.FileManager.Skills.Skills);
 
-                SkillsLoader.Instance.SortedSkills.Sort(
+                Client.Game.UO.FileManager.Skills.SortedSkills.Sort(
                     (a, b) => string.Compare(a.Name, b.Name, StringComparison.InvariantCulture)
                 );
             }
@@ -2769,7 +2769,7 @@ namespace ClassicUO.Network
                     }
                     else if (int.TryParse(name, out int cliloc))
                     {
-                        it.Name = ClilocLoader.Instance.Translate(
+                        it.Name = Client.Game.UO.FileManager.Clilocs.Translate(
                             cliloc,
                             $"\t{it.ItemData.Name}: \t{it.Amount}",
                             true
@@ -3392,7 +3392,7 @@ namespace ClassicUO.Network
 
                 if (int.TryParse(name, out int clilocnum))
                 {
-                    name = ClilocLoader.Instance.GetString(clilocnum);
+                    name = Client.Game.UO.FileManager.Clilocs.GetString(clilocnum);
                     fromcliloc = true;
                 }
                 else if (string.IsNullOrEmpty(name))
@@ -3401,7 +3401,7 @@ namespace ClassicUO.Network
 
                     if (!success)
                     {
-                        name = TileDataLoader.Instance.StaticData[graphic].Name;
+                        name = Client.Game.UO.FileManager.TileData.StaticData[graphic].Name;
                     }
                 }
 
@@ -3746,7 +3746,7 @@ namespace ClassicUO.Network
             Client.Game.UO.Animations.ConvertBodyIfNeeded(ref gfx);
             var animGroup = Client.Game.UO.Animations.GetAnimType(gfx);
             var animFlags = Client.Game.UO.Animations.GetAnimFlags(gfx);
-            byte group = AnimationsLoader.Instance.GetDeathAction(
+            byte group = Client.Game.UO.FileManager.Animations.GetDeathAction(
                 gfx,
                 animFlags,
                 animGroup,
@@ -4237,7 +4237,7 @@ namespace ClassicUO.Network
 
                     if (cliloc > 0)
                     {
-                        str = ClilocLoader.Instance.GetString((int)cliloc, true);
+                        str = Client.Game.UO.FileManager.Clilocs.GetString((int)cliloc, true);
 
                         if (!string.IsNullOrEmpty(str))
                         {
@@ -4293,7 +4293,7 @@ namespace ClassicUO.Network
                         }
 
                         short charges = (short)p.ReadUInt16BE();
-                        string attr = ClilocLoader.Instance.GetString((int)next);
+                        string attr = Client.Game.UO.FileManager.Clilocs.GetString((int)next);
 
                         if (attr != null)
                         {
@@ -4407,7 +4407,7 @@ namespace ClassicUO.Network
                 //===========================================================================================
                 case 0x18: // enable map patches
 
-                    if (MapLoader.Instance.ApplyPatches(ref p))
+                    if (Client.Game.UO.FileManager.Maps.ApplyPatches(ref p))
                     {
                         //List<GameObject> list = new List<GameObject>();
 
@@ -4793,7 +4793,7 @@ namespace ClassicUO.Network
                 }
             }
 
-            string text = ClilocLoader.Instance.Translate((int)cliloc, arguments);
+            string text = Client.Game.UO.FileManager.Clilocs.Translate((int)cliloc, arguments);
 
             if (text == null)
             {
@@ -4817,7 +4817,7 @@ namespace ClassicUO.Network
                 type = MessageType.System;
             }
 
-            if (!FontsLoader.Instance.UnicodeFontExists((byte)font))
+            if (!Client.Game.UO.FileManager.Fonts.UnicodeFontExists((byte)font))
             {
                 font = 0;
             }
@@ -4960,7 +4960,7 @@ namespace ClassicUO.Network
                     argument = p.ReadUnicodeLE(length / 2);
                 }
 
-                string str = ClilocLoader.Instance.Translate(cliloc, argument, true);
+                string str = Client.Game.UO.FileManager.Clilocs.Translate(cliloc, argument, true);
 
                 if (str == null)
                 {
@@ -5545,7 +5545,7 @@ namespace ClassicUO.Network
                         ushort arg_length = p.ReadUInt16BE();
                         var str = p.ReadUnicodeLE(2);
                         var args = str + p.ReadUnicodeLE();
-                        string title = ClilocLoader.Instance.Translate(
+                        string title = Client.Game.UO.FileManager.Clilocs.Translate(
                             (int)titleCliloc,
                             args,
                             true
@@ -5559,7 +5559,7 @@ namespace ClassicUO.Network
                         {
                             description =
                                 "\n"
-                                + ClilocLoader.Instance.Translate(
+                                + Client.Game.UO.FileManager.Clilocs.Translate(
                                     (int)descriptionCliloc,
                                     String.IsNullOrEmpty(args_2) ? args : args_2,
                                     true
@@ -5577,7 +5577,7 @@ namespace ClassicUO.Network
 
                         if (wtfCliloc != 0)
                         {
-                            wtf = ClilocLoader.Instance.Translate(
+                            wtf = Client.Game.UO.FileManager.Clilocs.Translate(
                                 (int)wtfCliloc,
                                 String.IsNullOrEmpty(args_3) ? args : args_3,
                                 true
@@ -6715,43 +6715,43 @@ namespace ClassicUO.Network
                         switch (pic.Graphic)
                         {
                             case 0x69:
-                                s = ClilocLoader.Instance.GetString(1051000 + 2);
+                                s = Client.Game.UO.FileManager.Clilocs.GetString(1051000 + 2);
 
                                 break;
 
                             case 0x6A:
-                                s = ClilocLoader.Instance.GetString(1051000 + 7);
+                                s = Client.Game.UO.FileManager.Clilocs.GetString(1051000 + 7);
 
                                 break;
 
                             case 0x6B:
-                                s = ClilocLoader.Instance.GetString(1051000 + 5);
+                                s = Client.Game.UO.FileManager.Clilocs.GetString(1051000 + 5);
 
                                 break;
 
                             case 0x6D:
-                                s = ClilocLoader.Instance.GetString(1051000 + 6);
+                                s = Client.Game.UO.FileManager.Clilocs.GetString(1051000 + 6);
 
                                 break;
 
                             case 0x6E:
-                                s = ClilocLoader.Instance.GetString(1051000 + 1);
+                                s = Client.Game.UO.FileManager.Clilocs.GetString(1051000 + 1);
 
                                 break;
 
                             case 0x6F:
-                                s = ClilocLoader.Instance.GetString(1051000 + 3);
+                                s = Client.Game.UO.FileManager.Clilocs.GetString(1051000 + 3);
 
                                 break;
 
                             case 0x70:
-                                s = ClilocLoader.Instance.GetString(1051000 + 4);
+                                s = Client.Game.UO.FileManager.Clilocs.GetString(1051000 + 4);
 
                                 break;
 
                             case 0x6C:
                             default:
-                                s = ClilocLoader.Instance.GetString(1051000);
+                                s = Client.Game.UO.FileManager.Clilocs.GetString(1051000);
 
                                 break;
                         }
@@ -6799,7 +6799,7 @@ namespace ClassicUO.Network
                             int.Parse(gparams[6]) == 1,
                             int.Parse(gparams[7]) != 0,
                             gparams[6] != "0" && gparams[7] == "2",
-                            ClilocLoader.Instance.GetString(int.Parse(gparams[5].Replace("#", ""))),
+                            Client.Game.UO.FileManager.Clilocs.GetString(int.Parse(gparams[5].Replace("#", ""))),
                             0,
                             true
                         )
@@ -6833,7 +6833,7 @@ namespace ClassicUO.Network
                             int.Parse(gparams[6]) == 1,
                             int.Parse(gparams[7]) != 0,
                             gparams[6] != "0" && gparams[7] == "2",
-                            ClilocLoader.Instance.GetString(int.Parse(gparams[5].Replace("#", ""))),
+                            Client.Game.UO.FileManager.Clilocs.GetString(int.Parse(gparams[5].Replace("#", ""))),
                             color,
                             true
                         )
@@ -6877,10 +6877,10 @@ namespace ClassicUO.Network
                             int.Parse(gparams[6]) != 0,
                             gparams[5] != "0" && gparams[6] == "2",
                             sb == null
-                                ? ClilocLoader.Instance.GetString(
+                                ? Client.Game.UO.FileManager.Clilocs.GetString(
                                     int.Parse(gparams[8].Replace("#", ""))
                                 )
-                                : ClilocLoader.Instance.Translate(
+                                : Client.Game.UO.FileManager.Clilocs.Translate(
                                     int.Parse(gparams[8].Replace("#", "")),
                                     sb.ToString().Trim('@').Replace('@', '\t')
                                 ),
@@ -6995,14 +6995,14 @@ namespace ClassicUO.Network
 
                         if (args.Length == 0)
                         {
-                            text = ClilocLoader.Instance.GetString(int.Parse(gparams[1]));
+                            text = Client.Game.UO.FileManager.Clilocs.GetString(int.Parse(gparams[1]));
                             Log.Error(
                                 $"String '{args}' too short, something wrong with gump tooltip: {text}"
                             );
                         }
                         else
                         {
-                            text = ClilocLoader.Instance.Translate(
+                            text = Client.Game.UO.FileManager.Clilocs.Translate(
                                 int.Parse(gparams[1]),
                                 args,
                                 false
@@ -7011,7 +7011,7 @@ namespace ClassicUO.Network
                     }
                     else
                     {
-                        text = ClilocLoader.Instance.GetString(int.Parse(gparams[1]));
+                        text = Client.Game.UO.FileManager.Clilocs.GetString(int.Parse(gparams[1]));
                     }
 
                     Control last =

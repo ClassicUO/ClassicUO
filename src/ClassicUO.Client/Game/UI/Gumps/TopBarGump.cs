@@ -100,7 +100,7 @@ namespace ClassicUO.Game.UI.Gumps
                 new[] { 1, (int)Buttons.GlobalChat }
             };
 
-            var cliloc = ClilocLoader.Instance;
+            var cliloc = Client.Game.UO.FileManager.Clilocs;
 
             string[] texts =
             {

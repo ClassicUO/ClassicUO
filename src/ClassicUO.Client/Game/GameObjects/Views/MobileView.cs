@@ -183,7 +183,7 @@ namespace ClassicUO.Game.GameObjects
             ProcessSteps(out byte dir);
             byte layerDir = dir;
 
-            AnimationsLoader.Instance.GetAnimDirection(ref dir, ref IsFlipped);
+            Client.Game.UO.FileManager.Animations.GetAnimDirection(ref dir, ref IsFlipped);
 
             ushort graphic = GetGraphicForAnimation();
             byte animGroup = GetGroupForAnimation(this, graphic, true);
@@ -294,7 +294,7 @@ namespace ClassicUO.Game.GameObjects
 
                     ProcessSteps(out dir);
 
-                    AnimationsLoader.Instance.FixSittingDirection(
+                    Client.Game.UO.FileManager.Animations.FixSittingDirection(
                         ref dir,
                         ref IsFlipped,
                         ref drawX,
@@ -410,7 +410,7 @@ namespace ClassicUO.Game.GameObjects
                             }
 
                             if (
-                                AnimationsLoader.Instance.EquipConversions.TryGetValue(
+                                Client.Game.UO.FileManager.Animations.EquipConversions.TryGetValue(
                                     Graphic,
                                     out Dictionary<ushort, EquipConvData> map
                                 )
@@ -523,7 +523,7 @@ namespace ClassicUO.Game.GameObjects
                 }
 
                 if (
-                    AnimationsLoader.Instance.EquipConversions.TryGetValue(
+                    Client.Game.UO.FileManager.Animations.EquipConversions.TryGetValue(
                         owner.Graphic,
                         out Dictionary<ushort, EquipConvData> map
                     )
@@ -1019,7 +1019,7 @@ namespace ClassicUO.Game.GameObjects
 
             ProcessSteps(out byte dir);
             bool isFlipped = IsFlipped;
-            AnimationsLoader.Instance.GetAnimDirection(ref dir, ref isFlipped);
+            Client.Game.UO.FileManager.Animations.GetAnimDirection(ref dir, ref isFlipped);
 
             ushort graphic = GetGraphicForAnimation();
             byte animGroup = GetGroupForAnimation(this, graphic, true);

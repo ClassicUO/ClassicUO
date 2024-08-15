@@ -39,18 +39,14 @@ using System.Threading.Tasks;
 
 namespace ClassicUO.Assets
 {
-    public class TileDataLoader : UOFileLoader
+    public sealed class TileDataLoader : UOFileLoader
     {
-        private static TileDataLoader _instance;
-
         private static StaticTiles[] _staticData;
         private static LandTiles[] _landData;
 
-        private TileDataLoader()
+        public TileDataLoader(UOFileManager fileManager) : base(fileManager)
         {
         }
-
-        public static TileDataLoader Instance => _instance ?? (_instance = new TileDataLoader());
 
         public ref LandTiles[] LandData => ref _landData;
         public ref StaticTiles[] StaticData => ref _staticData;
@@ -61,14 +57,14 @@ namespace ClassicUO.Assets
             (
                 () =>
                 {
-                    string path = UOFileManager.GetUOFilePath("tiledata.mul");
+                    string path = FileManager.GetUOFilePath("tiledata.mul");
 
                     FileSystemHelper.EnsureFileExists(path);
 
                     var tileData = new UOFileMul(path);
                     var reader = tileData.GetReader();
 
-                    bool isold = UOFileManager.Version < ClientVersion.CV_7090;
+                    bool isold = FileManager.Version < ClientVersion.CV_7090;
                     const int LAND_SIZE = 512;
 
                     int land_group = isold ? Marshal.SizeOf<LandGroupOld>() : Marshal.SizeOf<LandGroupNew>();

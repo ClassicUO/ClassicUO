@@ -278,12 +278,12 @@ namespace ClassicUO.Game.Managers
                 isunicode = ProfileManager.CurrentProfile.OverrideAllFontsIsUnicode;
             }
 
-            int width = isunicode ? FontsLoader.Instance.GetWidthUnicode(font, msg) : FontsLoader.Instance.GetWidthASCII(font, msg);
+            int width = isunicode ? Client.Game.UO.FileManager.Fonts.GetWidthUnicode(font, msg) : Client.Game.UO.FileManager.Fonts.GetWidthASCII(font, msg);
 
             if (width > 200)
             {
                 width = isunicode ?
-                    FontsLoader.Instance.GetWidthExUnicode
+                    Client.Game.UO.FileManager.Fonts.GetWidthExUnicode
                     (
                         font,
                         msg,
@@ -291,7 +291,7 @@ namespace ClassicUO.Game.Managers
                         TEXT_ALIGN_TYPE.TS_LEFT,
                         (ushort) FontStyle.BlackBorder
                     ) :
-                    FontsLoader.Instance.GetWidthExASCII
+                    Client.Game.UO.FileManager.Fonts.GetWidthExASCII
                     (
                         font,
                         msg,

@@ -36,28 +36,24 @@ using ClassicUO.Utility.Logging;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace ClassicUO.Assets
 {
-    public class SoundsLoader : UOFileLoader
+    public sealed class SoundsLoader : UOFileLoader
     {
         private static readonly char[] _configFileDelimiters = { ' ', ',', '\t' };
         private static readonly Dictionary<int, (string, bool)> _musicData = new Dictionary<int, (string, bool)>();
 
-        private static SoundsLoader _instance;
 
         public const int MAX_SOUND_DATA_INDEX_COUNT = 0xFFFF;
 
         private UOFile _file;
 
-        private SoundsLoader()
+        public SoundsLoader(UOFileManager fileManager) : base(fileManager)
         {
         }
-
-        public static SoundsLoader Instance => _instance ?? (_instance = new SoundsLoader());
 
         public override Task Load()
         {
@@ -65,17 +61,17 @@ namespace ClassicUO.Assets
             (
                 () =>
                 {
-                    string path = UOFileManager.GetUOFilePath("soundLegacyMUL.uop");
+                    string path = FileManager.GetUOFilePath("soundLegacyMUL.uop");
 
-                    if (UOFileManager.IsUOPInstallation && File.Exists(path))
+                    if (FileManager.IsUOPInstallation && File.Exists(path))
                     {
                         _file = new UOFileUop(path, "build/soundlegacymul/{0:D8}.dat");
                         Entries = new UOFileIndex[Math.Max(((UOFileUop) _file).TotalEntriesCount, MAX_SOUND_DATA_INDEX_COUNT)];
                     }
                     else
                     {
-                        path = UOFileManager.GetUOFilePath("sound.mul");
-                        string idxpath = UOFileManager.GetUOFilePath("soundidx.mul");
+                        path = FileManager.GetUOFilePath("sound.mul");
+                        string idxpath = FileManager.GetUOFilePath("soundidx.mul");
 
                         if (File.Exists(path) && File.Exists(idxpath))
                         {
@@ -89,7 +85,7 @@ namespace ClassicUO.Assets
 
                     _file.FillEntries(ref Entries);
 
-                    string def = UOFileManager.GetUOFilePath("Sound.def");
+                    string def = FileManager.GetUOFilePath("Sound.def");
 
                     if (File.Exists(def))
                     {
@@ -142,7 +138,7 @@ namespace ClassicUO.Assets
                         }
                     }
 
-                    path = UOFileManager.GetUOFilePath(UOFileManager.Version >= ClientVersion.CV_4011C ?  @"Music/Digital/Config.txt" : @"Music/Config.txt");
+                    path = FileManager.GetUOFilePath(FileManager.Version >= ClientVersion.CV_4011C ?  @"Music/Digital/Config.txt" : @"Music/Config.txt");
 
                     if (File.Exists(path))
                     {
@@ -294,10 +290,10 @@ namespace ClassicUO.Assets
         /// </summary>
         /// <param name="name">The filename from the music Config.txt</param>
         /// <returns>a string with the true case sensitive filename</returns>
-        private static string GetTrueFileName(string name)
+        private string GetTrueFileName(string name)
         {
             // don't worry about subdirectories, we'll recursively search them all
-            string dir = UOFileManager.BasePath + $"/Music";
+            string dir = FileManager.BasePath + $"/Music";
 
             // Enumerate all files in the directory, using the file name as a pattern
             // This will list all case variants of the filename even on file systems that

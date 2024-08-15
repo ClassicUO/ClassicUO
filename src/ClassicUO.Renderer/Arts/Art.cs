@@ -13,11 +13,15 @@ namespace ClassicUO.Renderer.Arts
         private readonly TextureAtlas _atlas;
         private readonly PixelPicker _picker = new PixelPicker();
         private readonly Rectangle[] _realArtBounds;
+        private readonly ArtLoader _artLoader;
+        private readonly HuesLoader _huesLoader;
 
-        public Art(GraphicsDevice device)
+        public Art(ArtLoader artLoader, HuesLoader huesLoader, GraphicsDevice device)
         {
+            _artLoader = artLoader;
+            _huesLoader = huesLoader;
             _atlas = new TextureAtlas(device, 4096, 4096, SurfaceFormat.Color);
-            _spriteInfos = new SpriteInfo[ArtLoader.Instance.Entries.Length];
+            _spriteInfos = new SpriteInfo[_artLoader.Entries.Length];
             _realArtBounds = new Rectangle[_spriteInfos.Length];
         }
 
@@ -36,7 +40,7 @@ namespace ClassicUO.Renderer.Arts
 
             if (spriteInfo.Texture == null)
             {
-                var artInfo = ArtLoader.Instance.GetArt(idx);
+                var artInfo = _artLoader.GetArt(idx);
                 if (!artInfo.Pixels.IsEmpty)
                 {
                     spriteInfo.Texture = _atlas.AddSprite(
@@ -88,7 +92,7 @@ namespace ClassicUO.Renderer.Arts
         {
             hotX = hotY = 0;
 
-            var artInfo = ArtLoader.Instance.GetArt((uint)(index + 0x4000));
+            var artInfo = _artLoader.GetArt((uint)(index + 0x4000));
 
             if (artInfo.Pixels.IsEmpty)
             {
@@ -150,7 +154,7 @@ namespace ClassicUO.Renderer.Arts
                                 c.PackedValue = *pixels_ptr;
                                 *pixels_ptr =
                                     HuesHelper.Color16To32(
-                                        HuesLoader.Instance.GetColor16(
+                                        _huesLoader.GetColor16(
                                             HuesHelper.ColorToHue(c),
                                             customHue
                                         )

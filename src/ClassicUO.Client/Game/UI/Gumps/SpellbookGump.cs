@@ -455,7 +455,7 @@ namespace ClassicUO.Game.UI.Gumps
                                                 if (toolTipCliloc > 0)
                                                 {
                                                     string tooltip =
-                                                        ClilocLoader.Instance.GetString(
+                                                        Client.Game.UO.FileManager.Clilocs.GetString(
                                                             toolTipCliloc + id
                                                         );
 
@@ -781,7 +781,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (toolTipCliloc > 0)
                 {
-                    string tooltip = ClilocLoader.Instance.GetString(toolTipCliloc + i);
+                    string tooltip = Client.Game.UO.FileManager.Clilocs.GetString(toolTipCliloc + i);
                     icon.SetTooltip(tooltip, 250);
                 }
 

@@ -39,17 +39,14 @@ using System.Threading.Tasks;
 
 namespace ClassicUO.Assets
 {
-    public class GumpsLoader : UOFileLoader
+    public sealed class GumpsLoader : UOFileLoader
     {
-        private static GumpsLoader _instance;
         private UOFile _file;
 
         public const int MAX_GUMP_DATA_INDEX_COUNT = 0x10000;
 
-        private GumpsLoader(int count) { }
+        public GumpsLoader(UOFileManager fileManager) : base(fileManager) { }
 
-        public static GumpsLoader Instance =>
-            _instance ?? (_instance = new GumpsLoader(MAX_GUMP_DATA_INDEX_COUNT));
 
         public bool UseUOPGumps = false;
 
@@ -57,9 +54,9 @@ namespace ClassicUO.Assets
         {
             return Task.Run(() =>
             {
-                string path = UOFileManager.GetUOFilePath("gumpartLegacyMUL.uop");
+                string path = FileManager.GetUOFilePath("gumpartLegacyMUL.uop");
 
-                if (UOFileManager.IsUOPInstallation && File.Exists(path))
+                if (FileManager.IsUOPInstallation && File.Exists(path))
                 {
                     _file = new UOFileUop(path, "build/gumpartlegacymul/{0:D8}.tga", true);
                     Entries = new UOFileIndex[
@@ -69,17 +66,17 @@ namespace ClassicUO.Assets
                 }
                 else
                 {
-                    path = UOFileManager.GetUOFilePath("gumpart.mul");
-                    string pathidx = UOFileManager.GetUOFilePath("gumpidx.mul");
+                    path = FileManager.GetUOFilePath("gumpart.mul");
+                    string pathidx = FileManager.GetUOFilePath("gumpidx.mul");
 
                     if (!File.Exists(path))
                     {
-                        path = UOFileManager.GetUOFilePath("Gumpart.mul");
+                        path = FileManager.GetUOFilePath("Gumpart.mul");
                     }
 
                     if (!File.Exists(pathidx))
                     {
-                        pathidx = UOFileManager.GetUOFilePath("Gumpidx.mul");
+                        pathidx = FileManager.GetUOFilePath("Gumpidx.mul");
                     }
 
                     _file = new UOFileMul(path, pathidx, MAX_GUMP_DATA_INDEX_COUNT, 12);
@@ -89,7 +86,7 @@ namespace ClassicUO.Assets
 
                 _file.FillEntries(ref Entries);
 
-                string pathdef = UOFileManager.GetUOFilePath("gump.def");
+                string pathdef = FileManager.GetUOFilePath("gump.def");
 
                 if (!File.Exists(pathdef))
                 {
@@ -159,7 +156,7 @@ namespace ClassicUO.Assets
             reader.Seek(entry.Offset);
 
             ReadOnlySpan<byte> output;
-            var newFileFormat = UOFileManager.Version >= ClientVersion.CV_7010400;
+            var newFileFormat = FileManager.Version >= ClientVersion.CV_7010400;
             if (newFileFormat)
             {
                 var cbuf = reader.ReadArray(entry.Length);
@@ -208,7 +205,7 @@ namespace ClassicUO.Assets
 
                     if (color != 0 && val != 0)
                     {
-                        val = HuesLoader.Instance.GetColor16(gmul[i].Value, color);
+                        val = FileManager.Hues.GetColor16(gmul[i].Value, color);
                     }
 
                     if (val != 0)

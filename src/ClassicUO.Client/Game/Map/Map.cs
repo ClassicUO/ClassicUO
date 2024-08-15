@@ -49,16 +49,16 @@ namespace ClassicUO.Game.Map
         {
             int maxX = -1, maxY = -1;
 
-            for (int i = 0; i < MapLoader.Instance.MapBlocksSize.GetLength(0); i++)
+            for (int i = 0; i < Client.Game.UO.FileManager.Maps.MapBlocksSize.GetLength(0); i++)
             {
-                if (maxX < MapLoader.Instance.MapBlocksSize[i, 0])
+                if (maxX < Client.Game.UO.FileManager.Maps.MapBlocksSize[i, 0])
                 {
-                    maxX = MapLoader.Instance.MapBlocksSize[i, 0];
+                    maxX = Client.Game.UO.FileManager.Maps.MapBlocksSize[i, 0];
                 }
 
-                if (maxY < MapLoader.Instance.MapBlocksSize[i, 1])
+                if (maxY < Client.Game.UO.FileManager.Maps.MapBlocksSize[i, 1])
                 {
-                    maxY = MapLoader.Instance.MapBlocksSize[i, 1];
+                    maxY = Client.Game.UO.FileManager.Maps.MapBlocksSize[i, 1];
                 }
             }
 
@@ -70,7 +70,7 @@ namespace ClassicUO.Game.Map
         {
             _world = world;
             Index = index;
-            BlocksCount = MapLoader.Instance.MapBlocksSize[Index, 0] * MapLoader.Instance.MapBlocksSize[Index, 1];
+            BlocksCount = Client.Game.UO.FileManager.Maps.MapBlocksSize[Index, 0] * Client.Game.UO.FileManager.Maps.MapBlocksSize[Index, 1];
             ClearBockAccess();
         }
 
@@ -228,12 +228,12 @@ namespace ClassicUO.Game.Map
                         continue;
                     }
 
-                    if (obj.Graphic >= TileDataLoader.Instance.StaticData.Length)
+                    if (obj.Graphic >= Client.Game.UO.FileManager.TileData.StaticData.Length)
                     {
                         continue;
                     }
 
-                    if (!TileDataLoader.Instance.StaticData[obj.Graphic].IsRoof || Math.Abs(z - obj.Z) > 6)
+                    if (!Client.Game.UO.FileManager.TileData.StaticData[obj.Graphic].IsRoof || Math.Abs(z - obj.Z) > 6)
                     {
                         continue;
                     }
@@ -267,8 +267,8 @@ namespace ClassicUO.Game.Map
         {
             int block = GetBlock(blockX, blockY);
             int map = Index;
-            MapLoader.Instance.SanitizeMapIndex(ref map);
-            IndexMap[] list = MapLoader.Instance.BlockData[map];
+            Client.Game.UO.FileManager.Maps.SanitizeMapIndex(ref map);
+            IndexMap[] list = Client.Game.UO.FileManager.Maps.BlockData[map];
 
             return ref block >= list.Length ? ref IndexMap.Invalid : ref list[block];
         }
@@ -276,7 +276,7 @@ namespace ClassicUO.Game.Map
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private int GetBlock(int blockX, int blockY)
         {
-            return blockX * MapLoader.Instance.MapBlocksSize[Index, 1] + blockY;
+            return blockX * Client.Game.UO.FileManager.Maps.MapBlocksSize[Index, 1] + blockY;
         }
 
         public IEnumerable<Chunk> GetUsedChunks()

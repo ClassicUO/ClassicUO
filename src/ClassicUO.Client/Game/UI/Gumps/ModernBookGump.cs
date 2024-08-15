@@ -112,7 +112,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             for (int i = 0, l = BookLines.Length; i < l; i++)
             {
-                int w = IsNewBook ? FontsLoader.Instance.GetWidthUnicode(_bookPage.renderedText.Font, BookLines[i]) : FontsLoader.Instance.GetWidthASCII(_bookPage.renderedText.Font, BookLines[i]);
+                int w = IsNewBook ? Client.Game.UO.FileManager.Fonts.GetWidthUnicode(_bookPage.renderedText.Font, BookLines[i]) : Client.Game.UO.FileManager.Fonts.GetWidthASCII(_bookPage.renderedText.Font, BookLines[i]);
 
                 sb.Append(BookLines[i]);
 

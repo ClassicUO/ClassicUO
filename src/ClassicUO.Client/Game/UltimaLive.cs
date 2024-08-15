@@ -119,8 +119,8 @@ namespace ClassicUO.Game
                         return;
                     }
 
-                    int mapWidthInBlocks = MapLoader.Instance.MapBlocksSize[mapId, 0];
-                    int mapHeightInBlocks = MapLoader.Instance.MapBlocksSize[mapId, 1];
+                    int mapWidthInBlocks = Client.Game.UO.FileManager.Maps.MapBlocksSize[mapId, 0];
+                    int mapHeightInBlocks = Client.Game.UO.FileManager.Maps.MapBlocksSize[mapId, 1];
                     int blocks = mapWidthInBlocks * mapHeightInBlocks;
 
                     if (block < 0 || block >= blocks)
@@ -242,7 +242,7 @@ namespace ClassicUO.Game
                     p.Buffer.Slice(p.Position, totalLength).CopyTo(staticsData);
 
 
-                    if (block >= 0 && block < MapLoader.Instance.MapBlocksSize[mapId, 0] * MapLoader.Instance.MapBlocksSize[mapId, 1])
+                    if (block >= 0 && block < Client.Game.UO.FileManager.Maps.MapBlocksSize[mapId, 0] * Client.Game.UO.FileManager.Maps.MapBlocksSize[mapId, 1])
                     {
                         int index = block * 12;
 
@@ -394,9 +394,9 @@ namespace ClassicUO.Game
                         int mapNumber = p.ReadUInt8();
                         validMaps.Add(mapNumber);
 
-                        _UL.MapSizeWrapSize[mapNumber, 0] = Math.Min((ushort) MapLoader.Instance.MapsDefaultSize[0, 0], p.ReadUInt16BE());
+                        _UL.MapSizeWrapSize[mapNumber, 0] = Math.Min((ushort) Client.Game.UO.FileManager.Maps.MapsDefaultSize[0, 0], p.ReadUInt16BE());
 
-                        _UL.MapSizeWrapSize[mapNumber, 1] = Math.Min((ushort) MapLoader.Instance.MapsDefaultSize[0, 1], p.ReadUInt16BE());
+                        _UL.MapSizeWrapSize[mapNumber, 1] = Math.Min((ushort) Client.Game.UO.FileManager.Maps.MapsDefaultSize[0, 1], p.ReadUInt16BE());
 
                         _UL.MapSizeWrapSize[mapNumber, 2] = Math.Min(p.ReadUInt16BE(), _UL.MapSizeWrapSize[mapNumber, 0]);
                         _UL.MapSizeWrapSize[mapNumber, 3] = Math.Min(p.ReadUInt16BE(), _UL.MapSizeWrapSize[mapNumber, 1]);
@@ -407,7 +407,7 @@ namespace ClassicUO.Game
                     {
                         _UL._ValidMaps = validMaps;
                         MapLoader.MAPS_COUNT = sbyte.MaxValue;
-                        ULMapLoader mapLoader = new ULMapLoader((uint)MapLoader.MAPS_COUNT);
+                        var mapLoader = new ULMapLoader(Client.Game.UO.FileManager, (uint)MapLoader.MAPS_COUNT);
 
                         //for (int i = 0; i < maps; i++)
                         for (int i = 0; i < validMaps.Count; i++)
@@ -497,8 +497,8 @@ namespace ClassicUO.Game
                 return;
             }
 
-            ushort mapWidthInBlocks = (ushort) MapLoader.Instance.MapBlocksSize[mapId, 0];
-            ushort mapHeightInBlocks = (ushort) MapLoader.Instance.MapBlocksSize[mapId, 1];
+            ushort mapWidthInBlocks = (ushort) Client.Game.UO.FileManager.Maps.MapBlocksSize[mapId, 0];
+            ushort mapHeightInBlocks = (ushort) Client.Game.UO.FileManager.Maps.MapBlocksSize[mapId, 1];
 
             if (block >= 0 && block < mapWidthInBlocks * mapHeightInBlocks)
             {
@@ -751,7 +751,7 @@ namespace ClassicUO.Game
 
             public override void Dispose()
             {
-                MapLoader.Instance.Dispose();
+                Client.Game.UO.FileManager.Maps.Dispose();
             }
 
             public void WriteArray(long position, ArraySegment<byte> seg)
@@ -785,7 +785,7 @@ namespace ClassicUO.Game
 
             private new UOFileIndex[][] Entries;
 
-            public ULMapLoader(uint maps)
+            public ULMapLoader(UOFileManager fileManager, uint maps) : base(fileManager)
             {
                 Initialize();
 
@@ -844,12 +844,14 @@ namespace ClassicUO.Game
                 (
                     () =>
                     {
-                        if (Instance is ULMapLoader)
+                        if (Client.Game.UO.FileManager.Maps is ULMapLoader)
                         {
                             return;
                         }
 
-                        UOFileManager.MapLoaderReLoad(this);
+                        Client.Game.UO.FileManager.Maps?.Dispose();
+                        Client.Game.UO.FileManager.Maps = this;
+
                         _UL._EOF = new uint[NumMaps];
                         _filesStaticsStream = new FileStream[NumMaps];
                         bool foundOneMap = false;
@@ -916,9 +918,9 @@ namespace ClassicUO.Game
                     Entries = new UOFileIndex[MapLoader.MAPS_COUNT][];
                 }
 
-                string oldMap = UOFileManager.GetUOFilePath($"map{mapId}.mul");
-                string oldStaIdx = UOFileManager.GetUOFilePath($"staidx{mapId}.mul");
-                string oldStatics = UOFileManager.GetUOFilePath($"statics{mapId}.mul");
+                string oldMap = FileManager.GetUOFilePath($"map{mapId}.mul");
+                string oldStaIdx = FileManager.GetUOFilePath($"staidx{mapId}.mul");
+                string oldStatics = FileManager.GetUOFilePath($"statics{mapId}.mul");
 
                 //create file names
                 string mapPath = Path.Combine(_UL.ShardName, $"map{mapId}.mul");
@@ -973,11 +975,11 @@ namespace ClassicUO.Game
                 }
             }
 
-            private static void CreateNewPersistentMap(int mapId, string mapPath, string staIdxPath, string staticsPath)
+            private void CreateNewPersistentMap(int mapId, string mapPath, string staIdxPath, string staticsPath)
             {
-                int mapWidthInBlocks = Instance.MapBlocksSize[Instance.MapBlocksSize.GetLength(0) > mapId ? mapId : 0, 0]; //horizontal
+                int mapWidthInBlocks = MapBlocksSize[MapBlocksSize.GetLength(0) > mapId ? mapId : 0, 0]; //horizontal
 
-                int mapHeightInBlocks = Instance.MapBlocksSize[Instance.MapBlocksSize.GetLength(0) > mapId ? mapId : 0, 1]; //vertical
+                int mapHeightInBlocks = MapBlocksSize[MapBlocksSize.GetLength(0) > mapId ? mapId : 0, 1]; //vertical
 
                 int numberOfBytesInStrip = 196 * mapHeightInBlocks;
                 byte[] pVerticalBlockStrip = new byte[numberOfBytesInStrip];

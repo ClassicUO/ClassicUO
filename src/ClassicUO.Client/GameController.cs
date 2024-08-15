@@ -119,8 +119,6 @@ namespace ClassicUO
         {
             base.LoadContent();
 
-            MapLoader.MapsLayouts = Settings.GlobalSettings.MapsLayouts;
-
             Fonts.Initialize(GraphicsDevice);
             SolidColorTextureCache.Initialize(GraphicsDevice);
             Audio = new AudioManager();

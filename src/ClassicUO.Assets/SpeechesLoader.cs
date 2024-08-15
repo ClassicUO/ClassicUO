@@ -35,21 +35,18 @@ using ClassicUO.Utility;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace ClassicUO.Assets
 {
-    public class SpeechesLoader : UOFileLoader
+    public sealed class SpeechesLoader : UOFileLoader
     {
-        private static SpeechesLoader _instance;
         private SpeechEntry[] _speech;
 
-        private SpeechesLoader()
+        public SpeechesLoader(UOFileManager fileManager) : base(fileManager)
         {
         }
 
-        public static SpeechesLoader Instance => _instance ?? (_instance = new SpeechesLoader());
 
         public override unsafe Task Load()
         {
@@ -57,7 +54,7 @@ namespace ClassicUO.Assets
             (
                 () =>
                 {
-                    string path = UOFileManager.GetUOFilePath("speech.mul");
+                    string path = FileManager.GetUOFilePath("speech.mul");
 
                     if (!File.Exists(path))
                     {
@@ -136,7 +133,7 @@ namespace ClassicUO.Assets
         {
             List<SpeechEntry> list = new List<SpeechEntry>();
 
-            if (UOFileManager.Version < ClientVersion.CV_305D)
+            if (FileManager.Version < ClientVersion.CV_305D)
             {
                 return list;
             }

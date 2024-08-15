@@ -192,7 +192,7 @@ namespace ClassicUO.Game.UI.Gumps
             #region Hair style
             Add
             (
-                new Label(ClilocLoader.Instance.GetString(selectedRace == RaceType.GARGOYLE ? 1112309 : 3000121), unicode, hue, font: font)
+                new Label(Client.Game.UO.FileManager.Clilocs.GetString(selectedRace == RaceType.GARGOYLE ? 1112309 : 3000121), unicode, hue, font: font)
                 {
                     X = x + 1,
                     Y = y
@@ -228,7 +228,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Add
                 (
-                    new Label(ClilocLoader.Instance.GetString(selectedRace == RaceType.GARGOYLE ? 1112511 : 3000122), unicode, hue, font: font)
+                    new Label(Client.Game.UO.FileManager.Clilocs.GetString(selectedRace == RaceType.GARGOYLE ? 1112511 : 3000122), unicode, hue, font: font)
                     {
                         X = x + 1,
                         Y = y
@@ -563,7 +563,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Add
                 (
-                    new Label(ClilocLoader.Instance.GetString(label), unicode, hue, font: font)
+                    new Label(Client.Game.UO.FileManager.Clilocs.GetString(label), unicode, hue, font: font)
                     {
                         X = 0,
                         Y = 0
