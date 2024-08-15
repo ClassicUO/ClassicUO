@@ -155,15 +155,14 @@ namespace ClassicUO.Assets
 
             ushort color = entry.Hue;
 
-            _file.SetData(entry.Address, entry.FileSize);
-            _file.Seek(entry.Offset);
-
+            var reader = new StackDataReader(entry.Address, (int)entry.FileSize);
+            reader.Seek(entry.Offset);
 
             ReadOnlySpan<byte> output;
             var newFileFormat = UOFileManager.Version >= ClientVersion.CV_7010400;
             if (newFileFormat)
             {
-                var cbuf = _file.ReadArray(entry.Length);
+                var cbuf = reader.ReadArray(entry.Length);
                 var dbuf = new byte[entry.DecompressedLength];
                 var result = ZLib.Decompress(cbuf, 0, dbuf, dbuf.Length);
                 if (result != ZLib.ZLibError.Okay)
@@ -175,18 +174,18 @@ namespace ClassicUO.Assets
             }
             else
             {
-                output = new ReadOnlySpan<byte>(_file.PositionAddress.ToPointer(), entry.Length);
+                output = new ReadOnlySpan<byte>(reader.PositionAddress.ToPointer(), entry.Length);
             }
 
-            var reader = new StackDataReader(output);
-            var w = newFileFormat ? reader.ReadUInt32LE() : (uint)entry.Width;
-            var h = newFileFormat ? reader.ReadUInt32LE() : (uint)entry.Height;
+            var zlibReader = new StackDataReader(output);
+            var w = newFileFormat ? zlibReader.ReadUInt32LE() : (uint)entry.Width;
+            var h = newFileFormat ? zlibReader.ReadUInt32LE() : (uint)entry.Height;
 
-            IntPtr dataStart = reader.PositionAddress;
+            IntPtr dataStart = zlibReader.PositionAddress;
             var pixels = new uint[w * h];
             int* lookuplist = (int*)dataStart;
             int gsize;
-            var len = reader.Remaining;
+            var len = zlibReader.Remaining;
 
             for (int y = 0, half_len = len >> 2; y < h; y++)
             {

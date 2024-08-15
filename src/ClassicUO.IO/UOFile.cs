@@ -39,8 +39,10 @@ using System.IO.MemoryMappedFiles;
 
 namespace ClassicUO.IO
 {
-    public unsafe class UOFile : DataReader
+    public unsafe class UOFile : IDisposable
     {
+        private IntPtr _ptr;
+
         public UOFile(string filepath, bool loadFile = false)
         {
             FilePath = filepath;
@@ -56,6 +58,17 @@ namespace ClassicUO.IO
         protected MemoryMappedViewAccessor _accessor;
         protected MemoryMappedFile _file;
 #endif
+
+        public long Length { get; private set; }
+       
+        public StackDataReader GetReader()
+            => new (new ReadOnlySpan<byte>(_ptr.ToPointer(), (int) Length));
+
+        protected void SetPtr(IntPtr ptr, long len)
+        {
+            _ptr = ptr;
+            Length = len;
+        }
 
         protected virtual void Load()
         {
@@ -92,7 +105,8 @@ namespace ClassicUO.IO
                 try
                 {
                     _accessor.SafeMemoryMappedViewHandle.AcquirePointer(ref ptr);
-                    SetData(ptr, (long) _accessor.SafeMemoryMappedViewHandle.ByteLength);
+                    _ptr = (IntPtr)ptr;
+                    Length = (long)_accessor.SafeMemoryMappedViewHandle.ByteLength;
                 }
                 catch
                 {
@@ -118,6 +132,8 @@ namespace ClassicUO.IO
             _accessor.SafeMemoryMappedViewHandle.ReleasePointer();
             _accessor.Dispose();
             _file.Dispose();
+            _ptr = 0;
+            Length = 0;
 #endif
             Log.Trace($"Unloaded:\t\t{FilePath}");
         }

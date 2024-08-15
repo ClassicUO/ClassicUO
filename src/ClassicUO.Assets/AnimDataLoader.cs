@@ -70,7 +70,11 @@ namespace ClassicUO.Assets
 
         public unsafe AnimDataFrame CalculateCurrentGraphic(ushort graphic)
         {
-            IntPtr address = _file?.StartAddress ?? IntPtr.Zero;
+            if (_file == null)
+                return default;
+
+            var reader = _file.GetReader();
+            var address = reader.StartAddress;
 
             if (address != IntPtr.Zero)
             {

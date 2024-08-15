@@ -263,14 +263,14 @@ namespace ClassicUO.Game.GameObjects
             }
 
             ref UOFileIndex entry = ref MultiLoader.Instance.GetValidRefEntry(Graphic);
-            MultiLoader.Instance.File.SetData(entry.Address, entry.FileSize);
+            var reader = new StackDataReader(entry.Address, (int)entry.FileSize);
             bool movable = false;
 
             if (MultiLoader.Instance.IsUOP)
             {
                 if (entry.Length > 0 && entry.DecompressedLength > 0)
                 {
-                    MultiLoader.Instance.File.Seek(entry.Offset);
+                    reader.Seek(entry.Offset);
 
                     byte[] buffer = null;
                     Span<byte> span =
@@ -287,31 +287,31 @@ namespace ClassicUO.Game.GameObjects
                         fixed (byte* dataPtr = span)
                         {
                             ZLib.Decompress(
-                                MultiLoader.Instance.File.PositionAddress,
+                                reader.PositionAddress,
                                 entry.Length,
                                 0,
                                 (IntPtr)dataPtr,
                                 entry.DecompressedLength
                             );
 
-                            StackDataReader reader = new StackDataReader(
+                            var zlibReader = new StackDataReader(
                                 span.Slice(0, entry.DecompressedLength)
                             );
-                            reader.Skip(4);
+                            zlibReader.Skip(4);
 
-                            int count = reader.ReadInt32LE();
+                            int count = zlibReader.ReadInt32LE();
 
                             int sizeOf = sizeof(MultiBlockNew);
 
                             for (int i = 0; i < count; i++)
                             {
                                 MultiBlockNew* block = (MultiBlockNew*)(
-                                    reader.PositionAddress + i * sizeOf
+                                    zlibReader.PositionAddress + i * sizeOf
                                 );
 
                                 if (block->Unknown != 0)
                                 {
-                                    reader.Skip((int)(block->Unknown * 4));
+                                    zlibReader.Skip((int)(block->Unknown * 4));
                                 }
 
                                 if (block->X < minX)
@@ -365,7 +365,7 @@ namespace ClassicUO.Game.GameObjects
                                 }
                             }
 
-                            reader.Release();
+                            zlibReader.Release();
                         }
                     }
                     finally
@@ -384,12 +384,12 @@ namespace ClassicUO.Game.GameObjects
             else
             {
                 int count = entry.Length / MultiLoader.Instance.Offset;
-                MultiLoader.Instance.File.Seek(entry.Offset);
+                reader.Seek(entry.Offset);
 
                 for (int i = 0; i < count; i++)
                 {
                     MultiBlock* block = (MultiBlock*)(
-                        MultiLoader.Instance.File.PositionAddress + i * MultiLoader.Instance.Offset
+                        reader.PositionAddress + i * MultiLoader.Instance.Offset
                     );
 
                     if (block->X < minX)

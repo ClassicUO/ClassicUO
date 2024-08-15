@@ -364,8 +364,9 @@ namespace ClassicUO.Assets
             var fileIdx = _files[fileIndex].IdxFile;
             var offsetAddress = CalculateOffset(body, animType, flags, out var actionCount);
 
-            var offset = fileIdx.StartAddress.ToInt64() + offsetAddress;
-            var end = fileIdx.StartAddress.ToInt64() + fileIdx.Length;
+            var reader = fileIdx.GetReader();
+            var offset = reader.StartAddress.ToInt64() + offsetAddress;
+            var end = reader.StartAddress.ToInt64() + fileIdx.Length;
 
             if (offset >= end)
             {
@@ -825,6 +826,7 @@ namespace ClassicUO.Assets
             //animSeq.FillEntries(ref animseqEntries);
 
             Span<byte> spanAlloc = stackalloc byte[1024];
+            var reader = animSeq.GetReader();
 
             foreach (var pair in animSeq.Hashes)
             {
@@ -835,7 +837,7 @@ namespace ClassicUO.Assets
                     continue;
                 }
 
-                animSeq.Seek(entry.Offset);
+                reader.Seek(entry.Offset);
 
                 byte[] buffer = null;
 
@@ -853,7 +855,7 @@ namespace ClassicUO.Assets
                     fixed (byte* destPtr = span)
                     {
                         var result = ZLib.Decompress(
-                            animSeq.PositionAddress,
+                            reader.PositionAddress,
                             entry.Length,
                             0,
                             (IntPtr)destPtr,
@@ -867,11 +869,11 @@ namespace ClassicUO.Assets
                         }
                     }
 
-                    var reader = new StackDataReader(span.Slice(0, entry.DecompressedLength));
+                    var zlibReader = new StackDataReader(span.Slice(0, entry.DecompressedLength));
 
-                    uint animID = reader.ReadUInt32LE();
-                    reader.Skip(48);
-                    int replaces = reader.ReadInt32LE();
+                    uint animID = zlibReader.ReadUInt32LE();
+                    zlibReader.Skip(48);
+                    int replaces = zlibReader.ReadInt32LE();
 
                     var uopInfo = new UopInfo();
                     var replacedAnimSpan = uopInfo.ReplacedAnimations;
@@ -882,16 +884,16 @@ namespace ClassicUO.Assets
                     {
                         for (int k = 0; k < replaces; k++)
                         {
-                            int oldGroup = reader.ReadInt32LE();
-                            uint frameCount = reader.ReadUInt32LE();
-                            int newGroup = reader.ReadInt32LE();
+                            int oldGroup = zlibReader.ReadInt32LE();
+                            uint frameCount = zlibReader.ReadUInt32LE();
+                            int newGroup = zlibReader.ReadInt32LE();
 
                             if (frameCount == 0)
                             {
                                 replacedAnimSpan[oldGroup] = newGroup;
                             }
 
-                            reader.Skip(60);
+                            zlibReader.Skip(60);
                         }
 
                         if (
@@ -917,7 +919,7 @@ namespace ClassicUO.Assets
 
                     _uopInfos[(int)animID] = uopInfo;
 
-                    reader.Release();
+                    zlibReader.Release();
                 }
                 finally
                 {
@@ -1308,7 +1310,8 @@ namespace ClassicUO.Assets
                 return Span<FrameInfo>.Empty;
             }
 
-            file.Seek(index.Position);
+            var reader = file.GetReader();
+            reader.Seek(index.Position);
 
             if (_decompressedData == null || index.Unknown > _decompressedData.Length)
             {
@@ -1318,7 +1321,7 @@ namespace ClassicUO.Assets
             fixed (byte* ptr = _decompressedData.AsSpan())
             {
                 var result = ZLib.Decompress(
-                    file.PositionAddress,
+                    reader.PositionAddress,
                     (int)index.Size,
                     0,
                     (IntPtr)ptr,
@@ -1333,16 +1336,16 @@ namespace ClassicUO.Assets
                 }
             }
 
-            var reader = new StackDataReader(
+            var zlibReader = new StackDataReader(
                 _decompressedData.AsSpan().Slice(0, (int)index.Unknown)
             );
-            reader.Skip(32);
+            zlibReader.Skip(32);
 
-            long end = (long)reader.StartAddress + reader.Length;
+            long end = (long)zlibReader.StartAddress + zlibReader.Length;
 
-            int fc = reader.ReadInt32LE();
-            uint dataStart = reader.ReadUInt32LE();
-            reader.Seek(dataStart);
+            int fc = zlibReader.ReadInt32LE();
+            uint dataStart = zlibReader.ReadUInt32LE();
+            zlibReader.Seek(dataStart);
 
             byte frameCount = (byte)(
                 type < AnimationGroupsType.Equipment ? Math.Round(fc / (float) MAX_DIRECTIONS) : MAX_DIRECTIONS * 2
@@ -1355,17 +1358,17 @@ namespace ClassicUO.Assets
             var frames = _frames.AsSpan(0, frameCount);
 
             /* If the UOP files didn't omit frames, we could just do this:
-             * reader.Skip(sizeof(UOPAnimationHeader) * direction * frameCount);
+             * zlibReader.Skip(sizeof(UOPAnimationHeader) * direction * frameCount);
              * but we can't. So we have to walk through the frames to seek to where we need to go.
              */
-            UOPAnimationHeader* animHeaderInfo = (UOPAnimationHeader*)reader.PositionAddress;
+            UOPAnimationHeader* animHeaderInfo = (UOPAnimationHeader*)zlibReader.PositionAddress;
 
             for (ushort currentDir = 0; currentDir <= direction; currentDir++)
             {
                 for (ushort frameNum = 0; frameNum < frameCount; frameNum++)
                 {
-                    long start = reader.Position;
-                    animHeaderInfo = (UOPAnimationHeader*)reader.PositionAddress;
+                    long start = zlibReader.Position;
+                    animHeaderInfo = (UOPAnimationHeader*)zlibReader.PositionAddress;
 
                     if (animHeaderInfo->Group != animGroup)
                     {
@@ -1402,25 +1405,25 @@ namespace ClassicUO.Assets
                     if (currentDir == direction)
                     {
                         /* We're on the direction we actually wanted to read */
-                        if (start + animHeaderInfo->DataOffset >= reader.Length)
+                        if (start + animHeaderInfo->DataOffset >= zlibReader.Length)
                         {
                             /* File seems to be corrupt? Skip loading. */
                             continue;
                         }
 
-                        reader.Skip((int)animHeaderInfo->DataOffset);
+                        zlibReader.Skip((int)animHeaderInfo->DataOffset);
 
-                        var palette = new ReadOnlySpan<ushort>(reader.PositionAddress.ToPointer(), 512 / sizeof(ushort));
-                        reader.Skip(512);
+                        var palette = new ReadOnlySpan<ushort>(zlibReader.PositionAddress.ToPointer(), 512 / sizeof(ushort));
+                        zlibReader.Skip(512);
 
-                        ReadSpriteData(ref reader, palette, ref frame, true);
+                        ReadSpriteData(ref zlibReader, palette, ref frame, true);
                     }
 
-                    reader.Seek(start + sizeof(UOPAnimationHeader));
+                    zlibReader.Seek(start + sizeof(UOPAnimationHeader));
                 }
             }
 
-            reader.Release();
+            zlibReader.Release();
 
             return frames;
         }
@@ -1449,14 +1452,15 @@ namespace ClassicUO.Assets
                 return Span<FrameInfo>.Empty;
             }
 
-            var reader = new StackDataReader(
-                new ReadOnlySpan<byte>(
-                    (byte*)file.StartAddress.ToPointer() + index.Position,
-                    (int)index.Size
-                )
-            );
+            var reader = file.GetReader();
+            reader.Seek(index.Position);
 
-            reader.Seek(0);
+            //var zlibReader = new StackDataReader(
+            //    new ReadOnlySpan<byte>(
+            //        (byte*)file.StartAddress.ToPointer() + index.Position,
+            //        (int)index.Size
+            //    )
+            //);
 
             var palette = new ReadOnlySpan<ushort>(reader.PositionAddress.ToPointer(), 512 / sizeof(ushort));
             reader.Skip(512);

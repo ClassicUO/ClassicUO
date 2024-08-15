@@ -72,7 +72,8 @@ namespace ClassicUO.Assets
                     int entrycount = (int) file.Length / groupSize;
                     HuesCount = entrycount * 8;
                     HuesRange = new HuesGroup[entrycount];
-                    ulong addr = (ulong) file.StartAddress;
+                    var reader = file.GetReader();
+                    ulong addr = (ulong)reader.StartAddress;
 
                     for (int i = 0; i < entrycount; i++)
                     {
@@ -83,12 +84,13 @@ namespace ClassicUO.Assets
 
                     FileSystemHelper.EnsureFileExists(path);
 
-                    UOFileMul radarcol = new UOFileMul(path);
+                    var radarcol = new UOFileMul(path);
                     RadarCol = new ushort[(int)(radarcol.Length >> 1)];
 
+                    reader = radarcol.GetReader();
                     fixed (ushort* ptr = RadarCol)
                     {
-                        Unsafe.CopyBlockUnaligned((void*)(byte*)ptr, radarcol.PositionAddress.ToPointer(), (uint)radarcol.Length);
+                        Unsafe.CopyBlockUnaligned((void*)(byte*)ptr, reader.PositionAddress.ToPointer(), (uint)radarcol.Length);
                     }
                     
                     file.Dispose();

@@ -255,11 +255,11 @@ namespace ClassicUO.Game
                         }
                         else
                         {
-                            _UL._filesIdxStatics[mapId].Seek(index);
+                            var reader = _UL._filesIdxStatics[mapId].GetReader();
+                            reader.Seek(index);
 
-                            uint lookup = _UL._filesIdxStatics[mapId].ReadUInt();
-
-                            uint existingStaticsLength = _UL._filesIdxStatics[mapId].ReadUInt();
+                            uint lookup = reader.ReadUInt32LE();
+                            uint existingStaticsLength = reader.ReadUInt32LE();
 
                             //Do we have enough room to write the statics into the existing location?
                             if (existingStaticsLength >= totalLength && lookup != 0xFFFFFFFF)
@@ -566,41 +566,42 @@ namespace ClassicUO.Game
         {
             int mapId = world.Map.Index;
 
-            _UL._filesIdxStatics[mapId].Seek(block * 12);
+            var reader = _UL._filesIdxStatics[mapId].GetReader();
+            reader.Seek(block * 12);
 
-            uint lookup = _UL._filesIdxStatics[mapId].ReadUInt();
+            uint lookup = reader.ReadUInt32LE();
 
-            int byteCount = Math.Max(0, _UL._filesIdxStatics[mapId].ReadInt());
+            int byteCount = Math.Max(0, reader.ReadInt32LE());
 
             byte[] blockData = new byte[LAND_BLOCK_LENGTH + byteCount];
 
             //we prevent the system from reading beyond the end of file, causing an exception, if the data isn't there, we don't read it and leave the array blank, simple...
-            _UL._filesMap[mapId].Seek(block * 196 + 4);
+            reader.Seek(block * 196 + 4);
 
             for (int x = 0; x < 192; x++)
             {
-                if (_UL._filesMap[mapId].Position + 1 >= _UL._filesMap[mapId].Length)
+                if (reader.Position + 1 >= _UL._filesMap[mapId].Length)
                 {
                     break;
                 }
 
-                blockData[x] = _UL._filesMap[mapId].ReadByte();
+                blockData[x] = reader.ReadUInt8();
             }
 
             if (lookup != 0xFFFFFFFF && byteCount > 0)
             {
-                if (lookup < _UL._filesStatics[mapId].Length)
+                if (lookup < reader.Length)
                 {
-                    _UL._filesStatics[mapId].Seek(lookup);
+                    reader.Seek(lookup);
 
                     for (int x = LAND_BLOCK_LENGTH; x < blockData.Length; x++)
                     {
-                        if (_UL._filesStatics[mapId].Position + 1 >= _UL._filesStatics[mapId].Length)
+                        if (reader.Position + 1 >= reader.Length)
                         {
                             break;
                         }
 
-                        blockData[x] = _UL._filesStatics[mapId].ReadByte();
+                        blockData[x] = reader.ReadUInt8();
                     }
                 }
             }
@@ -731,7 +732,7 @@ namespace ClassicUO.Game
                     try
                     {
                         _accessor.SafeMemoryMappedViewHandle.AcquirePointer(ref ptr);
-                        SetData(ptr, (long) _accessor.SafeMemoryMappedViewHandle.ByteLength);
+                        SetPtr((IntPtr)ptr, (long) _accessor.SafeMemoryMappedViewHandle.ByteLength);
                     }
                     catch
                     {
@@ -943,11 +944,12 @@ namespace ClassicUO.Game
 
                             using (FileStream stream = File.Create(mapPath))
                             {
+                                var reader = uop.GetReader();
                                 for (int x = 0; x < Entries[mapId].Length; x++)
                                 {
-                                    uop.Seek(Entries[mapId][x].Offset);
+                                    reader.Seek(Entries[mapId][x].Offset);
 
-                                    stream.Write(uop.ReadArray(Entries[mapId][x].Length), 0, Entries[mapId][x].Length);
+                                    stream.Write(reader.ReadArray(Entries[mapId][x].Length), 0, Entries[mapId][x].Length);
                                 }
 
                                 stream.Flush();
@@ -1085,11 +1087,16 @@ namespace ClassicUO.Game
                 UOFile file = _filesMap[map];
                 UOFile fileIdx = _filesIdxStatics[map];
                 UOFile staticFile = _filesStatics[map];
-                ulong staticIdxAddress = (ulong) fileIdx.StartAddress;
+
+                var reader = file.GetReader();
+                var readerIdx = fileIdx.GetReader();
+                var staticsReader = staticFile.GetReader();
+
+                ulong staticIdxAddress = (ulong)readerIdx.StartAddress;
                 ulong endStaticIdxAddress = staticIdxAddress + (ulong) fileIdx.Length;
-                ulong staticAddress = (ulong) staticFile.StartAddress;
+                ulong staticAddress = (ulong)staticsReader.StartAddress;
                 ulong endStaticAddress = staticAddress + (ulong) staticFile.Length;
-                ulong mapAddress = (ulong) file.StartAddress;
+                ulong mapAddress = (ulong)reader.StartAddress;
                 ulong endMapAddress = mapAddress + (ulong) file.Length;
                 ulong uopOffset = 0;
                 int fileNumber = -1;

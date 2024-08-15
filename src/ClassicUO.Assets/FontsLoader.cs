@@ -139,7 +139,7 @@ namespace ClassicUO.Assets
                     {
                         uniFonts[i] = new UOFileMul(path);
 
-                        _unicodeFontAddress[i] = uniFonts[i].StartAddress;
+                        _unicodeFontAddress[i] = uniFonts[i].GetReader().StartAddress;
 
                         _unicodeFontSize[i] = uniFonts[i].Length;
                     }
@@ -148,31 +148,32 @@ namespace ClassicUO.Assets
                 int fontHeaderSize = sizeof(FontHeader);
                 FontCount = 0;
 
-                while (fonts.Position < fonts.Length)
+                var reader = fonts.GetReader();
+                while (reader.Position < fonts.Length)
                 {
                     bool exit = false;
-                    fonts.Skip(1);
+                    reader.Skip(1);
 
                     for (int i = 0; i < 224; i++)
                     {
-                        FontHeader* fh = (FontHeader*)fonts.PositionAddress;
+                        FontHeader* fh = (FontHeader*)reader.PositionAddress;
 
-                        if (fonts.Position + fontHeaderSize >= fonts.Length)
+                        if (reader.Position + fontHeaderSize >= fonts.Length)
                         {
                             continue;
                         }
 
-                        fonts.Skip(fontHeaderSize);
+                        reader.Skip(fontHeaderSize);
                         int bcount = fh->Width * fh->Height * 2;
 
-                        if (fonts.Position + bcount > fonts.Length)
+                        if (reader.Position + bcount > fonts.Length)
                         {
                             exit = true;
 
                             break;
                         }
 
-                        fonts.Skip(bcount);
+                        reader.Skip(bcount);
                     }
 
                     if (exit)
@@ -191,28 +192,28 @@ namespace ClassicUO.Assets
                 }
 
                 _fontData = new FontCharacterData[FontCount, 224];
-                fonts.Seek(0);
+                reader.Seek(0);
 
                 for (int i = 0; i < FontCount; i++)
                 {
-                    byte header = fonts.ReadByte();
+                    byte header = reader.ReadUInt8();
 
                     for (int j = 0; j < 224; j++)
                     {
-                        if (fonts.Position + 3 >= fonts.Length)
+                        if (reader.Position + 3 >= fonts.Length)
                         {
                             continue;
                         }
 
-                        byte w = fonts.ReadByte();
-                        byte h = fonts.ReadByte();
-                        fonts.Skip(1);
+                        byte w = reader.ReadUInt8();
+                        byte h = reader.ReadUInt8();
+                        reader.Skip(1);
                         _fontData[i, j] = new FontCharacterData(
                             w,
                             h,
-                            (ushort*)fonts.PositionAddress
+                            (ushort*)reader.PositionAddress
                         );
-                        fonts.Skip(w * h * sizeof(ushort));
+                        reader.Skip(w * h * sizeof(ushort));
                     }
                 }
 

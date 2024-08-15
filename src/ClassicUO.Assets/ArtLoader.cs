@@ -104,8 +104,9 @@ namespace ClassicUO.Assets
                 return false;
             }
 
-            _file.SetData(entry.Address, entry.FileSize);
-            _file.Seek(entry.Offset);
+            var reader = new StackDataReader(entry.Address, (int)entry.FileSize);
+            reader.Seek(entry.Offset);
+
             //var flags = _file.ReadUInt();
 
             //if (flags > 0xFFFF || flags == 0)
@@ -134,7 +135,7 @@ namespace ClassicUO.Assets
 
                     for (int j = start; j < end; ++j)
                     {
-                        data[pos++] = HuesHelper.Color16To32(_file.ReadUShort()) | 0xFF_00_00_00;
+                        data[pos++] = HuesHelper.Color16To32(reader.ReadUInt16LE()) | 0xFF_00_00_00;
                     }
                 }
 
@@ -145,15 +146,15 @@ namespace ClassicUO.Assets
 
                     for (int j = i; j < end; ++j)
                     {
-                        data[pos++] = HuesHelper.Color16To32(_file.ReadUShort()) | 0xFF_00_00_00;
+                        data[pos++] = HuesHelper.Color16To32(reader.ReadUInt16LE()) | 0xFF_00_00_00;
                     }
                 }
             }
             else
             {
-                var flags = _file.ReadUInt();
-                width = _file.ReadShort();
-                height = _file.ReadShort();
+                var flags = reader.ReadUInt32LE();
+                width = reader.ReadInt16LE();
+                height = reader.ReadInt16LE();
 
                 if (width <= 0 || height <= 0 || data.Length < (width * height))
                 {
@@ -169,7 +170,7 @@ namespace ClassicUO.Assets
 
                 ushort fixedGraphic = (ushort)(g - 0x4000);
 
-                if (ReadData(data, width, height, _file))
+                if (ReadData(data, width, height, reader))
                 {
                     // keep the cursor graphic check to cleanup edges
                     //if ((fixedGraphic >= 0x2053 && fixedGraphic <= 0x2062) || (fixedGraphic >= 0x206A && fixedGraphic <= 0x2079))
@@ -212,31 +213,7 @@ namespace ClassicUO.Assets
             return _data.AsSpan(0, width * height);
         }
 
-        private bool ReadHeader(
-            DataReader file,
-            ref UOFileIndex entry,
-            out short width,
-            out short height
-        )
-        {
-            if (entry.Length == 0)
-            {
-                width = 0;
-                height = 0;
-
-                return false;
-            }
-
-            file.SetData(entry.Address, entry.FileSize);
-            file.Seek(entry.Offset);
-            file.Skip(4);
-            width = file.ReadShort();
-            height = file.ReadShort();
-
-            return width > 0 && height > 0;
-        }
-
-        private unsafe bool ReadData(Span<uint> pixels, int width, int height, DataReader file)
+        private unsafe bool ReadData(Span<uint> pixels, int width, int height, StackDataReader file)
         {
             ushort* ptr = (ushort*)file.PositionAddress;
             ushort* lineoffsets = ptr;

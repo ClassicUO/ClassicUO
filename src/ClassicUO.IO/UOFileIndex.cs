@@ -31,6 +31,7 @@
 #endregion
 
 using System;
+using System.Runtime.InteropServices;
 
 namespace ClassicUO.IO
 {
@@ -87,6 +88,7 @@ namespace ClassicUO.IO
         }
     }
 
+    [StructLayout(LayoutKind.Sequential)]
     public struct UOFileIndex5D
     {
         public UOFileIndex5D(uint file, uint index, uint offset, uint length, uint extra = 0)

@@ -106,10 +106,11 @@ namespace ClassicUO.Assets
                 return default;
             }
 
-            _file.Seek(0);
+            var reader = _file.GetReader();
+            reader.Seek(0);
 
-            int w = _file.ReadInt();
-            int h = _file.ReadInt();
+            int w = reader.ReadInt32LE();
+            int h = reader.ReadInt32LE();
 
             if (w < 1 || h < 1)
             {
@@ -150,9 +151,9 @@ namespace ClassicUO.Assets
             int maxPixelValue = 1;
             int startHeight = starty * pheight;
 
-            while (_file.Position < _file.Length)
+            while (reader.Position < _file.Length)
             {
-                byte pic = _file.ReadByte();
+                byte pic = reader.ReadUInt8();
                 byte size = (byte) (pic & 0x7F);
                 bool colored = (pic & 0x80) != 0;
 
@@ -253,11 +254,11 @@ namespace ClassicUO.Assets
                 return default;
             }
 
-            _facets[facet].Seek(0);
+            var reader = _facets[facet].GetReader();
+            reader.Seek(0);
 
-            int w = _facets[facet].ReadShort();
-
-            int h = _facets[facet].ReadShort();
+            int w = reader.ReadUInt16LE();
+            int h = reader.ReadUInt16LE();
 
             if (w < 1 || h < 1)
             {
@@ -279,13 +280,13 @@ namespace ClassicUO.Assets
             {
                 int x = 0;
 
-                int colorCount = _facets[facet].ReadInt() / 3;
+                int colorCount = reader.ReadInt32LE() / 3;
 
                 for (int i = 0; i < colorCount; i++)
                 {
-                    int size = _facets[facet].ReadByte();
+                    int size = reader.ReadUInt8();
 
-                    uint color = HuesHelper.Color16To32(_facets[facet].ReadUShort()) | 0xFF_00_00_00;
+                    uint color = HuesHelper.Color16To32(reader.ReadUInt16LE()) | 0xFF_00_00_00;
 
                     for (int j = 0; j < size; j++)
                     {

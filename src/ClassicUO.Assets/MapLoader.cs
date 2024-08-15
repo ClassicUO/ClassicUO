@@ -235,7 +235,7 @@ namespace ClassicUO.Assets
                     }
 
                     // This is an hack to patch correctly all maps when you have to fake map1
-                    if (_filesMap[1] == null || _filesMap[1].StartAddress == IntPtr.Zero)
+                    if (_filesMap[1] == null || _filesMap[1].Length == 0)
                     {
                         _filesMap[1] = _filesMap[0];
                         _filesStatics[1] = _filesStatics[0];
@@ -285,11 +285,15 @@ namespace ClassicUO.Assets
                 staticfile = _filesStatics[0];
             }
 
-            ulong staticidxaddress = (ulong) fileidx.StartAddress;
+            var reader = file.GetReader();
+            var idxReader = fileidx.GetReader();
+            var staticsReader = staticfile.GetReader();
+
+            ulong staticidxaddress = (ulong)idxReader.StartAddress;
             ulong endstaticidxaddress = staticidxaddress + (ulong) fileidx.Length;
-            ulong staticaddress = (ulong) staticfile.StartAddress;
+            ulong staticaddress = (ulong)staticsReader.StartAddress;
             ulong endstaticaddress = staticaddress + (ulong) staticfile.Length;
-            ulong mapddress = (ulong) file.StartAddress;
+            ulong mapddress = (ulong) reader.StartAddress;
             ulong endmapaddress = mapddress + (ulong) file.Length;
             ulong uopoffset = 0;
             int fileNumber = -1;
@@ -433,7 +437,7 @@ namespace ClassicUO.Assets
 
                 //SanitizeMapIndex(ref idx);
 
-                if (_filesMap[idx] == null || _filesMap[idx].StartAddress == IntPtr.Zero)
+                if (_filesMap[idx] == null || _filesMap[idx].Length == 0)
                 {
                     reader.Skip(8);
 
@@ -462,21 +466,24 @@ namespace ClassicUO.Assets
 
                     mapPatchesCount = Math.Min(mapPatchesCount, (int) difl.Length >> 2);
 
-                    difl.Seek(0);
-                    dif.Seek(0);
+                    var diflReader = difl.GetReader();
+                    var difReader = dif.GetReader();
+
+                    diflReader.Seek(0);
+                    difReader.Seek(0);
 
                     for (int j = 0; j < mapPatchesCount; j++)
                     {
-                        uint blockIndex = difl.ReadUInt();
+                        uint blockIndex = diflReader.ReadUInt32LE();
 
                         if (blockIndex < maxBlockCount)
                         {
-                            BlockData[idx][blockIndex].MapAddress = (ulong) dif.PositionAddress;
+                            BlockData[idx][blockIndex].MapAddress = (ulong)difReader.PositionAddress;
 
                             result = true;
                         }
 
-                        dif.Skip(sizeof(MapBlock));
+                        difReader.Skip(sizeof(MapBlock));
                     }
                 }
 
@@ -490,28 +497,31 @@ namespace ClassicUO.Assets
                         continue;
                     }
 
-                    ulong startAddress = (ulong) _staDif[i].StartAddress;
+                    ulong startAddress = (ulong) _staDif[i].GetReader().StartAddress;
 
                     staticPatchesCount = Math.Min(staticPatchesCount, (int) difl.Length >> 2);
 
-                    difl.Seek(0);
-                    difi.Seek(0);
+                    var diflReader = difl.GetReader();
+                    var difiReader = difi.GetReader();
+
+                    diflReader.Seek(0);
+                    difiReader.Seek(0);
 
                     int sizeOfStaicsBlock = sizeof(StaticsBlock);
                     int sizeOfStaidxBlock = sizeof(StaidxBlock);
 
                     for (int j = 0; j < staticPatchesCount; j++)
                     {
-                        if (difl.IsEOF || difi.IsEOF)
+                        if (diflReader.Remaining <= 0 || difiReader.Remaining <= 0)
                         {
                             break;
                         }
 
-                        uint blockIndex = difl.ReadUInt();
+                        uint blockIndex = diflReader.ReadUInt32LE();
 
-                        StaidxBlock* sidx = (StaidxBlock*) difi.PositionAddress;
+                        StaidxBlock* sidx = (StaidxBlock*)difiReader.PositionAddress;
 
-                        difi.Skip(sizeOfStaidxBlock);
+                        difiReader.Skip(sizeOfStaidxBlock);
 
                         if (blockIndex < maxBlockCount)
                         {
@@ -566,11 +576,11 @@ namespace ClassicUO.Assets
                     return;
                 }
 
-                if (_filesMap[i] is UOFileMul mul && mul.StartAddress != IntPtr.Zero)
+                if (_filesMap[i] is UOFileMul mul && mul.Length != 0)
                 {
-                    if (_filesIdxStatics[i] is UOFileMul stIdxMul && stIdxMul.StartAddress != IntPtr.Zero)
+                    if (_filesIdxStatics[i] is UOFileMul stIdxMul && stIdxMul.Length != 0)
                     {
-                        if (_filesStatics[i] is UOFileMul stMul && stMul.StartAddress != IntPtr.Zero)
+                        if (_filesStatics[i] is UOFileMul stMul && stMul.Length != 0)
                         {
                             for (int block = 0; block < maxBlockCount; block++)
                             {
@@ -587,7 +597,7 @@ namespace ClassicUO.Assets
 
         public void SanitizeMapIndex(ref int map)
         {
-            if (map == 1 && (_filesMap[1] == null || _filesMap[1].StartAddress == IntPtr.Zero || _filesStatics[1] == null || _filesStatics[1].StartAddress == IntPtr.Zero || _filesIdxStatics[1] == null || _filesIdxStatics[1].StartAddress == IntPtr.Zero))
+            if (map == 1 && (_filesMap[1] == null || _filesMap[1].Length == 0 || _filesStatics[1] == null || _filesStatics[1].Length == 0 || _filesIdxStatics[1] == null || _filesIdxStatics[1].Length == 0))
             {
                 map = 0;
             }

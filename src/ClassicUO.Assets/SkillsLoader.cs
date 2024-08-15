@@ -76,18 +76,16 @@ namespace ClassicUO.Assets
 
                     for (int i = 0, count = 0; i < Entries.Length; i++)
                     {
-                        ref UOFileIndex entry = ref GetValidRefEntry(i);
+                        ref var entry = ref GetValidRefEntry(i);
+                        if (entry.Length <= 0) continue;
 
-                        if (entry.Length > 0)
-                        {
-                            _file.SetData(entry.Address, entry.FileSize);
-                            _file.Seek(entry.Offset);
-                          
-                            bool hasAction = _file.ReadBool();
-                            string name = Encoding.UTF8.GetString((byte*)_file.PositionAddress, entry.Length - 1).TrimEnd('\0');
+                        var reader = new StackDataReader(entry.Address, (int)entry.FileSize);
+                        reader.Seek(entry.Offset);
 
-                            Skills.Add(new SkillEntry(count++, name, hasAction));
-                        }
+                        bool hasAction = reader.ReadBool();
+                        var name = reader.ReadASCII(entry.Length -1).TrimEnd('\0');
+
+                        Skills.Add(new SkillEntry(count++, name, hasAction));
                     }
 
                     SortedSkills.AddRange(Skills);
