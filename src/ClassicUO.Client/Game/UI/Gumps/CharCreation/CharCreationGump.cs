@@ -88,7 +88,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                     continue;
                 }
 
-                if (!CUOEnviroment.IsOutlands && (World.ClientFeatures.Flags & CharacterListFlags.CLF_SAMURAI_NINJA) == 0 && (skillIndex == 52 || skillIndex == 53))
+                if ((World.ClientFeatures.Flags & CharacterListFlags.CLF_SAMURAI_NINJA) == 0 && (skillIndex == 52 || skillIndex == 53))
                 {
                     // reset skills if needed
                     for (int k = 0; k < i; k++)

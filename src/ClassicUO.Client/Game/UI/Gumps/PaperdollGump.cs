@@ -378,24 +378,17 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (args.Button == MouseButtonType.Left)
             {
-                if (CUOEnviroment.IsOutlands)
+                PartyGump party = UIManager.GetGump<PartyGump>();
+
+                if (party == null)
                 {
-                    NetClient.Socket.Send_ASCIISpeechRequest("party", MessageType.Command, 0, 0);
+                    int x = Client.Game.Window.ClientBounds.Width / 2 - 272;
+                    int y = Client.Game.Window.ClientBounds.Height / 2 - 240;
+                    UIManager.Add(new PartyGump(World, x, y, World.Party.CanLoot));
                 }
                 else
                 {
-                    PartyGump party = UIManager.GetGump<PartyGump>();
-
-                    if (party == null)
-                    {
-                        int x = Client.Game.Window.ClientBounds.Width / 2 - 272;
-                        int y = Client.Game.Window.ClientBounds.Height / 2 - 240;
-                        UIManager.Add(new PartyGump(World, x, y, World.Party.CanLoot));
-                    }
-                    else
-                    {
-                        party.BringOnTop();
-                    }
+                    party.BringOnTop();
                 }
             }
         }
