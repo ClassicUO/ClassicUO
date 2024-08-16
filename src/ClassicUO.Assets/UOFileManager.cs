@@ -45,6 +45,8 @@ namespace ClassicUO.Assets
 {
     public sealed class UOFileManager : IDisposable
     {
+        private readonly UOFilesOverrideMap _overrideMap;
+
         public UOFileManager(ClientVersion clientVersion, string uoPath)
         {
             Version = clientVersion;
@@ -68,6 +70,8 @@ namespace ClassicUO.Assets
             MultiMaps = new MultiMapLoader(this);
             Verdata = new VerdataLoader(this);
             Professions = new ProfessionLoader(this);
+
+            _overrideMap = new UOFilesOverrideMap();
         }
 
         public ClientVersion Version { get; }
@@ -119,7 +123,7 @@ namespace ClassicUO.Assets
 
         public string GetUOFilePath(string file)
         {
-            if (!UOFilesOverrideMap.Instance.TryGetValue(file.ToLowerInvariant(), out string uoFilePath))
+            if (!_overrideMap.TryGetValue(file.ToLowerInvariant(), out string uoFilePath))
             {
                 uoFilePath = Path.Combine(BasePath, file);
             }
@@ -158,7 +162,7 @@ namespace ClassicUO.Assets
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
 
-            UOFilesOverrideMap.Instance.Load(); // need to load this first so that it manages can perform the file overrides if needed
+            _overrideMap.Load(); // need to load this first so that it manages can perform the file overrides if needed
 
             IsUOPInstallation = Version >= ClientVersion.CV_7000 && File.Exists(GetUOFilePath("MainMisc.uop"));
 

@@ -183,7 +183,7 @@ namespace ClassicUO.Game.GameObjects
             ProcessSteps(out byte dir);
             byte layerDir = dir;
 
-            Client.Game.UO.FileManager.Animations.GetAnimDirection(ref dir, ref IsFlipped);
+            Client.Game.UO.Animations.GetAnimDirection(ref dir, ref IsFlipped);
 
             ushort graphic = GetGraphicForAnimation();
             byte animGroup = GetGroupForAnimation(this, graphic, true);
@@ -1017,9 +1017,11 @@ namespace ClassicUO.Game.GameObjects
                 Client.Game.UO.Version >= ClientVersion.CV_7000
                 && (Graphic == 666 || Graphic == 667 || Graphic == 0x02B7 || Graphic == 0x02B6);
 
+            var animations = Client.Game.UO.Animations;
+
             ProcessSteps(out byte dir);
             bool isFlipped = IsFlipped;
-            Client.Game.UO.FileManager.Animations.GetAnimDirection(ref dir, ref isFlipped);
+            animations.GetAnimDirection(ref dir, ref isFlipped);
 
             ushort graphic = GetGraphicForAnimation();
             byte animGroup = GetGroupForAnimation(this, graphic, true);
@@ -1063,7 +1065,7 @@ namespace ClassicUO.Game.GameObjects
                             int y = position.Y - (spriteInfo.UV.Height + spriteInfo.Center.Y);
 
                             if (
-                                Client.Game.UO.Animations.PixelCheck(
+                                animations.PixelCheck(
                                     mountGraphic,
                                     animGroupMount,
                                     dir,
@@ -1081,7 +1083,7 @@ namespace ClassicUO.Game.GameObjects
                                 return true;
                             }
 
-                            position.Y += Client.Game.UO.Animations.GetMountedHeightOffset(
+                            position.Y += animations.GetMountedHeightOffset(
                                 mountGraphic
                             );
                         }
@@ -1097,7 +1099,7 @@ namespace ClassicUO.Game.GameObjects
                 int y = position.Y - (spriteInfo.UV.Height + spriteInfo.Center.Y);
 
                 if (
-                    Client.Game.UO.Animations.PixelCheck(
+                    animations.PixelCheck(
                         graphic,
                         animGroup,
                         dir,
@@ -1159,7 +1161,7 @@ namespace ClassicUO.Game.GameObjects
                             int y = position.Y - (spriteInfo.UV.Height + spriteInfo.Center.Y);
 
                             if (
-                                Client.Game.UO.Animations.PixelCheck(
+                                animations.PixelCheck(
                                     graphic,
                                     animGroup,
                                     dir,

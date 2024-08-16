@@ -104,6 +104,7 @@ namespace ClassicUO.Game.Managers
             }
 
             int showWhen = ProfileManager.CurrentProfile.MobileHPShowWhen;
+            var animations = Client.Game.UO.Animations;
 
             foreach (Mobile mobile in _world.Mobiles.Values)
             {
@@ -135,7 +136,7 @@ namespace ClassicUO.Game.Managers
                     {
                         if (mobile.HitsPercentage != 0)
                         {
-                            Client.Game.UO.Animations.GetAnimationDimensions(
+                            animations.GetAnimationDimensions(
                                 mobile.AnimIndex,
                                 mobile.GetGraphicForAnimation(),
                                 /*(byte) m.GetDirectionForAnimation()*/

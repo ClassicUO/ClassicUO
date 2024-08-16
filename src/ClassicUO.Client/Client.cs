@@ -220,7 +220,7 @@ namespace ClassicUO
             FileManager = new UOFileManager(clientVersion, clientPath);
             FileManager.Load(Settings.GlobalSettings.UseVerdata, Settings.GlobalSettings.Language, Settings.GlobalSettings.MapsLayouts);
             
-            StaticFilters.Load();
+            StaticFilters.Load(FileManager.TileData);
             BuffTable.Load();
             ChairTable.Load();
 

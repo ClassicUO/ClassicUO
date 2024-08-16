@@ -3742,10 +3742,11 @@ namespace ClassicUO.Network
                 world.CorpseManager.Add(corpseSerial, serial, owner.Direction, running != 0);
             }
 
+            var animations = Client.Game.UO.Animations;
             var gfx = owner.Graphic;
-            Client.Game.UO.Animations.ConvertBodyIfNeeded(ref gfx);
-            var animGroup = Client.Game.UO.Animations.GetAnimType(gfx);
-            var animFlags = Client.Game.UO.Animations.GetAnimFlags(gfx);
+            animations.ConvertBodyIfNeeded(ref gfx);
+            var animGroup = animations.GetAnimType(gfx);
+            var animFlags = animations.GetAnimFlags(gfx);
             byte group = Client.Game.UO.FileManager.Animations.GetDeathAction(
                 gfx,
                 animFlags,

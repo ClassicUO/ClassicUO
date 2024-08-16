@@ -75,7 +75,7 @@ namespace ClassicUO.Assets
 
                     if (File.Exists(filePath) && File.Exists(idxPath))
                     {
-                        _file = new UOFileMul(filePath, idxPath, MAX_STATIC_DATA_INDEX_COUNT);
+                        _file = new UOFileMul(filePath, idxPath);
                     }
                 }
 

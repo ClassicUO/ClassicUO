@@ -58,7 +58,7 @@ namespace ClassicUO.Game.Data
         public static readonly List<ushort> CaveTiles = new List<ushort>();
         public static readonly List<ushort> TreeTiles = new List<ushort>();
 
-        public static void Load()
+        public static void Load(TileDataLoader tileData)
         {
             string path = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Client");
 
@@ -115,7 +115,7 @@ namespace ClassicUO.Game.Data
                     {
                         ushort g = vegetationTiles[i];
 
-                        if (Client.Game.UO.FileManager.TileData.StaticData[g].IsImpassable)
+                        if (tileData.StaticData[g].IsImpassable)
                         {
                             continue;
                         }
@@ -167,7 +167,7 @@ namespace ClassicUO.Game.Data
                                 break;
                         }
 
-                        if (!Client.Game.UO.FileManager.TileData.StaticData[graphic].IsImpassable)
+                        if (!tileData.StaticData[graphic].IsImpassable)
                         {
                             writerveg.WriteLine(graphic);
                         }
