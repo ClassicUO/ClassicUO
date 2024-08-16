@@ -63,7 +63,8 @@ namespace ClassicUO.Utility.Platforms
 
             try
             {
-                _customWindow = new CustomWindow(world, "UOASSIST-TP-MSG-WND");
+                if (Client.Game?.Window != null)
+                    _customWindow = new CustomWindow(Client.Game.Window.Handle, world, "UOASSIST-TP-MSG-WND");
             }
             catch
             { }
@@ -115,13 +116,13 @@ namespace ClassicUO.Utility.Platforms
 
             private readonly WndProc m_wnd_proc_delegate;
 
-            public CustomWindow(World world, string class_name)
+            public CustomWindow(IntPtr wndHandle, World world, string class_name)
             {
                 _world = world;
 
                 SDL.SDL_SysWMinfo info = new SDL.SDL_SysWMinfo();
                 SDL.SDL_VERSION(out info.version);
-                SDL.SDL_GetWindowWMInfo(Client.Game.Window.Handle, ref info);
+                SDL.SDL_GetWindowWMInfo(wndHandle, ref info);
 
                 IntPtr hwnd = IntPtr.Zero;
 
