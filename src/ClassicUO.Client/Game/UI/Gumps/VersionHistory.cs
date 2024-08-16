@@ -8,6 +8,9 @@ namespace ClassicUO.Game.UI.Gumps
     internal class VersionHistory : Gump
     {
         private static string[] updateTexts = {
+            "/c[white][3.23.1]/cd\n" +
+                "- Fixed Weird lines if show Nameplate",
+
             "/c[white][3.23.0]/cd\n" +
                 "- Nameplate healthbar poison and invul/paralyzed colors from Elderwyn\n" +
                 "- Target indiciator option from original client from Elderwyn\n" +
