@@ -823,7 +823,7 @@ namespace ClassicUO.Game.UI.Gumps
             (
                 SolidColorTextureCache.GetTexture(Color.White),
                 new Vector2(x + 1, y + 1),
-                new Rectangle(x, y, Math.Min((int)((Width - 1) * data.Item2), Width - 1), height - 1),
+                new Rectangle(x, y, Math.Min((int)((Width - 1) * data.Item2), Width - 1), height),
                 data.Item1
             );
             nY = y + height;
