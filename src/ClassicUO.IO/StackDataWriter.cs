@@ -34,18 +34,18 @@ namespace ClassicUO.IO
         }
 
 
-        public byte[] AllocatedBuffer => _allocatedBuffer;
+        public readonly byte[] AllocatedBuffer => _allocatedBuffer;
       
-        public Span<byte> RawBuffer => _buffer;
+        public readonly Span<byte> RawBuffer => _buffer;
        
-        public ReadOnlySpan<byte> Buffer => _buffer.Slice(0, Position);
+        public readonly ReadOnlySpan<byte> Buffer => _buffer.Slice(0, Position);
        
-        public Span<byte> BufferWritten => _buffer.Slice(0, BytesWritten);
+        public readonly Span<byte> BufferWritten => _buffer.Slice(0, BytesWritten);
       
         public int Position
         {
             [MethodImpl(IMPL_OPTION)]
-            get => _position;
+            readonly get => _position;
 
             [MethodImpl(IMPL_OPTION)]
             set
@@ -100,11 +100,11 @@ namespace ClassicUO.IO
         [MethodImpl(IMPL_OPTION)]
         public void WriteInt8(sbyte b)
         {
-            EnsureSize(1);
+            EnsureSize(sizeof(byte));
 
             _buffer[Position] = (byte) b;
 
-            Position += 1;
+            Position += sizeof(byte);
         }
 
         [MethodImpl(IMPL_OPTION)]
@@ -120,61 +120,61 @@ namespace ClassicUO.IO
         [MethodImpl(IMPL_OPTION)]
         public void WriteUInt16LE(ushort b)
         {
-            EnsureSize(2);
+            EnsureSize(sizeof(ushort));
 
             BinaryPrimitives.WriteUInt16LittleEndian(_buffer.Slice(Position), b);
 
-            Position += 2;
+            Position += sizeof(ushort);
         }
 
         [MethodImpl(IMPL_OPTION)]
         public void WriteInt16LE(short b)
         {
-            EnsureSize(2);
+            EnsureSize(sizeof(short));
 
             BinaryPrimitives.WriteInt16LittleEndian(_buffer.Slice(Position), b);
 
-            Position += 2;
+            Position += sizeof(short);
         }
 
         [MethodImpl(IMPL_OPTION)]
         public void WriteUInt32LE(uint b)
         {
-            EnsureSize(4);
+            EnsureSize(sizeof(uint));
 
             BinaryPrimitives.WriteUInt32LittleEndian(_buffer.Slice(Position), b);
 
-            Position += 4;
+            Position += sizeof(uint);
         }
 
         [MethodImpl(IMPL_OPTION)]
         public void WriteInt32LE(int b)
         {
-            EnsureSize(4);
+            EnsureSize(sizeof(int));
 
             BinaryPrimitives.WriteInt32LittleEndian(_buffer.Slice(Position), b);
 
-            Position += 4;
+            Position += sizeof(int);
         }
 
         [MethodImpl(IMPL_OPTION)]
         public void WriteUInt64LE(ulong b)
         {
-            EnsureSize(8);
+            EnsureSize(sizeof(ulong));
 
             BinaryPrimitives.WriteUInt64LittleEndian(_buffer.Slice(Position), b);
 
-            Position += 8;
+            Position += sizeof(ulong);
         }
 
         [MethodImpl(IMPL_OPTION)]
         public void WriteInt64LE(long b)
         {
-            EnsureSize(8);
+            EnsureSize(sizeof(long));
 
             BinaryPrimitives.WriteInt64LittleEndian(_buffer.Slice(Position), b);
 
-            Position += 8;
+            Position += sizeof(long);
         }
 
         [MethodImpl(IMPL_OPTION)]
@@ -198,61 +198,61 @@ namespace ClassicUO.IO
         [MethodImpl(IMPL_OPTION)]
         public void WriteUInt16BE(ushort b)
         {
-            EnsureSize(2);
+            EnsureSize(sizeof(ushort));
 
             BinaryPrimitives.WriteUInt16BigEndian(_buffer.Slice(Position), b);
 
-            Position += 2;
+            Position += sizeof(ushort);
         }
 
         [MethodImpl(IMPL_OPTION)]
         public void WriteInt16BE(short b)
         {
-            EnsureSize(2);
+            EnsureSize(sizeof(short));
 
             BinaryPrimitives.WriteInt16BigEndian(_buffer.Slice(Position), b);
 
-            Position += 2;
+            Position += sizeof(short);
         }
 
         [MethodImpl(IMPL_OPTION)]
         public void WriteUInt32BE(uint b)
         {
-            EnsureSize(4);
+            EnsureSize(sizeof(uint));
 
             BinaryPrimitives.WriteUInt32BigEndian(_buffer.Slice(Position), b);
 
-            Position += 4;
+            Position += sizeof(uint);
         }
 
         [MethodImpl(IMPL_OPTION)]
         public void WriteInt32BE(int b)
         {
-            EnsureSize(4);
+            EnsureSize(sizeof(int));
 
             BinaryPrimitives.WriteInt32BigEndian(_buffer.Slice(Position), b);
 
-            Position += 4;
+            Position += sizeof(int);
         }
 
         [MethodImpl(IMPL_OPTION)]
         public void WriteUInt64BE(ulong b)
         {
-            EnsureSize(8);
+            EnsureSize(sizeof(ulong));
 
             BinaryPrimitives.WriteUInt64BigEndian(_buffer.Slice(Position), b);
 
-            Position += 8;
+            Position += sizeof(ulong);
         }
 
         [MethodImpl(IMPL_OPTION)]
         public void WriteInt64BE(long b)
         {
-            EnsureSize(8);
+            EnsureSize(sizeof(long));
 
             BinaryPrimitives.WriteInt64BigEndian(_buffer.Slice(Position), b);
 
-            Position += 8;
+            Position += sizeof(long);
         }
 
         [MethodImpl(IMPL_OPTION)]
@@ -281,9 +281,6 @@ namespace ClassicUO.IO
         [MethodImpl(IMPL_OPTION)]
         public void WriteASCII(string str)
         {
-            //WriteString<byte>(StringHelper.Cp1252Encoding, str, -1);
-            //WriteUInt8(0x00);
-
             if (!string.IsNullOrEmpty(str))
             {
                 foreach (var b in StringHelper.StringToCp1252Bytes(str))
@@ -298,8 +295,6 @@ namespace ClassicUO.IO
         [MethodImpl(IMPL_OPTION)]
         public void WriteASCII(string str, int length)
         {
-            //WriteString<byte>(StringHelper.Cp1252Encoding, str, length);
-
             int start = Position;
 
             if (string.IsNullOrEmpty(str))
