@@ -345,13 +345,7 @@ namespace ClassicUO.Game.Scenes
             NetClient.Socket.Disconnected -= OnNetClientDisconnected;
             NetClient.Socket.Connected += OnNetClientConnected;
             NetClient.Socket.Disconnected += OnNetClientDisconnected;
-            Settings.GlobalSettings.Encryption = (byte)NetClient.Socket.Connect
-            (
-                Settings.GlobalSettings.IP, 
-                Settings.GlobalSettings.Port, 
-                Client.Game.UO.Version, 
-                (EncryptionType)Settings.GlobalSettings.Encryption
-            );
+            NetClient.Socket.Connect(Settings.GlobalSettings.IP, Settings.GlobalSettings.Port);
         }
 
 
@@ -689,14 +683,7 @@ namespace ClassicUO.Game.Scenes
             uint seed = p.ReadUInt32BE();
 
             NetClient.Socket.Disconnect();
-
-            Settings.GlobalSettings.Encryption = (byte) NetClient.Socket.Connect
-            (
-                new IPAddress(ip).ToString(), 
-                port, 
-                Client.Game.UO.Version, 
-                (EncryptionType)Settings.GlobalSettings.Encryption
-            );
+            NetClient.Socket.Connect(new IPAddress(ip).ToString(), port);
 
             if (NetClient.Socket.IsConnected)
             {
