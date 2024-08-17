@@ -699,7 +699,6 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-
         private void ParseCharacterList(ref StackDataReader p)
         {
             int count = p.ReadUInt8();

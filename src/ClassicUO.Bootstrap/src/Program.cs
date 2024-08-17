@@ -194,7 +194,7 @@ sealed class ClassicUOHost : IPluginHandler
             var initializePtr = Native.GetProcessAddress(libPtr, "Initialize");
             var initializeMethod = Marshal.GetDelegateForFunctionPointer<dOnInitializeCuo>(initializePtr);
 
-            var argv = stackalloc IntPtr[args.Length];
+            var argv = new IntPtr[args.Length];
             for (int i = 0; i < args.Length; i++)
                 argv[i] = Marshal.StringToHGlobalAnsi(args[i]);
 
@@ -219,7 +219,8 @@ sealed class ClassicUOHost : IPluginHandler
             hostSetup.DisconnectedFn = _disconnectedDel.Pointer;
             hostSetup.CmdListFn = _cmdListDel.Pointer;
 
-            initializeMethod(argv, args.Length, mem);
+            fixed (IntPtr* argvPtr = argv)
+                initializeMethod(argvPtr, args.Length, mem);
 
             if (mem != null)
                 Marshal.FreeHGlobal(mem);
@@ -469,6 +470,7 @@ sealed class ClassicUOHost : IPluginHandler
         var count = Encoding.UTF8.GetByteCount(title);
 
         var ptr = stackalloc byte[count + 1];
+        ptr[count] = 0;
 
         fixed (char* titlePtr = title)
         //fixed (byte* ptr = &buf[0])

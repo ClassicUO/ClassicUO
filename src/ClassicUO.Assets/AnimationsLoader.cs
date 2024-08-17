@@ -811,7 +811,7 @@ namespace ClassicUO.Assets
                 "build/animationsequence/{0:D8}.bin"
             );
 
-            Span<byte> spanAlloc = stackalloc byte[1024];
+            var buffer = new byte[1024];
             var reader = animSeq.GetReader();
 
             foreach (var pair in animSeq.Hashes)
@@ -825,95 +825,80 @@ namespace ClassicUO.Assets
 
                 reader.Seek(entry.Offset);
 
-                byte[] buffer = null;
-
-                Span<byte> span =
-                    entry.DecompressedLength <= 1024
-                        ? spanAlloc
-                        : (
-                            buffer = System.Buffers.ArrayPool<byte>.Shared.Rent(
-                                entry.DecompressedLength
-                            )
-                        );
-
-                try
+                if (entry.DecompressedLength > buffer.Length)
                 {
-                    fixed (byte* destPtr = span)
-                    {
-                        var result = ZLib.Decompress(
-                            reader.PositionAddress,
-                            entry.Length,
-                            0,
-                            (IntPtr)destPtr,
-                            entry.DecompressedLength
-                        );
-
-                        if (result != ZLib.ZLibError.Okay)
-                        {
-                            Log.Error($"error reading animationsequence {result}");
-                            return;
-                        }
-                    }
-
-                    var zlibReader = new StackDataReader(span.Slice(0, entry.DecompressedLength));
-
-                    uint animID = zlibReader.ReadUInt32LE();
-                    zlibReader.Skip(48);
-                    int replaces = zlibReader.ReadInt32LE();
-
-                    var uopInfo = new UopInfo();
-                    var replacedAnimSpan = uopInfo.ReplacedAnimations;
-                    for (var j = 0; j < replacedAnimSpan.Length; ++j)
-                        replacedAnimSpan[j] = j;
-
-                    if (replaces != 48 && replaces != 68)
-                    {
-                        for (int k = 0; k < replaces; k++)
-                        {
-                            int oldGroup = zlibReader.ReadInt32LE();
-                            uint frameCount = zlibReader.ReadUInt32LE();
-                            int newGroup = zlibReader.ReadInt32LE();
-
-                            if (frameCount == 0)
-                            {
-                                replacedAnimSpan[oldGroup] = newGroup;
-                            }
-
-                            zlibReader.Skip(60);
-                        }
-
-                        if (
-                            animID == 0x04E7
-                            || animID == 0x042D
-                            || animID == 0x04E6
-                            || animID == 0x05F7
-                            || animID == 0x05A1
-                        )
-                        {
-                            uopInfo.HeightOffset = 18;
-                        }
-                        else if (
-                            animID == 0x01B0
-                            || animID == 0x0579
-                            || animID == 0x05F6
-                            || animID == 0x05A0
-                        )
-                        {
-                            uopInfo.HeightOffset = 9;
-                        }
-                    }
-
-                    _uopInfos[(int)animID] = uopInfo;
-
-                    zlibReader.Release();
+                    Array.Resize(ref buffer, entry.DecompressedLength);
                 }
-                finally
+                
+                var span = buffer.AsSpan(0, entry.DecompressedLength);
+                fixed (byte* destPtr = span)
                 {
-                    if (buffer != null)
+                    var result = ZLib.Decompress(
+                        reader.PositionAddress,
+                        entry.Length,
+                        0,
+                        (IntPtr)destPtr,
+                        entry.DecompressedLength
+                    );
+
+                    if (result != ZLib.ZLibError.Okay)
                     {
-                        System.Buffers.ArrayPool<byte>.Shared.Return(buffer);
+                        Log.Error($"error reading animationsequence {result}");
+                        return;
                     }
                 }
+
+                var zlibReader = new StackDataReader(span);
+
+                uint animID = zlibReader.ReadUInt32LE();
+                zlibReader.Skip(48);
+                int replaces = zlibReader.ReadInt32LE();
+
+                var uopInfo = new UopInfo();
+                var replacedAnimSpan = uopInfo.ReplacedAnimations;
+                for (var j = 0; j < replacedAnimSpan.Length; ++j)
+                    replacedAnimSpan[j] = j;
+
+                if (replaces != 48 && replaces != 68)
+                {
+                    for (int k = 0; k < replaces; k++)
+                    {
+                        int oldGroup = zlibReader.ReadInt32LE();
+                        uint frameCount = zlibReader.ReadUInt32LE();
+                        int newGroup = zlibReader.ReadInt32LE();
+
+                        if (frameCount == 0)
+                        {
+                            replacedAnimSpan[oldGroup] = newGroup;
+                        }
+
+                        zlibReader.Skip(60);
+                    }
+
+                    if (
+                        animID == 0x04E7
+                        || animID == 0x042D
+                        || animID == 0x04E6
+                        || animID == 0x05F7
+                        || animID == 0x05A1
+                    )
+                    {
+                        uopInfo.HeightOffset = 18;
+                    }
+                    else if (
+                        animID == 0x01B0
+                        || animID == 0x0579
+                        || animID == 0x05F6
+                        || animID == 0x05A0
+                    )
+                    {
+                        uopInfo.HeightOffset = 9;
+                    }
+                }
+
+                _uopInfos[(int)animID] = uopInfo;
+
+                zlibReader.Release();
             }
 
             animSeq.Dispose();

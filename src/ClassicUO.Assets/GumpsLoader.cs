@@ -41,14 +41,16 @@ namespace ClassicUO.Assets
 {
     public sealed class GumpsLoader : UOFileLoader
     {
-        private UOFile _file;
-
         public const int MAX_GUMP_DATA_INDEX_COUNT = 0x10000;
+
+
+        private UOFile _file;
 
         public GumpsLoader(UOFileManager fileManager) : base(fileManager) { }
 
 
         public bool UseUOPGumps = false;
+
 
         public override Task Load()
         {
@@ -141,9 +143,9 @@ namespace ClassicUO.Assets
             });
         }
 
-        public unsafe GumpInfo GetGump(uint index)
+        public GumpInfo GetGump(uint index)
         {
-            ref UOFileIndex entry = ref GetValidRefEntry((int)index);
+            ref var entry = ref GetValidRefEntry((int)index);
 
             if (entry.Width <= 0 && entry.Height <= 0)
             {
@@ -152,71 +154,65 @@ namespace ClassicUO.Assets
 
             ushort color = entry.Hue;
 
-            var reader = new StackDataReader(entry.Address, (int)entry.FileSize);
-            reader.Seek(entry.Offset);
+            var reader = new StackDataReader((IntPtr)(entry.Address + entry.Offset), entry.Length);
+            var w = (uint)entry.Width;
+            var h = (uint)entry.Height;
 
-            ReadOnlySpan<byte> output;
-            var newFileFormat = FileManager.Version >= ClientVersion.CV_7010400;
-            if (newFileFormat)
+            if (FileManager.Version >= ClientVersion.CV_7010400)
             {
-                var cbuf = reader.ReadArray(entry.Length);
                 var dbuf = new byte[entry.DecompressedLength];
-                var result = ZLib.Decompress(cbuf, 0, dbuf, dbuf.Length);
-                if (result != ZLib.ZLibError.Okay)
+
+                unsafe
                 {
-                    return default;
-                }
-
-                output = BwtDecompress.Decompress(dbuf);
-            }
-            else
-            {
-                output = new ReadOnlySpan<byte>(reader.PositionAddress.ToPointer(), entry.Length);
-            }
-
-            var zlibReader = new StackDataReader(output);
-            var w = newFileFormat ? zlibReader.ReadUInt32LE() : (uint)entry.Width;
-            var h = newFileFormat ? zlibReader.ReadUInt32LE() : (uint)entry.Height;
-
-            IntPtr dataStart = zlibReader.PositionAddress;
-            var pixels = new uint[w * h];
-            int* lookuplist = (int*)dataStart;
-            int gsize;
-            var len = zlibReader.Remaining;
-
-            for (int y = 0, half_len = len >> 2; y < h; y++)
-            {
-                if (y < h - 1)
-                {
-                    gsize = lookuplist[y + 1] - lookuplist[y];
-                }
-                else
-                {
-                    gsize = half_len - lookuplist[y];
-                }
-
-                GumpBlock* gmul = (GumpBlock*)(dataStart + (lookuplist[y] << 2));
-
-                var pos = y * w;
-
-                for (int i = 0; i < gsize; i++)
-                {
-                    uint val = gmul[i].Value;
-
-                    if (color != 0 && val != 0)
+                    fixed (byte* dstPtr = dbuf)
                     {
-                        val = FileManager.Hues.GetColor16(gmul[i].Value, color);
+                        var result = ZLib.Decompress(reader.PositionAddress, entry.Length, 0, (IntPtr)dstPtr, dbuf.Length);
+                        if (result != ZLib.ZLibError.Okay)
+                        {
+                            return default;
+                        }
+                    }
+                }
+                
+                var output = BwtDecompress.Decompress(dbuf);
+                reader = new StackDataReader(output);
+                w = reader.ReadUInt32LE();
+                h = reader.ReadUInt32LE(); 
+            }
+
+            Span<uint> pixels = new uint[w * h];
+            var len = reader.Remaining;
+            var halfLen = len >> 2;
+
+            var start = reader.Position;
+            var rowLookup = new int[h];
+            for (var y = 0; y < h; ++y)
+                rowLookup[y] = reader.ReadInt32LE();
+
+            for (var y = 0; y < h; ++y)
+            {
+                var gsize = (y < h - 1) ? rowLookup[y + 1] - rowLookup[y] : halfLen - rowLookup[y];
+                reader.Seek(start + (rowLookup[y] << 2));
+
+                var pixelIndex = (int)(y * w);
+                for (var i = 0; i < gsize; ++i)
+                {
+                    var value = reader.ReadUInt16LE();
+                    var run = reader.ReadUInt16LE();
+                    var rbga = 0u;
+
+                    if (color != 0 && value != 0)
+                    {
+                        value = FileManager.Hues.GetColor16(value, color);
                     }
 
-                    if (val != 0)
+                    if (value != 0)
                     {
-                        //val = 0x8000 | val;
-                        val = HuesHelper.Color16To32(gmul[i].Value) | 0xFF_00_00_00;
+                        rbga = HuesHelper.Color16To32(value) | 0xFF_00_00_00;
                     }
 
-                    var count = gmul[i].Run;
-                    pixels.AsSpan().Slice((int)pos, count).Fill(val);
-                    pos += count;
+                    pixels.Slice(pixelIndex, run).Fill(rbga);
+                    pixelIndex += run;
                 }
             }
 
@@ -226,13 +222,6 @@ namespace ClassicUO.Assets
                 Width = (int)w,
                 Height = (int)h
             };
-        }
-
-        [StructLayout(LayoutKind.Sequential, Pack = 1)]
-        private ref struct GumpBlock
-        {
-            public readonly ushort Value;
-            public readonly ushort Run;
         }
     }
 
