@@ -68,20 +68,14 @@ namespace ClassicUO.Assets
                     {
                         _file = new UOFile(path, true);
                     }
-                    
-                    var facetFiles = Directory.GetFiles(FileManager.BasePath, "*.mul", SearchOption.TopDirectoryOnly)
+
+                    _facets = Directory.GetFiles(FileManager.BasePath, "*.mul", SearchOption.TopDirectoryOnly)
                         .Select(s => Regex.Match(s, "facet0.*\\.mul", RegexOptions.IgnoreCase))
                         .Where(s => s.Success)
                         .Select(s => Path.Combine(FileManager.BasePath, s.Value))
                         .OrderBy(s => s)
+                        .Select(s => new UOFileMul(s))
                         .ToArray();
-
-                    _facets = new UOFileMul[facetFiles.Length];
-
-                    for (int i = 0; i < facetFiles.Length; i++)
-                    {
-                        _facets[i] = new UOFileMul(facetFiles[i]);
-                    }
                 }
             );
         }
