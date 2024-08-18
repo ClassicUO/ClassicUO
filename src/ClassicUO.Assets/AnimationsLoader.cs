@@ -56,8 +56,8 @@ namespace ClassicUO.Assets
         [ThreadStatic]
         private static byte[] _decompressedData;
 
-        private readonly List<UOFileMul> _files = new ();
-        private readonly List<UOFileUop> _filesUop = new ();
+        private readonly UOFileMul[] _files = new UOFileMul[10];
+        private readonly UOFileUop[] _filesUop = new UOFileUop[10];
 
         private readonly Dictionary<ushort, Dictionary<ushort, EquipConvData>> _equipConv = new Dictionary<ushort, Dictionary<ushort, EquipConvData>>();
         private readonly Dictionary<int, MobTypeInfo> _mobTypes = new Dictionary<int, MobTypeInfo>();
@@ -72,7 +72,7 @@ namespace ClassicUO.Assets
 
         }
 
-        public IReadOnlyDictionary<ushort, Dictionary<ushort, EquipConvData>> EquipConversions =>  _equipConv;
+        public IReadOnlyDictionary<ushort, Dictionary<ushort, EquipConvData>> EquipConversions => _equipConv;
 
         public List<(ushort, byte)>[] GroupReplaces { get; } =
             new List<(ushort, byte)>[2]
@@ -83,35 +83,38 @@ namespace ClassicUO.Assets
 
         private unsafe void LoadInternal()
         {
-            var loaduop = false;
-
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < _files.Length; i++)
             {
                 var pathmul = FileManager.GetUOFilePath("anim" + (i == 0 ? string.Empty : (i + 1).ToString()) + ".mul");
                 var pathidx = FileManager.GetUOFilePath("anim" + (i == 0 ? string.Empty : (i + 1).ToString()) + ".idx");
 
                 if (File.Exists(pathmul) && File.Exists(pathidx))
                 {
-                    _files.Add(new UOFileMul(pathmul, pathidx));
+                    _files[i] = new UOFileMul(pathmul, pathidx);
                 }
+            }
 
-                if (FileManager.IsUOPInstallation)
+            if (FileManager.IsUOPInstallation)
+            {
+                var loaduop = false;
+
+                for (var i = 0; i < _filesUop.Length; ++i)
                 {
-                    var pathuop = FileManager.GetUOFilePath($"AnimationFrame{i}.uop");
+                    var pathuop = FileManager.GetUOFilePath($"AnimationFrame{i + 1}.uop");
 
                     if (File.Exists(pathuop))
                     {
-                        _filesUop.Add(new UOFileUop(pathuop, "build/animationlegacyframe/{0:D6}/{0:D2}.bin"));
+                        _filesUop[i] = new UOFileUop(pathuop, "build/animationlegacyframe/{0:D6}/{0:D2}.bin");
                         loaduop = true;
                     }
                 }
-            }
 
-            if (loaduop)
-            {
-                LoadUop();
+                if (loaduop)
+                {
+                    LoadUop();
+                }
             }
-
+            
             if (FileManager.Version >= ClientVersion.CV_500A)
             {
                 string path = FileManager.GetUOFilePath("mobtypes.txt");
@@ -280,7 +283,7 @@ namespace ClassicUO.Assets
             ClientVersion clientVersion,
             ushort body,
             ref ushort hue,
-            ref AnimationFlags  flags,
+            ref AnimationFlags flags,
             out int fileIndex,
             out AnimationGroupsType animType,
             out sbyte mountHeight
@@ -313,7 +316,7 @@ namespace ClassicUO.Assets
                     var hashString = $"build/animationlegacyframe/{body:D6}/{action:D2}.bin";
                     var hash = UOFileUop.CreateHash(hashString);
 
-                    for (int index = 0; index < _filesUop.Count; ++index)
+                    for (int index = 0; index < _filesUop.Length; ++index)
                     {
                         if (_filesUop[index] != null && _filesUop[index].TryGetUOPData(hash, out var data))
                         {
@@ -534,7 +537,6 @@ namespace ClassicUO.Assets
                 while (defReader.Next())
                 {
                     ushort index = (ushort)defReader.ReadInt();
-
                     for (int i = 1; i < defReader.PartsCount; i++)
                     {
                         int body = defReader.ReadInt();
@@ -606,7 +608,7 @@ namespace ClassicUO.Assets
                             }
                         }
 
-                        if (i >= _files.Count || _files[i] == null)
+                        if (i >= _files.Length || _files[i] == null)
                         {
                             continue;
                         }
@@ -1215,7 +1217,7 @@ namespace ClassicUO.Assets
             AnimationsLoader.AnimIdxBlock index
         )
         {
-            if (fileIndex < 0 || fileIndex >= _filesUop.Count)
+            if (fileIndex < 0 || fileIndex >= _filesUop.Length)
             {
                 return Span<FrameInfo>.Empty;
             }
@@ -1364,7 +1366,7 @@ namespace ClassicUO.Assets
 
         public Span<FrameInfo> ReadMULAnimationFrames(int fileIndex, AnimIdxBlock index)
         {
-            if (fileIndex < 0 || fileIndex >= _files.Count)
+            if (fileIndex < 0 || fileIndex >= _files.Length)
             {
                 return Span<FrameInfo>.Empty;
             }

@@ -191,7 +191,7 @@ namespace ClassicUO.Renderer.Animations
                     var indices = _animationLoader.GetIndices
                     (
                         _animationLoader.FileManager.Version, 
-                        id, 
+                        id,
                         ref hue,
                         ref index.Flags, 
                         out index.FileIndex,
@@ -252,6 +252,12 @@ namespace ClassicUO.Renderer.Animations
             if (useUOP)
             {
                 _animationLoader.ReplaceUopGroup(id, ref action);
+            }
+
+            // When we are searching for an equipment item we must ignore any other animation which is not equipment
+            if (isEquip && GetAnimType(id) != AnimationGroupsType.Equipment)
+            {
+                return Span<SpriteInfo>.Empty;
             }
 
             // NOTE:
