@@ -220,8 +220,12 @@ readonly struct InGamePacketsPlugin : IPlugin
                     // map change
                     case 8:
                         var mapIndex = reader.ReadUInt8();
+                        fileManager.Value.Maps.LoadMap(mapIndex);
+
                         if (gameCtx.Value.Map != mapIndex)
+                        {
                             gameCtx.Value.Map = mapIndex;
+                        }
                         break;
 
                     // close statusbar

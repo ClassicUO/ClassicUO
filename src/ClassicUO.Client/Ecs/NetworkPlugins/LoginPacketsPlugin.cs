@@ -70,7 +70,7 @@ readonly struct LoginPacketsPlugin : IPlugin
                 var seed = reader.ReadUInt32BE();
 
                 network.Value.Disconnect();
-                settings.Value.Encryption = (byte) network.Value.Connect(new IPAddress(ip).ToString(), port, gameCtx.Value.ClientVersion, (EncryptionType)settings.Value.Encryption);
+                network.Value.Connect(new IPAddress(ip).ToString(), port);
 
                 if (network.Value.IsConnected)
                 {

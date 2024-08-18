@@ -155,7 +155,7 @@ readonly struct MobAnimationsPlugin : IPlugin
                 animation.Direction = realDirection;
 
                 var dir = (byte)(realDirection);
-                fileManager.Value.Animations.GetAnimDirection(ref dir, ref mirror);
+                assetsServer.Value.Animations.GetAnimDirection(ref dir, ref mirror);
 
                 var frames = assetsServer.Value.Animations.GetAnimationFrames
                 (

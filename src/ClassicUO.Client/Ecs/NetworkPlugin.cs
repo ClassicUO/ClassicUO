@@ -6,6 +6,7 @@ using ClassicUO.Utility;
 using ClassicUO.Ecs.NetworkPlugins;
 using TinyEcs;
 using ClassicUO.Network.Encryption;
+using ClassicUO.Assets;
 
 namespace ClassicUO.Ecs;
 
@@ -23,10 +24,16 @@ readonly struct NetworkPlugin : IPlugin
 {
     public void Build(Scheduler scheduler)
     {
-        scheduler.AddResource(new NetClient());
         scheduler.AddResource(new PacketsMap());
 
         scheduler.AddEvent<OnLoginRequest>();
+
+        scheduler.AddSystem((Res<Settings> settings, Res<UOFileManager> fileManager, SchedulerState sched) =>
+        {
+            var socket = new NetClient();
+            settings.Value.Encryption = (byte)socket.Load(fileManager.Value.Version, (EncryptionType)settings.Value.Encryption);
+            sched.AddResource(socket);
+        }, Stages.Startup);
 
         scheduler.AddPlugin<LoginPacketsPlugin>();
         scheduler.AddPlugin<InGamePacketsPlugin>();
@@ -51,8 +58,7 @@ readonly struct NetworkPlugin : IPlugin
         ) => {
             foreach (var request in requets)
             {
-                settings.Value.Encryption = (byte) network.Value.Connect(request.Address, request.Port, gameCtx.Value.ClientVersion, (EncryptionType)settings.Value.Encryption);
-
+                network.Value.Connect(request.Address, request.Port);
                 Console.WriteLine("Socket is connected ? {0}", network.Value.IsConnected);
 
                 if (!network.Value.IsConnected)
