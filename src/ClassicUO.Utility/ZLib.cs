@@ -44,7 +44,7 @@ namespace ClassicUO.Utility
 
         static ZLib()
         {
-            if(Environment.Is64BitProcess) 
+            if (Environment.Is64BitProcess) 
             {
                 if(PlatformHelper.IsWindows)
                 {
@@ -69,6 +69,13 @@ namespace ClassicUO.Utility
         public static ZLibError Decompress(IntPtr source, int sourceLength, int offset, IntPtr dest, int length)
         {
             return _compressor.Decompress(dest, ref length, source, sourceLength - offset);
+        }
+
+        public static unsafe ZLibError Decompress(ReadOnlySpan<byte> source, Span<byte> dest)
+        {
+            fixed (byte* srcPtr = source)
+            fixed (byte* destPtr = dest)
+                return Decompress((IntPtr)srcPtr, source.Length, 0, (IntPtr)destPtr, dest.Length);
         }
 
         private enum ZLibQuality

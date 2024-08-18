@@ -833,21 +833,11 @@ namespace ClassicUO.Assets
                 }
                 
                 var span = buffer.AsSpan(0, entry.DecompressedLength);
-                fixed (byte* destPtr = span)
-                {
-                    var result = ZLib.Decompress(
-                        reader.PositionAddress,
-                        entry.Length,
-                        0,
-                        (IntPtr)destPtr,
-                        entry.DecompressedLength
-                    );
 
-                    if (result != ZLib.ZLibError.Okay)
-                    {
-                        Log.Error($"error reading animationsequence {result}");
-                        return;
-                    }
+                var result = ZLib.Decompress(reader.Buffer.Slice(reader.Position, entry.Length), span);
+                if (result != ZLib.ZLibError.Okay)
+                {
+                    continue;
                 }
 
                 var zlibReader = new StackDataReader(span);
@@ -1254,22 +1244,12 @@ namespace ClassicUO.Assets
                 _decompressedData = new byte[index.Unknown];
             }
 
-            fixed (byte* ptr = _decompressedData.AsSpan())
+            var result = ZLib.Decompress(reader.Buffer.Slice(reader.Position, (int)index.Size), _decompressedData.AsSpan(0, (int)index.Unknown));
+            if (result != ZLib.ZLibError.Okay)
             {
-                var result = ZLib.Decompress(
-                    reader.PositionAddress,
-                    (int)index.Size,
-                    0,
-                    (IntPtr)ptr,
-                    (int)index.Unknown
-                );
+                Log.Error($"error reading uop animation. AnimID: {animID} | Group: {animGroup} | Dir: {direction} | FileIndex: {fileIndex}");
 
-                if (result != ZLib.ZLibError.Okay)
-                {
-                    Log.Error($"error reading uop animation. AnimID: {animID} | Group: {animGroup} | Dir: {direction} | FileIndex: {fileIndex}");
-
-                    return Span<FrameInfo>.Empty;
-                }
+                return Span<FrameInfo>.Empty;
             }
 
             var zlibReader = new StackDataReader(

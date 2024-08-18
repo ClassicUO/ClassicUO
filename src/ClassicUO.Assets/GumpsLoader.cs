@@ -162,16 +162,10 @@ namespace ClassicUO.Assets
             {
                 var dbuf = new byte[entry.DecompressedLength];
 
-                unsafe
+                var result = ZLib.Decompress(reader.Buffer.Slice(reader.Position, entry.Length), dbuf);
+                if (result != ZLib.ZLibError.Okay)
                 {
-                    fixed (byte* dstPtr = dbuf)
-                    {
-                        var result = ZLib.Decompress(reader.PositionAddress, entry.Length, 0, (IntPtr)dstPtr, dbuf.Length);
-                        if (result != ZLib.ZLibError.Okay)
-                        {
-                            return default;
-                        }
-                    }
+                    return default;
                 }
 
                 var output = entry.CompressionFlag == CompressionType.ZlibBwt ? BwtDecompress.Decompress(dbuf) : dbuf;

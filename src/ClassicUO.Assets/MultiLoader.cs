@@ -86,7 +86,7 @@ namespace ClassicUO.Assets
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public ref struct MultiBlock
+    public struct MultiBlock
     {
         public ushort ID;
         public short X;
@@ -96,7 +96,7 @@ namespace ClassicUO.Assets
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public ref struct MultiBlockNew
+    public struct MultiBlockNew
     {
         public ushort ID;
         public short X;
