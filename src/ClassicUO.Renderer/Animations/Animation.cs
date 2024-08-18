@@ -255,7 +255,8 @@ namespace ClassicUO.Renderer.Animations
             }
 
             // When we are searching for an equipment item we must ignore any other animation which is not equipment
-            if (isEquip && GetAnimType(id) != AnimationGroupsType.Equipment)
+            var currentAnimType = GetAnimType(id);
+            if (isEquip && currentAnimType != AnimationGroupsType.Equipment && currentAnimType != AnimationGroupsType.Human)
             {
                 return Span<SpriteInfo>.Empty;
             }
