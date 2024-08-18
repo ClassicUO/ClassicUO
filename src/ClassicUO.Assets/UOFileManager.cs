@@ -248,6 +248,7 @@ namespace ClassicUO.Assets
                                 vh.Position,
                                 (int) vh.Length,
                                 0,
+                                0,
                                 (short) (vh.GumpData >> 16),
                                 (short) (vh.GumpData & 0xFFFF)
                             );

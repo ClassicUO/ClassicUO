@@ -102,7 +102,6 @@ namespace ClassicUO.Assets
 
         void ReadCliloc(string path)
         {
-            var newFileFormat = FileManager.Version >= ClientVersion.CV_7010400;
             using var fileStream = new FileStream(path, FileMode.Open, FileAccess.Read);
 
             int bytesRead;
@@ -111,7 +110,7 @@ namespace ClassicUO.Assets
             while ((bytesRead = fileStream.Read(buf, totalRead, Math.Min(4096, buf.Length - totalRead))) > 0)
                 totalRead += bytesRead;
 
-            var output = newFileFormat ? ClassicUO.Utility.BwtDecompress.Decompress(buf) : buf;
+            var output = buf[3] == 0x8E /*|| FileManager.Version >= ClientVersion.CV_7010400*/ ? BwtDecompress.Decompress(buf) : buf;
 
             var reader = new StackDataReader(output);
             reader.ReadInt32LE();
@@ -119,9 +118,9 @@ namespace ClassicUO.Assets
 
             while (reader.Remaining > 0)
             {
-                int number = reader.ReadInt32LE();
-                byte flag = reader.ReadUInt8();
-                int length = reader.ReadInt16LE();
+                var number = reader.ReadInt32LE();
+                var flag = reader.ReadUInt8();
+                var length = reader.ReadInt16LE();
                 var text = string.Intern(reader.ReadUTF8(length));
 
                 _entries[number] = text;

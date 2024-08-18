@@ -147,7 +147,7 @@ namespace ClassicUO.Assets
         {
             ref var entry = ref GetValidRefEntry((int)index);
 
-            if (entry.Width <= 0 && entry.Height <= 0)
+            if (entry.CompressionFlag != CompressionType.ZlibBwt && entry.Width <= 0 && entry.Height <= 0)
             {
                 return default;
             }
@@ -158,7 +158,7 @@ namespace ClassicUO.Assets
             var w = (uint)entry.Width;
             var h = (uint)entry.Height;
 
-            if (FileManager.Version >= ClientVersion.CV_7010400)
+            if (entry.CompressionFlag >= CompressionType.Zlib)
             {
                 var dbuf = new byte[entry.DecompressedLength];
 
@@ -173,11 +173,11 @@ namespace ClassicUO.Assets
                         }
                     }
                 }
-                
-                var output = BwtDecompress.Decompress(dbuf);
+
+                var output = entry.CompressionFlag == CompressionType.ZlibBwt ? BwtDecompress.Decompress(dbuf) : dbuf;
                 reader = new StackDataReader(output);
                 w = reader.ReadUInt32LE();
-                h = reader.ReadUInt32LE(); 
+                h = reader.ReadUInt32LE();
             }
 
             Span<uint> pixels = new uint[w * h];

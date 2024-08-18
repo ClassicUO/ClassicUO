@@ -44,6 +44,7 @@ namespace ClassicUO.IO
             long offset,
             int length,
             int decompressed,
+            CompressionType compressionFlag = 0,
             int width = 0,
             int height = 0,
             ushort hue = 0
@@ -54,6 +55,7 @@ namespace ClassicUO.IO
             Offset = offset;
             Length = length;
             DecompressedLength = decompressed;
+            CompressionFlag = compressionFlag;
             Width = width;
             Height = height;
             Hue = hue;
@@ -66,6 +68,7 @@ namespace ClassicUO.IO
         public long Offset;
         public int Length;
         public int DecompressedLength;
+        public CompressionType CompressionFlag;
         public int Width;
         public int Height;
         public ushort Hue;
@@ -76,6 +79,7 @@ namespace ClassicUO.IO
         public static UOFileIndex Invalid = new UOFileIndex
         (
             IntPtr.Zero,
+            0,
             0,
             0,
             0,
