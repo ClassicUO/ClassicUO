@@ -347,7 +347,7 @@ namespace ClassicUO.Network
                 {
                     if (Handler._clilocRequests.Count != 0)
                     {
-                        NetClient.Socket.Send_MegaClilocRequest(ref Handler._clilocRequests);
+                        NetClient.Socket.Send_MegaClilocRequest(Handler._clilocRequests);
                     }
                 }
                 else
@@ -3742,10 +3742,11 @@ namespace ClassicUO.Network
                 world.CorpseManager.Add(corpseSerial, serial, owner.Direction, running != 0);
             }
 
+            var animations = Client.Game.UO.Animations;
             var gfx = owner.Graphic;
-            Client.Game.UO.Animations.ConvertBodyIfNeeded(ref gfx);
-            var animGroup = Client.Game.UO.Animations.GetAnimType(gfx);
-            var animFlags = Client.Game.UO.Animations.GetAnimFlags(gfx);
+            animations.ConvertBodyIfNeeded(ref gfx);
+            var animGroup = animations.GetAnimType(gfx);
+            var animFlags = animations.GetAnimFlags(gfx);
             byte group = Client.Game.UO.FileManager.Animations.GetDeathAction(
                 gfx,
                 animFlags,
@@ -4979,20 +4980,26 @@ namespace ClassicUO.Network
                     int.TryParse(argcheck[1], out argcliloc);
                 }
 
-                // horrible fix for (Imbued) hue
-                if (Client.Game.UO.Version >= Utility.ClientVersion.CV_60143 && cliloc == 1080418)
+                // hardcoded colors lol
+                switch (cliloc)
                 {
-                    str = str.Insert(0, "<basefont color=#42a5ff>");
-                    str += "</basefont>";
+                    case 1080418:
+                        if (Client.Game.UO.Version >= Utility.ClientVersion.CV_60143)
+                            str = "<basefont color=#40a4fe>" + str + "</basefont>";
+                        break;
+                    case 1061170:
+                        if (int.TryParse(argument, out var strength) && world.Player.Strength < strength)
+                            str = "<basefont color=#FF0000>" + str + "</basefont>";
+                        break;
+                    case 1062613:
+                        str = "<basefont color=#FFCC33>" + str + "</basefont>";
+                        break;
+                    case 1159561:
+                        str = "<basefont color=#b66dff>" + str + "</basefont>";
+                        break;
                 }
 
-                // horrible fix for "strength requirement ~1_val~" when player.str < argument
-                if (cliloc == 1061170 && int.TryParse(argument, out var strength) && world.Player.Strength < strength)
-                {
-                    str = str.Insert(0, "<basefont color=#FF0000>");
-                    str += "</basefont>";
-                }
-
+                
                 for (int i = 0; i < list.Count; i++)
                 {
                     if (

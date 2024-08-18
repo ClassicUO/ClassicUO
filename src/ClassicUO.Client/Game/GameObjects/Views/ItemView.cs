@@ -200,7 +200,7 @@ namespace ClassicUO.Game.GameObjects
             posY += 22;
 
             byte direction = (byte)((byte)Layer & 0x7F & 7);
-            Client.Game.UO.FileManager.Animations.GetAnimDirection(ref direction, ref IsFlipped);
+            Client.Game.UO.Animations.GetAnimDirection(ref direction, ref IsFlipped);
 
             byte animIndex = (byte)AnimIndex;
             ushort graphic = GetGraphicForAnimation();
@@ -556,12 +556,14 @@ namespace ClassicUO.Game.GameObjects
                     return true;
                 }
 
+                var animations = Client.Game.UO.Animations;
+
                 Point position = RealScreenPosition;
                 position.X += 22;
                 position.Y += 22;
 
                 byte direction = (byte)((byte)Layer & 0x7F & 7);
-                Client.Game.UO.FileManager.Animations.GetAnimDirection(ref direction, ref IsFlipped);
+                animations.GetAnimDirection(ref direction, ref IsFlipped);
                 byte animIndex = AnimIndex;
                 bool ishuman =
                     MathHelper.InRange(Amount, 0x0190, 0x0193)
@@ -616,16 +618,16 @@ namespace ClassicUO.Game.GameObjects
                         continue;
                     }
 
-                    Client.Game.UO.Animations.ConvertBodyIfNeeded(ref graphic, isCorpse: IsCorpse);
-                    var animGroup = Client.Game.UO.Animations.GetAnimType(graphic);
-                    var animFlags = Client.Game.UO.Animations.GetAnimFlags(graphic);
+                    animations.ConvertBodyIfNeeded(ref graphic, isCorpse: IsCorpse);
+                    var animGroup = animations.GetAnimType(graphic);
+                    var animFlags = animations.GetAnimFlags(graphic);
                     byte group = Client.Game.UO.FileManager.Animations.GetDeathAction(
                         graphic,
                         animFlags,
                         animGroup,
                         UsedLayer
                     );
-                    var frames = Client.Game.UO.Animations.GetAnimationFrames(
+                    var frames = animations.GetAnimationFrames(
                         graphic,
                         group,
                         direction,
@@ -664,7 +666,7 @@ namespace ClassicUO.Game.GameObjects
                         int y = position.Y - (spriteInfo.UV.Height + spriteInfo.Center.Y);
 
                         if (
-                            Client.Game.UO.Animations.PixelCheck(
+                            animations.PixelCheck(
                                 graphic,
                                 group,
                                 direction,

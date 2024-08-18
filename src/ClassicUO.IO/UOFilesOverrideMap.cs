@@ -5,13 +5,11 @@ using System.IO;
 
 namespace ClassicUO.IO
 {
-    public class UOFilesOverrideMap : Dictionary<string, string>
+    public sealed class UOFilesOverrideMap : Dictionary<string, string>
     {
         public static string OverrideFile { get; set; }
 
-        public static UOFilesOverrideMap Instance { get; private set; } = new UOFilesOverrideMap();
-
-        private UOFilesOverrideMap() : base()
+        public UOFilesOverrideMap() : base()
         {
         }
 

@@ -3116,7 +3116,7 @@ namespace ClassicUO.Network
             writer.Dispose();
         }
 
-        public static void Send_MegaClilocRequest(this NetClient socket, ref List<uint> serials)
+        public static void Send_MegaClilocRequest(this NetClient socket, List<uint> serials)
         {
             const byte ID = 0xD6;
 

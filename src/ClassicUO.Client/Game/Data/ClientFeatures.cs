@@ -36,7 +36,7 @@ using ClassicUO.Utility;
 namespace ClassicUO.Game.Data
 {
     [Flags]
-    internal enum CharacterListFlags
+    internal enum CharacterListFlags : uint
     {
         CLF_UNKNOWN = 0x01,
         CLF_OWERWRITE_CONFIGURATION_BUTTON = 0x02,

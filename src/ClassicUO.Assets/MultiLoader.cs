@@ -74,8 +74,7 @@ namespace ClassicUO.Assets
 
                         if (System.IO.File.Exists(path) && System.IO.File.Exists(pathidx))
                         {
-                            File = new UOFileMul(path, pathidx, MAX_MULTI_DATA_INDEX_COUNT, 14);
-
+                            File = new UOFileMul(path, pathidx);
                             Count = Offset = FileManager.Version >= ClientVersion.CV_7090 ? sizeof(MultiBlockNew) + 2 : sizeof(MultiBlock);
                         }
                     }

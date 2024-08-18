@@ -37,6 +37,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
@@ -55,8 +56,8 @@ namespace ClassicUO.Assets
         [ThreadStatic]
         private static byte[] _decompressedData;
 
-        private readonly UOFileMul[] _files = new UOFileMul[5];
-        private readonly UOFileUop[] _filesUop = new UOFileUop[4];
+        private readonly UOFileMul[] _files = new UOFileMul[10];
+        private readonly UOFileUop[] _filesUop = new UOFileUop[10];
 
         private readonly Dictionary<ushort, Dictionary<ushort, EquipConvData>> _equipConv = new Dictionary<ushort, Dictionary<ushort, EquipConvData>>();
         private readonly Dictionary<int, MobTypeInfo> _mobTypes = new Dictionary<int, MobTypeInfo>();
@@ -71,7 +72,7 @@ namespace ClassicUO.Assets
 
         }
 
-        public IReadOnlyDictionary<ushort, Dictionary<ushort, EquipConvData>> EquipConversions =>  _equipConv;
+        public IReadOnlyDictionary<ushort, Dictionary<ushort, EquipConvData>> EquipConversions => _equipConv;
 
         public List<(ushort, byte)>[] GroupReplaces { get; } =
             new List<(ushort, byte)>[2]
@@ -82,48 +83,38 @@ namespace ClassicUO.Assets
 
         private unsafe void LoadInternal()
         {
-            bool loaduop = false;
-            int[] un = { 0x40000, 0x10000, 0x20000, 0x20000, 0x20000 };
-
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < _files.Length; i++)
             {
-                string pathmul = FileManager.GetUOFilePath(
-                    "anim" + (i == 0 ? string.Empty : (i + 1).ToString()) + ".mul"
-                );
-
-                string pathidx = FileManager.GetUOFilePath(
-                    "anim" + (i == 0 ? string.Empty : (i + 1).ToString()) + ".idx"
-                );
+                var pathmul = FileManager.GetUOFilePath("anim" + (i == 0 ? string.Empty : (i + 1).ToString()) + ".mul");
+                var pathidx = FileManager.GetUOFilePath("anim" + (i == 0 ? string.Empty : (i + 1).ToString()) + ".idx");
 
                 if (File.Exists(pathmul) && File.Exists(pathidx))
                 {
-                    _files[i] = new UOFileMul(pathmul, pathidx, un[i], i == 0 ? 6 : -1);
+                    _files[i] = new UOFileMul(pathmul, pathidx);
                 }
+            }
 
-                if (i > 0 && FileManager.IsUOPInstallation)
+            if (FileManager.IsUOPInstallation)
+            {
+                var loaduop = false;
+
+                for (var i = 0; i < _filesUop.Length; ++i)
                 {
-                    string pathuop = FileManager.GetUOFilePath($"AnimationFrame{i}.uop");
+                    var pathuop = FileManager.GetUOFilePath($"AnimationFrame{i + 1}.uop");
 
                     if (File.Exists(pathuop))
                     {
-                        _filesUop[i - 1] = new UOFileUop(
-                            pathuop,
-                            "build/animationlegacyframe/{0:D6}/{0:D2}.bin"
-                        );
-
-                        if (!loaduop)
-                        {
-                            loaduop = true;
-                        }
+                        _filesUop[i] = new UOFileUop(pathuop, "build/animationlegacyframe/{0:D6}/{0:D2}.bin");
+                        loaduop = true;
                     }
                 }
-            }
 
-            if (loaduop)
-            {
-                LoadUop();
+                if (loaduop)
+                {
+                    LoadUop();
+                }
             }
-
+            
             if (FileManager.Version >= ClientVersion.CV_500A)
             {
                 string path = FileManager.GetUOFilePath("mobtypes.txt");
@@ -292,7 +283,7 @@ namespace ClassicUO.Assets
             ClientVersion clientVersion,
             ushort body,
             ref ushort hue,
-            ref AnimationFlags  flags,
+            ref AnimationFlags flags,
             out int fileIndex,
             out AnimationGroupsType animType,
             out sbyte mountHeight
@@ -546,7 +537,6 @@ namespace ClassicUO.Assets
                 while (defReader.Next())
                 {
                     ushort index = (ushort)defReader.ReadInt();
-
                     for (int i = 1; i < defReader.PartsCount; i++)
                     {
                         int body = defReader.ReadInt();
@@ -729,7 +719,7 @@ namespace ClassicUO.Assets
                 return;
             }
 
-            string animationSequencePath = FileManager.GetUOFilePath("AnimationSequence.uop");
+            var animationSequencePath = FileManager.GetUOFilePath("AnimationSequence.uop");
 
             if (!File.Exists(animationSequencePath))
             {
@@ -822,10 +812,8 @@ namespace ClassicUO.Assets
                 animationSequencePath,
                 "build/animationsequence/{0:D8}.bin"
             );
-            //var animseqEntries = new UOFileIndex[animSeq.TotalEntriesCount];
-            //animSeq.FillEntries(ref animseqEntries);
 
-            Span<byte> spanAlloc = stackalloc byte[1024];
+            var buffer = new byte[1024];
             var reader = animSeq.GetReader();
 
             foreach (var pair in animSeq.Hashes)
@@ -839,95 +827,80 @@ namespace ClassicUO.Assets
 
                 reader.Seek(entry.Offset);
 
-                byte[] buffer = null;
-
-                Span<byte> span =
-                    entry.DecompressedLength <= 1024
-                        ? spanAlloc
-                        : (
-                            buffer = System.Buffers.ArrayPool<byte>.Shared.Rent(
-                                entry.DecompressedLength
-                            )
-                        );
-
-                try
+                if (entry.DecompressedLength > buffer.Length)
                 {
-                    fixed (byte* destPtr = span)
-                    {
-                        var result = ZLib.Decompress(
-                            reader.PositionAddress,
-                            entry.Length,
-                            0,
-                            (IntPtr)destPtr,
-                            entry.DecompressedLength
-                        );
-
-                        if (result != ZLib.ZLibError.Okay)
-                        {
-                            Log.Error($"error reading animationsequence {result}");
-                            return;
-                        }
-                    }
-
-                    var zlibReader = new StackDataReader(span.Slice(0, entry.DecompressedLength));
-
-                    uint animID = zlibReader.ReadUInt32LE();
-                    zlibReader.Skip(48);
-                    int replaces = zlibReader.ReadInt32LE();
-
-                    var uopInfo = new UopInfo();
-                    var replacedAnimSpan = uopInfo.ReplacedAnimations;
-                    for (var j = 0; j < replacedAnimSpan.Length; ++j)
-                        replacedAnimSpan[j] = j;
-
-                    if (replaces != 48 && replaces != 68)
-                    {
-                        for (int k = 0; k < replaces; k++)
-                        {
-                            int oldGroup = zlibReader.ReadInt32LE();
-                            uint frameCount = zlibReader.ReadUInt32LE();
-                            int newGroup = zlibReader.ReadInt32LE();
-
-                            if (frameCount == 0)
-                            {
-                                replacedAnimSpan[oldGroup] = newGroup;
-                            }
-
-                            zlibReader.Skip(60);
-                        }
-
-                        if (
-                            animID == 0x04E7
-                            || animID == 0x042D
-                            || animID == 0x04E6
-                            || animID == 0x05F7
-                            || animID == 0x05A1
-                        )
-                        {
-                            uopInfo.HeightOffset = 18;
-                        }
-                        else if (
-                            animID == 0x01B0
-                            || animID == 0x0579
-                            || animID == 0x05F6
-                            || animID == 0x05A0
-                        )
-                        {
-                            uopInfo.HeightOffset = 9;
-                        }
-                    }
-
-                    _uopInfos[(int)animID] = uopInfo;
-
-                    zlibReader.Release();
+                    Array.Resize(ref buffer, entry.DecompressedLength);
                 }
-                finally
+                
+                var span = buffer.AsSpan(0, entry.DecompressedLength);
+                fixed (byte* destPtr = span)
                 {
-                    if (buffer != null)
+                    var result = ZLib.Decompress(
+                        reader.PositionAddress,
+                        entry.Length,
+                        0,
+                        (IntPtr)destPtr,
+                        entry.DecompressedLength
+                    );
+
+                    if (result != ZLib.ZLibError.Okay)
                     {
-                        System.Buffers.ArrayPool<byte>.Shared.Return(buffer);
+                        Log.Error($"error reading animationsequence {result}");
+                        return;
                     }
                 }
+
+                var zlibReader = new StackDataReader(span);
+
+                uint animID = zlibReader.ReadUInt32LE();
+                zlibReader.Skip(48);
+                int replaces = zlibReader.ReadInt32LE();
+
+                var uopInfo = new UopInfo();
+                var replacedAnimSpan = uopInfo.ReplacedAnimations;
+                for (var j = 0; j < replacedAnimSpan.Length; ++j)
+                    replacedAnimSpan[j] = j;
+
+                if (replaces != 48 && replaces != 68)
+                {
+                    for (int k = 0; k < replaces; k++)
+                    {
+                        int oldGroup = zlibReader.ReadInt32LE();
+                        uint frameCount = zlibReader.ReadUInt32LE();
+                        int newGroup = zlibReader.ReadInt32LE();
+
+                        if (frameCount == 0)
+                        {
+                            replacedAnimSpan[oldGroup] = newGroup;
+                        }
+
+                        zlibReader.Skip(60);
+                    }
+
+                    if (
+                        animID == 0x04E7
+                        || animID == 0x042D
+                        || animID == 0x04E6
+                        || animID == 0x05F7
+                        || animID == 0x05A1
+                    )
+                    {
+                        uopInfo.HeightOffset = 18;
+                    }
+                    else if (
+                        animID == 0x01B0
+                        || animID == 0x0579
+                        || animID == 0x05F6
+                        || animID == 0x05A0
+                    )
+                    {
+                        uopInfo.HeightOffset = 9;
+                    }
+                }
+
+                _uopInfos[(int)animID] = uopInfo;
+
+                zlibReader.Release();
             }
 
             animSeq.Dispose();
@@ -977,43 +950,6 @@ namespace ClassicUO.Assets
 
         public override void ClearResources() { }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void GetAnimDirection(ref byte dir, ref bool mirror)
-        {
-            switch (dir)
-            {
-                case 2:
-                case 4:
-                    mirror = dir == 2;
-                    dir = 1;
-
-                    break;
-
-                case 1:
-                case 5:
-                    mirror = dir == 1;
-                    dir = 2;
-
-                    break;
-
-                case 0:
-                case 6:
-                    mirror = dir == 0;
-                    dir = 3;
-
-                    break;
-
-                case 3:
-                    dir = 0;
-
-                    break;
-
-                case 7:
-                    dir = 4;
-
-                    break;
-            }
-        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void GetSittingAnimDirection(ref byte dir, ref bool mirror, ref int x, ref int y)

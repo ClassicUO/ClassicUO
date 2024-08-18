@@ -34,14 +34,11 @@ namespace ClassicUO.IO
 {
     public class UOFileMul : UOFile
     {
-        private readonly int _count, _patch;
         private readonly UOFileIdxMul _idxFile;
 
-        public UOFileMul(string file, string idxfile, int count, int patch = -1) : this(file)
+        public UOFileMul(string file, string idxfile) : this(file)
         {
             _idxFile = new UOFileIdxMul(idxfile);
-            _count = count;
-            _patch = patch;
         }
 
         public UOFileMul(string file) : base(file)

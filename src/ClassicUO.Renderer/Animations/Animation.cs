@@ -76,6 +76,44 @@ namespace ClassicUO.Renderer.Animations
             return _picker.Get(packed, x, y);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void GetAnimDirection(ref byte dir, ref bool mirror)
+        {
+            switch (dir)
+            {
+                case 2:
+                case 4:
+                    mirror = dir == 2;
+                    dir = 1;
+
+                    break;
+
+                case 1:
+                case 5:
+                    mirror = dir == 1;
+                    dir = 2;
+
+                    break;
+
+                case 0:
+                case 6:
+                    mirror = dir == 0;
+                    dir = 3;
+
+                    break;
+
+                case 3:
+                    dir = 0;
+
+                    break;
+
+                case 7:
+                    dir = 4;
+
+                    break;
+            }
+        }
+
         public void GetAnimationDimensions(
             byte animIndex,
             ushort graphic,
@@ -91,7 +129,7 @@ namespace ClassicUO.Renderer.Animations
         {
             dir &= 0x7F;
             bool mirror = false;
-            _animationLoader.GetAnimDirection(ref dir, ref mirror);
+            GetAnimDirection(ref dir, ref mirror);
 
             if (frameIndex == 0xFF)
             {
@@ -152,7 +190,7 @@ namespace ClassicUO.Renderer.Animations
                     var indices = _animationLoader.GetIndices
                     (
                         _animationLoader.FileManager.Version, 
-                        id, 
+                        id,
                         ref hue,
                         ref index.Flags,
                         out index.FileIndex,
@@ -213,6 +251,13 @@ namespace ClassicUO.Renderer.Animations
             if (useUOP)
             {
                 _animationLoader.ReplaceUopGroup(id, ref action);
+            }
+
+            // When we are searching for an equipment item we must ignore any other animation which is not equipment
+            var currentAnimType = GetAnimType(id);
+            if (isEquip && currentAnimType != AnimationGroupsType.Equipment && currentAnimType != AnimationGroupsType.Human)
+            {
+                return Span<SpriteInfo>.Empty;
             }
 
             // NOTE:

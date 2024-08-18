@@ -44,6 +44,7 @@ using ClassicUO.Resources;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using ClassicUO.Renderer.Animations;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -773,9 +774,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             public bool InBuyGump { get; set; }
 
-            private static byte GetAnimGroup(ushort graphic)
+            private static byte GetAnimGroup(Animations animations, ushort graphic)
             {
-                var groupType = Client.Game.UO.Animations.GetAnimType(graphic);
+                var groupType = animations.GetAnimType(graphic);
                 switch (Client.Game.UO.FileManager.Animations.GetGroupIndex(graphic, groupType))
                 {
                     case AnimationGroups.Low:
@@ -810,16 +811,17 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (InBuyGump && SerialHelper.IsMobile(LocalSerial))
                 {
+                    var animations = Client.Game.UO.Animations;
                     ushort graphic = Graphic;
 
-                    if (graphic >= Client.Game.UO.Animations.MaxAnimationCount)
+                    if (graphic >= animations.MaxAnimationCount)
                     {
                         graphic = 0;
                     }
 
-                    byte group = GetAnimGroup(graphic);
+                    byte group = GetAnimGroup(animations, graphic);
 
-                    var frames = Client.Game.UO.Animations.GetAnimationFrames(
+                    var frames = animations.GetAnimationFrames(
                         graphic,
                         group,
                         1,

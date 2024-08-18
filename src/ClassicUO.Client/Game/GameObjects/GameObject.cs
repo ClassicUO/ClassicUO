@@ -388,6 +388,9 @@ namespace ClassicUO.Game.GameObjects
 
         public static bool CanBeDrawn(World world, ushort g)
         {
+            if (Client.Game == null)
+                return true;
+
             switch (g)
             {
                 case 0x0001:

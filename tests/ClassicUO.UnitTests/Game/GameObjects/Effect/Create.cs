@@ -7,7 +7,7 @@ namespace ClassicUO.UnitTests.Game.GameObjects.Effect
     public class Create
     {
         [Theory]
-        [InlineData((int) ClassicUO.Game.Data.GraphicEffectType.FixedXYZ, typeof(ClassicUO.Game.GameObjects.FixedEffect))]
+        [InlineData((int)ClassicUO.Game.Data.GraphicEffectType.FixedXYZ, typeof(ClassicUO.Game.GameObjects.FixedEffect))]
         [InlineData((int)ClassicUO.Game.Data.GraphicEffectType.FixedFrom, typeof(ClassicUO.Game.GameObjects.FixedEffect))]
         [InlineData((int)ClassicUO.Game.Data.GraphicEffectType.DragEffect, typeof(ClassicUO.Game.GameObjects.DragEffect))]
         [InlineData((int)ClassicUO.Game.Data.GraphicEffectType.Moving, typeof(ClassicUO.Game.GameObjects.MovingEffect))]

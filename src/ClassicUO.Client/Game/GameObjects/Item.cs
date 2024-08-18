@@ -715,52 +715,56 @@ namespace ClassicUO.Game.GameObjects
 
         public override void ProcessAnimation(bool evalutate = false)
         {
-            if (IsCorpse)
+            if (!IsCorpse)
             {
-                var dir = (byte)Layer;
+                return;
+            }
 
-                if (LastAnimationChangeTime < Time.Ticks)
+            var dir = (byte)Layer;
+
+            if (LastAnimationChangeTime < Time.Ticks)
+            {
+                byte frameIndex = (byte)(AnimIndex + (ExecuteAnimation ? 1 : 0));
+                ushort id = GetGraphicForAnimation();
+
+                bool mirror = false;
+
+                var animations = Client.Game.UO.Animations;
+                animations.GetAnimDirection(ref dir, ref mirror);
+
+                if (id < animations.MaxAnimationCount && dir < 5)
                 {
-                    byte frameIndex = (byte)(AnimIndex + (ExecuteAnimation ? 1 : 0));
-                    ushort id = GetGraphicForAnimation();
+                    animations.ConvertBodyIfNeeded(ref id);
+                    var animGroup = animations.GetAnimType(id);
+                    var animFlags = animations.GetAnimFlags(id);
+                    byte action = Client.Game.UO.FileManager.Animations.GetDeathAction(
+                        id,
+                        animFlags,
+                        animGroup,
+                        UsedLayer
+                    );
+                    var frames = animations.GetAnimationFrames(
+                        id,
+                        action,
+                        dir,
+                        out _,
+                        out _,
+                        isCorpse: true
+                    );
 
-                    bool mirror = false;
-                    Client.Game.UO.FileManager.Animations.GetAnimDirection(ref dir, ref mirror);
-
-                    if (id < Client.Game.UO.Animations.MaxAnimationCount && dir < 5)
+                    if (frames.Length > 0)
                     {
-                        Client.Game.UO.Animations.ConvertBodyIfNeeded(ref id);
-                        var animGroup = Client.Game.UO.Animations.GetAnimType(id);
-                        var animFlags = Client.Game.UO.Animations.GetAnimFlags(id);
-                        byte action = Client.Game.UO.FileManager.Animations.GetDeathAction(
-                            id,
-                            animFlags,
-                            animGroup,
-                            UsedLayer
-                        );
-                        var frames = Client.Game.UO.Animations.GetAnimationFrames(
-                            id,
-                            action,
-                            dir,
-                            out _,
-                            out _,
-                            isCorpse: true
-                        );
-
-                        if (frames.Length > 0)
+                        // when the animation is done, stop to animate the corpse
+                        if (frameIndex >= frames.Length)
                         {
-                            // when the animation is done, stop to animate the corpse
-                            if (frameIndex >= frames.Length)
-                            {
-                                frameIndex = (byte)(frames.Length - 1);
-                            }
-
-                            AnimIndex = (byte)(frameIndex % frames.Length);
+                            frameIndex = (byte)(frames.Length - 1);
                         }
-                    }
 
-                    LastAnimationChangeTime = Time.Ticks + Constants.CHARACTER_ANIMATION_DELAY;
+                        AnimIndex = (byte)(frameIndex % frames.Length);
+                    }
                 }
+
+                LastAnimationChangeTime = Time.Ticks + Constants.CHARACTER_ANIMATION_DELAY;
             }
         }
     }
