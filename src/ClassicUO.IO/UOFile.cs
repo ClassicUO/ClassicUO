@@ -46,6 +46,7 @@ namespace ClassicUO.IO
         public UOFile(string filepath, bool loadFile = false)
         {
             FilePath = filepath;
+            Entries = Array.Empty<UOFileIndex>();
 
             if (loadFile)
             {
@@ -53,14 +54,33 @@ namespace ClassicUO.IO
             }
         }
 
-        public string FilePath { get; }
 #if USE_MMF
         protected MemoryMappedViewAccessor _accessor;
         protected MemoryMappedFile _file;
 #endif
 
         public long Length { get; private set; }
-       
+        public string FilePath { get; }
+        public UOFileIndex[] Entries;
+
+        public ref UOFileIndex GetValidRefEntry(int index)
+        {
+            if (index < 0 || Entries == null || index >= Entries.Length)
+            {
+                return ref UOFileIndex.Invalid;
+            }
+
+            ref UOFileIndex entry = ref Entries[index];
+
+            if (entry.Offset < 0 || entry.Length <= 0 || entry.Offset == 0x0000_0000_FFFF_FFFF)
+            {
+                return ref UOFileIndex.Invalid;
+            }
+
+            return ref entry;
+        }
+
+
         public StackDataReader GetReader()
             => new (new ReadOnlySpan<byte>(_ptr.ToPointer(), (int) Length));
 
@@ -122,7 +142,7 @@ namespace ClassicUO.IO
             }
         }
 
-        public virtual void FillEntries(ref UOFileIndex[] entries)
+        public virtual void FillEntries()
         {
         }
 

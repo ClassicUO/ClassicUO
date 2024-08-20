@@ -227,9 +227,9 @@ namespace ClassicUO.Assets
                         }
                         else if (vh.FileID == 4)
                         {
-                            if (vh.BlockID < Arts.Entries.Length)
+                            if (vh.BlockID < Arts.File.Entries.Length)
                             {
-                                Arts.Entries[vh.BlockID] = new UOFileIndex
+                                Arts.File.Entries[vh.BlockID] = new UOFileIndex
                                 (
                                     reader.StartAddress,
                                     (uint) verdata.Length,
@@ -241,7 +241,7 @@ namespace ClassicUO.Assets
                         }
                         else if (vh.FileID == 12)
                         {
-                            Gumps.Entries[vh.BlockID] = new UOFileIndex
+                            Gumps.File.Entries[vh.BlockID] = new UOFileIndex
                             (
                                 reader.StartAddress,
                                 (uint) verdata.Length,
@@ -255,7 +255,7 @@ namespace ClassicUO.Assets
                         }
                         else if (vh.FileID == 14 && vh.BlockID < Multis.Count)
                         {
-                            Multis.Entries[vh.BlockID] = new UOFileIndex
+                            Multis.File.Entries[vh.BlockID] = new UOFileIndex
                             (
                                 reader.StartAddress,
                                 (uint) verdata.Length,
@@ -417,14 +417,14 @@ namespace ClassicUO.Assets
                             continue;
                         }
 
-                        if (index < Arts.Entries.Length && checkIndex < Arts.Entries.Length)
+                        if (index < Arts.File.Entries.Length && checkIndex < Arts.File.Entries.Length)
                         {
-                            ref UOFileIndex currentEntry = ref Arts.GetValidRefEntry(index);
-                            ref UOFileIndex checkEntry = ref Arts.GetValidRefEntry(checkIndex);
+                            ref UOFileIndex currentEntry = ref Arts.File.GetValidRefEntry(index);
+                            ref UOFileIndex checkEntry = ref Arts.File.GetValidRefEntry(checkIndex);
 
                             if (currentEntry.Equals(UOFileIndex.Invalid) && !checkEntry.Equals(UOFileIndex.Invalid))
                             {
-                                Arts.Entries[index] = Arts.Entries[checkIndex];
+                                Arts.File.Entries[index] = Arts.File.Entries[checkIndex];
                             }
                         }
 

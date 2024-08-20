@@ -59,7 +59,7 @@ namespace ClassicUO.Game.GameObjects
 
             //Engine.DebugInfo.EffectsRendered++;
 
-            ref UOFileIndex index = ref Client.Game.UO.FileManager.Gumps.GetValidRefEntry(AnimationGraphic);
+            ref UOFileIndex index = ref Client.Game.UO.FileManager.Gumps.File.GetValidRefEntry(AnimationGraphic);
 
             posX -= index.Width >> 1;
             posY -= index.Height;

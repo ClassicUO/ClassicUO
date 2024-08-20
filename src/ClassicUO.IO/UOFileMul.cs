@@ -49,18 +49,16 @@ namespace ClassicUO.IO
         public UOFile IdxFile => _idxFile;
 
 
-        public override void FillEntries(ref UOFileIndex[] entries)
+        public override void FillEntries()
         {
-            UOFile file = _idxFile ?? (UOFile) this;
-
-            int count = (int) file.Length / 12;
-            entries = new UOFileIndex[count];
-
-            var reader = file.GetReader();
+            UOFile f = _idxFile ?? (UOFile)this;
+            int count = (int)f.Length / 12;
+            Entries = new UOFileIndex[count];
+            var reader = f.GetReader();
             var startAddress = GetReader().StartAddress;
-            for (int i = 0; i < count; i++)
+            for (int i = 0; i < Entries.Length; i++)
             {
-                ref UOFileIndex e = ref entries[i];
+                ref UOFileIndex e = ref Entries[i];
                 e.Address = startAddress;   // .mul mmf address
                 e.FileSize = (uint) Length; // .mul mmf length
                 e.Offset = reader.ReadUInt32LE(); // .idx offset
@@ -89,7 +87,7 @@ namespace ClassicUO.IO
             {
             }
 
-            public override void FillEntries(ref UOFileIndex[] entries)
+            public override void FillEntries()
             {
             }
         }

@@ -352,14 +352,15 @@ namespace ClassicUO.Assets
                         fileNumber = shifted;
                         var uop = file as UOFileUop;
 
-                        if (shifted < uop.TotalEntriesCount)
+                        if (shifted < uop.Entries.Length)
                         {
-                            var hash = UOFileUop.CreateHash(string.Format(uop.Pattern, shifted));
+                            uopoffset = (ulong) uop.Entries[shifted].Offset;
+                            //var hash = UOFileUop.CreateHash(string.Format(uop.Pattern, shifted));
 
-                            if (uop.TryGetUOPData(hash, out var dataIndex))
-                            {
-                                uopoffset = (ulong)dataIndex.Offset;
-                            }
+                            //if (uop.TryGetUOPData(hash, out var dataIndex))
+                            //{
+                            //    uopoffset = (ulong)dataIndex.Offset;
+                            //}
                         }
                     }
                 }

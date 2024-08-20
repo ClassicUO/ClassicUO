@@ -264,7 +264,7 @@ namespace ClassicUO.Game.GameObjects
                 house.ClearComponents();
             }
 
-            ref var entry = ref Client.Game.UO.FileManager.Multis.GetValidRefEntry(Graphic);
+            ref var entry = ref Client.Game.UO.FileManager.Multis.File.GetValidRefEntry(Graphic);
             var reader = new StackDataReader(entry.Address, (int)entry.FileSize);
             bool movable = false;
 

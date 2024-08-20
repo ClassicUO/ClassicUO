@@ -939,23 +939,23 @@ namespace ClassicUO.Game
                     {
                         if (mapFile is UOFileUop uop)
                         {
-                            Entries[mapId] = new UOFileIndex[uop.TotalEntriesCount];
-                            uop.FillEntries(ref Entries[mapId]);
+                            //Entries[mapId] = new UOFileIndex[uop.TotalEntriesCount];
+                            //uop.FillEntries(ref Entries[mapId]);
 
-                            Log.Trace($"UltimaLive -> converting file:\t{mapPath} from {uop.FilePath}");
+                            //Log.Trace($"UltimaLive -> converting file:\t{mapPath} from {uop.FilePath}");
 
-                            using (FileStream stream = File.Create(mapPath))
-                            {
-                                var reader = uop.GetReader();
-                                for (int x = 0; x < Entries[mapId].Length; x++)
-                                {
-                                    reader.Seek(Entries[mapId][x].Offset);
+                            //using (FileStream stream = File.Create(mapPath))
+                            //{
+                            //    var reader = uop.GetReader();
+                            //    for (int x = 0; x < Entries[mapId].Length; x++)
+                            //    {
+                            //        reader.Seek(Entries[mapId][x].Offset);
 
-                                    stream.Write(reader.ReadArray(Entries[mapId][x].Length), 0, Entries[mapId][x].Length);
-                                }
+                            //        stream.Write(reader.ReadArray(Entries[mapId][x].Length), 0, Entries[mapId][x].Length);
+                            //    }
 
-                                stream.Flush();
-                            }
+                            //    stream.Flush();
+                            //}
                         }
                         else
                         {

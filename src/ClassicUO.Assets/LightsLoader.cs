@@ -58,13 +58,12 @@ namespace ClassicUO.Assets
                 FileSystemHelper.EnsureFileExists(pathidx);
 
                 _file = new UOFileMul(path, pathidx);
-                _file.FillEntries(ref Entries);
             });
         }
 
         public LightInfo GetLight(uint idx)
         {
-            ref var entry = ref GetValidRefEntry((int)idx);
+            ref var entry = ref _file.GetValidRefEntry((int)idx);
 
             if (entry.Width == 0 && entry.Height == 0)
             {

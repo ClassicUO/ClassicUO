@@ -100,7 +100,7 @@ namespace ClassicUO.Game.Managers
             uint next_time = Time.Ticks + 250;
             bool no_animated_field = ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.FieldsType != 0;
             long startAddr = reader.StartAddress.ToInt64();
-            UOFileIndex[] static_data = Client.Game.UO.FileManager.Arts.Entries;
+            UOFileIndex[] static_data = Client.Game.UO.FileManager.Arts.File.Entries;
 
             for (int i = 0; i < _staticInfos.Length; i++)
             {

@@ -64,7 +64,6 @@ namespace ClassicUO.Assets
                     {
                         Count = MAX_MULTI_DATA_INDEX_COUNT;
                         File = new UOFileUop(uopPath, "build/multicollection/{0:D6}.bin");
-                        Entries = new UOFileIndex[Count];
                         IsUOP = true;
                     }
                     else
@@ -78,8 +77,6 @@ namespace ClassicUO.Assets
                             Count = Offset = FileManager.Version >= ClientVersion.CV_7090 ? sizeof(MultiBlockNew) + 2 : sizeof(MultiBlock);
                         }
                     }
-
-                    File.FillEntries(ref Entries);
                 }
             );
         }

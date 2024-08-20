@@ -50,7 +50,7 @@ namespace ClassicUO.Assets
 
 
         public bool UseUOPGumps = false;
-
+        public UOFile File => _file;
 
         public override Task Load()
         {
@@ -58,12 +58,9 @@ namespace ClassicUO.Assets
             {
                 string path = FileManager.GetUOFilePath("gumpartLegacyMUL.uop");
 
-                if (FileManager.IsUOPInstallation && File.Exists(path))
+                if (FileManager.IsUOPInstallation && System.IO.File.Exists(path))
                 {
                     _file = new UOFileUop(path, "build/gumpartlegacymul/{0:D8}.tga", true);
-                    Entries = new UOFileIndex[
-                        Math.Max(((UOFileUop)_file).TotalEntriesCount, MAX_GUMP_DATA_INDEX_COUNT)
-                    ];
                     UseUOPGumps = true;
                 }
                 else
@@ -71,12 +68,12 @@ namespace ClassicUO.Assets
                     path = FileManager.GetUOFilePath("gumpart.mul");
                     string pathidx = FileManager.GetUOFilePath("gumpidx.mul");
 
-                    if (!File.Exists(path))
+                    if (!System.IO.File.Exists(path))
                     {
                         path = FileManager.GetUOFilePath("Gumpart.mul");
                     }
 
-                    if (!File.Exists(pathidx))
+                    if (!System.IO.File.Exists(pathidx))
                     {
                         pathidx = FileManager.GetUOFilePath("Gumpidx.mul");
                     }
@@ -86,11 +83,11 @@ namespace ClassicUO.Assets
                     UseUOPGumps = false;
                 }
 
-                _file.FillEntries(ref Entries);
+                _file.FillEntries();
 
                 string pathdef = FileManager.GetUOFilePath("gump.def");
 
-                if (!File.Exists(pathdef))
+                if (!System.IO.File.Exists(pathdef))
                 {
                     return;
                 }
@@ -104,8 +101,8 @@ namespace ClassicUO.Assets
                         if (
                             ingump < 0
                             || ingump >= MAX_GUMP_DATA_INDEX_COUNT
-                            || ingump >= Entries.Length
-                            || Entries[ingump].Length > 0
+                            || ingump >= _file.Entries.Length
+                            || _file.Entries[ingump].Length > 0
                         )
                         {
                             continue;
@@ -125,16 +122,15 @@ namespace ClassicUO.Assets
                             if (
                                 checkIndex < 0
                                 || checkIndex >= MAX_GUMP_DATA_INDEX_COUNT
-                                || checkIndex >= Entries.Length
-                                || Entries[checkIndex].Length <= 0
+                                || checkIndex >= _file.Entries.Length
+                                || _file.Entries[checkIndex].Length <= 0
                             )
                             {
                                 continue;
                             }
 
-                            Entries[ingump] = Entries[checkIndex];
-
-                            Entries[ingump].Hue = (ushort)defReader.ReadInt();
+                            _file.Entries[ingump] = _file.Entries[checkIndex];
+                            _file.Entries[ingump].Hue = (ushort)defReader.ReadInt();
 
                             break;
                         }
@@ -145,7 +141,7 @@ namespace ClassicUO.Assets
 
         public GumpInfo GetGump(uint index)
         {
-            ref var entry = ref GetValidRefEntry((int)index);
+            ref var entry = ref _file.GetValidRefEntry((int)index);
 
             if (entry.CompressionFlag != CompressionType.ZlibBwt && entry.Width <= 0 && entry.Height <= 0)
             {
@@ -154,7 +150,7 @@ namespace ClassicUO.Assets
 
             ushort color = entry.Hue;
 
-            var reader = new StackDataReader((IntPtr)(entry.Address + entry.Offset), entry.Length);
+            var reader = new StackDataReader((IntPtr)(entry.Address.ToInt64() + entry.Offset), entry.Length);
             var w = (uint)entry.Width;
             var h = (uint)entry.Height;
 
