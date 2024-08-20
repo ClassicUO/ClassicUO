@@ -41,18 +41,15 @@ namespace ClassicUO.Assets
     public sealed class ArtLoader : UOFileLoader
     {
         private UOFile _file;
-        private readonly ushort _graphicMask;
-
-        [ThreadStatic]
-        private static uint[] _data = null;
-
         public const int MAX_LAND_DATA_INDEX_COUNT = 0x4000;
         public const int MAX_STATIC_DATA_INDEX_COUNT = 0x14000;
 
         public ArtLoader(UOFileManager fileManager) : base(fileManager)
         {
-            _graphicMask = FileManager.IsUOPInstallation ? (ushort)0xFFFF : (ushort)0x3FFF;
         }
+
+
+        public UOFile File => _file;
 
 
         public override Task Load()
@@ -61,25 +58,22 @@ namespace ClassicUO.Assets
             {
                 string filePath = FileManager.GetUOFilePath("artLegacyMUL.uop");
 
-                if (FileManager.IsUOPInstallation && File.Exists(filePath))
+                if (FileManager.IsUOPInstallation && System.IO.File.Exists(filePath))
                 {
                     _file = new UOFileUop(filePath, "build/artlegacymul/{0:D8}.tga");
-                    Entries = new UOFileIndex[
-                        Math.Max(((UOFileUop)_file).TotalEntriesCount, MAX_STATIC_DATA_INDEX_COUNT)
-                    ];
                 }
                 else
                 {
                     filePath = FileManager.GetUOFilePath("art.mul");
                     string idxPath = FileManager.GetUOFilePath("artidx.mul");
 
-                    if (File.Exists(filePath) && File.Exists(idxPath))
+                    if (System.IO.File.Exists(filePath) && System.IO.File.Exists(idxPath))
                     {
                         _file = new UOFileMul(filePath, idxPath);
                     }
                 }
 
-                _file.FillEntries(ref Entries);
+                _file.FillEntries();
             });
         }
 
@@ -88,130 +82,67 @@ namespace ClassicUO.Assets
         //         ? Rectangle.Empty
         //         : _spriteInfos[index + 0x4000].ArtBounds;
 
-        private bool LoadData(Span<uint> data, int g, out short width, out short height)
+        private static uint[] LoadLand(ref readonly UOFileIndex entry, out short width, out short height)
         {
-            ref var entry = ref GetValidRefEntry(g);
-
             if (entry.Length == 0)
             {
                 width = 0;
                 height = 0;
 
-                return false;
+                return Array.Empty<uint>();
             }
 
-            var reader = new StackDataReader(entry.Address, (int)entry.FileSize);
-            reader.Seek(entry.Offset);
+            var reader = new StackDataReader((IntPtr)(entry.Address + entry.Offset), entry.Length);
+            width = 44;
+            height = 44;
 
-            //var flags = _file.ReadUInt();
+            var data = new uint[width * height];
 
-            //if (flags > 0xFFFF || flags == 0)
-            if (g < 0x4000)
+            for (int i = 0; i < 22; ++i)
             {
-                width = 44;
-                height = 44;
+                int start = 22 - (i + 1);
+                int pos = i * 44 + start;
+                int end = start + ((i + 1) << 1);
 
-                if (data == null || data.Length < (width * height))
+                for (int j = start; j < end; ++j)
                 {
-                    return false;
-                }
-
-                /*
-                 * Since the data only contains the diamond shape, we may not actually read
-                 * into every pixel in 'data'. We must zero the buffer here since it is
-                 * re-used. But we only have to zero out the (44 * 44) worth.
-                 */
-                data.Slice(0, (width * height)).Fill(0);
-
-                for (int i = 0; i < 22; ++i)
-                {
-                    int start = 22 - (i + 1);
-                    int pos = i * 44 + start;
-                    int end = start + ((i + 1) << 1);
-
-                    for (int j = start; j < end; ++j)
-                    {
-                        data[pos++] = HuesHelper.Color16To32(reader.ReadUInt16LE()) | 0xFF_00_00_00;
-                    }
-                }
-
-                for (int i = 0; i < 22; ++i)
-                {
-                    int pos = (i + 22) * 44 + i;
-                    int end = i + ((22 - i) << 1);
-
-                    for (int j = i; j < end; ++j)
-                    {
-                        data[pos++] = HuesHelper.Color16To32(reader.ReadUInt16LE()) | 0xFF_00_00_00;
-                    }
+                    data[pos++] = HuesHelper.Color16To32(reader.ReadUInt16LE()) | 0xFF_00_00_00;
                 }
             }
-            else
+
+            for (int i = 0; i < 22; ++i)
             {
-                var flags = reader.ReadUInt32LE();
-                width = reader.ReadInt16LE();
-                height = reader.ReadInt16LE();
+                int pos = (i + 22) * 44 + i;
+                int end = i + ((22 - i) << 1);
 
-                if (width <= 0 || height <= 0 || data.Length < (width * height))
+                for (int j = i; j < end; ++j)
                 {
-                    return false;
-                }
-
-                /*
-                    * Since the data is run-length-encoded, we may not actually read
-                    * into every pixel in 'data'. We must zero the buffer here since it is
-                    * re-used. But we only have to zero out the (width * height) worth.
-                    */
-                data.Slice(0, (width * height)).Fill(0);
-
-                ushort fixedGraphic = (ushort)(g - 0x4000);
-
-                if (ReadData(data, width, height, reader))
-                {
-                    // keep the cursor graphic check to cleanup edges
-                    //if ((fixedGraphic >= 0x2053 && fixedGraphic <= 0x2062) || (fixedGraphic >= 0x206A && fixedGraphic <= 0x2079))
-                    //{
-                    //    for (int i = 0; i < width; i++)
-                    //    {
-                    //        data[i] = 0;
-                    //        data[(height - 1) * width + i] = 0;
-                    //    }
-
-                    //    for (int i = 0; i < height; i++)
-                    //    {
-                    //        data[i * width] = 0;
-                    //        data[i * width + width - 1] = 0;
-                    //    }
-                    //}
+                    data[pos++] = HuesHelper.Color16To32(reader.ReadUInt16LE()) | 0xFF_00_00_00;
                 }
             }
 
-            return true;
+            return data;
         }
 
-        public Span<uint> GetRawImage(uint g, out short width, out short height)
+        private static unsafe uint[] LoadArt(ref readonly UOFileIndex entry, out short width, out short height)
         {
-            if (!LoadData(_data, (int)g, out width, out height))
+            if (entry.Length == 0)
             {
-                if (_data != null && width * height < _data.Length)
-                {
-                    return Span<uint>.Empty;
-                }
+                width = 0;
+                height = 0;
 
-                _data = new uint[width * height];
-
-                if (!LoadData(_data, (int)g, out width, out height))
-                {
-                    return Span<uint>.Empty;
-                }
+                return Array.Empty<uint>();
             }
 
-            return _data.AsSpan(0, width * height);
-        }
+            var reader = new StackDataReader((IntPtr)(entry.Address.ToInt64() + entry.Offset), entry.Length);
 
-        private unsafe bool ReadData(Span<uint> pixels, int width, int height, StackDataReader file)
-        {
-            ushort* ptr = (ushort*)file.PositionAddress;
+            var flags = reader.ReadUInt32LE();
+            width = reader.ReadInt16LE();
+            height = reader.ReadInt16LE();
+
+            var data = new uint[width * height];
+
+            ushort* ptr = (ushort*)reader.PositionAddress;
             ushort* lineoffsets = ptr;
             byte* datastart = (byte*)ptr + height * 2;
             int x = 0;
@@ -225,7 +156,7 @@ namespace ClassicUO.Assets
 
                 if (xoffs + run >= 2048)
                 {
-                    return false;
+                    break;
                 }
 
                 if (xoffs + run != 0)
@@ -239,7 +170,7 @@ namespace ClassicUO.Assets
 
                         if (val != 0)
                         {
-                            pixels[pos] = HuesHelper.Color16To32(val) | 0xFF_00_00_00;
+                            data[pos] = HuesHelper.Color16To32(val) | 0xFF_00_00_00;
                         }
                     }
 
@@ -253,55 +184,10 @@ namespace ClassicUO.Assets
                 }
             }
 
-            return true;
+            return data;
         }
 
-        // private void FinalizeData(
-        //     Span<uint> pixels,
-        //     ref UOFileIndex entry,
-        //     ushort graphic,
-        //     int width,
-        //     int height,
-        //     out Rectangle bounds
-        // )
-        // {
-        //     int pos1 = 0;
-        //     int minX = width,
-        //         minY = height,
-        //         maxX = 0,
-        //         maxY = 0;
-
-        //     /* Temporarily broken. This isn't the right way to do it anyway since it can't be toggled on/off.
-        //     if (StaticFilters.IsCave(graphic) && ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.EnableCaveBorder)
-        //     {
-        //         AddBlackBorder(pixels, width, height);
-        //     }
-        //     */
-
-        //     for (int y = 0; y < height; ++y)
-        //     {
-        //         for (int x = 0; x < width; ++x)
-        //         {
-        //             if (pixels[pos1++] != 0)
-        //             {
-        //                 minX = Math.Min(minX, x);
-        //                 maxX = Math.Max(maxX, x);
-        //                 minY = Math.Min(minY, y);
-        //                 maxY = Math.Max(maxY, y);
-        //             }
-        //         }
-        //     }
-
-        //     entry.Width = (short)((width >> 1) - 22);
-        //     entry.Height = (short)(height - 44);
-
-        //     bounds.X = minX;
-        //     bounds.Y = minY;
-        //     bounds.Width = maxX - minX;
-        //     bounds.Height = maxY - minY;
-        // }
-
-        private void AddBlackBorder(Span<uint> pixels, int width, int height)
+        private static void AddBlackBorder(Span<uint> pixels, int width, int height)
         {
             for (int yy = 0; yy < height; yy++)
             {
@@ -342,7 +228,12 @@ namespace ClassicUO.Assets
 
         public ArtInfo GetArt(uint idx)
         {
-            var pixels = GetRawImage(idx, out var width, out var height);
+            ref var entry = ref _file.GetValidRefEntry((int)idx);
+            var loadLand = idx < 0x4000;
+            var pixels = loadLand ? 
+                LoadLand(in entry, out var width, out var height)
+                : 
+                LoadArt(in entry, out width, out height);
 
             return new ArtInfo()
             {

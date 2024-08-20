@@ -139,7 +139,7 @@ namespace ClassicUO.Game.GameObjects
                     graphic = Constants.TREE_REPLACE_GRAPHIC;
                 }
 
-                ref var index = ref Client.Game.UO.FileManager.Arts.GetValidRefEntry(graphic + 0x4000);
+                ref var index = ref Client.Game.UO.FileManager.Arts.File.GetValidRefEntry(graphic + 0x4000);
 
                 Point position = RealScreenPosition;
                 position.X -= index.Width;

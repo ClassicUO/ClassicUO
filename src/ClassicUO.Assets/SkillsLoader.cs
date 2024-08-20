@@ -69,11 +69,11 @@ namespace ClassicUO.Assets
                     FileSystemHelper.EnsureFileExists(pathidx);
 
                     _file = new UOFileMul(path, pathidx);
-                    _file.FillEntries(ref Entries);
+                    _file.FillEntries();
 
-                    for (int i = 0, count = 0; i < Entries.Length; i++)
+                    for (int i = 0, count = 0; i < _file.Entries.Length; i++)
                     {
-                        ref var entry = ref GetValidRefEntry(i);
+                        ref var entry = ref _file.GetValidRefEntry(i);
                         if (entry.Length <= 0) continue;
 
                         var reader = new StackDataReader(entry.Address, (int)entry.FileSize);

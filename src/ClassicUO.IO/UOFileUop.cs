@@ -46,8 +46,8 @@ namespace ClassicUO.IO
     {
         private const uint UOP_MAGIC_NUMBER = 0x50594D;
         private readonly bool _hasExtra;
-        private readonly Dictionary<ulong, UOFileIndex> _hashes = new Dictionary<ulong, UOFileIndex>();
         private readonly string _pattern;
+        private readonly Dictionary<ulong, UOFileIndex> _hashes = new Dictionary<ulong, UOFileIndex>();
 
         public UOFileUop(string path, string pattern, bool hasextra = false) : base(path)
         {
@@ -56,9 +56,7 @@ namespace ClassicUO.IO
             Load();
         }
 
-        public int TotalEntriesCount { get; private set; }
         public string Pattern => _pattern;
-        public Dictionary<ulong, UOFileIndex> Hashes => _hashes;
 
 
         protected override void Load()
@@ -148,7 +146,7 @@ namespace ClassicUO.IO
                                 offset,
                                 compressedLength,
                                 decompressedLength,
-                                (CompressionType) flag,
+                                (CompressionType)flag,
                                 0,
                                 0
                             )
@@ -159,12 +157,13 @@ namespace ClassicUO.IO
                 reader.Seek(nextBlock);
             } while (nextBlock != 0);
 
-            TotalEntriesCount = real_total;
+            Entries = new UOFileIndex[ushort.MaxValue];
+            FillEntries();
         }
 
         public void ClearHashes()
         {
-            _hashes.Clear();
+            // _hashes.Clear();
         }
 
         public override void Dispose()
@@ -179,16 +178,16 @@ namespace ClassicUO.IO
             return _hashes.TryGetValue(hash, out data);
         }
 
-        public override void FillEntries(ref UOFileIndex[] entries)
+        public override void FillEntries()
         {
-            for (int i = 0; i < entries.Length; i++)
+            for (int i = 0; i < Entries.Length; i++)
             {
                 string file = string.Format(_pattern, i);
                 ulong hash = CreateHash(file);
 
-                if (_hashes.TryGetValue(hash, out UOFileIndex data))
+                if (_hashes.TryGetValue(hash, out var e))
                 {
-                    entries[i] = data;
+                    Entries[i] = e;
                 }
             }
         }

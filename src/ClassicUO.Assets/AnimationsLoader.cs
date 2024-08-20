@@ -816,10 +816,8 @@ namespace ClassicUO.Assets
             var buffer = new byte[1024];
             var reader = animSeq.GetReader();
 
-            foreach (var pair in animSeq.Hashes)
+            foreach (var entry in animSeq.Entries)
             {
-                var entry = pair.Value;
-
                 if (entry.Offset == 0)
                 {
                     continue;

@@ -46,6 +46,7 @@ namespace ClassicUO.Assets
 
         public TexmapsLoader(UOFileManager fileManager) : base(fileManager) { }
 
+        public UOFile File => _file;
 
         public override Task Load()
         {
@@ -58,10 +59,10 @@ namespace ClassicUO.Assets
                 FileSystemHelper.EnsureFileExists(pathidx);
 
                 _file = new UOFileMul(path, pathidx);
-                _file.FillEntries(ref Entries);
+                _file.FillEntries();
                 string pathdef = FileManager.GetUOFilePath("TexTerr.def");
 
-                if (File.Exists(pathdef))
+                if (System.IO.File.Exists(pathdef))
                 {
                     using (DefReader defReader = new DefReader(pathdef))
                     {
@@ -69,7 +70,7 @@ namespace ClassicUO.Assets
                         {
                             int index = defReader.ReadInt();
 
-                            if (index < 0 || index >= Entries.Length)
+                            if (index < 0 || index >= _file.Entries.Length)
                             {
                                 continue;
                             }
@@ -85,12 +86,12 @@ namespace ClassicUO.Assets
                             {
                                 int checkindex = group[i];
 
-                                if (checkindex < 0 || checkindex >= Entries.Length)
+                                if (checkindex < 0 || checkindex >= _file.Entries.Length)
                                 {
                                     continue;
                                 }
 
-                                Entries[index] = Entries[checkindex];
+                                _file.Entries[index] = _file.Entries[checkindex];
                             }
                         }
                     }
@@ -100,7 +101,7 @@ namespace ClassicUO.Assets
 
         public TexmapInfo GetTexmap(uint idx)
         {
-            ref UOFileIndex entry = ref GetValidRefEntry((int)idx);
+            ref UOFileIndex entry = ref _file.GetValidRefEntry((int)idx);
 
             if (entry.Length <= 0)
             {
