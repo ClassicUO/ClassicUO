@@ -94,7 +94,6 @@ namespace ClassicUO.Dust765.External
                 }
                 _endTime = _startTime + 400 + (circle + protection_delay) * 250 + _re; // (0.5+ 0.25 * circle) * 1000
                 GameActions.iscasting = true;
-                GameActions.spellCircle = spell;
             }
             catch
             {
@@ -137,9 +136,6 @@ namespace ClassicUO.Dust765.External
         {
             GameActions.iscasting = false;
             IsVisible = false;
-            GameActions.spellCircle = 0;
-
-
         }
 
         public static void OnSceneLoad()

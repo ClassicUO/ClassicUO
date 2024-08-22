@@ -1030,7 +1030,7 @@ namespace ClassicUO.Game
                         _pointIndex++;
                     }
 
-                    if (!World.Player.Walk((Direction) p.Direction, _run))
+                    if (!World.Player.Walk((Direction) p.Direction, _run, "pathfinder" ))
                     {
                         StopAutoWalk();
                     }

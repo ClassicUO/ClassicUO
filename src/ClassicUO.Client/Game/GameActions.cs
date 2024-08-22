@@ -31,7 +31,6 @@
 #endregion
 
 using ClassicUO.Configuration;
-using ClassicUO.Dust765.Managers;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -44,7 +43,6 @@ using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using System;
 using static ClassicUO.Network.NetClient;
-using ClassicUO.Dust765.Managers;
 
 namespace ClassicUO.Game
 {
@@ -60,7 +58,6 @@ namespace ClassicUO.Game
         public static bool iscasting { get; set; } = false;
         // ## BEGIN - END ## // ONCASTINGGUMP
 
-        public static SpellAction spellCircle { get; set; } = 0;
 
         public static void ToggleWarMode()
         {

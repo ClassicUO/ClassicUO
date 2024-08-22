@@ -2024,34 +2024,21 @@ namespace ClassicUO.Network
 
             const int TIME_TURN_TO_LASTTARGET = 2000;
 
-            if (
-                TargetManager.LastAttack == defenders
-                && World.Player.InWarMode
-                && World.Player.Walker.LastStepRequestTime + TIME_TURN_TO_LASTTARGET < Time.Ticks
-                && World.Player.Steps.Count == 0
-            )
+            if (TargetManager.LastAttack == defenders && World.Player.InWarMode && World.Player.Walker.LastStepRequestTime + TIME_TURN_TO_LASTTARGET < Time.Ticks && World.Player.Steps.Count == 0)
             {
                 Mobile enemy = World.Mobiles.Get(defenders);
 
                 if (enemy != null)
                 {
-                    Direction pdir = DirectionHelper.GetDirectionAB(
-                        World.Player.X,
-                        World.Player.Y,
-                        enemy.X,
-                        enemy.Y
-                    );
+                    Direction pdir = DirectionHelper.GetDirectionAB(World.Player.X, World.Player.Y, enemy.X, enemy.Y);
 
                     int x = World.Player.X;
                     int y = World.Player.Y;
                     sbyte z = World.Player.Z;
 
-                    if (
-                        Pathfinder.CanWalk(ref pdir, ref x, ref y, ref z)
-                        && World.Player.Direction != pdir
-                    )
+                    if (Pathfinder.CanWalk(ref pdir, ref x, ref y, ref z) && World.Player.Direction != pdir)
                     {
-                        World.Player.Walk(pdir, false);
+                        World.Player.Walk(pdir, false, "handle");
                     }
                 }
             }
@@ -3446,7 +3433,7 @@ namespace ClassicUO.Network
             }
 
             Direction direction = (Direction)p.ReadUInt8();
-            World.Player.Walk(direction & Direction.Mask, (direction & Direction.Running) != 0);
+            World.Player.Walk(direction & Direction.Mask, (direction & Direction.Running) != 0, "packet heandler 2");
         }
 
         private static void UpdateName(ref StackDataReader p)

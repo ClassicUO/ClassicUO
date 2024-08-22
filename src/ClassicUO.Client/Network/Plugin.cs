@@ -499,7 +499,7 @@ namespace ClassicUO.Network
 
         private static bool RequestMove(int dir, bool run)
         {
-            return World.Player.Walk((Direction)dir, run);
+            return World.Player.Walk((Direction)dir, run, "plugin");
         }
 
         private static bool GetPlayerPosition(out int x, out int y, out int z)
