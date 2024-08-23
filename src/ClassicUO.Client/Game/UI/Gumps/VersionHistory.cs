@@ -8,6 +8,10 @@ namespace ClassicUO.Game.UI.Gumps
     internal class VersionHistory : Gump
     {
         private static string[] updateTexts = {
+
+            "/c[white][3.23.2]/cd\n" +
+                "- Fixed Disarm and Stun Hability AOS",
+
             "/c[white][3.23.1]/cd\n" +
                 "- Fixed Weird lines if show Nameplate",
 
