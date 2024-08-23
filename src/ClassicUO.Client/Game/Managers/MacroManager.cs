@@ -1516,7 +1516,7 @@ namespace ClassicUO.Game.Managers
                     break;
 
                 case MacroType.DisarmAbility:
-                    Socket.Send_DisarmRequest()
+                    Socket.Send_DisarmRequest();
 
                     break;
 
@@ -2437,8 +2437,8 @@ namespace ClassicUO.Game.Managers
         KillGumpOpen,
         PrimaryAbility,
         SecondaryAbility,
-        StunAbility
-        DisarmAbility
+        StunAbility,
+        DisarmAbility,
         EquipLastWeapon,
         SetUpdateRange,
         ModifyUpdateRange,
