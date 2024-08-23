@@ -831,7 +831,7 @@ namespace ClassicUO.Game
                     World.Player.Abilities[i] &= (Ability)0x7F;
                 }
                 if (Client.Version >= ClientVersion.CV_308Z) {
-                    socket.Send_StunRequest((byte)ability)
+                    Socket.Send_StunRequest();
                 } else {
                     Socket.Send_UseCombatAbility((byte)ability);
                 }
@@ -839,8 +839,8 @@ namespace ClassicUO.Game
             }
             else
             {
-                if (Client.Version >= ClientVersion.CV_308Z) { 
-                    socket.Send_DisarmRequest((byte)ability)
+                if (Client.Version >= ClientVersion.CV_308Z) {
+                    Socket.Send_DisarmRequest();
                 } else {
                     Socket.Send_UseCombatAbility(0);
                 }
