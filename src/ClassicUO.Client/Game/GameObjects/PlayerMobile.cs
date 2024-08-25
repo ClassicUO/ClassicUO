@@ -1671,6 +1671,7 @@ namespace ClassicUO.Game.GameObjects
 
         public bool Walk(Direction direction, bool run, string text)
         {
+            if(text != "1" ) GameActions.Print(text + "to walk", 88);
             if (Walker.WalkingFailed || Walker.LastStepRequestTime > Time.Ticks || Walker.StepsCount >= Constants.MAX_STEP_COUNT || Client.Version >= ClientVersion.CV_60142 && IsParalyzed)
             {
                 return false;
