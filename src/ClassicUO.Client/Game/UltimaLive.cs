@@ -566,42 +566,45 @@ namespace ClassicUO.Game
         {
             int mapId = world.Map.Index;
 
-            var reader = _UL._filesIdxStatics[mapId].GetReader();
-            reader.Seek(block * 12);
+            var staidxReader = _UL._filesIdxStatics[mapId].GetReader();
+            staidxReader.Seek(block * 12);
 
-            uint lookup = reader.ReadUInt32LE();
+            uint lookup = staidxReader.ReadUInt32LE();
 
-            int byteCount = Math.Max(0, reader.ReadInt32LE());
+            int byteCount = Math.Max(0, staidxReader.ReadInt32LE());
 
             byte[] blockData = new byte[LAND_BLOCK_LENGTH + byteCount];
 
             //we prevent the system from reading beyond the end of file, causing an exception, if the data isn't there, we don't read it and leave the array blank, simple...
-            reader.Seek(block * 196 + 4);
+            var mapReader = _UL._filesMap[mapId].GetReader();
+            mapReader.Seek(block * 196 + 4);
+            
+            var staticsReader = _UL._filesStatics[mapId].GetReader();
 
             for (int x = 0; x < 192; x++)
             {
-                if (reader.Position + 1 >= _UL._filesMap[mapId].Length)
+                if (mapReader.Position + 1 >= mapReader.Length)
                 {
                     break;
                 }
 
-                blockData[x] = reader.ReadUInt8();
+                blockData[x] = mapReader.ReadUInt8();
             }
 
             if (lookup != 0xFFFFFFFF && byteCount > 0)
             {
-                if (lookup < reader.Length)
+                if (lookup < staticsReader.Length)
                 {
-                    reader.Seek(lookup);
+                    staticsReader.Seek(lookup);
 
                     for (int x = LAND_BLOCK_LENGTH; x < blockData.Length; x++)
                     {
-                        if (reader.Position + 1 >= reader.Length)
+                        if (staticsReader.Position + 1 >= staticsReader.Length)
                         {
                             break;
                         }
 
-                        blockData[x] = reader.ReadUInt8();
+                        blockData[x] = staticsReader.ReadUInt8();
                     }
                 }
             }
