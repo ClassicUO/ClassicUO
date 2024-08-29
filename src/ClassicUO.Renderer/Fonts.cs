@@ -35,30 +35,30 @@ using System;
 
 namespace ClassicUO.Renderer
 {
-    partial class FontResources
+    public partial class FontResources
     {
-        [EmbedResourceCSharp.FileEmbed("fonts/regular_font.xnb")]
+        [FileEmbed.FileEmbed("fonts/regular_font.xnb")]
         public static partial ReadOnlySpan<byte> GetRegularFont();
 
-        [EmbedResourceCSharp.FileEmbed("fonts/bold_font.xnb")]
+        [FileEmbed.FileEmbed("fonts/bold_font.xnb")]
         public static partial ReadOnlySpan<byte> GetBoldFont();
 
-        [EmbedResourceCSharp.FileEmbed("fonts/map1_font.xnb")]
+        [FileEmbed.FileEmbed("fonts/map1_font.xnb")]
         public static partial ReadOnlySpan<byte> GetMap1Font();
 
-        [EmbedResourceCSharp.FileEmbed("fonts/map2_font.xnb")]
+        [FileEmbed.FileEmbed("fonts/map2_font.xnb")]
         public static partial ReadOnlySpan<byte> GetMap2Font();
 
-        [EmbedResourceCSharp.FileEmbed("fonts/map3_font.xnb")]
+        [FileEmbed.FileEmbed("fonts/map3_font.xnb")]
         public static partial ReadOnlySpan<byte> GetMap3Font();
 
-        [EmbedResourceCSharp.FileEmbed("fonts/map4_font.xnb")]
+        [FileEmbed.FileEmbed("fonts/map4_font.xnb")]
         public static partial ReadOnlySpan<byte> GetMap4Font();
 
-        [EmbedResourceCSharp.FileEmbed("fonts/map5_font.xnb")]
+        [FileEmbed.FileEmbed("fonts/map5_font.xnb")]
         public static partial ReadOnlySpan<byte> GetMap5Font();
 
-        [EmbedResourceCSharp.FileEmbed("fonts/map6_font.xnb")]
+        [FileEmbed.FileEmbed("fonts/map6_font.xnb")]
         public static partial ReadOnlySpan<byte> GetMap6Font();
     }
 
