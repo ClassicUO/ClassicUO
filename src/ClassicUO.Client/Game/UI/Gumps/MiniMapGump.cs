@@ -49,12 +49,18 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class MiniMapGump : Gump
     {
+        struct ColorInfo
+        {
+            public ushort Color;
+            public sbyte Z;
+            public bool IsLand;
+        }
+
         private bool _draw;
         private int _lastMap = -1;
         private long _timeMS;
         private bool _useLargeMap;
-        private ushort _x,
-            _y;
+        private ushort _x, _y;
         private static readonly uint[][] _blankGumpsPixels = new uint[4][];
 
         const ushort SMALL_MAP_GRAPHIC = 5010;
@@ -277,14 +283,14 @@ namespace ClassicUO.Game.UI.Gumps
 
             uint[] data = _blankGumpsPixels[index + 2];
 
-            Point* table = stackalloc Point[2];
+            Span<Point> table = stackalloc Point[2];
             table[0].X = 0;
             table[0].Y = 0;
             table[1].X = 0;
             table[1].Y = 1;
 
-            Span<byte> buf = stackalloc byte[sizeof(MapBlock)];
-            Span<byte> buf2 = stackalloc byte[sizeof(StaticsBlock)];
+            Span<ColorInfo> staticsZ = stackalloc ColorInfo[64];
+            var d = new ColorInfo() { Z = sbyte.MinValue };
 
             for (int i = minBlockX; i <= maxBlockX; i++)
             {
@@ -306,13 +312,30 @@ namespace ClassicUO.Game.UI.Gumps
                         break;
                     }
 
+                    staticsZ.Fill(d);
+                    indexMap.StaticFile.Seek((long)indexMap.StaticAddress, System.IO.SeekOrigin.Begin);
                     indexMap.MapFile.Seek((long)indexMap.MapAddress, System.IO.SeekOrigin.Begin);
-                    indexMap.MapFile.Read(buf);
-                    var cells = Unsafe.AsRef<MapBlock>(Unsafe.AsPointer(ref buf[0])).Cells;
+                    var cells = indexMap.MapFile.Read<MapBlock>().Cells;
                     
                     Chunk block = World.Map.GetChunk(blockIndex);
                     int realBlockX = i << 3;
                     int realBlockY = j << 3;
+
+
+                    for (int c = 0; c < indexMap.StaticCount; ++c)
+                    {
+                        var stblock = indexMap.StaticFile.Read<StaticsBlock>();
+                        if (stblock.Color > 0 && stblock.Color != 0xFFFF && GameObject.CanBeDrawn(World, stblock.Color))
+                        {
+                            ref var st = ref staticsZ[stblock.Y * 8 + stblock.X];
+                            if (st.Z < stblock.Z)
+                            {
+                                st.Color = stblock.Hue > 0 ? (ushort)(stblock.Hue + 0x4000) : stblock.Color;
+                                st.Z = stblock.Z;
+                                st.IsLand = stblock.Hue > 0;
+                            }
+                        }
+                    }
 
                     for (int x = 0; x < 8; x++)
                     {
@@ -320,37 +343,17 @@ namespace ClassicUO.Game.UI.Gumps
 
                         for (int y = 0; y < 8; y++)
                         {
-                            ref var cell = ref cells[(y << 3) + x];
+                            ref readonly var cell = ref cells[(y << 3) + x];
                             int color = cell.TileID;
                             bool isLand = true;
                             int z = cell.Z;
 
-                            indexMap.StaticFile.Seek((long)indexMap.StaticAddress, System.IO.SeekOrigin.Begin);
-
-                            for (int c = 0; c < indexMap.StaticCount; ++c)
+                            ref var stZ = ref staticsZ[y * 8 + x];
+                            if (stZ.Z >= z)
                             {
-                                indexMap.StaticFile.Read(buf2);
-                                ref var stblock = ref Unsafe.AsRef<StaticsBlock>(Unsafe.AsPointer(ref buf2[0]));
-
-                                if (
-                                    stblock.X == x
-                                    && stblock.Y == y
-                                    && stblock.Color > 0
-                                    && stblock.Color != 0xFFFF
-                                    && GameObject.CanBeDrawn(World, stblock.Color)
-                                )
-                                {
-                                    if (stblock.Z >= z)
-                                    {
-                                        color =
-                                            stblock.Hue > 0
-                                                ? (ushort)(stblock.Hue + 0x4000)
-                                                : stblock.Color;
-                                        isLand = stblock.Hue > 0;
-
-                                        z = stblock.Z;
-                                    }
-                                }
+                                z = stZ.Z;
+                                color = stZ.Color;
+                                isLand = stZ.IsLand;
                             }
 
                             if (block != null)
@@ -432,7 +435,7 @@ namespace ClassicUO.Game.UI.Gumps
             int y,
             int w,
             int h,
-            Point* table,
+            Span<Point> table,
             int count
         )
         {
