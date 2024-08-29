@@ -82,7 +82,7 @@ namespace ClassicUO.Assets
         //         ? Rectangle.Empty
         //         : _spriteInfos[index + 0x4000].ArtBounds;
 
-        private static uint[] LoadLand(ref readonly UOFileIndex entry, out short width, out short height)
+        private static uint[] LoadLand(UOFile file, ref readonly UOFileIndex entry, out short width, out short height)
         {
             if (entry.Length == 0)
             {
@@ -92,9 +92,13 @@ namespace ClassicUO.Assets
                 return Array.Empty<uint>();
             }
 
-            var reader = new StackDataReader((IntPtr)(entry.Address + entry.Offset), entry.Length);
             width = 44;
             height = 44;
+
+            if (entry.File != null)
+                file = entry.File;
+
+            file.Seek(entry.Offset, SeekOrigin.Begin);
 
             var data = new uint[width * height];
 
@@ -106,7 +110,7 @@ namespace ClassicUO.Assets
 
                 for (int j = start; j < end; ++j)
                 {
-                    data[pos++] = HuesHelper.Color16To32(reader.ReadUInt16LE()) | 0xFF_00_00_00;
+                    data[pos++] = HuesHelper.Color16To32(file.ReadUInt16()) | 0xFF_00_00_00;
                 }
             }
 
@@ -117,14 +121,14 @@ namespace ClassicUO.Assets
 
                 for (int j = i; j < end; ++j)
                 {
-                    data[pos++] = HuesHelper.Color16To32(reader.ReadUInt16LE()) | 0xFF_00_00_00;
+                    data[pos++] = HuesHelper.Color16To32(file.ReadUInt16()) | 0xFF_00_00_00;
                 }
             }
 
             return data;
         }
 
-        private static unsafe uint[] LoadArt(ref readonly UOFileIndex entry, out short width, out short height)
+        private static unsafe uint[] LoadArt(UOFile file, ref readonly UOFileIndex entry, out short width, out short height)
         {
             if (entry.Length == 0)
             {
@@ -134,53 +138,61 @@ namespace ClassicUO.Assets
                 return Array.Empty<uint>();
             }
 
-            var reader = new StackDataReader((IntPtr)(entry.Address.ToInt64() + entry.Offset), entry.Length);
+            if (entry.File != null)
+                file = entry.File;
 
-            var flags = reader.ReadUInt32LE();
-            width = reader.ReadInt16LE();
-            height = reader.ReadInt16LE();
+            file.Seek(entry.Offset, SeekOrigin.Begin);
+
+            var flags = file.ReadUInt32();
+            width = file.ReadInt16();
+            height = file.ReadInt16();
+
+            var buf = new byte[entry.Length];
+            file.Read(buf);
 
             var data = new uint[width * height];
 
-            ushort* ptr = (ushort*)reader.PositionAddress;
-            ushort* lineoffsets = ptr;
-            byte* datastart = (byte*)ptr + height * 2;
-            int x = 0;
-            int y = 0;
-            ptr = (ushort*)(datastart + lineoffsets[0] * 2);
-
-            while (y < height)
+            fixed (byte* startPtr = buf)
             {
-                ushort xoffs = *ptr++;
-                ushort run = *ptr++;
+                ushort* lineoffsets = (ushort*)startPtr;
+                byte* datastart = (byte*)startPtr + height * 2;
+                int x = 0;
+                int y = 0;
+                var ptr = (ushort*)(datastart + lineoffsets[0] * 2);
 
-                if (xoffs + run >= 2048)
+                while (y < height)
                 {
-                    break;
-                }
+                    ushort xoffs = *ptr++;
+                    ushort run = *ptr++;
 
-                if (xoffs + run != 0)
-                {
-                    x += xoffs;
-                    int pos = y * width + x;
-
-                    for (int j = 0; j < run; ++j, ++pos)
+                    if (xoffs + run >= 2048)
                     {
-                        ushort val = *ptr++;
-
-                        if (val != 0)
-                        {
-                            data[pos] = HuesHelper.Color16To32(val) | 0xFF_00_00_00;
-                        }
+                        break;
                     }
 
-                    x += run;
-                }
-                else
-                {
-                    x = 0;
-                    ++y;
-                    ptr = (ushort*)(datastart + lineoffsets[y] * 2);
+                    if (xoffs + run != 0)
+                    {
+                        x += xoffs;
+                        int pos = y * width + x;
+
+                        for (int j = 0; j < run; ++j, ++pos)
+                        {
+                            ushort val = *ptr++;
+
+                            if (val != 0)
+                            {
+                                data[pos] = HuesHelper.Color16To32(val) | 0xFF_00_00_00;
+                            }
+                        }
+
+                        x += run;
+                    }
+                    else
+                    {
+                        x = 0;
+                        ++y;
+                        ptr = (ushort*)(datastart + lineoffsets[y] * 2);
+                    }
                 }
             }
 
@@ -231,9 +243,9 @@ namespace ClassicUO.Assets
             ref var entry = ref _file.GetValidRefEntry((int)idx);
             var loadLand = idx < 0x4000;
             var pixels = loadLand ? 
-                LoadLand(in entry, out var width, out var height)
+                LoadLand(_file, in entry, out var width, out var height)
                 : 
-                LoadArt(in entry, out width, out height);
+                LoadArt(_file, in entry, out width, out height);
 
             return new ArtInfo()
             {

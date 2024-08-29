@@ -150,22 +150,34 @@ namespace ClassicUO.Assets
 
             ushort color = entry.Hue;
 
-            var reader = new StackDataReader((IntPtr)(entry.Address.ToInt64() + entry.Offset), entry.Length);
+            var file = _file;
+            if (entry.File != null)
+                file = entry.File;
+
+            file.Seek(entry.Offset, SeekOrigin.Begin);
+
+            var buf = new byte[entry.Length];
+            file.Read(buf);
+
+            var reader = new StackDataReader(buf);
             var w = (uint)entry.Width;
             var h = (uint)entry.Height;
 
             if (entry.CompressionFlag >= CompressionType.Zlib)
             {
                 var dbuf = new byte[entry.DecompressedLength];
-
-                var result = ZLib.Decompress(reader.Buffer.Slice(reader.Position, entry.Length), dbuf);
-                if (result != ZLib.ZLibError.Okay)
+                var result = ClassicUO.Utility.ZLib.Decompress(reader.Buffer.Slice(reader.Position), dbuf);
+                if (result != Utility.ZLib.ZLibError.Ok)
                 {
                     return default;
                 }
 
-                var output = entry.CompressionFlag == CompressionType.ZlibBwt ? BwtDecompress.Decompress(dbuf) : dbuf;
-                reader = new StackDataReader(output);
+                if (entry.CompressionFlag == CompressionType.ZlibBwt)
+                {
+                    dbuf = ClassicUO.Utility.BwtDecompress.Decompress(dbuf);
+                }
+
+                reader = new StackDataReader(dbuf);
                 w = reader.ReadUInt32LE();
                 h = reader.ReadUInt32LE();
             }

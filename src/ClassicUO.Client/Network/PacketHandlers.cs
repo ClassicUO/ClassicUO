@@ -5407,7 +5407,7 @@ namespace ClassicUO.Network
                         ZLib.Decompress(p.Buffer.Slice(p.Position, (int)clen), decData.AsSpan(0, dlen));
                         p.Skip((int)clen);
 
-                        StackDataReader reader = new StackDataReader(decData.AsSpan(0, dlen));
+                        var reader = new StackDataReader(decData.AsSpan(0, dlen));
 
                         for (int i = 0; i < linesNum; ++i)
                         {

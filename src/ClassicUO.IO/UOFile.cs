@@ -30,38 +30,31 @@
 
 #endregion
 
-#define USE_MMF
-
 using ClassicUO.Utility.Logging;
 using System;
 using System.IO;
-using System.IO.MemoryMappedFiles;
 
 namespace ClassicUO.IO
 {
-    public unsafe class UOFile : IDisposable
+    public class UOFile : MMFileReader
     {
-        private IntPtr _ptr;
-
-        public UOFile(string filepath, bool loadFile = false)
+        public UOFile(string filepath) : base(File.Open(filepath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
         {
             FilePath = filepath;
             Entries = Array.Empty<UOFileIndex>();
 
-            if (loadFile)
+            Log.Trace($"Loading file:\t\t{filepath}");
+
+            if (!File.Exists(filepath))
             {
-                Load();
+                Log.Error($"{filepath} not exists.");
             }
         }
 
-#if USE_MMF
-        protected MemoryMappedViewAccessor _accessor;
-        protected MemoryMappedFile _file;
-#endif
 
-        public long Length { get; private set; }
         public string FilePath { get; }
         public UOFileIndex[] Entries;
+
 
         public ref UOFileIndex GetValidRefEntry(int index)
         {
@@ -80,81 +73,13 @@ namespace ClassicUO.IO
             return ref entry;
         }
 
-
-        public StackDataReader GetReader()
-            => new (new ReadOnlySpan<byte>(_ptr.ToPointer(), (int) Length));
-
-        protected void SetPtr(IntPtr ptr, long len)
-        {
-            _ptr = ptr;
-            Length = len;
-        }
-
-        protected virtual void Load()
-        {
-            Log.Trace($"Loading file:\t\t{FilePath}");
-
-            FileInfo fileInfo = new FileInfo(FilePath);
-
-            if (!fileInfo.Exists)
-            {
-                Log.Error($"{FilePath}  not exists.");
-
-                return;
-            }
-
-            long size = fileInfo.Length;
-
-            if (size > 0)
-            {
-#if USE_MMF
-                _file = MemoryMappedFile.CreateFromFile
-                (
-                    File.Open(fileInfo.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite),
-                    null,
-                    0,
-                    MemoryMappedFileAccess.Read,
-                    HandleInheritability.None,
-                    false
-                );
-
-                _accessor = _file.CreateViewAccessor(0, size, MemoryMappedFileAccess.Read);
-
-                byte* ptr = null;
-
-                try
-                {
-                    _accessor.SafeMemoryMappedViewHandle.AcquirePointer(ref ptr);
-                    _ptr = (IntPtr)ptr;
-                    Length = (long)_accessor.SafeMemoryMappedViewHandle.ByteLength;
-                }
-                catch
-                {
-                    _accessor.SafeMemoryMappedViewHandle.ReleasePointer();
-
-                    throw new Exception("Something goes wrong...");
-                }
-#endif
-            }
-            else
-            {
-                Log.Error($"{FilePath}  size must be > 0");
-            }
-        }
-
         public virtual void FillEntries()
         {
         }
 
-        public virtual void Dispose()
+        public override void Dispose()
         {
-#if USE_MMF
-            _accessor.SafeMemoryMappedViewHandle.ReleasePointer();
-            _accessor.Dispose();
-            _file.Dispose();
-            _ptr = 0;
-            Length = 0;
-#endif
+            base.Dispose();
             Log.Trace($"Unloaded:\t\t{FilePath}");
         }
     }

@@ -59,10 +59,13 @@ namespace ClassicUO.Assets
                     // the scope of this try/catch is to avoid unexpected crashes if servers redestribuite wrong verdata
                     try
                     {
-                        var reader = File.GetReader();
-                        int len = reader.ReadInt32LE();
+                        var len = File.ReadInt32();
+                        Patches = new UOFileIndex5D[len];
 
-                        Patches = MemoryMarshal.Cast<byte, UOFileIndex5D>(reader.ReadArray(len * sizeof(UOFileIndex5D))).ToArray();
+                        for (var i = 0; i < len; i++)
+                        {
+                            Patches[i] = File.Read<UOFileIndex5D>();
+                        }
                     }
                     catch (Exception ex)
                     {

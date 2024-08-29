@@ -33,8 +33,10 @@
 using ClassicUO.IO;
 using ClassicUO.Utility;
 using System;
+using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace ClassicUO.Assets
@@ -64,17 +66,24 @@ namespace ClassicUO.Assets
                     }
 
                     var file = new UOFileMul(path);
-                    var reader = file.GetReader();
                     var entries = new List<SpeechEntry>();
 
-                    while (reader.Remaining > 0)
+                    var buf = new byte[256];
+                    while (file.Position < file.Length)
                     {
-                        int id = reader.ReadUInt16BE();
-                        int length = reader.ReadUInt16BE();
+                        file.Read(buf.AsSpan(0, sizeof(ushort) * 2));
+                        var id = BinaryPrimitives.ReadUInt16BigEndian(buf);
+                        var length = BinaryPrimitives.ReadUInt16BigEndian(buf.AsSpan(sizeof(ushort)));
 
                         if (length > 0)
                         {
-                            entries.Add(new SpeechEntry(id, string.Intern(reader.ReadUTF8(length))));
+                            if (length > buf.Length)
+                                buf = new byte[length];
+
+                            file.Read(buf.AsSpan(0, length));
+                            var text = string.Intern(Encoding.UTF8.GetString(buf.AsSpan(0, length)));
+                            
+                            entries.Add(new SpeechEntry(id, text));
                         }
                     }
 

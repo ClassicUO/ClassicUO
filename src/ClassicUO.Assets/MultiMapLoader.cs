@@ -66,7 +66,7 @@ namespace ClassicUO.Assets
 
                     if (File.Exists(path))
                     {
-                        _file = new UOFile(path, true);
+                        _file = new UOFile(path);
                     }
 
                     _facets = Directory.GetFiles(FileManager.BasePath, "*.mul", SearchOption.TopDirectoryOnly)
@@ -97,11 +97,10 @@ namespace ClassicUO.Assets
                 return default;
             }
 
-            var reader = _file.GetReader();
-            reader.Seek(0);
+            _file.Seek(0, SeekOrigin.Begin);
 
-            int w = reader.ReadInt32LE();
-            int h = reader.ReadInt32LE();
+            int w = _file.ReadInt32();
+            int h = _file.ReadInt32();
 
             if (w < 1 || h < 1)
             {
@@ -142,9 +141,9 @@ namespace ClassicUO.Assets
             int maxPixelValue = 1;
             int startHeight = starty * pheight;
 
-            while (reader.Position < _file.Length)
+            while (_file.Position < _file.Length)
             {
-                byte pic = reader.ReadUInt8();
+                byte pic = _file.ReadUInt8();
                 byte size = (byte) (pic & 0x7F);
                 bool colored = (pic & 0x80) != 0;
 
@@ -245,11 +244,11 @@ namespace ClassicUO.Assets
                 return default;
             }
 
-            var reader = _facets[facet].GetReader();
-            reader.Seek(0);
+            var file = _facets[facet];
+            file.Seek(0, SeekOrigin.Begin);
 
-            int w = reader.ReadUInt16LE();
-            int h = reader.ReadUInt16LE();
+            int w = file.ReadUInt16();
+            int h = file.ReadUInt16();
 
             if (w < 1 || h < 1)
             {
@@ -271,13 +270,13 @@ namespace ClassicUO.Assets
             {
                 int x = 0;
 
-                int colorCount = reader.ReadInt32LE() / 3;
+                int colorCount = file.ReadInt32() / 3;
 
                 for (int i = 0; i < colorCount; i++)
                 {
-                    int size = reader.ReadUInt8();
+                    int size = file.ReadUInt8();
 
-                    uint color = HuesHelper.Color16To32(reader.ReadUInt16LE()) | 0xFF_00_00_00;
+                    uint color = HuesHelper.Color16To32(file.ReadUInt16()) | 0xFF_00_00_00;
 
                     for (int j = 0; j < size; j++)
                     {

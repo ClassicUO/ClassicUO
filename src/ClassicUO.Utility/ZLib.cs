@@ -97,7 +97,7 @@ namespace ClassicUO.Utility
             StreamError = -2,
             FileError = -1,
 
-            Okay = 0,
+            Ok = 0,
 
             StreamEnd = 1,
             NeedDictionary = 2
@@ -238,7 +238,7 @@ namespace ClassicUO.Utility
             {
                 ZLibManaged.Compress(dest, ref destLength, source);
 
-                return ZLibError.Okay;
+                return ZLibError.Ok;
             }
 
             public ZLibError Compress(byte[] dest, ref int destLength, byte[] source, int sourceLength, ZLibQuality quality)
@@ -258,7 +258,7 @@ namespace ClassicUO.Utility
                     destLength
                 );
 
-                return ZLibError.Okay;
+                return ZLibError.Ok;
             }
 
             public ZLibError Decompress(IntPtr dest, ref int destLength, IntPtr source, int sourceLength)
@@ -272,7 +272,7 @@ namespace ClassicUO.Utility
                     destLength
                 );
 
-                return ZLibError.Okay;
+                return ZLibError.Ok;
             }
         }
     }
