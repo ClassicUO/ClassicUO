@@ -108,9 +108,7 @@ namespace ClassicUO.Assets
                 return default;
             }
 
-            var reader = new StackDataReader(entry.Address, (int)entry.FileSize);
-            reader.Seek(entry.Offset);
-
+            _file.Seek(entry.Offset, SeekOrigin.Begin);
             var size = entry.Length == 0x2000 ? 64 : 128;
             var data = new uint[size * size];
 
@@ -120,7 +118,7 @@ namespace ClassicUO.Assets
 
                 for (int j = 0; j < size; ++j)
                 {
-                    data[pos + j] = HuesHelper.Color16To32(reader.ReadUInt16LE()) | 0xFF_00_00_00;
+                    data[pos + j] = HuesHelper.Color16To32(_file.ReadUInt16()) | 0xFF_00_00_00;
                 }
             }
 

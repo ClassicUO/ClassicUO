@@ -174,12 +174,15 @@ namespace ClassicUO.Assets
                         if (FileManager.IsUOPInstallation && File.Exists(path))
                         {
                             _filesMap[i] = new UOFileUop(path, $"build/map{i}legacymul/{{0:D8}}.dat");
+                            _filesMap[i].FillEntries();
 
                             path = FileManager.GetUOFilePath($"map{i}xLegacyMUL.uop");
                             if (File.Exists(path))
                             {
                                 _filesMapX[i] = new UOFileUop(path, $"build/map{i}legacymul/{{0:D8}}.dat");
+                                _filesMapX[i].FillEntries();
                             }
+
 
                             foundOneMap = true;
                         }
@@ -322,24 +325,15 @@ namespace ClassicUO.Assets
                 staticfile = _filesStatics[0];
             }
 
-            var reader = file.GetReader();
-            var idxReader = fileidx.GetReader();
-            var staticsReader = staticfile.GetReader();
 
-            ulong staticidxaddress = (ulong)idxReader.StartAddress;
-            ulong endstaticidxaddress = staticidxaddress + (ulong) fileidx.Length;
-            ulong staticaddress = (ulong)staticsReader.StartAddress;
-            ulong endstaticaddress = staticaddress + (ulong) staticfile.Length;
-            ulong mapddress = (ulong) reader.StartAddress;
-            ulong endmapaddress = mapddress + (ulong) file.Length;
             ulong uopoffset = 0;
             int fileNumber = -1;
             bool isuop = file is UOFileUop;
 
+            Span<StaidxBlock> statics = stackalloc StaidxBlock[1];
+
             for (int block = 0; block < maxblockcount; block++)
             {
-                ulong realmapaddress = 0, realstaticaddress = 0;
-                uint realstaticcount = 0;
                 int blocknum = block;
 
                 if (isuop)
@@ -354,50 +348,36 @@ namespace ClassicUO.Assets
 
                         if (shifted < uop.Entries.Length)
                         {
-                            uopoffset = (ulong) uop.Entries[shifted].Offset;
-                            //var hash = UOFileUop.CreateHash(string.Format(uop.Pattern, shifted));
-
-                            //if (uop.TryGetUOPData(hash, out var dataIndex))
-                            //{
-                            //    uopoffset = (ulong)dataIndex.Offset;
-                            //}
+                            uopoffset = (ulong)uop.Entries[shifted].Offset;
                         }
                     }
                 }
 
-                ulong address = mapddress + uopoffset + (ulong) (blocknum * mapblocksize);
+                var mapPos = uopoffset + (ulong)(blocknum * mapblocksize);
+                var staticIdxPos = (ulong)(block * staticidxblocksize);
+                var staticPos = 0ul;
+                var staticCount = 0u;
 
-                if (address < endmapaddress)
+                fileidx.Seek(block * staticidxblocksize, SeekOrigin.Begin);
+                
+                var st = fileidx.Read<StaidxBlock>();
+                
+                if (st.Size > 0 && st.Position != 0xFFFF_FFFF)
                 {
-                    realmapaddress = address;
-                }
-
-                ulong stidxaddress = staticidxaddress + (ulong) (block * staticidxblocksize);
-                StaidxBlock* bb = (StaidxBlock*) stidxaddress;
-
-                if (stidxaddress < endstaticidxaddress && bb->Size > 0 && bb->Position != 0xFFFFFFFF)
-                {
-                    ulong address1 = staticaddress + bb->Position;
-
-                    if (address1 < endstaticaddress)
-                    {
-                        realstaticaddress = address1;
-                        realstaticcount = (uint) (bb->Size / staticblocksize);
-
-                        if (realstaticcount > 1024)
-                        {
-                            realstaticcount = 1024;
-                        }
-                    }
+                    staticPos = st.Position;
+                    staticCount = Math.Min(1024, (uint)(st.Size / staticblocksize));
                 }
 
                 ref IndexMap data = ref BlockData[i][block];
-                data.MapAddress = realmapaddress;
-                data.StaticAddress = realstaticaddress;
-                data.StaticCount = realstaticcount;
-                data.OriginalMapAddress = realmapaddress;
-                data.OriginalStaticAddress = realstaticaddress;
-                data.OriginalStaticCount = realstaticcount;
+                data.MapAddress = mapPos;
+                data.StaticAddress = staticPos;
+                data.StaticCount = staticCount;
+                data.OriginalMapAddress = mapPos;
+                data.OriginalStaticAddress = staticPos;
+                data.OriginalStaticCount = staticCount;
+
+                data.MapFile = file;
+                data.StaticFile = staticfile;
             }
 
             if (isuop)
@@ -407,7 +387,7 @@ namespace ClassicUO.Assets
             }
         }
 
-        public void PatchMapBlock(ulong block, ulong address)
+        public void PatchMapBlock(UOFile file, ulong block, ulong address)
         {
             int w = MapBlocksSize[0, 0];
             int h = MapBlocksSize[0, 1];
@@ -419,12 +399,13 @@ namespace ClassicUO.Assets
                 return;
             }
 
+            BlockData[0][block].MapFile = file;
             BlockData[0][block].OriginalMapAddress = address;
             BlockData[0][block].MapAddress = address;
         }
 
 
-        public unsafe void PatchStaticBlock(ulong block, ulong address, uint count)
+        public unsafe void PatchStaticBlock(UOFile file, ulong block, ulong address, uint count)
         {
             int w = MapBlocksSize[0, 0];
             int h = MapBlocksSize[0, 1];
@@ -436,6 +417,7 @@ namespace ClassicUO.Assets
                 return;
             }
 
+            BlockData[0][block].StaticFile = file;
             BlockData[0][block].StaticAddress = BlockData[0][block].OriginalStaticAddress = address;
 
             count = (uint) (count / (sizeof(StaidxBlockVerdata)));
@@ -482,9 +464,9 @@ namespace ClassicUO.Assets
                     continue;
                 }
 
-                int mapPatchesCount = (int) reader.ReadUInt32BE();
+                int mapPatchesCount = (int)reader.ReadUInt32BE();
                 MapPatchCount[i] = mapPatchesCount;
-                int staticPatchesCount = (int) reader.ReadUInt32BE();
+                int staticPatchesCount = (int)reader.ReadUInt32BE();
                 StaticPatchCount[i] = staticPatchesCount;
 
                 int w = MapBlocksSize[i, 0];
@@ -502,26 +484,24 @@ namespace ClassicUO.Assets
                         continue;
                     }
 
-                    mapPatchesCount = Math.Min(mapPatchesCount, (int) difl.Length >> 2);
+                    mapPatchesCount = Math.Min(mapPatchesCount, (int)difl.Length >> 2);
 
-                    var diflReader = difl.GetReader();
-                    var difReader = dif.GetReader();
-
-                    diflReader.Seek(0);
-                    difReader.Seek(0);
+                    difl.Seek(0, SeekOrigin.Begin);
+                    dif.Seek(0, SeekOrigin.Begin);
 
                     for (int j = 0; j < mapPatchesCount; j++)
                     {
-                        uint blockIndex = diflReader.ReadUInt32LE();
+                        uint blockIndex = difl.ReadUInt32();
 
                         if (blockIndex < maxBlockCount)
                         {
-                            BlockData[idx][blockIndex].MapAddress = (ulong)difReader.PositionAddress;
+                            BlockData[idx][blockIndex].MapFile = dif;
+                            BlockData[idx][blockIndex].MapAddress = (ulong)dif.Position;
 
                             result = true;
                         }
 
-                        difReader.Skip(sizeof(MapBlock));
+                        dif.Seek(sizeof(MapBlock), SeekOrigin.Current);
                     }
                 }
 
@@ -535,54 +515,38 @@ namespace ClassicUO.Assets
                         continue;
                     }
 
-                    ulong startAddress = (ulong) _staDif[i].GetReader().StartAddress;
+                    staticPatchesCount = Math.Min(staticPatchesCount, (int)difl.Length >> 2);
 
-                    staticPatchesCount = Math.Min(staticPatchesCount, (int) difl.Length >> 2);
-
-                    var diflReader = difl.GetReader();
-                    var difiReader = difi.GetReader();
-
-                    diflReader.Seek(0);
-                    difiReader.Seek(0);
+                    difl.Seek(0, SeekOrigin.Begin);
+                    difi.Seek(0, SeekOrigin.Begin);
 
                     int sizeOfStaicsBlock = sizeof(StaticsBlock);
                     int sizeOfStaidxBlock = sizeof(StaidxBlock);
 
                     for (int j = 0; j < staticPatchesCount; j++)
                     {
-                        if (diflReader.Remaining <= 0 || difiReader.Remaining <= 0)
+                        if (difl.Position >= difl.Length || difi.Position >= difi.Length)
                         {
                             break;
                         }
 
-                        uint blockIndex = diflReader.ReadUInt32LE();
-
-                        StaidxBlock* sidx = (StaidxBlock*)difiReader.PositionAddress;
-
-                        difiReader.Skip(sizeOfStaidxBlock);
+                        uint blockIndex = difl.ReadUInt32();
+                        var st = difi.Read<StaidxBlock>();
 
                         if (blockIndex < maxBlockCount)
                         {
                             ulong realStaticAddress = 0;
-                            int realStaticCount = 0;
+                            uint realStaticCount = 0;
 
-                            if (sidx->Size > 0 && sidx->Position != 0xFFFF_FFFF)
+                            if (st.Size > 0 && st.Position != 0xFFFF_FFFF)
                             {
-                                realStaticAddress = startAddress + sidx->Position;
-                                realStaticCount = (int) (sidx->Size / sizeOfStaicsBlock);
-
-                                if (realStaticCount > 0)
-                                {
-                                    if (realStaticCount > 1024)
-                                    {
-                                        realStaticCount = 1024;
-                                    }
-                                }
+                                realStaticAddress = st.Position;
+                                realStaticCount = Math.Min(1024, (uint)(st.Size / sizeOfStaicsBlock));
                             }
 
+                            BlockData[idx][blockIndex].StaticFile = difi;
                             BlockData[idx][blockIndex].StaticAddress = realStaticAddress;
-
-                            BlockData[idx][blockIndex].StaticCount = (uint) realStaticCount;
+                            BlockData[idx][blockIndex].StaticCount = realStaticCount;
 
                             result = true;
                         }
@@ -652,7 +616,7 @@ namespace ClassicUO.Assets
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public ref struct StaticsBlock
+    public struct StaticsBlock
     {
         public ushort Color;
         public byte X;
@@ -662,7 +626,7 @@ namespace ClassicUO.Assets
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public ref struct StaidxBlock
+    public struct StaidxBlock
     {
         public uint Position;
         public uint Size;
@@ -678,33 +642,24 @@ namespace ClassicUO.Assets
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public ref struct MapCells
+    public struct MapCells
     {
         public ushort TileID;
         public sbyte Z;
     }
 
-    //[StructLayout(LayoutKind.Sequential, Pack = 1)]
-    //public struct MapBlock
-    //{
-    //    public readonly uint Header;
-    //    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 64)]
-    //    public MapCells[] Cells;
-    //}
-
-    [StructLayout(LayoutKind.Sequential, Pack = 1, Size = 4 + 64 * 3)]
-    public ref struct MapBlock
+    [InlineArray(64)]
+    public struct MapCellsArray
     {
-        public uint Header;
-        public unsafe MapCells* Cells;
+        private MapCells _a0;
     }
 
-    //[StructLayout(LayoutKind.Sequential, Pack = 1, Size = 4 + 64 * 3)]
-    //public struct MapBlock2
-    //{
-    //    public readonly uint Header;
-    //    public IntPtr Cells;
-    //}
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct MapBlock
+    {
+        public uint Header;
+        public unsafe MapCellsArray Cells;
+    }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct RadarMapcells
@@ -723,6 +678,7 @@ namespace ClassicUO.Assets
 
     public struct IndexMap
     {
+        public UOFile MapFile, StaticFile;
         public ulong MapAddress;
         public ulong OriginalMapAddress;
         public ulong OriginalStaticAddress;

@@ -59,38 +59,28 @@ namespace ClassicUO.Assets
             (
                 () =>
                 {
-                    string path = FileManager.GetUOFilePath("hues.mul");
+                    var path = FileManager.GetUOFilePath("hues.mul");
 
                     FileSystemHelper.EnsureFileExists(path);
 
-                    UOFileMul file = new UOFileMul(path);
-                    int groupSize = Marshal.SizeOf<HuesGroup>();
+                    using var file = new UOFileMul(path);
+                    int groupSize = Unsafe.SizeOf<HuesGroup>();
                     int entrycount = (int) file.Length / groupSize;
                     HuesCount = entrycount * 8;
                     HuesRange = new HuesGroup[entrycount];
-                    var reader = file.GetReader();
-                    ulong addr = (ulong)reader.StartAddress;
 
                     for (int i = 0; i < entrycount; i++)
                     {
-                        HuesRange[i] = Marshal.PtrToStructure<HuesGroup>((IntPtr) (addr + (ulong) (i * groupSize)));
+                        HuesRange[i] = file.Read<HuesGroup>();
                     }
 
                     path = FileManager.GetUOFilePath("radarcol.mul");
 
                     FileSystemHelper.EnsureFileExists(path);
 
-                    var radarcol = new UOFileMul(path);
-                    RadarCol = new ushort[(int)(radarcol.Length >> 1)];
-
-                    reader = radarcol.GetReader();
-                    fixed (ushort* ptr = RadarCol)
-                    {
-                        Unsafe.CopyBlockUnaligned((void*)(byte*)ptr, reader.PositionAddress.ToPointer(), (uint)radarcol.Length);
-                    }
-                    
-                    file.Dispose();
-                    radarcol.Dispose();
+                    using var radarcol = new UOFileMul(path);
+                    RadarCol = new ushort[radarcol.Length / sizeof(ushort)];
+                    radarcol.Read(MemoryMarshal.AsBytes<ushort>(RadarCol));
                 }
             );
         }
@@ -286,44 +276,51 @@ namespace ClassicUO.Assets
         }
     }
 
+
+    [InlineArray(32)]
+    public struct ColorTableArray
+    {
+        private ushort _a0;
+    }
+
+    [InlineArray(8)]
+    public struct HuesBlockArray
+    {
+        private HuesBlock _a0;
+    }
+
+
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct HuesBlock
     {
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
-        public ushort[] ColorTable;
+        public ColorTableArray ColorTable;
         public ushort TableStart;
         public ushort TableEnd;
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 20)]
-        public char[] Name;
+        public unsafe fixed byte Name[20];
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct HuesGroup
     {
         public uint Header;
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 8)]
-        public HuesBlock[] Entries;
+        public HuesBlockArray Entries;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public readonly struct VerdataHuesBlock
+    public struct VerdataHuesBlock
     {
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
-        public readonly ushort[] ColorTable;
-        public readonly ushort TableStart;
-        public readonly ushort TableEnd;
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 20)]
-        public readonly char[] Name;
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
-        public readonly ushort[] Unk;
+        public ColorTableArray ColorTable;
+        public ushort TableStart;
+        public ushort TableEnd;
+        public unsafe fixed byte Name[20];
+        public unsafe fixed ushort Unk[20];
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public readonly struct VerdataHuesGroup
+    public struct VerdataHuesGroup
     {
         public readonly uint Header;
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 8)]
-        public readonly VerdataHuesBlock[] Entries;
+        public HuesBlockArray Entries;
     }
 
     public struct FloatHues

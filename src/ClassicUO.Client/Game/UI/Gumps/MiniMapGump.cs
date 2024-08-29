@@ -43,6 +43,7 @@ using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System.Runtime.CompilerServices;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -282,6 +283,9 @@ namespace ClassicUO.Game.UI.Gumps
             table[1].X = 0;
             table[1].Y = 1;
 
+            Span<byte> buf = stackalloc byte[sizeof(MapBlock)];
+            Span<byte> buf2 = stackalloc byte[sizeof(StaticsBlock)];
+
             for (int i = minBlockX; i <= maxBlockX; i++)
             {
                 int blockIndexOffset = i * mapBlockHeight;
@@ -295,18 +299,17 @@ namespace ClassicUO.Game.UI.Gumps
                         break;
                     }
 
-                    ref IndexMap indexMap = ref World.Map.GetIndex(i, j);
+                    ref var indexMap = ref World.Map.GetIndex(i, j);
 
                     if (indexMap.MapAddress == 0)
                     {
                         break;
                     }
 
-                    MapBlock* mp = (MapBlock*)indexMap.MapAddress;
-                    MapCells* cells = (MapCells*)&mp->Cells;
-                    StaticsBlock* sb = (StaticsBlock*)indexMap.StaticAddress;
-                    uint staticCount = indexMap.StaticCount;
-
+                    indexMap.MapFile.Seek((long)indexMap.MapAddress, System.IO.SeekOrigin.Begin);
+                    indexMap.MapFile.Read(buf);
+                    var cells = Unsafe.AsRef<MapBlock>(Unsafe.AsPointer(ref buf[0])).Cells;
+                    
                     Chunk block = World.Map.GetChunk(blockIndex);
                     int realBlockX = i << 3;
                     int realBlockY = j << 3;
@@ -317,14 +320,17 @@ namespace ClassicUO.Game.UI.Gumps
 
                         for (int y = 0; y < 8; y++)
                         {
-                            ref MapCells cell = ref cells[(y << 3) + x];
+                            ref var cell = ref cells[(y << 3) + x];
                             int color = cell.TileID;
                             bool isLand = true;
                             int z = cell.Z;
 
-                            for (int c = 0; c < staticCount; ++c)
+                            indexMap.StaticFile.Seek((long)indexMap.StaticAddress, System.IO.SeekOrigin.Begin);
+
+                            for (int c = 0; c < indexMap.StaticCount; ++c)
                             {
-                                ref StaticsBlock stblock = ref sb[c];
+                                indexMap.StaticFile.Read(buf2);
+                                ref var stblock = ref Unsafe.AsRef<StaticsBlock>(Unsafe.AsPointer(ref buf2[0]));
 
                                 if (
                                     stblock.X == x

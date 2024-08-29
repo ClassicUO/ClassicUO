@@ -36,6 +36,7 @@ using ClassicUO.Utility.Logging;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -239,22 +240,18 @@ namespace ClassicUO.Assets
             }
 
             ref var entry = ref _file.GetValidRefEntry(sound);
-
-            var reader = new StackDataReader(entry.Address, (int)entry.FileSize);
-            reader.Seek(entry.Offset);
-
-            long offset = reader.Position;
-
-            if (offset < 0 || entry.Length <= 0)
-            {
+            if (entry.Length <= 0)
                 return false;
-            }
 
-            reader.Seek(offset);
+            _file.Seek(entry.Offset, SeekOrigin.Begin);
 
-            var current = reader.Position;
-            name = reader.ReadUTF8(40);
-            data = reader.ReadArray(entry.Length - 40);            
+            Span<byte> buf = stackalloc byte[40];
+            _file.Read(buf);
+
+            name = Encoding.UTF8.GetString(buf);
+            data = new byte[entry.Length - 40];
+            _file.Read(data);
+
             return true;
         }
 

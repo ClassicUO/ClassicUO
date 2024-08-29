@@ -70,9 +70,8 @@ namespace ClassicUO.Assets
                 return default;
             }
 
+            _file.Seek(entry.Offset, System.IO.SeekOrigin.Begin);
             var buffer = new uint[entry.Width * entry.Height];
-            var reader = new StackDataReader(entry.Address, (int)entry.FileSize);
-            reader.Seek(entry.Offset);
 
             for (int i = 0; i < entry.Height; i++)
             {
@@ -80,7 +79,7 @@ namespace ClassicUO.Assets
 
                 for (int j = 0; j < entry.Width; j++)
                 {
-                    ushort val = reader.ReadUInt8();
+                    ushort val = _file.ReadUInt8();
                     // Light can be from -31 to 31. When they are below 0 they are bit inverted
                     if (val > 0x1F)
                     {

@@ -62,7 +62,6 @@ namespace ClassicUO.Assets
                     FileSystemHelper.EnsureFileExists(path);
 
                     var tileData = new UOFileMul(path);
-                    var reader = tileData.GetReader();
 
                     bool isold = FileManager.Version < ClientVersion.CV_7090;
                     const int LAND_SIZE = 512;
@@ -76,26 +75,30 @@ namespace ClassicUO.Assets
                         staticscount = 2048;
                     }
 
-                    reader.Seek(0);
+                    tileData.Seek(0, System.IO.SeekOrigin.Begin);
 
                     _landData = new LandTiles[ArtLoader.MAX_LAND_DATA_INDEX_COUNT];
                     _staticData = new StaticTiles[staticscount * 32];
 
+                    Span<byte> buf = stackalloc byte[20];
+
                     for (int i = 0; i < 512; i++)
                     {
-                        reader.Skip(4);
+                        tileData.ReadUInt32();
 
                         for (int j = 0; j < 32; j++)
                         {
-                            if (reader.Position + (isold ? 4 : 8) + 2 + 20 > tileData.Length)
+                            if (tileData.Position + (isold ? 4 : 8) + 2 + 20 > tileData.Length)
                             {
                                 goto END;
                             }
 
                             int idx = i * 32 + j;
-                            ulong flags = isold ? reader.ReadUInt32LE() : reader.ReadUInt64LE();
-                            ushort textId = reader.ReadUInt16LE();
-                            var name = string.Intern(reader.ReadUTF8(20).TrimEnd('\0'));
+                            ulong flags = isold ? tileData.ReadUInt32() : tileData.ReadUInt64();
+                            ushort textId = tileData.ReadUInt16();
+
+                            tileData.Read(buf);
+                            var name = string.Intern(Encoding.UTF8.GetString(buf).TrimEnd('\0'));
                             LandData[idx] = new LandTiles(flags, textId, name);
                         }
                     }
@@ -104,31 +107,33 @@ namespace ClassicUO.Assets
 
                     for (int i = 0; i < staticscount; i++)
                     {
-                        if (reader.Position >= tileData.Length)
+                        if (tileData.Position >= tileData.Length)
                         {
                             break;
                         }
 
-                        reader.Skip(4);
+                        tileData.ReadUInt32();
 
                         for (int j = 0; j < 32; j++)
                         {
-                            if (reader.Position + (isold ? 4 : 8) + 13 + 20 > tileData.Length)
+                            if (tileData.Position + (isold ? 4 : 8) + 13 + 20 > tileData.Length)
                             {
                                 goto END_2;
                             }
 
                             int idx = i * 32 + j;
 
-                            ulong flags = isold ? reader.ReadUInt32LE() : reader.ReadUInt64LE();
-                            byte weight = reader.ReadUInt8();
-                            byte layer = reader.ReadUInt8();
-                            int count = reader.ReadInt32LE();
-                            ushort animId = reader.ReadUInt16LE();
-                            ushort hue = reader.ReadUInt16LE();
-                            ushort lightIndex = reader.ReadUInt16LE();
-                            byte height = reader.ReadUInt8();
-                            var name = string.Intern(reader.ReadUTF8(20).TrimEnd('\0'));
+                            ulong flags = isold ? tileData.ReadUInt32() : tileData.ReadUInt64();
+                            byte weight = tileData.ReadUInt8();
+                            byte layer = tileData.ReadUInt8();
+                            int count = tileData.ReadInt32();
+                            ushort animId = tileData.ReadUInt16();
+                            ushort hue = tileData.ReadUInt16();
+                            ushort lightIndex = tileData.ReadUInt16();
+                            byte height = tileData.ReadUInt8();
+
+                            tileData.Read(buf);
+                            var name = string.Intern(Encoding.UTF8.GetString(buf).TrimEnd('\0'));
 
                             StaticData[idx] = new StaticTiles
                             (

@@ -42,13 +42,13 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.MemoryMappedFiles;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Runtime.InteropServices;
 
 namespace ClassicUO.Game
 {
-    public class UltimaLive
+    public sealed class UltimaLive
     {
         private const int STATICS_MEMORY_SIZE = 200000000;
         private const int CRC_LENGTH = 25;
@@ -255,11 +255,11 @@ namespace ClassicUO.Game
                         }
                         else
                         {
-                            var reader = _UL._filesIdxStatics[mapId].GetReader();
-                            reader.Seek(index);
+                            var reader = _UL._filesIdxStatics[mapId];
+                            reader.Seek(index, SeekOrigin.Begin);
 
-                            uint lookup = reader.ReadUInt32LE();
-                            uint existingStaticsLength = reader.ReadUInt32LE();
+                            uint lookup = reader.ReadUInt32();
+                            uint existingStaticsLength = reader.ReadUInt32();
 
                             //Do we have enough room to write the statics into the existing location?
                             if (existingStaticsLength >= totalLength && lookup != 0xFFFFFFFF)
@@ -566,20 +566,20 @@ namespace ClassicUO.Game
         {
             int mapId = world.Map.Index;
 
-            var staidxReader = _UL._filesIdxStatics[mapId].GetReader();
-            staidxReader.Seek(block * 12);
+            var staidxReader = _UL._filesIdxStatics[mapId];
+            staidxReader.Seek(block * 12, SeekOrigin.Begin);
 
-            uint lookup = staidxReader.ReadUInt32LE();
+            uint lookup = staidxReader.ReadUInt32();
 
-            int byteCount = Math.Max(0, staidxReader.ReadInt32LE());
+            int byteCount = Math.Max(0, staidxReader.ReadInt32());
 
             byte[] blockData = new byte[LAND_BLOCK_LENGTH + byteCount];
 
             //we prevent the system from reading beyond the end of file, causing an exception, if the data isn't there, we don't read it and leave the array blank, simple...
-            var mapReader = _UL._filesMap[mapId].GetReader();
-            mapReader.Seek(block * 196 + 4);
+            var mapReader = _UL._filesMap[mapId];
+            mapReader.Seek(block * 196 + 4, SeekOrigin.Begin);
             
-            var staticsReader = _UL._filesStatics[mapId].GetReader();
+            var staticsReader = _UL._filesStatics[mapId];
 
             for (int x = 0; x < 192; x++)
             {
@@ -595,7 +595,7 @@ namespace ClassicUO.Game
             {
                 if (lookup < staticsReader.Length)
                 {
-                    staticsReader.Seek(lookup);
+                    staticsReader.Seek(lookup, SeekOrigin.Begin);
 
                     for (int x = LAND_BLOCK_LENGTH; x < blockData.Length; x++)
                     {
@@ -655,101 +655,17 @@ namespace ClassicUO.Game
             return null;
         }
         
-        private class ULFileMul : UOFileMul
+        private sealed class ULFileMul : UOFileMul
         {
+            private readonly BinaryWriter _writer;
+
             public ULFileMul(string file, bool isStaticMul) : base(file)
             {
-                LoadFile(isStaticMul);
+                _writer = new BinaryWriter(File.Open(file, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
             }
 
-            protected override void Load() //loadentries here is for staticmul particular memory preloading
+            public override void FillEntries()
             {
-            }
-
-            private unsafe void LoadFile(bool isStaticMul)
-            {
-                FileInfo fileInfo = new FileInfo(FilePath);
-
-                if (!fileInfo.Exists)
-                {
-                    throw new FileNotFoundException(fileInfo.FullName);
-                }
-
-                uint size = (uint) fileInfo.Length;
-                Log.Trace($"UltimaLive -> ReLoading file:\t{FilePath}");
-
-                if (size > 0 || isStaticMul) //if new map is generated automatically, staticX.mul size is equal to ZERO, other files should always be major than zero!
-                {
-                    MemoryMappedFile mmf;
-
-                    if (isStaticMul)
-                    {
-                        try
-                        {
-#pragma warning disable CA1416 // This call site is reachable on all platforms. 'MemoryMappedFile.OpenExisting(string)' is only supported on: 'windows'.
-                            mmf = MemoryMappedFile.OpenExisting(_UL.RealShardName + fileInfo.Name);
-#pragma warning restore CA1416
-                        }
-                        catch
-                        {
-                            mmf = MemoryMappedFile.CreateNew(_UL.RealShardName + fileInfo.Name, STATICS_MEMORY_SIZE, MemoryMappedFileAccess.ReadWrite);
-
-                            using (FileStream stream = File.Open(fileInfo.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-                            using (Stream s = mmf.CreateViewStream(0, stream.Length, MemoryMappedFileAccess.Write))
-                            {
-                                stream.CopyTo(s);
-                            }
-                        }
-
-                        _file = mmf;
-                    }
-                    else
-                    {
-                        try
-                        {
-#pragma warning disable CA1416 // This call site is reachable on all platforms. 'MemoryMappedFile.OpenExisting(string)' is only supported on: 'windows'.
-                            mmf = MemoryMappedFile.OpenExisting(_UL.RealShardName + fileInfo.Name);
-#pragma warning restore CA1416
-
-                        }
-                        catch
-                        {
-                            mmf = MemoryMappedFile.CreateFromFile
-                            (
-                                File.Open(FilePath, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite),
-                                _UL.RealShardName + fileInfo.Name,
-                                size,
-                                MemoryMappedFileAccess.ReadWrite,
-                                HandleInheritability.None,
-                                false
-                            );
-                        }
-
-                        _file = mmf;
-                    }
-
-                    _accessor = _file.CreateViewAccessor(0, isStaticMul ? STATICS_MEMORY_SIZE : size, MemoryMappedFileAccess.ReadWrite);
-
-                    byte* ptr = null;
-
-                    try
-                    {
-                        _accessor.SafeMemoryMappedViewHandle.AcquirePointer(ref ptr);
-                        SetPtr((IntPtr)ptr, (long) _accessor.SafeMemoryMappedViewHandle.ByteLength);
-                    }
-                    catch
-                    {
-                        _file.Dispose();
-                        _accessor.SafeMemoryMappedViewHandle.ReleasePointer();
-                        _accessor.Dispose();
-
-                        throw new Exception("Something goes wrong...");
-                    }
-                }
-                else
-                {
-                    throw new Exception($"{FilePath} size must be > 0");
-                }
             }
 
             public override void Dispose()
@@ -757,26 +673,11 @@ namespace ClassicUO.Game
                 Client.Game.UO.FileManager.Maps.Dispose();
             }
 
-            public void WriteArray(long position, ArraySegment<byte> seg)
-            {
-                if (!_accessor.CanWrite || seg.Array == null)
-                {
-                    return;
-                }
-
-                _accessor.WriteArray(position, seg.Array, seg.Offset, seg.Count);
-                _accessor.Flush();
-            }
-
             public void WriteArray(long position, byte[] array)
             {
-                if (!_accessor.CanWrite)
-                {
-                    return;
-                }
-
-                _accessor.WriteArray(position, array, 0, array.Length);
-                _accessor.Flush();
+                _writer.Seek((int) position, SeekOrigin.Begin);
+                _writer.Write(array, 0, array.Length);
+                _writer.Flush();
             }
         }
 
@@ -785,8 +686,6 @@ namespace ClassicUO.Game
             private readonly CancellationTokenSource _feedCancel;
             private FileStream[] _filesStaticsStream;
             private readonly Task _writerTask;
-
-            private new UOFileIndex[][] Entries;
 
             public ULMapLoader(UOFileManager fileManager, uint maps) : base(fileManager)
             {
@@ -883,7 +782,7 @@ namespace ClassicUO.Game
 
                             _filesStaticsStream[i] = File.Open(path, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite);
 
-                            _UL._EOF[i] = (uint) new FileInfo(path).Length;
+                            _UL._EOF[i] = (uint)new FileInfo(path).Length;
 
                             path = Path.Combine(_UL.ShardName, $"staidx{i}.mul");
 
@@ -916,11 +815,6 @@ namespace ClassicUO.Game
 
             public void CheckForShardMapFile(int mapId)
             {
-                if (Entries == null)
-                {
-                    Entries = new UOFileIndex[MapLoader.MAPS_COUNT][];
-                }
-
                 string oldMap = FileManager.GetUOFilePath($"map{mapId}.mul");
                 string oldStaIdx = FileManager.GetUOFilePath($"staidx{mapId}.mul");
                 string oldStatics = FileManager.GetUOFilePath($"statics{mapId}.mul");
@@ -1086,29 +980,16 @@ namespace ClassicUO.Game
 
             public unsafe void ReloadBlock(int map, int blockNumber)
             {
-                int mapBlockSize = sizeof(MapBlock);
-                int staticIdxBlockSize = sizeof(StaidxBlock);
-                int staticblockSize = sizeof(StaticsBlock);
+                int mapblocksize = sizeof(MapBlock);
+                int staticidxblocksize = sizeof(StaidxBlock);
+                int staticblocksize = sizeof(StaticsBlock);
                 UOFile file = _filesMap[map];
-                UOFile fileIdx = _filesIdxStatics[map];
-                UOFile staticFile = _filesStatics[map];
+                UOFile fileidx = _filesIdxStatics[map];
+                UOFile staticfile = _filesStatics[map];
 
-                var reader = file.GetReader();
-                var readerIdx = fileIdx.GetReader();
-                var staticsReader = staticFile.GetReader();
-
-                ulong staticIdxAddress = (ulong)readerIdx.StartAddress;
-                ulong endStaticIdxAddress = staticIdxAddress + (ulong) fileIdx.Length;
-                ulong staticAddress = (ulong)staticsReader.StartAddress;
-                ulong endStaticAddress = staticAddress + (ulong) staticFile.Length;
-                ulong mapAddress = (ulong)reader.StartAddress;
-                ulong endMapAddress = mapAddress + (ulong) file.Length;
-                ulong uopOffset = 0;
+                ulong uopoffset = 0;
                 int fileNumber = -1;
                 bool isUop = file is UOFileUop;
-                ulong realMapAddress = 0;
-                ulong realStaticAddress = 0;
-                uint realStaticCount = 0;
                 int block = blockNumber;
 
                 if (isUop)
@@ -1119,47 +1000,39 @@ namespace ClassicUO.Game
                     if (fileNumber != shifted)
                     {
                         fileNumber = shifted;
+                        var uop = file as UOFileUop;
 
-                        if (shifted < Entries.Length)
+                        if (shifted < uop.Entries.Length)
                         {
-                            uopOffset = (ulong) Entries[map][shifted].Offset;
+                            uopoffset = (ulong)uop.Entries[shifted].Offset;
                         }
                     }
                 }
 
-                ulong address = mapAddress + uopOffset + (ulong) (blockNumber * mapBlockSize);
+                var mapPos = uopoffset + (ulong)(blockNumber * mapblocksize);
+                var staticIdxPos = (ulong)(block * staticidxblocksize);
+                var staticPos = 0ul;
+                var staticCount = 0u;
 
-                if (address < endMapAddress)
+                fileidx.Seek(block * staticidxblocksize, SeekOrigin.Begin);
+                var st = fileidx.Read<StaidxBlock>();
+
+                if (st.Size > 0 && st.Position != 0xFFFF_FFFF)
                 {
-                    realMapAddress = address;
-                }
-
-                ulong stidxaddress = staticIdxAddress + (ulong) (block * staticIdxBlockSize);
-                StaidxBlock* bb = (StaidxBlock*) stidxaddress;
-
-                if (stidxaddress < endStaticIdxAddress && bb->Size > 0 && bb->Position != 0xFFFFFFFF)
-                {
-                    ulong address1 = staticAddress + bb->Position;
-
-                    if (address1 < endStaticAddress)
-                    {
-                        realStaticAddress = address1;
-                        realStaticCount = (uint) (bb->Size / staticblockSize);
-
-                        if (realStaticCount > 1024)
-                        {
-                            realStaticCount = 1024;
-                        }
-                    }
+                    staticPos = st.Position;
+                    staticCount = Math.Min(1024, (uint)(st.Size / staticblocksize));
                 }
 
                 ref IndexMap data = ref BlockData[map][block];
-                data.MapAddress = realMapAddress;
-                data.StaticAddress = realStaticAddress;
-                data.StaticCount = realStaticCount;
-                data.OriginalMapAddress = realMapAddress;
-                data.OriginalStaticAddress = realStaticAddress;
-                data.OriginalStaticCount = realStaticCount;
+                data.MapAddress = mapPos;
+                data.StaticAddress = staticPos;
+                data.StaticCount = staticCount;
+                data.OriginalMapAddress = mapPos;
+                data.OriginalStaticAddress = staticPos;
+                data.OriginalStaticCount = staticCount;
+
+                data.MapFile = file;
+                data.StaticFile = staticfile;
             }
 
             public class AsyncWriterTasked

@@ -65,27 +65,25 @@ namespace ClassicUO.Assets
             );
         }
 
-        public unsafe AnimDataFrame CalculateCurrentGraphic(ushort graphic)
+        public AnimDataFrame CalculateCurrentGraphic(ushort graphic)
         {
             if (_file == null)
                 return default;
 
-            var reader = _file.GetReader();
-            var address = reader.StartAddress;
-
-            if (address != IntPtr.Zero)
+            var pos = (graphic * 68 + 4 * ((graphic >> 3) + 1));
+            if (pos >= _file.Length)
             {
-                IntPtr addr = address + (graphic * 68 + 4 * ((graphic >> 3) + 1));
-
-                if (addr.ToInt64() < address.ToInt64() + _file.Length)
-                {
-                    ref AnimDataFrame a = ref Unsafe.AsRef<AnimDataFrame>((void*)addr);
-
-                    return a;
-                }
+                return default;
             }
 
-            return default;
+            _file.Seek(pos, SeekOrigin.Begin);
+
+            Span<byte> buf = stackalloc byte[Unsafe.SizeOf<AnimDataFrame>()];
+            _file.Read(buf);
+
+            var span = MemoryMarshal.Cast<byte, AnimDataFrame>(buf);
+            return span[0];
+
         }
     }
 
