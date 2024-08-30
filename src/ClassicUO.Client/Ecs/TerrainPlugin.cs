@@ -218,7 +218,7 @@ readonly struct TerrainPlugin : IPlugin
         out Vector3 normalBottom,
         out Vector3 normalLeft)
     {
-        if (isStretched || texmapsLoader.GetValidRefEntry(texId).Length <= 0)
+        if (isStretched || texmapsLoader.File.GetValidRefEntry(texId).Length <= 0)
         {
             isStretched = false;
             avgZ = z;
