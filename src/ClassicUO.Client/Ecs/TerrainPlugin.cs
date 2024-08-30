@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using ClassicUO.Assets;
 using Microsoft.Xna.Framework;
 using TinyEcs;
@@ -71,8 +72,9 @@ readonly struct TerrainPlugin : IPlugin
                     if (!chunksLoaded.Value.Add((chunkX, chunkY, chunkEv.Map)))
                         continue;
 
-                    var block = (Assets.MapBlock*) im.MapAddress;
-                    var cells = (Assets.MapCells*) &block->Cells;
+                    im.MapFile.Seek((long)im.MapAddress, System.IO.SeekOrigin.Begin);
+                    var cells = im.MapFile.Read<Assets.MapBlock>().Cells;
+
                     var bx = chunkX << 3;
                     var by = chunkY << 3;
 
@@ -146,55 +148,55 @@ readonly struct TerrainPlugin : IPlugin
 
                     if (im.StaticAddress != 0)
                     {
-                        var sb = (Assets.StaticsBlock*) im.StaticAddress;
+                        im.StaticFile.Seek((long)im.StaticAddress, System.IO.SeekOrigin.Begin);
 
-                        if (sb != null)
+                        for (int i = 0, count = (int)im.StaticCount; i < count; ++i)
                         {
-                            for (int i = 0, count = (int) im.StaticCount; i < count; ++i, ++sb)
+                            var sb = im.StaticFile.Read<Assets.StaticsBlock>();
+
+                            if (sb.Color != 0 && sb.Color != 0xFFFF)
                             {
-                                if (sb->Color != 0 && sb->Color != 0xFFFF)
+                                int pos = (sb.Y << 3) + sb.X;
+
+                                if (pos >= 64)
                                 {
-                                    int pos = (sb->Y << 3) + sb->X;
-
-                                    if (pos >= 64)
-                                    {
-                                        continue;
-                                    }
-
-                                    var staX = (ushort)(bx + sb->X);
-                                    var staY = (ushort)(by + sb->Y);
-
-                                    ref readonly var artInfo = ref assetsServer.Value.Arts.GetArt(sb->Color);
-
-                                    var priorityZ = sb->Z;
-
-                                    if (fileManager.Value.TileData.StaticData[sb->Color].IsBackground)
-                                    {
-                                        priorityZ -= 1;
-                                    }
-
-                                    if (fileManager.Value.TileData.StaticData[sb->Color].Height != 0)
-                                    {
-                                        priorityZ += 1;
-                                    }
-
-                                    if (fileManager.Value.TileData.StaticData[sb->Color].IsMultiMovable)
-                                    {
-                                        priorityZ += 1;
-                                    }
-
-                                    var posVec = Isometric.IsoToScreen(staX, staY, sb->Z);
-                                    posVec.X -= (short)((artInfo.UV.Width >> 1) - 22);
-                                    posVec.Y -= (short)(artInfo.UV.Height - 44);
-                                    world.Entity()
-                                        .Set(new Renderable() {
-                                            Texture = artInfo.Texture,
-                                            UV = artInfo.UV,
-                                            Color = Renderer.ShaderHueTranslator.GetHueVector(sb->Hue, fileManager.Value.TileData.StaticData[sb->Color].IsPartialHue, 1f),
-                                            Position = posVec,
-                                            Z = Isometric.GetDepthZ(staX, staY, priorityZ)
-                                        });
+                                    continue;
                                 }
+
+                                var staX = (ushort)(bx + sb.X);
+                                var staY = (ushort)(by + sb.Y);
+
+                                ref readonly var artInfo = ref assetsServer.Value.Arts.GetArt(sb.Color);
+
+                                var priorityZ = sb.Z;
+
+                                if (fileManager.Value.TileData.StaticData[sb.Color].IsBackground)
+                                {
+                                    priorityZ -= 1;
+                                }
+
+                                if (fileManager.Value.TileData.StaticData[sb.Color].Height != 0)
+                                {
+                                    priorityZ += 1;
+                                }
+
+                                if (fileManager.Value.TileData.StaticData[sb.Color].IsMultiMovable)
+                                {
+                                    priorityZ += 1;
+                                }
+
+                                var posVec = Isometric.IsoToScreen(staX, staY, sb.Z);
+                                posVec.X -= (short)((artInfo.UV.Width >> 1) - 22);
+                                posVec.Y -= (short)(artInfo.UV.Height - 44);
+                                world.Entity()
+                                    .Set(new Renderable()
+                                    {
+                                        Texture = artInfo.Texture,
+                                        UV = artInfo.UV,
+                                        Color = Renderer.ShaderHueTranslator.GetHueVector(sb.Hue, fileManager.Value.TileData.StaticData[sb.Color].IsPartialHue, 1f),
+                                        Position = posVec,
+                                        Z = Isometric.GetDepthZ(staX, staY, priorityZ)
+                                    });
                             }
                         }
                     }
@@ -318,13 +320,8 @@ readonly struct TerrainPlugin : IPlugin
         int mx = x % 8;
         int my = y % 8;
 
-        unsafe
-        {
-            var mp = (Assets.MapBlock*) blockIndex.MapAddress;
-            var cells = (Assets.MapCells*) &mp->Cells;
-
-            return cells[(my << 3) + mx].Z;
-        }
+        blockIndex.MapFile.Seek((long)blockIndex.MapAddress, System.IO.SeekOrigin.Begin);
+        return blockIndex.MapFile.Read<MapBlock>().Cells[(my << 3) + mx].Z;
     }
 
     private static bool CalculateNormal(sbyte tile, sbyte top, sbyte right, sbyte bottom, sbyte left, out Vector3 normal)
