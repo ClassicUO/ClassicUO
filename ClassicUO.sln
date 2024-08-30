@@ -73,6 +73,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FNA.Core", "external\FNA\FN
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClassicUO.Bootstrap", "src\ClassicUO.Bootstrap\src\ClassicUO.Bootstrap.csproj", "{8974A04C-8360-4225-ABDD-0C56555F676D}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FileEmbed", "external\FileEmbed\FileEmbed\FileEmbed.csproj", "{027B5178-C306-4900-996D-97E8E43567B6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -161,6 +163,14 @@ Global
 		{8974A04C-8360-4225-ABDD-0C56555F676D}.Release|Any CPU.Build.0 = Release|Any CPU
 		{8974A04C-8360-4225-ABDD-0C56555F676D}.Release|x64.ActiveCfg = Release|Any CPU
 		{8974A04C-8360-4225-ABDD-0C56555F676D}.Release|x64.Build.0 = Release|Any CPU
+		{027B5178-C306-4900-996D-97E8E43567B6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{027B5178-C306-4900-996D-97E8E43567B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{027B5178-C306-4900-996D-97E8E43567B6}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{027B5178-C306-4900-996D-97E8E43567B6}.Debug|x64.Build.0 = Debug|Any CPU
+		{027B5178-C306-4900-996D-97E8E43567B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{027B5178-C306-4900-996D-97E8E43567B6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{027B5178-C306-4900-996D-97E8E43567B6}.Release|x64.ActiveCfg = Release|Any CPU
+		{027B5178-C306-4900-996D-97E8E43567B6}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -177,6 +187,7 @@ Global
 		{9B748316-24DC-40AA-A39D-476EF83DF96C} = {8EAF9583-DC5B-46DC-A01E-47B00A1C862E}
 		{A6DCFCE5-192B-4AE1-B228-206D37A0021C} = {FA5D7AB8-3570-4E55-95B0-35BA6842FEE3}
 		{8974A04C-8360-4225-ABDD-0C56555F676D} = {8EAF9583-DC5B-46DC-A01E-47B00A1C862E}
+		{027B5178-C306-4900-996D-97E8E43567B6} = {FA5D7AB8-3570-4E55-95B0-35BA6842FEE3}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0A99E91A-ADAB-45C3-8170-2656140F6EFA}
