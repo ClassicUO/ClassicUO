@@ -1516,12 +1516,12 @@ namespace ClassicUO.Game.Managers
                     break;
 
                 case MacroType.DisarmAbility:
-                    Socket.Send_DisarmRequest();
+                    NetClient.Socket.Send_DisarmRequest();
 
                     break;
 
                 case MacroType.StunAbility:
-                    Socket.Send_StunRequest();
+                    NetClient.Socket.Send_StunRequest();
 
                     break;
             
@@ -2465,7 +2465,7 @@ namespace ClassicUO.Game.Managers
         Zoom,
         ToggleChatVisibility,
         INVALID,
-        Aura = 62,
+        Aura,
         AuraOnOff,
         Grab,
         SetGrabBag,
