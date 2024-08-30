@@ -1470,6 +1470,8 @@ namespace ClassicUO.Game.UI.Gumps
                                 _mapTexture.SetDataPointerEXT(0, null, (IntPtr)pixels, sizeof(uint) * _mapTexture.Width * _mapTexture.Height);
                             }
 
+                            Span<byte> buf = stackalloc byte[sizeof(MapBlock)];
+                            Span<byte> buf2 = stackalloc byte[sizeof(StaticsBlock)];
 
                             var huesLoader = Client.Game.UO.FileManager.Hues;
 
@@ -1481,15 +1483,16 @@ namespace ClassicUO.Game.UI.Gumps
 
                                 for (by = 0; by < fixedHeight; ++by)
                                 {
-                                    ref IndexMap indexMap = ref World.Map.GetIndex(bx, by);
+                                    ref var indexMap = ref World.Map.GetIndex(bx, by);
 
                                     if (indexMap.MapAddress == 0)
                                     {
                                         continue;
                                     }
 
-                                    MapBlock* mapBlock = (MapBlock*)indexMap.MapAddress;
-                                    MapCells* cells = (MapCells*)&mapBlock->Cells;
+                                    indexMap.MapFile.Seek((long)indexMap.MapAddress, System.IO.SeekOrigin.Begin);
+                                    indexMap.MapFile.Read(buf);
+                                    var cells = Unsafe.AsRef<MapBlock>(Unsafe.AsPointer(ref buf[0])).Cells;
 
                                     mapY = by << 3;
 
@@ -1508,26 +1511,23 @@ namespace ClassicUO.Game.UI.Gumps
                                         }
                                     }
 
+                                    indexMap.StaticFile.Seek((long)indexMap.StaticAddress, System.IO.SeekOrigin.Begin);
 
-                                    StaticsBlock* sb = (StaticsBlock*)indexMap.StaticAddress;
-
-                                    if (sb != null)
+                                    for (var c = 0; c < indexMap.StaticCount; ++c)
                                     {
-                                        int count = (int)indexMap.StaticCount;
+                                        indexMap.StaticFile.Read(buf2);
+                                        ref var sb = ref Unsafe.AsRef<StaticsBlock>(Unsafe.AsPointer(ref buf2[0]));
 
-                                        for (int c = 0; c < count; ++c, ++sb)
+                                        if (sb.Color != 0 && sb.Color != 0xFFFF && GameObject.CanBeDrawn(World, sb.Color))
                                         {
-                                            if (sb->Color != 0 && sb->Color != 0xFFFF && GameObject.CanBeDrawn(World, sb->Color))
+                                            int block = (mapY + sb.Y + OFFSET_PIX_HALF) * (realWidth + OFFSET_PIX) + mapX + sb.X + OFFSET_PIX_HALF;
+
+                                            if (sb.Z >= allZ[block])
                                             {
-                                                int block = (mapY + sb->Y + OFFSET_PIX_HALF) * (realWidth + OFFSET_PIX) + mapX + sb->X + OFFSET_PIX_HALF;
+                                                ushort color = (ushort)(0x8000 | (sb.Hue != 0 ? huesLoader.GetColor16(16384, sb.Hue) : huesLoader.GetRadarColorData(sb.Color + 0x4000)));
 
-                                                if (sb->Z >= allZ[block])
-                                                {
-                                                    ushort color = (ushort)(0x8000 | (sb->Hue != 0 ? huesLoader.GetColor16(16384, sb->Hue) : huesLoader.GetRadarColorData(sb->Color + 0x4000)));
-
-                                                    buffer[block] = HuesHelper.Color16To32(color) | 0xFF_00_00_00;
-                                                    allZ[block] = sb->Z;
-                                                }
+                                                buffer[block] = HuesHelper.Color16To32(color) | 0xFF_00_00_00;
+                                                allZ[block] = sb.Z;
                                             }
                                         }
                                     }

@@ -58,22 +58,20 @@ namespace ClassicUO.Assets
                 FileSystemHelper.EnsureFileExists(pathidx);
 
                 _file = new UOFileMul(path, pathidx);
-                _file.FillEntries(ref Entries);
             });
         }
 
         public LightInfo GetLight(uint idx)
         {
-            ref var entry = ref GetValidRefEntry((int)idx);
+            ref var entry = ref _file.GetValidRefEntry((int)idx);
 
             if (entry.Width == 0 && entry.Height == 0)
             {
                 return default;
             }
 
+            _file.Seek(entry.Offset, System.IO.SeekOrigin.Begin);
             var buffer = new uint[entry.Width * entry.Height];
-            var reader = new StackDataReader(entry.Address, (int)entry.FileSize);
-            reader.Seek(entry.Offset);
 
             for (int i = 0; i < entry.Height; i++)
             {
@@ -81,7 +79,7 @@ namespace ClassicUO.Assets
 
                 for (int j = 0; j < entry.Width; j++)
                 {
-                    ushort val = reader.ReadUInt8();
+                    ushort val = _file.ReadUInt8();
                     // Light can be from -31 to 31. When they are below 0 they are bit inverted
                     if (val > 0x1F)
                     {

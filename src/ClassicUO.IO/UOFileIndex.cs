@@ -39,8 +39,7 @@ namespace ClassicUO.IO
     {
         public UOFileIndex
         (
-            IntPtr address,
-            uint fileSize,
+            UOFile file,
             long offset,
             int length,
             int decompressed,
@@ -50,8 +49,7 @@ namespace ClassicUO.IO
             ushort hue = 0
         )
         {
-            Address = address;
-            FileSize = fileSize;
+            File = file;
             Offset = offset;
             Length = length;
             DecompressedLength = decompressed;
@@ -63,8 +61,7 @@ namespace ClassicUO.IO
             AnimOffset = 0;
         }
 
-        public IntPtr Address;
-        public uint FileSize;
+        public UOFile File;
         public long Offset;
         public int Length;
         public int DecompressedLength;
@@ -75,10 +72,9 @@ namespace ClassicUO.IO
         public sbyte AnimOffset;
 
 
-
         public static UOFileIndex Invalid = new UOFileIndex
         (
-            IntPtr.Zero,
+            null,
             0,
             0,
             0,
@@ -88,7 +84,7 @@ namespace ClassicUO.IO
 
         public bool Equals(UOFileIndex other)
         {
-            return (Address, Offset, Length, DecompressedLength) == (other.Address, other.Offset, other.Length, other.DecompressedLength);
+            return (File, Offset, Length, DecompressedLength) == (File, other.Offset, other.Length, other.DecompressedLength);
         }
     }
 

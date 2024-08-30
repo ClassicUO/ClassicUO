@@ -34,40 +34,36 @@ namespace ClassicUO.IO
 {
     public class UOFileMul : UOFile
     {
-        private readonly UOFileIdxMul _idxFile;
+        private readonly UOFile _idxFile;
 
         public UOFileMul(string file, string idxfile) : this(file)
         {
-            _idxFile = new UOFileIdxMul(idxfile);
+            _idxFile = new UOFile(idxfile);
         }
 
         public UOFileMul(string file) : base(file)
         {
-            Load();
+
         }
 
         public UOFile IdxFile => _idxFile;
 
 
-        public override void FillEntries(ref UOFileIndex[] entries)
+        public override void FillEntries()
         {
-            UOFile file = _idxFile ?? (UOFile) this;
+            UOFile f = _idxFile ?? this;
+            int count = (int)f.Length / 12;
+            Entries = new UOFileIndex[count];
 
-            int count = (int) file.Length / 12;
-            entries = new UOFileIndex[count];
-
-            var reader = file.GetReader();
-            var startAddress = GetReader().StartAddress;
-            for (int i = 0; i < count; i++)
+            for (int i = 0; i < Entries.Length; i++)
             {
-                ref UOFileIndex e = ref entries[i];
-                e.Address = startAddress;   // .mul mmf address
-                e.FileSize = (uint) Length; // .mul mmf length
-                e.Offset = reader.ReadUInt32LE(); // .idx offset
-                e.Length = reader.ReadInt32LE();  // .idx length
+                ref var e = ref Entries[i];
+                e.File = this;   // .mul mmf address
+                e.Offset = f.ReadUInt32(); // .idx offset
+                e.Length = f.ReadInt32();  // .idx length
                 e.DecompressedLength = 0;   // UNUSED HERE --> .UOP
 
-                int size = reader.ReadInt32LE();
+                int size = f.ReadInt32();
 
                 if (size > 0)
                 {
@@ -81,17 +77,6 @@ namespace ClassicUO.IO
         {
             _idxFile?.Dispose();
             base.Dispose();
-        }
-
-        private class UOFileIdxMul : UOFile
-        {
-            public UOFileIdxMul(string idxpath) : base(idxpath, true)
-            {
-            }
-
-            public override void FillEntries(ref UOFileIndex[] entries)
-            {
-            }
         }
     }
 }

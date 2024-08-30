@@ -5113,143 +5113,136 @@ namespace ClassicUO.Network
 
             try
             {
-                fixed (byte* dbytesPtr = span)
+                var result = ZLib.Decompress(source.Slice(sourcePosition, clen), span.Slice(0, dlen));
+                var reader = new StackDataReader(span.Slice(0, dlen));
+
+                ushort id = 0;
+                sbyte x = 0,
+                    y = 0,
+                    z = 0;
+
+                switch (planeMode)
                 {
-                    fixed (byte* srcPtr = &source[sourcePosition])
-                    {
-                        ZLib.Decompress((IntPtr)srcPtr, clen, 0, (IntPtr)dbytesPtr, dlen);
-                    }
+                    case 0:
+                        int c = dlen / 5;
 
-                    StackDataReader reader = new StackDataReader(span.Slice(0, dlen));
+                        for (uint i = 0; i < c; i++)
+                        {
+                            id = reader.ReadUInt16BE();
+                            x = reader.ReadInt8();
+                            y = reader.ReadInt8();
+                            z = reader.ReadInt8();
 
-                    ushort id = 0;
-                    sbyte x = 0,
-                        y = 0,
-                        z = 0;
-
-                    switch (planeMode)
-                    {
-                        case 0:
-                            int c = dlen / 5;
-
-                            for (uint i = 0; i < c; i++)
+                            if (id != 0)
                             {
-                                id = reader.ReadUInt16BE();
-                                x = reader.ReadInt8();
-                                y = reader.ReadInt8();
-                                z = reader.ReadInt8();
-
-                                if (id != 0)
-                                {
-                                    house.Add(
-                                        id,
-                                        0,
-                                        (ushort)(item.X + x),
-                                        (ushort)(item.Y + y),
-                                        (sbyte)(item.Z + z),
-                                        true,
-                                        ismovable
-                                    );
-                                }
+                                house.Add(
+                                    id,
+                                    0,
+                                    (ushort)(item.X + x),
+                                    (ushort)(item.Y + y),
+                                    (sbyte)(item.Z + z),
+                                    true,
+                                    ismovable
+                                );
                             }
+                        }
 
-                            break;
+                        break;
 
-                        case 1:
+                    case 1:
 
-                            if (planeZ > 0)
+                        if (planeZ > 0)
+                        {
+                            z = (sbyte)((planeZ - 1) % 4 * 20 + 7);
+                        }
+                        else
+                        {
+                            z = 0;
+                        }
+
+                        c = dlen >> 2;
+
+                        for (uint i = 0; i < c; i++)
+                        {
+                            id = reader.ReadUInt16BE();
+                            x = reader.ReadInt8();
+                            y = reader.ReadInt8();
+
+                            if (id != 0)
                             {
-                                z = (sbyte)((planeZ - 1) % 4 * 20 + 7);
+                                house.Add(
+                                    id,
+                                    0,
+                                    (ushort)(item.X + x),
+                                    (ushort)(item.Y + y),
+                                    (sbyte)(item.Z + z),
+                                    true,
+                                    ismovable
+                                );
                             }
-                            else
+                        }
+
+                        break;
+
+                    case 2:
+                        short offX = 0,
+                            offY = 0;
+                        short multiHeight = 0;
+
+                        if (planeZ > 0)
+                        {
+                            z = (sbyte)((planeZ - 1) % 4 * 20 + 7);
+                        }
+                        else
+                        {
+                            z = 0;
+                        }
+
+                        if (planeZ <= 0)
+                        {
+                            offX = minX;
+                            offY = minY;
+                            multiHeight = (short)(maxY - minY + 2);
+                        }
+                        else if (planeZ <= 4)
+                        {
+                            offX = (short)(minX + 1);
+                            offY = (short)(minY + 1);
+                            multiHeight = (short)(maxY - minY);
+                        }
+                        else
+                        {
+                            offX = minX;
+                            offY = minY;
+                            multiHeight = (short)(maxY - minY + 1);
+                        }
+
+                        c = dlen >> 1;
+
+                        for (uint i = 0; i < c; i++)
+                        {
+                            id = reader.ReadUInt16BE();
+                            x = (sbyte)(i / multiHeight + offX);
+                            y = (sbyte)(i % multiHeight + offY);
+
+                            if (id != 0)
                             {
-                                z = 0;
+                                house.Add(
+                                    id,
+                                    0,
+                                    (ushort)(item.X + x),
+                                    (ushort)(item.Y + y),
+                                    (sbyte)(item.Z + z),
+                                    true,
+                                    ismovable
+                                );
                             }
+                        }
 
-                            c = dlen >> 2;
-
-                            for (uint i = 0; i < c; i++)
-                            {
-                                id = reader.ReadUInt16BE();
-                                x = reader.ReadInt8();
-                                y = reader.ReadInt8();
-
-                                if (id != 0)
-                                {
-                                    house.Add(
-                                        id,
-                                        0,
-                                        (ushort)(item.X + x),
-                                        (ushort)(item.Y + y),
-                                        (sbyte)(item.Z + z),
-                                        true,
-                                        ismovable
-                                    );
-                                }
-                            }
-
-                            break;
-
-                        case 2:
-                            short offX = 0,
-                                offY = 0;
-                            short multiHeight = 0;
-
-                            if (planeZ > 0)
-                            {
-                                z = (sbyte)((planeZ - 1) % 4 * 20 + 7);
-                            }
-                            else
-                            {
-                                z = 0;
-                            }
-
-                            if (planeZ <= 0)
-                            {
-                                offX = minX;
-                                offY = minY;
-                                multiHeight = (short)(maxY - minY + 2);
-                            }
-                            else if (planeZ <= 4)
-                            {
-                                offX = (short)(minX + 1);
-                                offY = (short)(minY + 1);
-                                multiHeight = (short)(maxY - minY);
-                            }
-                            else
-                            {
-                                offX = minX;
-                                offY = minY;
-                                multiHeight = (short)(maxY - minY + 1);
-                            }
-
-                            c = dlen >> 1;
-
-                            for (uint i = 0; i < c; i++)
-                            {
-                                id = reader.ReadUInt16BE();
-                                x = (sbyte)(i / multiHeight + offX);
-                                y = (sbyte)(i % multiHeight + offY);
-
-                                if (id != 0)
-                                {
-                                    house.Add(
-                                        id,
-                                        0,
-                                        (ushort)(item.X + x),
-                                        (ushort)(item.Y + y),
-                                        (sbyte)(item.Z + z),
-                                        true,
-                                        ismovable
-                                    );
-                                }
-                            }
-
-                            break;
-                    }
-
-                    reader.Release();
+                        break;
                 }
+
+                reader.Release();
             }
             finally
             {
@@ -5387,15 +5380,9 @@ namespace ClassicUO.Network
 
             try
             {
-                unsafe
-                {
-                    fixed (byte* destPtr = decData)
-                    {
-                        ZLib.Decompress(p.PositionAddress, (int)clen, 0, (IntPtr)destPtr, dlen);
+                ZLib.Decompress(p.Buffer.Slice(p.Position, (int)clen), decData.AsSpan(0, dlen));
 
-                        layout = Encoding.UTF8.GetString(destPtr, dlen);
-                    }
-                }
+                layout = Encoding.UTF8.GetString(decData.AsSpan(0, dlen));
             }
             finally
             {
@@ -5417,23 +5404,10 @@ namespace ClassicUO.Network
 
                     try
                     {
-                        unsafe
-                        {
-                            fixed (byte* destPtr = decData)
-                            {
-                                ZLib.Decompress(
-                                    p.PositionAddress,
-                                    (int)clen,
-                                    0,
-                                    (IntPtr)destPtr,
-                                    dlen
-                                );
-                            }
-                        }
-
+                        ZLib.Decompress(p.Buffer.Slice(p.Position, (int)clen), decData.AsSpan(0, dlen));
                         p.Skip((int)clen);
 
-                        StackDataReader reader = new StackDataReader(decData.AsSpan(0, dlen));
+                        var reader = new StackDataReader(decData.AsSpan(0, dlen));
 
                         for (int i = 0; i < linesNum; ++i)
                         {

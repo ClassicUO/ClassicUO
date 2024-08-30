@@ -4,6 +4,9 @@
 [submodule "external/MP3Sharp"]
 	path = external/MP3Sharp
 	url = https://github.com/andreakarasho/MP3Sharp.git
+[submodule "external/FileEmbed"]
+	path = external/FileEmbed
+	url = https://github.com/SirCxyrtyx/FileEmbed.git
 [submodule "external/TinyEcs"]
 	path = external/TinyEcs
 	url = https://github.com/andreakarasho/TinyEcs.git

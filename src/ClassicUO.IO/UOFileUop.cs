@@ -42,129 +42,25 @@ namespace ClassicUO.IO
         ZlibBwt = 3
     }
 
-    public class UOFileUop : UOFile
+    public sealed class UOFileUop : UOFile
     {
         private const uint UOP_MAGIC_NUMBER = 0x50594D;
         private readonly bool _hasExtra;
-        private readonly Dictionary<ulong, UOFileIndex> _hashes = new Dictionary<ulong, UOFileIndex>();
         private readonly string _pattern;
+        private readonly Dictionary<ulong, UOFileIndex> _hashes = new Dictionary<ulong, UOFileIndex>();
 
         public UOFileUop(string path, string pattern, bool hasextra = false) : base(path)
         {
             _pattern = pattern;
             _hasExtra = hasextra;
-            Load();
         }
 
-        public int TotalEntriesCount { get; private set; }
         public string Pattern => _pattern;
-        public Dictionary<ulong, UOFileIndex> Hashes => _hashes;
 
-
-        protected override void Load()
-        {
-            base.Load();
-
-            var reader = GetReader();
-            reader.Seek(0);
-
-            if (reader.ReadUInt32LE() != UOP_MAGIC_NUMBER)
-            {
-                throw new ArgumentException("Bad uop file");
-            }
-
-            var version = reader.ReadUInt32LE();
-            var format_timestamp = reader.ReadUInt32LE();
-            var nextBlock = reader.ReadInt64LE();
-            var block_size = reader.ReadUInt32LE();
-            var count = reader.ReadInt32LE();
-
-
-            reader.Seek(nextBlock);
-            int total = 0;
-            int real_total = 0;
-
-            do
-            {
-                var filesCount = reader.ReadInt32LE();
-                nextBlock = reader.ReadInt64LE();
-                total += filesCount;
-
-                for (int i = 0; i < filesCount; i++)
-                {
-                    long offset = reader.ReadInt64LE();
-                    int headerLength = reader.ReadInt32LE();
-                    int compressedLength = reader.ReadInt32LE();
-                    int decompressedLength = reader.ReadInt32LE();
-                    var hash = reader.ReadUInt64LE();
-                    uint data_hash = reader.ReadUInt32LE();
-                    short flag = reader.ReadInt16LE();
-                    int length = flag == 1 ? compressedLength : decompressedLength;
-
-                    if (offset == 0)
-                    {
-                        continue;
-                    }
-
-                    real_total++;
-
-                    offset += headerLength;
-
-                    if (_hasExtra && flag != 3)
-                    {
-                        long curpos = reader.Position;
-                        reader.Seek(offset);
-
-                        var extra1 = reader.ReadInt32LE();
-                        var extra2 = reader.ReadInt32LE();
-
-                        _hashes.Add
-                        (
-                            hash,
-                            new UOFileIndex
-                            (
-                                reader.StartAddress,
-                                (uint)Length,
-                                offset + 8,
-                                compressedLength - 8,
-                                decompressedLength,
-                                (CompressionType)flag,
-                                extra1,
-                                extra2
-                            )
-                        );
-
-                        reader.Seek(curpos);
-                    }
-                    else
-                    {
-                        _hashes.Add
-                        (
-                            hash,
-                            new UOFileIndex
-                            (
-                                reader.StartAddress,
-                                (uint)Length,
-                                offset,
-                                compressedLength,
-                                decompressedLength,
-                                (CompressionType) flag,
-                                0,
-                                0
-                            )
-                        );
-                    }
-                }
-
-                reader.Seek(nextBlock);
-            } while (nextBlock != 0);
-
-            TotalEntriesCount = real_total;
-        }
 
         public void ClearHashes()
         {
-            _hashes.Clear();
+            // _hashes.Clear();
         }
 
         public override void Dispose()
@@ -179,16 +75,109 @@ namespace ClassicUO.IO
             return _hashes.TryGetValue(hash, out data);
         }
 
-        public override void FillEntries(ref UOFileIndex[] entries)
+        public override void FillEntries()
         {
-            for (int i = 0; i < entries.Length; i++)
+            Seek(0, System.IO.SeekOrigin.Begin);
+
+            if (ReadUInt32() != UOP_MAGIC_NUMBER)
+            {
+                throw new ArgumentException("Bad uop file");
+            }
+
+            var version = ReadUInt32();
+            var format_timestamp = ReadUInt32();
+            var nextBlock = ReadInt64();
+            var block_size = ReadUInt32();
+            var count = ReadInt32();
+
+
+            Seek(nextBlock, System.IO.SeekOrigin.Begin);
+            int total = 0;
+            int real_total = 0;
+
+            do
+            {
+                var filesCount = ReadInt32();
+                nextBlock = ReadInt64();
+                total += filesCount;
+
+                for (int i = 0; i < filesCount; i++)
+                {
+                    long offset = ReadInt64();
+                    int headerLength = ReadInt32();
+                    int compressedLength = ReadInt32();
+                    int decompressedLength = ReadInt32();
+                    var hash = ReadUInt64();
+                    uint data_hash = ReadUInt32();
+                    short flag = ReadInt16();
+                    int length = flag == 1 ? compressedLength : decompressedLength;
+
+                    if (offset == 0)
+                    {
+                        continue;
+                    }
+
+                    real_total++;
+
+                    offset += headerLength;
+
+                    if (_hasExtra && flag != 3)
+                    {
+                        var pos = Position;
+                        Seek(offset, System.IO.SeekOrigin.Begin);
+
+                        var extra1 = ReadInt32();
+                        var extra2 = ReadInt32();
+
+                        _hashes.Add
+                        (
+                            hash,
+                            new UOFileIndex
+                            (
+                                null,
+                                offset + 8,
+                                compressedLength - 8,
+                                decompressedLength,
+                                (CompressionType)flag,
+                                extra1,
+                                extra2
+                            )
+                        );
+
+                        Seek(pos, System.IO.SeekOrigin.Begin);
+                    }
+                    else
+                    {
+                        _hashes.Add
+                        (
+                            hash,
+                            new UOFileIndex
+                            (
+                                null,
+                                offset,
+                                compressedLength,
+                                decompressedLength,
+                                (CompressionType)flag,
+                                0,
+                                0
+                            )
+                        );
+                    }
+                }
+
+                Seek(nextBlock, System.IO.SeekOrigin.Begin);
+            } while (nextBlock != 0);
+
+            Entries = new UOFileIndex[ushort.MaxValue];
+
+            for (int i = 0; i < Entries.Length; i++)
             {
                 string file = string.Format(_pattern, i);
                 ulong hash = CreateHash(file);
 
-                if (_hashes.TryGetValue(hash, out UOFileIndex data))
+                if (_hashes.TryGetValue(hash, out var e))
                 {
-                    entries[i] = data;
+                    Entries[i] = e;
                 }
             }
         }

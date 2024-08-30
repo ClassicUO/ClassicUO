@@ -142,7 +142,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (artInfo.Texture != null)
             {
-                ref var index = ref Client.Game.UO.FileManager.Arts.GetValidRefEntry(graphic + 0x4000);
+                ref var index = ref Client.Game.UO.FileManager.Arts.File.GetValidRefEntry(graphic + 0x4000);
                 index.Width = (short)((artInfo.UV.Width >> 1) - 22);
                 index.Height = (short)(artInfo.UV.Height - 44);
 
@@ -225,7 +225,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (artInfo.Texture != null)
             {
-                ref var index = ref Client.Game.UO.FileManager.Arts.GetValidRefEntry(graphic + 0x4000);
+                ref var index = ref Client.Game.UO.FileManager.Arts.File.GetValidRefEntry(graphic + 0x4000);
                 index.Width = (short)((artInfo.UV.Width >> 1) - 22);
                 index.Height = (short)(artInfo.UV.Height - 44);
 
@@ -258,7 +258,7 @@ namespace ClassicUO.Game.GameObjects
             bool isWet = false
         )
         {
-            ref UOFileIndex index = ref Client.Game.UO.FileManager.Arts.GetValidRefEntry(graphic + 0x4000);
+            ref UOFileIndex index = ref Client.Game.UO.FileManager.Arts.File.GetValidRefEntry(graphic + 0x4000);
 
             graphic = (ushort)(graphic + index.AnimOffset);
 
@@ -266,7 +266,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (artInfo.Texture != null)
             {
-                index = ref Client.Game.UO.FileManager.Arts.GetValidRefEntry(graphic + 0x4000);
+                index = ref Client.Game.UO.FileManager.Arts.File.GetValidRefEntry(graphic + 0x4000);
                 index.Width = (short)((artInfo.UV.Width >> 1) - 22);
                 index.Height = (short)(artInfo.UV.Height - 44);
 

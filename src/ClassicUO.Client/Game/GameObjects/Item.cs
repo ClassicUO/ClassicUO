@@ -43,6 +43,8 @@ using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using ClassicUO.Utility.Platforms;
 using Microsoft.Xna.Framework;
+using System.Runtime.InteropServices;
+using System.Runtime.CompilerServices;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -262,185 +264,61 @@ namespace ClassicUO.Game.GameObjects
                 house.ClearComponents();
             }
 
-            ref var entry = ref Client.Game.UO.FileManager.Multis.GetValidRefEntry(Graphic);
-            var reader = new StackDataReader(entry.Address, (int)entry.FileSize);
-            bool movable = false;
+            var movable = false;
+            var multis = Client.Game.UO.FileManager.Multis.GetMultis(Graphic);
 
-            if (Client.Game.UO.FileManager.Multis.IsUOP)
+            for (var i = 0; i < multis.Count; ++i)
             {
-                if (entry.Length > 0 && entry.DecompressedLength > 0)
+                var block = multis[i];
+
+                if (block.X < minX)
                 {
-                    reader.Seek(entry.Offset);
-
-                    byte[] buffer = null;
-                    Span<byte> span =
-                        entry.DecompressedLength <= 1024
-                            ? stackalloc byte[entry.DecompressedLength]
-                            : (
-                                buffer = System.Buffers.ArrayPool<byte>.Shared.Rent(
-                                    entry.DecompressedLength
-                                )
-                            );
-
-                    try
-                    {
-                        fixed (byte* dataPtr = span)
-                        {
-                            ZLib.Decompress(
-                                reader.PositionAddress,
-                                entry.Length,
-                                0,
-                                (IntPtr)dataPtr,
-                                entry.DecompressedLength
-                            );
-
-                            var zlibReader = new StackDataReader(
-                                span.Slice(0, entry.DecompressedLength)
-                            );
-                            zlibReader.Skip(4);
-
-                            int count = zlibReader.ReadInt32LE();
-
-                            int sizeOf = sizeof(MultiBlockNew);
-
-                            for (int i = 0; i < count; i++)
-                            {
-                                MultiBlockNew* block = (MultiBlockNew*)(
-                                    zlibReader.PositionAddress + i * sizeOf
-                                );
-
-                                if (block->Unknown != 0)
-                                {
-                                    zlibReader.Skip((int)(block->Unknown * 4));
-                                }
-
-                                if (block->X < minX)
-                                {
-                                    minX = block->X;
-                                }
-
-                                if (block->X > maxX)
-                                {
-                                    maxX = block->X;
-                                }
-
-                                if (block->Y < minY)
-                                {
-                                    minY = block->Y;
-                                }
-
-                                if (block->Y > maxY)
-                                {
-                                    maxY = block->Y;
-                                }
-
-                                if (block->Flags == 0 || block->Flags == 0x100)
-                                {
-                                    Multi m = Multi.Create(World, block->ID);
-                                    m.MultiOffsetX = block->X;
-                                    m.MultiOffsetY = block->Y;
-                                    m.MultiOffsetZ = block->Z;
-                                    m.Hue = Hue;
-                                    m.AlphaHue = 255;
-                                    m.IsCustom = false;
-                                    m.State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_DONT_REMOVE;
-                                    m.IsMovable = ItemData.IsMultiMovable;
-
-                                    m.SetInWorldTile(
-                                        (ushort)(X + block->X),
-                                        (ushort)(Y + block->Y),
-                                        (sbyte)(Z + block->Z)
-                                    );
-
-                                    house.Components.Add(m);
-
-                                    if (m.ItemData.IsMultiMovable)
-                                    {
-                                        movable = true;
-                                    }
-                                }
-                                else if (i == 0)
-                                {
-                                    MultiGraphic = block->ID;
-                                }
-                            }
-
-                            zlibReader.Release();
-                        }
-                    }
-                    finally
-                    {
-                        if (buffer != null)
-                        {
-                            System.Buffers.ArrayPool<byte>.Shared.Return(buffer);
-                        }
-                    }
+                    minX = block.X;
                 }
-                else
-                {
-                    Log.Warn($"[MultiCollection.uop] invalid entry (0x{Graphic:X4})");
-                }
-            }
-            else
-            {
-                int count = entry.Length / Client.Game.UO.FileManager.Multis.Offset;
-                reader.Seek(entry.Offset);
 
-                for (int i = 0; i < count; i++)
+                if (block.X > maxX)
                 {
-                    MultiBlock* block = (MultiBlock*)(
-                        reader.PositionAddress + i * Client.Game.UO.FileManager.Multis.Offset
+                    maxX = block.X;
+                }
+
+                if (block.Y < minY)
+                {
+                    minY = block.Y;
+                }
+
+                if (block.Y > maxY)
+                {
+                    maxY = block.Y;
+                }
+
+                if (block.IsVisible)
+                {
+                    Multi m = Multi.Create(World, block.ID);
+                    m.MultiOffsetX = block.X;
+                    m.MultiOffsetY = block.Y;
+                    m.MultiOffsetZ = block.Z;
+                    m.Hue = Hue;
+                    m.AlphaHue = 255;
+                    m.IsCustom = false;
+                    m.State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_DONT_REMOVE;
+                    m.IsMovable = ItemData.IsMultiMovable;
+
+                    m.SetInWorldTile(
+                        (ushort)(X + block.X),
+                        (ushort)(Y + block.Y),
+                        (sbyte)(Z + block.Z)
                     );
 
-                    if (block->X < minX)
+                    house.Components.Add(m);
+
+                    if (m.ItemData.IsMultiMovable)
                     {
-                        minX = block->X;
+                        movable = true;
                     }
-
-                    if (block->X > maxX)
-                    {
-                        maxX = block->X;
-                    }
-
-                    if (block->Y < minY)
-                    {
-                        minY = block->Y;
-                    }
-
-                    if (block->Y > maxY)
-                    {
-                        maxY = block->Y;
-                    }
-
-                    if (block->Flags != 0)
-                    {
-                        Multi m = Multi.Create(World, block->ID);
-                        m.MultiOffsetX = block->X;
-                        m.MultiOffsetY = block->Y;
-                        m.MultiOffsetZ = block->Z;
-                        m.Hue = Hue;
-                        m.AlphaHue = 255;
-                        m.IsCustom = false;
-                        m.State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_DONT_REMOVE;
-                        m.IsMovable = ItemData.IsMultiMovable;
-
-                        m.SetInWorldTile(
-                            (ushort)(X + block->X),
-                            (ushort)(Y + block->Y),
-                            (sbyte)(Z + block->Z)
-                        );
-
-                        house.Components.Add(m);
-
-                        if (m.ItemData.IsMultiMovable)
-                        {
-                            movable = true;
-                        }
-                    }
-                    else if (i == 0)
-                    {
-                        MultiGraphic = block->ID;
-                    }
+                }
+                else if (i == 0)
+                {
+                    MultiGraphic = block.ID;
                 }
             }
 

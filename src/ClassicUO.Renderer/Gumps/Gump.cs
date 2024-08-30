@@ -14,7 +14,7 @@ namespace ClassicUO.Renderer.Gumps
         {
             _gumpsLoader = gumpsLoader;
             _atlas = new TextureAtlas(device, 4096, 4096, SurfaceFormat.Color);
-            _spriteInfos = new SpriteInfo[gumpsLoader.Entries.Length];
+            _spriteInfos = new SpriteInfo[gumpsLoader.File.Entries.Length];
         }
 
         public ref readonly SpriteInfo GetGump(uint idx)

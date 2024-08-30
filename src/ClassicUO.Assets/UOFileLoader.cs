@@ -60,29 +60,11 @@ namespace ClassicUO.Assets
             ClearResources();
         }
 
-        public UOFileIndex[] Entries;
 
         public abstract Task Load();
 
         public virtual void ClearResources()
         {
-        }
-
-        public ref UOFileIndex GetValidRefEntry(int index)
-        {
-            if (index < 0 || Entries == null || index >= Entries.Length)
-            {
-                return ref UOFileIndex.Invalid;
-            }
-
-            ref UOFileIndex entry = ref Entries[index];
-
-            if (entry.Offset < 0 || entry.Length <= 0 || entry.Offset == 0x0000_0000_FFFF_FFFF)
-            {
-                return ref UOFileIndex.Invalid;
-            }
-
-            return ref entry;
         }
     }
 }

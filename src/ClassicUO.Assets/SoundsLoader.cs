@@ -36,6 +36,7 @@ using ClassicUO.Utility.Logging;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -66,7 +67,6 @@ namespace ClassicUO.Assets
                     if (FileManager.IsUOPInstallation && File.Exists(path))
                     {
                         _file = new UOFileUop(path, "build/soundlegacymul/{0:D8}.dat");
-                        Entries = new UOFileIndex[Math.Max(((UOFileUop) _file).TotalEntriesCount, MAX_SOUND_DATA_INDEX_COUNT)];
                     }
                     else
                     {
@@ -83,7 +83,7 @@ namespace ClassicUO.Assets
                         }
                     }
 
-                    _file.FillEntries(ref Entries);
+                    _file.FillEntries();
 
                     string def = FileManager.GetUOFilePath("Sound.def");
 
@@ -95,7 +95,7 @@ namespace ClassicUO.Assets
                             {
                                 int index = reader.ReadInt();
 
-                                if (index < 0 || index >= MAX_SOUND_DATA_INDEX_COUNT || index >= Entries.Length || Entries[index].Length != 0)
+                                if (index < 0 || index >= MAX_SOUND_DATA_INDEX_COUNT || index >= _file.Entries.Length || _file.Entries[index].Length != 0)
                                 {
                                     continue;
                                 }
@@ -116,7 +116,7 @@ namespace ClassicUO.Assets
                                         continue;
                                     }
 
-                                    ref UOFileIndex ind = ref Entries[index];
+                                    ref UOFileIndex ind = ref _file.Entries[index];
 
                                     if (checkIndex == -1)
                                     {
@@ -124,14 +124,14 @@ namespace ClassicUO.Assets
                                     }
                                     else
                                     {
-                                        ref readonly UOFileIndex outInd = ref Entries[checkIndex];
+                                        ref readonly UOFileIndex outInd = ref _file.Entries[checkIndex];
 
                                         if (outInd.Length == 0)
                                         {
                                             continue;
                                         }
 
-                                        Entries[index] = Entries[checkIndex];
+                                        _file.Entries[index] = _file.Entries[checkIndex];
                                     }
                                 }
                             }
@@ -239,23 +239,19 @@ namespace ClassicUO.Assets
                 return false;
             }
 
-            ref var entry = ref GetValidRefEntry(sound);
-
-            var reader = new StackDataReader(entry.Address, (int)entry.FileSize);
-            reader.Seek(entry.Offset);
-
-            long offset = reader.Position;
-
-            if (offset < 0 || entry.Length <= 0)
-            {
+            ref var entry = ref _file.GetValidRefEntry(sound);
+            if (entry.Length <= 0)
                 return false;
-            }
 
-            reader.Seek(offset);
+            _file.Seek(entry.Offset, SeekOrigin.Begin);
 
-            var current = reader.Position;
-            name = reader.ReadUTF8(40);
-            data = reader.ReadArray(entry.Length - 40);            
+            Span<byte> buf = stackalloc byte[40];
+            _file.Read(buf);
+
+            name = Encoding.UTF8.GetString(buf);
+            data = new byte[entry.Length - 40];
+            _file.Read(data);
+
             return true;
         }
 

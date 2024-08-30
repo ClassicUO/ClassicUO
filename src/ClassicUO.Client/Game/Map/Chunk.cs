@@ -36,6 +36,8 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Assets;
 using ClassicUO.Utility;
+using System;
+using System.Runtime.InteropServices;
 
 namespace ClassicUO.Game.Map
 {
@@ -85,12 +87,17 @@ namespace ClassicUO.Game.Map
 
             Map map = _world.Map;
 
-            ref IndexMap im = ref GetIndex(index);
+            ref var im = ref GetIndex(index);
 
             if (im.MapAddress != 0)
             {
-                MapBlock* block = (MapBlock*) im.MapAddress;
-                MapCells* cells = (MapCells*) &block->Cells;
+                im.MapFile.Seek((long)im.MapAddress, System.IO.SeekOrigin.Begin);
+
+                Span<byte> buf = stackalloc byte[sizeof(MapBlock)];
+                im.MapFile.Read(buf);
+                ref readonly var block = ref Unsafe.AsRef<MapBlock>(Unsafe.AsPointer(ref buf[0]));
+
+                var cells = block.Cells;
                 int bx = X << 3;
                 int by = Y << 3;
 
@@ -121,29 +128,31 @@ namespace ClassicUO.Game.Map
 
                 if (im.StaticAddress != 0)
                 {
-                    StaticsBlock* sb = (StaticsBlock*) im.StaticAddress;
+                    im.StaticFile.Seek((long)im.StaticAddress, System.IO.SeekOrigin.Begin);
 
-                    if (sb != null)
+                    Span<byte> buf2 = stackalloc byte[sizeof(StaticsBlock)];
+
+                    for (int i = 0, count = (int)im.StaticCount; i < count; ++i)
                     {
-                        for (int i = 0, count = (int) im.StaticCount; i < count; ++i, ++sb)
+                        im.StaticFile.Read(buf2);
+                        ref var sb = ref Unsafe.AsRef<StaticsBlock>(Unsafe.AsPointer(ref buf2[0]));
+
+                        if (sb.Color != 0 && sb.Color != 0xFFFF)
                         {
-                            if (sb->Color != 0 && sb->Color != 0xFFFF)
+                            int pos = (sb.Y << 3) + sb.X;
+
+                            if (pos >= 64)
                             {
-                                int pos = (sb->Y << 3) + sb->X;
-
-                                if (pos >= 64)
-                                {
-                                    continue;
-                                }
-
-                                Static staticObject = Static.Create(_world, sb->Color, sb->Hue, pos);
-                                staticObject.X = (ushort) (bx + sb->X);
-                                staticObject.Y = (ushort) (by + sb->Y);
-                                staticObject.Z = sb->Z;
-                                staticObject.UpdateScreenPosition();
-
-                                AddGameObject(staticObject, sb->X, sb->Y);
+                                continue;
                             }
+
+                            Static staticObject = Static.Create(_world, sb.Color, sb.Hue, pos);
+                            staticObject.X = (ushort)(bx + sb.X);
+                            staticObject.Y = (ushort)(by + sb.Y);
+                            staticObject.Z = sb.Z;
+                            staticObject.UpdateScreenPosition();
+
+                            AddGameObject(staticObject, sb.X, sb.Y);
                         }
                     }
                 }

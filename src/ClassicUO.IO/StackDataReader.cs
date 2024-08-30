@@ -21,9 +21,6 @@ namespace ClassicUO.IO
             Position = 0;
         }
 
-        public StackDataReader(IntPtr ptr, int length) : this(new ReadOnlySpan<byte>(ptr.ToPointer(), length))
-        {
-        }
 
         public int Position { get; private set; }
         public long Length { get; }
@@ -189,6 +186,22 @@ namespace ClassicUO.IO
 
             return v;
         }
+
+        [MethodImpl(IMPL_OPTION)]
+        public T Read<T>() where T : unmanaged
+        {
+            var size = sizeof(T);
+            if (Position + size > Length)
+            {
+                return default;
+            }
+
+            var o = Unsafe.ReadUnaligned<T>(ref MemoryMarshal.GetReference(_data.Slice(Position, size)));
+            Skip(size);
+            return o;
+        }
+
+
 
         [MethodImpl(IMPL_OPTION)]
         public ushort ReadUInt16BE()
