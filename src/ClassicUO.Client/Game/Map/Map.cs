@@ -150,12 +150,7 @@ namespace ClassicUO.Game.Map
             unsafe
             {
                 blockIndex.MapFile.Seek((long)blockIndex.MapAddress, System.IO.SeekOrigin.Begin);
-
-                Span<byte> buf = stackalloc byte[sizeof(MapBlock)];
-                blockIndex.MapFile.Read(buf);
-                ref readonly var block = ref Unsafe.AsRef<MapBlock>(Unsafe.AsPointer(ref buf[0]));
-
-                return block.Cells[(my << 3) + mx].Z;
+                return blockIndex.MapFile.Read<MapBlock>().Cells[(my << 3) + mx].Z;
             }
         }
 

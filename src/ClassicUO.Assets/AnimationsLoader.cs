@@ -820,18 +820,25 @@ namespace ClassicUO.Assets
 
             foreach (var entry in animSeq.Entries)
             {
+                if (entry.Length == 0)
+                    continue;
+
                 animSeq.Seek(entry.Offset, SeekOrigin.Begin);
 
                 if (buf.Length < entry.Length)
                     buf = new byte[entry.Length];
 
+                animSeq.Read(buf.AsSpan(0, entry.Length));
                 var reader = new StackDataReader(buf);
                 if (entry.CompressionFlag >= CompressionType.Zlib)
                 {
                     if (dbuf.Length < entry.DecompressedLength)
                         dbuf = new byte[entry.DecompressedLength];
 
-                    ZLib.Decompress(buf.AsSpan(0, entry.Length), dbuf.AsSpan(0, entry.DecompressedLength));
+                    var ok = ZLib.Decompress(buf.AsSpan(0, entry.Length), dbuf.AsSpan(0, entry.DecompressedLength));
+                    if (ok != ZLib.ZLibError.Ok)
+                        continue;
+
                     reader = new StackDataReader(dbuf.AsSpan(0, entry.DecompressedLength));
                 }
 

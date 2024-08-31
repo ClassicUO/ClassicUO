@@ -92,10 +92,7 @@ namespace ClassicUO.Game.Map
             if (im.MapAddress != 0)
             {
                 im.MapFile.Seek((long)im.MapAddress, System.IO.SeekOrigin.Begin);
-
-                Span<byte> buf = stackalloc byte[sizeof(MapBlock)];
-                im.MapFile.Read(buf);
-                ref readonly var block = ref Unsafe.AsRef<MapBlock>(Unsafe.AsPointer(ref buf[0]));
+                var block = im.MapFile.Read<MapBlock>();
 
                 var cells = block.Cells;
                 int bx = X << 3;
@@ -130,12 +127,9 @@ namespace ClassicUO.Game.Map
                 {
                     im.StaticFile.Seek((long)im.StaticAddress, System.IO.SeekOrigin.Begin);
 
-                    Span<byte> buf2 = stackalloc byte[sizeof(StaticsBlock)];
-
                     for (int i = 0, count = (int)im.StaticCount; i < count; ++i)
-                    {
-                        im.StaticFile.Read(buf2);
-                        ref var sb = ref Unsafe.AsRef<StaticsBlock>(Unsafe.AsPointer(ref buf2[0]));
+                    {     
+                        var sb = im.StaticFile.Read<StaticsBlock>();
 
                         if (sb.Color != 0 && sb.Color != 0xFFFF)
                         {
