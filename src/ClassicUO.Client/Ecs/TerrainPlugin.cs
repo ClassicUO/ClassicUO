@@ -28,13 +28,14 @@ readonly struct TerrainPlugin : IPlugin
             Res<GameContext> gameCtx,
             Query<WorldPosition, With<Player>> playerQuery,
             EventWriter<OnNewChunkRequest> chunkRequests,
-            Local<(ushort LastX, ushort LastY)> lastPos
+            Local<(ushort? LastX, ushort? LastY)> lastPos
         ) =>
         {
             ref var pos = ref playerQuery.Single<WorldPosition>();
 
-            if (lastPos.Value.LastX == pos.X && lastPos.Value.LastY == pos.Y)
-                return;
+            if (lastPos.Value.LastX.HasValue && lastPos.Value.LastY.HasValue)
+                if (lastPos.Value.LastX == pos.X && lastPos.Value.LastY == pos.Y)
+                    return;
 
             if (gameCtx.Value.Map == -1)
                 return;
