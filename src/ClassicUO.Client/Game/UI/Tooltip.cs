@@ -156,7 +156,7 @@ namespace ClassicUO.Game.UI
             Client.Game.UO.FileManager.Fonts.RecalculateWidthByInfo = false;
             Client.Game.UO.FileManager.Fonts.SetUseHTML(false);
 
-            if (_renderedText.Texture == null || _renderedText.Texture.IsDisposed)
+            if (!_renderedText.IsValid)
             {
                 return false;
             }
@@ -209,20 +209,27 @@ namespace ClassicUO.Game.UI
                 hue_vec
             );
 
-            batcher.Draw
-            (
-                _renderedText.Texture,
-                new Rectangle
+            if (_renderedText.Texture == null)
+            {
+                _renderedText.Draw(batcher, x + 2, y + 2);
+            }
+            else
+            {
+                batcher.Draw
                 (
-                    x + 3,
-                    y + 3,
-                    (int)(_renderedText.Texture.Width * zoom),
-                    (int)(_renderedText.Texture.Height * zoom)
-                ),
-                null,
-                Vector3.UnitZ
-            );
-
+                    _renderedText.Texture,
+                    new Rectangle
+                    (
+                        x + 3,
+                        y + 3,
+                        (int)(_renderedText.Texture.Width * zoom),
+                        (int)(_renderedText.Texture.Height * zoom)
+                    ),
+                    null,
+                    Vector3.UnitZ
+                );
+            }
+            
             return true;
         }
 

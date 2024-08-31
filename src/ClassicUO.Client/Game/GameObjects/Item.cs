@@ -553,7 +553,7 @@ namespace ClassicUO.Game.GameObjects
 
                 for (; last != null; last = (TextObject)last.Previous)
                 {
-                    if (last.RenderedText != null && !last.RenderedText.IsDestroyed)
+                    if (last.RenderedText.IsValid)
                     {
                         if (offY == 0 && last.Time < Time.Ticks)
                         {
@@ -574,7 +574,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 for (; last != null; last = (TextObject)last.Previous)
                 {
-                    if (last.RenderedText != null && !last.RenderedText.IsDestroyed)
+                    if (last.RenderedText.IsValid)
                     {
                         if (offY == 0 && last.Time < Time.Ticks)
                         {

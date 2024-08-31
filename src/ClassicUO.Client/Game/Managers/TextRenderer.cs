@@ -70,7 +70,7 @@ namespace ClassicUO.Game.Managers
 
             for (TextObject o = DrawPointer; o != null; o = o.DLeft)
             {
-                if (o.IsDestroyed || o.RenderedText == null || o.RenderedText.IsDestroyed || o.RenderedText.Texture == null || o.Time < ClassicUO.Time.Ticks)
+                if (o.IsDestroyed || o.RenderedText == null || !o.RenderedText.IsValid || o.Time < ClassicUO.Time.Ticks)
                 {
                     continue;
                 }
@@ -155,7 +155,7 @@ namespace ClassicUO.Game.Managers
                 {
                     TextObject t = DrawPointer;
 
-                    if (t.Time >= ClassicUO.Time.Ticks && t.RenderedText != null && !t.RenderedText.IsDestroyed)
+                    if (t.Time >= ClassicUO.Time.Ticks && t.RenderedText.IsValid)
                     {
                         if (t.Owner != null)
                         {

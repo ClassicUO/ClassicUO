@@ -45,9 +45,12 @@ using ClassicUO.Renderer;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
+using FontStashSharp;
+using FontStashSharp.RichText;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -66,6 +69,7 @@ namespace ClassicUO
         private UltimaBatcher2D _uoSpriteBatch;
         private bool _suppressedDraw;
         private Texture2D _background;
+        private readonly Dictionary<string, FontSystem> _fontsCache = new ();
 
         public GameController(IPluginHost pluginHost)
         {
@@ -88,6 +92,25 @@ namespace ClassicUO
             IsFixedTimeStep = false; // Settings.GlobalSettings.FixedTimeStep;
             TargetElapsedTime = TimeSpan.FromMilliseconds(1000.0 / 250.0);
             PluginHost = pluginHost;
+
+            RichTextDefaults.FontResolver = p =>
+            {
+                // Parse font name and size
+                var args = p.Split(',');
+                var fontName = args[0].Trim();
+                var fontSize = int.Parse(args[1].Trim());
+                // _fontCache is field of type Dictionary<string, FontSystem>
+                // It is used to cache fonts
+                if (!_fontsCache.TryGetValue(fontName, out var fontSystem))
+                {
+                    // Load and cache the font system
+                    fontSystem = new FontSystem();
+                    fontSystem.AddFont(TTFFontsLoader.GetFont(fontName).ToArray());
+                    _fontsCache[fontName] = fontSystem;
+                }
+                // Return the required font
+                return fontSystem.GetFont(fontSize);
+            };
         }
 
         public Scene Scene { get; private set; }

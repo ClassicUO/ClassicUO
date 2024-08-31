@@ -238,7 +238,7 @@ namespace ClassicUO.Game.GameObjects
 
             foreach (TextObject item in _messages)
             {
-                if (item.IsDestroyed || item.RenderedText == null || item.RenderedText.IsDestroyed)
+                if (item.IsDestroyed || !item.RenderedText.IsValid)
                 {
                     continue;
                 }

@@ -122,16 +122,15 @@ float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 	}
 	else if (mode == HUE_TEXT_NO_BLACK)
 	{
-		if (color.r > 0.04f || color.g > 0.04f || color.b > 0.04f)
+        if (color.r > 0.08f || color.g > 0.08f || color.b > 0.08f)
 		{
 			color.rgb = get_rgb(1.0f, hue);
 		}
 	}
 	else if (mode == HUE_TEXT)
 	{
-		// 31 is max red, so this is just selecting the color of the darkest pixel in the hue
-		color.rgb = get_rgb(1.0f, hue);
-	}
+        color.rgb = color.rgb * IN.Normal;
+    }
 	else if (mode == LAND)
 	{
 		color.rgb *= get_light(IN.Normal);

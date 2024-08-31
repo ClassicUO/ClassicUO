@@ -227,7 +227,7 @@ namespace ClassicUO.Game.GameObjects
 
             for (; last != null; last = (TextObject)last.Previous)
             {
-                if (last.RenderedText != null && !last.RenderedText.IsDestroyed)
+                if (last.RenderedText.IsValid)
                 {
                     if (offY == 0 && last.Time < Time.Ticks)
                     {
@@ -265,12 +265,7 @@ namespace ClassicUO.Game.GameObjects
                 item = (TextObject)item.Next
             )
             {
-                if (
-                    item.RenderedText == null
-                    || item.RenderedText.IsDestroyed
-                    || item.RenderedText.Texture == null
-                    || item.Time < Time.Ticks
-                )
+                if (item.RenderedText == null || !item.RenderedText.IsValid || item.Time < Time.Ticks)
                 {
                     continue;
                 }
