@@ -5686,8 +5686,12 @@ namespace ClassicUO.Network
                     break;
 
                 case 0xFE:
-                    Log.Info("Razor ACK sent");
-                    NetClient.Socket.Send_RazorACK();
+
+                    Client.Game.EnqueueAction(5000, () =>
+                    {
+                        Log.Info("Razor ACK sent");
+                        NetClient.Socket.Send_RazorACK();
+                    });
 
                     break;
             }

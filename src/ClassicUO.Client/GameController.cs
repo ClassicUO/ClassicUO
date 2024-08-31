@@ -120,6 +120,12 @@ namespace ClassicUO
         public GraphicsDeviceManager GraphicManager { get; }
         public readonly uint[] FrameDelay = new uint[2];
 
+        private readonly List<(uint, Action)> _queuedActions = new ();
+
+        public void EnqueueAction(uint time, Action action)
+        {
+            _queuedActions.Add((Time.Ticks + time, action));
+        }
 
         protected override void Initialize()
         {
@@ -440,7 +446,20 @@ namespace ClassicUO
             UO.GameCursor?.Update();
             Audio?.Update();
 
-            base.Update(gameTime);
+
+            for (var i = _queuedActions.Count - 1; i >= 0; i--)
+            {
+                (var time, var fn) = _queuedActions[i];
+                
+                if (Time.Ticks > time)
+                {
+                    fn();
+                    _queuedActions.RemoveAt(i);
+                    break;
+                }
+            }
+
+             base.Update(gameTime);
         }
 
         protected override void Draw(GameTime gameTime)
