@@ -58,6 +58,7 @@ namespace ClassicUO.Assets
                 FileSystemHelper.EnsureFileExists(pathidx);
 
                 _file = new UOFileMul(path, pathidx);
+                _file.FillEntries();
             });
         }
 
