@@ -187,18 +187,25 @@ namespace ClassicUO.IO
             return v;
         }
 
+        public int Read(Span<byte> buffer)
+        {
+            if (Position + buffer.Length > Length)
+            {
+                return -1;
+            }
+
+            _data.Slice(Position, buffer.Length).CopyTo(buffer);
+            Skip(buffer.Length);
+            return buffer.Length;
+        }
+
         [MethodImpl(IMPL_OPTION)]
         public T Read<T>() where T : unmanaged
         {
-            var size = sizeof(T);
-            if (Position + size > Length)
-            {
-                return default;
-            }
-
-            var o = Unsafe.ReadUnaligned<T>(ref MemoryMarshal.GetReference(_data.Slice(Position, size)));
-            Skip(size);
-            return o;
+            Unsafe.SkipInit<T>(out var v);
+            var p = new Span<byte>(&v, sizeof(T));
+            Read(p);
+            return v;
         }
 
 

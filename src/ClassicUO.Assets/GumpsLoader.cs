@@ -188,15 +188,13 @@ namespace ClassicUO.Assets
 
             var start = reader.Position;
             var rowLookup = new int[h];
-            for (var y = 0; y < h; ++y)
-                rowLookup[y] = reader.ReadInt32LE();
+            reader.Read(MemoryMarshal.AsBytes<int>(rowLookup));
 
             for (var y = 0; y < h; ++y)
             {
-                var gsize = (y < h - 1) ? rowLookup[y + 1] - rowLookup[y] : halfLen - rowLookup[y];
                 reader.Seek(start + (rowLookup[y] << 2));
-
                 var pixelIndex = (int)(y * w);
+                var gsize = (y < h - 1) ? rowLookup[y + 1] - rowLookup[y] : halfLen - rowLookup[y];
                 for (var i = 0; i < gsize; ++i)
                 {
                     var value = reader.ReadUInt16LE();
