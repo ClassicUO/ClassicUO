@@ -1585,4 +1585,7 @@ Client version: '{0}'</value>
   <data name="HueContainerGumps" xml:space="preserve">
     <value>Recolor container gump by item hue</value>
   </data>
+  <data name="ResetMapsCache" xml:space="preserve">
+    <value>Reset maps cache</value>
+  </data>
 </root>

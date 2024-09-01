@@ -204,13 +204,10 @@ namespace ClassicUO.Network.Encryption
 
             if (use_md5)
             {
-                var md5B = new MD5Behaviour();
                 var ctx = new MD5Behaviour.MD5Context();
-                md5B.Initialize(ref ctx);
-
-                md5B.Update(ref ctx, _cipher_table.AsSpan(0, 256));
-
-                md5B.Finalize(ref ctx);
+                MD5Behaviour.Initialize(ref ctx);
+                MD5Behaviour.Update(ref ctx, _cipher_table.AsSpan(0, 256));
+                MD5Behaviour.Finalize(ref ctx);
 
                 _xor_data = new byte[16];
                 for (int i = 0; i < 16; ++i)
