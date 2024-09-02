@@ -409,7 +409,7 @@ namespace ClassicUO.Game.UI.Gumps
             _options["reset_map_cache"] = new ContextMenuItemEntry(ResGumps.ResetMapsCache, () =>
             {
                 Directory.GetFiles(_mapsCachePath, "*.png").ForEach(s => File.Delete(s));
-            }, true);
+            }, false);
         }
 
         public void GoToMarker(int x, int y, bool isManualType)
