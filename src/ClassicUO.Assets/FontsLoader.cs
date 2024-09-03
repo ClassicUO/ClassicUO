@@ -148,17 +148,17 @@ namespace ClassicUO.Assets
 
                     for (int i = 0; i < 224; i++)
                     {
+                        if (fonts.Position + fontHeaderSize >= fonts.Length)
+                        {
+                            break;
+                        }
+
                         var fh = new FontHeader()
                         {
                             Width = fonts.ReadUInt8(),
                             Height = fonts.ReadUInt8(),
                             Unknown = fonts.ReadUInt8(),
                         };
-
-                        if (fonts.Position + fontHeaderSize >= fonts.Length)
-                        {
-                            continue;
-                        }
 
                         int bcount = fh.Width * fh.Height * 2;
 
