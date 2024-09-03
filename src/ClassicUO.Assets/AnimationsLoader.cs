@@ -64,7 +64,7 @@ namespace ClassicUO.Assets
         private readonly Dictionary<int, BodyConvInfo> _bodyConvInfos = new Dictionary<int, BodyConvInfo>();
         private readonly Dictionary<int, UopInfo> _uopInfos = new Dictionary<int, UopInfo>();
 
-        
+
         public AnimationsLoader(UOFileManager fileManager) : base(fileManager)
         {
 
@@ -79,7 +79,8 @@ namespace ClassicUO.Assets
                 new List<(ushort, byte)>()
             };
 
-        private unsafe void LoadInternal()
+
+        public override void Load()
         {
             for (int i = 0; i < _files.Length; i++)
             {
@@ -113,7 +114,7 @@ namespace ClassicUO.Assets
                     LoadUop();
                 }
             }
-            
+
             if (FileManager.Version >= ClientVersion.CV_500A)
             {
                 string path = FileManager.GetUOFilePath("mobtypes.txt");
@@ -466,11 +467,6 @@ namespace ClassicUO.Assets
             }
 
             return result;
-        }
-
-        public override unsafe Task Load()
-        {
-            return Task.Run(LoadInternal);
         }
 
         private void ProcessEquipConvDef()
@@ -1359,7 +1355,7 @@ namespace ClassicUO.Assets
             {
                 return Span<FrameInfo>.Empty;
             }
-            
+
             var file = _files[fileIndex];
 
             if (index.Position + index.Size > file.Length)

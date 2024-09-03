@@ -48,55 +48,52 @@ namespace ClassicUO.Assets
 
         public UOFile File => _file;
 
-        public override Task Load()
+        public override void Load()
         {
-            return Task.Run(() =>
+            string path = FileManager.GetUOFilePath("texmaps.mul");
+            string pathidx = FileManager.GetUOFilePath("texidx.mul");
+
+            FileSystemHelper.EnsureFileExists(path);
+            FileSystemHelper.EnsureFileExists(pathidx);
+
+            _file = new UOFileMul(path, pathidx);
+            _file.FillEntries();
+            string pathdef = FileManager.GetUOFilePath("TexTerr.def");
+
+            if (System.IO.File.Exists(pathdef))
             {
-                string path = FileManager.GetUOFilePath("texmaps.mul");
-                string pathidx = FileManager.GetUOFilePath("texidx.mul");
-
-                FileSystemHelper.EnsureFileExists(path);
-                FileSystemHelper.EnsureFileExists(pathidx);
-
-                _file = new UOFileMul(path, pathidx);
-                _file.FillEntries();
-                string pathdef = FileManager.GetUOFilePath("TexTerr.def");
-
-                if (System.IO.File.Exists(pathdef))
+                using (DefReader defReader = new DefReader(pathdef))
                 {
-                    using (DefReader defReader = new DefReader(pathdef))
+                    while (defReader.Next())
                     {
-                        while (defReader.Next())
+                        int index = defReader.ReadInt();
+
+                        if (index < 0 || index >= _file.Entries.Length)
                         {
-                            int index = defReader.ReadInt();
+                            continue;
+                        }
 
-                            if (index < 0 || index >= _file.Entries.Length)
+                        int[] group = defReader.ReadGroup();
+
+                        if (group == null)
+                        {
+                            continue;
+                        }
+
+                        for (int i = 0; i < group.Length; i++)
+                        {
+                            int checkindex = group[i];
+
+                            if (checkindex < 0 || checkindex >= _file.Entries.Length)
                             {
                                 continue;
                             }
 
-                            int[] group = defReader.ReadGroup();
-
-                            if (group == null)
-                            {
-                                continue;
-                            }
-
-                            for (int i = 0; i < group.Length; i++)
-                            {
-                                int checkindex = group[i];
-
-                                if (checkindex < 0 || checkindex >= _file.Entries.Length)
-                                {
-                                    continue;
-                                }
-
-                                _file.Entries[index] = _file.Entries[checkindex];
-                            }
+                            _file.Entries[index] = _file.Entries[checkindex];
                         }
                     }
                 }
-            });
+            }
         }
 
         public TexmapInfo GetTexmap(uint idx)

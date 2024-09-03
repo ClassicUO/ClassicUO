@@ -2,7 +2,7 @@
 
 // Copyright (c) 2024, andreakarasho
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 // 1. Redistributions of source code must retain the above copyright
@@ -16,7 +16,7 @@
 // 4. Neither the name of the copyright holder nor the
 //    names of its contributors may be used to endorse or promote products
 //    derived from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -30,7 +30,6 @@
 
 #endregion
 
-using ClassicUO.IO;
 using ClassicUO.Utility;
 using System.Collections.Generic;
 using System.IO;
@@ -50,7 +49,7 @@ namespace ClassicUO.Assets
             int initialSkillValue = clientVersion >= ClientVersion.CV_70160 ? 30 : 50;
             int remainStatValue = clientVersion >= ClientVersion.CV_70160 ? 15 : 10;
 
-            return 
+            return
             (
                 new int[4, 2]
                 {
@@ -61,7 +60,7 @@ namespace ClassicUO.Assets
             );
         }
 
-       
+
         public string Name { get; set; }
         public string TrueName { get; set; }
         public int Localization { get; set; }
@@ -89,71 +88,65 @@ namespace ClassicUO.Assets
 
         public Dictionary<ProfessionInfo, List<ProfessionInfo>> Professions { get; } = new Dictionary<ProfessionInfo, List<ProfessionInfo>>();
 
-        public override Task Load()
+        public override void Load()
         {
-            return Task.Run
-            (
-                () =>
+            bool result = false;
+
+            FileInfo file = new FileInfo(FileManager.GetUOFilePath("Prof.txt"));
+
+            if (file.Exists)
+            {
+                if (file.Length > 0x100000) //1megabyte limit of string file
                 {
-                    bool result = false;
+                    throw new InternalBufferOverflowException($"{file.FullName} exceeds the maximum 1Megabyte allowed size for a string text file, please, check that the file is correct and not corrupted -> {file.Length} file size");
+                }
 
-                    FileInfo file = new FileInfo(FileManager.GetUOFilePath("Prof.txt"));
+                //what if file doesn't exist? we skip section completely...directly into advanced selection
+                TextFileParser read = new TextFileParser(File.ReadAllText(file.FullName), new[] { ' ', '\t', ',' }, new[] { '#', ';' }, new[] { '"', '"' });
 
-                    if (file.Exists)
+                while (!read.IsEOF())
+                {
+                    List<string> strings = read.ReadTokens();
+
+                    if (strings.Count > 0)
                     {
-                        if (file.Length > 0x100000) //1megabyte limit of string file
+                        if (strings[0].ToLower() == "begin")
                         {
-                            throw new InternalBufferOverflowException($"{file.FullName} exceeds the maximum 1Megabyte allowed size for a string text file, please, check that the file is correct and not corrupted -> {file.Length} file size");
-                        }
+                            result = ParseFilePart(read);
 
-                        //what if file doesn't exist? we skip section completely...directly into advanced selection
-                        TextFileParser read = new TextFileParser(File.ReadAllText(file.FullName), new[] { ' ', '\t', ',' }, new[] { '#', ';' }, new[] { '"', '"' });
-
-                        while (!read.IsEOF())
-                        {
-                            List<string> strings = read.ReadTokens();
-
-                            if (strings.Count > 0)
+                            if (!result)
                             {
-                                if (strings[0].ToLower() == "begin")
-                                {
-                                    result = ParseFilePart(read);
-
-                                    if (!result)
-                                    {
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    Professions[new ProfessionInfo(FileManager.Version)
-                    {
-                        Name = "Advanced",
-                        Localization = 1061176,
-                        Description = 1061226,
-                        Graphic = 5545,
-                        TopLevel = true,
-                        Type = PROF_TYPE.PROFESSION,
-                        DescriptionIndex = -1,
-                        TrueName = "advanced"
-                    }] = null;
-
-                    foreach (KeyValuePair<ProfessionInfo, List<ProfessionInfo>> kvp in Professions)
-                    {
-                        kvp.Key.Children = null;
-
-                        if (kvp.Value != null)
-                        {
-                            foreach (ProfessionInfo info in kvp.Value)
-                            {
-                                info.Children = null;
+                                break;
                             }
                         }
                     }
                 }
-            );
+            }
+
+            Professions[new ProfessionInfo(FileManager.Version)
+            {
+                Name = "Advanced",
+                Localization = 1061176,
+                Description = 1061226,
+                Graphic = 5545,
+                TopLevel = true,
+                Type = PROF_TYPE.PROFESSION,
+                DescriptionIndex = -1,
+                TrueName = "advanced"
+            }] = null;
+
+            foreach (KeyValuePair<ProfessionInfo, List<ProfessionInfo>> kvp in Professions)
+            {
+                kvp.Key.Children = null;
+
+                if (kvp.Value != null)
+                {
+                    foreach (ProfessionInfo info in kvp.Value)
+                    {
+                        info.Children = null;
+                    }
+                }
+            }
         }
 
         private int GetKeyCode(string key)

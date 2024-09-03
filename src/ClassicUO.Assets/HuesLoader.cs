@@ -2,7 +2,7 @@
 
 // Copyright (c) 2024, andreakarasho
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 // 1. Redistributions of source code must retain the above copyright
@@ -16,7 +16,7 @@
 // 4. Neither the name of the copyright holder nor the
 //    names of its contributors may be used to endorse or promote products
 //    derived from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -32,7 +32,6 @@
 
 using ClassicUO.IO;
 using ClassicUO.Utility;
-using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
@@ -53,36 +52,30 @@ namespace ClassicUO.Assets
 
         public ushort[] RadarCol { get; private set; }
 
-        public override unsafe Task Load()
+        public override unsafe void Load()
         {
-            return Task.Run
-            (
-                () =>
-                {
-                    var path = FileManager.GetUOFilePath("hues.mul");
+            var path = FileManager.GetUOFilePath("hues.mul");
 
-                    FileSystemHelper.EnsureFileExists(path);
+            FileSystemHelper.EnsureFileExists(path);
 
-                    using var file = new UOFileMul(path);
-                    int groupSize = Unsafe.SizeOf<HuesGroup>();
-                    int entrycount = (int) file.Length / groupSize;
-                    HuesCount = entrycount * 8;
-                    HuesRange = new HuesGroup[entrycount];
+            using var file = new UOFileMul(path);
+            int groupSize = Unsafe.SizeOf<HuesGroup>();
+            int entrycount = (int) file.Length / groupSize;
+            HuesCount = entrycount * 8;
+            HuesRange = new HuesGroup[entrycount];
 
-                    for (int i = 0; i < entrycount; i++)
-                    {
-                        HuesRange[i] = file.Read<HuesGroup>();
-                    }
+            for (int i = 0; i < entrycount; i++)
+            {
+                HuesRange[i] = file.Read<HuesGroup>();
+            }
 
-                    path = FileManager.GetUOFilePath("radarcol.mul");
+            path = FileManager.GetUOFilePath("radarcol.mul");
 
-                    FileSystemHelper.EnsureFileExists(path);
+            FileSystemHelper.EnsureFileExists(path);
 
-                    using var radarcol = new UOFileMul(path);
-                    RadarCol = new ushort[radarcol.Length / sizeof(ushort)];
-                    radarcol.Read(MemoryMarshal.AsBytes<ushort>(RadarCol));
-                }
-            );
+            using var radarcol = new UOFileMul(path);
+            RadarCol = new ushort[radarcol.Length / sizeof(ushort)];
+            radarcol.Read(MemoryMarshal.AsBytes<ushort>(RadarCol));
         }
 
         public float[] CreateHuesPalette()

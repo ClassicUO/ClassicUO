@@ -52,29 +52,26 @@ namespace ClassicUO.Assets
         public UOFile File => _file;
 
 
-        public override Task Load()
+        public override void Load()
         {
-            return Task.Run(() =>
+            string filePath = FileManager.GetUOFilePath("artLegacyMUL.uop");
+
+            if (FileManager.IsUOPInstallation && System.IO.File.Exists(filePath))
             {
-                string filePath = FileManager.GetUOFilePath("artLegacyMUL.uop");
+                _file = new UOFileUop(filePath, "build/artlegacymul/{0:D8}.tga");
+            }
+            else
+            {
+                filePath = FileManager.GetUOFilePath("art.mul");
+                string idxPath = FileManager.GetUOFilePath("artidx.mul");
 
-                if (FileManager.IsUOPInstallation && System.IO.File.Exists(filePath))
+                if (System.IO.File.Exists(filePath) && System.IO.File.Exists(idxPath))
                 {
-                    _file = new UOFileUop(filePath, "build/artlegacymul/{0:D8}.tga");
+                    _file = new UOFileMul(filePath, idxPath);
                 }
-                else
-                {
-                    filePath = FileManager.GetUOFilePath("art.mul");
-                    string idxPath = FileManager.GetUOFilePath("artidx.mul");
+            }
 
-                    if (System.IO.File.Exists(filePath) && System.IO.File.Exists(idxPath))
-                    {
-                        _file = new UOFileMul(filePath, idxPath);
-                    }
-                }
-
-                _file.FillEntries();
-            });
+            _file.FillEntries();
         }
 
         // public Rectangle GetRealArtBounds(int index) =>
@@ -242,9 +239,9 @@ namespace ClassicUO.Assets
         {
             ref var entry = ref _file.GetValidRefEntry((int)idx);
             var loadLand = idx < 0x4000;
-            var pixels = loadLand ? 
+            var pixels = loadLand ?
                 LoadLand(_file, in entry, out var width, out var height)
-                : 
+                :
                 LoadArt(_file, in entry, out width, out height);
 
             return new ArtInfo()

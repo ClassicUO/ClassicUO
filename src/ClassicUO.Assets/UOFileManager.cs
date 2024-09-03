@@ -169,30 +169,23 @@ namespace ClassicUO.Assets
 
             Maps.MapsLayouts = mapsLayouts;
 
-            var tasks = new List<Task>
-            {
-                Animations.Load(),
-                AnimData.Load(),
-                Arts.Load(),
-                Maps.Load(),
-                Clilocs.Load(lang),
-                Gumps.Load(),
-                Fonts.Load(),
-                Hues.Load(),
-                TileData.Load(),
-                Multis.Load(),
-                Skills.Load().ContinueWith(t => Professions.Load()),
-                Texmaps.Load(),
-                Speeches.Load(),
-                Lights.Load(),
-                Sounds.Load(),
-                MultiMaps.Load()
-            };
-
-            if (!Task.WhenAll(tasks).Wait(TimeSpan.FromSeconds(10)))
-            {
-                Log.Panic("Loading files timeout.");
-            }
+            Animations.Load();
+            AnimData.Load();
+            Arts.Load();
+            Maps.Load();
+            Clilocs.Load(lang);
+            Gumps.Load();
+            Fonts.Load();
+            Hues.Load();
+            TileData.Load();
+            Multis.Load();
+            Skills.Load();
+            Professions.Load();
+            Texmaps.Load();
+            Speeches.Load();
+            Lights.Load();
+            Sounds.Load();
+            MultiMaps.Load();
 
             ReadArtDefFile();
 

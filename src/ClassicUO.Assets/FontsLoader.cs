@@ -120,104 +120,101 @@ namespace ClassicUO.Assets
 
         public bool IsUsingHTML { get; set; }
 
-        public override unsafe Task Load()
+        public override unsafe void Load()
         {
-            return Task.Run(() =>
+            UOFileMul fonts = new UOFileMul(FileManager.GetUOFilePath("fonts.mul"));
+
+            for (int i = 0; i < 20; i++)
             {
-                UOFileMul fonts = new UOFileMul(FileManager.GetUOFilePath("fonts.mul"));
+                string path = FileManager.GetUOFilePath(
+                    "unifont" + (i == 0 ? "" : i.ToString()) + ".mul"
+                );
 
-                for (int i = 0; i < 20; i++)
+                if (File.Exists(path))
                 {
-                    string path = FileManager.GetUOFilePath(
-                        "unifont" + (i == 0 ? "" : i.ToString()) + ".mul"
-                    );
-
-                    if (File.Exists(path))
-                    {
-                        _unicodeFontAddress[i] = new UOFileMul(path);
-                    }
+                    _unicodeFontAddress[i] = new UOFileMul(path);
                 }
+            }
 
-                int fontHeaderSize = sizeof(FontHeader);
-                FontCount = 0;
+            int fontHeaderSize = sizeof(FontHeader);
+            FontCount = 0;
 
-                while (fonts.Position < fonts.Length)
+            while (fonts.Position < fonts.Length)
+            {
+                bool exit = false;
+                fonts.ReadUInt8();
+
+                for (int i = 0; i < 224; i++)
                 {
-                    bool exit = false;
-                    fonts.ReadUInt8();
-
-                    for (int i = 0; i < 224; i++)
-                    {
-                        if (fonts.Position + fontHeaderSize >= fonts.Length)
-                        {
-                            break;
-                        }
-
-                        var fh = new FontHeader()
-                        {
-                            Width = fonts.ReadUInt8(),
-                            Height = fonts.ReadUInt8(),
-                            Unknown = fonts.ReadUInt8(),
-                        };
-
-                        int bcount = fh.Width * fh.Height * 2;
-
-                        if (fonts.Position + bcount > fonts.Length)
-                        {
-                            exit = true;
-
-                            break;
-                        }
-
-                        fonts.Seek(bcount, SeekOrigin.Current);
-                    }
-
-                    if (exit)
+                    if (fonts.Position + fontHeaderSize >= fonts.Length)
                     {
                         break;
                     }
 
-                    FontCount++;
-                }
-
-                if (FontCount < 1)
-                {
-                    FontCount = 0;
-
-                    return;
-                }
-
-                _fontDataASCII = new FontCharacterData[FontCount, 224];
-                fonts.Seek(0, SeekOrigin.Begin);
-
-                for (int i = 0; i < FontCount; i++)
-                {
-                    byte header = fonts.ReadUInt8();
-
-                    for (int j = 0; j < 224; j++)
+                    var fh = new FontHeader()
                     {
-                        if (fonts.Position + 3 >= fonts.Length)
-                        {
-                            continue;
-                        }
+                        Width = fonts.ReadUInt8(),
+                        Height = fonts.ReadUInt8(),
+                        Unknown = fonts.ReadUInt8(),
+                    };
 
-                        byte w = fonts.ReadUInt8();
-                        byte h = fonts.ReadUInt8();
-                        fonts.ReadUInt8();
-                        var data = new ushort[w * h];
-                        int read = fonts.Read(MemoryMarshal.AsBytes(data.AsSpan()));
-                        _fontDataASCII[i, j] = new FontCharacterData(w, h, data);
+                    int bcount = fh.Width * fh.Height * 2;
+
+                    if (fonts.Position + bcount > fonts.Length)
+                    {
+                        exit = true;
+
+                        break;
                     }
+
+                    fonts.Seek(bcount, SeekOrigin.Current);
                 }
 
-                if (_unicodeFontAddress[1] == null)
+                if (exit)
                 {
-                    _unicodeFontAddress[1] = _unicodeFontAddress[0];
-                    _unicodeFontSize[1] = _unicodeFontSize[0];
+                    break;
                 }
 
-                _fontDataUNICODE = new FontCharacterDataUnicode[_unicodeFontAddress.Length, 0x10000];
-            });
+                FontCount++;
+            }
+
+            if (FontCount < 1)
+            {
+                FontCount = 0;
+
+                return;
+            }
+
+            _fontDataASCII = new FontCharacterData[FontCount, 224];
+            fonts.Seek(0, SeekOrigin.Begin);
+
+            for (int i = 0; i < FontCount; i++)
+            {
+                byte header = fonts.ReadUInt8();
+
+                for (int j = 0; j < 224; j++)
+                {
+                    if (fonts.Position + 3 >= fonts.Length)
+                    {
+                        continue;
+                    }
+
+                    byte w = fonts.ReadUInt8();
+                    byte h = fonts.ReadUInt8();
+                    fonts.ReadUInt8();
+                    var data = new ushort[w * h];
+                    int read = fonts.Read(MemoryMarshal.AsBytes(data.AsSpan()));
+                    _fontDataASCII[i, j] = new FontCharacterData(w, h, data);
+                }
+            }
+
+            if (_unicodeFontAddress[1] == null)
+            {
+                _unicodeFontAddress[1] = _unicodeFontAddress[0];
+                _unicodeFontSize[1] = _unicodeFontSize[0];
+            }
+
+            _fontDataUNICODE = new FontCharacterDataUnicode[_unicodeFontAddress.Length, 0x10000];
         }
 
         private static FontCharacterDataUnicode _nullChar = new FontCharacterDataUnicode();

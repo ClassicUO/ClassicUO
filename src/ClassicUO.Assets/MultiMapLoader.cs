@@ -2,7 +2,7 @@
 
 // Copyright (c) 2024, andreakarasho
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 // 1. Redistributions of source code must retain the above copyright
@@ -16,7 +16,7 @@
 // 4. Neither the name of the copyright holder nor the
 //    names of its contributors may be used to endorse or promote products
 //    derived from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -56,28 +56,22 @@ namespace ClassicUO.Assets
             return map >= 0 && map < _facets.Length && _facets[map] != null;
         }
 
-        public override Task Load()
+        public override void Load()
         {
-            return Task.Run
-            (
-                () =>
-                {
-                    string path = FileManager.GetUOFilePath("Multimap.rle");
+            string path = FileManager.GetUOFilePath("Multimap.rle");
 
-                    if (File.Exists(path))
-                    {
-                        _file = new UOFile(path);
-                    }
+            if (File.Exists(path))
+            {
+                _file = new UOFile(path);
+            }
 
-                    _facets = Directory.GetFiles(FileManager.BasePath, "*.mul", SearchOption.TopDirectoryOnly)
-                        .Select(s => Regex.Match(s, "facet0.*\\.mul", RegexOptions.IgnoreCase))
-                        .Where(s => s.Success)
-                        .Select(s => Path.Combine(FileManager.BasePath, s.Value))
-                        .OrderBy(s => s)
-                        .Select(s => new UOFileMul(s))
-                        .ToArray();
-                }
-            );
+            _facets = Directory.GetFiles(FileManager.BasePath, "*.mul", SearchOption.TopDirectoryOnly)
+                .Select(s => Regex.Match(s, "facet0.*\\.mul", RegexOptions.IgnoreCase))
+                .Where(s => s.Success)
+                .Select(s => Path.Combine(FileManager.BasePath, s.Value))
+                .OrderBy(s => s)
+                .Select(s => new UOFileMul(s))
+                .ToArray();
         }
 
         public unsafe MultiMapInfo LoadMap
