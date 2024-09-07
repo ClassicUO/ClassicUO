@@ -122,8 +122,8 @@ readonly struct MobAnimationsPlugin : IPlugin
 
                 animation.MountAction = 0xFF;
                 var term0 = new QueryTerm(IDOp.Pair(world.Entity<EquippedItem>(), ent.ID), TermOp.With);
-                var term1 = new QueryTerm(world.Entity<NetworkSerial>(), TermOp.DataAccess);
-                foreach ((var entities, var serials) in world.QueryRaw(term0, term1).Iter<NetworkSerial>())
+                var term1 = new QueryTerm(world.Entity<NetworkSerial>(), TermOp.With);
+                foreach (var entities in world.QueryRaw(term0, term1).Iter())
                 {
                     for (var i = 0; i < entities.Length; ++i)
                     {
