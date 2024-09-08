@@ -64,6 +64,7 @@ readonly struct MobAnimationsPlugin : IPlugin
     public void Build(Scheduler scheduler)
     {
         scheduler.AddSystem((
+            Res<GameContext> gameCtx,
             Time time,
             Query<(MobileSteps, WorldPosition, Facing, MobAnimation)> query
         ) =>
@@ -79,9 +80,8 @@ readonly struct MobAnimationsPlugin : IPlugin
                 {
                     ref var step = ref steps[0];
                     var delay = time.Total - steps.Time;
-                    // TODO: check for mount
-                    var mount = false;
 
+                    var mount = animation.MountAction != 0xFF;
                     var maxDelay = MovementSpeed.TimeToCompleteMovement(step.Run, mount);
                     var removeStep = delay >= maxDelay;
                     var directionChange = false;
@@ -91,6 +91,9 @@ readonly struct MobAnimationsPlugin : IPlugin
                         var stepsCount = maxDelay / (float)Constants.CHARACTER_ANIMATION_DELAY;
                         var x = delay / (float)Constants.CHARACTER_ANIMATION_DELAY;
                         var y = x;
+
+                        var offsetZ = ((step.Z - position.Z) * x * (4.0f / stepsCount));
+
                         // TODO: apply offset between a step
                         MovementSpeed.GetPixelOffset(step.Direction, ref x, ref y, stepsCount);
 
@@ -118,6 +121,10 @@ readonly struct MobAnimationsPlugin : IPlugin
                             steps[i - 1] = steps[i];
 
                         steps.Count = Math.Max(0, steps.Count - 1);
+
+                        gameCtx.Value.CenterX = position.X;
+                        gameCtx.Value.CenterY = position.Y;
+                        gameCtx.Value.CenterZ = position.Z;
 
                         if (directionChange)
                             continue;

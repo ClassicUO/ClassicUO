@@ -55,7 +55,7 @@ readonly struct PlayerMovementPlugin : IPlugin
             Res<MouseContext> mouseCtx,
             Res<NetClient> network,
             Res<PlayerStepsContext> stepsCtx,
-            Query<(WorldPosition, Facing, MobileSteps), With<Player>> playerQuery,
+            Query<(WorldPosition, Facing, MobileSteps, MobAnimation), With<Player>> playerQuery,
             Query<(WorldPosition, Graphic, Optional<TileStretched>), With<IsTile>> tilesQuery,
             Query<(WorldPosition, Graphic), (Without<IsTile>, Without<MobAnimation>)> staticsQuery,
             Time time
@@ -155,8 +155,10 @@ readonly struct PlayerMovementPlugin : IPlugin
 
             if (canMove || !sameDir)
             {
-                // TODO: check mount, check IsFlying flag
-                var isMountedOrFlying = false;
+                // ref var playerFlags = ref playerQuery.Single<MobileFlags>();
+                var playerFlags = Flags.None;
+                ref var animation = ref playerQuery.Single<MobAnimation>();
+                var isMountedOrFlying = animation.MountAction != 0xFF || playerFlags.HasFlag(Flags.Flying);
                 var stepTime = sameDir ? MovementSpeed.TimeToCompleteMovement(run, isMountedOrFlying) : Constants.TURN_DELAY;
                 ref var requestedStep = ref stepsCtx.Value.Steps[stepsCtx.Value.Index];
                 requestedStep.Sequence = stepsCtx.Value.Sequence;
