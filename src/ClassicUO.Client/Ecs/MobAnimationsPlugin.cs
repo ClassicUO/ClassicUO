@@ -4,6 +4,7 @@ using ClassicUO.Assets;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Utility;
+using Microsoft.Xna.Framework;
 using TinyEcs;
 using static TinyEcs.Defaults;
 
@@ -93,10 +94,9 @@ readonly struct MobAnimationsPlugin : IPlugin
                         var y = x;
 
                         var offsetZ = ((step.Z - position.Z) * x * (4.0f / stepsCount));
-
-                        // TODO: apply offset between a step
                         MovementSpeed.GetPixelOffset(step.Direction, ref x, ref y, stepsCount);
-
+                        gameCtx.Value.CenterOffset.X = x * -1;
+                        gameCtx.Value.CenterOffset.Y = y * -1 + offsetZ;
                         animation.Run = true;
                     }
                     else
@@ -125,6 +125,7 @@ readonly struct MobAnimationsPlugin : IPlugin
                         gameCtx.Value.CenterX = position.X;
                         gameCtx.Value.CenterY = position.Y;
                         gameCtx.Value.CenterZ = position.Z;
+                        gameCtx.Value.CenterOffset = Vector2.Zero;
 
                         if (directionChange)
                             continue;
@@ -164,7 +165,8 @@ readonly struct MobAnimationsPlugin : IPlugin
                 ref MobileFlags mobFlags,
                 ref MobileSteps mobSteps
             ) => {
-                if (animation.Time >= time.Total) return;
+                if (animation.Time >= time.Total)
+                    return;
 
                 var flags = Unsafe.IsNullRef(ref mobFlags) ? Flags.None : mobFlags.Value;
                 var isWalking = false;
@@ -280,7 +282,7 @@ readonly struct MobAnimationsPlugin : IPlugin
                 }
                 else
                 {
-                    if (frameIndex >= 0)
+                    if (frameIndex >= fc)
                     {
                         frameIndex = 0;
                         animation.Run = false;
