@@ -25,7 +25,7 @@ struct GameContext
 
 readonly struct CuoPlugin : IPlugin
 {
-    public unsafe void Build(Scheduler scheduler)
+    public void Build(Scheduler scheduler)
     {
         scheduler.AddResource(new GameContext() { Map = -1 });
         scheduler.AddResource(Settings.GlobalSettings);
@@ -64,8 +64,6 @@ readonly struct CuoPlugin : IPlugin
         scheduler.AddPlugin<MobAnimationsPlugin>();
         scheduler.AddPlugin<PlayerMovementPlugin>();
         scheduler.AddPlugin<RenderingPlugin>();
-
-
 
         // TODO: remove this once the UI is done
         scheduler.AddSystem((EventWriter<OnLoginRequest> writer, Res<Settings> settings) =>

@@ -159,6 +159,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                 ent.Set(new Ecs.WorldPosition() { X = x, Y = y, Z = z })
                     .Set(new Ecs.Graphic() { Value = graphic })
                     .Set(new Facing() { Value = dir })
+                    .Set(new MobileSteps())
                     .Add<Player>();
             };
 

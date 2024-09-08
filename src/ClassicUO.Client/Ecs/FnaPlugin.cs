@@ -63,7 +63,7 @@ readonly struct FnaPlugin : IPlugin
             game.Value.Tick();
 
             time.Frame = (float) game.Value.GameTime.ElapsedGameTime.TotalSeconds;
-            time.Total += time.Frame;
+            time.Total += time.Frame * 1000f;
 
             FrameworkDispatcher.Update();
         }, threadingType: ThreadingMode.Single).RunIf((SchedulerState state) => state.ResourceExists<UoGame>());

@@ -129,7 +129,10 @@ readonly struct TerrainPlugin : IPlugin
                                         AvgZ = avgZ,
                                         MinZ = minZ,
                                         Offset = offsets
-                                    });
+                                    })
+                                    .Set(new WorldPosition() { X = tileX, Y = tileY, Z = z })
+                                    .Set(new Graphic() { Value = tileID })
+                                    .Add<IsTile>();
                             }
                             else
                             {
@@ -142,7 +145,10 @@ readonly struct TerrainPlugin : IPlugin
                                         Color = Vector3.UnitZ,
                                         Position = Isometric.IsoToScreen(tileX, tileY, z),
                                         Z = Isometric.GetDepthZ(tileX, tileY, z - 2)
-                                    });
+                                    })
+                                    .Set(new WorldPosition() { X = tileX, Y = tileY, Z = z })
+                                    .Set(new Graphic() { Value = tileID })
+                                    .Add<IsTile>();
                             }
                         }
                     }
@@ -197,7 +203,10 @@ readonly struct TerrainPlugin : IPlugin
                                         Color = Renderer.ShaderHueTranslator.GetHueVector(sb.Hue, fileManager.Value.TileData.StaticData[sb.Color].IsPartialHue, 1f),
                                         Position = posVec,
                                         Z = Isometric.GetDepthZ(staX, staY, priorityZ)
-                                    });
+                                    })
+                                    .Set(new WorldPosition() { X = staX, Y = staY, Z = sb.Z })
+                                    .Set(new Graphic() { Value = sb.Color })
+                                    .Add<IsStatic>();
                             }
                         }
                     }

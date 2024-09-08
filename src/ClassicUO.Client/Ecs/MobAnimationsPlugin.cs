@@ -64,6 +64,75 @@ readonly struct MobAnimationsPlugin : IPlugin
     public void Build(Scheduler scheduler)
     {
         scheduler.AddSystem((
+            Time time,
+            Query<(MobileSteps, WorldPosition, Facing, MobAnimation)> query
+        ) =>
+        {
+            query.Each((
+                ref MobileSteps steps,
+                ref WorldPosition position,
+                ref Facing direction,
+                ref MobAnimation animation
+            ) =>
+            {
+                while (steps.Count > 0)
+                {
+                    ref var step = ref steps[0];
+                    var delay = time.Total - steps.Time;
+                    // TODO: check for mount
+                    var mount = false;
+
+                    var maxDelay = MovementSpeed.TimeToCompleteMovement(step.Run, mount);
+                    var removeStep = delay >= maxDelay;
+                    var directionChange = false;
+
+                    if (position.X != step.X || position.Y != step.Y)
+                    {
+                        var stepsCount = maxDelay / (float)Constants.CHARACTER_ANIMATION_DELAY;
+                        var x = delay / (float)Constants.CHARACTER_ANIMATION_DELAY;
+                        var y = x;
+                        // TODO: apply offset between a step
+                        MovementSpeed.GetPixelOffset(step.Direction, ref x, ref y, stepsCount);
+
+                        animation.Run = true;
+                    }
+                    else
+                    {
+                        directionChange = true;
+                        removeStep = true;
+                    }
+
+                    if (removeStep)
+                    {
+                        position.X = (ushort)step.X;
+                        position.Y = (ushort)step.Y;
+                        position.Z = step.Z;
+                        direction.Value = (Direction) step.Direction;
+
+                        if (step.Run)
+                            direction.Value |= Direction.Running;
+
+                        // TODO: offset
+
+                        for (var i = 1; i < steps.Count; ++i)
+                            steps[i - 1] = steps[i];
+
+                        steps.Count = Math.Max(0, steps.Count - 1);
+
+                        if (directionChange)
+                            continue;
+
+                        animation.Run = true;
+                        steps.Time = time.Total;
+                    }
+
+                    break;
+                }
+
+            });
+        });
+
+        scheduler.AddSystem((
             TinyEcs.World world,
             Time time,
             Res<GameContext> gameCtx,
@@ -212,7 +281,7 @@ readonly struct MobAnimationsPlugin : IPlugin
                 }
 
                 animation.Index = frames.IsEmpty ? 0 : frameIndex % frames.Length;
-                animation.Time = time.Total + currDelay / 1000f;
+                animation.Time = time.Total + currDelay;
             });
         });
     }

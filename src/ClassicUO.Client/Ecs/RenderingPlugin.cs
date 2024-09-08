@@ -162,12 +162,12 @@ readonly struct RenderingPlugin : IPlugin
 
                 ref var equip = ref ent.Get<EquippedItem>(act);
                 var orderKey = 0;
-                if (equip.Layer == Layer.Mount)
+                if (equip.Layer == Layer.Mount && !Unsafe.IsNullRef(ref animation))
                 {
                     animId = Mounts.FixMountGraphic(fileManager.Value.TileData, animId);
                     animAction = animation.MountAction;
                 }
-                else if (_layerOrders[(int)animation.Direction & 7].TryGetValue(equip.Layer, out orderKey) &&
+                else if (!Unsafe.IsNullRef(ref animation) && _layerOrders[(int)animation.Direction & 7].TryGetValue(equip.Layer, out orderKey) &&
                     !IsItemCovered(dict.Value ??= new Dictionary<Layer, EntityView>(), world, act, equip.Layer))
                 {
                     if (fileManager.Value.TileData.StaticData[graphic.Value].AnimID != 0)

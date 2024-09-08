@@ -77,3 +77,6 @@ struct PlayerData
     public short PoisonRes;
     public short EnergyRes;
 }
+
+struct IsStatic;
+struct IsTile;
