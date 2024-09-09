@@ -119,6 +119,7 @@ readonly struct InGamePacketsPlugin : IPlugin
             EventWriter<OnNewChunkRequest> chunkRequests,
             EventWriter<AcceptedStep> acceptedSteps,
             EventWriter<RejectedStep> rejectedSteps,
+            EventWriter<MobileQueuedStep> mobileQueuedSteps,
             Res<AssetsServer> assetsServer,
             TinyEcs.World world
         ) =>
@@ -409,7 +410,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                 var parentEnt = entitiesMap.Value.GetOrCreate(world, serial);
                 parentEnt
                     .Set(new Graphic() { Value = graphic })
-                    .Set(new WorldPosition() { X = x, Y = y, Z = z })
+                    // .Set(new WorldPosition() { X = x, Y = y, Z = z })
                     .Set(new Hue() { Value = hue })
                     .Set(new Facing() { Value = dir });
 
@@ -435,6 +436,16 @@ readonly struct InGamePacketsPlugin : IPlugin
 
                     Console.WriteLine("equip serial 0x{0:X8} | parentId: {1}", itemSerial, parentEnt.ID);
                 }
+
+                mobileQueuedSteps.Enqueue(new ()
+                {
+                    Serial = serial,
+                    EntityId = parentEnt,
+                    X = x,
+                    Y = y,
+                    Z = z,
+                    Direction = dir
+                });
             };
             packetsMap.Value[0xD3] = buffer => d3_78(0xD3, buffer);
             packetsMap.Value[0x78] = buffer => d3_78(0x78, buffer);
@@ -533,8 +544,18 @@ readonly struct InGamePacketsPlugin : IPlugin
                 var ent = entitiesMap.Value.GetOrCreate(world, serial);
                 ent.Set(new Graphic() { Value = (ushort)(graphic + graphicInc) })
                     .Set(new Hue() { Value = hue })
-                    .Set(new WorldPosition() { X = x, Y = y, Z = z })
+                    // .Set(new WorldPosition() { X = x, Y = y, Z = z })
                     .Set(new Facing() { Value = (Direction)direction });
+
+                mobileQueuedSteps.Enqueue(new ()
+                {
+                    Serial = serial,
+                    EntityId = ent,
+                    X = x,
+                    Y = y,
+                    Z = z,
+                    Direction = (Direction) direction,
+                });
             };
 
             // damage
@@ -659,8 +680,18 @@ readonly struct InGamePacketsPlugin : IPlugin
                 var ent = entitiesMap.Value.GetOrCreate(world, serial);
                 ent.Set(new Graphic() { Value = (ushort)(graphic + graphicInc) })
                     .Set(new Hue() { Value = hue })
-                    .Set(new WorldPosition() { X = x, Y = y, Z = z })
+                    //.Set(new WorldPosition() { X = x, Y = y, Z = z })
                     .Set(new Facing() { Value = direction });
+
+                mobileQueuedSteps.Enqueue(new ()
+                {
+                    Serial = serial,
+                    EntityId = ent,
+                    X = x,
+                    Y = y,
+                    Z = z,
+                    Direction = direction
+                });
             };
 
             // deny walk
@@ -1137,8 +1168,18 @@ readonly struct InGamePacketsPlugin : IPlugin
                 var ent = entitiesMap.Value.GetOrCreate(world, serial);
                 ent.Set(new Graphic() { Value = graphic })
                     .Set(new Hue() { Value = hue })
-                    .Set(new WorldPosition() { X = x, Y = y, Z = z })
+                    // .Set(new WorldPosition() { X = x, Y = y, Z = z })
                     .Set(new Facing() { Value = direction });
+
+                mobileQueuedSteps.Enqueue(new ()
+                {
+                    Serial = serial,
+                    EntityId = ent,
+                    X = x,
+                    Y = y,
+                    Z = z,
+                    Direction = direction
+                });
             };
             packetsMap.Value[0x77] = buffer => d2_77(0x77, buffer);
             packetsMap.Value[0xD2] = buffer => d2_77(0xD2, buffer);
