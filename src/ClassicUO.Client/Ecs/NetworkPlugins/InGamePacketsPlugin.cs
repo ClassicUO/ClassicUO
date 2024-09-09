@@ -1580,15 +1580,15 @@ readonly struct InGamePacketsPlugin : IPlugin
                 var gumpId = reader.ReadUInt32BE();
                 (var x, var y) = (reader.ReadUInt32BE(), reader.ReadUInt32BE());
                 var compressedLen = reader.ReadUInt32BE() - 4;
-                var decLen = reader.ReadInt32BE();
+                var decLen = reader.ReadUInt32BE();
 
                 reader.Skip((int)compressedLen);
                 var linesCount = reader.ReadUInt32BE();
 
-                for (var i = 0; i < linesCount; ++i)
+                if (linesCount > 0)
                 {
                     compressedLen = reader.ReadUInt32BE() - 4;
-                    decLen = reader.ReadInt32BE();
+                    decLen = reader.ReadUInt32BE();
 
                     reader.Skip((int)compressedLen);
                 }
