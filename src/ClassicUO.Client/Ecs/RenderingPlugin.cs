@@ -79,7 +79,8 @@ readonly struct RenderingPlugin : IPlugin
                     {
                         animAction = animation.Action;
                         animIndex = animation.Index;
-                        animation.Direction = (direction.Value & (~Direction.Running | Direction.Mask));
+                        if (!Unsafe.IsNullRef(ref direction))
+                            animation.Direction = (direction.Value & (~Direction.Running | Direction.Mask));
                     }
 
                     var frames = assetsServer.Value.Animations.GetAnimationFrames

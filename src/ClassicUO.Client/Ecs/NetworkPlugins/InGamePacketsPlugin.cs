@@ -11,7 +11,7 @@ using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using TinyEcs;
 
-namespace ClassicUO.Ecs.NetworkPlugins;
+namespace ClassicUO.Ecs;
 
 using static TinyEcs.Defaults;
 using PacketsMap = Dictionary<byte, OnPacket>;
@@ -411,8 +411,8 @@ readonly struct InGamePacketsPlugin : IPlugin
                 parentEnt
                     .Set(new Graphic() { Value = graphic })
                     // .Set(new WorldPosition() { X = x, Y = y, Z = z })
-                    .Set(new Hue() { Value = hue })
-                    .Set(new Facing() { Value = dir });
+                    .Set(new Hue() { Value = hue });
+                    //.Set(new Facing() { Value = dir });
 
                 uint itemSerial;
                 while ((itemSerial = reader.ReadUInt32BE()) != 0)
@@ -440,7 +440,6 @@ readonly struct InGamePacketsPlugin : IPlugin
                 mobileQueuedSteps.Enqueue(new ()
                 {
                     Serial = serial,
-                    EntityId = parentEnt,
                     X = x,
                     Y = y,
                     Z = z,
@@ -543,14 +542,13 @@ readonly struct InGamePacketsPlugin : IPlugin
 
                 var ent = entitiesMap.Value.GetOrCreate(world, serial);
                 ent.Set(new Graphic() { Value = (ushort)(graphic + graphicInc) })
-                    .Set(new Hue() { Value = hue })
+                    .Set(new Hue() { Value = hue });
                     // .Set(new WorldPosition() { X = x, Y = y, Z = z })
-                    .Set(new Facing() { Value = (Direction)direction });
+                    //.Set(new Facing() { Value = (Direction)direction });
 
                 mobileQueuedSteps.Enqueue(new ()
                 {
                     Serial = serial,
-                    EntityId = ent,
                     X = x,
                     Y = y,
                     Z = z,
@@ -679,14 +677,13 @@ readonly struct InGamePacketsPlugin : IPlugin
 
                 var ent = entitiesMap.Value.GetOrCreate(world, serial);
                 ent.Set(new Graphic() { Value = (ushort)(graphic + graphicInc) })
-                    .Set(new Hue() { Value = hue })
+                    .Set(new Hue() { Value = hue });
                     //.Set(new WorldPosition() { X = x, Y = y, Z = z })
-                    .Set(new Facing() { Value = direction });
+                    //.Set(new Facing() { Value = direction });
 
                 mobileQueuedSteps.Enqueue(new ()
                 {
                     Serial = serial,
-                    EntityId = ent,
                     X = x,
                     Y = y,
                     Z = z,
@@ -1167,14 +1164,13 @@ readonly struct InGamePacketsPlugin : IPlugin
 
                 var ent = entitiesMap.Value.GetOrCreate(world, serial);
                 ent.Set(new Graphic() { Value = graphic })
-                    .Set(new Hue() { Value = hue })
+                    .Set(new Hue() { Value = hue });
                     // .Set(new WorldPosition() { X = x, Y = y, Z = z })
-                    .Set(new Facing() { Value = direction });
+                    //.Set(new Facing() { Value = direction });
 
                 mobileQueuedSteps.Enqueue(new ()
                 {
                     Serial = serial,
-                    EntityId = ent,
                     X = x,
                     Y = y,
                     Z = z,

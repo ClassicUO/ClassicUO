@@ -63,7 +63,6 @@ unsafe struct MobileSteps
 
 struct MobileQueuedStep
 {
-    public ulong EntityId;
     public uint Serial;
     public ushort X, Y;
     public sbyte Z;
@@ -78,34 +77,41 @@ readonly struct MobAnimationsPlugin : IPlugin
 
         scheduler.AddSystem
         (
-            (TinyEcs.World world, Time time, EventReader<MobileQueuedStep> stepsQueued, Res<GameContext> gameCtx) =>
+            (TinyEcs.World world, Time time, EventReader<MobileQueuedStep> stepsQueued, Res<GameContext> gameCtx, Res<NetworkEntitiesMap> entitiesMap) =>
             {
                 foreach (var queuedStep in stepsQueued)
                 {
-                    if (!world.Exists(queuedStep.EntityId))
-                        continue;
+                    var ent = entitiesMap.Value.GetOrCreate(world, queuedStep.Serial);
 
                     if (gameCtx.Value.PlayerSerial == queuedStep.Serial)
                     {
-                        world.Set(queuedStep.EntityId, new WorldPosition()
+                        world.Set(ent, new WorldPosition()
                         {
                             X = queuedStep.X,
                             Y = queuedStep.Y,
                             Z = queuedStep.Z,
                         });
-                        world.Set(queuedStep.EntityId, new Facing() { Value = queuedStep.Direction });
+                        world.Set(ent, new Facing() { Value = queuedStep.Direction });
                         continue;
                     }
 
-                    if (!world.Has<MobileSteps>(queuedStep.EntityId))
-                        world.Set(queuedStep.EntityId, new MobileSteps());
+                    if (!world.Has<MobileSteps>(ent))
+                        world.Set(ent, new MobileSteps());
 
-                    if (!world.Has<WorldPosition>(queuedStep.EntityId))
-                        world.Set(queuedStep.EntityId, new WorldPosition());
+                    if (!world.Has<WorldPosition>(ent))
+                        world.Set(ent, new WorldPosition()
+                        {
+                            X = queuedStep.X,
+                            Y = queuedStep.Y,
+                            Z = queuedStep.Z,
+                        });
 
-                    ref var steps = ref world.Get<MobileSteps>(queuedStep.EntityId);
+                    if (!world.Has<Facing>(ent))
+                        world.Set(ent, new Facing() { Value = queuedStep.Direction });
 
-                    if (steps.Count >= 5)
+                    ref var steps = ref world.Get<MobileSteps>(ent);
+
+                    if (steps.Count >= MobileSteps.COUNT)
                     {
                         continue;
                     }
@@ -114,13 +120,15 @@ readonly struct MobAnimationsPlugin : IPlugin
                     sbyte endZ;
                     Direction endDir;
 
+                    var clearedDir = (queuedStep.Direction & (Direction.Up | ~Direction.Running));
+
                     if (steps.Count == 0)
                     {
-                        ref var pos = ref world.Get<WorldPosition>(queuedStep.EntityId);
+                        ref var pos = ref world.Get<WorldPosition>(ent);
                         endX = pos.X;
                         endY = pos.Y;
                         endZ = pos.Z;
-                        endDir = queuedStep.Direction;
+                        endDir = world.Get<Facing>(ent).Value;
                     }
                     else
                     {
@@ -131,52 +139,56 @@ readonly struct MobAnimationsPlugin : IPlugin
                         endDir = (Direction)step.Direction;
                     }
 
-                    if (!(endX == queuedStep.X && endY == queuedStep.Y && endZ == queuedStep.Z && (queuedStep.Direction & Direction.Up) == ((Direction)endDir & Direction.Up)))
+                    if (endX == queuedStep.X && endY == queuedStep.Y && endZ == queuedStep.Z && clearedDir == endDir)
                     {
-                        if (steps.Count == 0)
+                        continue;
+                    }
+
+
+
+                    if (steps.Count == 0)
+                    {
+                        if (steps.Time <= time.Total - Constants.WALKING_DELAY)
                         {
-                            if (steps.Time <= time.Total - Constants.WALKING_DELAY)
-                            {
-                                ref var anim = ref world.Get<MobAnimation>(queuedStep.EntityId);
-                                anim.Run = true;
-                                //anim.Time = 0;
-                            }
-                            steps.Time = time.Total;
+                            ref var anim = ref world.Get<MobAnimation>(ent);
+                            anim.Run = true;
+                            //anim.Time = 0;
+                        }
+                        steps.Time = time.Total;
+                    }
+
+                    var moveDir = DirectionHelper.CalculateDirection(endX, endY, queuedStep.X, queuedStep.Y);
+                    if (moveDir != Direction.NONE)
+                    {
+                        if (moveDir != endDir)
+                        {
+                            ref var step1 = ref steps[steps.Count];
+                            step1.X = endX;
+                            step1.Y = endY;
+                            step1.Z = endZ;
+                            step1.Direction = (byte)moveDir;
+                            step1.Run = queuedStep.Direction.HasFlag(Direction.Running);
+                            steps.Count = Math.Min(MobileSteps.COUNT - 1, steps.Count + 1);
                         }
 
-                        Direction moveDir = DirectionHelper.CalculateDirection(endX, endY, queuedStep.X, queuedStep.Y);
-                        if (moveDir != Direction.NONE)
-                        {
-                            if (moveDir != (Direction)endDir)
-                            {
-                                ref var step1 = ref steps[steps.Count];
-                                step1.X = endX;
-                                step1.Y = endY;
-                                step1.Z = endZ;
-                                step1.Direction = (byte)moveDir;
-                                step1.Run = queuedStep.Direction.HasFlag(Direction.Running);
-                                steps.Count = Math.Min(10 - 1, steps.Count + 1);
-                            }
+                        ref var step2 = ref steps[steps.Count];
+                        step2.X = queuedStep.X;
+                        step2.Y = queuedStep.Y;
+                        step2.Z = queuedStep.Z;
+                        step2.Direction = (byte)moveDir;
+                        step2.Run = queuedStep.Direction.HasFlag(Direction.Running);
+                        steps.Count = Math.Min(MobileSteps.COUNT - 1, steps.Count + 1);
+                    }
 
-                            ref var step2 = ref steps[steps.Count];
-                            step2.X = queuedStep.X;
-                            step2.Y = queuedStep.Y;
-                            step2.Z = queuedStep.Z;
-                            step2.Direction = (byte)moveDir;
-                            step2.Run = queuedStep.Direction.HasFlag(Direction.Running);
-                            steps.Count = Math.Min(10 - 1, steps.Count + 1);
-                        }
-
-                        if (moveDir != (queuedStep.Direction & Direction.Up))
-                        {
-                            ref var step3 = ref steps[steps.Count];
-                            step3.X = queuedStep.X;
-                            step3.Y = queuedStep.Y;
-                            step3.Z = queuedStep.Z;
-                            step3.Direction = (byte)moveDir;
-                            step3.Run = queuedStep.Direction.HasFlag(Direction.Running);
-                            steps.Count = Math.Min(10 - 1, steps.Count + 1);
-                        }
+                    if (moveDir != clearedDir)
+                    {
+                        ref var step3 = ref steps[steps.Count];
+                        step3.X = queuedStep.X;
+                        step3.Y = queuedStep.Y;
+                        step3.Z = queuedStep.Z;
+                        step3.Direction = (byte)clearedDir;
+                        step3.Run = queuedStep.Direction.HasFlag(Direction.Running);
+                        steps.Count = Math.Min(MobileSteps.COUNT - 1, steps.Count + 1);
                     }
                 }
             },
