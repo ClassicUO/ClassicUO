@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using ClassicUO.Assets;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
+using ClassicUO.Game.GameObjects;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using TinyEcs;
@@ -65,21 +66,25 @@ readonly struct MobAnimationsPlugin : IPlugin
     public void Build(Scheduler scheduler)
     {
         scheduler.AddSystem((
-            Res<GameContext> gameCtx,
             Time time,
-            Query<(MobileSteps, WorldPosition, Facing, MobAnimation)> query
+            Query<(MobileSteps, WorldPosition, Facing, MobAnimation, Renderable),
+                (Without<Pair<ContainedInto, Wildcard>>, Without<Pair<EquippedItem, Wildcard>>)> queryHandleWalking
         ) =>
         {
-            query.Each((
+            queryHandleWalking.Each((
+                EntityView entity,
                 ref MobileSteps steps,
                 ref WorldPosition position,
                 ref Facing direction,
-                ref MobAnimation animation
+                ref MobAnimation animation,
+                ref Renderable renderable
             ) =>
             {
+                // var isPlayer = entity.Has<Player>();
+
                 while (steps.Count > 0)
                 {
-                    ref var step = ref steps[0];
+                    ref readonly var step = ref steps[0];
                     var delay = time.Total - steps.Time;
 
                     var mount = animation.MountAction != 0xFF;
@@ -95,8 +100,10 @@ readonly struct MobAnimationsPlugin : IPlugin
 
                         var offsetZ = ((step.Z - position.Z) * x * (4.0f / stepsCount));
                         MovementSpeed.GetPixelOffset(step.Direction, ref x, ref y, stepsCount);
-                        gameCtx.Value.CenterOffset.X = x * -1;
-                        gameCtx.Value.CenterOffset.Y = y * -1 + offsetZ;
+
+                        renderable.PositionOffset.X = x;
+                        renderable.PositionOffset.Y = y - offsetZ;
+
                         animation.Run = true;
                     }
                     else
@@ -115,17 +122,12 @@ readonly struct MobAnimationsPlugin : IPlugin
                         if (step.Run)
                             direction.Value |= Direction.Running;
 
-                        // TODO: offset
-
                         for (var i = 1; i < steps.Count; ++i)
                             steps[i - 1] = steps[i];
 
                         steps.Count = Math.Max(0, steps.Count - 1);
 
-                        gameCtx.Value.CenterX = position.X;
-                        gameCtx.Value.CenterY = position.Y;
-                        gameCtx.Value.CenterZ = position.Z;
-                        gameCtx.Value.CenterOffset = Vector2.Zero;
+                        renderable.PositionOffset = Vector2.Zero;
 
                         if (directionChange)
                             continue;
@@ -136,9 +138,8 @@ readonly struct MobAnimationsPlugin : IPlugin
 
                     break;
                 }
-
             });
-        });
+        }, threadingType: ThreadingMode.Single);
 
         scheduler.AddSystem((
             TinyEcs.World world,
@@ -227,10 +228,8 @@ readonly struct MobAnimationsPlugin : IPlugin
                     animId, realDirection, isWalking, animation.MountAction != 0xFF, false, flags,
                     animation.IsFromServer, animation.Action);
 
-
                 realDirection &= ~Direction.Running;
                 realDirection &= Direction.Mask;
-                animation.Direction = realDirection;
 
                 var dir = (byte)(realDirection);
                 assetsServer.Value.Animations.GetAnimDirection(ref dir, ref mirror);

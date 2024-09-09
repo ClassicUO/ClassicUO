@@ -1,3 +1,5 @@
+using Microsoft.Xna.Framework;
+
 namespace ClassicUO.Ecs;
 
 struct WorldPosition

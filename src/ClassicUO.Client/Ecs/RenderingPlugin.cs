@@ -1,10 +1,6 @@
-using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using ClassicUO.Assets;
-using ClassicUO.Configuration;
-using ClassicUO.Ecs.NetworkPlugins;
-using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
@@ -20,7 +16,6 @@ readonly struct RenderingPlugin : IPlugin
     public void Build(Scheduler scheduler)
     {
         scheduler.AddSystem(static (
-            Res<NetworkEntitiesMap> entitiesMap,
             Query<Graphic,
                 (With<NetworkSerial>, Without<Pair<ContainedInto, Wildcard>>, With<Pair<EquippedItem, Wildcard>>)> queryEquip,
             Query<NetworkSerial, (Without<Renderable>, Without<Pair<ContainedInto, Wildcard>>)> queryAddRender,
@@ -35,8 +30,8 @@ readonly struct RenderingPlugin : IPlugin
                 if (parent.Has<WorldPosition>())
                     ent.Set(parent.Get<WorldPosition>());
 
-                // if (parent.Has<Facing>())
-                //     ent.Set(parent.Get<Facing>());
+                if (parent.Has<Renderable>())
+                    ent.Set(parent.Get<Renderable>());
 
                 if (parent.Has<MobAnimation>())
                     ent.Set(parent.Get<MobAnimation>());
@@ -46,21 +41,27 @@ readonly struct RenderingPlugin : IPlugin
             {
                 ent.Set(new Renderable());
             });
-        });
+        }, threadingType: ThreadingMode.Single);
 
         scheduler.AddSystem(static (
             Query<(WorldPosition, Graphic, Hue, Renderable, NetworkSerial, Optional<Facing>, Optional<MobAnimation>),
-                (Without<Pair<ContainedInto, Wildcard>>, Without<Pair<EquippedItem, Wildcard>>)> query,
+                (Without<Pair<ContainedInto, Wildcard>>, Without<Pair<EquippedItem, Wildcard>>)> queryBodyOnly,
             Query<(WorldPosition, Graphic, Hue, Renderable, NetworkSerial, Optional<MobAnimation>),
-                (Without<Pair<ContainedInto, Wildcard>>, With<Pair<EquippedItem, Wildcard>>)> queryEquip,
+                (Without<Pair<ContainedInto, Wildcard>>, With<Pair<EquippedItem, Wildcard>>)> queryEquipment,
             Res<AssetsServer> assetsServer,
             Res<UOFileManager> fileManager,
             TinyEcs.World world,
             Local<Dictionary<Layer, EntityView>> dict
         ) => {
-            query.Each((EntityView ent, ref WorldPosition pos, ref Graphic graphic, ref Hue hue,
-                ref Renderable renderable, ref NetworkSerial serial,
-                ref Facing direction, ref MobAnimation animation) =>
+            queryBodyOnly.Each((
+                ref WorldPosition pos,
+                ref Graphic graphic,
+                ref Hue hue,
+                ref Renderable renderable,
+                ref NetworkSerial serial,
+                ref Facing direction,
+                ref MobAnimation animation
+            ) =>
             {
                 var uoHue = hue.Value;
                 var priorityZ = pos.Z;
@@ -78,6 +79,7 @@ readonly struct RenderingPlugin : IPlugin
                     {
                         animAction = animation.Action;
                         animIndex = animation.Index;
+                        animation.Direction = (direction.Value & (~Direction.Running | Direction.Mask));
                     }
 
                     var frames = assetsServer.Value.Animations.GetAnimationFrames
@@ -135,11 +137,19 @@ readonly struct RenderingPlugin : IPlugin
 
                 renderable.Z = Isometric.GetDepthZ(pos.X, pos.Y, priorityZ);
                 renderable.Color = ShaderHueTranslator.GetHueVector(FixHue(uoHue));
+                renderable.Position += renderable.PositionOffset;
             });
 
 
-            queryEquip.Each((EntityView ent, ref WorldPosition pos, ref Graphic graphic, ref Hue hue,
-                ref Renderable renderable, ref NetworkSerial serial, ref MobAnimation animation) =>
+            queryEquipment.Each((
+                EntityView ent,
+                ref WorldPosition pos,
+                ref Graphic graphic,
+                ref Hue hue,
+                ref Renderable renderable,
+                ref NetworkSerial serial,
+                ref MobAnimation animation
+            ) =>
             {
                 var priorityZ = pos.Z + 2;
                 renderable.Position = Isometric.IsoToScreen(pos.X, pos.Y, pos.Z);
@@ -209,8 +219,9 @@ readonly struct RenderingPlugin : IPlugin
                 // TODO: priority Z based on layer ordering
                 renderable.Z = Isometric.GetDepthZ(pos.X, pos.Y, priorityZ) + (orderKey * 0.01f);
                 renderable.Color = ShaderHueTranslator.GetHueVector(FixHue(hue.Value != 0 ? hue.Value : baseHue));
+                renderable.Position += renderable.PositionOffset;
             });
-        });
+        }, threadingType: ThreadingMode.Single);
 
         scheduler.AddSystem((Res<MouseContext> mouseCtx, Res<KeyboardState> keyboard, Res<GameContext> gameCtx) =>
         {

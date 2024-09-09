@@ -54,17 +54,17 @@ readonly struct PlayerMovementPlugin : IPlugin
             Res<GraphicsDevice> device,
             Res<MouseContext> mouseCtx,
             Res<NetClient> network,
-            Res<PlayerStepsContext> stepsCtx,
+            Res<PlayerStepsContext> playerRequestedSteps,
             Query<(WorldPosition, Facing, MobileSteps, MobAnimation), With<Player>> playerQuery,
             Query<(WorldPosition, Graphic, Optional<TileStretched>), With<IsTile>> tilesQuery,
             Query<(WorldPosition, Graphic), (Without<IsTile>, Without<MobAnimation>)> staticsQuery,
             Time time
         ) =>
         {
-            if (stepsCtx.Value.LastStep >= time.Total)
+            if (playerRequestedSteps.Value.LastStep >= time.Total)
                 return;
 
-            if (stepsCtx.Value.Index >= 5)
+            if (playerRequestedSteps.Value.Index >= 5)
                 return;
 
             Span<sbyte> diag = stackalloc sbyte[2] { 1, -1 };
@@ -80,7 +80,7 @@ readonly struct PlayerMovementPlugin : IPlugin
             var run = mouseRange >= 190 || false;
 
             ref var mobSteps = ref playerQuery.Single<MobileSteps>();
-            ref var worldPos = ref playerQuery.Single<WorldPosition>();
+            ref readonly var worldPos = ref playerQuery.Single<WorldPosition>();
             var playerDir = playerQuery.Single<Facing>().Value;
             var hasNoSteps = mobSteps.Count == 0;
             var playerX = worldPos.X;
@@ -89,7 +89,7 @@ readonly struct PlayerMovementPlugin : IPlugin
 
             if (!hasNoSteps)
             {
-                ref var lastStep = ref mobSteps[Math.Min(0, stepsCtx.Value.Index - 1)];
+                ref var lastStep = ref mobSteps[Math.Max(0, mobSteps.Count - 1)];
                 playerX = (ushort) lastStep.X;
                 playerY = (ushort) lastStep.Y;
                 playerZ = lastStep.Z;
@@ -160,8 +160,8 @@ readonly struct PlayerMovementPlugin : IPlugin
                 ref var animation = ref playerQuery.Single<MobAnimation>();
                 var isMountedOrFlying = animation.MountAction != 0xFF || playerFlags.HasFlag(Flags.Flying);
                 var stepTime = sameDir ? MovementSpeed.TimeToCompleteMovement(run, isMountedOrFlying) : Constants.TURN_DELAY;
-                ref var requestedStep = ref stepsCtx.Value.Steps[stepsCtx.Value.Index];
-                requestedStep.Sequence = stepsCtx.Value.Sequence;
+                ref var requestedStep = ref playerRequestedSteps.Value.Steps[playerRequestedSteps.Value.Index];
+                requestedStep.Sequence = playerRequestedSteps.Value.Sequence;
                 requestedStep.X = playerX;
                 requestedStep.Y = playerY;
                 requestedStep.Z = playerZ;
@@ -169,9 +169,9 @@ readonly struct PlayerMovementPlugin : IPlugin
 
                 network.Value.Send_WalkRequest(requestedStep.Direction, requestedStep.Sequence, run, 0);
 
-                stepsCtx.Value.Index = Math.Min(5 - 1, stepsCtx.Value.Index + 1);
-                stepsCtx.Value.Sequence = (byte)((stepsCtx.Value.Sequence % byte.MaxValue) + 1);
-                stepsCtx.Value.LastStep = time.Total + stepTime;
+                playerRequestedSteps.Value.Index = Math.Min(5, playerRequestedSteps.Value.Index + 1);
+                playerRequestedSteps.Value.Sequence = (byte)((playerRequestedSteps.Value.Sequence % byte.MaxValue) + 1);
+                playerRequestedSteps.Value.LastStep = time.Total + stepTime;
                 if (run)
                     requestedStep.Direction |= Direction.Running;
 
@@ -188,13 +188,39 @@ readonly struct PlayerMovementPlugin : IPlugin
             }
         }).RunIf((Res<MouseContext> mouseCtx) => mouseCtx.Value.NewState.RightButton == Microsoft.Xna.Framework.Input.ButtonState.Pressed);
 
-        scheduler.AddSystem((EventReader<PlayerMovementResponse> responses) =>
+        scheduler.AddSystem((EventReader<PlayerMovementResponse> responses, Res<PlayerStepsContext> playerRequestedSteps, Res<GameContext> gameCtx) =>
         {
             foreach (var response in responses)
             {
-                if (response.Accepted)
+                var found = false;
+                for (var i = 0; i < playerRequestedSteps.Value.Index; i++)
                 {
+                    ref readonly var step = ref playerRequestedSteps.Value.Steps[i];
 
+                    if (step.Sequence == response.Sequence)
+                    {
+                        if (response.Accepted)
+                        {
+                            // gameCtx.Value.CenterX = step.X;
+                            // gameCtx.Value.CenterY = step.Y;
+                            // gameCtx.Value.CenterZ = step.Z;
+                        }
+
+                        // gameCtx.Value.CenterOffset = Vector2.Zero;
+
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (found)
+                {
+                    for (var i = 1; i < playerRequestedSteps.Value.Index; i++)
+                    {
+                        playerRequestedSteps.Value.Steps[i - 1] = playerRequestedSteps.Value.Steps[i];
+                    }
+
+                    playerRequestedSteps.Value.Index -= 1;
                 }
             }
         }).RunIf((EventReader<PlayerMovementResponse> responses) => !responses.IsEmpty);
