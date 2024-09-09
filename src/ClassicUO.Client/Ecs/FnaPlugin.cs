@@ -11,6 +11,11 @@ struct MouseContext
     public MouseState OldState, NewState;
 }
 
+struct KeyboardContext
+{
+    public KeyboardState OldState, NewState;
+}
+
 sealed class Time : SystemParam
 {
     public float Total;
@@ -45,7 +50,7 @@ readonly struct FnaPlugin : IPlugin
     public void Build(Scheduler scheduler)
     {
         scheduler.AddResource(new UoGame(MouseVisible, WindowResizable, VSync));
-        scheduler.AddResource(Keyboard.GetState());
+        scheduler.AddResource(new KeyboardContext());
         scheduler.AddResource(new MouseContext());
         scheduler.AddSystemParam(new Time());
         scheduler.AddEvent<KeyEvent>();
@@ -72,20 +77,16 @@ readonly struct FnaPlugin : IPlugin
         scheduler.AddSystem(() => Environment.Exit(0), Stages.AfterUpdate)
             .RunIf(static (Res<UoGame> game) => !game.Value.RunApplication);
 
-        scheduler.AddSystem((EventWriter<KeyEvent> writer, Res<KeyboardState> oldState) => {
-            var newState = Keyboard.GetState();
-
-            foreach (var key in oldState.Value.GetPressedKeys())
-                if (newState.IsKeyUp(key)) // [pressed] -> [released]
+        scheduler.AddSystem((EventWriter<KeyEvent> writer, Res<KeyboardContext> keyboardCtx) => {
+            foreach (var key in keyboardCtx.Value.OldState.GetPressedKeys())
+                if (keyboardCtx.Value.NewState.IsKeyUp(key)) // [pressed] -> [released]
                     writer.Enqueue(new () { Action = 0, Key = key });
 
-            foreach (var key in newState.GetPressedKeys())
-                if (oldState.Value.IsKeyUp(key)) // [released] -> [pressed]
+            foreach (var key in keyboardCtx.Value.NewState.GetPressedKeys())
+                if (keyboardCtx.Value.OldState.IsKeyUp(key)) // [released] -> [pressed]
                     writer.Enqueue(new () { Action = 1, Key = key });
-                else if (oldState.Value.IsKeyDown(key))
+                else if (keyboardCtx.Value.OldState.IsKeyDown(key))
                     writer.Enqueue(new () { Action = 2, Key = key });
-
-            oldState.Value = newState;
         }, Stages.FrameEnd)
             .RunIf((Res<UoGame> game) => game.Value.IsActive);
 
@@ -110,6 +111,12 @@ readonly struct FnaPlugin : IPlugin
         {
             mouseCtx.Value.OldState = mouseCtx.Value.NewState;
             mouseCtx.Value.NewState = Mouse.GetState();
+        }, Stages.FrameEnd);
+
+        scheduler.AddSystem((Res<KeyboardContext> keyboardCtx) =>
+        {
+            keyboardCtx.Value.OldState = keyboardCtx.Value.NewState;
+            keyboardCtx.Value.NewState = Keyboard.GetState();
         }, Stages.FrameEnd);
 
         scheduler.AddSystem((EventReader<KeyEvent> reader) => {

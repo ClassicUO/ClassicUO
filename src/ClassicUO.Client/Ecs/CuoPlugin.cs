@@ -16,6 +16,7 @@ struct GameContext
     public ushort CenterX, CenterY;
     public sbyte CenterZ;
     public Vector2 CenterOffset;
+    public bool FreeView;
     public uint PlayerSerial;
     public ClientFlags Protocol;
     public ClientVersion ClientVersion;

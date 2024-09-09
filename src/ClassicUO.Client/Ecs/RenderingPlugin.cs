@@ -223,7 +223,7 @@ readonly struct RenderingPlugin : IPlugin
             });
         }, threadingType: ThreadingMode.Single);
 
-        scheduler.AddSystem((Res<MouseContext> mouseCtx, Res<KeyboardState> keyboard, Res<GameContext> gameCtx) =>
+        scheduler.AddSystem((Res<MouseContext> mouseCtx, Res<KeyboardContext> keyboardCtx, Res<GameContext> gameCtx) =>
         {
             if (mouseCtx.Value.OldState.LeftButton == ButtonState.Pressed && mouseCtx.Value.NewState.LeftButton == ButtonState.Pressed)
             {
@@ -231,11 +231,27 @@ readonly struct RenderingPlugin : IPlugin
                 gameCtx.Value.CenterOffset.Y += mouseCtx.Value.NewState.Y - mouseCtx.Value.OldState.Y;
             }
 
-            if (keyboard.Value.IsKeyDown(Keys.Space))
+            if (keyboardCtx.Value.OldState.IsKeyUp(Keys.Space) && keyboardCtx.Value.NewState.IsKeyDown(Keys.Space))
             {
-                gameCtx.Value.CenterOffset = Vector2.Zero;
+                gameCtx.Value.FreeView = !gameCtx.Value.FreeView;
             }
         }, Stages.FrameStart).RunIf((Res<UoGame> game) => game.Value.IsActive);
+
+        scheduler.AddSystem
+        (
+            (Res<GameContext> gameCtx, Query<(WorldPosition, Renderable), With<Player>> playerQuery) =>
+            {
+                playerQuery.Each(
+                    (ref WorldPosition position, ref Renderable renderable) =>
+                    {
+                        gameCtx.Value.CenterX = position.X;
+                        gameCtx.Value.CenterY = position.Y;
+                        gameCtx.Value.CenterZ = position.Z;
+                        gameCtx.Value.CenterOffset = renderable.PositionOffset * -1;
+                    });
+            },
+            threadingType: ThreadingMode.Single
+        ).RunIf((Res<GameContext> gameCtx) => !gameCtx.Value.FreeView);
 
         scheduler.AddSystem(static (
             Res<GraphicsDevice> device,

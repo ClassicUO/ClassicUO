@@ -69,6 +69,7 @@ readonly struct PlayerMovementPlugin : IPlugin
 
             Span<sbyte> diag = stackalloc sbyte[2] { 1, -1 };
 
+            // TODO: we grab the center of the screen atm for convenience. But it will be necessary to use the game window bounds
             // var center = Isometric.IsoToScreen(gameCtx.Value.CenterX, gameCtx.Value.CenterY, gameCtx.Value.CenterZ);
             var center = new Vector2(device.Value.PresentationParameters.BackBufferWidth, device.Value.PresentationParameters.BackBufferHeight);
             center.X -= device.Value.PresentationParameters.BackBufferWidth / 2f;
