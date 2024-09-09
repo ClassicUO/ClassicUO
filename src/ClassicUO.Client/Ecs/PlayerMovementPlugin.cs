@@ -33,12 +33,21 @@ struct PlayerStepsContext
     public float LastStep;
     public int Index;
     public byte Sequence;
+    public bool ResyncSent;
 }
 
-struct PlayerMovementResponse
+struct RejectedStep
 {
-    public bool Accepted;
     public byte Sequence;
+    public Direction Direction;
+    public ushort X, Y;
+    public sbyte Z;
+}
+
+struct AcceptedStep
+{
+    public byte Sequence;
+    public NotorietyFlag Notoriety;
 }
 
 readonly struct PlayerMovementPlugin : IPlugin
@@ -46,7 +55,8 @@ readonly struct PlayerMovementPlugin : IPlugin
     public void Build(Scheduler scheduler)
     {
         scheduler.AddResource(new PlayerStepsContext());
-        scheduler.AddEvent<PlayerMovementResponse>();
+        scheduler.AddEvent<RejectedStep>();
+        scheduler.AddEvent<AcceptedStep>();
 
         scheduler.AddSystem(
         (
@@ -189,42 +199,87 @@ readonly struct PlayerMovementPlugin : IPlugin
             }
         }).RunIf((Res<MouseContext> mouseCtx) => mouseCtx.Value.NewState.RightButton == Microsoft.Xna.Framework.Input.ButtonState.Pressed);
 
-        scheduler.AddSystem((EventReader<PlayerMovementResponse> responses, Res<PlayerStepsContext> playerRequestedSteps, Res<GameContext> gameCtx) =>
+        scheduler.AddSystem((EventReader<AcceptedStep> acceptedSteps, Res<PlayerStepsContext> playerRequestedSteps, Res<NetClient> network) =>
         {
-            foreach (var response in responses)
+            foreach (var response in acceptedSteps)
             {
-                var found = false;
+                // TODO: query for the player notoriety
+                var notoriety = response.Notoriety;
+
+                var stepIndex = 0;
                 for (var i = 0; i < playerRequestedSteps.Value.Index; i++)
                 {
                     ref readonly var step = ref playerRequestedSteps.Value.Steps[i];
 
                     if (step.Sequence == response.Sequence)
                     {
-                        if (response.Accepted)
-                        {
-                            // gameCtx.Value.CenterX = step.X;
-                            // gameCtx.Value.CenterY = step.Y;
-                            // gameCtx.Value.CenterZ = step.Z;
-                        }
-
-                        // gameCtx.Value.CenterOffset = Vector2.Zero;
-
-                        found = true;
                         break;
                     }
+
+                    stepIndex += 1;
                 }
 
-                if (found)
+                var isBadStep = stepIndex == playerRequestedSteps.Value.Index;
+
+                if (!isBadStep)
                 {
+                    Console.WriteLine("step accepted");
                     for (var i = 1; i < playerRequestedSteps.Value.Index; i++)
                     {
                         playerRequestedSteps.Value.Steps[i - 1] = playerRequestedSteps.Value.Steps[i];
                     }
 
-                    playerRequestedSteps.Value.Index -= 1;
+                    playerRequestedSteps.Value.Index = Math.Max(0, playerRequestedSteps.Value.Index - 1);
+                }
+
+                if (isBadStep)
+                {
+                    Console.WriteLine("bad step found");
+                    if (!playerRequestedSteps.Value.ResyncSent)
+                    {
+                        Console.WriteLine("sending resync");
+                        network.Value.Send_Resync();
+                        playerRequestedSteps.Value.ResyncSent = true;
+                    }
+
+                    playerRequestedSteps.Value.Index = 0;
+                    playerRequestedSteps.Value.Sequence = 0;
                 }
             }
-        }).RunIf((EventReader<PlayerMovementResponse> responses) => !responses.IsEmpty);
+        }, threadingType: ThreadingMode.Single).RunIf((EventReader<AcceptedStep> responses) => !responses.IsEmpty);
+
+        scheduler.AddSystem((EventReader<RejectedStep> rejectedSteps, Res<PlayerStepsContext> playerRequestedSteps, Query<(WorldPosition, Facing, MobileSteps), With<Player>> playerQuery) =>
+        {
+            Console.WriteLine("step denied");
+            var player = playerQuery.Single();
+            foreach (var response in rejectedSteps)
+            {
+                player.Set
+                (
+                    new WorldPosition()
+                    {
+                        X = response.X,
+                        Y = response.Y,
+                        Z = response.Z
+                    }
+                );
+
+                player.Set
+                (
+                    new Facing()
+                    {
+                        Value = response.Direction
+                    }
+                );
+
+                player.Get<MobileSteps>().Count = 0;
+            }
+
+            playerRequestedSteps.Value.Index = 0;
+            playerRequestedSteps.Value.Sequence = 0;
+            playerRequestedSteps.Value.LastStep = 0;
+            playerRequestedSteps.Value.ResyncSent = false;
+        }, threadingType: ThreadingMode.Single).RunIf((EventReader<RejectedStep> responses) => !responses.IsEmpty);
     }
 
     private static List<TerrainInfo> GetListOfItemsAt(Query tileQuery, Query staticsQuery, TileDataLoader tileData, int x, int y)

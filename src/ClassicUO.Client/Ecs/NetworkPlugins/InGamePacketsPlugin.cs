@@ -117,7 +117,8 @@ readonly struct InGamePacketsPlugin : IPlugin
             Res<UOFileManager> fileManager,
             Res<GameContext> gameCtx,
             EventWriter<OnNewChunkRequest> chunkRequests,
-            EventWriter<PlayerMovementResponse> playerMovements,
+            EventWriter<AcceptedStep> acceptedSteps,
+            EventWriter<RejectedStep> rejectedSteps,
             Res<AssetsServer> assetsServer,
             TinyEcs.World world
         ) =>
@@ -672,10 +673,11 @@ readonly struct InGamePacketsPlugin : IPlugin
                 var direction = (Direction)reader.ReadUInt8();
                 var z = reader.ReadInt8();
 
-                playerMovements.Enqueue(new()
+                rejectedSteps.Enqueue(new()
                 {
-                    Accepted = false,
-                    Sequence = sequence
+                    Sequence = sequence,
+                    Direction = direction,
+                    X = x, Y = y, Z = z
                 });
             };
 
@@ -685,12 +687,12 @@ readonly struct InGamePacketsPlugin : IPlugin
                 var reader = new StackDataReader(buffer);
 
                 var sequence = reader.ReadUInt8();
-                var notoriety = reader.ReadUInt8();
+                var notoriety = (NotorietyFlag) reader.ReadUInt8();
 
-                playerMovements.Enqueue(new()
+                acceptedSteps.Enqueue(new()
                 {
-                    Accepted = true,
-                    Sequence = sequence
+                    Sequence = sequence,
+                    Notoriety = notoriety
                 });
             };
 
