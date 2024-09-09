@@ -111,13 +111,13 @@ readonly struct FnaPlugin : IPlugin
         {
             mouseCtx.Value.OldState = mouseCtx.Value.NewState;
             mouseCtx.Value.NewState = Mouse.GetState();
-        }, Stages.FrameEnd);
+        }, Stages.FrameEnd).RunIf((Res<UoGame> game) => game.Value.IsActive);;
 
         scheduler.AddSystem((Res<KeyboardContext> keyboardCtx) =>
         {
             keyboardCtx.Value.OldState = keyboardCtx.Value.NewState;
             keyboardCtx.Value.NewState = Keyboard.GetState();
-        }, Stages.FrameEnd);
+        }, Stages.FrameEnd).RunIf((Res<UoGame> game) => game.Value.IsActive);;
 
         scheduler.AddSystem((EventReader<KeyEvent> reader) => {
             foreach (var ev in reader)
