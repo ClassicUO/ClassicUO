@@ -144,8 +144,6 @@ readonly struct MobAnimationsPlugin : IPlugin
                         continue;
                     }
 
-
-
                     if (steps.Count == 0)
                     {
                         if (steps.Time <= time.Total - Constants.WALKING_DELAY)

@@ -22,7 +22,7 @@ readonly struct TerrainPlugin : IPlugin
     public unsafe void Build(Scheduler scheduler)
     {
         scheduler.AddEvent<OnNewChunkRequest>();
-        scheduler.AddResource(new HashSet<(int chunkX, int chunkY, int mapIndex)>());
+        scheduler.AddResource(new Dictionary<uint, List<ulong>>());
 
         scheduler.AddSystem((
             Res<GameContext> gameCtx,
@@ -31,19 +31,18 @@ readonly struct TerrainPlugin : IPlugin
             Local<(ushort? LastX, ushort? LastY)> lastPos
         ) =>
         {
+            if (gameCtx.Value.Map == -1)
+                return;
+
             ref var pos = ref playerQuery.Single<WorldPosition>();
 
             if (lastPos.Value.LastX.HasValue && lastPos.Value.LastY.HasValue)
                 if (lastPos.Value.LastX == pos.X && lastPos.Value.LastY == pos.Y)
-                    return;
-
-            if (gameCtx.Value.Map == -1)
-                return;
 
             lastPos.Value.LastX = pos.X;
             lastPos.Value.LastY = pos.Y;
 
-            var offset = 8;
+            var offset = 4;
             chunkRequests.Enqueue(new() {
                 Map = gameCtx.Value.Map,
                 RangeStartX = Math.Max(0, pos.X / 8 - offset),
@@ -57,7 +56,7 @@ readonly struct TerrainPlugin : IPlugin
             TinyEcs.World world,
             Res<UOFileManager> fileManager,
             Res<AssetsServer> assetsServer,
-            Res<HashSet<(int ChunkX, int ChunkY, int MapIndex)>> chunksLoaded,
+            Res<Dictionary<uint, List<ulong>>> chunksLoaded,
             EventReader<OnNewChunkRequest> chunkRequests
         ) => {
             foreach (var chunkEv in chunkRequests)
@@ -70,8 +69,12 @@ readonly struct TerrainPlugin : IPlugin
                     if (im.MapAddress == 0)
                         continue;
 
-                    if (!chunksLoaded.Value.Add((chunkX, chunkY, chunkEv.Map)))
+                    var key = CreateChunkKey(chunkX, chunkY);
+                    if (chunksLoaded.Value.ContainsKey(key))
                         continue;
+
+                    var list = new List<ulong>();
+                    chunksLoaded.Value.Add(key, list);
 
                     im.MapFile.Seek((long)im.MapAddress, System.IO.SeekOrigin.Begin);
                     var cells = im.MapFile.Read<Assets.MapBlock>().Cells;
@@ -113,7 +116,7 @@ readonly struct TerrainPlugin : IPlugin
                                 var position = Isometric.IsoToScreen(tileX, tileY, z);
                                 position.Y += z << 2;
 
-                                world.Entity()
+                                var e = world.Entity()
                                     .Set(new Renderable() {
                                         Texture = textmapInfo.Texture,
                                         UV = textmapInfo.UV,
@@ -133,12 +136,14 @@ readonly struct TerrainPlugin : IPlugin
                                     .Set(new WorldPosition() { X = tileX, Y = tileY, Z = z })
                                     .Set(new Graphic() { Value = tileID })
                                     .Add<IsTile>();
+
+                                list.Add(e);
                             }
                             else
                             {
                                 ref readonly var artInfo = ref assetsServer.Value.Arts.GetLand(tileID);
 
-                                world.Entity()
+                                var e = world.Entity()
                                     .Set(new Renderable() {
                                         Texture = artInfo.Texture,
                                         UV = artInfo.UV,
@@ -149,6 +154,8 @@ readonly struct TerrainPlugin : IPlugin
                                     .Set(new WorldPosition() { X = tileX, Y = tileY, Z = z })
                                     .Set(new Graphic() { Value = tileID })
                                     .Add<IsTile>();
+
+                                list.Add(e);
                             }
                         }
                     }
@@ -195,7 +202,7 @@ readonly struct TerrainPlugin : IPlugin
                                 var posVec = Isometric.IsoToScreen(staX, staY, sb.Z);
                                 posVec.X -= (short)((artInfo.UV.Width >> 1) - 22);
                                 posVec.Y -= (short)(artInfo.UV.Height - 44);
-                                world.Entity()
+                                var e = world.Entity()
                                     .Set(new Renderable()
                                     {
                                         Texture = artInfo.Texture,
@@ -207,6 +214,8 @@ readonly struct TerrainPlugin : IPlugin
                                     .Set(new WorldPosition() { X = staX, Y = staY, Z = sb.Z })
                                     .Set(new Graphic() { Value = sb.Color })
                                     .Add<IsStatic>();
+
+                                list.Add(e);
                             }
                         }
                     }
@@ -214,9 +223,63 @@ readonly struct TerrainPlugin : IPlugin
             }
         }, threadingType: ThreadingMode.Single)
         .RunIf((EventReader<OnNewChunkRequest> reader) => !reader.IsEmpty);
+
+        scheduler.AddSystem
+        (
+            (Local<List<uint>> toRemove,
+             Res<Dictionary<uint, List<ulong>>> chunksLoaded,
+             TinyEcs.World world,
+             Query<WorldPosition, With<Player>> playerQuery) =>
+            {
+                toRemove.Value ??= new();
+
+                ref var pos = ref playerQuery.Single<WorldPosition>();
+                foreach ((var key, var list) in chunksLoaded.Value)
+                {
+                    var x = (int)((key >> 16) & 0xFFFF);
+                    var y = (int)(key & 0xFFFF);
+
+                    var dist = GetDist(pos.X, pos.Y, x * 8, y * 8);
+                    if (dist > 64)
+                    {
+                        toRemove.Value.Add(key);
+
+                        foreach (var entity in list)
+                            world.Delete(entity);
+                    }
+                }
+
+                foreach (var p in toRemove.Value)
+                {
+                    chunksLoaded.Value.Remove(p);
+                }
+
+                toRemove.Value.Clear();
+            }
+            , threadingType: ThreadingMode.Single
+        ).RunIf(
+            (Query<WorldPosition, With<Player>> playerQuery, Local<float> timeUpdate, Time time) =>
+            {
+                if (timeUpdate.Value > time.Total)
+                {
+                    return false;
+                }
+
+                timeUpdate.Value = time.Total + 3000;
+
+                return playerQuery.Count() > 0;
+            });
     }
 
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static int GetDist(int x0, int y0, int x1, int y1)
+    {
+        return Math.Max(Math.Abs(x0 - x1), Math.Abs(y0 - y1));
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static uint CreateChunkKey(int x, int y) => (uint)(((x & 0xFFFF) << 16) | (y & 0xFFFF));
 
     static bool ApplyStretch(
         MapLoader mapLoader,

@@ -71,12 +71,6 @@ readonly struct PlayerMovementPlugin : IPlugin
             Time time
         ) =>
         {
-            if (playerRequestedSteps.Value.LastStep >= time.Total)
-                return;
-
-            if (playerRequestedSteps.Value.Index >= 5)
-                return;
-
             Span<sbyte> diag = stackalloc sbyte[2] { 1, -1 };
 
             // TODO: we grab the center of the screen atm for convenience. But it will be necessary to use the game window bounds
@@ -197,7 +191,9 @@ readonly struct PlayerMovementPlugin : IPlugin
                 if (hasNoSteps)
                     mobSteps.Time = time.Total;
             }
-        }).RunIf((Res<MouseContext> mouseCtx) => mouseCtx.Value.NewState.RightButton == Microsoft.Xna.Framework.Input.ButtonState.Pressed);
+        }).RunIf((Res<MouseContext> mouseCtx, Res<PlayerStepsContext> playerRequestedSteps, Time time)
+                     => mouseCtx.Value.NewState.RightButton == Microsoft.Xna.Framework.Input.ButtonState.Pressed &&
+                        playerRequestedSteps.Value.LastStep < time.Total && playerRequestedSteps.Value.Index < 5);
 
         scheduler.AddSystem((EventReader<AcceptedStep> acceptedSteps, Res<PlayerStepsContext> playerRequestedSteps, Res<NetClient> network) =>
         {

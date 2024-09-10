@@ -1,12 +1,8 @@
-using System;
-using System.Collections.Generic;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using TinyEcs;
-using static TinyEcs.Defaults;
 
 namespace ClassicUO.Ecs;
 
