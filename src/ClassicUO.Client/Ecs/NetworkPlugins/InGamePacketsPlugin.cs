@@ -33,7 +33,8 @@ sealed class NetworkEntitiesMap
         }
 
         var ent = world.Entity()
-            .Set(new NetworkSerial() { Value = serial });
+            .Set(new NetworkSerial() { Value = serial })
+            .Set(new Renderable());
 
         if (SerialHelper.IsMobile(serial))
         {

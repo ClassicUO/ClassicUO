@@ -16,10 +16,9 @@ readonly struct RenderingPlugin : IPlugin
     public void Build(Scheduler scheduler)
     {
         scheduler.AddSystem(static (
+            TinyEcs.World world,
             Query<Graphic,
-                (With<NetworkSerial>, Without<Pair<ContainedInto, Wildcard>>, With<Pair<EquippedItem, Wildcard>>)> queryEquip,
-            Query<NetworkSerial, (Without<Renderable>, Without<Pair<ContainedInto, Wildcard>>)> queryAddRender,
-            TinyEcs.World world
+                (With<NetworkSerial>, Without<Pair<ContainedInto, Wildcard>>, With<Pair<EquippedItem, Wildcard>>)> queryEquip
         ) => {
             queryEquip.Each((EntityView ent, ref Graphic graphic) =>
             {
@@ -35,11 +34,6 @@ readonly struct RenderingPlugin : IPlugin
 
                 if (parent.Has<MobAnimation>())
                     ent.Set(parent.Get<MobAnimation>());
-            });
-
-            queryAddRender.Each((EntityView ent, ref NetworkSerial serial) =>
-            {
-                ent.Set(new Renderable());
             });
         }, threadingType: ThreadingMode.Single);
 
