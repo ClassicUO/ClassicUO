@@ -23,7 +23,7 @@ namespace ClassicUO.Game.Managers
                         HttpRequestMessage restApi = new HttpRequestMessage()
                         {
                             Method = HttpMethod.Get,
-                            RequestUri = new Uri("https://api.github.com/repos/bittiez/TazUO/releases/latest"),
+                            RequestUri = new Uri("https://api.github.com/repos/jsebold666/TazUO/releases/latest"),
                         };
                         restApi.Headers.Add("X-GitHub-Api-Version", "2022-11-28");
                         restApi.Headers.Add("User-Agent", "Public");

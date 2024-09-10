@@ -1019,10 +1019,12 @@ namespace ClassicUO.Game.UI.Gumps
                         _normalHits = true;
                     }
                 }
-
-                // ## BEGIN - END ## // OVERHEAD / UNDERCHAR
-                CombatCollection.UpdateOverheads(mobile);
-                // ## BEGIN - END ## // OVERHEAD / UNDERCHAR
+                if (mobile != null) {
+                    // ## BEGIN - END ## // OVERHEAD / UNDERCHAR
+                    CombatCollection.UpdateOverheads(mobile);
+                    // ## BEGIN - END ## // OVERHEAD / UNDERCHAR
+                }
+                
 
                 // ## BEGIN - END ## // HEALTHBAR
                 if (ProfileManager.CurrentProfile != null)

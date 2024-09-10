@@ -1,4 +1,4 @@
-  #region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -59,20 +59,20 @@ namespace ClassicUO.Game.GameObjects
         // ## BEGIN - END ## // UI/GUMPS
         public BandageGump BandageTimer;
         // ## BEGIN - END ## // UI/GUMPS
-    // ## BEGIN - END ## // ONCASTINGGUMP
+        // ## BEGIN - END ## // ONCASTINGGUMP
         public OnCastingGump OnCasting;
         // ## BEGIN - END ## // ONCASTINGGUMP
 
         public PlayerMobile(uint serial) : base(serial)
         {
-            Skills = new Skill[SkillsLoader.Instance.SkillsCount];
-
             // ## BEGIN - END ## // UI/GUMPS
             UIManager.Add(BandageTimer = new BandageGump());
             // ## BEGIN - END ## // UI/GUMPS
             // ## BEGIN - END ## // ONCASTINGGUMP
             UIManager.Add(OnCasting = new OnCastingGump());
             // ## BEGIN - END ## // ONCASTINGGUMP
+
+            Skills = new Skill[SkillsLoader.Instance.SkillsCount];
 
             for (int i = 0; i < Skills.Length; i++)
             {
@@ -87,7 +87,7 @@ namespace ClassicUO.Game.GameObjects
                     SkillProgressBar.QueManager.AddSkill(e.Index);
                 }
             };
-        
+
             UIManager.Add(castTimer = new SpellVisualRangeManager.CastTimerProgressBar());
         }
 
@@ -1348,7 +1348,7 @@ namespace ClassicUO.Game.GameObjects
                     }
                 }
 
-                done:;
+            done:;
             }
 
 
@@ -1515,7 +1515,15 @@ namespace ClassicUO.Game.GameObjects
 
         public void CloseRangedGumps()
         {
-            foreach (Gump gump in UIManager.Gumps) { 
+            for (int i = 0; i < UIManager.Gumps.Count; i++)
+            {
+                if (UIManager.Gumps.Count > i)
+                    continue;
+
+                Gump gump = UIManager.Gumps.ElementAt(i);
+                //}
+                //foreach (Gump gump in UIManager.Gumps)
+                //{
                 switch (gump)
                 {
                     case ModernPaperdoll _:
@@ -1669,28 +1677,30 @@ namespace ClassicUO.Game.GameObjects
         //}
         // #############################################
 
-        public bool Walk(Direction direction, bool run, string text)
+        public bool Walk(Direction direction, bool run, string text, bool swing = false)
         {
-            if(text != "1" ) GameActions.Print(text + "to walk", 88);
             if (Walker.WalkingFailed || Walker.LastStepRequestTime > Time.Ticks || Walker.StepsCount >= Constants.MAX_STEP_COUNT || Client.Version >= ClientVersion.CV_60142 && IsParalyzed)
             {
                 return false;
             }
 
-            run |= ProfileManager.CurrentProfile.AlwaysRun;
+
+            if (!swing)
+            {
+                run |= ProfileManager.CurrentProfile.AlwaysRun;
+            }
+           
 
             if (SpeedMode >= CharacterSpeedType.CantRun || Stamina <= 1 && !IsDead || IsHidden && ProfileManager.CurrentProfile.AlwaysRunUnlessHidden)
             {
                 run = false;
             }
 
-            
-
             int x = X;
             int y = Y;
             sbyte z = Z;
             Direction oldDirection = Direction;
-            bool isFrozeSet = World.Player.IsParalyzed;
+
             bool emptyStack = Steps.Count == 0;
 
             if (!emptyStack)
@@ -1705,16 +1715,11 @@ namespace ClassicUO.Game.GameObjects
             sbyte oldZ = z;
             ushort walkTime = Constants.TURN_DELAY;
 
-  
-
             if ((oldDirection & Direction.Mask) == (direction & Direction.Mask))
             {
-                if (isFrozeSet ) return false;
 
-                // ## BEGIN - END ## // ONCASTINGGUMP
                 if (GameActions.iscasting) return false;
-                // ## BEGIN - END ## // ONCASTINGGUMP
-                
+                if (swing) return false;
                 Direction newDir = direction;
                 int newX = x;
                 int newY = y;

@@ -2038,7 +2038,7 @@ namespace ClassicUO.Network
 
                     if (Pathfinder.CanWalk(ref pdir, ref x, ref y, ref z) && World.Player.Direction != pdir)
                     {
-                        World.Player.Walk(pdir, false, "aaaasdfds");
+                        World.Player.Walk(pdir, false, "aaaasdfds", true);
                     }
                 }
             }
