@@ -3,7 +3,6 @@ using System.Net;
 using System.Net.Sockets;
 using ClassicUO.Utility.Logging;
 
-
 namespace ClassicUO.Network.Socket;
 
 sealed class TcpSocketWrapper : SocketWrapper
@@ -17,7 +16,8 @@ sealed class TcpSocketWrapper : SocketWrapper
 
     public override void Connect(Uri uri)
     {
-        if (IsConnected) return;
+        if (IsConnected)
+            return;
 
         _socket = new TcpClient();
         _socket.NoDelay = true;
@@ -29,6 +29,7 @@ sealed class TcpSocketWrapper : SocketWrapper
             if (!IsConnected)
             {
                 InvokeOnError(SocketError.NotConnected);
+
                 return;
             }
 
@@ -37,12 +38,12 @@ sealed class TcpSocketWrapper : SocketWrapper
         catch (SocketException socketEx)
         {
             Log.Error($"error while connecting {socketEx}");
-            InvokeOnError( socketEx.SocketErrorCode);
+            InvokeOnError(socketEx.SocketErrorCode);
         }
         catch (Exception ex)
         {
             Log.Error($"error while connecting {ex}");
-            InvokeOnError( SocketError.SocketError);
+            InvokeOnError(SocketError.SocketError);
         }
     }
 
@@ -55,7 +56,8 @@ sealed class TcpSocketWrapper : SocketWrapper
 
     public override int Read(byte[] buffer)
     {
-        if (!IsConnected) return 0;
+        if (!IsConnected)
+            return 0;
 
         var available = Math.Min(buffer.Length, _socket.Available);
         var done = 0;

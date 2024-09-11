@@ -160,7 +160,7 @@ namespace ClassicUO.Network
             var addr = $"{(IsWebsocketAddress(ip) ? "" : "tcp://")}{ip}:{port}";
             if (!Uri.TryCreate(addr, UriKind.RelativeOrAbsolute, out var uri))
             {
-                throw new UriFormatException($" NetClient::Connect() invalid Uri {addr}");
+                throw new UriFormatException($"NetClient::Connect() invalid Uri {addr}");
             }
             
             Log.Trace($"Connecting to {uri}");
