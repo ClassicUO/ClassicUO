@@ -11,17 +11,21 @@ using static System.Buffers.ArrayPool<byte>;
 
 namespace ClassicUO.Network.Socket;
 
+/// <summary>
+/// Handles websocket connections to shards that support it. `ws(s)://[hostname]` as the ip in settings.json.
+/// For testing see `tools/ws/README.md` 
+/// </summary>
 sealed class WebSocketWrapper : SocketWrapper
 {
     private const int MAX_RECEIVE_BUFFER_SIZE = 1024 * 1024; // 1MB
-    private const int WS_KEEP_ALIVE_INTERVAL = 5; // seconds
-    
+    private const int WS_KEEP_ALIVE_INTERVAL = 5;            // seconds
+
     private ClientWebSocket _webSocket;
     private TcpSocket _rawSocket;
 
     public override bool IsConnected => _webSocket?.State is WebSocketState.Connecting or WebSocketState.Open;
-    public bool IsCanceled => _tokenSource.IsCancellationRequested;
     public override EndPoint LocalEndPoint => _rawSocket?.LocalEndPoint;
+    public bool IsCanceled => _tokenSource.IsCancellationRequested;
 
     private CancellationTokenSource _tokenSource = new();
     private CircularBuffer _circularBuffer;
