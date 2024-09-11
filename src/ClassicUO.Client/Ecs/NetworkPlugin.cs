@@ -27,113 +27,125 @@ readonly struct NetworkPlugin : IPlugin
         scheduler.AddResource(new PacketsMap());
         scheduler.AddEvent<OnLoginRequest>();
 
-        scheduler.AddSystem((Res<Settings> settings, Res<UOFileManager> fileManager, SchedulerState sched) =>
-        {
-            var socket = new NetClient();
-            settings.Value.Encryption = (byte)socket.Load(fileManager.Value.Version, (EncryptionType)settings.Value.Encryption);
-            sched.AddResource(socket);
-        }, Stages.Startup);
+        var setupSocketFn = SetupSocket;
+        scheduler.AddSystem(setupSocketFn, Stages.Startup);
 
         scheduler.AddPlugin<LoginPacketsPlugin>();
         scheduler.AddPlugin<InGamePacketsPlugin>();
 
+        var sendPingEverySecondFn = SendPingEverySecond;
+        scheduler.AddSystem(sendPingEverySecondFn, threadingType: ThreadingMode.Single)
+            .RunIf((Res<GameContext> gameCtx, Res<NetClient> network) => network.Value!.IsConnected && gameCtx.Value.PlayerSerial != 0);
 
-        scheduler.AddSystem((Res<NetClient> network, Time time, Local<float> updateTime) =>
+        var handleLoginRequestsFn = HandleLoginRequests;
+        scheduler.AddSystem(handleLoginRequestsFn, threadingType: ThreadingMode.Single)
+            .RunIf((EventReader<OnLoginRequest> loginRequests) => !loginRequests.IsEmpty);
+
+        var packetReaderFn = PacketReader;
+        scheduler.AddSystem(packetReaderFn, threadingType: ThreadingMode.Single)
+            .RunIf((Res<NetClient> network) => network.Value!.IsConnected);
+    }
+
+    void SetupSocket(Res<Settings> settings, Res<UOFileManager> fileManager, SchedulerState sched)
+    {
+        var socket = new NetClient();
+        settings.Value.Encryption = (byte)socket.Load(fileManager.Value.Version, (EncryptionType)settings.Value.Encryption);
+        sched.AddResource(socket);
+    }
+
+    void SendPingEverySecond(Res<NetClient> network, Time time, Local<float> updateTime)
+    {
+        if (updateTime.Value < time.Total)
         {
-            if (updateTime.Value < time.Total)
+            updateTime.Value = time.Total + 1000f;
+            network.Value.Send_Ping(0xFF);
+        }
+    }
+
+    void HandleLoginRequests(
+        EventReader<OnLoginRequest> loginRequests,
+        Res<NetClient> network,
+        Res<GameContext> gameCtx,
+        Res<Settings> settings
+    )
+    {
+        foreach (var request in loginRequests)
+        {
+            network.Value.Connect(request.Address, request.Port);
+            Console.WriteLine("Socket is connected ? {0}", network.Value.IsConnected);
+
+            if (!network.Value.IsConnected)
+                continue;
+
+            if (gameCtx.Value.ClientVersion >= ClientVersion.CV_6040)
             {
-                updateTime.Value = time.Total + 1000f;
-                network.Value.Send_Ping(0xFF);
+                // NOTE: im forcing the use of latest client just for convenience rn
+                var major = (byte) ((uint)gameCtx.Value.ClientVersion >> 24);
+                var minor = (byte) ((uint)gameCtx.Value.ClientVersion >> 16);
+                var build = (byte) ((uint)gameCtx.Value.ClientVersion >> 8);
+                var extra = (byte) gameCtx.Value.ClientVersion;
+
+                network.Value.Send_Seed(network.Value.LocalIP, major, minor, build, extra);
             }
-        }, threadingType: ThreadingMode.Single)
-            .RunIf((Res<GameContext> gameCtx, Res<NetClient> network) =>
-                network.Value!.IsConnected && gameCtx.Value.PlayerSerial != 0);
-
-        scheduler.AddSystem(
-        (
-            EventReader<OnLoginRequest> loginRequests,
-            Res<NetClient> network,
-            Res<GameContext> gameCtx,
-            Res<Settings> settings
-        ) => {
-            foreach (var request in loginRequests)
+            else
             {
-                network.Value.Connect(request.Address, request.Port);
-                Console.WriteLine("Socket is connected ? {0}", network.Value.IsConnected);
+                network.Value.Send_Seed_Old(network.Value.LocalIP);
+            }
 
-                if (!network.Value.IsConnected)
-                    continue;
+            network.Value.Send_FirstLogin(settings.Value.Username, Crypter.Decrypt(settings.Value.Password));
 
-                if (gameCtx.Value.ClientVersion >= ClientVersion.CV_6040)
-                {
-                    // NOTE: im forcing the use of latest client just for convenience rn
-                    var major = (byte) ((uint)gameCtx.Value.ClientVersion >> 24);
-                    var minor = (byte) ((uint)gameCtx.Value.ClientVersion >> 16);
-                    var build = (byte) ((uint)gameCtx.Value.ClientVersion >> 8);
-                    var extra = (byte) gameCtx.Value.ClientVersion;
+            break;
+        }
+        loginRequests.Clear();
+    }
 
-                    network.Value.Send_Seed(network.Value.LocalIP, major, minor, build, extra);
-                }
-                else
-                {
-                    network.Value.Send_Seed_Old(network.Value.LocalIP);
-                }
+    void PacketReader(Res<NetClient> network, Res<PacketsMap> packetsMap, Local<CircularBuffer> buffer, Local<byte[]> packetBuffer)
+    {
+        buffer.Value ??= new();
+        packetBuffer.Value ??= new byte[4096];
 
-                network.Value.Send_FirstLogin(settings.Value.Username, Crypter.Decrypt(settings.Value.Password));
+        var availableData = network.Value.CollectAvailableData();
+        var span = availableData.AsSpan();
+        if (!span.IsEmpty)
+            buffer.Value.Enqueue(span);
 
+        while (buffer.Value.Length > 0)
+        {
+            var packetId = buffer.Value[0];
+            var packetLen = (int)network.Value.PacketsTable.GetPacketLength(packetId);
+            var packetHeaderOffset = sizeof(byte);
+
+            if (packetLen == -1)
+            {
+                if (buffer.Value.Length < 3)
+                    break;
+
+                var b0 = buffer.Value[1];
+                var b1 = buffer.Value[2];
+
+                packetLen = (b0 << 8) | b1;
+                packetHeaderOffset += sizeof(ushort);
+            }
+
+            if (buffer.Value.Length < packetLen)
+            {
+                Console.WriteLine("needs more data for packet 0x{0:X2}", packetId);
                 break;
             }
-            loginRequests.Clear();
-        }, threadingType: ThreadingMode.Single).RunIf((EventReader<OnLoginRequest> loginRequests) => !loginRequests.IsEmpty);
 
-        scheduler.AddSystem((Res<NetClient> network, Res<PacketsMap> packetsMap, Local<CircularBuffer> buffer, Local<byte[]> packetBuffer) => {
-            buffer.Value ??= new();
-            packetBuffer.Value ??= new byte[4096];
+            while (packetLen > packetBuffer.Value.Length)
+                Array.Resize(ref packetBuffer.Value, packetBuffer.Value.Length * 2);
 
-            var availableData = network.Value.CollectAvailableData();
-            var span = availableData.AsSpan();
-            if (!span.IsEmpty)
-                buffer.Value.Enqueue(span);
+            _ = buffer.Value.Dequeue(packetBuffer.Value, 0, packetLen);
 
-            while (buffer.Value.Length > 0)
+            // Console.WriteLine(">> packet-in: ID 0x{0:X2} | Len: {1}", packetId, packetLen);
+
+            if (packetsMap.Value.TryGetValue(packetId, out var handler))
             {
-                var packetId = buffer.Value[0];
-                var packetLen = (int)network.Value.PacketsTable.GetPacketLength(packetId);
-                var packetHeaderOffset = sizeof(byte);
-
-                if (packetLen == -1)
-                {
-                    if (buffer.Value.Length < 3)
-                        break;
-
-                    var b0 = buffer.Value[1];
-                    var b1 = buffer.Value[2];
-
-                    packetLen = (b0 << 8) | b1;
-                    packetHeaderOffset += sizeof(ushort);
-                }
-
-                if (buffer.Value.Length < packetLen)
-                {
-                    Console.WriteLine("needs more data for packet 0x{0:X2}", packetId);
-                    break;
-                }
-
-                while (packetLen > packetBuffer.Value.Length)
-                    Array.Resize(ref packetBuffer.Value, packetBuffer.Value.Length * 2);
-
-                _ = buffer.Value.Dequeue(packetBuffer.Value, 0, packetLen);
-
-                // Console.WriteLine(">> packet-in: ID 0x{0:X2} | Len: {1}", packetId, packetLen);
-
-                if (packetsMap.Value.TryGetValue(packetId, out var handler))
-                {
-                    handler(packetBuffer.Value.AsSpan(packetHeaderOffset, packetLen - packetHeaderOffset));
-                }
+                handler(packetBuffer.Value.AsSpan(packetHeaderOffset, packetLen - packetHeaderOffset));
             }
+        }
 
-            network.Value.Flush();
-        },threadingType: ThreadingMode.Single)
-            .RunIf((Res<NetClient> network) => network.Value!.IsConnected);
+        network.Value.Flush();
     }
 }
