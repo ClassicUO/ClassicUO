@@ -40,25 +40,21 @@ struct MobileFlags
     public Flags Value;
 }
 
+[InlineArray(MobileSteps.COUNT)]
+struct MobileStepArray
+{
+    private Game.GameObjects.Mobile.Step _a;
+}
+
 unsafe struct MobileSteps
 {
     public const int COUNT = 10;
 
-    private Game.GameObjects.Mobile.Step _step0;
-    private Game.GameObjects.Mobile.Step _step1;
-    private Game.GameObjects.Mobile.Step _step2;
-    private Game.GameObjects.Mobile.Step _step3;
-    private Game.GameObjects.Mobile.Step _step4;
-    private Game.GameObjects.Mobile.Step _step5;
-    private Game.GameObjects.Mobile.Step _step6;
-    private Game.GameObjects.Mobile.Step _step7;
-    private Game.GameObjects.Mobile.Step _step8;
-    private Game.GameObjects.Mobile.Step _step9;
-
-    public ref Game.GameObjects.Mobile.Step this[int index] => ref (new Span<Game.GameObjects.Mobile.Step>(Unsafe.AsPointer(ref _step0), COUNT)[index]);
-
+    private MobileStepArray _steps;
     public int Count;
     public float Time;
+
+    public ref Game.GameObjects.Mobile.Step this[int index] => ref _steps[index];
 }
 
 struct MobileQueuedStep
@@ -120,7 +116,7 @@ readonly struct MobAnimationsPlugin : IPlugin
                     sbyte endZ;
                     Direction endDir;
 
-                    var clearedDir = (queuedStep.Direction & (Direction.Up | ~Direction.Running));
+                    var clearedDir = (queuedStep.Direction & (Direction.Mask | ~Direction.Running));
 
                     if (steps.Count == 0)
                     {
@@ -156,6 +152,23 @@ readonly struct MobAnimationsPlugin : IPlugin
                     }
 
                     var moveDir = DirectionHelper.CalculateDirection(endX, endY, queuedStep.X, queuedStep.Y);
+
+                    var over = 0;
+                    if (moveDir != Direction.NONE)
+                    {
+                        over += 1;
+                        if (moveDir != endDir)
+                            over += 1;
+                    }
+
+                    if (moveDir != clearedDir)
+                        over += 1;
+
+                    if (steps.Count + over >= MobileSteps.COUNT)
+                    {
+                        steps.Count = Math.Max(0, MobileSteps.COUNT - over);
+                    }
+
                     if (moveDir != Direction.NONE)
                     {
                         if (moveDir != endDir)
@@ -210,9 +223,15 @@ readonly struct MobAnimationsPlugin : IPlugin
                 while (steps.Count > 0)
                 {
                     ref readonly var step = ref steps[0];
-                    var delay = time.Total - steps.Time;
 
+                    var delay = time.Total - steps.Time;
                     var mount = animation.MountAction != 0xFF;
+
+                    if (!mount && steps.Count > 1 && delay > 0)
+                    {
+                        mount = delay <= (step.Run ? MovementSpeed.STEP_DELAY_MOUNT_RUN : MovementSpeed.STEP_DELAY_WALK);
+                    }
+
                     var maxDelay = MovementSpeed.TimeToCompleteMovement(step.Run, mount);
                     var removeStep = delay >= maxDelay;
                     var directionChange = false;

@@ -52,7 +52,7 @@ readonly struct TerrainPlugin : IPlugin
                 RangeEndX = Math.Min(gameCtx.Value.MaxMapWidth / 8, pos.X / 8 + offset),
                 RangeEndY = Math.Min(gameCtx.Value.MaxMapHeight / 8, pos.Y / 8 + offset),
             });
-        }).RunIf((Query<WorldPosition, With<Player>> playerQuery) => playerQuery.Count() > 0);
+        }, threadingType: ThreadingMode.Single).RunIf((Query<WorldPosition, With<Player>> playerQuery) => playerQuery.Count() > 0);
 
         scheduler.AddSystem(static (
             TinyEcs.World world,

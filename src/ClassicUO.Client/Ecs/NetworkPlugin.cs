@@ -25,7 +25,6 @@ readonly struct NetworkPlugin : IPlugin
     public void Build(Scheduler scheduler)
     {
         scheduler.AddResource(new PacketsMap());
-
         scheduler.AddEvent<OnLoginRequest>();
 
         scheduler.AddSystem((Res<Settings> settings, Res<UOFileManager> fileManager, SchedulerState sched) =>

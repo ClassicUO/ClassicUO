@@ -19,7 +19,6 @@ readonly struct LoginPacketsPlugin : IPlugin
         scheduler.AddSystem((
             Res<Settings> settings,
             Res<PacketsMap> packetsMap,
-            Res<NetworkEntitiesMap> networkEntitiesMap,
             Res<NetClient> network,
             Res<GameContext> gameCtx
         ) => {
