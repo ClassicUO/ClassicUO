@@ -28,14 +28,20 @@ sealed class WebSocketWrapper : SocketWrapper
     public bool IsCanceled => _tokenSource.IsCancellationRequested;
 
     private CancellationTokenSource _tokenSource = new();
-    private CircularBuffer _circularBuffer;
+    private CircularBuffer _receiveStream;
 
     public override void Connect(Uri uri) => ConnectAsync(uri, _tokenSource).Wait();
 
     public override void Send(byte[] buffer, int offset, int count) =>
         _webSocket.SendAsync(buffer.AsMemory().Slice(offset, count), WebSocketMessageType.Binary, true, _tokenSource.Token);
 
-    public override int Read(byte[] buffer) => _circularBuffer.Dequeue(buffer, 0, buffer.Length);
+    public override int Read(byte[] buffer)
+    {
+        lock (_receiveStream)
+        {
+            return _receiveStream.Dequeue(buffer, 0, buffer.Length);
+        }
+    }
 
     public async Task ConnectAsync(Uri uri, CancellationTokenSource tokenSource = null)
     {
@@ -43,7 +49,7 @@ sealed class WebSocketWrapper : SocketWrapper
             return;
 
         _tokenSource = tokenSource ?? new CancellationTokenSource();
-        _circularBuffer = new CircularBuffer();
+        _receiveStream = new CircularBuffer();
 
         try
         {
@@ -115,7 +121,7 @@ sealed class WebSocketWrapper : SocketWrapper
         Log.Trace($"Connected WebSocket: {uri}");
 
         // Kicks off the async receiving loop 
-        StartReceiveAsync();
+        StartReceiveAsync().ConfigureAwait(false);
     }
 
     private async Task StartReceiveAsync()
@@ -141,7 +147,10 @@ sealed class WebSocketWrapper : SocketWrapper
                 if (!receiveResult.EndOfMessage)
                     continue;
 
-                _circularBuffer.Enqueue(buffer, 0, position);
+                lock (_receiveStream)
+                {
+                    _receiveStream.Enqueue(buffer, 0, position);
+                }
                 position = 0;
             }
         }
