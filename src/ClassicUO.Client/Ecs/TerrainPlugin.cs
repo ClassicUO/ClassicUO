@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using ClassicUO.Assets;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using TinyEcs;
 
 namespace ClassicUO.Ecs;
@@ -19,7 +20,7 @@ struct TileStretched
 
 readonly struct TerrainPlugin : IPlugin
 {
-    public unsafe void Build(Scheduler scheduler)
+    public void Build(Scheduler scheduler)
     {
         scheduler.AddEvent<OnNewChunkRequest>();
         scheduler.AddResource(new Dictionary<uint, List<ulong>>());
@@ -38,6 +39,7 @@ readonly struct TerrainPlugin : IPlugin
 
             if (lastPos.Value.LastX.HasValue && lastPos.Value.LastY.HasValue)
                 if (lastPos.Value.LastX == pos.X && lastPos.Value.LastY == pos.Y)
+                    return;
 
             lastPos.Value.LastX = pos.X;
             lastPos.Value.LastY = pos.Y;
@@ -117,13 +119,13 @@ readonly struct TerrainPlugin : IPlugin
                                 position.Y += z << 2;
 
                                 var e = world.Entity()
-                                    .Set(new Renderable() {
-                                        Texture = textmapInfo.Texture,
-                                        UV = textmapInfo.UV,
-                                        Color = new Vector3(0, Renderer.ShaderHueTranslator.SHADER_LAND, 1f),
-                                        Position = position,
-                                        Z = Isometric.GetDepthZ(tileX, tileY, avgZ - 2)
-                                    })
+                                    // .Set(new Renderable() {
+                                    //     Texture = textmapInfo.Texture?.Id ?? IntPtr.Zero,
+                                    //     UV = textmapInfo.UV,
+                                    //     Color = new Vector3(0, Renderer.ShaderHueTranslator.SHADER_LAND, 1f),
+                                    //     Position = position,
+                                    //     Z = Isometric.GetDepthZ(tileX, tileY, avgZ - 2)
+                                    // })
                                     .Set(new TileStretched() {
                                         NormalTop = normalTop,
                                         NormalRight = normalRight,
@@ -144,13 +146,13 @@ readonly struct TerrainPlugin : IPlugin
                                 ref readonly var artInfo = ref assetsServer.Value.Arts.GetLand(tileID);
 
                                 var e = world.Entity()
-                                    .Set(new Renderable() {
-                                        Texture = artInfo.Texture,
-                                        UV = artInfo.UV,
-                                        Color = Vector3.UnitZ,
-                                        Position = Isometric.IsoToScreen(tileX, tileY, z),
-                                        Z = Isometric.GetDepthZ(tileX, tileY, z - 2)
-                                    })
+                                    // .Set(new Renderable() {
+                                    //     Texture = artInfo.Texture?.Id ?? IntPtr.Zero,
+                                    //     UV = artInfo.UV,
+                                    //     Color = Vector3.UnitZ,
+                                    //     Position = Isometric.IsoToScreen(tileX, tileY, z),
+                                    //     Z = Isometric.GetDepthZ(tileX, tileY, z - 2)
+                                    // })
                                     .Set(new WorldPosition() { X = tileX, Y = tileY, Z = z })
                                     .Set(new Graphic() { Value = tileID })
                                     .Add<IsTile>();
@@ -203,16 +205,17 @@ readonly struct TerrainPlugin : IPlugin
                                 posVec.X -= (short)((artInfo.UV.Width >> 1) - 22);
                                 posVec.Y -= (short)(artInfo.UV.Height - 44);
                                 var e = world.Entity()
-                                    .Set(new Renderable()
-                                    {
-                                        Texture = artInfo.Texture,
-                                        UV = artInfo.UV,
-                                        Color = Renderer.ShaderHueTranslator.GetHueVector(sb.Hue, fileManager.Value.TileData.StaticData[sb.Color].IsPartialHue, 1f),
-                                        Position = posVec,
-                                        Z = Isometric.GetDepthZ(staX, staY, priorityZ)
-                                    })
+                                    // .Set(new Renderable()
+                                    // {
+                                    //     Texture = artInfo.Texture?.Id ?? IntPtr.Zero,
+                                    //     UV = artInfo.UV,
+                                    //     Color = Renderer.ShaderHueTranslator.GetHueVector(sb.Hue, fileManager.Value.TileData.StaticData[sb.Color].IsPartialHue, 1f),
+                                    //     Position = posVec,
+                                    //     Z = Isometric.GetDepthZ(staX, staY, priorityZ)
+                                    // })
                                     .Set(new WorldPosition() { X = staX, Y = staY, Z = sb.Z })
                                     .Set(new Graphic() { Value = sb.Color })
+                                    .Set(new Hue() { Value =  sb.Hue })
                                     .Add<IsStatic>();
 
                                 list.Add(e);
@@ -229,18 +232,21 @@ readonly struct TerrainPlugin : IPlugin
             (Local<List<uint>> toRemove,
              Res<Dictionary<uint, List<ulong>>> chunksLoaded,
              TinyEcs.World world,
+             Query<WorldPosition, (With<NetworkSerial>, Without<Player>, Without<Pair<ContainedInto, Defaults.Wildcard>>)> queryAll,
              Query<WorldPosition, With<Player>> playerQuery) =>
             {
                 toRemove.Value ??= new();
 
-                ref var pos = ref playerQuery.Single<WorldPosition>();
+                const int MAX_DIST = 64;
+
+                var pos = playerQuery.Single<WorldPosition>();
                 foreach ((var key, var list) in chunksLoaded.Value)
                 {
                     var x = (int)((key >> 16) & 0xFFFF);
                     var y = (int)(key & 0xFFFF);
 
                     var dist = GetDist(pos.X, pos.Y, x * 8, y * 8);
-                    if (dist > 64)
+                    if (dist > MAX_DIST)
                     {
                         toRemove.Value.Add(key);
 
@@ -255,6 +261,18 @@ readonly struct TerrainPlugin : IPlugin
                 }
 
                 toRemove.Value.Clear();
+
+
+                queryAll.Each(
+                    (EntityView ent, ref WorldPosition mobPos) =>
+                    {
+                        var dist2 = GetDist(pos.X, pos.Y, mobPos.X, mobPos.Y);
+
+                        if (dist2 > MAX_DIST)
+                        {
+                            ent.Delete();
+                        }
+                    });
             }
             , threadingType: ThreadingMode.Single
         ).RunIf(

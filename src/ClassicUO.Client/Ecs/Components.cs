@@ -80,5 +80,10 @@ struct PlayerData
     public short EnergyRes;
 }
 
+public struct ScreenPositionOffset
+{
+    public Vector2 Value;
+}
+
 struct IsStatic;
 struct IsTile;

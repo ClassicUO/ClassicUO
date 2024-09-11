@@ -33,12 +33,12 @@ sealed class NetworkEntitiesMap
         }
 
         var ent = world.Entity()
-            .Set(new NetworkSerial() { Value = serial })
-            .Set(new Renderable());
+            .Set(new NetworkSerial() { Value = serial });
 
         if (SerialHelper.IsMobile(serial))
         {
             ent.Set(new MobAnimation());
+            ent.Set(new ScreenPositionOffset());
         }
         _entities.Add(serial, ent.ID);
 
@@ -52,6 +52,9 @@ sealed class NetworkEntitiesMap
         var result = false;
         if (_entities.Remove(serial, out var id))
         {
+            if (!world.Exists(id))
+                return false;
+
             // Some entities might have a network entity associated [child].
             // It's needed to remove from the dict these children entities.
             // Filter search:
@@ -117,11 +120,9 @@ readonly struct InGamePacketsPlugin : IPlugin
             Res<NetClient> network,
             Res<UOFileManager> fileManager,
             Res<GameContext> gameCtx,
-            EventWriter<OnNewChunkRequest> chunkRequests,
             EventWriter<AcceptedStep> acceptedSteps,
             EventWriter<RejectedStep> rejectedSteps,
             EventWriter<MobileQueuedStep> mobileQueuedSteps,
-            Res<AssetsServer> assetsServer,
             TinyEcs.World world
         ) =>
         {
@@ -432,8 +433,8 @@ readonly struct InGamePacketsPlugin : IPlugin
 
                     var child = entitiesMap.Value.GetOrCreate(world, itemSerial);
                     child.Set(new Graphic() { Value = itemGraphic })
-                        .Set(new Hue() { Value = itemHue })
-                        .Set(new EquippedItem() { Layer = layer }, parentEnt);
+                        .Set(new Hue() { Value = itemHue });
+                    child.Set(new EquippedItem() { Layer = layer }, parentEnt);
 
                     Console.WriteLine("equip serial 0x{0:X8} | parentId: {1}", itemSerial, parentEnt.ID);
                 }
@@ -832,8 +833,8 @@ readonly struct InGamePacketsPlugin : IPlugin
                 var parentEnt = entitiesMap.Value.GetOrCreate(world, container);
                 var childEnt = entitiesMap.Value.GetOrCreate(world, serial);
                 childEnt.Set(new Graphic() { Value = (ushort)(graphic + graphicInc) })
-                    .Set(new Hue() { Value = hue })
-                    .Set(new EquippedItem() { Layer = layer }, parentEnt);
+                    .Set(new Hue() { Value = hue });
+                childEnt.Set(new EquippedItem() { Layer = layer }, parentEnt);
                 Console.WriteLine("equip serial 0x{0:X8} | parentId: {1}", serial, parentEnt.ID);
                 //.Set<ContainedInto>(parentEnt);
             };

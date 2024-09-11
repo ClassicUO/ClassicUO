@@ -22,24 +22,6 @@ sealed class Time : SystemParam
     public float Frame;
 }
 
-struct Renderable
-{
-    public Texture2D Texture = null;
-    public Vector2 Position = Vector2.Zero;
-    public Vector2 PositionOffset = Vector2.Zero;
-    public float Rotation = 0;
-    public Vector3 Color = Vector3.Zero;
-    public Rectangle UV = Rectangle.Empty;
-    public float Z = 0;
-    public SpriteEffects Flip = SpriteEffects.None;
-    public Vector2 Origin = Vector2.Zero;
-    public float Scale = 1f;
-
-    public Renderable()
-    {
-    }
-}
-
 readonly struct FnaPlugin : IPlugin
 {
     public bool WindowResizable { get; init; }

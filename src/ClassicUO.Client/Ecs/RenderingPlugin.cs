@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using ClassicUO.Assets;
@@ -29,43 +30,216 @@ readonly struct RenderingPlugin : IPlugin
                 if (parent.Has<WorldPosition>())
                     ent.Set(parent.Get<WorldPosition>());
 
-                if (parent.Has<Renderable>())
-                    ent.Set(parent.Get<Renderable>());
-
                 if (parent.Has<MobAnimation>())
                     ent.Set(parent.Get<MobAnimation>());
             });
         }, threadingType: ThreadingMode.Single);
 
-        scheduler.AddSystem(static (
-            Query<(WorldPosition, Graphic, Hue, Renderable, NetworkSerial, Optional<Facing>, Optional<MobAnimation>),
-                (Without<Pair<ContainedInto, Wildcard>>, Without<Pair<EquippedItem, Wildcard>>)> queryBodyOnly,
-            Query<(WorldPosition, Graphic, Hue, Renderable, NetworkSerial, Optional<MobAnimation>),
-                (Without<Pair<ContainedInto, Wildcard>>, With<Pair<EquippedItem, Wildcard>>)> queryEquipment,
-            Res<AssetsServer> assetsServer,
-            Res<UOFileManager> fileManager,
-            TinyEcs.World world,
-            Local<Dictionary<Layer, EntityView>> dict
-        ) => {
-            queryBodyOnly.Each((
-                ref WorldPosition pos,
-                ref Graphic graphic,
-                ref Hue hue,
-                ref Renderable renderable,
-                ref NetworkSerial serial,
-                ref Facing direction,
-                ref MobAnimation animation
-            ) =>
+        scheduler.AddSystem((Res<MouseContext> mouseCtx, Res<KeyboardContext> keyboardCtx, Res<GameContext> gameCtx) =>
+        {
+            if (mouseCtx.Value.OldState.LeftButton == ButtonState.Pressed && mouseCtx.Value.NewState.LeftButton == ButtonState.Pressed)
+            {
+                gameCtx.Value.CenterOffset.X += mouseCtx.Value.NewState.X - mouseCtx.Value.OldState.X;
+                gameCtx.Value.CenterOffset.Y += mouseCtx.Value.NewState.Y - mouseCtx.Value.OldState.Y;
+            }
+
+            if (keyboardCtx.Value.OldState.IsKeyUp(Keys.Space) && keyboardCtx.Value.NewState.IsKeyDown(Keys.Space))
+            {
+                gameCtx.Value.FreeView = !gameCtx.Value.FreeView;
+            }
+        }, Stages.FrameStart).RunIf((Res<UoGame> game) => game.Value.IsActive);
+
+        scheduler.AddSystem
+        (
+            (Res<GameContext> gameCtx, Query<(WorldPosition, ScreenPositionOffset), With<Player>> playerQuery) =>
+            {
+                playerQuery.Each(
+                    (ref WorldPosition position, ref ScreenPositionOffset offset) =>
+                    {
+                        gameCtx.Value.CenterX = position.X;
+                        gameCtx.Value.CenterY = position.Y;
+                        gameCtx.Value.CenterZ = position.Z;
+                        gameCtx.Value.CenterOffset = offset.Value * -1;
+                    });
+            },
+            threadingType: ThreadingMode.Single
+        ).RunIf((Res<GameContext> gameCtx) => !gameCtx.Value.FreeView);
+
+
+        var beginFn = BeginRendering;
+        var renderingFn = Rendering;
+        var endFn = EndRendering;
+
+        scheduler.AddSystem(beginFn, Stages.AfterUpdate, ThreadingMode.Single)
+                 .RunIf((SchedulerState state) => state.ResourceExists<GraphicsDevice>());
+        scheduler.AddSystem(renderingFn, Stages.AfterUpdate, ThreadingMode.Single)
+                 .RunIf((SchedulerState state) => state.ResourceExists<GraphicsDevice>());
+        scheduler.AddSystem(endFn, Stages.AfterUpdate, ThreadingMode.Single)
+                 .RunIf((SchedulerState state) => state.ResourceExists<GraphicsDevice>());
+    }
+
+    void BeginRendering(Res<Renderer.UltimaBatcher2D> batch)
+    {
+        var sb = batch.Value;
+        var matrix = Matrix.Identity;
+        //matrix = Matrix.CreateScale(0.45f);
+
+        sb.GraphicsDevice.Clear(Color.Black);
+
+        sb.Begin(null, matrix);
+        sb.SetBrightlight(1.7f);
+        sb.SetSampler(SamplerState.PointClamp);
+        sb.SetStencil(DepthStencilState.Default);
+    }
+
+    void EndRendering(Res<Renderer.UltimaBatcher2D> batch)
+    {
+        var sb = batch.Value;
+        sb.SetSampler(null);
+        sb.SetStencil(null);
+        sb.End();
+        sb.GraphicsDevice.Present();
+    }
+
+    void Rendering
+    (
+        TinyEcs.World world,
+        Res<GameContext> gameCtx,
+        Res<Renderer.UltimaBatcher2D> batch,
+        Res<AssetsServer> assetsServer,
+        Res<UOFileManager> fileManager,
+        Local<Dictionary<Layer, EntityView>> dict,
+        Query<(WorldPosition, Graphic, Optional<TileStretched>), With<IsTile>> queryTiles,
+        Query<(WorldPosition, Graphic, Hue), (Without<IsTile>, Without<MobAnimation>, Without<Pair<ContainedInto, Wildcard>>)> queryStatics,
+        Query<(WorldPosition, Graphic, Hue, NetworkSerial, ScreenPositionOffset, Optional<Facing>, Optional<MobAnimation>),
+            (Without<Pair<ContainedInto, Wildcard>>, Without<Pair<EquippedItem, Wildcard>>)> queryBodyOnly,
+        Query<(WorldPosition, Graphic, Hue, NetworkSerial, Optional<MobAnimation>),
+            (Without<Pair<ContainedInto, Wildcard>>, With<Pair<EquippedItem, Wildcard>>)> queryEquipment
+    )
+    {
+        var center = Isometric.IsoToScreen(gameCtx.Value.CenterX, gameCtx.Value.CenterY, gameCtx.Value.CenterZ);
+        center.X -= batch.Value.GraphicsDevice.PresentationParameters.BackBufferWidth / 2f;
+        center.Y -= batch.Value.GraphicsDevice.PresentationParameters.BackBufferHeight / 2f;
+        center -= gameCtx.Value.CenterOffset;
+
+        queryTiles.Each(
+            (ref WorldPosition worldPos, ref Graphic graphic, ref TileStretched stretched) =>
+            {
+                var isStretched = !Unsafe.IsNullRef(ref stretched);
+
+                if (isStretched)
+                {
+                    ref readonly var textmapInfo = ref assetsServer.Value.Texmaps.GetTexmap(fileManager.Value.TileData.LandData[graphic.Value].TexID);
+                    if (textmapInfo.Texture == null)
+                        return;
+
+                    var position = Isometric.IsoToScreen(worldPos.X, worldPos.Y, worldPos.Z);
+                    position.Y += worldPos.Z << 2;
+                    var depthZ = Isometric.GetDepthZ(worldPos.X, worldPos.Y, stretched.AvgZ - 2);
+                    var color = new Vector3(0, Renderer.ShaderHueTranslator.SHADER_LAND, 1f);
+
+                    batch.Value.DrawStretchedLand(
+                        textmapInfo.Texture,
+                        position - center,
+                        textmapInfo.UV,
+                        ref stretched.Offset,
+                        ref stretched.NormalTop,
+                        ref stretched.NormalRight,
+                        ref stretched.NormalLeft,
+                        ref stretched.NormalBottom,
+                        color,
+                        depthZ
+                    );
+                }
+                else
+                {
+                    ref readonly var artInfo = ref assetsServer.Value.Arts.GetLand(graphic.Value);
+                    if (artInfo.Texture == null)
+                        return;
+
+                    var position = Isometric.IsoToScreen(worldPos.X, worldPos.Y, worldPos.Z);
+                    var depthZ = Isometric.GetDepthZ(worldPos.X, worldPos.Y, worldPos.Z - 2);
+                    var color = Vector3.UnitZ;
+
+                    batch.Value.Draw(
+                        artInfo.Texture,
+                        position - center,
+                        artInfo.UV,
+                        color,
+                        rotation: 0f,
+                        origin: Vector2.Zero,
+                        scale: 1f,
+                        effects: SpriteEffects.None,
+                        depthZ
+                    );
+                }
+            });
+
+        queryStatics.Each(
+            (ref WorldPosition worldPos, ref Graphic graphic, ref Hue hue) =>
+            {
+                ref readonly var artInfo = ref assetsServer.Value.Arts.GetArt(graphic.Value);
+                if (artInfo.Texture == null)
+                    return;
+
+                var priorityZ = worldPos.Z;
+
+                if (fileManager.Value.TileData.StaticData[graphic.Value].IsBackground)
+                {
+                    priorityZ -= 1;
+                }
+
+                if (fileManager.Value.TileData.StaticData[graphic.Value].Height != 0)
+                {
+                    priorityZ += 1;
+                }
+
+                if (fileManager.Value.TileData.StaticData[graphic.Value].IsMultiMovable)
+                {
+                    priorityZ += 1;
+                }
+
+                var position = Isometric.IsoToScreen(worldPos.X, worldPos.Y, worldPos.Z);
+                position.X -= (short)((artInfo.UV.Width >> 1) - 22);
+                position.Y -= (short)(artInfo.UV.Height - 44);
+                var depthZ = Isometric.GetDepthZ(worldPos.X, worldPos.Y, priorityZ);
+                var color = Renderer.ShaderHueTranslator.GetHueVector(hue.Value, fileManager.Value.TileData.StaticData[graphic.Value].IsPartialHue, 1f);
+
+                batch.Value.Draw(
+                    artInfo.Texture,
+                    position - center,
+                    artInfo.UV,
+                    color,
+                    rotation: 0f,
+                    origin: Vector2.Zero,
+                    scale: 1f,
+                    effects: SpriteEffects.None,
+                    depthZ
+                );
+            });
+
+        queryBodyOnly.Each((
+            ref WorldPosition pos,
+            ref Graphic graphic,
+            ref Hue hue,
+            ref NetworkSerial serial,
+            ref ScreenPositionOffset offset,
+            ref Facing direction,
+            ref MobAnimation animation
+        ) =>
             {
                 var uoHue = hue.Value;
                 var priorityZ = pos.Z;
-                renderable.Position = Isometric.IsoToScreen(pos.X, pos.Y, pos.Z);
+                var position = Isometric.IsoToScreen(pos.X, pos.Y, pos.Z);
+                Texture2D texture;
+                Rectangle? uv;
+                var mirror = false;
 
                 if (ClassicUO.Game.SerialHelper.IsMobile(serial.Value))
                 {
                     priorityZ += 2;
                     var dir = Unsafe.IsNullRef(ref direction) ? Direction.North : direction.Value;
-                    (dir, var mirror) = FixDirection(dir);
+                    (dir, mirror) = FixDirection(dir);
 
                     byte animAction = 0;
                     var animIndex = 0;
@@ -94,16 +268,15 @@ readonly struct RenderingPlugin : IPlugin
                         :
                         ref frames[animIndex % frames.Length];
 
-                    renderable.Texture = frame.Texture;
-                    renderable.UV = frame.UV;
-                    renderable.Flip = mirror ? SpriteEffects.FlipHorizontally : SpriteEffects.None;
-                    renderable.Position.X += 22;
-                    renderable.Position.Y += 22;
+                    texture = frame.Texture;
+                    uv = frame.UV;
+                    position.X += 22;
+                    position.Y += 22;
                     if (mirror)
-                        renderable.Position.X -= frame.UV.Width - frame.Center.X;
+                        position.X -= frame.UV.Width - frame.Center.X;
                     else
-                        renderable.Position.X -= frame.Center.X;
-                    renderable.Position.Y -= frame.UV.Height + frame.Center.Y;
+                        position.X -= frame.Center.X;
+                    position.Y -= frame.UV.Height + frame.Center.Y;
                 }
                 else
                 {
@@ -124,15 +297,31 @@ readonly struct RenderingPlugin : IPlugin
                         priorityZ += 1;
                     }
 
-                    renderable.Texture = artInfo.Texture;
-                    renderable.UV = artInfo.UV;
-                    renderable.Position.X -= (short)((artInfo.UV.Width >> 1) - 22);
-                    renderable.Position.Y -= (short)(artInfo.UV.Height - 44);
+                    texture = artInfo.Texture;
+                    uv = artInfo.UV;
+                    position.X -= (short)((artInfo.UV.Width >> 1) - 22);
+                    position.Y -= (short)(artInfo.UV.Height - 44);
                 }
 
-                renderable.Z = Isometric.GetDepthZ(pos.X, pos.Y, priorityZ);
-                renderable.Color = ShaderHueTranslator.GetHueVector(FixHue(uoHue));
-                renderable.Position += renderable.PositionOffset;
+                if (texture == null)
+                    return;
+
+                var depthZ = Isometric.GetDepthZ(pos.X, pos.Y, priorityZ);
+                var color = ShaderHueTranslator.GetHueVector(FixHue(uoHue));
+                position += offset.Value;
+
+                batch.Value.Draw
+                (
+                    texture,
+                    position - center,
+                    uv,
+                    color,
+                    0f,
+                    Vector2.Zero,
+                    1f,
+                    mirror ? SpriteEffects.FlipHorizontally : SpriteEffects.None,
+                    depthZ
+                );
             });
 
 
@@ -141,13 +330,12 @@ readonly struct RenderingPlugin : IPlugin
                 ref WorldPosition pos,
                 ref Graphic graphic,
                 ref Hue hue,
-                ref Renderable renderable,
                 ref NetworkSerial serial,
                 ref MobAnimation animation
             ) =>
             {
                 var priorityZ = pos.Z + 2;
-                renderable.Position = Isometric.IsoToScreen(pos.X, pos.Y, pos.Z);
+                var position = Isometric.IsoToScreen(pos.X, pos.Y, pos.Z);
 
                 var animId = graphic.Value;
                 byte animAction = 0;
@@ -161,7 +349,6 @@ readonly struct RenderingPlugin : IPlugin
                 var act = ent.Target<EquippedItem>();
                 if (!Races.IsHuman(world.Get<Graphic>(act).Value))
                 {
-                    renderable.Texture = null;
                     return;
                 }
 
@@ -180,7 +367,6 @@ readonly struct RenderingPlugin : IPlugin
                 }
                 else
                 {
-                    renderable.Texture = null;
                     return;
                 }
 
@@ -200,138 +386,35 @@ readonly struct RenderingPlugin : IPlugin
                     :
                     ref frames[animIndex % frames.Length];
 
-                renderable.Texture = frame.Texture;
-                renderable.UV = frame.UV;
-                renderable.Flip = mirror ? SpriteEffects.FlipHorizontally : SpriteEffects.None;
-                renderable.Position.X += 22;
-                renderable.Position.Y += 22;
+                if (frame.Texture == null)
+                    return;
+
+                position.X += 22;
+                position.Y += 22;
                 if (mirror)
-                    renderable.Position.X -= frame.UV.Width - frame.Center.X;
+                    position.X -= frame.UV.Width - frame.Center.X;
                 else
-                    renderable.Position.X -= frame.Center.X;
-                renderable.Position.Y -= frame.UV.Height + frame.Center.Y;
+                    position.X -= frame.Center.X;
+                position.Y -= frame.UV.Height + frame.Center.Y;
 
                 // TODO: priority Z based on layer ordering
-                renderable.Z = Isometric.GetDepthZ(pos.X, pos.Y, priorityZ) + (orderKey * 0.01f);
-                renderable.Color = ShaderHueTranslator.GetHueVector(FixHue(hue.Value != 0 ? hue.Value : baseHue));
-                renderable.Position += renderable.PositionOffset;
+                var depthZ = Isometric.GetDepthZ(pos.X, pos.Y, priorityZ) + (orderKey * 0.01f);
+                var color = ShaderHueTranslator.GetHueVector(FixHue(hue.Value != 0 ? hue.Value : baseHue));
+                position += world.Get<ScreenPositionOffset>(act).Value;
+
+                batch.Value.Draw
+                (
+                    frame.Texture,
+                    position - center,
+                    frame.UV,
+                    color,
+                    0f,
+                    Vector2.Zero,
+                    1f,
+                    mirror ? SpriteEffects.FlipHorizontally : SpriteEffects.None,
+                    depthZ
+                );
             });
-        }, threadingType: ThreadingMode.Single);
-
-        scheduler.AddSystem((Res<MouseContext> mouseCtx, Res<KeyboardContext> keyboardCtx, Res<GameContext> gameCtx) =>
-        {
-            if (mouseCtx.Value.OldState.LeftButton == ButtonState.Pressed && mouseCtx.Value.NewState.LeftButton == ButtonState.Pressed)
-            {
-                gameCtx.Value.CenterOffset.X += mouseCtx.Value.NewState.X - mouseCtx.Value.OldState.X;
-                gameCtx.Value.CenterOffset.Y += mouseCtx.Value.NewState.Y - mouseCtx.Value.OldState.Y;
-            }
-
-            if (keyboardCtx.Value.OldState.IsKeyUp(Keys.Space) && keyboardCtx.Value.NewState.IsKeyDown(Keys.Space))
-            {
-                gameCtx.Value.FreeView = !gameCtx.Value.FreeView;
-            }
-        }, Stages.FrameStart).RunIf((Res<UoGame> game) => game.Value.IsActive);
-
-        scheduler.AddSystem
-        (
-            (Res<GameContext> gameCtx, Query<(WorldPosition, Renderable), With<Player>> playerQuery) =>
-            {
-                playerQuery.Each(
-                    (ref WorldPosition position, ref Renderable renderable) =>
-                    {
-                        gameCtx.Value.CenterX = position.X;
-                        gameCtx.Value.CenterY = position.Y;
-                        gameCtx.Value.CenterZ = position.Z;
-                        gameCtx.Value.CenterOffset = renderable.PositionOffset * -1;
-                    });
-            },
-            threadingType: ThreadingMode.Single
-        ).RunIf((Res<GameContext> gameCtx) => !gameCtx.Value.FreeView);
-
-        scheduler.AddSystem(static (
-            Res<GraphicsDevice> device,
-            Res<Renderer.UltimaBatcher2D> batch,
-            Res<GameContext> gameCtx,
-            Res<MouseContext> mouseCtx,
-            Query<(Renderable, TileStretched), Without<Pair<ContainedInto, Wildcard>>> queryTiles,
-            Query<Renderable, (Without<TileStretched>, Without<MobAnimation>, Without<Pair<ContainedInto, Wildcard>>)> queryStatic,
-            Query<Renderable, (With<MobAnimation>, Without<TileStretched>, Without<Pair<ContainedInto, Wildcard>>)> queryAnimations
-        ) => {
-            device.Value.Clear(Color.Black);
-
-            var center = Isometric.IsoToScreen(gameCtx.Value.CenterX, gameCtx.Value.CenterY, gameCtx.Value.CenterZ);
-            center.X -= device.Value.PresentationParameters.BackBufferWidth / 2f;
-            center.Y -= device.Value.PresentationParameters.BackBufferHeight / 2f;
-            center -= gameCtx.Value.CenterOffset;
-
-            var sb = batch.Value;
-            var matrix = Matrix.Identity;
-            //matrix = Matrix.CreateScale(0.45f);
-
-            sb.Begin(null, matrix);
-            sb.SetBrightlight(1.7f);
-            sb.SetSampler(SamplerState.PointClamp);
-            sb.SetStencil(DepthStencilState.Default);
-
-            queryTiles.Each((ref Renderable renderable, ref TileStretched stretched) =>
-            {
-                if (renderable.Texture != null)
-                    sb.DrawStretchedLand
-                    (
-                        renderable.Texture,
-                        renderable.Position - center,
-                        renderable.UV,
-                        ref stretched.Offset,
-                        ref stretched.NormalTop,
-                        ref stretched.NormalRight,
-                        ref stretched.NormalLeft,
-                        ref stretched.NormalBottom,
-                        renderable.Color,
-                        renderable.Z
-                    );
-            });
-
-            queryStatic.Each((ref Renderable renderable) =>
-            {
-                if (renderable.Texture != null)
-                    sb.Draw
-                    (
-                        renderable.Texture,
-                        renderable.Position - center,
-                        renderable.UV,
-                        renderable.Color,
-                        renderable.Rotation,
-                        renderable.Origin,
-                        renderable.Scale,
-                        renderable.Flip,
-                        renderable.Z
-                    );
-            });
-
-            // NOTE: i cant mix statics with animation like ethereals because
-            //       the transparent pixels get overraided somehow
-            queryAnimations.Each((ref Renderable renderable) =>
-            {
-                if (renderable.Texture != null)
-                    sb.Draw
-                    (
-                        renderable.Texture,
-                        renderable.Position - center,
-                        renderable.UV,
-                        renderable.Color,
-                        renderable.Rotation,
-                        renderable.Origin,
-                        renderable.Scale,
-                        renderable.Flip,
-                        renderable.Z
-                    );
-            });
-            sb.SetSampler(null);
-            sb.SetStencil(null);
-            sb.End();
-            device.Value.Present();
-        }, Stages.AfterUpdate, ThreadingMode.Single)
-        .RunIf((SchedulerState state) => state.ResourceExists<GraphicsDevice>());
     }
 
 

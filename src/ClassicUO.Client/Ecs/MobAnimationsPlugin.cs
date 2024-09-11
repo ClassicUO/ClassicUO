@@ -195,7 +195,7 @@ readonly struct MobAnimationsPlugin : IPlugin
 
         scheduler.AddSystem((
             Time time,
-            Query<(MobileSteps, WorldPosition, Facing, MobAnimation, Renderable),
+            Query<(MobileSteps, WorldPosition, Facing, MobAnimation, ScreenPositionOffset),
                 (Without<Pair<ContainedInto, Wildcard>>, Without<Pair<EquippedItem, Wildcard>>)> queryHandleWalking
         ) =>
         {
@@ -205,7 +205,7 @@ readonly struct MobAnimationsPlugin : IPlugin
                 ref WorldPosition position,
                 ref Facing direction,
                 ref MobAnimation animation,
-                ref Renderable renderable
+                ref ScreenPositionOffset offset
             ) =>
             {
                 // var isPlayer = entity.Has<Player>();
@@ -229,8 +229,8 @@ readonly struct MobAnimationsPlugin : IPlugin
                         var offsetZ = ((step.Z - position.Z) * x * (4.0f / stepsCount));
                         MovementSpeed.GetPixelOffset(step.Direction, ref x, ref y, stepsCount);
 
-                        renderable.PositionOffset.X = x;
-                        renderable.PositionOffset.Y = y - offsetZ;
+                        offset.Value.X = x;
+                        offset.Value.Y = y - offsetZ;
 
                         animation.Run = true;
                     }
@@ -254,8 +254,7 @@ readonly struct MobAnimationsPlugin : IPlugin
                             steps[i - 1] = steps[i];
 
                         steps.Count = Math.Max(0, steps.Count - 1);
-
-                        renderable.PositionOffset = Vector2.Zero;
+                        offset.Value = Vector2.Zero;
 
                         if (directionChange)
                             continue;
@@ -276,7 +275,6 @@ readonly struct MobAnimationsPlugin : IPlugin
             Res<UOFileManager> fileManager,
             Res<AssetsServer> assetsServer,
             Query<(
-                Renderable,
                 MobAnimation,
                 Graphic,
                 Facing,
@@ -287,7 +285,6 @@ readonly struct MobAnimationsPlugin : IPlugin
             query.Each(
             (
                 EntityView ent,
-                ref Renderable renderable,
                 ref MobAnimation animation,
                 ref Graphic graphic,
                 ref Facing direction,
