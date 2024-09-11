@@ -64,9 +64,6 @@ namespace ClassicUO.Network
 
         public static NetClient Socket { get; private set; } = new();
 
-        public static bool IsWebsocketAddress(string ip) => ip.ToLowerInvariant().Substring(0, 2) is "ws" or "wss";
-
-
         public EncryptionType Load(ClientVersion clientVersion, EncryptionType encryption)
         {
             PacketsTable = new PacketsTable(clientVersion);
@@ -157,17 +154,17 @@ namespace ClassicUO.Network
             Statistics.Reset();
 
 
-            var addr = $"{(IsWebsocketAddress(ip) ? "" : "tcp://")}{ip}:{port}";
+            var isWebsocketAddress = ip.ToLowerInvariant().Substring(0, 2) is "ws" or "wss";
+            var addr = $"{(isWebsocketAddress ? "" : "tcp://")}{ip}:{port}";
+            
             if (!Uri.TryCreate(addr, UriKind.RelativeOrAbsolute, out var uri))
-            {
                 throw new UriFormatException($"NetClient::Connect() invalid Uri {addr}");
-            }
             
             Log.Trace($"Connecting to {uri}");
 
             // First connected socket sets the type for any future sockets.
             // This prevents the client from swapping from WS -> TCP on game server login
-            SetupSocket(_socketType ??= uri.Scheme is "ws" or "wss" ? SocketWrapperType.WebSocket : SocketWrapperType.TcpSocket);
+            SetupSocket(_socketType ??= isWebsocketAddress ? SocketWrapperType.WebSocket : SocketWrapperType.TcpSocket);
             _socket.Connect(uri);
         }
 
