@@ -511,12 +511,14 @@ readonly struct RenderingPlugin : IPlugin
         var term0 = new QueryTerm(IDOp.Pair(world.Entity<EquippedItem>(), parent), TermOp.With);
         var term1 = new QueryTerm(world.Entity<NetworkSerial>(), TermOp.DataAccess);
 
-        var query = world.QueryRaw(term0, term1);
-        query.Each((EntityView ent, ref NetworkSerial serial) =>
+        foreach ((var entities, var serials) in world.QueryRaw(term0, term1).Iter<NetworkSerial>())
         {
-            ref var equip = ref ent.Get<EquippedItem>(parent);
-            dict[equip.Layer] = ent;
-        });
+            foreach (ref readonly var ent in entities)
+            {
+                ref var equip = ref ent.Get<EquippedItem>(parent);
+                dict[equip.Layer] = ent;
+            }
+        }
 
         switch (layer)
         {

@@ -189,7 +189,7 @@ namespace ClassicUO.Renderer.Animations
                     index = new IndexAnimation();
                     var indices = _animationLoader.GetIndices
                     (
-                        _animationLoader.FileManager.Version, 
+                        _animationLoader.FileManager.Version,
                         id,
                         ref hue,
                         ref index.Flags,
@@ -245,7 +245,7 @@ namespace ClassicUO.Renderer.Animations
                 }
             } while (index == null);
 
-            useUOP = index.Flags.HasFlag(AnimationFlags.UseUopAnimation);
+            useUOP = (index.Flags & AnimationFlags.UseUopAnimation) != 0;
             index.Hue = hue;
 
             if (useUOP)
