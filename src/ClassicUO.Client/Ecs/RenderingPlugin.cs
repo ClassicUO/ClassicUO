@@ -120,6 +120,8 @@ readonly struct RenderingPlugin : IPlugin
         var center = Isometric.IsoToScreen(gameCtx.Value.CenterX, gameCtx.Value.CenterY, gameCtx.Value.CenterZ);
         center.X -= batch.Value.GraphicsDevice.PresentationParameters.BackBufferWidth / 2f;
         center.Y -= batch.Value.GraphicsDevice.PresentationParameters.BackBufferHeight / 2f;
+        center.X += 22f;
+        center.Y += 22f;
         center -= gameCtx.Value.CenterOffset;
 
         queryTiles.Each(

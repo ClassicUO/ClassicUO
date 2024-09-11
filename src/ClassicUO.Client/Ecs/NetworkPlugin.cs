@@ -39,10 +39,11 @@ readonly struct NetworkPlugin : IPlugin
         scheduler.AddPlugin<InGamePacketsPlugin>();
 
 
-        scheduler.AddSystem((Res<NetClient> network, Local<DateTime> pingTime) => {
-            if ((DateTime.UtcNow - pingTime.Value).TotalSeconds > 1)
+        scheduler.AddSystem((Res<NetClient> network, Time time, Local<float> updateTime) =>
+        {
+            if (updateTime.Value < time.Total)
             {
-                pingTime.Value = DateTime.UtcNow.AddSeconds(1);
+                updateTime.Value = time.Total + 1000f;
                 network.Value.Send_Ping(0xFF);
             }
         }, threadingType: ThreadingMode.Single)
@@ -51,12 +52,12 @@ readonly struct NetworkPlugin : IPlugin
 
         scheduler.AddSystem(
         (
-            EventReader<OnLoginRequest> requets,
+            EventReader<OnLoginRequest> loginRequests,
             Res<NetClient> network,
             Res<GameContext> gameCtx,
             Res<Settings> settings
         ) => {
-            foreach (var request in requets)
+            foreach (var request in loginRequests)
             {
                 network.Value.Connect(request.Address, request.Port);
                 Console.WriteLine("Socket is connected ? {0}", network.Value.IsConnected);
@@ -83,8 +84,8 @@ readonly struct NetworkPlugin : IPlugin
 
                 break;
             }
-            requets.Clear();
-        }, threadingType: ThreadingMode.Single).RunIf((EventReader<OnLoginRequest> requets) => !requets.IsEmpty);
+            loginRequests.Clear();
+        }, threadingType: ThreadingMode.Single).RunIf((EventReader<OnLoginRequest> loginRequests) => !loginRequests.IsEmpty);
 
         scheduler.AddSystem((Res<NetClient> network, Res<PacketsMap> packetsMap, Local<CircularBuffer> buffer, Local<byte[]> packetBuffer) => {
             buffer.Value ??= new();

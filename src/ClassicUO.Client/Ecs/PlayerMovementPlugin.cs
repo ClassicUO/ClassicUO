@@ -60,6 +60,7 @@ readonly struct PlayerMovementPlugin : IPlugin
 
         scheduler.AddSystem(
         (
+            Local<List<TerrainInfo>> terrainList,
             Res<UOFileManager> fileManager,
             Res<GraphicsDevice> device,
             Res<MouseContext> mouseCtx,
@@ -71,6 +72,7 @@ readonly struct PlayerMovementPlugin : IPlugin
             Time time
         ) =>
         {
+            terrainList.Value ??= new();
             Span<sbyte> diag = stackalloc sbyte[2] { 1, -1 };
 
             // TODO: we grab the center of the screen atm for convenience. But it will be necessary to use the game window bounds
@@ -110,7 +112,7 @@ readonly struct PlayerMovementPlugin : IPlugin
             var newFacing = facing;
 
             var sameDir = playerDir == facing;
-            var canMove = CheckMovement(tilesQuery, staticsQuery, fileManager.Value.TileData, facing, ref newX, ref newY, ref newZ);
+            var canMove = CheckMovement(terrainList, tilesQuery, staticsQuery, fileManager.Value.TileData, facing, ref newX, ref newY, ref newZ);
             var isDiagonal = (byte)facing % 2 != 0;
 
             if (isDiagonal)
@@ -123,7 +125,7 @@ readonly struct PlayerMovementPlugin : IPlugin
                         var testX = playerX;
                         var testY = playerY;
                         var testZ = playerZ;
-                        canMove = CheckMovement(tilesQuery, staticsQuery, fileManager.Value.TileData, testDir, ref testX, ref testY, ref testZ);
+                        canMove = CheckMovement(terrainList, tilesQuery, staticsQuery, fileManager.Value.TileData, testDir, ref testX, ref testY, ref testZ);
                     }
                 }
 
@@ -135,7 +137,7 @@ readonly struct PlayerMovementPlugin : IPlugin
                         newX = playerX;
                         newY = playerY;
                         newZ = playerZ;
-                        canMove = CheckMovement(tilesQuery, staticsQuery, fileManager.Value.TileData, newFacing, ref newX, ref newY, ref newZ);
+                        canMove = CheckMovement(terrainList, tilesQuery, staticsQuery, fileManager.Value.TileData, newFacing, ref newX, ref newY, ref newZ);
                     }
                 }
             }
@@ -278,12 +280,12 @@ readonly struct PlayerMovementPlugin : IPlugin
         }, threadingType: ThreadingMode.Single).RunIf((EventReader<RejectedStep> responses) => !responses.IsEmpty);
     }
 
-    private static List<TerrainInfo> GetListOfItemsAt(Query tileQuery, Query staticsQuery, TileDataLoader tileData, int x, int y)
+    private static void FillListOfItemsAtPosition(List<TerrainInfo> list, Query tileQuery, Query staticsQuery, TileDataLoader tileData, int x, int y)
     {
-        var list = new List<TerrainInfo>();
+        list.Clear();
 
         tileQuery.Each(
-            (ref WorldPosition pos, ref Graphic graphic, ref TileStretched tilStretch) =>
+            (ref WorldPosition pos, ref Graphic graphic, ref TileStretched stretched) =>
             {
                 if (pos.X != x || pos.Y != y)
                     return;
@@ -302,7 +304,7 @@ readonly struct PlayerMovementPlugin : IPlugin
                 }
 
                 TerrainInfo tinfo;
-                if (Unsafe.IsNullRef(ref tilStretch))
+                if (Unsafe.IsNullRef(ref stretched))
                 {
                     tinfo = new()
                     {
@@ -310,7 +312,7 @@ readonly struct PlayerMovementPlugin : IPlugin
                         Z = pos.Z,
                         AvgZ = pos.Z,
                         Height = pos.Z,
-                        LandStretched = !Unsafe.IsNullRef(ref tilStretch),
+                        LandStretched = !Unsafe.IsNullRef(ref stretched),
                         LandBounds = default,
                         RealZ = pos.Z
                     };
@@ -320,11 +322,11 @@ readonly struct PlayerMovementPlugin : IPlugin
                     tinfo = new TerrainInfo()
                     {
                         Flags = flags,
-                        Z = tilStretch.MinZ,
-                        AvgZ = tilStretch.AvgZ,
-                        Height = tilStretch.AvgZ - tilStretch.MinZ,
-                        LandStretched = !Unsafe.IsNullRef(ref tilStretch),
-                        LandBounds = tilStretch.Offset,
+                        Z = stretched.MinZ,
+                        AvgZ = stretched.AvgZ,
+                        Height = stretched.AvgZ - stretched.MinZ,
+                        LandStretched = !Unsafe.IsNullRef(ref stretched),
+                        LandBounds = stretched.Offset,
                         RealZ = pos.Z
                     };
                 }
@@ -372,11 +374,9 @@ readonly struct PlayerMovementPlugin : IPlugin
                     list.Add(tinfo);
                 }
             });
-
-        return list;
     }
 
-    private static void GetMinMaxZ(Query tileQuery, Query staticsQuery, TileDataLoader tileData, Direction facing, int playerX, int playerY, int playerZ, out int minZ, out int maxZ)
+    private static void GetMinMaxZ(List<TerrainInfo> list, Query tileQuery, Query staticsQuery, TileDataLoader tileData, Direction facing, int playerX, int playerY, int playerZ, out int minZ, out int maxZ)
     {
         Span<int> offX = stackalloc int[]
         {
@@ -408,7 +408,7 @@ readonly struct PlayerMovementPlugin : IPlugin
         newDir &= 7;
         var newX = (ushort)(playerX + offX[newDir ^ 4]);
         var newY = (ushort)(playerY + offY[newDir ^ 4]);
-        var list = GetListOfItemsAt(tileQuery, staticsQuery, tileData, newX, newY);
+        FillListOfItemsAtPosition(list, tileQuery, staticsQuery, tileData, newX, newY);
 
         maxZ = playerZ;
         minZ = -128;
@@ -464,15 +464,16 @@ readonly struct PlayerMovementPlugin : IPlugin
         maxZ += 2;
     }
 
-    private static bool CheckMovement(Query tileQuery, Query staticsQuery, TileDataLoader tileData, Direction facing, ref ushort playerX, ref ushort playerY, ref sbyte playerZ)
+    private static bool CheckMovement(List<TerrainInfo> list, Query tileQuery, Query staticsQuery, TileDataLoader tileData, Direction facing, ref ushort playerX, ref ushort playerY, ref sbyte playerZ)
     {
         GetNewXY(facing, out var offsetX, out var offsetY);
         var newX = (ushort)(playerX + offsetX);
         var newY = (ushort)(playerY + offsetY);
-        GetMinMaxZ(tileQuery, staticsQuery, tileData, facing, newX, newY, playerZ, out var minZ, out var maxZ);
+        GetMinMaxZ(list, tileQuery, staticsQuery, tileData, facing, newX, newY, playerZ, out var minZ, out var maxZ);
 
-        var list = GetListOfItemsAt(tileQuery, staticsQuery, tileData, newX, newY);
-        if (list.Count == 0) return false;
+        FillListOfItemsAtPosition(list, tileQuery, staticsQuery, tileData, newX, newY);
+        if (list.Count == 0)
+            return false;
 
         list.Sort();
 

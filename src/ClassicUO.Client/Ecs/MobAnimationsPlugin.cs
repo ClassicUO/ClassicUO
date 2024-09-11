@@ -200,7 +200,6 @@ readonly struct MobAnimationsPlugin : IPlugin
         ) =>
         {
             queryHandleWalking.Each((
-                EntityView entity,
                 ref MobileSteps steps,
                 ref WorldPosition position,
                 ref Facing direction,
@@ -208,8 +207,6 @@ readonly struct MobAnimationsPlugin : IPlugin
                 ref ScreenPositionOffset offset
             ) =>
             {
-                // var isPlayer = entity.Has<Player>();
-
                 while (steps.Count > 0)
                 {
                     ref readonly var step = ref steps[0];

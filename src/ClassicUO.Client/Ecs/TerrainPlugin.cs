@@ -57,7 +57,6 @@ readonly struct TerrainPlugin : IPlugin
         scheduler.AddSystem(static (
             TinyEcs.World world,
             Res<UOFileManager> fileManager,
-            Res<AssetsServer> assetsServer,
             Res<Dictionary<uint, List<ulong>>> chunksLoaded,
             EventReader<OnNewChunkRequest> chunkRequests
         ) => {
@@ -113,19 +112,10 @@ readonly struct TerrainPlugin : IPlugin
 
                             if (isStretched)
                             {
-                                ref readonly var textmapInfo = ref assetsServer.Value.Texmaps.GetTexmap(fileManager.Value.TileData.LandData[tileID].TexID);
-
                                 var position = Isometric.IsoToScreen(tileX, tileY, z);
                                 position.Y += z << 2;
 
                                 var e = world.Entity()
-                                    // .Set(new Renderable() {
-                                    //     Texture = textmapInfo.Texture?.Id ?? IntPtr.Zero,
-                                    //     UV = textmapInfo.UV,
-                                    //     Color = new Vector3(0, Renderer.ShaderHueTranslator.SHADER_LAND, 1f),
-                                    //     Position = position,
-                                    //     Z = Isometric.GetDepthZ(tileX, tileY, avgZ - 2)
-                                    // })
                                     .Set(new TileStretched() {
                                         NormalTop = normalTop,
                                         NormalRight = normalRight,
@@ -143,16 +133,7 @@ readonly struct TerrainPlugin : IPlugin
                             }
                             else
                             {
-                                ref readonly var artInfo = ref assetsServer.Value.Arts.GetLand(tileID);
-
                                 var e = world.Entity()
-                                    // .Set(new Renderable() {
-                                    //     Texture = artInfo.Texture?.Id ?? IntPtr.Zero,
-                                    //     UV = artInfo.UV,
-                                    //     Color = Vector3.UnitZ,
-                                    //     Position = Isometric.IsoToScreen(tileX, tileY, z),
-                                    //     Z = Isometric.GetDepthZ(tileX, tileY, z - 2)
-                                    // })
                                     .Set(new WorldPosition() { X = tileX, Y = tileY, Z = z })
                                     .Set(new Graphic() { Value = tileID })
                                     .Add<IsTile>();
@@ -182,37 +163,7 @@ readonly struct TerrainPlugin : IPlugin
                                 var staX = (ushort)(bx + sb.X);
                                 var staY = (ushort)(by + sb.Y);
 
-                                ref readonly var artInfo = ref assetsServer.Value.Arts.GetArt(sb.Color);
-
-                                var priorityZ = sb.Z;
-
-                                if (fileManager.Value.TileData.StaticData[sb.Color].IsBackground)
-                                {
-                                    priorityZ -= 1;
-                                }
-
-                                if (fileManager.Value.TileData.StaticData[sb.Color].Height != 0)
-                                {
-                                    priorityZ += 1;
-                                }
-
-                                if (fileManager.Value.TileData.StaticData[sb.Color].IsMultiMovable)
-                                {
-                                    priorityZ += 1;
-                                }
-
-                                var posVec = Isometric.IsoToScreen(staX, staY, sb.Z);
-                                posVec.X -= (short)((artInfo.UV.Width >> 1) - 22);
-                                posVec.Y -= (short)(artInfo.UV.Height - 44);
                                 var e = world.Entity()
-                                    // .Set(new Renderable()
-                                    // {
-                                    //     Texture = artInfo.Texture?.Id ?? IntPtr.Zero,
-                                    //     UV = artInfo.UV,
-                                    //     Color = Renderer.ShaderHueTranslator.GetHueVector(sb.Hue, fileManager.Value.TileData.StaticData[sb.Color].IsPartialHue, 1f),
-                                    //     Position = posVec,
-                                    //     Z = Isometric.GetDepthZ(staX, staY, priorityZ)
-                                    // })
                                     .Set(new WorldPosition() { X = staX, Y = staY, Z = sb.Z })
                                     .Set(new Graphic() { Value = sb.Color })
                                     .Set(new Hue() { Value =  sb.Hue })

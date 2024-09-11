@@ -169,17 +169,6 @@ sealed class UoGame : Microsoft.Xna.Framework.Game
     public GraphicsDeviceManager GraphicManager { get; }
     public GameTime GameTime { get; private set; }
 
-
-    protected override void Initialize()
-    {
-        base.Initialize();
-    }
-
-    protected override void LoadContent()
-    {
-        base.LoadContent();
-    }
-
     protected override void Update(GameTime gameTime)
     {
         GameTime = gameTime;
