@@ -151,6 +151,7 @@ sealed class WebSocketWrapper : SocketWrapper
                 {
                     _receiveStream.Enqueue(buffer, 0, position);
                 }
+
                 position = 0;
             }
         }
@@ -162,6 +163,10 @@ sealed class WebSocketWrapper : SocketWrapper
         {
             Log.Trace($"WebSocket error in StartReceiveAsync {e}");
             InvokeOnError(SocketError.SocketError);
+        }
+        finally
+        {
+            Shared.Return(buffer);
         }
 
         if (!IsCanceled)

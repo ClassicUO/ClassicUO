@@ -153,6 +153,8 @@ namespace ClassicUO.Network
             _huffman.Reset();
             Statistics.Reset();
 
+            if (string.IsNullOrEmpty(ip))
+                throw new ArgumentNullException(nameof(ip));
 
             var isWebsocketAddress = ip.ToLowerInvariant().Substring(0, 2) is "ws" or "wss";
             var addr = $"{(isWebsocketAddress ? "" : "tcp://")}{ip}:{port}";
