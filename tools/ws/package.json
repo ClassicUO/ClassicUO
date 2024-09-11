@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@maximegris/node-websockify": "^1.0.7"
+  }
+}

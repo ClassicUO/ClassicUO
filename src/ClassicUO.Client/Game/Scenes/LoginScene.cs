@@ -683,7 +683,15 @@ namespace ClassicUO.Game.Scenes
             uint seed = p.ReadUInt32BE();
 
             NetClient.Socket.Disconnect();
-            NetClient.Socket.Connect(new IPAddress(ip).ToString(), port);
+
+            // Ignore the packet, connect with the original IP regardless (i.e. websocket proxying)
+            if (Settings.GlobalSettings.IgnoreRelayIp || ip == 0)
+            {
+                Log.Trace("Ignoring relay server packet IP address");
+                NetClient.Socket.Connect(Settings.GlobalSettings.IP, Settings.GlobalSettings.Port);
+            }
+            else
+                NetClient.Socket.Connect(new IPAddress(ip).ToString(), port);
 
             if (NetClient.Socket.IsConnected)
             {
