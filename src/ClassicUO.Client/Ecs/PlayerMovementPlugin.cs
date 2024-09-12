@@ -58,226 +58,238 @@ readonly struct PlayerMovementPlugin : IPlugin
         scheduler.AddEvent<RejectedStep>();
         scheduler.AddEvent<AcceptedStep>();
 
-        scheduler.AddSystem(
-        (
-            Local<List<TerrainInfo>> terrainList,
-            Res<UOFileManager> fileManager,
-            Res<GraphicsDevice> device,
-            Res<MouseContext> mouseCtx,
-            Res<NetClient> network,
-            Res<PlayerStepsContext> playerRequestedSteps,
-            Query<(WorldPosition, Facing, MobileSteps, MobAnimation), With<Player>> playerQuery,
-            Query<(WorldPosition, Graphic, Optional<TileStretched>), With<IsTile>> tilesQuery,
-            Query<(WorldPosition, Graphic), (Without<IsTile>, Without<MobAnimation>)> staticsQuery,
-            Time time
-        ) =>
+        var enqueuePlayerStepsFn = EnqueuePlayerSteps;
+        scheduler.AddSystem(enqueuePlayerStepsFn, threadingType: ThreadingMode.Single)
+            .RunIf((Res<MouseContext> mouseCtx, Res<PlayerStepsContext> playerRequestedSteps, Time time)
+                => mouseCtx.Value.NewState.RightButton == Microsoft.Xna.Framework.Input.ButtonState.Pressed &&
+                   playerRequestedSteps.Value.LastStep < time.Total && playerRequestedSteps.Value.Index < 5);
+
+        var parseAcceptedStepsFn = ParseAcceptedSteps;
+        scheduler.AddSystem(parseAcceptedStepsFn, threadingType: ThreadingMode.Single)
+            .RunIf((EventReader<AcceptedStep> responses) => !responses.IsEmpty);
+
+        var parseDeniedStepsFn = ParseDeniedSteps;
+        scheduler.AddSystem(parseDeniedStepsFn, threadingType: ThreadingMode.Single)
+            .RunIf((EventReader<RejectedStep> responses) => !responses.IsEmpty);
+    }
+
+    void EnqueuePlayerSteps
+    (
+        Local<List<TerrainInfo>> terrainList,
+        Res<UOFileManager> fileManager,
+        Res<GraphicsDevice> device,
+        Res<MouseContext> mouseCtx,
+        Res<NetClient> network,
+        Res<PlayerStepsContext> playerRequestedSteps,
+        Query<(WorldPosition, Facing, MobileSteps, MobAnimation), With<Player>> playerQuery,
+        Query<(WorldPosition, Graphic, Optional<TileStretched>), With<IsTile>> tilesQuery,
+        Query<(WorldPosition, Graphic), (Without<IsTile>, Without<MobAnimation>)> staticsQuery,
+        Time time
+    )
+    {
+        terrainList.Value ??= new();
+        Span<sbyte> diag = stackalloc sbyte[2] { 1, -1 };
+
+        // TODO: we grab the center of the screen atm for convenience. But it will be necessary to use the game window bounds
+        // var center = Isometric.IsoToScreen(gameCtx.Value.CenterX, gameCtx.Value.CenterY, gameCtx.Value.CenterZ);
+        var center = new Vector2(device.Value.PresentationParameters.BackBufferWidth, device.Value.PresentationParameters.BackBufferHeight);
+        center.X -= device.Value.PresentationParameters.BackBufferWidth / 2f;
+        center.Y -= device.Value.PresentationParameters.BackBufferHeight / 2f;
+
+        var mouseDir = (Direction) ClassicUO.Game.GameCursor.GetMouseDirection((int)center.X, (int)center.Y, mouseCtx.Value.NewState.X, mouseCtx.Value.NewState.Y, 1);
+        var mouseRange = Utility.MathHelper.Hypotenuse(center.X - mouseCtx.Value.NewState.X, center.Y - mouseCtx.Value.NewState.Y);
+        var facing = mouseDir == Direction.North ? Direction.Mask : mouseDir - 1;
+        var run = mouseRange >= 190 || false;
+
+        ref var mobSteps = ref playerQuery.Single<MobileSteps>();
+        ref readonly var worldPos = ref playerQuery.Single<WorldPosition>();
+        var playerDir = playerQuery.Single<Facing>().Value;
+        var hasNoSteps = mobSteps.Count == 0;
+        var playerX = worldPos.X;
+        var playerY = worldPos.Y;
+        var playerZ = worldPos.Z;
+
+        if (!hasNoSteps)
         {
-            terrainList.Value ??= new();
-            Span<sbyte> diag = stackalloc sbyte[2] { 1, -1 };
+            ref var lastStep = ref mobSteps[Math.Max(0, mobSteps.Count - 1)];
+            playerX = (ushort) lastStep.X;
+            playerY = (ushort) lastStep.Y;
+            playerZ = lastStep.Z;
+            playerDir = (Direction)lastStep.Direction;
+        }
 
-            // TODO: we grab the center of the screen atm for convenience. But it will be necessary to use the game window bounds
-            // var center = Isometric.IsoToScreen(gameCtx.Value.CenterX, gameCtx.Value.CenterY, gameCtx.Value.CenterZ);
-            var center = new Vector2(device.Value.PresentationParameters.BackBufferWidth, device.Value.PresentationParameters.BackBufferHeight);
-            center.X -= device.Value.PresentationParameters.BackBufferWidth / 2f;
-            center.Y -= device.Value.PresentationParameters.BackBufferHeight / 2f;
+        playerDir &= ~Direction.Running;
+        facing &= ~Direction.Running;
 
-            var mouseDir = (Direction) ClassicUO.Game.GameCursor.GetMouseDirection((int)center.X, (int)center.Y, mouseCtx.Value.NewState.X, mouseCtx.Value.NewState.Y, 1);
-            var mouseRange = Utility.MathHelper.Hypotenuse(center.X - mouseCtx.Value.NewState.X, center.Y - mouseCtx.Value.NewState.Y);
-            var facing = mouseDir == Direction.North ? Direction.Mask : mouseDir - 1;
-            var run = mouseRange >= 190 || false;
+        var newX = playerX;
+        var newY = playerY;
+        var newZ = playerZ;
+        var newFacing = facing;
 
-            ref var mobSteps = ref playerQuery.Single<MobileSteps>();
-            ref readonly var worldPos = ref playerQuery.Single<WorldPosition>();
-            var playerDir = playerQuery.Single<Facing>().Value;
-            var hasNoSteps = mobSteps.Count == 0;
-            var playerX = worldPos.X;
-            var playerY = worldPos.Y;
-            var playerZ = worldPos.Z;
+        var sameDir = playerDir == facing;
+        var canMove = CheckMovement(terrainList, tilesQuery, staticsQuery, fileManager.Value.TileData, facing, ref newX, ref newY, ref newZ);
+        var isDiagonal = (byte)facing % 2 != 0;
 
-            if (!hasNoSteps)
-            {
-                ref var lastStep = ref mobSteps[Math.Max(0, mobSteps.Count - 1)];
-                playerX = (ushort) lastStep.X;
-                playerY = (ushort) lastStep.Y;
-                playerZ = lastStep.Z;
-                playerDir = (Direction)lastStep.Direction;
-            }
-
-            playerDir &= ~Direction.Running;
-            facing &= ~Direction.Running;
-
-            var newX = playerX;
-            var newY = playerY;
-            var newZ = playerZ;
-            var newFacing = facing;
-
-            var sameDir = playerDir == facing;
-            var canMove = CheckMovement(terrainList, tilesQuery, staticsQuery, fileManager.Value.TileData, facing, ref newX, ref newY, ref newZ);
-            var isDiagonal = (byte)facing % 2 != 0;
-
-            if (isDiagonal)
-            {
-                if (canMove)
-                {
-                    for (var i = 0; i < 2 && canMove; i++)
-                    {
-                        var testDir = (Direction)(((byte)facing + diag[i]) % 8);
-                        var testX = playerX;
-                        var testY = playerY;
-                        var testZ = playerZ;
-                        canMove = CheckMovement(terrainList, tilesQuery, staticsQuery, fileManager.Value.TileData, testDir, ref testX, ref testY, ref testZ);
-                    }
-                }
-
-                if (!canMove)
-                {
-                    for (var i = 0; i < 2 && !canMove; i++)
-                    {
-                        newFacing = (Direction)(((byte)facing + diag[i]) % 8);
-                        newX = playerX;
-                        newY = playerY;
-                        newZ = playerZ;
-                        canMove = CheckMovement(terrainList, tilesQuery, staticsQuery, fileManager.Value.TileData, newFacing, ref newX, ref newY, ref newZ);
-                    }
-                }
-            }
-
+        if (isDiagonal)
+        {
             if (canMove)
             {
-                sameDir = playerDir == newFacing;
-
-                if (sameDir)
+                for (var i = 0; i < 2 && canMove; i++)
                 {
-                    playerX = newX;
-                    playerY = newY;
-                    playerZ = newZ;
+                    var testDir = (Direction)(((byte)facing + diag[i]) % 8);
+                    var testX = playerX;
+                    var testY = playerY;
+                    var testZ = playerZ;
+                    canMove = CheckMovement(terrainList, tilesQuery, staticsQuery, fileManager.Value.TileData, testDir, ref testX, ref testY, ref testZ);
                 }
-
-                playerDir = newFacing;
             }
-            else if (!sameDir)
+
+            if (!canMove)
             {
-                playerDir = facing;
+                for (var i = 0; i < 2 && !canMove; i++)
+                {
+                    newFacing = (Direction)(((byte)facing + diag[i]) % 8);
+                    newX = playerX;
+                    newY = playerY;
+                    newZ = playerZ;
+                    canMove = CheckMovement(terrainList, tilesQuery, staticsQuery, fileManager.Value.TileData, newFacing, ref newX, ref newY, ref newZ);
+                }
             }
+        }
 
-            if (canMove || !sameDir)
-            {
-                // ref var playerFlags = ref playerQuery.Single<MobileFlags>();
-                var playerFlags = Flags.None;
-                ref var animation = ref playerQuery.Single<MobAnimation>();
-                var isMountedOrFlying = animation.MountAction != 0xFF || playerFlags.HasFlag(Flags.Flying);
-                var stepTime = sameDir ? MovementSpeed.TimeToCompleteMovement(run, isMountedOrFlying) : Constants.TURN_DELAY;
-                ref var requestedStep = ref playerRequestedSteps.Value.Steps[playerRequestedSteps.Value.Index];
-                requestedStep.Sequence = playerRequestedSteps.Value.Sequence;
-                requestedStep.X = playerX;
-                requestedStep.Y = playerY;
-                requestedStep.Z = playerZ;
-                requestedStep.Direction = playerDir;
-
-                network.Value.Send_WalkRequest(requestedStep.Direction, requestedStep.Sequence, run, 0);
-
-                playerRequestedSteps.Value.Index = Math.Min(5, playerRequestedSteps.Value.Index + 1);
-                playerRequestedSteps.Value.Sequence = (byte)((playerRequestedSteps.Value.Sequence % byte.MaxValue) + 1);
-                playerRequestedSteps.Value.LastStep = time.Total + stepTime;
-                if (run)
-                    requestedStep.Direction |= Direction.Running;
-
-                ref var step = ref mobSteps[mobSteps.Count];
-                step.X = playerX;
-                step.Y = playerY;
-                step.Z = playerZ;
-                step.Direction = (byte)playerDir;
-                step.Run = run;
-                mobSteps.Count = Math.Min(MobileSteps.COUNT - 1, mobSteps.Count + 1);
-
-                if (hasNoSteps)
-                    mobSteps.Time = time.Total;
-            }
-        }).RunIf((Res<MouseContext> mouseCtx, Res<PlayerStepsContext> playerRequestedSteps, Time time)
-                     => mouseCtx.Value.NewState.RightButton == Microsoft.Xna.Framework.Input.ButtonState.Pressed &&
-                        playerRequestedSteps.Value.LastStep < time.Total && playerRequestedSteps.Value.Index < 5);
-
-        scheduler.AddSystem((EventReader<AcceptedStep> acceptedSteps, Res<PlayerStepsContext> playerRequestedSteps, Res<NetClient> network) =>
+        if (canMove)
         {
-            foreach (var response in acceptedSteps)
+            sameDir = playerDir == newFacing;
+
+            if (sameDir)
             {
-                // TODO: query for the player notoriety
-                var notoriety = response.Notoriety;
-
-                var stepIndex = 0;
-                for (var i = 0; i < playerRequestedSteps.Value.Index; i++)
-                {
-                    ref readonly var step = ref playerRequestedSteps.Value.Steps[i];
-
-                    if (step.Sequence == response.Sequence)
-                    {
-                        break;
-                    }
-
-                    stepIndex += 1;
-                }
-
-                var isBadStep = stepIndex == playerRequestedSteps.Value.Index;
-
-                if (!isBadStep)
-                {
-                    Console.WriteLine("step accepted");
-                    for (var i = 1; i < playerRequestedSteps.Value.Index; i++)
-                    {
-                        playerRequestedSteps.Value.Steps[i - 1] = playerRequestedSteps.Value.Steps[i];
-                    }
-
-                    playerRequestedSteps.Value.Index = Math.Max(0, playerRequestedSteps.Value.Index - 1);
-                }
-
-                if (isBadStep)
-                {
-                    Console.WriteLine("bad step found");
-                    if (!playerRequestedSteps.Value.ResyncSent)
-                    {
-                        Console.WriteLine("sending resync");
-                        network.Value.Send_Resync();
-                        playerRequestedSteps.Value.ResyncSent = true;
-                    }
-
-                    playerRequestedSteps.Value.Index = 0;
-                    playerRequestedSteps.Value.Sequence = 0;
-                }
+                playerX = newX;
+                playerY = newY;
+                playerZ = newZ;
             }
-        }, threadingType: ThreadingMode.Single).RunIf((EventReader<AcceptedStep> responses) => !responses.IsEmpty);
 
-        scheduler.AddSystem((EventReader<RejectedStep> rejectedSteps, Res<PlayerStepsContext> playerRequestedSteps, Query<(WorldPosition, Facing, MobileSteps), With<Player>> playerQuery) =>
+            playerDir = newFacing;
+        }
+        else if (!sameDir)
         {
-            Console.WriteLine("step denied");
-            var player = playerQuery.Single();
-            foreach (var response in rejectedSteps)
+            playerDir = facing;
+        }
+
+        if (canMove || !sameDir)
+        {
+            // ref var playerFlags = ref playerQuery.Single<MobileFlags>();
+            var playerFlags = Flags.None;
+            ref var animation = ref playerQuery.Single<MobAnimation>();
+            var isMountedOrFlying = animation.MountAction != 0xFF || playerFlags.HasFlag(Flags.Flying);
+            var stepTime = sameDir ? MovementSpeed.TimeToCompleteMovement(run, isMountedOrFlying) : Constants.TURN_DELAY;
+            ref var requestedStep = ref playerRequestedSteps.Value.Steps[playerRequestedSteps.Value.Index];
+            requestedStep.Sequence = playerRequestedSteps.Value.Sequence;
+            requestedStep.X = playerX;
+            requestedStep.Y = playerY;
+            requestedStep.Z = playerZ;
+            requestedStep.Direction = playerDir;
+
+            network.Value.Send_WalkRequest(requestedStep.Direction, requestedStep.Sequence, run, 0);
+
+            playerRequestedSteps.Value.Index = Math.Min(5, playerRequestedSteps.Value.Index + 1);
+            playerRequestedSteps.Value.Sequence = (byte)((playerRequestedSteps.Value.Sequence % byte.MaxValue) + 1);
+            playerRequestedSteps.Value.LastStep = time.Total + stepTime;
+            if (run)
+                requestedStep.Direction |= Direction.Running;
+
+            ref var step = ref mobSteps[mobSteps.Count];
+            step.X = playerX;
+            step.Y = playerY;
+            step.Z = playerZ;
+            step.Direction = (byte)playerDir;
+            step.Run = run;
+            mobSteps.Count = Math.Min(MobileSteps.COUNT - 1, mobSteps.Count + 1);
+
+            if (hasNoSteps)
+                mobSteps.Time = time.Total;
+        }
+    }
+
+    void ParseAcceptedSteps(EventReader<AcceptedStep> acceptedSteps, Res<PlayerStepsContext> playerRequestedSteps, Res<NetClient> network)
+    {
+        foreach (var response in acceptedSteps)
+        {
+            // TODO: query for the player notoriety
+            var notoriety = response.Notoriety;
+
+            var stepIndex = 0;
+            for (var i = 0; i < playerRequestedSteps.Value.Index; i++)
             {
-                player.Set
-                (
-                    new WorldPosition()
-                    {
-                        X = response.X,
-                        Y = response.Y,
-                        Z = response.Z
-                    }
-                );
+                ref readonly var step = ref playerRequestedSteps.Value.Steps[i];
 
-                player.Set
-                (
-                    new Facing()
-                    {
-                        Value = response.Direction
-                    }
-                );
+                if (step.Sequence == response.Sequence)
+                {
+                    break;
+                }
 
-                player.Get<MobileSteps>().Count = 0;
+                stepIndex += 1;
             }
 
-            playerRequestedSteps.Value.Index = 0;
-            playerRequestedSteps.Value.Sequence = 0;
-            playerRequestedSteps.Value.LastStep = 0;
-            playerRequestedSteps.Value.ResyncSent = false;
-        }, threadingType: ThreadingMode.Single).RunIf((EventReader<RejectedStep> responses) => !responses.IsEmpty);
+            var isBadStep = stepIndex == playerRequestedSteps.Value.Index;
+
+            if (!isBadStep)
+            {
+                Console.WriteLine("step accepted");
+                for (var i = 1; i < playerRequestedSteps.Value.Index; i++)
+                {
+                    playerRequestedSteps.Value.Steps[i - 1] = playerRequestedSteps.Value.Steps[i];
+                }
+
+                playerRequestedSteps.Value.Index = Math.Max(0, playerRequestedSteps.Value.Index - 1);
+            }
+
+            if (isBadStep)
+            {
+                Console.WriteLine("bad step found");
+                if (!playerRequestedSteps.Value.ResyncSent)
+                {
+                    Console.WriteLine("sending resync");
+                    network.Value.Send_Resync();
+                    playerRequestedSteps.Value.ResyncSent = true;
+                }
+
+                playerRequestedSteps.Value.Index = 0;
+                playerRequestedSteps.Value.Sequence = 0;
+            }
+        }
+    }
+
+    void ParseDeniedSteps(EventReader<RejectedStep> rejectedSteps, Res<PlayerStepsContext> playerRequestedSteps, Query<(WorldPosition, Facing, MobileSteps), With<Player>> playerQuery)
+    {
+        Console.WriteLine("step denied");
+        var player = playerQuery.Single();
+        foreach (var response in rejectedSteps)
+        {
+            player.Set
+            (
+                new WorldPosition()
+                {
+                    X = response.X,
+                    Y = response.Y,
+                    Z = response.Z
+                }
+            );
+
+            player.Set
+            (
+                new Facing()
+                {
+                    Value = response.Direction
+                }
+            );
+
+            player.Get<MobileSteps>().Count = 0;
+        }
+
+        playerRequestedSteps.Value.Index = 0;
+        playerRequestedSteps.Value.Sequence = 0;
+        playerRequestedSteps.Value.LastStep = 0;
+        playerRequestedSteps.Value.ResyncSent = false;
     }
 
     private static void FillListOfItemsAtPosition(List<TerrainInfo> list, Query tileQuery, Query staticsQuery, TileDataLoader tileData, int x, int y)

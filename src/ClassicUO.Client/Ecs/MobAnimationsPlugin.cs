@@ -216,7 +216,8 @@ readonly struct MobAnimationsPlugin : IPlugin
     void HandleMobileSteps
     (
         Time time,
-        Query<(MobileSteps, WorldPosition, Facing, MobAnimation, ScreenPositionOffset), (Without<Pair<ContainedInto, Wildcard>>, Without<Pair<EquippedItem, Wildcard>>)>
+        Query<(MobileSteps, WorldPosition, Facing, MobAnimation, ScreenPositionOffset),
+                (Without<Pair<ContainedInto, Wildcard>>, Without<Pair<EquippedItem, Wildcard>>)>
             queryHandleWalking
     )
     {
@@ -296,14 +297,8 @@ readonly struct MobAnimationsPlugin : IPlugin
         Res<GameContext> gameCtx,
         Res<UOFileManager> fileManager,
         Res<AssetsServer> assetsServer,
-        Query<(
-            MobAnimation,
-            Graphic,
-            Facing,
-            Optional<MobileFlags>,
-            Optional<MobileSteps>),
-            (Without<Pair<ContainedInto, Wildcard>>,
-            Without<Pair<EquippedItem, Wildcard>>)> query
+        Query<(MobAnimation, Graphic, Facing,  Optional<MobileFlags>, Optional<MobileSteps>),
+            (Without<Pair<ContainedInto, Wildcard>>, Without<Pair<EquippedItem, Wildcard>>)> query
     )
     {
         query.Each(
