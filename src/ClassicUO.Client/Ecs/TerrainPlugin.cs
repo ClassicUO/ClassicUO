@@ -25,218 +25,228 @@ readonly struct TerrainPlugin : IPlugin
         scheduler.AddEvent<OnNewChunkRequest>();
         scheduler.AddResource(new Dictionary<uint, List<ulong>>());
 
-        scheduler.AddSystem((
-            Res<GameContext> gameCtx,
-            Query<WorldPosition, With<Player>> playerQuery,
-            EventWriter<OnNewChunkRequest> chunkRequests,
-            Local<(ushort? LastX, ushort? LastY)> lastPos
-        ) =>
-        {
-            if (gameCtx.Value.Map == -1)
-                return;
+        var enqueueChunksRequestsFn = EnqueueChunksRequests;
+        scheduler.AddSystem(enqueueChunksRequestsFn, threadingType: ThreadingMode.Single)
+            .RunIf((Query<WorldPosition, With<Player>> playerQuery) => playerQuery.Count() > 0);
 
-            ref var pos = ref playerQuery.Single<WorldPosition>();
+        var loadChunksFn = LoadChunks;
+        scheduler.AddSystem(loadChunksFn, threadingType: ThreadingMode.Single)
+            .RunIf((EventReader<OnNewChunkRequest> reader) => !reader.IsEmpty);
 
-            if (lastPos.Value.LastX.HasValue && lastPos.Value.LastY.HasValue)
-                if (lastPos.Value.LastX == pos.X && lastPos.Value.LastY == pos.Y)
-                    return;
-
-            lastPos.Value.LastX = pos.X;
-            lastPos.Value.LastY = pos.Y;
-
-            var offset = 4;
-            chunkRequests.Enqueue(new() {
-                Map = gameCtx.Value.Map,
-                RangeStartX = Math.Max(0, pos.X / 8 - offset),
-                RangeStartY = Math.Max(0, pos.Y / 8 - offset),
-                RangeEndX = Math.Min(gameCtx.Value.MaxMapWidth / 8, pos.X / 8 + offset),
-                RangeEndY = Math.Min(gameCtx.Value.MaxMapHeight / 8, pos.Y / 8 + offset),
-            });
-        }, threadingType: ThreadingMode.Single).RunIf((Query<WorldPosition, With<Player>> playerQuery) => playerQuery.Count() > 0);
-
-        scheduler.AddSystem(static (
-            TinyEcs.World world,
-            Res<UOFileManager> fileManager,
-            Res<Dictionary<uint, List<ulong>>> chunksLoaded,
-            EventReader<OnNewChunkRequest> chunkRequests
-        ) => {
-            foreach (var chunkEv in chunkRequests)
-            {
-                for (int chunkX = chunkEv.RangeStartX; chunkX <= chunkEv.RangeEndX; chunkX += 1)
-                for (int chunkY = chunkEv.RangeStartY; chunkY <= chunkEv.RangeEndY; chunkY += 1)
-                {
-                    ref var im = ref fileManager.Value.Maps.GetIndex(chunkEv.Map, chunkX, chunkY);
-
-                    if (im.MapAddress == 0)
-                        continue;
-
-                    var key = CreateChunkKey(chunkX, chunkY);
-                    if (chunksLoaded.Value.ContainsKey(key))
-                        continue;
-
-                    var list = new List<ulong>();
-                    chunksLoaded.Value.Add(key, list);
-
-                    im.MapFile.Seek((long)im.MapAddress, System.IO.SeekOrigin.Begin);
-                    var cells = im.MapFile.Read<Assets.MapBlock>().Cells;
-
-                    var bx = chunkX << 3;
-                    var by = chunkY << 3;
-
-                    for (int y = 0; y < 8; ++y)
-                    {
-                        var pos = y << 3;
-                        var tileY = (ushort) (by + y);
-
-                        for (int x = 0; x < 8; ++x, ++pos)
-                        {
-                            var tileID = (ushort) (cells[pos].TileID & 0x3FFF);
-                            var z = cells[pos].Z;
-                            var tileX = (ushort) (bx + x);
-
-                            var isStretched = fileManager.Value.TileData.LandData[tileID].TexID == 0 &&
-                                fileManager.Value.TileData.LandData[tileID].IsWet;
-
-                            isStretched = ApplyStretch(
-                                fileManager.Value.Maps, fileManager.Value.Texmaps,
-                                chunkEv.Map, fileManager.Value.TileData.LandData[tileID].TexID,
-                                tileX, tileY, z,
-                                isStretched,
-                                out var avgZ, out var minZ,
-                                out var offsets,
-                                out var normalTop,
-                                out var normalRight,
-                                out var normalBottom,
-                                out var normalLeft
-                            );
-
-                            if (isStretched)
-                            {
-                                var position = Isometric.IsoToScreen(tileX, tileY, z);
-                                position.Y += z << 2;
-
-                                var e = world.Entity()
-                                    .Set(new TileStretched() {
-                                        NormalTop = normalTop,
-                                        NormalRight = normalRight,
-                                        NormalBottom = normalBottom,
-                                        NormalLeft = normalLeft,
-                                        AvgZ = avgZ,
-                                        MinZ = minZ,
-                                        Offset = offsets
-                                    })
-                                    .Set(new WorldPosition() { X = tileX, Y = tileY, Z = z })
-                                    .Set(new Graphic() { Value = tileID })
-                                    .Add<IsTile>();
-
-                                list.Add(e);
-                            }
-                            else
-                            {
-                                var e = world.Entity()
-                                    .Set(new WorldPosition() { X = tileX, Y = tileY, Z = z })
-                                    .Set(new Graphic() { Value = tileID })
-                                    .Add<IsTile>();
-
-                                list.Add(e);
-                            }
-                        }
-                    }
-
-                    if (im.StaticAddress != 0)
-                    {
-                        im.StaticFile.Seek((long)im.StaticAddress, System.IO.SeekOrigin.Begin);
-
-                        for (int i = 0, count = (int)im.StaticCount; i < count; ++i)
-                        {
-                            var sb = im.StaticFile.Read<Assets.StaticsBlock>();
-
-                            if (sb.Color != 0 && sb.Color != 0xFFFF)
-                            {
-                                int pos = (sb.Y << 3) + sb.X;
-
-                                if (pos >= 64)
-                                {
-                                    continue;
-                                }
-
-                                var staX = (ushort)(bx + sb.X);
-                                var staY = (ushort)(by + sb.Y);
-
-                                var e = world.Entity()
-                                    .Set(new WorldPosition() { X = staX, Y = staY, Z = sb.Z })
-                                    .Set(new Graphic() { Value = sb.Color })
-                                    .Set(new Hue() { Value =  sb.Hue })
-                                    .Add<IsStatic>();
-
-                                list.Add(e);
-                            }
-                        }
-                    }
-                }
-            }
-        }, threadingType: ThreadingMode.Single)
-        .RunIf((EventReader<OnNewChunkRequest> reader) => !reader.IsEmpty);
-
-        scheduler.AddSystem
-        (
-            (Local<List<uint>> toRemove,
-             Res<Dictionary<uint, List<ulong>>> chunksLoaded,
-             TinyEcs.World world,
-             Query<WorldPosition, (With<NetworkSerial>, Without<Player>, Without<Pair<ContainedInto, Defaults.Wildcard>>)> queryAll,
-             Query<WorldPosition, With<Player>> playerQuery) =>
-            {
-                toRemove.Value ??= new();
-
-                const int MAX_DIST = 64;
-
-                var pos = playerQuery.Single<WorldPosition>();
-                foreach ((var key, var list) in chunksLoaded.Value)
-                {
-                    var x = (int)((key >> 16) & 0xFFFF);
-                    var y = (int)(key & 0xFFFF);
-
-                    var dist = GetDist(pos.X, pos.Y, x * 8, y * 8);
-                    if (dist > MAX_DIST)
-                    {
-                        toRemove.Value.Add(key);
-
-                        foreach (var entity in list)
-                            world.Delete(entity);
-                    }
-                }
-
-                foreach (var p in toRemove.Value)
-                {
-                    chunksLoaded.Value.Remove(p);
-                }
-
-                toRemove.Value.Clear();
-
-
-                queryAll.Each(
-                    (EntityView ent, ref WorldPosition mobPos) =>
-                    {
-                        var dist2 = GetDist(pos.X, pos.Y, mobPos.X, mobPos.Y);
-
-                        if (dist2 > MAX_DIST)
-                        {
-                            ent.Delete();
-                        }
-                    });
-            }
-            , threadingType: ThreadingMode.Single
-        ).RunIf(
-            (Query<WorldPosition, With<Player>> playerQuery, Local<float> timeUpdate, Time time) =>
+        var removeEntitiesOutOfRangeFn = RemoveEntitiesOutOfRange;
+        scheduler.AddSystem(removeEntitiesOutOfRangeFn, threadingType: ThreadingMode.Single )
+            .RunIf((Query<WorldPosition, With<Player>> playerQuery, Local<float> timeUpdate, Time time) =>
             {
                 if (timeUpdate.Value > time.Total)
-                {
                     return false;
+                timeUpdate.Value = time.Total + 3000;
+                return playerQuery.Count() > 0;
+            });
+    }
+
+    void EnqueueChunksRequests
+    (
+        Res<GameContext> gameCtx,
+        Query<WorldPosition, With<Player>> playerQuery,
+        EventWriter<OnNewChunkRequest> chunkRequests,
+        Local<(ushort? LastX, ushort? LastY)> lastPos
+    )
+    {
+        if (gameCtx.Value.Map == -1)
+            return;
+
+        ref var pos = ref playerQuery.Single<WorldPosition>();
+
+        if (lastPos.Value.LastX.HasValue && lastPos.Value.LastY.HasValue)
+            if (lastPos.Value.LastX == pos.X && lastPos.Value.LastY == pos.Y)
+                return;
+
+        lastPos.Value.LastX = pos.X;
+        lastPos.Value.LastY = pos.Y;
+
+        var offset = 4;
+
+        chunkRequests.Enqueue(new()
+        {
+            Map = gameCtx.Value.Map,
+            RangeStartX = Math.Max(0, pos.X / 8 - offset),
+            RangeStartY = Math.Max(0, pos.Y / 8 - offset),
+            RangeEndX = Math.Min(gameCtx.Value.MaxMapWidth / 8, pos.X / 8 + offset),
+            RangeEndY = Math.Min(gameCtx.Value.MaxMapHeight / 8, pos.Y / 8 + offset),
+        });
+    }
+
+    void LoadChunks
+    (
+        TinyEcs.World world,
+        Res<UOFileManager> fileManager,
+        Res<Dictionary<uint, List<ulong>>> chunksLoaded,
+        EventReader<OnNewChunkRequest> chunkRequests
+    )
+    {
+        foreach (var chunkEv in chunkRequests)
+        {
+            for (int chunkX = chunkEv.RangeStartX; chunkX <= chunkEv.RangeEndX; chunkX += 1)
+            for (int chunkY = chunkEv.RangeStartY; chunkY <= chunkEv.RangeEndY; chunkY += 1)
+            {
+                ref var im = ref fileManager.Value.Maps.GetIndex(chunkEv.Map, chunkX, chunkY);
+
+                if (im.MapAddress == 0)
+                    continue;
+
+                var key = CreateChunkKey(chunkX, chunkY);
+                if (chunksLoaded.Value.ContainsKey(key))
+                    continue;
+
+                var list = new List<ulong>();
+                chunksLoaded.Value.Add(key, list);
+
+                im.MapFile.Seek((long)im.MapAddress, System.IO.SeekOrigin.Begin);
+                var cells = im.MapFile.Read<Assets.MapBlock>().Cells;
+
+                var bx = chunkX << 3;
+                var by = chunkY << 3;
+
+                for (int y = 0; y < 8; ++y)
+                {
+                    var pos = y << 3;
+                    var tileY = (ushort) (by + y);
+
+                    for (int x = 0; x < 8; ++x, ++pos)
+                    {
+                        var tileID = (ushort) (cells[pos].TileID & 0x3FFF);
+                        var z = cells[pos].Z;
+                        var tileX = (ushort) (bx + x);
+
+                        var isStretched = fileManager.Value.TileData.LandData[tileID].TexID == 0 &&
+                            fileManager.Value.TileData.LandData[tileID].IsWet;
+
+                        isStretched = ApplyStretch(
+                            fileManager.Value.Maps, fileManager.Value.Texmaps,
+                            chunkEv.Map, fileManager.Value.TileData.LandData[tileID].TexID,
+                            tileX, tileY, z,
+                            isStretched,
+                            out var avgZ, out var minZ,
+                            out var offsets,
+                            out var normalTop,
+                            out var normalRight,
+                            out var normalBottom,
+                            out var normalLeft
+                        );
+
+                        if (isStretched)
+                        {
+                            var position = Isometric.IsoToScreen(tileX, tileY, z);
+                            position.Y += z << 2;
+
+                            var e = world.Entity()
+                                .Set(new TileStretched() {
+                                    NormalTop = normalTop,
+                                    NormalRight = normalRight,
+                                    NormalBottom = normalBottom,
+                                    NormalLeft = normalLeft,
+                                    AvgZ = avgZ,
+                                    MinZ = minZ,
+                                    Offset = offsets
+                                })
+                                .Set(new WorldPosition() { X = tileX, Y = tileY, Z = z })
+                                .Set(new Graphic() { Value = tileID })
+                                .Add<IsTile>();
+
+                            list.Add(e);
+                        }
+                        else
+                        {
+                            var e = world.Entity()
+                                .Set(new WorldPosition() { X = tileX, Y = tileY, Z = z })
+                                .Set(new Graphic() { Value = tileID })
+                                .Add<IsTile>();
+
+                            list.Add(e);
+                        }
+                    }
                 }
 
-                timeUpdate.Value = time.Total + 3000;
+                if (im.StaticAddress != 0)
+                {
+                    im.StaticFile.Seek((long)im.StaticAddress, System.IO.SeekOrigin.Begin);
 
-                return playerQuery.Count() > 0;
+                    for (int i = 0, count = (int)im.StaticCount; i < count; ++i)
+                    {
+                        var sb = im.StaticFile.Read<Assets.StaticsBlock>();
+
+                        if (sb.Color != 0 && sb.Color != 0xFFFF)
+                        {
+                            int pos = (sb.Y << 3) + sb.X;
+
+                            if (pos >= 64)
+                            {
+                                continue;
+                            }
+
+                            var staX = (ushort)(bx + sb.X);
+                            var staY = (ushort)(by + sb.Y);
+
+                            var e = world.Entity()
+                                .Set(new WorldPosition() { X = staX, Y = staY, Z = sb.Z })
+                                .Set(new Graphic() { Value = sb.Color })
+                                .Set(new Hue() { Value =  sb.Hue })
+                                .Add<IsStatic>();
+
+                            list.Add(e);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    void RemoveEntitiesOutOfRange
+    (
+       TinyEcs.World world,
+       Local<List<uint>> toRemove,
+       Res<Dictionary<uint, List<ulong>>> chunksLoaded,
+       Query<WorldPosition, (With<NetworkSerial>, Without<Player>, Without<Pair<ContainedInto, Defaults.Wildcard>>)> queryAll,
+       Query<WorldPosition, With<Player>> playerQuery
+    )
+    {
+        toRemove.Value ??= new();
+
+        const int MAX_DIST = 64;
+
+        var pos = playerQuery.Single<WorldPosition>();
+        foreach ((var key, var list) in chunksLoaded.Value)
+        {
+            var x = (int)((key >> 16) & 0xFFFF);
+            var y = (int)(key & 0xFFFF);
+
+            var dist = GetDist(pos.X, pos.Y, x * 8, y * 8);
+            if (dist > MAX_DIST)
+            {
+                toRemove.Value.Add(key);
+
+                foreach (var entity in list)
+                    world.Delete(entity);
+            }
+        }
+
+        foreach (var p in toRemove.Value)
+        {
+            chunksLoaded.Value.Remove(p);
+        }
+
+        toRemove.Value.Clear();
+
+
+        queryAll.Each(
+            (EntityView ent, ref WorldPosition mobPos) =>
+            {
+                var dist2 = GetDist(pos.X, pos.Y, mobPos.X, mobPos.Y);
+
+                if (dist2 > MAX_DIST)
+                {
+                    ent.Delete();
+                }
             });
     }
 
