@@ -336,7 +336,7 @@ namespace ClassicUO.Game
                         {
                             if (s)
                             {
-                                Socket.Send_AttackRequest(serial);
+                                Socket.Send_DoubleClick(serial);
                             }
                         }
                     );
@@ -345,10 +345,28 @@ namespace ClassicUO.Game
                     return;
 
                 }
-            }
+            } else {
+                Mobile m = World.Mobiles.Get(serial);
+                Item item = World.Items.Get(serial);
 
-            TargetManager.LastAttack = serial;
-            Socket.Send_AttackRequest(serial);
+                if ((m == null) && (item == null))
+                    return;
+
+                if (m != null && (World.Player.NotorietyFlag == NotorietyFlag.Innocent || World.Player.NotorietyFlag == NotorietyFlag.Ally) && m.NotorietyFlag == NotorietyFlag.Innocent && m != World.Player)
+                {
+                   
+                    Socket.Send_AttackRequest(serial);
+                           
+                    return;
+                }
+
+                if (item !=  null)
+                {      
+                    Socket.Send_DoubleClick(serial);
+                    return;
+
+                }
+            }
         }
 
         public static void DoubleClickQueued(uint serial)

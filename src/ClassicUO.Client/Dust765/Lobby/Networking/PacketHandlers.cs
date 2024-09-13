@@ -39,8 +39,7 @@ namespace ClassicUO.Dust765.Lobby.Networking
             string name = pvSrc.ReadString();
 
             Mobile mob = World.Mobiles.Get(target);
-            Item item = World.Items.Get(target);
-            if (mob != null && item == null)
+            if (mob != null)
             {
                 GameActions.Print($"[Group]: Attacking '{name}'", blueHue);
 
@@ -54,12 +53,8 @@ namespace ClassicUO.Dust765.Lobby.Networking
                     GameActions.Print(mob, "- attacking -", blueHue);
             }
 
-            if (mob == null && item != null)
-            {
-                GameActions.DoubleClick(item.Serial);
-            }
-
         }
+        
         private static void HiddenPosition(NetState ns, PacketReader pvSrc)
         {
             const ushort blueHue = 89;
