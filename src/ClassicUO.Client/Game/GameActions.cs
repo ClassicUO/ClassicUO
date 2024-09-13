@@ -304,6 +304,10 @@ namespace ClassicUO.Game
             if (ProfileManager.CurrentProfile.EnabledCriminalActionQuery)
             {
                 Mobile m = World.Mobiles.Get(serial);
+                Item item = World.Items.Get(serial);
+
+                if ((m == null) && (item == null))
+                    return;
 
                 if (m != null && (World.Player.NotorietyFlag == NotorietyFlag.Innocent || World.Player.NotorietyFlag == NotorietyFlag.Ally) && m.NotorietyFlag == NotorietyFlag.Innocent && m != World.Player)
                 {
@@ -321,6 +325,25 @@ namespace ClassicUO.Game
 
                     UIManager.Add(messageBox);
                     return;
+                }
+
+                if (item !=  null)
+                {
+                    QuestionGump messageBox = new QuestionGump
+                    (
+                        ResGeneral.ThisMayFlagYouCriminal,
+                        s =>
+                        {
+                            if (s)
+                            {
+                                Socket.Send_AttackRequest(serial);
+                            }
+                        }
+                    );
+
+                    UIManager.Add(messageBox);
+                    return;
+
                 }
             }
 

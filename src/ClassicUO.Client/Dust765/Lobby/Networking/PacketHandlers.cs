@@ -39,7 +39,8 @@ namespace ClassicUO.Dust765.Lobby.Networking
             string name = pvSrc.ReadString();
 
             Mobile mob = World.Mobiles.Get(target);
-            if (mob != null)
+            Item item = World.Items.Get(target);
+            if (mob != null && item == null)
             {
                 GameActions.Print($"[Group]: Attacking '{name}'", blueHue);
 
@@ -51,6 +52,11 @@ namespace ClassicUO.Dust765.Lobby.Networking
 
                 if (mob.Distance < 18)
                     GameActions.Print(mob, "- attacking -", blueHue);
+            }
+
+            if (mob == null && item != null)
+            {
+                GameActions.DoubleClick(item.Serial);
             }
 
         }
