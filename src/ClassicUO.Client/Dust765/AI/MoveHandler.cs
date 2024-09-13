@@ -15,7 +15,7 @@ namespace ClassicUO.Game.Cheats.AIBot
 
         protected override InternalState OnUpdate()
         {
-            if ( World.Player.Walk( _nextDirection, true, "movehandle" ) )
+            if ( World.Player.Walk( _nextDirection, true) )
                 GameActions.Print( "AI: You have moved a step closer to the target." );
 
             return InternalState.IsReady;

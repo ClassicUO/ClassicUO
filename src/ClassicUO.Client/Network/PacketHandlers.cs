@@ -2038,7 +2038,7 @@ namespace ClassicUO.Network
 
                     if (Pathfinder.CanWalk(ref pdir, ref x, ref y, ref z) && World.Player.Direction != pdir)
                     {
-                        World.Player.Walk(pdir, false, "aaaasdfds", true);
+                        World.Player.Walk(pdir, false, true);
                     }
                 }
             }
@@ -3433,7 +3433,7 @@ namespace ClassicUO.Network
             }
 
             Direction direction = (Direction)p.ReadUInt8();
-            World.Player.Walk(direction & Direction.Mask, (direction & Direction.Running) != 0, "packet heandler 2");
+            World.Player.Walk(direction & Direction.Mask, (direction & Direction.Running) != 0);
         }
 
         private static void UpdateName(ref StackDataReader p)

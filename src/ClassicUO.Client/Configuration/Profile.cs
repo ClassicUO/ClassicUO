@@ -442,6 +442,7 @@ namespace ClassicUO.Configuration
         public bool ShowDeathOnWorldmap { get; set; } = false;
 
         public bool ShowMapCloseFriend { get; set; } = true;
+        public bool AutoAvoidMobiles { get; set; } = false;
         // ## BEGIN - END ## // MISC2
         // ## BEGIN - END ## // MACROS
         public int LastTargetRange { get; set; }

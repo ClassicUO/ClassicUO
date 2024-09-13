@@ -536,7 +536,7 @@ namespace ClassicUO.Game.Managers
 
                     if (!Pathfinder.AutoWalking)
                     {
-                        World.Player.Walk((Direction)dt, false, "macro manager" );
+                        World.Player.Walk((Direction)dt, false );
                     }
 
                     break;

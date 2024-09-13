@@ -109,7 +109,7 @@ namespace ClassicUO.Game.Scenes
                 }
                 else
                 {
-                    World.Player.Walk(facing - 1, run, "1");
+                    World.Player.Walk(facing - 1, run);
                 }
 
                 return true;
@@ -131,43 +131,43 @@ namespace ClassicUO.Game.Scenes
 
                 if (dir.X > THRESHOLD && dir.Y > THRESHOLD) // North
                 {
-                    World.Player.Walk(Direction.North, run, "2");
+                    World.Player.Walk(Direction.North, run);
                     return true;
                 }
                 if (dir.X < -THRESHOLD && dir.Y < -THRESHOLD) // South
                 {
-                    World.Player.Walk(Direction.South, run, "3");
+                    World.Player.Walk(Direction.South, run);
                     return true;
                 }
                 if (dir.X < -THRESHOLD && dir.Y > THRESHOLD) // Left
                 {
-                    World.Player.Walk(Direction.West, run, "4");
+                    World.Player.Walk(Direction.West, run);
                     return true;
                 }
                 if (dir.X > THRESHOLD && dir.Y < -THRESHOLD) // Left
                 {
-                    World.Player.Walk(Direction.East, run, "5");
+                    World.Player.Walk(Direction.East, run);
                     return true;
                 }
 
                 if (dir.X < THRESHOLD && dir.Y > THRESHOLD) //Up
                 {
-                    World.Player.Walk(Direction.Up, run, "6");
+                    World.Player.Walk(Direction.Up, run);
                     return true;
                 }
                 if (dir.X < THRESHOLD && dir.Y < -THRESHOLD) //Down
                 {
-                    World.Player.Walk(Direction.Down, run, "7");
+                    World.Player.Walk(Direction.Down, run);
                     return true;
                 }
                 if (dir.X > THRESHOLD && dir.Y < THRESHOLD) // Right
                 {
-                    World.Player.Walk(Direction.Right, run, "8");
+                    World.Player.Walk(Direction.Right, run);
                     return true;
                 }
                 if (dir.X < -THRESHOLD && dir.Y < THRESHOLD) // Left
                 {
-                    World.Player.Walk(Direction.Left, run, "9");
+                    World.Player.Walk(Direction.Left, run);
                     return true;
                 }
             }
