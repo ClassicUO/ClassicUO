@@ -3007,152 +3007,184 @@ namespace ClassicUO.Assets
                     content = content.Slice(1);
             }
 
-            TrimWhitespaces(ref content);
-
-            ReadOnlySpan<char> command = ReadOnlySpan<char>.Empty;
-
-            for (var i = 0; i < content.Length; i++)
+            while (!content.IsEmpty)
             {
-                var c = content[i];
+                TrimWhitespaces(ref content);
 
-                if (char.IsWhiteSpace(c) || c == '=' || c == '\\')
+                // If content is empty after trimming, exit the loop
+                if (content.IsEmpty)
+                    break;
+
+                // Parse the attribute name (command)
+                ReadOnlySpan<char> command = ReadOnlySpan<char>.Empty;
+                var i = 0;
+
+                for (; i < content.Length; i++)
                 {
-                    command = content.Slice(0, i);
-                    content = content.Slice(i + 1);
-                    break;
+                    var c = content[i];
+
+                    if (char.IsWhiteSpace(c) || c == '=' || c == '\\')
+                    {
+                        command = content.Slice(0, i);
+                        content = content.Slice(i);
+                        break;
+                    }
                 }
-            }
 
-            TrimWhitespaces(ref content);
-            ReadOnlySpan<char> value = ReadOnlySpan<char>.Empty;
-
-            for (var i = 0; i < content.Length; i++)
-            {
-                var c = content[i];
-
-                if (char.IsWhiteSpace(c) || c == '\\' || c == '<' || c == '>' || c == '=')
+                if (command.IsEmpty)
                 {
-                    content = content.Slice(i + 1);
-                    break;
+                    break; // Exit if no command is found
                 }
-            }
 
-            var first = content.IndexOf('"');
-            var last = content.LastIndexOf('"');
+                TrimWhitespaces(ref content);
 
-            if (first < last)
-            {
-                value = content.Slice(first + 1, last - first - 1);
-            }
-            else
-            {
-                value = content;
-            }
+                // Parse the attribute value
+                ReadOnlySpan<char> value = ReadOnlySpan<char>.Empty;
 
-            switch (info.Tag)
-            {
-                case HTML_TAG_TYPE.HTT_BODY:
-                case HTML_TAG_TYPE.HTT_BODYBGCOLOR:
+                if (!content.IsEmpty && content[0] == '=')
+                {
+                    // Move past '='
+                    content = content.Slice(1);
+                    TrimWhitespaces(ref content);
 
-                    if (MemoryExtensions.Equals(command, "text", StringComparison.InvariantCultureIgnoreCase))
+                    // Quoted value handling
+                    if (!content.IsEmpty && content[0] == '"')
                     {
-                        ReadColorFromTextBuffer(value, ref info.Color);
-                    }
-                    else if (MemoryExtensions.Equals(command, "bgcolor", StringComparison.InvariantCultureIgnoreCase))
-                    {
-                        if (_htmlStatus.IsHtmlBackgroundColored)
+                        // Find end quote
+                        var endQuoteIndex = content.Slice(1).IndexOf('"') + 1;
+                        if (endQuoteIndex > 0)
                         {
-                            ReadColorFromTextBuffer(value, ref _htmlStatus.BackgroundColor);
+                            value = content.Slice(1, endQuoteIndex - 1);
+                            content = content.Slice(endQuoteIndex + 1); // Move past the closing quote
                         }
                     }
-                    else if (MemoryExtensions.Equals(command, "link", StringComparison.InvariantCultureIgnoreCase))
+                    else
                     {
-                        ReadColorFromTextBuffer(value, ref _htmlStatus.WebLinkColor);
-                    }
-                    else if (MemoryExtensions.Equals(command, "vlink", StringComparison.InvariantCultureIgnoreCase))
-                    {
-                        ReadColorFromTextBuffer(value, ref _htmlStatus.VisitedWebLinkColor);
-                    }
-                    else if (MemoryExtensions.Equals(command, "leftmargin", StringComparison.InvariantCultureIgnoreCase))
-                    {
-                        _htmlStatus.Margins.X = int.Parse(value);
-                    }
-                    else if (MemoryExtensions.Equals(command, "topmargin", StringComparison.InvariantCultureIgnoreCase))
-                    {
-                        _htmlStatus.Margins.Y = int.Parse(value);
-                    }
-                    else if (MemoryExtensions.Equals(command, "rightmargin", StringComparison.InvariantCultureIgnoreCase))
-                    {
-                        _htmlStatus.Margins.Width = int.Parse(value);
-                    }
-                    else if (MemoryExtensions.Equals(command, "bottommargin", StringComparison.InvariantCultureIgnoreCase))
-                    {
-                        _htmlStatus.Margins.Height = int.Parse(value);
-                    }
-
-                    break;
-
-                case HTML_TAG_TYPE.HTT_BASEFONT:
-
-                    if (MemoryExtensions.Equals(command, "color", StringComparison.InvariantCultureIgnoreCase))
-                    {
-                        ReadColorFromTextBuffer(value, ref info.Color);
-                    }
-                    else if (MemoryExtensions.Equals(command, "size", StringComparison.InvariantCultureIgnoreCase))
-                    {
-                        byte font = byte.Parse(value);
-
-                        if (font == 0 || font == 4)
+                        // Non-quoted value
+                        i = 0;
+                        for (; i < content.Length; i++)
                         {
-                            info.Font = 1;
+                            var c = content[i];
+                            if (char.IsWhiteSpace(c) || c == '\\' || c == '<' || c == '>' || c == '=')
+                            {
+                                break;
+                            }
                         }
-                        else if (font < 4)
-                        {
-                            info.Font = 2;
-                        }
-                        else
-                        {
-                            info.Font = 0;
-                        }
+
+                        value = content.Slice(0, i);
+                        content = content.Slice(i); // Move past the value
                     }
+                }
 
-                    break;
 
-                case HTML_TAG_TYPE.HTT_A:
+                switch (info.Tag)
+                {
+                    case HTML_TAG_TYPE.HTT_BODY:
+                    case HTML_TAG_TYPE.HTT_BODYBGCOLOR:
 
-                    if (MemoryExtensions.Equals(command, "href", StringComparison.InvariantCultureIgnoreCase))
-                    {
-                        info.Flags = UOFONT_UNDERLINE;
-                        info.Color = _htmlStatus.WebLinkColor;
-                        info.Link = GetWebLinkID(value, ref info.Color);
-                    }
-
-                    break;
-
-                case HTML_TAG_TYPE.HTT_P:
-                case HTML_TAG_TYPE.HTT_DIV:
-
-                    if (MemoryExtensions.Equals(command, "align", StringComparison.InvariantCultureIgnoreCase))
-                    {
-                        if (MemoryExtensions.Equals(value, "left", StringComparison.InvariantCultureIgnoreCase))
+                        if (MemoryExtensions.Equals(command, "text", StringComparison.InvariantCultureIgnoreCase))
                         {
-                            info.Align = TEXT_ALIGN_TYPE.TS_LEFT;
+                            ReadColorFromTextBuffer(value, ref info.Color);
                         }
-                        else if (MemoryExtensions.Equals(value, "center", StringComparison.InvariantCultureIgnoreCase))
+                        else if (MemoryExtensions.Equals(command, "bgcolor", StringComparison.InvariantCultureIgnoreCase))
                         {
-                            info.Align = TEXT_ALIGN_TYPE.TS_CENTER;
+                            if (_htmlStatus.IsHtmlBackgroundColored)
+                            {
+                                ReadColorFromTextBuffer(value, ref _htmlStatus.BackgroundColor);
+                            }
                         }
-                        else if (MemoryExtensions.Equals(value, "right", StringComparison.InvariantCultureIgnoreCase))
+                        else if (MemoryExtensions.Equals(command, "link", StringComparison.InvariantCultureIgnoreCase))
                         {
-                            info.Align = TEXT_ALIGN_TYPE.TS_RIGHT;
+                            ReadColorFromTextBuffer(value, ref _htmlStatus.WebLinkColor);
                         }
-                    }
+                        else if (MemoryExtensions.Equals(command, "vlink", StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            ReadColorFromTextBuffer(value, ref _htmlStatus.VisitedWebLinkColor);
+                        }
+                        else if (MemoryExtensions.Equals(command, "leftmargin", StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            _htmlStatus.Margins.X = int.Parse(value);
+                        }
+                        else if (MemoryExtensions.Equals(command, "topmargin", StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            _htmlStatus.Margins.Y = int.Parse(value);
+                        }
+                        else if (MemoryExtensions.Equals(command, "rightmargin", StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            _htmlStatus.Margins.Width = int.Parse(value);
+                        }
+                        else if (MemoryExtensions.Equals(command, "bottommargin", StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            _htmlStatus.Margins.Height = int.Parse(value);
+                        }
 
-                    break;
+                        break;
+
+                    case HTML_TAG_TYPE.HTT_BASEFONT:
+
+                        if (MemoryExtensions.Equals(command, "color", StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            ReadColorFromTextBuffer(value, ref info.Color);
+                        }
+                        else if (MemoryExtensions.Equals(command, "size", StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            byte font = byte.Parse(value);
+
+                            if (font == 0 || font == 4)
+                            {
+                                info.Font = 1;
+                            }
+                            else if (font < 4)
+                            {
+                                info.Font = 2;
+                            }
+                            else
+                            {
+                                info.Font = 0;
+                            }
+                        }
+
+                        break;
+
+                    case HTML_TAG_TYPE.HTT_A:
+
+                        if (MemoryExtensions.Equals(command, "href", StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            info.Flags = UOFONT_UNDERLINE;
+                            info.Color = _htmlStatus.WebLinkColor;
+                            info.Link = GetWebLinkID(value, ref info.Color);
+                        }
+
+                        break;
+
+                    case HTML_TAG_TYPE.HTT_P:
+                    case HTML_TAG_TYPE.HTT_DIV:
+
+                        if (MemoryExtensions.Equals(command, "align", StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            if (MemoryExtensions.Equals(value, "left", StringComparison.InvariantCultureIgnoreCase))
+                            {
+                                info.Align = TEXT_ALIGN_TYPE.TS_LEFT;
+                            }
+                            else if (MemoryExtensions.Equals(value, "center", StringComparison.InvariantCultureIgnoreCase))
+                            {
+                                info.Align = TEXT_ALIGN_TYPE.TS_CENTER;
+                            }
+                            else if (MemoryExtensions.Equals(value, "right", StringComparison.InvariantCultureIgnoreCase))
+                            {
+                                info.Align = TEXT_ALIGN_TYPE.TS_RIGHT;
+                            }
+                        }
+
+                        break;
+                }
+
+                // Continue parsing the remaining content until it is empty
+                TrimWhitespaces(ref content);
             }
         }
 
-        private unsafe ushort GetWebLinkID(ReadOnlySpan<char> link, ref uint color)
+        private ushort GetWebLinkID(ReadOnlySpan<char> link, ref uint color)
         {
             foreach (KeyValuePair<ushort, WebLink> ll in _webLinks)
             {
