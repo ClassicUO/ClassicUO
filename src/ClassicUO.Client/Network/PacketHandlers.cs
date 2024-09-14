@@ -4999,7 +4999,7 @@ namespace ClassicUO.Network
                         break;
                 }
 
-                
+
                 for (int i = 0; i < list.Count; i++)
                 {
                     if (
@@ -7066,6 +7066,16 @@ namespace ClassicUO.Network
                 {
                     //This gump is null terminated: Breaking
                     break;
+                }
+                else if (string.Equals(entry, "gumppichued", StringComparison.InvariantCultureIgnoreCase) ||
+                         string.Equals(entry, "gumppicphued", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    if (gparams.Count >= 3)
+                        gump.Add(new GumpPic(gparams));
+                }
+                else if (string.Equals(entry, "togglelimitgumpscale", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    // ??
                 }
                 else
                 {
