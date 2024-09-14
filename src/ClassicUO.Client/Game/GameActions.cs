@@ -327,21 +327,20 @@ namespace ClassicUO.Game
                     return;
                 }
 
+
+                if (m != null && m != World.Player)
+                {
+
+                    Socket.Send_AttackRequest(serial);
+
+                    return;
+                }
+
+
                 if (item !=  null)
                 {
-                    QuestionGump messageBox = new QuestionGump
-                    (
-                        ResGeneral.ThisMayFlagYouCriminal,
-                        s =>
-                        {
-                            if (s)
-                            {
-                                Socket.Send_DoubleClick(serial);
-                            }
-                        }
-                    );
-
-                    UIManager.Add(messageBox);
+                   
+                    Socket.Send_DoubleClick(serial);
                     return;
 
                 }
@@ -357,6 +356,15 @@ namespace ClassicUO.Game
                    
                     Socket.Send_AttackRequest(serial);
                            
+                    return;
+                }
+
+
+                if (m != null && m != World.Player)
+                {
+
+                    Socket.Send_AttackRequest(serial);
+
                     return;
                 }
 
