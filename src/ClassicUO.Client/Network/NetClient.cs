@@ -36,100 +36,11 @@ using ClassicUO.Utility.Logging;
 using System;
 using System.Net;
 using System.Net.Sockets;
+using System.Net.WebSockets;
+using ClassicUO.Network.Socket;
 
 namespace ClassicUO.Network
 {
-    sealed class SocketWrapper : IDisposable
-    {
-        private TcpClient _socket;
-
-        public bool IsConnected => _socket?.Client?.Connected ?? false;
-
-        public EndPoint LocalEndPoint => _socket?.Client?.LocalEndPoint;
-
-
-        public event EventHandler OnConnected, OnDisconnected;
-        public event EventHandler<SocketError> OnError;
-
-
-        public void Connect(string ip, int port)
-        {
-            if (IsConnected) return;
-
-            _socket = new TcpClient();
-            _socket.NoDelay = true;
-
-            try
-            {
-                _socket.Connect(ip, port);
-
-                if (!IsConnected)
-                {
-                    OnError?.Invoke(this, SocketError.NotConnected);
-                    return;
-                }
-
-                OnConnected?.Invoke(this, EventArgs.Empty);
-            }
-            catch (SocketException socketEx)
-            {
-                Log.Error($"error while connecting {socketEx}");
-                OnError?.Invoke(this, socketEx.SocketErrorCode);
-            }
-            catch (Exception ex)
-            {
-                Log.Error($"error while connecting {ex}");
-                OnError?.Invoke(this, SocketError.SocketError);
-            }
-        }
-
-        public void Send(byte[] buffer, int offset, int count)
-        {
-            var stream = _socket.GetStream();
-            stream.Write(buffer, offset, count);
-            stream.Flush();
-        }
-
-        public int Read(byte[] buffer)
-        {
-            if (!IsConnected) return 0;
-
-            var available = Math.Min(buffer.Length, _socket.Available);
-            var done = 0;
-
-            var stream = _socket.GetStream();
-
-            while (done < available)
-            {
-                var toRead = Math.Min(buffer.Length, available - done);
-                var read = stream.Read(buffer, done, toRead);
-
-                if (read <= 0)
-                {
-                    OnDisconnected?.Invoke(this, EventArgs.Empty);
-                    Disconnect();
-
-                    return 0;
-                }
-
-                done += read;
-            }
-
-            return done;
-        }
-
-        public void Disconnect()
-        {
-            _socket?.Close();
-            Dispose();
-        }
-
-        public void Dispose()
-        {
-            _socket?.Dispose();
-        }
-    }
-
     internal sealed class NetClient
     {
         private const int BUFF_SIZE = 0x10000;
@@ -139,28 +50,19 @@ namespace ClassicUO.Network
         private readonly byte[] _sendingBuffer = new byte[4096];
         private readonly Huffman _huffman = new Huffman();
         private bool _isCompressionEnabled;
-        private readonly SocketWrapper _socket;
         private uint? _localIP;
         private readonly CircularBuffer _sendStream;
+        private SocketWrapper _socket = null;
+        private SocketWrapperType? _socketType;
 
 
         public NetClient()
         {
             Statistics = new NetStatistics(this);
             _sendStream = new CircularBuffer();
-
-            _socket = new SocketWrapper();
-            _socket.OnConnected += (o, e) =>
-            {
-                Statistics.Reset();
-                Connected?.Invoke(this, EventArgs.Empty);
-            };
-            _socket.OnDisconnected += (o, e) => Disconnected?.Invoke(this, SocketError.Success);
-            _socket.OnError += (o, e) => Disconnected?.Invoke(this, SocketError.SocketError);
         }
 
-
-        public static NetClient Socket { get; private set; } = new NetClient();
+        public static NetClient Socket { get; private set; } = new();
 
         public EncryptionType Load(ClientVersion clientVersion, EncryptionType encryption)
         {
@@ -224,6 +126,26 @@ namespace ClassicUO.Network
         public event EventHandler Connected;
         public event EventHandler<SocketError> Disconnected;
 
+        private void SetupSocket(SocketWrapperType wrapperType)
+        {
+            _socket?.Dispose();
+
+            _socket = wrapperType switch
+            {
+                SocketWrapperType.TcpSocket => new TcpSocketWrapper(),
+                SocketWrapperType.WebSocket => new WebSocketWrapper(),
+                _ => throw new ArgumentOutOfRangeException(nameof(wrapperType), wrapperType, null)
+            };
+
+            _socket.OnConnected += (o, e) =>
+            {
+                Statistics.Reset();
+                Connected?.Invoke(this, EventArgs.Empty);
+            };
+
+            _socket.OnDisconnected += (_, _) => Disconnected?.Invoke(this, SocketError.Success);
+            _socket.OnError += (_, e) => Disconnected?.Invoke(this, e);
+        }
 
         public void Connect(string ip, ushort port)
         {
@@ -231,7 +153,21 @@ namespace ClassicUO.Network
             _huffman.Reset();
             Statistics.Reset();
 
-            _socket.Connect(ip, port);
+            if (string.IsNullOrEmpty(ip))
+                throw new ArgumentNullException(nameof(ip));
+
+            var isWebsocketAddress = ip.ToLowerInvariant().Substring(0, 2) is "ws" or "wss";
+            var addr = $"{(isWebsocketAddress ? "" : "tcp://")}{ip}:{port}";
+            
+            if (!Uri.TryCreate(addr, UriKind.RelativeOrAbsolute, out var uri))
+                throw new UriFormatException($"NetClient::Connect() invalid Uri {addr}");
+            
+            Log.Trace($"Connecting to {uri}");
+
+            // First connected socket sets the type for any future sockets.
+            // This prevents the client from swapping from WS -> TCP on game server login
+            SetupSocket(_socketType ??= isWebsocketAddress ? SocketWrapperType.WebSocket : SocketWrapperType.TcpSocket);
+            _socket.Connect(uri);
         }
 
         public void Disconnect()
@@ -248,8 +184,14 @@ namespace ClassicUO.Network
             _sendStream.Clear();
         }
 
+
         public ArraySegment<byte> CollectAvailableData()
         {
+            if (_socket == null)
+            {
+                return ArraySegment<byte>.Empty;
+            }
+            
             try
             {
                 var size = _socket.Read(_compressedBuffer);
@@ -317,7 +259,8 @@ namespace ClassicUO.Network
                 return;
             }
 
-            if (message.IsEmpty) return;
+            if (message.IsEmpty)
+                return;
 
             PacketLogger.Default?.Log(message, true);
 
@@ -338,14 +281,16 @@ namespace ClassicUO.Network
 
         private void ProcessEncryption(Span<byte> buffer)
         {
-            if (!_isCompressionEnabled) return;
+            if (!_isCompressionEnabled)
+                return;
 
             Encryption?.Decrypt(buffer, buffer, buffer.Length);
         }
 
         private void ProcessSend()
         {
-            if (!IsConnected) return;
+            if (!IsConnected)
+                return;
 
             try
             {
@@ -354,6 +299,7 @@ namespace ClassicUO.Network
                     while (_sendStream.Length > 0)
                     {
                         var read = _sendStream.Dequeue(_sendingBuffer, 0, _sendingBuffer.Length);
+
                         if (read <= 0)
                         {
                             break;
@@ -398,6 +344,7 @@ namespace ClassicUO.Network
                 return buffer;
 
             var size = 65536;
+
             if (!_huffman.Decompress(buffer, _uncompressedBuffer, ref size))
             {
                 Disconnect();

@@ -2,7 +2,7 @@
 
 // Copyright (c) 2024, andreakarasho
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 // 1. Redistributions of source code must retain the above copyright
@@ -16,7 +16,7 @@
 // 4. Neither the name of the copyright holder nor the
 //    names of its contributors may be used to endorse or promote products
 //    derived from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -42,37 +42,34 @@ namespace ClassicUO.Assets
     {
         public VerdataLoader(UOFileManager fileManager) : base(fileManager) { }
 
-        public unsafe override Task Load()
+        public unsafe override void Load()
         {
-            return Task.Run(() =>
+            string path = FileManager.GetUOFilePath("verdata.mul");
+
+            if (!System.IO.File.Exists(path))
             {
-                string path = FileManager.GetUOFilePath("verdata.mul");
+                File = null;
+            }
+            else
+            {
+                File = new UOFileMul(path);
 
-                if (!System.IO.File.Exists(path))
+                // the scope of this try/catch is to avoid unexpected crashes if servers redestribuite wrong verdata
+                try
                 {
-                    File = null;
-                }
-                else
-                {
-                    File = new UOFileMul(path);
+                    var len = File.ReadInt32();
+                    Patches = new UOFileIndex5D[len];
 
-                    // the scope of this try/catch is to avoid unexpected crashes if servers redestribuite wrong verdata
-                    try
+                    for (var i = 0; i < len; i++)
                     {
-                        var len = File.ReadInt32();
-                        Patches = new UOFileIndex5D[len];
-
-                        for (var i = 0; i < len; i++)
-                        {
-                            Patches[i] = File.Read<UOFileIndex5D>();
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Error($"error while reading verdata.mul\n{ex}");
+                        Patches[i] = File.Read<UOFileIndex5D>();
                     }
                 }
-            });
+                catch (Exception ex)
+                {
+                    Log.Error($"error while reading verdata.mul\n{ex}");
+                }
+            }
         }
 
 
@@ -95,7 +92,7 @@ namespace ClassicUO.Assets
         //15 - skills.idx
         //16 - skills.mul
         //30 - tiledata.mul
-        //31 - animdata.mul 
+        //31 - animdata.mul
 
         public UOFileIndex5D[] Patches { get; private set; } = Array.Empty<UOFileIndex5D>();
 

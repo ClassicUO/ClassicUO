@@ -2,7 +2,7 @@
 
 // Copyright (c) 2024, andreakarasho
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 // 1. Redistributions of source code must retain the above copyright
@@ -16,7 +16,7 @@
 // 4. Neither the name of the copyright holder nor the
 //    names of its contributors may be used to endorse or promote products
 //    derived from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -51,47 +51,41 @@ namespace ClassicUO.Assets
         public readonly List<SkillEntry> Skills = new List<SkillEntry>();
         public readonly List<SkillEntry> SortedSkills = new List<SkillEntry>();
 
-        public override unsafe Task Load()
+        public override unsafe void Load()
         {
-            return Task.Run
-            (
-                () =>
-                {
-                    if (SkillsCount > 0)
-                    {
-                        return;
-                    }
+            if (SkillsCount > 0)
+            {
+                return;
+            }
 
-                    string path = FileManager.GetUOFilePath("skills.mul");
-                    string pathidx = FileManager.GetUOFilePath("Skills.idx");
+            string path = FileManager.GetUOFilePath("skills.mul");
+            string pathidx = FileManager.GetUOFilePath("Skills.idx");
 
-                    FileSystemHelper.EnsureFileExists(path);
-                    FileSystemHelper.EnsureFileExists(pathidx);
+            FileSystemHelper.EnsureFileExists(path);
+            FileSystemHelper.EnsureFileExists(pathidx);
 
-                    _file = new UOFileMul(path, pathidx);
-                    _file.FillEntries();
+            _file = new UOFileMul(path, pathidx);
+            _file.FillEntries();
 
-                    var buf = new byte[256];
-                    for (int i = 0, count = 0; i < _file.Entries.Length; i++)
-                    {
-                        ref var entry = ref _file.GetValidRefEntry(i);
-                        if (entry.Length <= 0) continue;
+            var buf = new byte[256];
+            for (int i = 0, count = 0; i < _file.Entries.Length; i++)
+            {
+                ref var entry = ref _file.GetValidRefEntry(i);
+                if (entry.Length <= 0) continue;
 
-                        _file.Seek(entry.Offset, System.IO.SeekOrigin.Begin);
-                        bool hasAction = _file.ReadInt8() != 0;
-                        if (buf.Length < entry.Length)
-                            buf = new byte[entry.Length];
+                _file.Seek(entry.Offset, System.IO.SeekOrigin.Begin);
+                bool hasAction = _file.ReadInt8() != 0;
+                if (buf.Length < entry.Length)
+                    buf = new byte[entry.Length];
 
-                        _file.Read(buf.AsSpan(0, entry.Length - 1));
-                        var name = Encoding.ASCII.GetString(buf.AsSpan(0, entry.Length - 1)).TrimEnd('\0');
-                        
-                        Skills.Add(new SkillEntry(count++, name, hasAction));
-                    }
+                _file.Read(buf.AsSpan(0, entry.Length - 1));
+                var name = Encoding.ASCII.GetString(buf.AsSpan(0, entry.Length - 1)).TrimEnd('\0');
 
-                    SortedSkills.AddRange(Skills);
-                    SortedSkills.Sort((a, b) => string.Compare(a.Name, b.Name, StringComparison.InvariantCulture));
-                }
-            );
+                Skills.Add(new SkillEntry(count++, name, hasAction));
+            }
+
+            SortedSkills.AddRange(Skills);
+            SortedSkills.Sort((a, b) => string.Compare(a.Name, b.Name, StringComparison.InvariantCulture));
         }
 
         public int GetSortedIndex(int index)

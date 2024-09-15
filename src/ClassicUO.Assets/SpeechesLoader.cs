@@ -2,7 +2,7 @@
 
 // Copyright (c) 2024, andreakarasho
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 // 1. Redistributions of source code must retain the above copyright
@@ -16,7 +16,7 @@
 // 4. Neither the name of the copyright holder nor the
 //    names of its contributors may be used to endorse or promote products
 //    derived from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -50,47 +50,41 @@ namespace ClassicUO.Assets
         }
 
 
-        public override unsafe Task Load()
+        public override unsafe void Load()
         {
-            return Task.Run
-            (
-                () =>
+            string path = FileManager.GetUOFilePath("speech.mul");
+
+            if (!File.Exists(path))
+            {
+                _speech = Array.Empty<SpeechEntry>();
+
+                return;
+            }
+
+            var file = new UOFileMul(path);
+            var entries = new List<SpeechEntry>();
+
+            var buf = new byte[256];
+            while (file.Position < file.Length)
+            {
+                file.Read(buf.AsSpan(0, sizeof(ushort) * 2));
+                var id = BinaryPrimitives.ReadUInt16BigEndian(buf);
+                var length = BinaryPrimitives.ReadUInt16BigEndian(buf.AsSpan(sizeof(ushort)));
+
+                if (length > 0)
                 {
-                    string path = FileManager.GetUOFilePath("speech.mul");
+                    if (length > buf.Length)
+                        buf = new byte[length];
 
-                    if (!File.Exists(path))
-                    {
-                        _speech = Array.Empty<SpeechEntry>();
+                    file.Read(buf.AsSpan(0, length));
+                    var text = string.Intern(Encoding.UTF8.GetString(buf.AsSpan(0, length)));
 
-                        return;
-                    }
-
-                    var file = new UOFileMul(path);
-                    var entries = new List<SpeechEntry>();
-
-                    var buf = new byte[256];
-                    while (file.Position < file.Length)
-                    {
-                        file.Read(buf.AsSpan(0, sizeof(ushort) * 2));
-                        var id = BinaryPrimitives.ReadUInt16BigEndian(buf);
-                        var length = BinaryPrimitives.ReadUInt16BigEndian(buf.AsSpan(sizeof(ushort)));
-
-                        if (length > 0)
-                        {
-                            if (length > buf.Length)
-                                buf = new byte[length];
-
-                            file.Read(buf.AsSpan(0, length));
-                            var text = string.Intern(Encoding.UTF8.GetString(buf.AsSpan(0, length)));
-                            
-                            entries.Add(new SpeechEntry(id, text));
-                        }
-                    }
-
-                    _speech = entries.ToArray();
-                    file.Dispose();
+                    entries.Add(new SpeechEntry(id, text));
                 }
-            );
+            }
+
+            _speech = entries.ToArray();
+            file.Dispose();
         }
 
         public bool IsMatch(string input, in SpeechEntry entry)
@@ -125,7 +119,7 @@ namespace ClassicUO.Assets
                 while (idx >= 0)
                 {
                     // "bank" or " bank" or "bank " or " bank " or "!bank" or "bank!"
-                    if ((idx - 1 < 0 || char.IsWhiteSpace(input[idx - 1]) || !char.IsLetter(input[idx - 1])) && 
+                    if ((idx - 1 < 0 || char.IsWhiteSpace(input[idx - 1]) || !char.IsLetter(input[idx - 1])) &&
                         (idx + split[i].Length >= input.Length || char.IsWhiteSpace(input[idx + split[i].Length]) || !char.IsLetter(input[idx + split[i].Length]) ))
                     {
                         return true;

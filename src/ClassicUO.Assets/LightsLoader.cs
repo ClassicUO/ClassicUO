@@ -47,18 +47,16 @@ namespace ClassicUO.Assets
 
         public UOFileMul File => _file;
 
-        public override Task Load()
+        public override void Load()
         {
-            return Task.Run(() =>
-            {
-                string path = FileManager.GetUOFilePath("light.mul");
-                string pathidx = FileManager.GetUOFilePath("lightidx.mul");
+            string path = FileManager.GetUOFilePath("light.mul");
+            string pathidx = FileManager.GetUOFilePath("lightidx.mul");
 
-                FileSystemHelper.EnsureFileExists(path);
-                FileSystemHelper.EnsureFileExists(pathidx);
+            FileSystemHelper.EnsureFileExists(path);
+            FileSystemHelper.EnsureFileExists(pathidx);
 
-                _file = new UOFileMul(path, pathidx);
-            });
+            _file = new UOFileMul(path, pathidx);
+            _file.FillEntries();
         }
 
         public LightInfo GetLight(uint idx)

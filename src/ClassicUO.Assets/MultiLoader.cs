@@ -2,7 +2,7 @@
 
 // Copyright (c) 2024, andreakarasho
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 // 1. Redistributions of source code must retain the above copyright
@@ -16,7 +16,7 @@
 // 4. Neither the name of the copyright holder nor the
 //    names of its contributors may be used to endorse or promote products
 //    derived from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -50,32 +50,26 @@ namespace ClassicUO.Assets
 
         internal UOFile File { get; private set; }
 
-        public override unsafe Task Load()
+        public override unsafe void Load()
         {
-            return Task.Run
-            (
-                () =>
+            var uopPath = FileManager.GetUOFilePath("MultiCollection.uop");
+
+            if (FileManager.IsUOPInstallation && System.IO.File.Exists(uopPath))
+            {
+                File = new UOFileUop(uopPath, "build/multicollection/{0:D6}.bin");
+            }
+            else
+            {
+                var path = FileManager.GetUOFilePath("multi.mul");
+                var pathidx = FileManager.GetUOFilePath("multi.idx");
+
+                if (System.IO.File.Exists(path) && System.IO.File.Exists(pathidx))
                 {
-                    var uopPath = FileManager.GetUOFilePath("MultiCollection.uop");
-
-                    if (FileManager.IsUOPInstallation && System.IO.File.Exists(uopPath))
-                    {
-                        File = new UOFileUop(uopPath, "build/multicollection/{0:D6}.bin");
-                    }
-                    else
-                    {
-                        var path = FileManager.GetUOFilePath("multi.mul");
-                        var pathidx = FileManager.GetUOFilePath("multi.idx");
-
-                        if (System.IO.File.Exists(path) && System.IO.File.Exists(pathidx))
-                        {
-                            File = new UOFileMul(path, pathidx);
-                        }
-                    }
-
-                    File.FillEntries();
+                    File = new UOFileMul(path, pathidx);
                 }
-            );
+            }
+
+            File.FillEntries();
         }
 
         public List<MultiInfo> GetMultis(uint idx)
@@ -107,7 +101,7 @@ namespace ClassicUO.Assets
                 for (var i = 0; i < count; ++i)
                 {
                     var block = reader.Read<MultiBlockNew>();
-                    
+
                     if (block.Unknown != 0)
                     {
                         reader.Skip((int)(block.Unknown * sizeof(uint)));
@@ -132,7 +126,7 @@ namespace ClassicUO.Assets
                 {
                     var block = reader.Read<MultiBlock>();
                     reader.Skip(size - Unsafe.SizeOf<MultiBlock>());
-                    
+
                     list.Add(new ()
                     {
                         ID = block.ID,
@@ -143,7 +137,7 @@ namespace ClassicUO.Assets
                     });
                 }
             }
-          
+
             return list;
         }
 

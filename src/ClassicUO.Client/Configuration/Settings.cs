@@ -66,6 +66,11 @@ namespace ClassicUO.Configuration
         [JsonPropertyName("ip")] public string IP { get; set; } = "127.0.0.1";
 
         [JsonPropertyName("port"), JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)] public ushort Port { get; set; } = 2593;
+        
+        /**
+         * Ignores the login servers relay packet, connects back with the settings IP
+         */
+        [JsonPropertyName("ignore_relay_ip")] public bool IgnoreRelayIp { get; set; } = false;
 
         [JsonPropertyName("ultimaonlinedirectory")] public string UltimaOnlineDirectory { get; set; } = "";
 

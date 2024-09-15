@@ -36,7 +36,7 @@ using System.Runtime.InteropServices;
 
 namespace ClassicUO.Network.Encryption
 {
-    unsafe sealed class MD5Behaviour
+    unsafe static class MD5Behaviour
     {
         [StructLayout(LayoutKind.Sequential)]
         internal unsafe struct MD5Context
@@ -137,7 +137,7 @@ namespace ClassicUO.Network.Encryption
            => (y ^ (x | ~z));
 
 
-        public void Initialize(ref MD5Context ctx)
+        public static void Initialize(ref MD5Context ctx)
         {
             ctx.Size = 0;
             ctx.Buffer(0) = A;
@@ -146,7 +146,7 @@ namespace ClassicUO.Network.Encryption
             ctx.Buffer(3) = D;
         }
 
-        public void Update(ref MD5Context ctx, Span<byte> inputBuffer)
+        public static void Update(ref MD5Context ctx, ReadOnlySpan<byte> inputBuffer)
         {
             Span<uint> input = stackalloc uint[16];
             int offset = (int)(ctx.Size % 64);
@@ -174,7 +174,7 @@ namespace ClassicUO.Network.Encryption
             }
         }
 
-        public void Finalize(ref MD5Context ctx)
+        public static void Finalize(ref MD5Context ctx)
         {
             Span<uint> input = stackalloc uint[16];
             int offset = (int)(ctx.Size % 64);
@@ -207,7 +207,7 @@ namespace ClassicUO.Network.Encryption
             }
         }
 
-        private void Step(ref MD5Context ctx, Span<uint> input)
+        private static void Step(ref MD5Context ctx, Span<uint> input)
         {
             uint AA = ctx.Buffer(0);
             uint BB = ctx.Buffer(1);

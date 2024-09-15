@@ -2,7 +2,7 @@
 
 // Copyright (c) 2024, andreakarasho
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 // 1. Redistributions of source code must retain the above copyright
@@ -16,7 +16,7 @@
 // 4. Neither the name of the copyright holder nor the
 //    names of its contributors may be used to endorse or promote products
 //    derived from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -56,177 +56,171 @@ namespace ClassicUO.Assets
         {
         }
 
-        public override Task Load()
+        public override void Load()
         {
-            return Task.Run
-            (
-                () =>
+            string path = FileManager.GetUOFilePath("soundLegacyMUL.uop");
+
+            if (FileManager.IsUOPInstallation && File.Exists(path))
+            {
+                _file = new UOFileUop(path, "build/soundlegacymul/{0:D8}.dat");
+            }
+            else
+            {
+                path = FileManager.GetUOFilePath("sound.mul");
+                string idxpath = FileManager.GetUOFilePath("soundidx.mul");
+
+                if (File.Exists(path) && File.Exists(idxpath))
                 {
-                    string path = FileManager.GetUOFilePath("soundLegacyMUL.uop");
+                    _file = new UOFileMul(path, idxpath);
+                }
+                else
+                {
+                    throw new FileNotFoundException("no sounds found");
+                }
+            }
 
-                    if (FileManager.IsUOPInstallation && File.Exists(path))
-                    {
-                        _file = new UOFileUop(path, "build/soundlegacymul/{0:D8}.dat");
-                    }
-                    else
-                    {
-                        path = FileManager.GetUOFilePath("sound.mul");
-                        string idxpath = FileManager.GetUOFilePath("soundidx.mul");
+            _file.FillEntries();
 
-                        if (File.Exists(path) && File.Exists(idxpath))
+            string def = FileManager.GetUOFilePath("Sound.def");
+
+            if (File.Exists(def))
+            {
+                using (DefReader reader = new DefReader(def))
+                {
+                    while (reader.Next())
+                    {
+                        int index = reader.ReadInt();
+
+                        if (index < 0 || index >= MAX_SOUND_DATA_INDEX_COUNT || index >= _file.Entries.Length || _file.Entries[index].Length != 0)
                         {
-                            _file = new UOFileMul(path, idxpath);
+                            continue;
                         }
-                        else
+
+                        int[] group = reader.ReadGroup();
+
+                        if (group == null)
                         {
-                            throw new FileNotFoundException("no sounds found");
+                            continue;
                         }
-                    }
 
-                    _file.FillEntries();
-
-                    string def = FileManager.GetUOFilePath("Sound.def");
-
-                    if (File.Exists(def))
-                    {
-                        using (DefReader reader = new DefReader(def))
+                        for (int i = 0; i < group.Length; i++)
                         {
-                            while (reader.Next())
+                            int checkIndex = group[i];
+
+                            if (checkIndex < -1 || checkIndex >= MAX_SOUND_DATA_INDEX_COUNT)
                             {
-                                int index = reader.ReadInt();
+                                continue;
+                            }
 
-                                if (index < 0 || index >= MAX_SOUND_DATA_INDEX_COUNT || index >= _file.Entries.Length || _file.Entries[index].Length != 0)
+                            ref UOFileIndex ind = ref _file.Entries[index];
+
+                            if (checkIndex == -1)
+                            {
+                                ind = default;
+                            }
+                            else
+                            {
+                                ref readonly UOFileIndex outInd = ref _file.Entries[checkIndex];
+
+                                if (outInd.Length == 0)
                                 {
                                     continue;
                                 }
 
-                                int[] group = reader.ReadGroup();
-
-                                if (group == null)
-                                {
-                                    continue;
-                                }
-
-                                for (int i = 0; i < group.Length; i++)
-                                {
-                                    int checkIndex = group[i];
-
-                                    if (checkIndex < -1 || checkIndex >= MAX_SOUND_DATA_INDEX_COUNT)
-                                    {
-                                        continue;
-                                    }
-
-                                    ref UOFileIndex ind = ref _file.Entries[index];
-
-                                    if (checkIndex == -1)
-                                    {
-                                        ind = default;
-                                    }
-                                    else
-                                    {
-                                        ref readonly UOFileIndex outInd = ref _file.Entries[checkIndex];
-
-                                        if (outInd.Length == 0)
-                                        {
-                                            continue;
-                                        }
-
-                                        _file.Entries[index] = _file.Entries[checkIndex];
-                                    }
-                                }
+                                _file.Entries[index] = _file.Entries[checkIndex];
                             }
                         }
-                    }
-
-                    path = FileManager.GetUOFilePath(FileManager.Version >= ClientVersion.CV_4011C ?  @"Music/Digital/Config.txt" : @"Music/Config.txt");
-
-                    if (File.Exists(path))
-                    {
-                        using (var reader = new StreamReader(path))
-                        {
-                            string line;
-
-                            while ((line = reader.ReadLine()) != null)
-                            {
-                                if (TryParseConfigLine(line, out (int index, string name, bool loop) data))
-                                {
-                                    _musicData[data.index] = (data.name, data.loop);
-                                }
-                            }
-                        }
-                    }
-                    else
-                    {
-                        _musicData.Add(0, ("oldult01", true));
-                        _musicData.Add(1, ("create1", false));
-                        _musicData.Add(2, ("dragflit", false));
-                        _musicData.Add(3, ("oldult02", true));
-                        _musicData.Add(4, ("oldult03", true));
-                        _musicData.Add(5, ("oldult04", true));
-                        _musicData.Add(6, ("oldult05", true));
-                        _musicData.Add(7, ("oldult06", true));
-                        _musicData.Add(8, ("stones2", true));
-                        _musicData.Add(9, ("britain1", true));
-                        _musicData.Add(10, ("britain2", true));
-                        _musicData.Add(11, ("bucsden", true));
-                        _musicData.Add(12, ("jhelom", false));
-                        _musicData.Add(13, ("lbcastle", false));
-                        _musicData.Add(14, ("linelle", false));
-                        _musicData.Add(15, ("magincia", true));
-                        _musicData.Add(16, ("minoc", true));
-                        _musicData.Add(17, ("ocllo", true));
-                        _musicData.Add(18, ("samlethe", false));
-                        _musicData.Add(19, ("serpents", true));
-                        _musicData.Add(20, ("skarabra", true));
-                        _musicData.Add(21, ("trinsic", true));
-                        _musicData.Add(22, ("vesper", true));
-                        _musicData.Add(23, ("wind", true));
-                        _musicData.Add(24, ("yew", true));
-                        _musicData.Add(25, ("cave01", false));
-                        _musicData.Add(26, ("dungeon9", false));
-                        _musicData.Add(27, ("forest_a", false));
-                        _musicData.Add(28, ("intown01", false));
-                        _musicData.Add(29, ("jungle_a", false));
-                        _musicData.Add(30, ("mountn_a", false));
-                        _musicData.Add(31, ("plains_a", false));
-                        _musicData.Add(32, ("sailing", false));
-                        _musicData.Add(33, ("swamp_a", false));
-                        _musicData.Add(34, ("tavern01", false));
-                        _musicData.Add(35, ("tavern02", false));
-                        _musicData.Add(36, ("tavern03", false));
-                        _musicData.Add(37, ("tavern04", false));
-                        _musicData.Add(38, ("combat1", false));
-                        _musicData.Add(39, ("combat2", false));
-                        _musicData.Add(40, ("combat3", false));
-                        _musicData.Add(41, ("approach", false));
-                        _musicData.Add(42, ("death", false));
-                        _musicData.Add(43, ("victory", false));
-                        _musicData.Add(44, ("btcastle", false));
-                        _musicData.Add(45, ("nujelm", true));
-                        _musicData.Add(46, ("dungeon2", false));
-                        _musicData.Add(47, ("cove", true));
-                        _musicData.Add(48, ("moonglow", true));
-                        _musicData.Add(49, ("zento", true));
-                        _musicData.Add(50, ("tokunodungeon", true));
-                        _musicData.Add(51, ("Taiko", true));
-                        _musicData.Add(52, ("dreadhornarea", true));
-                        _musicData.Add(53, ("elfcity", true));
-                        _musicData.Add(54, ("grizzledungeon", true));
-                        _musicData.Add(55, ("melisandeslair", true));
-                        _musicData.Add(56, ("paroxysmuslair", true));
-                        _musicData.Add(57, ("gwennoconversation", true));
-                        _musicData.Add(58, ("goodendgame", true));
-                        _musicData.Add(59, ("goodvsevil", true));
-                        _musicData.Add(60, ("greatearthserpents", true));
-                        _musicData.Add(61, ("humanoids_u9", true));
-                        _musicData.Add(62, ("minocnegative", true));
-                        _musicData.Add(63, ("paws", true));
-                        _musicData.Add(64, ("selimsbar", true));
-                        _musicData.Add(65, ("serpentislecombat_u7", true));
-                        _musicData.Add(66, ("valoriaships", true));
                     }
                 }
-            );
+            }
+
+            path = FileManager.GetUOFilePath(FileManager.Version >= ClientVersion.CV_4011C ?  @"Music/Digital/Config.txt" : @"Music/Config.txt");
+
+            if (File.Exists(path))
+            {
+                using (var reader = new StreamReader(path))
+                {
+                    string line;
+
+                    while ((line = reader.ReadLine()) != null)
+                    {
+                        if (TryParseConfigLine(line, out (int index, string name, bool loop) data))
+                        {
+                            _musicData[data.index] = (data.name, data.loop);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                _musicData.Add(0, ("oldult01", true));
+                _musicData.Add(1, ("create1", false));
+                _musicData.Add(2, ("dragflit", false));
+                _musicData.Add(3, ("oldult02", true));
+                _musicData.Add(4, ("oldult03", true));
+                _musicData.Add(5, ("oldult04", true));
+                _musicData.Add(6, ("oldult05", true));
+                _musicData.Add(7, ("oldult06", true));
+                _musicData.Add(8, ("stones2", true));
+                _musicData.Add(9, ("britain1", true));
+                _musicData.Add(10, ("britain2", true));
+                _musicData.Add(11, ("bucsden", true));
+                _musicData.Add(12, ("jhelom", false));
+                _musicData.Add(13, ("lbcastle", false));
+                _musicData.Add(14, ("linelle", false));
+                _musicData.Add(15, ("magincia", true));
+                _musicData.Add(16, ("minoc", true));
+                _musicData.Add(17, ("ocllo", true));
+                _musicData.Add(18, ("samlethe", false));
+                _musicData.Add(19, ("serpents", true));
+                _musicData.Add(20, ("skarabra", true));
+                _musicData.Add(21, ("trinsic", true));
+                _musicData.Add(22, ("vesper", true));
+                _musicData.Add(23, ("wind", true));
+                _musicData.Add(24, ("yew", true));
+                _musicData.Add(25, ("cave01", false));
+                _musicData.Add(26, ("dungeon9", false));
+                _musicData.Add(27, ("forest_a", false));
+                _musicData.Add(28, ("intown01", false));
+                _musicData.Add(29, ("jungle_a", false));
+                _musicData.Add(30, ("mountn_a", false));
+                _musicData.Add(31, ("plains_a", false));
+                _musicData.Add(32, ("sailing", false));
+                _musicData.Add(33, ("swamp_a", false));
+                _musicData.Add(34, ("tavern01", false));
+                _musicData.Add(35, ("tavern02", false));
+                _musicData.Add(36, ("tavern03", false));
+                _musicData.Add(37, ("tavern04", false));
+                _musicData.Add(38, ("combat1", false));
+                _musicData.Add(39, ("combat2", false));
+                _musicData.Add(40, ("combat3", false));
+                _musicData.Add(41, ("approach", false));
+                _musicData.Add(42, ("death", false));
+                _musicData.Add(43, ("victory", false));
+                _musicData.Add(44, ("btcastle", false));
+                _musicData.Add(45, ("nujelm", true));
+                _musicData.Add(46, ("dungeon2", false));
+                _musicData.Add(47, ("cove", true));
+                _musicData.Add(48, ("moonglow", true));
+                _musicData.Add(49, ("zento", true));
+                _musicData.Add(50, ("tokunodungeon", true));
+                _musicData.Add(51, ("Taiko", true));
+                _musicData.Add(52, ("dreadhornarea", true));
+                _musicData.Add(53, ("elfcity", true));
+                _musicData.Add(54, ("grizzledungeon", true));
+                _musicData.Add(55, ("melisandeslair", true));
+                _musicData.Add(56, ("paroxysmuslair", true));
+                _musicData.Add(57, ("gwennoconversation", true));
+                _musicData.Add(58, ("goodendgame", true));
+                _musicData.Add(59, ("goodvsevil", true));
+                _musicData.Add(60, ("greatearthserpents", true));
+                _musicData.Add(61, ("humanoids_u9", true));
+                _musicData.Add(62, ("minocnegative", true));
+                _musicData.Add(63, ("paws", true));
+                _musicData.Add(64, ("selimsbar", true));
+                _musicData.Add(65, ("serpentislecombat_u7", true));
+                _musicData.Add(66, ("valoriaships", true));
+            }
         }
 
         public unsafe bool TryGetSound(int sound, out byte[] data, out string name)
@@ -311,7 +305,7 @@ namespace ClassicUO.Assets
 
                 return Path.GetFileName(fileList[0]);
             }
-            
+
             // If we've made it this far, there is no file with that name, regardless of case spelling
             // return name and GetMusic will fail gracefully (play nothing)
             Log.Warn($"No File found known as {name}");

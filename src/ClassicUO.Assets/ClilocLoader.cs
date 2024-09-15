@@ -2,7 +2,7 @@
 
 // Copyright (c) 2024, andreakarasho
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 // 1. Redistributions of source code must retain the above copyright
@@ -16,7 +16,7 @@
 // 4. Neither the name of the copyright holder nor the
 //    names of its contributors may be used to endorse or promote products
 //    derived from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -50,7 +50,7 @@ namespace ClassicUO.Assets
         {
         }
 
-        public Task Load(string lang)
+        public void Load(string lang)
         {
             if (string.IsNullOrEmpty(lang))
             {
@@ -67,37 +67,31 @@ namespace ClassicUO.Assets
                 _cliloc = "Cliloc.enu";
             }
 
-            return Load();
+            Load();
         }
 
-        public override Task Load()
+        public override void Load()
         {
-            return Task.Run
-            (
-                () =>
-                {
-                    if (string.IsNullOrEmpty(_cliloc))
-                    {
-                        _cliloc = "Cliloc.enu";
-                    }
+            if (string.IsNullOrEmpty(_cliloc))
+            {
+                _cliloc = "Cliloc.enu";
+            }
 
-                    string path = FileManager.GetUOFilePath(_cliloc);
+            string path = FileManager.GetUOFilePath(_cliloc);
 
-                    if (!File.Exists(path))
-                    {
-                        Log.Error($"cliloc not found: '{path}'");
-                        return;
-                    }
+            if (!File.Exists(path))
+            {
+                Log.Error($"cliloc not found: '{path}'");
+                return;
+            }
 
-                    if (string.Compare(_cliloc, "cliloc.enu", StringComparison.InvariantCultureIgnoreCase) != 0)
-                    {
-                        string enupath = FileManager.GetUOFilePath("Cliloc.enu");
-                        ReadCliloc(enupath);
-                    }
+            if (string.Compare(_cliloc, "cliloc.enu", StringComparison.InvariantCultureIgnoreCase) != 0)
+            {
+                string enupath = FileManager.GetUOFilePath("Cliloc.enu");
+                ReadCliloc(enupath);
+            }
 
-                    ReadCliloc(path);
-                }
-            );
+            ReadCliloc(path);
         }
 
         void ReadCliloc(string path)
