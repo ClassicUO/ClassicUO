@@ -349,7 +349,7 @@ readonly struct RenderingPlugin : IPlugin
                 }
 
                 var act = ent.Target<EquippedItem>();
-                if (!Races.IsHuman(world.Get<Graphic>(act).Value))
+                if (!act.IsValid() || !Races.IsHuman(world.Get<Graphic>(act).Value))
                 {
                     return;
                 }
