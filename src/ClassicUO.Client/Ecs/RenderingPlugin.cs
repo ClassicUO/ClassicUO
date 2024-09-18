@@ -104,93 +104,43 @@ readonly struct RenderingPlugin : IPlugin
         center.Y += 22f;
         center -= gameCtx.Value.CenterOffset;
 
-        queryTiles.Each(
-            (ref WorldPosition worldPos, ref Graphic graphic, ref TileStretched stretched) =>
+        queryTiles.Each((ref WorldPosition worldPos, ref Graphic graphic, ref TileStretched stretched) =>
+        {
+            var isStretched = !Unsafe.IsNullRef(ref stretched);
+
+            if (isStretched)
             {
-                var isStretched = !Unsafe.IsNullRef(ref stretched);
+                ref readonly var textmapInfo = ref assetsServer.Value.Texmaps.GetTexmap(fileManager.Value.TileData.LandData[graphic.Value].TexID);
+                if (textmapInfo.Texture == null)
+                    return;
 
-                if (isStretched)
-                {
-                    ref readonly var textmapInfo = ref assetsServer.Value.Texmaps.GetTexmap(fileManager.Value.TileData.LandData[graphic.Value].TexID);
-                    if (textmapInfo.Texture == null)
-                        return;
+                var position = Isometric.IsoToScreen(worldPos.X, worldPos.Y, worldPos.Z);
+                position.Y += worldPos.Z << 2;
+                var depthZ = Isometric.GetDepthZ(worldPos.X, worldPos.Y, stretched.AvgZ - 2);
+                var color = new Vector3(0, Renderer.ShaderHueTranslator.SHADER_LAND, 1f);
 
-                    var position = Isometric.IsoToScreen(worldPos.X, worldPos.Y, worldPos.Z);
-                    position.Y += worldPos.Z << 2;
-                    var depthZ = Isometric.GetDepthZ(worldPos.X, worldPos.Y, stretched.AvgZ - 2);
-                    var color = new Vector3(0, Renderer.ShaderHueTranslator.SHADER_LAND, 1f);
-
-                    batch.Value.DrawStretchedLand(
-                        textmapInfo.Texture,
-                        position - center,
-                        textmapInfo.UV,
-                        ref stretched.Offset,
-                        ref stretched.NormalTop,
-                        ref stretched.NormalRight,
-                        ref stretched.NormalLeft,
-                        ref stretched.NormalBottom,
-                        color,
-                        depthZ
-                    );
-                }
-                else
-                {
-                    ref readonly var artInfo = ref assetsServer.Value.Arts.GetLand(graphic.Value);
-                    if (artInfo.Texture == null)
-                        return;
-
-                    var position = Isometric.IsoToScreen(worldPos.X, worldPos.Y, worldPos.Z);
-                    var depthZ = Isometric.GetDepthZ(worldPos.X, worldPos.Y, worldPos.Z - 2);
-                    var color = Vector3.UnitZ;
-
-                    batch.Value.Draw(
-                        artInfo.Texture,
-                        position - center,
-                        artInfo.UV,
-                        color,
-                        rotation: 0f,
-                        origin: Vector2.Zero,
-                        scale: 1f,
-                        effects: SpriteEffects.None,
-                        depthZ
-                    );
-                }
-            });
-
-        queryStatics.Each(
-            (ref WorldPosition worldPos, ref Graphic graphic, ref Hue hue) =>
+                batch.Value.DrawStretchedLand(
+                    textmapInfo.Texture,
+                    position - center,
+                    textmapInfo.UV,
+                    ref stretched.Offset,
+                    ref stretched.NormalTop,
+                    ref stretched.NormalRight,
+                    ref stretched.NormalLeft,
+                    ref stretched.NormalBottom,
+                    color,
+                    depthZ
+                );
+            }
+            else
             {
-                ref readonly var artInfo = ref assetsServer.Value.Arts.GetArt(graphic.Value);
+                ref readonly var artInfo = ref assetsServer.Value.Arts.GetLand(graphic.Value);
                 if (artInfo.Texture == null)
                     return;
 
-                var priorityZ = worldPos.Z;
-
-                if (fileManager.Value.TileData.StaticData[graphic.Value].IsBackground)
-                {
-                    priorityZ -= 1;
-                }
-
-                if (fileManager.Value.TileData.StaticData[graphic.Value].Height != 0)
-                {
-                    priorityZ += 1;
-                }
-
-                if (fileManager.Value.TileData.StaticData[graphic.Value].IsWall)
-                {
-                    priorityZ += 2;
-                }
-
-                if (fileManager.Value.TileData.StaticData[graphic.Value].IsMultiMovable)
-                {
-                    priorityZ += 1;
-                }
-
                 var position = Isometric.IsoToScreen(worldPos.X, worldPos.Y, worldPos.Z);
-                position.X -= (short)((artInfo.UV.Width >> 1) - 22);
-                position.Y -= (short)(artInfo.UV.Height - 44);
-                var depthZ = Isometric.GetDepthZ(worldPos.X, worldPos.Y, priorityZ);
-                var color = Renderer.ShaderHueTranslator.GetHueVector(hue.Value, fileManager.Value.TileData.StaticData[graphic.Value].IsPartialHue, 1f);
+                var depthZ = Isometric.GetDepthZ(worldPos.X, worldPos.Y, worldPos.Z - 2);
+                var color = Vector3.UnitZ;
 
                 batch.Value.Draw(
                     artInfo.Texture,
@@ -203,7 +153,55 @@ readonly struct RenderingPlugin : IPlugin
                     effects: SpriteEffects.None,
                     depthZ
                 );
-            });
+            }
+        });
+
+        queryStatics.Each((ref WorldPosition worldPos, ref Graphic graphic, ref Hue hue) =>
+        {
+            ref readonly var artInfo = ref assetsServer.Value.Arts.GetArt(graphic.Value);
+            if (artInfo.Texture == null)
+                return;
+
+            var priorityZ = worldPos.Z;
+
+            if (fileManager.Value.TileData.StaticData[graphic.Value].IsBackground)
+            {
+                priorityZ -= 1;
+            }
+
+            if (fileManager.Value.TileData.StaticData[graphic.Value].Height != 0)
+            {
+                priorityZ += 1;
+            }
+
+            if (fileManager.Value.TileData.StaticData[graphic.Value].IsWall)
+            {
+                priorityZ += 2;
+            }
+
+            if (fileManager.Value.TileData.StaticData[graphic.Value].IsMultiMovable)
+            {
+                priorityZ += 1;
+            }
+
+            var position = Isometric.IsoToScreen(worldPos.X, worldPos.Y, worldPos.Z);
+            position.X -= (short)((artInfo.UV.Width >> 1) - 22);
+            position.Y -= (short)(artInfo.UV.Height - 44);
+            var depthZ = Isometric.GetDepthZ(worldPos.X, worldPos.Y, priorityZ);
+            var color = Renderer.ShaderHueTranslator.GetHueVector(hue.Value, fileManager.Value.TileData.StaticData[graphic.Value].IsPartialHue, 1f);
+
+            batch.Value.Draw(
+                artInfo.Texture,
+                position - center,
+                artInfo.UV,
+                color,
+                rotation: 0f,
+                origin: Vector2.Zero,
+                scale: 1f,
+                effects: SpriteEffects.None,
+                depthZ
+            );
+        });
 
         queryBodyOnly.Each((
             ref WorldPosition pos,
@@ -223,7 +221,7 @@ readonly struct RenderingPlugin : IPlugin
                 Rectangle? uv;
                 var mirror = false;
 
-                if (ClassicUO.Game.SerialHelper.IsMobile(serial.Value) || graphic.Value == 0x2006)
+                if (ClassicUO.Game.SerialHelper.IsMobile(serial.Value))
                 {
                     priorityZ += 2;
                     var dir = Unsafe.IsNullRef(ref direction) ? Direction.North : direction.Value;
