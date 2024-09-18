@@ -66,7 +66,7 @@ sealed class NetworkEntitiesMap
             // var term3 = new QueryTerm(IDOp.Pair(world.Entity<EquippedItem>(), id), TermOp.Without);
 
             world.BeginDeferred();
-            var iterator = world.GetQueryIterator([term0, term2]);
+            using var iterator = world.GetQueryIterator([term0, term2]);
             while (iterator.Next(out var arch))
             {
                 var index = arch.GetComponentIndex<NetworkSerial>();
@@ -84,8 +84,8 @@ sealed class NetworkEntitiesMap
                 }
             }
 
-            iterator = world.GetQueryIterator([term1, term2]);
-            while (iterator.Next(out var arch))
+            using var iterator2 = world.GetQueryIterator([term1, term2]);
+            while (iterator2.Next(out var arch))
             {
                 var index = arch.GetComponentIndex<NetworkSerial>();
                 foreach (ref readonly var chunk in arch)
