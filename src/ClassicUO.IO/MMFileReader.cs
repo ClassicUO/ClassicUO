@@ -12,6 +12,9 @@ namespace ClassicUO.IO
 
         public MMFileReader(FileStream stream) : base(stream)
         {
+            if (Length <= 0)
+                return;
+
             _mmf = MemoryMappedFile.CreateFromFile
             (
                 stream,
@@ -45,9 +48,9 @@ namespace ClassicUO.IO
 
         public override void Dispose()
         {
-            _accessor.SafeMemoryMappedViewHandle.ReleasePointer();
-            _accessor.Dispose();
-            _mmf.Dispose();
+            _accessor?.SafeMemoryMappedViewHandle.ReleasePointer();
+            _accessor?.Dispose();
+            _mmf?.Dispose();
 
             base.Dispose();
         }
