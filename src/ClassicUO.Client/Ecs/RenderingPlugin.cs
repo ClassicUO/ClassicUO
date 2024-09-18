@@ -1,7 +1,6 @@
-using System;
-using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using ClassicUO.Assets;
+using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
@@ -9,6 +8,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using TinyEcs;
 using static TinyEcs.Defaults;
+using World = TinyEcs.World;
 
 namespace ClassicUO.Ecs;
 
@@ -16,25 +16,6 @@ readonly struct RenderingPlugin : IPlugin
 {
     public void Build(Scheduler scheduler)
     {
-        scheduler.AddSystem(static (
-            TinyEcs.World world,
-            Query<Graphic,
-                (With<NetworkSerial>, Without<Pair<ContainedInto, Wildcard>>, With<Pair<EquippedItem, Wildcard>>)> queryEquip
-        ) => {
-            queryEquip.Each((EntityView ent, ref Graphic graphic) =>
-            {
-                // sync equipment position with the parent
-                var id = ent.Target<EquippedItem>();
-                var parent = world.Entity(id);
-
-                if (parent.Has<WorldPosition>())
-                    ent.Set(parent.Get<WorldPosition>());
-
-                if (parent.Has<MobAnimation>())
-                    ent.Set(parent.Get<MobAnimation>());
-            });
-        }, threadingType: ThreadingMode.Single);
-
         scheduler.AddSystem((Res<MouseContext> mouseCtx, Res<KeyboardContext> keyboardCtx, Res<GameContext> gameCtx) =>
         {
             if (mouseCtx.Value.OldState.LeftButton == ButtonState.Pressed && mouseCtx.Value.NewState.LeftButton == ButtonState.Pressed)
@@ -108,13 +89,12 @@ readonly struct RenderingPlugin : IPlugin
         Res<Renderer.UltimaBatcher2D> batch,
         Res<AssetsServer> assetsServer,
         Res<UOFileManager> fileManager,
-        Local<Dictionary<Layer, EntityView>> dict,
         Query<(WorldPosition, Graphic, Optional<TileStretched>), With<IsTile>> queryTiles,
         Query<(WorldPosition, Graphic, Hue), (Without<IsTile>, Without<MobAnimation>, Without<Pair<ContainedInto, Wildcard>>)> queryStatics,
-        Query<(WorldPosition, Graphic, Hue, NetworkSerial, ScreenPositionOffset, Optional<Facing>, Optional<MobAnimation>),
-            (Without<Pair<ContainedInto, Wildcard>>, Without<Pair<EquippedItem, Wildcard>>)> queryBodyOnly,
-        Query<(WorldPosition, Graphic, Hue, NetworkSerial, Optional<MobAnimation>),
-            (Without<Pair<ContainedInto, Wildcard>>, With<Pair<EquippedItem, Wildcard>>)> queryEquipment
+        Query<(WorldPosition, Graphic, Hue, NetworkSerial, ScreenPositionOffset, Optional<Facing>, Optional<MobAnimation>, Optional<MobileSteps>),
+            Without<Pair<ContainedInto, Wildcard>>> queryBodyOnly,
+        Query<(EquipmentSlots, ScreenPositionOffset, WorldPosition, Graphic, Facing, Optional<MobileSteps>, Optional<MobAnimation>),
+            Without<Pair<ContainedInto, Wildcard>>> queryEquipmentSlots
     )
     {
         var center = Isometric.IsoToScreen(gameCtx.Value.CenterX, gameCtx.Value.CenterY, gameCtx.Value.CenterZ);
@@ -196,6 +176,11 @@ readonly struct RenderingPlugin : IPlugin
                     priorityZ += 1;
                 }
 
+                if (fileManager.Value.TileData.StaticData[graphic.Value].IsWall)
+                {
+                    priorityZ += 2;
+                }
+
                 if (fileManager.Value.TileData.StaticData[graphic.Value].IsMultiMovable)
                 {
                     priorityZ += 1;
@@ -227,7 +212,8 @@ readonly struct RenderingPlugin : IPlugin
             ref NetworkSerial serial,
             ref ScreenPositionOffset offset,
             ref Facing direction,
-            ref MobAnimation animation
+            ref MobAnimation animation,
+            ref MobileSteps steps
         ) =>
             {
                 var uoHue = hue.Value;
@@ -237,7 +223,7 @@ readonly struct RenderingPlugin : IPlugin
                 Rectangle? uv;
                 var mirror = false;
 
-                if (ClassicUO.Game.SerialHelper.IsMobile(serial.Value))
+                if (ClassicUO.Game.SerialHelper.IsMobile(serial.Value) || graphic.Value == 0x2006)
                 {
                     priorityZ += 2;
                     var dir = Unsafe.IsNullRef(ref direction) ? Direction.North : direction.Value;
@@ -294,6 +280,11 @@ readonly struct RenderingPlugin : IPlugin
                         priorityZ += 1;
                     }
 
+                    if (fileManager.Value.TileData.StaticData[graphic.Value].IsWall)
+                    {
+                        priorityZ += 2;
+                    }
+
                     if (fileManager.Value.TileData.StaticData[graphic.Value].IsMultiMovable)
                     {
                         priorityZ += 1;
@@ -312,6 +303,21 @@ readonly struct RenderingPlugin : IPlugin
                 var color = ShaderHueTranslator.GetHueVector(FixHue(uoHue));
                 position += offset.Value;
 
+                if (!Unsafe.IsNullRef(ref steps) && steps.Count > 0)
+                {
+                    ref var step = ref steps[steps.Count - 1];
+
+                    if (((Direction)step.Direction & Direction.Mask) is Direction.Down or Direction.South or Direction.East)
+                    {
+                        priorityZ = (sbyte)(step.Z + 2);
+                        depthZ = Isometric.GetDepthZ(step.X, step.Y, priorityZ);
+                    }
+                }
+                else if ((direction.Value & Direction.Mask) is Direction.Down or Direction.South or Direction.East)
+                {
+                    depthZ = Isometric.GetDepthZ(pos.X + 1, pos.Y + 1, priorityZ);
+                }
+
                 batch.Value.Draw
                 (
                     texture,
@@ -326,96 +332,117 @@ readonly struct RenderingPlugin : IPlugin
                 );
             });
 
-
-            queryEquipment.Each((
-                EntityView ent,
+            queryEquipmentSlots.Each(
+         (
+                ref EquipmentSlots slots,
+                ref ScreenPositionOffset offset,
                 ref WorldPosition pos,
                 ref Graphic graphic,
-                ref Hue hue,
-                ref NetworkSerial serial,
+                ref Facing direction,
+                ref MobileSteps steps,
                 ref MobAnimation animation
             ) =>
             {
+                if (!Races.IsHuman(graphic.Value))
+                    return;
+
                 var priorityZ = pos.Z + 2;
-                var position = Isometric.IsoToScreen(pos.X, pos.Y, pos.Z);
+                var depthZ = Isometric.GetDepthZ(pos.X, pos.Y, priorityZ);
 
-                var animId = graphic.Value;
-                byte animAction = 0;
-                var animIndex = 0;
-                if (!Unsafe.IsNullRef(ref animation))
+                if (!Unsafe.IsNullRef(ref steps) && steps.Count > 0)
                 {
-                    animAction = animation.Action;
-                    animIndex = animation.Index;
-                }
+                    ref var step = ref steps[steps.Count - 1];
 
-                var act = ent.Target<EquippedItem>();
-                if (!act.IsValid() || !Races.IsHuman(world.Get<Graphic>(act).Value))
-                {
-                    return;
+                    if (((Direction)step.Direction & Direction.Mask) is Direction.Down or Direction.South or Direction.East)
+                    {
+                        priorityZ = (sbyte)(step.Z + 2);
+                        depthZ = Isometric.GetDepthZ(step.X, step.Y, priorityZ);
+                    }
                 }
-
-                ref var equip = ref ent.Get<EquippedItem>(act);
-                var orderKey = 0;
-                if (equip.Layer == Layer.Mount && !Unsafe.IsNullRef(ref animation))
+                else if ((direction.Value & Direction.Mask) is Direction.Down or Direction.South or Direction.East)
                 {
-                    animId = Mounts.FixMountGraphic(fileManager.Value.TileData, animId);
-                    animAction = animation.MountAction;
-                }
-                else if (!Unsafe.IsNullRef(ref animation) && _layerOrders[(int)animation.Direction & 7].TryGetValue(equip.Layer, out orderKey) &&
-                    !IsItemCovered(dict.Value ??= new Dictionary<Layer, EntityView>(), world, act, equip.Layer))
-                {
-                    if (fileManager.Value.TileData.StaticData[graphic.Value].AnimID != 0)
-                        animId = fileManager.Value.TileData.StaticData[graphic.Value].AnimID;
-                }
-                else
-                {
-                    return;
+                    depthZ = Isometric.GetDepthZ(pos.X + 1, pos.Y + 1, priorityZ);
                 }
 
                 (var dir, var mirror) = FixDirection(animation.Direction);
 
-                var frames = assetsServer.Value.Animations.GetAnimationFrames
-                (
-                    animId,
-                    animAction,
-                    (byte) dir,
-                    out var baseHue,
-                    out var _
-                );
+                if (!Unsafe.IsNullRef(ref animation))
+                {
+                    for (int i = -1; i < Constants.USED_LAYER_COUNT; i++)
+                    {
+                        var layer = i == -1 ? Layer.Mount : LayerOrder.UsedLayers[(int)animation.Direction & 0x7, i];
+                        var layerEnt = slots[layer];
+                        if (!layerEnt.IsValid())
+                            continue;
 
-                ref readonly var frame = ref frames.IsEmpty ?
-                    ref SpriteInfo.Empty
-                    :
-                    ref frames[animIndex % frames.Length];
+                        if (!world.Exists(layerEnt))
+                        {
+                            slots[layer] = 0;
+                            continue;
+                        }
 
-                if (frame.Texture == null)
-                    return;
+                        byte animAction = animation.Action;
+                        var graphicLayer = world.Get<Graphic>(layerEnt).Value;
+                        var hueLayer = world.Get<Hue>(layerEnt).Value;
+                        var animId = graphicLayer;
+                        if (layer == Layer.Mount)
+                        {
+                            animId = Mounts.FixMountGraphic(fileManager.Value.TileData, animId);
+                            animAction = animation.MountAction;
+                        }
+                        else if (!IsItemCovered2(world, ref slots, layer))
+                        {
+                            if (fileManager.Value.TileData.StaticData[graphicLayer].AnimID != 0)
+                                animId = fileManager.Value.TileData.StaticData[graphicLayer].AnimID;
+                        }
+                        else
+                        {
+                            continue;
+                        }
 
-                position.X += 22;
-                position.Y += 22;
-                if (mirror)
-                    position.X -= frame.UV.Width - frame.Center.X;
-                else
-                    position.X -= frame.Center.X;
-                position.Y -= frame.UV.Height + frame.Center.Y;
+                        var frames = assetsServer.Value.Animations.GetAnimationFrames
+                        (
+                            animId,
+                            animAction,
+                            (byte) dir,
+                            out var baseHue,
+                            out var _
+                        );
 
-                // TODO: priority Z based on layer ordering
-                var depthZ = Isometric.GetDepthZ(pos.X, pos.Y, priorityZ) + (orderKey * 0.01f);
-                var color = ShaderHueTranslator.GetHueVector(FixHue(hue.Value != 0 ? hue.Value : baseHue));
-                position += world.Get<ScreenPositionOffset>(act).Value;
+                        ref readonly var frame = ref frames.IsEmpty ?
+                            ref SpriteInfo.Empty
+                            :
+                            ref frames[animation.Index % frames.Length];
 
-                batch.Value.Draw
-                (
-                    frame.Texture,
-                    position - center,
-                    frame.UV,
-                    color,
-                    0f,
-                    Vector2.Zero,
-                    1f,
-                    mirror ? SpriteEffects.FlipHorizontally : SpriteEffects.None,
-                    depthZ
-                );
+                        if (frame.Texture == null)
+                            continue;
+
+                        var position = Isometric.IsoToScreen(pos.X, pos.Y, pos.Z);
+                        position.X += 22;
+                        position.Y += 22;
+                        if (mirror)
+                            position.X -= frame.UV.Width - frame.Center.X;
+                        else
+                            position.X -= frame.Center.X;
+                        position.Y -= frame.UV.Height + frame.Center.Y;
+
+                        var color = ShaderHueTranslator.GetHueVector(FixHue(hueLayer != 0 ? hueLayer : baseHue));
+                        position += offset.Value;
+
+                        batch.Value.Draw
+                        (
+                            frame.Texture,
+                            position - center,
+                            frame.UV,
+                            color,
+                            0f,
+                            Vector2.Zero,
+                            1f,
+                            mirror ? SpriteEffects.FlipHorizontally : SpriteEffects.None,
+                            depthZ
+                        );
+                    }
+                }
             });
     }
 
@@ -485,73 +512,42 @@ readonly struct RenderingPlugin : IPlugin
         return (dir, mirror);
     }
 
-    static RenderingPlugin()
+    static bool IsItemCovered2(World world, ref EquipmentSlots slots, Layer layer)
     {
-        var usedLayers = ClassicUO.Game.Data.LayerOrder.UsedLayers;
-
-        _layerOrders = new Dictionary<Layer, int>[usedLayers.GetLength(0)];
-
-        for (var i = 0; i < usedLayers.GetLength(0); ++i)
-        {
-            var dict = new Dictionary<Layer, int>();
-            for (var k = 0; k < usedLayers.GetLength(1); ++k)
-            {
-                var layer = usedLayers[i, k];
-                dict.Add(layer, k);
-            }
-            _layerOrders[i] = dict;
-        }
-    }
-
-    private static readonly Dictionary<Layer, int>[] _layerOrders;
-
-    static bool IsItemCovered(Dictionary<Layer, EntityView> dict, TinyEcs.World world, ulong parent, Layer layer)
-    {
-        dict.Clear();
-        var term0 = new QueryTerm(IDOp.Pair(world.Entity<EquippedItem>(), parent), TermOp.With);
-        var term1 = new QueryTerm(world.Entity<NetworkSerial>(), TermOp.DataAccess);
-
-        foreach ((var entities, var serials) in world.QueryRaw(term0, term1).Iter<NetworkSerial>())
-        {
-            foreach (ref readonly var ent in entities)
-            {
-                ref var equip = ref ent.Get<EquippedItem>(parent);
-                dict[equip.Layer] = ent;
-            }
-        }
-
         switch (layer)
         {
             case Layer.Shoes:
-                if (dict.TryGetValue(Layer.Legs, out var legs) ||
-                    (dict.TryGetValue(Layer.Pants, out var pants) && pants.Get<Graphic>().Value == 0x1411))
+                if (slots[Layer.Legs].IsValid() ||
+                    (slots[Layer.Pants].IsValid() && world.Exists(slots[Layer.Pants]) && world.Get<Graphic>(slots[Layer.Pants]).Value == 0x1411))
                 {
                     return true;
                 }
-                else if (pants.ID.IsValid() && (pants.Get<Graphic>().Value is 0x0513 or 0x0514) ||
-                    (dict.TryGetValue(Layer.Robe, out var robe) && robe.Get<Graphic>().Value is 0x0504))
+                else if (slots[Layer.Pants].IsValid() &&
+                         world.Exists(slots[Layer.Pants]) && (world.Get<Graphic>(slots[Layer.Pants]).Value is 0x0513 or 0x0514) ||
+                         (slots[Layer.Robe].IsValid() && world.Exists(slots[Layer.Robe]) && world.Get<Graphic>(slots[Layer.Robe]).Value is 0x0504))
                 {
                     return true;
                 }
                 break;
 
             case Layer.Pants:
-                dict.TryGetValue(Layer.Pants, out pants);
-                if (dict.TryGetValue(Layer.Legs, out legs) ||
-                    (dict.TryGetValue(Layer.Robe, out var robe1) &&
-                        robe1.Get<Graphic>().Value == 0x0504))
+                if (slots[Layer.Legs].IsValid() ||
+                    (slots[Layer.Robe].IsValid() && world.Exists(slots[Layer.Robe]) && world.Get<Graphic>(slots[Layer.Robe]).Value == 0x0504))
                 {
                     return true;
                 }
 
-                if (pants.ID.IsValid() && pants.Get<Graphic>().Value is 0x01EB or 0x03E5 or 0x03EB)
+                if (slots[Layer.Pants].IsValid() && world.Exists(slots[Layer.Pants]) &&
+                    world.Get<Graphic>(slots[Layer.Pants]).Value is 0x01EB or 0x03E5 or 0x03EB)
                 {
-                    if (dict.TryGetValue(Layer.Skirt, out var skirt) && skirt.Get<Graphic>().Value is not 0x01C7 and not 0x01E4)
+                    if (slots[Layer.Skirt].IsValid() && world.Exists(slots[Layer.Skirt]) &&
+                        world.Get<Graphic>(slots[Layer.Skirt]).Value is not 0x01C7 and not 0x01E4)
                     {
                         return true;
                     }
 
-                    if (robe1.ID.IsValid() && robe1.Get<Graphic>().Value is not 0x0229 and not (>= 0x04E8 and <= 0x04EB))
+                    if (slots[Layer.Robe].IsValid() && world.Exists(slots[Layer.Robe]) &&
+                        world.Get<Graphic>(slots[Layer.Robe]).Value is not 0x0229 and not (>= 0x04E8 and <= 0x04EB))
                     {
                         return true;
                     }
@@ -559,16 +555,18 @@ readonly struct RenderingPlugin : IPlugin
                 break;
 
             case Layer.Tunic:
-                if (dict.TryGetValue(Layer.Robe, out var robe2))
+                if (slots[Layer.Robe].IsValid() && world.Exists(slots[Layer.Robe]))
                 {
-                    if (robe2.Get<Graphic>().Value is not 0 and not 0x9985 and not 0x9986 and not 0xA412)
+                    if (world.Get<Graphic>(slots[Layer.Robe]).Value is not 0 and not 0x9985 and not 0x9986 and not 0xA412)
                     {
                         return true;
                     }
                 }
-                else if (dict.TryGetValue(Layer.Tunic, out var tunic) && tunic.Get<Graphic>().Value == 0x0238)
+                else if (slots[Layer.Tunic].IsValid() && world.Exists(slots[Layer.Tunic]) &&
+                         world.Get<Graphic>(slots[Layer.Tunic]).Value == 0x0238)
                 {
-                    if (robe2.ID.IsValid() && robe2.Get<Graphic>().Value is not 0x9985 and not 0x9986 and not 0xA412)
+                    if (slots[Layer.Robe].IsValid() && world.Exists(slots[Layer.Robe]) &&
+                        world.Get<Graphic>(slots[Layer.Robe]).Value is not 0x9985 and not 0x9986 and not 0xA412)
                     {
                         return true;
                     }
@@ -576,14 +574,16 @@ readonly struct RenderingPlugin : IPlugin
                 break;
 
             case Layer.Torso:
-                if (dict.TryGetValue(Layer.Robe, out var robe3)
-                    && robe3.Get<Graphic>().Value is not 0 and not 0x9985 and not 0x9986 and not 0xA412 and not 0xA2CA)
+                if (slots[Layer.Robe].IsValid() && world.Exists(slots[Layer.Robe]) &&
+                    world.Get<Graphic>(slots[Layer.Robe]).Value is not 0 and not 0x9985 and not 0x9986 and not 0xA412 and not 0xA2CA)
                 {
                     return true;
                 }
-                else if (dict.TryGetValue(Layer.Tunic, out var tunic) && tunic.Get<Graphic>().Value is not 0x1541 and not 0x1542)
+                else if (slots[Layer.Tunic].IsValid() && world.Exists(slots[Layer.Tunic]) &&
+                         world.Get<Graphic>(slots[Layer.Tunic]).Value is not 0x1541 and not 0x1542)
                 {
-                    if (dict.TryGetValue(Layer.Torso, out var torso) && torso.Get<Graphic>().Value is 0x782A or 0x782B)
+                    if (slots[Layer.Torso].IsValid() && world.Exists(slots[Layer.Torso]) &&
+                        world.Get<Graphic>(slots[Layer.Torso]).Value is 0x782A or 0x782B)
                     {
                         return true;
                     }
@@ -591,8 +591,8 @@ readonly struct RenderingPlugin : IPlugin
                 break;
 
             case Layer.Arms:
-                if (dict.TryGetValue(Layer.Robe, out var robe4) &&
-                    robe4.Get<Graphic>().Value is not 0 and not 0x9985 and not 0x9986 and not 0xA412)
+                if (slots[Layer.Robe].IsValid() && world.Exists(slots[Layer.Robe]) &&
+                    world.Get<Graphic>(slots[Layer.Robe]).Value is not 0 and not 0x9985 and not 0x9986 and not 0xA412)
                 {
                     return true;
                 }
@@ -600,9 +600,9 @@ readonly struct RenderingPlugin : IPlugin
 
             case Layer.Helmet:
             case Layer.Hair:
-                if (dict.TryGetValue(Layer.Robe, out var robe5))
+                if (slots[Layer.Robe].IsValid() && world.Exists(slots[Layer.Robe]))
                 {
-                    ref var gfx = ref robe5.Get<Graphic>();
+                    ref var gfx = ref world.Get<Graphic>(slots[Layer.Robe]);
 
                     if (gfx.Value > 0x3173)
                     {

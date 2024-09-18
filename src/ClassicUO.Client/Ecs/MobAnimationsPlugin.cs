@@ -216,9 +216,7 @@ readonly struct MobAnimationsPlugin : IPlugin
     void HandleMobileSteps
     (
         Time time,
-        Query<(MobileSteps, WorldPosition, Facing, MobAnimation, ScreenPositionOffset),
-                (Without<Pair<ContainedInto, Wildcard>>, Without<Pair<EquippedItem, Wildcard>>)>
-            queryHandleWalking
+        Query<(MobileSteps, WorldPosition, Facing, MobAnimation, ScreenPositionOffset), Without<Pair<ContainedInto, Wildcard>>> queryHandleWalking
     )
     {
         queryHandleWalking.Each
@@ -297,8 +295,7 @@ readonly struct MobAnimationsPlugin : IPlugin
         Res<GameContext> gameCtx,
         Res<UOFileManager> fileManager,
         Res<AssetsServer> assetsServer,
-        Query<(MobAnimation, Graphic, Facing,  Optional<MobileFlags>, Optional<MobileSteps>),
-            (Without<Pair<ContainedInto, Wildcard>>, Without<Pair<EquippedItem, Wildcard>>)> query
+        Query<(MobAnimation, Graphic, Facing, EquipmentSlots, Optional<MobileFlags>, Optional<MobileSteps>), Without<Pair<ContainedInto, Wildcard>>> query
     )
     {
         query.Each(
@@ -307,6 +304,7 @@ readonly struct MobAnimationsPlugin : IPlugin
             ref MobAnimation animation,
             ref Graphic graphic,
             ref Facing direction,
+            ref EquipmentSlots slots,
             ref MobileFlags mobFlags,
             ref MobileSteps mobSteps
         ) => {
@@ -344,27 +342,17 @@ readonly struct MobAnimationsPlugin : IPlugin
             }
 
             animation.MountAction = 0xFF;
-            var term0 = new QueryTerm(IDOp.Pair(world.Entity<EquippedItem>(), ent.ID), TermOp.With);
-            var term1 = new QueryTerm(world.Entity<NetworkSerial>(), TermOp.With);
-            foreach (var entities in world.QueryRaw(term0, term1).Iter())
+
+            if (slots[Layer.Mount].IsValid())
             {
-                for (var i = 0; i < entities.Length; ++i)
-                {
-                    ref var equip = ref entities[i].Get<EquippedItem>(ent.ID);
-                    if (equip.Layer == Layer.Mount)
-                    {
-                        var mountGraphic = entities[i].Get<Graphic>().Value;
-                        mountGraphic = Mounts.FixMountGraphic(fileManager.Value.TileData, mountGraphic);
+                var mountGraphic = world.Get<Graphic>(slots[Layer.Mount]).Value;
+                mountGraphic = Mounts.FixMountGraphic(fileManager.Value.TileData, mountGraphic);
 
-                        animation.MountAction = GetAnimationGroup(
-                            gameCtx.Value.ClientVersion, fileManager.Value.Animations, assetsServer.Value.Animations,
-                            mountGraphic, realDirection, isWalking, true, false, flags,
-                            animation.IsFromServer, animation.MountAction
-                        );
-
-                        break;
-                    }
-                }
+                animation.MountAction = GetAnimationGroup(
+                    gameCtx.Value.ClientVersion, fileManager.Value.Animations, assetsServer.Value.Animations,
+                    mountGraphic, realDirection, isWalking, true, false, flags,
+                    animation.IsFromServer, animation.MountAction
+                );
             }
 
             animation.Action = GetAnimationGroup(

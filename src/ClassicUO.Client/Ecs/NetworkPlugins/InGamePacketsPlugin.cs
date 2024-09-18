@@ -8,7 +8,6 @@ using ClassicUO.Game.Managers;
 using ClassicUO.IO;
 using ClassicUO.Network;
 using ClassicUO.Utility;
-using Microsoft.Xna.Framework;
 using TinyEcs;
 
 namespace ClassicUO.Ecs;
@@ -66,25 +65,43 @@ sealed class NetworkEntitiesMap
             var term2 = new QueryTerm(world.Entity<NetworkSerial>(), TermOp.DataAccess);
             // var term3 = new QueryTerm(IDOp.Pair(world.Entity<EquippedItem>(), id), TermOp.Without);
 
-            var q0 = world.QueryRaw(term0, term2);
-            q0.Each((EntityView child, ref NetworkSerial ser) =>
+            world.BeginDeferred();
+            var iterator = world.GetQueryIterator([term0, term2]);
+            while (iterator.Next(out var arch))
             {
-                Console.WriteLine("  removing serial: 0x{0:X8} associated to 0x{1:X8}", ser.Value, serial);
-                if (!Remove(world, ser.Value))
+                var index = arch.GetComponentIndex<NetworkSerial>();
+                foreach (ref readonly var chunk in arch)
                 {
+                    var span = chunk.GetSpan<NetworkSerial>(index);
+                    foreach (ref var ser in span)
+                    {
+                        Console.WriteLine("  removing serial: 0x{0:X8} associated to 0x{1:X8}", ser.Value, serial);
+                        if (!Remove(world, ser.Value))
+                        {
 
+                        }
+                    }
                 }
-            });
+            }
 
-            var q1 = world.QueryRaw(term1, term2);
-            q1.Each((EntityView child, ref NetworkSerial ser) =>
+            iterator = world.GetQueryIterator([term1, term2]);
+            while (iterator.Next(out var arch))
             {
-                Console.WriteLine("  removing serial: 0x{0:X8} associated to 0x{1:X8}", ser.Value, serial);
-                if (!Remove(world, ser.Value))
+                var index = arch.GetComponentIndex<NetworkSerial>();
+                foreach (ref readonly var chunk in arch)
                 {
+                    var span = chunk.GetSpan<NetworkSerial>(index);
+                    foreach (ref var ser in span)
+                    {
+                        Console.WriteLine("  removing serial: 0x{0:X8} associated to 0x{1:X8}", ser.Value, serial);
+                        if (!Remove(world, ser.Value))
+                        {
 
+                        }
+                    }
                 }
-            });
+            }
+            world.EndDeferred();
 
             // // we want to keep the equipments for some reason lol
             // var term4 = new QueryTerm(IDOp.Pair(world.Entity<EquippedItem>(), id), TermOp.With);
@@ -416,6 +433,8 @@ readonly struct InGamePacketsPlugin : IPlugin
                     .Set(new Hue() { Value = hue });
                     //.Set(new Facing() { Value = dir });
 
+                var slots = parentEnt.Has<EquipmentSlots>() ? parentEnt.Get<EquipmentSlots>() : new EquipmentSlots();
+
                 uint itemSerial;
                 while ((itemSerial = reader.ReadUInt32BE()) != 0)
                 {
@@ -434,10 +453,15 @@ readonly struct InGamePacketsPlugin : IPlugin
                     var child = entitiesMap.Value.GetOrCreate(world, itemSerial);
                     child.Set(new Graphic() { Value = itemGraphic })
                         .Set(new Hue() { Value = itemHue });
-                    child.Set(new EquippedItem() { Layer = layer }, parentEnt);
+                    // child.Set(new EquippedItem() { Layer = layer }, parentEnt);
+
+                    slots[layer] = child;
 
                     Console.WriteLine("equip serial 0x{0:X8} | parentId: {1}", itemSerial, parentEnt.ID);
                 }
+
+                parentEnt.Set(slots);
+
 
                 mobileQueuedSteps.Enqueue(new ()
                 {
@@ -834,7 +858,11 @@ readonly struct InGamePacketsPlugin : IPlugin
                 var childEnt = entitiesMap.Value.GetOrCreate(world, serial);
                 childEnt.Set(new Graphic() { Value = (ushort)(graphic + graphicInc) })
                     .Set(new Hue() { Value = hue });
-                childEnt.Set(new EquippedItem() { Layer = layer }, parentEnt);
+                // childEnt.Set(new EquippedItem() { Layer = layer }, parentEnt);
+
+                var slots = parentEnt.Has<EquipmentSlots>() ? parentEnt.Get<EquipmentSlots>() : new EquipmentSlots();
+                slots[layer] = childEnt;
+                parentEnt.Set(slots);
                 Console.WriteLine("equip serial 0x{0:X8} | parentId: {1}", serial, parentEnt.ID);
                 //.Set<ContainedInto>(parentEnt);
             };
@@ -1222,14 +1250,20 @@ readonly struct InGamePacketsPlugin : IPlugin
 
                 var parentEnt = entitiesMap.Value.GetOrCreate(world, serial);
 
+                var slots = parentEnt.Has<EquipmentSlots>() ? parentEnt.Get<EquipmentSlots>() : new EquipmentSlots();
+
                 var layer = Layer.Invalid;
                 uint itemSerial = 0;
                 while ((layer = (Layer)reader.ReadUInt8()) != Layer.Invalid &&
                      (itemSerial = reader.ReadUInt32BE()) != 0)
                 {
                     var childEnt = entitiesMap.Value.GetOrCreate(world, itemSerial);
-                    childEnt.Set(new EquippedItem() { Layer = layer }, parentEnt);
+                    // childEnt.Set(new EquippedItem() { Layer = layer }, parentEnt);
+
+                    slots[layer] = childEnt;
                 }
+
+                parentEnt.Set(slots);
             };
 
             // show map

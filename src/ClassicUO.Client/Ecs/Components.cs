@@ -1,3 +1,5 @@
+using System.Runtime.CompilerServices;
+using ClassicUO.Game.Data;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Ecs;
@@ -34,11 +36,6 @@ struct Amount
 }
 
 struct ContainedInto;
-
-struct EquippedItem
-{
-    public ClassicUO.Game.Data.Layer Layer;
-}
 
 struct Hitpoints
 {
@@ -78,6 +75,23 @@ struct PlayerData
     public short ColdRes;
     public short PoisonRes;
     public short EnergyRes;
+}
+
+[InlineArray(0x1D + 1)]
+struct EquipmentArray
+{
+    private ulong _a;
+}
+
+struct EquipmentSlots
+{
+    private EquipmentArray _array;
+
+    public ulong this[Layer layer]
+    {
+        get => _array[(int)layer];
+        set => _array[(int)layer] = value;
+    }
 }
 
 public struct ScreenPositionOffset
