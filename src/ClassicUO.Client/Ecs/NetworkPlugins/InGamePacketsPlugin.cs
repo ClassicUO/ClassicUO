@@ -101,7 +101,39 @@ sealed class NetworkEntitiesMap
                     }
                 }
             }
+
+            using var iterator3 = world.GetQueryIterator([new QueryTerm(world.Entity<EquipmentSlots>(), TermOp.DataAccess)]);
+            while (iterator3.Next(out var arch))
+            {
+                var index = arch.GetComponentIndex<EquipmentSlots>();
+
+                foreach (ref readonly var chunk in arch)
+                {
+                    var span = chunk.GetSpan<EquipmentSlots>(index);
+
+                    foreach (ref var slots in span)
+                    {
+                        for (Layer layer = Layer.Invalid + 1; layer <= Layer.Bank; layer++)
+                        {
+                            var e = slots[layer];
+
+                            if (e.IsValid() && world.Exists(e) && world.Has<NetworkSerial>(e))
+                            {
+                                ref var ser = ref world.Get<NetworkSerial>(e);
+                                Console.WriteLine("  removing serial: 0x{0:X8} associated to 0x{1:X8}", ser.Value, serial);
+                                if (!Remove(world, ser.Value))
+                                {
+
+                                }
+                            }
+
+                            slots[layer] = 0;
+                        }
+                    }
+                }
+            }
             world.EndDeferred();
+
 
             // // we want to keep the equipments for some reason lol
             // var term4 = new QueryTerm(IDOp.Pair(world.Entity<EquippedItem>(), id), TermOp.With);

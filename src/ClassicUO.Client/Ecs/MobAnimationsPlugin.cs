@@ -343,7 +343,7 @@ readonly struct MobAnimationsPlugin : IPlugin
 
             animation.MountAction = 0xFF;
 
-            if (slots[Layer.Mount].IsValid())
+            if (slots[Layer.Mount].IsValid() && world.Exists(slots[Layer.Mount]))
             {
                 var mountGraphic = world.Get<Graphic>(slots[Layer.Mount]).Value;
                 mountGraphic = Mounts.FixMountGraphic(fileManager.Value.TileData, mountGraphic);
