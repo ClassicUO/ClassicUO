@@ -93,13 +93,13 @@ internal readonly struct FnaPlugin : IPlugin
         {
             mouseCtx.Value.OldState = mouseCtx.Value.NewState;
             mouseCtx.Value.NewState = Mouse.GetState();
-        }, Stages.FrameEnd).RunIf((Res<UoGame> game) => game.Value.IsActive); ;
+        }, Stages.FrameEnd).RunIf((Res<UoGame> game) => game.Value.IsActive);
 
         scheduler.AddSystem((Res<KeyboardContext> keyboardCtx) =>
         {
             keyboardCtx.Value.OldState = keyboardCtx.Value.NewState;
             keyboardCtx.Value.NewState = Keyboard.GetState();
-        }, Stages.FrameEnd).RunIf((Res<UoGame> game) => game.Value.IsActive); ;
+        }, Stages.FrameEnd).RunIf((Res<UoGame> game) => game.Value.IsActive);
 
         scheduler.AddSystem((EventReader<KeyEvent> reader) => {
             foreach (var ev in reader)
@@ -108,7 +108,7 @@ internal readonly struct FnaPlugin : IPlugin
                     0 => "up",
                     1 => "down",
                     2 => "pressed",
-                    _ => "unkown"
+                    _ => "unknown"
                 });
         });
 
