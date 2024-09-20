@@ -18,6 +18,7 @@ using PacketsMap = Dictionary<byte, OnPacket>;
 sealed class NetworkEntitiesMap
 {
     private readonly Dictionary<uint, ulong> _entities = new ();
+    private readonly List<uint> _toRemove = new();
 
     public EntityView GetOrCreate(TinyEcs.World world, uint serial)
     {
@@ -76,10 +77,11 @@ sealed class NetworkEntitiesMap
                     foreach (ref var ser in span)
                     {
                         Console.WriteLine("  removing serial: 0x{0:X8} associated to 0x{1:X8}", ser.Value, serial);
-                        if (!Remove(world, ser.Value))
-                        {
-
-                        }
+                        _toRemove.Add(ser.Value);
+                        // if (!Remove(world, ser.Value))
+                        // {
+                        //
+                        // }
                     }
                 }
             }
@@ -94,41 +96,31 @@ sealed class NetworkEntitiesMap
                     foreach (ref var ser in span)
                     {
                         Console.WriteLine("  removing serial: 0x{0:X8} associated to 0x{1:X8}", ser.Value, serial);
-                        if (!Remove(world, ser.Value))
-                        {
-
-                        }
+                        _toRemove.Add(ser.Value);
+                        // if (!Remove(world, ser.Value))
+                        // {
+                        //
+                        // }
                     }
                 }
             }
 
-            using var iterator3 = world.GetQueryIterator([new QueryTerm(world.Entity<EquipmentSlots>(), TermOp.DataAccess)]);
-            while (iterator3.Next(out var arch))
+            if (world.Has<EquipmentSlots>(id))
             {
-                var index = arch.GetComponentIndex<EquipmentSlots>();
-
-                foreach (ref readonly var chunk in arch)
+                ref var slots = ref world.Get<EquipmentSlots>(id);
+                for (Layer layer = Layer.Invalid + 1; layer <= Layer.Bank; layer++)
                 {
-                    var span = chunk.GetSpan<EquipmentSlots>(index);
+                    var e = slots[layer];
+                    slots[layer] = 0;
 
-                    foreach (ref var slots in span)
+                    if (e.IsValid() && world.Exists(e) && world.Has<NetworkSerial>(e))
                     {
-                        for (Layer layer = Layer.Invalid + 1; layer <= Layer.Bank; layer++)
-                        {
-                            var e = slots[layer];
-
-                            if (e.IsValid() && world.Exists(e) && world.Has<NetworkSerial>(e))
-                            {
-                                ref var ser = ref world.Get<NetworkSerial>(e);
-                                Console.WriteLine("  removing serial: 0x{0:X8} associated to 0x{1:X8}", ser.Value, serial);
-                                if (!Remove(world, ser.Value))
-                                {
-
-                                }
-                            }
-
-                            slots[layer] = 0;
-                        }
+                        ref var ser = ref world.Get<NetworkSerial>(e);
+                        Console.WriteLine("  removing serial: 0x{0:X8} associated to 0x{1:X8}", ser.Value, serial);
+                        _toRemove.Add(ser.Value);
+                        // if (Remove(world, ser.Value))
+                        // {
+                        // }
                     }
                 }
             }
@@ -145,6 +137,14 @@ sealed class NetworkEntitiesMap
             //     //ent.Unset<EquippedItem>(id2);
             //     Remove(world, ser.Value);
             // });
+
+            foreach (var s in _toRemove)
+            {
+                if (_entities.Remove(s, out var childId) && world.Exists(childId))
+                    world.Delete(childId);
+            }
+
+            _toRemove.Clear();
 
             world.Delete(id);
             result = true;
@@ -715,6 +715,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                 if (gameCtx.Value.PlayerSerial == 0) return;
                 var reader = new StackDataReader(buffer);
                 var serial = reader.ReadUInt32BE();
+                Console.WriteLine("delete obj from packet: 0x{0:X8}", serial);
                 var deleted = entitiesMap.Value.Remove(world, serial);
             };
 

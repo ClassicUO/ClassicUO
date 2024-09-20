@@ -60,9 +60,10 @@ readonly struct PlayerMovementPlugin : IPlugin
 
         var enqueuePlayerStepsFn = EnqueuePlayerSteps;
         scheduler.AddSystem(enqueuePlayerStepsFn, threadingType: ThreadingMode.Single)
-            .RunIf((Res<MouseContext> mouseCtx, Res<PlayerStepsContext> playerRequestedSteps, Time time)
+            .RunIf((Res<MouseContext> mouseCtx, Res<PlayerStepsContext> playerRequestedSteps, Time time, Query<(WorldPosition, Facing, MobileSteps, MobAnimation), With<Player>> playerQuery)
                 => mouseCtx.Value.NewState.RightButton == Microsoft.Xna.Framework.Input.ButtonState.Pressed &&
-                   playerRequestedSteps.Value.LastStep < time.Total && playerRequestedSteps.Value.Index < 5);
+                   playerRequestedSteps.Value.LastStep < time.Total && playerRequestedSteps.Value.Index < 5 &&
+                   playerQuery.Count() > 0);
 
         var parseAcceptedStepsFn = ParseAcceptedSteps;
         scheduler.AddSystem(parseAcceptedStepsFn, threadingType: ThreadingMode.Single)
