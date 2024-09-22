@@ -1,5 +1,8 @@
 {
   "dependencies": {
     "@maximegris/node-websockify": "^1.0.7"
+  },
+  "overrides": {
+    "ws": "^7.5.10"
   }
 }
