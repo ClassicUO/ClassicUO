@@ -47,6 +47,8 @@ namespace ClassicUO
 
     internal unsafe sealed class UnmanagedAssistantHost : IPluginHost
     {
+        public bool Initialized { get; private set; } = false;
+        
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         delegate void dOnPluginBindCuoFunctions(IntPtr exportedFuncs);
         [MarshalAs(UnmanagedType.FunctionPtr)]
@@ -281,6 +283,7 @@ namespace ClassicUO
             cuoHost.ReflectionCmdFn = Marshal.GetFunctionPointerForDelegate(_reflectionCmd);
 
             _initialize((IntPtr)mem);
+            Initialized = true;
         }
 
         public void LoadPlugin(string pluginPath)
