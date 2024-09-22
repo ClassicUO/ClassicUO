@@ -539,8 +539,8 @@ namespace ClassicUO
         {
             SDL_Event* sdlEvent = (SDL_Event*)ptr;
 
-            // Don't pass SDL events to the plugin host before it's initialized,
-            // or the garbage collector gets screwed up
+            // Don't pass SDL events to the plugin host before the plugins are initialized
+            // or the garbage collector can get screwed up
             if (_pluginsInitialized && Plugin.ProcessWndProc(sdlEvent) != 0)
             {
                 if (sdlEvent->type == SDL_EventType.SDL_MOUSEMOTION)
