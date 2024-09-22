@@ -364,5 +364,6 @@ namespace ClassicUO
         public void UpdatePlayerPosition(int x, int y, int z);
         public bool PacketIn(ArraySegment<byte> buffer);
         public bool PacketOut(Span<byte> buffer);
+        public bool Initialized { get; }
     }
 }
