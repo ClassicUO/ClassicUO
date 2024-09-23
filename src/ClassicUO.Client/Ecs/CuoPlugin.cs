@@ -45,7 +45,8 @@ readonly struct CuoPlugin : IPlugin
         scheduler.AddPlugin<NetworkPlugin>();
         scheduler.AddPlugin<MobAnimationsPlugin>();
         scheduler.AddPlugin<PlayerMovementPlugin>();
-        scheduler.AddPlugin<RenderingPlugin>();
+        scheduler.AddPlugin<WorldRenderingPlugin>();
+        scheduler.AddPlugin<TextOverheadPlugin>();
 
         // TODO: remove this once the UI is done
         scheduler.AddSystem((EventWriter<OnLoginRequest> writer, Res<Settings> settings) =>

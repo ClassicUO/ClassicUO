@@ -56,6 +56,13 @@ internal readonly struct FnaPlugin : IPlugin
             FrameworkDispatcher.Update();
         }, threadingType: ThreadingMode.Single).RunIf((SchedulerState state) => state.ResourceExists<UoGame>());
 
+
+        scheduler.AddSystem((Res<GraphicsDevice> device) => device.Value.Clear(Color.Black), Stages.FrameStart, ThreadingMode.Single)
+                 .RunIf((SchedulerState state) => state.ResourceExists<GraphicsDevice>());
+
+        scheduler.AddSystem((Res<GraphicsDevice> device) => device.Value.Present(), Stages.FrameEnd, ThreadingMode.Single)
+                 .RunIf((SchedulerState state) => state.ResourceExists<GraphicsDevice>());
+
         scheduler.AddSystem(() => Environment.Exit(0), Stages.AfterUpdate)
             .RunIf(static (Res<UoGame> game) => !UnsafeFNAAccessor.GetSetRunApplication(game.Value));
 

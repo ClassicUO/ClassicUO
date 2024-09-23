@@ -12,7 +12,7 @@ using World = TinyEcs.World;
 
 namespace ClassicUO.Ecs;
 
-readonly struct RenderingPlugin : IPlugin
+readonly struct WorldRenderingPlugin : IPlugin
 {
     public void Build(Scheduler scheduler)
     {
@@ -46,41 +46,11 @@ readonly struct RenderingPlugin : IPlugin
             threadingType: ThreadingMode.Single
         ).RunIf((Res<GameContext> gameCtx) => !gameCtx.Value.FreeView);
 
-
-        var beginFn = BeginRendering;
         var renderingFn = Rendering;
-        var endFn = EndRendering;
-
-        scheduler.AddSystem(beginFn, Stages.AfterUpdate, ThreadingMode.Single)
-                 .RunIf((SchedulerState state) => state.ResourceExists<GraphicsDevice>());
         scheduler.AddSystem(renderingFn, Stages.AfterUpdate, ThreadingMode.Single)
                  .RunIf((SchedulerState state) => state.ResourceExists<GraphicsDevice>());
-        scheduler.AddSystem(endFn, Stages.AfterUpdate, ThreadingMode.Single)
-                 .RunIf((SchedulerState state) => state.ResourceExists<GraphicsDevice>());
     }
 
-    void BeginRendering(Res<Renderer.UltimaBatcher2D> batch)
-    {
-        var sb = batch.Value;
-        var matrix = Matrix.Identity;
-        //matrix = Matrix.CreateScale(0.45f);
-
-        sb.GraphicsDevice.Clear(Color.Black);
-
-        sb.Begin(null, matrix);
-        sb.SetBrightlight(1.7f);
-        sb.SetSampler(SamplerState.PointClamp);
-        sb.SetStencil(DepthStencilState.Default);
-    }
-
-    void EndRendering(Res<Renderer.UltimaBatcher2D> batch)
-    {
-        var sb = batch.Value;
-        sb.SetSampler(null);
-        sb.SetStencil(null);
-        sb.End();
-        sb.GraphicsDevice.Present();
-    }
 
     void Rendering
     (
@@ -94,7 +64,11 @@ readonly struct RenderingPlugin : IPlugin
         Query<(WorldPosition, Graphic, Hue, NetworkSerial, ScreenPositionOffset, Optional<Facing>, Optional<MobAnimation>, Optional<MobileSteps>),
             Without<Pair<ContainedInto, Wildcard>>> queryBodyOnly,
         Query<(EquipmentSlots, ScreenPositionOffset, WorldPosition, Graphic, Facing, Optional<MobileSteps>, Optional<MobAnimation>),
-            Without<Pair<ContainedInto, Wildcard>>> queryEquipmentSlots
+            Without<Pair<ContainedInto, Wildcard>>> queryEquipmentSlots,
+
+        Time time,
+        Res<TextOverHeadManager> textOverHeadManager,
+        Res<NetworkEntitiesMap> networkEntities
     )
     {
         var center = Isometric.IsoToScreen(gameCtx.Value.CenterX, gameCtx.Value.CenterY, gameCtx.Value.CenterZ);
@@ -103,6 +77,15 @@ readonly struct RenderingPlugin : IPlugin
         center.X += 22f;
         center.Y += 22f;
         center -= gameCtx.Value.CenterOffset;
+
+
+        var matrix = Matrix.Identity;
+        //matrix = Matrix.CreateScale(0.45f);
+
+        batch.Value.Begin(null, matrix);
+        batch.Value.SetBrightlight(1.7f);
+        batch.Value.SetSampler(SamplerState.PointClamp);
+        batch.Value.SetStencil(DepthStencilState.Default);
 
         queryTiles.Each((ref WorldPosition worldPos, ref Graphic graphic, ref TileStretched stretched) =>
         {
@@ -301,20 +284,43 @@ readonly struct RenderingPlugin : IPlugin
                 var color = ShaderHueTranslator.GetHueVector(FixHue(uoHue));
                 position += offset.Value;
 
-                if (!Unsafe.IsNullRef(ref steps) && steps.Count > 0)
+                if (offset.Value.X > 0 && offset.Value.Y > 0)
                 {
-                    ref var step = ref steps[steps.Count - 1];
-
-                    if (((Direction)step.Direction & Direction.Mask) is Direction.Down or Direction.South or Direction.East)
-                    {
-                        priorityZ = (sbyte)(step.Z + 2);
-                        depthZ = Isometric.GetDepthZ(step.X, step.Y, priorityZ);
-                    }
+                    depthZ = Isometric.GetDepthZ(pos.X + 1, pos.Y, priorityZ);
                 }
-                else if ((direction.Value & Direction.Mask) is Direction.Down or Direction.South or Direction.East)
+                else if (offset.Value.X == 0 && offset.Value.Y > 0)
                 {
                     depthZ = Isometric.GetDepthZ(pos.X + 1, pos.Y + 1, priorityZ);
                 }
+                else if (offset.Value.X < 0 && offset.Value.Y > 0)
+                {
+                    depthZ = Isometric.GetDepthZ(pos.X, pos.Y + 1, priorityZ);
+                }
+
+                // if (!Unsafe.IsNullRef(ref steps) && steps.Count > 0)
+                // {
+                //     ref var step = ref steps[steps.Count - 1];
+                //
+                //     if (((Direction)step.Direction & Direction.Mask) is Direction.Down or Direction.South or Direction.East)
+                //     {
+                //         priorityZ = (sbyte)(step.Z + 2);
+                //         depthZ = Isometric.GetDepthZ(step.X, step.Y, priorityZ);
+                //     }
+                // }
+                // else
+                // {
+                //     depthZ = (direction.Value & Direction.Mask) switch
+                //     {
+                //         Direction.Down => Isometric.GetDepthZ(pos.X + 1, pos.Y + 1, priorityZ - 1),
+                //         Direction.South => Isometric.GetDepthZ(pos.X, pos.Y + 1, priorityZ - 1),
+                //         Direction.East => Isometric.GetDepthZ(pos.X + 1, pos.Y, priorityZ -1),
+                //         _ => depthZ
+                //     };
+                // }
+                // else if ((direction.Value & Direction.Mask) is Direction.Down or Direction.South or Direction.East)
+                // {
+                //     depthZ = Isometric.GetDepthZ(pos.X + 1, pos.Y + 1, priorityZ);
+                // }
 
                 batch.Value.Draw
                 (
@@ -347,20 +353,39 @@ readonly struct RenderingPlugin : IPlugin
                 var priorityZ = pos.Z + 2;
                 var depthZ = Isometric.GetDepthZ(pos.X, pos.Y, priorityZ);
 
-                if (!Unsafe.IsNullRef(ref steps) && steps.Count > 0)
+                if (offset.Value.X > 0 && offset.Value.Y > 0)
                 {
-                    ref var step = ref steps[steps.Count - 1];
-
-                    if (((Direction)step.Direction & Direction.Mask) is Direction.Down or Direction.South or Direction.East)
-                    {
-                        priorityZ = (sbyte)(step.Z + 2);
-                        depthZ = Isometric.GetDepthZ(step.X, step.Y, priorityZ);
-                    }
+                    depthZ = Isometric.GetDepthZ(pos.X + 1, pos.Y, priorityZ);
                 }
-                else if ((direction.Value & Direction.Mask) is Direction.Down or Direction.South or Direction.East)
+                else if (offset.Value.X == 0 && offset.Value.Y > 0)
                 {
                     depthZ = Isometric.GetDepthZ(pos.X + 1, pos.Y + 1, priorityZ);
                 }
+                else if (offset.Value.X < 0 && offset.Value.Y > 0)
+                {
+                    depthZ = Isometric.GetDepthZ(pos.X, pos.Y + 1, priorityZ);
+                }
+
+                // if (!Unsafe.IsNullRef(ref steps) && steps.Count > 0)
+                // {
+                //     ref var step = ref steps[steps.Count - 1];
+                //
+                //     if (((Direction)step.Direction & Direction.Mask) is Direction.Down or Direction.South or Direction.East)
+                //     {
+                //         priorityZ = (sbyte)(step.Z + 2);
+                //         depthZ = Isometric.GetDepthZ(step.X, step.Y, priorityZ);
+                //     }
+                // }
+                // else // if ((direction.Value & Direction.Mask) is Direction.Down or Direction.South or Direction.East)
+                // {
+                //     depthZ = (direction.Value & Direction.Mask) switch
+                //     {
+                //         Direction.Down => Isometric.GetDepthZ(pos.X + 1, pos.Y + 1, priorityZ - 1),
+                //         Direction.South => Isometric.GetDepthZ(pos.X, pos.Y + 1, priorityZ - 1),
+                //         Direction.East => Isometric.GetDepthZ(pos.X + 1, pos.Y, priorityZ -1),
+                //         _ => depthZ
+                //     };
+                // }
 
                 (var dir, var mirror) = FixDirection(animation.Direction);
 
@@ -442,6 +467,10 @@ readonly struct RenderingPlugin : IPlugin
                     }
                 }
             });
+
+            batch.Value.SetSampler(null);
+            batch.Value.SetStencil(null);
+            batch.Value.End();
     }
 
 

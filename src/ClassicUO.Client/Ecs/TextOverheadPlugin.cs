@@ -1,0 +1,239 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using ClassicUO.Game;
+using ClassicUO.Game.Data;
+using ClassicUO.Renderer;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using TinyEcs;
+using World = TinyEcs.World;
+
+namespace ClassicUO.Ecs;
+
+struct TextInfo
+{
+    public uint Serial;
+    public string Text;
+    public string Name;
+    public ushort Hue;
+    public byte Font;
+    public MessageType MessageType;
+    public float Time;
+}
+
+struct TextOverheadPlugin : IPlugin
+{
+    public void Build(Scheduler scheduler)
+    {
+        scheduler.AddEvent<TextInfo>();
+        scheduler.AddResource(new TextOverHeadManager());
+
+        var readTextOverHeadFn = ReadTextOverhead;
+        scheduler.AddSystem(readTextOverHeadFn, Stages.Update, ThreadingMode.Single)
+                 .RunIf((EventReader<TextInfo> texts) => !texts.IsEmpty);
+
+        var showTextOverheadFn = ShowTextOverhead;
+        scheduler.AddSystem(showTextOverheadFn, Stages.AfterUpdate, ThreadingMode.Single);
+    }
+
+    void ReadTextOverhead(TinyEcs.World world, Time time, EventReader<TextInfo> texts, Res<TextOverHeadManager> textOverHeadManager)
+    {
+        foreach (var text in texts)
+        {
+            var copyText = text;
+            copyText.Time = time.Total + 5000f;
+
+            textOverHeadManager.Value.Append(copyText);
+        }
+    }
+
+    void ShowTextOverhead(
+        TinyEcs.World world, Time time, Res<TextOverHeadManager> textOverHeadManager,
+        Res<NetworkEntitiesMap> networkEntities, Res<UltimaBatcher2D> batcher,
+        Res<GameContext> gameCtx)
+    {
+        textOverHeadManager.Value.Update(world, time, networkEntities);
+        textOverHeadManager.Value.Render(world, networkEntities, batcher, gameCtx);
+    }
+}
+
+internal sealed class TextOverHeadManager
+{
+    private readonly List<uint> _toRemove = new();
+    private readonly List<(int, int)> _cuttedTextIndices = new ();
+    private readonly Dictionary<uint, LinkedList<TextInfo>> _textOverHeadMap = new();
+
+    public void Append(TextInfo text)
+    {
+        if (!_textOverHeadMap.TryGetValue(text.Serial, out var list))
+        {
+            list = new();
+            _textOverHeadMap[text.Serial] = list;
+        }
+
+        if (list.Count >= 5)
+            list.RemoveFirst();
+        list.AddLast(text);
+    }
+
+    public void Update(TinyEcs.World world, Time time, NetworkEntitiesMap networkEntities)
+    {
+        foreach ((var serial, var list) in _textOverHeadMap)
+        {
+            var ent = networkEntities.Get(world, serial);
+
+            if (!ent.ID.IsValid() || list.Count == 0)
+            {
+                    _toRemove.Add(serial);
+                continue;
+            }
+
+            var first = list.First;
+            while (first != null)
+            {
+                var next = first.Next;
+                if (first.Value.Time <= time.Total)
+                    list.Remove(first);
+                first = next;
+            }
+        }
+
+        if (_toRemove.Count > 0)
+        {
+            foreach (var serial in _toRemove)
+                _textOverHeadMap.Remove(serial);
+            _toRemove.Clear();
+        }
+    }
+
+    public void Render(World world, NetworkEntitiesMap networkEntities, UltimaBatcher2D batch, GameContext gameCtx)
+    {
+        var center = Isometric.IsoToScreen(gameCtx.CenterX, gameCtx.CenterY, gameCtx.CenterZ);
+        var windowSize = new Vector2(batch.GraphicsDevice.PresentationParameters.BackBufferWidth, batch.GraphicsDevice.PresentationParameters.BackBufferHeight);
+        center -= windowSize / 2f;
+        center.X += 22f;
+        center.Y += 22f;
+        center -= gameCtx.CenterOffset;
+
+        var matrix = Matrix.Identity;
+        //matrix = Matrix.CreateScale(0.45f);
+
+        // batch.GraphicsDevice.Clear(Color.Black);
+        batch.Begin(null, matrix);
+        batch.SetBrightlight(1.7f);
+        batch.SetSampler(SamplerState.PointClamp);
+        // batch.SetStencil(DepthStencilState.Default);
+
+        var lines = _cuttedTextIndices;
+
+        foreach ((var serial, var list) in _textOverHeadMap)
+        {
+            var ent = networkEntities.Get(world, serial);
+
+            if (!ent.ID.IsValid() || list.Count == 0)
+                continue;
+
+            ref var worldPos = ref ent.Get<WorldPosition>();
+            ref var offset = ref ent.Get<ScreenPositionOffset>();
+            var position = Isometric.IsoToScreen(worldPos.X, worldPos.Y, worldPos.Z);
+
+            if (!Unsafe.IsNullRef(ref offset))
+                position += offset.Value;
+            position -= center;
+
+            position.X += 22f;
+            position.Y += 22f;
+            position.Y -= Constants.DEFAULT_CHARACTER_HEIGHT * 6;
+
+            if (position.X < 0)
+                position.X = 0;
+            if (position.Y < 0)
+                position.Y = 0;
+
+            var last = list.Last;
+            while (last != null)
+            {
+                const int MAX_LENGTH = 200;
+
+                var text = last.Value;
+                var font = text.MessageType switch
+                {
+                    MessageType.Spell => Fonts.Regular,
+                    _ => Fonts.Bold,
+                };
+
+                var textLength = text.Text.Length;
+                var currentStart = 0;
+                var startPos = position;
+                float widthMax = 0f, heightMax = 0f;
+                while (currentStart < textLength)
+                {
+                    var maxSize = 0f;
+                    var cutAtIndex = textLength;
+                    var lastWhiteSpaceIndex = -1;
+
+                    for (int i = currentStart; i < textLength; i++)
+                    {
+                        var charSize = font.MeasureString(text.Text.AsSpan(i, 1)).X;
+                        if (char.IsWhiteSpace(text.Text[i]))
+                            lastWhiteSpaceIndex = i;
+
+                        if (maxSize + charSize > MAX_LENGTH)
+                        {
+                            // Cut at the last whitespace or current index if no whitespace found
+                            cutAtIndex = lastWhiteSpaceIndex >= currentStart ? lastWhiteSpaceIndex : i;
+                            break;
+                        }
+
+                        maxSize += charSize;
+                    }
+
+                    // Determine the length of the current line
+                    var spanLength = cutAtIndex - currentStart;
+
+                    // Collect the substring that fits in this line
+                    lines.Add((currentStart, spanLength));
+
+                    var line = text.Text.AsSpan(currentStart, spanLength);
+                    var size = font.MeasureString(line);
+                    var pos = position - size / 2f;
+                    startPos.X = Math.Min(startPos.X, pos.X);
+                    widthMax = Math.Max(widthMax, size.X);
+                    heightMax = Math.Max(heightMax, size.Y);
+
+                    // Move to the next segment of the text, skip any whitespace after the cut
+                    currentStart = cutAtIndex + (cutAtIndex < textLength - 1 && char.IsWhiteSpace(text.Text[cutAtIndex]) ? 1 : 0);
+                }
+
+                if (startPos.X < 0)
+                    startPos.X = 0;
+                if (startPos.Y < (lines.Count - 1) * heightMax)
+                    startPos.Y = (lines.Count - 1) * heightMax;
+                if (startPos.X + widthMax> windowSize.X)
+                    startPos.X = windowSize.X - widthMax;
+
+                // Now draw the lines in correct order (top-down)
+                for (int i = lines.Count - 1; i >= 0; i--)
+                {
+                    var line = text.Text.AsSpan(lines[i].Item1, lines[i].Item2);
+
+                    // Draw the text
+                    batch.DrawString(font, line, startPos + Vector2.One, ShaderHueTranslator.GetHueVector(1));
+                    batch.DrawString(font, line, startPos, ShaderHueTranslator.GetHueVector(text.Hue));
+
+                    startPos.Y -= heightMax;
+                    position.Y -= heightMax;
+                }
+
+                last = last.Previous; // Move to the previous sentence in the list
+
+                lines.Clear();
+            }
+        }
+
+        batch.SetSampler(null);
+        // batch.SetStencil(null);
+        batch.End();
+    }
+}

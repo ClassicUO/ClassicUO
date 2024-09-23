@@ -47,6 +47,21 @@ sealed class NetworkEntitiesMap
         return ent;
     }
 
+    public EntityView Get(TinyEcs.World world, uint serial)
+    {
+        if (_entities.TryGetValue(serial, out var id))
+        {
+            if (world.Exists(id))
+            {
+                return world.Entity(id);
+            }
+
+            _entities.Remove(serial);
+        }
+
+        return EntityView.Invalid;
+    }
+
     public bool Remove(TinyEcs.World world, uint serial)
     {
         var result = false;
@@ -172,6 +187,7 @@ readonly struct InGamePacketsPlugin : IPlugin
             EventWriter<AcceptedStep> acceptedSteps,
             EventWriter<RejectedStep> rejectedSteps,
             EventWriter<MobileQueuedStep> mobileQueuedSteps,
+            EventWriter<TextInfo> textOverHeadQueue,
             TinyEcs.World world
         ) =>
         {
@@ -439,7 +455,17 @@ readonly struct InGamePacketsPlugin : IPlugin
                 else
                 {
                     var text = reader.ReadUnicodeBE();
-                    Console.WriteLine("{0} says: '{1}'", name, text);
+                    Console.WriteLine("[0xAE] {0} says: '{1}'", name, text);
+
+                    textOverHeadQueue.Enqueue(new TextInfo()
+                    {
+                        Serial = serial,
+                        Name = name,
+                        Hue = hue,
+                        Font = (byte) font,
+                        Text = text,
+                        MessageType = msgType,
+                    });
                 }
             };
 
@@ -494,7 +520,6 @@ readonly struct InGamePacketsPlugin : IPlugin
 
                 parentEnt.Set(slots);
 
-
                 mobileQueuedSteps.Enqueue(new ()
                 {
                     Serial = serial,
@@ -512,6 +537,45 @@ readonly struct InGamePacketsPlugin : IPlugin
             {
                 var reader = new StackDataReader(buffer);
                 var range = reader.ReadUInt8();
+            };
+
+            // ascii speech
+            packetsMap.Value[0x1C] = buffer =>
+            {
+                var reader = new StackDataReader(buffer);
+
+                var serial = reader.ReadUInt32BE();
+                var graphic = reader.ReadUInt16BE();
+                var msgType = (MessageType)reader.ReadUInt8();
+                var hue = reader.ReadUInt16BE();
+                var font = reader.ReadUInt16BE();
+                var name = reader.ReadASCII(30);
+                var text = reader.ReadASCII();
+
+                if (
+                    serial == 0
+                    && graphic == 0
+                    && msgType == MessageType.Regular
+                    && font == 0xFFFF
+                    && hue == 0xFFFF
+                    && name.StartsWith("SYSTEM")
+                )
+                {
+                    network.Value.Send_ACKTalk();
+                    return;
+                }
+
+                Console.WriteLine("[0x1C] {0} says: '{1}'", name, text);
+
+                textOverHeadQueue.Enqueue(new TextInfo()
+                {
+                    Serial = serial,
+                    Name = name,
+                    Hue = hue,
+                    Font = (byte) font,
+                    Text = text,
+                    MessageType = msgType,
+                });
             };
 
             // update item

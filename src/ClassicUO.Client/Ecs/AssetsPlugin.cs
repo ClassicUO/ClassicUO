@@ -2,6 +2,7 @@ using System;
 using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
+using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework.Graphics;
 using TinyEcs;
@@ -27,12 +28,14 @@ readonly struct AssetsPlugin : IPlugin
 
     unsafe void LoadAssets
     (
-            Res<GraphicsDevice> device,
-            Res<GameContext> gameCtx,
-            Res<Settings> settings,
-            SchedulerState schedState
+        Res<GraphicsDevice> device,
+        Res<GameContext> gameCtx,
+        Res<Settings> settings,
+        SchedulerState schedState
     )
     {
+        Fonts.Initialize(device);
+
         var fileManager = new UOFileManager(gameCtx.Value.ClientVersion, settings.Value.UltimaOnlineDirectory);
         fileManager.Load(false, settings.Value.Language);
 

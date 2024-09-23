@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using ClassicUO.Assets;
 using ClassicUO.Game;
@@ -46,7 +47,7 @@ struct MobileStepArray
     private Game.GameObjects.Mobile.Step _a;
 }
 
-unsafe struct MobileSteps
+struct MobileSteps
 {
     public const int COUNT = 10;
 
@@ -54,6 +55,7 @@ unsafe struct MobileSteps
     public int Count;
     public float Time;
 
+    [UnscopedRef]
     public ref Game.GameObjects.Mobile.Step this[int index] => ref _steps[index];
 }
 
