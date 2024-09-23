@@ -60,6 +60,8 @@ struct TextOverheadPlugin : IPlugin
 
 internal sealed class TextOverHeadManager
 {
+    const int MAX_LENGTH = 200;
+
     private readonly List<uint> _toRemove = new();
     private readonly List<(int, int)> _cuttedTextIndices = new ();
     private readonly Dictionary<uint, LinkedList<TextInfo>> _textOverHeadMap = new();
@@ -85,7 +87,7 @@ internal sealed class TextOverHeadManager
 
             if (!ent.ID.IsValid() || list.Count == 0)
             {
-                    _toRemove.Add(serial);
+                _toRemove.Add(serial);
                 continue;
             }
 
@@ -144,17 +146,23 @@ internal sealed class TextOverHeadManager
 
             position.X += 22f;
             position.Y += 22f;
-            position.Y -= Constants.DEFAULT_CHARACTER_HEIGHT * 6;
+            position.Y -= Constants.DEFAULT_CHARACTER_HEIGHT * 5;
 
+            (var bounds, var totalLines) = GetBounds(list);
+
+            var lineHeight = bounds.Y / totalLines;
             if (position.X < 0)
                 position.X = 0;
-            if (position.Y < 0)
-                position.Y = 0;
+            if (position.Y < bounds.Y - lineHeight)
+                position.Y = bounds.Y - lineHeight;
 
             var last = list.Last;
+            var offsetY = 0f;
+
             while (last != null)
             {
-                const int MAX_LENGTH = 200;
+                var startPos = position;
+                startPos.Y += offsetY;
 
                 var text = last.Value;
                 var font = text.MessageType switch
@@ -165,7 +173,6 @@ internal sealed class TextOverHeadManager
 
                 var textLength = text.Text.Length;
                 var currentStart = 0;
-                var startPos = position;
                 float widthMax = 0f, heightMax = 0f;
                 while (currentStart < textLength)
                 {
@@ -214,7 +221,7 @@ internal sealed class TextOverHeadManager
                     startPos.X = windowSize.X - widthMax;
 
                 // Now draw the lines in correct order (top-down)
-                for (int i = lines.Count - 1; i >= 0; i--)
+                for (var i = lines.Count - 1; i >= 0; i--)
                 {
                     var line = text.Text.AsSpan(lines[i].Item1, lines[i].Item2);
 
@@ -223,7 +230,7 @@ internal sealed class TextOverHeadManager
                     batch.DrawString(font, line, startPos, ShaderHueTranslator.GetHueVector(text.Hue));
 
                     startPos.Y -= heightMax;
-                    position.Y -= heightMax;
+                    offsetY -= heightMax;
                 }
 
                 last = last.Previous; // Move to the previous sentence in the list
@@ -235,5 +242,68 @@ internal sealed class TextOverHeadManager
         batch.SetSampler(null);
         // batch.SetStencil(null);
         batch.End();
+    }
+
+    private (Vector2 bounds, int lines) GetBounds(LinkedList<TextInfo> list)
+    {
+        var bounds = Vector2.Zero;
+        var last = list.Last;
+        var lines = 0;
+
+        while (last != null)
+        {
+            var text = last.Value;
+            var font = text.MessageType switch
+            {
+                MessageType.Spell => Fonts.Regular,
+                _ => Fonts.Bold,
+            };
+
+            var textLength = text.Text.Length;
+            var currentStart = 0;
+            float widthMax = 0f, heightMax = 0f;
+            var linesCount = 0;
+
+            while (currentStart < textLength)
+            {
+                var maxSize = 0f;
+                var cutAtIndex = textLength;
+                var lastWhiteSpaceIndex = -1;
+
+                for (int i = currentStart; i < textLength; i++)
+                {
+                    var charSize = font.MeasureString(text.Text.AsSpan(i, 1)).X;
+                    if (char.IsWhiteSpace(text.Text[i]))
+                        lastWhiteSpaceIndex = i;
+
+                    if (maxSize + charSize > MAX_LENGTH)
+                    {
+                        cutAtIndex = lastWhiteSpaceIndex >= currentStart ? lastWhiteSpaceIndex : i;
+                        break;
+                    }
+
+                    maxSize += charSize;
+                }
+
+                var spanLength = cutAtIndex - currentStart;
+                var line = text.Text.AsSpan(currentStart, spanLength);
+                var size = font.MeasureString(line);
+
+                widthMax = Math.Max(widthMax, size.X);
+                heightMax = Math.Max(heightMax, size.Y);
+
+                linesCount++;
+
+                currentStart = cutAtIndex + (cutAtIndex < textLength - 1 && char.IsWhiteSpace(text.Text[cutAtIndex]) ? 1 : 0);
+            }
+
+            bounds.X = Math.Max(bounds.X, widthMax);
+            bounds.Y += heightMax * linesCount;
+            last = last.Previous;
+
+            lines += linesCount;
+        }
+
+        return (bounds, lines);
     }
 }
