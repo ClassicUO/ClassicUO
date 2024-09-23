@@ -120,6 +120,14 @@ readonly struct MobAnimationsPlugin : IPlugin
 
             if (steps.Count >= MobileSteps.COUNT)
             {
+                world.Set(ent, new WorldPosition()
+                {
+                    X = queuedStep.X,
+                    Y = queuedStep.Y,
+                    Z = queuedStep.Z,
+                });
+                world.Set(ent, new Facing() { Value = queuedStep.Direction });
+                steps.Count = 0;
                 continue;
             }
 
@@ -164,53 +172,37 @@ readonly struct MobAnimationsPlugin : IPlugin
 
             var moveDir = DirectionHelper.CalculateDirection(endX, endY, queuedStep.X, queuedStep.Y);
 
-            var over = 0;
-            if (moveDir != Direction.NONE)
-            {
-                over += 1;
-                if (moveDir != endDir)
-                    over += 1;
-            }
-
-            if (moveDir != clearedDir)
-                over += 1;
-
-            if (steps.Count + over >= MobileSteps.COUNT)
-            {
-                steps.Count = Math.Max(0, MobileSteps.COUNT - over);
-            }
-
             if (moveDir != Direction.NONE)
             {
                 if (moveDir != endDir)
                 {
-                    ref var step1 = ref steps[steps.Count];
+                    ref var step1 = ref steps[Math.Min(MobileSteps.COUNT - 1, steps.Count)];
                     step1.X = endX;
                     step1.Y = endY;
                     step1.Z = endZ;
                     step1.Direction = (byte)moveDir;
                     step1.Run = queuedStep.Direction.HasFlag(Direction.Running);
-                    steps.Count = Math.Min(MobileSteps.COUNT - 1, steps.Count + 1);
+                    steps.Count = Math.Min(MobileSteps.COUNT, steps.Count + 1);
                 }
 
-                ref var step2 = ref steps[steps.Count];
+                ref var step2 = ref steps[Math.Min(MobileSteps.COUNT - 1, steps.Count)];
                 step2.X = queuedStep.X;
                 step2.Y = queuedStep.Y;
                 step2.Z = queuedStep.Z;
                 step2.Direction = (byte)moveDir;
                 step2.Run = queuedStep.Direction.HasFlag(Direction.Running);
-                steps.Count = Math.Min(MobileSteps.COUNT - 1, steps.Count + 1);
+                steps.Count = Math.Min(MobileSteps.COUNT, steps.Count + 1);
             }
 
             if (moveDir != clearedDir)
             {
-                ref var step3 = ref steps[steps.Count];
+                ref var step3 = ref steps[Math.Min(MobileSteps.COUNT - 1, steps.Count)];
                 step3.X = queuedStep.X;
                 step3.Y = queuedStep.Y;
                 step3.Z = queuedStep.Z;
                 step3.Direction = (byte)clearedDir;
                 step3.Run = queuedStep.Direction.HasFlag(Direction.Running);
-                steps.Count = Math.Min(MobileSteps.COUNT - 1, steps.Count + 1);
+                steps.Count = Math.Min(MobileSteps.COUNT, steps.Count + 1);
             }
         }
     }
@@ -227,7 +219,7 @@ readonly struct MobAnimationsPlugin : IPlugin
             {
                 while (steps.Count > 0)
                 {
-                    ref readonly var step = ref steps[0];
+                    ref var step = ref steps[0];
 
                     var delay = time.Total - steps.Time;
                     var mount = animation.MountAction != 0xFF;
@@ -237,21 +229,46 @@ readonly struct MobAnimationsPlugin : IPlugin
                         mount = delay <= (step.Run ? MovementSpeed.STEP_DELAY_MOUNT_RUN : MovementSpeed.STEP_DELAY_WALK);
                     }
 
-                    var maxDelay = MovementSpeed.TimeToCompleteMovement(step.Run, mount);
+                    var maxDelay = MovementSpeed.TimeToCompleteMovement(step.Run, mount) - 15;
                     var removeStep = delay >= maxDelay;
                     var directionChange = false;
 
                     if (position.X != step.X || position.Y != step.Y)
                     {
-                        var stepsCount = maxDelay / (float)Constants.CHARACTER_ANIMATION_DELAY;
-                        var x = delay / (float)Constants.CHARACTER_ANIMATION_DELAY;
-                        var y = x;
+                        var badStep = false;
 
-                        var offsetZ = ((step.Z - position.Z) * x * (4.0f / stepsCount));
-                        MovementSpeed.GetPixelOffset(step.Direction, ref x, ref y, stepsCount);
+                        if (offset.Value == Vector2.Zero)
+                        {
+                            var absX = Math.Abs(position.X - step.X);
+                            var absY = Math.Abs(position.Y - step.Y);
 
-                        offset.Value.X = x;
-                        offset.Value.Y = y - offsetZ;
+                            badStep = absX > 1 || absY > 1 || absX + absY == 0;
+
+                            if (!badStep)
+                            {
+                                absX = position.X;
+                                absY = position.Y;
+
+                                Pathfinder.GetNewXY((byte)(step.Direction & 7), ref absX, ref absY);
+
+                                badStep = absX != step.X || absY != step.Y;
+                            }
+                        }
+
+                        if (badStep)
+                            removeStep = true;
+                        else
+                        {
+                            var stepsCount = maxDelay / (float)Constants.CHARACTER_ANIMATION_DELAY;
+                            var x = delay / (float)Constants.CHARACTER_ANIMATION_DELAY;
+                            var y = x;
+
+                            var offsetZ = ((step.Z - position.Z) * x * (4.0f / stepsCount));
+                            MovementSpeed.GetPixelOffset(step.Direction, ref x, ref y, stepsCount);
+
+                            offset.Value.X = x;
+                            offset.Value.Y = y - offsetZ;
+                        }
 
                         animation.Run = true;
                     }
