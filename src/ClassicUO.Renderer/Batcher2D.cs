@@ -236,11 +236,12 @@ namespace ClassicUO.Renderer
 
                 float offsetX = baseOffset.X + (curOffset.X + cCrop.X) * axisDirX;
                 float offsetY = baseOffset.Y + (curOffset.Y + cCrop.Y) * axisDirY;
-                var offset = new Vector2(offsetX, offsetY);
+
+                var pos = new Vector2(offsetX, offsetY);
                 Draw
                 (
                     textureValue,
-                    position + offset,
+                    position + pos,
                     cGlyph,
                     color
                 );
