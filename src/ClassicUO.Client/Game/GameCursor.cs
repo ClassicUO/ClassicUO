@@ -189,27 +189,27 @@ namespace ClassicUO.Game
         {
             ushort graphic = GetDraggingItemGraphic();
 
-            if (graphic != 0xFFFF)
+            if (graphic == 0xFFFF)
             {
-                ref readonly var artInfo = ref (ItemHold.IsGumpTexture ? ref Client.Game.UO.Gumps.GetGump(graphic) : ref Client.Game.UO.Arts.GetArt(graphic));
-  
-                float scale = 1;
-
-                if (
-                    ProfileManager.CurrentProfile != null
-                    && ProfileManager.CurrentProfile.ScaleItemsInsideContainers
-                )
-                {
-                    scale = UIManager.ContainerScale;
-                }
-
-                return new Point(
-                    (int)((artInfo.UV.Width >> 1) * scale) - ItemHold.MouseOffset.X,
-                    (int)((artInfo.UV.Height >> 1) * scale) - ItemHold.MouseOffset.Y
-                );
+                return Point.Zero;
             }
 
-            return Point.Zero;
+            ref readonly var artInfo = ref (ItemHold.IsGumpTexture ? ref Client.Game.UO.Gumps.GetGump(graphic) : ref Client.Game.UO.Arts.GetArt(graphic));
+
+            float scale = 1;
+
+            if (
+                ProfileManager.CurrentProfile != null
+                && ProfileManager.CurrentProfile.ScaleItemsInsideContainers
+            )
+            {
+                scale = UIManager.ContainerScale;
+            }
+
+            return new Point(
+                (int)((artInfo.UV.Width >> 1) * scale) - ItemHold.MouseOffset.X,
+                (int)((artInfo.UV.Height >> 1) * scale) - ItemHold.MouseOffset.Y
+            );
         }
 
         public void Update()
