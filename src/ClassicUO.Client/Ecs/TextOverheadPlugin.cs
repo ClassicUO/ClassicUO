@@ -41,10 +41,20 @@ struct TextOverheadPlugin : IPlugin
     {
         foreach (var text in texts)
         {
-            var copyText = text;
-            copyText.Time = time.Total + 5000f;
+            switch (text.MessageType)
+            {
+                case MessageType.Regular:
+                case MessageType.Spell:
+                case MessageType.Whisper:
+                case MessageType.Yell:
+                case MessageType.Label:
+                case MessageType.Limit3Spell:
+                    var copyText = text;
+                    copyText.Time = time.Total + 5000f;
 
-            textOverHeadManager.Value.Append(copyText);
+                    textOverHeadManager.Value.Append(copyText);
+                    break;
+            }
         }
     }
 
@@ -121,11 +131,9 @@ internal sealed class TextOverHeadManager
         var matrix = Matrix.Identity;
         //matrix = Matrix.CreateScale(0.45f);
 
-        // batch.GraphicsDevice.Clear(Color.Black);
         batch.Begin(null, matrix);
         batch.SetBrightlight(1.7f);
         batch.SetSampler(SamplerState.PointClamp);
-        // batch.SetStencil(DepthStencilState.Default);
 
         var lines = _cuttedTextIndices;
 
@@ -240,7 +248,6 @@ internal sealed class TextOverHeadManager
         }
 
         batch.SetSampler(null);
-        // batch.SetStencil(null);
         batch.End();
     }
 
