@@ -64,7 +64,7 @@ internal readonly struct FnaPlugin : IPlugin
                  .RunIf((SchedulerState state) => state.ResourceExists<GraphicsDevice>());
 
         scheduler.AddSystem(() => Environment.Exit(0), Stages.AfterUpdate)
-            .RunIf(static (Res<UoGame> game) => !UnsafeFNAAccessor.GetSetRunApplication(game.Value));
+                .RunIf(static (Res<UoGame> game) => !UnsafeFNAAccessor.GetSetRunApplication(game.Value));
 
         scheduler.AddSystem((EventWriter<KeyEvent> writer, Res<KeyboardContext> keyboardCtx) => {
             foreach (var key in keyboardCtx.Value.OldState.GetPressedKeys())
@@ -76,8 +76,7 @@ internal readonly struct FnaPlugin : IPlugin
                     writer.Enqueue(new() { Action = 1, Key = key });
                 else if (keyboardCtx.Value.OldState.IsKeyDown(key))
                     writer.Enqueue(new() { Action = 2, Key = key });
-        }, Stages.FrameEnd)
-            .RunIf((Res<UoGame> game) => game.Value.IsActive);
+        }, Stages.FrameEnd).RunIf((Res<UoGame> game) => game.Value.IsActive);
 
         scheduler.AddSystem((EventWriter<MouseEvent> writer, EventWriter<WheelEvent> wheelWriter, Res<MouseContext> mouseCtx) => {
             if (mouseCtx.Value.NewState.LeftButton != mouseCtx.Value.OldState.LeftButton)

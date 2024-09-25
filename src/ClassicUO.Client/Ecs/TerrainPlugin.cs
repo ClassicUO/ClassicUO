@@ -136,9 +136,6 @@ readonly struct TerrainPlugin : IPlugin
 
                         if (isStretched)
                         {
-                            var position = Isometric.IsoToScreen(tileX, tileY, z);
-                            position.Y += z << 2;
-
                             var e = world.Entity()
                                 .Set(new TileStretched() {
                                     NormalTop = normalTop,
@@ -342,7 +339,7 @@ readonly struct TerrainPlugin : IPlugin
         return isStretched;
     }
 
-    private unsafe static sbyte GetTileZ(MapLoader mapLoader, int mapIndex, int x, int y)
+    private static sbyte GetTileZ(MapLoader mapLoader, int mapIndex, int x, int y)
     {
         static ref Assets.IndexMap getIndex(MapLoader mapLoader, int mapIndex, int x, int y)
         {
