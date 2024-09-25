@@ -3128,19 +3128,32 @@ namespace ClassicUO.Assets
                         }
                         else if (MemoryExtensions.Equals(command, "size", StringComparison.InvariantCultureIgnoreCase))
                         {
-                            byte font = byte.Parse(value);
+                            if (!byte.TryParse(value, out var font))
+                            {
+                                if (MemoryExtensions.Equals(value, "big", StringComparison.InvariantCultureIgnoreCase))
+                                    info.Font = 4;
+                                else if (MemoryExtensions.Equals(value, "small", StringComparison.InvariantCultureIgnoreCase))
+                                    info.Font = 0;
+                                else
+                                    info.Font = 1;
+                            }
+                            else switch (font)
+                            {
+                                case 0:
+                                case 4:
+                                    info.Font = 1;
 
-                            if (font == 0 || font == 4)
-                            {
-                                info.Font = 1;
-                            }
-                            else if (font < 4)
-                            {
-                                info.Font = 2;
-                            }
-                            else
-                            {
-                                info.Font = 0;
+                                    break;
+
+                                case < 4:
+                                    info.Font = 2;
+
+                                    break;
+
+                                default:
+                                    info.Font = 0;
+
+                                    break;
                             }
                         }
 
