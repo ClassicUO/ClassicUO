@@ -30,8 +30,9 @@
 
 #endregion
 
-using ClassicUO.Configuration;
 using ClassicUO.Assets;
+using ClassicUO.Configuration;
+using ClassicUO.Game.Managers;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -67,6 +68,22 @@ namespace ClassicUO.Game.GameObjects
             {
                 hue = Constants.DEAD_RANGE_COLOR;
             }
+
+            if (SelectedObject.Object == this)
+            {
+                SpellVisualRangeManager.Instance.LastCursorTileLoc = new Vector2(X, Y);
+            }
+            if (SpellVisualRangeManager.Instance.IsTargetingAfterCasting())
+            {
+                hue = SpellVisualRangeManager.Instance.ProcessHueForTile(hue, this);
+            }
+
+            if (TileMarkerManager.Instance.IsTileMarked(X, Y, World.Map.Index, out var nhue))
+                hue = nhue;
+
+            if (ProfileManager.CurrentProfile.DisplayRadius && Distance == ProfileManager.CurrentProfile.DisplayRadiusDistance)
+                hue = ProfileManager.CurrentProfile.DisplayRadiusHue;
+
 
             Vector3 hueVec;
             if (hue != 0)
@@ -125,6 +142,10 @@ namespace ClassicUO.Game.GameObjects
             {
                 ref readonly var artInfo = ref Client.Game.UO.Arts.GetLand(Graphic);
 
+                ref readonly var texmapInfo = ref Client.Game.Texmaps.GetTexmap(
+                    TileDataLoader.Instance.LandData[Graphic].TexID
+                );
+
                 if (artInfo.Texture != null)
                 {
                     var pos = new Vector2(posX, posY);
@@ -149,17 +170,33 @@ namespace ClassicUO.Game.GameObjects
                         scale = new Vector2(1.1f + sin * 0.1f, 1.1f + cos * 0.5f * 0.1f);
                     }
 
-                    batcher.Draw(
-                        artInfo.Texture,
-                        pos,
-                        artInfo.UV,
-                        hueVec,
-                        0f,
-                        Vector2.Zero,
-                        scale,
-                        SpriteEffects.None,
-                        depth + 0.5f
-                    );
+                    if (texmapInfo.Texture != null && ProfileManager.CurrentProfile.UseLandTextures)
+                    {
+                        batcher.Draw(
+                            texmapInfo.Texture,
+                            new Rectangle(posX, posY, artInfo.UV.Width, artInfo.UV.Height),
+                            texmapInfo.UV,
+                            hueVec,
+                            0f,
+                            Vector2.Zero,
+                            SpriteEffects.None,
+                            depth + 0.5f
+                        );
+                    }
+                    else
+                    {
+                        batcher.Draw(
+                            artInfo.Texture,
+                            pos,
+                            artInfo.UV,
+                            hueVec,
+                            0f,
+                            Vector2.Zero,
+                            scale,
+                            SpriteEffects.None,
+                            depth + 0.5f
+                        );
+                    }
                 }
             }
 

@@ -35,7 +35,7 @@ using System.Collections.Generic;
 
 namespace ClassicUO.Game.Data
 {
-    internal abstract class CustomHouseObject
+    public abstract class CustomHouseObject
     {
         public int Category;
         public int FeatureMask;
@@ -48,13 +48,13 @@ namespace ClassicUO.Game.Data
         public abstract int Contains(ushort graphic);
     }
 
-    internal abstract class CustomHouseObjectCategory<T> where T : CustomHouseObject
+    public abstract class CustomHouseObjectCategory<T> where T : CustomHouseObject
     {
         public int Index;
         public List<T> Items = new List<T>();
     }
 
-    internal class CustomHouseWall : CustomHouseObject
+    public class CustomHouseWall : CustomHouseObject
     {
         public const int GRAPHICS_COUNT = 8;
         public ushort[] Graphics = new ushort[GRAPHICS_COUNT];
@@ -139,11 +139,11 @@ namespace ClassicUO.Game.Data
         }
     }
 
-    internal class CustomHouseWallCategory : CustomHouseObjectCategory<CustomHouseWall>
+    public class CustomHouseWallCategory : CustomHouseObjectCategory<CustomHouseWall>
     {
     }
 
-    internal class CustomHouseFloor : CustomHouseObject
+    public class CustomHouseFloor : CustomHouseObject
     {
         public const int GRAPHICS_COUNT = 16;
 
@@ -198,7 +198,7 @@ namespace ClassicUO.Game.Data
         }
     }
 
-    internal class CustomHouseRoof : CustomHouseObject
+    public class CustomHouseRoof : CustomHouseObject
     {
         public const int GRAPHICS_COUNT = 16;
         public ushort[] Graphics = new ushort[GRAPHICS_COUNT];
@@ -253,11 +253,11 @@ namespace ClassicUO.Game.Data
         }
     }
 
-    internal class CustomHouseRoofCategory : CustomHouseObjectCategory<CustomHouseRoof>
+    public class CustomHouseRoofCategory : CustomHouseObjectCategory<CustomHouseRoof>
     {
     }
 
-    internal class CustomHouseMisc : CustomHouseObject
+    public class CustomHouseMisc : CustomHouseObject
     {
         public const int GRAPHICS_COUNT = 8;
         public ushort[] Graphics = new ushort[GRAPHICS_COUNT];
@@ -304,11 +304,11 @@ namespace ClassicUO.Game.Data
         }
     }
 
-    internal class CustomHouseMiscCategory : CustomHouseObjectCategory<CustomHouseMisc>
+    public class CustomHouseMiscCategory : CustomHouseObjectCategory<CustomHouseMisc>
     {
     }
 
-    internal class CustomHouseDoor : CustomHouseObject
+    public class CustomHouseDoor : CustomHouseObject
     {
         public const int GRAPHICS_COUNT = 8;
         public ushort[] Graphics = new ushort[GRAPHICS_COUNT];
@@ -355,7 +355,7 @@ namespace ClassicUO.Game.Data
         }
     }
 
-    internal class CustomHouseTeleport : CustomHouseObject
+    public class CustomHouseTeleport : CustomHouseObject
     {
         public const int GRAPHICS_COUNT = 16;
 
@@ -410,7 +410,7 @@ namespace ClassicUO.Game.Data
         }
     }
 
-    internal class CustomHouseStair : CustomHouseObject
+    public class CustomHouseStair : CustomHouseObject
     {
         public const int GRAPHICS_COUNT = 9;
 
@@ -458,7 +458,7 @@ namespace ClassicUO.Game.Data
         }
     }
 
-    internal class CustomHousePlaceInfo : CustomHouseObject
+    public class CustomHousePlaceInfo : CustomHouseObject
     {
         public const int GRAPHICS_COUNT = 1;
         public int Graphic, Top, Bottom, AdjUN, AdjLN, AdjUE, AdjLE, AdjUS, AdjLS, AdjUW, AdjLW, DirectSupports, CanGoW, CanGoN, CanGoNWS;

@@ -30,13 +30,13 @@
 
 #endregion
 
-using System;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
+using System;
 
 namespace ClassicUO.Game.Managers
 {
-    internal class MessageEventArgs : EventArgs
+    public class MessageEventArgs : EventArgs
     {
         public MessageEventArgs
         (
@@ -78,7 +78,7 @@ namespace ClassicUO.Game.Managers
 
         public string Language { get; }
 
-        public uint Cliloc { get; }
+        public uint Cliloc { get; set; }
 
         public AffixType AffixType { get; }
 

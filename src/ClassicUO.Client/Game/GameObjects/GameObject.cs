@@ -30,20 +30,19 @@
 
 #endregion
 
-using System;
-using System.Runtime.CompilerServices;
+using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Map;
-using ClassicUO.Assets;
-using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
+using System;
+using System.Runtime.CompilerServices;
 
 namespace ClassicUO.Game.GameObjects
 {
-    internal abstract class BaseGameObject : LinkedObject
+    public abstract class BaseGameObject : LinkedObject
     {
         protected BaseGameObject(World world) => World = world;
 
@@ -52,7 +51,7 @@ namespace ClassicUO.Game.GameObjects
         public World World { get; }
     }
 
-    internal abstract partial class GameObject : BaseGameObject
+    public abstract partial class GameObject : BaseGameObject
     {
         protected GameObject(World world) : base(world) { }
 
@@ -117,6 +116,13 @@ namespace ClassicUO.Game.GameObjects
                 RealScreenPosition.X + Offset.X,
                 RealScreenPosition.Y + (Offset.Y - Offset.Z)
             );
+        }
+
+        public int DistanceFrom(Vector2 pos)
+        {
+            if (pos == null) { return int.MaxValue; }
+
+            return Math.Max(Math.Abs(X - (int)pos.X), Math.Abs(Y - (int)pos.Y));
         }
 
         public void AddToTile()
@@ -227,7 +233,7 @@ namespace ClassicUO.Game.GameObjects
 
             for (; last != null; last = (TextObject)last.Previous)
             {
-                if (last.RenderedText != null && !last.RenderedText.IsDestroyed)
+                if (last.TextBox != null && !last.TextBox.IsDisposed)
                 {
                     if (offY == 0 && last.Time < Time.Ticks)
                     {
@@ -235,9 +241,9 @@ namespace ClassicUO.Game.GameObjects
                     }
 
                     last.OffsetY = offY;
-                    offY += last.RenderedText.Height;
+                    offY += last.TextBox.Height;
 
-                    last.RealScreenPosition.X = p.X - (last.RenderedText.Width >> 1);
+                    last.RealScreenPosition.X = p.X - (last.TextBox.Width >> 1);
                     last.RealScreenPosition.Y = p.Y - offY;
                 }
             }
@@ -265,18 +271,13 @@ namespace ClassicUO.Game.GameObjects
                 item = (TextObject)item.Next
             )
             {
-                if (
-                    item.RenderedText == null
-                    || item.RenderedText.IsDestroyed
-                    || item.RenderedText.Texture == null
-                    || item.Time < Time.Ticks
-                )
+                if (item.TextBox == null || item.TextBox.IsDisposed || item.Time < Time.Ticks)
                 {
                     continue;
                 }
 
                 int startX = item.RealScreenPosition.X;
-                int endX = startX + item.RenderedText.Width;
+                int endX = startX + item.TextBox.Width;
 
                 if (startX < minX)
                 {

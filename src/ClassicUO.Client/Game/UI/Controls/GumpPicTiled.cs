@@ -30,17 +30,18 @@
 
 #endregion
 
-using System.Collections.Generic;
-using ClassicUO.Assets;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
+using System.Collections.Generic;
 
 namespace ClassicUO.Game.UI.Controls
 {
-    internal class GumpPicTiled : Control
+    public class GumpPicTiled : Control
     {
         private ushort _graphic;
+        private ushort hue;
+        Vector3 hueVector;
 
         public GumpPicTiled(ushort graphic)
         {
@@ -98,11 +99,27 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        public ushort Hue { get; set; }
+        public ushort Hue
+        {
+            get => hue; set
+            {
+                hue = value;
+                hueVector = ShaderHueTranslator.GetHueVector(value, false, Alpha, true);
+            }
+        }
+
+        public override void AlphaChanged(float oldValue, float newValue)
+        {
+            base.AlphaChanged(oldValue, newValue);
+            hueVector = ShaderHueTranslator.GetHueVector(Hue, false, newValue, true);
+        }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            Vector3 hueVector = ShaderHueTranslator.GetHueVector(Hue, false, Alpha, true);
+            if (hueVector == default)
+            {
+                hueVector = ShaderHueTranslator.GetHueVector(Hue, false, Alpha, true);
+            }
 
             ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(Graphic);
 

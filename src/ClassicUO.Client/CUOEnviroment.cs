@@ -49,6 +49,7 @@ namespace ClassicUO
         public static uint CurrentRefreshRate;
         public static bool SkipLoginScreen;
         public static bool NoServerPing;
+        public static Assembly Assembly => Assembly.GetEntryAssembly();
 
         public static readonly bool IsUnix = Environment.OSVersion.Platform != PlatformID.Win32NT && Environment.OSVersion.Platform != PlatformID.Win32Windows && Environment.OSVersion.Platform != PlatformID.Win32S && Environment.OSVersion.Platform != PlatformID.WinCE;
 

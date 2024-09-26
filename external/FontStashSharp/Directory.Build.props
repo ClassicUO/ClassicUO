@@ -1,0 +1,14 @@
+<Project>
+  <PropertyGroup>
+    <Authors>FontStashSharpTeam</Authors>
+    <Product>FontStashSharp</Product>
+    <PackageLicenseExpression>Zlib</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/rds1983/FontStashSharp</PackageProjectUrl>
+    <RootNamespace>FontStashSharp</RootNamespace>
+    <Version>1.2.8</Version>
+    <FontStashSharpBaseVersion>1.1.8</FontStashSharpBaseVersion>
+    <StbImageSharpVersion>2.27.13</StbImageSharpVersion>
+    <CyotekDrawingBitmapFontVersion>2.0.4</CyotekDrawingBitmapFontVersion>
+    <MonoGameVersion>3.8.1.303</MonoGameVersion>
+  </PropertyGroup>
+</Project>

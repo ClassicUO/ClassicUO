@@ -31,9 +31,7 @@
 #endregion
 
 using ClassicUO.Game.UI.Controls;
-using ClassicUO.Input;
 using ClassicUO.Network;
-using ClassicUO.Utility.Collections;
 
 namespace ClassicUO.Game.UI.Gumps
 {

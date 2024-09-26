@@ -32,7 +32,7 @@
 
 namespace ClassicUO.Game.Data
 {
-    internal enum Layer : byte
+    public enum Layer : byte
     {
         Invalid = 0x00,
         OneHanded = 0x01,
@@ -64,5 +64,33 @@ namespace ClassicUO.Game.Data
         ShopBuy = 0x1B,
         ShopSell = 0x1C,
         Bank = 0x1D
+    }
+
+    public enum TooltipLayers : byte
+    {
+        Any = 0x00,
+        OneHanded = 0x01,
+        TwoHanded = 0x02,
+        Shoes = 0x03,
+        Pants = 0x04,
+        Shirt = 0x05,
+        Helmet = 0x06,
+        Gloves = 0x07,
+        Ring = 0x08,
+        Talisman = 0x09,
+        Necklace = 0x0A,
+        Waist = 0x0C,
+        Torso = 0x0D,
+        Bracelet = 0x0E,
+        Tunic = 0x11,
+        Earrings = 0x12,
+        Arms = 0x13,
+        Cloak = 0x14,
+        Robe = 0x16,
+        Skirt = 0x17,
+        Legs = 0x18,
+        Body_Group = 0xA1,
+        Jewelry_Group = 0xA2,
+        Weapon_Group = 0xA3
     }
 }

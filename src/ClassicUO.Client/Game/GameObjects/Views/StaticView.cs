@@ -30,11 +30,11 @@
 
 #endregion
 
+using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
-using ClassicUO.IO;
-using ClassicUO.Assets;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 
@@ -89,6 +89,22 @@ namespace ClassicUO.Game.GameObjects
                 hue = Constants.DEAD_RANGE_COLOR;
                 partial = false;
             }
+
+            if (SelectedObject.Object == this)
+            {
+                SpellVisualRangeManager.Instance.LastCursorTileLoc = new Vector2(X, Y);
+            }
+
+            if (SpellVisualRangeManager.Instance.IsTargetingAfterCasting())
+            {
+                hue = SpellVisualRangeManager.Instance.ProcessHueForTile(hue, this);
+            }
+
+            if (TileMarkerManager.Instance.IsTileMarked(X, Y, World.Map.Index, out var nhue))
+                hue = nhue;
+
+            if (ProfileManager.CurrentProfile.DisplayRadius && Distance == ProfileManager.CurrentProfile.DisplayRadiusDistance && System.Math.Abs(Z - World.Player.Z) < 11)
+                hue = ProfileManager.CurrentProfile.DisplayRadiusHue;
 
             Vector3 hueVec = ShaderHueTranslator.GetHueVector(hue, partial, AlphaHue / 255f);
 

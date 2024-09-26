@@ -56,11 +56,11 @@ namespace ClassicUO.Game.Scenes
             }
 
             Unload();
-            IsDestroyed = true;          
+            IsDestroyed = true;
         }
 
         public virtual void Update()
-        {           
+        {
             Camera.Update(true, Time.Delta, Mouse.Position);
         }
 
@@ -79,13 +79,16 @@ namespace ClassicUO.Game.Scenes
         {
             IsLoaded = false;
         }
-       
+
 
         internal virtual bool OnMouseUp(MouseButtonType button) => false;
         internal virtual bool OnMouseDown(MouseButtonType button) => false;
         internal virtual bool OnMouseDoubleClick(MouseButtonType button) => false;
         internal virtual bool OnMouseWheel(bool up) => false;
         internal virtual bool OnMouseDragging() => false;
+
+        internal virtual void OnControllerButtonDown(SDL.SDL_ControllerButtonEvent e) { }
+        internal virtual void OnControllerButtonUp(SDL.SDL_ControllerButtonEvent e) { }
 
         internal virtual void OnTextInput(string text)
         {

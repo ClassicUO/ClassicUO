@@ -37,7 +37,7 @@ using ClassicUO.Renderer;
 
 namespace ClassicUO.Game.Managers
 {
-    internal class WorldTextManager : TextRenderer
+    public class WorldTextManager : TextRenderer
     {
         private readonly Dictionary<uint, OverheadDamage> _damages = new Dictionary<uint, OverheadDamage>();
         private readonly List<Tuple<uint, uint>> _subst = new List<Tuple<uint, uint>>();

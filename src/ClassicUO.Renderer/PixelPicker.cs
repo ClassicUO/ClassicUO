@@ -10,23 +10,33 @@ namespace ClassicUO.Renderer
         Dictionary<ulong, int> m_IDs = new Dictionary<ulong, int>();
         readonly List<byte> m_Data = new List<byte>(InitialDataCount); // list<t> access is 10% slower than t[].
 
-        public bool Get(ulong textureID, int x, int y, int extraRange = 0)
+        public bool Get(ulong textureID, int x, int y, int extraRange = 0, double scale = 1f)
         {
             int index;
             if (!m_IDs.TryGetValue(textureID, out index))
             {
                 return false;
             }
+
+            if (scale != 1f)
+            {
+                x = (int)(x / scale);
+                y = (int)(y / scale);
+            }
+
             int width = ReadIntegerFromData(ref index);
+
+
             if (x < 0 || x >= width)
             {
                 return false;
             }
-            int height = ReadIntegerFromData(ref index);
-            if (y < 0 || y >= height)
+
+            if (y < 0 || y >= ReadIntegerFromData(ref index))
             {
                 return false;
             }
+
             int current = 0;
             int target = x + y * width;
             bool inTransparentSpan = true;

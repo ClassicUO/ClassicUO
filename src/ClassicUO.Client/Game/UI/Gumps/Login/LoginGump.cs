@@ -41,6 +41,7 @@ using ClassicUO.Resources;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using SDL2;
+using System.Collections.Generic;
 
 namespace ClassicUO.Game.UI.Gumps.Login
 {
@@ -83,7 +84,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 // Quit Button
                 Add
                 (
-                    new Button((int) Buttons.Quit, 0x1589, 0x158B, 0x158A)
+                    new Button((int)Buttons.Quit, 0x1589, 0x158B, 0x158A)
                     {
                         X = 555,
                         Y = 4,
@@ -149,7 +150,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 // Arrow Button
                 Add
                 (
-                    _nextArrow0 = new Button((int) Buttons.NextArrow, 0x15A4, 0x15A6, 0x15A5)
+                    _nextArrow0 = new Button((int)Buttons.NextArrow, 0x15A4, 0x15A6, 0x15A5)
                     {
                         X = 610,
                         Y = 445,
@@ -173,7 +174,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
                 Add
                 (
-                    new Label(string.Format(ResGumps.CUOVersion0, CUOEnviroment.Version), false, 0x034E, font: 9)
+                    new Label(string.Format("TazUO Version {0}", CUOEnviroment.Version), false, 0x034E, font: 9)
                     {
                         X = 286,
                         Y = 465
@@ -228,7 +229,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 //// Quit Button
                 Add
                 (
-                    new Button((int) Buttons.Quit, 0x05CA, 0x05C9, 0x05C8)
+                    new Button((int)Buttons.Quit, 0x05CA, 0x05C9, 0x05C8)
                     {
                         X = 25,
                         Y = 240,
@@ -250,7 +251,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 // Arrow Button
                 Add
                 (
-                    _nextArrow0 = new Button((int) Buttons.NextArrow, 0x5CD, 0x5CC, 0x5CB)
+                    _nextArrow0 = new Button((int)Buttons.NextArrow, 0x5CD, 0x5CC, 0x5CB)
                     {
                         X = 280,
                         Y = 365,
@@ -274,7 +275,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
                 Add
                 (
-                    new Label(string.Format(ResGumps.CUOVersion0, CUOEnviroment.Version), false, 0x0481, font: 9)
+                    new Label(string.Format("TazUO Version {0}", CUOEnviroment.Version), false, 0x0481, font: 9)
                     {
                         X = 286,
                         Y = 465
@@ -386,22 +387,30 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 }
             );
 
+            string[] accts = SimpleAccountManager.GetAccounts();
+            if (accts.Length > 0)
+            {
+                _textboxAccount.ContextMenu = new ContextMenuControl();
+                foreach (string acct in accts)
+                {
+                    _textboxAccount.ContextMenu.Add(new ContextMenuItemEntry(acct, () => { _textboxAccount.SetText(acct); }));
+                }
+                _textboxAccount.SetTooltip("Right click to select another account.");
+                _textboxAccount.MouseUp += (s, e) => { if (e.Button == MouseButtonType.Right) _textboxAccount.ContextMenu.Show(); };
+            }
+
             _passwordFake.RealText = Crypter.Decrypt(Settings.GlobalSettings.Password);
 
             _checkboxSaveAccount.IsChecked = Settings.GlobalSettings.SaveAccount;
             _checkboxAutologin.IsChecked = Settings.GlobalSettings.AutoLogin;
 
 
-            int htmlX = 130;
-            int htmlY = 442;
-
-
             Add
             (
                 new HtmlControl
                 (
-                    htmlX,
-                    htmlY,
+                    505,
+                    420,
                     150,
                     15,
                     false,
@@ -421,7 +430,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 new HtmlControl
                 (
                     505,
-                    htmlY,
+                    440,
                     100,
                     15,
                     false,
@@ -440,7 +449,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 new HtmlControl
                 (
                     505,
-                    htmlY + 19,
+                    460,
                     100,
                     15,
                     false,
@@ -454,6 +463,21 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 )
             );
 
+            TextBox _;
+            HitBox _hit;
+            Add(_ = new TextBox("TazUO Wiki", TrueTypeLoader.EMBEDDED_FONT, 15, 200, Color.Orange, strokeEffect: false) { X = 30, Y = 420, AcceptMouseInput = true });
+            Add(_hit = new HitBox(_.X, _.Y, _.MeasuredSize.X, _.MeasuredSize.Y));
+            _hit.MouseUp += (s, e) =>
+            {
+                Utility.Platforms.PlatformHelper.LaunchBrowser("https://github.com/bittiez/ClassicUO/wiki");
+            };
+
+            Add(_ = new TextBox("TazUO Discord", TrueTypeLoader.EMBEDDED_FONT, 15, 200, Color.Orange, strokeEffect: false) { X = 30, Y = 440, AcceptMouseInput = true });
+            Add(_hit = new HitBox(_.X, _.Y, _.MeasuredSize.X, _.MeasuredSize.Y));
+            _hit.MouseUp += (s, e) =>
+            {
+                Utility.Platforms.PlatformHelper.LaunchBrowser("https://discord.gg/SqwtB5g95H");
+            };
 
             Checkbox loginmusic_checkbox = new Checkbox
             (
@@ -513,6 +537,33 @@ namespace ClassicUO.Game.UI.Gumps.Login
             {
                 _textboxAccount.SetKeyboardFocus();
             }
+
+            _ = new TextBox("A new version of TazUO is available!\n Click to open the download page.", TrueTypeLoader.EMBEDDED_FONT, 20, 300, Color.Yellow, strokeEffect: false) { X = 10, Y = 10, AcceptMouseInput = false };
+            Add(_hit = new HitBox(_.X, _.Y, _.MeasuredSize.X, _.MeasuredSize.Y));
+            _hit.MouseUp += (s, e) =>
+            {
+                Utility.Platforms.PlatformHelper.LaunchBrowser("https://github.com/bittiez/TazUO/releases/latest");
+            };
+            _hit.Add(new AlphaBlendControl() { Width = _hit.Width, Height = _hit.Height });
+            Add(_);
+            if (!UpdateManager.HasUpdate)
+            {
+                _.IsVisible = false;
+                _hit.IsVisible = false;
+            }
+
+            if (!UpdateManager.SkipUpdateCheck)
+            {
+                UpdateManager.UpdateStatusChanged += (s, e) =>
+                {
+                    if (UpdateManager.HasUpdate)
+                    {
+                        _.IsVisible = true;
+                        _hit.IsVisible = true;
+                    }
+                };
+            }
+
         }
 
         public override void OnKeyboardReturn(int textID, string text)
@@ -575,7 +626,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
         public override void OnButtonClick(int buttonID)
         {
-            switch ((Buttons) buttonID)
+            switch ((Buttons)buttonID)
             {
                 case Buttons.NextArrow:
                     SaveCheckboxStatus();

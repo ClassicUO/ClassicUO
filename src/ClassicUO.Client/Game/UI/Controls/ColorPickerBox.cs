@@ -30,15 +30,13 @@
 
 #endregion
 
-using System;
-using System.Runtime.InteropServices;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
-using ClassicUO.Assets;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -133,9 +131,9 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        public ushort SelectedHue => SelectedIndex < 0 || SelectedIndex >= _hues.Length ? (ushort) 0 : _hues[SelectedIndex];
+        public ushort SelectedHue => SelectedIndex < 0 || SelectedIndex >= _hues.Length ? (ushort)0 : _hues[SelectedIndex];
 
-        
+
         public override void Update()
         {
             if (IsDisposed)
@@ -192,7 +190,7 @@ namespace ClassicUO.Game.UI.Controls
 
             if (_hues.Length > 1)
             {
-                rect.X = (int) (x + Width / _columns * (SelectedIndex % _columns + .5f) - 1);
+                rect.X = (int)(x + Width / _columns * (SelectedIndex % _columns + .5f) - 1);
                 rect.Y = (int)(y + Height / _rows * (SelectedIndex / _columns + .5f) - 1);
                 rect.Width = 2;
                 rect.Height = 2;
@@ -241,12 +239,12 @@ namespace ClassicUO.Game.UI.Controls
             {
                 _hues = new ushort[size];
             }
-            
+
             for (int y = 0; y < _rows; y++)
             {
                 for (int x = 0; x < _columns; x++)
                 {
-                    ushort hue = (ushort) ((_customPallete?[y * _columns + x] ?? startColor) + 1);
+                    ushort hue = (ushort)((_customPallete?[y * _columns + x] ?? startColor) + 1);
 
                     _hues[y * _columns + x] = hue;
 

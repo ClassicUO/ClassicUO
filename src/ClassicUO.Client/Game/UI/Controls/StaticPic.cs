@@ -30,17 +30,20 @@
 
 #endregion
 
-using System.Collections.Generic;
 using ClassicUO.Assets;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
+using System.Collections.Generic;
 
 namespace ClassicUO.Game.UI.Controls
 {
-    internal class StaticPic : Control
+    public class StaticPic : Control
     {
-        private ushort _graphic;
+        private ushort graphic;
+        private Vector3 hueVector;
+        private ushort hue;
+        private bool isPartialHue;
 
         public StaticPic(ushort graphic, ushort hue)
         {
@@ -61,15 +64,29 @@ namespace ClassicUO.Game.UI.Controls
             IsFromServer = true;
         }
 
-        public ushort Hue { get; set; }
-        public bool IsPartialHue { get; set; }
+        public ushort Hue
+        {
+            get => hue; set
+            {
+                hue = value;
+                hueVector = ShaderHueTranslator.GetHueVector(value, IsPartialHue, 1);
+            }
+        }
+        public bool IsPartialHue
+        {
+            get => isPartialHue; set
+            {
+                isPartialHue = value;
+                hueVector = ShaderHueTranslator.GetHueVector(Hue, value, 1);
+            }
+        }
 
         public ushort Graphic
         {
-            get => _graphic;
+            get => graphic;
             set
             {
-                _graphic = value;
+                graphic = value;
 
                 ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(value);
 
@@ -89,7 +106,10 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            Vector3 hueVector = ShaderHueTranslator.GetHueVector(Hue, IsPartialHue, 1);
+            if (hueVector == default)
+            {
+                hueVector = ShaderHueTranslator.GetHueVector(Hue, IsPartialHue, 1);
+            }
 
             ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(Graphic);
 

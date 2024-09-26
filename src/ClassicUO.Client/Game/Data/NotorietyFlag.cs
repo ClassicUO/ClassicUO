@@ -34,7 +34,7 @@ using ClassicUO.Configuration;
 
 namespace ClassicUO.Game.Data
 {
-    internal enum NotorietyFlag : byte
+    public enum NotorietyFlag : byte
     {
         Unknown = 0x00,
         Innocent = 0x01,
@@ -46,7 +46,7 @@ namespace ClassicUO.Game.Data
         Invulnerable = 0x07
     }
 
-    internal static class Notoriety
+    public static class Notoriety
     {
         public static ushort GetHue(NotorietyFlag flag)
         {

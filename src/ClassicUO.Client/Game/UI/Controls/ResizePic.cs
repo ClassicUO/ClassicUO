@@ -40,7 +40,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.UI.Controls
 {
-    internal class ResizePic : Control
+    public class ResizePic : Control
     {
         private int _maxIndex;
 

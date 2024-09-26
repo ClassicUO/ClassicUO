@@ -31,17 +31,19 @@
 #endregion
 
 using System;
+using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Renderer;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using MathHelper = Microsoft.Xna.Framework.MathHelper;
 
 namespace ClassicUO.Game
 {
-    enum WeatherType
+    public enum WeatherType
     {
         WT_RAIN = 0,
         WT_STORM_APPROACH,
@@ -73,7 +75,7 @@ namespace ClassicUO.Game
         public byte CurrentCount { get; private set; }
         public byte Temperature{ get; private set; }
         public sbyte Wind { get; private set; }
-
+        private Texture2D rainImage = PNGLoader.Instance.GetImageTexture(System.IO.Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "rain.png"));
 
 
         private static float SinOscillate(float freq, int range, uint current_tick)
@@ -444,17 +446,26 @@ namespace ClassicUO.Game
                             oldY = (int) (effect.Y + MAX_OFFSET_XY);
                         }
 
-                        Vector2 start = new Vector2(x + oldX, y + oldY);
-                        Vector2 end = new Vector2(x + effect.X, y + effect.Y);
+                        if (rainImage != null)
+                        {
+                            Vector3 hue = ShaderHueTranslator.GetHueVector(0);
+                            batcher.Draw(rainImage, new Rectangle(x + oldX, y + oldY, 80, 80), new Rectangle(x, y, 1000, 1000), hue);
+                        }
+                        else
+                        {
 
-                        batcher.DrawLine
-                        (
-                           SolidColorTextureCache.GetTexture(Color.Blue),
-                           start,
-                           end,
-                           Vector3.UnitZ,
-                           2
-                        );
+                            Vector2 start = new Vector2(x + oldX, y + oldY);
+                            Vector2 end = new Vector2(x + effect.X, y + effect.Y);
+
+                            batcher.DrawLine
+                            (
+                               SolidColorTextureCache.GetTexture(Color.Blue),
+                               start,
+                               end,
+                               Vector3.UnitZ,
+                               2
+                            );
+                        }
 
                         break;
 

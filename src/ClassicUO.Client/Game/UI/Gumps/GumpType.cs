@@ -32,7 +32,7 @@
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    internal enum GumpType
+    public enum GumpType
     {
         None,
 
@@ -58,6 +58,9 @@ namespace ClassicUO.Game.UI.Gumps
         Debug,
         NetStats,
 
-        NameOverHeadHandler
+        NameOverHeadHandler,
+        MacroButtonEditor = 6464,
+        DurabilityGump = 6465,
+        GridContainer = 8787
     }
 }

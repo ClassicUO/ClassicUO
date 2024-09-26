@@ -30,13 +30,16 @@
 
 #endregion
 
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
+using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
+using System.Xml;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    internal abstract class ResizableGump : Gump
+    public abstract class ResizableGump : AnchorableGump
     {
         private readonly BorderControl _borderControl;
         private readonly Button _button;
@@ -44,7 +47,10 @@ namespace ClassicUO.Game.UI.Gumps
         private Point _lastSize, _savedSize;
         private readonly int _minH;
         private readonly int _minW;
+        protected bool _isLocked = false;
+        protected bool? _prevCanMove = null, _prevCloseWithRightClick = null, _prevBorder = null;
 
+        public BorderControl BorderControl { get { return _borderControl; } }
 
         protected ResizableGump
         (
@@ -85,6 +91,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             Width = _lastSize.X = width;
             Height = _lastSize.Y = height;
+            GroupMatrixHeight = Height;
+            GroupMatrixWidth = Width;
             _savedSize = _lastSize;
 
             _minW = minW;
@@ -147,6 +155,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _lastSize.X = w;
                 _lastSize.Y = h;
+                GroupMatrixHeight = Height;
+                GroupMatrixWidth = Width;
             }
 
             if (Width != _lastSize.X || Height != _lastSize.Y)
@@ -166,6 +176,84 @@ namespace ClassicUO.Game.UI.Gumps
             _borderControl.Height = Height;
             _button.X = Width - (_button.Width >> 0) + 2;
             _button.Y = Height - (_button.Height >> 0) + 2;
+            GroupMatrixHeight = Height;
+            GroupMatrixWidth = Width;
+        }
+
+        public override void Restore(XmlElement xml)
+        {
+            base.Restore(xml);
+
+            SetLockStatus(IsLocked);
+        }
+
+        protected virtual void SetLockStatus(bool locked)
+        {
+            _prevCanMove ??= CanMove;
+            _prevCloseWithRightClick ??= CanCloseWithRightClick;
+            _prevBorder ??= ShowBorder;
+
+            _isLocked = locked;
+            IsLocked = locked;
+            if (_isLocked)
+            {
+                CanMove = false;
+                CanCloseWithRightClick = false;
+                ShowBorder = false;
+            }
+            else
+            {
+                CanMove = _prevCanMove ?? true;
+                CanCloseWithRightClick = _prevCloseWithRightClick ?? true;
+                ShowBorder = _prevBorder ?? true;
+            }
+        }
+
+        protected override void OnMouseUp(int x, int y, MouseButtonType button)
+        {
+            base.OnMouseUp(x, y, button);
+
+            if (button == MouseButtonType.Left && Keyboard.Alt && UIManager.MouseOverControl != null && (UIManager.MouseOverControl == this || UIManager.MouseOverControl.RootParent == this))
+            {
+                ref readonly var texture = ref Client.Game.Gumps.GetGump(0x82C);
+                if (texture.Texture != null)
+                {
+                    if (x >= 0 && x <= texture.UV.Width && y >= 0 && y <= texture.UV.Height)
+                    {
+                        SetLockStatus(!_isLocked);
+                    }
+                }
+            }
+        }
+
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        {
+            base.Draw(batcher, x, y);
+
+            if (Keyboard.Alt && UIManager.MouseOverControl != null && (UIManager.MouseOverControl == this || UIManager.MouseOverControl.RootParent == this))
+            {
+                Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
+
+                ref readonly var texture = ref Client.Game.Gumps.GetGump(0x82C);
+
+                if (texture.Texture != null)
+                {
+                    if (_isLocked)
+                    {
+                        hueVector.X = 34;
+                        hueVector.Y = 1;
+                    }
+                    batcher.Draw
+                    (
+                        texture.Texture,
+                        new Vector2(x, y),
+                        texture.UV,
+                        hueVector
+                    );
+                }
+            }
+
+            return true;
         }
     }
 }

@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <PackageId>FontStashSharp.FNA</PackageId>
+    <AssemblyName>FontStashSharp.FNA</AssemblyName>
+    <Description>FontStashSharp for FNA.Core</Description>
+    <DefineConstants>$(DefineConstants);FNA</DefineConstants>
+    <OutputPath>bin\FNA.Core\$(Configuration)</OutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\FNA\FNA.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FontStashSharp.Base" Version="$(FontStashSharpBaseVersion)" />
+    <PackageReference Include="FontStashSharp.Rasterizers.StbTrueTypeSharp" Version="$(FontStashSharpBaseVersion)" />
+    <PackageReference Include="Cyotek.Drawing.BitmapFont" Version="$(CyotekDrawingBitmapFontVersion)" />
+    <PackageReference Include="StbImageSharp" Version="$(StbImageSharpVersion)" />
+  </ItemGroup>  
+
+  <ItemGroup>
+    <Compile Include="..\FontStashSharp\**\*.cs" LinkBase="FontStashSharp" />
+    <Compile Remove="..\FontStashSharp\obj\**\*.cs" LinkBase="FontStashSharp" />
+  </ItemGroup>
+</Project>

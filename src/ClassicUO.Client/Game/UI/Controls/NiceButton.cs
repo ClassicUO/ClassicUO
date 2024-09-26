@@ -38,11 +38,13 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
-    internal class NiceButton : HitBox
+    public class NiceButton : HitBox
     {
         private readonly ButtonAction _action;
         private readonly int _groupnumber;
         private bool _isSelected;
+
+        public bool DisplayBorder;
 
         public NiceButton
         (
@@ -164,6 +166,16 @@ namespace ClassicUO.Game.UI.Controls
                     new Rectangle(0, 0, Width, Height),
                     hueVector
                 );
+            }
+
+            if (DisplayBorder)
+            {
+                batcher.DrawRectangle(
+                    SolidColorTextureCache.GetTexture(Color.LightGray),
+                    x, y,
+                    Width, Height,
+                    ShaderHueTranslator.GetHueVector(0, false, Alpha)
+                    );
             }
 
             return base.Draw(batcher, x, y);

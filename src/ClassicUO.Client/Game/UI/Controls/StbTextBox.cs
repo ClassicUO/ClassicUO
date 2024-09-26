@@ -45,7 +45,7 @@ using StbTextEditSharp;
 
 namespace ClassicUO.Game.UI.Controls
 {
-    internal class StbTextBox : Control, ITextEditHandler
+    public class StbTextBox : Control, ITextEditHandler
     {
         protected static readonly Color SELECTION_COLOR = new Color() { PackedValue = 0x80a06020 };
         private readonly FontStyle _fontStyle;
@@ -111,6 +111,7 @@ namespace ClassicUO.Game.UI.Controls
             );
 
             Height = _rendererCaret.Height;
+            LoseFocusOnEscapeKey = true;
         }
 
         public StbTextBox(List<string> parts, string[] lines) : this
@@ -163,6 +164,8 @@ namespace ClassicUO.Game.UI.Controls
 
         public bool AllowTAB { get; set; }
         public bool NoSelection { get; set; }
+
+        public bool LoseFocusOnEscapeKey { get; set; }
 
         public int CaretIndex
         {
@@ -513,9 +516,12 @@ namespace ClassicUO.Game.UI.Controls
                     break;
 
                 case SDL.SDL_Keycode.SDLK_ESCAPE:
+                    if (LoseFocusOnEscapeKey && SelectionStart == SelectionEnd)
+                    {
+                        UIManager.KeyboardFocusControl = null;
+                    }
                     SelectionStart = 0;
-                    SelectionEnd = 0;
-
+                    SelectionEnd = 0;                    
                     break;
 
                 case SDL.SDL_Keycode.SDLK_INSERT when IsEditable:

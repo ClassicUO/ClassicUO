@@ -30,8 +30,6 @@
 
 #endregion
 
-using System;
-using System.Collections.Generic;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
@@ -39,6 +37,8 @@ using ClassicUO.Network;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System;
+using System.Collections.Generic;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -50,6 +50,7 @@ namespace ClassicUO.Game.UI.Gumps
         private Point _lastPoint;
         private HitBox _hit;
         private Texture2D _mapTexture;
+        private ResizePic mapGump;
 
         private uint _pinTimer;
 
@@ -64,19 +65,19 @@ namespace ClassicUO.Game.UI.Gumps
             WantUpdateSize = false;
 
             Add
-            (
+            (mapGump =
                 new ResizePic(0x1432)
                 {
-                    Width = width + 44, Height = height + 61
+                    Width = width + 44,
+                    Height = height + 61
                 }
             );
 
+            Add(_buttons[0] = new Button((int)ButtonType.PlotCourse, 0x1398, 0x1398) { X = (width - 100) >> 1, Y = 5, ButtonAction = ButtonAction.Activate });
 
-            Add(_buttons[0] = new Button((int) ButtonType.PlotCourse, 0x1398, 0x1398) { X = (width - 100) >> 1, Y = 5, ButtonAction = ButtonAction.Activate });
+            Add(_buttons[1] = new Button((int)ButtonType.StopPlotting, 0x1399, 0x1399) { X = (width - 70) >> 1, Y = 5, ButtonAction = ButtonAction.Activate });
 
-            Add(_buttons[1] = new Button((int) ButtonType.StopPlotting, 0x1399, 0x1399) { X = (width - 70) >> 1, Y = 5, ButtonAction = ButtonAction.Activate });
-
-            Add(_buttons[2] = new Button((int) ButtonType.ClearCourse, 0x139A, 0x139A) { X = (width - 66) >> 1, Y = height + 37, ButtonAction = ButtonAction.Activate });
+            Add(_buttons[2] = new Button((int)ButtonType.ClearCourse, 0x139A, 0x139A) { X = (width - 66) >> 1, Y = height + 37, ButtonAction = ButtonAction.Activate });
 
             _buttons[0].IsVisible = _buttons[0].IsEnabled = PlotState == 0;
 
@@ -86,12 +87,81 @@ namespace ClassicUO.Game.UI.Gumps
 
 
 
-            _hit = new HitBox(24, 31, width, height, null, 0f);
+            _hit = new HitBox(24, 31, width, height, null, 0f) { CanMove = true };
             Add(_hit);
 
             _hit.MouseUp += TextureControlOnMouseUp;
 
+            MenuButton menu = new MenuButton(25, Color.Black.PackedValue, 0.75f, "Menu") { X = width + 44 - 43, Y = 6 };
+
+            menu.MouseUp += (s, e) =>
+            {
+                menu.ContextMenu?.Show();
+            };
+            menu.ContextMenu = new ContextMenuControl();
+            menu.ContextMenu.Add(new ContextMenuItemEntry("Show approximate location on world map", () =>
+            {
+                if (foundMapLoc)
+                {
+                    WorldMapGump map = UIManager.GetGump<WorldMapGump>();
+                    if (map != null)
+                    {
+                        if (mapFacet != -1)
+                        {
+                            if (World.MapIndex != mapFacet)
+                                GameActions.Print("You're on the wrong facet!", 32);
+                            else
+                                map.GoToMarker(mapX, mapY, true);
+                        }
+                        else
+                            map.GoToMarker(mapX, mapY, true);
+                    }
+                }
+            }));
+            menu.ContextMenu.Add(new ContextMenuItemEntry("Add as marker on world map", () =>
+            {
+                if (foundMapLoc)
+                {
+                    WorldMapGump map = UIManager.GetGump<WorldMapGump>();
+                    if (map != null)
+                    {
+                        if (mapFacet != -1)
+                        {
+                            map.AddUserMarker("TMap", mapX, mapY, mapFacet);
+                        }
+                        else
+                            map.AddUserMarker("TMap", mapX, mapY, World.Map.Index);
+                    }
+                }
+            }));
+            menu.ContextMenu.Add(new ContextMenuItemEntry("Try to pathfind", () =>
+            {
+                if (foundMapLoc)
+                {
+                    int distance = Math.Max(Math.Abs(World.Player.X - mapX), Math.Abs(World.Player.Y - mapY));
+
+                    if (distance > 10)
+                    {
+                        GameActions.Print("You're too far away to try to pathfind, you need to be within 10 tiles.", 32);
+                        return;
+                    }
+
+                    if (mapFacet != -1)
+                    {
+                        if (World.MapIndex != mapFacet)
+                            GameActions.Print("You're on the wrong facet!", 32);
+                        else
+                            Pathfinder.WalkTo(mapX, mapY, 0, 1);
+                    }
+                    else
+                        Pathfinder.WalkTo(mapX, mapY, 0, 1);
+                }
+            }));
+            menu.ContextMenu.Add(new ContextMenuItemEntry("Close", () => { Dispose(); }));
+            menu.CanCloseWithRightClick = false;
+
             Add(new GumpPic(width - 20, height - 20, 0x0139D, 0));
+            Add(menu);
         }
 
 
@@ -108,6 +178,18 @@ namespace ClassicUO.Game.UI.Gumps
             WantUpdateSize = true;
         }
 
+        private int mapX = 0, mapY = 0, mapFacet = -1, mapEndX = 0, mapEndY = 0;
+        private bool foundMapLoc = false;
+
+        public void MapInfos(int x, int y, int endX, int endY, int facet = -1)
+        {
+            mapX = x;
+            mapY = y;
+            mapEndX = endX;
+            mapEndY = endY;
+            mapFacet = facet;
+        }
+
         public void AddPin(int x, int y)
         {
             PinControl c = new PinControl(x, y);
@@ -116,6 +198,31 @@ namespace ClassicUO.Game.UI.Gumps
             c.NumberText = (_container.Count + 1).ToString();
             _container.Add(c);
             Add(c);
+            if (!foundMapLoc)
+            {
+                //multiplier = float((mapinfo.MapEnd.X) - (mapinfo.MapOrigin.X)) / float(width)
+                //    multiX = mapinfo.PinPosition.X * multiplier
+                //    multiY = mapinfo.PinPosition.Y * multiplier
+                //    finalX = int(mapinfo.MapOrigin.X + multiX)
+                //    finalY = int(mapinfo.MapOrigin.Y + multiY)
+
+                float multiplier = (float)Width / 300f;
+                //if (Width == 200)
+                //    multiplier = 0.666666666f;
+                //if (Width == 600)
+                //    multiplier = 2f;
+                if (CUOEnviroment.Debug)
+                    GameActions.Print($"Width: {Width}, Multiplier: {multiplier}, Facet: {mapFacet}, MapData: {mapX}, {mapY}, {mapEndX}, {mapEndY}");
+
+                mapX = (int)(mapX + (x * multiplier));
+                mapY = (int)(mapY + (y * multiplier));
+
+                //mapX = mapX + x;
+                //mapY = mapY + y;
+                foundMapLoc = true;
+
+                _hit?.SetTooltip($"Estimated loc: {mapX}, {mapY}");
+            }
         }
 
         public void ClearContainer()
@@ -141,7 +248,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void OnButtonClick(int buttonID)
         {
-            ButtonType b = (ButtonType) buttonID;
+            ButtonType b = (ButtonType)buttonID;
 
             switch (b)
             {
@@ -214,8 +321,8 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (PlotState != 0 && _currentPin == null && _pinTimer > Time.Ticks)
                 {
-                    ushort x = (ushort) (e.X + 5);
-                    ushort y = (ushort) e.Y;
+                    ushort x = (ushort)(e.X + 5);
+                    ushort y = (ushort)e.Y;
 
                     NetClient.Socket.Send_MapMessage(LocalSerial,
                                                      1,
@@ -303,9 +410,9 @@ namespace ClassicUO.Game.UI.Gumps
                 testOfsX = 1.0f;
             }
 
-            float pi = (float) Math.PI;
+            float pi = (float)Math.PI;
 
-            float a = -(float) (Math.Atan(tempY / testOfsX) * 180f / pi);
+            float a = -(float)(Math.Atan(tempY / testOfsX) * 180f / pi);
 
             bool inverseCheck = false;
 
@@ -318,11 +425,11 @@ namespace ClassicUO.Game.UI.Gumps
                 inverseCheck = true;
             }
 
-            float sinA = (float) Math.Sin(a * pi / 180f);
-            float cosA = (float) Math.Sin(a * pi / 180f);
+            float sinA = (float)Math.Sin(a * pi / 180f);
+            float cosA = (float)Math.Sin(a * pi / 180f);
 
-            int offsetX = (int) (tempX * cosA - tempY * sinA);
-            int offsetY = (int) (tempX * sinA + tempY * cosA);
+            int offsetX = (int)(tempX * cosA - tempY * sinA);
+            int offsetY = (int)(tempX * sinA + tempY * cosA);
 
             int endX2 = x1 + offsetX;
             int endY2 = y1 + offsetY;
@@ -330,8 +437,8 @@ namespace ClassicUO.Game.UI.Gumps
             tempX = Mouse.Position.X - x1; // TODO: must be position relative to the gump
             tempY = Mouse.Position.Y - y1;
 
-            offsetX = (int) (tempX * cosA - tempY * sinA);
-            offsetY = (int) (tempX * sinA + tempY * cosA);
+            offsetX = (int)(tempX * cosA - tempY * sinA);
+            offsetY = (int)(tempX * sinA + tempY * cosA);
 
             Point mousePoint = new Point(x1 + offsetX, y1 + offsetY);
 
@@ -378,11 +485,13 @@ namespace ClassicUO.Game.UI.Gumps
             return result;
         }
 
-        public override void Dispose()
+        public override void AfterDispose()
         {
-            _hit.MouseUp -= TextureControlOnMouseUp;
-            _mapTexture?.Dispose();
-            base.Dispose();
+            base.AfterDispose();
+            if (_hit != null)
+            {
+                _hit.MouseUp -= TextureControlOnMouseUp;
+            }
         }
 
         private enum ButtonType

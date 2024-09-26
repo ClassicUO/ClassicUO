@@ -14,7 +14,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             AlphaBlendControl macroGumpBackground = new AlphaBlendControl
             {
-                Width = 260,
+                Width = 360,
                 Height = 200,
                 X = camera.Bounds.Width / 2 - 125,
                 Y = 150,
