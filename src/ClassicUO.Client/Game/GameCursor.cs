@@ -189,27 +189,27 @@ namespace ClassicUO.Game
         {
             ushort graphic = GetDraggingItemGraphic();
 
-            if (graphic != 0xFFFF)
+            if (graphic == 0xFFFF)
             {
-                ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(graphic);
-
-                float scale = 1;
-
-                if (
-                    ProfileManager.CurrentProfile != null
-                    && ProfileManager.CurrentProfile.ScaleItemsInsideContainers
-                )
-                {
-                    scale = UIManager.ContainerScale;
-                }
-
-                return new Point(
-                    (int)((artInfo.UV.Width >> 1) * scale) - ItemHold.MouseOffset.X,
-                    (int)((artInfo.UV.Height >> 1) * scale) - ItemHold.MouseOffset.Y
-                );
+                return Point.Zero;
             }
 
-            return Point.Zero;
+            ref readonly var artInfo = ref (ItemHold.IsGumpTexture ? ref Client.Game.UO.Gumps.GetGump(graphic) : ref Client.Game.UO.Arts.GetArt(graphic));
+
+            float scale = 1;
+
+            if (
+                ProfileManager.CurrentProfile != null
+                && ProfileManager.CurrentProfile.ScaleItemsInsideContainers
+            )
+            {
+                scale = UIManager.ContainerScale;
+            }
+
+            return new Point(
+                (int)((artInfo.UV.Width >> 1) * scale) - ItemHold.MouseOffset.X,
+                (int)((artInfo.UV.Height >> 1) * scale) - ItemHold.MouseOffset.Y
+            );
         }
 
         public void Update()
@@ -249,38 +249,40 @@ namespace ClassicUO.Game
                 }
             }
 
-            if (ItemHold.Enabled)
+            if (!ItemHold.Enabled)
             {
-                ushort draggingGraphic = GetDraggingItemGraphic();
+                return;
+            }
+            ushort draggingGraphic = GetDraggingItemGraphic();
 
-                if (draggingGraphic != 0xFFFF && ItemHold.IsFixedPosition && !UIManager.IsDragging)
+            if (draggingGraphic == 0xFFFF || !ItemHold.IsFixedPosition || UIManager.IsDragging)
+            {
+                return;
+            }
+            ref readonly var artInfo = ref (ItemHold.IsGumpTexture ? ref Client.Game.UO.Gumps.GetGump(draggingGraphic) : ref Client.Game.UO.Arts.GetArt(draggingGraphic));
+
+            Point offset = GetDraggingItemOffset();
+
+            int x = ItemHold.FixedX - offset.X;
+            int y = ItemHold.FixedY - offset.Y;
+
+            if (
+                Mouse.Position.X >= x
+                && Mouse.Position.X < x + artInfo.UV.Width
+                && Mouse.Position.Y >= y
+                && Mouse.Position.Y < y + artInfo.UV.Height
+            )
+            {
+                if (!ItemHold.IgnoreFixedPosition)
                 {
-                    ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(draggingGraphic);
-
-                    Point offset = GetDraggingItemOffset();
-
-                    int x = ItemHold.FixedX - offset.X;
-                    int y = ItemHold.FixedY - offset.Y;
-
-                    if (
-                        Mouse.Position.X >= x
-                        && Mouse.Position.X < x + artInfo.UV.Width
-                        && Mouse.Position.Y >= y
-                        && Mouse.Position.Y < y + artInfo.UV.Height
-                    )
-                    {
-                        if (!ItemHold.IgnoreFixedPosition)
-                        {
-                            ItemHold.IsFixedPosition = false;
-                            ItemHold.FixedX = 0;
-                            ItemHold.FixedY = 0;
-                        }
-                    }
-                    else if (ItemHold.IgnoreFixedPosition)
-                    {
-                        ItemHold.IgnoreFixedPosition = false;
-                    }
+                    ItemHold.IsFixedPosition = false;
+                    ItemHold.FixedX = 0;
+                    ItemHold.FixedY = 0;
                 }
+            }
+            else if (ItemHold.IgnoreFixedPosition)
+            {
+                ItemHold.IgnoreFixedPosition = false;
             }
         }
 
@@ -467,8 +469,8 @@ namespace ClassicUO.Game
 
                 ushort draggingGraphic = GetDraggingItemGraphic();
 
-                ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(draggingGraphic);
-
+                ref readonly var artInfo = ref (ItemHold.IsGumpTexture ? ref Client.Game.UO.Gumps.GetGump(draggingGraphic) : ref Client.Game.UO.Arts.GetArt(draggingGraphic));
+ 
                 if (artInfo.Texture != null)
                 {
                     Point offset = GetDraggingItemOffset();
