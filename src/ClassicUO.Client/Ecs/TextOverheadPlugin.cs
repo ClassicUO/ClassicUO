@@ -75,6 +75,7 @@ internal sealed class TextOverHeadManager
     private readonly List<uint> _toRemove = new();
     private readonly List<(int, int)> _cuttedTextIndices = new ();
     private readonly Dictionary<uint, LinkedList<TextInfo>> _textOverHeadMap = new();
+    private readonly LinkedList<LinkedList<TextInfo>> _mainLinkedList = new();
 
     public void Append(TextInfo text)
     {
@@ -87,6 +88,9 @@ internal sealed class TextOverHeadManager
         if (list.Count >= 5)
             list.RemoveFirst();
         list.AddLast(text);
+
+        _mainLinkedList.Remove(list);
+        _mainLinkedList.AddLast(list);
     }
 
     public void Update(TinyEcs.World world, Time time, NetworkEntitiesMap networkEntities)
@@ -105,6 +109,7 @@ internal sealed class TextOverHeadManager
             while (first != null)
             {
                 var next = first.Next;
+
                 if (first.Value.Time <= time.Total)
                     list.Remove(first);
                 first = next;
@@ -114,10 +119,20 @@ internal sealed class TextOverHeadManager
         if (_toRemove.Count > 0)
         {
             foreach (var serial in _toRemove)
-                _textOverHeadMap.Remove(serial);
+            {
+                if (_textOverHeadMap.Remove(serial, out var list))
+                {
+                    if (!_mainLinkedList.Remove(list))
+                    {
+
+                    }
+                }
+            }
             _toRemove.Clear();
         }
     }
+
+    private static Texture2D _texture;
 
     public void Render(World world, NetworkEntitiesMap networkEntities, UltimaBatcher2D batch, GameContext gameCtx)
     {
@@ -137,11 +152,23 @@ internal sealed class TextOverHeadManager
 
         var lines = _cuttedTextIndices;
 
-        foreach ((var serial, var list) in _textOverHeadMap)
+        if (_texture == null)
         {
-            var ent = networkEntities.Get(world, serial);
+            _texture = new (batch.GraphicsDevice, 1, 1);
+            _texture.SetData(new Color[1] { Color.White });
+        }
 
-            if (!ent.ID.IsValid() || list.Count == 0)
+        foreach (var list in _mainLinkedList)
+        {
+            if (list.Count == 0)
+                continue;
+
+            if (list.First == null)
+                continue;
+
+            var ent = networkEntities.Get(world, list.First.Value.Serial);
+
+            if (!ent.ID.IsValid())
                 continue;
 
             ref var worldPos = ref ent.Get<WorldPosition>();
@@ -164,8 +191,14 @@ internal sealed class TextOverHeadManager
             if (position.Y < bounds.Y - lineHeight)
                 position.Y = bounds.Y - lineHeight;
 
+
+            // batch.DrawRectangle(_texture, (int)(position.X - bounds.X * 0.5f), (int)(position.Y - bounds.Y + lineHeight), (int)bounds.X, (int)bounds.Y, Vector3.UnitZ);
+            batch.Draw(_texture, new Rectangle((int)(position.X - bounds.X * 0.5f) - 2, (int)(position.Y - bounds.Y + lineHeight) - 2, (int)bounds.X + 4, (int)bounds.Y + 4),
+                new Rectangle(0, 0, 1, 1), ShaderHueTranslator.GetHueVector(1, false, 0.5f));
+
             var last = list.Last;
             var offsetY = 0f;
+            var alpha = IsOverlapped(world, networkEntities, list) ? 0.3f : 1f;
 
             while (last != null)
             {
@@ -234,8 +267,8 @@ internal sealed class TextOverHeadManager
                     var line = text.Text.AsSpan(lines[i].Item1, lines[i].Item2);
 
                     // Draw the text
-                    batch.DrawString(font, line, startPos + Vector2.One, ShaderHueTranslator.GetHueVector(1));
-                    batch.DrawString(font, line, startPos, ShaderHueTranslator.GetHueVector(text.Hue));
+                    batch.DrawString(font, line, startPos + Vector2.One, ShaderHueTranslator.GetHueVector(1, false, alpha));
+                    batch.DrawString(font, line, startPos, ShaderHueTranslator.GetHueVector(text.Hue, false, alpha));
 
                     startPos.Y -= heightMax;
                     offsetY -= heightMax;
@@ -249,6 +282,92 @@ internal sealed class TextOverHeadManager
 
         batch.SetSampler(null);
         batch.End();
+    }
+
+    private bool IsOverlapped(TinyEcs.World world, NetworkEntitiesMap networkEntities, LinkedList<TextInfo> list)
+    {
+        (var bounds, var totalLines) = GetBounds(list);
+
+        if (list.Count == 0)
+            return false;
+
+        if (list.First == null)
+            return false;
+
+        var mainEnt = networkEntities.Get(world, list.First.Value.Serial);
+        if (!mainEnt.ID.IsValid())
+            return false;
+
+        ref var worldPosMain = ref mainEnt.Get<WorldPosition>();
+        ref var offsetMain = ref mainEnt.Get<ScreenPositionOffset>();
+        var positionMain = Isometric.IsoToScreen(worldPosMain.X, worldPosMain.Y, worldPosMain.Z);
+
+        if (!Unsafe.IsNullRef(ref offsetMain))
+            positionMain += offsetMain.Value;
+
+        positionMain.X += 22f;
+        positionMain.Y += 22f;
+        positionMain.Y -= Constants.DEFAULT_CHARACTER_HEIGHT * 5;
+
+        var lineHeight = bounds.Y / totalLines;
+        if (positionMain.X < 0)
+            positionMain.X = 0;
+        if (positionMain.Y < bounds.Y - lineHeight)
+            positionMain.Y = bounds.Y - lineHeight;
+
+        var rectMain = new Rectangle((int) (positionMain.X - bounds.X * 0.5f), (int) (positionMain.Y - bounds.Y + lineHeight), (int) bounds.X, (int)bounds.Y);
+
+        var first = _mainLinkedList.First;
+        LinkedListNode<LinkedList<TextInfo>> current = null;
+        while (first != null)
+        {
+            if (first.Value == list)
+            {
+                current = first.Next;
+                break;
+            }
+            first = first.Next;
+        }
+
+        while (current != null)
+        {
+            if (current.Value.First == null)
+                return false;
+
+            (var bounds2, var totalLines2) = GetBounds(current.Value);
+
+            var ent = networkEntities.Get(world, current.Value.First.Value.Serial);
+            if (!ent.ID.IsValid())
+                continue;
+
+            ref var worldPos = ref ent.Get<WorldPosition>();
+            ref var offset = ref ent.Get<ScreenPositionOffset>();
+            var position = Isometric.IsoToScreen(worldPos.X, worldPos.Y, worldPos.Z);
+
+            if (!Unsafe.IsNullRef(ref offset))
+                position += offset.Value;
+
+            position.X += 22f;
+            position.Y += 22f;
+            position.Y -= Constants.DEFAULT_CHARACTER_HEIGHT * 5;
+
+            var lineHeight2 = bounds2.Y / totalLines2;
+            if (position.X < 0)
+                position.X = 0;
+            if (position.Y < bounds2.Y - lineHeight2)
+                position.Y = bounds2.Y - lineHeight2;
+
+            var rect = new Rectangle((int) (position.X - bounds2.X * 0.5f), (int) (position.Y - bounds2.Y + lineHeight2), (int) bounds2.X, (int)bounds2.Y);
+
+            if (rectMain.Intersects(rect))
+            {
+                return true;
+            }
+
+            current = current.Next;
+        }
+
+        return false;
     }
 
     private (Vector2 bounds, int lines) GetBounds(LinkedList<TextInfo> list)

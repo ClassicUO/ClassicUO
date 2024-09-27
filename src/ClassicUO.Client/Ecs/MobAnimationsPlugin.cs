@@ -229,7 +229,7 @@ readonly struct MobAnimationsPlugin : IPlugin
                         mount = delay <= (step.Run ? MovementSpeed.STEP_DELAY_MOUNT_RUN : MovementSpeed.STEP_DELAY_WALK);
                     }
 
-                    var maxDelay = MovementSpeed.TimeToCompleteMovement(step.Run, mount) - 15;
+                    var maxDelay = MovementSpeed.TimeToCompleteMovement(step.Run, mount);
                     var removeStep = delay >= maxDelay;
                     var directionChange = false;
 
