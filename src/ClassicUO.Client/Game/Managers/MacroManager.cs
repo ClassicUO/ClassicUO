@@ -1562,7 +1562,7 @@ namespace ClassicUO.Game.Managers
                     switch (macro.SubCode)
                     {
                         case MacroSubType.BestHealPotion:
-                            Span<int> healpotion_clilocs = stackalloc int[3] { 1041330, 1041329, 1041329 };
+                            Span<int> healpotion_clilocs = stackalloc int[3] { 1041330, 1041329, 1041328 };
 
                             obj = _world.Player.FindPreferredItemByCliloc(healpotion_clilocs);
 
