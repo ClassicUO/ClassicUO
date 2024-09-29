@@ -1070,9 +1070,10 @@ namespace ClassicUO.Game.Managers
                         }
                         else
                         {
-                            if (gobj.Y + item.Y < EndPos.Y || gobj.X + item.X == StartPos.X || gobj.Z >= MinHouseZ)
+                            if (gobj.Y + item.Y < EndPos.Y || gobj.X + item.X == _bounds.X || gobj.Z >= MinHouseZ)
                                 return false;
-                            else if (gobj.Y + item.Y != EndPos.Y)
+
+                            if (gobj.Y + item.Y != EndPos.Y)
                             {
                                 item.Y = 0;
                                 list[0] = item;
