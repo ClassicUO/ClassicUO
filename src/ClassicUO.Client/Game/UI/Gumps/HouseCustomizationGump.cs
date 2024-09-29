@@ -811,7 +811,7 @@ namespace ClassicUO.Game.UI.Gumps
                         Y = offsetY,
                         CanMove = false,
                         LocalSerial = (uint)(ID_GUMP_CUSTOM_HOUSE.ID_GCH_ITEM_IN_LIST + i),
-                        Height = 60
+                        Height = artInfo.UV.Height < 60 ? artInfo.UV.Height : 60
                     };
 
                     pic.MouseUp += (sender, e) =>
@@ -1439,7 +1439,8 @@ namespace ClassicUO.Game.UI.Gumps
                         Y = offsetY,
                         CanMove = false,
                         LocalSerial = (uint)(ID_GUMP_CUSTOM_HOUSE.ID_GCH_ITEM_IN_LIST + i),
-                        Height = 60
+                        Width = artInfo.UV.Width < 48 ? artInfo.UV.Width : 48,
+                        Height = artInfo.UV.Height < 60 ? artInfo.UV.Height : 60
                     };
 
                     pic.MouseUp += (sender, e) =>
