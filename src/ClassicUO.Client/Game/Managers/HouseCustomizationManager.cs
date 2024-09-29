@@ -156,196 +156,285 @@ namespace ClassicUO.Game.Managers
         {
             Item foundationItem = _world.Items.Get(Serial);
 
-            if (foundationItem != null && _world.HouseManager.TryGetHouse(Serial, out House house))
+            if (foundationItem == null || !_world.HouseManager.TryGetHouse(Serial, out House house))
             {
-                house.ClearCustomHouseComponents(CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_GENERIC_INTERNAL);
+                return;
+            }
 
-                foreach (Multi item in house.Components)
+            house.ClearCustomHouseComponents(CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_GENERIC_INTERNAL);
+
+            foreach (Multi item in house.Components)
+            {
+                if (!item.IsCustom)
                 {
-                    if (!item.IsCustom)
+                    continue;
+                }
+
+                int currentFloor = -1;
+                int floorZ = foundationItem.Z + 7;
+                int itemZ = item.Z;
+
+                bool ignore = false;
+
+                for (int i = 0; i < 4; i++)
+                {
+                    int offset = 0 /*i != 0 ? 0 : 7*/;
+
+                    if (itemZ >= floorZ - offset && itemZ < floorZ + 20)
                     {
-                        continue;
+                        currentFloor = i;
+
+                        break;
                     }
 
-                    int currentFloor = -1;
-                    int floorZ = foundationItem.Z + 7;
-                    int itemZ = item.Z;
+                    floorZ += 20;
+                }
 
-                    bool ignore = false;
+                if (currentFloor == -1)
+                {
+                    ignore = true;
+                    currentFloor = 0;
+                    //continue;
+                }
 
-                    for (int i = 0; i < 4; i++)
+                (int floorCheck1, int floorCheck2) = SeekGraphicInCustomHouseObjectList(Floors, item.Graphic);
+
+                CUSTOM_HOUSE_MULTI_OBJECT_FLAGS state = item.State;
+
+                if (floorCheck1 != -1 && floorCheck2 != -1)
+                {
+                    state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR;
+
+                    if (FloorVisionState[currentFloor] == (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_HIDE_FLOOR)
                     {
-                        int offset = 0 /*i != 0 ? 0 : 7*/;
-
-                        if (itemZ >= floorZ - offset && itemZ < floorZ + 20)
-                        {
-                            currentFloor = i;
-
-                            break;
-                        }
-
-                        floorZ += 20;
+                        state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER;
                     }
-
-                    if (currentFloor == -1)
+                    else if (FloorVisionState[currentFloor] == (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_TRANSPARENT_FLOOR
+                             || FloorVisionState[currentFloor] == (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_TRANSLUCENT_FLOOR)
                     {
-                        ignore = true;
-                        currentFloor = 0;
-                        //continue;
+                        state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_TRANSPARENT;
                     }
+                }
+                else
+                {
+                    (int stairCheck1, int stairCheck2) = SeekGraphicInCustomHouseObjectList(Stairs, item.Graphic);
 
-                    (int floorCheck1, int floorCheck2) = SeekGraphicInCustomHouseObjectList(Floors, item.Graphic);
-
-                    CUSTOM_HOUSE_MULTI_OBJECT_FLAGS state = item.State;
-
-                    if (floorCheck1 != -1 && floorCheck2 != -1)
+                    if (stairCheck1 != -1 && stairCheck2 != -1)
                     {
-                        state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR;
-
-                        if (FloorVisionState[currentFloor] == (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_HIDE_FLOOR)
-                        {
-                            state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER;
-                        }
-                        else if (FloorVisionState[currentFloor] == (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_TRANSPARENT_FLOOR || FloorVisionState[currentFloor] == (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_TRANSLUCENT_FLOOR)
-                        {
-                            state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_TRANSPARENT;
-                        }
+                        state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_STAIR;
                     }
                     else
                     {
-                        (int stairCheck1, int stairCheck2) = SeekGraphicInCustomHouseObjectList(Stairs, item.Graphic);
+                        (int roofCheck1, int roofCheck2) = SeekGraphicInCustomHouseObjectListWithCategory<CustomHouseRoof, CustomHouseRoofCategory>(Roofs, item.Graphic);
 
-                        if (stairCheck1 != -1 && stairCheck2 != -1)
+                        if (roofCheck1 != -1 && roofCheck2 != -1)
                         {
-                            state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_STAIR;
+                            state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_ROOF;
                         }
                         else
                         {
-                            (int roofCheck1, int roofCheck2) = SeekGraphicInCustomHouseObjectListWithCategory<CustomHouseRoof, CustomHouseRoofCategory>(Roofs, item.Graphic);
+                            (int fixtureCheck1, int fixtureCheck2) = SeekGraphicInCustomHouseObjectList(Doors, item.Graphic);
 
-                            if (roofCheck1 != -1 && roofCheck2 != -1)
+                            if (fixtureCheck1 == -1 || fixtureCheck2 == -1)
                             {
-                                state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_ROOF;
+                                (fixtureCheck1, fixtureCheck2) = SeekGraphicInCustomHouseObjectList(Teleports, item.Graphic);
+
+                                if (fixtureCheck1 != -1 && fixtureCheck2 != -1)
+                                {
+                                    state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR;
+                                }
                             }
                             else
                             {
-                                (int fixtureCheck1, int fixtureCheck2) = SeekGraphicInCustomHouseObjectList(Doors, item.Graphic);
-
-                                if (fixtureCheck1 == -1 || fixtureCheck2 == -1)
-                                {
-                                    (fixtureCheck1, fixtureCheck2) = SeekGraphicInCustomHouseObjectList(Teleports, item.Graphic);
-
-                                    if (fixtureCheck1 != -1 && fixtureCheck2 != -1)
-                                    {
-                                        state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR;
-                                    }
-                                }
-                                else
-                                {
-                                    state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FIXTURE;
-                                }
-                            }
-                        }
-
-                        if (!ignore)
-                        {
-                            if (FloorVisionState[currentFloor] == (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_HIDE_CONTENT)
-                            {
-                                state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER;
-                            }
-                            else if (FloorVisionState[currentFloor] == (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_TRANSPARENT_CONTENT)
-                            {
-                                state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_TRANSPARENT;
+                                state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FIXTURE;
                             }
                         }
                     }
 
                     if (!ignore)
                     {
-                        if (FloorVisionState[currentFloor] == (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_HIDE_ALL)
+                        if (FloorVisionState[currentFloor] == (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_HIDE_CONTENT)
                         {
                             state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER;
                         }
+                        else if (FloorVisionState[currentFloor] == (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_TRANSPARENT_CONTENT)
+                        {
+                            state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_TRANSPARENT;
+                        }
                     }
-
-                    item.State = state;
                 }
 
-                int z = foundationItem.Z + 7;
-
-                for (int x = StartPos.X + 1; x < EndPos.X; x++)
+                if (!ignore)
                 {
-                    for (int y = StartPos.Y + 1; y < EndPos.Y; y++)
+                    if (FloorVisionState[currentFloor] == (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_HIDE_ALL)
                     {
-                        IEnumerable<Multi> multi = house.Components.Where(s => s.X == x && s.Y == y);
+                        state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER;
+                    }
+                }
 
-                        if (multi == null)
+                item.State = state;
+            }
+
+            int z = foundationItem.Z + 7;
+
+            for (int x = StartPos.X + 1; x < EndPos.X; x++)
+            {
+                for (int y = StartPos.Y + 1; y < EndPos.Y; y++)
+                {
+                    IEnumerable<Multi> multi = house.Components.Where(s => s.X == x && s.Y == y);
+
+                    if (multi == null)
+                    {
+                        continue;
+                    }
+
+                    Multi floorMulti = null;
+                    Multi floorCustomMulti = null;
+
+                    foreach (Multi item in multi)
+                    {
+                        if (item.Z != z || (item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR) == 0)
                         {
                             continue;
                         }
 
-                        Multi floorMulti = null;
-                        Multi floorCustomMulti = null;
-
-                        foreach (Multi item in multi)
+                        if (item.IsCustom)
                         {
-                            if (item.Z != z || (item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR) == 0)
+                            floorCustomMulti = item;
+                        }
+                        else
+                        {
+                            floorMulti = item;
+                        }
+                    }
+
+                    if (floorMulti != null && floorCustomMulti == null)
+                    {
+                        Multi mo = house.Add
+                        (
+                            floorMulti.Graphic,
+                            0,
+                            (ushort) (foundationItem.X + (x - foundationItem.X)),
+                            (ushort) (foundationItem.Y + (y - foundationItem.Y)),
+                            (sbyte) z,
+                            true,
+                            false
+                        );
+
+                        mo.AlphaHue = 0xFF;
+
+                        CUSTOM_HOUSE_MULTI_OBJECT_FLAGS state = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR;
+
+                        if (FloorVisionState[0] == (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_HIDE_FLOOR)
+                        {
+                            state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER;
+                        }
+                        else if (FloorVisionState[0] == (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_TRANSPARENT_FLOOR
+                                 || FloorVisionState[0] == (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_TRANSLUCENT_FLOOR)
+                        {
+                            state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_TRANSPARENT;
+                        }
+
+                        mo.State = state;
+                    }
+                }
+            }
+
+            for (int i = 0; i < FloorCount; i++)
+            {
+                int minZ = foundationItem.Z + 7 + i * 20;
+                int maxZ = minZ + 20;
+
+                for (int j = 0; j < 2; j++)
+                {
+                    List<Point> validatedFloors = new List<Point>();
+
+                    for (int x = StartPos.X; x < EndPos.X + 1; x++)
+                    {
+                        for (int y = StartPos.Y; y < EndPos.Y + 1; y++)
+                        {
+                            IEnumerable<Multi> multi = house.GetMultiAt(x, y);
+
+                            if (multi == null)
                             {
                                 continue;
                             }
 
-                            if (item.IsCustom)
+                            foreach (Multi item in multi)
                             {
-                                floorCustomMulti = item;
+                                if (!item.IsCustom)
+                                {
+                                    continue;
+                                }
+
+                                if (j == 0)
+                                {
+                                    if (i == 0 && item.Z < minZ)
+                                    {
+                                        item.State = item.State | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE;
+
+                                        continue;
+                                    }
+
+                                    if ((item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR) == 0)
+                                    {
+                                        continue;
+                                    }
+
+                                    if (i == 0 && item.Z >= minZ && item.Z < maxZ)
+                                    {
+                                        item.State = item.State | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE;
+
+                                        continue;
+                                    }
+                                }
+
+                                if ((item.State & (CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_GENERIC_INTERNAL)) == 0 && item.Z >= minZ && item.Z < maxZ)
+                                {
+                                    if (!ValidateItemPlace
+                                        (
+                                            foundationItem,
+                                            item,
+                                            minZ,
+                                            maxZ,
+                                            validatedFloors
+                                        ))
+                                    {
+                                        item.State = item.State | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE;
+                                    }
+                                    else
+                                    {
+                                        item.State = item.State | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE;
+                                    }
+                                }
                             }
-                            else
-                            {
-                                floorMulti = item;
-                            }
-                        }
-
-                        if (floorMulti != null && floorCustomMulti == null)
-                        {
-                            Multi mo = house.Add
-                            (
-                                floorMulti.Graphic,
-                                0,
-                                (ushort) (foundationItem.X + (x - foundationItem.X)),
-                                (ushort) (foundationItem.Y + (y - foundationItem.Y)),
-                                (sbyte) z,
-                                true,
-                                false
-                            );
-
-                            mo.AlphaHue = 0xFF;
-
-                            CUSTOM_HOUSE_MULTI_OBJECT_FLAGS state = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR;
-
-                            if (FloorVisionState[0] == (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_HIDE_FLOOR)
-                            {
-                                state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER;
-                            }
-                            else if (FloorVisionState[0] == (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_TRANSPARENT_FLOOR || FloorVisionState[0] == (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_TRANSLUCENT_FLOOR)
-                            {
-                                state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_TRANSPARENT;
-                            }
-
-                            mo.State = state;
                         }
                     }
-                }
 
-                for (int i = 0; i < FloorCount; i++)
-                {
-                    int minZ = foundationItem.Z + 7 + i * 20;
-                    int maxZ = minZ + 20;
-
-                    for (int j = 0; j < 2; j++)
+                    if (i != 0 && j == 0)
                     {
-                        List<Point> validatedFloors = new List<Point>();
+                        foreach (Point point in validatedFloors)
+                        {
+                            IEnumerable<Multi> multi = house.GetMultiAt(point.X, point.Y);
+
+                            if (multi == null)
+                            {
+                                continue;
+                            }
+
+                            foreach (Multi item in multi)
+                            {
+                                if (item.IsCustom && (item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR) != 0 && item.Z >= minZ && item.Z < maxZ)
+                                {
+                                    item.State = item.State & ~CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE;
+                                }
+                            }
+                        }
 
                         for (int x = StartPos.X; x < EndPos.X + 1; x++)
                         {
+                            int minY = 0, maxY = 0;
+
                             for (int y = StartPos.Y; y < EndPos.Y + 1; y++)
                             {
                                 IEnumerable<Multi> multi = house.GetMultiAt(x, y);
@@ -357,60 +446,23 @@ namespace ClassicUO.Game.Managers
 
                                 foreach (Multi item in multi)
                                 {
-                                    if (!item.IsCustom)
+                                    if (item.IsCustom && (item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR) != 0 && (item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE) != 0 && (item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE) == 0 && item.Z >= minZ && item.Z < maxZ)
                                     {
-                                        continue;
-                                    }
+                                        minY = y;
 
-                                    if (j == 0)
-                                    {
-                                        if (i == 0 && item.Z < minZ)
-                                        {
-                                            item.State = item.State | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE;
-
-                                            continue;
-                                        }
-
-                                        if ((item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR) == 0)
-                                        {
-                                            continue;
-                                        }
-
-                                        if (i == 0 && item.Z >= minZ && item.Z < maxZ)
-                                        {
-                                            item.State = item.State | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE;
-
-                                            continue;
-                                        }
-                                    }
-
-                                    if ((item.State & (CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_GENERIC_INTERNAL)) == 0 && item.Z >= minZ && item.Z < maxZ)
-                                    {
-                                        if (!ValidateItemPlace
-                                        (
-                                            foundationItem,
-                                            item,
-                                            minZ,
-                                            maxZ,
-                                            validatedFloors
-                                        ))
-                                        {
-                                            item.State = item.State | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE;
-                                        }
-                                        else
-                                        {
-                                            item.State = item.State | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE;
-                                        }
+                                        break;
                                     }
                                 }
-                            }
-                        }
 
-                        if (i != 0 && j == 0)
-                        {
-                            foreach (Point point in validatedFloors)
+                                if (minY != 0)
+                                {
+                                    break;
+                                }
+                            }
+
+                            for (int y = EndPos.Y; y >= StartPos.Y; y--)
                             {
-                                IEnumerable<Multi> multi = house.GetMultiAt(point.X, point.Y);
+                                IEnumerable<Multi> multi = house.GetMultiAt(x, y);
 
                                 if (multi == null)
                                 {
@@ -419,200 +471,152 @@ namespace ClassicUO.Game.Managers
 
                                 foreach (Multi item in multi)
                                 {
-                                    if (item.IsCustom && (item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR) != 0 && item.Z >= minZ && item.Z < maxZ)
+                                    if (item.IsCustom && (item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR) != 0 && (item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE) != 0 && (item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE) == 0 && item.Z >= minZ && item.Z < maxZ)
+                                    {
+                                        maxY = y;
+
+                                        break;
+                                    }
+                                }
+
+                                if (maxY != 0)
+                                {
+                                    break;
+                                }
+                            }
+
+                            for (int y = minY; y < maxY; y++)
+                            {
+                                IEnumerable<Multi> multi = house.GetMultiAt(x, y);
+
+                                if (multi == null)
+                                {
+                                    continue;
+                                }
+
+                                foreach (Multi item in multi)
+                                {
+                                    if (item.IsCustom && (item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR) != 0 && (item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE) != 0 && item.Z >= minZ && item.Z < maxZ)
                                     {
                                         item.State = item.State & ~CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE;
                                     }
                                 }
                             }
+                        }
+
+                        for (int y = StartPos.Y; y < EndPos.Y + 1; y++)
+                        {
+                            int minX = 0;
+                            int maxX = 0;
 
                             for (int x = StartPos.X; x < EndPos.X + 1; x++)
                             {
-                                int minY = 0, maxY = 0;
+                                IEnumerable<Multi> multi = house.GetMultiAt(x, y);
 
-                                for (int y = StartPos.Y; y < EndPos.Y + 1; y++)
+                                if (multi == null)
                                 {
-                                    IEnumerable<Multi> multi = house.GetMultiAt(x, y);
+                                    continue;
+                                }
 
-                                    if (multi == null)
+                                foreach (Multi item in multi)
+                                {
+                                    if (item.IsCustom && (item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR) != 0 && (item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE) != 0 && (item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE) == 0 && item.Z >= minZ && item.Z < maxZ)
                                     {
-                                        continue;
-                                    }
+                                        minX = x;
 
-                                    foreach (Multi item in multi)
-                                    {
-                                        if (item.IsCustom && (item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR) != 0 && (item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE) != 0 && (item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE) == 0 && item.Z >= minZ && item.Z < maxZ)
-                                        {
-                                            minY = y;
-
-                                            break;
-                                        }
-                                    }
-
-                                    if (minY != 0)
-                                    {
                                         break;
                                     }
                                 }
 
-                                for (int y = EndPos.Y; y >= StartPos.Y; y--)
+                                if (minX != 0)
                                 {
-                                    IEnumerable<Multi> multi = house.GetMultiAt(x, y);
-
-                                    if (multi == null)
-                                    {
-                                        continue;
-                                    }
-
-                                    foreach (Multi item in multi)
-                                    {
-                                        if (item.IsCustom && (item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR) != 0 && (item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE) != 0 && (item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE) == 0 && item.Z >= minZ && item.Z < maxZ)
-                                        {
-                                            maxY = y;
-
-                                            break;
-                                        }
-                                    }
-
-                                    if (maxY != 0)
-                                    {
-                                        break;
-                                    }
-                                }
-
-                                for (int y = minY; y < maxY; y++)
-                                {
-                                    IEnumerable<Multi> multi = house.GetMultiAt(x, y);
-
-                                    if (multi == null)
-                                    {
-                                        continue;
-                                    }
-
-                                    foreach (Multi item in multi)
-                                    {
-                                        if (item.IsCustom && (item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR) != 0 && (item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE) != 0 && item.Z >= minZ && item.Z < maxZ)
-                                        {
-                                            item.State = item.State & ~CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE;
-                                        }
-                                    }
+                                    break;
                                 }
                             }
 
-                            for (int y = StartPos.Y; y < EndPos.Y + 1; y++)
+                            for (int x = EndPos.X; x >= StartPos.X; x--)
                             {
-                                int minX = 0;
-                                int maxX = 0;
+                                IEnumerable<Multi> multi = house.GetMultiAt(x, y);
 
-                                for (int x = StartPos.X; x < EndPos.X + 1; x++)
+                                if (multi == null)
                                 {
-                                    IEnumerable<Multi> multi = house.GetMultiAt(x, y);
+                                    continue;
+                                }
 
-                                    if (multi == null)
+                                foreach (Multi item in multi)
+                                {
+                                    if (item.IsCustom && (item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR) != 0 && (item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE) != 0 && (item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE) == 0 && item.Z >= minZ && item.Z < maxZ)
                                     {
-                                        continue;
-                                    }
+                                        maxX = x;
 
-                                    foreach (Multi item in multi)
-                                    {
-                                        if (item.IsCustom && (item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR) != 0 && (item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE) != 0 && (item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE) == 0 && item.Z >= minZ && item.Z < maxZ)
-                                        {
-                                            minX = x;
-
-                                            break;
-                                        }
-                                    }
-
-                                    if (minX != 0)
-                                    {
                                         break;
                                     }
                                 }
 
-                                for (int x = EndPos.X; x >= StartPos.X; x--)
+                                if (maxX != 0)
                                 {
-                                    IEnumerable<Multi> multi = house.GetMultiAt(x, y);
+                                    break;
+                                }
+                            }
 
-                                    if (multi == null)
-                                    {
-                                        continue;
-                                    }
+                            for (int x = minX; x < maxX; x++)
+                            {
+                                IEnumerable<Multi> multi = house.GetMultiAt(x, y);
 
-                                    foreach (Multi item in multi)
-                                    {
-                                        if (item.IsCustom && (item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR) != 0 && (item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE) != 0 && (item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE) == 0 && item.Z >= minZ && item.Z < maxZ)
-                                        {
-                                            maxX = x;
-
-                                            break;
-                                        }
-                                    }
-
-                                    if (maxX != 0)
-                                    {
-                                        break;
-                                    }
+                                if (multi == null)
+                                {
+                                    continue;
                                 }
 
-                                for (int x = minX; x < maxX; x++)
+                                foreach (Multi item in multi)
                                 {
-                                    IEnumerable<Multi> multi = house.GetMultiAt(x, y);
-
-                                    if (multi == null)
+                                    if (item.IsCustom && (item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR) != 0 && (item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE) != 0 && item.Z >= minZ && item.Z < maxZ)
                                     {
-                                        continue;
-                                    }
-
-                                    foreach (Multi item in multi)
-                                    {
-                                        if (item.IsCustom && (item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR) != 0 && (item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE) != 0 && item.Z >= minZ && item.Z < maxZ)
-                                        {
-                                            item.State = item.State & ~CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE;
-                                        }
+                                        item.State = item.State & ~CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE;
                                     }
                                 }
                             }
                         }
                     }
                 }
+            }
 
-                z = foundationItem.Z + 7 + 20;
+            z = foundationItem.Z + 7 + 20;
 
-                ushort color = 0x0051;
+            ushort color = 0x0051;
 
-                for (int i = 1; i < CurrentFloor; i++)
+            for (int i = 1; i < CurrentFloor; i++)
+            {
+                for (int x = StartPos.X; x < EndPos.X; x++)
                 {
-                    for (int x = StartPos.X; x < EndPos.X; x++)
+                    for (int y = StartPos.Y; y < EndPos.Y; y++)
                     {
-                        for (int y = StartPos.Y; y < EndPos.Y; y++)
+                        ushort tempColor = color;
+
+                        if (x == StartPos.X || y == StartPos.Y)
                         {
-                            ushort tempColor = color;
-
-                            if (x == StartPos.X || y == StartPos.Y)
-                            {
-                                tempColor++;
-                            }
-
-                            Multi mo = house.Add
-                            (
-                                0x0496,
-                                tempColor,
-                                (ushort)(foundationItem.X + (x - foundationItem.X)),
-                                (ushort)(foundationItem.Y + (y - foundationItem.Y)),
-                                (sbyte) z,
-                                true,
-                                false
-                            );
-
-                            mo.AlphaHue = 0xFF;
-                            mo.State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_GENERIC_INTERNAL | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_TRANSPARENT;
-                            mo.AddToTile();
+                            tempColor++;
                         }
-                    }
 
-                    color += 5;
-                    z += 20;
+                        Multi mo = house.Add
+                        (
+                            0x0496,
+                            tempColor,
+                            (ushort)(foundationItem.X + (x - foundationItem.X)),
+                            (ushort)(foundationItem.Y + (y - foundationItem.Y)),
+                            (sbyte) z,
+                            true,
+                            false
+                        );
+
+                        mo.AlphaHue = 0xFF;
+                        mo.State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_GENERIC_INTERNAL | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_TRANSPARENT;
+                        mo.AddToTile();
+                    }
                 }
+
+                color += 5;
+                z += 20;
             }
         }
 
@@ -1503,6 +1507,27 @@ namespace ClassicUO.Game.Managers
                     if (!found)
                     {
                         return false;
+                    }
+                }
+
+                if ((item.State & (CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_STAIR |
+                                   CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_ROOF |
+                                   CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR |
+                                   CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_DONT_REMOVE)) == 0)
+                {
+                    var multis = house.GetMultiAt(item.X, item.Y).Where(s => s.IsCustom && s.Z <= item.Z - 20);
+
+                    if (multis.Any())
+                    {
+                        if (multis.Any(s => (s.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE) != 0))
+                            return false;
+
+                        if (!multis.Any
+                            (
+                                s => (s.State & (CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_STAIR | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_ROOF |
+                                                 CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_DONT_REMOVE)) == 0
+                            ))
+                            return false;
                     }
                 }
             }
