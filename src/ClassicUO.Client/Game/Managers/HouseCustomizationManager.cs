@@ -1052,32 +1052,15 @@ namespace ClassicUO.Game.Managers
                 if (!_bounds.Contains(gobj.X, gobj.Y))
                     return false;
 
-                // if (gobj.X < StartPos.X - 1 || gobj.X > EndPos.X - 1 || gobj.Y < StartPos.Y - 1 || gobj.Y > EndPos.Y - 1)
-                //     return false;
-                //
-                // if (gobj is not Multi && gobj.Z < MinHouseZ)
-                //     return false;
-
-                // if ((type != CUSTOM_HOUSE_BUILD_TYPE.CHBT_STAIR || CombinedStair) &&
-                //     gobj.Z < MinHouseZ && (gobj.X == EndPos.X - 1 || gobj.Y == EndPos.Y - 1))
-                // {
-                //     return false;
-                // }
-                //
-
-                //
-                var minZ = foundationItem.Z + 7 + (CurrentFloor - 1) * 20;
+                var minZ = foundationItem.Z + 0 + (CurrentFloor - 1) * 20;
                 var maxZ = minZ + 20;
 
                 var boundsOffset = State != CUSTOM_HOUSE_GUMP_STATE.CHGS_WALL ? 1 : 0;
-                // var rect = new Rectangle(StartPos.X + boundsOffset, StartPos.Y + boundsOffset, EndPos.X, EndPos.Y);
                 var rect = _bounds;
-                // rect.X -= boundsOffset;
-                // rect.Y -= boundsOffset;
 
-
-                foreach (var item in list)
+                for (var i = 0; i < list.Count; ++i)
                 {
+                    var item = list[i];
                     if (type == CUSTOM_HOUSE_BUILD_TYPE.CHBT_STAIR)
                     {
                         if (CombinedStair)
@@ -1091,9 +1074,8 @@ namespace ClassicUO.Game.Managers
                                 return false;
                             else if (gobj.Y + item.Y != EndPos.Y)
                             {
-                                var first = list[0];
-                                first.Y = 0;
-                                list[0] = first;
+                                item.Y = 0;
+                                list[0] = item;
                             }
                             continue;
                         }
@@ -1106,9 +1088,7 @@ namespace ClassicUO.Game.Managers
 
                     if (type != CUSTOM_HOUSE_BUILD_TYPE.CHBT_FLOOR)
                     {
-                        var multis = house.GetMultiAt(gobj.X + item.X, gobj.Y + item.Y);
-
-                        foreach (var multi in multis)
+                        foreach (var multi in house.GetMultiAt(gobj.X + item.X, gobj.Y + item.Y))
                         {
                             if (!multi.IsCustom)
                                 continue;
