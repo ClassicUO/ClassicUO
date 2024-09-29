@@ -1510,26 +1510,26 @@ namespace ClassicUO.Game.Managers
                     }
                 }
 
-                if ((item.State & (CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_STAIR |
-                                   CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_ROOF |
-                                   CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR |
-                                   CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_DONT_REMOVE)) == 0)
-                {
-                    var multis = house.GetMultiAt(item.X, item.Y).Where(s => s.IsCustom && s.Z <= item.Z - 20);
-
-                    if (multis.Any())
-                    {
-                        if (multis.Any(s => (s.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE) != 0))
-                            return false;
-
-                        if (!multis.Any
-                            (
-                                s => (s.State & (CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_STAIR | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_ROOF |
-                                                 CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_DONT_REMOVE)) == 0
-                            ))
-                            return false;
-                    }
-                }
+                // if ((item.State & (CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_STAIR |
+                //                    CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_ROOF |
+                //                    CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR |
+                //                    CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_DONT_REMOVE)) == 0)
+                // {
+                //     var multis = house.GetMultiAt(item.X, item.Y).Where(s => s.IsCustom && s.Z < item.Z - 20);
+                //
+                //     if (multis.Any())
+                //     {
+                //         if (multis.Any(s => (s.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE) != 0))
+                //             return false;
+                //
+                //         if (!multis.Any
+                //             (
+                //                 s => (s.State & (CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_STAIR | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_ROOF |
+                //                                  CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_DONT_REMOVE)) == 0
+                //             ))
+                //             return false;
+                //     }
+                // }
             }
 
             return true;
