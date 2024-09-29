@@ -792,7 +792,7 @@ namespace ClassicUO.Network
         {
             lock (PacketHandlers.Handler)
             {
-                PacketHandlers.Handler.Append(data.AsSpan(0, length), true);
+                PacketHandlers.Handler.Append(data.AsSpan(0, length));
             }
 
             return true;
@@ -814,7 +814,7 @@ namespace ClassicUO.Network
             {
                 lock (PacketHandlers.Handler)
                 {
-                    PacketHandlers.Handler.Append(new Span<byte>(buffer.ToPointer(), length), true);
+                    PacketHandlers.Handler.Append(new Span<byte>(buffer.ToPointer(), length));
                 }
             }
 
