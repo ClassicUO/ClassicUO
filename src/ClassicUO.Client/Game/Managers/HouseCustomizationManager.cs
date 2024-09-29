@@ -630,8 +630,8 @@ namespace ClassicUO.Game.Managers
             if (!_bounds.Contains(place.X, place.Y))
                 return;
 
-            int zOffset = 0;
-            var targetZ = _world.Player.Z;
+            // apply a minor offset for roof tiles
+            int zOffset = -3;
 
             HouseCustomizationGump gump = UIManager.GetGump<HouseCustomizationGump>(Serial);
 
@@ -676,7 +676,7 @@ namespace ClassicUO.Game.Managers
 
                         if (type == CUSTOM_HOUSE_BUILD_TYPE.CHBT_STAIR || type == CUSTOM_HOUSE_BUILD_TYPE.CHBT_ROOF)
                         {
-                            z = targetZ - (foundationItem.Z + z) + z;
+                            z = place.Z - (foundationItem.Z + z) + z;
                         }
 
                         if (type == CUSTOM_HOUSE_BUILD_TYPE.CHBT_ROOF)
