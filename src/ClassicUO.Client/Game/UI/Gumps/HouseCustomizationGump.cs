@@ -32,6 +32,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -63,6 +64,7 @@ namespace ClassicUO.Game.UI.Gumps
             CanCloseWithRightClick = true;
             _customHouseManager = new HouseCustomizationManager(world, serial);
             World.CustomHouseManager = _customHouseManager;
+            SetOtherHousesState(false);
 
             Add(new GumpPicTiled(121, 36, 397, 120, 0x0E14));
 
@@ -227,6 +229,18 @@ namespace ClassicUO.Game.UI.Gumps
 
             UpdateMaxPage();
             Update();
+        }
+
+        private void SetOtherHousesState(bool visible)
+        {
+            foreach (var multi in World.HouseManager.Houses.Where(s => s.Serial != LocalSerial)
+                                       .SelectMany(s => s.Components))
+            {
+                if (visible)
+                    multi.State &= ~CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER;
+                else
+                    multi.State |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER;
+            }
         }
 
         public new void Update()
@@ -2095,6 +2109,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Dispose()
         {
+            SetOtherHousesState(true);
             World.CustomHouseManager = null;
             NetClient.Socket.Send_CustomHouseBuildingExit(World);
             World.TargetManager.CancelTarget();
