@@ -371,8 +371,7 @@ namespace ClassicUO
 
             Mouse.Update();
 
-            var data = NetClient.Socket.CollectAvailableData();
-            var packetsCount = PacketHandlers.Handler.ParsePackets(NetClient.Socket, UO.World, data);
+            var packetsCount = PacketHandlers.Handler.ParsePackets(NetClient.Socket, UO.World);
 
             NetClient.Socket.Statistics.TotalPacketsReceived += (uint)packetsCount;
             NetClient.Socket.Flush();

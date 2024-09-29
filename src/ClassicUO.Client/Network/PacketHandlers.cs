@@ -48,6 +48,7 @@ using ClassicUO.Utility.Platforms;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 using System.Text;
 
 namespace ClassicUO.Network
@@ -84,48 +85,37 @@ namespace ClassicUO.Network
         private readonly CircularBuffer _buffer = new CircularBuffer();
         private readonly CircularBuffer _pluginsBuffer = new CircularBuffer();
 
-        public int ParsePackets(NetClient socket, World world, Span<byte> data)
+        public int ParsePackets(NetClient socket, World world)
         {
-            Append(data, false);
+            Span<byte> data = NetClient.Socket.CollectAvailableData();
+            if (!data.IsEmpty)
+            {
+                _buffer.Enqueue(data);
+                NetClient.Socket.CommitReadData(data.Length);
+            }
 
             return ParsePackets(socket, world, _buffer, true) + ParsePackets(socket, world, _pluginsBuffer, false);
         }
 
         private int ParsePackets(NetClient socket, World world, CircularBuffer stream, bool allowPlugins)
         {
-            var packetsCount = 0;
+            int packetsCount = 0;
 
             lock (stream)
             {
-                ref var packetBuffer = ref _readingBuffer;
+                ref byte[] packetBuffer = ref _readingBuffer;
 
                 while (stream.Length > 0)
                 {
-                    if (
-                        !GetPacketInfo(
-                            socket,
-                            stream,
-                            stream.Length,
-                            out var packetID,
-                            out int offset,
-                            out int packetlength
-                        )
-                    )
+                    if (!GetPacketInfo(socket, stream, stream.Length, out byte packetID, out int offset, out int packetlength))
                     {
-                        Log.Warn(
-                            $"Invalid ID: {packetID:X2} | off: {offset} | len: {packetlength} | stream.pos: {stream.Length}"
-                        );
-
+                        Log.Warn($"Invalid ID: {packetID:X2} | off: {offset} | len: {packetlength} | stream.pos: {stream.Length}");
                         break;
                     }
 
-                    if (stream.Length < packetlength)
+                    if (stream.Length < packetlength) // need more data
                     {
-                        Log.Warn(
-                            $"need more data ID: {packetID:X2} | off: {offset} | len: {packetlength} | stream.pos: {stream.Length}"
-                        );
-
-                        // need more data
+                        Log.Warn($"need more data ID: {packetID:X2} | off: {offset} | len: {packetlength} | stream.pos: {stream.Length}");
                         break;
                     }
 
@@ -153,12 +143,12 @@ namespace ClassicUO.Network
             return packetsCount;
         }
 
-        public void Append(Span<byte> data, bool fromPlugins)
+        public void Append(Span<byte> data)
         {
             if (data.IsEmpty)
                 return;
 
-            (fromPlugins ? _pluginsBuffer : _buffer).Enqueue(data);
+            _pluginsBuffer.Enqueue(data);
         }
 
         private void AnalyzePacket(World world, ReadOnlySpan<byte> data, int offset)
@@ -417,7 +407,7 @@ namespace ClassicUO.Network
                 uint id2 = p.ReadUInt32BE();
 
                 // standard client doesn't allow the trading system if one of the traders is invisible (=not sent by server)
-                if (world.Get(id1) == null ||world.Get(id2) == null)
+                if (world.Get(id1) == null || world.Get(id2) == null)
                 {
                     return;
                 }
@@ -496,7 +486,7 @@ namespace ClassicUO.Network
                 return;
             }
 
-            Entity entity =world.Get(p.ReadUInt32BE());
+            Entity entity = world.Get(p.ReadUInt32BE());
 
             if (entity != null)
             {
@@ -517,7 +507,7 @@ namespace ClassicUO.Network
             }
 
             uint serial = p.ReadUInt32BE();
-            Entity entity =world.Get(serial);
+            Entity entity = world.Get(serial);
 
             if (entity == null)
             {
@@ -1158,7 +1148,7 @@ namespace ClassicUO.Network
                     world.HouseManager.Remove(serial);
                 }
 
-                Entity cont =world.Get(item.Container);
+                Entity cont = world.Get(item.Container);
 
                 if (cont != null)
                 {
@@ -1795,7 +1785,7 @@ namespace ClassicUO.Network
         {
             uint serial = p.ReadUInt32BE();
 
-            Entity entity =world.Get(serial);
+            Entity entity = world.Get(serial);
 
             if (entity == null)
             {
@@ -1863,7 +1853,7 @@ namespace ClassicUO.Network
             item.FixHue(p.ReadUInt16BE());
             item.Amount = 1;
 
-            Entity entity =world.Get(item.Container);
+            Entity entity = world.Get(item.Container);
 
             entity?.PushToBack(item);
 
@@ -2142,7 +2132,7 @@ namespace ClassicUO.Network
 
                 if (i == 0)
                 {
-                    Entity container =world.Get(containerSerial);
+                    Entity container = world.Get(containerSerial);
 
                     if (container != null)
                     {
@@ -2252,7 +2242,7 @@ namespace ClassicUO.Network
                 Client.Game.SetScene(scene);
 
                 //GameActions.OpenPaperdoll(world.Player);
-                GameActions.RequestMobileStatus(world,world.Player);
+                GameActions.RequestMobileStatus(world, world.Player);
                 NetClient.Socket.Send_OpenChat("");
 
                 NetClient.Socket.Send_SkillsRequest(world.Player);
@@ -2868,7 +2858,7 @@ namespace ClassicUO.Network
                 UpdateGameObject(world, serial, graphic, 0, 0, x, y, z, direction, hue, flags, 0, 0, 1);
             }
 
-            Entity obj =world.Get(serial);
+            Entity obj = world.Get(serial);
 
             if (obj == null)
             {
@@ -3121,7 +3111,7 @@ namespace ClassicUO.Network
             }
 
             uint serial = p.ReadUInt32BE();
-            Entity corpse =world.Get(serial);
+            Entity corpse = world.Get(serial);
 
             if (corpse == null)
             {
@@ -3177,7 +3167,8 @@ namespace ClassicUO.Network
                     facet = p.ReadUInt16BE();
                 }
 
-                multiMapInfo = Client.Game.UO.MultiMaps.GetMap(facet, width, height, startX, startY, endX, endY);            }
+                multiMapInfo = Client.Game.UO.MultiMaps.GetMap(facet, width, height, startX, startY, endX, endY);
+            }
             else
             {
                 multiMapInfo = Client.Game.UO.MultiMaps.GetMap(null, width, height, startX, startY, endX, endY);
@@ -3416,7 +3407,7 @@ namespace ClassicUO.Network
 
         private static void UpdateHitpoints(World world, ref StackDataReader p)
         {
-            Entity entity =world.Get(p.ReadUInt32BE());
+            Entity entity = world.Get(p.ReadUInt32BE());
 
             if (entity == null)
             {
@@ -3593,7 +3584,7 @@ namespace ClassicUO.Network
             }
 
             uint serial = p.ReadUInt32BE();
-            Entity entity =world.Get(serial);
+            Entity entity = world.Get(serial);
             ushort graphic = p.ReadUInt16BE();
             MessageType type = (MessageType)p.ReadUInt8();
             ushort hue = p.ReadUInt16BE();
@@ -4652,7 +4643,7 @@ namespace ClassicUO.Network
                 case 0x22:
                     p.Skip(1);
 
-                    Entity en =world.Get(p.ReadUInt32BE());
+                    Entity en = world.Get(p.ReadUInt32BE());
 
                     if (en != null)
                     {
@@ -4757,7 +4748,7 @@ namespace ClassicUO.Network
             }
 
             uint serial = p.ReadUInt32BE();
-            Entity entity =world.Get(serial);
+            Entity entity = world.Get(serial);
             ushort graphic = p.ReadUInt16BE();
             MessageType type = (MessageType)p.ReadUInt8();
             ushort hue = p.ReadUInt16BE();
@@ -5845,7 +5836,7 @@ namespace ClassicUO.Network
                     world.RangeSize.Y = cy;
                 }
 
-                Entity ent =world.Get(cSerial);
+                Entity ent = world.Get(cSerial);
 
                 if (ent == null)
                 {

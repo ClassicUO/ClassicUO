@@ -307,10 +307,9 @@ namespace ClassicUO.Network
             _treePos = 0;
         }
 
-        public bool Decompress(Span<byte> src, Span<byte> dest, ref int size)
+        public bool Decompress(Span<byte> src, Span<byte> dest, out int size)
         {
-            var destIndex = 0;
-            dest.Clear();
+            int destIndex = 0;
 
             while (true)
             {
@@ -324,7 +323,7 @@ namespace ClassicUO.Network
                     }
 
                     _value = src[0];
-                    src = src.Slice(1);
+                    src = src[1..];
 
                     _bitNum = 0;
                     _mask = 0x80;
@@ -351,8 +350,9 @@ namespace ClassicUO.Network
                         continue;
                     }
 
-                    if (destIndex == size)
+                    if (destIndex == dest.Length)
                     {
+                        size = 0;
                         return false;
                     }
 
