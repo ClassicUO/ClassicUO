@@ -2,7 +2,7 @@
 
 // Copyright (c) 2024, andreakarasho
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 // 1. Redistributions of source code must retain the above copyright
@@ -16,7 +16,7 @@
 // 4. Neither the name of the copyright holder nor the
 //    names of its contributors may be used to endorse or promote products
 //    derived from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -69,6 +69,7 @@ namespace ClassicUO.Game.Managers
         public readonly List<CustomHousePlaceInfo> ObjectsInfo = new List<CustomHousePlaceInfo>();
 
         private readonly World _world;
+        private Rectangle _bounds;
 
         public HouseCustomizationManager(World world, uint serial)
         {
@@ -90,7 +91,7 @@ namespace ClassicUO.Game.Managers
             ParseFileWithCategory<CustomHouseRoof, CustomHouseRoofCategory>(Roofs, fileManager.GetUOFilePath("roof.txt"));
 
             ParseFile(ObjectsInfo, fileManager.GetUOFilePath("suppinfo.txt"));
-            // 
+            //
 
 
             InitializeHouse();
@@ -113,38 +114,42 @@ namespace ClassicUO.Game.Managers
         {
             Item foundation = _world.Items.Get(Serial);
 
-            if (foundation != null)
+            if (foundation == null)
             {
-                MinHouseZ = foundation.Z + 7;
-
-                Rectangle? multi = foundation.MultiInfo;
-
-                if (multi != null)
-                {
-                    StartPos.X = foundation.X + multi.Value.X;
-                    StartPos.Y = foundation.Y + multi.Value.Y;
-                    EndPos.X = foundation.X + multi.Value.Width + 1;
-                    EndPos.Y = foundation.Y + multi.Value.Height + 1;
-                }
-
-                int width = Math.Abs(EndPos.X - StartPos.X);
-                int height = Math.Abs(EndPos.Y - StartPos.Y);
-
-                if (width > 13 || height > 13)
-                {
-                    FloorCount = 4;
-                }
-                else
-                {
-                    FloorCount = 3;
-                }
-
-                int componentsOnFloor = (width - 1) * (height - 1);
-
-                MaxComponets = FloorCount * (componentsOnFloor + 2 * (width + height) - 4) - (int) (FloorCount * componentsOnFloor * -0.25) + 2 * width + 3 * height - 5;
-
-                MaxFixtures = MaxComponets / 20;
+                return;
             }
+
+            MinHouseZ = foundation.Z + 7;
+
+            if (foundation.MultiInfo.HasValue)
+            {
+                var multi = foundation.MultiInfo.Value;
+
+                StartPos.X = foundation.X + multi.X + 1;
+                StartPos.Y = foundation.Y + multi.Y + 1;
+                EndPos.X = foundation.X + multi.Width + 1;
+                EndPos.Y = foundation.Y + multi.Height + 1;
+            }
+
+            int width = Math.Abs(EndPos.X - StartPos.X);
+            int height = Math.Abs(EndPos.Y - StartPos.Y);
+
+            _bounds = new Rectangle(StartPos.X - 1, StartPos.Y - 1, width + 1, height + 2);
+
+            if (width > 13 || height > 13)
+            {
+                FloorCount = 4;
+            }
+            else
+            {
+                FloorCount = 3;
+            }
+
+            int componentsOnFloor = (width - 1) * (height - 1);
+
+            MaxComponets = FloorCount * (componentsOnFloor + 2 * (width + height) - 4) - (int) (FloorCount * componentsOnFloor * -0.25) + 2 * width + 3 * height - 5;
+
+            MaxFixtures = MaxComponets / 20;
         }
 
         public void GenerateFloorPlace()
@@ -600,9 +605,7 @@ namespace ClassicUO.Game.Managers
                             );
 
                             mo.AlphaHue = 0xFF;
-
                             mo.State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_GENERIC_INTERNAL | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_TRANSPARENT;
-
                             mo.AddToTile();
                         }
                     }
@@ -615,223 +618,224 @@ namespace ClassicUO.Game.Managers
 
         public void OnTargetWorld(GameObject place)
         {
-            if (place != null /*&& place is Multi m*/)
+            if (place == null /*&& place is Multi m*/)
             {
-                int zOffset = 0;
+                return;
+            }
 
-                HouseCustomizationGump gump = UIManager.GetGump<HouseCustomizationGump>(Serial);
+            if (!_bounds.Contains(place.X, place.Y))
+                return;
 
-                if (CurrentFloor == 1)
+            int zOffset = 0;
+            var targetZ = _world.Player.Z;
+
+            HouseCustomizationGump gump = UIManager.GetGump<HouseCustomizationGump>(Serial);
+
+            if (CurrentFloor == 1)
+            {
+                zOffset = -7;
+            }
+
+            if (SeekTile)
+            {
+                if (place is Multi)
                 {
-                    zOffset = -7;
+                    SeekGraphic(place.Graphic);
+                }
+            }
+            else if (place.Z >= _world.Player.Z + zOffset && place.Z < _world.Player.Z + 20)
+            {
+                Item foundationItem = _world.Items.Get(Serial);
+
+                if (foundationItem == null || !_world.HouseManager.TryGetHouse(Serial, out House house))
+                {
+                    return;
                 }
 
-                if (SeekTile)
+                if (Erasing)
                 {
-                    if (place is Multi)
-                    {
-                        SeekGraphic(place.Graphic);
-                    }
-                }
-                else if (place.Z >= _world.Player.Z + zOffset && place.Z < _world.Player.Z + 20)
-                {
-                    Item foundationItem = _world.Items.Get(Serial);
-
-                    if (foundationItem == null || !_world.HouseManager.TryGetHouse(Serial, out House house))
+                    if (!(place is Multi))
                     {
                         return;
                     }
 
-                    if (Erasing)
+                    if (CanEraseHere(place, out CUSTOM_HOUSE_BUILD_TYPE type))
                     {
-                        if (!(place is Multi))
+                        IEnumerable<Multi> multi = house.GetMultiAt(place.X, place.Y);
+
+                        if (multi == null || !multi.Any())
                         {
                             return;
                         }
 
-                        if (CanEraseHere(place, out CUSTOM_HOUSE_BUILD_TYPE type))
+                        int z = 7 + (CurrentFloor - 1) * 20;
+
+                        if (type == CUSTOM_HOUSE_BUILD_TYPE.CHBT_STAIR || type == CUSTOM_HOUSE_BUILD_TYPE.CHBT_ROOF)
                         {
-                            IEnumerable<Multi> multi = house.GetMultiAt(place.X, place.Y);
-
-                            if (multi == null || !multi.Any())
-                            {
-                                return;
-                            }
-
-                            int z = 7 + (CurrentFloor - 1) * 20;
-
-                            if (type == CUSTOM_HOUSE_BUILD_TYPE.CHBT_STAIR || type == CUSTOM_HOUSE_BUILD_TYPE.CHBT_ROOF)
-                            {
-                                z = place.Z - (foundationItem.Z + z) + z;
-                            }
-
-                            if (type == CUSTOM_HOUSE_BUILD_TYPE.CHBT_ROOF)
-                            {
-                                NetClient.Socket.Send_CustomHouseDeleteRoof(_world, place.Graphic, place.X - foundationItem.X, place.Y - foundationItem.Y, z);
-                            }
-                            else
-                            {
-                                NetClient.Socket.Send_CustomHouseDeleteItem(_world, place.Graphic, place.X - foundationItem.X, place.Y - foundationItem.Y, z);
-                            }
-
-                            place.Destroy();
+                            z = targetZ - (foundationItem.Z + z) + z;
                         }
-                    }
-                    else if (SelectedGraphic != 0)
-                    {
-                        CustomBuildObject[] list = new CustomBuildObject[10];
 
-                        if (CanBuildHere(list, out CUSTOM_HOUSE_BUILD_TYPE type) && list.Length != 0)
+                        if (type == CUSTOM_HOUSE_BUILD_TYPE.CHBT_ROOF)
                         {
-                            //if (type != CUSTOM_HOUSE_BUILD_TYPE.CHBT_STAIR && !(place is Multi))
-                            //    return;
+                            NetClient.Socket.Send_CustomHouseDeleteRoof(_world, place.Graphic, place.X - foundationItem.X, place.Y - foundationItem.Y, z);
+                        }
+                        else
+                        {
+                            NetClient.Socket.Send_CustomHouseDeleteItem(_world, place.Graphic, place.X - foundationItem.X, place.Y - foundationItem.Y, z);
+                        }
 
-                            int placeX = place.X;
-                            int placeY = place.Y;
+                        place.Destroy();
+                    }
+                }
+                else if (SelectedGraphic != 0)
+                {
+                    var list = new List<CustomBuildObject>();
 
-                            if (type == CUSTOM_HOUSE_BUILD_TYPE.CHBT_STAIR && CombinedStair)
+                    if (CanBuildHere(list, out CUSTOM_HOUSE_BUILD_TYPE type) && list.Count > 0)
+                    {
+                        //if (type != CUSTOM_HOUSE_BUILD_TYPE.CHBT_STAIR && !(place is Multi))
+                        //    return;
+
+                        int placeX = place.X;
+                        int placeY = place.Y;
+
+                        if (type == CUSTOM_HOUSE_BUILD_TYPE.CHBT_STAIR && CombinedStair)
+                        {
+                            if (gump.Page >= 0 && gump.Page < Stairs.Count)
                             {
-                                if (gump.Page >= 0 && gump.Page < Stairs.Count)
+                                CustomHouseStair stair = Stairs[gump.Page];
+
+                                ushort graphic = 0;
+
+                                if (SelectedGraphic == stair.North)
                                 {
-                                    CustomHouseStair stair = Stairs[gump.Page];
+                                    graphic = (ushort) stair.MultiNorth;
+                                }
+                                else if (SelectedGraphic == stair.East)
+                                {
+                                    graphic = (ushort) stair.MultiEast;
+                                }
+                                else if (SelectedGraphic == stair.South)
+                                {
+                                    graphic = (ushort) stair.MultiSouth;
+                                }
+                                else if (SelectedGraphic == stair.West)
+                                {
+                                    graphic = (ushort) stair.MultiWest;
+                                }
 
-                                    ushort graphic = 0;
-
-                                    if (SelectedGraphic == stair.North)
-                                    {
-                                        graphic = (ushort) stair.MultiNorth;
-                                    }
-                                    else if (SelectedGraphic == stair.East)
-                                    {
-                                        graphic = (ushort) stair.MultiEast;
-                                    }
-                                    else if (SelectedGraphic == stair.South)
-                                    {
-                                        graphic = (ushort) stair.MultiSouth;
-                                    }
-                                    else if (SelectedGraphic == stair.West)
-                                    {
-                                        graphic = (ushort) stair.MultiWest;
-                                    }
-
-                                    if (graphic != 0)
-                                    {
-                                        NetClient.Socket.Send_CustomHouseAddStair(_world, graphic, placeX - foundationItem.X, placeY - foundationItem.Y);
-                                    }
+                                if (graphic != 0)
+                                {
+                                    NetClient.Socket.Send_CustomHouseAddStair(_world, graphic, placeX - foundationItem.X, placeY - foundationItem.Y);
                                 }
                             }
-                            else
+                        }
+                        else
+                        {
+                            CustomBuildObject item = list[0];
+
+                            int x = placeX - foundationItem.X + item.X;
+                            int y = placeY - foundationItem.Y + item.Y;
+                            IEnumerable<Multi> multi = house.GetMultiAt(placeX + item.X, placeY + item.Y);
+
+                            if (multi.Any() || type == CUSTOM_HOUSE_BUILD_TYPE.CHBT_STAIR)
                             {
-                                CustomBuildObject item = list[0];
-
-                                int x = placeX - foundationItem.X + item.X;
-                                int y = placeY - foundationItem.Y + item.Y;
-                                IEnumerable<Multi> multi = house.GetMultiAt(placeX + item.X, placeY + item.Y);
-
-                                if (multi.Any() || type == CUSTOM_HOUSE_BUILD_TYPE.CHBT_STAIR)
+                                if (!CombinedStair)
                                 {
-                                    if (!CombinedStair)
-                                    {
-                                        int minZ = foundationItem.Z + 7 + (CurrentFloor - 1) * 20;
-                                        int maxZ = minZ + 20;
+                                    int minZ = foundationItem.Z + 7 + (CurrentFloor - 1) * 20;
+                                    int maxZ = minZ + 20;
 
-                                        if (CurrentFloor == 1)
+                                    if (CurrentFloor == 1)
+                                    {
+                                        minZ -= 7;
+                                    }
+
+                                    foreach (Multi multiObject in multi)
+                                    {
+                                        int testMinZ = minZ;
+
+                                        if ((multiObject.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_ROOF) != 0)
                                         {
-                                            minZ -= 7;
+                                            testMinZ -= 3;
                                         }
 
-                                        foreach (Multi multiObject in multi)
+                                        if (multiObject.Z < testMinZ || multiObject.Z >= maxZ || !multiObject.IsCustom || (multiObject.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_GENERIC_INTERNAL) != 0 /*|| (multiObject.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_DONT_REMOVE) != 0*/
+                                           )
                                         {
-                                            int testMinZ = minZ;
+                                            continue;
+                                        }
 
+                                        if (type == CUSTOM_HOUSE_BUILD_TYPE.CHBT_STAIR)
+                                        {
+                                            if ((multiObject.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_STAIR) != 0)
+                                            {
+                                                multiObject.Destroy();
+                                            }
+                                        }
+                                        else if (type == CUSTOM_HOUSE_BUILD_TYPE.CHBT_ROOF)
+                                        {
                                             if ((multiObject.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_ROOF) != 0)
                                             {
-                                                testMinZ -= 3;
-                                            }
-
-                                            if (multiObject.Z < testMinZ || multiObject.Z >= maxZ || !multiObject.IsCustom || (multiObject.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_GENERIC_INTERNAL) != 0 /*|| (multiObject.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_DONT_REMOVE) != 0*/
-                                            )
-                                            {
-                                                continue;
-                                            }
-
-                                            if (type == CUSTOM_HOUSE_BUILD_TYPE.CHBT_STAIR)
-                                            {
-                                                if ((multiObject.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_STAIR) != 0)
-                                                {
-                                                    multiObject.Destroy();
-                                                }
-                                            }
-                                            else if (type == CUSTOM_HOUSE_BUILD_TYPE.CHBT_ROOF)
-                                            {
-                                                if ((multiObject.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_ROOF) != 0)
-                                                {
-                                                    multiObject.Destroy();
-                                                }
-                                            }
-                                            else if (type == CUSTOM_HOUSE_BUILD_TYPE.CHBT_FLOOR)
-                                            {
-                                                if ((multiObject.State & (CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FIXTURE)) != 0)
-                                                {
-                                                    multiObject.Destroy();
-                                                }
-                                            }
-                                            else
-                                            {
-                                                if ((multiObject.State & (CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_STAIR | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_ROOF | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_DONT_REMOVE)) == 0)
-                                                {
-                                                    multiObject.Destroy();
-                                                }
+                                                multiObject.Destroy();
                                             }
                                         }
-
-                                        // todo: remove foundation if no components
+                                        else if (type == CUSTOM_HOUSE_BUILD_TYPE.CHBT_FLOOR)
+                                        {
+                                            if ((multiObject.State & (CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FIXTURE)) != 0)
+                                            {
+                                                multiObject.Destroy();
+                                            }
+                                        }
+                                        else
+                                        {
+                                            if ((multiObject.State & (CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_STAIR | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_ROOF | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_DONT_REMOVE)) == 0)
+                                            {
+                                                multiObject.Destroy();
+                                            }
+                                        }
                                     }
 
-                                    if (type == CUSTOM_HOUSE_BUILD_TYPE.CHBT_ROOF)
-                                    {
-                                        NetClient.Socket.Send_CustomHouseAddRoof(_world, item.Graphic, x, y, item.Z);
-                                    }
-                                    else
-                                    {
-                                        NetClient.Socket.Send_CustomHouseAddItem(_world, item.Graphic, x, y);
-                                    }
+                                    // todo: remove foundation if no components
                                 }
-                            }
 
-                            int xx = placeX - foundationItem.X;
-                            int yy = placeY - foundationItem.Y;
-                            int z = foundationItem.Z + 7 + (CurrentFloor - 1) * 20;
-
-                            if (type == CUSTOM_HOUSE_BUILD_TYPE.CHBT_STAIR && !CombinedStair)
-                            {
-                                z = foundationItem.Z;
-                            }
-
-                            foreach (CustomBuildObject item in list)
-                            {
-                                if (item.Graphic == 0)
+                                if (type == CUSTOM_HOUSE_BUILD_TYPE.CHBT_ROOF)
                                 {
-                                    break;
+                                    NetClient.Socket.Send_CustomHouseAddRoof(_world, item.Graphic, x, y, item.Z);
                                 }
-
-                                house.Add
-                                (
-                                    item.Graphic,
-                                    0,
-                                    (ushort) (foundationItem.X + xx + item.X),
-                                    (ushort) (foundationItem.Y + yy + item.Y),
-                                    (sbyte) (z + item.Z),
-                                    true,
-                                    false
-                                );
+                                else
+                                {
+                                    NetClient.Socket.Send_CustomHouseAddItem(_world, item.Graphic, x, y);
+                                }
                             }
                         }
-                    }
 
-                    GenerateFloorPlace();
-                    gump.Update();
+                        int xx = placeX - foundationItem.X;
+                        int yy = placeY - foundationItem.Y;
+                        int z = foundationItem.Z + 7 + (CurrentFloor - 1) * 20;
+
+                        if (type == CUSTOM_HOUSE_BUILD_TYPE.CHBT_STAIR && !CombinedStair)
+                        {
+                            z = foundationItem.Z;
+                        }
+
+                        foreach (CustomBuildObject item in list)
+                        {
+                            house.Add
+                            (
+                                item.Graphic,
+                                0,
+                                (ushort) (foundationItem.X + xx + item.X),
+                                (ushort) (foundationItem.Y + yy + item.Y),
+                                (sbyte) (z + item.Z),
+                                true,
+                                false
+                            );
+                        }
+                    }
                 }
+
+                GenerateFloorPlace();
+                gump.Update();
             }
         }
 
@@ -881,7 +885,7 @@ namespace ClassicUO.Game.Managers
             CombinedStair = false;
         }
 
-        public bool CanBuildHere(CustomBuildObject[] list, out CUSTOM_HOUSE_BUILD_TYPE type)
+        public bool CanBuildHere(List<CustomBuildObject> list, out CUSTOM_HOUSE_BUILD_TYPE type)
         {
             type = CUSTOM_HOUSE_BUILD_TYPE.CHBT_NORMAL;
 
@@ -889,6 +893,11 @@ namespace ClassicUO.Game.Managers
             {
                 return false;
             }
+
+            var foundationItem = _world.Items.Get(Serial);
+
+            if (foundationItem == null || !_world.HouseManager.TryGetHouse(foundationItem, out House house))
+                return false;
 
             bool result = true;
 
@@ -903,359 +912,74 @@ namespace ClassicUO.Game.Managers
 
                 if (res1 == -1 || res2 == -1 || res1 >= Stairs.Count)
                 {
-                    list[0].Graphic = SelectedGraphic;
-
-                    list[0].X = 0;
-
-                    list[0].Y = 0;
-
-                    list[0].Z = 0;
+                    list.Add(new CustomBuildObject()
+                    {
+                        Graphic = SelectedGraphic,
+                        X = 0,
+                        Y = 0,
+                        Z = 0
+                    });
 
                     return false;
                 }
 
                 CustomHouseStair item = Stairs[res1];
 
-                //if (StairMultis.Count == 0)
+                if (SelectedGraphic == item.North)
                 {
-                    if (SelectedGraphic == item.North)
-                    {
-                        list[0].Graphic = (ushort) item.Block;
-
-                        list[0].X = 0;
-
-                        list[0].Y = -3;
-
-                        list[0].Z = 0;
-
-                        list[1].Graphic = (ushort) item.Block;
-
-                        list[1].X = 0;
-
-                        list[1].Y = -2;
-
-                        list[1].Z = 0;
-
-                        list[2].Graphic = (ushort) item.Block;
-
-                        list[2].X = 0;
-
-                        list[2].Y = -1;
-
-                        list[2].Z = 0;
-
-                        list[3].Graphic = (ushort) item.North;
-
-                        list[3].X = 0;
-
-                        list[3].Y = 0;
-
-                        list[3].Z = 0;
-
-                        list[4].Graphic = (ushort) item.Block;
-
-                        list[4].X = 0;
-
-                        list[4].Y = -3;
-
-                        list[4].Z = 5;
-
-                        list[5].Graphic = (ushort) item.Block;
-
-                        list[5].X = 0;
-
-                        list[5].Y = -2;
-
-                        list[5].Z = 5;
-
-                        list[6].Graphic = (ushort) item.North;
-
-                        list[6].X = 0;
-
-                        list[6].Y = -1;
-
-                        list[6].Z = 5;
-
-                        list[7].Graphic = (ushort) item.Block;
-
-                        list[7].X = 0;
-
-                        list[7].Y = -3;
-
-                        list[7].Z = 10;
-
-                        list[8].Graphic = (ushort) item.North;
-
-                        list[8].X = 0;
-
-                        list[8].Y = -2;
-
-                        list[8].Z = 10;
-
-                        list[9].Graphic = (ushort) item.North;
-
-                        list[9].X = 0;
-
-                        list[9].Y = -3;
-
-                        list[9].Z = 15;
-                    }
-                    else if (SelectedGraphic == item.East)
-                    {
-                        list[0].Graphic = (ushort) item.East;
-
-                        list[0].X = 0;
-
-                        list[0].Y = 0;
-
-                        list[0].Z = 0;
-
-                        list[1].Graphic = (ushort) item.Block;
-
-                        list[1].X = 1;
-
-                        list[1].Y = 0;
-
-                        list[1].Z = 0;
-
-                        list[2].Graphic = (ushort) item.Block;
-
-                        list[2].X = 2;
-
-                        list[2].Y = 0;
-
-                        list[2].Z = 0;
-
-                        list[3].Graphic = (ushort) item.Block;
-
-                        list[3].X = 3;
-
-                        list[3].Y = 0;
-
-                        list[3].Z = 0;
-
-                        list[4].Graphic = (ushort) item.East;
-
-                        list[4].X = 1;
-
-                        list[4].Y = 0;
-
-                        list[4].Z = 5;
-
-                        list[5].Graphic = (ushort) item.Block;
-
-                        list[5].X = 2;
-
-                        list[5].Y = 0;
-
-                        list[5].Z = 5;
-
-                        list[6].Graphic = (ushort) item.Block;
-
-                        list[6].X = 3;
-
-                        list[6].Y = 0;
-
-                        list[6].Z = 5;
-
-                        list[7].Graphic = (ushort) item.East;
-
-                        list[7].X = 2;
-
-                        list[7].Y = 0;
-
-                        list[7].Z = 10;
-
-                        list[8].Graphic = (ushort) item.Block;
-
-                        list[8].X = 3;
-
-                        list[8].Y = 0;
-
-                        list[8].Z = 10;
-
-                        list[9].Graphic = (ushort) item.East;
-
-                        list[9].X = 3;
-
-                        list[9].Y = 0;
-
-                        list[9].Z = 15;
-                    }
-                    else if (SelectedGraphic == item.South)
-                    {
-                        list[0].Graphic = (ushort) item.South;
-
-                        list[0].X = 0;
-
-                        list[0].Y = 0;
-
-                        list[0].Z = 0;
-
-                        list[1].Graphic = (ushort) item.Block;
-
-                        list[1].X = 0;
-
-                        list[1].Y = 1;
-
-                        list[1].Z = 0;
-
-                        list[2].Graphic = (ushort) item.Block;
-
-                        list[2].X = 0;
-
-                        list[2].Y = 2;
-
-                        list[2].Z = 0;
-
-                        list[3].Graphic = (ushort) item.Block;
-
-                        list[3].X = 0;
-
-                        list[3].Y = 3;
-
-                        list[3].Z = 0;
-
-                        list[4].Graphic = (ushort) item.South;
-
-                        list[4].X = 0;
-
-                        list[4].Y = 1;
-
-                        list[4].Z = 5;
-
-                        list[5].Graphic = (ushort) item.Block;
-
-                        list[5].X = 0;
-
-                        list[5].Y = 2;
-
-                        list[5].Z = 5;
-
-                        list[6].Graphic = (ushort) item.Block;
-
-                        list[6].X = 0;
-
-                        list[6].Y = 3;
-
-                        list[6].Z = 5;
-
-                        list[7].Graphic = (ushort) item.South;
-
-                        list[7].X = 0;
-
-                        list[7].Y = 2;
-
-                        list[7].Z = 10;
-
-                        list[8].Graphic = (ushort) item.Block;
-
-                        list[8].X = 0;
-
-                        list[8].Y = 3;
-
-                        list[8].Z = 10;
-
-                        list[9].Graphic = (ushort) item.South;
-
-                        list[9].X = 0;
-
-                        list[9].Y = 3;
-
-                        list[9].Z = 15;
-                    }
-                    else if (SelectedGraphic == item.West)
-                    {
-                        list[0].Graphic = (ushort) item.Block;
-
-                        list[0].X = -3;
-
-                        list[0].Y = 0;
-
-                        list[0].Z = 0;
-
-                        list[1].Graphic = (ushort) item.Block;
-
-                        list[1].X = -2;
-
-                        list[1].Y = 0;
-
-                        list[1].Z = 0;
-
-                        list[2].Graphic = (ushort) item.Block;
-
-                        list[2].X = -1;
-
-                        list[2].Y = 0;
-
-                        list[2].Z = 0;
-
-                        list[3].Graphic = (ushort) item.West;
-
-                        list[3].X = 0;
-
-                        list[3].Y = 0;
-
-                        list[3].Z = 0;
-
-                        list[4].Graphic = (ushort) item.Block;
-
-                        list[4].X = -3;
-
-                        list[4].Y = 0;
-
-                        list[4].Z = 5;
-
-                        list[5].Graphic = (ushort) item.Block;
-
-                        list[5].X = -2;
-
-                        list[5].Y = 0;
-
-                        list[5].Z = 5;
-
-                        list[6].Graphic = (ushort) item.West;
-
-                        list[6].X = -1;
-
-                        list[6].Y = 0;
-
-                        list[6].Z = 5;
-
-                        list[7].Graphic = (ushort) item.Block;
-
-                        list[7].X = -3;
-
-                        list[7].Y = 0;
-
-                        list[7].Z = 10;
-
-                        list[8].Graphic = (ushort) item.West;
-
-                        list[8].X = -2;
-
-                        list[8].Y = 0;
-
-                        list[8].Z = 10;
-
-                        list[9].Graphic = (ushort) item.West;
-
-                        list[9].X = -3;
-
-                        list[9].Y = 0;
-
-                        list[9].Z = 15;
-                    }
-                    else
-                    {
-                        list[0].Graphic = SelectedGraphic;
-
-                        list[0].X = 0;
-
-                        list[0].Y = 0;
-
-                        list[0].Z = 0;
-                    }
+                    list.Add(new CustomBuildObject { Graphic = (ushort)item.Block, X = 0, Y = -3, Z = 0 });
+                    list.Add(new CustomBuildObject { Graphic = (ushort)item.Block, X = 0, Y = -2, Z = 0 });
+                    list.Add(new CustomBuildObject { Graphic = (ushort)item.Block, X = 0, Y = -1, Z = 0 });
+                    list.Add(new CustomBuildObject { Graphic = (ushort)item.North, X = 0, Y = 0, Z = 0 });
+                    list.Add(new CustomBuildObject { Graphic = (ushort)item.Block, X = 0, Y = -3, Z = 5 });
+                    list.Add(new CustomBuildObject { Graphic = (ushort)item.Block, X = 0, Y = -2, Z = 5 });
+                    list.Add(new CustomBuildObject { Graphic = (ushort)item.North, X = 0, Y = -1, Z = 5 });
+                    list.Add(new CustomBuildObject { Graphic = (ushort)item.Block, X = 0, Y = -3, Z = 10 });
+                    list.Add(new CustomBuildObject { Graphic = (ushort)item.North, X = 0, Y = -2, Z = 10 });
+                    list.Add(new CustomBuildObject { Graphic = (ushort)item.North, X = 0, Y = -3, Z = 15 });
+                }
+                else if (SelectedGraphic == item.East)
+                {
+                    list.Add(new CustomBuildObject { Graphic = (ushort)item.East, X = 0, Y = 0, Z = 0 });
+                    list.Add(new CustomBuildObject { Graphic = (ushort)item.Block, X = 1, Y = 0, Z = 0 });
+                    list.Add(new CustomBuildObject { Graphic = (ushort)item.Block, X = 2, Y = 0, Z = 0 });
+                    list.Add(new CustomBuildObject { Graphic = (ushort)item.Block, X = 3, Y = 0, Z = 0 });
+                    list.Add(new CustomBuildObject { Graphic = (ushort)item.East, X = 1, Y = 0, Z = 5 });
+                    list.Add(new CustomBuildObject { Graphic = (ushort)item.Block, X = 2, Y = 0, Z = 5 });
+                    list.Add(new CustomBuildObject { Graphic = (ushort)item.Block, X = 3, Y = 0, Z = 5 });
+                    list.Add(new CustomBuildObject { Graphic = (ushort)item.East, X = 2, Y = 0, Z = 10 });
+                    list.Add(new CustomBuildObject { Graphic = (ushort)item.Block, X = 3, Y = 0, Z = 10 });
+                    list.Add(new CustomBuildObject { Graphic = (ushort)item.East, X = 3, Y = 0, Z = 15 });
+                }
+                else if (SelectedGraphic == item.South)
+                {
+                    list.Add(new CustomBuildObject { Graphic = (ushort)item.South, X = 0, Y = 0, Z = 0 });
+                    list.Add(new CustomBuildObject { Graphic = (ushort)item.Block, X = 0, Y = 1, Z = 0 });
+                    list.Add(new CustomBuildObject { Graphic = (ushort)item.Block, X = 0, Y = 2, Z = 0 });
+                    list.Add(new CustomBuildObject { Graphic = (ushort)item.Block, X = 0, Y = 3, Z = 0 });
+                    list.Add(new CustomBuildObject { Graphic = (ushort)item.South, X = 0, Y = 1, Z = 5 });
+                    list.Add(new CustomBuildObject { Graphic = (ushort)item.Block, X = 0, Y = 2, Z = 5 });
+                    list.Add(new CustomBuildObject { Graphic = (ushort)item.Block, X = 0, Y = 3, Z = 5 });
+                    list.Add(new CustomBuildObject { Graphic = (ushort)item.South, X = 0, Y = 2, Z = 10 });
+                    list.Add(new CustomBuildObject { Graphic = (ushort)item.Block, X = 0, Y = 3, Z = 10 });
+                    list.Add(new CustomBuildObject { Graphic = (ushort)item.South, X = 0, Y = 3, Z = 15 });
+                }
+                else if (SelectedGraphic == item.West)
+                {
+                    list.Add(new CustomBuildObject { Graphic = (ushort)item.Block, X = -3, Y = 0, Z = 0 });
+                    list.Add(new CustomBuildObject { Graphic = (ushort)item.Block, X = -2, Y = 0, Z = 0 });
+                    list.Add(new CustomBuildObject { Graphic = (ushort)item.Block, X = -1, Y = 0, Z = 0 });
+                    list.Add(new CustomBuildObject { Graphic = (ushort)item.West, X = 0, Y = 0, Z = 0 });
+                    list.Add(new CustomBuildObject { Graphic = (ushort)item.Block, X = -3, Y = 0, Z = 5 });
+                    list.Add(new CustomBuildObject { Graphic = (ushort)item.Block, X = -2, Y = 0, Z = 5 });
+                    list.Add(new CustomBuildObject { Graphic = (ushort)item.West, X = -1, Y = 0, Z = 5 });
+                    list.Add(new CustomBuildObject { Graphic = (ushort)item.Block, X = -3, Y = 0, Z = 10 });
+                    list.Add(new CustomBuildObject { Graphic = (ushort)item.West, X = -2, Y = 0, Z = 10 });
+                    list.Add(new CustomBuildObject { Graphic = (ushort)item.West, X = -3, Y = 0, Z = 15 });
+                }
+                else
+                {
+                    list.Add(new CustomBuildObject { Graphic = SelectedGraphic, X = 0, Y = 0, Z = 0 });
                 }
 
                 type = CUSTOM_HOUSE_BUILD_TYPE.CHBT_STAIR;
@@ -1297,28 +1021,14 @@ namespace ClassicUO.Game.Managers
 
                 if (State == CUSTOM_HOUSE_GUMP_STATE.CHGS_ROOF)
                 {
-                    list[0].Graphic = SelectedGraphic;
-
-                    list[0].X = 0;
-
-                    list[0].Y = 0;
-
-                    list[0].Z = (RoofZ - 2) * 3;
-
+                    list.Add(new CustomBuildObject { Graphic = SelectedGraphic, X = 0, Y = 0, Z = (RoofZ - 2) * 3 });
                     type = CUSTOM_HOUSE_BUILD_TYPE.CHBT_ROOF;
                 }
                 else
                 {
                     if (State == CUSTOM_HOUSE_GUMP_STATE.CHGS_STAIR)
                     {
-                        list[0].Graphic = SelectedGraphic;
-
-                        list[0].X = 0;
-
-                        list[0].Y = 1;
-
-                        list[0].Z = 0;
-
+                        list.Add(new CustomBuildObject { Graphic = SelectedGraphic, X = 0, Y = 1, Z = 0 });
                         type = CUSTOM_HOUSE_BUILD_TYPE.CHBT_STAIR;
                     }
                     else
@@ -1328,81 +1038,59 @@ namespace ClassicUO.Game.Managers
                             type = CUSTOM_HOUSE_BUILD_TYPE.CHBT_FLOOR;
                         }
 
-                        list[0].Graphic = SelectedGraphic;
-
-                        list[0].X = 0;
-
-                        list[0].Y = 0;
-
-                        list[0].Z = 0;
+                        list.Add(new CustomBuildObject { Graphic = SelectedGraphic, X = 0, Y = 0, Z = 0 });
                     }
                 }
             }
 
             if (SelectedObject.Object is GameObject gobj)
             {
-                if (gobj.Z < MinHouseZ)
-                {
-                    if (CombinedStair)
-                    {
-                        if (gobj.X >= EndPos.X || gobj.Y >= EndPos.Y)
-                        {
-                            return false;
-                        }
-                    }
-                    else if (type != CUSTOM_HOUSE_BUILD_TYPE.CHBT_STAIR)
-                    {
-                        if (gobj.X > EndPos.X - 1 || gobj.Y > EndPos.Y - 1)
-                        {
-                            return false;
-                        }
-                    }
-                }
+                if (!_bounds.Contains(gobj.X, gobj.Y))
+                    return false;
 
-                //if ((type != CUSTOM_HOUSE_BUILD_TYPE.CHBT_STAIR || CombinedStair) && gobj.Z < MinHouseZ &&
-                //    (gobj.X == EndPos.X - 1 || gobj.Y == EndPos.Y - 1))
-                //{
-                //    return false;
-                //}
+                // if (gobj.X < StartPos.X - 1 || gobj.X > EndPos.X - 1 || gobj.Y < StartPos.Y - 1 || gobj.Y > EndPos.Y - 1)
+                //     return false;
+                //
+                // if (gobj is not Multi && gobj.Z < MinHouseZ)
+                //     return false;
 
-                Item foundationItem = _world.Items.Get(Serial);
+                // if ((type != CUSTOM_HOUSE_BUILD_TYPE.CHBT_STAIR || CombinedStair) &&
+                //     gobj.Z < MinHouseZ && (gobj.X == EndPos.X - 1 || gobj.Y == EndPos.Y - 1))
+                // {
+                //     return false;
+                // }
+                //
 
-                int minZ = (foundationItem?.Z ?? 0) + 7 + (CurrentFloor - 1) * 20;
-                int maxZ = minZ + 20;
+                //
+                var minZ = foundationItem.Z + 7 + (CurrentFloor - 1) * 20;
+                var maxZ = minZ + 20;
 
-                int boundsOffset = State != CUSTOM_HOUSE_GUMP_STATE.CHGS_WALL ? 1 : 0;
-
-                Rectangle rect = new Rectangle(StartPos.X + boundsOffset, StartPos.Y + boundsOffset, EndPos.X, EndPos.Y);
+                var boundsOffset = State != CUSTOM_HOUSE_GUMP_STATE.CHGS_WALL ? 1 : 0;
+                // var rect = new Rectangle(StartPos.X + boundsOffset, StartPos.Y + boundsOffset, EndPos.X, EndPos.Y);
+                var rect = _bounds;
+                // rect.X -= boundsOffset;
+                // rect.Y -= boundsOffset;
 
 
-                foreach (CustomBuildObject item in list)
+                foreach (var item in list)
                 {
                     if (type == CUSTOM_HOUSE_BUILD_TYPE.CHBT_STAIR)
                     {
                         if (CombinedStair)
                         {
                             if (item.Z != 0)
-                            {
                                 continue;
-                            }
                         }
                         else
                         {
-                            int sx = gobj.X + item.X;
-                            int sy = gobj.Y + item.Y;
-
-                            if (sy < EndPos.Y || sx == StartPos.X || gobj.Z >= MinHouseZ)
-
-                                //if ( !(sx > StartPos.X && sx < EndPos.X && sy >= EndPos.Y && sy <= EndPos.Y + 1)  || gobj.Z >= MinHouseZ)
-                            {
+                            if (gobj.Y + item.Y < EndPos.Y || gobj.X + item.X == StartPos.X || gobj.Z >= MinHouseZ)
                                 return false;
-                            }
-
-                            if (gobj.Y + item.Y != EndPos.Y)
+                            else if (gobj.Y + item.Y != EndPos.Y)
                             {
-                                list[0].Y = 0;
+                                var first = list[0];
+                                first.Y = 0;
+                                list[0] = first;
                             }
-
                             continue;
                         }
                     }
@@ -1412,39 +1100,31 @@ namespace ClassicUO.Game.Managers
                         return false;
                     }
 
-                    if (type != CUSTOM_HOUSE_BUILD_TYPE.CHBT_FLOOR && foundationItem != null && _world.HouseManager.TryGetHouse(Serial, out House house))
+                    if (type != CUSTOM_HOUSE_BUILD_TYPE.CHBT_FLOOR)
                     {
-                        //var multi = house.GetMultiAt(gobj.X + item.X, gobj.Y + item.Y);
+                        var multis = house.GetMultiAt(gobj.X + item.X, gobj.Y + item.Y);
 
-                        //if (multi != null)
+                        foreach (var multi in multis)
                         {
-                            foreach (Multi multiObject in house.Components.Where(s => s.X == gobj.X + item.X && s.Y == gobj.Y + item.Y))
+                            if (!multi.IsCustom)
+                                continue;
+
+                            if ((multi.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_GENERIC_INTERNAL) == 0 && multi.Z >= minZ && multi.Z < maxZ)
                             {
-                                if (multiObject.IsCustom && (multiObject.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_GENERIC_INTERNAL) == 0 && multiObject.Z >= minZ && multiObject.Z < maxZ)
+                                if (type == CUSTOM_HOUSE_BUILD_TYPE.CHBT_STAIR)
                                 {
-                                    if (type == CUSTOM_HOUSE_BUILD_TYPE.CHBT_STAIR)
-                                    {
-                                        if ((multiObject.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR) == 0)
-                                        {
-                                            return false;
-                                        }
-                                    }
-                                    else
-                                    {
-                                        if ((multiObject.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_STAIR) != 0)
-                                        {
-                                            return false;
-                                        }
-                                    }
+                                    if ((multi.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR) == 0)
+                                        return false;
+                                }
+                                else
+                                {
+                                    if ((multi.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_STAIR) != 0)
+                                        return false;
                                 }
                             }
                         }
                     }
                 }
-            }
-            else
-            {
-                return false;
             }
 
             return result;
@@ -1470,7 +1150,7 @@ namespace ClassicUO.Game.Managers
                     {
                         type = CUSTOM_HOUSE_BUILD_TYPE.CHBT_ROOF;
                     }
-                    else if (place.X >= StartPos.X && place.X <= EndPos.X && place.Y >= StartPos.Y && place.Y <= EndPos.Y && place.Z >= MinHouseZ)
+                    else if (_bounds.Contains(place.X, place.Y) && place.Z >= MinHouseZ)
                     {
                         // it's into the bounds
                     }
@@ -1567,17 +1247,17 @@ namespace ClassicUO.Game.Managers
             {
                 CustomHousePlaceInfo info = ObjectsInfo[infoCheck1];
 
-                if (info.CanGoW == 0 && x == StartPos.X)
+                if (info.CanGoW == 0 && x == rect.X)
                 {
                     return false;
                 }
 
-                if (info.CanGoN == 0 && y == StartPos.Y)
+                if (info.CanGoN == 0 && y == rect.Y)
                 {
                     return false;
                 }
 
-                if (info.CanGoNWS == 0 && x == StartPos.X && y == StartPos.Y)
+                if (info.CanGoNWS == 0 && x == rect.X && y == rect.Y)
                 {
                     return false;
                 }
@@ -1620,7 +1300,7 @@ namespace ClassicUO.Game.Managers
                 (
                     foundationItem,
                     house,
-                    house.GetMultiAt(item.X - 1, item.Y - 1),
+                    house.GetMultiAt(item.X - 1, item.Y),
                     minZ - 20,
                     maxZ - 20,
                     (int) (CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_DIRECT_SUPPORT | CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_CANGO_W)
@@ -1687,17 +1367,17 @@ namespace ClassicUO.Game.Managers
             {
                 CustomHousePlaceInfo info = ObjectsInfo[infoCheck1];
 
-                if (info.CanGoW == 0 && item.X == StartPos.X)
+                if (info.CanGoW == 0 && item.X == _bounds.X)
                 {
                     return false;
                 }
 
-                if (info.CanGoN == 0 && item.Y == StartPos.Y)
+                if (info.CanGoN == 0 && item.Y == _bounds.Y)
                 {
                     return false;
                 }
 
-                if (info.CanGoNWS == 0 && item.X == StartPos.X && item.Y == StartPos.Y)
+                if (info.CanGoNWS == 0 && item.X == _bounds.X && item.Y == _bounds.Y)
                 {
                     return false;
                 }
@@ -1845,10 +1525,10 @@ namespace ClassicUO.Game.Managers
                 return false;
             }
 
-
+            var validatedFloors = new List<Point>();
             foreach (Multi item in multi)
             {
-                List<Point> validatedFloors = new List<Point>();
+                validatedFloors.Clear();
 
                 if (item.IsCustom && (item.State & (CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_STAIR | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_ROOF | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FIXTURE)) == 0 && item.Z >= minZ && item.Z < maxZ)
                 {
@@ -1884,7 +1564,7 @@ namespace ClassicUO.Game.Managers
                                 return true;
                             }
                         }
-                        else if ((flags & (int) CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_BOTTOM) != 0 && info.Bottom != 0 || (flags & (int) CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_TOP) != 0 && info.Top != 0)
+                        else if (((flags & (int) CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_BOTTOM) != 0 && info.Bottom != 0) || ((flags & (int) CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_TOP) != 0 && info.Top != 0))
                         {
                             if ((item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE) == 0)
                             {
