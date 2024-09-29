@@ -431,6 +431,10 @@ namespace ClassicUO.Game.GameObjects
                 {
                     ref var data = ref Client.Game.UO.FileManager.TileData.StaticData[g];
 
+                    // Hacky way to do not render "nodraw"
+                    if (!string.IsNullOrEmpty(data.Name) && data.Name.StartsWith("nodraw", StringComparison.OrdinalIgnoreCase))
+                        return false;
+
                     if (
                         !data.IsNoDiagonal
                         || data.IsAnimated
