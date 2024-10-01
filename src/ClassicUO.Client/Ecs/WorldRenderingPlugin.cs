@@ -1,3 +1,4 @@
+using System;
 using System.Runtime.CompilerServices;
 using ClassicUO.Assets;
 using ClassicUO.Game;
@@ -48,7 +49,8 @@ readonly struct WorldRenderingPlugin : IPlugin
 
         var renderingFn = Rendering;
         scheduler.AddSystem(renderingFn, Stages.AfterUpdate, ThreadingMode.Single)
-                 .RunIf((SchedulerState state) => state.ResourceExists<GraphicsDevice>());
+                 .RunIf((SchedulerState state) => state.ResourceExists<GraphicsDevice>())
+                 .RunIf((Query<WorldPosition, With<Player>> playerQuery) => playerQuery.Count() > 0);
     }
 
 
@@ -59,18 +61,112 @@ readonly struct WorldRenderingPlugin : IPlugin
         Res<Renderer.UltimaBatcher2D> batch,
         Res<AssetsServer> assetsServer,
         Res<UOFileManager> fileManager,
+        Local<(int lastPosX, int lastPosY)?> lastPos,
+        Local<(int? maxZ, int? maxZGround, int? maxZRoof, bool drawRoof)> localZInfo,
+        Query<WorldPosition, With<Player>> queryPlayer,
         Query<(WorldPosition, Graphic, Optional<TileStretched>), With<IsTile>> queryTiles,
         Query<(WorldPosition, Graphic, Hue), (Without<IsTile>, Without<MobAnimation>, Without<Pair<ContainedInto, Wildcard>>)> queryStatics,
         Query<(WorldPosition, Graphic, Hue, NetworkSerial, ScreenPositionOffset, Optional<Facing>, Optional<MobAnimation>, Optional<MobileSteps>),
             Without<Pair<ContainedInto, Wildcard>>> queryBodyOnly,
         Query<(EquipmentSlots, ScreenPositionOffset, WorldPosition, Graphic, Facing, Optional<MobileSteps>, Optional<MobAnimation>),
-            Without<Pair<ContainedInto, Wildcard>>> queryEquipmentSlots,
-
-        Time time,
-        Res<TextOverHeadManager> textOverHeadManager,
-        Res<NetworkEntitiesMap> networkEntities
+            Without<Pair<ContainedInto, Wildcard>>> queryEquipmentSlots
     )
     {
+        ref var playerPos = ref queryPlayer.Single<WorldPosition>();
+
+        int? maxZ = null;
+        // if (!lastPos.Value.HasValue || lastPos.Value.Value.lastPosX != playerPos.X || lastPos.Value.Value.lastPosY != playerPos.Y)
+        {
+            localZInfo.Value.maxZ = null;
+            localZInfo.Value.maxZGround = null;
+            localZInfo.Value.maxZRoof = null;
+            localZInfo.Value.drawRoof = true;
+            var playerZ16 = playerPos.Z + 16;
+            var playerZ14 = playerPos.Z + 14;
+            (var chunkX, var chunkY) = (playerPos.X, playerPos.Y);
+
+            foreach ((var entities, var posSpan, var stretchedSpan) in queryTiles.Iter<WorldPosition, TileStretched>())
+            {
+                for (var i = 0; i < entities.Length; ++i)
+                {
+                    ref var pos = ref posSpan[i];
+                    ref var stretched = ref stretchedSpan.IsEmpty ? ref Unsafe.NullRef<TileStretched>() : ref stretchedSpan[i];
+
+                    if (Math.Abs(pos.X - chunkX) <= 0 && Math.Abs(pos.Y - chunkY) <= 0)
+                    {
+                        var tileZ = pos.Z;
+                        if (!Unsafe.IsNullRef(ref stretched))
+                        {
+                            tileZ = stretched.AvgZ;
+                        }
+
+                        if (tileZ > playerZ16)
+                        {
+                            localZInfo.Value.maxZGround = playerZ16;
+                        }
+                    }
+                }
+            }
+
+            foreach ((var entities, var posSpan, var graphicSpan) in queryStatics.Iter<WorldPosition, Graphic>())
+            {
+                for (var i = 0; i < entities.Length; ++i)
+                {
+                    ref var pos = ref posSpan[i];
+                    ref var graphic = ref graphicSpan[i];
+
+                    if (Math.Abs(pos.X - chunkX) <= 0 && Math.Abs(pos.Y - chunkY) <= 0)
+                    {
+                        var tileDataFlags = fileManager.Value.TileData.StaticData[graphic.Value].Flags;
+
+                        if ((tileDataFlags & (TileFlag.Roof)) != 0)
+                        {
+                            // localZInfo.Value.maxZRoof = playerZ16;
+                            // localZInfo.Value.drawRoof = false;
+                            if (pos.Z > playerZ16)
+                            {
+                                var max = localZInfo.Value.maxZRoof ?? 127;
+                                if (max > pos.Z)
+                                {
+                                    localZInfo.Value.maxZRoof = pos.Z;
+                                    localZInfo.Value.drawRoof = false;
+                                }
+                            }
+                        }
+
+                        if ((tileDataFlags & (TileFlag.Surface)) != 0)
+                        {
+                            if (pos.Z > playerZ16)
+                            {
+                                var max = localZInfo.Value.maxZ ?? 127;
+                                if (max > pos.Z)
+                                {
+                                    localZInfo.Value.maxZ = pos.Z;
+                                    localZInfo.Value.drawRoof = false;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (localZInfo.Value.maxZGround.HasValue && localZInfo.Value.maxZGround < localZInfo.Value.maxZ)
+            {
+                localZInfo.Value.maxZ = localZInfo.Value.maxZGround;
+            }
+
+            if (localZInfo.Value.maxZRoof.HasValue && localZInfo.Value.maxZRoof < localZInfo.Value.maxZ)
+            {
+                localZInfo.Value.maxZ = localZInfo.Value.maxZRoof;
+            }
+        }
+
+        maxZ = localZInfo.Value.maxZ;
+        if (!maxZ.HasValue)
+        {
+            maxZ = localZInfo.Value.maxZRoof;
+        }
+
         var center = Isometric.IsoToScreen(gameCtx.Value.CenterX, gameCtx.Value.CenterY, gameCtx.Value.CenterZ);
         center.X -= batch.Value.GraphicsDevice.PresentationParameters.BackBufferWidth / 2f;
         center.Y -= batch.Value.GraphicsDevice.PresentationParameters.BackBufferHeight / 2f;
@@ -89,6 +185,9 @@ readonly struct WorldRenderingPlugin : IPlugin
 
         queryTiles.Each((ref WorldPosition worldPos, ref Graphic graphic, ref TileStretched stretched) =>
         {
+            if (localZInfo.Value.maxZGround.HasValue && worldPos.Z > localZInfo.Value.maxZGround)
+                return;
+
             var isStretched = !Unsafe.IsNullRef(ref stretched);
 
             if (isStretched)
@@ -141,6 +240,12 @@ readonly struct WorldRenderingPlugin : IPlugin
 
         queryStatics.Each((ref WorldPosition worldPos, ref Graphic graphic, ref Hue hue) =>
         {
+            if (maxZ.HasValue && worldPos.Z >= maxZ)
+                return;
+
+            if (fileManager.Value.TileData.StaticData[graphic.Value].IsRoof && !localZInfo.Value.drawRoof)
+                return;
+
             ref readonly var artInfo = ref assetsServer.Value.Arts.GetArt(graphic.Value);
             if (artInfo.Texture == null)
                 return;

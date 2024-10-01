@@ -43,6 +43,7 @@ readonly struct CuoPlugin : IPlugin
         scheduler.AddPlugin<AssetsPlugin>();
         scheduler.AddPlugin<TerrainPlugin>();
         scheduler.AddPlugin<NetworkPlugin>();
+        // scheduler.AddPlugin<ChatPlugin>();
         scheduler.AddPlugin<MobAnimationsPlugin>();
         scheduler.AddPlugin<PlayerMovementPlugin>();
         scheduler.AddPlugin<WorldRenderingPlugin>();
