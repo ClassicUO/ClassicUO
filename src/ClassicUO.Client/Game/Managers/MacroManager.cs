@@ -1515,6 +1515,17 @@ namespace ClassicUO.Game.Managers
 
                     break;
 
+                case MacroType.DisarmAbility:
+                    NetClient.Socket.Send_DisarmRequest();
+
+                    break;
+
+                case MacroType.StunAbility:
+                    NetClient.Socket.Send_StunRequest();
+
+                    break;
+            
+
                 case MacroType.ToggleGargoyleFly:
 
                     if (World.Player.Race == RaceType.GARGOYLE)
@@ -2426,6 +2437,8 @@ namespace ClassicUO.Game.Managers
         KillGumpOpen,
         PrimaryAbility,
         SecondaryAbility,
+        StunAbility,
+        DisarmAbility,
         EquipLastWeapon,
         SetUpdateRange,
         ModifyUpdateRange,
@@ -2452,7 +2465,7 @@ namespace ClassicUO.Game.Managers
         Zoom,
         ToggleChatVisibility,
         INVALID,
-        Aura = 62,
+        Aura,
         AuraOnOff,
         Grab,
         SetGrabBag,

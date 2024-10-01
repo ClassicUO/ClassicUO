@@ -830,12 +830,21 @@ namespace ClassicUO.Game
                 {
                     World.Player.Abilities[i] &= (Ability)0x7F;
                 }
-
-                Socket.Send_UseCombatAbility((byte)ability);
+                if (Client.Version >= ClientVersion.CV_308Z) {
+                    Socket.Send_StunRequest();
+                } else {
+                    Socket.Send_UseCombatAbility((byte)ability);
+                }
+                
             }
             else
             {
-                Socket.Send_UseCombatAbility(0);
+                if (Client.Version >= ClientVersion.CV_308Z) {
+                    Socket.Send_DisarmRequest();
+                } else {
+                    Socket.Send_UseCombatAbility(0);
+                }
+                
             }
 
             ability ^= (Ability)0x80;
