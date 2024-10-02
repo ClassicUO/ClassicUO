@@ -61,7 +61,7 @@ readonly struct WorldRenderingPlugin : IPlugin
         Res<Renderer.UltimaBatcher2D> batch,
         Res<AssetsServer> assetsServer,
         Res<UOFileManager> fileManager,
-        Local<(int lastPosX, int lastPosY)?> lastPos,
+        Local<(int lastPosX, int lastPosY, int lastPosZ)?> lastPos,
         Local<(int? maxZ, int? maxZGround, int? maxZRoof, bool drawRoof)> localZInfo,
         Query<WorldPosition, With<Player>> queryPlayer,
         Query<(WorldPosition, Graphic, Optional<TileStretched>), With<IsTile>> queryTiles,
@@ -75,7 +75,10 @@ readonly struct WorldRenderingPlugin : IPlugin
         ref var playerPos = ref queryPlayer.Single<WorldPosition>();
 
         int? maxZ = null;
-        // if (!lastPos.Value.HasValue || lastPos.Value.Value.lastPosX != playerPos.X || lastPos.Value.Value.lastPosY != playerPos.Y)
+        if (!lastPos.Value.HasValue ||
+            lastPos.Value.Value.lastPosX != playerPos.X ||
+            lastPos.Value.Value.lastPosY != playerPos.Y ||
+            lastPos.Value.Value.lastPosZ != playerPos.Z)
         {
             localZInfo.Value.maxZ = null;
             localZInfo.Value.maxZGround = null;
@@ -92,7 +95,7 @@ readonly struct WorldRenderingPlugin : IPlugin
                     ref var pos = ref posSpan[i];
                     ref var stretched = ref stretchedSpan.IsEmpty ? ref Unsafe.NullRef<TileStretched>() : ref stretchedSpan[i];
 
-                    if (Math.Abs(pos.X - chunkX) <= 0 && Math.Abs(pos.Y - chunkY) <= 0)
+                    if (pos.X == chunkX && pos.Y == chunkY)
                     {
                         var tileZ = pos.Z;
                         if (!Unsafe.IsNullRef(ref stretched))
@@ -110,6 +113,8 @@ readonly struct WorldRenderingPlugin : IPlugin
 
             var isUnderRoof = false;
             var isUnderStatic = false;
+            Span<bool> roofDirections = stackalloc bool[9];
+            roofDirections.Fill(false);
 
             foreach ((var entities, var posSpan, var graphicSpan) in queryStatics.Iter<WorldPosition, Graphic>())
             {
@@ -118,47 +123,52 @@ readonly struct WorldRenderingPlugin : IPlugin
                     ref var pos = ref posSpan[i];
                     ref var graphic = ref graphicSpan[i];
 
-                    // if (Math.Abs(pos.X - chunkX) <= 0 && Math.Abs(pos.Y - chunkY) <= 0)
+                    var tileDataFlags = fileManager.Value.TileData.StaticData[graphic.Value].Flags;
+
+                    if (pos.Z > playerZ14)
                     {
-                        var tileDataFlags = fileManager.Value.TileData.StaticData[graphic.Value].Flags;
+                        if (Math.Abs(pos.X - chunkX) <= 1 && Math.Abs(pos.Y - chunkY) <= 1)
+                            if (((ulong)tileDataFlags & 0x204) == 0 && tileDataFlags.HasFlag(TileFlag.Roof))
+                                roofDirections[(pos.Y - chunkY + 1) * 3 + (pos.X - chunkX + 1)] = true;
 
-                        if ((tileDataFlags & (TileFlag.Roof)) != 0)
+                        var max = localZInfo.Value.maxZRoof ?? 127;
+
+                        if (max > pos.Z)
                         {
-                            if (pos.Z > playerZ16)
+                            if (((ulong)tileDataFlags & 0x204) == 0 && tileDataFlags.HasFlag(TileFlag.Roof))
                             {
-                                if (Math.Abs(pos.X - chunkX) <= 0 && Math.Abs(pos.Y - chunkY) <= 0)
-                                    isUnderRoof = true;
+                                localZInfo.Value.maxZRoof = pos.Z;
+                                localZInfo.Value.drawRoof = false;
+                            }
+                        }
+                    }
 
-                                var max = localZInfo.Value.maxZRoof ?? 127;
-                                if (max > pos.Z)
+                    if (pos.X == chunkX && pos.Y == chunkY)
+                    {
+                        if (pos.Z > playerZ14)
+                        {
+                            var max = localZInfo.Value.maxZ ?? 127;
+
+                            if (max > pos.Z)
+                            {
+                                if (((ulong)tileDataFlags & 0x20004) == 0 && (!tileDataFlags.HasFlag(TileFlag.Roof) || tileDataFlags.HasFlag(TileFlag.Surface)))
                                 {
-                                    localZInfo.Value.maxZRoof = pos.Z;
+                                    isUnderStatic = true;
+                                    localZInfo.Value.maxZ = pos.Z;
                                     localZInfo.Value.drawRoof = false;
                                 }
                             }
                         }
-
-                        if ((tileDataFlags & (TileFlag.Surface | TileFlag.Transparent)) != 0)
-                        {
-                            if (pos.Z > playerZ16)
-                            {
-                                if (Math.Abs(pos.X - chunkX) <= 0 && Math.Abs(pos.Y - chunkY) <= 0)
-                                {
-                                    // localZInfo.Value.maxZ = pos.Z;
-                                    isUnderStatic = true;
-
-                                    var max = localZInfo.Value.maxZ ?? 127;
-                                    if (max > pos.Z)
-                                    {
-                                        localZInfo.Value.maxZ = pos.Z;
-                                        localZInfo.Value.drawRoof = false;
-                                    }
-                                }
-                            }
-                        }
                     }
+
                 }
             }
+
+
+            for (int i = 0, count = 0; count <= 7 && i < roofDirections.Length; ++i)
+                if (roofDirections[i])
+                    if (count++ > 6)
+                        isUnderRoof = true;
 
             if (isUnderStatic && isUnderRoof)
             {
@@ -178,6 +188,11 @@ readonly struct WorldRenderingPlugin : IPlugin
             else
             {
                 localZInfo.Value.drawRoof = true;
+            }
+
+            if (localZInfo.Value.maxZGround.HasValue && localZInfo.Value.maxZGround < maxZ)
+            {
+                maxZ = localZInfo.Value.maxZGround.Value;
             }
 
             if (maxZ.HasValue && maxZ < playerZ16)
