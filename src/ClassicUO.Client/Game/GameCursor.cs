@@ -109,7 +109,7 @@ namespace ClassicUO.Game
         };
 
         private readonly Aura _aura;
-        private readonly CustomBuildObject[] _componentsList = new CustomBuildObject[10];
+        private readonly List<CustomBuildObject> _componentsList = new ();
         private readonly int[,] _cursorOffset = new int[2, 16];
         private readonly IntPtr[,] _cursors_ptr = new IntPtr[3, 16];
         private ushort _graphic = 0x2073;
@@ -299,8 +299,7 @@ namespace ClassicUO.Game
                     {
                         ushort hue = 0;
 
-                        Array.Clear(_componentsList, 0, 10);
-
+                        _componentsList.Clear();
                         if (
                             !_world.CustomHouseManager.CanBuildHere(
                                 _componentsList,
@@ -316,15 +315,9 @@ namespace ClassicUO.Game
                             _temp.ForEach(s => s.Destroy());
                             _temp.Clear();
 
-                            for (int i = 0; i < _componentsList.Length; i++)
+                            for (int i = 0; i < _componentsList.Count; i++)
                             {
-                                if (_componentsList[i].Graphic == 0)
-                                {
-                                    break;
-                                }
-
                                 Multi m = Multi.Create(_world, _componentsList[i].Graphic);
-
                                 m.AlphaHue = 0xFF;
                                 m.Hue = hue;
                                 m.State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_PREVIEW;
@@ -332,7 +325,7 @@ namespace ClassicUO.Game
                             }
                         }
 
-                        if (_componentsList.Length != 0)
+                        if (_componentsList.Count != 0)
                         {
                             if (SelectedObject.Object is GameObject selectedObj)
                             {
@@ -341,9 +334,9 @@ namespace ClassicUO.Game
                                 if (selectedObj.Z < _world.CustomHouseManager.MinHouseZ)
                                 {
                                     if (
-                                        selectedObj.X >= _world.CustomHouseManager.StartPos.X
+                                        selectedObj.X >= _world.CustomHouseManager.StartPos.X - 1
                                         && selectedObj.X <= _world.CustomHouseManager.EndPos.X - 1
-                                        && selectedObj.Y >= _world.CustomHouseManager.StartPos.Y
+                                        && selectedObj.Y >= _world.CustomHouseManager.StartPos.Y - 1
                                         && selectedObj.Y <= _world.CustomHouseManager.EndPos.Y - 1
                                     )
                                     {
@@ -354,19 +347,14 @@ namespace ClassicUO.Game
                                     }
                                 }
 
-                                for (int i = 0; i < _componentsList.Length; i++)
+                                for (int i = 0; i < _componentsList.Count; i++)
                                 {
-                                    ref readonly CustomBuildObject item = ref _componentsList[i];
-
-                                    if (item.Graphic == 0)
-                                    {
-                                        break;
-                                    }
+                                    var item = _componentsList[i];
 
                                     _temp[i].SetInWorldTile(
                                         (ushort)(selectedObj.X + item.X),
                                         (ushort)(selectedObj.Y + item.Y),
-                                        (sbyte)(selectedObj.Z + z + item.Z)
+                                        (sbyte)(_world.Player.Z + item.Z)
                                     );
                                 }
                             }
@@ -470,7 +458,7 @@ namespace ClassicUO.Game
                 ushort draggingGraphic = GetDraggingItemGraphic();
 
                 ref readonly var artInfo = ref (ItemHold.IsGumpTexture ? ref Client.Game.UO.Gumps.GetGump(draggingGraphic) : ref Client.Game.UO.Arts.GetArt(draggingGraphic));
- 
+
                 if (artInfo.Texture != null)
                 {
                     Point offset = GetDraggingItemOffset();
