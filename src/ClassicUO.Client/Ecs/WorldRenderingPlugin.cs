@@ -111,7 +111,6 @@ readonly struct WorldRenderingPlugin : IPlugin
                 }
             }
 
-            var isUnderRoof = false;
             var isUnderStatic = false;
             (var isSameTile, var isTileAhead) = (false, false);
 
@@ -168,7 +167,7 @@ readonly struct WorldRenderingPlugin : IPlugin
             }
 
 
-            isUnderRoof = isSameTile && isTileAhead;
+            var isUnderRoof = isSameTile && isTileAhead;
 
             if (isUnderStatic && isUnderRoof)
             {
