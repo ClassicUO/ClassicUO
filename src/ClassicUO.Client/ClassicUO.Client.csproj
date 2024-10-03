@@ -5,9 +5,9 @@
     <ApplicationIcon>cuoicon.ico</ApplicationIcon>
     <AssemblyName>ClassicUO</AssemblyName>
     <RootNamespace>ClassicUO</RootNamespace>
-    <AssemblyVersion>2.0.8</AssemblyVersion>
-    <FileVersion>2.0.8</FileVersion>
-    <Copyright>Tazuo Vs Dust765</Copyright>
+    <AssemblyVersion>2.0.9</AssemblyVersion>
+    <FileVersion>2.0.9</FileVersion>
+    <Copyright>Dust765.4</Copyright>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)'=='Release'">

@@ -174,7 +174,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
                 Add
                 (
-                    new Label(string.Format("TazUO Version {0}", CUOEnviroment.Version), false, 0x034E, font: 9)
+                    new Label(string.Format("Dust765 Version {0}", CUOEnviroment.Version), false, 0x034E, font: 9)
                     {
                         X = 286,
                         Y = 465
@@ -275,7 +275,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
                 Add
                 (
-                    new Label(string.Format("TazUO Version {0}", CUOEnviroment.Version), false, 0x0481, font: 9)
+                    new Label(string.Format("Dust765.4 Version {0}", CUOEnviroment.Version), false, 0x0481, font: 9)
                     {
                         X = 286,
                         Y = 465
@@ -465,19 +465,9 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             TextBox _;
             HitBox _hit;
-            Add(_ = new TextBox("TazUO Wiki", TrueTypeLoader.EMBEDDED_FONT, 15, 200, Color.Orange, strokeEffect: false) { X = 30, Y = 420, AcceptMouseInput = true });
-            Add(_hit = new HitBox(_.X, _.Y, _.MeasuredSize.X, _.MeasuredSize.Y));
-            _hit.MouseUp += (s, e) =>
-            {
-                Utility.Platforms.PlatformHelper.LaunchBrowser("https://github.com/bittiez/ClassicUO/wiki");
-            };
+            
 
-            Add(_ = new TextBox("TazUO Discord", TrueTypeLoader.EMBEDDED_FONT, 15, 200, Color.Orange, strokeEffect: false) { X = 30, Y = 440, AcceptMouseInput = true });
-            Add(_hit = new HitBox(_.X, _.Y, _.MeasuredSize.X, _.MeasuredSize.Y));
-            _hit.MouseUp += (s, e) =>
-            {
-                Utility.Platforms.PlatformHelper.LaunchBrowser("https://discord.gg/SqwtB5g95H");
-            };
+           
 
             Checkbox loginmusic_checkbox = new Checkbox
             (
@@ -538,11 +528,11 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 _textboxAccount.SetKeyboardFocus();
             }
 
-            _ = new TextBox("A new version of TazUO is available!\n Click to open the download page.", TrueTypeLoader.EMBEDDED_FONT, 20, 300, Color.Yellow, strokeEffect: false) { X = 10, Y = 10, AcceptMouseInput = false };
+            _ = new TextBox("A new version of Dust765.4 is available!\n Click to open the download page.", TrueTypeLoader.EMBEDDED_FONT, 20, 300, Color.Yellow, strokeEffect: false) { X = 10, Y = 10, AcceptMouseInput = false };
             Add(_hit = new HitBox(_.X, _.Y, _.MeasuredSize.X, _.MeasuredSize.Y));
             _hit.MouseUp += (s, e) =>
             {
-                Utility.Platforms.PlatformHelper.LaunchBrowser("https://github.com/bittiez/TazUO/releases/latest");
+                Utility.Platforms.PlatformHelper.LaunchBrowser("https://github.com/dust765/ClassicUO/releases/latest");
             };
             _hit.Add(new AlphaBlendControl() { Width = _hit.Width, Height = _hit.Height });
             Add(_);

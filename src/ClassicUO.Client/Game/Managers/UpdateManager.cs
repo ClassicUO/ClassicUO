@@ -58,7 +58,7 @@ namespace ClassicUO.Game.Managers
             Task.Factory.StartNew(() =>
             {
                 Task.Delay(30000).Wait();
-                GameActions.Print("TazUO vs Dust765 has an update available, please visit https://github.com/dust765/ClassicUO to get the most recent version.", 32);
+                GameActions.Print("Dust765.4 has an update available, please visit https://github.com/dust765/ClassicUO to get the most recent version.", 32);
             });
         }
     }

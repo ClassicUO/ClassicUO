@@ -1,4 +1,4 @@
-# Project dust765
+# Project Dust765.4
 This project is to address a problem constructed within the toxicity of this community. This is to show the community, open source projects are not meant for cliques and high school drama but rather the expansion of something greater, innovation. -A penny for your thoughts, the adder that prays beneath the rose.
 
 ![dust765_logo](https://user-images.githubusercontent.com/77043734/209156140-14558d04-eaf9-42f0-9939-ddec9cf6c1ac.png)
@@ -23,9 +23,9 @@ Release: [![Release](https://github.com/dust765/ClassicUO/actions/workflows/buil
 
 # contact and team info
 
-Discord: dust765#2787
+Discord: dust765.4#2787
 
-Dust765: 7 Link, 6 Gaechti, 5 Syrupz and jsebold666
+Dust765: 7 Link, 6 Gaechti, 5 Syrupz and astraroth/jsebold666
 
 Join me on TazUO discord:
 <a href="https://discord.gg/SqwtB5g95H">

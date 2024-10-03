@@ -56,6 +56,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Reflection;
+using ClassicUO.Dust765.Autos;
 
 namespace ClassicUO.Network
 {
@@ -2642,6 +2643,10 @@ namespace ClassicUO.Network
                 false,
                 blendmode
             );
+
+            // ## BEGIN - END ## // AUTOMATIONS
+            Defender.gfxTrigger(source, target, graphic);
+            // ## BEGIN - END ## // AUTOMATIONS
         }
 
         private static void ClientViewRange(ref StackDataReader p)
