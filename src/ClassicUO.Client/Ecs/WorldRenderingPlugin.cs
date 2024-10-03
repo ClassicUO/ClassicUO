@@ -113,8 +113,7 @@ readonly struct WorldRenderingPlugin : IPlugin
 
             var isUnderRoof = false;
             var isUnderStatic = false;
-            Span<bool> roofDirections = stackalloc bool[9];
-            roofDirections.Fill(false);
+            (var isSameTile, var isTileAhead) = (false, false);
 
             foreach ((var entities, var posSpan, var graphicSpan) in queryStatics.Iter<WorldPosition, Graphic>())
             {
@@ -127,9 +126,13 @@ readonly struct WorldRenderingPlugin : IPlugin
 
                     if (pos.Z > playerZ14)
                     {
-                        if (Math.Abs(pos.X - chunkX) <= 1 && Math.Abs(pos.Y - chunkY) <= 1)
-                            if (((ulong)tileDataFlags & 0x204) == 0 && tileDataFlags.HasFlag(TileFlag.Roof))
-                                roofDirections[(pos.Y - chunkY + 1) * 3 + (pos.X - chunkX + 1)] = true;
+                        if (((ulong)tileDataFlags & 0x204) == 0 && tileDataFlags.HasFlag(TileFlag.Roof))
+                        {
+                            if (pos.X == chunkX && pos.Y == chunkY)
+                                isSameTile = true;
+                            else if (pos.X == chunkX + 1 && pos.Y == chunkY + 1)
+                                isTileAhead = true;
+                        }
 
                         var max = localZInfo.Value.maxZRoof ?? 127;
 
@@ -165,10 +168,7 @@ readonly struct WorldRenderingPlugin : IPlugin
             }
 
 
-            for (int i = 0, count = 0; count <= 7 && i < roofDirections.Length; ++i)
-                if (roofDirections[i])
-                    if (count++ > 6)
-                        isUnderRoof = true;
+            isUnderRoof = isSameTile && isTileAhead;
 
             if (isUnderStatic && isUnderRoof)
             {
