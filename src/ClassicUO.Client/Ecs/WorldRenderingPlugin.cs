@@ -334,49 +334,257 @@ readonly struct WorldRenderingPlugin : IPlugin
             ref MobAnimation animation,
             ref MobileSteps steps
         ) =>
-            {
-                var uoHue = hue.Value;
-                var priorityZ = pos.Z;
-                var position = Isometric.IsoToScreen(pos.X, pos.Y, pos.Z);
-                Texture2D texture;
-                Rectangle? uv;
-                var mirror = false;
+        {
+            if (maxZ.HasValue && pos.Z >= maxZ)
+                return;
 
-                if (ClassicUO.Game.SerialHelper.IsMobile(serial.Value))
+            var uoHue = hue.Value;
+            var priorityZ = pos.Z;
+            var position = Isometric.IsoToScreen(pos.X, pos.Y, pos.Z);
+            Texture2D texture;
+            Rectangle? uv;
+            var mirror = false;
+
+            if (ClassicUO.Game.SerialHelper.IsMobile(serial.Value))
+            {
+                priorityZ += 2;
+                var dir = Unsafe.IsNullRef(ref direction) ? Direction.North : direction.Value;
+                (dir, mirror) = FixDirection(dir);
+
+                byte animAction = 0;
+                var animIndex = 0;
+                if (!Unsafe.IsNullRef(ref animation))
+                {
+                    animAction = animation.Action;
+                    animIndex = animation.Index;
+                    if (!Unsafe.IsNullRef(ref direction))
+                        animation.Direction = (direction.Value & (~Direction.Running | Direction.Mask));
+                }
+
+                var frames = assetsServer.Value.Animations.GetAnimationFrames
+                (
+                    graphic.Value,
+                    animAction,
+                    (byte) dir,
+                    out var baseHue,
+                    out var _
+                );
+
+                if (uoHue == 0)
+                    uoHue = baseHue;
+
+                ref readonly var frame = ref frames.IsEmpty ?
+                    ref SpriteInfo.Empty
+                    :
+                    ref frames[animIndex % frames.Length];
+
+                texture = frame.Texture;
+                uv = frame.UV;
+                position.X += 22;
+                position.Y += 22;
+                if (mirror)
+                    position.X -= frame.UV.Width - frame.Center.X;
+                else
+                    position.X -= frame.Center.X;
+                position.Y -= frame.UV.Height + frame.Center.Y;
+            }
+            else
+            {
+                ref readonly var artInfo = ref assetsServer.Value.Arts.GetArt(graphic.Value);
+
+                if (fileManager.Value.TileData.StaticData[graphic.Value].IsBackground)
+                {
+                    priorityZ -= 1;
+                }
+
+                if (fileManager.Value.TileData.StaticData[graphic.Value].Height != 0)
+                {
+                    priorityZ += 1;
+                }
+
+                if (fileManager.Value.TileData.StaticData[graphic.Value].IsWall)
                 {
                     priorityZ += 2;
-                    var dir = Unsafe.IsNullRef(ref direction) ? Direction.North : direction.Value;
-                    (dir, mirror) = FixDirection(dir);
+                }
 
-                    byte animAction = 0;
-                    var animIndex = 0;
-                    if (!Unsafe.IsNullRef(ref animation))
+                if (fileManager.Value.TileData.StaticData[graphic.Value].IsMultiMovable)
+                {
+                    priorityZ += 1;
+                }
+
+                texture = artInfo.Texture;
+                uv = artInfo.UV;
+                position.X -= (short)((artInfo.UV.Width >> 1) - 22);
+                position.Y -= (short)(artInfo.UV.Height - 44);
+            }
+
+            if (texture == null)
+                return;
+
+            var depthZ = Isometric.GetDepthZ(pos.X, pos.Y, priorityZ);
+            var color = ShaderHueTranslator.GetHueVector(FixHue(uoHue));
+            position += offset.Value;
+
+            if (offset.Value.X > 0 && offset.Value.Y > 0)
+            {
+                depthZ = Isometric.GetDepthZ(pos.X + 1, pos.Y, priorityZ);
+            }
+            else if (offset.Value.X == 0 && offset.Value.Y > 0)
+            {
+                depthZ = Isometric.GetDepthZ(pos.X + 1, pos.Y + 1, priorityZ);
+            }
+            else if (offset.Value.X < 0 && offset.Value.Y > 0)
+            {
+                depthZ = Isometric.GetDepthZ(pos.X, pos.Y + 1, priorityZ);
+            }
+
+            // if (!Unsafe.IsNullRef(ref steps) && steps.Count > 0)
+            // {
+            //     ref var step = ref steps[steps.Count - 1];
+            //
+            //     if (((Direction)step.Direction & Direction.Mask) is Direction.Down or Direction.South or Direction.East)
+            //     {
+            //         priorityZ = (sbyte)(step.Z + 2);
+            //         depthZ = Isometric.GetDepthZ(step.X, step.Y, priorityZ);
+            //     }
+            // }
+            // else
+            // {
+            //     depthZ = (direction.Value & Direction.Mask) switch
+            //     {
+            //         Direction.Down => Isometric.GetDepthZ(pos.X + 1, pos.Y + 1, priorityZ - 1),
+            //         Direction.South => Isometric.GetDepthZ(pos.X, pos.Y + 1, priorityZ - 1),
+            //         Direction.East => Isometric.GetDepthZ(pos.X + 1, pos.Y, priorityZ -1),
+            //         _ => depthZ
+            //     };
+            // }
+            // else if ((direction.Value & Direction.Mask) is Direction.Down or Direction.South or Direction.East)
+            // {
+            //     depthZ = Isometric.GetDepthZ(pos.X + 1, pos.Y + 1, priorityZ);
+            // }
+
+            batch.Value.Draw
+            (
+                texture,
+                position - center,
+                uv,
+                color,
+                0f,
+                Vector2.Zero,
+                1f,
+                mirror ? SpriteEffects.FlipHorizontally : SpriteEffects.None,
+                depthZ
+            );
+        });
+
+        queryEquipmentSlots.Each(
+     (
+            ref EquipmentSlots slots,
+            ref ScreenPositionOffset offset,
+            ref WorldPosition pos,
+            ref Graphic graphic,
+            ref Facing direction,
+            ref MobileSteps steps,
+            ref MobAnimation animation
+        ) =>
+        {
+            if (maxZ.HasValue && pos.Z >= maxZ)
+                return;
+
+            if (!Races.IsHuman(graphic.Value))
+                return;
+
+            var priorityZ = pos.Z + 2;
+            var depthZ = Isometric.GetDepthZ(pos.X, pos.Y, priorityZ);
+
+            if (offset.Value.X > 0 && offset.Value.Y > 0)
+            {
+                depthZ = Isometric.GetDepthZ(pos.X + 1, pos.Y, priorityZ);
+            }
+            else if (offset.Value.X == 0 && offset.Value.Y > 0)
+            {
+                depthZ = Isometric.GetDepthZ(pos.X + 1, pos.Y + 1, priorityZ);
+            }
+            else if (offset.Value.X < 0 && offset.Value.Y > 0)
+            {
+                depthZ = Isometric.GetDepthZ(pos.X, pos.Y + 1, priorityZ);
+            }
+
+            // if (!Unsafe.IsNullRef(ref steps) && steps.Count > 0)
+            // {
+            //     ref var step = ref steps[steps.Count - 1];
+            //
+            //     if (((Direction)step.Direction & Direction.Mask) is Direction.Down or Direction.South or Direction.East)
+            //     {
+            //         priorityZ = (sbyte)(step.Z + 2);
+            //         depthZ = Isometric.GetDepthZ(step.X, step.Y, priorityZ);
+            //     }
+            // }
+            // else // if ((direction.Value & Direction.Mask) is Direction.Down or Direction.South or Direction.East)
+            // {
+            //     depthZ = (direction.Value & Direction.Mask) switch
+            //     {
+            //         Direction.Down => Isometric.GetDepthZ(pos.X + 1, pos.Y + 1, priorityZ - 1),
+            //         Direction.South => Isometric.GetDepthZ(pos.X, pos.Y + 1, priorityZ - 1),
+            //         Direction.East => Isometric.GetDepthZ(pos.X + 1, pos.Y, priorityZ -1),
+            //         _ => depthZ
+            //     };
+            // }
+
+            (var dir, var mirror) = FixDirection(animation.Direction);
+
+            if (!Unsafe.IsNullRef(ref animation))
+            {
+                for (int i = -1; i < Constants.USED_LAYER_COUNT; i++)
+                {
+                    var layer = i == -1 ? Layer.Mount : LayerOrder.UsedLayers[(int)animation.Direction & 0x7, i];
+                    var layerEnt = slots[layer];
+                    if (!layerEnt.IsValid())
+                        continue;
+
+                    if (!world.Exists(layerEnt))
                     {
-                        animAction = animation.Action;
-                        animIndex = animation.Index;
-                        if (!Unsafe.IsNullRef(ref direction))
-                            animation.Direction = (direction.Value & (~Direction.Running | Direction.Mask));
+                        slots[layer] = 0;
+                        continue;
+                    }
+
+                    byte animAction = animation.Action;
+                    var graphicLayer = world.Get<Graphic>(layerEnt).Value;
+                    var hueLayer = world.Get<Hue>(layerEnt).Value;
+                    var animId = graphicLayer;
+                    if (layer == Layer.Mount)
+                    {
+                        animId = Mounts.FixMountGraphic(fileManager.Value.TileData, animId);
+                        animAction = animation.MountAction;
+                    }
+                    else if (!IsItemCovered2(world, ref slots, layer))
+                    {
+                        if (fileManager.Value.TileData.StaticData[graphicLayer].AnimID != 0)
+                            animId = fileManager.Value.TileData.StaticData[graphicLayer].AnimID;
+                    }
+                    else
+                    {
+                        continue;
                     }
 
                     var frames = assetsServer.Value.Animations.GetAnimationFrames
                     (
-                        graphic.Value,
+                        animId,
                         animAction,
                         (byte) dir,
                         out var baseHue,
                         out var _
                     );
 
-                    if (uoHue == 0)
-                        uoHue = baseHue;
-
                     ref readonly var frame = ref frames.IsEmpty ?
                         ref SpriteInfo.Empty
                         :
-                        ref frames[animIndex % frames.Length];
+                        ref frames[animation.Index % frames.Length];
 
-                    texture = frame.Texture;
-                    uv = frame.UV;
+                    if (frame.Texture == null)
+                        continue;
+
+                    var position = Isometric.IsoToScreen(pos.X, pos.Y, pos.Z);
                     position.X += 22;
                     position.Y += 22;
                     if (mirror)
@@ -384,231 +592,29 @@ readonly struct WorldRenderingPlugin : IPlugin
                     else
                         position.X -= frame.Center.X;
                     position.Y -= frame.UV.Height + frame.Center.Y;
+
+                    var color = ShaderHueTranslator.GetHueVector(FixHue(hueLayer != 0 ? hueLayer : baseHue));
+                    position += offset.Value;
+
+                    batch.Value.Draw
+                    (
+                        frame.Texture,
+                        position - center,
+                        frame.UV,
+                        color,
+                        0f,
+                        Vector2.Zero,
+                        1f,
+                        mirror ? SpriteEffects.FlipHorizontally : SpriteEffects.None,
+                        depthZ
+                    );
                 }
-                else
-                {
-                    ref readonly var artInfo = ref assetsServer.Value.Arts.GetArt(graphic.Value);
+            }
+        });
 
-                    if (fileManager.Value.TileData.StaticData[graphic.Value].IsBackground)
-                    {
-                        priorityZ -= 1;
-                    }
-
-                    if (fileManager.Value.TileData.StaticData[graphic.Value].Height != 0)
-                    {
-                        priorityZ += 1;
-                    }
-
-                    if (fileManager.Value.TileData.StaticData[graphic.Value].IsWall)
-                    {
-                        priorityZ += 2;
-                    }
-
-                    if (fileManager.Value.TileData.StaticData[graphic.Value].IsMultiMovable)
-                    {
-                        priorityZ += 1;
-                    }
-
-                    texture = artInfo.Texture;
-                    uv = artInfo.UV;
-                    position.X -= (short)((artInfo.UV.Width >> 1) - 22);
-                    position.Y -= (short)(artInfo.UV.Height - 44);
-                }
-
-                if (texture == null)
-                    return;
-
-                var depthZ = Isometric.GetDepthZ(pos.X, pos.Y, priorityZ);
-                var color = ShaderHueTranslator.GetHueVector(FixHue(uoHue));
-                position += offset.Value;
-
-                if (offset.Value.X > 0 && offset.Value.Y > 0)
-                {
-                    depthZ = Isometric.GetDepthZ(pos.X + 1, pos.Y, priorityZ);
-                }
-                else if (offset.Value.X == 0 && offset.Value.Y > 0)
-                {
-                    depthZ = Isometric.GetDepthZ(pos.X + 1, pos.Y + 1, priorityZ);
-                }
-                else if (offset.Value.X < 0 && offset.Value.Y > 0)
-                {
-                    depthZ = Isometric.GetDepthZ(pos.X, pos.Y + 1, priorityZ);
-                }
-
-                // if (!Unsafe.IsNullRef(ref steps) && steps.Count > 0)
-                // {
-                //     ref var step = ref steps[steps.Count - 1];
-                //
-                //     if (((Direction)step.Direction & Direction.Mask) is Direction.Down or Direction.South or Direction.East)
-                //     {
-                //         priorityZ = (sbyte)(step.Z + 2);
-                //         depthZ = Isometric.GetDepthZ(step.X, step.Y, priorityZ);
-                //     }
-                // }
-                // else
-                // {
-                //     depthZ = (direction.Value & Direction.Mask) switch
-                //     {
-                //         Direction.Down => Isometric.GetDepthZ(pos.X + 1, pos.Y + 1, priorityZ - 1),
-                //         Direction.South => Isometric.GetDepthZ(pos.X, pos.Y + 1, priorityZ - 1),
-                //         Direction.East => Isometric.GetDepthZ(pos.X + 1, pos.Y, priorityZ -1),
-                //         _ => depthZ
-                //     };
-                // }
-                // else if ((direction.Value & Direction.Mask) is Direction.Down or Direction.South or Direction.East)
-                // {
-                //     depthZ = Isometric.GetDepthZ(pos.X + 1, pos.Y + 1, priorityZ);
-                // }
-
-                batch.Value.Draw
-                (
-                    texture,
-                    position - center,
-                    uv,
-                    color,
-                    0f,
-                    Vector2.Zero,
-                    1f,
-                    mirror ? SpriteEffects.FlipHorizontally : SpriteEffects.None,
-                    depthZ
-                );
-            });
-
-            queryEquipmentSlots.Each(
-         (
-                ref EquipmentSlots slots,
-                ref ScreenPositionOffset offset,
-                ref WorldPosition pos,
-                ref Graphic graphic,
-                ref Facing direction,
-                ref MobileSteps steps,
-                ref MobAnimation animation
-            ) =>
-            {
-                if (!Races.IsHuman(graphic.Value))
-                    return;
-
-                var priorityZ = pos.Z + 2;
-                var depthZ = Isometric.GetDepthZ(pos.X, pos.Y, priorityZ);
-
-                if (offset.Value.X > 0 && offset.Value.Y > 0)
-                {
-                    depthZ = Isometric.GetDepthZ(pos.X + 1, pos.Y, priorityZ);
-                }
-                else if (offset.Value.X == 0 && offset.Value.Y > 0)
-                {
-                    depthZ = Isometric.GetDepthZ(pos.X + 1, pos.Y + 1, priorityZ);
-                }
-                else if (offset.Value.X < 0 && offset.Value.Y > 0)
-                {
-                    depthZ = Isometric.GetDepthZ(pos.X, pos.Y + 1, priorityZ);
-                }
-
-                // if (!Unsafe.IsNullRef(ref steps) && steps.Count > 0)
-                // {
-                //     ref var step = ref steps[steps.Count - 1];
-                //
-                //     if (((Direction)step.Direction & Direction.Mask) is Direction.Down or Direction.South or Direction.East)
-                //     {
-                //         priorityZ = (sbyte)(step.Z + 2);
-                //         depthZ = Isometric.GetDepthZ(step.X, step.Y, priorityZ);
-                //     }
-                // }
-                // else // if ((direction.Value & Direction.Mask) is Direction.Down or Direction.South or Direction.East)
-                // {
-                //     depthZ = (direction.Value & Direction.Mask) switch
-                //     {
-                //         Direction.Down => Isometric.GetDepthZ(pos.X + 1, pos.Y + 1, priorityZ - 1),
-                //         Direction.South => Isometric.GetDepthZ(pos.X, pos.Y + 1, priorityZ - 1),
-                //         Direction.East => Isometric.GetDepthZ(pos.X + 1, pos.Y, priorityZ -1),
-                //         _ => depthZ
-                //     };
-                // }
-
-                (var dir, var mirror) = FixDirection(animation.Direction);
-
-                if (!Unsafe.IsNullRef(ref animation))
-                {
-                    for (int i = -1; i < Constants.USED_LAYER_COUNT; i++)
-                    {
-                        var layer = i == -1 ? Layer.Mount : LayerOrder.UsedLayers[(int)animation.Direction & 0x7, i];
-                        var layerEnt = slots[layer];
-                        if (!layerEnt.IsValid())
-                            continue;
-
-                        if (!world.Exists(layerEnt))
-                        {
-                            slots[layer] = 0;
-                            continue;
-                        }
-
-                        byte animAction = animation.Action;
-                        var graphicLayer = world.Get<Graphic>(layerEnt).Value;
-                        var hueLayer = world.Get<Hue>(layerEnt).Value;
-                        var animId = graphicLayer;
-                        if (layer == Layer.Mount)
-                        {
-                            animId = Mounts.FixMountGraphic(fileManager.Value.TileData, animId);
-                            animAction = animation.MountAction;
-                        }
-                        else if (!IsItemCovered2(world, ref slots, layer))
-                        {
-                            if (fileManager.Value.TileData.StaticData[graphicLayer].AnimID != 0)
-                                animId = fileManager.Value.TileData.StaticData[graphicLayer].AnimID;
-                        }
-                        else
-                        {
-                            continue;
-                        }
-
-                        var frames = assetsServer.Value.Animations.GetAnimationFrames
-                        (
-                            animId,
-                            animAction,
-                            (byte) dir,
-                            out var baseHue,
-                            out var _
-                        );
-
-                        ref readonly var frame = ref frames.IsEmpty ?
-                            ref SpriteInfo.Empty
-                            :
-                            ref frames[animation.Index % frames.Length];
-
-                        if (frame.Texture == null)
-                            continue;
-
-                        var position = Isometric.IsoToScreen(pos.X, pos.Y, pos.Z);
-                        position.X += 22;
-                        position.Y += 22;
-                        if (mirror)
-                            position.X -= frame.UV.Width - frame.Center.X;
-                        else
-                            position.X -= frame.Center.X;
-                        position.Y -= frame.UV.Height + frame.Center.Y;
-
-                        var color = ShaderHueTranslator.GetHueVector(FixHue(hueLayer != 0 ? hueLayer : baseHue));
-                        position += offset.Value;
-
-                        batch.Value.Draw
-                        (
-                            frame.Texture,
-                            position - center,
-                            frame.UV,
-                            color,
-                            0f,
-                            Vector2.Zero,
-                            1f,
-                            mirror ? SpriteEffects.FlipHorizontally : SpriteEffects.None,
-                            depthZ
-                        );
-                    }
-                }
-            });
-
-            batch.Value.SetSampler(null);
-            batch.Value.SetStencil(null);
-            batch.Value.End();
+        batch.Value.SetSampler(null);
+        batch.Value.SetStencil(null);
+        batch.Value.End();
     }
 
 
