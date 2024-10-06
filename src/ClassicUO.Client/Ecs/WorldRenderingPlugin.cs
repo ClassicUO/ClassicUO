@@ -72,21 +72,20 @@ readonly struct WorldRenderingPlugin : IPlugin
             Without<Pair<ContainedInto, Wildcard>>> queryEquipmentSlots
     )
     {
-        ref var playerPos = ref queryPlayer.Single<WorldPosition>();
+        (var playerX, var playerY, var playerZ) = queryPlayer.Single<WorldPosition>();
 
         int? maxZ = null;
         if (!lastPos.Value.HasValue ||
-            lastPos.Value.Value.lastPosX != playerPos.X ||
-            lastPos.Value.Value.lastPosY != playerPos.Y ||
-            lastPos.Value.Value.lastPosZ != playerPos.Z)
+            lastPos.Value.Value.lastPosX != playerX ||
+            lastPos.Value.Value.lastPosY != playerY ||
+            lastPos.Value.Value.lastPosZ != playerZ)
         {
             localZInfo.Value.maxZ = null;
             localZInfo.Value.maxZGround = null;
             localZInfo.Value.maxZRoof = null;
             localZInfo.Value.drawRoof = true;
-            var playerZ16 = playerPos.Z + 16;
-            var playerZ14 = playerPos.Z + 14;
-            (var chunkX, var chunkY) = (playerPos.X, playerPos.Y);
+            var playerZ16 = playerZ + 16;
+            var playerZ14 = playerZ + 14;
 
             foreach ((var entities, var posSpan, var stretchedSpan) in queryTiles.Iter<WorldPosition, TileStretched>())
             {
@@ -95,7 +94,7 @@ readonly struct WorldRenderingPlugin : IPlugin
                     ref var pos = ref posSpan[i];
                     ref var stretched = ref stretchedSpan.IsEmpty ? ref Unsafe.NullRef<TileStretched>() : ref stretchedSpan[i];
 
-                    if (pos.X == chunkX && pos.Y == chunkY)
+                    if (pos.X == playerX && pos.Y == playerY)
                     {
                         var tileZ = pos.Z;
                         if (!Unsafe.IsNullRef(ref stretched))
@@ -127,9 +126,9 @@ readonly struct WorldRenderingPlugin : IPlugin
                     {
                         if (((ulong)tileDataFlags & 0x204) == 0 && tileDataFlags.HasFlag(TileFlag.Roof))
                         {
-                            if (pos.X == chunkX && pos.Y == chunkY)
+                            if (pos.X == playerX && pos.Y == playerY)
                                 isSameTile = true;
-                            else if (pos.X == chunkX + 1 && pos.Y == chunkY + 1)
+                            else if (pos.X == playerX + 1 && pos.Y == playerY + 1)
                                 isTileAhead = true;
                         }
 
@@ -145,7 +144,7 @@ readonly struct WorldRenderingPlugin : IPlugin
                         }
                     }
 
-                    if (pos.X == chunkX && pos.Y == chunkY)
+                    if (pos.X == playerX && pos.Y == playerY)
                     {
                         if (pos.Z > playerZ14)
                         {

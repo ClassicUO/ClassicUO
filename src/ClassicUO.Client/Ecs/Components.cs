@@ -8,6 +8,13 @@ struct WorldPosition
 {
     public ushort X, Y;
     public sbyte Z;
+
+    public void Deconstruct(out ushort x, out ushort y, out sbyte z)
+    {
+        x = X;
+        y = Y;
+        z = Z;
+    }
 }
 
 struct Graphic
