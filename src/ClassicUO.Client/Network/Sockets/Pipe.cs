@@ -43,6 +43,7 @@ namespace ClassicUO.Network.Sockets
         private int _writeIndex;
 
         public bool IsEmpty => _readIndex == _writeIndex;
+        public int Length => _writeIndex - _readIndex;
 
         public Pipe(uint size = 4096)
         {
@@ -84,6 +85,17 @@ namespace ClassicUO.Network.Sockets
                 return _buffer.AsSpan(readIndex);
 
             return _buffer.AsSpan(readIndex..writeIndex);
+        }
+
+        public Memory<byte> GetAvailableMemoryToRead()
+        {
+            int readIndex = _readIndex & _mask;
+            int writeIndex = _writeIndex & _mask;
+
+            if (readIndex > writeIndex)
+                return _buffer.AsMemory(readIndex);
+
+            return _buffer.AsMemory(readIndex..writeIndex);
         }
 
         public void CommitRead(int size)
