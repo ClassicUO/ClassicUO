@@ -123,9 +123,8 @@ internal sealed class NetClient
         _isCompressionEnabled = false;
         _source.Cancel();
         _sendTrigger.Cancel();
-
-        if (_readLoopTask is not null)
-            Task.WaitAll(_readLoopTask, _writeLoopTask!);
+        _readLoopTask?.Wait();
+        _writeLoopTask?.Wait();
 
         _sendPipe.Clear();
         _receivePipe.Clear();
@@ -341,7 +340,7 @@ internal sealed class NetClient
                 }
             }
 
-            await socket.DisconnectAsync();
+            Disconnect();
         }
         catch (OperationCanceledException)
         { }
