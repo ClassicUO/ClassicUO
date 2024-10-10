@@ -64,7 +64,12 @@ namespace ClassicUO.Game.Managers
                 _canReproduceAudio = false;
             }
 
-            LoginMusicIndex = Client.Game.UO.Version >= ClientVersion.CV_7000 ? 78 : Client.Game.UO.Version > ClientVersion.CV_308Z ? 0 : 8;
+            LoginMusicIndex = Client.Game.UO.Version switch
+            {
+                >= ClientVersion.CV_7000 => 78, // LoginLoop
+                > ClientVersion.CV_308Z => 0,
+                _ => 8 // stones2
+            };
 
             Client.Game.Activated += OnWindowActivated;
             Client.Game.Deactivated += OnWindowDeactivated;

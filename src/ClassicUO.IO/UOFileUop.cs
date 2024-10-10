@@ -168,7 +168,7 @@ namespace ClassicUO.IO
                 Seek(nextBlock, System.IO.SeekOrigin.Begin);
             } while (nextBlock != 0);
 
-            Entries = new UOFileIndex[ushort.MaxValue];
+            Entries = new UOFileIndex[Math.Max(total, ushort.MaxValue) + 0x4000];
 
             for (int i = 0; i < Entries.Length; i++)
             {

@@ -2982,7 +2982,7 @@ namespace ClassicUO.Assets
                             case HTML_TAG_TYPE.HTT_P:
                                 cmdLen = i - j;
 
-                                if (str.Length != 0 && str.Length > j && str.Length >= cmdLen)
+                                if (str.Length != 0 && cmdLen >= 0 && str.Length > j && str.Length >= cmdLen)
                                 {
                                     GetHTMLInfoFromContent(ref info, str.Slice(j, cmdLen));
                                 }
