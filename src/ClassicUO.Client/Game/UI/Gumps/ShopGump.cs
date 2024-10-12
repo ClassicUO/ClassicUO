@@ -827,7 +827,7 @@ namespace ClassicUO.Game.UI.Gumps
                         1,
                         out var hue2,
                         out _,
-                        true
+                        false
                     );
 
                     if (frames.Length != 0)
