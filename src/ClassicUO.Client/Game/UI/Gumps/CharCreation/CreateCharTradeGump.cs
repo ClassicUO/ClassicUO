@@ -185,7 +185,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                                      (character.Race == RaceType.GARGOYLE || s.Index != 57) // Throwing for gargoyle only
                                  )
                           .Where(s =>
-                                    clientFlags.HasFlag(LockedFeatureFlags.ExpansionAOS) ||
+                                    clientFlags.HasFlag(LockedFeatureFlags.AOS) ||
                                     (
                                         s.Index != 51 && // Chivlary
                                         s.Index != 50 && // Focus
@@ -194,7 +194,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                                 )
 
                           .Where(s =>
-                                    clientFlags.HasFlag(LockedFeatureFlags.ExpansionSE) ||
+                                    clientFlags.HasFlag(LockedFeatureFlags.SE) ||
                                     (
                                         s.Index != 52 && // Bushido
                                         s.Index != 53    // Ninjitsu
@@ -202,7 +202,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                                 )
 
                           .Where(s =>
-                                    clientFlags.HasFlag(LockedFeatureFlags.ExpansionSA) ||
+                                    clientFlags.HasFlag(LockedFeatureFlags.SA) ||
                                     (
                                         s.Index != 55 && // Mysticism
                                         s.Index != 56    // Imbuing
