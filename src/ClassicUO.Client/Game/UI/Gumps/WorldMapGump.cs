@@ -59,6 +59,7 @@ using SixLabors.ImageSharp.Formats.Png;
 using ClassicUO.Network.Encryption;
 using System.Text;
 using System.Runtime.InteropServices;
+using System.Threading;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -115,7 +116,9 @@ namespace ClassicUO.Game.UI.Gumps
         private bool _showGridIfZoomed = true;
         private bool _allowPositionalTarget = false;
         private WMapMarker _gotoMarker;
-        
+
+        private int _mapLoading;
+        private uint _mapLoadingTime;
 
         public WorldMapGump(World world) : base
         (
@@ -1217,6 +1220,8 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 try
                 {
+                    Interlocked.Increment(ref _mapLoading);
+
                     var size = (realWidth + OFFSET_PIX) * (realHeight + OFFSET_PIX);
                     var allZ = new sbyte[size];
 
@@ -1390,6 +1395,10 @@ namespace ClassicUO.Game.UI.Gumps
                     Log.Error($"error loading worldmap: {ex}");
 
                     return;
+                }
+                finally
+                {
+                    Interlocked.Decrement(ref _mapLoading);
                 }
             }
 
@@ -1946,7 +1955,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
-
             batcher.Draw
             (
                 SolidColorTextureCache.GetTexture(Color.Black),
@@ -1960,7 +1968,22 @@ namespace ClassicUO.Game.UI.Gumps
                 hueVector
             );
 
-            if (_mapTexture != null && !_mapTexture.IsDisposed)
+
+            if (_mapLoading == 1)
+            {
+                var str = "Please wait, I'm making the map file...".AsSpan();
+                //str = str[..(str.Length - (int)_mapLoadingTime % 3)];
+
+                //if (Time.Ticks > _mapLoadingTime)
+                //    _mapLoadingTime = Time.Ticks + 1000;
+
+                var strSize = Fonts.Bold.MeasureString(str);
+                var pos = strSize * -0.5f;
+                pos.X += gX + halfWidth;
+                pos.Y += gY + halfHeight;
+                batcher.DrawString(Fonts.Bold, str, pos, new Vector3(38, 1, 1));
+            }
+            else if (_mapTexture != null && !_mapTexture.IsDisposed)
             {
                 if (batcher.ClipBegin(gX, gY, gWidth, gHeight))
                 {
