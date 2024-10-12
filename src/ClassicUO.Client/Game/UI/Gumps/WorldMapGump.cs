@@ -1220,7 +1220,13 @@ namespace ClassicUO.Game.UI.Gumps
                     var size = (realWidth + OFFSET_PIX) * (realHeight + OFFSET_PIX);
                     var allZ = new sbyte[size];
 
-                    using var img = new SixLabors.ImageSharp.Image<Byte4>(realWidth + OFFSET_PIX, realHeight + OFFSET_PIX);
+                    using var img = new SixLabors.ImageSharp.Image<Byte4>(new SixLabors.ImageSharp.Configuration() 
+                    {
+                        PreferContiguousImageBuffers = true
+                    }, realWidth + OFFSET_PIX, realHeight + OFFSET_PIX);
+                    
+                    img.DangerousTryGetSinglePixelMemory(out var imgBuffer);
+                    var imgSpan = imgBuffer.Span;
 
                     var huesLoader = Client.Game.UO.FileManager.Hues;
 
@@ -1262,7 +1268,7 @@ namespace ClassicUO.Game.UI.Gumps
                                 {
                                     ushort color = (ushort)(0x8000 | huesLoader.GetRadarColorData(cells[pos].TileID & 0x3FFF));
 
-                                    img[x + mapX + OFFSET_PIX_HALF, y + mapY + OFFSET_PIX_HALF] = new Byte4() { PackedValue = HuesHelper.Color16To32(color) | 0xFF_00_00_00 };
+                                    imgSpan[block].PackedValue = HuesHelper.Color16To32(color) | 0xFF_00_00_00;
                                     allZ[block] = cells[pos].Z;
                                 }
                             }
@@ -1286,7 +1292,7 @@ namespace ClassicUO.Game.UI.Gumps
                                     {
                                         var color = (ushort)(0x8000 | (sb.Hue != 0 ? huesLoader.GetColor16(16384, sb.Hue) : huesLoader.GetRadarColorData(sb.Color + 0x4000)));
 
-                                        img[mapX + sb.X + OFFSET_PIX_HALF, mapY + sb.Y + OFFSET_PIX_HALF] = new Byte4() { PackedValue = HuesHelper.Color16To32(color) | 0xFF_00_00_00 };
+                                        imgSpan[block].PackedValue = HuesHelper.Color16To32(color) | 0xFF_00_00_00;
                                         allZ[block] = sb.Z;
                                     }
                                 }
@@ -1317,8 +1323,7 @@ namespace ClassicUO.Game.UI.Gumps
                                 continue;
                             }
 
-                            var cc = img[mapX, mapY];
-
+                            ref var cc = ref imgSpan[blockCurrent];
                             if (cc.PackedValue == 0)
                             {
                                 continue;
@@ -1344,7 +1349,7 @@ namespace ClassicUO.Game.UI.Gumps
                                     b = (byte)Math.Min(0xFF, b * MAG_1);
                                 }
 
-                                img[mapX, mapY] = new Byte4() { PackedValue = (uint)(r | (g << 8) | (b << 16) | (a << 24)) };
+                                cc.PackedValue = (uint)(r | (g << 8) | (b << 16) | (a << 24));
                             }
                         }
                     }
@@ -1369,7 +1374,7 @@ namespace ClassicUO.Game.UI.Gumps
                     var imageEncoder = new PngEncoder
                     {
                         ColorType = PngColorType.Palette,
-                        CompressionLevel = PngCompressionLevel.BestCompression,
+                        CompressionLevel = PngCompressionLevel.DefaultCompression,
                         SkipMetadata = true,
                         FilterMethod = PngFilterMethod.None,
                         ChunkFilter = PngChunkFilter.ExcludeAll,
