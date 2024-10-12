@@ -108,7 +108,6 @@ namespace ClassicUO.Game.GameObjects
         public ushort X,
             Y;
         public sbyte Z;
-        public GameObject RenderListNext;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Vector2 GetScreenPosition()
@@ -163,6 +162,7 @@ namespace ClassicUO.Game.GameObjects
             OnPositionChanged();
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void UpdateRealScreenPosition(int offsetX, int offsetY)
         {
             RealScreenPosition.X = ((X - Y) * 22) - offsetX - 22;
@@ -368,7 +368,6 @@ namespace ClassicUO.Game.GameObjects
 
             Next = null;
             Previous = null;
-            RenderListNext = null;
 
             Clear();
             RemoveFromTile();
