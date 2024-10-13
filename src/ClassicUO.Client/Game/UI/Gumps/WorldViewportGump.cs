@@ -41,6 +41,7 @@ using ClassicUO.Renderer;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -54,6 +55,9 @@ namespace ClassicUO.Game.UI.Gumps
             _savedSize;
         private readonly GameScene _scene;
         private readonly SystemChatControl _systemChatControl;
+
+        private static Microsoft.Xna.Framework.Graphics.Texture2D damageWindowOutline = SolidColorTextureCache.GetTexture(Color.White);
+        public static Vector3 DamageWindowOutlineHue = ShaderHueTranslator.GetHueVector(32);
 
         public WorldViewportGump(World world, GameScene scene) : base(world, 0, 0)
         {
@@ -120,6 +124,12 @@ namespace ClassicUO.Game.UI.Gumps
             Add(_button);
             Add(_systemChatControl);
             Resize();
+
+            if (ProfileManager.CurrentProfile.LastVersionHistoryShown != CUOEnviroment.Version.ToString())
+            {
+                //UIManager.Add(new VersionHistory());
+                ProfileManager.CurrentProfile.LastVersionHistoryShown = CUOEnviroment.Version.ToString();
+            }
         }
 
         public override void Update()
@@ -310,14 +320,67 @@ namespace ClassicUO.Game.UI.Gumps
 
             return base.Contains(x, y);
         }
+
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        {
+            bool res = base.Draw(batcher, x, y);
+
+            if (World.InGame && ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.EnableHealthIndicator)
+            {
+                float hpPercent = (float)World.Player.Hits / (float)World.Player.HitsMax;
+                if (hpPercent <= ProfileManager.CurrentProfile.ShowHealthIndicatorBelow)
+                {
+                    int size = ProfileManager.CurrentProfile.HealthIndicatorWidth;
+                    DamageWindowOutlineHue.Z = 1f - hpPercent;
+                    batcher.Draw( //Top bar
+                        damageWindowOutline,
+                        new Rectangle(x + BORDER_WIDTH, y + BORDER_WIDTH, Width - (BORDER_WIDTH * 3), size),
+                        DamageWindowOutlineHue
+                        );
+
+                    batcher.Draw( //Left Bar
+                        damageWindowOutline,
+                        new Rectangle(x + BORDER_WIDTH, y + BORDER_WIDTH + size, size, Height - (BORDER_WIDTH * 3) - (size * 2)),
+                        DamageWindowOutlineHue
+                        );
+
+                    batcher.Draw( //Right Bar
+                        damageWindowOutline,
+                        new Rectangle(x + Width - (BORDER_WIDTH * 2) - size, y + BORDER_WIDTH + size, size, Height - (BORDER_WIDTH * 3) - (size * 2)),
+                        DamageWindowOutlineHue
+                        );
+
+                    batcher.Draw( //Bottom bar
+                        damageWindowOutline,
+                        new Rectangle(x + BORDER_WIDTH, y + Height - (BORDER_WIDTH * 2) - size, Width - (BORDER_WIDTH * 3), size),
+                        DamageWindowOutlineHue
+                        );
+                }
+            }
+
+            return res;
+        }
     }
 
     internal class BorderControl : Control
     {
-        private readonly int _borderSize;
+        private int _borderSize;
 
-        const ushort H_BORDER = 0x0A8C;
-        const ushort V_BORDER = 0x0A8D;
+        private ushort h_border = 0x0A8C;
+        private ushort v_border = 0x0A8D;
+        private ushort h_bottom_border = 0x0A8C;
+        private ushort v_right_border = 0x0A8D;
+        private ushort t_left = 0xffff, t_right = 0xffff, b_left = 0xffff, b_right = 0xffff;
+
+        public int BorderSize { get { return _borderSize; } set { _borderSize = value; } }
+        public ushort H_Border { get { return h_border; } set { h_border = value; } }
+        public ushort V_Border { get { return v_border; } set { v_border = value; } }
+        public ushort V_Right_Border { get { return v_right_border; } set { v_right_border = value; } }
+        public ushort H_Bottom_Border { get { return h_bottom_border; } set { h_bottom_border = value; } }
+        public ushort T_Left { get { return t_left; } set { t_left = value; } }
+        public ushort T_Right { get { return t_right; } set { t_right = value; } }
+        public ushort B_Left { get { return b_left; } set { b_left = value; } }
+        public ushort B_Right { get { return b_right; } set { b_right = value; } }
 
         public BorderControl(int x, int y, int w, int h, int borderSize)
         {
@@ -332,55 +395,189 @@ namespace ClassicUO.Game.UI.Gumps
 
         public ushort Hue { get; set; }
 
+        public void DefaultGraphics()
+        {
+            h_border = 0x0A8C;
+            v_border = 0x0A8D;
+            h_bottom_border = 0x0A8C;
+            v_right_border = 0x0A8D;
+            t_left = 0xffff; t_right = 0xffff; b_left = 0xffff; b_right = 0xffff;
+            _borderSize = 4;
+        }
+
+        private Texture2D GetGumpTexture(uint g, out Rectangle bounds)
+        {
+            ref readonly var texture = ref Client.Game.UO.Gumps.GetGump(g);
+            bounds = texture.UV;
+            return texture.Texture;
+        }
+
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
+            Rectangle pos;
 
             if (Hue != 0)
             {
                 hueVector.X = Hue;
                 hueVector.Y = 1;
             }
+            hueVector.Z = Alpha;
 
-            ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(H_BORDER);
+            var texture = GetGumpTexture(h_border, out var bounds);
+            if (texture != null)
+            {
+                pos = new Rectangle
+                (
+                    x,
+                    y,
+                    Width,
+                    _borderSize
+                );
+                if (t_left != 0xffff)
+                {
+                    pos.X += _borderSize;
+                    pos.Width -= _borderSize;
+                }
+                if (t_right != 0xffff)
+                    pos.Width -= _borderSize;
+                // sopra
+                batcher.DrawTiled
+                (
+                    texture,
+                    pos,
+                    bounds,
+                    hueVector
+                );
+            }
 
-            // sopra
-            batcher.DrawTiled(
-                gumpInfo.Texture,
-                new Rectangle(x, y, Width, _borderSize),
-                gumpInfo.UV,
-                hueVector
-            );
+            ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(h_border);
 
-            // sotto
-            batcher.DrawTiled(
-                gumpInfo.Texture,
-                new Rectangle(x, y + Height - _borderSize, Width, _borderSize),
-                gumpInfo.UV,
-                hueVector
-            );
+            texture = GetGumpTexture(h_bottom_border, out bounds);
+            if (texture != null)
+            {
+                pos = new Rectangle
+                (
+                    x,
+                    y + Height - _borderSize,
+                    Width,
+                    _borderSize
+                );
+                if (b_left != 0xffff)
+                {
+                    pos.X += _borderSize;
+                    pos.Width -= _borderSize;
+                }
+                if (b_right != 0xffff)
+                    pos.Width -= _borderSize;
+                // sotto
+                batcher.DrawTiled
+                (
+                    texture,
+                    pos,
+                    bounds,
+                    hueVector
+                );
+            }
 
-            gumpInfo = ref Client.Game.UO.Gumps.GetGump(V_BORDER);
-            //sx
-            batcher.DrawTiled(
-                gumpInfo.Texture,
-                new Rectangle(x, y, _borderSize, Height),
-                gumpInfo.UV,
-                hueVector
-            );
-
-            //dx
-            batcher.DrawTiled(
-                gumpInfo.Texture,
-                new Rectangle(
-                    x + Width - _borderSize,
-                    y + (gumpInfo.UV.Width >> 1),
+            texture = GetGumpTexture(v_border, out bounds);
+            if (texture != null)
+            {
+                pos = new Rectangle
+                (
+                    x,
+                    y,
                     _borderSize,
-                    Height - _borderSize
-                ),
-                gumpInfo.UV,
-                hueVector
-            );
+                    Height
+                );
+                if (t_left != 0xffff)
+                {
+                    pos.Y += _borderSize;
+                    pos.Height -= _borderSize;
+                }
+                if (b_left != 0xffff)
+                    pos.Height -= _borderSize;
+                //sx
+                batcher.DrawTiled
+                (
+                    texture,
+                    pos,
+                    bounds,
+                    hueVector
+                );
+            }
+
+            texture = GetGumpTexture(v_right_border, out bounds);
+            if (texture != null)
+            {
+                pos = new Rectangle
+                (
+                    x + Width - _borderSize,
+                    y,
+                    _borderSize,
+                    Height
+                );
+                if (t_right != 0xffff)
+                {
+                    pos.Y += _borderSize;
+                    pos.Height -= _borderSize;
+                }
+                if (b_right != 0xffff)
+                    pos.Height -= _borderSize;
+                //dx
+                batcher.DrawTiled
+                (
+                    texture,
+                    pos,
+                    bounds,
+                    hueVector
+                );
+            }
+
+            if (t_left != 0xffff)
+            {
+                texture = GetGumpTexture(t_left, out bounds);
+                if (texture != null)
+                    batcher.Draw(
+                        texture,
+                        new Rectangle(x, y, bounds.Width, bounds.Height),
+                        bounds,
+                        hueVector
+                        );
+            }
+            if (t_right != 0xffff)
+            {
+                texture = GetGumpTexture(t_right, out bounds);
+                if (texture != null)
+                    batcher.Draw(
+                    texture,
+                    new Rectangle(x + Width - _borderSize, y, bounds.Width, bounds.Height),
+                    bounds,
+                    hueVector
+                    );
+            }
+            if (b_left != 0xffff)
+            {
+                texture = GetGumpTexture(b_left, out bounds);
+                if (texture != null)
+                    batcher.Draw(
+                    texture,
+                    new Rectangle(x, y + Height - _borderSize, bounds.Width, bounds.Height),
+                    bounds,
+                    hueVector
+                    );
+            }
+            if (b_right != 0xffff)
+            {
+                texture = GetGumpTexture(b_right, out bounds);
+                if (texture != null)
+                    batcher.Draw(
+                    texture,
+                    new Rectangle(x + Width - _borderSize, y + Height - _borderSize, bounds.Width, bounds.Height),
+                    bounds,
+                    hueVector
+                    );
+            }
 
             return base.Draw(batcher, x, y);
         }

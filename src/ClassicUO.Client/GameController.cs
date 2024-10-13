@@ -69,6 +69,8 @@ namespace ClassicUO
         private Texture2D _background;
         private bool _pluginsInitialized = false;
 
+        private static Vector3 bgHueShader = new Vector3(0, 0, 0.3f);
+
         public GameController(IPluginHost pluginHost)
         {
             GraphicManager = new GraphicsDeviceManager(this);
@@ -440,6 +442,12 @@ namespace ClassicUO
             }
 
              base.Update(gameTime);
+        }
+
+        public static void UpdateBackgroundHueShader()
+        {
+            if (ProfileManager.CurrentProfile != null)
+                bgHueShader = ShaderHueTranslator.GetHueVector(ProfileManager.CurrentProfile.MainWindowBackgroundHue, false, bgHueShader.Z);
         }
 
         protected override void Draw(GameTime gameTime)
@@ -846,6 +854,42 @@ namespace ClassicUO
 
                     break;
                 }
+
+                case SDL_EventType.SDL_CONTROLLERBUTTONDOWN:
+                    if (!IsActive)
+                    {
+                        break;
+                    }
+  
+
+                    if (sdlEvent->cbutton.button == (byte)SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_RIGHTSTICK)
+                    {
+                        SDL_Event e = new SDL_Event();
+                        e.type = SDL_EventType.SDL_MOUSEBUTTONDOWN;
+                        e.button.button = (byte)MouseButtonType.Left;
+                        SDL2.SDL.SDL_PushEvent(ref e);
+                    }
+                    else if (sdlEvent->cbutton.button == (byte)SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_LEFTSTICK)
+                    {
+                        SDL_Event e = new SDL_Event();
+                        e.type = SDL_EventType.SDL_MOUSEBUTTONDOWN;
+                        e.button.button = (byte)MouseButtonType.Right;
+                        SDL2.SDL.SDL_PushEvent(ref e);
+                    }
+                    else if (sdlEvent->cbutton.button == (byte)SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_START && UO.World.InGame)
+                    {
+                        Gump g = UIManager.GetGump<ModernOptionsGump>();
+                        if (g == null)
+                        {
+                            UIManager.Add(new ModernOptionsGump(UO.World));
+                        }
+                        else
+                        {
+                            g.Dispose();
+                        }
+                    }
+                    break;
+
             }
 
             return 1;

@@ -75,6 +75,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClassicUO.Bootstrap", "src\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FileEmbed", "external\FileEmbed\FileEmbed\FileEmbed.csproj", "{027B5178-C306-4900-996D-97E8E43567B6}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FontStashSharp", "external\FontStashSharp\src\FontStashSharp\FontStashSharp.csproj", "{CD5DF477-CB91-4E4E-9D9F-3652971D7253}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -171,6 +173,14 @@ Global
 		{027B5178-C306-4900-996D-97E8E43567B6}.Release|Any CPU.Build.0 = Release|Any CPU
 		{027B5178-C306-4900-996D-97E8E43567B6}.Release|x64.ActiveCfg = Release|Any CPU
 		{027B5178-C306-4900-996D-97E8E43567B6}.Release|x64.Build.0 = Release|Any CPU
+		{CD5DF477-CB91-4E4E-9D9F-3652971D7253}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CD5DF477-CB91-4E4E-9D9F-3652971D7253}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CD5DF477-CB91-4E4E-9D9F-3652971D7253}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{CD5DF477-CB91-4E4E-9D9F-3652971D7253}.Debug|x64.Build.0 = Debug|Any CPU
+		{CD5DF477-CB91-4E4E-9D9F-3652971D7253}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CD5DF477-CB91-4E4E-9D9F-3652971D7253}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CD5DF477-CB91-4E4E-9D9F-3652971D7253}.Release|x64.ActiveCfg = Release|Any CPU
+		{CD5DF477-CB91-4E4E-9D9F-3652971D7253}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -188,6 +198,7 @@ Global
 		{A6DCFCE5-192B-4AE1-B228-206D37A0021C} = {FA5D7AB8-3570-4E55-95B0-35BA6842FEE3}
 		{8974A04C-8360-4225-ABDD-0C56555F676D} = {8EAF9583-DC5B-46DC-A01E-47B00A1C862E}
 		{027B5178-C306-4900-996D-97E8E43567B6} = {FA5D7AB8-3570-4E55-95B0-35BA6842FEE3}
+		{CD5DF477-CB91-4E4E-9D9F-3652971D7253} = {FA5D7AB8-3570-4E55-95B0-35BA6842FEE3}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0A99E91A-ADAB-45C3-8170-2656140F6EFA}

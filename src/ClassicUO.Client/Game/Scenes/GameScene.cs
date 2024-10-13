@@ -606,17 +606,17 @@ namespace ClassicUO.Game.Scenes
 
             GetViewPort();
 
-            var useObjectHandles = _world.NameOverHeadManager.IsToggled || Keyboard.Ctrl && Keyboard.Shift;
+            var useObjectHandles = NameOverHeadManager.IsPermaToggled || Keyboard.Ctrl && Keyboard.Shift;
             if (useObjectHandles != _useObjectHandles)
             {
                 _useObjectHandles = useObjectHandles;
                 if (_useObjectHandles)
                 {
-                    _world.NameOverHeadManager.Open();
+                    NameOverHeadManager.Open();
                 }
                 else
                 {
-                    _world.NameOverHeadManager.Close();
+                    NameOverHeadManager.Close();
                 }
             }
 

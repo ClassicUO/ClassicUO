@@ -30,6 +30,14 @@
 
 #endregion
 
+using ClassicUO.Configuration.Json;
+using ClassicUO.Game;
+using ClassicUO.Game.Data;
+using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Managers;
+using ClassicUO.Game.UI.Gumps;
+using ClassicUO.Utility.Logging;
+using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -38,13 +46,6 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Xml;
-using ClassicUO.Configuration.Json;
-using ClassicUO.Game;
-using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.Managers;
-using ClassicUO.Game.UI.Gumps;
-using ClassicUO.Utility.Logging;
-using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Configuration
 {
@@ -95,7 +96,7 @@ namespace ClassicUO.Configuration
         public byte ChatFont { get; set; } = 1;
         public int SpeechDelay { get; set; } = 100;
         public bool ScaleSpeechDelay { get; set; } = true;
-        public bool SaveJournalToFile { get; set; } = true;
+        public bool SaveJournalToFile { get; set; } = false;
         public bool ForceUnicodeJournal { get; set; }
         public bool IgnoreAllianceMessages { get; set; }
         public bool IgnoreGuildMessages { get; set; }
@@ -125,6 +126,9 @@ namespace ClassicUO.Configuration
         public ushort PoisonHue { get; set; } = 0x0044;
         public ushort ParalyzedHue { get; set; } = 0x014C;
         public ushort InvulnerableHue { get; set; } = 0x0030;
+        public ushort AltJournalBackgroundHue { get; set; } = 0x0000;
+        public ushort AltGridContainerBackgroundHue { get; set; } = 0x0000;
+        public bool OverridePartyAndGuildHue { get; set; } = false;
 
         // visual
         public bool EnabledCriminalActionQuery { get; set; } = true;
@@ -138,6 +142,7 @@ namespace ClassicUO.Configuration
         public bool HighlightMobilesByPoisoned { get; set; } = true;
         public bool HighlightMobilesByInvul { get; set; } = true;
         public bool ShowMobilesHP { get; set; }
+        public bool ShowTargetIndicator { get; set; }
         public int MobileHPType { get; set; }     // 0 = %, 1 = line, 2 = both
         public int MobileHPShowWhen { get; set; } // 0 = Always, 1 - <100%
         public bool DrawRoofs { get; set; } = true;
@@ -157,6 +162,9 @@ namespace ClassicUO.Configuration
         public bool BandageSelfOld { get; set; } = true;
         public bool EnableDeathScreen { get; set; } = true;
         public bool EnableBlackWhiteEffect { get; set; } = true;
+        public ushort HiddenBodyHue { get; set; } = 0x038E;
+        public byte HiddenBodyAlpha { get; set; } = 40;
+        public int PlayerConstantAlpha { get; set; } = 100;
 
         // tooltip
         public bool UseTooltip { get; set; } = true;
@@ -169,6 +177,7 @@ namespace ClassicUO.Configuration
         // movements
         public bool EnablePathfind { get; set; }
         public bool UseShiftToPathfind { get; set; }
+        public bool PathfindSingleClick { get; set; }
         public bool AlwaysRun { get; set; }
         public bool AlwaysRunUnlessHidden { get; set; }
         public bool SmoothMovements { get; set; } = true;
@@ -201,8 +210,11 @@ namespace ClassicUO.Configuration
         public bool HoldDownKeyAltToCloseAnchored { get; set; } = true;
         public bool CloseAllAnchoredGumpsInGroupWithRightClick { get; set; } = false;
         public bool HoldAltToMoveGumps { get; set; }
-
+        public byte JournalOpacity { get; set; } = 50;
+        public int JournalStyle { get; set; } = 0;
         public bool HideScreenshotStoredInMessage { get; set; }
+        public bool UseModernPaperdoll { get; set; } = false;
+        public bool OpenModernPaperdollAtMinimizeLoc { get; set; } = false;
 
         // Experimental
         public bool CastSpellsByOneClick { get; set; }
@@ -220,7 +232,10 @@ namespace ClassicUO.Configuration
         public bool DisableCtrlQWBtn { get; set; }
         public bool DisableAutoMove { get; set; }
         public bool EnableDragSelect { get; set; }
-        public int DragSelectModifierKey { get; set; } // 0 = none, 1 = control, 2 = shift
+        public int DragSelectModifierKey { get; set; } // 0 = none, 1 = control, 2 = shift, 3 = alt
+        public int DragSelect_PlayersModifier { get; set; } = 0;
+        public int DragSelect_MonstersModifier { get; set; } = 0;
+        public int DragSelect_NameplateModifier { get; set; } = 0;
         public bool OverrideContainerLocation { get; set; }
 
         public int OverrideContainerLocationSetting { get; set; } // 0 = container position, 1 = top right of screen, 2 = last dragged position, 3 = remember every container
@@ -231,7 +246,9 @@ namespace ClassicUO.Configuration
         public int DragSelectStartX { get; set; } = 100;
         public int DragSelectStartY { get; set; } = 100;
         public bool DragSelectAsAnchor { get; set; } = false;
-        public NameOverheadTypeAllowed NameOverheadTypeAllowed { get; set; } = NameOverheadTypeAllowed.All;
+
+        //public NameOverheadOptions NameOverheadTypeAllowed { get; set; } = NameOverheadOptions.AllMobiles;
+        public string LastActiveNameOverheadOption { get; set; } = "All";
         public bool NameOverheadToggled { get; set; } = false;
         public bool ShowTargetRangeIndicator { get; set; }
         public bool PartyInviteGump { get; set; }
@@ -289,6 +306,8 @@ namespace ClassicUO.Configuration
 
         public byte ContainersScale { get; set; } = 100;
 
+        public byte ContainerOpacity { get; set; } = 50;
+
         public bool ScaleItemsInsideContainers { get; set; }
 
         public bool DoubleClickToLootInsideContainers { get; set; }
@@ -322,6 +341,7 @@ namespace ClassicUO.Configuration
         public int WorldMapZoomIndex { get; set; } = 4;
         public bool WorldMapShowCoordinates { get; set; } = true;
         public bool WorldMapShowMouseCoordinates { get; set; } = true;
+        public bool WorldMapShowCorpse { get; set; } = true;
         public bool WorldMapShowMobiles { get; set; } = true;
         public bool WorldMapShowPlayerName { get; set; } = true;
         public bool WorldMapShowPlayerBar { get; set; } = true;
@@ -333,10 +353,254 @@ namespace ClassicUO.Configuration
         public string WorldMapHiddenMarkerFiles { get; set; } = string.Empty;
         public string WorldMapHiddenZoneFiles { get; set; } = string.Empty;
         public bool WorldMapShowGridIfZoomed { get; set; } = true;
-        public bool WorldMapAllowPositionalTarget { get; set; } = false;
+        public bool WorldMapAllowPositionalTarget { get; set; } = true;
 
+        public int AutoFollowDistance { get; set; } = 2;
+        public bool DisableAutoFollowAlt { get; set; } = false;
+        [JsonConverter(typeof(Point2Converter))] public Point ResizeJournalSize { get; set; } = new Point(410, 350);
+        public bool FollowingMode { get; set; } = false;
+        public uint FollowingTarget { get; set; }
+        public bool NamePlateHealthBar { get; set; } = true;
+        public byte NamePlateOpacity { get; set; } = 75;
+        public byte NamePlateHealthBarOpacity { get; set; } = 50;
+        public bool NamePlateHideAtFullHealth { get; set; } = true;
+        public bool NamePlateHideAtFullHealthInWarmode { get; set; } = true;
+        public byte NamePlateBorderOpacity { get; set; } = 50;
+
+        public bool LeftAlignToolTips { get; set; } = false;
+        public bool ForceCenterAlignTooltipMobiles { get; set; } = false;
+
+        public bool CorpseSingleClickLoot { get; set; } = false;
+
+        public bool DisableSystemChat { get; set; } = false;
+
+        #region GRID CONTAINER
+        public bool UseGridLayoutContainerGumps { get; set; } = true;
+        public int GridContainerSearchMode { get; set; } = 1;
+        public bool EnableGridContainerAnchor { get; set; } = false;
+        public byte GridBorderAlpha { get; set; } = 75;
+        public ushort GridBorderHue { get; set; } = 0;
+        public byte GridContainersScale { get; set; } = 100;
+        public bool GridContainerScaleItems { get; set; } = true;
+        public bool GridEnableContPreview { get; set; } = true;
+        public int Grid_BorderStyle { get; set; } = 0;
+        public int Grid_DefaultColumns { get; set; } = 4;
+        public int Grid_DefaultRows { get; set; } = 4;
+        public bool Grid_UseContainerHue { get; set; } = false;
+        public bool Grid_HideBorder { get; set; } = false;
+        #endregion
+
+        #region COOLDOWNS
+        public int CoolDownX { get; set; } = 50;
+        public int CoolDownY { get; set; } = 50;
+
+        public List<ushort> Condition_Hue { get; set; } = new List<ushort>();
+        public List<string> Condition_Label { get; set; } = new List<string>();
+        public List<int> Condition_Duration { get; set; } = new List<int>();
+        public List<string> Condition_Trigger { get; set; } = new List<string>();
+        public List<int> Condition_Type { get; set; } = new List<int>();
+        public List<bool> Condition_ReplaceIfExists { get; set; } = new List<bool>();
+        public int CoolDownConditionCount
+        {
+            get
+            {
+                return Condition_Hue.Count;
+            }
+            set { }
+        }
+        #endregion
+
+        #region IMPROVED BUFF BAR
+        public bool UseImprovedBuffBar { get; set; } = true;
+        public ushort ImprovedBuffBarHue { get; set; } = 905;
+        #endregion
+
+        #region DAMAGE NUMBER HUES
+        public ushort DamageHueSelf { get; set; } = 0x0034;
+        public ushort DamageHuePet { get; set; } = 0x0033;
+        public ushort DamageHueAlly { get; set; } = 0x0030;
+        public ushort DamageHueLastAttck { get; set; } = 0x1F;
+        public ushort DamageHueOther { get; set; } = 0x0021;
+        #endregion
+
+        #region GridHighlightingProps
+        public List<string> GridHighlight_Name { get; set; } = new List<string>();
+        public List<ushort> GridHighlight_Hue { get; set; } = new List<ushort>();
+        public List<List<string>> GridHighlight_PropNames { get; set; } = new List<List<string>>();
+        public List<List<int>> GridHighlight_PropMinVal { get; set; } = new List<List<int>>();
+        public bool GridHighlight_CorpseOnly { get; set; } = false;
+        public int GridHightlightSize { get; set; } = 1;
+        #endregion
+
+        #region Modern paperdoll
+        public ushort ModernPaperDollHue { get; set; } = 0;
+        public ushort ModernPaperDollDurabilityHue { get; set; } = 32;
+        public int ModernPaperDoll_DurabilityPercent { get; set; } = 90;
+        [JsonConverter(typeof(Point2Converter))] public Point ModernPaperdollPosition { get; set; } = new Point(100, 100);
+        #endregion
+
+        #region Health indicator
+        public float ShowHealthIndicatorBelow { get; set; } = 0.9f;
+        public bool EnableHealthIndicator { get; set; } = true;
+        public int HealthIndicatorWidth { get; set; } = 10;
+        #endregion
+
+        public ushort MainWindowBackgroundHue { get; set; } = 1;
+
+        public int MoveMultiObjectDelay { get; set; } = 1000;
+
+        public bool SpellIcon_DisplayHotkey { get; set; } = true;
+        public ushort SpellIcon_HotkeyHue { get; set; } = 1;
+
+        public int SpellIconScale { get; set; } = 100;
+
+        public bool EnableAlphaScrollingOnGumps { get; set; } = true;
+
+        [JsonConverter(typeof(Point2Converter))] public Point WorldMapPosition { get; set; } = new Point(100, 100);
+        [JsonConverter(typeof(Point2Converter))] public Point PaperdollPosition { get; set; } = new Point(100, 100);
+        [JsonConverter(typeof(Point2Converter))] public Point JournalPosition { get; set; } = new Point(100, 100);
+        [JsonConverter(typeof(Point2Converter))] public Point StatusGumpPosition { get; set; } = new Point(100, 100);
+        [JsonConverter(typeof(Point2Converter))] public Point BackpackGridPosition { get; set; } = new Point(100, 100);
+        [JsonConverter(typeof(Point2Converter))] public Point BackpackGridSize { get; set; } = new Point(300, 300);
+        public bool WorldMapLocked { get; set; } = false;
+        public bool PaperdollLocked { get; set; } = false;
+        public bool JournalLocked { get; set; } = false;
+        public bool StatusGumpLocked { get; set; } = false;
+        public bool BackPackLocked { get; set; } = false;
+
+        public bool DisplayPartyChatOverhead { get; set; } = true;
+
+        public string SelectedTTFJournalFont { get; set; } = "avadonian";
+        public int SelectedJournalFontSize { get; set; } = 20;
+
+        public string SelectedToolTipFont { get; set; } = "Roboto-Regular";
+        public int SelectedToolTipFontSize { get; set; } = 20;
+
+        public string GameWindowSideChatFont { get; set; } = "avadonian";
+        public int GameWindowSideChatFontSize { get; set; } = 20;
+
+        public string OverheadChatFont { get; set; } = "avadonian";
+        public int OverheadChatFontSize { get; set; } = 20;
+        public int OverheadChatWidth { get; set; } = 200;
+
+        public string NamePlateFont { get; set; } = "avadonian";
+        public int NamePlateFontSize { get; set; } = 20;
+
+        public string DefaultTTFFont { get; set; } = "Roboto-Regular";
+        public int TextBorderSize { get; set; } = 1;
+
+        public bool UseModernShopGump { get; set; } = false;
+
+        public int MaxJournalEntries { get; set; } = 750;
+        public bool HideJournalBorder { get; set; } = false;
+        public bool HideJournalTimestamp { get; set; } = false;
+
+        public int HealthLineSizeMultiplier { get; set; } = 1;
+
+        public bool OpenHealthBarForLastAttack { get; set; } = true;
+        [JsonConverter(typeof(Point2Converter))]
+        public Point LastTargetHealthBarPos { get; set; } = Point.Zero;
+        public ushort ToolTipBGHue { get; set; } = 0;
+
+        public string LastVersionHistoryShown { get; set; }
+
+        public int AdvancedSkillsGumpHeight { get; set; } = 310;
+
+        #region ToolTip Overrides
+        public List<string> ToolTipOverride_SearchText { get; set; } = new List<string>() { "Physical Res", "Fire Resist", "Cold Resist", "Poison Resist", "Energy Resist" };
+        public List<string> ToolTipOverride_NewFormat { get; set; } = new List<string>() { "/c[#5f423c]Physical Resist {1}%", "/c[red]Fire Resist {1}%", "/c[blue]Cold Resist {1}%", "/c[green]Poison Resist {1}%", "/c[purple]Energy Resist {1}%" };
+        public List<int> ToolTipOverride_MinVal1 { get; set; } = new List<int>() { -1, -1, -1, -1, -1 };
+        public List<int> ToolTipOverride_MinVal2 { get; set; } = new List<int>() { -1, -1, -1, -1, -1 };
+        public List<int> ToolTipOverride_MaxVal1 { get; set; } = new List<int>() { 100, 100, 100, 100, 100 };
+        public List<int> ToolTipOverride_MaxVal2 { get; set; } = new List<int>() { 100, 100, 100, 100, 100 };
+        public List<byte> ToolTipOverride_Layer { get; set; } = new List<byte>() { (byte)TooltipLayers.Any, (byte)TooltipLayers.Any, (byte)TooltipLayers.Any, (byte)TooltipLayers.Any, (byte)TooltipLayers.Any };
+        #endregion
+
+        public string TooltipHeaderFormat { get; set; } = "/c[yellow]{0}";
+
+        public bool DisplaySkillBarOnChange { get; set; } = true;
+        public string SkillBarFormat { get; set; } = "{0}: {1} / {2}";
+
+        public bool DisplayRadius { get; set; } = false;
+        public int DisplayRadiusDistance { get; set; } = 10;
+        public ushort DisplayRadiusHue { get; set; } = 22;
+
+        public bool EnableSpellIndicators { get; set; } = true;
+
+        public bool EnableAutoLoot { get; set; } = false;
 
         public static uint GumpsVersion { get; private set; }
+
+        [JsonConverter(typeof(Point2Converter))]
+        public Point InfoBarSize { get; set; } = new Point(400, 20);
+        public bool InfoBarLocked { get; set; } = false;
+        public string InfoBarFont { get; set; } = "Roboto-Regular";
+        public int InfoBarFontSize { get; set; } = 18;
+
+        public int LastJournalTab { get; set; } = 0;
+        public Dictionary<string, MessageType[]> JournalTabs { get; set; } = new Dictionary<string, MessageType[]>()
+        {
+            { "All", new MessageType[] {
+                MessageType.Alliance, MessageType.Command, MessageType.Emote,
+                MessageType.Encoded, MessageType.Focus, MessageType.Guild,
+                MessageType.Label, MessageType.Limit3Spell, MessageType.Party,
+                MessageType.Regular, MessageType.Spell, MessageType.System,
+                MessageType.Whisper, MessageType.Yell, MessageType.System }
+            },
+            { "Chat", new MessageType[] {
+                MessageType.Regular,
+                MessageType.Guild,
+                MessageType.Alliance,
+                MessageType.Emote,
+                MessageType.Party,
+                MessageType.Whisper,
+                MessageType.Yell,
+                MessageType.System }
+            },
+            {
+                "Guild|Party", new MessageType[] {
+                    MessageType.Guild,
+                    MessageType.Alliance,
+                    MessageType.Party }
+            },
+            {
+                "System", new MessageType[] {
+                    MessageType.System }
+            }
+        };
+
+        public bool UseLastMovedCooldownPosition { get; set; } = false;
+        public bool CloseHealthBarIfAnchored { get; set; } = false;
+
+        [JsonConverter(typeof(Point2Converter))]
+        public Point SkillProgressBarPosition { get; set; } = Point.Zero;
+
+        public bool ForceResyncOnHang { get; set; } = false;
+
+        public bool UseOneHPBarForLastAttack { get; set; } = false;
+
+        public bool DisableMouseInteractionOverheadText { get; set; } = false;
+
+        public List<int> HiddenLayers { get; set; } = new List<int>();
+        public bool HideLayersForSelf { get; set; } = true;
+
+        public List<string> AutoOpenXmlGumps { get; set; } = new List<string>();
+
+        public int ControllerMouseSensativity { get => Input.Mouse.ControllerSensativity; set => Input.Mouse.ControllerSensativity = value; }
+
+        [JsonConverter(typeof(Point2Converter))]
+        public Point PlayerOffset { get; set; } = new Point(0, 0);
+
+        public bool UseLandTextures { get; set; } = false;
+
+        public double PaperdollScale { get; set; } = 1f;
+
+        public uint SOSGumpID { get; set; } = 1915258020;
+
+        public bool ModernPaperdollAnchorEnabled { get; set; } = false;
+        public bool JournalAnchorEnabled { get; set; } = false;
+        public bool EnableGumpCloseAnimation { get; set; } = true;
+
 
         public void Save(World world, string path)
         {
@@ -376,7 +640,7 @@ namespace ClassicUO.Configuration
                         gumps.AddLast(gump);
                     }
                 }
-                
+
                 LinkedListNode<Gump> first = gumps.First;
 
                 while (first != null)
@@ -433,11 +697,11 @@ namespace ClassicUO.Configuration
             {
                 SaveItemsGump(parent, xml, list);
 
-                Item first = (Item) parent.Items;
+                Item first = (Item)parent.Items;
 
                 while (first != null)
                 {
-                    Item next = (Item) first.Next;
+                    Item next = (Item)first.Next;
 
                     SaveItemsGumpRecursive(first, xml, list);
 
@@ -502,6 +766,8 @@ namespace ClassicUO.Configuration
 
                 if (root != null)
                 {
+                    int pdolc = 0;
+
                     foreach (XmlElement xml in root.ChildNodes /*.GetElementsByTagName("gump")*/)
                     {
                         if (xml.Name != "gump")
@@ -511,17 +777,25 @@ namespace ClassicUO.Configuration
 
                         try
                         {
-                            GumpType type = (GumpType) int.Parse(xml.GetAttribute(nameof(type)));
+                            GumpType type = (GumpType)int.Parse(xml.GetAttribute(nameof(type)));
                             int x = int.Parse(xml.GetAttribute(nameof(x)));
                             int y = int.Parse(xml.GetAttribute(nameof(y)));
                             uint serial = uint.Parse(xml.GetAttribute(nameof(serial)));
+
+                            if (uint.TryParse(xml.GetAttribute("serverSerial"), out uint serverSerial))
+                            {
+                                UIManager.SavePosition(serverSerial, new Point(x, y));
+                            }
 
                             Gump gump = null;
 
                             switch (type)
                             {
                                 case GumpType.Buff:
-                                    gump = new BuffGump(world);
+                                    if (ProfileManager.CurrentProfile.UseImprovedBuffBar)
+                                        gump = new BuffGump(world);
+                                    else
+                                        gump = new BuffGump(world);
 
                                     break;
 
@@ -561,14 +835,35 @@ namespace ClassicUO.Configuration
                                     gump = new MacroButtonGump(world);
 
                                     break;
+                                /*
+                                case GumpType.MacroButtonEditor:
+                                    gump = new MacroButtonEditorGump();
 
+                                    break;
+                                */
                                 case GumpType.MiniMap:
                                     gump = new MiniMapGump(world);
 
                                     break;
 
                                 case GumpType.PaperDoll:
-                                    gump = new PaperDollGump(world);
+                                    if (pdolc > 0)
+                                    {
+                                        break;
+                                    }
+
+                                    if (ProfileManager.CurrentProfile.UseModernPaperdoll && serial == world.Player.Serial)
+                                    {
+                                        gump = new PaperDollGump(world);
+                                        x = ProfileManager.CurrentProfile.ModernPaperdollPosition.X;
+                                        y = ProfileManager.CurrentProfile.ModernPaperdollPosition.Y;
+                                    }
+                                    else
+                                    {
+                                        gump = new PaperDollGump(world);
+                                        x = ProfileManager.CurrentProfile.PaperdollPosition.X;
+                                        y = ProfileManager.CurrentProfile.PaperdollPosition.Y;
+                                    }
 
                                     break;
 
@@ -591,6 +886,8 @@ namespace ClassicUO.Configuration
 
                                 case GumpType.StatusGump:
                                     gump = StatusGumpBase.AddStatusGump(world, 0, 0);
+                                    x = ProfileManager.CurrentProfile.StatusGumpPosition.X;
+                                    y = ProfileManager.CurrentProfile.StatusGumpPosition.Y;
 
                                     break;
 
@@ -631,11 +928,24 @@ namespace ClassicUO.Configuration
                                     gump = new NetworkStatsGump(world, 100, 100);
 
                                     break;
-
+                                /*
                                 case GumpType.NameOverHeadHandler:
                                     NameOverHeadHandlerGump.LastPosition = new Point(x, y);
                                     // Gump gets opened by NameOverHeadManager, we just want to save the last position from profile
                                     break;
+                                case GumpType.GridContainer:
+                                    ushort ogContainer = ushort.Parse(xml.GetAttribute("ogContainer"));
+                                    gump = new GridContainer(world, serial, ogContainer);
+                                    if (((GridContainer)gump).IsPlayerBackpack)
+                                    {
+                                        x = ProfileManager.CurrentProfile.BackpackGridPosition.X;
+                                        y = ProfileManager.CurrentProfile.BackpackGridPosition.Y;
+                                    }
+                                    break;
+                                case GumpType.DurabilityGump:
+                                    gump = new DurabilitysGump();
+                                    break;
+                                */
                             }
 
                             if (gump == null)
@@ -676,7 +986,7 @@ namespace ClassicUO.Configuration
                         {
                             try
                             {
-                                GumpType type = (GumpType) int.Parse(xml.GetAttribute("type"));
+                                GumpType type = (GumpType)int.Parse(xml.GetAttribute("type"));
                                 int x = int.Parse(xml.GetAttribute("x"));
                                 int y = int.Parse(xml.GetAttribute("y"));
                                 uint serial = uint.Parse(xml.GetAttribute("serial"));
@@ -719,6 +1029,24 @@ namespace ClassicUO.Configuration
                                         gump = new MacroButtonGump(world);
 
                                         break;
+                                    /*
+                                    case GumpType.GridContainer:
+                                        ushort ogContainer = ushort.Parse(xml.GetAttribute("ogContainer"));
+                                        gump = new GridContainer(world, serial, ogContainer);
+                                        break;
+                                    case GumpType.Journal:
+                                        gump = new ResizableJournal();
+                                        break;
+                                    case GumpType.WorldMap:
+                                        gump = new WorldMapGump(world);
+                                        break;
+                                    case GumpType.InfoBar:
+                                        gump = new InfoBarGump(world);
+                                        break;
+                                    case GumpType.PaperDoll:
+                                        gump = new ModernPaperdoll(world.Player.Serial);
+                                        break;
+                                    */
                                 }
 
                                 if (gump != null)

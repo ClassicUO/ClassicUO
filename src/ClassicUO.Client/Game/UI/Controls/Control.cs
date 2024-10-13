@@ -346,6 +346,39 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
+        public void ForceSizeUpdate()
+        {
+            int h = Height, w = Width;
+            for (int i = 0; i < Children.Count; i++)
+            {
+                Control c = Children[i];
+                if ((c.Page == 0 || c.Page == ActivePage) && c.IsVisible && !c.IsDisposed)
+                {
+                    if (w < c.Bounds.Right)
+                    {
+                        w = c.Bounds.Right;
+                    }
+
+                    if (h < c.Bounds.Bottom)
+                    {
+                        h = c.Bounds.Bottom;
+                    }
+                }
+            }
+
+            if (w != Width)
+            {
+                Width = w;
+            }
+
+            if (h != Height)
+            {
+                Height = h;
+            }
+
+            WantUpdateSize = false;
+        }
+
         public virtual void OnPageChanged()
         {
             //Update size as pages may vary in size.

@@ -49,6 +49,18 @@ namespace ClassicUO.Game.GameObjects
     {
         private static EquipConvData? _equipConvData;
 
+        public bool IsHumanCorpse => IsCorpse &&
+           Utility.MathHelper.InRange(Amount, 0x0190, 0x0193) ||
+           Utility.MathHelper.InRange(Amount, 0x00B7, 0x00BA) ||
+           Utility.MathHelper.InRange(Amount, 0x025D, 0x0260) ||
+           Utility.MathHelper.InRange(Amount, 0x029A, 0x029B) ||
+           Utility.MathHelper.InRange(Amount, 0x02B6, 0x02B7) ||
+           Amount == 0x03DB ||
+           Amount == 0x03DF ||
+           Amount == 0x03E2 ||
+           Amount == 0x02E8 ||
+           Amount == 0x02E9;
+
         public override bool Draw(UltimaBatcher2D batcher, int posX, int posY, float depth)
         {
             if (IsDestroyed)

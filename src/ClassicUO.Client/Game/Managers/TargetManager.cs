@@ -60,7 +60,7 @@ namespace ClassicUO.Game.Managers
         public static readonly uint Target = 6983686;
     }
 
-    internal enum TargetType
+    public enum TargetType
     {
         Neutral,
         Harmful,

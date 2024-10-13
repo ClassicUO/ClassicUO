@@ -103,5 +103,17 @@ namespace ClassicUO.Utility
                 diSourceSubDir.CopyAllTo(nextTargetSubDir);
             }
         }
+
+        public static string RemoveInvalidChars(string text)
+        {
+            char[] invalid = Path.GetInvalidFileNameChars();
+
+            for (int j = 0; j < invalid.Length; j++)
+            {
+                text = text.Replace(invalid[j].ToString(), "");
+            }
+
+            return text;
+        }
     }
 }

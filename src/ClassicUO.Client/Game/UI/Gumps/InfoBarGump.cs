@@ -122,6 +122,14 @@ namespace ClassicUO.Game.UI.Gumps
             //}
         }
 
+        public static void UpdateAllOptions()
+        {
+            foreach (InfoBarGump g in UIManager.Gumps.OfType<InfoBarGump>())
+            {
+                g.ResetItems();
+            }
+        }
+
         public override void Update()
         {
             if (IsDisposed)

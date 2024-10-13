@@ -45,6 +45,7 @@ using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using SDL2;
 using MathHelper = ClassicUO.Utility.MathHelper;
+using static ClassicUO.Configuration.ModernOptionsGumpLanguage;
 
 namespace ClassicUO.Game.Scenes
 {
@@ -1537,6 +1538,7 @@ namespace ClassicUO.Game.Scenes
                 }
             }
         }
+
 
         private bool CanExecuteMacro()
         {
