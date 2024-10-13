@@ -17,5 +17,3 @@ internal abstract class NetSocket : IDisposable
     public abstract ValueTask DisconnectAsync();
     public abstract void Dispose();
 }
-
-#nullable disable

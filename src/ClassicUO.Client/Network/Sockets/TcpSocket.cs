@@ -48,5 +48,3 @@ internal sealed class TcpSocket : NetSocket
         _socket.Dispose();
     }
 }
-
-#nullable disable

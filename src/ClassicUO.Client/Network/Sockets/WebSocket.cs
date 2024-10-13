@@ -88,5 +88,3 @@ internal sealed class WebSocket : NetSocket
         _webSocket.Dispose();
     }
 }
-
-#nullable disable

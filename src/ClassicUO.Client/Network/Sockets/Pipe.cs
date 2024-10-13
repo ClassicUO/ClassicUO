@@ -33,77 +33,78 @@
 using System;
 using System.Numerics;
 
-namespace ClassicUO.Network.Sockets
+namespace ClassicUO.Network.Sockets;
+
+#nullable enable
+
+internal sealed class Pipe
 {
-    internal sealed class Pipe
+    private readonly byte[] _buffer;
+    private readonly uint _mask;
+    private uint _readIndex;
+    private uint _writeIndex;
+
+    public int Length => (int)(_writeIndex - _readIndex);
+
+    public Pipe(uint size = 4096)
     {
-        private readonly byte[] _buffer;
-        private readonly uint _mask;
-        private uint _readIndex;
-        private uint _writeIndex;
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(size, (uint)int.MaxValue + 1);
 
-        public int Length => (int)(_writeIndex - _readIndex);
+        uint roundedSize = BitOperations.RoundUpToPowerOf2(size);
+        _mask = roundedSize - 1;
+        _buffer = new byte[roundedSize];
+    }
 
-        public Pipe(uint size = 4096)
-        {
-            ArgumentOutOfRangeException.ThrowIfGreaterThan(size, (uint)int.MaxValue + 1);
+    public void Clear()
+    {
+        _readIndex = 0;
+        _writeIndex = 0;
+    }
 
-            uint roundedSize = BitOperations.RoundUpToPowerOf2(size);
-            _mask = roundedSize - 1;
-            _buffer = new byte[roundedSize];
-        }
+    public Span<byte> GetAvailableSpanToWrite()
+    {
+        int readIndex = (int)(_readIndex & _mask);
+        int writeIndex = (int)(_writeIndex & _mask);
 
-        public void Clear()
-        {
-            _readIndex = 0;
-            _writeIndex = 0;
-        }
+        if (readIndex > writeIndex)
+            return _buffer.AsSpan(writeIndex..readIndex);
 
-        public Span<byte> GetAvailableSpanToWrite()
-        {
-            int readIndex = (int)(_readIndex & _mask);
-            int writeIndex = (int)(_writeIndex & _mask);
+        return _buffer.AsSpan(writeIndex);
+    }
 
-            if (readIndex > writeIndex)
-                return _buffer.AsSpan(writeIndex..readIndex);
+    public void CommitWrited(int size)
+    {
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(size, _buffer.Length - Length);
 
-            return _buffer.AsSpan(writeIndex);
-        }
+        _writeIndex += (uint)size;
+    }
 
-        public void CommitWrited(int size)
-        {
-            ArgumentOutOfRangeException.ThrowIfGreaterThan(size, _buffer.Length - Length);
+    public Span<byte> GetAvailableSpanToRead()
+    {
+        int readIndex = (int)(_readIndex & _mask);
+        int writeIndex = (int)(_writeIndex & _mask);
 
-            _writeIndex += (uint)size;
-        }
+        if (readIndex > writeIndex)
+            return _buffer.AsSpan(readIndex);
 
-        public Span<byte> GetAvailableSpanToRead()
-        {
-            int readIndex = (int)(_readIndex & _mask);
-            int writeIndex = (int)(_writeIndex & _mask);
+        return _buffer.AsSpan(readIndex..writeIndex);
+    }
 
-            if (readIndex > writeIndex)
-                return _buffer.AsSpan(readIndex);
+    public Memory<byte> GetAvailableMemoryToRead()
+    {
+        int readIndex = (int)(_readIndex & _mask);
+        int writeIndex = (int)(_writeIndex & _mask);
 
-            return _buffer.AsSpan(readIndex..writeIndex);
-        }
+        if (readIndex > writeIndex)
+            return _buffer.AsMemory(readIndex);
 
-        public Memory<byte> GetAvailableMemoryToRead()
-        {
-            int readIndex = (int)(_readIndex & _mask);
-            int writeIndex = (int)(_writeIndex & _mask);
+        return _buffer.AsMemory(readIndex..writeIndex);
+    }
 
-            if (readIndex > writeIndex)
-                return _buffer.AsMemory(readIndex);
+    public void CommitRead(int size)
+    {
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(size, Length);
 
-            return _buffer.AsMemory(readIndex..writeIndex);
-        }
-
-        public void CommitRead(int size)
-        {
-            ArgumentOutOfRangeException.ThrowIfGreaterThan(size, Length);
-
-            _readIndex += (uint)size;
-        }
+        _readIndex += (uint)size;
     }
 }
