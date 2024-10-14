@@ -38,17 +38,15 @@ namespace ClassicUO.Network.Sockets
     internal sealed class Pipe
     {
         private readonly byte[] _buffer;
-        private readonly uint _mask;
-        private uint _readIndex;
-        private uint _writeIndex;
+        private readonly int _mask;
+        private int _readIndex;
+        private int _writeIndex;
 
-        public int Length => (int)(_writeIndex - _readIndex);
+        public int Length => _writeIndex - _readIndex;
 
         public Pipe(uint size = 4096)
         {
-            ArgumentOutOfRangeException.ThrowIfGreaterThan(size, (uint)int.MaxValue + 1);
-
-            uint roundedSize = BitOperations.RoundUpToPowerOf2(size);
+            int roundedSize = (int)BitOperations.RoundUpToPowerOf2(size);
             _mask = roundedSize - 1;
             _buffer = new byte[roundedSize];
         }
@@ -61,8 +59,8 @@ namespace ClassicUO.Network.Sockets
 
         public Span<byte> GetAvailableSpanToWrite()
         {
-            int readIndex = (int)(_readIndex & _mask);
-            int writeIndex = (int)(_writeIndex & _mask);
+            int readIndex = _readIndex & _mask;
+            int writeIndex = _writeIndex & _mask;
 
             if (readIndex > writeIndex)
                 return _buffer.AsSpan(writeIndex..readIndex);
@@ -72,15 +70,15 @@ namespace ClassicUO.Network.Sockets
 
         public void CommitWrited(int size)
         {
-            ArgumentOutOfRangeException.ThrowIfGreaterThan(size, _buffer.Length - Length);
+            ArgumentOutOfRangeException.ThrowIfGreaterThan(size, _buffer.Length - (_writeIndex - _readIndex));
 
-            _writeIndex += (uint)size;
+            _writeIndex += size;
         }
 
         public Span<byte> GetAvailableSpanToRead()
         {
-            int readIndex = (int)(_readIndex & _mask);
-            int writeIndex = (int)(_writeIndex & _mask);
+            int readIndex = _readIndex & _mask;
+            int writeIndex = _writeIndex & _mask;
 
             if (readIndex > writeIndex)
                 return _buffer.AsSpan(readIndex);
@@ -90,8 +88,8 @@ namespace ClassicUO.Network.Sockets
 
         public Memory<byte> GetAvailableMemoryToRead()
         {
-            int readIndex = (int)(_readIndex & _mask);
-            int writeIndex = (int)(_writeIndex & _mask);
+            int readIndex = _readIndex & _mask;
+            int writeIndex = _writeIndex & _mask;
 
             if (readIndex > writeIndex)
                 return _buffer.AsMemory(readIndex);
@@ -101,9 +99,9 @@ namespace ClassicUO.Network.Sockets
 
         public void CommitRead(int size)
         {
-            ArgumentOutOfRangeException.ThrowIfGreaterThan(size, Length);
+            ArgumentOutOfRangeException.ThrowIfGreaterThan(size, _writeIndex - _readIndex);
 
-            _readIndex += (uint)size;
+            _readIndex += size;
         }
     }
 }
