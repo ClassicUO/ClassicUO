@@ -33,78 +33,77 @@
 using System;
 using System.Numerics;
 
-namespace ClassicUO.Network.Sockets;
-
-#nullable enable
-
-internal sealed class Pipe
+namespace ClassicUO.Network.Sockets
 {
-    private readonly byte[] _buffer;
-    private readonly uint _mask;
-    private uint _readIndex;
-    private uint _writeIndex;
-
-    public int Length => (int)(_writeIndex - _readIndex);
-
-    public Pipe(uint size = 4096)
+    internal sealed class Pipe
     {
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(size, (uint)int.MaxValue + 1);
+        private readonly byte[] _buffer;
+        private readonly uint _mask;
+        private uint _readIndex;
+        private uint _writeIndex;
 
-        uint roundedSize = BitOperations.RoundUpToPowerOf2(size);
-        _mask = roundedSize - 1;
-        _buffer = new byte[roundedSize];
-    }
+        public int Length => (int)(_writeIndex - _readIndex);
 
-    public void Clear()
-    {
-        _readIndex = 0;
-        _writeIndex = 0;
-    }
+        public Pipe(uint size = 4096)
+        {
+            ArgumentOutOfRangeException.ThrowIfGreaterThan(size, (uint)int.MaxValue + 1);
 
-    public Span<byte> GetAvailableSpanToWrite()
-    {
-        int readIndex = (int)(_readIndex & _mask);
-        int writeIndex = (int)(_writeIndex & _mask);
+            uint roundedSize = BitOperations.RoundUpToPowerOf2(size);
+            _mask = roundedSize - 1;
+            _buffer = new byte[roundedSize];
+        }
 
-        if (readIndex > writeIndex)
-            return _buffer.AsSpan(writeIndex..readIndex);
+        public void Clear()
+        {
+            _readIndex = 0;
+            _writeIndex = 0;
+        }
 
-        return _buffer.AsSpan(writeIndex);
-    }
+        public Span<byte> GetAvailableSpanToWrite()
+        {
+            int readIndex = (int)(_readIndex & _mask);
+            int writeIndex = (int)(_writeIndex & _mask);
 
-    public void CommitWrited(int size)
-    {
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(size, _buffer.Length - Length);
+            if (readIndex > writeIndex)
+                return _buffer.AsSpan(writeIndex..readIndex);
 
-        _writeIndex += (uint)size;
-    }
+            return _buffer.AsSpan(writeIndex);
+        }
 
-    public Span<byte> GetAvailableSpanToRead()
-    {
-        int readIndex = (int)(_readIndex & _mask);
-        int writeIndex = (int)(_writeIndex & _mask);
+        public void CommitWrited(int size)
+        {
+            ArgumentOutOfRangeException.ThrowIfGreaterThan(size, _buffer.Length - Length);
 
-        if (readIndex > writeIndex)
-            return _buffer.AsSpan(readIndex);
+            _writeIndex += (uint)size;
+        }
 
-        return _buffer.AsSpan(readIndex..writeIndex);
-    }
+        public Span<byte> GetAvailableSpanToRead()
+        {
+            int readIndex = (int)(_readIndex & _mask);
+            int writeIndex = (int)(_writeIndex & _mask);
 
-    public Memory<byte> GetAvailableMemoryToRead()
-    {
-        int readIndex = (int)(_readIndex & _mask);
-        int writeIndex = (int)(_writeIndex & _mask);
+            if (readIndex > writeIndex)
+                return _buffer.AsSpan(readIndex);
 
-        if (readIndex > writeIndex)
-            return _buffer.AsMemory(readIndex);
+            return _buffer.AsSpan(readIndex..writeIndex);
+        }
 
-        return _buffer.AsMemory(readIndex..writeIndex);
-    }
+        public Memory<byte> GetAvailableMemoryToRead()
+        {
+            int readIndex = (int)(_readIndex & _mask);
+            int writeIndex = (int)(_writeIndex & _mask);
 
-    public void CommitRead(int size)
-    {
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(size, Length);
+            if (readIndex > writeIndex)
+                return _buffer.AsMemory(readIndex);
 
-        _readIndex += (uint)size;
+            return _buffer.AsMemory(readIndex..writeIndex);
+        }
+
+        public void CommitRead(int size)
+        {
+            ArgumentOutOfRangeException.ThrowIfGreaterThan(size, Length);
+
+            _readIndex += (uint)size;
+        }
     }
 }
