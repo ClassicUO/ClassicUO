@@ -2747,6 +2747,15 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Use new target system.
+        /// </summary>
+        public static string NewTargetSystem {
+            get {
+                return ResourceManager.GetString("NewTargetSystem", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &gt;&gt;.
         /// </summary>
         public static string Next {

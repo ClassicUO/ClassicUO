@@ -134,6 +134,7 @@ namespace ClassicUO.Game.UI.Gumps
         private ClickableColorBox _innocentColorPickerBox, _friendColorPickerBox, _crimialColorPickerBox, _canAttackColorPickerBox, _enemyColorPickerBox, _murdererColorPickerBox, _neutralColorPickerBox, _beneficColorPickerBox, _harmfulColorPickerBox;
         private HSliderBar _lightBar;
         private Checkbox _buffBarTime, _uiButtonsSingleClick, _queryBeforAttackCheckbox, _queryBeforeBeneficialCheckbox, _spellColoringCheckbox, _spellFormatCheckbox, _enableFastSpellsAssign;
+        private Checkbox _newTargetSystem;
 
         // macro
         private MacroControl _macroControl;
@@ -2634,6 +2635,17 @@ namespace ClassicUO.Game.UI.Gumps
             int startX = 5;
             int startY = 5;
 
+
+            _newTargetSystem = AddCheckBox(
+                rightArea,
+                ResGumps.NewTargetSystem,
+                _currentProfile.HoldDownKeyTab,
+                startX,
+                startY
+            );
+
+            startY += _newTargetSystem.Height + 2;
+
             _holdDownKeyTab = AddCheckBox
             (
                 rightArea,
@@ -3457,6 +3469,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _reduceFPSWhenInactive.IsChecked = true;
                     _highlightObjects.IsChecked = true;
                     _enableTopbar.IsChecked = false;
+                    _newTargetSystem.IsChecked = true;
                     _holdDownKeyTab.IsChecked = true;
                     _holdDownKeyAlt.IsChecked = true;
                     _closeAllAnchoredGumpsWithRClick.IsChecked = false;
@@ -3698,6 +3711,7 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.InvulnerableHue = _invulnerableColorPickerBox.Hue;
             _currentProfile.MobileHPType = _hpComboBox.SelectedIndex;
             _currentProfile.MobileHPShowWhen = _hpComboBoxShowWhen.SelectedIndex;
+            _currentProfile.UseNewTargetSystem = _newTargetSystem.IsChecked;
             _currentProfile.HoldDownKeyTab = _holdDownKeyTab.IsChecked;
             _currentProfile.HoldDownKeyAltToCloseAnchored = _holdDownKeyAlt.IsChecked;
 

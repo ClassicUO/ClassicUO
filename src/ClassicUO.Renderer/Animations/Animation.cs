@@ -137,7 +137,7 @@ namespace ClassicUO.Renderer.Animations
                 frameIndex = (byte)animIndex;
             }
 
-            var frames = GetAnimationFrames(graphic, animGroup, dir, out _, out _, true);
+            var frames = GetAnimationFrames(graphic, animGroup, dir, out _, out _, false);
 
             if (!frames.IsEmpty && frames[frameIndex].Texture != null)
             {
