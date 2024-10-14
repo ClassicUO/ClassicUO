@@ -31,360 +31,329 @@
 #endregion
 
 using ClassicUO.Network.Encryption;
-using ClassicUO.Network.Sockets;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using System;
+using System.Net;
 using System.Net.Sockets;
-using System.Threading;
-using System.Threading.Tasks;
+using System.Net.WebSockets;
+using ClassicUO.Network.Socket;
 
-namespace ClassicUO.Network;
-
-#nullable enable
-
-internal sealed class NetClient
+namespace ClassicUO.Network
 {
-    private const int BUFF_SIZE = 4096;
-
-    public static NetClient Socket { get; } = new();
-
-    private readonly byte[] _receiveBuffer = new byte[BUFF_SIZE];
-    private readonly byte[] _sendBuffer = new byte[BUFF_SIZE];
-    private readonly byte[] _decompressionBuffer = new byte[BUFF_SIZE * 3];
-    private readonly Pipe _receivePipe = new(BUFF_SIZE * 3);
-    private readonly Huffman _huffman = new();
-
-    private bool _isCompressionEnabled;
-    private uint? _localIP;
-    private NetSocket? _socket;
-    private CancellationTokenSource _source;
-    private Task? _readLoopTask;
-    private int _sendIndex;
-
-    public bool IsConnected { get; private set; }
-    public bool IsWebSocket { get; private set; }
-    public NetStatistics Statistics { get; }
-    public EncryptionHelper? Encryption { get; private set; }
-    public PacketsTable? PacketsTable { get; private set; }
-    public bool ServerDisconnectionExpected { get; set; }
-    public uint LocalIP => GetLocalIP();
-
-    public event EventHandler? Connected;
-    public event EventHandler<SocketError>? Disconnected;
-
-    public NetClient()
+    internal sealed class NetClient
     {
-        Statistics = new NetStatistics(this);
-        _source = new();
-    }
+        private const int BUFF_SIZE = 0x10000;
 
-    public EncryptionType Load(ClientVersion clientVersion, EncryptionType encryption)
-    {
-        PacketsTable = new PacketsTable(clientVersion);
+        private readonly byte[] _compressedBuffer = new byte[4096];
+        private readonly byte[] _uncompressedBuffer = new byte[BUFF_SIZE];
+        private readonly byte[] _sendingBuffer = new byte[4096];
+        private readonly Huffman _huffman = new Huffman();
+        private bool _isCompressionEnabled;
+        private uint? _localIP;
+        private readonly CircularBuffer _sendStream;
+        private SocketWrapper _socket = null;
+        private SocketWrapperType? _socketType;
 
-        if (encryption == 0)
-            return encryption;
 
-        Encryption = new EncryptionHelper(clientVersion);
-        Log.Trace("Calculating encryption by client version...");
-        Log.Trace($"encryption: {Encryption.EncryptionType}");
-
-        if (Encryption.EncryptionType != encryption)
+        public NetClient()
         {
-            Log.Warn($"Encryption found: {Encryption.EncryptionType}");
-            encryption = Encryption.EncryptionType;
+            Statistics = new NetStatistics(this);
+            _sendStream = new CircularBuffer();
         }
 
-        return encryption;
-    }
+        public static NetClient Socket { get; private set; } = new();
 
-    public void Connect(string ip, ushort port)
-    {
-        IsWebSocket = ip.StartsWith("ws", StringComparison.InvariantCultureIgnoreCase);
-        string addr = $"{(IsWebSocket ? "" : "tcp://")}{ip}:{port}";
-
-        if (!Uri.TryCreate(addr, UriKind.RelativeOrAbsolute, out Uri? uri))
-            throw new UriFormatException($"{nameof(NetClient)}::{nameof(Connect)} invalid Uri {addr}");
-
-        Log.Trace($"Connecting to {uri}");
-
-        ConnectAsyncCore(uri, IsWebSocket).Wait();
-    }
-
-    public void Disconnect()
-    {
-        _isCompressionEnabled = false;
-        IsConnected = false;
-        Statistics.Reset();
-        _source.Cancel();
-    }
-
-    public Span<byte> CollectAvailableData()
-    {
-        return _receivePipe.GetAvailableSpanToRead();
-    }
-
-    public void CommitReadData(int size)
-    {
-        _receivePipe.CommitRead(size);
-    }
-
-    public void EnableCompression()
-    {
-        _isCompressionEnabled = true;
-        _huffman.Reset();
-    }
-
-    public void DiscardOutgoingPackets()
-    {
-        _sendIndex = 0;
-    }
-
-    public void Flush()
-    {
-        ProcessSend();
-        Statistics.Update();
-    }
-
-    public void Send(Span<byte> message, bool ignorePlugin = false, bool skipEncryption = false)
-    {
-        if (!IsConnected || message.IsEmpty)
-            return;
-
-        if (!ignorePlugin && !Plugin.ProcessSendPacket(ref message))
-            return;
-
-        if (message.IsEmpty)
-            return;
-
-        PacketLogger.Default?.Log(message, true);
-
-        if (!skipEncryption)
-            Encryption?.Encrypt(!_isCompressionEnabled, message, message, message.Length);
-
-        lock (_sendBuffer)
+        public EncryptionType Load(ClientVersion clientVersion, EncryptionType encryption)
         {
-            Span<byte> span = _sendBuffer.AsSpan(_sendIndex);
-            message.CopyTo(span);
-            _sendIndex += message.Length;
-        }
+            PacketsTable = new PacketsTable(clientVersion);
 
-        Statistics.TotalBytesSent += (uint)message.Length;
-        Statistics.TotalPacketsSent++;
-    }
-
-    private void ProcessEncryption(Span<byte> buffer)
-    {
-        if (!_isCompressionEnabled)
-            return;
-
-        Encryption?.Decrypt(buffer, buffer, buffer.Length);
-    }
-
-    private void ProcessSend()
-    {
-        if (!IsConnected)
-            return;
-
-        try
-        {
-            lock (_sendBuffer)
+            if (encryption != 0)
             {
-                if (_sendIndex == 0)
-                    return;
+                Encryption = new EncryptionHelper(clientVersion);
+                Log.Trace("Calculating encryption by client version...");
+                Log.Trace($"encryption: {Encryption.EncryptionType}");
 
-                Memory<byte> buffer = _sendBuffer.AsMemory(0, _sendIndex);
-
-                int toSend = _sendIndex;
-
-                while (toSend > 0)
+                if (Encryption.EncryptionType != encryption)
                 {
-                    ValueTask<int> task = _socket!.SendAsync(buffer, CancellationToken.None);
+                    Log.Warn($"Encryption found: {Encryption.EncryptionType}");
+                    encryption = Encryption.EncryptionType;
+                }
+            }
 
-                    if (task.IsCompletedSuccessfully)
-                        toSend -= task.Result;
-                    else
-                        toSend -= task.AsTask().GetAwaiter().GetResult();
+            return encryption;
+        }
+
+
+        public bool IsConnected => _socket != null && _socket.IsConnected;
+        public NetStatistics Statistics { get; }
+        public EncryptionHelper? Encryption { get; private set; }
+        public PacketsTable PacketsTable { get; private set; }
+
+        public uint LocalIP
+        {
+            get
+            {
+                if (!_localIP.HasValue)
+                {
+                    try
+                    {
+                        byte[] addressBytes = (_socket?.LocalEndPoint as IPEndPoint)?.Address.MapToIPv4().GetAddressBytes();
+
+                        if (addressBytes != null && addressBytes.Length != 0)
+                        {
+                            _localIP = (uint)(addressBytes[0] | (addressBytes[1] << 8) | (addressBytes[2] << 16) | (addressBytes[3] << 24));
+                        }
+
+                        if (!_localIP.HasValue || _localIP == 0)
+                        {
+                            _localIP = 0x100007f;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Error($"error while retriving local endpoint address: \n{ex}");
+
+                        _localIP = 0x100007f;
+                    }
                 }
 
-                _sendIndex = 0;
+                return _localIP.Value;
             }
         }
-        catch (SocketException ex)
-        {
-            Log.Error("socket error when sending:\n" + ex);
 
-            Disconnect();
-            Disconnected?.Invoke(this, ex.SocketErrorCode);
-        }
-        catch (Exception ex)
+
+        public event EventHandler Connected;
+        public event EventHandler<SocketError> Disconnected;
+
+        private void SetupSocket(SocketWrapperType wrapperType)
         {
-            if (ex.InnerException is SocketException socketEx)
+            _socket?.Dispose();
+
+            _socket = wrapperType switch
             {
-                Log.Error("main exception:\n" + ex);
-                Log.Error("socket error when sending:\n" + socketEx);
+                SocketWrapperType.TcpSocket => new TcpSocketWrapper(),
+                SocketWrapperType.WebSocket => new WebSocketWrapper(),
+                _ => throw new ArgumentOutOfRangeException(nameof(wrapperType), wrapperType, null)
+            };
 
-                Disconnect();
-                Disconnected?.Invoke(this, socketEx.SocketErrorCode);
-            }
-            else
+            _socket.OnConnected += (o, e) =>
             {
-                Log.Error("fatal error when sending:\n" + ex);
+                Statistics.Reset();
+                Connected?.Invoke(this, EventArgs.Empty);
+            };
 
-                Disconnect();
-                Disconnected?.Invoke(this, SocketError.SocketError);
-
-                throw;
-            }
+            _socket.OnDisconnected += (_, _) => Disconnected?.Invoke(this, SocketError.Success);
+            _socket.OnError += (_, e) => Disconnected?.Invoke(this, e);
         }
-    }
 
-    private Span<byte> ProcessCompression(Span<byte> buffer)
-    {
-        if (!_isCompressionEnabled)
-            return buffer;
-
-        if (_huffman.Decompress(buffer, _decompressionBuffer, out int size))
-            return _decompressionBuffer.AsSpan(..size);
-
-        return [];
-    }
-
-    private uint GetLocalIP()
-    {
-        if (!_localIP.HasValue)
+        public void Connect(string ip, ushort port)
         {
+            _sendStream.Clear();
+            _huffman.Reset();
+            Statistics.Reset();
+
+            if (string.IsNullOrEmpty(ip))
+                throw new ArgumentNullException(nameof(ip));
+
+            var isWebsocketAddress = ip.ToLowerInvariant().Substring(0, 2) is "ws" or "wss";
+            var addr = $"{(isWebsocketAddress ? "" : "tcp://")}{ip}:{port}";
+            
+            if (!Uri.TryCreate(addr, UriKind.RelativeOrAbsolute, out var uri))
+                throw new UriFormatException($"NetClient::Connect() invalid Uri {addr}");
+            
+            Log.Trace($"Connecting to {uri}");
+
+            // First connected socket sets the type for any future sockets.
+            // This prevents the client from swapping from WS -> TCP on game server login
+            SetupSocket(_socketType ??= isWebsocketAddress ? SocketWrapperType.WebSocket : SocketWrapperType.TcpSocket);
+            _socket.Connect(uri);
+        }
+
+        public void Disconnect()
+        {
+            _isCompressionEnabled = false;
+            Statistics.Reset();
+            _socket.Disconnect();
+        }
+
+        public void EnableCompression()
+        {
+            _isCompressionEnabled = true;
+            _huffman.Reset();
+            _sendStream.Clear();
+        }
+
+
+        public ArraySegment<byte> CollectAvailableData()
+        {
+            if (_socket == null)
+            {
+                return ArraySegment<byte>.Empty;
+            }
+            
             try
             {
-                byte[]? addressBytes = _socket?.LocalEndPoint?.Address.MapToIPv4().GetAddressBytes();
+                var size = _socket.Read(_compressedBuffer);
 
-                if (addressBytes is { Length: > 0 })
-                    _localIP = (uint)(addressBytes[0] | (addressBytes[1] << 8) | (addressBytes[2] << 16) | (addressBytes[3] << 24));
+                if (size <= 0)
+                {
+                    return ArraySegment<byte>.Empty;
+                }
 
-                if (!_localIP.HasValue || _localIP == 0)
-                    _localIP = 0x100007f;
+                Statistics.TotalBytesReceived += (uint)size;
+
+                var segment = new ArraySegment<byte>(_compressedBuffer, 0, size);
+                var span = _compressedBuffer.AsSpan(0, size);
+
+                ProcessEncryption(span);
+
+                return DecompressBuffer(segment);
+            }
+            catch (SocketException ex)
+            {
+                Log.Error("socket error when receving:\n" + ex);
+
+                Disconnect();
+                Disconnected?.Invoke(this, ex.SocketErrorCode);
             }
             catch (Exception ex)
             {
-                Log.Error($"error while retriving local endpoint address: \n{ex}");
-
-                _localIP = 0x100007f;
-            }
-        }
-
-        return _localIP.Value;
-    }
-
-    private async Task ConnectAsyncCore(Uri uri, bool isWebSocket)
-    {
-        Task? prevReadLoopTask = _readLoopTask;
-
-        if (prevReadLoopTask is not null)
-        {
-            _source.Cancel();
-            await prevReadLoopTask;
-
-            _source = new();
-            _sendIndex = 0;
-            _huffman.Reset();
-
-            Statistics.Reset();
-        }
-
-        ServerDisconnectionExpected = false;
-
-        _socket = isWebSocket ? new WebSocket() : new TcpSocket();
-
-        CancellationToken token = _source.Token;
-
-        try
-        {
-            await _socket.ConnectAsync(uri, token);
-
-            IsConnected = true;
-            Statistics.Reset();
-            Connected?.Invoke(this, EventArgs.Empty);
-
-            _readLoopTask = Task.Run(() => ReadLoop(_socket, token));
-        }
-        catch
-        {
-            IsConnected = false;
-            Disconnected?.Invoke(this, SocketError.ConnectionReset);
-            _socket.Dispose();
-        }
-    }
-
-    private async Task ReadLoop(NetSocket socket, CancellationToken token)
-    {
-        try
-        {
-            while (!token.IsCancellationRequested)
-            {
-                Memory<byte> buffer = _receiveBuffer.AsMemory();
-
-                int bytesRead = await socket.ReceiveAsync(buffer, token);
-                if (bytesRead == 0)
-                    throw new SocketException((int)SocketError.ConnectionReset);
-
-                Span<byte> span = buffer.Span[..bytesRead];
-
-                Statistics.TotalBytesReceived += (uint)buffer.Length;
-
-                ProcessEncryption(span);
-                span = ProcessCompression(span);
-
-                if (span.IsEmpty)
-                    throw new Exception("Huffman decompression failed");
-
-                Span<byte> targetSpan = _receivePipe.GetAvailableSpanToWrite();
-                if (targetSpan.IsEmpty)
-                    throw new Exception("Receive pipe is full");
-
-                if (span.Length <= targetSpan.Length)
+                if (ex.InnerException is SocketException socketEx)
                 {
-                    span.CopyTo(targetSpan);
-                    _receivePipe.CommitWrited(span.Length);
+                    Log.Error("main exception:\n" + ex);
+                    Log.Error("socket error when receving:\n" + socketEx);
+
+                    Disconnect();
+                    Disconnected?.Invoke(this, socketEx.SocketErrorCode);
                 }
                 else
                 {
-                    span[..targetSpan.Length].CopyTo(targetSpan);
-                    _receivePipe.CommitWrited(targetSpan.Length);
-                    span = span[targetSpan.Length..];
+                    Log.Error("fatal error when receving:\n" + ex);
 
-                    targetSpan = _receivePipe.GetAvailableSpanToWrite();
-                    if (span.Length > targetSpan.Length)
-                        throw new Exception("Receive pipe is full");
+                    Disconnect();
+                    Disconnected?.Invoke(this, SocketError.SocketError);
 
-                    span.CopyTo(targetSpan);
-                    _receivePipe.CommitWrited(span.Length);
+                    throw;
                 }
             }
 
-            await socket.DisconnectAsync();
+            return ArraySegment<byte>.Empty;
         }
-        catch (OperationCanceledException)
+
+        public void Flush()
         {
-            Disconnected?.Invoke(this, SocketError.Success);
+            ProcessSend();
+            Statistics.Update();
         }
-        catch (SocketException se)
+
+        public void Send(Span<byte> message, bool ignorePlugin = false, bool skipEncryption = false)
         {
-            if (se.SocketErrorCode == SocketError.ConnectionReset && ServerDisconnectionExpected)
-                Disconnected?.Invoke(this, SocketError.Success);
-            else
-                Disconnected?.Invoke(this, se.SocketErrorCode);
+            if (!IsConnected || message.IsEmpty)
+            {
+                return;
+            }
+
+            if (!ignorePlugin && !Plugin.ProcessSendPacket(ref message))
+            {
+                return;
+            }
+
+            if (message.IsEmpty)
+                return;
+
+            PacketLogger.Default?.Log(message, true);
+
+            if (!skipEncryption)
+            {
+                Encryption?.Encrypt(!_isCompressionEnabled, message, message, message.Length);
+            }
+
+            lock (_sendStream)
+            {
+                //_socket.Send(data, 0, length);
+                _sendStream.Enqueue(message);
+            }
+
+            Statistics.TotalBytesSent += (uint)message.Length;
+            Statistics.TotalPacketsSent++;
         }
-        catch
+
+        private void ProcessEncryption(Span<byte> buffer)
         {
-            Disconnected?.Invoke(this, SocketError.Fault);
+            if (!_isCompressionEnabled)
+                return;
+
+            Encryption?.Decrypt(buffer, buffer, buffer.Length);
         }
-        finally
+
+        private void ProcessSend()
         {
-            IsConnected = false;
-            socket.Dispose();
+            if (!IsConnected)
+                return;
+
+            try
+            {
+                lock (_sendStream)
+                {
+                    while (_sendStream.Length > 0)
+                    {
+                        var read = _sendStream.Dequeue(_sendingBuffer, 0, _sendingBuffer.Length);
+
+                        if (read <= 0)
+                        {
+                            break;
+                        }
+
+                        _socket.Send(_sendingBuffer, 0, read);
+                    }
+                }
+            }
+            catch (SocketException ex)
+            {
+                Log.Error("socket error when sending:\n" + ex);
+
+                Disconnect();
+                Disconnected?.Invoke(this, ex.SocketErrorCode);
+            }
+            catch (Exception ex)
+            {
+                if (ex.InnerException is SocketException socketEx)
+                {
+                    Log.Error("main exception:\n" + ex);
+                    Log.Error("socket error when sending:\n" + socketEx);
+
+                    Disconnect();
+                    Disconnected?.Invoke(this, socketEx.SocketErrorCode);
+                }
+                else
+                {
+                    Log.Error("fatal error when sending:\n" + ex);
+
+                    Disconnect();
+                    Disconnected?.Invoke(this, SocketError.SocketError);
+
+                    throw;
+                }
+            }
+        }
+
+        private ArraySegment<byte> DecompressBuffer(ArraySegment<byte> buffer)
+        {
+            if (!_isCompressionEnabled)
+                return buffer;
+
+            var size = 65536;
+
+            if (!_huffman.Decompress(buffer, _uncompressedBuffer, ref size))
+            {
+                Disconnect();
+                Disconnected?.Invoke(this, SocketError.SocketError);
+
+                return ArraySegment<byte>.Empty;
+            }
+
+            return new ArraySegment<byte>(_uncompressedBuffer, 0, size);
         }
     }
 }
-
-#nullable disable
