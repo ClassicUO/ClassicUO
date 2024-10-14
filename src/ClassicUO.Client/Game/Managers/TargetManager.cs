@@ -137,7 +137,7 @@ namespace ClassicUO.Game.Managers
 
         public TargetManager(World world) { _world = world; }
 
-        public uint LastAttack, SelectedTarget;
+        public uint LastAttack, SelectedTarget, NewTargetSystemSerial;
 
         public readonly LastTargetInfo LastTargetInfo = new LastTargetInfo();
 

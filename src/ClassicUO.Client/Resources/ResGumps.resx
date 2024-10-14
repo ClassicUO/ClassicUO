@@ -1588,4 +1588,7 @@ Client version: '{0}'</value>
   <data name="ResetMapsCache" xml:space="preserve">
     <value>Reset maps cache</value>
   </data>
+  <data name="NewTargetSystem" xml:space="preserve">
+    <value>Use new target system</value>
+  </data>
 </root>

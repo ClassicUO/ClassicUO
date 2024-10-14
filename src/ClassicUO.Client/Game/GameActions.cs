@@ -310,6 +310,7 @@ namespace ClassicUO.Game
                 }
             }
 
+            world.TargetManager.NewTargetSystemSerial = serial;
             world.TargetManager.LastAttack = serial;
             Socket.Send_AttackRequest(serial);
         }
