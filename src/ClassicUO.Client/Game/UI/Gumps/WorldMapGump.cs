@@ -119,7 +119,6 @@ namespace ClassicUO.Game.UI.Gumps
 
         private int _mapLoading;
         private uint _mapLoadingTime;
-        private Task _loadingTask;
 
         public WorldMapGump(World world) : base
         (
@@ -139,10 +138,10 @@ namespace ClassicUO.Game.UI.Gumps
             X = _last_position.X;
             Y = _last_position.Y;
 
-            _mapIndex = -1;
             LoadSettings();
 
             GameActions.Print(World, ResGumps.WorldMapLoading, 0x35);
+            Load();
             OnResize();
 
             LoadMarkers();
@@ -596,11 +595,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_mapIndex != World.MapIndex)
             {
-                _mapIndex = World.MapIndex;
-                if (_loadingTask != null && _loadingTask.Status == TaskStatus.Running)
-                    _loadingTask = _loadingTask.ContinueWith(s => LoadMap(_mapIndex));
-                else
-                    _loadingTask = Task.Run(() => LoadMap(_mapIndex));
+                Load();
             }
 
             World.WMapManager.RequestServerPartyGuildInfo();
@@ -622,7 +617,7 @@ namespace ClassicUO.Game.UI.Gumps
             double cos = Math.Cos(dist * Math.PI / 4.0);
             double sin = Math.Sin(dist * Math.PI / 4.0);
 
-            return new Point((int) Math.Round(cos * x - sin * y), (int) Math.Round(sin * x + cos * y));
+            return  new Point((int) Math.Round(cos * x - sin * y), (int) Math.Round(sin * x + cos * y));
         }
 
         private void AdjustPosition
@@ -1150,10 +1145,16 @@ namespace ClassicUO.Game.UI.Gumps
 
 
         #region Loading
-
-        private unsafe void LoadMap(int mapIndex)
+        private unsafe Task Load()
         {
-            if (mapIndex < 0 || mapIndex > MapLoader.MAPS_COUNT)
+            return Task.Run(LoadMap);
+        }
+
+        private unsafe void LoadMap()
+        {
+            _mapIndex = World.MapIndex;
+
+            if (_mapIndex < 0 || _mapIndex > MapLoader.MAPS_COUNT)
             {
                 return;
             }
@@ -1163,264 +1164,251 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
-            try
+            const int OFFSET_PIX = 2;
+            const int OFFSET_PIX_HALF = OFFSET_PIX / 2;
+
+            int realWidth = Client.Game.UO.FileManager.Maps.MapsDefaultSize[World.MapIndex, 0];
+            int realHeight = Client.Game.UO.FileManager.Maps.MapsDefaultSize[World.MapIndex, 1];
+
+            int fixedWidth = Client.Game.UO.FileManager.Maps.MapBlocksSize[World.MapIndex, 0];
+            int fixedHeight = Client.Game.UO.FileManager.Maps.MapBlocksSize[World.MapIndex, 1];
+
+            _mapTexture?.Dispose();
+
+            var mapFile = Client.Game.UO.FileManager.Maps.GetMapFile(_mapIndex);
+            var staticFile = Client.Game.UO.FileManager.Maps.GetStaticFile(_mapIndex);
+
+            if (!_mapCache.TryGetValue(mapFile.FilePath, out var fileMapPath))
             {
-                const int OFFSET_PIX = 2;
-                const int OFFSET_PIX_HALF = OFFSET_PIX / 2;
+                using var mapReader = new BinaryReader(File.Open(mapFile.FilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+                using var staticsReader = new BinaryReader(File.Open(staticFile.FilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
 
-                int realWidth = Client.Game.UO.FileManager.Maps.MapsDefaultSize[mapIndex, 0];
-                int realHeight = Client.Game.UO.FileManager.Maps.MapsDefaultSize[mapIndex, 1];
-
-                int fixedWidth = Client.Game.UO.FileManager.Maps.MapBlocksSize[mapIndex, 0];
-                int fixedHeight = Client.Game.UO.FileManager.Maps.MapBlocksSize[mapIndex, 1];
-
-                _mapTexture?.Dispose();
-
-                var mapFile = Client.Game.UO.FileManager.Maps.GetMapFile(mapIndex);
-                var staticFile = Client.Game.UO.FileManager.Maps.GetStaticFile(mapIndex);
-
-                if (!_mapCache.TryGetValue(mapFile.FilePath, out var fileMapPath))
+                static string calculateMd5(BinaryReader file)
                 {
-                    using var mapReader = new BinaryReader(File.Open(mapFile.FilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
-                    using var staticsReader = new BinaryReader(File.Open(staticFile.FilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
-
-                    static string calculateMd5(BinaryReader file)
-                    {
-                        var md5Ctx = new MD5Behaviour.MD5Context();
-                        MD5Behaviour.Initialize(ref md5Ctx);
-
-                        var h = new byte[4096];
-                        int bytesRead;
-                        while ((bytesRead = file.Read(h)) > 0)
-                            MD5Behaviour.Update(ref md5Ctx, h.AsSpan(0, bytesRead));
-                        MD5Behaviour.Finalize(ref md5Ctx);
-
-                        var strSb = new StringBuilder();
-                        for (int i = 0; i < 16; ++i)
-                            strSb.AppendFormat("{0:x2}", md5Ctx.Digest(i));
-
-                        return strSb.ToString();
-                    }
-
-                    var sum = calculateMd5(mapReader) + calculateMd5(staticsReader);
                     var md5Ctx = new MD5Behaviour.MD5Context();
                     MD5Behaviour.Initialize(ref md5Ctx);
-                    MD5Behaviour.Update(ref md5Ctx, MemoryMarshal.AsBytes<char>(sum));
+
+                    var h = new byte[4096];
+                    int bytesRead;
+                    while ((bytesRead = file.Read(h)) > 0)
+                        MD5Behaviour.Update(ref md5Ctx, h.AsSpan(0, bytesRead));
                     MD5Behaviour.Finalize(ref md5Ctx);
+
                     var strSb = new StringBuilder();
                     for (int i = 0; i < 16; ++i)
                         strSb.AppendFormat("{0:x2}", md5Ctx.Digest(i));
-                    var hash = strSb.ToString();
 
-                    fileMapPath = Path.Combine(_mapsCachePath, $"map{mapIndex}_{hash}.png");
-                    _mapCache[mapFile.FilePath] = fileMapPath;
+                    return strSb.ToString();
                 }
 
+                var sum = calculateMd5(mapReader) + calculateMd5(staticsReader);
+                var md5Ctx = new MD5Behaviour.MD5Context();
+                MD5Behaviour.Initialize(ref md5Ctx);
+                MD5Behaviour.Update(ref md5Ctx, MemoryMarshal.AsBytes<char>(sum));
+                MD5Behaviour.Finalize(ref md5Ctx);
+                var strSb = new StringBuilder();
+                for (int i = 0; i < 16; ++i)
+                    strSb.AppendFormat("{0:x2}", md5Ctx.Digest(i));
+                var hash = strSb.ToString();
 
-                if (!File.Exists(fileMapPath))
+                fileMapPath = Path.Combine(_mapsCachePath, $"map{_mapIndex}_{hash}.png");
+                _mapCache[mapFile.FilePath] = fileMapPath;
+            }
+
+  
+            if (!File.Exists(fileMapPath))
+            {
+                try
                 {
-                    try
+                    Interlocked.Increment(ref _mapLoading);
+
+                    var size = (realWidth + OFFSET_PIX) * (realHeight + OFFSET_PIX);
+                    var allZ = new sbyte[size];
+
+                    using var img = new SixLabors.ImageSharp.Image<Byte4>(new SixLabors.ImageSharp.Configuration() 
                     {
-                        var map = World.Map;
-                        Interlocked.Increment(ref _mapLoading);
+                        PreferContiguousImageBuffers = true
+                    }, realWidth + OFFSET_PIX, realHeight + OFFSET_PIX);
+                    
+                    img.DangerousTryGetSinglePixelMemory(out var imgBuffer);
+                    var imgSpan = imgBuffer.Span;
 
-                        var size = (realWidth + OFFSET_PIX) * (realHeight + OFFSET_PIX);
-                        var allZ = new sbyte[size];
-                        var staticBlocks = new StaticsBlock[32];
+                    var huesLoader = Client.Game.UO.FileManager.Hues;
 
-                        using var img = new SixLabors.ImageSharp.Image<Byte4>(new SixLabors.ImageSharp.Configuration()
+                    int bx, by, mapX = 0, mapY = 0, x, y;
+
+                    // Workaroud to avoid accessing map files from 2 sources at the same time
+                    UOFile fileMap = null;
+                    UOFile fileStatics = null;
+
+                    for (bx = 0; bx < fixedWidth; ++bx)
+                    {
+                        mapX = bx << 3;
+
+                        for (by = 0; by < fixedHeight; ++by)
                         {
-                            PreferContiguousImageBuffers = true
-                        }, realWidth + OFFSET_PIX, realHeight + OFFSET_PIX);
+                            ref var indexMap = ref World.Map.GetIndex(bx, by);
 
-                        img.DangerousTryGetSinglePixelMemory(out var imgBuffer);
-                        var imgSpan = imgBuffer.Span;
-
-                        var huesLoader = Client.Game.UO.FileManager.Hues;
-
-                        int bx, by, mapX = 0, mapY = 0, x, y;
-
-                        // Workaroud to avoid accessing map files from 2 sources at the same time
-                        UOFile fileMap = null;
-                        UOFile fileStatics = null;
-
-                        for (bx = 0; bx < fixedWidth; ++bx)
-                        {
-                            mapX = bx << 3;
-
-                            for (by = 0; by < fixedHeight; ++by)
+                            if (indexMap.MapAddress == 0)
                             {
-                                ref var indexMap = ref map.GetIndex(bx, by);
+                                continue;
+                            }
 
-                                if (indexMap.MapAddress == 0)
+                            if (fileMap == null)
+                            {
+                                fileMap = new UOFile(indexMap.MapFile.FilePath);
+                            }
+
+                            fileMap.Seek((long)indexMap.MapAddress, System.IO.SeekOrigin.Begin);
+                            var cells = fileMap.Read<MapBlock>().Cells;
+
+                            mapY = by << 3;
+
+                            for (y = 0; y < 8; ++y)
+                            {
+                                var block = (mapY + y + OFFSET_PIX_HALF) * (realWidth + OFFSET_PIX) + mapX + OFFSET_PIX_HALF;
+                                var pos = y << 3;
+
+                                for (x = 0; x < 8; ++x, ++pos, ++block)
                                 {
-                                    continue;
+                                    ushort color = (ushort)(0x8000 | huesLoader.GetRadarColorData(cells[pos].TileID & 0x3FFF));
+
+                                    imgSpan[block].PackedValue = HuesHelper.Color16To32(color) | 0xFF_00_00_00;
+                                    allZ[block] = cells[pos].Z;
                                 }
+                            }
 
-                                if (fileMap == null)
+                            if (fileStatics == null)
+                            {
+                                fileStatics = new UOFile(indexMap.StaticFile.FilePath);
+                            }
+
+                            fileStatics.Seek((long)indexMap.StaticAddress, System.IO.SeekOrigin.Begin);
+
+                            for (var c = 0; c < indexMap.StaticCount; ++c)
+                            {
+                                var sb = fileStatics.Read<StaticsBlock>();
+
+                                if (sb.Color != 0 && sb.Color != 0xFFFF && GameObject.CanBeDrawn(World, sb.Color))
                                 {
-                                    fileMap = new UOFile(indexMap.MapFile.FilePath);
-                                }
+                                    int block = (mapY + sb.Y + OFFSET_PIX_HALF) * (realWidth + OFFSET_PIX) + mapX + sb.X + OFFSET_PIX_HALF;
 
-                                fileMap.Seek((long)indexMap.MapAddress, System.IO.SeekOrigin.Begin);
-                                var cells = fileMap.Read<MapBlock>().Cells;
-
-                                mapY = by << 3;
-
-                                for (y = 0; y < 8; ++y)
-                                {
-                                    var block = (mapY + y + OFFSET_PIX_HALF) * (realWidth + OFFSET_PIX) + mapX + OFFSET_PIX_HALF;
-                                    var pos = y << 3;
-
-                                    for (x = 0; x < 8; ++x, ++pos, ++block)
+                                    if (sb.Z >= allZ[block])
                                     {
-                                        ushort color = (ushort)(0x8000 | huesLoader.GetRadarColorData(cells[pos].TileID & 0x3FFF));
+                                        var color = (ushort)(0x8000 | (sb.Hue != 0 ? huesLoader.GetColor16(16384, sb.Hue) : huesLoader.GetRadarColorData(sb.Color + 0x4000)));
 
                                         imgSpan[block].PackedValue = HuesHelper.Color16To32(color) | 0xFF_00_00_00;
-                                        allZ[block] = cells[pos].Z;
-                                    }
-                                }
-
-                                if (fileStatics == null)
-                                {
-                                    fileStatics = new UOFile(indexMap.StaticFile.FilePath);
-                                }
-
-                                fileStatics.Seek((long)indexMap.StaticAddress, System.IO.SeekOrigin.Begin);
-
-                                if (staticBlocks.Length < indexMap.StaticCount)
-                                    staticBlocks = new StaticsBlock[indexMap.StaticCount];
-
-                                var staticsBlocksSpan = staticBlocks.AsSpan(0, (int)indexMap.StaticCount);
-                                fileStatics.Read(MemoryMarshal.AsBytes(staticsBlocksSpan));
-
-                                foreach (ref var sb in staticsBlocksSpan)
-                                {
-                                    if (sb.Color != 0 && sb.Color != 0xFFFF && GameObject.CanBeDrawn(World, sb.Color))
-                                    {
-                                        int block = (mapY + sb.Y + OFFSET_PIX_HALF) * (realWidth + OFFSET_PIX) + mapX + sb.X + OFFSET_PIX_HALF;
-
-                                        if (sb.Z >= allZ[block])
-                                        {
-                                            var color = (ushort)(0x8000 | (sb.Hue != 0 ? huesLoader.GetColor16(16384, sb.Hue) : huesLoader.GetRadarColorData(sb.Color + 0x4000)));
-
-                                            imgSpan[block].PackedValue = HuesHelper.Color16To32(color) | 0xFF_00_00_00;
-                                            allZ[block] = sb.Z;
-                                        }
+                                        allZ[block] = sb.Z;
                                     }
                                 }
                             }
                         }
+                    }
 
-                        fileMap?.Dispose();
-                        fileStatics?.Dispose();
+                    fileMap?.Dispose();
+                    fileStatics?.Dispose();
 
-                        int real_width_less_one = realWidth - 1;
-                        int real_height_less_one = realHeight - 1;
-                        const float MAG_0 = 80f / 100f;
-                        const float MAG_1 = 100f / 80f;
+                    int real_width_less_one = realWidth - 1;
+                    int real_height_less_one = realHeight - 1;
+                    const float MAG_0 = 80f / 100f;
+                    const float MAG_1 = 100f / 80f;
 
-                        for (mapY = 1; mapY < real_height_less_one; ++mapY)
+                    for (mapY = 1; mapY < real_height_less_one; ++mapY)
+                    {
+                        int blockCurrent = (mapY + OFFSET_PIX_HALF) * (realWidth + OFFSET_PIX) + OFFSET_PIX_HALF;
+                        int blockNext = (mapY + 1 + OFFSET_PIX_HALF) * (realWidth + OFFSET_PIX) + OFFSET_PIX_HALF;
+
+                        for (mapX = 1; mapX < real_width_less_one; ++mapX)
                         {
-                            int blockCurrent = (mapY + OFFSET_PIX_HALF) * (realWidth + OFFSET_PIX) + OFFSET_PIX_HALF;
-                            int blockNext = (mapY + 1 + OFFSET_PIX_HALF) * (realWidth + OFFSET_PIX) + OFFSET_PIX_HALF;
+                            sbyte z0 = allZ[++blockCurrent];
+                            sbyte z1 = allZ[blockNext++];
 
-                            for (mapX = 1; mapX < real_width_less_one; ++mapX)
+                            if (z0 == z1)
                             {
-                                sbyte z0 = allZ[++blockCurrent];
-                                sbyte z1 = allZ[blockNext++];
+                                continue;
+                            }
 
-                                if (z0 == z1)
+                            ref var cc = ref imgSpan[blockCurrent];
+                            if (cc.PackedValue == 0)
+                            {
+                                continue;
+                            }
+
+                            byte r = (byte)(cc.PackedValue & 0xFF);
+                            byte g = (byte)((cc.PackedValue >> 8) & 0xFF);
+                            byte b = (byte)((cc.PackedValue >> 16) & 0xFF);
+                            byte a = (byte)((cc.PackedValue >> 24) & 0xFF);
+
+                            if (r != 0 || g != 0 || b != 0)
+                            {
+                                if (z0 < z1)
                                 {
-                                    continue;
+                                    r = (byte)Math.Min(0xFF, r * MAG_0);
+                                    g = (byte)Math.Min(0xFF, g * MAG_0);
+                                    b = (byte)Math.Min(0xFF, b * MAG_0);
+                                }
+                                else
+                                {
+                                    r = (byte)Math.Min(0xFF, r * MAG_1);
+                                    g = (byte)Math.Min(0xFF, g * MAG_1);
+                                    b = (byte)Math.Min(0xFF, b * MAG_1);
                                 }
 
-                                ref var cc = ref imgSpan[blockCurrent];
-                                if (cc.PackedValue == 0)
-                                {
-                                    continue;
-                                }
-
-                                byte r = (byte)(cc.PackedValue & 0xFF);
-                                byte g = (byte)((cc.PackedValue >> 8) & 0xFF);
-                                byte b = (byte)((cc.PackedValue >> 16) & 0xFF);
-                                byte a = (byte)((cc.PackedValue >> 24) & 0xFF);
-
-                                if (r != 0 || g != 0 || b != 0)
-                                {
-                                    if (z0 < z1)
-                                    {
-                                        r = (byte)Math.Min(0xFF, r * MAG_0);
-                                        g = (byte)Math.Min(0xFF, g * MAG_0);
-                                        b = (byte)Math.Min(0xFF, b * MAG_0);
-                                    }
-                                    else
-                                    {
-                                        r = (byte)Math.Min(0xFF, r * MAG_1);
-                                        g = (byte)Math.Min(0xFF, g * MAG_1);
-                                        b = (byte)Math.Min(0xFF, b * MAG_1);
-                                    }
-
-                                    cc.PackedValue = (uint)(r | (g << 8) | (b << 16) | (a << 24));
-                                }
+                                cc.PackedValue = (uint)(r | (g << 8) | (b << 16) | (a << 24));
                             }
                         }
-
-
-                        //var quantizer = new OctreeQuantizer();
-                        //for (var i = 0; i < buffer.Length; i++)
-                        //{
-                        //    quantizer.AddColor(buffer[i]);
-                        //}
-
-                        //var palette = quantizer.GetPalette(256);
-
-                        //for (var i = 0; i < buffer.Length; i++)
-                        //{
-                        //    var paletteIndex = quantizer.GetPaletteIndex(buffer[i]);
-                        //    buffer[i] = palette[paletteIndex];
-                        //}
-
-                        //quantizer.Clear();
-
-                        var imageEncoder = new PngEncoder
-                        {
-                            ColorType = PngColorType.Palette,
-                            CompressionLevel = PngCompressionLevel.DefaultCompression,
-                            SkipMetadata = true,
-                            FilterMethod = PngFilterMethod.None,
-                            ChunkFilter = PngChunkFilter.ExcludeAll,
-                            TransparentColorMode = PngTransparentColorMode.Clear,
-                        };
-
-                        Directory.CreateDirectory(_mapsCachePath);
-                        using var stream2 = File.Create(fileMapPath);
-                        img.Save(stream2, imageEncoder);
                     }
-                    catch (Exception ex)
+
+
+                    //var quantizer = new OctreeQuantizer();
+                    //for (var i = 0; i < buffer.Length; i++)
+                    //{
+                    //    quantizer.AddColor(buffer[i]);
+                    //}
+
+                    //var palette = quantizer.GetPalette(256);
+
+                    //for (var i = 0; i < buffer.Length; i++)
+                    //{
+                    //    var paletteIndex = quantizer.GetPaletteIndex(buffer[i]);
+                    //    buffer[i] = palette[paletteIndex];
+                    //}
+
+                    //quantizer.Clear();
+                    
+                    var imageEncoder = new PngEncoder
                     {
-                        Log.Error($"error loading worldmap: {ex}");
+                        ColorType = PngColorType.Palette,
+                        CompressionLevel = PngCompressionLevel.DefaultCompression,
+                        SkipMetadata = true,
+                        FilterMethod = PngFilterMethod.None,
+                        ChunkFilter = PngChunkFilter.ExcludeAll,
+                        TransparentColorMode = PngTransparentColorMode.Clear,
+                    };
 
-                        return;
-                    }
-                    finally
-                    {
-                        Interlocked.Decrement(ref _mapLoading);
-                    }
+                    Directory.CreateDirectory(_mapsCachePath);
+                    using var stream2 = File.Create(fileMapPath);
+                    img.Save(stream2, imageEncoder);
                 }
-
-                if (File.Exists(fileMapPath))
+                catch (Exception ex)
                 {
-                    using var stream = File.OpenRead(fileMapPath);
-                    _mapTexture = Texture2D.FromStream(Client.Game.GraphicsDevice, stream);
-                }
+                    Log.Error($"error loading worldmap: {ex}");
 
-                GameActions.Print(World, ResGumps.WorldMapLoaded, 0x48);
+                    return;
+                }
+                finally
+                {
+                    Interlocked.Decrement(ref _mapLoading);
+                }
             }
-            catch (ThreadInterruptedException)
+
+            if (File.Exists(fileMapPath))
             {
-                _mapLoading = 0;
+                using var stream = File.OpenRead(fileMapPath);
+                _mapTexture = Texture2D.FromStream(Client.Game.GraphicsDevice, stream);
             }
+            
+            GameActions.Print(World, ResGumps.WorldMapLoaded, 0x48);
         }
 
         internal class ZonesFileZoneData
@@ -1983,22 +1971,17 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_mapLoading == 1)
             {
-                if (batcher.ClipBegin(gX, gY, gWidth, gHeight))
-                {
-                    var str = "Please wait, I'm making the map file...".AsSpan();
-                    //str = str[..(str.Length - (int)_mapLoadingTime % 3)];
+                var str = "Please wait, I'm making the map file...".AsSpan();
+                //str = str[..(str.Length - (int)_mapLoadingTime % 3)];
 
-                    //if (Time.Ticks > _mapLoadingTime)
-                    //    _mapLoadingTime = Time.Ticks + 1000;
+                //if (Time.Ticks > _mapLoadingTime)
+                //    _mapLoadingTime = Time.Ticks + 1000;
 
-                    var strSize = Fonts.Bold.MeasureString(str);
-                    var pos = strSize * -0.5f;
-                    pos.X += gX + halfWidth;
-                    pos.Y += gY + halfHeight;
-                    batcher.DrawString(Fonts.Bold, str, pos, new Vector3(38, 1, 1));
-
-                    batcher.ClipEnd();
-                }
+                var strSize = Fonts.Bold.MeasureString(str);
+                var pos = strSize * -0.5f;
+                pos.X += gX + halfWidth;
+                pos.Y += gY + halfHeight;
+                batcher.DrawString(Fonts.Bold, str, pos, new Vector3(38, 1, 1));
             }
             else if (_mapTexture != null && !_mapTexture.IsDisposed)
             {
