@@ -285,14 +285,15 @@ internal sealed class NetClient
             _source.Cancel();
             await prevReadLoopTask;
 
+            _source = new();
             _sendIndex = 0;
             _huffman.Reset();
+
             Statistics.Reset();
         }
 
         ServerDisconnectionExpected = false;
 
-        _source = new();
         _socket = isWebSocket ? new WebSocket() : new TcpSocket();
 
         CancellationToken token = _source.Token;
