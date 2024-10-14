@@ -42,6 +42,7 @@ namespace ClassicUO.Network.Sockets
         private int _readIndex;
         private int _writeIndex;
 
+        public bool IsEmpty => _readIndex == _writeIndex;
         public int Length => _writeIndex - _readIndex;
 
         public Pipe(uint size = 4096)
