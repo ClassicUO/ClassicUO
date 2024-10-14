@@ -50,10 +50,9 @@ internal sealed class NetClient
     public static NetClient Socket { get; } = new();
 
     private readonly byte[] _receiveBuffer = new byte[BUFF_SIZE];
+    private readonly byte[] _sendBuffer = new byte[BUFF_SIZE];
     private readonly byte[] _decompressionBuffer = new byte[BUFF_SIZE * 3];
     private readonly Pipe _receivePipe = new(BUFF_SIZE * 3);
-    private readonly Pipe _sendPipe = new(BUFF_SIZE);
-    private readonly SendTrigger _sendTrigger;
     private readonly Huffman _huffman = new();
 
     private bool _isCompressionEnabled;
@@ -61,7 +60,7 @@ internal sealed class NetClient
     private NetSocket? _socket;
     private CancellationTokenSource _source;
     private Task? _readLoopTask;
-    private Task? _writeLoopTask;
+    private int _sendIndex;
 
     public bool IsConnected { get; private set; }
     public bool IsWebSocket { get; private set; }
@@ -77,7 +76,6 @@ internal sealed class NetClient
     public NetClient()
     {
         Statistics = new NetStatistics(this);
-        _sendTrigger = new(_sendPipe);
         _source = new();
     }
 
@@ -114,25 +112,12 @@ internal sealed class NetClient
         ConnectAsyncCore(uri, IsWebSocket).Wait();
     }
 
-    public void Disconnect(SocketError error = SocketError.Success)
+    public void Disconnect()
     {
-        if (!IsConnected)
-            return;
-
-        IsConnected = false;
         _isCompressionEnabled = false;
-        _source.Cancel();
-        _sendTrigger.Cancel();
-
-        if (_readLoopTask is not null)
-            Task.WaitAll(_readLoopTask, _writeLoopTask!);
-
-        _sendPipe.Clear();
-        _receivePipe.Clear();
-        _socket!.Dispose();
-
+        IsConnected = false;
         Statistics.Reset();
-        Disconnected?.Invoke(this, error);
+        _source.Cancel();
     }
 
     public Span<byte> CollectAvailableData()
@@ -151,6 +136,17 @@ internal sealed class NetClient
         _huffman.Reset();
     }
 
+    public void DiscardOutgoingPackets()
+    {
+        _sendIndex = 0;
+    }
+
+    public void Flush()
+    {
+        ProcessSend();
+        Statistics.Update();
+    }
+
     public void Send(Span<byte> message, bool ignorePlugin = false, bool skipEncryption = false)
     {
         if (!IsConnected || message.IsEmpty)
@@ -167,56 +163,15 @@ internal sealed class NetClient
         if (!skipEncryption)
             Encryption?.Encrypt(!_isCompressionEnabled, message, message, message.Length);
 
-        int messageLength = message.Length;
-
-        lock (_sendPipe)
+        lock (_sendBuffer)
         {
-            Span<byte> span = _sendPipe.GetAvailableSpanToWrite();
-
-            if (span.Length >= messageLength)
-            {
-                message.CopyTo(span);
-                _sendPipe.CommitWrited(messageLength);
-            }
-            else
-            {
-                message[..span.Length].CopyTo(span);
-                _sendPipe.CommitWrited(span.Length);
-
-                message = message[span.Length..];
-                span = _sendPipe.GetAvailableSpanToWrite();
-
-                if (span.Length < message.Length)
-                    throw new Exception("Send pipe is full");
-
-                message.CopyTo(span);
-                _sendPipe.CommitWrited(message.Length);
-            }
-
-            _sendTrigger.Trigger(messageLength);
+            Span<byte> span = _sendBuffer.AsSpan(_sendIndex);
+            message.CopyTo(span);
+            _sendIndex += message.Length;
         }
 
-        Statistics.TotalBytesSent += (uint)messageLength;
+        Statistics.TotalBytesSent += (uint)message.Length;
         Statistics.TotalPacketsSent++;
-    }
-
-    public void SendPing()
-    {
-        if (!IsConnected)
-            return;
-
-        Statistics.SendPing();
-    }
-
-    public void ReceivePing(byte idx)
-    {
-        Statistics.PingReceived(idx);
-    }
-
-    public void UpdateStatistics(int receivedPacketCount)
-    {
-        Statistics.TotalPacketsReceived += (uint)receivedPacketCount;
-        Statistics.Update();
     }
 
     private void ProcessEncryption(Span<byte> buffer)
@@ -225,6 +180,64 @@ internal sealed class NetClient
             return;
 
         Encryption?.Decrypt(buffer, buffer, buffer.Length);
+    }
+
+    private void ProcessSend()
+    {
+        if (!IsConnected)
+            return;
+
+        try
+        {
+            lock (_sendBuffer)
+            {
+                if (_sendIndex == 0)
+                    return;
+
+                Memory<byte> buffer = _sendBuffer.AsMemory(0, _sendIndex);
+
+                int toSend = _sendIndex;
+
+                while (toSend > 0)
+                {
+                    ValueTask<int> task = _socket!.SendAsync(buffer, CancellationToken.None);
+
+                    if (task.IsCompletedSuccessfully)
+                        toSend -= task.Result;
+                    else
+                        toSend -= task.AsTask().GetAwaiter().GetResult();
+                }
+
+                _sendIndex = 0;
+            }
+        }
+        catch (SocketException ex)
+        {
+            Log.Error("socket error when sending:\n" + ex);
+
+            Disconnect();
+            Disconnected?.Invoke(this, ex.SocketErrorCode);
+        }
+        catch (Exception ex)
+        {
+            if (ex.InnerException is SocketException socketEx)
+            {
+                Log.Error("main exception:\n" + ex);
+                Log.Error("socket error when sending:\n" + socketEx);
+
+                Disconnect();
+                Disconnected?.Invoke(this, socketEx.SocketErrorCode);
+            }
+            else
+            {
+                Log.Error("fatal error when sending:\n" + ex);
+
+                Disconnect();
+                Disconnected?.Invoke(this, SocketError.SocketError);
+
+                throw;
+            }
+        }
     }
 
     private Span<byte> ProcessCompression(Span<byte> buffer)
@@ -265,14 +278,22 @@ internal sealed class NetClient
 
     private async Task ConnectAsyncCore(Uri uri, bool isWebSocket)
     {
-        if (IsConnected)
-            Disconnect();
+        Task? prevReadLoopTask = _readLoopTask;
+
+        if (prevReadLoopTask is not null)
+        {
+            _source.Cancel();
+            await prevReadLoopTask;
+
+            _sendIndex = 0;
+            _huffman.Reset();
+            Statistics.Reset();
+        }
 
         ServerDisconnectionExpected = false;
 
         _source = new();
         _socket = isWebSocket ? new WebSocket() : new TcpSocket();
-        _sendTrigger.Reset();
 
         CancellationToken token = _source.Token;
 
@@ -285,7 +306,6 @@ internal sealed class NetClient
             Connected?.Invoke(this, EventArgs.Empty);
 
             _readLoopTask = Task.Run(() => ReadLoop(_socket, token));
-            _writeLoopTask = Task.Run(() => WriteLoop(_socket, token));
         }
         catch
         {
@@ -344,50 +364,24 @@ internal sealed class NetClient
             await socket.DisconnectAsync();
         }
         catch (OperationCanceledException)
-        { }
+        {
+            Disconnected?.Invoke(this, SocketError.Success);
+        }
         catch (SocketException se)
         {
             if (se.SocketErrorCode == SocketError.ConnectionReset && ServerDisconnectionExpected)
-                Disconnect();
+                Disconnected?.Invoke(this, SocketError.Success);
             else
-                Disconnect(se.SocketErrorCode);
+                Disconnected?.Invoke(this, se.SocketErrorCode);
         }
         catch
         {
-            Disconnect(SocketError.Fault);
+            Disconnected?.Invoke(this, SocketError.Fault);
         }
-    }
-
-    private async Task WriteLoop(NetSocket socket, CancellationToken token)
-    {
-        try
+        finally
         {
-            while (!token.IsCancellationRequested)
-            {
-                await _sendTrigger.Wait();
-
-                Memory<byte> buffer = _sendPipe.GetAvailableMemoryToRead();
-
-                int bufferLength = buffer.Length;
-                if (bufferLength == 0)
-                    continue;
-
-                while (!buffer.IsEmpty)
-                {
-                    int bytesWritten = await socket!.SendAsync(buffer, token);
-                    buffer = buffer[bytesWritten..];
-                }
-
-                _sendPipe.CommitRead(bufferLength);
-            }
-        }
-        catch (Exception e) when (e is OperationCanceledException or SocketException)
-        {
-            // ignored: socket errors are handled by ReadLoop
-        }
-        catch
-        {
-            Disconnect();
+            IsConnected = false;
+            socket.Dispose();
         }
     }
 }

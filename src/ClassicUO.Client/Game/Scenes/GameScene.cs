@@ -760,7 +760,7 @@ namespace ClassicUO.Game.Scenes
 
             if (Time.Ticks > _timePing)
             {
-                NetClient.Socket.SendPing();
+                NetClient.Socket.Statistics.SendPing();
                 _timePing = (long)Time.Ticks + 1000;
             }
 

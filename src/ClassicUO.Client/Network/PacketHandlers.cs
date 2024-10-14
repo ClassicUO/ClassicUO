@@ -2673,7 +2673,7 @@ namespace ClassicUO.Network
 
         private static void Ping(World world, ref StackDataReader p)
         {
-            NetClient.Socket.ReceivePing(p.ReadUInt8());
+            NetClient.Socket.Statistics.PingReceived(p.ReadUInt8());
         }
 
         private static void BuyList(World world, ref StackDataReader p)

@@ -192,7 +192,7 @@ namespace ClassicUO.Game.Scenes
 
                 if (NetClient.Socket.IsConnected)
                 {
-                    NetClient.Socket.SendPing();
+                    NetClient.Socket.Statistics.SendPing();
                 }
 
                 _pingTime = Time.Ticks + 60000;
@@ -682,8 +682,6 @@ namespace ClassicUO.Game.Scenes
 
             socket.Disconnect();
 
-            socket.Connected -= OnNetClientConnected;
-
             // Ignore the packet, connect with the original IP regardless (i.e. websocket proxying)
             if (Settings.GlobalSettings.IgnoreRelayIp || ip == 0)
             {
@@ -698,12 +696,11 @@ namespace ClassicUO.Game.Scenes
                     socket.Connect(new IPAddress(ip).ToString(), port);
             }
 
-            socket.Connected += OnNetClientConnected;
-
             if (socket.IsConnected)
             {
                 socket.Encryption?.Initialize(false, seed);
                 socket.EnableCompression();
+                socket.DiscardOutgoingPackets();
 
                 Span<byte> b = [(byte)(seed >> 24), (byte)(seed >> 16), (byte)(seed >> 8), (byte)seed];
                 socket.Send(b, true, true);
