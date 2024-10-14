@@ -87,11 +87,11 @@ namespace ClassicUO.Network
 
         public int ParsePackets(NetClient socket, World world)
         {
-            Span<byte> data = socket.CollectAvailableData();
+            Span<byte> data = NetClient.Socket.CollectAvailableData();
             if (!data.IsEmpty)
             {
                 _buffer.Enqueue(data);
-                socket.CommitReadData(data.Length);
+                NetClient.Socket.CommitReadData(data.Length);
             }
 
             return ParsePackets(socket, world, _buffer, true) + ParsePackets(socket, world, _pluginsBuffer, false);
