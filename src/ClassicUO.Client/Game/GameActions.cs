@@ -765,9 +765,24 @@ namespace ClassicUO.Game
             }
         }
 
+        private static void SendAbility(World world, byte idx, bool primary)
+        {
+            if ((world.ClientLockedFeatures.Flags & LockedFeatureFlags.AOS) == 0)
+            {
+                if (primary)
+                    Socket.Send_StunRequest();
+                else
+                    Socket.Send_DisarmRequest();
+            }
+            else
+            {
+                Socket.Send_UseCombatAbility(world, idx);
+            }
+        }
+
         public static void UsePrimaryAbility(World world)
         {
-            ref Ability ability = ref world.Player.Abilities[0];
+            ref var ability = ref world.Player.Abilities[0];
 
             if (((byte) ability & 0x80) == 0)
             {
@@ -776,11 +791,11 @@ namespace ClassicUO.Game
                     world.Player.Abilities[i] &= (Ability) 0x7F;
                 }
 
-                Socket.Send_UseCombatAbility(world, (byte)ability);
+                SendAbility(world, (byte)ability, true);
             }
             else
             {
-                Socket.Send_UseCombatAbility(world, 0);
+                SendAbility(world, 0, true);
             }
 
             ability ^= (Ability) 0x80;
@@ -797,11 +812,11 @@ namespace ClassicUO.Game
                     world.Player.Abilities[i] &= (Ability) 0x7F;
                 }
 
-                Socket.Send_UseCombatAbility(world, (byte)ability);
+                SendAbility(world, (byte)ability, false);
             }
             else
             {
-                Socket.Send_UseCombatAbility(world, 0);
+                SendAbility(world, 0, true);
             }
 
             ability ^= (Ability) 0x80;
