@@ -4521,7 +4521,7 @@ namespace ClassicUO.Network
 
             writer.WriteUInt8((byte)layers.Length);
             foreach (ref readonly var layer in layers)
-                writer.WriteUInt8((byte)layer);
+                writer.WriteUInt16BE((byte)layer);
 
             if (length < 0)
             {
