@@ -337,6 +337,7 @@ namespace ClassicUO.Network
             Handler.Add(0x82, ReceiveLoginRejection);
             Handler.Add(0x85, ReceiveLoginRejection);
             Handler.Add(0x53, ReceiveLoginRejection);
+            Handler.Add(0xFD, ReceiveLoginRejection);
         }
 
         public static void SendMegaClilocRequests(World world)

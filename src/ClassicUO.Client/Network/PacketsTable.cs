@@ -422,6 +422,7 @@ namespace ClassicUO.Network
             if (version >= ClientVersion.CV_7010400)
             {
                 _packetsTable[0xD5] = 0x09;
+                _packetsTable[0xFD] = 2;
             }
         }
 
