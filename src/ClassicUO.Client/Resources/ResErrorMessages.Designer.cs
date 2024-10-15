@@ -224,6 +224,15 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid name.
+        /// </summary>
+        public static string NameIsInvalid {
+            get {
+                return ResourceManager.GetString("NameIsInvalid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Someone is already using this account..
         /// </summary>
         public static string SomeoneIsAlreadyUsingThisAccount {

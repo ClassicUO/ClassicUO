@@ -92,6 +92,7 @@ namespace ClassicUO.Game.Scenes
         public static string Account { get; internal set; }
         public string Password { get; private set; }
         public bool CanAutologin => _autoLogin || Reconnect;
+        public (int min, int max) LoginDelay { get; private set; }
 
 
         public override void Load()
@@ -672,8 +673,15 @@ namespace ClassicUO.Game.Scenes
         {
             byte code = p.ReadUInt8();
 
-            PopupMessage = ServerErrorMessages.GetError(p[0], code);
+            PopupMessage = ServerErrorMessages.GetError(p[0], code, LoginDelay);
             CurrentLoginStep = LoginSteps.PopUpMessage;
+            LoginDelay = default;
+        }
+
+        public void HandleLoginDelayPacket(ref StackDataReader p)
+        {
+            var delay = p.ReadUInt8();
+            LoginDelay = ((delay - 1) * 10, delay * 10);
         }
 
         public void HandleRelayServerPacket(ref StackDataReader p)

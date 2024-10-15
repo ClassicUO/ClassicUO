@@ -208,4 +208,7 @@ Playing...</value>
   <data name="ClientPathIsNotAValidUODirectory" xml:space="preserve">
     <value>'{0}' is not a valid UO directory</value>
   </data>
+  <data name="NameIsInvalid" xml:space="preserve">
+    <value>Invalid name</value>
+  </data>
 </root>

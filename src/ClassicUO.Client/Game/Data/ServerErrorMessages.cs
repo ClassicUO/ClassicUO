@@ -38,20 +38,6 @@ namespace ClassicUO.Game.Data
 {
     internal static class ServerErrorMessages
     {
-        private static readonly Tuple<int, string>[] _loginErrors =
-        {
-            Tuple.Create(3000007, ResErrorMessages.IncorrectPassword),
-            Tuple.Create(3000009, ResErrorMessages.CharacterDoesNotExist),
-            Tuple.Create(3000006, ResErrorMessages.CharacterAlreadyExists),
-            Tuple.Create(3000016, ResErrorMessages.ClientCouldNotAttachToServer),
-            Tuple.Create(3000017, ResErrorMessages.ClientCouldNotAttachToServer),
-            Tuple.Create(3000012, ResErrorMessages.AnotherCharacterOnline),
-            Tuple.Create(3000013, ResErrorMessages.ErrorInSynchronization),
-            Tuple.Create(3000005, ResErrorMessages.IdleTooLong),
-            Tuple.Create(-1, ResErrorMessages.CouldNotAttachServer),
-            Tuple.Create(-1, ResErrorMessages.CharacterTransferInProgress)
-        };
-
         private static readonly Tuple<int, string>[] _errorCode =
         {
             Tuple.Create(3000018, ResErrorMessages.CharacterPasswordInvalid),
@@ -84,21 +70,35 @@ namespace ClassicUO.Game.Data
             Tuple.Create(3000037, ResErrorMessages.CouldntConnectToUO)
         };
 
-        public static string GetError(byte packetID, byte code)
+        private static string GetLoginError(ClilocLoader cliloc, byte code, (int min, int max) delay)
+        {
+            return code switch
+            {
+                0 => cliloc.GetString(3000007, ResErrorMessages.IncorrectPassword),
+                1 => cliloc.GetString(3000009, ResErrorMessages.CharacterDoesNotExist),
+                2 => cliloc.GetString(3000006, ResErrorMessages.CharacterAlreadyExists),
+                3 => cliloc.GetString(3000016, ResErrorMessages.ClientCouldNotAttachToServer),
+                4 => cliloc.GetString(3000017, ResErrorMessages.ClientCouldNotAttachToServer),
+                5 => cliloc.GetString(3000012, ResErrorMessages.AnotherCharacterOnline),
+                6 => cliloc.GetString(3000013, ResErrorMessages.ErrorInSynchronization),
+                7 => cliloc.GetString(3000005, ResErrorMessages.IdleTooLong),
+                8 => cliloc.GetString(-1, ResErrorMessages.CouldNotAttachServer),
+                9 => cliloc.GetString(-1, ResErrorMessages.CharacterTransferInProgress),
+                10 => cliloc.GetString(-1, ResErrorMessages.NameIsInvalid),
+                13 => cliloc.Translate(1161061, $"{delay.min}\t{delay.max}"),
+                14 => cliloc.Translate(1161062, $"{delay.min}\t{delay.max}"),
+                _ => $"Unkown error #{code}"
+            };
+        }
+
+        public static string GetError(byte packetID, byte code, (int min, int max) delay = default)
         {
             var cliloc = Client.Game.UO.FileManager.Clilocs;
 
             switch (packetID)
             {
                 case 0x53:
-                    if (code >= 10)
-                    {
-                        code = 9;
-                    }
-
-                    Tuple<int, string> t = _loginErrors[code];
-
-                    return cliloc.GetString(t.Item1, t.Item2);
+                    return GetLoginError(cliloc, code, delay);
 
                 case 0x85:
                     if (code >= 6)
@@ -106,7 +106,7 @@ namespace ClassicUO.Game.Data
                         code = 5;
                     }
 
-                    t = _errorCode[code];
+                    var t = _errorCode[code];
 
                     return cliloc.GetString(t.Item1, t.Item2);
 
