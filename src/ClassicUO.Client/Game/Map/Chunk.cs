@@ -38,6 +38,7 @@ using ClassicUO.Assets;
 using ClassicUO.Utility;
 using System;
 using System.Runtime.InteropServices;
+using System.Buffers;
 
 namespace ClassicUO.Game.Map
 {
@@ -123,14 +124,15 @@ namespace ClassicUO.Game.Map
                     }
                 }
 
-                if (im.StaticAddress != 0)
+                if (im.StaticAddress != 0 && im.StaticCount > 0)
                 {
+                    var staticsBlockBuffer = ArrayPool<StaticsBlock>.Shared.Rent((int)im.StaticCount);
+                    var staticsSpan = staticsBlockBuffer.AsSpan(0, (int)im.StaticCount);
                     im.StaticFile.Seek((long)im.StaticAddress, System.IO.SeekOrigin.Begin);
+                    im.StaticFile.Read(MemoryMarshal.AsBytes(staticsSpan));
 
-                    for (int i = 0, count = (int)im.StaticCount; i < count; ++i)
-                    {     
-                        var sb = im.StaticFile.Read<StaticsBlock>();
-
+                    foreach (ref var sb in staticsSpan)
+                    {
                         if (sb.Color != 0 && sb.Color != 0xFFFF)
                         {
                             int pos = (sb.Y << 3) + sb.X;
@@ -149,6 +151,8 @@ namespace ClassicUO.Game.Map
                             AddGameObject(staticObject, sb.X, sb.Y);
                         }
                     }
+
+                    ArrayPool<StaticsBlock>.Shared.Return(staticsBlockBuffer);
                 }
             }
         }
