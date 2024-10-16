@@ -1,8 +1,8 @@
 ﻿#region license
 
-// Copyright (c) 2021, andreakarasho
+// Copyright (c) 2024, andreakarasho
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 // 1. Redistributions of source code must retain the above copyright
@@ -16,7 +16,7 @@
 // 4. Neither the name of the copyright holder nor the
 //    names of its contributors may be used to endorse or promote products
 //    derived from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -53,7 +53,7 @@ namespace ClassicUO.IO
         public string Pattern => _pattern;
         public Dictionary<ulong, UOFileIndex> Hashes => _hashes;
 
-        
+
         protected override void Load()
         {
             base.Load();
@@ -99,14 +99,16 @@ namespace ClassicUO.IO
                     }
 
                     real_total++;
+
                     offset += headerLength;
 
-                    if (_hasExtra)
+                    if (_hasExtra && flag != 3)
                     {
                         long curpos = Position;
                         Seek(offset);
-                        short extra1 = (short) ReadInt();
-                        short extra2 = (short) ReadInt();
+
+                        var extra1 = ReadInt();
+                        var extra2 = ReadInt();
 
                         _hashes.Add
                         (
@@ -114,7 +116,7 @@ namespace ClassicUO.IO
                             new UOFileIndex
                             (
                                 StartAddress,
-                                (uint) Length,
+                                (uint)Length,
                                 offset + 8,
                                 compressedLength - 8,
                                 decompressedLength,
@@ -133,10 +135,12 @@ namespace ClassicUO.IO
                             new UOFileIndex
                             (
                                 StartAddress,
-                                (uint) Length,
+                                (uint)Length,
                                 offset,
                                 compressedLength,
-                                decompressedLength
+                                decompressedLength,
+                                flag == 3 ? 1 : 0,
+                                flag == 3 ? 1 : 0
                             )
                         );
                     }
@@ -183,14 +187,14 @@ namespace ClassicUO.IO
         {
             uint eax, ecx, edx, ebx, esi, edi;
             eax = ecx = edx = ebx = esi = edi = 0;
-            ebx = edi = esi = (uint) s.Length + 0xDEADBEEF;
+            ebx = edi = esi = (uint)s.Length + 0xDEADBEEF;
             int i = 0;
 
             for (i = 0; i + 12 < s.Length; i += 12)
             {
-                edi = (uint) ((s[i + 7] << 24) | (s[i + 6] << 16) | (s[i + 5] << 8) | s[i + 4]) + edi;
-                esi = (uint) ((s[i + 11] << 24) | (s[i + 10] << 16) | (s[i + 9] << 8) | s[i + 8]) + esi;
-                edx = (uint) ((s[i + 3] << 24) | (s[i + 2] << 16) | (s[i + 1] << 8) | s[i]) - esi;
+                edi = (uint)((s[i + 7] << 24) | (s[i + 6] << 16) | (s[i + 5] << 8) | s[i + 4]) + edi;
+                esi = (uint)((s[i + 11] << 24) | (s[i + 10] << 16) | (s[i + 9] << 8) | s[i + 8]) + esi;
+                edx = (uint)((s[i + 3] << 24) | (s[i + 2] << 16) | (s[i + 1] << 8) | s[i]) - esi;
                 edx = (edx + ebx) ^ (esi >> 28) ^ (esi << 4);
                 esi += edi;
                 edi = (edi - edx) ^ (edx >> 26) ^ (edx << 6);
@@ -210,15 +214,15 @@ namespace ClassicUO.IO
                 switch (s.Length - i)
                 {
                     case 12:
-                        esi += (uint) s[i + 11] << 24;
+                        esi += (uint)s[i + 11] << 24;
                         goto case 11;
 
                     case 11:
-                        esi += (uint) s[i + 10] << 16;
+                        esi += (uint)s[i + 10] << 16;
                         goto case 10;
 
                     case 10:
-                        esi += (uint) s[i + 9] << 8;
+                        esi += (uint)s[i + 9] << 8;
                         goto case 9;
 
                     case 9:
@@ -226,15 +230,15 @@ namespace ClassicUO.IO
                         goto case 8;
 
                     case 8:
-                        edi += (uint) s[i + 7] << 24;
+                        edi += (uint)s[i + 7] << 24;
                         goto case 7;
 
                     case 7:
-                        edi += (uint) s[i + 6] << 16;
+                        edi += (uint)s[i + 6] << 16;
                         goto case 6;
 
                     case 6:
-                        edi += (uint) s[i + 5] << 8;
+                        edi += (uint)s[i + 5] << 8;
                         goto case 5;
 
                     case 5:
@@ -242,15 +246,15 @@ namespace ClassicUO.IO
                         goto case 4;
 
                     case 4:
-                        ebx += (uint) s[i + 3] << 24;
+                        ebx += (uint)s[i + 3] << 24;
                         goto case 3;
 
                     case 3:
-                        ebx += (uint) s[i + 2] << 16;
+                        ebx += (uint)s[i + 2] << 16;
                         goto case 2;
 
                     case 2:
-                        ebx += (uint) s[i + 1] << 8;
+                        ebx += (uint)s[i + 1] << 8;
                         goto case 1;
 
                     case 1:
@@ -267,10 +271,10 @@ namespace ClassicUO.IO
                 edi = (edi ^ edx) - ((edx >> 18) ^ (edx << 14));
                 eax = (esi ^ edi) - ((edi >> 8) ^ (edi << 24));
 
-                return ((ulong) edi << 32) | eax;
+                return ((ulong)edi << 32) | eax;
             }
 
-            return ((ulong) esi << 32) | eax;
+            return ((ulong)esi << 32) | eax;
         }
     }
 }
