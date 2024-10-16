@@ -190,10 +190,10 @@ namespace ClassicUO.Renderer.Animations
                     index = new IndexAnimation();
                     var indices = _animationLoader.GetIndices
                     (
-                        _animationLoader.FileManager.Version, 
+                        _animationLoader.FileManager.Version,
                         id,
                         ref hue,
-                        ref index.Flags, 
+                        ref index.Flags,
                         out index.FileIndex,
                         out index.Type,
                         out index.MountedHeightOffset
@@ -245,8 +245,8 @@ namespace ClassicUO.Renderer.Animations
                     }
                 }
             } while (index == null);
-           
-            useUOP = index.Flags.HasFlag(AnimationFlags.UseUopAnimation);
+
+            useUOP = (index.Flags & AnimationFlags.UseUopAnimation) != 0;
             index.Hue = hue;
 
             if (useUOP)
@@ -399,7 +399,7 @@ namespace ClassicUO.Renderer.Animations
 
             ushort hue = 0;
 
-            if (_dataIndex[graphic] != null && _dataIndex[graphic].FileIndex == 0 && !_dataIndex[graphic].Flags.HasFlag(AnimationFlags.UseUopAnimation))
+            if (_dataIndex[graphic] != null && _dataIndex[graphic].FileIndex == 0 && (_dataIndex[graphic].Flags & AnimationFlags.UseUopAnimation) == 0)
                 _ = isCorpse ? _animationLoader.ReplaceCorpse(ref graphic, ref hue) : _animationLoader.ReplaceBody(ref graphic, ref hue);
         }
 

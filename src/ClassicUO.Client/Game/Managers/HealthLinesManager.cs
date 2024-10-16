@@ -71,6 +71,7 @@ namespace ClassicUO.Game.Managers
             int showWhen = ProfileManager.CurrentProfile.MobileHPShowWhen;
             var useNewTargetSystem = ProfileManager.CurrentProfile.UseNewTargetSystem;
             var animations = Client.Game.UO.Animations;
+            var isEnabled = IsEnabled;
 
             foreach (Mobile mobile in _world.Mobiles.Values)
             {
@@ -114,7 +115,7 @@ namespace ClassicUO.Game.Managers
                 p.Y += (int)(mobile.Offset.Y - mobile.Offset.Z) + 22 + 5;
                 var offsetY = 0;
 
-                if (IsEnabled)
+                if (isEnabled)
                 {
                     if (mode != 1 && !mobile.IsDead)
                     {
@@ -196,7 +197,7 @@ namespace ClassicUO.Game.Managers
                     continue;
                 }
 
-                if ((IsEnabled && mode >= 1) || newTargSystem || forceDraw)
+                if ((isEnabled && mode >= 1) || newTargSystem || forceDraw)
                 {
                     DrawHealthLine(batcher, mobile, p.X, p.Y, offsetY, passive, newTargSystem);
                 }
@@ -236,7 +237,6 @@ namespace ClassicUO.Game.Managers
             }
 
             const int MULTIPLER = 1;
-
 
             if (newTargetSystem && mobile != null && mobile.Serial != _world.Player.Serial)
             {

@@ -301,7 +301,7 @@ namespace ClassicUO.Assets
 
             flags = mobInfo.Flags;
 
-            if (mobInfo.Flags.HasFlag(AnimationFlags.UseUopAnimation))
+            if ((mobInfo.Flags & AnimationFlags.UseUopAnimation) != 0)
             {
                 if (animType == AnimationGroupsType.Unknown)
                     animType = mobInfo.Type != AnimationGroupsType.Unknown ? mobInfo.Type : CalculateTypeByGraphic(body);
