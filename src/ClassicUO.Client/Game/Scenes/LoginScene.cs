@@ -691,27 +691,35 @@ namespace ClassicUO.Game.Scenes
             uint seed = p.ReadUInt32BE();
 
             NetClient.Socket.Disconnect();
+            NetClient.Socket.Connected -= OnNetClientConnected;
 
-            // Ignore the packet, connect with the original IP regardless (i.e. websocket proxying)
-            if (Settings.GlobalSettings.IgnoreRelayIp || ip == 0)
+            try
             {
-                Log.Trace("Ignoring relay server packet IP address");
-                NetClient.Socket.Connect(Settings.GlobalSettings.IP, Settings.GlobalSettings.Port);
-            }
-            else
-                NetClient.Socket.Connect(new IPAddress(ip).ToString(), port);
-
-            if (NetClient.Socket.IsConnected)
-            {
-                NetClient.Socket.Encryption?.Initialize(false, seed);
-                NetClient.Socket.EnableCompression();
-                unsafe
+                // Ignore the packet, connect with the original IP regardless (i.e. websocket proxying)
+                if (Settings.GlobalSettings.IgnoreRelayIp || ip == 0)
                 {
-                    Span<byte> b = stackalloc byte[4] { (byte)(seed >> 24), (byte)(seed >> 16), (byte)(seed >> 8), (byte)seed };
-                    NetClient.Socket.Send(b, true, true);
+                    Log.Trace("Ignoring relay server packet IP address");
+                    NetClient.Socket.Connect(Settings.GlobalSettings.IP, Settings.GlobalSettings.Port);
                 }
+                else
+                    NetClient.Socket.Connect(new IPAddress(ip).ToString(), port);
 
-                NetClient.Socket.Send_SecondLogin(Account, Password, seed);
+                if (NetClient.Socket.IsConnected)
+                {
+                    NetClient.Socket.Encryption?.Initialize(false, seed);
+                    NetClient.Socket.EnableCompression();
+                    unsafe
+                    {
+                        Span<byte> b = stackalloc byte[4] { (byte)(seed >> 24), (byte)(seed >> 16), (byte)(seed >> 8), (byte)seed };
+                        NetClient.Socket.Send(b, true, true);
+                    }
+
+                    NetClient.Socket.Send_SecondLogin(Account, Password, seed);
+                }
+            }
+            finally
+            {
+                NetClient.Socket.Connected += OnNetClientConnected;
             }
         }
 
