@@ -2295,6 +2295,9 @@ namespace ClassicUO.Game.UI.Gumps
                 profile.DisableSystemChat = b;
             }), true, page);
             content.BlankLine();
+            content.AddToRight(new CheckboxWithLabel(lang.GetGeneral.AutoAvoidObstacules, isChecked: profile.AutoAvoidObstacules, valueChanged: (b) => { profile.AutoAvoidObstacules = b; }), true, page);
+
+            content.BlankLine();
             content.AddToRight(new CheckboxWithLabel(lang.GetTazUO.EnableImprovedBuffGump, 0, profile.UseImprovedBuffBar, (b) =>
             {
                 profile.UseImprovedBuffBar = b;

@@ -191,6 +191,8 @@ namespace ClassicUO.Configuration
             public string ObjFade { get; set; } = "Enable object fading";
             public string TextFade { get; set; } = "Enable text fading";
             public string CursorRange { get; set; } = "Show target range indicator";
+
+            public string AutoAvoidObstacules { get; set; } = "Auto Avoid Obstacules";
             public string DragSelectHP { get; set; } = "Enable drag select for health bars";
             public string DragKeyMod { get; set; } = "Key modifier";
             public string DragPlayersOnly { get; set; } = "Players only";

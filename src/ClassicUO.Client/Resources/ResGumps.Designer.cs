@@ -3682,7 +3682,15 @@ namespace ClassicUO.Resources {
                 return ResourceManager.GetString("ShowTarRangeIndic", resourceCulture);
             }
         }
-        
+
+        public static string AutoAvoidObstacules
+        {
+            get
+            {
+                return ResourceManager.GetString("AutoAvoidObstacules", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Show your coordinates.
         /// </summary>
