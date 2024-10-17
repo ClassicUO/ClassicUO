@@ -9,9 +9,9 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private static string[] updateTexts = {
             "/c[white][3.24.0]/cd\n" +
-                "- Updated the algorithm for reading mul encryption", +
-                "- Fix creation of the scroll in the list infobar manager",
-                "- Fix ignoring player also in chat too",
+                "- Updated the algorithm for reading mul encryption\n" +
+                "- Fix creation of the scroll in the list infobar manager\n" +
+                "- Fix ignoring player also in chat too\n" +
                 "- Add Auto Avoid Obstacules",
 
             "/c[white][3.23.2]/cd\n" +
