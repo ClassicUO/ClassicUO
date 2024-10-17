@@ -68,7 +68,6 @@ namespace ClassicUO.Utility
                 }
             }
 
-            // Convert Span<ushort> to array, sort it, and copy back
             ushort[] array = table.ToArray();
             Array.Sort(array);
             array.AsSpan().CopyTo(table);
@@ -79,6 +78,7 @@ namespace ClassicUO.Utility
             Span<char> symbolTable = stackalloc char[256];
             Span<char> frequency = stackalloc char[256];
             Span<int> partialInput = stackalloc int[256 * 3];
+            partialInput.Clear();
 
             for (var i = 0; i < 256; i++)
                 symbolTable[i] = (char)i;
