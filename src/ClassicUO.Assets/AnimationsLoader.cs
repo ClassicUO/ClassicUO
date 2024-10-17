@@ -1297,19 +1297,17 @@ namespace ClassicUO.Assets
              * zlibReader.Skip(sizeof(UOPAnimationHeader) * direction * frameCount);
              * but we can't. So we have to walk through the frames to seek to where we need to go.
              */
-            ref readonly var animHeaderInfo = ref Unsafe.AsRef<UOPAnimationHeader>(reader.PositionAddress.ToPointer());
-
             for (ushort currentDir = 0; currentDir <= direction; currentDir++)
             {
                 for (ushort frameNum = 0; frameNum < frameCount; frameNum++)
                 {
                     long start = reader.Position;
-                    animHeaderInfo = ref Unsafe.AsRef<UOPAnimationHeader>(reader.PositionAddress.ToPointer());
+                    ref readonly var animHeaderInfo = ref Unsafe.AsRef<UOPAnimationHeader>(reader.PositionAddress.ToPointer());
 
                     if (animHeaderInfo.Group != animGroup)
                     {
                         /* Something bad has happened. Just return. */
-                        return Span<FrameInfo>.Empty;
+                        // return Span<FrameInfo>.Empty;
                     }
 
                     /* FrameID is 1's based and just keeps increasing, regardless of direction.
