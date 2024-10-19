@@ -5,8 +5,8 @@
     <ApplicationIcon>cuoicon.ico</ApplicationIcon>
     <AssemblyName>ClassicUO</AssemblyName>
     <RootNamespace>ClassicUO</RootNamespace>
-    <AssemblyVersion>3.23.2</AssemblyVersion>
-    <FileVersion>3.23.2</FileVersion>
+    <AssemblyVersion>3.24.0</AssemblyVersion>
+    <FileVersion>3.24.0</FileVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)'=='Release'">
@@ -100,7 +100,9 @@
       <HintPath>..\..\..\..\..\..\..\..\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2\System.Windows.Forms.dll</HintPath>
     </Reference>
   </ItemGroup>
-
+  <ItemGroup>
+    <PackageReference Update="System.Text.Json" Version="8.0.5" />
+  </ItemGroup>
 
   <Target Name="CopyExternalDeps_build" AfterTargets="Build">
     <Copy SourceFiles="@(DataFiles_x64)" DestinationFolder="$(TargetDir)\x64\" SkipUnchangedFiles="true" />

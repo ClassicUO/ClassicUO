@@ -1,6 +1,6 @@
 ﻿#region license
 
-// Copyright (c) 2021, andreakarasho
+// Copyright (c) 2024, andreakarasho
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -158,17 +158,39 @@ namespace ClassicUO.Assets
             _file.SetData(entry.Address, entry.FileSize);
             _file.Seek(entry.Offset);
 
-            IntPtr dataStart = _file.PositionAddress;
 
-            var pixels = new uint[entry.Width * entry.Height];
-
-            int* lookuplist = (int*)dataStart;
-
-            int gsize;
-
-            for (int y = 0, half_len = entry.Length >> 2; y < entry.Height; y++)
+            ReadOnlySpan<byte> output;
+            var newFileFormat = UOFileManager.Version >= ClientVersion.CV_7010400;
+            if (newFileFormat)
             {
-                if (y < entry.Height - 1)
+                var cbuf = _file.ReadArray(entry.Length);
+                var dbuf = new byte[entry.DecompressedLength];
+                var result = ZLib.Decompress(cbuf, 0, dbuf, dbuf.Length);
+                if (result != ZLib.ZLibError.Okay)
+                {
+                    return default;
+                }
+
+                output = BwtDecompress.Decompress(dbuf);
+            }
+            else
+            {
+                output = new ReadOnlySpan<byte>(_file.PositionAddress.ToPointer(), entry.Length);
+            }
+
+            var reader = new StackDataReader(output);
+            var w = newFileFormat ? reader.ReadUInt32LE() : (uint)entry.Width;
+            var h = newFileFormat ? reader.ReadUInt32LE() : (uint)entry.Height;
+
+            IntPtr dataStart = reader.PositionAddress;
+            var pixels = new uint[w * h];
+            int* lookuplist = (int*)dataStart;
+            int gsize;
+            var len = reader.Remaining;
+
+            for (int y = 0, half_len = len >> 2; y < h; y++)
+            {
+                if (y < h - 1)
                 {
                     gsize = lookuplist[y + 1] - lookuplist[y];
                 }
@@ -179,16 +201,16 @@ namespace ClassicUO.Assets
 
                 GumpBlock* gmul = (GumpBlock*)(dataStart + (lookuplist[y] << 2));
 
-                int pos = y * entry.Width;
+                var pos = y * w;
 
                 for (int i = 0; i < gsize; i++)
                 {
                     uint val = gmul[i].Value;
 
-                        if (color != 0 && val != 0)
-                        {
-                            val = HuesLoader.Instance.ApplyHueRgba5551(gmul[i].Value, color);
-                        }
+                    if (color != 0 && val != 0)
+                    {
+                        val = HuesLoader.Instance.ApplyHueRgba5551(gmul[i].Value, color);
+                    }
 
                     if (val != 0)
                     {
@@ -197,7 +219,7 @@ namespace ClassicUO.Assets
                     }
 
                     var count = gmul[i].Run;
-                    pixels.AsSpan().Slice(pos, count).Fill(val);
+                    pixels.AsSpan().Slice((int)pos, count).Fill(val);
                     pos += count;
                 }
             }
@@ -205,40 +227,10 @@ namespace ClassicUO.Assets
             return new GumpInfo()
             {
                 Pixels = pixels,
-                Width = entry.Width,
-                Height = entry.Height
+                Width = (int)w,
+                Height = (int)h
             };
         }
-
-        //private unsafe void AddPNGSpriteToAtlas(TextureAtlas atlas, uint index, Texture2D texture)
-        //{
-        //    uint[] buffer = null;
-
-        //    Span<uint> pixels = texture.Width * texture.Height <= 1024 ? stackalloc uint[1024] : (buffer = System.Buffers.ArrayPool<uint>.Shared.Rent(texture.Width * texture.Height));
-
-        //    Color[] pixelColors = new Color[texture.Width * texture.Height];
-        //    texture.GetData<Color>(pixelColors);
-
-        //    for (int i = 0; i < pixelColors.Length; i++)
-        //    {
-        //        pixels[i] = pixelColors[i].PackedValue;
-        //    }
-
-        //    try
-        //    {
-        //        ref var spriteInfo = ref _spriteInfos[index];
-
-        //        spriteInfo.Texture = atlas.AddSprite(pixels, texture.Width, texture.Height, out spriteInfo.UV);
-        //        _picker.Set(index, texture.Width, texture.Height, pixels);
-        //    }
-        //    finally
-        //    {
-        //        if (buffer != null)
-        //        {
-        //            System.Buffers.ArrayPool<uint>.Shared.Return(buffer, true);
-        //        }
-        //    }
-        //}
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         private ref struct GumpBlock

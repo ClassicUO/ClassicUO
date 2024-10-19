@@ -357,5 +357,46 @@ namespace ClassicUO.Game.Data
         {
             return g == 0x038A;
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsOutStamina()
+        {
+            return World.Player.Stamina != World.Player.StaminaMax;
+        }
+        // ## BEGIN - END ## // MISC2
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool isHumanAndMonster(ushort g)
+        {
+            switch (g)
+            {
+                case 0x0192:
+                case 0x0193:
+                    return true;
+
+                case 0x02B6:
+                    return true;
+
+                case 0x02B7:
+                    return true;
+
+                default:
+                    return false;
+            }
+            // foreach (Mobile mobile in World.Mobiles.Values)
+            // {
+            //     if (World.Mobiles.Get(mobile.Serial).Distance <= 1 && mobile.IsHuman)
+            //     {
+            //         return true;
+            //     }
+
+            //     if (World.Mobiles.Get(mobile.Serial).Distance <= 1 && !mobile.IsHuman)
+            //     {
+            //         return true;
+            //     }
+            //     return false;
+            // }
+            // return false;
+        }
     }
+    
 }

@@ -38,4 +38,8 @@
     <ProjectReference Include="..\ClassicUO.Utility\ClassicUO.Utility.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Update="System.Text.Json" Version="8.0.5" />
+  </ItemGroup>
+
 </Project>
