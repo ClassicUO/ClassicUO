@@ -429,7 +429,7 @@ namespace ClassicUO.Renderer.Animations
         {
             public int FileIndex;
             public ushort Hue;
-            public AnimationFlags  Flags;
+            public AnimationFlags Flags;
             public AnimationGroup[] Groups;
             public AnimationGroupUop[] UopGroups;
             public sbyte MountedHeightOffset;
