@@ -158,7 +158,20 @@ namespace ClassicUO.Network
             if (data.IsEmpty)
                 return;
 
-            (fromPlugins ? _pluginsBuffer : _buffer).Enqueue(data);
+            if (fromPlugins)
+            {
+                lock (_pluginsBuffer)
+                {
+                    _pluginsBuffer.Enqueue(data);
+                }
+            }
+            else
+            {
+                lock (_buffer)
+                {
+                    _buffer.Enqueue(data);
+                }
+            }
         }
 
         private void AnalyzePacket(World world, ReadOnlySpan<byte> data, int offset)
