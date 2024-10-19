@@ -2639,7 +2639,7 @@ namespace ClassicUO.Game.UI.Gumps
             _newTargetSystem = AddCheckBox(
                 rightArea,
                 ResGumps.NewTargetSystem,
-                _currentProfile.HoldDownKeyTab,
+                _currentProfile.UseNewTargetSystem,
                 startX,
                 startY
             );
