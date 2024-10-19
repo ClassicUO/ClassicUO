@@ -277,29 +277,32 @@ namespace ClassicUO.Game.Managers
                 var topTargetY = height + centerY + 8 + 22 + offsetY;
 
                 ref readonly var newTargGumpInfo = ref Client.Game.UO.Gumps.GetGump(topGump);
-                batcher.Draw(
-                   newTargGumpInfo.Texture,
-                   new Vector2(targetX, y - topTargetY),
-                   newTargGumpInfo.UV,
-                   hueVec
-               );
+                if (newTargGumpInfo.Texture != null)
+                    batcher.Draw(
+                        newTargGumpInfo.Texture,
+                        new Vector2(targetX, y - topTargetY),
+                        newTargGumpInfo.UV,
+                        hueVec
+                    );
 
-                batcher.Draw(
-                   hueGumpInfo.Texture,
-                   new Vector2(targetX, y - topTargetY),
-                   hueGumpInfo.UV,
-                   hueVec
-                );
+                if (hueGumpInfo.Texture != null)
+                    batcher.Draw(
+                        hueGumpInfo.Texture,
+                        new Vector2(targetX, y - topTargetY),
+                        hueGumpInfo.UV,
+                        hueVec
+                    );
 
                 y += 7 + newTargGumpInfo.UV.Height / 2 - centerY;
 
                 newTargGumpInfo = ref Client.Game.UO.Gumps.GetGump(bottomGump);
-                batcher.Draw(
-                   newTargGumpInfo.Texture,
-                   new Vector2(targetX, y - 1 - newTargGumpInfo.UV.Height / 2f),
-                   newTargGumpInfo.UV,
-                   hueVec
-               );
+                if (newTargGumpInfo.Texture != null)
+                    batcher.Draw(
+                        newTargGumpInfo.Texture,
+                        new Vector2(targetX, y - 1 - newTargGumpInfo.UV.Height / 2f),
+                        newTargGumpInfo.UV,
+                        hueVec
+                    );
             }
 
 
