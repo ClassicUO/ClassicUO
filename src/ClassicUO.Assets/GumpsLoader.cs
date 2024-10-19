@@ -177,6 +177,11 @@ namespace ClassicUO.Assets
                 reader = new StackDataReader(dbuf);
                 w = reader.ReadUInt32LE();
                 h = reader.ReadUInt32LE();
+
+                if (entry.Width <= 0)
+                    entry.Width = (int)w;
+                if (entry.Height <= 0)
+                    entry.Height = (int)h;
             }
 
             Span<uint> pixels = new uint[w * h];
