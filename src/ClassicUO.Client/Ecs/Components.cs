@@ -1,10 +1,11 @@
 using System.Runtime.CompilerServices;
 using ClassicUO.Game.Data;
 using Microsoft.Xna.Framework;
+using TinyEcs;
 
 namespace ClassicUO.Ecs;
 
-struct WorldPosition
+struct WorldPosition : IComponent
 {
     public ushort X, Y;
     public sbyte Z;
@@ -17,51 +18,51 @@ struct WorldPosition
     }
 }
 
-struct Graphic
+struct Graphic : IComponent
 {
     public ushort Value;
 }
 
-struct Hue
+struct Hue : IComponent
 {
     public ushort Value;
 }
 
-struct Facing
+struct Facing : IComponent
 {
     public ClassicUO.Game.Data.Direction Value;
 }
 
-struct NetworkSerial
+struct NetworkSerial : IComponent
 {
     public uint Value;
 }
 
-struct Amount
+struct Amount : IComponent
 {
     public int Value;
 }
 
-struct ContainedInto;
+struct ContainedInto : IComponent;
 
-struct Hitpoints
+struct Hitpoints : IComponent
 {
     public ushort Value, MaxValue;
 }
 
-struct Mana
+struct Mana : IComponent
 {
     public ushort Value, MaxValue;
 }
 
-struct Stamina
+struct Stamina : IComponent
 {
     public ushort Value, MaxValue;
 }
 
-struct Player;
+struct Player : IComponent;
 
-struct PlayerData
+struct PlayerData : IComponent
 {
     public ushort Str, StrMax;
     public ushort Dex, DexMax;
@@ -90,7 +91,7 @@ struct EquipmentArray
     private ulong _a;
 }
 
-struct EquipmentSlots
+struct EquipmentSlots : IComponent
 {
     private EquipmentArray _array;
 
@@ -101,10 +102,10 @@ struct EquipmentSlots
     }
 }
 
-public struct ScreenPositionOffset
+public struct ScreenPositionOffset : IComponent
 {
     public Vector2 Value;
 }
 
-struct IsStatic;
-struct IsTile;
+struct IsStatic : IComponent;
+struct IsTile : IComponent;

@@ -60,7 +60,7 @@ readonly struct PlayerMovementPlugin : IPlugin
 
         var enqueuePlayerStepsFn = EnqueuePlayerSteps;
         scheduler.AddSystem(enqueuePlayerStepsFn, threadingType: ThreadingMode.Single)
-            .RunIf((Res<MouseContext> mouseCtx, Res<PlayerStepsContext> playerRequestedSteps, Time time, Query<(WorldPosition, Facing, MobileSteps, MobAnimation), With<Player>> playerQuery)
+            .RunIf((Res<MouseContext> mouseCtx, Res<PlayerStepsContext> playerRequestedSteps, Time time, Query<TinyEcs.Data<WorldPosition, Facing, MobileSteps, MobAnimation>, With<Player>> playerQuery)
                 => mouseCtx.Value.NewState.RightButton == Microsoft.Xna.Framework.Input.ButtonState.Pressed &&
                    playerRequestedSteps.Value.LastStep < time.Total && playerRequestedSteps.Value.Index < 5 &&
                    playerQuery.Count() > 0);
@@ -82,9 +82,9 @@ readonly struct PlayerMovementPlugin : IPlugin
         Res<MouseContext> mouseCtx,
         Res<NetClient> network,
         Res<PlayerStepsContext> playerRequestedSteps,
-        Query<(WorldPosition, Facing, MobileSteps, MobAnimation), With<Player>> playerQuery,
-        Query<(WorldPosition, Graphic, Optional<TileStretched>), With<IsTile>> tilesQuery,
-        Query<(WorldPosition, Graphic), (Without<IsTile>, Without<MobAnimation>)> staticsQuery,
+        Query<TinyEcs.Data<WorldPosition, Facing, MobileSteps, MobAnimation>, With<Player>> playerQuery,
+        Query<TinyEcs.Data<WorldPosition, Graphic, TileStretched>, Filter<With<IsTile>, Optional<TileStretched>>> tilesQuery,
+        Query<TinyEcs.Data<WorldPosition, Graphic>, TinyEcs.Filter<Without<IsTile>, Without<MobAnimation>>> staticsQuery,
         Time time
     )
     {
@@ -260,7 +260,8 @@ readonly struct PlayerMovementPlugin : IPlugin
         }
     }
 
-    void ParseDeniedSteps(EventReader<RejectedStep> rejectedSteps, Res<PlayerStepsContext> playerRequestedSteps, Query<(WorldPosition, Facing, MobileSteps), With<Player>> playerQuery)
+    void ParseDeniedSteps(EventReader<RejectedStep> rejectedSteps, Res<PlayerStepsContext> playerRequestedSteps, 
+        Query<Data<WorldPosition, Facing, MobileSteps>, With<Player>> playerQuery)
     {
         Console.WriteLine("step denied");
         var player = playerQuery.Single();
@@ -293,18 +294,30 @@ readonly struct PlayerMovementPlugin : IPlugin
         playerRequestedSteps.Value.ResyncSent = false;
     }
 
-    private static void FillListOfItemsAtPosition(List<TerrainInfo> list, Query tileQuery, Query staticsQuery, TileDataLoader tileData, int x, int y)
+    private static void FillListOfItemsAtPosition
+    (
+        List<TerrainInfo> list,
+        Query<TinyEcs.Data<WorldPosition, Graphic, TileStretched>, Filter<With<IsTile>, Optional<TileStretched>>> tileQuery,
+        Query<TinyEcs.Data<WorldPosition, Graphic>, TinyEcs.Filter<Without<IsTile>, Without<MobAnimation>>> staticsQuery, 
+        TileDataLoader tileData, 
+        int x, int y
+    )
     {
         list.Clear();
 
-        tileQuery.Each(
-            (ref WorldPosition pos, ref Graphic graphic, ref TileStretched stretched) =>
+        foreach ((var entities, var posA, var graphicA, var tileStretechA) in tileQuery)
+        {
+            for (var i = 0; i < entities.Length; ++i)
             {
+                ref var pos = ref posA[i];
+                ref var graphic = ref graphicA[i];
+                ref var stretched = ref tileStretechA.IsEmpty ? ref Unsafe.NullRef<TileStretched>() : ref tileStretechA[i];
+
                 if (pos.X != x || pos.Y != y)
-                    return;
+                    continue;
 
                 if (!((graphic.Value < 0x01AE && graphic.Value != 2) || (graphic.Value > 0x01B5 && graphic.Value != 0x1DB)))
-                    return;
+                    continue;
 
                 ref var landData = ref tileData.LandData[graphic.Value];
                 var flags = TerrainFlags.ImpassableOrSurface;
@@ -345,13 +358,19 @@ readonly struct PlayerMovementPlugin : IPlugin
                 }
 
                 list.Add(tinfo);
-            });
+            }
+        }
 
-        staticsQuery.Each(
-            (ref WorldPosition pos, ref Graphic graphic) =>
+
+        foreach ((var entities, var posA, var graphicA) in staticsQuery)
+        {
+            for (var i = 0; i < entities.Length; ++i)
             {
+                ref var pos = ref posA[i];
+                ref var graphic = ref graphicA[i];
+
                 if (pos.X != x || pos.Y != y)
-                    return;
+                    continue;
 
                 ref var staticData = ref tileData.StaticData[graphic.Value];
                 TerrainFlags flags = 0;
@@ -386,10 +405,20 @@ readonly struct PlayerMovementPlugin : IPlugin
 
                     list.Add(tinfo);
                 }
-            });
+            }
+        }
     }
 
-    private static void GetMinMaxZ(List<TerrainInfo> list, Query tileQuery, Query staticsQuery, TileDataLoader tileData, Direction facing, int playerX, int playerY, int playerZ, out int minZ, out int maxZ)
+    private static void GetMinMaxZ
+    (
+        List<TerrainInfo> list,
+        Query<TinyEcs.Data<WorldPosition, Graphic, TileStretched>, Filter<With<IsTile>, Optional<TileStretched>>> tileQuery,
+        Query<TinyEcs.Data<WorldPosition, Graphic>, TinyEcs.Filter<Without<IsTile>, Without<MobAnimation>>> staticsQuery, 
+        TileDataLoader tileData, 
+        Direction facing, 
+        int playerX, int playerY, int playerZ, 
+        out int minZ, out int maxZ
+    )
     {
         Span<int> offX = stackalloc int[]
         {
@@ -477,7 +506,15 @@ readonly struct PlayerMovementPlugin : IPlugin
         maxZ += 2;
     }
 
-    private static bool CheckMovement(List<TerrainInfo> list, Query tileQuery, Query staticsQuery, TileDataLoader tileData, Direction facing, ref ushort playerX, ref ushort playerY, ref sbyte playerZ)
+    private static bool CheckMovement
+    (
+        List<TerrainInfo> list, 
+        Query<TinyEcs.Data<WorldPosition, Graphic, TileStretched>, Filter<With<IsTile>, Optional<TileStretched>>> tileQuery,
+        Query<TinyEcs.Data<WorldPosition, Graphic>, TinyEcs.Filter<Without<IsTile>, Without<MobAnimation>>> staticsQuery, 
+        TileDataLoader tileData,
+        Direction facing, 
+        ref ushort playerX, ref ushort playerY, ref sbyte playerZ
+    )
     {
         GetNewXY(facing, out var offsetX, out var offsetY);
         var newX = (ushort)(playerX + offsetX);

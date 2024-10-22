@@ -1,11 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.Net;
 using ClassicUO.Configuration;
 using ClassicUO.IO;
 using ClassicUO.Network;
-using ClassicUO.Network.Encryption;
 using ClassicUO.Utility;
+using System;
+using System.Collections.Generic;
+using System.Net;
 using TinyEcs;
 
 namespace ClassicUO.Ecs.NetworkPlugins;
@@ -21,9 +20,11 @@ readonly struct LoginPacketsPlugin : IPlugin
             Res<PacketsMap> packetsMap,
             Res<NetClient> network,
             Res<GameContext> gameCtx
-        ) => {
+        ) =>
+        {
             // server list
-            packetsMap.Value[0xA8] = buffer => {
+            packetsMap.Value[0xA8] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
                 var flags = reader.ReadUInt8();
                 var count = reader.ReadUInt16BE();
@@ -41,11 +42,12 @@ readonly struct LoginPacketsPlugin : IPlugin
                     Console.WriteLine("server entry -> {0}", name);
                 }
 
-                network.Value.Send_SelectServer((byte) serverList[0].index);
+                network.Value.Send_SelectServer((byte)serverList[0].index);
             };
 
             // characters list
-            packetsMap.Value[0xA9] = buffer => {
+            packetsMap.Value[0xA9] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
                 var charactersCount = reader.ReadUInt8();
                 var characterNames = new List<string>();
@@ -62,7 +64,8 @@ readonly struct LoginPacketsPlugin : IPlugin
             };
 
             // server relay
-            packetsMap.Value[0x8C] = buffer => {
+            packetsMap.Value[0x8C] = buffer =>
+            {
                 var reader = new StackDataReader(buffer);
                 var ip = reader.ReadUInt32LE();
                 var port = reader.ReadUInt16BE();

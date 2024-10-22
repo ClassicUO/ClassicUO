@@ -70,55 +70,55 @@ sealed class NetworkEntitiesMap
             if (!world.Exists(id))
                 return false;
 
-            // Some entities might have a network entity associated [child].
-            // It's needed to remove from the dict these children entities.
-            // Filter search:
-            // - (*, id) && (NetworkSerial)
-            // - (id, *) && (NetworkSerial)
-            // Suddenly the world.Delete(id) call will delete the children ecs side.
-            var term0 = new QueryTerm(IDOp.Pair(Wildcard.ID, id), TermOp.With);
-            var term1 = new QueryTerm(IDOp.Pair(id, Wildcard.ID), TermOp.With);
-            var term2 = new QueryTerm(world.Entity<NetworkSerial>(), TermOp.DataAccess);
-            // var term3 = new QueryTerm(IDOp.Pair(world.Entity<EquippedItem>(), id), TermOp.Without);
+            //// Some entities might have a network entity associated [child].
+            //// It's needed to remove from the dict these children entities.
+            //// Filter search:
+            //// - (*, id) && (NetworkSerial)
+            //// - (id, *) && (NetworkSerial)
+            //// Suddenly the world.Delete(id) call will delete the children ecs side.
+            //var term0 = new QueryTerm(IDOp.Pair(Wildcard.ID, id), TermOp.With);
+            //var term1 = new QueryTerm(IDOp.Pair(id, Wildcard.ID), TermOp.With);
+            //var term2 = new QueryTerm(world.Entity<NetworkSerial>(), TermOp.DataAccess);
+            //// var term3 = new QueryTerm(IDOp.Pair(world.Entity<EquippedItem>(), id), TermOp.Without);
 
-            world.BeginDeferred();
-            using var iterator = world.GetQueryIterator([term0, term2]);
-            while (iterator.Next(out var arch))
-            {
-                var index = arch.GetComponentIndex<NetworkSerial>();
-                foreach (ref readonly var chunk in arch)
-                {
-                    var span = chunk.GetSpan<NetworkSerial>(index);
-                    foreach (ref var ser in span)
-                    {
-                        Console.WriteLine("  removing serial: 0x{0:X8} associated to 0x{1:X8}", ser.Value, serial);
-                        _toRemove.Add(ser.Value);
-                        // if (!Remove(world, ser.Value))
-                        // {
-                        //
-                        // }
-                    }
-                }
-            }
+            //world.BeginDeferred();
+            //using var iterator = world.GetQueryIterator([term0, term2]);
+            //while (iterator.Next(out var arch))
+            //{
+            //    var index = arch.GetComponentIndex<NetworkSerial>();
+            //    foreach (ref readonly var chunk in arch)
+            //    {
+            //        var span = chunk.GetSpan<NetworkSerial>(index);
+            //        foreach (ref var ser in span)
+            //        {
+            //            Console.WriteLine("  removing serial: 0x{0:X8} associated to 0x{1:X8}", ser.Value, serial);
+            //            _toRemove.Add(ser.Value);
+            //            // if (!Remove(world, ser.Value))
+            //            // {
+            //            //
+            //            // }
+            //        }
+            //    }
+            //}
 
-            using var iterator2 = world.GetQueryIterator([term1, term2]);
-            while (iterator2.Next(out var arch))
-            {
-                var index = arch.GetComponentIndex<NetworkSerial>();
-                foreach (ref readonly var chunk in arch)
-                {
-                    var span = chunk.GetSpan<NetworkSerial>(index);
-                    foreach (ref var ser in span)
-                    {
-                        Console.WriteLine("  removing serial: 0x{0:X8} associated to 0x{1:X8}", ser.Value, serial);
-                        _toRemove.Add(ser.Value);
-                        // if (!Remove(world, ser.Value))
-                        // {
-                        //
-                        // }
-                    }
-                }
-            }
+            //using var iterator2 = world.GetQueryIterator([term1, term2]);
+            //while (iterator2.Next(out var arch))
+            //{
+            //    var index = arch.GetComponentIndex<NetworkSerial>();
+            //    foreach (ref readonly var chunk in arch)
+            //    {
+            //        var span = chunk.GetSpan<NetworkSerial>(index);
+            //        foreach (ref var ser in span)
+            //        {
+            //            Console.WriteLine("  removing serial: 0x{0:X8} associated to 0x{1:X8}", ser.Value, serial);
+            //            _toRemove.Add(ser.Value);
+            //            // if (!Remove(world, ser.Value))
+            //            // {
+            //            //
+            //            // }
+            //        }
+            //    }
+            //}
 
             if (world.Has<EquipmentSlots>(id))
             {
@@ -895,7 +895,10 @@ readonly struct InGamePacketsPlugin : IPlugin
                     .Set(new WorldPosition() { X = x, Y = y, Z = 0 })
                     .Set(new Hue() { Value = hue })
                     .Set(new Amount() { Value = amount })
-                    .Add<ContainedInto>(parentEnt);
+                    .Add<ContainedInto>()
+                    ;
+
+                parentEnt.AddChild2(ent);
             };
 
             // deny move item
@@ -1044,7 +1047,9 @@ readonly struct InGamePacketsPlugin : IPlugin
                         .Set(new Hue() { Value = hue })
                         .Set(new WorldPosition() { X = x, Y = y, Z = (sbyte)gridIdx })
                         .Set(new Amount() { Value = amount })
-                        .Add<ContainedInto>(parentEnt);
+                        .Add<ContainedInto>()
+                        ;
+                    parentEnt.AddChild2(childEnt);
                 }
             };
 

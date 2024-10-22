@@ -11,7 +11,7 @@ namespace ClassicUO.Ecs;
 
 struct OnNewChunkRequest { public int Map; public int RangeStartX, RangeStartY, RangeEndX, RangeEndY; }
 
-struct TileStretched
+struct TileStretched : IComponent
 {
     public sbyte AvgZ, MinZ;
     public Renderer.UltimaBatcher2D.YOffsets Offset;
@@ -27,7 +27,7 @@ readonly struct TerrainPlugin : IPlugin
 
         var enqueueChunksRequestsFn = EnqueueChunksRequests;
         scheduler.AddSystem(enqueueChunksRequestsFn, threadingType: ThreadingMode.Single)
-            .RunIf((Query<WorldPosition, With<Player>> playerQuery) => playerQuery.Count() > 0);
+            .RunIf((Query<TinyEcs.Data<WorldPosition>, With<Player>> playerQuery) => playerQuery.Count() > 0);
 
         var loadChunksFn = LoadChunks;
         scheduler.AddSystem(loadChunksFn, threadingType: ThreadingMode.Single)
@@ -35,7 +35,7 @@ readonly struct TerrainPlugin : IPlugin
 
         var removeEntitiesOutOfRangeFn = RemoveEntitiesOutOfRange;
         scheduler.AddSystem(removeEntitiesOutOfRangeFn, threadingType: ThreadingMode.Single )
-            .RunIf((Query<WorldPosition, With<Player>> playerQuery, Local<float> timeUpdate, Time time) =>
+            .RunIf((Query<TinyEcs.Data<WorldPosition>, With<Player>> playerQuery, Local<float> timeUpdate, Time time) =>
             {
                 if (timeUpdate.Value > time.Total)
                     return false;
@@ -47,7 +47,7 @@ readonly struct TerrainPlugin : IPlugin
     void EnqueueChunksRequests
     (
         Res<GameContext> gameCtx,
-        Query<WorldPosition, With<Player>> playerQuery,
+        Query<Data<WorldPosition>, With<Player>> playerQuery,
         EventWriter<OnNewChunkRequest> chunkRequests,
         Local<(ushort? LastX, ushort? LastY)> lastPos
     )
@@ -203,8 +203,8 @@ readonly struct TerrainPlugin : IPlugin
        TinyEcs.World world,
        Local<List<uint>> toRemove,
        Res<Dictionary<uint, List<ulong>>> chunksLoaded,
-       Query<WorldPosition, (With<NetworkSerial>, Without<Player>, Without<Pair<ContainedInto, Defaults.Wildcard>>)> queryAll,
-       Query<WorldPosition, With<Player>> playerQuery
+       Query<Data<WorldPosition>, Filter<With<NetworkSerial>, Without<Player>, Without<ContainedInto>>> queryAll,
+       Query<Data<WorldPosition>, With<Player>> playerQuery
     )
     {
         toRemove.Value ??= new();
@@ -235,16 +235,20 @@ readonly struct TerrainPlugin : IPlugin
         toRemove.Value.Clear();
 
 
-        queryAll.Each(
-            (EntityView ent, ref WorldPosition mobPos) =>
+        foreach ((var entities, var mobPosA) in queryAll)
+        {
+            for (var i = 0; i < entities.Length; i++)
             {
+                ref var mobPos = ref mobPosA[i];
+
                 var dist2 = GetDist(pos.X, pos.Y, mobPos.X, mobPos.Y);
 
                 if (dist2 > MAX_DIST)
                 {
-                    ent.Delete();
+                    entities[i].Delete();
                 }
-            });
+            }
+        }
     }
 
 

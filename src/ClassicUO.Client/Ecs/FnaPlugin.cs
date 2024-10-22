@@ -17,10 +17,22 @@ internal struct KeyboardContext
     public KeyboardState OldState, NewState;
 }
 
-internal sealed class Time : SystemParam
+internal sealed class Time : SystemParam<TinyEcs.World>, IIntoSystemParam<World>
 {
     public float Total;
     public float Frame;
+
+    public static ISystemParam<World> Generate(World arg)
+    {
+        if (arg.Entity<Placeholder<Time>>().Has<Placeholder<Time>>())
+            return arg.Entity<Placeholder<Time>>().Get<Placeholder<Time>>().Value;
+
+        var time = new Time();
+        arg.Entity<Placeholder<Time>>().Set(new Placeholder<Time>() { Value = time });
+        return time;
+    }
+
+    private struct Placeholder<T> { public T Value; }
 }
 
 internal readonly struct FnaPlugin : IPlugin
@@ -63,7 +75,7 @@ internal readonly struct FnaPlugin : IPlugin
         scheduler.AddSystem((Res<GraphicsDevice> device) => device.Value.Present(), Stages.FrameEnd, ThreadingMode.Single)
                  .RunIf((SchedulerState state) => state.ResourceExists<GraphicsDevice>());
 
-        scheduler.AddSystem(() => Environment.Exit(0), Stages.AfterUpdate)
+        scheduler.AddSystem(() => Environment.Exit(0), Stages.AfterUpdate, ThreadingMode.Single)
                 .RunIf(static (Res<UoGame> game) => !UnsafeFNAAccessor.GetSetRunApplication(game.Value));
 
         scheduler.AddSystem((EventWriter<KeyEvent> writer, Res<KeyboardContext> keyboardCtx) => {
