@@ -1,5 +1,3 @@
-using System;
-using System.Runtime.CompilerServices;
 using ClassicUO.Assets;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
@@ -7,6 +5,7 @@ using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System.Runtime.CompilerServices;
 using TinyEcs;
 using World = TinyEcs.World;
 
@@ -462,13 +461,13 @@ readonly struct WorldRenderingPlugin : IPlugin
 
         foreach ((
             var entities,
-            var posA, 
-            var graphicA, 
-            var hueA, 
-            var serialA, 
+            var posA,
+            var graphicA,
+            var hueA,
+            var serialA,
             var offsetA,
             var directionA,
-            var animationA, 
+            var animationA,
             var stepsA) in queryBodyOnly)
         {
             for (var i = 0; i < entities.Length; ++i)
@@ -650,12 +649,12 @@ readonly struct WorldRenderingPlugin : IPlugin
 
         foreach ((
             var entities,
-            var slotsA, 
-            var offsetA, 
-            var posA, 
-            var graphicA, 
-            var directionA, 
-            var stepsA, 
+            var slotsA,
+            var offsetA,
+            var posA,
+            var graphicA,
+            var directionA,
+            var stepsA,
             var animationA) in queryEquipmentSlots)
         {
             for (var i = 0; i < entities.Length; ++i)
@@ -822,7 +821,7 @@ readonly struct WorldRenderingPlugin : IPlugin
 
     static ushort FixHue(ushort hue)
     {
-        var fixedColor = (ushort) (hue & 0x3FFF);
+        var fixedColor = (ushort)(hue & 0x3FFF);
 
         if (fixedColor != 0)
         {
@@ -831,11 +830,11 @@ readonly struct WorldRenderingPlugin : IPlugin
                 fixedColor = 1;
             }
 
-            fixedColor |= (ushort) (hue & 0xC000);
+            fixedColor |= (ushort)(hue & 0xC000);
         }
         else
         {
-            fixedColor = (ushort) (hue & 0x8000);
+            fixedColor = (ushort)(hue & 0x8000);
         }
 
         return fixedColor;

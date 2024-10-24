@@ -1,9 +1,9 @@
+using ClassicUO.Assets;
+using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using ClassicUO.Assets;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
+using System.Runtime.InteropServices;
 using TinyEcs;
 
 namespace ClassicUO.Ecs;
@@ -34,7 +34,7 @@ readonly struct TerrainPlugin : IPlugin
             .RunIf((EventReader<OnNewChunkRequest> reader) => !reader.IsEmpty);
 
         var removeEntitiesOutOfRangeFn = RemoveEntitiesOutOfRange;
-        scheduler.AddSystem(removeEntitiesOutOfRangeFn, threadingType: ThreadingMode.Single )
+        scheduler.AddSystem(removeEntitiesOutOfRangeFn, threadingType: ThreadingMode.Single)
             .RunIf((Query<TinyEcs.Data<WorldPosition>, With<Player>> playerQuery, Local<float> timeUpdate, Time time) =>
             {
                 if (timeUpdate.Value > time.Total)
@@ -81,116 +81,124 @@ readonly struct TerrainPlugin : IPlugin
         TinyEcs.World world,
         Res<UOFileManager> fileManager,
         Res<Dictionary<uint, List<ulong>>> chunksLoaded,
+        Local<StaticsBlock[]> staticsBlockBuffer,
         EventReader<OnNewChunkRequest> chunkRequests
     )
     {
         foreach (var chunkEv in chunkRequests)
         {
             for (int chunkX = chunkEv.RangeStartX; chunkX <= chunkEv.RangeEndX; chunkX += 1)
-            for (int chunkY = chunkEv.RangeStartY; chunkY <= chunkEv.RangeEndY; chunkY += 1)
             {
-                ref var im = ref fileManager.Value.Maps.GetIndex(chunkEv.Map, chunkX, chunkY);
-
-                if (im.MapAddress == 0)
-                    continue;
-
-                var key = CreateChunkKey(chunkX, chunkY);
-                if (chunksLoaded.Value.ContainsKey(key))
-                    continue;
-
-                var list = new List<ulong>();
-                chunksLoaded.Value.Add(key, list);
-
-                im.MapFile.Seek((long)im.MapAddress, System.IO.SeekOrigin.Begin);
-                var cells = im.MapFile.Read<Assets.MapBlock>().Cells;
-
-                var bx = chunkX << 3;
-                var by = chunkY << 3;
-
-                for (int y = 0; y < 8; ++y)
+                for (int chunkY = chunkEv.RangeStartY; chunkY <= chunkEv.RangeEndY; chunkY += 1)
                 {
-                    var pos = y << 3;
-                    var tileY = (ushort) (by + y);
+                    ref var im = ref fileManager.Value.Maps.GetIndex(chunkEv.Map, chunkX, chunkY);
 
-                    for (int x = 0; x < 8; ++x, ++pos)
+                    if (im.MapAddress == 0)
+                        continue;
+
+                    var key = CreateChunkKey(chunkX, chunkY);
+                    if (chunksLoaded.Value.ContainsKey(key))
+                        continue;
+
+                    var list = new List<ulong>();
+                    chunksLoaded.Value.Add(key, list);
+
+                    im.MapFile.Seek((long)im.MapAddress, System.IO.SeekOrigin.Begin);
+                    var cells = im.MapFile.Read<Assets.MapBlock>().Cells;
+
+                    var bx = chunkX << 3;
+                    var by = chunkY << 3;
+
+                    for (int y = 0; y < 8; ++y)
                     {
-                        var tileID = (ushort) (cells[pos].TileID & 0x3FFF);
-                        var z = cells[pos].Z;
-                        var tileX = (ushort) (bx + x);
+                        var pos = y << 3;
+                        var tileY = (ushort)(by + y);
 
-                        var isStretched = fileManager.Value.TileData.LandData[tileID].TexID == 0 &&
-                            fileManager.Value.TileData.LandData[tileID].IsWet;
-
-                        isStretched = ApplyStretch(
-                            fileManager.Value.Maps, fileManager.Value.Texmaps,
-                            chunkEv.Map, fileManager.Value.TileData.LandData[tileID].TexID,
-                            tileX, tileY, z,
-                            isStretched,
-                            out var avgZ, out var minZ,
-                            out var offsets,
-                            out var normalTop,
-                            out var normalRight,
-                            out var normalBottom,
-                            out var normalLeft
-                        );
-
-                        if (isStretched)
+                        for (int x = 0; x < 8; ++x, ++pos)
                         {
-                            var e = world.Entity()
-                                .Set(new TileStretched() {
-                                    NormalTop = normalTop,
-                                    NormalRight = normalRight,
-                                    NormalBottom = normalBottom,
-                                    NormalLeft = normalLeft,
-                                    AvgZ = avgZ,
-                                    MinZ = minZ,
-                                    Offset = offsets
-                                })
-                                .Set(new WorldPosition() { X = tileX, Y = tileY, Z = z })
-                                .Set(new Graphic() { Value = tileID })
-                                .Add<IsTile>();
+                            var tileID = (ushort)(cells[pos].TileID & 0x3FFF);
+                            var z = cells[pos].Z;
+                            var tileX = (ushort)(bx + x);
 
-                            list.Add(e);
-                        }
-                        else
-                        {
-                            var e = world.Entity()
-                                .Set(new WorldPosition() { X = tileX, Y = tileY, Z = z })
-                                .Set(new Graphic() { Value = tileID })
-                                .Add<IsTile>();
+                            var isStretched = fileManager.Value.TileData.LandData[tileID].TexID == 0 &&
+                                fileManager.Value.TileData.LandData[tileID].IsWet;
 
-                            list.Add(e);
+                            isStretched = ApplyStretch(
+                                fileManager.Value.Maps, fileManager.Value.Texmaps,
+                                chunkEv.Map, fileManager.Value.TileData.LandData[tileID].TexID,
+                                tileX, tileY, z,
+                                isStretched,
+                                out var avgZ, out var minZ,
+                                out var offsets,
+                                out var normalTop,
+                                out var normalRight,
+                                out var normalBottom,
+                                out var normalLeft
+                            );
+
+                            if (isStretched)
+                            {
+                                var e = world.Entity()
+                                    .Set(new TileStretched()
+                                    {
+                                        NormalTop = normalTop,
+                                        NormalRight = normalRight,
+                                        NormalBottom = normalBottom,
+                                        NormalLeft = normalLeft,
+                                        AvgZ = avgZ,
+                                        MinZ = minZ,
+                                        Offset = offsets
+                                    })
+                                    .Set(new WorldPosition() { X = tileX, Y = tileY, Z = z })
+                                    .Set(new Graphic() { Value = tileID })
+                                    .Add<IsTile>();
+
+                                list.Add(e);
+                            }
+                            else
+                            {
+                                var e = world.Entity()
+                                    .Set(new WorldPosition() { X = tileX, Y = tileY, Z = z })
+                                    .Set(new Graphic() { Value = tileID })
+                                    .Add<IsTile>();
+
+                                list.Add(e);
+                            }
                         }
                     }
-                }
 
-                if (im.StaticAddress != 0)
-                {
-                    im.StaticFile.Seek((long)im.StaticAddress, System.IO.SeekOrigin.Begin);
-
-                    for (int i = 0, count = (int)im.StaticCount; i < count; ++i)
+                    if (im.StaticAddress != 0)
                     {
-                        var sb = im.StaticFile.Read<Assets.StaticsBlock>();
+                        staticsBlockBuffer.Value ??= new StaticsBlock[im.StaticCount];
+                        if (staticsBlockBuffer.Value.Length < im.StaticCount)
+                            Array.Resize(ref staticsBlockBuffer.Value, (int)im.StaticCount);
 
-                        if (sb.Color != 0 && sb.Color != 0xFFFF)
+                        var staticsSpan = staticsBlockBuffer.Value.AsSpan(0, (int)im.StaticCount);
+                        im.StaticFile.Seek((long)im.StaticAddress, System.IO.SeekOrigin.Begin);
+                        im.StaticFile.Read(MemoryMarshal.AsBytes(staticsSpan));
+
+                        foreach (ref var sb in staticsSpan)
                         {
-                            int pos = (sb.Y << 3) + sb.X;
-
-                            if (pos >= 64)
+                            if (sb.Color != 0 && sb.Color != 0xFFFF)
                             {
-                                continue;
+                                int pos = (sb.Y << 3) + sb.X;
+
+                                if (pos >= 64)
+                                {
+                                    continue;
+                                }
+
+                                var staX = (ushort)(bx + sb.X);
+                                var staY = (ushort)(by + sb.Y);
+
+                                var e = world.Entity()
+                                    .Set(new WorldPosition() { X = staX, Y = staY, Z = sb.Z })
+                                    .Set(new Graphic() { Value = sb.Color })
+                                    .Set(new Hue() { Value = sb.Hue })
+                                    .Add<IsStatic>();
+
+                                list.Add(e);
                             }
-
-                            var staX = (ushort)(bx + sb.X);
-                            var staY = (ushort)(by + sb.Y);
-
-                            var e = world.Entity()
-                                .Set(new WorldPosition() { X = staX, Y = staY, Z = sb.Z })
-                                .Set(new Graphic() { Value = sb.Color })
-                                .Set(new Hue() { Value =  sb.Hue })
-                                .Add<IsStatic>();
-
-                            list.Add(e);
                         }
                     }
                 }
@@ -302,11 +310,11 @@ readonly struct TerrainPlugin : IPlugin
 
         if (Math.Abs(zTop - zBottom) <= Math.Abs(zLeft - zRight))
         {
-            avgZ = (sbyte) ((zTop + zBottom) >> 1);
+            avgZ = (sbyte)((zTop + zBottom) >> 1);
         }
         else
         {
-            avgZ = (sbyte) ((zLeft + zRight) >> 1);
+            avgZ = (sbyte)((zLeft + zRight) >> 1);
         }
 
         minZ = Math.Min(zTop, Math.Min(zRight, Math.Min(zLeft, zBottom)));
