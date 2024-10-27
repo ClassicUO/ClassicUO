@@ -3515,7 +3515,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
