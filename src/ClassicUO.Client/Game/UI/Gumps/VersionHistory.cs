@@ -8,6 +8,10 @@ namespace ClassicUO.Game.UI.Gumps
     internal class VersionHistory : Gump
     {
         private static string[] updateTexts = {
+             "/c[white][3.24.1]/cd\n" +
+                "- Fix for not load Modern Paperdoll\n" +
+                "- Fix Using Weapons Habilitys\n" +
+
             "/c[white][3.24.0]/cd\n" +
                 "- Updated the algorithm for reading mul encryption\n" +
                 "- Fix creation of the scroll in the list infobar manager\n" +
