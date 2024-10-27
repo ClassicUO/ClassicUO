@@ -42,6 +42,7 @@ using ClassicUO.Utility;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 
 namespace ClassicUO.Game.Managers
 {

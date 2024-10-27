@@ -41,9 +41,9 @@ namespace ClassicUO.Assets
 {
     public class TileDataLoader : UOFileLoader
     {
-        private static TileDataLoader _instance;
+        public static TileDataLoader _instance;
 
-        private static StaticTiles[] _staticData;
+        public static StaticTiles[] _staticData;
         private static LandTiles[] _landData;
 
         private TileDataLoader()
@@ -388,6 +388,14 @@ namespace ClassicUO.Assets
         public bool IsWeapon => (Flags & TileFlag.Weapon) != 0;
         public bool IsMultiMovable => (Flags & TileFlag.MultiMovable) != 0;
         public bool IsWindow => (Flags & TileFlag.Window) != 0;
+
+        public void SetImpassable(bool value)
+        {
+            if (value)
+                Flags |= TileFlag.Impassable;
+            else
+                Flags &= ~TileFlag.Impassable;
+        }
     }
 
     // old

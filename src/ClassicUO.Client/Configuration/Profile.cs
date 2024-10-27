@@ -143,6 +143,7 @@ namespace ClassicUO.Configuration
         public bool HighlightMobilesByInvul { get; set; } = true;
         public bool ShowMobilesHP { get; set; }
         public bool ShowTargetIndicator { get; set; }
+        public bool AutoAvoidObstacules { get; set; }
         public int MobileHPType { get; set; }     // 0 = %, 1 = line, 2 = both
         public int MobileHPShowWhen { get; set; } // 0 = Always, 1 - <100%
         public bool DrawRoofs { get; set; } = true;

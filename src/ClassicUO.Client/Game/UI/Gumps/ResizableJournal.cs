@@ -404,6 +404,8 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (journalEntry == null)
                 return;
+            if (!string.IsNullOrEmpty(journalEntry.Name) && IgnoreManager.IgnoredCharsList.Contains(journalEntry.Name))
+                return;
             _journalArea.AddEntry($"{journalEntry.Name}: {journalEntry.Text}", journalEntry.Hue, journalEntry.Time, journalEntry.TextType, journalEntry.MessageType);
         }
 
