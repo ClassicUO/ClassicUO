@@ -982,7 +982,7 @@ namespace ClassicUO.Game.Managers
                         int totalCount = 0;
                         int spellType;
 
-                        for (spellType = 0; spellType < 7; spellType++)
+                        for (spellType = 0; spellType < 8; spellType++)
                         {
                             totalCount += _spellsCountTable[spellType];
 
@@ -2273,8 +2273,9 @@ namespace ClassicUO.Game.Managers
 
                 case MacroType.CastSpell:
                     offset = (int)MacroSubType.Clumsy;
-                    count = MacroSubType.Hostile - MacroSubType.Clumsy;
-
+                    var countInitial = MacroSubType.Hostile - MacroSubType.Clumsy;
+                    var countFinal =  MacroSubType.DeathRay - MacroSubType.Boarding;
+                    count = countInitial + 33 + 43;
                     break;
 
                 case MacroType.SelectNext:
@@ -2415,6 +2416,7 @@ namespace ClassicUO.Game.Managers
         UseSkill,
         LastSkill,
         CastSpell,
+        CastSpellMastery,
         LastSpell,
         LastObject,
         Bow,
@@ -2692,6 +2694,9 @@ namespace ClassicUO.Game.Managers
         Perseverance,
         Tribulation,
         Despair,
+        
+
+
         Hostile, //Select Next/Preveous/Nearest group
         Party,
         Follower,
@@ -2734,6 +2739,47 @@ namespace ClassicUO.Game.Managers
         SpellStone,
 
         LookForwards,
-        LookBackwards
+        LookBackwards,
+
+        DeathRay,
+        EtherealBurst,
+        NetherBlast,
+        MysticWeapon,
+        CommandUndead,
+        Conduit,
+        ManaShield,
+        SummonReaper,
+        EnchantedSummoning,
+        AnticipateHit,
+        Warcry,
+        Intuition,
+        Rejuvenate,
+        HolyFist,
+        Shadow,
+        WhiteTigerForm,
+        FlamingShot,
+        PlayingTheOdds,
+        Thrust,
+        Pierce,
+        Stagger,
+        Toughness,
+        Onslaught,
+        FocusedEye,
+        ElementalFury,
+        CalledShot,
+        WarriorsGifts,
+        ShieldBash,
+        Bodyguard,
+        HeightenSenses,
+        Tolerance,
+        InjectedStrike,
+        Potency,
+        Rampage,
+        FistsofFury,
+        Knockout,
+        Whispering,
+        CombatTraining,
+        Boarding,
+       
     }
 }

@@ -798,10 +798,25 @@ namespace ClassicUO.Game
                 UIManager.Add(new CombatBookGump(100, 100));
             }
         }
+        private static void SendAbility(byte idx, bool primary)
+        {
+            if ((World.ClientLockedFeatures.Flags & LockedFeatureFlags.AOS) == 0)
+            {
+                if (primary)
+                    Socket.Send_StunRequest();
+                else
+                    Socket.Send_DisarmRequest();
+            }
+            else
+            {
+                Socket.Send_UseCombatAbility(idx);
+            }
+        }
+
 
         public static void UsePrimaryAbility()
         {
-            ref Ability ability = ref World.Player.Abilities[0];
+            ref var ability = ref World.Player.Abilities[0];
 
             if (((byte)ability & 0x80) == 0)
             {
@@ -810,12 +825,13 @@ namespace ClassicUO.Game
                     World.Player.Abilities[i] &= (Ability)0x7F;
                 }
 
-                Socket.Send_UseCombatAbility((byte)ability);
+                SendAbility((byte)ability, true);
             }
             else
             {
-                Socket.Send_UseCombatAbility(0);
+                SendAbility( 0, true);
             }
+
 
             ability ^= (Ability)0x80;
         }
@@ -830,21 +846,12 @@ namespace ClassicUO.Game
                 {
                     World.Player.Abilities[i] &= (Ability)0x7F;
                 }
-                if (Client.Version >= ClientVersion.CV_308Z) {
-                    Socket.Send_StunRequest();
-                } else {
-                    Socket.Send_UseCombatAbility((byte)ability);
-                }
-                
+
+                SendAbility((byte)ability, false);
             }
             else
             {
-                if (Client.Version >= ClientVersion.CV_308Z) {
-                    Socket.Send_DisarmRequest();
-                } else {
-                    Socket.Send_UseCombatAbility(0);
-                }
-                
+                SendAbility(0, true);
             }
 
             ability ^= (Ability)0x80;

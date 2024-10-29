@@ -36,6 +36,7 @@ using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -98,6 +99,43 @@ namespace ClassicUO.Game.UI.Controls
             }
 
             return false;
+        }
+    }
+
+    internal class CustomGumpPic : GumpPicBase
+    {
+        private Texture2D _customTexture;
+        public int Width { get; }
+        public int Height { get; }
+        public ushort Hue { get; set; }
+
+        public CustomGumpPic(int x, int y, Texture2D texture, ushort hue = 0)
+        {
+            X = x;
+            Y = y;
+            _customTexture = texture;
+            Hue = hue;
+            Width = _customTexture.Width;
+            Height = _customTexture.Height;
+        }
+
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        {
+            if (IsDisposed || _customTexture == null)
+            {
+                return false;
+            }
+
+            Vector3 hueVector = ShaderHueTranslator.GetHueVector(Hue, false, Alpha, true);
+
+            // Desenha a textura customizada
+            batcher.Draw(
+                _customTexture,
+                new Rectangle(x, y, Width, Height),
+                hueVector
+            );
+
+            return base.Draw(batcher, x, y);
         }
     }
 

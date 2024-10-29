@@ -8,10 +8,13 @@ using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
+using System.IO;
+
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -20,13 +23,14 @@ namespace ClassicUO.Game.UI.Gumps
         #region CONST
         private const int WIDTH = 250, HEIGHT = 380;
         private const int CELL_SPACING = 2, TOP_SPACING = 40;
+        private Texture2D MordernPaperdollGump = PNGLoader.Instance.GetImageTexture(Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "modern-paperdollgump.png"));
         #endregion
 
         #region VARS
         private readonly Dictionary<Layer[], ItemSlot> itemLayerSlots;
         private Label titleLabel;
         private static int lastX = 100, lastY = 100;
-        private GumpPic backgroundImage;
+        private GumpPicBase backgroundImage;
         #endregion
 
         public override GumpType GumpType => GumpType.PaperDoll;
@@ -55,7 +59,7 @@ namespace ClassicUO.Game.UI.Gumps
             itemLayerSlots = new Dictionary<Layer[], ItemSlot>();
             #endregion
 
-            Add(backgroundImage = new GumpPic(0, 0, 40312, ProfileManager.CurrentProfile.ModernPaperDollHue));
+            Add(backgroundImage = new CustomGumpPic(0, 0, MordernPaperdollGump, ProfileManager.CurrentProfile.ModernPaperDollHue));
 
             HitBox _menuHit = new HitBox(Width - 26, 1, 25, 16, alpha: 0f);
             Add(_menuHit);

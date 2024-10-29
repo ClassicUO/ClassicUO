@@ -22,6 +22,7 @@ using System.Runtime.Remoting.Contexts;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using static ClassicUO.Renderer.UltimaBatcher2D;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.Header;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -5824,6 +5825,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
 
+
                 private void AddSubMacro(MacroObject obj)
                 {
                     if (obj == null || obj.Code == 0)
@@ -5843,6 +5845,53 @@ namespace ClassicUO.Game.UI.Gumps
                             for (int i = 0; i < count; i++)
                             {
                                 names[i] = _allSubHotkeysNames[i + offset];
+                            }
+
+                            if (obj.Code == MacroType.CastSpell)
+                            {
+                                List<string> namesList = new List<string>(names);
+
+                                namesList.Remove("Hostile");
+                                namesList.Remove("Party");
+                                namesList.Remove("Follower");
+                                namesList.Remove("Object");
+                                namesList.Remove("Mobile");
+                                namesList.Remove("MscTotalCount");
+                                namesList.Remove("INVALID_0");
+                                namesList.Remove("INVALID_1");
+                                namesList.Remove("INVALID_2");
+                                namesList.Remove("INVALID_3");
+                                namesList.Remove("ConfusionBlastPotion");
+                                namesList.Remove("CurePotion");
+                                namesList.Remove("AgilityPotion");
+                                namesList.Remove("StrengthPotion");
+                                namesList.Remove("PoisonPotion");
+                                namesList.Remove("RefreshPotion");
+                                namesList.Remove("HealPotion");
+                                namesList.Remove("ExplosionPotion");
+
+                                namesList.Remove("DefaultZoom");
+                                namesList.Remove("ZoomIn");
+                                namesList.Remove("ZoomOut");
+
+                                namesList.Remove("BestHealPotion");
+                                namesList.Remove("BestCurePotion");
+                                namesList.Remove("BestRefreshPotion");
+                                namesList.Remove("BestStrengthPotion");
+                                namesList.Remove("BestAgiPotion");
+                                namesList.Remove("BestExplosionPotion");
+                                namesList.Remove("BestConflagPotion");
+                                namesList.Remove("EnchantedApple");
+                                namesList.Remove("PetalsOfTrinsic");
+                                namesList.Remove("OrangePetals");
+                                namesList.Remove("TrappedBox");
+                                namesList.Remove("SmokeBomb");
+                                namesList.Remove("HealStone");
+                                namesList.Remove("SpellStone");
+
+                                namesList.Remove("LookForwards");
+                                namesList.Remove("LookBackwards");
+                                names = namesList.ToArray();
                             }
 
                             ComboBoxWithLabel sub = new ComboBoxWithLabel(string.Empty, 0, 200, names, (int)obj.SubCode - offset, (i, s) =>
