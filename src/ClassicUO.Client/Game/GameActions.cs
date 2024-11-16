@@ -31,7 +31,6 @@
 #endregion
 
 using ClassicUO.Configuration;
-using ClassicUO.Dust765.Managers;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -44,7 +43,6 @@ using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using System;
 using static ClassicUO.Network.NetClient;
-using ClassicUO.Dust765.Managers;
 
 namespace ClassicUO.Game
 {
@@ -60,7 +58,6 @@ namespace ClassicUO.Game
         public static bool iscasting { get; set; } = false;
         // ## BEGIN - END ## // ONCASTINGGUMP
 
-        public static SpellAction spellCircle { get; set; } = 0;
 
         public static void ToggleWarMode()
         {
@@ -307,6 +304,10 @@ namespace ClassicUO.Game
             if (ProfileManager.CurrentProfile.EnabledCriminalActionQuery)
             {
                 Mobile m = World.Mobiles.Get(serial);
+                Item item = World.Items.Get(serial);
+
+                if ((m == null) && (item == null))
+                    return;
 
                 if (m != null && (World.Player.NotorietyFlag == NotorietyFlag.Innocent || World.Player.NotorietyFlag == NotorietyFlag.Ally) && m.NotorietyFlag == NotorietyFlag.Innocent && m != World.Player)
                 {
@@ -325,10 +326,55 @@ namespace ClassicUO.Game
                     UIManager.Add(messageBox);
                     return;
                 }
-            }
 
-            TargetManager.LastAttack = serial;
-            Socket.Send_AttackRequest(serial);
+
+                if (m != null && m != World.Player)
+                {
+
+                    Socket.Send_AttackRequest(serial);
+
+                    return;
+                }
+
+
+                if (item !=  null)
+                {
+                   
+                    Socket.Send_DoubleClick(serial);
+                    return;
+
+                }
+            } else {
+                Mobile m = World.Mobiles.Get(serial);
+                Item item = World.Items.Get(serial);
+
+                if ((m == null) && (item == null))
+                    return;
+
+                if (m != null && (World.Player.NotorietyFlag == NotorietyFlag.Innocent || World.Player.NotorietyFlag == NotorietyFlag.Ally) && m.NotorietyFlag == NotorietyFlag.Innocent && m != World.Player)
+                {
+                   
+                    Socket.Send_AttackRequest(serial);
+                           
+                    return;
+                }
+
+
+                if (m != null && m != World.Player)
+                {
+
+                    Socket.Send_AttackRequest(serial);
+
+                    return;
+                }
+
+                if (item !=  null)
+                {      
+                    Socket.Send_DoubleClick(serial);
+                    return;
+
+                }
+            }
         }
 
         public static void DoubleClickQueued(uint serial)
@@ -353,6 +399,7 @@ namespace ClassicUO.Game
                         g.SetInScreen();
                         g.BringOnTop();
                     }
+                   
                     Socket.Send_DoubleClick(serial);
                 }
                 else

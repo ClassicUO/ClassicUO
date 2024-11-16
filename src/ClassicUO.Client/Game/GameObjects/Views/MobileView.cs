@@ -1080,9 +1080,27 @@ namespace ClassicUO.Game.GameObjects
             return mod;
         }
 
+
+
         public override bool CheckMouseSelection()
         {
+            // Verifica se RealScreenPosition e Offset foram inicializados
+            if (RealScreenPosition == null)
+            {
+                GameActions.Print("RealScreenPosition not inicizalided");
+                return false; // Saia da função se não estiver inicializado
+            }
+
+            if (Offset == null)
+            {
+                GameActions.Print("Offset no started!");
+                return false; // Saia da função se não estiver inicializado
+            }
+
+            // Se tudo estiver inicializado corretamente, continue com o cálculo
             Point position = RealScreenPosition;
+
+            // Realiza ajustes na posição
             position.Y -= 3;
             position.X += (int)Offset.X + 22;
             position.Y += (int)(Offset.Y - Offset.Z) + 22;
@@ -1091,6 +1109,7 @@ namespace ClassicUO.Game.GameObjects
             r.X = position.X - r.X;
             r.Y = position.Y - r.Y;
 
+            // Supondo que aqui você continue a verificação
             if (!r.Contains(SelectedObject.TranslatedMousePositionByViewport))
             {
                 return false;

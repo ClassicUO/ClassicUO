@@ -99,6 +99,23 @@ namespace ClassicUO.Game.GameObjects
             }
             // ## BEGIN - END ## // ART / HUE CHANGES
             // ## BEGIN - END ## // MISC
+            // ## BEGIN - END ## // MISC
+            if (ProfileManager.CurrentProfile.AutoAvoidMobiles) {
+                if  (StaticFilters.isHumanAndMonster(graphic))
+                {
+                    if (StaticFilters.IsOutStamina())
+                    {
+                        TileDataLoader.Instance.StaticData[Graphic].Flags  = TileFlag.Impassable;
+
+                    }
+                    else
+                    {
+                        TileDataLoader.Instance.StaticData[Graphic].Flags = TileFlag.Impassable;
+                    }
+                        
+                }
+            }
+            
             if (ProfileManager.CurrentProfile.BlockWoS)
             {
                 if (StaticFilters.IsWallOfStone(Graphic) || Graphic == ProfileManager.CurrentProfile.BlockWoSArt)

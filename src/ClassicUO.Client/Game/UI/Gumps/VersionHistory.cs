@@ -8,9 +8,10 @@ namespace ClassicUO.Game.UI.Gumps
     internal class VersionHistory : Gump
     {
         private static string[] updateTexts = {
-            "/c[white][2.00.]/cd\n" +
+            "/c[white][2.0.9]/cd\n" +
                 "- Welcome\n" +
-                "- Fusion to Dust765 with TazUO Beta Version\n" 
+                "- Auto Avoid Obstacules\n"  +
+                "- Defende Party\n" 
         };
 
         public VersionHistory() : base(0, 0)

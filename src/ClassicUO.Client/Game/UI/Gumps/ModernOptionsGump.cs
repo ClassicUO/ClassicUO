@@ -2309,6 +2309,16 @@ namespace ClassicUO.Game.UI.Gumps
                 profile.OverrideContainerOpenRange = b;
             }), true, page);
             content.BlankLine();
+            content.AddToRight(new CheckboxWithLabel("Show Close Friend in WordMapGump", 0, profile.ShowMapCloseFriend , (b) =>
+            {
+                profile.ShowMapCloseFriend = b;
+            }), true, page);
+            content.BlankLine();
+            content.AddToRight(new CheckboxWithLabel("Auto avoid obstacules and mobiles", 0, profile.AutoAvoidMobiles , (b) =>
+            {
+                profile.AutoAvoidMobiles = b;
+            }), true, page);
+            content.BlankLine();
             content.AddToRight(new CheckboxWithLabel("Razor * Target * to lasttarget string", 0, profile.SpecialSetLastTargetCliloc, (b) =>
             {
                 profile.SpecialSetLastTargetCliloc = b;

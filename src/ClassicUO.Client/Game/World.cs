@@ -272,6 +272,7 @@ namespace ClassicUO.Game
                             {
                                 UIManager.GetGump<ContainerGump>(container.Serial)?.RequestUpdateContents();
                                 #region GridContainer
+                               
                                 UIManager.GetGump<GridContainer>(container.Serial)?.RequestUpdateContents();
                                 #endregion
 
@@ -306,7 +307,8 @@ namespace ClassicUO.Game
                     }
                     else
                     {
-                        if (mob.NotorietyFlag == NotorietyFlag.Ally)
+                        WMapEntity wme = WMapManager.GetEntity(mob.Serial);
+                        if (mob.NotorietyFlag == NotorietyFlag.Ally || wme != null && wme.IsGuild && ProfileManager.CurrentProfile.ShowMapCloseFriend)
                         {
                             WMapManager.AddOrUpdate
                             (
@@ -496,6 +498,7 @@ namespace ClassicUO.Game
                 {
                     UIManager.GetGump<ContainerGump>(containerSerial)?.RequestUpdateContents();
                     #region GridContainer
+                    
                     UIManager.GetGump<GridContainer>(containerSerial)?.RequestUpdateContents();
                     #endregion
                 }
@@ -789,7 +792,7 @@ namespace ClassicUO.Game
             }
 
             UIManager.GetGump<BaseHealthBarGump>(Player.Serial)?.Dispose();
-
+           
             GridContainer.ClearInstance();
 
             ObjectToRemove = 0;

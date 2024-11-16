@@ -536,7 +536,7 @@ namespace ClassicUO.Game.Managers
 
                     if (!Pathfinder.AutoWalking)
                     {
-                        World.Player.Walk((Direction)dt, false);
+                        World.Player.Walk((Direction)dt, false );
                     }
 
                     break;
@@ -1862,6 +1862,16 @@ namespace ClassicUO.Game.Managers
                     }
 
                     break;
+                case MacroType.AutoMeditate:
+
+                    CommandManager.Execute("automed");
+
+                    break;
+                case MacroType.AIBot:
+
+                    CommandManager.Execute("aibot");
+
+                    break;
 
                 case MacroType.CloseInactiveHealthBars:
                     IEnumerable<BaseHealthBarGump> inactiveHealthBarGumps = UIManager.Gumps.OfType<BaseHealthBarGump>().Where(hb => hb.IsInactive);
@@ -2722,6 +2732,7 @@ namespace ClassicUO.Game.Managers
         CureGH, // ## BEGIN - END ## // MACROS
         // ## BEGIN - END ## // AUTOMATIONS
         AutoMeditate,
+        AIBot,
         // ## BEGIN - END ## // AUTOMATIONS
         // ## BEGIN - END ## // ADVMACROS
         CustomInterrupt,

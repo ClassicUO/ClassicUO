@@ -74,7 +74,7 @@ namespace ClassicUO.Game.Managers
                 if (loaded && e.Parent != null && ReferenceEquals(e.Parent, World.Player))
                 {
                     // ## BEGIN - END ## // ONCASTINGGUMP
-                    if (ProfileManager.CurrentProfile.OnCastingGump && !ProfileManager.CurrentProfile.EnableSpellIndicators)
+                    if (ProfileManager.CurrentProfile.OnCastingGump)
                     {
                         if (spellRangePowerWordCache.TryGetValue(RemoveContentInBrackets(e.Text.Trim()), out SpellRangeInfo spell))
                         {
@@ -88,7 +88,8 @@ namespace ClassicUO.Game.Managers
                                 World.Player.OnCasting.Start((uint)spell.ID);
                         }
                             
-                    } else
+                    }
+                    if (ProfileManager.CurrentProfile.EnableSpellIndicators)
                     {
                         if (spellRangePowerWordCache.TryGetValue(RemoveContentInBrackets(e.Text.Trim()), out SpellRangeInfo spell))
                         {

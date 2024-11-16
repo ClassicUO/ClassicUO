@@ -556,6 +556,7 @@ namespace ClassicUO.Game.UI.Gumps
                             if (child.Container == _c)
                             {
                                 UIManager.GetGump<GridContainer>(child)?.Dispose();
+                                
                                 UIManager.GetGump<ContainerGump>(child)?.Dispose();
                             }
                         }

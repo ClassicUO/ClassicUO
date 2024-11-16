@@ -21,6 +21,7 @@
 
 #endregion
 using ClassicUO.Dust765.Autos;
+using ClassicUO.Game.Cheats.AIBot;
 // ## BEGIN - END ## // LOBBY
 using ClassicUO.Dust765.Lobby;
 // ## BEGIN - END ## // LOBBY
@@ -35,6 +36,7 @@ namespace ClassicUO.Game.Managers // only exception to not being in the 'Interop
             AutoMeditate.Initialize();  //AUTOMEDITATE##//
             AutoEngage.Initialize();  //AUTOENGAGE##//
             AutoMimic.Initialize();  //##AUTO MIMIC##//
+            Automation.Initialize();
             //AutoWorldMapMarker.LoadCommands();
             Defender.Initialize();
             // ## BEGIN - END ## // LOBBY
@@ -62,6 +64,7 @@ namespace ClassicUO.Game.Managers // only exception to not being in the 'Interop
             AutoMeditate.Update();  //AUTOMEDITATE##//
             AutoEngage.Update();  //AUTOENGAGE##//
             Defender.Update();
+            Automation.Update();
             // ## BEGIN - END ## // LOBBY
             Lobby.Update();
             AutoLobbyStealthPosition.Update();

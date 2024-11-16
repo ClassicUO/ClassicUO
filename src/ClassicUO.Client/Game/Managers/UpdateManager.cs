@@ -23,7 +23,7 @@ namespace ClassicUO.Game.Managers
                         HttpRequestMessage restApi = new HttpRequestMessage()
                         {
                             Method = HttpMethod.Get,
-                            RequestUri = new Uri("https://api.github.com/repos/bittiez/TazUO/releases/latest"),
+                            RequestUri = new Uri("https://api.github.com/repos/jsebold666/TazUO/releases/latest"),
                         };
                         restApi.Headers.Add("X-GitHub-Api-Version", "2022-11-28");
                         restApi.Headers.Add("User-Agent", "Public");
@@ -58,7 +58,7 @@ namespace ClassicUO.Game.Managers
             Task.Factory.StartNew(() =>
             {
                 Task.Delay(30000).Wait();
-                GameActions.Print("TazUO vs Dust765 has an update available, please visit https://github.com/dust765/ClassicUO to get the most recent version.", 32);
+                GameActions.Print("Dust765.4 has an update available, please visit https://github.com/dust765/ClassicUO to get the most recent version.", 32);
             });
         }
     }

@@ -231,7 +231,7 @@ namespace ClassicUO.Game.UI.Gumps
         private InputField _SpecialSetLastTargetClilocText, _blockWoSArt, _blockEnergyFArt;
         // ## BEGIN - END ## // MISC
         // ## BEGIN - END ## // MISC2
-        private Checkbox _wireframeView, _hueImpassableView, _transparentHouses, _invisibleHouses, _ignoreCoT, _showDeathOnWorldmap, _showMapCloseFriend, _drawMobilesWithSurfaceOverhead;
+        private Checkbox _wireframeView, _hueImpassableView, _transparentHouses, _invisibleHouses, _ignoreCoT, _showDeathOnWorldmap, _showMapCloseFriend, _drawMobilesWithSurfaceOverhead, _autoAvoidMobiles;
         private HSliderBar _transparentHousesZ, _transparentHousesTransparency, _invisibleHousesZ, _dontRemoveHouseBelowZ;
         // ## BEGIN - END ## // MISC2
         // ## BEGIN - END ## // MACROS
@@ -6165,6 +6165,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             section8.Add(_showMapCloseFriend = AddCheckBox(null, "Show closed friend in World Map:", _currentProfile.ShowMapCloseFriend, startX, startY));
             startY += _showMapCloseFriend.Height + 2;
+            section8.Add(_autoAvoidMobiles = AddCheckBox(null, "Auto avoid obstacules and mobiles", _currentProfile.AutoAvoidMobiles, startX, startY));
+            startY += _autoAvoidMobiles.Height + 2;
+
 
             // ## BEGIN - END ## // MISC2
             // ## BEGIN - END ## // NAMEOVERHEAD
@@ -6254,6 +6257,7 @@ namespace ClassicUO.Game.UI.Gumps
             // ## BEGIN - END ## // LINES
             // ## BEGIN - END ## // AUTOMATIONS
             section.Add(AddLabel(null, "AutoMeditate (toggle on / off automed)", startX, startY));
+            section.Add(AddLabel(null, "Using AIBOT  (toggle on / off usingBot)", startX, startY));
             // ## BEGIN - END ## // AUTOMATIONS
             // ## BEGIN - END ## // MODERNCOOLDOWNBAR
             section.Add(AddLabel(null, "ToggleECBuffGump (toggle on / off EC alike buff gump)", startX, startY));
@@ -6532,6 +6536,7 @@ namespace ClassicUO.Game.UI.Gumps
             section4.Add(AddLabel(null, "write in chat or use macro to enable / disable:", startX, startY));
             section4.Add(AddLabel(null, "(runs in background until disabled)", startX, startY));
             section4.Add(AddLabel(null, "-automed or macro AutoMeditate (auto meditates \n with 2.5s delay and not targeting)", startX, startY));
+            section4.Add(AddLabel(null, "-aibot or macro aibot (auto bot \n)", startX, startY));
             section4.Add(AddLabel(null, "-engange (auto engage and pathfind to last target)", startX, startY));
 
             SettingsSection section5 = AddSettingsSection(box, "-----MISC-----");
@@ -8199,6 +8204,7 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.OnCastingGump = _onCastingGump.IsChecked;
             _currentProfile.OnCastingGump_hidden = _onCastingGump_hidden.IsChecked;
             _currentProfile.ShowMapCloseFriend = _showMapCloseFriend.IsChecked;
+            _currentProfile.AutoAvoidMobiles = _autoAvoidMobiles.IsChecked;
             // ## BEGIN - END ## // ONCASTINGGUMP
             // ## BEGIN - END ## // MISC3 SHOWALLLAYERS
             _currentProfile.ShowAllLayers = _showAllLayers.IsChecked;

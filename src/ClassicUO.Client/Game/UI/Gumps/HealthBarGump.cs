@@ -748,7 +748,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _hpLineRed.IsVisible = entity.HitsMax > 0;
 
-                Mobile mobile = entity as Mobile;
+                Mobile mobile = World.Mobiles.Get(entity);
 
                 if (!_isDead && entity != World.Player && mobile != null && mobile.IsDead && (ProfileManager.CurrentProfile.CloseHealthBarType == 2 || ProfileManager.CurrentProfile.CloseHealthBarType == 3)) // is dead
                 {
@@ -1020,9 +1020,12 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 }
 
-                // ## BEGIN - END ## // OVERHEAD / UNDERCHAR
-                CombatCollection.UpdateOverheads(mobile);
-                // ## BEGIN - END ## // OVERHEAD / UNDERCHAR
+                if (SerialHelper.IsMobile(mobile.Serial)) {
+                    // ## BEGIN - END ## // OVERHEAD / UNDERCHAR
+                    CombatCollection.UpdateOverheads(mobile);
+                    // ## BEGIN - END ## // OVERHEAD / UNDERCHAR
+                }
+                
 
                 // ## BEGIN - END ## // HEALTHBAR
                 if (ProfileManager.CurrentProfile != null)

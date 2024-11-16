@@ -56,6 +56,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Reflection;
+using ClassicUO.Dust765.Autos;
 
 namespace ClassicUO.Network
 {
@@ -164,7 +165,20 @@ namespace ClassicUO.Network
             if (data.IsEmpty)
                 return;
 
-            (fromPlugins ? _pluginsBuffer : _buffer).Enqueue(data);
+            if (fromPlugins)
+            {
+                lock (_pluginsBuffer)
+                {
+                    _pluginsBuffer.Enqueue(data);
+                }
+            }
+            else
+            {
+                lock (_buffer)
+                {
+                    _buffer.Enqueue(data);
+                }
+            }
         }
 
         private void AnalyzePacket(ReadOnlySpan<byte> data, int offset)
@@ -1595,6 +1609,7 @@ namespace ClassicUO.Network
                         if (gridContainer != null)
                         {
                             gridContainer.RequestUpdateContents();
+                    
                         }
                         else
                         {
@@ -1614,6 +1629,7 @@ namespace ClassicUO.Network
                         {
                             x = container.ScreenCoordinateX;
                             y = container.ScreenCoordinateY;
+                            
                             container.Dispose();
                         }
                         else
@@ -1758,11 +1774,11 @@ namespace ClassicUO.Network
                                 if (SerialHelper.IsMobile(container.Serial))
                                 {
                                     Console.WriteLine("=== DENY === ADD TO PAPERDOLL");
-
+                                   
                                     World.RemoveItemFromContainer(item);
                                     container.PushToBack(item);
                                     item.Container = container.Serial;
-
+                                     
                                     UIManager.GetGump<PaperDollGump>(item.Container)?.RequestUpdateContents();
                                     UIManager.GetGump<ModernPaperdoll>(item.Container)?.RequestUpdateContents();
                                 }
@@ -1776,7 +1792,7 @@ namespace ClassicUO.Network
                             else
                             {
                                 Console.WriteLine("=== DENY === ADD TO TERRAIN");
-
+                                
                                 World.RemoveItemFromContainer(item);
 
                                 item.SetInWorldTile(item.X, item.Y, item.Z);
@@ -1940,6 +1956,7 @@ namespace ClassicUO.Network
 
             if (item.Graphic != 0 && item.Layer != Layer.Backpack)
             {
+                
                 //ClearContainerAndRemoveItems(item);
                 World.RemoveItemFromContainer(item);
             }
@@ -2008,34 +2025,21 @@ namespace ClassicUO.Network
 
             const int TIME_TURN_TO_LASTTARGET = 2000;
 
-            if (
-                TargetManager.LastAttack == defenders
-                && World.Player.InWarMode
-                && World.Player.Walker.LastStepRequestTime + TIME_TURN_TO_LASTTARGET < Time.Ticks
-                && World.Player.Steps.Count == 0
-            )
+            if (TargetManager.LastAttack == defenders && World.Player.InWarMode && World.Player.Walker.LastStepRequestTime + TIME_TURN_TO_LASTTARGET < Time.Ticks && World.Player.Steps.Count == 0)
             {
                 Mobile enemy = World.Mobiles.Get(defenders);
 
                 if (enemy != null)
                 {
-                    Direction pdir = DirectionHelper.GetDirectionAB(
-                        World.Player.X,
-                        World.Player.Y,
-                        enemy.X,
-                        enemy.Y
-                    );
+                    Direction pdir = DirectionHelper.GetDirectionAB(World.Player.X, World.Player.Y, enemy.X, enemy.Y);
 
                     int x = World.Player.X;
                     int y = World.Player.Y;
                     sbyte z = World.Player.Z;
 
-                    if (
-                        Pathfinder.CanWalk(ref pdir, ref x, ref y, ref z)
-                        && World.Player.Direction != pdir
-                    )
+                    if (Pathfinder.CanWalk(ref pdir, ref x, ref y, ref z) && World.Player.Direction != pdir)
                     {
-                        World.Player.Walk(pdir, false);
+                        World.Player.Walk(pdir, false, true);
                     }
                 }
             }
@@ -2639,6 +2643,10 @@ namespace ClassicUO.Network
                 false,
                 blendmode
             );
+
+            // ## BEGIN - END ## // AUTOMATIONS
+            Defender.gfxTrigger(source, target, graphic);
+            // ## BEGIN - END ## // AUTOMATIONS
         }
 
         private static void ClientViewRange(ref StackDataReader p)
@@ -3057,6 +3065,7 @@ namespace ClassicUO.Network
                 item.Graphic = itemGraphic;
                 item.FixHue(item_hue);
                 item.Amount = 1;
+               
                 World.RemoveItemFromContainer(item);
                 item.Container = serial;
                 item.Layer = (Layer)layer;
@@ -3285,7 +3294,7 @@ namespace ClassicUO.Network
                 if (layer - 1 != Layer.Backpack)
                 {
                     Item item = World.GetOrCreateItem(item_serial);
-
+                    
                     World.RemoveItemFromContainer(item);
                     item.Container = serial;
                     item.Layer = layer - 1;
@@ -4560,7 +4569,8 @@ namespace ClassicUO.Network
 
                         case 0x0C: //container
                             UIManager.GetGump<ContainerGump>(serial)?.Dispose();
-
+                            
+         
                             break;
                     }
 
@@ -6336,7 +6346,7 @@ namespace ClassicUO.Network
             item.X = x;
             item.Y = y;
             item.Z = 0;
-
+            
             World.RemoveItemFromContainer(item);
             item.Container = containerSerial;
             container.PushToBack(item);
@@ -6516,6 +6526,7 @@ namespace ClassicUO.Network
 
                     if (SerialHelper.IsValid(item.Container))
                     {
+                        
                         World.RemoveItemFromContainer(item);
                     }
                 }

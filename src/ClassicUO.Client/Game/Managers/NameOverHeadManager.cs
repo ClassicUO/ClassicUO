@@ -60,7 +60,7 @@ namespace ClassicUO.Game.Managers
 
         // Corpses
         MonsterCorpses = 1 << 5,
-        HumanoidCorpses = 1 << 6,
+        HumanoidCorpses = 1 << 7,
         OwnCorpses = 1 << 7,
 
         // Mobiles (type)
