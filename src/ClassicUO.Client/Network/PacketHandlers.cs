@@ -2240,9 +2240,26 @@ namespace ClassicUO.Network
 
         private static void PlayMusic(World world, ref StackDataReader p)
         {
-            ushort index = p.ReadUInt16BE();
+            if (p.Length == 3) // Play Midi Music packet (0x6D, 0x10, index)
+            {
+                byte cmd = p.ReadUInt8();
+                byte index = p.ReadUInt8();
 
-            Client.Game.Audio.PlayMusic(index);
+                // Check for stop music packet (6D 1F FF)
+                if (cmd == 0x1F && index == 0xFF)
+                {
+                    Client.Game.Audio.StopMusic();
+                }
+                else
+                {
+                    Client.Game.Audio.PlayMusic(index);
+                }
+            }
+            else
+            {
+                ushort index = p.ReadUInt16BE();
+                Client.Game.Audio.PlayMusic(index);
+            }
         }
 
         private static void LoginComplete(World world, ref StackDataReader p)
