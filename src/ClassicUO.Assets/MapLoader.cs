@@ -568,7 +568,7 @@ namespace ClassicUO.Assets
                                 realStaticCount = Math.Min(1024, (uint)(st.Size / sizeOfStaicsBlock));
                             }
 
-                            BlockData[idx][blockIndex].StaticFile = difi;
+                            BlockData[idx][blockIndex].StaticFile = _staDif[i];
                             BlockData[idx][blockIndex].StaticAddress = realStaticAddress;
                             BlockData[idx][blockIndex].StaticCount = realStaticCount;
 
