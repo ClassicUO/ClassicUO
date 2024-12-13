@@ -35,7 +35,7 @@ jobs:
             target: win-x64
           - os: ubuntu-20.04
             target: linux-x64
-          - os: macos-12
+          - os: macos-13
             target: osx-x64
 
     steps:
