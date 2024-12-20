@@ -2,12 +2,18 @@ using System;
 using System.Net;
 using System.Net.Sockets;
 using ClassicUO.Utility.Logging;
+using System.Threading; // for CancellationTokenSource
+using System.Threading.Tasks;
 
 namespace ClassicUO.Network.Socket;
 
 sealed class TcpSocketWrapper : SocketWrapper
 {
     private TcpClient _socket;
+
+    private readonly CircularBuffer readBuffer = new CircularBuffer();
+    private CancellationTokenSource readCancellationTokenSource;
+    private Task readTask;
 
     public override bool IsConnected => _socket?.Client?.Connected ?? false;
 
@@ -34,6 +40,9 @@ sealed class TcpSocketWrapper : SocketWrapper
             }
 
             InvokeOnConnected();
+
+            readCancellationTokenSource = new CancellationTokenSource();
+            readTask = ReadTask(_socket.GetStream(), readCancellationTokenSource.Token);
         }
         catch (SocketException socketEx)
         {
@@ -44,6 +53,27 @@ sealed class TcpSocketWrapper : SocketWrapper
         {
             Log.Error($"error while connecting {ex}");
             InvokeOnError(SocketError.SocketError);
+        }
+    }
+
+    /**
+     * Fills #readBuffer asynchronously with data received on the
+     * TCP connection.  This data will be consumed by method Read().
+     */
+    private async Task ReadTask(NetworkStream stream, CancellationToken cancellationToken)
+    {
+        byte[] tempBuffer = new byte[4096];
+
+        while (true)
+        {
+            int nbytes = await stream.ReadAsync(tempBuffer, cancellationToken);
+            if (nbytes <= 0)
+                break;
+
+            lock (readBuffer)
+            {
+                readBuffer.Enqueue(tempBuffer.AsSpan(0, nbytes));
+            }
         }
     }
 
@@ -66,32 +96,29 @@ sealed class TcpSocketWrapper : SocketWrapper
             return 0;
         }
 
-        var available = Math.Min(buffer.Length, _socket.Available);
-        var done = 0;
-
-        var stream = _socket.GetStream();
-
-        while (done < available)
+        lock (readBuffer)
         {
-            var toRead = Math.Min(buffer.Length, available - done);
-            var read = stream.Read(buffer, done, toRead);
-
-            if (read <= 0)
-            {
-                InvokeOnDisconnected();
-                Disconnect();
-
-                return 0;
-            }
-
-            done += read;
+            int nbytes = readBuffer.Dequeue(buffer, 0, buffer.Length);
+            if (nbytes > 0)
+                return nbytes;
         }
 
-        return done;
+        if (readTask.IsCompleted)
+        {
+            /* the readTask finishes only if the connection was
+               closed (by the peer) */
+            InvokeOnDisconnected();
+            Disconnect();
+            return 0;
+        }
+
+        /* no data in the buffer (yet) */
+        return 0;
     }
 
     public override void Disconnect()
     {
+        readCancellationTokenSource?.Cancel();
         _socket?.Close();
         Dispose();
     }
@@ -100,5 +127,7 @@ sealed class TcpSocketWrapper : SocketWrapper
     {
         _socket?.Dispose();
         _socket = null;
+        readCancellationTokenSource = null;
+        readBuffer.Clear();
     }
 }
