@@ -56,8 +56,15 @@ sealed class TcpSocketWrapper : SocketWrapper
 
     public override int Read(byte[] buffer)
     {
+        if (_socket == null) return 0;
+
         if (!IsConnected)
+        {
+            InvokeOnDisconnected();
+            Disconnect();
+
             return 0;
+        }
 
         var available = Math.Min(buffer.Length, _socket.Available);
         var done = 0;
@@ -92,5 +99,6 @@ sealed class TcpSocketWrapper : SocketWrapper
     public override void Dispose()
     {
         _socket?.Dispose();
+        _socket = null;
     }
 }
