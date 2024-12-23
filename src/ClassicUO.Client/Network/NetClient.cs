@@ -7,6 +7,8 @@ using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Net.WebSockets;
+using System.Threading; // for CancellationTokenSource
+using System.Threading.Tasks;
 using ClassicUO.Network.Socket;
 
 namespace ClassicUO.Network
@@ -24,6 +26,8 @@ namespace ClassicUO.Network
         private readonly CircularBuffer _sendStream;
         private SocketWrapper _socket = null;
         private SocketWrapperType? _socketType;
+        private CancellationTokenSource connectCancellationTokenSource;
+        private Task connectTask;
 
 
         public NetClient()
@@ -132,22 +136,25 @@ namespace ClassicUO.Network
             // This prevents the client from swapping from WS -> TCP on game server login
             SetupSocket(_socketType ??= isWebsocketAddress ? SocketWrapperType.WebSocket : SocketWrapperType.TcpSocket);
 
-            try
-            {
-                _socket.Connect(uri);
+            var ui = TaskScheduler.FromCurrentSynchronizationContext();
 
+            connectCancellationTokenSource = new CancellationTokenSource();
+            connectTask = _socket.ConnectAsync(uri, connectCancellationTokenSource.Token);
+
+            connectTask.ContinueWith(_ => {
                 Statistics.Reset();
                 Connected?.Invoke(this, EventArgs.Empty);
-            }
-            catch (Exception ex)
-            {
-                Log.Error($"error while connecting {ex}");
+            }, connectCancellationTokenSource.Token, TaskContinuationOptions.OnlyOnRanToCompletion, ui);
+
+            connectTask.ContinueWith(t => {
+                Log.Error($"error while connecting {t.Exception.InnerException}");
                 Disconnected?.Invoke(this, SocketError.SocketError);
-            }
+            }, connectCancellationTokenSource.Token, TaskContinuationOptions.OnlyOnFaulted, ui);
         }
 
         public void Disconnect()
         {
+            connectCancellationTokenSource?.Cancel();
             _isCompressionEnabled = false;
             Statistics.Reset();
             _socket.Disconnect();
@@ -163,6 +170,11 @@ namespace ClassicUO.Network
 
         public ArraySegment<byte> CollectAvailableData()
         {
+            if (connectTask != null && !connectTask.IsCompleted)
+            {
+                return ArraySegment<byte>.Empty;
+            }
+
             if (_socket == null)
             {
                 return ArraySegment<byte>.Empty;

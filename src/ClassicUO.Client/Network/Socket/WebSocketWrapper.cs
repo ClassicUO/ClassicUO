@@ -30,8 +30,6 @@ sealed class WebSocketWrapper : SocketWrapper
     private CancellationTokenSource _tokenSource = new();
     private CircularBuffer _receiveStream;
 
-    public override void Connect(Uri uri) => ConnectAsync(uri, _tokenSource).Wait();
-
     public override void Send(byte[] buffer, int offset, int count) =>
         _webSocket.SendAsync(buffer.AsMemory().Slice(offset, count), WebSocketMessageType.Binary, true, _tokenSource.Token);
 
@@ -43,19 +41,19 @@ sealed class WebSocketWrapper : SocketWrapper
         }
     }
 
-    public async Task ConnectAsync(Uri uri, CancellationTokenSource tokenSource = null)
+    public override async Task ConnectAsync(Uri uri, CancellationToken cancellationToken)
     {
         if (IsConnected)
             return;
 
-        _tokenSource = tokenSource ?? new CancellationTokenSource();
+        _tokenSource = new CancellationTokenSource();
         _receiveStream = new CircularBuffer();
 
-        await ConnectWebSocketAsyncCore(uri);
+        await ConnectWebSocketAsyncCore(uri, cancellationToken);
     }
 
 
-    private async Task ConnectWebSocketAsyncCore(Uri uri)
+    private async Task ConnectWebSocketAsyncCore(Uri uri, CancellationToken cancellationToken)
     {
         // Take control of creating the raw socket, turn off Nagle, also lets us peek at `Available` bytes.
         _rawSocket = new TcpSocket(SocketType.Stream, ProtocolType.Tcp)
@@ -92,7 +90,7 @@ sealed class WebSocketWrapper : SocketWrapper
         );
 
 
-        await _webSocket.ConnectAsync(uri, httpClient, _tokenSource.Token);
+        await _webSocket.ConnectAsync(uri, httpClient, cancellationToken);
 
         Log.Trace($"Connected WebSocket: {uri}");
 

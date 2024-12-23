@@ -20,7 +20,7 @@ sealed class TcpSocketWrapper : SocketWrapper
     public override EndPoint LocalEndPoint => _socket?.Client?.LocalEndPoint;
 
 
-    public override void Connect(Uri uri)
+    public override async Task ConnectAsync(Uri uri, CancellationToken cancellationToken)
     {
         if (IsConnected)
             return;
@@ -28,7 +28,7 @@ sealed class TcpSocketWrapper : SocketWrapper
         _socket = new TcpClient();
         _socket.NoDelay = true;
 
-        _socket.Connect(uri.Host, uri.Port);
+        await _socket.ConnectAsync(uri.Host, uri.Port, cancellationToken);
 
         readCancellationTokenSource = new CancellationTokenSource();
         readTask = ReadTask(_socket.GetStream(), readCancellationTokenSource.Token);

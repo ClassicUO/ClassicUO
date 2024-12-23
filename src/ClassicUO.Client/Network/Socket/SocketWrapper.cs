@@ -1,6 +1,8 @@
 using System;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading; // for CancellationToken
+using System.Threading.Tasks;
 using ClassicUO.Utility.Logging;
 using System.Net.WebSockets;
 
@@ -23,7 +25,7 @@ abstract class SocketWrapper : IDisposable
     public event EventHandler<SocketError> OnError;
 
 
-    public abstract void Connect(Uri uri);
+    public abstract Task ConnectAsync(Uri uri, CancellationToken cancellationToken);
     public abstract void Send(byte[] buffer, int offset, int count);
 
     public abstract int Read(byte[] buffer);
