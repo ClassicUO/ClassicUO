@@ -107,12 +107,6 @@ namespace ClassicUO.Network
                 _ => throw new ArgumentOutOfRangeException(nameof(wrapperType), wrapperType, null)
             };
 
-            _socket.OnConnected += (o, e) =>
-            {
-                Statistics.Reset();
-                Connected?.Invoke(this, EventArgs.Empty);
-            };
-
             _socket.OnDisconnected += (_, _) => Disconnected?.Invoke(this, SocketError.Success);
             _socket.OnError += (_, e) => Disconnected?.Invoke(this, e);
         }
@@ -137,7 +131,19 @@ namespace ClassicUO.Network
             // First connected socket sets the type for any future sockets.
             // This prevents the client from swapping from WS -> TCP on game server login
             SetupSocket(_socketType ??= isWebsocketAddress ? SocketWrapperType.WebSocket : SocketWrapperType.TcpSocket);
-            _socket.Connect(uri);
+
+            try
+            {
+                _socket.Connect(uri);
+
+                Statistics.Reset();
+                Connected?.Invoke(this, EventArgs.Empty);
+            }
+            catch (Exception ex)
+            {
+                Log.Error($"error while connecting {ex}");
+                Disconnected?.Invoke(this, SocketError.SocketError);
+            }
         }
 
         public void Disconnect()

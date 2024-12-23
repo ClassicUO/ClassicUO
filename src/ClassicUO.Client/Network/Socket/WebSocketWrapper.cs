@@ -51,28 +51,7 @@ sealed class WebSocketWrapper : SocketWrapper
         _tokenSource = tokenSource ?? new CancellationTokenSource();
         _receiveStream = new CircularBuffer();
 
-        try
-        {
-            await ConnectWebSocketAsyncCore(uri);
-
-            InvokeOnConnected();
-        }
-        catch (WebSocketException ex)
-        {
-            SocketError error = ex.InnerException?.InnerException switch
-            {
-                SocketException socketException => socketException.SocketErrorCode,
-                _ => SocketError.SocketError
-            };
-
-            Log.Error($"Error {ex.GetType().Name} {error} while connecting to {uri} {ex}");
-            InvokeOnError(error);
-        }
-        catch (Exception ex)
-        {
-            Log.Error($"Unknown Error {ex.GetType().Name} while connecting to {uri} {ex}");
-            InvokeOnError(SocketError.SocketError);
-        }
+        await ConnectWebSocketAsyncCore(uri);
     }
 
 

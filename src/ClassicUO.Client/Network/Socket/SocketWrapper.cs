@@ -19,7 +19,7 @@ abstract class SocketWrapper : IDisposable
     public abstract EndPoint LocalEndPoint { get; }
 
 
-    public event EventHandler OnConnected, OnDisconnected;
+    public event EventHandler OnDisconnected;
     public event EventHandler<SocketError> OnError;
 
 
@@ -31,11 +31,6 @@ abstract class SocketWrapper : IDisposable
     public abstract void Disconnect();
 
     public abstract void Dispose();
-
-    protected virtual void InvokeOnConnected()
-    {
-        OnConnected?.Invoke(this, EventArgs.Empty);
-    }
 
     protected virtual void InvokeOnDisconnected()
     {

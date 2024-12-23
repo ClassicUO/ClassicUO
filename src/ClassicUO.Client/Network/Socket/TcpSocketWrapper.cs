@@ -28,25 +28,10 @@ sealed class TcpSocketWrapper : SocketWrapper
         _socket = new TcpClient();
         _socket.NoDelay = true;
 
-        try
-        {
-            _socket.Connect(uri.Host, uri.Port);
+        _socket.Connect(uri.Host, uri.Port);
 
-            InvokeOnConnected();
-
-            readCancellationTokenSource = new CancellationTokenSource();
-            readTask = ReadTask(_socket.GetStream(), readCancellationTokenSource.Token);
-        }
-        catch (SocketException socketEx)
-        {
-            Log.Error($"error while connecting {socketEx}");
-            InvokeOnError(socketEx.SocketErrorCode);
-        }
-        catch (Exception ex)
-        {
-            Log.Error($"error while connecting {ex}");
-            InvokeOnError(SocketError.SocketError);
-        }
+        readCancellationTokenSource = new CancellationTokenSource();
+        readTask = ReadTask(_socket.GetStream(), readCancellationTokenSource.Token);
     }
 
     /**
