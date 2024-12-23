@@ -32,13 +32,6 @@ sealed class TcpSocketWrapper : SocketWrapper
         {
             _socket.Connect(uri.Host, uri.Port);
 
-            if (!IsConnected)
-            {
-                InvokeOnError(SocketError.NotConnected);
-
-                return;
-            }
-
             InvokeOnConnected();
 
             readCancellationTokenSource = new CancellationTokenSource();

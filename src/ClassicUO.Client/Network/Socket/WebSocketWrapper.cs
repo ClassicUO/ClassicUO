@@ -55,10 +55,7 @@ sealed class WebSocketWrapper : SocketWrapper
         {
             await ConnectWebSocketAsyncCore(uri);
 
-            if (IsConnected)
-                InvokeOnConnected();
-            else
-                InvokeOnError(SocketError.NotConnected);
+            InvokeOnConnected();
         }
         catch (WebSocketException ex)
         {
