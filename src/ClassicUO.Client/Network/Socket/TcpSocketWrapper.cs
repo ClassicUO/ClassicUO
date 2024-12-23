@@ -20,7 +20,7 @@ sealed class TcpSocketWrapper : SocketWrapper
     public override EndPoint LocalEndPoint => _socket?.Client?.LocalEndPoint;
 
 
-    public override async Task ConnectAsync(Uri uri, CancellationToken cancellationToken)
+    private async Task ConnectAsync(IPAddress ip, int port, CancellationToken cancellationToken)
     {
         if (IsConnected)
             return;
@@ -28,10 +28,41 @@ sealed class TcpSocketWrapper : SocketWrapper
         _socket = new TcpClient();
         _socket.NoDelay = true;
 
-        await _socket.ConnectAsync(uri.Host, uri.Port, cancellationToken);
+        Log.Trace($"Trying address [{ip}]:{port}");
+        await _socket.ConnectAsync(ip, port, cancellationToken);
 
         readCancellationTokenSource = new CancellationTokenSource();
         readTask = ReadTask(_socket.GetStream(), readCancellationTokenSource.Token);
+    }
+
+    public override async Task ConnectAsync(Uri uri, CancellationToken cancellationToken)
+    {
+        Exception lastError = null;
+        var addresses = await Dns.GetHostAddressesAsync(uri.Host, cancellationToken);
+        foreach (var address in addresses)
+        {
+            try
+            {
+                await ConnectAsync(address, uri.Port, cancellationToken).WaitAsync(TimeSpan.FromSeconds(5));
+                return;
+            }
+            catch (TimeoutException ex)
+            {
+                Log.Warn($"Connection to [{address}]:{uri.Port} timed out");
+                lastError = new TimeoutException($"Connection to [{address}]:{uri.Port} timed out");
+            }
+            catch (SocketException ex)
+            {
+                Log.Warn($"Connection to [{address}]:{uri.Port} failed: {ex.Message}");
+                lastError = ex;
+            }
+
+            /* disconnect and try the next address */
+            Disconnect();
+        }
+
+        /* rethrow the last exception */
+        throw lastError;
     }
 
     /**
