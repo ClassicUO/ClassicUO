@@ -234,19 +234,17 @@ namespace ClassicUO.Game.Scenes
             }
             else
             {
+                showButtons = LoginButtons.Cancel;
+
                 switch (CurrentLoginStep)
                 {
                     case LoginSteps.Connecting:
                         labelText = Client.Game.UO.FileManager.Clilocs.GetString(3000002, ResGeneral.Connecting); // "Connecting..."
 
-                        showButtons = LoginButtons.Cancel;
-
                         break;
 
                     case LoginSteps.VerifyingAccount:
                         labelText = Client.Game.UO.FileManager.Clilocs.GetString(3000003, ResGeneral.VerifyingAccount); // "Verifying Account..."
-
-                        showButtons = LoginButtons.Cancel;
 
                         break;
 
