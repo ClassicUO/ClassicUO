@@ -1,34 +1,4 @@
-﻿#region license
-
-// Copyright (c) 2024, andreakarasho
-// All rights reserved.
-// 
-// Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions are met:
-// 1. Redistributions of source code must retain the above copyright
-//    notice, this list of conditions and the following disclaimer.
-// 2. Redistributions in binary form must reproduce the above copyright
-//    notice, this list of conditions and the following disclaimer in the
-//    documentation and/or other materials provided with the distribution.
-// 3. All advertising materials mentioning features or use of this software
-//    must display the following acknowledgement:
-//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
-// 4. Neither the name of the copyright holder nor the
-//    names of its contributors may be used to endorse or promote products
-//    derived from this software without specific prior written permission.
-// 
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
-// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
-// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-#endregion
+﻿// SPDX-License-Identifier: BSD-2-Clause
 
 using System;
 using System.Runtime.CompilerServices;
@@ -306,10 +276,10 @@ namespace ClassicUO.Network.Encryption
         *
         * Notes:
         *	This function is a keyed 32-bit permutation.  It is the major building
-        *	block for the Twofish round function, including the four keyed 8x8 
+        *	block for the Twofish round function, including the four keyed 8x8
         *	permutations and the 4x4 MDS matrix multiply.  This function is used
         *	both for generating round subkeys and within the round function on the
-        *	block being encrypted.  
+        *	block being encrypted.
         *
         *	This version is fairly slow and pedagogical, although a smartcard would
         *	probably perform the operation exactly this way in firmware.   For
@@ -377,7 +347,7 @@ namespace ClassicUO.Network.Encryption
         *
         * Notes:
         *	Here we precompute all the round subkeys, although that is not actually
-        *	required.  For example, on a smartcard, the round subkeys can 
+        *	required.  For example, on a smartcard, the round subkeys can
         *	be generated on-the-fly	using f32()
         *
         -****************************************************************************/
@@ -600,7 +570,7 @@ namespace ClassicUO.Network.Encryption
         private static void RS_rem(ref uint x)
         {
             byte b = (byte)(x >> 24);
-            // TODO: maybe change g2 and g3 to bytes			 
+            // TODO: maybe change g2 and g3 to bytes
             uint g2 = (uint)(((b << 1) ^ ((b & 0x80) == 0x80 ? RS_GF_FDBK : 0)) & 0xFF);
             uint g3 = (uint)(((b >> 1) & 0x7F) ^ ((b & 1) == 1 ? RS_GF_FDBK >> 1 : 0) ^ g2);
             x = (x << 8) ^ (g3 << 24) ^ (g2 << 16) ^ (g3 << 8) ^ b;
@@ -620,10 +590,10 @@ namespace ClassicUO.Network.Encryption
         *             102    76    41    24     8     4     1     3     0     0     0
         * Runs[8]:      2     4     5     6     7     8     9    11
         * MSBs[8]:      1     4    15     8    18    38    40    43
-        * HW= 8: 05040705 0A080E0A 14101C14 28203828 50407050 01499101 A080E0A0 
-        * HW= 9: 04050707 080A0E0E 10141C1C 20283838 40507070 80A0E0E0 C6432020 07070504 
-        *        0E0E0A08 1C1C1410 38382820 70705040 E0E0A080 202043C6 05070407 0A0E080E 
-        *        141C101C 28382038 50704070 A0E080E0 4320C620 02924B02 089A4508 
+        * HW= 8: 05040705 0A080E0A 14101C14 28203828 50407050 01499101 A080E0A0
+        * HW= 9: 04050707 080A0E0E 10141C1C 20283838 40507070 80A0E0E0 C6432020 07070504
+        *        0E0E0A08 1C1C1410 38382820 70705040 E0E0A080 202043C6 05070407 0A0E080E
+        *        141C101C 28382038 50704070 A0E080E0 4320C620 02924B02 089A4508
         * Min Hamming weight (two byte difference) =  3. Max=28.  Total = 390150.
         * Prob[3]:      7    18    55   149   270   914  2185  5761 11363 20719 32079
         *           43492 51612 53851 52098 42015 31117 20854 11538  6223  2492  1033
@@ -778,7 +748,7 @@ namespace ClassicUO.Network.Encryption
             return Mx_Y(x);
         }
 
-        /*	Define the fixed p0/p1 permutations used in keyed S-box lookup.  
+        /*	Define the fixed p0/p1 permutations used in keyed S-box lookup.
             By changing the following constant definitions for P_ij, the S-boxes will
             automatically get changed in all the Twofish source code. Note that P_i0 is
             the "outermost" 8x8 permutation applied.  See the f32() function to see
@@ -812,7 +782,7 @@ namespace ClassicUO.Network.Encryption
 
         /***********************************************************************
         *  07:07:14  05/30/98  [4x4]  TestCnt=256. keySize=128. CRC=4BD14D9E.
-        * maxKeyed:  dpMax = 18. lpMax =100. fixPt =  8. skXor =  0. skDup =  6. 
+        * maxKeyed:  dpMax = 18. lpMax =100. fixPt =  8. skXor =  0. skDup =  6.
         * log2(dpMax[ 6..18])=   --- 15.42  1.33  0.89  4.05  7.98 12.05
         * log2(lpMax[ 7..12])=  9.32  1.01  1.16  4.23  8.02 12.45
         * log2(fixPt[ 0.. 8])=  1.44  1.44  2.44  4.06  6.01  8.21 11.07 14.09 17.00
@@ -825,10 +795,10 @@ namespace ClassicUO.Network.Encryption
             /*  dpMax      = 10.  lpMax      = 64.  cycleCnt=   1  1  1  0.         */
             /* 817D6F320B59ECA4.ECB81235F4A6709D.BA5E6D90C8F32471.D7F4126E9B3085CA. */
             /* Karnaugh maps:
-            *  0111 0001 0011 1010. 0001 1001 1100 1111. 1001 1110 0011 1110. 1101 0101 1111 1001. 
-            *  0101 1111 1100 0100. 1011 0101 0010 0000. 0101 1000 1100 0101. 1000 0111 0011 0010. 
-            *  0000 1001 1110 1101. 1011 1000 1010 0011. 0011 1001 0101 0000. 0100 0010 0101 1011. 
-            *  0111 0100 0001 0110. 1000 1011 1110 1001. 0011 0011 1001 1101. 1101 0101 0000 1100. 
+            *  0111 0001 0011 1010. 0001 1001 1100 1111. 1001 1110 0011 1110. 1101 0101 1111 1001.
+            *  0101 1111 1100 0100. 1011 0101 0010 0000. 0101 1000 1100 0101. 1000 0111 0011 0010.
+            *  0000 1001 1110 1101. 1011 1000 1010 0011. 0011 1001 0101 0000. 0100 0010 0101 1011.
+            *  0111 0100 0001 0110. 1000 1011 1110 1001. 0011 0011 1001 1101. 1101 0101 0000 1100.
             */
             {
                 0xA9, 0x67, 0xB3, 0xE8, 0x04, 0xFD, 0xA3, 0x76,
@@ -868,10 +838,10 @@ namespace ClassicUO.Network.Encryption
             /*  dpMax      = 10.  lpMax      = 64.  cycleCnt=   2  0  0  1.         */
             /* 28BDF76E31940AC5.1E2B4C376DA5F908.4C75169A0ED82B3F.B951C3DE647F208A. */
             /* Karnaugh maps:
-            *  0011 1001 0010 0111. 1010 0111 0100 0110. 0011 0001 1111 0100. 1111 1000 0001 1100. 
-            *  1100 1111 1111 1010. 0011 0011 1110 0100. 1001 0110 0100 0011. 0101 0110 1011 1011. 
-            *  0010 0100 0011 0101. 1100 1000 1000 1110. 0111 1111 0010 0110. 0000 1010 0000 0011. 
-            *  1101 1000 0010 0001. 0110 1001 1110 0101. 0001 0100 0101 0111. 0011 1011 1111 0010. 
+            *  0011 1001 0010 0111. 1010 0111 0100 0110. 0011 0001 1111 0100. 1111 1000 0001 1100.
+            *  1100 1111 1111 1010. 0011 0011 1110 0100. 1001 0110 0100 0011. 0101 0110 1011 1011.
+            *  0010 0100 0011 0101. 1100 1000 1000 1110. 0111 1111 0010 0110. 0000 1010 0000 0011.
+            *  1101 1000 0010 0001. 0110 1001 1110 0101. 0001 0100 0101 0111. 0011 1011 1111 0010.
             */
             {
                 0x75, 0xF3, 0xC6, 0xF4, 0xDB, 0x7B, 0xFB, 0xC8,
