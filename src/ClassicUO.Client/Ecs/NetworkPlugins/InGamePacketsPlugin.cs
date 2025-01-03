@@ -39,7 +39,13 @@ sealed class NetworkEntitiesMap
         {
             ent.Set(new MobAnimation());
             ent.Set(new ScreenPositionOffset());
+            ent.Add<Mobiles>();
         }
+        else
+        {
+            ent.Add<Items>();
+        }
+
         _entities.Add(serial, ent.ID);
 
         Console.WriteLine("created: serial: 0x{0:X8} | ecsId: {1}", serial, ent.ID);
@@ -898,7 +904,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                     .Add<ContainedInto>()
                     ;
 
-                parentEnt.AddChild2(ent);
+                parentEnt.AddChild(ent);
             };
 
             // deny move item
@@ -1049,7 +1055,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                         .Set(new Amount() { Value = amount })
                         .Add<ContainedInto>()
                         ;
-                    parentEnt.AddChild2(childEnt);
+                    parentEnt.AddChild(childEnt);
                 }
             };
 

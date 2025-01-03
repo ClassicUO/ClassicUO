@@ -1,5 +1,4 @@
-﻿using System.Net.Sockets;
-using System.Text;
+﻿using System.Text;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Network;

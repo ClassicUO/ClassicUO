@@ -16,7 +16,7 @@ using static TinyEcs.Defaults;
 namespace ClassicUO.Ecs;
 
 
-struct MobAnimation : IComponent
+struct MobAnimation
 {
     public int Index;
     public int FramesCount;
@@ -39,7 +39,7 @@ struct MobAnimation : IComponent
     }
 }
 
-struct MobileFlags : IComponent
+struct MobileFlags
 {
     public Flags Value;
 }
@@ -50,7 +50,7 @@ struct MobileStepArray
     private Game.GameObjects.Mobile.Step _a;
 }
 
-struct MobileSteps : IComponent
+struct MobileSteps
 {
     public const int COUNT = 10;
 
@@ -216,101 +216,92 @@ readonly struct MobAnimationsPlugin : IPlugin
         Query<TinyEcs.Data<MobileSteps, WorldPosition, Facing, MobAnimation, ScreenPositionOffset>, Without<ContainedInto>> queryHandleWalking
     )
     {
-        foreach ((var entities, var stepsA, var positionA, var directionA, var animationA, var offsetA) in queryHandleWalking)
+        foreach ((var steps, var position, var direction, var animation, var offset) in queryHandleWalking)
         {
-            for (var i = 0; i < entities.Length; ++i)
+            while (steps.Ref.Count > 0)
             {
-                ref var steps = ref stepsA[i];
-                ref var position = ref positionA[i];
-                ref var direction = ref directionA[i];
-                ref var animation = ref animationA[i];
-                ref var offset = ref offsetA[i];
+                ref var step = ref steps.Ref[0];
 
-                while (steps.Count > 0)
+                var delay = time.Total - steps.Ref.Time;
+                var mount = animation.Ref.MountAction != 0xFF;
+
+                if (!mount && steps.Ref.Count > 1 && delay > 0)
                 {
-                    ref var step = ref steps[0];
+                    mount = delay <= (step.Run ? MovementSpeed.STEP_DELAY_MOUNT_RUN : MovementSpeed.STEP_DELAY_WALK);
+                }
 
-                    var delay = time.Total - steps.Time;
-                    var mount = animation.MountAction != 0xFF;
+                var maxDelay = MovementSpeed.TimeToCompleteMovement(step.Run, mount);
+                var removeStep = delay >= maxDelay;
+                var directionChange = false;
 
-                    if (!mount && steps.Count > 1 && delay > 0)
+                if (position.Ref.X != step.X || position.Ref.Y != step.Y)
+                {
+                    var badStep = false;
+
+                    if (offset.Ref.Value == Vector2.Zero)
                     {
-                        mount = delay <= (step.Run ? MovementSpeed.STEP_DELAY_MOUNT_RUN : MovementSpeed.STEP_DELAY_WALK);
+                        var absX = Math.Abs(position.Ref.X - step.X);
+                        var absY = Math.Abs(position.Ref.Y - step.Y);
+
+                        badStep = absX > 1 || absY > 1 || absX + absY == 0;
+
+                        if (!badStep)
+                        {
+                            absX = position.Ref.X;
+                            absY = position.Ref.Y;
+
+                            Pathfinder.GetNewXY((byte)(step.Direction & 7), ref absX, ref absY);
+
+                            badStep = absX != step.X || absY != step.Y;
+                        }
                     }
 
-                    var maxDelay = MovementSpeed.TimeToCompleteMovement(step.Run, mount);
-                    var removeStep = delay >= maxDelay;
-                    var directionChange = false;
-
-                    if (position.X != step.X || position.Y != step.Y)
-                    {
-                        var badStep = false;
-
-                        if (offset.Value == Vector2.Zero)
-                        {
-                            var absX = Math.Abs(position.X - step.X);
-                            var absY = Math.Abs(position.Y - step.Y);
-
-                            badStep = absX > 1 || absY > 1 || absX + absY == 0;
-
-                            if (!badStep)
-                            {
-                                absX = position.X;
-                                absY = position.Y;
-
-                                Pathfinder.GetNewXY((byte)(step.Direction & 7), ref absX, ref absY);
-
-                                badStep = absX != step.X || absY != step.Y;
-                            }
-                        }
-
-                        if (badStep)
-                            removeStep = true;
-                        else
-                        {
-                            var stepsCount = maxDelay / (float)Constants.CHARACTER_ANIMATION_DELAY;
-                            var x = delay / (float)Constants.CHARACTER_ANIMATION_DELAY;
-                            var y = x;
-
-                            var offsetZ = ((step.Z - position.Z) * x * (4.0f / stepsCount));
-                            MovementSpeed.GetPixelOffset(step.Direction, ref x, ref y, stepsCount);
-
-                            offset.Value.X = x;
-                            offset.Value.Y = y - offsetZ;
-                        }
-
-                        animation.Run = true;
-                    }
+                    if (badStep)
+                        removeStep = true;
                     else
                     {
-                        directionChange = true;
-                        removeStep = true;
+                        var stepsCount = maxDelay / (float)Constants.CHARACTER_ANIMATION_DELAY;
+                        var x = delay / (float)Constants.CHARACTER_ANIMATION_DELAY;
+                        var y = x;
+
+                        var offsetZ = ((step.Z - position.Ref.Z) * x * (4.0f / stepsCount));
+                        MovementSpeed.GetPixelOffset(step.Direction, ref x, ref y, stepsCount);
+
+                        offset.Ref.Value.X = x;
+                        offset.Ref.Value.Y = y - offsetZ;
                     }
 
-                    if (removeStep)
-                    {
-                        position.X = (ushort)step.X;
-                        position.Y = (ushort)step.Y;
-                        position.Z = step.Z;
-                        direction.Value = (Direction)step.Direction;
-
-                        if (step.Run)
-                            direction.Value |= Direction.Running;
-                        for (var j = 1; j < steps.Count; ++j)
-                            steps[j - 1] = steps[j];
-
-                        steps.Count = Math.Max(0, steps.Count - 1);
-                        offset.Value = Vector2.Zero;
-
-                        if (directionChange)
-                            continue;
-
-                        animation.Run = true;
-                        steps.Time = time.Total;
-                    }
-
-                    break;
+                    animation.Ref.Run = true;
                 }
+                else
+                {
+                    directionChange = true;
+                    removeStep = true;
+                }
+
+                if (removeStep)
+                {
+                    position.Ref.X = (ushort)step.X;
+                    position.Ref.Y = (ushort)step.Y;
+                    position.Ref.Z = step.Z;
+                    direction.Ref.Value = (Direction)step.Direction;
+
+                    if (step.Run)
+                        direction.Ref.Value |= Direction.Running;
+                    for (var j = 1; j < steps.Ref.Count; ++j)
+                        steps.Ref[j - 1] = steps.Ref[j];
+
+                    steps.Ref.Count = Math.Max(0, steps.Ref.Count - 1);
+                    offset.Ref.Value = Vector2.Zero;
+
+                    if (directionChange)
+                        continue;
+
+                    animation.Ref.Run = true;
+                    steps.Ref.Time = time.Total;
+                }
+
+                break;
             }
         }
     }
@@ -322,143 +313,144 @@ readonly struct MobAnimationsPlugin : IPlugin
         Res<GameContext> gameCtx,
         Res<UOFileManager> fileManager,
         Res<AssetsServer> assetsServer,
-        Query<TinyEcs.Data<MobAnimation, Graphic, Facing, EquipmentSlots, MobileFlags, MobileSteps>, 
+        Query<TinyEcs.Data<MobAnimation, Graphic, Facing, EquipmentSlots, MobileFlags, MobileSteps>,
             Filter<Without<ContainedInto>, Optional<MobileFlags>, Optional<MobileSteps>>> query
     )
     {
         foreach ((
-            var entities,
-            var animationA, 
-            var graphicA, 
-            var facingA, 
-            var equipmentSlotsA, 
-            var mobFlagsA,
-            var mobStepsA) in query)
+            var animation,
+            var graphic,
+            var direction,
+            var slots,
+            var mobFlags,
+            var mobSteps) in query)
         {
-            for (var i = 0; i < entities.Length; ++i)
+            // for (var i = 0; i < entities.Length; ++i)
+            // {
+            //     ref var animation = ref animationA[i];
+            //     ref var graphic = ref graphicA[i];
+            //     ref var direction = ref facingA[i];
+            //     ref var slots = ref equipmentSlotsA[i];
+            //     ref var mobFlags = ref mobFlagsA.IsEmpty ? ref Unsafe.NullRef<MobileFlags>() : ref mobFlagsA[i];
+            //     ref var mobSteps = ref mobStepsA.IsEmpty ? ref Unsafe.NullRef<MobileSteps>() : ref mobStepsA[i];
+
+
+            // }
+
+            if (animation.Ref.Time >= time.Total)
+                continue;
+
+            var flags = Unsafe.IsNullRef(ref mobFlags.Ref) ? Flags.None : mobFlags.Ref.Value;
+            var isWalking = false;
+            var iterate = true;
+            var realDirection = direction.Ref.Value;
+            var mirror = false;
+            var animId = graphic.Ref.Value;
+
+            if (!Unsafe.IsNullRef(ref mobSteps.Ref))
             {
-                ref var animation = ref animationA[i];
-                ref var graphic = ref graphicA[i];
-                ref var direction = ref facingA[i];
-                ref var slots = ref equipmentSlotsA[i];
-                ref var mobFlags = ref mobFlagsA.IsEmpty ? ref Unsafe.NullRef<MobileFlags>() : ref mobFlagsA[i];
-                ref var mobSteps = ref mobStepsA.IsEmpty ? ref Unsafe.NullRef<MobileSteps>() : ref mobStepsA[i];
+                isWalking = mobSteps.Ref.Time > time.Total - Constants.WALKING_DELAY;
 
-                if (animation.Time >= time.Total)
-                    continue;
-
-                var flags = Unsafe.IsNullRef(ref mobFlags) ? Flags.None : mobFlags.Value;
-                var isWalking = false;
-                var iterate = true;
-                var realDirection = direction.Value;
-                var mirror = false;
-                var animId = graphic.Value;
-
-                if (!Unsafe.IsNullRef(ref mobSteps))
+                if (mobSteps.Ref.Count > 0)
                 {
-                    isWalking = mobSteps.Time > time.Total - Constants.WALKING_DELAY;
-
-                    if (mobSteps.Count > 0)
+                    isWalking = true;
+                    realDirection = (Direction)mobSteps.Ref[0].Direction;
+                    if (mobSteps.Ref[0].Run)
                     {
-                        isWalking = true;
-                        realDirection = (Direction)mobSteps[0].Direction;
-                        if (mobSteps[0].Run)
-                        {
-                            realDirection |= Direction.Running;
-                        }
-                        else
-                        {
-                            realDirection &= ~Direction.Running;
-                        }
+                        realDirection |= Direction.Running;
                     }
-                    else if (isWalking)
+                    else
                     {
-                        iterate = false;
+                        realDirection &= ~Direction.Running;
                     }
                 }
-
-                animation.MountAction = 0xFF;
-
-                if (slots[Layer.Mount].IsValid() && world.Exists(slots[Layer.Mount]))
+                else if (isWalking)
                 {
-                    var mountGraphic = world.Get<Graphic>(slots[Layer.Mount]).Value;
-                    mountGraphic = Mounts.FixMountGraphic(fileManager.Value.TileData, mountGraphic);
-
-                    animation.MountAction = GetAnimationGroup(
-                        gameCtx.Value.ClientVersion, fileManager.Value.Animations, assetsServer.Value.Animations,
-                        mountGraphic, realDirection, isWalking, true, false, flags,
-                        animation.IsFromServer, animation.MountAction
-                    );
+                    iterate = false;
                 }
+            }
 
-                animation.Action = GetAnimationGroup(
+            animation.Ref.MountAction = 0xFF;
+
+            if (slots.Ref[Layer.Mount].IsValid() && world.Exists(slots.Ref[Layer.Mount]))
+            {
+                var mountGraphic = world.Get<Graphic>(slots.Ref[Layer.Mount]).Value;
+                mountGraphic = Mounts.FixMountGraphic(fileManager.Value.TileData, mountGraphic);
+
+                animation.Ref.MountAction = GetAnimationGroup(
                     gameCtx.Value.ClientVersion, fileManager.Value.Animations, assetsServer.Value.Animations,
-                    animId, realDirection, isWalking, animation.MountAction != 0xFF, false, flags,
-                    animation.IsFromServer, animation.Action);
-
-                realDirection &= ~Direction.Running;
-                realDirection &= Direction.Mask;
-
-                var dir = (byte)(realDirection);
-                assetsServer.Value.Animations.GetAnimDirection(ref dir, ref mirror);
-
-                var frames = assetsServer.Value.Animations.GetAnimationFrames
-                (
-                    animId,
-                    animation.Action,
-                    dir,
-                    out _,
-                    out _
+                    mountGraphic, realDirection, isWalking, true, false, flags,
+                    animation.Ref.IsFromServer, animation.Ref.MountAction
                 );
+            }
 
-                var currDelay = Constants.CHARACTER_ANIMATION_DELAY;
-                var fc = frames.Length;
-                var d = iterate ? 1 : 0;
-                var frameIndex = animation.Index + (animation.IsFromServer && !animation.ForwardDirection ? -d : d);
+            animation.Ref.Action = GetAnimationGroup(
+                gameCtx.Value.ClientVersion, fileManager.Value.Animations, assetsServer.Value.Animations,
+                animId, realDirection, isWalking, animation.Ref.MountAction != 0xFF, false, flags,
+                animation.Ref.IsFromServer, animation.Ref.Action);
 
-                if (animation.IsFromServer)
+            realDirection &= ~Direction.Running;
+            realDirection &= Direction.Mask;
+
+            var dir = (byte)(realDirection);
+            assetsServer.Value.Animations.GetAnimDirection(ref dir, ref mirror);
+
+            var frames = assetsServer.Value.Animations.GetAnimationFrames
+            (
+                animId,
+                animation.Ref.Action,
+                dir,
+                out _,
+                out _
+            );
+
+            var currDelay = Constants.CHARACTER_ANIMATION_DELAY;
+            var fc = frames.Length;
+            var d = iterate ? 1 : 0;
+            var frameIndex = animation.Ref.Index + (animation.Ref.IsFromServer && !animation.Ref.ForwardDirection ? -d : d);
+
+            if (animation.Ref.IsFromServer)
+            {
+                currDelay += currDelay * (animation.Ref.Interval + 1);
+
+                if (animation.Ref.FramesCount == 0)
+                    animation.Ref.FramesCount = fc;
+                else
+                    fc = animation.Ref.FramesCount;
+
+                if (animation.Ref.ForwardDirection && frameIndex >= fc)
+                    frameIndex = 0;
+                else if (!animation.Ref.ForwardDirection && frameIndex < 0)
+                    frameIndex = fc == 0 ? 0 : frames.Length - 1;
+                else
+                    goto SKIP;
+
+                animation.Ref.RepeatMode = Math.Max(0, animation.Ref.RepeatMode - 1);
+                if (animation.Ref.RepeatMode >= 0)
+                    goto SKIP;
+
+                if (animation.Ref.Repeat)
                 {
-                    currDelay += currDelay * (animation.Interval + 1);
-
-                    if (animation.FramesCount == 0)
-                        animation.FramesCount = fc;
-                    else
-                        fc = animation.FramesCount;
-
-                    if (animation.ForwardDirection && frameIndex >= fc)
-                        frameIndex = 0;
-                    else if (!animation.ForwardDirection && frameIndex < 0)
-                        frameIndex = fc == 0 ? 0 : frames.Length - 1;
-                    else
-                        goto SKIP;
-
-                    animation.RepeatMode = Math.Max(0, animation.RepeatMode - 1);
-                    if (animation.RepeatMode >= 0)
-                        goto SKIP;
-
-                    if (animation.Repeat)
-                    {
-                        animation.RepeatModeCount = animation.RepeatMode;
-                        animation.Repeat = false;
-                    }
-                    else
-                    {
-                        animation.Run = true;
-                    }
-                SKIP:;
+                    animation.Ref.RepeatModeCount = animation.Ref.RepeatMode;
+                    animation.Ref.Repeat = false;
                 }
                 else
                 {
-                    if (frameIndex >= fc)
-                    {
-                        frameIndex = 0;
-                        animation.Run = false;
-                    }
+                    animation.Ref.Run = true;
                 }
-
-                animation.Index = frames.IsEmpty ? 0 : frameIndex % frames.Length;
-                animation.Time = time.Total + currDelay;
+            SKIP:;
             }
+            else
+            {
+                if (frameIndex >= fc)
+                {
+                    frameIndex = 0;
+                    animation.Ref.Run = false;
+                }
+            }
+
+            animation.Ref.Index = frames.IsEmpty ? 0 : frameIndex % frames.Length;
+            animation.Ref.Time = time.Total + currDelay;
         }
     }
 

@@ -255,12 +255,11 @@ namespace ClassicUO
                         break;
                 }
 
-                var ecs = new TinyEcs.World();
+                using var ecs = new TinyEcs.World();
                 var scheduler = new Scheduler(ecs);
 
                 scheduler.AddPlugin<Ecs.CuoPlugin>();
-                while (true)
-                    scheduler.Run();
+                scheduler.Run(() => true);
 
                 // Client.Run(pluginHost);
             }

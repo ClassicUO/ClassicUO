@@ -11,7 +11,7 @@ namespace ClassicUO.Ecs;
 
 struct OnNewChunkRequest { public int Map; public int RangeStartX, RangeStartY, RangeEndX, RangeEndY; }
 
-struct TileStretched : IComponent
+struct TileStretched
 {
     public sbyte AvgZ, MinZ;
     public Renderer.UltimaBatcher2D.YOffsets Offset;
@@ -243,18 +243,12 @@ readonly struct TerrainPlugin : IPlugin
         toRemove.Value.Clear();
 
 
-        foreach ((var entities, var mobPosA) in queryAll)
+        foreach ((var entity, var mobPos) in queryAll)
         {
-            for (var i = 0; i < entities.Length; i++)
+            var dist2 = GetDist(pos.X, pos.Y, mobPos.Ref.X, mobPos.Ref.Y);
+            if (dist2 > MAX_DIST)
             {
-                ref var mobPos = ref mobPosA[i];
-
-                var dist2 = GetDist(pos.X, pos.Y, mobPos.X, mobPos.Y);
-
-                if (dist2 > MAX_DIST)
-                {
-                    entities[i].Delete();
-                }
+                entity.Ref.Delete();
             }
         }
     }

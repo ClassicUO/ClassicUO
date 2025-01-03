@@ -5,12 +5,12 @@ using TinyEcs;
 
 namespace ClassicUO.Ecs;
 
-struct WorldPosition : IComponent
+struct WorldPosition
 {
     public ushort X, Y;
     public sbyte Z;
 
-    public void Deconstruct(out ushort x, out ushort y, out sbyte z)
+    public readonly void Deconstruct(out ushort x, out ushort y, out sbyte z)
     {
         x = X;
         y = Y;
@@ -18,51 +18,51 @@ struct WorldPosition : IComponent
     }
 }
 
-struct Graphic : IComponent
+struct Graphic
 {
     public ushort Value;
 }
 
-struct Hue : IComponent
+struct Hue
 {
     public ushort Value;
 }
 
-struct Facing : IComponent
+struct Facing
 {
     public ClassicUO.Game.Data.Direction Value;
 }
 
-struct NetworkSerial : IComponent
+struct NetworkSerial
 {
     public uint Value;
 }
 
-struct Amount : IComponent
+struct Amount
 {
     public int Value;
 }
 
-struct ContainedInto : IComponent;
+struct ContainedInto;
 
-struct Hitpoints : IComponent
+struct Hitpoints
 {
     public ushort Value, MaxValue;
 }
 
-struct Mana : IComponent
+struct Mana
 {
     public ushort Value, MaxValue;
 }
 
-struct Stamina : IComponent
+struct Stamina
 {
     public ushort Value, MaxValue;
 }
 
-struct Player : IComponent;
+struct Player;
 
-struct PlayerData : IComponent
+struct PlayerData
 {
     public ushort Str, StrMax;
     public ushort Dex, DexMax;
@@ -91,7 +91,7 @@ struct EquipmentArray
     private ulong _a;
 }
 
-struct EquipmentSlots : IComponent
+struct EquipmentSlots
 {
     private EquipmentArray _array;
 
@@ -102,10 +102,12 @@ struct EquipmentSlots : IComponent
     }
 }
 
-public struct ScreenPositionOffset : IComponent
+public struct ScreenPositionOffset
 {
     public Vector2 Value;
 }
 
-struct IsStatic : IComponent;
-struct IsTile : IComponent;
+internal struct IsStatic;
+internal struct IsTile;
+internal struct Items;
+internal struct Mobiles;
