@@ -136,7 +136,7 @@ namespace ClassicUO.Game.Managers
 
             _bounds = new Rectangle(StartPos.X - 1, StartPos.Y - 1, width + 1, height + 2);
 
-            if (width > 13 || height > 13)
+            if (width >= 13 || height >= 13)
             {
                 FloorCount = 4;
             }
