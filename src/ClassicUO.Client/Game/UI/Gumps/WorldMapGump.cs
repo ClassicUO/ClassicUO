@@ -1,32 +1,30 @@
 ﻿#region license
 
-// Copyright (c) 2024, andreakarasho
+// BSD 2-Clause License
+//
+// Copyright (c) 2025, andreakarasho
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
-// 1. Redistributions of source code must retain the above copyright
-//    notice, this list of conditions and the following disclaimer.
-// 2. Redistributions in binary form must reproduce the above copyright
-//    notice, this list of conditions and the following disclaimer in the
-//    documentation and/or other materials provided with the distribution.
-// 3. All advertising materials mentioning features or use of this software
-//    must display the following acknowledgement:
-//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
-// 4. Neither the name of the copyright holder nor the
-//    names of its contributors may be used to endorse or promote products
-//    derived from this software without specific prior written permission.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
-// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
-// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+// - Redistributions of source code must retain the above copyright notice, this
+//   list of conditions and the following disclaimer.
+//
+// - Redistributions in binary form must reproduce the above copyright notice,
+//   this list of conditions and the following disclaimer in the documentation
+//   and/or other materials provided with the distribution.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+// FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+// DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+// CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+// OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endregion
 
@@ -93,7 +91,8 @@ namespace ClassicUO.Game.UI.Gumps
         private bool _freeView;
         private List<string> _hiddenMarkerFiles;
         private bool _isScrolling;
-        private bool _isTopMost;  
+        private bool _isTopMost;
+        private int _mapIndex;
         private bool _mapMarkersLoaded;
         private List<string> _hiddenZoneFiles;
         private ZoneSets _zoneSets = new ZoneSets();
@@ -350,7 +349,7 @@ namespace ClassicUO.Game.UI.Gumps
             _options["show_coordinates"] = new ContextMenuItemEntry(ResGumps.ShowYourCoordinates, () => { _showCoordinates = !_showCoordinates; SaveSettings(); }, true, _showCoordinates);
 
             _options["show_sextant_coordinates"] = new ContextMenuItemEntry(ResGumps.ShowSextantCoordinates, () => { _showSextantCoordinates = !_showSextantCoordinates; }, true, _showSextantCoordinates);
-            
+
             _options["show_mouse_coordinates"] = new ContextMenuItemEntry(ResGumps.ShowMouseCoordinates, () => { _showMouseCoordinates = !_showMouseCoordinates; }, true, _showMouseCoordinates);
 
             _options["allow_positional_target"] = new ContextMenuItemEntry(
@@ -527,15 +526,15 @@ namespace ClassicUO.Game.UI.Gumps
             ContextMenu.Add(_options["goto_location"]);
             ContextMenu.Add(_options["flip_map"]);
             ContextMenu.Add(_options["top_most"]);
-            
+
             ContextMenuItemEntry freeView = new ContextMenuItemEntry(ResGumps.FreeView);
             freeView.Add(_options["free_view"]);
 
             for (int i = 0; i < MapLoader.MAPS_COUNT; i++)
                 freeView.Add(_options[$"free_view_map_{i}"]);
-            
+
             ContextMenu.Add(freeView);
-            
+
             ContextMenu.Add("", null);
             ContextMenu.Add(_options["show_party_members"]);
             ContextMenu.Add(_options["show_mobiles"]);
@@ -574,8 +573,8 @@ namespace ClassicUO.Game.UI.Gumps
         {
             Client.Game.UO.FileManager.Maps.LoadMap(index, World.ClientFeatures.Flags.HasFlag(CharacterListFlags.CLF_UNLOCK_FELUCCA_AREAS));
             _map = new Map.Map(World, index);
-            
-            
+
+
             if (_loadingTask is { Status: TaskStatus.Running })
                 _loadingTask = _loadingTask.ContinueWith(_ => LoadMap(index));
             else
@@ -2297,10 +2296,10 @@ namespace ClassicUO.Game.UI.Gumps
             if (_showCoordinates)
             {
                 string text = $"{World.Player.X}, {World.Player.Y} ({World.Player.Z}) [{_zoomIndex}]";
-                
+
                 if (_showSextantCoordinates && Sextant.FormatString(new Point(World.Player.X, World.Player.Y), _map, out var sextantCoords))
                     text += "\n" + sextantCoords;
-                
+
                 Vector3 hueVector = new(0f, 1f, 1f);
 
                 batcher.DrawString(Fonts.Bold, text, gX + 6, gY + 6, hueVector);
@@ -2311,12 +2310,12 @@ namespace ClassicUO.Game.UI.Gumps
             if (_showMouseCoordinates && _lastMousePosition != null)
             {
                 CanvasToWorld(_lastMousePosition.Value.X, _lastMousePosition.Value.Y, out int mouseWorldX, out int mouseWorldY);
-                
+
                 string mouseCoordinateString = $"{mouseWorldX} {mouseWorldY}";
-                
+
                 if (_showSextantCoordinates && Sextant.FormatString(new Point(mouseWorldX, mouseWorldY), _map, out var sextantCoords))
                     mouseCoordinateString += "\n" + sextantCoords;
-                
+
                 Vector2 size = Fonts.Regular.MeasureString(mouseCoordinateString);
                 int mx = gX + 5;
                 int my = gY + Height - (int)Math.Ceiling(size.Y) - 15;
