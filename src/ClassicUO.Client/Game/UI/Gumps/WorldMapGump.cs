@@ -362,19 +362,19 @@ namespace ClassicUO.Game.UI.Gumps
 
             _options["free_view"] = new ContextMenuItemEntry(ResGumps.FreeView, () => { FreeView = !FreeView; }, true, FreeView);
 
-            _options["show_party_members"] = new ContextMenuItemEntry
-            (
-                ResGumps.ShowPartyMembers,
-                () =>
-                {
-                    _showPartyMembers = !_showPartyMembers;
-
-                    World.WMapManager.SetEnable(_showPartyMembers);
-                    SaveSettings();
-                },
-                true,
-                _showPartyMembers
-            );
+            // (_options["show_party_members"] = new ContextMenuItemEntry
+            // (
+            //     ResGumps.ShowPartyMembers,
+            //     () =>
+            //     {
+            //         _showPartyMembers = !_showPartyMembers;
+            //
+            //         World.WMapManager.SetEnable(_showPartyMembers);
+            //         SaveSettings();
+            //     },
+            //     true,
+            //     _showPartyMembers
+            // );
 
             _options["show_mobiles"] = new ContextMenuItemEntry(ResGumps.ShowMobiles, () => { _showMobiles = !_showMobiles; SaveSettings(); }, true, _showMobiles);
 
@@ -568,7 +568,7 @@ namespace ClassicUO.Game.UI.Gumps
             ContextMenu.Add(_options["top_most"]);
             ContextMenu.Add(_options["free_view"]);
             ContextMenu.Add("", null);
-            ContextMenu.Add(_options["show_party_members"]);
+            //ContextMenu.Add(_options["show_party_members"]);
             ContextMenu.Add(_options["show_mobiles"]);
             ContextMenu.Add(_options["show_multis"]);
             ContextMenu.Add(_options["show_coordinates"]);
