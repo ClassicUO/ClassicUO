@@ -28,6 +28,7 @@ namespace ClassicUO
 {
     internal unsafe class GameController : Microsoft.Xna.Framework.Game
     {
+        private readonly ManualSynchronizationContext SyncContext = new ManualSynchronizationContext();
         private SDL_EventFilter _filter;
 
         private bool _ignoreNextTextInput;
@@ -78,6 +79,8 @@ namespace ClassicUO
 
         protected override void Initialize()
         {
+            SynchronizationContext.SetSynchronizationContext(SyncContext);
+
             if (GraphicManager.GraphicsDevice.Adapter.IsProfileSupported(GraphicsProfile.HiDef))
             {
                 GraphicManager.GraphicsProfile = GraphicsProfile.HiDef;
@@ -346,6 +349,8 @@ namespace ClassicUO
 
             NetClient.Socket.Statistics.TotalPacketsReceived += (uint)packetsCount;
             NetClient.Socket.Flush();
+
+            SyncContext.Tick();
 
             Plugin.Tick();
 
