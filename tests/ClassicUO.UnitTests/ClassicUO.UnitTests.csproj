@@ -3,7 +3,7 @@
     <IsPackable>false</IsPackable>
     <DebugType>Full</DebugType>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
