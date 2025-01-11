@@ -44,8 +44,8 @@ internal readonly struct PickupPlugin : IPlugin
                     delay.Value = time.Total + 1000f;
                 else if (!mouseCtx.Value.IsPressed(Input.MouseButtonType.Left))
                     return false;
-                var ok = time.Total > delay;
-                if (ok)
+
+                if (time.Total > delay)
                     return true;
 
                 if (delay.Value.HasValue)

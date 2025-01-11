@@ -259,7 +259,7 @@ namespace ClassicUO
                 var scheduler = new Scheduler(ecs);
 
                 scheduler.AddPlugin<Ecs.CuoPlugin>();
-                scheduler.Run(() => true);
+                scheduler.Run(() => false);
 
                 // Client.Run(pluginHost);
             }

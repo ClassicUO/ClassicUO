@@ -53,7 +53,8 @@ readonly struct LoginPacketsPlugin : IPlugin
                 var characterNames = new List<string>();
                 for (var i = 0; i < charactersCount; ++i)
                 {
-                    characterNames.Add(reader.ReadASCII(30).TrimEnd('\0'));
+                    var name = reader.ReadASCII(30).TrimEnd('\0');
+                    characterNames.Add(name);
                     reader.Skip(30);
                 }
 

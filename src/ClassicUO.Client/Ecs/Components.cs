@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using ClassicUO.Game.Data;
 using Microsoft.Xna.Framework;
@@ -95,10 +96,10 @@ struct EquipmentSlots
 {
     private EquipmentArray _array;
 
-    public ulong this[Layer layer]
+    [UnscopedRef]
+    public ref ulong this[Layer layer]
     {
-        get => _array[(int)layer];
-        set => _array[(int)layer] = value;
+        get => ref _array[(int)layer];
     }
 }
 
