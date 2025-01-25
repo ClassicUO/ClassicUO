@@ -145,7 +145,7 @@ sealed class NetworkEntitiesMap
                     }
                 }
             }
-            world.EndDeferred();
+            // world.EndDeferred();
 
 
             // // we want to keep the equipments for some reason lol
@@ -494,7 +494,8 @@ readonly struct InGamePacketsPlugin : IPlugin
                 parentEnt
                     .Set(new Graphic() { Value = graphic })
                     // .Set(new WorldPosition() { X = x, Y = y, Z = z })
-                    .Set(new Hue() { Value = hue });
+                    .Set(new Hue() { Value = hue })
+                    .Set(new MobileFlags() { Value = flags});
                     //.Set(new Facing() { Value = dir });
 
                 var slots = parentEnt.Has<EquipmentSlots>() ? parentEnt.Get<EquipmentSlots>() : new EquipmentSlots();
@@ -806,7 +807,8 @@ readonly struct InGamePacketsPlugin : IPlugin
 
                 var ent = entitiesMap.Value.GetOrCreate(world, serial);
                 ent.Set(new Graphic() { Value = (ushort)(graphic + graphicInc) })
-                    .Set(new Hue() { Value = hue });
+                    .Set(new Hue() { Value = hue })
+                    .Set(new MobileFlags() { Value = flags});
                     //.Set(new WorldPosition() { X = x, Y = y, Z = z })
                     //.Set(new Facing() { Value = direction });
 
@@ -1302,7 +1304,8 @@ readonly struct InGamePacketsPlugin : IPlugin
 
                 var ent = entitiesMap.Value.GetOrCreate(world, serial);
                 ent.Set(new Graphic() { Value = graphic })
-                    .Set(new Hue() { Value = hue });
+                    .Set(new Hue() { Value = hue })
+                    .Set(new MobileFlags() { Value = flags });
                     // .Set(new WorldPosition() { X = x, Y = y, Z = z })
                     //.Set(new Facing() { Value = direction });
 
