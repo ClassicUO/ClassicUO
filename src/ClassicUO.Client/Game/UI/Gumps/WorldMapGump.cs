@@ -101,6 +101,7 @@ namespace ClassicUO.Game.UI.Gumps
         private int _markerFontIndex = 1;
         private readonly Dictionary<string, ContextMenuItemEntry> _options = new Dictionary<string, ContextMenuItemEntry>();
         private bool _showCoordinates;
+        private bool _showSextantCoordinates;
         private bool _showMouseCoordinates;
         private bool _showGroupBar = true;
         private bool _showGroupName = true;
@@ -216,6 +217,7 @@ namespace ClassicUO.Game.UI.Gumps
             _zoomIndex = ProfileManager.CurrentProfile.WorldMapZoomIndex;
 
             _showCoordinates = ProfileManager.CurrentProfile.WorldMapShowCoordinates;
+            _showSextantCoordinates = ProfileManager.CurrentProfile.WorldMapShowSextantCoordinates;
             _showMouseCoordinates = ProfileManager.CurrentProfile.WorldMapShowMouseCoordinates;
             _showMobiles = ProfileManager.CurrentProfile.WorldMapShowMobiles;
 
@@ -256,6 +258,7 @@ namespace ClassicUO.Game.UI.Gumps
             ProfileManager.CurrentProfile.WorldMapZoomIndex = _zoomIndex;
 
             ProfileManager.CurrentProfile.WorldMapShowCoordinates = _showCoordinates;
+            ProfileManager.CurrentProfile.WorldMapShowSextantCoordinates = _showSextantCoordinates;
             ProfileManager.CurrentProfile.WorldMapShowMouseCoordinates = _showMouseCoordinates;
             ProfileManager.CurrentProfile.WorldMapShowMobiles = _showMobiles;
 
@@ -296,66 +299,7 @@ namespace ClassicUO.Game.UI.Gumps
             _options["goto_location"] = new ContextMenuItemEntry
             (
                 ResGumps.GotoLocation,
-                () =>
-                {
-                    EntryDialog dialog = new EntryDialog
-                    (
-                        World,
-                        250,
-                        150,
-                        ResGumps.EnterLocation,
-                        name =>
-                        {
-                            _gotoMarker = null;
-
-                            if (string.IsNullOrWhiteSpace(name))
-                            {
-                                GameActions.Print(World, ResGumps.InvalidLocation, 0x35);
-
-                                return;
-                            }
-
-                            int x = -1;
-                            int y = -1;
-
-                            string[] coords = name.Split(' ');
-
-                            if (coords.Length < 2)
-                            {
-                                try
-                                {
-                                    ConvertCoords(name, ref x, ref y);
-                                }
-                                catch
-                                {
-                                    GameActions.Print(World, ResGumps.InvalidLocation, 0x35);
-                                }
-                            }
-                            else
-                            {
-                                if (!int.TryParse(coords[0], out x))
-                                {
-                                    GameActions.Print(World, ResGumps.InvalidLocation, 0x35);
-                                }
-
-                                if (!int.TryParse(coords[1], out y))
-                                {
-                                    GameActions.Print(World, ResGumps.InvalidLocation, 0x35);
-                                }
-                            }
-
-                            if (x != -1 && y != -1)
-                            {
-                                GoToMarker(x, y, true);
-                            }
-                        }
-                    )
-                    {
-                        CanCloseWithRightClick = true
-                    };
-
-                    UIManager.Add(dialog);
-                }
+                () => UIManager.Add(new LocationGoGump(World, (x, y) => GoToMarker(x, y, true)))
             );
 
             _options["top_most"] = new ContextMenuItemEntry(ResGumps.TopMost, () => { TopMost = !TopMost; }, true, _isTopMost);
@@ -390,6 +334,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             _options["show_coordinates"] = new ContextMenuItemEntry(ResGumps.ShowYourCoordinates, () => { _showCoordinates = !_showCoordinates; SaveSettings(); }, true, _showCoordinates);
 
+            _options["show_sextant_coordinates"] = new ContextMenuItemEntry(ResGumps.ShowSextantCoordinates, () => { _showSextantCoordinates = !_showSextantCoordinates; }, true, _showSextantCoordinates);
+            
             _options["show_mouse_coordinates"] = new ContextMenuItemEntry(ResGumps.ShowMouseCoordinates, () => { _showMouseCoordinates = !_showMouseCoordinates; }, true, _showMouseCoordinates);
 
             _options["allow_positional_target"] = new ContextMenuItemEntry(
@@ -572,6 +518,7 @@ namespace ClassicUO.Game.UI.Gumps
             ContextMenu.Add(_options["show_mobiles"]);
             ContextMenu.Add(_options["show_multis"]);
             ContextMenu.Add(_options["show_coordinates"]);
+            ContextMenu.Add(_options["show_sextant_coordinates"]);
             ContextMenu.Add(_options["show_mouse_coordinates"]);
             ContextMenu.Add(_options["allow_positional_target"]);
             ContextMenu.Add("", null);
@@ -2321,42 +2268,32 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_showCoordinates)
             {
-                Vector3 hueVector = new Vector3(0f, 1f, 1f);
+                string text = $"{World.Player.X}, {World.Player.Y} ({World.Player.Z}) [{_zoomIndex}]";
+                
+                if (_showSextantCoordinates && Sextant.FormatString(new Point(World.Player.X, World.Player.Y), World.Map, out var sextantCoords))
+                    text += "\n" + sextantCoords;
+                
+                Vector3 hueVector = new(0f, 1f, 1f);
 
-                batcher.DrawString
-                (
-                    Fonts.Bold,
-                    $"{World.Player.X}, {World.Player.Y} ({World.Player.Z}) [{_zoomIndex}]",
-                    gX + 6,
-                    gY + 6,
-                    hueVector
-                );
-
+                batcher.DrawString(Fonts.Bold, text, gX + 6, gY + 6, hueVector);
                 hueVector = ShaderHueTranslator.GetHueVector(0);
-
-                batcher.DrawString
-                (
-                    Fonts.Bold,
-                    $"{World.Player.X}, {World.Player.Y} ({World.Player.Z}) [{_zoomIndex}]",
-                    gX + 5,
-                    gY + 5,
-                    hueVector
-                );
+                batcher.DrawString(Fonts.Bold, text, gX + 5, gY + 5, hueVector);
             }
 
             if (_showMouseCoordinates && _lastMousePosition != null)
             {
-
-                int mouseWorldX;
-                int mouseWorldY;
-                CanvasToWorld(_lastMousePosition.Value.X, _lastMousePosition.Value.Y, out mouseWorldX, out mouseWorldY);
-
+                CanvasToWorld(_lastMousePosition.Value.X, _lastMousePosition.Value.Y, out int mouseWorldX, out int mouseWorldY);
+                
                 string mouseCoordinateString = $"{mouseWorldX} {mouseWorldY}";
+                
+                if (_showSextantCoordinates && Sextant.FormatString(new Point(mouseWorldX, mouseWorldY), World.Map, out var sextantCoords))
+                    mouseCoordinateString += "\n" + sextantCoords;
+                
                 Vector2 size = Fonts.Regular.MeasureString(mouseCoordinateString);
                 int mx = gX + 5;
                 int my = gY + Height - (int)Math.Ceiling(size.Y) - 15;
 
-                Vector3 hueVector = new Vector3(0f, 1f, 1f);
+                Vector3 hueVector = new(0f, 1f, 1f);
 
                 batcher.DrawString
                 (
@@ -3325,67 +3262,6 @@ namespace ClassicUO.Game.UI.Gumps
         public static Color GetColor(string name)
         {
             return _colorMap.TryGetValue(name, out var color) ? color : Color.White;
-        }
-
-        /// <summary>
-        /// Converts latitudes and longitudes to X and Y locations based on Lord British's throne is located at 1323.1624 or 0° 0'N 0° 0'E
-        /// </summary>
-        /// <param name="coords"></param>
-        /// <param name="xAxis"></param>
-        /// <param name="yAxis"></param>
-        private static void ConvertCoords(string coords, ref int xAxis, ref int yAxis)
-        {
-            string[] coordsSplit = coords.Split(',');
-
-            string yCoord = coordsSplit[0];
-            string xCoord = coordsSplit[1];
-
-            // Calc Y first
-            string[] ySplit = yCoord.Split('°', 'o');
-            double yDegree = Convert.ToDouble(ySplit[0]);
-            double yMinute = Convert.ToDouble(ySplit[1].Substring(0, ySplit[1].IndexOf("'", StringComparison.Ordinal)));
-
-            if (yCoord.Substring(yCoord.Length - 1).Equals("N"))
-            {
-                yAxis = (int) (1624 - (yMinute / 60) * (4096.0 / 360) - yDegree * (4096.0 / 360));
-            }
-            else
-            {
-                yAxis = (int) (1624 + (yMinute / 60) * (4096.0 / 360) + yDegree * (4096.0 / 360));
-            }
-
-            // Calc X next
-            string[] xSplit = xCoord.Split('°', 'o');
-            double xDegree = Convert.ToDouble(xSplit[0]);
-            double xMinute = Convert.ToDouble(xSplit[1].Substring(0, xSplit[1].IndexOf("'", StringComparison.Ordinal)));
-
-            if (xCoord.Substring(xCoord.Length - 1).Equals("W"))
-            {
-                xAxis = (int) (1323 - (xMinute / 60) * (5120.0 / 360) - xDegree * (5120.0 / 360));
-            }
-            else
-            {
-                xAxis = (int) (1323 + (xMinute / 60) * (5120.0 / 360) + xDegree * (5120.0 / 360));
-            }
-
-            // Normalize values outside of map range.
-            if (xAxis < 0)
-            {
-                xAxis += 5120;
-            }
-            else if (xAxis > 5120)
-            {
-                xAxis -= 5120;
-            }
-
-            if (yAxis < 0)
-            {
-                yAxis += 4096;
-            }
-            else if (yAxis > 4096)
-            {
-                yAxis -= 4096;
-            }
         }
     }
 

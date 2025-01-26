@@ -1197,7 +1197,7 @@ Min. Skill: {1}</value>
     <value>Go to location</value>
   </data>
   <data name="EnterLocation" xml:space="preserve">
-    <value>Enter X Y location:</value>
+    <value>Enter Location</value>
   </data>
   <data name="InvalidLocation" xml:space="preserve">
     <value>Invalid location entered: Enter "X Y" or "0°0'N,0°0'W"</value>
@@ -1590,5 +1590,8 @@ Client version: '{0}'</value>
   </data>
   <data name="NewTargetSystem" xml:space="preserve">
     <value>Use new target system</value>
+  </data>
+  <data name="ShowSextantCoordinates" xml:space="preserve">
+    <value>Show sextant coordinates</value>
   </data>
 </root>
