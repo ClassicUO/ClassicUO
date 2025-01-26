@@ -489,13 +489,15 @@ namespace ClassicUO.Game.UI.Controls
             return null;
         }
 
-        public virtual void Add(Control c, int page = 0)
+        public virtual T Add<T>(T c, int page = 0) where T : Control
         {
             c.Page = page;
             c.Parent = this;
             OnChildAdded();
-        }
 
+            return c;
+        }
+        
         public void Insert(int index, Control c, int page = 0)
         {
             c.Page = 0;
