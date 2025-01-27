@@ -72,7 +72,8 @@ readonly struct WorldRenderingPlugin : IPlugin
             Filter<Without<ContainedInto>, Optional<MobileSteps>, Optional<MobAnimation>>> queryEquipmentSlots
     )
     {
-        (var playerX, var playerY, var playerZ) = queryPlayer.Single<WorldPosition>();
+        (_, var playerPos) = queryPlayer.Single();
+        (var playerX, var playerY, var playerZ) = playerPos.Ref;
 
         int? maxZ = null;
         if (!lastPos.Value.HasValue ||

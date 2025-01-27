@@ -55,24 +55,24 @@ readonly struct TerrainPlugin : IPlugin
         if (gameCtx.Value.Map == -1)
             return;
 
-        ref var pos = ref playerQuery.Single<WorldPosition>();
+        (_, var pos) = playerQuery.Single();
 
         if (lastPos.Value.LastX.HasValue && lastPos.Value.LastY.HasValue)
-            if (lastPos.Value.LastX == pos.X && lastPos.Value.LastY == pos.Y)
+            if (lastPos.Value.LastX == pos.Ref.X && lastPos.Value.LastY == pos.Ref.Y)
                 return;
 
-        lastPos.Value.LastX = pos.X;
-        lastPos.Value.LastY = pos.Y;
+        lastPos.Value.LastX = pos.Ref.X;
+        lastPos.Value.LastY = pos.Ref.Y;
 
         var offset = 4;
 
         chunkRequests.Enqueue(new()
         {
             Map = gameCtx.Value.Map,
-            RangeStartX = Math.Max(0, pos.X / 8 - offset),
-            RangeStartY = Math.Max(0, pos.Y / 8 - offset),
-            RangeEndX = Math.Min(gameCtx.Value.MaxMapWidth / 8, pos.X / 8 + offset),
-            RangeEndY = Math.Min(gameCtx.Value.MaxMapHeight / 8, pos.Y / 8 + offset),
+            RangeStartX = Math.Max(0, pos.Ref.X / 8 - offset),
+            RangeStartY = Math.Max(0, pos.Ref.Y / 8 - offset),
+            RangeEndX = Math.Min(gameCtx.Value.MaxMapWidth / 8, pos.Ref.X / 8 + offset),
+            RangeEndY = Math.Min(gameCtx.Value.MaxMapHeight / 8, pos.Ref.Y / 8 + offset),
         });
     }
 
@@ -219,13 +219,14 @@ readonly struct TerrainPlugin : IPlugin
 
         const int MAX_DIST = 64;
 
-        var pos = playerQuery.Single<WorldPosition>();
+        (_, var pos) = playerQuery.Single();
+
         foreach ((var key, var list) in chunksLoaded.Value)
         {
             var x = (int)((key >> 16) & 0xFFFF);
             var y = (int)(key & 0xFFFF);
 
-            var dist = GetDist(pos.X, pos.Y, x * 8, y * 8);
+            var dist = GetDist(pos.Ref.X, pos.Ref.Y, x * 8, y * 8);
             if (dist > MAX_DIST)
             {
                 toRemove.Value.Add(key);
@@ -245,7 +246,7 @@ readonly struct TerrainPlugin : IPlugin
 
         foreach ((var entity, var mobPos) in queryAll)
         {
-            var dist2 = GetDist(pos.X, pos.Y, mobPos.Ref.X, mobPos.Ref.Y);
+            var dist2 = GetDist(pos.Ref.X, pos.Ref.Y, mobPos.Ref.X, mobPos.Ref.Y);
             if (dist2 > MAX_DIST)
             {
                 entity.Ref.Delete();

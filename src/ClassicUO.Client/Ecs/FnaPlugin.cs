@@ -20,12 +20,16 @@ internal abstract class InputContext<T>
     public abstract bool IsPressedOnce(T input);
     public abstract bool IsReleased(T input);
 
-    public virtual void Update() { }
+    public virtual void Update(float deltaTime) { }
 }
 
 internal sealed class MouseContext : InputContext<MouseButtonType>
 {
+    private static float DCLICK_DELTA = 300;
+
     private MouseState _oldState, _newState;
+    private float _lastClickTime, _currentTime;
+    private MouseButtonType? _lastClickButton;
 
     internal MouseContext(Microsoft.Xna.Framework.Game game) : base (game) { }
 
@@ -40,11 +44,30 @@ internal sealed class MouseContext : InputContext<MouseButtonType>
 
     public override bool IsReleased(MouseButtonType input) => VerifyCondition(input, ButtonState.Released, ButtonState.Released);
 
-    public override void Update()
+    public bool IsPressedDouble(MouseButtonType input)
+    {
+        if (IsPressedOnce(input))
+        {
+            if (_lastClickButton == input && _lastClickTime + DCLICK_DELTA > _currentTime)
+            {
+                _lastClickButton = null;
+                return true;
+            }
+
+            _lastClickButton = input;
+            _lastClickTime = _currentTime;
+        }
+
+        return false;
+    }
+
+    public override void Update(float deltaTime)
     {
         _oldState = _newState;
         _newState = Microsoft.Xna.Framework.Input.Mouse.GetState();
-        base.Update();
+        _currentTime = deltaTime;
+
+        base.Update(deltaTime);
     }
 
     private bool VerifyCondition(MouseButtonType button, ButtonState stateNew, ButtonState stateOld)
@@ -73,11 +96,11 @@ internal sealed class KeyboardContext : InputContext<Keys>
 
     public Keys[] GetPressedKeys() => _newState.GetPressedKeys();
 
-    public override void Update()
+    public override void Update(float deltaTime)
     {
         _oldState = _newState;
         _newState = Microsoft.Xna.Framework.Input.Keyboard.GetState();
-        base.Update();
+        base.Update(deltaTime);
     }
 }
 
@@ -172,10 +195,10 @@ internal readonly struct FnaPlugin : IPlugin
         //         wheelWriter.Enqueue(new() { Value = (mouseCtx.Value.OldState.ScrollWheelValue - mouseCtx.Value.NewState.ScrollWheelValue) / 120 });
         // }, Stages.FrameEnd).RunIf((Res<UoGame> game) => game.Value.IsActive);
 
-        scheduler.AddSystem((Res<MouseContext> mouseCtx, Res<KeyboardContext> keyboardCtx) =>
+        scheduler.AddSystem((Res<MouseContext> mouseCtx, Res<KeyboardContext> keyboardCtx, Time time) =>
         {
-            mouseCtx.Value.Update();
-            keyboardCtx.Value.Update();
+            mouseCtx.Value.Update(time.Total);
+            keyboardCtx.Value.Update(time.Total);
         }, Stages.FrameEnd);
 
         // scheduler.AddSystem((Res<KeyboardContext> keyboardCtx) =>

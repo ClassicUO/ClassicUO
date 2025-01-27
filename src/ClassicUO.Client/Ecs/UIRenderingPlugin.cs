@@ -1,3 +1,4 @@
+using System;
 using System.Runtime.CompilerServices;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
@@ -17,8 +18,8 @@ internal struct UIRenderingPlugin : IPlugin
             Res<AssetsServer> assets,
             Local<Texture2D> dumbTexture,
             Query<
-                Data<GuiBounds, GuiInputState, ZIndex, GuiUOInteractionWidget>,
-                Filter<With<Gui>, Optional<GuiUOInteractionWidget>>> query) =>
+                Data<GuiBounds, GuiInputState, ZIndex, GuiUOInteractionWidget, Hue>,
+                Filter<With<Gui>, Optional<GuiUOInteractionWidget>, Optional<Hue>>> query) =>
         {
             var b = batch.Value;
 
@@ -29,14 +30,18 @@ internal struct UIRenderingPlugin : IPlugin
                 dumbTexture.Value.SetData([Color.White]);
             }
 
-            b.Begin(null, Matrix.Identity);
+            b.GraphicsDevice.Clear(ClearOptions.DepthBuffer, Color.Transparent, 1, 0);
 
-            foreach ((var bounds, var inputState, var zIndex, var uoWidget) in query)
+            b.Begin(null, Matrix.Identity);
+            b.SetSampler(SamplerState.PointClamp);
+            b.SetStencil(DepthStencilState.Default);
+
+            foreach ((var bounds, var inputState, var zIndex, var uoWidget, var color) in query)
             {
                 var hue = inputState.Ref switch {
                     GuiInputState.Over => new Vector3(0x22, 1, 1f),
                     GuiInputState.Pressed => new Vector3(0x33, 1, 1f),
-                    _ => Vector3.UnitZ
+                    _ => Unsafe.IsNullRef(ref color.Ref) ? Vector3.UnitZ : new Vector3(color.Ref.Value, 1, 1f)
                 };
 
                 if (Unsafe.IsNullRef(ref uoWidget.Ref))
@@ -72,12 +77,19 @@ internal struct UIRenderingPlugin : IPlugin
                             gumpInfo.Texture,
                             new Vector2(bounds.Ref.Value.X, bounds.Ref.Value.Y),
                             gumpInfo.UV,
-                            Vector3.UnitZ
+                            hue,
+                            0.0f,
+                            Vector2.Zero,
+                            1.0f,
+                            SpriteEffects.None,
+                            zIndex.Ref.Value
                         );
                     }
                 }
             }
 
+            b.SetSampler(null);
+            b.SetStencil(null);
             b.End();
 
         }, Stages.AfterUpdate, ThreadingMode.Single);
@@ -87,7 +99,7 @@ internal struct UIRenderingPlugin : IPlugin
         scheduler.AddSystem((
             World world,
             Query<Data<GuiBounds, ZIndex, GuiInputState, Children>, Filter<With<Gui>, Optional<Children>>> query,
-            // Query<Data<Bounds>, Filter<With<Gui>, Without<Parent>>> queryChildren,
+            Query<Data<GuiBounds, Children>, Filter<With<Gui>, Without<Parent>, Optional<Children>>> queryChildren,
             Res<MouseContext> mouseCtx,
             Local<EntityView?> selected) =>
         {
@@ -104,6 +116,8 @@ internal struct UIRenderingPlugin : IPlugin
             }
 
             var newState = GuiInputState.None;
+            float? lastZIndex = null;
+            var found = EntityView.Invalid;
             foreach ((var ent, var bounds, var zIndex, var inputState, var children) in query)
             {
                 if (selected.Value.HasValue)
@@ -117,20 +131,26 @@ internal struct UIRenderingPlugin : IPlugin
                             bounds.Ref.Value.X += (int)mousePosOff.X;
                             bounds.Ref.Value.Y += (int)mousePosOff.Y;
 
-                            moveChildren(world, ref children.Ref, in mousePosOff);
+                            moveChildren( ref children.Ref, in mousePosOff, queryChildren);
 
-                            static void moveChildren(World world, ref Children children, ref readonly Vector2 offset)
+                            static void moveChildren(
+                                ref Children children,
+                                ref readonly Vector2 offset,
+                                Query<Data<GuiBounds, Children>, Filter<With<Gui>, Without<Parent>, Optional<Children>>> queryChildren)
                             {
                                 if (Unsafe.IsNullRef(ref children))
                                     return;
 
                                 foreach (var child in children)
                                 {
-                                    ref var childBounds = ref world.Get<GuiBounds>(child);
-                                    childBounds.Value.X += (int)offset.X;
-                                    childBounds.Value.Y += (int)offset.Y;
+                                    (var id, var childBounds, var childChildren) = queryChildren.Get(child);
+                                    if (id.Ref != child)
+                                    {
 
-                                    moveChildren(world, ref world.Get<Children>(child), in offset);
+                                    }
+                                    childBounds.Ref.Value.X += (int)offset.X;
+                                    childBounds.Ref.Value.Y += (int)offset.Y;
+                                    moveChildren( ref childChildren.Ref, in offset, queryChildren);
                                 }
                             }
                         }
@@ -140,42 +160,71 @@ internal struct UIRenderingPlugin : IPlugin
                 {
                     if (!isDragging)
                     {
-                        selected.Value = ent.Ref;
-                        newState = GuiInputState.Over;
+                        if (!lastZIndex.HasValue || lastZIndex.Value <= zIndex.Ref.Value)
+                        {
+                            found = ent.Ref;
+                            newState = GuiInputState.Over;
+                            lastZIndex = zIndex.Ref.Value;
+                        }
                     }
                 }
 
                 inputState.Ref = GuiInputState.None;
             }
 
-            if (selected.Value.HasValue)
+            if (found != 0)
             {
+                selected.Value = found;
                 selected.Value.Value.Set(newState);
             }
         }, Stages.Update, ThreadingMode.Single);
 
+
+        scheduler.AddSystem((Query<Data<GuiInputState>, With<Gui>> query, Res<MouseContext> mouseCtx) =>
+        {
+            foreach ((var ent, var inputState) in query)
+            {
+                if (inputState.Ref == GuiInputState.Pressed)
+                {
+                    Console.WriteLine("{0} has been pressed", ent.Ref.ID);
+                }
+            }
+
+            if (mouseCtx.Value.IsPressedDouble(Input.MouseButtonType.Left))
+            {
+                Console.WriteLine("double click");
+            }
+
+        }, Stages.Update, ThreadingMode.Single);
+
         scheduler.AddSystem((TinyEcs.World world) =>
         {
-            static EntityView basicWidget(World ecs, Rectangle? bounds = null)
+            static EntityView basicWidget(World ecs, Rectangle? bounds = null, float zIndex = 0)
                 => ecs.Entity()
                     .Add<Gui>()
-                    .Set(new ZIndex())
+                    .Set(new ZIndex() { Value = zIndex })
                     .Set(GuiInputState.None)
                     .Set(new GuiBounds() { Value = bounds ?? Rectangle.Empty});
 
-            var child3 = basicWidget(world, new() { X = 100, Y = 100, Width = 120, Height = 50 });
 
-            var root = basicWidget(world, new () { X = 100, Y = 200, Width = 120, Height = 90 });
+            var root = basicWidget(world, new () { X = 100, Y = 200, Width = 120, Height = 90 })
+                .Add<GuiRoot>();
 
-            var child0 = basicWidget(world)
-                .Set(new GuiUOInteractionWidget() { Normal = 0x1589, Pressed = 0x158B, Over = 0x158A });
-            var child1 = basicWidget(world)
-                .Set(new GuiUOInteractionWidget() { Normal = 0x085d, Pressed = 0x085e, Over = 0x085f });
+            for (var i = 0; i < 6000; ++i)
+            {
+                var child0 = basicWidget(world, zIndex: 2)
+                    .Set(new GuiUOInteractionWidget() { Normal = 0x1589, Pressed = 0x158B, Over = 0x158A });
+                var child1 = basicWidget(world, zIndex: 0.1f)
+                    .Set(new GuiUOInteractionWidget() { Normal = 0x085d, Pressed = 0x085e, Over = 0x085f });
+                var child2 = basicWidget(world, new Rectangle(30, 30, 0, 0), 1)
+                    .Set(new Hue() { Value = 0x44 })
+                    .Set(new GuiUOInteractionWidget() { Normal = 0x085d, Pressed = 0x085e, Over = 0x085f });
 
-            root.AddChild(child0);
-            root.AddChild(child1);
+                root.AddChild(child0);
+                root.AddChild(child1);
+                root.AddChild(child2);
 
-            child1.AddChild(child3);
+            }
 
         }, Stages.Startup, ThreadingMode.Single);
 
@@ -184,6 +233,7 @@ internal struct UIRenderingPlugin : IPlugin
 
 
 struct Gui;
+struct GuiRoot;
 
 internal enum GuiInputState
 {

@@ -735,7 +735,8 @@ namespace ClassicUO.Renderer
             Texture2D texture,
             Vector2 position,
             Rectangle? sourceRectangle,
-            Vector3 color
+            Vector3 color,
+            float layerDepth = 0.0f
         )
         {
             float sourceX, sourceY, sourceW, sourceH;
@@ -760,7 +761,7 @@ namespace ClassicUO.Renderer
                 destH = texture.Height;
             }
 
-            AddSprite(texture, sourceX, sourceY, sourceW, sourceH, position.X, position.Y, destW, destH, color, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0);
+            AddSprite(texture, sourceX, sourceY, sourceW, sourceH, position.X, position.Y, destW, destH, color, 0.0f, 0.0f, 0.0f, 1.0f, layerDepth, 0);
         }
 
         public void Draw

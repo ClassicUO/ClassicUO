@@ -102,17 +102,16 @@ readonly struct PlayerMovementPlugin : IPlugin
         var facing = mouseDir == Direction.North ? Direction.Mask : mouseDir - 1;
         var run = mouseRange >= 190 || false;
 
-        ref var mobSteps = ref playerQuery.Single<MobileSteps>();
-        ref readonly var worldPos = ref playerQuery.Single<WorldPosition>();
-        var playerDir = playerQuery.Single<Facing>().Value;
-        var hasNoSteps = mobSteps.Count == 0;
-        var playerX = worldPos.X;
-        var playerY = worldPos.Y;
-        var playerZ = worldPos.Z;
+        (var worldPos, var dir, var mobSteps, var animation) = playerQuery.Single();
+        var hasNoSteps = mobSteps.Ref.Count == 0;
+        var playerX = worldPos.Ref.X;
+        var playerY = worldPos.Ref.Y;
+        var playerZ = worldPos.Ref.Z;
+        var playerDir = dir.Ref.Value;
 
         if (!hasNoSteps)
         {
-            ref var lastStep = ref mobSteps[Math.Max(0, mobSteps.Count - 1)];
+            ref var lastStep = ref mobSteps.Ref[Math.Max(0, mobSteps.Ref.Count - 1)];
             playerX = (ushort) lastStep.X;
             playerY = (ushort) lastStep.Y;
             playerZ = lastStep.Z;
@@ -180,8 +179,7 @@ readonly struct PlayerMovementPlugin : IPlugin
         {
             // ref var playerFlags = ref playerQuery.Single<MobileFlags>();
             var playerFlags = Flags.None;
-            ref var animation = ref playerQuery.Single<MobAnimation>();
-            var isMountedOrFlying = animation.MountAction != 0xFF || playerFlags.HasFlag(Flags.Flying);
+            var isMountedOrFlying = animation.Ref.MountAction != 0xFF || playerFlags.HasFlag(Flags.Flying);
             var stepTime = sameDir ? MovementSpeed.TimeToCompleteMovement(run, isMountedOrFlying) : Constants.TURN_DELAY;
             ref var requestedStep = ref playerRequestedSteps.Value.Steps[playerRequestedSteps.Value.Index];
             requestedStep.Sequence = playerRequestedSteps.Value.Sequence;
@@ -198,16 +196,16 @@ readonly struct PlayerMovementPlugin : IPlugin
             if (run)
                 requestedStep.Direction |= Direction.Running;
 
-            ref var step = ref mobSteps[mobSteps.Count];
+            ref var step = ref mobSteps.Ref[mobSteps.Ref.Count];
             step.X = playerX;
             step.Y = playerY;
             step.Z = playerZ;
             step.Direction = (byte)playerDir;
             step.Run = run;
-            mobSteps.Count = Math.Min(MobileSteps.COUNT - 1, mobSteps.Count + 1);
+            mobSteps.Ref.Count = Math.Min(MobileSteps.COUNT - 1, mobSteps.Ref.Count + 1);
 
             if (hasNoSteps)
-                mobSteps.Time = time.Total;
+                mobSteps.Ref.Time = time.Total;
         }
     }
 
@@ -264,28 +262,15 @@ readonly struct PlayerMovementPlugin : IPlugin
         Query<Data<WorldPosition, Facing, MobileSteps>, With<Player>> playerQuery)
     {
         Console.WriteLine("step denied");
-        var player = playerQuery.Single();
+
+        (var pos, var dir, var steps) = playerQuery.Single();
         foreach (var response in rejectedSteps)
         {
-            player.Set
-            (
-                new WorldPosition()
-                {
-                    X = response.X,
-                    Y = response.Y,
-                    Z = response.Z
-                }
-            );
-
-            player.Set
-            (
-                new Facing()
-                {
-                    Value = response.Direction
-                }
-            );
-
-            player.Get<MobileSteps>().Count = 0;
+            pos.Ref.X = response.X;
+            pos.Ref.Y = response.Y;
+            pos.Ref.Z = response.Z;
+            dir.Ref.Value = response.Direction;
+            steps.Ref.Count = 0;
         }
 
         playerRequestedSteps.Value.Index = 0;
