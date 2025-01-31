@@ -39,8 +39,8 @@ internal struct UIRenderingPlugin : IPlugin
             foreach ((var bounds, var inputState, var zIndex, var uoWidget, var color) in query)
             {
                 var hue = inputState.Ref switch {
-                    GuiInputState.Over => new Vector3(0x22, 1, 1f),
-                    GuiInputState.Pressed => new Vector3(0x33, 1, 1f),
+                    GuiInputState.Over => new Vector3(0x44, 1, 1f),
+                    GuiInputState.Pressed => new Vector3(38, 1, 1f),
                     _ => Unsafe.IsNullRef(ref color.Ref) ? Vector3.UnitZ : new Vector3(color.Ref.Value, 1, 1f)
                 };
 
@@ -125,13 +125,14 @@ internal struct UIRenderingPlugin : IPlugin
                     if (selected.Value.Value == ent.Ref.ID && isDragging)
                     {
                         newState = GuiInputState.Pressed;
+                        found = ent.Ref;
 
                         if (length > 0)
                         {
                             bounds.Ref.Value.X += (int)mousePosOff.X;
                             bounds.Ref.Value.Y += (int)mousePosOff.Y;
 
-                            moveChildren( ref children.Ref, in mousePosOff, queryChildren);
+                            moveChildren(ref children.Ref, in mousePosOff, queryChildren);
 
                             static void moveChildren(
                                 ref Children children,
@@ -150,7 +151,7 @@ internal struct UIRenderingPlugin : IPlugin
                                     }
                                     childBounds.Ref.Value.X += (int)offset.X;
                                     childBounds.Ref.Value.Y += (int)offset.Y;
-                                    moveChildren( ref childChildren.Ref, in offset, queryChildren);
+                                    moveChildren(ref childChildren.Ref, in offset, queryChildren);
                                 }
                             }
                         }
@@ -210,22 +211,17 @@ internal struct UIRenderingPlugin : IPlugin
             var root = basicWidget(world, new () { X = 100, Y = 200, Width = 120, Height = 90 })
                 .Add<GuiRoot>();
 
-            for (var i = 0; i < 6000; ++i)
-            {
-                var child0 = basicWidget(world, zIndex: 2)
-                    .Set(new GuiUOInteractionWidget() { Normal = 0x1589, Pressed = 0x158B, Over = 0x158A });
-                var child1 = basicWidget(world, zIndex: 0.1f)
-                    .Set(new GuiUOInteractionWidget() { Normal = 0x085d, Pressed = 0x085e, Over = 0x085f });
-                var child2 = basicWidget(world, new Rectangle(30, 30, 0, 0), 1)
-                    .Set(new Hue() { Value = 0x44 })
-                    .Set(new GuiUOInteractionWidget() { Normal = 0x085d, Pressed = 0x085e, Over = 0x085f });
+           var child0 = basicWidget(world, zIndex: 2)
+                .Set(new GuiUOInteractionWidget() { Normal = 0x1589, Pressed = 0x158B, Over = 0x158A });
+            var child1 = basicWidget(world, zIndex: 0.1f)
+                .Set(new GuiUOInteractionWidget() { Normal = 0x085d, Pressed = 0x085e, Over = 0x085f });
+            var child2 = basicWidget(world, new Rectangle(30, 30, 0, 0), 1)
+                .Set(new Hue() { Value = 0x44 })
+                .Set(new GuiUOInteractionWidget() { Normal = 0x085d, Pressed = 0x085e, Over = 0x085f });
 
-                root.AddChild(child0);
-                root.AddChild(child1);
-                root.AddChild(child2);
-
-            }
-
+            root.AddChild(child0);
+            root.AddChild(child1);
+            root.AddChild(child2);
         }, Stages.Startup, ThreadingMode.Single);
 
     }

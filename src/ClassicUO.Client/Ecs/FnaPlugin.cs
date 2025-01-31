@@ -71,7 +71,7 @@ internal sealed class MouseContext : InputContext<MouseButtonType>
     }
 
     private bool VerifyCondition(MouseButtonType button, ButtonState stateNew, ButtonState stateOld)
-        => button switch {
+        => _game.IsActive && button switch {
                 MouseButtonType.Left => _newState.LeftButton == stateNew && _oldState.LeftButton == stateOld,
                 MouseButtonType.Middle => _newState.MiddleButton == stateNew && _oldState.MiddleButton == stateOld,
                 MouseButtonType.Right => _newState.RightButton == stateNew && _oldState.RightButton == stateOld,
@@ -88,11 +88,11 @@ internal sealed class KeyboardContext : InputContext<Keys>
     internal KeyboardContext(Microsoft.Xna.Framework.Game game) : base (game) { }
 
 
-    public override bool IsPressed(Keys input) => _newState.IsKeyDown(input) && _oldState.IsKeyDown(input);
+    public override bool IsPressed(Keys input) => _game.IsActive && _newState.IsKeyDown(input) && _oldState.IsKeyDown(input);
 
-    public override bool IsPressedOnce(Keys input) => _newState.IsKeyDown(input) && _oldState.IsKeyUp(input);
+    public override bool IsPressedOnce(Keys input) => _game.IsActive && _newState.IsKeyDown(input) && _oldState.IsKeyUp(input);
 
-    public override bool IsReleased(Keys input) => _newState.IsKeyUp(input) && _oldState.IsKeyDown(input);
+    public override bool IsReleased(Keys input) => _game.IsActive && _newState.IsKeyUp(input) && _oldState.IsKeyDown(input);
 
     public Keys[] GetPressedKeys() => _newState.GetPressedKeys();
 
