@@ -7,21 +7,7 @@ using TinyEcs;
 
 namespace ClassicUO.Ecs;
 
-struct GameContext
-{
-    public int Map;
-    public ushort CenterX, CenterY;
-    public sbyte CenterZ;
-    public Vector2 CenterOffset;
-    public bool FreeView;
-    public uint PlayerSerial;
-    public ClientFlags Protocol;
-    public ClientVersion ClientVersion;
-    public int MaxMapWidth, MaxMapHeight;
-}
-
-
-readonly struct CuoPlugin : IPlugin
+internal readonly struct CuoPlugin : IPlugin
 {
     public void Build(Scheduler scheduler)
     {
@@ -58,15 +44,29 @@ readonly struct CuoPlugin : IPlugin
                 Port = settings.Value.Port,
         }), Stages.Startup);
 
-        scheduler.AddSystem((TinyEcs.World world) => Console.WriteLine("Archetypes removed: {0}", world.RemoveEmptyArchetypes()), threadingType: ThreadingMode.Single)
-                 .RunIf(
-                     (Time time, Local<float> updateTime) =>
-                     {
-                         if (updateTime.Value > time.Total)
-                             return false;
+        scheduler
+            .AddSystem((TinyEcs.World world) => Console.WriteLine("Archetypes removed: {0}", world.RemoveEmptyArchetypes()), threadingType: ThreadingMode.Single)
+            .RunIf(
+                (Time time, Local<float> updateTime) =>
+                {
+                    if (updateTime.Value > time.Total)
+                        return false;
 
-                         updateTime.Value = time.Total + 3000f;
-                         return true;
-                     });
+                    updateTime.Value = time.Total + 3000f;
+                    return true;
+                });
     }
+}
+
+struct GameContext
+{
+    public int Map;
+    public ushort CenterX, CenterY;
+    public sbyte CenterZ;
+    public Vector2 CenterOffset;
+    public bool FreeView;
+    public uint PlayerSerial;
+    public ClientFlags Protocol;
+    public ClientVersion ClientVersion;
+    public int MaxMapWidth, MaxMapHeight;
 }

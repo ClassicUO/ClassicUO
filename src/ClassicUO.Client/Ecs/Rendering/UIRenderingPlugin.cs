@@ -145,10 +145,6 @@ internal struct UIRenderingPlugin : IPlugin
                                 foreach (var child in children)
                                 {
                                     (var id, var childBounds, var childChildren) = queryChildren.Get(child);
-                                    if (id.Ref != child)
-                                    {
-
-                                    }
                                     childBounds.Ref.Value.X += (int)offset.X;
                                     childBounds.Ref.Value.Y += (int)offset.Y;
                                     moveChildren(ref childChildren.Ref, in offset, queryChildren);
@@ -247,4 +243,22 @@ struct GuiText { public string Value; }
 struct GuiUOInteractionWidget
 {
     public ushort Normal, Pressed, Over;
+}
+
+
+sealed class UOGumpMaker
+{
+    private readonly World _world;
+
+    public EntityView AddButton(ulong root, int x, int y, ushort normal, ushort pressed, ushort over, ushort hue)
+    {
+        var ent = _world.Entity(root)
+            .Add<Gui>()
+            .Set(GuiInputState.None)
+            .Set(new Hue() { Value = hue })
+            .Set(new GuiUOInteractionWidget() { Normal = normal, Pressed = pressed, Over = over })
+            .Set(new GuiBounds() { Value = new Rectangle(x, y, 0, 0) });
+
+        return ent;
+    }
 }

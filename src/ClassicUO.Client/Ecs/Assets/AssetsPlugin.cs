@@ -9,15 +9,6 @@ using TinyEcs;
 
 namespace ClassicUO.Ecs;
 
-
-struct AssetsServer
-{
-    public Renderer.Arts.Art Arts;
-    public Renderer.Animations.Animations Animations;
-    public Renderer.Texmaps.Texmap Texmaps;
-    public Renderer.Gumps.Gump Gumps;
-}
-
 readonly struct AssetsPlugin : IPlugin
 {
     public void Build(Scheduler scheduler)
@@ -40,14 +31,8 @@ readonly struct AssetsPlugin : IPlugin
         fileManager.Load(false, settings.Value.Language);
 
         schedState.AddResource(fileManager);
-        schedState.AddResource(new AssetsServer()
-        {
-            Arts = new Renderer.Arts.Art(fileManager.Arts, fileManager.Hues, device),
-            Texmaps = new Renderer.Texmaps.Texmap(fileManager.Texmaps, device),
-            Animations = new Renderer.Animations.Animations(fileManager.Animations, device),
-            Gumps = new Renderer.Gumps.Gump(fileManager.Gumps, device)
-        });
-        schedState.AddResource(new Renderer.UltimaBatcher2D(device));
+        schedState.AddResource(new AssetsServer(fileManager, device));
+        schedState.AddResource(new UltimaBatcher2D(device));
 
         gameCtx.Value.Protocol = ClientFlags.CF_T2A;
 

@@ -9,120 +9,6 @@ using TinyEcs;
 
 namespace ClassicUO.Ecs;
 
-
-internal abstract class InputContext<T>
-{
-    protected Microsoft.Xna.Framework.Game _game;
-
-    protected InputContext(Microsoft.Xna.Framework.Game game) => _game = game;
-
-    public abstract bool IsPressed(T input);
-    public abstract bool IsPressedOnce(T input);
-    public abstract bool IsReleased(T input);
-
-    public virtual void Update(float deltaTime) { }
-}
-
-internal sealed class MouseContext : InputContext<MouseButtonType>
-{
-    private static float DCLICK_DELTA = 300;
-
-    private MouseState _oldState, _newState;
-    private float _lastClickTime, _currentTime;
-    private MouseButtonType? _lastClickButton;
-
-    internal MouseContext(Microsoft.Xna.Framework.Game game) : base (game) { }
-
-
-    public Vector2 Position => new(_newState.X, _newState.Y);
-    public Vector2 PositionOffset => new (_newState.X - _oldState.X, _newState.Y - _oldState.Y);
-
-
-    public override bool IsPressed(MouseButtonType input) => VerifyCondition(input, ButtonState.Pressed, ButtonState.Pressed);
-
-    public override bool IsPressedOnce(MouseButtonType input) => VerifyCondition(input, ButtonState.Pressed, ButtonState.Released);
-
-    public override bool IsReleased(MouseButtonType input) => VerifyCondition(input, ButtonState.Released, ButtonState.Released);
-
-    public bool IsPressedDouble(MouseButtonType input)
-    {
-        if (IsPressedOnce(input))
-        {
-            if (_lastClickButton == input && _lastClickTime + DCLICK_DELTA > _currentTime)
-            {
-                _lastClickButton = null;
-                return true;
-            }
-
-            _lastClickButton = input;
-            _lastClickTime = _currentTime;
-        }
-
-        return false;
-    }
-
-    public override void Update(float deltaTime)
-    {
-        _oldState = _newState;
-        _newState = Microsoft.Xna.Framework.Input.Mouse.GetState();
-        _currentTime = deltaTime;
-
-        base.Update(deltaTime);
-    }
-
-    private bool VerifyCondition(MouseButtonType button, ButtonState stateNew, ButtonState stateOld)
-        => _game.IsActive && button switch {
-                MouseButtonType.Left => _newState.LeftButton == stateNew && _oldState.LeftButton == stateOld,
-                MouseButtonType.Middle => _newState.MiddleButton == stateNew && _oldState.MiddleButton == stateOld,
-                MouseButtonType.Right => _newState.RightButton == stateNew && _oldState.RightButton == stateOld,
-                MouseButtonType.XButton1 => _newState.XButton1 == stateNew&& _oldState.XButton1 == stateOld,
-                MouseButtonType.XButton2 => _newState.XButton2 == stateNew && _oldState.XButton2 == stateOld,
-                _ => false
-            };
-}
-
-internal sealed class KeyboardContext : InputContext<Keys>
-{
-    private KeyboardState _oldState, _newState;
-
-    internal KeyboardContext(Microsoft.Xna.Framework.Game game) : base (game) { }
-
-
-    public override bool IsPressed(Keys input) => _game.IsActive && _newState.IsKeyDown(input) && _oldState.IsKeyDown(input);
-
-    public override bool IsPressedOnce(Keys input) => _game.IsActive && _newState.IsKeyDown(input) && _oldState.IsKeyUp(input);
-
-    public override bool IsReleased(Keys input) => _game.IsActive && _newState.IsKeyUp(input) && _oldState.IsKeyDown(input);
-
-    public Keys[] GetPressedKeys() => _newState.GetPressedKeys();
-
-    public override void Update(float deltaTime)
-    {
-        _oldState = _newState;
-        _newState = Microsoft.Xna.Framework.Input.Keyboard.GetState();
-        base.Update(deltaTime);
-    }
-}
-
-
-internal sealed class Time : SystemParam<TinyEcs.World>, IIntoSystemParam<World>
-{
-    public float Total;
-    public float Frame;
-
-    public static ISystemParam<World> Generate(World arg)
-    {
-        if (arg.Entity<Placeholder<Time>>().Has<Placeholder<Time>>())
-            return arg.Entity<Placeholder<Time>>().Get<Placeholder<Time>>().Value;
-
-        var time = new Time();
-        arg.Entity<Placeholder<Time>>().Set(new Placeholder<Time>() { Value = time });
-        return time;
-    }
-
-    private struct Placeholder<T> { public T Value; }
-}
-
 internal readonly struct FnaPlugin : IPlugin
 {
     public bool WindowResizable { get; init; }
@@ -137,7 +23,8 @@ internal readonly struct FnaPlugin : IPlugin
         scheduler.AddEvent<MouseEvent>();
         scheduler.AddEvent<WheelEvent>();
 
-        scheduler.AddSystem(static (Res<UoGame> game, SchedulerState schedState) => {
+        scheduler.AddSystem(static (Res<UoGame> game, SchedulerState schedState) =>
+        {
             UnsafeFNAAccessor.BeforeLoop(game.Value);
             game.Value.RunOneFrame();
             schedState.AddResource(game.Value.GraphicsDevice);
@@ -146,7 +33,8 @@ internal readonly struct FnaPlugin : IPlugin
             UnsafeFNAAccessor.GetSetRunApplication(game.Value) = true;
         }, Stages.Startup, ThreadingMode.Single);
 
-        scheduler.AddSystem((Res<UoGame> game, Time time) => {
+        scheduler.AddSystem((Res<UoGame> game, Time time) =>
+        {
             game.Value.SuppressDraw();
             game.Value.Tick();
 
@@ -262,38 +150,20 @@ internal readonly struct FnaPlugin : IPlugin
     }
 }
 
-internal sealed class UoGame : Microsoft.Xna.Framework.Game
+internal sealed class Time : SystemParam<TinyEcs.World>, IIntoSystemParam<World>
 {
-    public UoGame(bool mouseVisible, bool allowWindowResizing, bool vSync)
+    public float Total;
+    public float Frame;
+
+    public static ISystemParam<World> Generate(World arg)
     {
-        GraphicManager = new GraphicsDeviceManager(this)
-        {
-            SynchronizeWithVerticalRetrace = vSync,
-            PreferredDepthStencilFormat = DepthFormat.Depth24Stencil8
-        };
+        if (arg.Entity<Placeholder<Time>>().Has<Placeholder<Time>>())
+            return arg.Entity<Placeholder<Time>>().Get<Placeholder<Time>>().Value;
 
-        GraphicManager.PreparingDeviceSettings += (sender, e) =>
-        {
-            e.GraphicsDeviceInformation.PresentationParameters.RenderTargetUsage =
-                RenderTargetUsage.DiscardContents;
-        };
-
-        IsFixedTimeStep = false;
-        IsMouseVisible = mouseVisible;
-        Window.AllowUserResizing = allowWindowResizing;
+        var time = new Time();
+        arg.Entity<Placeholder<Time>>().Set(new Placeholder<Time>() { Value = time });
+        return time;
     }
 
-    public GraphicsDeviceManager GraphicManager { get; }
-    public GameTime GameTime { get; private set; }
-
-    protected override void Update(GameTime gameTime)
-    {
-        GameTime = gameTime;
-        // I don't want to update things here, but on ecs systems instead
-    }
-
-    protected override void Draw(GameTime gameTime)
-    {
-        // I don't want to render things here, but on ecs systems instead
-    }
+    private struct Placeholder<T> { public T Value; }
 }

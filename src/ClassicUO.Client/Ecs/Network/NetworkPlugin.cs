@@ -33,9 +33,16 @@ readonly struct NetworkPlugin : IPlugin
         scheduler.AddPlugin<LoginPacketsPlugin>();
         scheduler.AddPlugin<InGamePacketsPlugin>();
 
-        var sendPingEverySecondFn = SendPingEverySecond;
-        scheduler.AddSystem(sendPingEverySecondFn, threadingType: ThreadingMode.Single)
-            .RunIf((Res<GameContext> gameCtx, Res<NetClient> network) => network.Value!.IsConnected && gameCtx.Value.PlayerSerial != 0);
+        scheduler.AddSystem((Res<NetClient> network) => network.Value.Send_Ping(0xFF), threadingType: ThreadingMode.Single)
+            .RunIf((Res<GameContext> gameCtx, Res<NetClient> network) => network.Value!.IsConnected && gameCtx.Value.PlayerSerial != 0)
+            .RunIf((Time time, Local<float> updateTime) =>
+            {
+                if (updateTime.Value >= time.Total)
+                    return false;
+
+                updateTime.Value = time.Total + 1000f;
+                return true;
+            });
 
         var handleLoginRequestsFn = HandleLoginRequests;
         scheduler.AddSystem(handleLoginRequestsFn, threadingType: ThreadingMode.Single)
@@ -51,15 +58,6 @@ readonly struct NetworkPlugin : IPlugin
         var socket = new NetClient();
         settings.Value.Encryption = (byte)socket.Load(fileManager.Value.Version, (EncryptionType)settings.Value.Encryption);
         sched.AddResource(socket);
-    }
-
-    void SendPingEverySecond(Res<NetClient> network, Time time, Local<float> updateTime)
-    {
-        if (updateTime.Value < time.Total)
-        {
-            updateTime.Value = time.Total + 1000f;
-            network.Value.Send_Ping(0xFF);
-        }
     }
 
     void HandleLoginRequests(
