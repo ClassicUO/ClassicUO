@@ -392,6 +392,20 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
+            protected override void OnMouseOver(int x, int y)
+            {
+                base.OnMouseOver(x, y);
+
+                if (_gump.World.Player.FindItemByLayer(Layer.Backpack)?.FindItem(Graphic, Hue) is {} item)
+                    SetTooltip(item);
+            }
+
+            protected override void OnMouseExit(int x, int y)
+            {
+                base.OnMouseExit(x, y);
+                ClearTooltip();
+            }
+
             protected override void OnMouseUp(int x, int y, MouseButtonType button)
             {
                 if (button == MouseButtonType.Left)
