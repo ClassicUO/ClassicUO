@@ -146,7 +146,7 @@ namespace ClassicUO.Game.UI.Controls
             bool partialHue = IsPartialHue;
             ushort hue = Hue;
 
-            if (HighlightOnMouseOver && MouseIsOver)
+            if (HighlightOnMouseOver && MouseIsOver || LocalSerial == SelectedObject.SelectedContainer?.Serial)
             {
                 hue = 0x0035;
                 partialHue = false;
