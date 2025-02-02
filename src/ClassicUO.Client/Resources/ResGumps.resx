@@ -1594,4 +1594,7 @@ Client version: '{0}'</value>
   <data name="ShowSextantCoordinates" xml:space="preserve">
     <value>Show sextant coordinates</value>
   </data>
+  <data name="WorldMapChangeMap0" xml:space="preserve">
+    <value>Map {0}</value>
+  </data>
 </root>

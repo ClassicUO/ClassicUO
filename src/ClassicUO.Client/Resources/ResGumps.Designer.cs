@@ -2978,5 +2978,11 @@ namespace ClassicUO.Resources {
                 return ResourceManager.GetString("ShowSextantCoordinates", resourceCulture);
             }
         }
+        
+        public static string WorldMapChangeMap0 {
+            get {
+                return ResourceManager.GetString("WorldMapChangeMap0", resourceCulture);
+            }
+        }
     }
 }
