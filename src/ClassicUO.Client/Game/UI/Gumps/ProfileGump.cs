@@ -169,6 +169,7 @@ namespace ClassicUO.Game.UI.Gumps
             _scrollArea.Height = Height - (96 + _diffY);
             _databox.Y = _textBox.Bounds.Bottom + 3;
             _databox.WantUpdateSize = true;
+            WantUpdateSize = true;
 
             base.Update();
         }
