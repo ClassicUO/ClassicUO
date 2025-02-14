@@ -2984,5 +2984,17 @@ namespace ClassicUO.Resources {
                 return ResourceManager.GetString("WorldMapChangeMap0", resourceCulture);
             }
         }
+        
+        public static string StatusGumpBarMutuallyExclusive {
+            get {
+                return ResourceManager.GetString("StatusGumpBarMutuallyExclusive", resourceCulture);
+            }
+        }
+        
+        public static string StatusGumpOpenBar {
+            get {
+                return ResourceManager.GetString("StatusGumpOpenBar", resourceCulture);
+            }
+        }
     }
 }

@@ -102,6 +102,7 @@ namespace ClassicUO.Configuration
         public bool EnableStatReport { get; set; } = true;
         public bool EnableSkillReport { get; set; } = true;
         public bool UseOldStatusGump { get; set; }
+        public bool StatusGumpBarMutuallyExclusive { get; set; } = true;
         public int BackpackStyle { get; set; }
         public bool HighlightGameObjects { get; set; }
         public bool HighlightMobilesByParalize { get; set; } = true;

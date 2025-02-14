@@ -699,7 +699,8 @@ namespace ClassicUO.Game.Managers
                                     {
                                         if (status != null)
                                         {
-                                            status.Dispose();
+                                            if (ProfileManager.CurrentProfile.StatusGumpBarMutuallyExclusive)
+                                                status.Dispose();
 
                                             if (ProfileManager.CurrentProfile.CustomBarsToggled)
                                             {

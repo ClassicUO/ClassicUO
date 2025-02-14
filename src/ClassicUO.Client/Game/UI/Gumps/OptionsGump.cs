@@ -136,7 +136,7 @@ namespace ClassicUO.Game.UI.Gumps
         private Checkbox _dragSelectAsAnchor;
 
         // video
-        private Checkbox _use_old_status_gump, _windowBorderless, _enableDeathScreen, _enableBlackWhiteEffect, _altLights, _enableLight, _enableShadows, _enableShadowsStatics, _auraMouse, _runMouseInSeparateThread, _useColoredLights, _darkNights, _partyAura, _hideChatGradient, _animatedWaterEffect;
+        private Checkbox _use_old_status_gump, _statusGumpBarMutuallyExclusive, _windowBorderless, _enableDeathScreen, _enableBlackWhiteEffect, _altLights, _enableLight, _enableShadows, _enableShadowsStatics, _auraMouse, _runMouseInSeparateThread, _useColoredLights, _darkNights, _partyAura, _hideChatGradient, _animatedWaterEffect;
         private Combobox _lightLevelType;
         private Checkbox _use_smooth_boat_movement;
         private HSliderBar _terrainShadowLevel;
@@ -959,6 +959,20 @@ namespace ClassicUO.Game.UI.Gumps
             );
 
             _use_old_status_gump.IsVisible = true;
+            
+            section3.Add
+            (
+                _statusGumpBarMutuallyExclusive = AddCheckBox
+                (
+                    null,
+                    ResGumps.StatusGumpBarMutuallyExclusive,
+                    _currentProfile.StatusGumpBarMutuallyExclusive,
+                    startX,
+                    startY
+                )
+            );
+            
+            _statusGumpBarMutuallyExclusive.IsVisible = true;
 
             section3.Add
             (
@@ -3491,6 +3505,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _use_smooth_boat_movement.IsChecked = false;
                     _hideScreenshotStoredInMessage.IsChecked = false;
                     _use_old_status_gump.IsChecked = false;
+                    _statusGumpBarMutuallyExclusive.IsChecked = true;
                     _auraType.SelectedIndex = 0;
                     _fieldsType.SelectedIndex = 0;
 
@@ -3837,9 +3852,18 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (status != null)
                 {
-                    status.Dispose();
+                    if (_currentProfile.StatusGumpBarMutuallyExclusive)
+                        status.Dispose();
                     UIManager.Add(StatusGumpBase.AddStatusGump(World, status.ScreenCoordinateX, status.ScreenCoordinateY));
                 }
+            }
+            
+            if (_statusGumpBarMutuallyExclusive.IsChecked != _currentProfile.StatusGumpBarMutuallyExclusive)
+            {
+                var active = _currentProfile.StatusGumpBarMutuallyExclusive = _statusGumpBarMutuallyExclusive.IsChecked;
+
+                if (active && StatusGumpBase.GetStatusGump() != null && UIManager.GetGump<BaseHealthBarGump>(World.Player) is {} bar)
+                    bar.Dispose();
             }
 
 

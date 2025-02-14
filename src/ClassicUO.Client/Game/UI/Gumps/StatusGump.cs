@@ -23,8 +23,11 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected StatusGumpBase(World world) : base(world, 0, 0)
         {
-            // sanity check
-            UIManager.GetGump<HealthBarGump>(World.Player)?.Dispose();
+            if (ProfileManager.CurrentProfile.StatusGumpBarMutuallyExclusive)
+            {
+                // sanity check
+                UIManager.GetGump<HealthBarGump>(World.Player)?.Dispose();
+            }
 
             CanCloseWithRightClick = true;
             CanMove = true;
@@ -77,15 +80,12 @@ namespace ClassicUO.Game.UI.Gumps
                         UIManager.GetGump<BaseHealthBarGump>(World.Player)?.Dispose();
 
                         if (ProfileManager.CurrentProfile.CustomBarsToggled)
-                        {
                             UIManager.Add(new HealthBarGumpCustom(World, World.Player) { X = ScreenCoordinateX, Y = ScreenCoordinateY });
-                        }
                         else
-                        {
                             UIManager.Add(new HealthBarGump(World, World.Player) { X = ScreenCoordinateX, Y = ScreenCoordinateY });
-                        }
 
-                        Dispose();
+                        if (ProfileManager.CurrentProfile.StatusGumpBarMutuallyExclusive)
+                            Dispose();
                     }
                 }
             }
@@ -1308,7 +1308,8 @@ namespace ClassicUO.Game.UI.Gumps
                     p.Y,
                     16,
                     16,
-                    ResGumps.Minimize,
+                    ProfileManager.CurrentProfile.StatusGumpBarMutuallyExclusive 
+                        ? ResGumps.Minimize : ResGumps.StatusGumpOpenBar,
                     0
                 ) { CanMove = true }
             );

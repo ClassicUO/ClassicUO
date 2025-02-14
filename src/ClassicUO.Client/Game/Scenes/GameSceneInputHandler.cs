@@ -1073,7 +1073,7 @@ namespace ClassicUO.Game.Scenes
                             );
                             customgump?.Dispose();
 
-                            if (obj == _world.Player)
+                            if (obj == _world.Player && ProfileManager.CurrentProfile.StatusGumpBarMutuallyExclusive)
                             {
                                 StatusGumpBase.GetStatusGump()?.Dispose();
                             }

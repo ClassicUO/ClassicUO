@@ -223,7 +223,7 @@ namespace ClassicUO.Game.UI.Gumps
                 BaseHealthBarGump gump = UIManager.GetGump<BaseHealthBarGump>(LocalSerial);
                 gump?.Dispose();
 
-                if (entity == World.Player)
+                if (entity == World.Player && ProfileManager.CurrentProfile.StatusGumpBarMutuallyExclusive)
                 {
                     StatusGumpBase.GetStatusGump()?.Dispose();
                 }
