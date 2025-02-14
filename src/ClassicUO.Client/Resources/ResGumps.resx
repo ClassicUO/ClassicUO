@@ -1597,4 +1597,10 @@ Client version: '{0}'</value>
   <data name="WorldMapChangeMap0" xml:space="preserve">
     <value>Map {0}</value>
   </data>
+  <data name="StatusGumpBarMutuallyExclusive" xml:space="preserve">
+    <value>Status Gump and Health Bar are mutually exclusive</value>
+  </data>
+  <data name="StatusGumpOpenBar" xml:space="preserve">
+    <value>Open Health Bar</value>
+  </data>
 </root>
