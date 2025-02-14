@@ -160,7 +160,7 @@ namespace ClassicUO.Assets
 
             var start = reader.Position;
             var rowLookup = new int[h];
-            reader.Read(MemoryMarshal.AsBytes<int>(rowLookup));
+            reader.Read(MemoryMarshal.AsBytes<int>(rowLookup.AsSpan()));
 
             for (var y = 0; y < h; ++y)
             {

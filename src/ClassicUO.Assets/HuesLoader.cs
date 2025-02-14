@@ -2,6 +2,7 @@
 
 using ClassicUO.IO;
 using ClassicUO.Utility;
+using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
@@ -45,7 +46,7 @@ namespace ClassicUO.Assets
 
             using var radarcol = new UOFileMul(path);
             RadarCol = new ushort[radarcol.Length / sizeof(ushort)];
-            radarcol.Read(MemoryMarshal.AsBytes<ushort>(RadarCol));
+            radarcol.Read(MemoryMarshal.AsBytes<ushort>(RadarCol.AsSpan()));
         }
 
         public float[] CreateHuesPalette()
