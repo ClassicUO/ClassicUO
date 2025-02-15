@@ -1603,4 +1603,7 @@ Client version: '{0}'</value>
   <data name="StatusGumpOpenBar" xml:space="preserve">
     <value>Open Health Bar</value>
   </data>
+  <data name="DragHostileOnly" xml:space="preserve">
+    <value>Select hostiles only</value>
+  </data>
 </root>

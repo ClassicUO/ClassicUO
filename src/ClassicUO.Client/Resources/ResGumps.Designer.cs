@@ -2996,5 +2996,11 @@ namespace ClassicUO.Resources {
                 return ResourceManager.GetString("StatusGumpOpenBar", resourceCulture);
             }
         }
+        
+        public static string DragHostileOnly {
+            get {
+                return ResourceManager.GetString("DragHostileOnly", resourceCulture);
+            }
+        }
     }
 }

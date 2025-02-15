@@ -52,7 +52,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         //counters
         private Checkbox _enableCounters, _highlightOnUse, _highlightOnAmount, _enableAbbreviatedAmount;
-        private Checkbox _enableDragSelect, _dragSelectHumanoidsOnly;
+        private Checkbox _enableDragSelect, _dragSelectHumanoidsOnly, _dragSelectHostileOnly;
 
         // sounds
         private Checkbox _enableSounds, _enableMusic, _footStepsSound, _combatMusic, _musicInBackground, _loginMusic;
@@ -1223,6 +1223,18 @@ namespace ClassicUO.Game.UI.Gumps
                     null,
                     ResGumps.DragHumanoidsOnly,
                     _currentProfile.DragSelectHumanoidsOnly,
+                    startX,
+                    startY
+                )
+            );
+            
+            section4.Add
+            (
+                _dragSelectHostileOnly = AddCheckBox
+                (
+                    null,
+                    ResGumps.DragHostileOnly,
+                    _currentProfile.DragSelectHostileOnly,
                     startX,
                     startY
                 )
@@ -3494,6 +3506,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _textFading.IsChecked = true;
                     _enableDragSelect.IsChecked = false;
                     _dragSelectHumanoidsOnly.IsChecked = false;
+                    _dragSelectHostileOnly.IsChecked = false;
                     _showTargetRangeIndicator.IsChecked = false;
                     _customBars.IsChecked = false;
                     _customBarsBBG.IsChecked = false;
@@ -4103,6 +4116,8 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.EnableDragSelect = _enableDragSelect.IsChecked;
             _currentProfile.DragSelectModifierKey = _dragSelectModifierKey.SelectedIndex;
             _currentProfile.DragSelectHumanoidsOnly = _dragSelectHumanoidsOnly.IsChecked;
+            _currentProfile.DragSelectHostileOnly = _dragSelectHostileOnly.IsChecked;
+
             _currentProfile.DragSelectStartX = _dragSelectStartX.Value;
             _currentProfile.DragSelectStartY = _dragSelectStartY.Value;
             _currentProfile.DragSelectAsAnchor = _dragSelectAsAnchor.IsChecked;

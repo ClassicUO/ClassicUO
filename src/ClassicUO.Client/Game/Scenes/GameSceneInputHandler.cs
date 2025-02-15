@@ -174,9 +174,11 @@ namespace ClassicUO.Game.Scenes
             foreach (Mobile mobile in _world.Mobiles.Values)
             {
                 if (ProfileManager.CurrentProfile.DragSelectHumanoidsOnly && !mobile.IsHuman)
-                {
                     continue;
-                }
+
+                // Skip if is Renamable (follower), or non-hostile notoriety
+                if (ProfileManager.CurrentProfile.DragSelectHostileOnly && (mobile.IsRenamable || mobile.NotorietyFlag is NotorietyFlag.Ally or NotorietyFlag.Innocent or NotorietyFlag.Invulnerable))
+                    continue;
 
                 Point p = mobile.RealScreenPosition;
 
