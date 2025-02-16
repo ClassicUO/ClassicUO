@@ -172,7 +172,10 @@ namespace ClassicUO.Game.GameObjects
                     && mountGraphic < Client.Game.UO.Animations.MaxAnimationCount
                 )
                 {
-                    mountOffsetY = Client.Game.UO.Animations.GetMountedHeightOffset(mountGraphic);
+                    if (Mounts.TryGet(mountGraphic, out var mountInfo))
+                    {
+                        mountOffsetY = mountInfo.OffsetY;
+                    }
 
                     if (hasShadow)
                     {
@@ -1053,9 +1056,10 @@ namespace ClassicUO.Game.GameObjects
                                 return true;
                             }
 
-                            position.Y += animations.GetMountedHeightOffset(
-                                mountGraphic
-                            );
+                            if (Mounts.TryGet(mountGraphic, out var moutInfo))
+                            {
+                                position.Y += moutInfo.OffsetY;
+                            }
                         }
                     }
                 }

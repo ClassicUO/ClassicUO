@@ -255,13 +255,11 @@ namespace ClassicUO.Assets
             ref ushort hue,
             ref AnimationFlags flags,
             out int fileIndex,
-            out AnimationGroupsType animType,
-            out sbyte mountHeight
+            out AnimationGroupsType animType
         )
         {
             fileIndex = 0;
             animType = AnimationGroupsType.Unknown;
-            mountHeight = 0;
 
             if (!_mobTypes.TryGetValue(body, out var mobInfo))
             {
@@ -277,7 +275,6 @@ namespace ClassicUO.Assets
                     animType = mobInfo.Type != AnimationGroupsType.Unknown ? mobInfo.Type : CalculateTypeByGraphic(body);
 
                 var replaceFound = _uopInfos.TryGetValue(body, out var uopInfo);
-                mountHeight = uopInfo.HeightOffset;
                 var animIndices = Array.Empty<AnimationDirection>();
 
                 for (int actioIdx = 0; actioIdx < MAX_ACTIONS; ++actioIdx)
@@ -314,7 +311,6 @@ namespace ClassicUO.Assets
                 hue = bodyConvInfo.Hue;
                 body = bodyConvInfo.Graphic;
                 fileIndex = bodyConvInfo.FileIndex;
-                mountHeight = bodyConvInfo.MountHeight;
 
                 if (clientVersion < ClientVersion.CV_500A)
                     animType = bodyConvInfo.AnimType;
@@ -850,26 +846,6 @@ namespace ClassicUO.Assets
                         }
 
                         reader.Skip(60);
-                    }
-
-                    if (
-                        animID == 0x04E7
-                        || animID == 0x042D
-                        || animID == 0x04E6
-                        || animID == 0x05F7
-                        || animID == 0x05A1
-                    )
-                    {
-                        uopInfo.HeightOffset = 18;
-                    }
-                    else if (
-                        animID == 0x01B0
-                        || animID == 0x0579
-                        || animID == 0x05F6
-                        || animID == 0x05A0
-                    )
-                    {
-                        uopInfo.HeightOffset = 9;
                     }
                 }
 
@@ -1728,7 +1704,6 @@ namespace ClassicUO.Assets
     struct UopInfo
     {
         public ReplacedAnimArray ReplacedAnimations;
-        public sbyte HeightOffset;
     }
 
     [Flags]
