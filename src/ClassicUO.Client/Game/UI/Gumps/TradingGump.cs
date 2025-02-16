@@ -473,7 +473,7 @@ namespace ClassicUO.Game.UI.Gumps
                                 send = true;
                             }
                         }
-                        else if (uint.TryParse(entry.Text, out uint value))
+                        else if (uint.TryParse(entry.Text.Replace(",", ""), out uint value))
                         {
                             if ((int)entry.Tag == 0) // gold
                             {
@@ -508,7 +508,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                             if (send)
                             {
-                                entry.SetText(value.ToString());
+                                entry.SetText(value.ToString("N0"));
                             }
                         }
 
