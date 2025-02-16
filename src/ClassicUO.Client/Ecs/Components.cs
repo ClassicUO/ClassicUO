@@ -97,10 +97,7 @@ struct EquipmentSlots
     private EquipmentArray _array;
 
     [UnscopedRef]
-    public ref ulong this[Layer layer]
-    {
-        get => ref _array[(int)layer];
-    }
+    public ref ulong this[Layer layer] => ref _array[(int)layer];
 }
 
 public struct ScreenPositionOffset

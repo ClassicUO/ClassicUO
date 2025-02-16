@@ -1,10 +1,7 @@
 using System;
-using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using ClassicUO.Input;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 using TinyEcs;
 
 namespace ClassicUO.Ecs;
@@ -19,9 +16,6 @@ internal readonly struct FnaPlugin : IPlugin
     {
         scheduler.AddResource(new UoGame(MouseVisible, WindowResizable, VSync));
         scheduler.AddSystemParam(new Time());
-        scheduler.AddEvent<KeyEvent>();
-        scheduler.AddEvent<MouseEvent>();
-        scheduler.AddEvent<WheelEvent>();
 
         scheduler.AddSystem(static (Res<UoGame> game, SchedulerState schedState) =>
         {
@@ -54,90 +48,11 @@ internal readonly struct FnaPlugin : IPlugin
         scheduler.AddSystem(() => Environment.Exit(0), Stages.AfterUpdate, ThreadingMode.Single)
                 .RunIf(static (Res<UoGame> game) => !UnsafeFNAAccessor.GetSetRunApplication(game.Value));
 
-        // scheduler.AddSystem((EventWriter<KeyEvent> writer, Res<KeyboardContext> keyboardCtx) => {
-        //     foreach (var key in keyboardCtx.Value.OldState.GetPressedKeys())
-        //         if (keyboardCtx.Value.NewState.IsKeyUp(key)) // [pressed] -> [released]
-        //             writer.Enqueue(new() { Action = 0, Key = key });
-
-        //     foreach (var key in keyboardCtx.Value.NewState.GetPressedKeys())
-        //         if (keyboardCtx.Value.OldState.IsKeyUp(key)) // [released] -> [pressed]
-        //             writer.Enqueue(new() { Action = 1, Key = key });
-        //         else if (keyboardCtx.Value.OldState.IsKeyDown(key))
-        //             writer.Enqueue(new() { Action = 2, Key = key });
-        // }, Stages.FrameEnd).RunIf((Res<UoGame> game) => game.Value.IsActive);
-
-        // scheduler.AddSystem((EventWriter<MouseEvent> writer, EventWriter<WheelEvent> wheelWriter, Res<MouseContext> mouseCtx) => {
-        //     if (mouseCtx.Value.NewState.LeftButton != mouseCtx.Value.OldState.LeftButton)
-        //         writer.Enqueue(new() { Action = mouseCtx.Value.NewState.LeftButton, Button = Input.MouseButtonType.Left, X = mouseCtx.Value.NewState.X, Y = mouseCtx.Value.NewState.Y });
-        //     if (mouseCtx.Value.NewState.RightButton != mouseCtx.Value.OldState.RightButton)
-        //         writer.Enqueue(new() { Action = mouseCtx.Value.NewState.RightButton, Button = Input.MouseButtonType.Right, X = mouseCtx.Value.NewState.X, Y = mouseCtx.Value.NewState.Y });
-        //     if (mouseCtx.Value.NewState.MiddleButton != mouseCtx.Value.OldState.MiddleButton)
-        //         writer.Enqueue(new() { Action = mouseCtx.Value.NewState.MiddleButton, Button = Input.MouseButtonType.Middle, X = mouseCtx.Value.NewState.X, Y = mouseCtx.Value.NewState.Y });
-        //     if (mouseCtx.Value.NewState.XButton1 != mouseCtx.Value.OldState.XButton1)
-        //         writer.Enqueue(new() { Action = mouseCtx.Value.NewState.XButton1, Button = Input.MouseButtonType.XButton1, X = mouseCtx.Value.NewState.X, Y = mouseCtx.Value.NewState.Y });
-        //     if (mouseCtx.Value.NewState.XButton2 != mouseCtx.Value.OldState.XButton2)
-        //         writer.Enqueue(new() { Action = mouseCtx.Value.NewState.XButton2, Button = Input.MouseButtonType.XButton2, X = mouseCtx.Value.NewState.X, Y = mouseCtx.Value.NewState.Y });
-
-        //     if (mouseCtx.Value.NewState.ScrollWheelValue != mouseCtx.Value.OldState.ScrollWheelValue)
-        //         // FNA multiplies for 120 for some reason
-        //         wheelWriter.Enqueue(new() { Value = (mouseCtx.Value.OldState.ScrollWheelValue - mouseCtx.Value.NewState.ScrollWheelValue) / 120 });
-        // }, Stages.FrameEnd).RunIf((Res<UoGame> game) => game.Value.IsActive);
-
         scheduler.AddSystem((Res<MouseContext> mouseCtx, Res<KeyboardContext> keyboardCtx, Time time) =>
         {
             mouseCtx.Value.Update(time.Total);
             keyboardCtx.Value.Update(time.Total);
         }, Stages.FrameEnd);
-
-        // scheduler.AddSystem((Res<KeyboardContext> keyboardCtx) =>
-        // {
-        //     keyboardCtx.Value.OldState = keyboardCtx.Value.NewState;
-        //     keyboardCtx.Value.NewState = Keyboard.GetState();
-        // }, Stages.FrameEnd).RunIf((Res<UoGame> game) => game.Value.IsActive);
-
-        // scheduler.AddSystem((EventReader<KeyEvent> reader) => {
-        //     foreach (var ev in reader)
-        //         Console.WriteLine("key {0} is {1}", ev.Key, ev.Action switch
-        //         {
-        //             0 => "up",
-        //             1 => "down",
-        //             2 => "pressed",
-        //             _ => "unknown"
-        //         });
-        // });
-
-        // scheduler.AddSystem((EventReader<MouseEvent> reader) => {
-        //     foreach (var ev in reader)
-        //         Console.WriteLine("mouse button {0} is {1} at {2},{3}", ev.Button, ev.Action switch
-        //         {
-        //             ButtonState.Pressed => "pressed",
-        //             ButtonState.Released => "released",
-        //             _ => "unknown"
-        //         }, ev.X, ev.Y);
-        // }).RunIf((Res<UoGame> game) => game.Value.IsActive);
-
-        // scheduler.AddSystem((EventReader<WheelEvent> reader) => {
-        //     foreach (var ev in reader)
-        //         Console.WriteLine("wheel value {0}", ev.Value);
-        // }).RunIf((Res<UoGame> game) => game.Value.IsActive);
-    }
-
-    private struct KeyEvent
-    {
-        public byte Action;
-        public Keys Key;
-    }
-
-    private struct MouseEvent
-    {
-        public ButtonState Action;
-        public MouseButtonType Button;
-        public int X, Y;
-    }
-
-    private struct WheelEvent
-    {
-        public int Value;
     }
 
     private sealed class UnsafeFNAAccessor

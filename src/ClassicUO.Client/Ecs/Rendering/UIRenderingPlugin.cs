@@ -97,9 +97,8 @@ internal struct UIRenderingPlugin : IPlugin
 
         // input
         scheduler.AddSystem((
-            World world,
             Query<Data<GuiBounds, ZIndex, GuiInputState, Children>, Filter<With<Gui>, Optional<Children>>> query,
-            Query<Data<GuiBounds, Children>, Filter<With<Gui>, Without<Parent>, Optional<Children>>> queryChildren,
+            Query<Data<GuiBounds, Children>, Filter<With<Gui>, Optional<Children>>> queryChildren,
             Res<MouseContext> mouseCtx,
             Local<EntityView?> selected) =>
         {
@@ -137,7 +136,7 @@ internal struct UIRenderingPlugin : IPlugin
                             static void moveChildren(
                                 ref Children children,
                                 ref readonly Vector2 offset,
-                                Query<Data<GuiBounds, Children>, Filter<With<Gui>, Without<Parent>, Optional<Children>>> queryChildren)
+                                Query<Data<GuiBounds, Children>, Filter<With<Gui>, Optional<Children>>> queryChildren)
                             {
                                 if (Unsafe.IsNullRef(ref children))
                                     return;
@@ -145,6 +144,10 @@ internal struct UIRenderingPlugin : IPlugin
                                 foreach (var child in children)
                                 {
                                     (var id, var childBounds, var childChildren) = queryChildren.Get(child);
+                                    if (id.Ref != child)
+                                    {
+                                        Console.WriteLine("WRONG ID!!");
+                                    }
                                     childBounds.Ref.Value.X += (int)offset.X;
                                     childBounds.Ref.Value.Y += (int)offset.Y;
                                     moveChildren(ref childChildren.Ref, in offset, queryChildren);
@@ -207,17 +210,17 @@ internal struct UIRenderingPlugin : IPlugin
             var root = basicWidget(world, new () { X = 100, Y = 200, Width = 120, Height = 90 })
                 .Add<GuiRoot>();
 
-           var child0 = basicWidget(world, zIndex: 2)
+            var child0 = basicWidget(world, zIndex: 2)
                 .Set(new GuiUOInteractionWidget() { Normal = 0x1589, Pressed = 0x158B, Over = 0x158A });
             var child1 = basicWidget(world, zIndex: 0.1f)
                 .Set(new GuiUOInteractionWidget() { Normal = 0x085d, Pressed = 0x085e, Over = 0x085f });
             var child2 = basicWidget(world, new Rectangle(30, 30, 0, 0), 1)
-                .Set(new Hue() { Value = 0x44 })
+                .Set(new Hue() { Value = 0x123 })
                 .Set(new GuiUOInteractionWidget() { Normal = 0x085d, Pressed = 0x085e, Over = 0x085f });
 
             root.AddChild(child0);
             root.AddChild(child1);
-            root.AddChild(child2);
+            child1.AddChild(child2);
         }, Stages.Startup, ThreadingMode.Single);
 
     }
