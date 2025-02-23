@@ -60,7 +60,7 @@ namespace ClassicUO.Game.Map
 
             ref var im = ref GetIndex(index);
 
-            if (im.MapAddress != 0)
+            if (im.MapAddress != IndexMap.INVALID_ADDRESS)
             {
                 im.MapFile.Seek((long)im.MapAddress, System.IO.SeekOrigin.Begin);
                 var block = im.MapFile.Read<MapBlock>();
@@ -94,7 +94,7 @@ namespace ClassicUO.Game.Map
                     }
                 }
 
-                if (im.StaticAddress != 0 && im.StaticCount > 0)
+                if (im.StaticAddress != IndexMap.INVALID_ADDRESS && im.StaticCount > 0)
                 {
                     var staticsBlockBuffer = ArrayPool<StaticsBlock>.Shared.Rent((int)im.StaticCount);
                     var staticsSpan = staticsBlockBuffer.AsSpan(0, (int)im.StaticCount);

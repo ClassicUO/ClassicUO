@@ -350,6 +350,12 @@ namespace ClassicUO.Assets
                 }
 
                 var mapPos = uopoffset + (ulong)(blocknum * mapblocksize);
+                if (isuop && mapPos == 0)
+                {
+                    //This would mean that map file is invalid, but we at least won't crash
+                    mapPos = IndexMap.INVALID_ADDRESS;
+                }
+                
                 var staticPos = 0ul;
                 var staticCount = 0u;
 
@@ -681,5 +687,6 @@ namespace ClassicUO.Assets
         public ulong StaticAddress;
         public uint StaticCount;
         public static IndexMap Invalid = new IndexMap();
+        public const ulong INVALID_ADDRESS = 0xFFFF_FFFF;
     }
 }

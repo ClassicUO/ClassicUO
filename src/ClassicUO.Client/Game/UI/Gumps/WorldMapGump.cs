@@ -1197,7 +1197,7 @@ namespace ClassicUO.Game.UI.Gumps
                             {
                                 ref var indexMap = ref map.GetIndex(bx, by);
 
-                                if (indexMap.MapAddress == 0)
+                                if (indexMap.MapAddress == IndexMap.INVALID_ADDRESS)
                                 {
                                     continue;
                                 }

@@ -277,7 +277,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     ref var indexMap = ref World.Map.GetIndex(i, j);
 
-                    if (indexMap.MapAddress == 0)
+                    if (indexMap.MapAddress == IndexMap.INVALID_ADDRESS)
                     {
                         break;
                     }
