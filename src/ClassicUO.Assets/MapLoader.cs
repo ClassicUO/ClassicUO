@@ -680,6 +680,9 @@ namespace ClassicUO.Assets
         public uint OriginalStaticCount;
         public ulong StaticAddress;
         public uint StaticCount;
-        public static IndexMap Invalid = new IndexMap();
+
+        public static IndexMap Invalid = new IndexMap() { MapAddress = ulong.MaxValue };
+
+        public readonly bool IsValid() => MapAddress != ulong.MaxValue;
     }
 }

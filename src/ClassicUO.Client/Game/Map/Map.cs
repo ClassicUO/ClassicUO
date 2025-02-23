@@ -113,7 +113,7 @@ namespace ClassicUO.Game.Map
 
             ref var blockIndex = ref GetIndex(x >> 3, y >> 3);
 
-            if (blockIndex.MapAddress == 0)
+            if (!blockIndex.IsValid())
             {
                 return -125;
             }

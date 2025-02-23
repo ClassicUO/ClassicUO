@@ -60,70 +60,72 @@ namespace ClassicUO.Game.Map
 
             ref var im = ref GetIndex(index);
 
-            if (im.MapAddress != 0)
+            if (!im.IsValid())
             {
-                im.MapFile.Seek((long)im.MapAddress, System.IO.SeekOrigin.Begin);
-                var block = im.MapFile.Read<MapBlock>();
+                return;
+            }
 
-                var cells = block.Cells;
-                int bx = X << 3;
-                int by = Y << 3;
+            im.MapFile.Seek((long)im.MapAddress, System.IO.SeekOrigin.Begin);
+            var block = im.MapFile.Read<MapBlock>();
 
-                for (int y = 0; y < 8; ++y)
+            var cells = block.Cells;
+            int bx = X << 3;
+            int by = Y << 3;
+
+            for (int y = 0; y < 8; ++y)
+            {
+                int pos = y << 3;
+                ushort tileY = (ushort)(by + y);
+
+                for (int x = 0; x < 8; ++x, ++pos)
                 {
-                    int pos = y << 3;
-                    ushort tileY = (ushort) (by + y);
+                    ushort tileID = (ushort)(cells[pos].TileID & 0x3FFF);
 
-                    for (int x = 0; x < 8; ++x, ++pos)
-                    {
-                        ushort tileID = (ushort) (cells[pos].TileID & 0x3FFF);
+                    sbyte z = cells[pos].Z;
 
-                        sbyte z = cells[pos].Z;
+                    Land land = Land.Create(_world, tileID);
 
-                        Land land = Land.Create(_world, tileID);
+                    ushort tileX = (ushort)(bx + x);
 
-                        ushort tileX = (ushort) (bx + x);
+                    land.ApplyStretch(map, tileX, tileY, z);
+                    land.X = tileX;
+                    land.Y = tileY;
+                    land.Z = z;
+                    land.UpdateScreenPosition();
 
-                        land.ApplyStretch(map, tileX, tileY, z);
-                        land.X = tileX;
-                        land.Y = tileY;
-                        land.Z = z;
-                        land.UpdateScreenPosition();
-
-                        AddGameObject(land, x, y);
-                    }
+                    AddGameObject(land, x, y);
                 }
+            }
 
-                if (im.StaticAddress != 0 && im.StaticCount > 0)
+            if (im.StaticAddress != 0 && im.StaticCount > 0)
+            {
+                var staticsBlockBuffer = ArrayPool<StaticsBlock>.Shared.Rent((int)im.StaticCount);
+                var staticsSpan = staticsBlockBuffer.AsSpan(0, (int)im.StaticCount);
+                im.StaticFile.Seek((long)im.StaticAddress, System.IO.SeekOrigin.Begin);
+                im.StaticFile.Read(MemoryMarshal.AsBytes(staticsSpan));
+
+                foreach (ref var sb in staticsSpan)
                 {
-                    var staticsBlockBuffer = ArrayPool<StaticsBlock>.Shared.Rent((int)im.StaticCount);
-                    var staticsSpan = staticsBlockBuffer.AsSpan(0, (int)im.StaticCount);
-                    im.StaticFile.Seek((long)im.StaticAddress, System.IO.SeekOrigin.Begin);
-                    im.StaticFile.Read(MemoryMarshal.AsBytes(staticsSpan));
-
-                    foreach (ref var sb in staticsSpan)
+                    if (sb.Color != 0 && sb.Color != 0xFFFF)
                     {
-                        if (sb.Color != 0 && sb.Color != 0xFFFF)
+                        int pos = (sb.Y << 3) + sb.X;
+
+                        if (pos >= 64)
                         {
-                            int pos = (sb.Y << 3) + sb.X;
-
-                            if (pos >= 64)
-                            {
-                                continue;
-                            }
-
-                            Static staticObject = Static.Create(_world, sb.Color, sb.Hue, pos);
-                            staticObject.X = (ushort)(bx + sb.X);
-                            staticObject.Y = (ushort)(by + sb.Y);
-                            staticObject.Z = sb.Z;
-                            staticObject.UpdateScreenPosition();
-
-                            AddGameObject(staticObject, sb.X, sb.Y);
+                            continue;
                         }
-                    }
 
-                    ArrayPool<StaticsBlock>.Shared.Return(staticsBlockBuffer);
+                        Static staticObject = Static.Create(_world, sb.Color, sb.Hue, pos);
+                        staticObject.X = (ushort)(bx + sb.X);
+                        staticObject.Y = (ushort)(by + sb.Y);
+                        staticObject.Z = sb.Z;
+                        staticObject.UpdateScreenPosition();
+
+                        AddGameObject(staticObject, sb.X, sb.Y);
+                    }
                 }
+
+                ArrayPool<StaticsBlock>.Shared.Return(staticsBlockBuffer);
             }
         }
 
