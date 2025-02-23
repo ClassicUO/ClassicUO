@@ -33,6 +33,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\external\Clay-cs\Clay-cs\Clay-cs.csproj" />
     <ProjectReference Include="..\..\external\FNA\FNA.Core.csproj" />
     <ProjectReference Include="..\ClassicUO.Assets\ClassicUO.Assets.csproj" />
     <ProjectReference Include="..\ClassicUO.Renderer\ClassicUO.Renderer.csproj" />

@@ -17,7 +17,7 @@ internal sealed class MouseContext : InputContext<MouseButtonType>
 
     public Vector2 Position => new(_newState.X, _newState.Y);
     public Vector2 PositionOffset => new(_newState.X - _oldState.X, _newState.Y - _oldState.Y);
-
+    public float Wheel { get; private set; }
 
     public override bool IsPressed(MouseButtonType input) => VerifyCondition(input, ButtonState.Pressed, ButtonState.Pressed);
 
@@ -47,6 +47,7 @@ internal sealed class MouseContext : InputContext<MouseButtonType>
         _oldState = _newState;
         _newState = Microsoft.Xna.Framework.Input.Mouse.GetState();
         _currentTime = deltaTime;
+        Wheel = (_newState.ScrollWheelValue - _oldState.ScrollWheelValue) / 120f;
 
         base.Update(deltaTime);
     }
