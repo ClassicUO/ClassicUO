@@ -1606,4 +1606,7 @@ Client version: '{0}'</value>
   <data name="DragHostileOnly" xml:space="preserve">
     <value>Select hostiles only</value>
   </data>
+  <data name="ShowDPSWithDamage" xml:space="preserve">
+    <value>Show DPS with damage numbers</value>
+  </data>
 </root>
