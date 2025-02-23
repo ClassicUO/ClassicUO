@@ -309,7 +309,7 @@ namespace ClassicUO.Configuration
         public string WorldMapHiddenZoneFiles { get; set; } = string.Empty;
         public bool WorldMapShowGridIfZoomed { get; set; } = true;
         public bool WorldMapAllowPositionalTarget { get; set; } = false;
-        public bool ShowDPSWithDamageNumbers { get; set; } = true;
+        public bool ShowDPSWithDamageNumbers { get; set; } = false;
 
 
         public static uint GumpsVersion { get; private set; }
