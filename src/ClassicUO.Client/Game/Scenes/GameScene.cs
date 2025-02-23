@@ -266,7 +266,7 @@ namespace ClassicUO.Game.Scenes
 
             if (!string.IsNullOrEmpty(text))
             {
-                _world.Journal.Add(text, hue, name, e.TextType, e.IsUnicode);
+                _world.Journal.Add(text, hue, name, e.TextType, e.IsUnicode, e.Type);
             }
         }
 
