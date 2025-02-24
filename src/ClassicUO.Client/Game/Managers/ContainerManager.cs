@@ -275,7 +275,8 @@ namespace ClassicUO.Game.Managers
                 if (ss != null && ss.Count != 0)
                 {
                     if (
-                        ushort.TryParse(ss[0], out ushort graphic)
+                        ss.Count >= 7
+                        && ushort.TryParse(ss[0], out ushort graphic)
                         && ushort.TryParse(ss[1], out ushort open_sound_id)
                         && ushort.TryParse(ss[2], out ushort close_sound_id)
                         && int.TryParse(ss[3], out int x)
