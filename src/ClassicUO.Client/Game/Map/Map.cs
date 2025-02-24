@@ -1,34 +1,4 @@
-#region license
-
-// Copyright (c) 2024, andreakarasho
-// All rights reserved.
-// 
-// Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions are met:
-// 1. Redistributions of source code must retain the above copyright
-//    notice, this list of conditions and the following disclaimer.
-// 2. Redistributions in binary form must reproduce the above copyright
-//    notice, this list of conditions and the following disclaimer in the
-//    documentation and/or other materials provided with the distribution.
-// 3. All advertising materials mentioning features or use of this software
-//    must display the following acknowledgement:
-//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
-// 4. Neither the name of the copyright holder nor the
-//    names of its contributors may be used to endorse or promote products
-//    derived from this software without specific prior written permission.
-// 
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
-// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
-// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-#endregion
+// SPDX-License-Identifier: BSD-2-Clause
 
 using System;
 using System.Collections.Generic;
@@ -51,7 +21,7 @@ namespace ClassicUO.Game.Map
             _world = world;
             Index = index;
             BlocksCount = Client.Game.UO.FileManager.Maps.MapBlocksSize[Index, 0] * Client.Game.UO.FileManager.Maps.MapBlocksSize[Index, 1];
-           
+
             if (_terrainChunks == null || BlocksCount > _terrainChunks.Length)
                 _terrainChunks = new Chunk[BlocksCount];
 
@@ -60,8 +30,6 @@ namespace ClassicUO.Game.Map
 
         public readonly int BlocksCount;
         public readonly int Index;
-
-
 
 
         public Chunk GetChunk(int block)
@@ -83,7 +51,13 @@ namespace ClassicUO.Game.Map
 
             int cellX = x >> 3;
             int cellY = y >> 3;
-            int block = GetBlock(cellX, cellY);
+
+            return GetChunk2(cellX, cellY, load);
+        }
+
+        public Chunk GetChunk2(int chunkX, int chunkY, bool load = true)
+        {
+            int block = GetBlock(chunkX, chunkY);
 
             if (block >= BlocksCount || block >= _terrainChunks.Length)
             {
@@ -100,7 +74,7 @@ namespace ClassicUO.Game.Map
                 }
 
                 LinkedListNode<int> node = _usedIndices.AddLast(block);
-                chunk = Chunk.Create(_world, cellX, cellY);
+                chunk = Chunk.Create(_world, chunkX, chunkY);
                 chunk.Load(Index);
                 chunk.Node = node;
             }
@@ -113,8 +87,8 @@ namespace ClassicUO.Game.Map
                 }
 
                 LinkedListNode<int> node = _usedIndices.AddLast(block);
-                chunk.X = cellX;
-                chunk.Y = cellY;
+                chunk.X = chunkX;
+                chunk.Y = chunkY;
                 chunk.Load(Index);
                 chunk.Node = node;
             }
@@ -139,7 +113,7 @@ namespace ClassicUO.Game.Map
 
             ref var blockIndex = ref GetIndex(x >> 3, y >> 3);
 
-            if (blockIndex.MapAddress == 0)
+            if (!blockIndex.IsValid())
             {
                 return -125;
             }

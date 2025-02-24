@@ -26,28 +26,28 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-       os: [ macos-12, ubuntu-latest, windows-latest ]
+       os: [ macos-13, ubuntu-latest, windows-latest ]
 
     steps:
     - uses: actions/checkout@v4
-      
+
     - name: Get submodules
       run: |
         git config --global url."https://".insteadOf git://
         git submodule update --init --recursive
-        
-    - name: Setup .NET 8
+
+    - name: Setup dotnet
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 8.0.x
+        dotnet-version: 9.0.x
         include-prerelease: false
-        
+
     - name: Restore
       run: dotnet restore
-      
+
     - name: Build
       run: dotnet build -c Release
-      
+
     - name: Test
       run: dotnet test --verbosity normal tests/ClassicUO.UnitTests
-   
+

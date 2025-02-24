@@ -13,7 +13,7 @@ env:
   CUO_OUTPUT_PATH: "../../bin/dist"
   CUO_PROJECT_PATH: "src/ClassicUO.Client/ClassicUO.Client.csproj"
   BOOT_PROJECT_PATH: "src/ClassicUO.Bootstrap/src/ClassicUO.Bootstrap.csproj"
-  TARGET_FRAMEWORK: net8.0
+  TARGET_FRAMEWORK: net9.0
 
   DOTNET_NOLOGO: false
   DOTNET_CLI_TELEMETRY_OPTOUT: 1
@@ -35,7 +35,7 @@ jobs:
             target: win-x64
           - os: ubuntu-20.04
             target: linux-x64
-          - os: macos-12
+          - os: macos-13
             target: osx-x64
 
     steps:
@@ -46,10 +46,10 @@ jobs:
           git config --global url."https://".insteadOf git://
           git submodule update --init --recursive
 
-      - name: Setup .NET 8
+      - name: Setup dotnet
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 8.0.x
+          dotnet-version: 9.0.x
           include-prerelease: false
 
       - name: Build Bootstrap app
@@ -109,4 +109,4 @@ jobs:
   #       destination-repository-name: "deploy"
   #       commit-message: "release ${{ env.CUO_ASSEMBLY_VERSION }} on ${{ matrix.target }}"
   #       target-branch: main
-  
+

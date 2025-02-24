@@ -43,14 +43,10 @@ namespace ClassicUO.Renderer.Animations
         public int MaxAnimationCount => _dataIndex.Length;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public AnimationGroupsType GetAnimType(ushort graphic) => _dataIndex[graphic]?.Type ?? 0;
+        public AnimationGroupsType GetAnimType(ushort graphic) => graphic < _dataIndex.Length ? _dataIndex[graphic]?.Type ?? 0 : 0;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public AnimationFlags  GetAnimFlags(ushort graphic) => _dataIndex[graphic]?.Flags ?? 0;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public sbyte GetMountedHeightOffset(ushort graphic) =>
-            _dataIndex[graphic]?.MountedHeightOffset ?? 0;
+        public AnimationFlags GetAnimFlags(ushort graphic) => graphic < _dataIndex.Length ? _dataIndex[graphic]?.Flags ?? 0 : 0;
 
         public bool PixelCheck(
             ushort animID,
@@ -136,7 +132,7 @@ namespace ClassicUO.Renderer.Animations
                 frameIndex = (byte)animIndex;
             }
 
-            var frames = GetAnimationFrames(graphic, animGroup, dir, out _, out _, true);
+            var frames = GetAnimationFrames(graphic, animGroup, dir, out _, out _, false);
 
             if (!frames.IsEmpty && frames[frameIndex].Texture != null)
             {
@@ -194,22 +190,22 @@ namespace ClassicUO.Renderer.Animations
                         ref hue,
                         ref index.Flags,
                         out index.FileIndex,
-                        out index.Type,
-                        out index.MountedHeightOffset
+                        out index.Type
                     );
 
                     if (!indices.IsEmpty)
                     {
-                        if (index.Flags.HasFlag(AnimationFlags.UseUopAnimation))
+                        if ((index.Flags & AnimationFlags.UseUopAnimation) != 0)
                         {
                             index.UopGroups = new AnimationGroupUop[indices.Length];
                             for (int i = 0; i < index.UopGroups.Length; i++)
                             {
                                 index.UopGroups[i] = new AnimationGroupUop();
                                 index.UopGroups[i].FileIndex = index.FileIndex;
-                                index.UopGroups[i].DecompressedLength = indices[i].Unknown;
+                                index.UopGroups[i].DecompressedLength = indices[i].UncompressedSize;
                                 index.UopGroups[i].CompressedLength = indices[i].Size;
                                 index.UopGroups[i].Offset = indices[i].Position;
+                                index.UopGroups[i].CompressionType = indices[i].CompressionType;
                             }
                         }
                         else
@@ -298,11 +294,12 @@ namespace ClassicUO.Renderer.Animations
                 )
                 {
                     var uopGroupObj = (AnimationGroupUop)groupObj;
-                    var ff = new AnimationsLoader.AnimIdxBlock()
+                    var ff = new AnimationsLoader.AnimationDirection()
                     {
                         Position = uopGroupObj.Offset,
                         Size = uopGroupObj.CompressedLength,
-                        Unknown = uopGroupObj.DecompressedLength
+                        UncompressedSize = uopGroupObj.DecompressedLength,
+                        CompressionType = uopGroupObj.CompressionType
                     };
 
                     frames = _animationLoader.ReadUOPAnimationFrames(
@@ -316,7 +313,7 @@ namespace ClassicUO.Renderer.Animations
                 }
                 else
                 {
-                    var ff = new AnimationsLoader.AnimIdxBlock()
+                    var ff = new AnimationsLoader.AnimationDirection()
                     {
                         Position = groupObj.Direction[dir].Address,
                         Size = groupObj.Direction[dir].Size,
@@ -398,7 +395,7 @@ namespace ClassicUO.Renderer.Animations
 
             ushort hue = 0;
 
-            if (_dataIndex[graphic] != null && _dataIndex[graphic].FileIndex == 0 && !_dataIndex[graphic].Flags.HasFlag(AnimationFlags.UseUopAnimation))
+            if (_dataIndex[graphic] != null && _dataIndex[graphic].FileIndex == 0 && (_dataIndex[graphic].Flags & AnimationFlags.UseUopAnimation) == 0)
                 _ = isCorpse ? _animationLoader.ReplaceCorpse(ref graphic, ref hue) : _animationLoader.ReplaceBody(ref graphic, ref hue);
         }
 
@@ -426,10 +423,9 @@ namespace ClassicUO.Renderer.Animations
         {
             public int FileIndex;
             public ushort Hue;
-            public AnimationFlags  Flags;
+            public AnimationFlags Flags;
             public AnimationGroup[] Groups;
             public AnimationGroupUop[] UopGroups;
-            public sbyte MountedHeightOffset;
             public AnimationGroupsType Type = AnimationGroupsType.Unknown;
         }
     }

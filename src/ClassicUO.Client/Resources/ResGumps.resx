@@ -1197,7 +1197,7 @@ Min. Skill: {1}</value>
     <value>Go to location</value>
   </data>
   <data name="EnterLocation" xml:space="preserve">
-    <value>Enter X Y location:</value>
+    <value>Enter Location</value>
   </data>
   <data name="InvalidLocation" xml:space="preserve">
     <value>Invalid location entered: Enter "X Y" or "0°0'N,0°0'W"</value>
@@ -1415,7 +1415,7 @@ Client version: '{0}'</value>
     <value>ON</value>
   </data>
   <data name="HighlightContainerWhenSelected" xml:space="preserve">
-    <value>Highlight container on ground when mouse is over a container gump</value>
+    <value>Highlight container when mouse is over a container gump</value>
   </data>
   <data name="YouMustHaveThreeUniqueSkillsChosen" xml:space="preserve">
     <value>You must have three unique skills chosen!</value>
@@ -1587,5 +1587,23 @@ Client version: '{0}'</value>
   </data>
   <data name="ResetMapsCache" xml:space="preserve">
     <value>Reset maps cache</value>
+  </data>
+  <data name="NewTargetSystem" xml:space="preserve">
+    <value>Use new target system</value>
+  </data>
+  <data name="ShowSextantCoordinates" xml:space="preserve">
+    <value>Show sextant coordinates</value>
+  </data>
+  <data name="WorldMapChangeMap0" xml:space="preserve">
+    <value>Map {0}</value>
+  </data>
+  <data name="StatusGumpBarMutuallyExclusive" xml:space="preserve">
+    <value>Status Gump and Health Bar are mutually exclusive</value>
+  </data>
+  <data name="StatusGumpOpenBar" xml:space="preserve">
+    <value>Open Health Bar</value>
+  </data>
+  <data name="DragHostileOnly" xml:space="preserve">
+    <value>Select hostiles only</value>
   </data>
 </root>

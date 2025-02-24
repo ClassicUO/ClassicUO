@@ -1,48 +1,16 @@
-#region license
-
-// Copyright (c) 2024, andreakarasho
-// All rights reserved.
-//
-// Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions are met:
-// 1. Redistributions of source code must retain the above copyright
-//    notice, this list of conditions and the following disclaimer.
-// 2. Redistributions in binary form must reproduce the above copyright
-//    notice, this list of conditions and the following disclaimer in the
-//    documentation and/or other materials provided with the distribution.
-// 3. All advertising materials mentioning features or use of this software
-//    must display the following acknowledgement:
-//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
-// 4. Neither the name of the copyright holder nor the
-//    names of its contributors may be used to endorse or promote products
-//    derived from this software without specific prior written permission.
-//
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
-// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
-// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-#endregion
+// SPDX-License-Identifier: BSD-2-Clause
 
 using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text;
 using ClassicUO.Configuration;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
-using ClassicUO.Game.UI.Controls;
 using ClassicUO.IO;
 using ClassicUO.Assets;
 using ClassicUO.Utility;
@@ -4473,6 +4441,71 @@ namespace ClassicUO.Network
             writer.Dispose();
         }
 
+        public static void Send_EquipMacroKR(this NetClient socket, ReadOnlySpan<uint> serials)
+        {
+            const byte ID = 0xEC;
+
+            int length = socket.PacketsTable.GetPacketLength(ID);
+
+            var writer = new StackDataWriter(length < 0 ? 64 : length);
+
+            writer.WriteUInt8(ID);
+
+            if (length < 0)
+            {
+                writer.WriteZero(2);
+            }
+
+            writer.WriteUInt8((byte)serials.Length);
+            foreach (ref readonly var serial in serials)
+                writer.WriteUInt32BE(serial);
+
+            if (length < 0)
+            {
+                writer.Seek(1, SeekOrigin.Begin);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
+            }
+            else
+            {
+                writer.WriteZero(length - writer.BytesWritten);
+            }
+
+            socket.Send(writer.BufferWritten);
+            writer.Dispose();
+        }
+
+        public static void Send_UnequipMacroKR(this NetClient socket, ReadOnlySpan<Layer> layers)
+        {
+            const byte ID = 0xED;
+
+            int length = socket.PacketsTable.GetPacketLength(ID);
+
+            var writer = new StackDataWriter(length < 0 ? 64 : length);
+
+            writer.WriteUInt8(ID);
+
+            if (length < 0)
+            {
+                writer.WriteZero(2);
+            }
+
+            writer.WriteUInt8((byte)layers.Length);
+            foreach (ref readonly var layer in layers)
+                writer.WriteUInt16BE((byte)layer);
+
+            if (length < 0)
+            {
+                writer.Seek(1, SeekOrigin.Begin);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
+            }
+            else
+            {
+                writer.WriteZero(length - writer.BytesWritten);
+            }
+
+            socket.Send(writer.BufferWritten);
+            writer.Dispose();
+        }
 
         public static void Send_UOLive_HashResponse(this NetClient socket, uint block, byte mapIndex, Span<ushort> checksums)
         {

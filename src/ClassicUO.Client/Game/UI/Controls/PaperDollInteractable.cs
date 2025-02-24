@@ -1,34 +1,4 @@
-﻿#region license
-
-// Copyright (c) 2024, andreakarasho
-// All rights reserved.
-//
-// Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions are met:
-// 1. Redistributions of source code must retain the above copyright
-//    notice, this list of conditions and the following disclaimer.
-// 2. Redistributions in binary form must reproduce the above copyright
-//    notice, this list of conditions and the following disclaimer in the
-//    documentation and/or other materials provided with the distribution.
-// 3. All advertising materials mentioning features or use of this software
-//    must display the following acknowledgement:
-//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
-// 4. Neither the name of the copyright holder nor the
-//    names of its contributors may be used to endorse or promote products
-//    derived from this software without specific prior written permission.
-//
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
-// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
-// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-#endregion
+﻿// SPDX-License-Identifier: BSD-2-Clause
 
 using System.Collections.Generic;
 using ClassicUO.Configuration;
@@ -279,6 +249,7 @@ namespace ClassicUO.Game.UI.Controls
 
                     ushort id = GetAnimID(
                         mobile.Graphic,
+                        equipItem.Graphic,
                         equipItem.ItemData.AnimID,
                         mobile.IsFemale
                     );
@@ -315,6 +286,7 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     ushort id = GetAnimID(
                         mobile.Graphic,
+                        Client.Game.UO.GameCursor.ItemHold.Graphic,
                         Client.Game.UO.GameCursor.ItemHold.ItemData.AnimID,
                         mobile.IsFemale
                     );
@@ -413,24 +385,24 @@ namespace ClassicUO.Game.UI.Controls
             _updateUI = true;
         }
 
-        protected static ushort GetAnimID(ushort graphic, ushort animID, bool isfemale)
+        protected static ushort GetAnimID(ushort mobileGraphic, ushort itemGraphic, ushort animID, bool isfemale)
         {
             int offset = isfemale ? Constants.FEMALE_GUMP_OFFSET : Constants.MALE_GUMP_OFFSET;
 
             if (
                 Client.Game.UO.Version >= ClientVersion.CV_7000
                 && animID == 0x03CA // graphic for dead shroud
-                && (graphic == 0x02B7 || graphic == 0x02B6)
+                && (mobileGraphic == 0x02B7 || mobileGraphic == 0x02B6)
             ) // dead gargoyle graphics
             {
                 animID = 0x0223;
             }
 
-            Client.Game.UO.Animations.ConvertBodyIfNeeded(ref graphic);
+            Client.Game.UO.Animations.ConvertBodyIfNeeded(ref mobileGraphic);
 
             if (
                 Client.Game.UO.FileManager.Animations.EquipConversions.TryGetValue(
-                    graphic,
+                    mobileGraphic,
                     out Dictionary<ushort, EquipConvData> dict
                 )
             )
@@ -452,14 +424,23 @@ namespace ClassicUO.Game.UI.Controls
                 }
             }
 
-            if (
-                animID + offset > GumpsLoader.MAX_GUMP_DATA_INDEX_COUNT
-                || Client.Game.UO.Gumps.GetGump((ushort)(animID + offset)).Texture == null
-            )
+            if (Client.Game.UO.FileManager.TileArt.TryGetTileArtInfo(itemGraphic, out var tileArtInfo))
             {
-                // inverse
-                offset = isfemale ? Constants.MALE_GUMP_OFFSET : Constants.FEMALE_GUMP_OFFSET;
+                if (tileArtInfo.TryGetAppearance(mobileGraphic, out var appareanceId))
+                {
+                    if (animID != appareanceId)
+                        animID = (ushort)appareanceId;
+                }
             }
+
+            if (
+                    animID + offset > GumpsLoader.MAX_GUMP_DATA_INDEX_COUNT
+                    || Client.Game.UO.Gumps.GetGump((ushort)(animID + offset)).Texture == null
+                )
+                {
+                    // inverse
+                    offset = isfemale ? Constants.MALE_GUMP_OFFSET : Constants.FEMALE_GUMP_OFFSET;
+                }
 
             if (Client.Game.UO.Gumps.GetGump((ushort)(animID + offset)).Texture == null)
             {
