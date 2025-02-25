@@ -23,12 +23,6 @@ namespace ClassicUO.Game.GameObjects
         public World World { get; }
     }
 
-    internal class DamageEvent
-    {
-        public int Damage { get; set; }
-        public DateTime Timestamp { get; set; }
-    }
-
     internal abstract partial class GameObject : BaseGameObject
     {
         protected GameObject(World world) : base(world) { }
@@ -36,7 +30,8 @@ namespace ClassicUO.Game.GameObjects
         public bool IsDestroyed { get; protected set; }
         public bool IsPositionChanged { get; protected set; }
         public TextContainer TextContainer { get; private set; }
-        private List<DamageEvent> _damageEvents = new List<DamageEvent>();
+
+        private AverageOverTime _averageOverTime;
 
         public int Distance
         {
@@ -89,28 +84,13 @@ namespace ClassicUO.Game.GameObjects
 
         public void AddDamage(int damage)
         {
-            _damageEvents.Add(new DamageEvent { Damage = damage, Timestamp = DateTime.UtcNow });
+            _averageOverTime ??= new AverageOverTime(TimeSpan.FromSeconds(15));
 
-            while(_damageEvents.Count > 50)            
-                _damageEvents.RemoveAt(0);            
+            _averageOverTime.AddValue(Time.Ticks, damage);            
         }
-        public double GetCurrentDPS(int seconds = 15)
+        public double GetCurrentDPS()
         {
-            double totalDamage = 0;
-            int timestart = -1;
-            foreach (DamageEvent damageEvent in _damageEvents)
-            {
-                if (damageEvent.Timestamp < DateTime.UtcNow - TimeSpan.FromSeconds(seconds))
-                {
-                    continue;
-                }
-                if (timestart == -1)
-                    timestart = (int)(DateTime.UtcNow - damageEvent.Timestamp).TotalSeconds;
-
-                totalDamage += damageEvent.Damage;
-            }
-            timestart = timestart <= 0 ? seconds : timestart;
-            return Math.Round(totalDamage / (double)timestart, 1);
+            return Math.Round(_averageOverTime.LastAveragePerSecond, 1);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -376,7 +356,7 @@ namespace ClassicUO.Game.GameObjects
             Clear();
             RemoveFromTile();
             TextContainer?.Clear();
-            _damageEvents.Clear();
+            _averageOverTime = null;
 
             IsDestroyed = true;
             PriorityZ = 0;
