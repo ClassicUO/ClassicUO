@@ -743,10 +743,6 @@ namespace ClassicUO.Game.Managers
                                         {
                                             rjournal?.Dispose();
                                         }
-                                        else if (macro.Code == MacroType.Open)
-                                        {
-                                            UIManager.Add(new ResizableJournal(_world));
-                                        }
                                         break;
                                     }
 

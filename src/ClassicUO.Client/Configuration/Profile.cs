@@ -315,8 +315,8 @@ namespace ClassicUO.Configuration
         public static uint GumpsVersion { get; private set; }
 
         //Alternate Journal
-        public bool UseAlternateJournal { get; set; } = false;
-        public Dictionary<string, MessageType[]> JournalTabs { get; set; } = new Dictionary<string, MessageType[]>()
+        public bool UseAlternateJournal { get; set; }
+        public Dictionary<string, MessageType[]> JournalTabs { get; } = new Dictionary<string, MessageType[]>()
         {
             { "All", new MessageType[] {
                 MessageType.Alliance, MessageType.Command, MessageType.Emote,
