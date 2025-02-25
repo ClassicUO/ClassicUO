@@ -3423,7 +3423,7 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Save current settings as defaults for new users.
+        ///   Looks up a localized string similar to Set current profile as default for new characters.
         /// </summary>
         public static string SetAsNewDefault {
             get {
@@ -3536,6 +3536,15 @@ namespace ClassicUO.Resources {
         public static string ShowCaps {
             get {
                 return ResourceManager.GetString("ShowCaps", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Show DPS with damage numbers.
+        /// </summary>
+        public static string ShowDPSWithDamage {
+            get {
+                return ResourceManager.GetString("ShowDPSWithDamage", resourceCulture);
             }
         }
         
