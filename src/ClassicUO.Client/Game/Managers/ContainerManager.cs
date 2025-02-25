@@ -10,6 +10,7 @@ using ClassicUO.Assets;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
+using System;
 
 namespace ClassicUO.Game.Managers
 {
@@ -268,6 +269,8 @@ namespace ClassicUO.Game.Managers
                 new[] { '"', '"' }
             );
 
+            int line = 0;
+
             while (!containersParser.IsEOF())
             {
                 List<string> ss = containersParser.ReadTokens();
@@ -312,8 +315,13 @@ namespace ClassicUO.Game.Managers
                             minimizer_x,
                             minimizer_y
                         );
+                    } else
+                    {
+                        Console.WriteLine($"Error parsing container data at line {line}");
                     }
                 }
+
+                line++;
             }
         }
 
