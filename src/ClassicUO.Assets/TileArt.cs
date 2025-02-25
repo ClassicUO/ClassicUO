@@ -40,6 +40,9 @@ public sealed class TileArtLoader : UOFileLoader
     private bool LoadEntry(uint graphic, out TileArtInfo tileArtInfo)
     {
         tileArtInfo = null;
+        if (_file == null)
+            return false;
+            
         ref var entry = ref _file.GetValidRefEntry((int)graphic);
         if (entry.Length == 0)
             return false;
