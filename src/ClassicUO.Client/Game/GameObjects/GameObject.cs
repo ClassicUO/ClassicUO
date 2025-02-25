@@ -10,6 +10,7 @@ using ClassicUO.Assets;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
+using System.Collections.Generic;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -29,6 +30,8 @@ namespace ClassicUO.Game.GameObjects
         public bool IsDestroyed { get; protected set; }
         public bool IsPositionChanged { get; protected set; }
         public TextContainer TextContainer { get; private set; }
+
+        private AverageOverTime _averageOverTime;
 
         public int Distance
         {
@@ -78,6 +81,17 @@ namespace ClassicUO.Game.GameObjects
         public ushort X,
             Y;
         public sbyte Z;
+
+        public void AddDamage(int damage)
+        {
+            _averageOverTime ??= new AverageOverTime(TimeSpan.FromSeconds(15));
+
+            _averageOverTime.AddValue(Time.Ticks, damage);            
+        }
+        public double GetCurrentDPS()
+        {
+            return Math.Round(_averageOverTime.LastAveragePerSecond, 1);
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Vector2 GetScreenPosition()
@@ -342,6 +356,7 @@ namespace ClassicUO.Game.GameObjects
             Clear();
             RemoveFromTile();
             TextContainer?.Clear();
+            _averageOverTime = null;
 
             IsDestroyed = true;
             PriorityZ = 0;
