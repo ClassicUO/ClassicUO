@@ -518,4 +518,7 @@ Ultima Online?</value>
   <data name="Czech" xml:space="preserve">
     <value>Czech</value>
   </data>
+  <data name="DefaultProfileSet" xml:space="preserve">
+    <value>Current profile has been set as the default for new characters.</value>
+  </data>
 </root>

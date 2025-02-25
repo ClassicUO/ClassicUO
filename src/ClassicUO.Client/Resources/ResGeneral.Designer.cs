@@ -305,6 +305,15 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Current profile has been set as the default for new characters..
+        /// </summary>
+        public static string DefaultProfileSet {
+            get {
+                return ResourceManager.GetString("DefaultProfileSet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to dexterity.
         /// </summary>
         public static string Dexterity {

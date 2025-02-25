@@ -1606,4 +1606,7 @@ Client version: '{0}'</value>
   <data name="DragHostileOnly" xml:space="preserve">
     <value>Select hostiles only</value>
   </data>
+  <data name="SetAsNewDefault" xml:space="preserve">
+    <value>Save current settings as defaults for new users</value>
+  </data>
 </root>
