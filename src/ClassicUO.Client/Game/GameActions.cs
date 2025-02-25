@@ -107,6 +107,12 @@ namespace ClassicUO.Game
 
         public static void OpenJournal(World world)
         {
+            if (ProfileManager.CurrentProfile.UseAlternateJournal)
+            {
+                UIManager.Add(new ResizableJournal(world));
+                return;
+            }
+
             JournalGump journalGump = UIManager.GetGump<JournalGump>();
 
             if (journalGump == null)

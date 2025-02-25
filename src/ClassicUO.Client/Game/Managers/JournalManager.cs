@@ -20,7 +20,7 @@ namespace ClassicUO.Game.Managers
         public event EventHandler<JournalEntry> EntryAdded;
 
 
-        public void Add(string text, ushort hue, string name, TextType type, bool isunicode = true)
+        public void Add(string text, ushort hue, string name, TextType type, bool isunicode = true, MessageType messageType = MessageType.Regular)
         {
             JournalEntry entry = Entries.Count >= Constants.MAX_JOURNAL_HISTORY_COUNT ? Entries.RemoveFromFront() : new JournalEntry();
 
@@ -41,6 +41,7 @@ namespace ClassicUO.Game.Managers
             entry.IsUnicode = isunicode;
             entry.Time = timeNow;
             entry.TextType = type;
+            entry.MessageType = messageType;
 
             if (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.ForceUnicodeJournal)
             {
@@ -128,5 +129,7 @@ namespace ClassicUO.Game.Managers
 
         public TextType TextType;
         public DateTime Time;
+
+        public MessageType MessageType;
     }
 }
