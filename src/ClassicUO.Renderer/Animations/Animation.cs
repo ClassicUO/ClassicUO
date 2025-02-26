@@ -285,7 +285,7 @@ namespace ClassicUO.Renderer.Animations
 
             Span<AnimationsLoader.FrameInfo> frames;
 
-            if (animDir.FrameCount <= 0 || animDir.SpriteInfos == null)
+            if (animDir.FrameCount <= 0 && animDir.SpriteInfos == null)
             {
                 if (useUOP
                 //animDir.IsUOP ||
@@ -325,6 +325,8 @@ namespace ClassicUO.Renderer.Animations
 
                 if (frames.IsEmpty)
                 {
+                    animDir.FrameCount = 0;
+                    animDir.SpriteInfos = Array.Empty<SpriteInfo>();
                     return Span<SpriteInfo>.Empty;
                 }
 
