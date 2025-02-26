@@ -121,7 +121,7 @@ namespace ClassicUO.Game.UI.Gumps
         private Checkbox _showHouseContent;
         private Checkbox _showInfoBar;
         private Checkbox _ignoreAllianceMessages;
-        private Checkbox _ignoreGuildMessages, _useAlternateJournal;
+        private Checkbox _ignoreGuildMessages, _useAlternateJournal, _partyMessagesOverhead;
 
         // general
         private HSliderBar _sliderFPS, _circleOfTranspRadius;
@@ -2513,6 +2513,17 @@ namespace ClassicUO.Game.UI.Gumps
                 startY
             );
 
+            startY += _useAlternateJournal.Height + 2;
+
+            _partyMessagesOverhead = AddCheckBox
+            (
+                rightArea,
+                ResGumps.OverheadPartyMessages,
+                _currentProfile.OverheadPartyMessages,
+                startX,
+                startY
+            );
+
             startY += 35;
 
             _randomizeColorsButton = new NiceButton
@@ -3659,6 +3670,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _ignoreGuildMessages.IsChecked = false;
                     _ignoreAllianceMessages.IsChecked = false;
                     _useAlternateJournal.IsChecked = false;
+                    _partyMessagesOverhead.IsChecked = false;
 
                     break;
 
@@ -3890,6 +3902,7 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.ActivateChatAdditionalButtons = _chatAdditionalButtonsCheckbox.IsChecked;
             _currentProfile.ActivateChatShiftEnterSupport = _chatShiftEnterCheckbox.IsChecked;
             _currentProfile.SaveJournalToFile = _saveJournalCheckBox.IsChecked;
+            _currentProfile.OverheadPartyMessages = _partyMessagesOverhead.IsChecked;
 
             // video
             _currentProfile.EnableDeathScreen = _enableDeathScreen.IsChecked;

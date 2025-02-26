@@ -85,6 +85,40 @@ namespace ClassicUO.Game.Managers
                 case MessageType.Encoded:
                 case MessageType.System:
                 case MessageType.Party:
+                    if (!currentProfile.OverheadPartyMessages)
+                        break;
+
+                    if (parent == null)
+                    {
+                        bool handled = false;
+                        foreach (PartyMember member in _world.Party.Members)
+                            if (member != null)
+                                if (member.Name == name)
+                                {
+                                    Mobile m = _world.Mobiles.Get(member.Serial);
+                                    if (m != null)
+                                    {
+                                        parent = m;
+                                        handled = true;
+                                        break;
+                                    }
+
+                                }
+                        if (!handled) break;
+                    }
+
+                    if (_world.IgnoreManager.IgnoredCharsList.Contains(parent.Name) && type != MessageType.Spell)
+                        break;
+
+                    parent.AddMessage(CreateMessage
+                    (
+                        text,
+                        hue,
+                        font,
+                        unicode,
+                        type,
+                        textType
+                    ));
                     break;
 
                 case MessageType.Guild:
