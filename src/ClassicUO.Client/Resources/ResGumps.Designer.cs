@@ -3927,6 +3927,15 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Stay active.
+        /// </summary>
+        public static string StayActive {
+            get {
+                return ResourceManager.GetString("StayActive", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Story {0} Visibility.
         /// </summary>
         public static string Store0Visibility {

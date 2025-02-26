@@ -81,7 +81,11 @@ namespace ClassicUO.Game.Managers
         public void Close()
         {
             if (_gump == null)
-                return;
+            { //Required in case nameplates are active when closing and reopening the client
+                _gump = new NameOverHeadHandlerGump(_world);
+                UIManager.Add(_gump);
+            }
+
 
             _gump.IsEnabled = false;
             _gump.IsVisible = false;
