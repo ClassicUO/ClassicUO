@@ -2891,6 +2891,15 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Show party messages overhead.
+        /// </summary>
+        public static string OverheadPartyMessages {
+            get {
+                return ResourceManager.GetString("OverheadPartyMessages", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Override container gump location.
         /// </summary>
         public static string OverrideContainerGumpLocation {

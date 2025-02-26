@@ -1617,5 +1617,7 @@ Client version: '{0}'</value>
   </data>
   <data name="StayActive" xml:space="preserve">
     <value>Stay active</value>
+  <data name="OverheadPartyMessages" xml:space="preserve">
+    <value>Show party messages overhead</value>
   </data>
 </root>

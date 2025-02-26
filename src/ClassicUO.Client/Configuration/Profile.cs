@@ -347,6 +347,8 @@ namespace ClassicUO.Configuration
             }
         };
 
+        public bool OverheadPartyMessages { get; set; }
+
         public void Save(World world, string path)
         {
             Log.Trace($"Saving path:\t\t{path}");
