@@ -41,6 +41,8 @@ namespace ClassicUO.Assets
             MultiMaps = new MultiMapLoader(this);
             Verdata = new VerdataLoader(this);
             Professions = new ProfessionLoader(this);
+            TileArt = new TileArtLoader(this);
+            StringDictionary = new StringDictionaryLoader(this);
 
             _overrideMap = new UOFilesOverrideMap();
         }
@@ -67,6 +69,8 @@ namespace ClassicUO.Assets
         public MultiMapLoader MultiMaps { get; }
         public VerdataLoader Verdata { get; }
         public ProfessionLoader Professions { get; }
+        public TileArtLoader TileArt { get; }
+        public StringDictionaryLoader StringDictionary { get; }
 
 
 
@@ -90,6 +94,8 @@ namespace ClassicUO.Assets
             MultiMaps.Dispose();
             Verdata.Dispose();
             Professions.Dispose();
+            TileArt.Dispose();
+            StringDictionary.Dispose();
         }
 
         public string GetUOFilePath(string file)
@@ -156,6 +162,8 @@ namespace ClassicUO.Assets
             Lights.Load();
             Sounds.Load();
             MultiMaps.Load();
+            TileArt.Load();
+            StringDictionary.Load();
 
             ReadArtDefFile();
 

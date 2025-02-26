@@ -1609,4 +1609,10 @@ Client version: '{0}'</value>
   <data name="ShowDPSWithDamage" xml:space="preserve">
     <value>Show DPS with damage numbers</value>
   </data>
+  <data name="SetAsNewDefault" xml:space="preserve">
+    <value>Set current profile as default for new characters</value>
+  </data>
+  <data name="UseAlternateJournal" xml:space="preserve">
+    <value>Use alternative journal</value>
+  </data>
 </root>

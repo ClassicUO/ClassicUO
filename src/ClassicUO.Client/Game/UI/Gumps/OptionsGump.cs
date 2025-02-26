@@ -121,7 +121,7 @@ namespace ClassicUO.Game.UI.Gumps
         private Checkbox _showHouseContent;
         private Checkbox _showInfoBar;
         private Checkbox _ignoreAllianceMessages;
-        private Checkbox _ignoreGuildMessages;
+        private Checkbox _ignoreGuildMessages, _useAlternateJournal;
 
         // general
         private HSliderBar _sliderFPS, _circleOfTranspRadius;
@@ -2482,6 +2482,17 @@ namespace ClassicUO.Game.UI.Gumps
                 startY
             );
 
+            startY += _ignoreAllianceMessages.Height + 2;
+
+            _useAlternateJournal = AddCheckBox
+            (
+                rightArea,
+                ResGumps.UseAlternateJournal,
+                _currentProfile.UseAlternateJournal,
+                startX,
+                startY
+            );
+
             startY += 35;
 
             _randomizeColorsButton = new NiceButton
@@ -3627,6 +3638,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _hideChatGradient.IsChecked = false;
                     _ignoreGuildMessages.IsChecked = false;
                     _ignoreAllianceMessages.IsChecked = false;
+                    _useAlternateJournal.IsChecked = false;
 
                     break;
 
@@ -3997,6 +4009,7 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.HideChatGradient = _hideChatGradient.IsChecked;
             _currentProfile.IgnoreGuildMessages = _ignoreGuildMessages.IsChecked;
             _currentProfile.IgnoreAllianceMessages = _ignoreAllianceMessages.IsChecked;
+            _currentProfile.UseAlternateJournal = _useAlternateJournal.IsChecked;
 
             // fonts
             _currentProfile.ForceUnicodeJournal = _forceUnicodeJournal.IsChecked;

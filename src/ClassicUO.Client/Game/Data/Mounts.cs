@@ -16,8 +16,8 @@ internal static class Mounts
         _mounts[0x3E97] = new(0x00C3, 0x3E97, 0); // 16023 Ethereal Giant Beetle
         _mounts[0x3E98] = new(0x00C2, 0x3E98, 0); // 16024 Ethereal Swamp Dragon
         _mounts[0x3E9A] = new(0x00C1, 0x3E9A, 0); // 16026 Ethereal Ridgeback
-        _mounts[0x3E9B] = new(0x00C0, 0x3E9B, 0); // 16027
-        _mounts[0x3E9D] = new(0x00C0, 0x3E9D, 0); // 16029 Ethereal Unicorn
+        _mounts[0x3E9B] = new(0x00C0, 0x3E9B, -9); // 16027
+        _mounts[0x3E9D] = new(0x00C0, 0x3E9D, -9); // 16029 Ethereal Unicorn
         _mounts[0x3E9C] = new(0x00BF, 0x3E9C, 0); // 16028 Ethereal Kirin
         _mounts[0x3E9E] = new(0x00BE, 0x3E9E, 0); // 16030
         _mounts[0x3EA0] = new(0x00E2, 0x3EA0, 0); // 16032 light grey/horse3
@@ -45,7 +45,7 @@ internal static class Mounts
         _mounts[0x3EB7] = new(0x00B3, 0x3EB7, 0); // 16055 Dark Steed
         _mounts[0x3EB8] = new(0x00BC, 0x3EB8, 0); // 16056 Ridgeback
         _mounts[0x3EBA] = new(0x00BB, 0x3EBA, 0); // 16058 Ridgeback, Savage
-        _mounts[0x3EBB] = new(0x0319, 0x3EBB, 0); // 16059 Skeletal Mount
+        _mounts[0x3EBB] = new(0x0319, 0x3EBB, -9); // 16059 Skeletal Mount
         _mounts[0x3EBC] = new(0x0317, 0x3EBC, 0); // 16060 Beetle
         _mounts[0x3EBD] = new(0x031A, 0x3EBD, 0); // 16061 SwampDragon
         _mounts[0x3EBE] = new(0x031F, 0x3EBE, 0); // 16062 Armored Swamp Dragon
@@ -56,7 +56,7 @@ internal static class Mounts
         _mounts[0x3EC6] = new(0x01B0, 0x3EC6, 9); // 16070 Boura
         _mounts[0x3EC7] = new(0x04E6, 0x3EC7, 18); // 16071 Tiger
         _mounts[0x3EC8] = new(0x04E7, 0x3EC8, 18); // 16072 Tiger
-        _mounts[0x3EC9] = new(0x042D, 0x3EC9, 18); // 16073
+        _mounts[0x3EC9] = new(0x042D, 0x3EC9, 3); // 16073
         _mounts[0x3ECA] = new(0x0579, 0x3ECA, 9); // tarantula
         _mounts[0x3ECC] = new(0x0582, 0x3ECC, 0); // 16016
         _mounts[0x3ED1] = new(0x05E6, 0x3ED1, 0); // CoconutCrab

@@ -249,6 +249,7 @@ namespace ClassicUO.Game.UI.Controls
 
                     ushort id = GetAnimID(
                         mobile.Graphic,
+                        equipItem.Graphic,
                         equipItem.ItemData.AnimID,
                         mobile.IsFemale
                     );
@@ -285,6 +286,7 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     ushort id = GetAnimID(
                         mobile.Graphic,
+                        Client.Game.UO.GameCursor.ItemHold.Graphic,
                         Client.Game.UO.GameCursor.ItemHold.ItemData.AnimID,
                         mobile.IsFemale
                     );
@@ -383,24 +385,24 @@ namespace ClassicUO.Game.UI.Controls
             _updateUI = true;
         }
 
-        protected static ushort GetAnimID(ushort graphic, ushort animID, bool isfemale)
+        protected static ushort GetAnimID(ushort mobileGraphic, ushort itemGraphic, ushort animID, bool isfemale)
         {
             int offset = isfemale ? Constants.FEMALE_GUMP_OFFSET : Constants.MALE_GUMP_OFFSET;
 
             if (
                 Client.Game.UO.Version >= ClientVersion.CV_7000
                 && animID == 0x03CA // graphic for dead shroud
-                && (graphic == 0x02B7 || graphic == 0x02B6)
+                && (mobileGraphic == 0x02B7 || mobileGraphic == 0x02B6)
             ) // dead gargoyle graphics
             {
                 animID = 0x0223;
             }
 
-            Client.Game.UO.Animations.ConvertBodyIfNeeded(ref graphic);
+            Client.Game.UO.Animations.ConvertBodyIfNeeded(ref mobileGraphic);
 
             if (
                 Client.Game.UO.FileManager.Animations.EquipConversions.TryGetValue(
-                    graphic,
+                    mobileGraphic,
                     out Dictionary<ushort, EquipConvData> dict
                 )
             )
@@ -422,14 +424,23 @@ namespace ClassicUO.Game.UI.Controls
                 }
             }
 
-            if (
-                animID + offset > GumpsLoader.MAX_GUMP_DATA_INDEX_COUNT
-                || Client.Game.UO.Gumps.GetGump((ushort)(animID + offset)).Texture == null
-            )
+            if (Client.Game.UO.FileManager.TileArt.TryGetTileArtInfo(itemGraphic, out var tileArtInfo))
             {
-                // inverse
-                offset = isfemale ? Constants.MALE_GUMP_OFFSET : Constants.FEMALE_GUMP_OFFSET;
+                if (tileArtInfo.TryGetAppearance(mobileGraphic, out var appareanceId))
+                {
+                    if (animID != appareanceId)
+                        animID = (ushort)appareanceId;
+                }
             }
+
+            if (
+                    animID + offset > GumpsLoader.MAX_GUMP_DATA_INDEX_COUNT
+                    || Client.Game.UO.Gumps.GetGump((ushort)(animID + offset)).Texture == null
+                )
+                {
+                    // inverse
+                    offset = isfemale ? Constants.MALE_GUMP_OFFSET : Constants.FEMALE_GUMP_OFFSET;
+                }
 
             if (Client.Game.UO.Gumps.GetGump((ushort)(animID + offset)).Texture == null)
             {

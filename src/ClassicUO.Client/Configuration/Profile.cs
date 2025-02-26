@@ -10,6 +10,7 @@ using System.Text.Json.Serialization;
 using System.Xml;
 using ClassicUO.Configuration.Json;
 using ClassicUO.Game;
+using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
@@ -314,6 +315,39 @@ namespace ClassicUO.Configuration
 
         public static uint GumpsVersion { get; private set; }
 
+        //Alternate Journal
+        public bool UseAlternateJournal { get; set; }
+        public Dictionary<string, MessageType[]> JournalTabs { get; } = new Dictionary<string, MessageType[]>()
+        {
+            { "All", new MessageType[] {
+                MessageType.Alliance, MessageType.Command, MessageType.Emote,
+                MessageType.Encoded, MessageType.Focus, MessageType.Guild,
+                MessageType.Label, MessageType.Limit3Spell, MessageType.Party,
+                MessageType.Regular, MessageType.Spell, MessageType.System,
+                MessageType.Whisper, MessageType.Yell }
+            },
+            { "Chat", new MessageType[] {
+                MessageType.Regular,
+                MessageType.Guild,
+                MessageType.Alliance,
+                MessageType.Emote,
+                MessageType.Party,
+                MessageType.Whisper,
+                MessageType.Yell,
+            }
+            },
+            {
+                "Guild|Party", new MessageType[] {
+                    MessageType.Guild,
+                    MessageType.Alliance,
+                    MessageType.Party }
+            },
+            {
+                "System", new MessageType[] {
+                    MessageType.System }
+            }
+        };
+
         public void Save(World world, string path)
         {
             Log.Trace($"Saving path:\t\t{path}");
@@ -529,7 +563,10 @@ namespace ClassicUO.Configuration
                                     break;
 
                                 case GumpType.Journal:
-                                    gump = new JournalGump(world);
+                                    if(ProfileManager.CurrentProfile.UseAlternateJournal)
+                                        gump = new ResizableJournal(world);
+                                    else
+                                        gump = new JournalGump(world);
 
                                     break;
 

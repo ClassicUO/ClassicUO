@@ -3423,6 +3423,15 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Set current profile as default for new characters.
+        /// </summary>
+        public static string SetAsNewDefault {
+            get {
+                return ResourceManager.GetString("SetAsNewDefault", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Set loot bag.
         /// </summary>
         public static string SetLootBag {
@@ -4279,6 +4288,15 @@ namespace ClassicUO.Resources {
         public static string UseAdditionalButtonsToActivateChat {
             get {
                 return ResourceManager.GetString("UseAdditionalButtonsToActivateChat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Use alternative journal.
+        /// </summary>
+        public static string UseAlternateJournal {
+            get {
+                return ResourceManager.GetString("UseAlternateJournal", resourceCulture);
             }
         }
         
