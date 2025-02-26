@@ -2,7 +2,6 @@
 
 using System;
 using ClassicUO.Game.Managers;
-using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Resources;
 using Microsoft.Xna.Framework;
@@ -20,7 +19,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             CanMove = true;
             AcceptMouseInput = true;
-            CanCloseWithRightClick = true;
+            CanCloseWithRightClick = false; //Prevent accidentally closing when stay active is enabled
 
             if (LastPosition == null)
             {
@@ -39,6 +38,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             RadioButton all, mobiles, items, mobilesCorpses;
             AlphaBlendControl alpha;
+            Checkbox stayActive;
 
             Add
             (
@@ -48,6 +48,20 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             );
 
+            Add
+            (
+                stayActive = new Checkbox
+                (
+                    0x00D2,
+                    0x00D3,
+                    ResGumps.StayActive,
+                    color: 0xFFFF
+                )
+                {
+                    IsChecked = world.NameOverHeadManager.IsToggled,
+                }
+            );
+            stayActive.ValueChanged += (sender, e) => world.NameOverHeadManager.IsToggled = stayActive.IsChecked;
 
             Add
             (
@@ -60,7 +74,8 @@ namespace ClassicUO.Game.UI.Gumps
                     color: 0xFFFF
                 )
                 {
-                    IsChecked = World.NameOverHeadManager.TypeAllowed == NameOverheadTypeAllowed.All
+                    IsChecked = World.NameOverHeadManager.TypeAllowed == NameOverheadTypeAllowed.All,
+                    Y = stayActive.Y + stayActive.Height
                 }
             );
 
@@ -113,7 +128,7 @@ namespace ClassicUO.Game.UI.Gumps
             );
 
             alpha.Width = Math.Max(mobilesCorpses.Width, Math.Max(items.Width, Math.Max(all.Width, mobiles.Width)));
-            alpha.Height = all.Height + mobiles.Height + items.Height + mobilesCorpses.Height;
+            alpha.Height = stayActive.Height + all.Height + mobiles.Height + items.Height + mobilesCorpses.Height;
 
             Width = alpha.Width;
             Height = alpha.Height;
