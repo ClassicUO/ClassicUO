@@ -1232,8 +1232,8 @@ namespace ClassicUO.Assets
             {
                 var frameData = sharedBuffer.AsSpan(0, maxFrameCount);
 
-                // looks like each direction contains 10 frames. When missing we need to return 10 frames anyway.
-                var realFrameCount = 10;
+                // looks like each direction contains at least 10 frames. When missing we need to return min 10 frames anyway.
+                var realFrameCount = maxFrameCount / MAX_DIRECTIONS;
 
                 frameData.Clear();
 
