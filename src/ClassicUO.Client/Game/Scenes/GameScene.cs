@@ -740,7 +740,7 @@ namespace ClassicUO.Game.Scenes
             _world.Player.Pathfinder.ProcessAutoWalk();
             _world.DelayedObjectClickManager.Update();
 
-            if (!MoveCharacterByMouseInput() && !currentProfile.DisableArrowBtn)
+            if (!MoveCharacterByMouseInput() && !MoveCharByController() && !currentProfile.DisableArrowBtn)
             {
                 Direction dir = DirectionHelper.DirectionFromKeyboardArrows(
                     _flags[0],

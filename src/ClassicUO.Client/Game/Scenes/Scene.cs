@@ -68,5 +68,8 @@ namespace ClassicUO.Game.Scenes
         internal virtual void OnKeyUp(SDL.SDL_KeyboardEvent e)
         {
         }
+
+        internal virtual void OnControllerButtonDown(SDL.SDL_ControllerButtonEvent e) { }
+        internal virtual void OnControllerButtonUp(SDL.SDL_ControllerButtonEvent e) { }
     }
 }
