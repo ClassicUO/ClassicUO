@@ -671,8 +671,7 @@ namespace ClassicUO.Game.GameObjects
                 out var hueFromFile,
                 out _,
                 isEquip,
-                false,
-                forceUOP
+                false
             );
 
             if (hueFromFile == 0)

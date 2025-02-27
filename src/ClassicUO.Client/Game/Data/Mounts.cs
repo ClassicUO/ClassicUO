@@ -39,7 +39,7 @@ internal static class Mounts
         _mounts[0x3EB1] = new(0x0077, 0x3EB1, 0); // 16049 War Horse (Light Blue)
         _mounts[0x3EB2] = new(0x0076, 0x3EB2, 0); // 16050 War Horse (Purple)
         _mounts[0x3EB3] = new(0x0090, 0x3EB3, 0); // 16051 Sea Horse (Medium Blue)
-        _mounts[0x3EB4] = new(0x007A, 0x3EB4, 0); // 16052 Unicorn
+        _mounts[0x3EB4] = new(0x007A, 0x3EB4, -9); // 16052 Unicorn
         _mounts[0x3EB5] = new(0x00B1, 0x3EB5, 0); // 16053 Nightmare
         _mounts[0x3EB6] = new(0x00B2, 0x3EB6, 0); // 16054 Nightmare 4
         _mounts[0x3EB7] = new(0x00B3, 0x3EB7, 0); // 16055 Dark Steed
