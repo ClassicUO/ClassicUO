@@ -343,7 +343,6 @@ namespace ClassicUO.Assets
 
             var indicesBuf = ArrayPool<AnimIdxBlock>.Shared.Rent(size);
             fileIdx.Read(MemoryMarshal.AsBytes(indicesBuf.AsSpan(0, size)));
-            ArrayPool<AnimIdxBlock>.Shared.Return(indicesBuf);
 
             var directions = new AnimationDirection[size];
             for (var i = 0; i < directions.Length; ++i)
@@ -356,6 +355,7 @@ namespace ClassicUO.Assets
                 dir.CompressionType = CompressionType.None;
             }
 
+            ArrayPool<AnimIdxBlock>.Shared.Return(indicesBuf);
             return directions;
         }
 

@@ -390,13 +390,13 @@ namespace ClassicUO.Game.UI.Controls
             int offset = isfemale ? Constants.FEMALE_GUMP_OFFSET : Constants.MALE_GUMP_OFFSET;
 
             if (
-                Client.Game.UO.Version >= ClientVersion.CV_7000
-                && animID == 0x03CA // graphic for dead shroud
-                && (mobileGraphic == 0x02B7 || mobileGraphic == 0x02B6)
-            ) // dead gargoyle graphics
-            {
-                animID = 0x0223;
-            }
+                    Client.Game.UO.Version >= ClientVersion.CV_7000
+                    && animID == 0x03CA // graphic for dead shroud
+                    && (mobileGraphic == 0x02B7 || mobileGraphic == 0x02B6)
+                ) // dead gargoyle graphics
+                {
+                    animID = 0x0223;
+                }
 
             Client.Game.UO.Animations.ConvertBodyIfNeeded(ref mobileGraphic);
 
@@ -429,27 +429,39 @@ namespace ClassicUO.Game.UI.Controls
                 if (tileArtInfo.TryGetAppearance(mobileGraphic, out var appareanceId))
                 {
                     if (animID != appareanceId)
-                        animID = (ushort)appareanceId;
+                    {
+                        if (IsAnimExistsInGump((ushort)appareanceId, offset, isfemale))
+                            animID = (ushort)appareanceId;
+                    }
                 }
             }
 
+            _ = IsAnimExistsInGump(animID, offset, isfemale);
+
+            return (ushort)(animID + offset);
+        }
+
+        private static bool IsAnimExistsInGump(ushort animID, int offset, bool isFemale)
+        {
             if (
                     animID + offset > GumpsLoader.MAX_GUMP_DATA_INDEX_COUNT
                     || Client.Game.UO.Gumps.GetGump((ushort)(animID + offset)).Texture == null
                 )
-                {
-                    // inverse
-                    offset = isfemale ? Constants.MALE_GUMP_OFFSET : Constants.FEMALE_GUMP_OFFSET;
-                }
+            {
+                // inverse
+                offset = isFemale ? Constants.MALE_GUMP_OFFSET : Constants.FEMALE_GUMP_OFFSET;
+            }
 
             if (Client.Game.UO.Gumps.GetGump((ushort)(animID + offset)).Texture == null)
             {
                 Log.Error(
                     $"Texture not found in paperdoll: gump_graphic: {(ushort)(animID + offset)}"
                 );
+
+                return false;
             }
 
-            return (ushort)(animID + offset);
+            return true;
         }
 
         protected class GumpPicEquipment : GumpPic
