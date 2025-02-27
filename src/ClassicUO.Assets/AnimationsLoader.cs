@@ -6,6 +6,7 @@ using ClassicUO.Utility.Logging;
 using System;
 using System.Buffers;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -1231,12 +1232,7 @@ namespace ClassicUO.Assets
             try
             {
                 var frameData = sharedBuffer.AsSpan(0, maxFrameCount);
-
-                // looks like each direction contains at least 10 frames. When missing we need to return min 10 frames anyway.
-                var realFrameCount = maxFrameCount / MAX_DIRECTIONS;
-
                 frameData.Clear();
-
 
                 for (var i = 0; i < fc; ++i)
                 {
@@ -1247,26 +1243,34 @@ namespace ClassicUO.Assets
                     reader.ReadUInt64LE();
                     var pixeloffset = reader.ReadUInt32LE();
 
-                    ref var frame = ref frameData[frameId - 1];
+                    ref var frame = ref frameData[i];
                     frame.Position = start;
                     frame.Group = group;
                     frame.FrameID = frameId;
                     frame.PixelOffset = pixeloffset;
-                    frame.Direction = (frameId - 1) / realFrameCount;
                 }
 
-                // Add the missing frame. Direction & FrameID are necessary here
-                var lastFrameId = 0;
-                foreach (ref var frame in frameData)
+                var list = new List<UOPFrameData>();
+                var lastFrameId = 1;
+                for (var i = 0; i < fc; ++i)
                 {
-                    if (frame.FrameID == 0)
+                    while (frameData[i].FrameID - lastFrameId > 1)
                     {
-                        frame.FrameID = lastFrameId + 1;
-                        frame.Direction = (frame.FrameID - 1) / realFrameCount;
+                        lastFrameId += 1;
+                        list.Add(new()
+                        {
+                            Position = 0, // make sure we treat it as an empty frame
+                            FrameID = lastFrameId
+                        });
                     }
 
-                    lastFrameId = frame.FrameID;
+                    list.Add(frameData[i]);
+                    lastFrameId = frameData[i].FrameID;
                 }
+
+                frameData = CollectionsMarshal.AsSpan(list);
+                maxFrameCount = frameData.Length;
+                var realFrameCount = (int)Math.Round(maxFrameCount / (float)MAX_DIRECTIONS);
 
 
                 if (realFrameCount > _frames.Length)
@@ -1277,70 +1281,33 @@ namespace ClassicUO.Assets
                 var framesSpan = _frames.AsSpan(0, realFrameCount);
                 framesSpan.Clear();
 
-                // foreach (ref readonly var frame in frameData)
-                // {
-                //     if (frame.Position > 0)
-                //     {
-                //         if (frame.Group != animGroup)
-                //         {
-                //             continue;
-                //         }
-                //     }
+                // var dirFrameStartIdx = realFrameCount * direction;
 
-                //     if (frame.Direction < direction)
-                //     {
-                //         continue;
-                //     }
-
-                //     if (frame.Direction > direction)
-                //     {
-                //         break;
-                //     }
-
-                //     var idx = (frame.FrameID - 1) % realFrameCount;
-                //     ref var frameInfo = ref framesSpan[idx];
-                //     // we need to zero-out the frame or we will see ghost animations coming from other animation queries
-                //     frameInfo.Num = idx;
-                //     frameInfo.CenterX = 0;
-                //     frameInfo.CenterY = 0;
-                //     frameInfo.Width = 0;
-                //     frameInfo.Height = 0;
-
-                //     if (frame.Position == 0)
-                //     {
-                //         continue;
-                //     }
-
-                //     reader.Seek(frame.Position + frame.PixelOffset);
-
-                //     var palette = MemoryMarshal.Cast<byte, ushort>(reader.Buffer.Slice(reader.Position, 512));
-                //     reader.Skip(512);
-
-                //     ReadSpriteData(ref reader, palette, ref frameInfo, true);
-                // }
-
-                var dirFrameStartIdx = realFrameCount * direction;
-
-                for (int i = 0; i < realFrameCount; ++i)
+                for (int i = 0; i < maxFrameCount; ++i)
                 {
-                    ref readonly var frame = ref frameData[i + dirFrameStartIdx];
+                    ref readonly var frame = ref frameData[i];
 
                     // validate the group only if the frame is valid
                     if (frame.Position > 0)
                     {
                         if (frame.Group != animGroup)
                         {
-                            continue;
+                            // we dont ignore here, might be the AnimationSequence.uop that changes the group
+                            // continue;
                         }
                     }
 
-                    if (frame.Direction < direction)
+                    var frameDirection = (frame.FrameID - 1) / realFrameCount;
+
+                    if (frameDirection < direction)
                     {
+                        // still not getting the right direction yet
                         continue;
                     }
 
-                    if (frame.Direction > direction)
+                    if (frameDirection > direction)
                     {
+                        // end of the direction
                         break;
                     }
 
@@ -1579,11 +1546,12 @@ namespace ClassicUO.Assets
             public uint DataOffset;
         }
 
+        [DebuggerDisplay("FramID: {FrameID}")]
         struct UOPFrameData
         {
             public long Position;
             public uint PixelOffset;
-            public int FrameID, Group, Direction;
+            public int FrameID, Group;
         }
     }
 
