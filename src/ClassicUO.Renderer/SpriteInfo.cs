@@ -9,6 +9,6 @@ namespace ClassicUO.Renderer
         public Rectangle UV;
         public Point Center;
 
-        public static SpriteInfo Empty = new SpriteInfo { Texture = null };
+        public static readonly SpriteInfo Empty = new SpriteInfo { Texture = null };
     }
 }
