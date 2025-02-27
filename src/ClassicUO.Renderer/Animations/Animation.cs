@@ -157,8 +157,7 @@ namespace ClassicUO.Renderer.Animations
             out ushort hue,
             out bool useUOP,
             bool isEquip = false,
-            bool isCorpse = false,
-            bool forceUOP = false
+            bool isCorpse = false
         )
         {
             hue = 0;
