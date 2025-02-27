@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using ClassicUO.IO;
 using ClassicUO.Utility;
+using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Assets;
 
@@ -42,7 +43,7 @@ public sealed class TileArtLoader : UOFileLoader
         tileArtInfo = null;
         if (_file == null)
             return false;
-            
+
         ref var entry = ref _file.GetValidRefEntry((int)graphic);
         if (entry.Length == 0)
             return false;
@@ -156,8 +157,14 @@ public sealed class TileArtInfo
     internal TileArtInfo(ref StackDataReader reader)
     {
         var version = reader.ReadUInt16LE();
+        if (version != 4)
+        {
+            Log.Info($"tileart.uop v{version} is not supported.");
+            return;
+        }
+
         var stringDictOffset = reader.ReadUInt32LE();
-        TileId = reader.ReadUInt32LE();
+        TileId = version >= 4 ? reader.ReadUInt32LE() : reader.ReadUInt16LE();
         var unkBool1 = reader.ReadBool();
         var unkBool2 = reader.ReadBool();
         var unkFloat1 = reader.ReadUInt32LE();
