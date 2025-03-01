@@ -60,31 +60,31 @@ namespace ClassicUO.Assets
         public int[] MapPatchCount { get; private set; }
         public int[] StaticPatchCount { get; private set; }
 
-        protected UOFileMul[] _filesStatics, _filesIdxStatics, _filesStaticsX, _filesIdxStaticsX;
-        protected UOFile[] _filesMap, _filesMapX;
+        protected FileReader[] _filesStatics, _filesIdxStatics, _filesStaticsX, _filesIdxStaticsX;
+        protected FileReader[] _filesMap, _filesMapX;
 
-        private UOFile[] _currentMapFiles;
-        private UOFileMul[] _currentStaticsFiles, _currentIdxStaticsFiles;
+        protected FileReader[] _currentMapFiles;
+        protected FileReader[] _currentStaticsFiles, _currentIdxStaticsFiles;
 
-        public UOFile GetMapFile(int map)
+        public FileReader GetMapFile(int map)
         {
             return map < _currentMapFiles.Length ? _currentMapFiles[map] : null;
         }
 
-        public UOFileMul GetStaticFile(int map)
+        public FileReader GetStaticFile(int map)
         {
             return map < _currentStaticsFiles.Length ? _currentStaticsFiles[map] : null;
         }
 
         protected void Initialize()
         {
-            _filesMap = new UOFile[MAPS_COUNT];
-            _filesStatics = new UOFileMul[MAPS_COUNT];
-            _filesIdxStatics = new UOFileMul[MAPS_COUNT];
+            _filesMap = new FileReader[MAPS_COUNT];
+            _filesStatics = new FileReader[MAPS_COUNT];
+            _filesIdxStatics = new FileReader[MAPS_COUNT];
 
-            _filesMapX = new UOFile[MAPS_COUNT];
-            _filesStaticsX = new UOFileMul[MAPS_COUNT];
-            _filesIdxStaticsX = new UOFileMul[MAPS_COUNT];
+            _filesMapX = new FileReader[MAPS_COUNT];
+            _filesStaticsX = new FileReader[MAPS_COUNT];
+            _filesIdxStaticsX = new FileReader[MAPS_COUNT];
 
             MapPatchCount = new int[MAPS_COUNT];
             StaticPatchCount = new int[MAPS_COUNT];
@@ -146,14 +146,17 @@ namespace ClassicUO.Assets
 
                 if (FileManager.IsUOPInstallation && File.Exists(path))
                 {
-                    _filesMap[i] = new UOFileUop(path, $"build/map{i}legacymul/{{0:D8}}.dat");
-                    _filesMap[i].FillEntries();
+                    var uopFile = new UOFileUop(path, $"build/map{i}legacymul/{{0:D8}}.dat");
+                    uopFile.FillEntries();
+
+                    _filesMap[i] = uopFile;
 
                     path = FileManager.GetUOFilePath($"map{i}xLegacyMUL.uop");
                     if (File.Exists(path))
                     {
-                        _filesMapX[i] = new UOFileUop(path, $"build/map{i}legacymul/{{0:D8}}.dat");
-                        _filesMapX[i].FillEntries();
+                        var uopFileX = new UOFileUop(path, $"build/map{i}legacymul/{{0:D8}}.dat");
+                        uopFileX.FillEntries();
+                        _filesMapX[i] = uopFileX;
                     }
 
 
@@ -243,9 +246,9 @@ namespace ClassicUO.Assets
             }
 
 
-            _currentMapFiles = new UOFile[_filesMap.Length];
-            _currentIdxStaticsFiles = new UOFileMul[_filesIdxStatics.Length];
-            _currentStaticsFiles = new UOFileMul[_filesStatics.Length];
+            _currentMapFiles = new FileReader[_filesMap.Length];
+            _currentIdxStaticsFiles = new FileReader[_filesIdxStatics.Length];
+            _currentStaticsFiles = new FileReader[_filesStatics.Length];
 
             _filesMap.CopyTo(_currentMapFiles, 0);
             _filesIdxStatics.CopyTo(_currentIdxStaticsFiles, 0);
@@ -673,7 +676,7 @@ namespace ClassicUO.Assets
 
     public struct IndexMap
     {
-        public UOFile MapFile, StaticFile;
+        public FileReader MapFile, StaticFile;
         public ulong MapAddress;
         public ulong OriginalMapAddress;
         public ulong OriginalStaticAddress;

@@ -412,7 +412,7 @@ namespace ClassicUO.Game.Map
                         continue;
                     }
 
-                    GameObject first = GetHeadObject(i, j);
+                    GameObject first = GetHeadObject(x: i, j);
 
                     while (first != null)
                     {

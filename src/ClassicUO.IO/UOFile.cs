@@ -10,7 +10,6 @@ namespace ClassicUO.IO
     {
         public UOFile(string filepath) : base(File.Open(filepath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
         {
-            FilePath = filepath;
             Entries = Array.Empty<UOFileIndex>();
 
             Log.Trace($"Loading file:\t\t{filepath}");
@@ -22,7 +21,6 @@ namespace ClassicUO.IO
         }
 
 
-        public string FilePath { get; }
         public UOFileIndex[] Entries;
 
 
