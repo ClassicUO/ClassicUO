@@ -430,18 +430,18 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     if (animID != appareanceId)
                     {
-                        if (IsAnimExistsInGump((ushort)appareanceId, offset, isfemale))
+                        if (IsAnimExistsInGump((ushort)appareanceId, ref offset, isfemale))
                             animID = (ushort)appareanceId;
                     }
                 }
             }
 
-            _ = IsAnimExistsInGump(animID, offset, isfemale);
+            _ = IsAnimExistsInGump(animID, ref offset, isfemale);
 
             return (ushort)(animID + offset);
         }
 
-        private static bool IsAnimExistsInGump(ushort animID, int offset, bool isFemale)
+        private static bool IsAnimExistsInGump(ushort animID, ref int offset, bool isFemale)
         {
             if (
                     animID + offset > GumpsLoader.MAX_GUMP_DATA_INDEX_COUNT
