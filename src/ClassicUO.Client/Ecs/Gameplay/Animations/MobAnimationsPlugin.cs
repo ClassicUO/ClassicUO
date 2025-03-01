@@ -375,7 +375,7 @@ readonly struct MobAnimationsPlugin : IPlugin
             if (slots.Ref[Layer.Mount].IsValid() && world.Exists(slots.Ref[Layer.Mount]))
             {
                 var mountGraphic = world.Get<Graphic>(slots.Ref[Layer.Mount]).Value;
-                mountGraphic = Mounts.FixMountGraphic(fileManager.Value.TileData, mountGraphic);
+                (mountGraphic, _) = Mounts.FixMountGraphic(fileManager.Value.TileData, mountGraphic);
 
                 animation.Ref.MountAction = GetAnimationGroup(
                     gameCtx.Value.ClientVersion, fileManager.Value.Animations, assetsServer.Value.Animations,

@@ -593,9 +593,10 @@ readonly struct WorldRenderingPlugin : IPlugin
                     var graphicLayer = world.Get<Graphic>(layerEnt).Value;
                     var hueLayer = world.Get<Hue>(layerEnt).Value;
                     var animId = graphicLayer;
+                    var offsetY = 0;
                     if (layer == Layer.Mount)
                     {
-                        animId = Mounts.FixMountGraphic(fileManager.Value.TileData, animId);
+                        (animId, offsetY) = Mounts.FixMountGraphic(fileManager.Value.TileData, animId);
                         animAction = animation.Ref.MountAction;
                     }
                     else if (!IsItemCovered2(world, ref slots.Ref, layer))
@@ -626,6 +627,7 @@ readonly struct WorldRenderingPlugin : IPlugin
                         continue;
 
                     var position = Isometric.IsoToScreen(pos.Ref.X, pos.Ref.Y, pos.Ref.Z);
+                    position.Y -= offsetY;
                     position.X += 22;
                     position.Y += 22;
                     if (mirror)
