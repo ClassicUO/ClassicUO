@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
 using ClassicUO.Assets;
+using ClassicUO.Configuration;
 using ClassicUO.Renderer;
 using ClassicUO.Utility.Collections;
 using Microsoft.Xna.Framework;
@@ -71,10 +72,17 @@ namespace ClassicUO.Game.GameObjects
 
         public void Add(int damage)
         {
+            if(Parent != null) Parent.AddDamage(damage);
+
             TextObject text_obj = TextObject.Create(_world);
 
+            string dmgString = damage.ToString();
+
+            if(ProfileManager.CurrentProfile.ShowDPSWithDamageNumbers && Parent != null)
+                dmgString += $" (DPS: {Parent.GetCurrentDPS()})";
+
             text_obj.RenderedText = RenderedText.Create(
-                damage.ToString(),
+                dmgString,
                 (ushort)(ReferenceEquals(Parent, _world.Player) ? 0x0034 : 0x0021),
                 3,
                 false
