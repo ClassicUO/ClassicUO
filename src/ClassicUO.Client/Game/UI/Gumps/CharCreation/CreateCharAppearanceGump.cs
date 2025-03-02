@@ -13,6 +13,7 @@ using ClassicUO.Assets;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using ClassicUO.Renderer.Gumps;
+using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.UI.Gumps.CharCreation
 {
@@ -775,6 +776,8 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
                 return false;
             }
+            
+            Log.Trace($"Creating character '{character.Name}'");
 
             return true;
         }
@@ -789,6 +792,8 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             if (string.IsNullOrEmpty(name) || name.Length < minLength)
                 return 3000612;
             else if (name.Length > maxLength)
+                return 3000611;
+            else if (name.Trim() != name)
                 return 3000611;
 
             int exceptCount = 0;
