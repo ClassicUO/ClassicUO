@@ -244,20 +244,21 @@ public sealed class TileArtInfo
             {
                 var subCount = reader.ReadUInt32LE();
 
-                if (!Appareances.TryGetValue(subType, out var dict))
+                if (!Appearances.TryGetValue(subType, out var dict))
                 {
                     dict = [];
-                    Appareances.Add(subType, dict);
+                    Appearances.Add(subType, dict);
                 }
 
                 for (var k = 0; k < subCount; ++k)
                 {
-                    var unk1 = reader.ReadUInt32LE();
-                    var unk2 = reader.ReadUInt32LE();
+                    var val = reader.ReadUInt32LE();
+                    var animId = reader.ReadUInt32LE();
 
-                    var body = unk1 % 10000;
+                    uint offset = val / 1000;
+                    uint body = val % 1000;
 
-                    if (!dict.TryAdd(body, unk2))
+                    if (!dict.TryAdd(body, animId + offset))
                     {
 
                     }
@@ -323,15 +324,16 @@ public sealed class TileArtInfo
     public TAEFlag[] Flags { get; } = [0, 0];
     public List<(TAEPropID PropType, uint Value)>[] Props { get; } = [[], []];
     public List<(uint, uint)> StackAliases { get; } = [];
-    public Dictionary<byte, Dictionary<uint, uint>> Appareances { get; } = [];
+    public Dictionary<byte, Dictionary<uint, uint>> Appearances { get; } = [];
 
 
-    public bool TryGetAppearance(uint mobGraphic, out uint appareanceId)
+    public bool TryGetAppearance(uint mobGraphic, out uint appearanceId)
     {
-        appareanceId = 0;
+        appearanceId = 0;
 
         // get in account only type 0 for some unknown reason :D
-        return Appareances.TryGetValue(0, out var appareanceDict) &&
-            appareanceDict.TryGetValue(mobGraphic, out appareanceId);
+        // added the Appearances.Count > 1 because seems like the conversion should happen only when there is more than 1 appearance (?)
+        return Appearances.Count > 1 && Appearances.TryGetValue(0, out var appearanceDict) &&
+            appearanceDict.TryGetValue(mobGraphic, out appearanceId);
     }
 }

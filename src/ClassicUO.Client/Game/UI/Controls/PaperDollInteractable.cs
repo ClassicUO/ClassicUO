@@ -428,10 +428,11 @@ namespace ClassicUO.Game.UI.Controls
             {
                 if (tileArtInfo.TryGetAppearance(mobileGraphic, out var appareanceId))
                 {
-                    if (animID != appareanceId)
+                    var gumpId = (ushort)(Constants.MALE_GUMP_OFFSET + appareanceId);
+                    if (Client.Game.UO.Gumps.GetGump(gumpId).Texture != null)
                     {
-                        if (IsAnimExistsInGump((ushort)appareanceId, ref offset, isfemale))
-                            animID = (ushort)appareanceId;
+                        Log.Info($"Equip conversion through tileart.uop done: old {animID} -> new {appareanceId}");
+                        return gumpId;
                     }
                 }
             }
