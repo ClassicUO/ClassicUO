@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.CompilerServices;
+using ClassicUO.Input;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Clay_cs;
@@ -16,7 +17,7 @@ internal readonly struct GuiPlugin : IPlugin
         scheduler.AddSystem(() =>
         {
             var arenaHandle = Clay.CreateArena(Clay.MinMemorySize());
-            Clay.Initialize(arenaHandle, new() { width = 300, height = 300 }, 0);
+            var ctx = Clay.Initialize(arenaHandle, new() { width = 300, height = 300 }, 0);
         }, Stages.Startup, ThreadingMode.Single);
 
         scheduler.AddSystem((Res<GraphicsDevice> device, Res<MouseContext> mouseCtx, Time time) =>
@@ -33,12 +34,11 @@ internal readonly struct GuiPlugin : IPlugin
 
         scheduler.AddSystem((
             Res<UltimaBatcher2D> batcher,
-            Res<MouseContext> mouseCtx,
             Local<Texture2D> dumbTexture,
             Res<AssetsServer> assets,
-            Time time,
-            Query<Data<UINode, Children>, Filter<With<Parent>, Optional<Children>>> query,
-            Query<Data<UINode, Children>, Filter<Optional<Children>>> queryChildren
+            Res<MouseContext> mouseCtx,
+            Query<Data<UINode, UIInteractionState, Children>, Filter<With<Parent>, Optional<UIInteractionState>, Optional<Children>>> query,
+            Query<Data<UINode, UIInteractionState, Children>, Filter<Optional<UIInteractionState>, Optional<Children>>> queryChildren
         ) =>
         {
             if (dumbTexture.Value == null)
@@ -48,8 +48,8 @@ internal readonly struct GuiPlugin : IPlugin
             }
 
             Clay.BeginLayout();
-            foreach ((var ent, var node, var children) in query)
-                renderNodes(ref node.Ref, ref children.Ref, queryChildren);
+            foreach ((var node, var interaction, var children) in query)
+                renderNodes(ref node.Ref, ref interaction.Ref, ref children.Ref, mouseCtx, queryChildren);
             var cmds = Clay.EndLayout();
 
             var b = batcher.Value;
@@ -76,7 +76,7 @@ internal readonly struct GuiPlugin : IPlugin
                         b.Draw(
                             dumbTexture.Value,
                             new Rectangle((int)boundingBox.x, (int)boundingBox.y, (int)boundingBox.width, (int)boundingBox.height),
-                            Vector3.UnitZ
+                            new Vector3(0x44, 1, 1)
                         );
 
                         break;
@@ -114,10 +114,20 @@ internal readonly struct GuiPlugin : IPlugin
             b.SetStencil(null);
             b.End();
 
-            static void renderNodes(ref UINode node, ref Children children,
-                Query<Data<UINode, Children>, Filter<Optional<Children>>> query)
+            static void renderNodes
+            (
+                ref UINode node, ref UIInteractionState interaction, ref Children children,
+                MouseContext mouseCtx,
+                Query<Data<UINode, UIInteractionState, Children>, Filter<Optional<UIInteractionState>, Optional<Children>>> query
+            )
             {
                 Clay.OpenElement();
+
+                if (!Unsafe.IsNullRef(ref interaction))
+                {
+                    interaction = Clay.IsHovered() ? mouseCtx.IsPressed(MouseButtonType.Left) ? UIInteractionState.Pressed : UIInteractionState.Hover : UIInteractionState.None;
+                }
+
                 Clay.ConfigureOpenElement(node.Config);
 
                 if (!string.IsNullOrEmpty(node.Text))
@@ -129,8 +139,8 @@ internal readonly struct GuiPlugin : IPlugin
                 {
                     foreach (var child in children)
                     {
-                        (var childNode, var childChildren) = query.Get(child);
-                        renderNodes(ref childNode.Ref, ref childChildren.Ref, query);
+                        (var childNode, var childInteraction, var childChildren) = query.Get(child);
+                        renderNodes(ref childNode.Ref, ref childInteraction.Ref, ref childChildren.Ref, mouseCtx, query);
                     }
                 }
 
@@ -207,7 +217,8 @@ internal readonly struct GuiPlugin : IPlugin
                                 }
                             }
                         }
-                    });
+                    })
+                    .Set(UIInteractionState.None);
 
 
                 // clayEnt.AddChild(childText);
@@ -222,4 +233,11 @@ struct UINode
     public string Text;
     public Clay_TextElementConfig TextConfig;
     public Clay_ElementDeclaration Config;
+}
+
+enum UIInteractionState : byte
+{
+    None,
+    Hover,
+    Pressed
 }
