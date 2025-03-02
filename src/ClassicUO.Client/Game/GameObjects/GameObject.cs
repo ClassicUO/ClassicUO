@@ -23,6 +23,12 @@ namespace ClassicUO.Game.GameObjects
         public World World { get; }
     }
 
+    internal class DamageEvent
+    {
+        public int Damage { get; set; }
+        public DateTime Timestamp { get; set; }
+    }
+
     internal abstract partial class GameObject : BaseGameObject
     {
         protected GameObject(World world) : base(world) { }
@@ -30,6 +36,7 @@ namespace ClassicUO.Game.GameObjects
         public bool IsDestroyed { get; protected set; }
         public bool IsPositionChanged { get; protected set; }
         public TextContainer TextContainer { get; private set; }
+        private List<DamageEvent> _damageEvents = new List<DamageEvent>();
 
         private AverageOverTime _averageOverTime;
 
