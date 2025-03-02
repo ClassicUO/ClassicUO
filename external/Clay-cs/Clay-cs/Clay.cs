@@ -77,12 +77,12 @@ public static class Clay
 		ClayInterop.Clay_SetMeasureTextFunction(measureText, null);
 	}
 
-	public static unsafe void Initialize(
+	public static unsafe Clay_Context* Initialize(
 		ClayArenaHandle handle,
 		Clay_Dimensions dimensions,
 		nint errorHandler)
 	{
-		ClayInterop.Clay_Initialize(handle.Arena, dimensions, new Clay_ErrorHandler { errorHandlerFunction = errorHandler });
+		return ClayInterop.Clay_Initialize(handle.Arena, dimensions, new Clay_ErrorHandler { errorHandlerFunction = errorHandler });
 	}
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
