@@ -1610,7 +1610,7 @@ Client version: '{0}'</value>
     <value>Show DPS with damage numbers</value>
   </data>
   <data name="SetAsNewDefault" xml:space="preserve">
-    <value>Set current profile as default for new characters</value>
+    <value>Save current settings as defaults for new users</value>
   </data>
   <data name="UseAlternateJournal" xml:space="preserve">
     <value>Use alternative journal</value>

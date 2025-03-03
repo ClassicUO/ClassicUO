@@ -134,6 +134,7 @@ namespace ClassicUO.Game.UI.Gumps
         private FontSelector _tooltip_font_selector;
         private HSliderBar _dragSelectStartX, _dragSelectStartY;
         private Checkbox _dragSelectAsAnchor;
+        private NiceButton _setAsNewDefault;
 
         // video
         private Checkbox _use_old_status_gump, _statusGumpBarMutuallyExclusive, _windowBorderless, _enableDeathScreen, _enableBlackWhiteEffect, _altLights, _enableLight, _enableShadows, _enableShadowsStatics, _auraMouse, _runMouseInSeparateThread, _useColoredLights, _darkNights, _partyAura, _hideChatGradient, _animatedWaterEffect;
@@ -1297,6 +1298,25 @@ namespace ClassicUO.Game.UI.Gumps
             );
 
             section4.PopIndent();
+
+            section4.Add
+            (
+                _setAsNewDefault = new NiceButton
+                (
+                    startX, 
+                    startY,
+                    section4.Width - 18,
+                    25,
+                    ButtonAction.Default,
+                    ResGumps.SetAsNewDefault
+                )
+                { IsSelectable = true, IsSelected = true } //For styling, easier to distinguish as a button.
+            );
+            _setAsNewDefault.MouseUp += (s, e) => 
+            {
+                ProfileManager.SetProfileAsDefault(_currentProfile);
+                GameActions.Print(World, ResGeneral.DefaultProfileSet);
+            };
 
 
             SettingsSection section5 = AddSettingsSection(box, "Terrain & Statics");
