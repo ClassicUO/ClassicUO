@@ -3423,7 +3423,7 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Set current profile as default for new characters.
+        ///   Looks up a localized string similar to Save current settings as defaults for new users.
         /// </summary>
         public static string SetAsNewDefault {
             get {

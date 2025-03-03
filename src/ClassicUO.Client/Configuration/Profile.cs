@@ -360,6 +360,11 @@ namespace ClassicUO.Configuration
             Log.Trace("Saving done!");
         }
 
+        public void SaveAs(string path, string filename = "default.json")
+        {
+            ConfigurationResolver.Save(this, Path.Combine(path, filename), ProfileJsonContext.DefaultToUse.Profile);
+        }
+
         private void SaveGumps(World world, string path)
         {
             string gumpsXmlPath = Path.Combine(path, "gumps.xml");
