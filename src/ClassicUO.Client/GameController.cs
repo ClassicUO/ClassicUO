@@ -64,7 +64,24 @@ namespace ClassicUO
         
         public GameController(IPluginHost pluginHost)
         {
-            GameController();
+            GraphicManager = new GraphicsDeviceManager(this);
+
+            GraphicManager.PreparingDeviceSettings += (sender, e) =>
+            {
+                e.GraphicsDeviceInformation.PresentationParameters.RenderTargetUsage =
+                    RenderTargetUsage.DiscardContents;
+            };
+
+            GraphicManager.PreferredDepthStencilFormat = DepthFormat.Depth24Stencil8;
+            SetVSync(false);
+
+            Window.ClientSizeChanged += WindowOnClientSizeChanged;
+            Window.AllowUserResizing = true;
+            Window.Title = $"ClassicUO - {CUOEnviroment.Version}";
+            IsMouseVisible = Settings.GlobalSettings.RunMouseInASeparateThread;
+
+            IsFixedTimeStep = false; // Settings.GlobalSettings.FixedTimeStep;
+            TargetElapsedTime = TimeSpan.FromMilliseconds(1000.0 / 250.0);
             
             PluginHost = pluginHost;
         }
