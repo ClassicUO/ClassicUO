@@ -39,6 +39,11 @@ namespace ClassicUO
         private Texture2D _background;
         private bool _pluginsInitialized = false;
 
+        public GameController()
+        {
+            // an easily accessible constructor is needed when accessing via reflection
+        }
+        
         public GameController(IPluginHost pluginHost)
         {
             GraphicManager = new GraphicsDeviceManager(this);
