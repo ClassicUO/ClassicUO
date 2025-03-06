@@ -42,10 +42,6 @@ namespace ClassicUO
         public GameController()
         {
             // an easily accessible constructor is needed when accessing via reflection
-        }
-        
-        public GameController(IPluginHost pluginHost)
-        {
             GraphicManager = new GraphicsDeviceManager(this);
 
             GraphicManager.PreparingDeviceSettings += (sender, e) =>
@@ -64,6 +60,12 @@ namespace ClassicUO
 
             IsFixedTimeStep = false; // Settings.GlobalSettings.FixedTimeStep;
             TargetElapsedTime = TimeSpan.FromMilliseconds(1000.0 / 250.0);
+        }
+        
+        public GameController(IPluginHost pluginHost)
+        {
+            GameController();
+            
             PluginHost = pluginHost;
         }
 
