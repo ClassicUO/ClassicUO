@@ -88,29 +88,26 @@ namespace ClassicUO.Game.Managers
                     if (!currentProfile.OverheadPartyMessages)
                         break;
 
-                    if (parent == null)
+                    if (parent == null) //No parent entity, need to check party members by name
                     {
-                        bool handled = false;
                         foreach (PartyMember member in _world.Party.Members)
                             if (member != null)
-                                if (member.Name == name)
+                                if (member.Name == name) //Name matches message from server
                                 {
                                     Mobile m = _world.Mobiles.Get(member.Serial);
-                                    if (m != null)
+                                    if (m != null) //Mobile exists
                                     {
                                         parent = m;
-                                        handled = true;
                                         break;
                                     }
-
                                 }
-                        if (!handled) break;
                     }
 
-                    if (_world.IgnoreManager.IgnoredCharsList.Contains(parent.Name) && type != MessageType.Spell)
+                    if (type != MessageType.Spell && _world.IgnoreManager.IgnoredCharsList.Contains(parent.Name))
                         break;
 
-                    parent.AddMessage(CreateMessage
+                    //Add null check in case parent was not found above.
+                    parent?.AddMessage(CreateMessage
                     (
                         text,
                         hue,
