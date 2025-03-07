@@ -1227,11 +1227,10 @@ namespace ClassicUO.Assets
             uint dataStart = reader.ReadUInt32LE();
             reader.Seek(dataStart);
 
-            var maxFrameCount = Math.Max(fc, 50);
-            UOPFrameData[] sharedBuffer = ArrayPool<UOPFrameData>.Shared.Rent(maxFrameCount);
+            UOPFrameData[] sharedBuffer = ArrayPool<UOPFrameData>.Shared.Rent(fc);
             try
             {
-                var frameData = sharedBuffer.AsSpan(0, maxFrameCount);
+                var frameData = sharedBuffer.AsSpan(0, fc);
                 frameData.Clear();
 
                 for (var i = 0; i < fc; ++i)
@@ -1269,8 +1268,10 @@ namespace ClassicUO.Assets
                 }
 
                 frameData = CollectionsMarshal.AsSpan(list);
-                maxFrameCount = frameData.Length;
-                var realFrameCount = (int)Math.Round(maxFrameCount / (float)MAX_DIRECTIONS);
+                var maxFrameCount = frameData.Length;
+
+                // Looks like the min amount of frames is 10
+                var realFrameCount = Math.Max(10, (int)Math.Round(maxFrameCount / (float)MAX_DIRECTIONS));
 
 
                 if (realFrameCount > _frames.Length)
@@ -1283,10 +1284,8 @@ namespace ClassicUO.Assets
 
                 // var dirFrameStartIdx = realFrameCount * direction;
 
-                for (int i = 0; i < maxFrameCount; ++i)
+                foreach (ref readonly var frame in frameData)
                 {
-                    ref readonly var frame = ref frameData[i];
-
                     // validate the group only if the frame is valid
                     if (frame.Position > 0)
                     {
