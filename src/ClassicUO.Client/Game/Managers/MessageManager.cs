@@ -103,7 +103,7 @@ namespace ClassicUO.Game.Managers
                                 }
                     }
 
-                    if (type != MessageType.Spell && _world.IgnoreManager.IgnoredCharsList.Contains(parent.Name))
+                    if (type != MessageType.Spell && parent != null && _world.IgnoreManager.IgnoredCharsList.Contains(parent.Name))
                         break;
 
                     //Add null check in case parent was not found above.
