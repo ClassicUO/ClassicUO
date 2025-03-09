@@ -39,6 +39,29 @@ namespace ClassicUO
         private Texture2D _background;
         private bool _pluginsInitialized = false;
 
+        public GameController()
+        {
+            // an easily accessible constructor is needed when accessing via reflection
+            GraphicManager = new GraphicsDeviceManager(this);
+
+            GraphicManager.PreparingDeviceSettings += (sender, e) =>
+            {
+                e.GraphicsDeviceInformation.PresentationParameters.RenderTargetUsage =
+                    RenderTargetUsage.DiscardContents;
+            };
+
+            GraphicManager.PreferredDepthStencilFormat = DepthFormat.Depth24Stencil8;
+            SetVSync(false);
+
+            Window.ClientSizeChanged += WindowOnClientSizeChanged;
+            Window.AllowUserResizing = true;
+            Window.Title = $"ClassicUO - {CUOEnviroment.Version}";
+            IsMouseVisible = Settings.GlobalSettings.RunMouseInASeparateThread;
+
+            IsFixedTimeStep = false; // Settings.GlobalSettings.FixedTimeStep;
+            TargetElapsedTime = TimeSpan.FromMilliseconds(1000.0 / 250.0);
+        }
+        
         public GameController(IPluginHost pluginHost)
         {
             GraphicManager = new GraphicsDeviceManager(this);
@@ -59,6 +82,7 @@ namespace ClassicUO
 
             IsFixedTimeStep = false; // Settings.GlobalSettings.FixedTimeStep;
             TargetElapsedTime = TimeSpan.FromMilliseconds(1000.0 / 250.0);
+            
             PluginHost = pluginHost;
         }
 
