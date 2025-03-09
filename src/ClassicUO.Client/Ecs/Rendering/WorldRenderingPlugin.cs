@@ -670,7 +670,7 @@ readonly struct WorldRenderingPlugin : IPlugin
                         Vector2.Zero,
                         1f,
                         mirror ? SpriteEffects.FlipHorizontally : SpriteEffects.None,
-                        depthZ
+                        depthZ + (j == -1 ? -0.01f : 0f) // hack to bring the mount back to the body
                     );
                 }
             }
