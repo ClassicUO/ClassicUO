@@ -53,7 +53,7 @@ namespace ClassicUO.Game.Data
             abilities[1] = Second;
         }
     }
-    
+
     internal static class AbilityData
     {
         public static readonly AbilityDefinition[] Abilities =
@@ -94,7 +94,7 @@ namespace ClassicUO.Game.Data
 
 
         public static readonly ItemAbilities DefaultItemAbilities = new(0, Ability.ParalyzingBlow, Ability.Disarm);
-        
+
         public static readonly Dictionary<ushort, ItemAbilities> GraphicToAbilitiesMap = new()
         {
             {0, DefaultItemAbilities},
@@ -129,7 +129,7 @@ namespace ClassicUO.Game.Data
             { 0x0F48, new (0x0F48, Ability.BleedAttack, Ability.ConcussionBlow) }, // Battle Axes
             { 0x0F49, new (0x0F49, Ability.CrushingBlow, Ability.Dismount) },
             { 0x0F4A, new (0x0F4A, Ability.CrushingBlow, Ability.Dismount) },        // Axes
-            { 0x0F4B, new (0x0F4B, Ability.DoubleStrike, Ability.WhirlwindAttack) }, 
+            { 0x0F4B, new (0x0F4B, Ability.DoubleStrike, Ability.WhirlwindAttack) },
             { 0x0F4C, new (0x0F4C, Ability.DoubleStrike, Ability.WhirlwindAttack) }, // Double Axe
             { 0x0F4D, new (0x0F4D, Ability.ParalyzingBlow, Ability.Dismount) },
             { 0x0F4E, new (0x0F4E, Ability.ParalyzingBlow, Ability.Dismount) }, // Bardiches
@@ -146,7 +146,7 @@ namespace ClassicUO.Game.Data
             { 0x0F62, new (0x0F62, Ability.ArmorIgnore, Ability.ParalyzingBlow) },
             { 0x0F63, new (0x0F63, Ability.ArmorIgnore, Ability.ParalyzingBlow) }, // Spears
             { 0x0FB5, new (0x0FB5, Ability.CrushingBlow, Ability.ShadowStrike) },
-            { 0x13AF, new (0x13AF, Ability.ArmorIgnore, Ability.BleedAttack) }, 
+            { 0x13AF, new (0x13AF, Ability.ArmorIgnore, Ability.BleedAttack) },
             { 0x13B0, new (0x13B0, Ability.ArmorIgnore, Ability.BleedAttack) }, // War Axes
             { 0x13B1, new (0x13B1, Ability.ParalyzingBlow, Ability.MortalStrike) },
             { 0x13B2, new (0x13B2, Ability.ParalyzingBlow, Ability.MortalStrike) }, // Bows
@@ -202,7 +202,7 @@ namespace ClassicUO.Game.Data
             { 0x26CB, new (0x26CB, Ability.DoubleStrike, Ability.MortalStrike) },       // also Crescent Blades
             { 0x26CC, new (0x26CC, Ability.ArmorIgnore, Ability.MovingShot) },          // also Composite Bows
             { 0x26CD, new (0x26CD, Ability.DoubleStrike, Ability.MovingShot) },         // also Repeating Crossbows
-            { 0x26CE, new (0x26CE, Ability.WhirlwindAttack, Ability.Disarm) },          
+            { 0x26CE, new (0x26CE, Ability.WhirlwindAttack, Ability.Disarm) },
             { 0x26CF, new (0x26CF, Ability.WhirlwindAttack, Ability.Disarm) },           // paladin sword
             { 0x27A2, new (0x27A2, Ability.CrushingBlow, Ability.RidingSwipe) },         // No-Dachi
             { 0x27A3, new (0x27A3, Ability.Feint, Ability.Block) },                      // Tessen
@@ -261,7 +261,7 @@ namespace ClassicUO.Game.Data
             { 0x406C, new (0x406C, Ability.MovingShot, Ability.InfusedThrow) },       // Cyclone
             { 0x0904, new (0x0904, Ability.DoubleStrike, Ability.Disarm) },
             { 0x406D, new (0x406D, Ability.DoubleStrike, Ability.Disarm) }, // Dual Pointed Spear
-            { 0x0903, new (0x0903, Ability.ArmorIgnore, Ability.Disarm) },  
+            { 0x0903, new (0x0903, Ability.ArmorIgnore, Ability.Disarm) },
             { 0x406E, new (0x406E, Ability.ArmorIgnore, Ability.Disarm) },  // Disc Mace
             { 0x08FE, new (0x08FE, Ability.BleedAttack, Ability.ParalyzingBlow) },
             { 0x4072, new (0x4072, Ability.BleedAttack, Ability.ParalyzingBlow) }, // Blood Blade
@@ -270,7 +270,7 @@ namespace ClassicUO.Game.Data
             { 0x0908, new (0x0908, Ability.WhirlwindAttack, Ability.Dismount) },
             { 0x4075, new (0x4075, Ability.WhirlwindAttack, Ability.Dismount) }, // Gargish Talwar
             { 0x4076, new (0x4076, Ability.ArmorIgnore, Ability.MortalStrike) }, // Shortblade
-            { 0x48AE, new (0x48AE, Ability.BleedAttack, Ability.InfectiousStrike) }, 
+            { 0x48AE, new (0x48AE, Ability.BleedAttack, Ability.InfectiousStrike) },
             { 0x48B0, new (0x48B0, Ability.BleedAttack, Ability.ConcussionBlow) }, // Gargish Battle Axe
             { 0x48B3, new (0x48B3, Ability.CrushingBlow, Ability.Dismount) },
             { 0x48B2, new (0x48B2, Ability.CrushingBlow, Ability.Dismount) }, // Gargish Axe
@@ -305,12 +305,12 @@ namespace ClassicUO.Game.Data
             { 0x48D1, new (0x48D1, Ability.Feint, Ability.DoubleStrike) },
             { 0x48D0, new (0x48D0, Ability.Feint, Ability.DoubleStrike) },             // Gargish Daisho
             { 0xA289, new (0xA289, Ability.ConcussionBlow, Ability.WhirlwindAttack) }, // Barbed Whip
-            { 0xA292, new (0xA292, Ability.ArmorPierce, Ability.WhirlwindAttack) },    // Spiked Whip
+            { 0xA28A, new (0xA28A, Ability.ArmorPierce, Ability.WhirlwindAttack) },    // Spiked Whip
             { 0xA28B, new (0xA28B, Ability.BleedAttack, Ability.WhirlwindAttack) },    // Bladed Whip
             { 0x08FF, new (0x08FF, Ability.MysticArc, Ability.ConcussionBlow) },       // Boomerang
             { 0x0900, new (0x0900, Ability.ArmorIgnore, Ability.ParalyzingBlow) },     // Stone War Sword
             { 0x090A, new (0x090A, Ability.ArmorIgnore, Ability.MortalStrike) },       // Soul Glaive
-            { 0xAEA5, new (0xAEA5, Ability.DoubleStrike, Ability.ArmorIgnore) }, 
+            { 0xAEA5, new (0xAEA5, Ability.DoubleStrike, Ability.ArmorIgnore) },
             { 0xAEB4, new (0xAEB4, Ability.DoubleStrike, Ability.ArmorIgnore) },
             { 0xAEC3, new (0xAEC3, Ability.DoubleStrike, Ability.ArmorIgnore) },
             { 0xAED2, new (0xAED2, Ability.DoubleStrike, Ability.ArmorIgnore) },// Publish 119 Paladin War Forks
