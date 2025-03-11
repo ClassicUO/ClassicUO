@@ -89,7 +89,7 @@ readonly struct PlayerMovementPlugin : IPlugin
     )
     {
         terrainList.Value ??= new();
-        Span<sbyte> diag = stackalloc sbyte[2] { 1, -1 };
+        Span<sbyte> diag = [1, -1];
 
         // TODO: we grab the center of the screen atm for convenience. But it will be necessary to use the game window bounds
         // var center = Isometric.IsoToScreen(gameCtx.Value.CenterX, gameCtx.Value.CenterY, gameCtx.Value.CenterZ);

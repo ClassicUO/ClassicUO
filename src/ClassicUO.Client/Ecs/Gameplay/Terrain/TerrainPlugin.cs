@@ -85,6 +85,8 @@ readonly struct TerrainPlugin : IPlugin
         EventReader<OnNewChunkRequest> chunkRequests
     )
     {
+        staticsBlockBuffer.Value ??= new StaticsBlock[64];
+
         foreach (var chunkEv in chunkRequests)
         {
             for (int chunkX = chunkEv.RangeStartX; chunkX <= chunkEv.RangeEndX; chunkX += 1)
@@ -171,34 +173,36 @@ readonly struct TerrainPlugin : IPlugin
                     {
                         staticsBlockBuffer.Value ??= new StaticsBlock[im.StaticCount];
                         if (staticsBlockBuffer.Value.Length < im.StaticCount)
-                            Array.Resize(ref staticsBlockBuffer.Value, (int)im.StaticCount);
+                            staticsBlockBuffer.Value = new StaticsBlock[im.StaticCount];
 
                         var staticsSpan = staticsBlockBuffer.Value.AsSpan(0, (int)im.StaticCount);
                         im.StaticFile.Seek((long)im.StaticAddress, System.IO.SeekOrigin.Begin);
                         im.StaticFile.Read(MemoryMarshal.AsBytes(staticsSpan));
 
-                        foreach (ref var sb in staticsSpan)
+                        foreach (ref readonly var sb in staticsSpan)
                         {
-                            if (sb.Color != 0 && sb.Color != 0xFFFF)
+                            if (sb.Color == 0 || sb.Color == 0xFFFF)
                             {
-                                int pos = (sb.Y << 3) + sb.X;
-
-                                if (pos >= 64)
-                                {
-                                    continue;
-                                }
-
-                                var staX = (ushort)(bx + sb.X);
-                                var staY = (ushort)(by + sb.Y);
-
-                                var e = world.Entity()
-                                    .Set(new WorldPosition() { X = staX, Y = staY, Z = sb.Z })
-                                    .Set(new Graphic() { Value = sb.Color })
-                                    .Set(new Hue() { Value = sb.Hue })
-                                    .Add<IsStatic>();
-
-                                list.Add(e);
+                                continue;
                             }
+
+                            int pos = (sb.Y << 3) + sb.X;
+
+                            if (pos >= 64)
+                            {
+                                continue;
+                            }
+
+                            var staX = (ushort)(bx + sb.X);
+                            var staY = (ushort)(by + sb.Y);
+
+                            var e = world.Entity()
+                                .Set(new WorldPosition() { X = staX, Y = staY, Z = sb.Z })
+                                .Set(new Graphic() { Value = sb.Color })
+                                .Set(new Hue() { Value = sb.Hue })
+                                .Add<IsStatic>();
+
+                            list.Add(e);
                         }
                     }
                 }
