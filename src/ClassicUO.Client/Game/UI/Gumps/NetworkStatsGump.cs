@@ -7,6 +7,7 @@ using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
+using ClassicUO.Sdk.IO;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 
@@ -84,7 +85,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
                 Span<char> span = stackalloc char[128];
-                ValueStringBuilder sb = new ValueStringBuilder(span);
+                var sb = new ValueStringBuilder(span);
 
                 if (IsMinimized)
                 {

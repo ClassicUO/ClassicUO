@@ -1,8 +1,7 @@
 using System;
 using System.Runtime.CompilerServices;
-using ClassicUO.Assets;
+using ClassicUO.Sdk.Assets;
 using Microsoft.Xna.Framework.Graphics;
-using static System.Collections.Specialized.BitVector32;
 
 namespace ClassicUO.Renderer.Animations
 {

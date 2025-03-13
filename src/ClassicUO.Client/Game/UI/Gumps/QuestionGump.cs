@@ -2,7 +2,7 @@
 
 using System;
 using ClassicUO.Game.UI.Controls;
-using ClassicUO.Assets;
+using ClassicUO.Sdk.Assets;
 using ClassicUO.Renderer;
 
 namespace ClassicUO.Game.UI.Gumps

@@ -13,7 +13,7 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO;
-using ClassicUO.Assets;
+using ClassicUO.Sdk.Assets;
 using ClassicUO.Renderer;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
@@ -30,6 +30,7 @@ using ClassicUO.Network.Encryption;
 using System.Text;
 using System.Runtime.InteropServices;
 using System.Threading;
+using ClassicUO.Sdk.IO;
 
 namespace ClassicUO.Game.UI.Gumps
 {

@@ -3,7 +3,7 @@
 using System;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
-using ClassicUO.Assets;
+using ClassicUO.Sdk.Assets;
 using ClassicUO.Network;
 
 namespace ClassicUO.Game.UI.Gumps

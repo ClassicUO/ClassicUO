@@ -1,7 +1,7 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
 using System.Linq;
-using ClassicUO.Assets;
+using ClassicUO.Sdk.Assets;
 
 namespace ClassicUO.Game.Data
 {

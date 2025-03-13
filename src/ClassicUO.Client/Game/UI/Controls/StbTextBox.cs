@@ -5,13 +5,13 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using ClassicUO.Game.Managers;
 using ClassicUO.Input;
-using ClassicUO.Assets;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 using SDL2;
 using StbTextEditSharp;
+using ClassicUO.Sdk.Assets;
 
 namespace ClassicUO.Game.UI.Controls
 {

@@ -5,9 +5,10 @@ using System.Collections.Generic;
 using ClassicUO.Utility;
 using ClassicUO.Configuration;
 using ClassicUO.IO.Audio;
-using ClassicUO.Assets;
+using ClassicUO.Sdk.Assets;
 using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework.Audio;
+using ClassicUO.Sdk;
 
 namespace ClassicUO.Game.Managers
 {

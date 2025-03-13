@@ -1,5 +1,6 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
+using ClassicUO.Sdk.IO;
 using ClassicUO.Utility;
 using System.Collections.Generic;
 using System.IO;
@@ -218,7 +219,7 @@ namespace ClassicUO.Game.Data
             {
                 var tempList = new List<ushort>();
 
-                TextFileParser buffParser = new TextFileParser(File.ReadAllText(buff), new[] { ' ', '\t', ',' }, new[] { '#', ';' }, new[] { '"', '"' });
+                var buffParser = new TextFileParser(File.ReadAllText(buff), new[] { ' ', '\t', ',' }, new[] { '#', ';' }, new[] { '"', '"' });
 
                 while (!buffParser.IsEOF())
                 {

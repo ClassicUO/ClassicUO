@@ -1,7 +1,8 @@
-﻿using ClassicUO.Utility;
+﻿using ClassicUO.Sdk.IO;
+using ClassicUO.Utility;
 using System.Collections.Generic;
 using System.IO;
-using static ClassicUO.Assets.AnimationsLoader;
+using static ClassicUO.Sdk.Assets.AnimationsLoader;
 
 namespace ClassicUO.Game.Data
 {
@@ -31,7 +32,7 @@ namespace ClassicUO.Game.Data
                 }
             }
 
-            TextFileParser chairParse = new TextFileParser(File.ReadAllText(chair), new[] { ' ', '\t', ',' }, new[] { '#', ';' }, new[] { '"', '"' });
+            var chairParse = new TextFileParser(File.ReadAllText(chair), new[] { ' ', '\t', ',' }, new[] { '#', ';' }, new[] { '"', '"' });
 
             while (!chairParse.IsEOF())
             {

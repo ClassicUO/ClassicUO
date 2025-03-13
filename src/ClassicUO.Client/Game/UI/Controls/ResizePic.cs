@@ -2,7 +2,7 @@
 
 using System;
 using System.Collections.Generic;
-using ClassicUO.Assets;
+using ClassicUO.Sdk.Assets;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;

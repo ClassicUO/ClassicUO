@@ -6,11 +6,10 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
-using ClassicUO.Assets;
 using ClassicUO.Resources;
-using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
-using ClassicUO.Game.Scenes;
+using ClassicUO.Sdk.Assets;
+using ClassicUO.Sdk;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -1308,7 +1307,7 @@ namespace ClassicUO.Game.UI.Gumps
                     p.Y,
                     16,
                     16,
-                    ProfileManager.CurrentProfile.StatusGumpBarMutuallyExclusive 
+                    ProfileManager.CurrentProfile.StatusGumpBarMutuallyExclusive
                         ? ResGumps.Minimize : ResGumps.StatusGumpOpenBar,
                     0
                 ) { CanMove = true }

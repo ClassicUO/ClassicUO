@@ -109,15 +109,13 @@ namespace StbTextEditSharp
         {
             int count = start + length;
 
-            ValueStringBuilder sb = new ValueStringBuilder(count);
+            var sb = new StringBuilder(count);
             for (int i = start; i < count; ++i)
             {
                 sb.Append(char.ConvertFromUtf32(codepoints[i]));
             }
 
             InsertChars(pos, sb.ToString());
-
-            sb.Dispose();
 
             return length;
         }

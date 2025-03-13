@@ -1,7 +1,5 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
-using ClassicUO.IO;
-using ClassicUO.Assets;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
@@ -9,6 +7,8 @@ using Microsoft.Xna.Framework.Graphics;
 using StbTextEditSharp;
 using System;
 using System.Collections.Generic;
+using ClassicUO.Sdk.Assets;
+using ClassicUO.Sdk;
 
 namespace ClassicUO.Game
 {
@@ -339,7 +339,7 @@ namespace ClassicUO.Game
 
                     if (x >= 0)
                     {
-                        char c = x >= info.Data.Length ? '\n' : info.Data[x].Item;
+                        char c = x >= info.Data.Count ? '\n' : info.Data[x].Item;
 
                         if (IsUnicode)
                         {
@@ -646,7 +646,7 @@ namespace ClassicUO.Game
             Links.Clear();
             if (fi.Links != null)
             {
-                for (int i = 0; i < fi.Links.Length; ++i)
+                for (int i = 0; i < fi.Links.Count; ++i)
                 {
                     Links.Add(fi.Links[i]);
                 }

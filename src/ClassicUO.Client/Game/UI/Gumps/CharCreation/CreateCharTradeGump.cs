@@ -7,10 +7,11 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
-using ClassicUO.Assets;
+using ClassicUO.Sdk.Assets;
 using ClassicUO.Resources;
 using System.Collections.Generic;
 using ClassicUO.Utility;
+using ClassicUO.Sdk;
 
 namespace ClassicUO.Game.UI.Gumps.CharCreation
 {

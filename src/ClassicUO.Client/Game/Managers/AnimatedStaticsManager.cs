@@ -3,7 +3,7 @@
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.IO;
-using ClassicUO.Assets;
+using ClassicUO.Sdk.Assets;
 using ClassicUO.Utility.Collections;
 using System;
 using System.Runtime.InteropServices;
@@ -18,7 +18,7 @@ namespace ClassicUO.Game.Managers
 
         public unsafe void Initialize()
         {
-            UOFile file = Client.Game.UO.FileManager.AnimData.AnimDataFile;
+            var file = Client.Game.UO.FileManager.AnimData.AnimDataFile;
 
             if (file == null)
             {
@@ -67,7 +67,7 @@ namespace ClassicUO.Game.Managers
             uint delay = Constants.ITEM_EFFECT_ANIMATION_DELAY * 2;
             uint next_time = Time.Ticks + 250;
             bool no_animated_field = ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.FieldsType != 0;
-            UOFileIndex[] static_data = Client.Game.UO.FileManager.Arts.File.Entries;
+            var static_data = Client.Game.UO.FileManager.Arts.File.Entries;
 
             for (int i = 0; i < _staticInfos.Length; i++)
             {

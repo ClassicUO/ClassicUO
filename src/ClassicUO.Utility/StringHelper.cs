@@ -25,7 +25,7 @@ namespace ClassicUO.Utility
 
         public static string Cp1252ToString(ReadOnlySpan<byte> strCp1252)
         {
-            var sb = new ValueStringBuilder(strCp1252.Length);
+            var sb = new StringBuilder(strCp1252.Length);
 
             for (int i = 0; i < strCp1252.Length; ++i)
             {
@@ -33,8 +33,6 @@ namespace ClassicUO.Utility
             }
 
             var str = sb.ToString();
-
-            sb.Dispose();
 
             return str;
         }
@@ -145,8 +143,7 @@ namespace ClassicUO.Utility
                 return string.Empty;
             }
 
-            Span<char> span = stackalloc char[str.Length];
-            ValueStringBuilder sb = new ValueStringBuilder(span);
+            var sb = new StringBuilder(str.Length);
             bool capitalizeNext = true;
 
             for (int i = 0; i < str.Length; i++)
@@ -161,8 +158,6 @@ namespace ClassicUO.Utility
 
             string ss = sb.ToString();
 
-            sb.Dispose();
-
             return ss;
         }
 
@@ -173,8 +168,7 @@ namespace ClassicUO.Utility
                 return string.Empty;
             }
 
-            Span<char> span = stackalloc char[str.Length];
-            ValueStringBuilder sb = new ValueStringBuilder(span);
+            var sb = new StringBuilder(str.Length);
 
             bool capitalizeNext = true;
 
@@ -195,8 +189,6 @@ namespace ClassicUO.Utility
             }
 
             string ss = sb.ToString();
-
-            sb.Dispose();
 
             return ss;
         }
@@ -222,7 +214,7 @@ namespace ClassicUO.Utility
                 return "";
             }
 
-            ValueStringBuilder sb = new ValueStringBuilder(str.Length * 2);
+            var sb = new StringBuilder(str.Length * 2);
             sb.Append(str[0]);
 
             for (int i = 1, len = str.Length - 1; i <= len; i++)
@@ -240,8 +232,6 @@ namespace ClassicUO.Utility
 
             string s = sb.ToString();
 
-            sb.Dispose();
-
             return s;
         }
 
@@ -252,8 +242,7 @@ namespace ClassicUO.Utility
                 return "";
             }
 
-            Span<char> span = stackalloc char[str.Length];
-            ValueStringBuilder sb = new ValueStringBuilder(span);
+            var sb = new StringBuilder(str.Length);
 
             for (int i = 0; i < str.Length; i++)
             {
@@ -264,8 +253,6 @@ namespace ClassicUO.Utility
             }
 
             string ss = sb.ToString();
-
-            sb.Dispose();
 
             return ss;
         }
@@ -321,8 +308,7 @@ namespace ClassicUO.Utility
                     return str;
                 }
 
-                Span<char> span = stackalloc char[str.Length];
-                ValueStringBuilder sb = new ValueStringBuilder(span);
+                var sb = new StringBuilder(str.Length);
 
                 sb.Append(parts[0]);
 
@@ -350,8 +336,6 @@ namespace ClassicUO.Utility
                 }
 
                 string ss = sb.ToString();
-
-                sb.Dispose();
 
                 return ss;
             }

@@ -4,7 +4,7 @@ using System;
 using System.Runtime.CompilerServices;
 using ClassicUO.Configuration;
 using ClassicUO.IO;
-using ClassicUO.Assets;
+using ClassicUO.Sdk.Assets;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -228,7 +228,7 @@ namespace ClassicUO.Game.GameObjects
             bool isWet = false
         )
         {
-            ref UOFileIndex index = ref Client.Game.UO.FileManager.Arts.File.GetValidRefEntry(graphic + 0x4000);
+            ref var index = ref Client.Game.UO.FileManager.Arts.File.GetValidRefEntry(graphic + 0x4000);
 
             graphic = (ushort)(graphic + index.AnimOffset);
 

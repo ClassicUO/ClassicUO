@@ -7,11 +7,12 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
-using ClassicUO.Assets;
+using ClassicUO.Sdk.Assets;
 using ClassicUO.Network;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using ClassicUO.Game.Scenes;
+using ClassicUO.Sdk;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -240,7 +241,7 @@ namespace ClassicUO.Game.GameObjects
         public void UpdateAbilities()
         {
             AbilityData.DefaultItemAbilities.Set(Abilities);
-            
+
             if ((FindItemByLayer(Layer.OneHanded) ?? FindItemByLayer(Layer.TwoHanded)) is { Graphic: > 0 } weapon)
             {
                 ushort animId = weapon.ItemData.AnimID;

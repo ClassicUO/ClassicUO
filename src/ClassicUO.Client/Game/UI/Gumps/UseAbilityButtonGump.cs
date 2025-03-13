@@ -4,7 +4,7 @@ using System.Xml;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
-using ClassicUO.Assets;
+using ClassicUO.Sdk.Assets;
 using ClassicUO.Renderer;
 
 namespace ClassicUO.Game.UI.Gumps

@@ -5,10 +5,11 @@ using System.Text;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Assets;
+using ClassicUO.Sdk.Assets;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
+using ClassicUO.Sdk.IO;
 
 namespace ClassicUO.Game.UI
 {
@@ -232,9 +233,9 @@ namespace ClassicUO.Game.UI
 
             if (SerialHelper.IsValid(serial) && _world.OPL.TryGetNameAndData(serial, out string name, out string data))
             {
-                ValueStringBuilder sbHTML = new ValueStringBuilder();
+                var sbHTML = new ValueStringBuilder();
                 {
-                    ValueStringBuilder sb = new ValueStringBuilder();
+                    var sb = new ValueStringBuilder();
                     {
                         if (!string.IsNullOrEmpty(name))
                         {

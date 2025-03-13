@@ -6,6 +6,7 @@ using ClassicUO.Game.Managers;
 using ClassicUO.IO;
 using ClassicUO.Network;
 using ClassicUO.Resources;
+using ClassicUO.Sdk;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using ClassicUO.Utility.Platforms;
@@ -290,7 +291,7 @@ namespace ClassicUO
 
                     case "filesoverride":
                     case "uofilesoverride":
-                        UOFilesOverrideMap.OverrideFile = value;
+                        // UOFilesOverrideMap.OverrideFile = value;
 
                         break;
 

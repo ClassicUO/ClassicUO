@@ -1,6 +1,6 @@
 using System;
 using System.Text.RegularExpressions;
-using ClassicUO.Assets;
+using ClassicUO.Sdk.Assets;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Resources;
@@ -14,11 +14,11 @@ internal partial class LocationGoGump : Gump
      * Valid inputs:
      * 3123, 124
      * 123 4141
-     * 1331:745 
+     * 1331:745
      */
     [GeneratedRegex(@"^(?<X>\d+)\s*[,:\s]\s*(?<Y>\d+)$")]
     private static partial Regex PointCoordsRegex();
-    
+
     private readonly World _world;
     private readonly Action<int, int> _goTo;
 
@@ -53,7 +53,7 @@ internal partial class LocationGoGump : Gump
                 Hue = 999
             }
         );
-        
+
         Label l = Add
         (
             new Label(_message, true, 0xFFFF, Width - 90, 0xFF)
@@ -101,7 +101,7 @@ internal partial class LocationGoGump : Gump
                 ButtonAction = ButtonAction.Activate
             }
         );
-        
+
         Add
         (
             new Label("Examples:\n 1639, 1532\n 100o25'S,40o04'E\n 9 14'N 91 37'W", true, 0xFFFF, Width - 90, 0xFF)
@@ -136,7 +136,7 @@ internal partial class LocationGoGump : Gump
         {
             // do nothing
         }
-        
+
         return false;
     }
 

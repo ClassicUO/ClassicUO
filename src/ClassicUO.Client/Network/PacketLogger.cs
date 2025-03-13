@@ -1,4 +1,5 @@
-﻿using ClassicUO.Utility;
+﻿using ClassicUO.Sdk.IO;
+using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using System;
 

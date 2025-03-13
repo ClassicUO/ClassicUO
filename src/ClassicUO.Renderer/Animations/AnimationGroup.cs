@@ -1,5 +1,5 @@
-using ClassicUO.Assets;
-using ClassicUO.IO;
+using ClassicUO.Sdk.Assets;
+using ClassicUO.Sdk.IO;
 
 namespace ClassicUO.Renderer.Animations
 {

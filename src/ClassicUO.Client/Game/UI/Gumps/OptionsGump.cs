@@ -11,13 +11,14 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
-using ClassicUO.Assets;
+using ClassicUO.Sdk.Assets;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using ClassicUO.Sdk;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -960,7 +961,7 @@ namespace ClassicUO.Game.UI.Gumps
             );
 
             _use_old_status_gump.IsVisible = true;
-            
+
             section3.Add
             (
                 _statusGumpBarMutuallyExclusive = AddCheckBox
@@ -972,7 +973,7 @@ namespace ClassicUO.Game.UI.Gumps
                     startY
                 )
             );
-            
+
             _statusGumpBarMutuallyExclusive.IsVisible = true;
 
             section3.Add
@@ -1228,7 +1229,7 @@ namespace ClassicUO.Game.UI.Gumps
                     startY
                 )
             );
-            
+
             section4.Add
             (
                 _dragSelectHostileOnly = AddCheckBox
@@ -1303,7 +1304,7 @@ namespace ClassicUO.Game.UI.Gumps
             (
                 _setAsNewDefault = new NiceButton
                 (
-                    startX, 
+                    startX,
                     startY,
                     section4.Width - 18,
                     25,
@@ -1312,7 +1313,7 @@ namespace ClassicUO.Game.UI.Gumps
                 )
                 { IsSelectable = true, IsSelected = true } //For styling, easier to distinguish as a button.
             );
-            _setAsNewDefault.MouseUp += (s, e) => 
+            _setAsNewDefault.MouseUp += (s, e) =>
             {
                 ProfileManager.SetProfileAsDefault(_currentProfile);
                 GameActions.Print(World, ResGeneral.DefaultProfileSet);
@@ -3914,7 +3915,7 @@ namespace ClassicUO.Game.UI.Gumps
                     UIManager.Add(StatusGumpBase.AddStatusGump(World, status.ScreenCoordinateX, status.ScreenCoordinateY));
                 }
             }
-            
+
             if (_statusGumpBarMutuallyExclusive.IsChecked != _currentProfile.StatusGumpBarMutuallyExclusive)
             {
                 var active = _currentProfile.StatusGumpBarMutuallyExclusive = _statusGumpBarMutuallyExclusive.IsChecked;

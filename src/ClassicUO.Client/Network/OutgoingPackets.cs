@@ -11,9 +11,9 @@ using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
-using ClassicUO.IO;
-using ClassicUO.Assets;
-using ClassicUO.Utility;
+using ClassicUO.Sdk;
+using ClassicUO.Sdk.Assets;
+using ClassicUO.Sdk.IO;
 
 namespace ClassicUO.Network
 {

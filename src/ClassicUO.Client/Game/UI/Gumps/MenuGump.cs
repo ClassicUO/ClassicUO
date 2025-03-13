@@ -2,7 +2,7 @@
 
 using System.Linq;
 using ClassicUO.Game.UI.Controls;
-using ClassicUO.Assets;
+using ClassicUO.Sdk.Assets;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Utility.Logging;

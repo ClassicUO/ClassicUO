@@ -5,12 +5,13 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
-using ClassicUO.Assets;
 using ClassicUO.Renderer;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using SDL2;
+using ClassicUO.Sdk.Assets;
+using ClassicUO.Sdk;
 
 namespace ClassicUO.Game.UI.Gumps.Login
 {

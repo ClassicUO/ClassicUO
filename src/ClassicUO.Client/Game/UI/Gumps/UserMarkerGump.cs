@@ -6,7 +6,7 @@ using ClassicUO.Utility;
 using ClassicUO.Configuration;
 using ClassicUO.Game.UI.Controls;
 using static ClassicUO.Game.UI.Gumps.WorldMapGump;
-using ClassicUO.Assets;
+using ClassicUO.Sdk.Assets;
 using ClassicUO.Resources;
 
 namespace ClassicUO.Game.UI.Gumps

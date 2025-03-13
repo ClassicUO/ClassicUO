@@ -1,5 +1,6 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
+using ClassicUO.Sdk;
 using ClassicUO.Utility;
 using System;
 

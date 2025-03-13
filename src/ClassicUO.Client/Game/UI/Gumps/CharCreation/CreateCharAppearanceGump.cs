@@ -9,11 +9,12 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
-using ClassicUO.Assets;
+using ClassicUO.Sdk.Assets;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using ClassicUO.Renderer.Gumps;
 using ClassicUO.Utility.Logging;
+using ClassicUO.Sdk;
 
 namespace ClassicUO.Game.UI.Gumps.CharCreation
 {
@@ -776,7 +777,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
                 return false;
             }
-            
+
             Log.Trace($"Creating character '{character.Name}'");
 
             return true;

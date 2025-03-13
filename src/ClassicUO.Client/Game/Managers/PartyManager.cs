@@ -5,9 +5,8 @@ using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Gumps;
-using ClassicUO.IO;
-using ClassicUO.Network;
 using ClassicUO.Resources;
+using ClassicUO.Sdk.IO;
 
 namespace ClassicUO.Game.Managers
 {

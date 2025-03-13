@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Text;
 using ClassicUO.Game.Managers;
 using ClassicUO.Resources;
+using ClassicUO.Sdk.IO;
 using ClassicUO.Utility;
 
 namespace ClassicUO.Game.Data
@@ -132,7 +133,7 @@ namespace ClassicUO.Game.Data
 
         public string CreateReagentListString(string separator)
         {
-            ValueStringBuilder sb = new ValueStringBuilder();
+            var sb = new ValueStringBuilder();
             {
                 for (int i = 0; i < Regs.Length; i++)
                 {

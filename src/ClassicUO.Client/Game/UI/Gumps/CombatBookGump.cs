@@ -7,6 +7,7 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.Resources;
+using ClassicUO.Sdk;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 
@@ -49,7 +50,7 @@ namespace ClassicUO.Game.UI.Gumps
             Clear();
             _primAbility = null;
             _secAbility = null;
-            
+
             Add(new GumpPic(0, 0, 0x2B02, 0));
 
             Add(_pageCornerLeft = new GumpPic(50, 8, 0x08BB, 0));

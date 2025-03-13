@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Assets;
+using ClassicUO.Sdk.Assets;
 
 namespace ClassicUO.Game.Map
 {

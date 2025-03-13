@@ -3,7 +3,7 @@
 using System;
 using ClassicUO.Configuration;
 using ClassicUO.Game.UI.Controls;
-using ClassicUO.Assets;
+using ClassicUO.Sdk.Assets;
 using SDL2;
 
 namespace ClassicUO.Game.UI.Gumps.Login

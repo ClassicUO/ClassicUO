@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
-using ClassicUO.Assets;
+using ClassicUO.Sdk.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
@@ -9,9 +9,9 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
-using ClassicUO.IO;
 using ClassicUO.Renderer;
 using ClassicUO.Resources;
+using ClassicUO.Sdk.IO;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using ClassicUO.Utility.Platforms;
@@ -314,7 +314,7 @@ namespace ClassicUO.Network
         {
             if (world.ClientFeatures.TooltipsEnabled && Handler._clilocRequests.Count != 0)
             {
-                if (Client.Game.UO.Version >= Utility.ClientVersion.CV_5090)
+                if (Client.Game.UO.Version >= ClassicUO.Sdk.ClientVersion.CV_5090)
                 {
                     if (Handler._clilocRequests.Count != 0)
                     {
@@ -625,7 +625,7 @@ namespace ClassicUO.Network
                         }
                         else
                         {
-                            if (Client.Game.UO.Version >= Utility.ClientVersion.CV_500A)
+                            if (Client.Game.UO.Version >= ClassicUO.Sdk.ClientVersion.CV_500A)
                             {
                                 world.Player.WeightMax = (ushort)(
                                     7 * (world.Player.Strength >> 1) + 40
@@ -714,7 +714,7 @@ namespace ClassicUO.Network
                 return;
             }
 
-            if (p[0] == 0x16 && Client.Game.UO.Version < Utility.ClientVersion.CV_500A)
+            if (p[0] == 0x16 && Client.Game.UO.Version < ClassicUO.Sdk.ClientVersion.CV_500A)
             {
                 return;
             }
@@ -737,7 +737,7 @@ namespace ClassicUO.Network
                 {
                     if (enabled)
                     {
-                        if (Client.Game.UO.Version >= Utility.ClientVersion.CV_7000)
+                        if (Client.Game.UO.Version >= ClassicUO.Sdk.ClientVersion.CV_7000)
                         {
                             mobile.SetSAPoison(true);
                         }
@@ -748,7 +748,7 @@ namespace ClassicUO.Network
                     }
                     else
                     {
-                        if (Client.Game.UO.Version >= Utility.ClientVersion.CV_7000)
+                        if (Client.Game.UO.Version >= ClassicUO.Sdk.ClientVersion.CV_7000)
                         {
                             mobile.SetSAPoison(false);
                         }
@@ -916,7 +916,7 @@ namespace ClassicUO.Network
 
             Client.Game.Audio.UpdateCurrentMusicVolume();
 
-            if (Client.Game.UO.Version >= Utility.ClientVersion.CV_200)
+            if (Client.Game.UO.Version >= ClassicUO.Sdk.ClientVersion.CV_200)
             {
                 if (ProfileManager.CurrentProfile != null)
                 {
@@ -940,7 +940,7 @@ namespace ClassicUO.Network
             }
 
             if (
-                Client.Game.UO.Version >= Utility.ClientVersion.CV_70796
+                Client.Game.UO.Version >= ClassicUO.Sdk.ClientVersion.CV_70796
                 && ProfileManager.CurrentProfile != null
             )
             {
@@ -1427,7 +1427,7 @@ namespace ClassicUO.Network
 
                     // TODO: check client version ?
                     if (
-                        Client.Game.UO.Version >= Utility.ClientVersion.CV_706000
+                        Client.Game.UO.Version >= ClassicUO.Sdk.ClientVersion.CV_706000
                         && ProfileManager.CurrentProfile != null
                         && ProfileManager.CurrentProfile.UseLargeContainerGumps
                     )
@@ -1570,7 +1570,7 @@ namespace ClassicUO.Network
             ushort x = p.ReadUInt16BE();
             ushort y = p.ReadUInt16BE();
 
-            if (Client.Game.UO.Version >= Utility.ClientVersion.CV_6017)
+            if (Client.Game.UO.Version >= ClassicUO.Sdk.ClientVersion.CV_6017)
             {
                 p.Skip(1);
             }
@@ -2103,7 +2103,7 @@ namespace ClassicUO.Network
                 ushort x = p.ReadUInt16BE();
                 ushort y = p.ReadUInt16BE();
 
-                if (Client.Game.UO.Version >= Utility.ClientVersion.CV_6017)
+                if (Client.Game.UO.Version >= ClassicUO.Sdk.ClientVersion.CV_6017)
                 {
                     p.Skip(1);
                 }
@@ -2246,12 +2246,12 @@ namespace ClassicUO.Network
                 NetClient.Socket.Send_SkillsRequest(world.Player);
                 scene.DoubleClickDelayed(world.Player);
 
-                if (Client.Game.UO.Version >= Utility.ClientVersion.CV_306E)
+                if (Client.Game.UO.Version >= ClassicUO.Sdk.ClientVersion.CV_306E)
                 {
                     NetClient.Socket.Send_ClientType();
                 }
 
-                if (Client.Game.UO.Version >= Utility.ClientVersion.CV_305D)
+                if (Client.Game.UO.Version >= ClassicUO.Sdk.ClientVersion.CV_305D)
                 {
                     NetClient.Socket.Send_ClientViewRange(world.ClientViewRange);
                 }
@@ -2904,7 +2904,7 @@ namespace ClassicUO.Network
                 byte layer = p.ReadUInt8();
                 ushort item_hue = 0;
 
-                if (Client.Game.UO.Version >= Utility.ClientVersion.CV_70331)
+                if (Client.Game.UO.Version >= ClassicUO.Sdk.ClientVersion.CV_70331)
                 {
                     item_hue = p.ReadUInt16BE();
                 }
@@ -3156,7 +3156,7 @@ namespace ClassicUO.Network
             MapGump gump = new MapGump(world, serial, gumpid, width, height);
             SpriteInfo multiMapInfo;
 
-            if (p[0] == 0xF5 || Client.Game.UO.Version >= Utility.ClientVersion.CV_308Z)
+            if (p[0] == 0xF5 || Client.Game.UO.Version >= ClassicUO.Sdk.ClientVersion.CV_308Z)
             {
                 ushort facet = 0;
 
@@ -4010,7 +4010,7 @@ namespace ClassicUO.Network
         {
             LockedFeatureFlags flags = 0;
 
-            if (Client.Game.UO.Version >= Utility.ClientVersion.CV_60142)
+            if (Client.Game.UO.Version >= ClassicUO.Sdk.ClientVersion.CV_60142)
             {
                 flags = (LockedFeatureFlags)p.ReadUInt32BE();
             }
@@ -4050,7 +4050,7 @@ namespace ClassicUO.Network
 
             uint serial = 0;
 
-            if (Client.Game.UO.Version >= Utility.ClientVersion.CV_7090)
+            if (Client.Game.UO.Version >= ClassicUO.Sdk.ClientVersion.CV_7090)
             {
                 serial = p.ReadUInt32BE();
             }
@@ -4977,7 +4977,7 @@ namespace ClassicUO.Network
                 switch (cliloc)
                 {
                     case 1080418:
-                        if (Client.Game.UO.Version >= Utility.ClientVersion.CV_60143)
+                        if (Client.Game.UO.Version >= ClassicUO.Sdk.ClientVersion.CV_60143)
                             str = "<basefont color=#40a4fe>" + str + "</basefont>";
                         break;
                     case 1061170:

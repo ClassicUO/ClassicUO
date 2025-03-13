@@ -2,7 +2,7 @@
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
-using ClassicUO.Assets;
+using ClassicUO.Sdk.Assets;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 

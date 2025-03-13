@@ -1,15 +1,13 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
-using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using ClassicUO.Input;
-using ClassicUO.Assets;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using ClassicUO.Utility.Platforms;
 using Microsoft.Xna.Framework;
+using ClassicUO.Sdk.Assets;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -273,7 +271,7 @@ namespace ClassicUO.Game.UI.Controls
 
                         bool inbounds = link.Bounds.Contains(x, (_scrollBar == null ? 0 : _scrollBar.Value) + y);
 
-                        if (inbounds && Client.Game.UO.FileManager.Fonts.GetWebLink(link.LinkID, out WebLink result))
+                        if (inbounds && Client.Game.UO.FileManager.Fonts.GetWebLink(link.LinkID, out var result))
                         {
                             Log.Info("LINK CLICKED: " + result.Link);
 

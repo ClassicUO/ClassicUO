@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using ClassicUO.Renderer;
+using ClassicUO.Sdk;
 using ClassicUO.Utility;
 
 namespace ClassicUO.Game.UI.Controls

@@ -1,4 +1,4 @@
-using ClassicUO.Assets;
+using ClassicUO.Sdk.Assets;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Renderer.Texmaps

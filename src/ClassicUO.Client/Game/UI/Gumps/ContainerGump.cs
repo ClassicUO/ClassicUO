@@ -10,9 +10,10 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
-using ClassicUO.Assets;
+using ClassicUO.Sdk.Assets;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
+using ClassicUO.Sdk;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -47,7 +48,7 @@ namespace ClassicUO.Game.UI.Gumps
             // New Backpack gumps. Client Version 7.0.53.1
             if (
                 item == world.Player.FindItemByLayer(Layer.Backpack)
-                && Client.Game.UO.Version >= ClassicUO.Utility.ClientVersion.CV_705301
+                && Client.Game.UO.Version >= ClientVersion.CV_705301
                 && ProfileManager.CurrentProfile != null
             )
             {

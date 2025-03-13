@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
-using ClassicUO.Assets;
+using ClassicUO.Sdk.Assets;
 
 namespace ClassicUO.Game.UI.Gumps.CharCreation
 {
@@ -18,7 +18,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         {
             _Parent = parent;
 
-            if (parent == null || !Client.Game.UO.FileManager.Professions.Professions.TryGetValue(parent, out List<ProfessionInfo> professions) || professions == null)
+            if (parent == null || !Client.Game.UO.FileManager.Professions.Professions.TryGetValue(parent, out var professions) || professions == null)
             {
                 professions = new List<ProfessionInfo>(Client.Game.UO.FileManager.Professions.Professions.Keys);
             }

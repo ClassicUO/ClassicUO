@@ -1270,8 +1270,11 @@ namespace ClassicUO.Assets
                 frameData = CollectionsMarshal.AsSpan(list);
                 var maxFrameCount = frameData.Length;
 
-                // Looks like the min amount of frames is 10
-                var realFrameCount = Math.Max(10, (int)Math.Round(maxFrameCount / (float)MAX_DIRECTIONS));
+                // Looks like the min amount of frames is 10 for equipment
+                var realFrameCount = type == AnimationGroupsType.Equipment ?
+                    Math.Max(10, (int)Math.Round(maxFrameCount / (float)MAX_DIRECTIONS))
+                    :
+                    (int)Math.Round(maxFrameCount / (float)MAX_DIRECTIONS);
 
 
                 if (realFrameCount > _frames.Length)

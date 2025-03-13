@@ -1,10 +1,9 @@
-﻿using ClassicUO.Assets;
-using ClassicUO.Game.Data;
-using ClassicUO.IO;
+﻿using ClassicUO.Game.Data;
 using ClassicUO.Utility.Logging;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using ClassicUO.Sdk;
 
 namespace ClassicUO.Game.Managers
 {
@@ -135,7 +134,7 @@ namespace ClassicUO.Game.Managers
                 case "UPPER_LEGS_BOTTOM": return Layer.Invalid;
                 case "LOWER_LEGS_TOP": return Layer.Invalid;
                 case "LOWER_LEGS_BOTTOM": return Layer.Invalid;
-                case "FEET": return Layer.Shoes;   
+                case "FEET": return Layer.Shoes;
             }
 
             Log.Warn($"layer not handled: {layerName}");

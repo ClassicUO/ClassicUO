@@ -1,5 +1,4 @@
-using ClassicUO.Assets;
-using Microsoft.Xna.Framework;
+using ClassicUO.Sdk.Assets;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Renderer.Lights
