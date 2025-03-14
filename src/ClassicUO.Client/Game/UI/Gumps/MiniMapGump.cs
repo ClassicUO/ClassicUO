@@ -275,7 +275,7 @@ namespace ClassicUO.Game.UI.Gumps
                         break;
                     }
 
-                    ref var indexMap = ref World.Map.GetIndex(i, j);
+                    ref readonly var indexMap = ref World.Map.GetIndex(i, j);
 
                     if (!indexMap.IsValid())
                     {

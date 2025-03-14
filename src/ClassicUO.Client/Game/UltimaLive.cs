@@ -374,8 +374,7 @@ namespace ClassicUO.Game
                     if (_UL._ValidMaps.Count == 0 || validMaps.Count > _UL._ValidMaps.Count || !validMaps.TrueForAll(i => _UL._ValidMaps.Contains(i)))
                     {
                         _UL._ValidMaps = validMaps;
-                        MapLoader.MAPS_COUNT = sbyte.MaxValue;
-                        var mapLoader = new ULMapLoader(Client.Game.UO.FileManager, (uint)MapLoader.MAPS_COUNT);
+                        var mapLoader = new ULMapLoader(Client.Game.UO.FileManager, (uint)sbyte.MaxValue);
 
                         //for (int i = 0; i < maps; i++)
                         for (int i = 0; i < validMaps.Count; i++)
@@ -386,9 +385,9 @@ namespace ClassicUO.Game
                         mapLoader.Load();
 
                         _UL._ULMap = mapLoader;
-                        _UL._filesMap = new ULFileMul[MapLoader.MAPS_COUNT];
-                        _UL._filesIdxStatics = new ULFileMul[MapLoader.MAPS_COUNT];
-                        _UL._filesStatics = new ULFileMul[MapLoader.MAPS_COUNT];
+                        _UL._filesMap = new ULFileMul[mapLoader.MapsCount];
+                        _UL._filesIdxStatics = new ULFileMul[mapLoader.MapsCount];
+                        _UL._filesStatics = new ULFileMul[mapLoader.MapsCount];
                         (FileReader[], FileReader[], FileReader[]) refs = mapLoader.GetFilesReference;
 
                         for (int i = 0; i < validMaps.Count; i++)
@@ -692,8 +691,6 @@ namespace ClassicUO.Game
 
             public ULMapLoader(UOFileManager fileManager, uint maps) : base(fileManager)
             {
-                Initialize();
-
                 _feedCancel = new CancellationTokenSource();
                 NumMaps = maps;
                 var old = _UL.MapSizeWrapSize;

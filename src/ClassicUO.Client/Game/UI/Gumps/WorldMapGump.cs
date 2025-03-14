@@ -278,7 +278,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             _options["free_view"] = new ContextMenuItemEntry(ResGumps.FreeView, () => { FreeView = !FreeView; }, true, FreeView);
 
-            for (int i = 0; i < MapLoader.MAPS_COUNT; i++)
+            for (int i = 0; i < Client.Game.UO.FileManager.Maps.MapsCount; i++)
             {
                 var idx = i;
 
@@ -502,7 +502,7 @@ namespace ClassicUO.Game.UI.Gumps
             ContextMenuItemEntry freeView = new ContextMenuItemEntry(ResGumps.FreeView);
             freeView.Add(_options["free_view"]);
 
-            for (int i = 0; i < MapLoader.MAPS_COUNT; i++)
+            for (int i = 0; i < Client.Game.UO.FileManager.Maps.MapsCount; i++)
                 freeView.Add(_options[$"free_view_map_{i}"]);
 
             ContextMenu.Add(freeView);
@@ -1100,7 +1100,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private unsafe void LoadMap(int mapIndex)
         {
-            if (mapIndex < 0 || mapIndex > MapLoader.MAPS_COUNT)
+            if (mapIndex < 0 || mapIndex > Client.Game.UO.FileManager.Maps.MapsCount)
             {
                 return;
             }
@@ -1196,7 +1196,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                             for (by = 0; by < fixedHeight; ++by)
                             {
-                                ref var indexMap = ref map.GetIndex(bx, by);
+                                ref readonly var indexMap = ref map.GetIndex(bx, by);
 
                                 if (!indexMap.IsValid())
                                 {

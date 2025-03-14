@@ -150,7 +150,7 @@ namespace ClassicUO.Game
 
                         Map = null;
 
-                        if (value >= MapLoader.MAPS_COUNT)
+                        if (value >= Client.Game.UO.FileManager.Maps.MapsCount)
                         {
                             value = 0;
                         }

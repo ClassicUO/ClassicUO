@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Runtime.CompilerServices;
@@ -962,9 +963,8 @@ namespace ClassicUO.Sdk.Assets
                             ptr.MaxHeight = 14;
                         }
 
-                        //ptr.CharCount = charCount;
                         charCount = 0;
-                        // ptr.Data.Length = ptr.CharCount;
+                        ptr.Data.RemoveRange(ptr.CharCount, ptr.Data.Count - ptr.CharCount);
 
                         if (isFixed || isCropped)
                         {
@@ -1524,10 +1524,8 @@ namespace ClassicUO.Sdk.Assets
                             ptr.MaxHeight = 14 + extraheight;
                         }
 
-                        //ptr.CharCount = charCount;
-
                         charCount = 0;
-                        // ptr.Data.Length = ptr.CharCount;
+                        ptr.Data.RemoveRange(ptr.CharCount, ptr.Data.Count - ptr.CharCount);
 
                         if (isFixed || isCropped)
                         {
@@ -1832,7 +1830,7 @@ namespace ClassicUO.Sdk.Assets
                             oldLink = 0;
                         }
 
-                        if (@char.Data == null)
+                        if (@char.Data == null && si != ' ')
                         {
                             continue;
                         }
@@ -2340,7 +2338,8 @@ namespace ClassicUO.Sdk.Assets
                         }
 
                         ptr.MaxHeight = MAX_HTML_TEXT_HEIGHT;
-                        // ptr.Data.Length = ptr.CharCount;
+                        ptr.Data.RemoveRange(ptr.CharCount, ptr.Data.Count - ptr.CharCount);
+
                         MultilinesFontInfo newptr = new MultilinesFontInfo();
                         newptr.Reset();
                         ptr.Next = newptr;
@@ -2427,7 +2426,8 @@ namespace ClassicUO.Sdk.Assets
                         }
 
                         ptr.MaxHeight = MAX_HTML_TEXT_HEIGHT;
-                        // ptr.Data.Length = ptr.CharCount;
+                        ptr.Data.RemoveRange(ptr.CharCount, ptr.Data.Count - ptr.CharCount);
+
                         charCount = 0;
 
                         if (isFixed || isCropped)
@@ -3784,6 +3784,7 @@ namespace ClassicUO.Sdk.Assets
         }
     }
 
+    [DebuggerDisplay("Char: {Item}")]
     public struct MultilinesFontData
     {
         public MultilinesFontData(uint color, ushort flags, byte font, char item, ushort linkid)

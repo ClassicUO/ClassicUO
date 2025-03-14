@@ -11,8 +11,8 @@ namespace ClassicUO.Sdk.Assets
 {
     public sealed class MultiMapLoader : UOFileLoader
     {
-        private UOFileMul[] _facets;
-        private UOFile _file;
+        private UOFileMul[]? _facets;
+        private UOFile? _file;
 
         public MultiMapLoader(UOFileManager fileManager) : base(fileManager)
         {
@@ -20,7 +20,7 @@ namespace ClassicUO.Sdk.Assets
 
         public bool HasFacet(int map)
         {
-            return map >= 0 && map < _facets.Length && _facets[map] != null;
+            return _facets != null && map >= 0 && map < _facets.Length && _facets[map] != null;
         }
 
         public override void Load()
@@ -196,7 +196,7 @@ namespace ClassicUO.Sdk.Assets
             int endy
         )
         {
-            if (_file == null || facet < 0 || facet > MapLoader.MAPS_COUNT || facet >= _facets.Length || _facets[facet] == null)
+            if (_facets == null || _file == null || facet < 0 || facet > FileManager.Maps.MapsCount || facet >= _facets.Length || _facets[facet] == null)
             {
                 return default;
             }

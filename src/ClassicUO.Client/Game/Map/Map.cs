@@ -111,7 +111,7 @@ namespace ClassicUO.Game.Map
                 return -125;
             }
 
-            ref var blockIndex = ref GetIndex(x >> 3, y >> 3);
+            ref readonly var blockIndex = ref GetIndex(x >> 3, y >> 3);
 
             if (!blockIndex.IsValid())
             {
@@ -219,14 +219,14 @@ namespace ClassicUO.Game.Map
         }
 
 
-        public ref IndexMap GetIndex(int blockX, int blockY)
+        public ref readonly IndexMap GetIndex(int blockX, int blockY)
         {
             int block = GetBlock(blockX, blockY);
             int map = Index;
             Client.Game.UO.FileManager.Maps.SanitizeMapIndex(ref map);
-            IndexMap[] list = Client.Game.UO.FileManager.Maps.BlockData[map];
+            var list = Client.Game.UO.FileManager.Maps.BlockData[map];
 
-            return ref block >= list.Length ? ref IndexMap.Invalid : ref list[block];
+            return ref list == null || block >= list.Length ? ref IndexMap.Invalid : ref list[block];
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
