@@ -5,15 +5,15 @@ using System.Net.Sockets;
 using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
-using ClassicUO.Utility.Logging;
 using TcpSocket = System.Net.Sockets.Socket;
 using static System.Buffers.ArrayPool<byte>;
+using ClassicUO.Sdk;
 
 namespace ClassicUO.Network.Socket;
 
 /// <summary>
 /// Handles websocket connections to shards that support it. `ws(s)://[hostname]` as the ip in settings.json.
-/// For testing see `tools/ws/README.md` 
+/// For testing see `tools/ws/README.md`
 /// </summary>
 sealed class WebSocketWrapper : SocketWrapper
 {
@@ -120,7 +120,7 @@ sealed class WebSocketWrapper : SocketWrapper
 
         Log.Trace($"Connected WebSocket: {uri}");
 
-        // Kicks off the async receiving loop 
+        // Kicks off the async receiving loop
         StartReceiveAsync().ConfigureAwait(false);
     }
 

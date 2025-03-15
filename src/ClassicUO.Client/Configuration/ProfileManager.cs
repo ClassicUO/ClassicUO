@@ -34,10 +34,10 @@ namespace ClassicUO.Configuration
 
         public static void Load(string servername, string username, string charactername)
         {
-            string path = FileSystemHelper.CreateFolderIfNotExists(RootPath, username, servername, charactername);
-            string fileToLoad = Path.Combine(path, "profile.json");
+            var path = Directory.CreateDirectory(Path.Combine(RootPath, username, servername, charactername));
+            string fileToLoad = Path.Combine(path.FullName, "profile.json");
 
-            ProfilePath = path;
+            ProfilePath = path.FullName;
             CurrentProfile = ConfigurationResolver.Load<Profile>(fileToLoad, ProfileJsonContext.DefaultToUse.Profile) ?? NewFromDefault();
 
             CurrentProfile.Username = username;

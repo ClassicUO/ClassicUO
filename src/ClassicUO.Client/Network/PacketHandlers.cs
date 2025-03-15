@@ -12,13 +12,12 @@ using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Renderer;
 using ClassicUO.Resources;
 using ClassicUO.Sdk.IO;
-using ClassicUO.Utility;
-using ClassicUO.Utility.Logging;
-using ClassicUO.Utility.Platforms;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using ClassicUO.Sdk;
+using ClassicUO.Platforms;
 
 namespace ClassicUO.Network
 {
@@ -3571,9 +3570,7 @@ namespace ClassicUO.Network
                     if (p.Length > 48)
                     {
                         p.Seek(48);
-                        Log.PushIndent();
                         Log.Warn("Handled UnicodeTalk in LoginScene");
-                        Log.PopIndent();
                     }
                 }
 
@@ -4731,7 +4728,7 @@ namespace ClassicUO.Network
                     break;
 
                 default:
-                    Log.Warn($"Unhandled 0xBF - sub: {cmd.ToHex()}");
+                    Log.Warn($"Unhandled 0xBF - sub: 0x{cmd:X2}");
 
                     break;
             }
@@ -5106,7 +5103,7 @@ namespace ClassicUO.Network
 
             try
             {
-                var result = ZLib.Decompress(source.Slice(sourcePosition, clen), span.Slice(0, dlen));
+                Decompressor.Zlib(source.Slice(sourcePosition, clen), span.Slice(0, dlen));
                 var reader = new StackDataReader(span.Slice(0, dlen));
 
                 ushort id = 0;
@@ -5373,8 +5370,7 @@ namespace ClassicUO.Network
 
             try
             {
-                ZLib.Decompress(p.Buffer.Slice(p.Position, (int)clen), decData.AsSpan(0, dlen));
-
+                Decompressor.Zlib(p.Buffer.Slice(p.Position, (int)clen), decData.AsSpan(0, dlen));
                 layout = Encoding.UTF8.GetString(decData.AsSpan(0, dlen));
             }
             finally
@@ -5397,7 +5393,7 @@ namespace ClassicUO.Network
 
                     try
                     {
-                        ZLib.Decompress(p.Buffer.Slice(p.Position, (int)clen), decData.AsSpan(0, dlen));
+                        Decompressor.Zlib(p.Buffer.Slice(p.Position, (int)clen), decData.AsSpan(0, dlen));
                         p.Skip((int)clen);
 
                         var reader = new StackDataReader(decData.AsSpan(0, dlen));

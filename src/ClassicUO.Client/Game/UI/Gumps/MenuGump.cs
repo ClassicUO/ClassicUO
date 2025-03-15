@@ -2,10 +2,8 @@
 
 using System.Linq;
 using ClassicUO.Game.UI.Controls;
-using ClassicUO.Sdk.Assets;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
-using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps

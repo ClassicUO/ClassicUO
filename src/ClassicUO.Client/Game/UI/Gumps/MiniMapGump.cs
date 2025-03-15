@@ -14,6 +14,7 @@ using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.Runtime.CompilerServices;
+using ClassicUO.Sdk;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -435,7 +436,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (data[block] == 0xFF080808)
                 {
-                    data[block] = HuesHelper.Color16To32((ushort)color) | 0xFF_00_00_00;
+                    data[block] = ColorConverter.Color16To32((ushort)color) | 0xFF_00_00_00;
                 }
             }
         }

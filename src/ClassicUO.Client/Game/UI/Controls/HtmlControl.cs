@@ -3,11 +3,10 @@
 using System.Collections.Generic;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
-using ClassicUO.Utility;
-using ClassicUO.Utility.Logging;
-using ClassicUO.Utility.Platforms;
 using Microsoft.Xna.Framework;
 using ClassicUO.Sdk.Assets;
+using ClassicUO.Sdk;
+using ClassicUO.Platforms;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -115,7 +114,7 @@ namespace ClassicUO.Game.UI.Controls
                         }
                         else
                         {
-                            htmlColor = (HuesHelper.Color16To32((ushort) hue) << 8) | 0xFF;
+                            htmlColor = (ColorConverter.Color16To32((ushort) hue) << 8) | 0xFF;
                         }
                     }
                     else if (!HasBackground)

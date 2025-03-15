@@ -431,9 +431,9 @@ namespace ClassicUO.Game.UI.Gumps
                         _iconTexture?.Dispose();
                         _iconTexture = new DrawTexture(editedMarker.MarkerIcon);
                     }
-                        
 
-                    EditMarkerEvent.Raise();
+
+                    EditMarkerEvent?.Invoke(null, EventArgs.Empty);
                 }
             }
 
@@ -453,7 +453,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         break;
                     case (int)ButtonsOption.REMOVE_MARKER_BTN:
-                        RemoveMarkerEvent.Raise(_idx);
+                        RemoveMarkerEvent?.Invoke( _idx, EventArgs.Empty);
                         break;
                     case (int)ButtonsOption.GOTO_MARKER_BTN:
                         var wmGump = UIManager.GetGump<WorldMapGump>();

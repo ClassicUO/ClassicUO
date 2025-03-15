@@ -6,7 +6,6 @@ using ClassicUO.Game.Map;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Sdk.Assets;
 using ClassicUO.Network;
-using ClassicUO.Utility.Logging;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;

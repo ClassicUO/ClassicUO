@@ -3,13 +3,10 @@
 using ClassicUO.Configuration;
 using ClassicUO.Game;
 using ClassicUO.Game.Managers;
-using ClassicUO.IO;
 using ClassicUO.Network;
+using ClassicUO.Platforms;
 using ClassicUO.Resources;
 using ClassicUO.Sdk;
-using ClassicUO.Utility;
-using ClassicUO.Utility.Logging;
-using ClassicUO.Utility.Platforms;
 using SDL2;
 using System;
 using System.Globalization;
@@ -44,7 +41,7 @@ namespace ClassicUO
         {
             CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
 
-            Log.Start(LogTypes.All);
+            // Log.Start(LogTypes.All);
 
             DllMap.Init();
 

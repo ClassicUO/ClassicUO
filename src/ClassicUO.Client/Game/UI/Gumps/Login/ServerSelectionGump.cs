@@ -1,16 +1,11 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
 using System.Linq;
-using System.Net;
 using System.Net.NetworkInformation;
-using ClassicUO.Configuration;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
-using ClassicUO.Sdk.Assets;
 using ClassicUO.Resources;
-using ClassicUO.Utility;
-using ClassicUO.Utility.Logging;
 using SDL2;
 using ClassicUO.Sdk;
 

@@ -7,10 +7,8 @@ using System.Text;
 using System.Xml;
 using ClassicUO.Configuration;
 using ClassicUO.Game.UI.Gumps;
-using ClassicUO.IO;
-using ClassicUO.Sdk.Assets;
 using ClassicUO.Resources;
-using ClassicUO.Utility.Logging;
+using ClassicUO.Sdk;
 
 namespace ClassicUO.Game.Managers
 {

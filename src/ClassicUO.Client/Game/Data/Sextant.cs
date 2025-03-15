@@ -1,6 +1,6 @@
 using System;
 using System.Text.RegularExpressions;
-using ClassicUO.Utility.Logging;
+using ClassicUO.Sdk;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Data;
@@ -11,7 +11,7 @@ namespace ClassicUO.Game.Data;
 internal static partial class Sextant
 {
     public static readonly Point InvalidPoint = new(-1, -1);
-    
+
     [GeneratedRegex(@"(?<LatDegrees>\d{1,3})[°o\s]*(?<LatMinutes>\d{2})'(?<LatDirection>[NS])[\s,]*(?<LongDegrees>\d{1,3})[°o\s]*(?<LongMinutes>\d{2})'(?<LongDirection>[EW])")]
     private static partial Regex SextantCoordsRegex();
 
@@ -24,7 +24,7 @@ internal static partial class Sextant
     public static bool Parse(Map.Map map, string coords, out Point point)
     {
         Match match = SextantCoordsRegex().Match(coords.Trim());
-        
+
         point = InvalidPoint;
 
         try
@@ -50,7 +50,7 @@ internal static partial class Sextant
         {
             Log.Trace($"Failed to parse sextant coords \"{coords}\": {e.Message}");
         }
-        
+
         return false;
     }
 
@@ -64,7 +64,7 @@ internal static partial class Sextant
 
         var isTrammel = map.Index == 0 && mapWidth == 7168 && mapHeight == 4096;
         var isFelucca = map.Index == 1 && mapWidth == 7168 && mapHeight == 4096;
-        
+
         if (isTrammel || isFelucca)
         {
             switch (x)

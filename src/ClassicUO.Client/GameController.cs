@@ -13,8 +13,6 @@ using ClassicUO.Network;
 using ClassicUO.Network.Encryption;
 using ClassicUO.Renderer;
 using ClassicUO.Resources;
-using ClassicUO.Utility;
-using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -23,6 +21,7 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using static SDL2.SDL;
+using ClassicUO.Sdk;
 
 namespace ClassicUO
 {
@@ -830,15 +829,15 @@ namespace ClassicUO
 
         private void TakeScreenshot()
         {
-            string screenshotsFolder = FileSystemHelper.CreateFolderIfNotExists(
+            var screenshotsFolder = Directory.CreateDirectory(Path.Combine(
                 CUOEnviroment.ExecutablePath,
                 "Data",
                 "Client",
                 "Screenshots"
-            );
+            ));
 
             string path = Path.Combine(
-                screenshotsFolder,
+                screenshotsFolder.FullName,
                 $"screenshot_{DateTime.Now:yyyy-MM-dd_hh-mm-ss}.png"
             );
 

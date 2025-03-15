@@ -40,7 +40,7 @@ namespace ClassicUO.Game.UI.Controls
                     _value = MaxValue;
                 }
 
-                ValueChanged.Raise();
+                ValueChanged?.Invoke(this, EventArgs.Empty);
             }
         }
 

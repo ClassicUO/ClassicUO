@@ -3,6 +3,7 @@
 using ClassicUO.Game.Data;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
+using ClassicUO.Sdk;
 using ClassicUO.Sdk.Assets;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
@@ -40,7 +41,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (item.ReplacedHue != 0)
                 {
-                    uint h = (HuesHelper.Color16To32(item.ReplacedHue) << 8) | 0xFF;
+                    uint h = (ColorConverter.Color16To32(item.ReplacedHue) << 8) | 0xFF;
 
                     Client.Game.UO.FileManager.Fonts.SetUseHTML(true, h);
                 }

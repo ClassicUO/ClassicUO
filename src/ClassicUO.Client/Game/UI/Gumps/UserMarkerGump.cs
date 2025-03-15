@@ -268,7 +268,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             _markers[_markerIdx] = editedMarker;
 
-            EditEnd.Raise(editedMarker);
+            EditEnd?.Invoke(editedMarker, EventArgs.Empty);
 
             Dispose();
         }

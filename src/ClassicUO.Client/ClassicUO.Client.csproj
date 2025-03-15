@@ -35,7 +35,7 @@
     <ProjectReference Include="..\..\external\FNA\FNA.Core.csproj" />
     <ProjectReference Include="..\ClassicUO.Sdk\ClassicUO.Sdk.csproj" />
     <ProjectReference Include="..\ClassicUO.Renderer\ClassicUO.Renderer.csproj" />
-    <ProjectReference Include="..\ClassicUO.Utility\ClassicUO.Utility.csproj" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="3.1.5" />
   </ItemGroup>
 
   <ItemGroup>

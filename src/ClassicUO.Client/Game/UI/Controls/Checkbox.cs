@@ -107,7 +107,7 @@ namespace ClassicUO.Game.UI.Controls
 
         protected virtual void OnCheckedChanged()
         {
-            ValueChanged.Raise(this);
+            ValueChanged?.Invoke(this, EventArgs.Empty);
         }
 
         protected override void OnMouseUp(int x, int y, MouseButtonType button)

@@ -7,7 +7,7 @@ using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Resources;
-using ClassicUO.Utility.Logging;
+using ClassicUO.Sdk;
 
 namespace ClassicUO.Game.Managers
 {

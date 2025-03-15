@@ -1,12 +1,9 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
 using ClassicUO.Network.Encryption;
-using ClassicUO.Utility;
-using ClassicUO.Utility.Logging;
 using System;
 using System.Net;
 using System.Net.Sockets;
-using System.Net.WebSockets;
 using ClassicUO.Network.Socket;
 using ClassicUO.Sdk;
 

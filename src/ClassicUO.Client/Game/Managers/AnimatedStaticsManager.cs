@@ -2,17 +2,15 @@
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
-using ClassicUO.IO;
 using ClassicUO.Sdk.Assets;
-using ClassicUO.Utility.Collections;
-using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
 namespace ClassicUO.Game.Managers
 {
     sealed class AnimatedStaticsManager
     {
-        private readonly FastList<StaticAnimationInfo> _staticInfos = new FastList<StaticAnimationInfo>();
+        private readonly List<StaticAnimationInfo> _staticInfos = new List<StaticAnimationInfo>();
         private uint _processTime;
 
 
@@ -50,7 +48,7 @@ namespace ClassicUO.Game.Managers
 
         public unsafe void Process()
         {
-            if (_staticInfos == null || _staticInfos.Length == 0 || _processTime >= Time.Ticks)
+            if (_staticInfos == null || _staticInfos.Count == 0 || _processTime >= Time.Ticks)
             {
                 return;
             }
@@ -69,10 +67,8 @@ namespace ClassicUO.Game.Managers
             bool no_animated_field = ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.FieldsType != 0;
             var static_data = Client.Game.UO.FileManager.Arts.File.Entries;
 
-            for (int i = 0; i < _staticInfos.Length; i++)
+            foreach (ref var o in CollectionsMarshal.AsSpan(_staticInfos))
             {
-                ref StaticAnimationInfo o = ref _staticInfos.Buffer[i];
-
                 if (no_animated_field && o.IsField)
                 {
                     o.AnimIndex = 0;

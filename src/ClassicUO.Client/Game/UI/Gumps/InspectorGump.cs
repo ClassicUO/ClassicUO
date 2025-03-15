@@ -2,13 +2,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Controls;
-using ClassicUO.Renderer;
 using ClassicUO.Resources;
-using ClassicUO.Utility;
-using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 using SDL2;
 
@@ -192,24 +190,22 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (buttonID == 0) // dump
             {
-                Dictionary<string, string> dict = GetGameObjectProperties(_obj);
+                var dict = GetGameObjectProperties(_obj);
 
-                if (dict != null)
+                if (dict == null)
                 {
-                    using (LogFile writer = new LogFile(CUOEnviroment.ExecutablePath, "dump_gameobject.txt"))
-                    {
-                        writer.Write("###################################################");
-                        writer.Write($"CUO version: {CUOEnviroment.Version}");
-                        writer.Write($"OBJECT TYPE: {_obj.GetType()}");
+                    return;
+                }
 
-                        foreach (KeyValuePair<string, string> item in dict.OrderBy(s => s.Key))
-                        {
-                            writer.Write($"{item.Key} = {item.Value}");
-                        }
+                using var stream = File.OpenWrite(Path.Combine(CUOEnviroment.ExecutablePath, $"dump_gameobject_{_obj.Graphic:X4}.txt"));
+                using var writer = new StreamWriter(stream);
 
-                        writer.Write("###################################################");
-                        writer.Write("");
-                    }
+                writer.Write($"CUO version: {CUOEnviroment.Version}");
+                writer.Write($"OBJECT TYPE: {_obj.GetType()}");
+
+                foreach (var item in dict.OrderBy(s => s.Key))
+                {
+                    writer.Write($"{item.Key} = {item.Value}");
                 }
             }
         }

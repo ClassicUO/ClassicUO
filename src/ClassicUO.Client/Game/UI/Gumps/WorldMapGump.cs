@@ -12,25 +12,23 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
-using ClassicUO.IO;
 using ClassicUO.Sdk.Assets;
 using ClassicUO.Renderer;
 using ClassicUO.Resources;
-using ClassicUO.Utility;
-using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SDL2;
 using SpriteFont = ClassicUO.Renderer.SpriteFont;
 using System.Text.Json.Serialization;
 using static ClassicUO.Game.UI.Gumps.WorldMapGump;
-using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Formats.Png;
 using ClassicUO.Network.Encryption;
 using System.Text;
 using System.Runtime.InteropServices;
 using System.Threading;
 using ClassicUO.Sdk.IO;
+using ClassicUO.Sdk;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Formats.Jpeg;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -344,7 +342,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             _options["reset_map_cache"] = new ContextMenuItemEntry(ResGumps.ResetMapsCache, () =>
             {
-                Directory.GetFiles(_mapsCachePath, "*.png").ForEach(s => File.Delete(s));
+                foreach (var s in Directory.GetFiles(_mapsCachePath, "*.png"))
+                    File.Delete(s);
             }, false);
         }
 
@@ -1222,7 +1221,7 @@ namespace ClassicUO.Game.UI.Gumps
                                     {
                                         ushort color = (ushort)(0x8000 | huesLoader.GetRadarColorData(cells[pos].TileID & 0x3FFF));
 
-                                        imgSpan[block].PackedValue = HuesHelper.Color16To32(color) | 0xFF_00_00_00;
+                                        imgSpan[block].PackedValue = ColorConverter.Color16To32(color) | 0xFF_00_00_00;
                                         allZ[block] = cells[pos].Z;
                                     }
                                 }
@@ -1250,7 +1249,7 @@ namespace ClassicUO.Game.UI.Gumps
                                         {
                                             var color = (ushort)(0x8000 | (sb.Hue != 0 ? huesLoader.GetColor16(16384, sb.Hue) : huesLoader.GetRadarColorData(sb.Color + 0x4000)));
 
-                                            imgSpan[block].PackedValue = HuesHelper.Color16To32(color) | 0xFF_00_00_00;
+                                            imgSpan[block].PackedValue = ColorConverter.Color16To32(color) | 0xFF_00_00_00;
                                             allZ[block] = sb.Z;
                                         }
                                     }
@@ -1312,31 +1311,9 @@ namespace ClassicUO.Game.UI.Gumps
                             }
                         }
 
-
-                        //var quantizer = new OctreeQuantizer();
-                        //for (var i = 0; i < buffer.Length; i++)
-                        //{
-                        //    quantizer.AddColor(buffer[i]);
-                        //}
-
-                        //var palette = quantizer.GetPalette(256);
-
-                        //for (var i = 0; i < buffer.Length; i++)
-                        //{
-                        //    var paletteIndex = quantizer.GetPaletteIndex(buffer[i]);
-                        //    buffer[i] = palette[paletteIndex];
-                        //}
-
-                        //quantizer.Clear();
-
-                        var imageEncoder = new PngEncoder
+                        var imageEncoder = new JpegEncoder()
                         {
-                            ColorType = PngColorType.Palette,
-                            CompressionLevel = PngCompressionLevel.DefaultCompression,
-                            SkipMetadata = true,
-                            FilterMethod = PngFilterMethod.None,
-                            ChunkFilter = PngChunkFilter.ExcludeAll,
-                            TransparentColorMode = PngTransparentColorMode.Clear,
+                            Quality = 100
                         };
 
                         Directory.CreateDirectory(_mapsCachePath);

@@ -249,14 +249,14 @@ namespace ClassicUO.Game.UI.Controls
             switch ((ButtonState) buttonID)
             {
                 case ButtonState.Ok:
-                    HotkeyChanged.Raise(this);
+                    HotkeyChanged?.Invoke(this, EventArgs.Empty);
 
                     break;
 
                 case ButtonState.Cancel:
                     _label.Text = string.Empty;
 
-                    HotkeyCancelled.Raise(this);
+                    HotkeyCancelled?.Invoke(this, EventArgs.Empty);
 
                     Key = SDL.SDL_Keycode.SDLK_UNKNOWN;
                     Mod = SDL.SDL_Keymod.KMOD_NONE;

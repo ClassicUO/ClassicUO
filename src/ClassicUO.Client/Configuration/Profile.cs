@@ -14,7 +14,7 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
-using ClassicUO.Utility.Logging;
+using ClassicUO.Sdk;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Configuration

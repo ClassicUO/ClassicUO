@@ -210,8 +210,8 @@ namespace ClassicUO.Game.Managers
                     break;
             }
 
-            MessageReceived.Raise
-            (
+            MessageReceived?.Invoke(
+                parent,
                 new MessageEventArgs
                 (
                     parent,
@@ -223,14 +223,13 @@ namespace ClassicUO.Game.Managers
                     textType,
                     unicode,
                     lang
-                ),
-                parent
+                )
             );
         }
 
         public void OnLocalizedMessage(Entity entity, MessageEventArgs args)
         {
-            LocalizedMessageReceived.Raise(args, entity);
+            LocalizedMessageReceived?.Invoke(entity, args);
         }
 
         public TextObject CreateMessage

@@ -6,12 +6,11 @@ using System.Diagnostics;
 using ClassicUO.Game.Managers;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
-using ClassicUO.Utility;
-using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 using SDL2;
 using StbTextEditSharp;
 using ClassicUO.Sdk.Assets;
+using ClassicUO.Sdk;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -431,7 +430,7 @@ namespace ClassicUO.Game.UI.Controls
 
         protected virtual void OnTextChanged()
         {
-            TextChanged?.Raise(this);
+            TextChanged?.Invoke(this, EventArgs.Empty);
 
             UpdateCaretScreenPosition();
         }

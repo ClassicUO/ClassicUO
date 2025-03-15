@@ -4,9 +4,8 @@ using System;
 using System.IO;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
-using ClassicUO.Utility;
+using ClassicUO.Sdk;
 using ClassicUO.Utility.Collections;
-using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.Managers
 {
@@ -50,7 +49,7 @@ namespace ClassicUO.Game.Managers
             }
 
             Entries.AddToBack(entry);
-            EntryAdded.Raise(entry);
+            EntryAdded?.Invoke(entry, entry);
 
             if (_fileWriter == null && !_writerHasException)
             {
@@ -73,22 +72,22 @@ namespace ClassicUO.Game.Managers
             {
                 try
                 {
-                    string path = FileSystemHelper.CreateFolderIfNotExists(Path.Combine(CUOEnviroment.ExecutablePath, "Data"), "Client", "JournalLogs");
+                    var path = Directory.CreateDirectory(Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Client", "JournalLogs"));
 
-                    _fileWriter = new StreamWriter(File.Open(Path.Combine(path, $"{DateTime.Now:yyyy_MM_dd_HH_mm_ss}_journal.txt"), FileMode.Create, FileAccess.Write, FileShare.Read))
+                    _fileWriter = new StreamWriter(File.Open(Path.Combine(path.FullName, $"{DateTime.Now:yyyy_MM_dd_HH_mm_ss}_journal.txt"), FileMode.Create, FileAccess.Write, FileShare.Read))
                     {
                         AutoFlush = true
                     };
 
                     try
                     {
-                        string[] files = Directory.GetFiles(path, "*_journal.txt");
-                        Array.Sort(files);
+                        var files = path.GetFiles("*_journal.txt");
+                        Array.Sort(files, (a, b) => a.FullName.CompareTo(b.FullName));
                         Array.Reverse(files);
 
                         for (int i = files.Length - 1; i >= 100; --i)
                         {
-                            File.Delete(files[i]);
+                            files[i].Delete();
                         }
                     }
                     catch

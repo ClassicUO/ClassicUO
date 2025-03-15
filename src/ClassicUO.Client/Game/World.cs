@@ -10,12 +10,10 @@ using ClassicUO.Game.Map;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Utility.Platforms;
 using Microsoft.Xna.Framework;
-using MathHelper = ClassicUO.Utility.MathHelper;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Scenes;
-using ClassicUO.Utility.Logging;
-using ClassicUO.Sdk.Assets;
-using ClassicUO.Network;
+using MathHelper = ClassicUO.Renderer.MathHelper;
+using ClassicUO.Sdk;
 
 namespace ClassicUO.Game
 {

@@ -30,14 +30,14 @@ namespace ClassicUO.Game
 
     internal sealed class RenderedText
     {
-        private static readonly QueuedPool<RenderedText> _pool = new QueuedPool<RenderedText>(
-            3000,
-            r =>
-            {
-                r.IsDestroyed = false;
-                r.Links.Clear();
-            }
-        );
+        // private static readonly QueuedPool<RenderedText> _pool = new QueuedPool<RenderedText>(
+        //     3000,
+        //     r =>
+        //     {
+        //         r.IsDestroyed = false;
+        //         r.Links.Clear();
+        //     }
+        // );
 
         private static PixelPicker _picker = new PixelPicker();
         private byte _font;
@@ -168,7 +168,7 @@ namespace ClassicUO.Game
             bool saveHitmap = false
         )
         {
-            RenderedText r = _pool.GetOne();
+            RenderedText r = new(); // _pool.GetOne();
             r.Hue = hue;
             r.Font = font;
             r.IsUnicode = isunicode;
@@ -692,7 +692,7 @@ namespace ClassicUO.Game
                 Texture.Dispose();
             }
 
-            _pool.ReturnOne(this);
+            // _pool.ReturnOne(this);
         }
     }
 }

@@ -670,7 +670,7 @@ namespace ClassicUO.Renderer
             float stroke
         )
         {
-            var radians = ClassicUO.Utility.MathHelper.AngleBetweenVectors(start, end);
+            var radians = MathHelper.AngleBetweenVectors(start, end);
             Vector2.Distance(ref start, ref end, out var length);
 
             Draw
@@ -754,8 +754,8 @@ namespace ClassicUO.Renderer
             {
                 sourceX = sourceRectangle.Value.X / (float)texture.Width;
                 sourceY = sourceRectangle.Value.Y / (float)texture.Height;
-                sourceW = Math.Sign(sourceRectangle.Value.Width) * Math.Max(Math.Abs(sourceRectangle.Value.Width), Utility.MathHelper.MachineEpsilonFloat) / (float)texture.Width;
-                sourceH = Math.Sign(sourceRectangle.Value.Height) * Math.Max(Math.Abs(sourceRectangle.Value.Height), Utility.MathHelper.MachineEpsilonFloat) / (float)texture.Height;
+                sourceW = Math.Sign(sourceRectangle.Value.Width) * Math.Max(Math.Abs(sourceRectangle.Value.Width), MathHelper.MachineEpsilonFloat) / (float)texture.Width;
+                sourceH = Math.Sign(sourceRectangle.Value.Height) * Math.Max(Math.Abs(sourceRectangle.Value.Height), MathHelper.MachineEpsilonFloat) / (float)texture.Height;
                 destW *= sourceRectangle.Value.Width;
                 destH *= sourceRectangle.Value.Height;
             }
@@ -808,8 +808,8 @@ namespace ClassicUO.Renderer
             {
                 sourceX = sourceRectangle.Value.X / (float)texture.Width;
                 sourceY = sourceRectangle.Value.Y / (float)texture.Height;
-                sourceW = Math.Sign(sourceRectangle.Value.Width) * Math.Max(Math.Abs(sourceRectangle.Value.Width), Utility.MathHelper.MachineEpsilonFloat) / (float)texture.Width;
-                sourceH = Math.Sign(sourceRectangle.Value.Height) * Math.Max(Math.Abs(sourceRectangle.Value.Height), Utility.MathHelper.MachineEpsilonFloat) / (float)texture.Height;
+                sourceW = Math.Sign(sourceRectangle.Value.Width) * Math.Max(Math.Abs(sourceRectangle.Value.Width), MathHelper.MachineEpsilonFloat) / (float)texture.Width;
+                sourceH = Math.Sign(sourceRectangle.Value.Height) * Math.Max(Math.Abs(sourceRectangle.Value.Height), MathHelper.MachineEpsilonFloat) / (float)texture.Height;
                 scale.X *= sourceRectangle.Value.Width;
                 scale.Y *= sourceRectangle.Value.Height;
             }
@@ -935,11 +935,11 @@ namespace ClassicUO.Renderer
                 sourceY = sourceRectangle.Value.Y / (float)texture.Height;
                 sourceW = Math.Sign(sourceRectangle.Value.Width) * Math.Max(
                     Math.Abs(sourceRectangle.Value.Width),
-                    Utility.MathHelper.MachineEpsilonFloat
+                    MathHelper.MachineEpsilonFloat
                 ) / (float)texture.Width;
                 sourceH = Math.Sign(sourceRectangle.Value.Height) * Math.Max(
                     Math.Abs(sourceRectangle.Value.Height),
-                    Utility.MathHelper.MachineEpsilonFloat
+                    MathHelper.MachineEpsilonFloat
                 ) / (float)texture.Height;
             }
             else

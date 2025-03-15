@@ -1,6 +1,6 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
-using ClassicUO.Utility.Logging;
+using ClassicUO.Sdk;
 using Microsoft.Xna.Framework.Audio;
 using MP3Sharp;
 using System;
@@ -47,7 +47,7 @@ namespace ClassicUO.IO.Audio
                         if (m_Repeat)
                         {
                             m_Stream.Position = 0;
-                            m_Stream.Read(m_WaveBuffer, bytesReturned, m_WaveBuffer.Length - bytesReturned);
+                            m_Stream.ReadExactly(m_WaveBuffer, bytesReturned, m_WaveBuffer.Length - bytesReturned);
                         }
                         else
                         {

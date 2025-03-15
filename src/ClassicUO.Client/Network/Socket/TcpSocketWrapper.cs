@@ -1,7 +1,7 @@
 using System;
 using System.Net;
 using System.Net.Sockets;
-using ClassicUO.Utility.Logging;
+using ClassicUO.Sdk;
 
 namespace ClassicUO.Network.Socket;
 

@@ -6,7 +6,7 @@ using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using ClassicUO.Utility.Logging;
+using ClassicUO.Sdk;
 
 namespace ClassicUO.Game.Scenes
 {

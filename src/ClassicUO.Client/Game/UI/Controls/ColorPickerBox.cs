@@ -80,7 +80,7 @@ namespace ClassicUO.Game.UI.Controls
                     _needToFileeBoxes = true;
 
                     CreateTexture();
-                    ColorSelectedIndex.Raise();
+                    ColorSelectedIndex?.Invoke(this, EventArgs.Empty);
                 }
             }
         }
@@ -98,7 +98,7 @@ namespace ClassicUO.Game.UI.Controls
                 if (_selectedIndex != value)
                 {
                     _selectedIndex = value;
-                    ColorSelectedIndex.Raise();
+                    ColorSelectedIndex?.Invoke(this, EventArgs.Empty);
                 }
             }
         }

@@ -2,24 +2,21 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Sockets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
-using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.Sdk.Assets;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Resources;
-using ClassicUO.Utility;
-using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SDL2;
+using ClassicUO.Sdk;
 
 namespace ClassicUO.Game.Scenes
 {

@@ -3,10 +3,9 @@
 using System;
 using System.Collections.Generic;
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
 using ClassicUO.Resources;
-using ClassicUO.Utility.Logging;
+using ClassicUO.Sdk;
 
 namespace ClassicUO.Game.Managers
 {

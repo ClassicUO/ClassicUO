@@ -114,7 +114,7 @@ namespace ClassicUO.Game.UI.Controls
                         CalculateOffset();
                     }
 
-                    ValueChanged.Raise();
+                    ValueChanged?.Invoke(this, EventArgs.Empty);
                 }
             }
         }

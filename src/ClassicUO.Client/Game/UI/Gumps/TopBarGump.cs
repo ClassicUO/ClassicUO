@@ -3,16 +3,11 @@
 using System.Collections.Generic;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
-using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
-using ClassicUO.Sdk.Assets;
 using ClassicUO.Network;
-using ClassicUO.Renderer;
 using ClassicUO.Resources;
-using ClassicUO.Utility;
-using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 using ClassicUO.Sdk;
 
@@ -81,7 +76,7 @@ namespace ClassicUO.Game.UI.Gumps
                 cliloc.GetString(3000129, ResGumps.Journal),
                 cliloc.GetString(3000131, ResGumps.Chat),
                 cliloc.GetString(3000134, ResGumps.Help),
-                StringHelper.CapitalizeAllWords(cliloc.GetString(1015233, ResGumps.WorldMap)),
+                TextUtilities.CapitalizeAllWords(cliloc.GetString(1015233, ResGumps.WorldMap)),
                 cliloc.GetString(1079449, ResGumps.Info),
                 cliloc.GetString(1042237, ResGumps.Debug),
                 cliloc.GetString(3000169, ResGumps.NetStats),

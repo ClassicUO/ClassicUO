@@ -8,7 +8,7 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Sdk.Assets;
 using Microsoft.Xna.Framework;
-using MathHelper = ClassicUO.Utility.MathHelper;
+using MathHelper = ClassicUO.Renderer.MathHelper;
 
 namespace ClassicUO.Game
 {

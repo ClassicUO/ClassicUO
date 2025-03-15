@@ -2,15 +2,12 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.Managers;
-using ClassicUO.Game.Scenes;
-using ClassicUO.Utility.Logging;
+using ClassicUO.Sdk;
 using SDL2;
 
 namespace ClassicUO.Utility.Platforms

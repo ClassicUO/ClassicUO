@@ -7,7 +7,7 @@ using System.Text;
 using System.Xml;
 using ClassicUO.Configuration;
 using ClassicUO.Resources;
-using ClassicUO.Utility.Logging;
+using ClassicUO.Sdk;
 
 namespace ClassicUO.Game.Managers
 {
@@ -29,7 +29,7 @@ namespace ClassicUO.Game.Managers
 
         public static string[] GetVars()
         {
-            return Enum.GetNames(typeof(InfoBarVars));
+            return Enum.GetNames<InfoBarVars>();
         }
 
         public void AddItem(InfoBarItem ibi)

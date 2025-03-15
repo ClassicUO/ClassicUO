@@ -15,8 +15,6 @@ using ClassicUO.Game.UI.Gumps.CharCreation;
 using ClassicUO.Game.UI.Gumps.Login;
 using ClassicUO.Network;
 using ClassicUO.Resources;
-using ClassicUO.Utility;
-using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 using ClassicUO.Sdk.IO;
 using ClassicUO.Sdk;

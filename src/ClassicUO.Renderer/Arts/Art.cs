@@ -1,6 +1,6 @@
 using System;
+using ClassicUO.Sdk;
 using ClassicUO.Sdk.Assets;
-using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SDL2;
@@ -153,9 +153,9 @@ namespace ClassicUO.Renderer.Arts
                             {
                                 c.PackedValue = *pixels_ptr;
                                 *pixels_ptr =
-                                    HuesHelper.Color16To32(
+                                    ColorConverter.Color16To32(
                                         _huesLoader.GetColor16(
-                                            HuesHelper.ColorToHue(c),
+                                            ColorConverter.ColorToHue(c.PackedValue),
                                             customHue
                                         )
                                     ) | 0xFF_00_00_00;

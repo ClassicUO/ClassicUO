@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Network;
@@ -18,7 +19,7 @@ namespace ClassicUO.Game.Managers
 
         private readonly Dictionary<uint, Deque<BoatStep>> _steps = new Dictionary<uint, Deque<BoatStep>>();
         private readonly List<uint> _toRemove = new List<uint>();
-        private readonly Dictionary<uint, FastList<ItemInside>> _items = new Dictionary<uint, FastList<ItemInside>>();
+        private readonly Dictionary<uint, List<ItemInside>> _items = new Dictionary<uint, List<ItemInside>>();
 
         private uint _timePacket;
         private readonly World _world;
@@ -136,10 +137,8 @@ namespace ClassicUO.Game.Managers
 
                 if (_items.TryGetValue(serial, out var list))
                 {
-                    for (int i = 0; i < list.Length; i++)
+                    foreach (ref var it in CollectionsMarshal.AsSpan(list))
                     {
-                        ref var it = ref list.Buffer[i];
-
                         Entity ent = _world.Get(it.Serial);
 
                         if (ent == null)
@@ -174,15 +173,13 @@ namespace ClassicUO.Game.Managers
         {
             if (!_items.TryGetValue(serial, out var list))
             {
-                list = new FastList<ItemInside>();
+                list = new ();
 
                 _items[serial] = list;
             }
 
-            for (int i = 0; i < list.Length; i++)
+            foreach (ref var item in CollectionsMarshal.AsSpan(list))
             {
-                ref var item = ref list.Buffer[i];
-
                 if (!SerialHelper.IsValid(item.Serial))
                 {
                     break;
@@ -347,10 +344,8 @@ namespace ClassicUO.Game.Managers
             {
                 Item item = _world.Items.Get(serial);
 
-                for (int i = 0; i < list.Length; i++)
+                foreach (ref var it in CollectionsMarshal.AsSpan(list))
                 {
-                    ref var it = ref list.Buffer[i];
-
                     //if (!SerialHelper.IsValid(it.Serial))
                     //    break;
 

@@ -229,7 +229,7 @@ namespace ClassicUO.Game.UI.Gumps
             public override void OnButtonClick(int buttonId)
             {
                 _gump.World.IgnoreManager.RemoveIgnoredTarget(_chName);
-                RemoveMarkerEvent.Raise();
+                RemoveMarkerEvent?.Invoke(this, EventArgs.Empty);
             }
         }
     }

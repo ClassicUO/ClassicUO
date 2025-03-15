@@ -1,7 +1,6 @@
 ﻿using ClassicUO.Sdk.IO;
-using ClassicUO.Utility;
-using ClassicUO.Utility.Logging;
 using System;
+using System.IO;
 
 namespace ClassicUO.Network
 {
@@ -11,16 +10,17 @@ namespace ClassicUO.Network
 
 
 
-        private LogFile _logFile;
+        private StreamWriter _logFile;
 
         public bool Enabled { get; set; }
 
 
 
-        public LogFile CreateFile()
+        public StreamWriter CreateFile()
         {
             _logFile?.Dispose();
-            return _logFile = new LogFile(FileSystemHelper.CreateFolderIfNotExists(CUOEnviroment.ExecutablePath, "Logs", "Network"), "packets.log");
+            var filePath = Path.Combine(Directory.CreateDirectory(Path.Combine(CUOEnviroment.ExecutablePath, "Logs", "Network")).FullName, "packets.log");
+            return _logFile = new StreamWriter(File.OpenWrite(filePath));
         }
 
         public void Log(Span<byte> message, bool toServer)

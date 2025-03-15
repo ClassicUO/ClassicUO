@@ -2,7 +2,6 @@
 
 using System;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
@@ -10,8 +9,6 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.Map;
 using ClassicUO.Sdk.Assets;
 using ClassicUO.Renderer;
-using ClassicUO.Utility;
-using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
@@ -324,7 +321,7 @@ namespace ClassicUO.Game.Scenes
                         rect.X = obj.RealScreenPosition.X - (rect.Width >> 1) + rect.X;
                         rect.Y = obj.RealScreenPosition.Y - rect.Height + rect.Y;
 
-                        check = Exstentions.InRect(ref rect, ref _rectanglePlayer);
+                        check = rect.Intersects(_rectanglePlayer);
 
                         if (check)
                         {

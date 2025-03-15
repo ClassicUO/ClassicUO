@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using ClassicUO.Sdk;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StbRectPackSharp;
 using System;
@@ -60,7 +61,7 @@ namespace ClassicUO.Renderer
 
         private void CreateNewTexture2D()
         {
-            Utility.Logging.Log.Trace($"creating texture: {_width}x{_height} {_format}");
+            Log.Trace($"creating texture: {_width}x{_height} {_format}");
             Texture2D texture = new Texture2D(_device, _width, _height, false, _format);
             _textureList.Add(texture);
 

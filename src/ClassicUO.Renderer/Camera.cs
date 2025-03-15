@@ -50,7 +50,7 @@ namespace ClassicUO.Renderer
             get => _zoom;
             set
             {
-                _zoom = MathHelper.Clamp(value, ZoomMin, ZoomMax);
+                _zoom = Microsoft.Xna.Framework.MathHelper.Clamp(value, ZoomMin, ZoomMax);
                 _updateMatrixes = true;
             }
         }
@@ -178,7 +178,7 @@ namespace ClassicUO.Renderer
                 if (length > 0)
                 {
                     float length_factor = Math.Min(length / (Bounds.Height >> 1), 1f);
-                    target_offset = Vector2.Normalize(target_offset) * Utility.Easings.OutQuad(length_factor) * MAX_PEEK_DISTANCE / Zoom;
+                    target_offset = Vector2.Normalize(target_offset) * Easings.OutQuad(length_factor) * MAX_PEEK_DISTANCE / Zoom;
                 }
             }
 
@@ -186,7 +186,7 @@ namespace ClassicUO.Renderer
 
             if (dist > 1f)
             {
-                float time = Math.Max(Utility.Easings.OutQuart(dist / MAX_PEEK_DISTANCE) * _timeDelta * PEEK_TIME_FACTOR, MIN_PEEK_SPEED);
+                float time = Math.Max(Easings.OutQuart(dist / MAX_PEEK_DISTANCE) * _timeDelta * PEEK_TIME_FACTOR, MIN_PEEK_SPEED);
                 _lerpOffset = Vector2.Lerp(_lerpOffset, target_offset, time);
             }
             else

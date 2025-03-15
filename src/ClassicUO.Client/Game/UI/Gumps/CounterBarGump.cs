@@ -8,11 +8,9 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
-using ClassicUO.Sdk.Assets;
 using ClassicUO.Renderer;
 using ClassicUO.Resources;
-using ClassicUO.Utility;
-using ClassicUO.Utility.Logging;
+using ClassicUO.Sdk;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 

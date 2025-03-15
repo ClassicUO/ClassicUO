@@ -11,10 +11,9 @@ using ClassicUO.Input;
 using ClassicUO.Sdk.Assets;
 using ClassicUO.Network;
 using ClassicUO.Resources;
-using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using SDL2;
-using MathHelper = ClassicUO.Utility.MathHelper;
+using MathHelper = ClassicUO.Renderer.MathHelper;
 
 namespace ClassicUO.Game.Scenes
 {
