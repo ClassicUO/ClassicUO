@@ -51,11 +51,6 @@ namespace ClassicUO.Renderer
 
         public Vector2 MeasureString(ReadOnlySpan<char> text)
         {
-            if (text == null)
-            {
-                throw new ArgumentNullException("text");
-            }
-
             if (text.Length == 0)
             {
                 return Vector2.Zero;
@@ -187,7 +182,7 @@ namespace ClassicUO.Renderer
                 int levelCount = reader.ReadInt32();
 
                 int levelDataSizeInBytes = reader.ReadInt32();
-                byte[] levelData = null; // Don't assign this quite yet...
+                byte[]? levelData = null; // Don't assign this quite yet...
                 int levelWidth = width >> 0;
                 int levelHeight = height >> 0;
                 levelData = reader.ReadBytes(levelDataSizeInBytes);

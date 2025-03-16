@@ -58,7 +58,7 @@ namespace ClassicUO.Game.UI.Controls
 
         private bool HandleClick()
         {
-            IEnumerable<RadioButton> en = Parent?.FindControls<RadioButton>().Where(s => s.GroupIndex == GroupIndex && s != this);
+            var en = Parent?.FindControls<RadioButton>()?.Where(s => s.GroupIndex == GroupIndex && s != this);
 
             if (en == null)
             {

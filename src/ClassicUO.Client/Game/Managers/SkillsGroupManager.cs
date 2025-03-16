@@ -196,7 +196,7 @@ namespace ClassicUO.Game.Managers
         {
             Groups.Clear();
 
-            string path = Path.Combine(ProfileManager.ProfilePath, "skillsgroups.xml");
+            string path = Path.Combine(ProfileManager.CurrentProfile.ProfilePath, "skillsgroups.xml");
 
             if (!File.Exists(path))
             {
@@ -250,7 +250,7 @@ namespace ClassicUO.Game.Managers
 
         public void Save()
         {
-            string path = Path.Combine(ProfileManager.ProfilePath, "skillsgroups.xml");
+            string path = Path.Combine(ProfileManager.CurrentProfile.ProfilePath, "skillsgroups.xml");
 
             using (XmlTextWriter xml = new XmlTextWriter(path, Encoding.UTF8)
             {

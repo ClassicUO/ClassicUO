@@ -89,7 +89,7 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        internal static NiceButton GetSelected(Control p, int group)
+        internal static NiceButton? GetSelected(Control p, int group)
         {
             IEnumerable<NiceButton> list = p.FindControls<NiceButton>();
 

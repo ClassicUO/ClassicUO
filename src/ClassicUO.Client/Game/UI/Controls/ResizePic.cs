@@ -377,7 +377,7 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        private Texture2D GetTexture(int index, out Rectangle bounds)
+        private Texture2D? GetTexture(int index, out Rectangle bounds)
         {
             if (index >= 0 && index <= _maxIndex)
             {

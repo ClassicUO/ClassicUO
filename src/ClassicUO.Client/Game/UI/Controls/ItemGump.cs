@@ -134,7 +134,7 @@ namespace ClassicUO.Game.UI.Controls
 
                 batcher.Draw(spriteInfo.Texture, rect, spriteInfo.UV, hueVector);
 
-                Item item = _gump.World.Items.Get(LocalSerial);
+                var item = _gump.World.Items.Get(LocalSerial);
 
                 if (
                     item != null
@@ -186,7 +186,7 @@ namespace ClassicUO.Game.UI.Controls
                     return true;
                 }
 
-                Item item = _gump.World.Items.Get(LocalSerial);
+                var item = _gump.World.Items.Get(LocalSerial);
 
                 if (item != null && !item.IsCoin && item.Amount > 1 && item.ItemData.IsStackable)
                 {
@@ -203,7 +203,7 @@ namespace ClassicUO.Game.UI.Controls
                     return true;
                 }
 
-                Item item = _gump.World.Items.Get(LocalSerial);
+                var item = _gump.World.Items.Get(LocalSerial);
 
                 if (item != null && !item.IsCoin && item.Amount > 1 && item.ItemData.IsStackable)
                 {
@@ -240,7 +240,7 @@ namespace ClassicUO.Game.UI.Controls
                 return false;
             }
 
-            SplitMenuGump split = UIManager.GetGump<SplitMenuGump>(LocalSerial);
+            var split = UIManager.GetGump<SplitMenuGump>(LocalSerial);
 
             if (split == null)
             {
@@ -262,8 +262,8 @@ namespace ClassicUO.Game.UI.Controls
                 return false;
             }
 
-            Item item = _gump.World.Items.Get(LocalSerial);
-            Item container;
+            var item = _gump.World.Items.Get(LocalSerial);
+            Item? container;
 
             if (
                 !Keyboard.Ctrl

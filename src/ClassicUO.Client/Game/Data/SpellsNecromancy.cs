@@ -282,7 +282,7 @@ namespace ClassicUO.Game.Data
 
         public static SpellDefinition GetSpell(int spellIndex)
         {
-            return _spellsDict.TryGetValue(spellIndex, out SpellDefinition spell) ? spell : SpellDefinition.EmptySpell;
+            return _spellsDict.TryGetValue(spellIndex, out var spell) ? spell : SpellDefinition.EmptySpell;
         }
 
         public static void SetSpell(int id, in SpellDefinition newspell)

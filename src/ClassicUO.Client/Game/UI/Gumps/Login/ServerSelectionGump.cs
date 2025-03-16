@@ -169,22 +169,26 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             DataBox databox = new DataBox(0, 0, 1, 1);
             databox.WantUpdateSize = true;
-            LoginScene loginScene = Client.Game.GetScene<LoginScene>();
-
+             
             scrollArea.ScissorRectangle.Y = 16;
             scrollArea.ScissorRectangle.Height = -32;
 
-            foreach (ServerListEntry server in loginScene.Servers)
+            var loginScene = Client.Game.GetScene<LoginScene>();
+            if (loginScene != null)
             {
-                databox.Add(new ServerEntryGump(server, 5, NORMAL_COLOR, SELECTED_COLOR));
+                foreach (var server in loginScene.Servers)
+                {
+                    databox.Add(new ServerEntryGump(server, 5, NORMAL_COLOR, SELECTED_COLOR));
+                }
             }
+
 
             databox.ReArrangeChildren();
 
             Add(scrollArea);
             scrollArea.Add(databox);
 
-            if (loginScene.Servers.Length != 0)
+            if (loginScene != null && loginScene.Servers.Count != 0)
             {
                 int index = loginScene.GetServerIndexFromSettings();
 
@@ -204,7 +208,9 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
         public override void OnButtonClick(int buttonID)
         {
-            LoginScene loginScene = Client.Game.GetScene<LoginScene>();
+            var loginScene = Client.Game.GetScene<LoginScene>();
+            if (loginScene == null)
+                return;
 
             if (buttonID >= (int) Buttons.Server)
             {
@@ -218,7 +224,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                     case Buttons.Next:
                     case Buttons.Earth:
 
-                        if (loginScene.Servers.Length != 0)
+                        if (loginScene.Servers.Count != 0)
                         {
                             int index = loginScene.GetServerIndexFromSettings();
 
@@ -239,9 +245,9 @@ namespace ClassicUO.Game.UI.Gumps.Login
         {
             if (key == SDL.SDL_Keycode.SDLK_RETURN || key == SDL.SDL_Keycode.SDLK_KP_ENTER)
             {
-                LoginScene loginScene = Client.Game.GetScene<LoginScene>();
+                var loginScene = Client.Game.GetScene<LoginScene>();
 
-                if (loginScene.Servers?.Any(s => s != null) ?? false)
+                if (loginScene?.Servers?.Any(s => s != null) ?? false)
                 {
                     int index = loginScene.GetServerIndexFromSettings();
 

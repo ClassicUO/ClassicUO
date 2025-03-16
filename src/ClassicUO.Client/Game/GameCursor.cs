@@ -641,7 +641,9 @@ namespace ClassicUO.Game
                 return result;
             }
 
-            var camera = Client.Game.Scene.Camera;
+            var camera = Client.Game.Scene?.Camera;
+            if (camera == null)
+                return result;
 
             int windowCenterX = camera.Bounds.X + (camera.Bounds.Width >> 1);
             int windowCenterY = camera.Bounds.Y + (camera.Bounds.Height >> 1);

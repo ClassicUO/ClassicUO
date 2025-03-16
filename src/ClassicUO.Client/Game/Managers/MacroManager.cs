@@ -56,7 +56,7 @@ namespace ClassicUO.Game.Managers
 
         public void Load()
         {
-            string path = Path.Combine(ProfileManager.ProfilePath, "macros.xml");
+            string path = Path.Combine(ProfileManager.CurrentProfile.ProfilePath, "macros.xml");
 
             if (!File.Exists(path))
             {
@@ -102,7 +102,7 @@ namespace ClassicUO.Game.Managers
         {
             List<Macro> list = GetAllMacros();
 
-            string path = Path.Combine(ProfileManager.ProfilePath, "macros.xml");
+            string path = Path.Combine(ProfileManager.CurrentProfile.ProfilePath, "macros.xml");
 
             using (XmlTextWriter xml = new XmlTextWriter(path, Encoding.UTF8)
             {
@@ -1193,7 +1193,7 @@ namespace ClassicUO.Game.Managers
                     break;
 
                 case MacroType.SaveDesktop:
-                    ProfileManager.CurrentProfile?.Save(_world, ProfileManager.ProfilePath);
+                    ProfileManager.CurrentProfile?.Save(_world, ProfileManager.CurrentProfile.ProfilePath);
 
                     break;
 

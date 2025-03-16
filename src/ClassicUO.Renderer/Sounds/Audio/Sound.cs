@@ -9,7 +9,7 @@ namespace ClassicUO.IO.Audio
     public abstract class Sound : IComparable<Sound>, IDisposable
     {
         private uint _lastPlayedTime;
-        private string m_Name;
+        private string m_Name = "";
         private float m_volume = 1.0f;
         private float m_volumeFactor;
 
@@ -76,7 +76,7 @@ namespace ClassicUO.IO.Audio
 
         public bool IsPlaying(uint curTime) => SoundInstance != null && SoundInstance.State == SoundState.Playing && DurationTime > curTime;
 
-        public int CompareTo(Sound other)
+        public int CompareTo(Sound? other)
         {
             return other == null ? -1 : Index.CompareTo(other.Index);
         }
@@ -97,14 +97,14 @@ namespace ClassicUO.IO.Audio
             }
         }
 
-        protected DynamicSoundEffectInstance SoundInstance;
+        protected DynamicSoundEffectInstance? SoundInstance;
         protected AudioChannels Channels = AudioChannels.Mono;
         protected uint Delay = 250;
 
         protected int Frequency = 22050;
 
         protected abstract ArraySegment<byte> GetBuffer();
-        protected abstract void OnBufferNeeded(object sender, EventArgs e);
+        protected abstract void OnBufferNeeded(object? sender, EventArgs e);
 
         protected virtual void AfterStop()
         {

@@ -124,8 +124,8 @@ namespace ClassicUO.Configuration.Json
         public override void Write(Utf8JsonWriter writer, Point? value, JsonSerializerOptions options)
         {
             writer.WriteStartObject();
-            writer.WriteNumber("X", value.Value.X);
-            writer.WriteNumber("Y", value.Value.Y);
+            writer.WriteNumber("X", value?.X ?? 0);
+            writer.WriteNumber("Y", value?.Y ?? 0);
             writer.WriteEndObject();
         }
     }

@@ -21,7 +21,7 @@ namespace ClassicUO.Renderer.Sounds
             _useDigitalMusicFolder = Directory.Exists(Path.Combine(soundsLoader.FileManager.BasePath, "Music", "Digital"));
         }
 
-        public IO.Audio.Sound GetSound(int index)
+        public IO.Audio.Sound? GetSound(int index)
         {
             if (index >= 0 && index < MAX_SOUND_DATA_INDEX_COUNT)
             {
@@ -38,7 +38,7 @@ namespace ClassicUO.Renderer.Sounds
             return null;
         }
 
-        public IO.Audio.Sound GetMusic(int index)
+        public IO.Audio.Sound? GetMusic(int index)
         {
             if (index >= 0 && index < MAX_SOUND_DATA_INDEX_COUNT)
             {

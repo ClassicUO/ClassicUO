@@ -200,7 +200,7 @@ namespace ClassicUO.Game.UI.Controls
             get
             {
                 int h = 20;
-                MultilinesFontInfo info = GetInfo();
+                var info = GetInfo();
 
                 while (info != null)
                 {
@@ -232,7 +232,7 @@ namespace ClassicUO.Game.UI.Controls
 
                 //Sanitize(ref value);
 
-                _rendererText.Text = value;
+                _rendererText.Text = value ?? "";
 
                 if (!_is_writing)
                 {
@@ -270,7 +270,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public event EventHandler TextChanged;
 
-        public MultilinesFontInfo CalculateFontInfo(string text, bool countret = true)
+        public MultilinesFontInfo? CalculateFontInfo(string text, bool countret = true)
         {
             if (IsUnicode)
             {
@@ -435,7 +435,7 @@ namespace ClassicUO.Game.UI.Controls
             UpdateCaretScreenPosition();
         }
 
-        protected MultilinesFontInfo GetInfo()
+        protected MultilinesFontInfo? GetInfo()
         {
             return _rendererText.GetInfo();
         }
@@ -879,7 +879,7 @@ namespace ClassicUO.Game.UI.Controls
 
             if (selectStart < selectEnd)
             {
-                MultilinesFontInfo info = _rendererText.GetInfo();
+                var info = _rendererText.GetInfo();
 
                 int drawY = 1;
                 int start = 0;

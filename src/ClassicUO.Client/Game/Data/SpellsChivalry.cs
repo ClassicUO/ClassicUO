@@ -184,7 +184,7 @@ namespace ClassicUO.Game.Data
 
         public static SpellDefinition GetSpell(int spellIndex)
         {
-            if (_spellsDict.TryGetValue(spellIndex, out SpellDefinition spell))
+            if (_spellsDict.TryGetValue(spellIndex, out var spell))
             {
                 return spell;
             }

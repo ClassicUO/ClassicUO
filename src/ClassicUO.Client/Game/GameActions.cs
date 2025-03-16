@@ -542,7 +542,7 @@ namespace ClassicUO.Game
             }
         }
 
-        public static void ReplyGump(uint local, uint server, int button, uint[]? switches = null, Tuple<ushort, string>[] entries = null)
+        public static void ReplyGump(uint local, uint server, int button, uint[] switches, Tuple<ushort, string>[] entries)
         {
             Socket.Send_GumpResponse(local,
                                      server,

@@ -169,7 +169,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 int minColor = 0xFFFF;
 
-                for (LinkedObject i = Items; i != null; i = i.Next)
+                for (var i = Items; i != null; i = i.Next)
                 {
                     Item it = (Item) i;
 
@@ -196,7 +196,7 @@ namespace ClassicUO.Game.GameObjects
             }
             else
             {
-                for (LinkedObject i = Items; i != null; i = i.Next)
+                for (var i = Items; i != null; i = i.Next)
                 {
                     Item it = (Item) i;
 
@@ -222,7 +222,7 @@ namespace ClassicUO.Game.GameObjects
 
         public Item? GetItemByGraphic(ushort graphic, bool deepsearch = false)
         {
-            for (LinkedObject i = Items; i != null; i = i.Next)
+            for (var i = Items; i != null; i = i.Next)
             {
                 Item item = (Item) i;
 
@@ -233,7 +233,7 @@ namespace ClassicUO.Game.GameObjects
 
                 if (deepsearch && !item.IsEmpty)
                 {
-                    for (LinkedObject ic = Items; ic != null; ic = ic.Next)
+                    for (var ic = Items; ic != null; ic = ic.Next)
                     {
                         Item childItem = (Item) ic;
 
@@ -253,7 +253,7 @@ namespace ClassicUO.Game.GameObjects
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Item? FindItemByLayer(Layer layer)
         {
-            for (LinkedObject i = Items; i != null; i = i.Next)
+            for (var i = Items; i != null; i = i.Next)
             {
                 Item it = (Item) i;
 

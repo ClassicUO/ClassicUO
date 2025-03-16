@@ -111,7 +111,7 @@ namespace ClassicUO
                 Settings.GlobalSettings.ClientVersion = Settings.GlobalSettings.ClientVersion.Replace(",", ".").Replace(" ", "").ToLower();
             }
 
-            string clientVersionText = Settings.GlobalSettings.ClientVersion;
+            var clientVersionText = Settings.GlobalSettings.ClientVersion;
 
             // check if directory is good
             if (!Directory.Exists(clientPath))
@@ -139,7 +139,7 @@ namespace ClassicUO
                 Log.Trace($"Found a valid client.exe [{clientVersionText} - {clientVersion}]");
 
                 // update the wrong/missing client version in settings.json
-                Settings.GlobalSettings.ClientVersion = clientVersionText;
+                Settings.GlobalSettings.ClientVersion = clientVersionText ?? "0.0.0.0";
             }
 
             Version = clientVersion;

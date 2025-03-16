@@ -46,7 +46,7 @@ namespace ClassicUO
                 return string.Empty;
             }
 
-            byte[] buff = null;
+            byte[]? buff = null;
 
             if (source.Length > 2 && source[0] == '1' && (source[1] == '-' || source[1] == '+'))
             {

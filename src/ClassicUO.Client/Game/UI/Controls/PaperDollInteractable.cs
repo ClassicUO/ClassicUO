@@ -110,7 +110,7 @@ namespace ClassicUO.Game.UI.Controls
                 return;
             }
 
-            Mobile mobile = _paperDollGump.World.Mobiles.Get(LocalSerial);
+            var mobile = _paperDollGump.World.Mobiles.Get(LocalSerial);
 
             if (mobile == null || mobile.IsDestroyed)
             {
@@ -178,8 +178,8 @@ namespace ClassicUO.Game.UI.Controls
             }
 
             // equipment
-            Item equipItem = mobile.FindItemByLayer(Layer.Cloak);
-            Item arms = mobile.FindItemByLayer(Layer.Arms);
+            var equipItem = mobile.FindItemByLayer(Layer.Cloak);
+            var arms = mobile.FindItemByLayer(Layer.Arms);
 
             bool switch_arms_with_torso = false;
 
@@ -402,7 +402,7 @@ namespace ClassicUO.Game.UI.Controls
             if (
                 Client.Game.UO.FileManager.Animations.EquipConversions.TryGetValue(
                     mobileGraphic,
-                    out Dictionary<ushort, EquipConvData> dict
+                    out var dict
                 )
             )
             {
@@ -423,7 +423,7 @@ namespace ClassicUO.Game.UI.Controls
                 }
             }
 
-            if (Client.Game.UO.FileManager.TileArt.TryGetTileArtInfo(itemGraphic, out var tileArtInfo))
+            if (Client.Game.UO.FileManager.TileArt.TryGetTileArtInfo(itemGraphic, out var tileArtInfo) && tileArtInfo != null)
             {
                 if (tileArtInfo.TryGetAppearance(mobileGraphic, out var appareanceId))
                 {

@@ -711,12 +711,15 @@ namespace ClassicUO.Renderer
 
         public void Draw
         (
-            Texture2D texture,
+            Texture2D? texture,
             Vector2 position,
             Rectangle? sourceRectangle,
             Vector3 color
         )
         {
+            if (texture == null)
+                return;
+
             float sourceX, sourceY, sourceW, sourceH;
             float destW, destH;
 

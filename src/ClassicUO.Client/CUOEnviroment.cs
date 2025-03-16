@@ -9,11 +9,11 @@ namespace ClassicUO
 {
     internal static class CUOEnviroment
     {
-        public static Thread GameThread;
+        public static Thread? GameThread;
         public static float DPIScaleFactor = 1.0f;
         public static bool NoSound;
-        public static string[] Args;
-        public static string[] Plugins;
+        public static string[] Args = [];
+        public static string[] Plugins = [];
         public static bool Debug;
         public static bool IsHighDPI;
         public static uint CurrentRefreshRate;

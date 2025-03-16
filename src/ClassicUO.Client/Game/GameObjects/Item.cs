@@ -216,7 +216,7 @@ namespace ClassicUO.Game.GameObjects
             short maxX = 0;
             short maxY = 0;
 
-            if (!World.HouseManager.TryGetHouse(Serial, out House house))
+            if (!World.HouseManager.TryGetHouse(Serial, out var house) || house == null)
             {
                 house = new House(World, Serial, 0, false);
                 World.HouseManager.Add(Serial, house);
@@ -415,7 +415,7 @@ namespace ClassicUO.Game.GameObjects
                 return;
             }
 
-            TextObject last = (TextObject)TextContainer.Items;
+            var last = (TextObject?)TextContainer.Items;
 
             while (last?.Next != null)
             {
@@ -441,7 +441,7 @@ namespace ClassicUO.Game.GameObjects
 
                 p = Client.Game.Scene.Camera.WorldToScreen(p);
 
-                for (; last != null; last = (TextObject)last.Previous)
+                for (; last != null; last = (TextObject?)last.Previous)
                 {
                     if (last.RenderedText != null && !last.RenderedText.IsDestroyed)
                     {
@@ -462,7 +462,7 @@ namespace ClassicUO.Game.GameObjects
             }
             else
             {
-                for (; last != null; last = (TextObject)last.Previous)
+                for (; last != null; last = (TextObject?)last.Previous)
                 {
                     if (last.RenderedText != null && !last.RenderedText.IsDestroyed)
                     {

@@ -137,9 +137,9 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             Add(_htmlControl);
 
-            for (int i = 0; i < scene.Cities.Length; i++)
+            for (int i = 0; i < scene.Cities.Count; i++)
             {
-                CityInfo c = scene.GetCity(i);
+                var c = scene.GetCity(i);
 
                 if (c == null)
                 {

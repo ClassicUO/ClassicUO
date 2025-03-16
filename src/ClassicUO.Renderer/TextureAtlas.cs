@@ -9,8 +9,7 @@ namespace ClassicUO.Renderer
 {
     public class TextureAtlas : IDisposable
     {
-        private readonly int _width,
-            _height;
+        private readonly int _width, _height;
         private readonly SurfaceFormat _format;
         private readonly GraphicsDevice _device;
         private readonly List<Texture2D> _textureList;

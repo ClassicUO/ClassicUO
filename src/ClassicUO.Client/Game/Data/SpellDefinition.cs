@@ -100,9 +100,9 @@ namespace ClassicUO.Game.Data
             AddToWatchedSpell();
         }
 
-        public bool Equals(SpellDefinition other)
+        public bool Equals(SpellDefinition? other)
         {
-            return ID.Equals(other.ID);
+            return other != null && ID.Equals(other.ID);
         }
 
         public readonly int GumpIconID;

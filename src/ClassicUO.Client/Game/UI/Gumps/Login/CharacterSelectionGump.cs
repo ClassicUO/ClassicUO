@@ -30,15 +30,15 @@ namespace ClassicUO.Game.UI.Gumps.Login
             int yBonus = 0;
             int listTitleY = 106;
 
-            LoginScene loginScene = Client.Game.GetScene<LoginScene>();
+            var loginScene = Client.Game.GetScene<LoginScene>();
 
             string lastCharName = LastCharacterManager.GetLastCharacter(LoginScene.Account, World.ServerName);
-            string lastSelected = loginScene.Characters.FirstOrDefault(o => o == lastCharName);
+            var lastSelected = loginScene.Characters.FirstOrDefault(o => o == lastCharName);
 
             LockedFeatureFlags f = World.ClientLockedFeatures.Flags;
             CharacterListFlags ff = World.ClientFeatures.Flags;
 
-            if (Client.Game.UO.Version >= ClientVersion.CV_6040 || Client.Game.UO.Version >= ClientVersion.CV_5020 && loginScene.Characters.Length > 5)
+            if (Client.Game.UO.Version >= ClientVersion.CV_6040 || Client.Game.UO.Version >= ClientVersion.CV_5020 && loginScene.Characters.Count > 5)
             {
                 listTitleY = 96;
                 yOffset = 125;
@@ -47,9 +47,9 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             if (!string.IsNullOrEmpty(lastSelected))
             {
-                _selectedCharacter = (uint) Array.IndexOf(loginScene.Characters, lastSelected);
+                _selectedCharacter = (uint)loginScene.Characters.IndexOf(lastSelected);
             }
-            else if (loginScene.Characters.Length > 0)
+            else if (loginScene.Characters.Count > 0)
             {
                 _selectedCharacter = 0;
             }
@@ -80,7 +80,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 1
             );
 
-            for (int i = 0, valid = 0; i < loginScene.Characters.Length; i++)
+            for (int i = 0, valid = 0; i < loginScene.Characters.Count; i++)
             {
                 string character = loginScene.Characters[i];
 
@@ -163,11 +163,11 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
         private bool CanCreateChar(LoginScene scene)
         {
-            if (scene.Characters != null)
+            if (scene.Characters.Count != 0)
             {
                 int empty = scene.Characters.Count(string.IsNullOrEmpty);
 
-                if (empty >= 0 && scene.Characters.Length - empty < World.ClientFeatures.MaxChars)
+                if (empty >= 0 && scene.Characters.Count - empty < World.ClientFeatures.MaxChars)
                 {
                     return true;
                 }
@@ -186,7 +186,9 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
         public override void OnButtonClick(int buttonID)
         {
-            LoginScene loginScene = Client.Game.GetScene<LoginScene>();
+            var loginScene = Client.Game.GetScene<LoginScene>();
+            if (loginScene == null)
+                return;
 
             switch ((Buttons) buttonID)
             {
@@ -216,11 +218,11 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
         private void DeleteCharacter(LoginScene loginScene)
         {
-            string charName = loginScene.Characters[_selectedCharacter];
+            string charName = loginScene.Characters[(int)_selectedCharacter];
 
             if (!string.IsNullOrEmpty(charName))
             {
-                LoadingGump existing = Children.OfType<LoadingGump>().FirstOrDefault();
+                var existing = Children.OfType<LoadingGump>().FirstOrDefault();
 
                 if (existing != null)
                 {
@@ -265,9 +267,9 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
         private void LoginCharacter(uint index)
         {
-            LoginScene loginScene = Client.Game.GetScene<LoginScene>();
+            var loginScene = Client.Game.GetScene<LoginScene>();
 
-            if (loginScene.Characters != null && loginScene.Characters.Length > index && !string.IsNullOrEmpty(loginScene.Characters[index]))
+            if (loginScene != null && index < loginScene.Characters.Count && !string.IsNullOrEmpty(loginScene.Characters[(int)index]))
             {
                 loginScene.SelectCharacter(index);
             }

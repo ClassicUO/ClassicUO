@@ -19,7 +19,7 @@ namespace ClassicUO.Renderer
 
         public static Texture2D GetTexture(Color color)
         {
-            if (_textures.TryGetValue(color, out Texture2D texture))
+            if (_textures.TryGetValue(color, out var texture))
             {
                 return texture;
             }

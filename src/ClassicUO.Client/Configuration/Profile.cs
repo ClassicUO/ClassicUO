@@ -45,13 +45,12 @@ namespace ClassicUO.Configuration
         public static ProfileJsonContext DefaultToUse { get; } = new ProfileJsonContext(_jsonOptions.Value);
     }
 
-
-
     internal sealed class Profile
     {
-        [JsonIgnore] public string Username { get; set; }
-        [JsonIgnore] public string ServerName { get; set; }
-        [JsonIgnore] public string CharacterName { get; set; }
+        [JsonIgnore] public string ProfilePath { get; set; } = "";
+        [JsonIgnore] public string Username { get; set; } = "";
+        [JsonIgnore] public string ServerName { get; set; } = "";
+        [JsonIgnore] public string CharacterName { get; set; } = "";
 
         // sounds
         public bool EnableSound { get; set; } = true;
@@ -381,7 +380,7 @@ namespace ClassicUO.Configuration
 
                 UIManager.AnchorManager.Save(xml);
 
-                LinkedList<Gump> gumps = new LinkedList<Gump>();
+                var gumps = new LinkedList<Gump>();
 
                 foreach (Gump gump in UIManager.Gumps)
                 {
@@ -391,7 +390,7 @@ namespace ClassicUO.Configuration
                     }
                 }
 
-                LinkedListNode<Gump> first = gumps.First;
+                var first = gumps.First;
 
                 while (first != null)
                 {
@@ -399,11 +398,11 @@ namespace ClassicUO.Configuration
 
                     if (gump.LocalSerial != 0)
                     {
-                        Item item = world.Items.Get(gump.LocalSerial);
+                        var item = world.Items.Get(gump.LocalSerial);
 
                         if (item != null && !item.IsDestroyed && item.Opened)
                         {
-                            while (SerialHelper.IsItem(item.Container))
+                            while (item != null && SerialHelper.IsItem(item.Container))
                             {
                                 item = world.Items.Get(item.Container);
                             }
@@ -441,17 +440,17 @@ namespace ClassicUO.Configuration
             world.SkillsGroupManager.Save();
         }
 
-        private static void SaveItemsGumpRecursive(Item parent, XmlTextWriter xml, LinkedList<Gump> list)
+        private static void SaveItemsGumpRecursive(Item? parent, XmlTextWriter xml, LinkedList<Gump> list)
         {
             if (parent != null && !parent.IsDestroyed && parent.Opened)
             {
                 SaveItemsGump(parent, xml, list);
 
-                Item first = (Item) parent.Items;
+                var first = (Item?) parent.Items;
 
                 while (first != null)
                 {
-                    Item next = (Item) first.Next;
+                    var next = (Item?) first.Next;
 
                     SaveItemsGumpRecursive(first, xml, list);
 
@@ -464,11 +463,11 @@ namespace ClassicUO.Configuration
         {
             if (item != null && !item.IsDestroyed && item.Opened)
             {
-                LinkedListNode<Gump> first = list.First;
+                var first = list.First;
 
                 while (first != null)
                 {
-                    LinkedListNode<Gump> next = first.Next;
+                    var next = first.Next;
 
                     if (first.Value.LocalSerial == item.Serial && !first.Value.IsDisposed)
                     {
@@ -512,7 +511,7 @@ namespace ClassicUO.Configuration
                     return gumps;
                 }
 
-                XmlElement root = doc["gumps"];
+                XmlElement? root = doc["gumps"];
 
                 if (root != null)
                 {
@@ -530,7 +529,7 @@ namespace ClassicUO.Configuration
                             int y = int.Parse(xml.GetAttribute(nameof(y)));
                             uint serial = uint.Parse(xml.GetAttribute(nameof(serial)));
 
-                            Gump gump = null;
+                            Gump? gump = null;
 
                             switch (type)
                             {
@@ -701,7 +700,7 @@ namespace ClassicUO.Configuration
                                 int matrix_x = int.Parse(xml.GetAttribute("matrix_x"));
                                 int matrix_y = int.Parse(xml.GetAttribute("matrix_y"));
 
-                                AnchorableGump gump = null;
+                                AnchorableGump? gump = null;
 
                                 switch (type)
                                 {

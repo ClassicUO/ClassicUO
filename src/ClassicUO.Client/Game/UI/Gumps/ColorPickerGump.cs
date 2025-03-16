@@ -16,7 +16,7 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly ushort _graphic;
         private readonly Action<ushort> _okClicked;
 
-        public ColorPickerGump(World world, uint serial, ushort graphic, int x, int y, Action<ushort> okClicked) : base(world, serial, 0)
+        public ColorPickerGump(World world, uint serial, ushort graphic, int x, int y, Action<ushort>? okClicked) : base(world, serial, 0)
         {
             CanCloseWithRightClick = serial == 0;
             _graphic = graphic;

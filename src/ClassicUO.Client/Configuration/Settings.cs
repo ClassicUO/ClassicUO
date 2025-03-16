@@ -26,7 +26,7 @@ namespace ClassicUO.Configuration
     {
         public const string SETTINGS_FILENAME = "settings.json";
         public static Settings GlobalSettings = new Settings();
-        public static string CustomSettingsFilepath = null;
+        public static string? CustomSettingsFilepath = null;
 
 
         [JsonPropertyName("username")] public string Username { get; set; } = string.Empty;
@@ -82,7 +82,7 @@ namespace ClassicUO.Configuration
 
         [JsonPropertyName("use_verdata")] public bool UseVerdata { get; set; }
 
-        [JsonPropertyName("maps_layouts")] public string MapsLayouts { get; set; }
+        [JsonPropertyName("maps_layouts")] public string? MapsLayouts { get; set; }
 
         [JsonPropertyName("encryption")] public byte Encryption { get; set; }
 
@@ -108,7 +108,7 @@ namespace ClassicUO.Configuration
         {
             // Make a copy of the settings object that we will use in the saving process
             var json = JsonSerializer.Serialize(this, SettingsJsonContext.RealDefault.Settings);
-            var settingsToSave = JsonSerializer.Deserialize(json, SettingsJsonContext.RealDefault.Settings);
+            var settingsToSave = JsonSerializer.Deserialize(json, SettingsJsonContext.RealDefault.Settings) ?? new Settings();
 
             // Make sure we don't save username and password if `saveaccount` flag is not set
             // NOTE: Even if we pass username and password via command-line arguments they won't be saved

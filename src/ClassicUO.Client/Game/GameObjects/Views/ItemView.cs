@@ -31,7 +31,7 @@ namespace ClassicUO.Game.GameObjects
                 || DisplayedGraphic >= 0x3914 && DisplayedGraphic <= 0x3929
             )
             {
-                Client.Game.GetScene<GameScene>().AddLight(this, this, posX + 22, posY + 22);
+                Client.Game.GetScene<GameScene>()?.AddLight(this, this, posX + 22, posY + 22);
             }
 
             if (!AllowedToDraw)

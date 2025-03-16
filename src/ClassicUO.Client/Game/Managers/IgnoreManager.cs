@@ -75,7 +75,7 @@ namespace ClassicUO.Game.Managers
         {
             HashSet<string> list = new HashSet<string>();
 
-            string ignoreXmlPath = Path.Combine(ProfileManager.ProfilePath, "ignore_list.xml");
+            string ignoreXmlPath = Path.Combine(ProfileManager.CurrentProfile.ProfilePath, "ignore_list.xml");
 
             if (!File.Exists(ignoreXmlPath))
             {
@@ -117,7 +117,7 @@ namespace ClassicUO.Game.Managers
         /// </summary>
         public void SaveIgnoreList()
         {
-            string ignoreXmlPath = Path.Combine(ProfileManager.ProfilePath, "ignore_list.xml");
+            string ignoreXmlPath = Path.Combine(ProfileManager.CurrentProfile.ProfilePath, "ignore_list.xml");
 
             using (XmlTextWriter xml = new XmlTextWriter(ignoreXmlPath, Encoding.UTF8)
             {

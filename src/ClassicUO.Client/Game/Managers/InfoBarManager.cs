@@ -49,7 +49,7 @@ namespace ClassicUO.Game.Managers
 
         public void Save()
         {
-            string path = Path.Combine(ProfileManager.ProfilePath, "infobar.xml");
+            string path = Path.Combine(ProfileManager.CurrentProfile.ProfilePath, "infobar.xml");
 
             using (XmlTextWriter xml = new XmlTextWriter(path, Encoding.UTF8)
             {
@@ -73,7 +73,7 @@ namespace ClassicUO.Game.Managers
 
         public void Load()
         {
-            string path = Path.Combine(ProfileManager.ProfilePath, "infobar.xml");
+            string path = Path.Combine(ProfileManager.CurrentProfile.ProfilePath, "infobar.xml");
 
             if (!File.Exists(path))
             {

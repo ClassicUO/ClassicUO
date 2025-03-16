@@ -8,9 +8,8 @@ namespace ClassicUO.Configuration
     internal static class ProfileManager
     {
         public static Profile CurrentProfile { get; private set; }
-        public static string ProfilePath { get; private set; }
 
-        private static string _rootPath;
+        private static string? _rootPath;
         private static string RootPath
         {
             get
@@ -34,11 +33,11 @@ namespace ClassicUO.Configuration
         public static void Load(string servername, string username, string charactername)
         {
             var path = Directory.CreateDirectory(Path.Combine(RootPath, username, servername, charactername));
-            string fileToLoad = Path.Combine(path.FullName, "profile.json");
+            var fileToLoad = Path.Combine(path.FullName, "profile.json");
 
-            ProfilePath = path.FullName;
             CurrentProfile = ConfigurationResolver.Load<Profile>(fileToLoad, ProfileJsonContext.DefaultToUse.Profile) ?? NewFromDefault();
-
+            
+            CurrentProfile.ProfilePath = path.FullName;
             CurrentProfile.Username = username;
             CurrentProfile.ServerName = servername;
             CurrentProfile.CharacterName = charactername;

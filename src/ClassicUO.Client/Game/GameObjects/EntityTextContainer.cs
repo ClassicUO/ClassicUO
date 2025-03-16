@@ -211,7 +211,11 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-            p = Client.Game.Scene.Camera.WorldToScreen(p);
+            var camera = Client.Game.Scene?.Camera;
+            if (camera == null)
+                return;
+
+            p = camera.WorldToScreen(p);
 
             foreach (TextObject item in _messages)
             {

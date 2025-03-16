@@ -10,7 +10,7 @@ namespace ClassicUO.Configuration
 {
     internal static class ConfigurationResolver
     {
-        public static T Load<T>(string file, JsonTypeInfo<T> ctx) where T : class
+        public static T? Load<T>(string file, JsonTypeInfo<T> ctx) where T : class
         {
             if (!File.Exists(file))
             {

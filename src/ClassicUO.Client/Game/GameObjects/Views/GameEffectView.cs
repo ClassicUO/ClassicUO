@@ -247,7 +247,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (data.IsLight && Source != null)
             {
-                Client.Game.GetScene<GameScene>().AddLight(Source, Source, posX + 22, posY + 22);
+                Client.Game.GetScene<GameScene>()?.AddLight(Source, Source, posX + 22, posY + 22);
             }
 
             return true;

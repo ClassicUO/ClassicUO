@@ -4289,7 +4289,7 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.TooltipDisplayZoom = _tooltip_zoom.Value;
             _currentProfile.TooltipFont = _tooltip_font_selector.GetSelectedFont();
 
-            _currentProfile?.Save(World, ProfileManager.ProfilePath);
+            _currentProfile?.Save(World, ProfileManager.CurrentProfile.ProfilePath);
         }
 
         internal void UpdateVideo()

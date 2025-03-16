@@ -134,9 +134,9 @@ namespace ClassicUO.Game.UI.Controls
 
         private void AddEmptyMacro()
         {
-            MacroObject ob = (MacroObject) Macro.Items;
+            var ob = (MacroObject?) Macro.Items;
 
-            if (ob.Code == MacroType.None)
+            if (ob == null || ob.Code == MacroType.None)
             {
                 return;
             }
@@ -166,7 +166,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (_databox.Children.Count != 0)
             {
-                LinkedObject last = Macro.GetLast();
+                var last = Macro.GetLast();
 
                 Macro.Remove(last);
 
@@ -196,7 +196,7 @@ namespace ClassicUO.Game.UI.Controls
                 Macro.Items = Macro.Create(MacroType.None);
             }
 
-            MacroObject obj = (MacroObject) Macro.Items;
+            var obj = (MacroObject) Macro.Items;
 
             while (obj != null)
             {
@@ -207,7 +207,7 @@ namespace ClassicUO.Game.UI.Controls
                     break;
                 }
 
-                obj = (MacroObject) obj.Next;
+                obj = (MacroObject?) obj.Next;
             }
 
             _databox.WantUpdateSize = true;
@@ -252,7 +252,7 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        private void BoxOnHotkeyChanged(object sender, EventArgs e)
+        private void BoxOnHotkeyChanged(object? sender, EventArgs e)
         {
             bool shift = (_hotkeyBox.Mod & SDL.SDL_Keymod.KMOD_SHIFT) != SDL.SDL_Keymod.KMOD_NONE;
             bool alt = (_hotkeyBox.Mod & SDL.SDL_Keymod.KMOD_ALT) != SDL.SDL_Keymod.KMOD_NONE;
@@ -260,7 +260,7 @@ namespace ClassicUO.Game.UI.Controls
 
             if (_hotkeyBox.Key != SDL.SDL_Keycode.SDLK_UNKNOWN)
             {
-                Macro macro = _gump.World.Macros.FindMacro(_hotkeyBox.Key, alt, ctrl, shift);
+                var macro = _gump.World.Macros.FindMacro(_hotkeyBox.Key, alt, ctrl, shift);
 
                 if (macro != null)
                 {
@@ -277,7 +277,7 @@ namespace ClassicUO.Game.UI.Controls
             }
             else if (_hotkeyBox.MouseButton != MouseButtonType.None)
             {
-                Macro macro = _gump.World.Macros.FindMacro(_hotkeyBox.MouseButton, alt, ctrl, shift);
+                var macro = _gump.World.Macros.FindMacro(_hotkeyBox.MouseButton, alt, ctrl, shift);
 
                 if (macro != null)
                 {
@@ -294,7 +294,7 @@ namespace ClassicUO.Game.UI.Controls
             }
             else if (_hotkeyBox.WheelScroll == true)
             {
-                Macro macro = _gump.World.Macros.FindMacro(_hotkeyBox.WheelUp, alt, ctrl, shift);
+                var macro = _gump.World.Macros.FindMacro(_hotkeyBox.WheelUp, alt, ctrl, shift);
 
                 if (macro != null)
                 {
@@ -324,7 +324,7 @@ namespace ClassicUO.Game.UI.Controls
             m.Ctrl = ctrl;
         }
 
-        private void BoxOnHotkeyCancelled(object sender, EventArgs e)
+        private void BoxOnHotkeyCancelled(object? sender, EventArgs e)
         {
             Macro m = Macro;
             m.Alt = m.Ctrl = m.Shift = false;
@@ -469,9 +469,9 @@ namespace ClassicUO.Game.UI.Controls
 
                         textbox.TextChanged += (sss, eee) =>
                         {
-                            if (obj.HasString())
+                            if (obj.HasString() && sss is StbTextBox stb)
                             {
-                                ((MacroObjectString) obj).Text = ((StbTextBox) sss).Text;
+                                ((MacroObjectString) obj).Text = stb.Text;
                             }
                         };
 
@@ -487,12 +487,15 @@ namespace ClassicUO.Game.UI.Controls
             }
 
 
-            private void BoxOnOnOptionSelected(object sender, int e)
+            private void BoxOnOnOptionSelected(object? sender, int e)
             {
                 WantUpdateSize = true;
 
-                Combobox box = (Combobox) sender;
-                MacroObject currentMacroObj = (MacroObject) box.Tag;
+                if (sender is not Combobox box)
+                    return;
+
+                if (box.Tag is not MacroObject currentMacroObj)
+                    return;
 
                 if (e == 0)
                 {

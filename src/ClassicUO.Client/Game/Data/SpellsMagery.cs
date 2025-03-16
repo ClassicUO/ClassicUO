@@ -10,7 +10,7 @@ namespace ClassicUO.Game.Data
     {
         private static readonly Dictionary<int, SpellDefinition> _spellsDict;
 
-        private static string[] _spRegsChars;
+        private static string[]? _spRegsChars;
 
         static SpellsMagery()
         {
@@ -929,7 +929,7 @@ namespace ClassicUO.Game.Data
 
                     for (int i = _spRegsChars.Length; i > 0; --i)
                     {
-                        if (_spellsDict.TryGetValue(i, out SpellDefinition sd))
+                        if (_spellsDict.TryGetValue(i, out var sd))
                         {
                             _spRegsChars[i - 1] = StringHelper.RemoveUpperLowerChars(sd.PowerWords);
                         }
@@ -946,7 +946,7 @@ namespace ClassicUO.Game.Data
 
         public static SpellDefinition GetSpell(int index)
         {
-            return _spellsDict.TryGetValue(index, out SpellDefinition spell) ? spell : SpellDefinition.EmptySpell;
+            return _spellsDict.TryGetValue(index, out var spell) ? spell : SpellDefinition.EmptySpell;
         }
 
         public static void SetSpell(int id, in SpellDefinition newspell)
