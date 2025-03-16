@@ -68,8 +68,8 @@ namespace ClassicUO.Sdk.Assets
 
         private HtmlStatus _htmlStatus;
 
-        private FontCharacterData[,] _fontDataASCII;
-        private FontCharacterDataUnicode[,] _fontDataUNICODE;
+        private FontCharacterData[,]? _fontDataASCII;
+        private FontCharacterDataUnicode[,]? _fontDataUNICODE;
         private readonly UOFile[] _unicodeFontAddress = new UOFile[20];
         private readonly long[] _unicodeFontSize = new long[20];
         private readonly Dictionary<ushort, WebLink> _webLinks = new Dictionary<ushort, WebLink>();
@@ -190,7 +190,7 @@ namespace ClassicUO.Sdk.Assets
         {
             int index = (int)c; /*((int)c & 0xFFFFF) - 0x20*/;
 
-            if (index < 0)
+            if (index < 0 || _fontDataUNICODE == null)
             {
                 return ref _nullChar;
             }
@@ -214,7 +214,7 @@ namespace ClassicUO.Sdk.Assets
         {
             var file = _unicodeFontAddress[font];
 
-            if (file == null)
+            if (file == null || _fontDataUNICODE == null)
             {
                 return;
             }
@@ -290,7 +290,7 @@ namespace ClassicUO.Sdk.Assets
 
         public int GetWidthASCII(byte font, string str)
         {
-            if (font >= FontCount || string.IsNullOrEmpty(str))
+            if (font >= FontCount || string.IsNullOrEmpty(str) || _fontDataASCII == null)
             {
                 return 0;
             }
@@ -307,7 +307,7 @@ namespace ClassicUO.Sdk.Assets
 
         public int GetCharWidthASCII(byte font, char c)
         {
-            if (font >= FontCount || c == 0 || c == '\r')
+            if (font >= FontCount || c == 0 || c == '\r' || _fontDataASCII == null)
             {
                 return 0;
             }
@@ -512,7 +512,7 @@ namespace ClassicUO.Sdk.Assets
             ushort flags
         )
         {
-            if (font >= FontCount || string.IsNullOrEmpty(str))
+            if (font >= FontCount || string.IsNullOrEmpty(str) || _fontDataASCII == null)
             {
                 return string.Empty;
             }
@@ -586,7 +586,7 @@ namespace ClassicUO.Sdk.Assets
             bool saveHitmap
         )
         {
-            if (font >= FontCount)
+            if (font >= FontCount || _fontDataASCII == null)
             {
                 return FontInfo.Empty;
             }
@@ -690,7 +690,7 @@ namespace ClassicUO.Sdk.Assets
 
                         int offsY = GetFontOffsetY(font, index);
 
-                        ref FontCharacterData fcd = ref _fontDataASCII[
+                        ref var fcd = ref _fontDataASCII[
                             font,
                             GetASCIIIndex(ptr.Data[i].Item)
                         ];
@@ -807,7 +807,7 @@ namespace ClassicUO.Sdk.Assets
             bool countspaces = false
         )
         {
-            if (font >= FontCount)
+            if (font >= FontCount || _fontDataASCII == null)
             {
                 return null;
             }
@@ -847,7 +847,7 @@ namespace ClassicUO.Sdk.Assets
                     charCount = 0;
                 }
 
-                ref FontCharacterData fcd = ref _fontDataASCII[font, GetASCIIIndex(si)];
+                ref var fcd = ref _fontDataASCII[font, GetASCIIIndex(si)];
                 int eval = ptr.CharStart;
 
                 if (si == '\n' || ptr.Width + readWidth + fcd.Width > width)
@@ -964,7 +964,8 @@ namespace ClassicUO.Sdk.Assets
                         }
 
                         charCount = 0;
-                        ptr.Data.RemoveRange(ptr.CharCount, ptr.Data.Count - ptr.CharCount);
+                        if (ptr.CharCount < ptr.Data.Count)
+                            ptr.Data.RemoveRange(ptr.CharCount, ptr.Data.Count - ptr.CharCount);
 
                         if (isFixed || isCropped)
                         {
@@ -1525,7 +1526,8 @@ namespace ClassicUO.Sdk.Assets
                         }
 
                         charCount = 0;
-                        ptr.Data.RemoveRange(ptr.CharCount, ptr.Data.Count - ptr.CharCount);
+                        if (ptr.CharCount < ptr.Data.Count)
+                            ptr.Data.RemoveRange(ptr.CharCount, ptr.Data.Count - ptr.CharCount);
 
                         if (isFixed || isCropped)
                         {
@@ -1928,7 +1930,7 @@ namespace ClassicUO.Sdk.Assets
                                             break;
                                         }
 
-                                        byte cl = (byte)(@char.Data[scanLineOff + c] & (1 << (7 - j)));
+                                        byte cl = (byte)(@char.Data == null ? 0 : @char.Data[scanLineOff + c] & (1 << (7 - j)));
                                         int block = testY * width + nowX;
 
                                         if (cl != 0)
@@ -2338,7 +2340,8 @@ namespace ClassicUO.Sdk.Assets
                         }
 
                         ptr.MaxHeight = MAX_HTML_TEXT_HEIGHT;
-                        ptr.Data.RemoveRange(ptr.CharCount, ptr.Data.Count - ptr.CharCount);
+                        if (ptr.CharCount < ptr.Data.Count)
+                            ptr.Data.RemoveRange(ptr.CharCount, ptr.Data.Count - ptr.CharCount);
 
                         MultilinesFontInfo newptr = new MultilinesFontInfo();
                         newptr.Reset();
@@ -2426,7 +2429,8 @@ namespace ClassicUO.Sdk.Assets
                         }
 
                         ptr.MaxHeight = MAX_HTML_TEXT_HEIGHT;
-                        ptr.Data.RemoveRange(ptr.CharCount, ptr.Data.Count - ptr.CharCount);
+                        if (ptr.CharCount < ptr.Data.Count)
+                            ptr.Data.RemoveRange(ptr.CharCount, ptr.Data.Count - ptr.CharCount);
 
                         charCount = 0;
 
@@ -3610,7 +3614,7 @@ namespace ClassicUO.Sdk.Assets
                     break;
             }
 
-            if (font >= FontCount || string.IsNullOrEmpty(str))
+            if (font >= FontCount || string.IsNullOrEmpty(str) || _fontDataASCII == null)
             {
                 return (x, y);
             }

@@ -8,7 +8,6 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.Map;
 using ClassicUO.Sdk.Assets;
 using ClassicUO.Renderer;
-using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using ClassicUO.Sdk;
 

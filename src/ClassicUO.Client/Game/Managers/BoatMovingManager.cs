@@ -3,10 +3,10 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using ClassicUO.Collections;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Network;
-using ClassicUO.Utility.Collections;
 
 namespace ClassicUO.Game.Managers
 {

@@ -8,7 +8,6 @@ using ClassicUO.Input;
 using ClassicUO.Sdk.Assets;
 using ClassicUO.Network;
 using ClassicUO.Resources;
-using ClassicUO.Utility;
 using ClassicUO.Sdk;
 
 namespace ClassicUO.Game.Managers

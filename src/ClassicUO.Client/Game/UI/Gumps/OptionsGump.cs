@@ -15,7 +15,6 @@ using ClassicUO.Sdk.Assets;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Resources;
-using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ClassicUO.Sdk;
@@ -30,7 +29,7 @@ namespace ClassicUO.Game.UI.Gumps
         private const int HEIGHT = 500;
         private const int TEXTBOX_HEIGHT = 25;
 
-        private static Texture2D _logoTexture2D;
+        private static Texture2D? _logoTexture2D;
         private Combobox _auraType;
         private Combobox _autoOpenCorpseOptions;
         private InputField _autoOpenCorpseRange;

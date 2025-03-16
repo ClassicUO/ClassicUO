@@ -10,7 +10,6 @@ using ClassicUO.Sdk.Assets;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Resources;
-using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using ClassicUO.Sdk;
 

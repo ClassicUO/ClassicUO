@@ -9,7 +9,6 @@ using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps.Login;
 using ClassicUO.Sdk;
 using ClassicUO.Sdk.Assets;
-using ClassicUO.Utility;
 
 namespace ClassicUO.Game.UI.Gumps.CharCreation
 {

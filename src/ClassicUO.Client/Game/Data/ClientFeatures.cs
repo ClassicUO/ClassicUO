@@ -2,7 +2,6 @@
 
 using System;
 using ClassicUO.Sdk;
-using ClassicUO.Utility;
 
 namespace ClassicUO.Game.Data
 {

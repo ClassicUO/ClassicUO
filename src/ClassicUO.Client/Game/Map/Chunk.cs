@@ -5,7 +5,6 @@ using System.Runtime.CompilerServices;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Sdk.Assets;
-using ClassicUO.Utility;
 using System;
 using System.Runtime.InteropServices;
 using System.Buffers;

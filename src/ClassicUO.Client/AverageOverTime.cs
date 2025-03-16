@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace ClassicUO.Utility
+namespace ClassicUO
 {
     public class AverageOverTime
     {

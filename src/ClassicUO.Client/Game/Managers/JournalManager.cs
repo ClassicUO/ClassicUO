@@ -2,10 +2,10 @@
 
 using System;
 using System.IO;
+using ClassicUO.Collections;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Sdk;
-using ClassicUO.Utility.Collections;
 
 namespace ClassicUO.Game.Managers
 {

@@ -3,7 +3,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using ClassicUO.Game.Managers;
-using ClassicUO.Utility;
 
 namespace ClassicUO.Game.Data
 {

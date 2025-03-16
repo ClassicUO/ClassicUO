@@ -7,7 +7,6 @@ using System.Runtime.CompilerServices;
 using ClassicUO.Configuration;
 using ClassicUO.Sdk.Assets;
 using ClassicUO.Renderer;
-using ClassicUO.Utility;
 using ClassicUO.Sdk.IO;
 
 namespace ClassicUO.Game.Data

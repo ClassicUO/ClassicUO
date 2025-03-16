@@ -18,17 +18,17 @@ using ClassicUO.Resources;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SDL2;
-using SpriteFont = ClassicUO.Renderer.SpriteFont;
 using System.Text.Json.Serialization;
-using static ClassicUO.Game.UI.Gumps.WorldMapGump;
 using ClassicUO.Network.Encryption;
 using System.Text;
 using System.Runtime.InteropServices;
 using System.Threading;
 using ClassicUO.Sdk.IO;
 using ClassicUO.Sdk;
-using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Formats.Jpeg;
+using SpriteFont = ClassicUO.Renderer.SpriteFont;
+using static ClassicUO.Game.UI.Gumps.WorldMapGump;
+using StbImageWriteSharp;
+
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -53,8 +53,8 @@ namespace ClassicUO.Game.UI.Gumps
         private static readonly float[] _zooms = new float[10] { 0.125f, 0.25f, 0.5f, 0.75f, 1f, 1.5f, 2f, 4f, 6f, 8f };
         private static readonly Color _semiTransparentWhiteForGrid = new Color(255, 255, 255, 56);
         private static Point _last_position = new Point(100, 100);
-        private static Texture2D _mapTexture;
-        private Map.Map _map = null;
+        private static Texture2D? _mapTexture;
+        private Map.Map? _map = null;
 
         private Point _center, _lastScroll, _mouseCenter, _scroll;
         private Point? _lastMousePosition = null;
@@ -88,7 +88,6 @@ namespace ClassicUO.Game.UI.Gumps
         private WMapMarker _gotoMarker;
 
         private int _mapLoading;
-        private uint _mapLoadingTime;
         private Task _loadingTask;
 
         public WorldMapGump(World world) : base
@@ -354,7 +353,7 @@ namespace ClassicUO.Game.UI.Gumps
             _gotoMarker = new WMapMarker
             {
                 Color = Color.Aquamarine,
-                MapId = _map.Index,
+                MapId = _map?.Index ?? 0,
                 Name = isManualType ? $"Go to: {x}, {y}" : "",
                 X = x,
                 Y = y,
@@ -394,7 +393,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                                 if (!zoneSet.Hidden)
                                 {
-                                    string hiddenFile = _hiddenZoneFiles.FirstOrDefault(x => x.Equals(filename));
+                                    var hiddenFile = _hiddenZoneFiles.FirstOrDefault(x => x.Equals(filename));
 
                                     if (!string.IsNullOrEmpty(hiddenFile))
                                     {
@@ -455,7 +454,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                             if (!markerFile.Hidden)
                             {
-                                string hiddenFile = _hiddenMarkerFiles.SingleOrDefault(x => x.Equals(markerFile.Name));
+                                var hiddenFile = _hiddenMarkerFiles.SingleOrDefault(x => x.Equals(markerFile.Name));
 
                                 if (!string.IsNullOrEmpty(hiddenFile))
                                 {
@@ -753,14 +752,14 @@ namespace ClassicUO.Game.UI.Gumps
 
         private bool GetOptionValue(string key)
         {
-            _options.TryGetValue(key, out ContextMenuItemEntry v);
+            _options.TryGetValue(key, out var v);
 
             return v != null && v.IsSelected;
         }
 
         public void SetOptionValue(string key, bool v)
         {
-            if (_options.TryGetValue(key, out ContextMenuItemEntry entry) && entry != null)
+            if (_options.TryGetValue(key, out var entry) && entry != null)
             {
                 entry.IsSelected = v;
             }
@@ -769,22 +768,22 @@ namespace ClassicUO.Game.UI.Gumps
 
         internal class WMapMarker
         {
-            public string Name { get; set; }
+            public string Name { get; set; } = "";
             public int X { get; set; }
             public int Y { get; set; }
             public int MapId { get; set; }
             public Color Color { get; set; }
-            public Texture2D MarkerIcon { get; set; }
-            public string MarkerIconName { get; set; }
+            public Texture2D? MarkerIcon { get; set; }
+            public string MarkerIconName { get; set; } = "";
             public int ZoomIndex { get; set; }
-            public string ColorName { get; set; }
+            public string ColorName { get; set; } = "";
         }
 
         internal class WMapMarkerFile
         {
-            public string Name { get; set; }
-            public string FullPath { get; set; }
-            public List<WMapMarker> Markers { get; set; }
+            public string Name { get; set; } = "";
+            public string FullPath { get; set; } = "";
+            public List<WMapMarker> Markers { get; set; } = [];
             public bool Hidden { get; set; }
             public bool IsEditable { get; set; }
         }
@@ -797,9 +796,9 @@ namespace ClassicUO.Game.UI.Gumps
 
                 try
                 {
-                    stream.Read(buffer, 0, buffer.Length);
+                    stream.ReadExactly(buffer, 0, (int) stream.Length);
 
-                    StackDataReader reader = new StackDataReader(buffer.AsSpan(0, (int)stream.Length));
+                    var reader = new StackDataReader(buffer.AsSpan(0, (int)stream.Length));
 
                     int bmp_pitch;
                     int i, pad;
@@ -1125,42 +1124,47 @@ namespace ClassicUO.Game.UI.Gumps
                 var mapFile = Client.Game.UO.FileManager.Maps.GetMapFile(mapIndex);
                 var staticFile = Client.Game.UO.FileManager.Maps.GetStaticFile(mapIndex);
 
-                if (!_mapCache.TryGetValue(mapFile.FilePath, out var fileMapPath))
+                if (mapFile == null || staticFile == null)
                 {
-                    using var mapReader = new BinaryReader(File.Open(mapFile.FilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
-                    using var staticsReader = new BinaryReader(File.Open(staticFile.FilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+                    return;
+                }
 
-                    static string calculateMd5(BinaryReader file)
+                if (!_mapCache.TryGetValue(mapFile.FilePath, out var fileMapPath))
                     {
+                        using var mapReader = new BinaryReader(File.Open(mapFile.FilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+                        using var staticsReader = new BinaryReader(File.Open(staticFile.FilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+
+                        static string calculateMd5(BinaryReader file)
+                        {
+                            var md5Ctx = new MD5Behaviour.MD5Context();
+                            MD5Behaviour.Initialize(ref md5Ctx);
+
+                            var h = new byte[4096];
+                            int bytesRead;
+                            while ((bytesRead = file.Read(h)) > 0)
+                                MD5Behaviour.Update(ref md5Ctx, h.AsSpan(0, bytesRead));
+                            MD5Behaviour.Finalize(ref md5Ctx);
+
+                            var strSb = new StringBuilder();
+                            for (int i = 0; i < 16; ++i)
+                                strSb.AppendFormat("{0:x2}", md5Ctx.Digest(i));
+
+                            return strSb.ToString();
+                        }
+
+                        var sum = calculateMd5(mapReader) + calculateMd5(staticsReader);
                         var md5Ctx = new MD5Behaviour.MD5Context();
                         MD5Behaviour.Initialize(ref md5Ctx);
-
-                        var h = new byte[4096];
-                        int bytesRead;
-                        while ((bytesRead = file.Read(h)) > 0)
-                            MD5Behaviour.Update(ref md5Ctx, h.AsSpan(0, bytesRead));
+                        MD5Behaviour.Update(ref md5Ctx, MemoryMarshal.AsBytes<char>(sum));
                         MD5Behaviour.Finalize(ref md5Ctx);
-
                         var strSb = new StringBuilder();
                         for (int i = 0; i < 16; ++i)
                             strSb.AppendFormat("{0:x2}", md5Ctx.Digest(i));
+                        var hash = strSb.ToString();
 
-                        return strSb.ToString();
+                        fileMapPath = Path.Combine(_mapsCachePath, $"map{mapIndex}_{hash}.png");
+                        _mapCache[mapFile.FilePath] = fileMapPath;
                     }
-
-                    var sum = calculateMd5(mapReader) + calculateMd5(staticsReader);
-                    var md5Ctx = new MD5Behaviour.MD5Context();
-                    MD5Behaviour.Initialize(ref md5Ctx);
-                    MD5Behaviour.Update(ref md5Ctx, MemoryMarshal.AsBytes<char>(sum));
-                    MD5Behaviour.Finalize(ref md5Ctx);
-                    var strSb = new StringBuilder();
-                    for (int i = 0; i < 16; ++i)
-                        strSb.AppendFormat("{0:x2}", md5Ctx.Digest(i));
-                    var hash = strSb.ToString();
-
-                    fileMapPath = Path.Combine(_mapsCachePath, $"map{mapIndex}_{hash}.png");
-                    _mapCache[mapFile.FilePath] = fileMapPath;
-                }
 
                 if (!File.Exists(fileMapPath))
                 {
@@ -1169,25 +1173,20 @@ namespace ClassicUO.Game.UI.Gumps
                         var map = _map;
                         Interlocked.Increment(ref _mapLoading);
 
-                        var size = (realWidth + OFFSET_PIX) * (realHeight + OFFSET_PIX);
+                        var imgWidth = realWidth + OFFSET_PIX;
+                        var imgHeight = realHeight + OFFSET_PIX;
+                        var size = imgWidth * imgHeight;
                         var allZ = new sbyte[size];
+                        var imgSpan = new uint[size];
                         var staticBlocks = new StaticsBlock[32];
-
-                        using var img = new SixLabors.ImageSharp.Image<Byte4>(new SixLabors.ImageSharp.Configuration()
-                        {
-                            PreferContiguousImageBuffers = true
-                        }, realWidth + OFFSET_PIX, realHeight + OFFSET_PIX);
-
-                        img.DangerousTryGetSinglePixelMemory(out var imgBuffer);
-                        var imgSpan = imgBuffer.Span;
 
                         var huesLoader = Client.Game.UO.FileManager.Hues;
 
                         int bx, by, mapX = 0, mapY = 0, x, y;
 
                         // Workaroud to avoid accessing map files from 2 sources at the same time
-                        UOFile fileMap = null;
-                        UOFile fileStatics = null;
+                        UOFile? fileMap = null;
+                        UOFile? fileStatics = null;
 
                         for (bx = 0; bx < fixedWidth; ++bx)
                         {
@@ -1221,7 +1220,7 @@ namespace ClassicUO.Game.UI.Gumps
                                     {
                                         ushort color = (ushort)(0x8000 | huesLoader.GetRadarColorData(cells[pos].TileID & 0x3FFF));
 
-                                        imgSpan[block].PackedValue = ColorConverter.Color16To32(color) | 0xFF_00_00_00;
+                                        imgSpan[block] = ColorConverter.Color16To32(color) | 0xFF_00_00_00;
                                         allZ[block] = cells[pos].Z;
                                     }
                                 }
@@ -1249,7 +1248,7 @@ namespace ClassicUO.Game.UI.Gumps
                                         {
                                             var color = (ushort)(0x8000 | (sb.Hue != 0 ? huesLoader.GetColor16(16384, sb.Hue) : huesLoader.GetRadarColorData(sb.Color + 0x4000)));
 
-                                            imgSpan[block].PackedValue = ColorConverter.Color16To32(color) | 0xFF_00_00_00;
+                                            imgSpan[block] = ColorConverter.Color16To32(color) | 0xFF_00_00_00;
                                             allZ[block] = sb.Z;
                                         }
                                     }
@@ -1281,15 +1280,15 @@ namespace ClassicUO.Game.UI.Gumps
                                 }
 
                                 ref var cc = ref imgSpan[blockCurrent];
-                                if (cc.PackedValue == 0)
+                                if (cc == 0)
                                 {
                                     continue;
                                 }
 
-                                byte r = (byte)(cc.PackedValue & 0xFF);
-                                byte g = (byte)((cc.PackedValue >> 8) & 0xFF);
-                                byte b = (byte)((cc.PackedValue >> 16) & 0xFF);
-                                byte a = (byte)((cc.PackedValue >> 24) & 0xFF);
+                                byte r = (byte)(cc & 0xFF);
+                                byte g = (byte)((cc >> 8) & 0xFF);
+                                byte b = (byte)((cc >> 16) & 0xFF);
+                                byte a = (byte)((cc >> 24) & 0xFF);
 
                                 if (r != 0 || g != 0 || b != 0)
                                 {
@@ -1306,19 +1305,22 @@ namespace ClassicUO.Game.UI.Gumps
                                         b = (byte)Math.Min(0xFF, b * MAG_1);
                                     }
 
-                                    cc.PackedValue = (uint)(r | (g << 8) | (b << 16) | (a << 24));
+                                    cc = (uint)(r | (g << 8) | (b << 16) | (a << 24));
                                 }
                             }
                         }
 
-                        var imageEncoder = new JpegEncoder()
-                        {
-                            Quality = 100
-                        };
 
                         Directory.CreateDirectory(_mapsCachePath);
-                        using var stream2 = File.Create(fileMapPath);
-                        img.Save(stream2, imageEncoder);
+                        using var stream = File.Create(fileMapPath);
+                        var writer = new ImageWriter();
+                        unsafe
+                        {
+                            fixed (uint* ptr = imgSpan)
+                            {
+                                writer.WriteJpg(ptr, imgWidth, imgHeight, ColorComponents.RedGreenBlueAlpha, stream, 90);
+                            }
+                        }
                     }
                     catch (Exception ex)
                     {

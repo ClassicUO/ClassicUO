@@ -1,5 +1,4 @@
 ﻿using ClassicUO.Sdk.IO;
-using ClassicUO.Utility;
 using System.Collections.Generic;
 using System.IO;
 using static ClassicUO.Sdk.Assets.AnimationsLoader;

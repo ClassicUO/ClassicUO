@@ -7,11 +7,9 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Sdk.Assets;
 using ClassicUO.Resources;
-using ClassicUO.Utility;
-using ClassicUO.Utility.Collections;
 using Microsoft.Xna.Framework;
-using ClassicUO.Game.Scenes;
 using ClassicUO.Sdk;
+using ClassicUO.Collections;
 
 namespace ClassicUO.Game.GameObjects
 {

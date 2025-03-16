@@ -10,7 +10,7 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Sdk;
 using SDL2;
 
-namespace ClassicUO.Utility.Platforms
+namespace ClassicUO.Platforms
 {
     internal sealed class UoAssist
     {

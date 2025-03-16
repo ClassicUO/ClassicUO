@@ -66,7 +66,7 @@ namespace ClassicUO.Game.UI.Controls
 
     internal sealed class ContextMenuItemEntry
     {
-        public ContextMenuItemEntry(string text, Action action = null, bool canBeSelected = false, bool defaultValue = false)
+        public ContextMenuItemEntry(string text, Action? action = null, bool canBeSelected = false, bool defaultValue = false)
         {
             Text = text;
             Action = action;
@@ -74,7 +74,7 @@ namespace ClassicUO.Game.UI.Controls
             IsSelected = defaultValue;
         }
 
-        public readonly Action Action;
+        public readonly Action? Action;
         public readonly bool CanBeSelected;
         public bool IsSelected;
         public List<ContextMenuItemEntry> Items = new List<ContextMenuItemEntry>();
@@ -90,7 +90,7 @@ namespace ClassicUO.Game.UI.Controls
     internal class ContextMenuShowMenu : Gump
     {
         private readonly AlphaBlendControl _background;
-        private List<ContextMenuShowMenu> _subMenus;
+        private List<ContextMenuShowMenu>? _subMenus;
 
 
         public ContextMenuShowMenu(World world, List<ContextMenuItemEntry> list) : base(world, 0, 0)

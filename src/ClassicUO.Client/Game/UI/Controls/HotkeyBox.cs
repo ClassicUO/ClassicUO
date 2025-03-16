@@ -4,7 +4,6 @@ using System;
 using ClassicUO.Input;
 using ClassicUO.Sdk.Assets;
 using ClassicUO.Renderer;
-using ClassicUO.Utility;
 using SDL2;
 
 namespace ClassicUO.Game.UI.Controls

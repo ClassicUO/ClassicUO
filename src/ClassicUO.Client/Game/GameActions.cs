@@ -11,7 +11,6 @@ using ClassicUO.Input;
 using ClassicUO.Network;
 using ClassicUO.Resources;
 using ClassicUO.Sdk;
-using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using static ClassicUO.Network.NetClient;
 

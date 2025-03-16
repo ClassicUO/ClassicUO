@@ -8,12 +8,12 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Map;
 using ClassicUO.Game.UI.Gumps;
-using ClassicUO.Utility.Platforms;
 using Microsoft.Xna.Framework;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Scenes;
 using MathHelper = ClassicUO.Renderer.MathHelper;
 using ClassicUO.Sdk;
+using ClassicUO.Platforms;
 
 namespace ClassicUO.Game
 {

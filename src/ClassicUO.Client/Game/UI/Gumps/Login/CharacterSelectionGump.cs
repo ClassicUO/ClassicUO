@@ -10,7 +10,6 @@ using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.Sdk.Assets;
 using ClassicUO.Resources;
-using ClassicUO.Utility;
 using SDL2;
 using ClassicUO.Sdk;
 

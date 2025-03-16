@@ -2,7 +2,6 @@
 
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Sdk;
-using ClassicUO.Utility;
 
 namespace ClassicUO.Game.UI.Gumps.Login
 {

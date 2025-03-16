@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using ClassicUO.Game.Data;
 using ClassicUO.Sdk.Assets;
-using ClassicUO.Utility;
 using ClassicUO.Renderer.Animations;
 
 namespace ClassicUO.Game.GameObjects

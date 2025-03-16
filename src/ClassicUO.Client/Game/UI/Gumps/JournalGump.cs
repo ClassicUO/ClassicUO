@@ -1,17 +1,15 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
 using System;
-using System.IO;
 using System.Xml;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
-using ClassicUO.Sdk.Assets;
 using ClassicUO.Renderer;
 using ClassicUO.Resources;
-using ClassicUO.Utility.Collections;
+using ClassicUO.Collections;
 
 namespace ClassicUO.Game.UI.Gumps
 {

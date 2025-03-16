@@ -3,7 +3,6 @@
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Sdk.Assets;
-using ClassicUO.Utility;
 using System.Runtime.CompilerServices;
 
 namespace ClassicUO.Game.GameObjects

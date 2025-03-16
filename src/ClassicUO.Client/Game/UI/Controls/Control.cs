@@ -6,12 +6,10 @@ using System.Linq;
 using ClassicUO.Game.Managers;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
-using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using SDL2;
 using Keyboard = ClassicUO.Input.Keyboard;
-using Mouse = ClassicUO.Input.Mouse;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -25,9 +23,9 @@ namespace ClassicUO.Game.UI.Controls
         private Rectangle _bounds;
         private bool _handlesKeyboardFocus;
         private Point _offset;
-        private Control _parent;
+        private Control? _parent;
 
-        protected Control(Control parent = null)
+        protected Control(Control? parent = null)
         {
             Parent = parent;
             Children = new List<Control>();
@@ -88,9 +86,9 @@ namespace ClassicUO.Game.UI.Controls
 
         public List<Control> Children { get; }
 
-        public object Tag { get; set; }
+        public object? Tag { get; set; }
 
-        public object Tooltip { get; private set; }
+        public object? Tooltip { get; private set; }
 
         public bool HasTooltip => /*World.ClientFlags.TooltipsEnabled &&*/ Tooltip != null;
 
@@ -122,9 +120,9 @@ namespace ClassicUO.Game.UI.Controls
 
         public int ScreenCoordinateY => ParentY + Y;
 
-        public ContextMenuControl ContextMenu { get; set; }
+        public ContextMenuControl? ContextMenu { get; set; }
 
-        public Control Parent
+        public Control? Parent
         {
             get => _parent;
             internal set
@@ -143,7 +141,7 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        public Control RootParent
+        public Control? RootParent
         {
             get
             {
@@ -152,7 +150,7 @@ namespace ClassicUO.Game.UI.Controls
                     return null;
                 }
 
-                Control p = Parent;
+                var p = Parent;
 
                 while (p.Parent != null)
                 {
@@ -378,18 +376,18 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        internal event EventHandler<MouseEventArgs> MouseDown, MouseUp, MouseOver, MouseEnter, MouseExit, DragBegin, DragEnd;
+        internal event EventHandler<MouseEventArgs>? MouseDown, MouseUp, MouseOver, MouseEnter, MouseExit, DragBegin, DragEnd;
 
-        internal event EventHandler<MouseWheelEventArgs> MouseWheel;
+        internal event EventHandler<MouseWheelEventArgs>? MouseWheel;
 
-        internal event EventHandler<MouseDoubleClickEventArgs> MouseDoubleClick;
+        internal event EventHandler<MouseDoubleClickEventArgs>? MouseDoubleClick;
 
-        internal event EventHandler FocusEnter, FocusLost;
+        internal event EventHandler? FocusEnter, FocusLost;
 
-        internal event EventHandler<KeyboardEventArgs> KeyDown, KeyUp;
+        internal event EventHandler<KeyboardEventArgs>? KeyDown, KeyUp;
 
 
-        public void HitTest(int x, int y, ref Control res)
+        public void HitTest(int x, int y, ref Control? res)
         {
             if (!IsVisible || !IsEnabled || IsDisposed)
             {
@@ -425,16 +423,16 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        public void HitTest(Point position, ref Control res)
+        public void HitTest(Point position, ref Control? res)
         {
             HitTest(position.X, position.Y, ref res);
         }
 
-        public virtual void OnHitTestSuccess(int x, int y, ref Control res)
+        public virtual void OnHitTestSuccess(int x, int y, ref Control? res)
         {
         }
 
-        public Control GetFirstControlAcceptKeyboardInput()
+        public Control? GetFirstControlAcceptKeyboardInput()
         {
             if (_acceptKeyboardInput)
             {
@@ -446,9 +444,9 @@ namespace ClassicUO.Game.UI.Controls
                 return null;
             }
 
-            foreach (Control c in Children)
+            foreach (var c in Children)
             {
-                Control a = c.GetFirstControlAcceptKeyboardInput();
+                var a = c.GetFirstControlAcceptKeyboardInput();
 
                 if (a != null)
                 {
@@ -725,7 +723,7 @@ namespace ClassicUO.Game.UI.Controls
                 return;
             }
 
-            Control parent = Parent;
+            var parent = Parent;
 
             while (parent != null)
             {

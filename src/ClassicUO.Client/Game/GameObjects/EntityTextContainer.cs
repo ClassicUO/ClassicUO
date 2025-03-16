@@ -1,9 +1,8 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
-using ClassicUO.Sdk.Assets;
+using ClassicUO.Collections;
 using ClassicUO.Configuration;
 using ClassicUO.Renderer;
-using ClassicUO.Utility.Collections;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.GameObjects

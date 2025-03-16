@@ -2,7 +2,6 @@
 
 using System;
 using ClassicUO.Input;
-using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls

@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
 using ClassicUO.Renderer;
-using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StbTextEditSharp;

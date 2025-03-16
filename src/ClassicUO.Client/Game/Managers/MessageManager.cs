@@ -10,7 +10,6 @@ using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Sdk.Assets;
 using ClassicUO.Renderer;
-using ClassicUO.Utility;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Sdk.IO;
 

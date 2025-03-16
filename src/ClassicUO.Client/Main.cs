@@ -77,16 +77,15 @@ namespace ClassicUO
                 sb.AppendLine();
                 sb.AppendLine();
 
-                Log.Panic(e.ExceptionObject.ToString());
+                Log.Error(e.ExceptionObject?.ToString() ?? "unknown error");
                 string path = Path.Combine(CUOEnviroment.ExecutablePath, "Logs");
 
                 if (!Directory.Exists(path))
                     Directory.CreateDirectory(path);
 
-                using (LogFile crashfile = new LogFile(path, "crash.txt"))
-                {
-                    crashfile.WriteAsync(sb.ToString()).RunSynchronously();
-                }
+                using var crashFile = File.Create(Path.Combine(path, $"crash_{DateTime.Now:yyyy-MM-dd-HH-mm-ss}.txt"));
+                using var writer = new StreamWriter(crashFile);
+                writer.WriteLine(sb.ToString());
             };
 #endif
             ReadSettingsFromArgs(args);

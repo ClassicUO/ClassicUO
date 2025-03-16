@@ -2,12 +2,8 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml;
 
 namespace ClassicUO
@@ -27,7 +23,7 @@ namespace ClassicUO
             string wordsize = (IntPtr.Size * 8).ToString();
 
             // Get the executing assembly
-            Assembly assembly = Assembly.GetAssembly(typeof(Microsoft.Xna.Framework.Graphics.ColorWriteChannels));
+            var assembly = Assembly.GetAssembly(typeof(Microsoft.Xna.Framework.Graphics.ColorWriteChannels));
 
             // Locate the config file
             string xmlPath = Path.Combine(AppContext.BaseDirectory, "FNA.dll.config");
@@ -58,10 +54,8 @@ namespace ClassicUO
             // Parse the XML into a mapping dictionary
             foreach (XmlNode node in xmlDoc.GetElementsByTagName("dllmap"))
             {
-                XmlAttribute attribute;
-
                 // Check the OS
-                attribute = node.Attributes["os"];
+                XmlAttribute? attribute = node.Attributes?["os"];
                 if (attribute != null)
                 {
                     bool containsOS = attribute.Value.Contains(os);
@@ -73,7 +67,7 @@ namespace ClassicUO
                 }
 
                 // Check the CPU
-                attribute = node.Attributes["cpu"];
+                attribute = node.Attributes?["cpu"];
                 if (attribute != null)
                 {
                     bool containsCPU = attribute.Value.Contains(cpu);
@@ -85,7 +79,7 @@ namespace ClassicUO
                 }
 
                 // Check the word size
-                attribute = node.Attributes["wordsize"];
+                attribute = node.Attributes?["wordsize"];
                 if (attribute != null)
                 {
                     bool containsWordsize = attribute.Value.Contains(wordsize);
@@ -97,8 +91,8 @@ namespace ClassicUO
                 }
 
                 // Check for the existence of 'dll' and 'target' attributes
-                XmlAttribute dllAttribute = node.Attributes["dll"];
-                XmlAttribute targetAttribute = node.Attributes["target"];
+                XmlAttribute? dllAttribute = node.Attributes?["dll"];
+                XmlAttribute? targetAttribute = node.Attributes?["target"];
                 if (dllAttribute == null || targetAttribute == null)
                 {
                     continue;
@@ -121,7 +115,8 @@ namespace ClassicUO
                 mapDictionary.Add(oldLib, newLib);
             }
 
-            NativeLibrary.SetDllImportResolver(assembly, mapAndLoad);
+            if (assembly != null)
+                NativeLibrary.SetDllImportResolver(assembly, mapAndLoad);
 
             static IntPtr mapAndLoad(
                 string libraryName,
@@ -129,8 +124,7 @@ namespace ClassicUO
                 DllImportSearchPath? dllImportSearchPath
             )
             {
-                string mappedName;
-                if (!mapDictionary.TryGetValue(libraryName, out mappedName))
+                if (!mapDictionary.TryGetValue(libraryName, out var mappedName))
                 {
                     mappedName = libraryName;
                 }

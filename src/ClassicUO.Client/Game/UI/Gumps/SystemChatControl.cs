@@ -11,8 +11,6 @@ using ClassicUO.Input;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Resources;
-using ClassicUO.Utility.Collections;
-using ClassicUO.Utility.Platforms;
 using SDL2;
 
 namespace ClassicUO.Game.UI.Gumps

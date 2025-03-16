@@ -12,7 +12,7 @@ namespace ClassicUO.IO.Audio
         private const int NUMBER_OF_PCM_BYTES_TO_READ_PER_CHUNK = 0x8000; // 32768 bytes, about 0.9 seconds
         private bool m_Playing;
         private readonly bool m_Repeat;
-        private MP3Stream m_Stream;
+        private MP3Stream? m_Stream;
         private readonly byte[] m_WaveBuffer = new byte[NUMBER_OF_PCM_BYTES_TO_READ_PER_CHUNK];
 
 
@@ -31,14 +31,14 @@ namespace ClassicUO.IO.Audio
         public void Update()
         {
             // sanity - if the buffer empties, we will lose our sound effect. Thus we must continually check if it is dead.
-            OnBufferNeeded(null, null);
+            OnBufferNeeded(null, EventArgs.Empty);
         }
 
         protected override ArraySegment<byte> GetBuffer()
         {
             try
             {
-                if (m_Playing && SoundInstance != null)
+                if (m_Playing && SoundInstance != null && m_Stream != null)
                 {
                     int bytesReturned = m_Stream.Read(m_WaveBuffer, 0, m_WaveBuffer.Length);
 
@@ -71,7 +71,7 @@ namespace ClassicUO.IO.Audio
             return ArraySegment<byte>.Empty;
         }
 
-        protected override void OnBufferNeeded(object sender, EventArgs e)
+        protected override void OnBufferNeeded(object? sender, EventArgs e)
         {
             if (m_Playing)
             {
